@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Stardos+Stencil:wght@700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;}
+  body{margin:0;background:#CFC7B4;}
+  a{color:#D2402C;text-decoration:underline;text-underline-offset:2px;}
+  a:hover{color:#211C15;}
+  @keyframes stamp{0%{transform:scale(1.18) rotate(-3deg);opacity:0}60%{transform:scale(.99) rotate(.6deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
+  @keyframes pulse{0%{transform:scaleY(1)}50%{transform:scaleY(1.35)}100%{transform:scaleY(1)}}
+  @media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
+</style>
+</helmet>
+
+<div style="font-family:'Inter',sans-serif;color:#211C15;padding:56px 48px 120px;display:flex;flex-direction:column;gap:88px">
+
+  <div style="max-width:1040px">
+    <div style="font-family:'Stardos Stencil',sans-serif;font-size:34px;letter-spacing:.02em">TOUR DE <span style="color:#D2402C">GROWTH</span></div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:#5B5346;margin-top:10px">Direction B — Marquage au sol · 9 écrans · mobile 390 + desktop 1040</div>
+  </div>
+
+  <!-- ============ 01 LANDING ============ -->
+  <section id="landing" data-screen-label="01 Landing" style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:#DED6C2;border:2px solid #211C15;border-radius:4px;padding:5px 12px">01 · Landing</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5B5346">desktop 1040 + mobile 390</span>
+    </div>
+    <div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap">
+
+      <div style="flex:none;width:1040px;background:#E7E1D2;background-image:radial-gradient(circle at 18% 14%, rgba(255,255,255,.45), transparent 42%),radial-gradient(circle at 86% 72%, rgba(0,0,0,.05), transparent 46%);border:2px solid #211C15;border-radius:10px;overflow:hidden">
+        <div style="padding:0 40px 56px">
+          <header style="display:flex;align-items:center;justify-content:space-between;padding:24px 0;border-bottom:2px dashed rgba(33,28,21,.22)">
+            <div style="font-family:'Stardos Stencil',sans-serif;font-size:19px;letter-spacing:.02em">TOUR DE <span style="color:#D2402C">GROWTH</span></div>
+            <nav style="display:flex;gap:26px;font-size:13.5px;font-weight:500;color:#5B5346">
+              <a href="#landing" style="color:#5B5346;text-decoration:none">How it works</a>
+              <a href="#result-neutral" style="color:#5B5346;text-decoration:none">Examples</a>
+              <a href="#result-roast" style="color:#5B5346;text-decoration:none">Roast mode</a>
+            </nav>
+            <button style="font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;padding:11px 20px;border-radius:6px;border:2px solid #D2402C;background:#D2402C;color:#FBF9F2;cursor:pointer" style-focus="outline:3px solid #211C15;outline-offset:3px">Start your Tour →</button>
+          </header>
+
+          <div style="display:grid;grid-template-columns:1.05fr .95fr;gap:48px;padding-top:60px;align-items:start">
+            <div>
+              <div style="display:inline-flex;align-items:center;gap:10px;font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:12.5px;letter-spacing:.05em;text-transform:uppercase;color:#5B5346;background:#FBF9F2;border:2px dashed #5B5346;padding:7px 16px;border-radius:4px;transform:rotate(-1.2deg);margin-bottom:26px">№ 15 questions — 3 min — free entry</div>
+              <h1 style="font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:62px;line-height:1.02;letter-spacing:.01em;margin:0 0 22px">Where does<br>your growth <span style="color:#D2402C">stall</span>?</h1>
+              <p style="font-size:17px;line-height:1.55;color:#5B5346;font-weight:500;max-width:440px;margin:0 0 30px;text-wrap:pretty">A guided check-up across Acquisition, Activation, Retention, Referral and Revenue — scored, explained, and built to share.</p>
+              <div style="display:flex;gap:14px;flex-wrap:wrap">
+                <button style="font-family:'Inter',sans-serif;font-size:15px;font-weight:600;padding:15px 26px;border-radius:6px;border:2px solid #D2402C;background:#D2402C;color:#FBF9F2;cursor:pointer" style-focus="outline:3px solid #211C15;outline-offset:3px">Start your Tour →</button>
+                <button style="font-family:'Inter',sans-serif;font-size:15px;font-weight:600;padding:15px 26px;border-radius:6px;border:2px solid #211C15;background:transparent;color:#211C15;cursor:pointer" style-focus="outline:3px solid #211C15;outline-offset:3px">See a sample result</button>
+              </div>
+            </div>
+
+            <div style="background:#FBF9F2;border:2px solid #211C15;border-radius:10px;padding:30px 32px 32px;box-shadow:7px 7px 0 #211C15">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#5B5346">
+                <span>Overall Growth Score — Sample B2B SaaS</span>
+                <span>Stage 5/5</span>
+              </div>
+              <div style="font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:118px;line-height:.86;position:relative;display:inline-block;margin-top:14px">74<span style="font-size:31px;color:#5B5346;vertical-align:super;margin-left:8px">/100</span>
+                <sc-if value="{{ sprayTexture }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;inset:0;background:repeating-linear-gradient(115deg, transparent 0 3px, rgba(33,28,21,.055) 3px 4px);mix-blend-mode:multiply;pointer-events:none"></span></sc-if>
+              </div>
+              <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:24px">
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:500;padding:9px 13px;border:2px dashed #5B5346;border-radius:4px;background:#E7E1D2;color:#5B5346"><b style="color:#211C15;font-weight:600">18</b> Acquisition</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:500;padding:9px 13px;border:2px dashed #5B5346;border-radius:4px;background:#E7E1D2;color:#5B5346"><b style="color:#211C15;font-weight:600">12</b> Activation</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:500;padding:9px 13px;border:2px dashed #D2402C;border-radius:4px;background:#F3D9D2;color:#A32E1F"><b style="color:#A32E1F;font-weight:600">8</b> Retention</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:500;padding:9px 13px;border:2px dashed #5B5346;border-radius:4px;background:#E7E1D2;color:#5B5346"><b style="color:#211C15;font-weight:600">16</b> Referral</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:500;padding:9px 13px;border:2px dashed #5B5346;border-radius:4px;background:#E7E1D2;color:#5B5346"><b style="color:#211C15;font-weight:600">20</b> Revenue</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="flex:none;width:390px;background:#E7E1D2;background-image:radial-gradient(circle at 20% 12%, rgba(255,255,255,.45), transparent 46%);border:2px solid #211C15;border-radius:10px;overflow:hidden">
+        <div style="padding:0 20px 32px">
+          <header style="display:flex;align-items:center;justify-content:space-between;padding:18px 0;border-bottom:2px dashed rgba(33,28,21,.22)">
+            <div style="font-family:'Stardos Stencil',sans-serif;font-size:16px">TOUR DE <span style="color:#D2402C">GROWTH</span></div>
+            <div style="width:26px;height:14px;border-top:2px solid #211C15;border-bottom:2px solid #211C15"></div>
+          </header>
+          <div style="display:inline-flex;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:#5B5346;background:#FBF9F2;border:2px dashed #5B5346;padding:6px 12px;border-radius:4px;transform:rotate(-1.2deg);margin:28px 0 20px">№ 15 questions — 3 min — free entry</div>
+          <h1 style="font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:40px;line-height:1.03;margin:0 0 16px">Where does your growth <span style="color:#D2402C">stall</span>?</h1>
+          <p style="font-size:15.5px;line-height:1.55;color:#5B5346;font-weight:500;margin:0 0 24px;text-wrap:pretty">A guided check-up across Acquisition, Activation, Retention, Referral and Revenue — scored, explained, and built to share.</p>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <button style="font-family:'Inter',sans-serif;font-size:16px;font-weight:600;padding:16px;border-radius:6px;border:2px solid #D2402C;background:#D2402C;color:#FBF9F2;cursor:pointer" style-focus="outline:3px solid #211C15;outline-offset:3px">Start your Tour →</button>
+            <button style="font-family:'Inter',sans-serif;font-size:16px;font-weight:600;padding:16px;border-radius:6px;border:2px solid #211C15;background:transparent;color:#211C15;cursor:pointer" style-focus="outline:3px solid #211C15;outline-offset:3px">See a sample result</button>
+          </div>
+          <div style="background:#FBF9F2;border:2px solid #211C15;border-radius:10px;padding:20px;box-shadow:6px 6px 0 #211C15;margin-top:30px">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#5B5346">Overall Growth Score — Sample</div>
+            <div style="font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:84px;line-height:.9;margin-top:8px">74<span style="font-size:24px;color:#5B5346;vertical-align:super;margin-left:6px">/100</span></div>
+            <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:16px">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;padding:7px 10px;border:2px dashed #5B5346;border-radius:4px;background:#E7E1D2;color:#5B5346"><b style="color:#211C15">18</b> Acq</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;padding:7px 10px;border:2px dashed #5B5346;border-radius:4px;background:#E7E1D2;color:#5B5346"><b style="color:#211C15">12</b> Act</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;padding:7px 10px;border:2px dashed #D2402C;border-radius:4px;background:#F3D9D2;color:#A32E1F"><b>8</b> Ret</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;padding:7px 10px;border:2px dashed #5B5346;border-radius:4px;background:#E7E1D2;color:#5B5346"><b style="color:#211C15">16</b> Ref</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;padding:7px 10px;border:2px dashed #5B5346;border-radius:4px;background:#E7E1D2;color:#5B5346"><b style="color:#211C15">20</b> Rev</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 02 RESULT NEUTRAL ============ -->
+  <section id="result-neutral" data-screen-label="02 Result Neutral" style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:#DED6C2;border:2px solid #211C15;border-radius:4px;padding:5px 12px">02 · Result — Straight up</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5B5346">mobile first, then desktop · hard shadow is the only signature effect on the score card</span>
+    </div>
+    <div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap">
+
+      <div style="flex:none;width:390px;background:#E7E1D2;background-image:radial-gradient(circle at 22% 10%, rgba(255,255,255,.45), transparent 46%);border:2px solid #211C15;border-radius:10px;overflow:hidden">
+        <div style="padding:18px 20px 32px;display:flex;flex-direction:column;gap:22px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:14px;border-bottom:2px dashed rgba(33,28,21,.22)">
+            <div style="font-family:'Stardos Stencil',sans-serif;font-size:15px">TOUR DE <span style="color:#D2402C">GROWTH</span></div>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#5B5346">Stage 5/5 — finished</span>
+          </div>
+
+          <div style="background:#FBF9F2;border:2px solid #211C15;border-radius:10px;padding:22px 20px 24px;box-shadow:7px 7px 0 #211C15">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#5B5346">Overall Growth Score</div>
+            <div style="font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:110px;line-height:.88;position:relative;display:inline-block;margin-top:6px;animation:stamp .26s cubic-bezier(.2,1.4,.4,1) both">74<span style="font-size:30px;color:#5B5346;vertical-align:super;margin-left:6px">/100</span>
+              <sc-if value="{{ sprayTexture }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;inset:0;background:repeating-linear-gradient(115deg, transparent 0 3px, rgba(33,28,21,.055) 3px 4px);mix-blend-mode:multiply;pointer-events:none"></span></sc-if>
+            </div>
+            <div style="font-family:'Inter',sans-serif;font-size:14px;font-weight:500;color:#5B5346;margin-top:10px;text-wrap:pretty">Solid engine, one flat tyre. Retention is what's costing you the most time.</div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;padding:10px 12px;border:2px dashed #5B5346;border-radius:4px;background:#DED6C2;color:#5B5346"><b style="color:#211C15;font-weight:600">18</b>/20 Acquisition</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;padding:10px 12px;border:2px dashed #5B5346;border-radius:4px;background:#DED6C2;color:#5B5346"><b style="color:#211C15;font-weight:600">12</b>/20 Activation</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;padding:10px 12px;border:2px dashed #D2402C;border-radius:4px;background:#F3D9D2;color:#A32E1F"><b style="font-weight:600">8</b>/20 Retention</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;padding:10px 12px;border:2px dashed #5B5346;border-radius:4px;background:#DED6C2;color:#5B5346"><b style="color:#211C15;font-weight:600">16</b>/20 Referral</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;padding:10px 12px;border:2px dashed #5B5346;border-radius:4px;background:#DED6C2;color:#5B5346;grid-column:span 2"><b style="color:#211C15;font-weight:600">20</b>/20 Revenue</span>
+          </div>
+
+          <div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:#211C15;margin-bottom:12px">Strengths</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="background:#FBF9F2;border:2px solid #211C15;border-radius:8px;padding:14px 16px">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#5B5346;margin-bottom:6px">Revenue — 20/20</div>
+                <div style="font-size:14.5px;line-height:1.5;font-weight:500;text-wrap:pretty">Pricing and expansion pull their weight: paid conversion is measured and reviewed every month.</div>
+              </div>
+              <div style="background:#FBF9F2;border:2px solid #211C15;border-radius:8px;padding:14px 16px">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#5B5346;margin-bottom:6px">Acquisition — 18/20</div>
+                <div style="font-size:14.5px;line-height:1.5;font-weight:500;text-wrap:pretty">Two channels are documented with a known cost per lead, so spend decisions aren't guesses.</div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:#211C15;margin-bottom:12px">Where you're losing time</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="background:#F3D9D2;border:2px solid #D2402C;border-radius:8px;padding:14px 16px">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#A32E1F;margin-bottom:6px">Retention — 8/20</div>
+                <div style="font-size:14.5px;line-height:1.5;font-weight:500;text-wrap:pretty">No cohort view of week-4 retention, so churn only becomes visible once it shows up in revenue.</div>
+              </div>
+              <div style="background:#F3D9D2;border:2px solid #D2402C;border-radius:8px;padding:14px 16px">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#A32E1F;margin-bottom:6px">Activation — 12/20</div>
+                <div style="font-size:14.5px;line-height:1.5;font-weight:500;text-wrap:pretty">The "aha" moment is defined but not instrumented — nobody knows how many new users reach it.</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <button style="font-family:'Inter',sans-serif;font-size:16px;font-weight:600;padding:16px;border-radius:6px;border:2px solid #D2402C;background:#D2402C;color:#FBF9F2;cursor:pointer" style-focus="outline:3px solid #211C15;outline-offset:3px">Share my score</button>
+            <button style="font-family:'Inter',sans-serif;font-size:16px;font-weight:600;padding:16px;border-radius:6px;border:2px solid #211C15;background:transparent;color:#211C15;cursor:pointer" style-focus="outline:3px solid #211C15;outline-offset:3px">Take the Tour again</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="flex:none;width:1040px;background:#E7E1D2;background-image:radial-gradient(circle at 16% 12%, rgba(255,255,255,.45), transparent 42%),radial-gradient(circle at 88% 74%, rgba(0,0,0,.05), transparent 46%);border:2px solid #211C15;border-radius:10px;overflow:hidden">
+        <div style="padding:0 40px 48px">
+          <header style="display:flex;align-items:center;justify-content:space-between;padding:22px 0;border-bottom:2px dashed rgba(33,28,21,.22)">
+            <div style="font-family:'Stardos Stencil',sans-serif;font-size:18px">TOUR DE <span style="color:#D2402C">GROWTH</span></div>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#5B5346">Stage 5/5 — finished · 15/15 answered</span>
+          </header>
+          <div style="display:grid;grid-template-columns:400px 1fr;gap:44px;padding-top:44px;align-items:start">
+            <div style="display:flex;flex-direction:column;gap:20px">
+              <div style="background:#FBF9F2;border:2px solid #211C15;border-radius:10px;padding:28px 30px 30px;box-shadow:7px 7px 0 #211C15">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#5B5346">Overall Growth Score</div>
+                <div style="font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:144px;line-height:.86;position:relative;display:inline-block;margin-top:10px;animation:stamp .26s cubic-bezier(.2,1.4,.4,1) both">74<span style="font-size:38px;color:#5B5346;vertical-align:super;margin-left:8px">/100</span>
+                  <sc-if value="{{ sprayTexture }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;inset:0;background:repeating-linear-gradient(115deg, transparent 0 3px, rgba(33,28,21,.055) 3px 4px);mix-blend-mode:multiply;pointer-events:none"></span></sc-if>
+                </div>
+                <div style="font-size:15px;font-weight:500;color:#5B5346;line-height:1.5;margin-top:12px;text-wrap:pretty">Solid engine, one flat tyre. Retention is what's costing you the most time.</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;padding:11px 14px;border:2px dashed #5B5346;border-radius:4px;background:#DED6C2;color:#5B5346"><b style="color:#211C15;font-weight:600">18</b>/20 &nbsp;Acquisition</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;padding:11px 14px;border:2px dashed #5B5346;border-radius:4px;background:#DED6C2;color:#5B5346"><b style="color:#211C15;font-weight:600">12</b>/20 &nbsp;Activation</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;padding:11px 14px;border:2px dashed #D2402C;border-radius:4px;background:#F3D9D2;color:#A32E1F"><b style="font-weight:600">08</b>/20 &nbsp;Retention</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;padding:11px 14px;border:2px dashed #5B5346;border-radius:4px;background:#DED6C2;color:#5B5346"><b style="color:#211C15;font-weight:600">16</b>/20 &nbsp;Referral</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;padding:11px 14px;border:2px dashed #5B5346;border-radius:4px;background:#DED6C2;color:#5B5346"><b style="color:#211C15;font-weight:600">20</b>/20 &nbsp;Revenue</span>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:32px">
+              <div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:14px">Strengths</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                  <div style="background:#FBF9F2;border:2px solid #211C15;border-radius:8px;padding:18px 20px">
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#5B5346;margin-bottom:8px">Revenue — 20/20</div>
+                    <div style="font-size:15px;line-height:1.5;font-weight:500;text-wrap:pretty">Pricing and expansion pull their weight: paid conversion is measured and reviewed every month.</div>
+                  </div>
+                  <div style="background:#FBF9F2;border:2px solid #211C15;border-radius:8px;padding:18px 20px">
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#5B5346;margin-bottom:8px">Acquisition — 18/20</div>
+                    <div style="font-size:15px;line-height:1.5;font-weight:500;text-wrap:pretty">Two channels are documented with a known cost per lead, so spend decisions aren't guesses.</div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:14px">Where you're losing time</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                  <div style="background:#F3D9D2;border:2px solid #D2402C;border-radius:8px;padding:18px 20px">
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#A32E1F;margin-bottom:8px">Retention — 8/20</div>
+                    <div style="font-size:15px;line-height:1.5;font-weight:500;text-wrap:pretty">No cohort view of week-4 retention, so churn only becomes visible once it shows up in revenue.</div>
+                  </div>
+                  <div style="background:#F3D9D2;border:2px solid #D2402C;border-radius:8px;padding:18px 20px">
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#A32E1F;margin-bottom:8px">Activation — 12/20</div>
+                    <div style="font-size:15px;line-height:1.5;font-weight:500;text-wrap:pretty">The "aha" moment is defined but not instrumented — nobody knows how many new users reach it.</div>
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex;gap:12px;flex-wrap:wrap">
+                <button style="font-family:'Inter',sans-serif;font-size:15px;font-weight:600;padding:14px 24px;border-radius:6px;border:2px solid #D2402C;background:#D2402C;color:#FBF9F2;cursor:pointer" style-focus="outline:3px solid #211C15;outline-offset:3px">Share my score</button>
+                <button style="font-family:'Inter',sans-serif;font-size:15px;font-weight:600;padding:14px 24px;border-radius:6px;border:2px solid #211C15;background:transparent;color:#211C15;cursor:pointer" style-focus="outline:3px solid #211C15;outline-offset:3px">Take the Tour again</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 03 OPEN GRAPH ============ -->
+  <section id="og" data-screen-label="03 Open Graph" style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:#DED6C2;border:2px solid #211C15;border-radius:4px;padding:5px 12px">03 · Share image</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5B5346">1200 × 630 · shown at 100% then at LinkedIn feed size (≈ 320px wide)</span>
+    </div>
+
+    <div style="flex:none;width:1200px;height:630px;background:#E7E1D2;background-image:radial-gradient(circle at 12% 10%, rgba(255,255,255,.5), transparent 40%),radial-gradient(circle at 92% 86%, rgba(0,0,0,.06), transparent 44%);border:2px solid #211C15;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;padding:48px 56px">
+      <div style="position:absolute;left:0;right:0;top:96px;height:0;border-top:8px dashed rgba(33,28,21,.10)"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;position:relative">
+        <div style="font-family:'Stardos Stencil',sans-serif;font-size:28px;letter-spacing:.02em">TOUR DE <span style="color:#D2402C">GROWTH</span></div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:16px;letter-spacing:.08em;text-transform:uppercase;color:#5B5346;background:#FBF9F2;border:2px dashed #5B5346;border-radius:4px;padding:8px 16px">AARRR check-up — 3 min</div>
+      </div>
+
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:48px;position:relative">
+        <div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:19px;letter-spacing:.1em;text-transform:uppercase;color:#5B5346;margin-bottom:6px">Overall Growth Score</div>
+          <div style="font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:268px;line-height:.8;position:relative;display:inline-block">74<span style="font-size:76px;color:#5B5346;vertical-align:super;margin-left:12px">/100</span>
+            <sc-if value="{{ sprayTexture }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;inset:0;background:repeating-linear-gradient(115deg, transparent 0 5px, rgba(33,28,21,.06) 5px 7px);mix-blend-mode:multiply;pointer-events:none"></span></sc-if>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:9px;width:400px;padding-bottom:14px">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:20px;padding:12px 16px;border:2px dashed #5B5346;border-radius:4px;background:#DED6C2;color:#5B5346;display:flex;justify-content:space-between"><span>Acquisition</span><b style="color:#211C15;font-weight:600">18</b></span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:20px;padding:12px 16px;border:2px dashed #5B5346;border-radius:4px;background:#DED6C2;color:#5B5346;display:flex;justify-content:space-between"><span>Activation</span><b style="color:#211C15;font-weight:600">12</b></span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:20px;padding:12px 16px;border:2px solid #D2402C;border-radius:4px;background:#F3D9D2;color:#A32E1F;display:flex;justify-content:space-between"><span>Retention</span><b style="font-weight:600">08</b></span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:20px;padding:12px 16px;border:2px dashed #5B5346;border-radius:4px;background:#DED6C2;color:#5B5346;display:flex;justify-content:space-between"><span>Referral</span><b style="color:#211C15;font-weight:600">16</b></span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:20px;padding:12px 16px;border:2px dashed #5B5346;border-radius:4px;background:#DED6C2;color:#5B5346;display:flex;justify-content:space-between"><span>Revenue</span><b style="color:#211C15;font-weight:600">20</b></span>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:32px;position:relative">
+        <div style="font-family:'Inter',sans-serif;font-size:30px;font-weight:600;line-height:1.25;max-width:640px;text-wrap:pretty">Retention is where this growth stalls. <span style="color:#5B5346">Where does yours?</span></div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:19px;letter-spacing:.06em;color:#211C15;background:#D2402C;color:#FBF9F2;border-radius:5px;padding:12px 18px;white-space:nowrap">tourdegrowth.com</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap">
+      <div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#5B5346;margin-bottom:8px">Feed size check — 320px</div>
+        <div style="flex:none;width:320px;height:168px;overflow:hidden;border:2px solid #211C15;position:relative">
+          <div style="width:1200px;height:630px;transform:scale(.2667);transform-origin:top left;background:#E7E1D2;display:flex;flex-direction:column;justify-content:space-between;padding:48px 56px;box-sizing:border-box">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-family:'Stardos Stencil',sans-serif;font-size:28px">TOUR DE <span style="color:#D2402C">GROWTH</span></div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:16px;letter-spacing:.08em;text-transform:uppercase;color:#5B5346;background:#FBF9F2;border:2px dashed #5B5346;border-radius:4px;padding:8px 16px">AARRR check-up — 3 min</div>
+            </div>
+            <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:48px">
+              <div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:19px;letter-spacing:.1em;text-transform:uppercase;color:#5B5346;margin-bottom:6px">Overall Growth Score</div>
+                <div style="font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:268px;line-height:.8">74<span style="font-size:76px;color:#5B5346;vertical-align:super;margin-left:12px">/100</span></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:9px;width:400px;padding-bottom:14px">
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:20px;padding:12px 16px;border:2px dashed #5B5346;border-radius:4px;background:#DED6C2;color:#5B5346;display:flex;justify-content:space-between"><span>Acquisition</span><b style="color:#211C15">18</b></span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:20px;padding:12px 16px;border:2px dashed #5B5346;border-radius:4px;background:#DED6C2;color:#5B5346;display:flex;justify-content:space-between"><span>Activation</span><b style="color:#211C15">12</b></span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:20px;padding:12px 16px;border:2px solid #D2402C;border-radius:4px;background:#F3D9D2;color:#A32E1F;display:flex;justify-content:space-between"><span>Retention</span><b>08</b></span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:20px;padding:12px 16px;border:2px dashed #5B5346;border-radius:4px;background:#DED6C2;color:#5B5346;display:flex;justify-content:space-between"><span>Referral</span><b style="color:#211C15">16</b></span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:20px;padding:12px 16px;border:2px dashed #5B5346;border-radius:4px;background:#DED6C2;color:#5B5346;display:flex;justify-content:space-between"><span>Revenue</span><b style="color:#211C15">20</b></span>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:32px">
+              <div style="font-family:'Inter',sans-serif;font-size:30px;font-weight:600;line-height:1.25;max-width:640px">Retention is where this growth stalls. <span style="color:#5B5346">Where does yours?</span></div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:19px;background:#D2402C;color:#FBF9F2;border-radius:5px;padding:12px 18px;white-space:nowrap">tourdegrowth.com</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="max-width:420px;font-size:13.5px;line-height:1.55;color:#5B5346;font-weight:500;padding-top:26px;text-wrap:pretty">At feed size only three things survive: the stencil number, the red Retention row, and the wordmark. That's the intended reading order — everything else is detail for people who tap through.</div>
+    </div>
+  </section>
+
+  <!-- ============ 04 RESULT ROAST ============ -->
+  <section id="result-roast" data-screen-label="04 Result Roast" style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:#DED6C2;border:2px solid #211C15;border-radius:4px;padding:5px 12px">04 · Result — Roast</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5B5346">same system · badge + red accent + one stamped tag (Retention), nothing else changes</span>
+    </div>
+    <div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap">
+
+      <div style="flex:none;width:390px;background:#E7E1D2;background-image:radial-gradient(circle at 22% 10%, rgba(255,255,255,.45), transparent 46%);border:2px solid #211C15;border-radius:10px;overflow:hidden">
+        <div style="padding:18px 20px 32px;display:flex;flex-direction:column;gap:22px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:14px;border-bottom:2px dashed rgba(33,28,21,.22)">
+            <div style="font-family:'Stardos Stencil',sans-serif;font-size:15px">TOUR DE <span style="color:#D2402C">GROWTH</span></div>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:#D2402C;color:#FBF9F2;border-radius:4px;padding:6px 10px;transform:rotate(-1.5deg)">🔥 Roast Mode</span>
+          </div>
+
+          <div style="background:#FBF9F2;border:2px solid #D2402C;border-radius:10px;padding:22px 20px 24px;box-shadow:7px 7px 0 #D2402C">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#5B5346">Overall Growth Score</div>
+            <div style="font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:110px;line-height:.88;position:relative;display:inline-block;margin-top:6px;animation:stamp .26s cubic-bezier(.2,1.4,.4,1) both">74<span style="font-size:30px;color:#5B5346;vertical-align:super;margin-left:6px">/100</span>
+              <sc-if value="{{ sprayTexture }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;inset:0;background:repeating-linear-gradient(115deg, transparent 0 3px, rgba(33,28,21,.055) 3px 4px);mix-blend-mode:multiply;pointer-events:none"></span></sc-if>
+            </div>
+            <div style="font-size:14.5px;font-weight:600;line-height:1.45;margin-top:10px;text-wrap:pretty">Not bad for someone whose users leave before the second week.</div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;padding:10px 12px;border:2px dashed #5B5346;border-radius:4px;background:#DED6C2;color:#5B5346"><b style="color:#211C15;font-weight:600">18</b>/20 Acquisition</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;padding:10px 12px;border:2px solid #D2402C;border-radius:4px;background:#F3D9D2;color:#A32E1F"><b style="font-weight:600">12</b>/20 Activation</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;padding:10px 12px;border:2px solid #D2402C;border-radius:4px;background:#D2402C;color:#FBF9F2;grid-column:span 2;transform:rotate(-1deg)"><b>08</b>/20 RETENTION — dead last</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;padding:10px 12px;border:2px dashed #5B5346;border-radius:4px;background:#DED6C2;color:#5B5346"><b style="color:#211C15;font-weight:600">16</b>/20 Referral</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;padding:10px 12px;border:2px dashed #5B5346;border-radius:4px;background:#DED6C2;color:#5B5346"><b style="color:#211C15;font-weight:600">20</b>/20 Revenue</span>
+          </div>
+
+          <div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px">Credit where it's due</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="background:#FBF9F2;border:2px solid #211C15;border-radius:8px;padding:14px 16px">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#5B5346;margin-bottom:6px">Revenue — 20/20</div>
+                <div style="font-size:14.5px;line-height:1.5;font-weight:500;text-wrap:pretty">You do know how to charge money. Shame the people paying it keep leaving.</div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px">Where you're losing time</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="background:#F3D9D2;border:2px solid #D2402C;border-radius:8px;padding:14px 16px">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#A32E1F;margin-bottom:6px">Retention — 8/20</div>
+                <div style="font-size:14.5px;line-height:1.5;font-weight:500;text-wrap:pretty">Your retention took one look at your product and rode straight past the finish line.</div>
+              </div>
+              <div style="background:#F3D9D2;border:2px solid #D2402C;border-radius:8px;padding:14px 16px">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#A32E1F;margin-bottom:6px">Activation — 12/20</div>
+                <div style="font-size:14.5px;line-height:1.5;font-weight:500;text-wrap:pretty">You named your "aha" moment, then never checked whether anyone gets there. Bold.</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <button style="font-family:'Inter',sans-serif;font-size:16px;font-weight:600;padding:16px;border-radius:6px;border:2px solid #D2402C;background:#D2402C;color:#FBF9F2;cursor:pointer" style-focus="outline:3px solid #211C15;outline-offset:3px">Share my roast</button>
+            <button style="font-family:'Inter',sans-serif;font-size:16px;font-weight:600;padding:16px;border-radius:6px;border:2px solid #211C15;background:transparent;color:#211C15;cursor:pointer" style-focus="outline:3px solid #211C15;outline-offset:3px">Switch to straight up</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="flex:none;width:560px;background:#E7E1D2;background-image:radial-gradient(circle at 16% 12%, rgba(255,255,255,.45), transparent 42%);border:2px solid #211C15;border-radius:10px;overflow:hidden">
+        <div style="padding:0 32px 40px">
+          <header style="display:flex;align-items:center;justify-content:space-between;padding:20px 0;border-bottom:2px dashed rgba(33,28,21,.22)">
+            <div style="font-family:'Stardos Stencil',sans-serif;font-size:17px">TOUR DE <span style="color:#D2402C">GROWTH</span></div>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:#D2402C;color:#FBF9F2;border-radius:4px;padding:6px 10px;transform:rotate(-1.5deg)">🔥 Roast Mode</span>
+          </header>
+          <div style="display:flex;flex-direction:column;gap:22px;padding-top:32px">
+            <div style="background:#FBF9F2;border:2px solid #D2402C;border-radius:10px;padding:26px 28px;box-shadow:7px 7px 0 #D2402C;display:flex;align-items:flex-end;gap:24px">
+              <div style="font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:132px;line-height:.84;position:relative;display:inline-block">74<span style="font-size:34px;color:#5B5346;vertical-align:super;margin-left:6px">/100</span>
+                <sc-if value="{{ sprayTexture }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;inset:0;background:repeating-linear-gradient(115deg, transparent 0 3px, rgba(33,28,21,.055) 3px 4px);mix-blend-mode:multiply;pointer-events:none"></span></sc-if>
+              </div>
+              <div style="padding-bottom:14px">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#5B5346;margin-bottom:8px">Overall Growth Score</div>
+                <div style="font-size:15px;font-weight:600;line-height:1.4;text-wrap:pretty">Not bad for someone whose users leave before the second week.</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;padding:10px 13px;border:2px dashed #5B5346;border-radius:4px;background:#DED6C2;color:#5B5346"><b style="color:#211C15;font-weight:600">18</b> Acquisition</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;padding:10px 13px;border:2px solid #D2402C;border-radius:4px;background:#F3D9D2;color:#A32E1F"><b style="font-weight:600">12</b> Activation</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;padding:10px 13px;border:2px solid #D2402C;border-radius:4px;background:#D2402C;color:#FBF9F2;transform:rotate(-1deg)"><b>08</b> RETENTION</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;padding:10px 13px;border:2px dashed #5B5346;border-radius:4px;background:#DED6C2;color:#5B5346"><b style="color:#211C15;font-weight:600">16</b> Referral</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;padding:10px 13px;border:2px dashed #5B5346;border-radius:4px;background:#DED6C2;color:#5B5346"><b style="color:#211C15;font-weight:600">20</b> Revenue</span>
+            </div>
+            <div style="background:#F3D9D2;border:2px solid #D2402C;border-radius:8px;padding:18px 20px">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#A32E1F;margin-bottom:8px">Retention — 8/20</div>
+              <div style="font-size:15px;line-height:1.5;font-weight:500;text-wrap:pretty">Your retention took one look at your product and rode straight past the finish line.</div>
+            </div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#5B5346;line-height:1.5">Desktop shown narrow on purpose — the roast layout is the neutral layout, only the accent moves.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 05 QUESTIONNAIRE ============ -->
+  <section id="quiz" data-screen-label="05 Questionnaire" style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:#DED6C2;border:2px solid #211C15;border-radius:4px;padding:5px 12px">05 · Questionnaire</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5B5346">one question at a time · dotted stage bar (tweakable stage) · 64px+ tap targets</span>
+    </div>
+    <div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap">
+
+      <div style="flex:none;width:390px;background:#E7E1D2;border:2px solid #211C15;border-radius:10px;overflow:hidden">
+        <div style="padding:18px 20px 28px;display:flex;flex-direction:column;gap:22px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-family:'Stardos Stencil',sans-serif;font-size:15px">TOUR DE <span style="color:#D2402C">GROWTH</span></div>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#5B5346">Q 4 / 15</span>
+          </div>
+
+          <div>
+            <div style="display:flex;gap:6px;margin-bottom:10px">
+              <sc-for list="{{ segments }}" as="seg" hint-placeholder-count="5">
+                <div style="flex:1;height:16px;border:2px dashed #5B5346;border-radius:4px;background:{{ seg.bg }};border-style:{{ seg.borderStyle }};border-color:{{ seg.borderColor }}"></div>
+              </sc-for>
+            </div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5B5346">{{ stageLabel }}</div>
+          </div>
+
+          <div style="background:#FBF9F2;border:2px solid #211C15;border-radius:10px;padding:22px 20px;box-shadow:7px 7px 0 #211C15">
+            <h2 style="font-family:'Inter',sans-serif;font-size:22px;font-weight:600;line-height:1.3;margin:0;text-wrap:pretty">Have you defined a specific "aha" moment for new users?</h2>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <button style="text-align:left;font-family:'Inter',sans-serif;font-size:16px;font-weight:500;padding:20px 18px;border-radius:8px;border:2px solid #211C15;background:#DED6C2;color:#211C15;cursor:pointer;min-height:64px" style-hover="background:#FBF9F2;box-shadow:4px 4px 0 #211C15" style-focus="outline:3px solid #D2402C;outline-offset:3px">Yes, and we measure it</button>
+            <button style="text-align:left;font-family:'Inter',sans-serif;font-size:16px;font-weight:500;padding:20px 18px;border-radius:8px;border:2px solid #211C15;background:#DED6C2;color:#211C15;cursor:pointer;min-height:64px" style-hover="background:#FBF9F2;box-shadow:4px 4px 0 #211C15" style-focus="outline:3px solid #D2402C;outline-offset:3px">We have one, but don't measure it</button>
+            <button style="text-align:left;font-family:'Inter',sans-serif;font-size:16px;font-weight:500;padding:20px 18px;border-radius:8px;border:2px solid #211C15;background:#DED6C2;color:#211C15;cursor:pointer;min-height:64px" style-hover="background:#FBF9F2;box-shadow:4px 4px 0 #211C15" style-focus="outline:3px solid #D2402C;outline-offset:3px">Not really</button>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5B5346">
+            <button style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5B5346;background:none;border:none;padding:8px 0;cursor:pointer;text-decoration:underline;text-underline-offset:3px" style-focus="outline:3px solid #211C15;outline-offset:3px">← Back</button>
+            <span>Answer to continue</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="flex:none;width:620px;background:#E7E1D2;border:2px solid #211C15;border-radius:10px;overflow:hidden">
+        <div style="padding:0 36px 40px">
+          <header style="display:flex;align-items:center;justify-content:space-between;padding:20px 0;border-bottom:2px dashed rgba(33,28,21,.22)">
+            <div style="font-family:'Stardos Stencil',sans-serif;font-size:17px">TOUR DE <span style="color:#D2402C">GROWTH</span></div>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#5B5346">Q 4 / 15 — 2 min left</span>
+          </header>
+          <div style="padding-top:34px;display:flex;flex-direction:column;gap:26px">
+            <div>
+              <div style="display:flex;gap:8px;margin-bottom:12px">
+                <div style="flex:1;height:18px;border:2px solid #211C15;border-radius:4px;background:#211C15"></div>
+                <div style="flex:1;height:18px;border:2px solid #D2402C;border-radius:4px;background:#D2402C;animation:pulse .4s ease-out both"></div>
+                <div style="flex:1;height:18px;border:2px dashed #5B5346;border-radius:4px;background:#DED6C2"></div>
+                <div style="flex:1;height:18px;border:2px dashed #5B5346;border-radius:4px;background:#DED6C2"></div>
+                <div style="flex:1;height:18px;border:2px dashed #5B5346;border-radius:4px;background:#DED6C2"></div>
+              </div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:#5B5346">Stage 2 of 5 — Activation</div>
+            </div>
+            <div style="background:#FBF9F2;border:2px solid #211C15;border-radius:10px;padding:30px 32px;box-shadow:7px 7px 0 #211C15">
+              <h2 style="font-family:'Inter',sans-serif;font-size:28px;font-weight:600;line-height:1.28;margin:0;text-wrap:pretty">Have you defined a specific "aha" moment for new users?</h2>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <button style="text-align:left;font-family:'Inter',sans-serif;font-size:17px;font-weight:500;padding:20px;border-radius:8px;border:2px solid #211C15;background:#DED6C2;cursor:pointer" style-hover="background:#FBF9F2;box-shadow:4px 4px 0 #211C15" style-focus="outline:3px solid #D2402C;outline-offset:3px">Yes, and we measure it</button>
+              <button style="text-align:left;font-family:'Inter',sans-serif;font-size:17px;font-weight:500;padding:20px;border-radius:8px;border:2px solid #211C15;background:#FBF9F2;cursor:pointer;box-shadow:4px 4px 0 #211C15" style-focus="outline:3px solid #D2402C;outline-offset:3px">We have one, but don't measure it <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5B5346;float:right">hover</span></button>
+              <button style="text-align:left;font-family:'Inter',sans-serif;font-size:17px;font-weight:500;padding:20px;border-radius:8px;border:2px solid #211C15;background:#DED6C2;cursor:pointer;outline:3px solid #D2402C;outline-offset:3px">Not really <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5B5346;float:right">keyboard focus</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 06 TONE / LOADING / ERROR ============ -->
+  <section id="states" data-screen-label="06 Tone, loading, error" style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:#DED6C2;border:2px solid #211C15;border-radius:4px;padding:5px 12px">06 · Tone · Loading · Error</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5B5346">mobile 390</span>
+    </div>
+    <div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap">
+
+      <div style="flex:none;width:390px;background:#E7E1D2;border:2px solid #211C15;border-radius:10px;overflow:hidden">
+        <div style="padding:18px 20px 28px;display:flex;flex-direction:column;gap:22px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:14px;border-bottom:2px dashed rgba(33,28,21,.22)">
+            <div style="font-family:'Stardos Stencil',sans-serif;font-size:15px">TOUR DE <span style="color:#D2402C">GROWTH</span></div>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#5B5346">15 / 15 answered</span>
+          </div>
+          <h2 style="font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:34px;line-height:1.05;margin:12px 0 0">How do you want your results?</h2>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <button style="text-align:left;background:#FBF9F2;border:2px solid #211C15;border-radius:8px;padding:20px;cursor:pointer;box-shadow:6px 6px 0 #211C15" style-focus="outline:3px solid #D2402C;outline-offset:3px">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:6px">
+                <span style="font-family:'Inter',sans-serif;font-size:19px;font-weight:600">Straight up</span>
+                <span style="width:18px;height:18px;border-radius:50%;border:2px solid #211C15;background:#211C15;box-shadow:inset 0 0 0 3px #FBF9F2;flex:none"></span>
+              </div>
+              <div style="font-family:'Inter',sans-serif;font-size:14.5px;font-weight:500;color:#5B5346;line-height:1.45">Clear, constructive, no sugar-coating.</div>
+            </button>
+            <button style="text-align:left;background:#DED6C2;border:2px solid #211C15;border-radius:8px;padding:20px;cursor:pointer" style-hover="background:#FBF9F2" style-focus="outline:3px solid #D2402C;outline-offset:3px">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:6px">
+                <span style="font-family:'Inter',sans-serif;font-size:19px;font-weight:600">Roast me <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:#D2402C;color:#FBF9F2;border-radius:4px;padding:4px 8px;margin-left:6px;vertical-align:2px">🔥</span></span>
+                <span style="width:18px;height:18px;border-radius:50%;border:2px solid #5B5346;flex:none"></span>
+              </div>
+              <div style="font-family:'Inter',sans-serif;font-size:14.5px;font-weight:500;color:#5B5346;line-height:1.45">Same insights, sharper tongue. All in good fun.</div>
+            </button>
+          </div>
+          <button style="font-family:'Inter',sans-serif;font-size:16px;font-weight:600;padding:16px;border-radius:6px;border:2px solid #D2402C;background:#D2402C;color:#FBF9F2;cursor:pointer;margin-top:4px" style-focus="outline:3px solid #211C15;outline-offset:3px">Get my score →</button>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#5B5346;text-align:center">You can switch tone on the result page.</div>
+        </div>
+      </div>
+
+      <div style="flex:none;width:390px;background:#E7E1D2;border:2px solid #211C15;border-radius:10px;overflow:hidden;min-height:520px;display:flex;flex-direction:column">
+        <div style="padding:18px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px dashed rgba(33,28,21,.22)">
+          <div style="font-family:'Stardos Stencil',sans-serif;font-size:15px">TOUR DE <span style="color:#D2402C">GROWTH</span></div>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#5B5346">Calculating</span>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:26px;padding:32px 24px">
+          <div style="font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:96px;line-height:.9;color:#5B5346;opacity:.45;position:relative">
+            ——<span style="position:absolute;inset:0;background:repeating-linear-gradient(115deg, transparent 0 3px, rgba(33,28,21,.05) 3px 4px);mix-blend-mode:multiply"></span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;width:100%">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:13.5px;color:#211C15;background:#FBF9F2;border:2px solid #211C15;border-radius:6px;padding:12px 14px">Reviewing your answers...</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:13.5px;color:#5B5346;padding:12px 14px;border:2px dashed rgba(33,28,21,.25);border-radius:6px">Calculating your stage times...</div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:13.5px;color:#5B5346;opacity:.5;padding:12px 14px;border:2px dashed rgba(33,28,21,.18);border-radius:6px">Drafting your race report...</div>
+          </div>
+          <div style="display:flex;gap:6px;width:100%">
+            <div style="flex:1;height:12px;border:2px solid #D2402C;border-radius:3px;background:#D2402C"></div>
+            <div style="flex:1;height:12px;border:2px dashed #5B5346;border-radius:3px"></div>
+            <div style="flex:1;height:12px;border:2px dashed #5B5346;border-radius:3px"></div>
+          </div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#5B5346;text-align:center">Messages advance every ~1.3s. The stencil dashes hold the score's place so the layout doesn't jump.</div>
+        </div>
+      </div>
+
+      <div style="flex:none;width:390px;background:#E7E1D2;border:2px solid #211C15;border-radius:10px;overflow:hidden;min-height:520px;display:flex;flex-direction:column">
+        <div style="padding:18px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px dashed rgba(33,28,21,.22)">
+          <div style="font-family:'Stardos Stencil',sans-serif;font-size:15px">TOUR DE <span style="color:#D2402C">GROWTH</span></div>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#A32E1F">Error</span>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:22px;padding:32px 22px">
+          <div style="background:#FBF9F2;border:2px solid #D2402C;border-radius:10px;padding:24px 22px;box-shadow:7px 7px 0 #D2402C">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A32E1F;margin-bottom:12px">Detour</div>
+            <h2 style="font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:36px;line-height:1.05;margin:0 0 12px">Your results took a wrong turn.</h2>
+            <p style="font-size:15px;font-weight:500;line-height:1.5;color:#5B5346;margin:0;text-wrap:pretty">Something broke on our end — try again in a moment.</p>
+          </div>
+          <button style="font-family:'Inter',sans-serif;font-size:16px;font-weight:600;padding:16px;border-radius:6px;border:2px solid #D2402C;background:#D2402C;color:#FBF9F2;cursor:pointer" style-focus="outline:3px solid #211C15;outline-offset:3px">Try again</button>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#5B5346;line-height:1.5">Your 15 answers are still saved on this device — retrying doesn't restart the questionnaire.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 07 FR CHECK ============ -->
+  <section id="fr" data-screen-label="07 French labels" style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:#DED6C2;border:2px solid #211C15;border-radius:4px;padding:5px 12px">07 · Test FR</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5B5346">les libellés français sont plus longs de 15-25 % — vérification du gabarit, pas une traduction validée</span>
+    </div>
+    <div style="flex:none;width:390px;background:#E7E1D2;border:2px solid #211C15;border-radius:10px;overflow:hidden">
+      <div style="padding:18px 20px 28px;display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:14px;border-bottom:2px dashed rgba(33,28,21,.22)">
+          <div style="font-family:'Stardos Stencil',sans-serif;font-size:15px">TOUR DE <span style="color:#D2402C">GROWTH</span></div>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#5B5346">Étape 5/5 — terminé</span>
+        </div>
+        <div style="background:#FBF9F2;border:2px solid #211C15;border-radius:10px;padding:22px 20px;box-shadow:7px 7px 0 #211C15">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#5B5346">Score growth global</div>
+          <div style="font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:110px;line-height:.88;margin-top:6px">74<span style="font-size:30px;color:#5B5346;vertical-align:super;margin-left:6px">/100</span></div>
+          <div style="font-size:14px;font-weight:500;color:#5B5346;margin-top:10px;text-wrap:pretty">Bon moteur, un pneu à plat. C'est la rétention qui vous coûte le plus de temps.</div>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase">Là où vous perdez du temps</div>
+        <div style="background:#F3D9D2;border:2px solid #D2402C;border-radius:8px;padding:14px 16px">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#A32E1F;margin-bottom:6px">Rétention — 8/20</div>
+          <div style="font-size:14.5px;line-height:1.5;font-weight:500;text-wrap:pretty">Aucune vue par cohorte de la rétention à 4 semaines : le churn ne devient visible qu'une fois dans le chiffre d'affaires.</div>
+        </div>
+        <button style="font-family:'Inter',sans-serif;font-size:16px;font-weight:600;padding:16px;border-radius:6px;border:2px solid #D2402C;background:#D2402C;color:#FBF9F2;cursor:pointer" style-focus="outline:3px solid #211C15;outline-offset:3px">Partager mon score</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;sprayTexture&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Signature&quot;},&quot;progressStage&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:2,&quot;min&quot;:1,&quot;max&quot;:5,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Questionnaire&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const stage = Math.min(5, Math.max(1, this.props.progressStage ?? 2));
+    const names = ['Acquisition', 'Activation', 'Retention', 'Referral', 'Revenue'];
+    const segments = names.map((n, i) => {
+      const done = i + 1 < stage, current = i + 1 === stage;
+      return {
+        bg: done ? '#211C15' : current ? '#D2402C' : '#DED6C2',
+        borderColor: done ? '#211C15' : current ? '#D2402C' : '#5B5346',
+        borderStyle: done || current ? 'solid' : 'dashed'
+      };
+    });
+    return {
+      segments,
+      stageLabel: 'Stage ' + stage + ' of 5 — ' + names[stage - 1],
+      sprayTexture: this.props.sprayTexture ?? true
+    };
+  }
+}
+</script>
+</body>
+</html>
