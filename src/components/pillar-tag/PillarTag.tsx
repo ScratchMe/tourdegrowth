@@ -9,22 +9,50 @@ interface PillarTagProps {
   locale: Locale;
   /** The weak pillar gets the red/dashed treatment (DESIGN-BRIEF.md §01/§02). */
   weak?: boolean;
+  /**
+   * Show the `/20` denominator after the score. DESIGN-BRIEF.md's own two
+   * formats differ by context: the landing preview (§01) reads bare `18
+   * Acquisition`, but the result screens (§02/§04) read `18/20 Acquisition`
+   * — same component, same recipe, different text. Defaults to false (the
+   * landing-preview format) since that's this component's original context.
+   */
+  showMax?: boolean;
+  /**
+   * Keep the full pillar name at every width instead of abbreviating below
+   * 760px. DESIGN-BRIEF.md only calls for the 3-letter abbreviation
+   * ("Acq/Act/Ret/Ref/Rev") on the landing preview's mobile card (§01) — its
+   * own mobile result-screen example (§02) spells out `18/20 Acquisition`
+   * in full. Defaults to false (abbreviate), matching this component's
+   * original landing-preview context.
+   */
+  fullLabel?: boolean;
 }
 
 /**
- * One `"18 Acquisition"` tag. Renders both the full label and a 3-letter
- * abbreviation ("Acq") and lets CSS pick one per breakpoint (DESIGN-BRIEF.md:
- * "stage tags abbreviated to Acq/Act/Ret/Ref/Rev" on mobile) — no JS
- * viewport detection, no hydration mismatch risk.
+ * One `"18 Acquisition"` (or, on the result screens, `"18/20 Acquisition"`)
+ * tag. Renders both the full label and a 3-letter abbreviation ("Acq") and
+ * lets CSS pick one per breakpoint (DESIGN-BRIEF.md: "stage tags abbreviated
+ * to Acq/Act/Ret/Ref/Rev" on mobile) — no JS viewport detection, no
+ * hydration mismatch risk.
  */
-export function PillarTag({ pillar, score, locale, weak = false }: PillarTagProps) {
+export function PillarTag({
+  pillar,
+  score,
+  locale,
+  weak = false,
+  showMax = false,
+  fullLabel = false,
+}: PillarTagProps) {
   const label = tc(UI_STRINGS.pillars[pillar], locale);
 
   return (
     <span className={`${styles.tag} ${weak ? styles.weak : ""}`}>
-      <strong className={styles.score}>{score}</strong>
-      <span className={styles.labelFull}>{label}</span>
-      <span className={styles.labelShort}>{label.slice(0, 3)}</span>
+      <strong className={styles.score}>
+        {score}
+        {showMax ? "/20" : ""}
+      </strong>
+      <span className={fullLabel ? undefined : styles.labelFull}>{label}</span>
+      {!fullLabel && <span className={styles.labelShort}>{label.slice(0, 3)}</span>}
     </span>
   );
 }

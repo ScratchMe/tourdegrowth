@@ -67,7 +67,11 @@
 .left {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  /* DESIGN-BRIEF.md §02: the score card and the pillar grid are two
+     separate items in the same 22px vertical rhythm as the rest of the
+     screen (header/score/pillars/strengths/weaknesses/CTAs) — not a tighter
+     8px, which is the *pillar grid's own* internal gap between tags. */
+  gap: 22px;
 }
 
 .pillarGrid {
@@ -138,6 +142,13 @@
     grid-template-columns: 400px 1fr;
     gap: 44px;
     align-items: start;
+  }
+
+  /* DESIGN-BRIEF.md §02 desktop: "Section gap 32px" — the right column's
+     own rhythm (Strengths / Weaknesses / Recommendation / CTAs) widens from
+     the mobile 22px once there's a two-column layout to fill. */
+  .right {
+    gap: 32px;
   }
 
   .pillarGrid {
