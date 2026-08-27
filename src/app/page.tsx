@@ -1,23 +1,31 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import { Button } from "@/components/button/Button";
 import { ScoreCard } from "@/components/score-card/ScoreCard";
 import { Wordmark } from "@/components/wordmark/Wordmark";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { useLocale } from "@/lib/i18n/locale-context";
+import { saveRefId } from "@/lib/quiz/storage";
 import { SAMPLE_RESULT } from "@/lib/submissions/sample";
 import styles from "./page.module.css";
 
 // Landing page — DESIGN-BRIEF.md screen 01. Nav links ("How it works",
 // "Examples", "Roast mode") are cut from the MVP per SPEC.md §12 — the
 // header keeps just the wordmark and a compact CTA.
-//
-// "Start your Tour" and "See a sample result" point at /quiz and /r/sample,
-// which don't exist yet (steps 4 and 10 of the build plan) — clicking them
-// hits Next.js's default 404 for now, that's expected at this stage.
 export default function LandingPage() {
   const { locale } = useLocale();
+  const searchParams = useSearchParams();
   const t = UI_STRINGS.landing;
+
+  // SPEC.md §7: a visitor arriving via a shared result's `?ref=<id>` is
+  // captured here (or on /quiz, whichever they land on first) and carried
+  // through the whole questionnaire in localStorage — see quiz/storage.ts.
+  useEffect(() => {
+    const ref = searchParams.get("ref");
+    if (ref) saveRefId(ref);
+  }, [searchParams]);
 
   return (
     <>

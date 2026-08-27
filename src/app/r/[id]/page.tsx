@@ -58,6 +58,7 @@ export default async function ResultPage({ params }: PageProps) {
 
   return (
     <ResultView
+      id={submission.id}
       total={submission.total}
       pillars={submission.pillars}
       weakestPillar={submission.weakestPillar}

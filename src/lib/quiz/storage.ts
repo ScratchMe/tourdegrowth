@@ -46,3 +46,38 @@ function isAnswersShape(value: unknown): value is Answers {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
   return Object.values(value).every((v) => v === 0 || v === 1 || v === 2 || v === 3);
 }
+
+/**
+ * The `?ref=<id>` referral attribution (SPEC.md §7) — captured once,
+ * wherever it first shows up (landing or quiz), then carried through the
+ * whole questionnaire so it's still there when the submission is finally
+ * created, however many questions later that is.
+ */
+const REF_STORAGE_KEY = "tdg.quiz.refId.v1";
+
+export function loadRefId(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.localStorage.getItem(REF_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function saveRefId(refId: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(REF_STORAGE_KEY, refId);
+  } catch {
+    // ignore — attribution is a nice-to-have, never worth crashing over
+  }
+}
+
+export function clearRefId(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(REF_STORAGE_KEY);
+  } catch {
+    // ignore
+  }
+}

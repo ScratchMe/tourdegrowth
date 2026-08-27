@@ -17,6 +17,8 @@ import type { Verdict } from "@/lib/submissions/types";
 import styles from "./ResultView.module.css";
 
 interface ResultViewProps {
+  /** This result's own id — used to attribute whoever starts their own Tour from here (SPEC.md §7). Omitted for the fixed sample (no real submission to attribute to). */
+  id?: string;
   total: number;
   pillars: { pillar: Pillar; score: number }[];
   weakestPillar: Pillar;
@@ -28,7 +30,7 @@ interface ResultViewProps {
 }
 
 /** Result page — DESIGN-BRIEF.md §02 (Straight up) / §04 (Roast). Same layout, same components; only the accent (and which verdict/CTAs show) changes with `tone`. */
-export function ResultView({ total, pillars, weakestPillar, verdicts, initialTone, isSample = false }: ResultViewProps) {
+export function ResultView({ id, total, pillars, weakestPillar, verdicts, initialTone, isSample = false }: ResultViewProps) {
   const { locale } = useLocale();
   const [tone, setTone] = useState<Tone>(initialTone);
   const [copied, setCopied] = useState(false);
@@ -164,7 +166,11 @@ export function ResultView({ total, pillars, weakestPillar, verdicts, initialTon
                   {tc(t.ctaSwitchToNeutral, locale)}
                 </Button>
               ) : (
-                <Button href="/quiz" variant="secondary" onClick={() => clearStoredAnswers()}>
+                <Button
+                  href={id ? `/quiz?ref=${id}` : "/quiz"}
+                  variant="secondary"
+                  onClick={() => clearStoredAnswers()}
+                >
                   {tc(t.ctaAgain, locale)}
                 </Button>
               )}
