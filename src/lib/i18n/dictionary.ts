@@ -74,4 +74,30 @@ export const UI_STRINGS = {
     caption: { en: "Sample B2B SaaS", fr: "Exemple SaaS B2B" },
     stageLabel: { en: "Stage 5/5", fr: "Étape 5/5" },
   },
+
+  /**
+   * Questionnaire chrome (DESIGN-BRIEF.md §05) — question/answer copy itself
+   * lives in questionnaire-content.ts, not here. `{n}`/`{pillar}`/`{m}` are
+   * replaced in code (see quiz/page.tsx) — this project's i18n is
+   * intentionally template-free otherwise, this is the one spot with
+   * enough moving parts (a number AND a translated pillar name) to need it.
+   */
+  quiz: {
+    stageLabelTemplate: { en: "Stage {n} of 5 — {pillar}", fr: "Étape {n} sur 5 — {pillar}" },
+    questionCounterTemplate: { en: "Q {n} / 15", fr: "Q {n} / 15" },
+    minutesLeftTemplate: { en: "— {m} min left", fr: "— {m} min restantes" },
+    backButton: { en: "← Back", fr: "← Retour" },
+    answerToContinue: { en: "Answer to continue", fr: "Réponds pour continuer" },
+    // Step 4 only shows this once all 15 are answered — replaced by the real
+    // tone selector in step 5. Deliberately reads as a build placeholder,
+    // not as product copy.
+    donePlaceholderTitle: {
+      en: "All 15 questions answered.",
+      fr: "15 questions sur 15, répondues.",
+    },
+    donePlaceholderBody: {
+      en: "The tone selector (Straight up / Roast) lands in the next build step — this placeholder just confirms the full 15-question flow works end to end.",
+      fr: "Le sélecteur de ton (Neutre / Roast) arrive à la prochaine étape du build — cet écran temporaire confirme juste que le parcours des 15 questions fonctionne de bout en bout.",
+    },
+  },
 } as const satisfies Record<string, Record<string, Translatable>>;
