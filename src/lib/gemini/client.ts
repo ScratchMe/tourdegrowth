@@ -26,6 +26,16 @@ export const GEMINI_MODEL_CANDIDATES = [
 /** Statuses worth retrying with the next model candidate. */
 const RETRIABLE_STATUSES = [404, 429, 500, 503];
 
+/**
+ * Per-attempt timeout. Found necessary the hard way while building this:
+ * this build session's own network egress silently black-holes
+ * `generateContent` calls (connects, sends, never responds — see
+ * CLAUDE.md's step 6 note) with no error at all, which would otherwise hang
+ * a whole model attempt (and, on Vercel, the Route Handler's function
+ * timeout) indefinitely instead of falling back to the next candidate.
+ */
+const REQUEST_TIMEOUT_MS = 20_000;
+
 export interface GeminiCallResult {
   data: unknown;
   modelUsed: string;
@@ -37,10 +47,10 @@ function errorMessage(err: unknown): string {
 
 /**
  * Calls the Gemini API, trying each model in {@link GEMINI_MODEL_CANDIDATES}
- * in order. A retriable HTTP status (overloaded/unavailable/not-found) or a
- * network-level failure moves on to the next candidate; any other HTTP
- * error fails immediately (it would be identical on every model). Throws
- * once every candidate has been exhausted.
+ * in order. A retriable HTTP status (overloaded/unavailable/not-found), a
+ * network-level failure, or a timeout moves on to the next candidate; any
+ * other HTTP error fails immediately (it would be identical on every
+ * model). Throws once every candidate has been exhausted.
  */
 export async function callGeminiWithFallback(
   prompt: string,
@@ -50,6 +60,9 @@ export async function callGeminiWithFallback(
   let lastError = "";
 
   for (const model of GEMINI_MODEL_CANDIDATES) {
+    const timeoutController = new AbortController();
+    const timeout = setTimeout(() => timeoutController.abort(), REQUEST_TIMEOUT_MS);
+
     let response: Response;
     try {
       response = await fetchImpl(
@@ -61,11 +74,15 @@ export async function callGeminiWithFallback(
             contents: [{ parts: [{ text: prompt }] }],
             generationConfig: { temperature: 0.3, responseMimeType: "application/json" },
           }),
+          signal: timeoutController.signal,
         },
       );
     } catch (networkErr) {
-      lastError = `${model} → ${errorMessage(networkErr)}`;
+      const timedOut = timeoutController.signal.aborted;
+      lastError = `${model} → ${timedOut ? `timed out after ${REQUEST_TIMEOUT_MS}ms` : errorMessage(networkErr)}`;
       continue;
+    } finally {
+      clearTimeout(timeout);
     }
 
     if (response.ok) {

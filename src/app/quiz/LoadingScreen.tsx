@@ -7,31 +7,26 @@ import styles from "./LoadingScreen.module.css";
 
 interface LoadingScreenProps {
   locale: Locale;
-  onDone: () => void;
 }
 
-// 3 messages x 900ms = 2.7s total, landing inside DESIGN-BRIEF.md §06b's
-// stated "2-3 s" duration (its "~1.3s each" would total 3.9s — calibrated
-// down to fit the duration it actually states, not the per-message figure).
+// 3 messages x 900ms = 2.7s to cycle through all of them, landing inside
+// DESIGN-BRIEF.md §06b's stated "2-3 s" duration (its "~1.3s each" would
+// total 3.9s — calibrated down to fit the duration it actually states, not
+// the per-message figure). The real work (the /api/submissions call) runs
+// independently in the parent (quiz/page.tsx) and decides when to leave
+// this screen — this component only owns the animation, and holds on the
+// last message rather than timing out if the real call takes longer.
 const MESSAGE_DURATION_MS = 900;
 
-/** Loading screen — DESIGN-BRIEF.md §06b. Purely a timed animation for now; nothing real is being computed yet (steps 6-7). */
-export function LoadingScreen({ locale, onDone }: LoadingScreenProps) {
+/** Loading screen — DESIGN-BRIEF.md §06b. Purely the animation; the real Gemini/Firestore call happens in the parent while this plays. */
+export function LoadingScreen({ locale }: LoadingScreenProps) {
   const [step, setStep] = useState(0);
 
   useEffect(() => {
-    const timer = window.setTimeout(
-      () => {
-        if (step >= 2) {
-          onDone();
-        } else {
-          setStep((s) => s + 1);
-        }
-      },
-      MESSAGE_DURATION_MS,
-    );
+    if (step >= 2) return; // hold on the last message until the parent navigates away
+    const timer = window.setTimeout(() => setStep((s) => s + 1), MESSAGE_DURATION_MS);
     return () => window.clearTimeout(timer);
-  }, [step, onDone]);
+  }, [step]);
 
   const messages = [UI_STRINGS.loading.message1, UI_STRINGS.loading.message2, UI_STRINGS.loading.message3];
 

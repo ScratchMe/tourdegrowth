@@ -1,7 +1,9 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Wordmark } from "@/components/wordmark/Wordmark";
+import { Button } from "@/components/button/Button";
 import { ProgressBar } from "@/components/progress-bar/ProgressBar";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { QUESTION_CONTENT } from "@/lib/i18n/questionnaire-content";
@@ -22,15 +24,20 @@ import { LoadingScreen } from "./LoadingScreen";
 import { ToneSelector, type Tone } from "./ToneSelector";
 import styles from "./page.module.css";
 
-type Phase = "answering" | "tone" | "loading" | "done";
+type Phase = "answering" | "tone" | "loading" | "error";
 
 // The full pre-result flow — DESIGN-BRIEF.md §05/§06a/§06b — as one route,
 // one client state machine (`phase`), matching the design's own "State"
-// section (no per-question or per-screen URLs).
+// section (no per-question or per-screen URLs). On success, `loading`
+// redirects straight to the real /r/<id> result page (step 7) — there's no
+// terminal "done" state on this page anymore.
 //
-// `phase: "done"` stands in for the real result page: Gemini/Supabase
-// (step 6) and the result screens (step 7) don't exist yet.
+// `phase: "error"` is a minimal, honest stand-in for the real DESIGN-BRIEF.md
+// §06c error screen (step 9) — it keeps the SPEC.md §4 promise (answers
+// stay saved, retry doesn't restart the questionnaire) without pretending
+// to be the polished screen that isn't built yet.
 export default function QuizPage() {
+  const router = useRouter();
   const { locale } = useLocale();
   const t = UI_STRINGS.quiz;
 
@@ -39,6 +46,7 @@ export default function QuizPage() {
   const [answers, setAnswers] = useState<Answers>({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [pulseStage, setPulseStage] = useState<number | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   // SPEC.md §6bis: "Straight up" (neutral) is the explicit default tone.
   const [tone, setTone] = useState<Tone>("neutral");
 
@@ -88,6 +96,31 @@ export default function QuizPage() {
     setCurrentIndex((i) => Math.max(i - 1, 0));
   }
 
+  // "Get my score →" and "Try again" both call this — same request, same
+  // stored answers, so a retry after a failure never restarts the
+  // questionnaire (SPEC.md §4).
+  async function handleGetScore() {
+    setSubmitError(null);
+    setPhase("loading");
+    try {
+      const res = await fetch("/api/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answers, tone, locale, refId: null }), // ?ref= attribution lands in step 8
+      });
+      if (!res.ok) {
+        const body: unknown = await res.json().catch(() => null);
+        const message = (body as { error?: string } | null)?.error;
+        throw new Error(message || `Request failed (${res.status})`);
+      }
+      const submission = (await res.json()) as { id: string };
+      router.push(`/r/${submission.id}`);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Unknown error");
+      setPhase("error");
+    }
+  }
+
   const questionCounter = tc(t.questionCounterTemplate, locale).replace(
     "{n}",
     String(Math.min(currentIndex + 1, QUESTION_COUNT)),
@@ -96,8 +129,6 @@ export default function QuizPage() {
   const stageLabel = tc(t.stageLabelTemplate, locale)
     .replace("{n}", String(stageOfQuestion(currentIndex) + 1))
     .replace("{pillar}", tc(UI_STRINGS.pillars[content.pillar], locale));
-  const toneLabel = tc(tone === "roast" ? UI_STRINGS.toneSelector.roastTitle : UI_STRINGS.toneSelector.neutralTitle, locale);
-  const doneBody = tc(t.donePlaceholderBodyTemplate, locale).replace("{tone}", toneLabel);
 
   return (
     <>
@@ -158,15 +189,18 @@ export default function QuizPage() {
         )}
 
         {phase === "tone" && (
-          <ToneSelector locale={locale} tone={tone} onSelectTone={setTone} onSubmit={() => setPhase("loading")} />
+          <ToneSelector locale={locale} tone={tone} onSelectTone={setTone} onSubmit={handleGetScore} />
         )}
 
-        {phase === "loading" && <LoadingScreen locale={locale} onDone={() => setPhase("done")} />}
+        {phase === "loading" && <LoadingScreen locale={locale} />}
 
-        {phase === "done" && (
+        {phase === "error" && (
           <div className={styles.doneCard}>
-            <h2 className={styles.doneTitle}>{tc(t.donePlaceholderTitle, locale)}</h2>
-            <p className={styles.doneBody}>{doneBody}</p>
+            <h2 className={styles.doneTitle}>{tc(t.errorTitle, locale)}</h2>
+            <p className={styles.doneBody}>{submitError}</p>
+            <Button data-testid="retry-button" onClick={handleGetScore}>
+              {tc(t.errorRetry, locale)}
+            </Button>
           </div>
         )}
       </main>

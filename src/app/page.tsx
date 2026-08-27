@@ -5,7 +5,7 @@ import { ScoreCard } from "@/components/score-card/ScoreCard";
 import { Wordmark } from "@/components/wordmark/Wordmark";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { useLocale } from "@/lib/i18n/locale-context";
-import { SAMPLE_RESULT } from "@/lib/scoring/sample-result";
+import { SAMPLE_RESULT } from "@/lib/submissions/sample";
 import styles from "./page.module.css";
 
 // Landing page — DESIGN-BRIEF.md screen 01. Nav links ("How it works",

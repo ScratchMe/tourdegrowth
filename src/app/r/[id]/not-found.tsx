@@ -1,0 +1,28 @@
+import { cookies, headers } from "next/headers";
+import { Button } from "@/components/button/Button";
+import { Wordmark } from "@/components/wordmark/Wordmark";
+import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
+import { LOCALE_COOKIE, resolveLocale } from "@/lib/i18n/locale";
+import styles from "./not-found.module.css";
+
+// Not the DESIGN-BRIEF.md §06c error screen (that's the "calculation
+// failed" state, step 9) — this is a plain "no submission at this id"
+// 404, e.g. a mistyped or since-deleted result link.
+export default async function ResultNotFound() {
+  const [cookieStore, headerList] = await Promise.all([cookies(), headers()]);
+  const locale = resolveLocale({
+    queryLang: null,
+    cookieLocale: cookieStore.get(LOCALE_COOKIE)?.value ?? null,
+    acceptLanguage: headerList.get("accept-language"),
+  });
+  const t = UI_STRINGS.result;
+
+  return (
+    <main className={styles.main}>
+      <Wordmark />
+      <h1 className={styles.title}>{tc(t.notFoundTitle, locale)}</h1>
+      <p className={styles.body}>{tc(t.notFoundBody, locale)}</p>
+      <Button href="/">{tc(t.notFoundCta, locale)}</Button>
+    </main>
+  );
+}
