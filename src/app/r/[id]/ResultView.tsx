@@ -7,6 +7,7 @@ import { ScoreCard } from "@/components/score-card/ScoreCard";
 import { StampedTag } from "@/components/stamped-tag/StampedTag";
 import { VerdictCard } from "@/components/verdict-card/VerdictCard";
 import { Wordmark } from "@/components/wordmark/Wordmark";
+import { trackEvent } from "@/lib/analytics/goatcounter";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { clearStoredAnswers } from "@/lib/quiz/storage";
@@ -50,6 +51,7 @@ export function ResultView({ id, total, pillars, weakestPillar, verdicts, initia
     try {
       if (navigator.share) {
         await navigator.share(shareData);
+        trackEvent("share", tone); // SPEC.md §8: one custom event per share
         return;
       }
     } catch {
@@ -58,6 +60,7 @@ export function ResultView({ id, total, pillars, weakestPillar, verdicts, initia
     try {
       await navigator.clipboard.writeText(window.location.href);
       setCopied(true);
+      trackEvent("share", tone);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
       // clipboard unavailable — nothing more we can do without a real UI affordance here (step 8 revisits sharing)
