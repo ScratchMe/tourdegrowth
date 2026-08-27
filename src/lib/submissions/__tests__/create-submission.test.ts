@@ -14,6 +14,7 @@ function fullAnswers(value: AnswerIndex): Answers {
 
 function geminiJson(overrides: Record<string, unknown> = {}) {
   const body = {
+    headline: "Solid engine, one flat tyre.",
     strengths: ["Strong acquisition discipline.", "Revenue model is validated."],
     weaknesses: ["Retention isn't tracked.", "No re-engagement mechanism."],
     recommendation: "Set up a D7/D30 retention dashboard before anything else.",
@@ -38,8 +39,16 @@ function fakeDeps(overrides: Partial<CreateSubmissionDeps> = {}): CreateSubmissi
   };
 }
 
+const expectedVerdict = {
+  headline: "Solid engine, one flat tyre.",
+  strengths: ["Strong acquisition discipline.", "Revenue model is validated."],
+  weaknesses: ["Retention isn't tracked.", "No re-engagement mechanism."],
+  recommendation: "Set up a D7/D30 retention dashboard before anything else.",
+  modelUsed: "gemini-3.7-flash",
+};
+
 describe("createSubmissionFlow", () => {
-  it("computes the score, gets a verdict, and saves the full submission", async () => {
+  it("computes the score, gets a verdict for BOTH tones, and saves the full submission", async () => {
     const deps = fakeDeps();
 
     const result = await createSubmissionFlow(
@@ -51,16 +60,14 @@ describe("createSubmissionFlow", () => {
     expect(result.createdAt).toBe("2026-08-27T12:00:00.000Z");
     expect(result.total).toBe(100);
     expect(result.pillars).toHaveLength(5);
-    expect(result.verdict).toEqual({
-      strengths: ["Strong acquisition discipline.", "Revenue model is validated."],
-      weaknesses: ["Retention isn't tracked.", "No re-engagement mechanism."],
-      recommendation: "Set up a D7/D30 retention dashboard before anything else.",
-      modelUsed: "gemini-3.7-flash",
-    });
+    expect(result.verdicts.neutral).toEqual(expectedVerdict);
+    expect(result.verdicts.roast).toEqual(expectedVerdict);
     expect(deps.saved).toEqual([result]);
+    // one Gemini call per tone, not one shared call
+    expect(deps.callGemini).toHaveBeenCalledTimes(2);
   });
 
-  it("passes refId through untouched", async () => {
+  it("passes refId and the selected tone through untouched", async () => {
     const deps = fakeDeps();
     const result = await createSubmissionFlow(
       { answers: fullAnswers(1), tone: "roast", locale: "fr", refId: "sub_referrer" },
@@ -71,13 +78,17 @@ describe("createSubmissionFlow", () => {
     expect(result.locale).toBe("fr");
   });
 
-  it("sends a prompt to Gemini containing the resolved question/answer text at the requested locale", async () => {
+  it("sends a prompt to Gemini containing the resolved question/answer text at the requested locale, for both tones", async () => {
     const deps = fakeDeps();
     await createSubmissionFlow({ answers: fullAnswers(3), tone: "neutral", locale: "fr", refId: null }, deps);
 
-    const promptSent = (deps.callGemini as ReturnType<typeof vi.fn>).mock.calls[0]?.[0] as string;
-    expect(promptSent).toContain("As-tu un canal d'acquisition principal identifié et mesuré ?");
-    expect(promptSent).toContain("Oui, identifié et mesuré");
+    const calls = (deps.callGemini as ReturnType<typeof vi.fn>).mock.calls;
+    expect(calls).toHaveLength(2);
+    for (const call of calls) {
+      const promptSent = call[0] as string;
+      expect(promptSent).toContain("As-tu un canal d'acquisition principal identifié et mesuré ?");
+      expect(promptSent).toContain("Oui, identifié et mesuré");
+    }
   });
 
   it("never calls Gemini or saves anything when the answers are incomplete", async () => {

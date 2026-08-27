@@ -64,9 +64,10 @@ describe("buildGeminiPrompt", () => {
     expect(prompt).toContain("Yes, identified and measured");
   });
 
-  it("asks for a JSON-only response matching the strengths/weaknesses/recommendation schema", () => {
+  it("asks for a JSON-only response matching the headline/strengths/weaknesses/recommendation schema", () => {
     const prompt = buildGeminiPrompt(baseInput());
     expect(prompt).toMatch(/ONLY a valid JSON object/i);
+    expect(prompt).toContain('"headline"');
     expect(prompt).toContain('"strengths"');
     expect(prompt).toContain('"weaknesses"');
     expect(prompt).toContain('"recommendation"');

@@ -18,6 +18,9 @@ function isPairOfNonEmptyStrings(value: unknown): value is [string, string] {
 export function parseVerdict(rawText: string, modelUsed: string): Verdict {
   const parsed = extractJson(rawText) as Record<string, unknown>;
 
+  if (typeof parsed.headline !== "string" || parsed.headline.trim().length === 0) {
+    throw new Error(`Gemini verdict missing a valid "headline": ${JSON.stringify(parsed)}`);
+  }
   if (!isPairOfNonEmptyStrings(parsed.strengths)) {
     throw new Error(`Gemini verdict missing a valid "strengths" pair: ${JSON.stringify(parsed)}`);
   }
@@ -29,6 +32,7 @@ export function parseVerdict(rawText: string, modelUsed: string): Verdict {
   }
 
   return {
+    headline: parsed.headline,
     strengths: parsed.strengths,
     weaknesses: parsed.weaknesses,
     recommendation: parsed.recommendation,
