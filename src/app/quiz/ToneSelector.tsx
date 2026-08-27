@@ -3,9 +3,10 @@
 import { Button } from "@/components/button/Button";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import type { Locale } from "@/lib/i18n/locale";
+import type { Tone } from "@/lib/quiz/tone";
 import styles from "./ToneSelector.module.css";
 
-export type Tone = "neutral" | "roast";
+export type { Tone };
 
 interface ToneSelectorProps {
   locale: Locale;
