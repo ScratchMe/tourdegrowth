@@ -17,6 +17,7 @@ import {
   minutesLeft,
   stageOfQuestion,
 } from "@/lib/quiz/navigation";
+import { trackEvent } from "@/lib/analytics/goatcounter";
 import { loadRefId, loadStoredAnswers, saveRefId, saveStoredAnswers } from "@/lib/quiz/storage";
 import type { AnswerIndex, Answers } from "@/lib/scoring/score";
 import { QUESTIONS } from "@/lib/scoring/questions";
@@ -121,6 +122,7 @@ export default function QuizPage() {
         throw new Error(message || `Request failed (${res.status})`);
       }
       const submission = (await res.json()) as { id: string };
+      trackEvent("submission_completed", tone); // SPEC.md §8: one custom event per completed analysis
       router.push(`/r/${submission.id}`);
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Unknown error");
