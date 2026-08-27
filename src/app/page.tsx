@@ -1,77 +1,70 @@
 "use client";
 
-// TODO: page de scaffold temporaire — remplacée par le vrai écran Landing
-// (étape 3 du plan de build, voir design/DESIGN-BRIEF.md §01 — Landing).
-// Le seul but de cette page est de prouver, de bout en bout, que le
-// scaffold Next.js, les tokens de design et la résolution FR/EN
-// fonctionnent avant de construire le premier vrai écran.
-
+import { Button } from "@/components/button/Button";
+import { ScoreCard } from "@/components/score-card/ScoreCard";
+import { Wordmark } from "@/components/wordmark/Wordmark";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { useLocale } from "@/lib/i18n/locale-context";
+import { SAMPLE_RESULT } from "@/lib/scoring/sample-result";
+import styles from "./page.module.css";
 
-export default function ScaffoldCheckPage() {
-  const { locale, setLocale } = useLocale();
-  const t = UI_STRINGS.scaffold;
+// Landing page — DESIGN-BRIEF.md screen 01. Nav links ("How it works",
+// "Examples", "Roast mode") are cut from the MVP per SPEC.md §12 — the
+// header keeps just the wordmark and a compact CTA.
+//
+// "Start your Tour" and "See a sample result" point at /quiz and /r/sample,
+// which don't exist yet (steps 4 and 10 of the build plan) — clicking them
+// hits Next.js's default 404 for now, that's expected at this stage.
+export default function LandingPage() {
+  const { locale } = useLocale();
+  const t = UI_STRINGS.landing;
 
   return (
-    <main
-      style={{
-        maxWidth: "var(--content-max-width)",
-        margin: "0 auto",
-        padding: "var(--space-9) var(--space-6)",
-      }}
-    >
-      <p
-        style={{
-          fontFamily: "var(--font-mono)",
-          fontSize: 12,
-          textTransform: "uppercase",
-          letterSpacing: ".08em",
-          color: "var(--ink-soft)",
-        }}
-      >
-        Scaffold check — step 1/12
-      </p>
+    <>
+      <header className={styles.header}>
+        <div className={styles.headerInner}>
+          <Wordmark />
+          <Button href="/quiz" size="compact" className={styles.headerCta}>
+            {tc(t.ctaPrimary, locale)}
+          </Button>
+        </div>
+      </header>
 
-      <h1
-        style={{
-          fontFamily: "var(--font-display)",
-          fontWeight: 700,
-          fontSize: 40,
-          marginTop: "var(--space-5)",
-        }}
-      >
-        {tc(t.placeholderTitle, locale)}
-      </h1>
+      <main className={styles.main}>
+        <div className={styles.hero}>
+          <div className={styles.heroLeft}>
+            <span className={styles.bibTag}>{tc(t.bibTag, locale)}</span>
 
-      <p style={{ marginTop: "var(--space-5)", maxWidth: 560, color: "var(--ink-soft)" }}>
-        {tc(t.placeholderBody, locale)}
-      </p>
+            <h1 className={styles.h1}>
+              {tc(t.h1Line1, locale)}
+              <br />
+              {tc(t.h1Line2, locale)}
+              <span className={styles.h1Accent}>{tc(t.h1Accent, locale)}</span>
+            </h1>
 
-      <p style={{ marginTop: "var(--space-6)", fontFamily: "var(--font-mono)", fontSize: 13 }}>
-        {tc(t.localeLabel, locale)}: <strong>{locale}</strong>
-      </p>
+            <p className={styles.subtitle}>{tc(t.subtitle, locale)}</p>
 
-      <div style={{ marginTop: "var(--space-6)", display: "flex", gap: "var(--space-3)" }}>
-        <button type="button" onClick={() => setLocale("en")} style={buttonStyle}>
-          EN
-        </button>
-        <button type="button" onClick={() => setLocale("fr")} style={buttonStyle}>
-          FR
-        </button>
-      </div>
-    </main>
+            <div className={styles.ctaRow}>
+              <Button href="/quiz">{tc(t.ctaPrimary, locale)}</Button>
+              <Button href="/r/sample" variant="secondary">
+                {tc(t.ctaSecondary, locale)}
+              </Button>
+            </div>
+          </div>
+
+          <div className={styles.heroRight}>
+            <ScoreCard
+              total={SAMPLE_RESULT.total}
+              pillars={SAMPLE_RESULT.pillars}
+              weakestPillar={SAMPLE_RESULT.weakestPillar}
+              locale={locale}
+              caption={tc(UI_STRINGS.sample.caption, locale)}
+              stageLabel={tc(UI_STRINGS.sample.stageLabel, locale)}
+              size="preview"
+            />
+          </div>
+        </div>
+      </main>
+    </>
   );
 }
-
-const buttonStyle: React.CSSProperties = {
-  fontFamily: "var(--font-mono)",
-  fontSize: 13,
-  fontWeight: 600,
-  padding: "8px 16px",
-  border: "2px solid var(--ink)",
-  borderRadius: "var(--radius-button)",
-  background: "var(--paint-white)",
-  color: "var(--ink)",
-  cursor: "pointer",
-};
