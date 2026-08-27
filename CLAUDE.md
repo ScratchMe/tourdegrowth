@@ -60,3 +60,11 @@ Correctif :
 3. Après avoir renommé/déplacé ce fichier, **redémarrer complètement** `next dev` — le hot-reload ne suffit pas à (re)détecter un fichier de convention comme celui-ci.
 
 Next.js 16 ajoute aussi une fonctionnalité qui réinjecte automatiquement un bloc "agent rules" dans `CLAUDE.md` à chaque `next dev` (annonçant justement ce genre de rupture d'API). Désactivée volontairement via `agentRules: false` dans `next.config.mjs` : ce fichier est un document tenu à la main, pas un endroit où laisser un outil de build écrire.
+
+### Moteur de scoring (étape 2)
+
+`src/lib/scoring/` : `pillars.ts` (ordre canonique AARRR), `questions.ts` (structure id → pilier des 15 questions, copie affichée pas encore fournie — voir `TODO` dans le fichier et SPEC.md §12), `score.ts` (`computeScore()`, pur, 24 tests unitaires côté arrondi/départage/erreurs).
+
+**Écart repéré entre SPEC et design (non bloquant, résolu via la propre règle d'arbitrage de SPEC.md §4) :** SPEC.md §6 fixe une échelle de points à 4 valeurs par réponse (0/7/13/20), donc 4 options de réponse par question. Mais l'écran 05 du design (`DESIGN-BRIEF.md`) ne montre que 3 boutons de réponse dans son exemple ("Yes, and we measure it" / "We have one, but don't measure it" / "Not really"). SPEC.md §4 tranche explicitement ce type de divergence : "le dossier `design/` fait foi pour le visuel, ce document fait foi pour la logique produit" — le nombre d'options par question est de la logique de scoring, pas du visuel. Le moteur de scoring (et donc l'UI du questionnaire à l'étape 4) est construit avec **4 options par question**, pas 3. Signalé ici plutôt qu'implémenté silencieusement.
+
+Autre point à connaître : à cause de l'arrondi (§6, chaque pilier arrondi à l'entier le plus proche avant sommation), toutes les valeurs de 0 à 20 ne sont pas atteignables par pilier — l'ensemble réellement atteignable est `{0,2,4,5,7,9,11,13,15,16,18,20}` (voir le test "every pillar score is always an integer" dans `score.test.ts` pour le détail). Ce n'est pas un bug : le résultat échantillon fixe de la landing (`18/12/8/16/20`, SPEC.md §12) est un contenu codé en dur, jamais recalculé — il n'a donc pas besoin d'être atteignable par de vraies réponses.
