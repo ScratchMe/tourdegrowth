@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GEMINI_MODEL_CANDIDATES, callGeminiWithFallback, extractJson } from "../client";
 
 function jsonResponse(status: number, body: unknown): Response {
@@ -79,6 +79,40 @@ describe("callGeminiWithFallback", () => {
   it("last candidate is the Google-maintained alias, never a single hard-coded model", () => {
     expect(GEMINI_MODEL_CANDIDATES.at(-1)).toBe("gemini-flash-latest");
     expect(GEMINI_MODEL_CANDIDATES.length).toBeGreaterThan(1);
+  });
+
+  describe("timeout (a call that silently hangs forever, never erroring)", () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("aborts a hung request and falls back to the next model instead of hanging forever", async () => {
+      const calls: string[] = [];
+      // Simulates exactly what this build session hit for real against
+      // generativelanguage.googleapis.com: the request never resolves and
+      // never rejects on its own — only responds to the abort signal.
+      const fetchImpl = (url: string | URL | Request, init?: RequestInit) => {
+        calls.push(String(url));
+        if (calls.length === 1) {
+          return new Promise<Response>((_resolve, reject) => {
+            init?.signal?.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")));
+          });
+        }
+        return Promise.resolve(new Response(JSON.stringify({ ok: true }), { status: 200 }));
+      };
+
+      const promise = callGeminiWithFallback("prompt", "key", fetchImpl);
+      // Let the first attempt's timeout fire, then let the retry's microtasks settle.
+      await vi.advanceTimersByTimeAsync(20_000);
+
+      const result = await promise;
+      expect(result.modelUsed).toBe(GEMINI_MODEL_CANDIDATES[1]);
+      expect(calls).toHaveLength(2);
+    });
   });
 });
 

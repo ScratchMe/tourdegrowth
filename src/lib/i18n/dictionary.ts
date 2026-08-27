@@ -88,17 +88,14 @@ export const UI_STRINGS = {
     minutesLeftTemplate: { en: "— {m} min left", fr: "— {m} min restantes" },
     backButton: { en: "← Back", fr: "← Retour" },
     answerToContinue: { en: "Answer to continue", fr: "Réponds pour continuer" },
-    // Shown once all 15 are answered but before Gemini/Supabase (step 6) and
-    // the real result page (step 7) exist. Deliberately reads as a build
-    // placeholder, not as product copy.
-    donePlaceholderTitle: {
-      en: "All 15 questions answered.",
-      fr: "15 questions sur 15, répondues.",
+    // Minimal stand-in for DESIGN-BRIEF.md §06c (the real error screen,
+    // step 9) — placeholder copy, but the promise it makes (retry doesn't
+    // restart the questionnaire) is already real and true.
+    errorTitle: {
+      en: "Something went wrong.",
+      fr: "Quelque chose s'est mal passé.",
     },
-    donePlaceholderBodyTemplate: {
-      en: "Tone chosen: {tone}. The real scoring call and result page land in steps 6-7 of the build — this placeholder just confirms the full flow (questionnaire → tone → loading) works end to end.",
-      fr: "Ton choisi : {tone}. Le vrai calcul et la page de résultat arrivent aux étapes 6-7 du build — cet écran temporaire confirme juste que le parcours complet (questionnaire → ton → chargement) fonctionne de bout en bout.",
-    },
+    errorRetry: { en: "Try again", fr: "Réessayer" },
   },
 
   /** Tone selector (DESIGN-BRIEF.md §06a). SPEC.md §6bis: "Straight up" /
@@ -128,5 +125,30 @@ export const UI_STRINGS = {
     message1: { en: "Reviewing your answers...", fr: "Relecture de tes réponses..." },
     message2: { en: "Calculating your stage times...", fr: "Calcul de tes temps par étape..." },
     message3: { en: "Drafting your race report...", fr: "Rédaction de ton rapport de course..." },
+  },
+
+  /** Result page chrome (DESIGN-BRIEF.md §02/§04) — headline/strengths/weaknesses SENTENCES come from Gemini (or sample.ts), not from here; this is just the surrounding UI text. */
+  result: {
+    finishedLabel: { en: "Stage 5/5 — finished", fr: "Étape 5/5 — terminé" },
+    answeredSuffixTemplate: { en: " · {n}/15 answered", fr: " · {n}/15 répondues" },
+    roastBadge: { en: "🔥 Roast Mode", fr: "🔥 Roast Mode" },
+    strengthsTitle: { en: "Strengths", fr: "Points forts" },
+    strengthsTitleRoast: { en: "Credit where it's due", fr: "Ce qui marche, quand même" },
+    weaknessesTitle: { en: "Where you're losing time", fr: "Là où tu perds du temps" },
+    recommendationTitle: { en: "Priority recommendation", fr: "Recommandation prioritaire" },
+    ctaShare: { en: "Share my score", fr: "Partager mon score" },
+    ctaShareRoast: { en: "Share my roast", fr: "Partager mon roast" },
+    ctaAgain: { en: "Take the Tour again", fr: "Refaire le Tour" },
+    ctaSwitchToRoast: { en: "Switch to roast", fr: "Passer en roast" },
+    ctaSwitchToNeutral: { en: "Switch to straight up", fr: "Repasser en neutre" },
+    // Roast-only stamped tag on the weakest pillar (DESIGN-BRIEF.md §04: "08/20 RETENTION — dead last").
+    stampedSuffix: { en: "dead last", fr: "bon dernier" },
+    sampleBadge: { en: "Sample result — not your data", fr: "Résultat d'exemple — pas tes données" },
+    notFoundTitle: { en: "No result at this address.", fr: "Aucun résultat à cette adresse." },
+    notFoundBody: {
+      en: "This link may be wrong, or the result may no longer exist.",
+      fr: "Ce lien est peut-être incorrect, ou le résultat n'existe plus.",
+    },
+    notFoundCta: { en: "Start your Tour →", fr: "Démarre ton Tour →" },
   },
 } as const satisfies Record<string, Record<string, Translatable>>;

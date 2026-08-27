@@ -1,0 +1,162 @@
+.header {
+  border-bottom: 2px dashed var(--line);
+  padding: 24px 0;
+}
+
+.headerInner {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.desktopOnly {
+  display: none;
+}
+
+.roastBadge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--paint-white);
+  background: var(--red);
+  border-radius: var(--radius-tag);
+  padding: 6px 10px;
+  transform: rotate(-1.5deg);
+}
+
+.main {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: 22px 24px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.sampleBadge {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--red-ink);
+  background: var(--red-soft);
+  border: 2px dashed var(--red);
+  border-radius: var(--radius-tag);
+  padding: 8px 12px;
+  display: inline-block;
+  width: fit-content;
+}
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pillarGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.spanFull {
+  grid-column: 1 / -1;
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sectionLabel {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.recommendation {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--paint-white);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-subcard);
+  padding: 14px 16px;
+}
+
+.ctaRow {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (min-width: 761px) {
+  .desktopOnly {
+    display: inline;
+  }
+
+  .main {
+    padding: 44px 24px 80px;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 44px;
+    align-items: start;
+  }
+
+  .pillarGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .spanFull {
+    grid-column: auto;
+  }
+
+  .cardGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ctaRow {
+    flex-direction: row;
+  }
+
+  .ctaRow > * {
+    flex: 1;
+  }
+}

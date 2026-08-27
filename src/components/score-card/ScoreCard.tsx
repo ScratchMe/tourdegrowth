@@ -17,6 +17,10 @@ interface ScoreCardProps {
   size?: "preview" | "full";
   /** Roast mode swaps the card's border/shadow from --ink to --red (DESIGN-BRIEF.md §04). */
   roast?: boolean;
+  /** One-line summary under the numeral (DESIGN-BRIEF.md §02/§04) — Inter 500 neutral, 600 roast. Omit to show no line at all (landing preview doesn't have one). */
+  headline?: string;
+  /** The landing preview renders its own wrapping tag row here; the result screens lay pillar tags out themselves alongside the card instead. Defaults to true. */
+  showTags?: boolean;
 }
 
 export function ScoreCard({
@@ -28,6 +32,8 @@ export function ScoreCard({
   stageLabel,
   size = "preview",
   roast = false,
+  headline,
+  showTags = true,
 }: ScoreCardProps) {
   return (
     <div
@@ -46,17 +52,23 @@ export function ScoreCard({
         <span className={styles.suffix}>/100</span>
       </div>
 
-      <div className={styles.tags}>
-        {pillars.map((p) => (
-          <PillarTag
-            key={p.pillar}
-            pillar={p.pillar}
-            score={p.score}
-            locale={locale}
-            weak={p.pillar === weakestPillar}
-          />
-        ))}
-      </div>
+      {headline ? (
+        <p className={`${styles.headline} ${roast ? styles.headlineRoast : ""}`}>{headline}</p>
+      ) : null}
+
+      {showTags ? (
+        <div className={styles.tags}>
+          {pillars.map((p) => (
+            <PillarTag
+              key={p.pillar}
+              pillar={p.pillar}
+              score={p.score}
+              locale={locale}
+              weak={p.pillar === weakestPillar}
+            />
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }

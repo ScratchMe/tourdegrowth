@@ -1,0 +1,34 @@
+.card {
+  background: var(--paint-white);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-subcard);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.weak {
+  background: var(--red-soft);
+  border-color: var(--red);
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+}
+
+.weak .label {
+  color: var(--red-ink);
+}
+
+.sentence {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--ink);
+}
