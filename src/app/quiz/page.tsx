@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Wordmark } from "@/components/wordmark/Wordmark";
 import { Button } from "@/components/button/Button";
@@ -17,7 +17,7 @@ import {
   minutesLeft,
   stageOfQuestion,
 } from "@/lib/quiz/navigation";
-import { loadStoredAnswers, saveStoredAnswers } from "@/lib/quiz/storage";
+import { loadRefId, loadStoredAnswers, saveRefId, saveStoredAnswers } from "@/lib/quiz/storage";
 import type { AnswerIndex, Answers } from "@/lib/scoring/score";
 import { QUESTIONS } from "@/lib/scoring/questions";
 import { LoadingScreen } from "./LoadingScreen";
@@ -38,6 +38,7 @@ type Phase = "answering" | "tone" | "loading" | "error";
 // to be the polished screen that isn't built yet.
 export default function QuizPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { locale } = useLocale();
   const t = UI_STRINGS.quiz;
 
@@ -62,7 +63,14 @@ export default function QuizPage() {
     } else {
       setCurrentIndex(firstUnansweredIndex(stored));
     }
+
+    // SPEC.md §7: capture ?ref= if this visitor landed here directly
+    // (rather than via / — either way works, see storage.ts).
+    const ref = searchParams.get("ref");
+    if (ref) saveRefId(ref);
+
     setMounted(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!mounted) return null;
@@ -106,7 +114,7 @@ export default function QuizPage() {
       const res = await fetch("/api/submissions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answers, tone, locale, refId: null }), // ?ref= attribution lands in step 8
+        body: JSON.stringify({ answers, tone, locale, refId: loadRefId() }), // SPEC.md §7
       });
       if (!res.ok) {
         const body: unknown = await res.json().catch(() => null);

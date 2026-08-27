@@ -1,6 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { Answers } from "@/lib/scoring/score";
-import { clearStoredAnswers, loadStoredAnswers, saveStoredAnswers } from "../storage";
+import {
+  clearRefId,
+  clearStoredAnswers,
+  loadRefId,
+  loadStoredAnswers,
+  saveRefId,
+  saveStoredAnswers,
+} from "../storage";
 
 /** A minimal in-memory localStorage fake — no jsdom needed for this. */
 function createFakeLocalStorage() {
@@ -58,5 +65,39 @@ describe("quiz answers storage", () => {
     expect(loadStoredAnswers()).toEqual({});
     expect(() => saveStoredAnswers({ "acquisition-1": 1 })).not.toThrow();
     expect(() => clearStoredAnswers()).not.toThrow();
+  });
+});
+
+describe("ref id storage (SPEC.md §7 attribution)", () => {
+  const originalWindow = (globalThis as { window?: unknown }).window;
+
+  beforeEach(() => {
+    (globalThis as { window?: unknown }).window = { localStorage: createFakeLocalStorage() };
+  });
+
+  afterEach(() => {
+    (globalThis as { window?: unknown }).window = originalWindow;
+  });
+
+  it("returns null when nothing has been saved", () => {
+    expect(loadRefId()).toBeNull();
+  });
+
+  it("round-trips a ref id through save/load", () => {
+    saveRefId("sub_abc123");
+    expect(loadRefId()).toBe("sub_abc123");
+  });
+
+  it("clears the ref id", () => {
+    saveRefId("sub_abc123");
+    clearRefId();
+    expect(loadRefId()).toBeNull();
+  });
+
+  it("is a no-op on the server (no window)", () => {
+    (globalThis as { window?: unknown }).window = undefined;
+    expect(loadRefId()).toBeNull();
+    expect(() => saveRefId("sub_abc123")).not.toThrow();
+    expect(() => clearRefId()).not.toThrow();
   });
 });

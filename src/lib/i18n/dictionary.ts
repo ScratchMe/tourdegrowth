@@ -151,4 +151,13 @@ export const UI_STRINGS = {
     },
     notFoundCta: { en: "Start your Tour →", fr: "Démarre ton Tour →" },
   },
+
+  /** OG share image only (DESIGN-BRIEF.md §03) — rendered by Satori (src/app/r/[id]/opengraph-image.tsx), a separate pipeline from the rest of the UI. */
+  og: {
+    checkupBadge: { en: "AARRR check-up — 3 min", fr: "Bilan AARRR — 3 min" },
+    roastBadge: { en: "🔥 ROAST MODE", fr: "🔥 ROAST MODE" },
+    scoreLabel: { en: "Overall Growth Score", fr: "Score growth global" },
+    stallSentenceTemplate: { en: "{pillar} is where this growth stalls.", fr: "{pillar} est là où cette croissance cale." },
+    whereDoesYours: { en: "Where does yours?", fr: "Et la tienne ?" },
+  },
 } as const satisfies Record<string, Record<string, Translatable>>;
