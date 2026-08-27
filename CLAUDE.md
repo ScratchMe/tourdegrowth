@@ -38,3 +38,25 @@ Tu sais déjà ce que ça implique d'être sérieux là-dessus — je ne vais pa
 ## Ce fichier est vivant
 
 Complète-le au fil du projet : décisions d'architecture prises, conventions adoptées, pièges rencontrés et leur correctif, structure de dossiers choisie. La même logique qu'un `CONTRIBUTING.md` ou `ARCHITECTURE.md` qu'une équipe d'ingénierie tient à jour — sauf que là, c'est toi l'équipe.
+
+## Décisions d'architecture
+
+### Stack (étape 1 — scaffold)
+
+- **Next.js 16 (App Router) + TypeScript + React 19**, hébergement visé Vercel. Le §8 de `SPEC.md` laissait vanilla JS/CSS par défaut sauf si la complexité d'état le justifiait — décision documentée dans la conversation de build : le vrai déclencheur est la génération d'image OG dynamique (`@vercel/og`/Satori), pensée pour tourner dans des route handlers Next.js sur Vercel.
+- **CSS Modules + custom properties** pour les tokens de design (pas de Tailwind) — fidélité pixel au design sans réinterprétation.
+- **i18n maison** dans `src/lib/i18n/` : `locale.ts` (résolution pure, testée unitairement), `dictionary.ts` (`UI_STRINGS` + `tc()`), `locale-context.tsx` (provider client). Priorité de résolution : `?lang=` > cookie `tdg_locale` > `Accept-Language` > `en` par défaut.
+- **Tests** : Vitest pour toute logique pure (i18n, et le moteur de scoring à l'étape 2) ; Playwright pour la vérification visuelle à chaque étape et l'E2E du parcours critique plus tard. Vitest est appelé directement (`npx vitest run`) plutôt que via un script qui viendrait masquer les warnings de config.
+
+### Piège rencontré : Next.js 16 renomme `middleware` en `proxy`
+
+Next.js 16 déprécie `middleware.ts` / `export function middleware` — mais ne le signale ni au démarrage de `next dev`, ni par une erreur : le fichier est simplement ignoré. Pire, `next build` continue d'afficher `ƒ Proxy (Middleware)` dans le résumé des routes même quand le fichier est totalement inopérant, ce qui masque le problème à la vérification la plus évidente (le build).
+
+Symptôme observé : `?lang=fr` dans l'URL n'avait strictement aucun effet — pas de `Set-Cookie`, langue jamais changée — alors que la même logique fonctionnait très bien en test unitaire (`resolveLocale()` seule est correcte, c'est l'intégration Next.js qui silencieusement ne s'exécutait pas).
+
+Correctif :
+1. Le fichier doit s'appeler **`proxy.ts`** et exporter une fonction **`proxy`** (pas `middleware`).
+2. Il doit être placé **au même niveau que `app/`** — donc `src/proxy.ts` ici, puisque l'App Router vit dans `src/app/`. Un `proxy.ts` (ou `middleware.ts`) posé à la racine du repo quand le code applicatif est dans `src/` est silencieusement ignoré aussi.
+3. Après avoir renommé/déplacé ce fichier, **redémarrer complètement** `next dev` — le hot-reload ne suffit pas à (re)détecter un fichier de convention comme celui-ci.
+
+Next.js 16 ajoute aussi une fonctionnalité qui réinjecte automatiquement un bloc "agent rules" dans `CLAUDE.md` à chaque `next dev` (annonçant justement ce genre de rupture d'API). Désactivée volontairement via `agentRules: false` dans `next.config.mjs` : ce fichier est un document tenu à la main, pas un endroit où laisser un outil de build écrire.
