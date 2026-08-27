@@ -1,0 +1,24 @@
+# Next.js
+/.next/
+/out/
+
+# Dependencies
+/node_modules/
+
+# Env
+.env
+.env.local
+.env*.local
+
+# Build
+/build
+*.tsbuildinfo
+next-env.d.ts
+
+# Misc
+.DS_Store
+*.log
+npm-debug.log*
+
+# Vitest / coverage
+/coverage
