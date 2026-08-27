@@ -32,10 +32,9 @@ type Phase = "answering" | "tone" | "loading" | "error";
 // redirects straight to the real /r/<id> result page (step 7) — there's no
 // terminal "done" state on this page anymore.
 //
-// `phase: "error"` is a minimal, honest stand-in for the real DESIGN-BRIEF.md
-// §06c error screen (step 9) — it keeps the SPEC.md §4 promise (answers
-// stay saved, retry doesn't restart the questionnaire) without pretending
-// to be the polished screen that isn't built yet.
+// `phase: "error"` is DESIGN-BRIEF.md §06c — it keeps the SPEC.md §4 promise
+// (answers stay saved, retry doesn't restart the questionnaire) that the
+// copy itself makes explicit.
 export default function QuizPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -149,6 +148,8 @@ export default function QuizPage() {
                 <span className={styles.mono}>{questionCounter}</span>
                 <span className={`${styles.mono} ${styles.minutesLeft}`}>{minutesLeftLabel}</span>
               </>
+            ) : phase === "error" ? (
+              <span className={`${styles.mono} ${styles.errorHeaderLabel}`}>{tc(t.errorHeaderLabel, locale)}</span>
             ) : (
               <span className={styles.mono}>{tc(UI_STRINGS.toneSelector.headerLabel, locale)}</span>
             )}
@@ -203,12 +204,15 @@ export default function QuizPage() {
         {phase === "loading" && <LoadingScreen locale={locale} />}
 
         {phase === "error" && (
-          <div className={styles.doneCard}>
-            <h2 className={styles.doneTitle}>{tc(t.errorTitle, locale)}</h2>
-            <p className={styles.doneBody}>{submitError}</p>
-            <Button data-testid="retry-button" onClick={handleGetScore}>
+          <div className={styles.errorCard}>
+            <p className={styles.errorEyebrow}>{tc(t.errorEyebrow, locale)}</p>
+            <h2 className={styles.errorTitle}>{tc(t.errorTitle, locale)}</h2>
+            <p className={styles.errorBody}>{tc(t.errorBody, locale)}</p>
+            {submitError && <p className={styles.errorDetail}>{submitError}</p>}
+            <Button data-testid="retry-button" className={styles.errorCta} onClick={handleGetScore}>
               {tc(t.errorRetry, locale)}
             </Button>
+            <p className={styles.errorHint}>{tc(t.errorHint, locale)}</p>
           </div>
         )}
       </main>

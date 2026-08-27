@@ -115,29 +115,63 @@
   text-underline-offset: 3px;
 }
 
-.doneCard {
+/* DESIGN-BRIEF.md §06c — error card is the one place in the questionnaire
+   flow that breaks from the ink-outline/red-shadow card language: red
+   outline, red shadow, to read as distinct from a normal question card. */
+.errorHeaderLabel {
+  color: var(--red-ink);
+}
+
+.errorCard {
   background: var(--paint-white);
-  border: 2px solid var(--ink);
+  border: 2px solid var(--red);
   border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
-  padding: 32px;
+  box-shadow: 7px 7px 0 var(--red);
+  padding: 24px 22px;
   display: flex;
   flex-direction: column;
   gap: 14px;
   align-items: flex-start;
+  max-width: 480px;
 }
 
-.doneTitle {
+.errorEyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--red-ink);
+}
+
+.errorTitle {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 28px;
+  font-size: 36px;
+  line-height: 1.15;
 }
 
-.doneBody {
+.errorBody {
   font-family: var(--font-body);
   font-weight: 500;
   font-size: 15px;
   line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.errorDetail {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-soft);
+  word-break: break-word;
+}
+
+.errorCta {
+  width: 100%;
+}
+
+.errorHint {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
   color: var(--ink-soft);
 }
 
