@@ -116,7 +116,7 @@ export function ResultView({ id, total, pillars, weakestPillar, verdicts, initia
                 const isWeak = pillar === weakestPillar || (roast && pillar === secondWeakestName);
                 return (
                   <div key={pillar} className={spanFull ? styles.spanFull : ""}>
-                    <PillarTag pillar={pillar} score={entry.score} locale={locale} weak={isWeak} showMax fullLabel />
+                    <PillarTag pillar={pillar} score={entry.score} locale={locale} weak={isWeak} showMax fullLabel stretch />
                   </div>
                 );
               })}

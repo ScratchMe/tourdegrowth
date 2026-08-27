@@ -26,7 +26,21 @@
   font-size: 96px;
   line-height: 0.88;
   color: var(--ink-soft);
-  opacity: 0.45;
+  /* Breathes continuously for as long as this screen is mounted — a
+     real call can take well over a minute (see LoadingScreen.tsx), so this
+     is deliberately not tied to the message-step timer: it must keep moving
+     regardless of how long the wait turns out to be. */
+  animation: breathe 2.4s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.32;
+  }
+  50% {
+    opacity: 0.58;
+  }
 }
 
 .messages {
@@ -62,6 +76,12 @@
   opacity: 0.5;
 }
 
+.dots {
+  display: inline-block;
+  width: 1.5em;
+  text-align: left;
+}
+
 .segments {
   display: flex;
   gap: 8px;
@@ -79,4 +99,22 @@
 .filled {
   border: 2px solid var(--red);
   background: var(--red);
+}
+
+/* The currently-active segment keeps a slow pulse once the screen has
+   settled into its open-ended "still working" state — same purpose as the
+   ellipsis and the breathing numeral: visible motion for as long as the
+   real call takes, never a fixed timeout. */
+.pulsing {
+  animation: segmentPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes segmentPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
 }

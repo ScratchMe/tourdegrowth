@@ -26,6 +26,16 @@ interface PillarTagProps {
    * original landing-preview context.
    */
   fullLabel?: boolean;
+  /**
+   * Stretch the tag to fill its container width, with the score pinned to
+   * the left edge and the pillar name to the right (desktop only — see
+   * PillarTag.module.css). DESIGN-BRIEF.md §02 desktop stacks the five tags
+   * in the same 400px column as the score card itself; a compact chip
+   * sized to its own text (this component's original landing-preview
+   * behavior) reads as narrower and mis-aligned against that card, not as
+   * one continuous block. Defaults to false.
+   */
+  stretch?: boolean;
 }
 
 /**
@@ -42,11 +52,12 @@ export function PillarTag({
   weak = false,
   showMax = false,
   fullLabel = false,
+  stretch = false,
 }: PillarTagProps) {
   const label = tc(UI_STRINGS.pillars[pillar], locale);
 
   return (
-    <span className={`${styles.tag} ${weak ? styles.weak : ""}`}>
+    <span className={`${styles.tag} ${weak ? styles.weak : ""} ${stretch ? styles.stretch : ""}`}>
       <strong className={styles.score}>
         {score}
         {showMax ? "/20" : ""}

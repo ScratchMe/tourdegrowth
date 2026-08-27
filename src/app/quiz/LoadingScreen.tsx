@@ -9,26 +9,47 @@ interface LoadingScreenProps {
   locale: Locale;
 }
 
-// 3 messages x 900ms = 2.7s to cycle through all of them, landing inside
-// DESIGN-BRIEF.md §06b's stated "2-3 s" duration (its "~1.3s each" would
-// total 3.9s — calibrated down to fit the duration it actually states, not
-// the per-message figure). The real work (the /api/submissions call) runs
-// independently in the parent (quiz/page.tsx) and decides when to leave
-// this screen — this component only owns the animation, and holds on the
-// last message rather than timing out if the real call takes longer.
-const MESSAGE_DURATION_MS = 900;
+// DESIGN-BRIEF.md §06b states a "2-3 s" duration and assumes the real
+// backend call finishes roughly within it. In production the real
+// /api/submissions call (Gemini generation + Firestore write) has been
+// measured taking 30s+ — the multi-model fallback can retry up to 4 times
+// at a 20s timeout each (see gemini/client.ts), so worst case is over a
+// minute. A 2.7s animation that then sits frozen for another 30-90s reads
+// as broken, not "almost done" — so this component now deliberately
+// diverges from the brief's stated timing: real reassurance during an
+// unpredictable wait matters more than hitting the "2-3s" figure literally.
+// The messages still narrate three real phases once, slower and readable
+// (2.6s each — the old 900ms was too fast to actually read), then the
+// screen settles into a persistent "still working" state: last message
+// held, plus two continuously-animating cues (the numeral placeholder
+// breathing, an ellipsis ticking) that are driven by their own CSS/interval
+// loops, never by a fixed timeout — so motion never stops, no matter how
+// long the real call takes. The parent (quiz/page.tsx) alone decides when
+// to leave this screen, on the real response.
+const MESSAGE_DURATION_MS = 2600;
+const DOT_TICK_MS = 450;
 
-/** Loading screen — DESIGN-BRIEF.md §06b. Purely the animation; the real Gemini/Firestore call happens in the parent while this plays. */
+/** Loading screen — DESIGN-BRIEF.md §06b, extended for real-world latency (see note above). Purely the animation; the real Gemini/Firestore call happens in the parent while this plays. */
 export function LoadingScreen({ locale }: LoadingScreenProps) {
   const [step, setStep] = useState(0);
+  const [dots, setDots] = useState(0);
 
   useEffect(() => {
-    if (step >= 2) return; // hold on the last message until the parent navigates away
+    if (step >= 2) return; // hold on the last message — the ellipsis below keeps it visibly alive
     const timer = window.setTimeout(() => setStep((s) => s + 1), MESSAGE_DURATION_MS);
     return () => window.clearTimeout(timer);
   }, [step]);
 
+  // Independent of `step` and of how long the real call takes — this just
+  // keeps ticking for as long as the screen is mounted, so there is always
+  // something moving even if Gemini takes a full minute.
+  useEffect(() => {
+    const timer = window.setInterval(() => setDots((d) => (d + 1) % 4), DOT_TICK_MS);
+    return () => window.clearInterval(timer);
+  }, []);
+
   const messages = [UI_STRINGS.loading.message1, UI_STRINGS.loading.message2, UI_STRINGS.loading.message3];
+  const stillWorking = step >= 2;
 
   return (
     <div className={styles.wrap}>
@@ -38,10 +59,21 @@ export function LoadingScreen({ locale }: LoadingScreenProps) {
 
       <div className={styles.messages}>
         {messages.map((msg, i) => {
-          const state = i === step ? styles.active : i === step + 1 ? styles.next : styles.pending;
+          const active = i === step;
+          const state = active ? styles.active : i === step + 1 ? styles.next : styles.pending;
+          // The copy itself already ends in "..." (see dictionary.ts) — once
+          // settled in the persistent "still working" state, that fixed
+          // ellipsis is stripped and replaced by the ticking one below, so
+          // the two never pile up into "report......".
+          const text = active && stillWorking ? tc(msg, locale).replace(/\.+$/, "") : tc(msg, locale);
           return (
             <span key={i} className={`${styles.message} ${state}`}>
-              {tc(msg, locale)}
+              {text}
+              {active && stillWorking && (
+                <span className={styles.dots} aria-hidden="true">
+                  {".".repeat(dots || 1)}
+                </span>
+              )}
             </span>
           );
         })}
@@ -49,7 +81,12 @@ export function LoadingScreen({ locale }: LoadingScreenProps) {
 
       <div className={styles.segments}>
         {messages.map((_, i) => (
-          <span key={i} className={`${styles.segment} ${i <= step ? styles.filled : ""}`} />
+          <span
+            key={i}
+            className={`${styles.segment} ${i <= step ? styles.filled : ""} ${
+              i === step && stillWorking ? styles.pulsing : ""
+            }`}
+          />
         ))}
       </div>
     </div>

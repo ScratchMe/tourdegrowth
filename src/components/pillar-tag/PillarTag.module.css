@@ -41,3 +41,14 @@
     display: inline;
   }
 }
+
+@media (min-width: 761px) {
+  /* DESIGN-BRIEF.md §02 desktop: the five tags stack in the same 400px
+     column as the score card above them — stretched to that width, score
+     pinned left and the pillar name right, instead of a chip sized to its
+     own text (this component's landing-preview default). */
+  .stretch {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
