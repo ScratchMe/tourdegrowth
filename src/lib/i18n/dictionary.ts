@@ -88,16 +88,45 @@ export const UI_STRINGS = {
     minutesLeftTemplate: { en: "— {m} min left", fr: "— {m} min restantes" },
     backButton: { en: "← Back", fr: "← Retour" },
     answerToContinue: { en: "Answer to continue", fr: "Réponds pour continuer" },
-    // Step 4 only shows this once all 15 are answered — replaced by the real
-    // tone selector in step 5. Deliberately reads as a build placeholder,
-    // not as product copy.
+    // Shown once all 15 are answered but before Gemini/Supabase (step 6) and
+    // the real result page (step 7) exist. Deliberately reads as a build
+    // placeholder, not as product copy.
     donePlaceholderTitle: {
       en: "All 15 questions answered.",
       fr: "15 questions sur 15, répondues.",
     },
-    donePlaceholderBody: {
-      en: "The tone selector (Straight up / Roast) lands in the next build step — this placeholder just confirms the full 15-question flow works end to end.",
-      fr: "Le sélecteur de ton (Neutre / Roast) arrive à la prochaine étape du build — cet écran temporaire confirme juste que le parcours des 15 questions fonctionne de bout en bout.",
+    donePlaceholderBodyTemplate: {
+      en: "Tone chosen: {tone}. The real scoring call and result page land in steps 6-7 of the build — this placeholder just confirms the full flow (questionnaire → tone → loading) works end to end.",
+      fr: "Ton choisi : {tone}. Le vrai calcul et la page de résultat arrivent aux étapes 6-7 du build — cet écran temporaire confirme juste que le parcours complet (questionnaire → ton → chargement) fonctionne de bout en bout.",
     },
+  },
+
+  /** Tone selector (DESIGN-BRIEF.md §06a). SPEC.md §6bis: "Straight up" /
+   * neutral is the explicit default. */
+  toneSelector: {
+    headerLabel: { en: "15 / 15 answered", fr: "15 / 15 répondues" },
+    title: { en: "How do you want your results?", fr: "Comment veux-tu tes résultats ?" },
+    neutralTitle: { en: "Straight up", fr: "Neutre" },
+    neutralDescription: {
+      en: "Clear, constructive, no sugar-coating.",
+      fr: "Clair, constructif, sans détour.",
+    },
+    roastTitle: { en: "Roast me", fr: "Roast me" },
+    roastDescription: {
+      en: "Same insights, sharper tongue. All in good fun.",
+      fr: "Mêmes constats, un ton plus mordant. Toujours bienveillant.",
+    },
+    cta: { en: "Get my score →", fr: "Obtiens ton score →" },
+    switchHint: {
+      en: "You can switch tone on the result page.",
+      fr: "Tu pourras changer de ton sur la page de résultat.",
+    },
+  },
+
+  /** Loading (DESIGN-BRIEF.md §06b) — 3 rotating messages, ~2-3s total. */
+  loading: {
+    message1: { en: "Reviewing your answers...", fr: "Relecture de tes réponses..." },
+    message2: { en: "Calculating your stage times...", fr: "Calcul de tes temps par étape..." },
+    message3: { en: "Drafting your race report...", fr: "Rédaction de ton rapport de course..." },
   },
 } as const satisfies Record<string, Record<string, Translatable>>;

@@ -18,22 +18,29 @@ import {
 import { loadStoredAnswers, saveStoredAnswers } from "@/lib/quiz/storage";
 import type { AnswerIndex, Answers } from "@/lib/scoring/score";
 import { QUESTIONS } from "@/lib/scoring/questions";
+import { LoadingScreen } from "./LoadingScreen";
+import { ToneSelector, type Tone } from "./ToneSelector";
 import styles from "./page.module.css";
 
-// Questionnaire — DESIGN-BRIEF.md §05. One route, all client state (no
-// per-question URLs — matches the design's own "State" section).
+type Phase = "answering" | "tone" | "loading" | "done";
+
+// The full pre-result flow — DESIGN-BRIEF.md §05/§06a/§06b — as one route,
+// one client state machine (`phase`), matching the design's own "State"
+// section (no per-question or per-screen URLs).
 //
-// After question 15, this shows a `showDone` placeholder instead of the
-// real tone selector — that's step 5 of the build plan, not built yet.
+// `phase: "done"` stands in for the real result page: Gemini/Supabase
+// (step 6) and the result screens (step 7) don't exist yet.
 export default function QuizPage() {
   const { locale } = useLocale();
   const t = UI_STRINGS.quiz;
 
   const [mounted, setMounted] = useState(false);
+  const [phase, setPhase] = useState<Phase>("answering");
   const [answers, setAnswers] = useState<Answers>({});
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [showDone, setShowDone] = useState(false);
   const [pulseStage, setPulseStage] = useState<number | null>(null);
+  // SPEC.md §6bis: "Straight up" (neutral) is the explicit default tone.
+  const [tone, setTone] = useState<Tone>("neutral");
 
   // Resuming from localStorage is client-only (SSR always sees an empty
   // store) — done in an effect, after mount, rather than in the initial
@@ -43,7 +50,7 @@ export default function QuizPage() {
     setAnswers(stored);
     if (isComplete(stored)) {
       setCurrentIndex(QUESTION_COUNT - 1);
-      setShowDone(true);
+      setPhase("tone");
     } else {
       setCurrentIndex(firstUnansweredIndex(stored));
     }
@@ -54,7 +61,7 @@ export default function QuizPage() {
 
   const currentQuestion = QUESTIONS[currentIndex]!;
   const content = QUESTION_CONTENT[currentQuestion.id]!;
-  const currentStage = showDone ? STAGE_COUNT : stageOfQuestion(currentIndex);
+  const currentStage = phase === "answering" ? stageOfQuestion(currentIndex) : STAGE_COUNT;
 
   function handleAnswer(optionIndex: AnswerIndex) {
     const nextAnswers: Answers = { ...answers, [currentQuestion.id]: optionIndex };
@@ -71,17 +78,13 @@ export default function QuizPage() {
     }
 
     if (currentIndex === QUESTION_COUNT - 1) {
-      setShowDone(true);
+      setPhase("tone");
     } else {
       setCurrentIndex(currentIndex + 1);
     }
   }
 
   function handleBack() {
-    if (showDone) {
-      setShowDone(false);
-      return;
-    }
     setCurrentIndex((i) => Math.max(i - 1, 0));
   }
 
@@ -91,8 +94,10 @@ export default function QuizPage() {
   );
   const minutesLeftLabel = tc(t.minutesLeftTemplate, locale).replace("{m}", String(minutesLeft(currentIndex)));
   const stageLabel = tc(t.stageLabelTemplate, locale)
-    .replace("{n}", String(currentStage + 1 > STAGE_COUNT ? STAGE_COUNT : currentStage + 1))
+    .replace("{n}", String(stageOfQuestion(currentIndex) + 1))
     .replace("{pillar}", tc(UI_STRINGS.pillars[content.pillar], locale));
+  const toneLabel = tc(tone === "roast" ? UI_STRINGS.toneSelector.roastTitle : UI_STRINGS.toneSelector.neutralTitle, locale);
+  const doneBody = tc(t.donePlaceholderBodyTemplate, locale).replace("{tone}", toneLabel);
 
   return (
     <>
@@ -100,25 +105,23 @@ export default function QuizPage() {
         <div className={styles.headerInner}>
           <Wordmark />
           <div className={styles.headerRight}>
-            <span className={styles.mono}>{questionCounter}</span>
-            {!showDone && <span className={`${styles.mono} ${styles.minutesLeft}`}>{minutesLeftLabel}</span>}
+            {phase === "answering" ? (
+              <>
+                <span className={styles.mono}>{questionCounter}</span>
+                <span className={`${styles.mono} ${styles.minutesLeft}`}>{minutesLeftLabel}</span>
+              </>
+            ) : (
+              <span className={styles.mono}>{tc(UI_STRINGS.toneSelector.headerLabel, locale)}</span>
+            )}
           </div>
         </div>
       </header>
 
       <main className={styles.main}>
         <ProgressBar currentStage={currentStage} pulseStage={pulseStage} />
-        {!showDone && <p className={styles.stageLabel}>{stageLabel}</p>}
+        {phase === "answering" && <p className={styles.stageLabel}>{stageLabel}</p>}
 
-        {showDone ? (
-          <div className={styles.doneCard}>
-            <h2 className={styles.doneTitle}>{tc(t.donePlaceholderTitle, locale)}</h2>
-            <p className={styles.doneBody}>{tc(t.donePlaceholderBody, locale)}</p>
-            <button type="button" data-testid="back-button" className={styles.backLink} onClick={handleBack}>
-              {tc(t.backButton, locale)}
-            </button>
-          </div>
-        ) : (
+        {phase === "answering" && (
           <>
             <div className={styles.questionCard}>
               <h2 className={styles.question}>{tc(content.question, locale)}</h2>
@@ -152,6 +155,19 @@ export default function QuizPage() {
               <span className={styles.mono}>{tc(t.answerToContinue, locale)}</span>
             </div>
           </>
+        )}
+
+        {phase === "tone" && (
+          <ToneSelector locale={locale} tone={tone} onSelectTone={setTone} onSubmit={() => setPhase("loading")} />
+        )}
+
+        {phase === "loading" && <LoadingScreen locale={locale} onDone={() => setPhase("done")} />}
+
+        {phase === "done" && (
+          <div className={styles.doneCard}>
+            <h2 className={styles.doneTitle}>{tc(t.donePlaceholderTitle, locale)}</h2>
+            <p className={styles.doneBody}>{doneBody}</p>
+          </div>
         )}
       </main>
     </>

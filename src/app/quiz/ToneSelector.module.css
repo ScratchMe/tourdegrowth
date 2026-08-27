@@ -1,0 +1,99 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 480px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 34px;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.option {
+  text-align: left;
+  width: 100%;
+  padding: 20px;
+  border-radius: var(--radius-subcard);
+  border: 2px solid var(--ink);
+  background: var(--stone-2);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.option:hover {
+  background: var(--paint-white);
+}
+
+.option.selected {
+  background: var(--paint-white);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
+.option:focus-visible {
+  outline: 3px solid var(--red);
+  outline-offset: 3px;
+}
+
+.optionTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.optionTitle {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 19px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--red-ink);
+}
+
+.radio {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--ink-soft);
+  flex-shrink: 0;
+}
+
+.radioSelected {
+  border: 2px solid var(--ink);
+  background: var(--ink);
+  box-shadow: inset 0 0 0 3px var(--paint-white);
+}
+
+.optionDescription {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 14.5px;
+  color: var(--ink-soft);
+}
+
+.cta {
+  width: 100%;
+}
+
+.hint {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  text-align: center;
+  color: var(--ink-soft);
+}
