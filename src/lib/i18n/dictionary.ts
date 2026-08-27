@@ -88,14 +88,25 @@ export const UI_STRINGS = {
     minutesLeftTemplate: { en: "— {m} min left", fr: "— {m} min restantes" },
     backButton: { en: "← Back", fr: "← Retour" },
     answerToContinue: { en: "Answer to continue", fr: "Réponds pour continuer" },
-    // Minimal stand-in for DESIGN-BRIEF.md §06c (the real error screen,
-    // step 9) — placeholder copy, but the promise it makes (retry doesn't
-    // restart the questionnaire) is already real and true.
+    // DESIGN-BRIEF.md §06c — copy transcribed verbatim from the brief (not
+    // invented here); French is a working translation of that same brief
+    // copy, same status as the rest of this file's FR strings (see the note
+    // above UI_STRINGS) — this is UI chrome, not the verdict-text library.
+    errorHeaderLabel: { en: "Error", fr: "Erreur" },
+    errorEyebrow: { en: "Detour", fr: "Détour" },
     errorTitle: {
-      en: "Something went wrong.",
-      fr: "Quelque chose s'est mal passé.",
+      en: "Your results took a wrong turn.",
+      fr: "Tes résultats ont pris un mauvais virage.",
+    },
+    errorBody: {
+      en: "Something broke on our end — try again in a moment.",
+      fr: "Quelque chose a cassé de notre côté — réessaie dans un instant.",
     },
     errorRetry: { en: "Try again", fr: "Réessayer" },
+    errorHint: {
+      en: "Your 15 answers are still saved on this device — retrying doesn't restart the questionnaire.",
+      fr: "Tes 15 réponses sont toujours enregistrées sur cet appareil — réessayer ne relance pas le questionnaire.",
+    },
   },
 
   /** Tone selector (DESIGN-BRIEF.md §06a). SPEC.md §6bis: "Straight up" /
