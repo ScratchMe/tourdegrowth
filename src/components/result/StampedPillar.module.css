@@ -1,0 +1,13 @@
+.stamped {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  font: var(--meta-sm);
+  font-weight: 600;
+  color: var(--text-inverse);
+  background: var(--paint-red);
+  border-radius: var(--radius-tag);
+  padding: 8px 12px;
+  transform: rotate(-1deg);
+}

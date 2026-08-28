@@ -1,0 +1,39 @@
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  margin-left: 4px;
+  vertical-align: middle;
+  border-radius: var(--radius-round);
+  background: none;
+  font: var(--meta-2xs);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.muted {
+  border: 2px dashed var(--text-muted);
+  color: var(--text-muted);
+}
+
+.ink {
+  border: 2px dashed var(--text-body);
+  color: var(--text-body);
+}
+
+.alert {
+  border: 2px dashed var(--text-alert);
+  color: var(--text-alert);
+}
+
+.open {
+  border-color: var(--text-body);
+  color: var(--text-body);
+}
+
+.trigger:focus-visible {
+  outline-offset: var(--focus-offset-tight);
+}

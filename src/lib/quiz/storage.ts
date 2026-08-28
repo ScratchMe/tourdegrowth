@@ -44,7 +44,7 @@ export function clearStoredAnswers(): void {
 
 function isAnswersShape(value: unknown): value is Answers {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
-  return Object.values(value).every((v) => v === 0 || v === 1 || v === 2 || v === 3);
+  return Object.values(value).every((v) => v === 0 || v === 1 || v === 2);
 }
 
 /**

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { PILLARS } from "@/lib/scoring/pillars";
 import { SAMPLE_RESULT, getSampleVerdict } from "../sample";
 
 describe("SAMPLE_RESULT", () => {
@@ -14,24 +15,24 @@ describe("SAMPLE_RESULT", () => {
 });
 
 describe("getSampleVerdict", () => {
-  it("returns bilingual, tone-specific fixed content, never empty", () => {
+  it("returns a non-empty headline and a sentence for every pillar, for every tone/locale", () => {
     for (const tone of ["neutral", "roast"] as const) {
       for (const locale of ["en", "fr"] as const) {
         const verdict = getSampleVerdict(tone, locale);
         expect(verdict.headline.length).toBeGreaterThan(0);
-        expect(verdict.strengths).toHaveLength(2);
-        expect(verdict.weaknesses).toHaveLength(2);
-        expect(verdict.recommendation.length).toBeGreaterThan(0);
-        expect(verdict.modelUsed).toBe("sample");
+        for (const pillar of PILLARS) {
+          expect(verdict.pillarSentences[pillar]?.length, `${tone}/${locale}/${pillar}`).toBeGreaterThan(0);
+        }
       }
     }
   });
 
-  it("uses DESIGN-BRIEF.md's literal roast example lines", () => {
-    const roast = getSampleVerdict("roast", "en");
-    expect(roast.headline).toBe("Not bad for someone whose users leave before the second week.");
-    expect(roast.weaknesses[0]).toBe(
-      "Your retention took one look at your product and rode straight past the finish line.",
+  it("reads from the same copy library every real Quick result uses, keyed by the fixed sample scores' bands", () => {
+    // retention=8 -> weak, acquisition=18 -> strong (see scoreBand in copy-library.ts).
+    const roastEn = getSampleVerdict("roast", "en");
+    expect(roastEn.pillarSentences.retention).toBe("Your retention decided to go home before the stage was even over.");
+    expect(roastEn.pillarSentences.acquisition).toBe(
+      "Your acquisition actually knows where it's going. Deserved yellow jersey on this stage.",
     );
   });
 
@@ -39,6 +40,6 @@ describe("getSampleVerdict", () => {
     const en = getSampleVerdict("neutral", "en");
     const fr = getSampleVerdict("neutral", "fr");
     expect(en.headline).not.toBe(fr.headline);
-    expect(en.recommendation).not.toBe(fr.recommendation);
+    expect(en.pillarSentences.retention).not.toBe(fr.pillarSentences.retention);
   });
 });

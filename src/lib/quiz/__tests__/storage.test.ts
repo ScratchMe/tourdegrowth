@@ -39,7 +39,7 @@ describe("quiz answers storage", () => {
   });
 
   it("round-trips answers through save/load", () => {
-    const answers: Answers = { "acquisition-1": 3, "retention-2": 0 };
+    const answers: Answers = { "acquisition-1": 2, "retention-2": 0 };
     saveStoredAnswers(answers);
     expect(loadStoredAnswers()).toEqual(answers);
   });

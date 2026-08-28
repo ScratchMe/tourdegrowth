@@ -2,18 +2,21 @@
 
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
-import { Button } from "@/components/button/Button";
-import { ScoreCard } from "@/components/score-card/ScoreCard";
-import { Wordmark } from "@/components/wordmark/Wordmark";
+import { Wordmark } from "@/components/brand/Wordmark";
+import { MetaLabel } from "@/components/brand/MetaLabel";
+import { Button } from "@/components/core/Button";
+import { Card } from "@/components/core/Card";
+import { PillarChip } from "@/components/result/PillarChip";
+import { ScoreDisplay } from "@/components/result/ScoreDisplay";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { saveRefId } from "@/lib/quiz/storage";
 import { SAMPLE_RESULT } from "@/lib/submissions/sample";
 import styles from "./page.module.css";
 
-// Landing page — DESIGN-BRIEF.md screen 01. Nav links ("How it works",
-// "Examples", "Roast mode") are cut from the MVP per SPEC.md §12 — the
-// header keeps just the wordmark and a compact CTA.
+// Landing page — DESIGN-BRIEF.md screen 01. Nav links ("Examples", "Roast
+// mode") stay cut from the MVP per SPEC.md §12 — SPEC-ADDENDUM-01.md §1.3
+// reintroduces just "How it works", now that there's a real page behind it.
 export default function LandingPage() {
   const { locale } = useLocale();
   const searchParams = useSearchParams();
@@ -32,9 +35,14 @@ export default function LandingPage() {
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <Wordmark />
-          <Button href="/quiz" size="compact" className={styles.headerCta}>
-            {tc(t.ctaPrimary, locale)}
-          </Button>
+          <nav className={styles.nav}>
+            <Button href="/how-it-works" variant="quiet" className={styles.navLink}>
+              {tc(UI_STRINGS.nav.howItWorks, locale)}
+            </Button>
+            <Button href="/quiz" size="md" compact className={styles.headerCta}>
+              {tc(t.ctaPrimary, locale)}
+            </Button>
+          </nav>
         </div>
       </header>
 
@@ -53,23 +61,38 @@ export default function LandingPage() {
             <p className={styles.subtitle}>{tc(t.subtitle, locale)}</p>
 
             <div className={styles.ctaRow}>
-              <Button href="/quiz">{tc(t.ctaPrimary, locale)}</Button>
-              <Button href="/r/sample" variant="secondary">
+              <Button size="lg" href="/quiz">
+                {tc(t.ctaPrimary, locale)}
+              </Button>
+              <Button size="lg" href="/r/sample" variant="secondary">
                 {tc(t.ctaSecondary, locale)}
               </Button>
             </div>
           </div>
 
           <div className={styles.heroRight}>
-            <ScoreCard
-              total={SAMPLE_RESULT.total}
-              pillars={SAMPLE_RESULT.pillars}
-              weakestPillar={SAMPLE_RESULT.weakestPillar}
-              locale={locale}
-              caption={tc(UI_STRINGS.sample.caption, locale)}
-              stageLabel={tc(UI_STRINGS.sample.stageLabel, locale)}
-              size="preview"
-            />
+            <Card elevation="raised" className={styles.previewCard}>
+              <div className={styles.previewTopRow}>
+                <MetaLabel size="xs">
+                  {tc(UI_STRINGS.scoreCard.label, locale)} — {tc(UI_STRINGS.sample.caption, locale)}
+                </MetaLabel>
+                <MetaLabel size="xs">{tc(UI_STRINGS.sample.stageLabel, locale)}</MetaLabel>
+              </div>
+
+              <ScoreDisplay score={SAMPLE_RESULT.total} size="mobile" />
+
+              <div className={styles.previewTags}>
+                {SAMPLE_RESULT.pillars.map((p) => (
+                  <PillarChip
+                    key={p.pillar}
+                    pillar={tc(UI_STRINGS.pillars[p.pillar], locale)}
+                    score={p.score}
+                    size="mobile"
+                    weak={p.pillar === SAMPLE_RESULT.weakestPillar}
+                  />
+                ))}
+              </div>
+            </Card>
           </div>
         </div>
       </main>

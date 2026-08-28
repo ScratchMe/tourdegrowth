@@ -1,0 +1,20 @@
+.card {
+  background: var(--surface-card);
+  border: 2px dashed var(--border-alert);
+  border-radius: var(--radius-card);
+  padding: 20px 22px;
+}
+
+.eyebrow {
+  font: var(--meta-2xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-alert);
+  margin-bottom: 10px;
+}
+
+.body {
+  font: 600 15px/1.5 var(--font-ui);
+  color: var(--text-body);
+  text-wrap: pretty;
+}

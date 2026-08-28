@@ -1,0 +1,81 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.segments {
+  display: flex;
+  margin-bottom: 12px;
+}
+
+/* "desktop" shrinks to the "mobile" figures below the app's breakpoint on
+   its own — see ScoreDisplay.module.css for the rationale. */
+.desktop {
+  gap: 8px;
+}
+
+@media (max-width: 760px) {
+  .desktop {
+    gap: 6px;
+  }
+}
+
+.mobile {
+  gap: 6px;
+}
+
+.segment {
+  flex: 1;
+  border-radius: var(--radius-tag);
+}
+
+.segmentDesktop {
+  height: 18px;
+}
+
+@media (max-width: 760px) {
+  .segmentDesktop {
+    height: 16px;
+  }
+}
+
+.segmentMobile {
+  height: 16px;
+}
+
+.done {
+  border: 2px solid var(--ink-0);
+  background: var(--ink-0);
+}
+
+.current {
+  border: 2px solid var(--paint-red);
+  background: var(--paint-red);
+  /* tdg-pulse is defined once, globally, in tokens/motion.css. */
+  animation: tdg-pulse var(--dur-pulse) var(--ease-out) both;
+}
+
+.pending {
+  border: var(--border-dashed);
+  background: var(--surface-sunken);
+}
+
+.label {
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.labelDesktop {
+  font: var(--meta-md);
+}
+
+@media (max-width: 760px) {
+  .labelDesktop {
+    font: var(--meta-sm);
+  }
+}
+
+.labelMobile {
+  font: var(--meta-sm);
+}

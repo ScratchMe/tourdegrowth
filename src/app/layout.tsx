@@ -16,11 +16,18 @@ import "./globals.css";
 // cookies, hence no banner requirement).
 const GOATCOUNTER_CODE = process.env.NEXT_PUBLIC_GOATCOUNTER_CODE;
 
-// Three type roles, no more — see DESIGN-BRIEF.md "Typography".
+// Three type roles, no more — see DESIGN-BRIEF.md "Typography". Variable
+// names match the design system v2 tokens (tokens/typography.css) exactly —
+// `--font-ui` (renamed from the original `--font-body`), `--font-mono`,
+// `--font-display` — so components can reference the token names directly,
+// no bridging alias needed. next/font self-hosts each family at build time,
+// which is also the fix the DS bundle's README asks for under "Known gaps"
+// (it shipped referencing the Google Fonts CDN because no binaries were
+// supplied) — no separate CDN <link>/@import is needed here.
 const inter = Inter({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  variable: "--font-body",
+  variable: "--font-ui",
   display: "swap",
 });
 

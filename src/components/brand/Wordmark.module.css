@@ -1,0 +1,36 @@
+.wordmark {
+  font: var(--display-wordmark);
+  letter-spacing: var(--display-letter-spacing);
+  color: var(--text-body);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.sm {
+  font-size: 15px;
+}
+
+/*
+ * "md" is the default header wordmark and shrinks to the "sm" size below
+ * the app's mobile breakpoint on its own (CSS-only — matches how the app's
+ * server-rendered pages, e.g. the landing header, must stay responsive
+ * without any JS viewport check). Pass size="sm"/"lg" explicitly only where
+ * a fixed size is wanted regardless of viewport (none currently).
+ */
+.md {
+  font-size: 19px;
+}
+
+@media (max-width: 760px) {
+  .md {
+    font-size: 15px;
+  }
+}
+
+.lg {
+  font-size: 34px;
+}
+
+.accent {
+  color: var(--paint-red);
+}

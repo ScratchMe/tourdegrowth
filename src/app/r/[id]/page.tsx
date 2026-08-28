@@ -64,6 +64,7 @@ export default async function ResultPage({ params }: PageProps) {
       weakestPillar={submission.weakestPillar}
       verdicts={submission.verdicts}
       initialTone={submission.tone}
+      deepDive={submission.deepDive}
     />
   );
 }

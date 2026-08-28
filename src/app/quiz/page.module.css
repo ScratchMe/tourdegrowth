@@ -1,5 +1,5 @@
 .header {
-  border-bottom: 2px dashed var(--line);
+  border-bottom: var(--border-rule);
   padding: 24px 0;
 }
 
@@ -19,12 +19,6 @@
   gap: 8px;
 }
 
-.mono {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--ink-soft);
-}
-
 .minutesLeft {
   display: none;
 }
@@ -38,63 +32,10 @@
   gap: 20px;
 }
 
-.stageLabel {
-  font-family: var(--font-mono);
-  font-size: 12.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--ink-soft);
-}
-
-.questionCard {
-  background: var(--paint-white);
-  border: 2px solid var(--ink);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
-  padding: 30px 32px;
-}
-
-.question {
-  font-family: var(--font-body);
-  font-weight: 600;
-  font-size: 28px;
-  line-height: 1.3;
-  text-wrap: pretty;
-}
-
 .answers {
   display: flex;
   flex-direction: column;
   gap: 12px;
-}
-
-.answerButton {
-  text-align: left;
-  font-family: var(--font-body);
-  font-weight: 500;
-  font-size: 17px;
-  padding: 20px;
-  border-radius: var(--radius-subcard);
-  border: 2px solid var(--ink);
-  background: var(--stone-2);
-  color: var(--ink);
-  cursor: pointer;
-  min-height: 64px;
-}
-
-.answerButton:hover {
-  background: var(--paint-white);
-  box-shadow: 4px 4px 0 var(--ink);
-}
-
-.answerButton:focus-visible {
-  outline: 3px solid var(--red);
-  outline-offset: 3px;
-}
-
-.answerButton.selected {
-  background: var(--paint-white);
-  box-shadow: 4px 4px 0 var(--ink);
 }
 
 .footer {
@@ -103,30 +44,14 @@
   justify-content: space-between;
 }
 
-.backLink {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--ink-soft);
-  background: none;
-  border: none;
-  padding: 8px 0;
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-/* DESIGN-BRIEF.md §06c — error card is the one place in the questionnaire
-   flow that breaks from the ink-outline/red-shadow card language: red
-   outline, red shadow, to read as distinct from a normal question card. */
-.errorHeaderLabel {
-  color: var(--red-ink);
-}
-
+/* The one place in the questionnaire flow that breaks from the ink-outline/
+   red-shadow card language: red outline, red shadow, to read as distinct
+   from a normal question card (DESIGN-BRIEF.md §06c). */
 .errorCard {
-  background: var(--paint-white);
-  border: 2px solid var(--red);
+  background: var(--surface-card);
+  border: 2px solid var(--paint-red);
   border-radius: var(--radius-card);
-  box-shadow: 7px 7px 0 var(--red);
+  box-shadow: 7px 7px 0 var(--paint-red);
   padding: 24px 22px;
   display: flex;
   flex-direction: column;
@@ -135,62 +60,26 @@
   max-width: 480px;
 }
 
-.errorEyebrow {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--red-ink);
-}
-
 .errorTitle {
-  font-family: var(--font-display);
-  font-weight: 700;
+  font: var(--display-section);
   font-size: 36px;
   line-height: 1.15;
+  color: var(--text-body);
 }
 
 .errorBody {
-  font-family: var(--font-body);
-  font-weight: 500;
-  font-size: 15px;
-  line-height: 1.5;
-  color: var(--ink-soft);
+  font: var(--body-md);
+  color: var(--text-muted);
 }
 
 .errorDetail {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--ink-soft);
+  font: var(--meta-sm);
+  color: var(--text-muted);
   word-break: break-word;
-}
-
-.errorCta {
-  width: 100%;
-}
-
-.errorHint {
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  color: var(--ink-soft);
 }
 
 @media (min-width: 761px) {
   .minutesLeft {
     display: inline;
-  }
-
-  .question {
-    font-size: 28px;
-  }
-}
-
-@media (max-width: 760px) {
-  .question {
-    font-size: 22px;
-  }
-
-  .answerButton {
-    font-size: 16px;
   }
 }

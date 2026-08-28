@@ -1,80 +1,87 @@
 import { describe, expect, it } from "vitest";
-import { buildGeminiPrompt, type PromptAnswer } from "../prompt";
+import { buildDeepDivePrompt, type PromptAnswer } from "../prompt";
 import type { PillarScore } from "@/lib/scoring/score";
 
 const pillars: PillarScore[] = [
-  { pillar: "acquisition", rawPoints: 53, score: 18 },
-  { pillar: "activation", rawPoints: 34, score: 11 },
-  { pillar: "retention", rawPoints: 13, score: 4 },
+  { pillar: "acquisition", rawPoints: 47, score: 16 },
+  { pillar: "activation", rawPoints: 14, score: 5 },
+  { pillar: "retention", rawPoints: 7, score: 2 },
   { pillar: "referral", rawPoints: 47, score: 16 },
   { pillar: "revenue", rawPoints: 60, score: 20 },
 ];
 
-const answers: PromptAnswer[] = [
-  { pillar: "acquisition", question: "Do you have a primary acquisition channel?", answer: "Yes, identified and measured" },
+const quickAnswers: PromptAnswer[] = [
+  { pillar: "acquisition", question: "Do you have a primary acquisition channel?", answer: "Yes, clearly identified and tracked" },
 ];
 
-function baseInput(overrides: Partial<Parameters<typeof buildGeminiPrompt>[0]> = {}) {
+const contextAnswers: PromptAnswer[] = [
+  { pillar: "acquisition", question: "What's your primary acquisition channel today?", answer: "SEO / content" },
+];
+
+function baseInput(overrides: Partial<Parameters<typeof buildDeepDivePrompt>[0]> = {}) {
   return {
     locale: "en" as const,
     tone: "neutral" as const,
     pillars,
-    total: 69,
+    total: 59,
     weakestPillar: "retention" as const,
-    answers,
+    quickAnswers,
+    contextAnswers,
     ...overrides,
   };
 }
 
-describe("buildGeminiPrompt", () => {
+describe("buildDeepDivePrompt", () => {
   it("includes the anti-mockery guardrail for roast, in both locales", () => {
-    const en = buildGeminiPrompt(baseInput({ tone: "roast", locale: "en" }));
-    const fr = buildGeminiPrompt(baseInput({ tone: "roast", locale: "fr" }));
+    const en = buildDeepDivePrompt(baseInput({ tone: "roast", locale: "en" }));
+    const fr = buildDeepDivePrompt(baseInput({ tone: "roast", locale: "fr" }));
 
     expect(en).toMatch(/NEVER mock the person/i);
     expect(fr).toMatch(/ne te moque JAMAIS de la personne/i);
   });
 
   it("does not include the roast calibration/guardrail block for the neutral tone", () => {
-    const en = buildGeminiPrompt(baseInput({ tone: "neutral", locale: "en" }));
+    const en = buildDeepDivePrompt(baseInput({ tone: "neutral", locale: "en" }));
     expect(en).not.toMatch(/NEVER mock the person/i);
     expect(en).not.toMatch(/Franco-English/i);
   });
 
   it("instructs the model that scores are final and must not be altered", () => {
-    const prompt = buildGeminiPrompt(baseInput());
+    const prompt = buildDeepDivePrompt(baseInput());
     expect(prompt).toMatch(/FINAL/);
     expect(prompt).toMatch(/never recompute/i);
   });
 
   it("includes every pillar score, the total, and the weakest pillar", () => {
-    const prompt = buildGeminiPrompt(baseInput());
-    expect(prompt).toContain("acquisition: 18/20");
-    expect(prompt).toContain("activation: 11/20");
-    expect(prompt).toContain("retention: 4/20");
+    const prompt = buildDeepDivePrompt(baseInput());
+    expect(prompt).toContain("acquisition: 16/20");
+    expect(prompt).toContain("activation: 5/20");
+    expect(prompt).toContain("retention: 2/20");
     expect(prompt).toContain("referral: 16/20");
     expect(prompt).toContain("revenue: 20/20");
-    expect(prompt).toContain("Total: 69/100");
+    expect(prompt).toContain("Total: 59/100");
     expect(prompt).toContain("Weakest pillar: retention");
   });
 
-  it("includes the question/answer pairs given", () => {
-    const prompt = buildGeminiPrompt(baseInput());
+  it("includes both the original Quick answers and the Deep dive context answers", () => {
+    const prompt = buildDeepDivePrompt(baseInput());
     expect(prompt).toContain("Do you have a primary acquisition channel?");
-    expect(prompt).toContain("Yes, identified and measured");
+    expect(prompt).toContain("Yes, clearly identified and tracked");
+    expect(prompt).toContain("What's your primary acquisition channel today?");
+    expect(prompt).toContain("SEO / content");
   });
 
-  it("asks for a JSON-only response matching the headline/strengths/weaknesses/recommendation schema", () => {
-    const prompt = buildGeminiPrompt(baseInput());
+  it("asks for a JSON-only response matching the pillarRecommendations/priorityAction schema", () => {
+    const prompt = buildDeepDivePrompt(baseInput());
     expect(prompt).toMatch(/ONLY a valid JSON object/i);
-    expect(prompt).toContain('"headline"');
-    expect(prompt).toContain('"strengths"');
-    expect(prompt).toContain('"weaknesses"');
-    expect(prompt).toContain('"recommendation"');
+    expect(prompt).toContain('"pillarRecommendations"');
+    expect(prompt).toContain('"priorityAction"');
+    expect(prompt).not.toContain('"headline"');
+    expect(prompt).not.toContain('"strengths"');
   });
 
   it("switches every instructional block to French for locale fr", () => {
-    const prompt = buildGeminiPrompt(baseInput({ locale: "fr" }));
+    const prompt = buildDeepDivePrompt(baseInput({ locale: "fr" }));
     expect(prompt).toMatch(/consultant growth senior/);
     expect(prompt).toMatch(/DÉFINITIFS/);
     expect(prompt).toMatch(/UNIQUEMENT avec un objet JSON valide/);

@@ -1,0 +1,72 @@
+.popover {
+  background: var(--surface-card);
+  border: var(--border-solid);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-panel);
+}
+
+.anchored {
+  padding: 14px 16px;
+  max-width: 280px;
+  width: max-content;
+}
+
+.docked {
+  padding: 16px;
+  width: 100%;
+  max-width: none;
+}
+
+.topRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.term {
+  font: var(--body-sm);
+  font-weight: 600;
+  color: var(--text-body);
+}
+
+.closeButton {
+  font: var(--meta-md);
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  padding: 2px 0;
+  cursor: pointer;
+}
+
+.definition {
+  font: var(--body-sm);
+  color: var(--text-muted);
+  margin-top: 8px;
+  text-wrap: pretty;
+}
+
+/*
+ * Docked (mobile) placement: a light bottom-sheet fixed to the viewport
+ * rather than positioned near the trigger, which always overflows on a
+ * ~390px screen (DESIGN-BRIEF-ADDENDUM-01.md). The parent that renders this
+ * with placement="docked" is responsible for the backdrop click target;
+ * this class only handles the sheet's own fixed position.
+ */
+.dockedWrap {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 40;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 39;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: default;
+}

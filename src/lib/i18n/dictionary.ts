@@ -75,9 +75,30 @@ export const UI_STRINGS = {
     stageLabel: { en: "Stage 5/5", fr: "Étape 5/5" },
   },
 
+  /** Header nav — SPEC.md §12 cut "How it works"/"Examples"/"Roast mode" from
+   * the MVP; SPEC-ADDENDUM-01.md §1.3 explicitly reintroduces just the first
+   * one, now that there's a real page behind it. */
+  nav: {
+    howItWorks: { en: "How it works", fr: "Comment ça marche" },
+  },
+
+  /** Glossary info-bubble chrome (SPEC-ADDENDUM-01.md §1.2) — the terms and
+   * definitions themselves live in content/glossary.ts, this is just the
+   * trigger's accessible label and the mobile sheet's close button. */
+  glossary: {
+    definitionLabelTemplate: { en: "Definition: {term}", fr: "Définition : {term}" },
+    closeLabel: { en: "Close", fr: "Fermer" },
+  },
+
+  /** "How it works" page chrome (SPEC-ADDENDUM-01.md §1.3) not already in
+   * content/how-it-works.ts (title/body copy lives there). */
+  howItWorksPage: {
+    exampleQuestionLabel: { en: "Example question:", fr: "Exemple de question :" },
+  },
+
   /**
    * Questionnaire chrome (DESIGN-BRIEF.md §05) — question/answer copy itself
-   * lives in questionnaire-content.ts, not here. `{n}`/`{pillar}`/`{m}` are
+   * lives in content/copy-library.ts, not here. `{n}`/`{pillar}`/`{m}` are
    * replaced in code (see quiz/page.tsx) — this project's i18n is
    * intentionally template-free otherwise, this is the one spot with
    * enough moving parts (a number AND a translated pillar name) to need it.
@@ -131,14 +152,41 @@ export const UI_STRINGS = {
     },
   },
 
-  /** Loading (DESIGN-BRIEF.md §06b) — 3 rotating messages, ~2-3s total. */
+  /** Loading — DESIGN-BRIEF.md §06b's 3 rotating messages. Quick mode now
+   * only ever shows message1, briefly (SPEC-ADDENDUM-01.md §0: no real wait
+   * left to narrate); the Deep dive keeps the full 3-message sequence,
+   * since it still makes a real Gemini call. */
   loading: {
     message1: { en: "Reviewing your answers...", fr: "Relecture de tes réponses..." },
     message2: { en: "Calculating your stage times...", fr: "Calcul de tes temps par étape..." },
     message3: { en: "Drafting your race report...", fr: "Rédaction de ton rapport de course..." },
   },
 
-  /** Result page chrome (DESIGN-BRIEF.md §02/§04) — headline/strengths/weaknesses SENTENCES come from Gemini (or sample.ts), not from here; this is just the surrounding UI text. */
+  /** Deep dive mode (SPEC-ADDENDUM-01.md §2) — the 10-question follow-up
+   * offered from the result page. Question/answer copy itself lives in
+   * content/deep-mode-questions.ts. */
+  deepDive: {
+    teaserText: { en: "Want more specific advice?", fr: "Envie d'un diagnostic plus précis ?" },
+    teaserCta: { en: "Get my deep dive →", fr: "Obtenir mon diagnostic →" },
+    questionCounterTemplate: {
+      en: "Deep dive · Question {n} of {total}",
+      fr: "Approfondissement · Question {n} sur {total}",
+    },
+    // The mode badge itself stays "Deep dive" in both locales, same
+    // treatment as the AARRR pillar names and the roast 🔥 badge — a
+    // product-level label, not a sentence to translate.
+    badge: { en: "Deep dive", fr: "Deep dive" },
+    priorityMoveLabel: { en: "Priority move", fr: "Action prioritaire" },
+  },
+
+  /** Result page chrome (DESIGN-BRIEF.md §02/§04) — the Strengths/Where
+   * you're losing time SENTENCES come from content/copy-library.ts (Quick)
+   * or Gemini (Deep dive), not from here; this is just the surrounding UI
+   * text. Quick mode's old single "Priority recommendation" section is
+   * retired (SPEC-ADDENDUM-01.md §0 drops the Gemini-authored
+   * recommendation along with the Gemini call that produced it) — a
+   * single actionable recommendation is now exclusively the Deep dive's
+   * `priorityAction` (see `deepDive.priorityMoveLabel` above). */
   result: {
     finishedLabel: { en: "Stage 5/5 — finished", fr: "Étape 5/5 — terminé" },
     answeredSuffixTemplate: { en: " · {n}/15 answered", fr: " · {n}/15 répondues" },
@@ -146,7 +194,6 @@ export const UI_STRINGS = {
     strengthsTitle: { en: "Strengths", fr: "Points forts" },
     strengthsTitleRoast: { en: "Credit where it's due", fr: "Ce qui marche, quand même" },
     weaknessesTitle: { en: "Where you're losing time", fr: "Là où tu perds du temps" },
-    recommendationTitle: { en: "Priority recommendation", fr: "Recommandation prioritaire" },
     ctaShare: { en: "Share my score", fr: "Partager mon score" },
     ctaShareRoast: { en: "Share my roast", fr: "Partager mon roast" },
     ctaAgain: { en: "Take the Tour again", fr: "Refaire le Tour" },
@@ -166,6 +213,11 @@ export const UI_STRINGS = {
   /** OG share image only (DESIGN-BRIEF.md §03) — rendered by Satori (src/app/r/[id]/opengraph-image.tsx), a separate pipeline from the rest of the UI. */
   og: {
     checkupBadge: { en: "AARRR check-up — 3 min", fr: "Bilan AARRR — 3 min" },
+    // SPEC-ADDENDUM-01.md §2.6: the same badge becomes this once the result
+    // has been enriched by a Deep dive — same gabarit otherwise, just this
+    // one string. (Only the non-roast badge; the roast badge below doesn't
+    // get a Deep dive variant per the addendum's own scope.)
+    checkupBadgeDeepDive: { en: "AARRR check-up — Deep dive", fr: "Bilan AARRR — Deep dive" },
     roastBadge: { en: "🔥 ROAST MODE", fr: "🔥 ROAST MODE" },
     scoreLabel: { en: "Overall Growth Score", fr: "Score growth global" },
     stallSentenceTemplate: { en: "{pillar} is where this growth stalls.", fr: "{pillar} est là où cette croissance cale." },

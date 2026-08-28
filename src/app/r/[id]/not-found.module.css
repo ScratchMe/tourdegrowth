@@ -9,15 +9,13 @@
 }
 
 .title {
-  font-family: var(--font-display);
-  font-weight: 700;
+  font: var(--display-section);
   font-size: 36px;
+  color: var(--text-body);
 }
 
 .body {
-  font-family: var(--font-body);
-  font-weight: 500;
-  font-size: 15px;
-  color: var(--ink-soft);
+  font: var(--body-md);
+  color: var(--text-muted);
   max-width: 480px;
 }

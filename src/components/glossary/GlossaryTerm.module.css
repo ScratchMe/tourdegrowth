@@ -1,0 +1,23 @@
+.anchor {
+  position: relative;
+  display: inline;
+}
+
+.anchoredWrap {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 30;
+}
+
+@media (max-width: 640px) {
+  .anchoredWrap {
+    display: none;
+  }
+}
+
+@media (min-width: 641px) {
+  .dockedWrap {
+    display: none;
+  }
+}

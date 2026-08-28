@@ -1,0 +1,154 @@
+.header {
+  border-bottom: var(--border-rule);
+  padding: 24px 0;
+}
+
+.headerInner {
+  max-width: var(--width-reading);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.main {
+  max-width: var(--width-reading);
+  margin: 0 auto;
+  padding: 56px 24px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 44px;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.title {
+  font: var(--display-hero);
+  color: var(--text-body);
+}
+
+.subtitle {
+  font: var(--body-lg);
+  color: var(--text-muted);
+}
+
+.pillarStack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pillarCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pillarName {
+  font: var(--title-card);
+  color: var(--text-body);
+}
+
+.pillarExplanation {
+  font: var(--body-sm);
+  color: var(--text-muted);
+}
+
+.exampleBox {
+  background: var(--surface-sunken);
+  border-radius: var(--radius-button);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.exampleLabel {
+  color: var(--text-muted);
+}
+
+.exampleQuestion {
+  font: var(--meta-md);
+  font-size: 13px;
+  color: var(--text-body);
+}
+
+.proseSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionTitle {
+  font: var(--title-card);
+  color: var(--text-body);
+}
+
+.sectionBody {
+  font: var(--body-md);
+  color: var(--text-muted);
+}
+
+.toneGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.toneBlock {
+  padding: 20px;
+  border-radius: var(--radius-panel);
+  border: var(--border-solid);
+  background: var(--surface-sunken);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.toneTitle {
+  font: var(--title-card);
+  font-size: 17px;
+  color: var(--text-body);
+}
+
+.toneBody {
+  font: var(--body-sm);
+  color: var(--text-muted);
+}
+
+/* The one use of --paint-red on this page, border-only per
+   DESIGN-BRIEF-ADDENDUM-01.md — deliberately not --surface-alert (that's
+   the discrete weak-pillar wash used elsewhere; this encart should stand
+   out, not blend into that quieter language). Not one of Card's own 4
+   tones (none combine a solid red border with a paper background), so this
+   is a small local override, same pattern as ResultView's roast score card. */
+.limitationCard {
+  border-color: var(--paint-red) !important;
+}
+
+.limitationText {
+  font: var(--body-md);
+  color: var(--text-body);
+}
+
+.ctaWrap {
+  display: flex;
+}
+
+@media (min-width: 761px) {
+  .toneGrid {
+    flex-direction: row;
+  }
+
+  .toneBlock {
+    flex: 1;
+  }
+}
+
+@media (max-width: 760px) {
+  .ctaWrap > * {
+    width: 100%;
+  }
+}
