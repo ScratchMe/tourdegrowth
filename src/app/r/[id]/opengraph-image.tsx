@@ -62,6 +62,8 @@ interface OgData {
   weakestPillar: Pillar;
   locale: Locale;
   roast: boolean;
+  /** SPEC-ADDENDUM-01.md §2.6 — swaps the checkup badge's text, no other gabarit change. */
+  deepDive: boolean;
 }
 
 async function loadOgData(id: string): Promise<OgData> {
@@ -72,6 +74,7 @@ async function loadOgData(id: string): Promise<OgData> {
       weakestPillar: SAMPLE_RESULT.weakestPillar,
       locale: "en",
       roast: false,
+      deepDive: false, // SPEC.md §12: the sample is never enriched
     };
   }
 
@@ -79,7 +82,14 @@ async function loadOgData(id: string): Promise<OgData> {
   if (!submission) {
     // No dedicated "not found" OG image — the crawler still gets a frame
     // rather than a broken image request. A real visitor hits not-found.tsx.
-    return { total: 0, pillars: SAMPLE_RESULT.pillars, weakestPillar: "retention", locale: "en", roast: false };
+    return {
+      total: 0,
+      pillars: SAMPLE_RESULT.pillars,
+      weakestPillar: "retention",
+      locale: "en",
+      roast: false,
+      deepDive: false,
+    };
   }
 
   return {
@@ -88,13 +98,14 @@ async function loadOgData(id: string): Promise<OgData> {
     weakestPillar: submission.weakestPillar,
     locale: submission.locale,
     roast: submission.tone === "roast",
+    deepDive: submission.deepDive !== null,
   };
 }
 
 export default async function OgImage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const [data, fonts] = await Promise.all([loadOgData(id), loadFonts()]);
-  const { total, pillars, weakestPillar, locale, roast } = data;
+  const { total, pillars, weakestPillar, locale, roast, deepDive } = data;
   const accent = roast ? RED : INK;
 
   const weakestLabel = tc(UI_STRINGS.pillars[weakestPillar], locale);
@@ -169,7 +180,7 @@ export default async function OgImage({ params }: { params: Promise<{ id: string
                 padding: "8px 16px",
               }}
             >
-              {tc(UI_STRINGS.og.checkupBadge, locale)}
+              {tc(deepDive ? UI_STRINGS.og.checkupBadgeDeepDive : UI_STRINGS.og.checkupBadge, locale)}
             </div>
           )}
         </div>

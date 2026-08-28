@@ -1,22 +1,18 @@
-import { PILLARS, type Pillar } from "./pillars";
+import { QUESTIONS as COPY_LIBRARY_QUESTIONS } from "@/content/copy-library";
+import type { Pillar } from "./pillars";
 
 export interface Question {
-  /** Stable id, `${pillar}-${1|2|3}` — used as the key in the Answers record. */
+  /** Stable id from content/copy-library.ts (`acq-1`, `act-2`, …) — used as the key in the Answers record. */
   id: string;
   pillar: Pillar;
 }
 
 /**
- * The 15 questions (3 per pillar, canonical AARRR order), structure only.
- *
- * // TODO: la copie affichée (texte des questions et des réponses, FR + EN)
- * n'est pas encore fournie par l'agent produit — voir SPEC.md §12, qui liste
- * explicitement "copie française complète des 15 questions" comme non
- * tranchée. Cette structure (id -> pilier) est en revanche définitive : elle
- * fixe la répartition des questions pour le moteur de scoring. Le texte lui-
- * même vivra dans le dictionnaire i18n (étape 4 du plan de build), initialisé
- * avec les exemples de SPEC.md §6 marqués comme temporaires.
+ * The 15 questions (3 per pillar, canonical AARRR order), structure only —
+ * derived from `content/copy-library.ts` (the id -> pillar assignment is
+ * definitive there; this just re-exposes the shape the scoring/navigation
+ * layer already depends on, so those call sites didn't need to change when
+ * the display copy moved from a temporary dictionary entry to the delivered
+ * content library — see SPEC-ADDENDUM-01.md §0).
  */
-export const QUESTIONS: readonly Question[] = PILLARS.flatMap((pillar) =>
-  ([1, 2, 3] as const).map((n): Question => ({ id: `${pillar}-${n}`, pillar })),
-);
+export const QUESTIONS: readonly Question[] = COPY_LIBRARY_QUESTIONS.map((q) => ({ id: q.id, pillar: q.pillar }));

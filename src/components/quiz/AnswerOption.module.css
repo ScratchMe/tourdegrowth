@@ -1,0 +1,43 @@
+.option {
+  text-align: left;
+  width: 100%;
+  color: var(--text-body);
+  padding: var(--pad-option);
+  min-height: var(--hit-option);
+  border-radius: var(--radius-panel);
+  border: var(--border-solid);
+  background: var(--surface-sunken);
+  cursor: pointer;
+  transition:
+    box-shadow var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+
+.option:hover,
+.option.selected {
+  background: var(--surface-card);
+  box-shadow: var(--shadow-hover);
+}
+
+/* "desktop" shrinks to the "mobile" figure below the app's breakpoint on
+   its own — see ScoreDisplay.module.css for the rationale. */
+.desktop {
+  font: var(--body-lg);
+}
+
+@media (max-width: 760px) {
+  .desktop {
+    font: 500 16px/1.4 var(--font-ui);
+  }
+}
+
+.mobile {
+  font: 500 16px/1.4 var(--font-ui);
+}
+
+/* Resting fill is already the sunken neutral, so the global ink focus ring
+   would barely register — red reads clearly against it instead. */
+.option:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring-invert);
+  outline-offset: var(--focus-offset);
+}

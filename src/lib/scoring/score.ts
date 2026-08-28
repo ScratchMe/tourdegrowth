@@ -1,22 +1,27 @@
+import { QUESTIONS } from "@/content/copy-library";
 import { PILLARS, type Pillar } from "./pillars";
-import { QUESTIONS } from "./questions";
 
 /**
- * Fixed point scale per answer option (SPEC.md §6): index 0 = "not really",
- * … index 3 = "yes, and measured". Four options, never derived, never
- * weighted per-question — the whole point of a rule-based score is that
- * anyone can re-derive it from the 15 raw answers in a few seconds.
+ * Answer options and their point values now live directly on each question
+ * in `content/copy-library.ts` (3 options per question, 20/7/0 points) —
+ * the delivered content library from the product agent (SPEC.md §12).
  *
- * Note: because 20 is not evenly divisible by 3 questions, a pillar's raw
- * points (sum of 3 answers, 0-60) scaled to /20 does not land on every
- * integer — e.g. a rounded pillar score of exactly 12 is mathematically
- * unreachable with this scale. That's expected; see score.test.ts for the
- * full reachable set. Any hard-coded sample result (SPEC.md §12 "Sample
- * result") is fixed display data, not something computeScore() has to
- * reproduce.
+ * Real, signalled change from the previously-shipped engine: the original
+ * build used a fixed `ANSWER_POINTS = [0, 7, 13, 20]` array with 4 options
+ * per question, because SPEC.md §6's text said "4 valeurs par réponse" even
+ * though the design mock only ever showed 3 buttons (documented at the
+ * time as a deliberate arbitration in favor of the spec text). The
+ * delivered copy-library.ts only ever has 3 options — the product agent's
+ * actual final content supersedes that earlier call. Points are now read
+ * per-option from the question itself rather than a separate universal
+ * array, which is both more correct (no assumption that every question
+ * shares one scale) and removes the now-obsolete 4-way index.
+ *
+ * The formula itself is unchanged: sum a pillar's 3 raw answer points, round
+ * to the nearest integer, then sum the 5 already-rounded pillar scores for
+ * the total (SPEC.md §6) — never a recomputed average of raw points.
  */
-export const ANSWER_POINTS = [0, 7, 13, 20] as const;
-export type AnswerIndex = 0 | 1 | 2 | 3;
+export type AnswerIndex = 0 | 1 | 2;
 
 export type Answers = Record<string, AnswerIndex>;
 
@@ -42,14 +47,15 @@ export interface ScoringResult {
 }
 
 function isAnswerIndex(value: unknown): value is AnswerIndex {
-  return value === 0 || value === 1 || value === 2 || value === 3;
+  return value === 0 || value === 1 || value === 2;
 }
 
 /**
  * Computes the deterministic, rule-based score for a completed
  * questionnaire. Pure function: same input always produces the same output.
- * Gemini (see CLAUDE.md) only ever comments on this result — it never feeds
- * back into it.
+ * Nothing — not Gemini, not the Deep dive — ever feeds back into this
+ * (CLAUDE.md non-negotiable, reinforced by SPEC-ADDENDUM-01.md §2.1: "le
+ * score chiffré ne change jamais entre Quick et Détaillé").
  *
  * Throws if any of the 15 questions is missing or has an invalid answer
  * index. That's an assertion, not a recoverable user-facing error: the
@@ -59,11 +65,12 @@ function isAnswerIndex(value: unknown): value is AnswerIndex {
 export function computeScore(answers: Answers): ScoringResult {
   const pillars: PillarScore[] = PILLARS.map((pillar) => {
     const rawPoints = QUESTIONS.filter((q) => q.pillar === pillar).reduce((sum, question) => {
-      const answer = answers[question.id];
-      if (!isAnswerIndex(answer)) {
+      const answerIndex = answers[question.id];
+      if (!isAnswerIndex(answerIndex)) {
         throw new Error(`Missing or invalid answer for question "${question.id}"`);
       }
-      return sum + ANSWER_POINTS[answer];
+      const option = question.options[answerIndex];
+      return sum + option.points;
     }, 0);
 
     // Round THIS pillar to the nearest integer now, before it's summed into

@@ -1,6 +1,6 @@
 import { cookies, headers } from "next/headers";
-import { Button } from "@/components/button/Button";
-import { Wordmark } from "@/components/wordmark/Wordmark";
+import { Button } from "@/components/core/Button";
+import { Wordmark } from "@/components/brand/Wordmark";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { LOCALE_COOKIE, resolveLocale } from "@/lib/i18n/locale";
 import styles from "./not-found.module.css";

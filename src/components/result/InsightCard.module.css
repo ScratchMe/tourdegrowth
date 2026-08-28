@@ -1,0 +1,33 @@
+.card {
+  border-radius: var(--radius-panel);
+  padding: 18px 20px;
+}
+
+.strength {
+  background: var(--surface-card);
+  border: var(--border-solid);
+}
+
+.weakness {
+  background: var(--surface-alert);
+  border: 2px solid var(--border-alert);
+}
+
+.eyebrow {
+  font: var(--meta-xs);
+  margin-bottom: 8px;
+}
+
+.eyebrowStrength {
+  color: var(--text-muted);
+}
+
+.eyebrowWeakness {
+  color: var(--text-alert);
+}
+
+.body {
+  font: var(--body-md);
+  color: var(--text-body);
+  text-wrap: pretty;
+}

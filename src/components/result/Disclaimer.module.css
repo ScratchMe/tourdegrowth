@@ -1,0 +1,20 @@
+.disclaimer {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+.left {
+  text-align: left;
+}
+
+.center {
+  text-align: center;
+}
+
+.disclaimer a {
+  color: var(--text-link);
+}
+
+.disclaimer a:hover {
+  color: var(--text-link-hover);
+}

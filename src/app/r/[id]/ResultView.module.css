@@ -1,5 +1,5 @@
 .header {
-  border-bottom: 2px dashed var(--line);
+  border-bottom: var(--border-rule);
   padding: 24px 0;
 }
 
@@ -13,10 +13,10 @@
   gap: 16px;
 }
 
-.mono {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--ink-soft);
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .desktopOnly {
@@ -24,12 +24,11 @@
 }
 
 .roastBadge {
-  font-family: var(--font-mono);
-  font-size: 11px;
+  font: var(--meta-sm);
   font-weight: 600;
   text-transform: uppercase;
-  color: var(--paint-white);
-  background: var(--red);
+  color: var(--text-inverse);
+  background: var(--paint-red);
   border-radius: var(--radius-tag);
   padding: 6px 10px;
   transform: rotate(-1.5deg);
@@ -45,17 +44,25 @@
 }
 
 .sampleBadge {
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--red-ink);
-  background: var(--red-soft);
-  border: 2px dashed var(--red);
+  background: var(--surface-alert);
+  border: 2px dashed var(--paint-red);
   border-radius: var(--radius-tag);
   padding: 8px 12px;
   display: inline-block;
   width: fit-content;
+}
+
+/*
+ * Roast-mode score card: border/shadow swap from ink to red. Not part of
+ * the v2 design system's Card tone matrix (paper/sunken/alert/outlineAlert)
+ * — those are about diagnosis vs advice, not about which tone the whole
+ * result is in — so this stays a small local override, same --paint-red
+ * 7px offset shadow the app has always used here (see --shadow-card-roast
+ * in tokens/shape.css).
+ */
+.scoreCardRoast {
+  border-color: var(--paint-red) !important;
+  box-shadow: var(--shadow-card-roast) !important;
 }
 
 .layout {
@@ -96,36 +103,43 @@
   gap: 10px;
 }
 
-.sectionLabel {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--ink-soft);
-}
-
 .cardGrid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 8px;
 }
 
-.recommendation {
-  font-family: var(--font-body);
-  font-weight: 500;
-  font-size: 15px;
-  line-height: 1.5;
-  color: var(--ink);
-  background: var(--paint-white);
-  border: 2px solid var(--ink);
-  border-radius: var(--radius-subcard);
-  padding: 14px 16px;
-}
-
 .ctaRow {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+/*
+ * Deep dive locked-preview content (SPEC-ADDENDUM-01.md §2.2, sharpened
+ * 2026-08-28): rendered *inside* the same PriorityMove card the real
+ * priorityAction will occupy once unlocked — same dashed-red border, same
+ * eyebrow slot (just "— locked" appended) — so completing the Deep dive
+ * visually fills this exact card in rather than revealing a new one.
+ * .lockedText reads as an explanation, not yet an actual recommendation,
+ * so it's muted body-sm rather than PriorityMove's confident 600-weight
+ * default body style.
+ */
+.lockedText {
+  font: var(--body-sm);
+  color: var(--text-muted);
+}
+
+.lockedCta {
+  margin-top: 12px;
+}
+
+.disclaimer {
+  text-align: center;
+}
+
+.disclaimer a {
+  color: var(--text-link);
 }
 
 @media (min-width: 761px) {
@@ -169,5 +183,9 @@
 
   .ctaRow > * {
     flex: 1;
+  }
+
+  .disclaimer {
+    text-align: left;
   }
 }

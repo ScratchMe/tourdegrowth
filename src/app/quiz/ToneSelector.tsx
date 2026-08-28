@@ -1,6 +1,7 @@
 "use client";
 
-import { Button } from "@/components/button/Button";
+import { Button } from "@/components/core/Button";
+import { MetaLabel } from "@/components/brand/MetaLabel";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import type { Locale } from "@/lib/i18n/locale";
 import type { Tone } from "@/lib/quiz/tone";
@@ -39,11 +40,13 @@ export function ToneSelector({ locale, tone, onSelectTone, onSubmit }: ToneSelec
         />
       </div>
 
-      <Button onClick={onSubmit} className={styles.cta} data-testid="get-score-cta">
+      <Button size="lg" fullWidth onClick={onSubmit} data-testid="get-score-cta">
         {tc(t.cta, locale)}
       </Button>
 
-      <p className={styles.hint}>{tc(t.switchHint, locale)}</p>
+      <MetaLabel size="xs" uppercase={false} className={styles.hint}>
+        {tc(t.switchHint, locale)}
+      </MetaLabel>
     </div>
   );
 }

@@ -2,11 +2,15 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Wordmark } from "@/components/wordmark/Wordmark";
-import { Button } from "@/components/button/Button";
-import { ProgressBar } from "@/components/progress-bar/ProgressBar";
+import { Wordmark } from "@/components/brand/Wordmark";
+import { Button } from "@/components/core/Button";
+import { MetaLabel } from "@/components/brand/MetaLabel";
+import { AnswerOption } from "@/components/quiz/AnswerOption";
+import { QuestionCard } from "@/components/quiz/QuestionCard";
+import { QuestionText } from "@/components/quiz/QuestionText";
+import { StageProgress } from "@/components/quiz/StageProgress";
+import { QUESTIONS } from "@/content/copy-library";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
-import { QUESTION_CONTENT } from "@/lib/i18n/questionnaire-content";
 import { useLocale } from "@/lib/i18n/locale-context";
 import {
   QUESTIONS_PER_STAGE,
@@ -20,7 +24,6 @@ import {
 import { trackEvent } from "@/lib/analytics/goatcounter";
 import { loadRefId, loadStoredAnswers, saveRefId, saveStoredAnswers } from "@/lib/quiz/storage";
 import type { AnswerIndex, Answers } from "@/lib/scoring/score";
-import { QUESTIONS } from "@/lib/scoring/questions";
 import { LoadingScreen } from "./LoadingScreen";
 import { ToneSelector, type Tone } from "./ToneSelector";
 import styles from "./page.module.css";
@@ -41,6 +44,10 @@ export default function QuizPage() {
   const searchParams = useSearchParams();
   const { locale } = useLocale();
   const t = UI_STRINGS.quiz;
+  // Components below shrink to their own mobile figures via CSS below the
+  // app's breakpoint (see e.g. QuestionCard.module.css) — "desktop" here is
+  // just the base size, not a fixed desktop-only choice.
+  const size = "desktop";
 
   const [mounted, setMounted] = useState(false);
   const [phase, setPhase] = useState<Phase>("answering");
@@ -48,6 +55,7 @@ export default function QuizPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [pulseStage, setPulseStage] = useState<number | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [openGlossaryId, setOpenGlossaryId] = useState<string | null>(null);
   // SPEC.md §6bis: "Straight up" (neutral) is the explicit default tone.
   const [tone, setTone] = useState<Tone>("neutral");
 
@@ -76,13 +84,13 @@ export default function QuizPage() {
   if (!mounted) return null;
 
   const currentQuestion = QUESTIONS[currentIndex]!;
-  const content = QUESTION_CONTENT[currentQuestion.id]!;
   const currentStage = phase === "answering" ? stageOfQuestion(currentIndex) : STAGE_COUNT;
 
   function handleAnswer(optionIndex: AnswerIndex) {
     const nextAnswers: Answers = { ...answers, [currentQuestion.id]: optionIndex };
     setAnswers(nextAnswers);
     saveStoredAnswers(nextAnswers);
+    setOpenGlossaryId(null);
 
     const stageJustCompleted = (currentIndex + 1) % QUESTIONS_PER_STAGE === 0;
     if (stageJustCompleted) {
@@ -101,21 +109,30 @@ export default function QuizPage() {
   }
 
   function handleBack() {
+    setOpenGlossaryId(null);
     setCurrentIndex((i) => Math.max(i - 1, 0));
   }
 
   // "Get my score →" and "Try again" both call this — same request, same
   // stored answers, so a retry after a failure never restarts the
-  // questionnaire (SPEC.md §4).
+  // questionnaire (SPEC.md §4). SPEC-ADDENDUM-01.md §0: this is now a
+  // synchronous scoring + lookup on the server, no Gemini call — a minimum
+  // dwell (see LoadingScreen's "quick" variant) keeps the transition from
+  // feeling abrupt even on a very fast response, without adding any delay
+  // to a normal or slow one.
   async function handleGetScore() {
     setSubmitError(null);
     setPhase("loading");
+    const minDwell = new Promise((resolve) => window.setTimeout(resolve, 300));
     try {
-      const res = await fetch("/api/submissions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answers, tone, locale, refId: loadRefId() }), // SPEC.md §7
-      });
+      const [res] = await Promise.all([
+        fetch("/api/submissions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ answers, tone, locale, refId: loadRefId() }), // SPEC.md §7
+        }),
+        minDwell,
+      ]);
       if (!res.ok) {
         const body: unknown = await res.json().catch(() => null);
         const message = (body as { error?: string } | null)?.error;
@@ -137,7 +154,7 @@ export default function QuizPage() {
   const minutesLeftLabel = tc(t.minutesLeftTemplate, locale).replace("{m}", String(minutesLeft(currentIndex)));
   const stageLabel = tc(t.stageLabelTemplate, locale)
     .replace("{n}", String(stageOfQuestion(currentIndex) + 1))
-    .replace("{pillar}", tc(UI_STRINGS.pillars[content.pillar], locale));
+    .replace("{pillar}", tc(UI_STRINGS.pillars[currentQuestion.pillar], locale));
 
   return (
     <>
@@ -147,54 +164,67 @@ export default function QuizPage() {
           <div className={styles.headerRight}>
             {phase === "answering" ? (
               <>
-                <span className={styles.mono}>{questionCounter}</span>
-                <span className={`${styles.mono} ${styles.minutesLeft}`}>{minutesLeftLabel}</span>
+                <MetaLabel size="sm">{questionCounter}</MetaLabel>
+                <MetaLabel size="sm" className={styles.minutesLeft}>
+                  {minutesLeftLabel}
+                </MetaLabel>
               </>
             ) : phase === "error" ? (
-              <span className={`${styles.mono} ${styles.errorHeaderLabel}`}>{tc(t.errorHeaderLabel, locale)}</span>
+              <MetaLabel size="sm" tone="alert">
+                {tc(t.errorHeaderLabel, locale)}
+              </MetaLabel>
             ) : (
-              <span className={styles.mono}>{tc(UI_STRINGS.toneSelector.headerLabel, locale)}</span>
+              <MetaLabel size="sm">{tc(UI_STRINGS.toneSelector.headerLabel, locale)}</MetaLabel>
             )}
           </div>
         </div>
       </header>
 
       <main className={styles.main}>
-        <ProgressBar currentStage={currentStage} pulseStage={pulseStage} />
-        {phase === "answering" && <p className={styles.stageLabel}>{stageLabel}</p>}
+        <StageProgress current={currentStage + 1} total={STAGE_COUNT} size={size} />
+        {phase === "answering" && <MetaLabel>{stageLabel}</MetaLabel>}
 
         {phase === "answering" && (
           <>
-            <div className={styles.questionCard}>
-              <h2 className={styles.question}>{tc(content.question, locale)}</h2>
-            </div>
+            <QuestionCard size={size}>
+              <QuestionText
+                questionId={currentQuestion.id}
+                text={tc(currentQuestion.question, locale)}
+                locale={locale}
+                openGlossaryId={openGlossaryId}
+                onOpenGlossaryChange={setOpenGlossaryId}
+                glossaryCloseLabel={tc(UI_STRINGS.glossary.closeLabel, locale)}
+                glossaryLabelTemplate={tc(UI_STRINGS.glossary.definitionLabelTemplate, locale)}
+              />
+            </QuestionCard>
 
             <div className={styles.answers}>
-              {content.options.map((option) => {
-                const selected = answers[currentQuestion.id] === option.index;
+              {currentQuestion.options.map((option, index) => {
+                const optionIndex = index as AnswerIndex;
+                const selected = answers[currentQuestion.id] === optionIndex;
                 return (
-                  <button
-                    key={option.index}
-                    type="button"
+                  <AnswerOption
+                    key={optionIndex}
+                    size={size}
                     data-testid="answer-option"
-                    className={`${styles.answerButton} ${selected ? styles.selected : ""}`}
-                    onClick={() => handleAnswer(option.index)}
+                    selected={selected}
+                    onClick={() => handleAnswer(optionIndex)}
                   >
                     {tc(option.label, locale)}
-                  </button>
+                  </AnswerOption>
                 );
               })}
             </div>
 
             <div className={styles.footer}>
               {currentIndex > 0 ? (
-                <button type="button" data-testid="back-button" className={styles.backLink} onClick={handleBack}>
+                <Button variant="quiet" data-testid="back-button" onClick={handleBack}>
                   {tc(t.backButton, locale)}
-                </button>
+                </Button>
               ) : (
                 <span />
               )}
-              <span className={styles.mono}>{tc(t.answerToContinue, locale)}</span>
+              <MetaLabel size="sm">{tc(t.answerToContinue, locale)}</MetaLabel>
             </div>
           </>
         )}
@@ -203,18 +233,22 @@ export default function QuizPage() {
           <ToneSelector locale={locale} tone={tone} onSelectTone={setTone} onSubmit={handleGetScore} />
         )}
 
-        {phase === "loading" && <LoadingScreen locale={locale} />}
+        {phase === "loading" && <LoadingScreen locale={locale} variant="quick" />}
 
         {phase === "error" && (
           <div className={styles.errorCard}>
-            <p className={styles.errorEyebrow}>{tc(t.errorEyebrow, locale)}</p>
+            <MetaLabel size="xs" tone="alert">
+              {tc(t.errorEyebrow, locale)}
+            </MetaLabel>
             <h2 className={styles.errorTitle}>{tc(t.errorTitle, locale)}</h2>
             <p className={styles.errorBody}>{tc(t.errorBody, locale)}</p>
             {submitError && <p className={styles.errorDetail}>{submitError}</p>}
-            <Button data-testid="retry-button" className={styles.errorCta} onClick={handleGetScore}>
+            <Button size="lg" fullWidth data-testid="retry-button" onClick={handleGetScore}>
               {tc(t.errorRetry, locale)}
             </Button>
-            <p className={styles.errorHint}>{tc(t.errorHint, locale)}</p>
+            <MetaLabel size="xs" uppercase={false}>
+              {tc(t.errorHint, locale)}
+            </MetaLabel>
           </div>
         )}
       </main>

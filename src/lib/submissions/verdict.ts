@@ -1,41 +1,46 @@
 import { extractJson } from "@/lib/gemini/client";
-import type { Verdict } from "./types";
+import { PILLARS } from "@/lib/scoring/pillars";
+import type { DeepDiveVerdict } from "./types";
 
-function isPairOfNonEmptyStrings(value: unknown): value is [string, string] {
-  return (
-    Array.isArray(value) &&
-    value.length === 2 &&
-    value.every((item) => typeof item === "string" && item.trim().length > 0)
-  );
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0;
 }
 
 /**
- * Parses and validates Gemini's raw response text against the Verdict
- * schema (see prompt.ts's OUTPUT_INSTRUCTION). Throws a descriptive error
- * if Gemini didn't follow the instructions — better to surface that as a
- * clear failure than to silently store a malformed verdict.
+ * Parses and validates Gemini's raw Deep dive response text against the
+ * pillarRecommendations/priorityAction schema (see
+ * gemini/prompt.ts's DEEP_DIVE_OUTPUT_INSTRUCTION). Throws a descriptive
+ * error if Gemini didn't follow the instructions — better to surface that
+ * as a clear failure than to silently store a malformed verdict.
+ *
+ * Quick mode's verdict used to be parsed here too (headline/strengths/
+ * weaknesses/recommendation) — replaced by the deterministic
+ * `lib/scoring/verdict.ts` lookup, SPEC-ADDENDUM-01.md §0. This module is
+ * now Deep dive-only.
  */
-export function parseVerdict(rawText: string, modelUsed: string): Verdict {
+export function parseDeepDiveVerdict(rawText: string, modelUsed: string): DeepDiveVerdict {
   const parsed = extractJson(rawText) as Record<string, unknown>;
 
-  if (typeof parsed.headline !== "string" || parsed.headline.trim().length === 0) {
-    throw new Error(`Gemini verdict missing a valid "headline": ${JSON.stringify(parsed)}`);
+  const recommendations = parsed.pillarRecommendations;
+  if (typeof recommendations !== "object" || recommendations === null) {
+    throw new Error(
+      `Gemini Deep dive verdict missing a valid "pillarRecommendations" object: ${JSON.stringify(parsed)}`,
+    );
   }
-  if (!isPairOfNonEmptyStrings(parsed.strengths)) {
-    throw new Error(`Gemini verdict missing a valid "strengths" pair: ${JSON.stringify(parsed)}`);
-  }
-  if (!isPairOfNonEmptyStrings(parsed.weaknesses)) {
-    throw new Error(`Gemini verdict missing a valid "weaknesses" pair: ${JSON.stringify(parsed)}`);
-  }
-  if (typeof parsed.recommendation !== "string" || parsed.recommendation.trim().length === 0) {
-    throw new Error(`Gemini verdict missing a valid "recommendation": ${JSON.stringify(parsed)}`);
+  const pillarRecommendations = {} as Record<(typeof PILLARS)[number], string>;
+  for (const pillar of PILLARS) {
+    const value = (recommendations as Record<string, unknown>)[pillar];
+    if (!isNonEmptyString(value)) {
+      throw new Error(
+        `Gemini Deep dive verdict missing a valid "pillarRecommendations.${pillar}": ${JSON.stringify(parsed)}`,
+      );
+    }
+    pillarRecommendations[pillar] = value;
   }
 
-  return {
-    headline: parsed.headline,
-    strengths: parsed.strengths,
-    weaknesses: parsed.weaknesses,
-    recommendation: parsed.recommendation,
-    modelUsed,
-  };
+  if (!isNonEmptyString(parsed.priorityAction)) {
+    throw new Error(`Gemini Deep dive verdict missing a valid "priorityAction": ${JSON.stringify(parsed)}`);
+  }
+
+  return { pillarRecommendations, priorityAction: parsed.priorityAction, modelUsed };
 }

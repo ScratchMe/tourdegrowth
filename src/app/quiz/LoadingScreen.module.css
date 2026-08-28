@@ -25,7 +25,7 @@
   font-weight: 700;
   font-size: 96px;
   line-height: 0.88;
-  color: var(--ink-soft);
+  color: var(--text-muted);
   /* Breathes continuously for as long as this screen is mounted — a
      real call can take well over a minute (see LoadingScreen.tsx), so this
      is deliberately not tied to the message-step timer: it must keep moving
@@ -60,19 +60,19 @@
 }
 
 .active {
-  background: var(--paint-white);
-  border: 2px solid var(--ink);
-  color: var(--ink);
+  background: var(--surface-card);
+  border: var(--border-solid);
+  color: var(--text-body);
 }
 
 .next {
-  border: 2px dashed rgba(33, 28, 21, 0.25);
-  color: var(--ink-soft);
+  border: var(--border-rule);
+  color: var(--text-muted);
 }
 
 .pending {
-  border: 2px dashed rgba(33, 28, 21, 0.25);
-  color: var(--ink-soft);
+  border: var(--border-rule);
+  color: var(--text-muted);
   opacity: 0.5;
 }
 
@@ -93,12 +93,12 @@
   flex: 1;
   height: 12px;
   border-radius: var(--radius-tag);
-  border: 2px dashed var(--ink-soft);
+  border: var(--border-dashed);
 }
 
 .filled {
-  border: 2px solid var(--red);
-  background: var(--red);
+  border: 2px solid var(--paint-red);
+  background: var(--paint-red);
 }
 
 /* The currently-active segment keeps a slow pulse once the screen has

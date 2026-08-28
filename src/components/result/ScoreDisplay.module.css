@@ -1,0 +1,100 @@
+.eyebrow {
+  font: var(--meta-2xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.numeralRow {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--text-body);
+  position: relative;
+  display: inline-block;
+}
+
+/*
+ * "desktop" is the default and shrinks to the "mobile" figures below the
+ * app's breakpoint on its own (CSS-only — this component is used from
+ * server-rendered pages like ResultView, which must stay responsive
+ * without a JS viewport check; see Wordmark.module.css for the same
+ * pattern). Pass size="mobile" explicitly only where a smaller size is
+ * wanted regardless of viewport (the landing hero's preview card, which is
+ * always a secondary/smaller context than the real result screen).
+ */
+.desktop {
+  font-size: 144px;
+  line-height: 0.86;
+  margin-top: 10px;
+}
+
+@media (max-width: 760px) {
+  .desktop {
+    font-size: 110px;
+    line-height: 0.88;
+    margin-top: 6px;
+  }
+}
+
+.mobile {
+  font-size: 110px;
+  line-height: 0.88;
+  margin-top: 6px;
+}
+
+.animate {
+  /* tdg-stamp is defined once, globally, in tokens/motion.css. */
+  animation: tdg-stamp var(--dur-stamp) var(--ease-out) both;
+}
+
+.suffix {
+  color: var(--text-muted);
+  vertical-align: super;
+  margin-left: 8px;
+}
+
+.suffixDesktop {
+  font-size: 38px;
+}
+
+@media (max-width: 760px) {
+  .suffixDesktop {
+    font-size: 30px;
+    margin-left: 6px;
+  }
+}
+
+.suffixMobile {
+  font-size: 30px;
+  margin-left: 6px;
+}
+
+.spray {
+  position: absolute;
+  inset: 0;
+  background: var(--texture-spray);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+.verdict {
+  color: var(--text-muted);
+  text-wrap: pretty;
+}
+
+.verdictDesktop {
+  font: var(--body-md);
+  margin-top: 12px;
+}
+
+@media (max-width: 760px) {
+  .verdictDesktop {
+    font: var(--body-sm);
+    margin-top: 10px;
+  }
+}
+
+.verdictMobile {
+  font: var(--body-sm);
+  margin-top: 10px;
+}

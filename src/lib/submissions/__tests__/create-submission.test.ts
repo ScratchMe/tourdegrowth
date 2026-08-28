@@ -1,7 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
+import { DEEP_MODE_QUESTIONS } from "@/content/deep-mode-questions";
 import { QUESTIONS } from "@/lib/scoring/questions";
 import type { AnswerIndex, Answers } from "@/lib/scoring/score";
-import { createSubmissionFlow, type CreateSubmissionDeps } from "../create-submission";
+import {
+  completeDeepDiveFlow,
+  createSubmissionFlow,
+  type CompleteDeepDiveDeps,
+  type CreateSubmissionDeps,
+  type DeepDiveAnswers,
+} from "../create-submission";
 import type { Submission } from "../types";
 
 function fullAnswers(value: AnswerIndex): Answers {
@@ -12,23 +19,17 @@ function fullAnswers(value: AnswerIndex): Answers {
   return answers;
 }
 
-function geminiJson(overrides: Record<string, unknown> = {}) {
-  const body = {
-    headline: "Solid engine, one flat tyre.",
-    strengths: ["Strong acquisition discipline.", "Revenue model is validated."],
-    weaknesses: ["Retention isn't tracked.", "No re-engagement mechanism."],
-    recommendation: "Set up a D7/D30 retention dashboard before anything else.",
-    ...overrides,
-  };
-  return { candidates: [{ content: { parts: [{ text: JSON.stringify(body) }] } }] };
+function fullContextAnswers(value = 0): DeepDiveAnswers {
+  const answers: DeepDiveAnswers = {};
+  DEEP_MODE_QUESTIONS.forEach((q) => {
+    answers[q.id] = value;
+  });
+  return answers;
 }
 
-function fakeDeps(overrides: Partial<CreateSubmissionDeps> = {}): CreateSubmissionDeps & {
-  saved: Submission[];
-} {
+function fakeDeps(overrides: Partial<CreateSubmissionDeps> = {}): CreateSubmissionDeps & { saved: Submission[] } {
   const saved: Submission[] = [];
   return {
-    callGemini: vi.fn(async () => ({ data: geminiJson(), modelUsed: "gemini-3.7-flash" })),
     saveSubmission: vi.fn(async (s: Submission) => {
       saved.push(s);
     }),
@@ -39,20 +40,12 @@ function fakeDeps(overrides: Partial<CreateSubmissionDeps> = {}): CreateSubmissi
   };
 }
 
-const expectedVerdict = {
-  headline: "Solid engine, one flat tyre.",
-  strengths: ["Strong acquisition discipline.", "Revenue model is validated."],
-  weaknesses: ["Retention isn't tracked.", "No re-engagement mechanism."],
-  recommendation: "Set up a D7/D30 retention dashboard before anything else.",
-  modelUsed: "gemini-3.7-flash",
-};
-
-describe("createSubmissionFlow", () => {
-  it("computes the score, gets a verdict for BOTH tones, and saves the full submission", async () => {
+describe("createSubmissionFlow (Quick mode — deterministic, no Gemini)", () => {
+  it("computes the score, resolves both tones' verdicts from the copy library, and saves the submission", async () => {
     const deps = fakeDeps();
 
     const result = await createSubmissionFlow(
-      { answers: fullAnswers(3), tone: "neutral", locale: "en", refId: null },
+      { answers: fullAnswers(0), tone: "neutral", locale: "en", refId: null },
       deps,
     );
 
@@ -60,11 +53,14 @@ describe("createSubmissionFlow", () => {
     expect(result.createdAt).toBe("2026-08-27T12:00:00.000Z");
     expect(result.total).toBe(100);
     expect(result.pillars).toHaveLength(5);
-    expect(result.verdicts.neutral).toEqual(expectedVerdict);
-    expect(result.verdicts.roast).toEqual(expectedVerdict);
+    expect(result.deepDive).toBeNull();
+
+    // Every pillar answered "best" (index 0, 20pts) -> every pillar is "strong".
+    expect(result.verdicts.neutral.pillarSentences.acquisition.length).toBeGreaterThan(0);
+    expect(result.verdicts.roast.pillarSentences.acquisition.length).toBeGreaterThan(0);
+    expect(result.verdicts.neutral.headline.length).toBeGreaterThan(0);
+
     expect(deps.saved).toEqual([result]);
-    // one Gemini call per tone, not one shared call
-    expect(deps.callGemini).toHaveBeenCalledTimes(2);
   });
 
   it("passes refId and the selected tone through untouched", async () => {
@@ -78,54 +74,107 @@ describe("createSubmissionFlow", () => {
     expect(result.locale).toBe("fr");
   });
 
-  it("sends a prompt to Gemini containing the resolved question/answer text at the requested locale, for both tones", async () => {
+  it("resolves the FR verdict in French", async () => {
     const deps = fakeDeps();
-    await createSubmissionFlow({ answers: fullAnswers(3), tone: "neutral", locale: "fr", refId: null }, deps);
-
-    const calls = (deps.callGemini as ReturnType<typeof vi.fn>).mock.calls;
-    expect(calls).toHaveLength(2);
-    for (const call of calls) {
-      const promptSent = call[0] as string;
-      expect(promptSent).toContain("As-tu un canal d'acquisition principal identifié et mesuré ?");
-      expect(promptSent).toContain("Oui, identifié et mesuré");
-    }
+    const result = await createSubmissionFlow(
+      { answers: fullAnswers(2), tone: "neutral", locale: "fr", refId: null },
+      deps,
+    );
+    // Every pillar at its worst band (index 2, 0pts) -> "weak" band sentences, in French.
+    expect(result.verdicts.neutral.pillarSentences.retention).toMatch(/[àâäéèêëïîôöùûüç]/i);
   });
 
-  it("never calls Gemini or saves anything when the answers are incomplete", async () => {
+  it("never saves anything when the answers are incomplete", async () => {
     const deps = fakeDeps();
-    const incomplete: Answers = { "acquisition-1": 2 };
+    const incomplete: Answers = { "acq-1": 1 };
 
     await expect(
       createSubmissionFlow({ answers: incomplete, tone: "neutral", locale: "en", refId: null }, deps),
     ).rejects.toThrow();
 
-    expect(deps.callGemini).not.toHaveBeenCalled();
     expect(deps.saveSubmission).not.toHaveBeenCalled();
   });
+});
 
-  it("propagates a Gemini failure and saves nothing (no partial submission)", async () => {
-    const deps = fakeDeps({
+function geminiJson(overrides: Record<string, unknown> = {}) {
+  const body = {
+    pillarRecommendations: {
+      acquisition: "Specific acquisition recommendation.",
+      activation: "Specific activation recommendation.",
+      retention: "Specific retention recommendation.",
+      referral: "Specific referral recommendation.",
+      revenue: "Specific revenue recommendation.",
+    },
+    priorityAction: "Instrument week-4 retention by cohort this month.",
+    ...overrides,
+  };
+  return { candidates: [{ content: { parts: [{ text: JSON.stringify(body) }] } }] };
+}
+
+function fakeDeepDiveDeps(overrides: Partial<CompleteDeepDiveDeps> = {}): CompleteDeepDiveDeps {
+  return {
+    callGemini: vi.fn(async () => ({ data: geminiJson(), modelUsed: "gemini-3.7-flash" })),
+    ...overrides,
+  };
+}
+
+async function baseSubmission(): Promise<Submission> {
+  const deps = fakeDeps();
+  return createSubmissionFlow({ answers: fullAnswers(1), tone: "neutral", locale: "en", refId: null }, deps);
+}
+
+describe("completeDeepDiveFlow (Deep dive — still calls Gemini)", () => {
+  it("calls Gemini once per tone and returns the enriched verdicts, never touching the score", async () => {
+    const submission = await baseSubmission();
+    const deps = fakeDeepDiveDeps();
+
+    const result = await completeDeepDiveFlow(
+      { submission, contextAnswerIndices: fullContextAnswers(), locale: "en" },
+      deps,
+    );
+
+    expect(result.completed).toBe(true);
+    expect(result.verdicts.neutral.priorityAction).toBe("Instrument week-4 retention by cohort this month.");
+    expect(result.verdicts.roast.priorityAction).toBe("Instrument week-4 retention by cohort this month.");
+    expect(deps.callGemini).toHaveBeenCalledTimes(2);
+    expect(Object.keys(result.contextAnswers)).toHaveLength(DEEP_MODE_QUESTIONS.length);
+  });
+
+  it("sends a prompt containing both the original Quick answers and the Deep dive context answers", async () => {
+    const submission = await baseSubmission();
+    const deps = fakeDeepDiveDeps();
+
+    await completeDeepDiveFlow({ submission, contextAnswerIndices: fullContextAnswers(), locale: "en" }, deps);
+
+    const calls = (deps.callGemini as ReturnType<typeof vi.fn>).mock.calls;
+    for (const call of calls) {
+      const promptSent = call[0] as string;
+      expect(promptSent).toContain("Do you have a primary acquisition channel");
+      expect(promptSent).toContain("What's your primary acquisition channel today?");
+    }
+  });
+
+  it("propagates a Gemini failure without persisting (persistence is the caller's job)", async () => {
+    const submission = await baseSubmission();
+    const deps = fakeDeepDiveDeps({
       callGemini: vi.fn(async () => {
         throw new Error("All Gemini model candidates failed.");
       }),
     });
 
     await expect(
-      createSubmissionFlow({ answers: fullAnswers(2), tone: "neutral", locale: "en", refId: null }, deps),
+      completeDeepDiveFlow({ submission, contextAnswerIndices: fullContextAnswers(), locale: "en" }, deps),
     ).rejects.toThrow(/All Gemini model candidates failed/);
-
-    expect(deps.saveSubmission).not.toHaveBeenCalled();
   });
 
-  it("propagates a malformed Gemini verdict and saves nothing", async () => {
-    const deps = fakeDeps({
-      callGemini: vi.fn(async () => ({ data: geminiJson({ recommendation: undefined }), modelUsed: "m" })),
+  it("propagates a malformed Gemini verdict", async () => {
+    const submission = await baseSubmission();
+    const deps = fakeDeepDiveDeps({
+      callGemini: vi.fn(async () => ({ data: geminiJson({ priorityAction: undefined }), modelUsed: "m" })),
     });
 
     await expect(
-      createSubmissionFlow({ answers: fullAnswers(2), tone: "neutral", locale: "en", refId: null }, deps),
-    ).rejects.toThrow(/recommendation/);
-
-    expect(deps.saveSubmission).not.toHaveBeenCalled();
+      completeDeepDiveFlow({ submission, contextAnswerIndices: fullContextAnswers(), locale: "en" }, deps),
+    ).rejects.toThrow(/priorityAction/);
   });
 });

@@ -1,0 +1,72 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-tag);
+  white-space: nowrap;
+}
+
+/* "desktop" shrinks to the "mobile" figures below the app's breakpoint on
+   its own — see ScoreDisplay.module.css for the rationale (this component
+   is used from server-rendered pages). Pass size="mobile" explicitly only
+   where the smaller figures are wanted regardless of viewport. */
+.desktop {
+  font: var(--meta-md);
+  padding: var(--pad-chip);
+}
+
+@media (max-width: 760px) {
+  .desktop {
+    font: var(--meta-sm);
+    padding: var(--pad-chip-sm);
+  }
+}
+
+.mobile {
+  font: var(--meta-sm);
+  padding: var(--pad-chip-sm);
+}
+
+.normal {
+  border: var(--border-dashed);
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+}
+
+.weak {
+  border: 2px dashed var(--paint-red);
+  background: var(--surface-alert);
+  color: var(--text-alert);
+}
+
+.score {
+  font-weight: 600;
+}
+
+.scoreNormal {
+  color: var(--text-body);
+}
+
+.scoreWeak {
+  color: var(--text-alert);
+}
+
+.label {
+  margin-left: 6px;
+}
+
+/*
+ * Desktop result-screen alignment fix, carried over from the app's original
+ * PillarTag (its own step-12bis note): the five chips stretch to the full
+ * width of the 400px score column instead of staying chip-sized, score
+ * pinned left and pillar name right — matching the same
+ * justify-content:space-between language the OG image already uses for its
+ * pillar rows. Mobile's 2-up grid is untouched (this only applies ≥761px).
+ * Not part of the DS bundle's own PillarChip.jsx, which only ever renders
+ * this component at its own content width.
+ */
+@media (min-width: 761px) {
+  .stretch {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

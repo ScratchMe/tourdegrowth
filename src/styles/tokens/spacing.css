@@ -1,0 +1,45 @@
+/*
+ * Spacing scale, component padding, layout widths — transcribed from
+ * tokens/spacing.css in the Claude Design bundle. Values are literal (not
+ * snapped to a strict grid) on purpose — see the bundle's own note.
+ */
+:root {
+  --space-1: 4px;
+  --space-2: 6px;
+  --space-3: 8px;
+  --space-4: 10px;
+  --space-5: 12px;
+  --space-6: 14px;
+  --space-7: 16px;
+  --space-8: 20px;
+  --space-9: 22px;
+  --space-10: 26px;
+  --space-11: 32px;
+  --space-12: 40px;
+  --space-13: 48px;
+  --space-14: 56px;
+  --space-15: 88px; /* gap between artboard sections */
+
+  /* Component padding, as built */
+  --pad-card: 26px 30px; /* desktop card */
+  --pad-card-mobile: 20px; /* mobile card */
+  --pad-button: 14px 24px; /* desktop button */
+  --pad-button-mobile: 16px; /* mobile button, full width */
+  --pad-chip: 11px 14px; /* pillar chip, desktop */
+  --pad-chip-sm: 10px 12px; /* pillar chip, mobile grid */
+  --pad-tag: 5px 12px; /* mono uppercase tag */
+  --pad-option: 20px; /* answer option */
+
+  /* Layout */
+  --width-mobile: 390px;
+  --width-reading: 760px; /* How it works, prose pages */
+  --width-desktop: 1040px; /* app shell max width */
+  --gutter-desktop: 40px;
+  --gutter-mobile: 20px;
+  --hit-min: 44px; /* never smaller */
+  --hit-option: 64px; /* answer options */
+
+  /* Kept from the app's original spacing scale — still used by the landing
+     header/hero grid, which the DS bundle's boards don't relayout. */
+  --content-max-width: var(--width-desktop);
+}

@@ -1,0 +1,36 @@
+.label {
+  display: block;
+}
+
+.md {
+  font: var(--meta-md);
+}
+
+.sm {
+  font: var(--meta-sm);
+}
+
+.xs {
+  font: var(--meta-xs);
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+.ink {
+  color: var(--text-body);
+}
+
+.alert {
+  color: var(--text-alert);
+}
+
+.uppercase {
+  text-transform: uppercase;
+  letter-spacing: var(--meta-tracking);
+}
+
+.wide {
+  letter-spacing: var(--meta-tracking-wide);
+}

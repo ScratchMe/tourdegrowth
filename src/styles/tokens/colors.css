@@ -1,0 +1,47 @@
+/*
+ * Design tokens — Tour de Growth design system v2 (Claude Design handoff,
+ * "évolutions" bundle). Transcribed exactly from tokens/colors.css in that
+ * bundle; values are byte-identical to the ones this app already shipped
+ * under the old --stone/--ink/--red names (see git history), just renamed
+ * onto the design system's own semantic scale. No color was invented here.
+ */
+:root {
+  /* --- Base palette: paper, ink, road paint --- */
+  --paper-0: #fbf9f2; /* raised card face, the brightest surface */
+  --paper-1: #e7e1d2; /* page / artboard ground */
+  --paper-2: #ded6c2; /* recessed fill: option buttons, meta chips */
+  --paper-3: #cfc7b4; /* desk, the darkest neutral ground */
+
+  --ink-0: #211c15; /* text, every 2px hard border, every hard shadow */
+  --ink-1: #5b5346; /* secondary text, dashed borders, meta labels */
+
+  --paint-red: #d2402c; /* road-marking red: primary action, accents */
+  --paint-red-deep: #a32e1f; /* red text on light grounds (AA on --paper-0) */
+  --paint-red-wash: #f3d9d2; /* soft red surface: weak pillar, problem cards */
+
+  /* --- Semantic aliases: use these in components --- */
+  --surface-page: var(--paper-1);
+  --surface-card: var(--paper-0);
+  --surface-sunken: var(--paper-2);
+  --surface-desk: var(--paper-3);
+  --surface-alert: var(--paint-red-wash);
+
+  --text-body: var(--ink-0);
+  --text-muted: var(--ink-1);
+  --text-inverse: var(--paper-0);
+  --text-alert: var(--paint-red-deep);
+  --text-link: var(--paint-red);
+  --text-link-hover: var(--ink-0);
+
+  --border-hard: var(--ink-0); /* 2px solid — a real edge */
+  --border-soft: var(--ink-1); /* 2px dashed — pending / secondary */
+  --border-alert: var(--paint-red);
+  --border-divider: rgba(33, 28, 21, 0.22); /* 1-2px dashed rules */
+
+  --action-primary-bg: var(--paint-red);
+  --action-primary-text: var(--paper-0);
+  --action-secondary-text: var(--ink-0);
+
+  --focus-ring: var(--ink-0); /* on light grounds */
+  --focus-ring-invert: var(--paint-red); /* on --paper-2 option buttons */
+}

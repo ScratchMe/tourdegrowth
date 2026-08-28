@@ -1,5 +1,5 @@
 .header {
-  border-bottom: 2px dashed var(--line);
+  border-bottom: var(--border-rule);
   padding: 24px 0;
 }
 
@@ -11,6 +11,16 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.navLink {
+  flex-shrink: 0;
 }
 
 .headerCta {
@@ -38,13 +48,13 @@
 
 .bibTag {
   display: inline-flex;
-  font-family: var(--font-mono);
+  font: var(--meta-md);
   font-size: 12.5px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--ink-soft);
-  background: var(--paint-white);
-  border: 2px dashed var(--ink-soft);
+  color: var(--text-muted);
+  background: var(--surface-card);
+  border: var(--border-dashed);
   border-radius: var(--radius-tag);
   padding: 7px 16px;
   transform: rotate(-1.2deg);
@@ -52,23 +62,18 @@
 }
 
 .h1 {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 62px;
-  line-height: 1.03;
+  font: var(--display-hero);
   margin-bottom: 22px;
+  color: var(--text-body);
 }
 
 .h1Accent {
-  color: var(--red);
+  color: var(--paint-red);
 }
 
 .subtitle {
-  font-family: var(--font-body);
-  font-weight: 500;
-  font-size: 17px;
-  line-height: 1.55;
-  color: var(--ink-soft);
+  font: var(--body-lg);
+  color: var(--text-muted);
   max-width: 440px;
   margin-bottom: 30px;
 }
@@ -80,6 +85,27 @@
 
 .heroRight {
   display: flex;
+}
+
+.previewCard {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+
+.previewTopRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.previewTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 6px;
 }
 
 @media (max-width: 760px) {
@@ -105,8 +131,7 @@
   }
 
   .h1 {
-    font-size: 40px;
-    line-height: 1.02;
+    font: var(--display-hero-mobile);
   }
 
   .subtitle {

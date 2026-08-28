@@ -1,0 +1,45 @@
+.card {
+  border-radius: var(--radius-card);
+}
+
+.padDefault {
+  padding: var(--pad-card);
+}
+
+.raised {
+  box-shadow: var(--shadow-card);
+}
+
+.panel {
+  box-shadow: var(--shadow-panel);
+}
+
+.flat {
+  box-shadow: var(--shadow-none);
+}
+
+.paper {
+  background: var(--surface-card);
+  border: var(--border-solid);
+}
+
+.sunken {
+  background: var(--surface-sunken);
+  border: var(--border-solid);
+}
+
+.alert {
+  background: var(--surface-alert);
+  border: 2px solid var(--border-alert);
+}
+
+.outlineAlert {
+  background: var(--surface-card);
+  border: 2px dashed var(--border-alert);
+}
+
+@media (max-width: 760px) {
+  .padDefault {
+    padding: var(--pad-card-mobile);
+  }
+}

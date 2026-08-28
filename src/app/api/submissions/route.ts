@@ -1,17 +1,21 @@
 import { NextResponse } from "next/server";
-import { callGeminiWithFallback } from "@/lib/gemini/client";
 import type { Locale } from "@/lib/i18n/locale";
 import type { Tone } from "@/lib/quiz/tone";
 import type { AnswerIndex, Answers } from "@/lib/scoring/score";
 import { createSubmissionFlow } from "@/lib/submissions/create-submission";
 import { saveSubmission } from "@/lib/submissions/repository";
 
-// Runs on Vercel as a Node.js Route Handler — this is where the Gemini call
-// + Firestore write happen, replacing the Supabase Edge Function the SPEC
-// originally called for (see CLAUDE.md: moved off Supabase mid-build).
+// Runs on Vercel as a Node.js Route Handler. Originally this is where the
+// Gemini call + Firestore write happened (replacing the Supabase Edge
+// Function the SPEC originally called for — see CLAUDE.md, moved off
+// Supabase mid-build). SPEC-ADDENDUM-01.md §0 removed the Gemini call from
+// this path entirely: Quick mode's verdict is now a deterministic lookup
+// (see createSubmissionFlow), so this route is now just validation +
+// scoring + a single Firestore write. The Gemini call now lives in
+// `[id]/deep-dive/route.ts` instead.
 
 function isAnswerIndex(value: unknown): value is AnswerIndex {
-  return value === 0 || value === 1 || value === 2 || value === 3;
+  return value === 0 || value === 1 || value === 2;
 }
 
 function isAnswers(value: unknown): value is Answers {
@@ -42,7 +46,7 @@ export async function POST(request: Request): Promise<Response> {
   const { answers, tone, locale, refId } = (body ?? {}) as Record<string, unknown>;
 
   if (!isAnswers(answers)) {
-    return NextResponse.json({ error: "answers must be a map of questionId -> 0|1|2|3." }, { status: 400 });
+    return NextResponse.json({ error: "answers must be a map of questionId -> 0|1|2." }, { status: 400 });
   }
   if (!isTone(tone)) {
     return NextResponse.json({ error: 'tone must be "neutral" or "roast".' }, { status: 400 });
@@ -54,17 +58,10 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({ error: "refId must be a string or null." }, { status: 400 });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    console.error("GEMINI_API_KEY is not configured.");
-    return NextResponse.json({ error: "Server is not configured to score submissions yet." }, { status: 500 });
-  }
-
   try {
     const submission = await createSubmissionFlow(
       { answers, tone, locale, refId: (refId as string | null | undefined) ?? null },
       {
-        callGemini: (prompt) => callGeminiWithFallback(prompt, apiKey),
         saveSubmission,
         generateId: () => crypto.randomUUID(),
         now: () => new Date(),

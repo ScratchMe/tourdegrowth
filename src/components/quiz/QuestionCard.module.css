@@ -1,0 +1,42 @@
+.card {
+  background: var(--surface-card);
+  border: var(--border-solid);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+
+/* "desktop" shrinks to the "mobile" figures below the app's breakpoint on
+   its own — see ScoreDisplay.module.css for the rationale. */
+.desktop {
+  padding: 30px 32px;
+}
+
+@media (max-width: 760px) {
+  .desktop {
+    padding: 22px 20px;
+  }
+}
+
+.mobile {
+  padding: 22px 20px;
+}
+
+.question {
+  color: var(--text-body);
+  margin: 0;
+  text-wrap: pretty;
+}
+
+.questionDesktop {
+  font: var(--title-question-lg);
+}
+
+@media (max-width: 760px) {
+  .questionDesktop {
+    font: var(--title-question-sm);
+  }
+}
+
+.questionMobile {
+  font: var(--title-question-sm);
+}

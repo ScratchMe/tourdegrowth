@@ -1,5 +1,5 @@
 import { getDb } from "@/lib/firebase/admin";
-import type { Submission } from "./types";
+import type { DeepDiveResult, Submission } from "./types";
 
 const COLLECTION = "submissions";
 
@@ -10,6 +10,15 @@ export async function saveSubmission(submission: Submission): Promise<void> {
 export async function getSubmissionById(id: string): Promise<Submission | null> {
   const doc = await getDb().collection(COLLECTION).doc(id).get();
   return doc.exists ? (doc.data() as Submission) : null;
+}
+
+/**
+ * Persists the Deep dive result onto an already-existing submission
+ * (SPEC-ADDENDUM-01.md §2.7) — the score/verdicts/answers written by
+ * `saveSubmission` are never rewritten here, only the `deepDive` field.
+ */
+export async function saveDeepDive(id: string, deepDive: DeepDiveResult): Promise<void> {
+  await getDb().collection(COLLECTION).doc(id).update({ deepDive });
 }
 
 /**

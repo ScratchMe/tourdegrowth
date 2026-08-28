@@ -52,7 +52,7 @@ describe("isComplete", () => {
 
   it("is true once every question has an answer", () => {
     const full: Answers = {};
-    for (const q of QUESTIONS) full[q.id] = 3;
+    for (const q of QUESTIONS) full[q.id] = 2;
     expect(isComplete(full)).toBe(true);
   });
 });

@@ -1,0 +1,70 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: var(--radius-button);
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition:
+    box-shadow var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.md {
+  font: var(--label-button);
+  padding: var(--pad-button);
+  min-height: var(--hit-min);
+}
+
+.lg {
+  font: var(--label-button-lg);
+  padding: var(--pad-button-mobile);
+  min-height: var(--hit-min);
+}
+
+.primary {
+  background: var(--action-primary-bg);
+  color: var(--action-primary-text);
+  border: 2px solid var(--paint-red);
+}
+
+.secondary {
+  background: transparent;
+  color: var(--action-secondary-text);
+  border: var(--border-solid);
+}
+
+.quiet {
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  border-radius: 0;
+  min-height: auto;
+  padding: 8px 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+/*
+ * Not part of the DS bundle's Button (which only defines md/lg) — kept from
+ * the app's original "compact" size for the one place that still needs it:
+ * the landing/quiz header's inline CTA, which sits next to the wordmark in
+ * a 24px-padding header and was always visually smaller than a normal
+ * inline button. A real, already-shipped need, not a new design decision.
+ */
+.compact {
+  font-size: 13px;
+  padding: 11px 20px;
+  min-height: auto;
+}

@@ -1,43 +1,14 @@
 /*
- * Design tokens — transcribed exactly from design/DESIGN-BRIEF.md.
- * Do not "improve" these values without updating the brief; the brief is
- * the source of truth for the visual system, this file is its CSS form.
+ * Design tokens — Tour de Growth design system v2 (Claude Design "évolutions"
+ * bundle, see CLAUDE.md). Do not "improve" these values without updating the
+ * bundle; it is the source of truth for the visual system, this file (and
+ * the imports below) is its CSS form.
  */
-:root {
-  /* Colors */
-  --stone: #e7e1d2;
-  --stone-2: #ded6c2;
-  --ink: #211c15;
-  --ink-soft: #5b5346;
-  --red: #d2402c;
-  --red-ink: #a32e1f; /* small red text only (<=14px) — approved in SPEC.md §12 */
-  --red-soft: #f3d9d2;
-  --paint-white: #fbf9f2;
-  --line: rgba(33, 28, 21, 0.22);
-
-  /* Radii — never 0, never pill */
-  --radius-tag: 4px;
-  --radius-button: 6px;
-  --radius-subcard: 8px;
-  --radius-card: 10px;
-
-  /* Spacing rhythm */
-  --space-1: 8px;
-  --space-2: 10px;
-  --space-3: 12px;
-  --space-4: 14px;
-  --space-5: 20px;
-  --space-6: 22px;
-  --space-7: 26px;
-  --space-8: 32px;
-  --space-9: 44px;
-
-  --content-max-width: 1040px;
-
-  /* Elevation — hard shadow, zero blur (sticker/ticket, not Material) */
-  --shadow-card: 7px 7px 0 var(--ink);
-  --shadow-card-roast: 7px 7px 0 var(--red);
-}
+@import "../styles/tokens/colors.css";
+@import "../styles/tokens/typography.css";
+@import "../styles/tokens/spacing.css";
+@import "../styles/tokens/shape.css";
+@import "../styles/tokens/motion.css";
 
 *,
 *::before,
@@ -53,19 +24,18 @@ body {
 }
 
 body {
-  background-color: var(--stone);
-  background-image: radial-gradient(circle at 18% 14%, rgba(255, 255, 255, 0.45), transparent 42%),
-    radial-gradient(circle at 86% 72%, rgba(0, 0, 0, 0.05), transparent 46%);
-  color: var(--ink);
-  font-family: var(--font-body), system-ui, sans-serif;
+  background-color: var(--surface-page);
+  background-image: var(--ground-lift);
+  color: var(--text-body);
+  font-family: var(--font-ui), system-ui, sans-serif;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Every interactive element must show a visible focus ring (DESIGN-BRIEF.md §Focus). */
+/* Every interactive element must show a visible focus ring. */
 :focus-visible {
-  outline: 3px solid var(--ink);
-  outline-offset: 3px;
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
 }
 
 @media (prefers-reduced-motion: reduce) {
