@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { DEEP_MODE_QUESTIONS } from "@/content/deep-mode-questions";
+import { FREE_CONTEXT_MAX_LENGTH } from "@/content/free-context";
 import { callGeminiWithFallback } from "@/lib/gemini/client";
 import type { Locale } from "@/lib/i18n/locale";
 import { completeDeepDiveFlow, type DeepDiveAnswers } from "@/lib/submissions/create-submission";
@@ -32,7 +33,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const { contextAnswers, locale } = (body ?? {}) as Record<string, unknown>;
+  const { contextAnswers, locale, freeContext } = (body ?? {}) as Record<string, unknown>;
 
   if (!isDeepDiveAnswers(contextAnswers)) {
     return NextResponse.json(
@@ -43,6 +44,14 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   if (!isLocaleValue(locale)) {
     return NextResponse.json({ error: 'locale must be "en" or "fr".' }, { status: 400 });
   }
+  if (freeContext !== undefined && freeContext !== null && typeof freeContext !== "string") {
+    return NextResponse.json({ error: "freeContext must be a string, null, or omitted." }, { status: 400 });
+  }
+  // SPEC-ADDENDUM-02.md §1.4, non-negotiable: truncate server-side even
+  // though the textarea already enforces this client-side — never trust a
+  // client-only limit for text that goes straight into a Gemini prompt.
+  const truncatedFreeContext =
+    typeof freeContext === "string" ? freeContext.slice(0, FREE_CONTEXT_MAX_LENGTH) : null;
 
   const submission = await getSubmissionById(id);
   if (!submission) {
@@ -61,7 +70,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
 
   try {
     const deepDive = await completeDeepDiveFlow(
-      { submission, contextAnswerIndices: contextAnswers, locale },
+      { submission, contextAnswerIndices: contextAnswers, locale, freeContext: truncatedFreeContext },
       { callGemini: (prompt) => callGeminiWithFallback(prompt, apiKey) },
     );
 

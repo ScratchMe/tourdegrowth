@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { cookies, headers } from "next/headers";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import { Button } from "@/components/core/Button";
@@ -7,7 +6,7 @@ import { Card } from "@/components/core/Card";
 import { QUESTIONS } from "@/content/copy-library";
 import { HOW_IT_WORKS } from "@/content/how-it-works";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
-import { LOCALE_COOKIE, resolveLocale } from "@/lib/i18n/locale";
+import { resolveRequestLocale } from "@/lib/i18n/resolve-request-locale";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
@@ -22,12 +21,7 @@ export const metadata: Metadata = {
  * way not-found.tsx and the sample result page do, no client JS needed.
  */
 export default async function HowItWorksPage() {
-  const [cookieStore, headerList] = await Promise.all([cookies(), headers()]);
-  const locale = resolveLocale({
-    queryLang: null,
-    cookieLocale: cookieStore.get(LOCALE_COOKIE)?.value ?? null,
-    acceptLanguage: headerList.get("accept-language"),
-  });
+  const locale = await resolveRequestLocale();
 
   return (
     <>

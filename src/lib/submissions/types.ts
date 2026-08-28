@@ -62,6 +62,14 @@ export interface DeepDiveResult {
   /** questionId -> the selected option's resolved contextLabel, at the locale the Deep dive was completed in. */
   contextAnswers: Record<string, string>;
   /**
+   * The optional free-text field from the Deep dive's last screen
+   * (SPEC-ADDENDUM-02.md §1) — already truncated to 500 characters, `null`
+   * when left empty/skipped. Stored verbatim (not re-derived from the
+   * prompt) for transparency/debugging; never re-sent anywhere as an
+   * instruction — see gemini/prompt.ts's FREE_CONTEXT_INSTRUCTION.
+   */
+  freeContext: string | null;
+  /**
    * BOTH tones, same rationale as the Quick `verdicts` field: the result
    * page's tone switch must stay an instant client-side swap even after a
    * Deep dive, so both are generated once at completion time.

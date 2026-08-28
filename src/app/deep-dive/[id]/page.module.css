@@ -40,6 +40,16 @@
   justify-content: space-between;
 }
 
+.freeContextPitch {
+  font: var(--body-sm);
+  color: var(--text-muted);
+}
+
+.freeContextActions {
+  display: flex;
+  gap: 12px;
+}
+
 .errorCard {
   background: var(--surface-card);
   border: 2px solid var(--paint-red);

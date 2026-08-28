@@ -96,6 +96,16 @@ export const UI_STRINGS = {
     exampleQuestionLabel: { en: "Example question:", fr: "Exemple de question :" },
   },
 
+  /** `/glossary` + `/glossary/[term]` (SPEC-ADDENDUM-02.md §3.1) — the term/definition content itself lives in content/glossary.ts, this is just page chrome. */
+  glossaryPage: {
+    indexTitle: { en: "Growth glossary", fr: "Glossaire growth" },
+    indexIntro: {
+      en: "Plain-English definitions for the growth vocabulary used throughout Tour de Growth.",
+      fr: "Des définitions simples pour le vocabulaire growth utilisé dans Tour de Growth.",
+    },
+    backToIndex: { en: "← Glossary", fr: "← Glossaire" },
+  },
+
   /**
    * Questionnaire chrome (DESIGN-BRIEF.md §05) — question/answer copy itself
    * lives in content/copy-library.ts, not here. `{n}`/`{pillar}`/`{m}` are
