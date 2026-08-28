@@ -5,6 +5,7 @@ import Script from "next/script";
 import type { ReactNode } from "react";
 import { LOCALE_COOKIE, resolveLocale } from "@/lib/i18n/locale";
 import { LocaleProvider } from "@/lib/i18n/locale-context";
+import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 // SPEC.md §8: GoatCounter — free, cookie-less pageview analytics, "already in
@@ -46,8 +47,26 @@ const stardos = Stardos_Stencil({
 });
 
 export const metadata: Metadata = {
+  // Needed for Next.js to resolve absolute OG/canonical URLs correctly
+  // (was missing — silent build warning until SPEC-ADDENDUM-02.md's SEO
+  // pass made it worth fixing alongside everything else here).
+  metadataBase: new URL(SITE_URL),
   title: "Tour de Growth",
   description: "A guided AARRR growth check-up — scored, explained, and built to share.",
+  // SPEC-ADDENDUM-02.md §4 — SVG first (crisp at any size, what modern
+  // browsers prefer), PNGs as the fallback chain for tab-icon contexts that
+  // don't support SVG. No favicon.ico: none was delivered, and every
+  // browser new enough to be in this product's audience accepts an SVG or
+  // PNG <link rel="icon">.
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon-16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-48.png", sizes: "48x48", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {

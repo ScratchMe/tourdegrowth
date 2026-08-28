@@ -33,6 +33,21 @@
   --text-link: var(--paint-red);
   --text-link-hover: var(--ink-0);
 
+  /*
+   * SPEC-ADDENDUM-02.md §2.1 names a fainter tone than --text-muted for the
+   * single line of "Built by Antoine Berthaud" credit in the score card's
+   * footer — genuinely the point of that section ("volontairement sobre",
+   * "trop insister ici nuirait à sa crédibilité"), so reusing --text-muted
+   * (already doing meta-label/eyebrow duty everywhere else) would
+   * undersell how quiet this specific line needs to be. Not in the v2
+   * design system bundle (no visual deliverable shipped with addendum-02),
+   * so defined here rather than guessed at inline: a translucent --ink-0
+   * rather than a new flat hex, so it stays visually related to the ink
+   * scale instead of introducing an unrelated grey.
+   */
+  --ink-faint: rgba(33, 28, 21, 0.45);
+  --text-faint: var(--ink-faint);
+
   --border-hard: var(--ink-0); /* 2px solid — a real edge */
   --border-soft: var(--ink-1); /* 2px dashed — pending / secondary */
   --border-alert: var(--paint-red);

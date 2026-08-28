@@ -65,6 +65,34 @@
   box-shadow: var(--shadow-card-roast) !important;
 }
 
+/* SPEC-ADDENDUM-02.md §2.1 — deliberately the quietest text on the screen. */
+.builtByCredit {
+  font: 500 12px/1.4 var(--font-ui);
+  color: var(--text-faint);
+  margin-top: 14px;
+}
+
+.builtByCredit a {
+  color: inherit;
+}
+
+/* SPEC-ADDENDUM-02.md §2.2 — a real card, but flat (no hard shadow) so it
+   doesn't compete with Priority move just above it. */
+.antoineCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.antoineBio {
+  font: var(--body-md);
+  color: var(--text-body);
+}
+
+.antoineBio a {
+  color: var(--text-link);
+}
+
 .layout {
   display: flex;
   flex-direction: column;

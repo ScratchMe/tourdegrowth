@@ -7,16 +7,18 @@ import { MetaLabel } from "@/components/brand/MetaLabel";
 import { ModeTag } from "@/components/brand/ModeTag";
 import { Button } from "@/components/core/Button";
 import { AnswerOption } from "@/components/quiz/AnswerOption";
+import { FreeContextField } from "@/components/quiz/FreeContextField";
 import { QuestionCard } from "@/components/quiz/QuestionCard";
 import { StageProgress } from "@/components/quiz/StageProgress";
 import { LoadingScreen } from "@/app/quiz/LoadingScreen";
 import { DEEP_MODE_QUESTIONS } from "@/content/deep-mode-questions";
+import { FREE_CONTEXT, FREE_CONTEXT_MAX_LENGTH } from "@/content/free-context";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { PILLARS } from "@/lib/scoring/pillars";
 import styles from "./page.module.css";
 
-type Phase = "answering" | "loading" | "error";
+type Phase = "answering" | "freeContext" | "loading" | "error";
 
 const QUESTION_COUNT = DEEP_MODE_QUESTIONS.length; // 10
 
@@ -27,7 +29,12 @@ const QUESTION_COUNT = DEEP_MODE_QUESTIONS.length; // 10
  * questionnaire (StageProgress/QuestionCard/AnswerOption) — only the
  * progress label and question count differ.
  *
- * Unlike the Quick questionnaire, answers here are NOT persisted to
+ * SPEC-ADDENDUM-02.md §1 adds an 11th, final screen: an optional free-text
+ * context field, "un écran de plus dans la même séquence" rather than a
+ * different kind of step — same StageProgress (now fully filled, since all
+ * 10 pillar questions are done), same QuestionCard-as-heading treatment.
+ *
+ * Unlike the Quick questionnaire, nothing here is persisted to
  * localStorage: this is a short, optional bonus flow (not the core 15-
  * question promise SPEC.md §4 makes about never losing progress), so a
  * reload simply restarts it — a low-cost trade-off for not adding a second
@@ -42,6 +49,7 @@ export default function DeepDivePage() {
 
   const [phase, setPhase] = useState<Phase>("answering");
   const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [freeContext, setFreeContext] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -53,7 +61,7 @@ export default function DeepDivePage() {
     setAnswers(next);
 
     if (currentIndex === QUESTION_COUNT - 1) {
-      void submit(next);
+      setPhase("freeContext");
     } else {
       setCurrentIndex(currentIndex + 1);
     }
@@ -63,14 +71,21 @@ export default function DeepDivePage() {
     setCurrentIndex((i) => Math.max(i - 1, 0));
   }
 
-  async function submit(finalAnswers: Record<string, number>) {
+  async function submit(finalAnswers: Record<string, number>, finalFreeContext: string) {
     setSubmitError(null);
     setPhase("loading");
     try {
       const res = await fetch(`/api/submissions/${params.id}/deep-dive`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contextAnswers: finalAnswers, locale }),
+        body: JSON.stringify({
+          contextAnswers: finalAnswers,
+          locale,
+          // Trimmed client-side too so an all-whitespace field behaves like
+          // "skipped" rather than sending a technically-non-empty string —
+          // the server still truncates/validates independently either way.
+          freeContext: finalFreeContext.trim() || null,
+        }),
       });
       if (!res.ok) {
         const body: unknown = await res.json().catch(() => null);
@@ -133,6 +148,42 @@ export default function DeepDivePage() {
           </>
         )}
 
+        {phase === "freeContext" && (
+          <>
+            {/* All 5 pillar segments are done at this point — this screen is
+                the extra 11th step, not a 6th pillar, so `current` sits one
+                past `total` (StageProgress renders every n < current as
+                "done"). */}
+            <StageProgress current={PILLARS.length + 1} total={PILLARS.length} />
+
+            <QuestionCard>{tc(FREE_CONTEXT.label, locale)}</QuestionCard>
+
+            <p className={styles.freeContextPitch}>{tc(FREE_CONTEXT.pitch, locale)}</p>
+
+            <FreeContextField
+              value={freeContext}
+              onChange={setFreeContext}
+              maxLength={FREE_CONTEXT_MAX_LENGTH}
+              placeholder={tc(FREE_CONTEXT.placeholder, locale)}
+              data-testid="free-context-textarea"
+            />
+
+            <div className={styles.footer}>
+              <Button variant="quiet" data-testid="back-button" onClick={() => setPhase("answering")}>
+                {tc(t.backButton, locale)}
+              </Button>
+              <div className={styles.freeContextActions}>
+                <Button variant="secondary" data-testid="skip-button" onClick={() => void submit(answers, "")}>
+                  {tc(FREE_CONTEXT.skip, locale)}
+                </Button>
+                <Button data-testid="submit-button" onClick={() => void submit(answers, freeContext)}>
+                  {tc(FREE_CONTEXT.submit, locale)}
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
+
         {phase === "loading" && <LoadingScreen locale={locale} variant="deep" />}
 
         {phase === "error" && (
@@ -143,7 +194,7 @@ export default function DeepDivePage() {
             <h2 className={styles.errorTitle}>{tc(t.errorTitle, locale)}</h2>
             <p className={styles.errorBody}>{tc(t.errorBody, locale)}</p>
             {submitError && <p className={styles.errorDetail}>{submitError}</p>}
-            <Button size="lg" fullWidth data-testid="retry-button" onClick={() => void submit(answers)}>
+            <Button size="lg" fullWidth data-testid="retry-button" onClick={() => void submit(answers, freeContext)}>
               {tc(t.errorRetry, locale)}
             </Button>
           </div>

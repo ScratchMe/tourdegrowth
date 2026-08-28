@@ -2,6 +2,7 @@ import { tc } from "@/lib/i18n/dictionary";
 import type { Locale } from "@/lib/i18n/locale";
 import { QUESTIONS } from "@/content/copy-library";
 import { DEEP_MODE_QUESTIONS } from "@/content/deep-mode-questions";
+import { FREE_CONTEXT_MAX_LENGTH } from "@/content/free-context";
 import { buildDeepDivePrompt, type PromptAnswer } from "@/lib/gemini/prompt";
 import { extractGeminiText } from "@/lib/gemini/response";
 import type { Tone } from "@/lib/quiz/tone";
@@ -75,6 +76,14 @@ export interface CompleteDeepDiveInput {
   contextAnswerIndices: DeepDiveAnswers;
   /** The locale to generate the Deep dive verdict in — normally the submission's own, but not forced to be. */
   locale: Locale;
+  /**
+   * Optional free-text field (SPEC-ADDENDUM-02.md §1) — clamped to
+   * `FREE_CONTEXT_MAX_LENGTH` again here regardless of what the caller
+   * already did (the API route truncates too; a non-negotiable this
+   * important is worth enforcing at more than one layer, never trusting a
+   * single boundary alone).
+   */
+  freeContext?: string | null;
 }
 
 export interface CompleteDeepDiveDeps {
@@ -119,9 +128,10 @@ async function getDeepDiveVerdictForTone(
   weakestPillar: Pillar,
   quickAnswers: PromptAnswer[],
   contextAnswers: PromptAnswer[],
+  freeContext: string | undefined,
   callGemini: CompleteDeepDiveDeps["callGemini"],
 ): Promise<DeepDiveVerdict> {
-  const prompt = buildDeepDivePrompt({ locale, tone, pillars, total, weakestPillar, quickAnswers, contextAnswers });
+  const prompt = buildDeepDivePrompt({ locale, tone, pillars, total, weakestPillar, quickAnswers, contextAnswers, freeContext });
   const { data, modelUsed } = await callGemini(prompt);
   return parseDeepDiveVerdict(extractGeminiText(data), modelUsed);
 }
@@ -147,14 +157,28 @@ export async function completeDeepDiveFlow(
   const quickAnswers = resolveQuickPromptAnswers(answers, locale);
   const contextAnswers = resolveContextPromptAnswers(contextAnswerIndices, locale);
 
+  const trimmedFreeContext = input.freeContext?.trim().slice(0, FREE_CONTEXT_MAX_LENGTH);
+  const freeContextForPrompt = trimmedFreeContext ? trimmedFreeContext : undefined;
+
   const forTone = (tone: Tone) =>
-    getDeepDiveVerdictForTone(tone, locale, pillars, total, weakestPillar, quickAnswers, contextAnswers, deps.callGemini);
+    getDeepDiveVerdictForTone(
+      tone,
+      locale,
+      pillars,
+      total,
+      weakestPillar,
+      quickAnswers,
+      contextAnswers,
+      freeContextForPrompt,
+      deps.callGemini,
+    );
 
   const [neutral, roast] = await Promise.all([forTone("neutral"), forTone("roast")]);
 
   return {
     completed: true,
     contextAnswers: resolveContextAnswerLabels(contextAnswerIndices, locale),
+    freeContext: freeContextForPrompt ?? null,
     verdicts: { neutral, roast },
   };
 }

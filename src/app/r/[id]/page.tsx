@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { cookies, headers } from "next/headers";
 import { notFound } from "next/navigation";
-import { LOCALE_COOKIE, resolveLocale } from "@/lib/i18n/locale";
+import { resolveRequestLocale } from "@/lib/i18n/resolve-request-locale";
 import { getSampleVerdict, SAMPLE_RESULT } from "@/lib/submissions/sample";
 import { getSubmissionById } from "@/lib/submissions/repository";
 import { ResultView } from "./ResultView";
@@ -18,6 +17,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       id === "sample"
         ? "A sample Tour de Growth result — see what a shareable AARRR growth score looks like."
         : "Your AARRR growth score, scored and explained.",
+    // SPEC-ADDENDUM-02.md §3.3, non-negotiable: individual result pages
+    // (this whole route, sample included — see CLAUDE.md) never get
+    // indexed. A `noindex` meta tag, not a robots.txt disallow: shared
+    // results get real inbound links from the growth loop itself, and
+    // blocking the crawl would stop Google from ever seeing this tag,
+    // which can leave a linked-but-unindexable page showing up with no
+    // snippet anyway — `noindex` alone is the correct way to keep a page
+    // truly out of the index while it's still linked to.
+    robots: { index: false, follow: true },
   };
 }
 
@@ -31,12 +39,7 @@ export default async function ResultPage({ params }: PageProps) {
     // the proxy has already folded ?lang= into the cookie by this point) so
     // the fixed sample verdict's language matches everything else on first
     // paint, without needing a client fetch just for demo copy.
-    const [cookieStore, headerList] = await Promise.all([cookies(), headers()]);
-    const locale = resolveLocale({
-      queryLang: null,
-      cookieLocale: cookieStore.get(LOCALE_COOKIE)?.value ?? null,
-      acceptLanguage: headerList.get("accept-language"),
-    });
+    const locale = await resolveRequestLocale();
 
     return (
       <ResultView

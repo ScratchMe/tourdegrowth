@@ -14,6 +14,7 @@ import { PillarChip } from "@/components/result/PillarChip";
 import { PriorityMove } from "@/components/result/PriorityMove";
 import { ScoreDisplay } from "@/components/result/ScoreDisplay";
 import { StampedPillar } from "@/components/result/StampedPillar";
+import { ANTOINE_LINKS, DEEP_DIVE_CREDIT, QUICK_CREDIT } from "@/content/antoine-credit";
 import { HOW_IT_WORKS } from "@/content/how-it-works";
 import { trackEvent } from "@/lib/analytics/goatcounter";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
@@ -140,6 +141,17 @@ export function ResultView({
                 label={tc(UI_STRINGS.scoreCard.label, locale)}
                 verdict={verdict.headline}
               />
+              {/* SPEC-ADDENDUM-02.md §2.1: sober "built by" credit, in the
+                  score card's own footer — stays visible on Deep dive
+                  results too (§2.3), additive to the §2.2 card below, not
+                  replaced by it. */}
+              <p className={styles.builtByCredit}>
+                {tc(QUICK_CREDIT.prefix, locale)}
+                <a href={ANTOINE_LINKS.cv} target="_blank" rel="noopener noreferrer">
+                  {QUICK_CREDIT.name}
+                </a>
+                {tc(QUICK_CREDIT.suffix, locale)}
+              </p>
             </Card>
 
             <div className={styles.pillarGrid}>
@@ -201,7 +213,26 @@ export function ResultView({
             </section>
 
             {deepVerdict ? (
-              <PriorityMove label={tc(dd.priorityMoveLabel, locale)}>{deepVerdict.priorityAction}</PriorityMove>
+              <>
+                <PriorityMove label={tc(dd.priorityMoveLabel, locale)}>{deepVerdict.priorityAction}</PriorityMove>
+                {/* SPEC-ADDENDUM-02.md §2.2: the assertive placement — real
+                    engagement (25 answers, maybe free text) earns a real
+                    card, not just the §2.1 footer line. No hard shadow, so
+                    it doesn't compete with Priority move just above it. */}
+                <Card tone="paper" elevation="flat" className={styles.antoineCard}>
+                  <MetaLabel wide>{tc(DEEP_DIVE_CREDIT.eyebrow, locale)}</MetaLabel>
+                  <p className={styles.antoineBio}>
+                    {tc(DEEP_DIVE_CREDIT.bio, locale)}
+                    <a href={ANTOINE_LINKS.cv} target="_blank" rel="noopener noreferrer">
+                      {tc(DEEP_DIVE_CREDIT.cvLinkText, locale)}
+                    </a>
+                    {" · "}
+                    <a href={ANTOINE_LINKS.linkedin} target="_blank" rel="noopener noreferrer">
+                      {tc(DEEP_DIVE_CREDIT.linkedinLinkText, locale)}
+                    </a>
+                  </p>
+                </Card>
+              </>
             ) : !isSample && id ? (
               // Locked preview of the SAME card, same slot: completing the
               // Deep dive doesn't add a new element to the layout, it fills

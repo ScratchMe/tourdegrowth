@@ -11,8 +11,29 @@ import { ScoreDisplay } from "@/components/result/ScoreDisplay";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { saveRefId } from "@/lib/quiz/storage";
+import { SITE_URL } from "@/lib/site";
 import { SAMPLE_RESULT } from "@/lib/submissions/sample";
 import styles from "./page.module.css";
+
+/**
+ * SPEC-ADDENDUM-02.md §3.2: `WebApplication`, not `Person` (unlike the CV
+ * site — Tour de Growth is the product being described here, not Antoine).
+ * `aggregateRating` deliberately omitted per the addendum itself: "une fois
+ * qu'il y aura un volume d'usage suffisant pour l'alimenter honnêtement" —
+ * add it once there's real usage data, not before. One static object, not
+ * localized: structured data for search engines is conventionally
+ * single-language regardless of the page's own bilingual UI.
+ */
+const WEB_APPLICATION_SCHEMA = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "Tour de Growth",
+  description:
+    "A guided AARRR growth check-up for founders and PMs — a scored, shareable growth assessment across Acquisition, Activation, Retention, Referral and Revenue.",
+  url: SITE_URL,
+  applicationCategory: "BusinessApplication",
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+};
 
 // Landing page — DESIGN-BRIEF.md screen 01. Nav links ("Examples", "Roast
 // mode") stay cut from the MVP per SPEC.md §12 — SPEC-ADDENDUM-01.md §1.3
@@ -32,6 +53,11 @@ export default function LandingPage() {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger -- static, developer-authored JSON, not user input
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(WEB_APPLICATION_SCHEMA) }}
+      />
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <Wordmark />

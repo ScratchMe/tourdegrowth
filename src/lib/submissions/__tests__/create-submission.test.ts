@@ -154,6 +154,57 @@ describe("completeDeepDiveFlow (Deep dive — still calls Gemini)", () => {
     }
   });
 
+  it("stores the free-text context on the result and forwards it into the Gemini prompt (SPEC-ADDENDUM-02.md §1)", async () => {
+    const submission = await baseSubmission();
+    const deps = fakeDeepDiveDeps();
+
+    const result = await completeDeepDiveFlow(
+      {
+        submission,
+        contextAnswerIndices: fullContextAnswers(),
+        locale: "en",
+        freeContext: "We sell to accounting firms, long sales cycle.",
+      },
+      deps,
+    );
+
+    expect(result.freeContext).toBe("We sell to accounting firms, long sales cycle.");
+    const calls = (deps.callGemini as ReturnType<typeof vi.fn>).mock.calls;
+    for (const call of calls) {
+      expect(call[0] as string).toContain("We sell to accounting firms, long sales cycle.");
+    }
+  });
+
+  it("stores null and sends no free-context block when freeContext is omitted, empty, or whitespace-only", async () => {
+    const submission = await baseSubmission();
+
+    for (const value of [undefined, null, "", "   "]) {
+      const deps = fakeDeepDiveDeps();
+      const result = await completeDeepDiveFlow(
+        { submission, contextAnswerIndices: fullContextAnswers(), locale: "en", freeContext: value },
+        deps,
+      );
+      expect(result.freeContext).toBeNull();
+      const calls = (deps.callGemini as ReturnType<typeof vi.fn>).mock.calls;
+      for (const call of calls) {
+        expect(call[0] as string).not.toContain("User-provided business context");
+      }
+    }
+  });
+
+  it("truncates an over-long freeContext defensively, even if the API route's own truncation were bypassed", async () => {
+    const submission = await baseSubmission();
+    const deps = fakeDeepDiveDeps();
+    const tooLong = "x".repeat(600);
+
+    const result = await completeDeepDiveFlow(
+      { submission, contextAnswerIndices: fullContextAnswers(), locale: "en", freeContext: tooLong },
+      deps,
+    );
+
+    expect(result.freeContext).toHaveLength(500);
+  });
+
   it("propagates a Gemini failure without persisting (persistence is the caller's job)", async () => {
     const submission = await baseSubmission();
     const deps = fakeDeepDiveDeps({
