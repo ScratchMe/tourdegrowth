@@ -200,7 +200,20 @@ export function ResultView({
               </div>
             </section>
 
-            {deepVerdict && <PriorityMove label={tc(dd.priorityMoveLabel, locale)}>{deepVerdict.priorityAction}</PriorityMove>}
+            {deepVerdict ? (
+              <PriorityMove label={tc(dd.priorityMoveLabel, locale)}>{deepVerdict.priorityAction}</PriorityMove>
+            ) : !isSample && id ? (
+              // Locked preview of the SAME card, same slot: completing the
+              // Deep dive doesn't add a new element to the layout, it fills
+              // this exact one in — the emptiness is the incentive, per
+              // Antoine's steer (2026-08-28).
+              <PriorityMove label={tc(dd.priorityMoveLockedLabel, locale)}>
+                <p className={styles.lockedText}>{tc(dd.teaserText, locale)}</p>
+                <Button variant="secondary" href={`/deep-dive/${id}`} className={styles.lockedCta}>
+                  {tc(dd.teaserCta, locale)}
+                </Button>
+              </PriorityMove>
+            ) : null}
 
             <div className={styles.ctaRow}>
               <Button onClick={handleShare}>{copied ? "✓" : tc(roast ? t.ctaShareRoast : t.ctaShare, locale)}</Button>
@@ -214,15 +227,6 @@ export function ResultView({
                 </Button>
               )}
             </div>
-
-            {!isSample && id && !deepDive && (
-              <div className={styles.deepDiveTeaser}>
-                <p className={styles.deepDiveTeaserText}>{tc(dd.teaserText, locale)}</p>
-                <Button variant="secondary" href={`/deep-dive/${id}`}>
-                  {tc(dd.teaserCta, locale)}
-                </Button>
-              </div>
-            )}
 
             <Disclaimer align="left" className={styles.disclaimer}>
               {disclaimerSplit[0]}

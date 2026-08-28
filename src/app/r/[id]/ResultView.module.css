@@ -115,19 +115,23 @@
   gap: 12px;
 }
 
-/* New Deep dive teaser block (SPEC-ADDENDUM-01.md §2.2), separated from the
-   CTAs above by a dashed rule. */
-.deepDiveTeaser {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding-top: 22px;
-  border-top: var(--border-rule);
-}
-
-.deepDiveTeaserText {
+/*
+ * Deep dive locked-preview content (SPEC-ADDENDUM-01.md §2.2, sharpened
+ * 2026-08-28): rendered *inside* the same PriorityMove card the real
+ * priorityAction will occupy once unlocked — same dashed-red border, same
+ * eyebrow slot (just "— locked" appended) — so completing the Deep dive
+ * visually fills this exact card in rather than revealing a new one.
+ * .lockedText reads as an explanation, not yet an actual recommendation,
+ * so it's muted body-sm rather than PriorityMove's confident 600-weight
+ * default body style.
+ */
+.lockedText {
   font: var(--body-sm);
   color: var(--text-muted);
+}
+
+.lockedCta {
+  margin-top: 12px;
 }
 
 .disclaimer {

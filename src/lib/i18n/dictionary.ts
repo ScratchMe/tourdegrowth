@@ -164,10 +164,20 @@ export const UI_STRINGS = {
 
   /** Deep dive mode (SPEC-ADDENDUM-01.md §2) — the 10-question follow-up
    * offered from the result page. Question/answer copy itself lives in
-   * content/deep-mode-questions.ts. */
+   * content/deep-mode-questions.ts.
+   *
+   * `teaserText`/`teaserCta` anchor the incentive to the one concrete thing
+   * being locked (the Priority move card, see ResultView's
+   * `lockedPriorityMove` — sharpened from an earlier, vaguer "Want more
+   * specific advice?" once Quick mode's own recommendation was retired,
+   * per Antoine's steer: the Deep dive is now the ONLY place a priority
+   * action exists at all, so the copy should say exactly that). */
   deepDive: {
-    teaserText: { en: "Want more specific advice?", fr: "Envie d'un diagnostic plus précis ?" },
-    teaserCta: { en: "Get my deep dive →", fr: "Obtenir mon diagnostic →" },
+    teaserText: {
+      en: "Answer 10 more questions to unlock your personalized priority action.",
+      fr: "Réponds à 10 questions supplémentaires pour débloquer ton action prioritaire personnalisée.",
+    },
+    teaserCta: { en: "Unlock my priority action →", fr: "Débloquer mon action prioritaire →" },
     questionCounterTemplate: {
       en: "Deep dive · Question {n} of {total}",
       fr: "Approfondissement · Question {n} sur {total}",
@@ -177,6 +187,7 @@ export const UI_STRINGS = {
     // product-level label, not a sentence to translate.
     badge: { en: "Deep dive", fr: "Deep dive" },
     priorityMoveLabel: { en: "Priority move", fr: "Action prioritaire" },
+    priorityMoveLockedLabel: { en: "Priority move — locked", fr: "Action prioritaire — verrouillée" },
   },
 
   /** Result page chrome (DESIGN-BRIEF.md §02/§04) — the Strengths/Where
