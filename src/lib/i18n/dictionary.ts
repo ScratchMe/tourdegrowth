@@ -107,6 +107,8 @@ export const UI_STRINGS = {
       fr: "Des définitions simples pour le vocabulaire growth utilisé dans Tour de Growth.",
     },
     backToIndex: { en: "← Glossary", fr: "← Glossaire" },
+    inPracticeLabel: { en: "In practice", fr: "En pratique" },
+    relatedLabel: { en: "Related terms", fr: "Termes liés" },
   },
 
   /**
