@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Card } from "@/components/core/Card";
 import { MetaLabel } from "@/components/brand/MetaLabel";
+import { fetchFunnelStats, type FunnelWindow } from "@/lib/analytics/goatcounter-api";
 import { computeGrowthStats } from "@/lib/submissions/growth-stats";
 import styles from "./page.module.css";
 
@@ -19,6 +20,26 @@ function pct(ratio: number): string {
   return `${Math.round(ratio * 100)}%`;
 }
 
+function FunnelCard({ window }: { window: FunnelWindow }) {
+  return (
+    <Card elevation="panel" className={styles.breakdown}>
+      <MetaLabel size="xs" wide>{window.label}</MetaLabel>
+      {window.stats ? (
+        <>
+          <p className={styles.number}>
+            {window.stats.rate === null ? "—" : pct(window.stats.rate)}
+          </p>
+          <p className={styles.detail}>
+            {window.stats.profileClicks} profile clicks / {window.stats.homeViews} homepage views
+          </p>
+        </>
+      ) : (
+        <p className={styles.detail}>Unavailable — {window.error}</p>
+      )}
+    </Card>
+  );
+}
+
 /**
  * Internal-only dashboard, English-only on purpose (single operator, not a
  * user-facing surface — no `resolveRequestLocale()`/`tc()` needed here, the
@@ -28,7 +49,7 @@ function pct(ratio: number): string {
  * engineering at this volume.
  */
 export default async function AdminStatsPage() {
-  const stats = await computeGrowthStats();
+  const [stats, funnelWindows] = await Promise.all([computeGrowthStats(), fetchFunnelStats()]);
 
   return (
     <main className={styles.main}>
@@ -81,6 +102,15 @@ export default async function AdminStatsPage() {
           <MetaLabel size="xs">Unique sharers</MetaLabel>
           <p className={styles.number}>{stats.uniqueSharers}</p>
         </Card>
+      </section>
+
+      <MetaLabel size="xs" wide className={styles.sectionLabel}>
+        Homepage → profile click (GoatCounter)
+      </MetaLabel>
+      <section className={styles.breakdownRow}>
+        {funnelWindows.map((window) => (
+          <FunnelCard key={window.label} window={window} />
+        ))}
       </section>
 
       <section className={styles.breakdownRow}>
