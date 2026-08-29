@@ -66,6 +66,24 @@ export default async function GlossaryTermPage({ params }: PageProps) {
           <p className={styles.definition}>{tc(entry.definition, locale)}</p>
         </Card>
 
+        <section className={styles.extendedSection}>
+          <h2 className={styles.sectionLabel}>{tc(t.inPracticeLabel, locale)}</h2>
+          <p className={styles.extended}>{tc(entry.extended, locale)}</p>
+        </section>
+
+        {entry.related.length > 0 && (
+          <section className={styles.relatedSection}>
+            <h2 className={styles.sectionLabel}>{tc(t.relatedLabel, locale)}</h2>
+            <div className={styles.relatedList}>
+              {entry.related.map((relatedId) => (
+                <Link key={relatedId} href={`/glossary/${relatedId}`} className={styles.relatedLink}>
+                  {tc(GLOSSARY[relatedId].term, locale)}
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
         <div className={styles.ctaRow}>
           <Button size="lg" href="/quiz">
             {tc(UI_STRINGS.landing.ctaPrimary, locale)}
