@@ -45,3 +45,12 @@ export function trackEvent(name: string, detail?: string): void {
     // Analytics must never break the feature it's attached to.
   }
 }
+
+/**
+ * The `profile_click` detail suffixes instrumented on the three Antoine
+ * credit links in `ResultView.tsx` (SPEC-ADDENDUM-02.md §2). Shared with
+ * `goatcounter-api.ts`'s server-side funnel fetch so the two lists can
+ * never drift apart — the API module needs the exact same three path names
+ * to ask GoatCounter for.
+ */
+export const PROFILE_CLICK_DETAILS = ["footer_cv", "card_cv", "card_linkedin"] as const;

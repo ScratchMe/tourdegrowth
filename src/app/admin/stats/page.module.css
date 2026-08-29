@@ -39,6 +39,10 @@
   color: var(--text-muted);
 }
 
+.sectionLabel {
+  margin-top: -8px;
+}
+
 .breakdownRow {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));

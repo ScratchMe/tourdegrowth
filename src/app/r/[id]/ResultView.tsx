@@ -16,7 +16,7 @@ import { ScoreDisplay } from "@/components/result/ScoreDisplay";
 import { StampedPillar } from "@/components/result/StampedPillar";
 import { ANTOINE_LINKS, DEEP_DIVE_CREDIT, QUICK_CREDIT } from "@/content/antoine-credit";
 import { HOW_IT_WORKS } from "@/content/how-it-works";
-import { trackEvent } from "@/lib/analytics/goatcounter";
+import { PROFILE_CLICK_DETAILS, trackEvent } from "@/lib/analytics/goatcounter";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { clearStoredAnswers } from "@/lib/quiz/storage";
@@ -26,6 +26,11 @@ import { rankPillarsAscending } from "@/lib/scoring/rank";
 import type { QuickVerdict } from "@/lib/scoring/verdict";
 import type { DeepDiveResult } from "@/lib/submissions/types";
 import styles from "./ResultView.module.css";
+
+// Named for readability at the trackEvent() call sites below — the array
+// itself (and the order) is shared with lib/analytics/goatcounter-api.ts's
+// server-side funnel fetch, so the two can never drift apart.
+const [FOOTER_CV_DETAIL, CARD_CV_DETAIL, CARD_LINKEDIN_DETAIL] = PROFILE_CLICK_DETAILS;
 
 interface ResultViewProps {
   /** This result's own id — used to attribute whoever starts their own Tour from here (SPEC.md §7), and to link to the Deep dive flow. Omitted for the fixed sample (no real submission to attribute to, and no Deep dive on a sample — SPEC.md §12: "jamais recalculé"). */
@@ -151,7 +156,7 @@ export function ResultView({
                   href={ANTOINE_LINKS.cv}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={() => trackEvent("profile_click", "footer_cv")}
+                  onClick={() => trackEvent("profile_click", FOOTER_CV_DETAIL)}
                 >
                   {QUICK_CREDIT.name}
                 </a>
@@ -232,7 +237,7 @@ export function ResultView({
                       href={ANTOINE_LINKS.cv}
                       target="_blank"
                       rel="noopener noreferrer"
-                      onClick={() => trackEvent("profile_click", "card_cv")}
+                      onClick={() => trackEvent("profile_click", CARD_CV_DETAIL)}
                     >
                       {tc(DEEP_DIVE_CREDIT.cvLinkText, locale)}
                     </a>
@@ -241,7 +246,7 @@ export function ResultView({
                       href={ANTOINE_LINKS.linkedin}
                       target="_blank"
                       rel="noopener noreferrer"
-                      onClick={() => trackEvent("profile_click", "card_linkedin")}
+                      onClick={() => trackEvent("profile_click", CARD_LINKEDIN_DETAIL)}
                     >
                       {tc(DEEP_DIVE_CREDIT.linkedinLinkText, locale)}
                     </a>
