@@ -147,7 +147,12 @@ export function ResultView({
                   replaced by it. */}
               <p className={styles.builtByCredit}>
                 {tc(QUICK_CREDIT.prefix, locale)}
-                <a href={ANTOINE_LINKS.cv} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={ANTOINE_LINKS.cv}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackEvent("profile_click", "footer_cv")}
+                >
                   {QUICK_CREDIT.name}
                 </a>
                 {tc(QUICK_CREDIT.suffix, locale)}
@@ -223,11 +228,21 @@ export function ResultView({
                   <MetaLabel wide>{tc(DEEP_DIVE_CREDIT.eyebrow, locale)}</MetaLabel>
                   <p className={styles.antoineBio}>
                     {tc(DEEP_DIVE_CREDIT.bio, locale)}
-                    <a href={ANTOINE_LINKS.cv} target="_blank" rel="noopener noreferrer">
+                    <a
+                      href={ANTOINE_LINKS.cv}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => trackEvent("profile_click", "card_cv")}
+                    >
                       {tc(DEEP_DIVE_CREDIT.cvLinkText, locale)}
                     </a>
                     {" · "}
-                    <a href={ANTOINE_LINKS.linkedin} target="_blank" rel="noopener noreferrer">
+                    <a
+                      href={ANTOINE_LINKS.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => trackEvent("profile_click", "card_linkedin")}
+                    >
                       {tc(DEEP_DIVE_CREDIT.linkedinLinkText, locale)}
                     </a>
                   </p>
