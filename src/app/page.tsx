@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
-import { Wordmark } from "@/components/brand/Wordmark";
+import { WordmarkLink } from "@/components/brand/WordmarkLink";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
@@ -60,8 +60,11 @@ export default function LandingPage() {
       />
       <header className={styles.header}>
         <div className={styles.headerInner}>
-          <Wordmark />
+          <WordmarkLink />
           <nav className={styles.nav}>
+            <Button href="/glossary" variant="quiet" className={styles.navLink}>
+              {tc(UI_STRINGS.nav.glossary, locale)}
+            </Button>
             <Button href="/how-it-works" variant="quiet" className={styles.navLink}>
               {tc(UI_STRINGS.nav.howItWorks, locale)}
             </Button>

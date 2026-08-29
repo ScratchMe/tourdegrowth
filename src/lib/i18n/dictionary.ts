@@ -77,9 +77,12 @@ export const UI_STRINGS = {
 
   /** Header nav — SPEC.md §12 cut "How it works"/"Examples"/"Roast mode" from
    * the MVP; SPEC-ADDENDUM-01.md §1.3 explicitly reintroduces just the first
-   * one, now that there's a real page behind it. */
+   * one, now that there's a real page behind it. "Glossary" joins it once
+   * SPEC-ADDENDUM-02.md §3.1 gives the glossary its own indexable pages —
+   * on Antoine's request, not part of either addendum's own spec text. */
   nav: {
     howItWorks: { en: "How it works", fr: "Comment ça marche" },
+    glossary: { en: "Glossary", fr: "Glossaire" },
   },
 
   /** Glossary info-bubble chrome (SPEC-ADDENDUM-01.md §1.2) — the terms and

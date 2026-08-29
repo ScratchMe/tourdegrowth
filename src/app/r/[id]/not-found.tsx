@@ -1,5 +1,5 @@
 import { Button } from "@/components/core/Button";
-import { Wordmark } from "@/components/brand/Wordmark";
+import { WordmarkLink } from "@/components/brand/WordmarkLink";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { resolveRequestLocale } from "@/lib/i18n/resolve-request-locale";
 import styles from "./not-found.module.css";
@@ -13,7 +13,7 @@ export default async function ResultNotFound() {
 
   return (
     <main className={styles.main}>
-      <Wordmark />
+      <WordmarkLink />
       <h1 className={styles.title}>{tc(t.notFoundTitle, locale)}</h1>
       <p className={styles.body}>{tc(t.notFoundBody, locale)}</p>
       <Button href="/">{tc(t.notFoundCta, locale)}</Button>

@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Wordmark } from "@/components/brand/Wordmark";
+import { WordmarkLink } from "@/components/brand/WordmarkLink";
 import { Button } from "@/components/core/Button";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import { AnswerOption } from "@/components/quiz/AnswerOption";
@@ -160,7 +160,7 @@ export default function QuizPage() {
     <>
       <header className={styles.header}>
         <div className={styles.headerInner}>
-          <Wordmark />
+          <WordmarkLink />
           <div className={styles.headerRight}>
             {phase === "answering" ? (
               <>

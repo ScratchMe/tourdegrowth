@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Wordmark } from "@/components/brand/Wordmark";
+import { WordmarkLink } from "@/components/brand/WordmarkLink";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
@@ -27,7 +27,7 @@ export default async function HowItWorksPage() {
     <>
       <header className={styles.header}>
         <div className={styles.headerInner}>
-          <Wordmark />
+          <WordmarkLink />
         </div>
       </header>
 
