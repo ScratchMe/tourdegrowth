@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Wordmark } from "@/components/brand/Wordmark";
+import { WordmarkLink } from "@/components/brand/WordmarkLink";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { GLOSSARY, type GlossaryTermId } from "@/content/glossary";
@@ -51,7 +51,7 @@ export default async function GlossaryTermPage({ params }: PageProps) {
     <>
       <header className={styles.header}>
         <div className={styles.headerInner}>
-          <Wordmark />
+          <WordmarkLink />
         </div>
       </header>
 

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Wordmark } from "@/components/brand/Wordmark";
+import { WordmarkLink } from "@/components/brand/WordmarkLink";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import { ModeTag } from "@/components/brand/ModeTag";
 import { Button } from "@/components/core/Button";
@@ -111,7 +111,7 @@ export function ResultView({
     <>
       <header className={`${styles.header} ${roast ? styles.headerRoast : ""}`}>
         <div className={styles.headerInner}>
-          <Wordmark />
+          <WordmarkLink />
           <div className={styles.headerRight}>
             {deepDive && <ModeTag mode="deep">{tc(dd.badge, locale)}</ModeTag>}
             {roast ? (
