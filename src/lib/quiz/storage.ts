@@ -132,14 +132,26 @@ export interface StoredResult {
    * no stored answers simply shows no breakdown.
    */
   answers?: Answers;
+  /**
+   * The score this result came out at (REVIEW.md R-20), so the landing can
+   * offer "your last score: 74/100" without a network round trip — and
+   * without needing the result id to already be in the URL.
+   *
+   * Optional for the same reason as `answers`: entries written before R-20
+   * don't have it, and the landing then falls back to an unnumbered "see
+   * your last result" link rather than showing nothing.
+   */
+  total?: number;
 }
 
 function isStoredResult(value: unknown): value is StoredResult {
   if (typeof value !== "object" || value === null) return false;
   const v = value as Record<string, unknown>;
   if (typeof v.id !== "string" || typeof v.ownerToken !== "string" || typeof v.createdAt !== "string") return false;
-  // `answers` is optional (pre-R-12 entries), but must be the right shape when present.
-  return v.answers === undefined || isAnswersShape(v.answers);
+  // Both optional (pre-R-12 / pre-R-20 entries), but must be the right shape
+  // when present.
+  if (v.answers !== undefined && !isAnswersShape(v.answers)) return false;
+  return v.total === undefined || (typeof v.total === "number" && Number.isFinite(v.total));
 }
 
 export function loadStoredResults(): StoredResult[] {
@@ -180,4 +192,74 @@ export function isOwnResult(id: string): boolean {
 /** The full stored entry for a result this browser created, or null for someone else's link. */
 export function findStoredResult(id: string): StoredResult | null {
   return loadStoredResults().find((r) => r.id === id) ?? null;
+}
+
+/**
+ * Deep dive progress — REVIEW.md R-20.
+ *
+ * The Deep dive was deliberately NOT persisted when it shipped (see the note
+ * at the top of `deep-dive/[id]/page.tsx`): a short optional flow, not the
+ * "never lose your answers" promise SPEC.md §4 makes about the 15 core
+ * questions. It grew since: 10 questions, then an 11th free-text screen, and
+ * a generation that can take a minute. Losing all of that to a stray reload
+ * is no longer a small cost.
+ *
+ * One entry, not a list: this is in-flight progress for a single Deep dive,
+ * so a newer one simply replaces it. It is keyed by submission id and only
+ * returned for a matching id, so progress from one result can never leak
+ * into another's.
+ *
+ * Cleared as soon as the Deep dive succeeds — `freeContext` is a founder
+ * describing their business in their own words, and there is no reason for
+ * it to outlive the request it was written for.
+ */
+const DEEP_DIVE_STORAGE_KEY = "tdg.deepDive.v1";
+
+export interface StoredDeepDiveProgress {
+  submissionId: string;
+  /** Question id → chosen option index. Partial while in progress. */
+  answers: Record<string, number>;
+  freeContext: string;
+}
+
+function isDeepDiveProgress(value: unknown): value is StoredDeepDiveProgress {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  const v = value as Record<string, unknown>;
+  if (typeof v.submissionId !== "string" || typeof v.freeContext !== "string") return false;
+  if (typeof v.answers !== "object" || v.answers === null || Array.isArray(v.answers)) return false;
+  return Object.values(v.answers as Record<string, unknown>).every(
+    (n) => typeof n === "number" && Number.isInteger(n) && n >= 0,
+  );
+}
+
+export function loadDeepDiveProgress(submissionId: string): StoredDeepDiveProgress | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(DEEP_DIVE_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed: unknown = JSON.parse(raw);
+    if (!isDeepDiveProgress(parsed)) return null;
+    return parsed.submissionId === submissionId ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveDeepDiveProgress(progress: StoredDeepDiveProgress): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(DEEP_DIVE_STORAGE_KEY, JSON.stringify(progress));
+  } catch {
+    // Same trade-off as everywhere else in this file: not persisting is a
+    // degraded experience, never a crash.
+  }
+}
+
+export function clearDeepDiveProgress(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(DEEP_DIVE_STORAGE_KEY);
+  } catch {
+    // ignore
+  }
 }

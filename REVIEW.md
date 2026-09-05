@@ -49,8 +49,8 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 | | R-17 | Infra versionnée : règles Firestore, env vars documentées | T | S | **Fait** (PR #36, 2026-09-05) |
 | | R-18 | Dépendances et config TypeScript | T | S | **Fait** (PR #37, 2026-09-05) — clôt le lot E |
 | **F — Expérience** | R-19 | Accessibilité du parcours | F+T | M | **Fait** (PR #38, 2026-09-05) |
-| | R-20 | Petits plus produit (dernier score, benchmark, persistance Deep dive) | F | S/M | À faire |
-| | R-21 | La nav FR de la landing déborde le viewport mobile | F+T | XS | À faire |
+| | R-20 | Petits plus produit (dernier score, benchmark, persistance Deep dive) | F | S/M | **Fait** (PR #40, 2026-09-05) |
+| | R-21 | La nav de la landing déborde le viewport mobile (FR **et** EN depuis R-13) | F+T | XS | À faire |
 | | R-22 | Trois paires de couleurs sous le seuil AA de contraste | F+T | S | À faire |
 | | R-23 | Boutons de partage LinkedIn/X : où les mettre sans casser « 2 CTA » | F | S | À faire |
 
@@ -340,7 +340,9 @@ Documenter la nomenclature complète en tête de `src/lib/analytics/goatcounter.
 
 ### R-20 — Petits plus produit
 
-**Type** F · **Effort** S/M · **Statut** À faire
+**Type** F · **Effort** S/M · **Statut** **Fait** (PR #40, 2026-09-05)
+
+Les trois livrés. Copie d'interface écrite ici et marquée `TODO` (même statut que l'écran d'erreur et le dépliant R-12 : ce n'est ni la bibliothèque de verdicts ni la voix roast), à relire. Le benchmark s'appuie sur un document agrégé `stats/global` qui **démarre à zéro le jour du déploiement** et reste masqué sous 30 soumissions — il peut donc légitimement différer du chiffre de `/admin/stats`, qui lit toute la collection. Détail dans `CLAUDE.md`.
 
 Trois compléments indépendants, à faire ensemble ou séparément :
 
@@ -350,7 +352,9 @@ Trois compléments indépendants, à faire ensemble ou séparément :
 
 Hors périmètre ici, noté pour mémoire : historique de progression / comparaison entre deux Tours (SPEC.md §5, fast-follow explicite).
 
-### R-21 — La nav FR de la landing déborde le viewport mobile
+### R-21 — La nav de la landing déborde le viewport mobile
+
+> **Mise à jour du 2026-09-05 (constaté en mesurant pendant R-20) : ce n'est plus seulement le français.** R-13 a ajouté le sélecteur de langue dans ce même header. À 390 px, `scrollWidth` vaut maintenant **515 en FR et 452 en EN**, pour un viewport de 390 — les deux langues débordent, alors que le constat d'origine ne trouvait le problème qu'en français. Ça reste le même correctif et le même arbitrage visuel (wrapper la nav, la masquer sous 760 px comme le CTA d'en-tête l'est déjà, ou réduire la typo), mais ça touche désormais tous les visiteurs mobiles, pas une partie.
 
 **Type** F+T · **Effort** XS · **Statut** À faire
 

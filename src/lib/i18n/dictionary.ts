@@ -60,6 +60,38 @@ export const UI_STRINGS = {
     ctaSecondary: { en: "See a sample result", fr: "Voir un résultat d'exemple" },
   },
 
+  /**
+   * The "how does this compare" line under the score (REVIEW.md R-20).
+   *
+   * // TODO: copie finale à valider. Same status as `lastResult` below:
+   * interface copy, not verdict voice. Only ever rendered once enough Tours
+   * have been taken for the average to mean something (see
+   * `submissions/benchmark.ts`), and never on the fixed sample.
+   */
+  benchmark: {
+    line: { en: "Average of every Tour: {score}/100", fr: "Moyenne de tous les Tours : {score}/100" },
+  },
+
+  /**
+   * The returning-visitor line on the landing (REVIEW.md R-20). Its own
+   * section rather than a nested key under `landing`, because UI_STRINGS is
+   * exactly two levels deep by construction (see the `satisfies` at the
+   * bottom of this file).
+   *
+   * // TODO: copie finale à valider. Interface copy, not verdict voice, so
+   * the same status as the error screen and the score breakdown: written
+   * here to make the feature real, still worth a read. Only ever shown to
+   * someone who already took a Tour on this device, so it never competes
+   * with the primary CTA for a newcomer.
+   */
+  lastResult: {
+    withScore: {
+      en: "Your last score: {score}/100 — see it again →",
+      fr: "Ton dernier score : {score}/100 — le revoir →",
+    },
+    withoutScore: { en: "See your last result →", fr: "Revoir ton dernier résultat →" },
+  },
+
   /** The score card recipe is shared by the landing preview and the real
    * result screens (DESIGN-BRIEF.md #01/#02/#04) — only this label is
    * universal across all of them; caption/stage text is context-specific

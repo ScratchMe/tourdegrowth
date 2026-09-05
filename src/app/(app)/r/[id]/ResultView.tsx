@@ -51,6 +51,8 @@ interface ResultViewProps {
   deepDive?: DeepDiveView | null;
   /** Questions and per-pillar raw points behind the score (REVIEW.md R-12) — public content; the owner's answers come from their own device, never from here. */
   breakdown?: BreakdownData | null;
+  /** Average score across every Tour taken (REVIEW.md R-20), or null when there aren't enough yet — and never on the fixed sample, whose numbers aren't real. */
+  benchmark?: number | null;
 }
 
 /**
@@ -71,6 +73,7 @@ export function ResultView({
   isSample = false,
   deepDive = null,
   breakdown = null,
+  benchmark = null,
 }: ResultViewProps) {
   const { locale } = useLocale();
   const [tone, setTone] = useState<Tone>(initialTone);
@@ -208,6 +211,16 @@ export function ResultView({
                 label={tc(UI_STRINGS.scoreCard.label, locale)}
                 verdict={verdict.headline}
               />
+              {/* REVIEW.md R-20 — one line, under the score it qualifies and
+                  above the credit. Absent entirely below the minimum sample
+                  and on the sample result, rather than shown as a zero or a
+                  dash: a benchmark you can't trust is worse than none on a
+                  screen whose promise is a score you can re-explain. */}
+              {benchmark !== null ? (
+                <p className={styles.benchmark} data-testid="benchmark">
+                  {tc(UI_STRINGS.benchmark.line, locale).replace("{score}", String(benchmark))}
+                </p>
+              ) : null}
               {/* SPEC-ADDENDUM-02.md §2.1: sober "built by" credit, in the
                   score card's own footer — stays visible on Deep dive
                   results too (§2.3), additive to the §2.2 card below, not

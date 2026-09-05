@@ -200,7 +200,7 @@ export default function QuizPage() {
         const message = (body as { error?: string } | null)?.error;
         throw new Error(message || `Request failed (${res.status})`);
       }
-      const created = (await res.json()) as { id: string; ownerToken: string };
+      const created = (await res.json()) as { id: string; ownerToken: string; total: number };
       // REVIEW.md R-01: the owner token comes back exactly once and is never
       // recoverable afterwards — store it before navigating away. It is the
       // only thing that will later prove this browser created the result.
@@ -211,6 +211,10 @@ export default function QuizPage() {
         // REVIEW.md R-12: kept on this device so the owner — and only the
         // owner — can see how their score was calculated.
         answers,
+        // REVIEW.md R-20: lets the landing offer "your last score: 74/100"
+        // on a return visit, which is the only way back to a result without
+        // the URL when there are no accounts (SPEC.md §5).
+        total: created.total,
       });
       // REVIEW.md R-03, first-touch attribution: the ref has now been spent.
       // Clearing it means a second Tour from this browser starts clean
