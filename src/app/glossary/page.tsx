@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SiteFooter } from "@/components/brand/SiteFooter";
 import { WordmarkLink } from "@/components/brand/WordmarkLink";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
@@ -56,6 +57,8 @@ export default async function GlossaryIndexPage() {
           </Button>
         </div>
       </main>
+
+      <SiteFooter locale={locale} width="reading" />
     </>
   );
 }

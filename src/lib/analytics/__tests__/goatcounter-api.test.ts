@@ -65,7 +65,7 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
     const requested = new URL(url as string);
     expect(requested.searchParams.get("path_by_name")).toBe("true");
     expect(requested.searchParams.get("include_paths")).toBe(
-      "/,profile_click/footer_cv,profile_click/card_cv,profile_click/card_linkedin",
+      "/,profile_click/footer_cv,profile_click/card_cv,profile_click/card_linkedin,profile_click/sitefooter_cv",
     );
   });
 

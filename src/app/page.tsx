@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
+import { SiteFooter } from "@/components/brand/SiteFooter";
 import { WordmarkLink } from "@/components/brand/WordmarkLink";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import { Button } from "@/components/core/Button";
@@ -125,6 +126,8 @@ export default function LandingPage() {
           </div>
         </div>
       </main>
+
+      <SiteFooter locale={locale} />
     </>
   );
 }
