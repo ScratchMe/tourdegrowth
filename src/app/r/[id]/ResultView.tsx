@@ -78,6 +78,9 @@ export function ResultView({
   const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
+    // Deliberate: the server cannot know who is looking, so ownership is
+    // only knowable after mount (see the comment on `isOwner` above).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (id) setIsOwner(isOwnResult(id));
   }, [id]);
   const roast = tone === "roast";

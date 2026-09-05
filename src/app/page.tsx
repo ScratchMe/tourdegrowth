@@ -56,7 +56,10 @@ export default function LandingPage() {
     <>
       <script
         type="application/ld+json"
-        // eslint-disable-next-line react/no-danger -- static, developer-authored JSON, not user input
+        // Static, developer-authored JSON — never user input. (This line
+        // used to carry an `eslint-disable` for react/no-danger; with a real
+        // config now running, that rule isn't enabled and the directive was
+        // reported as unused — see REVIEW.md R-06.)
         dangerouslySetInnerHTML={{ __html: JSON.stringify(WEB_APPLICATION_SCHEMA) }}
       />
       <header className={styles.header}>

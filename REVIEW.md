@@ -33,9 +33,9 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 | | R-03 | Attribution `?ref=` : anti auto-parrainage + validation serveur | F+T | S | **Fait** (PR #22, 2026-09-05) |
 | | R-04 | Validation API stricte et messages d'erreur génériques | T | S | **Fait** (PR #23, 2026-09-05) |
 | **B — Filet automatisé** | R-05 | CI GitHub Actions (tsc, tests, build, puis lint et E2E) | T | S | **Fait** (PR #25, 2026-09-05) |
-| | R-06 | Réparer le lint (ESLint flat config) | T | S | À faire |
+| | R-06 | Réparer le lint (ESLint flat config) | T | S | **Fait** (PR #26, 2026-09-05) |
 | | R-07 | Playwright committé : parcours critique en E2E | T | M | À faire |
-| | R-08 | Supprimer le code mort | T | XS | À faire |
+| | R-08 | Supprimer le code mort | T | XS | **Fait** (PR #26, 2026-09-05) |
 | **C — Boucle de partage (cœur du produit)** | R-09 | Verdict Quick résolu dans la langue du visiteur | F | S | À faire |
 | | R-10 | Partage enrichi : métadonnées personnalisées, texte, boutons | F | M | À faire |
 | | R-11 | Instrumentation du funnel dans GoatCounter | F | S | À faire |
@@ -140,7 +140,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 
 ### R-06 — Réparer le lint
 
-**Type** T · **Effort** S · **Statut** À faire
+**Type** T · **Effort** S · **Statut** **Fait** (PR #26, 2026-09-05) — ESLint 9 flat config, livré avec R-08 comme prévu ici
 
 **Constat.** Next.js 16 a retiré la commande `next lint` ; `npm run lint` (`package.json:10`) échoue avec « Invalid project directory provided, no such directory: …/lint ». Le repo n'a **jamais** eu de config ESLint. Les commentaires `// eslint-disable-next-line …` (dans `src/app/quiz/page.tsx` et `src/app/page.tsx`) n'ont donc jamais désactivé quoi que ce soit.
 
@@ -165,7 +165,7 @@ Ajouter `@axe-core/playwright` sur landing, quiz et `/r/sample` (lien avec R-19)
 
 ### R-08 — Supprimer le code mort
 
-**Type** T · **Effort** XS · **Statut** À faire
+**Type** T · **Effort** XS · **Statut** **Fait** (PR #26, 2026-09-05) — `clearRefId` finalement conservé : R-03 l'utilise, comme ce constat l'anticipait
 
 **Constat.** `countSubmissionsReferredBy` (`src/lib/submissions/repository.ts`, jamais appelé — `growth-stats.ts` fait un seul passage), `ctaSwitchToRoast` (`src/lib/i18n/dictionary.ts`, jamais lu — cohérent avec la décision « exactement 2 CTA » de l'étape 7), `clearRefId` (`src/lib/quiz/storage.ts`, seul usage : son propre test — deviendra utile avec R-03, à garder si R-03 l'emploie, sinon supprimer).
 

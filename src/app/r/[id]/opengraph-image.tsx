@@ -4,7 +4,6 @@ import { ImageResponse } from "next/og";
 import { tc } from "@/lib/i18n/dictionary";
 import { UI_STRINGS } from "@/lib/i18n/dictionary";
 import type { Locale } from "@/lib/i18n/locale";
-import { rankPillarsAscending } from "@/lib/scoring/rank";
 import type { Pillar } from "@/lib/scoring/pillars";
 import { getSubmissionById } from "@/lib/submissions/repository";
 import { SAMPLE_RESULT } from "@/lib/submissions/sample";

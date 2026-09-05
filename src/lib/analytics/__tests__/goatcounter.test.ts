@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { trackEvent } from "../goatcounter";
 
 describe("trackEvent (SPEC.md §8: GoatCounter custom events)", () => {
