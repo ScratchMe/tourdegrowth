@@ -396,3 +396,26 @@ Vérifié en rejouant localement la séquence exacte du job (tsc 0 erreur, 178 t
 **Le lint est ajouté à la CI** (`.github/workflows/ci.yml`), en première étape puisque c'est la plus rapide.
 
 **Vérifié en réel** : `npm run lint` sort en 0, `tsc` propre, 178 tests verts, build OK. Et surtout en navigateur, parce que du code a été retiré de `handleAnswer` : le pulse du segment courant est bien présent, les 15 questions défilent dans l'ordre, le sélecteur de ton apparaît après la 15e, un rechargement avec 15 réponses en mémoire reprend directement au sélecteur de ton, et un parcours partiel reprend à la première question sans réponse (Q3 pour 2 réponses stockées) avec le bouton Retour disponible.
+
+### R-07 : Playwright committé (2026-09-05) — clôt le lot B
+
+Chaque étape de ce projet a été vérifiée avec Playwright (voir tout ce qui précède), mais toujours par des scripts jetables jamais committés. Les `data-testid` étaient déjà posés partout dans l'app : il ne manquait que les specs, donc rien ne protégeait le parcours critique d'une régression.
+
+`playwright.config.ts` + `e2e/` : **17 specs**, Chromium seul (un moteur qui attrape les vraies régressions de parcours vaut mieux que trois que personne ne maintient), exécutées contre un **build de production** (`next start`) et non `next dev` — les bugs qui valent la peine d'être attrapés ici (hydratation, payload RSC, redirections) ne se comportent pas pareil entre les deux.
+
+- `critical-path.spec.ts` : CTA de la landing → questionnaire ; les 15 questions → sélecteur de ton → page de résultat, avec vérification que les 15 réponses sont bien persistées avant la soumission ; le ton roast est opt-in et voyage jusqu'à l'API ; Retour resurligne la réponse précédente ; un parcours partiel reprend à la première question sans réponse.
+- `error-retry.spec.ts` : la promesse écrite noir sur blanc sur l'écran d'erreur (SPEC.md §4) — API en 500, code `SCORING_FAILED` affiché (R-04), les 15 réponses toujours en mémoire, puis « Réessayer » repart directement vers le résultat sans jamais repasser par la question 1.
+- `attribution-and-locale.spec.ts` : le ref survit landing → quiz et atteint l'API ; first-touch (un second ref n'écrase pas le premier) ; un ref pointant vers un de mes propres résultats n'est pas attribué (R-03) ; `?lang=` bascule l'interface **et** persiste d'une page à l'autre ; le questionnaire lui-même est traduit, pas seulement la landing (leçon n°5 de ce fichier) ; un visiteur sur une URL de Deep dive est redirigé (R-01).
+- `accessibility.spec.ts` : passe axe sur 5 écrans, limitée aux impacts serious/critical.
+
+**Toutes les specs bouchonnent `/api/submissions`** plutôt que d'appeler la vraie : la CI n'a ni identifiants Firebase ni clé Gemini, et un test qui dépend d'une écriture Firestore réelle testerait la disponibilité de quelqu'un d'autre. Ce que ces specs protègent, c'est le parcours client — 15 réponses entrent, une page de résultat sort, les réponses ne sont jamais perdues, l'attribution suit — et tout ça nous appartient entièrement.
+
+**Piège rencontré (vrai flake, corrigé à la racine plutôt que masqué)** : la landing capture `?ref=` dans un `useEffect`, donc l'écriture dans `localStorage` arrive **après** l'hydratation, pas au `load`. Lire la clé juste après `page.goto()` passait en solo et échouait en parallèle. Corrigé avec `expect.poll` (helper `expectStoredRefId`), jamais avec un `waitForTimeout`. Suite rejouée deux fois de suite pour confirmer la stabilité.
+
+**Piège d'outillage** : `@axe-core/playwright` déclare `playwright-core` en peer avec une plage `>= 1.0.0`, ce qui a fait installer un 1.63 à côté du 1.56.1 de `@playwright/test` — deux jeux de types `Page` incompatibles, `tsc` en erreur. Résolu en épinglant `playwright-core@1.56.1` en devDependency plutôt qu'en castant le type.
+
+**La CI gagne deux étapes** (`npx playwright install --with-deps chromium`, puis `npx playwright test`), plus l'upload du rapport HTML en artefact **uniquement en cas d'échec** — pour qu'une CI rouge soit débogable sans rejouer en local.
+
+**Ce que la passe axe a trouvé dès son premier passage** : trois paires de couleurs sous le seuil AA de contraste, toutes des **tokens du design system** (bouton principal 4,41:1, ligne de crédit `--text-faint` 2,80:1, lien du disclaimer 3,56:1) — donc présentes partout où le token sert. Consignées en `REVIEW.md` **R-22** plutôt que corrigées ici : ce sont des couleurs de marque livrées par Claude Design, deux des trois demandent un arbitrage d'Antoine. La spec ne désactive pas la règle pour autant : elle liste ces trois paires **par couleur** (stable) et non par sélecteur (un hash de build), donc toute **nouvelle** violation de contraste fait rougir la CI pendant que les connues restent visibles dans le code.
+
+**Lot B terminé** (R-05 à R-08) : CI, lint, E2E, code mort. La suite est le lot C (boucle de partage).

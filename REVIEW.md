@@ -34,7 +34,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 | | R-04 | Validation API stricte et messages d'erreur génériques | T | S | **Fait** (PR #23, 2026-09-05) |
 | **B — Filet automatisé** | R-05 | CI GitHub Actions (tsc, tests, build, puis lint et E2E) | T | S | **Fait** (PR #25, 2026-09-05) |
 | | R-06 | Réparer le lint (ESLint flat config) | T | S | **Fait** (PR #26, 2026-09-05) |
-| | R-07 | Playwright committé : parcours critique en E2E | T | M | À faire |
+| | R-07 | Playwright committé : parcours critique en E2E | T | M | **Fait** (PR #27, 2026-09-05) |
 | | R-08 | Supprimer le code mort | T | XS | **Fait** (PR #26, 2026-09-05) |
 | **C — Boucle de partage (cœur du produit)** | R-09 | Verdict Quick résolu dans la langue du visiteur | F | S | À faire |
 | | R-10 | Partage enrichi : métadonnées personnalisées, texte, boutons | F | M | À faire |
@@ -49,6 +49,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 | **F — Expérience** | R-19 | Accessibilité du parcours | F+T | M | À faire |
 | | R-20 | Petits plus produit (dernier score, benchmark, persistance Deep dive) | F | S/M | À faire |
 | | R-21 | La nav FR de la landing déborde le viewport mobile | F+T | XS | À faire |
+| | R-22 | Trois paires de couleurs sous le seuil AA de contraste | F+T | S | À faire |
 
 ### Pourquoi cet ordre
 
@@ -150,7 +151,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 
 ### R-07 — Playwright committé : parcours critique en E2E
 
-**Type** T · **Effort** M · **Statut** À faire
+**Type** T · **Effort** M · **Statut** **Fait** (PR #27, 2026-09-05) — 17 specs, clôt le lot B. A révélé R-22 dès son premier passage.
 
 **Constat.** Chaque étape du projet a été vérifiée visuellement avec Playwright (voir CLAUDE.md), mais toujours via des scripts jetables jamais committés. Résultat : zéro protection contre une régression du parcours critique, alors que les hooks sont déjà là (`data-testid` : `answer-option`, `back-button`, `get-score-cta`, `tone-option`, `retry-button`, `deep-dive-answer-option`, `free-context-textarea`, `skip-button`, `submit-button`).
 
@@ -366,6 +367,31 @@ C'est exactement la classe de bug que la leçon n°5 de `CLAUDE.md` décrit (« 
 L'option 2 est la plus cohérente avec la décision déjà prise pour le CTA d'en-tête, et elle est maintenant sans coût d'accessibilité grâce au pied de page. À confirmer par Antoine, c'est une décision visuelle.
 
 **Vérification attendue.** À 360, 390 et 430px, en FR **et** en EN : `scrollWidth === innerWidth`, sur la landing et sur toute page portant ce header.
+### R-22 — Trois paires de couleurs sous le seuil AA de contraste
+
+**Type** F+T · **Effort** S · **Statut** À faire
+
+**Constat.** Relevé par la passe axe ajoutée en R-07, dès son premier passage. Trois paires échouent au seuil WCAG AA (4,5:1 pour du texte normal), toutes des choix de **tokens du design system**, pas des erreurs de page — elles se répètent donc partout où le token sert :
+
+| Paire | Mesuré | Où | Token |
+|---|---|---|---|
+| `#fbf9f2` sur `#d2402c` | **4,41:1** | Le bouton d'action principal, donc quasiment chaque écran | `--action-primary-text` sur `--action-primary-bg` |
+| `#99968f` sur `#fbf9f2` | **2,80:1** | La ligne de crédit « Built by… » de la carte de score | `--text-faint` sur `--surface-card` |
+| `#d2402c` sur `#e7e1d2` | **3,56:1** (à 11,5px) | Le lien du disclaimer sous les CTA du résultat | `--text-link` sur `--surface-page` |
+
+**Impact.** Le premier est le plus large : il rate le seuil de 0,09 seulement, mais il concerne l'élément le plus cliqué du produit. Le deuxième est le plus sévère (2,80:1 est nettement sous le seuil) — ironiquement sur la ligne qui pointe vers le CV d'Antoine, donc du texte qu'on veut voir lu. Le troisième est du petit texte rouge sur fond papier.
+
+**Correctif proposé.** Le troisième est le plus simple et le mieux fondé : le design system **livre déjà** `--paint-red-deep` (`#a32e1f`) dont le commentaire dit exactement « red text on light grounds (AA on --paper-0) », et SPEC.md §12 note que ce token a été approuvé par Antoine pour l'accessibilité. Le disclaimer utilise `--text-link` là où `--text-alert` conviendrait — c'est un mésusage du système par lui-même, pas un arbitrage de marque.
+
+Les deux autres demandent une décision d'Antoine, parce qu'ils touchent la couleur de marque :
+1. bouton principal — assombrir très légèrement `--paint-red` pour le fond de bouton, ou passer le libellé en `--font-weight: 600` (le seuil tombe à 3:1 pour du gras ≥ 14pt, ce qui règle le cas sans toucher aux couleurs) ;
+2. `--text-faint` — remonter l'opacité (il est à `rgba(33,28,21,0.45)`) jusqu'à atteindre 4,5:1, en acceptant que la ligne soit un peu moins discrète que ce que SPEC-ADDENDUM-02.md §2.1 demandait.
+
+**Ne pas corriger en silence** : ce sont des couleurs de marque livrées par Claude Design. À arbitrer avec Antoine, éventuellement en remontant l'écart au design.
+
+**En attendant**, la spec axe (`e2e/accessibility.spec.ts`) liste ces trois paires explicitement, **par couleur** (stable) et non par sélecteur (un hash de build) : toute **nouvelle** violation de contraste fait rougir la CI, tandis que ces trois-là restent visibles dans le code plutôt que cachées derrière une règle désactivée.
+
+**Vérification attendue.** Les trois paires passent 4,5:1, et l'entrée correspondante disparaît de `KNOWN_CONTRAST_GAPS` sans que la suite ne rougisse.
 ---
 
 ## Ce qui a été vérifié et jugé sain
