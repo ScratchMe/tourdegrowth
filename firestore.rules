@@ -1,0 +1,24 @@
+rules_version = '2';
+
+// Deny everything, deliberately — REVIEW.md R-17.
+//
+// Every read and write in this app goes through the Firebase Admin SDK from
+// server-side code (Route Handlers and Server Components), and the Admin SDK
+// bypasses these rules entirely. So this file changes nothing about how the
+// app works today. It exists for two reasons:
+//
+//   1. The intent lives in the repository rather than only in a console
+//      someone has to remember to check. "No client may touch this data" is
+//      a design decision, and design decisions belong in version control.
+//   2. If a client SDK is ever added — an offline mode, a realtime feature —
+//      it starts closed. The dangerous default is the other way round: rules
+//      left permissive from a project's setup wizard, discovered later.
+//
+// Deploy with: npx firebase-tools deploy --only firestore:rules
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -576,3 +576,15 @@ Jusqu'ici seules les **deux extrémités** du funnel étaient instrumentées (`s
 - L'appel unique ne gagne pas de latence (les deux tons partent déjà en parallèle, donc la latence est celle du plus lent, pas la somme) mais divise le quota par deux. Le risque est un prompt unique portant à la fois le style neutre et le style roast avec son garde-fou : contamination de ton plausible, sur un différenciateur produit, et ça se juge sur des sorties réelles.
 
 **Vérifié en réel** : 208 tests unitaires (+7), lint/tsc/build propres, 37 specs Playwright, plus les deux requêtes HTTP contre la vraie API décrites plus haut.
+
+### R-17 : l'infra entre dans le repo (2026-09-05)
+
+**Constat.** Aucun `firestore.rules`, aucun `firebase.json`, aucun `vercel.json` : toute la configuration Firebase et Vercel vivait uniquement dans des tableaux de bord. Impossible de savoir, en lisant le repo, si les règles Firestore interdisent bien tout accès client. Et `.env.local.example` ne mentionnait ni `ADMIN_DASHBOARD_PASSWORD` ni `GOATCOUNTER_API_TOKEN`, pourtant tous deux requis en production — inventaire fait par `grep` sur `process.env` plutôt qu'à la mémoire : 8 variables lues par le code, 6 documentées.
+
+**`firestore.rules` en deny-all.** Ça ne change rien au fonctionnement : tout passe par l'Admin SDK côté serveur, qui contourne les règles. Le fichier existe pour deux raisons — que l'intention (« aucun client ne touche ces données ») vive sous contrôle de version plutôt que dans une console qu'il faut penser à ouvrir, et que si un SDK client est ajouté un jour, il démarre **fermé**. Le défaut dangereux est l'inverse : des règles laissées permissives par un assistant de création de projet, découvertes plus tard.
+
+**`.env.local.example` complété et réorganisé** en trois blocs — requis pour que l'app score, requis en production pour les fonctionnalités concernées, optionnel — avec pour chacun ce qui casse en son absence. `ADMIN_DASHBOARD_PASSWORD` en particulier **échoue fermé** : sans lui, `/admin/stats` renvoie 401 à tout le monde, y compris à Antoine. C'est le défaut voulu, mais rien dans le repo ne le disait.
+
+**Deux actions manuelles restent côté Antoine** : déployer les règles (`npx firebase-tools deploy --only firestore:rules`) et confirmer dans la console Firebase que celles réellement en place sont bien en deny. Ce fichier documente l'intention ; il ne s'applique qu'une fois déployé.
+
+**Pas de `vercel.json`** : rien à y mettre aujourd'hui. Le seul réglage qui aurait pu y aller est `maxDuration`, déclaré en R-15 dans la route elle-même, ce qui est plus proche du code qui en a besoin.

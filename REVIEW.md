@@ -46,7 +46,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 | **E — Robustesse backend** | R-15 | Rate limiting sur les routes POST + `maxDuration` | T | S/M | **Fait** (PR #34, 2026-09-05) — limite en mémoire, pas distribuée |
 | | R-16 | Appel Gemini : header, `finishReason`, `maxOutputTokens` | T | M | **Fait en partie** (PR #35, 2026-09-05) — `responseSchema` et l'appel unique reportés en R-25 |
 | | R-25 | Gemini : `responseSchema` et un seul appel pour les deux tons | T | M | À faire — **exige un vrai appel réussi pour être vérifié** |
-| | R-17 | Infra versionnée : règles Firestore, env vars documentées | T | S | À faire |
+| | R-17 | Infra versionnée : règles Firestore, env vars documentées | T | S | **Fait** (PR #36, 2026-09-05) |
 | | R-18 | Dépendances et config TypeScript | T | S | À faire |
 | **F — Expérience** | R-19 | Accessibilité du parcours | F+T | M | À faire |
 | | R-20 | Petits plus produit (dernier score, benchmark, persistance Deep dive) | F | S/M | À faire |
@@ -312,7 +312,7 @@ Documenter la nomenclature complète en tête de `src/lib/analytics/goatcounter.
 
 ### R-17 — Infra versionnée
 
-**Type** T · **Effort** S · **Statut** À faire
+**Type** T · **Effort** S · **Statut** **Fait** (PR #36, 2026-09-05). **Deux actions manuelles restent côté Antoine** : déployer les règles (`npx firebase-tools deploy --only firestore:rules`) et vérifier dans la console Firebase que les règles réellement en place sont bien en deny — ce fichier documente l'intention, il ne s'applique pas tant qu'il n'est pas déployé.
 
 **Constat.** Aucun `firestore.rules`, `firebase.json` ni `vercel.json` dans le repo : la configuration Firebase et Vercel vit uniquement dans les dashboards. `.env.local.example` ne mentionne ni `ADMIN_DASHBOARD_PASSWORD` ni `GOATCOUNTER_API_TOKEN`, pourtant requis en production. Impossible de savoir depuis le repo si les règles Firestore actuelles interdisent bien tout accès client.
 
