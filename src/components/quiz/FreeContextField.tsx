@@ -7,6 +7,12 @@ export interface FreeContextFieldProps
   onChange: (value: string) => void;
   /** Client-side limit — display and soft-cap only. The real enforcement is server-side (see the deep-dive API route); never rely on this alone. */
   maxLength: number;
+  /**
+   * Accessible name. The visible prompt sits in a QuestionCard above rather
+   * than in a `<label>`, so without this the field announces as an unnamed
+   * text area (REVIEW.md R-19).
+   */
+  "aria-label": string;
 }
 
 /**

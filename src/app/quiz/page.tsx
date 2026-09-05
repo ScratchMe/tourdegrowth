@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { WordmarkLink } from "@/components/brand/WordmarkLink";
 import { Button } from "@/components/core/Button";
 import { MetaLabel } from "@/components/brand/MetaLabel";
@@ -57,6 +57,17 @@ export default function QuizPage() {
   // just the base size, not a fixed desktop-only choice.
   const size = "desktop";
 
+  /**
+   * REVIEW.md R-19. Answering removes the button that had focus and replaces
+   * the question, which dropped focus back to <body>: a keyboard user had to
+   * tab from the top of the page again, fifteen times in a row. Focus moves
+   * to the new question instead, which is also what makes a screen reader
+   * announce it.
+   */
+  const questionRegionRef = useRef<HTMLDivElement>(null);
+  const errorRegionRef = useRef<HTMLDivElement>(null);
+  const lastAnnouncedIndex = useRef<number | null>(null);
+
   const [mounted, setMounted] = useState(false);
   const [phase, setPhase] = useState<Phase>("answering");
   const [answers, setAnswers] = useState<Answers>({});
@@ -92,6 +103,22 @@ export default function QuizPage() {
     setMounted(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (phase === "error") {
+      errorRegionRef.current?.focus();
+      return;
+    }
+    if (phase !== "answering") return;
+    // Never on the first paint: nothing has moved yet, and stealing focus on
+    // arrival is its own accessibility problem.
+    if (lastAnnouncedIndex.current === null || lastAnnouncedIndex.current === currentIndex) {
+      lastAnnouncedIndex.current = currentIndex;
+      return;
+    }
+    lastAnnouncedIndex.current = currentIndex;
+    questionRegionRef.current?.focus();
+  }, [currentIndex, phase]);
 
   if (!mounted) return null;
 
@@ -231,11 +258,20 @@ export default function QuizPage() {
       </header>
 
       <main className={styles.main}>
-        <StageProgress current={currentStage + 1} total={STAGE_COUNT} size={size} />
+        <StageProgress current={currentStage + 1} total={STAGE_COUNT} size={size} aria-label={stageLabel} />
         {phase === "answering" && <MetaLabel>{stageLabel}</MetaLabel>}
 
         {phase === "answering" && (
-          <>
+          // `role="group"` + the counter as its name means one announcement
+          // carries "Question 3 of 15" and then the question itself, rather
+          // than a live region racing the focus move.
+          <div
+            ref={questionRegionRef}
+            tabIndex={-1}
+            role="group"
+            aria-label={questionCounter}
+            className={styles.questionRegion}
+          >
             <QuestionCard size={size}>
               <QuestionText
                 questionId={currentQuestion.id}
@@ -276,7 +312,7 @@ export default function QuizPage() {
               )}
               <MetaLabel size="sm">{tc(t.answerToContinue, locale)}</MetaLabel>
             </div>
-          </>
+          </div>
         )}
 
         {phase === "tone" && (
@@ -297,7 +333,7 @@ export default function QuizPage() {
         {phase === "loading" && <LoadingScreen locale={locale} variant="quick" />}
 
         {phase === "error" && (
-          <div className={styles.errorCard}>
+          <div ref={errorRegionRef} tabIndex={-1} role="alert" className={styles.errorCard}>
             <MetaLabel size="xs" tone="alert">
               {tc(t.errorEyebrow, locale)}
             </MetaLabel>

@@ -80,3 +80,9 @@
   color: var(--text-muted);
   word-break: break-word;
 }
+
+/* Programmatically focused container (REVIEW.md R-19) — see the same rule in
+   the Quick questionnaire's stylesheet. */
+.questionRegion:focus {
+  outline: none;
+}

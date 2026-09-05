@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { Button } from "@/components/core/Button";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
@@ -19,10 +20,20 @@ interface ToneSelectorProps {
 /** Tone selector — DESIGN-BRIEF.md §06a. "Straight up" (neutral) is the SPEC.md §6bis default. */
 export function ToneSelector({ locale, tone, onSelectTone, onSubmit }: ToneSelectorProps) {
   const t = UI_STRINGS.toneSelector;
+  // This screen only mounts once the 15th question is answered, so focusing
+  // on mount is exactly the transition a keyboard user needs following
+  // (REVIEW.md R-19).
+  const titleRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    titleRef.current?.focus();
+  }, []);
 
   return (
     <div className={styles.wrap}>
-      <h2 className={styles.title}>{tc(t.title, locale)}</h2>
+      <h2 ref={titleRef} tabIndex={-1} className={styles.title}>
+        {tc(t.title, locale)}
+      </h2>
 
       <div className={styles.options}>
         <ToneOption

@@ -70,3 +70,10 @@
   padding: 0;
   cursor: default;
 }
+
+/* Focused programmatically on open (REVIEW.md R-19) — the panel is not
+   tabbable, so a ring here would mark something the user never tabbed to.
+   Its own interactive children keep their focus styles. */
+.popover:focus {
+  outline: none;
+}

@@ -48,7 +48,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 | | R-25 | Gemini : `responseSchema` et un seul appel pour les deux tons | T | M | À faire — **exige un vrai appel réussi pour être vérifié** |
 | | R-17 | Infra versionnée : règles Firestore, env vars documentées | T | S | **Fait** (PR #36, 2026-09-05) |
 | | R-18 | Dépendances et config TypeScript | T | S | **Fait** (PR #37, 2026-09-05) — clôt le lot E |
-| **F — Expérience** | R-19 | Accessibilité du parcours | F+T | M | À faire |
+| **F — Expérience** | R-19 | Accessibilité du parcours | F+T | M | **Fait** (PR #38, 2026-09-05) |
 | | R-20 | Petits plus produit (dernier score, benchmark, persistance Deep dive) | F | S/M | À faire |
 | | R-21 | La nav FR de la landing déborde le viewport mobile | F+T | XS | À faire |
 | | R-22 | Trois paires de couleurs sous le seuil AA de contraste | F+T | S | À faire |
@@ -332,7 +332,7 @@ Documenter la nomenclature complète en tête de `src/lib/analytics/goatcounter.
 
 ### R-19 — Accessibilité du parcours
 
-**Type** F+T · **Effort** M · **Statut** À faire
+**Type** F+T · **Effort** M · **Statut** **Fait** (PR #38, 2026-09-05) — les 3 paires de contraste restent ouvertes en **R-22** (couleurs de marque, arbitrage d'Antoine)
 
 **Constat.** Après un clic sur une réponse, le bouton disparaît et le focus retombe sur `body` : au clavier, il faut re-tabuler depuis le début à chaque question. Aucune région `aria-live` (compteur de question, « ✓ » de copie, écran de chargement). `StageProgress` est une suite de `div` sans rôle. La popover glossaire a `role="dialog"` mais ne déplace pas le focus à l'ouverture ni ne le restitue à la fermeture. Le textarea de contexte libre n'a pas de `<label>` associé. Points déjà bons : `aria-pressed` sur les réponses, `aria-expanded` sur les déclencheurs, `focus-visible` et `prefers-reduced-motion` présents dans le CSS.
 
