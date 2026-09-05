@@ -42,6 +42,17 @@ const config = [
   },
 
   {
+    // Playwright fixtures receive a `use` callback, which the React Hooks
+    // rule reads as React's `use` hook. There is no React in these files at
+    // all — the rule simply doesn't apply here.
+    name: "tourdegrowth/e2e",
+    files: ["e2e/**/*.ts", "playwright.config.ts"],
+    rules: {
+      "react-hooks/rules-of-hooks": "off",
+    },
+  },
+
+  {
     // `scripts/` holds standalone Node utilities (utm-link.mjs) that the app
     // never imports and the build never runs — no browser, no React.
     name: "tourdegrowth/scripts",

@@ -459,3 +459,26 @@ Le partage est le mécanisme que SPEC.md §7 désigne comme « le cœur du produ
 **Vérifié en réel** : 182 tests, lint/tsc/build propres, **20 specs Playwright** (+2 : la copie desktop confirme et le lien copié ne contient pas `lang=` ; un partage natif annulé n'émet aucun événement et ne copie rien). Et par requête HTTP directe sur `/r/sample`, les balises réellement produites : `<title>74/100 — Tour de Growth</title>`, `og:description` « Retention is where this growth stalls. Where does yours? », `og:locale`, `twitter:card`, `robots: noindex, follow`.
 
 **Note d'infrastructure (2026-09-05)** : rendre le check CI bloquant s'avère impossible sur le plan actuel — GitHub n'applique pas les rulesets (ni la protection de branche classique) sur un dépôt **privé** d'une organisation en plan **Free**. Voir `REVIEW.md` R-05 pour les trois issues possibles. En attendant, convention pour les prochaines sessions : **ne jamais merger une PR dont le check `Types, tests, build` n'est pas vert.**
+
+### R-11 : mesurer enfin où les gens décrochent (2026-09-05)
+
+Jusqu'ici seules les **deux extrémités** du funnel étaient instrumentées (`submission_completed`, `share`). On savait combien de personnes terminaient, jamais où les autres partaient. Pour un projet dont l'objet est de démontrer une maîtrise de l'AARRR (SPEC.md §1), l'Activation de l'outil lui-même était la seule chose non mesurée.
+
+**Six événements ajoutés** : `quiz_started`, `quiz_stage_completed/<1..5>`, `tone_selected/<ton>`, `deep_dive_started`, `deep_dive_completed/<with_context|no_context>` — plus `share/<ton>/<méthode>` livré en R-10. Le vocabulaire complet est documenté en tête de `lib/analytics/goatcounter.ts`, avec les listes (`TONES`, `SHARE_METHODS`, `QUIZ_STAGES`, `DEEP_DIVE_CONTEXT_DETAILS`) **exportées et partagées** avec `goatcounter-api.ts` : `include_paths` matche par nom exact, donc un chemin écrit différemment aux deux endroits est un clic que le tableau de bord sous-compte en silence, sans erreur nulle part.
+
+**Trois pièges de comptage évités, pas découverts après coup :**
+- Revenir en arrière et changer une réponse ne doit pas re-déclencher `quiz_started` ni recompter une étape — d'où le garde `firstTimeAnswered`.
+- `tone_selected` est émis dans le `onSubmit` du sélecteur de ton, **pas** dans `handleGetScore`, que le bouton « Réessayer » de l'écran d'erreur appelle aussi : un retry n'est pas un nouveau choix de ton.
+- `deep_dive_started` n'est émis qu'**après** la vérification de propriété (R-01), donc un visiteur redirigé ne compte jamais comme un démarrage.
+
+**Bug corrigé au passage dans `goatcounter-api.ts`** : `limit` était codé en dur à `10`, écrit à l'époque où 4 chemins étaient demandés. Avec 22 chemins, la réponse aurait été tronquée en silence et la queue du funnel sous-rapportée. Il suit maintenant la longueur de la liste, et un test le verrouille.
+
+**`/admin/stats` gagne une vue de déperdition** : vues d'accueil → quiz démarré → chaque étape → ton choisi → résultat créé → partagé, plus le Deep dive, chacun avec son taux par rapport à l'étape pertinente.
+
+**La leçon d'outillage de l'étape précédente, appliquée cette fois d'emblée.** En vérifiant le pied de page, une assertion analytics était passée **à vide** : sans `NEXT_PUBLIC_GOATCOUNTER_CODE`, le script n'est pas injecté, `trackEvent` ne fait rien, et le test réussit sans rien prouver. Ici, le stub GoatCounter est devenu une **fixture Playwright** (`e2e/helpers.ts`) que toutes les specs utilisent, et la CI définit `NEXT_PUBLIC_GOATCOUNTER_CODE: e2e-stub` au build pour que la balise soit réellement rendue. La fixture intercepte la requête du script, donc aucune spec ne joint gc.zgo.at : la CI reste hors-ligne et déterministe.
+
+**Non-trivialité prouvée, pas supposée** : la suite a été rejouée après un build **sans** le code GoatCounter — 3 des 4 specs analytics échouent alors, ce qui confirme qu'elles mesurent bien quelque chose. (La 4ᵉ affirme une liste vide, elle passe dans les deux cas ; c'est une assertion compagnon, pas une garantie.)
+
+**Faux positif ESLint rencontré** : les fixtures Playwright reçoivent un callback `use`, que `react-hooks/rules-of-hooks` prend pour le hook React `use`. Règle désactivée pour `e2e/**` et `playwright.config.ts` uniquement — il n'y a aucun React dans ces fichiers.
+
+**Vérifié en réel** : 183 tests unitaires (+1), **24 specs Playwright** (+4), lint/tsc/build propres. Reste non vérifiable depuis ce bac à sable : que les événements arrivent dans le vrai tableau de bord GoatCounter (le proxy sortant bloque `*.goatcounter.com`, limite déjà documentée à l'étape 11). À confirmer par Antoine après déploiement, en regardant la nouvelle section « Funnel » de `/admin/stats`.

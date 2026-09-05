@@ -24,6 +24,12 @@ permissions:
 env:
   # Keeps the first-run telemetry notice out of the logs.
   NEXT_TELEMETRY_DISABLED: "1"
+  # A fake site code, so the GoatCounter script TAG is rendered and the E2E
+  # fixture can replace it with a local stub (REVIEW.md R-11). Without it
+  # `trackEvent` no-ops and every analytics assertion passes while proving
+  # nothing. Nothing is ever sent anywhere: the fixture intercepts the
+  # script request, so no spec reaches gc.zgo.at or this made-up site.
+  NEXT_PUBLIC_GOATCOUNTER_CODE: "e2e-stub"
 
 jobs:
   check:

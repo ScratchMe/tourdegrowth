@@ -38,7 +38,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 | | R-08 | Supprimer le code mort | T | XS | **Fait** (PR #26, 2026-09-05) |
 | **C — Boucle de partage (cœur du produit)** | R-09 | Verdict Quick résolu dans la langue du visiteur | F | S | **Fait** (PR #28, 2026-09-05) |
 | | R-10 | Partage enrichi : métadonnées personnalisées, texte, boutons | F | M | **Fait en partie** (PR #29, 2026-09-05) — boutons LinkedIn/X reportés, voir R-23 |
-| | R-11 | Instrumentation du funnel dans GoatCounter | F | S | À faire |
+| | R-11 | Instrumentation du funnel dans GoatCounter | F | S | **Fait** (PR #30, 2026-09-05) |
 | | R-12 | Explicabilité : « comment ce score est calculé » | F | M | À faire |
 | **D — Architecture i18n / SEO / cache** | R-13 | Locale dans l'URL, `hreflang`, pages statiques, switch de langue | F+T | L | À faire |
 | | R-14 | Cache du résultat partagé + OG 404 pour id inconnu | T | M | À faire |
@@ -210,7 +210,7 @@ Ajouter `@axe-core/playwright` sur landing, quiz et `/r/sample` (lien avec R-19)
 
 ### R-11 — Instrumentation du funnel dans GoatCounter
 
-**Type** F · **Effort** S · **Statut** À faire
+**Type** F · **Effort** S · **Statut** **Fait** (PR #30, 2026-09-05) — 6 événements ajoutés, `/admin/stats` gagne une vue de déperdition, et les specs E2E qui les vérifient sont non triviales (prouvé en les faisant échouer sans le code GoatCounter)
 
 **Constat.** Événements existants : `submission_completed/<tone>`, `share/<tone>`, `profile_click/<emplacement>`, plus les pageviews. Rien entre l'arrivée sur `/quiz` et la soumission : impossible de savoir où les gens décrochent, ni combien choisissent le roast, ni combien commencent un Deep dive sans le finir. Pour un projet qui veut démontrer une maîtrise de l'AARRR, l'**Activation** de l'outil lui-même n'est pas mesurée.
 

@@ -13,6 +13,7 @@ import { QUESTIONS } from "@/content/copy-library";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { useLocale } from "@/lib/i18n/locale-context";
 import {
+  QUESTIONS_PER_STAGE,
   QUESTION_COUNT,
   STAGE_COUNT,
   firstUnansweredIndex,
@@ -98,10 +99,22 @@ export default function QuizPage() {
   const currentStage = phase === "answering" ? stageOfQuestion(currentIndex) : STAGE_COUNT;
 
   function handleAnswer(optionIndex: AnswerIndex) {
+    // Only first-time answers count towards the funnel (REVIEW.md R-11):
+    // going Back and changing an answer must not re-fire `quiz_started` or
+    // re-count a stage that was already completed.
+    const firstTimeAnswered = answers[currentQuestion.id] === undefined;
+    if (firstTimeAnswered && Object.keys(answers).length === 0) {
+      trackEvent("quiz_started");
+    }
+
     const nextAnswers: Answers = { ...answers, [currentQuestion.id]: optionIndex };
     setAnswers(nextAnswers);
     saveStoredAnswers(nextAnswers);
     setOpenGlossaryId(null);
+
+    if (firstTimeAnswered && (currentIndex + 1) % QUESTIONS_PER_STAGE === 0) {
+      trackEvent("quiz_stage_completed", String(stageOfQuestion(currentIndex) + 1));
+    }
 
     // The stage-completion pulse (DESIGN-BRIEF.md "Motion") is handled
     // entirely by StageProgress's own CSS since the design-system v2
@@ -260,7 +273,18 @@ export default function QuizPage() {
         )}
 
         {phase === "tone" && (
-          <ToneSelector locale={locale} tone={tone} onSelectTone={setTone} onSubmit={handleGetScore} />
+          <ToneSelector
+            locale={locale}
+            tone={tone}
+            onSelectTone={setTone}
+            onSubmit={() => {
+              // Fired here rather than inside handleGetScore, which the error
+              // screen's "Try again" also calls — a retry is not a new tone
+              // choice (REVIEW.md R-11).
+              trackEvent("tone_selected", tone);
+              void handleGetScore();
+            }}
+          />
         )}
 
         {phase === "loading" && <LoadingScreen locale={locale} variant="quick" />}

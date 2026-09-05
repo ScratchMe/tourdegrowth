@@ -1,5 +1,12 @@
-import { expect, test } from "@playwright/test";
-import { answerAllQuestions, QUESTION_COUNT, readStoredAnswers, stubSubmissions } from "./helpers";
+import {
+  answerAllQuestions,
+  expect,
+  QUESTION_COUNT,
+  readStoredAnswers,
+  stubSubmissions,
+  test,
+  trackedEvents,
+} from "./helpers";
 
 /**
  * The one flow the whole product exists to complete: landing → 15 questions →
@@ -91,22 +98,17 @@ test.describe("sharing", () => {
 
   test("a cancelled native share is not counted as a share", async ({ page }) => {
     await page.addInitScript(() => {
-      (window as unknown as { __events: string[] }).__events = [];
       Object.defineProperty(navigator, "share", {
         configurable: true,
         value: () => Promise.reject(Object.assign(new Error("cancelled"), { name: "AbortError" })),
       });
-      (window as unknown as { goatcounter: unknown }).goatcounter = {
-        count: (o: { path: string }) => (window as unknown as { __events: string[] }).__events.push(o.path),
-      };
     });
 
     await page.goto("/r/sample");
     await page.getByTestId("share-button").click();
     await page.waitForTimeout(300);
 
-    const events = await page.evaluate(() => (window as unknown as { __events: string[] }).__events);
-    expect(events).toEqual([]);
+    expect(await trackedEvents(page)).toEqual([]);
     // And it must not silently fall back to writing the clipboard either.
     await expect(page.getByTestId("share-button")).not.toHaveText(/copied|copié/i);
   });

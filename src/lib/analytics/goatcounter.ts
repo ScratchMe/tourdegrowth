@@ -47,6 +47,45 @@ export function trackEvent(name: string, detail?: string): void {
 }
 
 /**
+ * ---------------------------------------------------------------------------
+ * The event vocabulary, in one place — REVIEW.md R-11.
+ * ---------------------------------------------------------------------------
+ *
+ * Before this, only the two ENDS of the funnel were measured
+ * (`submission_completed`, `share`): we could see how many people finished,
+ * never where the rest dropped out. For a project whose whole point is
+ * demonstrating AARRR fluency (SPEC.md §1), the tool's own Activation was
+ * the one thing not instrumented.
+ *
+ *   /                                   pageview, GoatCounter does this itself
+ *   quiz_started                        first answer recorded, once per run
+ *   quiz_stage_completed/<1..5>         a pillar's 3 questions answered
+ *   tone_selected/<neutral|roast>       "Get my score" pressed
+ *   submission_completed/<tone>         a result exists (SPEC.md §8)
+ *   share/<tone>/<native|copy>          a share actually happened (SPEC.md §8)
+ *   deep_dive_started                   the owner opened the Deep dive
+ *   deep_dive_completed/<with_context|no_context>
+ *   profile_click/<placement>           a credit link to Antoine's CV
+ *
+ * These names are also what `goatcounter-api.ts` asks GoatCounter for, by
+ * exact path — a name typed differently in the two places is a click the
+ * dashboard silently under-counts, which is why the lists below are shared
+ * rather than repeated.
+ */
+
+/** Both tones, as they appear in event paths. Mirrors `lib/quiz/tone.ts`. */
+export const TONES = ["neutral", "roast"] as const;
+
+/** How a share actually happened — the native sheet, or the desktop clipboard fallback. */
+export const SHARE_METHODS = ["native", "copy"] as const;
+
+/** The five AARRR stages, as stage-completion suffixes. */
+export const QUIZ_STAGES = ["1", "2", "3", "4", "5"] as const;
+
+/** Whether the Deep dive's optional free-text field was filled in (SPEC-ADDENDUM-02.md §1). */
+export const DEEP_DIVE_CONTEXT_DETAILS = ["with_context", "no_context"] as const;
+
+/**
  * The `profile_click` detail suffixes instrumented on every Antoine credit
  * link. Shared with `goatcounter-api.ts`'s server-side funnel fetch so the
  * two lists can never drift apart — the API module needs the exact same path
