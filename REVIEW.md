@@ -37,7 +37,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 | | R-07 | Playwright committé : parcours critique en E2E | T | M | **Fait** (PR #27, 2026-09-05) |
 | | R-08 | Supprimer le code mort | T | XS | **Fait** (PR #26, 2026-09-05) |
 | **C — Boucle de partage (cœur du produit)** | R-09 | Verdict Quick résolu dans la langue du visiteur | F | S | **Fait** (PR #28, 2026-09-05) |
-| | R-10 | Partage enrichi : métadonnées personnalisées, texte, boutons | F | M | À faire |
+| | R-10 | Partage enrichi : métadonnées personnalisées, texte, boutons | F | M | **Fait en partie** (PR #29, 2026-09-05) — boutons LinkedIn/X reportés, voir R-23 |
 | | R-11 | Instrumentation du funnel dans GoatCounter | F | S | À faire |
 | | R-12 | Explicabilité : « comment ce score est calculé » | F | M | À faire |
 | **D — Architecture i18n / SEO / cache** | R-13 | Locale dans l'URL, `hreflang`, pages statiques, switch de langue | F+T | L | À faire |
@@ -50,6 +50,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 | | R-20 | Petits plus produit (dernier score, benchmark, persistance Deep dive) | F | S/M | À faire |
 | | R-21 | La nav FR de la landing déborde le viewport mobile | F+T | XS | À faire |
 | | R-22 | Trois paires de couleurs sous le seuil AA de contraste | F+T | S | À faire |
+| | R-23 | Boutons de partage LinkedIn/X : où les mettre sans casser « 2 CTA » | F | S | À faire |
 
 ### Pourquoi cet ordre
 
@@ -131,7 +132,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 
 ### R-05 — CI GitHub Actions
 
-**Type** T · **Effort** S · **Statut** **Fait** (PR #25, 2026-09-05) — le lint (R-06) et les E2E (R-07) s'ajouteront au workflow avec leurs propres PR. **Reste une action manuelle d'Antoine** : rendre le check obligatoire sur `main` dans les paramètres GitHub du repo (Settings → Branches → Branch protection rules), ce qui ne peut pas se faire depuis le code.
+**Type** T · **Effort** S · **Statut** **Fait** (PR #25, 2026-09-05) — le lint (R-06) et les E2E (R-07) s'ajouteront au workflow avec leurs propres PR. **Rendre le check bloquant s'avère impossible sur le plan actuel** : Antoine a créé le ruleset le 2026-09-05, GitHub répond « Your rulesets won't be enforced on this private repository until you move to GitHub Team organization account ». Les rulesets (et la protection de branche classique) ne sont pas appliqués sur un dépôt **privé** d'une organisation en plan **Free**. Trois issues possibles, aucune urgente : passer le repo en public (cohérent avec sa vocation de portfolio, aucun secret n'y est committé — `.env.local` est ignoré), passer l'organisation en GitHub Team, ou s'en tenir à la convention. La CI **tourne et rapporte** sur chaque PR dans tous les cas : seul le blocage du bouton de merge manque. Convention retenue en attendant, écrite ici pour les prochaines sessions : **ne jamais merger une PR dont le check `Types, tests, build` n'est pas vert.**
 
 **Constat.** Pas de `.github/workflows`. Vercel construit à chaque push, mais ni Vitest ni `tsc` ne tournent jamais automatiquement. Les 19 PR mergées à ce jour l'ont été sans aucun check.
 
@@ -190,7 +191,7 @@ Ajouter `@axe-core/playwright` sur landing, quiz et `/r/sample` (lien avec R-19)
 
 ### R-10 — Partage enrichi
 
-**Type** F · **Effort** M · **Statut** À faire
+**Type** F · **Effort** M · **Statut** **Fait en partie** (PR #29, 2026-09-05) — métadonnées par résultat, texte de partage, URL nettoyée, événements par méthode, et confirmation de copie réelle. **Les boutons LinkedIn/X sont volontairement reportés en R-23** : les ajouter casserait la règle « exactement 2 CTA, jamais 3 » tranchée à l'étape 7, donc c'est un arbitrage design, pas une implémentation.
 
 **Constat.**
 - `handleShare` (`src/app/r/[id]/ResultView.tsx:91`) partage `window.location.href` avec un `title` générique, **sans `text`** : sur mobile, la feuille de partage arrive vide de tout message.
@@ -392,6 +393,21 @@ Les deux autres demandent une décision d'Antoine, parce qu'ils touchent la coul
 **En attendant**, la spec axe (`e2e/accessibility.spec.ts`) liste ces trois paires explicitement, **par couleur** (stable) et non par sélecteur (un hash de build) : toute **nouvelle** violation de contraste fait rougir la CI, tandis que ces trois-là restent visibles dans le code plutôt que cachées derrière une règle désactivée.
 
 **Vérification attendue.** Les trois paires passent 4,5:1, et l'entrée correspondante disparaît de `KNOWN_CONTRAST_GAPS` sans que la suite ne rougisse.
+### R-23 — Boutons de partage LinkedIn/X : où les mettre sans casser « 2 CTA »
+
+**Type** F · **Effort** S · **Statut** À faire — **décision design, pas une implémentation**
+
+**D'où ça vient.** Découpé de R-10 au moment de le livrer, plutôt que tranché en silence.
+
+**La tension.** SPEC.md §2 et §7 désignent explicitement LinkedIn et X comme les canaux du produit (« une page de résultat conçue pour être partagée sur LinkedIn/X », « c'est elle qui fait le travail de conversion sur LinkedIn/X »). Mais l'étape 7 a tranché, à partir d'une lecture littérale du design, que l'écran de résultat porte **exactement 2 CTA, jamais 3** — et DESIGN-BRIEF.md décrit le partage comme « native share sheet where available, otherwise copy the result URL », rien de plus.
+
+Ajouter deux boutons de partage réseau casserait donc une décision produit déjà prise, sur l'écran le plus soigné du produit.
+
+**Ce que R-10 a déjà réglé sans y toucher** : le partage natif emporte maintenant un vrai texte (score + pilier faible), la copie desktop confirme visiblement, et le lien copié est propre. Un partage vers LinkedIn reste donc parfaitement faisable — via la feuille native sur mobile, via un collage manuel sur desktop.
+
+**Ce qui reste à décider (Antoine, éventuellement avec Claude Design)** : soit on s'en tient aux 2 CTA et on considère la question close, soit on ouvre un emplacement pour les boutons réseau. Pistes si on ouvre : un petit rang d'icônes/liens **sous** la ligne de CTA (donc pas un 3ᵉ CTA au même niveau), ou une feuille de partage qui s'ouvre au clic sur « Partager » et propose LinkedIn / X / Copier.
+
+**Attention si on le fait** : LinkedIn et X ajoutent `nofollow` à ce qu'ils publient, donc ces boutons n'ont **aucune** valeur SEO — leur intérêt est uniquement le confort de partage. Ne pas les vendre comme un levier de référencement.
 ---
 
 ## Ce qui a été vérifié et jugé sain
