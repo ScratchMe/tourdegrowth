@@ -35,6 +35,23 @@ function apiKey(): string {
   return process.env.GEMINI_API_KEY!;
 }
 
+/**
+ * What the model actually spent, printed on every call.
+ *
+ * `thoughtsTokenCount` is the number that matters: these are thinking models
+ * and reasoning tokens come out of the SAME `maxOutputTokens` budget as the
+ * answer. That is what truncated a French roast mid-JSON on the first live
+ * run, and it is invisible unless printed.
+ */
+function usage(data: unknown): string {
+  const d = data as {
+    candidates?: { finishReason?: string }[];
+    usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number; thoughtsTokenCount?: number };
+  };
+  const u = d.usageMetadata ?? {};
+  return `finishReason=${d.candidates?.[0]?.finishReason ?? "?"} prompt=${u.promptTokenCount ?? "?"} thoughts=${u.thoughtsTokenCount ?? 0} answer=${u.candidatesTokenCount ?? "?"}`;
+}
+
 function samplePrompt(locale: Locale, tone: Tone): string {
   return buildDeepDivePrompt({
     locale,
@@ -67,6 +84,7 @@ describe("live Gemini", () => {
     const verdict = parseDeepDiveVerdict(extractGeminiText(data), modelUsed);
 
     console.log(`\n  ── model: ${modelUsed}, ${Math.round((Date.now() - started) / 1000)}s`);
+    console.log(`  ── ${usage(data)}`);
     console.log(`  ── priority action\n     ${verdict.priorityAction}`);
 
     for (const pillar of PILLARS) {
@@ -82,6 +100,11 @@ describe("live Gemini", () => {
       callGeminiWithFallback(samplePrompt("fr", "neutral"), apiKey()),
       callGeminiWithFallback(samplePrompt("fr", "roast"), apiKey()),
     ]);
+
+    // Printed BEFORE parsing: a truncated answer throws in `extractGeminiText`,
+    // and the token counts are precisely the evidence needed to understand why.
+    console.log(`\n  ── FR neutre  ${usage(neutral.data)}`);
+    console.log(`  ── FR roast   ${usage(roast.data)}`);
 
     const neutre = parseDeepDiveVerdict(extractGeminiText(neutral.data), neutral.modelUsed);
     const cassant = parseDeepDiveVerdict(extractGeminiText(roast.data), roast.modelUsed);

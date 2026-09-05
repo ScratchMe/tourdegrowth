@@ -746,3 +746,19 @@ Corrigé en testant l'invariant réel plutôt qu'un proxy : un **canari** (`TDG-
 **Fait produit à connaître, pas un défaut** : ce que quelqu'un écrit dans le champ de contexte libre façonne du texte qui atterrit sur une page qu'il peut partager. C'est inhérent à la fonctionnalité et l'auteur l'a choisi en écrivant le champ — mais ça mérite peut-être une ligne sous le champ un jour, à l'appréciation de l'agent produit.
 
 **Correctif de workflow au passage** : l'étape Gemini est passée en `if: ${{ !cancelled() && … }}`. Le premier run s'est arrêté avant elle parce que l'étape production sortait en 1 — quand on demande « both », l'échec de l'une ne doit pas masquer le résultat de l'autre.
+
+### Le probe Gemini trouve un vrai bug : les réponses tronquées passaient pour valides (2026-09-05)
+
+Second run du workflow : **production 9/9**, et la sonde Gemini en échec — cette fois sur un défaut réel de l'app, pas sur mon test.
+
+**Le symptôme.** `SyntaxError: Expected ',' or '}' after property value in JSON at position 2037`, levé dans `extractJson`. La réponse française du ton roast — la plus longue sortie que ce produit demande — revenait coupée en plein objet JSON.
+
+**La cause immédiate, et pourquoi R-16 ne l'avait pas couverte.** `extractGeminiText` inspectait `finishReason` **uniquement quand le texte était absent**. Or une réponse tronquée porte quand même la partie déjà écrite : elle était donc renvoyée comme un succès, et n'échouait que bien plus loin, dans `JSON.parse`, sous une forme qui ne dit rien de ce qui s'est réellement passé. C'est exactement l'opacité que R-16 existait pour supprimer — le test était simplement sur la mauvaise branche. Corrigé : `finishReason` est vérifié **avant** le texte, et tout ce qui n'est pas `STOP` lève une erreur nommée.
+
+**La cause de fond, et pourquoi 4096 « paraissait » généreux.** La sortie utile fait ~600 tokens ; le plafond était à 4096. Mais ce sont des **modèles à raisonnement, et les tokens de réflexion sont décomptés du même `maxOutputTokens`**. Une délibération assez longue ne laissait plus la place à la réponse. Plafond relevé à 16384 — il ne coûte rien tant qu'il n'est pas atteint, puisque seule la sortie réelle est facturée.
+
+**Honnêteté sur ce qui est prouvé et ce qui est déduit** : le correctif de *signalement* est certain (le test était sur la mauvaise branche, c'est lisible dans le code). Le plafond est une déduction fortement étayée mais pas encore vérifiée — le premier run ne pouvait pas montrer `finishReason`, justement à cause du bug. La sonde imprime maintenant `finishReason`, `thoughtsTokenCount` et `candidatesTokenCount` à chaque appel : le prochain run tranche avec des chiffres.
+
+**Conséquence utilisateur, à ne pas minimiser** : quand cette troncature touche la langue de complétion, `completeDeepDiveFlow` échoue et l'utilisateur reçoit `DEEP_DIVE_FAILED` après avoir répondu à 10 questions de plus. C'est intermittent (le run production, lui, est passé deux fois) — donc c'était un échec réel et difficile à reproduire, que seule une sonde contre le vrai service pouvait attraper.
+
+3 tests de non-régression ajoutés (`response.test.ts`) : une réponse tronquée **avec** texte partiel doit lever, l'erreur doit porter les compteurs de tokens, et une réponse `STOP` normale doit toujours passer.

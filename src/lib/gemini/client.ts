@@ -37,13 +37,21 @@ const RETRIABLE_STATUSES = [404, 429, 500, 503];
 const REQUEST_TIMEOUT_MS = 20_000;
 
 /**
- * Generous ceiling on one tone's Deep dive JSON (5 pillar recommendations of
- * 3-4 sentences, plus a priority action) — REVIEW.md R-16. It exists to cap
- * a runaway response, not to shape a normal one, and hitting it is now
- * diagnosable rather than opaque: see `finishReason` handling in
- * `response.ts`.
+ * Ceiling on one tone's Deep dive JSON (5 pillar recommendations of 3-4
+ * sentences, plus a priority action) — REVIEW.md R-16. It exists to cap a
+ * runaway response, not to shape a normal one.
+ *
+ * Raised from 4096 after the live Gemini probe caught a French roast coming
+ * back truncated mid-JSON. The answer itself is only ~600 tokens, so 4096
+ * looked generous — but these are thinking models, and **reasoning tokens
+ * count against this same ceiling**. A long enough deliberation left too
+ * little room for the answer. The visible output is what is billed and what
+ * needs the headroom; raising the cap costs nothing when it is not reached.
+ *
+ * A truncation is no longer silent either: `response.ts` now inspects
+ * `finishReason` before returning the text, not only when there is none.
  */
-const MAX_OUTPUT_TOKENS = 4096;
+const MAX_OUTPUT_TOKENS = 16384;
 
 export interface GeminiCallResult {
   data: unknown;
