@@ -47,7 +47,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 | | R-16 | Appel Gemini : header, `finishReason`, `maxOutputTokens` | T | M | **Fait en partie** (PR #35, 2026-09-05) — `responseSchema` et l'appel unique reportés en R-25 |
 | | R-25 | Gemini : `responseSchema` et un seul appel pour les deux tons | T | M | À faire — **exige un vrai appel réussi pour être vérifié** |
 | | R-17 | Infra versionnée : règles Firestore, env vars documentées | T | S | **Fait** (PR #36, 2026-09-05) |
-| | R-18 | Dépendances et config TypeScript | T | S | À faire |
+| | R-18 | Dépendances et config TypeScript | T | S | **Fait** (PR #37, 2026-09-05) — clôt le lot E |
 | **F — Expérience** | R-19 | Accessibilité du parcours | F+T | M | À faire |
 | | R-20 | Petits plus produit (dernier score, benchmark, persistance Deep dive) | F | S/M | À faire |
 | | R-21 | La nav FR de la landing déborde le viewport mobile | F+T | XS | À faire |
@@ -320,7 +320,7 @@ Documenter la nomenclature complète en tête de `src/lib/analytics/goatcounter.
 
 ### R-18 — Dépendances et config TypeScript
 
-**Type** T · **Effort** S · **Statut** À faire
+**Type** T · **Effort** S · **Statut** **Fait** (PR #37, 2026-09-05) — clôt le lot E. **Le remplacement de `firebase-admin` par `@google-cloud/firestore` a été évalué puis écarté, mesure à l'appui** : importer `firebase-admin/firestore` charge 455 modules dont **zéro** venant de `@google-cloud/storage`. Le point d'entrée modulaire évite déjà Storage à l'exécution, et le poids réel (6,2 Mo) est `@google-cloud/firestore` lui-même, chargé dans les deux cas. Le constat initial supposait un gain de cold start qui n'existe pas : `firebase-admin` n'ajoute qu'un mince wrapper de 2,1 Mo. Ne pas y revenir sans une mesure de cold start réelle sur Vercel qui contredirait celle-ci.
 
 **Constat.** `npm audit --omit=dev` : 6 vulnérabilités modérées, toutes transitives via `firebase-admin` → `@google-cloud/storage` / `retry-request` / `teeny-request`. `firebase-admin` embarque Storage, Auth, Messaging… pour trois opérations Firestore, et pèse sur le cold start de chaque fonction. `tsconfig.json` : `baseUrl` est déprécié (`tsc` l'annonce comme erreur future en TS 7), `target: ES2017` est daté, `@types/node` est en 20 alors que Vercel exécute Node 22.
 
