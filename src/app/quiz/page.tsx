@@ -177,7 +177,14 @@ export default function QuizPage() {
       // REVIEW.md R-01: the owner token comes back exactly once and is never
       // recoverable afterwards — store it before navigating away. It is the
       // only thing that will later prove this browser created the result.
-      rememberResult({ id: created.id, ownerToken: created.ownerToken, createdAt: new Date().toISOString() });
+      rememberResult({
+        id: created.id,
+        ownerToken: created.ownerToken,
+        createdAt: new Date().toISOString(),
+        // REVIEW.md R-12: kept on this device so the owner — and only the
+        // owner — can see how their score was calculated.
+        answers,
+      });
       // REVIEW.md R-03, first-touch attribution: the ref has now been spent.
       // Clearing it means a second Tour from this browser starts clean
       // instead of silently inheriting the first one's credit.

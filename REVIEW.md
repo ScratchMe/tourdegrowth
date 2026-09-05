@@ -39,7 +39,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 | **C — Boucle de partage (cœur du produit)** | R-09 | Verdict Quick résolu dans la langue du visiteur | F | S | **Fait** (PR #28, 2026-09-05) |
 | | R-10 | Partage enrichi : métadonnées personnalisées, texte, boutons | F | M | **Fait en partie** (PR #29, 2026-09-05) — boutons LinkedIn/X reportés, voir R-23 |
 | | R-11 | Instrumentation du funnel dans GoatCounter | F | S | **Fait** (PR #30, 2026-09-05) |
-| | R-12 | Explicabilité : « comment ce score est calculé » | F | M | À faire |
+| | R-12 | Explicabilité : « comment ce score est calculé » | F | M | **Fait** (PR #31, 2026-09-05) — clôt le lot C |
 | **D — Architecture i18n / SEO / cache** | R-13 | Locale dans l'URL, `hreflang`, pages statiques, switch de langue | F+T | L | À faire |
 | | R-14 | Cache du résultat partagé + OG 404 pour id inconnu | T | M | À faire |
 | **E — Robustesse backend** | R-15 | Rate limiting sur les routes POST + `maxDuration` | T | S/M | À faire |
@@ -227,7 +227,7 @@ Documenter la nomenclature complète en tête de `src/lib/analytics/goatcounter.
 
 ### R-12 — Explicabilité : « comment ce score est calculé »
 
-**Type** F · **Effort** M · **Statut** À faire
+**Type** F · **Effort** M · **Statut** **Fait** (PR #31, 2026-09-05) — clôt le lot C. Deux points à relire par Antoine : la copie du panneau (marquée `TODO`) et le fait qu'aucun composant du design system ne couvre un dépliant, donc il est construit aux tokens.
 
 **Constat.** La règle non négociable « un score partagé doit être ré-explicable en 10 secondes » est tenue par le code (`computeScore` est pur et testé), pas par l'interface : la page résultat ne montre jamais les trois réponses derrière chaque sous-score. `Submission.answers` existe en base et n'est jamais lu pour l'affichage.
 

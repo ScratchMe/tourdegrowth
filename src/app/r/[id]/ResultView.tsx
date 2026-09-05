@@ -20,12 +20,14 @@ import { HOW_IT_WORKS } from "@/content/how-it-works";
 import { PROFILE_CLICK_DETAILS, trackEvent } from "@/lib/analytics/goatcounter";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { useLocale } from "@/lib/i18n/locale-context";
-import { clearStoredAnswers, isOwnResult } from "@/lib/quiz/storage";
+import { clearStoredAnswers, findStoredResult } from "@/lib/quiz/storage";
 import type { Tone } from "@/lib/quiz/tone";
 import { PILLARS, type Pillar } from "@/lib/scoring/pillars";
 import { rankPillarsAscending } from "@/lib/scoring/rank";
 import type { QuickVerdict } from "@/lib/scoring/verdict";
+import type { Answers } from "@/lib/scoring/score";
 import type { DeepDiveView } from "@/lib/submissions/types";
+import { ScoreBreakdown, type BreakdownData } from "./ScoreBreakdown";
 import styles from "./ResultView.module.css";
 
 // Named for readability at the trackEvent() call sites below — the array
@@ -46,6 +48,8 @@ interface ResultViewProps {
   isSample?: boolean;
   /** Deep dive enrichment (SPEC-ADDENDUM-01.md §2) — null on a plain Quick result. Display-safe subset only: the free-text context and the 10 context answers never leave the server (REVIEW.md R-02). */
   deepDive?: DeepDiveView | null;
+  /** Questions and per-pillar raw points behind the score (REVIEW.md R-12) — public content; the owner's answers come from their own device, never from here. */
+  breakdown?: BreakdownData | null;
 }
 
 /**
@@ -65,6 +69,7 @@ export function ResultView({
   initialTone,
   isSample = false,
   deepDive = null,
+  breakdown = null,
 }: ResultViewProps) {
   const { locale } = useLocale();
   const [tone, setTone] = useState<Tone>(initialTone);
@@ -76,12 +81,17 @@ export function ResultView({
   // lesson). Starting at `false` also means the safe state — no Deep dive
   // offer — is what a visitor briefly sees, not the other way round.
   const [isOwner, setIsOwner] = useState(false);
+  /** The owner's own answers, read from this device — see ScoreBreakdown (REVIEW.md R-12). */
+  const [ownAnswers, setOwnAnswers] = useState<Answers | null>(null);
 
   useEffect(() => {
+    if (!id) return;
+    const stored = findStoredResult(id);
     // Deliberate: the server cannot know who is looking, so ownership is
     // only knowable after mount (see the comment on `isOwner` above).
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (id) setIsOwner(isOwnResult(id));
+    setIsOwner(stored !== null);
+    setOwnAnswers(stored?.answers ?? null);
   }, [id]);
   const roast = tone === "roast";
   const verdict = verdicts[tone];
@@ -347,6 +357,12 @@ export function ResultView({
               <Link href="/how-it-works">{disclaimerLinkText}</Link>
               {disclaimerSplit[1]}
             </Disclaimer>
+
+            {/* Owner only, and closed by default: the screen the design brief
+                specified is unchanged until someone asks for the detail. */}
+            {isOwner && breakdown && ownAnswers && (
+              <ScoreBreakdown locale={locale} data={breakdown} answers={ownAnswers} pillars={pillars} />
+            )}
           </div>
         </div>
       </main>

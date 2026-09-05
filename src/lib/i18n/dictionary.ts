@@ -240,6 +240,32 @@ export const UI_STRINGS = {
   },
 
   /**
+   * "How this score is calculated" — the owner-only breakdown under the
+   * result (REVIEW.md R-12). The rule CLAUDE.md calls non-negotiable ("un
+   * score partagé doit être ré-explicable en 10 secondes") was true of the
+   * code and invisible in the interface: the page never showed the three
+   * answers behind a pillar's score.
+   *
+   * // TODO: copie de travail, à relire par l'agent produit. C'est de la
+   * copie d'interface (titres, libellés, gabarit de calcul), pas de la voix
+   * verdict ni du roast — même statut que l'écran d'erreur repris du brief.
+   */
+  breakdown: {
+    title: { en: "How this score is calculated", fr: "Comment ce score est calculé" },
+    intro: {
+      en: "Three questions per stage. Your answers, and what each one was worth.",
+      fr: "Trois questions par étape. Tes réponses, et ce que chacune valait.",
+    },
+    // e.g. "47/60 → 16/20"
+    pillarMathTemplate: { en: "{raw}/60 → {score}/20", fr: "{raw}/60 → {score}/20" },
+    pointsTemplate: { en: "{n} pts", fr: "{n} pts" },
+    ownerOnlyNote: {
+      en: "Only visible to you — your answers are stored on this device, never on the shared page.",
+      fr: "Visible par toi seul — tes réponses sont sur cet appareil, jamais sur la page partagée.",
+    },
+  },
+
+  /**
    * Text that leaves the product with the shared link — the native share
    * sheet's message (REVIEW.md R-10). `{total}` and `{pillar}` are replaced
    * in code, same convention as the quiz counters above.

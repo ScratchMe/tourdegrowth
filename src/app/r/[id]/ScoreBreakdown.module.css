@@ -1,0 +1,121 @@
+/* Built from design tokens only — the design system has no disclosure
+   component (see the CLAUDE.md entry for R-12). Deliberately quiet: this
+   sits after the CTAs and stays closed until asked for. */
+.wrap {
+  border-top: var(--border-rule);
+  padding-top: var(--space-8);
+  margin-top: var(--space-8);
+}
+
+.summary {
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.summary::-webkit-details-marker {
+  display: none;
+}
+
+/* A rotating caret, so the control reads as expandable without an icon file
+   (the design system ships no icons at all — see DESIGN-BRIEF.md "Assets"). */
+.summary::before {
+  content: "+";
+  font: var(--meta-md);
+  color: var(--text-muted);
+}
+
+.wrap[open] .summary::before {
+  content: "−";
+}
+
+.summary:hover {
+  color: var(--text-body);
+}
+
+.summary:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
+  border-radius: 2px;
+}
+
+.intro {
+  font: var(--body-sm);
+  color: var(--text-muted);
+  margin-top: var(--space-5);
+}
+
+.pillar {
+  margin-top: var(--space-8);
+}
+
+.pillarHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-5);
+  border-bottom: var(--border-rule);
+  padding-bottom: var(--space-3);
+}
+
+.pillarName {
+  font: var(--meta-md);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-body);
+}
+
+.pillarMath {
+  font: var(--meta-sm);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.questions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.question {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-5) 0;
+  border-bottom: 1px dashed var(--border-divider);
+}
+
+.questionText {
+  font: var(--body-sm);
+  color: var(--text-body);
+}
+
+.answerRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-5);
+}
+
+.answerLabel {
+  font: var(--body-sm);
+  color: var(--text-muted);
+}
+
+.points {
+  font: var(--meta-sm);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.note {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+  margin-top: var(--space-8);
+}
