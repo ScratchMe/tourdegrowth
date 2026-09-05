@@ -36,6 +36,15 @@ const RETRIABLE_STATUSES = [404, 429, 500, 503];
  */
 const REQUEST_TIMEOUT_MS = 20_000;
 
+/**
+ * Generous ceiling on one tone's Deep dive JSON (5 pillar recommendations of
+ * 3-4 sentences, plus a priority action) — REVIEW.md R-16. It exists to cap
+ * a runaway response, not to shape a normal one, and hitting it is now
+ * diagnosable rather than opaque: see `finishReason` handling in
+ * `response.ts`.
+ */
+const MAX_OUTPUT_TOKENS = 4096;
+
 export interface GeminiCallResult {
   data: unknown;
   modelUsed: string;
@@ -66,13 +75,24 @@ export async function callGeminiWithFallback(
     let response: Response;
     try {
       response = await fetchImpl(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            // REVIEW.md R-16: the key used to travel in the query string,
+            // where any intermediate that logs URLs — a proxy, an error
+            // tracker, a browser devtools export — would capture it. The
+            // header is the supported alternative and leaks nowhere.
+            "x-goog-api-key": apiKey,
+          },
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.3, responseMimeType: "application/json" },
+            generationConfig: {
+              temperature: 0.3,
+              responseMimeType: "application/json",
+              maxOutputTokens: MAX_OUTPUT_TOKENS,
+            },
           }),
           signal: timeoutController.signal,
         },

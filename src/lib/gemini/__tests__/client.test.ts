@@ -129,3 +129,32 @@ describe("extractJson", () => {
     expect(extractJson('```\n{"a":1}\n```')).toEqual({ a: 1 });
   });
 });
+
+/** REVIEW.md R-16 — the key must not travel in a URL. */
+describe("callGeminiWithFallback — request shape", () => {
+  it("sends the API key as a header, never in the query string", async () => {
+    const fetchImpl = vi.fn(async () =>
+      new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: "{}" }] } }] }), { status: 200 }),
+    ) as unknown as typeof fetch;
+
+    await callGeminiWithFallback("prompt", "super-secret-key", fetchImpl);
+
+    const [url, init] = (fetchImpl as unknown as { mock: { calls: [string, RequestInit][] } }).mock.calls[0]!;
+    expect(url).not.toContain("super-secret-key");
+    expect(url).not.toContain("key=");
+    expect((init.headers as Record<string, string>)["x-goog-api-key"]).toBe("super-secret-key");
+  });
+
+  it("caps the output so a runaway answer can't bill forever", async () => {
+    const fetchImpl = vi.fn(async () =>
+      new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: "{}" }] } }] }), { status: 200 }),
+    ) as unknown as typeof fetch;
+
+    await callGeminiWithFallback("prompt", "k", fetchImpl);
+
+    const [, init] = (fetchImpl as unknown as { mock: { calls: [string, RequestInit][] } }).mock.calls[0]!;
+    const body = JSON.parse(init.body as string);
+    expect(body.generationConfig.maxOutputTokens).toBeGreaterThan(0);
+    expect(body.generationConfig.responseMimeType).toBe("application/json");
+  });
+});

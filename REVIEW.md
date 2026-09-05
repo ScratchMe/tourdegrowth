@@ -44,7 +44,8 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 | | R-24 | Rendre les pages de contenu réellement statiques | T | M | À faire |
 | | R-14 | Cache du résultat partagé + OG 404 pour id inconnu | T | M | **Fait** (PR #33, 2026-09-05) — clôt le lot D |
 | **E — Robustesse backend** | R-15 | Rate limiting sur les routes POST + `maxDuration` | T | S/M | **Fait** (PR #34, 2026-09-05) — limite en mémoire, pas distribuée |
-| | R-16 | Appel Gemini : header, `responseSchema`, `finishReason`, un seul appel | T | M | À faire |
+| | R-16 | Appel Gemini : header, `finishReason`, `maxOutputTokens` | T | M | **Fait en partie** (PR #35, 2026-09-05) — `responseSchema` et l'appel unique reportés en R-25 |
+| | R-25 | Gemini : `responseSchema` et un seul appel pour les deux tons | T | M | À faire — **exige un vrai appel réussi pour être vérifié** |
 | | R-17 | Infra versionnée : règles Firestore, env vars documentées | T | S | À faire |
 | | R-18 | Dépendances et config TypeScript | T | S | À faire |
 | **F — Expérience** | R-19 | Accessibilité du parcours | F+T | M | À faire |
@@ -294,9 +295,9 @@ Documenter la nomenclature complète en tête de `src/lib/analytics/goatcounter.
 
 **Vérification attendue.** Test d'intégration local : la 11ᵉ soumission en une heure depuis la même IP renvoie 429 ; le retry après expiration passe.
 
-### R-16 — Appel Gemini : header, `responseSchema`, `finishReason`, un seul appel
+### R-16 — Appel Gemini : header, `finishReason`, `maxOutputTokens`
 
-**Type** T · **Effort** M · **Statut** À faire
+**Type** T · **Effort** M · **Statut** **Fait en partie** (PR #35, 2026-09-05). Livré : clé en en-tête, diagnostic de `finishReason`/`blockReason`, `maxOutputTokens`. **Reporté en R-25** : `responseSchema` et l'appel unique pour les deux tons — les deux modifient la *requête* d'une fonctionnalité IA qui marche aujourd'hui, et aucun des deux n'est vérifiable sans une génération réussie.
 
 **Constat.**
 - Clé API dans la query string (`src/lib/gemini/client.ts:69`) : elle se retrouve dans tout log d'URL intermédiaire. L'API accepte le header `x-goog-api-key`.
@@ -432,6 +433,23 @@ Le chrome partagé (polices `next/font`, script GoatCounter, `LocaleProvider`, `
 **Points d'attention.** Passer d'un layout racine à l'autre force un chargement complet de page (pas de transition client) — acceptable ici, `/en` → `/quiz` est déjà une vraie navigation. Et `app/not-found.tsx` global doit être rattaché à l'un des deux, ce qui est le point de friction connu de cette structure : à valider empiriquement plutôt qu'à supposer.
 
 **Vérification attendue.** `next build` affiche `○` pour les 32 pages de contenu, `ƒ` pour `/quiz`, `/r/[id]`, `/deep-dive`, `/admin`, `/api`. Les 36 specs E2E restent vertes, `<html lang>` reste correct dans les deux arbres.
+### R-25 — Gemini : `responseSchema` et un seul appel pour les deux tons
+
+**Type** T · **Effort** M · **Statut** À faire — **exige un vrai appel Gemini réussi pour être vérifié**
+
+**D'où ça vient.** Découpé de R-16 au moment de le livrer, pour une raison précise : ces deux changements modifient la **requête** envoyée à Gemini, sur la seule fonctionnalité IA du produit, qui **fonctionne aujourd'hui en production**. Les livrer sans pouvoir exercer une génération réussie, c'est risquer de casser ce qui marche.
+
+Ce qui a changé depuis l'étape 6 : le endpoint `generateContent` est de nouveau **joignable** depuis ce bac à sable (400 rapide sur clé invalide, vérifié — l'ancien blocage silencieux a disparu). Ce qui manque n'est plus le réseau mais une **clé valide** : sans `.env.local`, impossible d'obtenir une génération réussie et donc de valider ces deux points.
+
+**1. `responseSchema`.** Le JSON est aujourd'hui demandé par instruction textuelle puis nettoyé à la regex (`extractJson` retire les balises markdown). `generationConfig.responseSchema` le garantirait côté API. `parseDeepDiveVerdict` resterait en seconde ligne de défense.
+
+*Le risque à couvrir* : un schéma mal formé fait renvoyer 400 par l'API. Or un 400 est non retriable dans `callGeminiWithFallback` — donc **tous** les Deep dive échoueraient jusqu'à correction. À valider avec une vraie clé avant de livrer, ou à livrer avec un repli sans schéma sur 400.
+
+**2. Un seul appel pour les deux tons.** Aujourd'hui deux appels, un par ton. Le gain n'est **pas** la latence : ils partent déjà en parallèle (`Promise.all`), donc la latence est celle du plus lent, pas la somme. Le gain réel est la consommation de quota, divisée par deux.
+
+*Le risque à couvrir* : un prompt unique contenant à la fois le bloc de style neutre et le bloc roast — avec son garde-fou anti-moquerie — demande au modèle d'appliquer deux voix différentes à deux champs. Le risque de contamination de ton est réel, et la voix roast est un différenciateur produit (SPEC.md §6bis). Ça se juge sur des sorties réelles, pas en relecture.
+
+**Vérification attendue.** Avec une vraie clé : une génération réussie avec `responseSchema`, puis une comparaison des sorties roast et neutres avant/après passage à l'appel unique, dans les deux langues, en vérifiant que le garde-fou tient toujours.
 ---
 
 ## Ce qui a été vérifié et jugé sain
