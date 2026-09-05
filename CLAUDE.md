@@ -280,3 +280,13 @@ Le seul vrai risque était une nomenclature bricolée à la main (`Reddit_SaaS`,
 4 nouveaux tests (`content/__tests__/glossary.test.ts`) : `extended` non vide dans les deux langues pour les 15 termes, chaque `related` pointe vers un id qui existe réellement (aucun lien mort), aucun terme ne se référence lui-même, 2 à 3 termes liés partout (assez pour du vrai maillage, jamais un lien unique symbolique).
 
 **Vérifié réellement** (`npm run build` + `npx vitest run`, 128 tests) et visuellement (Playwright, `/glossary/viral-coefficient` desktop + mobile, FR + EN) : la section étendue et les liens liés s'affichent correctement, tous les liens "Related terms" testés répondent 200, le rendu FR affiche bien les guillemets français dans le texte de `churn`.
+
+### Revue technique & fonctionnelle complète (2026-09-05)
+
+Revue à froid de tout le repo à la demande d'Antoine — code, `next build`, `vitest`, `tsc`, `npm audit`, tout exécuté réellement plutôt que déduit de la lecture. Les 20 constats, leur détail (preuve `fichier:ligne`, impact, correctif proposé, critères de vérification) et surtout **l'ordre de traitement par lots** sont dans **`REVIEW.md`** à la racine. Antoine a validé l'ensemble des constats et l'ordre le jour même.
+
+Convention pour les prochaines sessions : traiter les items de `REVIEW.md` dans l'ordre des lots (A → F), un PR par item sauf regroupement explicitement indiqué dans le détail de l'item, mettre à jour la colonne « Statut » de `REVIEW.md` à chaque livraison, et ajouter ici l'entrée habituelle (décision, pièges, ce qui a été vérifié en réel). `REVIEW.md` liste aussi ce qui a été audité et jugé sain, pour ne pas le ré-auditer.
+
+Deux corrections factuelles à des notes plus haut dans ce fichier, découvertes pendant la revue :
+- **L'étape 13 parle de « 24 pages statiques »** : c'est le compteur de `generateStaticParams` affiché pendant le build, pas des pages statiques. Le root layout lit `cookies()`/`headers()`, donc **toutes** les routes sont rendues dynamiquement (`ƒ` dans le résumé de `next build`), landing et glossaire compris — aucune n'est servie depuis le CDN, et une même URL sert deux langues, ce qui rend le contenu FR invisible pour les moteurs. Voir `REVIEW.md` R-13.
+- **`npm run lint` ne fonctionne plus** : Next.js 16 a retiré la commande `next lint`, et le repo n'a jamais eu de configuration ESLint — les commentaires `eslint-disable` présents dans le code n'ont donc jamais eu d'effet. Voir `REVIEW.md` R-06.
