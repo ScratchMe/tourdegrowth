@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { resolveRequestLocale } from "@/lib/i18n/resolve-request-locale";
 import { getSampleVerdict, SAMPLE_RESULT } from "@/lib/submissions/sample";
 import { getSubmissionById } from "@/lib/submissions/repository";
+import { toDeepDiveView } from "@/lib/submissions/view-model";
 import { ResultView } from "./ResultView";
 
 interface PageProps {
@@ -67,7 +68,11 @@ export default async function ResultPage({ params }: PageProps) {
       weakestPillar={submission.weakestPillar}
       verdicts={submission.verdicts}
       initialTone={submission.tone}
-      deepDive={submission.deepDive}
+      // REVIEW.md R-02: only the generated verdicts cross to the client.
+      // `deepDive` also holds the founder's free-text context and their 10
+      // Deep dive answers, which would otherwise ride along in this public
+      // page's RSC payload without ever being rendered.
+      deepDive={toDeepDiveView(submission.deepDive)}
     />
   );
 }

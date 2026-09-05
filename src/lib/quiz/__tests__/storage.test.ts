@@ -3,8 +3,12 @@ import type { Answers } from "@/lib/scoring/score";
 import {
   clearRefId,
   clearStoredAnswers,
+  findOwnerToken,
+  isOwnResult,
   loadRefId,
   loadStoredAnswers,
+  loadStoredResults,
+  rememberResult,
   saveRefId,
   saveStoredAnswers,
 } from "../storage";
@@ -99,5 +103,87 @@ describe("ref id storage (SPEC.md §7 attribution)", () => {
     expect(loadRefId()).toBeNull();
     expect(() => saveRefId("sub_abc123")).not.toThrow();
     expect(() => clearRefId()).not.toThrow();
+  });
+});
+
+/** REVIEW.md R-01 — the client half of Deep dive ownership. */
+describe("created-results store", () => {
+  const originalWindow = (globalThis as { window?: unknown }).window;
+
+  beforeEach(() => {
+    (globalThis as { window?: unknown }).window = { localStorage: createFakeLocalStorage() };
+  });
+
+  afterEach(() => {
+    (globalThis as { window?: unknown }).window = originalWindow;
+  });
+
+  function result(id: string, token = `token-${id}`) {
+    return { id, ownerToken: token, createdAt: "2026-09-05T10:00:00.000Z" };
+  }
+
+  it("has nothing before any Tour is completed", () => {
+    expect(loadStoredResults()).toEqual([]);
+    expect(findOwnerToken("sub_a")).toBeNull();
+    expect(isOwnResult("sub_a")).toBe(false);
+  });
+
+  it("remembers a created result and returns its owner token", () => {
+    rememberResult(result("sub_a"));
+
+    expect(findOwnerToken("sub_a")).toBe("token-sub_a");
+    expect(isOwnResult("sub_a")).toBe(true);
+  });
+
+  it("treats someone else's shared result as not owned", () => {
+    rememberResult(result("sub_mine"));
+
+    expect(isOwnResult("sub_theirs")).toBe(false);
+    expect(findOwnerToken("sub_theirs")).toBeNull();
+  });
+
+  it("keeps several results, most recent first", () => {
+    rememberResult(result("sub_a"));
+    rememberResult(result("sub_b"));
+
+    expect(loadStoredResults().map((r) => r.id)).toEqual(["sub_b", "sub_a"]);
+    expect(isOwnResult("sub_a")).toBe(true);
+    expect(isOwnResult("sub_b")).toBe(true);
+  });
+
+  it("replaces rather than duplicates an id recorded twice", () => {
+    rememberResult(result("sub_a", "old-token"));
+    rememberResult(result("sub_a", "new-token"));
+
+    expect(loadStoredResults()).toHaveLength(1);
+    expect(findOwnerToken("sub_a")).toBe("new-token");
+  });
+
+  it("caps the list at 20 entries, dropping the oldest", () => {
+    for (let i = 0; i < 25; i += 1) rememberResult(result(`sub_${i}`));
+
+    const stored = loadStoredResults();
+    expect(stored).toHaveLength(20);
+    expect(stored[0]?.id).toBe("sub_24");
+    expect(isOwnResult("sub_0")).toBe(false);
+    expect(isOwnResult("sub_5")).toBe(true);
+  });
+
+  it("ignores corrupted or foreign entries instead of throwing", () => {
+    (globalThis as { window: { localStorage: { setItem: (k: string, v: string) => void } } }).window.localStorage.setItem(
+      "tdg.results.v1",
+      JSON.stringify([{ id: "sub_a" }, "nonsense", null, result("sub_ok")]),
+    );
+
+    expect(loadStoredResults().map((r) => r.id)).toEqual(["sub_ok"]);
+    expect(isOwnResult("sub_a")).toBe(false);
+  });
+
+  it("is a no-op on the server (no window)", () => {
+    (globalThis as { window?: unknown }).window = undefined;
+    expect(loadStoredResults()).toEqual([]);
+    expect(findOwnerToken("sub_a")).toBeNull();
+    expect(isOwnResult("sub_a")).toBe(false);
+    expect(() => rememberResult(result("sub_a"))).not.toThrow();
   });
 });

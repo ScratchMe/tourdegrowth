@@ -28,6 +28,18 @@ export interface Submission {
   /** The submission id that referred this visitor here (`?ref=`), if any — SPEC.md §7. */
   refId: string | null;
   /**
+   * SHA-256 of the one-time owner token handed to the creating browser
+   * (REVIEW.md R-01, see `owner-token.ts`). Proves "this browser created
+   * this submission" for the one action that must not be open to every
+   * recipient of a shared link: completing the Deep dive.
+   *
+   * `null` for submissions created before R-01 existed — those simply can
+   * no longer be deep-dived (fail closed; the volume is small and the
+   * alternative is a bypass anyone could use). NEVER serialize this to the
+   * browser — see `view-model.ts`.
+   */
+  ownerTokenHash: string | null;
+  /**
    * BOTH tones' Quick verdicts, computed once at submission time — not just
    * `tone`'s — so the result page's tone switch is a client-side swap, never
    * a recomputation (DESIGN-BRIEF.md's interaction model). Deterministic and
@@ -46,6 +58,27 @@ export interface Submission {
    * results shared before this feature existed.
    */
   deepDive: DeepDiveResult | null;
+}
+
+/**
+ * The display-safe subset of a `DeepDiveVerdict` — the only part that ever
+ * reaches the browser (REVIEW.md R-02). Deliberately has no `modelUsed`.
+ */
+export interface DeepDiveVerdictView {
+  pillarRecommendations: Record<Pillar, string>;
+  priorityAction: string;
+}
+
+/**
+ * The display-safe subset of a `DeepDiveResult`, built by
+ * `view-model.ts#toDeepDiveView`. `/r/<id>` is public: `freeContext` and
+ * `contextAnswers` stay on the server, always.
+ */
+export interface DeepDiveView {
+  verdicts: {
+    neutral: DeepDiveVerdictView;
+    roast: DeepDiveVerdictView;
+  };
 }
 
 export interface DeepDiveVerdict {

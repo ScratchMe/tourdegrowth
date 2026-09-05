@@ -9,6 +9,7 @@ import type { Tone } from "@/lib/quiz/tone";
 import { computeScore, type Answers, type PillarScore } from "@/lib/scoring/score";
 import type { Pillar } from "@/lib/scoring/pillars";
 import { buildQuickVerdict } from "@/lib/scoring/verdict";
+import { hashOwnerToken } from "./owner-token";
 import type { DeepDiveResult, DeepDiveVerdict, Submission } from "./types";
 import { parseDeepDiveVerdict } from "./verdict";
 
@@ -23,7 +24,20 @@ export interface CreateSubmissionInput {
 export interface CreateSubmissionDeps {
   saveSubmission: (submission: Submission) => Promise<void>;
   generateId: () => string;
+  /** The one-time ownership secret for this submission (REVIEW.md R-01) — injected like `generateId` so tests stay deterministic. */
+  generateOwnerToken: () => string;
   now: () => Date;
+}
+
+export interface CreateSubmissionResult {
+  submission: Submission;
+  /**
+   * The plaintext owner token, returned to the caller EXACTLY once — only
+   * its hash is persisted. The API route passes it straight to the creating
+   * browser, which keeps it in localStorage; it is never recoverable
+   * afterwards, by anyone, including us.
+   */
+  ownerToken: string;
 }
 
 /**
@@ -34,8 +48,13 @@ export interface CreateSubmissionDeps {
  * Both tones' verdicts are computed (trivially, they're just lookups) so
  * the result page's tone switch stays a client-side swap.
  */
-export async function createSubmissionFlow(input: CreateSubmissionInput, deps: CreateSubmissionDeps): Promise<Submission> {
+export async function createSubmissionFlow(
+  input: CreateSubmissionInput,
+  deps: CreateSubmissionDeps,
+): Promise<CreateSubmissionResult> {
   const { pillars, total, weakestPillar } = computeScore(input.answers);
+
+  const ownerToken = deps.generateOwnerToken();
 
   const submission: Submission = {
     id: deps.generateId(),
@@ -47,6 +66,7 @@ export async function createSubmissionFlow(input: CreateSubmissionInput, deps: C
     total,
     weakestPillar,
     refId: input.refId,
+    ownerTokenHash: hashOwnerToken(ownerToken),
     verdicts: {
       neutral: buildQuickVerdict("neutral", input.locale, pillars, weakestPillar),
       roast: buildQuickVerdict("roast", input.locale, pillars, weakestPillar),
@@ -55,7 +75,7 @@ export async function createSubmissionFlow(input: CreateSubmissionInput, deps: C
   };
 
   await deps.saveSubmission(submission);
-  return submission;
+  return { submission, ownerToken };
 }
 
 // ---------------------------------------------------------------------------

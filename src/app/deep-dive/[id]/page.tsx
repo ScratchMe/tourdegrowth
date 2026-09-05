@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { WordmarkLink } from "@/components/brand/WordmarkLink";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import { ModeTag } from "@/components/brand/ModeTag";
@@ -15,6 +15,7 @@ import { DEEP_MODE_QUESTIONS } from "@/content/deep-mode-questions";
 import { FREE_CONTEXT, FREE_CONTEXT_MAX_LENGTH } from "@/content/free-context";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { useLocale } from "@/lib/i18n/locale-context";
+import { findOwnerToken } from "@/lib/quiz/storage";
 import { PILLARS } from "@/lib/scoring/pillars";
 import styles from "./page.module.css";
 
@@ -52,6 +53,24 @@ export default function DeepDivePage() {
   const [freeContext, setFreeContext] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  // REVIEW.md R-01: the Deep dive belongs to whoever took the Tour, and the
+  // only proof of that on the client is the one-time token stored when the
+  // submission was created. Checked after mount (localStorage is
+  // client-only) — someone opening this URL from a shared link is sent
+  // straight to the result page rather than being walked through 11 screens
+  // that the API would reject at the end.
+  const [ownerToken, setOwnerToken] = useState<string | null>(null);
+  const [ownershipChecked, setOwnershipChecked] = useState(false);
+
+  useEffect(() => {
+    const token = findOwnerToken(params.id);
+    if (!token) {
+      router.replace(`/r/${params.id}`);
+      return;
+    }
+    setOwnerToken(token);
+    setOwnershipChecked(true);
+  }, [params.id, router]);
 
   const currentQuestion = DEEP_MODE_QUESTIONS[currentIndex]!;
   const currentStage = PILLARS.indexOf(currentQuestion.pillar); // 0-4
@@ -72,6 +91,7 @@ export default function DeepDivePage() {
   }
 
   async function submit(finalAnswers: Record<string, number>, finalFreeContext: string) {
+    if (!ownerToken) return; // unreachable in practice: the effect above redirects away without one
     setSubmitError(null);
     setPhase("loading");
     try {
@@ -81,6 +101,7 @@ export default function DeepDivePage() {
         body: JSON.stringify({
           contextAnswers: finalAnswers,
           locale,
+          ownerToken,
           // Trimmed client-side too so an all-whitespace field behaves like
           // "skipped" rather than sending a technically-non-empty string —
           // the server still truncates/validates independently either way.
@@ -98,6 +119,10 @@ export default function DeepDivePage() {
       setPhase("error");
     }
   }
+
+  // Nothing renders until ownership is settled — a flash of the first Deep
+  // dive question before redirecting would be worse than a blank moment.
+  if (!ownershipChecked) return null;
 
   const questionCounter = tc(dd.questionCounterTemplate, locale)
     .replace("{n}", String(currentIndex + 1))

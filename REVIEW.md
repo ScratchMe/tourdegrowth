@@ -28,8 +28,8 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 
 | Lot | ID | Titre | Type | Effort | Statut |
 |---|---|---|---|---|---|
-| **A — Stopper les dégâts sur les données réelles** | R-01 | Deep dive : jeton de propriétaire | F+T | S/M | À faire |
-| | R-02 | Ne plus exposer `freeContext`/`contextAnswers` dans la page publique | T | XS | À faire |
+| **A — Stopper les dégâts sur les données réelles** | R-01 | Deep dive : jeton de propriétaire | F+T | S/M | **Fait** (PR #21, 2026-09-05) |
+| | R-02 | Ne plus exposer `freeContext`/`contextAnswers` dans la page publique | T | XS | **Fait** (PR #21, 2026-09-05) |
 | | R-03 | Attribution `?ref=` : anti auto-parrainage + validation serveur | F+T | S | À faire |
 | | R-04 | Validation API stricte et messages d'erreur génériques | T | S | À faire |
 | **B — Filet automatisé** | R-05 | CI GitHub Actions (tsc, tests, build, puis lint et E2E) | T | S | À faire |
@@ -63,7 +63,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 
 ### R-01 — Deep dive : jeton de propriétaire
 
-**Type** F+T · **Effort** S/M · **Statut** À faire
+**Type** F+T · **Effort** S/M · **Statut** **Fait** (PR #21, 2026-09-05) — voir `CLAUDE.md` pour les décisions prises et ce qui a été vérifié en réel
 
 **Constat.** La route `POST /api/submissions/[id]/deep-dive` et la page `/deep-dive/[id]` sont accessibles à quiconque connaît l'id d'un résultat, c'est-à-dire à tous les destinataires d'un lien partagé. La carte « Action prioritaire — verrouillée » et son bouton « Débloquer mon action prioritaire → » s'affichent pour tous les visiteurs (`src/app/r/[id]/ResultView.tsx`, condition `!isSample && id`). Un visiteur qui clique complète le Deep dive avec **son** contexte et **son** texte libre ; la page du partageur affiche alors des recommandations Gemini basées sur l'activité d'un inconnu. L'idempotence de la route (`src/app/api/submissions/[id]/deep-dive/route.ts:60`, « si `deepDive` existe déjà, renvoyer tel quel ») rend ça définitif : le vrai auteur ne pourra plus jamais faire le sien.
 
@@ -83,7 +83,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 
 ### R-02 — Ne plus exposer `freeContext`/`contextAnswers` dans la page publique
 
-**Type** T · **Effort** XS · **Statut** À faire
+**Type** T · **Effort** XS · **Statut** **Fait** (PR #21, 2026-09-05) — livré avec R-01, même PR comme prévu ici
 
 **Constat.** `src/app/r/[id]/page.tsx:70` passe l'objet `submission.deepDive` **entier** au Client Component `ResultView`. `DeepDiveResult` contient `freeContext` (le texte libre où un fondateur décrit son business, ses freins, ses clients), `contextAnswers` et `modelUsed`. Rien de tout ça n'est rendu, mais tout est sérialisé dans le payload RSC de la page, donc lisible par n'importe quel destinataire du lien (ou n'importe quel crawler) en ouvrant la source.
 

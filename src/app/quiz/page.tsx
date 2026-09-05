@@ -22,7 +22,7 @@ import {
   stageOfQuestion,
 } from "@/lib/quiz/navigation";
 import { trackEvent } from "@/lib/analytics/goatcounter";
-import { loadRefId, loadStoredAnswers, saveRefId, saveStoredAnswers } from "@/lib/quiz/storage";
+import { loadRefId, loadStoredAnswers, rememberResult, saveRefId, saveStoredAnswers } from "@/lib/quiz/storage";
 import type { AnswerIndex, Answers } from "@/lib/scoring/score";
 import { LoadingScreen } from "./LoadingScreen";
 import { ToneSelector, type Tone } from "./ToneSelector";
@@ -138,9 +138,13 @@ export default function QuizPage() {
         const message = (body as { error?: string } | null)?.error;
         throw new Error(message || `Request failed (${res.status})`);
       }
-      const submission = (await res.json()) as { id: string };
+      const created = (await res.json()) as { id: string; ownerToken: string };
+      // REVIEW.md R-01: the owner token comes back exactly once and is never
+      // recoverable afterwards — store it before navigating away. It is the
+      // only thing that will later prove this browser created the result.
+      rememberResult({ id: created.id, ownerToken: created.ownerToken, createdAt: new Date().toISOString() });
       trackEvent("submission_completed", tone); // SPEC.md §8: one custom event per completed analysis
-      router.push(`/r/${submission.id}`);
+      router.push(`/r/${created.id}`);
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Unknown error");
       setPhase("error");
