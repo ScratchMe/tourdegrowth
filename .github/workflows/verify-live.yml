@@ -66,7 +66,10 @@ jobs:
         run: npx vitest run --config vitest.live.config.ts scripts/live/production.live.ts
 
       - name: Gemini client against the real API
-        if: inputs.target != 'production'
+        # `!cancelled()` rather than a plain condition: when both are asked
+        # for, a failure in the step above must not hide this one's result.
+        # The first run stopped here for exactly that reason.
+        if: ${{ !cancelled() && inputs.target != 'production' }}
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: npx vitest run --config vitest.live.config.ts scripts/live/gemini.live.ts

@@ -22,7 +22,15 @@ const SITE = (process.env.VERIFY_SITE_URL ?? "https://www.tourdegrowth.com").rep
 /** Every question answered "middle option", so the score is neither 0 nor 100. */
 const ANSWERS = Object.fromEntries(QUESTIONS.map((q) => [q.id, 1]));
 const CONTEXT_ANSWERS = Object.fromEntries(DEEP_MODE_QUESTIONS.map((q) => [q.id, 0]));
-const FREE_CONTEXT = "We sell a scheduling tool to independent physiotherapists; onboarding is where people drop.";
+/**
+ * A nonsense token inside otherwise realistic context. Gemini has every
+ * reason to reuse the *subject matter* in the advice it writes — that is the
+ * whole point of the field — and no reason at all to reproduce this. So it is
+ * the canary: if the raw stored field ever rides along in the public page's
+ * payload, this shows up in the HTML and the check below fails.
+ */
+const LEAK_CANARY = "TDG-CANARY-7F3A91";
+const FREE_CONTEXT = `We sell a scheduling tool to independent physiotherapists; onboarding is where people drop. Internal ref ${LEAK_CANARY}.`;
 
 let created: { id: string; ownerToken: string; total: number } | undefined;
 
@@ -172,7 +180,30 @@ describe("live production pipeline", () => {
 
   it("keeps the free-text context off the public page (R-02)", async () => {
     const page = await fetchResultPage(created!.id, "en");
-    expect(page).not.toContain("physiotherapists");
-    expect(page).not.toContain("freeContext");
+
+    // What R-02 actually guarantees: the STORED fields never enter the RSC
+    // payload of a public page. Not "no word from the context ever appears" —
+    // the first run of this probe asserted that, and failed, because Gemini
+    // had written "physiotherapists" into its own recommendations. That is
+    // the feature working, not a leak. Do not put that assertion back.
+    expect(page, "the raw free-text field must not be in the payload").not.toContain(LEAK_CANARY);
+    for (const key of ["freeContext", "contextAnswers", "modelUsed"]) {
+      expect(page, `${key} must not cross to the client`).not.toContain(key);
+    }
+    // The Deep dive answers are keyed by question id; one appearing would mean
+    // the whole answer map came along.
+    expect(page).not.toContain(DEEP_MODE_QUESTIONS[0]!.id);
+    // The model that answered is observability, never shown to a user.
+    expect(page).not.toMatch(/gemini-\d/);
+  });
+
+  it("does put the founder's own context INTO the advice — which is the point", async () => {
+    // The flip side of the check above, asserted so the two can't be confused
+    // later: the free-text field exists to make the recommendations specific.
+    // Worth knowing as a product fact, not a defect: whatever someone writes
+    // there shapes text that lands on a page they may share.
+    const submission = await readSubmission(created!.id);
+    const advice = Object.values(submission.deepDive!.localized!.en!.neutral.pillarRecommendations).join(" ");
+    expect(advice.toLowerCase()).toContain("physiotherapist");
   });
 });

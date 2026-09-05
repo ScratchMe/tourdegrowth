@@ -729,3 +729,20 @@ Antoine a demandé s'il pouvait me donner un accès Firebase/Gemini, puis a prop
 **Le nettoyage annule aussi l'incrément `stats/global`** (`FieldValue.increment(-1)` et `-total`), dans un `afterAll` qui tourne même si une assertion a échoué : sinon chaque vérification fausserait la moyenne affichée aux vrais utilisateurs. Le texte français généré est **imprimé, pas assert** — seul un humain peut juger si la voix roast survit à la traduction, et c'est précisément pour ça que la sonde tourne là où Antoine peut la lire.
 
 **Passage du dépôt en public.** Historique scanné avant (voir `REVIEW.md` R-05) : propre. `LICENSE` (AGPL-3.0) et `README.md` ajoutés, le dépôt n'en avait aucun — pour un projet dont la vocation est le portfolio, arriver sur une arborescence nue était un vrai manque. AGPL plutôt que MIT parce que le seul scénario qui coûterait vraiment quelque chose ici est quelqu'un qui déploie une copie de Tour de Growth en service, et c'est exactement ce que l'AGPL couvre ; ça ne gêne en rien le public réel du dépôt (des gens qui le lisent), et Antoine étant seul détenteur des droits, il peut relicencier quand il veut. Le README note aussi que la licence couvre le **code**, pas le nom ni l'identité visuelle.
+
+### Premier run réel du workflow de vérification (2026-09-05)
+
+Antoine a posé les 4 secrets et lancé « Verify against live services ». **7 sondes sur 8 vertes du premier coup**, et elles ferment plusieurs « à confirmer après déploiement » qui traînaient dans ce fichier :
+
+- **Le Deep dive bilingue fonctionne en production** — `localized` contient bien `en` et `fr`, `gemini-3.7-flash` a répondu aux deux, et un lecteur FR voit bien le texte FR. Le français est de vrai français, pas de l'anglais traduit : Gemini a même localisé le métier (*physiotherapists* → *kinésithérapeute*).
+- **Latence : 11 s pour quatre générations en parallèle**, contre ~41 s mesurés à l'étape 12 pour deux. Passer de 2 à 4 appels n'a donc rien coûté — c'était l'hypothèse (`Promise.all`, latence du plus lent), elle est maintenant mesurée.
+- **R-09 sur un vrai document Firestore**, ce qui n'avait jamais été prouvé : la spec existante ne porte que sur `/r/sample`, qui n'a aucun Deep dive par construction.
+- **`stats/global` s'incrémente réellement** (`count: 4`), et le nettoyage annule bien l'incrément.
+
+**La sonde en échec était fausse, pas l'app.** Elle vérifiait que le mot « physiotherapists » n'apparaît pas sur la page publique — or il y est, **parce que Gemini l'a écrit dans ses propres recommandations**. C'est la fonctionnalité qui marche : le champ de contexte libre existe pour rendre les conseils spécifiques. Vérifié dans le log plutôt que supposé : la phrase brute (« onboarding is where people drop ») et la clé `freeContext` sont, elles, bien **absentes** de la page.
+
+Corrigé en testant l'invariant réel plutôt qu'un proxy : un **canari** (`TDG-CANARY-…`) glissé dans le contexte libre — du charabia que Gemini n'a aucune raison de reprendre dans un conseil, donc sa présence dans le HTML signifierait vraiment que le champ stocké a fui — plus l'absence des clés `freeContext`/`contextAnswers`/`modelUsed`, d'un id de question Deep dive, et de tout nom de modèle. Une sonde compagnon affirme l'inverse (le contexte du fondateur **doit** se retrouver dans les recommandations), pour que les deux ne soient plus confondues plus tard. Commentaire explicite dans le fichier : ne pas remettre l'ancienne assertion.
+
+**Fait produit à connaître, pas un défaut** : ce que quelqu'un écrit dans le champ de contexte libre façonne du texte qui atterrit sur une page qu'il peut partager. C'est inhérent à la fonctionnalité et l'auteur l'a choisi en écrivant le champ — mais ça mérite peut-être une ligne sous le champ un jour, à l'appréciation de l'agent produit.
+
+**Correctif de workflow au passage** : l'étape Gemini est passée en `if: ${{ !cancelled() && … }}`. Le premier run s'est arrêté avant elle parce que l'étape production sortait en 1 — quand on demande « both », l'échec de l'une ne doit pas masquer le résultat de l'autre.
