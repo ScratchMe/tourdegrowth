@@ -1,18 +1,18 @@
-"use client";
-
-import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
-import { SiteFooter } from "@/components/brand/SiteFooter";
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { LocaleSwitcher } from "@/components/brand/LocaleSwitcher";
 import { WordmarkLink } from "@/components/brand/WordmarkLink";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { PillarChip } from "@/components/result/PillarChip";
 import { ScoreDisplay } from "@/components/result/ScoreDisplay";
+import { SiteFooter } from "@/components/brand/SiteFooter";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
-import { useLocale } from "@/lib/i18n/locale-context";
-import { saveRefId } from "@/lib/quiz/storage";
+import { isLocale, type Locale } from "@/lib/i18n/locale";
+import { contentAlternates, localePath } from "@/lib/i18n/routes";
 import { SITE_URL } from "@/lib/site";
+import { RefCapture } from "./RefCapture";
 import { SAMPLE_RESULT } from "@/lib/submissions/sample";
 import styles from "./page.module.css";
 
@@ -39,21 +39,30 @@ const WEB_APPLICATION_SCHEMA = {
 // Landing page — DESIGN-BRIEF.md screen 01. Nav links ("Examples", "Roast
 // mode") stay cut from the MVP per SPEC.md §12 — SPEC-ADDENDUM-01.md §1.3
 // reintroduces just "How it works", now that there's a real page behind it.
-export default function LandingPage() {
-  const { locale } = useLocale();
-  const searchParams = useSearchParams();
-  const t = UI_STRINGS.landing;
+interface PageProps {
+  params: Promise<{ locale: string }>;
+}
 
-  // SPEC.md §7: a visitor arriving via a shared result's `?ref=<id>` is
-  // captured here (or on /quiz, whichever they land on first) and carried
-  // through the whole questionnaire in localStorage — see quiz/storage.ts.
-  useEffect(() => {
-    const ref = searchParams.get("ref");
-    if (ref) saveRefId(ref);
-  }, [searchParams]);
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  return { alternates: contentAlternates(isLocale(locale) ? locale : "en", "/") };
+}
+
+/**
+ * Landing page — DESIGN-BRIEF.md screen 01, now a Server Component
+ * (REVIEW.md R-13). It was `"use client"` in its entirety only to capture
+ * `?ref=`; that one effect now lives in its own island.
+ */
+export default async function LandingPage({ params }: PageProps) {
+  const locale = (await params).locale as Locale;
+  const t = UI_STRINGS.landing;
 
   return (
     <>
+      {/* useSearchParams needs a Suspense boundary in a Server Component tree. */}
+      <Suspense fallback={null}>
+        <RefCapture />
+      </Suspense>
       <script
         type="application/ld+json"
         // Static, developer-authored JSON — never user input. (This line
@@ -64,12 +73,13 @@ export default function LandingPage() {
       />
       <header className={styles.header}>
         <div className={styles.headerInner}>
-          <WordmarkLink />
+          <WordmarkLink locale={locale} />
           <nav className={styles.nav}>
-            <Button href="/glossary" variant="quiet" className={styles.navLink}>
+            <LocaleSwitcher locale={locale} path="/" />
+            <Button href={localePath(locale, "/glossary")} variant="quiet" className={styles.navLink}>
               {tc(UI_STRINGS.nav.glossary, locale)}
             </Button>
-            <Button href="/how-it-works" variant="quiet" className={styles.navLink}>
+            <Button href={localePath(locale, "/how-it-works")} variant="quiet" className={styles.navLink}>
               {tc(UI_STRINGS.nav.howItWorks, locale)}
             </Button>
             <Button href="/quiz" size="md" compact className={styles.headerCta}>

@@ -18,7 +18,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 |---|---|
 | `npx vitest run` | 128 tests verts, 17 fichiers |
 | `npx tsc --noEmit` | OK (une dépréciation `baseUrl`, voir R-18) |
-| `npm run build` | OK — mais **aucune page statique** hors `robots.txt`/`sitemap.xml` : toutes les routes sont `ƒ` (dynamiques), voir R-13 |
+| `npm run build` | OK — mais **aucune page statique** hors `robots.txt`/`sitemap.xml` : toutes les routes sont `ƒ` (dynamiques), voir R-13 (moitié SEO livrée) et R-24 (rendu statique, à faire) |
 | `npm run lint` | **Cassé** : `next lint` n'existe plus en Next.js 16, aucune config ESLint dans le repo, voir R-06 |
 | `npm audit --omit=dev` | 6 vulnérabilités modérées, toutes via `firebase-admin` → `@google-cloud/storage` / `teeny-request`, voir R-18 |
 | `.github/` | Absent — aucune CI, voir R-05 |
@@ -40,7 +40,8 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 | | R-10 | Partage enrichi : métadonnées personnalisées, texte, boutons | F | M | **Fait en partie** (PR #29, 2026-09-05) — boutons LinkedIn/X reportés, voir R-23 |
 | | R-11 | Instrumentation du funnel dans GoatCounter | F | S | **Fait** (PR #30, 2026-09-05) |
 | | R-12 | Explicabilité : « comment ce score est calculé » | F | M | **Fait** (PR #31, 2026-09-05) — clôt le lot C |
-| **D — Architecture i18n / SEO / cache** | R-13 | Locale dans l'URL, `hreflang`, pages statiques, switch de langue | F+T | L | À faire |
+| **D — Architecture i18n / SEO / cache** | R-13 | Locale dans l'URL, `hreflang`, switch de langue | F+T | L | **Fait** (PR #32, 2026-09-05) |
+| | R-24 | Rendre les pages de contenu réellement statiques | T | M | À faire |
 | | R-14 | Cache du résultat partagé + OG 404 pour id inconnu | T | M | À faire |
 | **E — Robustesse backend** | R-15 | Rate limiting sur les routes POST + `maxDuration` | T | S/M | À faire |
 | | R-16 | Appel Gemini : header, `responseSchema`, `finishReason`, un seul appel | T | M | À faire |
@@ -239,9 +240,9 @@ Documenter la nomenclature complète en tête de `src/lib/analytics/goatcounter.
 
 ## Lot D — Architecture i18n / SEO / cache
 
-### R-13 — Locale dans l'URL, `hreflang`, pages statiques, switch de langue
+### R-13 — Locale dans l'URL, `hreflang`, switch de langue
 
-**Type** F+T · **Effort** L · **Statut** À faire
+**Type** F+T · **Effort** L · **Statut** **Fait** (PR #32, 2026-09-05) — **la moitié SEO seulement**. Le rendu statique, qui exige de restructurer les layouts racine, est découpé en **R-24** : c'est un problème distinct (coût/latence) du problème d'indexation (contenu FR invisible), et le mélanger au changement de routing aurait fait une PR à la fois énorme et difficile à vérifier.
 
 **Constat.**
 - Le root layout lit `cookies()` et `headers()` (`src/app/layout.tsx:76`). Conséquence : **toutes** les routes sont rendues dynamiquement à chaque requête (`ƒ` dans le résumé de `next build`), landing, `/how-it-works` et les 15 pages glossaire comprises. Aucune n'est servie depuis le CDN. La note « 24 pages statiques » de CLAUDE.md (étape 13) est le compteur de `generateStaticParams`, pas des pages statiques.
@@ -408,6 +409,29 @@ Ajouter deux boutons de partage réseau casserait donc une décision produit dé
 **Ce qui reste à décider (Antoine, éventuellement avec Claude Design)** : soit on s'en tient aux 2 CTA et on considère la question close, soit on ouvre un emplacement pour les boutons réseau. Pistes si on ouvre : un petit rang d'icônes/liens **sous** la ligne de CTA (donc pas un 3ᵉ CTA au même niveau), ou une feuille de partage qui s'ouvre au clic sur « Partager » et propose LinkedIn / X / Copier.
 
 **Attention si on le fait** : LinkedIn et X ajoutent `nofollow` à ce qu'ils publient, donc ces boutons n'ont **aucune** valeur SEO — leur intérêt est uniquement le confort de partage. Ne pas les vendre comme un levier de référencement.
+### R-24 — Rendre les pages de contenu réellement statiques
+
+**Type** T · **Effort** M · **Statut** À faire
+
+**D'où ça vient.** Seconde moitié de R-13, découpée au moment de le livrer.
+
+**Constat.** R-13 a donné une URL par langue, mais **toutes les routes restent rendues à la demande** (`ƒ` dans le résumé de `next build`, y compris `/en/glossary/cac`). La cause n'a pas changé : `<html lang>` vit dans le layout racine, et le layout racine doit connaître la langue de la requête — il lit donc un en-tête, ce qui rend dynamique tout ce qui est en dessous.
+
+**Impact.** Aucun cache CDN sur les 32 pages de contenu, une invocation de fonction par visite, un TTFB plus lent. À ce volume c'est du confort, pas une urgence — mais c'est exactement ce qui coûte cher si le SEO du lot croissance fonctionne.
+
+**Correctif proposé.** Next.js autorise **plusieurs layouts racine** via des groupes de routes, à condition qu'il n'existe aucun `app/layout.tsx` :
+
+```
+app/
+  (content)/[locale]/layout.tsx   → <html lang={locale}>, aucun header lu → statique
+  (app)/layout.tsx                → <html lang={résolu}>, lit l'en-tête → dynamique
+```
+
+Le chrome partagé (polices `next/font`, script GoatCounter, `LocaleProvider`, `metadataBase`) doit alors être extrait dans un composant commun appelé par les deux, sinon il diverge silencieusement.
+
+**Points d'attention.** Passer d'un layout racine à l'autre force un chargement complet de page (pas de transition client) — acceptable ici, `/en` → `/quiz` est déjà une vraie navigation. Et `app/not-found.tsx` global doit être rattaché à l'un des deux, ce qui est le point de friction connu de cette structure : à valider empiriquement plutôt qu'à supposer.
+
+**Vérification attendue.** `next build` affiche `○` pour les 32 pages de contenu, `ƒ` pour `/quiz`, `/r/[id]`, `/deep-dive`, `/admin`, `/api`. Les 36 specs E2E restent vertes, `<html lang>` reste correct dans les deux arbres.
 ---
 
 ## Ce qui a été vérifié et jugé sain

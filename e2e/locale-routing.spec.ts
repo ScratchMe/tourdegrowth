@@ -1,0 +1,92 @@
+import { expect, test } from "./helpers";
+
+/**
+ * REVIEW.md R-13 — one URL per language.
+ *
+ * Before this, the same address served French or English depending on a
+ * cookie, so a crawler only ever saw one of them and the whole French
+ * glossary was invisible to search: exactly the content the growth plan's
+ * SEO phase depends on.
+ */
+test.describe("locale in the URL", () => {
+  test("the bare homepage redirects to the reader's language", async ({ browser }) => {
+    for (const [acceptLanguage, expected] of [
+      ["fr-FR,fr;q=0.9", "/fr"],
+      ["en-US,en;q=0.9", "/en"],
+    ] as const) {
+      const context = await browser.newContext({ locale: acceptLanguage.slice(0, 5), extraHTTPHeaders: { "accept-language": acceptLanguage } });
+      const page = await context.newPage();
+      await page.goto("/");
+      expect(new URL(page.url()).pathname).toBe(expected);
+      await context.close();
+    }
+  });
+
+  test("URLs published before the split still resolve", async ({ page }) => {
+    for (const legacy of ["/how-it-works", "/glossary", "/glossary/viral-coefficient"]) {
+      await page.goto(legacy);
+      expect(new URL(page.url()).pathname).toBe(`/en${legacy}`);
+      await expect(page.locator("main")).toBeVisible();
+    }
+  });
+
+  test("a shared referral link survives the redirect", async ({ page }) => {
+    await page.goto("/?ref=8a2b1c3d-4e5f-4a6b-9c8d-0e1f2a3b4c5d");
+    expect(new URL(page.url()).search).toContain("ref=8a2b1c3d");
+  });
+
+  test("the page's language comes from the URL, never from a stale cookie", async ({ page, context }) => {
+    await context.addCookies([{ name: "tdg_locale", value: "en", url: "http://localhost:3210" }]);
+
+    await page.goto("/fr/glossary/cac");
+    await expect(page.locator("html")).toHaveAttribute("lang", "fr");
+    await expect(page.getByText(/En pratique/)).toBeVisible();
+
+    await page.goto("/en/glossary/cac");
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    await expect(page.getByText(/In practice/)).toBeVisible();
+  });
+
+  test("each localized page declares its alternates", async ({ page }) => {
+    await page.goto("/fr/how-it-works");
+
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      "href",
+      /\/fr\/how-it-works$/,
+    );
+    for (const lang of ["en", "fr", "x-default"]) {
+      await expect(page.locator(`link[rel="alternate"][hreflang="${lang}"]`)).toHaveCount(1);
+    }
+  });
+
+  test("the language switcher lands on the same page in the other language", async ({ page }) => {
+    await page.goto("/en/glossary/churn");
+    await page.getByRole("navigation", { name: "Language" }).getByRole("link", { name: "FR" }).click();
+    await page.waitForURL("**/fr/glossary/churn");
+    await expect(page.locator("html")).toHaveAttribute("lang", "fr");
+  });
+
+  test("switching language carries over to the unprefixed app pages", async ({ page }) => {
+    await page.goto("/en");
+    await page.getByRole("navigation", { name: "Language" }).getByRole("link", { name: "FR" }).click();
+    await page.waitForURL("**/fr");
+
+    // /quiz has no locale of its own; it must follow the choice just made,
+    // or "Démarre ton Tour" would open an English questionnaire.
+    await page.goto("/quiz");
+    await expect(page.locator("html")).toHaveAttribute("lang", "fr");
+    await expect(page.getByText(/Réponds pour continuer/i)).toBeVisible();
+  });
+
+  test("app routes are never prefixed — shared result links keep working as-is", async ({ page }) => {
+    for (const path of ["/quiz", "/r/sample"]) {
+      await page.goto(path);
+      expect(new URL(page.url()).pathname).toBe(path);
+    }
+  });
+
+  test("an unknown first segment is a 404, not the landing page in disguise", async ({ page }) => {
+    const response = await page.goto("/definitely-not-a-locale");
+    expect(response?.status()).toBe(404);
+  });
+});

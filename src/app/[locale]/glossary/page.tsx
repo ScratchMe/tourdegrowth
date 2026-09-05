@@ -1,19 +1,29 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteFooter } from "@/components/brand/SiteFooter";
+import { LocaleSwitcher } from "@/components/brand/LocaleSwitcher";
 import { WordmarkLink } from "@/components/brand/WordmarkLink";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { GLOSSARY } from "@/content/glossary";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
-import { resolveRequestLocale } from "@/lib/i18n/resolve-request-locale";
+import { isLocale, type Locale } from "@/lib/i18n/locale";
+import { contentAlternates, localePath } from "@/lib/i18n/routes";
 import styles from "./page.module.css";
 
-export const metadata: Metadata = {
-  title: "Growth glossary — Tour de Growth",
-  description:
-    "Plain-English definitions of the growth/AARRR vocabulary — CAC, LTV, viral coefficient, growth loop, and more.",
-};
+interface PageProps {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  return {
+    title: "Growth glossary — Tour de Growth",
+    description:
+      "Plain-English definitions of the growth/AARRR vocabulary — CAC, LTV, viral coefficient, growth loop, and more.",
+    alternates: contentAlternates(isLocale(locale) ? locale : "en", "/glossary"),
+  };
+}
 
 /**
  * `/glossary` index — SPEC-ADDENDUM-02.md §3.1: the glossary content
@@ -22,15 +32,16 @@ export const metadata: Metadata = {
  * page. Server Component, same locale-resolution pattern as
  * `/how-it-works` — no interactivity needed here either.
  */
-export default async function GlossaryIndexPage() {
-  const locale = await resolveRequestLocale();
+export default async function GlossaryIndexPage({ params }: PageProps) {
+  const locale = (await params).locale as Locale;
   const t = UI_STRINGS.glossaryPage;
 
   return (
     <>
       <header className={styles.header}>
         <div className={styles.headerInner}>
-          <WordmarkLink />
+          <WordmarkLink locale={locale} />
+          <LocaleSwitcher locale={locale} path="/glossary" />
         </div>
       </header>
 
@@ -42,7 +53,7 @@ export default async function GlossaryIndexPage() {
 
         <div className={styles.list}>
           {Object.entries(GLOSSARY).map(([id, entry]) => (
-            <Link key={id} href={`/glossary/${id}`} className={styles.itemLink}>
+            <Link key={id} href={localePath(locale, `/glossary/${id}`)} className={styles.itemLink}>
               <Card elevation="flat" tone="paper" className={styles.item}>
                 <h2 className={styles.term}>{tc(entry.term, locale)}</h2>
                 <p className={styles.definition}>{tc(entry.definition, locale)}</p>

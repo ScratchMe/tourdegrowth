@@ -5,6 +5,7 @@ import { ANTOINE_LINKS, SITE_FOOTER_CREDIT } from "@/content/antoine-credit";
 import { PROFILE_CLICK_DETAILS, trackEvent } from "@/lib/analytics/goatcounter";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import type { Locale } from "@/lib/i18n/locale";
+import { localePath } from "@/lib/i18n/routes";
 import styles from "./SiteFooter.module.css";
 
 const SITE_FOOTER_CV_DETAIL = PROFILE_CLICK_DETAILS[3];
@@ -47,10 +48,10 @@ export function SiteFooter({ locale, width = "wide" }: SiteFooterProps) {
     <footer className={styles.footer}>
       <div className={`${styles.inner} ${styles[width]}`}>
         <nav className={styles.nav}>
-          <Link href="/how-it-works" className={styles.navLink}>
+          <Link href={localePath(locale, "/how-it-works")} className={styles.navLink}>
             {tc(UI_STRINGS.nav.howItWorks, locale)}
           </Link>
-          <Link href="/glossary" className={styles.navLink}>
+          <Link href={localePath(locale, "/glossary")} className={styles.navLink}>
             {tc(UI_STRINGS.nav.glossary, locale)}
           </Link>
         </nav>

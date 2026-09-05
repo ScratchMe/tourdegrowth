@@ -1,20 +1,21 @@
-import { cookies, headers } from "next/headers";
-import { LOCALE_COOKIE, resolveLocale, type Locale } from "./locale";
+import { headers } from "next/headers";
+import { LOCALE_HEADER } from "@/proxy";
+import { isLocale, DEFAULT_LOCALE, type Locale } from "./locale";
 
 /**
- * Resolves the request's locale from Server Components/`generateMetadata`
- * (cookie set by the proxy from `?lang=`, then `Accept-Language`, then the
- * default — see `resolveLocale`). Was duplicated verbatim across
- * `not-found.tsx`, `/r/sample`'s branch of `r/[id]/page.tsx`, and
- * `/how-it-works` before the glossary pages (SPEC-ADDENDUM-02.md §3.1)
- * added two more call sites — consolidated here rather than copied a
- * fourth and fifth time.
+ * The request's effective locale, as resolved once by the proxy — REVIEW.md
+ * R-13.
+ *
+ * The proxy is the only place that knows the full picture (a locale prefix in
+ * the URL beats `?lang=`, which beats the cookie, which beats
+ * `Accept-Language`), so it computes the answer and forwards it as a header
+ * rather than every page re-deriving it and risking a different result.
+ *
+ * Localized pages should prefer their own `locale` route param, which is the
+ * URL itself; this is for app pages (`/quiz`, `/r/<id>`, …), which carry no
+ * prefix, and for `generateMetadata` on either.
  */
 export async function resolveRequestLocale(): Promise<Locale> {
-  const [cookieStore, headerList] = await Promise.all([cookies(), headers()]);
-  return resolveLocale({
-    queryLang: null,
-    cookieLocale: cookieStore.get(LOCALE_COOKIE)?.value ?? null,
-    acceptLanguage: headerList.get("accept-language"),
-  });
+  const value = (await headers()).get(LOCALE_HEADER);
+  return isLocale(value) ? value : DEFAULT_LOCALE;
 }

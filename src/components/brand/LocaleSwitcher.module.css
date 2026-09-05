@@ -1,0 +1,30 @@
+/* Built from tokens only — the design system has no switcher component.
+   Deliberately as quiet as a meta label: this is chrome, not an action. */
+.wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.link {
+  font: var(--meta-2xs);
+  letter-spacing: var(--meta-tracking);
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-tag);
+}
+
+.link:hover {
+  color: var(--text-body);
+}
+
+.link:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.current {
+  color: var(--text-body);
+  background: var(--surface-sunken);
+}
