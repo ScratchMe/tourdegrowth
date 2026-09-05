@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./helpers";
 
 /**
  * An automated accessibility floor, not a substitute for the real work:

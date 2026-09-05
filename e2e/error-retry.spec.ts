@@ -1,5 +1,4 @@
-import { expect, test } from "@playwright/test";
-import { answerAllQuestions, QUESTION_COUNT, readStoredAnswers, stubSubmissions } from "./helpers";
+import { expect, test, answerAllQuestions, QUESTION_COUNT, readStoredAnswers, stubSubmissions } from "./helpers";
 
 /**
  * SPEC.md §4, written into the error screen's own copy: "retrying doesn't

@@ -1,4 +1,37 @@
-import { expect, type Page, type Route } from "@playwright/test";
+import { expect, test as base, type Page, type Route } from "@playwright/test";
+
+/**
+ * Every spec runs with GoatCounter's script replaced by a local stub that
+ * records the events the app fires into `window.__tdgEvents`.
+ *
+ * Two reasons this is a fixture rather than per-spec setup. It keeps CI
+ * offline — no spec ever reaches out to gc.zgo.at, so a CDN hiccup can't
+ * slow or fail a run. And it makes analytics assertions real: the workflow
+ * sets `NEXT_PUBLIC_GOATCOUNTER_CODE` at build time so the script tag is
+ * actually rendered, without which `trackEvent` no-ops and any assertion
+ * about it would pass while proving nothing (a trap already hit once while
+ * verifying the site footer).
+ */
+const GOATCOUNTER_STUB = `
+  window.__tdgEvents = [];
+  window.goatcounter = { count: function (o) { window.__tdgEvents.push(o.path); } };
+`;
+
+export const test = base.extend({
+  page: async ({ page }, use) => {
+    await page.route("**/count.js", (route) =>
+      route.fulfill({ status: 200, contentType: "application/javascript", body: GOATCOUNTER_STUB }),
+    );
+    await use(page);
+  },
+});
+
+export { expect };
+
+/** The GoatCounter event paths fired so far, in order. */
+export async function trackedEvents(page: Page): Promise<string[]> {
+  return page.evaluate(() => (window as unknown as { __tdgEvents?: string[] }).__tdgEvents ?? []);
+}
 
 /**
  * Shared helpers for the critical-path specs.

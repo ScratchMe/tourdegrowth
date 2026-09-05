@@ -1,5 +1,4 @@
-import { expect, test } from "@playwright/test";
-import { answerAllQuestions, expectStoredRefId, stubSubmissions } from "./helpers";
+import { expect, test, answerAllQuestions, expectStoredRefId, stubSubmissions } from "./helpers";
 
 /**
  * The growth loop (SPEC.md §7) and the bilingual promise (CLAUDE.md, lesson

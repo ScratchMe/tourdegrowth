@@ -1,15 +1,61 @@
-import { PROFILE_CLICK_DETAILS } from "./goatcounter";
+import {
+  DEEP_DIVE_CONTEXT_DETAILS,
+  PROFILE_CLICK_DETAILS,
+  QUIZ_STAGES,
+  SHARE_METHODS,
+  TONES,
+} from "./goatcounter";
 
 // Server-only — never import this from a "use client" component.
 // GOATCOUNTER_API_TOKEN is a GoatCounter API key with the "read stats"
 // permission only (no site/account admin scope needed), generated in
 // GoatCounter's own Settings → API. See CLAUDE.md for how it was obtained.
 
+/**
+ * Every exact event path the dashboard asks GoatCounter for — REVIEW.md
+ * R-11. Built from the shared vocabulary in `goatcounter.ts` rather than
+ * retyped, because `include_paths` matches names exactly: a path spelled
+ * differently here than at the call site is simply invisible in the
+ * dashboard, with no error anywhere.
+ */
+const HOME_PATH = "/";
+const QUIZ_STARTED_PATH = "quiz_started";
+const DEEP_DIVE_STARTED_PATH = "deep_dive_started";
+
+const STAGE_PATHS = QUIZ_STAGES.map((stage) => `quiz_stage_completed/${stage}`);
+const TONE_SELECTED_PATHS = TONES.map((tone) => `tone_selected/${tone}`);
+const SUBMISSION_PATHS = TONES.map((tone) => `submission_completed/${tone}`);
+const SHARE_PATHS = TONES.flatMap((tone) => SHARE_METHODS.map((method) => `share/${tone}/${method}`));
+const DEEP_DIVE_COMPLETED_PATHS = DEEP_DIVE_CONTEXT_DETAILS.map((d) => `deep_dive_completed/${d}`);
 const PROFILE_CLICK_PATHS = PROFILE_CLICK_DETAILS.map((detail) => `profile_click/${detail}`);
+
+const ALL_PATHS = [
+  HOME_PATH,
+  QUIZ_STARTED_PATH,
+  ...STAGE_PATHS,
+  ...TONE_SELECTED_PATHS,
+  ...SUBMISSION_PATHS,
+  ...SHARE_PATHS,
+  DEEP_DIVE_STARTED_PATH,
+  ...DEEP_DIVE_COMPLETED_PATHS,
+  ...PROFILE_CLICK_PATHS,
+];
 
 export interface FunnelStats {
   /** Pageviews on "/" in the requested window. */
   homeViews: number;
+  /** First answer recorded — the quiz was actually started, not just loaded. */
+  quizStarted: number;
+  /** One entry per AARRR stage, in order: where people drop out mid-questionnaire. */
+  stagesCompleted: number[];
+  /** "Get my score" pressed (either tone). */
+  toneSelected: number;
+  /** A result exists. */
+  submissionsCompleted: number;
+  /** A share actually happened (native sheet or clipboard). */
+  shares: number;
+  deepDiveStarted: number;
+  deepDiveCompleted: number;
   /** Sum of all profile_click/* events (SPEC-ADDENDUM-02.md §2 credit links) in the same window. */
   profileClicks: number;
   /** profileClicks / homeViews — null when there were no home views to divide by. */
@@ -62,10 +108,13 @@ export async function fetchFunnelWindow(startISO: string, label: string): Promis
 
   const url = new URL(`https://${siteCode}.goatcounter.com/api/v0/stats/hits`);
   url.searchParams.set("path_by_name", "true");
-  url.searchParams.set("include_paths", ["/", ...PROFILE_CLICK_PATHS].join(","));
+  url.searchParams.set("include_paths", ALL_PATHS.join(","));
   url.searchParams.set("start", startISO);
   url.searchParams.set("end", new Date().toISOString());
-  url.searchParams.set("limit", "10"); // at most 4 distinct paths are ever requested — this never paginates
+  // Must stay above the number of paths requested: a limit below it would
+  // silently truncate the response and under-report the tail of the funnel.
+  // (It was hard-coded to 10 back when only 4 paths were asked for.)
+  url.searchParams.set("limit", String(ALL_PATHS.length + 10));
 
   let response: Response;
   try {
@@ -83,16 +132,29 @@ export async function fetchFunnelWindow(startISO: string, label: string): Promis
 
   const body = (await response.json()) as GoatCounterHitsResponse;
 
-  let homeViews = 0;
-  let profileClicks = 0;
+  const counts = new Map<string, number>();
   for (const hit of body.hits ?? []) {
-    if (hit.path === "/") homeViews += hit.count;
-    else if (hit.path.startsWith("profile_click/")) profileClicks += hit.count;
+    counts.set(hit.path, (counts.get(hit.path) ?? 0) + hit.count);
   }
+  const sum = (paths: readonly string[]) => paths.reduce((total, path) => total + (counts.get(path) ?? 0), 0);
+
+  const homeViews = counts.get(HOME_PATH) ?? 0;
+  const profileClicks = sum(PROFILE_CLICK_PATHS);
 
   return {
     label,
-    stats: { homeViews, profileClicks, rate: homeViews > 0 ? profileClicks / homeViews : null },
+    stats: {
+      homeViews,
+      quizStarted: counts.get(QUIZ_STARTED_PATH) ?? 0,
+      stagesCompleted: STAGE_PATHS.map((path) => counts.get(path) ?? 0),
+      toneSelected: sum(TONE_SELECTED_PATHS),
+      submissionsCompleted: sum(SUBMISSION_PATHS),
+      shares: sum(SHARE_PATHS),
+      deepDiveStarted: counts.get(DEEP_DIVE_STARTED_PATH) ?? 0,
+      deepDiveCompleted: sum(DEEP_DIVE_COMPLETED_PATHS),
+      profileClicks,
+      rate: homeViews > 0 ? profileClicks / homeViews : null,
+    },
   };
 }
 

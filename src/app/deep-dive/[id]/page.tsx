@@ -15,6 +15,7 @@ import { DEEP_MODE_QUESTIONS } from "@/content/deep-mode-questions";
 import { FREE_CONTEXT, FREE_CONTEXT_MAX_LENGTH } from "@/content/free-context";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { useLocale } from "@/lib/i18n/locale-context";
+import { trackEvent } from "@/lib/analytics/goatcounter";
 import { findOwnerToken } from "@/lib/quiz/storage";
 import { PILLARS } from "@/lib/scoring/pillars";
 import styles from "./page.module.css";
@@ -73,6 +74,9 @@ export default function DeepDivePage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setOwnerToken(token);
     setOwnershipChecked(true);
+    // REVIEW.md R-11: only counted once ownership is confirmed, so a visitor
+    // being redirected away never registers as a Deep dive start.
+    trackEvent("deep_dive_started");
   }, [params.id, router]);
 
   const currentQuestion = DEEP_MODE_QUESTIONS[currentIndex]!;
@@ -116,6 +120,7 @@ export default function DeepDivePage() {
         const message = (body as { error?: string } | null)?.error;
         throw new Error(message || `Request failed (${res.status})`);
       }
+      trackEvent("deep_dive_completed", finalFreeContext.trim() ? "with_context" : "no_context");
       router.push(`/r/${params.id}`);
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Unknown error");

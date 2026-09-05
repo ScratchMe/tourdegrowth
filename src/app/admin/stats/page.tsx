@@ -40,6 +40,59 @@ function FunnelCard({ window }: { window: FunnelWindow }) {
   );
 }
 
+/** `n` as a share of `of`, or "—" when there is nothing to divide by. */
+function ratio(n: number, of: number): string {
+  return of > 0 ? pct(n / of) : "—";
+}
+
+/**
+ * Where people actually drop out — REVIEW.md R-11. Until this existed only
+ * the two ends of the funnel were measured, so "how many finished" was
+ * knowable and "where the rest left" was not.
+ */
+function FunnelBreakdown({ window }: { window: FunnelWindow }) {
+  const stats = window.stats;
+
+  return (
+    <Card elevation="panel" className={styles.breakdown}>
+      <MetaLabel size="xs" wide>{window.label} — drop-off</MetaLabel>
+      {stats ? (
+        <ul className={styles.list}>
+          <li>Homepage views — {stats.homeViews}</li>
+          <li>
+            Quiz started — {stats.quizStarted} ({ratio(stats.quizStarted, stats.homeViews)} of views)
+          </li>
+          {stats.stagesCompleted.map((count, i) => (
+            <li key={i}>
+              Stage {i + 1} done — {count} ({ratio(count, stats.quizStarted)} of starts)
+            </li>
+          ))}
+          <li>
+            Tone chosen — {stats.toneSelected} ({ratio(stats.toneSelected, stats.quizStarted)} of starts)
+          </li>
+          <li>
+            Result created — {stats.submissionsCompleted} (
+            {ratio(stats.submissionsCompleted, stats.quizStarted)} of starts)
+          </li>
+          <li>
+            Shared — {stats.shares} ({ratio(stats.shares, stats.submissionsCompleted)} of results)
+          </li>
+          <li>
+            Deep dive started — {stats.deepDiveStarted} (
+            {ratio(stats.deepDiveStarted, stats.submissionsCompleted)} of results)
+          </li>
+          <li>
+            Deep dive completed — {stats.deepDiveCompleted} (
+            {ratio(stats.deepDiveCompleted, stats.deepDiveStarted)} of starts)
+          </li>
+        </ul>
+      ) : (
+        <p className={styles.detail}>Unavailable — {window.error}</p>
+      )}
+    </Card>
+  );
+}
+
 /**
  * Internal-only dashboard, English-only on purpose (single operator, not a
  * user-facing surface — no `resolveRequestLocale()`/`tc()` needed here, the
@@ -110,6 +163,15 @@ export default async function AdminStatsPage() {
       <section className={styles.breakdownRow}>
         {funnelWindows.map((window) => (
           <FunnelCard key={window.label} window={window} />
+        ))}
+      </section>
+
+      <MetaLabel size="xs" wide className={styles.sectionLabel}>
+        Funnel (GoatCounter events)
+      </MetaLabel>
+      <section className={styles.breakdownRow}>
+        {funnelWindows.map((window) => (
+          <FunnelBreakdown key={window.label} window={window} />
         ))}
       </section>
 
