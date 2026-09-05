@@ -54,7 +54,17 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   const truncatedFreeContext =
     typeof freeContext === "string" ? freeContext.slice(0, FREE_CONTEXT_MAX_LENGTH) : null;
 
-  const submission = await getSubmissionById(id);
+  // REVIEW.md R-04: this read sat outside every try/catch, so a Firestore
+  // outage surfaced as an unhandled throw (a bare framework 500) rather than
+  // the app's own error contract.
+  let submission;
+  try {
+    submission = await getSubmissionById(id);
+  } catch (err) {
+    console.error("getSubmissionById failed:", err);
+    return NextResponse.json({ error: "DEEP_DIVE_FAILED" }, { status: 502 });
+  }
+
   if (!submission) {
     return NextResponse.json({ error: `No submission found for id "${id}".` }, { status: 404 });
   }
@@ -100,10 +110,12 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     // before it can reach the browser (REVIEW.md R-02).
     return NextResponse.json({ id }, { status: 200 });
   } catch (err) {
+    // Same as the create route (REVIEW.md R-04): full detail to the logs, a
+    // stable code to the browser. This path in particular used to forward
+    // Gemini's raw response body — `parseDeepDiveVerdict` and
+    // `extractGeminiText` both JSON.stringify what they got into their error
+    // messages — straight onto the user's error screen.
     console.error("completeDeepDiveFlow failed:", err);
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Unknown error while running the Deep dive." },
-      { status: 502 },
-    );
+    return NextResponse.json({ error: "DEEP_DIVE_FAILED" }, { status: 502 });
   }
 }

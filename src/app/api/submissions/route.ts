@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { Locale } from "@/lib/i18n/locale";
 import type { Tone } from "@/lib/quiz/tone";
+import { QUESTIONS } from "@/lib/scoring/questions";
 import type { AnswerIndex, Answers } from "@/lib/scoring/score";
 import { createSubmissionFlow } from "@/lib/submissions/create-submission";
 import { generateOwnerToken } from "@/lib/submissions/owner-token";
@@ -20,13 +21,29 @@ function isAnswerIndex(value: unknown): value is AnswerIndex {
   return value === 0 || value === 1 || value === 2;
 }
 
+/** The 15 ids `computeScore` requires — the contract this route enforces. */
+const QUESTION_IDS = new Set(QUESTIONS.map((q) => q.id));
+
+/**
+ * REVIEW.md R-04: the keys have to be EXACTLY the 15 question ids.
+ *
+ * The previous check only looked at the values, so two things got through.
+ * Arbitrary keys were written verbatim into Firestore alongside the real
+ * answers (whatever a caller felt like sending, stored forever on a document
+ * we then read back and cast). And an INCOMPLETE set passed validation here
+ * only to make `computeScore` throw further down — turning a plain client
+ * mistake into a 502 carrying an internal message.
+ *
+ * Matching the count and checking every key belongs to the set is enough to
+ * prove the two sets are equal: no missing id, no extra one.
+ */
 function isAnswers(value: unknown): value is Answers {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    !Array.isArray(value) &&
-    Object.values(value).every(isAnswerIndex)
-  );
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+
+  const entries = Object.entries(value);
+  if (entries.length !== QUESTION_IDS.size) return false;
+
+  return entries.every(([id, answer]) => QUESTION_IDS.has(id) && isAnswerIndex(answer));
 }
 
 function isTone(value: unknown): value is Tone {
@@ -48,7 +65,10 @@ export async function POST(request: Request): Promise<Response> {
   const { answers, tone, locale, refId } = (body ?? {}) as Record<string, unknown>;
 
   if (!isAnswers(answers)) {
-    return NextResponse.json({ error: "answers must be a map of questionId -> 0|1|2." }, { status: 400 });
+    return NextResponse.json(
+      { error: `answers must map each of the ${QUESTION_IDS.size} question ids to 0, 1 or 2 — no more, no fewer.` },
+      { status: 400 },
+    );
   }
   if (!isTone(tone)) {
     return NextResponse.json({ error: 'tone must be "neutral" or "roast".' }, { status: 400 });
@@ -81,10 +101,13 @@ export async function POST(request: Request): Promise<Response> {
     // submission — answers included — used to come back here for no reason.
     return NextResponse.json({ id: submission.id, ownerToken }, { status: 201 });
   } catch (err) {
+    // REVIEW.md R-04: the full error goes to the server logs, a short stable
+    // code goes to the browser. `err.message` used to be forwarded straight
+    // to the user — which, depending on what failed, meant a Firestore error
+    // or another internal detail rendered on the error screen. The code is
+    // still shown there in small mono under the brief's reassuring sentence,
+    // so it stays useful for support without describing our internals.
     console.error("createSubmissionFlow failed:", err);
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Unknown error while scoring the submission." },
-      { status: 502 },
-    );
+    return NextResponse.json({ error: "SCORING_FAILED" }, { status: 502 });
   }
 }

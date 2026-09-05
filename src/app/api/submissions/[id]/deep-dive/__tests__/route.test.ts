@@ -152,6 +152,32 @@ describe("POST /api/submissions/[id]/deep-dive", () => {
     expect(res.status).toBe(404);
   });
 
+  // REVIEW.md R-04.
+  it("never forwards Gemini's raw response or any internal message to the browser", async () => {
+    callGeminiWithFallback.mockRejectedValue(
+      new Error('Unexpected Gemini response shape: {"promptFeedback":{"blockReason":"SAFETY"}}'),
+    );
+
+    const res = await call({ ...validBody, ownerToken: OWNER_TOKEN });
+    const payload = await res.json();
+
+    expect(res.status).toBe(502);
+    expect(payload).toEqual({ error: "DEEP_DIVE_FAILED" });
+    expect(JSON.stringify(payload)).not.toContain("blockReason");
+    expect(saveDeepDive).not.toHaveBeenCalled();
+  });
+
+  it("turns a Firestore outage into the app's own error contract, not a bare 500", async () => {
+    getSubmissionById.mockRejectedValue(new Error("7 PERMISSION_DENIED: Missing or insufficient permissions."));
+
+    const res = await call({ ...validBody, ownerToken: OWNER_TOKEN });
+    const payload = await res.json();
+
+    expect(res.status).toBe(502);
+    expect(payload).toEqual({ error: "DEEP_DIVE_FAILED" });
+    expect(JSON.stringify(payload)).not.toContain("PERMISSION_DENIED");
+  });
+
   it("still validates the payload before anything else", async () => {
     const res = await call({ contextAnswers: { "deep-acq-1": 0 }, locale: "en", ownerToken: OWNER_TOKEN });
 

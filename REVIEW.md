@@ -31,7 +31,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 | **A — Stopper les dégâts sur les données réelles** | R-01 | Deep dive : jeton de propriétaire | F+T | S/M | **Fait** (PR #21, 2026-09-05) |
 | | R-02 | Ne plus exposer `freeContext`/`contextAnswers` dans la page publique | T | XS | **Fait** (PR #21, 2026-09-05) |
 | | R-03 | Attribution `?ref=` : anti auto-parrainage + validation serveur | F+T | S | **Fait** (PR #22, 2026-09-05) |
-| | R-04 | Validation API stricte et messages d'erreur génériques | T | S | À faire |
+| | R-04 | Validation API stricte et messages d'erreur génériques | T | S | **Fait** (PR #23, 2026-09-05) |
 | **B — Filet automatisé** | R-05 | CI GitHub Actions (tsc, tests, build, puis lint et E2E) | T | S | À faire |
 | | R-06 | Réparer le lint (ESLint flat config) | T | S | À faire |
 | | R-07 | Playwright committé : parcours critique en E2E | T | M | À faire |
@@ -113,7 +113,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 
 ### R-04 — Validation API stricte et messages d'erreur génériques
 
-**Type** T · **Effort** S · **Statut** À faire
+**Type** T · **Effort** S · **Statut** **Fait** (PR #23, 2026-09-05) — clôt le lot A
 
 **Constat.**
 - `isAnswers` (`src/app/api/submissions/route.ts:21`) vérifie seulement que chaque valeur vaut 0, 1 ou 2. Il accepte des **clés arbitraires** (écrites telles quelles dans Firestore avec la soumission) et n'exige pas les 15 ids. Un `answers` incomplet passe la validation, puis `computeScore` lève une exception → réponse **502** avec le message interne, alors que c'est une erreur client (400).
