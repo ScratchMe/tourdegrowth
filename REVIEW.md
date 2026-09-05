@@ -32,7 +32,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 | | R-02 | Ne plus exposer `freeContext`/`contextAnswers` dans la page publique | T | XS | **Fait** (PR #21, 2026-09-05) |
 | | R-03 | Attribution `?ref=` : anti auto-parrainage + validation serveur | F+T | S | **Fait** (PR #22, 2026-09-05) |
 | | R-04 | Validation API stricte et messages d'erreur génériques | T | S | **Fait** (PR #23, 2026-09-05) |
-| **B — Filet automatisé** | R-05 | CI GitHub Actions (tsc, tests, build, puis lint et E2E) | T | S | À faire |
+| **B — Filet automatisé** | R-05 | CI GitHub Actions (tsc, tests, build, puis lint et E2E) | T | S | **Fait** (PR #25, 2026-09-05) |
 | | R-06 | Réparer le lint (ESLint flat config) | T | S | À faire |
 | | R-07 | Playwright committé : parcours critique en E2E | T | M | À faire |
 | | R-08 | Supprimer le code mort | T | XS | À faire |
@@ -130,7 +130,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 
 ### R-05 — CI GitHub Actions
 
-**Type** T · **Effort** S · **Statut** À faire
+**Type** T · **Effort** S · **Statut** **Fait** (PR #25, 2026-09-05) — le lint (R-06) et les E2E (R-07) s'ajouteront au workflow avec leurs propres PR. **Reste une action manuelle d'Antoine** : rendre le check obligatoire sur `main` dans les paramètres GitHub du repo (Settings → Branches → Branch protection rules), ce qui ne peut pas se faire depuis le code.
 
 **Constat.** Pas de `.github/workflows`. Vercel construit à chaque push, mais ni Vitest ni `tsc` ne tournent jamais automatiquement. Les 19 PR mergées à ce jour l'ont été sans aucun check.
 
