@@ -118,6 +118,15 @@ export function ResultView({
     }
   }
 
+  /**
+   * The bottom-right CTA's link. It carries the referral id for a visitor —
+   * that is the growth loop (SPEC.md §7) — but never for whoever created this
+   * result: crediting yourself for re-taking your own Tour inflates the
+   * K-factor, the one number SPEC.md §1 says the project exists to quote
+   * (REVIEW.md R-03).
+   */
+  const takeAgainHref = id && !isOwner ? `/quiz?ref=${id}` : "/quiz";
+
   const disclaimerShort = tc(HOW_IT_WORKS.limitationNotice.short, locale);
   const disclaimerLinkText = "How it works"; // the exact trailing phrase both locales' short notice ends with — see content/how-it-works.ts
   const disclaimerSplit = disclaimerShort.split(disclaimerLinkText);
@@ -289,7 +298,7 @@ export function ResultView({
                   {tc(t.ctaSwitchToNeutral, locale)}
                 </Button>
               ) : (
-                <Button href={id ? `/quiz?ref=${id}` : "/quiz"} variant="secondary" onClick={() => clearStoredAnswers()}>
+                <Button href={takeAgainHref} variant="secondary" onClick={() => clearStoredAnswers()}>
                   {tc(t.ctaAgain, locale)}
                 </Button>
               )}

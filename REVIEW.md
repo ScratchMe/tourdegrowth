@@ -30,7 +30,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 |---|---|---|---|---|---|
 | **A — Stopper les dégâts sur les données réelles** | R-01 | Deep dive : jeton de propriétaire | F+T | S/M | **Fait** (PR #21, 2026-09-05) |
 | | R-02 | Ne plus exposer `freeContext`/`contextAnswers` dans la page publique | T | XS | **Fait** (PR #21, 2026-09-05) |
-| | R-03 | Attribution `?ref=` : anti auto-parrainage + validation serveur | F+T | S | À faire |
+| | R-03 | Attribution `?ref=` : anti auto-parrainage + validation serveur | F+T | S | **Fait** (PR #22, 2026-09-05) |
 | | R-04 | Validation API stricte et messages d'erreur génériques | T | S | À faire |
 | **B — Filet automatisé** | R-05 | CI GitHub Actions (tsc, tests, build, puis lint et E2E) | T | S | À faire |
 | | R-06 | Réparer le lint (ESLint flat config) | T | S | À faire |
@@ -95,7 +95,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 
 ### R-03 — Attribution `?ref=` : anti auto-parrainage + validation serveur
 
-**Type** F+T · **Effort** S · **Statut** À faire
+**Type** F+T · **Effort** S · **Statut** **Fait** (PR #22, 2026-09-05) — politique retenue : **first-touch**, voir `CLAUDE.md`
 
 **Constat.**
 - Le bouton « Refaire le Tour » d'un résultat pointe vers `/quiz?ref=<id de ce résultat>` (`src/app/r/[id]/ResultView.tsx:276`) **y compris pour l'auteur**. Chaque re-test par la même personne est donc compté comme une analyse parrainée, avec elle-même comme « partageur unique ». K = analyses parrainées ÷ partageurs uniques : un utilisateur seul qui refait trois fois le Tour produit un K-factor de 3,00.

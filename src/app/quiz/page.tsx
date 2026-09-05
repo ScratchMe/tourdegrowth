@@ -22,7 +22,15 @@ import {
   stageOfQuestion,
 } from "@/lib/quiz/navigation";
 import { trackEvent } from "@/lib/analytics/goatcounter";
-import { loadRefId, loadStoredAnswers, rememberResult, saveRefId, saveStoredAnswers } from "@/lib/quiz/storage";
+import {
+  clearRefId,
+  isOwnResult,
+  loadRefId,
+  loadStoredAnswers,
+  rememberResult,
+  saveRefId,
+  saveStoredAnswers,
+} from "@/lib/quiz/storage";
 import type { AnswerIndex, Answers } from "@/lib/scoring/score";
 import { LoadingScreen } from "./LoadingScreen";
 import { ToneSelector, type Tone } from "./ToneSelector";
@@ -113,6 +121,19 @@ export default function QuizPage() {
     setCurrentIndex((i) => Math.max(i - 1, 0));
   }
 
+  /**
+   * The stored `?ref=`, unless it points at a result this very browser
+   * created (REVIEW.md R-03). Re-taking your own Tour from your own result
+   * page used to count as a referred analysis crediting yourself, which
+   * inflates the K-factor — the one number SPEC.md §1 says the project
+   * exists to be able to quote.
+   */
+  function attributableRefId(): string | null {
+    const refId = loadRefId();
+    if (!refId || isOwnResult(refId)) return null;
+    return refId;
+  }
+
   // "Get my score →" and "Try again" both call this — same request, same
   // stored answers, so a retry after a failure never restarts the
   // questionnaire (SPEC.md §4). SPEC-ADDENDUM-01.md §0: this is now a
@@ -129,7 +150,7 @@ export default function QuizPage() {
         fetch("/api/submissions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ answers, tone, locale, refId: loadRefId() }), // SPEC.md §7
+          body: JSON.stringify({ answers, tone, locale, refId: attributableRefId() }), // SPEC.md §7
         }),
         minDwell,
       ]);
@@ -143,6 +164,10 @@ export default function QuizPage() {
       // recoverable afterwards — store it before navigating away. It is the
       // only thing that will later prove this browser created the result.
       rememberResult({ id: created.id, ownerToken: created.ownerToken, createdAt: new Date().toISOString() });
+      // REVIEW.md R-03, first-touch attribution: the ref has now been spent.
+      // Clearing it means a second Tour from this browser starts clean
+      // instead of silently inheriting the first one's credit.
+      clearRefId();
       trackEvent("submission_completed", tone); // SPEC.md §8: one custom event per completed analysis
       router.push(`/r/${created.id}`);
     } catch (err) {
