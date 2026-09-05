@@ -419,3 +419,21 @@ Chaque étape de ce projet a été vérifiée avec Playwright (voir tout ce qui 
 **Ce que la passe axe a trouvé dès son premier passage** : trois paires de couleurs sous le seuil AA de contraste, toutes des **tokens du design system** (bouton principal 4,41:1, ligne de crédit `--text-faint` 2,80:1, lien du disclaimer 3,56:1) — donc présentes partout où le token sert. Consignées en `REVIEW.md` **R-22** plutôt que corrigées ici : ce sont des couleurs de marque livrées par Claude Design, deux des trois demandent un arbitrage d'Antoine. La spec ne désactive pas la règle pour autant : elle liste ces trois paires **par couleur** (stable) et non par sélecteur (un hash de build), donc toute **nouvelle** violation de contraste fait rougir la CI pendant que les connues restent visibles dans le code.
 
 **Lot B terminé** (R-05 à R-08) : CI, lint, E2E, code mort. La suite est le lot C (boucle de partage).
+
+### R-09 : le verdict suit le lecteur, plus l'auteur (2026-09-05) — début du lot C
+
+**Le bug.** `createSubmissionFlow` résolvait les deux verdicts Quick avec `input.locale` — la langue de l'auteur — et les **persistait** sur le document. Tout le reste de la page de résultat suit `useLocale()`, c'est-à-dire la langue du visiteur. Un fondateur français partageant son résultat à un collègue anglophone lui affichait donc une page en anglais avec un headline et cinq phrases de piliers en français. Et inversement. C'était la première impression du produit pour chaque personne arrivant par un lien partagé — sur l'écran dont dépend toute la boucle de croissance.
+
+**Le correctif.** `view-model.ts#buildQuickVerdicts(locale, pillars, weakestPillar)` résout les deux tons à la demande. C'est un pur lookup dans `content/copy-library.ts` indexé par bande de score, donc le résoudre à chaque requête ne coûte rien.
+
+- **Résolu côté serveur, pas dans le composant client** : le payload reste les mêmes douze courtes chaînes au lieu d'embarquer toute la bibliothèque de copie (483 lignes, 60 verdicts + 20 headlines × 2 langues) dans le bundle du navigateur.
+- **Le champ `verdicts` disparaît de `Submission`** : c'est une donnée dérivée et reproductible à volonté, et la stocker était précisément le piège — quelqu'un finirait par relire la version figée. Les documents antérieurs le portent encore, plus rien ne le lit. Un test vérifie maintenant qu'une soumission créée par un auteur français ne contient **aucun caractère accentué** : la langue appartient au rendu, pas à l'enregistrement.
+- **`/r/sample` passe par le même helper** (`getSampleVerdicts`), donc l'échantillon ne peut plus diverger du vrai chemin.
+
+**Asymétrie volontaire, à ne pas « corriger » plus tard** : l'image OG continue d'utiliser `submission.locale`, la langue de l'auteur (étape 8). Un crawler social n'envoie pas les cookies du visiteur qui partage — il n'y a donc pas de langue de lecteur à respecter à cet endroit.
+
+**Piège d'outillage rencontré** : `playwright.config.ts` a `reuseExistingServer: !process.env.CI`, donc en local un `next start` laissé tourner d'une vérification précédente sert **l'ancien build** en silence — 4 specs ont échoué de façon incompréhensible avant que je réalise que le serveur en mémoire datait. Tuer les `next-server` restants avant de relancer la suite ; `pkill -f "next start"` ne suffit pas, le processus s'appelle `next-server`.
+
+**Vérifié en réel** : 182 tests verts (+4), lint/tsc/build propres, 18 specs Playwright (+1 : `/r/sample` rend un verdict différent en FR et en EN, avec accents côté FR). Et par requête HTTP directe, **sans `?lang=` ni cookie**, uniquement sur `Accept-Language` — la même URL renvoie « Bon moteur global, un pneu à plat : la rétention. » en FR et « Solid engine, one flat tyre: retention. » en EN.
+
+**Non vérifiable ici** (pas de `.env.local`) : le rendu d'un **vrai** résultat Firestore dans les deux langues. Le chemin réel et celui de l'échantillon appellent désormais littéralement le même helper avec la même résolution de locale, donc le risque résiduel est faible — à confirmer après déploiement en ouvrant un vrai résultat avec `?lang=` dans les deux sens.

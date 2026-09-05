@@ -41,7 +41,12 @@ export function ScoreDisplay({
         <span aria-hidden="true" className={styles.spray} />
       </div>
       {verdict ? (
-        <div className={[styles.verdict, desktop ? styles.verdictDesktop : styles.verdictMobile].join(" ")}>{verdict}</div>
+        <div
+          data-testid="score-verdict"
+          className={[styles.verdict, desktop ? styles.verdictDesktop : styles.verdictMobile].join(" ")}
+        >
+          {verdict}
+        </div>
       ) : null}
     </div>
   );

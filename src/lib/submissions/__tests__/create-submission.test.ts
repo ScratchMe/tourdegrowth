@@ -43,7 +43,7 @@ function fakeDeps(overrides: Partial<CreateSubmissionDeps> = {}): CreateSubmissi
 }
 
 describe("createSubmissionFlow (Quick mode — deterministic, no Gemini)", () => {
-  it("computes the score, resolves both tones' verdicts from the copy library, and saves the submission", async () => {
+  it("computes the score and saves the submission", async () => {
     const deps = fakeDeps();
 
     const { submission } = await createSubmissionFlow(
@@ -57,12 +57,20 @@ describe("createSubmissionFlow (Quick mode — deterministic, no Gemini)", () =>
     expect(submission.pillars).toHaveLength(5);
     expect(submission.deepDive).toBeNull();
 
-    // Every pillar answered "best" (index 0, 20pts) -> every pillar is "strong".
-    expect(submission.verdicts.neutral.pillarSentences.acquisition.length).toBeGreaterThan(0);
-    expect(submission.verdicts.roast.pillarSentences.acquisition.length).toBeGreaterThan(0);
-    expect(submission.verdicts.neutral.headline.length).toBeGreaterThan(0);
-
     expect(deps.saved).toEqual([submission]);
+  });
+
+  // REVIEW.md R-09: the verdict follows the reader, so it can no longer be
+  // frozen into the document at the author's locale.
+  it("stores no verdict text at all — it is derived per reader", async () => {
+    const deps = fakeDeps();
+
+    await createSubmissionFlow({ answers: fullAnswers(0), tone: "neutral", locale: "fr", refId: null }, deps);
+
+    expect(deps.saved[0]).not.toHaveProperty("verdicts");
+    // Nothing French should have made it into a document created by a French
+    // author — the language belongs to the render, not to the record.
+    expect(JSON.stringify(deps.saved[0])).not.toMatch(/[àâäéèêëïîôöùûüç]/i);
   });
 
   // REVIEW.md R-01.
@@ -91,16 +99,6 @@ describe("createSubmissionFlow (Quick mode — deterministic, no Gemini)", () =>
     expect(submission.refId).toBe("sub_referrer");
     expect(submission.tone).toBe("roast");
     expect(submission.locale).toBe("fr");
-  });
-
-  it("resolves the FR verdict in French", async () => {
-    const deps = fakeDeps();
-    const { submission } = await createSubmissionFlow(
-      { answers: fullAnswers(2), tone: "neutral", locale: "fr", refId: null },
-      deps,
-    );
-    // Every pillar at its worst band (index 2, 0pts) -> "weak" band sentences, in French.
-    expect(submission.verdicts.neutral.pillarSentences.retention).toMatch(/[àâäéèêëïîôöùûüç]/i);
   });
 
   it("never saves anything when the answers are incomplete", async () => {

@@ -36,10 +36,6 @@ function submission(overrides: Partial<Submission> = {}): Submission {
     weakestPillar: "acquisition",
     refId: null,
     ownerTokenHash: hashOwnerToken(OWNER_TOKEN),
-    verdicts: {
-      neutral: { headline: "h", pillarSentences: Object.fromEntries(PILLARS.map((p) => [p, "s"])) },
-      roast: { headline: "h", pillarSentences: Object.fromEntries(PILLARS.map((p) => [p, "s"])) },
-    } as Submission["verdicts"],
     deepDive: null,
     ...overrides,
   };

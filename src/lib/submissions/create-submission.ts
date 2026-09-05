@@ -8,7 +8,6 @@ import { extractGeminiText } from "@/lib/gemini/response";
 import type { Tone } from "@/lib/quiz/tone";
 import { computeScore, type Answers, type PillarScore } from "@/lib/scoring/score";
 import type { Pillar } from "@/lib/scoring/pillars";
-import { buildQuickVerdict } from "@/lib/scoring/verdict";
 import { hashOwnerToken } from "./owner-token";
 import type { DeepDiveResult, DeepDiveVerdict, Submission } from "./types";
 import { parseDeepDiveVerdict } from "./verdict";
@@ -45,8 +44,13 @@ export interface CreateSubmissionResult {
  * non-negotiable) → verdict (deterministic, SPEC-ADDENDUM-01.md §0) →
  * persistence. No Gemini call at all — zero external calls between the last
  * question and the result, which is the whole point of the §0 migration.
- * Both tones' verdicts are computed (trivially, they're just lookups) so
- * the result page's tone switch stays a client-side swap.
+ *
+ * The Quick verdicts are NOT computed or stored here (REVIEW.md R-09): they
+ * are a pure lookup over the copy library, so they are resolved per request
+ * in the locale of whoever is reading the result — see
+ * `view-model.ts#buildQuickVerdicts`. Storing them once, in the author's
+ * locale, is exactly what made a shared result render half in the wrong
+ * language.
  */
 export async function createSubmissionFlow(
   input: CreateSubmissionInput,
@@ -67,10 +71,6 @@ export async function createSubmissionFlow(
     weakestPillar,
     refId: input.refId,
     ownerTokenHash: hashOwnerToken(ownerToken),
-    verdicts: {
-      neutral: buildQuickVerdict("neutral", input.locale, pillars, weakestPillar),
-      roast: buildQuickVerdict("roast", input.locale, pillars, weakestPillar),
-    },
     deepDive: null,
   };
 
