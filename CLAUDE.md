@@ -482,3 +482,24 @@ Jusqu'ici seules les **deux extrémités** du funnel étaient instrumentées (`s
 **Faux positif ESLint rencontré** : les fixtures Playwright reçoivent un callback `use`, que `react-hooks/rules-of-hooks` prend pour le hook React `use`. Règle désactivée pour `e2e/**` et `playwright.config.ts` uniquement — il n'y a aucun React dans ces fichiers.
 
 **Vérifié en réel** : 183 tests unitaires (+1), **24 specs Playwright** (+4), lint/tsc/build propres. Reste non vérifiable depuis ce bac à sable : que les événements arrivent dans le vrai tableau de bord GoatCounter (le proxy sortant bloque `*.goatcounter.com`, limite déjà documentée à l'étape 11). À confirmer par Antoine après déploiement, en regardant la nouvelle section « Funnel » de `/admin/stats`.
+
+### R-12 : rendre le score ré-explicable à l'écran, pas seulement dans le code (2026-09-05) — clôt le lot C
+
+`CLAUDE.md` pose comme non négociable qu'« un score partagé doit être ré-explicable en 10 secondes ». C'était vrai du **code** — `computeScore` est pur et bien testé — et invisible dans le **produit** : la page de résultat n'a jamais montré les trois réponses derrière un sous-score, alors que `Submission.answers` existait en base sans jamais être lu pour l'affichage.
+
+`ScoreBreakdown` (`src/app/r/[id]/`) : un `<details>` natif placé **après** les CTA et le disclaimer, fermé par défaut, qui déplie par pilier les 3 questions, la réponse choisie, ses points (20/7/0) et le calcul `54/60 → 18/20`.
+
+**Deux contraintes tenues d'emblée :**
+- **Propriétaire uniquement.** Les réponses décrivent une entreprise bien plus que le score ne le fait (« aucune idée de notre CAC ») et `/r/<id>` est public. Elles sont lues depuis le `localStorage` de l'appareil (`tdg.results.v1`, la clé de R-01, qui gagne un champ `answers`), donc **elles n'entrent jamais dans le payload d'un lien partagé** — même raisonnement que R-02, appliqué avant que le problème existe plutôt qu'après.
+- **Les questions viennent du serveur, pas du bundle.** Importer `content/copy-library.ts` (483 lignes, 2 langues) dans le bundle client de la page de résultat aurait refait l'erreur que R-09 venait d'éviter. La page résout ~60 chaînes courtes dans la langue du lecteur et les passe en props. Ces textes sont de toute façon publics — n'importe qui lit les 15 questions en ouvrant `/quiz`. Les **réponses**, elles, ne viennent jamais de là.
+
+**Écarts signalés plutôt que tranchés :**
+- **Aucun composant du design system ne couvre un dépliant** (les 17 du bundle n'en ont pas), donc celui-ci est construit aux tokens seuls, avec un `+`/`−` typographique plutôt qu'une icône — DESIGN-BRIEF.md « Assets » dit explicitement qu'il n'y a aucun fichier d'icône dans ce produit. À faire relire par Claude Design.
+- **La copie est marquée `TODO`** : c'est de la copie d'interface (titres, libellés, gabarit de calcul), même statut que l'écran d'erreur repris du brief, pas de la voix verdict — mais elle reste à relire.
+- **Tension assumée avec `AnswerOption`**, dont la doc dit « never label an option with its score — scoring stays invisible to the user ». Cette règle vaut pour le **questionnaire**, où afficher les points fausserait les réponses. Ici, montrer les points *est* le sujet.
+
+**Vérification : ce qui était couvrable, et ce qui ne l'était pas.** La spec E2E ne couvre que la moitié visiteur (aucun breakdown sur le lien de quelqu'un d'autre, aucune réponse dans le payload) — le breakdown a besoin des `rawPoints` d'une vraie soumission, et `/r/sample` est la seule page de résultat qui s'affiche sans Firestore, avec des données fixes et **aucune réponse derrière** par construction (SPEC.md §12). Le rendu côté propriétaire a donc été vérifié séparément, en navigateur, via un patch **local et jamais committé** donnant temporairement un breakdown à l'échantillon : **32 assertions vertes** (présent, fermé par défaut, s'ouvre au clic, calcul `54/60 → 18/20` correct, 15 questions, les trois valeurs de points, titre localisé, aucun débordement) en EN et FR × desktop et mobile, plus une relecture des captures. Patch retiré et absence de trace vérifiée avant commit.
+
+**Piège de vérification rencontré** : `innerText` renvoie le texte **rendu**, donc le `text-transform: uppercase` du `<summary>` le remonte en majuscules — quatre assertions ont échoué sur une comparaison de casse avant que je regarde la vraie valeur plutôt que de supposer un bug. Comparer sur `textContent` pour du texte transformé en CSS.
+
+**Reste à confirmer après déploiement** : le breakdown sur un **vrai** résultat Firestore (le chemin réel passe les `rawPoints` de `computeScore` au lieu de la valeur fabriquée du patch local).

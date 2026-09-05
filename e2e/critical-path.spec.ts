@@ -113,3 +113,41 @@ test.describe("sharing", () => {
     await expect(page.getByTestId("share-button")).not.toHaveText(/copied|copié/i);
   });
 });
+
+/**
+ * REVIEW.md R-12 — CLAUDE.md calls it non-negotiable that a shared score be
+ * re-explainable in ten seconds. That was true of the code and invisible in
+ * the product.
+ */
+test.describe("score breakdown", () => {
+  /**
+   * Only the visitor half is coverable here: the breakdown needs a real
+   * submission's per-pillar raw points, and `/r/sample` is the one result
+   * page that renders without Firestore — deliberately fixed display data
+   * with no answers behind it (SPEC.md §12), so it carries no breakdown by
+   * design. The owner-side rendering was verified in a browser separately;
+   * see the CLAUDE.md entry for R-12.
+   */
+  test("someone else's shared result never shows the breakdown", async ({ page }) => {
+    const calls = await stubSubmissions(page);
+    await page.goto("/quiz");
+    await answerAllQuestions(page);
+    await page.getByTestId("get-score-cta").click();
+    await page.waitForURL("**/r/**");
+    expect(calls).toHaveLength(1);
+
+    await page.evaluate(() => window.localStorage.clear()); // now just a visitor
+    await page.reload();
+    await expect(page.getByTestId("score-breakdown")).toHaveCount(0);
+  });
+
+  test("the answers never appear in the shared page's own payload", async ({ page }) => {
+    const response = await page.goto("/r/sample");
+    const html = (await response?.text()) ?? "";
+
+    // The breakdown's question/option text is public content and may appear;
+    // what must never be there is a stored answer map keyed by question id.
+    expect(html).not.toContain("tdg.results.v1");
+    expect(html).not.toMatch(/"acq-1"\s*:\s*\d/);
+  });
+});

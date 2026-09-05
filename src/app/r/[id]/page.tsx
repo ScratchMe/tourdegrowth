@@ -6,6 +6,8 @@ import { resolveRequestLocale } from "@/lib/i18n/resolve-request-locale";
 import { getSampleVerdicts, SAMPLE_RESULT } from "@/lib/submissions/sample";
 import { getSubmissionById } from "@/lib/submissions/repository";
 import { buildQuickVerdicts, toDeepDiveView } from "@/lib/submissions/view-model";
+import { QUESTIONS } from "@/content/copy-library";
+import type { BreakdownData } from "./ScoreBreakdown";
 import type { Locale } from "@/lib/i18n/locale";
 import type { Pillar } from "@/lib/scoring/pillars";
 import { ResultView } from "./ResultView";
@@ -74,6 +76,29 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return resultMetadata(submission.total, submission.weakestPillar, submission.locale, false);
 }
 
+/**
+ * The data behind "how this score is calculated" (REVIEW.md R-12), resolved
+ * to display text HERE rather than shipped as the copy library.
+ *
+ * `content/copy-library.ts` is 483 lines across two languages; importing it
+ * into the result page's client bundle to render 15 questions would be the
+ * same mistake R-09 avoided. These are ~60 short strings instead, already in
+ * the reader's language — and they're public content anyway (anyone can read
+ * all 15 questions by opening /quiz). The ANSWERS, which are not public,
+ * never come from here: they are read from the owner's own device.
+ */
+function buildBreakdownData(locale: Locale, pillars: { pillar: Pillar; rawPoints: number }[]): BreakdownData {
+  return {
+    questions: QUESTIONS.map((q) => ({
+      id: q.id,
+      pillar: q.pillar,
+      question: tc(q.question, locale),
+      options: q.options.map((o) => ({ label: tc(o.label, locale), points: o.points })),
+    })),
+    rawPoints: Object.fromEntries(pillars.map((p) => [p.pillar, p.rawPoints])) as BreakdownData["rawPoints"],
+  };
+}
+
 // `/r/sample` is the fixed, hard-coded "See a sample result" screen
 // (SPEC.md §12) — never a real Firestore lookup, never recalculated.
 export default async function ResultPage({ params }: PageProps) {
@@ -114,6 +139,7 @@ export default async function ResultPage({ params }: PageProps) {
       weakestPillar={submission.weakestPillar}
       verdicts={buildQuickVerdicts(locale, submission.pillars, submission.weakestPillar)}
       initialTone={submission.tone}
+      breakdown={buildBreakdownData(locale, submission.pillars)}
       // REVIEW.md R-02: only the generated verdicts cross to the client.
       // `deepDive` also holds the founder's free-text context and their 10
       // Deep dive answers, which would otherwise ride along in this public

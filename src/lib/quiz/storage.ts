@@ -118,12 +118,28 @@ export interface StoredResult {
   ownerToken: string;
   /** ISO 8601, client clock — only used to keep the most recent entries when trimming. */
   createdAt: string;
+  /**
+   * The 15 answers behind this result (REVIEW.md R-12), kept so the owner can
+   * be shown how their score was calculated.
+   *
+   * Client-side ON PURPOSE: the answers say more about a business than the
+   * score does ("no idea what our CAC is"), and `/r/<id>` is a public page.
+   * Keeping them here rather than sending them from the server means they
+   * never enter the RSC payload of a shared link at all — the same reasoning
+   * as R-02, applied before the problem exists rather than after.
+   *
+   * Optional: entries written before R-12 don't have it, and a result with
+   * no stored answers simply shows no breakdown.
+   */
+  answers?: Answers;
 }
 
 function isStoredResult(value: unknown): value is StoredResult {
   if (typeof value !== "object" || value === null) return false;
   const v = value as Record<string, unknown>;
-  return typeof v.id === "string" && typeof v.ownerToken === "string" && typeof v.createdAt === "string";
+  if (typeof v.id !== "string" || typeof v.ownerToken !== "string" || typeof v.createdAt !== "string") return false;
+  // `answers` is optional (pre-R-12 entries), but must be the right shape when present.
+  return v.answers === undefined || isAnswersShape(v.answers);
 }
 
 export function loadStoredResults(): StoredResult[] {
@@ -159,4 +175,9 @@ export function findOwnerToken(id: string): string | null {
 /** Whether this browser created that result — drives whether the Deep dive is offered at all. */
 export function isOwnResult(id: string): boolean {
   return findOwnerToken(id) !== null;
+}
+
+/** The full stored entry for a result this browser created, or null for someone else's link. */
+export function findStoredResult(id: string): StoredResult | null {
+  return loadStoredResults().find((r) => r.id === id) ?? null;
 }
