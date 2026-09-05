@@ -5,6 +5,7 @@ import { callGeminiWithFallback } from "@/lib/gemini/client";
 import type { Locale } from "@/lib/i18n/locale";
 import { completeDeepDiveFlow, type DeepDiveAnswers } from "@/lib/submissions/create-submission";
 import { verifyOwnerToken } from "@/lib/submissions/owner-token";
+import { invalidateSubmission } from "@/lib/submissions/cached-repository";
 import { getSubmissionById, saveDeepDive } from "@/lib/submissions/repository";
 
 // The one Route Handler that still calls Gemini (SPEC-ADDENDUM-01.md §0/§2.4)
@@ -57,6 +58,10 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   // REVIEW.md R-04: this read sat outside every try/catch, so a Firestore
   // outage surfaced as an unhandled throw (a bare framework 500) rather than
   // the app's own error contract.
+  //
+  // Deliberately the UNCACHED read (R-14): the "already completed?" check
+  // below has to see current state, or two Deep dives launched at once could
+  // both believe they are the first.
   let submission;
   try {
     submission = await getSubmissionById(id);
@@ -104,6 +109,9 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     );
 
     await saveDeepDive(id, deepDive);
+    // The one moment a submission changes — drop the cached copy so the
+    // result page shows the enriched version immediately (REVIEW.md R-14).
+    invalidateSubmission(id);
 
     // The client only redirects to /r/<id> from here; the enriched result is
     // rendered server-side on that page, where `freeContext` is stripped

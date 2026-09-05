@@ -4,7 +4,7 @@ import { cache } from "react";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { resolveRequestLocale } from "@/lib/i18n/resolve-request-locale";
 import { getSampleVerdicts, SAMPLE_RESULT } from "@/lib/submissions/sample";
-import { getSubmissionById } from "@/lib/submissions/repository";
+import { getCachedSubmissionById } from "@/lib/submissions/cached-repository";
 import { buildQuickVerdicts, toDeepDiveView } from "@/lib/submissions/view-model";
 import { QUESTIONS } from "@/content/copy-library";
 import type { BreakdownData } from "./ScoreBreakdown";
@@ -17,12 +17,13 @@ interface PageProps {
 }
 
 /**
- * `generateMetadata` and the page component both need the submission, and
- * they run in the SAME request — `cache()` makes that one Firestore read
- * instead of two. (Route handlers keep importing `getSubmissionById`
- * directly; this wrapper only exists for the React render pass.)
+ * `generateMetadata` and the page component both need the submission and run
+ * in the SAME request, so `cache()` dedupes them into one call; that call in
+ * turn goes through the cross-request cache (REVIEW.md R-14), so a shared
+ * result that many people open costs one Firestore read per hour rather than
+ * one per view. Route handlers keep importing `getSubmissionById` directly.
  */
-const loadSubmission = cache(getSubmissionById);
+const loadSubmission = cache(getCachedSubmissionById);
 
 /**
  * The shared link's preview text — REVIEW.md R-10. Every result used to

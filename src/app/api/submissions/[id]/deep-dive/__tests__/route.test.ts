@@ -6,8 +6,13 @@ import { hashOwnerToken } from "@/lib/submissions/owner-token";
 import type { Submission } from "@/lib/submissions/types";
 
 const getSubmissionById = vi.fn();
+const invalidateSubmission = vi.fn();
 const saveDeepDive = vi.fn<(id: string, deepDive: unknown) => Promise<void>>(async () => {});
 const callGeminiWithFallback = vi.fn();
+
+vi.mock("@/lib/submissions/cached-repository", () => ({
+  invalidateSubmission: (id: string) => invalidateSubmission(id),
+}));
 
 vi.mock("@/lib/submissions/repository", () => ({
   getSubmissionById: (id: string) => getSubmissionById(id),
@@ -117,6 +122,8 @@ describe("POST /api/submissions/[id]/deep-dive", () => {
     // One call per tone (SPEC-ADDENDUM-01.md §2 — both tones generated at once).
     expect(callGeminiWithFallback).toHaveBeenCalledTimes(2);
     expect(saveDeepDive).toHaveBeenCalledWith("sub_1", expect.objectContaining({ completed: true }));
+    // REVIEW.md R-14: the enriched result must not stay behind a cached copy.
+    expect(invalidateSubmission).toHaveBeenCalledWith("sub_1");
   });
 
   it("returns only the id, never the submission or the free-text context", async () => {
@@ -138,6 +145,7 @@ describe("POST /api/submissions/[id]/deep-dive", () => {
     expect(await res.json()).toEqual({ id: "sub_1" });
     expect(callGeminiWithFallback).not.toHaveBeenCalled();
     expect(saveDeepDive).not.toHaveBeenCalled();
+    expect(invalidateSubmission).not.toHaveBeenCalled();
   });
 
   it("still 404s on an unknown id, ownership aside", async () => {
