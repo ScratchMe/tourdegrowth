@@ -47,6 +47,8 @@ export const QUESTION_COUNT = 15;
 /** The stub's stand-in for a created submission. `/r/sample` is the one result page that renders without Firestore. */
 export const CREATED_ID = "sample";
 export const CREATED_OWNER_TOKEN = "e2e-owner-token";
+/** The score the stub reports back — kept on the device so the landing can offer it again (REVIEW.md R-20). */
+export const CREATED_TOTAL = 74;
 
 export interface SubmissionCall {
   answers: Record<string, number>;
@@ -67,7 +69,7 @@ export async function stubSubmissions(page: Page, status = 201): Promise<Submiss
     await route.fulfill({
       status: 201,
       contentType: "application/json",
-      body: JSON.stringify({ id: CREATED_ID, ownerToken: CREATED_OWNER_TOKEN }),
+      body: JSON.stringify({ id: CREATED_ID, ownerToken: CREATED_OWNER_TOKEN, total: CREATED_TOTAL }),
     });
   });
   return calls;
@@ -97,4 +99,23 @@ export async function readStoredRefId(page: Page): Promise<string | null> {
  */
 export async function expectStoredRefId(page: Page, expected: string | null): Promise<void> {
   await expect.poll(() => readStoredRefId(page), { timeout: 5_000 }).toBe(expected);
+}
+
+/**
+ * Marks this browser as the owner of a result, the way completing a Tour
+ * would (REVIEW.md R-01). Needed by anything that exercises the Deep dive,
+ * which redirects a non-owner away before rendering a single question.
+ */
+export async function seedOwnedResult(page: Page, id = CREATED_ID, total = CREATED_TOTAL): Promise<void> {
+  await page.evaluate(
+    ([resultId, score]) => {
+      window.localStorage.setItem(
+        "tdg.results.v1",
+        JSON.stringify([
+          { id: resultId, ownerToken: "e2e-owner-token", createdAt: "2026-09-05T10:00:00.000Z", total: score },
+        ]),
+      );
+    },
+    [id, total] as [string, number],
+  );
 }

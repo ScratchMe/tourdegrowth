@@ -16,7 +16,12 @@ import { FREE_CONTEXT, FREE_CONTEXT_MAX_LENGTH } from "@/content/free-context";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { trackEvent } from "@/lib/analytics/goatcounter";
-import { findOwnerToken } from "@/lib/quiz/storage";
+import {
+  clearDeepDiveProgress,
+  findOwnerToken,
+  loadDeepDiveProgress,
+  saveDeepDiveProgress,
+} from "@/lib/quiz/storage";
 import { PILLARS } from "@/lib/scoring/pillars";
 import styles from "./page.module.css";
 
@@ -36,11 +41,14 @@ const QUESTION_COUNT = DEEP_MODE_QUESTIONS.length; // 10
  * different kind of step — same StageProgress (now fully filled, since all
  * 10 pillar questions are done), same QuestionCard-as-heading treatment.
  *
- * Unlike the Quick questionnaire, nothing here is persisted to
- * localStorage: this is a short, optional bonus flow (not the core 15-
- * question promise SPEC.md §4 makes about never losing progress), so a
- * reload simply restarts it — a low-cost trade-off for not adding a second
- * persistence key/shape to reason about.
+ * Progress IS persisted since REVIEW.md R-20. It deliberately wasn't when
+ * this shipped — a short optional bonus flow, not the core 15-question
+ * promise of SPEC.md §4 — but the flow grew to 10 questions plus a free-text
+ * screen plus a generation that can take a minute, and losing all of that to
+ * a stray reload stopped being a low-cost trade-off. Same shape as the quiz:
+ * the resume point is DERIVED from the stored answers (first unanswered
+ * question, or the free-context screen once all 10 are in) rather than being
+ * a second piece of state to keep in sync.
  */
 export default function DeepDivePage() {
   const router = useRouter();
@@ -78,6 +86,17 @@ export default function DeepDivePage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setOwnerToken(token);
     setOwnershipChecked(true);
+
+    // Resume where they left off, if they were here before. Derived from the
+    // stored answers alone — one source of truth, as in the quiz.
+    const stored = loadDeepDiveProgress(params.id);
+    if (stored) {
+      setAnswers(stored.answers);
+      setFreeContext(stored.freeContext);
+      const firstUnanswered = DEEP_MODE_QUESTIONS.findIndex((q) => stored.answers[q.id] === undefined);
+      if (firstUnanswered === -1) setPhase("freeContext");
+      else setCurrentIndex(firstUnanswered);
+    }
     // REVIEW.md R-11: only counted once ownership is confirmed, so a visitor
     // being redirected away never registers as a Deep dive start.
     trackEvent("deep_dive_started");
@@ -99,6 +118,7 @@ export default function DeepDivePage() {
   function handleAnswer(optionIndex: number) {
     const next = { ...answers, [currentQuestion.id]: optionIndex };
     setAnswers(next);
+    saveDeepDiveProgress({ submissionId: params.id, answers: next, freeContext });
 
     if (currentIndex === QUESTION_COUNT - 1) {
       setPhase("freeContext");
@@ -109,6 +129,14 @@ export default function DeepDivePage() {
 
   function handleBack() {
     setCurrentIndex((i) => Math.max(i - 1, 0));
+  }
+
+  function handleFreeContextChange(value: string) {
+    setFreeContext(value);
+    // Written on every keystroke rather than debounced: it is a single
+    // small localStorage entry, and the case worth protecting is exactly the
+    // one a debounce would lose — a reload a moment after typing.
+    saveDeepDiveProgress({ submissionId: params.id, answers, freeContext: value });
   }
 
   async function submit(finalAnswers: Record<string, number>, finalFreeContext: string) {
@@ -135,6 +163,10 @@ export default function DeepDivePage() {
         throw new Error(message || `Request failed (${res.status})`);
       }
       trackEvent("deep_dive_completed", finalFreeContext.trim() ? "with_context" : "no_context");
+      // Cleared on success, not on abandon: `freeContext` is a founder
+      // describing their business in their own words, and it has no reason
+      // to outlive the request it was written for.
+      clearDeepDiveProgress();
       router.push(`/r/${params.id}`);
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Unknown error");
@@ -219,7 +251,7 @@ export default function DeepDivePage() {
 
             <FreeContextField
               value={freeContext}
-              onChange={setFreeContext}
+              onChange={handleFreeContextChange}
               maxLength={FREE_CONTEXT_MAX_LENGTH}
               placeholder={tc(FREE_CONTEXT.placeholder, locale)}
               aria-label={tc(FREE_CONTEXT.label, locale)}

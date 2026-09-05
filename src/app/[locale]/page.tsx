@@ -12,6 +12,7 @@ import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { contentAlternates, localePath } from "@/lib/i18n/routes";
 import { SITE_URL } from "@/lib/site";
+import { LastResult } from "./LastResult";
 import { RefCapture } from "./RefCapture";
 import { SAMPLE_RESULT } from "@/lib/submissions/sample";
 import styles from "./page.module.css";
@@ -111,6 +112,9 @@ export default async function LandingPage({ params }: PageProps) {
                 {tc(t.ctaSecondary, locale)}
               </Button>
             </div>
+
+            {/* Renders nothing unless this device already took a Tour. */}
+            <LastResult locale={locale} />
           </div>
 
           <div className={styles.heroRight}>

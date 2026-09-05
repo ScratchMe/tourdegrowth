@@ -5,10 +5,12 @@ import type { Submission } from "@/lib/submissions/types";
 
 const saveSubmission = vi.fn<(submission: Submission) => Promise<void>>(async () => {});
 const submissionExists = vi.fn<(id: string) => Promise<boolean>>(async () => true);
+const recordSubmissionInGlobalStats = vi.fn<(total: number) => Promise<void>>(async () => {});
 
 vi.mock("@/lib/submissions/repository", () => ({
   saveSubmission: (submission: Submission) => saveSubmission(submission),
   submissionExists: (id: string) => submissionExists(id),
+  recordSubmissionInGlobalStats: (total: number) => recordSubmissionInGlobalStats(total),
 }));
 
 const { POST } = await import("../route");
@@ -37,14 +39,20 @@ describe("POST /api/submissions", () => {
     resetRateLimitsForTests();
     submissionExists.mockResolvedValue(true);
     saveSubmission.mockResolvedValue(undefined);
+    recordSubmissionInGlobalStats.mockResolvedValue(undefined);
   });
 
-  it("scores a valid submission and returns only the id and the owner token", async () => {
+  it("scores a valid submission and returns nothing beyond what the browser needs", async () => {
     const res = await call(validBody);
     const payload = await res.json();
 
     expect(res.status).toBe(201);
-    expect(Object.keys(payload).sort()).toEqual(["id", "ownerToken"]);
+    // An EXACT key list on purpose (REVIEW.md R-02): the whole submission —
+    // answers included — used to come back here. `total` joined the list in
+    // R-20 and is public data (it is the headline of the result page); this
+    // stays exact so the next field to appear has to be a decision, not an
+    // accident.
+    expect(Object.keys(payload).sort()).toEqual(["id", "ownerToken", "total"]);
     expect(typeof payload.ownerToken).toBe("string");
     expect(saveSubmission).toHaveBeenCalledTimes(1);
   });
@@ -130,5 +138,47 @@ describe("POST /api/submissions", () => {
       new Request("https://tourdegrowth.com/api/submissions", { method: "POST", body: "not json" }),
     );
     expect(res.status).toBe(400);
+  });
+});
+
+/** REVIEW.md R-20 — the benchmark counter is bookkeeping, never a gate. */
+describe("POST /api/submissions — global stats counter", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    resetRateLimitsForTests();
+    submissionExists.mockResolvedValue(true);
+    saveSubmission.mockResolvedValue(undefined);
+    recordSubmissionInGlobalStats.mockResolvedValue(undefined);
+  });
+
+  it("records the score that was actually saved", async () => {
+    const res = await call(validBody);
+    expect(res.status).toBe(201);
+
+    const saved = saveSubmission.mock.calls[0]![0];
+    expect(recordSubmissionInGlobalStats).toHaveBeenCalledWith(saved.total);
+  });
+
+  it("still returns the result when the counter fails", async () => {
+    // The submission is already written by the time this runs. Failing the
+    // request here would hand someone a 502 for a Tour that completed.
+    recordSubmissionInGlobalStats.mockRejectedValue(new Error("firestore down"));
+    const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const res = await call(validBody);
+    const payload = await res.json();
+
+    expect(res.status).toBe(201);
+    expect(payload.id).toBeTruthy();
+    expect(payload.ownerToken).toBeTruthy();
+    expect(errors).toHaveBeenCalled();
+    errors.mockRestore();
+  });
+
+  it("returns the score, so the landing can offer it back later", async () => {
+    const res = await call(validBody);
+    const payload = await res.json();
+    const saved = saveSubmission.mock.calls[0]![0];
+    expect(payload.total).toBe(saved.total);
   });
 });

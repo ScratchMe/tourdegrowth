@@ -1,14 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { Answers } from "@/lib/scoring/score";
 import {
+  clearDeepDiveProgress,
   clearRefId,
   clearStoredAnswers,
   findOwnerToken,
   isOwnResult,
+  loadDeepDiveProgress,
   loadRefId,
   loadStoredAnswers,
   loadStoredResults,
   rememberResult,
+  saveDeepDiveProgress,
   saveRefId,
   saveStoredAnswers,
 } from "../storage";
@@ -199,5 +202,93 @@ describe("created-results store", () => {
     expect(findOwnerToken("sub_a")).toBeNull();
     expect(isOwnResult("sub_a")).toBe(false);
     expect(() => rememberResult(result("sub_a"))).not.toThrow();
+  });
+});
+
+/** REVIEW.md R-20 — the Deep dive stopped being throwaway once it grew to 11 screens. */
+describe("deep dive progress storage", () => {
+  const originalWindow = (globalThis as { window?: unknown }).window;
+
+  beforeEach(() => {
+    (globalThis as { window?: unknown }).window = { localStorage: createFakeLocalStorage() };
+  });
+
+  afterEach(() => {
+    (globalThis as { window?: unknown }).window = originalWindow;
+  });
+
+  it("round-trips answers and free context for the submission it was saved under", () => {
+    saveDeepDiveProgress({ submissionId: "sub-1", answers: { q1: 2 }, freeContext: "we sell to accountants" });
+    expect(loadDeepDiveProgress("sub-1")).toEqual({
+      submissionId: "sub-1",
+      answers: { q1: 2 },
+      freeContext: "we sell to accountants",
+    });
+  });
+
+  it("never leaks one result's progress into another's", () => {
+    saveDeepDiveProgress({ submissionId: "sub-1", answers: { q1: 2 }, freeContext: "x" });
+    expect(loadDeepDiveProgress("sub-2")).toBeNull();
+  });
+
+  it("keeps only the latest Deep dive — a newer one replaces the old", () => {
+    saveDeepDiveProgress({ submissionId: "sub-1", answers: { q1: 0 }, freeContext: "" });
+    saveDeepDiveProgress({ submissionId: "sub-2", answers: { q1: 1 }, freeContext: "" });
+    expect(loadDeepDiveProgress("sub-1")).toBeNull();
+    expect(loadDeepDiveProgress("sub-2")?.answers).toEqual({ q1: 1 });
+  });
+
+  it("clears completely — the free text does not outlive the request it was written for", () => {
+    saveDeepDiveProgress({ submissionId: "sub-1", answers: { q1: 2 }, freeContext: "our churn is brutal" });
+    clearDeepDiveProgress();
+    expect(loadDeepDiveProgress("sub-1")).toBeNull();
+  });
+
+  it("ignores a malformed entry rather than restoring garbage into the flow", () => {
+    (globalThis as { window: { localStorage: { setItem: (k: string, v: string) => void } } }).window.localStorage.setItem(
+      "tdg.deepDive.v1",
+      JSON.stringify({ submissionId: "sub-1", answers: { q1: "two" }, freeContext: "" }),
+    );
+    expect(loadDeepDiveProgress("sub-1")).toBeNull();
+  });
+
+  it("no-ops on the server, where there is no window", () => {
+    (globalThis as { window?: unknown }).window = undefined;
+    expect(() => saveDeepDiveProgress({ submissionId: "s", answers: {}, freeContext: "" })).not.toThrow();
+    expect(loadDeepDiveProgress("s")).toBeNull();
+  });
+});
+
+/** REVIEW.md R-20 — the landing reads the most recent entry back. */
+describe("stored results: the score kept for the landing", () => {
+  const originalWindow = (globalThis as { window?: unknown }).window;
+
+  beforeEach(() => {
+    (globalThis as { window?: unknown }).window = { localStorage: createFakeLocalStorage() };
+  });
+
+  afterEach(() => {
+    (globalThis as { window?: unknown }).window = originalWindow;
+  });
+
+  it("keeps the score alongside the token, most recent first", () => {
+    rememberResult({ id: "a", ownerToken: "t1", createdAt: "2026-01-01T00:00:00Z", total: 61 });
+    rememberResult({ id: "b", ownerToken: "t2", createdAt: "2026-01-02T00:00:00Z", total: 74 });
+    expect(loadStoredResults()[0]).toMatchObject({ id: "b", total: 74 });
+  });
+
+  it("still accepts an entry written before R-20, with no score at all", () => {
+    rememberResult({ id: "a", ownerToken: "t1", createdAt: "2026-01-01T00:00:00Z" });
+    const [entry] = loadStoredResults();
+    expect(entry?.id).toBe("a");
+    expect(entry?.total).toBeUndefined();
+  });
+
+  it("drops an entry whose score is not a real number", () => {
+    (globalThis as { window: { localStorage: { setItem: (k: string, v: string) => void } } }).window.localStorage.setItem(
+      "tdg.results.v1",
+      JSON.stringify([{ id: "a", ownerToken: "t", createdAt: "2026-01-01T00:00:00Z", total: "74" }]),
+    );
+    expect(loadStoredResults()).toEqual([]);
   });
 });

@@ -26,6 +26,13 @@ export interface CreateSubmissionDeps {
   /** The one-time ownership secret for this submission (REVIEW.md R-01) — injected like `generateId` so tests stay deterministic. */
   generateOwnerToken: () => string;
   now: () => Date;
+  /**
+   * Adds this score to the running totals behind the result page's
+   * benchmark (REVIEW.md R-20). Optional: it is bookkeeping, not part of
+   * producing a result, and a caller that doesn't care (a test, a future
+   * script) shouldn't have to stub it.
+   */
+  recordInGlobalStats?: (total: number) => Promise<void>;
 }
 
 export interface CreateSubmissionResult {
@@ -75,6 +82,20 @@ export async function createSubmissionFlow(
   };
 
   await deps.saveSubmission(submission);
+
+  // Bookkeeping for the benchmark (REVIEW.md R-20), never a reason to fail.
+  // The user's result exists and is saved by this point; a failed counter
+  // increment would cost them a 502 for a Tour that actually completed. The
+  // consequence of swallowing it is one submission missing from an average
+  // of hundreds.
+  if (deps.recordInGlobalStats) {
+    try {
+      await deps.recordInGlobalStats(total);
+    } catch (err) {
+      console.error("global stats increment failed (the submission itself is saved):", err);
+    }
+  }
+
   return { submission, ownerToken };
 }
 

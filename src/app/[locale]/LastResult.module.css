@@ -1,0 +1,24 @@
+/* No design-system component covers this: a quiet returning-visitor line,
+   not a CTA. Built from tokens only (REVIEW.md R-20) — same status as
+   SiteFooter, worth a Claude Design pass. */
+.link {
+  font: var(--meta-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border-divider);
+  padding-bottom: 3px;
+  align-self: flex-start;
+  /* The hero column spaces its children with margins, not gap. */
+  margin-top: 26px;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.link:hover,
+.link:focus-visible {
+  color: var(--text-alert);
+  border-bottom-color: var(--text-alert);
+}

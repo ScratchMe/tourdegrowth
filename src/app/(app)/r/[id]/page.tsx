@@ -4,6 +4,7 @@ import { cache } from "react";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { resolveRequestLocale } from "@/lib/i18n/resolve-request-locale";
 import { getSampleVerdicts, SAMPLE_RESULT } from "@/lib/submissions/sample";
+import { getBenchmarkAverage } from "@/lib/submissions/benchmark";
 import { getCachedSubmissionById } from "@/lib/submissions/cached-repository";
 import { buildQuickVerdicts, toDeepDiveView } from "@/lib/submissions/view-model";
 import { QUESTIONS } from "@/content/copy-library";
@@ -132,6 +133,13 @@ export default async function ResultPage({ params }: PageProps) {
   // as the sample branch above, and the same helper, so the two can't drift.
   const locale = await resolveRequestLocale();
 
+  // REVIEW.md R-20. Cached for an hour and null-safe by construction (see
+  // `benchmark.ts`), so this adds no per-view Firestore read and can never
+  // be the reason a result page fails to render. Not offered on `/r/sample`
+  // above: its numbers aren't real, and a real average beside them would
+  // blur exactly the line the "not your data" badge draws.
+  const benchmark = await getBenchmarkAverage();
+
   return (
     <ResultView
       id={submission.id}
@@ -146,6 +154,7 @@ export default async function ResultPage({ params }: PageProps) {
       // Deep dive answers, which would otherwise ride along in this public
       // page's RSC payload without ever being rendered.
       deepDive={toDeepDiveView(submission.deepDive)}
+      benchmark={benchmark}
     />
   );
 }

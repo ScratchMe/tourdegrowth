@@ -66,6 +66,17 @@
 }
 
 /* SPEC-ADDENDUM-02.md §2.1 — deliberately the quietest text on the screen. */
+/* REVIEW.md R-20 — a factual comparison line, deliberately quieter than the
+   score above it and a shade stronger than the credit below, so the reading
+   order stays score → context → attribution. */
+.benchmark {
+  font: var(--meta-xs);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-top: 16px;
+}
+
 .builtByCredit {
   font: 500 12px/1.4 var(--font-ui);
   color: var(--text-faint);

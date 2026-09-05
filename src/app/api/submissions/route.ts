@@ -7,7 +7,7 @@ import type { AnswerIndex, Answers } from "@/lib/scoring/score";
 import { createSubmissionFlow } from "@/lib/submissions/create-submission";
 import { generateOwnerToken } from "@/lib/submissions/owner-token";
 import { resolveRefId } from "@/lib/submissions/referral";
-import { saveSubmission, submissionExists } from "@/lib/submissions/repository";
+import { recordSubmissionInGlobalStats, saveSubmission, submissionExists } from "@/lib/submissions/repository";
 
 // Runs on Vercel as a Node.js Route Handler. Originally this is where the
 // Gemini call + Firestore write happened (replacing the Supabase Edge
@@ -110,13 +110,16 @@ export async function POST(request: Request): Promise<Response> {
         generateId: () => crypto.randomUUID(),
         generateOwnerToken,
         now: () => new Date(),
+        recordInGlobalStats: recordSubmissionInGlobalStats,
       },
     );
 
     // Only what the creating browser actually needs (REVIEW.md R-02): the id
-    // to redirect to, and the one-time owner token to keep (R-01). The full
-    // submission — answers included — used to come back here for no reason.
-    return NextResponse.json({ id: submission.id, ownerToken }, { status: 201 });
+    // to redirect to, the one-time owner token to keep (R-01), and the score
+    // itself so the landing can offer it back later (R-20 — public data, it
+    // is the first thing on the result page). The full submission — answers
+    // included — used to come back here for no reason.
+    return NextResponse.json({ id: submission.id, ownerToken, total: submission.total }, { status: 201 });
   } catch (err) {
     // REVIEW.md R-04: the full error goes to the server logs, a short stable
     // code goes to the browser. `err.message` used to be forwarded straight
