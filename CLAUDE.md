@@ -503,3 +503,23 @@ Jusqu'ici seules les **deux extrémités** du funnel étaient instrumentées (`s
 **Piège de vérification rencontré** : `innerText` renvoie le texte **rendu**, donc le `text-transform: uppercase` du `<summary>` le remonte en majuscules — quatre assertions ont échoué sur une comparaison de casse avant que je regarde la vraie valeur plutôt que de supposer un bug. Comparer sur `textContent` pour du texte transformé en CSS.
 
 **Reste à confirmer après déploiement** : le breakdown sur un **vrai** résultat Firestore (le chemin réel passe les `rawPoints` de `computeScore` au lieu de la valeur fabriquée du patch local).
+
+### R-13 : une URL par langue (2026-09-05) — lot D, moitié SEO
+
+**Le problème.** La même adresse servait le français ou l'anglais selon un cookie. Googlebot ne voit qu'une langue par URL, donc **tout le glossaire français était invisible pour les moteurs** — précisément le contenu sur lequel repose la phase SEO du plan de croissance. Aucun `hreflang` non plus, et aucun moyen de changer de langue dans l'interface : `setLocale` du contexte n'était appelé de nulle part, et `?lang=` n'est pas quelque chose qu'un visiteur devine.
+
+**Ce qui porte un préfixe, et ce qui n'en portera jamais.** Les pages de contenu passent sous `[locale]` (`/en`, `/fr/glossary/cac`). Les pages applicatives — `/quiz`, `/r/<id>`, `/deep-dive/<id>`, `/admin`, `/api` — restent nues, pour deux raisons distinctes : les liens `/r/<id>` sont déjà partagés dans la nature et doivent fonctionner indéfiniment (SPEC.md §12), et **un résultat n'a pas de langue propre** depuis R-09, qui le fait rendre dans celle du lecteur — mettre une langue dans son URL défferait ce travail.
+
+**Le point technique central.** `<html lang>` vit dans le layout racine, qui ne peut pas voir l'URL. Le proxy résout donc la locale une fois (préfixe d'URL > `?lang=` > cookie > `Accept-Language`) et la transmet dans un en-tête `x-tdg-locale` que le layout lit — une seule source de vérité plutôt que chaque page qui re-dérive la réponse et risque d'en trouver une autre.
+
+**Deux bugs trouvés en vérifiant, pas en relisant :**
+1. **Le sélecteur de langue laissait `<html lang>` périmé.** En navigation client, Next réutilise le layout racine sans le re-rendre : passer en français gardait `lang="en"`. Invisible pour les crawlers (qui voient le rendu serveur) mais faux pour les lecteurs d'écran et la traduction navigateur. Le sélecteur utilise donc de vrais `<a>` plutôt que `next/link` — un chargement de page complet sur une action que personne ne répète.
+2. **La langue ne suivait pas jusqu'aux pages applicatives.** Passer en français puis cliquer « Démarre ton Tour » ouvrait un questionnaire anglais, `/quiz` n'ayant pas de préfixe. Un préfixe d'URL est maintenant persisté dans le cookie exactement comme `?lang=` — c'est un choix aussi explicite.
+
+**Piège de couplage évité de justesse** : `goatcounter-api.ts` comptait les vues d'accueil sur le chemin exact `/`. Avec la landing devenue `/en` et `/fr`, la première étape du funnel construit en R-11 serait silencieusement tombée à zéro. Les trois chemins sont maintenant sommés (`/` reste, pour les visites enregistrées avant ce changement).
+
+**Rien de ce qui était publié ne casse** : `/`, `/how-it-works`, `/glossary`, `/glossary/<terme>` redirigent en 308 vers leur forme localisée, query string intacte — un `/?ref=<id>` partagé emporte toujours son parrainage.
+
+**Découpage assumé : le rendu statique part en R-24.** Toutes les routes restent `ƒ` (dynamiques), parce que le layout racine lit un en-tête. Les rendre statiques demande de restructurer les layouts racine (plusieurs racines via groupes de routes), ce qui est un problème distinct — coût et latence, pas indexation — et l'empiler ici aurait donné une PR énorme et difficile à vérifier. Voir `REVIEW.md` R-24, avec la structure proposée et le point de friction connu (`not-found.tsx` global).
+
+**Vérifié en réel** : 191 tests unitaires (+8 sur les helpers de route), **36 specs Playwright** (+9, dont un fichier `locale-routing.spec.ts` dédié), lint/tsc/build propres. Et par requête HTTP directe : `/` redirige selon `Accept-Language`, les 3 URL héritées redirigent, `?ref=` survit, `<html lang>` suit **l'URL et non le cookie** (vérifié avec un cookie contradictoire), les balises `canonical`/`alternate`/`x-default` sont bien émises, le contenu est réellement dans la bonne langue, `/quiz` et `/r/sample` ne sont pas redirigés, `/nonsense` renvoie 404, et le sitemap liste 36 URL (18 pages × 2 langues).

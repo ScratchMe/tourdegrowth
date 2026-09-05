@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SiteFooter } from "@/components/brand/SiteFooter";
+import { LocaleSwitcher } from "@/components/brand/LocaleSwitcher";
 import { WordmarkLink } from "@/components/brand/WordmarkLink";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import { Button } from "@/components/core/Button";
@@ -7,13 +8,24 @@ import { Card } from "@/components/core/Card";
 import { QUESTIONS } from "@/content/copy-library";
 import { HOW_IT_WORKS } from "@/content/how-it-works";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
-import { resolveRequestLocale } from "@/lib/i18n/resolve-request-locale";
+import { isLocale, type Locale } from "@/lib/i18n/locale";
+import { contentAlternates } from "@/lib/i18n/routes";
 import styles from "./page.module.css";
 
-export const metadata: Metadata = {
-  title: "Tour de Growth — How it works",
-  description: "The AARRR framework explained, how the score is calculated, and the two tones — plus the one thing to know before taking the score too seriously.",
-};
+interface PageProps {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  return {
+    title: "Tour de Growth — How it works",
+    description:
+      "The AARRR framework explained, how the score is calculated, and the two tones — plus the one thing to know before taking the score too seriously.",
+    // REVIEW.md R-13: one URL per language, each declaring the others.
+    alternates: contentAlternates(isLocale(locale) ? locale : "en", "/how-it-works"),
+  };
+}
 
 /**
  * "How it works" — SPEC-ADDENDUM-01.md §1.3. Server Component: nothing here
@@ -21,14 +33,16 @@ export const metadata: Metadata = {
  * spell things out in full prose instead), so it resolves locale the same
  * way not-found.tsx and the sample result page do, no client JS needed.
  */
-export default async function HowItWorksPage() {
-  const locale = await resolveRequestLocale();
+export default async function HowItWorksPage({ params }: PageProps) {
+  // The URL is the language here — no cookie or header involved.
+  const locale = (await params).locale as Locale;
 
   return (
     <>
       <header className={styles.header}>
         <div className={styles.headerInner}>
-          <WordmarkLink />
+          <WordmarkLink locale={locale} />
+          <LocaleSwitcher locale={locale} path="/how-it-works" />
         </div>
       </header>
 

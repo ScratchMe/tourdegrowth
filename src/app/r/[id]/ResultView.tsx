@@ -20,6 +20,7 @@ import { HOW_IT_WORKS } from "@/content/how-it-works";
 import { PROFILE_CLICK_DETAILS, trackEvent } from "@/lib/analytics/goatcounter";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { useLocale } from "@/lib/i18n/locale-context";
+import { localePath } from "@/lib/i18n/routes";
 import { clearStoredAnswers, findStoredResult } from "@/lib/quiz/storage";
 import type { Tone } from "@/lib/quiz/tone";
 import { PILLARS, type Pillar } from "@/lib/scoring/pillars";
@@ -177,7 +178,7 @@ export function ResultView({
     <>
       <header className={`${styles.header} ${roast ? styles.headerRoast : ""}`}>
         <div className={styles.headerInner}>
-          <WordmarkLink />
+          <WordmarkLink locale={locale} />
           <div className={styles.headerRight}>
             {deepDive && <ModeTag mode="deep">{tc(dd.badge, locale)}</ModeTag>}
             {roast ? (
@@ -354,7 +355,7 @@ export function ResultView({
 
             <Disclaimer align="left" className={styles.disclaimer}>
               {disclaimerSplit[0]}
-              <Link href="/how-it-works">{disclaimerLinkText}</Link>
+              <Link href={localePath(locale, "/how-it-works")}>{disclaimerLinkText}</Link>
               {disclaimerSplit[1]}
             </Disclaimer>
 

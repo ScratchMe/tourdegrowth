@@ -2,36 +2,39 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteFooter } from "@/components/brand/SiteFooter";
+import { LocaleSwitcher } from "@/components/brand/LocaleSwitcher";
 import { WordmarkLink } from "@/components/brand/WordmarkLink";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { GLOSSARY, type GlossaryTermId } from "@/content/glossary";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
-import { resolveRequestLocale } from "@/lib/i18n/resolve-request-locale";
+import { isLocale, LOCALES, type Locale } from "@/lib/i18n/locale";
+import { contentAlternates, localePath } from "@/lib/i18n/routes";
 import styles from "./page.module.css";
 
 interface PageProps {
-  params: Promise<{ term: string }>;
+  params: Promise<{ locale: string; term: string }>;
 }
 
 function isGlossaryTermId(value: string): value is GlossaryTermId {
   return Object.hasOwn(GLOSSARY, value);
 }
 
-/** Pre-renders all 15 terms at build time — a fixed, known set (content/glossary.ts), not user input. */
-export function generateStaticParams(): { term: string }[] {
-  return Object.keys(GLOSSARY).map((term) => ({ term }));
+/** All 15 terms × both locales — a fixed, known set (content/glossary.ts), not user input. */
+export function generateStaticParams(): { locale: string; term: string }[] {
+  return LOCALES.flatMap((locale) => Object.keys(GLOSSARY).map((term) => ({ locale, term })));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { term } = await params;
+  const { locale, term } = await params;
   if (!isGlossaryTermId(term)) return {};
 
   const entry = GLOSSARY[term];
-  const locale = await resolveRequestLocale();
+  const resolved = isLocale(locale) ? locale : "en";
   return {
-    title: `${tc(entry.term, locale)} — Tour de Growth Glossary`,
-    description: tc(entry.definition, locale),
+    title: `${tc(entry.term, resolved)} — Tour de Growth Glossary`,
+    description: tc(entry.definition, resolved),
+    alternates: contentAlternates(resolved, `/glossary/${term}`),
   };
 }
 
@@ -41,23 +44,24 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
  * quoi un growth loop") the landing page and How it works page don't.
  */
 export default async function GlossaryTermPage({ params }: PageProps) {
-  const { term } = await params;
+  const { locale: rawLocale, term } = await params;
   if (!isGlossaryTermId(term)) notFound();
 
   const entry = GLOSSARY[term];
-  const locale = await resolveRequestLocale();
+  const locale = rawLocale as Locale;
   const t = UI_STRINGS.glossaryPage;
 
   return (
     <>
       <header className={styles.header}>
         <div className={styles.headerInner}>
-          <WordmarkLink />
+          <WordmarkLink locale={locale} />
+          <LocaleSwitcher locale={locale} path={`/glossary/${term}`} />
         </div>
       </header>
 
       <main className={styles.main}>
-        <Link href="/glossary" className={styles.backLink}>
+        <Link href={localePath(locale, "/glossary")} className={styles.backLink}>
           {tc(t.backToIndex, locale)}
         </Link>
 
@@ -77,7 +81,7 @@ export default async function GlossaryTermPage({ params }: PageProps) {
             <h2 className={styles.sectionLabel}>{tc(t.relatedLabel, locale)}</h2>
             <div className={styles.relatedList}>
               {entry.related.map((relatedId) => (
-                <Link key={relatedId} href={`/glossary/${relatedId}`} className={styles.relatedLink}>
+                <Link key={relatedId} href={localePath(locale, `/glossary/${relatedId}`)} className={styles.relatedLink}>
                   {tc(GLOSSARY[relatedId].term, locale)}
                 </Link>
               ))}
@@ -89,7 +93,7 @@ export default async function GlossaryTermPage({ params }: PageProps) {
           <Button size="lg" href="/quiz">
             {tc(UI_STRINGS.landing.ctaPrimary, locale)}
           </Button>
-          <Button size="lg" variant="secondary" href="/how-it-works">
+          <Button size="lg" variant="secondary" href={localePath(locale, "/how-it-works")}>
             {tc(UI_STRINGS.nav.howItWorks, locale)}
           </Button>
         </div>

@@ -140,7 +140,7 @@ export default function DeepDivePage() {
     <>
       <header className={styles.header}>
         <div className={styles.headerInner}>
-          <WordmarkLink />
+          <WordmarkLink locale={locale} />
           <div className={styles.headerRight}>
             <ModeTag mode="deep">{tc(dd.badge, locale)}</ModeTag>
           </div>

@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, Inter, Stardos_Stencil } from "next/font/google";
-import { cookies, headers } from "next/headers";
 import Script from "next/script";
 import type { ReactNode } from "react";
-import { LOCALE_COOKIE, resolveLocale } from "@/lib/i18n/locale";
 import { LocaleProvider } from "@/lib/i18n/locale-context";
+import { resolveRequestLocale } from "@/lib/i18n/resolve-request-locale";
 import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
@@ -70,15 +69,10 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  // The middleware has already folded `?lang=` into this cookie for the
-  // current request (see middleware.ts) — see resolveLocale() for the
-  // full priority order. cookies()/headers() are async since Next.js 15.
-  const [cookieStore, headerList] = await Promise.all([cookies(), headers()]);
-  const locale = resolveLocale({
-    queryLang: null,
-    cookieLocale: cookieStore.get(LOCALE_COOKIE)?.value ?? null,
-    acceptLanguage: headerList.get("accept-language"),
-  });
+  // The proxy resolved this once for the whole request, URL locale prefix
+  // included (REVIEW.md R-13) — a layout can't see the URL, and `<html lang>`
+  // has to match the page's actual language, not the visitor's cookie.
+  const locale = await resolveRequestLocale();
 
   return (
     <html lang={locale}>

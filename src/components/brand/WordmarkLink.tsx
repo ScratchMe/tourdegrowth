@@ -1,4 +1,6 @@
 import Link from "next/link";
+import type { Locale } from "@/lib/i18n/locale";
+import { localePath } from "@/lib/i18n/routes";
 import { Wordmark, type WordmarkProps } from "./Wordmark";
 import styles from "./WordmarkLink.module.css";
 
@@ -9,9 +11,14 @@ import styles from "./WordmarkLink.module.css";
  * wrapper repeated at all 8 header call sites, so the "no default link
  * underline" fix lives in exactly one place.
  */
-export function WordmarkLink(props: WordmarkProps) {
+export interface WordmarkLinkProps extends WordmarkProps {
+  /** Home is a localized address since REVIEW.md R-13 (`/en`, `/fr`). */
+  locale: Locale;
+}
+
+export function WordmarkLink({ locale, ...props }: WordmarkLinkProps) {
   return (
-    <Link href="/" aria-label="Tour de Growth" className={styles.link}>
+    <Link href={localePath(locale)} aria-label="Tour de Growth" className={styles.link}>
       <Wordmark {...props} />
     </Link>
   );

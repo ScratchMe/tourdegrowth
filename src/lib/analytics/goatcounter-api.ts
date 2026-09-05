@@ -18,7 +18,13 @@ import {
  * differently here than at the call site is simply invisible in the
  * dashboard, with no error anywhere.
  */
-const HOME_PATH = "/";
+/**
+ * The landing page's paths. Since REVIEW.md R-13 the homepage lives at `/en`
+ * and `/fr` (with `/` redirecting), so counting only "/" would have silently
+ * zeroed the funnel's first step. The bare "/" stays for hits recorded
+ * before that change.
+ */
+const HOME_PATHS = ["/", "/en", "/fr"];
 const QUIZ_STARTED_PATH = "quiz_started";
 const DEEP_DIVE_STARTED_PATH = "deep_dive_started";
 
@@ -30,7 +36,7 @@ const DEEP_DIVE_COMPLETED_PATHS = DEEP_DIVE_CONTEXT_DETAILS.map((d) => `deep_div
 const PROFILE_CLICK_PATHS = PROFILE_CLICK_DETAILS.map((detail) => `profile_click/${detail}`);
 
 const ALL_PATHS = [
-  HOME_PATH,
+  ...HOME_PATHS,
   QUIZ_STARTED_PATH,
   ...STAGE_PATHS,
   ...TONE_SELECTED_PATHS,
@@ -138,7 +144,7 @@ export async function fetchFunnelWindow(startISO: string, label: string): Promis
   }
   const sum = (paths: readonly string[]) => paths.reduce((total, path) => total + (counts.get(path) ?? 0), 0);
 
-  const homeViews = counts.get(HOME_PATH) ?? 0;
+  const homeViews = sum(HOME_PATHS);
   const profileClicks = sum(PROFILE_CLICK_PATHS);
 
   return {

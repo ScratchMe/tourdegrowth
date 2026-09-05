@@ -210,7 +210,7 @@ export default function QuizPage() {
     <>
       <header className={styles.header}>
         <div className={styles.headerInner}>
-          <WordmarkLink />
+          <WordmarkLink locale={locale} />
           <div className={styles.headerRight}>
             {phase === "answering" ? (
               <>

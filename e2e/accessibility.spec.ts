@@ -36,11 +36,12 @@ const KNOWN_CONTRAST_GAPS: { fg: string; bg: string; what: string }[] = [
 ];
 
 const PAGES: [name: string, path: string][] = [
-  ["landing", "/"],
+  ["landing", "/en"],
+  ["landing (fr)", "/fr"],
   ["questionnaire", "/quiz"],
   ["sample result", "/r/sample"],
-  ["how it works", "/how-it-works"],
-  ["glossary term", "/glossary/viral-coefficient"],
+  ["how it works", "/en/how-it-works"],
+  ["glossary term", "/fr/glossary/viral-coefficient"],
 ];
 
 interface ContrastData {
