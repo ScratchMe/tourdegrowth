@@ -42,7 +42,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 | | R-12 | Explicabilité : « comment ce score est calculé » | F | M | **Fait** (PR #31, 2026-09-05) — clôt le lot C |
 | **D — Architecture i18n / SEO / cache** | R-13 | Locale dans l'URL, `hreflang`, switch de langue | F+T | L | **Fait** (PR #32, 2026-09-05) |
 | | R-24 | Rendre les pages de contenu réellement statiques | T | M | À faire |
-| | R-14 | Cache du résultat partagé + OG 404 pour id inconnu | T | M | À faire |
+| | R-14 | Cache du résultat partagé + OG 404 pour id inconnu | T | M | **Fait** (PR #33, 2026-09-05) — clôt le lot D |
 | **E — Robustesse backend** | R-15 | Rate limiting sur les routes POST + `maxDuration` | T | S/M | À faire |
 | | R-16 | Appel Gemini : header, `responseSchema`, `finishReason`, un seul appel | T | M | À faire |
 | | R-17 | Infra versionnée : règles Firestore, env vars documentées | T | S | À faire |
@@ -267,7 +267,7 @@ Documenter la nomenclature complète en tête de `src/lib/analytics/goatcounter.
 
 ### R-14 — Cache du résultat partagé + OG 404 pour id inconnu
 
-**Type** T · **Effort** M · **Statut** À faire
+**Type** T · **Effort** M · **Statut** **Fait** (PR #33, 2026-09-05) — clôt le lot D. `unstable_cache` retenu plutôt que `"use cache"` : ce dernier exige `cacheComponents`, dont l'activation appartient à R-24.
 
 **Constat.**
 - Chaque vue de `/r/[id]` = une lecture Firestore ; l'image OG en fait une deuxième à chaque passage de crawler ; `generateMetadata` (R-10) en ajouterait une troisième. Aucun cache. Le quota Spark (50 000 lectures/jour) est loin pour l'instant, mais c'est exactement la ressource qui s'épuise si un partage devient viral, c'est-à-dire si le produit réussit.

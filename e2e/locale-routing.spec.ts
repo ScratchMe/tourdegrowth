@@ -90,3 +90,23 @@ test.describe("locale in the URL", () => {
     expect(response?.status()).toBe(404);
   });
 });
+
+/**
+ * REVIEW.md R-14 — a dead link must not preview as a real, terrible score.
+ *
+ * The precise status can't be asserted here: reaching a missing submission
+ * means reaching Firestore, which has no credentials in CI, so this run gets
+ * a 500 where production gets the 404 the route now returns. What the check
+ * is actually for is the OLD behaviour — a 200 carrying a fabricated
+ * "0/100" frame — and "never a real image" holds in both environments.
+ */
+test("an unknown result never previews as a real image", async ({ request }) => {
+  const missing = await request.get("/r/3f1c2a7e-9b4d-4e21-a8c6-000000000000/opengraph-image");
+  expect(missing.status()).not.toBe(200);
+
+  // The sample still renders a genuine image, so the above is about the id,
+  // not a broken route.
+  const sample = await request.get("/r/sample/opengraph-image");
+  expect(sample.status()).toBe(200);
+  expect(sample.headers()["content-type"]).toContain("image/png");
+});

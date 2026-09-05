@@ -523,3 +523,23 @@ Jusqu'ici seules les **deux extrémités** du funnel étaient instrumentées (`s
 **Découpage assumé : le rendu statique part en R-24.** Toutes les routes restent `ƒ` (dynamiques), parce que le layout racine lit un en-tête. Les rendre statiques demande de restructurer les layouts racine (plusieurs racines via groupes de routes), ce qui est un problème distinct — coût et latence, pas indexation — et l'empiler ici aurait donné une PR énorme et difficile à vérifier. Voir `REVIEW.md` R-24, avec la structure proposée et le point de friction connu (`not-found.tsx` global).
 
 **Vérifié en réel** : 191 tests unitaires (+8 sur les helpers de route), **36 specs Playwright** (+9, dont un fichier `locale-routing.spec.ts` dédié), lint/tsc/build propres. Et par requête HTTP directe : `/` redirige selon `Accept-Language`, les 3 URL héritées redirigent, `?ref=` survit, `<html lang>` suit **l'URL et non le cookie** (vérifié avec un cookie contradictoire), les balises `canonical`/`alternate`/`x-default` sont bien émises, le contenu est réellement dans la bonne langue, `/quiz` et `/r/sample` ne sont pas redirigés, `/nonsense` renvoie 404, et le sitemap liste 36 URL (18 pages × 2 langues).
+
+### R-14 : ne plus relire Firestore à chaque vue d'un résultat partagé (2026-09-05) — clôt le lot D
+
+**Constat.** Chaque vue de `/r/<id>` était une lecture Firestore — et un résultat partagé est par définition lu plusieurs fois : la page, ses métadonnées et son image OG voulaient toutes le même document. Le quota gratuit est loin d'être atteint aujourd'hui, mais les lectures sont précisément la ressource qui s'épuise **si la boucle de croissance fonctionne**, c'est-à-dire dans le seul scénario pour lequel ce produit existe.
+
+`lib/submissions/cached-repository.ts` : lecture tagée `submission:<id>` via `unstable_cache`, invalidée explicitement au seul moment où une soumission change — la fin d'un Deep dive. Le TTL d'une heure n'est pas le mécanisme mais le filet : si une invalidation est ratée un jour, la page se répare toute seule dans l'heure au lieu de rester périmée indéfiniment.
+
+- **`unstable_cache` plutôt que `"use cache"`** : ce dernier exige `cacheComponents` dans `next.config`, qui change tout le modèle de rendu — ça appartient à R-24, pas ici.
+- **La route Deep dive garde la lecture NON cachée**, volontairement : son test « déjà complété ? » doit voir l'état courant, sinon deux Deep dive lancés en même temps pourraient tous deux se croire les premiers.
+- **Piège de signature Next 16** : `revalidateTag` prend désormais un **deuxième argument obligatoire** (un profil de cache). `{ expire: 0 }` est le cas « oublie ça tout de suite » ; la doc renvoie vers `updateTag` pour l'expiration immédiate, mais celui-là est réservé aux Server Actions et on est dans un Route Handler.
+
+**Défaut réel découvert par le test unitaire, pas seulement un souci d'environnement.** `revalidateTag` lève hors contexte Next, et comme il était appelé après `saveDeepDive`, une invalidation en échec faisait renvoyer un 502 pour un travail **déjà généré et déjà écrit** — l'utilisateur aurait vu une erreur pour un Deep dive réussi. L'invalidation est maintenant enveloppée dans un `try/catch` qui journalise : elle n'a pas le droit de faire échouer la requête, et le pire cas est justement ce que le TTL couvre.
+
+**Image OG d'un lien mort.** `loadOgData` fabriquait une frame « 0/100 » quand la soumission n'existait pas : un lien erroné ou supprimé s'affichait dans un aperçu social comme un vrai score, catastrophique. Elle renvoie maintenant un 404 — pas d'image vaut mieux qu'une fausse.
+
+**Limite de vérification, assumée** : la spec E2E n'affirme pas le code exact (`404`) mais « jamais une vraie image », parce qu'atteindre une soumission manquante veut dire atteindre Firestore, sans identifiants en CI — on obtient donc 500 là où la production renverra 404. L'assertion vise le comportement **précédent** (un 200 avec un faux score), et elle tient dans les deux environnements.
+
+**Vérifié en réel** : 191 tests unitaires, **37 specs Playwright** (+1), lint/tsc/build propres. Le comportement de cache lui-même (une lecture Firestore par heure au lieu d'une par vue) n'est pas observable sans identifiants — **à confirmer après déploiement** en regardant les lectures dans la console Firebase sur une page de résultat rechargée plusieurs fois.
+
+**Lot D terminé** pour ce qui était couvrable ici (R-13 moitié SEO, R-14). Restent R-24 (rendu statique) et le lot E.

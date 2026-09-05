@@ -5,7 +5,7 @@ import { tc } from "@/lib/i18n/dictionary";
 import { UI_STRINGS } from "@/lib/i18n/dictionary";
 import type { Locale } from "@/lib/i18n/locale";
 import type { Pillar } from "@/lib/scoring/pillars";
-import { getSubmissionById } from "@/lib/submissions/repository";
+import { getCachedSubmissionById } from "@/lib/submissions/cached-repository";
 import { SAMPLE_RESULT } from "@/lib/submissions/sample";
 import { SITE_DOMAIN_LABEL } from "@/lib/site";
 
@@ -65,7 +65,7 @@ interface OgData {
   deepDive: boolean;
 }
 
-async function loadOgData(id: string): Promise<OgData> {
+async function loadOgData(id: string): Promise<OgData | null> {
   if (id === "sample") {
     return {
       total: SAMPLE_RESULT.total,
@@ -77,19 +77,11 @@ async function loadOgData(id: string): Promise<OgData> {
     };
   }
 
-  const submission = await getSubmissionById(id);
-  if (!submission) {
-    // No dedicated "not found" OG image — the crawler still gets a frame
-    // rather than a broken image request. A real visitor hits not-found.tsx.
-    return {
-      total: 0,
-      pillars: SAMPLE_RESULT.pillars,
-      weakestPillar: "retention",
-      locale: "en",
-      roast: false,
-      deepDive: false,
-    };
-  }
+  const submission = await getCachedSubmissionById(id);
+  // REVIEW.md R-14: a dead link used to render a real-looking "0/100" frame,
+  // so a mistyped or deleted result previewed as a genuine, terrible score.
+  // `null` here becomes a 404 below — no image is better than a false one.
+  if (!submission) return null;
 
   return {
     total: submission.total,
@@ -104,6 +96,7 @@ async function loadOgData(id: string): Promise<OgData> {
 export default async function OgImage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const [data, fonts] = await Promise.all([loadOgData(id), loadFonts()]);
+  if (!data) return new Response(null, { status: 404 });
   const { total, pillars, weakestPillar, locale, roast, deepDive } = data;
   const accent = roast ? RED : INK;
 
