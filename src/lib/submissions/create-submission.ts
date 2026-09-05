@@ -1,5 +1,5 @@
 import { tc } from "@/lib/i18n/dictionary";
-import type { Locale } from "@/lib/i18n/locale";
+import { LOCALES, type Locale } from "@/lib/i18n/locale";
 import { QUESTIONS } from "@/content/copy-library";
 import { DEEP_MODE_QUESTIONS } from "@/content/deep-mode-questions";
 import { FREE_CONTEXT_MAX_LENGTH } from "@/content/free-context";
@@ -195,31 +195,65 @@ export async function completeDeepDiveFlow(
   const { submission, contextAnswerIndices, locale } = input;
   const { pillars, total, weakestPillar, answers } = submission;
 
-  const quickAnswers = resolveQuickPromptAnswers(answers, locale);
-  const contextAnswers = resolveContextPromptAnswers(contextAnswerIndices, locale);
-
   const trimmedFreeContext = input.freeContext?.trim().slice(0, FREE_CONTEXT_MAX_LENGTH);
   const freeContextForPrompt = trimmedFreeContext ? trimmedFreeContext : undefined;
 
-  const forTone = (tone: Tone) =>
+  // Every prompt input is resolved in the language being generated — the
+  // questions, the chosen answers, the context labels. Only `freeContext` is
+  // passed through untouched: those are the founder's own words, in whatever
+  // language they chose to write them.
+  const forTone = (tone: Tone, target: Locale) =>
     getDeepDiveVerdictForTone(
       tone,
-      locale,
+      target,
       pillars,
       total,
       weakestPillar,
-      quickAnswers,
-      contextAnswers,
+      resolveQuickPromptAnswers(answers, target),
+      resolveContextPromptAnswers(contextAnswerIndices, target),
       freeContextForPrompt,
       deps.callGemini,
     );
 
-  const [neutral, roast] = await Promise.all([forTone("neutral"), forTone("roast")]);
+  async function forLocale(target: Locale): Promise<{ neutral: DeepDiveVerdict; roast: DeepDiveVerdict }> {
+    const [neutral, roast] = await Promise.all([forTone("neutral", target), forTone("roast", target)]);
+    return { neutral, roast };
+  }
+
+  // The completion locale is required — failing it fails the request, the
+  // same fail-closed contract this flow always had.
+  //
+  // Every OTHER language is best-effort, and that asymmetry is the point: a
+  // reader arriving on a shared result deserves it in their own language
+  // (R-09's principle, which the Deep dive escaped because it REPLACES the
+  // Quick sentences), but nobody should lose the recommendation they answered
+  // ten extra questions for because the second generation flaked. A missing
+  // language simply falls back — see `view-model.ts#toDeepDiveView`.
+  const others = LOCALES.filter((l) => l !== locale);
+  const [primary, ...rest] = await Promise.all([
+    forLocale(locale),
+    ...others.map((l) => forLocale(l).catch((err: unknown) => {
+      console.error(`Deep dive generation failed for locale "${l}" (the ${locale} one is kept):`, err);
+      return null;
+    })),
+  ]);
+
+  const localized: Partial<Record<Locale, { neutral: DeepDiveVerdict; roast: DeepDiveVerdict }>> = {
+    [locale]: primary!,
+  };
+  others.forEach((l, i) => {
+    const verdicts = rest[i];
+    if (verdicts) localized[l] = verdicts;
+  });
 
   return {
     completed: true,
     contextAnswers: resolveContextAnswerLabels(contextAnswerIndices, locale),
     freeContext: freeContextForPrompt ?? null,
-    verdicts: { neutral, roast },
+    locale,
+    // Still written in the generation locale, so anything reading the old
+    // field keeps working exactly as before.
+    verdicts: primary!,
+    localized,
   };
 }

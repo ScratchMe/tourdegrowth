@@ -3,7 +3,7 @@
  *
  * Both are expensive in ways that are somebody else's quota: `POST
  * /api/submissions` writes to Firestore (20k writes/day on the free plan),
- * and `POST .../deep-dive` costs two Gemini generations, each of which can
+ * and `POST .../deep-dive` costs four Gemini generations (two tones x two languages), each of which can
  * retry across four models. Nothing stopped a script from looping either.
  *
  * **What this is, precisely.** An in-memory sliding window, per serverless

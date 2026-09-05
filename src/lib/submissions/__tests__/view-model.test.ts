@@ -23,7 +23,7 @@ const deepDive: DeepDiveResult = {
 /** REVIEW.md R-02 — /r/<id> is public, so this is a privacy boundary, not a tidiness one. */
 describe("toDeepDiveView", () => {
   it("keeps both tones' recommendations and priority action", () => {
-    const view = toDeepDiveView(deepDive);
+    const view = toDeepDiveView(deepDive, "en");
 
     expect(view?.verdicts.neutral.priorityAction).toBe("Neutral priority action.");
     expect(view?.verdicts.roast.priorityAction).toBe("Roast priority action.");
@@ -34,7 +34,7 @@ describe("toDeepDiveView", () => {
   });
 
   it("never lets the free-text context, the context answers or the model name through", () => {
-    const serialized = JSON.stringify(toDeepDiveView(deepDive));
+    const serialized = JSON.stringify(toDeepDiveView(deepDive, "en"));
 
     expect(serialized).not.toContain(SECRET_CONTEXT);
     expect(serialized).not.toContain("accounting firms");
@@ -45,8 +45,53 @@ describe("toDeepDiveView", () => {
   });
 
   it("maps a Quick result (no Deep dive) to null", () => {
-    expect(toDeepDiveView(null)).toBeNull();
-    expect(toDeepDiveView(undefined)).toBeNull();
+    expect(toDeepDiveView(null, "en")).toBeNull();
+    expect(toDeepDiveView(undefined, "en")).toBeNull();
+  });
+});
+
+/**
+ * The Deep dive follows the reader too — the gap R-09 left, reported by
+ * Antoine: his own English result opened in French kept the per-pillar
+ * explanations and the priority action in English.
+ */
+describe("toDeepDiveView — the reader's language", () => {
+  const bilingual: DeepDiveResult = {
+    ...deepDive,
+    locale: "en",
+    verdicts: { neutral: verdict("EN neutral"), roast: verdict("EN roast") },
+    localized: {
+      en: { neutral: verdict("EN neutral"), roast: verdict("EN roast") },
+      fr: { neutral: verdict("FR neutre"), roast: verdict("FR roast") },
+    },
+  };
+
+  it("serves a French reader the French generation", () => {
+    const view = toDeepDiveView(bilingual, "fr");
+    expect(view?.verdicts.neutral.priorityAction).toBe("FR neutre priority action.");
+    expect(view?.verdicts.roast.pillarRecommendations.retention).toBe("FR roast retention recommendation.");
+  });
+
+  it("serves an English reader the English generation", () => {
+    expect(toDeepDiveView(bilingual, "en")?.verdicts.neutral.priorityAction).toBe("EN neutral priority action.");
+  });
+
+  it("falls back to the generation locale when the other language is missing", () => {
+    // Best-effort by design: the second language's generation can fail
+    // without costing the author the Deep dive they answered ten questions
+    // for. Wrong language beats no recommendation.
+    const onlyEnglish: DeepDiveResult = {
+      ...deepDive,
+      locale: "en",
+      verdicts: { neutral: verdict("EN neutral"), roast: verdict("EN roast") },
+      localized: { en: { neutral: verdict("EN neutral"), roast: verdict("EN roast") } },
+    };
+    expect(toDeepDiveView(onlyEnglish, "fr")?.verdicts.neutral.priorityAction).toBe("EN neutral priority action.");
+  });
+
+  it("still renders a document written before Deep dives were bilingual", () => {
+    // No `localized` at all — exactly the old behaviour, not a crash.
+    expect(toDeepDiveView(deepDive, "fr")?.verdicts.neutral.priorityAction).toBe("Neutral priority action.");
   });
 });
 

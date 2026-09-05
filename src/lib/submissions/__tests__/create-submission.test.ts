@@ -145,7 +145,7 @@ async function baseSubmission(): Promise<Submission> {
 }
 
 describe("completeDeepDiveFlow (Deep dive — still calls Gemini)", () => {
-  it("calls Gemini once per tone and returns the enriched verdicts, never touching the score", async () => {
+  it("generates every tone in every language, and never touches the score", async () => {
     const submission = await baseSubmission();
     const deps = fakeDeepDiveDeps();
 
@@ -157,8 +157,53 @@ describe("completeDeepDiveFlow (Deep dive — still calls Gemini)", () => {
     expect(result.completed).toBe(true);
     expect(result.verdicts.neutral.priorityAction).toBe("Instrument week-4 retention by cohort this month.");
     expect(result.verdicts.roast.priorityAction).toBe("Instrument week-4 retention by cohort this month.");
-    expect(deps.callGemini).toHaveBeenCalledTimes(2);
+
+    // 2 tones x 2 languages. Gemini output cannot be re-resolved per request
+    // the way a copy-library lookup can, so a reader's language has to be
+    // generated up front — exactly as both tones already were.
+    expect(deps.callGemini).toHaveBeenCalledTimes(4);
+    expect(result.locale).toBe("en");
+    expect(Object.keys(result.localized ?? {}).sort()).toEqual(["en", "fr"]);
     expect(Object.keys(result.contextAnswers)).toHaveLength(DEEP_MODE_QUESTIONS.length);
+  });
+
+  it("keeps the completion language when another one fails, rather than losing the whole Deep dive", async () => {
+    const submission = await baseSubmission();
+    const deps = fakeDeepDiveDeps();
+    const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    // Only the French prompts fail. The author answered ten extra questions;
+    // a flaky second generation must not cost them the result.
+    (deps.callGemini as ReturnType<typeof vi.fn>).mockImplementation(async (prompt: string) => {
+      if (prompt.includes("As-tu un canal d'acquisition principal")) throw new Error("Gemini unavailable");
+      return { data: geminiJson(), modelUsed: "gemini-3.6-flash" };
+    });
+
+    const result = await completeDeepDiveFlow(
+      { submission, contextAnswerIndices: fullContextAnswers(), locale: "en" },
+      deps,
+    );
+
+    expect(result.verdicts.neutral.priorityAction).toBeTruthy();
+    expect(Object.keys(result.localized ?? {})).toEqual(["en"]);
+    expect(errors).toHaveBeenCalled();
+    errors.mockRestore();
+  });
+
+  it("fails the whole thing when the COMPLETION language fails — the fail-closed contract is unchanged", async () => {
+    const submission = await baseSubmission();
+    const deps = fakeDeepDiveDeps();
+    const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    (deps.callGemini as ReturnType<typeof vi.fn>).mockImplementation(async (prompt: string) => {
+      if (prompt.includes("Do you have a primary acquisition channel")) throw new Error("Gemini unavailable");
+      return { data: geminiJson(), modelUsed: "gemini-3.6-flash" };
+    });
+
+    await expect(
+      completeDeepDiveFlow({ submission, contextAnswerIndices: fullContextAnswers(), locale: "en" }, deps),
+    ).rejects.toThrow("Gemini unavailable");
+    errors.mockRestore();
   });
 
   it("sends a prompt containing both the original Quick answers and the Deep dive context answers", async () => {
@@ -167,12 +212,18 @@ describe("completeDeepDiveFlow (Deep dive — still calls Gemini)", () => {
 
     await completeDeepDiveFlow({ submission, contextAnswerIndices: fullContextAnswers(), locale: "en" }, deps);
 
-    const calls = (deps.callGemini as ReturnType<typeof vi.fn>).mock.calls;
-    for (const call of calls) {
-      const promptSent = call[0] as string;
-      expect(promptSent).toContain("Do you have a primary acquisition channel");
-      expect(promptSent).toContain("What's your primary acquisition channel today?");
-    }
+    const prompts = (deps.callGemini as ReturnType<typeof vi.fn>).mock.calls.map((c) => c[0] as string);
+
+    // Each prompt is resolved entirely in the language it generates — the
+    // Quick questions, the chosen answers and the Deep dive context labels
+    // together, never one language's questions under another's instructions.
+    const english = prompts.filter((p) => p.includes("Do you have a primary acquisition channel"));
+    const french = prompts.filter((p) => p.includes("As-tu un canal d'acquisition principal"));
+
+    expect(english).toHaveLength(2);
+    expect(french).toHaveLength(2);
+    for (const prompt of english) expect(prompt).toContain("What's your primary acquisition channel today?");
+    for (const prompt of french) expect(prompt).toContain("Quel est ton canal d'acquisition principal aujourd'hui ?");
   });
 
   it("stores the free-text context on the result and forwards it into the Gemini prompt (SPEC-ADDENDUM-02.md §1)", async () => {
