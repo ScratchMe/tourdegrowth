@@ -4,7 +4,8 @@ import type { Tone } from "@/lib/quiz/tone";
 import type { AnswerIndex, Answers } from "@/lib/scoring/score";
 import { createSubmissionFlow } from "@/lib/submissions/create-submission";
 import { generateOwnerToken } from "@/lib/submissions/owner-token";
-import { saveSubmission } from "@/lib/submissions/repository";
+import { resolveRefId } from "@/lib/submissions/referral";
+import { saveSubmission, submissionExists } from "@/lib/submissions/repository";
 
 // Runs on Vercel as a Node.js Route Handler. Originally this is where the
 // Gemini call + Firestore write happened (replacing the Supabase Edge
@@ -59,9 +60,14 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({ error: "refId must be a string or null." }, { status: 400 });
   }
 
+  // REVIEW.md R-03: a ref only counts if it looks like an id we could have
+  // issued AND names a real submission. Anything else is dropped rather than
+  // rejected — attribution is best-effort, scoring someone is not.
+  const attributedRefId = await resolveRefId(refId, submissionExists);
+
   try {
     const { submission, ownerToken } = await createSubmissionFlow(
-      { answers, tone, locale, refId: (refId as string | null | undefined) ?? null },
+      { answers, tone, locale, refId: attributedRefId },
       {
         saveSubmission,
         generateId: () => crypto.randomUUID(),

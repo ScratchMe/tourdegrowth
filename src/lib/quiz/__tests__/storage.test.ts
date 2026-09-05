@@ -98,6 +98,20 @@ describe("ref id storage (SPEC.md §7 attribution)", () => {
     expect(loadRefId()).toBeNull();
   });
 
+  // REVIEW.md R-03 — first-touch attribution.
+  it("keeps the first ref seen and ignores a later one", () => {
+    saveRefId("sub_first");
+    saveRefId("sub_second");
+    expect(loadRefId()).toBe("sub_first");
+  });
+
+  it("accepts a new ref once the previous one has been spent", () => {
+    saveRefId("sub_first");
+    clearRefId();
+    saveRefId("sub_second");
+    expect(loadRefId()).toBe("sub_second");
+  });
+
   it("is a no-op on the server (no window)", () => {
     (globalThis as { window?: unknown }).window = undefined;
     expect(loadRefId()).toBeNull();

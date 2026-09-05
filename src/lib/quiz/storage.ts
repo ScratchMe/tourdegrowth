@@ -64,9 +64,21 @@ export function loadRefId(): string | null {
   }
 }
 
+/**
+ * First-touch attribution (REVIEW.md R-03): the share that first brought
+ * someone here is the one credited, so an already-stored ref is never
+ * overwritten by a later one. That is the most faithful reading of SPEC.md
+ * §7's "issu du parrainage de <id>" — the ref is cleared once a submission
+ * actually uses it (`clearRefId`), so a second Tour starts from a clean
+ * slate rather than inheriting the first one's credit.
+ *
+ * Switching to last-touch later is a one-line change here; the policy is
+ * deliberately in one place rather than spread across the call sites.
+ */
 export function saveRefId(refId: string): void {
   if (typeof window === "undefined") return;
   try {
+    if (window.localStorage.getItem(REF_STORAGE_KEY)) return;
     window.localStorage.setItem(REF_STORAGE_KEY, refId);
   } catch {
     // ignore — attribution is a nice-to-have, never worth crashing over

@@ -22,6 +22,21 @@ export async function saveDeepDive(id: string, deepDive: DeepDiveResult): Promis
 }
 
 /**
+ * Whether a submission id names a real submission — used to drop bogus
+ * `?ref=` values before they ever reach Firestore and inflate the K-factor
+ * (REVIEW.md R-03, see `referral.ts`).
+ *
+ * One document read per submission created, and only when the ref already
+ * looks like a real id. At this volume that is cheaper than the alternative
+ * (a K-factor nobody can trust); if reads ever matter, R-14's caching work
+ * is where this would be revisited.
+ */
+export async function submissionExists(id: string): Promise<boolean> {
+  const doc = await getDb().collection(COLLECTION).doc(id).get();
+  return doc.exists;
+}
+
+/**
  * K-factor inputs (SPEC.md §7): how many submissions were attributed to a
  * given `ref` id (new analyses from that share), and how many distinct
  * sharers exist at all (unique submissions that have themselves been
