@@ -60,4 +60,40 @@ describe("extractGeminiText — why there is no text", () => {
       extractGeminiText({ promptFeedback: { blockReason: "OTHER" }, candidates: [{ finishReason: "SAFETY" }] }),
     ).toThrow(/blockReason: OTHER/);
   });
+
+  /**
+   * The gap the live probe found: a cut-off answer still carries the part
+   * that was written, so it used to be returned as if it were complete and
+   * blow up much later inside `extractJson` as a JSON syntax error.
+   */
+  it("refuses a TRUNCATED answer even though it carries partial text", () => {
+    const truncated = {
+      candidates: [
+        {
+          content: { parts: [{ text: '{"pillarRecommendations":{"acquisition":"Une phrase coupée en plein' }] },
+          finishReason: "MAX_TOKENS",
+        },
+      ],
+      usageMetadata: { thoughtsTokenCount: 3800, candidatesTokenCount: 240 },
+    };
+
+    expect(() => extractGeminiText(truncated)).toThrow(/finishReason: MAX_TOKENS/);
+    // The counts are the evidence that reasoning tokens ate the ceiling.
+    expect(() => extractGeminiText(truncated)).toThrow(/thoughts: 3800/);
+    expect(() => extractGeminiText(truncated)).toThrow(/reasoning tokens count against/);
+  });
+
+  it("refuses a partial answer stopped for any other reason too", () => {
+    expect(() =>
+      extractGeminiText({
+        candidates: [{ content: { parts: [{ text: "half a sentence" }] }, finishReason: "SAFETY" }],
+      }),
+    ).toThrow(/finishReason: SAFETY/);
+  });
+
+  it("still returns the text when the model finished normally", () => {
+    expect(
+      extractGeminiText({ candidates: [{ content: { parts: [{ text: "{}" }] }, finishReason: "STOP" }] }),
+    ).toBe("{}");
+  });
 });
