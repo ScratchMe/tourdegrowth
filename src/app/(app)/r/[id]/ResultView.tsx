@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { SiteFooter } from "@/components/brand/SiteFooter";
+import { LocaleSwitcher } from "@/components/brand/LocaleSwitcher";
 import { WordmarkLink } from "@/components/brand/WordmarkLink";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import { ModeTag } from "@/components/brand/ModeTag";
@@ -183,6 +184,14 @@ export function ResultView({
         <div className={styles.headerInner}>
           <WordmarkLink locale={locale} />
           <div className={styles.headerRight}>
+            {/* The reader's language switch. This page renders in the
+                READER's language since R-09, but until now nothing let them
+                say what it was — a shared result opened by a French speaker
+                stayed English unless their browser had already asked for
+                French. No locale prefix here (see `lib/i18n/routes.ts`), so
+                the switch goes through `?lang=`, which the proxy folds into
+                the cookie — the choice then carries on to `/quiz`. */}
+            <LocaleSwitcher locale={locale} />
             {deepDive && <ModeTag mode="deep">{tc(dd.badge, locale)}</ModeTag>}
             {roast ? (
               <span className={styles.roastBadge}>{tc(t.roastBadge, locale)}</span>

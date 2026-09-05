@@ -100,12 +100,37 @@ export interface DeepDiveResult {
    */
   freeContext: string | null;
   /**
+   * The locale `verdicts` below was generated in. Absent on documents written
+   * before Deep dives were generated in both languages — read those as the
+   * submission's own locale.
+   */
+  locale?: Locale;
+  /**
    * BOTH tones, same rationale as the Quick `verdicts` field: the result
    * page's tone switch must stay an instant client-side swap even after a
    * Deep dive, so both are generated once at completion time.
+   *
+   * In the generation locale. Kept alongside `localized` rather than replaced
+   * by it, so documents written before `localized` existed keep rendering
+   * from exactly the field they were written with.
    */
   verdicts: {
     neutral: DeepDiveVerdict;
     roast: DeepDiveVerdict;
   };
+  /**
+   * The same verdicts, per language — the fix for the bug Antoine hit:
+   * opening his own English result in French left the per-pillar
+   * explanations and the priority action in English.
+   *
+   * R-09 made the *Quick* verdict follow the reader, but a Deep dive replaces
+   * those very sentences (`ResultView`), and Gemini output cannot be
+   * re-resolved per request the way a copy-library lookup can — so every
+   * language is generated up front, exactly as both tones already were.
+   *
+   * Partial on purpose: the generation locale is guaranteed, any other is
+   * best-effort. An author must not lose their Deep dive because the second
+   * language's generation flaked.
+   */
+  localized?: Partial<Record<Locale, { neutral: DeepDiveVerdict; roast: DeepDiveVerdict }>>;
 }

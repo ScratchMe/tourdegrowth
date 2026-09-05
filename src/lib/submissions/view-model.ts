@@ -59,22 +59,37 @@ export function buildQuickVerdicts(
  *    user (see types.ts).
  *
  * Only the generated verdicts are display data, so only they cross over.
- * Pure function, no I/O — R-09 will extend this module with the full result
- * view model (verdict resolved in the VIEWER's locale rather than the
- * author's).
+ * Pure function, no I/O.
+ *
+ * It also picks the READER's language, the same principle R-09 applied to the
+ * Quick verdict — and the gap R-09 left, because a Deep dive replaces those
+ * very sentences on the result page. Reported by Antoine: his own English
+ * result, opened in French, kept the per-pillar explanations and the priority
+ * action in English.
+ *
+ * Falls back to the generation locale rather than hiding anything: a Deep
+ * dive in the wrong language is worse than one in the right language, but far
+ * better than an owner losing the recommendation they answered ten extra
+ * questions for. Documents written before `localized` existed only have that
+ * fallback, which is exactly the old behaviour.
  */
-export function toDeepDiveView(deepDive: DeepDiveResult | null | undefined): DeepDiveView | null {
+export function toDeepDiveView(
+  deepDive: DeepDiveResult | null | undefined,
+  readerLocale: Locale,
+): DeepDiveView | null {
   if (!deepDive) return null;
+
+  const verdicts = deepDive.localized?.[readerLocale] ?? deepDive.verdicts;
 
   return {
     verdicts: {
       neutral: {
-        pillarRecommendations: deepDive.verdicts.neutral.pillarRecommendations,
-        priorityAction: deepDive.verdicts.neutral.priorityAction,
+        pillarRecommendations: verdicts.neutral.pillarRecommendations,
+        priorityAction: verdicts.neutral.priorityAction,
       },
       roast: {
-        pillarRecommendations: deepDive.verdicts.roast.pillarRecommendations,
-        priorityAction: deepDive.verdicts.roast.priorityAction,
+        pillarRecommendations: verdicts.roast.pillarRecommendations,
+        priorityAction: verdicts.roast.priorityAction,
       },
     },
   };

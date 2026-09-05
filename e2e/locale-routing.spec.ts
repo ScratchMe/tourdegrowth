@@ -133,3 +133,42 @@ test("the OG image URL the page declares is the one that serves it", async ({ pa
   expect(image.status()).toBe(200);
   expect(image.headers()["content-type"]).toContain("image/png");
 });
+
+/**
+ * The result page renders in the READER's language (R-09), but until now
+ * nothing let a reader say what that was — reported by Antoine, who had to
+ * reach for `?lang=` by hand on his own shared result.
+ */
+test.describe("switching language on a shared result", () => {
+  test("the switch is there and actually changes the page", async ({ page }) => {
+    await page.goto("/r/sample");
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+
+    await page.getByRole("navigation", { name: "Language" }).getByText("FR", { exact: true }).click();
+    await page.waitForURL(/lang=fr/);
+
+    // Not just the chrome: the verdict itself, which is the point of R-09.
+    await expect(page.locator("html")).toHaveAttribute("lang", "fr");
+    await expect(page.getByTestId("score-verdict")).toContainText(/[àâéèêîôùûç]/);
+  });
+
+  test("the choice follows the reader into their own Tour", async ({ page }) => {
+    await page.goto("/r/sample");
+    await page.getByRole("navigation", { name: "Language" }).getByText("FR", { exact: true }).click();
+    await page.waitForURL(/lang=fr/);
+
+    // `/quiz` carries no locale prefix, so this only works because the proxy
+    // folded `?lang=` into the cookie.
+    await page.goto("/quiz");
+    await expect(page.locator("html")).toHaveAttribute("lang", "fr");
+  });
+
+  test("the questionnaire itself stays free of it", async ({ page }) => {
+    // Deliberate, same reasoning as the site footer: /quiz and /deep-dive are
+    // the two flows the product exists to get people through, and a language
+    // switch mid-funnel reloads the page. The choice is made before, on the
+    // landing or on the result.
+    await page.goto("/quiz");
+    await expect(page.getByRole("navigation", { name: "Language" })).toHaveCount(0);
+  });
+});

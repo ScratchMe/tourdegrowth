@@ -192,6 +192,8 @@ Ajouter `@axe-core/playwright` sur landing, quiz et `/r/sample` (lien avec R-19)
 
 **Vérification attendue.** Test unitaire du helper (soumission `en` + visiteur `fr` → headline FR). E2E : `/r/sample?lang=fr` → headline français.
 
+> **Suite du 2026-09-05, sur retour d'Antoine : R-09 ne couvrait que la moitié du problème.** Le verdict Quick suit bien le lecteur, mais dès qu'un Deep dive existe il **remplace** ces phrases par pilier (`ResultView`), et un Deep dive n'était stocké que dans la langue où il avait été généré. Antoine a ouvert son propre résultat anglais en français : explications des notes et action prioritaire restées en anglais. Corrigé en générant chaque langue à l'avance, comme les deux tons l'étaient déjà — détail dans `CLAUDE.md`.
+
 ### R-10 — Partage enrichi
 
 **Type** F · **Effort** M · **Statut** **Fait en partie** (PR #29, 2026-09-05) — métadonnées par résultat, texte de partage, URL nettoyée, événements par méthode, et confirmation de copie réelle. **Les boutons LinkedIn/X sont volontairement reportés en R-23** : les ajouter casserait la règle « exactement 2 CTA, jamais 3 » tranchée à l'étape 7, donc c'est un arbitrage design, pas une implémentation.
@@ -266,6 +268,8 @@ Documenter la nomenclature complète en tête de `src/lib/analytics/goatcounter.
 **Points d'attention.** C'est le seul item qui touche le routing de toute l'app : le faire **après** R-07 (E2E en place, spec langue incluse). Vérifier le comportement des crawlers sociaux sur `/r/<id>` (inchangé, mais à re-tester). `useLocale()` reste l'API des composants client ; seule la source du `initialLocale` change.
 
 **Vérification attendue.** `next build` montre `○` pour landing, How it works et glossaire dans les deux langues. `curl -I -H 'Accept-Language: fr' /` → 308 vers `/fr`. `curl /fr/glossary/cac` contient les balises `hreflang` `en`, `fr`, `x-default`. E2E FR/EN sur les pages migrées. Les anciennes URL `/glossary/cac` redirigent (308) vers la version localisée pour ne pas casser les liens déjà indexés.
+
+> **Suite du 2026-09-05, sur retour d'Antoine : le sélecteur de langue manquait là où il compte le plus.** R-13 l'a posé sur les pages de contenu, qui portent leur langue dans l'URL. La page de résultat, elle, n'en a pas — et c'est justement celle qui rend dans la langue du *lecteur* (R-09). Un lecteur francophone arrivant sur un résultat partagé n'avait donc aucun moyen de basculer, sauf à connaître `?lang=`. Le sélecteur accepte maintenant l'absence de préfixe et pointe sur `?lang=` ; le proxy le replie dans le cookie, donc le choix suit jusqu'au `/quiz`.
 
 ### R-14 — Cache du résultat partagé + OG 404 pour id inconnu
 

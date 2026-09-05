@@ -28,13 +28,20 @@ function isLocaleValue(value: unknown): value is Locale {
 
 /**
  * Vercel's default function timeout is shorter than this route reliably
- * needs: a real Deep dive was measured at ~41s (two Gemini generations, each
+ * needs: a real Deep dive was measured at ~41s (Gemini generations, each
  * able to retry across four models at 20s apiece). Declaring it means a slow
  * but successful generation is not cut off mid-flight — REVIEW.md R-15.
  */
 export const maxDuration = 120;
 
-/** Tighter than the submission limit: each of these costs two Gemini generations. */
+/**
+ * Tighter than the submission limit: each of these costs FOUR Gemini
+ * generations — two tones x two languages, since a Deep dive replaces the
+ * per-pillar sentences and Gemini output can't be re-resolved per reader the
+ * way the Quick copy-library lookup can. Five an hour per IP is therefore 20
+ * generations, not 10; kept at five because a false positive here means
+ * refusing a real founder, and 20 is still nothing against the quota.
+ */
 const DEEP_DIVE_LIMIT = { limit: 5, windowSeconds: 3600 };
 
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }): Promise<Response> {

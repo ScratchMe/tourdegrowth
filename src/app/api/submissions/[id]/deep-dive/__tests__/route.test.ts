@@ -123,8 +123,11 @@ describe("POST /api/submissions/[id]/deep-dive", () => {
     const res = await call({ ...validBody, ownerToken: OWNER_TOKEN });
 
     expect(res.status).toBe(200);
-    // One call per tone (SPEC-ADDENDUM-01.md §2 — both tones generated at once).
-    expect(callGeminiWithFallback).toHaveBeenCalledTimes(2);
+    // One call per tone AND per language: both tones so the tone switch stays
+    // instant (SPEC-ADDENDUM-01.md §2), both languages so a reader gets the
+    // Deep dive in theirs. Gemini output cannot be re-resolved per request the
+    // way the Quick copy-library lookup can. (SPEC-ADDENDUM-01.md §2 — both tones generated at once).
+    expect(callGeminiWithFallback).toHaveBeenCalledTimes(4);
     expect(saveDeepDive).toHaveBeenCalledWith("sub_1", expect.objectContaining({ completed: true }));
     // REVIEW.md R-14: the enriched result must not stay behind a cached copy.
     expect(invalidateSubmission).toHaveBeenCalledWith("sub_1");
@@ -186,15 +189,21 @@ describe("POST /api/submissions/[id]/deep-dive", () => {
     expect(JSON.stringify(payload)).not.toContain("PERMISSION_DENIED");
   });
 
-  // REVIEW.md R-15: each of these costs two Gemini generations, so the budget
-  // is tighter than the submission one.
+  // REVIEW.md R-15: each of these costs four Gemini generations (two tones x
+  // two languages), so the budget is tighter than the submission one.
   it("refuses a caller who keeps hammering, before spending any Gemini call", async () => {
-    let last: Response | undefined;
-    for (let i = 0; i < 6; i += 1) last = await call({ ...validBody, ownerToken: OWNER_TOKEN });
+    for (let i = 0; i < 5; i += 1) await call({ ...validBody, ownerToken: OWNER_TOKEN });
 
-    expect(last?.status).toBe(429);
-    expect(Number(last?.headers.get("Retry-After"))).toBeGreaterThan(0);
-    expect(callGeminiWithFallback.mock.calls.length).toBeLessThan(12);
+    // Asserted as "the refused call spent nothing", not as a call-count
+    // ceiling: the cost per Deep dive is a product decision that has already
+    // changed once, and the property worth pinning is that the gate runs
+    // BEFORE Gemini.
+    const spentBefore = callGeminiWithFallback.mock.calls.length;
+    const refused = await call({ ...validBody, ownerToken: OWNER_TOKEN });
+
+    expect(refused.status).toBe(429);
+    expect(Number(refused.headers.get("Retry-After"))).toBeGreaterThan(0);
+    expect(callGeminiWithFallback.mock.calls.length).toBe(spentBefore);
   });
 
   it("still validates the payload before anything else", async () => {

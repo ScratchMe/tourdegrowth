@@ -153,7 +153,7 @@ export default async function ResultPage({ params }: PageProps) {
       // `deepDive` also holds the founder's free-text context and their 10
       // Deep dive answers, which would otherwise ride along in this public
       // page's RSC payload without ever being rendered.
-      deepDive={toDeepDiveView(submission.deepDive)}
+      deepDive={toDeepDiveView(submission.deepDive, locale)}
       benchmark={benchmark}
     />
   );
