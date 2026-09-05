@@ -588,3 +588,19 @@ Jusqu'ici seules les **deux extrémités** du funnel étaient instrumentées (`s
 **Deux actions manuelles restent côté Antoine** : déployer les règles (`npx firebase-tools deploy --only firestore:rules`) et confirmer dans la console Firebase que celles réellement en place sont bien en deny. Ce fichier documente l'intention ; il ne s'applique qu'une fois déployé.
 
 **Pas de `vercel.json`** : rien à y mettre aujourd'hui. Le seul réglage qui aurait pu y aller est `maxDuration`, déclaré en R-15 dans la route elle-même, ce qui est plus proche du code qui en a besoin.
+
+### R-18 : dépendances et config TypeScript (2026-09-05) — clôt le lot E
+
+**Les 6 vulnérabilités modérées se réduisaient à une seule advisory racine** : `uuid` (<11.1.1, CVSS 7,5), tirée par `gaxios` et `teeny-request` sous `@google-cloud/storage` sous `firebase-admin`. Le reste n'était que la même faille remontée à travers la chaîne.
+
+`npm audit fix` ne changeait **rien** (aucun correctif non cassant), et sa suggestion « à jour » était de **rétrograder `firebase-admin` de 14 à 10.3.0** — quatre majeures en arrière, manifestement pire que le mal.
+
+Correctif retenu : un `overrides` npm forçant `uuid` à `^11.1.1`. Ciblé, et **vérifié plutôt que supposé** avant d'être gardé : `gaxios` et `teeny-request` n'utilisent que `uuid.v4` via un `require("uuid")` CJS, qui fonctionne toujours en v11 (testé en chargeant réellement le module), et `firebase-admin/app` comme `firebase-admin/firestore` se chargent normalement. `npm audit --omit=dev` passe de 6 à **0**. Vérifié aussi que `npm ci` — ce qu'exécute la CI — résout bien `uuid@11.1.1` depuis le lockfile, dans un dossier vierge.
+
+**Le remplacement de `firebase-admin` par `@google-cloud/firestore`, évalué puis écarté — avec une mesure.** Le constat R-18 supposait un gain de cold start. Mesuré : importer `firebase-admin/firestore` charge 455 modules dont **zéro** venant de `@google-cloud/storage`. Le point d'entrée modulaire évite déjà Storage à l'exécution. Et le poids réel est `@google-cloud/firestore` (6,2 Mo), chargé dans les deux cas ; `firebase-admin` n'ajoute qu'un wrapper de 2,1 Mo. Le gain n'est pas net, donc pas de changement du socle de données d'une app qui marche. Ne pas y revenir sans une mesure de cold start réelle sur Vercel qui contredirait celle-ci.
+
+**Config TypeScript** : `baseUrl` retiré (déprécié, `tsc` l'annonçait comme erreur future en TS 7) — `paths` fonctionne seul avec des entrées relatives au fichier. `target` passé de `ES2017` à `ES2022`. `@types/node` de 20 à 22, et un champ `engines: { node: ">=22" }` : Vercel exécute ce projet sur Node 22 et rien dans le repo ne le disait, ce qui est exactement comme on finit par déboguer sur 18.
+
+`npx tsc --noEmit` ne sort maintenant **aucun** avertissement, alors qu'il signalait la dépréciation de `baseUrl` depuis le début de cette revue.
+
+**Vérifié en réel** : 208 tests, 37 specs Playwright, lint/tsc/build propres, `npm audit --omit=dev` à zéro, et `npm ci` rejoué dans un dossier vierge.
