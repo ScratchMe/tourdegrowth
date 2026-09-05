@@ -543,3 +543,17 @@ Jusqu'ici seules les **deux extrémités** du funnel étaient instrumentées (`s
 **Vérifié en réel** : 191 tests unitaires, **37 specs Playwright** (+1), lint/tsc/build propres. Le comportement de cache lui-même (une lecture Firestore par heure au lieu d'une par vue) n'est pas observable sans identifiants — **à confirmer après déploiement** en regardant les lectures dans la console Firebase sur une page de résultat rechargée plusieurs fois.
 
 **Lot D terminé** pour ce qui était couvrable ici (R-13 moitié SEO, R-14). Restent R-24 (rendu statique) et le lot E.
+
+### R-15 : une limite de débit honnête, et `maxDuration` (2026-09-05) — début du lot E
+
+**Constat.** Les deux routes POST sont coûteuses en quota qui n'est pas le nôtre : `POST /api/submissions` écrit dans Firestore (20 000 écritures/jour sur le plan gratuit) et `POST .../deep-dive` vaut deux générations Gemini, chacune pouvant retenter sur quatre modèles. Rien n'empêchait un script de boucler sur l'une ou l'autre.
+
+**`lib/rate-limit.ts`** : fenêtre glissante **en mémoire**, par instance serverless. Limites volontairement généreuses (12 soumissions/h, 5 Deep dive/h, par IP et par route) — un faux positif ici veut dire refuser de scorer un vrai fondateur, ce qui est bien pire que servir quelques requêtes de plus à un curieux. Réponse `429` avec un `Retry-After` réel, jamais zéro (qui inviterait à réessayer immédiatement).
+
+**Ce que ça vaut, dit franchement.** Ça arrête le cas naïf : un client qui martèle un endpoint, qui sur une app à faible trafic retombe généralement sur la même instance chaude. Ça n'arrête **pas** un trafic réparti sur plusieurs instances ni quelqu'un de motivé. Fermer ça demande un store partagé (Upstash Redis — un compte, des identifiants) ou les règles de pare-feu Vercel (selon le plan). Consigné en R-15 comme chemin d'évolution **si un abus réel apparaît** : ajouter dès maintenant une dépendance de service pour un risque encore théorique coûterait plus que ça ne protège.
+
+**`export const maxDuration = 120`** sur la route Deep dive — la seule qui dure vraiment. Un Deep dive réel a été mesuré à ~41 s (deux générations, repli possible sur quatre modèles à 20 s chacun), et le défaut Vercel est plus court : sans cette ligne, une génération lente mais réussie pouvait être coupée en vol.
+
+**Détail de test à connaître** : le limiteur garde un état au niveau du module, donc les tests de route doivent le réinitialiser entre les cas — sans ça la suite finit par se rate-limiter elle-même. `resetRateLimitsForTests()` est là pour ça, appelé dans les `beforeEach` concernés.
+
+**Vérifié en réel** (serveur lancé, `x-forwarded-for` forgé) : 12 soumissions passent depuis une même IP, la 13ᵉ renvoie `429` avec `retry-after: 3600`, et une autre IP n'est pas affectée. 201 tests unitaires (+10), lint/tsc/build propres.
