@@ -43,7 +43,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 | **D — Architecture i18n / SEO / cache** | R-13 | Locale dans l'URL, `hreflang`, switch de langue | F+T | L | **Fait** (PR #32, 2026-09-05) |
 | | R-24 | Rendre les pages de contenu réellement statiques | T | M | À faire |
 | | R-14 | Cache du résultat partagé + OG 404 pour id inconnu | T | M | **Fait** (PR #33, 2026-09-05) — clôt le lot D |
-| **E — Robustesse backend** | R-15 | Rate limiting sur les routes POST + `maxDuration` | T | S/M | À faire |
+| **E — Robustesse backend** | R-15 | Rate limiting sur les routes POST + `maxDuration` | T | S/M | **Fait** (PR #34, 2026-09-05) — limite en mémoire, pas distribuée |
 | | R-16 | Appel Gemini : header, `responseSchema`, `finishReason`, un seul appel | T | M | À faire |
 | | R-17 | Infra versionnée : règles Firestore, env vars documentées | T | S | À faire |
 | | R-18 | Dépendances et config TypeScript | T | S | À faire |
@@ -286,7 +286,7 @@ Documenter la nomenclature complète en tête de `src/lib/analytics/goatcounter.
 
 ### R-15 — Rate limiting sur les routes POST + `maxDuration`
 
-**Type** T · **Effort** S/M · **Statut** À faire
+**Type** T · **Effort** S/M · **Statut** **Fait** (PR #34, 2026-09-05) — **avec une limite explicite**. La limite est **en mémoire, par instance serverless** : elle arrête le cas naïf (un client qui martèle, qui sur une app à faible trafic retombe généralement sur la même instance chaude) sans aucune dépendance ni identifiant à configurer. Elle ne couvre **pas** un trafic réparti sur plusieurs instances ni un attaquant motivé. Passer à une limite distribuée demande soit un store partagé (Upstash Redis : un compte, des identifiants), soit les règles de pare-feu Vercel (à vérifier selon le plan) — à faire **si un abus réel apparaît**, pas avant : le vrai coût aujourd'hui serait une dépendance de plus à maintenir pour un risque encore théorique.
 
 **Constat.** `POST /api/submissions` et `POST /api/submissions/[id]/deep-dive` n'ont aucune limite. Un script peut créer des soumissions en boucle (écritures Firestore, quota Spark 20 000/jour) puis déclencher autant de Deep dives, chacun valant deux appels Gemini et jusqu'à huit requêtes HTTP avec le repli. Aucun `export const maxDuration` sur la route Deep dive, la seule qui dure réellement 30 à 60 secondes en production : on dépend de la valeur par défaut du plan Vercel.
 

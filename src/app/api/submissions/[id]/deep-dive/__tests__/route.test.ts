@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { resetRateLimitsForTests } from "@/lib/rate-limit";
 import { DEEP_MODE_QUESTIONS } from "@/content/deep-mode-questions";
 import { QUESTIONS } from "@/content/copy-library";
 import { PILLARS } from "@/lib/scoring/pillars";
@@ -80,6 +81,9 @@ function call(body: Record<string, unknown>) {
 describe("POST /api/submissions/[id]/deep-dive", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // The rate limiter is module-level state (REVIEW.md R-15) — without this
+    // the suite would eventually rate-limit itself.
+    resetRateLimitsForTests();
     process.env.GEMINI_API_KEY = "test-key";
     getSubmissionById.mockResolvedValue(submission());
     callGeminiWithFallback.mockResolvedValue(geminiResponse());
@@ -180,6 +184,17 @@ describe("POST /api/submissions/[id]/deep-dive", () => {
     expect(res.status).toBe(502);
     expect(payload).toEqual({ error: "DEEP_DIVE_FAILED" });
     expect(JSON.stringify(payload)).not.toContain("PERMISSION_DENIED");
+  });
+
+  // REVIEW.md R-15: each of these costs two Gemini generations, so the budget
+  // is tighter than the submission one.
+  it("refuses a caller who keeps hammering, before spending any Gemini call", async () => {
+    let last: Response | undefined;
+    for (let i = 0; i < 6; i += 1) last = await call({ ...validBody, ownerToken: OWNER_TOKEN });
+
+    expect(last?.status).toBe(429);
+    expect(Number(last?.headers.get("Retry-After"))).toBeGreaterThan(0);
+    expect(callGeminiWithFallback.mock.calls.length).toBeLessThan(12);
   });
 
   it("still validates the payload before anything else", async () => {

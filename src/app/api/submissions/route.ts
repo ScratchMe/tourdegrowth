@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { clientKey, rateLimit } from "@/lib/rate-limit";
 import type { Locale } from "@/lib/i18n/locale";
 import type { Tone } from "@/lib/quiz/tone";
 import { QUESTIONS } from "@/lib/scoring/questions";
@@ -54,7 +55,23 @@ function isLocaleValue(value: unknown): value is Locale {
   return value === "en" || value === "fr";
 }
 
+/**
+ * REVIEW.md R-15. Generous on purpose: a false positive here means refusing
+ * to score a real founder, which is far worse than serving a few extra
+ * requests to someone curious. A shared laptop or an office NAT should never
+ * come close.
+ */
+const SUBMISSION_LIMIT = { limit: 12, windowSeconds: 3600 };
+
 export async function POST(request: Request): Promise<Response> {
+  const limit = rateLimit(clientKey(request, "submissions"), SUBMISSION_LIMIT);
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: "RATE_LIMITED" },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } },
+    );
+  }
+
   let body: unknown;
   try {
     body = await request.json();

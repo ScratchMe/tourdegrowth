@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { resetRateLimitsForTests } from "@/lib/rate-limit";
 import { QUESTIONS } from "@/content/copy-library";
 import type { Submission } from "@/lib/submissions/types";
 
@@ -31,6 +32,9 @@ const validBody = { answers: validAnswers, tone: "neutral", locale: "en" };
 describe("POST /api/submissions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // The rate limiter is module-level state (REVIEW.md R-15) — without this
+    // the suite would eventually rate-limit itself.
+    resetRateLimitsForTests();
     submissionExists.mockResolvedValue(true);
     saveSubmission.mockResolvedValue(undefined);
   });
@@ -107,6 +111,18 @@ describe("POST /api/submissions", () => {
     expect(res.status).toBe(502);
     expect(payload).toEqual({ error: "SCORING_FAILED" });
     expect(JSON.stringify(payload)).not.toContain("PERMISSION_DENIED");
+  });
+
+  // REVIEW.md R-15.
+  it("refuses a caller who keeps hammering, with a Retry-After", async () => {
+    let last: Response | undefined;
+    for (let i = 0; i < 13; i += 1) last = await call(validBody);
+
+    expect(last?.status).toBe(429);
+    expect(await last?.json()).toEqual({ error: "RATE_LIMITED" });
+    expect(Number(last?.headers.get("Retry-After"))).toBeGreaterThan(0);
+    // The refused attempts must never have reached Firestore.
+    expect(saveSubmission.mock.calls.length).toBeLessThan(13);
   });
 
   it("rejects a body that isn't JSON", async () => {

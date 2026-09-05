@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { clientKey, rateLimit } from "@/lib/rate-limit";
 import { DEEP_MODE_QUESTIONS } from "@/content/deep-mode-questions";
 import { FREE_CONTEXT_MAX_LENGTH } from "@/content/free-context";
 import { callGeminiWithFallback } from "@/lib/gemini/client";
@@ -25,7 +26,26 @@ function isLocaleValue(value: unknown): value is Locale {
   return value === "en" || value === "fr";
 }
 
+/**
+ * Vercel's default function timeout is shorter than this route reliably
+ * needs: a real Deep dive was measured at ~41s (two Gemini generations, each
+ * able to retry across four models at 20s apiece). Declaring it means a slow
+ * but successful generation is not cut off mid-flight — REVIEW.md R-15.
+ */
+export const maxDuration = 120;
+
+/** Tighter than the submission limit: each of these costs two Gemini generations. */
+const DEEP_DIVE_LIMIT = { limit: 5, windowSeconds: 3600 };
+
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }): Promise<Response> {
+  const limit = rateLimit(clientKey(request, "deep-dive"), DEEP_DIVE_LIMIT);
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: "RATE_LIMITED" },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } },
+    );
+  }
+
   const { id } = await context.params;
 
   let body: unknown;
