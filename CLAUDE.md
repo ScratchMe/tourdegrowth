@@ -376,3 +376,23 @@ Le lint (R-06) et les E2E (R-07) s'ajouteront à ce workflow avec leurs propres 
 **Action manuelle restante côté Antoine** : rendre ce check **obligatoire** sur `main` (GitHub → Settings → Branches → Branch protection rules). Tant que ce n'est pas fait, la CI signale sans bloquer. Ça ne peut pas se configurer depuis le repo.
 
 Vérifié en rejouant localement la séquence exacte du job (tsc 0 erreur, 178 tests verts, build compilé) avant de la committer, puis en réel sur le PR lui-même.
+
+### R-06 + R-08 : un vrai lint, et le code mort qu'il a révélé (2026-09-05)
+
+**Le lint n'a jamais existé sur ce projet.** `package.json` portait `"lint": "next lint"`, commande retirée par Next.js 16 — le script n'imprimait plus que « Invalid project directory provided, no such directory: .../lint ». Et comme aucune configuration ESLint n'avait jamais été committée, même avant cette rupture, les commentaires `// eslint-disable-next-line` présents dans le code n'avaient **jamais** rien désactivé : il n'y avait rien à désactiver.
+
+`eslint.config.mjs` en flat config (ESLint 9). `eslint-config-next` expose déjà `core-web-vitals` et `typescript` comme tableaux flat — vérifié en inspectant le paquet installé plutôt qu'en supposant, donc pas de pont `FlatCompat` à construire. `design/` est ignoré : c'est le bundle de handoff Claude Design recopié verbatim, du code que l'app n'importe pas et que personne ici ne maintient ; le linter y trouvait 5 problèmes sur lesquels on ne peut rien.
+
+**Ce que le lint a trouvé le jour de son installation**, au-delà du style :
+
+1. **Une animation du brief déjà perdue, et son état orphelin.** `quiz/page.tsx` tenait un state `pulseStage` écrit à chaque fin d'étape (avec son `setTimeout` de nettoyage) et **jamais lu par quoi que ce soit**. Reliquat de la migration design system v2 : depuis, le pulse de segment (DESIGN-BRIEF.md « Motion ») est porté entièrement par le CSS de `StageProgress` (`.current` + `tdg-pulse`). Retiré, ainsi que l'import `QUESTIONS_PER_STAGE` devenu inutile. Vérifié en navigateur que le pulse est bien toujours là (`animationName` relevé sur le segment courant : `tdg-pulse`), donc rien de visible n'est perdu.
+2. **Deux imports morts** : `rankPillarsAscending` dans `opengraph-image.tsx`, `beforeEach` dans `goatcounter.test.ts`.
+3. **Un `eslint-disable` inutile** (`react/no-danger` sur la landing) — la règle n'est pas activée par la config Next. Retiré ; le commentaire qui explique pourquoi ce `dangerouslySetInnerHTML` est sûr, lui, reste : il sert au lecteur.
+
+**Trois suppressions volontaires, documentées sur place** : la règle `react-hooks/set-state-in-effect` (nouvelle, React 19) signale les trois endroits où on lit `localStorage` après montage pour poser le state — quiz, page de résultat, Deep dive. C'est précisément la décision d'hydratation de l'étape 4 : SSR ne voit pas `localStorage`, donc semer l'état initial garantirait un mismatch. La bonne réponse React moderne serait `useSyncExternalStore` avec un snapshot serveur ; c'est un refactor à part entière, pas le sujet de cet item — noté ici pour la prochaine fois qu'on touche ces trois écrans.
+
+**R-08, le code mort qu'ESLint ne peut pas voir** : `countSubmissionsReferredBy` (`repository.ts`) et `ctaSwitchToRoast` (`dictionary.ts`) sont **exportés**, donc un linter par fichier les croit utilisés — seule une recherche projet montre que rien ne les importe. Supprimés. `clearRefId` en revanche est **conservé** : R-03 l'utilise désormais pour la politique first-touch, exactement comme le constat R-08 l'avait anticipé.
+
+**Le lint est ajouté à la CI** (`.github/workflows/ci.yml`), en première étape puisque c'est la plus rapide.
+
+**Vérifié en réel** : `npm run lint` sort en 0, `tsc` propre, 178 tests verts, build OK. Et surtout en navigateur, parce que du code a été retiré de `handleAnswer` : le pulse du segment courant est bien présent, les 15 questions défilent dans l'ordre, le sélecteur de ton apparaît après la 15e, un rechargement avec 15 réponses en mémoire reprend directement au sélecteur de ton, et un parcours partiel reprend à la première question sans réponse (Q3 pour 2 réponses stockées) avec le bouton Retour disponible.

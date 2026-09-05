@@ -13,7 +13,6 @@ import { QUESTIONS } from "@/content/copy-library";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { useLocale } from "@/lib/i18n/locale-context";
 import {
-  QUESTIONS_PER_STAGE,
   QUESTION_COUNT,
   STAGE_COUNT,
   firstUnansweredIndex,
@@ -61,7 +60,6 @@ export default function QuizPage() {
   const [phase, setPhase] = useState<Phase>("answering");
   const [answers, setAnswers] = useState<Answers>({});
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [pulseStage, setPulseStage] = useState<number | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [openGlossaryId, setOpenGlossaryId] = useState<string | null>(null);
   // SPEC.md §6bis: "Straight up" (neutral) is the explicit default tone.
@@ -72,6 +70,11 @@ export default function QuizPage() {
   // state, so the server-rendered HTML and the first client render match.
   useEffect(() => {
     const stored = loadStoredAnswers();
+    // localStorage does not exist during SSR, so this state cannot be
+    // seeded in the initial render without guaranteeing a hydration
+    // mismatch (CLAUDE.md, step 4's lesson) — reading it after mount and
+    // setting state is the deliberate trade-off, not an oversight.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAnswers(stored);
     if (isComplete(stored)) {
       setCurrentIndex(QUESTION_COUNT - 1);
@@ -100,14 +103,12 @@ export default function QuizPage() {
     saveStoredAnswers(nextAnswers);
     setOpenGlossaryId(null);
 
-    const stageJustCompleted = (currentIndex + 1) % QUESTIONS_PER_STAGE === 0;
-    if (stageJustCompleted) {
-      const completedStage = stageOfQuestion(currentIndex);
-      setPulseStage(completedStage);
-      window.setTimeout(() => {
-        setPulseStage((current) => (current === completedStage ? null : current));
-      }, 400);
-    }
+    // The stage-completion pulse (DESIGN-BRIEF.md "Motion") is handled
+    // entirely by StageProgress's own CSS since the design-system v2
+    // migration — `.current` carries the `tdg-pulse` animation. A
+    // `pulseStage` state and its timeout survived that migration here,
+    // written on every stage change and never read by anything; ESLint's
+    // no-unused-vars is what surfaced it (REVIEW.md R-06).
 
     if (currentIndex === QUESTION_COUNT - 1) {
       setPhase("tone");

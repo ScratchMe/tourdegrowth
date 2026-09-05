@@ -223,7 +223,6 @@ export const UI_STRINGS = {
     ctaShare: { en: "Share my score", fr: "Partager mon score" },
     ctaShareRoast: { en: "Share my roast", fr: "Partager mon roast" },
     ctaAgain: { en: "Take the Tour again", fr: "Refaire le Tour" },
-    ctaSwitchToRoast: { en: "Switch to roast", fr: "Passer en roast" },
     ctaSwitchToNeutral: { en: "Switch to straight up", fr: "Repasser en neutre" },
     // Roast-only stamped tag on the weakest pillar (DESIGN-BRIEF.md §04: "08/20 RETENTION — dead last").
     stampedSuffix: { en: "dead last", fr: "bon dernier" },

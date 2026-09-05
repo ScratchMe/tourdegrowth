@@ -68,6 +68,9 @@ export default function DeepDivePage() {
       router.replace(`/r/${params.id}`);
       return;
     }
+    // Same deliberate post-mount read as the quiz and result screens: the
+    // owner token lives in localStorage, which SSR cannot see.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setOwnerToken(token);
     setOwnershipChecked(true);
   }, [params.id, router]);
