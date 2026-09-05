@@ -672,3 +672,21 @@ Trois garde-fous, tous délibérés :
 **Fait constaté au passage, consigné en R-21 plutôt que corrigé** : la landing déborde horizontalement à 390 px **dans les deux langues** maintenant (`scrollWidth` 515 en FR, 452 en EN pour un viewport de 390), et non plus seulement en français comme le disait le constat d'origine — R-13 a ajouté le sélecteur de langue dans ce même header. Mesuré avec et sans le nouveau lien « dernier score » : chiffres identiques, donc il n'y contribue pas (son bord droit est à 328).
 
 **À confirmer après déploiement** : l'incrément `stats/global` réel dans Firestore, et l'apparition du benchmark une fois les 30 soumissions atteintes. Ce sont les seules parties de R-20 qui touchent Firestore.
+
+### Couture dans le fond de page (2026-09-05, signalé par Antoine)
+
+**Le symptôme, tel qu'il a été vu** : sur deux captures du même bas de page, une en français une en anglais, une ligne dans le fond ne tombait pas au même endroit par rapport au filet du pied de page. « Moche », et à juste titre.
+
+**La cause.** `--ground-lift` (`tokens/shape.css`) est constitué de deux dégradés radiaux peints sur `body`, et la zone de positionnement d'un fond est la boîte de l'élément lui-même. Or `globals.css` avait `html, body { height: 100% }` : la boîte du `body` faisait donc exactement une hauteur de fenêtre pendant que la page, elle, défilait bien au-delà. `background-repeat` valant `repeat` par défaut, les dégradés se **répétaient en mosaïque**, laissant une couture horizontale franche à chaque multiple de la hauteur de fenêtre.
+
+Et comme cette couture est à un `y` fixe alors que la hauteur de page varie avec la copie, elle tombait à une distance différente du pied de page en français et en anglais. C'est exactement comme ça qu'elle s'est fait repérer : le même écran, deux langues, la ligne ailleurs.
+
+**Mesuré, pas supposé** : capture pleine page, colonne d'un pixel dans la gouttière gauche (là où il n'y a que du fond), écart entre lignes voisines. Le tramage propre au dégradé mesure ~3/255 partout ; à `y=700` dans une fenêtre de 700 px, l'écart était de **28**, sur les trois pages testées. Après correctif, plus aucun écart ≥10 ailleurs que sur les deux filets pointillés eux-mêmes, qui traversent bien toute la largeur (ce sont eux, à ~136, et non le fond).
+
+**Correctif** : `min-height: 100%` au lieu de `height: 100%` sur le `body` (une page courte remplit toujours la fenêtre, mais la boîte grandit avec le contenu), plus `background-repeat: no-repeat` en ceinture et bretelles. Le « page ground » couvre alors la page une seule fois, ce qui est précisément ce que `tokens/shape.css` en dit. **Aucun token n'a été touché** — c'était un défaut d'intégration CSS, pas une valeur du design system.
+
+**Test de non-régression** (`e2e/page-ground.spec.ts`) : l'écart de couleur est mesuré **dans le navigateur**, en décodant la capture via un `canvas` plutôt qu'avec une bibliothèque d'images — `sharp` n'est présent ici qu'en dépendance transitive de Next et la CI ne doit pas reposer là-dessus. L'échantillonnage vise uniquement les multiples de la hauteur de fenêtre, seuls endroits où une mosaïque peut coudre ; balayer toute la colonne signalerait les filets pointillés, qui sont voulus. Deux assertions de propriété complètent la mesure (`body` couvre bien tout le document, `background-repeat` vaut `no-repeat`). Non-vacuité prouvée : en réintroduisant `height: 100%` et en reconstruisant, **les 5 specs tombent**.
+
+**Piège d'outillage à retenir** : `npx playwright test` ne type-vérifie pas les specs, `next build` si (il couvre `e2e/`). Une spec qui passe au runner peut casser le build — lancer `npx tsc --noEmit` **avant** de conclure qu'une nouvelle spec est bonne.
+
+**Trouvé en vérifiant, consigné plutôt qu'absorbé** : une URL inconnue (`/nonsense`) rend le document d'erreur intégré de Next, sans aucune feuille de style de l'app. **Ce n'est pas une régression de R-24** — vérifié en reconstruisant `main` au commit précédent dans un worktree, le résultat est identique : il n'y a simplement jamais eu d'`app/not-found.tsx` dans ce repo. Voir `REVIEW.md` **R-26**.
