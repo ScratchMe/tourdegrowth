@@ -22,3 +22,42 @@ describe("extractGeminiText", () => {
     expect(() => extractGeminiText(undefined)).toThrow(/Unexpected Gemini response shape/);
   });
 });
+
+/** REVIEW.md R-16 — every non-answer used to collapse into one opaque message. */
+describe("extractGeminiText — why there is no text", () => {
+  it("names a refused prompt", () => {
+    expect(() => extractGeminiText({ promptFeedback: { blockReason: "SAFETY" } })).toThrow(/blockReason: SAFETY/);
+  });
+
+  it("names a truncated answer and points at the ceiling", () => {
+    expect(() => extractGeminiText({ candidates: [{ finishReason: "MAX_TOKENS" }] })).toThrow(
+      /finishReason: MAX_TOKENS/,
+    );
+    expect(() => extractGeminiText({ candidates: [{ finishReason: "MAX_TOKENS" }] })).toThrow(/output ceiling/);
+  });
+
+  it("names a candidate blocked after generation started", () => {
+    expect(() => extractGeminiText({ candidates: [{ finishReason: "SAFETY" }] })).toThrow(/finishReason: SAFETY/);
+    // Retrying another model cannot help — the caller's fallback loop only
+    // retries on HTTP/network failures, and the message says why.
+    expect(() => extractGeminiText({ candidates: [{ finishReason: "SAFETY" }] })).toThrow(/not of the model/);
+  });
+
+  it("still reports a genuinely malformed payload, without dumping all of it", () => {
+    const huge = { candidates: [{ content: { parts: [{ text: 12345 }] } }], filler: "x".repeat(2000) };
+    let message = "";
+    try {
+      extractGeminiText(huge);
+    } catch (err) {
+      message = err instanceof Error ? err.message : String(err);
+    }
+    expect(message).toMatch(/Unexpected Gemini response shape/);
+    expect(message.length).toBeLessThan(500);
+  });
+
+  it("prefers the prompt-level refusal when both are present", () => {
+    expect(() =>
+      extractGeminiText({ promptFeedback: { blockReason: "OTHER" }, candidates: [{ finishReason: "SAFETY" }] }),
+    ).toThrow(/blockReason: OTHER/);
+  });
+});

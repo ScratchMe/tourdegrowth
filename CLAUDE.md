@@ -557,3 +557,22 @@ Jusqu'ici seules les **deux extrémités** du funnel étaient instrumentées (`s
 **Détail de test à connaître** : le limiteur garde un état au niveau du module, donc les tests de route doivent le réinitialiser entre les cas — sans ça la suite finit par se rate-limiter elle-même. `resetRateLimitsForTests()` est là pour ça, appelé dans les `beforeEach` concernés.
 
 **Vérifié en réel** (serveur lancé, `x-forwarded-for` forgé) : 12 soumissions passent depuis une même IP, la 13ᵉ renvoie `429` avec `retry-after: 3600`, et une autre IP n'est pas affectée. 201 tests unitaires (+10), lint/tsc/build propres.
+
+### R-16 : la clé sort de l'URL, et un échec Gemini dit enfin lequel (2026-09-05)
+
+**1. La clé API voyageait dans la query string.** `...:generateContent?key=<clé>` — donc capturable par tout intermédiaire qui journalise des URL : un proxy, un traqueur d'erreurs, un export devtools. Elle passe en en-tête `x-goog-api-key`.
+
+**Vérifié contre la vraie API, pas déduit** : sans clé du tout, elle répond `403 "Method doesn't allow unregistered callers"` ; avec la clé en en-tête (invalide exprès), `400 "API key not valid"`. La deuxième réponse prouve que l'en-tête est bien lu — c'est la différence entre « la clé est refusée » et « aucune clé trouvée ».
+
+**2. Tout échec de génération se lisait pareil.** Un prompt refusé pour raisons de sécurité, une réponse coupée au plafond de tokens et un payload réellement malformé produisaient tous les trois « Unexpected Gemini response shape » — sur le seul chemin où le modèle a le droit de dire non, et précisément sur le ton roast, qui par construction pousse à la limite de ce qu'un modèle accepte d'écrire. `response.ts` lit maintenant `promptFeedback.blockReason` et `candidates[0].finishReason` et nomme la cause. Aucun de ces cas ne mérite un repli sur un autre modèle — c'est une propriété de la requête, pas du modèle — ce que la boucle de repli respectait déjà (elle ne retente que sur erreur HTTP ou réseau) : seul le message manquait. Le payload n'est plus dumpé en entier dans le message, mais tronqué à 300 caractères.
+
+**3. `maxOutputTokens`** ajouté (4096, généreux) pour plafonner une réponse qui s'emballe. Utile surtout maintenant que `MAX_TOKENS` est diagnosticable.
+
+**Découpage assumé : `responseSchema` et l'appel unique partent en R-25.** Les deux modifient la **requête** envoyée à Gemini, sur la seule fonctionnalité IA du produit, qui **fonctionne en production**. Aucun des deux n'est vérifiable ici.
+
+*Ce qui a changé depuis l'étape 6* : `generateContent` est de nouveau **joignable** depuis ce bac à sable (400 rapide sur clé invalide — le blocage silencieux documenté à l'étape 6 a disparu). Ce qui manque n'est plus le réseau mais une **clé valide** : sans `.env.local`, pas de génération réussie, donc rien à valider contre.
+
+- Un `responseSchema` mal formé fait renvoyer 400, qui est **non retriable** dans notre client : tous les Deep dive casseraient jusqu'à correction.
+- L'appel unique ne gagne pas de latence (les deux tons partent déjà en parallèle, donc la latence est celle du plus lent, pas la somme) mais divise le quota par deux. Le risque est un prompt unique portant à la fois le style neutre et le style roast avec son garde-fou : contamination de ton plausible, sur un différenciateur produit, et ça se juge sur des sorties réelles.
+
+**Vérifié en réel** : 208 tests unitaires (+7), lint/tsc/build propres, 37 specs Playwright, plus les deux requêtes HTTP contre la vraie API décrites plus haut.
