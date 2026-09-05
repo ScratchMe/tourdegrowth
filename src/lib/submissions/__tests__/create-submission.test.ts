@@ -9,6 +9,7 @@ import {
   type CreateSubmissionDeps,
   type DeepDiveAnswers,
 } from "../create-submission";
+import { hashOwnerToken, verifyOwnerToken } from "../owner-token";
 import type { Submission } from "../types";
 
 function fullAnswers(value: AnswerIndex): Answers {
@@ -34,6 +35,7 @@ function fakeDeps(overrides: Partial<CreateSubmissionDeps> = {}): CreateSubmissi
       saved.push(s);
     }),
     generateId: () => "sub_123",
+    generateOwnerToken: () => "owner-token-abc",
     now: () => new Date("2026-08-27T12:00:00.000Z"),
     saved,
     ...overrides,
@@ -44,44 +46,61 @@ describe("createSubmissionFlow (Quick mode — deterministic, no Gemini)", () =>
   it("computes the score, resolves both tones' verdicts from the copy library, and saves the submission", async () => {
     const deps = fakeDeps();
 
-    const result = await createSubmissionFlow(
+    const { submission } = await createSubmissionFlow(
       { answers: fullAnswers(0), tone: "neutral", locale: "en", refId: null },
       deps,
     );
 
-    expect(result.id).toBe("sub_123");
-    expect(result.createdAt).toBe("2026-08-27T12:00:00.000Z");
-    expect(result.total).toBe(100);
-    expect(result.pillars).toHaveLength(5);
-    expect(result.deepDive).toBeNull();
+    expect(submission.id).toBe("sub_123");
+    expect(submission.createdAt).toBe("2026-08-27T12:00:00.000Z");
+    expect(submission.total).toBe(100);
+    expect(submission.pillars).toHaveLength(5);
+    expect(submission.deepDive).toBeNull();
 
     // Every pillar answered "best" (index 0, 20pts) -> every pillar is "strong".
-    expect(result.verdicts.neutral.pillarSentences.acquisition.length).toBeGreaterThan(0);
-    expect(result.verdicts.roast.pillarSentences.acquisition.length).toBeGreaterThan(0);
-    expect(result.verdicts.neutral.headline.length).toBeGreaterThan(0);
+    expect(submission.verdicts.neutral.pillarSentences.acquisition.length).toBeGreaterThan(0);
+    expect(submission.verdicts.roast.pillarSentences.acquisition.length).toBeGreaterThan(0);
+    expect(submission.verdicts.neutral.headline.length).toBeGreaterThan(0);
 
-    expect(deps.saved).toEqual([result]);
+    expect(deps.saved).toEqual([submission]);
+  });
+
+  // REVIEW.md R-01.
+  it("returns the owner token once and persists only its hash", async () => {
+    const deps = fakeDeps();
+
+    const { submission, ownerToken } = await createSubmissionFlow(
+      { answers: fullAnswers(0), tone: "neutral", locale: "en", refId: null },
+      deps,
+    );
+
+    expect(ownerToken).toBe("owner-token-abc");
+    expect(submission.ownerTokenHash).toBe(hashOwnerToken("owner-token-abc"));
+    // The secret itself must never be anywhere in what gets stored.
+    expect(JSON.stringify(deps.saved[0])).not.toContain("owner-token-abc");
+    expect(verifyOwnerToken(ownerToken, submission.ownerTokenHash)).toBe(true);
+    expect(verifyOwnerToken("some-other-token", submission.ownerTokenHash)).toBe(false);
   });
 
   it("passes refId and the selected tone through untouched", async () => {
     const deps = fakeDeps();
-    const result = await createSubmissionFlow(
+    const { submission } = await createSubmissionFlow(
       { answers: fullAnswers(1), tone: "roast", locale: "fr", refId: "sub_referrer" },
       deps,
     );
-    expect(result.refId).toBe("sub_referrer");
-    expect(result.tone).toBe("roast");
-    expect(result.locale).toBe("fr");
+    expect(submission.refId).toBe("sub_referrer");
+    expect(submission.tone).toBe("roast");
+    expect(submission.locale).toBe("fr");
   });
 
   it("resolves the FR verdict in French", async () => {
     const deps = fakeDeps();
-    const result = await createSubmissionFlow(
+    const { submission } = await createSubmissionFlow(
       { answers: fullAnswers(2), tone: "neutral", locale: "fr", refId: null },
       deps,
     );
     // Every pillar at its worst band (index 2, 0pts) -> "weak" band sentences, in French.
-    expect(result.verdicts.neutral.pillarSentences.retention).toMatch(/[àâäéèêëïîôöùûüç]/i);
+    expect(submission.verdicts.neutral.pillarSentences.retention).toMatch(/[àâäéèêëïîôöùûüç]/i);
   });
 
   it("never saves anything when the answers are incomplete", async () => {
@@ -120,7 +139,11 @@ function fakeDeepDiveDeps(overrides: Partial<CompleteDeepDiveDeps> = {}): Comple
 
 async function baseSubmission(): Promise<Submission> {
   const deps = fakeDeps();
-  return createSubmissionFlow({ answers: fullAnswers(1), tone: "neutral", locale: "en", refId: null }, deps);
+  const { submission } = await createSubmissionFlow(
+    { answers: fullAnswers(1), tone: "neutral", locale: "en", refId: null },
+    deps,
+  );
+  return submission;
 }
 
 describe("completeDeepDiveFlow (Deep dive — still calls Gemini)", () => {

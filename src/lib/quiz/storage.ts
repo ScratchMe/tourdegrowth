@@ -81,3 +81,70 @@ export function clearRefId(): void {
     // ignore
   }
 }
+
+/**
+ * The results this browser created, with the one-time owner token each was
+ * issued (REVIEW.md R-01). This is the ONLY place ownership of a result
+ * exists on the client: there are no accounts (SPEC.md §5), and the result
+ * id alone proves nothing since it's the shareable link itself.
+ *
+ * Used to decide whether to offer the Deep dive at all (`isOwnResult`), and
+ * to sign the Deep dive request (`findOwnerToken`).
+ *
+ * Known limit, accepted rather than worked around: clearing site data or
+ * switching device loses the ability to Deep dive an already-created result.
+ * That is the cost of having no accounts — the alternative is a bypass
+ * anyone holding the link could use, which is exactly what R-01 fixes.
+ */
+const RESULTS_STORAGE_KEY = "tdg.results.v1";
+
+/** Oldest entries beyond this are dropped — this list only ever grows one entry per completed Tour, but it should never grow without bound either. */
+const MAX_STORED_RESULTS = 20;
+
+export interface StoredResult {
+  id: string;
+  ownerToken: string;
+  /** ISO 8601, client clock — only used to keep the most recent entries when trimming. */
+  createdAt: string;
+}
+
+function isStoredResult(value: unknown): value is StoredResult {
+  if (typeof value !== "object" || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return typeof v.id === "string" && typeof v.ownerToken === "string" && typeof v.createdAt === "string";
+}
+
+export function loadStoredResults(): StoredResult[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(RESULTS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed: unknown = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter(isStoredResult) : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Records a freshly created result. Re-recording the same id replaces its entry rather than duplicating it. */
+export function rememberResult(result: StoredResult): void {
+  if (typeof window === "undefined") return;
+  try {
+    const existing = loadStoredResults().filter((r) => r.id !== result.id);
+    const next = [result, ...existing].slice(0, MAX_STORED_RESULTS);
+    window.localStorage.setItem(RESULTS_STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    // Same trade-off as the answers store: losing this degrades the
+    // experience (no Deep dive offered on this result) but never breaks it.
+  }
+}
+
+/** The owner token for a result created by this browser, or null for someone else's shared link. */
+export function findOwnerToken(id: string): string | null {
+  return loadStoredResults().find((r) => r.id === id)?.ownerToken ?? null;
+}
+
+/** Whether this browser created that result — drives whether the Deep dive is offered at all. */
+export function isOwnResult(id: string): boolean {
+  return findOwnerToken(id) !== null;
+}

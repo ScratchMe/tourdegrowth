@@ -4,6 +4,7 @@ import { FREE_CONTEXT_MAX_LENGTH } from "@/content/free-context";
 import { callGeminiWithFallback } from "@/lib/gemini/client";
 import type { Locale } from "@/lib/i18n/locale";
 import { completeDeepDiveFlow, type DeepDiveAnswers } from "@/lib/submissions/create-submission";
+import { verifyOwnerToken } from "@/lib/submissions/owner-token";
 import { getSubmissionById, saveDeepDive } from "@/lib/submissions/repository";
 
 // The one Route Handler that still calls Gemini (SPEC-ADDENDUM-01.md §0/§2.4)
@@ -33,7 +34,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const { contextAnswers, locale, freeContext } = (body ?? {}) as Record<string, unknown>;
+  const { contextAnswers, locale, freeContext, ownerToken } = (body ?? {}) as Record<string, unknown>;
 
   if (!isDeepDiveAnswers(contextAnswers)) {
     return NextResponse.json(
@@ -57,9 +58,27 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   if (!submission) {
     return NextResponse.json({ error: `No submission found for id "${id}".` }, { status: 404 });
   }
+
+  // REVIEW.md R-01, the whole point of this route's gate: a result id is a
+  // PUBLIC shareable link, so knowing it proves nothing. Only the browser
+  // that created the submission holds the matching owner token. Without this
+  // check any recipient of a shared link could fill someone else's result
+  // with their own business context — and irreversibly, because of the
+  // idempotent branch just below. Fails closed for pre-R-01 submissions
+  // (no stored hash) — see owner-token.ts.
+  if (!verifyOwnerToken(ownerToken, submission.ownerTokenHash)) {
+    return NextResponse.json(
+      { error: "Only the person who took this Tour can run its Deep dive." },
+      { status: 403 },
+    );
+  }
+
   if (submission.deepDive) {
-    // Idempotent: re-completing an already-enriched result just returns what's there.
-    return NextResponse.json(submission, { status: 200 });
+    // Idempotent: re-completing an already-enriched result is a no-op that
+    // just sends the caller to the result page. (Returns the id only — the
+    // full submission used to come back here, Deep dive free text included,
+    // see REVIEW.md R-02.)
+    return NextResponse.json({ id }, { status: 200 });
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
@@ -76,7 +95,10 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
 
     await saveDeepDive(id, deepDive);
 
-    return NextResponse.json({ ...submission, deepDive }, { status: 200 });
+    // The client only redirects to /r/<id> from here; the enriched result is
+    // rendered server-side on that page, where `freeContext` is stripped
+    // before it can reach the browser (REVIEW.md R-02).
+    return NextResponse.json({ id }, { status: 200 });
   } catch (err) {
     console.error("completeDeepDiveFlow failed:", err);
     return NextResponse.json(

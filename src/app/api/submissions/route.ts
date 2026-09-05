@@ -3,6 +3,7 @@ import type { Locale } from "@/lib/i18n/locale";
 import type { Tone } from "@/lib/quiz/tone";
 import type { AnswerIndex, Answers } from "@/lib/scoring/score";
 import { createSubmissionFlow } from "@/lib/submissions/create-submission";
+import { generateOwnerToken } from "@/lib/submissions/owner-token";
 import { saveSubmission } from "@/lib/submissions/repository";
 
 // Runs on Vercel as a Node.js Route Handler. Originally this is where the
@@ -59,16 +60,20 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   try {
-    const submission = await createSubmissionFlow(
+    const { submission, ownerToken } = await createSubmissionFlow(
       { answers, tone, locale, refId: (refId as string | null | undefined) ?? null },
       {
         saveSubmission,
         generateId: () => crypto.randomUUID(),
+        generateOwnerToken,
         now: () => new Date(),
       },
     );
 
-    return NextResponse.json(submission, { status: 201 });
+    // Only what the creating browser actually needs (REVIEW.md R-02): the id
+    // to redirect to, and the one-time owner token to keep (R-01). The full
+    // submission — answers included — used to come back here for no reason.
+    return NextResponse.json({ id: submission.id, ownerToken }, { status: 201 });
   } catch (err) {
     console.error("createSubmissionFlow failed:", err);
     return NextResponse.json(

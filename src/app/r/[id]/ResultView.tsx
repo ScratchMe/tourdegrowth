@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { WordmarkLink } from "@/components/brand/WordmarkLink";
 import { MetaLabel } from "@/components/brand/MetaLabel";
@@ -19,12 +19,12 @@ import { HOW_IT_WORKS } from "@/content/how-it-works";
 import { PROFILE_CLICK_DETAILS, trackEvent } from "@/lib/analytics/goatcounter";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { useLocale } from "@/lib/i18n/locale-context";
-import { clearStoredAnswers } from "@/lib/quiz/storage";
+import { clearStoredAnswers, isOwnResult } from "@/lib/quiz/storage";
 import type { Tone } from "@/lib/quiz/tone";
 import { PILLARS, type Pillar } from "@/lib/scoring/pillars";
 import { rankPillarsAscending } from "@/lib/scoring/rank";
 import type { QuickVerdict } from "@/lib/scoring/verdict";
-import type { DeepDiveResult } from "@/lib/submissions/types";
+import type { DeepDiveView } from "@/lib/submissions/types";
 import styles from "./ResultView.module.css";
 
 // Named for readability at the trackEvent() call sites below — the array
@@ -43,8 +43,8 @@ interface ResultViewProps {
   initialTone: Tone;
   /** SPEC.md §12: the fixed sample must be visibly marked so it's never mistaken for a real result. */
   isSample?: boolean;
-  /** Deep dive enrichment (SPEC-ADDENDUM-01.md §2) — null on a plain Quick result. */
-  deepDive?: DeepDiveResult | null;
+  /** Deep dive enrichment (SPEC-ADDENDUM-01.md §2) — null on a plain Quick result. Display-safe subset only: the free-text context and the 10 context answers never leave the server (REVIEW.md R-02). */
+  deepDive?: DeepDiveView | null;
 }
 
 /**
@@ -69,6 +69,16 @@ export function ResultView({
   const [tone, setTone] = useState<Tone>(initialTone);
   const [copied, setCopied] = useState(false);
   const [openGlossaryId, setOpenGlossaryId] = useState<string | null>(null);
+  // REVIEW.md R-01. Read from localStorage AFTER mount, never in the initial
+  // state: the server can't know who is looking, so rendering this on the
+  // server would guarantee a hydration mismatch (CLAUDE.md, step 4's
+  // lesson). Starting at `false` also means the safe state — no Deep dive
+  // offer — is what a visitor briefly sees, not the other way round.
+  const [isOwner, setIsOwner] = useState(false);
+
+  useEffect(() => {
+    if (id) setIsOwner(isOwnResult(id));
+  }, [id]);
   const roast = tone === "roast";
   const verdict = verdicts[tone];
   const deepVerdict = deepDive ? deepDive.verdicts[tone] : null;
@@ -253,11 +263,17 @@ export function ResultView({
                   </p>
                 </Card>
               </>
-            ) : !isSample && id ? (
+            ) : !isSample && id && isOwner ? (
               // Locked preview of the SAME card, same slot: completing the
               // Deep dive doesn't add a new element to the layout, it fills
               // this exact one in — the emptiness is the incentive, per
               // Antoine's steer (2026-08-28).
+              //
+              // Owner only (REVIEW.md R-01): every recipient of a shared link
+              // used to see this button, and clicking it filled the SHARER's
+              // result with the clicker's own context — irreversibly. A
+              // visitor now simply doesn't get the offer; the CTA row below
+              // is what invites them to run their own Tour.
               <PriorityMove label={tc(dd.priorityMoveLockedLabel, locale)}>
                 <p className={styles.lockedText}>{tc(dd.teaserText, locale)}</p>
                 <Button variant="secondary" href={`/deep-dive/${id}`} className={styles.lockedCta}>
