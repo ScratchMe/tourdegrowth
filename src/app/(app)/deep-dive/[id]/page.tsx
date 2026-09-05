@@ -10,7 +10,7 @@ import { AnswerOption } from "@/components/quiz/AnswerOption";
 import { FreeContextField } from "@/components/quiz/FreeContextField";
 import { QuestionCard } from "@/components/quiz/QuestionCard";
 import { StageProgress } from "@/components/quiz/StageProgress";
-import { LoadingScreen } from "@/app/quiz/LoadingScreen";
+import { LoadingScreen } from "@/components/quiz/LoadingScreen";
 import { DEEP_MODE_QUESTIONS } from "@/content/deep-mode-questions";
 import { FREE_CONTEXT, FREE_CONTEXT_MAX_LENGTH } from "@/content/free-context";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";

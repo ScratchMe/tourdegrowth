@@ -32,7 +32,7 @@ import {
   saveStoredAnswers,
 } from "@/lib/quiz/storage";
 import type { AnswerIndex, Answers } from "@/lib/scoring/score";
-import { LoadingScreen } from "./LoadingScreen";
+import { LoadingScreen } from "@/components/quiz/LoadingScreen";
 import { ToneSelector, type Tone } from "./ToneSelector";
 import styles from "./page.module.css";
 

@@ -3,9 +3,26 @@ import { IBM_Plex_Mono, Inter, Stardos_Stencil } from "next/font/google";
 import Script from "next/script";
 import type { ReactNode } from "react";
 import { LocaleProvider } from "@/lib/i18n/locale-context";
-import { resolveRequestLocale } from "@/lib/i18n/resolve-request-locale";
+import type { Locale } from "@/lib/i18n/locale";
 import { SITE_URL } from "@/lib/site";
 import "./globals.css";
+
+/**
+ * The chrome every page shares, extracted so that the app can have TWO root
+ * layouts — REVIEW.md R-24.
+ *
+ * Why two: `<html lang>` must match the page's actual language, and a root
+ * layout cannot see the URL. Content pages carry their language in the URL
+ * (`/fr/glossary/cac`), so theirs comes from the route param and nothing
+ * needs reading at request time — which is the whole point, since a layout
+ * that reads `headers()` makes every route beneath it render on demand. App
+ * pages (`/quiz`, `/r/<id>`, …) carry no prefix, so theirs still comes from
+ * the header the proxy sets, and stays dynamic.
+ *
+ * Everything below the `<html lang>` line is identical between the two, and
+ * living here rather than being copied twice is what keeps them from
+ * drifting apart silently.
+ */
 
 // SPEC.md §8: GoatCounter — free, cookie-less pageview analytics, "already in
 // place elsewhere" (Antoine's other sites). Site code comes from
@@ -45,7 +62,8 @@ const stardos = Stardos_Stencil({
   display: "swap",
 });
 
-export const metadata: Metadata = {
+/** Exported by BOTH root layouts — see the note above about drift. */
+export const rootMetadata: Metadata = {
   // Needed for Next.js to resolve absolute OG/canonical URLs correctly
   // (was missing — silent build warning until SPEC-ADDENDUM-02.md's SEO
   // pass made it worth fixing alongside everything else here).
@@ -68,12 +86,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({ children }: { children: ReactNode }) {
-  // The proxy resolved this once for the whole request, URL locale prefix
-  // included (REVIEW.md R-13) — a layout can't see the URL, and `<html lang>`
-  // has to match the page's actual language, not the visitor's cookie.
-  const locale = await resolveRequestLocale();
-
+export function RootShell({ locale, children }: { locale: Locale; children: ReactNode }) {
   return (
     <html lang={locale}>
       <body className={`${inter.variable} ${plexMono.variable} ${stardos.variable}`}>
