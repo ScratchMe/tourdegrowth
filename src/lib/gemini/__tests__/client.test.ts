@@ -9,6 +9,13 @@ function textResponse(status: number, body: string): Response {
   return new Response(body, { status });
 }
 
+/**
+ * The retry pause, injected away. Every test below is about WHICH calls are
+ * made and in what order — none of them should spend real seconds waiting for
+ * a backoff to elapse.
+ */
+const noSleep = async () => {};
+
 describe("callGeminiWithFallback", () => {
   it("returns the first model's result when it succeeds", async () => {
     const calls: string[] = [];
@@ -17,7 +24,7 @@ describe("callGeminiWithFallback", () => {
       return jsonResponse(200, { ok: true });
     };
 
-    const result = await callGeminiWithFallback("prompt", "key", fetchImpl);
+    const result = await callGeminiWithFallback("prompt", "key", fetchImpl, noSleep);
 
     expect(result).toEqual({ data: { ok: true }, modelUsed: GEMINI_MODEL_CANDIDATES[0] });
     expect(calls).toHaveLength(1);
@@ -32,7 +39,7 @@ describe("callGeminiWithFallback", () => {
       return jsonResponse(200, { ok: true });
     };
 
-    const result = await callGeminiWithFallback("prompt", "key", fetchImpl);
+    const result = await callGeminiWithFallback("prompt", "key", fetchImpl, noSleep);
 
     expect(result.modelUsed).toBe(GEMINI_MODEL_CANDIDATES[1]);
     expect(calls).toHaveLength(2);
@@ -46,7 +53,7 @@ describe("callGeminiWithFallback", () => {
       return jsonResponse(200, { ok: true });
     };
 
-    const result = await callGeminiWithFallback("prompt", "key", fetchImpl);
+    const result = await callGeminiWithFallback("prompt", "key", fetchImpl, noSleep);
 
     expect(result.modelUsed).toBe(GEMINI_MODEL_CANDIDATES[1]);
     expect(attempt).toBe(2);
@@ -55,7 +62,7 @@ describe("callGeminiWithFallback", () => {
   it("exhausts all 4 candidates and throws when every one is retriable-failing", async () => {
     const fetchImpl = async () => textResponse(429, "rate limited");
 
-    await expect(callGeminiWithFallback("prompt", "key", fetchImpl)).rejects.toThrow(
+    await expect(callGeminiWithFallback("prompt", "key", fetchImpl, noSleep)).rejects.toThrow(
       /All Gemini model candidates failed/,
     );
   });
@@ -67,7 +74,7 @@ describe("callGeminiWithFallback", () => {
       return textResponse(400, "bad request: malformed prompt");
     };
 
-    await expect(callGeminiWithFallback("prompt", "key", fetchImpl)).rejects.toThrow(
+    await expect(callGeminiWithFallback("prompt", "key", fetchImpl, noSleep)).rejects.toThrow(
       /Gemini API error \(400\)/,
     );
     // Regression guard: the ported reference implementation had a bug where
@@ -105,7 +112,7 @@ describe("callGeminiWithFallback", () => {
         return Promise.resolve(new Response(JSON.stringify({ ok: true }), { status: 200 }));
       };
 
-      const promise = callGeminiWithFallback("prompt", "key", fetchImpl);
+      const promise = callGeminiWithFallback("prompt", "key", fetchImpl, noSleep);
       // Let the first attempt's timeout fire, then let the retry's microtasks settle.
       await vi.advanceTimersByTimeAsync(20_000);
 
@@ -113,6 +120,78 @@ describe("callGeminiWithFallback", () => {
       expect(result.modelUsed).toBe(GEMINI_MODEL_CANDIDATES[1]);
       expect(calls).toHaveLength(2);
     });
+  });
+});
+
+/**
+ * REVIEW.md — found by the live Gemini probe, not by reasoning: an entire
+ * fallback chain died to a two-second 503 because it had no pause in it.
+ */
+describe("callGeminiWithFallback — backoff between attempts", () => {
+  it("waits before each retry, with a growing ceiling", async () => {
+    const waits: number[] = [];
+    const fetchImpl = async () => jsonResponse(503, { error: "overloaded" });
+
+    await expect(
+      callGeminiWithFallback("prompt", "key", fetchImpl, async (ms) => {
+        waits.push(ms);
+      }),
+    ).rejects.toThrow(/All Gemini model candidates failed/);
+
+    // Four candidates, so three pauses — never before the first attempt.
+    expect(waits).toHaveLength(GEMINI_MODEL_CANDIDATES.length - 1);
+    for (const ms of waits) expect(ms).toBeGreaterThanOrEqual(0);
+    // Full jitter, so each wait is a random point BELOW a growing ceiling:
+    // 500, 1000, 2000. Asserting the ceilings, not the values.
+    expect(waits[0]).toBeLessThanOrEqual(500);
+    expect(waits[1]).toBeLessThanOrEqual(1000);
+    expect(waits[2]).toBeLessThanOrEqual(2000);
+  });
+
+  it("never waits when the first model answers", async () => {
+    const waits: number[] = [];
+    const fetchImpl = async () => jsonResponse(200, { ok: true });
+
+    await callGeminiWithFallback("prompt", "key", fetchImpl, async (ms) => {
+      waits.push(ms);
+    });
+
+    expect(waits).toEqual([]);
+  });
+
+  it("does NOT wait after a 404 — a missing model will not appear because we paused", async () => {
+    const waits: number[] = [];
+    let call = 0;
+    const fetchImpl = async () => {
+      call += 1;
+      return call === 1 ? jsonResponse(404, { error: "not found" }) : jsonResponse(200, { ok: true });
+    };
+
+    const result = await callGeminiWithFallback("prompt", "key", fetchImpl, async (ms) => {
+      waits.push(ms);
+    });
+
+    expect(result.modelUsed).toBe(GEMINI_MODEL_CANDIDATES[1]);
+    expect(waits).toEqual([]);
+  });
+
+  it("jitters, so four parallel generations do not retry in lockstep", async () => {
+    // A Deep dive fires two tones x two languages at once. Identical backoffs
+    // would send them all back at the same instant, at an API that is already
+    // overloaded — which is the failure mode this is meant to soften.
+    const runs: number[][] = [];
+    for (let i = 0; i < 8; i += 1) {
+      const waits: number[] = [];
+      await expect(
+        callGeminiWithFallback("prompt", "key", async () => jsonResponse(503, {}), async (ms) => {
+          waits.push(ms);
+        }),
+      ).rejects.toThrow();
+      runs.push(waits);
+    }
+
+    const firstWaits = new Set(runs.map((w) => w[0]));
+    expect(firstWaits.size, "eight runs produced the same first delay — that is not jitter").toBeGreaterThan(1);
   });
 });
 
@@ -137,7 +216,7 @@ describe("callGeminiWithFallback — request shape", () => {
       new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: "{}" }] } }] }), { status: 200 }),
     ) as unknown as typeof fetch;
 
-    await callGeminiWithFallback("prompt", "super-secret-key", fetchImpl);
+    await callGeminiWithFallback("prompt", "super-secret-key", fetchImpl, noSleep);
 
     const [url, init] = (fetchImpl as unknown as { mock: { calls: [string, RequestInit][] } }).mock.calls[0]!;
     expect(url).not.toContain("super-secret-key");
@@ -150,7 +229,7 @@ describe("callGeminiWithFallback — request shape", () => {
       new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: "{}" }] } }] }), { status: 200 }),
     ) as unknown as typeof fetch;
 
-    await callGeminiWithFallback("prompt", "k", fetchImpl);
+    await callGeminiWithFallback("prompt", "k", fetchImpl, noSleep);
 
     const [, init] = (fetchImpl as unknown as { mock: { calls: [string, RequestInit][] } }).mock.calls[0]!;
     const body = JSON.parse(init.body as string);

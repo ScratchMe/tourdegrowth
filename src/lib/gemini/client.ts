@@ -27,6 +27,33 @@ export const GEMINI_MODEL_CANDIDATES = [
 const RETRIABLE_STATUSES = [404, 429, 500, 503];
 
 /**
+ * Wait between attempts, with full jitter — found by the live Gemini probe.
+ *
+ * The fallback chain protects against "this particular model is unavailable".
+ * It did nothing against the far more common "the API is overloaded for a
+ * couple of seconds": all four candidates were tried back to back with no
+ * pause at all, so a brief 503 burnt the entire chain in under a second and
+ * the user got a failed Deep dive. That is exactly what happened —
+ * `All Gemini model candidates failed. Last error: gemini-flash-latest → HTTP 503`.
+ *
+ * The jitter is not decoration here. A Deep dive fires FOUR generations in
+ * parallel (two tones x two languages); without it they would fail together
+ * and retry together, in lockstep, against an API that is already struggling.
+ *
+ * Bounded on purpose: at most ~6s added across the whole chain in the worst
+ * case, inside a route that already allows 120s.
+ */
+const RETRY_BASE_MS = 500;
+const RETRY_MAX_MS = 4_000;
+
+function backoffDelay(attempt: number): number {
+  const ceiling = Math.min(RETRY_BASE_MS * 2 ** attempt, RETRY_MAX_MS);
+  return Math.round(Math.random() * ceiling);
+}
+
+const realSleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+/**
  * Per-attempt timeout. Found necessary the hard way while building this:
  * this build session's own network egress silently black-holes
  * `generateContent` calls (connects, sends, never responds — see
@@ -42,14 +69,21 @@ const REQUEST_TIMEOUT_MS = 20_000;
  * runaway response, not to shape a normal one.
  *
  * Raised from 4096 after the live Gemini probe caught a French roast coming
- * back truncated mid-JSON. The answer itself is only ~600 tokens, so 4096
- * looked generous — but these are thinking models, and **reasoning tokens
- * count against this same ceiling**. A long enough deliberation left too
- * little room for the answer. The visible output is what is billed and what
- * needs the headroom; raising the cap costs nothing when it is not reached.
+ * back truncated mid-JSON, on the theory that reasoning tokens (these are
+ * thinking models, and they share this budget) were eating the ceiling.
  *
- * A truncation is no longer silent either: `response.ts` now inspects
- * `finishReason` before returning the text, not only when there is none.
+ * **That theory was not confirmed.** The next live run measured a real call
+ * at `thoughts=765 answer=440` against a 4096 ceiling — nowhere near it. So
+ * the raise is headroom, not a diagnosis: the actual cause of that one
+ * truncation is still unknown. It is kept because it costs nothing (only the
+ * tokens actually produced are billed) and because a bigger margin can only
+ * help, not because it explains anything.
+ *
+ * What DID come out of that investigation is real and unrelated to this
+ * number: `response.ts` now inspects `finishReason` before returning the
+ * text, not only when there is none, so a truncation is reported as one
+ * instead of surfacing as a JSON syntax error three call frames away. If it
+ * happens again, the error will name the reason and the token counts.
  */
 const MAX_OUTPUT_TOKENS = 16384;
 
@@ -65,18 +99,31 @@ function errorMessage(err: unknown): string {
 /**
  * Calls the Gemini API, trying each model in {@link GEMINI_MODEL_CANDIDATES}
  * in order. A retriable HTTP status (overloaded/unavailable/not-found), a
- * network-level failure, or a timeout moves on to the next candidate; any
- * other HTTP error fails immediately (it would be identical on every
- * model). Throws once every candidate has been exhausted.
+ * network-level failure, or a timeout moves on to the next candidate, after a
+ * jittered pause (see {@link backoffDelay}); any other HTTP error fails
+ * immediately (it would be identical on every model). Throws once every
+ * candidate has been exhausted.
+ *
+ * `sleepImpl` is injected for the same reason as `fetchImpl`: so tests can
+ * exercise the retry policy without actually waiting.
  */
 export async function callGeminiWithFallback(
   prompt: string,
   apiKey: string,
   fetchImpl: typeof fetch = fetch,
+  sleepImpl: (ms: number) => Promise<void> = realSleep,
 ): Promise<GeminiCallResult> {
   let lastError = "";
+  let attempt = 0;
 
   for (const model of GEMINI_MODEL_CANDIDATES) {
+    // Never before the first try, and never after a 404: a model name that
+    // does not exist will not start existing because we waited.
+    if (attempt > 0 && !lastError.endsWith("HTTP 404")) {
+      await sleepImpl(backoffDelay(attempt - 1));
+    }
+    attempt += 1;
+
     const timeoutController = new AbortController();
     const timeout = setTimeout(() => timeoutController.abort(), REQUEST_TIMEOUT_MS);
 

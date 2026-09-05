@@ -755,10 +755,33 @@ Second run du workflow : **production 9/9**, et la sonde Gemini en échec — ce
 
 **La cause immédiate, et pourquoi R-16 ne l'avait pas couverte.** `extractGeminiText` inspectait `finishReason` **uniquement quand le texte était absent**. Or une réponse tronquée porte quand même la partie déjà écrite : elle était donc renvoyée comme un succès, et n'échouait que bien plus loin, dans `JSON.parse`, sous une forme qui ne dit rien de ce qui s'est réellement passé. C'est exactement l'opacité que R-16 existait pour supprimer — le test était simplement sur la mauvaise branche. Corrigé : `finishReason` est vérifié **avant** le texte, et tout ce qui n'est pas `STOP` lève une erreur nommée.
 
-**La cause de fond, et pourquoi 4096 « paraissait » généreux.** La sortie utile fait ~600 tokens ; le plafond était à 4096. Mais ce sont des **modèles à raisonnement, et les tokens de réflexion sont décomptés du même `maxOutputTokens`**. Une délibération assez longue ne laissait plus la place à la réponse. Plafond relevé à 16384 — il ne coûte rien tant qu'il n'est pas atteint, puisque seule la sortie réelle est facturée.
+**La cause de fond supposée — et démentie au run suivant.** J'avais avancé que les tokens de réflexion (ce sont des modèles à raisonnement, et ils partagent le budget `maxOutputTokens`) mangeaient le plafond de 4096, et relevé celui-ci à 16384.
 
-**Honnêteté sur ce qui est prouvé et ce qui est déduit** : le correctif de *signalement* est certain (le test était sur la mauvaise branche, c'est lisible dans le code). Le plafond est une déduction fortement étayée mais pas encore vérifiée — le premier run ne pouvait pas montrer `finishReason`, justement à cause du bug. La sonde imprime maintenant `finishReason`, `thoughtsTokenCount` et `candidatesTokenCount` à chaque appel : le prochain run tranche avec des chiffres.
+**Les chiffres ne soutiennent pas cette explication.** Le run n°3 a mesuré un vrai appel à `thoughts=765 answer=440` contre un plafond de 4096 : on en était très loin. La cause réelle de cette troncature reste **inconnue**. Le plafond relevé est conservé comme marge (seuls les tokens réellement produits sont facturés, donc ça ne coûte rien) mais il n'explique rien, et le commentaire dans `client.ts` le dit désormais explicitement plutôt que d'affirmer une cause commode.
+
+Ce qui reste acquis de cette investigation est le correctif de *signalement*, qui vaut par lui-même : le test était sur la mauvaise branche, c'est lisible dans le code, et si la troncature revient l'erreur nommera la raison et les compteurs au lieu d'exploser trois cadres plus loin.
+
+**Leçon de méthode** : j'ai instrumenté avant de conclure, et c'est l'instrumentation qui m'a contredit. Sans les compteurs imprimés dans la sonde, l'explication fausse serait restée dans ce fichier.
 
 **Conséquence utilisateur, à ne pas minimiser** : quand cette troncature touche la langue de complétion, `completeDeepDiveFlow` échoue et l'utilisateur reçoit `DEEP_DIVE_FAILED` après avoir répondu à 10 questions de plus. C'est intermittent (le run production, lui, est passé deux fois) — donc c'était un échec réel et difficile à reproduire, que seule une sonde contre le vrai service pouvait attraper.
 
 3 tests de non-régression ajoutés (`response.test.ts`) : une réponse tronquée **avec** texte partiel doit lever, l'erreur doit porter les compteurs de tokens, et une réponse `STOP` normale doit toujours passer.
+
+### La chaîne de repli Gemini n'attendait jamais (2026-09-05)
+
+Run n°3 : **production 9/9 pour la troisième fois**, et la sonde Gemini échoue sur autre chose encore :
+
+```
+All Gemini model candidates failed. Last error: gemini-flash-latest → HTTP 503
+```
+
+Les quatre candidats ont répondu 503. Ce n'est pas notre code — mais ça expose une vraie faiblesse de conception : **la boucle enchaînait les quatre modèles sans aucune pause**. Le repli protégeait donc contre « ce modèle-là est indisponible », et pas du tout contre « l'API est surchargée pendant deux secondes », qui est le cas de loin le plus fréquent. Toute la chaîne brûlait en moins d'une seconde et l'utilisateur recevait `DEEP_DIVE_FAILED` après avoir répondu à 10 questions de plus.
+
+**Backoff exponentiel avec jitter complet** (500 ms, 1 s, 2 s de plafond, valeur tirée au hasard en dessous). Deux détails qui ne sont pas décoratifs :
+
+- **Le jitter compte particulièrement ici** parce qu'un Deep dive lance **quatre générations en parallèle** (2 tons × 2 langues). Sans lui, elles échouent ensemble et repartent ensemble, au même instant, contre une API déjà en difficulté.
+- **Aucune pause après un 404** : un nom de modèle qui n'existe pas ne se mettra pas à exister parce qu'on a attendu. La condition lit le dernier statut plutôt que d'attendre aveuglément.
+
+`sleepImpl` est injecté comme `fetchImpl` l'était déjà, pour que les tests exercent la politique de retry sans attendre réellement — la suite du client est passée de 8 s à 325 ms au passage, les anciens tests dormant pour de vrai.
+
+**Non-vacuité prouvée finement** : en retirant *seulement* le jitter, seul le test de jitter tombe ; en retirant la pause entière, les deux tests de pause tombent. Les tests distinguent donc bien les deux propriétés.
