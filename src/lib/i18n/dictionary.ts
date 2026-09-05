@@ -221,6 +221,10 @@ export const UI_STRINGS = {
     strengthsTitleRoast: { en: "Credit where it's due", fr: "Ce qui marche, quand même" },
     weaknessesTitle: { en: "Where you're losing time", fr: "Là où tu perds du temps" },
     ctaShare: { en: "Share my score", fr: "Partager mon score" },
+    // Replaces the mute "✓" the copy fallback used to show — on desktop,
+    // where there is no native share sheet, that tick was the ONLY feedback
+    // that anything had happened (REVIEW.md R-10).
+    ctaShareCopied: { en: "Link copied", fr: "Lien copié" },
     ctaShareRoast: { en: "Share my roast", fr: "Partager mon roast" },
     ctaAgain: { en: "Take the Tour again", fr: "Refaire le Tour" },
     ctaSwitchToNeutral: { en: "Switch to straight up", fr: "Repasser en neutre" },
@@ -233,6 +237,25 @@ export const UI_STRINGS = {
       fr: "Ce lien est peut-être incorrect, ou le résultat n'existe plus.",
     },
     notFoundCta: { en: "Start your Tour →", fr: "Démarre ton Tour →" },
+  },
+
+  /**
+   * Text that leaves the product with the shared link — the native share
+   * sheet's message (REVIEW.md R-10). `{total}` and `{pillar}` are replaced
+   * in code, same convention as the quiz counters above.
+   *
+   * // TODO: copie de travail, à relire par l'agent produit. Elle est
+   * assemblée à partir de blocs déjà livrés (le gabarit « où ça cale » et la
+   * relance de l'image OG, `og` ci-dessous) plutôt qu'écrite de zéro,
+   * précisément pour ne pas inventer une voix produit — mais c'est le
+   * premier texte que le produit met dans la bouche de l'utilisateur au
+   * moment de partager, donc il mérite une vraie relecture.
+   */
+  share: {
+    textTemplate: {
+      en: "I scored {total}/100 on my AARRR growth check-up. {pillar} is where this growth stalls. Where does yours?",
+      fr: "J'ai fait {total}/100 à mon bilan growth AARRR. {pillar} est là où cette croissance cale. Et la tienne ?",
+    },
   },
 
   /** OG share image only (DESIGN-BRIEF.md §03) — rendered by Satori (src/app/r/[id]/opengraph-image.tsx), a separate pipeline from the rest of the UI. */

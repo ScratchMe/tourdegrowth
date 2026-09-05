@@ -100,25 +100,53 @@ export function ResultView({
     return deepVerdict ? deepVerdict.pillarRecommendations[pillar] : verdict.pillarSentences[pillar];
   }
 
+  /**
+   * This page's URL minus `?lang=` — REVIEW.md R-10. That parameter records
+   * the READER's language choice; carrying it into a shared link would
+   * impose the sharer's language on everyone who opens it, which is exactly
+   * what R-09 just stopped the stored verdict from doing.
+   */
+  function shareUrl(): string {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("lang");
+    return url.toString();
+  }
+
   async function handleShare() {
     if (typeof window === "undefined") return;
-    const shareData = { url: window.location.href, title: "Tour de Growth" };
+
+    const url = shareUrl();
+    // Without this, the native share sheet opened with a bare link: the score
+    // and the weak pillar only existed inside the OG image, so the text next
+    // to it said nothing (REVIEW.md R-10).
+    const text = tc(UI_STRINGS.share.textTemplate, locale)
+      .replace("{total}", String(total))
+      .replace("{pillar}", tc(UI_STRINGS.pillars[weakestPillar], locale));
+
     try {
       if (navigator.share) {
-        await navigator.share(shareData);
-        trackEvent("share", tone); // SPEC.md §8: one custom event per share
+        await navigator.share({ url, title: "Tour de Growth", text });
+        trackEvent("share", `${tone}/native`); // SPEC.md §8: one custom event per share
         return;
       }
-    } catch {
-      // user cancelled the native share sheet — fall through to clipboard as a backup, not an error
+    } catch (err) {
+      // Closing the sheet is a decision, not a failure: don't quietly write
+      // to the user's clipboard instead, and don't count it as a share.
+      // (The old code fell through on every error, so a cancelled share was
+      // tracked as one — contradicting what CLAUDE.md said it did.)
+      if (err instanceof Error && err.name === "AbortError") return;
+      // Anything else means the sheet couldn't open at all — fall through.
     }
+
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      await navigator.clipboard.writeText(url);
       setCopied(true);
-      trackEvent("share", tone);
-      window.setTimeout(() => setCopied(false), 2000);
+      trackEvent("share", `${tone}/copy`);
+      window.setTimeout(() => setCopied(false), 2500);
     } catch {
-      // clipboard unavailable — nothing more we can do without a real UI affordance here (step 8 revisits sharing)
+      // clipboard unavailable (insecure context, permission denied) — nothing
+      // useful left to try, and failing silently beats an error the user
+      // can't act on
     }
   }
 
@@ -296,7 +324,13 @@ export function ResultView({
             ) : null}
 
             <div className={styles.ctaRow}>
-              <Button onClick={handleShare}>{copied ? "✓" : tc(roast ? t.ctaShareRoast : t.ctaShare, locale)}</Button>
+              {/* On desktop there is no native share sheet, so this label is
+                  the only confirmation anything happened — it used to be a
+                  mute "✓" (REVIEW.md R-10). aria-live so the change is
+                  announced, not just seen. */}
+              <Button onClick={handleShare} aria-live="polite" data-testid="share-button">
+                {copied ? tc(t.ctaShareCopied, locale) : tc(roast ? t.ctaShareRoast : t.ctaShare, locale)}
+              </Button>
               {roast ? (
                 <Button variant="secondary" onClick={() => setTone("neutral")}>
                   {tc(t.ctaSwitchToNeutral, locale)}

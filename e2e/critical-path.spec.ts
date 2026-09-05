@@ -66,3 +66,48 @@ test.describe("critical path", () => {
     await expect(page.getByTestId("back-button")).toBeVisible();
   });
 });
+
+/** REVIEW.md R-10 — the share button is the growth loop's only manual step. */
+test.describe("sharing", () => {
+  test("copies a clean link and says so, on a browser with no share sheet", async ({ page, context }) => {
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    // Desktop Chrome has no navigator.share; make that explicit rather than
+    // relying on the device profile staying that way.
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, "share", { value: undefined, configurable: true });
+    });
+
+    await page.goto("/r/sample?lang=fr");
+    await page.getByTestId("share-button").click();
+
+    // The label is the only confirmation on desktop.
+    await expect(page.getByTestId("share-button")).toHaveText(/Lien copié/i);
+
+    // `?lang=` is the reader's own choice and must not travel with the link.
+    const copied = await page.evaluate(() => navigator.clipboard.readText());
+    expect(copied).toContain("/r/sample");
+    expect(copied).not.toContain("lang=");
+  });
+
+  test("a cancelled native share is not counted as a share", async ({ page }) => {
+    await page.addInitScript(() => {
+      (window as unknown as { __events: string[] }).__events = [];
+      Object.defineProperty(navigator, "share", {
+        configurable: true,
+        value: () => Promise.reject(Object.assign(new Error("cancelled"), { name: "AbortError" })),
+      });
+      (window as unknown as { goatcounter: unknown }).goatcounter = {
+        count: (o: { path: string }) => (window as unknown as { __events: string[] }).__events.push(o.path),
+      };
+    });
+
+    await page.goto("/r/sample");
+    await page.getByTestId("share-button").click();
+    await page.waitForTimeout(300);
+
+    const events = await page.evaluate(() => (window as unknown as { __events: string[] }).__events);
+    expect(events).toEqual([]);
+    // And it must not silently fall back to writing the clipboard either.
+    await expect(page.getByTestId("share-button")).not.toHaveText(/copied|copié/i);
+  });
+});
