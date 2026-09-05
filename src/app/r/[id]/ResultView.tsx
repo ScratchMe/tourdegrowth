@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { SiteFooter } from "@/components/brand/SiteFooter";
 import { WordmarkLink } from "@/components/brand/WordmarkLink";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import { ModeTag } from "@/components/brand/ModeTag";
@@ -174,7 +175,7 @@ export function ResultView({
                 <a
                   href={ANTOINE_LINKS.cv}
                   target="_blank"
-                  rel="noopener noreferrer"
+                  rel="noopener"
                   onClick={() => trackEvent("profile_click", FOOTER_CV_DETAIL)}
                 >
                   {QUICK_CREDIT.name}
@@ -255,7 +256,7 @@ export function ResultView({
                     <a
                       href={ANTOINE_LINKS.cv}
                       target="_blank"
-                      rel="noopener noreferrer"
+                      rel="noopener"
                       onClick={() => trackEvent("profile_click", CARD_CV_DETAIL)}
                     >
                       {tc(DEEP_DIVE_CREDIT.cvLinkText, locale)}
@@ -264,7 +265,7 @@ export function ResultView({
                     <a
                       href={ANTOINE_LINKS.linkedin}
                       target="_blank"
-                      rel="noopener noreferrer"
+                      rel="noopener"
                       onClick={() => trackEvent("profile_click", CARD_LINKEDIN_DETAIL)}
                     >
                       {tc(DEEP_DIVE_CREDIT.linkedinLinkText, locale)}
@@ -312,6 +313,8 @@ export function ResultView({
           </div>
         </div>
       </main>
+
+      <SiteFooter locale={locale} />
     </>
   );
 }

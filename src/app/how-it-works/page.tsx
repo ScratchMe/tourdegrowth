@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SiteFooter } from "@/components/brand/SiteFooter";
 import { WordmarkLink } from "@/components/brand/WordmarkLink";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import { Button } from "@/components/core/Button";
@@ -87,6 +88,8 @@ export default async function HowItWorksPage() {
           </Button>
         </div>
       </main>
+
+      <SiteFooter locale={locale} width="reading" />
     </>
   );
 }

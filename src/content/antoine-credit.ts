@@ -30,3 +30,24 @@ export const DEEP_DIVE_CREDIT = {
   cvLinkText: { fr: "Voir mon profil", en: "See my background" },
   linkedinLinkText: { fr: "Me contacter sur LinkedIn", en: "Connect on LinkedIn" },
 } satisfies { eyebrow: Translatable; bio: Translatable; cvLinkText: Translatable; linkedinLinkText: Translatable };
+
+/**
+ * Site footer credit — added on Antoine's request (2026-09-05, on an SEO
+ * consultant's recommendation), not part of SPEC-ADDENDUM-02.md §2's two
+ * placements. Kept in this file anyway so every Antoine-credit string lives
+ * in one place rather than drifting apart across three.
+ *
+ * Deliberately NOT the same sentence as `QUICK_CREDIT`: both appear on a
+ * result page, and repeating "Built by Antoine Berthaud, Senior Growth PM"
+ * twice within one screen reads as insistence rather than a credit. This one
+ * says what the site *is* — which is a footer's job — and carries the link.
+ *
+ * The link text is the anchor text search engines read, so it names the role
+ * rather than saying "here" or "my CV": that is the whole point of the
+ * recommendation this implements.
+ */
+export const SITE_FOOTER_CREDIT = {
+  prefix: { fr: "Un side project d'", en: "A side project by " },
+  linkText: { fr: "Antoine Berthaud — Senior Growth PM", en: "Antoine Berthaud — Senior Growth PM" },
+  suffix: { fr: ".", en: "." },
+} satisfies { prefix: Translatable; linkText: Translatable; suffix: Translatable };

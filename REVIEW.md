@@ -48,6 +48,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 | | R-18 | Dépendances et config TypeScript | T | S | À faire |
 | **F — Expérience** | R-19 | Accessibilité du parcours | F+T | M | À faire |
 | | R-20 | Petits plus produit (dernier score, benchmark, persistance Deep dive) | F | S/M | À faire |
+| | R-21 | La nav FR de la landing déborde le viewport mobile | F+T | XS | À faire |
 
 ### Pourquoi cet ordre
 
@@ -252,6 +253,7 @@ Documenter la nomenclature complète en tête de `src/lib/analytics/goatcounter.
 - `/` : redirection 308 dans `proxy.ts` vers `/en` ou `/fr` selon `?lang=` > cookie > `Accept-Language` (la logique `resolveLocale` existante, inchangée).
 - Les **pages applicatives** restent non préfixées : `/quiz`, `/r/[id]`, `/deep-dive/[id]`, `/api/*`, `/admin`. Elles sont dynamiques par nature ou `noindex`, et surtout les liens `/r/<id>` déjà partagés doivent continuer à fonctionner indéfiniment (SPEC.md §12). Elles gardent la résolution cookie/header actuelle.
 - `metadata.alternates.languages` (+ `x-default`) et `canonical` par locale sur toutes les pages de contenu ; `sitemap.ts` liste les deux langues.
+- Le pied de page (`components/brand/SiteFooter`, ajouté le 2026-09-05) pointe vers `/how-it-works` et `/glossary` en dur : ces deux liens devront être préfixés par la locale en même temps que le reste.
 - Switch de langue visible dans le header des pages de contenu : un simple lien vers la même page dans l'autre locale, qui pose aussi le cookie (via `?lang=` ou le proxy), pas d'état client.
 - Landing en Server Component, avec un îlot client `RefCapture` (`useSearchParams` sous `<Suspense>`) pour `?ref=`.
 - Nettoyer les commentaires `middleware.ts`.
@@ -344,6 +346,26 @@ Trois compléments indépendants, à faire ensemble ou séparément :
 
 Hors périmètre ici, noté pour mémoire : historique de progression / comparaison entre deux Tours (SPEC.md §5, fast-follow explicite).
 
+### R-21 — La nav FR de la landing déborde le viewport mobile
+
+**Type** F+T · **Effort** XS · **Statut** À faire
+
+**Constat, trouvé en vérifiant autre chose.** Repéré pendant la recette du pied de page (2026-09-05), pas pendant la revue initiale — et confirmé **préexistant sur `main`**, indépendant du pied de page : mesuré à l'identique avec et sans lui.
+
+Sur la landing en **français** à 390px de large, `document.documentElement.scrollWidth` vaut **418px** pour un viewport de 390 : la page défile horizontalement. Le coupable est le lien de nav « Comment ça marche » du header (`x=268..418`, 150px de large) : la nav du header est en `flex-wrap: nowrap`, et la traduction française est plus large que « How it works », qui tient tout juste. En anglais, `scrollWidth` vaut exactement 390 — aucun débordement. Le problème persiste à 360px et disparaît à 430px.
+
+C'est exactement la classe de bug que la leçon n°5 de `CLAUDE.md` décrit (« teste les deux langues, pas seulement celle par défaut ») : invisible en anglais, bien réel en français. Probablement introduit le 2026-08-28 avec l'ajout du lien « Glossaire » à côté de « Comment ça marche » — avant, un seul lien tenait.
+
+**Impact.** La landing est la page d'entrée principale et la seule page où cette nav existe. Un défilement horizontal parasite sur mobile, dans une des deux langues du produit, sur la page qui reçoit le trafic.
+
+**Correctif proposé.** Trois options, à trancher visuellement plutôt que par le code :
+1. `flex-wrap: wrap` sur `.nav` — la nav passe sur deux lignes en FR, aucune perte de fonctionnalité ;
+2. masquer les liens de nav sous 760px, comme le CTA d'en-tête l'est déjà (`CLAUDE.md` étape 3 : « sur mobile, le CTA d'en-tête est masqué ») — le pied de page ajouté depuis porte désormais ces deux mêmes liens, donc rien ne devient inaccessible ;
+3. réduire la taille de police / l'espacement de la nav sous 760px.
+
+L'option 2 est la plus cohérente avec la décision déjà prise pour le CTA d'en-tête, et elle est maintenant sans coût d'accessibilité grâce au pied de page. À confirmer par Antoine, c'est une décision visuelle.
+
+**Vérification attendue.** À 360, 390 et 430px, en FR **et** en EN : `scrollWidth === innerWidth`, sur la landing et sur toute page portant ce header.
 ---
 
 ## Ce qui a été vérifié et jugé sain
