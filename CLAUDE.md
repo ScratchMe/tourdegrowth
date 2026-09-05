@@ -359,3 +359,20 @@ Le K-factor est la métrique que SPEC.md §1 désigne comme le critère de succ�
 **Vérifié en réel** (Playwright, `next start`) : **64 assertions vertes** sur 5 pages × 2 langues — un seul lien CV par pied de page, `rel=noopener`, ancre exacte, phrase de crédit bien localisée, liens internes présents, aucun débordement horizontal causé par le pied de page ; absence confirmée sur `/quiz` et `/deep-dive`. Le tracking a d'abord été « vérifié » à vide (sans `NEXT_PUBLIC_GOATCOUNTER_CODE`, le script n'est pas injecté, donc l'assertion passait sans rien prouver) — rebuild avec un code de test et stub du script : `profile_click/sitefooter_cv` bien émis au clic. Captures relues en FR et EN, desktop et mobile 390px.
 
 **Bug préexistant trouvé pendant cette recette, non corrigé ici :** la landing **en français** défile horizontalement à 390px (`scrollWidth` 418 pour un viewport de 390), à cause du lien de nav « Comment ça marche » dans un header en `flex-wrap: nowrap`. Mesuré identique avec et sans le pied de page, donc antérieur. En anglais, aucun débordement. Consigné en **`REVIEW.md` R-21** plutôt que corrigé au passage : le correctif est un choix visuel (wrapper la nav, la masquer sous 760px comme le CTA d'en-tête l'est déjà, ou réduire la typo), pas une évidence technique.
+
+### R-05 : CI GitHub Actions (2026-09-05) — début du lot B
+
+`.github/workflows/ci.yml`, déclenché sur `pull_request` et sur `push` vers `main`. Le repo n'avait aucune CI : 19 PR mergées sans le moindre check automatique, alors que Vitest et `tsc` ne tournaient que quand on y pensait. Vercel construit bien chaque push, mais un build qui passe ne dit rien des tests.
+
+**Un seul job, pas plusieurs** : un side project paie `npm ci` une fois plutôt que trois, et les étapes sont ordonnées du moins cher au plus cher (`tsc` → `vitest` → `next build`) pour qu'une erreur de type ou un test cassé remonte en quelques secondes au lieu d'attendre un build Next complet. `tsc --noEmit` fait doublon avec la passe TypeScript de `next build`, c'est volontaire : il échoue plus vite et son message est plus direct.
+
+- **Node 22**, le major que Vercel exécute sur ce projet (le repo n'a pas de champ `engines` — voir R-18).
+- **Aucun secret nécessaire** : toutes les routes qui touchent Firestore ou Gemini sont rendues à la demande, rien ne les appelle au moment du build. Vérifié en construisant sans `.env.local` depuis le début de cette revue.
+- `concurrency` avec `cancel-in-progress` : un nouveau push annule le run en cours sur la même ref.
+- `permissions: contents: read` — le workflow ne fait que lire.
+
+Le lint (R-06) et les E2E (R-07) s'ajouteront à ce workflow avec leurs propres PR, comme prévu dans `REVIEW.md`.
+
+**Action manuelle restante côté Antoine** : rendre ce check **obligatoire** sur `main` (GitHub → Settings → Branches → Branch protection rules). Tant que ce n'est pas fait, la CI signale sans bloquer. Ça ne peut pas se configurer depuis le repo.
+
+Vérifié en rejouant localement la séquence exacte du job (tsc 0 erreur, 178 tests verts, build compilé) avant de la committer, puis en réel sur le PR lui-même.

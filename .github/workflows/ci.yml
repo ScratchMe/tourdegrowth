@@ -1,0 +1,53 @@
+# REVIEW.md R-05 — the repo had no CI at all: 19 PRs were merged without a
+# single automated check, while Vitest and tsc only ever ran when someone
+# remembered to. Vercel builds every push, but a build passing says nothing
+# about the tests.
+#
+# One job, not several: a side project pays for `npm ci` once, and the steps
+# below are ordered cheapest-first so a broken type or a failing test reports
+# in seconds rather than after a full Next.js build.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A new push supersedes the run in flight for the same ref.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Keeps the first-run telemetry notice out of the logs.
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  check:
+    name: Types, tests, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Matches the Node major Vercel runs this project on.
+          node-version: "22"
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Type-check
+        run: npx tsc --noEmit
+
+      - name: Unit tests
+        run: npx vitest run
+
+      # No secrets needed: every route that touches Firestore or Gemini is
+      # rendered on demand, so nothing calls them at build time.
+      - name: Build
+        run: npm run build
