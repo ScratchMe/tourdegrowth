@@ -1,0 +1,72 @@
+# Verification against the REAL deployed site, Firestore and Gemini.
+#
+# Separate from `ci.yml` on purpose, and MANUAL ONLY. Two rules keep the
+# secrets safe, and neither is negotiable:
+#
+#   1. `workflow_dispatch` is the only trigger. Never `pull_request`, and
+#      above all never `pull_request_target` — that one runs code from a fork
+#      WITH access to secrets, which is how repositories leak credentials.
+#      A public repository makes this a hard requirement, not a preference.
+#   2. `permissions: contents: read`. This workflow reads the code and
+#      nothing else; it never needs to write to the repository.
+#
+# It creates a real submission and a real Deep dive, then deletes both and
+# undoes the `stats/global` increment, so a verification run never shows up
+# in the benchmark real users see.
+name: Verify against live services
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: What to verify
+        type: choice
+        default: production
+        options:
+          - production
+          - gemini
+          - both
+      site:
+        description: Site to verify (defaults to production)
+        type: string
+        default: https://www.tourdegrowth.com
+
+permissions:
+  contents: read
+
+concurrency:
+  # These share one live database and clean up after themselves; two runs at
+  # once would delete each other's fixtures.
+  group: verify-live
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Live pipeline
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Deployed site, Firestore, Deep dive
+        if: inputs.target != 'gemini'
+        env:
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
+          FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
+          VERIFY_SITE_URL: ${{ inputs.site }}
+        run: npx vitest run --config vitest.live.config.ts scripts/live/production.live.ts
+
+      - name: Gemini client against the real API
+        if: inputs.target != 'production'
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: npx vitest run --config vitest.live.config.ts scripts/live/gemini.live.ts

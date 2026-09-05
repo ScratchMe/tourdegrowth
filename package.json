@@ -13,7 +13,8 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:live": "vitest run --config vitest.live.config.ts"
   },
   "dependencies": {
     "firebase-admin": "^14.3.0",
