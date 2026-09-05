@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { PILLARS } from "@/lib/scoring/pillars";
 import type { DeepDiveResult, DeepDiveVerdict } from "../types";
-import { toDeepDiveView } from "../view-model";
+import { buildQuickVerdicts, toDeepDiveView } from "../view-model";
 
 function verdict(prefix: string): DeepDiveVerdict {
   const pillarRecommendations = Object.fromEntries(
@@ -47,5 +47,49 @@ describe("toDeepDiveView", () => {
   it("maps a Quick result (no Deep dive) to null", () => {
     expect(toDeepDiveView(null)).toBeNull();
     expect(toDeepDiveView(undefined)).toBeNull();
+  });
+});
+
+/** REVIEW.md R-09 — the verdict belongs to whoever is reading. */
+describe("buildQuickVerdicts", () => {
+  const pillars = [
+    { pillar: "acquisition" as const, score: 20 },
+    { pillar: "activation" as const, score: 18 },
+    { pillar: "retention" as const, score: 2 },
+    { pillar: "referral" as const, score: 16 },
+    { pillar: "revenue" as const, score: 20 },
+  ];
+
+  it("resolves both tones for the requested locale", () => {
+    const en = buildQuickVerdicts("en", pillars, "retention");
+
+    expect(en.neutral.headline.length).toBeGreaterThan(0);
+    expect(en.roast.headline.length).toBeGreaterThan(0);
+    for (const p of PILLARS) {
+      expect(en.neutral.pillarSentences[p].length).toBeGreaterThan(0);
+      expect(en.roast.pillarSentences[p].length).toBeGreaterThan(0);
+    }
+  });
+
+  it("returns different text per locale for the same scores", () => {
+    const en = buildQuickVerdicts("en", pillars, "retention");
+    const fr = buildQuickVerdicts("fr", pillars, "retention");
+
+    expect(fr.neutral.headline).not.toBe(en.neutral.headline);
+    expect(fr.neutral.pillarSentences.retention).not.toBe(en.neutral.pillarSentences.retention);
+    // Same input, same output: this is a pure lookup, safe to resolve per request.
+    expect(buildQuickVerdicts("fr", pillars, "retention")).toEqual(fr);
+  });
+
+  it("keys the headline off the weakest pillar, not the author's choices", () => {
+    const weakRetention = buildQuickVerdicts("en", pillars, "retention");
+    const weakRevenue = buildQuickVerdicts("en", pillars, "revenue");
+
+    expect(weakRetention.neutral.headline).not.toBe(weakRevenue.neutral.headline);
+  });
+
+  it("gives a low-scoring pillar different copy than a high-scoring one", () => {
+    const v = buildQuickVerdicts("en", pillars, "retention");
+    expect(v.neutral.pillarSentences.retention).not.toBe(v.neutral.pillarSentences.revenue);
   });
 });

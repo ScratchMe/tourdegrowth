@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { resolveRequestLocale } from "@/lib/i18n/resolve-request-locale";
-import { getSampleVerdict, SAMPLE_RESULT } from "@/lib/submissions/sample";
+import { getSampleVerdicts, SAMPLE_RESULT } from "@/lib/submissions/sample";
 import { getSubmissionById } from "@/lib/submissions/repository";
-import { toDeepDiveView } from "@/lib/submissions/view-model";
+import { buildQuickVerdicts, toDeepDiveView } from "@/lib/submissions/view-model";
 import { ResultView } from "./ResultView";
 
 interface PageProps {
@@ -47,10 +47,7 @@ export default async function ResultPage({ params }: PageProps) {
         total={SAMPLE_RESULT.total}
         pillars={SAMPLE_RESULT.pillars}
         weakestPillar={SAMPLE_RESULT.weakestPillar}
-        verdicts={{
-          neutral: getSampleVerdict("neutral", locale),
-          roast: getSampleVerdict("roast", locale),
-        }}
+        verdicts={getSampleVerdicts(locale)}
         initialTone="neutral"
         isSample
       />
@@ -60,13 +57,18 @@ export default async function ResultPage({ params }: PageProps) {
   const submission = await getSubmissionById(id);
   if (!submission) notFound();
 
+  // REVIEW.md R-09: the verdict follows whoever is READING, not whoever
+  // created the result — the rest of this page already did. Same resolution
+  // as the sample branch above, and the same helper, so the two can't drift.
+  const locale = await resolveRequestLocale();
+
   return (
     <ResultView
       id={submission.id}
       total={submission.total}
       pillars={submission.pillars}
       weakestPillar={submission.weakestPillar}
-      verdicts={submission.verdicts}
+      verdicts={buildQuickVerdicts(locale, submission.pillars, submission.weakestPillar)}
       initialTone={submission.tone}
       // REVIEW.md R-02: only the generated verdicts cross to the client.
       // `deepDive` also holds the founder's free-text context and their 10

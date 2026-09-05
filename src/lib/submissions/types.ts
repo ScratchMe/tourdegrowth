@@ -1,6 +1,5 @@
 import type { Locale } from "@/lib/i18n/locale";
 import type { Tone } from "@/lib/quiz/tone";
-import type { QuickVerdict } from "@/lib/scoring/verdict";
 import type { Answers, PillarScore } from "@/lib/scoring/score";
 import type { Pillar } from "@/lib/scoring/pillars";
 
@@ -39,18 +38,16 @@ export interface Submission {
    * browser — see `view-model.ts`.
    */
   ownerTokenHash: string | null;
-  /**
-   * BOTH tones' Quick verdicts, computed once at submission time — not just
-   * `tone`'s — so the result page's tone switch is a client-side swap, never
-   * a recomputation (DESIGN-BRIEF.md's interaction model). Deterministic and
-   * synchronous now (SPEC-ADDENDUM-01.md §0): both are effectively free to
-   * compute, so there's no cost trade-off left in generating both, same as
-   * before.
+  /*
+   * There is deliberately no `verdicts` field (REVIEW.md R-09). Both tones'
+   * Quick verdicts used to be resolved at submission time and persisted
+   * here — which froze them in the AUTHOR's language, so a shared result
+   * rendered half in the wrong one. They are a pure lookup over
+   * `content/copy-library.ts` keyed by score band, so they are now resolved
+   * per request in the READER's locale instead
+   * (`view-model.ts#buildQuickVerdicts`). Documents created before this
+   * change still carry the old field; nothing reads it.
    */
-  verdicts: {
-    neutral: QuickVerdict;
-    roast: QuickVerdict;
-  };
   /**
    * Deep dive addition (SPEC-ADDENDUM-01.md §2.7) — null until the user
    * completes the 10 extra contextual questions from the result page. A

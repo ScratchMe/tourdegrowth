@@ -69,6 +69,21 @@ test.describe("bilingual", () => {
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
   });
 
+  // REVIEW.md R-09: the verdict used to be frozen at submission time in the
+  // AUTHOR's locale, so a shared result rendered half in the wrong language.
+  test("a result renders its verdict in the reader's language", async ({ page }) => {
+    await page.goto("/r/sample?lang=en");
+    const english = await page.getByTestId("score-verdict").innerText();
+    await expect(page.getByText(/Where you're losing time/i)).toBeVisible();
+
+    await page.goto("/r/sample?lang=fr");
+    const french = await page.getByTestId("score-verdict").innerText();
+    await expect(page.getByText(/Là où tu perds du temps/i)).toBeVisible();
+
+    expect(french).not.toBe(english);
+    expect(french).toMatch(/[àâäéèêëïîôöùûüç]/i);
+  });
+
   test("the questionnaire itself is translated, not just the landing", async ({ page }) => {
     await page.goto("/quiz?lang=fr");
     await expect(page.locator("header")).toContainText("Q 1 / 15");

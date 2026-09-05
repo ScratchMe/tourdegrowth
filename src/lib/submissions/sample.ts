@@ -2,6 +2,7 @@ import type { Locale } from "@/lib/i18n/locale";
 import type { Tone } from "@/lib/quiz/tone";
 import type { Pillar } from "@/lib/scoring/pillars";
 import { buildQuickVerdict, type QuickVerdict } from "@/lib/scoring/verdict";
+import { buildQuickVerdicts, type QuickVerdicts } from "./view-model";
 
 /**
  * The landing page's "Sample B2B SaaS" score card and the full
@@ -42,4 +43,13 @@ export const SAMPLE_RESULT: {
 /** Resolves the sample's Quick verdict for one tone/locale, from the real copy library (see module comment above). `modelUsed` doesn't apply — this was never AI-generated. */
 export function getSampleVerdict(tone: Tone, locale: Locale): QuickVerdict {
   return buildQuickVerdict(tone, locale, SAMPLE_RESULT.pillars, SAMPLE_RESULT.weakestPillar);
+}
+
+/**
+ * The sample resolved in the reader's locale, through the exact same helper
+ * real results now use (REVIEW.md R-09) — so the sample stays a faithful
+ * preview rather than a separately-wired path that could drift.
+ */
+export function getSampleVerdicts(locale: Locale): QuickVerdicts {
+  return buildQuickVerdicts(locale, SAMPLE_RESULT.pillars, SAMPLE_RESULT.weakestPillar);
 }

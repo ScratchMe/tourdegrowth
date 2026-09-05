@@ -1,4 +1,45 @@
+import type { Locale } from "@/lib/i18n/locale";
+import type { Pillar } from "@/lib/scoring/pillars";
+import { buildQuickVerdict, type QuickVerdict } from "@/lib/scoring/verdict";
 import type { DeepDiveResult, DeepDiveView } from "./types";
+
+export interface QuickVerdicts {
+  neutral: QuickVerdict;
+  roast: QuickVerdict;
+}
+
+/**
+ * Both tones' Quick verdicts, resolved in the locale of whoever is LOOKING —
+ * REVIEW.md R-09.
+ *
+ * These used to be resolved once at submission time, in the author's locale,
+ * and persisted on the document. Everything else on the result page follows
+ * the visitor's own locale, so a French founder sharing their result with an
+ * English colleague showed them an English page with a French headline and
+ * French pillar sentences — on the single screen the whole growth loop
+ * depends on.
+ *
+ * They are a pure lookup over `content/copy-library.ts` keyed by score band
+ * (see `scoring/verdict.ts`), so resolving them per request costs nothing and
+ * removes the need to store derived data at all. Resolved on the SERVER
+ * rather than in the client component on purpose: the payload stays the same
+ * twelve short strings instead of shipping the whole copy library to the
+ * browser.
+ *
+ * Note the deliberate asymmetry with the OG image, which still uses the
+ * submission's OWN locale (`opengraph-image.tsx`): a social crawler doesn't
+ * send the sharer's cookies, so there is no viewer locale to speak of there.
+ */
+export function buildQuickVerdicts(
+  locale: Locale,
+  pillars: readonly { pillar: Pillar; score: number }[],
+  weakestPillar: Pillar,
+): QuickVerdicts {
+  return {
+    neutral: buildQuickVerdict("neutral", locale, pillars, weakestPillar),
+    roast: buildQuickVerdict("roast", locale, pillars, weakestPillar),
+  };
+}
 
 /**
  * Maps what's stored on a submission to what the browser is allowed to see —

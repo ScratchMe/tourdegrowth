@@ -36,7 +36,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 | | R-06 | Réparer le lint (ESLint flat config) | T | S | **Fait** (PR #26, 2026-09-05) |
 | | R-07 | Playwright committé : parcours critique en E2E | T | M | **Fait** (PR #27, 2026-09-05) |
 | | R-08 | Supprimer le code mort | T | XS | **Fait** (PR #26, 2026-09-05) |
-| **C — Boucle de partage (cœur du produit)** | R-09 | Verdict Quick résolu dans la langue du visiteur | F | S | À faire |
+| **C — Boucle de partage (cœur du produit)** | R-09 | Verdict Quick résolu dans la langue du visiteur | F | S | **Fait** (PR #28, 2026-09-05) |
 | | R-10 | Partage enrichi : métadonnées personnalisées, texte, boutons | F | M | À faire |
 | | R-11 | Instrumentation du funnel dans GoatCounter | F | S | À faire |
 | | R-12 | Explicabilité : « comment ce score est calculé » | F | M | À faire |
@@ -180,7 +180,7 @@ Ajouter `@axe-core/playwright` sur landing, quiz et `/r/sample` (lien avec R-19)
 
 ### R-09 — Verdict Quick résolu dans la langue du visiteur
 
-**Type** F · **Effort** S · **Statut** À faire
+**Type** F · **Effort** S · **Statut** **Fait** (PR #28, 2026-09-05) — le champ `verdicts` a bien été retiré de `Submission`, comme proposé ici
 
 **Constat.** `createSubmissionFlow` résout les deux verdicts avec `input.locale` (la langue de l'auteur) et les **stocke** (`src/lib/submissions/create-submission.ts:51`). `ResultView` affiche ces textes stockés, mais tout le reste de l'UI suit `useLocale()` du **visiteur**. Un Français qui partage à un collègue anglophone lui montre une page en anglais avec un headline et des phrases de piliers en français, et inversement. C'est la première impression du produit pour chaque personne qui arrive par un lien.
 
