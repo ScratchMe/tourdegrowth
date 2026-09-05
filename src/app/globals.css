@@ -18,14 +18,35 @@
   padding: 0;
 }
 
-html,
-body {
+html {
   height: 100%;
 }
 
 body {
+  /*
+   * `min-height`, NOT `height` — and `no-repeat` with it.
+   *
+   * `--ground-lift` is two radial gradients painted on the body, and a
+   * background's positioning area is the element's own box. With
+   * `height: 100%` that box was exactly one viewport tall while the page
+   * scrolled past it, so the gradients TILED (the default is
+   * `background-repeat: repeat`) and left a hard horizontal seam at every
+   * multiple of the viewport height — measured as a ~28/255 colour step at
+   * y=700 in a 700px-tall window, against ~3 of dithering everywhere else.
+   *
+   * Because the seam sat at a fixed y while page height varies, it landed at
+   * a different distance from the footer in French than in English, which is
+   * how it was spotted: the same screen, two languages, the line in a
+   * different place.
+   *
+   * `min-height: 100%` keeps a short page filling the window while letting
+   * the box grow with the content, so the "page ground" spans the page once
+   * — which is what `tokens/shape.css` describes it as.
+   */
+  min-height: 100%;
   background-color: var(--surface-page);
   background-image: var(--ground-lift);
+  background-repeat: no-repeat;
   color: var(--text-body);
   font-family: var(--font-ui), system-ui, sans-serif;
   line-height: 1.5;

@@ -4,7 +4,7 @@
 
 ## Comment utiliser ce document
 
-- Chaque constat a un identifiant stable (`R-01` … `R-20`), un type (**F** = fonctionnel/produit, **T** = technique), un effort estimé (XS / S / M / L) et un **statut** à tenir à jour ici même : `À faire` → `En cours` → `Fait (PR #n, date)`.
+- Chaque constat a un identifiant stable (`R-01` … `R-26`), un type (**F** = fonctionnel/produit, **T** = technique), un effort estimé (XS / S / M / L) et un **statut** à tenir à jour ici même : `À faire` → `En cours` → `Fait (PR #n, date)`.
 - Les items sont regroupés en **lots** et l'ordre des lots est l'ordre de traitement. À l'intérieur d'un lot, l'ordre est indicatif sauf quand une dépendance est notée.
 - Un PR par item, sauf quand le détail indique explicitement « à faire avec R-xx ».
 - Quand un item est livré : mettre à jour la colonne statut ci-dessous, et ajouter l'entrée habituelle dans `CLAUDE.md` (décision prise, pièges rencontrés, ce qui a été vérifié en réel).
@@ -53,6 +53,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 | | R-21 | La nav de la landing déborde le viewport mobile (FR **et** EN depuis R-13) | F+T | XS | À faire |
 | | R-22 | Trois paires de couleurs sous le seuil AA de contraste | F+T | S | À faire |
 | | R-23 | Boutons de partage LinkedIn/X : où les mettre sans casser « 2 CTA » | F | S | À faire |
+| | R-26 | Le 404 global n'a ni notre CSS ni notre chrome | F+T | S | À faire |
 
 ### Pourquoi cet ordre
 
@@ -442,6 +443,22 @@ Le chrome partagé (polices `next/font`, script GoatCounter, `LocaleProvider`, `
 **Points d'attention.** Passer d'un layout racine à l'autre force un chargement complet de page (pas de transition client) — acceptable ici, `/en` → `/quiz` est déjà une vraie navigation. Et `app/not-found.tsx` global doit être rattaché à l'un des deux, ce qui est le point de friction connu de cette structure : à valider empiriquement plutôt qu'à supposer.
 
 **Vérification attendue.** `next build` affiche `○` pour les 32 pages de contenu, `ƒ` pour `/quiz`, `/r/[id]`, `/deep-dive`, `/admin`, `/api`. Les 36 specs E2E restent vertes, `<html lang>` reste correct dans les deux arbres.
+### R-26 — Le 404 global n'a ni notre CSS ni notre chrome
+
+**Type** F+T · **Effort** S · **Statut** À faire
+
+**D'où ça vient.** Trouvé en vérifiant le correctif de la couture de fond (2026-09-05), pas dans la revue initiale.
+
+**Constat.** Une URL inconnue (`/nonsense`, un chemin mal tapé) rend le document d'erreur intégré de Next — `<html id="__next_error__">`, **aucune feuille de style de l'app**, page blanche non marquée. Vérifié par requête HTTP.
+
+**Ce n'est pas une régression de R-24** : reconstruit `main` au commit précédent dans un worktree, le résultat est identique au caractère près. La cause est qu'il n'y a jamais eu d'`app/not-found.tsx` dans ce repo — seulement `r/[id]/not-found.tsx`, qui couvre le cas qui compte vraiment (un lien de résultat partagé devenu mort) et reste correct.
+
+**Impact.** Faible mais réel : c'est la seule surface du produit qui ne ressemble pas au produit. Un lien mal recopié depuis un partage tombe dessus.
+
+**Correctif proposé.** Un `app/not-found.tsx`. Point de friction connu de la structure à deux layouts racine (R-24) : un `not-found` global n'a pas de layout racine dans sa chaîne, donc il devra rendre lui-même son `<html>`/`<body>` via `RootShell` — et il ne peut pas connaître la langue du visiteur autrement qu'en lisant l'en-tête du proxy, ce qui le rendrait dynamique. À valider empiriquement, comme le reste de R-24.
+
+**Vérification attendue.** `/nonsense` renvoie toujours 404, avec le fond, la typo et le wordmark du produit, dans la langue résolue, et sans faire repasser une seule page de contenu de `●` à `ƒ`.
+
 ### R-25 — Gemini : `responseSchema` et un seul appel pour les deux tons
 
 **Type** T · **Effort** M · **Statut** À faire — **exige un vrai appel Gemini réussi pour être vérifié**
