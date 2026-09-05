@@ -87,3 +87,45 @@ describe("proxy (admin gate)", () => {
     expect(response.status).not.toBe(401);
   });
 });
+
+/**
+ * REVIEW.md R-24 — the content pages are prerendered and CDN-cacheable now,
+ * so what the proxy adds to their responses matters in a way it did not
+ * before.
+ */
+describe("proxy (locale cookie)", () => {
+  function request(url: string, cookie?: string): NextRequest {
+    const headers = cookie ? { cookie: `tdg_locale=${cookie}` } : undefined;
+    return new NextRequest(`https://tourdegrowth.com${url}`, { headers });
+  }
+
+  it("sets the cookie when a URL prefix disagrees with it", () => {
+    expect(proxy(request("/fr/glossary/cac", "en")).cookies.get("tdg_locale")?.value).toBe("fr");
+  });
+
+  it("sets the cookie when there is none yet", () => {
+    expect(proxy(request("/fr")).cookies.get("tdg_locale")?.value).toBe("fr");
+  });
+
+  it("sets the cookie from ?lang= on an unprefixed app page", () => {
+    expect(proxy(request("/quiz?lang=fr")).cookies.get("tdg_locale")?.value).toBe("fr");
+  });
+
+  it("does NOT re-send an identical cookie on an already-agreeing page", () => {
+    // Every one of these responses is a CDN-cacheable prerender; a
+    // `Set-Cookie` repeating what the browser already holds is pure noise on
+    // it.
+    expect(proxy(request("/fr/glossary/cac", "fr")).cookies.get("tdg_locale")).toBeUndefined();
+  });
+
+  it("never writes a cookie for a page that expresses no choice", () => {
+    expect(proxy(request("/quiz", "fr")).cookies.get("tdg_locale")).toBeUndefined();
+    expect(proxy(request("/r/abc")).cookies.get("tdg_locale")).toBeUndefined();
+  });
+
+  it("hands the resolved locale down to the root layout as a header", () => {
+    const withPrefix = proxy(request("/fr/how-it-works", "en"));
+    expect(withPrefix.headers.get("x-middleware-override-headers")).toContain("x-tdg-locale");
+    expect(withPrefix.headers.get("x-middleware-request-x-tdg-locale")).toBe("fr");
+  });
+});

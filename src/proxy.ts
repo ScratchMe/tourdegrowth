@@ -106,7 +106,13 @@ export function proxy(request: NextRequest) {
   // persisted the same way — otherwise a reader who switched to French and
   // then pressed "Démarre ton Tour" would land on an English questionnaire,
   // since `/quiz` carries no prefix of its own.
-  const explicitChoice = fromUrl?.locale ?? (isLocale(queryLang) ? queryLang : null);
+  const currentCookie = request.cookies.get(LOCALE_COOKIE)?.value ?? null;
+  const chosen = fromUrl?.locale ?? (isLocale(queryLang) ? queryLang : null);
+  // Only write when it actually changes. Content pages are prerendered and
+  // CDN-cacheable since R-24, and re-sending an identical `Set-Cookie` on
+  // every one of their responses is both pointless and the kind of header
+  // that makes caches nervous.
+  const explicitChoice = chosen && chosen !== currentCookie ? chosen : null;
   if (explicitChoice) {
     request.cookies.set(LOCALE_COOKIE, explicitChoice);
   }

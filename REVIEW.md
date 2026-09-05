@@ -18,7 +18,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 |---|---|
 | `npx vitest run` | 128 tests verts, 17 fichiers |
 | `npx tsc --noEmit` | OK (une dépréciation `baseUrl`, voir R-18) |
-| `npm run build` | OK — mais **aucune page statique** hors `robots.txt`/`sitemap.xml` : toutes les routes sont `ƒ` (dynamiques), voir R-13 (moitié SEO livrée) et R-24 (rendu statique, à faire) |
+| `npm run build` | OK — mais **aucune page statique** hors `robots.txt`/`sitemap.xml` : toutes les routes étaient `ƒ` (dynamiques), voir R-13 (moitié SEO) et R-24 (rendu statique). Les 36 pages de contenu sont `●` depuis le PR #39. |
 | `npm run lint` | **Cassé** : `next lint` n'existe plus en Next.js 16, aucune config ESLint dans le repo, voir R-06 |
 | `npm audit --omit=dev` | 6 vulnérabilités modérées, toutes via `firebase-admin` → `@google-cloud/storage` / `teeny-request`, voir R-18 |
 | `.github/` | Absent — aucune CI, voir R-05 |
@@ -41,7 +41,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 | | R-11 | Instrumentation du funnel dans GoatCounter | F | S | **Fait** (PR #30, 2026-09-05) |
 | | R-12 | Explicabilité : « comment ce score est calculé » | F | M | **Fait** (PR #31, 2026-09-05) — clôt le lot C |
 | **D — Architecture i18n / SEO / cache** | R-13 | Locale dans l'URL, `hreflang`, switch de langue | F+T | L | **Fait** (PR #32, 2026-09-05) |
-| | R-24 | Rendre les pages de contenu réellement statiques | T | M | À faire |
+| | R-24 | Rendre les pages de contenu réellement statiques | T | M | **Fait** (PR #39, 2026-09-05) |
 | | R-14 | Cache du résultat partagé + OG 404 pour id inconnu | T | M | **Fait** (PR #33, 2026-09-05) — clôt le lot D |
 | **E — Robustesse backend** | R-15 | Rate limiting sur les routes POST + `maxDuration` | T | S/M | **Fait** (PR #34, 2026-09-05) — limite en mémoire, pas distribuée |
 | | R-16 | Appel Gemini : header, `finishReason`, `maxOutputTokens` | T | M | **Fait en partie** (PR #35, 2026-09-05) — `responseSchema` et l'appel unique reportés en R-25 |
@@ -412,7 +412,12 @@ Ajouter deux boutons de partage réseau casserait donc une décision produit dé
 **Attention si on le fait** : LinkedIn et X ajoutent `nofollow` à ce qu'ils publient, donc ces boutons n'ont **aucune** valeur SEO — leur intérêt est uniquement le confort de partage. Ne pas les vendre comme un levier de référencement.
 ### R-24 — Rendre les pages de contenu réellement statiques
 
-**Type** T · **Effort** M · **Statut** À faire
+**Type** T · **Effort** M · **Statut** **Fait** (PR #39, 2026-09-05)
+
+**Ce qui a changé par rapport au correctif proposé ci-dessous.** Deux points, tous deux découverts en construisant plutôt qu'en relisant :
+
+1. Le layout racine des pages de contenu n'est **pas** `(content)/layout.tsx` mais `[locale]/layout.tsx` directement. Next n'exige pas qu'un layout racine soit à la racine d'un groupe : il exige que chaque route en ait un dans sa chaîne. Et un groupe au-dessus de `[locale]` ne verrait pas le paramètre de langue, donc ne saurait pas quoi mettre dans `<html lang>`.
+2. Mettre les routes applicatives dans un groupe `(app)` **renomme leurs routes de métadonnées** : `/r/<id>/opengraph-image` devient `/r/<id>/opengraph-image-<hash>`. Détail traité dans `CLAUDE.md`, avec l'alias de compatibilité et le test qui l'épingle.
 
 **D'où ça vient.** Seconde moitié de R-13, découpée au moment de le livrer.
 
