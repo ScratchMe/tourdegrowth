@@ -36,6 +36,25 @@ export function DefinitionPopover({
   const docked = placement === "docked";
   const ref = useRef<HTMLDivElement>(null);
 
+  /**
+   * REVIEW.md R-19. The panel had `role="dialog"` but never took focus, so a
+   * screen-reader user was told a dialog existed and left standing outside
+   * it, and Escape only worked because the handler is on `document`. Focus
+   * moves in on open and returns to whatever opened it on close — otherwise
+   * closing drops focus to <body> and the reader loses their place mid-
+   * question.
+   *
+   * Guarded on `docked`: both placements render at once and CSS picks one
+   * per viewport (see GlossaryTerm), so focusing both would have the mobile
+   * copy win on desktop.
+   */
+  useEffect(() => {
+    if (docked) return;
+    const opener = document.activeElement as HTMLElement | null;
+    ref.current?.focus();
+    return () => opener?.focus?.();
+  }, [docked]);
+
   useEffect(() => {
     if (!onClose) return;
 
@@ -60,6 +79,7 @@ export function DefinitionPopover({
     <div
       ref={ref}
       role="dialog"
+      tabIndex={-1}
       aria-label={term}
       className={[styles.popover, docked ? styles.docked : styles.anchored, className ?? ""].filter(Boolean).join(" ")}
       style={style}

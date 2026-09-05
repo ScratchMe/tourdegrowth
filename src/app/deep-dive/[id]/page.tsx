@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { WordmarkLink } from "@/components/brand/WordmarkLink";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import { ModeTag } from "@/components/brand/ModeTag";
@@ -62,6 +62,10 @@ export default function DeepDivePage() {
   // that the API would reject at the end.
   const [ownerToken, setOwnerToken] = useState<string | null>(null);
   const [ownershipChecked, setOwnershipChecked] = useState(false);
+  // Same reason as the Quick questionnaire (REVIEW.md R-19): answering
+  // removes the focused button and swaps the question.
+  const questionRegionRef = useRef<HTMLDivElement>(null);
+  const lastAnnouncedIndex = useRef<number | null>(null);
 
   useEffect(() => {
     const token = findOwnerToken(params.id);
@@ -78,6 +82,16 @@ export default function DeepDivePage() {
     // being redirected away never registers as a Deep dive start.
     trackEvent("deep_dive_started");
   }, [params.id, router]);
+
+  useEffect(() => {
+    if (phase !== "answering") return;
+    if (lastAnnouncedIndex.current === null || lastAnnouncedIndex.current === currentIndex) {
+      lastAnnouncedIndex.current = currentIndex;
+      return;
+    }
+    lastAnnouncedIndex.current = currentIndex;
+    questionRegionRef.current?.focus();
+  }, [currentIndex, phase]);
 
   const currentQuestion = DEEP_MODE_QUESTIONS[currentIndex]!;
   const currentStage = PILLARS.indexOf(currentQuestion.pillar); // 0-4
@@ -149,8 +163,14 @@ export default function DeepDivePage() {
 
       <main className={styles.main}>
         {phase === "answering" && (
-          <>
-            <StageProgress current={currentStage + 1} total={PILLARS.length} />
+          <div
+            ref={questionRegionRef}
+            tabIndex={-1}
+            role="group"
+            aria-label={questionCounter}
+            className={styles.questionRegion}
+          >
+            <StageProgress current={currentStage + 1} total={PILLARS.length} aria-label={questionCounter} />
             <MetaLabel>{questionCounter}</MetaLabel>
 
             <QuestionCard>{tc(currentQuestion.question, locale)}</QuestionCard>
@@ -178,7 +198,7 @@ export default function DeepDivePage() {
               )}
               <MetaLabel size="sm">{tc(t.answerToContinue, locale)}</MetaLabel>
             </div>
-          </>
+          </div>
         )}
 
         {phase === "freeContext" && (
@@ -187,7 +207,11 @@ export default function DeepDivePage() {
                 the extra 11th step, not a 6th pillar, so `current` sits one
                 past `total` (StageProgress renders every n < current as
                 "done"). */}
-            <StageProgress current={PILLARS.length + 1} total={PILLARS.length} />
+            <StageProgress
+              current={PILLARS.length + 1}
+              total={PILLARS.length}
+              aria-label={tc(FREE_CONTEXT.label, locale)}
+            />
 
             <QuestionCard>{tc(FREE_CONTEXT.label, locale)}</QuestionCard>
 
@@ -198,6 +222,7 @@ export default function DeepDivePage() {
               onChange={setFreeContext}
               maxLength={FREE_CONTEXT_MAX_LENGTH}
               placeholder={tc(FREE_CONTEXT.placeholder, locale)}
+              aria-label={tc(FREE_CONTEXT.label, locale)}
               data-testid="free-context-textarea"
             />
 

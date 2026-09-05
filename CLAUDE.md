@@ -604,3 +604,24 @@ Correctif retenu : un `overrides` npm forçant `uuid` à `^11.1.1`. Ciblé, et *
 `npx tsc --noEmit` ne sort maintenant **aucun** avertissement, alors qu'il signalait la dépréciation de `baseUrl` depuis le début de cette revue.
 
 **Vérifié en réel** : 208 tests, 37 specs Playwright, lint/tsc/build propres, `npm audit --omit=dev` à zéro, et `npm ci` rejoué dans un dossier vierge.
+
+### R-19 : ce qu'axe ne peut pas voir (2026-09-05) — lot F
+
+La passe axe ajoutée en R-07 couvrait contraste, noms et rôles. Elle ne dit rien de ce qui se passe **quand l'écran change** — et c'est là qu'était le vrai problème.
+
+**Le focus retombait sur `<body>` à chaque transition.** Répondre supprime le bouton qui avait le focus et remplace la question : un utilisateur clavier devait re-tabuler depuis le haut de la page, **quinze fois de suite**. Le focus va maintenant sur la nouvelle question, ce qui est aussi ce qui la fait annoncer par un lecteur d'écran.
+
+- La zone question porte `role="group"` + `aria-label` = le compteur, donc **une seule** annonce dit « Q 3 / 15 » puis la question. Un `aria-live` sur le compteur, comme le prévoyait le constat initial, aurait couru contre le déplacement de focus et fait parler deux fois — écart assumé.
+- Jamais au premier rendu : voler le focus à l'arrivée est un défaut d'accessibilité à part entière. Un `useRef` distingue « première peinture » de « la question a changé ».
+- Même traitement pour les autres transitions de cet écran : le sélecteur de ton prend le focus en montant (il ne monte qu'après la 15ᵉ réponse, donc c'est exactement la bonne transition), et l'écran d'erreur devient `role="alert"` et prend le focus. Idem sur les 10 questions du Deep dive.
+- Les conteneurs focalisés **programmatiquement** n'affichent pas d'anneau : l'utilisateur n'y a pas tabulé, et ils ne sont pas atteignables au clavier (`tabIndex={-1}`), donc aucun indicateur réel n'est perdu.
+
+**La popover de glossaire annonçait un dialogue et laissait l'utilisateur dehors.** Elle avait `role="dialog"` mais ne prenait jamais le focus ; Escape ne marchait que parce que le gestionnaire est sur `document`. Elle prend le focus à l'ouverture et le **rend à ce qui l'a ouverte** à la fermeture — sans quoi fermer laisse le focus sur `<body>` et le lecteur perd sa place au milieu d'une question. Garde nécessaire : les deux placements (ancré/docké) sont rendus **simultanément**, le CSS choisissant selon le viewport, donc sans le garde `docked` la copie mobile prendrait le focus sur desktop.
+
+**`StageProgress` était cinq `div` décoratifs, sans rôle.** Devient un `role="progressbar"` avec `aria-valuemin/max/now` et un nom localisé fourni par l'appelant (les segments n'ont aucun texte propre). `aria-valuenow` est **borné** : l'écran de contexte libre passe `total + 1` pour peindre tous les segments comme faits, ce qui est correct visuellement mais invalide en ARIA.
+
+**Le textarea de contexte libre n'avait aucun nom accessible** — son intitulé visible est dans une `QuestionCard` au-dessus, pas dans un `<label>`. Le prop `aria-label` est désormais **obligatoire** dans le type, pour qu'un futur appelant ne puisse pas l'oublier.
+
+**Vérifié en réel** : nouveau fichier `e2e/keyboard.spec.ts`, **5 specs** qui vérifient le comportement et pas la présence d'attributs — le focus suit la question en avant *et* en arrière, atterrit sur le sélecteur de ton et sur l'écran d'erreur, la barre de progression annonce sa position et la met à jour à la fin d'une étape, et la popover prend le focus puis le rend au déclencheur après Escape. 42 specs Playwright au total, 208 tests unitaires, lint/tsc/build propres.
+
+**Ce que R-19 ne règle pas** : les 3 paires de contraste sous AA relevées en R-07 restent ouvertes en **R-22**. Ce sont des couleurs de marque livrées par Claude Design, pas des attributs à corriger.

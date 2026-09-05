@@ -83,3 +83,11 @@
     display: inline;
   }
 }
+
+/* Programmatically focused containers (REVIEW.md R-19): the user did not tab
+   to these, so a focus ring on them would be noise. They are not reachable
+   by keyboard either — tabIndex is -1 — so no real focus indicator is lost. */
+.questionRegion:focus,
+.errorCard:focus {
+  outline: none;
+}

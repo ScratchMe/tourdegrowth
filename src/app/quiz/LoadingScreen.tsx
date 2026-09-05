@@ -48,7 +48,7 @@ export function LoadingScreen({ locale, variant }: LoadingScreenProps) {
 /** Brief, single-message transition — see the `variant` doc above. No open-ended "still working" state: the real wait behind it is near-instant now. */
 function QuickLoadingScreen({ locale }: { locale: Locale }) {
   return (
-    <div className={styles.wrap}>
+    <div className={styles.wrap} role="status" aria-live="polite">
       <div className={styles.numeralWrap}>
         <span className={styles.numeral}>——</span>
       </div>
@@ -81,7 +81,7 @@ function DeepDiveLoadingScreen({ locale }: { locale: Locale }) {
   const stillWorking = step >= 2;
 
   return (
-    <div className={styles.wrap}>
+    <div className={styles.wrap} role="status" aria-live="polite">
       <div className={styles.numeralWrap}>
         <span className={styles.numeral}>——</span>
       </div>
