@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { WordmarkLink } from "@/components/brand/WordmarkLink";
 import { Button } from "@/components/core/Button";
+import { DetourCard } from "@/components/core/DetourCard";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import { AnswerOption } from "@/components/quiz/AnswerOption";
 import { QuestionCard } from "@/components/quiz/QuestionCard";
@@ -337,16 +338,25 @@ export default function QuizPage() {
         {phase === "loading" && <LoadingScreen locale={locale} variant="quick" />}
 
         {phase === "error" && (
-          <div ref={errorRegionRef} tabIndex={-1} role="alert" className={styles.errorCard}>
-            <MetaLabel size="xs" tone="alert">
-              {tc(t.errorEyebrow, locale)}
-            </MetaLabel>
-            <h2 className={styles.errorTitle}>{tc(t.errorTitle, locale)}</h2>
-            <p className={styles.errorBody}>{tc(t.errorBody, locale)}</p>
-            {submitError && <p className={styles.errorDetail}>{submitError}</p>}
-            <Button size="lg" fullWidth data-testid="retry-button" onClick={handleGetScore}>
+          <div className={styles.detour}>
+            <DetourCard
+              ref={errorRegionRef}
+              tabIndex={-1}
+              tone="fault"
+              headingLevel="h2"
+              eyebrow={tc(t.errorEyebrow, locale)}
+              title={tc(t.errorTitle, locale)}
+            >
+              {tc(t.errorBody, locale)}
+              {submitError && <p className={styles.errorDetail}>{submitError}</p>}
+            </DetourCard>
+
+            {/* Below the card, never inside it: what is hidden or nested is not
+                the screen's one action (DetourCard.prompt.md). */}
+            <Button size="lg" data-testid="retry-button" onClick={handleGetScore}>
               {tc(t.errorRetry, locale)}
             </Button>
+
             <MetaLabel size="xs" uppercase={false}>
               {tc(t.errorHint, locale)}
             </MetaLabel>

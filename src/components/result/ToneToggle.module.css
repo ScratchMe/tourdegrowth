@@ -1,30 +1,5 @@
-.group {
-  display: inline-flex;
-  border: var(--border-solid);
-  border-radius: var(--radius-button);
-  overflow: hidden;
-}
-
-.option {
-  font: var(--label-button);
-  padding: 12px 18px;
-  min-height: var(--hit-min);
-  border: none;
-  background: var(--surface-sunken);
-  color: var(--text-muted);
-  cursor: pointer;
-}
-
-.option + .option {
-  border-left: var(--border-solid);
-}
-
-.onStraight {
-  background: var(--ink-0);
-  color: var(--text-inverse);
-}
-
-.onRoast {
-  background: var(--paint-red);
-  color: var(--text-inverse);
+/* Everything visual lives in core/Segmented since extension 01; this file
+   exists only so the wrapper keeps a stable class for call sites to target. */
+.toggle {
+  /* no overrides */
 }

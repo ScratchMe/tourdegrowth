@@ -42,12 +42,18 @@ export interface SiteFooterProps {
  *
  * A Client Component only because of `trackEvent`; it renders fine inside the
  * Server Components that use it.
+ *
+ * Design system extension 01 brought it into the system as-is: text on stone
+ * under the same dashed rule as the header, because that rule IS the footer's
+ * signature — the page is a ticket with a top and a bottom edge. Never add a
+ * card, a Tag, a second rule or a wordmark to give it "more presence"
+ * (SiteFooter.prompt.md).
  */
 export function SiteFooter({ locale, width = "wide" }: SiteFooterProps) {
   return (
     <footer className={styles.footer}>
       <div className={`${styles.inner} ${styles[width]}`}>
-        <nav className={styles.nav}>
+        <nav aria-label="Site" className={styles.nav}>
           <Link href={localePath(locale, "/how-it-works")} className={styles.navLink}>
             {tc(UI_STRINGS.nav.howItWorks, locale)}
           </Link>

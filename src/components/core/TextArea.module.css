@@ -1,0 +1,49 @@
+/* Design system extension 01 — see design/ds-extension-01-return/components/core/TextArea.prompt.md */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* A flat paper card you type into: the field spends its one effect on the solid edge. */
+.field {
+  display: block;
+  width: 100%;
+  min-height: var(--field-min-height);
+  padding: var(--pad-field);
+  font: var(--body-md);
+  color: var(--text-body);
+  background: var(--field-bg);
+  border: var(--border-solid);
+  border-radius: var(--radius-panel);
+  resize: none;
+  /* Removed so the system focus ring below is uniform. */
+  outline: none;
+}
+
+.field::placeholder {
+  font: var(--body-md);
+  color: var(--field-placeholder);
+}
+
+.field:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+/* Past the limit only: solid red is diagnosis. No amber, no "50 left" warning. */
+.fieldOverLimit {
+  border-color: var(--field-border-alert);
+}
+
+.counter {
+  align-self: flex-end;
+  font: var(--meta-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+.counterOverLimit {
+  color: var(--text-alert);
+}

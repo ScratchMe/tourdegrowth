@@ -1,0 +1,5 @@
+/* Tour de Growth loads its three families from Google Fonts.
+   No font binaries were supplied with the brief; these are the exact
+   families named in DESIGN-BRIEF.md, served from the Google CDN.
+   Replace with self-hosted @font-face rules if the site must run offline. */
+@import url("https://fonts.googleapis.com/css2?family=Stardos+Stencil:wght@400;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap");

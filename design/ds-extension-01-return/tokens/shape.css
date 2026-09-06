@@ -1,0 +1,33 @@
+:root {
+  /* --- Radii: four steps, by element size --- */
+  --radius-tag: 4px;      /* mono tags, pillar chips, progress segments */
+  --radius-button: 6px;   /* buttons, sunken example blocks */
+  --radius-panel: 8px;    /* answer options, insight cards, popovers */
+  --radius-card: 10px;    /* main cards, device frames */
+  --radius-round: 50%;    /* definition trigger */
+
+  /* --- Borders: the system has exactly three --- */
+  --border-width: 2px;
+  --border-solid: 2px solid var(--border-hard);
+  --border-dashed: 2px dashed var(--border-soft);
+  --border-rule: 2px dashed var(--border-divider);
+
+  /* --- Hard offset shadows, no blur, always --ink-0 --- */
+  --shadow-card: 7px 7px 0 var(--ink-0);   /* primary card: score, question */
+  --shadow-panel: 5px 5px 0 var(--ink-0);  /* popover, secondary card */
+  --shadow-hover: 4px 4px 0 var(--ink-0);  /* option button on hover */
+  --shadow-none: none;
+
+  /* --- Focus --- */
+  --focus-width: 3px;
+  --focus-offset: 3px;
+  --focus-offset-tight: 2px; /* on the 16px definition trigger */
+
+  /* --- Stencil spray texture: overlay on large display numerals only --- */
+  --texture-spray: repeating-linear-gradient(115deg, transparent 0 3px, rgba(33, 28, 21, 0.055) 3px 4px);
+  --texture-spray-strong: repeating-linear-gradient(115deg, transparent 0 3px, rgba(33, 28, 21, 0.05) 3px 4px);
+
+  /* --- Page ground: two soft radial lifts, never a linear gradient --- */
+  --ground-lift: radial-gradient(circle at 16% 12%, rgba(255, 255, 255, 0.45), transparent 42%),
+                 radial-gradient(circle at 88% 74%, rgba(0, 0, 0, 0.05), transparent 46%);
+}

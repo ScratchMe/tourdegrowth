@@ -19,10 +19,6 @@
   gap: 10px;
 }
 
-.desktopOnly {
-  display: none;
-}
-
 .roastBadge {
   font: var(--meta-sm);
   font-weight: 600;
@@ -182,9 +178,6 @@
 }
 
 @media (min-width: 761px) {
-  .desktopOnly {
-    display: inline;
-  }
 
   .main {
     padding: 44px 24px 80px;

@@ -1,8 +1,9 @@
+import { Segmented } from "@/components/core/Segmented";
 import { LOCALES, type Locale } from "@/lib/i18n/locale";
 import { localePath } from "@/lib/i18n/routes";
-import styles from "./LocaleSwitcher.module.css";
 
 const LABELS: Record<Locale, string> = { en: "EN", fr: "FR" };
+const GROUP_LABEL: Record<Locale, string> = { en: "Language", fr: "Langue" };
 
 export interface LocaleSwitcherProps {
   /** The locale currently being shown. */
@@ -22,17 +23,19 @@ export interface LocaleSwitcherProps {
 }
 
 /**
- * The language switch — REVIEW.md R-13.
+ * The language switch — REVIEW.md R-13, restyled by design system
+ * extension 01 (see `LocaleSwitcher.prompt.md`).
  *
  * The app has been bilingual since its first functional commit (a CLAUDE.md
  * non-negotiable), but nothing in the interface ever let anyone switch:
  * `setLocale` on the locale context was never called from anywhere, and
- * `?lang=` is not something a visitor guesses. The only people who ever saw
- * the French version were those whose browser already asked for it.
+ * `?lang=` is not something a visitor guesses. On a result page it is also
+ * the only way a reader can act on R-09 at all — the verdict follows their
+ * language, but nothing let them say what it is.
  *
- * On a result page it is also the only way a reader can act on R-09 at all:
- * the verdict follows their language, but nothing let them say what it is —
- * reported by Antoine, who had to reach for `?lang=` by hand.
+ * A compact `Segmented` of real links since extension 01: both languages are
+ * always shown, never reduced to a single "FR" (which hides that a choice
+ * exists and is ambiguous about which language it names).
  *
  * Plain `<a>` elements, deliberately, not `next/link`: `<html lang>` is
  * rendered by the ROOT layout, which a client-side navigation reuses without
@@ -43,23 +46,19 @@ export interface LocaleSwitcherProps {
  */
 export function LocaleSwitcher({ locale, path }: LocaleSwitcherProps) {
   return (
-    <nav className={styles.wrap} aria-label="Language">
-      {LOCALES.map((candidate) => {
-        const current = candidate === locale;
-        return (
-          <a
-            key={candidate}
-            // A query-only href resolves against the current URL, so the
-            // path is preserved without this component having to know it.
-            href={path === undefined ? `?lang=${candidate}` : localePath(candidate, path)}
-            hrefLang={candidate}
-            aria-current={current ? "true" : undefined}
-            className={`${styles.link} ${current ? styles.current : ""}`}
-          >
-            {LABELS[candidate]}
-          </a>
-        );
-      })}
-    </nav>
+    <Segmented
+      as="a"
+      size="compact"
+      label={GROUP_LABEL[locale]}
+      value={locale}
+      options={LOCALES.map((candidate) => ({
+        id: candidate,
+        label: LABELS[candidate],
+        lang: candidate,
+        // A query-only href resolves against the current URL, so the path is
+        // preserved without this component having to know it.
+        href: path === undefined ? `?lang=${candidate}` : localePath(candidate, path),
+      }))}
+    />
   );
 }

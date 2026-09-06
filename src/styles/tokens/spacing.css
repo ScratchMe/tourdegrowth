@@ -29,6 +29,8 @@
   --pad-chip-sm: 10px 12px; /* pillar chip, mobile grid */
   --pad-tag: 5px 12px; /* mono uppercase tag */
   --pad-option: 20px; /* answer option */
+  --pad-field: 16px; /* TextArea inner padding */
+  --pad-footer: 26px 0 40px; /* SiteFooter, both widths */
 
   /* Layout */
   --width-mobile: 390px;
@@ -38,6 +40,9 @@
   --gutter-mobile: 20px;
   --hit-min: 44px; /* never smaller */
   --hit-option: 64px; /* answer options */
+  /* Visual height of header-scale controls; the 44px hit comes from a transparent 6px outer pad. */
+  --hit-compact: 32px;
+  --field-min-height: 120px; /* TextArea */
 
   /* Kept from the app's original spacing scale — still used by the landing
      header/hero grid, which the DS bundle's boards don't relayout. */

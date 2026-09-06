@@ -21,7 +21,8 @@
    * AA for the 15-16px semibold label of the primary button (WCAG's relaxed
    * 3:1 "large text" rule needs 18.66px bold, which the label is not).
    * Darkening the fill by 3% clears it at 4.65:1 and is indistinguishable
-   * from --paint-red side by side. Only the BUTTON FILL uses this: the
+   * from --paint-red side by side. This is the fill under ANY white action
+   * label — the primary button, and the roast segment of core/Segmented; the
    * road-paint red itself is unchanged everywhere it is an accent.
    */
   --paint-red-action: #cc3e2b;
@@ -80,4 +81,10 @@
 
   --focus-ring: var(--ink-0); /* on light grounds */
   --focus-ring-invert: var(--paint-red); /* on --paper-2 option buttons */
+
+  /* --- Fields (design system extension 01): the one place a person types --- */
+  --field-bg: var(--surface-card);
+  --field-placeholder: var(--text-muted);
+  /* Solid red outline past the limit — diagnosis, not advice (TextArea.prompt.md). */
+  --field-border-alert: var(--paint-red);
 }

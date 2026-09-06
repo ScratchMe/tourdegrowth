@@ -23,6 +23,7 @@
   --display-hero: 700 62px/1.02 var(--font-display);
   --display-hero-mobile: 700 40px/1.03 var(--font-display);
   --display-section: 700 30px/1.1 var(--font-display);
+  --display-title: 700 36px/1.05 var(--font-display); /* detour card title: 404, error 06c */
   --display-wordmark: 700 19px/1 var(--font-display);
   --display-letter-spacing: 0.02em;
 

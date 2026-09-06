@@ -37,7 +37,7 @@ export default async function GlobalNotFound() {
 
   return (
     <RootShell locale={locale}>
-      <NotFoundScreen locale={locale} title={t.title} body={t.body} cta={t.cta} />
+      <NotFoundScreen locale={locale} eyebrow={t.eyebrow} title={t.title} body={t.body} cta={t.cta} />
     </RootShell>
   );
 }
