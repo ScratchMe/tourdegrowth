@@ -136,7 +136,10 @@ export default async function LandingPage({ params }: PageProps) {
             </div>
 
             {/* Renders nothing unless this device already took a Tour. */}
-            <LastResult locale={locale} />
+            <LastResult
+              withScore={tc(UI_STRINGS.lastResult.withScore, locale)}
+              withoutScore={tc(UI_STRINGS.lastResult.withoutScore, locale)}
+            />
           </div>
 
           <div className={styles.heroRight}>

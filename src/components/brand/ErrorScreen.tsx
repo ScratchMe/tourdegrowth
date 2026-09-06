@@ -6,7 +6,8 @@ import { Button } from "@/components/core/Button";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import { SiteFooter } from "@/components/brand/SiteFooter";
 import { WordmarkLink } from "@/components/brand/WordmarkLink";
-import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
+import { ERROR_SCREEN_STRINGS } from "@/lib/i18n/error-screen-strings";
+import { tc } from "@/lib/i18n/translatable";
 import type { Locale } from "@/lib/i18n/locale";
 import styles from "./NotFoundScreen.module.css";
 
@@ -32,7 +33,7 @@ export interface ErrorScreenProps {
  * family in two temperatures.
  */
 export function ErrorScreen({ locale, error, reset }: ErrorScreenProps) {
-  const t = UI_STRINGS.quiz;
+  const t = ERROR_SCREEN_STRINGS;
 
   useEffect(() => {
     // The server already logged the real error; this is for the browser

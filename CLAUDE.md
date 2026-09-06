@@ -1113,6 +1113,20 @@ Les deux pages applicatives sont des Client Components et ne peuvent pas exporte
 
 ---
 
+### R2-14 : ce que le navigateur télécharge pour rien, et les trois chemins par lesquels ça revenait (2026-09-06)
+
+Le constat disait deux choses : `SiteFooter` était `"use client"` pour un seul `onClick` et embarquait tout `UI_STRINGS` dans le chunk de chaque page indexable ; `GlossaryTerm` importait `content/glossary.ts` entier, `extended` compris, sur `/quiz` et `/r/<id>`. Les deux sont corrigés — le pied de page redevient un Server Component avec un îlot `TrackedLink` de dix lignes, et le glossaire est scindé en `content/glossary-terms.ts` (terme + définition, la seule partie que le popover affiche) et `content/glossary.ts` (qui spreade la première et ajoute le long) — **mais la mesure après coup a montré que le dictionnaire était toujours là**, et par trois chemins que la lecture du code n'avait pas vus :
+
+1. **`tc()` vivait dans `dictionary.ts`.** Tout Client Component qui importait la fonction pour traduire une prop reçue — le déclencheur de glossaire, le texte des questions — importait le module entier, `UI_STRINGS` compris. `tc` et `Translatable` sont maintenant dans `lib/i18n/translatable.ts` ; le dictionnaire les réexporte, rien côté serveur n'a changé.
+2. **L'écran d'erreur de R2-23, livré une heure plus tôt.** `error.tsx` est un Client Component présent dans le bundle de **chaque** route de son arbre, et `ErrorScreen` importait `UI_STRINGS` pour quatre chaînes. Les quatre sont dans `lib/i18n/error-screen-strings.ts`, que le dictionnaire spreade dans `quiz` pour que le questionnaire les lise sous leurs noms habituels.
+3. **Le pied de page dans l'écran d'erreur.** Un Server Component importé **par** un Client Component devient client : `SiteFooter` sans directive ne suffisait pas, il fallait aussi qu'il n'importe plus le dictionnaire pour ses deux libellés de nav — `lib/i18n/nav-strings.ts`.
+
+**Mesuré, pas supposé** : les chunks réellement référencés par le HTML servi ont été lus et fouillés avant et après. Avant : « Drafting your race report », « dead last » et « Roast Mode » dans les chunks de `/en/glossary/cac` ; le texte long du glossaire (« 7 amis en 10 jours ») dans ceux de `/quiz`. Après : tous absents ; ~185 Ko gzip de JavaScript par page de contenu, ~199 sur `/quiz`, le plancher React + App Router. `src/__tests__/client-bundles.test.ts` transforme la leçon en garde statique : aucun Client Component hors des trois écrans qui en ont besoin n'importe le dictionnaire, rien sous `components/` n'importe `content/glossary`, et le pied de page comme l'écran d'erreur n'importent ni l'un ni l'autre. Le probe « Dave McClure » utilisé au départ était mauvais — il figure aussi dans la définition courte d'AARRR ; « 7 amis en 10 jours » ne figure que dans le long.
+
+**Vérifié en réel** : lint, tsc, 282 tests (+4), `next build`, 97 specs Playwright, chunks fouillés.
+
+---
+
 ## État du projet au 2026-09-06 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.

@@ -52,7 +52,7 @@ La colonne **Autonomie** dit ce que chaque item attend d'Antoine : **Auto** = je
 | **C — Contenu de référence** | R2-11 | Glossaire : 76 à 105 mots par terme, contre 600 à 1 500 chez ceux qui rangent | F | L | Relecture (lourde) | À faire |
 | | R2-12 | « AARRR » n'apparaît ni sur la landing ni sur `/how-it-works` | F | S | Relecture | À faire |
 | | R2-13 | Maillage interne : le glossaire n'est lié depuis aucune page qui a de l'autorité | F | S/M | Auto | À faire |
-| | R2-14 | Le dictionnaire bilingue entier et tout le glossaire partent dans le bundle client | T | S | Auto | À faire |
+| | R2-14 | Le dictionnaire bilingue entier et tout le glossaire partent dans le bundle client | T | S | Auto | **Fait** (PR #75, 2026-09-06) — gardé par un test statique |
 | | R2-15 | Structured data : un seul bloc JSON-LD, identique en FR et en EN | F | M | Auto | **Fait en partie** (PR #58 : localisé, `author`) — reste `DefinedTerm`, `BreadcrumbList`, `url` par langue |
 | | R2-16 | Titres FR non localisés là où la requête française diffère | F | S | Relecture | À faire |
 | | R2-17 | `/how-it-works` répète chaque nom de pilier deux fois | F | XS | Auto | **Fait** (PR #61, 2026-09-06) |

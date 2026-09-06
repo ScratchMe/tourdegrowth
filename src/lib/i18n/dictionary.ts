@@ -1,13 +1,11 @@
-import type { Locale } from "./locale";
-import { DEFAULT_LOCALE } from "./locale";
+import { ERROR_SCREEN_STRINGS } from "./error-screen-strings";
+import { NAV_STRINGS } from "./nav-strings";
+import { tc, type Translatable } from "./translatable";
 
-/** A piece of UI copy provided in both supported languages. */
-export type Translatable = Record<Locale, string>;
-
-/** `tc` = "translate content": picks the string for the active locale. */
-export function tc(entry: Translatable, locale: Locale): string {
-  return entry[locale] ?? entry[DEFAULT_LOCALE];
-}
+// `Translatable` and `tc` moved to `./translatable` (REVIEW-02.md R2-14) so
+// Client Components can translate a prop without importing this whole file.
+// Re-exported here: nothing on the server had to change.
+export { tc, type Translatable };
 
 /**
  * UI_STRINGS holds every bit of interface copy, keyed by screen/section.
@@ -125,10 +123,10 @@ export const UI_STRINGS = {
    * one, now that there's a real page behind it. "Glossary" joins it once
    * SPEC-ADDENDUM-02.md §3.1 gives the glossary its own indexable pages —
    * on Antoine's request, not part of either addendum's own spec text. */
-  nav: {
-    howItWorks: { en: "How it works", fr: "Comment ça marche" },
-    glossary: { en: "Glossary", fr: "Glossaire" },
-  },
+  // The two header/footer labels live in `./nav-strings` since R2-14: the
+  // footer is rendered inside the (client) error boundary too, and importing
+  // them from here dragged this whole file into every page's bundle.
+  nav: NAV_STRINGS,
 
   /** Glossary info-bubble chrome (SPEC-ADDENDUM-01.md §1.2) — the terms and
    * definitions themselves live in content/glossary.ts, this is just the
@@ -177,16 +175,9 @@ export const UI_STRINGS = {
     // copy, same status as the rest of this file's FR strings (see the note
     // above UI_STRINGS) — this is UI chrome, not the verdict-text library.
     errorHeaderLabel: { en: "Error", fr: "Erreur" },
-    errorEyebrow: { en: "Detour", fr: "Détour" },
-    errorTitle: {
-      en: "Your results took a wrong turn.",
-      fr: "Tes résultats ont pris un mauvais virage.",
-    },
-    errorBody: {
-      en: "Something broke on our end — try again in a moment.",
-      fr: "Quelque chose a cassé de notre côté — réessaie dans un instant.",
-    },
-    errorRetry: { en: "Try again", fr: "Réessayer" },
+    // errorEyebrow / errorTitle / errorBody / errorRetry live in
+    // `./error-screen-strings` since R2-14 (shared with the error boundaries).
+    ...ERROR_SCREEN_STRINGS,
     errorHint: {
       en: "Your 15 answers are still saved on this device — retrying doesn't restart the questionnaire.",
       fr: "Tes 15 réponses sont toujours enregistrées sur cet appareil — réessayer ne relance pas le questionnaire.",

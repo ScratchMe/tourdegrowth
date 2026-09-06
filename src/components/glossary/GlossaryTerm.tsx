@@ -1,7 +1,7 @@
 "use client";
 
-import { GLOSSARY, type GlossaryTermId } from "@/content/glossary";
-import { tc } from "@/lib/i18n/dictionary";
+import { GLOSSARY_TERMS, type GlossaryTermId } from "@/content/glossary-terms";
+import { tc } from "@/lib/i18n/translatable";
 import type { Locale } from "@/lib/i18n/locale";
 import { DefinitionPopover } from "./DefinitionPopover";
 import { DefinitionTrigger } from "./DefinitionTrigger";
@@ -29,7 +29,7 @@ export interface GlossaryTermProps {
  * uses elsewhere for breakpoint-dependent rendering).
  */
 export function GlossaryTerm({ id, locale, openId, onOpenChange, tone = "muted", closeLabel, labelTemplate }: GlossaryTermProps) {
-  const entry = GLOSSARY[id];
+  const entry = GLOSSARY_TERMS[id];
   const term = tc(entry.term, locale);
   const definition = tc(entry.definition, locale);
   const open = openId === id;

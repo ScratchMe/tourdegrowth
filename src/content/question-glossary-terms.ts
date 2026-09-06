@@ -1,5 +1,5 @@
 import type { Translatable } from "@/lib/i18n/dictionary";
-import type { GlossaryTermId } from "./glossary";
+import type { GlossaryTermId } from "./glossary-terms";
 
 /**
  * Which quiz questions carry a jargon term with a glossary entry, and the
