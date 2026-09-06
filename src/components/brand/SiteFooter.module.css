@@ -3,12 +3,22 @@
   margin-top: var(--space-15);
 }
 
+/*
+ * `--pad-footer` carries the vertical rhythm only (26px / 40px). The gutters
+ * are added back explicitly because the pages above this footer have them:
+ * without them the links would sit flush to the viewport edge on a screen
+ * exactly as wide as the container, and the prompt's own rule is that the
+ * footer aligns with the content above it. 24px is what every page container
+ * in this app uses, not `--gutter-desktop` (40px), which nothing does.
+ */
 .inner {
   margin: 0 auto;
-  padding: var(--space-10) 24px var(--space-12);
+  padding: var(--pad-footer);
+  padding-left: 24px;
+  padding-right: 24px;
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-3);
 }
 
 /* Mirrors the two container widths the pages themselves use: the app shell
@@ -25,35 +35,48 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-8);
+  gap: 0 var(--space-8);
 }
 
+/*
+ * Every line in this system is 2px — there is no 1px anything
+ * (SiteFooter.prompt.md). The 44px hit height comes from the row, not from
+ * padding that would push the underline away from the text.
+ */
 .navLink {
   font: var(--label-nav);
   color: var(--text-muted);
-  text-decoration: none;
-  border-bottom: 1px solid var(--border-divider);
-  padding-bottom: 2px;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--border-divider);
+  text-underline-offset: 6px;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--hit-min);
 }
 
 .navLink:hover {
   color: var(--text-body);
-  border-bottom-color: var(--text-body);
+  text-decoration-color: var(--border-hard);
 }
 
 .credit {
   font: var(--meta-xs);
   color: var(--text-muted);
+  margin: 0;
+  text-wrap: pretty;
 }
 
+/* The credit link runs the same direction as every other link in the system:
+   red-deep, ink on hover — not the reverse (SiteFooter.prompt.md). */
 .creditLink {
-  color: var(--text-muted);
+  color: var(--text-link);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 .creditLink:hover {
-  color: var(--text-link);
+  color: var(--text-link-hover);
 }
 
 .footer a:focus-visible {
@@ -64,11 +87,11 @@
 
 @media (max-width: 760px) {
   .inner {
-    padding: var(--space-9) var(--gutter-mobile) var(--space-11);
-    gap: var(--space-5);
+    padding-left: var(--gutter-mobile);
+    padding-right: var(--gutter-mobile);
   }
 
   .nav {
-    gap: var(--space-6);
+    gap: 0 var(--space-6);
   }
 }

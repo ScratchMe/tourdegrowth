@@ -22,6 +22,12 @@ export const FREE_CONTEXT = {
     fr: "Ex. : on vend à des cabinets comptables, cycle de vente long, le vrai frein c'est la confiance plus que le prix...",
     en: "E.g.: we sell to accounting firms, long sales cycle, trust is a bigger blocker than price...",
   },
+  /**
+   * No longer rendered: design system extension 01 reduced this screen to two
+   * actions (← Back, primary). Leaving the field empty and submitting is what
+   * skipping now is. Kept because this file is product-agent copy — deleting
+   * a delivered string is the product agent's call, not ours.
+   */
   skip: { fr: "Skip", en: "Skip" },
   submit: { fr: "Obtenir mon diagnostic →", en: "Get my results →" },
 } satisfies Record<string, Translatable>;

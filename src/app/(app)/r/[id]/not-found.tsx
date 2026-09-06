@@ -10,6 +10,12 @@ export default async function ResultNotFound() {
   const t = UI_STRINGS.result;
 
   return (
-    <NotFoundScreen locale={locale} title={t.notFoundTitle} body={t.notFoundBody} cta={t.notFoundCta} />
+    <NotFoundScreen
+      locale={locale}
+      eyebrow={t.notFoundEyebrow}
+      title={t.notFoundTitle}
+      body={t.notFoundBody}
+      cta={t.notFoundCta}
+    />
   );
 }

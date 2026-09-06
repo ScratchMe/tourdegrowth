@@ -6,8 +6,9 @@ import { WordmarkLink } from "@/components/brand/WordmarkLink";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import { ModeTag } from "@/components/brand/ModeTag";
 import { Button } from "@/components/core/Button";
+import { DetourCard } from "@/components/core/DetourCard";
 import { AnswerOption } from "@/components/quiz/AnswerOption";
-import { FreeContextField } from "@/components/quiz/FreeContextField";
+import { TextArea } from "@/components/core/TextArea";
 import { QuestionCard } from "@/components/quiz/QuestionCard";
 import { StageProgress } from "@/components/quiz/StageProgress";
 import { LoadingScreen } from "@/components/quiz/LoadingScreen";
@@ -249,27 +250,26 @@ export default function DeepDivePage() {
 
             <p className={styles.freeContextPitch}>{tc(FREE_CONTEXT.pitch, locale)}</p>
 
-            <FreeContextField
+            <TextArea
               value={freeContext}
               onChange={handleFreeContextChange}
               maxLength={FREE_CONTEXT_MAX_LENGTH}
               placeholder={tc(FREE_CONTEXT.placeholder, locale)}
-              aria-label={tc(FREE_CONTEXT.label, locale)}
+              label={tc(FREE_CONTEXT.label, locale)}
               data-testid="free-context-textarea"
             />
 
+            {/* Two actions since design system extension 01, not three: the
+                field is already marked optional in its own question, and the
+                primary button submits an empty one just as Skip did. Leaving
+                the field blank is still the way to skip. */}
             <div className={styles.footer}>
               <Button variant="quiet" data-testid="back-button" onClick={() => setPhase("answering")}>
                 {tc(t.backButton, locale)}
               </Button>
-              <div className={styles.freeContextActions}>
-                <Button variant="secondary" data-testid="skip-button" onClick={() => void submit(answers, "")}>
-                  {tc(FREE_CONTEXT.skip, locale)}
-                </Button>
-                <Button data-testid="submit-button" onClick={() => void submit(answers, freeContext)}>
-                  {tc(FREE_CONTEXT.submit, locale)}
-                </Button>
-              </div>
+              <Button data-testid="submit-button" onClick={() => void submit(answers, freeContext)}>
+                {tc(FREE_CONTEXT.submit, locale)}
+              </Button>
             </div>
           </>
         )}
@@ -277,14 +277,18 @@ export default function DeepDivePage() {
         {phase === "loading" && <LoadingScreen locale={locale} variant="deep" />}
 
         {phase === "error" && (
-          <div className={styles.errorCard}>
-            <MetaLabel size="xs" tone="alert">
-              {tc(t.errorEyebrow, locale)}
-            </MetaLabel>
-            <h2 className={styles.errorTitle}>{tc(t.errorTitle, locale)}</h2>
-            <p className={styles.errorBody}>{tc(t.errorBody, locale)}</p>
-            {submitError && <p className={styles.errorDetail}>{submitError}</p>}
-            <Button size="lg" fullWidth data-testid="retry-button" onClick={() => void submit(answers, freeContext)}>
+          <div className={styles.detour}>
+            <DetourCard
+              tone="fault"
+              headingLevel="h2"
+              eyebrow={tc(t.errorEyebrow, locale)}
+              title={tc(t.errorTitle, locale)}
+            >
+              {tc(t.errorBody, locale)}
+              {submitError && <p className={styles.errorDetail}>{submitError}</p>}
+            </DetourCard>
+
+            <Button size="lg" data-testid="retry-button" onClick={() => void submit(answers, freeContext)}>
               {tc(t.errorRetry, locale)}
             </Button>
           </div>

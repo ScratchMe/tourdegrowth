@@ -193,14 +193,12 @@ export function ResultView({
                 the cookie — the choice then carries on to `/quiz`. */}
             <LocaleSwitcher locale={locale} />
             {deepDive && <ModeTag mode="deep">{tc(dd.badge, locale)}</ModeTag>}
-            {roast ? (
-              <span className={styles.roastBadge}>{tc(t.roastBadge, locale)}</span>
-            ) : (
-              <MetaLabel size="sm">
-                {tc(t.finishedLabel, locale)}
-                <span className={styles.desktopOnly}>{tc(t.answeredSuffixTemplate, locale).replace("{n}", "15")}</span>
-              </MetaLabel>
-            )}
+            {/* Design system extension 01 drops the "Stage 5/5 — Finished ·
+                15/15 answered" meta line from this header: the score below is
+                the proof it is finished. The roast badge and the Deep dive tag
+                stay — those are state, not a progress read-out, and each has
+                its own component in the system. */}
+            {roast && <span className={styles.roastBadge}>{tc(t.roastBadge, locale)}</span>}
           </div>
         </div>
       </header>

@@ -44,34 +44,6 @@
   justify-content: space-between;
 }
 
-/* The one place in the questionnaire flow that breaks from the ink-outline/
-   red-shadow card language: red outline, red shadow, to read as distinct
-   from a normal question card (DESIGN-BRIEF.md §06c). */
-.errorCard {
-  background: var(--surface-card);
-  border: 2px solid var(--paint-red);
-  border-radius: var(--radius-card);
-  box-shadow: 7px 7px 0 var(--paint-red);
-  padding: 24px 22px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  align-items: flex-start;
-  max-width: 480px;
-}
-
-.errorTitle {
-  font: var(--display-section);
-  font-size: 36px;
-  line-height: 1.15;
-  color: var(--text-body);
-}
-
-.errorBody {
-  font: var(--body-md);
-  color: var(--text-muted);
-}
-
 .errorDetail {
   font: var(--meta-sm);
   color: var(--text-muted);
@@ -84,10 +56,20 @@
   }
 }
 
-/* Programmatically focused containers (REVIEW.md R-19): the user did not tab
-   to these, so a focus ring on them would be noise. They are not reachable
-   by keyboard either — tabIndex is -1 — so no real focus indicator is lost. */
-.questionRegion:focus,
-.errorCard:focus {
+/* Programmatically focused container (REVIEW.md R-19): the user did not tab
+   to it, so a focus ring on it would be noise. It is not reachable by
+   keyboard either — tabIndex is -1 — so no real focus indicator is lost.
+   The error card's own rule now lives in DetourCard.module.css. */
+.questionRegion:focus {
   outline: none;
+}
+
+/* The detour screen: the card is the one raised element, the primary action
+   sits below it (DetourCard.prompt.md). */
+.detour {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-8);
+  max-width: 560px;
 }

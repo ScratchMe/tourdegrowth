@@ -1,79 +1,45 @@
-/* Built from design tokens only — the design system has no disclosure
-   component (see the CLAUDE.md entry for R-12). Deliberately quiet: this
-   sits after the CTAs and stays closed until asked for. */
-.wrap {
-  border-top: var(--border-rule);
-  padding-top: var(--space-8);
-  margin-top: var(--space-8);
-}
-
-.summary {
-  font: var(--meta-sm);
-  letter-spacing: var(--meta-tracking);
-  text-transform: uppercase;
-  color: var(--text-muted);
-  cursor: pointer;
-  list-style: none;
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.summary::-webkit-details-marker {
-  display: none;
-}
-
-/* A rotating caret, so the control reads as expandable without an icon file
-   (the design system ships no icons at all — see DESIGN-BRIEF.md "Assets"). */
-.summary::before {
-  content: "+";
-  font: var(--meta-md);
-  color: var(--text-muted);
-}
-
-.wrap[open] .summary::before {
-  content: "−";
-}
-
-.summary:hover {
-  color: var(--text-body);
-}
-
-.summary:focus-visible {
-  outline: var(--focus-width) solid var(--focus-ring);
-  outline-offset: var(--focus-offset);
-  border-radius: 2px;
-}
-
+/*
+ * Design system extension 01 brought this into the system as a composition of
+ * `core/Disclosure`: one top-level row, and one nested `sm` row per pillar.
+ * See design/ds-extension-01-return/components/result/ScoreBreakdown.prompt.md
+ */
 .intro {
   font: var(--body-sm);
   color: var(--text-muted);
-  margin-top: var(--space-5);
+  margin: 0 0 var(--space-8);
+  text-wrap: pretty;
+}
+
+.pillars {
+  display: flex;
+  flex-direction: column;
 }
 
 .pillar {
-  margin-top: var(--space-8);
+  border-top: var(--border-rule);
 }
 
+/* The pillar head IS the ten-second explanation: name left, maths right. */
 .pillarHead {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space-5);
-  border-bottom: var(--border-rule);
-  padding-bottom: var(--space-3);
+  width: 100%;
 }
 
 .pillarName {
   font: var(--meta-md);
   letter-spacing: var(--meta-tracking);
-  text-transform: uppercase;
   color: var(--text-body);
 }
 
 .pillarMath {
   font: var(--meta-sm);
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
@@ -84,38 +50,46 @@
 }
 
 .question {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: var(--space-7);
+  row-gap: var(--space-1);
   padding: var(--space-5) 0;
-  border-bottom: 1px dashed var(--border-divider);
+}
+
+.question + .question {
+  border-top: var(--border-rule);
 }
 
 .questionText {
+  grid-column: 1 / -1;
   font: var(--body-sm);
   color: var(--text-body);
-}
-
-.answerRow {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-5);
+  text-wrap: pretty;
 }
 
 .answerLabel {
   font: var(--body-sm);
   color: var(--text-muted);
+  text-wrap: pretty;
 }
 
 .points {
   font: var(--meta-sm);
-  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
+  align-self: end;
+  color: var(--text-muted);
+}
+
+/* Solid red is diagnosis, and the zeros are the diagnosis. 7 and 20 stay muted. */
+.pointsZero {
+  color: var(--text-alert);
 }
 
 .note {
   font: var(--meta-xs);
-  color: var(--text-muted);
-  margin-top: var(--space-8);
+  color: var(--text-faint);
+  margin: var(--space-8) 0 0;
+  text-wrap: pretty;
 }

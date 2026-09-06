@@ -1,0 +1,85 @@
+/* Design system extension 01 — see design/ds-extension-01-return/components/core/Disclosure.prompt.md */
+
+.wrap {
+  border-top: none;
+}
+
+.ruled {
+  border-top: var(--border-rule);
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  /* The whole row is the hit target, never the text alone. */
+  min-height: var(--hit-min);
+  padding: var(--space-3) 0;
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+}
+
+.summary::-webkit-details-marker {
+  display: none;
+}
+
+.md .summary {
+  font: var(--meta-sm);
+}
+
+.sm .summary {
+  font: var(--meta-xs);
+}
+
+.wrap[open] > .summary {
+  color: var(--text-body);
+}
+
+.summaryText {
+  /* Lets a summary node lay its own children out edge to edge (pillar name / maths). */
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.summary:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset-tight);
+  border-radius: 2px;
+}
+
+/*
+ * The marker: a sunken mono chip. `+` closed, `−` open — the chip is the
+ * affordance, the glyph is the state. Content in CSS rather than the DOM so
+ * a screen reader announces the row's own expanded state (native <details>)
+ * instead of reading a stray plus sign.
+ */
+.marker {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font: var(--meta-md);
+  font-weight: 600;
+  background: var(--surface-sunken);
+  color: var(--text-body);
+  border-radius: var(--radius-tag);
+}
+
+.marker::before {
+  content: "+";
+}
+
+.wrap[open] > .summary .marker::before {
+  content: "−";
+}
+
+.content {
+  padding-bottom: var(--space-8);
+}

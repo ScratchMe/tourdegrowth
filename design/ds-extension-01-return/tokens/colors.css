@@ -1,0 +1,48 @@
+:root {
+  /* --- Base palette: paper, ink, road paint --- */
+  --paper-0: #FBF9F2;   /* raised card face, the brightest surface */
+  --paper-1: #E7E1D2;   /* page / artboard ground */
+  --paper-2: #DED6C2;   /* recessed fill: option buttons, meta chips */
+  --paper-3: #CFC7B4;   /* desk, the darkest neutral ground */
+
+  --ink-0: #211C15;     /* text, every 2px hard border, every hard shadow */
+  --ink-1: #5B5346;     /* secondary text, dashed borders, meta labels */
+  --ink-faint: rgba(33, 28, 21, 0.65); /* credit lines, closing notes — was .45, failed AA at 2.80:1 */
+
+  --paint-red: #D2402C;     /* road-marking red: accents, borders, washes */
+  --paint-red-action: #CC3E2B; /* primary button fill only — --paper-0 on it is 4.65:1 (AA) */
+  --paint-red-deep: #A32E1F;/* red text on light grounds (AA on --paper-0) */
+  --paint-red-wash: #F3D9D2;/* soft red surface: weak pillar, problem cards */
+
+  /* --- Semantic aliases: use these in components --- */
+  --surface-page: var(--paper-1);
+  --surface-card: var(--paper-0);
+  --surface-sunken: var(--paper-2);
+  --surface-desk: var(--paper-3);
+  --surface-alert: var(--paint-red-wash);
+
+  --text-body: var(--ink-0);
+  --text-muted: var(--ink-1);
+  --text-inverse: var(--paper-0);
+  --text-faint: var(--ink-faint);    /* quieter than muted, still AA on paper */
+  --text-alert: var(--paint-red-deep);
+  --text-link: var(--paint-red-deep);/* red text on paper: 5.42:1 on --paper-1 */
+  --text-link-hover: var(--ink-0);
+
+  --border-hard: var(--ink-0);       /* 2px solid — a real edge */
+  --border-soft: var(--ink-1);       /* 2px dashed — pending / secondary */
+  --border-alert: var(--paint-red);
+  --border-divider: rgba(33, 28, 21, 0.22); /* 1-2px dashed rules */
+
+  --action-primary-bg: var(--paint-red-action);
+  --action-primary-text: var(--paper-0);
+  --action-secondary-text: var(--ink-0);
+
+  --focus-ring: var(--ink-0);        /* on light grounds */
+  --focus-ring-invert: var(--paint-red); /* on --paper-2 option buttons */
+
+  /* --- Fields (ext-01): the one place a person types --- */
+  --field-bg: var(--surface-card);
+  --field-placeholder: var(--text-muted);
+  --field-border-alert: var(--paint-red); /* solid red outline past the limit — diagnosis, not advice */
+}

@@ -59,16 +59,22 @@ test.describe("locale in the URL", () => {
     }
   });
 
+  /*
+   * The switch is a named GROUP of links, not a `nav` landmark: design system
+   * extension 01 rebased it on `core/Segmented`, whose container is
+   * `role="group"` (`Segmented.prompt.md`). Its accessible name is localized,
+   * so these specs click FR from an English page where it reads "Language".
+   */
   test("the language switcher lands on the same page in the other language", async ({ page }) => {
     await page.goto("/en/glossary/churn");
-    await page.getByRole("navigation", { name: "Language" }).getByRole("link", { name: "FR" }).click();
+    await page.getByRole("group", { name: "Language" }).getByRole("link", { name: "FR" }).click();
     await page.waitForURL("**/fr/glossary/churn");
     await expect(page.locator("html")).toHaveAttribute("lang", "fr");
   });
 
   test("switching language carries over to the unprefixed app pages", async ({ page }) => {
     await page.goto("/en");
-    await page.getByRole("navigation", { name: "Language" }).getByRole("link", { name: "FR" }).click();
+    await page.getByRole("group", { name: "Language" }).getByRole("link", { name: "FR" }).click();
     await page.waitForURL("**/fr");
 
     // /quiz has no locale of its own; it must follow the choice just made,
@@ -144,7 +150,7 @@ test.describe("switching language on a shared result", () => {
     await page.goto("/r/sample");
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
 
-    await page.getByRole("navigation", { name: "Language" }).getByText("FR", { exact: true }).click();
+    await page.getByRole("group", { name: "Language" }).getByText("FR", { exact: true }).click();
     await page.waitForURL(/lang=fr/);
 
     // Not just the chrome: the verdict itself, which is the point of R-09.
@@ -154,7 +160,7 @@ test.describe("switching language on a shared result", () => {
 
   test("the choice follows the reader into their own Tour", async ({ page }) => {
     await page.goto("/r/sample");
-    await page.getByRole("navigation", { name: "Language" }).getByText("FR", { exact: true }).click();
+    await page.getByRole("group", { name: "Language" }).getByText("FR", { exact: true }).click();
     await page.waitForURL(/lang=fr/);
 
     // `/quiz` carries no locale prefix, so this only works because the proxy
@@ -169,7 +175,7 @@ test.describe("switching language on a shared result", () => {
     // switch mid-funnel reloads the page. The choice is made before, on the
     // landing or on the result.
     await page.goto("/quiz");
-    await expect(page.getByRole("navigation", { name: "Language" })).toHaveCount(0);
+    await expect(page.getByRole("group", { name: "Language" })).toHaveCount(0);
   });
 });
 

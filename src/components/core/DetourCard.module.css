@@ -1,0 +1,58 @@
+/* Design system extension 01 — see design/ds-extension-01-return/components/core/DetourCard.prompt.md */
+
+.card {
+  background: var(--surface-card);
+  border: var(--border-solid);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: var(--pad-card);
+  max-width: 560px;
+}
+
+/*
+ * `fault` is the only card in the system with a red shadow, and it is
+ * reserved for OUR failures. A 404 is never fault: the reader is lost, not
+ * broken, and red would blame them.
+ */
+.fault {
+  border-color: var(--border-alert);
+  box-shadow: var(--shadow-card-roast);
+}
+
+/* Focus is moved here programmatically when a flow fails; the reader never
+   tabbed to it, so no ring — same rule as the quiz's question region (R-19). */
+.card:focus {
+  outline: none;
+}
+
+.eyebrow {
+  font: var(--meta-2xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: var(--space-5);
+}
+
+.fault .eyebrow {
+  color: var(--text-alert);
+}
+
+.title {
+  font: var(--display-title);
+  letter-spacing: 0.01em;
+  color: var(--text-body);
+  margin: 0 0 var(--space-5);
+  text-wrap: balance;
+}
+
+.body {
+  font: var(--body-md);
+  color: var(--text-muted);
+  text-wrap: pretty;
+}
+
+@media (max-width: 760px) {
+  .card {
+    padding: var(--pad-card-mobile);
+  }
+}

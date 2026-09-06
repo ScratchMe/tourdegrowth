@@ -70,6 +70,8 @@ export const UI_STRINGS = {
    * screen: written to make the page real, still worth a read.
    */
   notFound: {
+    /* Design system extension 01: the detour family's mono eyebrow. */
+    eyebrow: { en: "Detour", fr: "Détour" },
     title: { en: "This page doesn't exist.", fr: "Cette page n'existe pas." },
     body: {
       en: "The address may be mistyped, or the page may have moved. Everything else is still where you left it.",
@@ -264,8 +266,6 @@ export const UI_STRINGS = {
    * single actionable recommendation is now exclusively the Deep dive's
    * `priorityAction` (see `deepDive.priorityMoveLabel` above). */
   result: {
-    finishedLabel: { en: "Stage 5/5 — finished", fr: "Étape 5/5 — terminé" },
-    answeredSuffixTemplate: { en: " · {n}/15 answered", fr: " · {n}/15 répondues" },
     roastBadge: { en: "🔥 Roast Mode", fr: "🔥 Roast Mode" },
     strengthsTitle: { en: "Strengths", fr: "Points forts" },
     strengthsTitleRoast: { en: "Credit where it's due", fr: "Ce qui marche, quand même" },
@@ -281,6 +281,8 @@ export const UI_STRINGS = {
     // Roast-only stamped tag on the weakest pillar (DESIGN-BRIEF.md §04: "08/20 RETENTION — dead last").
     stampedSuffix: { en: "dead last", fr: "bon dernier" },
     sampleBadge: { en: "Sample result — not your data", fr: "Résultat d'exemple — pas tes données" },
+    /* Design system extension 01 names this case's eyebrow separately from the generic detour. */
+    notFoundEyebrow: { en: "Lost result", fr: "Résultat introuvable" },
     notFoundTitle: { en: "No result at this address.", fr: "Aucun résultat à cette adresse." },
     notFoundBody: {
       en: "This link may be wrong, or the result may no longer exist.",

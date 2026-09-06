@@ -33,6 +33,9 @@ const PAGES: [name: string, path: string][] = [
   ["sample result", "/r/sample"],
   ["how it works", "/en/how-it-works"],
   ["glossary term", "/fr/glossary/viral-coefficient"],
+  // Added with design system extension 01, which turned this into a real
+  // screen (DetourCard) rather than the framework's bare error document.
+  ["not found", "/nonsense"],
 ];
 
 interface ContrastData {
