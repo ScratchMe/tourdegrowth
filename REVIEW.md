@@ -53,7 +53,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 | | R-21 | La nav de la landing déborde le viewport mobile (FR **et** EN depuis R-13) | F+T | XS | À faire |
 | | R-22 | Trois paires de couleurs sous le seuil AA de contraste | F+T | S | À faire |
 | | R-23 | Boutons de partage LinkedIn/X : où les mettre sans casser « 2 CTA » | F | S | À faire |
-| | R-26 | Le 404 global n'a ni notre CSS ni notre chrome | F+T | S | À faire |
+| | R-26 | Le 404 global n'a ni notre CSS ni notre chrome | F+T | S | **Fait** (PR #48, 2026-09-06) |
 
 ### Pourquoi cet ordre
 
@@ -451,7 +451,9 @@ Le chrome partagé (polices `next/font`, script GoatCounter, `LocaleProvider`, `
 **Vérification attendue.** `next build` affiche `○` pour les 32 pages de contenu, `ƒ` pour `/quiz`, `/r/[id]`, `/deep-dive`, `/admin`, `/api`. Les 36 specs E2E restent vertes, `<html lang>` reste correct dans les deux arbres.
 ### R-26 — Le 404 global n'a ni notre CSS ni notre chrome
 
-**Type** F+T · **Effort** S · **Statut** À faire
+**Type** F+T · **Effort** S · **Statut** **Fait** (PR #48, 2026-09-06)
+
+**Le correctif proposé ci-dessous était incomplet sur deux points, tous deux découverts en construisant** : il faut `global-not-found.tsx` (que Next monte comme un layout) et non `not-found.tsx`, et il faut cesser de lever `notFound()` depuis le layout de langue. Détail dans `CLAUDE.md`.
 
 **D'où ça vient.** Trouvé en vérifiant le correctif de la couture de fond (2026-09-05), pas dans la revue initiale.
 

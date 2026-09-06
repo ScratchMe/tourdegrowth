@@ -172,3 +172,44 @@ test.describe("switching language on a shared result", () => {
     await expect(page.getByRole("navigation", { name: "Language" })).toHaveCount(0);
   });
 });
+
+/**
+ * REVIEW.md R-26 — the 404 used to be the only surface of the product that
+ * did not look like the product: Next's built-in `<html id="__next_error__">`,
+ * unbranded, without one of our stylesheets. A link mistyped from a shared
+ * result lands there.
+ */
+test.describe("the page that does not exist", () => {
+  for (const [path, expected] of [
+    ["/nonsense", "en"],
+    ["/fr/pas-une-page", "fr"],
+    ["/fr/glossary/pas-un-terme", "fr"],
+    ["/en/glossary/not-a-term", "en"],
+  ] as const) {
+    test(`${path} is a branded 404 in ${expected}`, async ({ page }) => {
+      const response = await page.goto(path);
+      expect(response?.status()).toBe(404);
+
+      // Ours, not Next's fallback document.
+      await expect(page.locator("html")).not.toHaveAttribute("id", "__next_error__");
+      await expect(page.locator("html")).toHaveAttribute("lang", expected);
+      await expect(page.getByRole("link", { name: "Tour de Growth" }).first()).toBeVisible();
+
+      // A stylesheet of ours actually applied — the wordmark is invisible
+      // without it, so this is what "looks like the product" means.
+      const styled = await page.evaluate(() => {
+        const body = getComputedStyle(document.body);
+        return { background: body.backgroundColor, family: body.fontFamily };
+      });
+      expect(styled.background).not.toBe("rgba(0, 0, 0, 0)");
+      expect(styled.family).toMatch(/Inter/);
+    });
+  }
+
+  test("and it offers a way back rather than being a cul-de-sac", async ({ page }) => {
+    await page.goto("/fr/pas-une-page");
+    await page.getByRole("link", { name: /Retour à Tour de Growth/i }).click();
+    await page.waitForURL("**/fr");
+    await expect(page.locator("html")).toHaveAttribute("lang", "fr");
+  });
+});

@@ -61,6 +61,24 @@ export const UI_STRINGS = {
   },
 
   /**
+   * The global 404 — an address that matches no page at all (REVIEW.md R-26).
+   *
+   * Distinct from `result.notFound*`, which is specifically "no submission at
+   * this id" and can say so. This one knows nothing about why you are here.
+   *
+   * // TODO: copie finale à valider. Interface copy, same status as the error
+   * screen: written to make the page real, still worth a read.
+   */
+  notFound: {
+    title: { en: "This page doesn't exist.", fr: "Cette page n'existe pas." },
+    body: {
+      en: "The address may be mistyped, or the page may have moved. Everything else is still where you left it.",
+      fr: "L'adresse est peut-être mal recopiée, ou la page a changé de place. Le reste est là où tu l'as laissé.",
+    },
+    cta: { en: "Back to Tour de Growth →", fr: "Retour à Tour de Growth →" },
+  },
+
+  /**
    * The "how does this compare" line under the score (REVIEW.md R-20).
    *
    * // TODO: copie finale à valider. Same status as `lastResult` below:
