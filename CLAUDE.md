@@ -848,3 +848,44 @@ C'est une hypothèse bien étayée, pas une preuve : R-04 masque la cause du 502
 **Le texte français du roast, tel que Gemini l'a produit ce run-là** (avant correctif, sur le petit prompt) — à faire lire à Antoine, c'est lui qui juge si la voix survit à la traduction : « Votre produit souffre d'une fuite critique : vos praticiens s'en vont durant les deux premières semaines… ». Le garde-fou tient (ça vise la stratégie, pas la personne), et c'est du français, pas de l'anglais traduit.
 
 **Vérifié en réel** : 245 tests unitaires (+1), 66 specs Playwright, lint/tsc/build propres. Ce qui ne peut se vérifier qu'au prochain run : que la production passe avec le nouveau plafond, et la durée réelle qu'affiche la sonde sur un prompt de vraie longueur — si elle dépasse 45 s un jour lent, c'est ce chiffre qu'il faudra revoir, pas une théorie.
+
+### Run n°6 : vert de bout en bout, et le nouveau plafond a servi (2026-09-06)
+
+Premier run entièrement vert depuis la création du workflow : production 9/9 **et** sonde Gemini 2/2, sur le prompt de vraie longueur.
+
+**Le plafond de 45 s a été exercé pour de vrai, pas seulement relevé.** Le Deep dive de production a mis **70 s** pour ses quatre générations en parallèle, et le côté anglais est sorti de `gemini-3.6-flash` : `gemini-3.7-flash` n'a pas répondu (timeout à 45 s puis repli, ou 503 immédiat — le log de la sonde production ne distingue pas les deux). Sous l'ancien plafond de 20 s, ce même run aurait été un `DEEP_DIVE_FAILED` de plus. Côté sonde, sur un prompt de 3 970 caractères : 5,8 s et 6,9 s pour les deux neutres (`3.7-flash`), **20,6 s** pour le roast français (`3.6-flash`, après un 3.7 refusé vite, `thoughts=2801`). Le roast est ce que le produit demande de plus long à écrire, et il reste à moins de la moitié du plafond un jour ordinaire.
+
+**Le français du roast, produit sur un prompt complet** (à faire lire à Antoine) : « Un outil d'usage quotidien qui n'a aucun suivi de rétention et perd la majorité de ses praticiens au cours du premier mois est la définition même du *leaky bucket*. Sans mécanisme de réengagement ni analyse des causes de départ, le produit s'effondre en silence. » Vise la stratégie, jamais la personne ; et c'est du français.
+
+**Coût utilisateur à garder en tête** : 70 s est long. L'écran de chargement tient (étape 12bis : état « toujours en cours » sans fin fixe), mais si cette durée devient la norme plutôt que l'exception, c'est le nombre de générations par Deep dive (quatre depuis le bilingue) qu'il faudra regarder — pas le plafond.
+
+### R-21 : la nav de la landing sur mobile (2026-09-06)
+
+Décision prise avec Antoine après **mesure** des trois options de `REVIEW.md` sur le vrai build, à 360, 390 et 430 px, en FR et en EN — plutôt qu'en débattant sur plan :
+
+| Option | Débordement | Hauteur du header |
+|---|---|---|
+| État actuel | oui partout (515 px FR, 452 px EN) | 81 px |
+| Masquer les deux liens sous 760 px | aucun | 69 px |
+| Nav sur deux lignes | aucun | 132 à 171 px |
+| Typo de nav réduite à 12 px | toujours oui | 78 px |
+
+Masquer les liens est la seule option qui corrige sans doubler le header sur un téléphone, et le pied de page (2026-09-05) porte déjà « Comment ça marche » et « Glossaire » partout, donc rien ne devient inaccessible. C'est la même décision que celle déjà prise pour le CTA d'en-tête à l'étape 3. Le sélecteur de langue, lui, reste : c'est lui qui avait fait déborder le header (R-13), mais c'est aussi le seul moyen de changer de langue depuis la landing.
+
+**Piège CSS évité d'emblée** : `.navLink { display: none }` en sélecteur à une classe aurait la même spécificité que `.button { display: inline-flex }` d'un autre module CSS — lequel gagne dépendrait de l'ordre d'émission des feuilles, exactement la leçon n°2 de ce fichier. D'où `.nav .navLink`.
+
+**Vérifié en réel** : `e2e/landing-mobile.spec.ts`, 10 specs — `scrollWidth === viewport` sur la landing FR et EN aux trois largeurs, les deux liens masqués dans le header et visibles dans le pied de page à 390 px, présents dans le header à 1 280 px, et `/r/sample` comme `/quiz` (dont les headers portent aussi ces liens) sans débordement à 390 px. 76 specs Playwright au total.
+
+### R-22 + R-23 : contrastes corrigés au niveau des tokens, boutons réseau écartés (2026-09-06)
+
+**Une de mes propres pistes était fausse, et ça mérite d'être écrit.** `REVIEW.md` et la liste d'actions proposaient, pour le bouton principal, de « passer le libellé en gras » afin de tomber sous la règle WCAG du texte large (3:1 au lieu de 4,5:1). Vérifié avant de le proposer à Antoine : le libellé est **déjà** en 600 (`--label-button`), et la règle exige 18,66 px en gras — il fait 15 à 16 px. Ce chemin n'existait pas.
+
+Les trois corrections, toutes calculées avant d'être choisies (voir les ratios dans `tokens/colors.css`) :
+
+1. **Bouton principal** : nouveau paint `--paint-red-action: #cc3e2b`, le rouge de marque assombri de 3 % — 4,65:1 au lieu de 4,42:1, indiscernable côte à côte. Seul `--action-primary-bg` l'utilise ; `--paint-red` reste le rouge de tout le reste (accents, H1, bordures roast, image OG). La bordure du bouton passe sur le même token que son fond, sinon elle dessinerait un liseré plus clair.
+2. **`--text-link` → `--paint-red-deep`** plutôt que corriger le seul disclaimer : ses cinq usages (disclaimer, pied de page, termes liés du glossaire, deux liens de crédit) sont tous du texte rouge sur papier, et le commentaire du paint dit exactement « red text on light grounds ». 5,42:1 sur `--paper-1`, 6,72:1 sur `--paper-0`. Corriger le disclaimer seul aurait laissé les liens du crédit Deep dive à 4,42:1 — non signalés par axe uniquement parce que `/r/sample` n'a pas de Deep dive.
+3. **`--ink-faint`** : opacité 0,45 → 0,65 (5,18:1). Le minimum AA est 0,62 ; 0,65 garde de la marge et reste visiblement plus clair que `--text-muted`, donc la hiérarchie demandée par SPEC-ADDENDUM-02.md §2.1 tient.
+
+`KNOWN_CONTRAST_GAPS` (`e2e/accessibility.spec.ts`) est **vide** — et la passe axe reste verte sur les six écrans, ce qui prouve à la fois que les trois corrections sont effectives et qu'aucune autre paire ne se cachait derrière les entrées connues. Le mécanisme est conservé, avec son mode d'emploi, pour le jour où une décision de marque réintroduirait un écart assumé.
+
+**R-23 clos sans code.** Antoine a tranché : rester à exactement 2 CTA sur la page de résultat, pas de boutons LinkedIn/X. Les raisons sont dans `REVIEW.md` ; la seule à retenir ici est que ces boutons n'auraient eu aucune valeur SEO (`nofollow` chez les deux), donc le seul argument pour les ajouter était le confort, contre une décision de design déjà prise.

@@ -32,7 +32,8 @@
 .primary {
   background: var(--action-primary-bg);
   color: var(--action-primary-text);
-  border: 2px solid var(--paint-red);
+  /* Same token as the fill: a border in the lighter accent red would draw a faint rim around it. */
+  border: 2px solid var(--action-primary-bg);
 }
 
 .secondary {

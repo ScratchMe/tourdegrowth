@@ -50,9 +50,9 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 | | R-18 | Dépendances et config TypeScript | T | S | **Fait** (PR #37, 2026-09-05) — clôt le lot E |
 | **F — Expérience** | R-19 | Accessibilité du parcours | F+T | M | **Fait** (PR #38, 2026-09-05) |
 | | R-20 | Petits plus produit (dernier score, benchmark, persistance Deep dive) | F | S/M | **Fait** (PR #40, 2026-09-05) |
-| | R-21 | La nav de la landing déborde le viewport mobile (FR **et** EN depuis R-13) | F+T | XS | À faire |
-| | R-22 | Trois paires de couleurs sous le seuil AA de contraste | F+T | S | À faire |
-| | R-23 | Boutons de partage LinkedIn/X : où les mettre sans casser « 2 CTA » | F | S | À faire |
+| | R-21 | La nav de la landing déborde le viewport mobile (FR **et** EN depuis R-13) | F+T | XS | **Fait** (PR #50, 2026-09-06) |
+| | R-22 | Trois paires de couleurs sous le seuil AA de contraste | F+T | S | **Fait** (PR #51, 2026-09-06) |
+| | R-23 | Boutons de partage LinkedIn/X : où les mettre sans casser « 2 CTA » | F | S | **Clos** (décision d'Antoine, 2026-09-06 : rester à 2 CTA) |
 | | R-26 | Le 404 global n'a ni notre CSS ni notre chrome | F+T | S | **Fait** (PR #48, 2026-09-06) |
 
 ### Pourquoi cet ordre
@@ -363,7 +363,7 @@ Hors périmètre ici, noté pour mémoire : historique de progression / comparai
 
 > **Mise à jour du 2026-09-05 (constaté en mesurant pendant R-20) : ce n'est plus seulement le français.** R-13 a ajouté le sélecteur de langue dans ce même header. À 390 px, `scrollWidth` vaut maintenant **515 en FR et 452 en EN**, pour un viewport de 390 — les deux langues débordent, alors que le constat d'origine ne trouvait le problème qu'en français. Ça reste le même correctif et le même arbitrage visuel (wrapper la nav, la masquer sous 760 px comme le CTA d'en-tête l'est déjà, ou réduire la typo), mais ça touche désormais tous les visiteurs mobiles, pas une partie.
 
-**Type** F+T · **Effort** XS · **Statut** À faire
+**Type** F+T · **Effort** XS · **Statut** **Fait** (PR #50, 2026-09-06) — option 2 retenue par Antoine après mesure des trois sur le vrai build (360/390/430 px, FR et EN) : masquer les liens est la seule qui corrige sans doubler la hauteur du header (69 px, contre 132-171 px en wrappant ; la typo réduite déborde encore). Spec `e2e/landing-mobile.spec.ts`.
 
 **Constat, trouvé en vérifiant autre chose.** Repéré pendant la recette du pied de page (2026-09-05), pas pendant la revue initiale — et confirmé **préexistant sur `main`**, indépendant du pied de page : mesuré à l'identique avec et sans lui.
 
@@ -383,7 +383,9 @@ L'option 2 est la plus cohérente avec la décision déjà prise pour le CTA d'e
 **Vérification attendue.** À 360, 390 et 430px, en FR **et** en EN : `scrollWidth === innerWidth`, sur la landing et sur toute page portant ce header.
 ### R-22 — Trois paires de couleurs sous le seuil AA de contraste
 
-**Type** F+T · **Effort** S · **Statut** À faire
+**Type** F+T · **Effort** S · **Statut** **Fait** (PR #51, 2026-09-06) — les trois corrigées au niveau des tokens, décision d'Antoine. `KNOWN_CONTRAST_GAPS` est vide et la passe axe reste verte sur les 6 écrans.
+
+> **Correction à la piste proposée plus bas pour le bouton.** « Passer le libellé en gras » ne tient pas : il est **déjà** en 600, et la règle WCAG du texte large (seuil 3:1) exige 18,66 px en gras — le libellé fait 15-16 px. Le fond du bouton a donc été assombri de 3 % (`--paint-red-action: #cc3e2b`, 4,65:1), sur le seul token de fond de bouton ; `--paint-red` est inchangé partout ailleurs. Le crédit passe à 0,65 d'opacité (5,18:1, toujours plus clair que `--text-muted`). Pour le lien, c'est le token `--text-link` lui-même qui pointe désormais sur `--paint-red-deep` : chacun de ses usages (disclaimer, pied de page, termes liés du glossaire, liens du crédit Deep dive) est du texte rouge sur papier, précisément ce pour quoi ce paint existe.
 
 **Constat.** Relevé par la passe axe ajoutée en R-07, dès son premier passage. Trois paires échouent au seuil WCAG AA (4,5:1 pour du texte normal), toutes des choix de **tokens du design system**, pas des erreurs de page — elles se répètent donc partout où le token sert :
 
@@ -408,7 +410,7 @@ Les deux autres demandent une décision d'Antoine, parce qu'ils touchent la coul
 **Vérification attendue.** Les trois paires passent 4,5:1, et l'entrée correspondante disparaît de `KNOWN_CONTRAST_GAPS` sans que la suite ne rougisse.
 ### R-23 — Boutons de partage LinkedIn/X : où les mettre sans casser « 2 CTA »
 
-**Type** F · **Effort** S · **Statut** À faire — **décision design, pas une implémentation**
+**Type** F · **Effort** S · **Statut** **Clos** (2026-09-06) — décision d'Antoine : **rester à 2 CTA**, aucun bouton réseau. Le partage natif emporte déjà le score et le pilier faible (R-10), la copie desktop couvre le reste, et ces boutons n'auraient aucune valeur SEO. Aucun changement de code.
 
 **D'où ça vient.** Découpé de R-10 au moment de le livrer, plutôt que tranché en silence.
 
