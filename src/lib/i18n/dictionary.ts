@@ -223,6 +223,15 @@ export const UI_STRINGS = {
     message1: { en: "Reviewing your answers...", fr: "Relecture de tes réponses..." },
     message2: { en: "Calculating your stage times...", fr: "Calcul de tes temps par étape..." },
     message3: { en: "Drafting your race report...", fr: "Rédaction de ton rapport de course..." },
+    // TODO: à relire (REVIEW-02) — R2-09. Shown once the three messages have
+    // run their course and the Deep dive is still generating: a real Deep
+    // dive was measured at ~70 s in production, and nothing on this screen
+    // said so. Not a fourth message (the three segments are the design), a
+    // line under them.
+    stillWorkingHint: {
+      en: "About a minute in total — nothing is stuck.",
+      fr: "Environ une minute en tout — rien n'est bloqué.",
+    },
   },
 
   /** Deep dive mode (SPEC-ADDENDUM-01.md §2) — the 10-question follow-up
@@ -251,6 +260,12 @@ export const UI_STRINGS = {
     badge: { en: "Deep dive", fr: "Deep dive" },
     priorityMoveLabel: { en: "Priority move", fr: "Action prioritaire" },
     priorityMoveLockedLabel: { en: "Priority move — locked", fr: "Action prioritaire — verrouillée" },
+    // TODO: à relire (REVIEW-02) — R2-09. Under the last screen's primary
+    // button, BEFORE the wait starts: the one thing nobody had been told.
+    waitNotice: {
+      en: "About a minute — we write your recommendations in both tones and both languages.",
+      fr: "Environ une minute — on rédige tes recommandations dans les deux tons et les deux langues.",
+    },
   },
 
   /** Result page chrome (DESIGN-BRIEF.md §02/§04) — the Strengths/Where

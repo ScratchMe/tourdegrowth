@@ -66,3 +66,9 @@
   gap: var(--space-8);
   max-width: 560px;
 }
+
+/* REVIEW-02.md R2-09 — the wait notice under the last screen's actions. */
+.waitNotice {
+  text-align: center;
+  color: var(--text-muted);
+}
