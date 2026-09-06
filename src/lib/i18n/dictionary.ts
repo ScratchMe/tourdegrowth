@@ -159,6 +159,15 @@ export const UI_STRINGS = {
     backToIndex: { en: "← Glossary", fr: "← Glossaire" },
     inPracticeLabel: { en: "In practice", fr: "En pratique" },
     relatedLabel: { en: "Related terms", fr: "Termes liés" },
+    // TODO: à relire (REVIEW-02) — R2-11. Section labels of the long-form
+    // term pages; the sections themselves are content/glossary-deep.ts.
+    formulaLabel: { en: "The formula", fr: "La formule" },
+    exampleLabel: { en: "Worked example", fr: "Exemple chiffré" },
+    benchmarkLabel: { en: "Orders of magnitude", fr: "Ordres de grandeur" },
+    improveLabel: { en: "How to improve it", fr: "Comment l'améliorer" },
+    inTheTourLabel: { en: "In the Tour", fr: "Dans le Tour" },
+    inTheTourQuestionLabel: { en: "The question that measures it", fr: "La question qui le mesure" },
+    faqLabel: { en: "Questions people ask", fr: "Questions fréquentes" },
   },
 
   /**

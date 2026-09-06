@@ -49,7 +49,7 @@ describe("client bundles (REVIEW-02.md R2-14)", () => {
 
   it("nothing under components/ imports the server-side glossary", () => {
     const offenders = FILES.filter(
-      (f) => f.path.startsWith("components/") && /from ["']@\/content\/glossary["']/.test(f.source),
+      (f) => f.path.startsWith("components/") && /from ["']@\/content\/glossary(-deep)?["']/.test(f.source),
     ).map((f) => f.path);
     expect(offenders).toEqual([]);
   });
@@ -59,7 +59,7 @@ describe("client bundles (REVIEW-02.md R2-14)", () => {
       const file = FILES.find((f) => f.path === path);
       expect(file, path).toBeDefined();
       expect(file!.source, path).not.toMatch(/from ["']@\/lib\/i18n\/dictionary["']/);
-      expect(file!.source, path).not.toMatch(/from ["']@\/content\/glossary["']/);
+      expect(file!.source, path).not.toMatch(/from ["']@\/content\/glossary(-deep)?["']/);
     }
   });
 
