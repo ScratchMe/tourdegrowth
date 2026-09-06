@@ -325,6 +325,35 @@ export const UI_STRINGS = {
   },
 
   /** OG share image only (DESIGN-BRIEF.md §03) — rendered by Satori (src/app/r/[id]/opengraph-image.tsx), a separate pipeline from the rest of the UI. */
+  /**
+   * `<title>`, description and Open Graph text of the indexable content pages
+   * (landing, How it works, glossary). Until now every page carried the root
+   * layout's English title/description whatever the URL's language, and none
+   * had Open Graph tags — a LinkedIn share of `/fr` showed an English title and
+   * no image. Descriptions reuse validated copy where one exists
+   * (`landing.subtitle`, `HOW_IT_WORKS.intro`); the strings that are new here
+   * start at "à relire" (CLAUDE.md, convention 6).
+   */
+  meta: {
+    landingTitle: {
+      en: "Tour de Growth — a 3-minute AARRR growth check-up",
+      fr: "Tour de Growth — diagnostic growth AARRR en 3 minutes",
+    },
+    howItWorksTitle: { en: "How Tour de Growth works — Tour de Growth", fr: "Comment fonctionne Tour de Growth — Tour de Growth" },
+    glossaryTitle: { en: "Growth glossary — Tour de Growth", fr: "Glossaire growth — Tour de Growth" },
+    glossaryDescription: {
+      en: "Plain-English definitions of the growth/AARRR vocabulary — CAC, LTV, viral coefficient, growth loop, and more.",
+      fr: "Le vocabulaire growth et AARRR expliqué en mots simples — CAC, LTV, coefficient viral, growth loop, et plus.",
+    },
+    glossaryTermSuffix: { en: "Tour de Growth Glossary", fr: "Glossaire Tour de Growth" },
+    // Alt text of the landing share image (opengraph-image.tsx): what it shows,
+    // for the people who can't see it.
+    shareImageAlt: {
+      en: "Tour de Growth — Where does your growth stall? A guided AARRR check-up, 15 questions, 3 minutes.",
+      fr: "Tour de Growth — Où ta croissance cale-t-elle ? Un diagnostic AARRR guidé, 15 questions, 3 minutes.",
+    },
+  },
+
   og: {
     checkupBadge: { en: "AARRR check-up — 3 min", fr: "Bilan AARRR — 3 min" },
     // SPEC-ADDENDUM-01.md §2.6: the same badge becomes this once the result

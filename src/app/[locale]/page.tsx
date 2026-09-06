@@ -8,9 +8,11 @@ import { Card } from "@/components/core/Card";
 import { PillarChip } from "@/components/result/PillarChip";
 import { ScoreDisplay } from "@/components/result/ScoreDisplay";
 import { SiteFooter } from "@/components/brand/SiteFooter";
+import { ANTOINE_LINKS, QUICK_CREDIT } from "@/content/antoine-credit";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
-import { contentAlternates, localePath } from "@/lib/i18n/routes";
+import { contentMetadata } from "@/lib/i18n/meta";
+import { localePath } from "@/lib/i18n/routes";
 import { SITE_URL } from "@/lib/site";
 import { LastResult } from "./LastResult";
 import { RefCapture } from "./RefCapture";
@@ -22,20 +24,34 @@ import styles from "./page.module.css";
  * site — Tour de Growth is the product being described here, not Antoine).
  * `aggregateRating` deliberately omitted per the addendum itself: "une fois
  * qu'il y aura un volume d'usage suffisant pour l'alimenter honnêtement" —
- * add it once there's real usage data, not before. One static object, not
- * localized: structured data for search engines is conventionally
- * single-language regardless of the page's own bilingual UI.
+ * add it once there's real usage data, not before.
+ *
+ * Built per language rather than one static object: the description is the
+ * page's own subtitle in the page's own language, and `inLanguage` says
+ * which. `author` is the same Person node the CV site declares
+ * (`https://cv.antoine.berthaud.me/#person`, its JSON-LD `@id`), so search
+ * engines can tie the product to its author instead of reading two
+ * unrelated sites — the point of the "sites liés" pass of the CV audit.
  */
-const WEB_APPLICATION_SCHEMA = {
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  name: "Tour de Growth",
-  description:
-    "A guided AARRR growth check-up for founders and PMs — a scored, shareable growth assessment across Acquisition, Activation, Retention, Referral and Revenue.",
-  url: SITE_URL,
-  applicationCategory: "BusinessApplication",
-  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-};
+function webApplicationSchema(locale: Locale) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "Tour de Growth",
+    description: tc(UI_STRINGS.landing.subtitle, locale),
+    url: SITE_URL,
+    inLanguage: locale,
+    applicationCategory: "BusinessApplication",
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+    author: {
+      "@type": "Person",
+      "@id": `${ANTOINE_LINKS.cv}/#person`,
+      name: QUICK_CREDIT.name,
+      url: `${ANTOINE_LINKS.cv}/`,
+      sameAs: [ANTOINE_LINKS.linkedin],
+    },
+  };
+}
 
 // Landing page — DESIGN-BRIEF.md screen 01. Nav links ("Examples", "Roast
 // mode") stay cut from the MVP per SPEC.md §12 — SPEC-ADDENDUM-01.md §1.3
@@ -46,7 +62,13 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = await params;
-  return { alternates: contentAlternates(isLocale(locale) ? locale : "en", "/") };
+  const resolved: Locale = isLocale(locale) ? locale : "en";
+  return contentMetadata(
+    resolved,
+    "/",
+    tc(UI_STRINGS.meta.landingTitle, resolved),
+    tc(UI_STRINGS.landing.subtitle, resolved),
+  );
 }
 
 /**
@@ -70,7 +92,7 @@ export default async function LandingPage({ params }: PageProps) {
         // used to carry an `eslint-disable` for react/no-danger; with a real
         // config now running, that rule isn't enabled and the directive was
         // reported as unused — see REVIEW.md R-06.)
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(WEB_APPLICATION_SCHEMA) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webApplicationSchema(locale)) }}
       />
       <header className={styles.header}>
         <div className={styles.headerInner}>

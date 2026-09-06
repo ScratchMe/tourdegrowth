@@ -1,9 +1,18 @@
-import { readFile } from "node:fs/promises";
-import { fileURLToPath } from "node:url";
 import { ImageResponse } from "next/og";
-import { tc } from "@/lib/i18n/dictionary";
-import { UI_STRINGS } from "@/lib/i18n/dictionary";
+import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import type { Locale } from "@/lib/i18n/locale";
+import { loadOgFonts } from "@/lib/og/fonts";
+import {
+  OG_INK as INK,
+  OG_INK_SOFT as INK_SOFT,
+  OG_PAINT_WHITE as PAINT_WHITE,
+  OG_RED as RED,
+  OG_RED_INK as RED_INK,
+  OG_RED_SOFT as RED_SOFT,
+  OG_SIZE,
+  OG_STONE as STONE,
+  OG_STONE_2 as STONE_2,
+} from "@/lib/og/tokens";
 import type { Pillar } from "@/lib/scoring/pillars";
 import { getCachedSubmissionById } from "@/lib/submissions/cached-repository";
 import { SAMPLE_RESULT } from "@/lib/submissions/sample";
@@ -11,49 +20,12 @@ import { SITE_DOMAIN_LABEL } from "@/lib/site";
 
 // DESIGN-BRIEF.md §03 — "highest care". Exact 1200x630 frame, Stardos
 // Stencil embedded (never a system fallback — the stencil numeral IS the
-// image). This is a Satori render, a separate pipeline from the rest of
-// the app's CSS: every value below is a literal copy of a design token,
-// not a shared variable, and must be kept in sync by hand if a token
-// changes (see globals.css for the source of truth).
+// image). Fonts and colour tokens live in `src/lib/og/` since the landing
+// page got a share image of its own: one copy, two images.
 
-export const size = { width: 1200, height: 630 };
+export const size = OG_SIZE;
 export const contentType = "image/png";
 export const alt = "Tour de Growth — AARRR growth check-up result";
-
-const INK = "#211c15";
-const INK_SOFT = "#5b5346";
-const STONE = "#e7e1d2";
-const STONE_2 = "#ded6c2";
-const RED = "#d2402c";
-const RED_INK = "#a32e1f";
-const RED_SOFT = "#f3d9d2";
-const PAINT_WHITE = "#fbf9f2";
-
-async function loadFonts() {
-  // `fetch(new URL(...))` is the pattern Next.js docs show for this, but
-  // plain Node.js `fetch` doesn't support `file://` URLs ("not implemented
-  // yet") — reading the bytes directly with `fs` works in every runtime
-  // this route actually runs in (Node.js, not Edge).
-  //
-  // Files are .ttf, not the .woff2 Google Fonts actually serves — Satori's
-  // font parser rejects woff2 ("Unsupported OpenType signature wOF2").
-  // Converted once with `wawoff2` and committed as static assets (see
-  // CLAUDE.md) rather than re-fetching+converting on every request.
-  const load = (file: string) => readFile(fileURLToPath(new URL(`./fonts/${file}`, import.meta.url)));
-  const [stardos, interLatin, mono500, mono600] = await Promise.all([
-    load("stardos-stencil-700.ttf"),
-    load("inter-latin.ttf"),
-    load("ibm-plex-mono-500.ttf"),
-    load("ibm-plex-mono-600.ttf"),
-  ]);
-  return [
-    { name: "Stardos Stencil", data: stardos, weight: 700 as const, style: "normal" as const },
-    { name: "Inter", data: interLatin, weight: 600 as const, style: "normal" as const },
-    { name: "Inter", data: interLatin, weight: 500 as const, style: "normal" as const },
-    { name: "IBM Plex Mono", data: mono500, weight: 500 as const, style: "normal" as const },
-    { name: "IBM Plex Mono", data: mono600, weight: 600 as const, style: "normal" as const },
-  ];
-}
 
 interface OgData {
   total: number;
@@ -95,7 +67,7 @@ async function loadOgData(id: string): Promise<OgData | null> {
 
 export default async function OgImage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [data, fonts] = await Promise.all([loadOgData(id), loadFonts()]);
+  const [data, fonts] = await Promise.all([loadOgData(id), loadOgFonts()]);
   if (!data) return new Response(null, { status: 404 });
   const { total, pillars, weakestPillar, locale, roast, deepDive } = data;
   const accent = roast ? RED : INK;
@@ -194,7 +166,9 @@ export default async function OgImage({ params }: { params: Promise<{ id: string
             >
               {tc(UI_STRINGS.og.scoreLabel, locale)}
             </div>
-            <div style={{ display: "flex", alignItems: "baseline" }}>
+            {/* 12px of air: the stencil digits sit taller than the 0.85 line box
+                and were touching the label above once the font actually loaded. */}
+            <div style={{ display: "flex", alignItems: "baseline", marginTop: 12 }}>
               <div style={{ display: "flex", fontFamily: "Stardos Stencil", fontSize: 268, lineHeight: 0.85, color: INK }}>
                 {total}
               </div>
