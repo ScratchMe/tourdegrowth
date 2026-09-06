@@ -1,14 +1,3 @@
-.header {
-  border-bottom: var(--border-rule);
-  padding: 24px 0;
-}
-
-.headerInner {
-  max-width: var(--width-reading);
-  margin: 0 auto;
-  padding: 0 24px;
-}
-
 .main {
   max-width: var(--width-reading);
   margin: 0 auto;

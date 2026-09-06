@@ -15,6 +15,8 @@
 
 Tout a été exécuté réellement dans ce conteneur, pas déduit de la lecture.
 
+**`main` a bougé pendant la revue.** Deux PR d'une autre session ont été mergées entre le début de l'audit (commit `11758de`) et le début des travaux : [#58](https://github.com/ScratchMe/tourdegrowth/pull/58) (métadonnées et Open Graph localisés sur les pages de contenu, JSON-LD par langue avec `author`, polices des images OG) et [#59](https://github.com/ScratchMe/tourdegrowth/pull/59) (glyphe « № » des images OG, test de couverture des polices). Les constats qu'elles touchent (R2-06, R2-07, R2-15, R2-19) ont été **revérifiés sur `1166ebd`** avant la première PR de ce plan ; leur statut ci-dessous reflète cet état, pas celui du commit audité. Les chiffres de l'annexe A.2 datent, eux, de `11758de`.
+
 | Vérification | Résultat |
 |---|---|
 | `npm ci` | 590 paquets, 0 vulnérabilité ; 3 avertissements de dépréciation transitifs (`node-domexception`, `glob@10`, `eslint@9.39` « no longer supported ») |
@@ -39,11 +41,11 @@ La colonne **Autonomie** dit ce que chaque item attend d'Antoine : **Auto** = je
 |---|---|---|---|---|---|---|
 | **A — Crédibilité devant le public visé** | R2-01 | Le K-factor ne peut jamais être entre 0 et 1 | F+T | S | Auto | À faire |
 | | R2-02 | La page de résultat parle au propriétaire, jamais au visiteur | F | S | Relecture | À faire |
-| | R2-03 | Ni mentions légales ni information RGPD | F | M | Toi (2 infos) + Relecture | À faire |
+| | R2-03 | Ni mentions légales ni information RGPD | F | M | Toi (1 info) + Relecture | À faire |
 | | R2-04 | Rien ne rattache le contenu à Antoine : ni page, ni entité | F | M | Relecture | À faire |
-| | R2-05 | Wordmark et sélecteur de langue collés sur les 36 pages de contenu | F+T | XS | Auto | À faire |
-| **B — Boucle de partage et mesure** | R2-06 | Métadonnées : descriptions anglaises sur les URL françaises, titre sans mot-clé | F | S | Relecture | À faire |
-| | R2-07 | Zéro balise Open Graph sur les pages de contenu | F | M | Auto | À faire |
+| | R2-05 | Wordmark et sélecteur de langue collés sur les 36 pages de contenu | F+T | XS | Auto | **Fait** (PR #61, 2026-09-06) |
+| **B — Boucle de partage et mesure** | R2-06 | Métadonnées : descriptions anglaises sur les URL françaises, titre sans mot-clé | F | S | Relecture | **Fait pour l'essentiel par la PR #58** (autre session) — le reliquat (descriptions de terme, `/quiz`) est repris dans R2-08 |
+| | R2-07 | Zéro balise Open Graph sur les pages de contenu | F | M | Auto | **Fait** (PR #58, autre session ; vérifié sur le build le 2026-09-06) |
 | | R2-08 | `/quiz` et `/deep-dive/[id]` indexables ; `lastmod` absent du sitemap | F+T | S | Auto | À faire |
 | | R2-09 | Le Deep dive dure ~70 s et rien ne prévient | F | S | Relecture | À faire |
 | | R2-10 | Le calcul de la métrique reine n'a aucun test | T | S | Auto | À faire |
@@ -51,9 +53,9 @@ La colonne **Autonomie** dit ce que chaque item attend d'Antoine : **Auto** = je
 | | R2-12 | « AARRR » n'apparaît ni sur la landing ni sur `/how-it-works` | F | S | Relecture | À faire |
 | | R2-13 | Maillage interne : le glossaire n'est lié depuis aucune page qui a de l'autorité | F | S/M | Auto | À faire |
 | | R2-14 | Le dictionnaire bilingue entier et tout le glossaire partent dans le bundle client | T | S | Auto | À faire |
-| | R2-15 | Structured data : un seul bloc JSON-LD, identique en FR et en EN | F | M | Auto | À faire |
+| | R2-15 | Structured data : un seul bloc JSON-LD, identique en FR et en EN | F | M | Auto | **Fait en partie** (PR #58 : localisé, `author`) — reste `DefinedTerm`, `BreadcrumbList`, `url` par langue |
 | | R2-16 | Titres FR non localisés là où la requête française diffère | F | S | Relecture | À faire |
-| | R2-17 | `/how-it-works` répète chaque nom de pilier deux fois | F | XS | Auto | À faire |
+| | R2-17 | `/how-it-works` répète chaque nom de pilier deux fois | F | XS | Auto | **Fait** (PR #61, 2026-09-06) |
 | **D — Robustesse et sécurité** | R2-18 | Aucun en-tête de sécurité hors HSTS | T | S | Auto | À faire |
 | | R2-19 | Amplification de lectures Firestore non authentifiée sur `/r/<id>` | T | S | Auto | À faire |
 | | R2-20 | `freeContext` conservé indéfiniment pour calculer un booléen | T | S | Auto | À faire |
@@ -67,6 +69,7 @@ La colonne **Autonomie** dit ce que chaque item attend d'Antoine : **Auto** = je
 | | R2-28 | Une page de métriques publique : l'outil montre son propre AARRR | F | M | Toi | À trancher |
 | | R2-29 | Le roast est le crochet viral et il est invisible avant la 15ᵉ question | F | S | Toi | À trancher |
 | | R2-30 | Fenêtre Tour de France (SPEC.md §10) : à caler dans le calendrier | F | S | Toi | À trancher |
+| **F — Hygiène du dépôt** | R2-31 | Branches distantes obsolètes : audit fait, suppression à faire | T | XS | Toi | **Audit fait** (PR #61) — suppression à faire par Antoine |
 
 ### Pourquoi cet ordre
 
@@ -90,22 +93,23 @@ Une PR par ligne, mergée dès que le check `Types, tests, build` est vert (jama
 | 6 | R2-20 + R2-24 | `freeContextProvided` à la place du texte, `contextAnswers`/`modelUsed` plus écrits, `rawPoints` retiré du payload public, `errText` tronqué, `dependabot.yml`, actions épinglées par SHA dans `verify-live.yml` | Auto |
 | 7 | R2-21 + R2-22 | `saveDeepDive` transactionnel, Basic Auth en comparaison constante et UTF-8 | Auto |
 | 8 | R2-09 | Copie d'attente avant et pendant le Deep dive | Relecture (2 chaînes) |
-| 9 | R2-06 + R2-08 | Métadonnées localisées, titre de landing avec mot-clé, `metaDescription` par terme, `noindex` sur `/deep-dive/[id]`, titre et description propres pour `/quiz` (gardé indexable — c'est une cible légitime pour « growth quiz », à contredire si tu préfères l'inverse), `lastmod` et `x-default` dans le sitemap | Relecture (titres et descriptions) |
+| 9 | R2-08 (+ reliquat de R2-06) | `metaDescription` par terme, `noindex` sur `/deep-dive/[id]`, titre et description propres pour `/quiz` (gardé indexable — c'est une cible légitime pour « growth quiz », à contredire si tu préfères l'inverse), `lastmod` et `x-default` dans le sitemap. Le reste de R2-06 (titres et descriptions localisés, titre de landing) a été livré par la PR #58 | Relecture (titres et descriptions) |
 | 10 | R2-14 | `SiteFooter` en Server Component, `glossary.ts` scindé en moitié popover et moitié serveur | Auto |
 | 11 | R2-13 + R2-12 + R2-16 | Liens depuis `/how-it-works`, la landing et le popover ; « AARRR » nommé ; H1/titres FR localisés ; guillemets français ; `x-default` → `/` | Relecture (quelques chaînes) |
-| 12 | R2-07 | `openGraph`/`twitter` par défaut + image OG statique pour les pages de contenu | Auto (capture jointe à la PR) |
-| 13 | R2-15 | Module `lib/seo/jsonld.ts` : `WebApplication` localisé avec `author`, `Person`, `DefinedTerm`, `DefinedTermSet`, `BreadcrumbList` | Auto |
-| 14 | R2-03 | Page `/[locale]/legal`, lien pied de page, ligne sous le champ de contexte libre | Toi (voir ci-dessous) + Relecture |
+| 12 | R2-07 | ~~`openGraph`/`twitter` par défaut + image OG statique pour les pages de contenu~~ Livré par la PR #58 avant le début du plan ; vérifié sur le build : balises et image présentes sur les quatre types de page | Rien à livrer |
+| 13 | R2-15 | Module `lib/seo/jsonld.ts` : `DefinedTerm`, `DefinedTermSet`, `BreadcrumbList` ; `url` et devise du `WebApplication` par langue (le bloc est déjà localisé avec `author` depuis la PR #58) | Auto |
+| 14 | R2-03 | Deux pages, `/[locale]/privacy` et `/[locale]/terms`, sur le modèle de Ramille ; liens dans le pied de page ; ligne sous le champ de contexte libre | Toi (voir ci-dessous) + Relecture |
 | 15 | R2-04 | Page `/[locale]/about` avec méthodologie complète et `Person` | Relecture (c'est ta voix) |
 | 16 à 20 | R2-11 | Contenu long du glossaire par lots de trois termes, en commençant par `cac`, `ltv`, `churn`, puis `retention`, `activation`, `viral-coefficient`, puis le reste | Relecture (lourde, lot par lot) |
+| — | R2-31 | Rien à livrer côté code : la liste des branches à supprimer est dans la section R2-31, la suppression se fait dans l'interface GitHub | Toi |
 
 ### Ce dont j'ai besoin de toi
 
-**Avant la PR 14 (R2-03), deux informations :**
-1. L'adresse e-mail de contact à afficher dans les mentions légales (obligatoire ; celle du CV, une adresse dédiée, ou un formulaire).
-2. Veux-tu afficher une adresse postale ? La LCEN permet à une personne physique éditant un site à titre non professionnel de ne pas la publier à condition d'indiquer l'hébergeur (Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, USA). Le site étant une pièce de portfolio, « non professionnel » est défendable ; je pars sur « nom + e-mail + hébergeur, sans adresse postale » sauf avis contraire.
+**Avant la PR 14 (R2-03).** Tranché le 2026-09-06 avec Antoine : même modèle que Ramille (`ScratchMe/TraceVerte`, `src/app/confidentialite.tsx` et `conditions.tsx`) — deux pages, régime « personne physique, à titre non professionnel » de l'article 6 III-2 de la LCEN, donc ni adresse postale, ni téléphone, ni statut juridique, ni directeur de la publication ; Vercel nommé comme hébergeur avec son adresse ; le nom de l'éditeur et une adresse e-mail restent affichés parce que le RGPD article 13 l'exige. Il manque encore :
+1. **L'adresse e-mail de contact**, qui doit pouvoir *recevoir* du courrier (Ramille en a fait l'expérience : une adresse qui n'arrive nulle part serait un manquement à l'article 12). Une adresse dédiée sur tourdegrowth.com demande un enregistrement MX chez IONOS ; une adresse existante marche aussi.
+2. Deux faits pour la notice, pas des décisions : **la région Firestore** du projet (pour écrire ou non « hébergées dans l'Union européenne ») et **le palier de la clé Gemini** (gratuit ou payant — sur le palier gratuit Google peut utiliser les requêtes pour améliorer ses produits, ce qui change la phrase à écrire et mérite peut-être de changer de palier vu ce que contient le champ de contexte libre).
 
-Je rédige le texte complet (mentions légales, notice de confidentialité avec Firestore, Gemini, Vercel, GoatCounter, durées de conservation telles qu'elles seront après la PR 6). Tu relis.
+Je rédige les deux pages en entier, bilingues, en ne décrivant que ce que le produit fait réellement (même règle que Ramille). Tu relis.
 
 **Pour le lot E, une réponse par ligne suffit.** Ma recommandation entre parenthèses :
 - R2-26 segmentation du benchmark : oui / non / plus tard (oui, mais après le lot C — deux questions de plus se justifient quand le contenu qui les exploite existe).
@@ -155,7 +159,7 @@ L'ancien ratio peut rester s'il est renommé pour ce qu'il est (« référées p
 
 **Impact.** Deux obligations distinctes, toutes deux non remplies : LCEN art. 6-III (identification de l'éditeur d'un site publié en France) et RGPD art. 13 (information : quoi, pourquoi, base légale, durée, sous-traitants — Google Cloud, Google Gemini, Vercel — et le fait qu'un texte libre part chez un LLM). GoatCounter sans cookie évite le bandeau, pas la notice : ce sont deux sujets. Et au-delà du droit, c'est l'impression exacte à ne pas donner au public visé : un site de Growth PM qui demande à un fondateur de décrire son business et ne dit pas où ça va.
 
-**Correctif proposé.** Une page `/[locale]/legal` (mentions légales + notice de confidentialité, bilingue, prérendue comme le reste), un lien dans `SiteFooter`, et une ligne sous le champ de contexte libre (« Ce texte est envoyé à Gemini pour rédiger ta recommandation, et n'apparaît jamais sur la page partagée »). À faire avec R2-20, qui réduit ce qu'il y a à déclarer. Le contenu juridique est à écrire par Antoine (ou à partir d'un modèle qu'il valide), pas inventé ici.
+**Correctif proposé** (précisé avec Antoine le 2026-09-06). Deux pages sur le modèle de Ramille (`ScratchMe/TraceVerte`) : `/[locale]/privacy` (qui est responsable, ce qui est collecté et pourquoi, où ça va — Firestore, Gemini, Vercel, GoatCounter —, combien de temps, tes droits, CNIL) et `/[locale]/terms` (objet, ce que le score est et n'est pas, ce qu'on s'engage à ne pas faire, disponibilité, responsabilité, propriété, éditeur et hébergeur). Régime non professionnel de la LCEN 6 III-2 : nom et e-mail de l'éditeur, hébergeur avec adresse, rien d'autre. Bilingues, prérendues, liées depuis `SiteFooter`, plus une ligne sous le champ de contexte libre (« Ce texte est envoyé à Gemini pour rédiger ta recommandation, et n'apparaît jamais sur la page partagée »). Trois choses que Ramille n'a pas à dire et que nous devons dire : le texte libre part chez Gemini ; le score et les réponses sont conservés sans limite parce qu'un lien partagé doit rester valide ; la suppression d'un résultat se demande par e-mail en joignant son URL, faute de compte pour prouver qu'on en est l'auteur. À faire après R2-20, qui réduit ce qu'il y a à déclarer.
 
 **Vérification attendue.** Page présente dans le sitemap, liée depuis le pied de page de toutes les pages, `curl` des deux langues.
 
@@ -327,9 +331,9 @@ L'ancien ratio peut rester s'il est renommé pour ce qu'il est (« référées p
 
 **Type** T · **Effort** S · **Statut** À faire
 
-**Constat.** `r/[id]/page.tsx:128` et `opengraph-image.tsx:80` lisent la soumission via `unstable_cache` clé par id : **chaque id distinct est un miss, donc une lecture Firestore facturée**, que le document existe ou non. L'id vient du paramètre de route sans aucune validation. Aucune limite de débit sur les GET (`rateLimit()` n'est appelé que dans les deux POST). Une boucle `curl /r/$(uuidgen)` consomme le quota Spark (50 000 lectures/jour) sans effort, et l'épuiser rend **tout** le plan de données indisponible — résultats existants compris. La route OG est la plus chère par requête : `loadFonts()` relit quatre fichiers (~235 Ko) **à chaque appel** (`opengraph-image.tsx:98`), avant un rendu Satori complet, y compris pour `/r/sample` qui ne touche pas Firestore.
+**Constat.** `r/[id]/page.tsx:128` et `opengraph-image.tsx:80` lisent la soumission via `unstable_cache` clé par id : **chaque id distinct est un miss, donc une lecture Firestore facturée**, que le document existe ou non. L'id vient du paramètre de route sans aucune validation. Aucune limite de débit sur les GET (`rateLimit()` n'est appelé que dans les deux POST). Une boucle `curl /r/$(uuidgen)` consomme le quota Spark (50 000 lectures/jour) sans effort, et l'épuiser rend **tout** le plan de données indisponible — résultats existants compris. La route OG est la plus chère par requête : `loadOgFonts()` (`src/lib/og/fonts.ts`, depuis la PR #58 — c'était `loadFonts()` dans `opengraph-image.tsx:98` au moment de l'audit) relit **cinq** fichiers de police **à chaque appel**, avant un rendu Satori complet, y compris pour `/r/sample` qui ne touche pas Firestore — et désormais aussi pour les 36 images OG des pages de contenu, qui sont prérendues au build mais partagent le même chargeur.
 
-**Correctif proposé.** Du moins cher au plus utile : (1) `isValidSubmissionId` existe déjà (`referral.ts:28`) — l'appliquer dans `page.tsx` et `opengraph-image.tsx` avant toute lecture (`notFound()` sinon), ce qui ferme aussi le cas d'un id exotique qui ferait lever `INVALID_ARGUMENT` côté Firestore et tomber sur le document nu de Next (R2-23) ; (2) mémoïser `loadFonts()` au niveau du module ; (3) appliquer `rateLimit()` aux GET `/r/` dans le proxy avec un budget large, ou les règles de pare-feu Vercel — même caveat « en mémoire, par instance » que R-15, mais une limite vaut mieux qu'aucune sur le chemin de lecture.
+**Correctif proposé.** Du moins cher au plus utile : (1) `isValidSubmissionId` existe déjà (`referral.ts:28`) — l'appliquer dans `page.tsx` et `opengraph-image.tsx` avant toute lecture (`notFound()` sinon), ce qui ferme aussi le cas d'un id exotique qui ferait lever `INVALID_ARGUMENT` côté Firestore et tomber sur le document nu de Next (R2-23) ; (2) mémoïser `loadOgFonts()` au niveau du module ; (3) appliquer `rateLimit()` aux GET `/r/` dans le proxy avec un budget large, ou les règles de pare-feu Vercel — même caveat « en mémoire, par instance » que R-15, mais une limite vaut mieux qu'aucune sur le chemin de lecture.
 
 ### R2-20 — `freeContext` conservé indéfiniment pour calculer un booléen
 
@@ -419,6 +423,36 @@ Le fast-follow événementiel (badge « Maillot Jaune », vocabulaire « échapp
 
 ---
 
+## Lot F — Hygiène du dépôt
+
+### R2-31 — Branches distantes obsolètes : audit fait, suppression à faire
+
+**Type** T · **Effort** XS · **Statut** **Audit fait** (PR #61, 2026-09-06) — suppression à faire par Antoine dans l'interface GitHub
+
+**Constat.** Onze branches distantes en plus de `main` au 2026-09-06, toutes issues de PR déjà mergées : GitHub ne supprimait pas les branches de tête après merge (option activée par Antoine le 2026-09-06, donc le problème ne se reproduira plus pour les PR à venir).
+
+**Vérification faite, branche par branche**, avant de dire qu'on peut supprimer : pour chacune, la ou les PR ouvertes depuis cette branche (une branche a servi à plusieurs PR successives) et leur date de merge, relevées par l'API GitHub — pas devinées d'après le nom.
+
+| Branche | PR mergées depuis cette branche | Dernier commit | Verdict |
+|---|---|---|---|
+| `claude/tour-de-growth-tool-6q3tui` | #1 à #13 | 2026-08-27 | Tout est dans `main` (0 commit d'avance). Supprimer. |
+| `feat/growth-tour-evolutions` | #14 | 2026-08-28 | Trois commits d'avance sur le merge-base, mais leur contenu (incentive Deep dive « verrouillé », `teaserText`/`teaserCta`) est bien dans `main` et documenté dans CLAUDE.md. Supprimer. |
+| `feat/addendum-02-context-credit-seo` | #15 | 2026-08-28 | Supprimer. |
+| `feat/nav-glossary-link-home-logo` | #16 | 2026-08-29 | Supprimer. |
+| `feat/growth-dashboard-and-profile-click-tracking` | #17 | 2026-08-29 | Supprimer. |
+| `feat/goatcounter-funnel-api` | #18 | 2026-08-29 | Supprimer. |
+| `feat/utm-discipline-and-glossary-hub` | #19 | 2026-08-29 | Supprimer. |
+| `claude/repo-technical-functional-review-w75nho` | #20 à #57 | 2026-09-06 | Supprimer. |
+| `claude/og-content-pages` | #58 | 2026-09-06 | Supprimer. |
+| `claude/og-bib-numero` | #59 | 2026-09-06 | Supprimer. |
+| `claude/repo-technical-functional-audit-e9xr8t` | #60 | 2026-09-06 | Supprimer. |
+
+Aucune branche ne porte de travail non repris. Les différences de contenu qu'on observe entre ces branches et `main` sont celles de `main` qui a continué d'avancer après leur merge (squash), pas du travail perdu.
+
+**Ce qui reste à faire.** Supprimer les onze branches (GitHub → Branches, ou `git push origin --delete <branche>`). Les branches des PR de ce plan se supprimeront seules au merge grâce à l'option activée.
+
+---
+
 ## Ce qui a été audité et jugé sain (ne pas ré-auditer)
 
 - **Toolchain** : `tsc`, ESLint, 249 tests, 80 specs, build, audit — tout vert et conforme aux chiffres de CLAUDE.md. La CI reproduit exactement cette séquence.
@@ -464,7 +498,7 @@ Les chiffres derrière les constats, pour ne pas avoir à les remesurer. Tous re
 
 Corps rendu des autres pages : landing 59 mots (EN) / 62 (FR) ; `/how-it-works` 320 / 340 ; index du glossaire 291 / 314.
 
-### A.2 Métadonnées émises (HTML prérendu)
+### A.2 Métadonnées émises (HTML prérendu au commit `11758de` — la PR #58 a corrigé les quatre premiers points depuis, voir R2-06/R2-07)
 
 - Titre de landing : « Tour de Growth », 14 caractères, hérité par `/quiz` et `/deep-dive/[id]`.
 - Descriptions anglaises servies sur `/fr`, `/fr/how-it-works`, `/fr/glossary`.

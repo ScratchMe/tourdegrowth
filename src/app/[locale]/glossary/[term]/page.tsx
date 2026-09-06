@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteFooter } from "@/components/brand/SiteFooter";
-import { LocaleSwitcher } from "@/components/brand/LocaleSwitcher";
-import { WordmarkLink } from "@/components/brand/WordmarkLink";
+import { ContentHeader } from "@/components/brand/ContentHeader";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { GLOSSARY, type GlossaryTermId } from "@/content/glossary";
@@ -55,12 +54,7 @@ export default async function GlossaryTermPage({ params }: PageProps) {
 
   return (
     <>
-      <header className={styles.header}>
-        <div className={styles.headerInner}>
-          <WordmarkLink locale={locale} />
-          <LocaleSwitcher locale={locale} path={`/glossary/${term}`} />
-        </div>
-      </header>
+      <ContentHeader locale={locale} path={`/glossary/${term}`} />
 
       <main className={styles.main}>
         <Link href={localePath(locale, "/glossary")} className={styles.backLink}>
