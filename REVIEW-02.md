@@ -56,7 +56,7 @@ La colonne **Autonomie** dit ce que chaque item attend d'Antoine : **Auto** = je
 | | R2-15 | Structured data : un seul bloc JSON-LD, identique en FR et en EN | F | M | Auto | **Fait en partie** (PR #58 : localisé, `author`) — reste `DefinedTerm`, `BreadcrumbList`, `url` par langue |
 | | R2-16 | Titres FR non localisés là où la requête française diffère | F | S | Relecture | À faire |
 | | R2-17 | `/how-it-works` répète chaque nom de pilier deux fois | F | XS | Auto | **Fait** (PR #61, 2026-09-06) |
-| **D — Robustesse et sécurité** | R2-18 | Aucun en-tête de sécurité hors HSTS | T | S | Auto | À faire |
+| **D — Robustesse et sécurité** | R2-18 | Aucun en-tête de sécurité hors HSTS | T | S | Auto | **Fait** (PR #64, 2026-09-06) — CSP `script-src` complète volontairement hors périmètre |
 | | R2-19 | Amplification de lectures Firestore non authentifiée sur `/r/<id>` | T | S | Auto | À faire |
 | | R2-20 | `freeContext` conservé indéfiniment pour calculer un booléen | T | S | Auto | À faire |
 | | R2-21 | Deep dive : deux requêtes concurrentes génèrent deux fois | T | S | Auto | À faire |

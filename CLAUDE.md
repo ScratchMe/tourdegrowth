@@ -1045,6 +1045,18 @@ Deux CTA, toujours — la règle de l'étape 7 tient — mais **les deux du bon 
 
 ---
 
+### R2-18 : les en-têtes de sécurité que l'app ne posait pas (2026-09-06)
+
+Jusqu'ici la seule protection d'en-tête en production était le HSTS que Vercel ajoute lui-même. `next.config.mjs` pose maintenant, sur toutes les routes : `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, un `Permissions-Policy` minimal, et `Content-Security-Policy: frame-ancestors 'none'` doublé de `X-Frame-Options: DENY` — `/r/<id>`, page publique avec de vraies actions, pouvait être embarquée dans une iframe par n'importe quel site.
+
+Deux absences volontaires, écrites dans le fichier pour qu'on ne les « corrige » pas : pas de CSP `script-src` (elle exigerait un nonce par requête dans le proxy, donc re-dynamiserait les 36 pages de contenu et déferait R-24 — décision séparée, à commencer en Report-Only), et pas de HSTS en doublon de Vercel (`includeSubDomains` serait un engagement sur des sous-domaines dont personne n'a décidé). Et une valeur à ne jamais durcir : `Referrer-Policy` reste à `strict-origin-when-cross-origin`, jamais `no-referrer`, sinon les liens vers le CV (volontairement `noopener` sans `noreferrer`) perdraient leur attribution — ce que la suppression de `noreferrer` du 2026-09-05 existait précisément pour éviter.
+
+`e2e/security-headers.spec.ts` lit les en-têtes réellement servis sur une page statique, une page dynamique, le questionnaire et une route API, et vérifie explicitement que la politique de referrer n'est pas `no-referrer`.
+
+**Vérifié en réel** : `curl -I` sur le build, lint, tsc, 264 tests, `next build`, 93 specs Playwright (+4).
+
+---
+
 ## État du projet au 2026-09-06 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
