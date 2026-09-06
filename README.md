@@ -68,7 +68,8 @@ the code:
 | [`SPEC.md`](SPEC.md) | The product specification — scoring rules, tone, sharing mechanics |
 | [`design/DESIGN-BRIEF.md`](design/DESIGN-BRIEF.md) | The visual system, screen by screen |
 | [`CLAUDE.md`](CLAUDE.md) | Every architectural decision, the traps hit along the way, and what was verified how |
-| [`REVIEW.md`](REVIEW.md) | A full technical and functional review, with each finding's status |
+| [`REVIEW.md`](REVIEW.md) | A full technical and functional review — 26 findings, each with its status and what remains open |
+| [`design/DS-EXTENSION-BRIEF-01.md`](design/DS-EXTENSION-BRIEF-01.md) | The brief that took five interface pieces built outside the design system back into it, and `design/ds-extension-01-return/` is what came back |
 
 ## Licence
 

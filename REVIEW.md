@@ -1,10 +1,12 @@
 # Revue technique & fonctionnelle — 2026-09-05
 
-**Statut :** constats validés par Antoine le 2026-09-05, traitement à venir item par item, dans l'ordre ci-dessous.
+**Statut : close le 2026-09-06.** Les 26 constats sont traités — 24 corrigés, R-23 clos sans code sur décision d'Antoine, R-25 livré pour moitié et l'autre moitié écartée. Ce qui reste ouvert est listé en fin de document, et rien n'y est bloquant.
+
+Le document reste utile comme **carte du raisonnement** : chaque item garde son constat d'origine, la preuve `fichier:ligne` qui l'a établi, ce qui a été décidé et pourquoi. Une nouvelle revue partirait d'ici, pas de zéro.
 
 ## Comment utiliser ce document
 
-- Chaque constat a un identifiant stable (`R-01` … `R-26`), un type (**F** = fonctionnel/produit, **T** = technique), un effort estimé (XS / S / M / L) et un **statut** à tenir à jour ici même : `À faire` → `En cours` → `Fait (PR #n, date)`.
+- Chaque constat a un identifiant stable (`R-01` … `R-26`), un type (**F** = fonctionnel/produit, **T** = technique), un effort estimé (XS / S / M / L) et un **statut** tenu à jour ici même : `À faire` → `En cours` → `Fait (PR #n, date)`. Un statut n'est écrit qu'après avoir vérifié que le merge n'était pas vide (`git show --stat <sha>`) — la PR #50 a prouvé que la CI verte ne suffit pas.
 - Les items sont regroupés en **lots** et l'ordre des lots est l'ordre de traitement. À l'intérieur d'un lot, l'ordre est indicatif sauf quand une dépendance est notée.
 - Un PR par item, sauf quand le détail indique explicitement « à faire avec R-xx ».
 - Quand un item est livré : mettre à jour la colonne statut ci-dessous, et ajouter l'entrée habituelle dans `CLAUDE.md` (décision prise, pièges rencontrés, ce qui a été vérifié en réel).
@@ -504,3 +506,25 @@ Pour éviter de re-auditer ce qui tient déjà :
 - **SEO de base** : `noindex` sur `/r/*` sans `disallow` robots (le bon choix), sitemap, JSON-LD, favicons, `metadataBase`.
 - **Admin** : Basic Auth fail-closed, `force-dynamic`, funnel GoatCounter codé contre le vrai code source de l'API plutôt qu'une doc supposée.
 - **Documentation** : CLAUDE.md est un modèle du genre. Ce document s'y ajoute, il ne le remplace pas.
+
+
+---
+
+## Ce qui reste ouvert après la clôture (2026-09-06)
+
+Aucun de ces points ne bloque le produit. Ils sont listés ici pour qu'une prochaine session n'ait pas à les redécouvrir, avec ce qui déclencherait de s'en occuper.
+
+| Sujet | Origine | État | Déclencheur |
+|---|---|---|---|
+| Limite de débit non distribuée | R-15 | En mémoire, par instance serverless. Arrête un client naïf, pas un trafic réparti. | Un abus réel. Le chemin est un store partagé (Upstash Redis) ou les règles de pare-feu Vercel selon le plan. |
+| Latence du Deep dive | Mesurée à ~70 s au run n°6 | Quatre générations en parallèle (2 tons × 2 langues) depuis le bilingue. L'écran de chargement est conçu pour une attente longue et sans fin annoncée. | Si 70 s devient la norme plutôt que l'exception, c'est le **nombre** de générations qu'il faut regarder, pas le plafond de temps par tentative. |
+| `/r/<id>` déborde de 37 px à 320 px | Mesuré pendant R-21 | Le `PillarChip` met score, nom et déclencheur de glossaire sur une ligne. Aucun débordement de 360 à 430 px. | Hors contrat : DESIGN-BRIEF.md fixe le mobile à 390 px et exige de tenir 375-430. Redimensionner un composant du design system hors de sa plage annoncée est une décision de design. Antoine a choisi de laisser en l'état. |
+| `guidelines/` absent du bundle d'extension 01 | Extension 01 | Le README du bundle l'annonce (planches de référence + `voice.md`), l'archive ne le contenait pas. | Sans conséquence à ce jour. À demander à Claude Design si un futur composant en a besoin. |
+
+### Ce que la revue a appris sur la méthode, au-delà des items
+
+Trois choses valent d'être retenues, parce qu'aucune n'est venue d'une relecture de code :
+
+1. **La sonde contre les vrais services a trouvé ce que les tests ne pouvaient pas.** En sept runs : un bug utilisateur intermittent (réponses tronquées), une faiblesse de conception (chaîne de repli sans pause), un plafond de timeout sous-dimensionné, et le démenti d'une de mes propres théories. Sa valeur n'est pas d'être verte.
+2. **Un test de non-vacuité qui passe est un signal, pas une formalité.** Deux fois le 2026-09-06 il a révélé autre chose que ce qu'il cherchait.
+3. **Une CI verte peut être verte pour la mauvaise raison.** La PR #50 était vide ; la CI testait un `main` inchangé et le bug a survécu une demi-journée à son propre correctif.
