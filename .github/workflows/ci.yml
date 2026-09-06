@@ -53,8 +53,11 @@ jobs:
       - name: Type-check
         run: npx tsc --noEmit
 
+      # `--coverage` enforces the floor set in vitest.config.ts (REVIEW-02.md
+      # R2-10): a module nobody imports from a test now fails the run instead
+      # of silently not counting.
       - name: Unit tests
-        run: npx vitest run
+        run: npx vitest run --coverage
 
       # No secrets needed: every route that touches Firestore or Gemini is
       # rendered on demand, so nothing calls them at build time.

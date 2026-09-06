@@ -1018,6 +1018,18 @@ Première PR du plan de `REVIEW-02.md`. `components/brand/ContentHeader` remplac
 
 ---
 
+### R2-01 + R2-10 : un K-factor qui peut valoir moins de 1, et le test qui aurait dû exister (2026-09-06)
+
+**Le défaut.** `growth-stats.ts` divisait les soumissions référées par le nombre de résultats **ayant déjà converti au moins une personne** — ce que le tableau de bord appelait « partageurs uniques » et qui n'en est pas : un résultat partagé qui ne convertit personne est invisible pour Firestore, donc jamais compté. Chaque résultat du dénominateur contribuant par construction à au moins une soumission du numérateur, le ratio valait ≥ 1 dès qu'il était défini. Le « K = 2,00 » vérifié le 2026-08-29 (2 référées ÷ 1 parraineur) illustrait le biais, pas la métrique : trois partages dont un seul convertit deux fois, c'est 0,67, pas 2.
+
+**Deux chiffres à la place, tous deux honnêtes.** `kFactor` = soumissions référées ÷ **toutes** les soumissions (la définition standard : nouveaux utilisateurs générés par utilisateur existant, chaque résultat étant un partageur potentiel). Et « conversion par partage » = soumissions référées ÷ événements `share` GoatCounter, calculé dans la page `/admin/stats` à partir de la fenêtre « All-time » déjà chargée — Firestore ne sait pas qui a partagé, seul GoatCounter le sait. L'ancien ratio reste affiché sous son vrai nom (« référées par résultat qui convertit »), parce qu'il dit quelque chose de vrai ; il ne s'appelle simplement plus K-factor.
+
+**Pourquoi personne ne l'avait vu** : `growth-stats.ts` n'était importé par aucun test. La couverture « 95 % » ne portait que sur les fichiers qu'un test importe ; un fichier jamais importé n'apparaissait pas à 0 %, il n'apparaissait pas. `computeGrowthStats` est scindé en `summarizeSubmissions(submissions, now)` (pure, 9 tests dont le jeu de données exact qui donnait 2,00 et donne maintenant 0,40) et un wrapper Firestore. `@vitest/coverage-v8` entre dans le repo avec `coverage.include: src/lib/**` — tout l'arbre, pas seulement ce qui est importé — et des seuils posés juste sous la mesure du jour (lignes 82 %, mesuré 85 %) : un plancher qui fait rougir la CI si un nouveau module reste sans test, pas un objectif. `src/app` est exclu à dessein : les routes et les pages sont couvertes par Playwright contre un vrai build.
+
+**Vérifié en réel** : lint, tsc, 264 tests unitaires (+9), `npx vitest run --coverage` avec seuils, `next build`. Le rendu de `/admin/stats` n'est pas vérifiable ici (Firestore), mais la page ne fait qu'afficher des champs dont le calcul est maintenant testé.
+
+---
+
 ## État du projet au 2026-09-06 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.

@@ -103,6 +103,13 @@ function FunnelBreakdown({ window }: { window: FunnelWindow }) {
  */
 export default async function AdminStatsPage() {
   const [stats, funnelWindows] = await Promise.all([computeGrowthStats(), fetchFunnelStats()]);
+  // Conversion per share — REVIEW-02.md R2-01. Firestore knows who was
+  // referred; only GoatCounter knows how many times a result was shared. The
+  // all-time window is the one whose share count matches an all-time referral
+  // count; null when GoatCounter is unavailable or nothing was shared yet.
+  const allTimeShares = funnelWindows.find((w) => w.label === "All-time")?.stats?.shares ?? null;
+  const conversionPerShare =
+    allTimeShares !== null && allTimeShares > 0 ? stats.referredSubmissions / allTimeShares : null;
 
   return (
     <main className={styles.main}>
@@ -141,19 +148,38 @@ export default async function AdminStatsPage() {
         </Card>
       </section>
 
+      {/* REVIEW-02.md R2-01. The card used to divide by "unique sharers",
+          which Firestore cannot see — it only sees the results whose link
+          converted someone, so the ratio was ≥ 1 by construction whenever it
+          was defined. Two honest numbers instead: K over all results, and
+          how often a share turns into a result (GoatCounter share events). */}
       <section className={styles.grid}>
         <Card elevation="raised" tone="outlineAlert" className={styles.stat}>
           <MetaLabel size="xs">K-factor</MetaLabel>
           <p className={styles.number}>{stats.kFactor.toFixed(2)}</p>
-          <p className={styles.detail}>SPEC.md §7 — referred submissions ÷ unique sharers</p>
+          <p className={styles.detail}>
+            {stats.referredSubmissions} referred ÷ {stats.totalSubmissions} results — new analyses per analysis
+          </p>
+        </Card>
+        <Card elevation="raised" className={styles.stat}>
+          <MetaLabel size="xs">Conversion per share</MetaLabel>
+          <p className={styles.number}>{conversionPerShare === null ? "—" : pct(conversionPerShare)}</p>
+          <p className={styles.detail}>
+            {allTimeShares === null
+              ? "share count unavailable (GoatCounter)"
+              : `${stats.referredSubmissions} referred ÷ ${allTimeShares} share events (all-time)`}
+          </p>
         </Card>
         <Card elevation="raised" className={styles.stat}>
           <MetaLabel size="xs">Referred submissions</MetaLabel>
           <p className={styles.number}>{stats.referredSubmissions}</p>
         </Card>
         <Card elevation="raised" className={styles.stat}>
-          <MetaLabel size="xs">Unique sharers</MetaLabel>
-          <p className={styles.number}>{stats.uniqueSharers}</p>
+          <MetaLabel size="xs">Converting results</MetaLabel>
+          <p className={styles.number}>{stats.convertingResults}</p>
+          <p className={styles.detail}>
+            results whose link brought ≥ 1 analysis — {stats.referralsPerConvertingResult.toFixed(2)} each
+          </p>
         </Card>
       </section>
 
