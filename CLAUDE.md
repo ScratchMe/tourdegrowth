@@ -983,6 +983,16 @@ La vérification visuelle qui aurait dû l'attraper à l'étape 8 a été faite 
 
 **Vérifié** : `tsc`, `eslint`, 249 tests unitaires, `next build`, e2e Playwright ; HTML pré-rendu de `/fr`, `/en`, `/fr/how-it-works`, `/fr/glossary`, `/fr/glossary/cac` (titre localisé, `og:*`, `twitter:*`, `og:image` avec hash, JSON-LD) ; les trois images (landing FR/EN, résultat échantillon) rendues et regardées, y compris réduites à 320 px (règle « feed-size » : titre, accent rouge et wordmark survivent).
 
+### Le « № » du badge de partage sortait en carré vide, et le test qui l'empêche de revenir (2026-09-06)
+
+**Le constat, sur la production, dix minutes après le merge de la PR #58.** Sur l'image de partage de la landing (`/fr/opengraph-image/fr`), le badge « № 15 questions — 3 min — entrée gratuite » commençait par un rectangle vide : le « № » (U+2116) n'existe pas dans le sous-ensemble Latin d'IBM Plex Mono que sert Google Fonts (229 glyphes), et Satori n'a aucun repli système — un glyphe absent est dessiné vide, sans erreur. Dans le navigateur, le même `bibTag` s'affiche bien : la police web complète a le caractère. Troisième piège des polices OG, ajouté au commentaire de `src/lib/og/fonts.ts`.
+
+**Le correctif.** `ibm-plex-mono-500.ttf` et `-600.ttf` sont désormais découpés avec fonttools depuis les polices **complètes** du paquet npm `@ibm/plex-mono` (1 049 glyphes) : la plage Latin de Google plus U+2116, soit 230 glyphes, ~51 Ko chacune. Les trois autres fichiers ne changent pas.
+
+**Le garde-fou : `src/lib/og/fonts.test.ts`.** Un lecteur de table `cmap` (formats 4 et 12, une soixantaine de lignes, pas de dépendance) et, famille par famille, la liste des chaînes que les deux images dessinent réellement — wordmark, `h1*` et chiffres en Stardos ; sous-titre, phrase du bas et « Et la tienne ? » en Inter ; `bibTag`, piliers, badges, `scoreLabel` et domaine en Plex Mono — vérifiée dans les deux langues, emoji exclus (next/og les dessine avec Twemoji). Ajouter du texte à une image, c'est l'ajouter là aussi. Test de non-vacuité fait : remis sur les anciennes polices, il échoue sur « № » exactement, et sur rien d'autre.
+
+**Vérifié** : les trois images rendues en local avec les nouvelles polices (`№` présent, résultat échantillon inchangé), `tsc`, `eslint`, 255 tests unitaires (+6), puis la production après merge.
+
 ## État du projet au 2026-09-06 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -991,7 +1001,7 @@ Tout ce qui précède est un journal, dans l'ordre où les choses se sont passé
 
 En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue, avec les deux modes (Quick déterministe, Deep dive généré par Gemini). La revue technique et fonctionnelle du 2026-09-05 est **close** : les 26 constats de `REVIEW.md` sont traités.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément) : 249 tests unitaires, 80 specs Playwright, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro.
+**Chiffres de référence** (à comparer, pas à recopier aveuglément) : 255 tests unitaires, 80 specs Playwright, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro.
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 

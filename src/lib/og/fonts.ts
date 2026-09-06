@@ -24,6 +24,13 @@ import { fileURLToPath } from "node:url";
  *    `Inter-Medium` / `Inter-SemiBold` (`extras/ttf/`), subset to Latin with
  *    fonttools — not the variable file Google Fonts serves. All files are
  *    .ttf: Satori rejects woff2 ("Unsupported OpenType signature wOF2").
+ * 3. **A subset must contain every code point an image draws.** Satori has
+ *    no system fallback: a missing glyph renders as an empty box and nothing
+ *    fails. The "№" of the landing bib tag shipped as tofu that way (the
+ *    Plex Mono subset served by Google Fonts stops at Latin). The Plex Mono
+ *    files are now cut with fonttools from the complete fonts of the
+ *    `@ibm/plex-mono` npm package: Google's Latin range plus U+2116.
+ *    `fonts.test.ts` checks the coverage of every string the images render.
  */
 const FONT_FILES = {
   stardos: new URL("./fonts/stardos-stencil-700.ttf", import.meta.url),
