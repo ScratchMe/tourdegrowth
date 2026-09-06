@@ -36,7 +36,11 @@
   margin-top: 6px;
 }
 
-/* Only past the limit, never as a warning before it (§1.2: "jamais avant"). */
+/* Only past the limit, never as a warning before it (§1.2: "jamais avant").
+   --text-alert, not --paint-red: 11px red text on stone is exactly the pair
+   REVIEW.md R-22 moved every link off (3.57:1 → 5.42:1). This screen is not
+   in the axe gate, which is why it was only caught while photographing it
+   for design/DS-EXTENSION-BRIEF-01.md. */
 .counterOverLimit {
-  color: var(--paint-red);
+  color: var(--text-alert);
 }
