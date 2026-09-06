@@ -80,7 +80,8 @@ export function summarizeSubmissions(submissions: readonly Submission[], now: nu
 
     if (s.deepDive) {
       deepDiveCompleted += 1;
-      if (s.deepDive.freeContext) freeContextProvided += 1;
+      // Documents written before REVIEW-02.md R2-20 carry the text, not the boolean.
+      if (s.deepDive.freeContextProvided ?? Boolean(s.deepDive.freeContext)) freeContextProvided += 1;
     }
 
     if (s.refId) {

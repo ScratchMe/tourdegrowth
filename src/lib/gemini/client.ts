@@ -220,7 +220,10 @@ export async function callGeminiWithFallback(
       continue;
     }
 
-    const errText = await response.text();
+    // Truncated (REVIEW-02.md R2-24): Google's INVALID_ARGUMENT bodies can
+    // echo the offending request, and the request carries the founder's
+    // free-text context. Enough to diagnose, not enough to log a business.
+    const errText = (await response.text()).slice(0, 300);
     throw new Error(`Gemini API error (${response.status}): ${errText}`);
   }
 

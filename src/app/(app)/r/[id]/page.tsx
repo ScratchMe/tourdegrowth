@@ -115,7 +115,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
  * all 15 questions by opening /quiz). The ANSWERS, which are not public,
  * never come from here: they are read from the owner's own device.
  */
-function buildBreakdownData(locale: Locale, pillars: { pillar: Pillar; rawPoints: number }[]): BreakdownData {
+function buildBreakdownData(locale: Locale): BreakdownData {
   return {
     questions: QUESTIONS.map((q) => ({
       id: q.id,
@@ -123,7 +123,6 @@ function buildBreakdownData(locale: Locale, pillars: { pillar: Pillar; rawPoints
       question: tc(q.question, locale),
       options: q.options.map((o) => ({ label: tc(o.label, locale), points: o.points })),
     })),
-    rawPoints: Object.fromEntries(pillars.map((p) => [p.pillar, p.rawPoints])) as BreakdownData["rawPoints"],
   };
 }
 
@@ -175,7 +174,7 @@ export default async function ResultPage({ params }: PageProps) {
       weakestPillar={submission.weakestPillar}
       verdicts={buildQuickVerdicts(locale, submission.pillars, submission.weakestPillar)}
       initialTone={submission.tone}
-      breakdown={buildBreakdownData(locale, submission.pillars)}
+      breakdown={buildBreakdownData(locale)}
       // REVIEW.md R-02: only the generated verdicts cross to the client.
       // `deepDive` also holds the founder's free-text context and their 10
       // Deep dive answers, which would otherwise ride along in this public

@@ -1071,6 +1071,16 @@ Deux absences volontaires, écrites dans le fichier pour qu'on ne les « corrige
 
 ---
 
+### R2-20 + R2-24 : ne plus garder ce qu'on ne relit pas, et quatre petites dettes (2026-09-06)
+
+**Le texte libre n'est plus stocké.** `DeepDiveResult.freeContext` — un fondateur décrivant son entreprise dans ses mots — était conservé indéfiniment, et la seule chose qui le relisait était un `if (freeContext)` dans le tableau de bord. Il devient `freeContextProvided: boolean` ; `contextAnswers` (les dix réponses de contexte résolues en libellés) n'est plus écrit non plus, rien ne le relisait. Les deux restent dans le type en optionnels « legacy » pour que les documents antérieurs se lisent, et `growth-stats.ts` retombe sur la truthiness de l'ancien texte quand le booléen manque — testé avec un document de chaque génération. Le texte part toujours dans le prompt Gemini, délimité comme donnée (`FREE_CONTEXT_INSTRUCTION`) ; la troncature à 500 caractères se vérifie maintenant sur le prompt, puisqu'il n'y a plus de champ stocké à mesurer. **Correction du constat en le livrant** : `modelUsed` est bien relu — par la sonde de production, qui rapporte quel modèle a répondu — donc il reste écrit ; c'est de l'observabilité, pas une donnée sur quelqu'un.
+
+**Quatre dettes courtes.** `rawPoints` sort du payload public de `/r/<id>` : `ScoreBreakdown` recalcule le numérateur à partir des réponses du propriétaire et des points de chaque option, qu'il avait déjà — le champ était redondant, et avec des options à 20/7/0 chaque somme atteignable trahissait exactement le multiset de réponses. Le corps d'erreur de l'API Gemini est tronqué à 300 caractères avant d'être journalisé (Google peut y faire écho à la requête, qui contient le texte libre). `.github/dependabot.yml` (npm et actions, mensuel, groupé, Playwright ignoré à cause de l'épinglage de R-07). Et les deux actions de `verify-live.yml` — le seul workflow qui tient les secrets Firebase et Gemini — sont épinglées par SHA de commit, résolu avec `git ls-remote` sur les dépôts d'actions plutôt que recopié.
+
+**Vérifié en réel** : lint, tsc, 268 tests, `next build`, 95 specs Playwright. Le nouveau champ ne peut se voir en base qu'après déploiement : le prochain run de « Verify against live services » écrit un vrai Deep dive, et la sonde vérifie déjà que ni `freeContext` ni `contextAnswers` n'apparaissent dans la page.
+
+---
+
 ## État du projet au 2026-09-06 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.

@@ -17,8 +17,14 @@ export interface BreakdownQuestion {
 
 export interface BreakdownData {
   questions: BreakdownQuestion[];
-  /** Raw 0-60 total per pillar, straight from `computeScore` — the numerator of the shown maths. */
-  rawPoints: Record<Pillar, number>;
+  /*
+   * There is deliberately no `rawPoints` here (REVIEW-02.md R2-24). The raw
+   * 0-60 total per pillar used to travel in every visitor's payload, owner or
+   * not — and with options worth 20/7/0, each reachable sum maps to exactly
+   * one multiset of answers, so it disclosed a little more than the shown
+   * score. It is also redundant: the owner's answers and each option's
+   * points are both here, so the numerator is computed below instead.
+   */
 }
 
 interface ScoreBreakdownProps {
@@ -67,8 +73,9 @@ export function ScoreBreakdown({ locale, data, answers, pillars }: ScoreBreakdow
           const questions = data.questions.filter((q) => q.pillar === pillar);
           if (questions.length === 0) return null;
 
+          const rawPoints = questions.reduce((sum, q) => sum + (q.options[answers[q.id] ?? -1]?.points ?? 0), 0);
           const maths = tc(t.pillarMathTemplate, locale)
-            .replace("{raw}", String(data.rawPoints[pillar] ?? 0))
+            .replace("{raw}", String(rawPoints))
             .replace("{score}", String(scoreOf.get(pillar) ?? 0));
 
           return (

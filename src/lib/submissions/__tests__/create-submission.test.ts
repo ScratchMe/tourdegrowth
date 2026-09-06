@@ -164,7 +164,8 @@ describe("completeDeepDiveFlow (Deep dive — still calls Gemini)", () => {
     expect(deps.callGemini).toHaveBeenCalledTimes(4);
     expect(result.locale).toBe("en");
     expect(Object.keys(result.localized ?? {}).sort()).toEqual(["en", "fr"]);
-    expect(Object.keys(result.contextAnswers)).toHaveLength(DEEP_MODE_QUESTIONS.length);
+    // REVIEW-02.md R2-20: the resolved context answers are prompt material, not a stored field.
+    expect(result).not.toHaveProperty("contextAnswers");
   });
 
   it("keeps the completion language when another one fails, rather than losing the whole Deep dive", async () => {
@@ -240,14 +241,16 @@ describe("completeDeepDiveFlow (Deep dive — still calls Gemini)", () => {
       deps,
     );
 
-    expect(result.freeContext).toBe("We sell to accounting firms, long sales cycle.");
+    // REVIEW-02.md R2-20: what is kept is THAT it was provided, never the text.
+    expect(result.freeContextProvided).toBe(true);
+    expect(result).not.toHaveProperty("freeContext");
     const calls = (deps.callGemini as ReturnType<typeof vi.fn>).mock.calls;
     for (const call of calls) {
       expect(call[0] as string).toContain("We sell to accounting firms, long sales cycle.");
     }
   });
 
-  it("stores null and sends no free-context block when freeContext is omitted, empty, or whitespace-only", async () => {
+  it("records no context and sends no free-context block when freeContext is omitted, empty, or whitespace-only", async () => {
     const submission = await baseSubmission();
 
     for (const value of [undefined, null, "", "   "]) {
@@ -256,7 +259,7 @@ describe("completeDeepDiveFlow (Deep dive — still calls Gemini)", () => {
         { submission, contextAnswerIndices: fullContextAnswers(), locale: "en", freeContext: value },
         deps,
       );
-      expect(result.freeContext).toBeNull();
+      expect(result.freeContextProvided).toBe(false);
       const calls = (deps.callGemini as ReturnType<typeof vi.fn>).mock.calls;
       for (const call of calls) {
         expect(call[0] as string).not.toContain("User-provided business context");
@@ -269,12 +272,16 @@ describe("completeDeepDiveFlow (Deep dive — still calls Gemini)", () => {
     const deps = fakeDeepDiveDeps();
     const tooLong = "x".repeat(600);
 
-    const result = await completeDeepDiveFlow(
+    await completeDeepDiveFlow(
       { submission, contextAnswerIndices: fullContextAnswers(), locale: "en", freeContext: tooLong },
       deps,
     );
 
-    expect(result.freeContext).toHaveLength(500);
+    // The text is no longer stored (R2-20), so the truncation shows in what
+    // reaches the prompt: 500 characters, never 501.
+    const prompt = (deps.callGemini as ReturnType<typeof vi.fn>).mock.calls[0]?.[0] as string;
+    expect(prompt).toContain("x".repeat(500));
+    expect(prompt).not.toContain("x".repeat(501));
   });
 
   it("propagates a Gemini failure without persisting (persistence is the caller's job)", async () => {

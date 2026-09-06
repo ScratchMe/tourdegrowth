@@ -15,6 +15,9 @@ const SECRET_CONTEXT = "We sell to accounting firms, trust is a bigger blocker t
 
 const deepDive: DeepDiveResult = {
   completed: true,
+  freeContextProvided: true,
+  // Legacy fields (pre-R2-20 documents still carry them) — kept in this fixture
+  // precisely so the leak assertions below keep meaning something.
   contextAnswers: { "deep-acq-1": "Outbound sales", "deep-ret-1": "We don't measure it" },
   freeContext: SECRET_CONTEXT,
   verdicts: { neutral: verdict("Neutral"), roast: verdict("Roast") },
