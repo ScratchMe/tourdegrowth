@@ -14,13 +14,12 @@ export function tc(entry: Translatable, locale: Locale): string {
  * Filled in screen-by-screen as the build reaches them (see CLAUDE.md's
  * build plan) — sections not built yet simply don't exist here.
  *
- * // TODO: la copie ci-dessous (landing) est une traduction FR de travail —
- * cohérente avec la copie EN "finale" du design (voir DESIGN-BRIEF.md), mais
- * pas encore relue par l'agent produit. Ce n'est PAS la bibliothèque de
- * textes de verdict ni la voix "roast" visées par SPEC.md §12 (celles-là
- * restent non tranchées et ne sont pas inventées ici) — juste la traduction
- * factuelle du hero/CTA de la landing, nécessaire dès le premier commit
- * fonctionnel bilingue (CLAUDE.md).
+ * Toute la copie de ce fichier a été relue et validée par Antoine
+ * (2026-09-06). Les blocs qui portaient un `TODO: à relire` — landing FR,
+ * écran 404, benchmark, dernier résultat, dépliant du score, texte de
+ * partage — n'en portent plus. Une nouvelle chaîne ajoutée ici après cette
+ * date repart au statut « à relire » : le marquer explicitement plutôt que
+ * de la glisser dans un fichier désormais approuvé.
  */
 export const UI_STRINGS = {
   /**
@@ -66,8 +65,6 @@ export const UI_STRINGS = {
    * Distinct from `result.notFound*`, which is specifically "no submission at
    * this id" and can say so. This one knows nothing about why you are here.
    *
-   * // TODO: copie finale à valider. Interface copy, same status as the error
-   * screen: written to make the page real, still worth a read.
    */
   notFound: {
     /* Design system extension 01: the detour family's mono eyebrow. */
@@ -83,10 +80,9 @@ export const UI_STRINGS = {
   /**
    * The "how does this compare" line under the score (REVIEW.md R-20).
    *
-   * // TODO: copie finale à valider. Same status as `lastResult` below:
-   * interface copy, not verdict voice. Only ever rendered once enough Tours
-   * have been taken for the average to mean something (see
-   * `submissions/benchmark.ts`), and never on the fixed sample.
+   * Only ever rendered once enough Tours have been taken for the average to
+   * mean something (see `submissions/benchmark.ts`), and never on the fixed
+   * sample.
    */
   benchmark: {
     line: { en: "Average of every Tour: {score}/100", fr: "Moyenne de tous les Tours : {score}/100" },
@@ -98,11 +94,8 @@ export const UI_STRINGS = {
    * exactly two levels deep by construction (see the `satisfies` at the
    * bottom of this file).
    *
-   * // TODO: copie finale à valider. Interface copy, not verdict voice, so
-   * the same status as the error screen and the score breakdown: written
-   * here to make the feature real, still worth a read. Only ever shown to
-   * someone who already took a Tour on this device, so it never competes
-   * with the primary CTA for a newcomer.
+   * Only ever shown to someone who already took a Tour on this device, so it
+   * never competes with the primary CTA for a newcomer.
    */
   lastResult: {
     withScore: {
@@ -298,9 +291,6 @@ export const UI_STRINGS = {
    * code and invisible in the interface: the page never showed the three
    * answers behind a pillar's score.
    *
-   * // TODO: copie de travail, à relire par l'agent produit. C'est de la
-   * copie d'interface (titres, libellés, gabarit de calcul), pas de la voix
-   * verdict ni du roast — même statut que l'écran d'erreur repris du brief.
    */
   breakdown: {
     title: { en: "How this score is calculated", fr: "Comment ce score est calculé" },
@@ -322,12 +312,10 @@ export const UI_STRINGS = {
    * sheet's message (REVIEW.md R-10). `{total}` and `{pillar}` are replaced
    * in code, same convention as the quiz counters above.
    *
-   * // TODO: copie de travail, à relire par l'agent produit. Elle est
-   * assemblée à partir de blocs déjà livrés (le gabarit « où ça cale » et la
-   * relance de l'image OG, `og` ci-dessous) plutôt qu'écrite de zéro,
-   * précisément pour ne pas inventer une voix produit — mais c'est le
-   * premier texte que le produit met dans la bouche de l'utilisateur au
-   * moment de partager, donc il mérite une vraie relecture.
+   * Assemblée à partir de blocs déjà livrés (le gabarit « où ça cale » et la
+   * relance de l'image OG, `og` ci-dessous) plutôt qu'écrite de zéro. C'est
+   * le seul texte que le produit met dans la bouche de l'utilisateur : le
+   * modifier n'est pas un changement d'interface comme un autre.
    */
   share: {
     textTemplate: {

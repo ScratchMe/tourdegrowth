@@ -10,11 +10,9 @@ import type { Translatable } from "@/lib/i18n/dictionary";
  *
  * `extended`/`related` were added later (growth-plan Phase 2, 2026-08-29)
  * for `/glossary/[term]`'s standalone SEO page only — a longer, practical
- * explainer plus 2-3 related terms for internal linking. Unlike
- * `term`/`definition`, this is my own first-draft copy (factual/explanatory,
- * not the persona/verdict voice CLAUDE.md reserves for the product agent) —
- * worth a skim before treating it as final the way the rest of this file's
- * content is.
+ * explainer plus 2-3 related terms for internal linking. Written here rather
+ * than in the handoff bundle, and reviewed and approved by Antoine on
+ * 2026-09-06, so it now has the same standing as the rest of this file.
  */
 
 export type GlossaryTermId =
