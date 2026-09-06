@@ -13,27 +13,18 @@ import { expect, test } from "./helpers";
  */
 
 /**
- * Contrast pairs that already fail today, every one of them a design-system
- * token choice rather than a page-level mistake. They are listed here — by
- * colour pair, which is stable, rather than by CSS-module selector, which is
- * a build hash — so that a NEW contrast failure still turns this red while
- * the known ones stay visible in the code instead of being hidden behind a
- * disabled rule.
+ * Contrast pairs the suite tolerates. EMPTY since REVIEW.md R-22: the three
+ * design-system pairs that failed when this gate was first switched on
+ * (primary button label 4.42:1, faint credit line 2.80:1, red link 3.57:1)
+ * were fixed at the token level, so every colour-contrast violation now
+ * turns this red.
  *
- * All three are tracked as REVIEW.md R-22, and fixing them means changing
- * brand colours, which is Antoine's call, not a silent edit here.
+ * The mechanism stays, deliberately. If a future brand decision reintroduces
+ * a known gap, list it here BY COLOUR PAIR (stable) rather than by CSS-module
+ * selector (a build hash), so that a NEW failure still fails while the
+ * accepted one remains visible in the code instead of behind a disabled rule.
  */
-const KNOWN_CONTRAST_GAPS: { fg: string; bg: string; what: string }[] = [
-  // --action-primary-text on --action-primary-bg: 4.41:1, needs 4.5:1. The
-  // product's primary button, so this one is on every screen.
-  { fg: "#fbf9f2", bg: "#d2402c", what: "primary button label on road-paint red" },
-  // --text-faint on --surface-card: 2.8:1. The deliberately quiet "Built by"
-  // credit line (SPEC-ADDENDUM-02.md §2.1) — quiet went too far.
-  { fg: "#99968f", bg: "#fbf9f2", what: "faint credit line on card paper" },
-  // --text-link on --surface-page: 3.56:1 at 11.5px. The design system already
-  // ships --paint-red-deep for exactly this ("red text on light grounds").
-  { fg: "#d2402c", bg: "#e7e1d2", what: "red link in the disclaimer on page ground" },
-];
+const KNOWN_CONTRAST_GAPS: { fg: string; bg: string; what: string }[] = [];
 
 const PAGES: [name: string, path: string][] = [
   ["landing", "/en"],

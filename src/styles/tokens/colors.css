@@ -16,6 +16,15 @@
   --ink-1: #5b5346; /* secondary text, dashed borders, meta labels */
 
   --paint-red: #d2402c; /* road-marking red: primary action, accents */
+  /*
+   * REVIEW.md R-22. --paper-0 on --paint-red measures 4.42:1, 0.08 short of
+   * AA for the 15-16px semibold label of the primary button (WCAG's relaxed
+   * 3:1 "large text" rule needs 18.66px bold, which the label is not).
+   * Darkening the fill by 3% clears it at 4.65:1 and is indistinguishable
+   * from --paint-red side by side. Only the BUTTON FILL uses this: the
+   * road-paint red itself is unchanged everywhere it is an accent.
+   */
+  --paint-red-action: #cc3e2b;
   --paint-red-deep: #a32e1f; /* red text on light grounds (AA on --paper-0) */
   --paint-red-wash: #f3d9d2; /* soft red surface: weak pillar, problem cards */
 
@@ -30,7 +39,13 @@
   --text-muted: var(--ink-1);
   --text-inverse: var(--paper-0);
   --text-alert: var(--paint-red-deep);
-  --text-link: var(--paint-red);
+  /*
+   * REVIEW.md R-22. Was --paint-red, which is 3.57:1 on --paper-1 and 4.42:1
+   * on --paper-0 — under AA on both grounds this token is ever used on. The
+   * deep red exists precisely for "red text on light grounds" (see its
+   * comment above), and every --text-link usage IS red text on paper.
+   */
+  --text-link: var(--paint-red-deep);
   --text-link-hover: var(--ink-0);
 
   /*
@@ -44,8 +59,14 @@
    * so defined here rather than guessed at inline: a translucent --ink-0
    * rather than a new flat hex, so it stays visually related to the ink
    * scale instead of introducing an unrelated grey.
+   *
+   * REVIEW.md R-22: 0.45 measured 2.80:1 on --surface-card — "quiet" had
+   * become "unreadable", on the one line that points at Antoine's CV. 0.62
+   * is the minimum that clears AA (4.67:1); 0.65 gives 5.18:1 and still
+   * sits visibly lighter than --text-muted (#5b5346), so the hierarchy the
+   * addendum asks for (fainter than muted) survives.
    */
-  --ink-faint: rgba(33, 28, 21, 0.45);
+  --ink-faint: rgba(33, 28, 21, 0.65);
   --text-faint: var(--ink-faint);
 
   --border-hard: var(--ink-0); /* 2px solid — a real edge */
@@ -53,7 +74,7 @@
   --border-alert: var(--paint-red);
   --border-divider: rgba(33, 28, 21, 0.22); /* 1-2px dashed rules */
 
-  --action-primary-bg: var(--paint-red);
+  --action-primary-bg: var(--paint-red-action);
   --action-primary-text: var(--paper-0);
   --action-secondary-text: var(--ink-0);
 
