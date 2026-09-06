@@ -18,14 +18,16 @@ import type { GlossaryTermId } from "./glossary-terms";
  * the wording can't drift) and to the score band it lands you in. That is
  * the one thing a glossary attached to a working tool can say.
  *
- * Batches of three, as REVIEW-02.md planned: this file starts with the three
- * most commercially searched terms. Facts are the widely cited ones (the 3:1
+ * Delivered in five batches of three, as REVIEW-02.md planned, starting with
+ * the most commercially searched terms; every term has one now, which the
+ * `Record` type (not `Partial`) enforces for any term added later. Facts are the widely cited ones (the 3:1
  * LTV:CAC rule of thumb, CAC payback under 12 months for SMB SaaS, monthly
  * churn compounding), always with their caveat, never a made-up statistic.
  *
- * TODO: à relire (REVIEW-02) — R2-11, lot 1 (cac, ltv, churn), lot 2
- * (retention, activation, viral-coefficient), lot 3 (acquisition, referral,
- * revenue) et lot 4 (aarrr, aha-moment, onboarding). Premier jet
+ * TODO: à relire (REVIEW-02) — R2-11, les cinq lots : cac, ltv, churn ;
+ * retention, activation, viral-coefficient ; acquisition, referral, revenue ;
+ * aarrr, aha-moment, onboarding ; growth-loop, north-star-metric,
+ * upsell-cross-sell. Premier jet
  * de la session de code : c'est de la copie de fond qui porte le nom
  * d'Antoine, à relire ligne à ligne.
  */
@@ -51,7 +53,7 @@ export interface DeepGlossaryContent {
 
 const t = (en: string, fr: string): Translatable => ({ en, fr });
 
-export const GLOSSARY_DEEP: Partial<Record<GlossaryTermId, DeepGlossaryContent>> = {
+export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
   cac: {
     formula: {
       expression: t(
@@ -1568,6 +1570,385 @@ export const GLOSSARY_DEEP: Partial<Record<GlossaryTermId, DeepGlossaryContent>>
         answer: t(
           "As long as the path to the first value requires, and not a screen more. The right question isn't duration but distance: how many decisions and how much typing stand between the account and the moment. Measure time-to-value, then remove steps until the median stops dropping.",
           "Le temps que demande le chemin vers la première valeur, et pas un écran de plus. La bonne question n'est pas la durée mais la distance : combien de décisions et de saisie séparent le compte du moment. Mesure le time-to-value, puis retire des étapes jusqu'à ce que la médiane cesse de baisser.",
+        ),
+      },
+    ],
+  },
+  "growth-loop": {
+    formula: {
+      expression: t(
+        "Next cycle's input = this cycle's users × share who take the loop action × conversion of what that action produces",
+        "Entrée du cycle suivant = utilisateurs de ce cycle × part qui fait l'action de boucle × conversion de ce que cette action produit",
+      ),
+      terms: [
+        {
+          symbol: t("Loop action", "Action de boucle"),
+          meaning: t(
+            "What a user does that creates the next user's entry point: shares a result (viral loop), publishes something search engines index (content loop), pays money that funds ads (paid loop). If nothing a user does creates an entry point for someone else, you have a funnel, not a loop.",
+            "Ce qu'un utilisateur fait qui crée le point d'entrée du suivant : partager un résultat (boucle virale), publier quelque chose que les moteurs indexent (boucle de contenu), payer de l'argent qui finance de la publicité (boucle payante). Si rien de ce qu'un utilisateur fait ne crée un point d'entrée pour quelqu'un d'autre, tu as un entonnoir, pas une boucle.",
+          ),
+        },
+        {
+          symbol: t("Conversion", "Conversion"),
+          meaning: t(
+            "How much of what the action produces becomes a new user: readers of a shared page who start their own, searchers who land on a user-generated page and sign up, ad impressions bought with revenue that convert.",
+            "Quelle part de ce que l'action produit devient un nouvel utilisateur : les lecteurs d'une page partagée qui lancent la leur, les chercheurs qui atterrissent sur une page créée par un utilisateur et s'inscrivent, les impressions publicitaires achetées avec le revenu qui convertissent.",
+          ),
+        },
+        {
+          symbol: t("Cycle time", "Temps de cycle"),
+          meaning: t(
+            "How long one turn takes — from a user entering to the users they generate entering. A loop with a lower ratio but a daily cycle outgrows a stronger loop that turns monthly.",
+            "Combien de temps prend un tour — de l'entrée d'un utilisateur à l'entrée de ceux qu'il génère. Une boucle au ratio plus faible mais au cycle quotidien dépasse une boucle plus forte qui tourne chaque mois.",
+          ),
+        },
+      ],
+      note: t(
+        "The ratio output ÷ input is the loop's multiplier; for the viral loop it is exactly K. Above 1, the loop is self-sustaining; below 1 — the usual case — it multiplies whatever you feed it from outside, which is still the cheapest growth there is.",
+        "Le ratio sortie ÷ entrée est le multiplicateur de la boucle ; pour la boucle virale, c'est exactement K. Au-dessus de 1, la boucle s'auto-entretient ; en dessous — le cas habituel — elle multiplie ce que tu lui donnes de l'extérieur, ce qui reste la croissance la moins chère qui existe.",
+      ),
+    },
+    example: {
+      title: t("This site's own loop, with the real mechanics", "La boucle de ce site, avec sa vraie mécanique"),
+      steps: [
+        t(
+          "Input: someone takes the Tour. Loop action: they share their result page — a link with a preview image showing their score.",
+          "Entrée : quelqu'un fait le Tour. Action de boucle : il partage sa page de résultat — un lien avec une image d'aperçu montrant son score.",
+        ),
+        t(
+          "Conversion: a reader of that page clicks \"take your own Tour\" (the link carries a reference to the result that brought them) and completes fifteen questions. They are now an input, and the cycle turns.",
+          "Conversion : un lecteur de cette page clique sur « fais ton propre Tour » (le lien porte une référence au résultat qui l'a amené) et répond aux quinze questions. Il est maintenant une entrée, et le cycle tourne.",
+        ),
+        t(
+          "Suppose 20% of Tours are shared, a shared page is read by 12 people, and 6% of readers start their own: 0.2 × 12 × 0.06 = 0.144 new Tours per Tour. Multiplier 0.144; every 100 Tours from outside eventually yield about 117.",
+          "Suppose que 20 % des Tours soient partagés, qu'une page partagée soit lue par 12 personnes, et que 6 % des lecteurs lancent le leur : 0,2 × 12 × 0,06 = 0,144 nouveau Tour par Tour. Multiplicateur 0,144 ; chaque centaine de Tours venue de l'extérieur en produit finalement environ 117.",
+        ),
+        t(
+          "Cycle time is hours, not months: a result is shared the day it is created, and read within days. That is why even a modest multiplier matters here — it compounds fast.",
+          "Le temps de cycle se compte en heures, pas en mois : un résultat est partagé le jour où il est créé, et lu dans les jours qui suivent. C'est pour ça qu'un multiplicateur modeste compte ici — il compose vite.",
+        ),
+      ],
+      takeaway: t(
+        "A loop is designed, not discovered: the preview image, the visitor's call to action and the reference on the link are each one term of the formula. Remove any of them and the loop is a funnel again.",
+        "Une boucle se conçoit, elle ne se découvre pas : l'image d'aperçu, l'appel à l'action pour le visiteur et la référence sur le lien sont chacun un terme de la formule. Retire l'un d'eux et la boucle redevient un entonnoir.",
+      ),
+    },
+    benchmark: [
+      t(
+        "Three families, three speeds. Viral loops (a user brings a user) turn in hours or days; content loops (user-generated pages that rank — public profiles, reviews, Q&A) take months to build and then run for years; paid loops (revenue funds acquisition) turn as fast as your payback period. Most durable companies run at least two.",
+        "Trois familles, trois vitesses. Les boucles virales (un utilisateur amène un utilisateur) tournent en heures ou en jours ; les boucles de contenu (des pages créées par les utilisateurs qui rangent — profils publics, avis, questions-réponses) prennent des mois à construire puis tournent pendant des années ; les boucles payantes (le revenu finance l'acquisition) tournent à la vitesse de ton délai de remboursement. La plupart des entreprises durables en font tourner au moins deux.",
+      ),
+      t(
+        "A loop multiplier above 1 is as rare as a viral coefficient above 1 — they are the same thing for the viral family. The realistic goal is a loop that turns a €500 CAC into an effective €350, not one that removes acquisition spend altogether.",
+        "Un multiplicateur de boucle au-dessus de 1 est aussi rare qu'un coefficient viral au-dessus de 1 — c'est la même chose pour la famille virale. L'objectif réaliste est une boucle qui transforme un CAC de 500 € en 350 € effectifs, pas une boucle qui supprime toute dépense d'acquisition.",
+      ),
+      t(
+        "Loops decay: the network saturates, the content ages, the ad auction gets pricier. A loop that ran at 0.3 last year and 0.15 today is telling you where the next product work is.",
+        "Les boucles s'usent : le réseau sature, le contenu vieillit, l'enchère publicitaire renchérit. Une boucle qui tournait à 0,3 l'an dernier et à 0,15 aujourd'hui te dit où est le prochain travail produit.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Draw it. One box per step, from a user entering to the next user entering, with a number on each arrow. If you can't draw it, you don't have one yet.",
+        "Dessine-la. Une case par étape, de l'entrée d'un utilisateur à l'entrée du suivant, avec un chiffre sur chaque flèche. Si tu ne peux pas la dessiner, tu n'en as pas encore une.",
+      ),
+      t(
+        "Instrument the arrow you can't see. Usually it's conversion: who arrived through the loop's output, and did they become an input? A reference on every shared link and first-touch attribution answer that.",
+        "Instrumente la flèche que tu ne vois pas. En général c'est la conversion : qui est arrivé par la sortie de la boucle, et est-il devenu une entrée ? Une référence sur chaque lien partagé et une attribution au premier contact y répondent.",
+      ),
+      t(
+        "Work the weakest arrow, not the whole loop. Doubling the share who share when readers never convert doubles nothing; fixing what the reader sees first might.",
+        "Travaille la flèche la plus faible, pas toute la boucle. Doubler la part qui partage quand les lecteurs ne convertissent jamais ne double rien ; corriger ce que le lecteur voit en premier, peut-être.",
+      ),
+      t(
+        "Shorten the cycle before raising the ratio: getting an invitee to their own first value the same day is worth more than a small gain in share rate.",
+        "Raccourcis le cycle avant de monter le ratio : amener un invité à sa propre première valeur le jour même vaut plus qu'un petit gain de taux de partage.",
+      ),
+      t(
+        "Add a second family when the first plateaus: a viral loop plus a content loop (public results, glossary pages) reach different people at different speeds.",
+        "Ajoute une seconde famille quand la première plafonne : une boucle virale plus une boucle de contenu (résultats publics, pages de glossaire) atteignent des gens différents à des vitesses différentes.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "ref-1",
+      body: t(
+        "The Tour has no \"growth loop\" question because a loop is not a stage — it is what the Referral stage becomes when it is built into the product. The first Referral question asks exactly that: is there a sharing or referral mechanism in the product (20), only in your communication (7), or none (0)? A loop that exists \"in communication\" — a newsletter asking people to recommend you — has no action inside the product to run on, and cannot turn.",
+        "Le Tour n'a pas de question « boucle de croissance » parce qu'une boucle n'est pas une étape — c'est ce que l'étape Referral devient quand elle est construite dans le produit. La première question Referral demande exactement ça : y a-t-il un mécanisme de partage ou de parrainage dans le produit (20), seulement dans ta communication (7), ou rien (0) ? Une boucle qui existe « en communication » — une newsletter qui demande de te recommander — n'a aucune action dans le produit sur laquelle tourner, et ne peut pas tourner.",
+      ),
+    },
+    faq: [
+      {
+        question: t("Growth loop vs. funnel — which one should I use?", "Boucle de croissance ou entonnoir, lequel utiliser ?"),
+        answer: t(
+          "Both, for different questions. The funnel (AARRR) tells you where people drop between arriving and paying; the loop tells you whether the people who stay create the next arrivals. A team with only a funnel keeps buying the top; a team with only a loop can't tell which stage is leaking. Draw the funnel inside the loop.",
+          "Les deux, pour des questions différentes. L'entonnoir (AARRR) te dit où les gens décrochent entre l'arrivée et le paiement ; la boucle te dit si ceux qui restent créent les arrivées suivantes. Une équipe qui n'a qu'un entonnoir achète sans cesse le haut ; une équipe qui n'a qu'une boucle ne sait pas quelle étape fuit. Dessine l'entonnoir à l'intérieur de la boucle.",
+        ),
+      },
+      {
+        question: t("What are the main types of growth loop?", "Quels sont les principaux types de boucle de croissance ?"),
+        answer: t(
+          "Viral (a user brings a user — invitations, shared artefacts, collaboration), content (what users create gets indexed and found — profiles, reviews, public documents), paid (revenue from customers funds the acquisition of the next ones), and sometimes sales (a customer becomes a reference that closes the next). The famous product-led companies usually combine a viral loop with a content loop.",
+          "Virale (un utilisateur amène un utilisateur — invitations, livrables partagés, collaboration), de contenu (ce que les utilisateurs créent est indexé et trouvé — profils, avis, documents publics), payante (le revenu des clients finance l'acquisition des suivants), et parfois commerciale (un client devient une référence qui ferme le suivant). Les entreprises product-led célèbres combinent en général une boucle virale et une boucle de contenu.",
+        ),
+      },
+      {
+        question: t("Can a B2B tool have a growth loop?", "Un outil B2B peut-il avoir une boucle de croissance ?"),
+        answer: t(
+          "Yes, and the most common one is collaboration: the product is more useful with a colleague in it, so users invite colleagues, who invite theirs. Document tools, design tools and messaging all grew on it. The weaker B2B version is the output loop — reports, dashboards or links that get sent outside the team and carry the product's name.",
+          "Oui, et la plus courante est la collaboration : le produit est plus utile avec un collègue dedans, donc les utilisateurs invitent des collègues, qui invitent les leurs. Les outils de documents, de design et de messagerie ont tous grandi dessus. La version B2B plus faible est la boucle de sortie — des rapports, tableaux de bord ou liens envoyés hors de l'équipe et qui portent le nom du produit.",
+        ),
+      },
+    ],
+  },
+
+  "north-star-metric": {
+    formula: {
+      expression: t(
+        "North Star Metric = users who get value × how often they get it × how much value each time — one number, three input levers",
+        "North Star Metric = utilisateurs qui obtiennent de la valeur × fréquence à laquelle ils l'obtiennent × valeur à chaque fois — un chiffre, trois leviers d'entrée",
+      ),
+      terms: [
+        {
+          symbol: t("Value delivered, not activity", "Valeur délivrée, pas activité"),
+          meaning: t(
+            "The metric counts a moment where the user got what they came for — a night booked, a message read by a teammate, a report sent — never a proxy that can be inflated without anyone being better off (page views, sign-ups, sessions).",
+            "La métrique compte un moment où l'utilisateur a obtenu ce pour quoi il est venu — une nuit réservée, un message lu par un collègue, un rapport envoyé — jamais un indicateur gonflable sans que personne ne s'en porte mieux (pages vues, inscriptions, sessions).",
+          ),
+        },
+        {
+          symbol: t("Input metrics", "Métriques d'entrée"),
+          meaning: t(
+            "The three factors are what teams actually work on: breadth (more users reaching the moment — activation), frequency (retention), depth (engagement or monetisation). The North Star is the output; nobody moves it directly.",
+            "Les trois facteurs sont ce sur quoi les équipes travaillent vraiment : l'étendue (plus d'utilisateurs atteignant le moment — activation), la fréquence (rétention), la profondeur (engagement ou monétisation). La North Star est la sortie ; personne ne la fait bouger directement.",
+          ),
+        },
+        {
+          symbol: t("Leading, not lagging", "Avancée, pas retardée"),
+          meaning: t(
+            "Revenue is a result of value delivered months earlier; the North Star should move before revenue does, so that it predicts it. If your North Star is revenue, you're reading the rear-view mirror.",
+            "Le revenu est le résultat d'une valeur délivrée des mois plus tôt ; la North Star doit bouger avant le revenu, pour le prédire. Si ta North Star est le revenu, tu lis le rétroviseur.",
+          ),
+        },
+      ],
+      note: t(
+        "The test of a good North Star is a single question: if this number doubles and nothing else changes, is the business clearly better off? Sign-ups fail it (they could all churn). Nights booked passes it. So does \"weekly active teams\" for a collaboration tool — as long as \"active\" means doing the valuable thing.",
+        "Le test d'une bonne North Star tient en une question : si ce chiffre double et que rien d'autre ne change, l'entreprise va-t-elle clairement mieux ? Les inscriptions échouent (elles pourraient toutes partir). Les nuits réservées réussissent. « Équipes actives par semaine » aussi, pour un outil de collaboration — tant qu'« actif » veut dire faire la chose qui a de la valeur.",
+      ),
+    },
+    example: {
+      title: t("Choosing one for a B2B reporting tool", "En choisir une pour un outil de reporting B2B"),
+      steps: [
+        t(
+          "Candidates: sign-ups per week (fails the test — they could all churn), reports created (closer, but a draft nobody reads is not value), monthly revenue (lags by months and says nothing about why).",
+          "Candidates : inscriptions par semaine (échoue au test — elles pourraient toutes partir), rapports créés (plus proche, mais un brouillon que personne ne lit n'est pas de la valeur), revenu mensuel (en retard de plusieurs mois et muet sur le pourquoi).",
+        ),
+        t(
+          "Chosen: reports sent to at least one recipient per week. It is the aha moment repeated; it requires a retained user; a team that sends more is a team getting more value.",
+          "Retenue : rapports envoyés à au moins un destinataire par semaine. C'est le moment « aha » répété ; ça demande un utilisateur fidèle ; une équipe qui en envoie plus est une équipe qui obtient plus de valeur.",
+        ),
+        t(
+          "Decomposed: 1,200 sending accounts × 1.8 reports a week × 3.1 recipients each. Three teams, three inputs: onboarding owns the first, product owns the second, sharing owns the third.",
+          "Décomposée : 1 200 comptes qui envoient × 1,8 rapport par semaine × 3,1 destinataires chacun. Trois équipes, trois entrées : l'onboarding porte la première, le produit la deuxième, le partage la troisième.",
+        ),
+        t(
+          "Two quarters later, revenue grows 30% — and the North Star had shown it a quarter earlier, when sending accounts crossed 1,500 while revenue was still flat.",
+          "Deux trimestres plus tard, le revenu croît de 30 % — et la North Star l'avait montré un trimestre plus tôt, quand les comptes qui envoient ont passé 1 500 alors que le revenu était encore plat.",
+        ),
+      ],
+      takeaway: t(
+        "A North Star doesn't replace the AARRR stages; it names which moment in them the whole company is optimising for. The stages then tell you where that moment is being lost.",
+        "Une North Star ne remplace pas les étapes AARRR ; elle nomme quel moment, parmi elles, toute l'entreprise optimise. Les étapes disent ensuite où ce moment se perd.",
+      ),
+    },
+    benchmark: [
+      t(
+        "The canonical examples: Airbnb's nights booked, Facebook's monthly (then daily) active users, Spotify's time spent listening, Slack's messages sent within teams, WhatsApp's messages sent. Each counts value received, and each was picked over a vanity alternative the company could have reported instead.",
+        "Les exemples canoniques : les nuits réservées d'Airbnb, les utilisateurs actifs mensuels (puis quotidiens) de Facebook, le temps d'écoute de Spotify, les messages envoyés au sein des équipes chez Slack, les messages envoyés chez WhatsApp. Chacun compte de la valeur reçue, et chacun a été choisi contre une alternative de vanité que l'entreprise aurait pu afficher à la place.",
+      ),
+      t(
+        "One is the right number of North Stars. Two \"North Stars\" means the company hasn't decided; five means it has a dashboard. Teams keep their own input metrics underneath — that is the point of the decomposition.",
+        "Une, c'est le bon nombre de North Star. Deux « North Star » veulent dire que l'entreprise n'a pas décidé ; cinq, qu'elle a un tableau de bord. Les équipes gardent leurs métriques d'entrée en dessous — c'est le but de la décomposition.",
+      ),
+      t(
+        "It changes as the business does: a marketplace's North Star at launch (listings created) is not its North Star at scale (transactions completed). Revisit it when the constraint moves, not every quarter.",
+        "Elle change avec l'activité : la North Star d'une place de marché au lancement (annonces créées) n'est pas celle qu'elle a à l'échelle (transactions réalisées). Revois-la quand la contrainte se déplace, pas à chaque trimestre.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Start from the aha moment and ask what its repetition looks like: the North Star is usually that moment, counted across all users over a period.",
+        "Pars du moment « aha » et demande-toi à quoi ressemble sa répétition : la North Star est en général ce moment, compté sur tous les utilisateurs sur une période.",
+      ),
+      t(
+        "Run the doubling test on every candidate — \"if this doubles and nothing else moves, are we better off?\" — and discard the ones that fail, however convenient to report.",
+        "Fais passer le test du doublement à chaque candidate — « si ça double et que rien d'autre ne bouge, on va mieux ? » — et écarte celles qui échouent, aussi pratiques soient-elles à afficher.",
+      ),
+      t(
+        "Decompose it into three or four input metrics and give each one an owner. A North Star nobody can move is a slogan.",
+        "Décompose-la en trois ou quatre métriques d'entrée et donne un responsable à chacune. Une North Star que personne ne peut faire bouger est un slogan.",
+      ),
+      t(
+        "Put it at the top of the one page the team looks at weekly, with the AARRR stage metrics underneath. The star says where you're going; the stages say what's in the way.",
+        "Mets-la en haut de la page que l'équipe regarde chaque semaine, avec les métriques des étapes AARRR en dessous. L'étoile dit où tu vas ; les étapes disent ce qui est sur le chemin.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "act-2",
+      body: t(
+        "The Tour doesn't ask what your North Star is — but two of its questions are the ones a North Star is built from: \"Do you know what percentage of users reach that moment?\" (Activation: 20 for tracked precisely, 7 for a rough sense, 0 for no visibility) and \"Do you track a retention rate?\" (Retention). A team that answers 20 to both has the breadth and frequency terms of the formula above; the North Star is one multiplication away. A team that answers 0 to both cannot have one, whatever its slide says.",
+        "Le Tour ne demande pas ta North Star — mais deux de ses questions sont celles dont une North Star se construit : « Sais-tu quel pourcentage d'utilisateurs atteint ce moment ? » (Activation : 20 pour suivi précisément, 7 pour une intuition approximative, 0 pour aucune visibilité) et « Suis-tu un taux de rétention ? » (Retention). Une équipe qui répond 20 aux deux a les termes d'étendue et de fréquence de la formule ci-dessus ; la North Star est à une multiplication de là. Une équipe qui répond 0 aux deux ne peut pas en avoir une, quoi qu'en dise sa slide.",
+      ),
+    },
+    faq: [
+      {
+        question: t("Is revenue a good North Star Metric?", "Le revenu est-il une bonne North Star ?"),
+        answer: t(
+          "Almost never, for two reasons: it lags value by months, so it can't guide this quarter's work, and it can rise while users get less value (price increases, aggressive upsells) — right up until it collapses. Revenue is the goal; the North Star is the value creation that produces it. Businesses whose value moment is the payment itself (a marketplace's transaction) are the exception, and even they count transactions, not euros.",
+          "Presque jamais, pour deux raisons : il est en retard de plusieurs mois sur la valeur, donc il ne peut pas guider le travail du trimestre, et il peut monter pendant que les utilisateurs reçoivent moins de valeur (hausses de prix, upsells agressifs) — jusqu'à ce qu'il s'effondre. Le revenu est l'objectif ; la North Star est la création de valeur qui le produit. Les activités dont le moment de valeur est le paiement lui-même (la transaction d'une place de marché) sont l'exception, et même elles comptent des transactions, pas des euros.",
+        ),
+      },
+      {
+        question: t("North Star Metric vs. OKRs — how do they fit together?", "North Star et OKR, comment ça s'articule ?"),
+        answer: t(
+          "The North Star is the long-lived measure of value the company optimises; OKRs are quarterly commitments to move specific input metrics beneath it. A good OKR names an input (activation rate from 23% to 30%) and can explain, in one sentence, how it moves the star. OKRs that can't are activity dressed as outcomes.",
+          "La North Star est la mesure durable de valeur que l'entreprise optimise ; les OKR sont des engagements trimestriels à faire bouger des métriques d'entrée précises en dessous. Un bon OKR nomme une entrée (taux d'activation de 23 % à 30 %) et peut expliquer, en une phrase, comment il fait bouger l'étoile. Les OKR qui ne le peuvent pas sont de l'activité déguisée en résultat.",
+        ),
+      },
+      {
+        question: t(
+          "Can a small startup have a North Star, or is it a scale-up thing?",
+          "Une petite startup peut-elle avoir une North Star, ou c'est un truc de scale-up ?",
+        ),
+        answer: t(
+          "It's more useful early, when the temptation to chase every number is strongest. A three-person team with one metric that means value — and a habit of asking whether each week's work moved it — makes better decisions than one with a full dashboard. It just needs an aha moment defined first, which is also the first Activation question of the Tour.",
+          "C'est plus utile tôt, quand la tentation de courir après tous les chiffres est la plus forte. Une équipe de trois avec une métrique qui veut dire « valeur » — et l'habitude de se demander si le travail de la semaine l'a fait bouger — décide mieux qu'une équipe avec un tableau de bord complet. Il faut juste un moment « aha » défini d'abord, ce qui est aussi la première question Activation du Tour.",
+        ),
+      },
+    ],
+  },
+
+  "upsell-cross-sell": {
+    formula: {
+      expression: t(
+        "Expansion rate = MRR added by existing customers in the period (upgrades, added seats, extra modules) ÷ MRR at the start of the period",
+        "Taux d'expansion = MRR ajouté par les clients existants sur la période (montées en gamme, sièges ajoutés, modules en plus) ÷ MRR de début de période",
+      ),
+      terms: [
+        {
+          symbol: t("Upsell", "Upsell"),
+          meaning: t(
+            "The same customer paying more for more of the same: a higher tier, more seats, more usage. It rides on a pricing model that has room above the plan the customer chose.",
+            "Le même client qui paie plus pour plus de la même chose : un palier supérieur, plus de sièges, plus d'usage. Ça repose sur un modèle de prix qui a de la place au-dessus de l'offre choisie par le client.",
+          ),
+        },
+        {
+          symbol: t("Cross-sell", "Cross-sell"),
+          meaning: t(
+            "The same customer buying something adjacent: a second module, a companion product, a service. It rides on knowing which customers have the adjacent problem — which means usage data, not a list of everyone.",
+            "Le même client qui achète quelque chose d'adjacent : un second module, un produit compagnon, un service. Ça repose sur le fait de savoir quels clients ont le problème adjacent — donc des données d'usage, pas la liste de tout le monde.",
+          ),
+        },
+        {
+          symbol: t("Against churn", "Face au churn"),
+          meaning: t(
+            "Expansion rate minus gross revenue churn is net revenue churn; when expansion wins, net churn is negative and the base grows without a single new customer. That comparison is the whole reason this lever exists.",
+            "Le taux d'expansion moins le churn revenu brut donne le churn revenu net ; quand l'expansion l'emporte, le churn net est négatif et la base grandit sans un seul nouveau client. Cette comparaison est toute la raison d'être de ce levier.",
+          ),
+        },
+      ],
+      note: t(
+        "It is almost always cheaper to sell more to a customer who already trusts you than to acquire one who doesn't — the cost of an expansion is a conversation, the cost of a new customer is a CAC. But the timing rule is absolute: no offer before the customer has reached their aha moment on what they already pay for. An upsell pitched to someone who hasn't got value yet reads as a sales tactic, and is remembered as one.",
+        "Il est presque toujours moins cher de vendre plus à un client qui te fait déjà confiance que d'en acquérir un qui ne te connaît pas — le coût d'une expansion est une conversation, le coût d'un nouveau client est un CAC. Mais la règle de timing est absolue : aucune offre avant que le client ait atteint son moment « aha » sur ce qu'il paie déjà. Un upsell proposé à quelqu'un qui n'a pas encore obtenu de valeur se lit comme une technique de vente, et reste en mémoire comme telle.",
+      ),
+    },
+    example: {
+      title: t("A playbook, written down", "Un playbook, écrit noir sur blanc"),
+      steps: [
+        t(
+          "A project tool with a €50 plan (5 seats) and a €110 plan (15 seats). 400 customers, €20,000 MRR. Until now, upgrades happen when a customer hits the seat limit and finds the pricing page on their own.",
+          "Un outil de projet avec une offre à 50 € (5 sièges) et une à 110 € (15 sièges). 400 clients, 20 000 € de MRR. Jusqu'ici, les montées en gamme arrivent quand un client atteint la limite de sièges et trouve la page de tarifs tout seul.",
+        ),
+        t(
+          "Playbook, three lines: (1) at 4 of 5 seats used and at least 30 days of activity, show an in-app note explaining the next tier — never before day 30; (2) at 5 of 5, the founder sends one personal email; (3) any account that added a second project type gets offered the reporting module.",
+          "Playbook, trois lignes : (1) à 4 sièges sur 5 utilisés et au moins 30 jours d'activité, afficher une note dans l'app expliquant le palier suivant — jamais avant le 30ᵉ jour ; (2) à 5 sur 5, le fondateur envoie un e-mail personnel ; (3) tout compte qui a ajouté un second type de projet se voit proposer le module de reporting.",
+        ),
+        t(
+          "Before: about 8 upgrades a month, +€480. After a quarter: 15 upgrades (+€900) and 6 module sales at €30 (+€180). Expansion rate: from 2.4% to 5.4% of opening MRR.",
+          "Avant : environ 8 montées en gamme par mois, +480 €. Après un trimestre : 15 montées (+900 €) et 6 ventes de module à 30 € (+180 €). Taux d'expansion : de 2,4 % à 5,4 % du MRR de départ.",
+        ),
+        t(
+          "Gross revenue churn that month: 5%. Net revenue churn went from +2.6% to −0.4%: the existing base now grows by itself, before counting a single new customer.",
+          "Churn revenu brut ce mois-là : 5 %. Le churn revenu net est passé de +2,6 % à −0,4 % : la base existante grandit maintenant toute seule, avant de compter le moindre nouveau client.",
+        ),
+      ],
+      takeaway: t(
+        "Nothing in the playbook is clever. What changed is that the offer now happens at a signal, after value, every time — instead of whenever a customer stumbles onto the pricing page.",
+        "Rien dans le playbook n'est malin. Ce qui a changé, c'est que l'offre arrive maintenant sur un signal, après la valeur, à chaque fois — au lieu de quand un client tombe par hasard sur la page de tarifs.",
+      ),
+    },
+    benchmark: [
+      t(
+        "The best B2B SaaS companies report net revenue retention of 110-130%, which means expansion outruns churn by 10-30 points a year; below 100%, every year starts with a smaller base than the last. Expansion is where most of that gap is made.",
+        "Les meilleures entreprises SaaS B2B affichent une rétention nette de revenu de 110-130 %, c'est-à-dire une expansion qui dépasse le churn de 10 à 30 points par an ; sous 100 %, chaque année commence avec une base plus petite que la précédente. L'expansion est là où l'essentiel de cet écart se fait.",
+      ),
+      t(
+        "A commonly cited pattern: winning an expansion from an existing customer costs a fraction of winning a new one — figures of a quarter to a third of the CAC are often quoted, and the exact number matters less than the direction.",
+        "Un schéma couramment cité : gagner une expansion chez un client existant coûte une fraction de ce que coûte un nouveau client — on cite souvent le quart au tiers du CAC, et le chiffre exact compte moins que la direction.",
+      ),
+      t(
+        "Pricing models without room to grow (one flat plan, unlimited everything) make expansion structurally impossible. That is a pricing decision, and it is usually taken by accident.",
+        "Les modèles de prix sans place pour grandir (une offre unique, tout illimité) rendent l'expansion structurellement impossible. C'est une décision de pricing, et elle est en général prise par accident.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Give the pricing somewhere to go: tiers, seats, usage or modules. No amount of playbook fixes a single flat plan.",
+        "Donne au pricing quelque part où aller : paliers, sièges, usage ou modules. Aucun playbook ne répare une offre unique et plate.",
+      ),
+      t(
+        "Define the signals — usage near a limit, a second team, a feature request, a support question about something the next tier does — and trigger the offer from them, never from a calendar.",
+        "Définis les signaux — usage proche d'une limite, une seconde équipe, une demande de fonctionnalité, une question au support sur quelque chose que le palier suivant fait — et déclenche l'offre depuis eux, jamais depuis un calendrier.",
+      ),
+      t(
+        "Gate every offer on value already received: a minimum tenure, the aha moment reached, or an activity threshold. The fastest way to lose an expansion is to ask for it too early.",
+        "Conditionne chaque offre à de la valeur déjà reçue : une ancienneté minimale, le moment « aha » atteint, ou un seuil d'activité. Le moyen le plus rapide de perdre une expansion est de la demander trop tôt.",
+      ),
+      t(
+        "Make the upgrade the path of least resistance: one click from the place where the limit was hit, with the price and the difference in plain words.",
+        "Fais de la montée en gamme le chemin de moindre résistance : un clic depuis l'endroit où la limite a été atteinte, avec le prix et la différence en mots simples.",
+      ),
+      t(
+        "Track expansion MRR as its own line, monthly, next to churn. \"Some ideas, not systematic\" is the Tour's 7-point answer because ideas don't show up on that line.",
+        "Suis le MRR d'expansion sur sa propre ligne, chaque mois, à côté du churn. « Quelques idées, rien de systématique » est la réponse à 7 points du Tour parce que des idées n'apparaissent pas sur cette ligne.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "rev-3",
+      body: t(
+        "\"Do you have an expansion playbook (upsell/cross-sell)?\" is the third and last question of the Tour — 20 for active and used, 7 for some ideas, not systematic, 0 for nothing. It closes the Revenue stage after pricing and LTV because it is the lever that turns both into growth without new acquisition. Answering 0 here is common and rarely fatal on its own; a 0 here next to a 0 on retention is the combination the whole Tour exists to point out.",
+        "« As-tu un playbook d'expansion (upsell/cross-sell) ? » est la troisième et dernière question du Tour — 20 pour actif et utilisé, 7 pour quelques idées, rien de systématique, 0 pour rien. Elle ferme l'étape Revenue après le pricing et la LTV parce que c'est le levier qui transforme les deux en croissance sans nouvelle acquisition. Répondre 0 ici est courant et rarement fatal en soi ; un 0 ici à côté d'un 0 en rétention est la combinaison que tout le Tour existe pour pointer.",
+      ),
+    },
+    faq: [
+      {
+        question: t("What's the difference between upsell and cross-sell?", "Quelle différence entre upsell et cross-sell ?"),
+        answer: t(
+          "Upsell: more of the same thing — a bigger plan, more seats, more usage. Cross-sell: a different thing — a second module, an add-on, a service. Upsell is driven by the customer's own growth and needs a pricing model with tiers; cross-sell is driven by adjacent problems and needs usage data to know who has them. Most companies should do the first before the second.",
+          "Upsell : plus de la même chose — une offre plus grande, plus de sièges, plus d'usage. Cross-sell : une chose différente — un second module, une option, un service. L'upsell est porté par la croissance du client lui-même et demande un modèle à paliers ; le cross-sell est porté par des problèmes adjacents et demande des données d'usage pour savoir qui les a. La plupart des entreprises devraient faire le premier avant le second.",
+        ),
+      },
+      {
+        question: t("When is the right moment to propose an upgrade?", "Quel est le bon moment pour proposer une montée en gamme ?"),
+        answer: t(
+          "After value, at a signal. After value means the customer has reached the aha moment on what they already pay for — a minimum tenure or an activity threshold is the practical proxy. At a signal means the trigger is something they did (approached a limit, added a team, asked about a feature), not something on your calendar. Both conditions, every time.",
+          "Après la valeur, sur un signal. Après la valeur veut dire que le client a atteint le moment « aha » sur ce qu'il paie déjà — une ancienneté minimale ou un seuil d'activité en est l'indicateur pratique. Sur un signal veut dire que le déclencheur est quelque chose qu'il a fait (s'approcher d'une limite, ajouter une équipe, poser une question sur une fonctionnalité), pas quelque chose dans ton calendrier. Les deux conditions, à chaque fois.",
+        ),
+      },
+      {
+        question: t("How does expansion relate to negative churn?", "Quel rapport entre expansion et churn négatif ?"),
+        answer: t(
+          "Directly: net revenue churn = gross revenue churn − expansion. When expansion in a period exceeds what cancellations and downgrades removed, net churn is negative and the existing base grows on its own. Expansion is the only lever that can make that happen — retention work can bring gross churn towards zero, but never below it.",
+          "Direct : churn revenu net = churn revenu brut − expansion. Quand l'expansion d'une période dépasse ce que les résiliations et rétrogradations ont retiré, le churn net est négatif et la base existante grandit toute seule. L'expansion est le seul levier qui peut produire ça — le travail de rétention peut ramener le churn brut vers zéro, jamais en dessous.",
         ),
       },
     ],

@@ -1205,6 +1205,20 @@ Les exemples célèbres cités sont ceux déjà validés dans les `extended` (7 
 
 **Vérifié en réel** : lint, tsc, 295 tests (plancher de 500 mots sur douze termes), `next build`, 17 specs Playwright sur les fichiers touchés (+2 : la page AARRR cite bien la première question du Tour et parle des quinze questions, la page onboarding FR tient à 390 px). La spec « un terme sans contenu long garde sa page courte » pointe maintenant sur `growth-loop`, dernier terme sans `deep` — le lot 5 devra la remplacer par son contraire (tous les termes ont une page longue).
 
+### R2-11, lot 5 : boucle de croissance, North Star, upsell — le glossaire long est complet (2026-09-06)
+
+`growth-loop` (972 mots EN / 1 115 FR), `north-star-metric` (920 / 1 087), `upsell-cross-sell` (965 / 1 136). Les quinze termes ont maintenant leur page longue : de 76-105 mots par terme au départ de la revue à 770-970 en EN et 910-1 140 en FR.
+
+- **La boucle de croissance prend ce site pour exemple, avec sa vraie mécanique** : l'aperçu du lien partagé, le lien « fais ton propre Tour » du visiteur (R2-02) et la référence portée par ce lien (R-03) sont présentés comme les trois termes de la formule — retire l'un d'eux et la boucle redevient un entonnoir. Les chiffres de l'exemple (20 % partagent, 12 lecteurs, 6 % convertissent → 0,144) sont une hypothèse de calcul présentée comme telle, pas une mesure du site.
+- **La North Star** reçoit la décomposition étendue × fréquence × profondeur, le « test du doublement », et un « Dans le Tour » qui cite `act-2` et `ret-1` comme les deux questions dont une North Star se construit. Piège attrapé par `tsc`, pas à la relecture : j'avais cité la question `act-2` de mémoire (« atteint le moment "aha" ») avec des guillemets non échappés — la vraie formulation est « atteint ce moment ». Corrigé en citant le texte exact de `copy-library.ts` ; c'est précisément pour ça que la carte « Dans le Tour » rend la question depuis le code plutôt que depuis la prose.
+- **L'upsell** reçoit un playbook écrit à trois lignes dont l'arithmétique prolonge l'exemple partagé par les pages Churn et Revenue (mêmes 400 clients et 20 000 € de MRR) : expansion 2,4 % → 5,4 %, churn revenu net +2,6 % → −0,4 %, vérifié à la main.
+
+**`GLOSSARY_DEEP` passe de `Partial<Record<…>>` à `Record<…>`** : un terme ajouté au glossaire sans page longue ne compile plus. Le test unitaire « couvre tous les termes » le redit à l'exécution, et la spec E2E « un terme sans contenu long garde sa page courte » est remplacée par son contraire. Le rendu conditionnel du composant est conservé pour qu'un futur terme puisse malgré tout être livré court d'abord, en assumant le `deep` manquant dans le type.
+
+**Ce qui reste de R2-11 n'est pas du code : c'est la relecture** de quinze pages × deux langues, marquées en tête de `glossary-deep.ts` et sur les libellés de section dans `dictionary.ts`. Une fois relues, mettre à jour `updatedAt` des termes retouchés et lever les marqueurs, comme pour les `extended` le 2026-09-06.
+
+**Vérifié en réel** : lint, tsc, 295 tests, `next build`, 24 specs Playwright sur les fichiers touchés, passe axe verte, capture EN desktop de la page upsell relue.
+
 ---
 
 ## État du projet au 2026-09-06 — à lire en premier dans une nouvelle session

@@ -77,23 +77,8 @@ describe("long-form term pages (REVIEW-02.md R2-11)", () => {
   const DEEP_IDS = Object.keys(GLOSSARY_DEEP) as GlossaryTermId[];
   const words = (text: string) => text.trim().split(/\s+/).filter(Boolean).length;
 
-  it("covers the terms delivered so far, in the order the plan set", () => {
-    expect(DEEP_IDS).toEqual(
-      expect.arrayContaining([
-        "cac",
-        "ltv",
-        "churn",
-        "retention",
-        "activation",
-        "viral-coefficient",
-        "acquisition",
-        "referral",
-        "revenue",
-        "aarrr",
-        "aha-moment",
-        "onboarding",
-      ]),
-    );
+  it("covers every glossary term — the five batches are complete", () => {
+    expect(DEEP_IDS.sort()).toEqual([...ALL_IDS].sort());
   });
 
   it("every deep entry is wired into GLOSSARY, dated, and points at a real Tour question", () => {
