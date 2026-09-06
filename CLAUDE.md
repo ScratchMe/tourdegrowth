@@ -1171,6 +1171,16 @@ Le glossaire anglais entier faisait 1 402 mots — à peu près une seule page �
 
 **Vérifié en réel** : lint, tsc, 295 tests (+6, dont un plancher de **500 mots par terme et par langue** — mesuré entre 773 et 1 004), `next build`, 24 specs Playwright sur les fichiers touchés (+4 : les six sections et la question citée en EN, la même chose en FR, la page courte d'un terme sans contenu long, aucun débordement à 390 px), captures EN desktop et FR mobile relues. Piège d'outillage : après un changement de branche, `tsc` a signalé deux modules introuvables sous `.next/types/validator.ts` — ce fichier est généré par le build précédent (celui d'une autre branche) ; un rebuild le régénère, ce n'était pas une erreur du code.
 
+### R2-11, lot 2 : rétention, activation, coefficient viral (2026-09-06)
+
+Même structure que le lot 1 (`content/glossary-deep.ts`), trois termes de plus : `retention` (924 mots EN / 1 051 FR), `activation` (904 / 1 016), `viral-coefficient` (907 / 1 028). Trois choses propres à ce lot :
+
+- **Les exemples chiffrés sont vérifiés à la main avant d'être écrits**, pas seulement relus : deux cohortes au même J30 (25 %) dont l'une s'aplatit et l'autre glisse ; un taux d'activation qui passe de 23 % à 31 % en déplaçant la fin de l'onboarding ; et la géométrie du K < 1 (K = 0,15 → 1 000 ÷ 0,85 ≈ 1 176 ; K = 0,3 → ≈ 1 429, soit +43 %, ce qui à 500 € de CAC vaut environ 215 € par utilisateur payé — 429 × 500 ÷ 1 000). Les formules de composition (1 − 0,97¹² ≈ 31 %) et les bornes 1,25-1,7 pour K = 0,2-0,4 (1 ÷ (1 − K)) ont été recalculées.
+- **La FAQ du coefficient viral dit comment le site mesure son propre K** — directement (Tours parrainés ÷ tous les Tours, premier contact, auto-parrainages exclus, R2-01/R-03), pas par « invitations × conversion » — et assume qu'il sous-compte. Conséquence à relire : la phrase « calcule d'ailleurs son propre K-factor en continu, exactement selon cette formule » de l'`extended` validé le 2026-08-29 est devenue approximative depuis R2-01. Pas modifiée ici (copie approuvée), signalée dans `REVIEW-02.md`.
+- **Les affirmations sur « ce que font la plupart des équipes » ont été adoucies** en relisant (« une façon typique », « beaucoup d'équipes ») : ce sont des observations de praticien, pas des statistiques, et le texte ne doit pas leur donner l'air d'en être.
+
+**Vérifié en réel** : lint, tsc, 295 tests (le plancher de 500 mots couvre les six termes), `next build`, 16 specs Playwright sur les fichiers touchés (+2 : la question Retention citée, le coefficient viral à 390 px), passe axe verte sur la page de terme.
+
 ---
 
 ## État du projet au 2026-09-06 — à lire en premier dans une nouvelle session

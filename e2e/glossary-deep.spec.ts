@@ -37,6 +37,19 @@ test("/fr/glossary/ltv renders the same sections in French", async ({ page }) =>
   await expect(page.getByTestId("in-the-tour")).toContainText("Connais-tu ta LTV, même grossièrement ?");
 });
 
+test("/en/glossary/retention quotes the retention question (lot 2)", async ({ page }) => {
+  await page.goto("/en/glossary/retention");
+  await expect(page.getByTestId("in-the-tour")).toContainText("Do you track a retention rate (D7/D30 or similar)?");
+  expect(await page.getByTestId("faq").getByRole("heading", { level: 3 }).count()).toBeGreaterThanOrEqual(3);
+});
+
+test("/fr/glossary/viral-coefficient fits a phone (lot 2)", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 800 });
+  await page.goto("/fr/glossary/viral-coefficient");
+  await page.getByTestId("faq").waitFor();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+});
+
 test("a term without long-form content keeps the short page", async ({ page }) => {
   await page.goto("/en/glossary/onboarding");
   await expect(page.locator("main").getByRole("heading", { level: 2, name: "In practice" })).toBeVisible();
