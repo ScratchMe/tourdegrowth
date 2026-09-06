@@ -8,7 +8,8 @@ import { Card } from "@/components/core/Card";
 import { GLOSSARY } from "@/content/glossary";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
-import { contentAlternates, localePath } from "@/lib/i18n/routes";
+import { contentMetadata } from "@/lib/i18n/meta";
+import { localePath } from "@/lib/i18n/routes";
 import styles from "./page.module.css";
 
 interface PageProps {
@@ -17,12 +18,13 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = await params;
-  return {
-    title: "Growth glossary — Tour de Growth",
-    description:
-      "Plain-English definitions of the growth/AARRR vocabulary — CAC, LTV, viral coefficient, growth loop, and more.",
-    alternates: contentAlternates(isLocale(locale) ? locale : "en", "/glossary"),
-  };
+  const resolved: Locale = isLocale(locale) ? locale : "en";
+  return contentMetadata(
+    resolved,
+    "/glossary",
+    tc(UI_STRINGS.meta.glossaryTitle, resolved),
+    tc(UI_STRINGS.meta.glossaryDescription, resolved),
+  );
 }
 
 /**

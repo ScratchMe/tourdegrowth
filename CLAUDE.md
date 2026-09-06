@@ -964,6 +964,25 @@ Retour de la session Claude Design (brief `design/DS-EXTENSION-BRIEF-01.md`), d�
 
 ---
 
+### Partage et référencement des pages de contenu, et le bug des polices des images OG (2026-09-06, audit du site CV d'Antoine, item « sites liés »)
+
+**Le constat venu de l'audit du CV.** Un partage de `/fr` ou `/en` sur LinkedIn partait sans image et avec le titre anglais du layout racine ; `/fr` portait un `<title>` et une description en anglais ; le JSON-LD `WebApplication` ne déclarait ni auteur ni langue, donc rien ne reliait le produit à la personne qui le signe en bas de page.
+
+**Ce qui a été fait.**
+- `src/lib/i18n/meta.ts` — `contentMetadata(locale, path, title, description)` : `<title>`/description dans la langue de la page, le jeu hreflang/canonical (R-13) et le texte Open Graph / Twitter, pour les quatre types de pages de contenu (landing, How it works, glossaire, terme). Les titres et descriptions vivent dans `UI_STRINGS.meta` (`dictionary.ts`), et réutilisent la copie validée quand elle existe (`landing.subtitle`, `HOW_IT_WORKS.intro`).
+- `src/app/[locale]/opengraph-image.tsx` — image de partage 1200×630 des pages de contenu, même gabarit que celle du résultat (§03 du brief : bordure ink 2 px, fond stone, ligne de route), avec le titre de l'écran 01 en stencil et son accent rouge, le sous-titre et les cinq piliers. Une image par langue, choisie par le segment `[locale]`. **Next n'hérite pas d'un `opengraph-image` parent** (vérifié sur le build : sans fichier propre, `/fr/glossary` n'avait aucun `og:image`) : `how-it-works/`, `glossary/` et `glossary/[term]/` ré-exportent l'implémentation unique.
+- JSON-LD de la landing construit par langue : `description` = sous-titre de la page, `inLanguage`, et `author` = le même nœud `Person` que le site CV (`@id` `https://cv.antoine.berthaud.me/#person`).
+- `src/lib/og/` — `fonts.ts` et `tokens.ts` partagés par les deux images (la copie des tokens en constantes hex reste manuelle, voir étape 8).
+
+**Le bug trouvé en route, qui touchait la production.** L'image de résultat — « highest care », le chiffre en stencil *est* l'image — s'affichait en IBM Plex Mono, wordmark et phrase du bas compris, depuis le début. Deux causes empilées :
+1. `loadFonts()` construisait le chemin dans un gabarit (`new URL(\`./fonts/${file}\`, import.meta.url)`) ; **Turbopack compile ça en un seul asset statique** (visible dans le chunk : cinq appels, un seul `e.R(id)`), donc les cinq « polices » étaient le même fichier. Corrigé par cinq `new URL("./fonts/<nom>.ttf", import.meta.url)` littéraux — ne jamais les refactorer en boucle.
+2. `inter-latin.ttf` était la **police variable** de Google Fonts (`fvar`/`gvar`) ; Satori (opentype.js) la rejette (`Cannot read properties of undefined (reading '257')`) et abandonne la liste entière. Remplacée par les instances statiques Inter 4.1 `Inter-Medium` / `Inter-SemiBold`, sous-ensemble Latin via fonttools (75 Ko chacune).
+La vérification visuelle qui aurait dû l'attraper à l'étape 8 a été faite sur un rendu où tout était en mono, et personne n'a comparé au brief. Leçon n°1 de ce fichier, une fois de plus : « le code avait l'air correct ».
+
+**Copie nouvelle, statut « à relire » (convention 6)** : `meta.landingTitle`, `meta.howItWorksTitle`, `meta.glossaryTitle`, `meta.glossaryDescription` (FR), `meta.glossaryTermSuffix`, `meta.shareImageAlt`.
+
+**Vérifié** : `tsc`, `eslint`, 249 tests unitaires, `next build`, e2e Playwright ; HTML pré-rendu de `/fr`, `/en`, `/fr/how-it-works`, `/fr/glossary`, `/fr/glossary/cac` (titre localisé, `og:*`, `twitter:*`, `og:image` avec hash, JSON-LD) ; les trois images (landing FR/EN, résultat échantillon) rendues et regardées, y compris réduites à 320 px (règle « feed-size » : titre, accent rouge et wordmark survivent).
+
 ## État du projet au 2026-09-06 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -982,6 +1001,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Deep dive à ~70 s | Quatre générations en parallèle depuis le bilingue ; l'écran de chargement est conçu pour une attente longue | Si ça devient la norme, regarder le **nombre** de générations, pas le plafond de temps. |
 | `/r/<id>` déborde de 37 px à 320 px | Hors contrat (DESIGN-BRIEF fixe 390 et exige 375-430) ; c'est le `PillarChip` | Une décision de design, pas un correctif évident. Antoine a choisi de laisser. |
 | `guidelines/` absent du bundle d'extension 01 | Le README du bundle l'annonce, l'archive ne le contenait pas | Sans conséquence à ce jour ; à demander si on en a besoin. |
+| Image OG : tokens recopiés à la main dans `src/lib/og/tokens.ts` | Deux images partagent désormais un seul fichier de constantes | Si `globals.css` change une couleur, la resynchroniser là. |
 
 Rien d'autre n'est en attente côté code. Le reste (lancement, SEO, seeding, payant) est le plan de croissance, qui appartient à Antoine.
 
@@ -1003,7 +1023,7 @@ src/app/(app)/           quiz, résultat, deep dive, admin — dynamiques, sans 
 src/app/api/             deux routes POST : création de soumission, Deep dive
 src/components/          core / brand / quiz / result / glossary — le design system porté
 src/content/             copie livrée par l'agent produit (validée)
-src/lib/                 scoring (pur), i18n, gemini, submissions, analytics
+src/lib/                 scoring (pur), i18n (dont meta.ts), og (polices + tokens des images de partage), gemini, submissions, analytics
 design/                  brief d'origine, brief d'extension 01, bundle de retour
 e2e/                     80 specs Playwright contre un build de production
 scripts/live/            sondes contre les vrais services, lancées à la main

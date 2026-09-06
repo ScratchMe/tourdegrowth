@@ -9,7 +9,7 @@ import { QUESTIONS } from "@/content/copy-library";
 import { HOW_IT_WORKS } from "@/content/how-it-works";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
-import { contentAlternates } from "@/lib/i18n/routes";
+import { contentMetadata } from "@/lib/i18n/meta";
 import styles from "./page.module.css";
 
 interface PageProps {
@@ -18,13 +18,15 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = await params;
-  return {
-    title: "Tour de Growth — How it works",
-    description:
-      "The AARRR framework explained, how the score is calculated, and the two tones — plus the one thing to know before taking the score too seriously.",
-    // REVIEW.md R-13: one URL per language, each declaring the others.
-    alternates: contentAlternates(isLocale(locale) ? locale : "en", "/how-it-works"),
-  };
+  const resolved: Locale = isLocale(locale) ? locale : "en";
+  // Title/description in the page's own language (the page's own intro,
+  // already validated copy), hreflang set (REVIEW.md R-13), Open Graph text.
+  return contentMetadata(
+    resolved,
+    "/how-it-works",
+    tc(UI_STRINGS.meta.howItWorksTitle, resolved),
+    tc(HOW_IT_WORKS.intro, resolved),
+  );
 }
 
 /**

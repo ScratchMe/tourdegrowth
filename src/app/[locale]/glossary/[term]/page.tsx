@@ -9,7 +9,8 @@ import { Card } from "@/components/core/Card";
 import { GLOSSARY, type GlossaryTermId } from "@/content/glossary";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { isLocale, LOCALES, type Locale } from "@/lib/i18n/locale";
-import { contentAlternates, localePath } from "@/lib/i18n/routes";
+import { contentMetadata } from "@/lib/i18n/meta";
+import { localePath } from "@/lib/i18n/routes";
 import styles from "./page.module.css";
 
 interface PageProps {
@@ -31,11 +32,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const entry = GLOSSARY[term];
   const resolved = isLocale(locale) ? locale : "en";
-  return {
-    title: `${tc(entry.term, resolved)} — Tour de Growth Glossary`,
-    description: tc(entry.definition, resolved),
-    alternates: contentAlternates(resolved, `/glossary/${term}`),
-  };
+  return contentMetadata(
+    resolved,
+    `/glossary/${term}`,
+    `${tc(entry.term, resolved)} — ${tc(UI_STRINGS.meta.glossaryTermSuffix, resolved)}`,
+    tc(entry.definition, resolved),
+  );
 }
 
 /**
