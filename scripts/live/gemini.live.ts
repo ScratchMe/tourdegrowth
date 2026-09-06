@@ -1,9 +1,16 @@
 import { beforeAll, describe, expect, it } from "vitest";
+import { QUESTIONS } from "@/content/copy-library";
+import { DEEP_MODE_QUESTIONS } from "@/content/deep-mode-questions";
 import { PILLARS } from "@/lib/scoring/pillars";
-import type { PillarScore } from "@/lib/scoring/score";
+import { computeScore, type AnswerIndex, type Answers } from "@/lib/scoring/score";
 import { buildDeepDivePrompt } from "@/lib/gemini/prompt";
-import { callGeminiWithFallback } from "@/lib/gemini/client";
+import { REQUEST_TIMEOUT_MS, callGeminiWithFallback } from "@/lib/gemini/client";
 import { extractGeminiText } from "@/lib/gemini/response";
+import {
+  resolveContextPromptAnswers,
+  resolveQuickPromptAnswers,
+  type DeepDiveAnswers,
+} from "@/lib/submissions/create-submission";
 import { parseDeepDiveVerdict } from "@/lib/submissions/verdict";
 import type { Locale } from "@/lib/i18n/locale";
 import type { Tone } from "@/lib/quiz/tone";
@@ -22,13 +29,34 @@ import type { Tone } from "@/lib/quiz/tone";
  *
  * Costs real quota. Manual trigger only.
  */
-const PILLAR_SCORES: PillarScore[] = [
-  { pillar: "acquisition", rawPoints: 40, score: 13 },
-  { pillar: "activation", rawPoints: 27, score: 9 },
-  { pillar: "retention", rawPoints: 13, score: 4 },
-  { pillar: "referral", rawPoints: 20, score: 7 },
-  { pillar: "revenue", rawPoints: 45, score: 15 },
-];
+
+/**
+ * A FULL set of answers — all 15 Quick questions, all 10 context questions —
+ * resolved through the same functions the Deep dive route uses, so the prompt
+ * this probe sends is the size and shape of a real one.
+ *
+ * The fifth live run is why. This probe used to send 2 Quick + 2 context
+ * answers (a sixth of a real prompt) and passed in 18s, while production —
+ * same API, same key, same minute — failed after 47s. A probe that is
+ * lighter than the thing it stands in for cannot fail the way that thing
+ * fails, and its green means nothing when production is red.
+ *
+ * Option index 2 is the 0-point answer; retention gets it on every question
+ * so the sample has an unambiguous weakest pillar to write about.
+ */
+const QUICK_ANSWERS: Answers = Object.fromEntries(
+  QUESTIONS.map((q) => {
+    const index: AnswerIndex = q.pillar === "retention" ? 2 : q.pillar === "revenue" ? 0 : 1;
+    return [q.id, index];
+  }),
+);
+
+/** Spread across each question's options rather than always the first, so the prompt reads like a real founder's. */
+const CONTEXT_ANSWERS: DeepDiveAnswers = Object.fromEntries(
+  DEEP_MODE_QUESTIONS.map((q, i) => [q.id, i % q.options.length]),
+);
+
+const SCORING = computeScore(QUICK_ANSWERS);
 
 /** Read once, not per call, so a missing key fails in `beforeAll` with a clear message. */
 function apiKey(): string {
@@ -38,10 +66,12 @@ function apiKey(): string {
 /**
  * What the model actually spent, printed on every call.
  *
- * `thoughtsTokenCount` is the number that matters: these are thinking models
- * and reasoning tokens come out of the SAME `maxOutputTokens` budget as the
- * answer. That is what truncated a French roast mid-JSON on the first live
- * run, and it is invisible unless printed.
+ * `thoughtsTokenCount` is worth watching: these are thinking models and
+ * reasoning tokens come out of the SAME `maxOutputTokens` budget as the
+ * answer. It was suspected of truncating a French roast mid-JSON on the
+ * second live run — and the very next run measured `thoughts=765` against a
+ * 4096 ceiling, which cleared it. Printed precisely so the next theory gets
+ * the same treatment before it lands in a comment.
  */
 function usage(data: unknown): string {
   const d = data as {
@@ -56,19 +86,29 @@ function samplePrompt(locale: Locale, tone: Tone): string {
   return buildDeepDivePrompt({
     locale,
     tone,
-    pillars: PILLAR_SCORES,
-    total: 48,
-    weakestPillar: "retention",
-    quickAnswers: [
-      { pillar: "acquisition", question: "Primary acquisition channel?", answer: "One channel, roughly tracked" },
-      { pillar: "retention", question: "Do you track churn?", answer: "Not really" },
-    ],
-    contextAnswers: [
-      { pillar: "acquisition", question: "Main channel today?", answer: "SEO / content" },
-      { pillar: "retention", question: "When do people leave?", answer: "In the first two weeks" },
-    ],
+    pillars: SCORING.pillars,
+    total: SCORING.total,
+    weakestPillar: SCORING.weakestPillar,
+    quickAnswers: resolveQuickPromptAnswers(QUICK_ANSWERS, locale),
+    contextAnswers: resolveContextPromptAnswers(CONTEXT_ANSWERS, locale),
     freeContext: "We sell a scheduling tool to independent physiotherapists.",
   });
+}
+
+/**
+ * One generation, timed. The seconds are the point: the per-attempt timeout
+ * in `client.ts` is a bet about how long a real-length generation takes on a
+ * slow day, and this is the only place that bet gets measured against the
+ * real API with a real-length prompt.
+ */
+async function timed(what: string, prompt: string) {
+  const started = Date.now();
+  const result = await callGeminiWithFallback(prompt, apiKey());
+  const seconds = (Date.now() - started) / 1000;
+  console.log(
+    `  ── ${what}: ${result.modelUsed}, ${seconds.toFixed(1)}s (per-attempt ceiling ${REQUEST_TIMEOUT_MS / 1000}s), ${usage(result.data)}`,
+  );
+  return result;
 }
 
 /**
@@ -109,14 +149,13 @@ describe("live Gemini", () => {
   });
 
   it("answers a real Deep dive prompt through the fallback chain", async () => {
-    const started = Date.now();
+    const prompt = samplePrompt("en", "neutral");
+    console.log(`\n  ── prompt: ${prompt.length} chars, ${QUESTIONS.length} Quick + ${DEEP_MODE_QUESTIONS.length} context answers`);
     const { data, modelUsed } = await reportingUpstreamOutages("one English Deep dive prompt", () =>
-      callGeminiWithFallback(samplePrompt("en", "neutral"), apiKey()),
+      timed("EN neutral", prompt),
     );
     const verdict = parseDeepDiveVerdict(extractGeminiText(data), modelUsed);
 
-    console.log(`\n  ── model: ${modelUsed}, ${Math.round((Date.now() - started) / 1000)}s`);
-    console.log(`  ── ${usage(data)}`);
     console.log(`  ── priority action\n     ${verdict.priorityAction}`);
 
     for (const pillar of PILLARS) {
@@ -128,17 +167,13 @@ describe("live Gemini", () => {
     // Printed rather than asserted beyond the obvious: whether the roast voice
     // survives translation is a judgement call, and the point of this probe is
     // to put the real text in front of someone who can make it.
+    // Both at once, like the route does (it fires 2 tones x 2 languages in
+    // parallel): the usage line each prints is the evidence to read if a
+    // truncated answer then throws in `extractGeminiText`.
+    console.log("");
     const [neutral, roast] = await reportingUpstreamOutages("both French tones", () =>
-      Promise.all([
-        callGeminiWithFallback(samplePrompt("fr", "neutral"), apiKey()),
-        callGeminiWithFallback(samplePrompt("fr", "roast"), apiKey()),
-      ]),
+      Promise.all([timed("FR neutre", samplePrompt("fr", "neutral")), timed("FR roast ", samplePrompt("fr", "roast"))]),
     );
-
-    // Printed BEFORE parsing: a truncated answer throws in `extractGeminiText`,
-    // and the token counts are precisely the evidence needed to understand why.
-    console.log(`\n  ── FR neutre  ${usage(neutral.data)}`);
-    console.log(`  ── FR roast   ${usage(roast.data)}`);
 
     const neutre = parseDeepDiveVerdict(extractGeminiText(neutral.data), neutral.modelUsed);
     const cassant = parseDeepDiveVerdict(extractGeminiText(roast.data), roast.modelUsed);

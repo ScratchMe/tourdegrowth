@@ -54,14 +54,38 @@ function backoffDelay(attempt: number): number {
 const realSleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 /**
- * Per-attempt timeout. Found necessary the hard way while building this:
+ * Per-attempt timeout.
+ *
+ * Raised from 20s to 45s after the fifth live run. The Gemini probe, calling
+ * the same API with the same key from the GitHub runner, succeeded — an
+ * English generation took 18s, two seconds under the old ceiling, on a prompt
+ * one sixth the size of a real one. Production, whose prompts carry all 15
+ * Quick answers and 10 context answers, failed after 47s with
+ * `DEEP_DIVE_FAILED`. The reading: when Gemini is slow (18s where the same
+ * call took 5s two runs earlier), real-length generations cross 20s and get
+ * aborted by OUR OWN client, model after model. A thinking model spends
+ * 1-2k tokens reasoning before ~500 tokens of answer; 20s was never sized
+ * for that, it was sized for the case below.
+ *
+ * Originally found necessary the hard way while building this:
  * this build session's own network egress silently black-holes
  * `generateContent` calls (connects, sends, never responds — see
  * CLAUDE.md's step 6 note) with no error at all, which would otherwise hang
  * a whole model attempt (and, on Vercel, the Route Handler's function
  * timeout) indefinitely instead of falling back to the next candidate.
  */
-const REQUEST_TIMEOUT_MS = 20_000;
+export const REQUEST_TIMEOUT_MS = 45_000;
+
+/**
+ * The whole chain — every model, every pause — gives up after this, so that
+ * the four generations a Deep dive runs in parallel all land inside the
+ * route's `maxDuration` (120s) with room to spare. Without it, four attempts
+ * at the per-attempt ceiling above would exceed the route's own budget.
+ */
+export const CHAIN_BUDGET_MS = 100_000;
+
+/** Below this much remaining budget, starting another attempt is pointless. */
+const MIN_ATTEMPT_MS = 5_000;
 
 /**
  * Ceiling on one tone's Deep dive JSON (5 pillar recommendations of 3-4
@@ -115,6 +139,7 @@ export async function callGeminiWithFallback(
 ): Promise<GeminiCallResult> {
   let lastError = "";
   let attempt = 0;
+  const deadline = Date.now() + CHAIN_BUDGET_MS;
 
   for (const model of GEMINI_MODEL_CANDIDATES) {
     // Never before the first try, and never after a 404: a model name that
@@ -124,8 +149,16 @@ export async function callGeminiWithFallback(
     }
     attempt += 1;
 
+    const remaining = deadline - Date.now();
+    if (remaining < MIN_ATTEMPT_MS) {
+      lastError = `${lastError} — chain budget of ${CHAIN_BUDGET_MS}ms exhausted before trying ${model}`;
+      break;
+    }
+
     const timeoutController = new AbortController();
-    const timeout = setTimeout(() => timeoutController.abort(), REQUEST_TIMEOUT_MS);
+    // Never past the chain's own deadline, whatever the per-attempt ceiling.
+    const attemptTimeoutMs = Math.min(REQUEST_TIMEOUT_MS, remaining);
+    const timeout = setTimeout(() => timeoutController.abort(), attemptTimeoutMs);
 
     let response: Response;
     try {
@@ -154,7 +187,7 @@ export async function callGeminiWithFallback(
       );
     } catch (networkErr) {
       const timedOut = timeoutController.signal.aborted;
-      lastError = `${model} → ${timedOut ? `timed out after ${REQUEST_TIMEOUT_MS}ms` : errorMessage(networkErr)}`;
+      lastError = `${model} → ${timedOut ? `timed out after ${attemptTimeoutMs}ms` : errorMessage(networkErr)}`;
       continue;
     } finally {
       clearTimeout(timeout);
