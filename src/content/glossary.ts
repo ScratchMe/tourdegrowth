@@ -58,6 +58,8 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   acquisition: {
     ...GLOSSARY_TERMS.acquisition,
+    deep: GLOSSARY_DEEP.acquisition,
+    updatedAt: "2026-09-06", // R2-11, lot 3
     extended: {
       fr: "L'acquisition couvre tous les canaux par lesquels quelqu'un arrive chez toi pour la première fois : SEO, publicité payante, bouche-à-oreille, contenu, communautés, partenariats. Le piège classique : juger un canal uniquement sur le volume qu'il apporte, sans se demander s'il est reproductible et si son coût est connu (voir CAC). Un canal qui a bien marché une fois par chance n'est pas une stratégie d'acquisition, c'est un coup de chance. Et l'acquisition seule ne dit rien de la santé du produit — un pic de nouveaux visiteurs qui n'activent jamais n'est qu'un chiffre de vanité.",
       en: "Acquisition covers every channel through which someone finds you for the first time: SEO, paid ads, word of mouth, content, communities, partnerships. The classic trap: judging a channel purely on volume, without asking whether it's repeatable and whether its cost is even known (see CAC). A channel that worked once by luck isn't an acquisition strategy, it's a lucky break. And acquisition alone says nothing about product health — a spike of new visitors who never activate is just a vanity number.",
@@ -92,6 +94,8 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   referral: {
     ...GLOSSARY_TERMS.referral,
+    deep: GLOSSARY_DEEP.referral,
+    updatedAt: "2026-09-06", // R2-11, lot 3
     extended: {
       fr: "Le referral existe avec ou sans programme de parrainage formel — un utilisateur satisfait qui en parle spontanément à un collègue compte tout autant. Ce qui distingue un produit à fort referral, c'est qu'il devient moins cher à faire grandir avec le temps : chaque nouvel utilisateur en amène d'autres, contrairement à l'acquisition payante dont le coût reste stable (voir CAC). Un score NPS élevé est souvent le signal précoce qu'un mécanisme de referral, une fois construit, aura un vrai effet — un mauvais NPS prédit l'inverse, quel que soit le mécanisme.",
       en: "Referral exists with or without a formal referral program — a happy user who spontaneously tells a colleague counts just as much. What sets a high-referral product apart is that it gets cheaper to grow over time: every new user brings in others, unlike paid acquisition where the cost stays flat (see CAC). A high NPS score is often the early signal that a referral mechanism, once built, will actually work — a poor NPS predicts the opposite, whatever the mechanism.",
@@ -100,6 +104,8 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   revenue: {
     ...GLOSSARY_TERMS.revenue,
+    deep: GLOSSARY_DEEP.revenue,
+    updatedAt: "2026-09-06", // R2-11, lot 3
     extended: {
       fr: "Ce pilier ne juge pas le montant encaissé, mais si le modèle de revenu a été réellement testé face à de vrais clients — beaucoup de produits ont un plan de monétisation « pour plus tard » qui n'a jamais rencontré une carte bancaire. Une référence souvent citée dans le SaaS est un ratio LTV:CAC autour de 3:1 comme seuil de viabilité (voir LTV et CAC) — à prendre comme repère directionnel, pas comme une règle absolue selon ton marché. L'upsell et le cross-sell sont les deux leviers les plus rapides une fois le modèle de base validé.",
       en: "This pillar doesn't judge how much money comes in, but whether the revenue model has actually been tested against real customers — plenty of products have a monetization plan for \"later\" that has never met a credit card. A commonly cited SaaS rule of thumb is an LTV:CAC ratio around 3:1 as a viability threshold (see LTV and CAC) — treat it as a directional benchmark, not an absolute rule for every market. Upsell and cross-sell are the fastest levers once the base model is validated.",

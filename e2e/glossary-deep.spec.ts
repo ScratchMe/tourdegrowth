@@ -50,6 +50,19 @@ test("/fr/glossary/viral-coefficient fits a phone (lot 2)", async ({ page }) => 
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
 });
 
+test("/en/glossary/revenue quotes the pricing question (lot 3)", async ({ page }) => {
+  await page.goto("/en/glossary/revenue");
+  await expect(page.getByTestId("in-the-tour")).toContainText("Has your pricing model been tested, not just chosen?");
+  expect(await page.getByTestId("faq").getByRole("heading", { level: 3 }).count()).toBeGreaterThanOrEqual(3);
+});
+
+test("/fr/glossary/referral fits a phone (lot 3)", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 800 });
+  await page.goto("/fr/glossary/referral");
+  await page.getByTestId("faq").waitFor();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+});
+
 test("a term without long-form content keeps the short page", async ({ page }) => {
   await page.goto("/en/glossary/onboarding");
   await expect(page.locator("main").getByRole("heading", { level: 2, name: "In practice" })).toBeVisible();
