@@ -50,7 +50,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 | | R-18 | Dépendances et config TypeScript | T | S | **Fait** (PR #37, 2026-09-05) — clôt le lot E |
 | **F — Expérience** | R-19 | Accessibilité du parcours | F+T | M | **Fait** (PR #38, 2026-09-05) |
 | | R-20 | Petits plus produit (dernier score, benchmark, persistance Deep dive) | F | S/M | **Fait** (PR #40, 2026-09-05) |
-| | R-21 | La nav de la landing déborde le viewport mobile (FR **et** EN depuis R-13) | F+T | XS | **Fait** (PR #50, 2026-09-06) |
+| | R-21 | La nav de la landing déborde le viewport mobile (FR **et** EN depuis R-13) | F+T | XS | **Fait** (PR #55, 2026-09-06) — la PR #50 annoncée d'abord était **vide**, voir CLAUDE.md |
 | | R-22 | Trois paires de couleurs sous le seuil AA de contraste | F+T | S | **Fait** (PR #51, 2026-09-06) |
 | | R-23 | Boutons de partage LinkedIn/X : où les mettre sans casser « 2 CTA » | F | S | **Clos** (décision d'Antoine, 2026-09-06 : rester à 2 CTA) |
 | | R-26 | Le 404 global n'a ni notre CSS ni notre chrome | F+T | S | **Fait** (PR #48, 2026-09-06) |
@@ -363,7 +363,11 @@ Hors périmètre ici, noté pour mémoire : historique de progression / comparai
 
 > **Mise à jour du 2026-09-05 (constaté en mesurant pendant R-20) : ce n'est plus seulement le français.** R-13 a ajouté le sélecteur de langue dans ce même header. À 390 px, `scrollWidth` vaut maintenant **515 en FR et 452 en EN**, pour un viewport de 390 — les deux langues débordent, alors que le constat d'origine ne trouvait le problème qu'en français. Ça reste le même correctif et le même arbitrage visuel (wrapper la nav, la masquer sous 760 px comme le CTA d'en-tête l'est déjà, ou réduire la typo), mais ça touche désormais tous les visiteurs mobiles, pas une partie.
 
-**Type** F+T · **Effort** XS · **Statut** **Fait** (PR #50, 2026-09-06) — option 2 retenue par Antoine après mesure des trois sur le vrai build (360/390/430 px, FR et EN) : masquer les liens est la seule qui corrige sans doubler la hauteur du header (69 px, contre 132-171 px en wrappant ; la typo réduite déborde encore). Spec `e2e/landing-mobile.spec.ts`.
+**Type** F+T · **Effort** XS · **Statut** **Fait** (PR #55, 2026-09-06) — option 2 retenue par Antoine après mesure des trois sur le vrai build (360/390/430 px, FR et EN) : masquer les liens est la seule qui corrige sans doubler la hauteur du header (69 px, contre 132-171 px en wrappant ; la typo réduite déborde encore). Spec `e2e/landing-mobile.spec.ts`, 13 specs de 320 à 430 px.
+
+> **La PR #50, annoncée livrée le matin même, était vide** — correctif committé sur `main` local au lieu de la branche, branche poussée périmée, squash vide, CI verte pour la mauvaise raison. Refait en #55. Convention ajoutée : vérifier `git show --stat <sha>` après chaque merge avant d'annoncer. Détail dans `CLAUDE.md`.
+
+> **Reste ouvert, hors contrat** : `/r/<id>` déborde de 37 px à **320 px seulement** (le `PillarChip` met score + nom + déclencheur de glossaire sur une ligne). DESIGN-BRIEF.md fixe le mobile à 390 px et exige 375-430 — 320 est en dehors. Antoine a choisi de laisser en l'état (2026-09-06).
 
 **Constat, trouvé en vérifiant autre chose.** Repéré pendant la recette du pied de page (2026-09-05), pas pendant la revue initiale — et confirmé **préexistant sur `main`**, indépendant du pied de page : mesuré à l'identique avec et sans lui.
 
