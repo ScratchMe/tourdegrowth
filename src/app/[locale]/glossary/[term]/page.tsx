@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     resolved,
     `/glossary/${term}`,
     `${tc(entry.term, resolved)} — ${tc(UI_STRINGS.meta.glossaryTermSuffix, resolved)}`,
-    tc(entry.definition, resolved),
+    tc(entry.metaDescription ?? entry.definition, resolved),
   );
 }
 
