@@ -16,8 +16,7 @@ function daysAgo(n: number): string {
 const DEEP_DIVE: DeepDiveResult = {
   completed: true,
   locale: "en",
-  contextAnswers: {},
-  freeContext: null,
+  freeContextProvided: false,
   verdicts: {
     neutral: { pillarRecommendations: {} as never, priorityAction: "", modelUsed: "x" },
     roast: { pillarRecommendations: {} as never, priorityAction: "", modelUsed: "x" },
@@ -130,19 +129,25 @@ describe("summarizeSubmissions — the rest of the dashboard", () => {
   });
 
   it("measures Deep dive completion and the free-context fill rate against the right denominators", () => {
+    // A document written before REVIEW-02.md R2-20 carries the text and no
+    // boolean; it must still count, or the rate would drop the day the
+    // boolean shipped.
+    const legacyWithText = { ...DEEP_DIVE, freeContextProvided: undefined, freeContext: "we sell to accounting firms" };
+    const legacyWithout = { ...DEEP_DIVE, freeContextProvided: undefined, freeContext: null };
     const stats = summarizeSubmissions(
       [
         submission({ id: "a" }),
         submission({ id: "b", deepDive: DEEP_DIVE }),
-        submission({ id: "c", deepDive: { ...DEEP_DIVE, freeContext: "we sell to accounting firms" } }),
-        submission({ id: "d", deepDive: { ...DEEP_DIVE, freeContext: "" } }),
+        submission({ id: "c", deepDive: { ...DEEP_DIVE, freeContextProvided: true } }),
+        submission({ id: "d", deepDive: legacyWithText as unknown as DeepDiveResult }),
+        submission({ id: "e", deepDive: legacyWithout as unknown as DeepDiveResult }),
       ],
       NOW,
     );
-    expect(stats.deepDiveCompleted).toBe(3);
-    expect(stats.deepDiveCompletionRate).toBeCloseTo(3 / 4);
-    expect(stats.freeContextProvided).toBe(1);
-    expect(stats.freeContextRate).toBeCloseTo(1 / 3);
+    expect(stats.deepDiveCompleted).toBe(4);
+    expect(stats.deepDiveCompletionRate).toBeCloseTo(4 / 5);
+    expect(stats.freeContextProvided).toBe(2);
+    expect(stats.freeContextRate).toBeCloseTo(2 / 4);
   });
 
   it("returns zeros, not NaN, for an empty collection", () => {

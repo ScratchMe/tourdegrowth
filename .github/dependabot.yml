@@ -1,0 +1,23 @@
+# REVIEW-02.md R2-24. The `uuid` advisory of REVIEW.md R-18 was found by a
+# manual `npm audit`; nothing would have surfaced the next one. Monthly, and
+# grouped, so a side project gets one PR to look at rather than twelve.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      production:
+        dependency-type: production
+      development:
+        dependency-type: development
+    # Playwright is pinned on purpose (REVIEW.md R-07): `@axe-core/playwright`
+    # drags a newer `playwright-core` in beside `@playwright/test` otherwise.
+    ignore:
+      - dependency-name: "@playwright/test"
+      - dependency-name: "playwright-core"
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

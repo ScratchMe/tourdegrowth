@@ -89,16 +89,24 @@ export interface DeepDiveVerdict {
 
 export interface DeepDiveResult {
   completed: true;
-  /** questionId -> the selected option's resolved contextLabel, at the locale the Deep dive was completed in. */
-  contextAnswers: Record<string, string>;
   /**
-   * The optional free-text field from the Deep dive's last screen
-   * (SPEC-ADDENDUM-02.md §1) — already truncated to 500 characters, `null`
-   * when left empty/skipped. Stored verbatim (not re-derived from the
-   * prompt) for transparency/debugging; never re-sent anywhere as an
-   * instruction — see gemini/prompt.ts's FREE_CONTEXT_INSTRUCTION.
+   * Whether the optional free-text field of the Deep dive's last screen
+   * (SPEC-ADDENDUM-02.md §1) was filled in — REVIEW-02.md R2-20. The TEXT
+   * itself is no longer stored: it is a founder describing their business
+   * in their own words, and after generation nothing ever read it again
+   * except this one boolean in the growth dashboard. The safest way not to
+   * leak a field is not to keep it. (It still goes into the Gemini prompt,
+   * delimited as data — see gemini/prompt.ts's FREE_CONTEXT_INSTRUCTION.)
    */
-  freeContext: string | null;
+  freeContextProvided: boolean;
+  /**
+   * Legacy, documents written before R2-20 (2026-09-06): the resolved labels
+   * of the 10 context answers, and the free text. Never written any more,
+   * never read except `freeContext`'s truthiness as a fallback for
+   * `freeContextProvided` in the growth stats.
+   */
+  contextAnswers?: Record<string, string>;
+  freeContext?: string | null;
   /**
    * The locale `verdicts` below was generated in. Absent on documents written
    * before Deep dives were generated in both languages — read those as the

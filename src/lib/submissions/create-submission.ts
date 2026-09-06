@@ -149,17 +149,6 @@ export function resolveContextPromptAnswers(contextAnswerIndices: DeepDiveAnswer
   });
 }
 
-/** questionId -> the selected option's resolved contextLabel — the shape SPEC-ADDENDUM-01.md §2.7 stores on the submission. */
-function resolveContextAnswerLabels(contextAnswerIndices: DeepDiveAnswers, locale: Locale): Record<string, string> {
-  const result: Record<string, string> = {};
-  for (const q of DEEP_MODE_QUESTIONS) {
-    const selected = contextAnswerIndices[q.id];
-    const option = q.options[selected as number];
-    if (!option) throw new Error(`Missing or invalid Deep dive answer for question "${q.id}"`);
-    result[q.id] = tc(option.contextLabel, locale);
-  }
-  return result;
-}
 
 async function getDeepDiveVerdictForTone(
   tone: Tone,
@@ -248,8 +237,8 @@ export async function completeDeepDiveFlow(
 
   return {
     completed: true,
-    contextAnswers: resolveContextAnswerLabels(contextAnswerIndices, locale),
-    freeContext: freeContextForPrompt ?? null,
+    // REVIEW-02.md R2-20: a boolean, not the text — see `DeepDiveResult`.
+    freeContextProvided: freeContextForPrompt !== undefined,
     locale,
     // Still written in the generation locale, so anything reading the old
     // field keeps working exactly as before.

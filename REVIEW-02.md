@@ -58,11 +58,11 @@ La colonne **Autonomie** dit ce que chaque item attend d'Antoine : **Auto** = je
 | | R2-17 | `/how-it-works` répète chaque nom de pilier deux fois | F | XS | Auto | **Fait** (PR #61, 2026-09-06) |
 | **D — Robustesse et sécurité** | R2-18 | Aucun en-tête de sécurité hors HSTS | T | S | Auto | **Fait** (PR #64, 2026-09-06) — CSP `script-src` complète volontairement hors périmètre |
 | | R2-19 | Amplification de lectures Firestore non authentifiée sur `/r/<id>` | T | S | Auto | **Fait** (PR #65, 2026-09-06) |
-| | R2-20 | `freeContext` conservé indéfiniment pour calculer un booléen | T | S | Auto | À faire |
+| | R2-20 | `freeContext` conservé indéfiniment pour calculer un booléen | T | S | Auto | **Fait** (PR #66, 2026-09-06) — `modelUsed` conservé, il est lu par la sonde |
 | | R2-21 | Deep dive : deux requêtes concurrentes génèrent deux fois | T | S | Auto | À faire |
 | | R2-22 | Basic Auth admin : comparaison non constante, `atob` Latin-1 | T | XS | Auto | À faire |
 | | R2-23 | Aucun `error.tsx` : une panne rend le document nu de Next | T | S | Auto | **Fait** (PR #65, 2026-09-06) — limite : une panne dans le shell initial reste rendue côté client, voir CLAUDE.md |
-| | R2-24 | Petites dettes : `rawPoints` public, logs Gemini non tronqués, pas de Dependabot | T | XS | Auto | À faire |
+| | R2-24 | Petites dettes : `rawPoints` public, logs Gemini non tronqués, pas de Dependabot | T | XS | Auto | **Fait** (PR #66, 2026-09-06) |
 | | R2-25 | Le stderr de Playwright n'est pas vide, donc plus lu | T | XS | Auto | **Fait en partie** (PR #65) — la ligne Firebase ne vient plus que de la spec qui l'annonce ; `NoFallbackError` est à Next |
 | **E — Décisions produit (Antoine)** | R2-26 | Segmenter le benchmark : « la moyenne des SaaS B2B à ton stade » | F | M | Toi | À trancher |
 | | R2-27 | Historique de progression : les données sont déjà sur l'appareil | F | S | Toi | À trancher |
@@ -341,7 +341,7 @@ L'ancien ratio peut rester s'il est renommé pour ce qu'il est (« référées p
 
 **Constat.** `create-submission.ts:251-252` persiste `contextAnswers` et `freeContext`. Trace de chaque lecture après écriture : `freeContext` n'est lu qu'à `growth-stats.ts:70`, **en truthiness** (le texte lui-même n'est relu par rien) ; `contextAnswers`, `modelUsed`, `completed`, `locale` du Deep dive ne sont relus par rien du tout. Aucune TTL Firestore, aucune suppression nulle part. Le champ le plus sensible que le produit détient — un fondateur décrivant son entreprise dans ses mots — est donc conservé pour toujours afin de compter combien de personnes l'ont rempli.
 
-**Correctif proposé.** Écrire `freeContextProvided: boolean` à la place du texte, cesser d'écrire `contextAnswers` et `modelUsed`, lire le booléen dans `growth-stats.ts`. Garder `freeContext` optionnel dans le type pour que les documents existants se lisent encore. Si le texte brut est vraiment voulu « pour déboguer », la version honnête est un champ dédié avec une TTL Firestore déclarée et une durée écrite dans la notice de R2-03. Aucune IP, aucun user agent, aucun identifiant n'est stocké — ça, c'est propre.
+**Correctif proposé.** Écrire `freeContextProvided: boolean` à la place du texte, cesser d'écrire `contextAnswers`, lire le booléen dans `growth-stats.ts`. (Correction au moment de livrer : `modelUsed` **est** relu — par la sonde `scripts/live/production.live.ts`, qui rapporte quel modèle a répondu ; c'est de l'observabilité, pas une donnée personnelle, il reste écrit.) Garder `freeContext` optionnel dans le type pour que les documents existants se lisent encore. Si le texte brut est vraiment voulu « pour déboguer », la version honnête est un champ dédié avec une TTL Firestore déclarée et une durée écrite dans la notice de R2-03. Aucune IP, aucun user agent, aucun identifiant n'est stocké — ça, c'est propre.
 
 ### R2-21 — Deep dive : deux requêtes concurrentes génèrent deux fois
 
