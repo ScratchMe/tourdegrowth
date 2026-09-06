@@ -107,8 +107,13 @@ test.describe("locale in the URL", () => {
  * "0/100" frame — and "never a real image" holds in both environments.
  */
 test("an unknown result never previews as a real image", async ({ request }) => {
-  const missing = await request.get("/r/3f1c2a7e-9b4d-4e21-a8c6-000000000000/opengraph-image");
-  expect(missing.status()).not.toBe(200);
+  // An id that is not even a UUID is refused before any Firestore read
+  // (REVIEW-02.md R2-19), so this is a real 404 in every environment — CI has
+  // no Firebase credentials, and the old valid-looking id only "worked" here
+  // because the read threw (R2-25: that error line was the noisiest thing in
+  // the Playwright output). The valid-but-unknown case is the error-page spec.
+  const missing = await request.get("/r/not-a-result-id/opengraph-image");
+  expect(missing.status()).toBe(404);
 
   // The sample still renders a genuine image, so the above is about the id,
   // not a broken route.

@@ -15,6 +15,7 @@ import {
 } from "@/lib/og/tokens";
 import type { Pillar } from "@/lib/scoring/pillars";
 import { getCachedSubmissionById } from "@/lib/submissions/cached-repository";
+import { isValidSubmissionId } from "@/lib/submissions/referral";
 import { SAMPLE_RESULT } from "@/lib/submissions/sample";
 import { SITE_DOMAIN_LABEL } from "@/lib/site";
 
@@ -48,6 +49,9 @@ async function loadOgData(id: string): Promise<OgData | null> {
       deepDive: false, // SPEC.md §12: the sample is never enriched
     };
   }
+
+  // REVIEW-02.md R2-19: an id that cannot be ours is a 404 before it is a read.
+  if (!isValidSubmissionId(id)) return null;
 
   const submission = await getCachedSubmissionById(id);
   // REVIEW.md R-14: a dead link used to render a real-looking "0/100" frame,

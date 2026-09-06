@@ -40,7 +40,25 @@ const FONT_FILES = {
   mono600: new URL("./fonts/ibm-plex-mono-600.ttf", import.meta.url),
 };
 
-export async function loadOgFonts() {
+type OgFonts = Awaited<ReturnType<typeof readOgFonts>>;
+let fontsPromise: Promise<OgFonts> | null = null;
+
+/**
+ * REVIEW-02.md R2-19: the five files were re-read on EVERY image render —
+ * per result page preview, per content-page preview, per crawler hit. They
+ * never change while the process lives, so they are read once per instance
+ * and the promise is shared; a failed read is not cached, so a transient
+ * error can't poison every image until the next cold start.
+ */
+export function loadOgFonts(): Promise<OgFonts> {
+  fontsPromise ??= readOgFonts().catch((err: unknown) => {
+    fontsPromise = null;
+    throw err;
+  });
+  return fontsPromise;
+}
+
+async function readOgFonts() {
   const load = (url: URL) => readFile(fileURLToPath(url));
   const [stardos, inter500, inter600, mono500, mono600] = await Promise.all([
     load(FONT_FILES.stardos),

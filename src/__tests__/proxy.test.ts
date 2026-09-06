@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { resetRateLimitsForTests } from "@/lib/rate-limit";
 import { isAuthorizedForAdmin, proxy } from "../proxy";
 
 function requestWithAuth(pathname: string, authHeader?: string): NextRequest {
@@ -127,5 +128,42 @@ describe("proxy (locale cookie)", () => {
     const withPrefix = proxy(request("/fr/how-it-works", "en"));
     expect(withPrefix.headers.get("x-middleware-override-headers")).toContain("x-tdg-locale");
     expect(withPrefix.headers.get("x-middleware-request-x-tdg-locale")).toBe("fr");
+  });
+});
+
+describe("proxy (result read budget — REVIEW-02.md R2-19)", () => {
+  beforeEach(() => resetRateLimitsForTests());
+
+  function resultRequest(pathname: string, ip: string): NextRequest {
+    return new NextRequest(`https://tourdegrowth.com${pathname}`, { headers: { "x-forwarded-for": ip } });
+  }
+  const ID = "/r/3f1c2a7e-9b4d-4e21-a8c6-000000000000";
+
+  it("lets 120 result reads through in ten minutes, then answers 429 with a real Retry-After", () => {
+    for (let i = 0; i < 120; i += 1) {
+      expect(proxy(resultRequest(ID, "203.0.113.9")).status).not.toBe(429);
+    }
+    const blocked = proxy(resultRequest(ID, "203.0.113.9"));
+    expect(blocked.status).toBe(429);
+    expect(Number(blocked.headers.get("retry-after"))).toBeGreaterThan(0);
+  });
+
+  it("counts per IP: another visitor is not affected by a flood from the first", () => {
+    for (let i = 0; i < 121; i += 1) proxy(resultRequest(ID, "203.0.113.9"));
+    expect(proxy(resultRequest(ID, "198.51.100.4")).status).not.toBe(429);
+  });
+
+  it("never counts the sample result, which reads no Firestore", () => {
+    for (let i = 0; i < 200; i += 1) {
+      expect(proxy(resultRequest("/r/sample", "203.0.113.9")).status).not.toBe(429);
+    }
+    // …and the budget it did not spend is still there for a real result.
+    expect(proxy(resultRequest(ID, "203.0.113.9")).status).not.toBe(429);
+  });
+
+  it("leaves every other path alone", () => {
+    for (let i = 0; i < 200; i += 1) {
+      expect(proxy(resultRequest("/quiz", "203.0.113.9")).status).not.toBe(429);
+    }
   });
 });
