@@ -1,6 +1,6 @@
 "use client";
 
-import { tc } from "@/lib/i18n/dictionary";
+import { tc } from "@/lib/i18n/translatable";
 import type { Locale } from "@/lib/i18n/locale";
 import { GlossaryTerm } from "@/components/glossary/GlossaryTerm";
 import { QUESTION_GLOSSARY_TERMS } from "@/content/question-glossary-terms";

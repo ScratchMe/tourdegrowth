@@ -2,10 +2,19 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
-import type { Locale } from "@/lib/i18n/locale";
 import { loadStoredResults, type StoredResult } from "@/lib/quiz/storage";
 import styles from "./LastResult.module.css";
+
+/**
+ * Resolved strings, not the dictionary (REVIEW-02.md R2-14): this island is
+ * the landing's only client code, and importing `UI_STRINGS` here put the
+ * whole bilingual dictionary in the landing's bundle for two lines of text.
+ */
+export interface LastResultProps {
+  /** "Your last score: {score}/100 — see it again →", `{score}` replaced here. */
+  withScore: string;
+  withoutScore: string;
+}
 
 /**
  * "Your last score: 74/100 — see it again →" on the landing — REVIEW.md R-20.
@@ -23,7 +32,7 @@ import styles from "./LastResult.module.css";
  * newcomer, who is most of this page's traffic, sees nothing appear and
  * disappear.
  */
-export function LastResult({ locale }: { locale: Locale }) {
+export function LastResult({ withScore, withoutScore }: LastResultProps) {
   const [last, setLast] = useState<StoredResult | null>(null);
 
   useEffect(() => {
@@ -33,13 +42,9 @@ export function LastResult({ locale }: { locale: Locale }) {
 
   if (!last) return null;
 
-  const t = UI_STRINGS.lastResult;
   // Entries written before R-20 carry no score — an unnumbered link is still
   // the way back, so those fall back rather than being hidden.
-  const label =
-    typeof last.total === "number"
-      ? tc(t.withScore, locale).replace("{score}", String(last.total))
-      : tc(t.withoutScore, locale);
+  const label = typeof last.total === "number" ? withScore.replace("{score}", String(last.total)) : withoutScore;
 
   return (
     <Link href={`/r/${last.id}`} className={styles.link} data-testid="last-result-link">

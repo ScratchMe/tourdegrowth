@@ -1,11 +1,11 @@
-"use client";
-
 import Link from "next/link";
 import { ANTOINE_LINKS, SITE_FOOTER_CREDIT } from "@/content/antoine-credit";
-import { PROFILE_CLICK_DETAILS, trackEvent } from "@/lib/analytics/goatcounter";
-import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
+import { PROFILE_CLICK_DETAILS } from "@/lib/analytics/goatcounter";
+import { NAV_STRINGS } from "@/lib/i18n/nav-strings";
+import { tc } from "@/lib/i18n/translatable";
 import type { Locale } from "@/lib/i18n/locale";
 import { localePath } from "@/lib/i18n/routes";
+import { TrackedLink } from "./TrackedLink";
 import styles from "./SiteFooter.module.css";
 
 const SITE_FOOTER_CV_DETAIL = PROFILE_CLICK_DETAILS[3];
@@ -40,8 +40,13 @@ export interface SiteFooterProps {
  * halfway down a 15-question funnel works against that. Neither is in the
  * sitemap either, so nothing is lost on the SEO side.
  *
- * A Client Component only because of `trackEvent`; it renders fine inside the
- * Server Components that use it.
+ * No `"use client"` since REVIEW-02.md R2-14 — but it is still rendered by
+ * the error boundaries, which ARE Client Components, so whatever this file
+ * imports ends up in every page's bundle regardless. That is why it imports
+ * only the two nav labels (`nav-strings`) and the credit copy, never
+ * `UI_STRINGS`: the footer used to be the reason the whole bilingual
+ * dictionary shipped to the 36 content pages. The click is a one-line
+ * client island (`TrackedLink`).
  *
  * Design system extension 01 brought it into the system as-is: text on stone
  * under the same dashed rule as the header, because that rule IS the footer's
@@ -55,16 +60,16 @@ export function SiteFooter({ locale, width = "wide" }: SiteFooterProps) {
       <div className={`${styles.inner} ${styles[width]}`}>
         <nav aria-label="Site" className={styles.nav}>
           <Link href={localePath(locale, "/how-it-works")} className={styles.navLink}>
-            {tc(UI_STRINGS.nav.howItWorks, locale)}
+            {tc(NAV_STRINGS.howItWorks, locale)}
           </Link>
           <Link href={localePath(locale, "/glossary")} className={styles.navLink}>
-            {tc(UI_STRINGS.nav.glossary, locale)}
+            {tc(NAV_STRINGS.glossary, locale)}
           </Link>
         </nav>
 
         <p className={styles.credit}>
           {tc(SITE_FOOTER_CREDIT.prefix, locale)}
-          <a
+          <TrackedLink
             className={styles.creditLink}
             href={ANTOINE_LINKS.cv}
             target="_blank"
@@ -74,10 +79,11 @@ export function SiteFooter({ locale, width = "wide" }: SiteFooterProps) {
             // attribute any of it back here. `noopener` alone already
             // closes the tabnabbing hole.
             rel="noopener"
-            onClick={() => trackEvent("profile_click", SITE_FOOTER_CV_DETAIL)}
+            event="profile_click"
+            detail={SITE_FOOTER_CV_DETAIL}
           >
             {tc(SITE_FOOTER_CREDIT.linkText, locale)}
-          </a>
+          </TrackedLink>
           {tc(SITE_FOOTER_CREDIT.suffix, locale)}
         </p>
       </div>

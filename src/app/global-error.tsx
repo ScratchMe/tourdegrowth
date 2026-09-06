@@ -2,7 +2,8 @@
 
 import { DetourCard } from "@/components/core/DetourCard";
 import { Button } from "@/components/core/Button";
-import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
+import { ERROR_SCREEN_STRINGS } from "@/lib/i18n/error-screen-strings";
+import { tc } from "@/lib/i18n/translatable";
 import styles from "@/components/brand/NotFoundScreen.module.css";
 import "./globals.css";
 
@@ -15,7 +16,7 @@ import "./globals.css";
  * cookie — but when it does, it still looks like the product.
  */
 export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
-  const t = UI_STRINGS.quiz;
+  const t = ERROR_SCREEN_STRINGS;
   return (
     <html lang="en">
       <body>
