@@ -77,11 +77,15 @@ test("/fr/glossary/onboarding fits a phone (lot 4)", async ({ page }) => {
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
 });
 
-test("a term without long-form content keeps the short page", async ({ page }) => {
-  await page.goto("/en/glossary/growth-loop");
-  await expect(page.locator("main").getByRole("heading", { level: 2, name: "In practice" })).toBeVisible();
-  await expect(page.getByTestId("in-the-tour")).toHaveCount(0);
-  await expect(page.getByTestId("faq")).toHaveCount(0);
+test("the last three terms have the long page too (lot 5)", async ({ page }) => {
+  await page.goto("/en/glossary/upsell-cross-sell");
+  await expect(page.getByTestId("in-the-tour")).toContainText("Do you have an expansion playbook (upsell/cross-sell)?");
+  await page.goto("/fr/glossary/north-star-metric");
+  await expect(page.getByTestId("in-the-tour")).toContainText("Sais-tu quel pourcentage d'utilisateurs atteint ce moment ?");
+  await page.setViewportSize({ width: 390, height: 800 });
+  await page.goto("/fr/glossary/growth-loop");
+  await page.getByTestId("faq").waitFor();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
 });
 
 test("the long page does not push a phone sideways", async ({ page }) => {

@@ -41,8 +41,8 @@ export interface GlossaryEntry {
   /**
    * The long-form sections — formula, worked example, benchmarks, levers, the
    * Tour question that measures it, FAQ (REVIEW-02.md R2-11). Lives in
-   * `glossary-deep.ts`, arrives term by term; a term without it renders the
-   * short page it always had.
+   * `glossary-deep.ts`; every term has one since the fifth batch. The page
+   * still renders without it, so a future term can ship short first.
    */
   deep?: DeepGlossaryContent;
 }
@@ -182,6 +182,8 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   "upsell-cross-sell": {
     ...GLOSSARY_TERMS["upsell-cross-sell"],
+    deep: GLOSSARY_DEEP["upsell-cross-sell"],
+    updatedAt: "2026-09-06", // R2-11, lot 5
     extended: {
       fr: "Les deux sont des leviers d'expansion revenue — la manière la plus fiable de faire du « churn négatif » (voir Churn), parce qu'il est presque toujours moins cher de vendre plus à un client déjà convaincu que d'en acquérir un nouveau. Le timing compte plus que la technique : proposer un upsell avant que le client n'ait atteint son moment « aha » sur l'offre de base se lit comme de l'agressivité commerciale, pas comme de la valeur ajoutée.",
       en: "Both are expansion-revenue levers — the most reliable way to achieve \"negative churn\" (see Churn), because it's almost always cheaper to sell more to an already-convinced customer than to acquire a new one. Timing matters more than technique: pitching an upsell before the customer has reached their aha moment on the base plan reads as pushy sales, not added value.",
@@ -190,6 +192,8 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   "growth-loop": {
     ...GLOSSARY_TERMS["growth-loop"],
+    deep: GLOSSARY_DEEP["growth-loop"],
+    updatedAt: "2026-09-06", // R2-11, lot 5
     extended: {
       fr: "Un entonnoir classique se termine à la conversion ; une boucle de croissance, elle, réinjecte la sortie comme entrée du cycle suivant. C'est exactement le mécanisme de ce test : chaque résultat partagé (voir Referral) amène potentiellement un nouveau visiteur, qui complète à son tour son propre test et le partage. On distingue généralement trois familles de boucles : les boucles de contenu (le contenu généré attire du trafic organique), les boucles virales (le partage amène directement de nouveaux utilisateurs) et les boucles payantes (le revenu généré finance l'acquisition suivante).",
       en: "A classic funnel ends at conversion; a growth loop instead feeds its output back in as the next cycle's input. That's exactly this tool's own mechanism: every shared result (see Referral) potentially brings in a new visitor, who in turn completes their own test and shares it. Growth teams generally group loops into three families: content loops (generated content pulls in organic traffic), viral loops (sharing directly brings in new users), and paid loops (revenue generated funds the next round of acquisition).",
@@ -198,6 +202,8 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   "north-star-metric": {
     ...GLOSSARY_TERMS["north-star-metric"],
+    deep: GLOSSARY_DEEP["north-star-metric"],
+    updatedAt: "2026-09-06", // R2-11, lot 5
     extended: {
       fr: "Les exemples les plus connus : Airbnb a longtemps suivi les « nuits réservées » plutôt que le nombre d'inscriptions, Facebook a suivi les utilisateurs actifs mensuels plutôt que le nombre de comptes créés. Le point commun : dans les deux cas, la métrique capture de la valeur réellement délivrée, pas une action facile à gonfler artificiellement. Une bonne North Star Metric doit répondre à une question simple : si elle grimpe sans que rien d'autre ne bouge, est-ce que l'entreprise va vraiment mieux ? Si la réponse n'est pas clairement oui, ce n'est pas la bonne métrique.",
       en: "The best-known examples: Airbnb tracked \"nights booked\" for years rather than sign-ups, Facebook tracked monthly active users rather than accounts created. The common thread: in both cases the metric captures value actually delivered, not an easily-inflated vanity action. A good North Star Metric has to answer one simple question: if it goes up and nothing else changes, is the business actually better off? If the answer isn't a clear yes, it's the wrong metric.",
