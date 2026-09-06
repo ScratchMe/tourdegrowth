@@ -142,6 +142,9 @@ export const UI_STRINGS = {
    * content/how-it-works.ts (title/body copy lives there). */
   howItWorksPage: {
     exampleQuestionLabel: { en: "Example question:", fr: "Exemple de question :" },
+    // TODO: à relire (REVIEW-02) — R2-17. Eyebrow of each pillar card: the
+    // stage number, since the <h2> right under it already names the pillar.
+    stageEyebrowTemplate: { en: "Stage {n} of 5", fr: "Étape {n} sur 5" },
   },
 
   /** `/glossary` + `/glossary/[term]` (SPEC-ADDENDUM-02.md §3.1) — the term/definition content itself lives in content/glossary.ts, this is just page chrome. */

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { SiteFooter } from "@/components/brand/SiteFooter";
-import { LocaleSwitcher } from "@/components/brand/LocaleSwitcher";
-import { WordmarkLink } from "@/components/brand/WordmarkLink";
+import { ContentHeader } from "@/components/brand/ContentHeader";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
@@ -41,12 +40,7 @@ export default async function HowItWorksPage({ params }: PageProps) {
 
   return (
     <>
-      <header className={styles.header}>
-        <div className={styles.headerInner}>
-          <WordmarkLink locale={locale} />
-          <LocaleSwitcher locale={locale} path="/how-it-works" />
-        </div>
-      </header>
+      <ContentHeader locale={locale} path="/how-it-works" />
 
       <main className={styles.main}>
         <div className={styles.intro}>
@@ -55,11 +49,16 @@ export default async function HowItWorksPage({ params }: PageProps) {
         </div>
 
         <div className={styles.pillarStack}>
-          {HOW_IT_WORKS.pillars.map((block) => {
+          {HOW_IT_WORKS.pillars.map((block, index) => {
             const example = QUESTIONS.find((q) => q.id === block.exampleQuestionId);
             return (
               <Card key={block.pillar} elevation="raised" className={styles.pillarCard}>
-                <MetaLabel size="xs">{tc(UI_STRINGS.pillars[block.pillar], locale)}</MetaLabel>
+                {/* REVIEW-02.md R2-17: this used to repeat the pillar name the
+                    <h2> below already carries ("ACQUISITION / Acquisition").
+                    The stage number is the one thing the heading doesn't say. */}
+                <MetaLabel size="xs">
+                  {tc(UI_STRINGS.howItWorksPage.stageEyebrowTemplate, locale).replace("{n}", String(index + 1))}
+                </MetaLabel>
                 <h2 className={styles.pillarName}>{tc(UI_STRINGS.pillars[block.pillar], locale)}</h2>
                 <p className={styles.pillarExplanation}>{tc(block.explanation, locale)}</p>
                 {example && (

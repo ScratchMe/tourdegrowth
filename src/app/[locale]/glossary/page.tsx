@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteFooter } from "@/components/brand/SiteFooter";
-import { LocaleSwitcher } from "@/components/brand/LocaleSwitcher";
-import { WordmarkLink } from "@/components/brand/WordmarkLink";
+import { ContentHeader } from "@/components/brand/ContentHeader";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { GLOSSARY } from "@/content/glossary";
@@ -40,12 +39,7 @@ export default async function GlossaryIndexPage({ params }: PageProps) {
 
   return (
     <>
-      <header className={styles.header}>
-        <div className={styles.headerInner}>
-          <WordmarkLink locale={locale} />
-          <LocaleSwitcher locale={locale} path="/glossary" />
-        </div>
-      </header>
+      <ContentHeader locale={locale} path="/glossary" />
 
       <main className={styles.main}>
         <div className={styles.intro}>

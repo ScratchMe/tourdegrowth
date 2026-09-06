@@ -1,0 +1,23 @@
+/* Header of the four content pages (landing excepted, which carries a nav
+   and a CTA of its own). Same recipe as the landing's `.headerInner`:
+   wordmark pinned left, language switch pinned right, one row.
+
+   REVIEW-02.md R2-05: the three page modules this replaces had the rule
+   without `display: flex`, so the wordmark and the EN|FR control sat glued
+   together at the left edge on all 36 content pages. The header only held
+   the wordmark before R-13 added the switch; nobody re-read the capture on
+   these pages once extension 01 swapped the switch for `Segmented`. */
+.header {
+  border-bottom: var(--border-rule);
+  padding: 24px 0;
+}
+
+.inner {
+  max-width: var(--width-reading);
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
