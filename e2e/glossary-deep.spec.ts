@@ -63,8 +63,22 @@ test("/fr/glossary/referral fits a phone (lot 3)", async ({ page }) => {
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
 });
 
+test("/en/glossary/aarrr explains how the Tour itself is built from the framework (lot 4)", async ({ page }) => {
+  await page.goto("/en/glossary/aarrr");
+  const tour = page.getByTestId("in-the-tour");
+  await expect(tour).toContainText("Do you have a primary acquisition channel that's identified and measured?");
+  await expect(tour).toContainText(/fifteen questions/);
+});
+
+test("/fr/glossary/onboarding fits a phone (lot 4)", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 800 });
+  await page.goto("/fr/glossary/onboarding");
+  await page.getByTestId("faq").waitFor();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+});
+
 test("a term without long-form content keeps the short page", async ({ page }) => {
-  await page.goto("/en/glossary/onboarding");
+  await page.goto("/en/glossary/growth-loop");
   await expect(page.locator("main").getByRole("heading", { level: 2, name: "In practice" })).toBeVisible();
   await expect(page.getByTestId("in-the-tour")).toHaveCount(0);
   await expect(page.getByTestId("faq")).toHaveCount(0);

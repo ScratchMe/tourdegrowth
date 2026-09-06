@@ -24,8 +24,8 @@ import type { GlossaryTermId } from "./glossary-terms";
  * churn compounding), always with their caveat, never a made-up statistic.
  *
  * TODO: à relire (REVIEW-02) — R2-11, lot 1 (cac, ltv, churn), lot 2
- * (retention, activation, viral-coefficient) et lot 3 (acquisition, referral,
- * revenue). Premier jet
+ * (retention, activation, viral-coefficient), lot 3 (acquisition, referral,
+ * revenue) et lot 4 (aarrr, aha-moment, onboarding). Premier jet
  * de la session de code : c'est de la copie de fond qui porte le nom
  * d'Antoine, à relire ligne à ligne.
  */
@@ -1181,6 +1181,393 @@ export const GLOSSARY_DEEP: Partial<Record<GlossaryTermId, DeepGlossaryContent>>
         answer: t(
           "Earlier than feels comfortable — because the first price test teaches you more about value than any survey, and because a user base built on free is harder to convert later than one that always knew a paid tier existed. Charging a small number of customers a real price beats charging nobody: it answers the pricing question the Tour asks with evidence instead of reasoning.",
           "Plus tôt que ce qui paraît confortable — parce que le premier test de prix t'apprend plus sur la valeur que n'importe quelle enquête, et parce qu'une base construite sur le gratuit est plus dure à convertir ensuite qu'une base qui a toujours su qu'un palier payant existait. Facturer un vrai prix à un petit nombre de clients vaut mieux que ne facturer personne : ça répond à la question de pricing du Tour avec des preuves plutôt qu'avec une logique.",
+        ),
+      },
+    ],
+  },
+  aarrr: {
+    formula: {
+      expression: t(
+        "Paying, retained customers = acquired × activation rate × retention rate × paying rate — and referral feeds the first term with K × the last",
+        "Clients payants et fidèles = acquis × taux d'activation × taux de rétention × taux de passage au payant — et le parrainage réalimente le premier terme avec K × le dernier",
+      ),
+      terms: [
+        {
+          symbol: t("Each stage is a rate", "Chaque étape est un taux"),
+          meaning: t(
+            "Acquisition is the only absolute number; every other stage is the share of the previous one that made it through. That is why the framework is drawn as a funnel, and why a weak stage late in the funnel wastes everything spent before it.",
+            "L'acquisition est le seul nombre absolu ; chaque autre étape est la part de la précédente qui est passée. C'est pour ça que le cadre se dessine en entonnoir, et qu'une étape faible en bas gaspille tout ce qui a été dépensé avant.",
+          ),
+        },
+        {
+          symbol: t("The stages multiply", "Les étapes se multiplient"),
+          meaning: t(
+            "Which is the practical point of the whole model: a 10% improvement at each of four stages is not +40% at the end but 1.1⁴ ≈ +46%, and a stage at zero makes every other stage worthless.",
+            "Ce qui est l'intérêt pratique de tout le modèle : 10 % de mieux à chacune de quatre étapes ne fait pas +40 % à la fin mais 1,1⁴ ≈ +46 %, et une étape à zéro rend toutes les autres inutiles.",
+          ),
+        },
+        {
+          symbol: t("Referral closes the loop", "Le parrainage referme la boucle"),
+          meaning: t(
+            "The one stage that feeds back into the top: each retained customer brings K more acquired ones. It is listed last but changes the economics of the first.",
+            "La seule étape qui réalimente le haut : chaque client fidèle amène K nouveaux acquis. Elle est listée en dernier mais change l'économie de la première.",
+          ),
+        },
+      ],
+      note: t(
+        "The order was named by Dave McClure in 2007 as \"Startup Metrics for Pirates\" — the acronym is the joke, the funnel is the point. Variants swap the last two (Revenue before Referral) or add Awareness in front (AAARRR); the arithmetic is the same.",
+        "L'ordre a été nommé par Dave McClure en 2007 sous le titre « Startup Metrics for Pirates » — l'acronyme est la blague, l'entonnoir est le fond. Des variantes intervertissent les deux dernières (Revenue avant Referral) ou ajoutent Awareness devant (AAARRR) ; l'arithmétique est la même.",
+      ),
+    },
+    example: {
+      title: t("Where a founder's month actually goes", "Où passe réellement le mois d'un fondateur"),
+      steps: [
+        t(
+          "10,000 visitors acquired. 25% activate (2,500). 40% of those are still active at month three (1,000). 10% of those pay (100 customers).",
+          "10 000 visiteurs acquis. 25 % s'activent (2 500). 40 % d'entre eux sont encore actifs au troisième mois (1 000). 10 % d'entre eux paient (100 clients).",
+        ),
+        t(
+          "Option A, the reflex: double acquisition to 20,000 visitors. Result: 200 customers, at double the acquisition cost.",
+          "Option A, le réflexe : doubler l'acquisition à 20 000 visiteurs. Résultat : 200 clients, pour le double du coût d'acquisition.",
+        ),
+        t(
+          "Option B: leave acquisition alone, take activation from 25% to 35% and retention from 40% to 50% — two onboarding and product changes. 10,000 × 0.35 × 0.5 × 0.1 = 175 customers, at zero extra acquisition cost.",
+          "Option B : ne pas toucher à l'acquisition, passer l'activation de 25 à 35 % et la rétention de 40 à 50 % — deux changements d'onboarding et de produit. 10 000 × 0,35 × 0,5 × 0,1 = 175 clients, pour zéro coût d'acquisition en plus.",
+        ),
+        t(
+          "Then double acquisition: 350 customers. The same spend that bought 200 in option A buys 350 after B — because the funnel was fixed before it was fed.",
+          "Puis double l'acquisition : 350 clients. La même dépense qui achetait 200 clients en option A en achète 350 après B — parce que l'entonnoir a été réparé avant d'être alimenté.",
+        ),
+      ],
+      takeaway: t(
+        "The framework's real instruction is an order of operations: measure all five, find the weakest, fix it, then pour. Which is also, stage by stage, what the Tour scores.",
+        "La vraie consigne du cadre est un ordre des opérations : mesurer les cinq, trouver la plus faible, la réparer, puis alimenter. Ce qui est aussi, étape par étape, ce que le Tour note.",
+      ),
+    },
+    benchmark: [
+      t(
+        "There is no benchmark for \"AARRR\" as a whole — each stage has its own (see CAC, activation, retention, viral coefficient, revenue). What is consistent across companies is the shape of the problem: one or two stages dragging the rest, rarely all five weak at once.",
+        "Il n'y a pas de benchmark pour « AARRR » en bloc — chaque étape a le sien (voir CAC, activation, rétention, coefficient viral, revenu). Ce qui est constant d'une entreprise à l'autre, c'est la forme du problème : une ou deux étapes qui tirent le reste vers le bas, rarement les cinq faibles à la fois.",
+      ),
+      t(
+        "The stage most often neglected in early-stage products is retention: it is the slowest to measure (cohorts have to age), the least visible at a launch, and the one every other stage depends on. Acquisition is the most often over-invested, for the opposite reasons.",
+        "L'étape la plus souvent négligée dans un produit jeune est la rétention : la plus lente à mesurer (il faut que les cohortes vieillissent), la moins visible à un lancement, et celle dont toutes les autres dépendent. L'acquisition est la plus souvent sur-investie, pour les raisons inverses.",
+      ),
+      t(
+        "A useful sanity check: can you name one number per stage, today, from memory? Teams that can are rare; the Tour's fifteen questions are, in effect, that check in three minutes.",
+        "Un test de bon sens utile : peux-tu citer un chiffre par étape, aujourd'hui, de mémoire ? Les équipes qui le peuvent sont rares ; les quinze questions du Tour sont, en pratique, ce test en trois minutes.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Put one metric per stage on a single page and look at it weekly. Not fifteen dashboards — five numbers, one funnel.",
+        "Mets une métrique par étape sur une seule page et regarde-la chaque semaine. Pas quinze tableaux de bord — cinq chiffres, un entonnoir.",
+      ),
+      t(
+        "Work the weakest stage first, even when it is the least exciting. Fixing retention before acquisition feels slow; it is the only order in which the arithmetic works.",
+        "Travaille d'abord l'étape la plus faible, même quand c'est la moins excitante. Réparer la rétention avant l'acquisition paraît lent ; c'est le seul ordre dans lequel l'arithmétique fonctionne.",
+      ),
+      t(
+        "Define each stage's metric in a sentence anyone in the team can repeat: what counts as activated, what counts as retained, what counts as referred. Most disagreements about growth are disagreements about definitions.",
+        "Définis la métrique de chaque étape en une phrase que n'importe qui dans l'équipe peut répéter : ce qui compte comme activé, comme fidèle, comme parrainé. La plupart des désaccords sur la croissance sont des désaccords de définition.",
+      ),
+      t(
+        "Re-run the diagnosis every quarter. The weakest stage moves: fix activation and retention becomes the bottleneck, fix retention and acquisition is suddenly worth scaling.",
+        "Refais le diagnostic chaque trimestre. L'étape la plus faible se déplace : répare l'activation et la rétention devient le goulot, répare la rétention et l'acquisition mérite soudain d'être mise à l'échelle.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "acq-1",
+      body: t(
+        "The Tour is this framework turned into fifteen questions: three per stage, each worth 20, 7 or 0, averaged into a stage score out of 20, the five summed into a score out of 100. The first question opens the Acquisition stage; the last closes Revenue. What the result page shows first is not the total but the weakest stage — because that, not the sum, is what the framework tells you to work on.",
+        "Le Tour est ce cadre transformé en quinze questions : trois par étape, chacune valant 20, 7 ou 0, moyennées en un score d'étape sur 20, les cinq additionnés en un score sur 100. La première question ouvre l'étape Acquisition ; la dernière ferme Revenue. Ce que la page de résultat montre en premier n'est pas le total mais l'étape la plus faible — parce que c'est elle, pas la somme, que le cadre te dit de travailler.",
+      ),
+    },
+    faq: [
+      {
+        question: t("What does AARRR stand for?", "Que veut dire AARRR ?"),
+        answer: t(
+          "Acquisition, Activation, Retention, Referral, Revenue: the five stages a user goes through, from first hearing of a product to paying for it and bringing others. Dave McClure coined it in 2007 as \"pirate metrics\" because the acronym sounds like one. Some versions put Revenue before Referral; the order of the last two matters less than the idea that each stage is a share of the previous one.",
+          "Acquisition, Activation, Rétention, Referral (parrainage), Revenue (revenu) : les cinq étapes qu'un utilisateur traverse, de la première fois qu'il entend parler d'un produit au moment où il paie et en amène d'autres. Dave McClure l'a forgé en 2007 sous le nom de « pirate metrics » parce que l'acronyme sonne comme un cri de pirate. Certaines versions mettent Revenue avant Referral ; l'ordre des deux dernières compte moins que l'idée que chaque étape est une part de la précédente.",
+        ),
+      },
+      {
+        question: t(
+          "Is AARRR still relevant, or has it been replaced by growth loops?",
+          "AARRR est-il encore pertinent, ou remplacé par les boucles de croissance ?",
+        ),
+        answer: t(
+          "Both are true. Loops describe how the output of one cycle feeds the next (a shared result brings a new user who shares); AARRR describes the stages inside each cycle. You need the funnel to find where users drop and the loop to understand why growth compounds — or doesn't. Teams that dropped the funnel for loops usually rediscover it the first time they ask \"where exactly are we losing people?\".",
+          "Les deux sont vrais. Les boucles décrivent comment la sortie d'un cycle alimente le suivant (un résultat partagé amène un nouvel utilisateur qui partage) ; AARRR décrit les étapes à l'intérieur de chaque cycle. Il faut l'entonnoir pour trouver où les utilisateurs décrochent et la boucle pour comprendre pourquoi la croissance compose — ou pas. Les équipes qui ont abandonné l'entonnoir pour les boucles le redécouvrent en général la première fois qu'elles demandent « où exactement perd-on des gens ? ».",
+        ),
+      },
+      {
+        question: t(
+          "How do I apply AARRR to a B2B product with a sales team?",
+          "Comment appliquer AARRR à un produit B2B avec une équipe commerciale ?",
+        ),
+        answer: t(
+          "The stages hold; the units change. Acquisition becomes qualified leads by channel, activation becomes the first real use inside the customer's team (not the signed contract), retention becomes renewal and usage depth, referral becomes references and expansion into sister teams, revenue becomes net revenue retention. The trap is to let the CRM's stages replace the user's: a closed deal is a revenue event, not an activation.",
+          "Les étapes tiennent ; les unités changent. L'acquisition devient les leads qualifiés par canal, l'activation le premier vrai usage dans l'équipe du client (pas le contrat signé), la rétention le renouvellement et la profondeur d'usage, le parrainage les références et l'extension aux équipes voisines, le revenu la rétention nette de revenu. Le piège est de laisser les étapes du CRM remplacer celles de l'utilisateur : un contrat signé est un événement de revenu, pas une activation.",
+        ),
+      },
+    ],
+  },
+
+  "aha-moment": {
+    formula: {
+      expression: t(
+        "Lift of a candidate action = share of retained users who did it in week 1 ÷ share of churned users who did it in week 1",
+        "Levier d'une action candidate = part des utilisateurs fidèles qui l'ont faite en semaine 1 ÷ part des utilisateurs partis qui l'ont faite en semaine 1",
+      ),
+      terms: [
+        {
+          symbol: t("Candidate action", "Action candidate"),
+          meaning: t(
+            "Any early, observable event: created a project, invited someone, imported data, hit a threshold (7 friends, 3 reports, 1 payment). Test several; the winner is rarely the feature the team is proudest of.",
+            "Tout événement précoce et observable : a créé un projet, invité quelqu'un, importé des données, franchi un seuil (7 amis, 3 rapports, 1 paiement). Teste plusieurs ; la gagnante est rarement la fonctionnalité dont l'équipe est la plus fière.",
+          ),
+        },
+        {
+          symbol: t("Retained vs. churned", "Fidèles vs partis"),
+          meaning: t(
+            "Retained: still active after your natural cycle × 3 (month three for a weekly tool). Churned: gone by the end of month one. The middle is noise; leave it out of the comparison.",
+            "Fidèles : encore actifs après ton cycle naturel × 3 (le troisième mois pour un outil hebdomadaire). Partis : disparus à la fin du premier mois. Le milieu est du bruit ; laisse-le hors de la comparaison.",
+          ),
+        },
+        {
+          symbol: t("Lift", "Levier"),
+          meaning: t(
+            "A lift of 1 means the action doesn't distinguish the two groups. A lift of 5 or more, on an action a majority of retained users did, is a strong candidate. Pick the earliest strong one you can plausibly get most new users to do.",
+            "Un levier de 1 veut dire que l'action ne distingue pas les deux groupes. Un levier de 5 ou plus, sur une action qu'une majorité des fidèles a faite, est une candidate solide. Choisis la plus précoce que tu peux raisonnablement faire faire à la plupart des nouveaux.",
+          ),
+        },
+      ],
+      note: t(
+        "This finds correlation, not cause. Users who invite a teammate in week one don't stay because they invited someone; they invited someone because they already intended to use the tool with their team. The action is a visible proxy for that intent — which is exactly what you need to measure and to design onboarding towards.",
+        "Ça trouve une corrélation, pas une cause. Les utilisateurs qui invitent un collègue la première semaine ne restent pas parce qu'ils ont invité quelqu'un ; ils l'ont invité parce qu'ils avaient déjà l'intention d'utiliser l'outil en équipe. L'action est un indicateur visible de cette intention — exactement ce qu'il faut mesurer et vers quoi concevoir l'onboarding.",
+      ),
+    },
+    example: {
+      title: t("The famous one, and a small one", "Le célèbre, et un petit"),
+      steps: [
+        t(
+          "Facebook, around 2008: users who reached 7 friends within 10 days retained far better than those who didn't. The number was found in the data, not chosen; the whole onboarding was then bent towards \"find people you know\".",
+          "Facebook, vers 2008 : les utilisateurs qui atteignaient 7 amis en 10 jours restaient bien mieux que les autres. Le chiffre a été trouvé dans les données, pas choisi ; tout l'onboarding a ensuite été plié vers « retrouve des gens que tu connais ».",
+        ),
+        t(
+          "A two-person invoicing app, today: 800 sign-ups over a quarter. Retained at month three: 140. Churned in month one: 480.",
+          "Une appli de facturation à deux personnes, aujourd'hui : 800 inscrits sur un trimestre. Fidèles au troisième mois : 140. Partis le premier mois : 480.",
+        ),
+        t(
+          "Candidate \"created an invoice in week 1\": 78% of retained, 35% of churned — lift 2.2. Candidate \"sent an invoice to a real client in week 1\": 64% of retained, 6% of churned — lift 10.7.",
+          "Candidate « a créé une facture en semaine 1 » : 78 % des fidèles, 35 % des partis — levier 2,2. Candidate « a envoyé une facture à un vrai client en semaine 1 » : 64 % des fidèles, 6 % des partis — levier 10,7.",
+        ),
+        t(
+          "Aha moment: first invoice sent, not created. The onboarding stops ending on a beautifully formatted draft and starts ending on \"send it\". The activation rate is now something worth tracking.",
+          "Moment « aha » : première facture envoyée, pas créée. L'onboarding cesse de se terminer sur un brouillon bien mis en forme et se termine sur « envoie-la ». Le taux d'activation devient une chose qui vaut d'être suivie.",
+        ),
+      ],
+      takeaway: t(
+        "Creating something is the demo; using it for real is the moment. Most products' true aha is one step later than where their onboarding stops.",
+        "Créer quelque chose, c'est la démo ; s'en servir pour de vrai, c'est le moment. Le vrai « aha » de la plupart des produits est une étape plus loin que là où leur onboarding s'arrête.",
+      ),
+    },
+    benchmark: [
+      t(
+        "The well-known examples are thresholds, not features: Facebook's 7 friends in 10 days, Slack's 2,000 messages sent by a team, Dropbox's one file in one folder on one device. Each is early, countable, and a proxy for \"this thing is now part of how I work\".",
+        "Les exemples connus sont des seuils, pas des fonctionnalités : les 7 amis en 10 jours de Facebook, les 2 000 messages envoyés par une équipe chez Slack, un fichier dans un dossier sur un appareil chez Dropbox. Chacun est précoce, comptable, et un indicateur de « cette chose fait maintenant partie de ma façon de travailler ».",
+      ),
+      t(
+        "How many users reach it is the activation rate; how long it takes them is time-to-value. Both belong on the same chart, because a moment reached by 60% of users in three weeks and one reached by 35% in ten minutes describe very different onboardings.",
+        "Combien d'utilisateurs l'atteignent, c'est le taux d'activation ; combien de temps ils mettent, c'est le time-to-value. Les deux ont leur place sur le même graphique, parce qu'un moment atteint par 60 % des utilisateurs en trois semaines et un atteint par 35 % en dix minutes décrivent des onboardings très différents.",
+      ),
+      t(
+        "A moment that fewer than a fifth of retained users ever reached is not their aha moment, however much the team wishes it were. The data has to nominate it.",
+        "Un moment que moins d'un cinquième des utilisateurs fidèles ont atteint n'est pas leur moment « aha », quoi qu'en souhaite l'équipe. Ce sont les données qui doivent le désigner.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Find it before you optimise anything: the comparison above takes an afternoon with an analytics export. Guessing it costs months of onboarding work pointed at the wrong screen.",
+        "Trouve-le avant d'optimiser quoi que ce soit : la comparaison ci-dessus prend un après-midi avec un export d'analytics. Le deviner coûte des mois d'onboarding pointés sur le mauvais écran.",
+      ),
+      t(
+        "Write it as one sentence with a number and a deadline — \"sent one invoice to a real client within 7 days\" — and put that sentence where the whole team sees it.",
+        "Écris-le en une phrase avec un chiffre et une échéance — « a envoyé une facture à un vrai client sous 7 jours » — et mets cette phrase là où toute l'équipe la voit.",
+      ),
+      t(
+        "Redesign onboarding backwards from it: every screen either moves the user towards the moment or gets cut. Empty states, sample data and templates exist to shorten the path to it.",
+        "Reconçois l'onboarding à rebours depuis lui : chaque écran rapproche l'utilisateur du moment ou disparaît. Les états vides, les données d'exemple et les modèles existent pour raccourcir le chemin qui y mène.",
+      ),
+      t(
+        "Revisit it once a year or when the product changes shape. A moment that fit a single-player tool stops fitting once teams become the customer.",
+        "Revois-le une fois par an ou quand le produit change de forme. Un moment qui allait à un outil solo ne va plus quand les équipes deviennent le client.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "act-1",
+      body: t(
+        "\"Have you defined a specific aha moment for new users?\" opens the Activation stage: 20 if it is defined and measured, 7 if it exists but isn't measured, 0 if not really. The two questions after it — what share of users reach it, has onboarding been iterated on data — cannot be answered well if this one scores 0, which is why an undefined moment usually drags the whole stage into the weak band.",
+        "« As-tu défini un moment \"aha\" précis pour tes nouveaux utilisateurs ? » ouvre l'étape Activation : 20 s'il est défini et mesuré, 7 s'il existe sans être mesuré, 0 si pas vraiment. Les deux questions suivantes — quelle part d'utilisateurs l'atteint, l'onboarding a-t-il été itéré sur des données — ne peuvent pas être bien répondues si celle-ci vaut 0, et c'est pour ça qu'un moment non défini tire en général toute l'étape dans la bande faible.",
+      ),
+    },
+    faq: [
+      {
+        question: t("Is the aha moment the same as activation?", "Le moment « aha », c'est la même chose que l'activation ?"),
+        answer: t(
+          "The aha moment is the event; activation is the stage, and the activation rate is the share of new users who reach that event within a window. Defining the moment is what makes activation measurable at all — without it, \"activated\" means whatever the last person to build a dashboard decided.",
+          "Le moment « aha » est l'événement ; l'activation est l'étape, et le taux d'activation est la part des nouveaux utilisateurs qui atteignent cet événement dans une fenêtre. Définir le moment est ce qui rend l'activation mesurable tout court — sans lui, « activé » veut dire ce que la dernière personne à avoir construit un tableau de bord a décidé.",
+        ),
+      },
+      {
+        question: t(
+          "What if I don't have enough users to find it in the data?",
+          "Et si je n'ai pas assez d'utilisateurs pour le trouver dans les données ?",
+        ),
+        answer: t(
+          "Then find it in conversations. Ask ten users who stayed what made them decide to keep using the product, and ten who left what they were hoping for; the stayers' answers converge on an event much faster than you'd expect. Write it down as a hypothesis, instrument it, and confirm it with data once the cohorts exist.",
+          "Alors trouve-le dans les conversations. Demande à dix utilisateurs restés ce qui leur a fait décider de continuer, et à dix partis ce qu'ils espéraient ; les réponses de ceux qui restent convergent vers un événement bien plus vite qu'on ne le croit. Écris-le comme une hypothèse, instrumente-le, et confirme-le avec des données dès que les cohortes existent.",
+        ),
+      },
+      {
+        question: t(
+          "Can the aha moment be a feeling rather than an action?",
+          "Le moment « aha » peut-il être une sensation plutôt qu'une action ?",
+        ),
+        answer: t(
+          "It can be experienced as one — \"oh, that's what this is for\" — but it has to be defined as an action to be of any use, because you can only measure and design towards things you can observe. Pick the action that most reliably accompanies the feeling. Half of the work is precisely that translation.",
+          "Il peut être vécu comme tel — « ah, c'est à ça que ça sert » — mais il doit être défini comme une action pour servir à quelque chose, parce qu'on ne peut mesurer et concevoir que vers ce qu'on observe. Choisis l'action qui accompagne le plus fiablement la sensation. La moitié du travail, c'est précisément cette traduction.",
+        ),
+      },
+    ],
+  },
+
+  onboarding: {
+    formula: {
+      expression: t(
+        "Time-to-value = median time between sign-up and the aha moment (and activation rate = the share who get there at all)",
+        "Time-to-value = temps médian entre l'inscription et le moment « aha » (et taux d'activation = la part qui y arrive tout court)",
+      ),
+      terms: [
+        {
+          symbol: t("Median, not mean", "Médiane, pas moyenne"),
+          meaning: t(
+            "A few users who take three months would drag a mean to nonsense. The median tells you what the typical new user lives through — and the 75th percentile tells you what the slow half does.",
+            "Quelques utilisateurs qui mettent trois mois tireraient une moyenne vers l'absurde. La médiane dit ce que vit le nouvel utilisateur typique — et le 75ᵉ percentile ce que fait la moitié lente.",
+          ),
+        },
+        {
+          symbol: t("Sign-up", "Inscription"),
+          meaning: t(
+            "The start of the clock is account creation, not first visit: onboarding owns what happens after someone decided to try, not before.",
+            "Le chrono part à la création du compte, pas à la première visite : l'onboarding est responsable de ce qui se passe après que quelqu'un a décidé d'essayer, pas avant.",
+          ),
+        },
+        {
+          symbol: t("Aha moment", "Moment « aha »"),
+          meaning: t(
+            "The end of the clock — the defined action from the Activation stage. An onboarding without a defined destination cannot be measured, only redesigned on taste.",
+            "La fin du chrono — l'action définie de l'étape Activation. Un onboarding sans destination définie ne peut pas se mesurer, seulement se redessiner au goût.",
+          ),
+        },
+      ],
+      note: t(
+        "Onboarding is the path; activation is the destination. The two are confused constantly, and the confusion has a cost: teams measure \"completed the onboarding flow\" (clicked through the tour) instead of \"reached the value\", and optimise a tutorial nobody needed.",
+        "L'onboarding est le chemin ; l'activation est la destination. Les deux sont confondus en permanence, et la confusion a un coût : les équipes mesurent « a terminé le parcours d'onboarding » (a cliqué à travers la visite) au lieu de « a atteint la valeur », et optimisent un tutoriel dont personne n'avait besoin.",
+      ),
+    },
+    example: {
+      title: t("Cutting a path in half without adding a feature", "Raccourcir le chemin de moitié sans ajouter de fonctionnalité"),
+      steps: [
+        t(
+          "An analytics tool's aha moment: the first chart built on the user's own data. Before: sign-up → 5-step profile form → product tour (9 tooltips) → empty dashboard → \"connect a data source\" buried in settings. Median time-to-value: 4.5 days. Activation: 22%.",
+          "Moment « aha » d'un outil d'analytics : le premier graphique construit sur les données de l'utilisateur. Avant : inscription → formulaire de profil en 5 étapes → visite du produit (9 infobulles) → tableau de bord vide → « connecter une source » enfoui dans les réglages. Time-to-value médian : 4,5 jours. Activation : 22 %.",
+        ),
+        t(
+          "Change 1: the first screen after sign-up is \"connect a source\", with a sample dataset one click away for those who can't yet. Change 2: the tour is removed; the two tooltips that mattered move onto the chart builder itself. Change 3: the profile form is asked for later, when the user invites a colleague.",
+          "Changement 1 : le premier écran après l'inscription est « connecter une source », avec un jeu de données d'exemple à un clic pour ceux qui ne peuvent pas encore. Changement 2 : la visite est retirée ; les deux infobulles qui comptaient migrent sur le constructeur de graphique lui-même. Changement 3 : le formulaire de profil est demandé plus tard, quand l'utilisateur invite un collègue.",
+        ),
+        t(
+          "After one month of cohorts: median time-to-value 38 minutes. Activation: 41%.",
+          "Après un mois de cohortes : time-to-value médian 38 minutes. Activation : 41 %.",
+        ),
+        t(
+          "Nothing was added. Three things were removed or moved. The product didn't change; the distance between the door and the value did.",
+          "Rien n'a été ajouté. Trois choses ont été retirées ou déplacées. Le produit n'a pas changé ; la distance entre la porte et la valeur, si.",
+        ),
+      ],
+      takeaway: t(
+        "Most onboarding work that pays is subtraction. The question to ask of every step is not \"is this useful?\" but \"does the user need this before the moment, or could it wait?\".",
+        "L'essentiel du travail d'onboarding qui rapporte est de la soustraction. La question à poser à chaque étape n'est pas « est-ce utile ? » mais « l'utilisateur en a-t-il besoin avant le moment, ou ça peut attendre ? ».",
+      ),
+    },
+    benchmark: [
+      t(
+        "Time-to-value should match the product's cycle: minutes for consumer apps, within the first session for most SaaS, a day or two when real data has to be connected, longer only when a human has to be involved — and then the onboarding's job is to make that human show up fast.",
+        "Le time-to-value devrait suivre le cycle du produit : des minutes en grand public, dans la première session pour la plupart des SaaS, un jour ou deux quand de vraies données doivent être connectées, plus long seulement quand un humain doit intervenir — et alors le travail de l'onboarding est de faire venir cet humain vite.",
+      ),
+      t(
+        "Drop-off in the first session is the largest single loss in most funnels: it is common for half or more of sign-ups never to return after day one. Every step removed between sign-up and value moves that number.",
+        "La perte pendant la première session est la plus grosse perte unique de la plupart des entonnoirs : il est courant que la moitié des inscrits ou plus ne reviennent jamais après le premier jour. Chaque étape retirée entre l'inscription et la valeur fait bouger ce chiffre.",
+      ),
+      t(
+        "Product tours and coach marks are among the most-skipped elements in software; the value of guidance lies in showing up at the moment of need, inside the task, not in a sequence up front.",
+        "Les visites guidées et les infobulles de démarrage sont parmi les éléments les plus sautés des logiciels ; la valeur d'une aide, c'est d'apparaître au moment du besoin, dans la tâche, pas en séquence au début.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Start from the aha moment and count backwards: list every screen between it and sign-up, then justify each one. Cut what can't be justified, defer what can wait.",
+        "Pars du moment « aha » et compte à rebours : liste chaque écran entre lui et l'inscription, puis justifie chacun. Coupe ce qui ne se justifie pas, reporte ce qui peut attendre.",
+      ),
+      t(
+        "Replace empty states with a starting point: sample data, a template, an import. An empty dashboard is the most common place a new user quietly leaves.",
+        "Remplace les états vides par un point de départ : des données d'exemple, un modèle, un import. Un tableau de bord vide est l'endroit le plus courant où un nouvel utilisateur s'en va sans bruit.",
+      ),
+      t(
+        "Ask for information when it becomes useful, not at the door. Name, company, role, team size can all wait until the product needs them for something the user wants.",
+        "Demande les informations quand elles deviennent utiles, pas à la porte. Nom, entreprise, rôle, taille d'équipe peuvent tous attendre que le produit en ait besoin pour quelque chose que l'utilisateur veut.",
+      ),
+      t(
+        "Watch five new users go through it — recordings or a live session. You will find the step that loses people faster than any funnel chart will show it.",
+        "Regarde cinq nouveaux utilisateurs le traverser — enregistrements ou session en direct. Tu trouveras l'étape qui perd les gens plus vite que n'importe quel graphique d'entonnoir ne la montrera.",
+      ),
+      t(
+        "Iterate on cohorts, one change at a time. \"Never touched since launch\" is the 0-point answer in the Tour because an onboarding is a hypothesis about your users, and hypotheses age.",
+        "Itère sur des cohortes, un changement à la fois. « Jamais retouché depuis le lancement » vaut 0 point dans le Tour parce qu'un onboarding est une hypothèse sur tes utilisateurs, et les hypothèses vieillissent.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "act-3",
+      body: t(
+        "\"Has your onboarding been tested or iterated on at least once?\" is the third Activation question — 20 for iterated on real data, 7 for tweaked a little, informally, 0 for never touched since launch. It sits after the two questions that make iteration possible (a defined moment, a measured share who reach it): an onboarding can only be improved towards a destination someone has named.",
+        "« Ton onboarding a-t-il été testé ou itéré au moins une fois ? » est la troisième question Activation — 20 pour itéré sur de vraies données, 7 pour ajusté un peu, à l'instinct, 0 pour jamais retouché depuis le lancement. Elle vient après les deux questions qui rendent l'itération possible (un moment défini, une part mesurée qui l'atteint) : un onboarding ne peut être amélioré que vers une destination que quelqu'un a nommée.",
+      ),
+    },
+    faq: [
+      {
+        question: t(
+          "What's the difference between onboarding and activation?",
+          "Quelle différence entre onboarding et activation ?",
+        ),
+        answer: t(
+          "Onboarding is everything you build between sign-up and the first value: screens, emails, defaults, sample data. Activation is whether — and how fast — users reach that value. One is the design, the other is the measurement. Good onboarding is judged only by activation; it has no score of its own.",
+          "L'onboarding, c'est tout ce que tu construis entre l'inscription et la première valeur : écrans, e-mails, réglages par défaut, données d'exemple. L'activation, c'est si — et à quelle vitesse — les utilisateurs atteignent cette valeur. L'un est la conception, l'autre la mesure. Un bon onboarding ne se juge qu'à l'activation ; il n'a pas de score propre.",
+        ),
+      },
+      {
+        question: t("Should onboarding include a product tour?", "L'onboarding doit-il inclure une visite guidée du produit ?"),
+        answer: t(
+          "Rarely as a sequence up front. Guidance works when it appears at the moment a user is about to need it, inside the task; a tour before the user has any task teaches things they'll have forgotten by the time they matter. If you keep one, make it skippable, three steps at most, and measure whether people who skip it activate less — they usually don't.",
+          "Rarement en séquence au début. Une aide fonctionne quand elle apparaît au moment où l'utilisateur va en avoir besoin, dans la tâche ; une visite avant que l'utilisateur ait la moindre tâche enseigne des choses oubliées au moment où elles comptent. Si tu en gardes une, rends-la sautable, trois étapes au plus, et mesure si ceux qui la sautent s'activent moins — en général non.",
+        ),
+      },
+      {
+        question: t("How long should onboarding take?", "Combien de temps doit durer l'onboarding ?"),
+        answer: t(
+          "As long as the path to the first value requires, and not a screen more. The right question isn't duration but distance: how many decisions and how much typing stand between the account and the moment. Measure time-to-value, then remove steps until the median stops dropping.",
+          "Le temps que demande le chemin vers la première valeur, et pas un écran de plus. La bonne question n'est pas la durée mais la distance : combien de décisions et de saisie séparent le compte du moment. Mesure le time-to-value, puis retire des étapes jusqu'à ce que la médiane cesse de baisser.",
         ),
       },
     ],

@@ -1193,6 +1193,18 @@ Même structure que le lot 1 (`content/glossary-deep.ts`), trois termes de plus 
 
 **Vérifié en réel** : lint, tsc, 295 tests (plancher de 500 mots et cohérence `questionId` sur les neuf termes), `next build`, 19 specs Playwright sur les fichiers touchés (+2 : la question de pricing citée, la page Referral FR à 390 px), passe axe verte, capture EN desktop de la page Revenue relue.
 
+### R2-11, lot 4 : AARRR, moment « aha », onboarding (2026-09-06)
+
+`aarrr` (905 mots EN / 1 025 FR), `aha-moment` (896 / 1 011), `onboarding` (873 / 994). Trois termes de vocabulaire plutôt que des métriques, ce qui a demandé de choisir pour chacun ce qui tient lieu de « formule » :
+
+- **AARRR** reçoit l'arithmétique de l'entonnoir — chaque étape est un taux, les taux se multiplient (10 % de mieux à quatre étapes = 1,1⁴ ≈ +46 %, pas +40 %), le parrainage referme la boucle — et l'exemple qui justifie tout le cadre : 10 000 visiteurs × 25 % × 40 % × 10 % = 100 clients ; doubler l'acquisition en donne 200, réparer d'abord activation (35 %) et rétention (50 %) en donne 175 à coût nul puis 350 en doublant. « Dans le Tour » y explique comment les quinze questions, les points 20/7/0 et le score sur 100 dérivent du cadre, et pourquoi la page de résultat montre d'abord l'étape la plus faible.
+- **Le moment « aha »** reçoit une méthode pour le trouver plutôt qu'une définition de plus : le levier d'une action candidate (part des fidèles qui l'ont faite en semaine 1 ÷ part des partis), avec un exemple à deux candidates (78/35 = 2,2 contre 64/6 = 10,7 — c'est la facture *envoyée*, pas créée) et la mise en garde corrélation/causalité écrite dans la note de la formule, pas en bas de page.
+- **L'onboarding** reçoit le time-to-value (médiane, pas moyenne) et un exemple entièrement en soustraction (4,5 jours → 38 minutes sans ajouter une fonctionnalité), parce que c'est la leçon que ce terme a à donner.
+
+Les exemples célèbres cités sont ceux déjà validés dans les `extended` (7 amis en 10 jours) ou de notoriété publique (2 000 messages chez Slack, un fichier chez Dropbox), sans chiffre inventé.
+
+**Vérifié en réel** : lint, tsc, 295 tests (plancher de 500 mots sur douze termes), `next build`, 17 specs Playwright sur les fichiers touchés (+2 : la page AARRR cite bien la première question du Tour et parle des quinze questions, la page onboarding FR tient à 390 px). La spec « un terme sans contenu long garde sa page courte » pointe maintenant sur `growth-loop`, dernier terme sans `deep` — le lot 5 devra la remplacer par son contraire (tous les termes ont une page longue).
+
 ---
 
 ## État du projet au 2026-09-06 — à lire en premier dans une nouvelle session
