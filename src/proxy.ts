@@ -82,6 +82,25 @@ export function isResultReadPath(pathname: string): boolean {
   return pathname.startsWith("/r/") && !pathname.startsWith("/r/sample");
 }
 
+/**
+ * `Vary: Accept-Language` on the one response the proxy authors itself: the
+ * 308 that sends `/` (and the pre-R-13 content URLs) to `/en` or `/fr`.
+ * Where it lands depends on the browser's language, absent `?lang=` or a
+ * cookie — Google asks locale-adaptive responses to say so, and it is plain
+ * HTTP correctness for any cache on the way (raised by a Search Console
+ * "page with redirect" review, 2026-09-06).
+ *
+ * NOT on the pages that render in the reader's language (`/quiz`, `/r/<id>`,
+ * `/deep-dive/<id>`, R-09), although they depend on it too: the App Router
+ * renderer sets its own `Vary` (rsc, next-router-*) and REPLACES whatever a
+ * `NextResponse.next()` or a `next.config` `headers()` rule put there —
+ * both were tried and read back from a production build. Low cost: `/r` and
+ * `/deep-dive` are noindex, `/quiz` is `no-store`. Never wanted on a
+ * prefixed content page anyway: there the language is the URL, and a `Vary`
+ * would fragment the CDN cache R-24 built, one copy per browser.
+ */
+const VARY_ACCEPT_LANGUAGE = "Accept-Language";
+
 function tooManyRequestsResponse(retryAfterSeconds: number): NextResponse {
   return new NextResponse("Too many requests.", {
     status: 429,
@@ -156,7 +175,11 @@ export function proxy(request: NextRequest) {
   if (!fromUrl && isLocalizableContentPath(pathname)) {
     const target = request.nextUrl.clone();
     target.pathname = localePath(locale, pathname);
-    return NextResponse.redirect(target, 308);
+    const redirect = NextResponse.redirect(target, 308);
+    // Where it lands depends on the browser's language (absent `?lang=` or
+    // a cookie): say so, for Google and for any cache on the way.
+    redirect.headers.set("Vary", VARY_ACCEPT_LANGUAGE);
+    return redirect;
   }
 
   // A locale prefix in the URL is as explicit a choice as `?lang=`, so it is
