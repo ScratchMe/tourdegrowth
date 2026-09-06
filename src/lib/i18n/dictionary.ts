@@ -373,6 +373,13 @@ export const UI_STRINGS = {
       fr: "Le vocabulaire growth et AARRR expliqué en mots simples — CAC, LTV, coefficient viral, growth loop, et plus.",
     },
     glossaryTermSuffix: { en: "Tour de Growth Glossary", fr: "Glossaire Tour de Growth" },
+    // TODO: à relire (REVIEW-02) — R2-08. `/quiz` used to inherit the root
+    // title and no description while being the most-linked page of the site.
+    quizTitle: { en: "The Tour — 15 questions, 3 minutes — Tour de Growth", fr: "Le Tour — 15 questions, 3 minutes — Tour de Growth" },
+    quizDescription: {
+      en: "Answer 15 questions about how your product acquires, activates, retains, refers and monetises — and get an AARRR growth score out of 100 you can share.",
+      fr: "Réponds à 15 questions sur la façon dont ton produit acquiert, active, retient, fait recommander et monétise — et obtiens un score growth AARRR sur 100 à partager.",
+    },
     // Alt text of the landing share image (opengraph-image.tsx): what it shows,
     // for the people who can't see it.
     shareImageAlt: {

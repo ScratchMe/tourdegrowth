@@ -1101,6 +1101,18 @@ Un Deep dive réel prend environ 70 s (quatre générations en parallèle depuis
 
 ---
 
+### R2-08 : ce que Google doit voir de `/quiz`, de `/deep-dive` et du sitemap (2026-09-06)
+
+Les deux pages applicatives sont des Client Components et ne peuvent pas exporter de métadonnées : un `layout.tsx` de passage le fait pour chacune. **`/quiz` reste indexable, avec un vrai titre et une vraie description** (`meta.quizTitle`/`quizDescription`, à relire, résolus dans la langue du lecteur via l'en-tête du proxy) — c'est la page la plus liée du site et « growth quiz » est une requête légitime pour elle ; jusqu'ici elle héritait du titre racine et concurrençait la landing sous le même nom. **`/deep-dive/[id]` passe en `noindex, follow`** : une URL par résultat, atteignable depuis chaque `/r/<id>`, identique pour quiconque n'en est pas le propriétaire — un stock illimité de pages minces. Jamais de `Disallow` dans `robots.txt`, même raison que pour `/r/`.
+
+**Sitemap.** `lastmod` était le seul champ absent et c'est le seul que Google lit ; `changefreq` et `priority` étaient là et sont ignorés depuis des années. Les dates viennent de `content/updated-at.ts`, **tenu à la main** : un `new Date()` au build prétendrait que tout change à chaque déploiement, ce qui est exactement ce qui fait qu'un crawler cesse de croire le champ. À mettre à jour quand les mots d'une page changent, pas son chrome. Les termes du glossaire peuvent porter leur propre `updatedAt` (R2-11 s'en servira) et retombent sinon sur la date d'approbation de la copie longue. `x-default` rejoint les alternates du sitemap pour dire la même chose que le `<head>`.
+
+**Reliquat de R2-06.** Les longueurs relevées à l'audit (179 caractères) comptaient les entités HTML ; mesurées sur la source, seules deux descriptions sortaient de la fenêtre 70-160 : `acquisition` en anglais (55) et `viral-coefficient` en français (164). Plutôt que trente nouvelles chaînes, `GlossaryEntry` gagne un `metaDescription` **optionnel**, posé sur ces deux termes seulement ; un test vérifie que toutes les descriptions effectives sont dans la fenêtre **et** qu'aucun override ne double une définition qui tenait déjà — pour que le champ ne devienne pas l'endroit où l'on réécrit la copie approuvée par habitude.
+
+**Vérifié en réel** : lint, tsc, 278 tests (+5), `next build`, 97 specs Playwright, et par `curl` sur le build : titre et description de `/quiz` en FR et en EN, `robots` de `/deep-dive/sample`, `lastmod` et `x-default` dans le XML.
+
+---
+
 ## État du projet au 2026-09-06 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.

@@ -40,6 +40,15 @@ export interface GlossaryEntry {
   extended: Translatable;
   /** 2-3 related terms, rendered as internal links at the bottom of /glossary/[term]. */
   related: GlossaryTermId[];
+  /**
+   * `/glossary/[term]`'s meta description when `definition` is the wrong
+   * length for a search snippet (REVIEW-02.md R2-06/R2-08): the definition
+   * is calibrated for the popover, and a snippet wants 70-160 characters.
+   * Only set where the definition falls outside that — the test enforces it.
+   */
+  metaDescription?: Translatable;
+  /** When this term's long-form copy last changed (sitemap `lastmod`); falls back to `GLOSSARY_UPDATED_AT`. */
+  updatedAt?: string;
 }
 
 function same(value: string): Translatable {
@@ -70,6 +79,12 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       en: "Acquisition covers every channel through which someone finds you for the first time: SEO, paid ads, word of mouth, content, communities, partnerships. The classic trap: judging a channel purely on volume, without asking whether it's repeatable and whether its cost is even known (see CAC). A channel that worked once by luck isn't an acquisition strategy, it's a lucky break. And acquisition alone says nothing about product health — a spike of new visitors who never activate is just a vanity number.",
     },
     related: ["cac", "growth-loop", "activation"],
+    // TODO: à relire (REVIEW-02) — R2-08. The English definition is 55
+    // characters, too short for a search snippet; the French one is fine.
+    metaDescription: {
+      fr: "La façon dont de nouveaux utilisateurs ou clients découvrent ton produit pour la première fois.",
+      en: "Acquisition: how new users or customers first discover your product — the channels that bring a stranger to your door, and whether you measure them.",
+    },
   },
   activation: {
     term: same("Activation"),
@@ -178,6 +193,12 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       en: "Standard formula, often written K: the average number of invitations sent per user, multiplied by their conversion rate. K > 1 means each user brings in more than one other on average — growth that feeds itself without spending more on acquisition. In practice, a sustained K > 1 is rare and valuable; most products instead aim for a K that meaningfully lowers effective CAC without claiming pure virality. This tool's own growth dashboard computes its K-factor continuously, using exactly this formula, on real completed analyses.",
     },
     related: ["referral", "growth-loop", "north-star-metric"],
+    // TODO: à relire (REVIEW-02) — R2-08. The French definition runs to 164
+    // characters; search engines cut around 160.
+    metaDescription: {
+      fr: "Le nombre moyen de nouveaux utilisateurs qu'un utilisateur existant amène par le partage — au-dessus de 1, la croissance s'auto-alimente.",
+      en: "The average number of new users an existing user brings in through sharing — a coefficient above 1 means growth that feeds itself.",
+    },
   },
   onboarding: {
     term: same("Onboarding"),

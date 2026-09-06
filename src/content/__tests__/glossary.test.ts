@@ -33,3 +33,25 @@ describe("GLOSSARY (growth-plan Phase 2: extended /glossary/[term] content)", ()
     }
   });
 });
+
+describe("search snippets (REVIEW-02.md R2-08)", () => {
+  it("every term's effective meta description is snippet-sized in both locales", () => {
+    for (const [id, entry] of Object.entries(GLOSSARY)) {
+      for (const locale of ["fr", "en"] as const) {
+        const text = (entry.metaDescription ?? entry.definition)[locale];
+        expect(text.length, `${id} (${locale}) is ${text.length} chars`).toBeGreaterThanOrEqual(70);
+        expect(text.length, `${id} (${locale}) is ${text.length} chars`).toBeLessThanOrEqual(160);
+      }
+    }
+  });
+
+  it("only overrides the definition where the definition itself is the wrong length", () => {
+    for (const [id, entry] of Object.entries(GLOSSARY)) {
+      if (!entry.metaDescription) continue;
+      const outOfRange = (["fr", "en"] as const).some(
+        (l) => entry.definition[l].length < 70 || entry.definition[l].length > 160,
+      );
+      expect(outOfRange, `${id} overrides a definition that already fit`).toBe(true);
+    }
+  });
+});
