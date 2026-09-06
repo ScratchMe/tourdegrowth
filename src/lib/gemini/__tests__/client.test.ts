@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { GEMINI_MODEL_CANDIDATES, callGeminiWithFallback, extractJson } from "../client";
+import { CHAIN_BUDGET_MS, GEMINI_MODEL_CANDIDATES, REQUEST_TIMEOUT_MS, callGeminiWithFallback, extractJson } from "../client";
 
 function jsonResponse(status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), { status });
@@ -114,11 +114,46 @@ describe("callGeminiWithFallback", () => {
 
       const promise = callGeminiWithFallback("prompt", "key", fetchImpl, noSleep);
       // Let the first attempt's timeout fire, then let the retry's microtasks settle.
-      await vi.advanceTimersByTimeAsync(20_000);
+      await vi.advanceTimersByTimeAsync(REQUEST_TIMEOUT_MS);
 
       const result = await promise;
       expect(result.modelUsed).toBe(GEMINI_MODEL_CANDIDATES[1]);
       expect(calls).toHaveLength(2);
+    });
+
+    /**
+     * The fifth live run: production's Deep dive failed after 47s while the
+     * same API answered the runner's probe in 18s. A per-attempt ceiling has
+     * to be generous enough for a slow-but-working generation — but four
+     * generous attempts in a row would blow past the route's own
+     * `maxDuration`. Hence a budget for the whole chain, not just a ceiling
+     * per model.
+     */
+    it("gives up on the whole chain once its budget is spent, clipping the last attempt to what is left", async () => {
+      const calls: string[] = [];
+      const hangForever = (url: string | URL | Request, init?: RequestInit) => {
+        calls.push(String(url));
+        return new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")));
+        });
+      };
+
+      const promise = callGeminiWithFallback("prompt", "key", hangForever, noSleep);
+      // Attach the handler before advancing, so the rejection is never unhandled.
+      const outcome = promise.then(
+        () => "resolved",
+        (err: Error) => err.message,
+      );
+      await vi.advanceTimersByTimeAsync(CHAIN_BUDGET_MS + REQUEST_TIMEOUT_MS);
+
+      const message = await outcome;
+      // 45s + 45s + the 10s left over = 100s. The fourth model is never tried:
+      // starting it with nothing left would be a fourth abort, not a chance.
+      expect(calls.length).toBeLessThan(GEMINI_MODEL_CANDIDATES.length);
+      expect(message).toMatch(/chain budget/);
+      // The clipped attempt reports the timeout it was ACTUALLY given, not the nominal one.
+      const leftover = CHAIN_BUDGET_MS - 2 * REQUEST_TIMEOUT_MS;
+      expect(message).toContain(`timed out after ${leftover}ms`);
     });
   });
 });

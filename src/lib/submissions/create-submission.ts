@@ -131,7 +131,7 @@ export interface CompleteDeepDiveDeps {
   callGemini: (prompt: string) => Promise<{ data: unknown; modelUsed: string }>;
 }
 
-function resolveQuickPromptAnswers(answers: Answers, locale: Locale): PromptAnswer[] {
+export function resolveQuickPromptAnswers(answers: Answers, locale: Locale): PromptAnswer[] {
   return QUESTIONS.map((q) => {
     const selected = answers[q.id];
     const option = q.options[selected as 0 | 1 | 2];
@@ -140,7 +140,7 @@ function resolveQuickPromptAnswers(answers: Answers, locale: Locale): PromptAnsw
   });
 }
 
-function resolveContextPromptAnswers(contextAnswerIndices: DeepDiveAnswers, locale: Locale): PromptAnswer[] {
+export function resolveContextPromptAnswers(contextAnswerIndices: DeepDiveAnswers, locale: Locale): PromptAnswer[] {
   return DEEP_MODE_QUESTIONS.map((q) => {
     const selected = contextAnswerIndices[q.id];
     const option = q.options[selected as number];
