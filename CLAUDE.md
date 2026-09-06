@@ -1181,6 +1181,18 @@ Même structure que le lot 1 (`content/glossary-deep.ts`), trois termes de plus 
 
 **Vérifié en réel** : lint, tsc, 295 tests (le plancher de 500 mots couvre les six termes), `next build`, 16 specs Playwright sur les fichiers touchés (+2 : la question Retention citée, le coefficient viral à 390 px), passe axe verte sur la page de terme.
 
+### R2-11, lot 3 : acquisition, referral, revenue — les cinq piliers ont leur page longue (2026-09-06)
+
+`acquisition` (947 mots EN / 1 115 FR), `referral` (914 / 1 058), `revenue` (919 / 1 094). Avec les lots 1 et 2, les cinq piliers du Tour et les quatre termes commerciaux sont couverts ; restent six termes de vocabulaire.
+
+**Un pilier n'a pas « une formule » comme le CAC en a une** — chacun a reçu l'identité qui structure vraiment sa lecture : le rendement d'un canal (visiteurs × taux d'inscription × inscription → client, dont le CAC du canal découle), la part du parrainage (arrivés par un utilisateur ÷ tous les nouveaux, complémentaire du K déjà traité), et l'identité du MRR (mois prochain = ce mois + nouveau + expansion − contraction − résilié), qui donne la NRR en une ligne. Les exemples se répondent toujours entre pages : la page Revenue rejoue **le même mois** que la page Churn (400 clients, 20 000 € de MRR, 12 résiliations, 8 rétrogradations, 15 montées en gamme) lu cette fois côté revenu — mêmes chiffres, autre pilier, ce qui est exactement ce que le cadre AARRR veut faire comprendre.
+
+**Recalculé avant d'être écrit** : 48 + 72 = 120 clients, 72/120 = 60 % pour un sixième du trafic, 250 € vs 28 € de CAC contre 117 € en mixte ; 410 × 120 € = 49 200 € ; 15 montées de 50 € à 110 € = +900 €, à 130 € = +1 200 €, NRR (20 000 + 1 200 − 400 − 600) ÷ 20 000 = 101 %. La première version de l'exemple Acquisition disait « un cinquième du trafic » pour 4 000 sur 24 000 — c'est un sixième, corrigé au calcul.
+
+**« Dans le Tour »** cite `acq-1`, `ref-1` et `rev-1` — la première question de chaque pilier, celle qui ouvre l'échelle des trois. La page Referral dit que le bouton de partage du Tour et le lien « fais ton propre Tour » de chaque résultat partagé (R2-02) sont la réponse du site à sa propre première question ; la page Revenue explique pourquoi le pilier est noté sur « le modèle a-t-il été testé » et non sur le montant, ce qui est la question qu'un lecteur se pose devant ce score.
+
+**Vérifié en réel** : lint, tsc, 295 tests (plancher de 500 mots et cohérence `questionId` sur les neuf termes), `next build`, 19 specs Playwright sur les fichiers touchés (+2 : la question de pricing citée, la page Referral FR à 390 px), passe axe verte, capture EN desktop de la page Revenue relue.
+
 ---
 
 ## État du projet au 2026-09-06 — à lire en premier dans une nouvelle session

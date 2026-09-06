@@ -23,8 +23,9 @@ import type { GlossaryTermId } from "./glossary-terms";
  * LTV:CAC rule of thumb, CAC payback under 12 months for SMB SaaS, monthly
  * churn compounding), always with their caveat, never a made-up statistic.
  *
- * TODO: à relire (REVIEW-02) — R2-11, lot 1 (cac, ltv, churn) et lot 2
- * (retention, activation, viral-coefficient). Premier jet
+ * TODO: à relire (REVIEW-02) — R2-11, lot 1 (cac, ltv, churn), lot 2
+ * (retention, activation, viral-coefficient) et lot 3 (acquisition, referral,
+ * revenue). Premier jet
  * de la session de code : c'est de la copie de fond qui porte le nom
  * d'Antoine, à relire ligne à ligne.
  */
@@ -802,6 +803,384 @@ export const GLOSSARY_DEEP: Partial<Record<GlossaryTermId, DeepGlossaryContent>>
         answer: t(
           "Directly rather than through the formula: every shared result link carries a reference to the result it came from, and a Tour started from such a link is counted as referred — first touch, ignoring people re-taking their own Tour. K is then referred Tours divided by all Tours. It undercounts (a link copied by hand loses the reference), which is the honest direction to be wrong in.",
           "Directement plutôt que par la formule : chaque lien de résultat partagé porte une référence au résultat dont il vient, et un Tour commencé depuis un tel lien est compté comme parrainé — premier contact, en ignorant les gens qui refont leur propre Tour. K est alors le nombre de Tours parrainés divisé par tous les Tours. Ça sous-compte (un lien recopié à la main perd la référence), et c'est la bonne direction dans laquelle se tromper.",
+        ),
+      },
+    ],
+  },
+  acquisition: {
+    formula: {
+      expression: t(
+        "New customers from a channel = visitors it sends × sign-up rate × sign-up-to-customer rate",
+        "Nouveaux clients d'un canal = visiteurs qu'il envoie × taux d'inscription × taux inscription → client",
+      ),
+      terms: [
+        {
+          symbol: t("Visitors it sends", "Visiteurs qu'il envoie"),
+          meaning: t(
+            "Counted per channel, which means attribution: a tagged link (utm_source) on everything you publish, a \"how did you hear about us?\" field for the channels tags can't see. Untagged traffic is the largest channel of most early products, and it is not a channel — it is ignorance.",
+            "Comptés par canal, donc avec attribution : un lien tagué (utm_source) sur tout ce que tu publies, un champ « comment nous as-tu connus ? » pour les canaux que les tags ne voient pas. Le trafic non tagué est le premier canal de la plupart des jeunes produits, et ce n'est pas un canal — c'est de l'ignorance.",
+          ),
+        },
+        {
+          symbol: t("Sign-up rate", "Taux d'inscription"),
+          meaning: t(
+            "Visitors who create an account, per channel. It measures how well the landing page keeps the promise the channel made: the same page converts differently for someone arriving from a friend's link and from a cold ad.",
+            "Les visiteurs qui créent un compte, par canal. Il mesure si la page d'accueil tient la promesse que le canal a faite : la même page convertit différemment pour quelqu'un qui arrive du lien d'un ami et d'une publicité froide.",
+          ),
+        },
+        {
+          symbol: t("Sign-up-to-customer", "Inscription → client"),
+          meaning: t(
+            "The part acquisition doesn't own — activation and pricing do — yet the only one that turns a channel's volume into revenue. A channel that brings thousands of sign-ups who never activate is a cost, not a source.",
+            "La partie qui n'appartient pas à l'acquisition — mais à l'activation et au pricing — et pourtant la seule qui transforme le volume d'un canal en revenu. Un canal qui amène des milliers d'inscrits qui ne s'activent jamais est un coût, pas une source.",
+          ),
+        },
+      ],
+      note: t(
+        "Multiply the three and you get the channel's yield; divide the channel's cost by that yield and you get its CAC. Acquisition is the pillar where a single blended number hides the most: the whole point is to know this per channel.",
+        "Multiplie les trois et tu as le rendement du canal ; divise le coût du canal par ce rendement et tu as son CAC. L'acquisition est le pilier où un chiffre mixte cache le plus de choses : tout l'intérêt est de connaître ça par canal.",
+      ),
+    },
+    example: {
+      title: t("Two channels, one flattering average", "Deux canaux, une moyenne flatteuse"),
+      steps: [
+        t(
+          "Paid social: 20,000 visitors a month, 3% sign up (600), 8% of those become customers (48). Cost: €12,000. CAC: €250.",
+          "Social payant : 20 000 visiteurs par mois, 3 % s'inscrivent (600), 8 % d'entre eux deviennent clients (48). Coût : 12 000 €. CAC : 250 €.",
+        ),
+        t(
+          "Founder-written articles and SEO: 4,000 visitors, 9% sign up (360), 20% become customers (72). Cost: two days of writing a month, say €2,000 of time. CAC: €28.",
+          "Articles écrits par le fondateur et SEO : 4 000 visiteurs, 9 % s'inscrivent (360), 20 % deviennent clients (72). Coût : deux jours d'écriture par mois, disons 2 000 € de temps. CAC : 28 €.",
+        ),
+        t(
+          "Blended: 24,000 visitors, 960 sign-ups, 120 customers, €14,000 — a €117 CAC that describes neither channel.",
+          "Mixte : 24 000 visiteurs, 960 inscrits, 120 clients, 14 000 € — un CAC de 117 € qui ne décrit aucun des deux canaux.",
+        ),
+        t(
+          "The channel with a sixth of the traffic brings 60% of the customers, at a ninth of the cost. Without per-channel numbers, the obvious next move — \"more ads, traffic is up\" — is exactly wrong.",
+          "Le canal qui fait un sixième du trafic amène 60 % des clients, pour un neuvième du coût. Sans chiffres par canal, le geste évident — « plus de pub, le trafic monte » — est exactement le mauvais.",
+        ),
+      ],
+      takeaway: t(
+        "A primary channel is not the one with the most visitors. It is the one whose economics you understand well enough to double.",
+        "Un canal principal n'est pas celui qui a le plus de visiteurs. C'est celui dont tu comprends assez bien l'économie pour le doubler.",
+      ),
+    },
+    benchmark: [
+      t(
+        "Most successful products get the bulk of their growth from one or two channels, not ten — the observation behind the \"Bullseye\" method popularised by Traction (Weinberg and Mares): test many cheaply, then concentrate. A spreadsheet of nine channels each bringing 5% is a symptom, not a strategy.",
+        "La plupart des produits qui réussissent tirent l'essentiel de leur croissance d'un ou deux canaux, pas de dix — l'observation derrière la méthode « Bullseye » popularisée par Traction (Weinberg et Mares) : tester beaucoup à bas coût, puis concentrer. Un tableur de neuf canaux à 5 % chacun est un symptôme, pas une stratégie.",
+      ),
+      t(
+        "Paid channels scale fast and get more expensive as they scale; organic channels (content, SEO, community, referral) start slow and get cheaper. Early on, paid buys you learning; over time, only the compounding channels keep CAC in check.",
+        "Les canaux payants passent vite à l'échelle et renchérissent en grandissant ; les canaux organiques (contenu, SEO, communauté, parrainage) démarrent lentement et deviennent moins chers. Au début, le payant achète de l'apprentissage ; à terme, seuls les canaux qui composent tiennent le CAC.",
+      ),
+      t(
+        "Landing-page sign-up rates are commonly quoted in the 2-5% range for cold paid traffic and well above that for warm traffic (a shared link, a recommendation). If a channel converts far below its peers, the problem is usually the fit between the promise made there and the page, not the page itself.",
+        "Les taux d'inscription d'une page d'accueil se citent couramment entre 2 et 5 % pour du trafic payant froid, et bien au-dessus pour du trafic chaud (un lien partagé, une recommandation). Si un canal convertit très en dessous des autres, le problème est en général l'accord entre la promesse faite là-bas et la page, pas la page elle-même.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Instrument attribution before anything else: tag every link you control, ask new users how they found you, and reconcile the two monthly. You cannot pick a primary channel you can't see.",
+        "Instrumente l'attribution avant tout : tague chaque lien que tu contrôles, demande aux nouveaux comment ils t'ont trouvé, et rapproche les deux chaque mois. Tu ne peux pas choisir un canal principal que tu ne vois pas.",
+      ),
+      t(
+        "Run cheap, time-boxed tests on several channels with the same success metric — customers, not clicks — and compare them honestly. \"We've tried a second one informally\" is what the Tour scores at 7 because informal tests can't be compared.",
+        "Fais des tests courts et peu coûteux sur plusieurs canaux avec la même mesure de succès — des clients, pas des clics — et compare-les honnêtement. « On en a essayé un second, sans grande rigueur » vaut 7 points dans le Tour parce qu'un test informel ne se compare pas.",
+      ),
+      t(
+        "Match the landing page to the channel: the headline that works for someone arriving from a technical forum is not the one for someone arriving from a friend's shared result.",
+        "Accorde la page d'accueil au canal : le titre qui marche pour quelqu'un qui arrive d'un forum technique n'est pas celui pour quelqu'un qui arrive du résultat partagé d'un ami.",
+      ),
+      t(
+        "Fix activation before scaling acquisition. Doubling traffic into a product that activates 10% of sign-ups doubles the waste; fixing activation first makes every later channel cheaper.",
+        "Répare l'activation avant de faire grandir l'acquisition. Doubler le trafic vers un produit qui active 10 % des inscrits double le gaspillage ; réparer l'activation d'abord rend chaque canal suivant moins cher.",
+      ),
+      t(
+        "Invest in one compounding channel early, even while paid does the volume: content, a community, a product-led loop. It is the only thing that makes year-three CAC lower than year-one CAC.",
+        "Investis tôt dans un canal qui compose, même pendant que le payant fait le volume : du contenu, une communauté, une boucle portée par le produit. C'est la seule chose qui rend le CAC de la troisième année plus bas que celui de la première.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "acq-1",
+      body: t(
+        "Acquisition is the first stage of the Tour, and its three questions follow the logic above: is there a primary channel, identified and measured (20 / 7 for \"we have one, but don't track it closely\" / 0 for \"it's scattered\"); has more than one channel been tested, with real comparison; and is the CAC known. A team with real traffic but \"scattered\" channels usually scores in the weak band here — not for lack of growth, for lack of knowing where it comes from.",
+        "Acquisition est la première étape du Tour, et ses trois questions suivent la logique ci-dessus : y a-t-il un canal principal, identifié et mesuré (20 / 7 pour « on en a un, mais pas suivi de près » / 0 pour « c'est dispersé ») ; plus d'un canal a-t-il été testé, avec une vraie comparaison ; et le CAC est-il connu. Une équipe avec du vrai trafic mais des canaux « dispersés » atterrit en général dans la bande faible ici — non par manque de croissance, mais faute de savoir d'où elle vient.",
+      ),
+    },
+    faq: [
+      {
+        question: t("What counts as an acquisition channel?", "Qu'est-ce qui compte comme un canal d'acquisition ?"),
+        answer: t(
+          "Any repeatable way people first find you that you can name, measure and invest in: search (SEO), paid ads on a given platform, content, a community, partnerships, events, cold outreach, app stores, referral from existing users. \"Word of mouth\" is an outcome of the others, not a channel you can buy more of — unless you build a referral mechanism, at which point it becomes one.",
+          "Toute façon reproductible dont les gens te découvrent, que tu peux nommer, mesurer et où tu peux investir : la recherche (SEO), la publicité sur une plateforme donnée, le contenu, une communauté, des partenariats, des événements, la prospection à froid, les magasins d'applications, le parrainage par les utilisateurs existants. Le « bouche-à-oreille » est un résultat des autres, pas un canal dont on peut acheter davantage — sauf si tu construis un mécanisme de parrainage, auquel cas il en devient un.",
+        ),
+      },
+      {
+        question: t("Should I focus on one channel or diversify?", "Un seul canal ou plusieurs ?"),
+        answer: t(
+          "Concentrate first, diversify later. Early on, one channel that works and that you understand beats five you half-run; spreading a small team across many channels usually means none gets the iteration it needs. Diversify once the primary channel is measured, saturating or getting expensive — and treat the second channel as a new experiment, not a copy of the first.",
+          "Concentre d'abord, diversifie ensuite. Au début, un canal qui marche et que tu comprends vaut mieux que cinq à moitié pilotés ; répartir une petite équipe sur beaucoup de canaux veut en général dire qu'aucun ne reçoit l'itération dont il a besoin. Diversifie quand le canal principal est mesuré, sature ou renchérit — et traite le second canal comme une nouvelle expérience, pas comme une copie du premier.",
+        ),
+      },
+      {
+        question: t("How is acquisition different from marketing?", "Quelle différence entre acquisition et marketing ?"),
+        answer: t(
+          "Acquisition is the measured part of marketing: the specific channels that bring new users, each with a cost and a yield. Brand, positioning and messaging shape how well every channel converts, but they are not channels themselves. In the AARRR frame, acquisition ends where activation starts — the moment someone who found you actually gets value.",
+          "L'acquisition est la partie mesurée du marketing : les canaux précis qui amènent de nouveaux utilisateurs, chacun avec un coût et un rendement. La marque, le positionnement et le message conditionnent la conversion de chaque canal, mais ne sont pas des canaux en eux-mêmes. Dans le cadre AARRR, l'acquisition s'arrête là où l'activation commence — le moment où quelqu'un qui t'a trouvé obtient réellement de la valeur.",
+        ),
+      },
+    ],
+  },
+
+  referral: {
+    formula: {
+      expression: t(
+        "Referral share = new users who arrived through an existing user ÷ all new users in the period",
+        "Part du parrainage = nouveaux utilisateurs arrivés par un utilisateur existant ÷ tous les nouveaux utilisateurs de la période",
+      ),
+      terms: [
+        {
+          symbol: t("Arrived through an existing user", "Arrivés par un utilisateur existant"),
+          meaning: t(
+            "Anyone whose first visit traces back to a user: a referral code, a shared link with a reference, an invitation, or \"a colleague told me\" in the sign-up survey. Attribution is the whole difficulty — most referral happens in conversations you can't see.",
+            "Toute personne dont la première visite remonte à un utilisateur : un code de parrainage, un lien partagé avec une référence, une invitation, ou un « un collègue m'en a parlé » dans le questionnaire d'inscription. L'attribution est toute la difficulté — l'essentiel du parrainage se passe dans des conversations que tu ne vois pas.",
+          ),
+        },
+        {
+          symbol: t("All new users", "Tous les nouveaux utilisateurs"),
+          meaning: t(
+            "Including the paid and organic ones. The share tells you how much of your growth is free and self-generated; it is the number that should rise as the product matures.",
+            "Payants et organiques compris. La part te dit quelle proportion de ta croissance est gratuite et auto-générée ; c'est le chiffre qui doit monter à mesure que le produit mûrit.",
+          ),
+        },
+        {
+          symbol: t("Viral coefficient (K)", "Coefficient viral (K)"),
+          meaning: t(
+            "The other lens on the same phenomenon: how many new users each existing user brings. Referral share reads the funnel from the outside; K reads it from the user's side. Both are needed, and the Tour asks about both.",
+            "L'autre lecture du même phénomène : combien de nouveaux utilisateurs chaque utilisateur existant amène. La part du parrainage lit l'entonnoir de l'extérieur ; K le lit du côté de l'utilisateur. Les deux sont nécessaires, et le Tour demande les deux.",
+          ),
+        },
+      ],
+      note: t(
+        "Referral exists whether or not you built anything for it. What a referral mechanism does is make the invisible conversations visible and easier — a link worth sending, a reason to send it, a way to count it.",
+        "Le parrainage existe que tu aies construit quelque chose pour lui ou non. Ce qu'un mécanisme de parrainage fait, c'est rendre les conversations invisibles visibles et plus faciles — un lien qui vaut d'être envoyé, une raison de l'envoyer, un moyen de le compter.",
+      ),
+    },
+    example: {
+      title: t("Building the mechanism where the value already is", "Construire le mécanisme là où la valeur est déjà"),
+      steps: [
+        t(
+          "A reporting tool notices in its sign-up survey that 30% of new users say \"a colleague showed me a report\". Nothing in the product supports that: reports are PDFs emailed by hand.",
+          "Un outil de reporting remarque dans son questionnaire d'inscription que 30 % des nouveaux utilisateurs disent « un collègue m'a montré un rapport ». Rien dans le produit ne soutient ça : les rapports sont des PDF envoyés à la main.",
+        ),
+        t(
+          "It adds a shareable link on every report, with a rich preview and a \"make your own\" button — and a reference on the link so arrivals can be counted.",
+          "Il ajoute un lien partageable sur chaque rapport, avec un aperçu riche et un bouton « faites le vôtre » — et une référence sur le lien pour compter les arrivées.",
+        ),
+        t(
+          "Three months later: 1,000 new users a month, 410 traced to a shared report. Referral share: 41%, up from an estimated 30% — and now measured instead of surveyed.",
+          "Trois mois plus tard : 1 000 nouveaux utilisateurs par mois, 410 attribués à un rapport partagé. Part du parrainage : 41 %, contre 30 % estimés — et maintenant mesurée au lieu d'être déclarée.",
+        ),
+        t(
+          "At the tool's €120 blended CAC, those 410 users are worth about €49,000 of acquisition a month — for a share button placed where people were already sharing.",
+          "Au CAC mixte de 120 € de l'outil, ces 410 utilisateurs valent environ 49 000 € d'acquisition par mois — pour un bouton de partage placé là où les gens partageaient déjà.",
+        ),
+      ],
+      takeaway: t(
+        "The mechanism didn't create the referral; the product's value did. It made an existing behaviour easier and countable — which is what most \"viral features\" that work actually do.",
+        "Le mécanisme n'a pas créé le parrainage ; la valeur du produit l'a fait. Il a rendu un comportement existant plus facile et comptable — ce que font la plupart des « fonctionnalités virales » qui marchent.",
+      ),
+    },
+    benchmark: [
+      t(
+        "Referral share varies from near zero (B2B tools used alone, in private) to a majority of growth (products whose output is inherently shown to others). A commonly cited signal that a mechanism is worth building is a high Net Promoter Score: people already recommending you in words will use a link if you give them one.",
+        "La part du parrainage va de presque zéro (outils B2B utilisés seul, en privé) à la majorité de la croissance (produits dont la sortie est par nature montrée à d'autres). Un signal couramment cité qu'un mécanisme vaut d'être construit est un Net Promoter Score élevé : des gens qui te recommandent déjà en paroles utiliseront un lien si tu leur en donnes un.",
+      ),
+      t(
+        "Incentivised programmes (\"give €20, get €20\", made famous by Dropbox's extra storage and Uber's ride credits) work when the incentive is the product itself or something close to it; cash for a product people don't love mostly buys low-quality sign-ups.",
+        "Les programmes incitatifs (« donnez 20 €, recevez 20 € », rendus célèbres par l'espace de stockage offert par Dropbox et les crédits de course d'Uber) marchent quand l'incitation est le produit lui-même ou quelque chose de proche ; de l'argent pour un produit que les gens n'aiment pas achète surtout des inscriptions de mauvaise qualité.",
+      ),
+      t(
+        "Referred users are usually worth more than average: they arrive pre-qualified by someone who knows them, activate faster and refer more in turn. That is why referral share matters beyond the CAC it saves.",
+        "Les utilisateurs parrainés valent en général plus que la moyenne : ils arrivent préqualifiés par quelqu'un qui les connaît, s'activent plus vite et parrainent davantage à leur tour. C'est pourquoi la part du parrainage compte au-delà du CAC qu'elle économise.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Find where sharing already happens — a survey question, support tickets, exports — and build the mechanism there, not in a menu nobody opens.",
+        "Trouve là où le partage se produit déjà — une question d'enquête, les tickets de support, les exports — et construis le mécanisme là, pas dans un menu que personne n'ouvre.",
+      ),
+      t(
+        "Give people something worth sending: a result, a report, a personal artefact with a rich preview. A referral code is a favour asked; a shared result is a gift given.",
+        "Donne aux gens quelque chose qui vaut d'être envoyé : un résultat, un rapport, un livrable personnel avec un aperçu riche. Un code de parrainage est un service demandé ; un résultat partagé est un cadeau fait.",
+      ),
+      t(
+        "Make the recipient's first step trivial: land them on the thing that was shared, then on their own first value — not on a sign-up wall.",
+        "Rends le premier pas du destinataire trivial : fais-le atterrir sur ce qui a été partagé, puis sur sa propre première valeur — pas sur un mur d'inscription.",
+      ),
+      t(
+        "Count it. A reference on every shared link, first-touch attribution, and a monthly look at referral share and K. \"Only in communication, not the product\" scores 7 in the Tour because a mechanism outside the product can't be measured or improved.",
+        "Compte-le. Une référence sur chaque lien partagé, une attribution au premier contact, et un regard mensuel sur la part du parrainage et sur K. « Seulement en communication, pas dans le produit » vaut 7 dans le Tour parce qu'un mécanisme hors du produit ne se mesure ni ne s'améliore.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "ref-1",
+      body: t(
+        "The three Referral questions climb one ladder: does a sharing or referral mechanism exist in the product (20 / 7 if it only lives in your communication / 0); is it actually used by customers, meaningfully; and is a viral coefficient or equivalent measured. It is the pillar where a 0/20 stage is common and, unlike the others, often a decision rather than a blind spot — many good products simply never built one. The Tour's own share button, and the \"take your own Tour\" link on every shared result, are its answer to the first question.",
+        "Les trois questions Referral gravissent une même échelle : un mécanisme de partage ou de parrainage existe-t-il dans le produit (20 / 7 s'il ne vit que dans ta communication / 0) ; est-il réellement utilisé par les clients, de façon significative ; et un coefficient viral ou équivalent est-il mesuré. C'est le pilier où une étape à 0/20 est courante et, contrairement aux autres, souvent une décision plutôt qu'un angle mort — beaucoup de bons produits n'en ont simplement jamais construit. Le bouton de partage du Tour, et le lien « fais ton propre Tour » sur chaque résultat partagé, sont sa réponse à la première question.",
+      ),
+    },
+    faq: [
+      {
+        question: t("Is referral the same as word of mouth?", "Le parrainage, c'est le bouche-à-oreille ?"),
+        answer: t(
+          "Word of mouth is referral you can't see: recommendations made in conversations, without a link or a code. Referral as a growth pillar is the effort to make that behaviour easier, more frequent and measurable. A product with strong word of mouth and no mechanism is leaving its cheapest channel unmanaged.",
+          "Le bouche-à-oreille est du parrainage que tu ne vois pas : des recommandations faites en conversation, sans lien ni code. Le parrainage comme pilier de croissance, c'est l'effort pour rendre ce comportement plus facile, plus fréquent et mesurable. Un produit avec un fort bouche-à-oreille et aucun mécanisme laisse son canal le moins cher sans pilotage.",
+        ),
+      },
+      {
+        question: t("Do referral programmes need an incentive?", "Un programme de parrainage a-t-il besoin d'une récompense ?"),
+        answer: t(
+          "Not necessarily, and the wrong one hurts. If the product's output is worth showing (a result, a design, a report), the share itself is the incentive and a reward mostly adds noise. Incentives make sense when the value is private and the ask is a favour — and they work best when paid in product (storage, credits, features) rather than cash.",
+          "Pas forcément, et la mauvaise fait du mal. Si la sortie du produit vaut d'être montrée (un résultat, un design, un rapport), le partage est sa propre incitation et une récompense ajoute surtout du bruit. Les incitations ont du sens quand la valeur est privée et que la demande est un service — et elles marchent mieux payées en produit (stockage, crédits, fonctionnalités) qu'en argent.",
+        ),
+      },
+      {
+        question: t(
+          "What's the difference between referral and a growth loop?",
+          "Quelle différence entre parrainage et boucle de croissance ?",
+        ),
+        answer: t(
+          "Referral is one kind of growth loop — the viral one, where a user brings the next user. Growth loops also include content loops (what users create attracts search traffic) and paid loops (revenue funds the next round of acquisition). Referral is usually the cheapest loop to start, because it runs on a behaviour that already exists.",
+          "Le parrainage est une sorte de boucle de croissance — la boucle virale, où un utilisateur amène le suivant. Les boucles de croissance comprennent aussi les boucles de contenu (ce que les utilisateurs créent attire du trafic de recherche) et les boucles payantes (le revenu finance l'acquisition suivante). Le parrainage est en général la boucle la moins chère à lancer, parce qu'elle repose sur un comportement qui existe déjà.",
+        ),
+      },
+    ],
+  },
+
+  revenue: {
+    formula: {
+      expression: t(
+        "MRR next month = MRR this month + new + expansion − contraction − churned",
+        "MRR du mois prochain = MRR de ce mois + nouveau + expansion − contraction − résilié",
+      ),
+      terms: [
+        {
+          symbol: t("New MRR", "Nouveau MRR"),
+          meaning: t(
+            "What new customers add: the output of acquisition and activation, priced. The only term most early teams look at.",
+            "Ce que les nouveaux clients ajoutent : la sortie de l'acquisition et de l'activation, une fois tarifée. Le seul terme que la plupart des jeunes équipes regardent.",
+          ),
+        },
+        {
+          symbol: t("Expansion MRR", "MRR d'expansion"),
+          meaning: t(
+            "Existing customers paying more: upgrades, added seats, usage, cross-sold modules. The term an expansion playbook exists to grow — and the one that can make net revenue churn negative.",
+            "Des clients existants qui paient plus : montées en gamme, sièges ajoutés, usage, modules vendus en complément. Le terme qu'un playbook d'expansion existe pour faire grandir — et celui qui peut rendre le churn revenu net négatif.",
+          ),
+        },
+        {
+          symbol: t("Contraction and churned MRR", "MRR de contraction et résilié"),
+          meaning: t(
+            "Downgrades and cancellations. Together with expansion they form net revenue retention (NRR): what last year's customers pay this year, as a share of what they paid then.",
+            "Rétrogradations et résiliations. Avec l'expansion, ils forment la rétention nette de revenu (NRR) : ce que les clients de l'an dernier paient cette année, en part de ce qu'ils payaient alors.",
+          ),
+        },
+      ],
+      note: t(
+        "Pricing sets the size of every term. A price chosen \"a bit arbitrarily\" is the single most common unforced error in this pillar: it caps new MRR, leaves no room for expansion, and is almost never revisited because changing it feels risky. Testing it is what the Tour's first Revenue question asks about.",
+        "Le pricing fixe la taille de chaque terme. Un prix choisi « un peu arbitrairement » est l'erreur non forcée la plus courante de ce pilier : il plafonne le nouveau MRR, ne laisse aucune place à l'expansion, et n'est presque jamais revu parce que le changer paraît risqué. Le tester, c'est ce que demande la première question Revenue du Tour.",
+      ),
+    },
+    example: {
+      title: t("The same month, read as a revenue pillar", "Le même mois, lu comme un pilier Revenue"),
+      steps: [
+        t(
+          "Start of month: €20,000 MRR from 400 customers (€50 average). New customers: 40 at €50 = +€2,000.",
+          "Début de mois : 20 000 € de MRR pour 400 clients (50 € en moyenne). Nouveaux clients : 40 à 50 € = +2 000 €.",
+        ),
+        t(
+          "Expansion: 15 customers move from the €50 plan to the €110 one, +€900. Contraction: 8 downgrade, −€400. Churn: 12 cancel, −€600.",
+          "Expansion : 15 clients passent de l'offre à 50 € à celle à 110 €, +900 €. Contraction : 8 rétrogradent, −400 €. Churn : 12 résilient, −600 €.",
+        ),
+        t(
+          "End of month: 20,000 + 2,000 + 900 − 400 − 600 = €21,900. Growth: +9.5%. Net revenue retention on the existing base: (20,000 + 900 − 400 − 600) ÷ 20,000 = 99.5%.",
+          "Fin de mois : 20 000 + 2 000 + 900 − 400 − 600 = 21 900 €. Croissance : +9,5 %. Rétention nette de revenu sur la base existante : (20 000 + 900 − 400 − 600) ÷ 20 000 = 99,5 %.",
+        ),
+        t(
+          "Now suppose pricing had been tested and the upper plan priced at €130 instead of €110: the same 15 upgrades bring +€1,200, NRR reaches 101%, and the business grows even in a month with zero new customers.",
+          "Suppose maintenant que le pricing ait été testé et l'offre supérieure fixée à 130 € au lieu de 110 € : les mêmes 15 montées en gamme rapportent +1 200 €, la NRR atteint 101 %, et l'activité grandit même un mois sans aucun nouveau client.",
+        ),
+      ],
+      takeaway: t(
+        "Revenue is not \"how much came in\". It is whether each of these five terms is known, and whether the two you control most directly — price and expansion — have ever been tested rather than assumed.",
+        "Le revenu, ce n'est pas « combien est rentré ». C'est si chacun de ces cinq termes est connu, et si les deux que tu contrôles le plus directement — le prix et l'expansion — ont un jour été testés plutôt que supposés.",
+      ),
+    },
+    benchmark: [
+      t(
+        "Net revenue retention is the number SaaS investors read first: above 100% means the existing base grows on its own; the best B2B companies report 110-130%, driven by expansion. Below 90%, growth has to outrun a leaking base.",
+        "La rétention nette de revenu est le chiffre que les investisseurs SaaS lisent en premier : au-dessus de 100 %, la base existante grandit toute seule ; les meilleures entreprises B2B affichent 110-130 %, portées par l'expansion. Sous 90 %, la croissance doit courir plus vite qu'une base qui fuit.",
+      ),
+      t(
+        "The LTV:CAC rule of thumb of about 3:1 lives in this pillar too — it is where price, margin and lifetime meet the cost of acquisition. Scoring the pillar on \"has the model been tested?\" rather than on the amount is deliberate: the amount follows from the terms above, not the reverse.",
+        "La règle empirique LTV:CAC d'environ 3:1 vit aussi dans ce pilier — c'est là que prix, marge et durée de vie rencontrent le coût d'acquisition. Noter le pilier sur « le modèle a-t-il été testé ? » plutôt que sur le montant est délibéré : le montant découle des termes ci-dessus, pas l'inverse.",
+      ),
+      t(
+        "Pricing changes are less dangerous than they feel: most price increases on a product people rely on lose a small share of customers and gain far more in revenue, and grandfathering existing customers removes most of the risk. The costly move is never testing.",
+        "Les changements de prix sont moins dangereux qu'ils n'en ont l'air : la plupart des hausses sur un produit dont les gens dépendent perdent une petite part de clients et gagnent bien plus en revenu, et maintenir l'ancien tarif aux clients existants retire l'essentiel du risque. Le geste coûteux, c'est de ne jamais tester.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Test the price against alternatives — two landing pages, two plans, a cohort at a new price — instead of choosing it once and defending it forever. Willingness-to-pay interviews with ten customers beat a competitor grid.",
+        "Teste le prix face à des alternatives — deux pages, deux offres, une cohorte à un nouveau tarif — au lieu de le choisir une fois et de le défendre pour toujours. Dix entretiens de disposition à payer valent mieux qu'une grille de concurrents.",
+      ),
+      t(
+        "Build a pricing model with room to grow: seats, usage, tiers, add-ons. Expansion MRR only exists if there is somewhere for a happy customer to go.",
+        "Construis un modèle de prix avec de la place pour grandir : sièges, usage, paliers, options. Le MRR d'expansion n'existe que s'il y a quelque part où un client satisfait peut aller.",
+      ),
+      t(
+        "Write the expansion playbook down: which signal (usage near a limit, a second team, a feature request) triggers which offer, made by whom, when. \"Some ideas, not systematic\" is the 7-point answer because ideas don't compound.",
+        "Écris le playbook d'expansion : quel signal (usage proche d'une limite, une seconde équipe, une demande de fonctionnalité) déclenche quelle offre, faite par qui, quand. « Quelques idées, rien de systématique » vaut 7 points parce que des idées ne composent pas.",
+      ),
+      t(
+        "Track the five terms of the MRR identity monthly, per plan. Revenue that is only read as a total hides which of the five is quietly going wrong.",
+        "Suis les cinq termes de l'identité du MRR chaque mois, par offre. Un revenu lu seulement en total cache lequel des cinq est en train de dérailler en silence.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "rev-1",
+      body: t(
+        "Revenue is the fifth stage of the Tour, and its questions are about knowledge, not amounts: has the pricing model been tested, not just chosen (20 for tested against alternatives, 7 for chosen with some reasoning, 0 for picked arbitrarily); is the LTV known, even roughly; and is there an expansion playbook, active and used. A product that charges real money but answers 7 to all three lands in the weak band — the score is not about what you earn but about whether the model behind it has ever met reality.",
+        "Revenue est la cinquième étape du Tour, et ses questions portent sur la connaissance, pas sur les montants : le modèle de pricing a-t-il été testé, pas juste choisi (20 pour testé face à des alternatives, 7 pour choisi avec une logique, 0 pour choisi un peu arbitrairement) ; la LTV est-elle connue, même grossièrement ; et existe-t-il un playbook d'expansion, actif et utilisé. Un produit qui facture de l'argent réel mais répond 7 aux trois atterrit dans la bande faible — le score ne dit pas ce que tu gagnes, mais si le modèle derrière a un jour rencontré la réalité.",
+      ),
+    },
+    faq: [
+      {
+        question: t(
+          "Why does the Tour score Revenue on testing rather than on revenue itself?",
+          "Pourquoi le Tour note-t-il Revenue sur le test plutôt que sur le revenu lui-même ?",
+        ),
+        answer: t(
+          "Because the amount is a lagging output of the other four stages, while the model is a decision you own. Two products with the same MRR can be in opposite situations: one with a tested price, a known LTV and an expansion path, the other with an arbitrary price it dares not touch. The second will hit a wall the first won't — and the number wouldn't have told you.",
+          "Parce que le montant est une sortie retardée des quatre autres étapes, alors que le modèle est une décision qui t'appartient. Deux produits au même MRR peuvent être dans des situations opposées : l'un avec un prix testé, une LTV connue et un chemin d'expansion, l'autre avec un prix arbitraire qu'il n'ose pas toucher. Le second frappera un mur que le premier évitera — et le chiffre ne te l'aurait pas dit.",
+        ),
+      },
+      {
+        question: t("What's the difference between MRR, ARR and revenue?", "Quelle différence entre MRR, ARR et chiffre d'affaires ?"),
+        answer: t(
+          "MRR is monthly recurring revenue: the subscription income you can expect next month if nothing changes, excluding one-off fees. ARR is MRR × 12, used for annual contracts and fundraising. Revenue, in accounting terms, is what was actually recognised in a period, one-offs included. Growth teams steer on MRR because it moves fast enough to learn from.",
+          "Le MRR est le revenu récurrent mensuel : ce que les abonnements rapporteront le mois prochain si rien ne change, hors frais ponctuels. L'ARR est le MRR × 12, utilisé pour les contrats annuels et les levées de fonds. Le chiffre d'affaires, au sens comptable, est ce qui a réellement été reconnu sur une période, ponctuels compris. Les équipes growth pilotent au MRR parce qu'il bouge assez vite pour en apprendre quelque chose.",
+        ),
+      },
+      {
+        question: t("When should a free product start charging?", "Quand un produit gratuit devrait-il commencer à facturer ?"),
+        answer: t(
+          "Earlier than feels comfortable — because the first price test teaches you more about value than any survey, and because a user base built on free is harder to convert later than one that always knew a paid tier existed. Charging a small number of customers a real price beats charging nobody: it answers the pricing question the Tour asks with evidence instead of reasoning.",
+          "Plus tôt que ce qui paraît confortable — parce que le premier test de prix t'apprend plus sur la valeur que n'importe quelle enquête, et parce qu'une base construite sur le gratuit est plus dure à convertir ensuite qu'une base qui a toujours su qu'un palier payant existait. Facturer un vrai prix à un petit nombre de clients vaut mieux que ne facturer personne : ça répond à la question de pricing du Tour avec des preuves plutôt qu'avec une logique.",
         ),
       },
     ],

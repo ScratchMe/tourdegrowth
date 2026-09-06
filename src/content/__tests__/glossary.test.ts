@@ -79,7 +79,17 @@ describe("long-form term pages (REVIEW-02.md R2-11)", () => {
 
   it("covers the terms delivered so far, in the order the plan set", () => {
     expect(DEEP_IDS).toEqual(
-      expect.arrayContaining(["cac", "ltv", "churn", "retention", "activation", "viral-coefficient"]),
+      expect.arrayContaining([
+        "cac",
+        "ltv",
+        "churn",
+        "retention",
+        "activation",
+        "viral-coefficient",
+        "acquisition",
+        "referral",
+        "revenue",
+      ]),
     );
   });
 
