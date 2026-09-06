@@ -50,6 +50,14 @@ npm run lint
 and Gemini. It runs from the "Verify against live services" workflow, by hand,
 and cleans up the data it creates.
 
+The two are deliberately different kinds of thing. **CI is the gate**: it runs
+on every push and pull request, it is entirely offline, and it is the check a
+branch rule should require. **The live workflow is a probe**: it fires only by
+hand, and it can go red because a third party is having a bad day. It must
+never gate a merge — it does not even report a status on a pull request, so
+requiring it would block merges permanently, and letting an external API's
+uptime decide whether you can ship is the wrong trade in any case.
+
 ## The documentation is the point
 
 This repository is a portfolio piece, so the reasoning is kept as carefully as

@@ -71,6 +71,36 @@ function samplePrompt(locale: Locale, tone: Tone): string {
   });
 }
 
+/**
+ * Turns "the dependency is down" into something nobody has to decode.
+ *
+ * A red run is only useful if it says WHICH kind of red it is. Exhausting the
+ * fallback chain on retriable statuses is not a regression in this codebase —
+ * the same request succeeds when the API is healthy — and treating it like
+ * one is how a verification job stops being read.
+ *
+ * It still FAILS rather than skipping: a skip would quietly hide a sustained
+ * outage, and knowing the Deep dive is unavailable right now is worth
+ * knowing. It just says so in words.
+ */
+async function reportingUpstreamOutages<T>(what: string, run: () => Promise<T>): Promise<T> {
+  try {
+    return await run();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    if (/All Gemini model candidates failed/.test(message)) {
+      throw new Error(
+        `UPSTREAM UNAVAILABLE — ${what}\n` +
+          `  ${message}\n` +
+          `  Every model in the fallback chain refused. This is the Gemini API being unavailable,\n` +
+          `  not a regression here: the same request succeeds when it is healthy. Re-run later.\n` +
+          `  Investigate only if it persists across runs hours apart.`,
+      );
+    }
+    throw err;
+  }
+}
+
 describe("live Gemini", () => {
   beforeAll(() => {
     if (!process.env.GEMINI_API_KEY) {
@@ -80,7 +110,9 @@ describe("live Gemini", () => {
 
   it("answers a real Deep dive prompt through the fallback chain", async () => {
     const started = Date.now();
-    const { data, modelUsed } = await callGeminiWithFallback(samplePrompt("en", "neutral"), apiKey());
+    const { data, modelUsed } = await reportingUpstreamOutages("one English Deep dive prompt", () =>
+      callGeminiWithFallback(samplePrompt("en", "neutral"), apiKey()),
+    );
     const verdict = parseDeepDiveVerdict(extractGeminiText(data), modelUsed);
 
     console.log(`\n  ── model: ${modelUsed}, ${Math.round((Date.now() - started) / 1000)}s`);
@@ -96,10 +128,12 @@ describe("live Gemini", () => {
     // Printed rather than asserted beyond the obvious: whether the roast voice
     // survives translation is a judgement call, and the point of this probe is
     // to put the real text in front of someone who can make it.
-    const [neutral, roast] = await Promise.all([
-      callGeminiWithFallback(samplePrompt("fr", "neutral"), apiKey()),
-      callGeminiWithFallback(samplePrompt("fr", "roast"), apiKey()),
-    ]);
+    const [neutral, roast] = await reportingUpstreamOutages("both French tones", () =>
+      Promise.all([
+        callGeminiWithFallback(samplePrompt("fr", "neutral"), apiKey()),
+        callGeminiWithFallback(samplePrompt("fr", "roast"), apiKey()),
+      ]),
+    );
 
     // Printed BEFORE parsing: a truncated answer throws in `extractGeminiText`,
     // and the token counts are precisely the evidence needed to understand why.
