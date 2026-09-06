@@ -1,0 +1,394 @@
+# Revue technique & fonctionnelle n°2 — 2026-09-06
+
+**Statut : ouverte.** Seconde revue à froid du repo, un jour après la clôture de `REVIEW.md` (26 constats, tous traités). Elle repart de là où la première s'est arrêtée : ce qui a déjà été audité et jugé sain n'est pas ré-audité (liste en fin de document), et les items de la première revue ne sont pas rouverts.
+
+**L'angle de cette revue est différent de la première.** `REVIEW.md` demandait « qu'est-ce qui casse, fuit ou fausse les chiffres ». Celle-ci demande « qu'est-ce qui empêche ce site d'être ce pour quoi il existe » : un side project qui valorise, sans le dire frontalement, le profil de Senior Growth PM de son auteur, en devenant une référence sur le sujet qu'il évalue. Chaque constat est donc pesé d'abord à cette aune — ce qu'un fondateur, un PM growth ou un recruteur verrait en cinq minutes — puis seulement ensuite à l'aune technique.
+
+## Comment utiliser ce document
+
+- Mêmes conventions que `REVIEW.md` : identifiant stable (`R2-01` … `R2-30`), type (**F** = fonctionnel/produit, **T** = technique), effort (XS / S / M / L), statut tenu à jour ici (`À faire` → `En cours` → `Fait (PR #n, date)`), un statut écrit seulement après `git show --stat <sha>` non vide.
+- Les lots sont dans l'ordre de traitement proposé. Le lot E est différent des autres : ce sont des **décisions produit à prendre par Antoine**, pas des correctifs — ils sont là pour ne pas être oubliés, pas pour être exécutés sans arbitrage.
+- Toute nouvelle chaîne de copie créée en traitant un item repart au statut « à relire » (`CLAUDE.md`, convention 6).
+- Instantané du repo au commit `11758de`. Les références `fichier:ligne` sont celles de ce commit.
+
+## État vérifié au moment de la revue
+
+Tout a été exécuté réellement dans ce conteneur, pas déduit de la lecture.
+
+| Vérification | Résultat |
+|---|---|
+| `npm ci` | 590 paquets, 0 vulnérabilité ; 3 avertissements de dépréciation transitifs (`node-domexception`, `glob@10`, `eslint@9.39` « no longer supported ») |
+| `npx tsc --noEmit` | 0 sortie |
+| `npm run lint` | 0 erreur, 0 avertissement |
+| `npx vitest run` | **249 tests verts, 26 fichiers**, 1,9 s, aucun bruit console |
+| `next build` | 36 pages de contenu `●`, routes applicatives `ƒ`, alias OG `opengraph-image-1u74ed` toujours juste ; **Next 16 n'imprime plus les tailles de bundle** — mesuré sur disque : 892 Ko de chunks client, le plus gros 223 Ko |
+| `npx playwright test` | **80 specs vertes**, 24 s, 0 flaky ; stderr non vide (5× `NoFallbackError`, 1× identifiants Firebase manquants — tous deux attendus et documentés) |
+| `npm audit` / `--omit=dev` | 0 / 0 |
+| `npm outdated` | 8 en retard, dont 4 majeures (eslint 10, TypeScript 7, vitest 5, `@types/node` 26) ; Playwright épinglé à 1.56.1 volontairement (R-07) |
+| Couverture (mesurée avec `@vitest/coverage-v8`, non committé) | 95,6 % des lignes **des fichiers importés par un test** ; 8 fichiers de `src/lib` ne sont importés par aucun test, dont `growth-stats.ts` (voir R2-01) |
+| Lighthouse mobile (build local, 4 pages) | Performance 96-97, Accessibilité 100, Bonnes pratiques 96, SEO 100 (63 sur `/r/sample`, attendu : `noindex`) ; LCP 2,5-2,8 s = le H1 en Stardos Stencil |
+| Production (`curl` sur www.tourdegrowth.com) | `NEXT_PUBLIC_SITE_URL` bien réglé sur `www` (canonical/hreflang/sitemap corrects) ; `x-vercel-cache: HIT` sur une page glossaire rechargée — **le point « à confirmer » de R-24 est confirmé** ; un seul en-tête de sécurité présent (`strict-transport-security`, posé par Vercel) |
+| Search Console (via SEO Gets, 15/08 → 04/09) | 1 clic, ~50 impressions ; pages glossaire indexées mais en **position 70 à 95** sur `virality coefficient`, `aha moment`, `activation definition`, `what is an activation` ; les URL vues par Google sont encore les anciennes non préfixées (`/glossary/…`), la migration R-13 date de la veille |
+| Captures Playwright (desktop 1280 + mobile 390, FR + EN, 9 écrans) | Aucun débordement horizontal ; **un bug visuel trouvé** (R2-05) |
+
+## Vue d'ensemble et ordre de traitement
+
+| Lot | ID | Titre | Type | Effort | Statut |
+|---|---|---|---|---|---|
+| **A — Crédibilité devant le public visé** | R2-01 | Le K-factor ne peut jamais être entre 0 et 1 | F+T | S | À faire |
+| | R2-02 | La page de résultat parle au propriétaire, jamais au visiteur | F | S | À faire |
+| | R2-03 | Ni mentions légales ni information RGPD | F | M | À faire |
+| | R2-04 | Rien ne rattache le contenu à Antoine : ni page, ni entité | F | M | À faire |
+| | R2-05 | Wordmark et sélecteur de langue collés sur les 36 pages de contenu | F+T | XS | À faire |
+| **B — Boucle de partage et mesure** | R2-06 | Métadonnées : descriptions anglaises sur les URL françaises, titre sans mot-clé | F | S | À faire |
+| | R2-07 | Zéro balise Open Graph sur les pages de contenu | F | M | À faire |
+| | R2-08 | `/quiz` et `/deep-dive/[id]` indexables ; `lastmod` absent du sitemap | F+T | S | À faire |
+| | R2-09 | Le Deep dive dure ~70 s et rien ne prévient | F | S | À faire |
+| | R2-10 | Le calcul de la métrique reine n'a aucun test | T | S | À faire |
+| **C — Contenu de référence** | R2-11 | Glossaire : 76 à 105 mots par terme, contre 600 à 1 500 chez ceux qui rangent | F | L | À faire |
+| | R2-12 | « AARRR » n'apparaît ni sur la landing ni sur `/how-it-works` | F | S | À faire |
+| | R2-13 | Maillage interne : le glossaire n'est lié depuis aucune page qui a de l'autorité | F | S/M | À faire |
+| | R2-14 | Le dictionnaire bilingue entier et tout le glossaire partent dans le bundle client | T | S | À faire |
+| | R2-15 | Structured data : un seul bloc JSON-LD, identique en FR et en EN | F | M | À faire |
+| | R2-16 | Titres FR non localisés là où la requête française diffère | F | S | À faire |
+| | R2-17 | `/how-it-works` répète chaque nom de pilier deux fois | F | XS | À faire |
+| **D — Robustesse et sécurité** | R2-18 | Aucun en-tête de sécurité hors HSTS | T | S | À faire |
+| | R2-19 | Amplification de lectures Firestore non authentifiée sur `/r/<id>` | T | S | À faire |
+| | R2-20 | `freeContext` conservé indéfiniment pour calculer un booléen | T | S | À faire |
+| | R2-21 | Deep dive : deux requêtes concurrentes génèrent deux fois | T | S | À faire |
+| | R2-22 | Basic Auth admin : comparaison non constante, `atob` Latin-1 | T | XS | À faire |
+| | R2-23 | Aucun `error.tsx` : une panne rend le document nu de Next | T | S | À faire |
+| | R2-24 | Petites dettes : `rawPoints` public, logs Gemini non tronqués, pas de Dependabot | T | XS | À faire |
+| | R2-25 | Le stderr de Playwright n'est pas vide, donc plus lu | T | XS | À faire |
+| **E — Décisions produit (Antoine)** | R2-26 | Segmenter le benchmark : « la moyenne des SaaS B2B à ton stade » | F | M | À trancher |
+| | R2-27 | Historique de progression : les données sont déjà sur l'appareil | F | S | À trancher |
+| | R2-28 | Une page de métriques publique : l'outil montre son propre AARRR | F | M | À trancher |
+| | R2-29 | Le roast est le crochet viral et il est invisible avant la 15ᵉ question | F | S | À trancher |
+| | R2-30 | Fenêtre Tour de France (SPEC.md §10) : à caler dans le calendrier | F | S | À trancher |
+
+### Pourquoi cet ordre
+
+1. **Lot A d'abord** parce que ce sont les cinq choses qu'un lecteur du public visé remarquerait en cinq minutes, et que trois d'entre elles se corrigent en moins d'une journée. Le K-factor en particulier : c'est le chiffre que SPEC.md §1 désigne comme le critère de succès du projet, celui « à citer en entretien », et sa définition actuelle le rend indéfendable devant quelqu'un qui connaît la métrique.
+2. **Lot B** parce que le partage est le cœur du produit et que ces items conditionnent ce qui se passe *après* un partage (aperçu du lien, page sur laquelle on atterrit, ce que Google en fait).
+3. **Lot C** est le chantier long. Il vient après A et B parce qu'un contenu de référence sur un site qui n'a ni mentions légales ni page auteur n'inspire pas confiance, et parce que R2-14 doit précéder R2-11 sous peine de gonfler le bundle du questionnaire à chaque paragraphe ajouté.
+4. **Lot D** : rien n'y est en feu, mais R2-18 et R2-19 coûtent une heure chacun et ferment deux trous réels.
+5. **Lot E** ne se traite pas : il se discute.
+
+---
+
+## Lot A — Crédibilité devant le public visé
+
+### R2-01 — Le K-factor ne peut jamais être entre 0 et 1
+
+**Type** F+T · **Effort** S · **Statut** À faire
+
+**Constat.** `src/lib/submissions/growth-stats.ts:72-80` définit `uniqueSharers` comme le nombre de `refId` **distincts référencés par au moins une soumission**, puis `kFactor = referredSubmissions / uniqueSharers` (ligne 95). Le dénominateur ne compte donc que les partageurs qui ont déjà converti quelqu'un. Chaque id de l'ensemble contribue par construction à au moins une soumission référée, donc `referredSubmissions ≥ uniqueSharers`, donc **K ≥ 1 dès qu'il existe un seul parrainage**, et 0 sinon. Le tableau de bord affiche ce chiffre sous le libellé « SPEC.md §7 — referred submissions ÷ unique sharers » (`src/app/(app)/admin/stats/page.tsx:146-148`). La vérification du 2026-08-29 (CLAUDE.md : « K-factor = 2.00 pour 2 soumissions référées / 1 parraineur unique ») illustre exactement le biais : trois personnes qui partagent dont une seule convertit deux fois donnent K = 2,00 au lieu de 0,67.
+
+**Impact.** La métrique que le projet existe pour produire ne peut pas prendre une valeur dans l'intervalle où vit un vrai coefficient viral de produit early-stage. Un interlocuteur qui connaît la métrique le verra en une question (« combien de gens ont partagé ? »). C'est le contraire de la démonstration visée.
+
+**Correctif proposé.** Firestore ne sait pas qui a partagé ; seul GoatCounter le sait (`share/<ton>/<méthode>`), et `/admin/stats` récupère déjà ces événements via l'API (`stats.shares`). Deux chiffres honnêtes, à afficher tous les deux :
+- **K = soumissions référées ÷ soumissions totales** — la définition standard (nouveaux utilisateurs générés par utilisateur existant : chaque résultat est un partageur potentiel). Calculable dans `growth-stats.ts` seul.
+- **Conversion par partage = soumissions référées ÷ événements `share`** — le taux qu'un partage produit une analyse. Calculable avec la donnée GoatCounter déjà chargée.
+L'ancien ratio peut rester s'il est renommé pour ce qu'il est (« référées par partageur ayant converti »), mais il ne doit plus s'appeler K-factor. Mettre à jour le libellé, le commentaire de `types.ts`/`growth-stats.ts`, et l'entrée CLAUDE.md du 2026-08-29.
+
+**Vérification attendue.** Tests unitaires sur `computeGrowthStats` avec la lecture Firestore mockée (voir R2-10) : le cas « 3 partageurs, 1 convertit 2 fois » doit donner K < 1.
+
+### R2-02 — La page de résultat parle au propriétaire, jamais au visiteur
+
+**Type** F · **Effort** S · **Statut** À faire
+
+**Constat.** Pour un visiteur arrivant par un lien partagé — c'est-à-dire le numérateur du K-factor —, `ResultView.tsx:362-372` affiche exactement les deux CTA du propriétaire : « Partager mon score » en primaire, « Refaire le Tour » en secondaire. Le lien du second est bon (il porte le `?ref=`, R-03), c'est le libellé qui est faux pour quelqu'un qui n'a jamais fait le Tour — R-01 l'avait noté « à traiter en R-10 », ce n'a pas été fait. Et rien sur la page ne dit au visiteur ce qu'est le site : pas de « 15 questions, 3 minutes, gratuit », qui n'existe que dans l'image OG et sur la landing. Vérifié en capture (`/r/sample`, EN et FR, desktop et mobile).
+
+**Impact.** L'écran qui convertit le trafic de parrainage est optimisé pour la personne qui l'a déjà fait. Le seul bouton qui invite le visiteur à agir pour lui-même est en secondaire, avec un libellé qui suppose qu'il est déjà passé par là.
+
+**Correctif proposé.** `isOwner` existe déjà (R-01). Pour un non-propriétaire : primaire = « Fais ton propre Tour → » (vers `/quiz?ref=<id>`), secondaire = « Partager ce résultat », plus une ligne courte au-dessus des CTA (« 15 questions, 3 minutes, gratuit, sans compte »). Toujours exactement deux CTA — la règle de l'étape 7 tient, seuls les rôles changent selon qui regarde. Comme `isOwner` n'est connu qu'après montage, l'état de départ doit être la version visiteur (c'est le cas majoritaire sur un lien partagé), et un test doit vérifier qu'un propriétaire retrouve bien ses libellés après montage. Copie nouvelle → à relire.
+
+**Vérification attendue.** Spec E2E : sur `/r/sample` sans jeton, le bouton primaire mène à `/quiz` ; avec un jeton semé, il redevient « Partager ». Événement analytics distinct pour le clic visiteur (`take_own_tour`) afin de mesurer ce taux, qui est aujourd'hui invisible.
+
+### R2-03 — Ni mentions légales ni information RGPD
+
+**Type** F · **Effort** M · **Statut** À faire
+
+**Constat.** `grep -ri "privacy\|confidentialit\|mentions légales\|RGPD\|GDPR" src` ne renvoie aucune copie produit. Or le produit persiste dans Firestore les 15 réponses, les 10 réponses de contexte, et `freeContext`, un champ dont le placeholder invite littéralement à décrire son entreprise (« we sell to accounting firms, long sales cycle, trust is a bigger blocker than price… », `src/content/free-context.ts:23`), puis envoie ce texte à l'API Gemini de Google. Aucune page ne le dit. Le pied de page ne porte que « How it works », « Glossary » et le lien CV.
+
+**Impact.** Deux obligations distinctes, toutes deux non remplies : LCEN art. 6-III (identification de l'éditeur d'un site publié en France) et RGPD art. 13 (information : quoi, pourquoi, base légale, durée, sous-traitants — Google Cloud, Google Gemini, Vercel — et le fait qu'un texte libre part chez un LLM). GoatCounter sans cookie évite le bandeau, pas la notice : ce sont deux sujets. Et au-delà du droit, c'est l'impression exacte à ne pas donner au public visé : un site de Growth PM qui demande à un fondateur de décrire son business et ne dit pas où ça va.
+
+**Correctif proposé.** Une page `/[locale]/legal` (mentions légales + notice de confidentialité, bilingue, prérendue comme le reste), un lien dans `SiteFooter`, et une ligne sous le champ de contexte libre (« Ce texte est envoyé à Gemini pour rédiger ta recommandation, et n'apparaît jamais sur la page partagée »). À faire avec R2-20, qui réduit ce qu'il y a à déclarer. Le contenu juridique est à écrire par Antoine (ou à partir d'un modèle qu'il valide), pas inventé ici.
+
+**Vérification attendue.** Page présente dans le sitemap, liée depuis le pied de page de toutes les pages, `curl` des deux langues.
+
+### R2-04 — Rien ne rattache le contenu à Antoine : ni page, ni entité
+
+**Type** F · **Effort** M · **Statut** À faire
+
+**Constat.** Sur les 36 pages indexables, le seul signal d'auteur est l'ancre du pied de page (`SiteFooter.tsx:69-77`). La bio (`content/antoine-credit.ts:26-29`, `DEEP_DIVE_CREDIT`) n'apparaît qu'après un Deep dive complété — la surface la plus profonde et la moins visitée du site. Le bloc JSON-LD `WebApplication` de la landing (`src/app/[locale]/page.tsx:29-38`) n'a ni `author` ni `creator`. Il n'existe aucune page « à propos » ni « méthodologie » : `/how-it-works` explique la forme du score en 63 mots (`content/how-it-works.ts:71-72`) sans jamais donner les valeurs de points (20/7/0), la règle d'arrondi par pilier, ni un exemple chiffré — tout ça n'est montré qu'au propriétaire d'un résultat (`ScoreBreakdown`, R-12). Le « ré-explicable en 10 secondes » que CLAUDE.md pose comme non négociable n'est pas public. Pas de contact non plus : LinkedIn n'est cité qu'après un Deep dive.
+
+**Impact.** L'objectif du site est de valoriser un profil, et Google n'a aucune entité `Person` à laquelle rattacher ce contenu. Un visiteur curieux de « qui a fait ça et pourquoi ces 15 questions » n'a nulle part où aller.
+
+**Correctif proposé.** Une page `/[locale]/about` (ou `/methodology`, qui sonne plus « outil » et moins « CV ») : qui a construit ça et pourquoi, les 15 questions et ce qu'elles mesurent, la règle de scoring exacte avec un exemple, la séparation déterministe / Gemini. JSON-LD `Person` (`sameAs` : CV, LinkedIn), et `author` ajouté au `WebApplication` de la landing. Lien dans le pied de page, entrée dans le sitemap. Une page qui ferme à la fois le trou d'entité, le trou de méthodologie publique et le trou de contact. Le texte de la page est de la copie nouvelle : premier jet possible ici, relecture par Antoine obligatoire — c'est sa voix.
+
+**Vérification attendue.** Rich Results Test de Google sur la page ; le `Person` visible dans le JSON-LD ; lien pied de page présent partout.
+
+### R2-05 — Wordmark et sélecteur de langue collés sur les 36 pages de contenu
+
+**Type** F+T · **Effort** XS · **Statut** À faire
+
+**Constat.** Sur `/how-it-works`, `/glossary` et les 15 pages de terme, dans les deux langues, desktop comme mobile, le wordmark « TOUR DE GROWTH » et le contrôle segmenté EN|FR se touchent, à gauche du header. Cause : `.headerInner` de ces trois modules (`src/app/[locale]/how-it-works/page.module.css:6-10`, et les mêmes lignes dans `glossary/page.module.css` et `glossary/[term]/page.module.css`) n'a ni `display: flex` ni `justify-content: space-between`, contrairement à celui de la landing (`src/app/[locale]/page.module.css:6-14`). Le header de ces pages ne contenait que le wordmark avant R-13 ; le sélecteur y a été ajouté sans que le conteneur soit adapté, et l'extension 01 l'a ensuite remplacé par `Segmented` sans que la capture ait été relue sur ces pages-là.
+
+**Impact.** Le défaut visuel le plus visible du site, sur exactement les pages destinées à être indexées et partagées.
+
+**Correctif proposé.** Aligner les trois `.headerInner` sur celui de la landing (flex, `space-between`, `align-items: center`, `gap`). Mieux : extraire un composant `ContentHeader` utilisé par les quatre pages de contenu, pour que le prochain ajout au header ne se fasse pas quatre fois.
+
+**Vérification attendue.** Une spec qui mesure que le bord droit du sélecteur est proche du bord droit du conteneur (et pas du wordmark) sur une page de terme, à 390 et 1 280 px.
+
+---
+
+## Lot B — Boucle de partage et mesure
+
+### R2-06 — Métadonnées : descriptions anglaises sur les URL françaises, titre sans mot-clé
+
+**Type** F · **Effort** S · **Statut** À faire
+
+**Constat** (relevé sur le HTML prérendu des 36 pages).
+- `/fr`, `/fr/how-it-works`, `/fr/glossary` servent une **description anglaise** : `generateMetadata` de la landing ne renvoie que `alternates` (`src/app/[locale]/page.tsx:47-50`) et hérite donc du `rootMetadata` anglais ; `how-it-works/page.tsx:22-24` et `glossary/page.tsx:21-23` codent l'anglais en dur.
+- Le titre de la landing est « Tour de Growth » (14 caractères, aucun mot-clé), et il est aussi le titre hérité de `/quiz` et `/deep-dive/[id]`.
+- 13 des 15 titres de terme sont identiques en FR et en EN (gabarit `${term} — Tour de Growth Glossary`, `glossary/[term]/page.tsx:35`, suffixe anglais partout).
+- Deux descriptions FR dépassent 160 caractères (`growth-loop`, `viral-coefficient` : 179), une EN fait 55 (`acquisition`) — parce que la description réutilise `definition`, calibrée pour le popover.
+
+**Impact.** Un chercheur francophone voit un extrait anglais sur trois pages clés ; le titre de la page la plus forte du site ne dit pas de quoi elle parle.
+
+**Correctif proposé.** Localiser les trois `generateMetadata` ; titre de landing du type « Tour de Growth — bilan croissance AARRR en 3 minutes » / « … AARRR growth check-up in 3 minutes » ; suffixe glossaire localisé ; champ `metaDescription: Translatable` dédié dans `GlossaryEntry` plutôt que la réutilisation de `definition`. Copie nouvelle → à relire.
+
+### R2-07 — Zéro balise Open Graph sur les pages de contenu
+
+**Type** F · **Effort** M · **Statut** À faire
+
+**Constat.** `og:*` et `twitter:*` : 0 occurrence sur `/en`, `/en/how-it-works`, `/en/glossary/cac`, `/fr/glossary/cac` (HTML prérendu). Seule `/r/[id]` en émet (`page.tsx:51-53`) et seule elle a une `opengraph-image`. Next ne dérive **pas** `og:*` de `title`/`description` (vérifié dans `resolve-opengraph.js` : `if (!openGraph) return null`).
+
+**Impact.** Un lien vers une page glossaire ou `/how-it-works` collé sur LinkedIn, Slack ou X donne une carte grise sans image ni titre — sur un site dont le modèle de croissance est le partage. Le pipeline Satori existe déjà (polices converties, tokens recopiés) : il n'est simplement pas branché sur ces pages.
+
+**Correctif proposé.** `openGraph`/`twitter` par défaut dans `rootMetadata` (`root-shell.tsx:113`, `type: "website"`) surchargés par page avec titre/description localisés et `og:locale` ; une `opengraph-image.tsx` statique sous `src/app/[locale]/` (héritée par toutes les routes de contenu), qui affiche le nom du terme pour `/glossary/[term]`.
+
+**Vérification attendue.** `curl` des balises ; image récupérée en 200 `image/png` ; aperçu vérifié dans l'inspecteur de LinkedIn ou de X après déploiement.
+
+### R2-08 — `/quiz` et `/deep-dive/[id]` indexables ; `lastmod` absent du sitemap
+
+**Type** F+T · **Effort** S · **Statut** À faire
+
+**Constat.** Ni `quiz/page.tsx` ni `deep-dive/[id]/page.tsx` ne posent de `robots` (seuls `/admin/stats` et `/r/[id]` le font). `/quiz` reçoit 18 liens internes par arbre de langue — plus que n'importe quelle page de contenu — et s'indexera comme une page mince sous le titre hérité « Tour de Growth », en concurrence avec la landing. `/deep-dive/[id]` est atteignable depuis `/r/[id]` (`noindex, follow`) et peut générer autant d'URL minces qu'il y a de résultats. Côté sitemap (`src/app/sitemap.ts:28-37`) : `changefreq` et `priority` présents (Google les ignore depuis des années), `lastModified` absent (le seul champ qu'il lit), `x-default` absent des alternates du sitemap alors qu'il est dans le `<head>`.
+
+**Correctif proposé.** `robots: { index: false, follow: true }` sur `/deep-dive/[id]` ; pour `/quiz`, un vrai titre et une vraie description (c'est une cible légitime pour « growth quiz ») ou le même `noindex` — décision à prendre, pas à laisser par défaut. Jamais de `Disallow` dans `robots.txt` (même raison que pour `/r/`, `robots.ts:43-48`). `lastModified` alimenté par une date tenue à la main par entrée de contenu (jamais `new Date()` au build, qui mentirait à chaque déploiement).
+
+### R2-09 — Le Deep dive dure ~70 s et rien ne prévient
+
+**Type** F · **Effort** S · **Statut** À faire
+
+**Constat.** Le run n°6 du workflow de vérification a mesuré un Deep dive de production à 70 s (quatre générations en parallèle depuis le bilingue). L'écran de chargement tient (état « toujours en cours », étape 12bis), mais **aucune copie ne prévient de la durée** : ni sous le bouton « Get my results → » de l'écran de contexte libre (`deep-dive/[id]/page.tsx:270-271`), ni sur l'écran de chargement, dont les trois messages ont été écrits pour une attente de 2-3 s (`dictionary.ts` `loading.*`). `grep "minute\|may take\|peut prendre"` sur la copie : rien.
+
+**Impact.** Une minute d'attente sans avoir été prévenu se lit comme un plantage, quelle que soit la qualité de l'animation. Le bouton Réessayer existe, mais son usage sur une génération encore en cours est précisément le cas de course de R2-21.
+
+**Correctif proposé.** Une ligne sous le bouton de soumission (« Environ une minute — on génère tes recommandations dans les deux tons et les deux langues ») et un quatrième message de chargement qui dit la même chose une fois les trois premiers écoulés. Copie nouvelle → à relire. La question de fond — faut-il quatre générations — reste celle notée dans l'état du projet de CLAUDE.md ; ceci ne la tranche pas, ça rend l'attente honnête.
+
+### R2-10 — Le calcul de la métrique reine n'a aucun test
+
+**Type** T · **Effort** S · **Statut** À faire
+
+**Constat.** `src/lib/submissions/growth-stats.ts` (97 lignes : K-factor, taux de Deep dive, taux de contexte libre, fenêtres 7/30 jours) n'est importé par aucun test — c'est ainsi que R2-01 a pu tenir depuis le 2026-08-29. Sept autres fichiers de `src/lib` sont dans le même cas, mais ce sont des wrappers d'I/O (`repository.ts`, `cached-repository.ts`, `firebase/admin.ts`, `resolve-request-locale.ts`, `site.ts`, `tone.ts`, `types.ts`) où un test unitaire apporterait peu. Le repo n'a aucune configuration de couverture : le 95,6 % mesuré pour cette revue ne porte que sur les fichiers qu'un test importe, ce qui est exactement le chiffre qui cache un fichier jamais testé.
+
+**Correctif proposé.** Séparer `computeGrowthStats` en une fonction pure `summarize(submissions, now)` testée, et un wrapper qui lit Firestore. Ajouter `@vitest/coverage-v8` avec `coverage.include: ["src/lib/**"]` et `coverage.all: true` pour que les fichiers jamais importés apparaissent à 0 % au lieu de ne pas apparaître ; un seuil bas mais réel (par exemple 80 % lignes sur `src/lib`) dans la CI.
+
+---
+
+## Lot C — Contenu de référence
+
+### R2-11 — Glossaire : 76 à 105 mots par terme, contre 600 à 1 500 chez ceux qui rangent
+
+**Type** F · **Effort** L · **Statut** À faire
+
+**Constat.** Comptage sur `src/content/glossary.ts` (`definition` + `extended`) : de 76 mots (`upsell-cross-sell`) à 105 (`viral-coefficient`) en EN, médiane 92 ; **tout le glossaire EN fait 1 402 mots**, soit à peu près une seule page « CAC » d'un glossaire concurrent (Amplitude, Mixpanel, Reforge, Lenny's : 600 à 1 500 mots avec formule, exemple chiffré, benchmark, « comment l'améliorer », FAQ). Les termes les plus recherchés commercialement (`cac`, `ltv`, `churn`, `retention`, `acquisition`) sont parmi les plus courts ; la `definition` d'`acquisition` fait 9 mots. Trois termes évoquent une formule en prose sans jamais la poser (`cac`, `ltv`, `viral-coefficient`). Search Console confirme le diagnostic : les pages sont indexées et apparaissent sur les bonnes requêtes, en position 70 à 95.
+
+**Impact.** C'est la thèse SEO du site — devenir une référence sur le vocabulaire growth — et les pages actuelles ne peuvent pas ranger sur des requêtes de tête. Elles rangeront sur de la longue traîne si, et seulement si, elles apportent quelque chose que les autres n'ont pas.
+
+**Correctif proposé.** Ajouter à `GlossaryEntry` des sections structurées (`formula`, `example`, `benchmark`, `howToImprove`, `faq`) rendues **uniquement** sur `/glossary/[term]` — ne jamais allonger `definition`, qui alimente le popover. Cibler d'abord les six termes commerciaux, 500 à 800 mots chacun. L'angle différenciant, qui est aussi celui du site : chaque terme relié à la question du Tour qui le mesure et à la bande de score qui va avec — personne d'autre n'a un outil derrière son glossaire. **Prérequis : R2-14**, sinon chaque paragraphe ajouté part dans le bundle de `/quiz`. Le contenu lui-même n'est pas à écrire par la session de code : premier jet possible, mais c'est de la copie de fond qui porte le nom d'Antoine, à relire ligne à ligne (même statut que les `extended` du 2026-08-29).
+
+### R2-12 — « AARRR » n'apparaît ni sur la landing ni sur `/how-it-works`
+
+**Type** F · **Effort** S · **Statut** À faire
+
+**Constat.** Occurrences de « AARRR » dans le `<body>` rendu : 0 sur `/en`, 0 sur `/en/how-it-works`, 1 sur `/en/glossary` (nom du terme). Le mot n'existe que dans le JSON-LD et dans la meta description de `/how-it-works`, qui promet « The AARRR framework explained » sur une page qui n'emploie pas le mot. Le sous-titre de la landing (`dictionary.ts:55`) énumère les cinq piliers sans nommer le cadre.
+
+**Correctif proposé.** Nommer le cadre dans le titre ou l'intro de `/how-it-works` (`content/how-it-works.ts:19-23`) et dans le sous-titre de la landing. Copie nouvelle → à relire.
+
+### R2-13 — Maillage interne : le glossaire n'est lié depuis aucune page qui a de l'autorité
+
+**Type** F · **Effort** S/M · **Statut** À faire
+
+**Constat** (graphe de liens extrait du HTML des 18 pages EN, FR identique).
+- `/how-it-works` ne lie **aucune** page de terme : il explique les cinq piliers et le scoring, et ses seuls liens internes sont la landing, `/quiz` et `/glossary` (pied de page).
+- Les cinq `PillarChip` de la landing (`src/app/[locale]/page.tsx:133`) ne sont pas des liens, alors que le composant a un slot `children` prévu pour ça.
+- Sur `/r/[id]` — `noindex, follow`, donc une page dont les liens sortants transmettent encore du signal, et celle où atterrit chaque lien partagé — les piliers ouvrent un popover (`GlossaryTerm`) qui **ne lie pas** vers `/glossary/<id>` (`DefinitionPopover.tsx` : aucun `href`). Même chose sur `/quiz` pour les six questions à déclencheur.
+- `aarrr` — la requête de tête du sujet — est le terme le **moins** lié (3 liens entrants : l'index et `north-star-metric`).
+
+**Correctif proposé.** Quatre petits diffs : lier les cinq `<h2>` de pilier de `/how-it-works` (les ids de pilier sont déjà les ids de terme) ; lier les chips de la landing ; un lien « En savoir plus → » dans `DefinitionPopover` (améliore aussi le produit, le popover est aujourd'hui un cul-de-sac) ; `aarrr` ajouté aux `related` des cinq piliers (le test `2 à 3 related` passe à 4, décision explicite).
+
+### R2-14 — Le dictionnaire bilingue entier et tout le glossaire partent dans le bundle client
+
+**Type** T · **Effort** S · **Statut** À faire
+
+**Constat** (vérifié en cherchant des chaînes dans les chunks réels du build).
+- `SiteFooter.tsx:1` est `"use client"` pour un seul `onClick` de tracking, et importe `UI_STRINGS` (`dictionary.ts`, 340 lignes). Résultat : « Drafting your race report », « dead last », « Roast Mode » et leurs équivalents FR sont dans le chunk de `/en/glossary/cac` — ~7 Ko gzip de copie du questionnaire, du roast et de l'écran d'erreur sur chaque page indexable.
+- `GlossaryTerm.tsx:1-3` (client) importe `GLOSSARY` entier, `extended` compris, pour n'utiliser que `term` et `definition` : « Dave McClure » est dans les chunks de `/quiz` et `/r/[id]`. Ce poids croît proportionnellement à R2-11.
+
+**Correctif proposé.** `SiteFooter` en Server Component avec un îlot client `TrackedLink` de dix lignes ; scinder `glossary.ts` en `glossary-terms.ts` (`term` + `definition`, sûr pour le popover) et `glossary-extended.ts` (`extended`, `related`, futures sections — serveur uniquement). Faire ceci **avant** R2-11.
+
+**Vérification attendue.** `grep` d'une chaîne `extended` dans les chunks référencés par `/quiz` : absente. Taille du chunk de la page de terme avant/après.
+
+### R2-15 — Structured data : un seul bloc JSON-LD, identique en FR et en EN
+
+**Type** F · **Effort** M · **Statut** À faire
+
+**Constat.** Un seul bloc `application/ld+json` sur tout le site : le `WebApplication` de la landing, octet pour octet identique sur `/en` et `/fr` — description anglaise sur la page FR, pas d'`inLanguage`, `url: SITE_URL` (donc `/fr` déclare une URL qui n'est pas elle-même), `priceCurrency: "USD"` pour un outil français, et surtout pas d'`author` (voir R2-04). Aucun `DefinedTerm` / `DefinedTermSet` sur le glossaire (le schéma conçu pour ça), aucun `BreadcrumbList` alors que le fil d'Ariane « ← Glossary » est rendu visuellement.
+
+**Correctif proposé.** Un module `src/lib/seo/jsonld.ts` (`webApplication(locale)`, `person()`, `definedTerm(entry, locale)`, `definedTermSet(locale)`, `breadcrumbs(...)`), branché sur la landing, l'index et les pages de terme. `inLanguage` et `url` par locale. `aggregateRating` reste absent tant qu'il n'y a pas de volume (décision de l'addendum 02, toujours juste).
+
+### R2-16 — Titres FR non localisés là où la requête française diffère
+
+**Type** F · **Effort** S · **Statut** À faire
+
+**Constat.** Les slugs sont anglais dans l'arbre FR (`/fr/glossary/cac`), ce qui est acceptable pour la plupart des termes (les praticiens francophones cherchent `CAC`, `churn`, `LTV`, `onboarding`). Mais la requête de tête française pour `cac` est « coût d'acquisition client », et cette expression n'est **ni dans le H1, ni dans le titre** de `/fr/glossary/cac` (H1 : « CAC »). `viral-coefficient` a un terme FR localisé (« Coefficient viral ») mais un slug anglais. Détails : `glossary.ts:123` écrit `Moment "aha"` avec des guillemets ASCII alors que le commentaire du fichier dit « moment « aha » » ; `routes.ts:130` pointe `x-default` sur `/en` plutôt que sur `/`, l'URL qui négocie la langue.
+
+**Correctif proposé.** La moitié bon marché d'abord : `term.fr` = « CAC — Coût d'Acquisition Client », « LTV — Lifetime Value », « North Star Metric — métrique phare » ; guillemets français ; `x-default` → chemin non préfixé. Ne pas localiser les slugs pour l'instant (second axe de `generateStaticParams`, table slug→id, canonicals par langue, et toute URL FR publiée doit vivre pour toujours) — sauf peut-être `coefficient-viral`, à décider quand le contenu de R2-11 sera là.
+
+### R2-17 — `/how-it-works` répète chaque nom de pilier deux fois
+
+**Type** F · **Effort** XS · **Statut** À faire
+
+**Constat.** `how-it-works/page.tsx:60-61` rend un `MetaLabel` puis un `<h2>` avec la même chaîne : « ACQUISITION / Acquisition / How people find you… ». Visible en capture.
+
+**Correctif proposé.** L'eyebrow devient le numéro d'étape (« Étape 1 sur 5 »), le `<h2>` garde le nom — et devient un lien (R2-13).
+
+---
+
+## Lot D — Robustesse et sécurité
+
+### R2-18 — Aucun en-tête de sécurité hors HSTS
+
+**Type** T · **Effort** S · **Statut** À faire
+
+**Constat.** `next.config.mjs` n'a pas de `headers()`, il n'y a pas de `vercel.json`, et `proxy.ts` n'ajoute que `x-tdg-locale` et le cookie. En production, le seul en-tête de sécurité est `strict-transport-security`, posé par Vercel. Pas de `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, ni de `frame-ancestors` : `/r/<id>` — page publique avec de vraies actions — peut être embarquée dans une iframe par n'importe quel site.
+
+**Correctif proposé.** Un bloc `headers()` statique dans `next.config.mjs` : `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` minimal, `Content-Security-Policy: frame-ancestors 'none'`. Deux garde-fous : **jamais `no-referrer`** (les liens CV sont volontairement `noopener` sans `noreferrer` pour que l'analytics du CV attribue le trafic — un `Referrer-Policy` trop strict annulerait ça silencieusement) ; et **pas de CSP `script-src` complète dans cet item** : elle exigerait un nonce par requête, donc re-dynamiserait les 36 pages et déferait R-24. Une CSP complète est une décision séparée, à commencer en `Report-Only`.
+
+**Vérification attendue.** `curl -I` en production ; spec E2E qui lit les en-têtes sur `/r/sample` et `/en`.
+
+### R2-19 — Amplification de lectures Firestore non authentifiée sur `/r/<id>`
+
+**Type** T · **Effort** S · **Statut** À faire
+
+**Constat.** `r/[id]/page.tsx:128` et `opengraph-image.tsx:80` lisent la soumission via `unstable_cache` clé par id : **chaque id distinct est un miss, donc une lecture Firestore facturée**, que le document existe ou non. L'id vient du paramètre de route sans aucune validation. Aucune limite de débit sur les GET (`rateLimit()` n'est appelé que dans les deux POST). Une boucle `curl /r/$(uuidgen)` consomme le quota Spark (50 000 lectures/jour) sans effort, et l'épuiser rend **tout** le plan de données indisponible — résultats existants compris. La route OG est la plus chère par requête : `loadFonts()` relit quatre fichiers (~235 Ko) **à chaque appel** (`opengraph-image.tsx:98`), avant un rendu Satori complet, y compris pour `/r/sample` qui ne touche pas Firestore.
+
+**Correctif proposé.** Du moins cher au plus utile : (1) `isValidSubmissionId` existe déjà (`referral.ts:28`) — l'appliquer dans `page.tsx` et `opengraph-image.tsx` avant toute lecture (`notFound()` sinon), ce qui ferme aussi le cas d'un id exotique qui ferait lever `INVALID_ARGUMENT` côté Firestore et tomber sur le document nu de Next (R2-23) ; (2) mémoïser `loadFonts()` au niveau du module ; (3) appliquer `rateLimit()` aux GET `/r/` dans le proxy avec un budget large, ou les règles de pare-feu Vercel — même caveat « en mémoire, par instance » que R-15, mais une limite vaut mieux qu'aucune sur le chemin de lecture.
+
+### R2-20 — `freeContext` conservé indéfiniment pour calculer un booléen
+
+**Type** T · **Effort** S · **Statut** À faire
+
+**Constat.** `create-submission.ts:251-252` persiste `contextAnswers` et `freeContext`. Trace de chaque lecture après écriture : `freeContext` n'est lu qu'à `growth-stats.ts:70`, **en truthiness** (le texte lui-même n'est relu par rien) ; `contextAnswers`, `modelUsed`, `completed`, `locale` du Deep dive ne sont relus par rien du tout. Aucune TTL Firestore, aucune suppression nulle part. Le champ le plus sensible que le produit détient — un fondateur décrivant son entreprise dans ses mots — est donc conservé pour toujours afin de compter combien de personnes l'ont rempli.
+
+**Correctif proposé.** Écrire `freeContextProvided: boolean` à la place du texte, cesser d'écrire `contextAnswers` et `modelUsed`, lire le booléen dans `growth-stats.ts`. Garder `freeContext` optionnel dans le type pour que les documents existants se lisent encore. Si le texte brut est vraiment voulu « pour déboguer », la version honnête est un champ dédié avec une TTL Firestore déclarée et une durée écrite dans la notice de R2-03. Aucune IP, aucun user agent, aucun identifiant n'est stocké — ça, c'est propre.
+
+### R2-21 — Deep dive : deux requêtes concurrentes génèrent deux fois
+
+**Type** T · **Effort** S · **Statut** À faire
+
+**Constat.** `deep-dive/route.ts` : lecture non cachée (ligne 94, volontaire), test « déjà complété ? » (118), génération (133, quatre appels Gemini), puis `saveDeepDive` = `.update()` inconditionnel (138 ; `repository.ts:21-23`). Deux requêtes qui passent la ligne 118 avant que l'une atteigne 138 génèrent toutes les deux : huit générations, dernier écrit gagne. Le scénario n'est pas théorique depuis que R-20 persiste la progression : un utilisateur qui recharge pendant les 70 s (R2-09) et ressoumet, ou qui clique Réessayer, produit exactement cette course. Borné par la limite 5/h, donc un problème de quota, pas de disponibilité.
+
+**Correctif proposé.** `saveDeepDive` dans une transaction : relire, renoncer si `deepDive` existe déjà, écrire sinon ; la route renvoie le résultat du gagnant. Empêcher la *génération* double (et pas seulement l'écriture) demanderait un marqueur de réservation avec fenêtre d'expiration ; vu la limite 5/h, la transaction seule est probablement le bon niveau d'ingénierie — noter le marqueur comme escalade si la dépense Gemini devient un sujet.
+
+### R2-22 — Basic Auth admin : comparaison non constante, `atob` Latin-1
+
+**Type** T · **Effort** XS · **Statut** À faire
+
+**Constat.** `proxy.ts:36-37` compare le mot de passe avec `===`. Inexploitable en pratique à travers le jitter d'un edge Vercel, mais le repo traite ce sujet correctement ailleurs (`owner-token.ts:41-56`, `timingSafeEqual` avec pré-vérification de longueur) et l'incohérence est le genre qui se copie. À côté, `atob` (ligne 29) décode en Latin-1 : un mot de passe contenant un caractère non-ASCII ne correspondra jamais à ce qu'envoie un navigateur — pas une faille, mais ça y ressemblera le jour où ça arrivera.
+
+**Correctif proposé.** Comparer les digests SHA-256 des deux côtés avec `timingSafeEqual` (ou `crypto.subtle` + boucle constante si le runtime edge l'exige) ; décoder en UTF-8.
+
+### R2-23 — Aucun `error.tsx` : une panne rend le document nu de Next
+
+**Type** T · **Effort** S · **Statut** À faire
+
+**Constat.** `find src -name "error.tsx" -o -name "global-error.tsx"` : rien. R-26 a réglé cette classe de problème pour le 404 ; le 500 l'a toujours : une panne Firestore pendant `/r/<id>`, ou l'id exotique de R2-19, rend le document d'erreur intégré de Next, sans aucune feuille de style du produit.
+
+**Correctif proposé.** `src/app/(app)/error.tsx` sur `DetourCard tone="fault"` (le composant existe, c'est celui de l'écran d'erreur du quiz) et un `global-error.tsx` pour le niveau layout. Spec E2E qui force une erreur serveur (route de test ou id invalide) et vérifie le chrome.
+
+### R2-24 — Petites dettes : `rawPoints` public, logs Gemini non tronqués, pas de Dependabot
+
+**Type** T · **Effort** XS · **Statut** À faire
+
+Regroupées parce qu'aucune ne mérite un PR seule :
+- **`rawPoints` dans le payload RSC de tout visiteur.** `r/[id]/page.tsx:151` passe `breakdown` (avec la somme brute 0-60 par pilier) à tous ; `ResultView` ne l'affiche qu'au propriétaire, mais le serveur ne peut pas filtrer. Avec des options à 20/7/0, chaque somme atteignable correspond à un unique multiset de réponses : un visiteur peut retrouver exactement combien de « oui / partiel / non » l'auteur a donnés par pilier. Le score affiché en révèle déjà presque autant, mais `rawPoints` est **redondant** : `ScoreBreakdown` reçoit déjà `answers` et les points de chaque option et peut le recalculer. Le retirer du view-model.
+- **`errText` de l'API Gemini** (`client.ts:223-224`) est journalisé sans troncature ; une erreur `INVALID_ARGUMENT` de Google peut faire écho à la requête, qui contient `freeContext`. Tronquer à 300 caractères comme `response.ts` le fait déjà.
+- **Aucun `dependabot.yml`**, ni Renovate ; l'advisory `uuid` de R-18 a été trouvée par un `npm audit` manuel et rien ne signalera la suivante. Actions GitHub sur tags flottants `@v4` (acceptable, sauf dans `verify-live.yml` qui porte les secrets Firebase et Gemini : y épingler par SHA).
+- **3 dépréciations à `npm ci`** (`eslint@9.39.5` « no longer supported » en tête) et 4 majeures disponibles (eslint 10, TS 7, vitest 5, `@types/node` 26) — pas urgent, mais à ne pas laisser dériver un trimestre.
+
+### R2-25 — Le stderr de Playwright n'est pas vide, donc plus lu
+
+**Type** T · **Effort** XS · **Statut** À faire
+
+**Constat.** La suite est verte mais son stderr contient 5× `Internal: NoFallbackError` (bruit connu de `dynamicParams = false`, R-26) et 1× l'erreur d'identifiants Firebase (attendue, spec « unknown result never previews as a real image »). Une vraie erreur serveur nouvelle serait noyée dans du bruit que tout le monde a appris à ignorer.
+
+**Correctif proposé.** Soit faire disparaître le bruit à la source (rendre la spec OG « lien mort » indépendante de Firestore avec un id refusé par R2-19 avant toute lecture ; le `NoFallbackError` dépend de Next), soit une assertion de fin de suite qui compare le stderr du serveur à une liste blanche de motifs connus et échoue sur tout le reste.
+
+---
+
+## Lot E — Décisions produit (à trancher par Antoine)
+
+Ces cinq points ne sont pas des correctifs. Ce sont les leviers qui, à mon avis, séparent « un bon outil » de « une référence », et chacun change le produit — donc chacun se décide, pas se code.
+
+### R2-26 — Segmenter le benchmark : « la moyenne des SaaS B2B à ton stade »
+
+**Type** F · **Effort** M · **Statut** À trancher
+
+« Moyenne de tous les Tours : 61/100 » (R-20) est un chiffre honnête mais faible : un indie hacker pré-lancement et une scale-up n'ont rien à se dire à travers cette moyenne. Une ou deux questions de contexte en mode Quick — stade (pré-lancement / premiers clients / >100 clients / >1 000) et modèle (B2B / B2C / marketplace) — permettraient « la moyenne des SaaS B2B à ton stade », qui est un chiffre qu'on a envie de partager et de battre. Deux champs sur la soumission, un document `stats/<segment>` par combinaison (même mécanisme que `stats/global`), le même seuil de 30. C'est aussi la matière première d'un contenu « État de la croissance des produits early-stage, édition 2027 » — le format classique par lequel un outil devient une référence citée. Le coût : deux questions de plus dans un parcours vendu « 3 minutes », et une conversation avec l'agent produit sur leur formulation.
+
+### R2-27 — Historique de progression : les données sont déjà sur l'appareil
+
+**Type** F · **Effort** S · **Statut** À trancher
+
+SPEC.md §5 liste « historique de progression » en fast-follow. Depuis R-01/R-20, `tdg.results.v1` garde déjà jusqu'à 20 résultats datés avec leur score. Il manque seulement l'affichage : « Ton Tour précédent : 58 → 66 » sur la landing (à côté du dernier score) et sur le résultat (sous le score). Quasi gratuit, et c'est la rétention de l'outil lui-même — la raison de revenir dans trois mois, qui n'existe pas aujourd'hui. À décider : voulu ou non, et si oui, la copie.
+
+### R2-28 — Une page de métriques publique : l'outil montre son propre AARRR
+
+**Type** F · **Effort** M · **Statut** À trancher
+
+Le projet existe pour « démontrer par la preuve plutôt que par la description » (SPEC.md §1). La preuve la plus directe est une page publique `/metrics` (ou une section de `/about`) avec les chiffres réels de l'outil : Tours complétés, répartition des scores, taux de Deep dive, taux de partage, K-factor — tel que redéfini en R2-01 — et la boucle de croissance dessinée. C'est le format « open metrics » que les fondateurs et les PM growth reconnaissent immédiatement, et c'est la version publique de ce que `/admin/stats` calcule déjà. Risques à peser : des chiffres petits les premiers mois (seuils d'affichage, ou l'assumer explicitement « en construction, en public »), et le fait qu'un K < 1 affiché est honnête mais pas flatteur — ce qui est précisément ce qui le rend crédible. Dépend de R2-01 ; la lecture GoatCounter existe déjà côté serveur.
+
+### R2-29 — Le roast est le crochet viral et il est invisible avant la 15ᵉ question
+
+**Type** F · **Effort** S · **Statut** À trancher
+
+Le ton roast est ce que le produit a de plus partageable (le brief lui consacre un écran et une image OG distincte), et un visiteur de la landing ne peut pas savoir qu'il existe : la nav « Roast mode » a été coupée du MVP (SPEC.md §12, décision explicite), et le sélecteur de ton n'apparaît qu'après 15 réponses. Ce n'est pas une omission à combler en silence — SPEC.md §12 dit exactement le contraire — mais c'est une décision à reprendre à la lumière de l'objectif « référence » : une phrase du headline roast sur la carte d'aperçu de la landing (un petit toggle « Straight up / Roast me » sur la carte, réutilisant `Segmented`), ou une ligne sous le sous-titre. Décision de design autant que de produit : à passer par le circuit Claude Design si retenu.
+
+### R2-30 — Fenêtre Tour de France (SPEC.md §10) : à caler dans le calendrier
+
+**Type** F · **Effort** S · **Statut** À trancher
+
+Le fast-follow événementiel (badge « Maillot Jaune », vocabulaire « échappée / peloton » pendant les dates du vrai Tour) est le prétexte de contenu annuel le plus naturel du projet et n'a pas de date. Le code est petit (une constante de dates, un badge, trois chaînes) ; ce qui compte, c'est de le construire **avant** juin 2027 pour que le post LinkedIn parte pendant le Tour, pas après. À mettre dans le plan de croissance avec une échéance, pas dans le backlog technique.
+
+---
+
+## Ce qui a été audité et jugé sain (ne pas ré-auditer)
+
+- **Toolchain** : `tsc`, ESLint, 249 tests, 80 specs, build, audit — tout vert et conforme aux chiffres de CLAUDE.md. La CI reproduit exactement cette séquence.
+- **Performance** : Lighthouse 96-97 sur quatre pages ; polices correctement chargées (`next/font`, 4 fichiers, 82 Ko, `swap`, sous-ensemble `latin` suffisant pour le français — vérifié sur les plages unicode émises) ; aucune image raster ; CLS 0 ; le seul tiers est GoatCounter. Le LCP de 2,5-2,8 s en mobile émulé est le H1 en Stardos Stencil et n'appelle pas d'action.
+- **i18n / indexation** : canonical + hreflang + `x-default` corrects sur les 36 URL (auto-référents, réciproques), `<html lang>` juste dans les deux arbres y compris avec un cookie contradictoire, copie FR réellement française, un H1 par page sans saut de niveau, `/r/[id]` en `noindex, follow` sans `Disallow` (le bon réglage), `NEXT_PUBLIC_SITE_URL` bien sur `www` en production, CDN Vercel en `HIT` sur les pages de contenu.
+- **Sécurité déjà en place** (re-vérifiée ligne à ligne, pas supposée) : jeton de propriétaire (hash, `timingSafeEqual`, vérifié avant la branche idempotente), validation stricte des payloads, codes d'erreur courts, limite de débit appelée en premier dans les deux POST, `x-forwarded-for` non falsifiable sur Vercel (documenté par Vercel, vérifié), clé Gemini en en-tête, `responseSchema`, intégrité du `?ref=` (forme puis existence, jamais bloquant), double troncature du contexte libre, `firestore.rules` en deny-all (à déployer — toujours une action manuelle ouverte de R-17), gate admin sur tous les chemins `/admin*` et `force-dynamic`, workflows (`workflow_dispatch` seul, pas de `pull_request_target`, secrets jamais imprimés, artefact sans secret).
+- **Payload public de `/r/<id>`** : tracé de bout en bout — `freeContext`, `contextAnswers`, `modelUsed`, `ownerTokenHash` ne peuvent pas atteindre le client. Seul `rawPoints` (R2-24) est discutable.
+- **Robustesse déjà bonne** : invalidation de cache qui ne peut pas faire échouer un Deep dive écrit, incrément `stats/global` avalé en cas d'échec, hygiène de prompt (`FREE_CONTEXT_INSTRUCTION`, délimitation), dates des stats sans dépendance au fuseau.
+
+## Ce que cette revue n'a pas pu vérifier
+
+- Les événements GoatCounter réels et le tableau de bord GoatCounter (proxy sortant du bac à sable, limite documentée depuis l'étape 11).
+- Que `firestore.rules` est déployé (console Firebase, compte d'Antoine).
+- Le comportement de Vercel Web Analytics / logs d'exécution : l'outil MCP Vercel ne voit toujours pas l'équipe du projet (même limite qu'à l'étape 12).
+- La qualité éditoriale du texte roast en production autrement qu'à travers les extraits déjà consignés dans CLAUDE.md.

@@ -961,6 +961,19 @@ Retour de la session Claude Design (brief `design/DS-EXTENSION-BRIEF-01.md`), d�
 
 **Copie validée.** Antoine a relu l'ensemble des textes marqués `TODO` (landing FR, écran 404, benchmark, dernier résultat, dépliant du score, texte de partage) et les 15 explications longues du glossaire : tous approuvés. Les marqueurs sont levés dans `dictionary.ts` et `content/glossary.ts`. Le commentaire en tête de `dictionary.ts` dit maintenant qu'une chaîne ajoutée après cette date repart au statut « à relire » — sinon le fichier approuvé devient un endroit où de la copie non relue se glisse sans marquage.
 
+### Deuxième revue technique & fonctionnelle (2026-09-06)
+
+Revue à froid demandée par Antoine, un jour après la clôture de `REVIEW.md`, avec un angle différent : non plus « qu'est-ce qui casse » mais « qu'est-ce qui empêche le site d'être une référence qui valorise le profil ». Les 30 constats, leur preuve `fichier:ligne`, l'ordre par lots et ce qui a été jugé sain sont dans **`REVIEW-02.md`**. Même convention de traitement que la première revue (un PR par item, statut tenu à jour dans le document, entrée ici à chaque livraison).
+
+Ce que cette revue a exécuté réellement plutôt que déduit : toute la toolchain (conforme aux chiffres de référence), une mesure de couverture (95,6 % des fichiers importés, mais `growth-stats.ts` n'est importé par aucun test), Lighthouse sur quatre pages (96-97 / 100 / 96 / 100), des captures des neuf écrans dans les deux langues et deux largeurs, des requêtes HTTP sur la production, et les données Search Console.
+
+Trois faits qui corrigent ou ferment des notes plus haut :
+- **Le point « à confirmer après déploiement » de R-24 est confirmé** : `x-vercel-cache: HIT` sur une page glossaire rechargée en production. `NEXT_PUBLIC_SITE_URL` est bien réglé sur `www` (canonical, hreflang et sitemap corrects en production — le repli `https://tourdegrowth.com` de `lib/site.ts` n'est utilisé qu'en local).
+- **La définition du K-factor de l'entrée du 2026-08-29 est fausse** : le dénominateur ne compte que les partageurs qui ont déjà converti, donc K ≥ 1 dès qu'il y a un parrainage. Le « K = 2,00 » vérifié ce jour-là illustre le biais, il ne le contredit pas. Voir `REVIEW-02.md` R2-01.
+- **Le CTA visiteur de la page de résultat** (« Refaire le Tour » pour quelqu'un qui n'a jamais fait le Tour), noté « à traiter en R-10 » dans l'entrée R-01, n'a pas été traité en R-10. Voir R2-02.
+
+**Piège d'outillage** : Next 16.3 (Turbopack) n'imprime plus les tailles de bundle au build — plus de colonne « First Load JS ». Pour surveiller un budget, mesurer sur disque (`.next/static/chunks`) ou chercher une chaîne connue dans les chunks référencés par une page, ce qui est la méthode qui a révélé que tout `UI_STRINGS` part dans le bundle de chaque page de contenu (R2-14).
+
 
 ---
 
@@ -970,7 +983,7 @@ Tout ce qui précède est un journal, dans l'ordre où les choses se sont passé
 
 ### Où en est le produit
 
-En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue, avec les deux modes (Quick déterministe, Deep dive généré par Gemini). La revue technique et fonctionnelle du 2026-09-05 est **close** : les 26 constats de `REVIEW.md` sont traités.
+En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue, avec les deux modes (Quick déterministe, Deep dive généré par Gemini). La revue technique et fonctionnelle du 2026-09-05 est **close** : les 26 constats de `REVIEW.md` sont traités. **Une seconde revue est ouverte** (`REVIEW-02.md`, 2026-09-06) : 25 constats à traiter par lots A → D, plus 5 décisions produit (lot E) qui appartiennent à Antoine. Commencer par le lot A.
 
 **Chiffres de référence** (à comparer, pas à recopier aveuglément) : 249 tests unitaires, 80 specs Playwright, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro.
 
@@ -983,7 +996,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | `/r/<id>` déborde de 37 px à 320 px | Hors contrat (DESIGN-BRIEF fixe 390 et exige 375-430) ; c'est le `PillarChip` | Une décision de design, pas un correctif évident. Antoine a choisi de laisser. |
 | `guidelines/` absent du bundle d'extension 01 | Le README du bundle l'annonce, l'archive ne le contenait pas | Sans conséquence à ce jour ; à demander si on en a besoin. |
 
-Rien d'autre n'est en attente côté code. Le reste (lancement, SEO, seeding, payant) est le plan de croissance, qui appartient à Antoine.
+Le reste de ce qui est en attente côté code est dans `REVIEW-02.md`. Le lancement, le seeding et le payant sont le plan de croissance, qui appartient à Antoine ; le SEO, lui, est maintenant en grande partie dans le lot C de `REVIEW-02.md`.
 
 ### Les conventions qui comptent pour la suite
 
