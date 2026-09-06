@@ -89,6 +89,9 @@ describe("long-form term pages (REVIEW-02.md R2-11)", () => {
         "acquisition",
         "referral",
         "revenue",
+        "aarrr",
+        "aha-moment",
+        "onboarding",
       ]),
     );
   });

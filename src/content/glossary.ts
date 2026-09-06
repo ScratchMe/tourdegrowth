@@ -50,6 +50,8 @@ export interface GlossaryEntry {
 export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   aarrr: {
     ...GLOSSARY_TERMS.aarrr,
+    deep: GLOSSARY_DEEP.aarrr,
+    updatedAt: "2026-09-06", // R2-11, lot 4
     extended: {
       fr: "Dave McClure (500 Startups) a présenté ce cadre en 2007 pour répondre à un problème simple : les fondateurs suivaient trop de métriques sans savoir lesquelles comptaient vraiment à chaque étape. L'ordre n'est pas arbitraire — c'est un entonnoir. Un produit qui dépense en acquisition alors que son activation fuit remplit un seau percé : chaque euro dépensé en amont perd de la valeur en aval. La plupart des équipes découvrent qu'un seul pilier tire toute la note vers le bas ; c'est exactement ce que ce test calcule, pilier par pilier, plutôt que de donner une impression générale.",
       en: "Dave McClure (500 Startups) introduced this framework in 2007 to solve a simple problem: founders were tracking too many metrics without knowing which ones mattered at which stage. The order isn't arbitrary — it's a funnel. A product spending on acquisition while activation leaks is filling a leaky bucket: every euro spent upstream loses value downstream. Most teams find that one single pillar is dragging the whole score down; that's exactly what this test calculates, pillar by pillar, instead of giving one vague overall impression.",
@@ -114,6 +116,8 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   "aha-moment": {
     ...GLOSSARY_TERMS["aha-moment"],
+    deep: GLOSSARY_DEEP["aha-moment"],
+    updatedAt: "2026-09-06", // R2-11, lot 4
     extended: {
       fr: "L'exemple le plus cité vient de Facebook : les équipes croissance avaient trouvé qu'un nouvel utilisateur qui atteignait 7 amis en 10 jours restait presque toujours par la suite — ce seuil précis est devenu leur boussole d'onboarding pendant des années. Trouver son propre moment « aha » demande de regarder en arrière, pas en avant : quelle action, faite tôt, les utilisateurs qui sont restés ont-ils tous en commun ? C'est rarement la fonctionnalité la plus mise en avant dans l'interface — souvent une action secondaire que personne ne pousse assez.",
       en: "The most-cited example comes from Facebook: growth teams found that a new user who reached 7 friends in 10 days almost always stuck around afterward — that specific threshold became their onboarding compass for years. Finding your own aha moment means looking backward, not forward: what early action do all the users who stayed have in common? It's rarely the most prominently featured part of the interface — often a secondary action nobody pushes hard enough.",
@@ -168,6 +172,8 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   onboarding: {
     ...GLOSSARY_TERMS.onboarding,
+    deep: GLOSSARY_DEEP.onboarding,
+    updatedAt: "2026-09-06", // R2-11, lot 4
     extended: {
       fr: "L'onboarding est le chemin, l'activation est la destination — les deux se confondent souvent à tort. L'erreur la plus fréquente est de tout expliquer d'un coup dès la première visite plutôt que de révéler les choses progressivement, au moment où l'utilisateur en a réellement besoin. Un bon onboarding se mesure à une seule question : combien de temps sépare l'inscription du moment « aha » — plus ce délai est court, mieux le parcours est calibré.",
       en: "Onboarding is the path, activation is the destination — the two are often wrongly treated as the same thing. The most common mistake is explaining everything at once on the first visit instead of revealing things progressively, right when the user actually needs them. A good onboarding is measured by one question: how much time separates sign-up from the aha moment — the shorter that gap, the better calibrated the path.",
