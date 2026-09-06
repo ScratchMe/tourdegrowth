@@ -1227,9 +1227,9 @@ Tout ce qui précède est un journal, dans l'ordre où les choses se sont passé
 
 ### Où en est le produit
 
-En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue, avec les deux modes (Quick déterministe, Deep dive généré par Gemini). La revue technique et fonctionnelle du 2026-09-05 est **close** : les 26 constats de `REVIEW.md` sont traités. **Une seconde revue est ouverte** (`REVIEW-02.md`, 2026-09-06) : 25 constats à traiter par lots A → D, plus 5 décisions produit (lot E) qui appartiennent à Antoine. Commencer par le lot A.
+En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue, avec les deux modes (Quick déterministe, Deep dive généré par Gemini). La revue technique et fonctionnelle du 2026-09-05 est **close** (`REVIEW.md`, 26 constats). **La seconde revue (`REVIEW-02.md`, 2026-09-06) est close côté code** : 24 constats livrés le jour même en 20 PR (#61 à #84), le 25ᵉ (R2-03, pages légales) est livré **en draft** sur la PR #79 et ne peut pas merger tant que `CONTACT_EMAIL` est vide dans `src/content/legal.ts`. Restent à Antoine : cette adresse, les cinq décisions produit du lot E (R2-26 à R2-30), la suppression des dix branches listées en R2-31, et surtout **la relecture de la copie** — c'est le plus gros bloc jamais produit ici (quinze pages de glossaire long, la page À propos, les deux pages légales, une vingtaine de chaînes d'interface), tout marqué `TODO: à relire (REVIEW-02)`.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément) : 255 tests unitaires, 80 specs Playwright, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro.
+**Chiffres de référence** (à comparer, pas à recopier aveuglément) : 295 tests unitaires, 118 specs Playwright, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro. La PR #79 en ajoute 6 et 7 respectivement, dont **un test et quatre specs volontairement rouges** tant que l'adresse de contact manque.
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 
@@ -1240,6 +1240,9 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | `/r/<id>` déborde de 37 px à 320 px | Hors contrat (DESIGN-BRIEF fixe 390 et exige 375-430) ; c'est le `PillarChip` | Une décision de design, pas un correctif évident. Antoine a choisi de laisser. |
 | `guidelines/` absent du bundle d'extension 01 | Le README du bundle l'annonce, l'archive ne le contenait pas | Sans conséquence à ce jour ; à demander si on en a besoin. |
 | Image OG : tokens recopiés à la main dans `src/lib/og/tokens.ts` | Deux images partagent désormais un seul fichier de constantes | Si `globals.css` change une couleur, la resynchroniser là. |
+| PR #79 (R2-03, pages légales) en draft | Rouge exprès : un test de garde et quatre specs exigent un `mailto:` | Antoine renseigne `CONTACT_EMAIL` (et, s'il les connaît, `FIRESTORE_REGION`, `GEMINI_TIER`), relit, puis rebase et merge. |
+| Dependabot #72 (TypeScript 7, ESLint 10, Vitest 5) | Laissée ouverte : `typescript-eslint` embarqué par `eslint-config-next` ne supporte pas TS 7 | Quand `eslint-config-next` suivra ; ou séparer les deux patchs des trois majeures. |
+| Copie du 2026-09-06 non relue | `glossary-deep.ts`, `about.ts`, `legal.ts`, chaînes de `dictionary.ts`/`nav-strings.ts`/`glossary-terms.ts`/`how-it-works.ts` | La relecture d'Antoine ; lever les marqueurs et mettre à jour les `updatedAt` des pages retouchées. |
 
 Le reste de ce qui est en attente côté code est dans `REVIEW-02.md`. Le lancement, le seeding et le payant sont le plan de croissance, qui appartient à Antoine ; le SEO, lui, est maintenant en grande partie dans le lot C de `REVIEW-02.md`.
 
@@ -1252,6 +1255,9 @@ Le reste de ce qui est en attente côté code est dans `REVIEW-02.md`. Le lancem
 5. **Un test de non-vacuité qui passe est lui-même un signal.** Deux fois le 2026-09-06 il a révélé autre chose que ce qu'il cherchait : un bug de CSS dé-scopé, puis le fait qu'un durcissement n'était pas observable. Ne pas le traiter comme une formalité.
 6. **Toute nouvelle chaîne de copie repart au statut « à relire ».** Le contenu de `dictionary.ts` et `content/glossary.ts` a été validé par Antoine le 2026-09-06 ; un fichier approuvé est exactement l'endroit où de la copie non relue se glisse sans se voir.
 7. **Le contraste est vérifié par la CI, sans aucune exception restante.** `KNOWN_CONTRAST_GAPS` est vide dans `e2e/accessibility.spec.ts`. Une nuance plus discrète demande un token qui passe AA, pas une exception — et une couleur translucide se compose **sur son fond réel** avant d'être mesurée.
+8. **Un numéro de PR écrit dans les docs avant la création se vérifie après.** Dependabot a pris #67 à #70 et #72 au milieu du plan et décalé toutes les prédictions ; les statuts de `REVIEW-02.md` ont dû être corrigés une fois. Créer la PR, lire le numéro renvoyé, puis seulement l'écrire.
+9. **`expectedHeadSha` au merge, c'est le SHA complet de `git rev-parse <branche>`**, jamais retapé de mémoire : un SHA inventé a fait rejeter le merge de la PR #80 en 409, ce qui est le bon comportement — mais il aurait suffi d'une coïncidence pour merger la mauvaise tête.
+10. **Une branche empilée se rebase avec `git rebase --onto origin/main <ancienne-base> <branche>`** après le merge de la PR du dessous, jamais avec un simple `git rebase main` (qui rejoue aussi les commits déjà squashés et crée des conflits fantômes).
 
 ### Carte du repo
 
@@ -1260,9 +1266,9 @@ src/app/[locale]/        pages de contenu, statiques, une URL par langue
 src/app/(app)/           quiz, résultat, deep dive, admin — dynamiques, sans préfixe de langue
 src/app/api/             deux routes POST : création de soumission, Deep dive
 src/components/          core / brand / quiz / result / glossary — le design system porté
-src/content/             copie livrée par l'agent produit (validée)
-src/lib/                 scoring (pur), i18n (dont meta.ts), og (polices + tokens des images de partage), gemini, submissions, analytics
+src/content/             copie livrée par l'agent produit (validée) ; glossary-deep.ts, about.ts, legal.ts = premier jet de la revue 02, à relire
+src/lib/                 scoring (pur), i18n (dont meta.ts), seo (JSON-LD), og (polices + tokens des images de partage), gemini, submissions, analytics
 design/                  brief d'origine, brief d'extension 01, bundle de retour
-e2e/                     80 specs Playwright contre un build de production
+e2e/                     118 specs Playwright contre un build de production
 scripts/live/            sondes contre les vrais services, lancées à la main
 ```
