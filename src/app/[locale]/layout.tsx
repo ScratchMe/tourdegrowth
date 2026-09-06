@@ -1,6 +1,5 @@
-import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
-import { isLocale, LOCALES } from "@/lib/i18n/locale";
+import { DEFAULT_LOCALE, isLocale, LOCALES } from "@/lib/i18n/locale";
 import { RootShell, rootMetadata } from "../root-shell";
 
 export const metadata = rootMetadata;
@@ -16,11 +15,20 @@ export const metadata = rootMetadata;
  * at build time and served from the CDN.
  *
  * It also guards the subtree. `[locale]` is a dynamic segment at the root, so
- * it matches any first path segment that isn't one of the app's static
- * folders (`quiz`, `r`, `deep-dive`, `admin`, `api`). Without this check,
- * `/nonsense` would quietly render the landing page in the default language
- * instead of a 404.
+ * it would otherwise match any first path segment that isn't one of the app's
+ * static folders (`quiz`, `r`, `deep-dive`, `admin`, `api`), and `/nonsense`
+ * would quietly render the landing page in the default language.
+ *
+ * `dynamicParams = false` is how that is refused, and the choice matters
+ * (REVIEW.md R-26). The guard used to be a `notFound()` call in the body
+ * below — which works, but makes `/nonsense` a route that MATCHED and then
+ * threw, and a thrown `notFound()` from a root layout has no boundary to
+ * render in: Next fell back to its own bare error document. Refusing the
+ * match outright turns it into an ordinary routing miss, which
+ * `global-not-found.tsx` handles with the product's own chrome.
  */
+export const dynamicParams = false;
+
 export function generateStaticParams(): { locale: string }[] {
   return LOCALES.map((locale) => ({ locale }));
 }
@@ -32,7 +40,8 @@ export default async function LocaleRootLayout({
   children: ReactNode;
   params: Promise<{ locale: string }>;
 }) {
+  // Narrowing only: `dynamicParams = false` already guarantees this is one of
+  // LOCALES, so the fallback is unreachable rather than a real default.
   const { locale } = await params;
-  if (!isLocale(locale)) notFound();
-  return <RootShell locale={locale}>{children}</RootShell>;
+  return <RootShell locale={isLocale(locale) ? locale : DEFAULT_LOCALE}>{children}</RootShell>;
 }
