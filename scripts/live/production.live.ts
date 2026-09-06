@@ -141,6 +141,20 @@ describe("live production pipeline", () => {
       }),
     });
     const elapsed = Math.round((Date.now() - started) / 1000);
+
+    if (res.status === 502) {
+      // The route deliberately hides the cause behind a short stable code
+      // (R-04), so this probe cannot tell "Gemini is down" from "we broke the
+      // Deep dive" on its own. Say that, rather than leaving a bare 502 to be
+      // decoded — a run has already been red for the first reason.
+      throw new Error(
+        `Deep dive returned 502 DEEP_DIVE_FAILED after ${elapsed}s.\n` +
+          `  The route hides the cause on purpose (REVIEW.md R-04). To tell which it is:\n` +
+          `  - the "Gemini client against the real API" step in THIS run says whether the API is healthy;\n` +
+          `  - Vercel's function logs carry the full error.\n` +
+          `  An upstream outage here is not a regression; the user keeps their answers and can retry.`,
+      );
+    }
     expect(res.status, await res.text().catch(() => "")).toBe(200);
     report("deep dive latency", `${elapsed}s (four generations, in parallel)`);
 

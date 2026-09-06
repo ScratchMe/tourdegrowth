@@ -801,3 +801,14 @@ Ce que le run apprend malgré tout :
 **Ce chemin n'avait aucune couverture E2E** — celui-là même qui compte quand Gemini tombe. Deux specs ajoutées (`returning-visitor.spec.ts`) : après un 502, le bouton Réessayer renvoie **les mêmes 10 réponses et le même texte libre** sans que l'utilisateur retouche une seule question ; et un rechargement sur l'écran d'erreur ne le ramène pas à la question 1. Non-vacuité prouvée : en remplaçant `submit(answers, freeContext)` par `submit({}, "")` dans le bouton, exactement ces deux specs tombent.
 
 **Ce qui reste ouvert, et volontairement pas tranché seul** : faut-il étendre le budget de retry (par exemple une seconde passe sur la chaîne des modèles) ? C'est défendable, mais impossible à valider tant que Gemini répond 503 — on ne saurait pas si un run vert vient du changement ou du rétablissement du service. À décider avec Antoine quand l'API sera revenue à la normale.
+
+**Les deux workflows ne sont pas la même chose, et il ne faut jamais les confondre.** Question d'Antoine, en découvrant qu'un run pouvait rougir sans que le code y soit pour rien : « et du coup, toute l'idée de ne merger que si ce workflow passe ? »
+
+- **`ci.yml` est la barrière.** `push` + `pull_request`, entièrement hors-ligne, déterministe. C'est ce check (`Types, tests, build`) — et lui seul — qu'un ruleset doit exiger.
+- **`verify-live.yml` est une sonde.** `workflow_dispatch` uniquement, et elle touche trois services réels.
+
+Deux raisons indépendantes de ne **jamais** la mettre en check requis. La première est mécanique : ne se déclenchant pas sur `pull_request`, elle ne rapporte aucun statut sur une PR — GitHub attendrait donc indéfiniment un statut qui n'arrive jamais, et les merges seraient bloqués **en permanence**, pas seulement pendant une panne. La seconde est de conception : faire dépendre la capacité à livrer de la disponibilité de Gemini serait un mauvais échange.
+
+**Mais l'intuition derrière la question est juste** : un rouge qui ne veut rien dire finit par ne plus être lu. Correctif apporté — les sondes **nomment désormais le type de rouge**. Une chaîne de repli épuisée sur des statuts retriables lève une erreur `UPSTREAM UNAVAILABLE` qui dit explicitement que ce n'est pas une régression et qu'il faut relancer plus tard ; et le 502 côté production, dont la cause est masquée par R-04, explique où aller la chercher (l'étape Gemini du même run, ou les logs Vercel). Elles **échouent toujours** plutôt que d'être ignorées : un `skip` cacherait une panne durable, alors que savoir que le Deep dive est indisponible a de la valeur.
+
+Enfin, ça mérite d'être écrit une fois : en quatre runs, cette sonde a trouvé un bug utilisateur réel et intermittent (les réponses tronquées), une faiblesse de conception (la chaîne de repli sans pause), a démenti une de mes propres théories, et a confirmé sur un vrai document ce qui n'était prouvé que sur l'échantillon. Sa valeur n'est pas d'être verte.
