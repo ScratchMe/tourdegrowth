@@ -286,6 +286,7 @@ export default function QuizPage() {
                 onOpenGlossaryChange={setOpenGlossaryId}
                 glossaryCloseLabel={tc(UI_STRINGS.glossary.closeLabel, locale)}
                 glossaryLabelTemplate={tc(UI_STRINGS.glossary.definitionLabelTemplate, locale)}
+                glossaryMoreLabel={tc(UI_STRINGS.glossary.moreLabel, locale)}
               />
             </QuestionCard>
 

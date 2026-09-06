@@ -50,11 +50,11 @@ La colonne **Autonomie** dit ce que chaque item attend d'Antoine : **Auto** = je
 | | R2-09 | Le Deep dive dure ~70 s et rien ne prévient | F | S | Relecture | **Fait** (PR #73, 2026-09-06) — 2 chaînes à relire |
 | | R2-10 | Le calcul de la métrique reine n'a aucun test | T | S | Auto | **Fait** (PR #62, 2026-09-06) |
 | **C — Contenu de référence** | R2-11 | Glossaire : 76 à 105 mots par terme, contre 600 à 1 500 chez ceux qui rangent | F | L | Relecture (lourde) | À faire |
-| | R2-12 | « AARRR » n'apparaît ni sur la landing ni sur `/how-it-works` | F | S | Relecture | À faire |
-| | R2-13 | Maillage interne : le glossaire n'est lié depuis aucune page qui a de l'autorité | F | S/M | Auto | À faire |
+| | R2-12 | « AARRR » n'apparaît ni sur la landing ni sur `/how-it-works` | F | S | Relecture | **Fait** (PR #76, 2026-09-06) — 2 chaînes retouchées, à relire |
+| | R2-13 | Maillage interne : le glossaire n'est lié depuis aucune page qui a de l'autorité | F | S/M | Auto | **Fait** (PR #76, 2026-09-06) — 1 chaîne à relire |
 | | R2-14 | Le dictionnaire bilingue entier et tout le glossaire partent dans le bundle client | T | S | Auto | **Fait** (PR #75, 2026-09-06) — gardé par un test statique |
 | | R2-15 | Structured data : un seul bloc JSON-LD, identique en FR et en EN | F | M | Auto | **Fait en partie** (PR #58 : localisé, `author`) — reste `DefinedTerm`, `BreadcrumbList`, `url` par langue |
-| | R2-16 | Titres FR non localisés là où la requête française diffère | F | S | Relecture | À faire |
+| | R2-16 | Titres FR non localisés là où la requête française diffère | F | S | Relecture | **Fait** (PR #76, 2026-09-06) — `x-default` laissé sur `/en`, voir la section |
 | | R2-17 | `/how-it-works` répète chaque nom de pilier deux fois | F | XS | Auto | **Fait** (PR #61, 2026-09-06) |
 | **D — Robustesse et sécurité** | R2-18 | Aucun en-tête de sécurité hors HSTS | T | S | Auto | **Fait** (PR #64, 2026-09-06) — CSP `script-src` complète volontairement hors périmètre |
 | | R2-19 | Amplification de lectures Firestore non authentifiée sur `/r/<id>` | T | S | Auto | **Fait** (PR #65, 2026-09-06) |
@@ -303,7 +303,7 @@ L'ancien ratio peut rester s'il est renommé pour ce qu'il est (« référées p
 
 **Constat.** Les slugs sont anglais dans l'arbre FR (`/fr/glossary/cac`), ce qui est acceptable pour la plupart des termes (les praticiens francophones cherchent `CAC`, `churn`, `LTV`, `onboarding`). Mais la requête de tête française pour `cac` est « coût d'acquisition client », et cette expression n'est **ni dans le H1, ni dans le titre** de `/fr/glossary/cac` (H1 : « CAC »). `viral-coefficient` a un terme FR localisé (« Coefficient viral ») mais un slug anglais. Détails : `glossary.ts:123` écrit `Moment "aha"` avec des guillemets ASCII alors que le commentaire du fichier dit « moment « aha » » ; `routes.ts:130` pointe `x-default` sur `/en` plutôt que sur `/`, l'URL qui négocie la langue.
 
-**Correctif proposé.** La moitié bon marché d'abord : `term.fr` = « CAC — Coût d'Acquisition Client », « LTV — Lifetime Value », « North Star Metric — métrique phare » ; guillemets français ; `x-default` → chemin non préfixé. Ne pas localiser les slugs pour l'instant (second axe de `generateStaticParams`, table slug→id, canonicals par langue, et toute URL FR publiée doit vivre pour toujours) — sauf peut-être `coefficient-viral`, à décider quand le contenu de R2-11 sera là.
+**Correctif proposé.** La moitié bon marché d'abord : `term.fr` = « CAC — Coût d'Acquisition Client », « LTV — Lifetime Value », « North Star Metric — métrique phare » ; guillemets français ; `x-default` → chemin non préfixé. **Livré sauf le dernier point, volontairement** : le chemin non préfixé répond par une redirection 308 selon `Accept-Language`, et Google demande que toute URL d'un jeu `hreflang` réponde 200 — un `x-default` qui redirige est précisément ce que ses consignes déconseillent. Il reste sur `/en`, la page de la langue par défaut, qui est une vraie page. Ne pas localiser les slugs pour l'instant (second axe de `generateStaticParams`, table slug→id, canonicals par langue, et toute URL FR publiée doit vivre pour toujours) — sauf peut-être `coefficient-viral`, à décider quand le contenu de R2-11 sera là.
 
 ### R2-17 — `/how-it-works` répète chaque nom de pilier deux fois
 

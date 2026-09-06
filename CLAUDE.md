@@ -1127,6 +1127,18 @@ Le constat disait deux choses : `SiteFooter` était `"use client"` pour un seul 
 
 ---
 
+### R2-13 + R2-12 + R2-16 : lier le glossaire depuis les pages qui comptent, nommer le cadre, titrer en français (2026-09-06)
+
+**Maillage (R2-13).** Le glossaire n'était lié que par l'index, le pied de page et ses propres `related`. Quatre liens ajoutés là où l'autorité et le trafic sont : les cinq `<h2>` de pilier de `/how-it-works` (les ids de pilier **sont** les ids de terme, aucune table de correspondance) ; les cinq chips de la carte d'aperçu de la landing, enveloppées dans un lien en `display: contents` pour ne rien changer au rendu ; un « En savoir plus → » dans le popover de définition — le cul-de-sac le plus fréquenté du site, sur `/quiz` et sur `/r/<id>` (qui est `noindex, follow`, donc c'est aussi le seul lien que chaque résultat partagé transmet au glossaire) ; et `aarrr`, le terme de tête du sujet et jusqu'ici le moins lié, ajouté aux `related` des cinq piliers — la borne du test passe de 3 à 4, décision écrite dans le test. Nuance honnête sur le popover : un crawler ne lit son balisage que s'il est ouvert, donc ce lien-là sert d'abord le lecteur.
+
+**« AARRR » nommé (R2-12).** Le mot n'apparaissait dans aucun texte visible de la landing ni de `/how-it-works`, alors que la meta description de cette dernière promettait « The AARRR framework explained ». Un mot inséré dans le sous-titre de la landing et dans l'intro de `/how-it-works` — deux chaînes approuvées retouchées, donc marquées à relire.
+
+**Titres FR (R2-16).** « coût d'acquisition client » est la requête française de tête et n'apparaissait ni dans le H1 ni dans le titre de `/fr/glossary/cac`. `term.fr` devient « CAC — Coût d'Acquisition Client », « LTV — Lifetime Value », « North Star Metric — métrique phare » (à relire) ; « Moment « aha » » prend enfin ses guillemets français. Ces termes sont aussi les titres des popovers : c'est voulu, le popover gagne à dire le nom complet. **Pas fait, et dit pourquoi** : pointer `x-default` sur le chemin non préfixé, qui répond par une 308 — Google demande que toute URL d'un jeu `hreflang` réponde 200 ; `x-default` reste sur `/en`, une vraie page. Les slugs FR ne bougent pas non plus (coût élevé, gain faible, et une URL publiée ne meurt jamais ici).
+
+**Vérifié en réel** : lint, tsc, 283 tests (+1), `next build`, **101 specs Playwright** (+4 : les cinq liens de `/how-it-works`, les cinq chips de la landing en FR, le lien du popover sur `/r/sample`, le lien AARRR d'une page de pilier), captures relues (popover EN desktop et FR mobile sur le quiz, index FR mobile avec les nouveaux titres, survol d'un titre lié sur `/how-it-works`).
+
+---
+
 ## État du projet au 2026-09-06 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.

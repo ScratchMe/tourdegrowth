@@ -162,3 +162,11 @@
     width: 100%;
   }
 }
+
+/* REVIEW-02.md R2-13 — the preview card's chips link to their glossary pages,
+   without changing how the chip looks. */
+.previewChipLink {
+  display: contents;
+  color: inherit;
+  text-decoration: none;
+}

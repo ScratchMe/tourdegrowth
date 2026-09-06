@@ -81,21 +81,25 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
     },
   },
   "aha-moment": {
-    term: { fr: 'Moment "aha"', en: '"Aha" moment' },
+    // R2-16: French quotation marks, as the file's own comment always said.
+    term: { fr: "Moment « aha »", en: '"Aha" moment' },
     definition: {
       fr: "L'instant précis où un nouvel utilisateur comprend enfin pourquoi ton produit lui est utile.",
       en: "The precise instant a new user finally understands why your product is useful to them.",
     },
   },
   cac: {
-    term: same("CAC"),
+    // TODO: à relire (REVIEW-02) — R2-16: the French head query is "coût
+    // d'acquisition client" and it appeared in neither the H1 nor the title.
+    term: { fr: "CAC — Coût d'Acquisition Client", en: "CAC" },
     definition: {
       fr: "Coût d'Acquisition Client : combien tu dépenses en moyenne pour obtenir un nouveau client.",
       en: "Customer Acquisition Cost: how much you spend on average to acquire one new customer.",
     },
   },
   ltv: {
-    term: same("LTV"),
+    // TODO: à relire (REVIEW-02) — R2-16.
+    term: { fr: "LTV — Lifetime Value", en: "LTV" },
     definition: {
       fr: "Lifetime Value : la valeur totale qu'un client génère en moyenne sur toute sa relation avec ton produit.",
       en: "Lifetime Value: the total value an average customer generates over their whole relationship with your product.",
@@ -137,7 +141,8 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
     },
   },
   "north-star-metric": {
-    term: same("North Star Metric"),
+    // TODO: à relire (REVIEW-02) — R2-16.
+    term: { fr: "North Star Metric — métrique phare", en: "North Star Metric" },
     definition: {
       fr: "L'indicateur unique qu'une équipe choisit de suivre en priorité, parce qu'il capture le mieux la valeur réelle livrée aux utilisateurs.",
       en: "The single metric a team chooses to prioritize, because it best captures the real value delivered to users.",

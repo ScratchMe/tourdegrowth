@@ -3,6 +3,7 @@
 import { GLOSSARY_TERMS, type GlossaryTermId } from "@/content/glossary-terms";
 import { tc } from "@/lib/i18n/translatable";
 import type { Locale } from "@/lib/i18n/locale";
+import { localePath } from "@/lib/i18n/routes";
 import { DefinitionPopover } from "./DefinitionPopover";
 import { DefinitionTrigger } from "./DefinitionTrigger";
 import styles from "./GlossaryTerm.module.css";
@@ -17,6 +18,8 @@ export interface GlossaryTermProps {
   closeLabel: string;
   /** e.g. "Definition: {term}" / "Définition : {term}" — {term} is replaced with the resolved term. */
   labelTemplate: string;
+  /** Link text for the term's own page, e.g. "Learn more →" — REVIEW-02.md R2-13. */
+  moreLabel: string;
 }
 
 /**
@@ -28,12 +31,22 @@ export interface GlossaryTermProps {
  * detection, so no hydration mismatch risk (same pattern the app already
  * uses elsewhere for breakpoint-dependent rendering).
  */
-export function GlossaryTerm({ id, locale, openId, onOpenChange, tone = "muted", closeLabel, labelTemplate }: GlossaryTermProps) {
+export function GlossaryTerm({
+  id,
+  locale,
+  openId,
+  onOpenChange,
+  tone = "muted",
+  closeLabel,
+  labelTemplate,
+  moreLabel,
+}: GlossaryTermProps) {
   const entry = GLOSSARY_TERMS[id];
   const term = tc(entry.term, locale);
   const definition = tc(entry.definition, locale);
   const open = openId === id;
   const label = labelTemplate.replace("{term}", term);
+  const more = { href: localePath(locale, `/glossary/${id}`), label: moreLabel };
 
   return (
     <span className={styles.anchor}>
@@ -47,13 +60,20 @@ export function GlossaryTerm({ id, locale, openId, onOpenChange, tone = "muted",
       {open ? (
         <>
           <span className={styles.anchoredWrap}>
-            <DefinitionPopover placement="anchored" term={term} definition={definition} onClose={() => onOpenChange(null)} />
+            <DefinitionPopover
+              placement="anchored"
+              term={term}
+              definition={definition}
+              more={more}
+              onClose={() => onOpenChange(null)}
+            />
           </span>
           <span className={styles.dockedWrap}>
             <DefinitionPopover
               placement="docked"
               term={term}
               definition={definition}
+              more={more}
               closeLabel={closeLabel}
               onClose={() => onOpenChange(null)}
             />

@@ -50,8 +50,10 @@ export const UI_STRINGS = {
     h1Line2: { en: "your growth ", fr: "" },
     h1Accent: { en: "stall?", fr: "cale-t-elle ?" },
     subtitle: {
-      en: "A guided check-up across Acquisition, Activation, Retention, Referral and Revenue — scored, explained, and built to share.",
-      fr: "Un diagnostic guidé sur l'Acquisition, l'Activation, la Retention, le Referral et le Revenue — noté, expliqué, et pensé pour être partagé.",
+      // TODO: à relire (REVIEW-02) — R2-12: "AARRR" added. The framework's name
+      // appeared nowhere in the landing's visible copy, only in its metadata.
+      en: "A guided AARRR check-up across Acquisition, Activation, Retention, Referral and Revenue — scored, explained, and built to share.",
+      fr: "Un diagnostic AARRR guidé sur l'Acquisition, l'Activation, la Retention, le Referral et le Revenue — noté, expliqué, et pensé pour être partagé.",
     },
     ctaPrimary: { en: "Start your Tour →", fr: "Démarre ton Tour →" },
     ctaSecondary: { en: "See a sample result", fr: "Voir un résultat d'exemple" },
@@ -134,6 +136,8 @@ export const UI_STRINGS = {
   glossary: {
     definitionLabelTemplate: { en: "Definition: {term}", fr: "Définition : {term}" },
     closeLabel: { en: "Close", fr: "Fermer" },
+    // TODO: à relire (REVIEW-02) — R2-13. The popover's way out, to the term's own page.
+    moreLabel: { en: "Learn more →", fr: "En savoir plus →" },
   },
 
   /** "How it works" page chrome (SPEC-ADDENDUM-01.md §1.3) not already in

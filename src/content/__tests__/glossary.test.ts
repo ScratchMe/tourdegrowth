@@ -26,10 +26,19 @@ describe("GLOSSARY (growth-plan Phase 2: extended /glossary/[term] content)", ()
     }
   });
 
-  it("every entry has 2-3 related terms — enough for real internal linking, not a token single link", () => {
+  it("every entry has 2-4 related terms — enough for real internal linking, not a token single link", () => {
+    // Upper bound raised from 3 to 4 by REVIEW-02.md R2-13: the five pillars
+    // each gained `aarrr`, the head term of the whole topic and until then the
+    // least-linked page of the glossary. A deliberate decision, not a loosening.
     for (const id of ALL_IDS) {
       expect(GLOSSARY[id].related.length, id).toBeGreaterThanOrEqual(2);
-      expect(GLOSSARY[id].related.length, id).toBeLessThanOrEqual(3);
+      expect(GLOSSARY[id].related.length, id).toBeLessThanOrEqual(4);
+    }
+  });
+
+  it("every pillar links the framework it belongs to (REVIEW-02.md R2-13)", () => {
+    for (const pillar of ["acquisition", "activation", "retention", "referral", "revenue"] as const) {
+      expect(GLOSSARY[pillar].related, pillar).toContain("aarrr");
     }
   });
 });
