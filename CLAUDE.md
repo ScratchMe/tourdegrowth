@@ -1057,6 +1057,20 @@ Deux absences volontaires, écrites dans le fichier pour qu'on ne les « corrige
 
 ---
 
+### R2-19 + R2-23 + R2-25 : le chemin de lecture d'un résultat, et ce qui se passe quand il casse (2026-09-06)
+
+**R2-19, trois choses sur le chemin `/r/<id>`.** (1) Un id qui ne peut pas être l'un des nôtres (les ids sont des UUID v4) est un 404 **avant** toute lecture Firestore — `page.tsx`, `generateMetadata` et l'image OG appellent tous `isValidSubmissionId`, la même garde que le `?ref=` a depuis R-03 ; chaque id distinct étant un miss de cache et donc une lecture facturée, c'était le trou le moins cher à fermer. (2) Les cinq fichiers de police des images OG étaient relus **à chaque rendu** ; `loadOgFonts` mémoïse maintenant la promesse au niveau du module, sans mettre en cache un échec. (3) Un budget de lecture sur `/r/` dans le proxy (120 requêtes par 10 minutes et par IP, `/r/sample` exclu), avec le même limiteur en mémoire que R-15 et la même franchise sur ce qu'il arrête. Les chiffres sont volontairement larges : les dépliants de liens de LinkedIn, X et Slack viennent d'un petit nombre d'IP partagées et chargent la page **et** son image à chaque partage — un budget assez serré pour ressembler à une protection renverrait des 429 au crawler dont la boucle de croissance dépend.
+
+**R2-23, une page d'erreur qui ressemble au produit.** `components/brand/ErrorScreen` (le ton `fault` de `DetourCard`, la copie de l'écran d'erreur du quiz, donc rien de nouveau à relire, le `digest` de Next en petit sous la carte), monté par `(app)/error.tsx` et `[locale]/error.tsx`, plus un `global-error.tsx` minimal pour le cas où un layout racine lui-même échoue.
+
+**Une limite du framework, mesurée et acceptée plutôt que contournée.** Quand la panne survient dans le **shell initial** d'une page (ici : `loadSubmission` qui lève au premier `await` de `/r/<id>`), Next ne rend pas la frontière d'erreur côté serveur : il sert son document minimal (`<html id="__next_error__">`, statut 500, corps vide) et la frontière est rendue **côté client** après hydratation — `curl` voit le document nu, un lecteur avec JavaScript voit notre écran en une fraction de seconde. Un `notFound()` au même endroit, lui, est rendu côté serveur : c'est un cas que Next traite spécialement. Obtenir un rendu serveur de l'écran de panne demanderait de déplacer la lecture derrière un `<Suspense>` pour que le shell parte avant, ce qui change le chargement de **toutes** les pages de résultat — pas le sujet de cet item. Deuxième découverte du même ordre : une erreur levée dans `generateMetadata` contourne complètement `error.tsx` ; la lecture y est donc enveloppée, et c'est le composant de page, qui voit le même rejet via `cache()`, qui lève dans la frontière.
+
+**R2-25.** La spec OG « lien mort » utilise maintenant un id refusé avant toute lecture (404 déterministe partout) ; la ligne « Firebase Admin credentials are missing » du stderr ne vient plus que de la spec de page d'erreur, qui le dit dans son commentaire. `Internal: NoFallbackError` reste : c'est Next.
+
+**Vérifié en réel** : lint, tsc, 268 tests unitaires (+4 sur le budget de lecture du proxy), `next build`, 95 specs Playwright (+2), et le HTML réellement servi relu au `curl` pour établir la limite ci-dessus au lieu de la supposer.
+
+---
+
 ## État du projet au 2026-09-06 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.

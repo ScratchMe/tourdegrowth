@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { LOCALE_COOKIE, isLocale, resolveLocale } from "@/lib/i18n/locale";
 import { isLocalizableContentPath, localePath, splitLocalePath } from "@/lib/i18n/routes";
+import { clientKey, rateLimit } from "@/lib/rate-limit";
 
 const ONE_YEAR = 60 * 60 * 24 * 365;
 
@@ -35,6 +36,35 @@ export function isAuthorizedForAdmin(request: NextRequest): boolean {
   // so a password containing ":" isn't truncated.
   const password = decoded.slice(decoded.indexOf(":") + 1);
   return password === expected;
+}
+
+/**
+ * Read budget on `/r/<id>` — REVIEW-02.md R2-19. Every distinct id is one
+ * Firestore read (the per-id cache can't help against a flood of fresh
+ * ids), and until now nothing at all limited GETs: a loop over random UUIDs
+ * could burn the free tier's daily reads and take every result page down
+ * with it. Same in-memory, per-instance limiter as the POST routes (R-15),
+ * with the same honesty about what it stops (the naive case) and not (a
+ * distributed one).
+ *
+ * The numbers are deliberately loose, and the window short, because of who
+ * else fetches these pages: LinkedIn's, X's and Slack's link unfurlers come
+ * from a small set of shared IPs and fetch the page AND its image for every
+ * share. A budget tight enough to feel like protection would 429 the very
+ * crawler the growth loop depends on. `/r/sample` reads no Firestore and is
+ * not counted.
+ */
+const RESULT_READ_LIMIT = { limit: 120, windowSeconds: 10 * 60 };
+
+export function isResultReadPath(pathname: string): boolean {
+  return pathname.startsWith("/r/") && !pathname.startsWith("/r/sample");
+}
+
+function tooManyRequestsResponse(retryAfterSeconds: number): NextResponse {
+  return new NextResponse("Too many requests.", {
+    status: 429,
+    headers: { "Retry-After": String(retryAfterSeconds) },
+  });
 }
 
 function unauthorizedResponse(): NextResponse {
@@ -80,6 +110,11 @@ export const LOCALE_HEADER = "x-tdg-locale";
 export function proxy(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/admin") && !isAuthorizedForAdmin(request)) {
     return unauthorizedResponse();
+  }
+
+  if (isResultReadPath(request.nextUrl.pathname)) {
+    const verdict = rateLimit(clientKey(request, "result-read"), RESULT_READ_LIMIT);
+    if (!verdict.allowed) return tooManyRequestsResponse(verdict.retryAfterSeconds);
   }
 
   const { pathname } = request.nextUrl;

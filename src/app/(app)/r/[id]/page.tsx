@@ -6,6 +6,7 @@ import { resolveRequestLocale } from "@/lib/i18n/resolve-request-locale";
 import { getSampleVerdicts, SAMPLE_RESULT } from "@/lib/submissions/sample";
 import { getBenchmarkAverage } from "@/lib/submissions/benchmark";
 import { getCachedSubmissionById } from "@/lib/submissions/cached-repository";
+import { isValidSubmissionId } from "@/lib/submissions/referral";
 import { buildQuickVerdicts, toDeepDiveView } from "@/lib/submissions/view-model";
 import { QUESTIONS } from "@/content/copy-library";
 import type { BreakdownData } from "./ScoreBreakdown";
@@ -25,6 +26,19 @@ interface PageProps {
  * one per view. Route handlers keep importing `getSubmissionById` directly.
  */
 const loadSubmission = cache(getCachedSubmissionById);
+
+/**
+ * REVIEW-02.md R2-19. Every distinct id is a cache miss and therefore one
+ * billed Firestore read, whether or not the document exists — so a route
+ * parameter that cannot possibly be one of ours (ids are UUID v4, see
+ * `referral.ts`) must 404 before anything is looked up. Same reasoning the
+ * `?ref=` path has applied since R-03: a bad id costs zero reads. It also
+ * keeps exotic path segments away from the Firestore client, whose own
+ * validation only rejects empty strings and `//`.
+ */
+function rejectImplausibleId(id: string): void {
+  if (id !== "sample" && !isValidSubmissionId(id)) notFound();
+}
 
 /**
  * The shared link's preview text — REVIEW.md R-10. Every result used to
@@ -65,6 +79,7 @@ function resultMetadata(total: number, weakestPillar: Pillar, locale: Locale, is
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
+  rejectImplausibleId(id);
 
   if (id === "sample") {
     // The sample's OG image is fixed to English (see opengraph-image.tsx), so
@@ -72,7 +87,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return resultMetadata(SAMPLE_RESULT.total, SAMPLE_RESULT.weakestPillar, "en", true);
   }
 
-  const submission = await loadSubmission(id);
+  // A read that FAILS (as opposed to one that finds nothing) must not throw
+  // from here: an error thrown while resolving metadata bypasses the
+  // segment's `error.tsx` and lands on Next's bare error document — the
+  // very thing REVIEW-02.md R2-23 removes. Return the minimal metadata and
+  // let the page component, whose `cache()`d call sees the same rejection,
+  // throw inside the boundary that renders our fault screen.
+  let submission;
+  try {
+    submission = await loadSubmission(id);
+  } catch {
+    return { title: "Tour de Growth", robots: { index: false, follow: true } };
+  }
   if (!submission) return { title: "Tour de Growth", robots: { index: false, follow: true } };
 
   return resultMetadata(submission.total, submission.weakestPillar, submission.locale, false);
@@ -105,6 +131,7 @@ function buildBreakdownData(locale: Locale, pillars: { pillar: Pillar; rawPoints
 // (SPEC.md §12) — never a real Firestore lookup, never recalculated.
 export default async function ResultPage({ params }: PageProps) {
   const { id } = await params;
+  rejectImplausibleId(id);
 
   if (id === "sample") {
     // Same locale-resolution priority as the root layout (cookie/header —

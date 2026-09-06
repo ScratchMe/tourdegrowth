@@ -57,13 +57,13 @@ La colonne **Autonomie** dit ce que chaque item attend d'Antoine : **Auto** = je
 | | R2-16 | Titres FR non localisés là où la requête française diffère | F | S | Relecture | À faire |
 | | R2-17 | `/how-it-works` répète chaque nom de pilier deux fois | F | XS | Auto | **Fait** (PR #61, 2026-09-06) |
 | **D — Robustesse et sécurité** | R2-18 | Aucun en-tête de sécurité hors HSTS | T | S | Auto | **Fait** (PR #64, 2026-09-06) — CSP `script-src` complète volontairement hors périmètre |
-| | R2-19 | Amplification de lectures Firestore non authentifiée sur `/r/<id>` | T | S | Auto | À faire |
+| | R2-19 | Amplification de lectures Firestore non authentifiée sur `/r/<id>` | T | S | Auto | **Fait** (PR #65, 2026-09-06) |
 | | R2-20 | `freeContext` conservé indéfiniment pour calculer un booléen | T | S | Auto | À faire |
 | | R2-21 | Deep dive : deux requêtes concurrentes génèrent deux fois | T | S | Auto | À faire |
 | | R2-22 | Basic Auth admin : comparaison non constante, `atob` Latin-1 | T | XS | Auto | À faire |
-| | R2-23 | Aucun `error.tsx` : une panne rend le document nu de Next | T | S | Auto | À faire |
+| | R2-23 | Aucun `error.tsx` : une panne rend le document nu de Next | T | S | Auto | **Fait** (PR #65, 2026-09-06) — limite : une panne dans le shell initial reste rendue côté client, voir CLAUDE.md |
 | | R2-24 | Petites dettes : `rawPoints` public, logs Gemini non tronqués, pas de Dependabot | T | XS | Auto | À faire |
-| | R2-25 | Le stderr de Playwright n'est pas vide, donc plus lu | T | XS | Auto | À faire |
+| | R2-25 | Le stderr de Playwright n'est pas vide, donc plus lu | T | XS | Auto | **Fait en partie** (PR #65) — la ligne Firebase ne vient plus que de la spec qui l'annonce ; `NoFallbackError` est à Next |
 | **E — Décisions produit (Antoine)** | R2-26 | Segmenter le benchmark : « la moyenne des SaaS B2B à ton stade » | F | M | Toi | À trancher |
 | | R2-27 | Historique de progression : les données sont déjà sur l'appareil | F | S | Toi | À trancher |
 | | R2-28 | Une page de métriques publique : l'outil montre son propre AARRR | F | M | Toi | À trancher |
@@ -429,7 +429,9 @@ Le fast-follow événementiel (badge « Maillot Jaune », vocabulaire « échapp
 
 **Type** T · **Effort** XS · **Statut** **Audit fait** (PR #61, 2026-09-06) — suppression à faire par Antoine dans l'interface GitHub
 
-**Constat.** Onze branches distantes en plus de `main` au 2026-09-06, toutes issues de PR déjà mergées : GitHub ne supprimait pas les branches de tête après merge (option activée par Antoine le 2026-09-06, donc le problème ne se reproduira plus pour les PR à venir).
+**Constat.** Onze branches distantes en plus de `main` au 2026-09-06, toutes issues de PR déjà mergées : GitHub ne supprimait pas les branches de tête après merge (option activée par Antoine le 2026-09-06, donc le problème ne se reproduira plus pour les PR à venir — la branche de l'audit, `claude/repo-technical-functional-audit-e9xr8t`, a d'ailleurs été supprimée automatiquement au merge de la PR #60).
+
+**Une affirmation à corriger, relayée par Antoine depuis une autre session** (« `main` n'a que trois commits, un commit sans parent depuis la PR #57, l'historique complet vit dans la branche de revue et les six branches `feat/`, la branche d'audit n'est pas mergée »). Mesuré le 2026-09-06 à 18 h 45 : `main` compte **56 commits**, la PR #60 est mergée et sa branche déjà supprimée. Ce qui est vrai, et qui vaut pour **toutes** les branches sans exception : l'historique commence à un commit **sans parent**, `739b7a2` (« Step 7 », squash de la PR #8, 2026-08-27). Les commits des PR #1 à #7 (scaffold, scoring, landing, questionnaire, sélecteur de ton, backend) ne sont atteignables depuis aucune branche — ni `main`, ni la branche de revue, ni `claude/tour-de-growth-tool-6q3tui`, qui ont exactement la même racine. Leur **contenu** est dans `main` (l'app en est faite) et leurs commits restent consultables sur les pages des PR GitHub ; seul le découpage commit par commit des sept premières étapes n'est plus dans l'arbre. Supprimer les branches ne change rien à cet état : elles ne contiennent pas cet historique non plus.
 
 **Vérification faite, branche par branche**, avant de dire qu'on peut supprimer : pour chacune, la ou les PR ouvertes depuis cette branche (une branche a servi à plusieurs PR successives) et leur date de merge, relevées par l'API GitHub — pas devinées d'après le nom.
 
@@ -445,11 +447,11 @@ Le fast-follow événementiel (badge « Maillot Jaune », vocabulaire « échapp
 | `claude/repo-technical-functional-review-w75nho` | #20 à #57 | 2026-09-06 | Supprimer. |
 | `claude/og-content-pages` | #58 | 2026-09-06 | Supprimer. |
 | `claude/og-bib-numero` | #59 | 2026-09-06 | Supprimer. |
-| `claude/repo-technical-functional-audit-e9xr8t` | #60 | 2026-09-06 | Supprimer. |
+| `claude/repo-technical-functional-audit-e9xr8t` | #60 | 2026-09-06 | Déjà supprimée automatiquement au merge (option activée). |
 
 Aucune branche ne porte de travail non repris. Les différences de contenu qu'on observe entre ces branches et `main` sont celles de `main` qui a continué d'avancer après leur merge (squash), pas du travail perdu.
 
-**Ce qui reste à faire.** Supprimer les onze branches (GitHub → Branches, ou `git push origin --delete <branche>`). Les branches des PR de ce plan se supprimeront seules au merge grâce à l'option activée.
+**Ce qui reste à faire.** Supprimer les dix branches restantes (GitHub → Branches, ou `git push origin --delete <branche>`). Les branches des PR de ce plan se suppriment seules au merge grâce à l'option activée — vérifié sur les PR #60 à #64.
 
 ---
 
