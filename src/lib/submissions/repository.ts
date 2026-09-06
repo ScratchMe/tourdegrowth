@@ -13,13 +13,30 @@ export async function getSubmissionById(id: string): Promise<Submission | null> 
   return doc.exists ? (doc.data() as Submission) : null;
 }
 
+export type SaveDeepDiveOutcome = "saved" | "already-present";
+
 /**
  * Persists the Deep dive result onto an already-existing submission
  * (SPEC-ADDENDUM-01.md §2.7) — the score/verdicts/answers written by
  * `saveSubmission` are never rewritten here, only the `deepDive` field.
+ *
+ * Check-and-set inside a transaction — REVIEW-02.md R2-21. The route tests
+ * "already enriched?" before generating, but two requests can both pass that
+ * test before either writes (a reload during the ~70 s generation and a
+ * resubmit, or the Retry button): both generated, and the last write won
+ * silently. The generation can't be un-spent from here, but the write can
+ * refuse to overwrite: the loser learns the winner's result is already
+ * there and the route sends it to the same page.
  */
-export async function saveDeepDive(id: string, deepDive: DeepDiveResult): Promise<void> {
-  await getDb().collection(COLLECTION).doc(id).update({ deepDive });
+export async function saveDeepDive(id: string, deepDive: DeepDiveResult): Promise<SaveDeepDiveOutcome> {
+  const db = getDb();
+  const ref = db.collection(COLLECTION).doc(id);
+  return db.runTransaction(async (tx) => {
+    const snapshot = await tx.get(ref);
+    if ((snapshot.data() as Partial<Submission> | undefined)?.deepDive) return "already-present";
+    tx.update(ref, { deepDive });
+    return "saved";
+  });
 }
 
 /**

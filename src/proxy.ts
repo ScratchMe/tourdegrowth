@@ -27,7 +27,10 @@ export function isAuthorizedForAdmin(request: NextRequest): boolean {
 
   let decoded: string;
   try {
-    decoded = atob(header.slice("Basic ".length));
+    // Browsers send the credentials UTF-8 encoded; `atob` alone yields
+    // Latin-1, so a password with an accent could never match (R2-22).
+    const binary = atob(header.slice("Basic ".length));
+    decoded = new TextDecoder().decode(Uint8Array.from(binary, (c) => c.charCodeAt(0)));
   } catch {
     return false;
   }
@@ -35,7 +38,26 @@ export function isAuthorizedForAdmin(request: NextRequest): boolean {
   // enough for a single-operator dashboard); split on the FIRST colon only,
   // so a password containing ":" isn't truncated.
   const password = decoded.slice(decoded.indexOf(":") + 1);
-  return password === expected;
+  return constantTimeEqual(password, expected);
+}
+
+/**
+ * Byte-by-byte comparison whose duration does not depend on WHERE two
+ * strings differ — REVIEW-02.md R2-22. A plain `===` returns at the first
+ * mismatching character, which is a timing side channel on a secret. Not
+ * realistically exploitable through an edge's jitter, but the codebase
+ * already does this right for the owner token (`owner-token.ts`,
+ * `timingSafeEqual`), and an inconsistency is the kind that gets copied.
+ * Runtime-agnostic (no `node:crypto`): the proxy must not depend on Node.
+ * Only the LENGTH can leak, as with `timingSafeEqual`'s own precondition.
+ */
+export function constantTimeEqual(a: string, b: string): boolean {
+  const x = new TextEncoder().encode(a);
+  const y = new TextEncoder().encode(b);
+  let diff = x.length ^ y.length;
+  const n = Math.max(x.length, y.length);
+  for (let i = 0; i < n; i += 1) diff |= (x[i] ?? 0) ^ (y[i] ?? 0);
+  return diff === 0;
 }
 
 /**

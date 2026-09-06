@@ -135,7 +135,14 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       { callGemini: (prompt) => callDeepDiveGemini(prompt, apiKey) },
     );
 
-    await saveDeepDive(id, deepDive);
+    const outcome = await saveDeepDive(id, deepDive);
+    if (outcome === "already-present") {
+      // Lost a race with a concurrent completion (REVIEW-02.md R2-21): the
+      // other request's Deep dive is the one on the document, and it is just
+      // as valid. Nothing to invalidate here — the winner did.
+      console.warn(`Deep dive for ${id} was completed concurrently; keeping the first write.`);
+      return NextResponse.json({ id }, { status: 200 });
+    }
     // The one moment a submission changes — drop the cached copy so the
     // result page shows the enriched version immediately (REVIEW.md R-14).
     invalidateSubmission(id);
