@@ -1006,6 +1006,18 @@ La vérification visuelle qui aurait dû l'attraper à l'étape 8 a été faite 
 
 **Vérifié** : les trois images rendues en local avec les nouvelles polices (`№` présent, résultat échantillon inchangé), `tsc`, `eslint`, 255 tests unitaires (+6), puis la production après merge.
 
+### R2-05 + R2-17 : le header des pages de contenu, et ce que l'audit des branches a révélé (2026-09-06)
+
+Première PR du plan de `REVIEW-02.md`. `components/brand/ContentHeader` remplace les trois copies du même header dans `/how-it-works`, `/glossary` et `/glossary/[term]` : les trois modules CSS avaient la règle sans `display: flex`, donc le wordmark et le sélecteur EN|FR se touchaient à gauche sur les 36 pages de contenu, desktop et mobile. Le header ne portait que le wordmark avant R-13 ; le sélecteur y a été ajouté sans adapter le conteneur, et personne n'a relu la capture de ces pages-là après l'extension 01. La spec `e2e/content-header.spec.ts` mesure la géométrie (même ligne, écart réel, sélecteur contre le bord droit de la colonne de lecture) sur les trois types de page et deux largeurs, plutôt que la présence d'une classe. Sur `/how-it-works`, l'eyebrow de chaque carte disait le nom du pilier que le `<h2>` juste dessous répétait ; il dit maintenant le numéro d'étape (`howItWorksPage.stageEyebrowTemplate`, à relire).
+
+**`main` avait bougé sous l'audit.** En dressant la liste des branches (demande d'Antoine), deux PR d'une autre session sont apparues, mergées pendant l'audit : #58 (métadonnées et Open Graph localisés sur les pages de contenu, JSON-LD par langue avec `author`, polices OG déplacées dans `lib/og/`) et #59 (glyphe « № », test de couverture des polices, 255 tests unitaires). R2-06, R2-07 et R2-15 étaient donc en partie déjà traités au moment où le plan a démarré : revérifiés sur le build de `main` (`curl` des balises, image OG en 200) et leur statut corrigé dans `REVIEW-02.md` plutôt que de refaire un travail déjà livré. Leçon : quand un audit dure plus d'une heure, refaire `git fetch` et relire `git log origin/main` avant d'écrire un statut.
+
+**Audit des branches (R2-31)** : onze branches distantes, toutes issues de PR mergées (#1 à #60), aucun travail non repris — vérifié par l'API GitHub (PR par branche) et non d'après les noms. La suppression revient à Antoine ; il a activé la suppression automatique des branches de tête, donc celles de ce plan disparaîtront seules.
+
+**Vérifié en réel** : lint, tsc, 255 tests unitaires, `next build`, **86 specs Playwright** (+6), captures du header sur `/en/how-it-works` desktop et `/fr/glossary/cac` mobile.
+
+---
+
 ## État du projet au 2026-09-06 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
