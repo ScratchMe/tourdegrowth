@@ -23,7 +23,8 @@ import type { GlossaryTermId } from "./glossary-terms";
  * LTV:CAC rule of thumb, CAC payback under 12 months for SMB SaaS, monthly
  * churn compounding), always with their caveat, never a made-up statistic.
  *
- * TODO: à relire (REVIEW-02) — R2-11, lot 1 (cac, ltv, churn). Premier jet
+ * TODO: à relire (REVIEW-02) — R2-11, lot 1 (cac, ltv, churn) et lot 2
+ * (retention, activation, viral-coefficient). Premier jet
  * de la session de code : c'est de la copie de fond qui porte le nom
  * d'Antoine, à relire ligne à ligne.
  */
@@ -414,6 +415,393 @@ export const GLOSSARY_DEEP: Partial<Record<GlossaryTermId, DeepGlossaryContent>>
         answer: t(
           "Count the churn when it happens and the return as a reactivation, separately. Netting them out hides both stories: why they left, and how you won them back — the second being a channel worth knowing. Most subscription analytics tools report reactivations on their own line for exactly this reason.",
           "Compte le churn au moment où il se produit et le retour comme une réactivation, séparément. Les compenser cache les deux sujets : pourquoi ils sont partis, et comment tu les as regagnés — le second étant un canal qui mérite d'être connu. La plupart des outils d'analyse d'abonnement rapportent les réactivations sur leur propre ligne pour exactement cette raison.",
+        ),
+      },
+    ],
+  },
+  retention: {
+    formula: {
+      expression: t(
+        "Retention (day N) = users still active on day N ÷ users who started on day 0",
+        "Rétention (jour N) = utilisateurs encore actifs au jour N ÷ utilisateurs arrivés au jour 0",
+      ),
+      terms: [
+        {
+          symbol: t("Cohort", "Cohorte"),
+          meaning: t(
+            "The users who started in the same window — a day, a week, a month. Retention is always a property of a cohort; a single \"retention rate\" with no cohort behind it mixes people who signed up yesterday with people who have been around for a year.",
+            "Les utilisateurs arrivés dans la même fenêtre — un jour, une semaine, un mois. La rétention est toujours la propriété d'une cohorte ; un « taux de rétention » unique sans cohorte derrière mélange ceux qui se sont inscrits hier avec ceux qui sont là depuis un an.",
+          ),
+        },
+        {
+          symbol: t("Active", "Actif"),
+          meaning: t(
+            "Whatever counts as using the product for real: a session, a key action, a paid renewal. Pick the definition that matches your natural frequency of use — daily for a messaging app, weekly for a project tool, monthly for accounting software — or the curve will lie in both directions.",
+            "Ce qui compte comme un vrai usage : une session, une action clé, un renouvellement payé. Choisis la définition qui correspond à ta fréquence naturelle d'usage — quotidienne pour une messagerie, hebdomadaire pour un outil de projet, mensuelle pour un logiciel de comptabilité — sinon la courbe ment dans les deux sens.",
+          ),
+        },
+        {
+          symbol: t("Day N", "Jour N"),
+          meaning: t(
+            "D1, D7 and D30 are the usual checkpoints for consumer products; week 4 or month 3 for B2B. What matters is the shape between the checkpoints, not any one of them.",
+            "J1, J7 et J30 sont les repères habituels en grand public ; semaine 4 ou mois 3 en B2B. Ce qui compte, c'est la forme de la courbe entre les repères, pas l'un d'eux en particulier.",
+          ),
+        },
+      ],
+      note: t(
+        "Retention and churn describe the same customers from two sides: 95% monthly retention is 5% monthly churn. Retention is read as a curve over a cohort's life; churn as a rate per period. Use retention to understand the product, churn to run the business.",
+        "Rétention et churn décrivent les mêmes clients de deux côtés : 95 % de rétention mensuelle, c'est 5 % de churn mensuel. La rétention se lit comme une courbe sur la vie d'une cohorte ; le churn comme un taux par période. La rétention pour comprendre le produit, le churn pour piloter l'activité.",
+      ),
+    },
+    example: {
+      title: t("Two cohorts, same D30, opposite futures", "Deux cohortes, même J30, avenirs opposés"),
+      steps: [
+        t(
+          "Cohort A: 1,000 sign-ups. Active on D1: 600. D7: 380. D30: 250. D60: 245. D90: 242.",
+          "Cohorte A : 1 000 inscrits. Actifs à J1 : 600. J7 : 380. J30 : 250. J60 : 245. J90 : 242.",
+        ),
+        t(
+          "Cohort B: 1,000 sign-ups. D1: 700. D7: 450. D30: 250. D60: 150. D90: 90.",
+          "Cohorte B : 1 000 inscrits. J1 : 700. J7 : 450. J30 : 250. J60 : 150. J90 : 90.",
+        ),
+        t(
+          "Both report \"25% D30 retention\". A's curve flattens at about 24%: a quarter of the people who tried it made it a habit. B's keeps sliding: it will reach zero, just slowly.",
+          "Les deux annoncent « 25 % de rétention à J30 ». La courbe de A s'aplatit vers 24 % : un quart des gens qui ont essayé en ont fait une habitude. Celle de B continue de glisser : elle atteindra zéro, juste lentement.",
+        ),
+        t(
+          "A can now spend on acquisition — every 1,000 new users adds about 240 lasting ones. B would be filling a bucket with no bottom; its problem is the product, not the funnel.",
+          "A peut maintenant dépenser en acquisition — chaque millier de nouveaux utilisateurs ajoute environ 240 durables. B remplirait un seau sans fond ; son problème est le produit, pas l'entonnoir.",
+        ),
+      ],
+      takeaway: t(
+        "One number cannot tell A from B. The curve can — and the flattening is the single most important thing a retention chart has to show you.",
+        "Un chiffre seul ne distingue pas A de B. La courbe, si — et l'aplatissement est la chose la plus importante qu'un graphique de rétention ait à te montrer.",
+      ),
+    },
+    benchmark: [
+      t(
+        "Ranges vary enormously by category, so compare within yours. Widely cited orders of magnitude: consumer mobile apps often keep 20-30% of a cohort at D30 and single digits by D90; SaaS is read in months, and 97-99% monthly customer retention is the range usually called healthy for small-business products, higher again in enterprise.",
+        "Les fourchettes varient énormément selon la catégorie, donc compare dans la tienne. Ordres de grandeur couramment cités : les applis mobiles grand public gardent souvent 20-30 % d'une cohorte à J30 et moins de 10 % à J90 ; le SaaS se lit en mois, et 97-99 % de rétention client mensuelle est la fourchette habituellement qualifiée de saine pour des produits vendus aux petites entreprises, plus haut encore en entreprise.",
+      ),
+      t(
+        "The shape matters more than the level: a curve that flattens at 10% describes a real product with a small core; a curve at 40% still heading down at month three describes a novelty. Investors read the flattening before they read the number.",
+        "La forme compte plus que le niveau : une courbe qui s'aplatit à 10 % décrit un vrai produit avec un petit noyau ; une courbe à 40 % encore en baisse au troisième mois décrit une nouveauté. Les investisseurs lisent l'aplatissement avant de lire le chiffre.",
+      ),
+      t(
+        "Retention compounds into everything downstream: it sets LTV, decides which CAC is affordable, and is the precondition for referral — nobody recommends a product they stopped using.",
+        "La rétention se répercute sur tout l'aval : elle fixe la LTV, décide quel CAC est supportable, et conditionne le parrainage — personne ne recommande un produit qu'il a cessé d'utiliser.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Measure it by cohort first. A retention rate you \"can pull but rarely look at\" is not a retention rate; a weekly cohort chart on the wall changes what the team ships.",
+        "Mesure-la par cohorte d'abord. Un taux de rétention qu'on « peut sortir mais qu'on regarde rarement » n'est pas un taux de rétention ; un graphique de cohortes hebdomadaire affiché au mur change ce que l'équipe livre.",
+      ),
+      t(
+        "Move the aha moment earlier. Most of the D1-D7 drop is people who never experienced the value; every day cut between sign-up and that moment lifts the whole curve.",
+        "Avance le moment « aha ». L'essentiel de la chute J1-J7, ce sont des gens qui n'ont jamais vécu la valeur ; chaque jour gagné entre l'inscription et ce moment relève toute la courbe.",
+      ),
+      t(
+        "Give the product a reason to be reopened: a recurring output (a report, a digest, an alert) or a stored asset that grows with use. Re-engagement emails help only if there is something to come back to.",
+        "Donne au produit une raison d'être rouvert : une sortie récurrente (un rapport, un résumé, une alerte) ou un actif stocké qui grandit avec l'usage. Les e-mails de réengagement n'aident que s'il y a quelque chose à retrouver.",
+      ),
+      t(
+        "Talk to the people who left at week two and to the people who stayed at month six. The gap between the two conversations is your roadmap.",
+        "Parle aux gens partis à la deuxième semaine et à ceux restés au sixième mois. L'écart entre les deux conversations, c'est ta feuille de route.",
+      ),
+      t(
+        "Segment the curve — by acquisition channel, by plan, by use case. A flat average often hides one segment that retains beautifully and one that never had a chance.",
+        "Segmente la courbe — par canal d'acquisition, par offre, par cas d'usage. Une moyenne plate cache souvent un segment qui retient très bien et un autre qui n'a jamais eu sa chance.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "ret-1",
+      body: t(
+        "The first Retention question is the simplest and the most discriminating: \"Do you track a retention rate (D7/D30 or similar)?\" — 20 for tracked and reviewed regularly, 7 for \"we can pull it, but rarely look\", 0 for no. It is averaged with the re-engagement mechanism and the cause of churn. Retention is the pillar whose weak band (0-9) costs the most elsewhere: LTV, an affordable CAC and referral all sit downstream of it.",
+        "La première question Retention est la plus simple et la plus discriminante : « Suis-tu un taux de rétention (J7/J30 ou équivalent) ? » — 20 pour suivi et revu régulièrement, 7 pour « on peut le sortir, mais on regarde rarement », 0 pour non. Elle fait moyenne avec le mécanisme de réengagement et la cause du churn. Retention est le pilier dont la bande faible (0-9) coûte le plus ailleurs : la LTV, un CAC supportable et le parrainage sont tous en aval.",
+      ),
+    },
+    faq: [
+      {
+        question: t(
+          "What's the difference between retention and churn?",
+          "Quelle différence entre rétention et churn ?",
+        ),
+        answer: t(
+          "Same customers, opposite sign, different lens. Retention follows a cohort over time and is drawn as a curve; churn is the share lost in a period and is quoted as a rate. 90% monthly retention and 10% monthly churn are one fact. Use retention when you want to know whether the product works, churn when you want to know what the business loses this month.",
+          "Mêmes clients, signe opposé, angle différent. La rétention suit une cohorte dans le temps et se dessine en courbe ; le churn est la part perdue sur une période et se cite en taux. 90 % de rétention mensuelle et 10 % de churn mensuel sont un seul fait. La rétention pour savoir si le produit fonctionne, le churn pour savoir ce que l'activité perd ce mois-ci.",
+        ),
+      },
+      {
+        question: t(
+          "Which retention metric should I track — D1, D7 or D30?",
+          "Quelle rétention suivre — J1, J7 ou J30 ?",
+        ),
+        answer: t(
+          "The one that matches how often the product should be used, then one checkpoint later. A daily-use product lives or dies on D1 and D7; a weekly tool should look at week 1 and week 4; monthly software at month 1 and month 3. Tracking D1 on a product people need once a month produces a terrifying chart that means nothing.",
+          "Celle qui correspond à la fréquence à laquelle le produit devrait être utilisé, puis un repère plus loin. Un produit d'usage quotidien vit ou meurt sur J1 et J7 ; un outil hebdomadaire se regarde à la semaine 1 et à la semaine 4 ; un logiciel mensuel au mois 1 et au mois 3. Suivre J1 sur un produit dont on a besoin une fois par mois produit un graphique terrifiant qui ne veut rien dire.",
+        ),
+      },
+      {
+        question: t("What does \"the curve flattens\" actually mean?", "Ça veut dire quoi, « la courbe s'aplatit » ?"),
+        answer: t(
+          "That from some point on, the share of a cohort still active stops falling: the users who remain have made the product part of their routine, and losing them takes a different cause than losing the early quitters. A curve that never flattens means nobody has formed a habit yet — a product problem that no amount of acquisition fixes.",
+          "Qu'à partir d'un certain point, la part d'une cohorte encore active cesse de baisser : les utilisateurs qui restent ont intégré le produit à leur routine, et les perdre demande une autre cause que celle qui a fait partir les premiers. Une courbe qui ne s'aplatit jamais veut dire que personne n'a encore pris l'habitude — un problème de produit qu'aucune acquisition ne corrige.",
+        ),
+      },
+    ],
+  },
+
+  activation: {
+    formula: {
+      expression: t(
+        "Activation rate = users who reached the aha moment within the activation window ÷ users who signed up",
+        "Taux d'activation = utilisateurs ayant atteint le moment « aha » dans la fenêtre d'activation ÷ utilisateurs inscrits",
+      ),
+      terms: [
+        {
+          symbol: t("Aha moment", "Moment « aha »"),
+          meaning: t(
+            "The first time the user gets the value they came for — a defined, observable action, not a feeling. \"Created a first project and invited a teammate\", not \"understood the product\".",
+            "La première fois que l'utilisateur obtient la valeur pour laquelle il est venu — une action définie et observable, pas un sentiment. « A créé un premier projet et invité un collègue », pas « a compris le produit ».",
+          ),
+        },
+        {
+          symbol: t("Activation window", "Fenêtre d'activation"),
+          meaning: t(
+            "How long after sign-up the moment still counts — a session, a day, a week. Without a window, a user who activates after six months inflates a rate that was supposed to describe onboarding.",
+            "Combien de temps après l'inscription le moment compte encore — une session, un jour, une semaine. Sans fenêtre, un utilisateur qui s'active au bout de six mois gonfle un taux censé décrire l'onboarding.",
+          ),
+        },
+        {
+          symbol: t("Signed up", "Inscrits"),
+          meaning: t(
+            "The denominator is everyone who created an account in the period, including those who left after thirty seconds. Excluding them is the most common way an activation rate gets flattered.",
+            "Le dénominateur, c'est tous ceux qui ont créé un compte sur la période, y compris ceux partis au bout de trente secondes. Les exclure est la façon la plus courante de flatter un taux d'activation.",
+          ),
+        },
+      ],
+      note: t(
+        "Sign-up is not activation. A sign-up rate measures the promise of your landing page; an activation rate measures whether the product kept it. Teams that report the first as if it were the second optimise the wrong screen for months.",
+        "S'inscrire n'est pas s'activer. Un taux d'inscription mesure la promesse de ta page d'accueil ; un taux d'activation mesure si le produit l'a tenue. Les équipes qui rapportent le premier comme s'il était le second optimisent le mauvais écran pendant des mois.",
+      ),
+    },
+    example: {
+      title: t("Finding the moment, then measuring it", "Trouver le moment, puis le mesurer"),
+      steps: [
+        t(
+          "A project-management tool looks at the users still active at month three and asks what they all did in their first week. 82% of them had invited at least one teammate; among users who churned in month one, 11% had.",
+          "Un outil de gestion de projet regarde les utilisateurs encore actifs au troisième mois et se demande ce qu'ils ont tous fait la première semaine. 82 % avaient invité au moins un collègue ; parmi ceux partis le premier mois, 11 %.",
+        ),
+        t(
+          "Aha moment: \"first teammate invited\". Window: 7 days. Definition written down, event instrumented.",
+          "Moment « aha » : « premier collègue invité ». Fenêtre : 7 jours. Définition écrite, événement instrumenté.",
+        ),
+        t(
+          "Last month: 2,400 sign-ups, 552 invited someone within a week. Activation rate = 552 ÷ 2,400 = 23%.",
+          "Le mois dernier : 2 400 inscrits, 552 ont invité quelqu'un dans la semaine. Taux d'activation = 552 ÷ 2 400 = 23 %.",
+        ),
+        t(
+          "The onboarding used to end on a tour of features. It now ends on the invite screen. Next month: 31%. Same acquisition spend, a third more users who might stay.",
+          "L'onboarding se terminait sur une visite des fonctionnalités. Il se termine maintenant sur l'écran d'invitation. Le mois suivant : 31 %. Même dépense d'acquisition, un tiers d'utilisateurs en plus susceptibles de rester.",
+        ),
+      ],
+      takeaway: t(
+        "Correlation, not proof: inviting a teammate doesn't cause retention — wanting to use the tool with a team does. But the action is the earliest visible trace of that intent, which is exactly what an activation metric is for.",
+        "Corrélation, pas preuve : inviter un collègue ne cause pas la rétention — vouloir utiliser l'outil en équipe, si. Mais l'action est la première trace visible de cette intention, et c'est exactement à ça que sert une métrique d'activation.",
+      ),
+    },
+    benchmark: [
+      t(
+        "There is no universal activation rate: the number depends entirely on how demanding your aha moment is. Commonly cited orders of magnitude for SaaS onboarding sit between 20% and 40% of sign-ups — often lower for free trials, higher for invite-only products. Compare month to month, not to a table.",
+        "Il n'y a pas de taux d'activation universel : le chiffre dépend entièrement de l'exigence de ton moment « aha ». Les ordres de grandeur couramment cités pour un onboarding SaaS se situent entre 20 % et 40 % des inscrits — souvent plus bas pour les essais gratuits, plus haut pour les produits sur invitation. Compare d'un mois à l'autre, pas à un tableau.",
+      ),
+      t(
+        "Time-to-value is the companion metric: how long the median user takes to reach the moment. Minutes for a consumer app, a day or two for a team tool, weeks for software that needs data imported. Halving it usually does more for retention than any feature.",
+        "Le time-to-value est la métrique compagne : combien de temps l'utilisateur médian met à atteindre le moment. Des minutes pour une appli grand public, un jour ou deux pour un outil d'équipe, des semaines pour un logiciel qui demande d'importer des données. Le diviser par deux fait en général plus pour la rétention que n'importe quelle fonctionnalité.",
+      ),
+      t(
+        "Activation is the cheapest pillar to move: it happens inside a flow you fully control, with users who already chose to come. A ten-point gain here is worth more than a ten-point gain in sign-up conversion, because every activated user carries into retention.",
+        "L'activation est le pilier le moins cher à faire bouger : ça se passe dans un parcours que tu contrôles entièrement, avec des utilisateurs qui ont déjà choisi de venir. Dix points gagnés ici valent plus que dix points de conversion à l'inscription, parce que chaque utilisateur activé se prolonge dans la rétention.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Define the moment from evidence, not from the roadmap: look at who stayed and what they did early. If the answer surprises you, that's a good sign — the obvious feature is rarely it.",
+        "Définis le moment à partir des preuves, pas de la feuille de route : regarde qui est resté et ce qu'ils ont fait tôt. Si la réponse te surprend, c'est bon signe — la fonctionnalité évidente l'est rarement.",
+      ),
+      t(
+        "Cut everything between sign-up and that moment that isn't strictly necessary: the profile form, the feature tour, the empty dashboard. Ask for what you need when you need it.",
+        "Retire tout ce qui sépare l'inscription de ce moment sans être strictement nécessaire : le formulaire de profil, la visite guidée, le tableau de bord vide. Demande ce dont tu as besoin au moment où tu en as besoin.",
+      ),
+      t(
+        "Instrument the moment as an event and put the rate on a weekly chart. An activation rate nobody sees does not improve.",
+        "Instrumente le moment comme un événement et mets le taux sur un graphique hebdomadaire. Un taux d'activation que personne ne voit ne s'améliore pas.",
+      ),
+      t(
+        "Iterate the onboarding on data, not instinct: one change at a time, one week of cohorts each. \"Tweaked a little, informally\" is what the Tour scores at 7 for a reason.",
+        "Itère l'onboarding sur des données, pas à l'instinct : un changement à la fois, une semaine de cohortes à chaque fois. « Ajusté un peu, à l'instinct » vaut 7 points dans le Tour pour une raison.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "act-1",
+      body: t(
+        "All three Activation questions are about the same moment: whether you have defined it (20 if you measure it, 7 if it exists unmeasured, 0 if not), whether you know what share of users reach it, and whether the onboarding that leads there has been iterated on real data. \"We have one, but don't measure it\" on all three lands the stage at 7 — the weak band — a typical way for a product with a genuinely good idea to score poorly here.",
+        "Les trois questions Activation portent sur le même moment : l'as-tu défini (20 si tu le mesures, 7 s'il existe sans être mesuré, 0 sinon), sais-tu quelle part d'utilisateurs l'atteint, et l'onboarding qui y mène a-t-il été itéré sur de vraies données. « On en a un, mais on ne le mesure pas » sur les trois met l'étape à 7 — la bande faible — une façon typique, pour un produit avec une vraie bonne idée, de mal scorer ici.",
+      ),
+    },
+    faq: [
+      {
+        question: t(
+          "Isn't activation just the sign-up conversion rate?",
+          "L'activation, ce n'est pas simplement le taux de conversion à l'inscription ?",
+        ),
+        answer: t(
+          "No, and confusing the two is the most expensive mistake in this pillar. Sign-up conversion is visitors → accounts; it lives on the landing page and measures the promise. Activation is accounts → people who got the value; it lives in the product and measures whether the promise was kept. You can double the first while the second stays flat, and the business won't move.",
+          "Non, et confondre les deux est l'erreur la plus coûteuse de ce pilier. La conversion à l'inscription, c'est visiteurs → comptes ; elle se joue sur la page d'accueil et mesure la promesse. L'activation, c'est comptes → personnes qui ont obtenu la valeur ; elle se joue dans le produit et mesure si la promesse a été tenue. Tu peux doubler la première pendant que la seconde reste plate, et l'activité ne bougera pas.",
+        ),
+      },
+      {
+        question: t("How do I find my aha moment?", "Comment trouver mon moment « aha » ?"),
+        answer: t(
+          "Backwards. Take the users who are still active after three months and the users who left in the first month, and compare what each group did in their first week: the actions heavily over-represented among the stayers are your candidates. Then pick the earliest one you can plausibly get most new users to do. Facebook's \"7 friends in 10 days\" is the famous example; yours will be smaller and more specific.",
+          "À l'envers. Prends les utilisateurs encore actifs après trois mois et ceux partis le premier mois, et compare ce que chaque groupe a fait la première semaine : les actions nettement surreprésentées chez ceux qui restent sont tes candidates. Puis choisis la plus précoce que tu peux raisonnablement faire faire à la plupart des nouveaux. Les « 7 amis en 10 jours » de Facebook sont l'exemple célèbre ; le tien sera plus petit et plus spécifique.",
+        ),
+      },
+      {
+        question: t(
+          "Can a product have more than one activation metric?",
+          "Un produit peut-il avoir plusieurs métriques d'activation ?",
+        ),
+        answer: t(
+          "It can have several segments with different moments — a solo user and a team admin rarely get value from the same action — but each segment should have one. A single product with three activation metrics for the same user usually means nobody has decided which one matters, and the onboarding tries to do all three.",
+          "Il peut avoir plusieurs segments avec des moments différents — un utilisateur seul et un administrateur d'équipe obtiennent rarement la valeur par la même action — mais chaque segment devrait en avoir une. Un même produit avec trois métriques d'activation pour le même utilisateur veut en général dire que personne n'a décidé laquelle compte, et l'onboarding essaie de faire les trois.",
+        ),
+      },
+    ],
+  },
+
+  "viral-coefficient": {
+    formula: {
+      expression: t(
+        "K = invitations sent per user × conversion rate of those invitations",
+        "K = invitations envoyées par utilisateur × taux de conversion de ces invitations",
+      ),
+      terms: [
+        {
+          symbol: t("Invitations per user", "Invitations par utilisateur"),
+          meaning: t(
+            "Every exposure a user creates: an explicit invite, a shared link, a public artefact someone else sees. Count them per existing user over a fixed period — and count the users who send zero, which is most of them.",
+            "Chaque exposition qu'un utilisateur crée : une invitation explicite, un lien partagé, un livrable public que quelqu'un d'autre voit. Compte-les par utilisateur existant sur une période fixe — et compte les utilisateurs qui n'en envoient aucune, c'est-à-dire la majorité.",
+          ),
+        },
+        {
+          symbol: t("Conversion rate", "Taux de conversion"),
+          meaning: t(
+            "The share of those exposures that become a new user — not a click, a user. A shared result that gets 100 views and 4 new sign-ups converts at 4%.",
+            "La part de ces expositions qui deviennent un nouvel utilisateur — pas un clic, un utilisateur. Un résultat partagé qui fait 100 vues et 4 nouvelles inscriptions convertit à 4 %.",
+          ),
+        },
+        {
+          symbol: t("K", "K"),
+          meaning: t(
+            "New users each existing user brings, on average. K = 0.3 means every 100 users bring 30 more, who bring 9, who bring about 3 — a finite boost of about 43%. K > 1 means the chain never ends on its own.",
+            "Le nombre de nouveaux utilisateurs que chaque utilisateur existant amène, en moyenne. K = 0,3 veut dire que 100 utilisateurs en amènent 30, qui en amènent 9, qui en amènent environ 3 — un gain fini d'environ 43 %. K > 1 veut dire que la chaîne ne s'arrête jamais d'elle-même.",
+          ),
+        },
+      ],
+      note: t(
+        "The second number that matters is cycle time: how long from a user joining to their invitees joining. K = 0.5 with a one-day cycle outgrows K = 0.8 with a two-month cycle for a long while. Most \"viral\" products won on cycle time, not on K.",
+        "Le second chiffre qui compte est le temps de cycle : combien de temps entre l'arrivée d'un utilisateur et celle de ses invités. K = 0,5 avec un cycle d'un jour dépasse longtemps K = 0,8 avec un cycle de deux mois. La plupart des produits « viraux » ont gagné sur le temps de cycle, pas sur K.",
+      ),
+    },
+    example: {
+      title: t("What a K below 1 still buys you", "Ce qu'un K inférieur à 1 rapporte quand même"),
+      steps: [
+        t(
+          "1,000 users. 20% of them share once; each share is seen by 15 people on average: 1,000 × 0.2 × 15 = 3,000 exposures, i.e. 3 per user.",
+          "1 000 utilisateurs. 20 % partagent une fois ; chaque partage est vu par 15 personnes en moyenne : 1 000 × 0,2 × 15 = 3 000 expositions, soit 3 par utilisateur.",
+        ),
+        t("5% of exposures become a user: K = 3 × 0.05 = 0.15.", "5 % des expositions deviennent un utilisateur : K = 3 × 0,05 = 0,15."),
+        t(
+          "Total users the loop eventually yields from those 1,000: 1,000 ÷ (1 − 0.15) ≈ 1,176. Referral added 17.6% on top of whatever acquisition paid for.",
+          "Total d'utilisateurs que la boucle finit par produire à partir de ces 1 000 : 1 000 ÷ (1 − 0,15) ≈ 1 176. Le parrainage a ajouté 17,6 % à ce que l'acquisition a payé.",
+        ),
+        t(
+          "Double the share of users who share (40%) and K becomes 0.3: 1,000 ÷ 0.7 ≈ 1,429, +43%. At a €500 CAC, that loop is worth about €215 of acquisition per paid user.",
+          "Double la part d'utilisateurs qui partagent (40 %) et K passe à 0,3 : 1 000 ÷ 0,7 ≈ 1 429, +43 %. À 500 € de CAC, cette boucle vaut environ 215 € d'acquisition par utilisateur payé.",
+        ),
+      ],
+      takeaway: t(
+        "You don't need K > 1 for referral to matter. You need to know your K, because it is the multiplier on every euro of acquisition — and a multiplier nobody measures gets optimised by nobody.",
+        "Tu n'as pas besoin de K > 1 pour que le parrainage compte. Tu as besoin de connaître ton K, parce que c'est le multiplicateur de chaque euro d'acquisition — et un multiplicateur que personne ne mesure n'est optimisé par personne.",
+      ),
+    },
+    benchmark: [
+      t(
+        "A sustained K above 1 is rare and almost always temporary — the handful of famous cases (early social networks, some messaging and collaboration tools) had a product that was useless alone. For most products, 0.15-0.5 is the realistic range, and a reliable 0.3 is a serious competitive advantage.",
+        "Un K durable au-dessus de 1 est rare et presque toujours temporaire — la poignée de cas célèbres (les premiers réseaux sociaux, certains outils de messagerie et de collaboration) avaient un produit inutile tout seul. Pour la plupart des produits, 0,15-0,5 est la fourchette réaliste, et un 0,3 fiable est un vrai avantage concurrentiel.",
+      ),
+      t(
+        "K is not stable over time: it falls as you saturate the network your early users belong to, and it differs by channel of arrival — users who came through a share tend to share more themselves.",
+        "K n'est pas stable dans le temps : il baisse à mesure que tu satures le réseau de tes premiers utilisateurs, et il diffère selon le canal d'arrivée — les utilisateurs venus par un partage ont tendance à partager davantage eux-mêmes.",
+      ),
+      t(
+        "Watch the denominator: a K computed only on users who shared at least once is not a K, it's a share conversion rate. The formula divides by every user, silent majority included.",
+        "Attention au dénominateur : un K calculé seulement sur les utilisateurs qui ont partagé au moins une fois n'est pas un K, c'est un taux de conversion des partages. La formule divise par tous les utilisateurs, majorité silencieuse comprise.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Put the share where the value is, not in a menu: the moment a user gets a result worth showing is the moment to offer the share. A referral button on the settings page measures nothing but its own irrelevance.",
+        "Mets le partage là où est la valeur, pas dans un menu : le moment où un utilisateur obtient un résultat qui vaut d'être montré est le moment de proposer le partage. Un bouton de parrainage dans les réglages ne mesure que sa propre inutilité.",
+      ),
+      t(
+        "Make what gets shared worth receiving. The conversion half of K depends on what the invitee sees: a rich preview, a personal result, a concrete reason to try it themselves — not a generic \"X invited you\".",
+        "Fais en sorte que ce qui est partagé vaille d'être reçu. La moitié conversion de K dépend de ce que l'invité voit : un aperçu riche, un résultat personnel, une raison concrète d'essayer à son tour — pas un « X vous a invité » générique.",
+      ),
+      t(
+        "Shorten the cycle: the faster an invitee becomes a user who shares, the more each K is worth. Remove every step between the shared link and the invitee's own first value.",
+        "Raccourcis le cycle : plus vite un invité devient un utilisateur qui partage, plus chaque K rapporte. Retire chaque étape entre le lien partagé et la première valeur de l'invité.",
+      ),
+      t(
+        "Instrument attribution before optimising anything: a reference parameter on every shared link, first touch, deduplicated for self-referrals. Without it you will be tuning a number you can't see.",
+        "Instrumente l'attribution avant d'optimiser quoi que ce soit : un paramètre de référence sur chaque lien partagé, premier contact, dédoublonné des auto-parrainages. Sans ça, tu régleras un chiffre que tu ne vois pas.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "ref-3",
+      body: t(
+        "\"Do you measure a viral coefficient or equivalent?\" is the third Referral question — 20 for tracked, 7 for vaguely aware of it, 0 for never measured — after whether a sharing mechanism exists in the product and whether customers actually use it. Referral is the pillar many teams score lowest on, and the one where a 0 is most often honest: the mechanism was never built, so there was nothing to measure.",
+        "« Mesures-tu un coefficient viral ou équivalent ? » est la troisième question Referral — 20 pour suivi, 7 pour vaguement conscient de son existence, 0 pour jamais mesuré — après l'existence d'un mécanisme de partage dans le produit et son usage réel par les clients. Referral est le pilier où beaucoup d'équipes scorent le plus bas, et celui où un 0 est le plus souvent honnête : le mécanisme n'a jamais été construit, donc il n'y avait rien à mesurer.",
+      ),
+    },
+    faq: [
+      {
+        question: t("What is a good viral coefficient?", "C'est quoi, un bon coefficient viral ?"),
+        answer: t(
+          "Above 1, growth would be self-sustaining — and almost nobody sustains that. In practice a good K is one you measure, that is above zero, and that you can move: 0.2 to 0.4 is a strong result for most products, and turns every paid customer into 1.25 to 1.7 customers. Judge it by what it does to your effective CAC, not by whether it crosses 1.",
+          "Au-dessus de 1, la croissance s'auto-entretiendrait — et presque personne ne tient ça. En pratique, un bon K est un K que tu mesures, supérieur à zéro, et que tu peux faire bouger : 0,2 à 0,4 est un résultat solide pour la plupart des produits, et transforme chaque client payé en 1,25 à 1,7 clients. Juge-le à ce qu'il fait à ton CAC effectif, pas à son passage au-dessus de 1.",
+        ),
+      },
+      {
+        question: t(
+          "Viral coefficient or referral rate — what's the difference?",
+          "Coefficient viral ou taux de parrainage, quelle différence ?",
+        ),
+        answer: t(
+          "The referral rate is the share of users who refer at least one person; it is one input. K multiplies how many exposures users create by how many of those convert, over all users — it is the output. A 40% referral rate with invitations that never convert gives a K near zero.",
+          "Le taux de parrainage est la part d'utilisateurs qui parrainent au moins une personne ; c'est une entrée. K multiplie le nombre d'expositions créées par les utilisateurs par la part qui convertit, sur tous les utilisateurs — c'est la sortie. Un taux de parrainage de 40 % avec des invitations qui ne convertissent jamais donne un K proche de zéro.",
+        ),
+      },
+      {
+        question: t(
+          "How does Tour de Growth measure its own K?",
+          "Comment Tour de Growth mesure-t-il son propre K ?",
+        ),
+        answer: t(
+          "Directly rather than through the formula: every shared result link carries a reference to the result it came from, and a Tour started from such a link is counted as referred — first touch, ignoring people re-taking their own Tour. K is then referred Tours divided by all Tours. It undercounts (a link copied by hand loses the reference), which is the honest direction to be wrong in.",
+          "Directement plutôt que par la formule : chaque lien de résultat partagé porte une référence au résultat dont il vient, et un Tour commencé depuis un tel lien est compté comme parrainé — premier contact, en ignorant les gens qui refont leur propre Tour. K est alors le nombre de Tours parrainés divisé par tous les Tours. Ça sous-compte (un lien recopié à la main perd la référence), et c'est la bonne direction dans laquelle se tromper.",
         ),
       },
     ],

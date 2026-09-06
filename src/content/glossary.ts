@@ -72,6 +72,8 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   activation: {
     ...GLOSSARY_TERMS.activation,
+    deep: GLOSSARY_DEEP.activation,
+    updatedAt: "2026-09-06", // R2-11, lot 2
     extended: {
       fr: "La plupart des équipes confondent activation et inscription. Ce sont deux choses différentes : l'inscription est une action administrative, l'activation est le moment où l'utilisateur comprend enfin pourquoi il est là (voir Moment « aha »). Bien définir son activation demande de regarder, parmi les utilisateurs qui reviennent des mois plus tard, quelle action ils ont tous faite tôt — c'est souvent contre-intuitif, rarement la première chose qu'on montre dans l'onboarding. Une activation mal définie fausse tout le reste : on optimise le mauvais moment du parcours.",
       en: "Most teams confuse activation with sign-up. They're two different things: sign-up is an administrative action, activation is the moment the user finally understands why they're there (see Aha moment). Defining activation correctly means looking at users who are still around months later and finding the one early action they all took — it's often counter-intuitive, rarely the first thing shown in onboarding. A poorly defined activation moment skews everything downstream: you end up optimizing the wrong point in the journey.",
@@ -80,6 +82,8 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   retention: {
     ...GLOSSARY_TERMS.retention,
+    deep: GLOSSARY_DEEP.retention,
+    updatedAt: "2026-09-06", // R2-11, lot 2
     extended: {
       fr: "La retention se lit sur une courbe, pas sur un seul chiffre : le signe à chercher, c'est qu'elle finisse par s'aplatir plutôt que de continuer à descendre vers zéro (une courbe qui se stabilise dit que le produit a trouvé un usage régulier pour un noyau d'utilisateurs). C'est aussi le pilier le plus rentable à réparer avant de pousser l'acquisition : faire grandir un entonnoir qui fuit revient à courir plus vite sur un tapis roulant. L'inverse de la retention, c'est le churn — les deux se lisent toujours ensemble.",
       en: "Retention is read as a curve, not a single number: the sign to look for is that it eventually flattens rather than sliding toward zero (a curve that stabilizes means the product found regular use with a core of users). It's also the highest-leverage pillar to fix before pushing acquisition harder — growing a leaking funnel is just running faster on a treadmill. The inverse of retention is churn — the two are always read together.",
@@ -142,6 +146,8 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   "viral-coefficient": {
     ...GLOSSARY_TERMS["viral-coefficient"],
+    deep: GLOSSARY_DEEP["viral-coefficient"],
+    updatedAt: "2026-09-06", // R2-11, lot 2
     extended: {
       fr: "Formule standard, souvent notée K : nombre moyen d'invitations envoyées par utilisateur, multiplié par leur taux de conversion. K > 1 veut dire que chaque utilisateur en amène plus d'un autre en moyenne — la croissance s'auto-alimente sans dépenser plus en acquisition. En pratique, K > 1 durable est rare et précieux ; la plupart des produits visent plutôt un K qui réduit sensiblement le CAC effectif sans prétendre à la viralité pure. Ce tableau de bord Growth calcule d'ailleurs son propre K-factor en continu, exactement selon cette formule, sur les vraies analyses complétées.",
       en: "Standard formula, often written K: the average number of invitations sent per user, multiplied by their conversion rate. K > 1 means each user brings in more than one other on average — growth that feeds itself without spending more on acquisition. In practice, a sustained K > 1 is rare and valuable; most products instead aim for a K that meaningfully lowers effective CAC without claiming pure virality. This tool's own growth dashboard computes its K-factor continuously, using exactly this formula, on real completed analyses.",
