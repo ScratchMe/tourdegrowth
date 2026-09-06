@@ -59,8 +59,8 @@ La colonne **Autonomie** dit ce que chaque item attend d'Antoine : **Auto** = je
 | **D — Robustesse et sécurité** | R2-18 | Aucun en-tête de sécurité hors HSTS | T | S | Auto | **Fait** (PR #64, 2026-09-06) — CSP `script-src` complète volontairement hors périmètre |
 | | R2-19 | Amplification de lectures Firestore non authentifiée sur `/r/<id>` | T | S | Auto | **Fait** (PR #65, 2026-09-06) |
 | | R2-20 | `freeContext` conservé indéfiniment pour calculer un booléen | T | S | Auto | **Fait** (PR #66, 2026-09-06) — `modelUsed` conservé, il est lu par la sonde |
-| | R2-21 | Deep dive : deux requêtes concurrentes génèrent deux fois | T | S | Auto | À faire |
-| | R2-22 | Basic Auth admin : comparaison non constante, `atob` Latin-1 | T | XS | Auto | À faire |
+| | R2-21 | Deep dive : deux requêtes concurrentes génèrent deux fois | T | S | Auto | **Fait** (PR #71, 2026-09-06) — l'écriture est protégée ; la double génération reste possible, voir CLAUDE.md |
+| | R2-22 | Basic Auth admin : comparaison non constante, `atob` Latin-1 | T | XS | Auto | **Fait** (PR #71, 2026-09-06) |
 | | R2-23 | Aucun `error.tsx` : une panne rend le document nu de Next | T | S | Auto | **Fait** (PR #65, 2026-09-06) — limite : une panne dans le shell initial reste rendue côté client, voir CLAUDE.md |
 | | R2-24 | Petites dettes : `rawPoints` public, logs Gemini non tronqués, pas de Dependabot | T | XS | Auto | **Fait** (PR #66, 2026-09-06) |
 | | R2-25 | Le stderr de Playwright n'est pas vide, donc plus lu | T | XS | Auto | **Fait en partie** (PR #65) — la ligne Firebase ne vient plus que de la spec qui l'annonce ; `NoFallbackError` est à Next |

@@ -1081,6 +1081,16 @@ Deux absences volontaires, écrites dans le fichier pour qu'on ne les « corrige
 
 ---
 
+### R2-21 + R2-22 : l'écriture du Deep dive ne s'écrase plus, et le mot de passe admin se compare correctement (2026-09-06)
+
+**R2-21.** La route Deep dive testait « déjà complété ? » avant de générer, puis écrivait sans condition : deux requêtes passant le test avant que l'une écrive (un rechargement pendant les ~70 s de génération suivi d'un renvoi, ou le bouton Réessayer) généraient toutes les deux, et la dernière écriture gagnait en silence. `saveDeepDive` est maintenant un check-and-set dans une transaction Firestore et renvoie `"saved"` ou `"already-present"` ; la route envoie le perdant vers la même page de résultat, sans invalider le cache (le gagnant l'a fait). **Ce que ça ne règle pas, dit clairement** : la double *génération* — les huit appels Gemini au lieu de quatre — reste possible, parce que l'empêcher demanderait un marqueur de réservation posé avant de générer, avec une fenêtre d'expiration pour qu'une génération plantée ne verrouille pas le résultat pour toujours. Borné par la limite de 5 Deep dive par heure, c'est une question de quota, pas d'intégrité ; la transaction seule est le bon niveau d'ingénierie tant que la dépense Gemini n'est pas un sujet. Testé au niveau de `getDb` bouchonné (`repository.test.ts`, premier test de ce fichier) : écrit quand rien n'existe, refuse et le dit quand un Deep dive est déjà là.
+
+**R2-22.** Deux défauts dans `isAuthorizedForAdmin`. `atob` décode en Latin-1 alors qu'un navigateur envoie les identifiants en UTF-8 : un mot de passe avec un accent ne pouvait jamais correspondre — le test le prouve avec « clé-d'été-très-sûre ». Et la comparaison `===` s'arrêtait au premier caractère différent, un canal temporel sur un secret ; pas exploitable en pratique à travers le jitter d'un edge, mais le repo faisait déjà ça correctement pour le jeton de propriétaire, et l'incohérence est le genre qui se copie. `constantTimeEqual` compare octet par octet sans court-circuit, sans `node:crypto` (le proxy ne doit pas dépendre de Node) ; seule la longueur peut fuir, comme pour `timingSafeEqual`.
+
+**Vérifié en réel** : lint, tsc, 273 tests (+5), `next build`, 95 specs Playwright.
+
+---
+
 ## État du projet au 2026-09-06 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.

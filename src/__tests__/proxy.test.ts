@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { resetRateLimitsForTests } from "@/lib/rate-limit";
-import { isAuthorizedForAdmin, proxy } from "../proxy";
+import { constantTimeEqual, isAuthorizedForAdmin, proxy } from "../proxy";
 
 function requestWithAuth(pathname: string, authHeader?: string): NextRequest {
   const headers = authHeader ? { authorization: authHeader } : undefined;
@@ -52,6 +52,12 @@ describe("isAuthorizedForAdmin", () => {
     process.env.ADMIN_DASHBOARD_PASSWORD = "pass:with:colons";
     const request = requestWithAuth("/admin/stats", basicHeader("admin:pass:with:colons"));
     expect(isAuthorizedForAdmin(request)).toBe(true);
+  });
+
+  it("accepts a password with non-ASCII characters, sent UTF-8 encoded as browsers do (REVIEW-02.md R2-22)", () => {
+    process.env.ADMIN_DASHBOARD_PASSWORD = "clé-d'été-très-sûre";
+    expect(isAuthorizedForAdmin(requestWithAuth("/admin/stats", basicHeader("admin:clé-d'été-très-sûre")))).toBe(true);
+    expect(isAuthorizedForAdmin(requestWithAuth("/admin/stats", basicHeader("admin:cle-d'ete-tres-sure")))).toBe(false);
   });
 
   it("rejects malformed base64", () => {
@@ -165,5 +171,28 @@ describe("proxy (result read budget — REVIEW-02.md R2-19)", () => {
     for (let i = 0; i < 200; i += 1) {
       expect(proxy(resultRequest("/quiz", "203.0.113.9")).status).not.toBe(429);
     }
+  });
+});
+
+describe("constantTimeEqual (REVIEW-02.md R2-22)", () => {
+  it("agrees with === on equal and unequal strings, including non-ASCII", () => {
+    expect(constantTimeEqual("secret", "secret")).toBe(true);
+    expect(constantTimeEqual("clé", "clé")).toBe(true);
+    expect(constantTimeEqual("secret", "secreT")).toBe(false);
+    expect(constantTimeEqual("secret", "secret ")).toBe(false);
+    expect(constantTimeEqual("", "")).toBe(true);
+    expect(constantTimeEqual("", "a")).toBe(false);
+  });
+
+  it("reads every byte even when the first one already differs", () => {
+    // Not a timing measurement (too noisy to assert on), but a structural
+    // one: the comparison must not short-circuit. A short-circuiting
+    // implementation would never touch the last byte of a string that
+    // differs at index 0 — so a string that differs ONLY at the last byte
+    // and one that differs only at the first must both be rejected the same
+    // way, and both must be compared over their full length.
+    const base = "x".repeat(64);
+    expect(constantTimeEqual("y" + base.slice(1), base)).toBe(false);
+    expect(constantTimeEqual(base.slice(0, 63) + "y", base)).toBe(false);
   });
 });
