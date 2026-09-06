@@ -150,6 +150,20 @@
   gap: 12px;
 }
 
+/* Visitor variant of the CTA slot (REVIEW-02.md R2-02): one line of pitch
+   above the two buttons, kept together so the column's section gap applies
+   to the pair, not between them. */
+.ctaBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.visitorPitch {
+  font: var(--body-sm);
+  color: var(--text-muted);
+}
+
 /*
  * Deep dive locked-preview content (SPEC-ADDENDUM-01.md §2.2, sharpened
  * 2026-08-28): rendered *inside* the same PriorityMove card the real
