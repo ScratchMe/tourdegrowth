@@ -109,7 +109,26 @@
 }
 
 @media (max-width: 760px) {
-  .headerCta {
+  /*
+   * REVIEW.md R-21. The header is `flex-wrap: nowrap`, and once the language
+   * switcher joined the two nav links (R-13) it no longer fit a phone in
+   * EITHER language: scrollWidth 537 (FR) / 474 (EN) for a 390px viewport,
+   * so the whole landing scrolled sideways. Measured on the real build,
+   * hiding these is the only option that fixes it without the header
+   * doubling in height (wrapping: 132-171px; smaller type: still overflows).
+   * Nothing becomes unreachable: the site footer carries both links on every
+   * page, and the language switcher — the one thing a visitor cannot reach
+   * any other way — stays.
+   *
+   * TWO-CLASS SELECTORS ON PURPOSE. `.button` in Button.module.css sets
+   * `display: inline-flex` with a single class, so a single-class rule here
+   * ties on specificity and the winner is decided by stylesheet ORDER — which
+   * is a build artefact. Design system extension 01 changed that order by
+   * adding four components, and `.headerCta` had been relying on it. This is
+   * the CLAUDE.md lesson 2 collision, and the fix is to stop tying.
+   */
+  .nav .navLink,
+  .nav .headerCta {
     display: none;
   }
 
