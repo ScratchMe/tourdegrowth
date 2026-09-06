@@ -1139,6 +1139,14 @@ Le constat disait deux choses : `SiteFooter` était `"use client"` pour un seul 
 
 ---
 
+### R2-15 : le glossaire dit enfin ce qu'il est aux moteurs (2026-09-06)
+
+La PR #58 (autre session) avait localisé le bloc `WebApplication` de la landing et lui avait donné un `author`. Restait le reste : `lib/seo/jsonld.tsx` regroupe maintenant tout le structured data du site — `webApplicationSchema` (déplacé de la landing ; `url` devient l'adresse de la page elle-même et non le site nu, `priceCurrency` passe en EUR), `definedTermSetSchema` sur l'index du glossaire (les quinze termes comme un seul vocabulaire, avec leur auteur), `definedTermSchema` sur chaque page de terme (rattaché au set par `@id`, avec la définition courte), et `breadcrumbSchema` sur les quatre types de page de contenu — le fil d'Ariane était rendu visuellement (« ← Glossaire ») et jamais déclaré. `JsonLd` rend le bloc en échappant `<`, ceinture et bretelles sur du contenu pourtant entièrement rédigé par nous. Module **serveur seulement** : il importe le glossaire long, et le test statique de R2-14 empêche qu'un Client Component l'importe un jour. `aggregateRating` reste absent, comme l'addendum 02 le demande tant qu'il n'y a pas de volume.
+
+**Vérifié en réel** : 4 tests unitaires sur les formes émises, lint, tsc, 287 tests, `next build`, 104 specs Playwright (+3 : les blocs présents et bien typés sur la landing, l'index et une page de terme, lus dans le HTML servi), et le Rich Results Test de Google **reste à passer sur la production** — il ne peut pas tourner sur un build local.
+
+---
+
 ## État du projet au 2026-09-06 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.

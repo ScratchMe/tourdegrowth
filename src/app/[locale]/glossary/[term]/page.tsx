@@ -6,6 +6,7 @@ import { ContentHeader } from "@/components/brand/ContentHeader";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { GLOSSARY, type GlossaryTermId } from "@/content/glossary";
+import { breadcrumbSchema, CRUMBS, definedTermSchema, JsonLd } from "@/lib/seo/jsonld";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { isLocale, LOCALES, type Locale } from "@/lib/i18n/locale";
 import { contentMetadata } from "@/lib/i18n/meta";
@@ -54,6 +55,9 @@ export default async function GlossaryTermPage({ params }: PageProps) {
 
   return (
     <>
+      {/* REVIEW-02.md R2-15: the term, its set, and the trail that leads here. */}
+      <JsonLd data={definedTermSchema(locale, term)} />
+      <JsonLd data={breadcrumbSchema(locale, [CRUMBS.glossary(locale), CRUMBS.term(locale, term)])} />
       <ContentHeader locale={locale} path={`/glossary/${term}`} />
 
       <main className={styles.main}>

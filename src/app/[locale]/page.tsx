@@ -9,50 +9,15 @@ import { Card } from "@/components/core/Card";
 import { PillarChip } from "@/components/result/PillarChip";
 import { ScoreDisplay } from "@/components/result/ScoreDisplay";
 import { SiteFooter } from "@/components/brand/SiteFooter";
-import { ANTOINE_LINKS, QUICK_CREDIT } from "@/content/antoine-credit";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { contentMetadata } from "@/lib/i18n/meta";
 import { localePath } from "@/lib/i18n/routes";
-import { SITE_URL } from "@/lib/site";
 import { LastResult } from "./LastResult";
 import { RefCapture } from "./RefCapture";
+import { JsonLd, webApplicationSchema } from "@/lib/seo/jsonld";
 import { SAMPLE_RESULT } from "@/lib/submissions/sample";
 import styles from "./page.module.css";
-
-/**
- * SPEC-ADDENDUM-02.md §3.2: `WebApplication`, not `Person` (unlike the CV
- * site — Tour de Growth is the product being described here, not Antoine).
- * `aggregateRating` deliberately omitted per the addendum itself: "une fois
- * qu'il y aura un volume d'usage suffisant pour l'alimenter honnêtement" —
- * add it once there's real usage data, not before.
- *
- * Built per language rather than one static object: the description is the
- * page's own subtitle in the page's own language, and `inLanguage` says
- * which. `author` is the same Person node the CV site declares
- * (`https://cv.antoine.berthaud.me/#person`, its JSON-LD `@id`), so search
- * engines can tie the product to its author instead of reading two
- * unrelated sites — the point of the "sites liés" pass of the CV audit.
- */
-function webApplicationSchema(locale: Locale) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    name: "Tour de Growth",
-    description: tc(UI_STRINGS.landing.subtitle, locale),
-    url: SITE_URL,
-    inLanguage: locale,
-    applicationCategory: "BusinessApplication",
-    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-    author: {
-      "@type": "Person",
-      "@id": `${ANTOINE_LINKS.cv}/#person`,
-      name: QUICK_CREDIT.name,
-      url: `${ANTOINE_LINKS.cv}/`,
-      sameAs: [ANTOINE_LINKS.linkedin],
-    },
-  };
-}
 
 // Landing page — DESIGN-BRIEF.md screen 01. Nav links ("Examples", "Roast
 // mode") stay cut from the MVP per SPEC.md §12 — SPEC-ADDENDUM-01.md §1.3
@@ -87,14 +52,8 @@ export default async function LandingPage({ params }: PageProps) {
       <Suspense fallback={null}>
         <RefCapture />
       </Suspense>
-      <script
-        type="application/ld+json"
-        // Static, developer-authored JSON — never user input. (This line
-        // used to carry an `eslint-disable` for react/no-danger; with a real
-        // config now running, that rule isn't enabled and the directive was
-        // reported as unused — see REVIEW.md R-06.)
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(webApplicationSchema(locale)) }}
-      />
+      {/* SPEC-ADDENDUM-02.md §3.2 — built per language, with the author node; see lib/seo/jsonld.tsx (REVIEW-02.md R2-15). */}
+      <JsonLd data={webApplicationSchema(locale)} />
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <WordmarkLink locale={locale} />

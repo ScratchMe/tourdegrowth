@@ -53,7 +53,7 @@ La colonne **Autonomie** dit ce que chaque item attend d'Antoine : **Auto** = je
 | | R2-12 | « AARRR » n'apparaît ni sur la landing ni sur `/how-it-works` | F | S | Relecture | **Fait** (PR #76, 2026-09-06) — 2 chaînes retouchées, à relire |
 | | R2-13 | Maillage interne : le glossaire n'est lié depuis aucune page qui a de l'autorité | F | S/M | Auto | **Fait** (PR #76, 2026-09-06) — 1 chaîne à relire |
 | | R2-14 | Le dictionnaire bilingue entier et tout le glossaire partent dans le bundle client | T | S | Auto | **Fait** (PR #75, 2026-09-06) — gardé par un test statique |
-| | R2-15 | Structured data : un seul bloc JSON-LD, identique en FR et en EN | F | M | Auto | **Fait en partie** (PR #58 : localisé, `author`) — reste `DefinedTerm`, `BreadcrumbList`, `url` par langue |
+| | R2-15 | Structured data : un seul bloc JSON-LD, identique en FR et en EN | F | M | Auto | **Fait** (PR #58 pour la localisation et `author`, PR #77 pour le reste, 2026-09-06) |
 | | R2-16 | Titres FR non localisés là où la requête française diffère | F | S | Relecture | **Fait** (PR #76, 2026-09-06) — `x-default` laissé sur `/en`, voir la section |
 | | R2-17 | `/how-it-works` répète chaque nom de pilier deux fois | F | XS | Auto | **Fait** (PR #61, 2026-09-06) |
 | **D — Robustesse et sécurité** | R2-18 | Aucun en-tête de sécurité hors HSTS | T | S | Auto | **Fait** (PR #64, 2026-09-06) — CSP `script-src` complète volontairement hors périmètre |
