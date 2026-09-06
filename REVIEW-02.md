@@ -33,38 +33,40 @@ Tout a été exécuté réellement dans ce conteneur, pas déduit de la lecture.
 
 ## Vue d'ensemble et ordre de traitement
 
-| Lot | ID | Titre | Type | Effort | Statut |
-|---|---|---|---|---|---|
-| **A — Crédibilité devant le public visé** | R2-01 | Le K-factor ne peut jamais être entre 0 et 1 | F+T | S | À faire |
-| | R2-02 | La page de résultat parle au propriétaire, jamais au visiteur | F | S | À faire |
-| | R2-03 | Ni mentions légales ni information RGPD | F | M | À faire |
-| | R2-04 | Rien ne rattache le contenu à Antoine : ni page, ni entité | F | M | À faire |
-| | R2-05 | Wordmark et sélecteur de langue collés sur les 36 pages de contenu | F+T | XS | À faire |
-| **B — Boucle de partage et mesure** | R2-06 | Métadonnées : descriptions anglaises sur les URL françaises, titre sans mot-clé | F | S | À faire |
-| | R2-07 | Zéro balise Open Graph sur les pages de contenu | F | M | À faire |
-| | R2-08 | `/quiz` et `/deep-dive/[id]` indexables ; `lastmod` absent du sitemap | F+T | S | À faire |
-| | R2-09 | Le Deep dive dure ~70 s et rien ne prévient | F | S | À faire |
-| | R2-10 | Le calcul de la métrique reine n'a aucun test | T | S | À faire |
-| **C — Contenu de référence** | R2-11 | Glossaire : 76 à 105 mots par terme, contre 600 à 1 500 chez ceux qui rangent | F | L | À faire |
-| | R2-12 | « AARRR » n'apparaît ni sur la landing ni sur `/how-it-works` | F | S | À faire |
-| | R2-13 | Maillage interne : le glossaire n'est lié depuis aucune page qui a de l'autorité | F | S/M | À faire |
-| | R2-14 | Le dictionnaire bilingue entier et tout le glossaire partent dans le bundle client | T | S | À faire |
-| | R2-15 | Structured data : un seul bloc JSON-LD, identique en FR et en EN | F | M | À faire |
-| | R2-16 | Titres FR non localisés là où la requête française diffère | F | S | À faire |
-| | R2-17 | `/how-it-works` répète chaque nom de pilier deux fois | F | XS | À faire |
-| **D — Robustesse et sécurité** | R2-18 | Aucun en-tête de sécurité hors HSTS | T | S | À faire |
-| | R2-19 | Amplification de lectures Firestore non authentifiée sur `/r/<id>` | T | S | À faire |
-| | R2-20 | `freeContext` conservé indéfiniment pour calculer un booléen | T | S | À faire |
-| | R2-21 | Deep dive : deux requêtes concurrentes génèrent deux fois | T | S | À faire |
-| | R2-22 | Basic Auth admin : comparaison non constante, `atob` Latin-1 | T | XS | À faire |
-| | R2-23 | Aucun `error.tsx` : une panne rend le document nu de Next | T | S | À faire |
-| | R2-24 | Petites dettes : `rawPoints` public, logs Gemini non tronqués, pas de Dependabot | T | XS | À faire |
-| | R2-25 | Le stderr de Playwright n'est pas vide, donc plus lu | T | XS | À faire |
-| **E — Décisions produit (Antoine)** | R2-26 | Segmenter le benchmark : « la moyenne des SaaS B2B à ton stade » | F | M | À trancher |
-| | R2-27 | Historique de progression : les données sont déjà sur l'appareil | F | S | À trancher |
-| | R2-28 | Une page de métriques publique : l'outil montre son propre AARRR | F | M | À trancher |
-| | R2-29 | Le roast est le crochet viral et il est invisible avant la 15ᵉ question | F | S | À trancher |
-| | R2-30 | Fenêtre Tour de France (SPEC.md §10) : à caler dans le calendrier | F | S | À trancher |
+La colonne **Autonomie** dit ce que chaque item attend d'Antoine : **Auto** = je fais et je merge sans rien demander ; **Relecture** = je livre avec de la copie nouvelle marquée « à relire », Antoine relit après coup (par lots, pas PR par PR) ; **Toi** = il manque une information ou une décision avant de pouvoir livrer.
+
+| Lot | ID | Titre | Type | Effort | Autonomie | Statut |
+|---|---|---|---|---|---|---|
+| **A — Crédibilité devant le public visé** | R2-01 | Le K-factor ne peut jamais être entre 0 et 1 | F+T | S | Auto | À faire |
+| | R2-02 | La page de résultat parle au propriétaire, jamais au visiteur | F | S | Relecture | À faire |
+| | R2-03 | Ni mentions légales ni information RGPD | F | M | Toi (2 infos) + Relecture | À faire |
+| | R2-04 | Rien ne rattache le contenu à Antoine : ni page, ni entité | F | M | Relecture | À faire |
+| | R2-05 | Wordmark et sélecteur de langue collés sur les 36 pages de contenu | F+T | XS | Auto | À faire |
+| **B — Boucle de partage et mesure** | R2-06 | Métadonnées : descriptions anglaises sur les URL françaises, titre sans mot-clé | F | S | Relecture | À faire |
+| | R2-07 | Zéro balise Open Graph sur les pages de contenu | F | M | Auto | À faire |
+| | R2-08 | `/quiz` et `/deep-dive/[id]` indexables ; `lastmod` absent du sitemap | F+T | S | Auto | À faire |
+| | R2-09 | Le Deep dive dure ~70 s et rien ne prévient | F | S | Relecture | À faire |
+| | R2-10 | Le calcul de la métrique reine n'a aucun test | T | S | Auto | À faire |
+| **C — Contenu de référence** | R2-11 | Glossaire : 76 à 105 mots par terme, contre 600 à 1 500 chez ceux qui rangent | F | L | Relecture (lourde) | À faire |
+| | R2-12 | « AARRR » n'apparaît ni sur la landing ni sur `/how-it-works` | F | S | Relecture | À faire |
+| | R2-13 | Maillage interne : le glossaire n'est lié depuis aucune page qui a de l'autorité | F | S/M | Auto | À faire |
+| | R2-14 | Le dictionnaire bilingue entier et tout le glossaire partent dans le bundle client | T | S | Auto | À faire |
+| | R2-15 | Structured data : un seul bloc JSON-LD, identique en FR et en EN | F | M | Auto | À faire |
+| | R2-16 | Titres FR non localisés là où la requête française diffère | F | S | Relecture | À faire |
+| | R2-17 | `/how-it-works` répète chaque nom de pilier deux fois | F | XS | Auto | À faire |
+| **D — Robustesse et sécurité** | R2-18 | Aucun en-tête de sécurité hors HSTS | T | S | Auto | À faire |
+| | R2-19 | Amplification de lectures Firestore non authentifiée sur `/r/<id>` | T | S | Auto | À faire |
+| | R2-20 | `freeContext` conservé indéfiniment pour calculer un booléen | T | S | Auto | À faire |
+| | R2-21 | Deep dive : deux requêtes concurrentes génèrent deux fois | T | S | Auto | À faire |
+| | R2-22 | Basic Auth admin : comparaison non constante, `atob` Latin-1 | T | XS | Auto | À faire |
+| | R2-23 | Aucun `error.tsx` : une panne rend le document nu de Next | T | S | Auto | À faire |
+| | R2-24 | Petites dettes : `rawPoints` public, logs Gemini non tronqués, pas de Dependabot | T | XS | Auto | À faire |
+| | R2-25 | Le stderr de Playwright n'est pas vide, donc plus lu | T | XS | Auto | À faire |
+| **E — Décisions produit (Antoine)** | R2-26 | Segmenter le benchmark : « la moyenne des SaaS B2B à ton stade » | F | M | Toi | À trancher |
+| | R2-27 | Historique de progression : les données sont déjà sur l'appareil | F | S | Toi | À trancher |
+| | R2-28 | Une page de métriques publique : l'outil montre son propre AARRR | F | M | Toi | À trancher |
+| | R2-29 | Le roast est le crochet viral et il est invisible avant la 15ᵉ question | F | S | Toi | À trancher |
+| | R2-30 | Fenêtre Tour de France (SPEC.md §10) : à caler dans le calendrier | F | S | Toi | À trancher |
 
 ### Pourquoi cet ordre
 
@@ -73,6 +75,46 @@ Tout a été exécuté réellement dans ce conteneur, pas déduit de la lecture.
 3. **Lot C** est le chantier long. Il vient après A et B parce qu'un contenu de référence sur un site qui n'a ni mentions légales ni page auteur n'inspire pas confiance, et parce que R2-14 doit précéder R2-11 sous peine de gonfler le bundle du questionnaire à chaque paragraphe ajouté.
 4. **Lot D** : rien n'y est en feu, mais R2-18 et R2-19 coûtent une heure chacun et ferment deux trous réels.
 5. **Lot E** ne se traite pas : il se discute.
+
+## Plan d'exécution : les PR dans l'ordre
+
+Une PR par ligne, mergée dès que le check `Types, tests, build` est vert (jamais avant), en squash, avec le `git show --stat` non vide vérifié avant de cocher. Chaque PR met à jour la colonne Statut ci-dessus et ajoute son entrée dans `CLAUDE.md`. L'ordre suit les lots, avec deux exceptions justifiées : les items de robustesse à une heure de travail (lot D) sont intercalés tôt parce qu'ils ne coûtent rien et ferment des trous réels, et R2-14 précède tout le lot C parce que chaque paragraphe de contenu écrit avant lui gonfle le bundle du questionnaire.
+
+| # | Items | Ce qui est livré | Autonomie |
+|---|---|---|---|
+| 1 | R2-05 + R2-17 | Header des pages de contenu aligné sur la landing (composant `ContentHeader`), eyebrow de pilier remplacé par le numéro d'étape | Auto |
+| 2 | R2-01 + R2-10 | K-factor redéfini (deux chiffres), `computeGrowthStats` scindé en fonction pure testée, couverture mesurée en CI avec seuil sur `src/lib` | Auto |
+| 3 | R2-02 | CTA visiteur / propriétaire sur la page de résultat, événement `take_own_tour`, spec E2E | Relecture (3 chaînes) |
+| 4 | R2-18 | En-têtes de sécurité statiques dans `next.config.mjs`, spec qui les lit | Auto |
+| 5 | R2-19 + R2-23 + R2-25 | Validation de l'id avant toute lecture Firestore, polices OG mémoïsées, limite de débit sur les GET `/r/`, `error.tsx` + `global-error.tsx` sur `DetourCard`, stderr Playwright réduit au silence | Auto |
+| 6 | R2-20 + R2-24 | `freeContextProvided` à la place du texte, `contextAnswers`/`modelUsed` plus écrits, `rawPoints` retiré du payload public, `errText` tronqué, `dependabot.yml`, actions épinglées par SHA dans `verify-live.yml` | Auto |
+| 7 | R2-21 + R2-22 | `saveDeepDive` transactionnel, Basic Auth en comparaison constante et UTF-8 | Auto |
+| 8 | R2-09 | Copie d'attente avant et pendant le Deep dive | Relecture (2 chaînes) |
+| 9 | R2-06 + R2-08 | Métadonnées localisées, titre de landing avec mot-clé, `metaDescription` par terme, `noindex` sur `/deep-dive/[id]`, titre et description propres pour `/quiz` (gardé indexable — c'est une cible légitime pour « growth quiz », à contredire si tu préfères l'inverse), `lastmod` et `x-default` dans le sitemap | Relecture (titres et descriptions) |
+| 10 | R2-14 | `SiteFooter` en Server Component, `glossary.ts` scindé en moitié popover et moitié serveur | Auto |
+| 11 | R2-13 + R2-12 + R2-16 | Liens depuis `/how-it-works`, la landing et le popover ; « AARRR » nommé ; H1/titres FR localisés ; guillemets français ; `x-default` → `/` | Relecture (quelques chaînes) |
+| 12 | R2-07 | `openGraph`/`twitter` par défaut + image OG statique pour les pages de contenu | Auto (capture jointe à la PR) |
+| 13 | R2-15 | Module `lib/seo/jsonld.ts` : `WebApplication` localisé avec `author`, `Person`, `DefinedTerm`, `DefinedTermSet`, `BreadcrumbList` | Auto |
+| 14 | R2-03 | Page `/[locale]/legal`, lien pied de page, ligne sous le champ de contexte libre | Toi (voir ci-dessous) + Relecture |
+| 15 | R2-04 | Page `/[locale]/about` avec méthodologie complète et `Person` | Relecture (c'est ta voix) |
+| 16 à 20 | R2-11 | Contenu long du glossaire par lots de trois termes, en commençant par `cac`, `ltv`, `churn`, puis `retention`, `activation`, `viral-coefficient`, puis le reste | Relecture (lourde, lot par lot) |
+
+### Ce dont j'ai besoin de toi
+
+**Avant la PR 14 (R2-03), deux informations :**
+1. L'adresse e-mail de contact à afficher dans les mentions légales (obligatoire ; celle du CV, une adresse dédiée, ou un formulaire).
+2. Veux-tu afficher une adresse postale ? La LCEN permet à une personne physique éditant un site à titre non professionnel de ne pas la publier à condition d'indiquer l'hébergeur (Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, USA). Le site étant une pièce de portfolio, « non professionnel » est défendable ; je pars sur « nom + e-mail + hébergeur, sans adresse postale » sauf avis contraire.
+
+Je rédige le texte complet (mentions légales, notice de confidentialité avec Firestore, Gemini, Vercel, GoatCounter, durées de conservation telles qu'elles seront après la PR 6). Tu relis.
+
+**Pour le lot E, une réponse par ligne suffit.** Ma recommandation entre parenthèses :
+- R2-26 segmentation du benchmark : oui / non / plus tard (oui, mais après le lot C — deux questions de plus se justifient quand le contenu qui les exploite existe).
+- R2-27 progression entre deux Tours : oui / non (oui, c'est quasi gratuit et c'est la seule raison de revenir).
+- R2-28 page de métriques publique : oui / non / plus tard (oui, après R2-01, avec un seuil d'affichage ou l'étiquette « en construction, en public »).
+- R2-29 roast visible sur la landing : oui / non (oui, par le circuit Claude Design, pas au jugé).
+- R2-30 fenêtre Tour de France : date cible (mai 2027 pour le code, juin pour le post).
+
+**Relecture de copie.** Toutes les chaînes nouvelles seront marquées `TODO: à relire (REVIEW-02)` dans le code, et je te les listerai en un seul message quand le lot concerné sera mergé, pour que tu relises en une fois plutôt qu'à chaque PR — même mécanique que la validation du 2026-09-06.
 
 ---
 
@@ -392,3 +434,113 @@ Le fast-follow événementiel (badge « Maillot Jaune », vocabulaire « échapp
 - Que `firestore.rules` est déployé (console Firebase, compte d'Antoine).
 - Le comportement de Vercel Web Analytics / logs d'exécution : l'outil MCP Vercel ne voit toujours pas l'équipe du projet (même limite qu'à l'étape 12).
 - La qualité éditoriale du texte roast en production autrement qu'à travers les extraits déjà consignés dans CLAUDE.md.
+
+---
+
+## Annexe — mesures brutes
+
+Les chiffres derrière les constats, pour ne pas avoir à les remesurer. Tous relevés le 2026-09-06 sur le commit `11758de`.
+
+### A.1 Longueur du glossaire (`src/content/glossary.ts`), en mots
+
+| Terme | EN définition | EN extended | **EN total** | **FR total** |
+|---|---|---|---|---|
+| upsell-cross-sell | 17 | 59 | **76** | 92 |
+| retention | 14 | 74 | **88** | 105 |
+| ltv | 16 | 72 | **88** | 106 |
+| aha-moment | 15 | 74 | **89** | 99 |
+| onboarding | 20 | 69 | **89** | 92 |
+| acquisition | 9 | 81 | **90** | 107 |
+| cac | 14 | 76 | **90** | 102 |
+| north-star-metric | 18 | 74 | **92** | 112 |
+| churn | 15 | 78 | **93** | 105 |
+| referral | 15 | 79 | **94** | 106 |
+| activation | 20 | 79 | **99** | 104 |
+| growth-loop | 20 | 82 | **102** | 108 |
+| aarrr | 19 | 84 | **103** | 117 |
+| revenue | 20 | 84 | **104** | 115 |
+| viral-coefficient | 22 | 83 | **105** | 112 |
+| **Total** | | | **1 402** | **1 582** |
+
+Corps rendu des autres pages : landing 59 mots (EN) / 62 (FR) ; `/how-it-works` 320 / 340 ; index du glossaire 291 / 314.
+
+### A.2 Métadonnées émises (HTML prérendu)
+
+- Titre de landing : « Tour de Growth », 14 caractères, hérité par `/quiz` et `/deep-dive/[id]`.
+- Descriptions anglaises servies sur `/fr`, `/fr/how-it-works`, `/fr/glossary`.
+- Titres de terme identiques FR/EN : 13 sur 15 (seuls `aha-moment` et `viral-coefficient` ont un `term` localisé).
+- Descriptions hors gabarit : `growth-loop` FR 179 caractères, `viral-coefficient` FR 179, `aarrr` FR 163, `acquisition` EN 55.
+- Balises `og:*` / `twitter:*` sur les pages de contenu : 0. JSON-LD : 1 bloc (`WebApplication`, landing, identique FR/EN).
+- Canonical, `hreflang` en/fr, `x-default` : présents et corrects sur les 36 URL. `<html lang>` correct dans les deux arbres.
+- Sitemap : 36 URL, `changefreq` + `priority` présents, `lastmod` absent, `x-default` absent.
+
+### A.3 Lighthouse (build local, `next start`, émulation mobile, Chromium 1194)
+
+| Page | Performance | Accessibilité | Bonnes pratiques | SEO | LCP | CLS | TBT |
+|---|---|---|---|---|---|---|---|
+| `/en` | 96 | 100 | 96 | 100 | 2,7 s | 0 | 40 ms |
+| `/quiz` | 96 | 100 | 96 | 100 | 2,8 s | 0 | 30 ms |
+| `/r/sample` | 97 | 100 | 96 | 63 (`noindex`, attendu) | 2,7 s | 0 | 30 ms |
+| `/en/glossary/cac` | 97 | 100 | 96 | 100 | 2,5 s | 0 | 40 ms |
+
+Le LCP est le H1 en Stardos Stencil dans les quatre cas. Polices : 4 fichiers préchargés, 82 432 octets au total (Inter variable 48 Ko, Stardos Stencil 14 Ko, IBM Plex Mono 500 et 600 à 10 Ko chacun), `display: swap`, sous-ensemble `latin` suffisant pour le français (plages unicode vérifiées dans le CSS émis).
+
+### A.4 Bundles (Next 16.3.3 n'imprime plus les tailles ; mesuré sur disque)
+
+- `.next` : 77 Mo ; `.next/static` : 1,5 Mo ; `.next/static/chunks` : 892 Ko sur 20 fichiers.
+- Cinq plus gros chunks : 222,6 Ko · 157,4 Ko · 110,0 Ko · 63,7 Ko · 45,9 Ko (CSS).
+- JavaScript total d'une page de contenu : 9 chunks, ~578 Ko bruts / ~176 Ko gzip — le plancher React 19 + App Router pour une page avec un îlot client.
+- Chunk propre à une page de terme : 19 020 octets bruts / 7 689 gzip, contenant tout `UI_STRINGS` (chaînes « Drafting your race report », « dead last », « Roast Mode » et leurs équivalents FR retrouvées dedans).
+- Chaîne `extended` du glossaire (« Dave McClure ») retrouvée dans les chunks de `/quiz` et `/r/[id]`.
+
+### A.5 Couverture unitaire (`@vitest/coverage-v8`, non committé)
+
+Sur les fichiers importés par au moins un test : 95,6 % lignes, 93,4 % instructions, 90,1 % branches, 94,7 % fonctions.
+
+Fichiers de `src/lib`, `src/app/api` et `src/proxy.ts` **jamais importés par un test** : `submissions/growth-stats.ts` (97 lignes), `submissions/repository.ts` (82), `submissions/cached-repository.ts` (57), `firebase/admin.ts` (41), `i18n/resolve-request-locale.ts` (21), `site.ts` (12), `quiz/tone.ts` (7), `submissions/types.ts` (136, types seuls).
+
+Fichiers importés les moins couverts : `rate-limit.ts` 76 % lignes, `api/submissions/[id]/deep-dive/route.ts` 89 %, `owner-token.ts` 90 %, `proxy.ts` 91 %.
+
+### A.6 Maillage interne (liens entrants depuis les pages de contenu, arbre EN)
+
+`/en`, `/en/glossary`, `/en/how-it-works`, `/quiz` : 18 chacun (header + pied de page partout) · `activation`, `retention`, `ltv` : 7 · `cac` : 6 · `acquisition`, `revenue`, `churn`, `onboarding`, `growth-loop` : 5 · `referral`, `aha-moment`, `viral-coefficient`, `upsell-cross-sell`, `north-star-metric` : 4 · **`aarrr` : 3** · `/r/sample` : 1. `/how-it-works` ne lie aucun terme ; le popover de définition ne lie rien.
+
+### A.7 Search Console (propriété `sc-domain:tourdegrowth.com`, 15/08 → 04/09, via SEO Gets)
+
+Total : 1 clic, 50 impressions. Première impression le 29/08 (le jour de la mise en ligne du glossaire étendu).
+
+| Page (URL telle que vue par Google) | Impressions | Position moyenne |
+|---|---|---|
+| `/` | 4 (1 clic) | 2,8 |
+| `/glossary/viral-coefficient` | 14 | 91,6 |
+| `/glossary/activation` | 9 | 82,4 |
+| `/glossary/aha-moment` | 7 | 82,1 |
+| `/glossary/ltv` | 4 | 90,8 |
+| `/glossary/upsell-cross-sell` | 3 | 90,0 |
+| `/glossary/aarrr`, `/churn` | 2 chacun | 71,5 / 83,5 |
+| `/glossary`, `/acquisition`, `/north-star-metric`, `/retention` | 1 chacun | 87 / 82 / 32 / 75 |
+
+Requêtes : `virality coefficient` (7 impressions, pos. 92), `a ha moment` (4, 84), `what is an activation` (3, 80), `activation definition` (2, 83), `activation short form` (2, 89), `virality factor` (2, 93), et une impression chacune pour `a-ha moment`, `activation`, `aha moment meaning`, `airbnb north star metric nights booked` (pos. 32), `churn works`, `viral coefficient`.
+
+Les URL sont encore celles d'avant R-13 (sans préfixe de langue) : la redirection 308 est en place, il faudra vérifier dans quelques semaines que les URL `/en/...` les ont remplacées dans l'index.
+
+### A.8 Production (`curl` sur `https://www.tourdegrowth.com`)
+
+- `/en/glossary/cac` : première requête `x-vercel-cache: PRERENDER`, seconde `HIT` ; `cache-control: public, max-age=0, must-revalidate` ; `set-cookie: tdg_locale=en` sur chaque réponse.
+- Canonical, `hreflang` et sitemap sur `https://www.tourdegrowth.com` (donc `NEXT_PUBLIC_SITE_URL` bien réglé) ; l'apex redirige en 308 vers `www`.
+- En-têtes de sécurité présents : `strict-transport-security: max-age=63072000` uniquement.
+- `/r/sample` : `cache-control: private, no-cache, no-store`, `x-vercel-cache: MISS` (attendu).
+
+### A.9 Dépendances en retard (`npm outdated`)
+
+| Paquet | Installé | Dernière |
+|---|---|---|
+| `@playwright/test`, `playwright-core` | 1.56.1 | 1.63.0 (épinglage volontaire, R-07) |
+| `next` | 16.3.3 | 16.3.4 |
+| `@types/react-dom` | 19.2.5 | 19.2.7 |
+| `eslint` | 9.39.5 | 10.10.0 (9.39 « no longer supported ») |
+| `typescript` | 5.9.3 | 7.0.2 |
+| `vitest` | 4.1.11 | 5.0.0 |
+| `@types/node` | 22.20.1 | 26.4.1 |
+
+Dépréciations à l'installation : `node-domexception@1.0.0`, `glob@10.5.0`, `eslint@9.39.5`.
