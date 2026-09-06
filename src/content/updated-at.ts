@@ -6,7 +6,9 @@
  * when the words on the page change, not when its chrome or its code does.
  *
  * Glossary terms fall back to `GLOSSARY_UPDATED_AT` unless an entry carries
- * its own `updatedAt` (R2-11 will give the rewritten terms one each).
+ * its own `updatedAt` (R2-11 will give the rewritten terms one each). The
+ * legal pages are not listed here: their date is printed on the page itself
+ * (`content/legal.ts`, `updatedAt`), and the sitemap reads that one.
  */
 export const CONTENT_UPDATED_AT: Record<string, string> = {
   "/": "2026-09-06", // title and share text (PR #58), visitor-facing copy

@@ -3,6 +3,7 @@ import { ABOUT } from "@/content/about";
 import { GLOSSARY, type GlossaryTermId } from "@/content/glossary";
 import { ANTOINE_LINKS, QUICK_CREDIT } from "@/content/antoine-credit";
 import { HOW_IT_WORKS } from "@/content/how-it-works";
+import { PRIVACY, TERMS } from "@/content/legal";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import type { Locale } from "@/lib/i18n/locale";
 import { localePath } from "@/lib/i18n/routes";
@@ -134,6 +135,8 @@ export const CRUMBS = {
   term: (locale: Locale, id: GlossaryTermId) => ({ name: tc(GLOSSARY[id].term, locale), path: `/glossary/${id}` }),
   howItWorks: (locale: Locale) => ({ name: tc(HOW_IT_WORKS.title, locale), path: "/how-it-works" }),
   about: (locale: Locale) => ({ name: tc(ABOUT.title, locale), path: "/about" }),
+  privacy: (locale: Locale) => ({ name: tc(PRIVACY.title, locale), path: "/privacy" }),
+  terms: (locale: Locale) => ({ name: tc(TERMS.title, locale), path: "/terms" }),
 };
 
 /**

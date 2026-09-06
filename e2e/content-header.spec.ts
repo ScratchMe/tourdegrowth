@@ -18,6 +18,7 @@ const PAGES: [name: string, path: string][] = [
   ["how-it-works", "/en/how-it-works"],
   ["glossary index", "/fr/glossary"],
   ["glossary term", "/en/glossary/cac"],
+  ["terms", "/fr/terms"],
 ];
 const WIDTHS = [390, 1280];
 

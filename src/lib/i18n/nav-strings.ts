@@ -12,4 +12,7 @@ export const NAV_STRINGS = {
   glossary: { en: "Glossary", fr: "Glossaire" },
   // TODO: à relire (REVIEW-02) — R2-04.
   about: { en: "About", fr: "À propos" },
+  // TODO: à relire (REVIEW-02) — R2-03.
+  privacy: { en: "Privacy", fr: "Confidentialité" },
+  terms: { en: "Terms", fr: "Conditions" },
 } as const satisfies Record<string, Translatable>;

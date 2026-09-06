@@ -45,6 +45,25 @@
   color: var(--text-muted);
 }
 
+/* REVIEW-02.md R2-03 — the privacy line under the free-text field. Read as a
+   sentence, so not uppercase; the link runs the same direction as every other
+   link in the system (red-deep, ink on hover). */
+.freeContextPrivacy {
+  color: var(--text-muted);
+  text-wrap: pretty;
+}
+
+.freeContextPrivacyLink {
+  color: var(--text-link);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  white-space: nowrap;
+}
+
+.freeContextPrivacyLink:hover {
+  color: var(--text-link-hover);
+}
+
 .errorDetail {
   font: var(--meta-sm);
   color: var(--text-muted);
