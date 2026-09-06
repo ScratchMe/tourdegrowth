@@ -1155,6 +1155,22 @@ La PR #58 (autre session) avait localisé le bloc `WebApplication` de la landing
 
 **Vérifié en réel** : lint, tsc, 289 tests (+2), `next build` (`/en/about` et `/fr/about` en `●`), 108 specs Playwright (+4 : les deux langues avec les quinze questions et les liens de contact, la redirection de l'adresse non préfixée, le JSON-LD), captures EN desktop et FR mobile sans débordement.
 
+### R2-11, lot 1 : les pages de glossaire pèsent enfin ce qu'une page qui range pèse (2026-09-06)
+
+Le glossaire anglais entier faisait 1 402 mots — à peu près une seule page « CAC » chez ceux qui rangent — et Search Console le confirmait : indexé, sur les bonnes requêtes, en position 70-95. Premier lot : `cac`, `ltv`, `churn`, les trois termes les plus recherchés commercialement.
+
+**La structure, pas seulement du volume.** `content/glossary-deep.ts` (nouveau, serveur seulement — le garde de R2-14 couvre maintenant `glossary(-deep)?`) : pour chaque terme, la formule écrite puis expliquée terme à terme, un exemple chiffré en étapes avec sa conclusion, des ordres de grandeur **toujours avec leur réserve** (jamais un chiffre présenté comme « le » benchmark), trois à cinq leviers, et une FAQ de vraies requêtes (« CAC ou CPA ? », « comment convertir un churn mensuel en annuel ? »). `definition` n'est pas touchée : elle alimente le popover. Un terme sans `deep` garde sa page courte — le rendu est conditionnel, pas une deuxième page.
+
+**L'angle que personne d'autre n'a : « Dans le Tour ».** Chaque terme cite **la question du questionnaire qui le mesure**, ses trois réponses et leurs points — rendus depuis `copy-library.ts` par `questionId`, donc la page ne peut pas déformer le questionnaire — puis explique dans quelle bande de score ça vous met. C'est la seule chose qu'un glossaire adossé à un outil qui marche peut dire, et c'est aussi le pont naturel vers `/quiz`.
+
+**Les faits sont les faits couramment cités, avec leur formulation prudente** : le ratio LTV:CAC de 3:1 « que citent la plupart des investisseurs SaaS », le CAC payback sous 12 mois en PME et 18-24 en entreprise « couramment cités », la composition du churn mensuel (3 %/mois = 31 %/an, pas 36 %), le plafonnement de la durée de vie à 3-5 ans « chez la plupart des praticiens ». Les exemples chiffrés se répondent d'une page à l'autre (le CAC de 500 € de la page CAC est réutilisé par la page LTV). Aucune statistique inventée, aucune source nommée qu'on ne pourrait pas défendre.
+
+**Pas de `FAQPage` en JSON-LD**, volontairement : depuis août 2023 Google ne montre plus ce résultat enrichi qu'aux sites gouvernementaux et de santé ; le balisage n'apporterait rien et la FAQ en prose cible déjà les requêtes de longue traîne.
+
+**Copie : premier jet de la session de code, à relire ligne à ligne** — c'est de la copie de fond qui porte le nom d'Antoine, même statut que les `extended` du 2026-08-29 avant leur validation. Marqué en tête du fichier et sur les libellés de section dans `dictionary.ts`.
+
+**Vérifié en réel** : lint, tsc, 295 tests (+6, dont un plancher de **500 mots par terme et par langue** — mesuré entre 773 et 1 004), `next build`, 24 specs Playwright sur les fichiers touchés (+4 : les six sections et la question citée en EN, la même chose en FR, la page courte d'un terme sans contenu long, aucun débordement à 390 px), captures EN desktop et FR mobile relues. Piège d'outillage : après un changement de branche, `tsc` a signalé deux modules introuvables sous `.next/types/validator.ts` — ce fichier est généré par le build précédent (celui d'une autre branche) ; un rebuild le régénère, ce n'était pas une erreur du code.
+
 ---
 
 ## État du projet au 2026-09-06 — à lire en premier dans une nouvelle session

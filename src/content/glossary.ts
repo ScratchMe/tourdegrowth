@@ -1,5 +1,6 @@
 import type { Translatable } from "@/lib/i18n/dictionary";
 import { GLOSSARY_TERMS, type GlossaryTermId } from "./glossary-terms";
+import { GLOSSARY_DEEP, type DeepGlossaryContent } from "./glossary-deep";
 
 /**
  * glossary.ts — Tour de Growth
@@ -37,6 +38,13 @@ export interface GlossaryEntry {
   metaDescription?: Translatable;
   /** When this term's long-form copy last changed (sitemap `lastmod`); falls back to `GLOSSARY_UPDATED_AT`. */
   updatedAt?: string;
+  /**
+   * The long-form sections — formula, worked example, benchmarks, levers, the
+   * Tour question that measures it, FAQ (REVIEW-02.md R2-11). Lives in
+   * `glossary-deep.ts`, arrives term by term; a term without it renders the
+   * short page it always had.
+   */
+  deep?: DeepGlossaryContent;
 }
 
 export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
@@ -104,6 +112,8 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   cac: {
     ...GLOSSARY_TERMS.cac,
+    deep: GLOSSARY_DEEP.cac,
+    updatedAt: "2026-09-06", // R2-11, lot 1
     extended: {
       fr: "Le calcul de base : dépenses totales de vente et marketing sur une période, divisées par le nombre de nouveaux clients obtenus sur cette même période. Le piège le plus fréquent est d'oublier d'y inclure les salaires de l'équipe commerciale/marketing et le coût des outils — un CAC qui ne compte que la pub payante est presque toujours sous-estimé. Le CAC n'a de sens qu'à côté de la LTV : un CAC bas sur un produit à faible valeur peut coûter plus cher qu'un CAC élevé sur un produit à forte rétention.",
       en: "The basic calculation: total sales and marketing spend over a period, divided by the number of new customers acquired in that same period. The most common trap is forgetting to include sales/marketing salaries and tool costs — a CAC that only counts paid ad spend is almost always underestimated. CAC only means something next to LTV: a low CAC on a low-value product can end up costing more than a high CAC on a highly retentive one.",
@@ -112,6 +122,8 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   ltv: {
     ...GLOSSARY_TERMS.ltv,
+    deep: GLOSSARY_DEEP.ltv,
+    updatedAt: "2026-09-06", // R2-11, lot 1
     extended: {
       fr: "Une estimation courante en SaaS : revenu mensuel moyen par client, divisé par le taux de churn mensuel. Un churn de 5 %/mois donne mécaniquement une durée de vie moyenne de 20 mois — ce qui montre à quel point la LTV dépend directement de la retention, pas seulement du prix. Augmenter son prix sans travailler la retention gonfle la LTV sur le papier sans rien changer à la réalité si les clients partent toujours aussi vite. C'est pour ça que ce pilier et Retention se lisent toujours ensemble, jamais isolément.",
       en: "A common SaaS estimate: average monthly revenue per customer, divided by the monthly churn rate. A 5%/month churn rate mechanically implies an average 20-month lifetime — which shows how directly LTV depends on retention, not just price. Raising your price without working on retention inflates LTV on paper without changing anything in reality if customers still leave just as fast. That's why this pillar and Retention are always read together, never in isolation.",
@@ -120,6 +132,8 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   churn: {
     ...GLOSSARY_TERMS.churn,
+    deep: GLOSSARY_DEEP.churn,
+    updatedAt: "2026-09-06", // R2-11, lot 1
     extended: {
       fr: "Deux churns à distinguer : le churn logo (nombre de clients perdus) et le churn revenu (montant perdu) — un client qui downgrade sans partir compte dans le second, pas dans le premier. Une autre distinction utile : le churn volontaire (le client décide de partir) contre le churn involontaire (un paiement qui échoue), ce dernier se corrige souvent avec de la simple mécanique de facturation. Le meilleur signe de santé qu'une équipe SaaS puisse viser est un « churn négatif » : l'expansion revenue des clients existants (upsell) dépasse ce que le churn fait perdre.",
       en: "Two churns worth telling apart: logo churn (number of customers lost) and revenue churn (amount lost) — a customer who downgrades without leaving counts in the second, not the first. Another useful split: voluntary churn (the customer decides to leave) vs. involuntary churn (a failed payment) — the latter is often fixed with plain billing mechanics. The strongest health signal a SaaS team can aim for is \"negative churn\": expansion revenue from existing customers (upsell) outpacing what churn takes away.",
