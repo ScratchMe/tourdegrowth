@@ -166,13 +166,13 @@ export function ResultView({
   }
 
   /**
-   * The bottom-right CTA's link. It carries the referral id for a visitor —
-   * that is the growth loop (SPEC.md §7) — but never for whoever created this
-   * result: crediting yourself for re-taking your own Tour inflates the
+   * A visitor's way into their own Tour. It carries the referral id — that
+   * is the growth loop (SPEC.md §7). The owner's "take it again" link below
+   * never does: crediting yourself for re-taking your own Tour inflates the
    * K-factor, the one number SPEC.md §1 says the project exists to quote
    * (REVIEW.md R-03).
    */
-  const takeAgainHref = id && !isOwner ? `/quiz?ref=${id}` : "/quiz";
+  const ownTourHref = id ? `/quiz?ref=${id}` : "/quiz";
 
   const disclaimerShort = tc(HOW_IT_WORKS.limitationNotice.short, locale);
   const disclaimerLinkText = "How it works"; // the exact trailing phrase both locales' short notice ends with — see content/how-it-works.ts
@@ -354,24 +354,57 @@ export function ResultView({
               </PriorityMove>
             ) : null}
 
-            <div className={styles.ctaRow}>
-              {/* On desktop there is no native share sheet, so this label is
-                  the only confirmation anything happened — it used to be a
-                  mute "✓" (REVIEW.md R-10). aria-live so the change is
-                  announced, not just seen. */}
-              <Button onClick={handleShare} aria-live="polite" data-testid="share-button">
-                {copied ? tc(t.ctaShareCopied, locale) : tc(roast ? t.ctaShareRoast : t.ctaShare, locale)}
-              </Button>
-              {roast ? (
-                <Button variant="secondary" onClick={() => setTone("neutral")}>
-                  {tc(t.ctaSwitchToNeutral, locale)}
+            {/* REVIEW-02.md R2-02. Two CTAs, always (step 7's rule) — but WHOSE
+                two depends on who is looking. The owner shares and can take
+                it again. A visitor — someone who just opened a shared link,
+                the numerator of the K-factor — used to get the owner's pair:
+                "Share my score" in primary and "Take the Tour AGAIN" for a
+                Tour they never took. Now their primary is their own Tour,
+                with one line saying what that is; sharing stays, secondary.
+                `isOwner` is only known after mount, so the visitor pair is
+                also the first paint — the right default on a page that is
+                mostly reached through a shared link. */}
+            {isOwner ? (
+              <div className={styles.ctaRow}>
+                {/* On desktop there is no native share sheet, so this label is
+                    the only confirmation anything happened — it used to be a
+                    mute "✓" (REVIEW.md R-10). aria-live so the change is
+                    announced, not just seen. */}
+                <Button onClick={handleShare} aria-live="polite" data-testid="share-button">
+                  {copied ? tc(t.ctaShareCopied, locale) : tc(roast ? t.ctaShareRoast : t.ctaShare, locale)}
                 </Button>
-              ) : (
-                <Button href={takeAgainHref} variant="secondary" onClick={() => clearStoredAnswers()}>
-                  {tc(t.ctaAgain, locale)}
-                </Button>
-              )}
-            </div>
+                {roast ? (
+                  <Button variant="secondary" onClick={() => setTone("neutral")}>
+                    {tc(t.ctaSwitchToNeutral, locale)}
+                  </Button>
+                ) : (
+                  <Button href="/quiz" variant="secondary" onClick={() => clearStoredAnswers()}>
+                    {tc(t.ctaAgain, locale)}
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className={styles.ctaBlock}>
+                <p className={styles.visitorPitch} data-testid="visitor-pitch">
+                  {tc(t.visitorPitch, locale)}
+                </p>
+                <div className={styles.ctaRow}>
+                  <Button
+                    href={ownTourHref}
+                    data-testid="own-tour-cta"
+                    onClick={() => {
+                      clearStoredAnswers();
+                      trackEvent("take_own_tour"); // the click this page exists to produce, until now unmeasured
+                    }}
+                  >
+                    {tc(t.ctaOwnTour, locale)}
+                  </Button>
+                  <Button variant="secondary" onClick={handleShare} aria-live="polite" data-testid="share-button">
+                    {copied ? tc(t.ctaShareCopied, locale) : tc(t.ctaShareResult, locale)}
+                  </Button>
+                </div>
+              </div>
+            )}
 
             <Disclaimer align="left" className={styles.disclaimer}>
               {disclaimerSplit[0]}

@@ -1030,6 +1030,21 @@ Première PR du plan de `REVIEW-02.md`. `components/brand/ContentHeader` remplac
 
 ---
 
+### R2-02 : la page de résultat parle enfin au visiteur (2026-09-06)
+
+Deux CTA, toujours — la règle de l'étape 7 tient — mais **les deux du bon lecteur**. Le propriétaire garde sa paire (« Partager mon score » + « Refaire le Tour », ou le retour au neutre en roast). Un visiteur — quelqu'un qui vient d'ouvrir un lien partagé, le numérateur du K-factor — recevait jusqu'ici exactement cette paire : partager le score de quelqu'un d'autre en primaire, et « Refaire » un Tour qu'il n'avait jamais fait. Il a maintenant « Fais ton propre Tour → » en primaire (avec le `?ref=`, c'est la boucle de SPEC.md §7), une ligne au-dessus qui dit ce que c'est (« Ton propre score en 3 minutes — 15 questions, gratuit, sans compte »), et le partage en secondaire, reformulé « Partager ce résultat ». Trois chaînes nouvelles, marquées à relire.
+
+- **Le premier rendu est la version visiteur**, par construction : `isOwner` n'est connu qu'après montage (R-01), et sur une page atteinte surtout par un lien partagé, c'est le bon défaut — le propriétaire voit ses libellés apparaître un instant après, pas l'inverse.
+- **Le lien du propriétaire ne porte plus jamais le ref**, c'était déjà l'intention de R-03 ; la garde de soumission côté client reste en place derrière.
+- **Un événement de plus, `take_own_tour`** : le clic que cette page existe pour produire n'était mesuré nulle part. Ajouté au vocabulaire, à la liste exacte que `goatcounter-api.ts` demande à GoatCounter (sinon le tableau de bord le sous-compterait en silence — R-11), et affiché dans la vue de déperdition de `/admin/stats` en pourcentage des partages.
+- En roast, un visiteur perd le bouton « Repasser en neutre » : le ton est le choix de l'auteur, et l'assurance « ce n'est pas irréversible » que ce bouton donne (étape 7) ne concerne que lui.
+
+**Limite de vérification, dite plutôt que contournée** : `/r/sample` ne porte pas d'id, donc il est toujours la version visiteur — ce qui est aussi ce qu'une page d'exemple doit être. La spec `e2e/visitor-cta.spec.ts` (3 specs) couvre cette moitié, événement compris (la navigation est retenue un instant par un `preventDefault` posé côté test pour lire l'événement dans le document qui l'a émis). La version propriétaire a été vérifiée en navigateur avec un patch **local et jamais committé** donnant un id à l'échantillon et un jeton semé, même méthode que R-12 ; patch retiré et absence de trace vérifiée avant commit.
+
+**Vérifié en réel** : lint, tsc, 264 tests, `next build`, **89 specs Playwright** (+3), captures visiteur EN desktop / FR mobile et propriétaire EN.
+
+---
+
 ## État du projet au 2026-09-06 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.

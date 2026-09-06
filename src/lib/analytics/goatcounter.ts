@@ -63,6 +63,7 @@ export function trackEvent(name: string, detail?: string): void {
  *   tone_selected/<neutral|roast>       "Get my score" pressed
  *   submission_completed/<tone>         a result exists (SPEC.md §8)
  *   share/<tone>/<native|copy>          a share actually happened (SPEC.md §8)
+ *   take_own_tour                       a VISITOR of a shared result clicked into their own Tour (REVIEW-02.md R2-02)
  *   deep_dive_started                   the owner opened the Deep dive
  *   deep_dive_completed/<with_context|no_context>
  *   profile_click/<placement>           a credit link to Antoine's CV
@@ -99,3 +100,10 @@ export const DEEP_DIVE_CONTEXT_DETAILS = ["with_context", "no_context"] as const
  *    is about the score card, not the page footer.
  */
 export const PROFILE_CLICK_DETAILS = ["footer_cv", "card_cv", "card_linkedin", "sitefooter_cv"] as const;
+
+/**
+ * The one click a shared result page exists to produce: a visitor starting
+ * their own Tour (REVIEW-02.md R2-02). Before this event the page's primary
+ * CTA was the owner's share button and nothing measured the visitor at all.
+ */
+export const OWN_TOUR_EVENT = "take_own_tour";

@@ -4,6 +4,7 @@ import {
   QUIZ_STAGES,
   SHARE_METHODS,
   TONES,
+  OWN_TOUR_EVENT,
 } from "./goatcounter";
 
 // Server-only — never import this from a "use client" component.
@@ -42,6 +43,7 @@ const ALL_PATHS = [
   ...TONE_SELECTED_PATHS,
   ...SUBMISSION_PATHS,
   ...SHARE_PATHS,
+  OWN_TOUR_EVENT,
   DEEP_DIVE_STARTED_PATH,
   ...DEEP_DIVE_COMPLETED_PATHS,
   ...PROFILE_CLICK_PATHS,
@@ -60,6 +62,8 @@ export interface FunnelStats {
   submissionsCompleted: number;
   /** A share actually happened (native sheet or clipboard). */
   shares: number;
+  /** Visitors of a shared result who clicked into their own Tour (REVIEW-02.md R2-02). */
+  ownTourClicks: number;
   deepDiveStarted: number;
   deepDiveCompleted: number;
   /** Sum of all profile_click/* events (SPEC-ADDENDUM-02.md §2 credit links) in the same window. */
@@ -156,6 +160,7 @@ export async function fetchFunnelWindow(startISO: string, label: string): Promis
       toneSelected: sum(TONE_SELECTED_PATHS),
       submissionsCompleted: sum(SUBMISSION_PATHS),
       shares: sum(SHARE_PATHS),
+      ownTourClicks: counts.get(OWN_TOUR_EVENT) ?? 0,
       deepDiveStarted: counts.get(DEEP_DIVE_STARTED_PATH) ?? 0,
       deepDiveCompleted: sum(DEEP_DIVE_COMPLETED_PATHS),
       profileClicks,

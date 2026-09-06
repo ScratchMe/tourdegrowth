@@ -40,7 +40,7 @@ La colonne **Autonomie** dit ce que chaque item attend d'Antoine : **Auto** = je
 | Lot | ID | Titre | Type | Effort | Autonomie | Statut |
 |---|---|---|---|---|---|---|
 | **A — Crédibilité devant le public visé** | R2-01 | Le K-factor ne peut jamais être entre 0 et 1 | F+T | S | Auto | **Fait** (PR #62, 2026-09-06) |
-| | R2-02 | La page de résultat parle au propriétaire, jamais au visiteur | F | S | Relecture | À faire |
+| | R2-02 | La page de résultat parle au propriétaire, jamais au visiteur | F | S | Relecture | **Fait** (PR #63, 2026-09-06) — 3 chaînes à relire |
 | | R2-03 | Ni mentions légales ni information RGPD | F | M | Toi (1 info) + Relecture | À faire |
 | | R2-04 | Rien ne rattache le contenu à Antoine : ni page, ni entité | F | M | Relecture | À faire |
 | | R2-05 | Wordmark et sélecteur de langue collés sur les 36 pages de contenu | F+T | XS | Auto | **Fait** (PR #61, 2026-09-06) |

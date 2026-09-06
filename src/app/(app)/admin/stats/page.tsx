@@ -78,6 +78,10 @@ function FunnelBreakdown({ window }: { window: FunnelWindow }) {
             Shared — {stats.shares} ({ratio(stats.shares, stats.submissionsCompleted)} of results)
           </li>
           <li>
+            Visitor clicked into their own Tour — {stats.ownTourClicks} ({ratio(stats.ownTourClicks, stats.shares)} of
+            shares)
+          </li>
+          <li>
             Deep dive started — {stats.deepDiveStarted} (
             {ratio(stats.deepDiveStarted, stats.submissionsCompleted)} of results)
           </li>

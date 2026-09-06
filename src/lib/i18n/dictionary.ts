@@ -273,6 +273,15 @@ export const UI_STRINGS = {
     ctaShareCopied: { en: "Link copied", fr: "Lien copié" },
     ctaShareRoast: { en: "Share my roast", fr: "Partager mon roast" },
     ctaAgain: { en: "Take the Tour again", fr: "Refaire le Tour" },
+    // TODO: à relire (REVIEW-02) — R2-02. The three strings a VISITOR gets in
+    // the CTA slot instead of the owner's pair: what the Tour is, their way
+    // into it, and sharing someone else's result.
+    visitorPitch: {
+      en: "Your own score in 3 minutes — 15 questions, free, no sign-up.",
+      fr: "Ton propre score en 3 minutes — 15 questions, gratuit, sans compte.",
+    },
+    ctaOwnTour: { en: "Take your own Tour →", fr: "Fais ton propre Tour →" },
+    ctaShareResult: { en: "Share this result", fr: "Partager ce résultat" },
     ctaSwitchToNeutral: { en: "Switch to straight up", fr: "Repasser en neutre" },
     // Roast-only stamped tag on the weakest pillar (DESIGN-BRIEF.md §04: "08/20 RETENTION — dead last").
     stampedSuffix: { en: "dead last", fr: "bon dernier" },
