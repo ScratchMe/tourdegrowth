@@ -1,0 +1,50 @@
+/* /about — REVIEW-02.md R2-04. Shares how-it-works/page.module.css for the
+   page frame; only what this page has and that one doesn't lives here. */
+.questionGroups {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.questionGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.questionList {
+  margin: 0;
+  padding-left: 1.25em;
+  font: var(--body-sm);
+  color: var(--text-body);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rules {
+  margin: 0;
+  padding-left: 1.25em;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.example {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.exampleText {
+  font: var(--body-md);
+  color: var(--text-body);
+}
+
+.link {
+  color: var(--text-link);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}

@@ -98,8 +98,9 @@ export const DEEP_DIVE_CONTEXT_DETAILS = ["with_context", "no_context"] as const
  *  - `sitefooter_cv`  — the site-wide footer (`components/brand/SiteFooter`),
  *    added 2026-09-05. Named apart from `footer_cv`, which despite its name
  *    is about the score card, not the page footer.
+ *  - `about_cv` / `about_linkedin` — the contact section of `/about` (REVIEW-02.md R2-04).
  */
-export const PROFILE_CLICK_DETAILS = ["footer_cv", "card_cv", "card_linkedin", "sitefooter_cv"] as const;
+export const PROFILE_CLICK_DETAILS = ["footer_cv", "card_cv", "card_linkedin", "sitefooter_cv", "about_cv", "about_linkedin"] as const;
 
 /**
  * The one click a shared result page exists to produce: a visitor starting

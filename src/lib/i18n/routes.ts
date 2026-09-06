@@ -21,7 +21,7 @@ import { DEFAULT_LOCALE, isLocale, LOCALES, type Locale } from "./locale";
  */
 
 /** First path segments that are localized. Everything else at the root is an app route. */
-const LOCALIZED_ROOTS = ["how-it-works", "glossary"] as const;
+const LOCALIZED_ROOTS = ["how-it-works", "glossary", "about"] as const;
 
 export function localePath(locale: Locale, path = "/"): string {
   if (path === "/" || path === "") return `/${locale}`;

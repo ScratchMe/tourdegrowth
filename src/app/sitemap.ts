@@ -17,6 +17,7 @@ import { SITE_URL } from "@/lib/site";
 const CONTENT_PATHS: { path: string; changeFrequency: "monthly" | "yearly"; priority: number; lastModified: string }[] = [
   { path: "/", changeFrequency: "monthly", priority: 1, lastModified: CONTENT_UPDATED_AT["/"]! },
   { path: "/how-it-works", changeFrequency: "monthly", priority: 0.8, lastModified: CONTENT_UPDATED_AT["/how-it-works"]! },
+  { path: "/about", changeFrequency: "monthly", priority: 0.7, lastModified: CONTENT_UPDATED_AT["/about"]! },
   { path: "/glossary", changeFrequency: "monthly", priority: 0.6, lastModified: CONTENT_UPDATED_AT["/glossary"]! },
   ...Object.entries(GLOSSARY).map(([term, entry]) => ({
     path: `/glossary/${term}`,
