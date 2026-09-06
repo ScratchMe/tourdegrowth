@@ -45,7 +45,7 @@ Tout a été exécuté réellement dans le repo, pas déduit de la lecture.
 | | R-14 | Cache du résultat partagé + OG 404 pour id inconnu | T | M | **Fait** (PR #33, 2026-09-05) — clôt le lot D |
 | **E — Robustesse backend** | R-15 | Rate limiting sur les routes POST + `maxDuration` | T | S/M | **Fait** (PR #34, 2026-09-05) — limite en mémoire, pas distribuée |
 | | R-16 | Appel Gemini : header, `finishReason`, `maxOutputTokens` | T | M | **Fait en partie** (PR #35, 2026-09-05) — `responseSchema` et l'appel unique reportés en R-25 |
-| | R-25 | Gemini : `responseSchema` et un seul appel pour les deux tons | T | M | À faire — **exige un vrai appel réussi pour être vérifié** |
+| | R-25 | Gemini : `responseSchema` et un seul appel pour les deux tons | T | M | **Fait** pour `responseSchema` (PR #52, 2026-09-06), **appel unique écarté** avec Antoine |
 | | R-17 | Infra versionnée : règles Firestore, env vars documentées | T | S | **Fait** (PR #36, 2026-09-05) |
 | | R-18 | Dépendances et config TypeScript | T | S | **Fait** (PR #37, 2026-09-05) — clôt le lot E |
 | **F — Expérience** | R-19 | Accessibilité du parcours | F+T | M | **Fait** (PR #38, 2026-09-05) |
@@ -471,7 +471,7 @@ Le chrome partagé (polices `next/font`, script GoatCounter, `LocaleProvider`, `
 
 ### R-25 — Gemini : `responseSchema` et un seul appel pour les deux tons
 
-**Type** T · **Effort** M · **Statut** À faire — **exige un vrai appel Gemini réussi pour être vérifié**
+**Type** T · **Effort** M · **Statut** **Fait** pour le point 1 (PR #52, 2026-09-06), **point 2 écarté** — décision d'Antoine. Ce qui a débloqué l'item est le workflow `verify-live.yml` : la sonde Gemini envoie désormais exactement la requête de production (`lib/gemini/deep-dive.ts#callDeepDiveGemini`, schéma inclus) et a été lancée **sur la branche, avant merge** — c'est la vérification attendue ci-dessous, obtenue sans qu'aucune clé ne quitte GitHub. Pas de repli « sans schéma » sur 400 : il masquerait précisément la mauvaise configuration qu'on veut voir ; la sonde avant merge est la bonne protection. L'appel unique pour les deux tons est abandonné : gain de quota seulement (pas de latence, les générations partent en parallèle), contre un risque de contamination entre les deux voix sur un différenciateur produit.
 
 **D'où ça vient.** Découpé de R-16 au moment de le livrer, pour une raison précise : ces deux changements modifient la **requête** envoyée à Gemini, sur la seule fonctionnalité IA du produit, qui **fonctionne aujourd'hui en production**. Les livrer sans pouvoir exercer une génération réussie, c'est risquer de casser ce qui marche.
 
