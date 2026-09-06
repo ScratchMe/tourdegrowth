@@ -5,6 +5,7 @@ import { ContentHeader } from "@/components/brand/ContentHeader";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { GLOSSARY } from "@/content/glossary";
+import { breadcrumbSchema, CRUMBS, definedTermSetSchema, JsonLd } from "@/lib/seo/jsonld";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { contentMetadata } from "@/lib/i18n/meta";
@@ -39,6 +40,9 @@ export default async function GlossaryIndexPage({ params }: PageProps) {
 
   return (
     <>
+      {/* REVIEW-02.md R2-15: the glossary as one vocabulary, and its place in the site. */}
+      <JsonLd data={definedTermSetSchema(locale)} />
+      <JsonLd data={breadcrumbSchema(locale, [CRUMBS.glossary(locale)])} />
       <ContentHeader locale={locale} path="/glossary" />
 
       <main className={styles.main}>

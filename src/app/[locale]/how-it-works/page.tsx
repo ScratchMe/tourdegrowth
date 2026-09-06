@@ -10,6 +10,7 @@ import { HOW_IT_WORKS } from "@/content/how-it-works";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { localePath } from "@/lib/i18n/routes";
+import { breadcrumbSchema, CRUMBS, JsonLd } from "@/lib/seo/jsonld";
 import { contentMetadata } from "@/lib/i18n/meta";
 import styles from "./page.module.css";
 
@@ -42,6 +43,7 @@ export default async function HowItWorksPage({ params }: PageProps) {
 
   return (
     <>
+      <JsonLd data={breadcrumbSchema(locale, [CRUMBS.howItWorks(locale)])} />
       <ContentHeader locale={locale} path="/how-it-works" />
 
       <main className={styles.main}>
