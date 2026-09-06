@@ -116,6 +116,22 @@ export interface GeminiCallResult {
   modelUsed: string;
 }
 
+export interface GeminiCallOptions {
+  /**
+   * An OpenAPI-subset schema the API is asked to ENFORCE on the JSON it
+   * returns (REVIEW.md R-25), on top of the textual instruction in the
+   * prompt. Optional so the client stays generic; the Deep dive's lives in
+   * `deep-dive.ts`. A malformed schema is a 400, which this client treats
+   * as non-retriable — the live probe (`scripts/live/gemini.live.ts`) sends
+   * the real one to the real API before any change to it ships.
+   */
+  responseSchema?: Record<string, unknown>;
+  /** Injected for tests: the unit suite never makes a real network call. */
+  fetchImpl?: typeof fetch;
+  /** Injected for tests: exercises the retry policy without actually waiting. */
+  sleepImpl?: (ms: number) => Promise<void>;
+}
+
 function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
@@ -134,9 +150,9 @@ function errorMessage(err: unknown): string {
 export async function callGeminiWithFallback(
   prompt: string,
   apiKey: string,
-  fetchImpl: typeof fetch = fetch,
-  sleepImpl: (ms: number) => Promise<void> = realSleep,
+  options: GeminiCallOptions = {},
 ): Promise<GeminiCallResult> {
+  const { responseSchema, fetchImpl = fetch, sleepImpl = realSleep } = options;
   let lastError = "";
   let attempt = 0;
   const deadline = Date.now() + CHAIN_BUDGET_MS;
@@ -180,6 +196,7 @@ export async function callGeminiWithFallback(
               temperature: 0.3,
               responseMimeType: "application/json",
               maxOutputTokens: MAX_OUTPUT_TOKENS,
+              ...(responseSchema ? { responseSchema } : {}),
             },
           }),
           signal: timeoutController.signal,

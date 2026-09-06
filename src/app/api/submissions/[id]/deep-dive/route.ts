@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
 import { DEEP_MODE_QUESTIONS } from "@/content/deep-mode-questions";
 import { FREE_CONTEXT_MAX_LENGTH } from "@/content/free-context";
-import { callGeminiWithFallback } from "@/lib/gemini/client";
+import { callDeepDiveGemini } from "@/lib/gemini/deep-dive";
 import type { Locale } from "@/lib/i18n/locale";
 import { completeDeepDiveFlow, type DeepDiveAnswers } from "@/lib/submissions/create-submission";
 import { verifyOwnerToken } from "@/lib/submissions/owner-token";
@@ -132,7 +132,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   try {
     const deepDive = await completeDeepDiveFlow(
       { submission, contextAnswerIndices: contextAnswers, locale, freeContext: truncatedFreeContext },
-      { callGemini: (prompt) => callGeminiWithFallback(prompt, apiKey) },
+      { callGemini: (prompt) => callDeepDiveGemini(prompt, apiKey) },
     );
 
     await saveDeepDive(id, deepDive);

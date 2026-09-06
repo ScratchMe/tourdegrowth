@@ -4,7 +4,8 @@ import { DEEP_MODE_QUESTIONS } from "@/content/deep-mode-questions";
 import { PILLARS } from "@/lib/scoring/pillars";
 import { computeScore, type AnswerIndex, type Answers } from "@/lib/scoring/score";
 import { buildDeepDivePrompt } from "@/lib/gemini/prompt";
-import { REQUEST_TIMEOUT_MS, callGeminiWithFallback } from "@/lib/gemini/client";
+import { REQUEST_TIMEOUT_MS } from "@/lib/gemini/client";
+import { callDeepDiveGemini } from "@/lib/gemini/deep-dive";
 import { extractGeminiText } from "@/lib/gemini/response";
 import {
   resolveContextPromptAnswers,
@@ -17,11 +18,11 @@ import type { Tone } from "@/lib/quiz/tone";
 
 /**
  * Exercises the app's OWN Gemini client against the real API — the thing no
- * sandbox in this project has ever been able to do, and the reason R-25
- * (`responseSchema`, and one call for both tones) has stayed unshipped:
- * both change the REQUEST on the only AI feature in the product, and a
- * malformed schema returns 400, which this client treats as non-retriable.
- * Every Deep dive would break until corrected.
+ * sandbox in this project has ever been able to do. It is what let R-25
+ * (`responseSchema`) ship: that changes the REQUEST on the only AI feature in
+ * the product, and a malformed schema returns 400, which this client treats
+ * as non-retriable — every Deep dive would break until corrected. Run this
+ * on the branch BEFORE merging any change to `deep-dive.ts` or `client.ts`.
  *
  * Deliberately imports `client.ts` / `prompt.ts` rather than calling the API
  * by hand: a probe that re-implements the request tests a copy, not the code
@@ -103,7 +104,8 @@ function samplePrompt(locale: Locale, tone: Tone): string {
  */
 async function timed(what: string, prompt: string) {
   const started = Date.now();
-  const result = await callGeminiWithFallback(prompt, apiKey());
+  // The production call, schema included — never a hand-assembled request (REVIEW.md R-25).
+  const result = await callDeepDiveGemini(prompt, apiKey());
   const seconds = (Date.now() - started) / 1000;
   console.log(
     `  ── ${what}: ${result.modelUsed}, ${seconds.toFixed(1)}s (per-attempt ceiling ${REQUEST_TIMEOUT_MS / 1000}s), ${usage(result.data)}`,

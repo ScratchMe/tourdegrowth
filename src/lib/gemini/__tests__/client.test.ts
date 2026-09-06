@@ -24,7 +24,7 @@ describe("callGeminiWithFallback", () => {
       return jsonResponse(200, { ok: true });
     };
 
-    const result = await callGeminiWithFallback("prompt", "key", fetchImpl, noSleep);
+    const result = await callGeminiWithFallback("prompt", "key", { fetchImpl, sleepImpl: noSleep });
 
     expect(result).toEqual({ data: { ok: true }, modelUsed: GEMINI_MODEL_CANDIDATES[0] });
     expect(calls).toHaveLength(1);
@@ -39,7 +39,7 @@ describe("callGeminiWithFallback", () => {
       return jsonResponse(200, { ok: true });
     };
 
-    const result = await callGeminiWithFallback("prompt", "key", fetchImpl, noSleep);
+    const result = await callGeminiWithFallback("prompt", "key", { fetchImpl, sleepImpl: noSleep });
 
     expect(result.modelUsed).toBe(GEMINI_MODEL_CANDIDATES[1]);
     expect(calls).toHaveLength(2);
@@ -53,7 +53,7 @@ describe("callGeminiWithFallback", () => {
       return jsonResponse(200, { ok: true });
     };
 
-    const result = await callGeminiWithFallback("prompt", "key", fetchImpl, noSleep);
+    const result = await callGeminiWithFallback("prompt", "key", { fetchImpl, sleepImpl: noSleep });
 
     expect(result.modelUsed).toBe(GEMINI_MODEL_CANDIDATES[1]);
     expect(attempt).toBe(2);
@@ -62,7 +62,7 @@ describe("callGeminiWithFallback", () => {
   it("exhausts all 4 candidates and throws when every one is retriable-failing", async () => {
     const fetchImpl = async () => textResponse(429, "rate limited");
 
-    await expect(callGeminiWithFallback("prompt", "key", fetchImpl, noSleep)).rejects.toThrow(
+    await expect(callGeminiWithFallback("prompt", "key", { fetchImpl, sleepImpl: noSleep })).rejects.toThrow(
       /All Gemini model candidates failed/,
     );
   });
@@ -74,7 +74,7 @@ describe("callGeminiWithFallback", () => {
       return textResponse(400, "bad request: malformed prompt");
     };
 
-    await expect(callGeminiWithFallback("prompt", "key", fetchImpl, noSleep)).rejects.toThrow(
+    await expect(callGeminiWithFallback("prompt", "key", { fetchImpl, sleepImpl: noSleep })).rejects.toThrow(
       /Gemini API error \(400\)/,
     );
     // Regression guard: the ported reference implementation had a bug where
@@ -112,7 +112,7 @@ describe("callGeminiWithFallback", () => {
         return Promise.resolve(new Response(JSON.stringify({ ok: true }), { status: 200 }));
       };
 
-      const promise = callGeminiWithFallback("prompt", "key", fetchImpl, noSleep);
+      const promise = callGeminiWithFallback("prompt", "key", { fetchImpl, sleepImpl: noSleep });
       // Let the first attempt's timeout fire, then let the retry's microtasks settle.
       await vi.advanceTimersByTimeAsync(REQUEST_TIMEOUT_MS);
 
@@ -138,7 +138,7 @@ describe("callGeminiWithFallback", () => {
         });
       };
 
-      const promise = callGeminiWithFallback("prompt", "key", hangForever, noSleep);
+      const promise = callGeminiWithFallback("prompt", "key", { fetchImpl: hangForever, sleepImpl: noSleep });
       // Attach the handler before advancing, so the rejection is never unhandled.
       const outcome = promise.then(
         () => "resolved",
@@ -168,8 +168,11 @@ describe("callGeminiWithFallback — backoff between attempts", () => {
     const fetchImpl = async () => jsonResponse(503, { error: "overloaded" });
 
     await expect(
-      callGeminiWithFallback("prompt", "key", fetchImpl, async (ms) => {
-        waits.push(ms);
+      callGeminiWithFallback("prompt", "key", {
+        fetchImpl,
+        sleepImpl: async (ms) => {
+          waits.push(ms);
+        },
       }),
     ).rejects.toThrow(/All Gemini model candidates failed/);
 
@@ -187,8 +190,11 @@ describe("callGeminiWithFallback — backoff between attempts", () => {
     const waits: number[] = [];
     const fetchImpl = async () => jsonResponse(200, { ok: true });
 
-    await callGeminiWithFallback("prompt", "key", fetchImpl, async (ms) => {
-      waits.push(ms);
+    await callGeminiWithFallback("prompt", "key", {
+      fetchImpl,
+      sleepImpl: async (ms) => {
+        waits.push(ms);
+      },
     });
 
     expect(waits).toEqual([]);
@@ -202,8 +208,11 @@ describe("callGeminiWithFallback — backoff between attempts", () => {
       return call === 1 ? jsonResponse(404, { error: "not found" }) : jsonResponse(200, { ok: true });
     };
 
-    const result = await callGeminiWithFallback("prompt", "key", fetchImpl, async (ms) => {
-      waits.push(ms);
+    const result = await callGeminiWithFallback("prompt", "key", {
+      fetchImpl,
+      sleepImpl: async (ms) => {
+        waits.push(ms);
+      },
     });
 
     expect(result.modelUsed).toBe(GEMINI_MODEL_CANDIDATES[1]);
@@ -218,8 +227,11 @@ describe("callGeminiWithFallback — backoff between attempts", () => {
     for (let i = 0; i < 8; i += 1) {
       const waits: number[] = [];
       await expect(
-        callGeminiWithFallback("prompt", "key", async () => jsonResponse(503, {}), async (ms) => {
-          waits.push(ms);
+        callGeminiWithFallback("prompt", "key", {
+          fetchImpl: async () => jsonResponse(503, {}),
+          sleepImpl: async (ms) => {
+            waits.push(ms);
+          },
         }),
       ).rejects.toThrow();
       runs.push(waits);
@@ -251,7 +263,7 @@ describe("callGeminiWithFallback — request shape", () => {
       new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: "{}" }] } }] }), { status: 200 }),
     ) as unknown as typeof fetch;
 
-    await callGeminiWithFallback("prompt", "super-secret-key", fetchImpl, noSleep);
+    await callGeminiWithFallback("prompt", "super-secret-key", { fetchImpl, sleepImpl: noSleep });
 
     const [url, init] = (fetchImpl as unknown as { mock: { calls: [string, RequestInit][] } }).mock.calls[0]!;
     expect(url).not.toContain("super-secret-key");
@@ -264,11 +276,28 @@ describe("callGeminiWithFallback — request shape", () => {
       new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: "{}" }] } }] }), { status: 200 }),
     ) as unknown as typeof fetch;
 
-    await callGeminiWithFallback("prompt", "k", fetchImpl, noSleep);
+    await callGeminiWithFallback("prompt", "k", { fetchImpl, sleepImpl: noSleep });
 
     const [, init] = (fetchImpl as unknown as { mock: { calls: [string, RequestInit][] } }).mock.calls[0]!;
     const body = JSON.parse(init.body as string);
     expect(body.generationConfig.maxOutputTokens).toBeGreaterThan(0);
     expect(body.generationConfig.responseMimeType).toBe("application/json");
+  });
+
+  /** REVIEW.md R-25 — the schema travels in `generationConfig`, and only when asked for. */
+  it("sends a response schema when given one, and no schema key at all otherwise", async () => {
+    const bodies: Record<string, { generationConfig: Record<string, unknown> }> = {};
+    const fetchImpl = (label: string) =>
+      (async (_url: string | URL | Request, init?: RequestInit) => {
+        bodies[label] = JSON.parse(init?.body as string);
+        return new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: "{}" }] } }] }), { status: 200 });
+      }) as unknown as typeof fetch;
+
+    const schema = { type: "OBJECT", properties: { a: { type: "STRING" } } };
+    await callGeminiWithFallback("prompt", "k", { fetchImpl: fetchImpl("with"), sleepImpl: noSleep, responseSchema: schema });
+    await callGeminiWithFallback("prompt", "k", { fetchImpl: fetchImpl("without"), sleepImpl: noSleep });
+
+    expect(bodies.with!.generationConfig.responseSchema).toEqual(schema);
+    expect("responseSchema" in bodies.without!.generationConfig).toBe(false);
   });
 });
