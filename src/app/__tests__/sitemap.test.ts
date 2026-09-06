@@ -7,7 +7,7 @@ describe("sitemap", () => {
   const entries = sitemap();
 
   it("lists every content page once per language", () => {
-    expect(entries).toHaveLength(36);
+    expect(entries).toHaveLength(38);
   });
 
   it("dates every entry with a real, hand-maintained lastModified", () => {

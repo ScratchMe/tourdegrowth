@@ -1147,6 +1147,16 @@ La PR #58 (autre session) avait localisé le bloc `WebApplication` de la landing
 
 ---
 
+### R2-04 : une page qui dit qui a fait ça, et comment le score est calculé — publiquement (2026-09-06)
+
+`/[locale]/about`, prérendue comme les autres pages de contenu, même feuille de style que `/how-it-works` (les deux sont une seule famille de pages de prose). Six sections : qui a construit l'outil et pourquoi ; pourquoi ces quinze questions — **rendues depuis `copy-library.ts`**, groupées par étape, pas de seconde copie qui dériverait ; la règle de calcul exacte, en cinq points, avec un exemple chiffré ; où il y a de l'IA et où il n'y en a pas ; construit en public, avec le lien vers le dépôt ; me contacter (LinkedIn et CV, deux nouveaux emplacements `profile_click/about_*`, ajoutés **en fin** de liste parce que `ResultView` et le pied de page lisent les leurs par position). JSON-LD `AboutPage` dont `mainEntity` est le nœud `Person` déjà utilisé partout, avec le titre de poste ; fil d'Ariane ; lien « À propos » dans le pied de page ; `/about` non préfixé redirige comme les autres ; sitemap à 38 URL.
+
+**Toute la copie de `content/about.ts` est un premier jet écrit à la première personne, dans la voix d'Antoine, par la session de code** — pas une copie livrée par l'agent produit. Les faits viennent d'`antoine-credit.ts` (dix ans, AB Tasty, SNCF Connect & Tech) ; l'arithmétique est celle de `lib/scoring/score.ts` et **un test l'épingle** : l'exemple « 20 + 7 + 7 = 34, 34 ÷ 3 = 11,33, arrondi à 11 » est recalculé par `computeScore`, et les trois valeurs de points nommées dans le texte sont celles des options. La voix, elle, est la sienne à approuver — marqué en tête du fichier.
+
+**Vérifié en réel** : lint, tsc, 289 tests (+2), `next build` (`/en/about` et `/fr/about` en `●`), 108 specs Playwright (+4 : les deux langues avec les quinze questions et les liens de contact, la redirection de l'adresse non préfixée, le JSON-LD), captures EN desktop et FR mobile sans débordement.
+
+---
+
 ## État du projet au 2026-09-06 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.

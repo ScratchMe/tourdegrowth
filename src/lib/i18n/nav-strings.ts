@@ -10,4 +10,6 @@ import type { Translatable } from "./translatable";
 export const NAV_STRINGS = {
   howItWorks: { en: "How it works", fr: "Comment ça marche" },
   glossary: { en: "Glossary", fr: "Glossaire" },
+  // TODO: à relire (REVIEW-02) — R2-04.
+  about: { en: "About", fr: "À propos" },
 } as const satisfies Record<string, Translatable>;

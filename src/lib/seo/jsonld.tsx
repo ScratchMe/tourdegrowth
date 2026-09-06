@@ -1,4 +1,5 @@
 import type { ReactElement } from "react";
+import { ABOUT } from "@/content/about";
 import { GLOSSARY, type GlossaryTermId } from "@/content/glossary";
 import { ANTOINE_LINKS, QUICK_CREDIT } from "@/content/antoine-credit";
 import { HOW_IT_WORKS } from "@/content/how-it-works";
@@ -110,11 +111,29 @@ export function definedTermSchema(locale: Locale, id: GlossaryTermId) {
   };
 }
 
-/** Localized breadcrumb names for the three content areas. */
+/**
+ * `/about` — REVIEW-02.md R2-04: the one page a search engine can attach the
+ * author entity to. `AboutPage` whose `mainEntity` is the same Person node
+ * as everywhere else, with the job title spelled out.
+ */
+export function aboutPageSchema(locale: Locale) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    name: tc(ABOUT.title, locale),
+    url: absolute(locale, "/about"),
+    inLanguage: locale,
+    about: { "@type": "WebApplication", name: SITE_NAME, url: absolute(locale) },
+    mainEntity: { ...personNode(), jobTitle: "Senior Growth Product Manager" },
+  };
+}
+
+/** Localized breadcrumb names for the content areas. */
 export const CRUMBS = {
   glossary: (locale: Locale) => ({ name: tc(UI_STRINGS.glossaryPage.indexTitle, locale), path: "/glossary" }),
   term: (locale: Locale, id: GlossaryTermId) => ({ name: tc(GLOSSARY[id].term, locale), path: `/glossary/${id}` }),
   howItWorks: (locale: Locale) => ({ name: tc(HOW_IT_WORKS.title, locale), path: "/how-it-works" }),
+  about: (locale: Locale) => ({ name: tc(ABOUT.title, locale), path: "/about" }),
 };
 
 /**

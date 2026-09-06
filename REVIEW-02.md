@@ -42,7 +42,7 @@ La colonne **Autonomie** dit ce que chaque item attend d'Antoine : **Auto** = je
 | **A — Crédibilité devant le public visé** | R2-01 | Le K-factor ne peut jamais être entre 0 et 1 | F+T | S | Auto | **Fait** (PR #62, 2026-09-06) |
 | | R2-02 | La page de résultat parle au propriétaire, jamais au visiteur | F | S | Relecture | **Fait** (PR #63, 2026-09-06) — 3 chaînes à relire |
 | | R2-03 | Ni mentions légales ni information RGPD | F | M | Toi (1 info) + Relecture | À faire |
-| | R2-04 | Rien ne rattache le contenu à Antoine : ni page, ni entité | F | M | Relecture | À faire |
+| | R2-04 | Rien ne rattache le contenu à Antoine : ni page, ni entité | F | M | Relecture | **Fait** (PR #78, 2026-09-06) — toute la copie de `content/about.ts` est un premier jet à relire |
 | | R2-05 | Wordmark et sélecteur de langue collés sur les 36 pages de contenu | F+T | XS | Auto | **Fait** (PR #61, 2026-09-06) |
 | **B — Boucle de partage et mesure** | R2-06 | Métadonnées : descriptions anglaises sur les URL françaises, titre sans mot-clé | F | S | Relecture | **Fait pour l'essentiel par la PR #58** (autre session) — le reliquat (descriptions de terme, `/quiz`) est repris dans R2-08 |
 | | R2-07 | Zéro balise Open Graph sur les pages de contenu | F | M | Auto | **Fait** (PR #58, autre session ; vérifié sur le build le 2026-09-06) |

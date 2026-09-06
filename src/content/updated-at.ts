@@ -11,6 +11,7 @@
 export const CONTENT_UPDATED_AT: Record<string, string> = {
   "/": "2026-09-06", // title and share text (PR #58), visitor-facing copy
   "/how-it-works": "2026-09-06", // stage eyebrows (R2-17)
+  "/about": "2026-09-06", // created (R2-04)
   "/glossary": "2026-08-29", // the 15 short definitions have not moved since the extended copy shipped
 };
 
