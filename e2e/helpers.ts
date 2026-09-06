@@ -119,3 +119,26 @@ export async function seedOwnedResult(page: Page, id = CREATED_ID, total = CREAT
     [id, total] as [string, number],
   );
 }
+
+/**
+ * Captures every POST to the Deep dive route and answers it with `status`.
+ *
+ * Stubbed rather than called for real, like `/api/submissions`: CI has no
+ * Gemini key, and a Deep dive is four real generations. What these specs
+ * protect is the client's behaviour when that call fails — which is not
+ * hypothetical, a live run has seen production return `DEEP_DIVE_FAILED`
+ * because Gemini itself was returning 503s.
+ */
+export async function stubDeepDive(page: Page, status = 200): Promise<Record<string, unknown>[]> {
+  const calls: Record<string, unknown>[] = [];
+  await page.route("**/api/submissions/*/deep-dive", async (route: Route) => {
+    calls.push(route.request().postDataJSON() as Record<string, unknown>);
+    await route.fulfill({
+      status,
+      contentType: "application/json",
+      body: JSON.stringify(status === 200 ? { id: CREATED_ID } : { error: "DEEP_DIVE_FAILED" }),
+    });
+  });
+  return calls;
+}
+

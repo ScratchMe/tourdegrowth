@@ -3,6 +3,7 @@ import {
   answerAllQuestions,
   expect,
   seedOwnedResult,
+  stubDeepDive,
   stubSubmissions,
   test,
 } from "./helpers";
@@ -120,4 +121,63 @@ test("the sample result never shows a benchmark", async ({ page }) => {
   await page.goto("/r/sample");
   await expect(page.getByTestId("score-verdict").first()).toBeVisible();
   await expect(page.getByTestId("benchmark")).toHaveCount(0);
+});
+
+/**
+ * What happens when the Deep dive generation fails.
+ *
+ * Not a hypothetical: a live verification run caught production returning
+ * `DEEP_DIVE_FAILED` because Gemini was answering 503 on every model in the
+ * fallback chain. No amount of client-side retry makes an upstream outage go
+ * away — so what matters is that it costs the user a click, not the ten
+ * questions they just answered.
+ */
+test.describe("when the Deep dive generation fails", () => {
+  async function answerWholeDeepDive(page: import("@playwright/test").Page) {
+    await page.goto("/r/sample");
+    await seedOwnedResult(page);
+    await page.goto("/deep-dive/sample");
+    for (let i = 0; i < 10; i += 1) {
+      await page.getByTestId("deep-dive-answer-option").first().click();
+    }
+    await page.getByTestId("free-context-textarea").fill("We sell to physiotherapists.");
+  }
+
+  test("retrying does not make them answer anything again", async ({ page }) => {
+    await stubDeepDive(page, 502);
+    await answerWholeDeepDive(page);
+    await page.getByTestId("submit-button").click();
+
+    // The failure is shown, with the short stable code (R-04) — not a stack.
+    await expect(page.getByTestId("retry-button")).toBeVisible();
+    await expect(page.getByTestId("deep-dive-answer-option")).toHaveCount(0);
+
+    await page.unroute("**/api/submissions/*/deep-dive");
+    const calls = await stubDeepDive(page, 200);
+    await page.getByTestId("retry-button").click();
+    await page.waitForURL("**/r/**");
+
+    // The retry sent the SAME ten answers and the same free text, without the
+    // user touching a single question again.
+    expect(Object.keys(calls[0]?.contextAnswers as object)).toHaveLength(10);
+    expect(calls[0]?.freeContext).toBe("We sell to physiotherapists.");
+  });
+
+  test("even a reload on the error screen keeps the ten answers", async ({ page }) => {
+    // The harder promise: an outage that outlasts the tab. R-20 persists the
+    // progress, so reloading lands back on the free-context screen with
+    // everything still filled in — not on question 1.
+    await stubDeepDive(page, 502);
+    await answerWholeDeepDive(page);
+    await page.getByTestId("submit-button").click();
+    await expect(page.getByTestId("retry-button")).toBeVisible();
+
+    await page.reload();
+
+    await expect(page.getByTestId("free-context-textarea")).toHaveValue("We sell to physiotherapists.");
+    const calls = await stubDeepDive(page, 200);
+    await page.getByTestId("submit-button").click();
+    await page.waitForURL("**/r/**");
+    expect(Object.keys(calls[0]?.contextAnswers as object)).toHaveLength(10);
+  });
 });
