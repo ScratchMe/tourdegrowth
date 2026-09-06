@@ -13,6 +13,7 @@ export interface QuestionTextProps {
   onOpenGlossaryChange: (id: string | null) => void;
   glossaryCloseLabel: string;
   glossaryLabelTemplate: string;
+  glossaryMoreLabel: string;
 }
 
 /**
@@ -30,6 +31,7 @@ export function QuestionText({
   onOpenGlossaryChange,
   glossaryCloseLabel,
   glossaryLabelTemplate,
+  glossaryMoreLabel,
 }: QuestionTextProps) {
   const glossaryTerm = QUESTION_GLOSSARY_TERMS[questionId];
   if (!glossaryTerm) return <>{text}</>;
@@ -51,6 +53,7 @@ export function QuestionText({
         onOpenChange={onOpenGlossaryChange}
         closeLabel={glossaryCloseLabel}
         labelTemplate={glossaryLabelTemplate}
+        moreLabel={glossaryMoreLabel}
       />
       {after}
     </>

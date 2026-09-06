@@ -54,7 +54,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "L'acquisition couvre tous les canaux par lesquels quelqu'un arrive chez toi pour la première fois : SEO, publicité payante, bouche-à-oreille, contenu, communautés, partenariats. Le piège classique : juger un canal uniquement sur le volume qu'il apporte, sans se demander s'il est reproductible et si son coût est connu (voir CAC). Un canal qui a bien marché une fois par chance n'est pas une stratégie d'acquisition, c'est un coup de chance. Et l'acquisition seule ne dit rien de la santé du produit — un pic de nouveaux visiteurs qui n'activent jamais n'est qu'un chiffre de vanité.",
       en: "Acquisition covers every channel through which someone finds you for the first time: SEO, paid ads, word of mouth, content, communities, partnerships. The classic trap: judging a channel purely on volume, without asking whether it's repeatable and whether its cost is even known (see CAC). A channel that worked once by luck isn't an acquisition strategy, it's a lucky break. And acquisition alone says nothing about product health — a spike of new visitors who never activate is just a vanity number.",
     },
-    related: ["cac", "growth-loop", "activation"],
+    related: ["cac", "growth-loop", "activation", "aarrr"],
     // TODO: à relire (REVIEW-02) — R2-08. The English definition is 55
     // characters, too short for a search snippet; the French one is fine.
     metaDescription: {
@@ -68,7 +68,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "La plupart des équipes confondent activation et inscription. Ce sont deux choses différentes : l'inscription est une action administrative, l'activation est le moment où l'utilisateur comprend enfin pourquoi il est là (voir Moment « aha »). Bien définir son activation demande de regarder, parmi les utilisateurs qui reviennent des mois plus tard, quelle action ils ont tous faite tôt — c'est souvent contre-intuitif, rarement la première chose qu'on montre dans l'onboarding. Une activation mal définie fausse tout le reste : on optimise le mauvais moment du parcours.",
       en: "Most teams confuse activation with sign-up. They're two different things: sign-up is an administrative action, activation is the moment the user finally understands why they're there (see Aha moment). Defining activation correctly means looking at users who are still around months later and finding the one early action they all took — it's often counter-intuitive, rarely the first thing shown in onboarding. A poorly defined activation moment skews everything downstream: you end up optimizing the wrong point in the journey.",
     },
-    related: ["aha-moment", "onboarding", "retention"],
+    related: ["aha-moment", "onboarding", "retention", "aarrr"],
   },
   retention: {
     ...GLOSSARY_TERMS.retention,
@@ -76,7 +76,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "La retention se lit sur une courbe, pas sur un seul chiffre : le signe à chercher, c'est qu'elle finisse par s'aplatir plutôt que de continuer à descendre vers zéro (une courbe qui se stabilise dit que le produit a trouvé un usage régulier pour un noyau d'utilisateurs). C'est aussi le pilier le plus rentable à réparer avant de pousser l'acquisition : faire grandir un entonnoir qui fuit revient à courir plus vite sur un tapis roulant. L'inverse de la retention, c'est le churn — les deux se lisent toujours ensemble.",
       en: "Retention is read as a curve, not a single number: the sign to look for is that it eventually flattens rather than sliding toward zero (a curve that stabilizes means the product found regular use with a core of users). It's also the highest-leverage pillar to fix before pushing acquisition harder — growing a leaking funnel is just running faster on a treadmill. The inverse of retention is churn — the two are always read together.",
     },
-    related: ["churn", "ltv", "onboarding"],
+    related: ["churn", "ltv", "onboarding", "aarrr"],
   },
   referral: {
     ...GLOSSARY_TERMS.referral,
@@ -84,7 +84,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "Le referral existe avec ou sans programme de parrainage formel — un utilisateur satisfait qui en parle spontanément à un collègue compte tout autant. Ce qui distingue un produit à fort referral, c'est qu'il devient moins cher à faire grandir avec le temps : chaque nouvel utilisateur en amène d'autres, contrairement à l'acquisition payante dont le coût reste stable (voir CAC). Un score NPS élevé est souvent le signal précoce qu'un mécanisme de referral, une fois construit, aura un vrai effet — un mauvais NPS prédit l'inverse, quel que soit le mécanisme.",
       en: "Referral exists with or without a formal referral program — a happy user who spontaneously tells a colleague counts just as much. What sets a high-referral product apart is that it gets cheaper to grow over time: every new user brings in others, unlike paid acquisition where the cost stays flat (see CAC). A high NPS score is often the early signal that a referral mechanism, once built, will actually work — a poor NPS predicts the opposite, whatever the mechanism.",
     },
-    related: ["viral-coefficient", "growth-loop", "cac"],
+    related: ["viral-coefficient", "growth-loop", "cac", "aarrr"],
   },
   revenue: {
     ...GLOSSARY_TERMS.revenue,
@@ -92,7 +92,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "Ce pilier ne juge pas le montant encaissé, mais si le modèle de revenu a été réellement testé face à de vrais clients — beaucoup de produits ont un plan de monétisation « pour plus tard » qui n'a jamais rencontré une carte bancaire. Une référence souvent citée dans le SaaS est un ratio LTV:CAC autour de 3:1 comme seuil de viabilité (voir LTV et CAC) — à prendre comme repère directionnel, pas comme une règle absolue selon ton marché. L'upsell et le cross-sell sont les deux leviers les plus rapides une fois le modèle de base validé.",
       en: "This pillar doesn't judge how much money comes in, but whether the revenue model has actually been tested against real customers — plenty of products have a monetization plan for \"later\" that has never met a credit card. A commonly cited SaaS rule of thumb is an LTV:CAC ratio around 3:1 as a viability threshold (see LTV and CAC) — treat it as a directional benchmark, not an absolute rule for every market. Upsell and cross-sell are the fastest levers once the base model is validated.",
     },
-    related: ["cac", "ltv", "upsell-cross-sell"],
+    related: ["cac", "ltv", "upsell-cross-sell", "aarrr"],
   },
   "aha-moment": {
     ...GLOSSARY_TERMS["aha-moment"],

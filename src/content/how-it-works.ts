@@ -17,9 +17,12 @@ export interface HowItWorksPillarBlock {
 
 export const HOW_IT_WORKS = {
   title: { fr: "Comment fonctionne Tour de Growth", en: "How Tour de Growth works" },
+  // TODO: à relire (REVIEW-02) — R2-12: "AARRR" added. The page explains the
+  // five stages of the framework and its meta description promises "the AARRR
+  // framework explained", but the word never appeared in the page itself.
   intro: {
-    fr: "Quinze questions, trois minutes, un score honnête. Voici précisément ce qu'on mesure, et pourquoi — et la seule chose à garder en tête avant de prendre ce chiffre trop au sérieux.",
-    en: "Fifteen questions, three minutes, one honest score. Here's exactly what we're measuring, and why — plus the one thing you should know before you take it too seriously.",
+    fr: "Quinze questions, trois minutes, un score AARRR honnête. Voici précisément ce qu'on mesure, et pourquoi — et la seule chose à garder en tête avant de prendre ce chiffre trop au sérieux.",
+    en: "Fifteen questions, three minutes, one honest AARRR score. Here's exactly what we're measuring, and why — plus the one thing you should know before you take it too seriously.",
   },
 
   pillars: [

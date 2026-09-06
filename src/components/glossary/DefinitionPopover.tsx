@@ -13,6 +13,8 @@ export interface DefinitionPopoverProps extends HTMLAttributes<HTMLDivElement> {
   closeLabel?: string;
   /** Called on outside click, Escape, or the docked ✕ — the trigger's own re-click toggle is handled by the caller. */
   onClose?: () => void;
+  /** The term's own page (`/glossary/<id>`), with its link text — REVIEW-02.md R2-13. Omit to render no link. */
+  more?: { href: string; label: string };
 }
 
 /**
@@ -29,6 +31,7 @@ export function DefinitionPopover({
   placement = "anchored",
   closeLabel = "Close",
   onClose,
+  more,
   className,
   style,
   ...rest
@@ -94,6 +97,18 @@ export function DefinitionPopover({
         ) : null}
       </div>
       <div className={styles.definition}>{definition}</div>
+      {/* REVIEW-02.md R2-13. The popover was a dead end: two sentences and
+          nowhere to go, on the two pages (`/quiz`, `/r/<id>`) where most
+          readers meet a term for the first time — and `/r/<id>` is
+          `noindex, follow`, so this is also the one link every shared
+          result passes on to the glossary. A real anchor: a crawler reads
+          the server-rendered popover markup only when it is open, so what
+          this earns is mostly the reader, not the index. */}
+      {more ? (
+        <a href={more.href} className={styles.more}>
+          {more.label}
+        </a>
+      ) : null}
     </div>
   );
 

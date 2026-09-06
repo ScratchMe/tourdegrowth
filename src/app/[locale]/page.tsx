@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
 import { LocaleSwitcher } from "@/components/brand/LocaleSwitcher";
 import { WordmarkLink } from "@/components/brand/WordmarkLink";
@@ -154,14 +155,23 @@ export default async function LandingPage({ params }: PageProps) {
               <ScoreDisplay score={SAMPLE_RESULT.total} size="mobile" />
 
               <div className={styles.previewTags}>
+                {/* REVIEW-02.md R2-13: each chip is a link to its pillar's glossary
+                    page — the landing is the strongest page on the site and
+                    passed nothing to any term page. */}
                 {SAMPLE_RESULT.pillars.map((p) => (
-                  <PillarChip
+                  <Link
                     key={p.pillar}
-                    pillar={tc(UI_STRINGS.pillars[p.pillar], locale)}
-                    score={p.score}
-                    size="mobile"
-                    weak={p.pillar === SAMPLE_RESULT.weakestPillar}
-                  />
+                    href={localePath(locale, `/glossary/${p.pillar}`)}
+                    className={styles.previewChipLink}
+                    aria-label={tc(UI_STRINGS.pillars[p.pillar], locale)}
+                  >
+                    <PillarChip
+                      pillar={tc(UI_STRINGS.pillars[p.pillar], locale)}
+                      score={p.score}
+                      size="mobile"
+                      weak={p.pillar === SAMPLE_RESULT.weakestPillar}
+                    />
+                  </Link>
                 ))}
               </div>
             </Card>

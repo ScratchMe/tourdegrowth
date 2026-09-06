@@ -77,3 +77,14 @@
 .popover:focus {
   outline: none;
 }
+
+/* REVIEW-02.md R2-13 — the way out of the popover, to the term's own page. */
+.more {
+  display: inline-block;
+  margin-top: 10px;
+  font: var(--meta-xs);
+  letter-spacing: 0.04em;
+  color: var(--text-link);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}

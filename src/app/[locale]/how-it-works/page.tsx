@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { SiteFooter } from "@/components/brand/SiteFooter";
 import { ContentHeader } from "@/components/brand/ContentHeader";
 import { MetaLabel } from "@/components/brand/MetaLabel";
@@ -8,6 +9,7 @@ import { QUESTIONS } from "@/content/copy-library";
 import { HOW_IT_WORKS } from "@/content/how-it-works";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
+import { localePath } from "@/lib/i18n/routes";
 import { contentMetadata } from "@/lib/i18n/meta";
 import styles from "./page.module.css";
 
@@ -59,7 +61,13 @@ export default async function HowItWorksPage({ params }: PageProps) {
                 <MetaLabel size="xs">
                   {tc(UI_STRINGS.howItWorksPage.stageEyebrowTemplate, locale).replace("{n}", String(index + 1))}
                 </MetaLabel>
-                <h2 className={styles.pillarName}>{tc(UI_STRINGS.pillars[block.pillar], locale)}</h2>
+                {/* REVIEW-02.md R2-13: the pillar ids ARE the glossary term ids, and this
+                    page explained all five without linking a single term page. */}
+                <h2 className={styles.pillarName}>
+                  <Link href={localePath(locale, `/glossary/${block.pillar}`)} className={styles.pillarLink}>
+                    {tc(UI_STRINGS.pillars[block.pillar], locale)}
+                  </Link>
+                </h2>
                 <p className={styles.pillarExplanation}>{tc(block.explanation, locale)}</p>
                 {example && (
                   <div className={styles.exampleBox}>

@@ -273,6 +273,7 @@ export function ResultView({
                         tone={isWeak ? "alert" : "muted"}
                         closeLabel={tc(UI_STRINGS.glossary.closeLabel, locale)}
                         labelTemplate={tc(UI_STRINGS.glossary.definitionLabelTemplate, locale)}
+                        moreLabel={tc(UI_STRINGS.glossary.moreLabel, locale)}
                       />
                     </PillarChip>
                   </div>
