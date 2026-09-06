@@ -1091,6 +1091,16 @@ Deux absences volontaires, écrites dans le fichier pour qu'on ne les « corrige
 
 ---
 
+### R2-09 : dire qu'on va attendre une minute (2026-09-06)
+
+Un Deep dive réel prend environ 70 s (quatre générations en parallèle depuis le bilingue), et rien ne le disait : le bouton « Obtenir mon diagnostic → » menait dans cette minute sans prévenir, et les trois messages de l'écran de chargement avaient été écrits pour une attente de 2-3 s. Deux lignes, toutes deux à relire : `deepDive.waitNotice` sous le bouton du dernier écran, **avant** que l'attente commence (« Environ une minute — on rédige tes recommandations dans les deux tons et les deux langues »), et `loading.stillWorkingHint` sous les segments de l'écran de chargement, uniquement une fois les trois messages écoulés (« Environ une minute en tout — rien n'est bloqué »). Pas un quatrième message : les trois segments sont le design ; une ligne en dessous. Les points de suspension animés disaient déjà que c'était vivant ; ceci dit que c'est **attendu**.
+
+`e2e/deep-dive-wait.spec.ts` (2 specs) : l'avertissement est là avant de soumettre ; avec une génération simulée à 9 s, l'indication n'apparaît pas pendant les trois messages et apparaît après, puis le parcours se termine bien sur la page de résultat. La question de fond — faut-il quatre générations — reste celle notée dans l'état du projet ; ceci rend l'attente honnête sans la trancher.
+
+**Vérifié en réel** : lint, tsc, 273 tests, `next build`, 97 specs Playwright (+2), captures des deux écrans.
+
+---
+
 ## État du projet au 2026-09-06 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.

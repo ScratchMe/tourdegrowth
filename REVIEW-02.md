@@ -47,7 +47,7 @@ La colonne **Autonomie** dit ce que chaque item attend d'Antoine : **Auto** = je
 | **B — Boucle de partage et mesure** | R2-06 | Métadonnées : descriptions anglaises sur les URL françaises, titre sans mot-clé | F | S | Relecture | **Fait pour l'essentiel par la PR #58** (autre session) — le reliquat (descriptions de terme, `/quiz`) est repris dans R2-08 |
 | | R2-07 | Zéro balise Open Graph sur les pages de contenu | F | M | Auto | **Fait** (PR #58, autre session ; vérifié sur le build le 2026-09-06) |
 | | R2-08 | `/quiz` et `/deep-dive/[id]` indexables ; `lastmod` absent du sitemap | F+T | S | Auto | À faire |
-| | R2-09 | Le Deep dive dure ~70 s et rien ne prévient | F | S | Relecture | À faire |
+| | R2-09 | Le Deep dive dure ~70 s et rien ne prévient | F | S | Relecture | **Fait** (PR #73, 2026-09-06) — 2 chaînes à relire |
 | | R2-10 | Le calcul de la métrique reine n'a aucun test | T | S | Auto | **Fait** (PR #62, 2026-09-06) |
 | **C — Contenu de référence** | R2-11 | Glossaire : 76 à 105 mots par terme, contre 600 à 1 500 chez ceux qui rangent | F | L | Relecture (lourde) | À faire |
 | | R2-12 | « AARRR » n'apparaît ni sur la landing ni sur `/how-it-works` | F | S | Relecture | À faire |

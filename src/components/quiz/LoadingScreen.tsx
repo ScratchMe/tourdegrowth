@@ -118,6 +118,15 @@ function DeepDiveLoadingScreen({ locale }: { locale: Locale }) {
           />
         ))}
       </div>
+
+      {/* REVIEW-02.md R2-09: once the three messages have run (7.8 s) and
+          the call is still going, say how long this normally takes. The
+          ticking dots show it is alive; this says it is EXPECTED. */}
+      {stillWorking && (
+        <p className={styles.hint} data-testid="still-working-hint">
+          {tc(UI_STRINGS.loading.stillWorkingHint, locale)}
+        </p>
+      )}
     </div>
   );
 }

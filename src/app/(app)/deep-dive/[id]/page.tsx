@@ -271,6 +271,13 @@ export default function DeepDivePage() {
                 {tc(FREE_CONTEXT.submit, locale)}
               </Button>
             </div>
+
+            {/* REVIEW-02.md R2-09: a real Deep dive takes about a minute (four
+                generations in parallel since it became bilingual), and this
+                button used to lead into that minute with no warning. */}
+            <MetaLabel size="xs" uppercase={false} className={styles.waitNotice} data-testid="wait-notice">
+              {tc(UI_STRINGS.deepDive.waitNotice, locale)}
+            </MetaLabel>
           </>
         )}
 
