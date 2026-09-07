@@ -1219,6 +1219,14 @@ Les exemples célèbres cités sont ceux déjà validés dans les `extended` (7 
 
 **Vérifié en réel** : lint, tsc, 295 tests, `next build`, 24 specs Playwright sur les fichiers touchés, passe axe verte, capture EN desktop de la page upsell relue.
 
+### Quota Vercel épuisé par la cadence de la revue, et `vercel.json` pour que ça ne se reproduise pas (2026-09-07)
+
+**Ce qui s'est passé.** Le 2026-09-06, la revue 02 a été livrée en vingt PR mergées, une trentaine de pushes de branche et cinq PR Dependabot. Chaque push déclenche un déploiement de prévisualisation sur Vercel et chaque merge un déploiement de production : le plan Hobby a plafonné en soirée et **la production a été gelée 24 heures** sur `main` à la PR #82 — les PR #83 et #84 (lots 4 et 5 du glossaire) sont restées non déployées jusqu'au lendemain. Vercel ne rattrape pas les commits arrivés pendant un blocage : il a fallu un « Redeploy » du dernier commit de `main`, ou attendre le merge suivant.
+
+**Le correctif.** `vercel.json` avec un `ignoreCommand` qui saute tout build hors production (`exit 0` = ignoré, `exit 1` = construit, c'est le contrat de Vercel). Les prévisualisations ne servaient à rien sur ce projet : la vérification se fait en local contre un build de production, puis en CI. R-17 disait « pas de `vercel.json`, rien à y mettre » — c'est maintenant faux pour exactement une ligne. Un test unitaire (`src/__tests__/vercel-config.test.ts`) garde le fichier valide (un `vercel.json` invalide fait échouer **tous** les déploiements, production comprise) et vérifie que la branche `production` reste du côté `exit 1`.
+
+**Convention qui en découle** : regrouper les pushes sur une branche de PR (une vérification complète, un push), et ne pas empiler plus de quelques merges dans la même journée quand chacun déploie la production — ou vérifier la consommation Vercel avant. Le blocage n'a rien cassé, mais il a retardé d'un jour la mise en ligne de travail déjà vérifié.
+
 ---
 
 ## État du projet au 2026-09-06 — à lire en premier dans une nouvelle session
