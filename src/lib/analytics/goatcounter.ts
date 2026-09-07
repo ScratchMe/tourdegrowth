@@ -60,6 +60,7 @@ export function trackEvent(name: string, detail?: string): void {
  *   /                                   pageview, GoatCounter does this itself
  *   quiz_started                        first answer recorded, once per run
  *   quiz_stage_completed/<1..5>         a pillar's 3 questions answered
+ *   segment_answered/<both|stage|model|neither>  the two context questions (REVIEW-02.md R2-26)
  *   tone_selected/<neutral|roast>       "Get my score" pressed
  *   submission_completed/<tone>         a result exists (SPEC.md §8)
  *   share/<tone>/<native|copy>          a share actually happened (SPEC.md §8)
@@ -82,6 +83,14 @@ export const SHARE_METHODS = ["native", "copy"] as const;
 
 /** The five AARRR stages, as stage-completion suffixes. */
 export const QUIZ_STAGES = ["1", "2", "3", "4", "5"] as const;
+
+/**
+ * How much of the segment screen was answered (REVIEW-02.md R2-26). Both
+ * questions default to "rather not say", so this is the one number that says
+ * whether the screen earns the extra step — and whether the segment averages
+ * will ever have the volume to appear.
+ */
+export const SEGMENT_DETAILS = ["both", "stage", "model", "neither"] as const;
 
 /** Whether the Deep dive's optional free-text field was filled in (SPEC-ADDENDUM-02.md §1). */
 export const DEEP_DIVE_CONTEXT_DETAILS = ["with_context", "no_context"] as const;

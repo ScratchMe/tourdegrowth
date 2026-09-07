@@ -11,6 +11,7 @@ vi.mock("@/lib/submissions/repository", () => ({
   saveSubmission: (submission: Submission) => saveSubmission(submission),
   submissionExists: (id: string) => submissionExists(id),
   recordSubmissionInGlobalStats: (total: number) => recordSubmissionInGlobalStats(total),
+  recordSubmissionInSegmentStats: vi.fn(async () => {}),
 }));
 
 const { POST } = await import("../route");

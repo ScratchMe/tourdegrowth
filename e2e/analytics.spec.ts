@@ -26,6 +26,12 @@ test.describe("funnel instrumentation", () => {
     for (let i = 3; i < 15; i += 1) {
       await page.getByTestId("answer-option").first().click();
     }
+    // The context screen (REVIEW-02.md R2-26) sits between the last question
+    // and the tone selector. Answering one axis and declining the other is
+    // the interesting case: it must report "stage", not "both", since only
+    // "both" can ever produce a segment average.
+    await page.getByTestId("segment-stage-option").first().click();
+    await page.getByTestId("segment-continue").click();
     await page.getByTestId("tone-option").nth(1).click(); // roast
     await page.getByTestId("get-score-cta").click();
     await page.waitForURL("**/r/**");
@@ -37,6 +43,7 @@ test.describe("funnel instrumentation", () => {
       "quiz_stage_completed/3",
       "quiz_stage_completed/4",
       "quiz_stage_completed/5",
+      "segment_answered/stage",
       "tone_selected/roast",
       "submission_completed/roast",
     ]);

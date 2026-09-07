@@ -41,6 +41,7 @@ function submission(overrides: Partial<Submission> = {}): Submission {
     total: 35,
     weakestPillar: "acquisition",
     refId: null,
+    segment: null,
     ownerTokenHash: hashOwnerToken(OWNER_TOKEN),
     deepDive: null,
     ...overrides,

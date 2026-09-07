@@ -47,7 +47,7 @@ describe("createSubmissionFlow (Quick mode — deterministic, no Gemini)", () =>
     const deps = fakeDeps();
 
     const { submission } = await createSubmissionFlow(
-      { answers: fullAnswers(0), tone: "neutral", locale: "en", refId: null },
+      { answers: fullAnswers(0), tone: "neutral", locale: "en", refId: null, segment: null },
       deps,
     );
 
@@ -65,7 +65,7 @@ describe("createSubmissionFlow (Quick mode — deterministic, no Gemini)", () =>
   it("stores no verdict text at all — it is derived per reader", async () => {
     const deps = fakeDeps();
 
-    await createSubmissionFlow({ answers: fullAnswers(0), tone: "neutral", locale: "fr", refId: null }, deps);
+    await createSubmissionFlow({ answers: fullAnswers(0), tone: "neutral", locale: "fr", refId: null, segment: null }, deps);
 
     expect(deps.saved[0]).not.toHaveProperty("verdicts");
     // Nothing French should have made it into a document created by a French
@@ -78,7 +78,7 @@ describe("createSubmissionFlow (Quick mode — deterministic, no Gemini)", () =>
     const deps = fakeDeps();
 
     const { submission, ownerToken } = await createSubmissionFlow(
-      { answers: fullAnswers(0), tone: "neutral", locale: "en", refId: null },
+      { answers: fullAnswers(0), tone: "neutral", locale: "en", refId: null, segment: null },
       deps,
     );
 
@@ -93,7 +93,7 @@ describe("createSubmissionFlow (Quick mode — deterministic, no Gemini)", () =>
   it("passes refId and the selected tone through untouched", async () => {
     const deps = fakeDeps();
     const { submission } = await createSubmissionFlow(
-      { answers: fullAnswers(1), tone: "roast", locale: "fr", refId: "sub_referrer" },
+      { answers: fullAnswers(1), tone: "roast", locale: "fr", refId: "sub_referrer", segment: null },
       deps,
     );
     expect(submission.refId).toBe("sub_referrer");
@@ -106,7 +106,7 @@ describe("createSubmissionFlow (Quick mode — deterministic, no Gemini)", () =>
     const incomplete: Answers = { "acq-1": 1 };
 
     await expect(
-      createSubmissionFlow({ answers: incomplete, tone: "neutral", locale: "en", refId: null }, deps),
+      createSubmissionFlow({ answers: incomplete, tone: "neutral", locale: "en", refId: null, segment: null }, deps),
     ).rejects.toThrow();
 
     expect(deps.saveSubmission).not.toHaveBeenCalled();
@@ -138,7 +138,7 @@ function fakeDeepDiveDeps(overrides: Partial<CompleteDeepDiveDeps> = {}): Comple
 async function baseSubmission(): Promise<Submission> {
   const deps = fakeDeps();
   const { submission } = await createSubmissionFlow(
-    { answers: fullAnswers(1), tone: "neutral", locale: "en", refId: null },
+    { answers: fullAnswers(1), tone: "neutral", locale: "en", refId: null, segment: null },
     deps,
   );
   return submission;

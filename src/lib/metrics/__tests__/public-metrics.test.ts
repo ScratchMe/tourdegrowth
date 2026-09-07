@@ -14,6 +14,7 @@ function submission(over: Partial<Submission> = {}): Submission {
     weakestPillar: "retention",
     answers: {},
     refId: null,
+    segment: null,
     deepDive: null,
     ...over,
   } as Submission;
