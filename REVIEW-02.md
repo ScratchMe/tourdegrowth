@@ -66,7 +66,7 @@ La colonne **Autonomie** dit ce que chaque item attend d'Antoine : **Auto** = je
 | | R2-25 | Le stderr de Playwright n'est pas vide, donc plus lu | T | XS | Auto | **Fait en partie** (PR #65) — la ligne Firebase ne vient plus que de la spec qui l'annonce ; `NoFallbackError` est à Next |
 | **E — Décisions produit (Antoine)** | R2-26 | Segmenter le benchmark : « la moyenne des SaaS B2B à ton stade » | F | M | Toi | À trancher |
 | | R2-27 | Historique de progression : les données sont déjà sur l'appareil | F | S | Toi | À trancher |
-| | R2-28 | Une page de métriques publique : l'outil montre son propre AARRR | F | M | Toi | **Tranché** (Antoine, 2026-09-07) : construire, mais derrière un drapeau pour ne l'ouvrir qu'avec du volume |
+| | R2-28 | Une page de métriques publique : l'outil montre son propre AARRR | F | M | Toi | **Fait, fermée** (PR #88, 2026-09-07) — `METRICS_PAGE_ENABLED` à basculer dans Vercel quand tu veux l'ouvrir ; copie de `content/metrics.ts` à relire |
 | | R2-29 | Le roast est le crochet viral et il est invisible avant la 15ᵉ question | F | S | Toi | **Tranché** (Antoine, 2026-09-07) : oui, par une passe Claude Design |
 | | R2-30 | Fenêtre Tour de France (SPEC.md §10) : à caler dans le calendrier | F | S | Toi | **Tranché** (Antoine, 2026-09-07) : pas d'urgence, à caler dans le plan de croissance pour juin 2027 |
 | **F — Hygiène du dépôt** | R2-31 | Branches distantes obsolètes : audit fait, suppression à faire | T | XS | Toi | **Audit fait** (PR #61) — suppression à faire par Antoine |

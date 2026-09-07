@@ -1255,6 +1255,22 @@ Ce qui manquait, mineur : la redirection de la racine (et celle des anciennes ad
 Deux choses à retenir de ce calcul plutôt que le seul montant : **le facteur 4 est notre choix** (générer les deux tons et les deux langues d'avance) et reste le seul levier si le coût devenait un sujet ; et le plafond d'abus est borné par la limite de débit de R-15 (5 Deep dive/h/IP = 20 générations, soit environ 2,4 $/jour pour une IP acharnée), ce qu'un plafond de dépense mensuel referme complètement.
 
 **Ce qui reste vague et pourquoi c'est assumé** : le nombre de tokens d'entrée est déduit du nombre de caractères, pas mesuré — la sonde imprime pourtant `promptTokenCount`, donc le prochain run contre les vrais services donnera le chiffre exact. La fourchette de sortie, elle, vient de mesures réelles.
+### R2-28 : la page de métriques publique, construite fermée (2026-09-07)
+
+Décision d'Antoine : construire, mais garder la page close tant que les chiffres ne valent pas la peine d'être lus. **Deux garde-fous distincts**, parce qu'ils répondent à deux questions différentes — et les confondre aurait donné soit une page vide en ligne, soit un drapeau qu'il faut redéployer pour bouger.
+
+- `isPublicMetricsEnabled()` — *la page doit-elle exister ?* Lit `METRICS_PAGE_ENABLED` **à chaque requête**, donc la basculer dans Vercel ouvre ou ferme sans redéploiement. Fermée par défaut et fermée pour toute valeur autre que `"true"` exactement (`"yes"`, `"1"`, `"TRUE"` laissent la page en 404 — vérifié sur un vrai serveur, pas seulement en test).
+- `MIN_SUBMISSIONS_TO_PUBLISH` (50) — *les chiffres veulent-ils dire quelque chose ?* En dessous, la page s'affiche et dit qu'il est trop tôt, au lieu de publier des ratios que le premier partage converti ferait bouger de plusieurs points.
+
+**`toPublicMetrics` est une liste blanche, pas un passe-plat.** Elle recopie champ par champ ce qui est publiable depuis `GrowthStats` : un champ ajouté au tableau de bord privé ne devient jamais public par accident. Un test épingle la liste exacte des clés et vérifie l'absence des ventilations par langue et par ton.
+
+**Piège de build évité par conception.** Une page de contenu est prérendue (R-24), et prérendre celle-ci appellerait Firestore pendant `next build` — or la CI n'a aucun identifiant (R-05 : rien de ce que le build touche ne va jusqu'à Firestore). D'où `dynamic = "force-dynamic"`, et la lecture Firestore enveloppée dans `unstable_cache` à une heure : le rendu est par requête (il doit lire le drapeau), mais la collection n'est scannée qu'une fois par heure quel que soit le trafic — même discipline que R-14, et elle compte davantage ici puisque c'est la collection entière, pas un document.
+
+**Volontairement pas encore liée.** Ni dans le pied de page, ni dans le sitemap. Le pied de page est rendu par les frontières d'erreur, qui sont des Client Components (R2-14) : il ne peut pas lire une variable serveur, et le lien manquerait donc sur les seules pages d'erreur — une incohérence silencieuse. Le sitemap, lui, est généré au build alors que le drapeau se lit à la requête. La découverte se livrera avec l'ouverture, en une ligne ; une spec vérifie qu'aucun lien ne pointe vers `/metrics` d'ici là, pour que ce ne soit pas oublié dans l'autre sens.
+
+`scoreBands` s'ajoute au passage à `GrowthStats` (répartition en 0-39 / 40-59 / 60-79 / 80-100) : une moyenne seule ne dit pas si l'outil rencontre surtout des produits en difficulté ou surtout des produits sains, ce qui est la première chose qu'on cherche sur une page de métriques.
+
+**Vérifié en réel** : lint, tsc, 318 tests (+6), `next build` (`/[locale]/metrics` bien en `ƒ`, et le build passe **sans** identifiants Firestore, ce qui était le risque), 3 specs Playwright sur le garde, les quatre comportements du drapeau contrôlés sur un vrai serveur, et la page regardée avec des chiffres fixes via un patch **local jamais committé** (même méthode que R-12 et R2-02) — captures EN desktop et FR mobile, aucun débordement, patch retiré et absence de trace vérifiée avant commit.
 
 ---
 
