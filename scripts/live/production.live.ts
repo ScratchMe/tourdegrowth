@@ -3,6 +3,7 @@ import { FieldValue } from "firebase-admin/firestore";
 import { QUESTIONS } from "@/content/copy-library";
 import { DEEP_MODE_QUESTIONS } from "@/content/deep-mode-questions";
 import { getDb } from "@/lib/firebase/admin";
+import { segmentId, type SegmentAnswers } from "@/lib/submissions/segment";
 import type { Submission } from "@/lib/submissions/types";
 
 /**
@@ -14,8 +15,11 @@ import type { Submission } from "@/lib/submissions/types";
  * what is being verified is production, not a local rebuild of it.
  *
  * It creates a real submission and a real Deep dive, then deletes both —
- * including undoing the `stats/global` increment, so a verification run never
- * skews the benchmark shown to real users.
+ * including undoing BOTH benchmark increments (`stats/global` and the
+ * per-segment one), so a verification run never skews a number shown to real
+ * users. Forgetting the second would be worse than the first: twelve segments
+ * split the same traffic twelve ways, so one stray test score weighs far more
+ * in a segment average than in the global one.
  */
 const SITE = (process.env.VERIFY_SITE_URL ?? "https://www.tourdegrowth.com").replace(/\/$/, "");
 
@@ -32,7 +36,22 @@ const CONTEXT_ANSWERS = Object.fromEntries(DEEP_MODE_QUESTIONS.map((q) => [q.id,
 const LEAK_CANARY = "TDG-CANARY-7F3A91";
 const FREE_CONTEXT = `We sell a scheduling tool to independent physiotherapists; onboarding is where people drop. Internal ref ${LEAK_CANARY}.`;
 
+/**
+ * A fully-answered segment (REVIEW-02.md R2-26) — the only shape that
+ * produces an aggregate id at all, and therefore the only one that exercises
+ * the `stats/<segment>` write this probe exists to check.
+ */
+const SEGMENT: SegmentAnswers = { stage: "first-customers", model: "b2b" };
+const SEGMENT_ID = segmentId(SEGMENT)!;
+
 let created: { id: string; ownerToken: string; total: number } | undefined;
+/** Counter values read BEFORE anything is created, so the increments can be proven rather than merely observed to be non-zero. */
+const before: Record<string, number> = {};
+
+async function statsCount(docId: string): Promise<number> {
+  const doc = await getDb().collection("stats").doc(docId).get();
+  return (doc.data()?.count as number | undefined) ?? 0;
+}
 
 function report(label: string, value: unknown) {
   console.log(`\n  ── ${label}\n     ${typeof value === "string" ? value : JSON.stringify(value)}`);
@@ -59,24 +78,28 @@ describe("live production pipeline", () => {
     console.log(`\n  Target: ${SITE}\n`);
   });
 
+  beforeAll(async () => {
+    before.global = await statsCount("global");
+    before.segment = await statsCount(SEGMENT_ID);
+  });
+
   afterAll(async () => {
     // Always, even when an assertion above failed: a half-verified run must
     // not leave test data in the collection real numbers are computed from.
     if (!created) return;
     const db = getDb();
     await db.collection("submissions").doc(created.id).delete();
-    await db
-      .collection("stats")
-      .doc("global")
-      .set({ count: FieldValue.increment(-1), scoreSum: FieldValue.increment(-created.total) }, { merge: true });
-    console.log(`\n  Cleaned up submission ${created.id} and undid its stats increment.\n`);
+    const undo = { count: FieldValue.increment(-1), scoreSum: FieldValue.increment(-created.total) };
+    await db.collection("stats").doc("global").set(undo, { merge: true });
+    await db.collection("stats").doc(SEGMENT_ID).set(undo, { merge: true });
+    console.log(`\n  Cleaned up submission ${created.id} and undid both stats increments.\n`);
   });
 
   it("creates a submission and returns only id, owner token and score", async () => {
     const res = await fetch(`${SITE}/api/submissions`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ answers: ANSWERS, tone: "neutral", locale: "en", refId: null }),
+      body: JSON.stringify({ answers: ANSWERS, tone: "neutral", locale: "en", refId: null, segment: SEGMENT }),
     });
 
     expect(res.status).toBe(201);
@@ -124,8 +147,25 @@ describe("live production pipeline", () => {
   it("counts the submission in the global benchmark (R-20)", async () => {
     const stats = await getDb().collection("stats").doc("global").get();
     const data = stats.data();
-    expect(data?.count, "stats/global must exist and count this submission").toBeGreaterThan(0);
+    // Compared against the value read before this run rather than to zero: a
+    // non-zero counter only proves that SOMETHING was once counted, which was
+    // already true before this feature existed.
+    expect(data?.count, "stats/global must have counted this submission").toBeGreaterThanOrEqual(before.global! + 1);
     report("stats/global", { count: data?.count, average: Math.round((data?.scoreSum ?? 0) / (data?.count || 1)) });
+  });
+
+  it("stores the segment and counts it in its own aggregate (R2-26)", async () => {
+    // The half of R2-26 no offline test can reach: the field surviving the
+    // round trip through Firestore, and the per-segment counter actually
+    // being written by the fire-and-forget increment (which is deliberately
+    // swallowed on failure, so a silent no-op would look exactly like
+    // success from the API's side).
+    const submission = await readSubmission(created!.id);
+    expect(submission.segment).toEqual(SEGMENT);
+
+    const count = await statsCount(SEGMENT_ID);
+    expect(count, `stats/${SEGMENT_ID} must have counted this submission`).toBeGreaterThanOrEqual(before.segment! + 1);
+    report(`stats/${SEGMENT_ID}`, { before: before.segment, after: count });
   });
 
   it("completes a Deep dive in BOTH languages, and shows the French for review", async () => {
