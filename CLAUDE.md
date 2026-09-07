@@ -1286,6 +1286,14 @@ Point signalé plutôt que caché : `result/ToneToggle` existe, porté à l'exte
 
 Captures prises avec le même patch **local jamais committé** que d'habitude pour l'écran roast (`initialTone` de l'échantillon basculé le temps des captures) — retiré, absence de trace vérifiée avant commit.
 
+### Palier Gemini payant, et le test de garde qui a rattrapé sa propre assertion (2026-09-08)
+
+Antoine a activé la facturation sur le projet derrière la clé (Tier 1, prépayé, plafond mensuel), sur la base du chiffrage de la veille : 4 à 6 centimes de dollar par Deep dive jusqu'au 31 décembre 2026, le double ensuite. `GEMINI_TIER` passe à `"paid"` et la notice dit maintenant que Google n'utilise pas ce texte pour améliorer ses produits — vrai, cette fois, et vérifié sur le HTML servi dans les deux langues.
+
+**Ce qui vaut d'être noté n'est pas la bascule mais ce qu'elle a révélé.** Le test posé la veille (« chaque valeur de la constante épinglée à sa phrase ») est passé au rouge — non parce que la copie était fausse, mais parce que **mon assertion française l'était** : elle cherchait `n['’]utilise pas pour améliorer` alors que la phrase dit « ne **l'**utilise pas ». Ce motif n'aurait jamais pu correspondre, à aucune version de la phrase — et personne ne pouvait le voir tant que le palier était `"free"`, puisque la branche `paid` du test n'était jamais exercée.
+
+C'est le cas d'école d'une assertion morte : verte pendant un jour entier, sans rien vérifier. Elle a été rattrapée par le seul événement capable de l'exercer. Deux choses en découlent, à garder : une garde à branches ne vaut que pour la branche que la configuration courante emprunte, et **la non-vacuité a été refaite après correction** (phrase remplacée par une version neutre → le test tombe bien), ce qui est la seule preuve que la garde tient vraiment.
+
 ---
 
 ## État du projet au 2026-09-06 — à lire en premier dans une nouvelle session

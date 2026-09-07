@@ -39,17 +39,19 @@ export const CONTACT_EMAIL = "contact@tourdegrowth.com";
 export const FIRESTORE_REGION = "eu" as "eu" | "us" | "unknown";
 
 /**
- * Which tier the Gemini API key is on — currently the free one (Antoine,
- * 2026-09-07), which is not a detail we may leave vague: Google's API terms
+ * Which tier the Gemini API key is on — **paid** since 2026-09-07 (Antoine
+ * enabled billing on the project behind the key, Tier 1, prepaid with a
+ * monthly spending cap). This is not a detail we may leave vague: Google's API terms
  * say the unpaid tier's prompts and responses are used "to provide, improve,
  * and develop Google products" and that "human reviewers may read, annotate,
  * and process" them, while the paid tier says Google "doesn't use your
  * prompts ... or responses to improve our products". The Deep dive sends a
  * founder's own words to that API, so the sentence below has to say which of
- * the two applies. Flip this to "paid" the day billing is enabled on the
- * project behind the key — that one word rewrites the notice.
+ * the two applies — and it now says the better of the two, honestly, because
+ * the billing behind it is real. If billing is ever removed, this constant
+ * moves back and the notice follows; a test enforces the pair.
  */
-export const GEMINI_TIER = "free" as "paid" | "free" | "unknown";
+export const GEMINI_TIER = "paid" as "paid" | "free" | "unknown";
 
 export const HOST = {
   name: "Vercel Inc.",
@@ -131,7 +133,7 @@ export const PRIVACY: LegalDocument = {
     "Ce que Tour de Growth enregistre quand tu fais le Tour, où ça va, combien de temps ça reste, et ce que tu peux demander.",
     "What Tour de Growth records when you take the Tour, where it goes, how long it stays, and what you can ask for.",
   ),
-  updatedAt: "2026-09-07",
+  updatedAt: "2026-09-08",
   intro: t(
     "Tour de Growth enregistre le strict nécessaire pour calculer ton score, te le redonner par son lien, et mesurer si l'outil fonctionne. Cette page dit précisément quoi, pourquoi, pendant combien de temps, et ce que tu peux exiger.",
     "Tour de Growth records the bare minimum needed to compute your score, hand it back to you through its link, and measure whether the tool works. This page says exactly what, why, for how long, and what you can ask for.",

@@ -93,7 +93,7 @@ describe("the two facts about where the data goes (2026-09-07)", () => {
       expect(privacyText).toMatch(/improve its products/);
     } else if (GEMINI_TIER === "paid") {
       expect(privacyText).toMatch(/palier payant/);
-      expect(privacyText).toMatch(/n['’]utilise pas pour améliorer/);
+      expect(privacyText).toMatch(/utilise pas pour améliorer ses produits/);
       expect(privacyText).toMatch(/paid tier/);
       expect(privacyText).toMatch(/does not use it to improve/);
     }
