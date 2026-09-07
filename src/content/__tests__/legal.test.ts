@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { CONTACT_EMAIL, EMAIL_PLACEHOLDER, PRIVACY, splitOnEmail, TERMS, type LegalDocument } from "../legal";
+import {
+  CONTACT_EMAIL,
+  EMAIL_PLACEHOLDER,
+  FIRESTORE_REGION,
+  GEMINI_TIER,
+  PRIVACY,
+  splitOnEmail,
+  TERMS,
+  type LegalDocument,
+} from "../legal";
 import { LOCALES } from "@/lib/i18n/locale";
 import { tc } from "@/lib/i18n/translatable";
 
@@ -58,6 +67,36 @@ describe.each([
 
   it("says the same number of things in both languages", () => {
     expect(everyText(document, "en")).toHaveLength(everyText(document, "fr").length);
+  });
+});
+
+describe("the two facts about where the data goes (2026-09-07)", () => {
+  const privacyText = [...everyText(PRIVACY, "fr"), ...everyText(PRIVACY, "en")].join(" ");
+
+  it("says the data is in the EU, because Firestore is on eur3", () => {
+    expect(FIRESTORE_REGION).toBe("eu");
+    expect(privacyText).toMatch(/Union européenne/);
+    expect(privacyText).toMatch(/European Union/);
+  });
+
+  /**
+   * The whole point of the constant: the free tier's terms differ from the
+   * paid tier's on the one thing a founder typing about their business would
+   * care about. Whichever tier is set, the notice has to say so — a constant
+   * flipped without the sentence following it is the failure this catches.
+   */
+  it("states the tier's actual data-use terms, whichever tier is set", () => {
+    if (GEMINI_TIER === "free") {
+      expect(privacyText).toMatch(/palier gratuit/);
+      expect(privacyText).toMatch(/améliorer ses produits/);
+      expect(privacyText).toMatch(/free tier/);
+      expect(privacyText).toMatch(/improve its products/);
+    } else if (GEMINI_TIER === "paid") {
+      expect(privacyText).toMatch(/palier payant/);
+      expect(privacyText).toMatch(/n['’]utilise pas pour améliorer/);
+      expect(privacyText).toMatch(/paid tier/);
+      expect(privacyText).toMatch(/does not use it to improve/);
+    }
   });
 });
 
