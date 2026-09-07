@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { GLOSSARY } from "@/content/glossary";
+import { PRIVACY, TERMS } from "@/content/legal";
 import { CONTENT_UPDATED_AT, GLOSSARY_UPDATED_AT } from "@/content/updated-at";
 import { DEFAULT_LOCALE, LOCALES } from "@/lib/i18n/locale";
 import { localePath } from "@/lib/i18n/routes";
@@ -19,6 +20,10 @@ const CONTENT_PATHS: { path: string; changeFrequency: "monthly" | "yearly"; prio
   { path: "/how-it-works", changeFrequency: "monthly", priority: 0.8, lastModified: CONTENT_UPDATED_AT["/how-it-works"]! },
   { path: "/about", changeFrequency: "monthly", priority: 0.7, lastModified: CONTENT_UPDATED_AT["/about"]! },
   { path: "/glossary", changeFrequency: "monthly", priority: 0.6, lastModified: CONTENT_UPDATED_AT["/glossary"]! },
+  // The legal pages carry their own date — it is printed on the page, so the
+  // sitemap reads the same value rather than a second copy that could drift.
+  { path: "/privacy", changeFrequency: "yearly", priority: 0.3, lastModified: PRIVACY.updatedAt },
+  { path: "/terms", changeFrequency: "yearly", priority: 0.3, lastModified: TERMS.updatedAt },
   ...Object.entries(GLOSSARY).map(([term, entry]) => ({
     path: `/glossary/${term}`,
     changeFrequency: "yearly" as const,

@@ -68,6 +68,12 @@ export function SiteFooter({ locale, width = "wide" }: SiteFooterProps) {
           <Link href={localePath(locale, "/about")} className={styles.navLink}>
             {tc(NAV_STRINGS.about, locale)}
           </Link>
+          <Link href={localePath(locale, "/privacy")} className={styles.navLink}>
+            {tc(NAV_STRINGS.privacy, locale)}
+          </Link>
+          <Link href={localePath(locale, "/terms")} className={styles.navLink}>
+            {tc(NAV_STRINGS.terms, locale)}
+          </Link>
         </nav>
 
         <p className={styles.credit}>

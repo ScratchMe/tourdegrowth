@@ -16,6 +16,7 @@ import { DEEP_MODE_QUESTIONS } from "@/content/deep-mode-questions";
 import { FREE_CONTEXT, FREE_CONTEXT_MAX_LENGTH } from "@/content/free-context";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { useLocale } from "@/lib/i18n/locale-context";
+import { localePath } from "@/lib/i18n/routes";
 import { trackEvent } from "@/lib/analytics/goatcounter";
 import {
   clearDeepDiveProgress,
@@ -258,6 +259,17 @@ export default function DeepDivePage() {
               label={tc(FREE_CONTEXT.label, locale)}
               data-testid="free-context-textarea"
             />
+
+            {/* REVIEW-02.md R2-03: the one field on the site that invites a
+                founder to describe their business — say where it goes before
+                they type. A new tab, not a navigation: the person is
+                mid-form. */}
+            <MetaLabel size="xs" uppercase={false} className={styles.freeContextPrivacy} data-testid="free-context-privacy">
+              {tc(UI_STRINGS.deepDive.freeContextPrivacy, locale)}{" "}
+              <a href={localePath(locale, "/privacy")} target="_blank" rel="noopener" className={styles.freeContextPrivacyLink}>
+                {tc(UI_STRINGS.deepDive.freeContextPrivacyLink, locale)}
+              </a>
+            </MetaLabel>
 
             {/* Two actions since design system extension 01, not three: the
                 field is already marked optional in its own question, and the

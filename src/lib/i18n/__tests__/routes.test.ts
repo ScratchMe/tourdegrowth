@@ -41,6 +41,9 @@ describe("isLocalizableContentPath", () => {
     expect(isLocalizableContentPath("/how-it-works")).toBe(true);
     expect(isLocalizableContentPath("/glossary")).toBe(true);
     expect(isLocalizableContentPath("/glossary/viral-coefficient")).toBe(true);
+    expect(isLocalizableContentPath("/about")).toBe(true);
+    expect(isLocalizableContentPath("/privacy")).toBe(true);
+    expect(isLocalizableContentPath("/terms")).toBe(true);
   });
 
   it("leaves app routes alone", () => {

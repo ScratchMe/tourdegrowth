@@ -270,6 +270,15 @@ export const UI_STRINGS = {
       en: "About a minute — we write your recommendations in both tones and both languages.",
       fr: "Environ une minute — on rédige tes recommandations dans les deux tons et les deux langues.",
     },
+    // TODO: à relire (REVIEW-02) — R2-03. Under the free-text field: where
+    // the text goes, that it is not kept, and that it can show through in
+    // the recommendation on a page the person may share (a fact the first
+    // live probe established — see CLAUDE.md, 2026-09-05).
+    freeContextPrivacy: {
+      en: "Sent to Google's Gemini to write your recommendation, not stored afterwards. It can shape the text shown on your result page.",
+      fr: "Envoyé à Gemini (Google) pour rédiger ta recommandation, pas conservé ensuite. Il peut façonner le texte affiché sur ta page de résultat.",
+    },
+    freeContextPrivacyLink: { en: "Privacy policy →", fr: "Politique de confidentialité →" },
   },
 
   /** Result page chrome (DESIGN-BRIEF.md §02/§04) — the Strengths/Where

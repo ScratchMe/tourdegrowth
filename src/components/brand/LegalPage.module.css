@@ -1,0 +1,62 @@
+/* /privacy and /terms — REVIEW-02.md R2-03. The page frame comes from
+   how-it-works/page.module.css; only what a legal page has and a prose page
+   doesn't lives here: bullet lists, definition lists, the mail link, and a
+   phone-sized title. */
+/* "Politique de confidentialité" at the 62px hero size is wider than a
+   390px phone (measured: 416px for a 342px column) — the landing already
+   drops to the mobile hero size under 760px, this does the same. Two
+   classes, not one: the frame's `.title` has the same specificity, and
+   which wins would otherwise depend on stylesheet emission order (CLAUDE.md,
+   lesson n°2). */
+@media (max-width: 760px) {
+  .legal .title {
+    font: var(--display-hero-mobile);
+  }
+}
+.list {
+  margin: 0;
+  padding-left: 1.25em;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.definitions {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.definition {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.term {
+  font: var(--body-md);
+  font-weight: 600;
+  color: var(--text-body);
+}
+
+.definition dd {
+  margin: 0;
+}
+
+.link {
+  color: var(--text-link);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  overflow-wrap: anywhere;
+}
+
+.link:hover {
+  color: var(--text-link-hover);
+}
+
+/* Only ever visible while CONTACT_EMAIL is unset — never in production. */
+.missing {
+  color: var(--text-alert);
+  font-family: var(--font-mono);
+}
