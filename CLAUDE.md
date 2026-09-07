@@ -1323,6 +1323,18 @@ C'est le cas d'école d'une assertion morte : verte pendant un jour entier, sans
 
 **Piège d'outillage qui a coûté un aller-retour** : un build local **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` ne rend pas la balise du script, donc `trackEvent` ne fait rien et 5 specs analytics échouent — alors que la CI, qui pose `NEXT_PUBLIC_GOATCOUNTER_CODE: e2e-stub` au niveau du workflow, les voit passer. Le contraire du piège de R-11 (là, l'absence rendait une assertion *vacuously verte*) : ici elle rend des specs *faussement rouges*. Reconstruire avec la variable avant de conclure quoi que ce soit sur une spec analytics en local.
 
+### Run n°8 de la sonde : R2-26 vérifié contre le vrai Firestore, et Gemini à 9 s (2026-09-08)
+
+Sonde production lancée **sur la branche avant merge**, contre la production qui venait de recevoir R2-26 : **10 sondes sur 10 vertes**.
+
+- **`stats/first-customers__b2b` : `{ before: 0, after: 1 }`.** C'est la preuve que R2-26 attendait, et elle ne pouvait venir que de là : l'incrément par segment est **volontairement avalé en cas d'échec** (à ce moment-là le résultat est déjà écrit, et lever coûterait un 502 pour un Tour réussi), donc un no-op silencieux aurait été indiscernable d'un succès vu de l'API. Le champ `segment` survit aussi à l'aller-retour Firestore.
+- **Les deux compteurs sont maintenant comparés en delta**, pas à zéro. `count > 0` ne prouvait que « quelque chose a été compté un jour », ce qui était déjà vrai avant la fonctionnalité. Comparaison en `>=` et non en égalité, pour qu'une vraie soumission concurrente ne rende pas la sonde rouge.
+- **Le nettoyage annule les deux incréments.** Le second comptait plus que le premier : douze segments découpent le même trafic en douze, donc un score de test pèse bien plus lourd dans une moyenne de segment. Conséquence bénigne à connaître : le document `stats/<segment>` reste en base à zéro après le nettoyage plutôt que d'être supprimé — le supprimer serait faux le jour où de vrais utilisateurs y auront contribué, et un compteur à zéro passe de toute façon sous le seuil de 30.
+- **Deep dive : 9 s pour quatre générations**, contre ~70 s au run n°6 (`gemini-3.7-flash` a répondu aux deux langues, aucun repli). Un seul point de mesure, donc pas une nouvelle norme — mais la latence de ce produit dépend visiblement plus de la charge de Gemini que de notre code, et le passage au palier payant a pu y contribuer.
+- **Le français reste du français**, garde-fou anti-moquerie tenu : « Pour un outil pensé pour un usage quotidien, constater l'essentiel des départs dès la première semaine démontre que l'ancrage de la routine échoue. » Vise la stratégie, jamais la personne.
+
+**Piège de vérification, encore le même, encore attrapé de justesse** : avant de lancer la sonde j'ai voulu confirmer que R2-26 était bien déployé en cherchant une chaîne du segment dans les chunks de `/quiz`. La recherche est revenue vide et j'ai conclu « pas déployé » — alors que **mon motif était faux** : les chunks sont servis sous `/_next/static/immutable/chunks/`, pas `/_next/static/chunks/`. La boucle ne parcourait aucun fichier. Une vérification qui ne trouve rien doit d'abord prouver qu'elle a regardé quelque part : compter ce qu'on a examiné, pas seulement ce qu'on a trouvé.
+
 ---
 
 ## État du projet au 2026-09-08 — à lire en premier dans une nouvelle session
