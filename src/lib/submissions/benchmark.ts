@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
-import { getGlobalStats } from "./repository";
+import { getGlobalStats, getSegmentStats } from "./repository";
+import { segmentId, type SegmentAnswers } from "./segment";
 
 /**
  * "Average of every Tour: 58/100" on the result page — REVIEW.md R-20.
@@ -46,3 +47,49 @@ export function getBenchmarkAverage(): Promise<number | null> {
 }
 
 export const BENCHMARK_MIN_SUBMISSIONS = MIN_SUBMISSIONS_FOR_BENCHMARK;
+
+/**
+ * The benchmark a given submission should be shown — REVIEW-02.md R2-26.
+ *
+ * A cascade, not a switch: the segment average when that segment has reached
+ * the same minimum sample, otherwise the global one, otherwise nothing.
+ * Twelve segments split the same traffic twelve ways, so for a long while
+ * most of them will not qualify — falling back rather than hiding keeps the
+ * line on the page while the data catches up.
+ *
+ * `scope` is what the copy branches on; the caller builds the segment's
+ * label from `content/segments.ts`, since that needs a locale and this
+ * does not.
+ */
+export interface Benchmark {
+  score: number;
+  scope: "segment" | "global";
+}
+
+async function computeSegmentBenchmark(segment: string): Promise<number | null> {
+  const stats = await getSegmentStats(segment);
+  if (!stats || stats.count < MIN_SUBMISSIONS_FOR_BENCHMARK) return null;
+  return Math.round(stats.scoreSum / stats.count);
+}
+
+export async function getBenchmarkFor(segment: SegmentAnswers | null): Promise<Benchmark | null> {
+  const id = segmentId(segment);
+  if (id) {
+    const scoped = await unstable_cache(
+      async () => {
+        try {
+          return await computeSegmentBenchmark(id);
+        } catch (err) {
+          console.error("segment benchmark unavailable (falling back to the global average):", err);
+          return null;
+        }
+      },
+      ["benchmark-segment", id],
+      { revalidate: ONE_HOUR_SECONDS },
+    )();
+    if (scoped !== null) return { score: scoped, scope: "segment" };
+  }
+
+  const global = await getBenchmarkAverage();
+  return global === null ? null : { score: global, scope: "global" };
+}

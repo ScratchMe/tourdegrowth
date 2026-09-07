@@ -1,0 +1,78 @@
+/* REVIEW-02.md R2-26 — the context screen, between the last question and the
+   tone selector. Same column rhythm as ToneSelector so the two read as
+   consecutive steps of one flow rather than two different screens. */
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.title {
+  font: var(--display-section);
+  color: var(--text-body);
+  text-wrap: balance;
+}
+
+.title:focus-visible {
+  outline: none;
+}
+
+.intro {
+  font: var(--body-sm);
+  color: var(--text-muted);
+  margin: 0;
+  text-wrap: pretty;
+}
+
+.group {
+  border: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.legend {
+  font: var(--meta-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--meta-tracking-wide);
+  color: var(--text-muted);
+  padding: 0;
+  margin-bottom: 2px;
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Chips rather than the full-width answer buttons of the questionnaire:
+   these are not questions of the Tour, and looking like them would suggest
+   they are scored. */
+.option {
+  font: var(--body-sm);
+  color: var(--text-body);
+  background: var(--surface-card);
+  border: var(--border-solid);
+  border-radius: var(--radius-button);
+  padding: 9px 14px;
+  cursor: pointer;
+  min-height: var(--hit-min);
+}
+
+.option:hover {
+  background: var(--surface-sunken);
+}
+
+.selected {
+  background: var(--ink-0);
+  color: var(--text-inverse);
+  border-color: var(--ink-0);
+}
+
+.hint {
+  color: var(--text-muted);
+  text-wrap: pretty;
+}

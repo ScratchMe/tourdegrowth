@@ -91,6 +91,27 @@ export async function recordSubmissionInGlobalStats(total: number): Promise<void
     .set({ count: FieldValue.increment(1), scoreSum: FieldValue.increment(total) }, { merge: true });
 }
 
+/**
+ * The same running totals, per segment — REVIEW-02.md R2-26. One document
+ * per stage × model combination, written alongside `stats/global` and read
+ * the same way. Twelve possible ids, most of them empty for a long time,
+ * which is exactly why the read falls back to the global average until a
+ * segment reaches its own minimum sample.
+ */
+export async function recordSubmissionInSegmentStats(segment: string, total: number): Promise<void> {
+  await getDb()
+    .collection(STATS_COLLECTION)
+    .doc(segment)
+    .set({ count: FieldValue.increment(1), scoreSum: FieldValue.increment(total) }, { merge: true });
+}
+
+export async function getSegmentStats(segment: string): Promise<GlobalStats | null> {
+  const doc = await getDb().collection(STATS_COLLECTION).doc(segment).get();
+  const data = doc.data();
+  if (!data || typeof data.count !== "number" || typeof data.scoreSum !== "number") return null;
+  return { count: data.count, scoreSum: data.scoreSum };
+}
+
 export async function getGlobalStats(): Promise<GlobalStats | null> {
   const doc = await getDb().collection(STATS_COLLECTION).doc(GLOBAL_STATS_DOC).get();
   const data = doc.data();

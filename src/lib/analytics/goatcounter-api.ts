@@ -5,6 +5,7 @@ import {
   SHARE_METHODS,
   TONES,
   OWN_TOUR_EVENT,
+  SEGMENT_DETAILS,
 } from "./goatcounter";
 
 // Server-only — never import this from a "use client" component.
@@ -35,11 +36,13 @@ const SUBMISSION_PATHS = TONES.map((tone) => `submission_completed/${tone}`);
 const SHARE_PATHS = TONES.flatMap((tone) => SHARE_METHODS.map((method) => `share/${tone}/${method}`));
 const DEEP_DIVE_COMPLETED_PATHS = DEEP_DIVE_CONTEXT_DETAILS.map((d) => `deep_dive_completed/${d}`);
 const PROFILE_CLICK_PATHS = PROFILE_CLICK_DETAILS.map((detail) => `profile_click/${detail}`);
+const SEGMENT_PATHS = SEGMENT_DETAILS.map((d) => `segment_answered/${d}`);
 
 const ALL_PATHS = [
   ...HOME_PATHS,
   QUIZ_STARTED_PATH,
   ...STAGE_PATHS,
+  ...SEGMENT_PATHS,
   ...TONE_SELECTED_PATHS,
   ...SUBMISSION_PATHS,
   ...SHARE_PATHS,
@@ -56,6 +59,9 @@ export interface FunnelStats {
   quizStarted: number;
   /** One entry per AARRR stage, in order: where people drop out mid-questionnaire. */
   stagesCompleted: number[];
+  /** The context screen (REVIEW-02.md R2-26): how many answered at least one axis, and how many both. */
+  segmentAnswered: number;
+  segmentBothAxes: number;
   /** "Get my score" pressed (either tone). */
   toneSelected: number;
   /** A result exists. */
@@ -157,6 +163,10 @@ export async function fetchFunnelWindow(startISO: string, label: string): Promis
       homeViews,
       quizStarted: counts.get(QUIZ_STARTED_PATH) ?? 0,
       stagesCompleted: STAGE_PATHS.map((path) => counts.get(path) ?? 0),
+      segmentAnswered: sum(SEGMENT_PATHS),
+      // "both" is the only detail that produces a segment average at all —
+      // the other three fall the reader back to the global one.
+      segmentBothAxes: sum(["segment_answered/both"]),
       toneSelected: sum(TONE_SELECTED_PATHS),
       submissionsCompleted: sum(SUBMISSION_PATHS),
       shares: sum(SHARE_PATHS),

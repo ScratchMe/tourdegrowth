@@ -68,6 +68,12 @@ function FunnelBreakdown({ window }: { window: FunnelWindow }) {
             </li>
           ))}
           <li>
+            Context screen passed — {stats.segmentAnswered} ({ratio(stats.segmentAnswered, stats.quizStarted)} of
+            starts), both axes answered {stats.segmentBothAxes} (
+            {ratio(stats.segmentBothAxes, stats.segmentAnswered)} of those) — REVIEW-02.md R2-26: only &quot;both&quot;
+            can ever produce a segment average.
+          </li>
+          <li>
             Tone chosen — {stats.toneSelected} ({ratio(stats.toneSelected, stats.quizStarted)} of starts)
           </li>
           <li>

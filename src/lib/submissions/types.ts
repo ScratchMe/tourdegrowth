@@ -1,3 +1,4 @@
+import type { SegmentAnswers } from "./segment";
 import type { Locale } from "@/lib/i18n/locale";
 import type { Tone } from "@/lib/quiz/tone";
 import type { Answers, PillarScore } from "@/lib/scoring/score";
@@ -26,6 +27,13 @@ export interface Submission {
   weakestPillar: Pillar;
   /** The submission id that referred this visitor here (`?ref=`), if any — SPEC.md §7. */
   refId: string | null;
+  /**
+   * Who this submission is comparable to (REVIEW-02.md R2-26) — stage and
+   * business model, asked before the score and never scored. `null` for
+   * submissions created before this shipped, and for anyone who declined
+   * both axes; either way the result page falls back to the global average.
+   */
+  segment: SegmentAnswers | null;
   /**
    * SHA-256 of the one-time owner token handed to the creating browser
    * (REVIEW.md R-01, see `owner-token.ts`). Proves "this browser created

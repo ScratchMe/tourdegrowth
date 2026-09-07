@@ -6,8 +6,11 @@ import { QUESTIONS } from "@/lib/scoring/questions";
 import type { AnswerIndex, Answers } from "@/lib/scoring/score";
 import { createSubmissionFlow } from "@/lib/submissions/create-submission";
 import { generateOwnerToken } from "@/lib/submissions/owner-token";
+import { isSegmentAnswers } from "@/lib/submissions/segment";
 import { resolveRefId } from "@/lib/submissions/referral";
-import { recordSubmissionInGlobalStats, saveSubmission, submissionExists } from "@/lib/submissions/repository";
+import { recordSubmissionInGlobalStats, saveSubmission, submissionExists,
+  recordSubmissionInSegmentStats,
+} from "@/lib/submissions/repository";
 
 // Runs on Vercel as a Node.js Route Handler. Originally this is where the
 // Gemini call + Firestore write happened (replacing the Supabase Edge
@@ -79,7 +82,7 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const { answers, tone, locale, refId } = (body ?? {}) as Record<string, unknown>;
+  const { answers, tone, locale, refId, segment } = (body ?? {}) as Record<string, unknown>;
 
   if (!isAnswers(answers)) {
     return NextResponse.json(
@@ -96,6 +99,12 @@ export async function POST(request: Request): Promise<Response> {
   if (refId !== undefined && refId !== null && typeof refId !== "string") {
     return NextResponse.json({ error: "refId must be a string or null." }, { status: 400 });
   }
+  // REVIEW-02.md R2-26. Absent is the normal case (someone who declined, or
+  // an older client); present but malformed is a contract error, and saying
+  // so beats writing junk into a document read back with `as Submission`.
+  if (segment !== undefined && segment !== null && !isSegmentAnswers(segment)) {
+    return NextResponse.json({ error: "segment must be {stage, model} with known values, or null." }, { status: 400 });
+  }
 
   // REVIEW.md R-03: a ref only counts if it looks like an id we could have
   // issued AND names a real submission. Anything else is dropped rather than
@@ -104,13 +113,14 @@ export async function POST(request: Request): Promise<Response> {
 
   try {
     const { submission, ownerToken } = await createSubmissionFlow(
-      { answers, tone, locale, refId: attributedRefId },
+      { answers, tone, locale, refId: attributedRefId, segment: isSegmentAnswers(segment) ? segment : null },
       {
         saveSubmission,
         generateId: () => crypto.randomUUID(),
         generateOwnerToken,
         now: () => new Date(),
         recordInGlobalStats: recordSubmissionInGlobalStats,
+        recordInSegmentStats: recordSubmissionInSegmentStats,
       },
     );
 

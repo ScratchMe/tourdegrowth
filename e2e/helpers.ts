@@ -55,6 +55,8 @@ export interface SubmissionCall {
   tone: string;
   locale: string;
   refId: string | null;
+  /** REVIEW-02.md R2-26 — stage and business model, both possibly "unknown". */
+  segment: { stage: string; model: string } | null;
 }
 
 /** Captures every POST /api/submissions and answers it with `status`. Returns the array the calls land in. */
@@ -75,11 +77,27 @@ export async function stubSubmissions(page: Page, status = 201): Promise<Submiss
   return calls;
 }
 
-/** Answers every remaining question by clicking its first option, leaving the flow on the tone selector. */
-export async function answerAllQuestions(page: Page): Promise<void> {
+/** Answers the 15 questions and stops on the context screen (REVIEW-02.md R2-26). */
+export async function answerQuestionsOnly(page: Page): Promise<void> {
   for (let i = 0; i < QUESTION_COUNT; i += 1) {
     await page.getByTestId("answer-option").first().click();
   }
+  await page.getByTestId("segment-screen").waitFor();
+}
+
+/**
+ * Gets the flow from the first question to the tone selector, which is what
+ * every spec that isn't about the context screen wants.
+ *
+ * Since R2-26 that means passing one screen the questionnaire does not own:
+ * two optional context questions, both defaulting to "rather not say", so
+ * pressing Continue without touching them is a complete answer. Specs that
+ * need to assert on that screen use `answerQuestionsOnly` and drive it
+ * themselves.
+ */
+export async function answerAllQuestions(page: Page): Promise<void> {
+  await answerQuestionsOnly(page);
+  await page.getByTestId("segment-continue").click();
   await page.getByTestId("get-score-cta").waitFor();
 }
 

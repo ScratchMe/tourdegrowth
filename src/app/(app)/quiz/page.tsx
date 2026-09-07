@@ -34,10 +34,12 @@ import {
 } from "@/lib/quiz/storage";
 import type { AnswerIndex, Answers } from "@/lib/scoring/score";
 import { LoadingScreen } from "@/components/quiz/LoadingScreen";
+import { segmentDetail, type SegmentAnswers } from "@/lib/submissions/segment";
+import { SegmentSelector } from "./SegmentSelector";
 import { ToneSelector, type Tone } from "./ToneSelector";
 import styles from "./page.module.css";
 
-type Phase = "answering" | "tone" | "loading" | "error";
+type Phase = "answering" | "segment" | "tone" | "loading" | "error";
 
 // The full pre-result flow — DESIGN-BRIEF.md §05/§06a/§06b — as one route,
 // one client state machine (`phase`), matching the design's own "State"
@@ -71,6 +73,14 @@ export default function QuizPage() {
 
   const [mounted, setMounted] = useState(false);
   const [phase, setPhase] = useState<Phase>("answering");
+  /**
+   * REVIEW-02.md R2-26. Defaults to "rather not say" on both axes, so the
+   * screen is already answered when it opens and Continue is never blocked.
+   * Deliberately NOT persisted, for the same reason the tone isn't
+   * (CLAUDE.md, step 5): losing it to a reload costs two clicks, where
+   * losing the 15 answers would break the error screen's promise.
+   */
+  const [segment, setSegment] = useState<SegmentAnswers>({ stage: "unknown", model: "unknown" });
   const [answers, setAnswers] = useState<Answers>({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -91,7 +101,7 @@ export default function QuizPage() {
     setAnswers(stored);
     if (isComplete(stored)) {
       setCurrentIndex(QUESTION_COUNT - 1);
-      setPhase("tone");
+      setPhase("segment");
     } else {
       setCurrentIndex(firstUnansweredIndex(stored));
     }
@@ -152,7 +162,7 @@ export default function QuizPage() {
     // no-unused-vars is what surfaced it (REVIEW.md R-06).
 
     if (currentIndex === QUESTION_COUNT - 1) {
-      setPhase("tone");
+      setPhase("segment");
     } else {
       setCurrentIndex(currentIndex + 1);
     }
@@ -192,7 +202,8 @@ export default function QuizPage() {
         fetch("/api/submissions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ answers, tone, locale, refId: attributableRefId() }), // SPEC.md §7
+          // SPEC.md §7 for the ref; REVIEW-02.md R2-26 for the segment.
+          body: JSON.stringify({ answers, tone, locale, refId: attributableRefId(), segment }),
         }),
         minDwell,
       ]);
@@ -319,6 +330,18 @@ export default function QuizPage() {
               <MetaLabel size="sm">{tc(t.answerToContinue, locale)}</MetaLabel>
             </div>
           </div>
+        )}
+
+        {phase === "segment" && (
+          <SegmentSelector
+            locale={locale}
+            segment={segment}
+            onChange={setSegment}
+            onSubmit={() => {
+              trackEvent("segment_answered", segmentDetail(segment));
+              setPhase("tone");
+            }}
+          />
         )}
 
         {phase === "tone" && (

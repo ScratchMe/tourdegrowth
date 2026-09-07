@@ -20,6 +20,7 @@ import { ANTOINE_LINKS, DEEP_DIVE_CREDIT, QUICK_CREDIT } from "@/content/antoine
 import { HOW_IT_WORKS } from "@/content/how-it-works";
 import { PROFILE_CLICK_DETAILS, trackEvent } from "@/lib/analytics/goatcounter";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
+import type { Locale } from "@/lib/i18n/locale";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { localePath } from "@/lib/i18n/routes";
 import { progressionFor, type Progression } from "@/lib/quiz/progression";
@@ -31,6 +32,9 @@ import { rankPillarsAscending } from "@/lib/scoring/rank";
 import type { QuickVerdict } from "@/lib/scoring/verdict";
 import type { Answers } from "@/lib/scoring/score";
 import type { DeepDiveView } from "@/lib/submissions/types";
+import { SEGMENT_MODELS, SEGMENT_STAGES } from "@/content/segments";
+import type { Benchmark } from "@/lib/submissions/benchmark";
+import type { SegmentAnswers } from "@/lib/submissions/segment";
 import { ScoreBreakdown, type BreakdownData } from "./ScoreBreakdown";
 import styles from "./ResultView.module.css";
 
@@ -55,7 +59,33 @@ interface ResultViewProps {
   /** Questions and per-pillar raw points behind the score (REVIEW.md R-12) — public content; the owner's answers come from their own device, never from here. */
   breakdown?: BreakdownData | null;
   /** Average score across every Tour taken (REVIEW.md R-20), or null when there aren't enough yet — and never on the fixed sample, whose numbers aren't real. */
-  benchmark?: number | null;
+  /** REVIEW-02.md R2-26 — the average, and whose average it is. */
+  benchmark?: Benchmark | null;
+  /** The reader's own segment, only used to name it in the line above. */
+  segment?: SegmentAnswers | null;
+}
+
+/**
+ * "Average for B2B, first customers: 61/100" once the reader's own segment
+ * has enough Tours of its own, "Average of every Tour" until then
+ * (REVIEW-02.md R2-26). Built here rather than on the server because the
+ * label needs the reader's locale and the number does not.
+ */
+function benchmarkLine(benchmark: Benchmark, segment: SegmentAnswers | null, locale: Locale): string {
+  const score = String(benchmark.score);
+  const globalLine = () => tc(UI_STRINGS.benchmark.line, locale).replace("{score}", score);
+  if (benchmark.scope !== "segment" || !segment) return globalLine();
+
+  const stage = SEGMENT_STAGES.find((o) => o.value === segment.stage);
+  const model = SEGMENT_MODELS.find((o) => o.value === segment.model);
+  // A segment-scoped average only exists when both axes were answered, but a
+  // stored value could still be unknown to a later options list.
+  if (!stage || !model) return globalLine();
+
+  const label = tc(UI_STRINGS.benchmark.segmentJoin, locale)
+    .replace("{model}", tc(model.label, locale))
+    .replace("{stage}", tc(stage.label, locale).toLocaleLowerCase(locale));
+  return tc(UI_STRINGS.benchmark.segmentLine, locale).replace("{segment}", label).replace("{score}", score);
 }
 
 /**
@@ -77,6 +107,7 @@ export function ResultView({
   deepDive = null,
   breakdown = null,
   benchmark = null,
+  segment = null,
 }: ResultViewProps) {
   const { locale } = useLocale();
   const [tone, setTone] = useState<Tone>(initialTone);
@@ -230,7 +261,7 @@ export function ResultView({
                   screen whose promise is a score you can re-explain. */}
               {benchmark !== null ? (
                 <p className={styles.benchmark} data-testid="benchmark">
-                  {tc(UI_STRINGS.benchmark.line, locale).replace("{score}", String(benchmark))}
+                  {benchmarkLine(benchmark, segment, locale)}
                 </p>
               ) : null}
               {/* REVIEW-02.md R2-27 — the owner's own trajectory, next to the

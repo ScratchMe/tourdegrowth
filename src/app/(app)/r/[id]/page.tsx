@@ -4,7 +4,7 @@ import { cache } from "react";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { resolveRequestLocale } from "@/lib/i18n/resolve-request-locale";
 import { getSampleVerdicts, SAMPLE_RESULT } from "@/lib/submissions/sample";
-import { getBenchmarkAverage } from "@/lib/submissions/benchmark";
+import { getBenchmarkFor } from "@/lib/submissions/benchmark";
 import { getCachedSubmissionById } from "@/lib/submissions/cached-repository";
 import { isValidSubmissionId } from "@/lib/submissions/referral";
 import { buildQuickVerdicts, toDeepDiveView } from "@/lib/submissions/view-model";
@@ -164,7 +164,7 @@ export default async function ResultPage({ params }: PageProps) {
   // be the reason a result page fails to render. Not offered on `/r/sample`
   // above: its numbers aren't real, and a real average beside them would
   // blur exactly the line the "not your data" badge draws.
-  const benchmark = await getBenchmarkAverage();
+  const benchmark = await getBenchmarkFor(submission.segment ?? null);
 
   return (
     <ResultView
@@ -181,6 +181,7 @@ export default async function ResultPage({ params }: PageProps) {
       // page's RSC payload without ever being rendered.
       deepDive={toDeepDiveView(submission.deepDive, locale)}
       benchmark={benchmark}
+      segment={submission.segment ?? null}
     />
   );
 }

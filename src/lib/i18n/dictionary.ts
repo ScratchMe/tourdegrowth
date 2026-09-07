@@ -86,6 +86,14 @@ export const UI_STRINGS = {
    */
   benchmark: {
     line: { en: "Average of every Tour: {score}/100", fr: "Moyenne de tous les Tours : {score}/100" },
+    // TODO: à relire (REVIEW-02) — R2-26. Shown instead of the line above
+    // once the reader's own segment has enough Tours of its own; `{segment}`
+    // is built from content/segments.ts ("B2B, first customers").
+    segmentLine: {
+      en: "Average for {segment}: {score}/100",
+      fr: "Moyenne pour {segment} : {score}/100",
+    },
+    segmentJoin: { en: "{model}, {stage}", fr: "{model}, {stage}" },
   },
 
   /**

@@ -9,6 +9,7 @@ import type { Tone } from "@/lib/quiz/tone";
 import { computeScore, type Answers, type PillarScore } from "@/lib/scoring/score";
 import type { Pillar } from "@/lib/scoring/pillars";
 import { hashOwnerToken } from "./owner-token";
+import { segmentId, type SegmentAnswers } from "./segment";
 import type { DeepDiveResult, DeepDiveVerdict, Submission } from "./types";
 import { parseDeepDiveVerdict } from "./verdict";
 
@@ -18,6 +19,8 @@ export interface CreateSubmissionInput {
   locale: Locale;
   /** The submission id that referred this visitor here (`?ref=`), if any. */
   refId: string | null;
+  /** Stage and business model, for a comparable benchmark (REVIEW-02.md R2-26). Never scored. */
+  segment: SegmentAnswers | null;
 }
 
 export interface CreateSubmissionDeps {
@@ -33,6 +36,8 @@ export interface CreateSubmissionDeps {
    * script) shouldn't have to stub it.
    */
   recordInGlobalStats?: (total: number) => Promise<void>;
+  /** Same, for the per-segment aggregate (REVIEW-02.md R2-26). Optional for the same reason. */
+  recordInSegmentStats?: (segment: string, total: number) => Promise<void>;
 }
 
 export interface CreateSubmissionResult {
@@ -77,6 +82,7 @@ export async function createSubmissionFlow(
     total,
     weakestPillar,
     refId: input.refId,
+    segment: input.segment,
     ownerTokenHash: hashOwnerToken(ownerToken),
     deepDive: null,
   };
@@ -93,6 +99,18 @@ export async function createSubmissionFlow(
       await deps.recordInGlobalStats(total);
     } catch (err) {
       console.error("global stats increment failed (the submission itself is saved):", err);
+    }
+  }
+
+  // Same bookkeeping, same swallow, for the segment this submission belongs
+  // to (REVIEW-02.md R2-26). `segmentId` is null whenever either axis was
+  // declined, so a partial answer never reaches an aggregate at all.
+  const segment = segmentId(input.segment);
+  if (segment && deps.recordInSegmentStats) {
+    try {
+      await deps.recordInSegmentStats(segment, total);
+    } catch (err) {
+      console.error("segment stats increment failed (the submission itself is saved):", err);
     }
   }
 

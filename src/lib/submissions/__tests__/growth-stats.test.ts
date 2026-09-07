@@ -33,6 +33,7 @@ function submission(overrides: Partial<Submission> & { id: string }): Submission
     total: 50,
     weakestPillar: "retention",
     refId: null,
+    segment: null,
     ownerTokenHash: null,
     deepDive: null,
     ...overrides,
