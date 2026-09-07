@@ -42,6 +42,23 @@ export interface GrowthStats {
   kFactor: number;
   /** The old ratio, kept under its honest name: how many submissions a result brings in once it brings in any. */
   referralsPerConvertingResult: number;
+  /**
+   * How the scores fall, in the four bands the result page's own language
+   * already uses. A single average hides whether the tool meets mostly
+   * struggling products or mostly healthy ones — which is the first thing
+   * anyone reading published metrics wants to know (REVIEW-02.md R2-28).
+   */
+  scoreBands: Record<ScoreBandId, number>;
+}
+
+/** Bands over the 0-100 total, low to high. */
+export type ScoreBandId = "0-39" | "40-59" | "60-79" | "80-100";
+
+export function scoreBandOf(total: number): ScoreBandId {
+  if (total < 40) return "0-39";
+  if (total < 60) return "40-59";
+  if (total < 80) return "60-79";
+  return "80-100";
 }
 
 function isWithin(createdAt: string, msAgo: number, now: number): boolean {
@@ -69,8 +86,10 @@ export function summarizeSubmissions(submissions: readonly Submission[], now: nu
   let deepDiveCompleted = 0;
   let freeContextProvided = 0;
   let referredSubmissions = 0;
+  const scoreBands: Record<ScoreBandId, number> = { "0-39": 0, "40-59": 0, "60-79": 0, "80-100": 0 };
 
   for (const s of submissions) {
+    scoreBands[scoreBandOf(s.total)] += 1;
     byTone[s.tone] += 1;
     byLocale[s.locale] += 1;
     totalScore += s.total;
@@ -108,6 +127,7 @@ export function summarizeSubmissions(submissions: readonly Submission[], now: nu
     convertingResults,
     kFactor: totalSubmissions ? referredSubmissions / totalSubmissions : 0,
     referralsPerConvertingResult: convertingResults ? referredSubmissions / convertingResults : 0,
+    scoreBands,
   };
 }
 

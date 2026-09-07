@@ -1,0 +1,82 @@
+/* /metrics — REVIEW-02.md R2-28. Page frame comes from how-it-works;
+   only the figure tiles and the distribution bars live here. */
+.figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+}
+
+/* Lifted, because on this page the figures ARE the content — everything
+   else on it exists to qualify them. */
+.figure {
+  background: var(--surface-card);
+  border: var(--border-solid);
+  box-shadow: var(--shadow-card);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.value {
+  font: var(--display-section);
+  color: var(--text-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.help {
+  font: var(--body-sm);
+  color: var(--text-muted);
+  margin: 0;
+  text-wrap: pretty;
+}
+
+.tooEarly {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.barRow {
+  display: grid;
+  grid-template-columns: 62px 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.barLabel,
+.barValue {
+  font: var(--meta-sm);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.barTrack {
+  height: 14px;
+  background: var(--surface-sunken);
+  border: var(--border-solid);
+  display: block;
+}
+
+.barFill {
+  display: block;
+  height: 100%;
+  background: var(--paint-red);
+  min-width: 0;
+}
+
+.caveats {
+  margin: 0;
+  padding-left: 1.25em;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
