@@ -41,7 +41,7 @@ La colonne **Autonomie** dit ce que chaque item attend d'Antoine : **Auto** = je
 |---|---|---|---|---|---|---|
 | **A — Crédibilité devant le public visé** | R2-01 | Le K-factor ne peut jamais être entre 0 et 1 | F+T | S | Auto | **Fait** (PR #62, 2026-09-06) |
 | | R2-02 | La page de résultat parle au propriétaire, jamais au visiteur | F | S | Relecture | **Fait** (PR #63, 2026-09-06) — 3 chaînes à relire |
-| | R2-03 | Ni mentions légales ni information RGPD | F | M | Toi (1 info) + Relecture | **Livré, en attente de toi** (PR #79 en draft, 2026-09-06) — les deux pages sont écrites ; la PR reste rouge et non mergeable tant que `CONTACT_EMAIL` est vide dans `src/content/legal.ts` |
+| | R2-03 | Ni mentions légales ni information RGPD | F | M | Toi (1 info) + Relecture | **Fait** (PR #79, mergée le 2026-09-06) — `CONTACT_EMAIL` renseignée (`contact@tourdegrowth.com`), `FIRESTORE_REGION` = `eu` et `GEMINI_TIER` = `paid` posés depuis ; copie à relire |
 | | R2-04 | Rien ne rattache le contenu à Antoine : ni page, ni entité | F | M | Relecture | **Fait** (PR #78, 2026-09-06) — toute la copie de `content/about.ts` est un premier jet à relire |
 | | R2-05 | Wordmark et sélecteur de langue collés sur les 36 pages de contenu | F+T | XS | Auto | **Fait** (PR #61, 2026-09-06) |
 | **B — Boucle de partage et mesure** | R2-06 | Métadonnées : descriptions anglaises sur les URL françaises, titre sans mot-clé | F | S | Relecture | **Fait pour l'essentiel par la PR #58** (autre session) — le reliquat (descriptions de terme, `/quiz`) est repris dans R2-08 |
@@ -69,7 +69,7 @@ La colonne **Autonomie** dit ce que chaque item attend d'Antoine : **Auto** = je
 | | R2-28 | Une page de métriques publique : l'outil montre son propre AARRR | F | M | Toi | **Fait, fermée** (PR #88, 2026-09-07) — `METRICS_PAGE_ENABLED` à basculer dans Vercel quand tu veux l'ouvrir ; copie de `content/metrics.ts` à relire |
 | | R2-29 | Le roast est le crochet viral et il est invisible avant la 15ᵉ question | F | S | Toi | **Brief envoyé** (PR #89, 2026-09-07) — `design/DS-EXTENSION-BRIEF-02.md` ; en attente du retour Claude Design |
 | | R2-30 | Fenêtre Tour de France (SPEC.md §10) : à caler dans le calendrier | F | S | Toi | **Tranché** (Antoine, 2026-09-07) : pas d'urgence, à caler dans le plan de croissance pour juin 2027 |
-| **F — Hygiène du dépôt** | R2-31 | Branches distantes obsolètes : audit fait, suppression à faire | T | XS | Toi | **Audit fait** (PR #61) — suppression à faire par Antoine |
+| **F — Hygiène du dépôt** | R2-31 | Branches distantes obsolètes : audit fait, suppression à faire | T | XS | Toi | **Audit fait** (PR #61) — suppression à faire ; **35 branches au 2026-09-08**, et la suppression automatique des branches de tête n'a manifestement pas pris effet (voir plus bas) |
 
 ### Pourquoi cet ordre
 
@@ -436,6 +436,8 @@ Le fast-follow événementiel (badge « Maillot Jaune », vocabulaire « échapp
 **Constat.** Onze branches distantes en plus de `main` au 2026-09-06, toutes issues de PR déjà mergées : GitHub ne supprimait pas les branches de tête après merge (option activée par Antoine le 2026-09-06, donc le problème ne se reproduira plus pour les PR à venir — la branche de l'audit, `claude/repo-technical-functional-audit-e9xr8t`, a d'ailleurs été supprimée automatiquement au merge de la PR #60).
 
 **Une affirmation à corriger, relayée par Antoine depuis une autre session** (« `main` n'a que trois commits, un commit sans parent depuis la PR #57, l'historique complet vit dans la branche de revue et les six branches `feat/`, la branche d'audit n'est pas mergée »). Mesuré le 2026-09-06 à 18 h 45 : `main` compte **56 commits**, la PR #60 est mergée et sa branche déjà supprimée. Ce qui est vrai, et qui vaut pour **toutes** les branches sans exception : l'historique commence à un commit **sans parent**, `739b7a2` (« Step 7 », squash de la PR #8, 2026-08-27). Les commits des PR #1 à #7 (scaffold, scoring, landing, questionnaire, sélecteur de ton, backend) ne sont atteignables depuis aucune branche — ni `main`, ni la branche de revue, ni `claude/tour-de-growth-tool-6q3tui`, qui ont exactement la même racine. Leur **contenu** est dans `main` (l'app en est faite) et leurs commits restent consultables sur les pages des PR GitHub ; seul le découpage commit par commit des sept premières étapes n'est plus dans l'arbre. Supprimer les branches ne change rien à cet état : elles ne contiennent pas cet historique non plus.
+
+**Mesure refaite le 2026-09-08 : le problème s'est aggravé, pas résolu.** 35 branches distantes en plus de `main`, contre 11 à l'audit. Surtout, `claude/r2-26-benchmark-segments` et `claude/r2-26-live-probe` — dont les PR ont été mergées quelques minutes plus tôt — sont toujours là : **l'option « automatically delete head branches » n'est donc pas active**, contrairement à ce qui était noté ci-dessus. À vérifier dans Settings → General → Pull Requests avant de faire le ménage, sinon la liste se reconstituera toute seule.
 
 **Vérification faite, branche par branche**, avant de dire qu'on peut supprimer : pour chacune, la ou les PR ouvertes depuis cette branche (une branche a servi à plusieurs PR successives) et leur date de merge, relevées par l'API GitHub — pas devinées d'après le nom.
 
