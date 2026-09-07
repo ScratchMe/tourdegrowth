@@ -22,3 +22,19 @@
   color: var(--text-alert);
   border-bottom-color: var(--text-alert);
 }
+
+/* REVIEW-02.md R2-27 — the progression sits under the link it qualifies,
+   quieter than it: the way back to the result is the action, the delta is
+   the reason to care. */
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+.progression {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}

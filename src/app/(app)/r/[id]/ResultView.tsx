@@ -22,7 +22,9 @@ import { PROFILE_CLICK_DETAILS, trackEvent } from "@/lib/analytics/goatcounter";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { localePath } from "@/lib/i18n/routes";
-import { clearStoredAnswers, findStoredResult } from "@/lib/quiz/storage";
+import { progressionFor, type Progression } from "@/lib/quiz/progression";
+import { progressionSentence } from "@/lib/quiz/progression-copy";
+import { clearStoredAnswers, findStoredResult, loadStoredResults } from "@/lib/quiz/storage";
 import type { Tone } from "@/lib/quiz/tone";
 import { PILLARS, type Pillar } from "@/lib/scoring/pillars";
 import { rankPillarsAscending } from "@/lib/scoring/rank";
@@ -88,6 +90,8 @@ export function ResultView({
   const [isOwner, setIsOwner] = useState(false);
   /** The owner's own answers, read from this device — see ScoreBreakdown (REVIEW.md R-12). */
   const [ownAnswers, setOwnAnswers] = useState<Answers | null>(null);
+  /** REVIEW-02.md R2-27 — anchored on THIS result, not on the newest one. */
+  const [progress, setProgress] = useState<Progression | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -97,6 +101,7 @@ export function ResultView({
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsOwner(stored !== null);
     setOwnAnswers(stored?.answers ?? null);
+    setProgress(stored ? progressionFor(loadStoredResults(), id) : null);
   }, [id]);
   const roast = tone === "roast";
   const verdict = verdicts[tone];
@@ -226,6 +231,19 @@ export function ResultView({
               {benchmark !== null ? (
                 <p className={styles.benchmark} data-testid="benchmark">
                   {tc(UI_STRINGS.benchmark.line, locale).replace("{score}", String(benchmark))}
+                </p>
+              ) : null}
+              {/* REVIEW-02.md R2-27 — the owner's own trajectory, next to the
+                  benchmark's "everyone else", under the score both qualify.
+                  Owner-only by construction: it is read from this device's
+                  stored results, so a visitor has nothing to read. */}
+              {progress ? (
+                <p className={styles.progression} data-testid="result-progression">
+                  {progressionSentence(progress, {
+                    up: tc(UI_STRINGS.progression.resultUp, locale),
+                    down: tc(UI_STRINGS.progression.resultDown, locale),
+                    flat: tc(UI_STRINGS.progression.resultFlat, locale),
+                  })}
                 </p>
               ) : null}
               {/* SPEC-ADDENDUM-02.md §2.1: sober "built by" credit, in the

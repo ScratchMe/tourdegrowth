@@ -281,6 +281,23 @@ export const UI_STRINGS = {
     freeContextPrivacyLink: { en: "Privacy policy →", fr: "Politique de confidentialité →" },
   },
 
+  /**
+   * Progression between two Tours — REVIEW-02.md R2-27. `{prev}`, `{score}`
+   * and `{delta}` are replaced in code. The delta is written with its sign
+   * because "+8" and "-8" have to read differently at a glance; a flat
+   * result gets its own sentence rather than "+0", which reads like a bug.
+   *
+   * TODO: à relire (REVIEW-02) — R2-27.
+   */
+  progression: {
+    landingUp: { en: "Previous Tour: {prev} → {score}, +{delta}", fr: "Tour précédent : {prev} → {score}, +{delta}" },
+    landingDown: { en: "Previous Tour: {prev} → {score}, {delta}", fr: "Tour précédent : {prev} → {score}, {delta}" },
+    landingFlat: { en: "Previous Tour: {prev} — same score", fr: "Tour précédent : {prev} — même score" },
+    resultUp: { en: "+{delta} points since your previous Tour ({prev}/100).", fr: "+{delta} points depuis ton Tour précédent ({prev}/100)." },
+    resultDown: { en: "{delta} points since your previous Tour ({prev}/100).", fr: "{delta} points depuis ton Tour précédent ({prev}/100)." },
+    resultFlat: { en: "Same score as your previous Tour.", fr: "Même score qu'à ton Tour précédent." },
+  },
+
   /** Result page chrome (DESIGN-BRIEF.md §02/§04) — the Strengths/Where
    * you're losing time SENTENCES come from content/copy-library.ts (Quick)
    * or Gemini (Deep dive), not from here; this is just the surrounding UI

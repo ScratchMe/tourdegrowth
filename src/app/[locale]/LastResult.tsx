@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { latestProgression, type Progression } from "@/lib/quiz/progression";
+import { progressionSentence, type ProgressionTemplates } from "@/lib/quiz/progression-copy";
 import { loadStoredResults, type StoredResult } from "@/lib/quiz/storage";
 import styles from "./LastResult.module.css";
 
@@ -14,6 +16,8 @@ export interface LastResultProps {
   /** "Your last score: {score}/100 — see it again →", `{score}` replaced here. */
   withScore: string;
   withoutScore: string;
+  /** REVIEW-02.md R2-27 — the three progression sentences, already translated. */
+  progression: ProgressionTemplates;
 }
 
 /**
@@ -32,12 +36,15 @@ export interface LastResultProps {
  * newcomer, who is most of this page's traffic, sees nothing appear and
  * disappear.
  */
-export function LastResult({ withScore, withoutScore }: LastResultProps) {
+export function LastResult({ withScore, withoutScore, progression }: LastResultProps) {
   const [last, setLast] = useState<StoredResult | null>(null);
+  const [progress, setProgress] = useState<Progression | null>(null);
 
   useEffect(() => {
+    const results = loadStoredResults();
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLast(loadStoredResults()[0] ?? null);
+    setLast(results[0] ?? null);
+    setProgress(latestProgression(results));
   }, []);
 
   if (!last) return null;
@@ -47,8 +54,17 @@ export function LastResult({ withScore, withoutScore }: LastResultProps) {
   const label = typeof last.total === "number" ? withScore.replace("{score}", String(last.total)) : withoutScore;
 
   return (
-    <Link href={`/r/${last.id}`} className={styles.link} data-testid="last-result-link">
-      {label}
-    </Link>
+    <span className={styles.wrap}>
+      <Link href={`/r/${last.id}`} className={styles.link} data-testid="last-result-link">
+        {label}
+      </Link>
+      {/* REVIEW-02.md R2-27 — only once there are two scored Tours to
+          compare; a first-time finisher sees the link alone. */}
+      {progress ? (
+        <span className={styles.progression} data-testid="progression">
+          {progressionSentence(progress, progression)}
+        </span>
+      ) : null}
+    </span>
   );
 }
