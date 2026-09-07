@@ -73,6 +73,18 @@
   margin-top: 16px;
 }
 
+/* REVIEW-02.md R2-27 — same register as the benchmark it sits with, in ink
+   rather than muted: this line is about the reader's own result, the
+   benchmark is about everyone else's. */
+.progression {
+  font: var(--meta-xs);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-body);
+  margin-top: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
 .builtByCredit {
   font: 500 12px/1.4 var(--font-ui);
   color: var(--text-faint);

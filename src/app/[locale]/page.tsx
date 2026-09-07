@@ -99,6 +99,11 @@ export default async function LandingPage({ params }: PageProps) {
             <LastResult
               withScore={tc(UI_STRINGS.lastResult.withScore, locale)}
               withoutScore={tc(UI_STRINGS.lastResult.withoutScore, locale)}
+              progression={{
+                up: tc(UI_STRINGS.progression.landingUp, locale),
+                down: tc(UI_STRINGS.progression.landingDown, locale),
+                flat: tc(UI_STRINGS.progression.landingFlat, locale),
+              }}
             />
           </div>
 

@@ -1293,6 +1293,17 @@ Antoine a activé la facturation sur le projet derrière la clé (Tier 1, prépa
 **Ce qui vaut d'être noté n'est pas la bascule mais ce qu'elle a révélé.** Le test posé la veille (« chaque valeur de la constante épinglée à sa phrase ») est passé au rouge — non parce que la copie était fausse, mais parce que **mon assertion française l'était** : elle cherchait `n['’]utilise pas pour améliorer` alors que la phrase dit « ne **l'**utilise pas ». Ce motif n'aurait jamais pu correspondre, à aucune version de la phrase — et personne ne pouvait le voir tant que le palier était `"free"`, puisque la branche `paid` du test n'était jamais exercée.
 
 C'est le cas d'école d'une assertion morte : verte pendant un jour entier, sans rien vérifier. Elle a été rattrapée par le seul événement capable de l'exercer. Deux choses en découlent, à garder : une garde à branches ne vaut que pour la branche que la configuration courante emprunte, et **la non-vacuité a été refaite après correction** (phrase remplacée par une version neutre → le test tombe bien), ce qui est la seule preuve que la garde tient vraiment.
+### R2-27 : la progression entre deux Tours (2026-09-08)
+
+`SPEC.md` §5 listait l'historique de progression en fast-follow, et depuis R-01 et R-20 la donnée dormait déjà sur l'appareil : `tdg.results.v1` garde jusqu'à 20 résultats datés avec leur score. Il ne manquait que la lecture — et c'est la seule raison de revenir dans trois mois que le produit n'avait pas.
+
+**Le choix de la paire est la partie qui a des cas limites, donc c'est la partie qui est pure et testée** (`lib/quiz/progression.ts`). Deux fonctions plutôt qu'une : `latestProgression` compare les deux Tours notés les plus récents (la landing), `progressionFor` s'ancre sur **un résultat donné** (sa propre page). La différence n'est pas cosmétique : quelqu'un qui rouvre un vieux résultat doit être comparé au Tour qui précédait **celui-là**, sinon une page ancienne annoncerait une progression survenue après elle. Le tri se fait sur les dates, pas sur l'ordre du tableau, et les entrées d'avant R-20 (sans score) sont ignorées — un appareil peut donc contenir plusieurs résultats et n'avoir rien à comparer.
+
+`progression-copy.ts` résout les trois formes (hausse, baisse, égalité) en un seul endroit, partagé par la landing et la page de résultat, pour qu'elles ne divergent pas sur le signe. Il reçoit les gabarits déjà traduits plutôt que le dictionnaire : l'îlot de la landing ne doit pas rapatrier `UI_STRINGS` dans son bundle (R2-14). Une égalité a sa propre phrase au lieu de « +0 », qui se lit comme un bug.
+
+**Défaut visible seulement à l'écran, attrapé à la capture** : la page de résultat affichait « 16 points depuis ton Tour précédent » — sans le plus, ça se lit aussi bien comme une baisse. Le gabarit porte maintenant le `+`, le `-` venant du nombre lui-même. C'est exactement le genre de chose qu'une relecture de code ne montre pas.
+
+**Vérifié en réel** : lint, tsc, 329 tests (+9), `next build`, **5 specs Playwright** (+5) — la landing avec deux Tours, un premier Tour sans delta, une baisse en français, un visiteur sans historique, et l'échantillon qui n'affiche jamais rien puisqu'il n'est le Tour de personne. Non-vacuité prouvée : en neutralisant le calcul, 2 des 5 tombent. La ligne sur une **vraie** page de résultat a été vue via un patch local jamais committé (un id donné à l'échantillon) : « +16 points depuis ton Tour précédent (58/100) » en EN et FR, mobile et desktop, patch retiré et absence de trace vérifiée avant commit.
 
 ---
 
