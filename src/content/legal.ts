@@ -31,11 +31,25 @@ import type { Translatable } from "@/lib/i18n/translatable";
  */
 export const CONTACT_EMAIL = "contact@tourdegrowth.com";
 
-/** TODO(Antoine): the Firestore location of the `tourdegrowth` project (Firebase console → Firestore). Drives the "where your data lives" sentence. */
-export const FIRESTORE_REGION = "unknown" as "eu" | "us" | "unknown";
+/**
+ * The Firestore location of the `tourdegrowth` project: `eur3`, Google's
+ * Europe multi-region (Antoine, 2026-09-07). Drives the "where your data
+ * lives" sentence — results never leave the EU.
+ */
+export const FIRESTORE_REGION = "eu" as "eu" | "us" | "unknown";
 
-/** TODO(Antoine): whether the Gemini API key is on the paid tier. On the unpaid tier, Google may use prompts to improve its products; on the paid tier it may not. */
-export const GEMINI_TIER = "unknown" as "paid" | "free" | "unknown";
+/**
+ * Which tier the Gemini API key is on — currently the free one (Antoine,
+ * 2026-09-07), which is not a detail we may leave vague: Google's API terms
+ * say the unpaid tier's prompts and responses are used "to provide, improve,
+ * and develop Google products" and that "human reviewers may read, annotate,
+ * and process" them, while the paid tier says Google "doesn't use your
+ * prompts ... or responses to improve our products". The Deep dive sends a
+ * founder's own words to that API, so the sentence below has to say which of
+ * the two applies. Flip this to "paid" the day billing is enabled on the
+ * project behind the key — that one word rewrites the notice.
+ */
+export const GEMINI_TIER = "free" as "paid" | "free" | "unknown";
 
 export const HOST = {
   name: "Vercel Inc.",
@@ -98,13 +112,18 @@ const dataLocation: Translatable =
 const geminiUse: Translatable =
   GEMINI_TIER === "paid"
     ? t(
-        "Google traite ce texte pour produire la réponse et ne l'utilise pas pour entraîner ou améliorer ses modèles (conditions de l'API payante).",
-        "Google processes that text to produce the answer and does not use it to train or improve its models (paid API terms).",
+        "Google traite ce texte pour produire la réponse et, sur le palier payant de son API, ne l'utilise pas pour améliorer ses produits.",
+        "Google processes that text to produce the answer and, on its API's paid tier, does not use it to improve its products.",
       )
-    : t(
-        "Google traite ce texte pour produire la réponse, dans les conditions de son API Gemini.",
-        "Google processes that text to produce the answer, under the terms of its Gemini API.",
-      );
+    : GEMINI_TIER === "free"
+      ? t(
+          "L'API est aujourd'hui utilisée sur son palier gratuit : Google indique s'y servir des requêtes et des réponses pour améliorer ses produits, et des relecteurs humains peuvent y accéder après dissociation du compte. N'écris donc dans le champ libre rien que tu ne voudrais pas voir lu.",
+          "The API is currently used on its free tier: Google states it uses prompts and responses there to improve its products, and human reviewers may access them once disconnected from the account. So don't write anything in the free-text field you wouldn't want read.",
+        )
+      : t(
+          "Google traite ce texte pour produire la réponse, dans les conditions de son API Gemini.",
+          "Google processes that text to produce the answer, under the terms of its Gemini API.",
+        );
 
 export const PRIVACY: LegalDocument = {
   title: t("Politique de confidentialité", "Privacy policy"),
@@ -112,7 +131,7 @@ export const PRIVACY: LegalDocument = {
     "Ce que Tour de Growth enregistre quand tu fais le Tour, où ça va, combien de temps ça reste, et ce que tu peux demander.",
     "What Tour de Growth records when you take the Tour, where it goes, how long it stays, and what you can ask for.",
   ),
-  updatedAt: "2026-09-06",
+  updatedAt: "2026-09-07",
   intro: t(
     "Tour de Growth enregistre le strict nécessaire pour calculer ton score, te le redonner par son lien, et mesurer si l'outil fonctionne. Cette page dit précisément quoi, pourquoi, pendant combien de temps, et ce que tu peux exiger.",
     "Tour de Growth records the bare minimum needed to compute your score, hand it back to you through its link, and measure whether the tool works. This page says exactly what, why, for how long, and what you can ask for.",
