@@ -224,3 +224,14 @@ test.describe("the page that does not exist", () => {
     await expect(page.locator("html")).toHaveAttribute("lang", "fr");
   });
 });
+
+test("the language redirect says it depends on the browser (Vary: Accept-Language)", async ({ request }) => {
+  // The root redirect lands on /en or /fr depending on the browser.
+  const root = await request.get("/", { maxRedirects: 0 });
+  expect(root.status()).toBe(308);
+  expect(root.headers().vary ?? "").toMatch(/accept-language/i);
+  // A prefixed page's language is its URL: no Vary, or the CDN cache would fragment per browser.
+  const en = await request.get("/en");
+  expect(en.status()).toBe(200);
+  expect(en.headers().vary ?? "").not.toMatch(/accept-language/i);
+});

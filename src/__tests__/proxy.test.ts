@@ -196,3 +196,27 @@ describe("constantTimeEqual (REVIEW-02.md R2-22)", () => {
     expect(constantTimeEqual(base.slice(0, 63) + "y", base)).toBe(false);
   });
 });
+
+describe("proxy (Vary: Accept-Language on the language redirect, 2026-09-06)", () => {
+  const vary = (pathname: string, headers?: Record<string, string>) =>
+    proxy(new NextRequest(`https://tourdegrowth.com${pathname}`, { headers })).headers.get("vary") ?? "";
+
+  it("marks the language redirect of an unprefixed content URL as depending on Accept-Language", () => {
+    const response = proxy(new NextRequest("https://tourdegrowth.com/", { headers: { "accept-language": "fr" } }));
+    expect(response.status).toBe(308);
+    expect(response.headers.get("location")).toBe("https://tourdegrowth.com/fr");
+    expect(response.headers.get("vary")).toMatch(/accept-language/i);
+  });
+
+  it("marks the legacy content URLs' redirects the same way", () => {
+    for (const path of ["/how-it-works", "/glossary", "/glossary/cac", "/about"]) {
+      expect(vary(path), path).toMatch(/accept-language/i);
+    }
+  });
+
+  it("never marks a prefixed content page — its language is in the URL, and the CDN caches it once", () => {
+    for (const path of ["/en", "/fr", "/fr/glossary/cac", "/en/about"]) {
+      expect(vary(path), path).not.toMatch(/accept-language/i);
+    }
+  });
+});
