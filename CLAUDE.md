@@ -1272,6 +1272,20 @@ Décision d'Antoine : construire, mais garder la page close tant que les chiffre
 
 **Vérifié en réel** : lint, tsc, 318 tests (+6), `next build` (`/[locale]/metrics` bien en `ƒ`, et le build passe **sans** identifiants Firestore, ce qui était le risque), 3 specs Playwright sur le garde, les quatre comportements du drapeau contrôlés sur un vrai serveur, et la page regardée avec des chiffres fixes via un patch **local jamais committé** (même méthode que R-12 et R2-02) — captures EN desktop et FR mobile, aucun débordement, patch retiré et absence de trace vérifiée avant commit.
 
+### R2-29 : brief Claude Design sur la visibilité du roast (2026-09-07)
+
+Décision d'Antoine : oui, mais par le circuit Claude Design, pas au jugé. `design/DS-EXTENSION-BRIEF-02.md` + `design/ds-extension-02/` (7 captures 2×, vrai build de production).
+
+**Un brief à une seule question**, contrairement au brief 01 qui en portait cinq : *comment un visiteur apprend-il que le ton roast existe, avant d'avoir répondu à quinze questions ?* Le brief ne demande pas un composant décidé d'avance — il demande à Claude Design de trancher si quelque chose a sa place sur la landing, et quoi. « Ne rien faire » est explicitement listé comme une réponse recevable.
+
+Ce qui est fourni pour que la réponse soit informée plutôt que devinée : l'état actuel de la landing aux deux largeurs, la carte d'aperçu isolée (le seul endroit où la sortie du produit est montrée, aujourd'hui silencieusement en neutre), le sélecteur de ton — c'est-à-dire l'endroit où le roast apparaît pour la première fois, après la quinzième question —, et **ce à quoi le roast ressemble en aval** : l'écran de résultat roast et son image de partage, pour que le traitement proposé ne sur-promette ni ne sous-promette. Trois formes possibles sont décrites avec leur défaut respectif, pour gagner du temps sans orienter.
+
+**Contraintes rappelées parce que chacune mord sur au moins une des formes** : le CTA principal reste le plus proéminent ; le neutre reste le défaut (SPEC.md §6bis) ; le garde-fou anti-moquerie n'est pas un élément de design ; un seul emoji dans toute la marque ; **AA vérifié en CI sans aucune exception restante**, donc une nuance plus discrète demande un token qui passe, pas une dérogation ; et le header mobile est plein depuis R-21.
+
+Point signalé plutôt que caché : `result/ToneToggle` existe, porté à l'extension 01 et **jamais câblé** — parce que l'écran de résultat montre exactement deux CTA (R-23, réaffirmé par Antoine). Le brief dit explicitement que l'utiliser **sur la landing** ne rouvre pas cette décision-là.
+
+Captures prises avec le même patch **local jamais committé** que d'habitude pour l'écran roast (`initialTone` de l'échantillon basculé le temps des captures) — retiré, absence de trace vérifiée avant commit.
+
 ---
 
 ## État du projet au 2026-09-06 — à lire en premier dans une nouvelle session
