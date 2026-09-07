@@ -64,7 +64,7 @@ La colonne **Autonomie** dit ce que chaque item attend d'Antoine : **Auto** = je
 | | R2-23 | Aucun `error.tsx` : une panne rend le document nu de Next | T | S | Auto | **Fait** (PR #65, 2026-09-06) — limite : une panne dans le shell initial reste rendue côté client, voir CLAUDE.md |
 | | R2-24 | Petites dettes : `rawPoints` public, logs Gemini non tronqués, pas de Dependabot | T | XS | Auto | **Fait** (PR #66, 2026-09-06) |
 | | R2-25 | Le stderr de Playwright n'est pas vide, donc plus lu | T | XS | Auto | **Fait en partie** (PR #65) — la ligne Firebase ne vient plus que de la spec qui l'annonce ; `NoFallbackError` est à Next |
-| **E — Décisions produit (Antoine)** | R2-26 | Segmenter le benchmark : « la moyenne des SaaS B2B à ton stade » | F | M | Toi | À trancher |
+| **E — Décisions produit (Antoine)** | R2-26 | Segmenter le benchmark : « la moyenne des SaaS B2B à ton stade » | F | M | Toi | **Fait** (PR #92, 2026-09-08) — copie de `content/segments.ts` à relire |
 | | R2-27 | Historique de progression : les données sont déjà sur l'appareil | F | S | Toi | **Fait** (PR #91, 2026-09-08) — 6 chaînes à relire |
 | | R2-28 | Une page de métriques publique : l'outil montre son propre AARRR | F | M | Toi | **Fait, fermée** (PR #88, 2026-09-07) — `METRICS_PAGE_ENABLED` à basculer dans Vercel quand tu veux l'ouvrir ; copie de `content/metrics.ts` à relire |
 | | R2-29 | Le roast est le crochet viral et il est invisible avant la 15ᵉ question | F | S | Toi | **Brief envoyé** (PR #89, 2026-09-07) — `design/DS-EXTENSION-BRIEF-02.md` ; en attente du retour Claude Design |
@@ -397,13 +397,13 @@ Ces cinq points ne sont pas des correctifs. Ce sont les leviers qui, à mon avis
 
 ### R2-26 — Segmenter le benchmark : « la moyenne des SaaS B2B à ton stade »
 
-**Type** F · **Effort** M · **Statut** À trancher
+**Type** F · **Effort** M · **Statut** **Fait** (PR #92, 2026-09-08) — copie de `content/segments.ts` à relire
 
 « Moyenne de tous les Tours : 61/100 » (R-20) est un chiffre honnête mais faible : un indie hacker pré-lancement et une scale-up n'ont rien à se dire à travers cette moyenne. Une ou deux questions de contexte en mode Quick — stade (pré-lancement / premiers clients / >100 clients / >1 000) et modèle (B2B / B2C / marketplace) — permettraient « la moyenne des SaaS B2B à ton stade », qui est un chiffre qu'on a envie de partager et de battre. Deux champs sur la soumission, un document `stats/<segment>` par combinaison (même mécanisme que `stats/global`), le même seuil de 30. C'est aussi la matière première d'un contenu « État de la croissance des produits early-stage, édition 2027 » — le format classique par lequel un outil devient une référence citée. Le coût : deux questions de plus dans un parcours vendu « 3 minutes », et une conversation avec l'agent produit sur leur formulation.
 
 ### R2-27 — Historique de progression : les données sont déjà sur l'appareil
 
-**Type** F · **Effort** S · **Statut** À trancher
+**Type** F · **Effort** S · **Statut** **Fait** (PR #91, 2026-09-08) — 6 chaînes à relire
 
 SPEC.md §5 liste « historique de progression » en fast-follow. Depuis R-01/R-20, `tdg.results.v1` garde déjà jusqu'à 20 résultats datés avec leur score. Il manque seulement l'affichage : « Ton Tour précédent : 58 → 66 » sur la landing (à côté du dernier score) et sur le résultat (sous le score). Quasi gratuit, et c'est la rétention de l'outil lui-même — la raison de revenir dans trois mois, qui n'existe pas aujourd'hui. À décider : voulu ou non, et si oui, la copie.
 

@@ -1305,17 +1305,37 @@ C'est le cas d'école d'une assertion morte : verte pendant un jour entier, sans
 
 **Vérifié en réel** : lint, tsc, 329 tests (+9), `next build`, **5 specs Playwright** (+5) — la landing avec deux Tours, un premier Tour sans delta, une baisse en français, un visiteur sans historique, et l'échantillon qui n'affiche jamais rien puisqu'il n'est le Tour de personne. Non-vacuité prouvée : en neutralisant le calcul, 2 des 5 tombent. La ligne sur une **vraie** page de résultat a été vue via un patch local jamais committé (un id donné à l'échantillon) : « +16 points depuis ton Tour précédent (58/100) » en EN et FR, mobile et desktop, patch retiré et absence de trace vérifiée avant commit.
 
+### R2-26 : à qui on se compare (2026-09-08)
+
+« Moyenne de tous les Tours : 61/100 » (R-20) est un chiffre honnête et faible : un indie hacker pré-lancement et une scale-up n'ont rien à se dire à travers cette moyenne. Deux questions facultatives — stade, modèle économique — la rendent comparable.
+
+**L'écran, et son coût assumé.** Un onzième écran s'intercale entre la 15ᵉ question et le sélecteur de ton (`SegmentSelector`, phase `"segment"`), dans un parcours vendu « 3 minutes ». Les deux questions sont donc **pré-répondues à « Je préfère ne pas dire »** : « Continuer → » n'est jamais bloqué et le coût de refuser est un clic, pas une friction. Les options sont des chips, volontairement différentes des boutons de réponse du questionnaire — répondre ici n'est pas répondre au Tour, et rien de ce qui s'y dit n'entre dans le score. Comme le ton (étape 5), le segment n'est **pas persisté** : le reperdre à un rechargement coûte deux clics.
+
+**Un demi-segment n'est pas un segment.** `segmentId` renvoie `null` dès qu'un des deux axes vaut « unknown ». Moyenner « B2B, stade inconnu » remettrait un prototype pré-lancement à côté d'une scale-up — exactement ce que la fonctionnalité existe pour empêcher. La conséquence est volontaire : quelqu'un qui ne répond qu'à une question n'alimente aucun agrégat et reçoit la moyenne globale.
+
+**La cascade est la vraie décision de conception.** `getBenchmarkFor` : moyenne du segment quand ce segment atteint le même seuil de 30, moyenne globale sinon, rien du tout si aucune des deux ne qualifie. Douze segments découpent le même trafic en douze, donc la plupart ne qualifieront pas avant longtemps ; retomber plutôt que masquer garde la ligne à l'écran pendant que les données se remplissent. Chaque lecture est cachée une heure, comme `stats/global` (discipline R-14) — et l'incrément `stats/<segment>` est avalé en cas d'échec pour la même raison qu'en R-20 : à ce moment-là le résultat est déjà écrit, et lever coûterait un 502 pour un Tour qui a réussi.
+
+**`segment_answered`** dit quels axes ont été renseignés (`both`/`stage`/`model`/`neither`) — sans ça, rien ne permettrait de juger si cet écran mérite sa place ou si tout le monde clique droit au travers. Ajouté au vocabulaire de `goatcounter.ts`, à la liste exacte que `goatcounter-api.ts` demande à GoatCounter (sinon le tableau de bord le sous-compterait en silence, R-11) et à la vue de déperdition de `/admin/stats`.
+
+**Le plancher de couverture de R2-10 a fait exactement son travail.** La première version laissait `getBenchmarkFor` (la cascade) et `segmentDetail` sans test : `vitest --coverage` est passé sous les seuils et la CI aurait rougi. Corrigé par six tests, jamais en baissant le seuil — c'est précisément le cas que ce plancher existe pour attraper (« un nouveau module qui reste sans test »), et c'est la première fois qu'il se déclenche depuis sa pose.
+
+**Vérifié en réel** : lint, tsc, **340 tests unitaires** (+6), `next build`, **142 specs Playwright** (+5). Non-vacuité prouvée finement : en retirant `segment` du corps du POST **et** l'événement, 3 des 5 nouvelles specs tombent, et les 2 qui ne portent que sur le placement de l'écran passent toujours — elles mesurent bien deux choses distinctes. Captures relues : EN desktop et FR mobile 390 px, `scrollWidth === clientWidth` dans les deux cas.
+
+**Piège d'outillage qui a coûté un aller-retour** : un build local **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` ne rend pas la balise du script, donc `trackEvent` ne fait rien et 5 specs analytics échouent — alors que la CI, qui pose `NEXT_PUBLIC_GOATCOUNTER_CODE: e2e-stub` au niveau du workflow, les voit passer. Le contraire du piège de R-11 (là, l'absence rendait une assertion *vacuously verte*) : ici elle rend des specs *faussement rouges*. Reconstruire avec la variable avant de conclure quoi que ce soit sur une spec analytics en local.
+
 ---
 
-## État du projet au 2026-09-06 — à lire en premier dans une nouvelle session
+## État du projet au 2026-09-08 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
 
 ### Où en est le produit
 
-En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue, avec les deux modes (Quick déterministe, Deep dive généré par Gemini). La revue technique et fonctionnelle du 2026-09-05 est **close** (`REVIEW.md`, 26 constats). **La seconde revue (`REVIEW-02.md`, 2026-09-06) est close côté code** : 24 constats livrés le jour même en 20 PR (#61 à #84), le 25ᵉ (R2-03, pages légales) est livré **en draft** sur la PR #79 et ne peut pas merger tant que `CONTACT_EMAIL` est vide dans `src/content/legal.ts`. Restent à Antoine : cette adresse, les cinq décisions produit du lot E (R2-26 à R2-30), la suppression des dix branches listées en R2-31, et surtout **la relecture de la copie** — c'est le plus gros bloc jamais produit ici (quinze pages de glossaire long, la page À propos, les deux pages légales, une vingtaine de chaînes d'interface), tout marqué `TODO: à relire (REVIEW-02)`.
+En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue, avec les deux modes (Quick déterministe, Deep dive généré par Gemini). La revue technique et fonctionnelle du 2026-09-05 est **close** (`REVIEW.md`, 26 constats). **La seconde revue (`REVIEW-02.md`) est close** : les 25 constats techniques et fonctionnels sont livrés (PR #61 à #92), et les cinq décisions produit du lot E ont été tranchées par Antoine le 2026-09-07 — R2-26 et R2-27 faits, R2-28 fait mais **livré fermé** derrière `METRICS_PAGE_ENABLED`, R2-29 parti en brief Claude Design (`design/DS-EXTENSION-BRIEF-02.md`, retour attendu), R2-30 volontairement reporté (la fenêtre Tour de France est un sujet de calendrier, pas de backlog).
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément) : 295 tests unitaires, 118 specs Playwright, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro. La PR #79 en ajoute 6 et 7 respectivement, dont **un test et quatre specs volontairement rouges** tant que l'adresse de contact manque.
+Ce qui reste appartient à Antoine : **la relecture de la copie** — le plus gros bloc jamais produit ici (quinze pages de glossaire long, la page À propos, les deux pages légales, l'écran de segmentation, une trentaine de chaînes d'interface), tout marqué `TODO: à relire (REVIEW-02)`. L'artifact « Bon à tirer du Tour » ([lien](https://claude.ai/code/artifact/bb3b1561-6c09-4dcb-af83-9fa7bf8752b9)) permet de le faire en plusieurs fois : chaque décision est écrite dans sa base (`reviews/<itemId>`) et se relit avec `read_db`. **Ce salon n'est pas réveillé quand Antoine avance dedans** (le service d'artifacts refuse les abonnements pour cette session) — il faut donc lire la base à la demande, pas attendre une notification.
+
+**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **340 tests unitaires**, **142 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 
@@ -1326,11 +1346,16 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | `/r/<id>` déborde de 37 px à 320 px | Hors contrat (DESIGN-BRIEF fixe 390 et exige 375-430) ; c'est le `PillarChip` | Une décision de design, pas un correctif évident. Antoine a choisi de laisser. |
 | `guidelines/` absent du bundle d'extension 01 | Le README du bundle l'annonce, l'archive ne le contenait pas | Sans conséquence à ce jour ; à demander si on en a besoin. |
 | Image OG : tokens recopiés à la main dans `src/lib/og/tokens.ts` | Deux images partagent désormais un seul fichier de constantes | Si `globals.css` change une couleur, la resynchroniser là. |
-| PR #79 (R2-03, pages légales) en draft | Rouge exprès : un test de garde et quatre specs exigent un `mailto:` | Antoine renseigne `CONTACT_EMAIL` (et, s'il les connaît, `FIRESTORE_REGION`, `GEMINI_TIER`), relit, puis rebase et merge. |
+| `/metrics` livrée fermée (R2-28) | Le code est en production, la page renvoie 404 tant que `METRICS_PAGE_ENABLED` n'est pas `"true"` dans Vercel, et se cache aussi d'elle-même sous 50 soumissions | Assez de volume pour que des chiffres publics soient crédibles. Poser la variable, rien d'autre à coder. |
+| R2-29 (rendre le roast visible avant la Q15) | Brief envoyé (`design/DS-EXTENSION-BRIEF-02.md` + captures) ; « ne rien faire » est une réponse acceptable | Le retour de Claude Design, à déposer sous `design/ds-extension-02-return/`. |
+| R2-30 (fenêtre Tour de France, SPEC.md §10) | Reporté d'un commun accord : pas d'urgence | À construire **avant** juin 2027, pour que le post parte pendant le vrai Tour et pas après. |
+| Dix branches distantes obsolètes (R2-31) | Auditées une par une, aucune ne porte de travail non repris | La suppression, dans l'interface GitHub, par Antoine. |
 | Dependabot #72 (TypeScript 7, ESLint 10, Vitest 5) | Laissée ouverte : `typescript-eslint` embarqué par `eslint-config-next` ne supporte pas TS 7 | Quand `eslint-config-next` suivra ; ou séparer les deux patchs des trois majeures. |
-| Copie du 2026-09-06 non relue | `glossary-deep.ts`, `about.ts`, `legal.ts`, chaînes de `dictionary.ts`/`nav-strings.ts`/`glossary-terms.ts`/`how-it-works.ts` | La relecture d'Antoine ; lever les marqueurs et mettre à jour les `updatedAt` des pages retouchées. |
+| Copie non relue | `glossary-deep.ts`, `about.ts`, `legal.ts`, `segments.ts`, `metrics.ts`, chaînes de `dictionary.ts`/`nav-strings.ts`/`glossary-terms.ts`/`how-it-works.ts` | La relecture d'Antoine, en cours dans l'artifact ; ensuite lever les marqueurs et mettre à jour les `updatedAt` des pages retouchées. |
 
-Le reste de ce qui est en attente côté code est dans `REVIEW-02.md`. Le lancement, le seeding et le payant sont le plan de croissance, qui appartient à Antoine ; le SEO, lui, est maintenant en grande partie dans le lot C de `REVIEW-02.md`.
+Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et le payant sont le plan de croissance, qui appartient à Antoine ; le SEO a été livré en grande partie par le lot C de cette revue.
+
+**Coût Gemini, mesuré plutôt qu'estimé au doigt mouillé** (clé passée en palier payant Tier 1 le 2026-09-07, avec plafonds de dépense) : un Deep dive = 4 générations (2 tons × 2 langues), prompt réel ~5 300 caractères, sorties mesurées par la sonde entre 765 et 2 801 tokens de réflexion et ~450-530 de réponse. Soit **~0,04 à 0,06 $ par Deep dive en 2026**, le double à partir de 2027 (les tarifs Flash doublent au 1ᵉʳ janvier). Le mode Quick ne coûte rien du tout — il n'appelle plus Gemini depuis SPEC-ADDENDUM-01 §0. La limite de 5 Deep dive/h/IP borne un abus à ~2,4 $/jour dans le pire cas.
 
 ### Les conventions qui comptent pour la suite
 
@@ -1352,9 +1377,9 @@ src/app/[locale]/        pages de contenu, statiques, une URL par langue
 src/app/(app)/           quiz, résultat, deep dive, admin — dynamiques, sans préfixe de langue
 src/app/api/             deux routes POST : création de soumission, Deep dive
 src/components/          core / brand / quiz / result / glossary — le design system porté
-src/content/             copie livrée par l'agent produit (validée) ; glossary-deep.ts, about.ts, legal.ts = premier jet de la revue 02, à relire
-src/lib/                 scoring (pur), i18n (dont meta.ts), seo (JSON-LD), og (polices + tokens des images de partage), gemini, submissions, analytics
-design/                  brief d'origine, brief d'extension 01, bundle de retour
-e2e/                     118 specs Playwright contre un build de production
+src/content/             copie livrée par l'agent produit (validée) ; glossary-deep.ts, about.ts, legal.ts, segments.ts, metrics.ts = premier jet de la revue 02, à relire
+src/lib/                 scoring (pur), i18n (dont meta.ts), seo (JSON-LD), og (polices + tokens des images de partage), gemini, submissions (dont segment.ts, benchmark.ts), metrics, analytics
+design/                  brief d'origine, briefs d'extension 01 et 02, bundle de retour de l'extension 01
+e2e/                     142 specs Playwright contre un build de production
 scripts/live/            sondes contre les vrais services, lancées à la main
 ```
