@@ -12,11 +12,30 @@ updates:
         dependency-type: production
       development:
         dependency-type: development
-    # Playwright is pinned on purpose (REVIEW.md R-07): `@axe-core/playwright`
-    # drags a newer `playwright-core` in beside `@playwright/test` otherwise.
     ignore:
+      # Playwright is pinned on purpose (REVIEW.md R-07): `@axe-core/playwright`
+      # drags a newer `playwright-core` in beside `@playwright/test` otherwise.
       - dependency-name: "@playwright/test"
       - dependency-name: "playwright-core"
+      # Three majors that were TRIED and cannot be taken yet (2026-09-08, from
+      # Dependabot #72). Each is a decision to revisit on its own, not a PR to
+      # rubber-stamp; the minor and patch lines still flow through.
+      #
+      # `typescript` 7: `typescript-eslint` (bundled by `eslint-config-next`)
+      # declares `typescript >=4.8.4 <6.1.0`. Re-check when eslint-config-next
+      # ships a typescript-eslint that accepts it.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      # `eslint` 10: `eslint-plugin-react` (also bundled by eslint-config-next)
+      # crashes on load — `context.getFilename is not a function`, an API
+      # ESLint 10 removed — and its peer range ends at 9. Same trigger.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      # `@types/node`: must track the runtime major, which is Node 22 on
+      # Vercel and in CI (`engines.node` in package.json). Bump it by hand
+      # when the runtime moves, never ahead of it.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
     schedule:

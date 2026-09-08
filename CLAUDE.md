@@ -1335,6 +1335,17 @@ Sonde production lancée **sur la branche avant merge**, contre la production qu
 
 **Piège de vérification, encore le même, encore attrapé de justesse** : avant de lancer la sonde j'ai voulu confirmer que R2-26 était bien déployé en cherchant une chaîne du segment dans les chunks de `/quiz`. La recherche est revenue vide et j'ai conclu « pas déployé » — alors que **mon motif était faux** : les chunks sont servis sous `/_next/static/immutable/chunks/`, pas `/_next/static/chunks/`. La boucle ne parcourait aucun fichier. Une vérification qui ne trouve rien doit d'abord prouver qu'elle a regardé quelque part : compter ce qu'on a examiné, pas seulement ce qu'on a trouvé.
 
+### Dependabot #72 : essayé plutôt que trié sur les plages de peer (2026-09-08)
+
+La PR groupée proposait six mises à jour de dev. Plutôt que d'accepter ou de refuser sur la foi des `peerDependencies`, chacune a été **installée et exercée** (lint, 340 tests, seuils de couverture, `tsc`, `vitest list` sur la config des sondes) :
+
+- **Vitest 5 + `@vitest/coverage-v8` 5 : pris.** Tout passe. Le comptage de couverture change légèrement (632 instructions contre 652 avec la v4 — la v5 compte un peu autrement), les seuils tiennent avec de la marge. `@types/react-dom` 19.2.7 pris aussi.
+- **ESLint 10 : refusé, et pas pour la raison attendue.** Les plages de peer de `typescript-eslint` et `eslint-config-next` acceptent le 10 ; c'est `eslint-plugin-react` (embarqué par `eslint-config-next`) qui **plante au chargement** : `context.getFilename is not a function`, une API qu'ESLint 10 a retirée. Lire les plages n'aurait rien montré ; installer, si.
+- **TypeScript 7 : refusé** — `typescript-eslint` déclare `<6.1.0`, et cette fois la plage dit vrai.
+- **`@types/node` 26 : refusé par principe** — les types doivent suivre le runtime (Node 22 sur Vercel et en CI), jamais le précéder.
+
+`dependabot.yml` ignore désormais ces trois **majeures** avec la raison en commentaire ; les mineures et patchs continuent d'arriver. Une majeure est une décision, pas une PR à valider par habitude. La #72 est fermée.
+
 ---
 
 ## État du projet au 2026-09-08 — à lire en premier dans une nouvelle session
@@ -1362,7 +1373,7 @@ Ce qui reste appartient à Antoine : **la relecture de la copie** — le plus gr
 | R2-29 (rendre le roast visible avant la Q15) | Brief envoyé (`design/DS-EXTENSION-BRIEF-02.md` + captures) ; « ne rien faire » est une réponse acceptable | Le retour de Claude Design, à déposer sous `design/ds-extension-02-return/`. |
 | R2-30 (fenêtre Tour de France, SPEC.md §10) | Reporté d'un commun accord : pas d'urgence | À construire **avant** juin 2027, pour que le post parte pendant le vrai Tour et pas après. |
 | 10 branches distantes obsolètes (R2-31) | Toutes issues de PR mergées avant l'activation de la suppression automatique, qui fonctionne depuis | La suppression, par Antoine, dans l'interface GitHub. |
-| Dependabot #72 (TypeScript 7, ESLint 10, Vitest 5) | Laissée ouverte : `typescript-eslint` embarqué par `eslint-config-next` ne supporte pas TS 7 | Quand `eslint-config-next` suivra ; ou séparer les deux patchs des trois majeures. |
+| TypeScript 7 et ESLint 10 | Tous deux bloqués par des paquets embarqués dans `eslint-config-next` (`typescript-eslint` refuse TS ≥ 6.1 ; `eslint-plugin-react` plante sur ESLint 10). Dependabot les ignore en majeure depuis le 2026-09-08 | Quand `eslint-config-next` suivra. Re-tester en installant, pas en lisant les plages de peer : c'est l'essai qui a montré qu'ESLint 10 plante. |
 | Copie non relue | `glossary-deep.ts`, `about.ts`, `legal.ts`, `segments.ts`, `metrics.ts`, chaînes de `dictionary.ts`/`nav-strings.ts`/`glossary-terms.ts`/`how-it-works.ts` | La relecture d'Antoine, en cours dans l'artifact ; ensuite lever les marqueurs et mettre à jour les `updatedAt` des pages retouchées. |
 
 Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et le payant sont le plan de croissance, qui appartient à Antoine ; le SEO a été livré en grande partie par le lot C de cette revue.
