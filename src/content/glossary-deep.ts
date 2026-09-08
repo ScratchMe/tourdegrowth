@@ -812,8 +812,8 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
   acquisition: {
     formula: {
       expression: t(
-        "New customers from a channel = visitors it sends × sign-up rate × sign-up-to-customer rate",
-        "Nouveaux clients d'un canal = visiteurs qu'il envoie × taux d'inscription × taux inscription → client",
+        "New paying customers from a channel = visitors it sends × sign-up rate (visitor → sign-up) × conversion rate (sign-up → paying customer)",
+        "Nouveaux clients payants d'un canal = visiteurs qu'il envoie × taux d'inscription (visiteur → inscrit) × taux de conversion (inscrit → client payant)",
       ),
       terms: [
         {
@@ -824,17 +824,17 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
           ),
         },
         {
-          symbol: t("Sign-up rate", "Taux d'inscription"),
+          symbol: t("Sign-up rate (visitor → sign-up)", "Taux d'inscription (visiteur → inscrit)"),
           meaning: t(
-            "Visitors who create an account, per channel. It measures how well the landing page keeps the promise the channel made: the same page converts differently for someone arriving from a friend's link and from a cold ad.",
-            "Les visiteurs qui créent un compte, par canal. Il mesure si la page d'accueil tient la promesse que le canal a faite : la même page convertit différemment pour quelqu'un qui arrive du lien d'un ami et d'une publicité froide.",
+            "The share of visitors who create an account, per channel — nothing more: a sign-up is not yet an active user, and not yet a customer. It measures how well the landing page keeps the promise the channel made: the same page converts differently for someone arriving from a friend's link and from a cold ad.",
+            "La part des visiteurs qui créent un compte, par canal — rien de plus : un inscrit n'est pas encore un utilisateur actif, ni un client. Il mesure si la page d'accueil tient la promesse que le canal a faite : la même page convertit différemment pour quelqu'un qui arrive du lien d'un ami et d'une publicité froide.",
           ),
         },
         {
-          symbol: t("Sign-up-to-customer", "Inscription → client"),
+          symbol: t("Conversion rate (sign-up → paying customer)", "Taux de conversion (inscrit → client payant)"),
           meaning: t(
-            "The part acquisition doesn't own — activation and pricing do — yet the only one that turns a channel's volume into revenue. A channel that brings thousands of sign-ups who never activate is a cost, not a source.",
-            "La partie qui n'appartient pas à l'acquisition — mais à l'activation et au pricing — et pourtant la seule qui transforme le volume d'un canal en revenu. Un canal qui amène des milliers d'inscrits qui ne s'activent jamais est un coût, pas une source.",
+            "The share of sign-ups who end up paying. \"Customer\" here means paying, not merely active: an active user is what activation measures; a customer is what makes a channel's cost worth it — which is why CAC below is a cost per customer, not per sign-up. This step is the part acquisition doesn't own — activation and pricing do — yet the only one that turns a channel's volume into revenue. A channel that brings thousands of sign-ups who never activate is a cost, not a source.",
+            "La part des inscrits qui finissent par payer. « Client » veut dire ici payant, pas seulement actif : l'utilisateur actif, c'est ce que mesure l'activation ; le client, c'est ce qui rentabilise le coût d'un canal — d'où le CAC plus bas, un coût par client et non par inscrit. Cette étape est la partie qui n'appartient pas à l'acquisition — mais à l'activation et au pricing — et pourtant la seule qui transforme le volume d'un canal en revenu. Un canal qui amène des milliers d'inscrits qui ne s'activent jamais est un coût, pas une source.",
           ),
         },
       ],
