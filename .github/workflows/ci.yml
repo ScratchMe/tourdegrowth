@@ -67,7 +67,16 @@ jobs:
       # REVIEW.md R-07. The specs run against `next start`, so they need the
       # build above; Playwright's own webServer starts it.
       - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+        # `--with-deps` runs `apt-get update` over EVERY apt source baked into
+        # the runner image, including Google's Chrome repository, which this
+        # job never installs from (Playwright downloads its own Chromium). On
+        # 2026-09-09 that repository served an index whose hash did not match
+        # its Release file for a good half hour, and two CI runs died there
+        # before a single test ran. Dropping the source first keeps the job's
+        # only apt dependency the Ubuntu archive itself.
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/google-chrome*
+          npx playwright install --with-deps chromium
 
       - name: End-to-end tests
         run: npx playwright test

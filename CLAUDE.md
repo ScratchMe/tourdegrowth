@@ -1364,6 +1364,8 @@ Acquisition, retouchée la veille (les deux taux de la formule nommés, « clien
 
 **Vérifié en réel** : lint, tsc, 340 tests (dont le plancher de 500 mots par terme et par langue, et la cohérence FR/EN des `updatedAt`), un seul `TODO: à relire` restant dans `src/` et c'est le bon.
 
+**Piège d'outillage, le soir même : la CI rouge sans qu'une ligne de code y soit pour rien.** Deux runs de suite morts à l'étape `playwright install --with-deps chromium`, avant le premier test — lint, `tsc`, les 340 tests et `next build` verts juste au-dessus dans le même log. Cause : `--with-deps` fait un `apt-get update` sur **toutes** les sources apt de l'image du runner, et le dépôt Chrome de Google (préinstallé sur `ubuntu-latest`, jamais utilisé par ce job — Playwright télécharge son propre Chromium) servait un index dont l'empreinte ne correspondait pas à son fichier Release, de façon stable pendant au moins une demi-heure. Une relance n'y pouvait rien, et il n'y en a eu qu'une, comme le veut la règle. Correctif dans `ci.yml` : supprimer ce fichier de source avant l'installation, pour que la seule dépendance apt du job soit l'archive Ubuntu elle-même. À retenir : quand une CI meurt à l'installation, lire **quel** dépôt a échoué avant de relancer — si c'est un dépôt qu'on n'utilise pas, relancer ne sert à rien, l'enlever si.
+
 ---
 
 ## État du projet au 2026-09-09 — à lire en premier dans une nouvelle session
