@@ -184,7 +184,7 @@ Trois lots, dans l'ordre. Chaque item dit qui fait quoi, et pourquoi il est là 
 ### Ordre et dépendances
 
 1. **A4 d'abord** (code seul, une PR) — pour mesurer un avant.
-2. **Brief 03** (A1, A3, B2 + R2-29, B4) — rédigé par la session, **envoyé par Antoine** à Claude Design. Remplace le brief 02.
+2. **Brief 03** (A1, A2 côté affichage, A3, B2 + R2-29, B4) — **écrit** (`design/DS-EXTENSION-BRIEF-03.md` + 10 captures dans `design/ds-extension-03/`), **à envoyer par Antoine** à Claude Design. Remplace et absorbe le brief 02.
 3. **A2, la bibliothèque d'actions** — premier jet par la session, relecture Antoine après la relecture en cours. Peut être écrite pendant que le design travaille : les deux ne dépendent pas l'un de l'autre.
 4. **Port du retour design** + A1/A2/A3/B2/B4 dans le code, en une extension 03.
 5. **B1, B3** — deux petites PR de copie, quand Antoine tranche.
@@ -201,7 +201,7 @@ Antoine a répondu **oui aux sept**, avec une précision sur la 6 (« oui avec p
 
 Réponses, dans l'ordre : 1 oui · 2 oui, sans ton (60 chaînes) · 3 oui · 4 oui · 5 oui · 6 oui, avec la prochaine action sur l'image · 7 oui.
 
-Ce que ça débloque, dans l'ordre : **A4** (fait, PR #102) → **brief 03** rédigé par la session, envoyé par Antoine → **A2** (premier jet session, relecture Antoine) → port du retour design → B1/B3 → C1 → C2.
+Ce que ça débloque, dans l'ordre : **A4** (fait, PR #102) → **brief 03** (`design/DS-EXTENSION-BRIEF-03.md`, **écrit**, à envoyer par Antoine à Claude Design) → **A2** (premier jet session, relecture Antoine) → port du retour design → B1/B3 → C1 → C2.
 
 <details>
 <summary>Les questions telles qu'elles ont été posées</summary>
