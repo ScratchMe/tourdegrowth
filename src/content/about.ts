@@ -94,4 +94,35 @@ export const ABOUT = {
   cta: { fr: "Faire mon Tour →", en: "Take the Tour →" },
 } as const;
 
+/**
+ * REVIEW-03.md B3 — one founder sentence on the landing, below the fold,
+ * pointing at `/about`. A sentence and a link, never a section.
+ *
+ * The quote is the same clause as in `ABOUT.intro` above — capitalised and
+ * given a full stop, since it stands alone here — rather than a rewrite, so
+ * the landing and `/about` cannot drift into two slightly different claims.
+ * A unit test pins that: it compares the two ignoring case and terminal
+ * punctuation, which is exactly the freedom taken and no more. It lives here
+ * rather than in `dictionary.ts` because it is Antoine's voice, which is
+ * what this file holds.
+ *
+ * Distinct on purpose from the site footer's "A side project by Antoine
+ * Berthaud — Senior Growth PM", which sits a few centimetres below: the
+ * footer says who made it, this says why.
+ *
+ * TODO: à relire — l'attribution et le libellé du lien sont nouveaux
+ * (la phrase citée, elle, est déjà validée). Convention 6.
+ */
+export const LANDING_PULL = {
+  quote: {
+    fr: "La façon la plus rapide d'expliquer ce qu'est le travail de growth, c'est de tendre un miroir.",
+    en: "The fastest way to explain what growth work actually is, is to hand someone a mirror.",
+  },
+  attribution: {
+    fr: "Antoine Berthaud, Senior Growth PM",
+    en: "Antoine Berthaud, Senior Growth PM",
+  },
+  cta: { fr: "Pourquoi j'ai construit ça →", en: "Why I built this →" },
+} satisfies Record<string, Translatable>;
+
 export const REPO_URL = "https://github.com/ScratchMe/tourdegrowth";

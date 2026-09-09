@@ -78,9 +78,46 @@
   margin-bottom: 30px;
 }
 
+/* REVIEW-03.md B1 — the deliverable, in the scanned voice (mono meta) so it
+   reads as a fact about the product rather than a second subtitle. The
+   subtitle's own 30px bottom margin is moved onto this line instead, so the
+   rhythm down to the CTA row is unchanged. */
+.promise {
+  font: var(--meta-sm);
+  letter-spacing: 0.04em;
+  color: var(--text-body);
+  max-width: 440px;
+  margin: -18px 0 30px;
+}
+
 .ctaRow {
   display: flex;
   gap: 14px;
+}
+
+/* REVIEW-03.md B3 — one sentence and a link, never a section: no card, no
+   border box, just a rule above it and the reading measure. */
+.founder {
+  margin-top: 72px;
+  padding-top: 26px;
+  border-top: var(--border-rule);
+  max-width: 620px;
+}
+
+.founderQuote {
+  font: var(--body-lg);
+  color: var(--text-body);
+  margin: 0 0 10px;
+}
+
+.founderMeta {
+  font: var(--meta-sm);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.founderLink {
+  color: var(--text-link);
 }
 
 .heroRight {
@@ -155,6 +192,14 @@
 
   .subtitle {
     max-width: none;
+  }
+
+  .promise {
+    max-width: none;
+  }
+
+  .founder {
+    margin-top: 48px;
   }
 
   .ctaRow {

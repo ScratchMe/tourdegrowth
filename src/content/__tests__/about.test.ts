@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ABOUT } from "../about";
+import { ABOUT, LANDING_PULL } from "../about";
 import { computeScore } from "@/lib/scoring/score";
 import { QUESTIONS } from "../copy-library";
 
@@ -31,6 +31,28 @@ describe("the About page's worked example matches the scoring engine", () => {
     expect([...points].sort((a, b) => b - a)).toEqual([20, 7, 0]);
     for (const locale of ["fr", "en"] as const) {
       expect(ABOUT.scoringSection.rules[0]![locale]).toMatch(/20, 7/);
+    }
+  });
+});
+
+/**
+ * REVIEW-03.md B3 — the landing's founder line must stay the same claim as
+ * the About intro. Two places saying almost the same thing is how a product
+ * ends up with two slightly different stories about why it exists.
+ */
+describe("LANDING_PULL", () => {
+  const loosen = (s: string) => s.toLowerCase().replace(/[.:…]+\s*$/, "").trim();
+
+  for (const locale of ["fr", "en"] as const) {
+    it(`quotes a clause that really is in the About intro (${locale})`, () => {
+      expect(loosen(ABOUT.intro[locale])).toContain(loosen(LANDING_PULL.quote[locale]));
+    });
+  }
+
+  it("is one sentence and a short link, never a section", () => {
+    for (const locale of ["fr", "en"] as const) {
+      expect(LANDING_PULL.quote[locale].length).toBeLessThan(140);
+      expect(LANDING_PULL.cta[locale].length).toBeLessThan(40);
     }
   });
 });
