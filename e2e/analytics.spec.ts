@@ -1,4 +1,4 @@
-import { answerAllQuestions, expect, stubSubmissions, test, trackedEvents } from "./helpers";
+import { answerAllQuestions, expect, seedOwnedResult, stubSubmissions, test, trackedEvents } from "./helpers";
 
 /**
  * REVIEW.md R-11 — before this, only the two ENDS of the funnel were
@@ -77,6 +77,44 @@ test.describe("funnel instrumentation", () => {
     const events = await trackedEvents(page);
     expect(events.filter((e) => e.startsWith("tone_selected"))).toEqual(["tone_selected/neutral"]);
     expect(events.filter((e) => e.startsWith("submission_completed"))).toEqual(["submission_completed/neutral"]);
+  });
+
+  /**
+   * REVIEW-03.md A4 — the two return signals. This tool's own Retention is
+   * the one thing a one-shot self-assessment has no natural reason to
+   * produce, and nothing measured it: `quiz_started` counts a first Tour and
+   * a fourth one identically.
+   */
+  test("a device that already holds a result counts a return and a retake", async ({ page }) => {
+    await stubSubmissions(page);
+    await page.goto("/en");
+    await seedOwnedResult(page);
+
+    await page.goto("/en");
+    await expect(page.getByTestId("last-result-link")).toBeVisible();
+    // Polled, never a fixed wait: this event is fired at mount, so it may be
+    // queued until `count.js` finishes loading (see `trackEvent`).
+    await expect.poll(() => trackedEvents(page)).toEqual(["landing_return"]);
+
+    await page.goto("/quiz");
+    await page.getByTestId("answer-option").first().click();
+    // Alongside `quiz_started`, never instead of it: that path is the
+    // denominator of every drop-off ratio on the dashboard.
+    expect(await trackedEvents(page)).toEqual(["quiz_started", "retake_started"]);
+  });
+
+  test("a first-time device counts neither a return nor a retake", async ({ page }) => {
+    await stubSubmissions(page);
+    await page.goto("/en");
+    await page.evaluate(() => localStorage.clear());
+
+    await page.goto("/en");
+    await expect(page.getByTestId("last-result-link")).toHaveCount(0);
+    expect(await trackedEvents(page)).toEqual([]);
+
+    await page.goto("/quiz");
+    await page.getByTestId("answer-option").first().click();
+    expect(await trackedEvents(page)).toEqual(["quiz_started"]);
   });
 
   test("a visitor redirected off a Deep dive URL never counts as a start", async ({ page }) => {

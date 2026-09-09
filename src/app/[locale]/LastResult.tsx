@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { LANDING_RETURN_EVENT, trackEvent } from "@/lib/analytics/goatcounter";
 import { latestProgression, type Progression } from "@/lib/quiz/progression";
 import { progressionSentence, type ProgressionTemplates } from "@/lib/quiz/progression-copy";
 import { loadStoredResults, type StoredResult } from "@/lib/quiz/storage";
@@ -39,12 +40,23 @@ export interface LastResultProps {
 export function LastResult({ withScore, withoutScore, progression }: LastResultProps) {
   const [last, setLast] = useState<StoredResult | null>(null);
   const [progress, setProgress] = useState<Progression | null>(null);
+  const returnCounted = useRef(false);
 
   useEffect(() => {
     const results = loadStoredResults();
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLast(results[0] ?? null);
     setProgress(latestProgression(results));
+
+    // REVIEW-03.md A4 — "someone with a result loaded the landing again".
+    // Not part of the value-action ratio: it is the denominator the 30-day
+    // nudge (C1) will need before anyone can say whether that nudge works.
+    // The ref guards against a double-invoked effect counting one visit
+    // twice; the effect itself runs once per load.
+    if (results.length > 0 && !returnCounted.current) {
+      returnCounted.current = true;
+      trackEvent(LANDING_RETURN_EVENT);
+    }
   }, []);
 
   if (!last) return null;

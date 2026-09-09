@@ -22,12 +22,13 @@ import {
   minutesLeft,
   stageOfQuestion,
 } from "@/lib/quiz/navigation";
-import { trackEvent } from "@/lib/analytics/goatcounter";
+import { RETAKE_STARTED_EVENT, trackEvent } from "@/lib/analytics/goatcounter";
 import {
   clearRefId,
   isOwnResult,
   loadRefId,
   loadStoredAnswers,
+  loadStoredResults,
   rememberResult,
   saveRefId,
   saveStoredAnswers,
@@ -143,6 +144,15 @@ export default function QuizPage() {
     const firstTimeAnswered = answers[currentQuestion.id] === undefined;
     if (firstTimeAnswered && Object.keys(answers).length === 0) {
       trackEvent("quiz_started");
+      // REVIEW-03.md A4 — alongside, never instead of, `quiz_started`: that
+      // path is the denominator of every drop-off ratio since R-11, and
+      // splitting it into `first`/`retake` details would restart it from
+      // zero. A retake is a Tour begun on a device that already holds a
+      // result, which is this tool's own Retention — the one thing a
+      // one-shot self-assessment has no natural reason to produce.
+      if (loadStoredResults().length > 0) {
+        trackEvent(RETAKE_STARTED_EVENT);
+      }
     }
 
     const nextAnswers: Answers = { ...answers, [currentQuestion.id]: optionIndex };

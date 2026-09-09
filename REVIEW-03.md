@@ -143,9 +143,10 @@ Trois lots, dans l'ordre. Chaque item dit qui fait quoi, et pourquoi il est là 
 *Pourquoi* : on ne partage bien que ce qu'on a vu. Aujourd'hui l'auteur découvre sa carte dans LinkedIn.
 *Qui* : brief 03 (placement) ; code : session.
 
-**A4. Mesurer la valeur, pas seulement la complétion.**
-*Quoi* : deux événements — `quiz_started/retake` (un démarrage avec un résultat antérieur sur l'appareil) et `landing_return` (une visite de la landing avec un résultat antérieur) — et un chiffre dans `/admin/stats` : **taux d'action de valeur** = (partages + Deep dive démarrés + « fais ton propre Tour » + re-tests) ÷ résultats créés. C'est la North Star de la revue (§24), simplifiée.
+**A4. Mesurer la valeur, pas seulement la complétion.** — **Fait** (PR #97)
+*Quoi* : deux événements — `retake_started` et `landing_return` — et un chiffre dans `/admin/stats` : **actions de valeur par résultat** = (partages + « fais ton propre Tour » + Deep dive démarrés + re-tests) ÷ résultats créés. C'est la North Star de la revue (§24), simplifiée.
 *Pourquoi* : sans ce chiffre, on ne saura pas si le lot A a changé quoi que ce soit. À poser **avant** A1-A3, pour avoir un avant.
+*Trois écarts par rapport à ce plan, assumés à la livraison* : (1) `retake_started` est un **événement à part** et non un détail `quiz_started/retake` — `quiz_started` est le dénominateur de tous les taux de déperdition depuis R-11, et un suffixe l'aurait figé pour en démarrer deux nouveaux ; (2) le chiffre n'est **pas un taux** et n'est pas affiché en pourcentage — un même résultat peut être partagé deux fois, ouvert par deux visiteurs *et* mener à un Deep dive, donc il dépasse légitimement 1 (l'appeler un taux referait l'erreur de R2-01) ; (3) les deux moitiés viennent de GoatCounter, jamais une de Firestore — un visiteur qui bloque les scripts est invisible pour l'un et visible pour l'autre.
 *Qui* : session, code seul, immédiat.
 
 ### Lot B — La landing promet la priorité
@@ -194,7 +195,16 @@ Pendant la relecture en cours, la session peut faire seule : A4, le brief 03, le
 
 ---
 
-## 6. Décisions à prendre (Antoine)
+## 6. Décisions — **prises le 2026-09-09**
+
+Antoine a répondu **oui aux sept**, avec une précision sur la 6 (« oui avec prochaine action » : l'action figure bien sur l'image) et sur la 2 (**sans variante de ton**). Le plan du §5 est donc adopté tel quel ; l'ordre du §« Ordre et dépendances » s'applique.
+
+Réponses, dans l'ordre : 1 oui · 2 oui, sans ton (60 chaînes) · 3 oui · 4 oui · 5 oui · 6 oui, avec la prochaine action sur l'image · 7 oui.
+
+Ce que ça débloque, dans l'ordre : **A4** (fait, PR #97) → **brief 03** rédigé par la session, envoyé par Antoine → **A2** (premier jet session, relecture Antoine) → port du retour design → B1/B3 → C1 → C2.
+
+<details>
+<summary>Les questions telles qu'elles ont été posées</summary>
 
 Dans l'ordre où elles débloquent le reste. Ma recommandation entre parenthèses.
 
@@ -207,3 +217,5 @@ Dans l'ordre où elles débloquent le reste. Ma recommandation entre parenthèse
 7. **La relance sur l'appareil à 30 jours** — oui / non. *(Oui, c'est trois lignes et c'est la seule forme possible.)*
 
 Si les réponses sont celles entre parenthèses, la prochaine PR est A4, et le document suivant est le brief 03.
+
+</details>

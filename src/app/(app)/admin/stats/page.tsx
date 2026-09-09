@@ -95,10 +95,28 @@ function FunnelBreakdown({ window }: { window: FunnelWindow }) {
             Deep dive completed — {stats.deepDiveCompleted} (
             {ratio(stats.deepDiveCompleted, stats.deepDiveStarted)} of starts)
           </li>
+          <li>
+            Came back to the landing with a result on the device — {stats.landingReturn}
+          </li>
+          <li>
+            Retook the Tour — {stats.retakeStarted} ({ratio(stats.retakeStarted, stats.landingReturn)} of those
+            returns)
+          </li>
         </ul>
       ) : (
         <p className={styles.detail}>Unavailable — {window.error}</p>
       )}
+      {stats ? (
+        <p className={styles.detail}>
+          {/* REVIEW-03.md A4 — the one number that says whether a result did
+              anything at all. Not a percentage on purpose: one result can be
+              shared twice, opened by two visitors AND lead to a Deep dive. */}
+          Value actions per result —{" "}
+          <strong>{stats.valueActionsPerResult === null ? "—" : stats.valueActionsPerResult.toFixed(2)}</strong> (
+          {stats.shares} shares + {stats.ownTourClicks} visitor Tours + {stats.deepDiveStarted} deep dives +{" "}
+          {stats.retakeStarted} retakes) / {stats.submissionsCompleted} results
+        </p>
+      ) : null}
     </Card>
   );
 }
