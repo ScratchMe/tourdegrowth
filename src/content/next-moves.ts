@@ -46,10 +46,14 @@ import type { Translatable } from "@/lib/i18n/translatable";
  * project plan oversells what fifteen questions can know. Address the reader
  * as "tu" in French, matching the rest of the product.
  *
- * TODO: à relire — premier jet de la session de code, pas de l'agent produit.
- * C'est le premier texte du produit qui dit à quelqu'un quoi faire de son
- * entreprise, donc il mérite la même relecture ligne à ligne que le
- * glossaire long.
+ * Relu et validé par Antoine le 2026-09-09, les 31 actions une par une
+ * (« Bon à tirer du Tour », bloc « Prochaine action » : 16 cartes approuvées
+ * sans réserve). C'est le premier texte du produit qui dit à quelqu'un quoi
+ * faire de son entreprise, d'où la relecture ligne à ligne.
+ *
+ * Une action ajoutée ici après cette date repart au statut « à relire » —
+ * la marquer explicitement plutôt que de la glisser dans un fichier
+ * approuvé (convention 6 de CLAUDE.md).
  */
 
 /** The point values an action can answer: a partial answer, or none at all. */
