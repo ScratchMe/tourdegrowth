@@ -61,13 +61,13 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   acquisition: {
     ...GLOSSARY_TERMS.acquisition,
     deep: GLOSSARY_DEEP.acquisition,
-    updatedAt: "2026-09-06", // R2-11, lot 3
+    updatedAt: "2026-09-08", // R2-11, lot 3 — formula terms reworded after review (PR #99)
     extended: {
       fr: "L'acquisition couvre tous les canaux par lesquels quelqu'un arrive chez toi pour la première fois : SEO, publicité payante, bouche-à-oreille, contenu, communautés, partenariats. Le piège classique : juger un canal uniquement sur le volume qu'il apporte, sans se demander s'il est reproductible et si son coût est connu (voir CAC). Un canal qui a bien marché une fois par chance n'est pas une stratégie d'acquisition, c'est un coup de chance. Et l'acquisition seule ne dit rien de la santé du produit — un pic de nouveaux visiteurs qui n'activent jamais n'est qu'un chiffre de vanité.",
       en: "Acquisition covers every channel through which someone finds you for the first time: SEO, paid ads, word of mouth, content, communities, partnerships. The classic trap: judging a channel purely on volume, without asking whether it's repeatable and whether its cost is even known (see CAC). A channel that worked once by luck isn't an acquisition strategy, it's a lucky break. And acquisition alone says nothing about product health — a spike of new visitors who never activate is just a vanity number.",
     },
     related: ["cac", "growth-loop", "activation", "aarrr"],
-    // TODO: à relire (REVIEW-02) — R2-08. The English definition is 55
+    // Relu et validé par Antoine (2026-09-09) — R2-08. The English definition is 55
     // characters, too short for a search snippet; the French one is fine.
     metaDescription: {
       fr: "La façon dont de nouveaux utilisateurs ou clients découvrent ton produit pour la première fois.",
@@ -107,7 +107,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   revenue: {
     ...GLOSSARY_TERMS.revenue,
     deep: GLOSSARY_DEEP.revenue,
-    updatedAt: "2026-09-06", // R2-11, lot 3
+    updatedAt: "2026-09-09", // R2-11, lot 3 — expansion term reworded after review
     extended: {
       fr: "Ce pilier ne juge pas le montant encaissé, mais si le modèle de revenu a été réellement testé face à de vrais clients — beaucoup de produits ont un plan de monétisation « pour plus tard » qui n'a jamais rencontré une carte bancaire. Une référence souvent citée dans le SaaS est un ratio LTV:CAC autour de 3:1 comme seuil de viabilité (voir LTV et CAC) — à prendre comme repère directionnel, pas comme une règle absolue selon ton marché. L'upsell et le cross-sell sont les deux leviers les plus rapides une fois le modèle de base validé.",
       en: "This pillar doesn't judge how much money comes in, but whether the revenue model has actually been tested against real customers — plenty of products have a monetization plan for \"later\" that has never met a credit card. A commonly cited SaaS rule of thumb is an LTV:CAC ratio around 3:1 as a viability threshold (see LTV and CAC) — treat it as a directional benchmark, not an absolute rule for every market. Upsell and cross-sell are the fastest levers once the base model is validated.",
@@ -117,7 +117,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   "aha-moment": {
     ...GLOSSARY_TERMS["aha-moment"],
     deep: GLOSSARY_DEEP["aha-moment"],
-    updatedAt: "2026-09-06", // R2-11, lot 4
+    updatedAt: "2026-09-09", // R2-11, lot 4 — cohort definition and three FR sentences reworded after review
     extended: {
       fr: "L'exemple le plus cité vient de Facebook : les équipes croissance avaient trouvé qu'un nouvel utilisateur qui atteignait 7 amis en 10 jours restait presque toujours par la suite — ce seuil précis est devenu leur boussole d'onboarding pendant des années. Trouver son propre moment « aha » demande de regarder en arrière, pas en avant : quelle action, faite tôt, les utilisateurs qui sont restés ont-ils tous en commun ? C'est rarement la fonctionnalité la plus mise en avant dans l'interface — souvent une action secondaire que personne ne pousse assez.",
       en: "The most-cited example comes from Facebook: growth teams found that a new user who reached 7 friends in 10 days almost always stuck around afterward — that specific threshold became their onboarding compass for years. Finding your own aha moment means looking backward, not forward: what early action do all the users who stayed have in common? It's rarely the most prominently featured part of the interface — often a secondary action nobody pushes hard enough.",
@@ -163,7 +163,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       en: "Standard formula, often written K: the average number of invitations sent per user, multiplied by their conversion rate. K > 1 means each user brings in more than one other on average — growth that feeds itself without spending more on acquisition. In practice, a sustained K > 1 is rare and valuable; most products instead aim for a K that meaningfully lowers effective CAC without claiming pure virality. This tool's own growth dashboard computes its K-factor continuously, using exactly this formula, on real completed analyses.",
     },
     related: ["referral", "growth-loop", "north-star-metric"],
-    // TODO: à relire (REVIEW-02) — R2-08. The French definition runs to 164
+    // Relu et validé par Antoine (2026-09-09) — R2-08. The French definition runs to 164
     // characters; search engines cut around 160.
     metaDescription: {
       fr: "Le nombre moyen de nouveaux utilisateurs qu'un utilisateur existant amène par le partage — au-dessus de 1, la croissance s'auto-alimente.",
@@ -203,7 +203,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   "north-star-metric": {
     ...GLOSSARY_TERMS["north-star-metric"],
     deep: GLOSSARY_DEEP["north-star-metric"],
-    updatedAt: "2026-09-06", // R2-11, lot 5
+    updatedAt: "2026-09-09", // R2-11, lot 5 — the "doubling test" paragraph reworded after review
     extended: {
       fr: "Les exemples les plus connus : Airbnb a longtemps suivi les « nuits réservées » plutôt que le nombre d'inscriptions, Facebook a suivi les utilisateurs actifs mensuels plutôt que le nombre de comptes créés. Le point commun : dans les deux cas, la métrique capture de la valeur réellement délivrée, pas une action facile à gonfler artificiellement. Une bonne North Star Metric doit répondre à une question simple : si elle grimpe sans que rien d'autre ne bouge, est-ce que l'entreprise va vraiment mieux ? Si la réponse n'est pas clairement oui, ce n'est pas la bonne métrique.",
       en: "The best-known examples: Airbnb tracked \"nights booked\" for years rather than sign-ups, Facebook tracked monthly active users rather than accounts created. The common thread: in both cases the metric captures value actually delivered, not an easily-inflated vanity action. A good North Star Metric has to answer one simple question: if it goes up and nothing else changes, is the business actually better off? If the answer isn't a clear yes, it's the wrong metric.",

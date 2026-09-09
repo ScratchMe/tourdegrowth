@@ -1346,9 +1346,27 @@ La PR groupée proposait six mises à jour de dev. Plutôt que d'accepter ou de 
 
 `dependabot.yml` ignore désormais ces trois **majeures** avec la raison en commentaire ; les mineures et patchs continuent d'arriver. Une majeure est une décision, pas une PR à valider par habitude. La #72 est fermée.
 
+### Le bon à tirer est signé : 55 éléments relus, 3 retouches, un oubli (2026-09-09)
+
+Antoine a passé les 55 éléments du document de relecture en trois séances (7, 8 et 9 septembre). **52 validés tels quels**, dont les quinze pages de glossaire long à quatre près, la page À propos écrite dans sa voix, les deux pages légales section par section, l'écran de segmentation et la page de métriques. Trois retours de fond, tous en français, tous appliqués le jour même :
+
+- **Moment « aha »** — quatre remarques, dont une qui a trouvé une **erreur dans l'anglais aussi** : « cycle naturel × 3 (le troisième mois pour un outil hebdomadaire) » — trois cycles hebdomadaires, c'est la troisième semaine, pas le troisième mois, et la définition des « partis » (« à la fin du premier mois ») chevauchait celle des fidèles. Les deux cohortes sont maintenant définies autour du cycle dans les deux langues. Plus deux traductions trop littérales (« plié vers », « un moment qui allait à un outil solo ») réécrites, et sa reformulation « chaque écran soit rapproche l'utilisateur du moment « aha », soit disparaît » reprise telle quelle.
+- **North Star** — le paragraphe du « test du doublement » ne se lisait pas ; réécrit avec « churner » en franglais comme il le propose, et le même verbe pour les trois exemples pour que le parallèle se voie.
+- **Revenue** — « le terme qu'un playbook d'expansion existe pour faire grandir » : « terme » voulait dire un terme de l'identité du MRR, et se lisait comme « le mot ». Il proposait « signe », qui aurait changé le sens ; c'est « la composante de l'identité », dit dans la réponse.
+
+Acquisition, retouchée la veille (les deux taux de la formule nommés, « client » explicité comme payant plutôt que remplacé par « utilisateur actif » — l'exemple calcule un CAC par client), a été **revalidée** sur sa nouvelle version.
+
+**Marqueurs levés partout, `updatedAt` bougé pour les quatre termes retouchés** (acquisition au 8, les trois autres au 9 ; le reste du glossaire garde le 6, sa date de mise en ligne). Le sitemap dit donc la vérité page par page, ce qui était l'objet de R2-08.
+
+**L'oubli.** Les six chaînes de progression de R2-27 n'ont jamais été dans le document : il a été construit avant que R2-27 soit livré, et quand j'y ai ajouté R2-26 et R2-28 le lendemain, j'ai oublié celui-là. Elles gardent leur marqueur, elles sont ajoutées au document (56ᵉ élément) et soumises en clair dans le salon. Le point à retenir : **le document de relecture doit être reconstruit depuis les marqueurs présents dans le code** (`grep "TODO: à relire"`), pas depuis la mémoire de ce qui a été livré — c'est le grep qui a trouvé l'oubli, pas moi.
+
+**Réponses dans le document plutôt que dans le salon.** Les trois retours ont chacun leur réponse écrite sous la note d'Antoine, dans un bloc distinct (champ `reply`, rendu à part de son champ de note depuis le 8 : coller une réponse dans sa zone de texte l'avait rendue invisible sous le pli). La conversation de relecture vit avec la décision, pas dans un fil séparé.
+
+**Vérifié en réel** : lint, tsc, 340 tests (dont le plancher de 500 mots par terme et par langue, et la cohérence FR/EN des `updatedAt`), un seul `TODO: à relire` restant dans `src/` et c'est le bon.
+
 ---
 
-## État du projet au 2026-09-08 — à lire en premier dans une nouvelle session
+## État du projet au 2026-09-09 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
 
@@ -1358,7 +1376,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **Une troisième pièce attend une décision : `REVIEW-03.md`** (2026-09-08), l'analyse d'une revue externe d'expert growth — recoupements avec le brief R2-29, critique, et une direction en trois lots avec sept décisions à prendre. Sa thèse : le mode Quick ne donne aucune action depuis SPEC-ADDENDUM-01 §0, et c'est le seul vrai P0. **Rien n'en est engagé tant qu'Antoine n'a pas tranché** ; le brief R2-29 (`design/DS-EXTENSION-BRIEF-02.md`) est en attente pour la même raison — il serait fondu dans un brief 03 si la direction est adoptée.
 
-Ce qui reste appartient à Antoine : **la relecture de la copie** — le plus gros bloc jamais produit ici (quinze pages de glossaire long, la page À propos, les deux pages légales, l'écran de segmentation, une trentaine de chaînes d'interface), tout marqué `TODO: à relire (REVIEW-02)`. L'artifact « Bon à tirer du Tour » ([lien](https://claude.ai/code/artifact/bb3b1561-6c09-4dcb-af83-9fa7bf8752b9)) permet de le faire en plusieurs fois : chaque décision est écrite dans sa base (`reviews/<itemId>`) et se relit avec `read_db`. **Ce salon n'est pas réveillé quand Antoine avance dedans** (le service d'artifacts refuse les abonnements pour cette session) — il faut donc lire la base à la demande, pas attendre une notification.
+**La relecture de la copie est faite** (2026-09-09) : 55 éléments passés par Antoine dans l'artifact « Bon à tirer du Tour » ([lien](https://claude.ai/code/artifact/bb3b1561-6c09-4dcb-af83-9fa7bf8752b9), décisions dans sa base `reviews/<itemId>`), 52 validés tels quels, 3 retouchés le jour même (aha-moment, north-star-metric, revenue) plus acquisition la veille. Tous les marqueurs `TODO: à relire (REVIEW-02)` sont levés, **sauf un** : les six chaînes de progression de R2-27, que la session avait oublié de mettre dans le document — soumises à part, marqueur en place jusqu'à sa réponse.
 
 **Chiffres de référence** (à comparer, pas à recopier aveuglément) : **340 tests unitaires**, **142 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
@@ -1376,7 +1394,7 @@ Ce qui reste appartient à Antoine : **la relecture de la copie** — le plus gr
 | R2-30 (fenêtre Tour de France, SPEC.md §10) | Reporté d'un commun accord : pas d'urgence | À construire **avant** juin 2027, pour que le post parte pendant le vrai Tour et pas après. |
 | 10 branches distantes obsolètes (R2-31) | Toutes issues de PR mergées avant l'activation de la suppression automatique, qui fonctionne depuis | La suppression, par Antoine, dans l'interface GitHub. |
 | TypeScript 7 et ESLint 10 | Tous deux bloqués par des paquets embarqués dans `eslint-config-next` (`typescript-eslint` refuse TS ≥ 6.1 ; `eslint-plugin-react` plante sur ESLint 10). Dependabot les ignore en majeure depuis le 2026-09-08 | Quand `eslint-config-next` suivra. Re-tester en installant, pas en lisant les plages de peer : c'est l'essai qui a montré qu'ESLint 10 plante. |
-| Copie non relue | `glossary-deep.ts`, `about.ts`, `legal.ts`, `segments.ts`, `metrics.ts`, chaînes de `dictionary.ts`/`nav-strings.ts`/`glossary-terms.ts`/`how-it-works.ts` | La relecture d'Antoine, en cours dans l'artifact ; ensuite lever les marqueurs et mettre à jour les `updatedAt` des pages retouchées. |
+| Six chaînes de progression (R2-27) à relire | Le seul bloc absent du bon à tirer du 2026-09-09 ; marqueur `TODO: à relire` maintenu sur `UI_STRINGS.progression` | Un mot d'Antoine ; puis lever le marqueur. |
 
 Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et le payant sont le plan de croissance, qui appartient à Antoine ; le SEO a été livré en grande partie par le lot C de cette revue.
 

@@ -10,9 +10,9 @@ import type { Translatable } from "./translatable";
 export const NAV_STRINGS = {
   howItWorks: { en: "How it works", fr: "Comment ça marche" },
   glossary: { en: "Glossary", fr: "Glossaire" },
-  // TODO: à relire (REVIEW-02) — R2-04.
+  // Relu et validé par Antoine (2026-09-09) — R2-04.
   about: { en: "About", fr: "À propos" },
-  // TODO: à relire (REVIEW-02) — R2-03.
+  // Relu et validé par Antoine (2026-09-09) — R2-03.
   privacy: { en: "Privacy", fr: "Confidentialité" },
   terms: { en: "Terms", fr: "Conditions" },
 } as const satisfies Record<string, Translatable>;

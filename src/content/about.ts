@@ -6,9 +6,9 @@ import type { Translatable } from "@/lib/i18n/translatable";
  * fifteen questions measure, exactly how the score is computed, where AI is
  * used and where it is not, and how to reach the author.
  *
- * TODO: à relire (REVIEW-02) — every string in this file is a FIRST DRAFT
- * written in Antoine's voice by the coding session, not copy delivered by
- * the product agent. The facts (experience, employers) come from
+ * Reviewed and approved by Antoine as written (2026-09-09). Every string
+ * in this file was a first draft written in his voice by the coding
+ * session, not copy delivered by the product agent. The facts (experience, employers) come from
  * `antoine-credit.ts`; the arithmetic mirrors `lib/scoring/score.ts` and
  * SPEC.md §6 and is checked by a test. The voice is his to approve.
  */

@@ -11,8 +11,8 @@ import type { Translatable } from "@/lib/i18n/translatable";
  * plainly is what makes the rest believable — hiding it would cost exactly
  * the credibility the page exists to earn.
  *
- * TODO: à relire (REVIEW-02) — premier jet de la session de code, comme
- * about.ts et glossary-deep.ts.
+ * Relu et validé par Antoine (2026-09-09). Premier jet de la session de
+ * code, comme about.ts et glossary-deep.ts.
  */
 const t = (fr: string, en: string): Translatable => ({ fr, en });
 
