@@ -12,12 +12,12 @@ export { tc, type Translatable };
  * Filled in screen-by-screen as the build reaches them (see CLAUDE.md's
  * build plan) — sections not built yet simply don't exist here.
  *
- * Toute la copie de ce fichier a été relue et validée par Antoine
- * (2026-09-06). Les blocs qui portaient un `TODO: à relire` — landing FR,
- * écran 404, benchmark, dernier résultat, dépliant du score, texte de
- * partage — n'en portent plus. Une nouvelle chaîne ajoutée ici après cette
- * date repart au statut « à relire » : le marquer explicitement plutôt que
- * de la glisser dans un fichier désormais approuvé.
+ * Toute la copie de ce fichier a été relue et validée par Antoine — une
+ * première fois le 2026-09-06, puis les blocs ajoutés par la revue 02 le
+ * 2026-09-09 (bon à tirer, 55 éléments). Une seule exception, marquée
+ * `TODO: à relire` : les six chaînes de progression (R2-27). Une nouvelle
+ * chaîne ajoutée ici après ces dates repart au statut « à relire » : le
+ * marquer explicitement plutôt que de la glisser dans un fichier approuvé.
  */
 export const UI_STRINGS = {
   /**
@@ -50,7 +50,7 @@ export const UI_STRINGS = {
     h1Line2: { en: "your growth ", fr: "" },
     h1Accent: { en: "stall?", fr: "cale-t-elle ?" },
     subtitle: {
-      // TODO: à relire (REVIEW-02) — R2-12: "AARRR" added. The framework's name
+      // Relu et validé par Antoine (2026-09-09) — R2-12: "AARRR" added. The framework's name
       // appeared nowhere in the landing's visible copy, only in its metadata.
       en: "A guided AARRR check-up across Acquisition, Activation, Retention, Referral and Revenue — scored, explained, and built to share.",
       fr: "Un diagnostic AARRR guidé sur l'Acquisition, l'Activation, la Retention, le Referral et le Revenue — noté, expliqué, et pensé pour être partagé.",
@@ -86,7 +86,7 @@ export const UI_STRINGS = {
    */
   benchmark: {
     line: { en: "Average of every Tour: {score}/100", fr: "Moyenne de tous les Tours : {score}/100" },
-    // TODO: à relire (REVIEW-02) — R2-26. Shown instead of the line above
+    // Relu et validé par Antoine (2026-09-09) — R2-26. Shown instead of the line above
     // once the reader's own segment has enough Tours of its own; `{segment}`
     // is built from content/segments.ts ("B2B, first customers").
     segmentLine: {
@@ -144,7 +144,7 @@ export const UI_STRINGS = {
   glossary: {
     definitionLabelTemplate: { en: "Definition: {term}", fr: "Définition : {term}" },
     closeLabel: { en: "Close", fr: "Fermer" },
-    // TODO: à relire (REVIEW-02) — R2-13. The popover's way out, to the term's own page.
+    // Relu et validé par Antoine (2026-09-09) — R2-13. The popover's way out, to the term's own page.
     moreLabel: { en: "Learn more →", fr: "En savoir plus →" },
   },
 
@@ -152,7 +152,7 @@ export const UI_STRINGS = {
    * content/how-it-works.ts (title/body copy lives there). */
   howItWorksPage: {
     exampleQuestionLabel: { en: "Example question:", fr: "Exemple de question :" },
-    // TODO: à relire (REVIEW-02) — R2-17. Eyebrow of each pillar card: the
+    // Relu et validé par Antoine (2026-09-09) — R2-17. Eyebrow of each pillar card: the
     // stage number, since the <h2> right under it already names the pillar.
     stageEyebrowTemplate: { en: "Stage {n} of 5", fr: "Étape {n} sur 5" },
   },
@@ -167,7 +167,7 @@ export const UI_STRINGS = {
     backToIndex: { en: "← Glossary", fr: "← Glossaire" },
     inPracticeLabel: { en: "In practice", fr: "En pratique" },
     relatedLabel: { en: "Related terms", fr: "Termes liés" },
-    // TODO: à relire (REVIEW-02) — R2-11. Section labels of the long-form
+    // Relu et validé par Antoine (2026-09-09) — R2-11. Section labels of the long-form
     // term pages; the sections themselves are content/glossary-deep.ts.
     formulaLabel: { en: "The formula", fr: "La formule" },
     exampleLabel: { en: "Worked example", fr: "Exemple chiffré" },
@@ -235,7 +235,7 @@ export const UI_STRINGS = {
     message1: { en: "Reviewing your answers...", fr: "Relecture de tes réponses..." },
     message2: { en: "Calculating your stage times...", fr: "Calcul de tes temps par étape..." },
     message3: { en: "Drafting your race report...", fr: "Rédaction de ton rapport de course..." },
-    // TODO: à relire (REVIEW-02) — R2-09. Shown once the three messages have
+    // Relu et validé par Antoine (2026-09-09) — R2-09. Shown once the three messages have
     // run their course and the Deep dive is still generating: a real Deep
     // dive was measured at ~70 s in production, and nothing on this screen
     // said so. Not a fourth message (the three segments are the design), a
@@ -272,13 +272,13 @@ export const UI_STRINGS = {
     badge: { en: "Deep dive", fr: "Deep dive" },
     priorityMoveLabel: { en: "Priority move", fr: "Action prioritaire" },
     priorityMoveLockedLabel: { en: "Priority move — locked", fr: "Action prioritaire — verrouillée" },
-    // TODO: à relire (REVIEW-02) — R2-09. Under the last screen's primary
+    // Relu et validé par Antoine (2026-09-09) — R2-09. Under the last screen's primary
     // button, BEFORE the wait starts: the one thing nobody had been told.
     waitNotice: {
       en: "About a minute — we write your recommendations in both tones and both languages.",
       fr: "Environ une minute — on rédige tes recommandations dans les deux tons et les deux langues.",
     },
-    // TODO: à relire (REVIEW-02) — R2-03. Under the free-text field: where
+    // Relu et validé par Antoine (2026-09-09) — R2-03. Under the free-text field: where
     // the text goes, that it is not kept, and that it can show through in
     // the recommendation on a page the person may share (a fact the first
     // live probe established — see CLAUDE.md, 2026-09-05).
@@ -295,7 +295,8 @@ export const UI_STRINGS = {
    * because "+8" and "-8" have to read differently at a glance; a flat
    * result gets its own sentence rather than "+0", which reads like a bug.
    *
-   * TODO: à relire (REVIEW-02) — R2-27.
+   * TODO: à relire (REVIEW-02) — R2-27. Le seul bloc qui n'était pas dans
+ * le bon à tirer du 2026-09-09 (oubli de la session) ; soumis à Antoine à part.
    */
   progression: {
     landingUp: { en: "Previous Tour: {prev} → {score}, +{delta}", fr: "Tour précédent : {prev} → {score}, +{delta}" },
@@ -326,7 +327,7 @@ export const UI_STRINGS = {
     ctaShareCopied: { en: "Link copied", fr: "Lien copié" },
     ctaShareRoast: { en: "Share my roast", fr: "Partager mon roast" },
     ctaAgain: { en: "Take the Tour again", fr: "Refaire le Tour" },
-    // TODO: à relire (REVIEW-02) — R2-02. The three strings a VISITOR gets in
+    // Relu et validé par Antoine (2026-09-09) — R2-02. The three strings a VISITOR gets in
     // the CTA slot instead of the owner's pair: what the Tour is, their way
     // into it, and sharing someone else's result.
     visitorPitch: {
@@ -411,7 +412,7 @@ export const UI_STRINGS = {
       fr: "Le vocabulaire growth et AARRR expliqué en mots simples — CAC, LTV, coefficient viral, growth loop, et plus.",
     },
     glossaryTermSuffix: { en: "Tour de Growth Glossary", fr: "Glossaire Tour de Growth" },
-    // TODO: à relire (REVIEW-02) — R2-08. `/quiz` used to inherit the root
+    // Relu et validé par Antoine (2026-09-09) — R2-08. `/quiz` used to inherit the root
     // title and no description while being the most-linked page of the site.
     quizTitle: { en: "The Tour — 15 questions, 3 minutes — Tour de Growth", fr: "Le Tour — 15 questions, 3 minutes — Tour de Growth" },
     quizDescription: {

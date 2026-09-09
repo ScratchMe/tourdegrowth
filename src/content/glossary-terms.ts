@@ -89,7 +89,7 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
     },
   },
   cac: {
-    // TODO: à relire (REVIEW-02) — R2-16: the French head query is "coût
+    // Relu et validé par Antoine (2026-09-09) — R2-16: the French head query is "coût
     // d'acquisition client" and it appeared in neither the H1 nor the title.
     term: { fr: "CAC — Coût d'Acquisition Client", en: "CAC" },
     definition: {
@@ -98,7 +98,7 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
     },
   },
   ltv: {
-    // TODO: à relire (REVIEW-02) — R2-16.
+    // Relu et validé par Antoine (2026-09-09) — R2-16.
     term: { fr: "LTV — Lifetime Value", en: "LTV" },
     definition: {
       fr: "Lifetime Value : la valeur totale qu'un client génère en moyenne sur toute sa relation avec ton produit.",
@@ -141,7 +141,7 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
     },
   },
   "north-star-metric": {
-    // TODO: à relire (REVIEW-02) — R2-16.
+    // Relu et validé par Antoine (2026-09-09) — R2-16.
     term: { fr: "North Star Metric — métrique phare", en: "North Star Metric" },
     definition: {
       fr: "L'indicateur unique qu'une équipe choisit de suivre en priorité, parce qu'il capture le mieux la valeur réelle livrée aux utilisateurs.",

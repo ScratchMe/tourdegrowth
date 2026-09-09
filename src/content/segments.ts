@@ -16,7 +16,7 @@ import type { Translatable } from "@/lib/i18n/translatable";
  * two profiling questions would trade a completion for a statistic. An
  * unanswered axis simply falls the reader back to the global average.
  *
- * TODO: à relire (REVIEW-02) — R2-26, premier jet de la session de code.
+ * Relu et validé par Antoine (2026-09-09). R2-26, premier jet de la session de code.
  */
 const t = (fr: string, en: string): Translatable => ({ fr, en });
 

@@ -17,7 +17,7 @@ export interface HowItWorksPillarBlock {
 
 export const HOW_IT_WORKS = {
   title: { fr: "Comment fonctionne Tour de Growth", en: "How Tour de Growth works" },
-  // TODO: à relire (REVIEW-02) — R2-12: "AARRR" added. The page explains the
+  // Relu et validé par Antoine (2026-09-09) — R2-12: "AARRR" added. The page explains the
   // five stages of the framework and its meta description promises "the AARRR
   // framework explained", but the word never appeared in the page itself.
   intro: {

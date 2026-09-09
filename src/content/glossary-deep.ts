@@ -24,7 +24,9 @@ import type { GlossaryTermId } from "./glossary-terms";
  * LTV:CAC rule of thumb, CAC payback under 12 months for SMB SaaS, monthly
  * churn compounding), always with their caveat, never a made-up statistic.
  *
- * TODO: à relire (REVIEW-02) — R2-11, les cinq lots : cac, ltv, churn ;
+ * Relu et validé par Antoine (2026-09-09), avec quatre retouches appliquées
+ * le jour même (acquisition, aha-moment, north-star-metric, revenue — voir
+ * `updatedAt` dans glossary.ts). Écrit en cinq lots (R2-11) : cac, ltv, churn ;
  * retention, activation, viral-coefficient ; acquisition, referral, revenue ;
  * aarrr, aha-moment, onboarding ; growth-loop, north-star-metric,
  * upsell-cross-sell. Premier jet
@@ -1080,7 +1082,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
           symbol: t("Expansion MRR", "MRR d'expansion"),
           meaning: t(
             "Existing customers paying more: upgrades, added seats, usage, cross-sold modules. The term an expansion playbook exists to grow — and the one that can make net revenue churn negative.",
-            "Des clients existants qui paient plus : montées en gamme, sièges ajoutés, usage, modules vendus en complément. Le terme qu'un playbook d'expansion existe pour faire grandir — et celui qui peut rendre le churn revenu net négatif.",
+            "Des clients existants qui paient plus : montées en gamme, sièges ajoutés, usage, modules vendus en complément. La composante de l'identité qu'un playbook d'expansion existe pour faire grandir — et celle qui peut rendre le churn revenu net négatif.",
           ),
         },
         {
@@ -1333,8 +1335,8 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         {
           symbol: t("Retained vs. churned", "Fidèles vs partis"),
           meaning: t(
-            "Retained: still active after your natural cycle × 3 (month three for a weekly tool). Churned: gone by the end of month one. The middle is noise; leave it out of the comparison.",
-            "Fidèles : encore actifs après ton cycle naturel × 3 (le troisième mois pour un outil hebdomadaire). Partis : disparus à la fin du premier mois. Le milieu est du bruit ; laisse-le hors de la comparaison.",
+            "Retained: still active after three of your natural cycles (week three for a weekly tool). Churned: gone before the end of the first one. The middle is noise; leave it out of the comparison.",
+            "Fidèles : encore actifs après trois de tes cycles naturels (la troisième semaine pour un outil hebdomadaire). Partis : disparus avant la fin du premier. Le milieu est du bruit ; laisse-le hors de la comparaison.",
           ),
         },
         {
@@ -1355,7 +1357,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       steps: [
         t(
           "Facebook, around 2008: users who reached 7 friends within 10 days retained far better than those who didn't. The number was found in the data, not chosen; the whole onboarding was then bent towards \"find people you know\".",
-          "Facebook, vers 2008 : les utilisateurs qui atteignaient 7 amis en 10 jours restaient bien mieux que les autres. Le chiffre a été trouvé dans les données, pas choisi ; tout l'onboarding a ensuite été plié vers « retrouve des gens que tu connais ».",
+          "Facebook, vers 2008 : les utilisateurs qui atteignaient 7 amis en 10 jours restaient bien mieux que les autres. Le chiffre a été trouvé dans les données, pas choisi ; tout l'onboarding a ensuite été réorienté vers « retrouve des gens que tu connais ».",
         ),
         t(
           "A two-person invoicing app, today: 800 sign-ups over a quarter. Retained at month three: 140. Churned in month one: 480.",
@@ -1400,11 +1402,11 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       ),
       t(
         "Redesign onboarding backwards from it: every screen either moves the user towards the moment or gets cut. Empty states, sample data and templates exist to shorten the path to it.",
-        "Reconçois l'onboarding à rebours depuis lui : chaque écran rapproche l'utilisateur du moment ou disparaît. Les états vides, les données d'exemple et les modèles existent pour raccourcir le chemin qui y mène.",
+        "Reconçois l'onboarding à rebours depuis lui : chaque écran soit rapproche l'utilisateur du moment « aha », soit disparaît. Les états vides, les données d'exemple et les modèles existent pour raccourcir le chemin qui y mène.",
       ),
       t(
         "Revisit it once a year or when the product changes shape. A moment that fit a single-player tool stops fitting once teams become the customer.",
-        "Revois-le une fois par an ou quand le produit change de forme. Un moment qui allait à un outil solo ne va plus quand les équipes deviennent le client.",
+        "Revois-le une fois par an ou quand le produit change de forme. Un moment « aha » défini pour un outil individuel cesse d'être le bon le jour où le client devient une équipe.",
       ),
     ],
     inTheTour: {
@@ -1732,7 +1734,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       ],
       note: t(
         "The test of a good North Star is a single question: if this number doubles and nothing else changes, is the business clearly better off? Sign-ups fail it (they could all churn). Nights booked passes it. So does \"weekly active teams\" for a collaboration tool — as long as \"active\" means doing the valuable thing.",
-        "Le test d'une bonne North Star tient en une question : si ce chiffre double et que rien d'autre ne change, l'entreprise va-t-elle clairement mieux ? Les inscriptions échouent (elles pourraient toutes partir). Les nuits réservées réussissent. « Équipes actives par semaine » aussi, pour un outil de collaboration — tant qu'« actif » veut dire faire la chose qui a de la valeur.",
+        "Le test d'une bonne North Star tient en une question : si ce chiffre double et que rien d'autre ne change, l'entreprise va-t-elle clairement mieux ? Le « nombre d'inscriptions » ne fonctionne pas : tous ces inscrits pourraient churner le lendemain. Les « nuits réservées » fonctionnent. « Équipes actives par semaine » fonctionne aussi, pour un outil de collaboration — tant qu'« actif » veut dire faire la chose qui a de la valeur.",
       ),
     },
     example: {

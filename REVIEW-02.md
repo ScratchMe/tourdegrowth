@@ -40,18 +40,18 @@ La colonne **Autonomie** dit ce que chaque item attend d'Antoine : **Auto** = je
 | Lot | ID | Titre | Type | Effort | Autonomie | Statut |
 |---|---|---|---|---|---|---|
 | **A — Crédibilité devant le public visé** | R2-01 | Le K-factor ne peut jamais être entre 0 et 1 | F+T | S | Auto | **Fait** (PR #62, 2026-09-06) |
-| | R2-02 | La page de résultat parle au propriétaire, jamais au visiteur | F | S | Relecture | **Fait** (PR #63, 2026-09-06) — 3 chaînes à relire |
-| | R2-03 | Ni mentions légales ni information RGPD | F | M | Toi (1 info) + Relecture | **Fait** (PR #79, mergée le 2026-09-06) — `CONTACT_EMAIL` renseignée (`contact@tourdegrowth.com`), `FIRESTORE_REGION` = `eu` et `GEMINI_TIER` = `paid` posés depuis ; copie à relire |
-| | R2-04 | Rien ne rattache le contenu à Antoine : ni page, ni entité | F | M | Relecture | **Fait** (PR #78, 2026-09-06) — toute la copie de `content/about.ts` est un premier jet à relire |
+| | R2-02 | La page de résultat parle au propriétaire, jamais au visiteur | F | S | Relecture | **Fait** (PR #63, 2026-09-06) — copie relue le 2026-09-09 |
+| | R2-03 | Ni mentions légales ni information RGPD | F | M | Toi (1 info) + Relecture | **Fait** (PR #79, mergée le 2026-09-06) — `CONTACT_EMAIL` renseignée (`contact@tourdegrowth.com`), `FIRESTORE_REGION` = `eu` et `GEMINI_TIER` = `paid` posés depuis ; copie relue le 2026-09-09 |
+| | R2-04 | Rien ne rattache le contenu à Antoine : ni page, ni entité | F | M | Relecture | **Fait** (PR #78, 2026-09-06) — toute la copie de `content/about.ts` relue et validée telle quelle le 2026-09-09 |
 | | R2-05 | Wordmark et sélecteur de langue collés sur les 36 pages de contenu | F+T | XS | Auto | **Fait** (PR #61, 2026-09-06) |
 | **B — Boucle de partage et mesure** | R2-06 | Métadonnées : descriptions anglaises sur les URL françaises, titre sans mot-clé | F | S | Relecture | **Fait pour l'essentiel par la PR #58** (autre session) — le reliquat (descriptions de terme, `/quiz`) est repris dans R2-08 |
 | | R2-07 | Zéro balise Open Graph sur les pages de contenu | F | M | Auto | **Fait** (PR #58, autre session ; vérifié sur le build le 2026-09-06) |
-| | R2-08 | `/quiz` et `/deep-dive/[id]` indexables ; `lastmod` absent du sitemap | F+T | S | Auto | **Fait** (PR #74, 2026-09-06) — reliquat de R2-06 inclus ; 4 chaînes à relire |
-| | R2-09 | Le Deep dive dure ~70 s et rien ne prévient | F | S | Relecture | **Fait** (PR #73, 2026-09-06) — 2 chaînes à relire |
+| | R2-08 | `/quiz` et `/deep-dive/[id]` indexables ; `lastmod` absent du sitemap | F+T | S | Auto | **Fait** (PR #74, 2026-09-06) — reliquat de R2-06 inclus ; copie relue le 2026-09-09 |
+| | R2-09 | Le Deep dive dure ~70 s et rien ne prévient | F | S | Relecture | **Fait** (PR #73, 2026-09-06) — copie relue le 2026-09-09 |
 | | R2-10 | Le calcul de la métrique reine n'a aucun test | T | S | Auto | **Fait** (PR #62, 2026-09-06) |
-| **C — Contenu de référence** | R2-11 | Glossaire : 76 à 105 mots par terme, contre 600 à 1 500 chez ceux qui rangent | F | L | Relecture (lourde) | **Fait — les cinq lots** (PR #80 : `cac`, `ltv`, `churn` ; #81 : `retention`, `activation`, `viral-coefficient` ; #82 : `acquisition`, `referral`, `revenue` ; #83 : `aarrr`, `aha-moment`, `onboarding` ; #84 : `growth-loop`, `north-star-metric`, `upsell-cross-sell` — 2026-09-06). Les quinze pages font 770 à 970 mots en EN et 910 à 1 140 en FR, contre 76 à 105 avant. **Tout est un premier jet à relire ligne à ligne** — c'est le plus gros bloc de copie de la revue |
-| | R2-12 | « AARRR » n'apparaît ni sur la landing ni sur `/how-it-works` | F | S | Relecture | **Fait** (PR #76, 2026-09-06) — 2 chaînes retouchées, à relire |
-| | R2-13 | Maillage interne : le glossaire n'est lié depuis aucune page qui a de l'autorité | F | S/M | Auto | **Fait** (PR #76, 2026-09-06) — 1 chaîne à relire |
+| **C — Contenu de référence** | R2-11 | Glossaire : 76 à 105 mots par terme, contre 600 à 1 500 chez ceux qui rangent | F | L | Relecture (lourde) | **Fait — les cinq lots** (PR #80 : `cac`, `ltv`, `churn` ; #81 : `retention`, `activation`, `viral-coefficient` ; #82 : `acquisition`, `referral`, `revenue` ; #83 : `aarrr`, `aha-moment`, `onboarding` ; #84 : `growth-loop`, `north-star-metric`, `upsell-cross-sell` — 2026-09-06). Les quinze pages font 770 à 970 mots en EN et 910 à 1 140 en FR, contre 76 à 105 avant. **Tout relue et validée telle quelle le 2026-09-09 ligne à ligne** — c'est le plus gros bloc de copie de la revue |
+| | R2-12 | « AARRR » n'apparaît ni sur la landing ni sur `/how-it-works` | F | S | Relecture | **Fait** (PR #76, 2026-09-06) — 2 chaînes retouchées, relues le 2026-09-09 |
+| | R2-13 | Maillage interne : le glossaire n'est lié depuis aucune page qui a de l'autorité | F | S/M | Auto | **Fait** (PR #76, 2026-09-06) — copie relue le 2026-09-09 |
 | | R2-14 | Le dictionnaire bilingue entier et tout le glossaire partent dans le bundle client | T | S | Auto | **Fait** (PR #75, 2026-09-06) — gardé par un test statique |
 | | R2-15 | Structured data : un seul bloc JSON-LD, identique en FR et en EN | F | M | Auto | **Fait** (PR #58 pour la localisation et `author`, PR #77 pour le reste, 2026-09-06) |
 | | R2-16 | Titres FR non localisés là où la requête française diffère | F | S | Relecture | **Fait** (PR #76, 2026-09-06) — `x-default` laissé sur `/en`, voir la section |
@@ -64,9 +64,9 @@ La colonne **Autonomie** dit ce que chaque item attend d'Antoine : **Auto** = je
 | | R2-23 | Aucun `error.tsx` : une panne rend le document nu de Next | T | S | Auto | **Fait** (PR #65, 2026-09-06) — limite : une panne dans le shell initial reste rendue côté client, voir CLAUDE.md |
 | | R2-24 | Petites dettes : `rawPoints` public, logs Gemini non tronqués, pas de Dependabot | T | XS | Auto | **Fait** (PR #66, 2026-09-06) |
 | | R2-25 | Le stderr de Playwright n'est pas vide, donc plus lu | T | XS | Auto | **Fait en partie** (PR #65) — la ligne Firebase ne vient plus que de la spec qui l'annonce ; `NoFallbackError` est à Next |
-| **E — Décisions produit (Antoine)** | R2-26 | Segmenter le benchmark : « la moyenne des SaaS B2B à ton stade » | F | M | Toi | **Fait** (PR #92, 2026-09-08) — copie de `content/segments.ts` à relire |
-| | R2-27 | Historique de progression : les données sont déjà sur l'appareil | F | S | Toi | **Fait** (PR #91, 2026-09-08) — 6 chaînes à relire |
-| | R2-28 | Une page de métriques publique : l'outil montre son propre AARRR | F | M | Toi | **Fait, fermée** (PR #88, 2026-09-07) — `METRICS_PAGE_ENABLED` à basculer dans Vercel quand tu veux l'ouvrir ; copie de `content/metrics.ts` à relire |
+| **E — Décisions produit (Antoine)** | R2-26 | Segmenter le benchmark : « la moyenne des SaaS B2B à ton stade » | F | M | Toi | **Fait** (PR #92, 2026-09-08) — copie de `content/segments.ts` relue le 2026-09-09 |
+| | R2-27 | Historique de progression : les données sont déjà sur l'appareil | F | S | Toi | **Fait** (PR #91, 2026-09-08) — 6 chaînes **encore à relire** — absentes du bon à tirer du 2026-09-09 (oubli de la session), soumises à Antoine à part |
+| | R2-28 | Une page de métriques publique : l'outil montre son propre AARRR | F | M | Toi | **Fait, fermée** (PR #88, 2026-09-07) — `METRICS_PAGE_ENABLED` à basculer dans Vercel quand tu veux l'ouvrir ; copie de `content/metrics.ts` relue le 2026-09-09 |
 | | R2-29 | Le roast est le crochet viral et il est invisible avant la 15ᵉ question | F | S | Toi | **Brief envoyé** (PR #89, 2026-09-07) — `design/DS-EXTENSION-BRIEF-02.md` ; en attente du retour Claude Design |
 | | R2-30 | Fenêtre Tour de France (SPEC.md §10) : à caler dans le calendrier | F | S | Toi | **Tranché** (Antoine, 2026-09-07) : pas d'urgence, à caler dans le plan de croissance pour juin 2027 |
 | **F — Hygiène du dépôt** | R2-31 | Branches distantes obsolètes : audit fait, suppression à faire | T | XS | Toi | **Audit fait** (PR #61) — **10 branches à supprimer au 2026-09-08**, toutes issues de PR mergées ; la suppression automatique fonctionne (les branches mergées depuis le 6 disparaissent seules) |
@@ -397,13 +397,13 @@ Ces cinq points ne sont pas des correctifs. Ce sont les leviers qui, à mon avis
 
 ### R2-26 — Segmenter le benchmark : « la moyenne des SaaS B2B à ton stade »
 
-**Type** F · **Effort** M · **Statut** **Fait** (PR #92, 2026-09-08) — copie de `content/segments.ts` à relire
+**Type** F · **Effort** M · **Statut** **Fait** (PR #92, 2026-09-08) — copie de `content/segments.ts` relue le 2026-09-09
 
 « Moyenne de tous les Tours : 61/100 » (R-20) est un chiffre honnête mais faible : un indie hacker pré-lancement et une scale-up n'ont rien à se dire à travers cette moyenne. Une ou deux questions de contexte en mode Quick — stade (pré-lancement / premiers clients / >100 clients / >1 000) et modèle (B2B / B2C / marketplace) — permettraient « la moyenne des SaaS B2B à ton stade », qui est un chiffre qu'on a envie de partager et de battre. Deux champs sur la soumission, un document `stats/<segment>` par combinaison (même mécanisme que `stats/global`), le même seuil de 30. C'est aussi la matière première d'un contenu « État de la croissance des produits early-stage, édition 2027 » — le format classique par lequel un outil devient une référence citée. Le coût : deux questions de plus dans un parcours vendu « 3 minutes », et une conversation avec l'agent produit sur leur formulation.
 
 ### R2-27 — Historique de progression : les données sont déjà sur l'appareil
 
-**Type** F · **Effort** S · **Statut** **Fait** (PR #91, 2026-09-08) — 6 chaînes à relire
+**Type** F · **Effort** S · **Statut** **Fait** (PR #91, 2026-09-08) — 6 chaînes **encore à relire** — absentes du bon à tirer du 2026-09-09 (oubli de la session), soumises à Antoine à part
 
 SPEC.md §5 liste « historique de progression » en fast-follow. Depuis R-01/R-20, `tdg.results.v1` garde déjà jusqu'à 20 résultats datés avec leur score. Il manque seulement l'affichage : « Ton Tour précédent : 58 → 66 » sur la landing (à côté du dernier score) et sur le résultat (sous le score). Quasi gratuit, et c'est la rétention de l'outil lui-même — la raison de revenir dans trois mois, qui n'existe pas aujourd'hui. À décider : voulu ou non, et si oui, la copie.
 

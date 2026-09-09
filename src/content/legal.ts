@@ -16,9 +16,9 @@ import type { Translatable } from "@/lib/i18n/translatable";
  * in `app/root-shell.tsx`. A promise the code doesn't keep is worse than
  * no page at all.
  *
- * TODO: à relire (REVIEW-02) — first draft by the coding session. Three
- * facts need Antoine before this ships (see `CONTACT_EMAIL`, `FIRESTORE_REGION`
- * and `GEMINI_TIER` below).
+ * Reviewed and approved by Antoine section by section (2026-09-09). First
+ * draft by the coding session; the three facts it needed from him are set
+ * (`CONTACT_EMAIL`, `FIRESTORE_REGION`, `GEMINI_TIER` below).
  */
 
 /**
