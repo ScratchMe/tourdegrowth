@@ -132,11 +132,12 @@ Trois lots, dans l'ordre. Chaque item dit qui fait quoi, et pourquoi il est là 
 *Pourquoi maintenant* : c'est la réponse à « Et alors ? » (§4 de la revue), et c'est du réagencement de données qu'on a déjà. Coût principal : le design (brief 03) et trois chaînes de copie.
 *Qui* : brief 03 → Claude Design ; code : session ; copie : Antoine.
 
-**A2. « Ta prochaine action » en mode Quick — bibliothèque déterministe.**
+**A2. « Ta prochaine action » en mode Quick — bibliothèque déterministe.** — **Bibliothèque écrite** (PR #105) ; l'affichage attend le retour du brief 03
 *Quoi* : `content/next-moves.ts`, indexé par pilier × bande (faible, en développement), une à trois actions par entrée. Affiché pour le pilier qui freine. Recommandation de dimensionnement : **actions sans variante de ton** — une action est une action, la voix roast vit dans les verdicts, et ça évite d'écrire des « actions » qui se moquent, ce que le garde-fou anti-moquerie n'a pas à arbitrer. Bande « forte » exclue (si l'étape qui freine est forte, tout l'est : un message unique). Soit **5 × 2 bandes × 3 actions × 2 langues = 60 chaînes courtes** plus un message — la taille d'un lot de glossaire.
 *Pourquoi* : c'est le P0 réel de la revue et le trou laissé par l'addendum 01. Sans lui, la valeur du Quick plafonne au constat.
 *Pourquoi pas Gemini* : non négociable. Et la latence : le Quick est instantané, il doit le rester.
-*Qui* : premier jet par la session (comme le glossaire long), relecture Antoine — **après** la relecture en cours, pas empilé dessus.
+*Qui* : premier jet par la session (comme le glossaire long), relecture Antoine.
+*Écart de dimensionnement, assumé à la livraison* : indexée par **question × réponse** et non par pilier × bande. Avec une clé pilier × bande, quelque chose doit encore choisir laquelle des trois actions montrer, et toute règle pour ça est soit arbitraire (un index, une rotation) soit une re-dérivation des réponses — auquel cas autant que les réponses soient la clé. La règle tient alors en une phrase : *la première chose qui manque dans l'étape qui te freine*. Même volume de copie que l'estimation (30 actions × 2 langues), pour une action qui répond à ce que la personne a réellement dit.
 
 **A3. La carte, visible et enregistrable.**
 *Quoi* : afficher l'image OG réelle sur la page de résultat (c'est une URL, elle existe déjà dans les deux tons) dans un bloc « Ta carte », avec Partager (existant) et Enregistrer l'image. Pas de feux tricolores. Éventuellement une ligne « ta prochaine action » sur l'image — à décider avec le design, car l'image est « highest care » dans le brief d'origine.
