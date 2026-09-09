@@ -1358,7 +1358,7 @@ Acquisition, retouchée la veille (les deux taux de la formule nommés, « clien
 
 **Marqueurs levés partout, `updatedAt` bougé pour les quatre termes retouchés** (acquisition au 8, les trois autres au 9 ; le reste du glossaire garde le 6, sa date de mise en ligne). Le sitemap dit donc la vérité page par page, ce qui était l'objet de R2-08.
 
-**L'oubli.** Les six chaînes de progression de R2-27 n'ont jamais été dans le document : il a été construit avant que R2-27 soit livré, et quand j'y ai ajouté R2-26 et R2-28 le lendemain, j'ai oublié celui-là. Elles gardent leur marqueur, elles sont ajoutées au document (56ᵉ élément) et soumises en clair dans le salon. Le point à retenir : **le document de relecture doit être reconstruit depuis les marqueurs présents dans le code** (`grep "TODO: à relire"`), pas depuis la mémoire de ce qui a été livré — c'est le grep qui a trouvé l'oubli, pas moi.
+**L'oubli.** Les six chaînes de progression de R2-27 n'ont jamais été dans le document : il a été construit avant que R2-27 soit livré, et quand j'y ai ajouté R2-26 et R2-28 le lendemain, j'ai oublié celui-là. Ajoutées au document (56ᵉ élément) et soumises en clair dans le salon, validées dans l'heure ; le dernier marqueur est levé. Le point à retenir : **le document de relecture doit être reconstruit depuis les marqueurs présents dans le code** (`grep "TODO: à relire"`), pas depuis la mémoire de ce qui a été livré — c'est le grep qui a trouvé l'oubli, pas moi.
 
 **Réponses dans le document plutôt que dans le salon.** Les trois retours ont chacun leur réponse écrite sous la note d'Antoine, dans un bloc distinct (champ `reply`, rendu à part de son champ de note depuis le 8 : coller une réponse dans sa zone de texte l'avait rendue invisible sous le pli). La conversation de relecture vit avec la décision, pas dans un fil séparé.
 
@@ -1376,7 +1376,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **Une troisième pièce attend une décision : `REVIEW-03.md`** (2026-09-08), l'analyse d'une revue externe d'expert growth — recoupements avec le brief R2-29, critique, et une direction en trois lots avec sept décisions à prendre. Sa thèse : le mode Quick ne donne aucune action depuis SPEC-ADDENDUM-01 §0, et c'est le seul vrai P0. **Rien n'en est engagé tant qu'Antoine n'a pas tranché** ; le brief R2-29 (`design/DS-EXTENSION-BRIEF-02.md`) est en attente pour la même raison — il serait fondu dans un brief 03 si la direction est adoptée.
 
-**La relecture de la copie est faite** (2026-09-09) : 55 éléments passés par Antoine dans l'artifact « Bon à tirer du Tour » ([lien](https://claude.ai/code/artifact/bb3b1561-6c09-4dcb-af83-9fa7bf8752b9), décisions dans sa base `reviews/<itemId>`), 52 validés tels quels, 3 retouchés le jour même (aha-moment, north-star-metric, revenue) plus acquisition la veille. Tous les marqueurs `TODO: à relire (REVIEW-02)` sont levés, **sauf un** : les six chaînes de progression de R2-27, que la session avait oublié de mettre dans le document — soumises à part, marqueur en place jusqu'à sa réponse.
+**La relecture de la copie est faite** (2026-09-09) : 55 éléments passés par Antoine dans l'artifact « Bon à tirer du Tour » ([lien](https://claude.ai/code/artifact/bb3b1561-6c09-4dcb-af83-9fa7bf8752b9), décisions dans sa base `reviews/<itemId>`), 52 validés tels quels, 3 retouchés le jour même (aha-moment, north-star-metric, revenue) plus acquisition la veille. Les six chaînes de progression de R2-27, que la session avait oublié de mettre dans le document, ont été soumises à part et validées le même jour. **Plus aucun marqueur `TODO: à relire` dans `src/`** : toute la copie en production est relue.
 
 **Chiffres de référence** (à comparer, pas à recopier aveuglément) : **340 tests unitaires**, **142 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
@@ -1394,7 +1394,6 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | R2-30 (fenêtre Tour de France, SPEC.md §10) | Reporté d'un commun accord : pas d'urgence | À construire **avant** juin 2027, pour que le post parte pendant le vrai Tour et pas après. |
 | 10 branches distantes obsolètes (R2-31) | Toutes issues de PR mergées avant l'activation de la suppression automatique, qui fonctionne depuis | La suppression, par Antoine, dans l'interface GitHub. |
 | TypeScript 7 et ESLint 10 | Tous deux bloqués par des paquets embarqués dans `eslint-config-next` (`typescript-eslint` refuse TS ≥ 6.1 ; `eslint-plugin-react` plante sur ESLint 10). Dependabot les ignore en majeure depuis le 2026-09-08 | Quand `eslint-config-next` suivra. Re-tester en installant, pas en lisant les plages de peer : c'est l'essai qui a montré qu'ESLint 10 plante. |
-| Six chaînes de progression (R2-27) à relire | Le seul bloc absent du bon à tirer du 2026-09-09 ; marqueur `TODO: à relire` maintenu sur `UI_STRINGS.progression` | Un mot d'Antoine ; puis lever le marqueur. |
 
 Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et le payant sont le plan de croissance, qui appartient à Antoine ; le SEO a été livré en grande partie par le lot C de cette revue.
 
@@ -1421,7 +1420,7 @@ src/app/[locale]/        pages de contenu, statiques, une URL par langue
 src/app/(app)/           quiz, résultat, deep dive, admin — dynamiques, sans préfixe de langue
 src/app/api/             deux routes POST : création de soumission, Deep dive
 src/components/          core / brand / quiz / result / glossary — le design system porté
-src/content/             copie livrée par l'agent produit (validée) ; glossary-deep.ts, about.ts, legal.ts, segments.ts, metrics.ts = premier jet de la revue 02, à relire
+src/content/             toute la copie du site, validée (agent produit pour l'origine, Antoine le 2026-09-06 et le 2026-09-09 pour le reste)
 src/lib/                 scoring (pur), i18n (dont meta.ts), seo (JSON-LD), og (polices + tokens des images de partage), gemini, submissions (dont segment.ts, benchmark.ts), metrics, analytics
 design/                  brief d'origine, briefs d'extension 01 et 02, bundle de retour de l'extension 01
 e2e/                     142 specs Playwright contre un build de production

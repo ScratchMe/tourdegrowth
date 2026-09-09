@@ -14,10 +14,9 @@ export { tc, type Translatable };
  *
  * Toute la copie de ce fichier a été relue et validée par Antoine — une
  * première fois le 2026-09-06, puis les blocs ajoutés par la revue 02 le
- * 2026-09-09 (bon à tirer, 55 éléments). Une seule exception, marquée
- * `TODO: à relire` : les six chaînes de progression (R2-27). Une nouvelle
- * chaîne ajoutée ici après ces dates repart au statut « à relire » : le
- * marquer explicitement plutôt que de la glisser dans un fichier approuvé.
+ * 2026-09-09 (bon à tirer, 56 éléments). Une nouvelle chaîne ajoutée ici
+ * après ces dates repart au statut « à relire » : le marquer explicitement
+ * plutôt que de la glisser dans un fichier approuvé.
  */
 export const UI_STRINGS = {
   /**
@@ -295,8 +294,8 @@ export const UI_STRINGS = {
    * because "+8" and "-8" have to read differently at a glance; a flat
    * result gets its own sentence rather than "+0", which reads like a bug.
    *
-   * TODO: à relire (REVIEW-02) — R2-27. Le seul bloc qui n'était pas dans
- * le bon à tirer du 2026-09-09 (oubli de la session) ; soumis à Antoine à part.
+   * Relu et validé par Antoine (2026-09-09), à part du bon à tirer où la
+   * session avait oublié de le mettre — R2-27.
    */
   progression: {
     landingUp: { en: "Previous Tour: {prev} → {score}, +{delta}", fr: "Tour précédent : {prev} → {score}, +{delta}" },
