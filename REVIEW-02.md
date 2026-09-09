@@ -65,7 +65,7 @@ La colonne **Autonomie** dit ce que chaque item attend d'Antoine : **Auto** = je
 | | R2-24 | Petites dettes : `rawPoints` public, logs Gemini non tronqués, pas de Dependabot | T | XS | Auto | **Fait** (PR #66, 2026-09-06) |
 | | R2-25 | Le stderr de Playwright n'est pas vide, donc plus lu | T | XS | Auto | **Fait en partie** (PR #65) — la ligne Firebase ne vient plus que de la spec qui l'annonce ; `NoFallbackError` est à Next |
 | **E — Décisions produit (Antoine)** | R2-26 | Segmenter le benchmark : « la moyenne des SaaS B2B à ton stade » | F | M | Toi | **Fait** (PR #92, 2026-09-08) — copie de `content/segments.ts` relue le 2026-09-09 |
-| | R2-27 | Historique de progression : les données sont déjà sur l'appareil | F | S | Toi | **Fait** (PR #91, 2026-09-08) — 6 chaînes **encore à relire** — absentes du bon à tirer du 2026-09-09 (oubli de la session), soumises à Antoine à part |
+| | R2-27 | Historique de progression : les données sont déjà sur l'appareil | F | S | Toi | **Fait** (PR #91, 2026-09-08) — copie relue le 2026-09-09 (à part du bon à tirer, où la session avait oublié ces 6 chaînes) |
 | | R2-28 | Une page de métriques publique : l'outil montre son propre AARRR | F | M | Toi | **Fait, fermée** (PR #88, 2026-09-07) — `METRICS_PAGE_ENABLED` à basculer dans Vercel quand tu veux l'ouvrir ; copie de `content/metrics.ts` relue le 2026-09-09 |
 | | R2-29 | Le roast est le crochet viral et il est invisible avant la 15ᵉ question | F | S | Toi | **Brief envoyé** (PR #89, 2026-09-07) — `design/DS-EXTENSION-BRIEF-02.md` ; en attente du retour Claude Design |
 | | R2-30 | Fenêtre Tour de France (SPEC.md §10) : à caler dans le calendrier | F | S | Toi | **Tranché** (Antoine, 2026-09-07) : pas d'urgence, à caler dans le plan de croissance pour juin 2027 |
@@ -403,7 +403,7 @@ Ces cinq points ne sont pas des correctifs. Ce sont les leviers qui, à mon avis
 
 ### R2-27 — Historique de progression : les données sont déjà sur l'appareil
 
-**Type** F · **Effort** S · **Statut** **Fait** (PR #91, 2026-09-08) — 6 chaînes **encore à relire** — absentes du bon à tirer du 2026-09-09 (oubli de la session), soumises à Antoine à part
+**Type** F · **Effort** S · **Statut** **Fait** (PR #91, 2026-09-08) — copie relue le 2026-09-09 (à part du bon à tirer, où la session avait oublié ces 6 chaînes)
 
 SPEC.md §5 liste « historique de progression » en fast-follow. Depuis R-01/R-20, `tdg.results.v1` garde déjà jusqu'à 20 résultats datés avec leur score. Il manque seulement l'affichage : « Ton Tour précédent : 58 → 66 » sur la landing (à côté du dernier score) et sur le résultat (sous le score). Quasi gratuit, et c'est la rétention de l'outil lui-même — la raison de revenir dans trois mois, qui n'existe pas aujourd'hui. À décider : voulu ou non, et si oui, la copie.
 
