@@ -1459,7 +1459,7 @@ Les deux petites PR de copie du lot B, livrées ensemble : elles touchent le mê
 
 **Piège CSS évité de justesse** : `--border-rule` est un raccourci `border` complet (`2px dashed var(--border-divider)`), pas une couleur — `border-top: 2px dashed var(--border-rule)` se serait développé en absurdité silencieuse. Vérifié sur les usages existants (`SiteFooter`, `ContentHeader`) plutôt que supposé.
 
-**Vérifié en réel** : lint, tsc, 359 tests unitaires (+2), `next build`, **150 specs Playwright** (+6). Non-vacuité prouvée : en retirant la ligne promesse et en reconstruisant, 4 des 6 nouvelles specs tombent. Captures relues en EN desktop, FR desktop et FR mobile 390 px — aucun débordement, la promesse tient sur deux lignes en français sans casser le rythme jusqu'au CTA.
+**Vérifié en réel** : lint, tsc, 360 tests unitaires (+3), `next build`, **150 specs Playwright** (+6). Non-vacuité prouvée : en retirant la ligne promesse et en reconstruisant, 4 des 6 nouvelles specs tombent. Captures relues en EN desktop, FR desktop et FR mobile 390 px — aucun débordement, la promesse tient sur deux lignes en français sans casser le rythme jusqu'au CTA.
 
 **Les deux chaînes repartent au statut « à relire »** (convention 6) — la phrase citée de B3, elle, est déjà validée ; seuls l'attribution et le libellé du lien sont neufs.
 
