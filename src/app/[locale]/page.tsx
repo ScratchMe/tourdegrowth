@@ -13,6 +13,7 @@ import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { contentMetadata } from "@/lib/i18n/meta";
 import { localePath } from "@/lib/i18n/routes";
+import { LANDING_PULL } from "@/content/about";
 import { LastResult } from "./LastResult";
 import { RefCapture } from "./RefCapture";
 import { JsonLd, webApplicationSchema } from "@/lib/seo/jsonld";
@@ -86,8 +87,16 @@ export default async function LandingPage({ params }: PageProps) {
 
             <p className={styles.subtitle}>{tc(t.subtitle, locale)}</p>
 
+            {/* REVIEW-03.md B1 — the H1 poses the problem, this says what you
+                leave with. Kept as its own line rather than folded into the
+                subtitle: the subtitle describes the framework, this is the
+                promise, and they are two different jobs. */}
+            <p className={styles.promise} data-testid="landing-promise">
+              {tc(t.promise, locale)}
+            </p>
+
             <div className={styles.ctaRow}>
-              <Button size="lg" href="/quiz">
+              <Button size="lg" href="/quiz" data-testid="hero-cta">
                 {tc(t.ctaPrimary, locale)}
               </Button>
               <Button size="lg" href="/r/sample" variant="secondary">
@@ -108,7 +117,7 @@ export default async function LandingPage({ params }: PageProps) {
           </div>
 
           <div className={styles.heroRight}>
-            <Card elevation="raised" className={styles.previewCard}>
+            <Card elevation="raised" className={styles.previewCard} data-testid="preview-card">
               <div className={styles.previewTopRow}>
                 <MetaLabel size="xs">
                   {tc(UI_STRINGS.scoreCard.label, locale)} — {tc(UI_STRINGS.sample.caption, locale)}
@@ -141,6 +150,22 @@ export default async function LandingPage({ params }: PageProps) {
             </Card>
           </div>
         </div>
+
+        {/* REVIEW-03.md B3 — below the fold on purpose: a visitor who is going
+            to start the Tour has already left above. This is for the one who
+            scrolled, and it is the only place on the landing that says a
+            person is behind the tool. */}
+        <aside className={styles.founder} data-testid="landing-founder">
+          <blockquote className={styles.founderQuote}>
+            {tc(LANDING_PULL.quote, locale)}
+          </blockquote>
+          <p className={styles.founderMeta}>
+            {tc(LANDING_PULL.attribution, locale)} —{" "}
+            <Link href={localePath(locale, "/about")} className={styles.founderLink}>
+              {tc(LANDING_PULL.cta, locale)}
+            </Link>
+          </p>
+        </aside>
       </main>
 
       <SiteFooter locale={locale} />

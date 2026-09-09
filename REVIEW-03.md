@@ -152,12 +152,16 @@ Trois lots, dans l'ordre. Chaque item dit qui fait quoi, et pourquoi il est là 
 
 ### Lot B — La landing promet la priorité
 
-**B1. La promesse.** Garder le H1. Ligne du dessous : « 15 questions · 5 étapes · 1 priorité claire » (ou dans le `bibTag`). Une décision de copie, deux chaînes.
+**B1. La promesse.** — **Fait** (PR #108)
+Garder le H1. Ligne du dessous, deux chaînes.
 *Pourquoi* : le H1 pose le problème, la ligne dit le livrable. Changer le H1 sans mesure possible serait un pari sur de la copie approuvée.
+*Écart assumé* : la chaîne proposée ici (« 15 questions · 5 étapes · 1 priorité claire ») n'a pas été retenue — le `bibTag` deux lignes plus haut dit déjà « № 15 questions — 3 min — entrée gratuite », et répéter « 15 questions » à quelques centimètres se lit comme du remplissage. La ligne ne dit donc que la moitié qui manquait, le livrable : « Tu repars avec l'étape qui te freine — et une action à mener. » Elle ne pouvait honnêtement être écrite qu'après A2.
 
 **B2. La carte d'aperçu montre le nouveau résultat — et c'est là que R2-29 se règle.** Même composant que A1/A2 en taille réduite ; la question du roast (toggle, ligne, carte alternée, rien) est posée sur cette carte-là dans le brief 03.
 
-**B3. Une phrase de fondateur, sous la ligne de flottaison, vers `/about`.** La copie existe (`about.ts`, intro). Une phrase et un lien, pas une section.
+**B3. Une phrase de fondateur, sous la ligne de flottaison, vers `/about`.** — **Fait** (PR #108)
+La copie existe (`about.ts`, intro). Une phrase et un lien, pas une section.
+*Précision de vérification* : « sous la ligne de flottaison » reste l'intention mais n'est pas assertée en position absolue — dans une fenêtre desktop courte le bloc est partiellement visible, et rembourrer la page pour franchir une ligne arbitraire serait concevoir contre un test. Ce qui est asserté est la propriété qui porte l'intention : le bloc vient après **tout** le hero, colonne de droite comprise.
 
 **B4. Une section « Problème » de deux lignes** (« La croissance ne cale rarement partout. La plupart des équipes ont une étape qui freine plus que les autres. »). Nouvelle copie, courte, à relire. Design : brief 03.
 

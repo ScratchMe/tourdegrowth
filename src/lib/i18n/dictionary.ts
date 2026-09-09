@@ -54,6 +54,23 @@ export const UI_STRINGS = {
       en: "A guided AARRR check-up across Acquisition, Activation, Retention, Referral and Revenue — scored, explained, and built to share.",
       fr: "Un diagnostic AARRR guidé sur l'Acquisition, l'Activation, la Retention, le Referral et le Revenue — noté, expliqué, et pensé pour être partagé.",
     },
+    /**
+      * REVIEW-03.md B1 — what you leave with, which the H1 above deliberately
+      * does not say (it poses the problem, and it stays as it is).
+      *
+      * `REVIEW-03.md` proposed "15 questions · 5 stages · 1 clear priority".
+      * Not used: the bib tag two lines above already reads "№ 15 questions —
+      * 3 min — free entry", and saying "15 questions" twice within a few
+      * centimetres reads as padding. The half that was genuinely missing is
+      * the deliverable, so this line says only that — and it can only say it
+      * honestly since the free result gained an action (A2).
+      *
+      * TODO: à relire — nouvelle chaîne (convention 6).
+      */
+    promise: {
+      en: "You leave with the one stage holding you back — and one action to take.",
+      fr: "Tu repars avec l'étape qui te freine — et une action à mener.",
+    },
     ctaPrimary: { en: "Start your Tour →", fr: "Démarre ton Tour →" },
     ctaSecondary: { en: "See a sample result", fr: "Voir un résultat d'exemple" },
   },
