@@ -1400,6 +1400,16 @@ Corrigé dans `trackEvent` plutôt qu'au point d'appel, pour que les prochains �
 
 **Action d'Antoine** : envoyer le brief à Claude Design. La session n'a pas accès au projet (`DesignSync` demande une autorisation qui ne s'obtient que depuis une session interactive sur sa machine), donc le retour se fait par dépôt sous `design/ds-extension-03-return/` ou par « Send to Claude Code Web », comme les deux fois précédentes.
 
+### L'image OG « roast » des briefs n'en était pas une (2026-09-09)
+
+Trouvé en relisant le résumé du merge du brief 03 : `08-og-neutral-en.png` et `09-og-roast.png` faisaient **exactement le même nombre d'octets**. Somme de contrôle : identiques, et identiques aussi à `design/ds-extension-02/07-og-roast.png`. Autrement dit le brief 02 avait capturé une image neutre en croyant capturer le roast, et le brief 03 en a hérité — j'aurais envoyé à Claude Design deux fois la même image en lui demandant de comparer les deux traitements.
+
+**La cause, qui vaut d'être notée parce qu'elle piège deux fois.** `loadOgData()` traite `/r/sample` dans une **branche précoce qui code `roast: false` en dur** ; la ligne `roast: …` qu'on voit en lisant le reste de la fonction appartient à la branche des vraies soumissions. Un patch local posé sur cette seconde ligne ne change donc rien à l'échantillon — c'est exactement ce qui s'est passé, deux fois : au brief 02, puis à ma première tentative de correction.
+
+**Et il a failli me piéger une troisième fois** : j'avais lancé le rebuild avec `>/dev/null 2>&1 &&`, donc quand `next build` a échoué (un fichier en cours d'écriture pour A2 avait une erreur de type), le `&&` a court-circuité en silence et le `curl` qui suivait a interrogé **l'ancien serveur**. La capture « après correctif » était en fait la capture d'avant. Ne jamais faire taire la sortie d'un build dont on va utiliser le résultat.
+
+**Ce qui a permis de le voir** : une taille de fichier identique dans le `--stat` d'un merge. C'est le genre de détail qu'on lit sans le voir ; ici, deux PNG censés être différents ne peuvent pas peser le même nombre d'octets. Les deux fichiers sont corrigés (brief 02 compris, même s'il ne part pas — un fichier mal étiqueté au dépôt est un piège pour la prochaine lecture).
+
 ---
 
 ## État du projet au 2026-09-09 — à lire en premier dans une nouvelle session
