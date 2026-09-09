@@ -143,7 +143,7 @@ Trois lots, dans l'ordre. Chaque item dit qui fait quoi, et pourquoi il est là 
 *Pourquoi* : on ne partage bien que ce qu'on a vu. Aujourd'hui l'auteur découvre sa carte dans LinkedIn.
 *Qui* : brief 03 (placement) ; code : session.
 
-**A4. Mesurer la valeur, pas seulement la complétion.** — **Fait** (PR #97)
+**A4. Mesurer la valeur, pas seulement la complétion.** — **Fait** (PR #102)
 *Quoi* : deux événements — `retake_started` et `landing_return` — et un chiffre dans `/admin/stats` : **actions de valeur par résultat** = (partages + « fais ton propre Tour » + Deep dive démarrés + re-tests) ÷ résultats créés. C'est la North Star de la revue (§24), simplifiée.
 *Pourquoi* : sans ce chiffre, on ne saura pas si le lot A a changé quoi que ce soit. À poser **avant** A1-A3, pour avoir un avant.
 *Trois écarts par rapport à ce plan, assumés à la livraison* : (1) `retake_started` est un **événement à part** et non un détail `quiz_started/retake` — `quiz_started` est le dénominateur de tous les taux de déperdition depuis R-11, et un suffixe l'aurait figé pour en démarrer deux nouveaux ; (2) le chiffre n'est **pas un taux** et n'est pas affiché en pourcentage — un même résultat peut être partagé deux fois, ouvert par deux visiteurs *et* mener à un Deep dive, donc il dépasse légitimement 1 (l'appeler un taux referait l'erreur de R2-01) ; (3) les deux moitiés viennent de GoatCounter, jamais une de Firestore — un visiteur qui bloque les scripts est invisible pour l'un et visible pour l'autre.
@@ -201,7 +201,7 @@ Antoine a répondu **oui aux sept**, avec une précision sur la 6 (« oui avec p
 
 Réponses, dans l'ordre : 1 oui · 2 oui, sans ton (60 chaînes) · 3 oui · 4 oui · 5 oui · 6 oui, avec la prochaine action sur l'image · 7 oui.
 
-Ce que ça débloque, dans l'ordre : **A4** (fait, PR #97) → **brief 03** rédigé par la session, envoyé par Antoine → **A2** (premier jet session, relecture Antoine) → port du retour design → B1/B3 → C1 → C2.
+Ce que ça débloque, dans l'ordre : **A4** (fait, PR #102) → **brief 03** rédigé par la session, envoyé par Antoine → **A2** (premier jet session, relecture Antoine) → port du retour design → B1/B3 → C1 → C2.
 
 <details>
 <summary>Les questions telles qu'elles ont été posées</summary>
