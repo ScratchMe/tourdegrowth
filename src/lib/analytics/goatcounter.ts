@@ -36,14 +36,72 @@ declare global {
  */
 export function trackEvent(name: string, detail?: string): void {
   if (typeof window === "undefined") return;
+  const path = detail ? `${name}/${detail}` : name;
+  if (!send(path)) queue(path);
+}
+
+/** Hands one path to GoatCounter, reporting whether the script was there to take it. */
+function send(path: string): boolean {
   try {
-    window.goatcounter?.count?.({
-      path: detail ? `${name}/${detail}` : name,
-      event: true,
-    });
+    const count = window.goatcounter?.count;
+    if (!count) return false;
+    count({ path, event: true });
+    return true;
   } catch {
-    // Analytics must never break the feature it's attached to.
+    // Analytics must never break the feature it's attached to. A throw here
+    // is not "try again later" — the script answered, badly.
+    return true;
   }
+}
+
+/**
+ * Events fired before the script finished loading — REVIEW-03.md A4.
+ *
+ * Every event up to now was fired from a click, long after
+ * `strategy="afterInteractive"` had loaded `count.js`. `landing_return`
+ * fires at mount instead, which races that load and lost to it: the
+ * optional chaining above made the miss completely silent, so the count
+ * would simply have run low in production with nothing to show for it. An
+ * e2e assertion caught it; nothing else would have.
+ *
+ * So a missed event waits instead of vanishing. The poll is bounded: if the
+ * script never arrives — an ad blocker, a request that fails — the queue is
+ * dropped rather than held forever, which is the same bargain the silent
+ * `?.` was already making, only deliberate.
+ */
+const PENDING: string[] = [];
+const RETRY_MS = 150;
+const GIVE_UP_MS = 10_000;
+let timer: ReturnType<typeof setInterval> | null = null;
+let waitedMs = 0;
+
+function queue(path: string): void {
+  PENDING.push(path);
+  if (timer) return;
+  waitedMs = 0;
+  timer = setInterval(() => {
+    waitedMs += RETRY_MS;
+    const ready = typeof window !== "undefined" && Boolean(window.goatcounter?.count);
+    if (!ready && waitedMs < GIVE_UP_MS) return;
+
+    if (ready) {
+      // Splice as we go: a send that somehow throws must not replay the
+      // whole queue on the next tick.
+      while (PENDING.length > 0) send(PENDING.shift()!);
+    } else {
+      PENDING.length = 0;
+    }
+    clearInterval(timer!);
+    timer = null;
+  }, RETRY_MS);
+}
+
+/** Test-only: drops any queued event and stops the poller between cases. */
+export function resetPendingEventsForTests(): void {
+  PENDING.length = 0;
+  if (timer) clearInterval(timer);
+  timer = null;
+  waitedMs = 0;
 }
 
 /**
@@ -65,6 +123,8 @@ export function trackEvent(name: string, detail?: string): void {
  *   submission_completed/<tone>         a result exists (SPEC.md §8)
  *   share/<tone>/<native|copy>          a share actually happened (SPEC.md §8)
  *   take_own_tour                       a VISITOR of a shared result clicked into their own Tour (REVIEW-02.md R2-02)
+ *   retake_started                      a Tour begun on a device that already holds a result (REVIEW-03.md A4)
+ *   landing_return                      the landing loaded for someone who already has a result (REVIEW-03.md A4)
  *   deep_dive_started                   the owner opened the Deep dive
  *   deep_dive_completed/<with_context|no_context>
  *   profile_click/<placement>           a credit link to Antoine's CV
@@ -117,3 +177,25 @@ export const PROFILE_CLICK_DETAILS = ["footer_cv", "card_cv", "card_linkedin", "
  * CTA was the owner's share button and nothing measured the visitor at all.
  */
 export const OWN_TOUR_EVENT = "take_own_tour";
+
+/**
+ * The two return signals — REVIEW-03.md A4.
+ *
+ * `REVIEW-03.md` proposed these as a `quiz_started/<first|retake>` detail.
+ * They are separate events instead, and the reason matters: `quiz_started`
+ * is the funnel's own denominator since R-11, and adding a detail suffix
+ * would freeze the exact path `quiz_started` and start two new ones — the
+ * same fragmentation `share/<tone>` took in R-10, but this time on the
+ * number every drop-off ratio divides by. A companion event leaves both the
+ * funnel and its history intact, and a retake is still counted once.
+ *
+ *  - `retake_started` — fired ALONGSIDE `quiz_started`, only when the device
+ *    already holds at least one result. This is the tool's own Retention:
+ *    the one thing a self-assessment has no natural reason to produce.
+ *  - `landing_return` — the landing rendered for someone who already has a
+ *    result. It is not part of the value-action ratio; it is the
+ *    denominator C1's 30-day nudge will need ("how many people came back at
+ *    all") before anyone can say whether the nudge works.
+ */
+export const RETAKE_STARTED_EVENT = "retake_started";
+export const LANDING_RETURN_EVENT = "landing_return";

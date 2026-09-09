@@ -86,6 +86,10 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
       "deep_dive_completed/no_context",
       "profile_click/footer_cv",
       "profile_click/sitefooter_cv",
+      // REVIEW-03.md A4 — the two return signals. Missing here would
+      // mean the dashboard reads them as flat zero, with no error.
+      "retake_started",
+      "landing_return",
     ]) {
       expect(requestedPaths).toContain(path);
     }
@@ -127,6 +131,54 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
     expect(stats?.shares).toBe(8);
     expect(stats?.deepDiveStarted).toBe(9);
     expect(stats?.deepDiveCompleted).toBe(6);
+  });
+
+  it("counts value actions per result across all four ways a result can produce one", async () => {
+    // REVIEW-03.md A4. 8 shares + 6 visitor Tours + 9 deep dives + 3 retakes
+    // = 26 value actions over 20 results = 1.3 — above 1 on purpose: one
+    // result can be shared twice AND opened by two visitors AND lead to a
+    // Deep dive, which is exactly why this is not called a rate.
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({
+        total: 0,
+        more: false,
+        hits: [
+          { path: "submission_completed/neutral", count: 14, event: true },
+          { path: "submission_completed/roast", count: 6, event: true },
+          { path: "share/neutral/native", count: 5, event: true },
+          { path: "share/roast/copy", count: 3, event: true },
+          { path: "take_own_tour", count: 6, event: true },
+          { path: "deep_dive_started", count: 9, event: true },
+          { path: "retake_started", count: 3, event: true },
+          { path: "landing_return", count: 11, event: true },
+        ],
+      }),
+    );
+
+    const { stats } = await fetchFunnelWindow("2024-01-01T00:00:00Z", "All-time");
+
+    expect(stats?.retakeStarted).toBe(3);
+    expect(stats?.landingReturn).toBe(11);
+    expect(stats?.valueActionsPerResult).toBeCloseTo(1.3, 10);
+  });
+
+  it("returns valueActionsPerResult: null when no result exists to divide by", async () => {
+    // A share with no result behind it is a data problem, not a ratio: it
+    // must read as "nothing to say yet" rather than dividing by zero.
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({
+        total: 0,
+        more: false,
+        hits: [{ path: "share/neutral/native", count: 2, event: true }],
+      }),
+    );
+
+    const { stats } = await fetchFunnelWindow("2024-01-01T00:00:00Z", "All-time");
+
+    expect(stats?.submissionsCompleted).toBe(0);
+    expect(stats?.valueActionsPerResult).toBeNull();
+    expect(stats?.retakeStarted).toBe(0);
+    expect(stats?.landingReturn).toBe(0);
   });
 
   it("returns rate: null when there are zero homepage views to divide by", async () => {

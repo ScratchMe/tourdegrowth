@@ -6,6 +6,8 @@ import {
   TONES,
   OWN_TOUR_EVENT,
   SEGMENT_DETAILS,
+  RETAKE_STARTED_EVENT,
+  LANDING_RETURN_EVENT,
 } from "./goatcounter";
 
 // Server-only — never import this from a "use client" component.
@@ -50,6 +52,8 @@ const ALL_PATHS = [
   DEEP_DIVE_STARTED_PATH,
   ...DEEP_DIVE_COMPLETED_PATHS,
   ...PROFILE_CLICK_PATHS,
+  RETAKE_STARTED_EVENT,
+  LANDING_RETURN_EVENT,
 ];
 
 export interface FunnelStats {
@@ -76,6 +80,30 @@ export interface FunnelStats {
   profileClicks: number;
   /** profileClicks / homeViews — null when there were no home views to divide by. */
   rate: number | null;
+  /** A Tour begun on a device that already held a result — REVIEW-03.md A4. */
+  retakeStarted: number;
+  /** The landing rendered for someone who already had a result — REVIEW-03.md A4. */
+  landingReturn: number;
+  /**
+   * Value actions per result — REVIEW-03.md A4, the closest thing this
+   * product has to the North Star the external review asked for: did the
+   * result produce anything at all?
+   *
+   * Numerator: shares + visitor "take your own Tour" clicks + Deep dives
+   * started + retakes. Denominator: results created.
+   *
+   * Deliberately NOT called a rate, and deliberately not a percentage: one
+   * result can be shared twice, opened by two visitors AND lead to a Deep
+   * dive, so this legitimately exceeds 1. Naming it a conversion rate would
+   * repeat exactly the R2-01 mistake — a ratio that cannot live in the range
+   * its name implies.
+   *
+   * Both halves come from GoatCounter, never one from Firestore: an
+   * ad-blocked visitor is invisible to GoatCounter and visible to Firestore,
+   * so dividing a GoatCounter numerator by a Firestore denominator would
+   * understate this number by however many people block scripts.
+   */
+  valueActionsPerResult: number | null;
 }
 
 export interface FunnelWindow {
@@ -157,6 +185,15 @@ export async function fetchFunnelWindow(startISO: string, label: string): Promis
   const homeViews = sum(HOME_PATHS);
   const profileClicks = sum(PROFILE_CLICK_PATHS);
 
+  // REVIEW-03.md A4 — every number in this ratio comes from this one
+  // response, so the two halves are always the same population.
+  const shares = sum(SHARE_PATHS);
+  const ownTourClicks = counts.get(OWN_TOUR_EVENT) ?? 0;
+  const deepDiveStarted = counts.get(DEEP_DIVE_STARTED_PATH) ?? 0;
+  const retakeStarted = counts.get(RETAKE_STARTED_EVENT) ?? 0;
+  const submissionsCompleted = sum(SUBMISSION_PATHS);
+  const valueActions = shares + ownTourClicks + deepDiveStarted + retakeStarted;
+
   return {
     label,
     stats: {
@@ -168,13 +205,16 @@ export async function fetchFunnelWindow(startISO: string, label: string): Promis
       // the other three fall the reader back to the global one.
       segmentBothAxes: sum(["segment_answered/both"]),
       toneSelected: sum(TONE_SELECTED_PATHS),
-      submissionsCompleted: sum(SUBMISSION_PATHS),
-      shares: sum(SHARE_PATHS),
-      ownTourClicks: counts.get(OWN_TOUR_EVENT) ?? 0,
-      deepDiveStarted: counts.get(DEEP_DIVE_STARTED_PATH) ?? 0,
+      submissionsCompleted,
+      shares,
+      ownTourClicks,
+      deepDiveStarted,
       deepDiveCompleted: sum(DEEP_DIVE_COMPLETED_PATHS),
       profileClicks,
       rate: homeViews > 0 ? profileClicks / homeViews : null,
+      retakeStarted,
+      landingReturn: counts.get(LANDING_RETURN_EVENT) ?? 0,
+      valueActionsPerResult: submissionsCompleted > 0 ? valueActions / submissionsCompleted : null,
     },
   };
 }
