@@ -99,21 +99,57 @@ page's hierarchy, not us.
 The brand has exactly one emoji (the roast 🔥) and there are no icon files in
 this product at all.
 
+**The copy for this block does not exist yet** — unlike §2, which is written
+and approved. Three short strings (one per sharpness state) will be written
+against whatever you deliver, so design with placeholder text at the length
+you think is right and say what length you assumed. Do not wait for the
+words.
+
 ---
 
 ## 2. The next action, in the free result
 
 **The problem to solve.** Show one concrete action for the bottleneck stage.
-It comes from a library indexed by pillar × score band (a low band and a
-developing band; the strong band gets a single different message, because
-if the weakest stage is strong then everything is). Antoine has decided it
-has **no tone variants** — an action is an action, the roast voice lives in
-the verdicts, and an action that mocks you is not an action.
 
-**Shape of the content**: one imperative sentence, roughly 12–20 words.
-Occasionally a second clause naming what it produces. No numbered lists, no
-checklists, no time estimates — anything that looks like a project plan
-oversells what a 15-question quiz can know.
+**This library is written and approved** — it is not a spec you are designing
+against a length. It holds 31 actions, keyed by question and by the answer
+that was given: the reader is shown the action for the first question in the
+bottleneck stage they did not fully answer. It has **no tone variants** — an
+action is an action, the roast voice lives in the verdicts, and an action
+that mocks you is not an action.
+
+**The real words, so you can set them rather than imagine them.** Three
+actual entries, longest and shortest included, in both languages:
+
+> Pick the single channel that brought your last ten customers, and give it
+> your full attention for one cycle.
+> *Choisis le seul canal qui a amené tes dix derniers clients, et
+> consacre-lui un cycle entier.*
+
+> Write your aha moment as a single event you could log, then log it — a
+> moment you can't count isn't defined yet.
+> *Écris ton moment « aha » comme un événement que tu pourrais tracer, puis
+> trace-le — un moment qu'on ne peut pas compter n'est pas encore défini.*
+
+> Take one month's cohort of new users and count how many are still active
+> thirty days later.
+> *Prends la cohorte de nouveaux utilisateurs d'un mois et compte combien
+> sont encore actifs trente jours plus tard.*
+
+One imperative sentence each, 15–23 words in English, no lists and no
+numbers promised. French runs 10–20% longer, as everywhere: the longest entry
+in the library is 144 characters in French. Size the slot for that, not for
+the shortest.
+
+**One more string, for the case where nothing is behind**: when the weakest
+stage is itself strong — which can only happen when all five are — there is
+no bottleneck to name, and the slot carries this instead:
+
+> Nothing is stalling you — every stage is solid. The question now is which
+> one you push, not which one you fix.
+
+That state has no pillar, no score and no sharpness. If your layout for §1
+and §2 assumes a named stage, tell us what it degrades to.
 
 **The hard part, and the reason this is a design question and not a coding
 one.** Look at `10-result-locked-card-en.png`. The owner today sees a dashed,
