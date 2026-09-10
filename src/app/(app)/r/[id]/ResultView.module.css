@@ -149,8 +149,21 @@
  *
  * which leaves two disagreements instead of a scatter: `move` and `pillars`
  * swap (adjacent), and `share` is announced last rather than before the
- * disclaimer. `e2e/result-composition.spec.ts` measures the worst
- * displacement and pins it, so this stays a bounded, checked trade-off.
+ * disclaimer.
+ *
+ * The worst displacement is 1 for a VISITOR — every shared link, and so the
+ * case the growth loop runs on — and 2 for the OWNER, whose page also
+ * renders the score breakdown, which lands in source order between the
+ * disclaimer and the share block. `src/__tests__/result-reading-order.test.ts`
+ * computes that from this file and the JSX for all four variants, including
+ * the two no e2e can render without Firestore, and pins the exact numbers;
+ * `e2e/result-composition.spec.ts` proves the browser really behaves that
+ * way on the one variant it can reach.
+ *
+ * Lifting the breakdown out of the column alongside the share block brings
+ * every variant to 1 — built and measured — but it then needs its own grid
+ * row below the taller of the two columns, opening ~230px of empty right
+ * column under the disclaimer on every owner's desktop. Not worth it.
  *
  * The `order` values are also correct WITHIN each desktop column — 1,3 on the
  * left and 2,4,5,6,7,9,10 on the right are both ascending — so nothing has to

@@ -244,9 +244,21 @@
 }
 
 /* REVIEW-02.md R2-13 — the preview card's chips link to their glossary pages,
-   without changing how the chip looks. */
+   without changing how the chip looks.
+ *
+ * NOT `display: contents`, which is what this was: an element with that
+ * display generates no box, and Chromium leaves such an anchor out of
+ * sequential focus navigation entirely. Measured on the built page — 17 tab
+ * stops on `/en` and not one of them was a glossary link, so the five chips
+ * were mouse-only. WCAG 2.1.1, level A.
+ *
+ * `display: flex` makes the link the flex item instead of the chip inside
+ * it, which is a box of exactly the same size: the chip is `width:
+ * fit-content` and the link now shrink-wraps it. Verified by measuring all
+ * five chip rectangles at 1280px and 390px before and after — identical to
+ * the pixel. */
 .previewChipLink {
-  display: contents;
+  display: flex;
   color: inherit;
   text-decoration: none;
 }

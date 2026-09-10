@@ -157,6 +157,15 @@ test.describe("the share block", () => {
  * seventh. After: 1, two adjacent swaps (the action and the pillar grid trade
  * places, and the share block is announced after the disclaimer rather than
  * before it). If a future stylesheet edit widens that again, this fails.
+ *
+ * IMPORTANT — what this can and cannot see. `/r/sample` carries no `id` and
+ * no `breakdown` prop, so it is structurally always the VISITOR variant; the
+ * owner's own page also renders the score breakdown, which puts the share
+ * block 2 places out instead of 1. That variant needs Firestore and so
+ * cannot be rendered here: it is computed from the source and the stylesheet,
+ * for all four combinations, in `src/__tests__/result-reading-order.test.ts`.
+ * This spec's job is to prove the browser really lays out the way those two
+ * files say it does — not to stand in for the variants it cannot render.
  */
 test.describe("what the reading order costs is bounded, and checked", () => {
   const SLOTS = [
@@ -172,7 +181,7 @@ test.describe("what the reading order costs is bounded, and checked", () => {
     "slotBreakdown",
   ];
 
-  test("no block on a phone is more than one place from where it is announced", async ({ page }) => {
+  test("no block on a visitor's phone is more than one place from where it is announced", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/r/sample?lang=en");
     await page.locator("main").waitFor();
