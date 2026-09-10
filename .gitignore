@@ -12,6 +12,7 @@
 
 # Build
 /build
+/dist/
 *.tsbuildinfo
 next-env.d.ts
 
@@ -28,3 +29,12 @@ npm-debug.log*
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# design-sync (claude.ai/design) — staged scripts, generated bundle, machine state.
+# The durable inputs under .design-sync/ (config.json, NOTES.md, conventions.md,
+# previews/, overrides/) ARE committed; everything below is regenerated.
+/.ds-sync/
+/ds-bundle/
+/.design-sync/.cache/
+/.design-sync/learnings/
+/.design-sync/node_modules

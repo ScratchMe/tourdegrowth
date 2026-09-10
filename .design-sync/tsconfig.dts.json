@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "declarationMap": false,
+    "outDir": "../dist/types",
+    "rootDir": "../src",
+    "types": [],
+    "baseUrl": "..",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    }
+  },
+  "include": [
+    "../src/components/**/*",
+    "./types/*.d.ts"
+  ],
+  "exclude": [
+    "../src/**/__tests__/**",
+    "../src/**/*.test.ts",
+    "../src/**/*.test.tsx"
+  ]
+}

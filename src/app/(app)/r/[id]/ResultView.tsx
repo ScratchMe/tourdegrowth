@@ -24,6 +24,7 @@ import { PROFILE_CLICK_DETAILS, trackEvent } from "@/lib/analytics/goatcounter";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import type { Locale } from "@/lib/i18n/locale";
 import { useLocale } from "@/lib/i18n/locale-context";
+import { NAV_STRINGS } from "@/lib/i18n/nav-strings";
 import { localePath } from "@/lib/i18n/routes";
 import { progressionFor, type Progression } from "@/lib/quiz/progression";
 import { progressionSentence } from "@/lib/quiz/progression-copy";
@@ -261,7 +262,13 @@ export function ResultView({
   const ownTourHref = id ? `/quiz?ref=${id}` : "/quiz";
 
   const disclaimerShort = tc(HOW_IT_WORKS.limitationNotice.short, locale);
-  const disclaimerLinkText = "How it works"; // the exact trailing phrase both locales' short notice ends with — see content/how-it-works.ts
+  /* The phrase each locale's short notice ends with, taken from the nav
+     labels rather than written out here: this used to be a hardcoded
+     English literal split against BOTH locales, which is how the French
+     disclaimer ended up saying "How it works" while the footer said
+     "Comment ça marche" for the same destination. Sharing the label makes
+     the two impossible to drift apart again. */
+  const disclaimerLinkText = tc(NAV_STRINGS.howItWorks, locale);
   const disclaimerSplit = disclaimerShort.split(disclaimerLinkText);
 
   return (

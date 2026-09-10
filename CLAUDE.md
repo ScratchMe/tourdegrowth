@@ -458,7 +458,9 @@ Le partage est le mécanisme que SPEC.md §7 désigne comme « le cœur du produ
 
 **Vérifié en réel** : 182 tests, lint/tsc/build propres, **20 specs Playwright** (+2 : la copie desktop confirme et le lien copié ne contient pas `lang=` ; un partage natif annulé n'émet aucun événement et ne copie rien). Et par requête HTTP directe sur `/r/sample`, les balises réellement produites : `<title>74/100 — Tour de Growth</title>`, `og:description` « Retention is where this growth stalls. Where does yours? », `og:locale`, `twitter:card`, `robots: noindex, follow`.
 
-**Note d'infrastructure (2026-09-05)** : rendre le check CI bloquant s'avère impossible sur le plan actuel — GitHub n'applique pas les rulesets (ni la protection de branche classique) sur un dépôt **privé** d'une organisation en plan **Free**. Voir `REVIEW.md` R-05 pour les trois issues possibles. En attendant, convention pour les prochaines sessions : **ne jamais merger une PR dont le check `Types, tests, build` n'est pas vert.**
+**Note d'infrastructure (2026-09-05, ~~périmée~~ — voir la mise à jour ci-dessous)** : rendre le check CI bloquant s'avérait impossible sur le plan d'alors — GitHub n'applique pas les rulesets (ni la protection de branche classique) sur un dépôt **privé** d'une organisation en plan **Free**. Voir `REVIEW.md` R-05.
+
+**Mise à jour (2026-09-11)** : c'est fait, et ce n'est plus une règle d'honneur. Le passage du dépôt en public a rendu les rulesets applicables, et `main` en porte un — vérifié à la source (`/rules/branches/main`) et non d'après un document : `Types, tests, build` est un **check requis**, une PR est obligatoire, `deletion` et `non_fast_forward` sont bloqués. Une PR dont le check n'est pas vert affiche `mergeable_state: blocked` et GitHub refuse le merge. À noter pour la prochaine session qui irait vérifier : l'API classique `/branches/main/protection` renvoie une liste de checks **vide**, parce que l'exigence vit dans un ruleset — c'est `/rules/branches/main` qu'il faut lire.
 
 ### R-11 : mesurer enfin où les gens décrochent (2026-09-05)
 
@@ -1727,7 +1729,101 @@ taille du bouton de partage sur mobile.
 mesurée finement (quel test tombe, et lesquels ne tombent pas), écrite dans
 son fichier de test plutôt que laissée à supposer.
 
-## État du projet au 2026-09-10 — à lire en premier dans une nouvelle session
+### Le design system part vers Claude Design (2026-09-11)
+
+`/design-sync` convertit `src/components/` en un bundle que Claude Design
+consomme, pour que la prochaine passe de design construise avec les vrais
+composants au lieu de les redessiner. Projet créé et synchronisé
+(`23b9671c-a55b-452e-aa41-39906ee71ba8`, 182 fichiers). Les entrées durables
+sont dans `.design-sync/` ; `ds-bundle/` et `dist/` sont générés et gitignorés.
+
+**Ce dépôt est une app, pas un paquet de composants**, et le convertisseur
+suppose l'inverse — d'où trois réglages non évidents, tous documentés en détail
+dans **`.design-sync/NOTES.md`**, à lire avant toute re-synchro : `--entry` doit
+être donné ET ne pas exister (s'il résout, la synthèse depuis `src/` ne tourne
+jamais et on obtient un bundle vide) ; `next/link` est shimmé (sans ça les
+`process.env.__NEXT_*` font échouer les 35 composants d'un coup) ; les tokens
+entrent par le graphe JS, pas par `cssEntry`.
+
+**Les contrats émis décrivaient l'API voulue par le design, pas celle qui est
+livrée.** Le convertisseur ne lit que des `.d.ts`, et les seuls du dépôt étaient
+les bundles de handoff sous `design/ds-extension-0{1,3}-return/` —
+`ScoreDisplay` y portait encore `verdict` (retiré à l'extension 03),
+`PriorityMove` n'avait ni `pillar` ni `upgrade`. `cfg.buildCmd` génère
+maintenant `dist/types` depuis les vraies sources.
+
+**Puis un second défaut du même trajet, plus subtil, trouvé par la session
+locale d'Antoine et pas par moi** : `tsc` recopie les alias `@/…` tels quels
+dans les déclarations, et le projet ts-morph du convertisseur n'a aucun mapping
+`paths`. Douze contrats référençaient donc des types **jamais définis** —
+`sharpness: Sharpness`, `locale: Locale`. Autrement dit l'agent design lisait,
+sur le prop qui existe précisément pour empêcher `Bottleneck` de mentir, un nom
+sans valeurs. `relativize-dts.mjs` réécrit ces specifiers et entre dans
+`buildCmd` : `sharpness: "clear" | "shared" | "level"`, `locale: "en" | "fr"`.
+Ma vérification de `dist/types` cherchait les imports `next` et la pollution
+`tw` ; je n'ai jamais vérifié que les types référencés **se résolvaient**.
+
+**Polices embarquées, et Inter est un seul fichier.** Un `@import` distant
+faisait attendre chaque rendu headless (la passe de vérification passait
+d'environ deux minutes à dix-huit estimées). Google sert le sous-ensemble latin
+d'Inter en police **variable** et renvoie la même URL pour les quatre graisses —
+vérifié contre l'endpoint css2, pas supposé. Déclarée une fois en
+`font-weight: 100 900`, ce qui instancie l'axe wght : 237 Ko → 104 Ko. Vérifié
+en mesurant le texte rendu dans Chromium, pas en relisant le CSS.
+
+*Piège de vérification à retenir* : les polices sont **toujours** chargées en
+mode CORS, et `page.setContent()` donne à la page `origin: null` — un harnais
+construit ainsi rapporte trois familles qui retombent sur le même substitut, ce
+qui ressemble exactement à des `@font-face` cassés. Le signe : trois
+typographies sans rapport qui mesurent la même largeur.
+
+**Six aperçus rendaient parfaitement et affirmaient quelque chose de faux**,
+trouvés à la notation des 116 cellules — tous passés par le render check, aucun
+visible à la relecture de code. Trois sont la même erreur de ma part : avoir
+écrit un nom d'état sans vérifier que le rendu le produisait. `rule` vaut `true`
+par défaut, donc la story « NoRule » dessinait un filet ; `total` vaut `20`,
+donc « WithTotal » était identique à « Chips » au pixel ; et « OverLimit »
+faisait 490 caractères pour une limite de 500, donc n'a jamais montré l'état
+rouge qu'il nommait.
+
+**Une septième « correction » a été annulée après vérification** : le lien
+anglais dans le disclaimer français n'était pas un oubli — la copie produit est
+littéralement « … voir How it works. » et `ResultView` découpait les deux
+langues sur ce littéral exact. L'observation de départ était juste pour autant
+(le pied de page traduisait la même destination), et Antoine a tranché pour
+traduire — voir l'entrée suivante.
+
+**Deux avertissements de validation sont permanents et attendus** : `"Impact"`
+(repli système dans `--font-display`, police Microsoft qu'on n'a pas le droit de
+redistribuer) et `GRID_OVERFLOW` sur `DefinitionPopover` — un test de
+**propriété** (`position: fixed` présent), pas de géométrie ; le `cardMode:
+"single"` qu'il suggère masquerait trois histoires sur quatre alors que la
+capture montre que l'encadrement tient. Ne pas les « corriger ».
+
+**Reproductibilité prouvée plutôt qu'affirmée** : un clone frais de la branche,
+sans rien de l'environnement de session, produit un bundle **identique octet
+pour octet**.
+
+*Note d'outillage* : `.design-sync/`, `.ds-sync/`, `ds-bundle/` et `dist/`
+rejoignent `design/` dans les ignores d'ESLint. Ce n'est pas du confort :
+`no-html-link-for-pages` exigeait `next/link` dans un aperçu qui doit justement
+utiliser un `<a>` nu, puisque `next/link` est shimmé hors du bundle. Suivre la
+règle aurait cassé le bundle.
+
+### « Comment ça marche » aussi dans le disclaimer français (2026-09-11)
+
+Décision d'Antoine. Le pied de page traduisait cette destination
+(`nav-strings.ts`) pendant que la phrase sous le score disait « How it works »
+en français — le même lien, deux noms selon l'écran.
+
+Corrigé à la cause : `ResultView` découpait la phrase sur un littéral anglais
+**codé en dur**, appliqué aux deux langues, ce qui empêchait mécaniquement la
+version française d'avoir son propre libellé. Il découpe maintenant sur
+`tc(NAV_STRINGS.howItWorks, locale)` — le libellé du lien et celui du pied de
+page sont la même chaîne, ils ne peuvent plus diverger. Vérifié sur un build de
+production dans les deux langues, point final bien en dehors du lien.
+
+## État du projet au 2026-09-11 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
 
@@ -1736,6 +1832,10 @@ Tout ce qui précède est un journal, dans l'ordre où les choses se sont passé
 En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue, avec les deux modes (Quick déterministe, Deep dive généré par Gemini). La revue technique et fonctionnelle du 2026-09-05 est **close** (`REVIEW.md`, 26 constats). **La seconde revue (`REVIEW-02.md`) est close** : les 25 constats techniques et fonctionnels sont livrés (PR #61 à #92), et les cinq décisions produit du lot E ont été tranchées par Antoine le 2026-09-07 — R2-26 et R2-27 faits, R2-28 fait mais **livré fermé** derrière `METRICS_PAGE_ENABLED`, R2-29 parti en brief Claude Design (`design/DS-EXTENSION-BRIEF-02.md`, retour attendu), R2-30 volontairement reporté (la fenêtre Tour de France est un sujet de calendrier, pas de backlog).
 
 **Le lot A et le lot B de `REVIEW-03.md` sont livrés** (2026-09-08 pour le document, 2026-09-10 pour la fin du portage). Sa thèse — le mode Quick ne donne aucune action depuis SPEC-ADDENDUM-01 §0, et c'est le seul vrai P0 — est traitée : A4 (PR #102), le brief 03 (#103), la bibliothèque d'actions (#105, relue le 2026-09-09), B1/B3 (#108), puis le **retour de Claude Design porté en quatre lots** — primitives (#109), page de résultat (#111), image de partage (#112), landing (#113). **R2-29 est close du même coup** : le brief 03 l'absorbait, et le design a tranché pour un toggle de ton compact dans la carte d'aperçu de la landing.
+
+**Le design system est synchronisé avec Claude Design** (2026-09-11) : les 34 composants de `src/components/` y sont, avec leurs contrats, 34 aperçus écrits à la main et un en-tête de conventions. Une passe de design construit donc maintenant avec les vrais composants. Les entrées vivent dans `.design-sync/` et **`.design-sync/NOTES.md` est à lire avant toute re-synchro** — ce dépôt est une app, pas un paquet de composants, et trois réglages non évidents en découlent.
+
+**Le check CI est réellement bloquant depuis le passage en public** : un ruleset sur `main` exige `Types, tests, build`. Ce n'est plus la convention manuelle que ce fichier décrivait.
 
 **Ce que le produit fait maintenant et ne faisait pas hier** : un résultat gratuit nomme l'étape qui freine (avec un état de netteté qui refuse de la nommer quand les chiffres ne le portent pas), donne **une action déterministe** — pour le propriétaire comme pour un visiteur arrivé par un lien partagé — montre la carte de partage sur la page plutôt que dans LinkedIn, et met cette action **sur l'image**. La landing prévisualise exactement ça.
 
@@ -1752,6 +1852,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Limite de débit en mémoire (R-15) | Par instance serverless, arrête le cas naïf | Un abus réel. Passer alors sur un store partagé (Upstash) ou le pare-feu Vercel. |
 | Deep dive à ~70 s | Quatre générations en parallèle depuis le bilingue ; l'écran de chargement est conçu pour une attente longue | Si ça devient la norme, regarder le **nombre** de générations, pas le plafond de temps. |
 | `/r/<id>` déborde de 37 px à 320 px | Hors contrat (DESIGN-BRIEF fixe 390 et exige 375-430) ; c'est le `PillarChip` | Une décision de design, pas un correctif évident. Antoine a choisi de laisser. |
+| Deux avertissements permanents de `design-sync validate` | « Impact » (repli système, police propriétaire) et `GRID_OVERFLOW` sur `DefinitionPopover` (test de propriété, pas de géométrie) | Rien — les deux sont attendus et documentés dans `.design-sync/NOTES.md`. Ne pas appliquer le `cardMode: "single"` suggéré : il masquerait trois histoires sur quatre. |
 | `guidelines/` absent du bundle d'extension 01 | Le README du bundle l'annonce, l'archive ne le contenait pas | Sans conséquence à ce jour ; à demander si on en a besoin. |
 | Image OG : tokens recopiés à la main dans `src/lib/og/tokens.ts` | Deux images partagent désormais un seul fichier de constantes | Si `globals.css` change une couleur, la resynchroniser là. |
 | `/metrics` livrée fermée (R2-28) | Le code est en production, la page renvoie 404 tant que `METRICS_PAGE_ENABLED` n'est pas `"true"` dans Vercel, et se cache aussi d'elle-même sous 50 soumissions | Assez de volume pour que des chiffres publics soient crédibles. Poser la variable, rien d'autre à coder. |

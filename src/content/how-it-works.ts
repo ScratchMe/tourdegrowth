@@ -100,7 +100,9 @@ export const HOW_IT_WORKS = {
       en: "Tour de Growth gives a fast, directional estimate — not a professional audit. The score reflects your own answers to 15 questions, useful as a conversation starter, not a final verdict.",
     },
     short: {
-      fr: "Estimation rapide, pas un audit — voir How it works.",
+      // Relu et validé par Antoine (2026-09-11) : le libellé du lien était resté
+      // en anglais alors que le pied de page traduit la même destination.
+      fr: "Estimation rapide, pas un audit — voir Comment ça marche.",
       en: "A quick estimate, not an audit — see How it works.",
     },
   },

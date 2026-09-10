@@ -16,10 +16,36 @@ import nextTypeScript from "eslint-config-next/typescript";
  */
 const config = [
   {
-    // `design/` holds the Claude Design handoff bundle verbatim (reference
-    // artifacts the app never imports and nobody here maintains) — linting
-    // vendored files would only ever produce noise we can't act on.
-    ignores: [".next/**", "node_modules/**", "next-env.d.ts", "public/**", "coverage/**", "design/**"],
+    /*
+     * `design/` holds the Claude Design handoff bundle verbatim (reference
+     * artifacts the app never imports and nobody here maintains) — linting
+     * vendored files would only ever produce noise we can't act on.
+     *
+     * The four design-sync paths are the same class. `.design-sync/` holds
+     * the converter's inputs: config, shims, and the 34 preview files that
+     * esbuild compiles into a standalone design-system bundle. They are
+     * never imported by the app and never run inside Next — which is why
+     * `@next/next/no-html-link-for-pages` fires there and is WRONG: a
+     * preview must use a plain `<a>`, because `next/link` is shimmed out of
+     * that bundle precisely so it can run outside Next (see
+     * `.design-sync/NOTES.md`). `.ds-sync/` is the converter itself,
+     * re-copied from the skill on every run. `ds-bundle/` and `dist/` are
+     * its generated output — both gitignored, so CI never sees them, but
+     * linting them locally after a build yields ~1,200 problems in
+     * machine-written code.
+     */
+    ignores: [
+      ".next/**",
+      "node_modules/**",
+      "next-env.d.ts",
+      "public/**",
+      "coverage/**",
+      "design/**",
+      ".design-sync/**",
+      ".ds-sync/**",
+      "ds-bundle/**",
+      "dist/**",
+    ],
   },
 
   ...nextCoreWebVitals,
