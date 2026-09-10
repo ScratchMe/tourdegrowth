@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Stardos+Stencil:wght@700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;}
+  body{margin:0;background:#CFC7B4;}
+  a{color:#A32E1F;text-decoration:underline;text-underline-offset:2px;}
+  a:hover{color:#211C15;}
+  @media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
+</style>
+</helmet>
+
+<div style="font-family:'Inter',sans-serif;color:#211C15;padding:56px 48px 120px;display:flex;flex-direction:column;gap:88px">
+
+  <div style="max-width:1040px">
+    <div style="font-family:'Stardos Stencil',sans-serif;font-size:34px;letter-spacing:.02em">TOUR DE <span style="color:#D2402C">GROWTH</span></div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:#5B5346;margin-top:10px">Extension 03 — le résultat dit quoi faire ensuite · 5 sections · mobile 390 + desktop 1040</div>
+    <div style="font-size:14.5px;font-weight:500;line-height:1.55;color:#5B5346;max-width:760px;margin-top:14px;text-wrap:pretty">Trois composants nouveaux (<b style="color:#211C15">result/</b> Bottleneck, ShareCard · <b style="color:#211C15">share/</b> ShareImage), deux modifiés (PriorityMove, ToneToggle), deux compositions documentées dans <b style="color:#211C15">guidelines/compositions-ext-03.md</b> : la page résultat réordonnée et la landing avec énoncé du problème. Aucun composant n'a été créé là où une composition suffisait.</div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.6;color:#5B5346;max-width:760px;margin-top:12px">Tokens ajoutés : <b>--ratio-share</b> 1200/630, <b>--pad-share-frame</b> 14px. Aucun nouvel hex. Les couleurs de ShareImage sont des constantes recopiées de colors.css (contrainte Satori).</div>
+    <nav style="display:flex;gap:8px;flex-wrap:wrap;margin-top:20px">
+      <a href="#result" style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:#FBF9F2;text-decoration:none;background:#211C15;border:2px solid #211C15;border-radius:4px;padding:6px 10px">01 Page résultat · §1 §2 §3</a>
+      <a href="#states" style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:#FBF9F2;text-decoration:none;background:#211C15;border:2px solid #211C15;border-radius:4px;padding:6px 10px">02 Bottleneck · 3 états · owner</a>
+      <a href="#og" style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:#FBF9F2;text-decoration:none;background:#211C15;border:2px solid #211C15;border-radius:4px;padding:6px 10px">03 ShareImage · §3</a>
+      <a href="#landing" style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:#FBF9F2;text-decoration:none;background:#211C15;border:2px solid #211C15;border-radius:4px;padding:6px 10px">04 Landing · §4 §5</a>
+      <a href="#handoff" style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:#FBF9F2;text-decoration:none;background:#D2402C;border:2px solid #D2402C;border-radius:4px;padding:6px 10px">05 Réponses · Handoff</a>
+    </nav>
+  </div>
+
+  <!-- ============ 01 RESULT PAGE ============ -->
+  <section id="result" data-screen-label="01 Result page" style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:#DED6C2;border:2px solid #211C15;border-radius:4px;padding:5px 12px">01 · Page résultat — visiteur</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5B5346">§1 Bottleneck dans la carte score · §2 PriorityMove libre, première chose à droite · §3 ShareCard sous les chips</span>
+    </div>
+    <div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap">
+
+      <!-- desktop EN -->
+      <div style="flex:none;width:1040px;background:#E7E1D2;background-image:radial-gradient(circle at 18% 14%, rgba(255,255,255,.45), transparent 42%),radial-gradient(circle at 86% 72%, rgba(0,0,0,.05), transparent 46%);border:2px solid #211C15;border-radius:10px;overflow:hidden">
+        <header style="display:flex;align-items:center;justify-content:space-between;padding:22px 40px;border-bottom:2px dashed rgba(33,28,21,.22)">
+          <span style="font-family:'Stardos Stencil',sans-serif;font-size:19px;letter-spacing:.02em">TOUR DE <span style="color:#D2402C">GROWTH</span></span>
+          <span style="display:inline-flex;border:2px solid #211C15;border-radius:4px;overflow:hidden;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.06em"><span style="background:#211C15;color:#FBF9F2;padding:9px 14px">EN</span><span style="color:#5B5346;padding:9px 14px">FR</span></span>
+        </header>
+        <div style="padding:40px 40px 56px;display:grid;grid-template-columns:440px 480px;gap:40px;align-items:start">
+
+          <div style="display:flex;flex-direction:column;gap:24px">
+            <span style="align-self:flex-start;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A32E1F;background:#F3D9D2;border:2px dashed #D2402C;border-radius:4px;padding:9px 12px">Sample result — not your data</span>
+
+            <div style="background:#FBF9F2;border:2px solid #211C15;border-radius:10px;box-shadow:7px 7px 0 #211C15;padding:24px 26px;margin-right:7px">
+              <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#5B5346">Overall growth score</div>
+              <div style="display:flex;align-items:flex-end;gap:10px;margin-top:8px;font-family:'Stardos Stencil',sans-serif;font-weight:700;line-height:.86">
+                <span style="font-size:144px;background-image:repeating-linear-gradient(115deg, rgba(33,28,21,.06) 0 1px, transparent 1px 4px)">74</span>
+                <span style="font-size:44px;color:#5B5346;padding-bottom:10px">/100</span>
+              </div>
+              <div style="border-top:2px dashed rgba(33,28,21,.22);padding-top:18px;margin-top:20px;display:flex;flex-direction:column;gap:10px">
+                <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A32E1F">One stage holding you back</div>
+                <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+                  <span style="font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:36px;line-height:1.05;letter-spacing:.02em;text-transform:uppercase">Retention</span>
+                  <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5B5346;font-variant-numeric:tabular-nums;white-space:nowrap"><b style="font-weight:600;color:#A32E1F">8</b>/20</span>
+                </div>
+                <div style="font-size:15px;font-weight:500;line-height:1.55;color:#5B5346;text-wrap:pretty">Solid engine, one flat tyre: retention.</div>
+              </div>
+              <div style="font-size:13.5px;font-weight:500;color:#5B5346;margin-top:18px">Built by <a href="#handoff" style="color:#5B5346">Antoine Berthaud</a>, Senior Growth PM</div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:10px;margin-right:7px">
+              <div style="display:grid;grid-template-columns:40px 1fr auto 28px;align-items:center;gap:12px;background:#DED6C2;border:2px dashed #5B5346;border-radius:6px;padding:14px 18px;font-family:'IBM Plex Mono',monospace;font-size:14px"><b style="font-weight:600">18</b><span style="color:#5B5346">/20</span><span>Acquisition</span><span aria-hidden="true" style="width:22px;height:22px;border:2px dashed #5B5346;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:#5B5346">?</span></div>
+              <div style="display:grid;grid-template-columns:40px 1fr auto 28px;align-items:center;gap:12px;background:#DED6C2;border:2px dashed #5B5346;border-radius:6px;padding:14px 18px;font-family:'IBM Plex Mono',monospace;font-size:14px"><b style="font-weight:600">12</b><span style="color:#5B5346">/20</span><span>Activation</span><span aria-hidden="true" style="width:22px;height:22px;border:2px dashed #5B5346;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:#5B5346">?</span></div>
+              <div style="display:grid;grid-template-columns:40px 1fr auto 28px;align-items:center;gap:12px;background:#F3D9D2;border:2px dashed #D2402C;border-radius:6px;padding:14px 18px;font-family:'IBM Plex Mono',monospace;font-size:14px;color:#A32E1F"><b style="font-weight:600">8</b><span>/20</span><span>Retention</span><span aria-hidden="true" style="width:22px;height:22px;border:2px dashed #A32E1F;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px">?</span></div>
+              <div style="display:grid;grid-template-columns:40px 1fr auto 28px;align-items:center;gap:12px;background:#DED6C2;border:2px dashed #5B5346;border-radius:6px;padding:14px 18px;font-family:'IBM Plex Mono',monospace;font-size:14px"><b style="font-weight:600">16</b><span style="color:#5B5346">/20</span><span>Referral</span><span aria-hidden="true" style="width:22px;height:22px;border:2px dashed #5B5346;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:#5B5346">?</span></div>
+              <div style="display:grid;grid-template-columns:40px 1fr auto 28px;align-items:center;gap:12px;background:#DED6C2;border:2px dashed #5B5346;border-radius:6px;padding:14px 18px;font-family:'IBM Plex Mono',monospace;font-size:14px"><b style="font-weight:600">20</b><span style="color:#5B5346">/20</span><span>Revenue</span><span aria-hidden="true" style="width:22px;height:22px;border:2px dashed #5B5346;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:#5B5346">?</span></div>
+            </div>
+
+            <!-- ShareCard -->
+            <div style="margin-right:7px;background:#DED6C2;border:2px solid #211C15;border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:14px">
+              <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#5B5346">Your share image — what LinkedIn and Slack will show</div>
+              <div style="border:2px solid #211C15;border-radius:6px;overflow:hidden;background:#E7E1D2;aspect-ratio:1200/630">
+                <div style="transform:scale(.3308);transform-origin:0 0;width:1200px;height:630px;display:flex;flex-direction:column;background:#E7E1D2;border:2px solid #211C15;font-family:'Inter',sans-serif;color:#211C15">
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:36px 56px 20px">
+                    <div style="font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:30px;letter-spacing:.6px">TOUR DE <span style="color:#D2402C">GROWTH</span></div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:16px;letter-spacing:1px;border:2px dashed #211C15;border-radius:4px;padding:10px 18px;white-space:nowrap">AARRR CHECK-UP — 3 MIN</div>
+                  </div>
+                  <div style="height:6px;border-top:6px dashed rgba(33,28,21,.22)"></div>
+                  <div style="display:flex;flex:1;padding:30px 56px 0;gap:48px">
+                    <div style="display:flex;flex-direction:column;width:560px">
+                      <div style="font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:20px;letter-spacing:2px;color:#5B5346">OVERALL GROWTH SCORE</div>
+                      <div style="display:flex;align-items:flex-end;font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:210px;line-height:.9;margin-top:10px"><span>74</span><span style="font-size:64px;color:#5B5346;margin-left:12px;margin-bottom:18px">/100</span></div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;flex:1;background:#FBF9F2;border:3px dashed #D2402C;border-radius:12px;padding:26px 30px;align-self:flex-start">
+                      <div style="display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:17px;letter-spacing:1.5px;color:#A32E1F"><span>NEXT MOVE</span><span style="color:#5B5346">RETENTION · 8/20</span></div>
+                      <div style="font-weight:600;font-size:28px;line-height:1.3;margin-top:14px">Take one month's cohort of new users and count how many are still active thirty days later.</div>
+                    </div>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:flex-end;padding:0 56px 44px">
+                    <div style="display:flex;flex-direction:column;font-weight:600;font-size:32px;line-height:1.2"><span>Retention is where this growth stalls.</span><span style="color:#5B5346">Where does yours?</span></div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:20px;background:#D2402C;color:#FBF9F2;border-radius:6px;padding:14px 22px">tourdegrowth.com</div>
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+                <button style="font-family:'Inter',sans-serif;font-size:15px;font-weight:600;padding:14px 24px;border-radius:6px;border:2px solid #211C15;background:transparent;color:#211C15;cursor:pointer" style-hover="background:#FBF9F2">Share this result</button>
+                <a href="#og" style="font-family:'Inter',sans-serif;font-size:13.5px;font-weight:500;color:#5B5346;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:6px;display:inline-flex;align-items:center;min-height:44px;padding:0 4px">Save image</a>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:28px">
+            <!-- PriorityMove, free -->
+            <div style="background:#FBF9F2;border:2px dashed #D2402C;border-radius:10px;padding:20px 22px">
+              <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A32E1F;margin-bottom:10px"><span>Next move</span><span style="color:#5B5346;font-variant-numeric:tabular-nums">Retention · 8/20</span></div>
+              <div style="font-size:15px;font-weight:600;line-height:1.5;text-wrap:pretty">Take one month's cohort of new users and count how many are still active thirty days later.</div>
+              <sc-if value="{{ ownerView }}" hint-placeholder-val="{{ false }}">
+                <div style="border-top:2px dashed rgba(33,28,21,.22);margin-top:16px;padding-top:14px;display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+                  <div style="font-size:14.5px;font-weight:500;line-height:1.5;color:#5B5346;text-wrap:pretty">Answer 10 more questions and this move gets rewritten for your business — your channel, your aha moment, your churn.</div>
+                  <button style="font-family:'Inter',sans-serif;font-size:15px;font-weight:600;padding:12px 20px;border-radius:6px;border:2px solid #211C15;background:transparent;color:#211C15;cursor:pointer">Make it specific to my business →</button>
+                </div>
+              </sc-if>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#5B5346">Strengths</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                <div style="background:#FBF9F2;border:2px solid #211C15;border-radius:8px;padding:18px 20px;display:flex;flex-direction:column;gap:8px"><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5B5346">Revenue — 20/20</div><div style="font-size:15px;font-weight:500;line-height:1.5;text-wrap:pretty">Pricing tested, LTV known, expansion playbook active — a revenue pillar that already holds up against much more established teams.</div></div>
+                <div style="background:#FBF9F2;border:2px solid #211C15;border-radius:8px;padding:18px 20px;display:flex;flex-direction:column;gap:8px"><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5B5346">Acquisition — 18/20</div><div style="font-size:15px;font-weight:500;line-height:1.5;text-wrap:pretty">Channel identified, measured, and already benchmarked against alternatives — exactly the discipline expected at this stage.</div></div>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#5B5346">Where you're losing time</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                <div style="background:#F3D9D2;border:2px solid #D2402C;border-radius:8px;padding:18px 20px;display:flex;flex-direction:column;gap:8px"><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#A32E1F">Retention — 8/20</div><div style="font-size:15px;font-weight:500;line-height:1.5;text-wrap:pretty">No retention tracking and no identified churn cause — this is the most urgent thing to address before investing elsewhere.</div></div>
+                <div style="background:#F3D9D2;border:2px solid #D2402C;border-radius:8px;padding:18px 20px;display:flex;flex-direction:column;gap:8px"><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#A32E1F">Activation — 12/20</div><div style="font-size:15px;font-weight:500;line-height:1.5;text-wrap:pretty">The key moment exists in broad strokes, but its completion rate isn't tracked yet — the next onboarding iteration should aim to measure it.</div></div>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:16px;margin-top:4px">
+              <div style="font-size:17px;font-weight:500;line-height:1.55;color:#5B5346">Your own score in 3 minutes — 15 questions, free, no sign-up.</div>
+              <button style="font-family:'Inter',sans-serif;font-size:16px;font-weight:600;padding:18px 24px;border-radius:6px;border:2px solid #CC3E2B;background:#CC3E2B;color:#FBF9F2;cursor:pointer;width:100%" style-focus="outline:3px solid #211C15;outline-offset:3px">Take your own Tour →</button>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.5;color:#5B5346">A quick estimate, not an audit — <a href="#handoff">see How it works</a>.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- mobile FR -->
+      <div style="flex:none;width:390px;background:#E7E1D2;background-image:radial-gradient(circle at 18% 14%, rgba(255,255,255,.45), transparent 42%),radial-gradient(circle at 86% 72%, rgba(0,0,0,.05), transparent 46%);border:2px solid #211C15;border-radius:10px;overflow:hidden">
+        <header style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:2px dashed rgba(33,28,21,.22)">
+          <span style="font-family:'Stardos Stencil',sans-serif;font-size:19px;letter-spacing:.02em">TOUR DE <span style="color:#D2402C">GROWTH</span></span>
+          <span style="display:inline-flex;border:2px solid #211C15;border-radius:4px;overflow:hidden;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.06em"><span style="color:#5B5346;padding:9px 12px">EN</span><span style="background:#211C15;color:#FBF9F2;padding:9px 12px">FR</span></span>
+        </header>
+        <div style="padding:28px 20px 48px;display:flex;flex-direction:column;gap:22px">
+          <span style="align-self:flex-start;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A32E1F;background:#F3D9D2;border:2px dashed #D2402C;border-radius:4px;padding:9px 12px">Exemple — pas tes données</span>
+
+          <div style="background:#FBF9F2;border:2px solid #211C15;border-radius:10px;box-shadow:7px 7px 0 #211C15;padding:22px 20px;margin-right:7px">
+            <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#5B5346">Score global de croissance</div>
+            <div style="display:flex;align-items:flex-end;gap:8px;margin-top:8px;font-family:'Stardos Stencil',sans-serif;font-weight:700;line-height:.88">
+              <span style="font-size:110px;background-image:repeating-linear-gradient(115deg, rgba(33,28,21,.06) 0 1px, transparent 1px 4px)">74</span>
+              <span style="font-size:36px;color:#5B5346;padding-bottom:8px">/100</span>
+            </div>
+            <div style="border-top:2px dashed rgba(33,28,21,.22);padding-top:14px;margin-top:16px;display:flex;flex-direction:column;gap:8px">
+              <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A32E1F">Une étape te freine</div>
+              <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+                <span style="font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:30px;line-height:1.1;letter-spacing:.02em;text-transform:uppercase">Retention</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5B5346;font-variant-numeric:tabular-nums;white-space:nowrap"><b style="font-weight:600;color:#A32E1F">8</b>/20</span>
+              </div>
+              <div style="font-size:14.5px;font-weight:500;line-height:1.5;color:#5B5346;text-wrap:pretty">Un moteur solide, un pneu à plat : la rétention.</div>
+            </div>
+          </div>
+
+          <div style="background:#FBF9F2;border:2px dashed #D2402C;border-radius:10px;padding:20px 22px;margin-right:7px">
+            <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A32E1F;margin-bottom:10px"><span>Prochain coup</span><span style="color:#5B5346;font-variant-numeric:tabular-nums">Retention · 8/20</span></div>
+            <div style="font-size:15px;font-weight:600;line-height:1.5;text-wrap:pretty">Prends la cohorte de nouveaux utilisateurs d'un mois et compte combien sont encore actifs trente jours plus tard.</div>
+          </div>
+
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-right:7px">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;background:#DED6C2;border:2px dashed #5B5346;border-radius:6px;padding:10px 12px;white-space:nowrap;display:inline-flex;align-items:baseline;gap:4px"><b style="font-weight:600">18</b><span style="color:#5B5346">/20</span> Acquisition</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;background:#DED6C2;border:2px dashed #5B5346;border-radius:6px;padding:10px 12px;white-space:nowrap;display:inline-flex;align-items:baseline;gap:4px"><b style="font-weight:600">12</b><span style="color:#5B5346">/20</span> Activation</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;background:#F3D9D2;border:2px dashed #D2402C;border-radius:6px;padding:10px 12px;color:#A32E1F;white-space:nowrap;display:inline-flex;align-items:baseline;gap:4px"><b style="font-weight:600">8</b>/20 Retention</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;background:#DED6C2;border:2px dashed #5B5346;border-radius:6px;padding:10px 12px;white-space:nowrap;display:inline-flex;align-items:baseline;gap:4px"><b style="font-weight:600">16</b><span style="color:#5B5346">/20</span> Referral</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;background:#DED6C2;border:2px dashed #5B5346;border-radius:6px;padding:10px 12px;white-space:nowrap;display:inline-flex;align-items:baseline;gap:4px"><b style="font-weight:600">20</b><span style="color:#5B5346">/20</span> Revenue</span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:12px;margin-right:7px">
+            <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#5B5346">Points forts</div>
+            <div style="background:#FBF9F2;border:2px solid #211C15;border-radius:8px;padding:16px 18px;display:flex;flex-direction:column;gap:6px"><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5B5346">Revenue — 20/20</div><div style="font-size:14.5px;font-weight:500;line-height:1.5;text-wrap:pretty">Pricing testé, LTV connue, playbook d'expansion actif — un pilier revenu qui tient déjà face à des équipes bien plus établies.</div></div>
+            <div style="background:#FBF9F2;border:2px solid #211C15;border-radius:8px;padding:16px 18px;display:flex;flex-direction:column;gap:6px"><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5B5346">Acquisition — 18/20</div><div style="font-size:14.5px;font-weight:500;line-height:1.5;text-wrap:pretty">Canal identifié, mesuré et déjà comparé aux alternatives — exactement la discipline attendue à ce stade.</div></div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:12px;margin-right:7px">
+            <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#5B5346">Où tu perds du temps</div>
+            <div style="background:#F3D9D2;border:2px solid #D2402C;border-radius:8px;padding:16px 18px;display:flex;flex-direction:column;gap:6px"><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#A32E1F">Retention — 8/20</div><div style="font-size:14.5px;font-weight:500;line-height:1.5;text-wrap:pretty">Aucun suivi de rétention, aucune cause de churn identifiée — c'est le point le plus urgent à traiter avant d'investir ailleurs.</div></div>
+            <div style="background:#F3D9D2;border:2px solid #D2402C;border-radius:8px;padding:16px 18px;display:flex;flex-direction:column;gap:6px"><div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#A32E1F">Activation — 12/20</div><div style="font-size:14.5px;font-weight:500;line-height:1.5;text-wrap:pretty">Le moment clé existe dans les grandes lignes, mais son taux de complétion n'est pas encore mesuré — la prochaine itération d'onboarding devrait viser à le mesurer.</div></div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:14px;margin-right:7px">
+            <div style="font-size:15px;font-weight:500;line-height:1.55;color:#5B5346">Ton propre score en 3 minutes — 15 questions, gratuit, sans inscription.</div>
+            <button style="font-family:'Inter',sans-serif;font-size:16px;font-weight:600;padding:16px 20px;border-radius:6px;border:2px solid #CC3E2B;background:#CC3E2B;color:#FBF9F2;cursor:pointer;width:100%">Fais ton propre Tour →</button>
+          </div>
+
+          <div style="margin-right:7px;background:#DED6C2;border:2px solid #211C15;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:12px">
+            <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#5B5346;line-height:1.5">Ton image de partage — ce que LinkedIn et Slack afficheront</div>
+            <div style="border:2px solid #211C15;border-radius:6px;overflow:hidden;background:#E7E1D2;aspect-ratio:1200/630">
+              <div style="transform:scale(.2558);transform-origin:0 0;width:1200px;height:630px;display:flex;flex-direction:column;background:#E7E1D2;border:2px solid #211C15;font-family:'Inter',sans-serif;color:#211C15">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:36px 56px 20px">
+                  <div style="font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:30px;letter-spacing:.6px">TOUR DE <span style="color:#D2402C">GROWTH</span></div>
+                  <div style="font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:16px;letter-spacing:1px;border:2px dashed #211C15;border-radius:4px;padding:10px 18px;white-space:nowrap">CHECK-UP AARRR — 3 MIN</div>
+                </div>
+                <div style="height:6px;border-top:6px dashed rgba(33,28,21,.22)"></div>
+                <div style="display:flex;flex:1;padding:30px 56px 0;gap:48px">
+                  <div style="display:flex;flex-direction:column;width:560px">
+                    <div style="font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:20px;letter-spacing:2px;color:#5B5346">SCORE GLOBAL DE CROISSANCE</div>
+                    <div style="display:flex;align-items:flex-end;font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:210px;line-height:.9;margin-top:10px"><span>74</span><span style="font-size:64px;color:#5B5346;margin-left:12px;margin-bottom:18px">/100</span></div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;flex:1;background:#FBF9F2;border:3px dashed #D2402C;border-radius:12px;padding:26px 30px;align-self:flex-start">
+                    <div style="display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:17px;letter-spacing:1.5px;color:#A32E1F"><span>PROCHAIN COUP</span><span style="color:#5B5346">RETENTION · 8/20</span></div>
+                    <div style="font-weight:600;font-size:28px;line-height:1.3;margin-top:14px">Prends la cohorte de nouveaux utilisateurs d'un mois et compte combien sont encore actifs trente jours plus tard.</div>
+                  </div>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:flex-end;padding:0 56px 44px">
+                  <div style="display:flex;flex-direction:column;font-weight:600;font-size:32px;line-height:1.2"><span>C'est la rétention qui cale ici.</span><span style="color:#5B5346">Et chez toi ?</span></div>
+                  <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:20px;background:#D2402C;color:#FBF9F2;border-radius:6px;padding:14px 22px">tourdegrowth.com</div>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+              <button style="font-family:'Inter',sans-serif;font-size:16px;font-weight:600;padding:16px 20px;border-radius:6px;border:2px solid #211C15;background:transparent;color:#211C15;cursor:pointer;flex:1 1 auto">Partager ce résultat</button>
+              <a href="#og" style="font-family:'Inter',sans-serif;font-size:13.5px;font-weight:500;color:#5B5346;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:6px;display:inline-flex;align-items:center;min-height:44px;padding:0 4px">Enregistrer l'image</a>
+            </div>
+          </div>
+
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.5;color:#5B5346;text-align:center;text-wrap:pretty;margin-right:7px">Une estimation rapide, pas un audit — <a href="#handoff">voir Comment ça marche</a>.</div>
+        </div>
+      </div>
+    </div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.6;color:#5B5346;max-width:760px">Ordre de lecture : numéral → goulot (même face stencil, une taille en dessous) → verdict → prochain coup. Le verdict quitte ScoreDisplay et clôt Bottleneck ; la carte « Priority move — locked » disparaît, PriorityMove porte l'action gratuite pour tout le monde ; « Share this result » quitte la rangée des CTA (le primaire reste seul) et rejoint ShareCard ; les cartes faiblesses sont ordonnées goulot en premier. Tweak <b>ownerView</b> : le seam Deep dive sous l'action.</div>
+  </section>
+
+  <!-- ============ 02 BOTTLENECK STATES ============ -->
+  <section id="states" data-screen-label="02 Bottleneck states" style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:#DED6C2;border:2px solid #211C15;border-radius:4px;padding:5px 12px">02 · result/Bottleneck — clear · shared · level</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5B5346">la netteté est le mécanisme d'honnêteté · libellés placeholder ≤ 32 caractères en capitales · + PriorityMove propriétaire</span>
+    </div>
+    <div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap">
+      <div style="flex:none;width:1040px;background:#E7E1D2;background-image:radial-gradient(circle at 18% 14%, rgba(255,255,255,.45), transparent 42%),radial-gradient(circle at 86% 72%, rgba(0,0,0,.05), transparent 46%);border:2px solid #211C15;border-radius:10px;overflow:hidden;padding:40px">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:32px;align-items:start">
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:#5B5346">clear · écart ≥ 4 · 74/100</div>
+            <div style="background:#FBF9F2;border:2px solid #211C15;border-radius:10px;box-shadow:7px 7px 0 #211C15;padding:22px 22px;margin-right:7px">
+              <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#5B5346">Overall growth score</div>
+              <div style="display:flex;align-items:flex-end;gap:8px;margin-top:8px;font-family:'Stardos Stencil',sans-serif;font-weight:700;line-height:.88"><span style="font-size:110px">74</span><span style="font-size:36px;color:#5B5346;padding-bottom:8px">/100</span></div>
+              <div style="border-top:2px dashed rgba(33,28,21,.22);padding-top:14px;margin-top:16px;display:flex;flex-direction:column;gap:8px">
+                <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A32E1F">One stage holding you back</div>
+                <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:30px;line-height:1.1;letter-spacing:.02em;text-transform:uppercase">Retention</span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5B5346;white-space:nowrap"><b style="font-weight:600;color:#A32E1F">8</b>/20</span></div>
+                <div style="font-size:14.5px;font-weight:500;line-height:1.5;color:#5B5346;text-wrap:pretty">Solid engine, one flat tyre: retention.</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:#5B5346">shared · écart ≤ 2 · 61/100 · FR</div>
+            <div style="background:#FBF9F2;border:2px solid #211C15;border-radius:10px;box-shadow:7px 7px 0 #211C15;padding:22px 22px;margin-right:7px">
+              <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#5B5346">Score global de croissance</div>
+              <div style="display:flex;align-items:flex-end;gap:8px;margin-top:8px;font-family:'Stardos Stencil',sans-serif;font-weight:700;line-height:.88"><span style="font-size:110px">61</span><span style="font-size:36px;color:#5B5346;padding-bottom:8px">/100</span></div>
+              <div style="border-top:2px dashed rgba(33,28,21,.22);padding-top:14px;margin-top:16px;display:flex;flex-direction:column;gap:8px">
+                <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A32E1F">Deux étapes te freinent</div>
+                <div style="display:flex;flex-direction:column;gap:4px">
+                  <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:30px;line-height:1.1;letter-spacing:.02em;text-transform:uppercase">Activation</span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5B5346;white-space:nowrap"><b style="font-weight:600;color:#A32E1F">9</b>/20</span></div>
+                  <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:30px;line-height:1.1;letter-spacing:.02em;text-transform:uppercase">Referral</span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5B5346;white-space:nowrap"><b style="font-weight:600;color:#A32E1F">10</b>/20</span></div>
+                </div>
+                <div style="font-size:14.5px;font-weight:500;line-height:1.5;color:#5B5346;text-wrap:pretty">Le moteur tourne, mais deux roues patinent en même temps.</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:#5B5346">level · cinq étapes fortes · 91/100</div>
+            <div style="background:#FBF9F2;border:2px solid #211C15;border-radius:10px;box-shadow:7px 7px 0 #211C15;padding:22px 22px;margin-right:7px">
+              <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#5B5346">Overall growth score</div>
+              <div style="display:flex;align-items:flex-end;gap:8px;margin-top:8px;font-family:'Stardos Stencil',sans-serif;font-weight:700;line-height:.88"><span style="font-size:110px">91</span><span style="font-size:36px;color:#5B5346;padding-bottom:8px">/100</span></div>
+              <div style="border-top:2px dashed rgba(33,28,21,.22);padding-top:14px;margin-top:16px;display:flex;flex-direction:column;gap:8px">
+                <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#5B5346">Nothing is stalling you</div>
+                <div style="font-size:14.5px;font-weight:500;line-height:1.5;color:#5B5346;text-wrap:pretty">Every stage is solid. The question now is which one you push, not which one you fix.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:#5B5346;border-top:2px solid #211C15;padding-top:10px;margin-top:40px">↓ PriorityMove — propriétaire (seam Deep dive) · niveau « level » (pas de pilier) · après Deep dive</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:32px;align-items:start;margin-top:20px">
+          <div style="background:#FBF9F2;border:2px dashed #D2402C;border-radius:10px;padding:20px 22px">
+            <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A32E1F;margin-bottom:10px"><span>Next move</span><span style="color:#5B5346">Retention · 8/20</span></div>
+            <div style="font-size:15px;font-weight:600;line-height:1.5;text-wrap:pretty">Take one month's cohort of new users and count how many are still active thirty days later.</div>
+            <div style="border-top:2px dashed rgba(33,28,21,.22);margin-top:16px;padding-top:14px;display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+              <div style="font-size:14.5px;font-weight:500;line-height:1.5;color:#5B5346;text-wrap:pretty">Answer 10 more questions and this move gets rewritten for your business — your channel, your aha moment, your churn.</div>
+              <button style="font-family:'Inter',sans-serif;font-size:15px;font-weight:600;padding:12px 20px;border-radius:6px;border:2px solid #211C15;background:transparent;color:#211C15;cursor:pointer">Make it specific to my business →</button>
+            </div>
+          </div>
+          <div style="background:#FBF9F2;border:2px dashed #D2402C;border-radius:10px;padding:20px 22px">
+            <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A32E1F;margin-bottom:10px">Prochain coup</div>
+            <div style="font-size:15px;font-weight:600;line-height:1.5;text-wrap:pretty">Rien ne te freine — chaque étape tient. La question n'est plus laquelle réparer, mais laquelle pousser.</div>
+          </div>
+          <div style="background:#FBF9F2;border:2px dashed #D2402C;border-radius:10px;padding:20px 22px">
+            <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A32E1F;margin-bottom:10px"><span>Priority move</span><span style="color:#5B5346">Retention · 8/20</span></div>
+            <div style="font-size:15px;font-weight:600;line-height:1.5;text-wrap:pretty">Your physiotherapists churn before importing their patient list: make the import the first screen after sign-up, and measure D14 on that cohort.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.6;color:#5B5346;max-width:760px">§1 : pas de jauge, pas de barre, pas de badge de confiance. Un nom et un chiffre sur 20 est toute l'affirmation. « shared » empile deux noms à la même taille — jamais un grand et un petit. « level » : libellé en --text-muted, pas de nom ; PriorityMove porte alors la phrase fixe sans pilier ni score. Longueur supposée pour les trois libellés : ≤ 32 caractères, une ligne à 390px.</div>
+  </section>
+
+  <!-- ============ 03 SHARE IMAGE ============ -->
+  <section id="og" data-screen-label="03 ShareImage" style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:#DED6C2;border:2px solid #211C15;border-radius:4px;padding:5px 12px">03 · share/ShareImage — 1200×630 · Satori</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5B5346">ce qui cède : les cinq lignes de piliers · ce qui ne bouge pas : numéral, en-tête, règle, accroche, URL</span>
+    </div>
+    <div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap">
+      <div style="flex:none;width:600px;height:315px;border:2px solid #211C15;border-radius:6px;overflow:hidden">
+        <div style="zoom:.5;width:1200px;height:630px;display:flex;flex-direction:column;background:#E7E1D2;border:2px solid #211C15;font-family:'Inter',sans-serif;color:#211C15">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:36px 56px 20px">
+            <div style="font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:30px;letter-spacing:.6px">TOUR DE <span style="color:#D2402C">GROWTH</span></div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:16px;letter-spacing:1px;border:2px dashed #211C15;border-radius:4px;padding:10px 18px;white-space:nowrap">AARRR CHECK-UP — 3 MIN</div>
+          </div>
+          <div style="height:6px;border-top:6px dashed rgba(33,28,21,.22)"></div>
+          <div style="display:flex;flex:1;padding:30px 56px 0;gap:48px">
+            <div style="display:flex;flex-direction:column;width:560px">
+              <div style="font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:20px;letter-spacing:2px;color:#5B5346">OVERALL GROWTH SCORE</div>
+              <div style="display:flex;align-items:flex-end;font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:210px;line-height:.9;margin-top:10px"><span>74</span><span style="font-size:64px;color:#5B5346;margin-left:12px;margin-bottom:18px">/100</span></div>
+            </div>
+            <div style="display:flex;flex-direction:column;flex:1;background:#FBF9F2;border:3px dashed #D2402C;border-radius:12px;padding:26px 30px;align-self:flex-start">
+              <div style="display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:17px;letter-spacing:1.5px;color:#A32E1F"><span>NEXT MOVE</span><span style="color:#5B5346">RETENTION · 8/20</span></div>
+              <div style="font-weight:600;font-size:28px;line-height:1.3;margin-top:14px">Take one month's cohort of new users and count how many are still active thirty days later.</div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;padding:0 56px 44px">
+            <div style="display:flex;flex-direction:column;font-weight:600;font-size:32px;line-height:1.2"><span>Retention is where this growth stalls.</span><span style="color:#5B5346">Where does yours?</span></div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:20px;background:#D2402C;color:#FBF9F2;border-radius:6px;padding:14px 22px">tourdegrowth.com</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="flex:none;width:600px;height:315px;border:2px solid #211C15;border-radius:6px;overflow:hidden">
+        <div style="zoom:.5;width:1200px;height:630px;display:flex;flex-direction:column;background:#E7E1D2;border:6px solid #D2402C;font-family:'Inter',sans-serif;color:#211C15">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:32px 52px 20px">
+            <div style="font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:30px;letter-spacing:.6px">TOUR DE <span style="color:#D2402C">GROWTH</span></div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:16px;letter-spacing:1px;background:#D2402C;color:#FBF9F2;border-radius:4px;padding:10px 18px">🔥 ROAST MODE</div>
+          </div>
+          <div style="height:6px;border-top:6px dashed rgba(33,28,21,.22)"></div>
+          <div style="display:flex;flex:1;padding:30px 52px 0;gap:48px">
+            <div style="display:flex;flex-direction:column;width:560px">
+              <div style="font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:20px;letter-spacing:2px;color:#5B5346">SCORE GLOBAL DE CROISSANCE</div>
+              <div style="display:flex;align-items:flex-end;font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:210px;line-height:.9;margin-top:10px"><span>74</span><span style="font-size:64px;color:#5B5346;margin-left:12px;margin-bottom:18px">/100</span></div>
+            </div>
+            <div style="display:flex;flex-direction:column;flex:1;background:#FBF9F2;border:3px dashed #D2402C;border-radius:12px;padding:26px 30px;align-self:flex-start">
+              <div style="display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:17px;letter-spacing:1.5px;color:#A32E1F"><span>PROCHAIN COUP</span><span style="color:#5B5346">RETENTION · 8/20</span></div>
+              <div style="font-weight:600;font-size:28px;line-height:1.3;margin-top:14px">Écris ton moment « aha » comme un événement que tu pourrais tracer, puis trace-le — un moment qu'on ne peut pas compter n'est pas encore défini.</div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;padding:0 52px 40px">
+            <div style="display:flex;flex-direction:column;font-weight:600;font-size:32px;line-height:1.2"><span>Le revenu décolle. La rétention fuit.</span><span style="color:#5B5346">Et toi, tu fuis où ?</span></div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:20px;background:#D2402C;color:#FBF9F2;border-radius:6px;padding:14px 22px">tourdegrowth.com</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.6;color:#5B5346;max-width:760px">À gauche : neutre EN, entrée la plus courte. À droite : roast FR, entrée la plus longue de la bibliothèque (144 caractères) — cinq lignes à Inter 600 28px/1.3, la carte se termine au-dessus de l'accroche. Même grammaire « rouge pointillé = conseil » que PriorityMove sur la page, pour qu'un lecteur qui clique reconnaisse ce qu'il a vu. Constantes hex recopiées de colors.css ; flexbox uniquement.</div>
+  </section>
+
+  <!-- ============ 04 LANDING ============ -->
+  <section id="landing" data-screen-label="04 Landing" style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:#DED6C2;border:2px solid #211C15;border-radius:4px;padding:5px 12px">04 · Landing — §5 problème · §4 carte aperçu + ToneToggle compact</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5B5346">le toggle est vivant — clique</span>
+    </div>
+    <div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap">
+
+      <div style="flex:none;width:1040px;background:#E7E1D2;background-image:radial-gradient(circle at 18% 14%, rgba(255,255,255,.45), transparent 42%),radial-gradient(circle at 86% 72%, rgba(0,0,0,.05), transparent 46%);border:2px solid #211C15;border-radius:10px;overflow:hidden">
+        <header style="display:flex;align-items:center;justify-content:space-between;padding:22px 40px;border-bottom:2px dashed rgba(33,28,21,.22)">
+          <span style="font-family:'Stardos Stencil',sans-serif;font-size:19px;letter-spacing:.02em">TOUR DE <span style="color:#D2402C">GROWTH</span></span>
+          <div style="display:flex;align-items:center;gap:24px">
+            <span style="display:inline-flex;border:2px solid #211C15;border-radius:4px;overflow:hidden;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.06em"><span style="background:#211C15;color:#FBF9F2;padding:9px 14px">EN</span><span style="color:#5B5346;padding:9px 14px">FR</span></span>
+            <a href="#handoff" style="font-size:13.5px;font-weight:500;color:#5B5346;text-decoration-thickness:2px;text-underline-offset:5px">Glossary</a>
+            <a href="#handoff" style="font-size:13.5px;font-weight:500;color:#5B5346;text-decoration-thickness:2px;text-underline-offset:5px">How it works</a>
+            <button style="font-family:'Inter',sans-serif;font-size:15px;font-weight:600;padding:12px 20px;border-radius:6px;border:2px solid #CC3E2B;background:#CC3E2B;color:#FBF9F2;cursor:pointer">Start your Tour →</button>
+          </div>
+        </header>
+        <div style="padding:48px 40px 64px;display:grid;grid-template-columns:440px 480px;gap:40px;align-items:start">
+          <div style="display:flex;flex-direction:column;gap:28px">
+            <span style="align-self:flex-start;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#211C15;border:2px dashed #211C15;border-radius:4px;padding:9px 12px">№ 15 questions — 3 min — free entry</span>
+            <h1 style="font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:62px;line-height:1.02;letter-spacing:.02em;margin:0;text-transform:none">Where does<br>your growth<br><span style="color:#D2402C">stall?</span></h1>
+            <p style="font-size:17px;font-weight:500;line-height:1.55;color:#5B5346;margin:0;text-wrap:pretty">A guided AARRR check-up across Acquisition, Activation, Retention, Referral and Revenue — scored, explained, and built to share.</p>
+            <div style="display:flex;gap:12px;flex-wrap:wrap">
+              <button style="font-family:'Inter',sans-serif;font-size:16px;font-weight:600;padding:18px 26px;border-radius:6px;border:2px solid #CC3E2B;background:#CC3E2B;color:#FBF9F2;cursor:pointer">Start your Tour →</button>
+              <button style="font-family:'Inter',sans-serif;font-size:16px;font-weight:600;padding:18px 26px;border-radius:6px;border:2px solid #211C15;background:transparent;color:#211C15;cursor:pointer">See a sample result</button>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:20px">
+            <p style="font-size:17px;font-weight:500;line-height:1.55;color:#211C15;margin:0;max-width:34em;text-wrap:pretty">Growth rarely stalls everywhere at once. Most teams have one stage holding the rest back — and it is usually not the one they are working on.</p>
+            <div style="background:#FBF9F2;border:2px solid #211C15;border-radius:10px;box-shadow:7px 7px 0 #211C15;padding:22px 22px;margin-right:7px;display:flex;flex-direction:column;gap:16px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+                <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#5B5346">Overall growth score — sample B2B SaaS</div>
+                <div role="radiogroup" aria-label="Tone" style="display:inline-flex;border:2px solid #211C15;border-radius:4px;overflow:hidden;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.04em">
+                  <button role="radio" aria-checked="{{ isStraight }}" onClick="{{ setStraight }}" style="font:inherit;letter-spacing:inherit;border:none;cursor:pointer;min-height:32px;padding:0 10px;white-space:nowrap;background:{{ straightBg }};color:{{ straightFg }}">Straight up</button>
+                  <button role="radio" aria-checked="{{ isRoast }}" onClick="{{ setRoast }}" style="font:inherit;letter-spacing:inherit;border:none;cursor:pointer;min-height:32px;padding:0 10px;white-space:nowrap;background:{{ roastBg }};color:{{ roastFg }}">Roast me 🔥</button>
+                </div>
+              </div>
+              <div style="display:flex;align-items:flex-end;gap:8px;font-family:'Stardos Stencil',sans-serif;font-weight:700;line-height:.88"><span style="font-size:110px;background-image:repeating-linear-gradient(115deg, rgba(33,28,21,.06) 0 1px, transparent 1px 4px)">74</span><span style="font-size:36px;color:#5B5346;padding-bottom:8px">/100</span></div>
+              <div style="border-top:2px dashed rgba(33,28,21,.22);padding-top:14px;display:flex;flex-direction:column;gap:8px">
+                <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A32E1F">One stage holding you back</div>
+                <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:30px;line-height:1.1;letter-spacing:.02em;text-transform:uppercase;color:{{ nameColor }}">Retention</span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5B5346;white-space:nowrap"><b style="font-weight:600;color:#A32E1F">8</b>/20</span></div>
+                <div style="font-size:14.5px;font-weight:500;line-height:1.5;color:#5B5346;text-wrap:pretty">{{ verdictEn }}</div>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px">
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;background:#DED6C2;border:2px dashed #5B5346;border-radius:6px;padding:10px 12px;white-space:nowrap;display:inline-flex;align-items:baseline;gap:4px"><b style="font-weight:600">18</b><span style="color:#5B5346">/20</span> Acquisition</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;background:#DED6C2;border:2px dashed #5B5346;border-radius:6px;padding:10px 12px;white-space:nowrap;display:inline-flex;align-items:baseline;gap:4px"><b style="font-weight:600">12</b><span style="color:#5B5346">/20</span> Activation</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;background:#F3D9D2;border:2px dashed #D2402C;border-radius:6px;padding:10px 12px;color:#A32E1F;white-space:nowrap;display:inline-flex;align-items:baseline;gap:4px"><b style="font-weight:600">8</b>/20 Retention</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;background:#DED6C2;border:2px dashed #5B5346;border-radius:6px;padding:10px 12px;white-space:nowrap;display:inline-flex;align-items:baseline;gap:4px"><b style="font-weight:600">16</b><span style="color:#5B5346">/20</span> Referral</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;background:#DED6C2;border:2px dashed #5B5346;border-radius:6px;padding:10px 12px;white-space:nowrap;display:inline-flex;align-items:baseline;gap:4px"><b style="font-weight:600">20</b><span style="color:#5B5346">/20</span> Revenue</span>
+              </div>
+              <div style="background:#FBF9F2;border:2px dashed #D2402C;border-radius:10px;padding:16px 18px">
+                <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A32E1F;margin-bottom:8px"><span>Next move</span><span style="color:#5B5346">Retention · 8/20</span></div>
+                <div style="font-size:14.5px;font-weight:600;line-height:1.5;text-wrap:pretty">Take one month's cohort of new users and count how many are still active thirty days later.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- mobile FR -->
+      <div style="flex:none;width:390px;background:#E7E1D2;background-image:radial-gradient(circle at 18% 14%, rgba(255,255,255,.45), transparent 42%),radial-gradient(circle at 86% 72%, rgba(0,0,0,.05), transparent 46%);border:2px solid #211C15;border-radius:10px;overflow:hidden">
+        <header style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:2px dashed rgba(33,28,21,.22)">
+          <span style="font-family:'Stardos Stencil',sans-serif;font-size:19px;letter-spacing:.02em">TOUR DE <span style="color:#D2402C">GROWTH</span></span>
+          <span style="display:inline-flex;border:2px solid #211C15;border-radius:4px;overflow:hidden;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.06em"><span style="color:#5B5346;padding:9px 12px">EN</span><span style="background:#211C15;color:#FBF9F2;padding:9px 12px">FR</span></span>
+        </header>
+        <div style="padding:32px 20px 48px;display:flex;flex-direction:column;gap:24px">
+          <span style="align-self:flex-start;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;border:2px dashed #211C15;border-radius:4px;padding:9px 12px">№ 15 questions — 3 min — entrée libre</span>
+          <h1 style="font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:40px;line-height:1.03;letter-spacing:.02em;margin:0">Où ta croissance<br><span style="color:#D2402C">cale ?</span></h1>
+          <p style="font-size:15px;font-weight:500;line-height:1.55;color:#5B5346;margin:0;text-wrap:pretty">Un check-up AARRR guidé sur Acquisition, Activation, Rétention, Referral et Revenue — noté, expliqué, fait pour être partagé.</p>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-right:7px">
+            <button style="font-family:'Inter',sans-serif;font-size:16px;font-weight:600;padding:16px 20px;border-radius:6px;border:2px solid #CC3E2B;background:#CC3E2B;color:#FBF9F2;cursor:pointer;width:100%">Commencer ton Tour →</button>
+            <button style="font-family:'Inter',sans-serif;font-size:16px;font-weight:600;padding:16px 20px;border-radius:6px;border:2px solid #211C15;background:transparent;color:#211C15;cursor:pointer;width:100%">Voir un exemple de résultat</button>
+          </div>
+          <p style="font-size:15px;font-weight:500;line-height:1.55;color:#211C15;margin:8px 0 0;text-wrap:pretty">La croissance cale rarement partout à la fois. La plupart des équipes ont une étape qui freine les autres — et ce n'est généralement pas celle sur laquelle elles travaillent.</p>
+          <div style="background:#FBF9F2;border:2px solid #211C15;border-radius:10px;box-shadow:7px 7px 0 #211C15;padding:20px 18px;margin-right:7px;display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#5B5346;line-height:1.5">Score global — exemple SaaS B2B</div>
+              <div role="radiogroup" aria-label="Ton" style="display:inline-flex;border:2px solid #211C15;border-radius:4px;overflow:hidden;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.04em">
+                <button role="radio" aria-checked="{{ isStraight }}" onClick="{{ setStraight }}" style="font:inherit;letter-spacing:inherit;border:none;cursor:pointer;min-height:32px;padding:0 10px;white-space:nowrap;background:{{ straightBg }};color:{{ straightFg }}">Sans détour</button>
+                <button role="radio" aria-checked="{{ isRoast }}" onClick="{{ setRoast }}" style="font:inherit;letter-spacing:inherit;border:none;cursor:pointer;min-height:32px;padding:0 10px;white-space:nowrap;background:{{ roastBg }};color:{{ roastFg }}">Roast-moi 🔥</button>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-end;gap:8px;font-family:'Stardos Stencil',sans-serif;font-weight:700;line-height:.88"><span style="font-size:96px">74</span><span style="font-size:32px;color:#5B5346;padding-bottom:8px">/100</span></div>
+            <div style="border-top:2px dashed rgba(33,28,21,.22);padding-top:14px;display:flex;flex-direction:column;gap:8px">
+              <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A32E1F">Une étape te freine</div>
+              <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font-family:'Stardos Stencil',sans-serif;font-weight:700;font-size:30px;line-height:1.1;letter-spacing:.02em;text-transform:uppercase;color:{{ nameColor }}">Retention</span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#5B5346;white-space:nowrap"><b style="font-weight:600;color:#A32E1F">8</b>/20</span></div>
+              <div style="font-size:14.5px;font-weight:500;line-height:1.5;color:#5B5346;text-wrap:pretty">{{ verdictFr }}</div>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;background:#DED6C2;border:2px dashed #5B5346;border-radius:6px;padding:10px 12px;white-space:nowrap;display:inline-flex;align-items:baseline;gap:4px"><b style="font-weight:600">18</b><span style="color:#5B5346">/20</span> Acquisition</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;background:#DED6C2;border:2px dashed #5B5346;border-radius:6px;padding:10px 12px;white-space:nowrap;display:inline-flex;align-items:baseline;gap:4px"><b style="font-weight:600">12</b><span style="color:#5B5346">/20</span> Activation</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;background:#F3D9D2;border:2px dashed #D2402C;border-radius:6px;padding:10px 12px;color:#A32E1F;white-space:nowrap;display:inline-flex;align-items:baseline;gap:4px"><b style="font-weight:600">8</b>/20 Retention</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;background:#DED6C2;border:2px dashed #5B5346;border-radius:6px;padding:10px 12px;white-space:nowrap;display:inline-flex;align-items:baseline;gap:4px"><b style="font-weight:600">16</b><span style="color:#5B5346">/20</span> Referral</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;background:#DED6C2;border:2px dashed #5B5346;border-radius:6px;padding:10px 12px;white-space:nowrap;display:inline-flex;align-items:baseline;gap:4px"><b style="font-weight:600">20</b><span style="color:#5B5346">/20</span> Revenue</span>
+            </div>
+            <div style="background:#FBF9F2;border:2px dashed #D2402C;border-radius:10px;padding:16px 18px">
+              <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A32E1F;margin-bottom:8px"><span>Prochain coup</span><span style="color:#5B5346">Retention · 8/20</span></div>
+              <div style="font-size:14.5px;font-weight:600;line-height:1.5;text-wrap:pretty">Prends la cohorte de nouveaux utilisateurs d'un mois et compte combien sont encore actifs trente jours plus tard.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.6;color:#5B5346;max-width:760px">§5 : l'énoncé sort au-dessus de la carte, aux deux largeurs — affirmation, puis preuve ; H1 et paire de CTA ne bougent pas. §4a : la carte montre exactement ce que le résultat livre (Bottleneck + PriorityMove, size mobile). §4b : ToneToggle compact dans l'emplacement libéré par « Stage 5/5 » — il démontre le roast sans troisième CTA ; il ne change que le verdict et peint le nom en rouge, jamais le cadre ni les chips. Mobile inclus : il vit dans la carte, pas dans l'en-tête plein. Le 🔥 reste sur le libellé, comme sur le sélecteur après la Q15.</div>
+  </section>
+
+  <!-- ============ 05 ANSWERS / HANDOFF ============ -->
+  <section id="handoff" data-screen-label="05 Answers Handoff" style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:#D2402C;color:#FBF9F2;border:2px solid #D2402C;border-radius:4px;padding:5px 12px">05 · Réponses aux 8 questions ouvertes · Handoff</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5B5346">design/ds-extension-03-return/</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;max-width:1040px">
+      <div style="background:#FBF9F2;border:2px solid #211C15;border-radius:10px;padding:24px 26px">
+        <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#5B5346;margin-bottom:14px">Questions 1–4</div>
+        <div style="font-size:14px;font-weight:500;line-height:1.6;text-wrap:pretty"><b>1.</b> Il remplace la ligne de verdict dans la carte score. Le verdict nommait déjà le goulot en 15px sous un numéral de 100px ; on le remonte au lieu d'ajouter un bloc.<br><br><b>2.</b> Il remplit l'ancien slot verrouillé, et le slot monte en tête de colonne droite. Offre Deep dive sous l'action, propriétaire seulement.<br><br><b>3.</b> Les cinq lignes de piliers cèdent ; l'action prend la colonne droite. Numéral, en-tête, accroche, URL intacts.<br><br><b>4.</b> Toggle sur la carte, compact, dans le slot « Stage 5/5 ».</div>
+      </div>
+      <div style="background:#FBF9F2;border:2px solid #211C15;border-radius:10px;padding:24px 26px">
+        <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#5B5346;margin-bottom:14px">Questions 5–8</div>
+        <div style="font-size:14px;font-weight:500;line-height:1.6;text-wrap:pretty"><b>5.</b> Le verdict seulement, plus le nom du pilier en --paint-red. Pas de cadre rouge ni de chip tamponnée : ce serait promettre un vrai résultat roast à partir d'un échantillon.<br><br><b>6.</b> Oui sur mobile : le toggle vit dans la carte, l'en-tête plein n'est pas concerné.<br><br><b>7.</b> Sur le libellé, comme après la Q15. Pas de badge.<br><br><b>8.</b> Au-dessus de la carte, aux deux largeurs. Ni la H1 ni les CTA ne bougent.</div>
+      </div>
+      <div style="background:#FBF9F2;border:2px solid #211C15;border-radius:10px;padding:24px 26px">
+        <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#5B5346;margin-bottom:14px">Fichiers</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;line-height:1.8">components/result/Bottleneck.* <span style="color:#A32E1F">new</span><br>components/result/ShareCard.* <span style="color:#A32E1F">new</span><br>components/share/ShareImage.* <span style="color:#A32E1F">new</span><br>components/result/PriorityMove.* <span style="color:#5B5346">changed</span><br>components/result/ToneToggle.* <span style="color:#5B5346">changed</span><br>guidelines/compositions-ext-03.md<br>tokens/spacing.css · README.md<br>ANSWERS.md · Tour de Growth ext-03.dc.html</div>
+      </div>
+      <div style="background:#FBF9F2;border:2px dashed #D2402C;border-radius:10px;padding:24px 26px">
+        <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#A32E1F;margin-bottom:14px">À écrire côté copy</div>
+        <div style="font-size:14px;font-weight:500;line-height:1.6;text-wrap:pretty">Trois libellés Bottleneck (clear / shared / level), ≤ 32 caractères en capitales, les deux langues.<br><br>Le texte du seam Deep dive sous l'action et son bouton (« Make it specific to my business → » est un placeholder).<br><br>Les légendes ShareCard et le libellé « Save image ».<br><br>Les accroches ShareImage en état « level ».</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;previewTone&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;straight&quot;,&quot;roast&quot;],&quot;default&quot;:&quot;straight&quot;,&quot;tsType&quot;:&quot;\&quot;straight\&quot; | \&quot;roast\&quot;&quot;,&quot;section&quot;:&quot;04 Landing&quot;},&quot;ownerView&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;01 Result&quot;}}">
+class Component extends DCLogic {
+  state = { tone: null };
+  renderVals() {
+    const tone = this.state.tone ?? this.props.previewTone ?? "straight";
+    const roast = tone === "roast";
+    return {
+      ownerView: this.props.ownerView ?? false,
+      isStraight: !roast, isRoast: roast,
+      setStraight: () => this.setState({ tone: "straight" }),
+      setRoast: () => this.setState({ tone: "roast" }),
+      straightBg: roast ? "transparent" : "#211C15", straightFg: roast ? "#5B5346" : "#FBF9F2",
+      roastBg: roast ? "#D2402C" : "transparent", roastFg: roast ? "#FBF9F2" : "#5B5346",
+      nameColor: roast ? "#D2402C" : "#211C15",
+      verdictEn: roast ? "Revenue's a rocket. Retention's a colander." : "Solid engine, one flat tyre: retention.",
+      verdictFr: roast ? "Le revenu décolle. La rétention fuit comme une passoire." : "Un moteur solide, un pneu à plat : la rétention.",
+    };
+  }
+}
+</script>
+</body>
+</html>

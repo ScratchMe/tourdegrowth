@@ -13,6 +13,12 @@ export interface ToneToggleProps {
   roastLabel?: string;
   /** Accessible group label, localized by the caller. */
   groupLabel?: string;
+  /**
+   * `md` is the post-quiz selector scale (44px). `compact` is the header
+   * scale — 32px visual, 44px hit — for the landing preview card, where the
+   * toggle demonstrates the roast without adding a CTA (extension 03, §4).
+   */
+  size?: "md" | "compact";
   className?: string;
 }
 
@@ -25,6 +31,11 @@ export interface ToneToggleProps {
  * Rebased on `core/Segmented` by design system extension 01, which made that
  * grammar a primitive; this wrapper stays so call sites do not carry the
  * option list.
+ *
+ * Two places, and only two. The post-question-15 tone selector at `md`, and
+ * the landing preview card at `compact` (extension 03) — a demo you can poke
+ * is a stronger promise that a roast exists than a line of copy saying so,
+ * and `compact` keeps it visibly subordinate to "Start your Tour →".
  *
  * Still not wired into ResultView's CTA row: the shipped result screen
  * deliberately shows exactly 2 CTAs (Share / Take the Tour again in neutral,
@@ -39,10 +50,12 @@ export function ToneToggle({
   straightLabel = "Straight up",
   roastLabel = "Roast me 🔥",
   groupLabel = "Tone",
+  size = "md",
   className,
 }: ToneToggleProps) {
   return (
     <Segmented<ToneToggleValue>
+      size={size}
       label={groupLabel}
       value={value}
       onChange={(id) => onChange?.(id)}

@@ -1,3 +1,5 @@
+/* Design system extension 03 — see design/ds-extension-03-return/components/result/PriorityMove.prompt.md */
+
 .card {
   background: var(--surface-card);
   border: 2px dashed var(--border-alert);
@@ -5,7 +7,14 @@
   padding: 20px 22px;
 }
 
+/* A row since extension 03: the label on the left, the stage the action
+   belongs to on the right. With no `pillar` it is a single flex item at
+   flex-start, i.e. exactly what it looked like before. */
 .eyebrow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
   font: var(--meta-2xs);
   letter-spacing: var(--meta-tracking);
   text-transform: uppercase;
@@ -13,8 +22,25 @@
   margin-bottom: 10px;
 }
 
+.stage {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
 .body {
   font: 600 15px/1.5 var(--font-ui);
   color: var(--text-body);
   text-wrap: pretty;
+}
+
+/* The upgrade seam. Owner-only, and it disappears once the Deep dive has
+   filled the card — so a rule with nothing under it must never render. */
+.upgrade {
+  border-top: var(--border-rule);
+  margin-top: 16px;
+  padding-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
 }

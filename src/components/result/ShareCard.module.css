@@ -1,0 +1,74 @@
+/* Design system extension 03 — see design/ds-extension-03-return/components/result/ShareCard.prompt.md */
+
+.frame {
+  background: var(--surface-sunken);
+  border: var(--border-solid);
+  border-radius: var(--radius-card);
+  display: flex;
+  flex-direction: column;
+}
+
+.desktop {
+  padding: var(--pad-share-frame);
+  gap: var(--pad-share-frame);
+}
+
+.mobile {
+  padding: 12px;
+  gap: 12px;
+}
+
+.caption {
+  font: var(--meta-2xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* The ratio holds the box before the PNG arrives, so the column does not
+   jump on a slow connection. */
+.image {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: var(--ratio-share);
+  border: var(--border-solid);
+  border-radius: var(--radius-button);
+  background: var(--surface-card);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.save {
+  font: var(--label-nav);
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--hit-min);
+  padding: 0 4px;
+}
+
+.save:hover {
+  color: var(--text-body);
+}
+
+.save:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset-tight);
+}
+
+@media (max-width: 760px) {
+  .desktop {
+    padding: 12px;
+    gap: 12px;
+  }
+}

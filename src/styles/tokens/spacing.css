@@ -44,6 +44,13 @@
   --hit-compact: 32px;
   --field-min-height: 120px; /* TextArea */
 
+  /* Design system extension 03 — the share image and the frame that shows it
+     on the result page. `--ratio-share` is an `aspect-ratio` value, not a
+     length: it reserves the 1200×630 box before the PNG has loaded, so the
+     column does not jump. */
+  --ratio-share: 1200 / 630;
+  --pad-share-frame: 14px; /* ShareCard inner padding (12px on mobile) */
+
   /* Kept from the app's original spacing scale — still used by the landing
      header/hero grid, which the DS bundle's boards don't relayout. */
   --content-max-width: var(--width-desktop);
