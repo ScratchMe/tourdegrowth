@@ -193,7 +193,7 @@ La copie existe (`about.ts`, intro). Une phrase et un lien, pas une section.
 3. **A2, la bibliothèque d'actions** — premier jet par la session, relecture Antoine après la relecture en cours. Peut être écrite pendant que le design travaille : les deux ne dépendent pas l'un de l'autre.
 4. **Port du retour design** + A1/A2/A3/B2/B4 dans le code, en une extension 03 — **fait**, en quatre lots : primitives (#109), page de résultat (#111), image de partage (#112), landing (#113).
 5. **B1, B3** — **faits** (PR #108).
-6. **C1** — une PR, quand le lot A est en production. **C'est maintenant la prochaine chose à faire du plan.**
+6. **C1** — **fait** (2026-09-11, PR #123), une fois le lot A vérifié en production.
 7. **C2** — quand `/metrics` ouvre.
 
 Pendant la relecture en cours, la session peut faire seule : A4, le brief 03, le premier jet de A2, et les corrections de copie au fil de l'eau. Rien de tout ça ne demande une décision avant demain.

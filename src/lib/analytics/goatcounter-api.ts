@@ -8,6 +8,7 @@ import {
   SEGMENT_DETAILS,
   RETAKE_STARTED_EVENT,
   LANDING_RETURN_EVENT,
+  RETAKE_NUDGE_EVENT,
 } from "./goatcounter";
 
 // Server-only — never import this from a "use client" component.
@@ -54,6 +55,7 @@ const ALL_PATHS = [
   ...PROFILE_CLICK_PATHS,
   RETAKE_STARTED_EVENT,
   LANDING_RETURN_EVENT,
+  RETAKE_NUDGE_EVENT,
 ];
 
 export interface FunnelStats {
@@ -84,6 +86,8 @@ export interface FunnelStats {
   retakeStarted: number;
   /** The landing rendered for someone who already had a result — REVIEW-03.md A4. */
   landingReturn: number;
+  /** REVIEW-03.md C1 — the 30-day nudge was clicked. Against `landingReturn`, this is whether the nudge works at all. */
+  retakeNudgeClicked: number;
   /**
    * Value actions per result — REVIEW-03.md A4, the closest thing this
    * product has to the North Star the external review asked for: did the
@@ -214,6 +218,7 @@ export async function fetchFunnelWindow(startISO: string, label: string): Promis
       rate: homeViews > 0 ? profileClicks / homeViews : null,
       retakeStarted,
       landingReturn: counts.get(LANDING_RETURN_EVENT) ?? 0,
+      retakeNudgeClicked: counts.get(RETAKE_NUDGE_EVENT) ?? 0,
       valueActionsPerResult: submissionsCompleted > 0 ? valueActions / submissionsCompleted : null,
     },
   };

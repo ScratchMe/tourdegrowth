@@ -1823,6 +1823,65 @@ version française d'avoir son propre libellé. Il découpe maintenant sur
 page sont la même chaîne, ils ne peuvent plus diverger. Vérifié sur un build de
 production dans les deux langues, point final bien en dehors du lien.
 
+### C1 : la seule relance qu'un produit sans email peut envoyer (2026-09-11)
+
+Dernier item du plan de `REVIEW-03.md`. Le produit a une raison honnête de
+revenir — un score bouge — et rien ne le disait jamais, faute de canal : ni
+email ni compte (SPEC.md §5). L'appareil **est** le canal, et la donnée y
+dormait depuis R-20 : `tdg.results.v1` garde jusqu'à 20 résultats datés.
+
+`progression.ts#retakeNudge(results, nowMs)` — pur, `nowMs` injecté pour que
+les seuils soient testables sans bouger l'horloge. Au-delà de 30 jours, la
+landing ajoute une troisième ligne sous le lien de retour : « Ton dernier Tour
+date de 5 semaines — le refaire ? ».
+
+**Volontairement pas restreint aux résultats notés**, contrairement à la
+lecture de progression juste au-dessus : la question est « c'était quand, la
+dernière fois », et une entrée écrite avant R-20 y répond aussi bien qu'une
+récente.
+
+**Semaines jusqu'à deux mois, mois au-delà.** « 52 semaines » se lit moins
+bien que « 12 mois ». La bascule est à 60 jours, sans trou ni recouvrement
+(59 j → 8 semaines, 60 j → 2 mois).
+
+**Trois cas limites tenus par des tests, pas par de la relecture** : une date
+dans le futur (horloge d'appareil en avance) ne produit pas « -1 semaines »
+mais rien du tout ; une date illisible est ignorée sans passer pour ancienne ;
+et c'est le plus récent des résultats **par date** qui compte, quel que soit
+l'ordre de stockage.
+
+**Un événement de plus, et il n'est pas décoratif.** `retake_started` (A4) ne
+peut pas dire si la relance fonctionne : il compte tous les re-tests, relancés
+ou non. `retake_nudge_clicked` sépare les deux, contre `landing_return` comme
+dénominateur — c'est exactement ce que A4 avait posé d'avance. Ajouté à la
+liste exacte que `goatcounter-api.ts` demande à GoatCounter, sans quoi le
+tableau de bord le sous-compterait en silence (R-11).
+
+**Piège évité en écrivant la spec, pas après** : la landing et le quiz vivent
+sous deux layouts racine différents (R-24), donc ce lien est un chargement
+complet de document et `window.__tdgEvents` a disparu quand le quiz s'affiche.
+Même parade que la spec de R2-02 : un premier clic retenu par `preventDefault`
+pour lire l'événement dans le document qui l'a émis, un second qui navigue.
+
+**Second piège, dans la spec elle-même** : les dates y sont **relatives** à
+l'instant du test, jamais littérales. La spec de progression utilise des dates
+fixes — inoffensif pour elle, mais une spec de fraîcheur écrite comme ça
+affirmerait le contraire de son intention un mois plus tard, sans que personne
+n'y touche.
+
+**Vérifié en réel** : 398 tests unitaires (+8), **176 specs Playwright** (+6),
+lint/tsc/build propres, couverture au-dessus des seuils. Non-vacuité mesurée
+finement — en neutralisant `retakeNudge`, **exactement les 4 specs qui
+affirment la présence tombent** et les 2 qui affirment une absence passent
+dans les deux états, ce qui est correct pour des assertions compagnes.
+Mesuré plutôt que jugé à l'œil : le pire cas (français, « 7 semaines ») finit
+à 370 px sur 390, une seule ligne, aucun débordement dans les quatre
+combinaisons testées.
+
+**Copie neuve, donc `TODO: à relire`** (convention 6) : trois chaînes, une
+question plutôt qu'un impératif — quelqu'un qui revient sait déjà où est le
+bouton.
+
 ## État du projet au 2026-09-11 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -1839,7 +1898,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **Ce que le produit fait maintenant et ne faisait pas hier** : un résultat gratuit nomme l'étape qui freine (avec un état de netteté qui refuse de la nommer quand les chiffres ne le portent pas), donne **une action déterministe** — pour le propriétaire comme pour un visiteur arrivé par un lien partagé — montre la carte de partage sur la page plutôt que dans LinkedIn, et met cette action **sur l'image**. La landing prévisualise exactement ça.
 
-**La prochaine chose du plan est C1** (relance sur l'appareil après 30 jours) — à faire quand le lot A est en production.
+**Le plan de `REVIEW-03.md` est entièrement livré** : lots A, B et C. C1 (relance sur l'appareil après 30 jours) est fait le 2026-09-11 ; C2 (« l'étape qui freine le plus souvent ce mois-ci ») attend l'ouverture de `/metrics`, qui attend elle-même du volume.
 
 **La relecture de la copie est faite** (2026-09-09) : 55 éléments passés par Antoine dans l'artifact « Bon à tirer du Tour » ([lien](https://claude.ai/code/artifact/bb3b1561-6c09-4dcb-af83-9fa7bf8752b9), décisions dans sa base `reviews/<itemId>`), 52 validés tels quels, 3 retouchés le jour même (aha-moment, north-star-metric, revenue) plus acquisition la veille. Les six chaînes de progression de R2-27, que la session avait oublié de mettre dans le document, ont été soumises à part et validées le même jour. Les 31 actions de la bibliothèque A2 ont suivi le 2026-09-09 (bloc « Prochaine action », 16 cartes, toutes approuvées sans note). Ce qui était vrai ce jour-là ne l'est plus : **B1/B3 puis le portage de l'extension 03 ont introduit de la copie neuve**, marquée `TODO: à relire` (convention 6) — les libellés de netteté, le seuil d'upgrade et son bouton, « Prochaine action », la légende et l'alt de la carte de partage, la relance « rien ne freine » de l'image, l'énoncé du problème, le nom du groupe de segments, et les deux chaînes de B1/B3. C'est le prochain « bon à tirer », et il doit être **reconstruit depuis `grep -rn "TODO: à relire" src/`** — pas depuis la mémoire de ce qui a été livré, ni depuis un compte écrit ici : c'est le grep qui avait rattrapé l'oubli des six chaînes de progression le 2026-09-09.
 

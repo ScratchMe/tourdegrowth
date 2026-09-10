@@ -199,3 +199,11 @@ export const OWN_TOUR_EVENT = "take_own_tour";
  */
 export const RETAKE_STARTED_EVENT = "retake_started";
 export const LANDING_RETURN_EVENT = "landing_return";
+/**
+ * REVIEW-03.md C1 — the 30-day nudge was clicked.
+ *
+ * `retake_started` alone cannot answer whether the nudge works: it counts
+ * every retake, nudged or not. This is the one event that separates them,
+ * against `landing_return` as the denominator.
+ */
+export const RETAKE_NUDGE_EVENT = "retake_nudge_clicked";

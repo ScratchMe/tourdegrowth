@@ -38,3 +38,24 @@
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
+
+/* REVIEW-03.md C1 — the 30-day nudge, one step quieter again than the
+   progression: the link back to the result is the action, the delta is the
+   reason to care, and this is only a reminder that time has passed. */
+.nudge {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.nudgeLink {
+  color: var(--text-link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.nudgeLink:hover,
+.nudgeLink:focus-visible {
+  color: var(--text-link-hover);
+}

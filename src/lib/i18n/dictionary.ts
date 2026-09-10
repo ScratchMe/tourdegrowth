@@ -147,6 +147,30 @@ export const UI_STRINGS = {
       fr: "Ton dernier score : {score}/100 — le revoir →",
     },
     withoutScore: { en: "See your last result →", fr: "Revoir ton dernier résultat →" },
+    /**
+     * REVIEW-03.md C1 — the 30-day nudge on the landing.
+     *
+     * The only reminder this product can send: no email, no account
+     * (SPEC.md §5), so the device is the channel and the landing is the
+     * moment. It reaches only people who come back on their own, which is
+     * weak and is the honest ceiling of having no accounts.
+     *
+     * A question rather than an instruction, and deliberately quiet mono
+     * beside the hero CTA: someone who came back already knows where the
+     * button is. `{n}` is replaced in code — weeks up to two months, months
+     * past that, since "52 semaines" reads worse than "12 mois".
+     *
+     * TODO: à relire — copie nouvelle (convention 6 de CLAUDE.md).
+     */
+    retakeNudgeWeeks: {
+      en: "Your last Tour was {n} weeks ago",
+      fr: "Ton dernier Tour date de {n} semaines",
+    },
+    retakeNudgeMonths: {
+      en: "Your last Tour was {n} months ago",
+      fr: "Ton dernier Tour date de {n} mois",
+    },
+    retakeNudgeCta: { en: "take it again?", fr: "le refaire ?" },
   },
 
   /** The score card recipe is shared by the landing preview and the real

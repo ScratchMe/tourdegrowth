@@ -63,3 +63,46 @@ export function progressionFor(results: readonly StoredResult[], id: string): Pr
   if (!current || !previous) return null;
   return { previousTotal: previous.total, currentTotal: current.total, delta: current.total - previous.total };
 }
+
+/**
+ * How stale the most recent Tour is — REVIEW-03.md C1.
+ *
+ * The product has one honest reason to come back: a score moves. But nothing
+ * ever said so, because with no email and no account (SPEC.md §5) there is no
+ * channel to say it through. The device itself is the channel: `tdg.results.v1`
+ * has carried a dated list since R-20, so a landing page can notice that the
+ * last Tour is old and say so. It reaches only people who come back on their
+ * own — that is weak, and it is the honest ceiling of "no accounts".
+ *
+ * Deliberately NOT restricted to scored entries, unlike the progression
+ * reading above: this answers "when did you last do this", which an entry
+ * written before R-20 answers just as well as a newer one.
+ *
+ * `nowMs` is injected rather than read here so the thresholds are testable
+ * without moving the clock.
+ */
+export interface RetakeNudge {
+  /** Weeks up to two months, months past that — "52 semaines" reads worse than "12 mois". */
+  unit: "weeks" | "months";
+  value: number;
+}
+
+const DAY_MS = 86_400_000;
+
+/** Below this, there is nothing to say: a Tour taken this month is current. */
+export const NUDGE_AFTER_DAYS = 30;
+/** At and past this, count in months instead of weeks. */
+const MONTHS_AFTER_DAYS = 60;
+
+export function retakeNudge(results: readonly StoredResult[], nowMs: number): RetakeNudge | null {
+  const newest = byNewest(results).find((r) => Number.isFinite(Date.parse(r.createdAt)));
+  if (!newest) return null;
+
+  const days = (nowMs - Date.parse(newest.createdAt)) / DAY_MS;
+  // A future date means a clock that disagrees with ours, not a stale Tour.
+  if (!Number.isFinite(days) || days < NUDGE_AFTER_DAYS) return null;
+
+  return days < MONTHS_AFTER_DAYS
+    ? { unit: "weeks", value: Math.floor(days / 7) }
+    : { unit: "months", value: Math.floor(days / 30) };
+}
