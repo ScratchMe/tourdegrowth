@@ -170,24 +170,36 @@ export default async function ResultPage({ params }: PageProps) {
   // blur exactly the line the "not your data" badge draws.
   const benchmark = await getBenchmarkFor(submission.segment ?? null);
 
+  // The ONE narrowing, and everything below reads from it — including the
+  // helpers that only return strings, which do not need it but must not be
+  // the reason `submission.pillars` stays quotable in this file.
+  //
+  // `PillarScore` carries `rawPoints` on top of `{pillar, score}`, and RSC
+  // serialises the runtime object regardless of how a prop is declared.
+  // Narrowing at the single point of use was not enough: `resolveBottleneck`
+  // is generic and hands back the very objects it was given, so nine lines
+  // below the `toPillarViews` fix a second prop put `rawPoints` straight
+  // back into every shared result's payload. The invariant is therefore
+  // stated where it can be checked — `submission.pillars` appears exactly
+  // once in this file, here — and pinned by the guard in
+  // `src/__tests__/client-bundles.test.ts`.
+  const pillars = toPillarViews(submission.pillars);
+
   return (
     <ResultView
       id={submission.id}
       total={submission.total}
-      // Not `submission.pillars` directly: that object also carries
-      // `rawPoints`, which RSC would serialise into this public page's
-      // payload however the prop is declared. See `toPillarViews`.
-      pillars={toPillarViews(submission.pillars)}
+      pillars={pillars}
       weakestPillar={submission.weakestPillar}
-      verdicts={buildQuickVerdicts(locale, submission.pillars, submission.weakestPillar)}
+      verdicts={buildQuickVerdicts(locale, pillars, submission.weakestPillar)}
       // Both resolved on the server, for the two reasons R-09 gave: the
       // answers behind the action never leave the server (R-02, R2-19), and
       // resolving here keeps the payload one short string instead of shipping
       // the action library to the browser. A VISITOR therefore sees the
       // action too — they are the numerator of the whole sharing loop, and
       // they have nothing on their device to derive it from.
-      bottleneck={resolveBottleneck(submission.pillars)}
-      nextMove={resolveNextMove(locale, submission.pillars, submission.weakestPillar, submission.answers)}
+      bottleneck={resolveBottleneck(pillars)}
+      nextMove={resolveNextMove(locale, pillars, submission.weakestPillar, submission.answers)}
       initialTone={submission.tone}
       breakdown={buildBreakdownData(locale)}
       // REVIEW.md R-02: only the generated verdicts cross to the client.
