@@ -125,3 +125,43 @@ test.describe("the problem statement", () => {
     expect(p.y).toBeLessThan(card.y);
   });
 });
+
+/**
+ * REVIEW-02.md R2-13 gave the preview card's five chips links to their
+ * glossary pages, wrapped in `<Link className={previewChipLink}>` styled
+ * `display: contents` so the chip's own look was untouched. An element with
+ * that display generates no box, and Chromium then leaves the anchor out of
+ * sequential focus navigation entirely: measured on the built page, 17 tab
+ * stops on `/en` and not one of them was a glossary link. Five links that a
+ * mouse could follow and a keyboard could not — WCAG 2.1.1, level A.
+ *
+ * Asserted by TABBING, not by checking a CSS value: the defect was invisible
+ * in the markup, which was correct throughout, and only the browser's focus
+ * order showed it.
+ */
+test.describe("the preview card's glossary links are reachable without a mouse", () => {
+  for (const { width, locale } of [
+    { width: 1280, locale: "en" },
+    { width: 390, locale: "fr" },
+  ]) {
+    test(`all five can be tabbed to at ${width}px in ${locale}`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(`/${locale}`);
+      await page.locator("main").waitFor();
+
+      const inCard = page.locator('[data-testid="preview-card"] a[href*="/glossary/"]');
+      await expect(inCard).toHaveCount(5);
+      const hrefs = await inCard.evaluateAll((els) => els.map((el) => el.getAttribute("href")!));
+
+      const reached = new Set<string>();
+      // Enough presses to cross the whole page once at either width.
+      for (let i = 0; i < 30; i += 1) {
+        await page.keyboard.press("Tab");
+        const href = await page.evaluate(() => document.activeElement?.getAttribute("href") ?? null);
+        if (href) reached.add(href);
+      }
+
+      expect([...hrefs].filter((h) => !reached.has(h)), "glossary links never focused").toEqual([]);
+    });
+  }
+});
