@@ -1567,6 +1567,166 @@ La carte d'aperçu reflète maintenant l'écran de résultat, dans les mêmes co
 
 **Vérifié en réel** : `tsc`, `eslint`, 373 tests unitaires, seuils de couverture, `next build`, **167 specs Playwright** (+8, nouveau `e2e/landing-preview.spec.ts`). Captures relues : landing EN desktop, FR mobile, et les deux tons — le rouge du nom de pilier en roast est bien `rgb(210, 64, 44)` (`--paint-red`, texte large, 4,42:1 contre un seuil de 3:1), assert dans la spec plutôt que constaté.
 
+### Deux passes de revue adversariale sur le portage, et six correctifs (2026-09-10)
+
+Une fois l'extension 03 portée (#109, #111, #112, #113), le diff complet est
+passé en revue adversariale — cinq lentilles indépendantes, chaque constat
+soumis à des sceptiques dont le travail est de le **réfuter**, et un critique
+de complétude à la fin. Deux passes : la première a perdu 16 agents sur une
+limite de session, la seconde a été relancée sur l'état final, correctifs
+compris.
+
+Bilan des deux : **12 constats confirmés, 15 réfutés**. Deux des confirmés
+étaient des régressions introduites le jour même, et deux autres portaient
+sur des affirmations que j'avais écrites et qui étaient fausses. Ce que ça
+dit du procédé mérite d'être noté : la valeur d'une passe adversariale n'est
+pas de trouver des bugs exotiques, c'est de contredire ce que l'auteur croit
+avoir vérifié.
+
+**1. `rawPoints` repartait dans le payload de chaque résultat partagé**
+(#115). Le correctif de la veille (#110) avait posé `toPillarViews` comme
+frontière sur le prop `pillars` ; le portage a ajouté **neuf lignes plus bas
+dans le même fichier** `bottleneck={resolveBottleneck(submission.pillars)}`.
+`resolveBottleneck` est générique : il renvoie les objets qu'on lui donne. Un
+type *déclaré* côté composant n'engage rien à l'exécution, et RSC sérialise
+l'objet réel.
+
+La garde de #110 ne pouvait pas l'attraper : elle affirmait un prop **nommé**,
+et une assertion par prop ne couvre que les props qui existent déjà. Elle
+exige maintenant que **tout** usage de `submission.pillars` passe par la
+narrowing (commentaires exclus du comptage, puisqu'ils citent la règle). Plus
+un test qui épingle la vraie cause : `resolveBottleneck` rend les mêmes
+références qu'on lui passe — c'est un résolveur, pas une frontière.
+
+**2. La page se contredisait quand rien ne freine** (#116). `SUMMARY_HEADLINES`
+est indexé par le pilier le plus faible et ses 20 lignes affirment toutes
+qu'une étape est en retard. Un tableau 20/20/7 sur les cinq piliers (16/20
+chacun, 80/100) affichait « RIEN NE TE FREINE » puis, une ligne dessous,
+« mais l'acquisition reste à muscler ». Corrigé à la source (`LEVEL_HEADLINE`
+substituée dans `buildQuickVerdict`), donc tout consommateur d'un verdict
+Quick reçoit la ligne corrigée, pas seulement l'écran où ça se voyait.
+
+**La capture a montré quatre autres formes du même défaut** que la relecture
+de code n'avait pas données : bandeau rouge, tampon roast, cartes d'alerte, et
+« Là où tu perds du temps » au-dessus de deux phrases de bande forte —
+c'est-à-dire des éloges dans des cartes rouges sous un titre alarmant. Plus
+`og:description`. Leçon n°1 de ce fichier, encore.
+
+**3. Le texte du partage natif était la cinquième surface** (#119), manquée
+par le balayage de #116. Corrigé structurellement : quatre surfaces
+construisaient chacune la même phrase et se voient ensemble dans un aperçu de
+lien. `lib/submissions/stall-sentence.ts` la construit une fois ; une
+cinquième ne peut plus diverger. Un test épingle mot pour mot que la sortie
+ne change pas pour un tableau qui a bien un goulot — une refonte de gabarit
+déplace une virgule sans qu'on le voie.
+
+**4. L'ordre de lecture mobile, et une borne que j'avais annoncée fausse**
+(#117 puis #120). En livrant le lot 2 j'avais mesuré l'écart DOM/visuel **en
+ne comptant que les éléments focalisables** et conclu à « une permutation de
+voisins ». Au niveau des blocs, la carte de partage était annoncée **cinq
+places** avant d'être vue — un lecteur d'écran lit tout, pas seulement ce qui
+prend le focus. Elle sort des deux colonnes et se place par sa propre zone de
+grille : pire écart 4 → 1.
+
+Puis la revue a montré que **la borne de 1 était fausse pour le
+propriétaire**, dont la page rend aussi le dépliant du calcul, qui
+s'intercale : écart réel 2. `src/__tests__/result-reading-order.test.ts`
+calcule les deux ordres depuis les fichiers réels et épingle le chiffre exact
+pour les **quatre** variantes, dont les deux qu'aucun e2e ne peut rendre.
+Chiffres exacts et non un plafond : le but est de connaître le coût.
+
+Une correction a été construite et mesurée puis abandonnée : sortir le
+dépliant de la colonne ramène tout à 1, mais lui donne sa propre rangée de
+grille sous la plus haute des deux colonnes, ce qui ouvre ~230 px de colonne
+droite vide sur le desktop de chaque propriétaire. Un trou visible partout
+vaut moins qu'un bloc annoncé deux places trop tôt sur un téléphone.
+
+**5. Cinq liens que la souris pouvait suivre et le clavier non** (#120).
+`display: contents` sur le `<a>` qui enveloppe chaque bandeau de la carte
+d'aperçu (posé par R2-13) : un élément avec ce display ne génère aucune
+boîte, et Chromium sort alors l'ancre de la navigation séquentielle. Mesuré
+sur le vrai build : **17 tabulations sur `/en`, pas une qui touche un lien de
+glossaire**. WCAG 2.1.1 niveau A. `display: flex` fait du lien l'élément flex
+à la place du bandeau — même boîte, mêmes cinq rectangles au pixel. La spec
+vérifie **en tabulant**, parce que le balisage était correct de bout en bout
+et que seul l'ordre de focus montrait le défaut.
+
+**6. Un `s-maxage` que j'avais justifié à tort** (#118). L'image de partage
+n'était demandée que par les crawlers ; le lot 2 en a fait une requête par
+vue (72 972 octets, ~150 ms de Satori, aucun ETag donc rien à revalider).
+`loading="lazy"` règle l'essentiel. J'y avais ajouté un `s-maxage=3600` en
+affirmant que `max-age=0` gardait la fraîcheur côté navigateur : **c'est
+faux**, `max-age=0, must-revalidate` renvoie le navigateur revalider et un
+cache partagé encore frais répond à sa place. Le propriétaire qui vient de
+finir son Deep dive verrait l'ancien badge jusqu'à une heure, et cette route
+n'étant pas ISR, `revalidateTag` ne peut pas la purger. Retiré ; la façon
+correcte (jeton de version dans l'URL, donc reprise à la main de la route de
+métadonnées) est écrite dans le composant pour que la prochaine tentative
+parte du bon endroit.
+
+**Ce qui a été soumis aux sceptiques et n'a pas survécu**, pour ne pas le
+ré-auditer : le ton de la landing qui changerait le verdict sans annonce (le
+focus reste sur le contrôle activé, donc c'est annoncé) ; la zone tactile de
+`Segmented compact` (géométrie exacte, mais `elementFromPoint` tombe bien sur
+le bouton) ; l'image de partage de l'échantillon en anglais pour un lecteur
+français (c'est la règle documentée depuis l'étape 8 — un crawler n'envoie
+pas les cookies) ; « nextMove révèle quelle réponse l'auteur a ratée » ; et la
+taille du bouton de partage sur mobile.
+
+#### Ce que ces passes disent sur la méthode
+
+- **Une garde par prop ne couvre que les props qui existent.** Les deux fuites
+  `rawPoints` sont la même erreur à un cran d'écart : la première fois la
+  frontière manquait, la seconde fois elle existait mais la garde était
+  nominale. Une garde utile compte ce qui traverse, pas ce qu'on a pensé à
+  nommer.
+- **Mesurer la bonne chose.** « 3 focalisables sur 10 hors ordre » et « la
+  carte de partage annoncée cinq blocs trop tôt » décrivent la même page. La
+  première mesure m'a rassuré et était la mauvaise.
+- **Une capture montre ce qu'une relecture ne montre pas** — quatre des cinq
+  formes du défaut « niveau » ne sont apparues qu'à l'écran.
+- **Écrire une justification ne la rend pas vraie.** Le commentaire du
+  `s-maxage` était confiant et faux ; la sémantique HTTP se vérifie, elle ne
+  se raisonne pas de mémoire.
+
+#### Reste ouvert
+
+- **À trancher par Antoine (copie, pas code)** : `SUMMARY_HEADLINES` n'a pas
+  d'axe de bande de score. Un tableau à **0/100, cinq piliers à 0/20**
+  affiche « 5 ÉTAPES TE FREINENT » puis « Bon moteur global, mais
+  l'acquisition reste à muscler » — et en roast « Beau vélo, mais personne ne
+  sait encore comment tu recrutes tes coureurs ». Idem à 35/100 (tous les
+  piliers à 7/20), qui est un score plausible. Les 20 lignes sont écrites
+  pour un tableau moyen ou bon avec **un** point faible. Deux formes
+  possibles : un axe de bande (5 piliers × 3 bandes × 2 tons × 2 langues), ou
+  une phrase « plancher » plus un prédicat. Non corrigé ici : c'est de la voix
+  verdict, que CLAUDE.md réserve à l'agent produit — et j'ai déjà étiré cette
+  règle une fois aujourd'hui avec `LEVEL_HEADLINE`.
+- **Piste de couverture, pas un défaut** : toutes les assertions e2e sur la
+  composition tournent sur `/r/sample`, qui prend une **branche différente**
+  pour les deux choses que ces correctifs touchent (`getSampleNextMove` au
+  lieu de `resolveNextMove`, `SAMPLE_RESULT.pillars` au lieu de la narrowing).
+  La garde statique est donc la seule chose entre une future modification et
+  `rawPoints` de retour dans le payload. Un id de fixture derrière une
+  variable d'environnement (même schéma que `NEXT_PUBLIC_GOATCOUNTER_CODE:
+  e2e-stub`, donc fermé par défaut) ferait passer les specs par le vrai
+  chemin. À décider : c'est une porte de test sur la route publique la plus
+  sensible.
+- **Flake confirmé** : `e2e/locale-routing.spec.ts:75` (« switching language
+  carries over to the unprefixed app pages ») a échoué deux fois aujourd'hui,
+  toujours dans la suite complète en parallèle, jamais isolée (8/8) ni sur
+  deux suites complètes rejouées ensuite. Donc rare et dépendant de la charge.
+  **Ne pas la durcir en attendant le cookie** : si le cookie n'est parfois pas
+  posé, c'est une course produit qu'une spec durcie masquerait. La config a
+  déjà `retries: 1` et `trace: "on-first-retry"` en CI, et le rapport HTML est
+  téléversé en cas d'échec — la prochaine occurrence en CI laisse donc une
+  trace exploitable. C'est là qu'il faut regarder.
+
+**Vérifié** : `tsc`, `eslint`, **390 tests unitaires**, seuils de couverture,
+`next build`, **170 specs Playwright**. Chaque correctif a sa non-vacuité
+mesurée finement (quel test tombe, et lesquels ne tombent pas), écrite dans
+son fichier de test plutôt que laissée à supposer.
+
 ## État du projet au 2026-09-10 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -1583,7 +1743,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **La relecture de la copie est faite** (2026-09-09) : 55 éléments passés par Antoine dans l'artifact « Bon à tirer du Tour » ([lien](https://claude.ai/code/artifact/bb3b1561-6c09-4dcb-af83-9fa7bf8752b9), décisions dans sa base `reviews/<itemId>`), 52 validés tels quels, 3 retouchés le jour même (aha-moment, north-star-metric, revenue) plus acquisition la veille. Les six chaînes de progression de R2-27, que la session avait oublié de mettre dans le document, ont été soumises à part et validées le même jour. Les 31 actions de la bibliothèque A2 ont suivi le 2026-09-09 (bloc « Prochaine action », 16 cartes, toutes approuvées sans note). Ce qui était vrai ce jour-là ne l'est plus : **B1/B3 puis le portage de l'extension 03 ont introduit de la copie neuve**, marquée `TODO: à relire` (convention 6) — les libellés de netteté, le seuil d'upgrade et son bouton, « Prochaine action », la légende et l'alt de la carte de partage, la relance « rien ne freine » de l'image, l'énoncé du problème, le nom du groupe de segments, et les deux chaînes de B1/B3. C'est le prochain « bon à tirer », et il doit être **reconstruit depuis `grep -rn "TODO: à relire" src/`** — pas depuis la mémoire de ce qui a été livré, ni depuis un compte écrit ici : c'est le grep qui avait rattrapé l'oubli des six chaînes de progression le 2026-09-09.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **373 tests unitaires**, **167 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
+**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **390 tests unitaires**, **170 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 
@@ -1602,6 +1762,9 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Les deux nouveaux événements A4 (`retake_started`, `landing_return`) | Vérifiés en e2e, jamais contre le vrai GoatCounter (le proxy du bac à sable bloque `*.goatcounter.com`) | Un regard d'Antoine sur `/admin/stats` après déploiement : deux lignes de plus dans la section funnel, et la ligne « Value actions per result ». |
 | R2-30 (fenêtre Tour de France, SPEC.md §10) | Reporté d'un commun accord : pas d'urgence | À construire **avant** juin 2027, pour que le post parte pendant le vrai Tour et pas après. |
 | 10 branches distantes obsolètes (R2-31) | Toutes issues de PR mergées avant l'activation de la suppression automatique, qui fonctionne depuis | La suppression, par Antoine, dans l'interface GitHub. |
+| `SUMMARY_HEADLINES` sans axe de bande | À 0/100 (cinq piliers à 0/20) la carte dit « 5 étapes te freinent » puis « Bon moteur global ». Idem à 35/100. Reproduit, pas corrigé | Une décision de copie d'Antoine — c'est de la voix verdict. Axe de bande, ou phrase plancher + prédicat. |
+| Les e2e de composition ne passent que par la branche échantillon | `/r/sample` utilise `getSampleNextMove` et `SAMPLE_RESULT.pillars`, pas le vrai chemin. La garde statique est donc seule à protéger le payload | Un id de fixture derrière une variable d'environnement fermée par défaut. À décider : c'est une porte de test sur la route publique la plus sensible. |
+| Flake `locale-routing.spec.ts:75` | Deux échecs le 2026-09-10, toujours en suite complète parallèle, jamais isolée (8/8) | La prochaine occurrence en CI laisse une trace (`retries: 1` + `trace: on-first-retry`, rapport téléversé). Ne pas durcir la spec en attendant le cookie : ça masquerait une éventuelle course produit. |
 | TypeScript 7 et ESLint 10 | Tous deux bloqués par des paquets embarqués dans `eslint-config-next` (`typescript-eslint` refuse TS ≥ 6.1 ; `eslint-plugin-react` plante sur ESLint 10). Dependabot les ignore en majeure depuis le 2026-09-08 | Quand `eslint-config-next` suivra. Re-tester en installant, pas en lisant les plages de peer : c'est l'essai qui a montré qu'ESLint 10 plante. |
 
 Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et le payant sont le plan de croissance, qui appartient à Antoine ; le SEO a été livré en grande partie par le lot C de cette revue.
@@ -1620,7 +1783,8 @@ Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et 
 8. **Un numéro de PR écrit dans les docs avant la création se vérifie après.** Dependabot a pris #67 à #70 et #72 au milieu du plan et décalé toutes les prédictions ; les statuts de `REVIEW-02.md` ont dû être corrigés une fois. Créer la PR, lire le numéro renvoyé, puis seulement l'écrire.
 9. **`expectedHeadSha` au merge, c'est le SHA complet de `git rev-parse <branche>`**, jamais retapé de mémoire : un SHA inventé a fait rejeter le merge de la PR #80 en 409, ce qui est le bon comportement — mais il aurait suffi d'une coïncidence pour merger la mauvaise tête.
 10. **Un état de dépôt s'énonce d'après GitHub, jamais d'après un clone ou un document.** Le 2026-09-08, deux affirmations fausses sont parties dans une PR : « 35 branches » (les refs `origin/*` d'un clone jamais élagué — `git fetch --prune` avant tout comptage, ou l'API) et « le check CI n'est pas obligatoire » (un statut de `REVIEW.md` vieux de trois jours, relu comme un fait présent alors que `main` était déjà `protected: true`). Ce qui est écrit dans un document est ce qui était vrai quand il a été écrit.
-11. **Une branche empilée se rebase avec `git rebase --onto origin/main <ancienne-base> <branche>`** après le merge de la PR du dessous, jamais avec un simple `git rebase main` (qui rejoue aussi les commits déjà squashés et crée des conflits fantômes).
+11. **Une garde de payload compte ce qui traverse, elle ne nomme pas des props.** Les deux fuites `rawPoints` (#110 puis #115) sont la même erreur à un cran d'écart : la seconde fois la frontière existait et la garde était nominale, donc aveugle au prop suivant. Même chose pour une borne annoncée : la calculer pour **toutes** les variantes, y compris celles qu'aucun e2e ne peut rendre.
+12. **Une branche empilée se rebase avec `git rebase --onto origin/main <ancienne-base> <branche>`** après le merge de la PR du dessous, jamais avec un simple `git rebase main` (qui rejoue aussi les commits déjà squashés et crée des conflits fantômes).
 
 ### Carte du repo
 
@@ -1632,6 +1796,6 @@ src/components/          core / brand / quiz / result / glossary — le design s
 src/content/             toute la copie du site, validée (agent produit pour l'origine, Antoine le 2026-09-06 et le 2026-09-09 pour le reste)
 src/lib/                 scoring (pur), i18n (dont meta.ts), seo (JSON-LD), og (polices + tokens des images de partage), gemini, submissions (dont segment.ts, benchmark.ts), metrics, analytics
 design/                  brief d'origine, briefs et bundles de retour des extensions 01 et 03 (le brief 02 n'est jamais parti)
-e2e/                     167 specs Playwright contre un build de production
+e2e/                     170 specs Playwright contre un build de production
 scripts/live/            sondes contre les vrais services, lancées à la main
 ```
