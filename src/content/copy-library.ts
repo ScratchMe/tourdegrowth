@@ -270,6 +270,30 @@ export function scoreBand(score: number): ScoreBand {
   return "strong";
 }
 
+/**
+ * How the REST of the board is doing, given which stage is being named.
+ *
+ * This is the axis `SUMMARY_HEADLINES` was missing, and the reason it was
+ * wrong on 90% of the reachable boards: every one of its lines asserted that
+ * the rest of the engine was fine ("Bon moteur global, mais X"), which is
+ * only true when the rest of the engine actually is fine.
+ *
+ * Banding on the NAMED pillar's own score does NOT fix that, which is the
+ * trap worth writing down: [0,0,0,0,0] and [0,20,20,20,20] both have their
+ * weakest in the weak band and would still be served the same line. It is
+ * the others that decide whether "solid engine" is a true sentence.
+ */
+export type BoardBand = "solid" | "mixed" | "floor";
+
+export function boardBand(pillars: readonly { pillar: Pillar; score: number }[], named: Pillar): BoardBand {
+  const others = pillars.filter((p) => p.pillar !== named);
+  if (others.length === 0) return "mixed";
+  const strong = others.filter((p) => scoreBand(p.score) === "strong").length;
+  if (strong === others.length) return "solid";
+  if (strong === 0) return "floor";
+  return "mixed";
+}
+
 export const PILLAR_VERDICTS: Record<Pillar, Record<ScoreBand, Record<Tone, Translatable>>> = {
   acquisition: {
     weak: {
