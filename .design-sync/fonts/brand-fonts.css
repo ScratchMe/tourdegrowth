@@ -1,0 +1,50 @@
+/*
+ * The three brand families, shipped as files — not fetched at render time.
+ *
+ * The app self-hosts them through `next/font/google`, which binds
+ * --font-ui / --font-mono / --font-display on <body> at build time. None of
+ * that exists in a design canvas: without these rules the bundle falls
+ * through to `typography.css`'s `:root` fallback stack and renders every
+ * screen in system-ui, silently, on every design ever built with this DS.
+ *
+ * Inter is ONE file: Google serves the latin subset as a variable font and
+ * returns the same URL for every weight (verified against the css2 endpoint).
+ * Declaring it `100 900` instantiates the wght axis; four single-weight
+ * faces would ship the same 48 KB four times. Plex Mono is not variable —
+ * 500 and 600 are genuinely different files.
+ *
+ * Latin subset from Google Fonts, full charset — NOT the five .ttf files in
+ * `src/lib/og/fonts/`, which are ~230-glyph cuts for Satori's share images:
+ * fine for that image's fixed strings, a silent glyph hole for anything a
+ * designer types. Shipped rather than @import-ed from the font host because
+ * a remote import made every headless render wait on the network (the render
+ * check went from ~2 minutes to ~18).
+ */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("./inter-variable.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("./ibm-plex-mono-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("./ibm-plex-mono-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Stardos Stencil";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("./stardos-stencil-700.woff2") format("woff2");
+}

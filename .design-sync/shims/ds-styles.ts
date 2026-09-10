@@ -15,7 +15,6 @@
  * `tokensPkg` names a package under `node_modules`, and these tokens live in
  * the repo.
  */
-import "./ds-fonts.css";
 import "../../src/app/globals.css";
 
 /** Marker export — the module has to export something to be a valid entry. */

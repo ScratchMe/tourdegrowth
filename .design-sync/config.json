@@ -4,7 +4,20 @@
   "shape": "package",
   "srcDir": "src/components",
   "tsconfig": "./.design-sync/tsconfig.ds.json",
+  "buildCmd": "npx tsc -p .design-sync/tsconfig.dts.json",
+  "readmeHeader": "./.design-sync/conventions.md",
   "extraEntries": [
     "./.design-sync/shims/ds-styles.ts"
-  ]
+  ],
+  "componentSrcMap": {
+    "LegalPage": null
+  },
+  "extraFonts": [
+    "./.design-sync/fonts/brand-fonts.css"
+  ],
+  "overrides": {
+    "GlossaryTerm": {
+      "cardMode": "column"
+    }
+  }
 }
