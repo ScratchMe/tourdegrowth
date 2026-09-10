@@ -7,6 +7,7 @@ import { getSampleNextMove, getSampleVerdicts, SAMPLE_RESULT } from "@/lib/submi
 import { getBenchmarkFor } from "@/lib/submissions/benchmark";
 import { getCachedSubmissionById } from "@/lib/submissions/cached-repository";
 import { isValidSubmissionId } from "@/lib/submissions/referral";
+import { stallSentence } from "@/lib/submissions/stall-sentence";
 import { buildQuickVerdicts, toDeepDiveView, toPillarViews } from "@/lib/submissions/view-model";
 import { primaryBottleneck, resolveBottleneck } from "@/lib/scoring/bottleneck";
 import { resolveNextMove } from "@/lib/scoring/next-move";
@@ -60,12 +61,7 @@ function resultMetadata(total: number, stalling: Pillar | null, locale: Locale, 
   // a link preview, so a description naming a stall next to an image saying
   // nothing is stalling would contradict itself in the one place the product
   // gets a first impression.
-  const stall = stalling
-    ? tc(UI_STRINGS.og.stallSentenceTemplate, locale).replace(
-        "{pillar}",
-        tc(UI_STRINGS.pillars[stalling], locale),
-      )
-    : tc(UI_STRINGS.og.stallSentenceLevel, locale);
+  const stall = stallSentence(locale, stalling);
   const description = isSample
     ? `${stall} ${tc(UI_STRINGS.og.whereDoesYours, locale)} — ${tc(UI_STRINGS.result.sampleBadge, locale)}`
     : `${stall} ${tc(UI_STRINGS.og.whereDoesYours, locale)}`;
