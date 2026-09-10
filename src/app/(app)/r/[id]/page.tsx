@@ -7,7 +7,7 @@ import { getSampleVerdicts, SAMPLE_RESULT } from "@/lib/submissions/sample";
 import { getBenchmarkFor } from "@/lib/submissions/benchmark";
 import { getCachedSubmissionById } from "@/lib/submissions/cached-repository";
 import { isValidSubmissionId } from "@/lib/submissions/referral";
-import { buildQuickVerdicts, toDeepDiveView } from "@/lib/submissions/view-model";
+import { buildQuickVerdicts, toDeepDiveView, toPillarViews } from "@/lib/submissions/view-model";
 import { QUESTIONS } from "@/content/copy-library";
 import type { BreakdownData } from "./ScoreBreakdown";
 import type { Locale } from "@/lib/i18n/locale";
@@ -170,7 +170,10 @@ export default async function ResultPage({ params }: PageProps) {
     <ResultView
       id={submission.id}
       total={submission.total}
-      pillars={submission.pillars}
+      // Not `submission.pillars` directly: that object also carries
+      // `rawPoints`, which RSC would serialise into this public page's
+      // payload however the prop is declared. See `toPillarViews`.
+      pillars={toPillarViews(submission.pillars)}
       weakestPillar={submission.weakestPillar}
       verdicts={buildQuickVerdicts(locale, submission.pillars, submission.weakestPillar)}
       initialTone={submission.tone}

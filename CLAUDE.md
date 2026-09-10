@@ -1497,6 +1497,21 @@ Mesuré plutôt que jugé à l'œil : `ToneToggle size="compact"` sort bien à *
 **Reste sans couverture automatisée jusqu'au lot 2**, dit franchement : `Bottleneck` et `ShareCard` n'ont aucune spec e2e, parce que la convention de ce repo est que les assertions de composant vivent dans `e2e/` contre de vraies pages et qu'aucune page ne les monte encore. Elles arrivent avec le lot 2 (page de résultat) et le lot 4 (landing).
 
 **Flake observé une fois, noté plutôt que tu** : `e2e/locale-routing.spec.ts:75` (« switching language carries over to the unprefixed app pages ») a échoué une fois sur une passe complète et repassé seul puis en passe complète — 150 specs vertes deux fois de suite ensuite. Aucun rapport avec ce changement ; à surveiller si ça se reproduit.
+### `rawPoints` partait dans le payload de chaque résultat partagé (2026-09-10)
+
+Trouvé en cartographiant la page de résultat avant de porter l'extension 03 — pas cherché, rencontré.
+
+**R2-24 avait retiré `rawPoints` de `BreakdownData` pour une raison précise** : avec des options à 20, 7 et 0, chaque somme atteignable (0, 7, 14, 20, 21, 27, 34, 40, 41, 47, 54, 60) identifie exactement le multiensemble de réponses derrière elle, ce que le score arrondi ne fait pas — 7/20 recouvre aussi bien 20+0+0 que 7+7+7. Mais le même item n'a pas touché **l'autre** chemin, qui est le plus exposé des deux : `page.tsx` passait `submission.pillars` tel quel à un Client Component.
+
+**Pourquoi rien n'a protesté.** Le prop est *déclaré* `{pillar, score}[]`, et TypeScript accepte un objet plus large dès qu'il n'est pas un littéral. Le typage était donc correct, le compilateur muet, et RSC sérialisait l'objet **à l'exécution** — `rawPoints` compris — dans le payload de chaque `/r/<id>` public. Une déclaration de type n'est pas une frontière ; `toPillarViews` en est une.
+
+`toPillarViews` fait pour ce champ ce que `toDeepDiveView` fait déjà pour le contexte libre, et vit au même endroit. `/r/sample` n'est pas passé à travers, volontairement : ses données sont fixes et publiques par construction, il n'y a rien à y cacher, et ajouter un appel qui ne fait rien laisserait croire le contraire.
+
+**Le test qui compte n'est pas celui de la fonction.** `toPillarViews` ne se trompera pas ; ce qui peut revenir, c'est un futur recâblage de `page.tsx`. D'où une garde statique ajoutée à `client-bundles.test.ts` (même précédent : « une déclaration de type n'est pas une frontière », un cran plus haut) qui exige que `pillars` passe par le view-model. Non-vacuité vérifiée : en remettant `pillars={submission.pillars}`, exactement ce test tombe. Plus deux tests unitaires, dont un en liste blanche — le second vérifie qu'un champ *futur* est écarté lui aussi, pas seulement celui qu'on connaît aujourd'hui.
+
+**Aucun e2e ne peut couvrir ça**, dit franchement : `/r/sample` n'a pas de `rawPoints` par construction, et un vrai résultat demande Firestore, que la CI n'a pas. La garde statique est ce qui reste, et c'est pour ça qu'elle existe.
+
+Vérifié : `tsc`, `eslint`, 363 tests unitaires (+3), seuils de couverture, `next build`.
 
 ## État du projet au 2026-09-09 — à lire en premier dans une nouvelle session
 

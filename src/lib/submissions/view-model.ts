@@ -3,6 +3,33 @@ import type { Pillar } from "@/lib/scoring/pillars";
 import { buildQuickVerdict, type QuickVerdict } from "@/lib/scoring/verdict";
 import type { DeepDiveResult, DeepDiveView } from "./types";
 
+/** What the result page is allowed to know about a pillar: its name and its score out of 20. */
+export interface PillarView {
+  pillar: Pillar;
+  score: number;
+}
+
+/**
+ * Strips a stored `PillarScore` down to what the browser may see — the same
+ * job `toDeepDiveView` does below, for the field R2-24 missed.
+ *
+ * `PillarScore` also carries `rawPoints`, the un-rounded 0-60 sum of that
+ * pillar's three answers. R2-24 removed it from `BreakdownData` for a stated
+ * reason — with options worth 20, 7 and 0, every reachable sum identifies the
+ * exact multiset of answers behind it, which the rounded score does not (7/20
+ * covers both 20+0+0 and 7+7+7) — but left this path alone, and this is the
+ * path that matters more: `page.tsx` passed `submission.pillars` straight
+ * through to a Client Component. The prop was *declared* `{pillar, score}[]`,
+ * and TypeScript accepts a wider object outside an object literal, so nothing
+ * complained; RSC then serialised the runtime object, `rawPoints` included,
+ * into the payload of every publicly shared result.
+ *
+ * A declared type is not a boundary. This function is.
+ */
+export function toPillarViews(pillars: readonly { pillar: Pillar; score: number }[]): PillarView[] {
+  return pillars.map(({ pillar, score }) => ({ pillar, score }));
+}
+
 export interface QuickVerdicts {
   neutral: QuickVerdict;
   roast: QuickVerdict;
