@@ -33,6 +33,8 @@ interface ScoreBreakdownProps {
   /** The owner's own answers, read from this device (never from the page payload). */
   answers: Answers;
   pillars: { pillar: Pillar; score: number }[];
+  /** So the page can place it — the mobile reading order is set with `order` on the layout's children (design system extension 03). */
+  className?: string;
 }
 
 /**
@@ -60,12 +62,12 @@ interface ScoreBreakdownProps {
  *  - **Closed by default**, and placed after the CTAs, so the screen the
  *    design brief specified is visually unchanged until someone asks.
  */
-export function ScoreBreakdown({ locale, data, answers, pillars }: ScoreBreakdownProps) {
+export function ScoreBreakdown({ locale, data, answers, pillars, className }: ScoreBreakdownProps) {
   const t = UI_STRINGS.breakdown;
   const scoreOf = new Map(pillars.map((p) => [p.pillar, p.score]));
 
   return (
-    <Disclosure summary={tc(t.title, locale)} data-testid="score-breakdown">
+    <Disclosure summary={tc(t.title, locale)} data-testid="score-breakdown" className={className}>
       <p className={styles.intro}>{tc(t.intro, locale)}</p>
 
       <div className={styles.pillars}>

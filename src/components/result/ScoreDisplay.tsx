@@ -7,8 +7,6 @@ export interface ScoreDisplayProps extends HTMLAttributes<HTMLDivElement> {
   total?: number;
   /** Mono eyebrow, e.g. "Overall Growth Score". */
   label?: ReactNode;
-  /** One-line verdict from the copy library — never generated ad hoc. */
-  verdict?: ReactNode;
   size?: "desktop" | "mobile";
   /** Stamp-in animation. Disable for OG images and print. */
   animate?: boolean;
@@ -24,7 +22,6 @@ export function ScoreDisplay({
   score,
   total = 100,
   label,
-  verdict,
   size = "desktop",
   animate = true,
   className,
@@ -40,14 +37,6 @@ export function ScoreDisplay({
         <span className={[styles.suffix, desktop ? styles.suffixDesktop : styles.suffixMobile].join(" ")}>/{total}</span>
         <span aria-hidden="true" className={styles.spray} />
       </div>
-      {verdict ? (
-        <div
-          data-testid="score-verdict"
-          className={[styles.verdict, desktop ? styles.verdictDesktop : styles.verdictMobile].join(" ")}
-        >
-          {verdict}
-        </div>
-      ) : null}
     </div>
   );
 }

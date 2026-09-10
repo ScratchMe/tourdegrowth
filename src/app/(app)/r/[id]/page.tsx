@@ -3,11 +3,13 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { resolveRequestLocale } from "@/lib/i18n/resolve-request-locale";
-import { getSampleVerdicts, SAMPLE_RESULT } from "@/lib/submissions/sample";
+import { getSampleNextMove, getSampleVerdicts, SAMPLE_RESULT } from "@/lib/submissions/sample";
 import { getBenchmarkFor } from "@/lib/submissions/benchmark";
 import { getCachedSubmissionById } from "@/lib/submissions/cached-repository";
 import { isValidSubmissionId } from "@/lib/submissions/referral";
 import { buildQuickVerdicts, toDeepDiveView, toPillarViews } from "@/lib/submissions/view-model";
+import { resolveBottleneck } from "@/lib/scoring/bottleneck";
+import { resolveNextMove } from "@/lib/scoring/next-move";
 import { QUESTIONS } from "@/content/copy-library";
 import type { BreakdownData } from "./ScoreBreakdown";
 import type { Locale } from "@/lib/i18n/locale";
@@ -145,6 +147,8 @@ export default async function ResultPage({ params }: PageProps) {
         pillars={SAMPLE_RESULT.pillars}
         weakestPillar={SAMPLE_RESULT.weakestPillar}
         verdicts={getSampleVerdicts(locale)}
+        bottleneck={resolveBottleneck(SAMPLE_RESULT.pillars)}
+        nextMove={getSampleNextMove(locale)}
         initialTone="neutral"
         isSample
       />
@@ -176,6 +180,14 @@ export default async function ResultPage({ params }: PageProps) {
       pillars={toPillarViews(submission.pillars)}
       weakestPillar={submission.weakestPillar}
       verdicts={buildQuickVerdicts(locale, submission.pillars, submission.weakestPillar)}
+      // Both resolved on the server, for the two reasons R-09 gave: the
+      // answers behind the action never leave the server (R-02, R2-19), and
+      // resolving here keeps the payload one short string instead of shipping
+      // the action library to the browser. A VISITOR therefore sees the
+      // action too — they are the numerator of the whole sharing loop, and
+      // they have nothing on their device to derive it from.
+      bottleneck={resolveBottleneck(submission.pillars)}
+      nextMove={resolveNextMove(locale, submission.pillars, submission.weakestPillar, submission.answers)}
       initialTone={submission.tone}
       breakdown={buildBreakdownData(locale)}
       // REVIEW.md R-02: only the generated verdicts cross to the client.

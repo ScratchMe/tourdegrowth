@@ -11,6 +11,8 @@ export interface ShareCardProps extends HTMLAttributes<HTMLDivElement> {
   caption?: string;
   /** Already-translated button label. */
   shareLabel: string;
+  /** Test id for the share control itself — the card's own `data-testid` lands on the frame. */
+  shareTestId?: string;
   /** Already-translated link label. */
   saveLabel: string;
   /** Web Share API where there is one, clipboard fallback otherwise — the caller decides. */
@@ -47,6 +49,7 @@ export function ShareCard({
   alt,
   caption,
   shareLabel,
+  shareTestId,
   saveLabel,
   onShare,
   saveHref,
@@ -71,7 +74,7 @@ export function ShareCard({
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img className={styles.image} src={src} alt={alt} width={1200} height={630} />
       <div className={styles.actions}>
-        <Button variant="secondary" onClick={onShare}>
+        <Button variant="secondary" onClick={onShare} aria-live="polite" data-testid={shareTestId}>
           {shareLabel}
         </Button>
         <a className={styles.save} href={saveHref} download={saveFileName ?? ""}>

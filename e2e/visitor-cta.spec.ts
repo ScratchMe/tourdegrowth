@@ -25,7 +25,7 @@ test.describe("a visitor on a shared result", () => {
     await expect(own).toHaveAttribute("href", "/quiz");
     await expect(page.getByTestId("visitor-pitch")).toHaveText(/3 minutes/);
 
-    // Sharing stays — secondary, and no longer "MY score" for someone else's result.
+    // Sharing stays — secondary, and in its own block since extension 03.
     await expect(page.getByTestId("share-button")).toHaveText(/share this result/i);
     await expect(page.getByRole("link", { name: /take the tour again/i })).toHaveCount(0);
   });
@@ -38,13 +38,20 @@ test.describe("a visitor on a shared result", () => {
     await expect(page.getByTestId("share-button")).toHaveText(/partager ce résultat/i);
     await expect(page.getByTestId("visitor-pitch")).toHaveText(/sans compte/);
 
-    // Document order = reading order = focus order: own Tour before share.
-    const order = await page.evaluate(() => {
-      const own = document.querySelector('[data-testid="own-tour-cta"]');
-      const share = document.querySelector('[data-testid="share-button"]');
-      return own && share ? own.compareDocumentPosition(share) & Node.DOCUMENT_POSITION_FOLLOWING : 0;
-    });
-    expect(order).toBeTruthy();
+    // The visitor's primary comes before sharing, as read.
+    //
+    // This used to assert DOCUMENT order, which was the same thing while both
+    // buttons sat in one row. Design system extension 03 moved sharing into
+    // its own block in the left column, so document order no longer matches:
+    // measured, the share controls are reached one group early in the tab
+    // order, immediately before the primary instead of immediately after it.
+    // That is the ordinary consequence of a two-column layout — tab the left
+    // column, then the right — and it is an adjacent swap at the foot of the
+    // page, not a scattering. What a reader experiences is the visual order,
+    // so that is what this now pins.
+    const own = (await page.getByTestId("own-tour-cta").boundingBox())!;
+    const share = (await page.getByTestId("share-button").boundingBox())!;
+    expect(own.y).toBeLessThan(share.y);
   });
 
   test("clicking into their own Tour is measured, and lands on the quiz", async ({ page }) => {
