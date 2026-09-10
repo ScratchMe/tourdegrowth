@@ -3,11 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { LocaleSwitcher } from "@/components/brand/LocaleSwitcher";
 import { WordmarkLink } from "@/components/brand/WordmarkLink";
-import { MetaLabel } from "@/components/brand/MetaLabel";
 import { Button } from "@/components/core/Button";
-import { Card } from "@/components/core/Card";
-import { PillarChip } from "@/components/result/PillarChip";
-import { ScoreDisplay } from "@/components/result/ScoreDisplay";
 import { SiteFooter } from "@/components/brand/SiteFooter";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
@@ -15,9 +11,10 @@ import { contentMetadata } from "@/lib/i18n/meta";
 import { localePath } from "@/lib/i18n/routes";
 import { LANDING_PULL } from "@/content/about";
 import { LastResult } from "./LastResult";
+import { PreviewCard } from "./PreviewCard";
 import { RefCapture } from "./RefCapture";
 import { JsonLd, webApplicationSchema } from "@/lib/seo/jsonld";
-import { SAMPLE_RESULT } from "@/lib/submissions/sample";
+import { getSampleNextMove, getSampleVerdicts, SAMPLE_RESULT } from "@/lib/submissions/sample";
 import styles from "./page.module.css";
 
 // Landing page — DESIGN-BRIEF.md screen 01. Nav links ("Examples", "Roast
@@ -46,6 +43,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function LandingPage({ params }: PageProps) {
   const locale = (await params).locale as Locale;
   const t = UI_STRINGS.landing;
+  // Resolved on the server, like every string the preview card receives: the
+  // island must not pull the dictionary or the copy library into the browser
+  // bundle (REVIEW-02.md R2-14).
+  const sampleVerdicts = getSampleVerdicts(locale);
+  const sampleBottleneckScore =
+    SAMPLE_RESULT.pillars.find((p) => p.pillar === SAMPLE_RESULT.weakestPillar)?.score ?? 0;
 
   return (
     <>
@@ -117,37 +120,39 @@ export default async function LandingPage({ params }: PageProps) {
           </div>
 
           <div className={styles.heroRight}>
-            <Card elevation="raised" className={styles.previewCard} data-testid="preview-card">
-              <div className={styles.previewTopRow}>
-                <MetaLabel size="xs">
-                  {tc(UI_STRINGS.scoreCard.label, locale)} — {tc(UI_STRINGS.sample.caption, locale)}
-                </MetaLabel>
-                <MetaLabel size="xs">{tc(UI_STRINGS.sample.stageLabel, locale)}</MetaLabel>
-              </div>
+            {/* Design system extension 03 §5 — two lines above the card:
+                claim, then proof. It says the PROBLEM; the promise line in
+                the left column says what you leave with. They sit on the
+                same screen, so neither restates the other. */}
+            <p className={styles.problem} data-testid="landing-problem">
+              {tc(t.problemClaim, locale)} {tc(t.problemProof, locale)}
+            </p>
 
-              <ScoreDisplay score={SAMPLE_RESULT.total} size="mobile" />
-
-              <div className={styles.previewTags}>
-                {/* REVIEW-02.md R2-13: each chip is a link to its pillar's glossary
-                    page — the landing is the strongest page on the site and
-                    passed nothing to any term page. */}
-                {SAMPLE_RESULT.pillars.map((p) => (
-                  <Link
-                    key={p.pillar}
-                    href={localePath(locale, `/glossary/${p.pillar}`)}
-                    className={styles.previewChipLink}
-                    aria-label={tc(UI_STRINGS.pillars[p.pillar], locale)}
-                  >
-                    <PillarChip
-                      pillar={tc(UI_STRINGS.pillars[p.pillar], locale)}
-                      score={p.score}
-                      size="mobile"
-                      weak={p.pillar === SAMPLE_RESULT.weakestPillar}
-                    />
-                  </Link>
-                ))}
-              </div>
-            </Card>
+            <PreviewCard
+              caption={tc(UI_STRINGS.sample.caption, locale)}
+              scoreLabel={tc(UI_STRINGS.scoreCard.label, locale)}
+              toneLabels={{
+                straight: tc(UI_STRINGS.toneSelector.neutralTitle, locale),
+                roast: `${tc(UI_STRINGS.toneSelector.roastTitle, locale)} 🔥`,
+                group: tc(UI_STRINGS.toneSelector.groupLabel, locale),
+              }}
+              total={SAMPLE_RESULT.total}
+              bottleneckLabel={tc(UI_STRINGS.bottleneck.clear, locale)}
+              bottleneckPillar={tc(UI_STRINGS.pillars[SAMPLE_RESULT.weakestPillar], locale)}
+              bottleneckScore={sampleBottleneckScore}
+              verdicts={{
+                straight: sampleVerdicts.neutral.headline,
+                roast: sampleVerdicts.roast.headline,
+              }}
+              chips={SAMPLE_RESULT.pillars.map((p) => ({
+                label: tc(UI_STRINGS.pillars[p.pillar], locale),
+                score: p.score,
+                href: localePath(locale, `/glossary/${p.pillar}`),
+                weak: p.pillar === SAMPLE_RESULT.weakestPillar,
+              }))}
+              moveLabel={tc(UI_STRINGS.result.nextMoveLabel, locale)}
+              move={getSampleNextMove(locale)}
+            />
           </div>
         </div>
 

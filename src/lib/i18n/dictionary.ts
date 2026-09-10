@@ -55,6 +55,26 @@ export const UI_STRINGS = {
       fr: "Un diagnostic AARRR guidé sur l'Acquisition, l'Activation, la Retention, le Referral et le Revenue — noté, expliqué, et pensé pour être partagé.",
     },
     /**
+     * Design system extension 03 §5 / REVIEW-03.md B4 — two lines above the
+     * preview card: claim, then proof.
+     *
+     * It says the PROBLEM. `promise` below says what you leave with, and the
+     * two must not restate each other — they sit in opposite columns of the
+     * same screen. So this one never mentions the deliverable, and stops at
+     * why a diagnosis is needed at all: four working stages are very good at
+     * hiding the one that is not.
+     *
+     * TODO: à relire — copie nouvelle (convention 6 de CLAUDE.md).
+     */
+    problemClaim: {
+      en: "Growth rarely stalls everywhere at once.",
+      fr: "La croissance cale rarement partout à la fois.",
+    },
+    problemProof: {
+      en: "It stalls at one stage, and the four that work keep hiding it.",
+      fr: "Elle cale à une étape, et les quatre qui marchent la masquent.",
+    },
+    /**
       * REVIEW-03.md B1 — what you leave with, which the H1 above deliberately
       * does not say (it poses the problem, and it stays as it is).
       *
@@ -141,7 +161,6 @@ export const UI_STRINGS = {
    * shown on the landing preview now, and on the future `/r/sample` page. */
   sample: {
     caption: { en: "Sample B2B SaaS", fr: "Exemple SaaS B2B" },
-    stageLabel: { en: "Stage 5/5", fr: "Étape 5/5" },
   },
 
   /** Header nav — SPEC.md §12 cut "How it works"/"Examples"/"Roast mode" from
@@ -232,6 +251,11 @@ export const UI_STRINGS = {
       fr: "Clair, constructif, sans détour.",
     },
     roastTitle: { en: "Roast me", fr: "Roast me" },
+    /* Accessible name for the compact toggle on the landing preview card
+       (design system extension 03 §4) — the segmented control is a named
+       `role="group"`, and "Tone" is what names it. Same word as the section
+       it demonstrates. TODO: à relire — copie nouvelle. */
+    groupLabel: { en: "Tone", fr: "Ton" },
     roastDescription: {
       en: "Same insights, sharper tongue. All in good fun.",
       fr: "Mêmes constats, un ton plus mordant. Toujours bienveillant.",
