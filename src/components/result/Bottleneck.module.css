@@ -1,0 +1,105 @@
+/* Design system extension 03 — see design/ds-extension-03-return/components/result/Bottleneck.prompt.md */
+
+.wrap {
+  border-top: var(--border-rule);
+  display: flex;
+  flex-direction: column;
+}
+
+/* `desktop` is the default and shrinks to the mobile figures on its own
+   below the app's breakpoint — CSS-only, no JS viewport read, the same
+   convention as ScoreDisplay.module.css, which this block sits directly
+   under inside the same card. `mobile` is a hard small at every width, for
+   the landing's preview card. */
+.desktop {
+  margin-top: 20px;
+  padding-top: 18px;
+  gap: 10px;
+}
+
+.mobile {
+  margin-top: 16px;
+  padding-top: 14px;
+  gap: 8px;
+}
+
+.label {
+  font: var(--meta-2xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-alert);
+}
+
+/* No stage is named, so the line is a statement rather than a flag. */
+.labelLevel {
+  color: var(--text-muted);
+}
+
+.names {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.name {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pillar {
+  font: var(--display-title);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+  color: var(--text-body);
+}
+
+.mobile .pillar {
+  font: var(--display-section);
+}
+
+/* --paint-red rather than the AA-safe --paint-red-deep: at 36px/30px stencil
+   700 this is large text, where the AA floor is 3:1 and this pair measures
+   4.42:1. Same reasoning as the landing H1's accent. */
+.pillarRoast {
+  color: var(--paint-red);
+}
+
+.score {
+  font: var(--meta-md);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.score b {
+  font-weight: 600;
+  color: var(--text-alert);
+}
+
+.verdict {
+  font: var(--body-md);
+  color: var(--text-muted);
+  text-wrap: pretty;
+}
+
+.mobile .verdict {
+  font: var(--body-sm);
+}
+
+@media (max-width: 760px) {
+  .desktop {
+    margin-top: 16px;
+    padding-top: 14px;
+    gap: 8px;
+  }
+
+  .desktop .pillar {
+    font: var(--display-section);
+  }
+
+  .desktop .verdict {
+    font: var(--body-sm);
+  }
+}
