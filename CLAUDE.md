@@ -1535,7 +1535,7 @@ Le lot 1 avait livré les composants sans rien câbler. Celui-ci recompose `/r/[
 
 **Défaut préexistant corrigé au passage** : `ResultView` appliquait `styles.headerRoast`, une classe **jamais définie** dans son module — l'en-tête en roast rendait donc `class="header undefined"` depuis toujours. Retiré ; le signal roast venait déjà du seul badge.
 
-**Défaut préexistant repéré et NON corrigé ici, pour ne pas brouiller ce que ce lot change** : sur desktop, `PillarChip stretch` étale ses quatre enfants en `space-between`, ce qui donne « 18 … /20 … Acquisition … ? » au lieu du « 18/20 … Acquisition » que l'étape 12bis décrivait. Visible en production aujourd'hui, invisible sur mobile (où `stretch` est inerte). À traiter séparément.
+**Défaut préexistant repéré et NON corrigé ici, pour ne pas brouiller ce que ce lot change** : sur desktop, `PillarChip stretch` étale ses quatre enfants en `space-between`, ce qui donne « 18 … /20 … Acquisition … ? » au lieu du « 18/20 … Acquisition » que l'étape 12bis décrivait. Visible en production aujourd'hui, invisible sur mobile (où `stretch` est inerte). À traiter séparément. *(Fait le 2026-09-11 — voir l'entrée « une régression de portage, pas un défaut d'origine » : la règle venait de ce lot-ci, recopiée d'un balisage à deux éléments flex sur un balisage qui en a quatre.)*
 
 **Vérifié en réel** : `tsc`, `eslint`, 373 tests unitaires, seuils de couverture, `next build`, **159 specs Playwright** (+9, nouveau fichier `e2e/result-composition.spec.ts`), passe axe verte sur `/r/sample`. Captures relues : visiteur EN desktop et FR mobile, propriétaire EN desktop et FR mobile (via un patch **local jamais committé** donnant un id à l'échantillon — retiré, absence de trace vérifiée avant commit).
 
@@ -1882,6 +1882,48 @@ combinaisons testées.
 question plutôt qu'un impératif — quelqu'un qui revient sait déjà où est le
 bouton.
 
+### `PillarChip stretch` : une régression de portage, pas un défaut d'origine (2026-09-11)
+
+Le défaut traînait dans le tableau des points ouverts depuis le portage de
+l'extension 03 : sur desktop, la ligne d'un pilier étalait ses quatre enfants,
+donc « 18 … /20 … Acquisition … ? » au lieu de « 18/20 … Acquisition ». Visible
+en production, inerte sous 761 px.
+
+**Ce que l'enquête a trouvé et que je n'aurais pas deviné** : la règle n'a
+jamais été fausse, c'est le balisage qui a changé sous elle. Le `PillarTag`
+d'avant l'étape 13 mettait le score et son dénominateur dans **un seul**
+élément et n'avait pas de créneau glossaire — deux éléments flex, pour
+lesquels `justify-content: space-between` produisait exactement la forme
+voulue. L'étape 13 a réécrit le balisage à la forme du design system (score et
+« /20 » séparés, plus `{children}` pour le déclencheur de glossaire), soit
+**quatre** éléments, et a recopié la règle telle quelle. `space-between` a
+alors divisé l'espace libre en trois écarts au lieu d'un.
+
+Correctif : `justify-content` retiré, une seule marge automatique sur le nom du
+pilier (Flexbox §8.1 — les marges auto prennent l'espace libre avant que
+`justify-content` ne s'applique). Deux classes (`.stretch .label`) pour battre
+la règle de base de façon déterministe ; les deux vivent dans le même module
+CSS, donc le piège d'ordre d'émission entre modules (leçon nº2) ne s'applique
+pas ici. `padding-left: 6px` conservé comme plancher si la colonne devenait un
+jour plus étroite que son contenu — pas atteignable aujourd'hui, les noms de
+piliers restant en anglais.
+
+**Le `justify-content` devait être retiré, pas seulement neutralisé** : mesuré,
+le garder donne une géométrie identique au pixel (la marge auto prend l'espace
+en premier), donc il aurait survécu comme déclaration morte qui ressemble
+toujours à la cause — la prochaine personne à déboguer cette ligne serait
+retombée dessus.
+
+**Vérifié en réel** : mesure dans le navigateur plutôt qu'à l'œil — écart
+score→« /20 » de 87 px avant, 0 après ; l'espace libre passe entre les deux
+moitiés. Non-vacuité prouvée en réintroduisant exactement l'ancienne règle :
+**seule la nouvelle spec tombe**, les dix autres du fichier passent. Captures
+relues en EN et FR desktop, et mobile FR inchangé (la règle est derrière
+`@media (min-width: 761px)`).
+
+L'avertissement « ne recopiez pas ça » est retiré de l'aperçu design-sync et de
+`.design-sync/NOTES.md` — le design system montre à nouveau la forme voulue.
+
 ## État du projet au 2026-09-11 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -1917,7 +1959,6 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | `/metrics` livrée fermée (R2-28) | Le code est en production, la page renvoie 404 tant que `METRICS_PAGE_ENABLED` n'est pas `"true"` dans Vercel, et se cache aussi d'elle-même sous 50 soumissions | Assez de volume pour que des chiffres publics soient crédibles. Poser la variable, rien d'autre à coder. |
 | Onze chaînes de copie neuves de l'extension 03 | Marquées `TODO: à relire` dans `dictionary.ts` | Une relecture d'Antoine, comme le « bon à tirer » du 2026-09-09. |
 | Le primaire du propriétaire est « Refaire le Tour », pas « Partager » | Lecture littérale du retour design : le partage a quitté la rangée de CTA pour un bloc image, et `ShareCard.prompt.md` dit « never primary ». Un essai contraire a été fait puis annulé | Un arbitrage d'Antoine : c'est une décision de croissance, pas d'implémentation. |
-| `PillarChip stretch` étale ses quatre enfants sur desktop | « 18 … /20 … Acquisition … ? » au lieu du « 18/20 … Acquisition » décrit à l'étape 12bis. Préexistant, visible en production, inerte sous 761px | Un correctif de deux lignes, hors du portage pour ne pas brouiller ce qu'il changeait. |
 | Les composants `Bottleneck` et `ShareCard` n'ont pas de test unitaire | Le runner ne peut pas rendre un composant (`.ts` seulement, environnement `node`, ni jsdom ni RTL) — c'est la convention du repo | Rien : leurs assertions vivent dans `e2e/result-composition.spec.ts` et `e2e/landing-preview.spec.ts`. |
 | Les deux nouveaux événements A4 (`retake_started`, `landing_return`) | Vérifiés en e2e, jamais contre le vrai GoatCounter (le proxy du bac à sable bloque `*.goatcounter.com`) | Un regard d'Antoine sur `/admin/stats` après déploiement : deux lignes de plus dans la section funnel, et la ligne « Value actions per result ». |
 | R2-30 (fenêtre Tour de France, SPEC.md §10) | Reporté d'un commun accord : pas d'urgence | À construire **avant** juin 2027, pour que le post parte pendant le vrai Tour et pas après. |

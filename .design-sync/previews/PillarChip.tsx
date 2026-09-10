@@ -36,11 +36,10 @@ export const Chips = () => (
  * screen's desktop alignment, so the chips line up with the score card above
  * them. It is inert below 761px, where the two-column chip grid takes over.
  *
- * KNOWN DEFECT, visible here and in production: the row spaces all four of
- * its children apart, so it reads "18 · /20 · Acquisition · ?" instead of
- * pairing the score as "18/20 … Acquisition". Do not copy this spacing — the
- * intended shape is the one the non-stretch chips show. Tracked in the
- * project's open-items list; the fix is in the component's own CSS.
+ * The free space is taken by a single auto margin on the pillar name, not by
+ * `justify-content` — the row has four flex children (score, "/20", name,
+ * glossary trigger), so spacing them apart split "18" from "/20". That was a
+ * real production defect for a month, fixed 2026-09-11.
  */
 export const Stretch = () => (
   <div style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 400 }}>
