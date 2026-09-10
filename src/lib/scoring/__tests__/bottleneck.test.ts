@@ -170,4 +170,26 @@ describe("the bottleneck block and the next move agree", () => {
       );
     }
   });
+
+  it("hands back the very objects it was given — it is a resolver, not a boundary", () => {
+    // Written after this exact assumption cost a payload leak. The function
+    // is generic so the OG image can pass its own lighter shape, which means
+    // a caller passing the stored `PillarScore` gets `PillarScore` objects
+    // back, `rawPoints` included. Narrowing has to happen at the caller
+    // (`toPillarViews`), and this test exists so nobody reads the signature
+    // and assumes otherwise.
+    const stored = [
+      { pillar: "acquisition", score: 16, rawPoints: 47 },
+      { pillar: "activation", score: 5, rawPoints: 14 },
+      { pillar: "retention", score: 20, rawPoints: 60 },
+      { pillar: "referral", score: 20, rawPoints: 60 },
+      { pillar: "revenue", score: 20, rawPoints: 60 },
+    ] as const;
+
+    const view = resolveBottleneck(stored);
+
+    expect(view.sharpness).toBe("clear");
+    expect(view.pillars[0]).toBe(stored[1]);
+    expect(Object.keys(view.pillars[0]!)).toContain("rawPoints");
+  });
 });
