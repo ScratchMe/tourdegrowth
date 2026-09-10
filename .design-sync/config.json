@@ -1,10 +1,11 @@
 {
   "pkg": "tour-de-growth",
+  "projectId": "23b9671c-a55b-452e-aa41-39906ee71ba8",
   "globalName": "TourDeGrowth",
   "shape": "package",
   "srcDir": "src/components",
   "tsconfig": "./.design-sync/tsconfig.ds.json",
-  "buildCmd": "npx tsc -p .design-sync/tsconfig.dts.json",
+  "buildCmd": "npx tsc -p .design-sync/tsconfig.dts.json && node .design-sync/relativize-dts.mjs",
   "readmeHeader": "./.design-sync/conventions.md",
   "extraEntries": [
     "./.design-sync/shims/ds-styles.ts"
@@ -19,5 +20,8 @@
     "GlossaryTerm": {
       "cardMode": "column"
     }
+  },
+  "dtsPropsFor": {
+    "NotFoundScreen": "  locale: \"en\" | \"fr\";\n  /** Mono eyebrow — \"Detour\" for an unknown address, \"Lost result\" for a shared id that names nothing. */\n  eyebrow: { en: string; fr: string };\n  /** Stardos Stencil heading, one short sentence. */\n  title: { en: string; fr: string };\n  /** Two lines at most: what happened, and that nothing else is lost. */\n  body: { en: string; fr: string };\n  /** Label of the single button under the card. */\n  cta: { en: string; fr: string };"
   }
 }

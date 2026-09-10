@@ -19,11 +19,21 @@ export const Inline = () => (
   </p>
 );
 
-/** `open` drives aria-expanded and a darker outline, so the trigger shows it is the one talking. */
+/*
+ * `open` drives aria-expanded and a darker border, so the trigger shows it is
+ * the one talking. The whole difference is a border/colour shift on a 16px
+ * glyph, which is invisible unless the two states sit side by side — so they
+ * do. (For the trigger together with the panel it opens, see GlossaryTerm.)
+ */
 export const Open = () => (
-  <p style={line}>
-    Do you know your main cause of churn <DefinitionTrigger term="churn" open /> ?
-  </p>
+  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+    <p style={line}>
+      Closed <DefinitionTrigger term="churn" /> — muted border, aria-expanded=false
+    </p>
+    <p style={line}>
+      Open <DefinitionTrigger term="churn" open /> — ink border, aria-expanded=true
+    </p>
+  </div>
 );
 
 /**

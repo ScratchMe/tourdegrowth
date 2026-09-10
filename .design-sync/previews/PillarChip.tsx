@@ -18,20 +18,15 @@ const PILLARS = [
   { pillar: "Revenue", score: 20 },
 ];
 
-/** The default chip — score, then name, sized to its content. */
+/**
+ * The default chip — score, then name, sized to its content. `total`
+ * defaults to 20, so the denominator always prints: there is no prop that
+ * yields a bare "18". Pass `total` only to override that 20.
+ */
 export const Chips = () => (
   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
     {PILLARS.map((p) => (
       <PillarChip key={p.pillar} pillar={p.pillar} score={p.score} weak={p.pillar === "Retention"} />
-    ))}
-  </div>
-);
-
-/** `total` prints the denominator — the result screen shows 18/20, the landing preview shows 18. */
-export const WithTotal = () => (
-  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-    {PILLARS.map((p) => (
-      <PillarChip key={p.pillar} pillar={p.pillar} score={p.score} total={20} weak={p.pillar === "Retention"} />
     ))}
   </div>
 );

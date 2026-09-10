@@ -35,7 +35,7 @@ export const Center = () => (
 export const French = () => (
   <div style={{ maxWidth: 420 }}>
     <Disclaimer align="left">
-      Estimation rapide, pas un audit — voir <a href="/fr/how-it-works">How it works</a>.
+      Estimation rapide, pas un audit — voir <a href="/fr/how-it-works">Comment ça marche</a>.
     </Disclaimer>
   </div>
 );

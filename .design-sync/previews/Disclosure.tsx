@@ -9,6 +9,9 @@ import { Disclosure, MetaLabel } from "tour-de-growth";
  *
  * Its one use in the product is the score breakdown, which is why `size="sm"`
  * exists: a top-level row opens onto nested rows one step quieter.
+ *
+ * `rule` DEFAULTS TO TRUE — a bare <Disclosure> draws the dashed line above
+ * itself. Pass `rule={false}` to suppress it.
  */
 
 const line = { margin: "8px 0 0", font: "15px/1.5 Inter, sans-serif" } as const;
@@ -23,14 +26,31 @@ export const TopLevel = () => (
   </div>
 );
 
+/*
+ * Opened, which is the only way a static card can show what the panel holds
+ * and what the marker looks like in its `−` state. `open` is the native
+ * <details> attribute: DisclosureProps does not declare it — the browser owns
+ * the open state — but it still reaches the element through the component's
+ * `...rest`. In the product nobody passes it; the user clicks.
+ */
+export const Open = () => (
+  <div style={{ maxWidth: 460 }}>
+    <Disclosure rule summary="How this score is calculated" open>
+      <p style={line}>Three questions per stage. Your answers, and what each one was worth.</p>
+    </Disclosure>
+  </div>
+);
+
 /**
  * Nested, which is the shape the breakdown actually ships: each pillar head
  * carries its own arithmetic, and the three answers behind it are `sm`.
+ * Shown open so both levels are visible at once.
  */
 export const Nested = () => (
   <div style={{ maxWidth: 460 }}>
     <Disclosure
       rule
+      open
       summary={
         <span style={{ display: "flex", justifyContent: "space-between", width: "100%", gap: 12 }}>
           <span>Retention</span>
@@ -48,10 +68,10 @@ export const Nested = () => (
   </div>
 );
 
-/** Without `rule`, for a disclosure that sits inside something already framed. */
+/** `rule={false}`, for a disclosure that sits inside something already framed. */
 export const NoRule = () => (
   <div style={{ maxWidth: 460 }}>
-    <Disclosure summary="Only visible to you">
+    <Disclosure rule={false} summary="Only visible to you">
       <p style={line}>Your answers are stored on this device, never on the shared page.</p>
     </Disclosure>
   </div>

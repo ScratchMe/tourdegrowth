@@ -39,7 +39,8 @@ export const OverLimit = () => (
       "We sell scheduling software to independent physiotherapists. Most churn happens in the first month, and we have never worked out why. " +
       "Acquisition is mostly word of mouth from two physio schools, which we cannot scale, and we have never measured what a customer costs us. " +
       "Pricing is one flat plan we set three years ago and have not revisited since, though several customers have asked for a team tier. " +
-      "We have no referral mechanism at all beyond people telling each other in the staff room."
+      "We have no referral mechanism at all beyond people telling each other in the staff room, " +
+      "and we have never asked a single customer to introduce us to another clinic."
     }
   />
 );

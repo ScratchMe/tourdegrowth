@@ -180,24 +180,116 @@ spaces all four children apart instead of pairing the score). It is documented
 in the story's own doc comment so the design agent does not copy it. The fix
 belongs in the component's CSS, as its own change.
 
-## Not synced to a project yet
+## Synced
 
-`DesignSync` needs an authorization this environment cannot obtain:
+Project `23b9671c-a55b-452e-aa41-39906ee71ba8` ("Tour de Growth"), pinned as
+`projectId` in `config.json`. 182 files, 34 components, 116 story cells.
 
-> DesignSync needs design-system authorization, and /design-login cannot run
-> in this non-interactive session. Ask the user to run /design-login once from
-> an interactive Claude Code session on this machine — headless and SDK runs
-> here then reuse that authorization. If this is claude.ai/code, ask them
-> instead to use Claude Design's "Send to Claude Code Web" (which seeds the
-> project into the workspace) or to provide the project files directly.
+The authorization that blocked the first attempt is obtained by running
+`/design-login` once from an interactive Claude Code session on this machine;
+headless runs then reuse it.
 
-So `config.json` has **no `projectId`**, and nothing has been uploaded. The
-bundle is built and validated locally. To finish, from an interactive session
-on Antoine's machine: `/design-login`, then `/design-sync` — it will re-read
-this config, rebuild deterministically, create the project and upload.
+## A fresh clone needs two installs before anything runs
+
+`npm ci` (the repo's own deps — `cfg.buildCmd` shells out to `npx tsc`, and the
+converter resolves React out of `./node_modules`), then the converter's own
+deps in `.ds-sync/`. Neither directory is committed.
+
+Playwright's browser is **not** in the repo either. `package-validate.mjs` and
+`package-capture.mjs` need Chromium; the repo pins `playwright-core@1.56.1`,
+which wants chromium build **1194**. `npx playwright install chromium` from the
+repo root gets the matching one. Nothing was cached on this machine on the
+first run — do not assume a sandbox has it.
+
+## `relativize-dts.mjs` — without it, half the contracts are useless
+
+`tsc` copies path aliases into the emitted declarations verbatim, so
+`dist/types/**` was full of `import type { Locale } from "@/lib/i18n/locale"`.
+The converter reads that tree with ts-morph in a project that has **no `paths`
+mapping**, so every aliased import was unresolved, every referenced type became
+an error type, and the extractor printed the bare alias name instead of
+expanding it. The emitted contracts — the thing the design agent codes against
+— said `locale: Locale` and `sharpness: Sharpness` with neither type defined
+anywhere in the file.
+
+`.design-sync/relativize-dts.mjs` rewrites those specifiers to relative paths
+and is chained into `cfg.buildCmd` after `tsc`. With it, `Locale` expands to
+`"en" | "fr"` across 9 components and `Sharpness` to
+`"clear" | "shared" | "level"`. Do not drop it from `buildCmd`; the failure is
+silent and only visible by reading a `.d.ts`.
+
+**Still unresolved, deliberately:** `BottleneckPillar`, `SegmentedOption` and
+`ToneToggleValue` (the last only inside an `onChange` signature). These are
+interfaces and non-union aliases, and ts-morph's `getText()` prints the alias
+name for those even when resolvable — only `dtsPropsFor` can inline them. Left
+alone because both previews pass the literal shape (`{ pillar, score }`,
+`{ id, label, href? }`) and those examples are carried into the `.prompt.md`,
+so the agent has the shape from the code that actually runs. Hand-writing the
+bodies would duplicate the contract and silently rot.
+
+`cfg.dtsPropsFor.NotFoundScreen` **is** pinned, because that one had neither:
+four props typed `Translatable` (a `Record`, so never expanded) and examples
+that spread a `{...UNKNOWN_PAGE}` constant defined off-screen. **Drift risk:** a
+prop added to `NotFoundScreen` will not appear in its contract until this entry
+is updated by hand.
+
+## Per-component docs are deliberately NOT wired
+
+`[DOCS_UNMAPPED]` lists all 34, and that is correct — do not "fix" it by
+pointing `cfg.docsDir` at `design/ds-extension-0{1,3}-return/`. Those 29
+handoff `.prompt.md` files describe the API the design asked for, not the one
+that shipped, and 25 of them would *replace* a synthesized doc that is strictly
+better: the components carry rich JSDoc, so the synthesized `.prompt.md` gets
+that prose **plus** the real props from `dist/types` **plus** worked examples
+lifted from the authored previews. Compared side by side on `PriorityMove`, the
+synthesized file wins on every axis.
+
+## Traps the previews hit — all six found by grading, none by reading code
+
+The render check passed 34/34 on the first run with zero flags. Every one of
+these was a card that rendered perfectly and said something false:
+
+- **`Disclosure.rule` defaults to `true`.** The story named `NoRule` omitted the
+  prop and therefore drew a rule. Pass `rule={false}`.
+- **`PillarChip.total` defaults to `20`.** `Chips` and `WithTotal` were
+  byte-identical; the second was dropped. There is no prop that yields a bare
+  "18" — the denominator always prints.
+- **`TextArea` over-limit needs `length > maxLength`.** The `OverLimit` story
+  was 490/500, i.e. it never showed the red state it is named for. Now 567.
+- **`TrackedLink` ships no styles at all.** It is a bare `<a>` that inherits
+  colour from its container, so previewed standalone it renders browser-default
+  blue. The preview applies `--text-link` the way the real containers do.
+- **A French story had an English link label** ("voir How it works"). Test the
+  FR cells, not just that they render.
+- **`DefinitionTrigger open`** only shifts a border on a 16px glyph — invisible
+  unless the closed and open states sit side by side, which the story now does.
+
+Two components have no way to show their most useful state without help:
+`Disclosure` (no `open` prop — `<details>` owns it) and any leaf that needs a
+parent. For `Disclosure` the preview passes the **native** `open` attribute,
+which reaches the element through the component's `...rest`. That is not in
+`DisclosureProps`, and it type-checks only because TypeScript's `include` globs
+skip dot-directories, so `.design-sync/previews/**` is outside the repo's
+`tsc`. If that ever changes, this line errors.
 
 ## Re-sync risks
 
+- **`cfg.buildCmd` is two commands now**, and the second one is load-bearing.
+  Simplifying it back to a bare `tsc` degrades a dozen contracts silently — no
+  warning, no failed check, just alias names where unions should be. After any
+  build change, spot-check that
+  `ds-bundle/components/brand/ContentHeader/ContentHeader.d.ts` says
+  `locale: "en" | "fr"` and not `locale: Locale`.
+- **`cfg.dtsPropsFor.NotFoundScreen` is hand-written** and will not follow the
+  component. If that component gains or renames a prop, update the config entry
+  or the contract lies.
+- **The Chromium build is pinned by the repo's `playwright-core`.** Bump that
+  dependency and the cached browser stops matching (`browserType.launch:
+  Executable doesn't exist`); re-run `npx playwright install chromium`.
+- **The grades in `.design-sync/.cache/` are not committed.** What makes
+  verification durable is the uploaded `_ds_sync.json`. If that anchor is ever
+  lost or the project is recreated, all 34 components re-verify from scratch —
+  which is a few hours of reading sheets, not minutes.
 - **The `--entry ./dist/index.js` trick breaks the day the repo gains a real
   `dist/`.** If a build is ever added, drop the flag and set `cfg.buildCmd`.
 - **`next-link.tsx` mirrors an API surface that can drift.** If a component
