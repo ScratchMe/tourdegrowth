@@ -127,12 +127,34 @@
  *   [credit] · CTA · share · disclaimer · [breakdown]
  *
  * Two columns cannot produce that by source order, so on mobile the columns
- * step out of the box tree (`display: contents`) and the ten children become
+ * step out of the box tree (`display: contents`) and their children become
  * direct items of `.layout`, placed by `order`.
  *
- * The same `order` values are also correct WITHIN each desktop column — 1,3,8
- * on the left and 2,4,5,6,7,9,10 on the right are both ascending — so nothing
- * has to be reset at the breakpoint, and the two layouts cannot disagree.
+ * ## What that costs, and why the share block sits outside both columns
+ *
+ * `order` moves boxes, not the document. A screen reader and the Tab key
+ * follow source order, so every step of `order` is a step the reading order
+ * disagrees with the visual one — and the share block was the worst of it:
+ * a whole card with two controls, last in the left column and therefore
+ * announced third, five blocks before it is seen.
+ *
+ * Two flex columns can't be interleaved in source, and a plain grid can't
+ * give each column its own vertical rhythm (rows are shared, so a tall card
+ * on the right would push the left column's items apart). The share block is
+ * the one item that has to cross, so it is lifted OUT of both columns and
+ * placed by its own grid area at the breakpoint. Source order becomes
+ *
+ *   score · pillars | move · strengths · losing time · [credit] · CTA ·
+ *   disclaimer · [breakdown] | share
+ *
+ * which leaves two disagreements instead of a scatter: `move` and `pillars`
+ * swap (adjacent), and `share` is announced last rather than before the
+ * disclaimer. `e2e/result-composition.spec.ts` measures the worst
+ * displacement and pins it, so this stays a bounded, checked trade-off.
+ *
+ * The `order` values are also correct WITHIN each desktop column — 1,3 on the
+ * left and 2,4,5,6,7,9,10 on the right are both ascending — so nothing has to
+ * be reset at the breakpoint, and the two layouts cannot disagree.
  *
  * `.layout`'s gap is the same 22px `.left`/`.right` carry, so collapsing them
  * changes the order and nothing else.
@@ -228,8 +250,33 @@
   .layout {
     display: grid;
     grid-template-columns: 400px 1fr;
-    gap: 44px;
+    /* The share block is not in either column (see the note above), so the
+       desktop shape is named rather than left to auto-placement: the right
+       column spans both rows, the left column sizes row 1, and the share
+       block takes row 2 directly beneath it. `auto` on row 2 is what absorbs
+       a right column taller than the left, instead of letting the extra
+       space push the share block down. */
+    grid-template-areas:
+      "left  right"
+      "share right";
+    grid-template-rows: min-content auto;
+    /* 22px between the left column and the share block — the left column's
+       own rhythm — and 44px between the columns. */
+    gap: 22px 44px;
     align-items: start;
+  }
+
+  .left {
+    grid-area: left;
+  }
+
+  .right {
+    grid-area: right;
+  }
+
+  .slotShare {
+    grid-area: share;
+    align-self: start;
   }
 
   /* The columns come back as boxes here — see the `display: contents` note

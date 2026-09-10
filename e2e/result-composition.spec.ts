@@ -144,3 +144,61 @@ test.describe("the share block", () => {
     expect(inCard).toBe(true);
   });
 });
+
+/**
+ * `order` moves boxes, not the document — so every step of it is a step where
+ * what a screen reader announces and what the Tab key visits disagree with
+ * what a sighted reader sees. That is a real cost of the mobile order above,
+ * and the honest thing is to bound it and check the bound rather than to
+ * assert it away.
+ *
+ * Measured before the share block was lifted out of the left column: worst
+ * displacement 4 — a whole card with two controls, announced third and shown
+ * seventh. After: 1, two adjacent swaps (the action and the pillar grid trade
+ * places, and the share block is announced after the disclaimer rather than
+ * before it). If a future stylesheet edit widens that again, this fails.
+ */
+test.describe("what the reading order costs is bounded, and checked", () => {
+  const SLOTS = [
+    "slotScore",
+    "slotMove",
+    "slotPillars",
+    "slotStrengths",
+    "slotWeaknesses",
+    "slotCredit",
+    "slotCta",
+    "slotShare",
+    "slotDisclaimer",
+    "slotBreakdown",
+  ];
+
+  test("no block on a phone is more than one place from where it is announced", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/r/sample?lang=en");
+    await page.locator("main").waitFor();
+
+    const blocks = await page.evaluate((slots) => {
+      const wanted = slots
+        .map((s) => document.querySelector(`[class*="${s}"]`))
+        .filter((el): el is Element => el !== null);
+      // Document order, taken from the document rather than from the query
+      // order, so this measures the sequence a screen reader follows.
+      return [...document.querySelectorAll("*")]
+        .filter((el) => wanted.includes(el))
+        .map((el, dom) => ({
+          slot: slots.find((s) => String(el.className).includes(s))!,
+          dom,
+          top: Math.round(el.getBoundingClientRect().top + window.scrollY),
+        }));
+    }, SLOTS);
+
+    expect(blocks.length, "the slot class names moved — this measures nothing now").toBeGreaterThan(6);
+
+    const visual = [...blocks].sort((a, b) => a.top - b.top);
+    const displaced = visual
+      .map((b, visualIndex) => ({ slot: b.slot, delta: Math.abs(visualIndex - b.dom) }))
+      .filter((b) => b.delta > 1);
+
+    expect(displaced, "a block is announced more than one place from where it is shown").toEqual([]);
+  });
+});
