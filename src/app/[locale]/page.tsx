@@ -116,6 +116,11 @@ export default async function LandingPage({ params }: PageProps) {
                 down: tc(UI_STRINGS.progression.landingDown, locale),
                 flat: tc(UI_STRINGS.progression.landingFlat, locale),
               }}
+              nudge={{
+                weeks: tc(UI_STRINGS.lastResult.retakeNudgeWeeks, locale),
+                months: tc(UI_STRINGS.lastResult.retakeNudgeMonths, locale),
+                cta: tc(UI_STRINGS.lastResult.retakeNudgeCta, locale),
+              }}
             />
           </div>
 

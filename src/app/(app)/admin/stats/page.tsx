@@ -99,6 +99,10 @@ function FunnelBreakdown({ window }: { window: FunnelWindow }) {
             Came back to the landing with a result on the device — {stats.landingReturn}
           </li>
           <li>
+            Clicked the 30-day nudge — {stats.retakeNudgeClicked} (
+            {ratio(stats.retakeNudgeClicked, stats.landingReturn)} of those returns)
+          </li>
+          <li>
             Retook the Tour — {stats.retakeStarted} ({ratio(stats.retakeStarted, stats.landingReturn)} of those
             returns)
           </li>
