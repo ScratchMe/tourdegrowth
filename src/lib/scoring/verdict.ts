@@ -1,7 +1,8 @@
-import { PILLAR_VERDICTS, scoreBand, SUMMARY_HEADLINES } from "@/content/copy-library";
+import { LEVEL_HEADLINE, PILLAR_VERDICTS, scoreBand, SUMMARY_HEADLINES } from "@/content/copy-library";
 import { tc } from "@/lib/i18n/dictionary";
 import type { Locale } from "@/lib/i18n/locale";
 import type { Tone } from "@/lib/quiz/tone";
+import { resolveBottleneck } from "./bottleneck";
 import type { Pillar } from "./pillars";
 
 export interface QuickVerdict {
@@ -24,7 +25,14 @@ export function buildQuickVerdict(
   pillars: readonly { pillar: Pillar; score: number }[],
   weakestPillar: Pillar,
 ): QuickVerdict {
-  const headline = tc(SUMMARY_HEADLINES[weakestPillar][tone], locale);
+  // `SUMMARY_HEADLINES` is indexed by the weakest pillar and every line
+  // asserts that stage still needs work — which is false when no stage is
+  // behind. Substituted here rather than at the one screen that showed the
+  // contradiction, so every consumer of a Quick verdict gets the corrected
+  // line, and so the predicate has one definition shared with the score
+  // card's sharpness and with `resolveNextMove` standing down.
+  const level = resolveBottleneck(pillars).sharpness === "level";
+  const headline = tc(level ? LEVEL_HEADLINE[tone] : SUMMARY_HEADLINES[weakestPillar][tone], locale);
 
   const pillarSentences = {} as Record<Pillar, string>;
   for (const p of pillars) {

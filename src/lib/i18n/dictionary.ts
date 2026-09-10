@@ -391,6 +391,12 @@ export const UI_STRINGS = {
     strengthsTitle: { en: "Strengths", fr: "Points forts" },
     strengthsTitleRoast: { en: "Credit where it's due", fr: "Ce qui marche, quand même" },
     weaknessesTitle: { en: "Where you're losing time", fr: "Là où tu perds du temps" },
+    /* The same section when no stage is behind: the two lowest pillars are
+       still in the strong band, so "Where you're losing time" was an alarming
+       title over two sentences of praise. Framed the way LEVEL_MOVE frames a
+       level board — which one you push, not which one you fix.
+       TODO: à relire — copie nouvelle. */
+    roomTitle: { en: "Where there's still room", fr: "Là où il reste de la marge" },
     // Replaces the mute "✓" the copy fallback used to show — on desktop,
     // where there is no native share sheet, that tick was the ONLY feedback
     // that anything had happened (REVIEW.md R-10).

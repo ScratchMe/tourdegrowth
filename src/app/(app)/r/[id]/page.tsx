@@ -8,7 +8,7 @@ import { getBenchmarkFor } from "@/lib/submissions/benchmark";
 import { getCachedSubmissionById } from "@/lib/submissions/cached-repository";
 import { isValidSubmissionId } from "@/lib/submissions/referral";
 import { buildQuickVerdicts, toDeepDiveView, toPillarViews } from "@/lib/submissions/view-model";
-import { resolveBottleneck } from "@/lib/scoring/bottleneck";
+import { primaryBottleneck, resolveBottleneck } from "@/lib/scoring/bottleneck";
 import { resolveNextMove } from "@/lib/scoring/next-move";
 import { QUESTIONS } from "@/content/copy-library";
 import type { BreakdownData } from "./ScoreBreakdown";
@@ -54,9 +54,18 @@ function rejectImplausibleId(id: string): void {
  * is kept language-neutral ("74/100 — Tour de Growth") so it reads correctly
  * as a browser tab title in either language.
  */
-function resultMetadata(total: number, weakestPillar: Pillar, locale: Locale, isSample: boolean): Metadata {
-  const pillar = tc(UI_STRINGS.pillars[weakestPillar], locale);
-  const stall = tc(UI_STRINGS.og.stallSentenceTemplate, locale).replace("{pillar}", pillar);
+function resultMetadata(total: number, stalling: Pillar | null, locale: Locale, isSample: boolean): Metadata {
+  // `stalling` is null when no stage is behind — the same call the share
+  // image makes (`opengraph-image.tsx`, lot 3). The two sit side by side in
+  // a link preview, so a description naming a stall next to an image saying
+  // nothing is stalling would contradict itself in the one place the product
+  // gets a first impression.
+  const stall = stalling
+    ? tc(UI_STRINGS.og.stallSentenceTemplate, locale).replace(
+        "{pillar}",
+        tc(UI_STRINGS.pillars[stalling], locale),
+      )
+    : tc(UI_STRINGS.og.stallSentenceLevel, locale);
   const description = isSample
     ? `${stall} ${tc(UI_STRINGS.og.whereDoesYours, locale)} — ${tc(UI_STRINGS.result.sampleBadge, locale)}`
     : `${stall} ${tc(UI_STRINGS.og.whereDoesYours, locale)}`;
@@ -86,7 +95,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (id === "sample") {
     // The sample's OG image is fixed to English (see opengraph-image.tsx), so
     // its preview text matches rather than contradicting the picture.
-    return resultMetadata(SAMPLE_RESULT.total, SAMPLE_RESULT.weakestPillar, "en", true);
+    return resultMetadata(SAMPLE_RESULT.total, primaryBottleneck(resolveBottleneck(SAMPLE_RESULT.pillars)), "en", true);
   }
 
   // A read that FAILS (as opposed to one that finds nothing) must not throw
@@ -103,7 +112,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
   if (!submission) return { title: "Tour de Growth", robots: { index: false, follow: true } };
 
-  return resultMetadata(submission.total, submission.weakestPillar, submission.locale, false);
+  return resultMetadata(
+    submission.total,
+    primaryBottleneck(resolveBottleneck(toPillarViews(submission.pillars))),
+    submission.locale,
+    false,
+  );
 }
 
 /**
@@ -180,8 +194,8 @@ export default async function ResultPage({ params }: PageProps) {
   // is generic and hands back the very objects it was given, so nine lines
   // below the `toPillarViews` fix a second prop put `rawPoints` straight
   // back into every shared result's payload. The invariant is therefore
-  // stated where it can be checked — `submission.pillars` appears exactly
-  // once in this file, here — and pinned by the guard in
+  // stated where it can be checked — every read of `submission.pillars` in
+  // this file goes through `toPillarViews` — and pinned by the guard in
   // `src/__tests__/client-bundles.test.ts`.
   const pillars = toPillarViews(submission.pillars);
 

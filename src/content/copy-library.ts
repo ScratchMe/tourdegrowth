@@ -481,3 +481,35 @@ export const SUMMARY_HEADLINES: Record<Pillar, Record<Tone, Translatable>> = {
     roast: { fr: "Tout roule, sauf la caisse.", en: "Everything's rolling, except the cash register." },
   },
 };
+
+/**
+ * The 21st headline: the one for a board where no stage is behind.
+ *
+ * `SUMMARY_HEADLINES` is indexed by the weakest pillar, and all 20 of its
+ * lines assert that stage still needs work — correct in the 19 cases out of
+ * 20 where a stage IS behind, and false when every pillar lands in the strong
+ * band. Design system extension 03 made that falsehood visible rather than
+ * introducing it: the score card now stamps "Nothing is stalling you" and
+ * then printed "…but acquisition still needs work before going further"
+ * directly underneath. The share image took the same turn in lot 3
+ * (`UI_STRINGS.og.stallSentenceLevel`); this is the summary half of it, and
+ * it lives here rather than in the dictionary because it is a verdict line,
+ * not chrome — `buildQuickVerdict` substitutes it whenever
+ * `resolveBottleneck` says the board is level, so every consumer of a Quick
+ * verdict gets it, not just the one screen that showed the contradiction.
+ *
+ * TODO: à relire — copie nouvelle. La variante roast en particulier relève de
+ * l'agent produit : CLAUDE.md réserve la voix roast définitive, et celle-ci
+ * vise l'auto-évaluation (ce que le questionnaire peut savoir), jamais la
+ * personne.
+ */
+export const LEVEL_HEADLINE: Record<Tone, Translatable> = {
+  neutral: {
+    fr: "Chaque étape tient — c'est tout le moteur qui tourne, pas une pièce qui porte les autres.",
+    en: "Every stage is holding — it's the whole engine working, not one part carrying the rest.",
+  },
+  roast: {
+    fr: "Étonnamment propre. Soit le moteur est vraiment à ce niveau, soit le questionnaire a été plus tendre que tes utilisateurs.",
+    en: "Suspiciously tidy. Either the engine really is this good, or the questionnaire was kinder than your users are.",
+  },
+};
