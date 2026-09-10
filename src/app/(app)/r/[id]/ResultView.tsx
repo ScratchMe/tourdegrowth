@@ -393,27 +393,6 @@ export function ResultView({
               })}
             </div>
 
-            {/* Design system extension 03 §3 — the picture of the result, under
-                the result. Sunken paper: an artefact OF the result, not a
-                surface of it, and the one raised card on this screen is
-                already spent on the score. It absorbs "Share this result",
-                which leaves the CTA row below. */}
-            <ShareCard
-              className={styles.slotShare}
-              data-testid="share-card"
-              src={shareImageSrc}
-              alt={shareImageAlt}
-              caption={tc(t.shareCardCaption, locale)}
-              /* Same control, same test id as when it lived in the CTA row —
-                 the specs that cover cancelled shares and the desktop
-                 clipboard fallback are about behaviour that did not change. */
-              shareTestId="share-button"
-              shareLabel={copied ? tc(t.ctaShareCopied, locale) : tc(t.ctaShareResult, locale)}
-              saveLabel={tc(t.shareCardSave, locale)}
-              onShare={handleShare}
-              saveHref={shareImageSrc}
-              saveFileName={`tour-de-growth-${total}.png`}
-            />
           </div>
 
           <div className={styles.right}>
@@ -597,6 +576,28 @@ export function ResultView({
               />
             )}
           </div>
+
+          {/* Design system extension 03 §3 — the picture of the result, under
+              the result. Sunken paper: an artefact OF the result, not a
+              surface of it, and the one raised card on this screen is
+              already spent on the score. It absorbs "Share this result",
+              which leaves the CTA row below. */}
+          <ShareCard
+            className={styles.slotShare}
+            data-testid="share-card"
+            src={shareImageSrc}
+            alt={shareImageAlt}
+            caption={tc(t.shareCardCaption, locale)}
+            /* Same control, same test id as when it lived in the CTA row —
+               the specs that cover cancelled shares and the desktop
+               clipboard fallback are about behaviour that did not change. */
+            shareTestId="share-button"
+            shareLabel={copied ? tc(t.ctaShareCopied, locale) : tc(t.ctaShareResult, locale)}
+            saveLabel={tc(t.shareCardSave, locale)}
+            onShare={handleShare}
+            saveHref={shareImageSrc}
+            saveFileName={`tour-de-growth-${total}.png`}
+          />
         </div>
       </main>
 
