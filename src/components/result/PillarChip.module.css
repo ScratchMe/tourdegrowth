@@ -55,18 +55,40 @@
 }
 
 /*
- * Desktop result-screen alignment fix, carried over from the app's original
- * PillarTag (its own step-12bis note): the five chips stretch to the full
- * width of the 400px score column instead of staying chip-sized, score
- * pinned left and pillar name right — matching the same
- * justify-content:space-between language the OG image already uses for its
- * pillar rows. Mobile's 2-up grid is untouched (this only applies ≥761px).
- * Not part of the DS bundle's own PillarChip.jsx, which only ever renders
- * this component at its own content width.
+ * Desktop result-screen alignment (step 12bis): the five chips stretch to the
+ * full width of the 400px score column instead of staying chip-sized, score
+ * pinned left and pillar name right. Mobile's 2-up grid is untouched (this
+ * only applies ≥761px). Not part of the DS bundle's own PillarChip.jsx, which
+ * only ever renders this component at its own content width.
+ *
+ * The free space is taken by ONE auto margin, not by `justify-content:
+ * space-between` — which is what this rule used until it was fixed, and why
+ * the row read "18 … /20 … Acquisition … ?" in production for a month.
+ *
+ * That was a port regression, not an original mistake. The pre-step-13
+ * `PillarTag` put the score and its denominator in a SINGLE element and had
+ * no glossary slot, so the row was two flex items and `space-between` did
+ * exactly the right thing. Step 13 rewrote the markup to the design system's
+ * shape — score and "/20" split apart, plus `{children}` for the glossary
+ * trigger — which makes FOUR flex items, and carried this rule across
+ * verbatim. `space-between` then divided the free space into all three gaps.
+ *
+ * An auto margin absorbs it in one place instead (Flexbox §8.1: auto margins
+ * take the free space before `justify-content` is applied), so "18/20" stays
+ * one unit at the left and "Acquisition ?" one unit at the right. `padding-left`
+ * keeps the non-stretch 6px as a floor if the column is ever narrower than its
+ * content — not reachable today, since pillar names stay untranslated English.
  */
 @media (min-width: 761px) {
   .stretch {
     width: 100%;
-    justify-content: space-between;
+  }
+
+  /* Two classes, so it beats the base `.label` rule deterministically. Both
+     live in this same module, so the cross-module emission-order hazard
+     (CLAUDE.md lesson 2) does not apply. */
+  .stretch .label {
+    margin-left: auto;
+    padding-left: 6px;
   }
 }

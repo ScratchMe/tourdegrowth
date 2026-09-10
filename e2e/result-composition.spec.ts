@@ -218,3 +218,51 @@ test.describe("what the reading order costs is bounded, and checked", () => {
     expect(displaced, "a block is announced more than one place from where it is shown").toEqual([]);
   });
 });
+
+test.describe("the stretched pillar rows", () => {
+  /*
+   * The row has FOUR flex children — score, "/20", pillar name, glossary
+   * trigger — so `justify-content: space-between` spread all three gaps and
+   * the row read "18 … /20 … Acquisition … ?" in production for a month.
+   * One auto margin on the name takes the free space instead.
+   *
+   * Measured, not asserted from a class name: a rule can be present and
+   * beaten. What matters is that the score reads as one unit with its
+   * denominator, and that the free space sits between the two halves.
+   *
+   * Deliberately NOT measuring the gap between the name and the "?": that
+   * 4px is a margin on the button INSIDE the trigger's anchor, not a gap
+   * between flex items, so it would measure something else entirely.
+   */
+  test("pair the score with its denominator and push the name right", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto("/r/sample?lang=en");
+    await page.locator('[class*="pillarGrid"]').first().waitFor();
+
+    const rows = await page.evaluate(() => {
+      // Each grid cell is an unclassed wrapper div; the chip is inside it.
+      const chips = document.querySelectorAll('[class*="pillarGrid"] [class*="chip"]');
+      return [...chips].map((chip) => {
+        const score = chip.querySelector('[class*="score"]')!.getBoundingClientRect();
+        // The denominator is the only child with no class of its own.
+        const denom = [...chip.children]
+          .find((c) => c.tagName === "SPAN" && !c.className)!
+          .getBoundingClientRect();
+        const label = chip.querySelector('[class*="label"]')!.getBoundingClientRect();
+        return {
+          name: chip.querySelector('[class*="label"]')!.textContent,
+          scoreToDenom: Math.round(denom.left - score.right),
+          denomToLabel: Math.round(label.left - denom.right),
+          width: Math.round(chip.getBoundingClientRect().width),
+        };
+      });
+    });
+
+    expect(rows.length, "the pillar grid moved — this measures nothing now").toBe(5);
+    for (const row of rows) {
+      expect(row.width, `${row.name}: the row should fill the column`).toBeGreaterThan(300);
+      expect(row.scoreToDenom, `${row.name}: "18" and "/20" must read as one unit`).toBeLessThanOrEqual(2);
+      expect(row.denomToLabel, `${row.name}: the free space belongs between the two halves`).toBeGreaterThan(60);
+    }
+  });
+});

@@ -175,10 +175,11 @@ via the same `.png` loader the bundler uses. **Do not** reuse the OG captures
 in `design/ds-extension-03/` for this — they predate extension 03 and still
 show the five pillar rows that release removed.
 
-`PillarChip`'s `Stretch` story reproduces a real production defect (the row
-spaces all four children apart instead of pairing the score). It is documented
-in the story's own doc comment so the design agent does not copy it. The fix
-belongs in the component's CSS, as its own change.
+`PillarChip`'s `Stretch` story used to reproduce a real production defect (the
+row spaced all four children apart instead of pairing the score). Fixed in the
+component's CSS on 2026-09-11; the story now shows the intended shape, and its
+doc comment says why the layout uses an auto margin rather than
+`justify-content`.
 
 ## Synced
 
