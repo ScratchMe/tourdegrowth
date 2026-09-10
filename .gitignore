@@ -12,6 +12,7 @@
 
 # Build
 /build
+/dist/
 *.tsbuildinfo
 next-env.d.ts
 
