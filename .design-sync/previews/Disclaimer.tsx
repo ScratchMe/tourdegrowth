@@ -32,25 +32,14 @@ export const Center = () => (
 );
 
 /**
- * In French, which runs a little longer and still holds one line on desktop.
- *
- * The link label stays "How it works" in English, and that is NOT an
- * untranslated string left behind: the product's French copy is literally
- * `"Estimation rapide, pas un audit — voir How it works."`
- * (`content/how-it-works.ts`), and `ResultView` splits both locales on that
- * exact literal to place the link. A preview showing "Comment ça marche"
- * would be showing something the product never renders.
- *
- * Worth noting that the footer nav DOES translate the same destination
- * (`nav-strings.ts`: "Comment ça marche"), so the product is inconsistent
- * with itself here — but that is a copy decision for the product agent, and
- * changing it means changing `how-it-works.ts` and the split literal, not
- * this file.
+ * In French. The link label is "Comment ça marche" — the same label the
+ * footer uses for this destination, because `ResultView` now splits on
+ * `NAV_STRINGS.howItWorks` rather than a hardcoded English literal.
  */
 export const French = () => (
   <div style={{ maxWidth: 420 }}>
     <Disclaimer align="left">
-      Estimation rapide, pas un audit — voir <a href="/fr/how-it-works">How it works</a>.
+      Estimation rapide, pas un audit — voir <a href="/fr/how-it-works">Comment ça marche</a>.
     </Disclaimer>
   </div>
 );
