@@ -69,3 +69,26 @@ describe("client bundles (REVIEW-02.md R2-14)", () => {
     }
   });
 });
+
+/**
+ * The same idea one layer out: a *declared* prop type is not a boundary.
+ *
+ * `ResultView` declares `pillars` as `{pillar, score}[]`, but TypeScript
+ * accepts a wider object outside an object literal, so passing the stored
+ * `PillarScore[]` (which also carries `rawPoints`) compiled cleanly and RSC
+ * serialised the extra field into every public result payload. The fix is
+ * `toPillarViews`; this is what stops it coming back, since no e2e can see
+ * it — `/r/sample` has no `rawPoints` by construction and a real submission
+ * needs Firestore, which CI does not have.
+ */
+describe("the result payload keeps stored-only fields on the server", () => {
+  const RESULT_PAGE = "app/(app)/r/[id]/page.tsx";
+
+  it("passes pillars through the view model rather than straight from the submission", () => {
+    const page = FILES.find((f) => f.path === RESULT_PAGE);
+    expect(page, `${RESULT_PAGE} not found — was it moved?`).toBeDefined();
+
+    expect(page!.source).toMatch(/pillars=\{toPillarViews\(/);
+    expect(page!.source).not.toMatch(/pillars=\{submission\.pillars\}/);
+  });
+});

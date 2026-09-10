@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { PILLARS } from "@/lib/scoring/pillars";
 import type { DeepDiveResult, DeepDiveVerdict } from "../types";
-import { buildQuickVerdicts, toDeepDiveView } from "../view-model";
+import { buildQuickVerdicts, toDeepDiveView, toPillarViews } from "../view-model";
 
 function verdict(prefix: string): DeepDiveVerdict {
   const pillarRecommendations = Object.fromEntries(
@@ -139,5 +139,38 @@ describe("buildQuickVerdicts", () => {
   it("gives a low-scoring pillar different copy than a high-scoring one", () => {
     const v = buildQuickVerdicts("en", pillars, "retention");
     expect(v.neutral.pillarSentences.retention).not.toBe(v.neutral.pillarSentences.revenue);
+  });
+});
+
+describe("toPillarViews", () => {
+  it("keeps the name and the score, and nothing else", () => {
+    // The leak this closes: `page.tsx` handed the stored `PillarScore`
+    // straight to a Client Component. `rawPoints` is the un-rounded 0-60 sum
+    // of that pillar's three answers, and every reachable sum identifies the
+    // exact multiset behind it — which the rounded score does not.
+    const stored = [
+      { pillar: "acquisition" as const, rawPoints: 47, score: 16 },
+      { pillar: "retention" as const, rawPoints: 20, score: 7 },
+    ];
+
+    const view = toPillarViews(stored);
+
+    expect(view).toEqual([
+      { pillar: "acquisition", score: 16 },
+      { pillar: "retention", score: 7 },
+    ]);
+    for (const entry of view) {
+      expect(Object.keys(entry).sort()).toEqual(["pillar", "score"]);
+    }
+  });
+
+  it("drops any field a future migration adds, not just the one known today", () => {
+    // An allow-list, not a deny-list: the point is that a field added to the
+    // stored shape cannot reach a public page by default.
+    const stored = [
+      { pillar: "revenue" as const, rawPoints: 60, score: 20, answeredAt: "2026-09-10", notes: "secret" },
+    ];
+
+    expect(Object.keys(toPillarViews(stored)[0]!).sort()).toEqual(["pillar", "score"]);
   });
 });
