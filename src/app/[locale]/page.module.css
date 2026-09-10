@@ -122,6 +122,25 @@
 
 .heroRight {
   display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/*
+ * Design system extension 03 §5 — the problem statement, above the preview
+ * card at both widths. `--body-lg` on `--text-body` rather than the muted
+ * subtitle register: this is a claim the page is making, not a caption.
+ *
+ * 34em is the measure the extension names. It is narrower than the column at
+ * desktop, which is the point — two lines that break where the sentence
+ * breaks, not where the column ends.
+ */
+.problem {
+  font: var(--body-lg);
+  color: var(--text-body);
+  max-width: 34em;
+  text-wrap: pretty;
+  margin: 0;
 }
 
 .previewCard {
@@ -133,9 +152,19 @@
 
 .previewTopRow {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
+  /* The caption and the toggle share the row at desktop; at 390px the card is
+     too narrow for both, so the toggle drops to its own line rather than
+     squeezing the caption to three. `margin-left: auto` on the toggle keeps
+     it at the right edge either way — "top-right of the card" is where the
+     extension puts it. */
+  flex-wrap: wrap;
   gap: 12px;
+}
+
+.previewTopRow > :last-child {
+  margin-left: auto;
 }
 
 .previewTags {
@@ -143,6 +172,12 @@
   flex-wrap: wrap;
   gap: 9px;
   margin-top: 6px;
+}
+
+/* The card's own 14px rhythm is right between score, bottleneck and chips;
+   the action is the last thing and earns a little more air before it. */
+.previewMove {
+  margin-top: 4px;
 }
 
 @media (max-width: 760px) {
