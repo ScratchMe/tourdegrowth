@@ -64,7 +64,7 @@ export const UI_STRINGS = {
      * why a diagnosis is needed at all: four working stages are very good at
      * hiding the one that is not.
      *
-     * TODO: à relire — copie nouvelle (convention 6 de CLAUDE.md).
+     * Relu et validé par Antoine (2026-09-11).
      */
     problemClaim: {
       en: "Growth rarely stalls everywhere at once.",
@@ -85,7 +85,7 @@ export const UI_STRINGS = {
       * the deliverable, so this line says only that — and it can only say it
       * honestly since the free result gained an action (A2).
       *
-      * TODO: à relire — nouvelle chaîne (convention 6).
+      * Relu et validé par Antoine (2026-09-11).
       */
     promise: {
       en: "You leave with the one stage holding you back — and one action to take.",
@@ -160,7 +160,7 @@ export const UI_STRINGS = {
      * button is. `{n}` is replaced in code — weeks up to two months, months
      * past that, since "52 semaines" reads worse than "12 mois".
      *
-     * TODO: à relire — copie nouvelle (convention 6 de CLAUDE.md).
+     * Relu et validé par Antoine (2026-09-11).
      */
     retakeNudgeWeeks: {
       en: "Your last Tour was {n} weeks ago",
@@ -278,7 +278,7 @@ export const UI_STRINGS = {
     /* Accessible name for the compact toggle on the landing preview card
        (design system extension 03 §4) — the segmented control is a named
        `role="group"`, and "Tone" is what names it. Same word as the section
-       it demonstrates. TODO: à relire — copie nouvelle. */
+       it demonstrates. Relu et validé par Antoine (2026-09-11). */
     groupLabel: { en: "Tone", fr: "Ton" },
     roastDescription: {
       en: "Same insights, sharper tongue. All in good fun.",
@@ -323,7 +323,7 @@ export const UI_STRINGS = {
    * dive sharpens what is already there — so "unlock" would now be a lie
    * about our own product.
    *
-   * TODO: à relire — copie nouvelle (convention 6 de CLAUDE.md). */
+   * Relu et validé par Antoine (2026-09-11). */
   deepDive: {
     upgradeText: {
       en: "Make this specific to your business — 10 more questions, about a minute.",
@@ -394,7 +394,7 @@ export const UI_STRINGS = {
    * purpose — the same finding, said once at the top of the card and once in
    * the action below it.
    *
-   * TODO: à relire — copie nouvelle (convention 6 de CLAUDE.md).
+   * Relu et validé par Antoine (2026-09-11).
    */
   bottleneck: {
     clear: { en: "One stage holding you back", fr: "Une étape te freine" },
@@ -419,7 +419,7 @@ export const UI_STRINGS = {
        still in the strong band, so "Where you're losing time" was an alarming
        title over two sentences of praise. Framed the way LEVEL_MOVE frames a
        level board — which one you push, not which one you fix.
-       TODO: à relire — copie nouvelle. */
+       Relu et validé par Antoine (2026-09-11). */
     roomTitle: { en: "Where there's still room", fr: "Là où il reste de la marge" },
     // Replaces the mute "✓" the copy fallback used to show — on desktop,
     // where there is no native share sheet, that tick was the ONLY feedback
@@ -439,17 +439,17 @@ export const UI_STRINGS = {
     /* Design system extension 03 §2: the eyebrow of the free, deterministic
        action every result now carries. Distinct from `deepDive.priorityMoveLabel`,
        which the SAME card switches to once a Deep dive has made it specific.
-       TODO: à relire — copie nouvelle. */
+       Relu et validé par Antoine (2026-09-11). */
     nextMoveLabel: { en: "Next move", fr: "Prochaine action" },
     /* Design system extension 03 §3 — the share block. The caption says what
        the picture IS, since a reader is otherwise looking at their own result
        twice without being told why.
-       TODO: à relire — copie nouvelle. */
+       Relu et validé par Antoine (2026-09-11). */
     shareCardCaption: { en: "What a shared link shows", fr: "Ce que montre un lien partagé" },
     shareCardSave: { en: "Save image", fr: "Enregistrer l'image" },
     /* Alt text for that image. `{total}` and `{pillar}` are replaced in code —
        an alt that repeated the caption would tell a screen-reader user nothing
-       about THIS result. TODO: à relire — copie nouvelle. */
+       about THIS result. Relu et validé par Antoine (2026-09-11). */
     shareCardAltTemplate: {
       en: "Share image: {total}/100, with {pillar} named as the stage holding this growth back.",
       fr: "Image de partage : {total}/100, avec {pillar} désignée comme l'étape qui freine cette croissance.",
@@ -566,7 +566,7 @@ export const UI_STRINGS = {
     /* Design system extension 03 §3 — the hook when no stage is behind, so
        the image never names a bottleneck the scores don't support (the same
        honesty rule as the Bottleneck block on the page).
-       TODO: à relire — copie nouvelle. */
+       Relu et validé par Antoine (2026-09-11). */
     stallSentenceLevel: {
       en: "No single stage is stalling this growth.",
       fr: "Aucune étape ne freine cette croissance.",

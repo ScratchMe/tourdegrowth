@@ -498,8 +498,7 @@ export const SUMMARY_HEADLINES: Record<Pillar, Record<Tone, Translatable>> = {
  * `resolveBottleneck` says the board is level, so every consumer of a Quick
  * verdict gets it, not just the one screen that showed the contradiction.
  *
- * TODO: à relire — copie nouvelle. La variante roast en particulier relève de
- * l'agent produit : CLAUDE.md réserve la voix roast définitive, et celle-ci
+ * Relu et validé par Antoine (2026-09-11). La variante roast a été regardée pour ce qu'elle est : elle
  * vise l'auto-évaluation (ce que le questionnaire peut savoir), jamais la
  * personne.
  */
