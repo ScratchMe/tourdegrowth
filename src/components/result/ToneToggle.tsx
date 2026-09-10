@@ -14,9 +14,11 @@ export interface ToneToggleProps {
   /** Accessible group label, localized by the caller. */
   groupLabel?: string;
   /**
-   * `md` is the post-quiz selector scale (44px). `compact` is the header
-   * scale — 32px visual, 44px hit — for the landing preview card, where the
-   * toggle demonstrates the roast without adding a CTA (extension 03, §4).
+   * `compact` is the header scale — 32px visual, 44px hit — and the only one
+   * anything asks for today: the landing preview card, where the toggle
+   * demonstrates the roast without adding a CTA (extension 03, §4). `md` is
+   * `Segmented`'s own 44px default, carried through so this wrapper doesn't
+   * narrow the primitive; it has no call site.
    */
   size?: "md" | "compact";
   className?: string;
@@ -32,10 +34,16 @@ export interface ToneToggleProps {
  * grammar a primitive; this wrapper stays so call sites do not carry the
  * option list.
  *
- * Two places, and only two. The post-question-15 tone selector at `md`, and
- * the landing preview card at `compact` (extension 03) — a demo you can poke
- * is a stronger promise that a roast exists than a line of copy saying so,
- * and `compact` keeps it visibly subordinate to "Start your Tour →".
+ * ONE place today: the landing preview card, at `compact` (extension 03) —
+ * a demo you can poke is a stronger promise that a roast exists than a line
+ * of copy saying so, and `compact` keeps it visibly subordinate to "Start
+ * your Tour →".
+ *
+ * This used to claim two, naming the post-question-15 tone selector as the
+ * `md` call site. That screen is `quiz/ToneSelector`, two cards built from
+ * `Button` — a different component that has never used this one. Written
+ * down because the mistake is easy to repeat: the two things are named
+ * almost identically and do the same job at different moments.
  *
  * Still not wired into ResultView's CTA row: the shipped result screen
  * deliberately shows exactly 2 CTAs (Share / Take the Tour again in neutral,
