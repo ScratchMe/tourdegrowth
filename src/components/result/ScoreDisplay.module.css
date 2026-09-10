@@ -77,24 +77,3 @@
   pointer-events: none;
 }
 
-.verdict {
-  color: var(--text-muted);
-  text-wrap: pretty;
-}
-
-.verdictDesktop {
-  font: var(--body-md);
-  margin-top: 12px;
-}
-
-@media (max-width: 760px) {
-  .verdictDesktop {
-    font: var(--body-sm);
-    margin-top: 10px;
-  }
-}
-
-.verdictMobile {
-  font: var(--body-sm);
-  margin-top: 10px;
-}

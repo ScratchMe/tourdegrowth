@@ -118,15 +118,40 @@
   gap: 22px;
 }
 
-.left {
-  display: flex;
-  flex-direction: column;
-  /* DESIGN-BRIEF.md §02: the score card and the pillar grid are two
-     separate items in the same 22px vertical rhythm as the rest of the
-     screen (header/score/pillars/strengths/weaknesses/CTAs) — not a tighter
-     8px, which is the *pillar grid's own* internal gap between tags. */
-  gap: 22px;
+/*
+ * Mobile is ONE reading order, and it is not "everything in the left column,
+ * then everything in the right" — design system extension 03 puts the action
+ * directly under the score card, and the share block after the CTA:
+ *
+ *   score+bottleneck · next move · pillars · strengths · losing time ·
+ *   [credit] · CTA · share · disclaimer · [breakdown]
+ *
+ * Two columns cannot produce that by source order, so on mobile the columns
+ * step out of the box tree (`display: contents`) and the ten children become
+ * direct items of `.layout`, placed by `order`.
+ *
+ * The same `order` values are also correct WITHIN each desktop column — 1,3,8
+ * on the left and 2,4,5,6,7,9,10 on the right are both ascending — so nothing
+ * has to be reset at the breakpoint, and the two layouts cannot disagree.
+ *
+ * `.layout`'s gap is the same 22px `.left`/`.right` carry, so collapsing them
+ * changes the order and nothing else.
+ */
+.left,
+.right {
+  display: contents;
 }
+
+.slotScore { order: 1; }
+.slotMove { order: 2; }
+.slotPillars { order: 3; }
+.slotStrengths { order: 4; }
+.slotWeaknesses { order: 5; }
+.slotCredit { order: 6; }
+.slotCta { order: 7; }
+.slotShare { order: 8; }
+.slotDisclaimer { order: 9; }
+.slotBreakdown { order: 10; }
 
 .pillarGrid {
   display: grid;
@@ -138,11 +163,6 @@
   grid-column: 1 / -1;
 }
 
-.right {
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
-}
 
 .section {
   display: flex;
@@ -177,22 +197,18 @@
 }
 
 /*
- * Deep dive locked-preview content (SPEC-ADDENDUM-01.md §2.2, sharpened
- * 2026-08-28): rendered *inside* the same PriorityMove card the real
- * priorityAction will occupy once unlocked — same dashed-red border, same
- * eyebrow slot (just "— locked" appended) — so completing the Deep dive
- * visually fills this exact card in rather than revealing a new one.
- * .lockedText reads as an explanation, not yet an actual recommendation,
- * so it's muted body-sm rather than PriorityMove's confident 600-weight
- * default body style.
+ * The Deep dive offer, under the rule inside the PriorityMove card (design
+ * system extension 03 §2). Muted body-sm rather than PriorityMove's confident
+ * 600-weight body: the action above it is the recommendation, this is an
+ * offer about it, and the two must not read at the same weight.
+ *
+ * The spacing under it is PriorityMove's own `.upgrade` gap, not a margin
+ * here — the seam belongs to the card, not to the sentence in it.
  */
-.lockedText {
+.upgradeText {
   font: var(--body-sm);
   color: var(--text-muted);
-}
-
-.lockedCta {
-  margin-top: 12px;
+  margin: 0;
 }
 
 .disclaimer {
@@ -216,9 +232,23 @@
     align-items: start;
   }
 
+  /* The columns come back as boxes here — see the `display: contents` note
+     above. `order` needs no reset: the same values are ascending inside each
+     column. */
+  .left,
+  .right {
+    display: flex;
+    flex-direction: column;
+    /* DESIGN-BRIEF.md §02: the score card and the pillar grid are two
+       separate items in the same 22px vertical rhythm as the rest of the
+       screen — not a tighter 8px, which is the *pillar grid's own* internal
+       gap between tags. */
+    gap: 22px;
+  }
+
   /* DESIGN-BRIEF.md §02 desktop: "Section gap 32px" — the right column's
-     own rhythm (Strengths / Weaknesses / Recommendation / CTAs) widens from
-     the mobile 22px once there's a two-column layout to fill. */
+     own rhythm (next move / Strengths / Weaknesses / CTAs) widens from the
+     mobile 22px once there's a two-column layout to fill. */
   .right {
     gap: 32px;
   }

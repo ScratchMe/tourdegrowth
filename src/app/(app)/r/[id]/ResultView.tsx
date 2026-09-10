@@ -10,11 +10,13 @@ import { ModeTag } from "@/components/brand/ModeTag";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { GlossaryTerm } from "@/components/glossary/GlossaryTerm";
+import { Bottleneck } from "@/components/result/Bottleneck";
 import { Disclaimer } from "@/components/result/Disclaimer";
 import { InsightCard } from "@/components/result/InsightCard";
 import { PillarChip } from "@/components/result/PillarChip";
 import { PriorityMove } from "@/components/result/PriorityMove";
 import { ScoreDisplay } from "@/components/result/ScoreDisplay";
+import { ShareCard } from "@/components/result/ShareCard";
 import { StampedPillar } from "@/components/result/StampedPillar";
 import { ANTOINE_LINKS, DEEP_DIVE_CREDIT, QUICK_CREDIT } from "@/content/antoine-credit";
 import { HOW_IT_WORKS } from "@/content/how-it-works";
@@ -29,6 +31,7 @@ import { clearStoredAnswers, findStoredResult, loadStoredResults } from "@/lib/q
 import type { Tone } from "@/lib/quiz/tone";
 import { PILLARS, type Pillar } from "@/lib/scoring/pillars";
 import { rankPillarsAscending } from "@/lib/scoring/rank";
+import type { BottleneckView } from "@/lib/scoring/bottleneck";
 import type { QuickVerdict } from "@/lib/scoring/verdict";
 import type { Answers } from "@/lib/scoring/score";
 import type { DeepDiveView } from "@/lib/submissions/types";
@@ -50,6 +53,10 @@ interface ResultViewProps {
   pillars: { pillar: Pillar; score: number }[];
   weakestPillar: Pillar;
   verdicts: { neutral: QuickVerdict; roast: QuickVerdict };
+  /** Which stage is holding this product back, and how honestly we can say so — resolved on the server (`lib/scoring/bottleneck.ts`), because deciding is not the same job as wording. */
+  bottleneck: BottleneckView<{ pillar: Pillar; score: number }>;
+  /** The one free action, already resolved in the reader's language. Server-side: the answers it is derived from never leave the server (REVIEW.md R-02), and a visitor has none of their own to derive it from. */
+  nextMove: string;
   /** The tone selected during the quiz — which verdict shows first. */
   initialTone: Tone;
   /** SPEC.md §12: the fixed sample must be visibly marked so it's never mistaken for a real result. */
@@ -102,6 +109,8 @@ export function ResultView({
   pillars,
   weakestPillar,
   verdicts,
+  bottleneck,
+  nextMove,
   initialTone,
   isSample = false,
   deepDive = null,
@@ -144,7 +153,34 @@ export function ResultView({
   const weakestName = ranked[0]?.pillar;
   const secondWeakestName = ranked[1]?.pillar;
   const strongestTwo = [...ranked].reverse().slice(0, 2); // strongest first
-  const weakestTwo = ranked.slice(0, 2); // weakest first
+  // Already bottleneck-first: `ranked` is ascending, so [0] is the stage the
+  // block above names. The composition doc asks for that order explicitly;
+  // it was already true, and this comment is what stops a future sort from
+  // quietly breaking it.
+  const weakestTwo = ranked.slice(0, 2);
+
+  /** The one stage the action belongs to. Null when nothing is behind. */
+  const bottleneckPrimary = bottleneck.pillars[0] ?? null;
+
+  /**
+   * The sharpness line. The server decided WHICH claim the scores support;
+   * this only says it in the reader's language, with the count when more
+   * than one stage is tied at the bottom.
+   */
+  const bottleneckLabel =
+    bottleneck.sharpness === "level"
+      ? tc(UI_STRINGS.bottleneck.level, locale)
+      : bottleneck.sharpness === "clear"
+        ? tc(UI_STRINGS.bottleneck.clear, locale)
+        : tc(UI_STRINGS.bottleneck.shared, locale).replace("{n}", String(bottleneck.pillars.length));
+
+  /** Rewritten by `next.config.mjs` to the hashed metadata route (REVIEW.md R-24). */
+  const shareImageSrc = id ? `/r/${id}/opengraph-image` : "/r/sample/opengraph-image";
+  const shareImageAlt = bottleneckPrimary
+    ? tc(t.shareCardAltTemplate, locale)
+        .replace("{total}", String(total))
+        .replace("{pillar}", tc(UI_STRINGS.pillars[bottleneckPrimary.pillar], locale))
+    : tc(t.shareCardAltLevelTemplate, locale).replace("{total}", String(total));
 
   /** The Deep dive's longer, specific recommendation once it exists; otherwise the static copy-library sentence — same pillar, same slot, richer text (SPEC-ADDENDUM-01.md §2.5). */
   function sentenceFor(pillar: Pillar): string {
@@ -216,7 +252,7 @@ export function ResultView({
 
   return (
     <>
-      <header className={`${styles.header} ${roast ? styles.headerRoast : ""}`}>
+      <header className={styles.header}>
         <div className={styles.headerInner}>
           <WordmarkLink locale={locale} />
           <div className={styles.headerRight}>
@@ -248,11 +284,27 @@ export function ResultView({
 
         <div className={styles.layout}>
           <div className={styles.left}>
-            <Card elevation="raised" className={roast ? styles.scoreCardRoast : undefined}>
-              <ScoreDisplay
-                score={total}
-                label={tc(UI_STRINGS.scoreCard.label, locale)}
+            <Card
+              elevation="raised"
+              className={[styles.slotScore, roast ? styles.scoreCardRoast : ""].filter(Boolean).join(" ")}
+            >
+              <ScoreDisplay score={total} label={tc(UI_STRINGS.scoreCard.label, locale)} />
+              {/* Design system extension 03 §1. This REPLACES the verdict line
+                  that used to float under the numeral — the verdict sentence
+                  is now this block's last line, so the stage that is holding
+                  the reader back gets the position it was already the
+                  subject of. `sharpness` is what says whether naming one
+                  stage is a claim the scores support. */}
+              <Bottleneck
+                data-testid="bottleneck"
+                sharpness={bottleneck.sharpness}
+                label={bottleneckLabel}
+                pillars={bottleneck.pillars.map((p) => ({
+                  pillar: tc(UI_STRINGS.pillars[p.pillar], locale),
+                  score: p.score,
+                }))}
                 verdict={verdict.headline}
+                tone={roast ? "roast" : "straight"}
               />
               {/* REVIEW.md R-20 — one line, under the score it qualifies and
                   above the credit. Absent entirely below the minimum sample
@@ -295,7 +347,7 @@ export function ResultView({
               </p>
             </Card>
 
-            <div className={styles.pillarGrid}>
+            <div className={`${styles.pillarGrid} ${styles.slotPillars}`}>
               {PILLARS.map((pillar) => {
                 const entry = pillars.find((p) => p.pillar === pillar);
                 if (!entry) return null;
@@ -329,10 +381,68 @@ export function ResultView({
                 );
               })}
             </div>
+
+            {/* Design system extension 03 §3 — the picture of the result, under
+                the result. Sunken paper: an artefact OF the result, not a
+                surface of it, and the one raised card on this screen is
+                already spent on the score. It absorbs "Share this result",
+                which leaves the CTA row below. */}
+            <ShareCard
+              className={styles.slotShare}
+              data-testid="share-card"
+              src={shareImageSrc}
+              alt={shareImageAlt}
+              caption={tc(t.shareCardCaption, locale)}
+              /* Same control, same test id as when it lived in the CTA row —
+                 the specs that cover cancelled shares and the desktop
+                 clipboard fallback are about behaviour that did not change. */
+              shareTestId="share-button"
+              shareLabel={copied ? tc(t.ctaShareCopied, locale) : tc(t.ctaShareResult, locale)}
+              saveLabel={tc(t.shareCardSave, locale)}
+              onShare={handleShare}
+              saveHref={shareImageSrc}
+              saveFileName={`tour-de-growth-${total}.png`}
+            />
           </div>
 
           <div className={styles.right}>
-            <section className={styles.section}>
+            {/* Design system extension 03 §2 — the free action, for everyone,
+                at the top of the column. The reader goes numeral →
+                bottleneck → action, and the strengths and weaknesses below
+                are the evidence. It FILLS the slot the empty "locked" card
+                used to occupy: since REVIEW-03.md A2 the Quick result has a
+                real action of its own (`content/next-moves.ts`), so the Deep
+                dive no longer unlocks the slot, it sharpens what is in it.
+
+                A visitor sees it too. They are the numerator of the whole
+                sharing loop, and an action is what makes a shared link worth
+                opening — an empty slot was never going to do that. */}
+            <PriorityMove
+              className={styles.slotMove}
+              data-testid="priority-move"
+              label={tc(deepVerdict ? dd.priorityMoveLabel : t.nextMoveLabel, locale)}
+              pillar={bottleneckPrimary ? tc(UI_STRINGS.pillars[bottleneckPrimary.pillar], locale) : undefined}
+              score={bottleneckPrimary?.score}
+              upgrade={
+                /* Owner only (REVIEW.md R-01): every recipient of a shared
+                   link used to see this button, and clicking it filled the
+                   SHARER's result with the clicker's own context —
+                   irreversibly. It also disappears once the Deep dive has
+                   been done, because there is nothing left to offer. */
+                !deepVerdict && !isSample && id && isOwner ? (
+                  <>
+                    <p className={styles.upgradeText}>{tc(dd.upgradeText, locale)}</p>
+                    <Button variant="secondary" href={`/deep-dive/${id}`} data-testid="deep-dive-cta">
+                      {tc(dd.upgradeCta, locale)}
+                    </Button>
+                  </>
+                ) : undefined
+              }
+            >
+              {deepVerdict ? deepVerdict.priorityAction : nextMove}
+            </PriorityMove>
+
+            <section className={`${styles.section} ${styles.slotStrengths}`}>
               <MetaLabel wide>{tc(roast ? t.strengthsTitleRoast : t.strengthsTitle, locale)}</MetaLabel>
               <div className={styles.cardGrid}>
                 {(roast ? strongestTwo.slice(0, 1) : strongestTwo).map((p) => (
@@ -343,7 +453,7 @@ export function ResultView({
               </div>
             </section>
 
-            <section className={styles.section}>
+            <section className={`${styles.section} ${styles.slotWeaknesses}`}>
               <MetaLabel wide>{tc(t.weaknessesTitle, locale)}</MetaLabel>
               <div className={styles.cardGrid}>
                 {weakestTwo.map((p) => (
@@ -354,14 +464,13 @@ export function ResultView({
               </div>
             </section>
 
+            {/* SPEC-ADDENDUM-02.md §2.2: the assertive credit placement —
+                real engagement (25 answers, maybe free text) earns a real
+                card, not just the §2.1 footer line. Still gated on a
+                completed Deep dive, and still never under the free action
+                alone. No hard shadow, so it doesn't compete with the score. */}
             {deepVerdict ? (
-              <>
-                <PriorityMove label={tc(dd.priorityMoveLabel, locale)}>{deepVerdict.priorityAction}</PriorityMove>
-                {/* SPEC-ADDENDUM-02.md §2.2: the assertive placement — real
-                    engagement (25 answers, maybe free text) earns a real
-                    card, not just the §2.1 footer line. No hard shadow, so
-                    it doesn't compete with Priority move just above it. */}
-                <Card tone="paper" elevation="flat" className={styles.antoineCard}>
+              <Card tone="paper" elevation="flat" className={`${styles.antoineCard} ${styles.slotCredit}`}>
                   <MetaLabel wide>{tc(DEEP_DIVE_CREDIT.eyebrow, locale)}</MetaLabel>
                   <p className={styles.antoineBio}>
                     {tc(DEEP_DIVE_CREDIT.bio, locale)}
@@ -383,58 +492,55 @@ export function ResultView({
                       {tc(DEEP_DIVE_CREDIT.linkedinLinkText, locale)}
                     </a>
                   </p>
-                </Card>
-              </>
-            ) : !isSample && id && isOwner ? (
-              // Locked preview of the SAME card, same slot: completing the
-              // Deep dive doesn't add a new element to the layout, it fills
-              // this exact one in — the emptiness is the incentive, per
-              // Antoine's steer (2026-08-28).
-              //
-              // Owner only (REVIEW.md R-01): every recipient of a shared link
-              // used to see this button, and clicking it filled the SHARER's
-              // result with the clicker's own context — irreversibly. A
-              // visitor now simply doesn't get the offer; the CTA row below
-              // is what invites them to run their own Tour.
-              <PriorityMove label={tc(dd.priorityMoveLockedLabel, locale)}>
-                <p className={styles.lockedText}>{tc(dd.teaserText, locale)}</p>
-                <Button variant="secondary" href={`/deep-dive/${id}`} className={styles.lockedCta}>
-                  {tc(dd.teaserCta, locale)}
-                </Button>
-              </PriorityMove>
+              </Card>
             ) : null}
 
-            {/* REVIEW-02.md R2-02. Two CTAs, always (step 7's rule) — but WHOSE
-                two depends on who is looking. The owner shares and can take
-                it again. A visitor — someone who just opened a shared link,
-                the numerator of the K-factor — used to get the owner's pair:
-                "Share my score" in primary and "Take the Tour AGAIN" for a
-                Tour they never took. Now their primary is their own Tour,
-                with one line saying what that is; sharing stays, secondary.
-                `isOwner` is only known after mount, so the visitor pair is
-                also the first paint — the right default on a page that is
-                mostly reached through a shared link. */}
+            {/* Whose CTAs these are still depends on who is looking
+                (REVIEW-02.md R2-02): a visitor's primary is their own Tour,
+                the owner's is taking it again. `isOwner` is only known after
+                mount, so the visitor arrangement is also the first paint —
+                the right default on a page mostly reached through a shared
+                link.
+
+                What changed with design system extension 03 §3: sharing
+                leaves this row for `ShareCard` in the left column, where the
+                image makes it a block rather than a button, and the row holds
+                the primary alone.
+
+                Two things the design return did not cover, decided here and
+                deliberately not silent:
+
+                - Which button is the owner's primary. Sharing was theirs
+                  before; with it gone from the row, "Take the Tour again"
+                  is promoted. Making the ShareCard's button primary instead
+                  was tried and reverted: `ShareCard.prompt.md` says "never
+                  primary", and the design's own mobile order puts the CTA row
+                  ABOVE the share block, so a primary in the card would sit
+                  below a secondary. The image is what sells the share here,
+                  not a filled button. Worth Antoine's eye all the same — it
+                  makes "retake" the loudest thing on an owner's result.
+                - A roast owner keeps "Switch to straight up". Removing it
+                  would take away the only way back from a tone, and that
+                  reassurance is precisely what step 7 promised when it
+                  refused a symmetric toggle (reaffirmed by Antoine at R-23).
+                  Sharing left the row; the way back did not. */}
             {isOwner ? (
-              <div className={styles.ctaRow}>
-                {/* On desktop there is no native share sheet, so this label is
-                    the only confirmation anything happened — it used to be a
-                    mute "✓" (REVIEW.md R-10). aria-live so the change is
-                    announced, not just seen. */}
-                <Button onClick={handleShare} aria-live="polite" data-testid="share-button">
-                  {copied ? tc(t.ctaShareCopied, locale) : tc(roast ? t.ctaShareRoast : t.ctaShare, locale)}
+              <div className={`${styles.ctaRow} ${styles.slotCta}`}>
+                <Button
+                  href="/quiz"
+                  data-testid="take-again-cta"
+                  onClick={() => clearStoredAnswers()}
+                >
+                  {tc(t.ctaAgain, locale)}
                 </Button>
                 {roast ? (
                   <Button variant="secondary" onClick={() => setTone("neutral")}>
                     {tc(t.ctaSwitchToNeutral, locale)}
                   </Button>
-                ) : (
-                  <Button href="/quiz" variant="secondary" onClick={() => clearStoredAnswers()}>
-                    {tc(t.ctaAgain, locale)}
-                  </Button>
-                )}
+                ) : null}
               </div>
             ) : (
-              <div className={styles.ctaBlock}>
+              <div className={`${styles.ctaBlock} ${styles.slotCta}`}>
                 <p className={styles.visitorPitch} data-testid="visitor-pitch">
                   {tc(t.visitorPitch, locale)}
                 </p>
@@ -449,14 +555,11 @@ export function ResultView({
                   >
                     {tc(t.ctaOwnTour, locale)}
                   </Button>
-                  <Button variant="secondary" onClick={handleShare} aria-live="polite" data-testid="share-button">
-                    {copied ? tc(t.ctaShareCopied, locale) : tc(t.ctaShareResult, locale)}
-                  </Button>
                 </div>
               </div>
             )}
 
-            <Disclaimer align="left" className={styles.disclaimer}>
+            <Disclaimer align="left" className={`${styles.disclaimer} ${styles.slotDisclaimer}`}>
               {disclaimerSplit[0]}
               <Link href={localePath(locale, "/how-it-works")}>{disclaimerLinkText}</Link>
               {disclaimerSplit[1]}
@@ -465,7 +568,13 @@ export function ResultView({
             {/* Owner only, and closed by default: the screen the design brief
                 specified is unchanged until someone asks for the detail. */}
             {isOwner && breakdown && ownAnswers && (
-              <ScoreBreakdown locale={locale} data={breakdown} answers={ownAnswers} pillars={pillars} />
+              <ScoreBreakdown
+                locale={locale}
+                data={breakdown}
+                answers={ownAnswers}
+                pillars={pillars}
+                className={styles.slotBreakdown}
+              />
             )}
           </div>
         </div>

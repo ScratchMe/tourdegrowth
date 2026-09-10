@@ -1,4 +1,6 @@
+import { NEXT_MOVES } from "@/content/next-moves";
 import type { Locale } from "@/lib/i18n/locale";
+import { tc } from "@/lib/i18n/translatable";
 import type { Tone } from "@/lib/quiz/tone";
 import type { Pillar } from "@/lib/scoring/pillars";
 import { buildQuickVerdict, type QuickVerdict } from "@/lib/scoring/verdict";
@@ -52,4 +54,23 @@ export function getSampleVerdict(tone: Tone, locale: Locale): QuickVerdict {
  */
 export function getSampleVerdicts(locale: Locale): QuickVerdicts {
   return buildQuickVerdicts(locale, SAMPLE_RESULT.pillars, SAMPLE_RESULT.weakestPillar);
+}
+
+/**
+ * The sample's next move — design system extension 03 §2, which gives every
+ * result a free action.
+ *
+ * `resolveNextMove` needs the answers behind a score, and the sample has none
+ * by construction (SPEC.md §12: fixed display data, never recomputed — its
+ * 18/12/8/16/20 aren't even reachable through `computeScore`). So this picks
+ * an entry rather than deriving one.
+ *
+ * It picks the entry the real resolver would surface for a retention score of
+ * 8/20: the first Retention question, unanswered. Read from `NEXT_MOVES`
+ * rather than retyped, for the same reason the sample's verdict is read from
+ * `copy-library.ts` — a sample that quietly drifts from the library stops
+ * being a preview of anything.
+ */
+export function getSampleNextMove(locale: Locale): string {
+  return tc(NEXT_MOVES["ret-1"]![0], locale);
 }

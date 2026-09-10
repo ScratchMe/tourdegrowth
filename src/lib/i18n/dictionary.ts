@@ -266,18 +266,25 @@ export const UI_STRINGS = {
    * offered from the result page. Question/answer copy itself lives in
    * content/deep-mode-questions.ts.
    *
-   * `teaserText`/`teaserCta` anchor the incentive to the one concrete thing
-   * being locked (the Priority move card, see ResultView's
-   * `lockedPriorityMove` — sharpened from an earlier, vaguer "Want more
-   * specific advice?" once Quick mode's own recommendation was retired,
-   * per Antoine's steer: the Deep dive is now the ONLY place a priority
-   * action exists at all, so the copy should say exactly that). */
+   * `upgradeText`/`upgradeCta` REPLACE the former `teaserText`/`teaserCta`,
+   * and the replacement is forced by the product, not by taste: those two
+   * said "unlock your personalized priority action", which was true while
+   * the Quick result had no action at all. Since REVIEW-03.md A2 it has one
+   * (`content/next-moves.ts`), and design system extension 03 puts it in the
+   * card the old copy called locked. Nothing is locked any more — the Deep
+   * dive sharpens what is already there — so "unlock" would now be a lie
+   * about our own product.
+   *
+   * TODO: à relire — copie nouvelle (convention 6 de CLAUDE.md). */
   deepDive: {
-    teaserText: {
-      en: "Answer 10 more questions to unlock your personalized priority action.",
-      fr: "Réponds à 10 questions supplémentaires pour débloquer ton action prioritaire personnalisée.",
+    upgradeText: {
+      en: "Make this specific to your business — 10 more questions, about a minute.",
+      fr: "Rends-la spécifique à ton entreprise — 10 questions de plus, environ une minute.",
     },
-    teaserCta: { en: "Unlock my priority action →", fr: "Débloquer mon action prioritaire →" },
+    upgradeCta: {
+      en: "Make it specific to my business →",
+      fr: "La rendre spécifique à mon entreprise →",
+    },
     questionCounterTemplate: {
       en: "Deep dive · Question {n} of {total}",
       fr: "Approfondissement · Question {n} sur {total}",
@@ -287,7 +294,6 @@ export const UI_STRINGS = {
     // product-level label, not a sentence to translate.
     badge: { en: "Deep dive", fr: "Deep dive" },
     priorityMoveLabel: { en: "Priority move", fr: "Action prioritaire" },
-    priorityMoveLockedLabel: { en: "Priority move — locked", fr: "Action prioritaire — verrouillée" },
     // Relu et validé par Antoine (2026-09-09) — R2-09. Under the last screen's primary
     // button, BEFORE the wait starts: the one thing nobody had been told.
     waitNotice: {
@@ -323,6 +329,31 @@ export const UI_STRINGS = {
     resultFlat: { en: "Same score as your previous Tour.", fr: "Même score qu'à ton Tour précédent." },
   },
 
+  /**
+   * The stage holding this product back — design system extension 03 §1,
+   * stamped under the score numeral in place of the old floating verdict
+   * line. The state comes from `lib/scoring/bottleneck.ts`; these are only
+   * the words for it.
+   *
+   * Uppercase mono, one line at 390px, so each stays under ~32 characters.
+   * `{n}` is replaced in code. The shared line is written with a count
+   * rather than the word "two" on purpose: with three answer options a
+   * pillar score can only land on nine values, so three-way ties at the
+   * bottom are ordinary, and the block names every stage in the tie (see the
+   * deviation note in `lib/scoring/bottleneck.ts`).
+   *
+   * `level` echoes the wording of `LEVEL_MOVE` in content/next-moves.ts on
+   * purpose — the same finding, said once at the top of the card and once in
+   * the action below it.
+   *
+   * TODO: à relire — copie nouvelle (convention 6 de CLAUDE.md).
+   */
+  bottleneck: {
+    clear: { en: "One stage holding you back", fr: "Une étape te freine" },
+    shared: { en: "{n} stages holding you back", fr: "{n} étapes te freinent" },
+    level: { en: "Nothing is stalling you", fr: "Rien ne te freine" },
+  },
+
   /** Result page chrome (DESIGN-BRIEF.md §02/§04) — the Strengths/Where
    * you're losing time SENTENCES come from content/copy-library.ts (Quick)
    * or Gemini (Deep dive), not from here; this is just the surrounding UI
@@ -336,12 +367,10 @@ export const UI_STRINGS = {
     strengthsTitle: { en: "Strengths", fr: "Points forts" },
     strengthsTitleRoast: { en: "Credit where it's due", fr: "Ce qui marche, quand même" },
     weaknessesTitle: { en: "Where you're losing time", fr: "Là où tu perds du temps" },
-    ctaShare: { en: "Share my score", fr: "Partager mon score" },
     // Replaces the mute "✓" the copy fallback used to show — on desktop,
     // where there is no native share sheet, that tick was the ONLY feedback
     // that anything had happened (REVIEW.md R-10).
     ctaShareCopied: { en: "Link copied", fr: "Lien copié" },
-    ctaShareRoast: { en: "Share my roast", fr: "Partager mon roast" },
     ctaAgain: { en: "Take the Tour again", fr: "Refaire le Tour" },
     // Relu et validé par Antoine (2026-09-09) — R2-02. The three strings a VISITOR gets in
     // the CTA slot instead of the owner's pair: what the Tour is, their way
@@ -353,6 +382,28 @@ export const UI_STRINGS = {
     ctaOwnTour: { en: "Take your own Tour →", fr: "Fais ton propre Tour →" },
     ctaShareResult: { en: "Share this result", fr: "Partager ce résultat" },
     ctaSwitchToNeutral: { en: "Switch to straight up", fr: "Repasser en neutre" },
+    /* Design system extension 03 §2: the eyebrow of the free, deterministic
+       action every result now carries. Distinct from `deepDive.priorityMoveLabel`,
+       which the SAME card switches to once a Deep dive has made it specific.
+       TODO: à relire — copie nouvelle. */
+    nextMoveLabel: { en: "Next move", fr: "Prochaine action" },
+    /* Design system extension 03 §3 — the share block. The caption says what
+       the picture IS, since a reader is otherwise looking at their own result
+       twice without being told why.
+       TODO: à relire — copie nouvelle. */
+    shareCardCaption: { en: "What a shared link shows", fr: "Ce que montre un lien partagé" },
+    shareCardSave: { en: "Save image", fr: "Enregistrer l'image" },
+    /* Alt text for that image. `{total}` and `{pillar}` are replaced in code —
+       an alt that repeated the caption would tell a screen-reader user nothing
+       about THIS result. TODO: à relire — copie nouvelle. */
+    shareCardAltTemplate: {
+      en: "Share image: {total}/100, with {pillar} named as the stage holding this growth back.",
+      fr: "Image de partage : {total}/100, avec {pillar} désignée comme l'étape qui freine cette croissance.",
+    },
+    shareCardAltLevelTemplate: {
+      en: "Share image: {total}/100, with no stage named as a bottleneck.",
+      fr: "Image de partage : {total}/100, sans étape désignée comme frein.",
+    },
     // Roast-only stamped tag on the weakest pillar (DESIGN-BRIEF.md §04: "08/20 RETENTION — dead last").
     stampedSuffix: { en: "dead last", fr: "bon dernier" },
     sampleBadge: { en: "Sample result — not your data", fr: "Résultat d'exemple — pas tes données" },
