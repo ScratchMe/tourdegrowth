@@ -127,19 +127,19 @@ Trois lots, dans l'ordre. Chaque item dit qui fait quoi, et pourquoi il est là 
 
 ### Lot A — Le résultat dit quoi faire
 
-**A1. L'étape qui freine, en bloc structurel, avec sa netteté.**
+**A1. L'étape qui freine, en bloc structurel, avec sa netteté.** — **Fait** (PR #109 + #111)
 *Quoi* : un composant au-dessus des chips (ou remplaçant la ligne de headline) : pilier, score, netteté, phrase. Netteté = écart avec le deuxième plus faible, en trois états (net / partagé / tout se tient — quand les cinq sont dans la bande forte). Déterministe, testable, ré-explicable.
 *Pourquoi maintenant* : c'est la réponse à « Et alors ? » (§4 de la revue), et c'est du réagencement de données qu'on a déjà. Coût principal : le design (brief 03) et trois chaînes de copie.
 *Qui* : brief 03 → Claude Design ; code : session ; copie : Antoine.
 
-**A2. « Ta prochaine action » en mode Quick — bibliothèque déterministe.** — **Bibliothèque écrite** (PR #105) ; l'affichage attend le retour du brief 03
+**A2. « Ta prochaine action » en mode Quick — bibliothèque déterministe.** — **Fait** : bibliothèque écrite (PR #105) et relue le 2026-09-09, affichage câblé (PR #111), portée aussi sur l'image de partage (PR #112)
 *Quoi* : `content/next-moves.ts`, indexé par pilier × bande (faible, en développement), une à trois actions par entrée. Affiché pour le pilier qui freine. Recommandation de dimensionnement : **actions sans variante de ton** — une action est une action, la voix roast vit dans les verdicts, et ça évite d'écrire des « actions » qui se moquent, ce que le garde-fou anti-moquerie n'a pas à arbitrer. Bande « forte » exclue (si l'étape qui freine est forte, tout l'est : un message unique). Soit **5 × 2 bandes × 3 actions × 2 langues = 60 chaînes courtes** plus un message — la taille d'un lot de glossaire.
 *Pourquoi* : c'est le P0 réel de la revue et le trou laissé par l'addendum 01. Sans lui, la valeur du Quick plafonne au constat.
 *Pourquoi pas Gemini* : non négociable. Et la latence : le Quick est instantané, il doit le rester.
 *Qui* : premier jet par la session (comme le glossaire long), relecture Antoine.
 *Écart de dimensionnement, assumé à la livraison* : indexée par **question × réponse** et non par pilier × bande. Avec une clé pilier × bande, quelque chose doit encore choisir laquelle des trois actions montrer, et toute règle pour ça est soit arbitraire (un index, une rotation) soit une re-dérivation des réponses — auquel cas autant que les réponses soient la clé. La règle tient alors en une phrase : *la première chose qui manque dans l'étape qui te freine*. Même volume de copie que l'estimation (30 actions × 2 langues), pour une action qui répond à ce que la personne a réellement dit.
 
-**A3. La carte, visible et enregistrable.**
+**A3. La carte, visible et enregistrable.** — **Fait** (PR #111 pour le bloc, #112 pour l'image)
 *Quoi* : afficher l'image OG réelle sur la page de résultat (c'est une URL, elle existe déjà dans les deux tons) dans un bloc « Ta carte », avec Partager (existant) et Enregistrer l'image. Pas de feux tricolores. Éventuellement une ligne « ta prochaine action » sur l'image — à décider avec le design, car l'image est « highest care » dans le brief d'origine.
 *Pourquoi* : on ne partage bien que ce qu'on a vu. Aujourd'hui l'auteur découvre sa carte dans LinkedIn.
 *Qui* : brief 03 (placement) ; code : session.
@@ -157,13 +157,13 @@ Garder le H1. Ligne du dessous, deux chaînes.
 *Pourquoi* : le H1 pose le problème, la ligne dit le livrable. Changer le H1 sans mesure possible serait un pari sur de la copie approuvée.
 *Écart assumé* : la chaîne proposée ici (« 15 questions · 5 étapes · 1 priorité claire ») n'a pas été retenue — le `bibTag` deux lignes plus haut dit déjà « № 15 questions — 3 min — entrée gratuite », et répéter « 15 questions » à quelques centimètres se lit comme du remplissage. La ligne ne dit donc que la moitié qui manquait, le livrable : « Tu repars avec l'étape qui te freine — et une action à mener. » Elle ne pouvait honnêtement être écrite qu'après A2.
 
-**B2. La carte d'aperçu montre le nouveau résultat — et c'est là que R2-29 se règle.** Même composant que A1/A2 en taille réduite ; la question du roast (toggle, ligne, carte alternée, rien) est posée sur cette carte-là dans le brief 03.
+**B2. La carte d'aperçu montre le nouveau résultat — et c'est là que R2-29 se règle.** — **Fait** (PR #113). R2-29 est donc close : le design a tranché pour un `ToneToggle size="compact"` dans la carte, qui échange le verdict et peint le nom du pilier en rouge, et rien d'autre. Même composant que A1/A2 en taille réduite ; la question du roast (toggle, ligne, carte alternée, rien) est posée sur cette carte-là dans le brief 03.
 
 **B3. Une phrase de fondateur, sous la ligne de flottaison, vers `/about`.** — **Fait** (PR #108)
 La copie existe (`about.ts`, intro). Une phrase et un lien, pas une section.
 *Précision de vérification* : « sous la ligne de flottaison » reste l'intention mais n'est pas assertée en position absolue — dans une fenêtre desktop courte le bloc est partiellement visible, et rembourrer la page pour franchir une ligne arbitraire serait concevoir contre un test. Ce qui est asserté est la propriété qui porte l'intention : le bloc vient après **tout** le hero, colonne de droite comprise.
 
-**B4. Une section « Problème » de deux lignes** (« La croissance ne cale rarement partout. La plupart des équipes ont une étape qui freine plus que les autres. »). Nouvelle copie, courte, à relire. Design : brief 03.
+**B4. Une section « Problème » de deux lignes** — **Fait** (PR #113), au-dessus de la carte d'aperçu aux deux largeurs, comme le design l'a tranché. (« La croissance ne cale rarement partout. La plupart des équipes ont une étape qui freine plus que les autres. »). Nouvelle copie, courte, à relire. Design : brief 03.
 
 ### Lot C — Une raison de revenir
 
@@ -189,11 +189,11 @@ La copie existe (`about.ts`, intro). Une phrase et un lien, pas une section.
 ### Ordre et dépendances
 
 1. **A4 d'abord** (code seul, une PR) — pour mesurer un avant.
-2. **Brief 03** (A1, A2 côté affichage, A3, B2 + R2-29, B4) — **écrit** (`design/DS-EXTENSION-BRIEF-03.md` + 10 captures dans `design/ds-extension-03/`), **à envoyer par Antoine** à Claude Design. Remplace et absorbe le brief 02.
+2. **Brief 03** (A1, A2 côté affichage, A3, B2 + R2-29, B4) — **envoyé, revenu et porté**. Le retour est sous `design/ds-extension-03-return/` et fait autorité comme les bundles précédents. Il remplaçait et absorbait le brief 02, qui n'est donc jamais parti.
 3. **A2, la bibliothèque d'actions** — premier jet par la session, relecture Antoine après la relecture en cours. Peut être écrite pendant que le design travaille : les deux ne dépendent pas l'un de l'autre.
-4. **Port du retour design** + A1/A2/A3/B2/B4 dans le code, en une extension 03.
-5. **B1, B3** — deux petites PR de copie, quand Antoine tranche.
-6. **C1** — une PR, quand le lot A est en production.
+4. **Port du retour design** + A1/A2/A3/B2/B4 dans le code, en une extension 03 — **fait**, en quatre lots : primitives (#109), page de résultat (#111), image de partage (#112), landing (#113).
+5. **B1, B3** — **faits** (PR #108).
+6. **C1** — une PR, quand le lot A est en production. **C'est maintenant la prochaine chose à faire du plan.**
 7. **C2** — quand `/metrics` ouvre.
 
 Pendant la relecture en cours, la session peut faire seule : A4, le brief 03, le premier jet de A2, et les corrections de copie au fil de l'eau. Rien de tout ça ne demande une décision avant demain.
