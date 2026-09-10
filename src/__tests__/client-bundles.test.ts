@@ -89,21 +89,24 @@ describe("the result payload keeps stored-only fields on the server", () => {
     return source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
   }
 
-  it("narrows the stored pillars exactly once, and every consumer reads the narrowed value", () => {
+  it("never reads the stored pillars except through the view model", () => {
     const page = FILES.find((f) => f.path === RESULT_PAGE);
     expect(page, `${RESULT_PAGE} not found — was it moved?`).toBeDefined();
 
     const source = code(page!.source);
     const uses = source.match(/submission\.pillars/g) ?? [];
+    const narrowed = source.match(/toPillarViews\(submission\.pillars\)/g) ?? [];
 
     // The first version of this guard asserted `pillars={toPillarViews(` and
     // nothing more, so it passed while `bottleneck={resolveBottleneck(
     // submission.pillars)}` on the next line put `rawPoints` back into the
     // payload — `resolveBottleneck` is generic and returns the objects it is
     // handed. Per-prop assertions can only ever cover the props that already
-    // exist. Counting the uses covers the ones that don't yet: a new prop
-    // reaching for the stored array fails here until someone narrows it.
-    expect(uses, "submission.pillars must be narrowed once and only once").toHaveLength(1);
+    // exist; this covers the ones that don't yet. Every read of the stored
+    // array has to go through the narrowing, wherever it is and whatever it
+    // feeds — `generateMetadata` reads it too, and only ever needs a name.
+    expect(uses.length, "the result page must read submission.pillars at least once").toBeGreaterThan(0);
+    expect(narrowed, "every read of submission.pillars must be wrapped in toPillarViews").toHaveLength(uses.length);
     expect(source).toMatch(/const pillars = toPillarViews\(submission\.pillars\)/);
   });
 });

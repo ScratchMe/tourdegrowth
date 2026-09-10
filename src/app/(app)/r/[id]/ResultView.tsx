@@ -163,6 +163,17 @@ export function ResultView({
   const bottleneckPrimary = bottleneck.pillars[0] ?? null;
 
   /**
+   * No stage is behind — so nothing on this page may present one as a
+   * problem. `weakestPillar` still exists on a level board (something has to
+   * be lowest) and used to drive four separate treatments: the red chip, the
+   * roast stamp, the red "Where you're losing time" cards and that section's
+   * title. All four asserted a stall the scores don't support, under a block
+   * that had just said none does — the same defect as the headline, in four
+   * more places on the same screen.
+   */
+  const level = bottleneck.sharpness === "level";
+
+  /**
    * The sharpness line. The server decided WHICH claim the scores support;
    * this only says it in the reader's language, with the count when more
    * than one stage is tied at the bottom.
@@ -351,10 +362,10 @@ export function ResultView({
               {PILLARS.map((pillar) => {
                 const entry = pillars.find((p) => p.pillar === pillar);
                 if (!entry) return null;
-                const spanFull = pillar === "revenue" || (roast && pillar === weakestName);
+                const spanFull = pillar === "revenue" || (roast && !level && pillar === weakestName);
                 const label = tc(UI_STRINGS.pillars[pillar], locale);
 
-                if (roast && pillar === weakestName) {
+                if (roast && !level && pillar === weakestName) {
                   return (
                     <div key={pillar} className={spanFull ? styles.spanFull : ""}>
                       <StampedPillar pillar={label} score={entry.score} suffix={tc(t.stampedSuffix, locale)} />
@@ -362,7 +373,7 @@ export function ResultView({
                   );
                 }
 
-                const isWeak = pillar === weakestPillar || (roast && pillar === secondWeakestName);
+                const isWeak = !level && (pillar === weakestPillar || (roast && pillar === secondWeakestName));
                 return (
                   <div key={pillar} className={spanFull ? styles.spanFull : ""}>
                     <PillarChip pillar={label} score={entry.score} weak={isWeak} stretch>
@@ -454,10 +465,19 @@ export function ResultView({
             </section>
 
             <section className={`${styles.section} ${styles.slotWeaknesses}`}>
-              <MetaLabel wide>{tc(t.weaknessesTitle, locale)}</MetaLabel>
+              <MetaLabel wide>{tc(level ? t.roomTitle : t.weaknessesTitle, locale)}</MetaLabel>
               <div className={styles.cardGrid}>
                 {weakestTwo.map((p) => (
-                  <InsightCard key={p.pillar} pillar={tc(UI_STRINGS.pillars[p.pillar], locale)} score={p.score} kind="weakness">
+                  <InsightCard
+                    key={p.pillar}
+                    pillar={tc(UI_STRINGS.pillars[p.pillar], locale)}
+                    score={p.score}
+                    /* The two lowest of a level board are still strong, and
+                       their sentences come from the strong band — so they read
+                       as praise. In the alert treatment that was praise inside
+                       a red card under an alarming title. */
+                    kind={level ? "strength" : "weakness"}
+                  >
                     {sentenceFor(p.pillar)}
                   </InsightCard>
                 ))}
