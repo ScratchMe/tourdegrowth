@@ -127,8 +127,15 @@ test.describe("the share block", () => {
     // An alt that repeated the caption would tell a screen-reader user
     // nothing about THIS result.
     await expect(img).toHaveAttribute("alt", /74\/100/);
-    // And it actually loaded — a broken image here is the whole block's point lost.
-    expect(await img.evaluate((el: HTMLImageElement) => el.naturalWidth)).toBeGreaterThan(0);
+    // And it actually loads when a reader reaches it — a broken image here is
+    // the whole block's point lost. Scrolled first because the image is
+    // `loading="lazy"`: on a phone it sits well below the fold, and fetching
+    // ~73 KB plus a server-side render for readers who never get there was
+    // the cost this block quietly added to every result view.
+    await img.scrollIntoViewIfNeeded();
+    await expect
+      .poll(() => img.evaluate((el: HTMLImageElement) => el.naturalWidth))
+      .toBeGreaterThan(0);
 
     await expect(card.getByRole("button", { name: "Share this result" })).toBeVisible();
     await expect(card.getByRole("link", { name: "Save image" })).toHaveAttribute("download", /\.png$/);

@@ -71,8 +71,23 @@ export function ShareCard({
       {/* Not next/image: this is a route handler's PNG, already exactly
           1200×630 and cached by the CDN, so the optimiser has nothing to add
           and would put a second render pass in front of it. */}
+      {/* And lazy. Until extension 03 this PNG was fetched only by social
+          crawlers; putting it on the page made it one request per view of the
+          screen the whole sharing loop leads to — measured at 72 972 bytes
+          and ~150ms of Satori render, with `max-age=0, must-revalidate` and
+          no ETag, so nothing to revalidate against and every request a full
+          re-render. On a phone the block sits ~1700px down, so most readers
+          never reach it and now never pay for it.
+
+          A CDN `s-maxage` was tried and reverted: `max-age=0,
+          must-revalidate` sends the browser back to the shared cache, which
+          answers from `s-maxage` — so the owner who has just finished a Deep
+          dive would keep seeing the old badge, and this route is not ISR, so
+          `revalidateTag` cannot purge it. Doing it properly means a version
+          token in the image URL, which also means overriding the metadata
+          route Next generates. Not worth it until the render cost is real. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img className={styles.image} src={src} alt={alt} width={1200} height={630} />
+      <img className={styles.image} src={src} alt={alt} width={1200} height={630} loading="lazy" />
       <div className={styles.actions}>
         <Button variant="secondary" onClick={onShare} aria-live="polite" data-testid={shareTestId}>
           {shareLabel}
