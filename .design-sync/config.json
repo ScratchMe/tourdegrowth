@@ -1,0 +1,10 @@
+{
+  "pkg": "tour-de-growth",
+  "globalName": "TourDeGrowth",
+  "shape": "package",
+  "srcDir": "src/components",
+  "tsconfig": "./.design-sync/tsconfig.ds.json",
+  "extraEntries": [
+    "./.design-sync/shims/ds-styles.ts"
+  ]
+}

@@ -1,0 +1,20 @@
+/*
+ * The three brand families, for the design-system bundle only.
+ *
+ * The app self-hosts them through `next/font/google` (see `root-shell.tsx`),
+ * which binds --font-ui / --font-mono / --font-display on <body> at build
+ * time. None of that exists in a design canvas: the bundle would fall through
+ * to `typography.css`'s `:root` fallback stack and render every screen in
+ * system-ui — silently, and on every design ever built with this DS.
+ *
+ * Weights match what the app requests exactly, so a design cannot use a
+ * weight the product cannot render: Inter 400/500/600/700, IBM Plex Mono
+ * 500/600, Stardos Stencil 700.
+ *
+ * Loaded from the font host rather than shipped as binaries on purpose. The
+ * repo does carry five .ttf files (`src/lib/og/fonts/`), but those are
+ * ~230-glyph subsets cut for Satori's share images — enough for the fixed
+ * strings that image draws, and a silent source of missing glyphs the moment
+ * a designer types anything else.
+ */
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Inter:wght@400;500;600;700&family=Stardos+Stencil:wght@700&display=swap");
