@@ -110,8 +110,7 @@ export const ABOUT = {
  * Berthaud — Senior Growth PM", which sits a few centimetres below: the
  * footer says who made it, this says why.
  *
- * TODO: à relire — l'attribution et le libellé du lien sont nouveaux
- * (la phrase citée, elle, est déjà validée). Convention 6.
+ * Relu et validé par Antoine (2026-09-11).
  */
 export const LANDING_PULL = {
   quote: {
