@@ -51,7 +51,14 @@ describe("NEXT_MOVES", () => {
           // embedded question ("... — why now? — and read ...") is not one.
           const sentences = text.split(/[.!?]+\s+(?=[A-ZÀ-Ý])/).filter(Boolean);
           expect(sentences.length, `${id}/${points} ${locale}: "${text}"`).toBe(1);
-          expect(text.length, `${id}/${points} ${locale} too long`).toBeLessThan(160);
+          // 144 is not a round number: it is what the share image's move card
+          // is sized for — five lines at Inter 600 28px/1.3 in a ~490px
+          // column (design system extension 03 §3). Past it the sentence
+          // either overflows the card or forces the type down, and the whole
+          // reason the five pillar rows left is that an action is the thing
+          // worth reposting. Rendered and looked at with the current longest
+          // entry, which is exactly 144. Cap the sentence, not the type.
+          expect(text.length, `${id}/${points} ${locale} too long for the share image`).toBeLessThanOrEqual(144);
         }
       }
     }
