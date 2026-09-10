@@ -16,6 +16,7 @@ import { getCachedSubmissionById } from "@/lib/submissions/cached-repository";
 import { isValidSubmissionId } from "@/lib/submissions/referral";
 import { getSampleNextMove, SAMPLE_RESULT } from "@/lib/submissions/sample";
 import { primaryBottleneck, resolveBottleneck } from "@/lib/scoring/bottleneck";
+import { stallSentence } from "@/lib/submissions/stall-sentence";
 import { resolveNextMove } from "@/lib/scoring/next-move";
 import { SITE_DOMAIN_LABEL } from "@/lib/site";
 
@@ -104,12 +105,7 @@ export default async function OgImage({ params }: { params: Promise<{ id: string
 
   // No stage is behind, so the hook cannot name one — the same honesty rule
   // the Bottleneck block applies on the page itself.
-  const bottomSentence = bottleneck
-    ? tc(UI_STRINGS.og.stallSentenceTemplate, locale).replace(
-        "{pillar}",
-        tc(UI_STRINGS.pillars[bottleneck.pillar], locale),
-      )
-    : tc(UI_STRINGS.og.stallSentenceLevel, locale);
+  const bottomSentence = stallSentence(locale, bottleneck?.pillar ?? null);
 
   return new ImageResponse(
     (

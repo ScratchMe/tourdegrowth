@@ -31,6 +31,7 @@ import { clearStoredAnswers, findStoredResult, loadStoredResults } from "@/lib/q
 import type { Tone } from "@/lib/quiz/tone";
 import { PILLARS, type Pillar } from "@/lib/scoring/pillars";
 import { rankPillarsAscending } from "@/lib/scoring/rank";
+import { shareText } from "@/lib/submissions/stall-sentence";
 import type { BottleneckView } from "@/lib/scoring/bottleneck";
 import type { QuickVerdict } from "@/lib/scoring/verdict";
 import type { Answers } from "@/lib/scoring/score";
@@ -217,9 +218,11 @@ export function ResultView({
     // Without this, the native share sheet opened with a bare link: the score
     // and the weak pillar only existed inside the OG image, so the text next
     // to it said nothing (REVIEW.md R-10).
-    const text = tc(UI_STRINGS.share.textTemplate, locale)
-      .replace("{total}", String(total))
-      .replace("{pillar}", tc(UI_STRINGS.pillars[weakestPillar], locale));
+    // Keyed on the bottleneck, never on `weakestPillar`: on a board where
+    // every stage is strong there is still a lowest pillar, and naming it
+    // here put "Acquisition is where this growth stalls" in the user's own
+    // mouth beside an image saying nothing was stalling.
+    const text = shareText(locale, total, bottleneckPrimary?.pillar ?? null);
 
     try {
       if (navigator.share) {

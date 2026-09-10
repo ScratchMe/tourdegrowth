@@ -481,9 +481,14 @@ export const UI_STRINGS = {
    * modifier n'est pas un changement d'interface comme un autre.
    */
   share: {
+    /* `{stall}` is filled by `lib/submissions/stall-sentence.ts`, which is
+       also what the share image and `og:description` use — the sentence used
+       to be spelled out here a second time, which is how this one surface
+       kept naming a stalled stage after the other three stopped. The words a
+       reader sees are unchanged. */
     textTemplate: {
-      en: "I scored {total}/100 on my AARRR growth check-up. {pillar} is where this growth stalls. Where does yours?",
-      fr: "J'ai fait {total}/100 à mon bilan growth AARRR. {pillar} est là où cette croissance cale. Et la tienne ?",
+      en: "I scored {total}/100 on my AARRR growth check-up. {stall} Where does yours?",
+      fr: "J'ai fait {total}/100 à mon bilan growth AARRR. {stall} Et la tienne ?",
     },
   },
 
