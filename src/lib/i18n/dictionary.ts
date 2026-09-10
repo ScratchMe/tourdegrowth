@@ -160,7 +160,7 @@ export const UI_STRINGS = {
      * button is. `{n}` is replaced in code — weeks up to two months, months
      * past that, since "52 semaines" reads worse than "12 mois".
      *
-     * TODO: à relire — copie nouvelle (convention 6 de CLAUDE.md).
+     * Relu et validé par Antoine (2026-09-11).
      */
     retakeNudgeWeeks: {
       en: "Your last Tour was {n} weeks ago",
