@@ -8,15 +8,15 @@ import {
   OG_PAINT_WHITE as PAINT_WHITE,
   OG_RED as RED,
   OG_RED_INK as RED_INK,
-  OG_RED_SOFT as RED_SOFT,
   OG_SIZE,
   OG_STONE as STONE,
-  OG_STONE_2 as STONE_2,
 } from "@/lib/og/tokens";
 import type { Pillar } from "@/lib/scoring/pillars";
 import { getCachedSubmissionById } from "@/lib/submissions/cached-repository";
 import { isValidSubmissionId } from "@/lib/submissions/referral";
-import { SAMPLE_RESULT } from "@/lib/submissions/sample";
+import { getSampleNextMove, SAMPLE_RESULT } from "@/lib/submissions/sample";
+import { primaryBottleneck, resolveBottleneck } from "@/lib/scoring/bottleneck";
+import { resolveNextMove } from "@/lib/scoring/next-move";
 import { SITE_DOMAIN_LABEL } from "@/lib/site";
 
 // DESIGN-BRIEF.md §03 — "highest care". Exact 1200x630 frame, Stardos
@@ -30,20 +30,38 @@ export const alt = "Tour de Growth — AARRR growth check-up result";
 
 interface OgData {
   total: number;
-  pillars: { pillar: Pillar; score: number }[];
-  weakestPillar: Pillar;
+  /** The stage the action belongs to, and its score. Null when nothing is behind — see `lib/scoring/bottleneck.ts`. */
+  bottleneck: { pillar: Pillar; score: number } | null;
+  /**
+   * The action, from `content/next-moves.ts` — NEVER the Deep dive's
+   * `priorityAction`, even when one exists.
+   *
+   * Two reasons. The library caps at 144 characters, which is exactly what
+   * this card is sized for (five lines at Inter 600 28px in ~490px); a
+   * Gemini sentence has no cap and would overflow or force the type down.
+   * And a link preview is the one surface that must render identically for
+   * everyone who sees it — deterministic beats personalised here.
+   */
+  nextMove: string;
   locale: Locale;
   roast: boolean;
   /** SPEC-ADDENDUM-01.md §2.6 — swaps the checkup badge's text, no other gabarit change. */
   deepDive: boolean;
 }
 
+/** Shared by both branches so the sample cannot drift from the real path. */
+function bottleneckOf(pillars: { pillar: Pillar; score: number }[]) {
+  const view = resolveBottleneck(pillars);
+  const pillar = primaryBottleneck(view);
+  return pillar ? { pillar, score: view.pillars[0]!.score } : null;
+}
+
 async function loadOgData(id: string): Promise<OgData | null> {
   if (id === "sample") {
     return {
       total: SAMPLE_RESULT.total,
-      pillars: SAMPLE_RESULT.pillars,
-      weakestPillar: SAMPLE_RESULT.weakestPillar,
+      bottleneck: bottleneckOf(SAMPLE_RESULT.pillars),
+      nextMove: getSampleNextMove("en"),
       locale: "en",
       roast: false,
       deepDive: false, // SPEC.md §12: the sample is never enriched
@@ -61,8 +79,16 @@ async function loadOgData(id: string): Promise<OgData | null> {
 
   return {
     total: submission.total,
-    pillars: submission.pillars,
-    weakestPillar: submission.weakestPillar,
+    bottleneck: bottleneckOf(submission.pillars),
+    // The AUTHOR's locale, like everything else in this image: a social
+    // crawler doesn't send the sharer's cookies, so there is no reader to
+    // localise for (the asymmetry R-09 documented).
+    nextMove: resolveNextMove(
+      submission.locale,
+      submission.pillars,
+      submission.weakestPillar,
+      submission.answers,
+    ),
     locale: submission.locale,
     roast: submission.tone === "roast",
     deepDive: submission.deepDive !== null,
@@ -73,11 +99,17 @@ export default async function OgImage({ params }: { params: Promise<{ id: string
   const { id } = await params;
   const [data, fonts] = await Promise.all([loadOgData(id), loadOgFonts()]);
   if (!data) return new Response(null, { status: 404 });
-  const { total, pillars, weakestPillar, locale, roast, deepDive } = data;
+  const { total, bottleneck, nextMove, locale, roast, deepDive } = data;
   const accent = roast ? RED : INK;
 
-  const weakestLabel = tc(UI_STRINGS.pillars[weakestPillar], locale);
-  const bottomSentence = tc(UI_STRINGS.og.stallSentenceTemplate, locale).replace("{pillar}", weakestLabel);
+  // No stage is behind, so the hook cannot name one — the same honesty rule
+  // the Bottleneck block applies on the page itself.
+  const bottomSentence = bottleneck
+    ? tc(UI_STRINGS.og.stallSentenceTemplate, locale).replace(
+        "{pillar}",
+        tc(UI_STRINGS.pillars[bottleneck.pillar], locale),
+      )
+    : tc(UI_STRINGS.og.stallSentenceLevel, locale);
 
   return new ImageResponse(
     (
@@ -182,39 +214,61 @@ export default async function OgImage({ params }: { params: Promise<{ id: string
             </div>
           </div>
 
+          {/* Design system extension 03 §3 — the five pillar rows leave, the
+              next move takes their place. Five scores are the least
+              shareable thing on this image: they are re-derivable from the
+              page and nobody reposts a table. An action is a reason to post.
+
+              Same "dashed red is advice" grammar as `PriorityMove` on the
+              page, so a reader who clicks through recognises it. Sized for
+              the library's 144-character cap: five lines at Inter 600
+              28px/1.3 in this column. Do not shrink the type to fit a longer
+              sentence — cap the sentence. */}
           <div
             style={{
               display: "flex",
               flexDirection: "column",
-              width: 400,
-              gap: 9,
-              paddingBottom: 14,
+              flex: 1,
+              marginLeft: 48,
+              background: PAINT_WHITE,
+              border: `3px dashed ${RED}`,
+              borderRadius: 12,
+              padding: "26px 30px",
+              marginBottom: 14,
             }}
           >
-            {pillars.map((p) => {
-              const weak = p.pillar === weakestPillar;
-              const label = tc(UI_STRINGS.pillars[p.pillar], locale);
-              return (
-                <div
-                  key={p.pillar}
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    fontFamily: "IBM Plex Mono",
-                    fontWeight: 500,
-                    fontSize: 20,
-                    color: weak ? RED_INK : INK_SOFT,
-                    background: weak ? RED_SOFT : STONE_2,
-                    border: weak ? `2px solid ${RED}` : `2px dashed ${INK_SOFT}`,
-                    borderRadius: 4,
-                    padding: "8px 16px",
-                  }}
-                >
-                  <span>{label}</span>
-                  <span style={{ fontWeight: 600 }}>{String(p.score).padStart(2, "0")}</span>
-                </div>
-              );
-            })}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                fontFamily: "IBM Plex Mono",
+                fontWeight: 600,
+                fontSize: 17,
+                letterSpacing: 1.5,
+                textTransform: "uppercase",
+                color: RED_INK,
+              }}
+            >
+              <span>{tc(UI_STRINGS.result.nextMoveLabel, locale)}</span>
+              {bottleneck ? (
+                <span style={{ color: INK_SOFT }}>
+                  {tc(UI_STRINGS.pillars[bottleneck.pillar], locale).toUpperCase()} · {bottleneck.score}/20
+                </span>
+              ) : null}
+            </div>
+            <div
+              style={{
+                display: "flex",
+                fontFamily: "Inter",
+                fontWeight: 600,
+                fontSize: 28,
+                lineHeight: 1.3,
+                marginTop: 14,
+                color: INK,
+              }}
+            >
+              {nextMove}
+            </div>
           </div>
         </div>
 

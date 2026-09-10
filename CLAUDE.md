@@ -1539,6 +1539,20 @@ Le lot 1 avait livré les composants sans rien câbler. Celui-ci recompose `/r/[
 
 **Non-vacuité mesurée, et une leçon dedans.** En retirant les règles `order`, **la spec d'ordre de lecture tombe** — mais une seconde tombait aussi, et pour une mauvaise raison : supprimer la seule règle d'une classe fait que **CSS Modules ne l'émet plus du tout**, donc `styles.slotScore` devenait `undefined` et mon sélecteur ne trouvait rien. Sabotage refait autrement (le bloc `Bottleneck` déplacé hors de la carte de score) : **exactement une** spec tombe, la bonne. Et ma première version de cette assertion cherchait un `data-testid` sur l'élément dont elle partait — elle ne pouvait que passer ; remplacée par une mesure de boîte englobante.
 
+### Extension 03, lot 3 : l'image de partage porte une action, plus un tableau (2026-09-10)
+
+Les cinq lignes de piliers quittent l'image OG du résultat ; l'action prend leur place dans une carte au pointillé rouge, même grammaire que `PriorityMove` sur la page — dashed red is advice — pour qu'un lecteur qui clique reconnaisse ce qu'il a vu dans l'aperçu. Le numéral, l'en-tête, le filet, la relance du bas et le badge de domaine ne bougent pas. Raison du design, reprise telle quelle : cinq scores sont la chose la moins partageable de cette image (ils sont re-dérivables depuis la page, et personne ne repartage un tableau) ; une action est une raison de poster.
+
+**L'image montre toujours l'action de la bibliothèque, jamais celle du Deep dive**, même quand un Deep dive existe. Deux raisons : la bibliothèque plafonne à 144 caractères, ce pour quoi cette carte est dimensionnée, alors qu'une phrase de Gemini n'a aucun plafond et déborderait ou forcerait à réduire le corps ; et un aperçu de lien est la seule surface qui doit s'afficher à l'identique pour tout le monde — déterministe vaut mieux que personnalisé ici.
+
+**Le pire cas a été rendu, pas supposé.** La plus longue entrée de la bibliothèque fait **exactement 144 caractères** (`act-1`/7 en français, avec guillemets français et accents). Rendue en vrai : cinq lignes, la carte tient largement entre le filet de route et la relance du bas. La borne du test passe donc de 160 à **144**, avec la raison écrite dedans — ce n'est pas un nombre rond, c'est la largeur de cette carte à Inter 600 28px/1.3. Plafonner la phrase, jamais le corps.
+
+**État « rien ne freine ».** La relance du bas nommait le pilier le plus faible ; quand aucune étape n'est derrière, elle nommerait un goulot que les chiffres ne portent pas — la même règle d'honnêteté que le bloc `Bottleneck`. Nouvelle chaîne `og.stallSentenceLevel` (à relire), et l'en-tête de la carte perd son `PILIER · score/20`.
+
+**Le test de couverture des polices s'étend à toute la bibliothèque d'actions**, pas à un échantillon : un seul caractère accentué absent du sous-ensemble est un carré vide sur le lien partagé de quelqu'un, et seulement le sien. Non-vacuité vérifiée — et instructive : ma première tentative a inséré `✂` et **le test est passé**, parce que `isEmoji` filtre les `Extended_Pictographic` (que next/og dessine avec Twemoji, donc c'est correct). Refaite avec `漢` : les deux tests Inter tombent. Un sabotage qui passe demande d'abord de comprendre pourquoi.
+
+**Vérifié en réel** : les trois variantes rendues en PNG 1200×630 et regardées — neutre, roast (cadre et badge rouges, la carte d'action ne change pas : l'addendum ne prévoit pas de variante roast pour l'action), et « niveau ». Plus `tsc`, `eslint`, 373 tests unitaires, seuils de couverture, `next build`, 159 specs Playwright. Les variantes roast et niveau ne sont pas atteignables sans Firestore : rendues via un patch **local jamais committé** piloté par variable d'environnement, retiré et absence de trace vérifiée avant commit.
+
 ## État du projet au 2026-09-09 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.

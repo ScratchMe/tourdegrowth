@@ -504,6 +504,14 @@ export const UI_STRINGS = {
     roastBadge: { en: "🔥 ROAST MODE", fr: "🔥 ROAST MODE" },
     scoreLabel: { en: "Overall Growth Score", fr: "Score growth global" },
     stallSentenceTemplate: { en: "{pillar} is where this growth stalls.", fr: "{pillar} est là où cette croissance cale." },
+    /* Design system extension 03 §3 — the hook when no stage is behind, so
+       the image never names a bottleneck the scores don't support (the same
+       honesty rule as the Bottleneck block on the page).
+       TODO: à relire — copie nouvelle. */
+    stallSentenceLevel: {
+      en: "No single stage is stalling this growth.",
+      fr: "Aucune étape ne freine cette croissance.",
+    },
     whereDoesYours: { en: "Where does yours?", fr: "Et la tienne ?" },
   },
 } as const satisfies Record<string, Record<string, Translatable>>;

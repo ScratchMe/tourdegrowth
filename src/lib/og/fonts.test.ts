@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { LEVEL_MOVE, NEXT_MOVES } from "@/content/next-moves";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { LOCALES, type Locale } from "@/lib/i18n/locale";
 import { PILLARS } from "@/lib/scoring/pillars";
@@ -31,7 +32,16 @@ function textsByFamily(locale: Locale) {
     inter: [
       tc(landing.subtitle, locale),
       ...pillars.map((label) => tc(og.stallSentenceTemplate, locale).replace("{pillar}", label)),
+      tc(og.stallSentenceLevel, locale),
       tc(og.whereDoesYours, locale),
+      // Design system extension 03 §3 — the whole action library is drawn on
+      // the result image now, one entry at a time. All of it, not a sample:
+      // a single accented character missing from the subset is a tofu box on
+      // somebody's shared link, and only their link.
+      ...Object.values(NEXT_MOVES).flatMap((byPoints) =>
+        Object.values(byPoints).map((move) => tc(move, locale)),
+      ),
+      tc(LEVEL_MOVE, locale),
     ],
     mono: [
       tc(landing.bibTag, locale),
@@ -40,6 +50,7 @@ function textsByFamily(locale: Locale) {
       tc(og.checkupBadgeDeepDive, locale),
       tc(og.roastBadge, locale),
       tc(og.scoreLabel, locale),
+      tc(UI_STRINGS.result.nextMoveLabel, locale),
       SITE_DOMAIN_LABEL,
       NUMERALS,
     ],
