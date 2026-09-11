@@ -1,4 +1,4 @@
-import { LEVEL_HEADLINE, PILLAR_VERDICTS, scoreBand, SUMMARY_HEADLINES } from "@/content/copy-library";
+import { boardBand, LEVEL_HEADLINE, PILLAR_VERDICTS, scoreBand, SUMMARY_HEADLINES } from "@/content/copy-library";
 import { tc } from "@/lib/i18n/dictionary";
 import type { Locale } from "@/lib/i18n/locale";
 import type { Tone } from "@/lib/quiz/tone";
@@ -25,14 +25,24 @@ export function buildQuickVerdict(
   pillars: readonly { pillar: Pillar; score: number }[],
   weakestPillar: Pillar,
 ): QuickVerdict {
-  // `SUMMARY_HEADLINES` is indexed by the weakest pillar and every line
-  // asserts that stage still needs work — which is false when no stage is
-  // behind. Substituted here rather than at the one screen that showed the
-  // contradiction, so every consumer of a Quick verdict gets the corrected
-  // line, and so the predicate has one definition shared with the score
-  // card's sharpness and with `resolveNextMove` standing down.
+  /* Two axes, and the second one is why this reads as one card rather than
+     two sentences that disagree.
+
+     `level` — no stage is behind at all — is substituted here rather than at
+     the one screen that showed the contradiction, so every consumer of a
+     Quick verdict gets the corrected line, and so the predicate has one
+     definition shared with the score card's sharpness and with
+     `resolveNextMove` standing down.
+
+     Otherwise the line is chosen by the weakest stage AND by how the rest of
+     the board is doing. Without that second axis every line asserted "bon
+     moteur global" — true on 560 of the 59 049 reachable boards, printed on
+     all of them. See `boardBand`. */
   const level = resolveBottleneck(pillars).sharpness === "level";
-  const headline = tc(level ? LEVEL_HEADLINE[tone] : SUMMARY_HEADLINES[weakestPillar][tone], locale);
+  const headline = tc(
+    level ? LEVEL_HEADLINE[tone] : SUMMARY_HEADLINES[weakestPillar][boardBand(pillars, weakestPillar)][tone],
+    locale,
+  );
 
   const pillarSentences = {} as Record<Pillar, string>;
   for (const p of pillars) {

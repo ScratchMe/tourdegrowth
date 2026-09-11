@@ -111,10 +111,16 @@ describe("resolveBottleneck (design system extension 03, §1)", () => {
 
         expect(min, label).toBeLessThan(16);
         expect(view.pillars[0]!.score, label).toBe(min);
-        // Ascending, and exactly the pillars inside the window.
+        /* Ascending, and exactly the pillars inside the window that are not
+           themselves strong. The strong exclusion is the narrower half: a
+           board of 13,13,13,13,16 used to name the 16 as a bottleneck because
+           it sat 3 points from the lowest, so the same card announced it as a
+           stage holding you back AND read it out under "Strengths". */
         expect(view.pillars.map((p) => p.score), label).toEqual(
-          [...acc].sort((x, y) => x - y).filter((s) => s - min < CLEAR_GAP),
+          [...acc].sort((x, y) => x - y).filter((s) => s - min < CLEAR_GAP && s < 16),
         );
+        // Nothing named is ever in the band the same screen calls a strength.
+        for (const named of view.pillars) expect(named.score, label).toBeLessThan(16);
         if (view.sharpness === "clear") {
           clear++;
           expect(view.pillars.length, label).toBe(1);

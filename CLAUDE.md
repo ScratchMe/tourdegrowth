@@ -18,7 +18,7 @@ Les seules choses non négociables sont listées plus bas, parce que ce sont des
 - **Le réglage de ton Neutre/Roast est un choix explicite de l'utilisateur**, avec le garde-fou anti-moquerie-personnelle codé en dur dans le prompt système — jamais laissé à l'appréciation du modèle au moment de l'appel.
 - **Le mécanisme de partage (`?ref=`) et son attribution s'instrumentent dès le premier commit fonctionnel.** C'est le cœur du produit, pas une fonctionnalité qu'on rajoute en fin de projet.
 - **Analytics (GoatCounter + événements custom) dès le MVP**, pas après coup.
-- **La bibliothèque de textes de verdict n'est pas encore fournie** (voir `SPEC.md` §12). Construis et teste tout le pipeline avec le contenu d'exemple du design, marqué clairement comme temporaire dans le code (`// TODO: copie finale à venir`). N'invente pas de copie française ou de ton "roast" définitif toi-même — ça doit remonter à l'agent produit.
+- **~~La bibliothèque de textes de verdict n'est pas encore fournie~~ — règle levée par Antoine le 2026-09-11.** Elle l'était : la voix verdict et la voix roast revenaient entièrement à l'agent produit, et la session ne devait rien en inventer. Antoine a ouvert l'écriture à la session ce jour-là. **Ce qui n'a pas bougé, et ne bouge pas :** le garde-fou anti-moquerie reste codé en dur dans le prompt système (voir plus haut), le roast vise la stratégie ou l'auto-évaluation et **jamais la personne**, et toute copie neuve repart au statut « à relire » (convention 6) — écrire n'est pas approuver. Historique conservé parce que les entrées de journal plus bas s'y réfèrent.
 
 ## Leçons tirées d'un projet précédent (le site CV d'Antoine, construit avec Claude.ai)
 
@@ -1924,6 +1924,78 @@ relues en EN et FR desktop, et mobile FR inchangé (la règle est derrière
 L'avertissement « ne recopiez pas ça » est retiré de l'aperçu design-sync et de
 `.design-sync/NOTES.md` — le design system montre à nouveau la forme voulue.
 
+### La phrase de verdict devient vraie sur tout l'espace des scores (2026-09-11)
+
+Dernier point ouvert de la revue 03, et le seul qui demandait une décision
+d'Antoine. Il a répondu « A+D+E, B » — donc tout — **et a ouvert l'écriture de
+la voix verdict à la session**, règle inscrite en tête de ce fichier.
+
+**Le défaut.** `SUMMARY_HEADLINES` était indexé par le seul pilier le plus
+faible, et ses dix phrases affirmaient toutes que le reste du moteur allait
+bien (« Bon moteur global, mais X »). Énuméré sur les **59 049 tableaux
+atteignables** : **9,5 % seulement** recevaient une phrase qui ne contredisait
+rien d'affiché deux centimètres plus haut. Le pire n'était pas le tableau à
+0/100 où l'écran dit « 5 étapes te freinent » puis « bon moteur global » — mais
+les **30 %** où le bandeau dit « une étape » et le verdict « bon moteur global »
+alors que les quatre autres sont à 5/20 : la carte est cohérente avec
+elle-même, et entièrement fausse.
+
+**Trois découvertes que mon propre brief avait manquées**, trouvées parce que
+le relecteur a énuméré l'espace avant de lire la copie plutôt que de juger au
+goût. Elles valent d'être gardées, parce qu'elles se reproduiront :
+
+1. **Ma règle « ne compte pas » ne marchait que dans un sens.** Le bandeau
+   compte le *groupe de goulots*, pas les étapes faibles — et il affiche « une
+   étape te freine » sur **43 %** des tableaux « mixed ». Neuf des dix phrases
+   « mixed » affirmaient le pluriel : elles contredisaient le bandeau dans
+   l'autre direction. La forme juste ne compte jamais, et ne classe pas non
+   plus (« la plus basse » est faux dès que le bas est à égalité, ce qui est
+   ordinaire).
+2. **« Floor » ne veut pas dire « rien ne marche ».** La bande plafonne à
+   **65/100** et **54 %** de ses tableaux contiennent un pilier à 13/20.
+   « Rien ne tient encore » y est faux une fois sur deux ; « aucune étape n'est
+   encore solide » est la définition de la bande, donc vraie partout.
+3. **Un score de pilier est l'empreinte de ses trois réponses.** Avec des
+   options à 20/7/0, **13/20 = deux questions sur trois répondues pleinement**.
+   Donc « personne ne sait d'où sortent tes coureurs » s'affichait au-dessus
+   d'`ACQUISITION 13/20` pour quelqu'un qui avait répondu « oui, clairement
+   identifié et suivi » deux fois — et le pilier nommé est à 9 ou plus sur
+   **43 %** des tableaux « solid ». En « solid » surtout, préférer le relatif
+   (cette étape est en retard sur les autres) à l'absolu (rien n'existe).
+
+**La correction de mon propre plan.** L'option B que j'avais proposée disait
+« donner un axe de bande de score ». Fausse telle quelle : bander sur le score
+du pilier **nommé** ne corrige rien, `[0,0,0,0,0]` et `[0,20,20,20,20]` ayant
+tous deux leur plus faible en bande faible. L'axe lit **les autres** piliers —
+`boardBand` : `solid` (tous forts), `floor` (aucun fort), `mixed` entre les
+deux. Un test dédié épingle cette paire précise, pour que le piège soit
+consigné et pas seulement évité.
+
+**Un pilier fort n'est plus nommé comme frein** (le morceau qui était du code
+et pas de la copie) : un tableau `13/13/13/13/16` annonçait « 2 étapes te
+freinent » alors qu'un des deux était dans la bande que la même carte lit
+ensuite sous « Points forts ». 180 tableaux. Le test exhaustif existant
+encodait l'ancien contrat et tombait — mis à jour vers le nouveau plutôt
+qu'assoupli, avec une assertion de plus.
+
+**Ce qui tient la copie mécaniquement, plutôt que par relecture** : un balayage
+qui interdit tout mot de comptage ou de classement dans les 60 chaînes ; une
+garde anti-doublon (deux agents avaient écrit indépendamment la même phrase
+d'ouverture anglaise) ; et une marche sur les 59 049 tableaux qui vérifie
+qu'une phrase « solid » n'est servie que quand tous les autres piliers sont
+forts, qu'une phrase « floor » ne l'est que quand aucun ne l'est, et que la
+phrase « rien ne te freine » n'est jamais servie en même temps qu'un nom
+d'étape. Les comptes de bandes sont épinglés en dur (560 / 41 650 / 16 807 /
+32) : si `scoreBand` ou `CLEAR_GAP` bouge, le test le dit avec des chiffres.
+
+**Vérifié en réel** : 408 tests unitaires, non-vacuité mesurée finement — en
+forçant `boardBand` à renvoyer toujours « solid », **6 tests tombent et 2
+passent**, et les deux qui passent sont exactement ceux qui ne dépendent pas de
+la bande.
+
+**Les 60 chaînes repartent au statut « à relire »** (convention 6). La règle
+levée autorise à écrire, pas à approuver.
+
 ## État du projet au 2026-09-11 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -1963,7 +2035,6 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Les deux nouveaux événements A4 (`retake_started`, `landing_return`) | Vérifiés en e2e, jamais contre le vrai GoatCounter (le proxy du bac à sable bloque `*.goatcounter.com`) | Un regard d'Antoine sur `/admin/stats` après déploiement : deux lignes de plus dans la section funnel, et la ligne « Value actions per result ». |
 | R2-30 (fenêtre Tour de France, SPEC.md §10) | Reporté d'un commun accord : pas d'urgence | À construire **avant** juin 2027, pour que le post parte pendant le vrai Tour et pas après. |
 | 10 branches distantes obsolètes (R2-31) | Toutes issues de PR mergées avant l'activation de la suppression automatique, qui fonctionne depuis | La suppression, par Antoine, dans l'interface GitHub. |
-| `SUMMARY_HEADLINES` sans axe de bande | À 0/100 (cinq piliers à 0/20) la carte dit « 5 étapes te freinent » puis « Bon moteur global ». Idem à 35/100. Reproduit, pas corrigé | Une décision de copie d'Antoine — c'est de la voix verdict. Axe de bande, ou phrase plancher + prédicat. |
 | Les e2e de composition ne passent que par la branche échantillon | `/r/sample` utilise `getSampleNextMove` et `SAMPLE_RESULT.pillars`, pas le vrai chemin. La garde statique est donc seule à protéger le payload | Un id de fixture derrière une variable d'environnement fermée par défaut. À décider : c'est une porte de test sur la route publique la plus sensible. |
 | Flake `locale-routing.spec.ts:75` | Deux échecs le 2026-09-10, toujours en suite complète parallèle, jamais isolée (8/8) | La prochaine occurrence en CI laisse une trace (`retries: 1` + `trace: on-first-retry`, rapport téléversé). Ne pas durcir la spec en attendant le cookie : ça masquerait une éventuelle course produit. |
 | TypeScript 7 et ESLint 10 | Tous deux bloqués par des paquets embarqués dans `eslint-config-next` (`typescript-eslint` refuse TS ≥ 6.1 ; `eslint-plugin-react` plante sur ESLint 10). Dependabot les ignore en majeure depuis le 2026-09-08 | Quand `eslint-config-next` suivra. Re-tester en installant, pas en lisant les plages de peer : c'est l'essai qui a montré qu'ESLint 10 plante. |

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { LEVEL_HEADLINE, SUMMARY_HEADLINES } from "@/content/copy-library";
+import { boardBand, LEVEL_HEADLINE, SUMMARY_HEADLINES } from "@/content/copy-library";
 import { UI_STRINGS } from "@/lib/i18n/dictionary";
 import { tc } from "@/lib/i18n/translatable";
 import type { Locale } from "@/lib/i18n/locale";
@@ -48,7 +48,9 @@ describe("buildQuickVerdict on a board where nothing is behind", () => {
     for (const tone of TONES) {
       for (const locale of LOCALES) {
         const { headline } = buildQuickVerdict(tone, locale, NOT_LEVEL, "retention");
-        expect(headline, `${tone}/${locale}`).toBe(tc(SUMMARY_HEADLINES.retention[tone], locale));
+        expect(headline, `${tone}/${locale}`).toBe(
+          tc(SUMMARY_HEADLINES.retention[boardBand(NOT_LEVEL, "retention")][tone], locale),
+        );
       }
     }
   });

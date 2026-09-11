@@ -75,7 +75,11 @@ export function resolveBottleneck<T extends Ranked>(pillars: readonly T[]): Bott
   // `resolveNextMove` makes, which is what the cross-check test asserts.
   if (scoreBand(lowest.score) === "strong") return { sharpness: "level", pillars: [] };
 
-  const group = ranked.filter((p) => p.score - lowest.score < CLEAR_GAP);
+  // A strong pillar is never named as a bottleneck, even when it sits inside
+  // the window: a board of 13/16/16/20/20 put a 16 next to the 13 and had the
+  // card announce "2 stages holding you back" while one of the two was in the
+  // band the same card calls a strength. 180 of the 59049 reachable boards.
+  const group = ranked.filter((p) => p.score - lowest.score < CLEAR_GAP && scoreBand(p.score) !== "strong");
   return { sharpness: group.length === 1 ? "clear" : "shared", pillars: group };
 }
 
