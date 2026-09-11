@@ -59,7 +59,21 @@
 /* Programmatically focused container (REVIEW.md R-19): the user did not tab
    to it, so a focus ring on it would be noise. It is not reachable by
    keyboard either — tabIndex is -1 — so no real focus indicator is lost.
-   The error card's own rule now lives in DetourCard.module.css. */
+   The error card's own rule now lives in DetourCard.module.css.
+
+   It carries the column rhythm itself, and that is not decoration. R-19
+   wrapped the question, the answers and the footer in this element to give
+   the group an accessible name; they used to be direct children of `.main`,
+   whose `gap: 20px` spaced them. A wrapper with no layout of its own made
+   that gap apply to a single child, so the question card sat flush against
+   the first answer with its 7px hard shadow falling behind the button. The
+   value below is `.main`'s, restored — not a new spacing decision. */
+.questionRegion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8); /* = the 20px `.main` used to provide */
+}
+
 .questionRegion:focus {
   outline: none;
 }
