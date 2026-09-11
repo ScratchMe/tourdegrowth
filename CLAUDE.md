@@ -2051,6 +2051,58 @@ sur une spec analytics en local sans la variable.
 sort un avertissement sur une directive `eslint-disable` devenue inutile dans
 `src/app/[locale]/LastResult.tsx`. Zéro erreur, donc la CI passe.
 
+### Bon à tirer nº3 : les 60 phrases de verdict sont signées, une case corrigée (2026-09-11)
+
+Antoine a passé les **15 cases** du document (5 étapes × 3 bandes, 4 phrases
+chacune — neutre et roast, FR et EN). **14 validées sans note.** Une seule
+retouche, et elle porte sur quelque chose qu'aucun test ne pouvait attraper.
+
+**`referral/mixed` : le neutre sonnait plus roast que le roast.** Sa note :
+« Je trouve que le ton neutre fait plus roast. En fait, je remplacerais le roast
+par le neutre et j'adoucirai le neutre. » En regardant les deux lignes côte à
+côte, la mécanique est visible : le neutre portait une pique adressée
+(« … — et **chez toi**, tout ne tient pas encore », avec le retournement après
+tiret qui est une cadence de roast), pendant que le roast faisait presque un
+compliment (« Tes clients **peuvent bien relayer** … »). Les deux registres
+étaient intervertis.
+
+Appliqué tel qu'il l'a demandé : l'ancienne neutre devient la roast, et une
+neutre plus calme est écrite. La nouvelle prend une tournure **propre au
+parrainage** plutôt que la formule de la bande : « pas assez solide pour
+compenser » servait déjà dans deux des cinq neutres « mixed » (activation,
+retention), et une troisième aurait rendu la bande formulaire. Le parrainage a
+sa propre logique — il amplifie, il ne compense pas — d'où « pas encore assez
+régulier pour **lui donner de la matière** ».
+
+**Un troisième changement qu'il n'avait pas demandé, signalé plutôt que glissé** :
+la roast anglaise dit maintenant « not all of **yours** holds yet » et non
+« not everything **here** holds yet ». La morsure du français vient de l'adresse
+directe (« chez toi ») ; « here » ne la porte pas, donc un déplacement verbatim
+aurait mis les deux langues dans deux registres différents dans le même créneau.
+La raison est écrite dans le fichier, à côté des chaînes.
+
+**Ce que cette relecture dit de la méthode.** Les gardes mécaniques posées avec
+ces 60 chaînes (balayage des 59 049 tableaux, interdiction de compter ou de
+classer, garde anti-doublon) vérifient qu'une phrase est **vraie** là où elle
+s'affiche. Aucune ne peut vérifier qu'elle est dans le **bon ton** — et c'est
+exactement la seule chose que la relecture a trouvée. Le partage du travail est
+donc net : la machine tient la vérité, l'œil tient le registre.
+
+**Vérifié en réel** : la bascule a été contrôlée par `buildQuickVerdict` sur deux
+vrais tableaux de la case (`20/13/7/2/5`, bandeau « 2 étapes te freinent », et
+`13/20/20/9/20`, bandeau « Une étape te freine ») plutôt que sur la constante —
+les deux nouvelles lignes tiennent avec le singulier comme avec le pluriel.
+408 tests unitaires, lint (0 erreur), `tsc`, `next build` propres. Sonde jetable
+supprimée, `git status` vérifié.
+
+*Piège de vérification, encore le même* : ma première passe de sonde a filtré sa
+sortie au `grep` et n'a **rien** renvoyé. Refaite en écrivant dans un fichier et
+en affichant le tout — la sonde avait bien tourné, c'est le motif qui ne
+matchait pas. Une vérification qui ne trouve rien doit d'abord prouver qu'elle a
+regardé quelque part (leçon du run nº8, troisième occurrence).
+
+**Marqueur levé** : plus aucun `TODO: à relire` dans `src/`.
+
 ## État du projet au 2026-09-11 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -2069,7 +2121,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **Le plan de `REVIEW-03.md` est entièrement livré** : lots A, B et C. C1 (relance sur l'appareil après 30 jours) est fait le 2026-09-11 ; C2 (« l'étape qui freine le plus souvent ce mois-ci ») attend l'ouverture de `/metrics`, qui attend elle-même du volume.
 
-**La relecture de la copie est faite** (2026-09-09) : 55 éléments passés par Antoine dans l'artifact « Bon à tirer du Tour » ([lien](https://claude.ai/code/artifact/bb3b1561-6c09-4dcb-af83-9fa7bf8752b9), décisions dans sa base `reviews/<itemId>`), 52 validés tels quels, 3 retouchés le jour même (aha-moment, north-star-metric, revenue) plus acquisition la veille. Les six chaînes de progression de R2-27, que la session avait oublié de mettre dans le document, ont été soumises à part et validées le même jour. Les 31 actions de la bibliothèque A2 ont suivi le 2026-09-09 (bloc « Prochaine action », 16 cartes, toutes approuvées sans note). **Deuxième bon à tirer passé le 2026-09-11** : les 13 chaînes livrées depuis la première relecture — celles de B1/B3 et du portage de l'extension 03, plus les trois de la relance à 30 jours (C1) — sont **toutes validées sans note**, marqueurs levés. **Plus aucun `TODO: à relire` dans `src/`.** Le prochain document devra toujours être **reconstruit depuis `grep -rn "TODO: à relire" src/`** — pas depuis la mémoire de ce qui a été livré, ni depuis un compte écrit ici. Deux fois de suite ce grep a rattrapé un oubli que la mémoire avait laissé passer : les six chaînes de progression le 2026-09-09, et les trois de C1 le 2026-09-11 — cette fois-là c'est Antoine qui l'a vu, parce que j'avais annoncé « 15 chaînes » sur un document qui en portait 12.
+**La relecture de la copie est faite** (2026-09-09) : 55 éléments passés par Antoine dans l'artifact « Bon à tirer du Tour » ([lien](https://claude.ai/code/artifact/bb3b1561-6c09-4dcb-af83-9fa7bf8752b9), décisions dans sa base `reviews/<itemId>`), 52 validés tels quels, 3 retouchés le jour même (aha-moment, north-star-metric, revenue) plus acquisition la veille. Les six chaînes de progression de R2-27, que la session avait oublié de mettre dans le document, ont été soumises à part et validées le même jour. Les 31 actions de la bibliothèque A2 ont suivi le 2026-09-09 (bloc « Prochaine action », 16 cartes, toutes approuvées sans note). **Deuxième bon à tirer passé le 2026-09-11** : les 13 chaînes livrées depuis la première relecture — celles de B1/B3 et du portage de l'extension 03, plus les trois de la relance à 30 jours (C1) — sont **toutes validées sans note**, marqueurs levés. **Troisième bon à tirer passé le même jour** : les **60 phrases de verdict** (15 cases) — 14 validées sans note, une corrigée (`referral/mixed`, où le neutre et le roast étaient dans des registres intervertis). **Plus aucun `TODO: à relire` dans `src/`.** Le prochain document devra toujours être **reconstruit depuis `grep -rn "TODO: à relire" src/`** — pas depuis la mémoire de ce qui a été livré, ni depuis un compte écrit ici. Deux fois de suite ce grep a rattrapé un oubli que la mémoire avait laissé passer : les six chaînes de progression le 2026-09-09, et les trois de C1 le 2026-09-11 — cette fois-là c'est Antoine qui l'a vu, parce que j'avais annoncé « 15 chaînes » sur un document qui en portait 12.
 
 **Chiffres de référence** (à comparer, pas à recopier aveuglément) : **408 tests unitaires**, **181 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
@@ -2084,7 +2136,6 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | `guidelines/` absent du bundle d'extension 01 | Le README du bundle l'annonce, l'archive ne le contenait pas | Sans conséquence à ce jour ; à demander si on en a besoin. |
 | Image OG : tokens recopiés à la main dans `src/lib/og/tokens.ts` | Deux images partagent désormais un seul fichier de constantes | Si `globals.css` change une couleur, la resynchroniser là. |
 | `/metrics` livrée fermée (R2-28) | Le code est en production, la page renvoie 404 tant que `METRICS_PAGE_ENABLED` n'est pas `"true"` dans Vercel, et se cache aussi d'elle-même sous 50 soumissions | Assez de volume pour que des chiffres publics soient crédibles. Poser la variable, rien d'autre à coder. |
-| Onze chaînes de copie neuves de l'extension 03 | Marquées `TODO: à relire` dans `dictionary.ts` | Une relecture d'Antoine, comme le « bon à tirer » du 2026-09-09. |
 | Le primaire du propriétaire est « Refaire le Tour », pas « Partager » | Lecture littérale du retour design : le partage a quitté la rangée de CTA pour un bloc image, et `ShareCard.prompt.md` dit « never primary ». Un essai contraire a été fait puis annulé | Un arbitrage d'Antoine : c'est une décision de croissance, pas d'implémentation. |
 | Les composants `Bottleneck` et `ShareCard` n'ont pas de test unitaire | Le runner ne peut pas rendre un composant (`.ts` seulement, environnement `node`, ni jsdom ni RTL) — c'est la convention du repo | Rien : leurs assertions vivent dans `e2e/result-composition.spec.ts` et `e2e/landing-preview.spec.ts`. |
 | Les deux nouveaux événements A4 (`retake_started`, `landing_return`) | Vérifiés en e2e, jamais contre le vrai GoatCounter (le proxy du bac à sable bloque `*.goatcounter.com`) | Un regard d'Antoine sur `/admin/stats` après déploiement : deux lignes de plus dans la section funnel, et la ligne « Value actions per result ». |

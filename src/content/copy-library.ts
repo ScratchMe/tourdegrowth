@@ -501,12 +501,15 @@ export const PILLAR_VERDICTS: Record<Pillar, Record<ScoreBand, Record<Tone, Tran
  * shape mechanically; rules 2 and 3 are properties of the prose and are kept
  * by review.
  *
- * Écrit par la session de code et relu par Antoine — la voix verdict lui
- * revenait entièrement jusqu'au 2026-09-11, où il a ouvert l'écriture à la
+ * Écrit par la session de code — la voix verdict revenait entièrement à
+ * l'agent produit jusqu'au 2026-09-11, où Antoine a ouvert l'écriture à la
  * session (voir CLAUDE.md). Le garde-fou roast, lui, n'a pas bougé : viser
  * la stratégie ou l'auto-évaluation, jamais la personne.
  *
- * TODO: à relire — copie nouvelle (convention 6 de CLAUDE.md).
+ * Les 60 chaînes ont été relues et validées par Antoine le 2026-09-11
+ * (bon à tirer nº3, 15 cases). Une seule case a changé : referral/mixed, où
+ * le neutre sonnait plus roast que le roast — voir le commentaire sur place.
+ * Toute chaîne ajoutée ici après cette date repart « à relire » (convention 6).
  */
 export const SUMMARY_HEADLINES: Record<Pillar, Record<BoardBand, Record<Tone, Translatable>>> = {
   acquisition: {
@@ -617,13 +620,20 @@ export const SUMMARY_HEADLINES: Record<Pillar, Record<BoardBand, Record<Tone, Tr
       },
     },
     mixed: {
+      /* Relu par Antoine le 2026-09-11 : la ligne neutre d'origine sonnait plus
+         roast que la roast elle-même — « et chez toi, tout ne tient pas encore »
+         est une pique, tandis que « peuvent bien relayer » était presque un
+         compliment. Sa décision : passer l'ancienne neutre en roast, et écrire
+         une neutre plus calme. La roast anglaise dit « yours » et non « here » :
+         c'est l'adresse directe qui porte la morsure du français, et sans elle
+         les deux langues ne seraient pas dans le même registre. */
       neutral: {
-        fr: "Le bouche-à-oreille multiplie ce qui tient déjà — et chez toi, tout ne tient pas encore.",
-        en: "Word-of-mouth multiplies what already holds — and not everything here holds yet.",
+        fr: "Le bouche-à-oreille est en retard, et le reste du moteur n'est pas encore assez régulier pour lui donner de la matière.",
+        en: "Word-of-mouth is behind, and the rest of the engine isn't steady enough yet to give it something to carry.",
       },
       roast: {
-        fr: "Tes clients peuvent bien relayer : derrière eux, le train n'est pas encore au complet.",
-        en: "Your customers can take a turn at the front. Behind them, the train isn't complete yet.",
+        fr: "Le bouche-à-oreille multiplie ce qui tient déjà — et chez toi, tout ne tient pas encore.",
+        en: "Word-of-mouth multiplies what already holds — and not all of yours holds yet.",
       },
     },
     floor: {
