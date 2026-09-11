@@ -70,8 +70,17 @@
   word-break: break-word;
 }
 
-/* Programmatically focused container (REVIEW.md R-19) — see the same rule in
-   the Quick questionnaire's stylesheet. */
+/* Programmatically focused container (REVIEW.md R-19) — see the same rules in
+   the Quick questionnaire's stylesheet, including why this wrapper carries the
+   column rhythm rather than inheriting it from `.main`. Five children here, so
+   the missing gap stacked the progress bar, the counter, the question card and
+   the answers flush against one another. */
+.questionRegion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8); /* = the 20px `.main` used to provide */
+}
+
 .questionRegion:focus {
   outline: none;
 }

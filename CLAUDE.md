@@ -1996,6 +1996,61 @@ la bande.
 **Les 60 chaînes repartent au statut « à relire »** (convention 6). La règle
 levée autorise à écrire, pas à approuver.
 
+### Un conteneur ajouté pour l'accessibilité avait emporté le rythme des écrans de questions (2026-09-11)
+
+**Ce qu'Antoine a vu** : sur le questionnaire, la carte de question et le premier
+bouton de réponse se touchent. Mesuré plutôt que jugé à l'œil : **0 px** entre le
+bas de la carte et le haut du bouton — et comme la carte porte `--shadow-card`
+(7px 7px 0), son ombre portée tombait *derrière* le bouton au lieu de tomber sur
+la page. C'est ce qui rendait le défaut illisible : ça ressemblait à un artefact
+de rendu, pas à une marge manquante.
+
+**La cause, et elle n'est pas dans le CSS qu'on soupçonne.** R-19 (2026-09-05) a
+enveloppé la carte, les réponses et le pied dans un `role="group"` nommé par le
+compteur, pour qu'un lecteur d'écran annonce « Q 3 / 15 » puis la question. Les
+trois étaient jusque-là des enfants **directs** de `.main`, dont le `gap: 20px`
+les espaçait. Le nouveau conteneur n'avait aucune mise en page à lui : le gap de
+`.main` s'est donc appliqué à un enfant unique, et les trois blocs se sont
+retrouvés collés. Aucune règle n'a été modifiée ce jour-là — `git show` le
+confirme, la feuille de style n'est pas dans le diff du commit. **Ajouter un
+conteneur est un changement de mise en page, même quand on l'ajoute pour de la
+sémantique.**
+
+**Deux écrans, pas un.** Le Deep dive porte le même `questionRegion`, avec
+**cinq** enfants au lieu de trois : la barre de progression, le compteur, la
+carte, les réponses et le pied étaient tous collés. Trouvé en cherchant les
+autres conteneurs posés par le même commit plutôt qu'en corrigeant seulement
+l'écran signalé. Les deux autres que R-19 a touchés (sélecteur de ton, écran
+d'erreur) vont bien : le premier focalise un `<h2>` à l'intérieur d'un `.wrap`
+qui a déjà sa mise en page, le second est `.detour`, qui a son propre `gap`.
+
+**Le correctif restaure, il ne redécide pas.** `gap: var(--space-8)` — les 20 px
+que `.main` fournissait — porté par le conteneur lui-même. La valeur n'est pas un
+nouveau choix d'espacement, et c'est écrit dans le fichier pour que personne ne
+la « corrige » vers autre chose.
+
+**Vérifié par la mesure** (`e2e/question-rhythm.spec.ts`, 4 specs) : la distance
+réelle entre les deux boîtes sur `/quiz` à 1280 et 390 px, sur le Deep dive, et
+entre la dernière réponse et le pied — fenêtre serrée des deux côtés (19-21) et
+non un plancher, puisqu'un écart qui grandit serait autant un changement qu'un
+écart qui disparaît. La spec affirme aussi les 12 px propres à la pile de
+réponses (DESIGN-BRIEF.md §05), pour qu'un correctif qui espacerait tout
+uniformément soit attrapé lui aussi. Non-vacuité : sans le correctif, **les 4
+tombent**, et la valeur reçue est bien `0`.
+
+**Les deux pièges d'outillage déjà documentés ont mordu à nouveau dans la même
+heure**, ce qui vaut d'être noté puisque les connaître n'a pas suffi :
+`npx playwright test` ne type-vérifie pas les specs — quatre erreurs
+`TS2532` sur des accès indexés n'ont été signalées que par `next build`. Et un
+build local **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` a fait échouer 8 specs (7
+analytics + le flake connu de `locale-routing.spec.ts:75`) ; reconstruit avec
+`e2e-stub` comme le fait la CI, **181 specs vertes, zéro échec**. Ne pas conclure
+sur une spec analytics en local sans la variable.
+
+**Détail signalé, non corrigé** (hors périmètre, et préexistant) : `npm run lint`
+sort un avertissement sur une directive `eslint-disable` devenue inutile dans
+`src/app/[locale]/LastResult.tsx`. Zéro erreur, donc la CI passe.
+
 ## État du projet au 2026-09-11 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -2016,7 +2071,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **La relecture de la copie est faite** (2026-09-09) : 55 éléments passés par Antoine dans l'artifact « Bon à tirer du Tour » ([lien](https://claude.ai/code/artifact/bb3b1561-6c09-4dcb-af83-9fa7bf8752b9), décisions dans sa base `reviews/<itemId>`), 52 validés tels quels, 3 retouchés le jour même (aha-moment, north-star-metric, revenue) plus acquisition la veille. Les six chaînes de progression de R2-27, que la session avait oublié de mettre dans le document, ont été soumises à part et validées le même jour. Les 31 actions de la bibliothèque A2 ont suivi le 2026-09-09 (bloc « Prochaine action », 16 cartes, toutes approuvées sans note). **Deuxième bon à tirer passé le 2026-09-11** : les 13 chaînes livrées depuis la première relecture — celles de B1/B3 et du portage de l'extension 03, plus les trois de la relance à 30 jours (C1) — sont **toutes validées sans note**, marqueurs levés. **Plus aucun `TODO: à relire` dans `src/`.** Le prochain document devra toujours être **reconstruit depuis `grep -rn "TODO: à relire" src/`** — pas depuis la mémoire de ce qui a été livré, ni depuis un compte écrit ici. Deux fois de suite ce grep a rattrapé un oubli que la mémoire avait laissé passer : les six chaînes de progression le 2026-09-09, et les trois de C1 le 2026-09-11 — cette fois-là c'est Antoine qui l'a vu, parce que j'avais annoncé « 15 chaînes » sur un document qui en portait 12.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **390 tests unitaires**, **170 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
+**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **408 tests unitaires**, **181 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 
