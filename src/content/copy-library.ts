@@ -462,47 +462,212 @@ export const PILLAR_VERDICTS: Record<Pillar, Record<ScoreBand, Record<Tone, Tran
 //    by the LOWEST-scoring pillar (see SPEC.md §6 for the tie-break) × tone
 //    × locale. 20 lines.
 // ---------------------------------------------------------------------------
-export const SUMMARY_HEADLINES: Record<Pillar, Record<Tone, Translatable>> = {
+/**
+ * The verdict sentence under the score numeral — one per stage, per board
+ * band, per tone.
+ *
+ * It used to be indexed by the weakest stage ALONE, and every one of its ten
+ * lines asserted that the rest of the engine was fine ("Bon moteur global,
+ * mais X"). Enumerated over the 59 049 reachable boards, only 9,5 % of them
+ * got a line that contradicted nothing printed two centimetres above it. The
+ * `BoardBand` axis is what makes each line true on the boards it is served
+ * to — see `boardBand` for why it reads the OTHER pillars and not the named
+ * one.
+ *
+ * Three rules govern every line here, each of them a defect that was measured
+ * rather than imagined. Break one and the card contradicts itself again:
+ *
+ * 1. **Never say how many stages are behind — in either direction.** The
+ *    label above counts the bottleneck GROUP, not the weak stages, and it
+ *    reads "One stage holding you back" on 43,2 % of `mixed` boards. So a
+ *    line asserting plurality is as wrong as one asserting singularity. Say
+ *    the rest is not solid enough to compensate; never count. Ranking
+ *    superlatives ("the lowest") are out for the same reason — the bottom is
+ *    often shared.
+ * 2. **`floor` does not mean the board is empty.** It means no OTHER stage
+ *    reaches the strong band. It tops out at 65/100, and 53,7 % of its boards
+ *    contain a pillar at 13/20. "Rien ne tient encore" is false on over half
+ *    of them; "aucune étape n'est encore solide" is the band's own definition
+ *    and true on all of them.
+ * 3. **No absolutes about the named stage.** A pillar score is a fingerprint
+ *    of its three answers: 13/20 means TWO of the three were answered at full
+ *    marks, and the named pillar is at 9 or above on 42,9 % of `solid`
+ *    boards. So "nobody knows where your riders come from" gets printed above
+ *    ACQUISITION 13/20 for someone who answered exactly that question "yes,
+ *    clearly identified and tracked". Prefer relative statements (this stage
+ *    lags the rest) over absolute ones (nothing exists).
+ *
+ * `board-band.test.ts` and `summary-headlines.test.ts` hold rules 1 and the
+ * shape mechanically; rules 2 and 3 are properties of the prose and are kept
+ * by review.
+ *
+ * Écrit par la session de code et relu par Antoine — la voix verdict lui
+ * revenait entièrement jusqu'au 2026-09-11, où il a ouvert l'écriture à la
+ * session (voir CLAUDE.md). Le garde-fou roast, lui, n'a pas bougé : viser
+ * la stratégie ou l'auto-évaluation, jamais la personne.
+ *
+ * TODO: à relire — copie nouvelle (convention 6 de CLAUDE.md).
+ */
+export const SUMMARY_HEADLINES: Record<Pillar, Record<BoardBand, Record<Tone, Translatable>>> = {
   acquisition: {
-    neutral: {
-      fr: "Bon moteur global, mais l'acquisition reste à muscler avant d'aller plus loin.",
-      en: "Solid engine overall, but acquisition still needs work before going further.",
+    solid: {
+      neutral: {
+        fr: "Le reste du moteur tient. Ce qui te limite, c'est l'acquisition : d'où viennent tes clients, et à quel prix.",
+        en: "The rest of the engine holds. Acquisition is what's limiting you: where customers come from, and at what cost.",
+      },
+      roast: {
+        fr: "Le reste de la machine est réglé. Le recrutement de tes coureurs, lui, n'a pas eu la même rigueur.",
+        en: "The rest of the machine is dialled in. Recruiting your riders hasn't had the same rigour.",
+      },
     },
-    roast: {
-      fr: "Beau vélo, mais personne ne sait encore comment tu recrutes tes coureurs.",
-      en: "Nice bike, but nobody quite knows how you're recruiting your riders yet.",
+    mixed: {
+      neutral: {
+        fr: "L'acquisition est en retard, et le reste ne prend pas le relais : tout ce qui suit dépend de ce qui entre.",
+        en: "Acquisition is behind, and the rest isn't taking up the slack: what follows depends on what comes in.",
+      },
+      roast: {
+        fr: "L'étape qui devrait amener du monde au départ est en retard, et le reste n'est pas en état de compenser.",
+        en: "The stage meant to bring riders to the start line is behind, and the rest isn't in shape to cover it.",
+      },
+    },
+    floor: {
+      neutral: {
+        fr: "Aucune étape n'est encore solide, acquisition comprise : ce qui entre rend tout le reste mesurable.",
+        en: "No stage is solid yet, acquisition included: what comes in is what makes everything else measurable.",
+      },
+      roast: {
+        fr: "Aucune étape n'est encore au niveau, et celle qui doit étoffer ton peloton est logée à la même enseigne.",
+        en: "No stage is up to speed yet, and the one that's meant to fill out your squad is no exception.",
+      },
     },
   },
   activation: {
-    neutral: {
-      fr: "Bon moteur global, mais l'activation reste le principal frein à lever.",
-      en: "Solid engine overall, but activation is the main brake left to release.",
+    solid: {
+      neutral: {
+        fr: "Le reste du moteur tient. C'est à l'activation qu'il cale — et c'est elle qui conditionne tout ce qui suit.",
+        en: "The rest of the engine holds. Activation is where it stalls — and it gates everything after it.",
+      },
+      roast: {
+        fr: "Tout ton parcours est au point, sauf les premiers mètres. C'est pourtant tout ce qu'un nouveau en voit.",
+        en: "Your whole course is dialled in except the opening metres. That's all a newcomer ever sees of it.",
+      },
     },
-    roast: {
-      fr: "Les gens arrivent à la ligne de départ. Peu comprennent pourquoi ils sont là.",
-      en: "People show up at the starting line. Few understand why they're there.",
+    mixed: {
+      neutral: {
+        fr: "L'activation est en retard, et le reste n'est pas assez solide pour compenser ce qui se joue à l'entrée.",
+        en: "Activation is behind, and the rest isn't solid enough to make up for what happens at the door.",
+      },
+      roast: {
+        fr: "Ce qui marche ailleurs ne suffit pas à couvrir ça : c'est l'entrée du parcours qui est restée en arrière.",
+        en: "What works elsewhere doesn't cover this: it's the way in that's been left behind.",
+      },
+    },
+    floor: {
+      neutral: {
+        fr: "Aucune étape n'est encore solide. La suite dépend de ce que vivent tes nouveaux venus.",
+        en: "No stage is solid yet. What follows depends on what your newcomers go through.",
+      },
+      roast: {
+        fr: "Aucune étape ne tient encore le rythme, et tes nouveaux partent déjà avec un tour de retard.",
+        en: "No stage is holding the pace yet, and your newcomers are already a lap down at the start.",
+      },
     },
   },
   retention: {
-    neutral: { fr: "Bon moteur global, un pneu à plat : la rétention.", en: "Solid engine, one flat tyre: retention." },
-    roast: {
-      fr: "Pas mal pour quelqu'un dont les utilisateurs partent avant la deuxième semaine.",
-      en: "Not bad for someone whose users leave before the second week.",
+    solid: {
+      neutral: {
+        fr: "Le reste du moteur tient. C'est à la rétention qu'il lâche, et c'est elle qui plafonne tout le reste.",
+        en: "The rest of the engine holds. Retention is where it gives way, and it caps everything else.",
+      },
+      roast: {
+        fr: "Le reste de ton parcours est réglé au millimètre. Ceux qui roulent déjà n'ont pas eu droit au même soin.",
+        en: "The rest of your race is dialled in. The riders already rolling didn't get the same care.",
+      },
+    },
+    mixed: {
+      neutral: {
+        fr: "Ta rétention décroche, et le reste du moteur n'est pas assez solide pour compenser.",
+        en: "Retention is lagging, and the rest of the engine isn't solid enough to cover for it.",
+      },
+      roast: {
+        fr: "Ta rétention roule en roue libre, et le reste du moteur ne pousse pas assez fort pour l'emmener.",
+        en: "Retention is freewheeling, and the rest of the engine isn't pushing hard enough to carry it.",
+      },
+    },
+    floor: {
+      neutral: {
+        fr: "Aucune étape n'est encore solide. La rétention est celle qui fait tenir tout ce que tu gagnes ailleurs.",
+        en: "No stage is solid yet. Retention is the one that makes everything you win elsewhere stick.",
+      },
+      roast: {
+        fr: "Aucune étape n'est encore solide, et la rétention défait tranquillement ce que les autres arrachent.",
+        en: "No stage is solid yet, and retention quietly undoes whatever the others manage to win.",
+      },
     },
   },
   referral: {
-    neutral: {
-      fr: "Bon moteur global, mais le bouche-à-oreille ne travaille pas encore pour toi.",
-      en: "Solid engine overall, but word-of-mouth isn't working for you yet.",
+    solid: {
+      neutral: {
+        fr: "Le reste du moteur tient. C'est le bouche-à-oreille qui ne suit pas : tes clients pourraient t'en amener plus.",
+        en: "The rest of the engine holds. Word-of-mouth isn't keeping up — your customers could be bringing you more.",
+      },
+      roast: {
+        fr: "Le reste de ton matériel est prêt pour la course. Le bouche-à-oreille roule encore sur un vélo de location.",
+        en: "The rest of your kit is race-ready. Word-of-mouth is still out there on a rental bike.",
+      },
     },
-    roast: { fr: "Tes clients t'aiment en silence. Donne-leur un micro.", en: "Your customers love you quietly. Hand them a microphone." },
+    mixed: {
+      neutral: {
+        fr: "Le bouche-à-oreille multiplie ce qui tient déjà — et chez toi, tout ne tient pas encore.",
+        en: "Word-of-mouth multiplies what already holds — and not everything here holds yet.",
+      },
+      roast: {
+        fr: "Tes clients peuvent bien relayer : derrière eux, le train n'est pas encore au complet.",
+        en: "Your customers can take a turn at the front. Behind them, the train isn't complete yet.",
+      },
+    },
+    floor: {
+      neutral: {
+        fr: "Aucune étape n'est encore solide. Le bouche-à-oreille ne s'achète pas : il se construit dans le produit.",
+        en: "No stage is solid yet. Word-of-mouth can't be bought — it gets built into the product.",
+      },
+      roast: {
+        fr: "Le bouche-à-oreille, c'est la récompense d'un moteur qui tourne. Le tien n'est pas encore au rythme de course.",
+        en: "Word-of-mouth is what a working engine earns. Yours isn't at race pace yet.",
+      },
+    },
   },
   revenue: {
-    neutral: {
-      fr: "Bon moteur global, mais le modèle économique reste à valider.",
-      en: "Solid engine overall, but the revenue model still needs validating.",
+    solid: {
+      neutral: {
+        fr: "Le reste du moteur tient. C'est ton modèle économique qui n'est pas encore au point.",
+        en: "The rest of the engine holds. It's your revenue model that isn't settled yet.",
+      },
+      roast: {
+        fr: "Le reste de l'équipe roule fort. C'est côté revenue que ta roue est encore voilée.",
+        en: "The rest of the team rides strong. At the cash register, the wheel is still out of true.",
+      },
     },
-    roast: { fr: "Tout roule, sauf la caisse.", en: "Everything's rolling, except the cash register." },
+    mixed: {
+      neutral: {
+        fr: "Ton revenue est en retard, et le reste ne compense pas. C'est pourtant lui qui rend tout chiffrable.",
+        en: "Revenue is behind, and the rest doesn't cover for it. It's what makes everything else countable.",
+      },
+      roast: {
+        fr: "Ton revenue traîne, et ce qui roule ailleurs ne paie pas les factures.",
+        en: "Revenue is trailing, and what works elsewhere doesn't pay the bills.",
+      },
+    },
+    floor: {
+      neutral: {
+        fr: "Aucune étape n'est encore solide. Tant que ton modèle économique ne l'est pas, le reste se chiffre mal.",
+        en: "No stage is solid yet. Until your revenue model is, everything else is hard to put a number on.",
+      },
+      roast: {
+        fr: "Ton revenue est en queue d'un peloton qui traîne, et ton modèle tient plus de l'hypothèse que de la preuve.",
+        en: "Your revenue sits at the back of a trailing pack, and your model is still more hypothesis than proof.",
+      },
+    },
   },
 };
 

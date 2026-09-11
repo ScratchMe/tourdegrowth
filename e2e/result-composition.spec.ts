@@ -70,7 +70,16 @@ test.describe("the bottleneck block", () => {
     await expect(block).toContainText("Retention");
     await expect(block).toContainText("8");
     // The verdict sentence closed the block rather than leaving with it.
-    await expect(block).toContainText("Solid engine, one flat tyre: retention.");
+    await expect(block).toContainText("Retention is lagging, and the rest of the engine isn't solid enough to cover for it.");
+
+    /* The sample was itself one of the boards the old library got wrong: with
+       activation at 12/20 the engine is NOT solid, yet every headline used to
+       open "Solid engine overall", and the retention line counted the problem
+       ("one flat tyre") under a label that counts the bottleneck group.
+       Asserted as properties as well as text, because these two survive a
+       copy edit while the sentence above does not. */
+    await expect(block).not.toContainText("Solid engine");
+    await expect(block).not.toContainText("flat tyre");
 
     // And it lives INSIDE the raised score card, under the numeral — not as
     // a second element somewhere else on the page. Measured, because the
