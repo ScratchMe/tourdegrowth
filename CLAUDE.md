@@ -2197,6 +2197,55 @@ mission réelle (la phase 1 bis existe pour ça), et pas de livrable imprimé
 avant le bon à tirer nº4 — la saisie peut afficher les 39 lignes, le readout
 ne peut pas les imprimer.
 
+### Faire connaître Tour de Growth sans LinkedIn et sans nom : le plan (2026-09-13)
+
+Demande d'Antoine : un plan pour faire connaître le site, avec deux
+contraintes — **pas LinkedIn**, et **il n'est jamais nommé** — et, si
+possible, des actions que la session mène seule. **`GROWTH-PLAN.md`** à la
+racine remplace le « Growth Plan » du 2026-08-29 (artifact), dont les trois
+leviers les plus forts (post LinkedIn natif, messages directs au réseau,
+Product Hunt en maker) tombent sous ces contraintes.
+
+**Ce que la recherche a établi avant d'écrire**, plutôt que supposé :
+Product Hunt exige un vrai nom sur les comptes personnels (centre d'aide) ;
+r/SaaS limite l'autopromotion à une fois par 60 jours depuis avril 2026 et
+compte les comptes alternatifs comme un seul acteur ; r/startups ne
+l'accepte que dans ses fils hebdomadaires ; r/SideProject et
+r/roastmystartup l'attendent — et le second est bâti sur exactement le
+format du mode roast. Deux SERP sont vides de tout outil (« diagnostic
+croissance startup gratuit questionnaire AARRR », « growth audit
+template ») : ce sont les deux premières pages de contenu du plan. Le dépôt
+GitHub a **1 étoile, aucune description, aucun topic et une homepage
+périmée** (`tourdegrowth.vercel.app`) — un canal anonyme par construction,
+laissé vide. Le Grand Départ 2027 est le vendredi 2 juillet (R2-30).
+
+**Ce qui n'a pas pu être mesuré d'ici** : la Search Console (SEO Gets répond
+« abonnement requis »), donc la ligne de départ SEO reste celle de la revue
+02 (1 clic, ~50 impressions) ; et `/admin/stats` (mot de passe dans Vercel).
+Le plan commence par les faire relever.
+
+**La question que le plan pose avant tout** : le site, lui, nomme Antoine
+en sept endroits (pied de page, crédit du score, carte Deep dive, `/about`,
+pages légales, JSON-LD, README). Deux lectures — A : promotion anonyme,
+site signé (hypothèse retenue) ; B : site anonymisé aussi (une PR, et la
+LCEN art. 6 III 2 permet à un éditeur non professionnel de ne publier que
+son hébergeur). À trancher avant la première vague.
+
+**Le plan en cinq vagues** : fondations (IndexNow, UTM refaits sans
+`linkedin`, kit de soumission, comptes de marque `tourdegrowth` créés avec
+`contact@tourdegrowth.com`, textes) ; lancement anonyme un seul jour (Show
+HN + Reddit + Indie Hackers + 15 annuaires) ; SEO qui compose (deux pages
+« porte ouverte », dix termes de glossaire, un cluster « AARRR vs X », le
+benchmark des pratiques à 50 soumissions) ; boucle produit (badge SVG
+embarquable, partage natif avec image, échantillon roast canonique) ;
+seeding sans visage (newsletters depuis `contact@`, listes awesome si le
+profil GitHub n'affiche pas le nom). Payant seulement sur un signal, mesuré
+par UTM sans pixel — donc sans bandeau de consentement. Le §5 sépare ce que
+la session mène seule (le code, le contenu, les textes, le kit) de ce qui
+demande un clic (comptes, posts sous pseudo, mails de vérification) et de
+ce qu'elle ne fera pas (créer des comptes, poster à sa place — un compte
+piloté par un agent est le motif de bannissement le plus courant).
+
 ## État du projet au 2026-09-13 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -2244,7 +2293,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Catalogue de l'instrument d'audit à relire | 39 lignes de texte qui s'imprimeront dans les livrables d'Antoine, sous son nom | Un bon à tirer, même circuit que les précédents. |
 | Vercel Functions Storage à 9,24 / 10 Go | Un déploiement passe de 241 à 45,5 Mo de fonctions (sharp puis le rendu Edge de next/og sortis, 2026-09-13) — mais ça n'allège que les déploiements à venir | **Action d'Antoine dans le dashboard Vercel** : une politique de rétention des déploiements (et une suppression des anciens pour libérer tout de suite). Le compteur doit redescendre nettement sous 5 Go ; sinon, chercher un second poste que la mesure locale ne voit pas. |
 
-Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et le payant sont le plan de croissance, qui appartient à Antoine ; le SEO a été livré en grande partie par le lot C de cette revue.
+Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et le payant sont dans **`GROWTH-PLAN.md`** (2026-09-13 — sans LinkedIn, sans nom ; cinq vagues, la moitié menable par la session seule) ; le SEO a été livré en grande partie par le lot C de cette revue, et sa suite est la vague 2 de ce plan.
 
 **Coût Gemini, mesuré plutôt qu'estimé au doigt mouillé** (clé passée en palier payant Tier 1 le 2026-09-07, avec plafonds de dépense) : un Deep dive = 4 générations (2 tons × 2 langues), prompt réel ~5 300 caractères, sorties mesurées par la sonde entre 765 et 2 801 tokens de réflexion et ~450-530 de réponse. Soit **~0,04 à 0,06 $ par Deep dive en 2026**, le double à partir de 2027 (les tarifs Flash doublent au 1ᵉʳ janvier). Le mode Quick ne coûte rien du tout — il n'appelle plus Gemini depuis SPEC-ADDENDUM-01 §0. La limite de 5 Deep dive/h/IP borne un abus à ~2,4 $/jour dans le pire cas.
 
@@ -2273,6 +2322,7 @@ src/components/          core / brand / quiz / result / glossary — le design s
 src/content/             toute la copie du site, validée (agent produit pour l'origine, Antoine le 2026-09-06 et le 2026-09-09 pour le reste)
 src/lib/                 scoring (pur), i18n (dont meta.ts), seo (JSON-LD), og (polices + tokens des images de partage), gemini, submissions (dont segment.ts, benchmark.ts), metrics, analytics
 src/lib/audit/           l'instrument d'audit growth (AUDIT.md = le schéma, AUDIT-PLAN.md = le plan par phases) — pur, navigateur seulement, jamais Firestore ; son catalogue est dans src/content/audit-catalog.ts
+GROWTH-PLAN.md           le plan de distribution (sans LinkedIn, sans nom) ; REVIEW*.md les revues ; AUDIT*.md l'instrument d'audit
 design/                  brief d'origine, briefs et bundles de retour des extensions 01 et 03 (le brief 02 n'est jamais parti)
 e2e/                     170 specs Playwright contre un build de production
 scripts/live/            sondes contre les vrais services, lancées à la main
