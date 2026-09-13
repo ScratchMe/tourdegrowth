@@ -2134,6 +2134,27 @@ Antoine signale que le plan Hobby « approche dangereusement » d'une limite de 
 
 **Leçon de méthode, la même que d'habitude** : j'avais une hypothèse cohérente, une mesure qui la confortait (`x-vercel-cache: MISS` sur l'image) et un correctif prêt — et le compteur n'était pas celui-là. Une capture du tableau de bord aurait dû être la première chose demandée, pas la première chose reçue par hasard. Quand une limite est nommée par son montant, demander **le libellé exact** avant de raisonner.
 
+### Le reste du poids des fonctions, mesuré ligne par ligne (2026-09-13)
+
+Antoine a envoyé la liste des fonctions après déploiement — **3,9 Mo chacune contre 20 Mo avant**, le correctif sharp a donc bien porté — et demandé si on pouvait faire mieux sans rien dégrader. Ventilation par fonction et par paquet sur le Build Output réel :
+
+| Fonction | Avant | Ce qu'elle porte |
+|---|---|---|
+| `r/[id]/opengraph-image` | 12,2 Mo | next/og 3,2 · Firestore 1,6 · Next 1,7 · app 1,5 · gRPC/gax/auth 2,2 |
+| `admin/stats` (groupe `(app)`) | 12,0 Mo | idem |
+| `api/submissions/[id]/deep-dive` | 8,7 Mo | Firestore et sa pile, pas d'og — déjà propre |
+| `[locale]/about` (toutes les pages de contenu) | 7,0 Mo | **next/og 3,2** · Next 1,5 · app 2,1 — aucun Firestore, déjà propre |
+| `[locale]/…/opengraph-image` | 6,7 Mo | next/og 3,2 · Next 1,7 · app 1,6 |
+| `_middleware` | 1,8 Mo | le proxy |
+
+**Un seul levier sûr, pris** : `@vercel/og` embarque **deux** rendus, Node et Edge, et Next trace les deux dans toute fonction qui peut l'atteindre. Rien ici ne tourne en Edge (un test l'affirme désormais, c'est ce qui rend l'exclusion valide), donc `index.edge.js` est 734 Ko morts dans quatre fonctions sur six. **48,4 → 45,5 Mo par déploiement.** Vérifié en exécution et pas seulement à la trace : fichier déplacé hors de `node_modules`, build servi, toutes les pages et les **quatre** images de partage répondent en PNG 1200×630 valide.
+
+**Le gros morceau n'est pas prenable, et la tentative mérite d'être consignée.** Les 3,2 Mo restants de satori+resvg sont dans deux fonctions qui ne rendent aucune image — parce que Turbopack place `@vercel/og` dans un chunk que chaque page partage avec l'`opengraph-image` de son propre segment. L'exclure par route a échoué pour une raison qui ne se devine pas : **les clés de `outputFileTracingExcludes` sont des globs**, donc `[id]` et `[locale]` se lisent comme des classes de caractères et non comme des segments littéraux. Ma première tentative a retiré satori de **toutes** les fonctions, images comprises — un build vert de bout en bout qui aurait livré des aperçus de liens cassés en production. Échapper les crochets n'a pas corrigé le tir non plus.
+
+Ce qui l'a attrapé n'est pas un test mais la mesure du Build Output après coup : les deux fonctions d'image étaient passées à `@vercel/og: 0,00 Mo`. **Aucun test du repo ne peut voir ça** — `next build` et les 181 specs passent, parce qu'elles tournent contre `next start`, qui lit `node_modules` et se moque du tracing. Un changement de `outputFileTracingExcludes` se vérifie sur le Build Output, jamais sur la suite.
+
+**Ce qui reste est incompressible ou trop risqué pour le gain** : Firestore et sa pile gRPC (4,2 Mo) sont là où il faut et absents des pages de contenu ; le runtime Next (1,3-1,7 Mo) n'est pas négociable ; les cinq polices TTF des images (279 Ko) voyagent dans le même chunk partagé que satori, donc mêmes limites.
+
 ## État du projet au 2026-09-13 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -2179,7 +2200,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | TypeScript 7 et ESLint 10 | Tous deux bloqués par des paquets embarqués dans `eslint-config-next` (`typescript-eslint` refuse TS ≥ 6.1 ; `eslint-plugin-react` plante sur ESLint 10). Dependabot les ignore en majeure depuis le 2026-09-08 | Quand `eslint-config-next` suivra. Re-tester en installant, pas en lisant les plages de peer : c'est l'essai qui a montré qu'ESLint 10 plante. |
 | Instrument d'audit : phase 1 (saisie) | Le schéma est livré (`AUDIT.md`), rien n'est visible dans l'app | Le prochain chantier : `/admin/audit` derrière le Basic Auth existant, import/export JSON, purge en un bouton. Puis une première mission réelle avant tout readout. |
 | Catalogue de l'instrument d'audit à relire | 39 lignes de texte qui s'imprimeront dans les livrables d'Antoine, sous son nom | Un bon à tirer, même circuit que les précédents. |
-| Vercel Functions Storage à 9,24 / 10 Go | Un déploiement passe de 241 à 48 Mo de fonctions (sharp sorti, 2026-09-13) — mais ça n'allège que les déploiements à venir | **Action d'Antoine dans le dashboard Vercel** : une politique de rétention des déploiements (et une suppression des anciens pour libérer tout de suite). Le compteur doit redescendre nettement sous 5 Go ; sinon, chercher un second poste que la mesure locale ne voit pas. |
+| Vercel Functions Storage à 9,24 / 10 Go | Un déploiement passe de 241 à 45,5 Mo de fonctions (sharp puis le rendu Edge de next/og sortis, 2026-09-13) — mais ça n'allège que les déploiements à venir | **Action d'Antoine dans le dashboard Vercel** : une politique de rétention des déploiements (et une suppression des anciens pour libérer tout de suite). Le compteur doit redescendre nettement sous 5 Go ; sinon, chercher un second poste que la mesure locale ne voit pas. |
 
 Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et le payant sont le plan de croissance, qui appartient à Antoine ; le SEO a été livré en grande partie par le lot C de cette revue.
 

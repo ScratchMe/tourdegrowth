@@ -40,6 +40,18 @@ describe("next.config.mjs keeps sharp out of the function bundle", () => {
     expect(excludes.some((glob) => /node_modules\/@img\//.test(glob))).toBe(true);
   });
 
+  it("excludes the Edge build of the OG renderer, which nothing here can reach", () => {
+    const excludes = nextConfig.outputFileTracingExcludes?.["*"] ?? [];
+    expect(excludes.some((glob) => /@vercel\/og\/index\.edge\.js/.test(glob))).toBe(true);
+  });
+
+  it("no route opts into the Edge runtime — the condition that makes that exclude safe", () => {
+    const offenders = walk(SRC)
+      .filter((full) => /export\s+const\s+runtime\s*=\s*["']edge["']/.test(readFileSync(full, "utf8")))
+      .map((full) => relative(SRC, full));
+    expect(offenders).toEqual([]);
+  });
+
   it("nothing under src/ imports next/image", () => {
     const offenders = walk(SRC)
       .filter((full) => /from\s+["']next\/image["']/.test(readFileSync(full, "utf8")))

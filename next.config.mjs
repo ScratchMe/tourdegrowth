@@ -26,10 +26,34 @@ const nextConfig = {
    * 48 MB of sharp — 241 MB per deployment before, 48 MB after.
    * `src/__tests__/next-config.test.ts` pins both settings, so a later
    * `next/image` cannot be added without a decision.
+   *
+   * The third entry, added the same day: `@vercel/og` ships both a Node and
+   * an Edge build of its renderer, and Next traces both into any function
+   * that can reach it. Nothing in this app runs on the Edge runtime — the
+   * test asserts that, because it is what makes the exclude safe — so the
+   * Edge build is 734 KB of dead weight in four of the six functions.
+   * 48.4 MB per deployment → 45.5 MB. Verified by moving the file out of
+   * node_modules and serving the build: every page and all four share
+   * images still answer with a valid 1200×630 PNG.
+   *
+   * What was tried and reverted, so nobody spends the afternoon again: the
+   * rest of `@vercel/og` (3.2 MB of satori + resvg) sits in two functions
+   * that render no image at all — the content pages and the app routes —
+   * because Turbopack puts it in a chunk those pages share with the
+   * `opengraph-image` route of their own segment. Excluding it per route
+   * does not work: the keys of `outputFileTracingExcludes` are globs, so
+   * `[id]` and `[locale]` read as character classes rather than literal
+   * segments, and the first attempt silently stripped satori from the image
+   * routes too — a build that passes every test and ships broken link
+   * previews. Escaping the brackets did not fix it either. Leave it.
    */
   images: { unoptimized: true },
   outputFileTracingExcludes: {
-    "*": ["./node_modules/sharp/**", "./node_modules/@img/**"],
+    "*": [
+      "./node_modules/sharp/**",
+      "./node_modules/@img/**",
+      "./node_modules/next/dist/compiled/@vercel/og/index.edge.js",
+    ],
   },
 
   /**
