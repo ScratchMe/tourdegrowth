@@ -2246,6 +2246,47 @@ demande un clic (comptes, posts sous pseudo, mails de vérification) et de
 ce qu'elle ne fera pas (créer des comptes, poster à sa place — un compte
 piloté par un agent est le motif de bannissement le plus courant).
 
+### Vague 0 du plan de distribution : IndexNow et le vocabulaire UTM (2026-09-13)
+
+Première PR autonome de `GROWTH-PLAN.md` (items 0.3 et 0.4), lancée sur le
+« point bonus » d'Antoine. Le même jour il a tranché **l'option A** : le site
+garde son nom, la promotion ne le porte jamais — inscrit dans le plan.
+
+**IndexNow.** Un fichier de clé sous `public/` et
+`.github/workflows/indexnow.yml` : chaque matin (et à la main via
+`workflow_dispatch`), le workflow lit la clé **depuis le checkout** (une seule
+source de vérité, jamais recopiée dans le YAML), vérifie que le site sert bien
+`<clé>.txt` — sinon la soumission serait acceptée puis ignorée en silence par
+les moteurs —, extrait les `<loc>` du vrai `sitemap.xml` et les envoie à
+`api.indexnow.org` (Bing, Yandex, Naver, Seznam en une requête ; Google ne lit
+pas IndexNow, le sitemap suffit pour lui). **Aucun secret, à dessein** : une
+clé IndexNow est publique par construction, la preuve de propriété est le
+fichier servi. `src/__tests__/indexnow.test.ts` tient le contrat entre les deux
+fichiers (exactement une clé, contenu = nom, pas de clé recopiée dans le
+workflow, `contents: read`, action épinglée par SHA comme `verify-live.yml`).
+
+**UTM.** Le vocabulaire quitte `scripts/utm-link.mjs` pour
+`scripts/utm-channels.mjs`, importable par un test : la CLI n'est plus que
+la ligne de commande autour. `src/__tests__/utm-channels.test.ts` refuse tout
+canal que le plan exclut (`linkedin`, `podcast`, `press`, `network_dm`) dans
+les clés, les sources et les familles — c'est là que la contrainte est
+appliquée, pas dans un document. Deux familles ouvertes, `directory:<slug>` et
+`newsletter:<slug>`, donnent une ligne GoatCounter par annuaire ou newsletter
+sans les lister d'avance ; l'hôte par défaut passe sur `www` (l'apex 308 vers
+`www` en gardant la query, mais autant coller le lien canonique).
+
+**Vérifié en réel** : 517 tests (+13), lint (0 erreur), `tsc`, la CLI (liens
+générés, `linkedin` refusé en exit 1), le YAML parsé, et les étapes shell du
+workflow rejouées localement contre le vrai sitemap : 42 URL extraites, corps
+JSON conforme au protocole. Le fichier de clé répond 404 tant que la PR n'est
+pas déployée — **le premier envoi réel se déclenche à la main après le merge**,
+et son log dit si Bing a répondu 200/202.
+
+**Piège rencontré** : `git push --force-with-lease` a échoué sur la branche de
+travail parce que la branche distante avait été **supprimée automatiquement**
+après le merge précédent (réglage GitHub d'Antoine) alors que la référence de
+suivi locale la croyait encore là. `git fetch --prune` avant de pousser.
+
 ## État du projet au 2026-09-13 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.

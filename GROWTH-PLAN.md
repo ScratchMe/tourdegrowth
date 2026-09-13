@@ -11,7 +11,7 @@ actions ne demandent aucun humain visible. Même règle de tenue que
 `AUDIT-PLAN.md` : quand une action est faite, sa ligne change ici, et
 `CLAUDE.md` reçoit l'entrée de journal.*
 
-*Dernière mise à jour : 2026-09-13.*
+*Dernière mise à jour : 2026-09-13 (option A tranchée ; vague 0 : IndexNow et UTM livrés).*
 
 ---
 
@@ -62,8 +62,9 @@ en trois secondes.** Deux lectures possibles :
   défait le lien CV ← site qui était l'objet du pied de page, et le crédit
   Deep dive de SPEC-ADDENDUM-02 §2.
 
-**Je pars sur A.** Si c'est B, dis-le : c'est une PR à faire *avant* la
-première vague, pas après.
+**Tranché par Antoine le 2026-09-13 : option A.** Le site garde son nom ;
+la promotion, elle, ne le porte jamais — aucun post, aucun compte, aucun
+pitch ne le nomme ni ne renvoie vers le CV.
 
 ---
 
@@ -172,8 +173,8 @@ est autonome.*
 |---|---|---|---|
 | 0.1 | **Relever `/admin/stats`** : analyses totales, partages, K, `take_own_tour`, funnel | Toi | L'avant, sans quoi rien ne se mesure. Coller les chiffres ici, §7 |
 | 0.2 | **Dépôt GitHub** : description (« A 3-minute AARRR growth check-up — deterministic score, roast mode, open source »), homepage `https://www.tourdegrowth.com`, topics (`aarrr`, `growth`, `saas`, `startup`, `nextjs`, `gemini`, `open-source`, `quiz`, `pirate-metrics`) | Toi (2 min, Settings) | Je ne peux pas régler ça par l'API dont je dispose. Le README reste tel quel sous l'hypothèse A |
-| 0.3 | **IndexNow** : fichier de clé sous `public/`, workflow GitHub quotidien + manuel qui soumet les 42 URL du sitemap à `api.indexnow.org` (Bing, Yandex, Naver, Seznam en une requête) | **Moi** — PR | Google n'utilise pas IndexNow ; Bing/DuckDuckGo si. Gratuit, sans compte, sans secret : la clé est publique par construction |
-| 0.4 | **Nomenclature UTM** : retirer `linkedin`, `network_dm`, `podcast`, `paid_linkedin` ; ajouter `reddit_sideproject`, `reddit_roastmystartup`, `reddit_imadethis`, `reddit_entrepreneur`, `bluesky`, `directory_<nom>` par annuaire, `newsletter_<nom>` | **Moi** — même PR | Sans ça, la semaine 2 ne dit pas ce qui a marché (leçon du plan d'août) |
+| 0.3 | **IndexNow** : fichier de clé sous `public/`, workflow GitHub quotidien + manuel qui soumet les 42 URL du sitemap à `api.indexnow.org` (Bing, Yandex, Naver, Seznam en une requête) | **Moi** — PR | **Livré le 2026-09-13** (`.github/workflows/indexnow.yml`, `src/__tests__/indexnow.test.ts`). Google n'utilise pas IndexNow ; Bing/DuckDuckGo si. Gratuit, sans compte, sans secret : la clé est publique par construction. Premier envoi réel à déclencher à la main après le déploiement |
+| 0.4 | **Nomenclature UTM** : retirer `linkedin`, `network_dm`, `podcast`, `paid_linkedin` ; ajouter `reddit_sideproject`, `reddit_roastmystartup`, `reddit_imadethis`, `reddit_entrepreneur`, `bluesky`, `directory:<slug>` par annuaire, `newsletter:<slug>` | **Moi** — même PR | **Livré le 2026-09-13** (`scripts/utm-channels.mjs`, testé : un canal exclu ne peut pas revenir). Sans ça, la semaine 2 ne dit pas ce qui a marché (leçon du plan d'août) |
 | 0.5 | **Le kit de soumission** : nom, tagline (60 car.), descriptions en 3 longueurs (140 / 300 / 800 car.) × FR + EN, catégories, 5 captures (landing, question, sélecteur de ton, résultat neutre, résultat roast) en 1280 et 390, logo carré 512 depuis `favicon-512.png`, les deux images OG | **Moi** — dossier `marketing/` dans le dépôt | Une seule source pour 15 formulaires ; la copie repart au statut « à relire » |
 | 0.6 | **Les comptes de marque** : HN, Reddit, Indie Hackers, X, Bluesky — pseudo `tourdegrowth`, mail `contact@tourdegrowth.com`, bio = la tagline, lien = le site, **aucun lien vers le CV** | Toi (30 min) | Reddit : commencer à **commenter** tout de suite dans les subs visés — un compte de 3 jours sans karma qui poste un lien est supprimé avant d'être lu |
 | 0.7 | **Les textes de la vague 1** : Show HN (titre + premier commentaire + FAQ des 10 objections probables), un post par subreddit dans son ton et sous ses règles, le post Indie Hackers, le fil X/Bluesky (un pilier par post, la carte roast en dernier) | **Moi** — `marketing/` | Rien de copié-collé entre communautés : plusieurs modérateurs suppriment à vue |
@@ -314,6 +315,7 @@ lise). Tout ce que je prépare est écrit pour être collé tel quel.
 | Date | Ce qui a été fait | Chiffres |
 |---|---|---|
 | 2026-09-13 | Plan écrit. Baseline connue : 1 clic / ~50 impressions GSC (15/08-04/09), `stats/global` = 4 début septembre, GitHub 1 étoile sans description | À relever : `/admin/stats` du jour |
+| 2026-09-13 | Option A tranchée (site signé, promotion anonyme). Vague 0 : IndexNow (clé + workflow quotidien) et vocabulaire UTM refait sans `linkedin`, avec familles ouvertes `directory:`/`newsletter:` | — |
 
 ---
 
