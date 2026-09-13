@@ -2155,6 +2155,48 @@ Ce qui l'a attrapé n'est pas un test mais la mesure du Build Output après coup
 
 **Ce qui reste est incompressible ou trop risqué pour le gain** : Firestore et sa pile gRPC (4,2 Mo) sont là où il faut et absents des pages de contenu ; le runtime Next (1,3-1,7 Mo) n'est pas négociable ; les cinq polices TTF des images (279 Ko) voyagent dans le même chunk partagé que satori, donc mêmes limites.
 
+### Le plan de l'instrument d'audit, mis au propre et versionné (2026-09-13)
+
+Demande d'Antoine : « le plan avec les différentes phases — mets-le au propre
+et sauvegarde-le dans le dépôt, il ne faut pas qu'on le perde ». Jusqu'ici il
+n'existait qu'en deux endroits fragiles : la réponse au document de l'expert
+dans une conversation (2026-09-12) et le tableau de cinq lignes du §7
+d'`AUDIT.md`. **`AUDIT-PLAN.md`** à la racine est maintenant la référence :
+la table des phases avec déclencheur et critère de sortie, les six principes
+qui ordonnent le plan, la phase 1 découpée en **six PR** avec pour chacune ce
+qu'elle livre, ses tests et ce qui permet de la dire finie, la phase 1 bis
+(la mission AB Tasty, jour par jour), la phase 2 en neuf étapes, le
+Go/No-Go à cinq entrées dont une qui ferme la branche seule, la liste
+explicite de ce qu'on ne fait à aucune phase, et les risques. Les trois
+documents ne se recouvrent pas : `AUDIT.md` dit ce que c'est, `AUDIT-PLAN.md`
+dans quel ordre on le construit, ce fichier-ci ce qui a été livré.
+
+**Sept décisions prises en écrivant le plan, listées pour être contestées
+en une phrase** (`AUDIT-PLAN.md` §3.3) — dont deux qui valent d'être notées
+ici parce qu'elles découlent de faits vérifiés dans le code plutôt que de
+préférences : le design system n'a **aucun `<input>`** (`TextArea` se décrit
+comme « the system's only text input »), donc les primitives de formulaire de
+la saisie seront locales à la route et jamais synchronisées vers Claude
+Design ; et `lib/audit` tire aujourd'hui **le catalogue et `copy-library`**
+par des imports de valeur (`schema.ts#snapshotCatalog`,
+`validate.ts#AUDIT_PROFILE_MODELS`, `quadrants.ts` via `computeScore`) — un
+îlot client qui l'importerait tel quel embarquerait 65 Ko de texte que la
+garde « aucun Client Component n'importe le catalogue » ne verrait pas,
+parce qu'elle ne regarde que les imports directs. La première PR de la phase
+1 est donc un découplage sans écran, avec une marche transitive ajoutée à la
+garde.
+
+**Deux chiffres mesurés pour le plan plutôt que supposés** : le dénominateur
+par profil (25 lignes en B2B assisté, 24 en self-serve, 19 en B2C, 22 en
+marketplace) et la répartition des formes de valeur (10 scalaires, 12
+couples, 9 distributions, 2 matrices, 2 qualitatives, 4 composites) — c'est
+ce qui a permis de décider que quatre éditeurs suffisent pour six formes.
+
+**Deux règles d'ordre qui ne se négocient pas** : pas de readout avant une
+mission réelle (la phase 1 bis existe pour ça), et pas de livrable imprimé
+avant le bon à tirer nº4 — la saisie peut afficher les 39 lignes, le readout
+ne peut pas les imprimer.
+
 ## État du projet au 2026-09-13 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -2175,7 +2217,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **La relecture de la copie est faite** (2026-09-09) : 55 éléments passés par Antoine dans l'artifact « Bon à tirer du Tour » ([lien](https://claude.ai/code/artifact/bb3b1561-6c09-4dcb-af83-9fa7bf8752b9), décisions dans sa base `reviews/<itemId>`), 52 validés tels quels, 3 retouchés le jour même (aha-moment, north-star-metric, revenue) plus acquisition la veille. Les six chaînes de progression de R2-27, que la session avait oublié de mettre dans le document, ont été soumises à part et validées le même jour. Les 31 actions de la bibliothèque A2 ont suivi le 2026-09-09 (bloc « Prochaine action », 16 cartes, toutes approuvées sans note). **Deuxième bon à tirer passé le 2026-09-11** : les 13 chaînes livrées depuis la première relecture — celles de B1/B3 et du portage de l'extension 03, plus les trois de la relance à 30 jours (C1) — sont **toutes validées sans note**, marqueurs levés. **Troisième bon à tirer passé le même jour** : les **60 phrases de verdict** (15 cases) — 14 validées sans note, une corrigée (`referral/mixed`, où le neutre et le roast étaient dans des registres intervertis). **Un seul `TODO: à relire` dans `src/`** depuis le 2026-09-13 : les 39 lignes de `content/audit-catalog.ts`, à passer au prochain bon à tirer. Le prochain document devra toujours être **reconstruit depuis `grep -rn "TODO: à relire" src/`** — pas depuis la mémoire de ce qui a été livré, ni depuis un compte écrit ici. Deux fois de suite ce grep a rattrapé un oubli que la mémoire avait laissé passer : les six chaînes de progression le 2026-09-09, et les trois de C1 le 2026-09-11 — cette fois-là c'est Antoine qui l'a vu, parce que j'avais annoncé « 15 chaînes » sur un document qui en portait 12.
 
-**L'instrument d'audit growth a son schéma** (2026-09-13, `AUDIT.md`) : un outil personnel pour les diagnostics qu'Antoine mène en entreprise, navigateur seulement, jamais Firestore — `src/lib/audit/` + `src/content/audit-catalog.ts`, sans aucune route ni UI encore. Phase 1 (la saisie sous `/admin/audit`) est le prochain chantier ; phase 3 (tout ce qui ressemble à un produit) reste fermée tant que les entretiens ne sont pas faits et le contrat de travail pas vérifié.
+**L'instrument d'audit growth a son schéma** (2026-09-13, `AUDIT.md`) : un outil personnel pour les diagnostics qu'Antoine mène en entreprise, navigateur seulement, jamais Firestore — `src/lib/audit/` + `src/content/audit-catalog.ts`, sans aucune route ni UI encore. Phase 1 (la saisie sous `/admin/audit`) est le prochain chantier, découpée en six PR dans **`AUDIT-PLAN.md`** (2026-09-13) ; phase 3 (tout ce qui ressemble à un produit) reste fermée tant que les entretiens ne sont pas faits et le contrat de travail pas vérifié.
 
 **Chiffres de référence** (à comparer, pas à recopier aveuglément) : **499 tests unitaires**, **181 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
@@ -2198,7 +2240,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Les e2e de composition ne passent que par la branche échantillon | `/r/sample` utilise `getSampleNextMove` et `SAMPLE_RESULT.pillars`, pas le vrai chemin. La garde statique est donc seule à protéger le payload | Un id de fixture derrière une variable d'environnement fermée par défaut. À décider : c'est une porte de test sur la route publique la plus sensible. |
 | Flake `locale-routing.spec.ts:75` | Deux échecs le 2026-09-10, toujours en suite complète parallèle, jamais isolée (8/8) | La prochaine occurrence en CI laisse une trace (`retries: 1` + `trace: on-first-retry`, rapport téléversé). Ne pas durcir la spec en attendant le cookie : ça masquerait une éventuelle course produit. |
 | TypeScript 7 et ESLint 10 | Tous deux bloqués par des paquets embarqués dans `eslint-config-next` (`typescript-eslint` refuse TS ≥ 6.1 ; `eslint-plugin-react` plante sur ESLint 10). Dependabot les ignore en majeure depuis le 2026-09-08 | Quand `eslint-config-next` suivra. Re-tester en installant, pas en lisant les plages de peer : c'est l'essai qui a montré qu'ESLint 10 plante. |
-| Instrument d'audit : phase 1 (saisie) | Le schéma est livré (`AUDIT.md`), rien n'est visible dans l'app | Le prochain chantier : `/admin/audit` derrière le Basic Auth existant, import/export JSON, purge en un bouton. Puis une première mission réelle avant tout readout. |
+| Instrument d'audit : phase 1 (saisie) | Le schéma est livré (`AUDIT.md`), rien n'est visible dans l'app. **Le plan complet est dans `AUDIT-PLAN.md`** (phases, six PR de la phase 1, critères de sortie, Go/No-Go) | Le feu vert d'Antoine sur le plan, puis la PR 1.1 (découplage `lib/audit` ↔ contenu + stockage, sans écran). La politique de rétention Vercel doit être en place avant, chaque merge déployant la production. |
 | Catalogue de l'instrument d'audit à relire | 39 lignes de texte qui s'imprimeront dans les livrables d'Antoine, sous son nom | Un bon à tirer, même circuit que les précédents. |
 | Vercel Functions Storage à 9,24 / 10 Go | Un déploiement passe de 241 à 45,5 Mo de fonctions (sharp puis le rendu Edge de next/og sortis, 2026-09-13) — mais ça n'allège que les déploiements à venir | **Action d'Antoine dans le dashboard Vercel** : une politique de rétention des déploiements (et une suppression des anciens pour libérer tout de suite). Le compteur doit redescendre nettement sous 5 Go ; sinon, chercher un second poste que la mesure locale ne voit pas. |
 
@@ -2230,7 +2272,7 @@ src/app/api/             deux routes POST : création de soumission, Deep dive
 src/components/          core / brand / quiz / result / glossary — le design system porté
 src/content/             toute la copie du site, validée (agent produit pour l'origine, Antoine le 2026-09-06 et le 2026-09-09 pour le reste)
 src/lib/                 scoring (pur), i18n (dont meta.ts), seo (JSON-LD), og (polices + tokens des images de partage), gemini, submissions (dont segment.ts, benchmark.ts), metrics, analytics
-src/lib/audit/           l'instrument d'audit growth (AUDIT.md) — pur, navigateur seulement, jamais Firestore ; son catalogue est dans src/content/audit-catalog.ts
+src/lib/audit/           l'instrument d'audit growth (AUDIT.md = le schéma, AUDIT-PLAN.md = le plan par phases) — pur, navigateur seulement, jamais Firestore ; son catalogue est dans src/content/audit-catalog.ts
 design/                  brief d'origine, briefs et bundles de retour des extensions 01 et 03 (le brief 02 n'est jamais parti)
 e2e/                     170 specs Playwright contre un build de production
 scripts/live/            sondes contre les vrais services, lancées à la main

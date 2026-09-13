@@ -257,12 +257,17 @@ de cette section n'est livré en phase 0.
 
 ## 7. Plan
 
+**Le plan détaillé — phases, étapes PR par PR, ordre, critères de sortie,
+Go/No-Go — vit dans `AUDIT-PLAN.md`.** Ce document-ci reste la spécification
+du schéma ; celui-là dit dans quel ordre on construit et pourquoi. Résumé :
+
 | Phase | Contenu | État |
 |---|---|---|
-| **0 — Schéma** | Types, validateur, compteurs, promotion, quadrants, diff, purge, catalogue versionné et embarqué, garde de frontière, ce document | **Livrée** (PR de ce document) |
-| **1 — Saisie** | Route `/admin/audit` derrière le Basic Auth existant : créer une mission, saisir les entrées ligne par ligne avec la fiche du catalogue à côté, enregistrer les définitions, remplir le Tour, écrire les constats ; compteurs en direct ; import/export JSON ; purge en un bouton. Persistance `localStorage` (clé `tdg.audit.v1`, même motif que `tdg.results.v1`) + fichier | À faire — c'est le prochain chantier |
-| **2 — Readouts** | Les quatre artefacts du §6 ; catalogue en anglais pour un livrable EN ; coupe par interlocuteur | Après une première mission réelle |
-| **3 — Au-delà** | Tout ce qui ressemble à un produit (comptes, connecteurs, benchmarks agrégés) | Fermée tant que : entretiens non faits, contrat de travail non vérifié |
+| **0 — Schéma** | Types, validateur, compteurs, promotion, quadrants, diff, purge, catalogue versionné et embarqué, garde de frontière, ce document | **Livrée** (PR #129, 2026-09-13) |
+| **1 — Saisie** | Route `/admin/audit` derrière le Basic Auth existant, import/export JSON, purge — six PR détaillées dans `AUDIT-PLAN.md` §3 | À faire — c'est le prochain chantier |
+| **1 bis — Première mission réelle** | AB Tasty, sans mandat, `pending = 0`, journal des frictions | Après la phase 1 |
+| **2 — Readouts** | Les quatre artefacts du §6 ; passes multiples et diff ; catalogue en anglais si un livrable EN existe | Après la phase 1 bis **et** le bon à tirer nº4 |
+| **2 bis → Go/No-Go → 3** | Trois à cinq missions réelles, une décision écrite, puis seulement ce qui ressemble à un produit | Fermée tant que : entretiens non faits, contrat de travail non vérifié |
 
 Côté Antoine, hors code : relire les 39 lignes du catalogue (elles portent
 son nom dans les livrables — `TODO: à relire` en tête du fichier), répondre
