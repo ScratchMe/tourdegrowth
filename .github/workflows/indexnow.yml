@@ -1,0 +1,90 @@
+name: IndexNow
+
+# Tells Bing, Yandex, Naver and Seznam — one request, one shared protocol —
+# which URLs this site has, once a day, so a new content page is crawled
+# within hours instead of weeks. Google does not use IndexNow; the sitemap
+# covers it. GROWTH-PLAN.md, vague 0, item 0.3.
+#
+# No secret anywhere, on purpose: an IndexNow key is public by design. The
+# protocol proves ownership by serving `<key>.txt` from the site root (the
+# file lives in public/), so publishing the key is the mechanism, not a
+# leak. The workflow reads the key from the checkout rather than repeating
+# it here, so there is exactly one source of truth;
+# src/__tests__/indexnow.test.ts keeps that file well-formed.
+#
+# Daily rather than on push: a deploy lands a few minutes after a merge, the
+# sitemap changes rarely, and resubmitting ~40 URLs once a day is well within
+# what the protocol expects. `workflow_dispatch` is there for the day a page
+# ships and should be crawled now.
+
+on:
+  schedule:
+    - cron: "17 6 * * *" # 06:17 UTC daily — off the hour, when GitHub's queue is quietest
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: indexnow
+  cancel-in-progress: false
+
+env:
+  SITE: https://www.tourdegrowth.com
+
+jobs:
+  submit:
+    name: Submit sitemap URLs
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: |
+            public
+
+      - name: Read the key from public/
+        id: key
+        run: |
+          set -euo pipefail
+          files=$(ls public | grep -E '^[0-9a-f]{32}\.txt$' || true)
+          count=$(printf '%s\n' "$files" | grep -c . || true)
+          if [ "$count" != "1" ]; then
+            echo "Expected exactly one IndexNow key file in public/, found $count." >&2
+            exit 1
+          fi
+          echo "key=${files%.txt}" >> "$GITHUB_OUTPUT"
+
+      # Fails fast when the key file is not deployed yet (a submission made
+      # before that would be silently dropped by the receiving engines).
+      - name: Check the key file is served by the site
+        env:
+          KEY: ${{ steps.key.outputs.key }}
+        run: |
+          set -euo pipefail
+          served=$(curl -fsS "$SITE/$KEY.txt")
+          if [ "$served" != "$KEY" ]; then
+            echo "The site serves $SITE/$KEY.txt with unexpected content." >&2
+            exit 1
+          fi
+
+      - name: Submit every sitemap URL
+        env:
+          KEY: ${{ steps.key.outputs.key }}
+        run: |
+          set -euo pipefail
+          curl -fsS "$SITE/sitemap.xml" -o sitemap.xml
+          grep -oE '<loc>[^<]+</loc>' sitemap.xml | sed -E 's#</?loc>##g' | sort -u > urls.txt
+          n=$(wc -l < urls.txt)
+          if [ "$n" -eq 0 ]; then echo "No <loc> in the sitemap." >&2; exit 1; fi
+          echo "Submitting $n URLs."
+          jq -Rn --arg host "${SITE#https://}" --arg key "$KEY" --arg loc "$SITE/$KEY.txt" \
+            '{host: $host, key: $key, keyLocation: $loc, urlList: [inputs]}' urls.txt > body.json
+          code=$(curl -sS -o response.txt -w '%{http_code}' -X POST 'https://api.indexnow.org/indexnow' \
+            -H 'Content-Type: application/json; charset=utf-8' --data-binary @body.json)
+          echo "IndexNow answered HTTP $code."
+          cat response.txt || true
+          case "$code" in
+            200|202) ;;
+            *) exit 1 ;;
+          esac
