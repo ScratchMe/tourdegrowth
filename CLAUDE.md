@@ -2287,6 +2287,58 @@ travail parce que la branche distante avait été **supprimée automatiquement**
 après le merge précédent (réglage GitHub d'Antoine) alors que la référence de
 suivi locale la croyait encore là. `git fetch --prune` avant de pousser.
 
+### Vague 0, suite : le kit de soumission et les textes de lancement (2026-09-13)
+
+Items 0.5 et 0.7 de `GROWTH-PLAN.md`, livrés dans **`marketing/`** — hors de
+`src/`, rien ne l'importe : `README.md` (les trois règles : jamais le nom,
+jamais un lien nu, rien sans relecture), `kit.md` (identité, tagline,
+descriptions 140/300/800 × FR/EN, faits avançables et faits à ne pas
+avancer, liens déjà tagués, table des annuaires), `launch/` (Show HN avec la
+FAQ des dix objections, un post par subreddit sous ses règles, Indie Hackers
+en « build log », le fil X/Bluesky), et 22 PNG dans `assets/`. **Aucun
+texte ne nomme l'auteur** — vérifié par `grep`, et la seule mention (« the
+site credits its author in the footer ») est la réponse prévue à « who's
+behind this? » sous l'option A, signalée à Antoine dans le fichier.
+
+**Le premier envoi IndexNow réel est passé** : run nº1 du workflow, déclenché
+à la main une fois le fichier de clé servi (20 s après le merge, `HIT`
+CDN) — « Submitting 42 URLs », **HTTP 202** de `api.indexnow.org`. La
+vérification préalable de la clé a donc bien joué son rôle dans l'ordre
+prévu.
+
+**Les annuaires ont été vérifiés en ouvrant leurs pages**, pas listés de
+mémoire, et ça change l'ordre du plan : Launching Next est le seul formulaire
+**sans compte** (nom, URL, titre 5-8 mots, description ≤ 2 500 caractères,
+5-10 tags, un nom et un e-mail de soumetteur — « Tour de Growth »,
+`contact@`) ; Uneed aspire la page puis demande une inscription ; Fazier
+**exige un backlink** sur son plan gratuit ; BetaList demande un compte X ou
+un lien magique ; Futurepedia est payant (247 $ épuisé, 497 $) → écarté ;
+Peerlist est un réseau de personnes → écarté ; SaaSHub et There's An AI For
+That refusent les robots (403) → à vérifier à la main.
+
+**Piège d'environnement, nouveau** : depuis ce bac à sable, **Chromium ne
+traverse pas le proxy sortant** — `page.goto` sur le site en production
+meurt en `ERR_CONNECTION_RESET`, et le statut du proxy montre le tunnel
+fermé en cours d'échange après 6 s (1,7 Ko envoyés, 39 octets reçus), même
+avec l'option `proxy` de Playwright ; `curl` passe. Les captures se font donc
+contre un build de production local, ce qui est de toute façon la méthode du
+repo ; `scripts/kit-screenshots.mjs` la fixe (seed des 15 réponses en
+`localStorage` pour atteindre le sélecteur de ton **via l'écran de
+segmentation**, que le premier essai avait pris pour le sélecteur — leçon du
+brief 03 : deux fichiers de même taille sont la même image, et un écran
+photographié se relit avant d'être nommé).
+
+**Optimisation des PNG sans dépendance nouvelle** : `sharp` est déjà dans
+`node_modules` (tiré par Next — c'est celui qu'on a sorti du bundle de
+fonction, pas du dépôt) ; un réencodage en palette fait passer les 22
+captures de 7,4 à 2,4 Mo sans perte visible sur une UI à aplats.
+
+**Deux surprises dans la copie du produit, vues en photographiant** : le
+sélecteur de ton n'est plus l'écran qui suit la 15ᵉ question — l'écran de
+segmentation (R2-26) s'intercale ; et la carte d'aperçu roast dit
+« Retention is freewheeling » / « roule en roue libre », qui est une bonne
+ligne à citer dans les posts.
+
 ## État du projet au 2026-09-13 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -2334,7 +2386,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Catalogue de l'instrument d'audit à relire | 39 lignes de texte qui s'imprimeront dans les livrables d'Antoine, sous son nom | Un bon à tirer, même circuit que les précédents. |
 | Vercel Functions Storage à 9,24 / 10 Go | Un déploiement passe de 241 à 45,5 Mo de fonctions (sharp puis le rendu Edge de next/og sortis, 2026-09-13) — mais ça n'allège que les déploiements à venir | **Action d'Antoine dans le dashboard Vercel** : une politique de rétention des déploiements (et une suppression des anciens pour libérer tout de suite). Le compteur doit redescendre nettement sous 5 Go ; sinon, chercher un second poste que la mesure locale ne voit pas. |
 
-Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et le payant sont dans **`GROWTH-PLAN.md`** (2026-09-13 — sans LinkedIn, sans nom ; cinq vagues, la moitié menable par la session seule) ; le SEO a été livré en grande partie par le lot C de cette revue, et sa suite est la vague 2 de ce plan.
+Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et le payant sont dans **`GROWTH-PLAN.md`** (2026-09-13 — sans LinkedIn, sans nom ; cinq vagues, la moitié menable par la session seule ; la part autonome de la vague 0 est livrée : IndexNow, UTM, kit et textes dans `marketing/`) ; le SEO a été livré en grande partie par le lot C de cette revue, et sa suite est la vague 2 de ce plan.
 
 **Coût Gemini, mesuré plutôt qu'estimé au doigt mouillé** (clé passée en palier payant Tier 1 le 2026-09-07, avec plafonds de dépense) : un Deep dive = 4 générations (2 tons × 2 langues), prompt réel ~5 300 caractères, sorties mesurées par la sonde entre 765 et 2 801 tokens de réflexion et ~450-530 de réponse. Soit **~0,04 à 0,06 $ par Deep dive en 2026**, le double à partir de 2027 (les tarifs Flash doublent au 1ᵉʳ janvier). Le mode Quick ne coûte rien du tout — il n'appelle plus Gemini depuis SPEC-ADDENDUM-01 §0. La limite de 5 Deep dive/h/IP borne un abus à ~2,4 $/jour dans le pire cas.
 
@@ -2363,7 +2415,7 @@ src/components/          core / brand / quiz / result / glossary — le design s
 src/content/             toute la copie du site, validée (agent produit pour l'origine, Antoine le 2026-09-06 et le 2026-09-09 pour le reste)
 src/lib/                 scoring (pur), i18n (dont meta.ts), seo (JSON-LD), og (polices + tokens des images de partage), gemini, submissions (dont segment.ts, benchmark.ts), metrics, analytics
 src/lib/audit/           l'instrument d'audit growth (AUDIT.md = le schéma, AUDIT-PLAN.md = le plan par phases) — pur, navigateur seulement, jamais Firestore ; son catalogue est dans src/content/audit-catalog.ts
-GROWTH-PLAN.md           le plan de distribution (sans LinkedIn, sans nom) ; REVIEW*.md les revues ; AUDIT*.md l'instrument d'audit
+GROWTH-PLAN.md           le plan de distribution (sans LinkedIn, sans nom) ; marketing/ son kit (textes de lancement, captures, annuaires) ; REVIEW*.md les revues ; AUDIT*.md l'instrument d'audit
 design/                  brief d'origine, briefs et bundles de retour des extensions 01 et 03 (le brief 02 n'est jamais parti)
 e2e/                     170 specs Playwright contre un build de production
 scripts/live/            sondes contre les vrais services, lancées à la main
