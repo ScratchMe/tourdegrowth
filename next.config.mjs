@@ -8,6 +8,31 @@ const nextConfig = {
   agentRules: false,
 
   /**
+   * Keep `sharp` out of the serverless function — 2026-09-13.
+   *
+   * The Hobby plan caps "Functions Storage" — the summed size of the function
+   * bundles of every retained deployment — at 10 GB, and this project stood at
+   * 9.24 GB. Measured on a local production build, the traced function weighed
+   * 62 MB, of which 48 MB was `sharp` and its two libvips builds
+   * (`@img/sharp-libvips-linux-x64`, `-linuxmusl-x64`, plus a 9 MB wasm) — an
+   * optional dependency Next traces in for `next/image`, which this app has
+   * never used: the only images are static files, and the share picture is a
+   * PNG rendered by `next/og`, whose rasteriser is resvg, not sharp.
+   *
+   * `images.unoptimized` states that intent (no `/_next/image` route to
+   * serve), and the tracing exclude is what actually removes the bytes.
+   * Measured with `vercel build` (the Build Output the platform stores):
+   * one deployment is six functions, four of which each carried the full
+   * 48 MB of sharp — 241 MB per deployment before, 48 MB after.
+   * `src/__tests__/next-config.test.ts` pins both settings, so a later
+   * `next/image` cannot be added without a decision.
+   */
+  images: { unoptimized: true },
+  outputFileTracingExcludes: {
+    "*": ["./node_modules/sharp/**", "./node_modules/@img/**"],
+  },
+
+  /**
    * HTTP security headers — REVIEW-02.md R2-18. Until this block the app
    * shipped none of its own (only the HSTS header Vercel adds), so `/r/<id>`
    * — a public page with real actions on it — could be framed by any site.
