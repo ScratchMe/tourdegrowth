@@ -3447,6 +3447,77 @@ tombe ; le libellé du champ de purge retiré → la passe axe tombe ; les
 constats retirés du fichier sérialisé → la recette d'aller-retour tombe.
 Chacun exactement une spec.
 
+### Deux pages « porte ouverte » : la checklist et la méthode (2026-09-14)
+
+Première brique de contenu de la vague 2 du plan de distribution. Deux SERP
+vides avaient été trouvées en préparant le plan — « growth audit checklist /
+template » en anglais, « diagnostic croissance startup gratuit » en français ;
+ce sont les deux pages qui s'y logent.
+
+**Deux écarts au plan, assumés et signalés plutôt qu'absorbés :**
+1. **Chacune existe dans les DEUX langues, à un slug unique.** Le plan les
+   écrivait `/en/growth-audit-checklist` et `/fr/diagnostic-croissance-startup`
+   — une page par langue. Impossible ici sans mentir trois fois : le jeu
+   hreflang n'aurait pas de contrepartie, le sitemap deviendrait asymétrique,
+   et le sélecteur de langue pointerait dans le vide. Les deux pages sont donc
+   bilingues, et chacune vise sa requête dans la langue où cette requête a du
+   volume.
+2. **Les slugs restent anglais dans les deux langues.** R2-16 a déjà tranché
+   contre les slugs localisés (coût élevé, gain faible, et une URL publiée ne
+   meurt jamais ici). Le contenu pèse de toute façon bien plus qu'un slug.
+
+**Elles ne se redisent pas, et c'est le point.** Le plan les désignait par
+deux requêtes différentes ; les livrer comme deux variantes du même texte
+aurait fait deux quasi-doublons, ce qui vaut moins que rien en référencement.
+L'une est l'**artefact** — les quinze points, le barème, comment se noter à la
+main ; l'autre est la **méthode** — par quoi commencer, dans quel ordre
+regarder, ce qu'un diagnostic doit produire. Une spec compare les `<h1>` et
+les `<h2>` des deux pages et exige zéro intersection.
+
+**La checklist EST le questionnaire**, rendue depuis `copy-library.ts` et
+jamais recopiée — même discipline que `/about`. Une seconde copie dériverait,
+et la page décrirait alors un questionnaire qui n'existe plus. **Le barème est
+visible ici**, là où `AnswerOption` l'interdit : cette règle protège le
+parcours de trois minutes (voir les points en répondant fausse les réponses),
+et cette page existe précisément pour qu'on puisse se noter à la main.
+
+**Le test dit la même chose que la page.** Ma première version de la spec
+citait une question « de mémoire » — et se trompait (« a main acquisition
+channel you can name and measure » au lieu de « a primary acquisition channel
+that's identified and measured »). Corrigé en **lisant la bibliothèque depuis
+la spec** plutôt qu'en recopiant la bonne phrase : c'est la différence entre
+« la page contient cette phrase-là » et « la page rend ce que la bibliothèque
+contient », et seule la seconde survit à une correction de copie.
+
+**Le H1 français prenait six lignes sur un téléphone** — le cas que l'entrée
+des pages légales annonçait (« à revoir si un titre plus long y apparaît un
+jour »). Les deux pages réutilisent la feuille de `/how-it-works`, qu'il ne
+faut pas bouger : l'override vit donc dans leur propre module, en sélecteur
+**élément + classe** (`h1.title`, 0,1,1) et non en classe seule. La règle
+qu'il doit battre vient d'un autre module CSS, donc à égalité de spécificité
+le gagnant dépendrait de l'ordre d'émission des feuilles — leçon nº2, que R-21
+a déjà fait payer une fois. Mesuré dans le navigateur plutôt que supposé, et
+non-vacuité faite : en retirant le qualificateur d'élément, exactement cette
+spec tombe.
+
+**Maillage appliqué d'emblée** (règle 2.4) : la checklist a son lien de pied
+de page — donc un chemin constant depuis n'importe quelle page de contenu —
+plus un depuis `/how-it-works` et un depuis la page méthode ; la page méthode
+en a deux et sort vers les cinq pages de pilier du glossaire. Une seule des
+deux entre au pied de page : à sept liens, un pied de page cesse d'en mettre
+aucun en avant.
+
+**Vérifié en réel** : lint, tsc, **662 tests unitaires**, `next build` (les
+quatre pages sortent en `●`, donc servies par le CDN — c'est tout l'intérêt
+pour des pages qui existent pour être trouvées), **264 specs Playwright**
+(+8). Captures relues en 1280 et 390 px, EN et FR, `scrollWidth ===
+clientWidth` mesuré aux deux largeurs.
+
+**Toute la copie est neuve, donc `TODO: à relire`** (convention 6) —
+`content/open-door.ts`, plus cinq chaînes de chrome dans `dictionary.ts` et
+une dans `nav-strings.ts`. À passer au prochain bon à tirer, avec les 39
+lignes du catalogue d'audit.
+
 ## État du projet au 2026-09-14 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -3469,7 +3540,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **L'instrument d'audit growth a son schéma** (2026-09-13, `AUDIT.md`) : un outil personnel pour les diagnostics qu'Antoine mène en entreprise, navigateur seulement, jamais Firestore — `src/lib/audit/` + `src/content/audit-catalog.ts`, sans aucune route ni UI encore. Phase 1 (la saisie sous `/admin/audit`) est le prochain chantier, découpée en six PR dans **`AUDIT-PLAN.md`** (2026-09-13) ; phase 3 (tout ce qui ressemble à un produit) reste fermée tant que les entretiens ne sont pas faits et le contrat de travail pas vérifié.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **662 tests unitaires**, **256 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
+**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **662 tests unitaires**, **264 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 
@@ -3491,7 +3562,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | TypeScript 7 et ESLint 10 | Tous deux bloqués par des paquets embarqués dans `eslint-config-next` (`typescript-eslint` refuse TS ≥ 6.1 ; `eslint-plugin-react` plante sur ESLint 10). Dependabot les ignore en majeure depuis le 2026-09-08 | Quand `eslint-config-next` suivra. Re-tester en installant, pas en lisant les plages de peer : c'est l'essai qui a montré qu'ESLint 10 plante. |
 | Instrument d'audit : phase 1 (saisie) | **Close le 2026-09-14** (PR #131 à #153). `/admin/audit` crée une mission, trie 25 lignes par palier, saisit tout ce que le schéma prévoit, produit `m19` depuis le Tour de l'auditeur, croise méthode × réalité, rédige les constats et le bloc de tête, exporte, réimporte et purge. La spec canari prouve qu'aucune requête ne porte un octet de la mission ; la recette vérifie le critère de sortie sur un vrai build, `localStorage` réellement vidé entre l'export et l'import | Rien côté code. |
 | Instrument d'audit : phase 1 bis (la vraie mission) | **Le prochain chantier, et il est côté Antoine** : mener AB Tasty dans l'outil jusqu'à `pending = 0`, en tenant le journal des frictions | C'est ce journal qui dira ce que la phase 2 (les readouts) doit construire — il n'y a aucune façon de le deviner d'ici. |
-| Catalogue de l'instrument d'audit à relire | 39 lignes de texte qui s'imprimeront dans les livrables d'Antoine, sous son nom | Un bon à tirer, même circuit que les précédents. |
+| Copie à relire (bon à tirer nº5) | Les 39 lignes du catalogue d'audit (elles s'impriment dans les livrables d'Antoine, sous son nom) **et** les deux pages « porte ouverte » du 2026-09-14 (`content/open-door.ts` + 6 chaînes de chrome) | Un bon à tirer, même circuit que les précédents — et le document se reconstruit depuis `grep -rn "TODO: à relire" src/`, jamais de mémoire. |
 | Vercel Functions Storage | **Réglé** : la politique de rétention posée par Antoine le 2026-09-14 l'a fait passer de 9,24 Go à 397 Mo, et un déploiement pèse 45,5 Mo de fonctions depuis le 2026-09-13 | Rien. |
 | Vercel Fluid Active CPU (36 min / 4 h par mois) | Les deux postes qui dominaient le coût par visite sont corrigés le 2026-09-14 : six préchargements dynamiques par vue de la homepage, et l'image de partage rendue à chaque vue de résultat — confirmé en production, `MISS` puis `HIT` sur l'adresse versionnée. La région des fonctions est passée à `cdg1` le même jour (vérifié : `x-vercel-id: iad1::cdg1::…`) | Relire le compteur dans Vercel une semaine après. |
 | Lecture des stats par la session | **Les deux moitiés marchent** (trois runs réels le 2026-09-14 : tableau de bord et Search Console, déchiffrés par la session ; ligne de départ du plan relevée, tenue hors du dépôt public). À surveiller au prochain run Search Console : `/en/glossary/*` doit remplacer les anciennes URL non préfixées dans les pages créditées | Rien : un `age-keygen` puis un run (`admin`, `gsc` ou `both`) quand une session a besoin des chiffres. |

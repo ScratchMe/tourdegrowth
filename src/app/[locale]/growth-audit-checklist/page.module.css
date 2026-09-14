@@ -1,0 +1,87 @@
+/* Les quinze points. Une liste de travail : rien de décoratif, et un rythme
+   assez large pour qu'on puisse la cocher à l'écran sans se perdre. */
+.stages {
+  list-style: none;
+  margin: 0 0 var(--space-12);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.stageName {
+  font: var(--display-section);
+  letter-spacing: var(--display-letter-spacing);
+  margin: 0;
+}
+
+.questions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.question {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.questionText {
+  font: var(--body-lg);
+  margin: 0;
+}
+
+.options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Le barème est visible ICI — la page existe pour qu'on se note à la main,
+   le cacher la rendrait inutilisable. Sur le questionnaire, la règle est
+   l'inverse et pour une bonne raison (voir le commentaire de la page). */
+.option {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-5);
+  font: var(--body-md);
+  border-bottom: var(--border-rule);
+  padding-bottom: var(--space-3);
+}
+
+.points {
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  color: var(--text-muted);
+  min-width: 2.5ch;
+  text-align: right;
+  flex: none;
+}
+
+/* Le H1 de ces deux pages est plus long que celui de `/how-it-works` (« la
+   méthode » et « les 15 points » s'ajoutent à un sujet déjà long), et en
+   français il prend six lignes à 62 px sur un téléphone. Même correctif que
+   la page Confidentialité, et même raison.
+
+   Sélecteur ÉLÉMENT + classe (0,1,1) plutôt qu'une seule classe : la règle
+   qu'il doit battre vient d'un AUTRE module CSS, donc à égalité de
+   spécificité le gagnant dépendrait de l'ordre d'émission des feuilles
+   (leçon nº2 de CLAUDE.md, R-21). `/how-it-works` n'est pas touché. */
+@media (max-width: 760px) {
+  h1.title {
+    font: var(--display-hero-mobile);
+  }
+}

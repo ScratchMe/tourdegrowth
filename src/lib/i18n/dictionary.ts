@@ -209,6 +209,22 @@ export const UI_STRINGS = {
 
   /** "How it works" page chrome (SPEC-ADDENDUM-01.md §1.3) not already in
    * content/how-it-works.ts (title/body copy lives there). */
+  /**
+   * Les deux pages « porte ouverte » (GROWTH-PLAN.md vague 2.1). Le gros du
+   * texte vit dans `content/open-door.ts` ; il ne reste ici que ce qui est
+   * du CHROME de page — les libellés de maillage, que le reste de l'app
+   * pourrait réutiliser.
+   *
+   * TODO: à relire (convention 6).
+   */
+  openDoor: {
+    stagesHeading: { en: "The five stages, one page each", fr: "Les cinq étapes, une page chacune" },
+    checklistLead: { en: "Want the list itself, ready to work through?", fr: "Tu veux la liste elle-même, prête à dérouler ?" },
+    checklistLink: { en: "The 15-point growth audit checklist", fr: "La checklist d'audit growth en 15 points" },
+    diagnosticLead: { en: "Wondering how to run one from start to finish?", fr: "Tu te demandes comment en mener un de bout en bout ?" },
+    diagnosticLink: { en: "The startup growth diagnostic method", fr: "La méthode du diagnostic de croissance" },
+  },
+
   howItWorksPage: {
     exampleQuestionLabel: { en: "Example question:", fr: "Exemple de question :" },
     // Relu et validé par Antoine (2026-09-09) — R2-17. Eyebrow of each pillar card: the

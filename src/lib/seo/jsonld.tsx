@@ -4,6 +4,7 @@ import { GLOSSARY, type GlossaryTermId } from "@/content/glossary";
 import { ANTOINE_LINKS, QUICK_CREDIT } from "@/content/antoine-credit";
 import { HOW_IT_WORKS } from "@/content/how-it-works";
 import { PRIVACY, TERMS } from "@/content/legal";
+import { CHECKLIST, DIAGNOSTIC } from "@/content/open-door";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import type { Locale } from "@/lib/i18n/locale";
 import { localePath } from "@/lib/i18n/routes";
@@ -64,6 +65,30 @@ export function webApplicationSchema(locale: Locale) {
 }
 
 /** Breadcrumbs, as rendered visually ("← Glossary") but until now never declared. */
+/**
+ * Un `Article` pour les pages de fond qui ne sont ni l'application, ni un
+ * terme de glossaire — les deux pages « porte ouverte » du plan de
+ * distribution (vague 2.1).
+ *
+ * Pas de `datePublished`/`dateModified` : ces dates vivent déjà dans
+ * `content/updated-at.ts`, qui alimente le `<lastmod>` du sitemap, et les
+ * dupliquer ici créerait deux sources qui divergeraient au premier oubli —
+ * exactement ce que R2-08 a corrigé en refusant un `new Date()` de build.
+ */
+export function articleSchema(locale: Locale, path: string, headline: string, description: string) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline,
+    description,
+    url: absolute(locale, path),
+    inLanguage: locale,
+    author: personNode(),
+    publisher: personNode(),
+    isPartOf: { "@type": "WebSite", name: SITE_NAME, url: absolute(locale) },
+  };
+}
+
 export function breadcrumbSchema(locale: Locale, trail: { name: string; path: string }[]) {
   return {
     "@context": "https://schema.org",
@@ -137,6 +162,8 @@ export const CRUMBS = {
   about: (locale: Locale) => ({ name: tc(ABOUT.title, locale), path: "/about" }),
   privacy: (locale: Locale) => ({ name: tc(PRIVACY.title, locale), path: "/privacy" }),
   terms: (locale: Locale) => ({ name: tc(TERMS.title, locale), path: "/terms" }),
+  checklist: (locale: Locale) => ({ name: tc(CHECKLIST.title, locale), path: "/growth-audit-checklist" }),
+  diagnostic: (locale: Locale) => ({ name: tc(DIAGNOSTIC.title, locale), path: "/startup-growth-diagnostic" }),
 };
 
 /**

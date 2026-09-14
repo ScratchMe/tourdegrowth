@@ -19,6 +19,21 @@ const CONTENT_PATHS: { path: string; changeFrequency: "monthly" | "yearly"; prio
   { path: "/", changeFrequency: "monthly", priority: 1, lastModified: CONTENT_UPDATED_AT["/"]! },
   { path: "/how-it-works", changeFrequency: "monthly", priority: 0.8, lastModified: CONTENT_UPDATED_AT["/how-it-works"]! },
   { path: "/about", changeFrequency: "monthly", priority: 0.7, lastModified: CONTENT_UPDATED_AT["/about"]! },
+  // Les deux pages « porte ouverte » (GROWTH-PLAN.md vague 2.1) : priorité
+  // au niveau de `/how-it-works`, puisqu'elles existent pour être le premier
+  // contact de quelqu'un qui cherche l'outil sans le connaître.
+  {
+    path: "/growth-audit-checklist",
+    changeFrequency: "monthly",
+    priority: 0.8,
+    lastModified: CONTENT_UPDATED_AT["/growth-audit-checklist"]!,
+  },
+  {
+    path: "/startup-growth-diagnostic",
+    changeFrequency: "monthly",
+    priority: 0.8,
+    lastModified: CONTENT_UPDATED_AT["/startup-growth-diagnostic"]!,
+  },
   { path: "/glossary", changeFrequency: "monthly", priority: 0.6, lastModified: CONTENT_UPDATED_AT["/glossary"]! },
   // The legal pages carry their own date — it is printed on the page, so the
   // sitemap reads the same value rather than a second copy that could drift.
