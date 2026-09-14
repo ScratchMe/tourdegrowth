@@ -39,7 +39,12 @@ export type GlossaryTermId =
   | "activation-rate"
   | "cac-payback"
   | "nrr-grr"
-  | "cohort-analysis";
+  | "cohort-analysis"
+  // wave 2.2, lot 2 — the three that describe HOW a product is used, where
+  // lot 1 described what it earns.
+  | "dau-mau"
+  | "time-to-value"
+  | "pql";
 
 function same(value: string): Translatable {
   return { fr: value, en: value };
@@ -182,6 +187,27 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
     definition: {
       fr: "Lire une métrique par groupe d'utilisateurs arrivés en même temps, au lieu d'une moyenne globale qui peut masquer deux tendances opposées.",
       en: "Reading a metric by group of users who arrived at the same time, instead of one blended average that can hide two opposite trends.",
+    },
+  },
+  "dau-mau": {
+    term: { fr: "DAU/MAU — ratio d'adhérence", en: "DAU/MAU ratio" },
+    definition: {
+      fr: "Le rapport entre utilisateurs actifs quotidiens et mensuels. Multiplié par 30, il donne le nombre de jours par mois où un utilisateur moyen revient.",
+      en: "The ratio of daily to monthly active users. Multiplied by 30, it gives the number of days a month the average user comes back.",
+    },
+  },
+  "time-to-value": {
+    term: { fr: "Time to value — délai jusqu'à la valeur", en: "Time to value" },
+    definition: {
+      fr: "Le temps médian entre l'inscription et le moment où l'utilisateur obtient vraiment ce pour quoi il est venu — à lire toujours à côté du taux d'activation.",
+      en: "The median time between sign-up and the moment a user actually gets what they came for — always read next to the activation rate.",
+    },
+  },
+  pql: {
+    term: { fr: "PQL — lead qualifié par le produit", en: "PQL — product-qualified lead" },
+    definition: {
+      fr: "Un utilisateur qui a franchi un seuil d'usage choisi parce qu'il prédit l'achat — qualifié par ce qu'il fait, pas par ce qu'il a téléchargé.",
+      en: "A user who has crossed a usage threshold chosen because it predicts buying — qualified by what they do, not by what they downloaded.",
     },
   },
 };

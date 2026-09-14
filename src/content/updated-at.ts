@@ -14,7 +14,7 @@ export const CONTENT_UPDATED_AT: Record<string, string> = {
   "/": "2026-09-06", // title and share text (PR #58), visitor-facing copy
   "/how-it-works": "2026-09-06", // stage eyebrows (R2-17)
   "/about": "2026-09-06", // created (R2-04)
-  "/glossary": "2026-09-14", // four terms added to the index (GROWTH-PLAN.md wave 2.2, lot 1)
+  "/glossary": "2026-09-14", // seven terms added to the index (GROWTH-PLAN.md wave 2.2, lots 1 et 2)
   "/growth-audit-checklist": "2026-09-14", // created (GROWTH-PLAN.md wave 2.1)
   "/startup-growth-diagnostic": "2026-09-14", // created (GROWTH-PLAN.md wave 2.1)
 };

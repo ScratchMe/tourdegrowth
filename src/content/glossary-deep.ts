@@ -1217,6 +1217,137 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
     ],
   },
 
+  // ——— wave 2.2, lot 2 (2026-09-14) ———
+  "dau-mau": {
+    formula: {
+      expression: t(
+        "DAU/MAU = (average daily active users over the month) ÷ (monthly active users) — and the ratio × 30 = days used per month",
+        "DAU/MAU = (moyenne des utilisateurs actifs quotidiens sur le mois) ÷ (utilisateurs actifs mensuels) — et le ratio × 30 = jours d'usage par mois",
+      ),
+      terms: [
+        {
+          symbol: t("DAU", "DAU"),
+          meaning: t(
+            "The average of your daily active counts across the month, not one good Tuesday. A single day is a sample of one, and the day you happen to look is rarely representative.",
+            "La moyenne de tes comptes quotidiens sur le mois, pas un bon mardi. Un jour unique est un échantillon de un, et celui où tu regardes est rarement représentatif.",
+          ),
+        },
+        {
+          symbol: t("MAU", "MAU"),
+          meaning: t(
+            "Unique users active at least once over the month, each counted once however often they came. Counting them per visit turns the ratio into nonsense.",
+            "Les utilisateurs uniques actifs au moins une fois dans le mois, comptés une seule fois quelle que soit leur fréquence. Les compter par visite rend le ratio absurde.",
+          ),
+        },
+        {
+          symbol: t("Active", "Actif"),
+          meaning: t(
+            "The same definition on both sides of the division, and something more demanding than opening the app. A ratio built on \"opened\" measures notifications, not usage.",
+            "La même définition des deux côtés de la division, et quelque chose de plus exigeant qu'ouvrir l'application. Un ratio construit sur « a ouvert » mesure les notifications, pas l'usage.",
+          ),
+        },
+      ],
+      note: t(
+        "The multiplication is the part worth remembering: a ratio of 0.2 is not an abstract score, it is six days out of thirty. Stating it that way is usually enough to settle whether the number is good, because a team knows what its product is for.",
+        "La multiplication est ce qu'il faut retenir : un ratio de 0,2 n'est pas une note abstraite, c'est six jours sur trente. Le dire ainsi suffit en général à trancher si le chiffre est bon, parce qu'une équipe sait à quoi sert son produit.",
+      ),
+    },
+    example: {
+      title: t("A ratio that describes nobody", "Un ratio qui ne décrit personne"),
+      steps: [
+        t(
+          "50,000 MAU, DAU averaging 10,000 over the month. DAU/MAU = 0.20, so the average user shows up six days out of thirty.",
+          "50 000 MAU, des DAU à 10 000 en moyenne sur le mois. DAU/MAU = 0,20, donc l'utilisateur moyen vient six jours sur trente.",
+        ),
+        t(
+          "Split the base and there is no such user. 8,000 people open it about 22 days a month; the other 42,000 open it about 3.",
+          "Découpe la base et cet utilisateur n'existe pas. 8 000 personnes l'ouvrent environ 22 jours par mois ; les 42 000 autres, environ 3.",
+        ),
+        t(
+          "Check the arithmetic: (8,000 × 22) + (42,000 × 3) = 302,000 user-days, ÷ 30 = about 10,000 DAU. The same 0.20, from two populations that share nothing.",
+          "Vérifie l'arithmétique : (8 000 × 22) + (42 000 × 3) = 302 000 jours-utilisateurs, ÷ 30 = environ 10 000 DAU. Le même 0,20, produit par deux populations qui n'ont rien en commun.",
+        ),
+        t(
+          "The two groups need opposite decisions. The 8,000 are a daily habit to protect and to learn from; the 42,000 are either a weekly product misread as a daily one, or a group that never found the habit at all — and only looking at what they do differently answers which.",
+          "Les deux groupes appellent des décisions opposées. Les 8 000 sont une habitude quotidienne à protéger et dont il faut s'inspirer ; les 42 000 sont soit un produit hebdomadaire lu comme quotidien, soit un groupe qui n'a jamais trouvé l'habitude — et seul l'examen de ce qu'ils font différemment le dira.",
+        ),
+      ],
+      takeaway: t(
+        "Same lesson as cohort analysis, on a different axis: cohorts split by when people arrived, this splits by how often they come. Both exist because an average over a mixed population describes the average and nobody in it.",
+        "Même leçon que l'analyse de cohortes, sur un autre axe : les cohortes découpent par date d'arrivée, ceci découpe par fréquence. Les deux existent parce qu'une moyenne sur une population mélangée décrit la moyenne et personne dedans.",
+      ),
+    },
+    benchmark: [
+      t(
+        "The threshold most often quoted is 20% for consumer social products, with 50%+ treated as exceptional — figures that come from a category where daily use is the whole point. Quoting them at a product not meant to be opened daily is comparing ambitions, not performance.",
+        "Le seuil le plus souvent cité est 20 % pour les produits sociaux grand public, 50 % et plus étant considéré comme exceptionnel — des chiffres issus d'une catégorie où l'usage quotidien est toute la raison d'être. Les citer pour un produit qui n'est pas fait pour être ouvert tous les jours compare des ambitions, pas des performances.",
+      ),
+      t(
+        "A payroll tool at 0.05 — a day and a half a month — is not failing; it is being used exactly when payroll runs. The first question is never \"is the ratio high\" but \"should this product be opened daily at all\", and answering it honestly retires the metric for a good share of B2B software.",
+        "Un outil de paie à 0,05 — un jour et demi par mois — n'échoue pas ; il est utilisé exactement quand la paie tombe. La première question n'est jamais « le ratio est-il élevé » mais « ce produit doit-il être ouvert tous les jours », et y répondre honnêtement met la métrique de côté pour une bonne part des logiciels B2B.",
+      ),
+      t(
+        "For a weekly-cycle product, WAU/MAU is the same idea at the right grain and is far more readable. Reading a weekly product on a daily ratio produces a number that is always low and never actionable.",
+        "Pour un produit à cycle hebdomadaire, WAU/MAU est la même idée à la bonne maille et se lit bien mieux. Lire un produit hebdomadaire sur un ratio quotidien produit un chiffre toujours bas et jamais actionnable.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Decide first whether daily use is the right ambition. Half the effort spent lifting this ratio is spent making people open something they had no reason to open, which shows up later as churn.",
+        "Décide d'abord si l'usage quotidien est la bonne ambition. La moitié de l'effort dépensé à monter ce ratio sert à faire ouvrir quelque chose que personne n'avait de raison d'ouvrir, ce qui ressort plus tard en churn.",
+      ),
+      t(
+        "Segment the ratio rather than averaging it, and look at what the frequent group does that the others do not. That behaviour, not the ratio, is the thing to design for.",
+        "Segmente le ratio au lieu de le moyenner, et regarde ce que le groupe fréquent fait et que les autres ne font pas. C'est ce comportement, pas le ratio, qu'il faut concevoir.",
+      ),
+      t(
+        "Read the ratio and MAU together, always. A rising ratio with a falling MAU is not an improvement: it is casual users leaving, which mechanically raises the average frequency of those who stay.",
+        "Lis le ratio et les MAU ensemble, toujours. Un ratio qui monte pendant que les MAU baissent n'est pas une amélioration : ce sont les utilisateurs occasionnels qui partent, ce qui remonte mécaniquement la fréquence moyenne de ceux qui restent.",
+      ),
+      t(
+        "Tie frequency to a real trigger in the user's week — a report that lands, a queue that fills, a teammate who acts — rather than to a notification. A trigger that exists outside your product survives someone turning notifications off.",
+        "Rattache la fréquence à un déclencheur réel dans la semaine de l'utilisateur — un rapport qui arrive, une file qui se remplit, un coéquipier qui agit — plutôt qu'à une notification. Un déclencheur qui existe hors de ton produit survit à quelqu'un qui coupe les notifications.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "ret-1",
+      body: t(
+        "The Tour asks whether you track a retention rate at all, for 20 points. DAU/MAU is the companion figure: retention says whether people come back at all, this says how often. They fail in opposite ways, which is why neither replaces the other — retention can look healthy on users who return once a month, and the ratio can look healthy on a shrinking core of enthusiasts. A team answering 20 here and never having multiplied its ratio by 30 is holding a number it has not yet read.",
+        "Le Tour demande si tu suis un taux de rétention, pour 20 points. Le DAU/MAU est le chiffre compagnon : la rétention dit si les gens reviennent, celui-ci dit à quelle fréquence. Les deux échouent de façons opposées, et c'est pourquoi aucun ne remplace l'autre — une rétention peut sembler saine sur des utilisateurs qui reviennent une fois par mois, et le ratio peut sembler sain sur un noyau d'enthousiastes qui rétrécit. Une équipe qui répond 20 ici sans jamais avoir multiplié son ratio par 30 tient un chiffre qu'elle n'a pas encore lu.",
+      ),
+    },
+    faq: [
+      {
+        question: t("What is a good DAU/MAU ratio?", "C'est quoi un bon ratio DAU/MAU ?"),
+        answer: t(
+          "Multiply it by 30 and ask whether that many days a month is what your product is for. A messaging app at 12 days is struggling; an invoicing tool at 12 days is being used far more than its job requires. The benchmark lives in the product's purpose, not in a table.",
+          "Multiplie-le par 30 et demande-toi si ce nombre de jours par mois correspond à ce que fait ton produit. Une messagerie à 12 jours est en difficulté ; un outil de facturation à 12 jours est utilisé bien plus que son travail ne l'exige. La référence est dans la vocation du produit, pas dans un tableau.",
+        ),
+      },
+      {
+        question: t("Is DAU/MAU a retention metric?", "Le DAU/MAU est-il une métrique de rétention ?"),
+        answer: t(
+          "Not quite — it measures frequency inside a month, retention measures survival across months. A cohort can retain beautifully at a low frequency, and a high ratio can sit on a base that halves every quarter. Read the cohort curve for survival and this for intensity.",
+          "Pas tout à fait — il mesure la fréquence à l'intérieur d'un mois, la rétention mesure la survie d'un mois à l'autre. Une cohorte peut très bien se retenir à faible fréquence, et un ratio élevé peut reposer sur une base qui fond de moitié chaque trimestre. Lis la courbe de cohorte pour la survie, celui-ci pour l'intensité.",
+        ),
+      },
+      {
+        question: t("Should I use WAU/MAU instead?", "Faut-il plutôt utiliser WAU/MAU ?"),
+        answer: t(
+          "If the natural cycle of your product is a week, yes, and the choice matters more than the precision of either. Pick the grain that matches the rhythm you are actually asking people to adopt, then keep it — switching grains mid-year produces a step change that looks like a result.",
+          "Si le cycle naturel de ton produit est la semaine, oui, et ce choix compte plus que la précision de l'un ou l'autre. Prends la maille qui correspond au rythme que tu demandes réellement d'adopter, puis garde-la — changer de maille en cours d'année produit une marche qui ressemble à un résultat.",
+        ),
+      },
+      {
+        question: t("Can the ratio rise while the business gets worse?", "Le ratio peut-il monter pendant que l'entreprise va moins bien ?"),
+        answer: t(
+          "Routinely, and it is the trap to know. Lose your casual users and the ones left are by definition the frequent ones, so the ratio climbs on a shrinking base. That is why it is never quoted alone: the absolute MAU next to it is what says whether the climb was earned.",
+          "Couramment, et c'est le piège à connaître. Perds tes utilisateurs occasionnels et ceux qui restent sont par définition les plus fréquents, donc le ratio grimpe sur une base qui rétrécit. C'est pour ça qu'on ne le cite jamais seul : le nombre de MAU à côté est ce qui dit si la hausse a été méritée.",
+        ),
+      },
+    ],
+  },
+
   "viral-coefficient": {
     formula: {
       expression: t(
@@ -1978,6 +2109,136 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
     ],
   },
 
+  "time-to-value": {
+    formula: {
+      expression: t(
+        "Time to value = the MEDIAN of (timestamp of the activation event − timestamp of sign-up), over the users who reached it",
+        "Time to value = la MÉDIANE de (horodatage de l'événement d'activation − horodatage de l'inscription), sur les utilisateurs qui l'ont atteint",
+      ),
+      terms: [
+        {
+          symbol: t("Median, not mean", "Médiane, pas moyenne"),
+          meaning: t(
+            "A handful of users who activate six weeks late drag a mean far past anything a real person experiences. The median is the time half your activating users beat, which is a sentence you can act on.",
+            "Une poignée d'utilisateurs qui activent six semaines plus tard tirent une moyenne bien au-delà de ce que vit une personne réelle. La médiane est le délai que la moitié de tes activateurs battent, et c'est une phrase sur laquelle on peut agir.",
+          ),
+        },
+        {
+          symbol: t("The activation event", "L'événement d'activation"),
+          meaning: t(
+            "The same one your activation rate uses — two different events make the two numbers impossible to read together, which is the whole reason to have both.",
+            "Le même que celui de ton taux d'activation — deux événements différents rendent les deux chiffres impossibles à lire ensemble, ce qui est toute la raison d'en avoir deux.",
+          ),
+        },
+        {
+          symbol: t("Users who reached it", "Ceux qui l'ont atteint"),
+          meaning: t(
+            "Users who never activate have no time to measure, so they are excluded by construction. That exclusion is the metric's dangerous edge, and the reason the activation rate has to be published next to it.",
+            "Ceux qui n'activent jamais n'ont pas de délai à mesurer, donc ils sont exclus par construction. Cette exclusion est le bord dangereux de la métrique, et la raison pour laquelle le taux d'activation doit être publié à côté.",
+          ),
+        },
+      ],
+      note: t(
+        "Never quote this number alone. Time to value computed only on activators improves when your slowest users give up — the metric gets better precisely because the product got worse, and nothing inside the figure shows it.",
+        "Ne cite jamais ce chiffre seul. Un time to value calculé sur les seuls activateurs s'améliore quand tes utilisateurs les plus lents abandonnent — la métrique progresse précisément parce que le produit a régressé, et rien dans le chiffre ne le montre.",
+      ),
+    },
+    example: {
+      title: t("The quarter the number improved by getting worse", "Le trimestre où le chiffre s'est amélioré en se dégradant"),
+      steps: [
+        t(
+          "1,000 sign-ups. 340 activate: 200 within the first hour, 80 within a week (about 3.5 days each), 60 spread over the following two months (about six weeks each).",
+          "1 000 inscriptions. 340 activent : 200 dans la première heure, 80 dans la semaine (environ 3,5 jours chacun), 60 étalés sur les deux mois suivants (environ six semaines chacun).",
+        ),
+        t(
+          "Mean time to value: (200 × 0.5h + 80 × 84h + 60 × 1,000h) ÷ 340 ≈ 197 hours, about 8 days. Median: the 170th and 171st values, both inside the first hour.",
+          "Time to value moyen : (200 × 0,5 h + 80 × 84 h + 60 × 1 000 h) ÷ 340 ≈ 197 heures, soit environ 8 jours. Médiane : les 170ᵉ et 171ᵉ valeurs, toutes deux dans la première heure.",
+        ),
+        t(
+          "Two numbers, same data, and they describe different companies. The mean describes the 60 stragglers; the median describes what a typical activating user actually lives through.",
+          "Deux chiffres, les mêmes données, et ils décrivent deux entreprises différentes. La moyenne décrit les 60 traînards ; la médiane décrit ce que vit réellement un utilisateur qui active.",
+        ),
+        t(
+          "Next quarter, nothing is fixed and the 60 stragglers simply stop bothering. Activation falls from 34% to 28%. Mean time to value: (200 × 0.5 + 80 × 84) ÷ 280 ≈ 24 hours — an eightfold \"improvement\", reported the same week the product lost sixty activations.",
+          "Le trimestre suivant, rien n'est corrigé et les 60 traînards cessent simplement d'insister. L'activation tombe de 34 % à 28 %. Time to value moyen : (200 × 0,5 + 80 × 84) ÷ 280 ≈ 24 heures — une « amélioration » d'un facteur huit, annoncée la semaine où le produit a perdu soixante activations.",
+        ),
+      ],
+      takeaway: t(
+        "The median would have barely moved, because the median never depended on the stragglers. Using it, and printing the activation rate beside it, is what makes this number safe to steer by — a rule that costs nothing and prevents exactly one very expensive kind of report.",
+        "La médiane, elle, aurait à peine bougé, parce qu'elle n'a jamais dépendu des traînards. L'utiliser, et imprimer le taux d'activation à côté, est ce qui rend ce chiffre sûr à piloter — une règle qui ne coûte rien et évite exactement un genre de rapport très coûteux.",
+      ),
+    },
+    benchmark: [
+      t(
+        "The ambition usually quoted for self-serve products is first value inside the first session, on the theory that a user who leaves without getting anything rarely comes back for a second try. It is an ambition, not a measured norm, and it does not transfer to products that need a data migration or an integration.",
+        "L'ambition couramment citée pour un produit en self-serve est une première valeur dès la première session, au motif qu'un utilisateur qui repart sans rien obtenir revient rarement pour un second essai. C'est une ambition, pas une norme mesurée, et elle ne se transpose pas aux produits qui demandent une migration de données ou une intégration.",
+      ),
+      t(
+        "Where setup genuinely takes days, the number to watch is the trend on your own cohorts, not the absolute. A tool that went from nine days to four has done something real; a tool at four days is neither good nor bad until you know where it started.",
+        "Là où la mise en place prend réellement des jours, le chiffre à suivre est la tendance sur tes propres cohortes, pas l'absolu. Un outil passé de neuf jours à quatre a fait quelque chose de réel ; un outil à quatre jours n'est ni bon ni mauvais tant qu'on ne sait pas d'où il part.",
+      ),
+      t(
+        "In B2B the largest component is usually not work but waiting — on credentials, on a colleague, on an approval. That share is worth measuring separately, because it responds to completely different fixes than the interface does.",
+        "En B2B, la plus grosse composante n'est en général pas du travail mais de l'attente — des identifiants, un collègue, une validation. Cette part mérite d'être mesurée à part, parce qu'elle répond à des correctifs complètement différents de ceux de l'interface.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Use the median, and publish the activation rate immediately next to it. Two numbers, always together, or the pair can be gamed by attrition alone.",
+        "Utilise la médiane, et publie le taux d'activation juste à côté. Deux chiffres, toujours ensemble, sinon le couple se truque par la seule attrition.",
+      ),
+      t(
+        "Measure it per step, not end to end. The total tells you there is a delay; the steps tell you whether it is your form or someone else's calendar.",
+        "Mesure-le par étape, pas de bout en bout. Le total te dit qu'il y a un délai ; les étapes te disent s'il vient de ton formulaire ou du calendrier de quelqu'un d'autre.",
+      ),
+      t(
+        "Remove waits before removing clicks. Three screens cost a minute; waiting on a colleague for database credentials costs three days, and no amount of interface polish touches it.",
+        "Supprime les attentes avant de supprimer les clics. Trois écrans coûtent une minute ; attendre les identifiants d'un collègue coûte trois jours, et aucun polissage d'interface n'y change rien.",
+      ),
+      t(
+        "Let value land before setup finishes — sample data, a prefilled example, a result computed on a partial import. The point is that the user sees what the product does before they have finished paying the price of admission.",
+        "Fais arriver la valeur avant la fin de la mise en place — des données d'exemple, un cas prérempli, un résultat calculé sur un import partiel. L'idée est que l'utilisateur voie ce que fait le produit avant d'avoir fini de payer le droit d'entrée.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "act-3",
+      body: t(
+        "The Tour asks whether your onboarding has been tested or iterated on at least once — 20 points for yes, 7 for \"a bit\", 0 for never touched. Time to value is how you would know whether an iteration worked: without it, \"we improved onboarding\" is a statement about effort rather than about outcome. Teams answering 7 have usually changed something and have no before-and-after, which is the cheapest gap on this list to close — the timestamps needed are already in the database.",
+        "Le Tour demande si ton onboarding a été testé ou itéré au moins une fois — 20 points pour oui, 7 pour « un peu », 0 pour jamais touché. Le time to value est ce qui permettrait de savoir si une itération a marché : sans lui, « on a amélioré l'onboarding » est une affirmation sur l'effort, pas sur le résultat. Les équipes qui répondent 7 ont en général changé quelque chose sans avoir d'avant-après, et c'est le trou le moins cher de cette liste à combler — les horodatages nécessaires sont déjà en base.",
+      ),
+    },
+    faq: [
+      {
+        question: t("Median or mean?", "Médiane ou moyenne ?"),
+        answer: t(
+          "Median, for two reasons. It resists the long tail of users who activate weeks later, and it stays stable when that tail changes size — which the worked example above shows is the difference between a metric you can steer by and one that rewards attrition.",
+          "La médiane, pour deux raisons. Elle résiste à la longue traîne des utilisateurs qui activent des semaines plus tard, et elle reste stable quand cette traîne change de taille — ce qui, comme le montre l'exemple ci-dessus, fait la différence entre une métrique pilotable et une métrique qui récompense l'attrition.",
+        ),
+      },
+      {
+        question: t("What if most users never activate?", "Et si la plupart des utilisateurs n'activent jamais ?"),
+        answer: t(
+          "Then time to value is the second problem and the activation rate is the first. A fast median over a small share of users describes a good experience that almost nobody has. Fix the share, then the speed.",
+          "Alors le time to value est le second problème et le taux d'activation le premier. Une médiane rapide sur une petite part d'utilisateurs décrit une bonne expérience que presque personne ne vit. Répare la part, puis la vitesse.",
+        ),
+      },
+      {
+        question: t("Is it the same as onboarding length?", "Est-ce la même chose que la durée de l'onboarding ?"),
+        answer: t(
+          "No, and the gap between them is often the finding. Onboarding length is how long your flow takes; time to value is how long the user waits for something worth having. A four-step onboarding finished in two minutes still has a six-day time to value if value only arrives once a colleague approves an integration.",
+          "Non, et l'écart entre les deux est souvent la trouvaille. La durée de l'onboarding, c'est le temps que prend ton parcours ; le time to value, c'est le temps que l'utilisateur attend avant d'obtenir quelque chose qui vaut la peine. Un onboarding en quatre étapes bouclé en deux minutes garde un time to value de six jours si la valeur n'arrive qu'une fois qu'un collègue a validé une intégration.",
+        ),
+      },
+      {
+        question: t("Does a shorter time to value always mean a better product?", "Un time to value plus court veut-il toujours dire un meilleur produit ?"),
+        answer: t(
+          "No — it can also mean the goalposts moved. Redefine the activation event as something shallower and the number drops overnight without a single user being better served. Freeze the event, publish the activation rate beside it, and the improvement is real or it is visible.",
+          "Non — ça peut aussi vouloir dire que les poteaux ont bougé. Redéfinis l'événement d'activation comme quelque chose de plus superficiel et le chiffre chute du jour au lendemain sans qu'un seul utilisateur soit mieux servi. Fige l'événement, publie le taux d'activation à côté, et l'amélioration est réelle ou bien elle se voit.",
+        ),
+      },
+    ],
+  },
+
   onboarding: {
     formula: {
       expression: t(
@@ -2355,6 +2616,136 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         answer: t(
           "It's more useful early, when the temptation to chase every number is strongest. A three-person team with one metric that means value — and a habit of asking whether each week's work moved it — makes better decisions than one with a full dashboard. It just needs an aha moment defined first, which is also the first Activation question of the Tour.",
           "C'est plus utile tôt, quand la tentation de courir après tous les chiffres est la plus forte. Une équipe de trois avec une métrique qui veut dire « valeur » — et l'habitude de se demander si le travail de la semaine l'a fait bouger — décide mieux qu'une équipe avec un tableau de bord complet. Il faut juste un moment « aha » défini d'abord, ce qui est aussi la première question Activation du Tour.",
+        ),
+      },
+    ],
+  },
+
+  pql: {
+    formula: {
+      expression: t(
+        "PQL lift = (conversion rate of users above the threshold) ÷ (conversion rate of users below it) — and the threshold is only useful if the list it produces is one a human can work",
+        "Lift du PQL = (taux de conversion des utilisateurs au-dessus du seuil) ÷ (taux de conversion de ceux en dessous) — et le seuil n'est utile que si la liste qu'il produit est travaillable par un humain",
+      ),
+      terms: [
+        {
+          symbol: t("Threshold", "Seuil"),
+          meaning: t(
+            "A behaviour inside the product — invited a teammate, imported real data, hit a plan limit — not a company size or a job title. That is the whole difference from an MQL, and it is the reason the number means anything.",
+            "Un comportement dans le produit — a invité un coéquipier, a importé de vraies données, a atteint une limite d'offre — pas une taille d'entreprise ni un intitulé de poste. C'est toute la différence avec un MQL, et la raison pour laquelle le chiffre veut dire quelque chose.",
+          ),
+        },
+        {
+          symbol: t("Lift", "Lift"),
+          meaning: t(
+            "How much better the qualified group converts than the unqualified one. A threshold with a lift near 1 is not qualifying anybody, it is drawing a line through the middle of your users.",
+            "À quel point le groupe qualifié convertit mieux que le groupe non qualifié. Un seuil au lift proche de 1 ne qualifie personne, il trace une ligne au milieu de tes utilisateurs.",
+          ),
+        },
+        {
+          symbol: t("List size", "Taille de la liste"),
+          meaning: t(
+            "How many users cross the threshold in a period. The forgotten half of the definition: a threshold can have a beautiful lift and still qualify more people than anyone could ever contact.",
+            "Combien d'utilisateurs franchissent le seuil sur une période. La moitié oubliée de la définition : un seuil peut avoir un lift magnifique et qualifier quand même plus de gens que personne ne pourra jamais contacter.",
+          ),
+        },
+      ],
+      note: t(
+        "Both halves have to hold. Optimising for lift alone produces thresholds so rare they qualify four people a quarter; optimising for volume produces a list indistinguishable from \"everyone who signed up\".",
+        "Les deux moitiés doivent tenir. Optimiser le seul lift produit des seuils si rares qu'ils qualifient quatre personnes par trimestre ; optimiser le volume produit une liste impossible à distinguer de « tous ceux qui se sont inscrits ».",
+      ),
+    },
+    example: {
+      title: t("Two thresholds, the same lift, one of them useless", "Deux seuils, le même lift, un seul utilisable"),
+      steps: [
+        t(
+          "5,000 free sign-ups in a quarter, 300 of whom convert to paid: a 6% baseline.",
+          "5 000 inscriptions gratuites sur un trimestre, dont 300 passent au payant : une base de 6 %.",
+        ),
+        t(
+          "Threshold A, \"invited a teammate\": 900 users qualify and 135 convert (15%); the other 4,100 produce 165 conversions (4.0%). Lift = 15 ÷ 4.0 ≈ 3.7×.",
+          "Seuil A, « a invité un coéquipier » : 900 utilisateurs qualifient et 135 convertissent (15 %) ; les 4 100 autres produisent 165 conversions (4,0 %). Lift = 15 ÷ 4,0 ≈ 3,7×.",
+        ),
+        t(
+          "Threshold B, \"logged in three times\": 3,200 qualify and 260 convert (8.1%); the other 1,800 produce 40 conversions (2.2%). Lift = 8.1 ÷ 2.2 ≈ 3.7× — identical.",
+          "Seuil B, « s'est connecté trois fois » : 3 200 qualifient et 260 convertissent (8,1 %) ; les 1 800 autres produisent 40 conversions (2,2 %). Lift = 8,1 ÷ 2,2 ≈ 3,7× — identique.",
+        ),
+        t(
+          "Same lift, and only one of them is a list. A is 900 people a quarter converting at 15%: about ten contacts a day, each with better-than-even odds of being worth the call. B is 3,200 people at 8%, which is a mailing list with extra steps.",
+          "Le même lift, et une seule des deux est une liste. A, c'est 900 personnes par trimestre qui convertissent à 15 % : une dizaine de contacts par jour, chacun avec une chance sérieuse d'en valoir la peine. B, c'est 3 200 personnes à 8 %, autrement dit une liste de diffusion avec des étapes en plus.",
+        ),
+      ],
+      takeaway: t(
+        "Lift alone would have rated these two thresholds identically. The second axis — how many people it qualifies, and at what density — is what separates a signal a team can act on from one it will quietly stop opening after three weeks.",
+        "Le lift seul aurait noté ces deux seuils à égalité. Le second axe — combien de personnes le seuil qualifie, et à quelle densité — est ce qui sépare un signal sur lequel une équipe peut agir d'un signal qu'elle cessera discrètement d'ouvrir au bout de trois semaines.",
+      ),
+    },
+    benchmark: [
+      t(
+        "The claim you will meet everywhere is that PQLs convert several times better than MQLs. It is true and the comparison is rigged: a PQL has used the product, an MQL downloaded a PDF. Quoting the ratio proves nothing about your thresholds, because it would hold for almost any behavioural threshold at all.",
+        "L'affirmation qu'on croise partout est que les PQL convertissent plusieurs fois mieux que les MQL. C'est vrai et la comparaison est biaisée : un PQL a utilisé le produit, un MQL a téléchargé un PDF. Citer ce rapport ne prouve rien sur tes seuils, parce qu'il tiendrait pour presque n'importe quel seuil comportemental.",
+      ),
+      t(
+        "The only benchmark worth holding is your own baseline conversion rate, measured before any threshold exists. Without it there is no lift to compute, which is why this is the one number to get first.",
+        "La seule référence qui vaille est ton propre taux de conversion de base, mesuré avant qu'un seuil n'existe. Sans lui il n'y a pas de lift à calculer, et c'est pour ça que c'est le premier chiffre à obtenir.",
+      ),
+      t(
+        "A threshold that stops working is normal rather than alarming: it means the product changed and the behaviour that used to be a strong signal became routine. Re-deriving it quarterly is maintenance, not a sign the first one was wrong.",
+        "Un seuil qui cesse de fonctionner est normal plutôt qu'alarmant : le produit a changé et le comportement qui était un signal fort est devenu banal. Le recalculer chaque trimestre est de l'entretien, pas le signe que le premier était mauvais.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Derive the threshold from data, never from a workshop. Take the users who converted, look at what they did in their first two weeks that the others did not, and test each candidate behaviour for lift and list size.",
+        "Dérive le seuil des données, jamais d'un atelier. Prends les utilisateurs qui ont converti, regarde ce qu'ils ont fait dans leurs deux premières semaines que les autres n'ont pas fait, et teste chaque comportement candidat sur le lift et la taille de liste.",
+      ),
+      t(
+        "Check both axes before adopting one, as the example above shows. Write down the lift AND the quarterly count next to every candidate.",
+        "Vérifie les deux axes avant d'en adopter un, comme le montre l'exemple ci-dessus. Note le lift ET le nombre trimestriel à côté de chaque candidat.",
+      ),
+      t(
+        "Keep it to a single behaviour a person can read in one sentence. A score built from seven weighted signals cannot be argued with, cannot be debugged, and gets ignored the first time it is wrong.",
+        "Garde un comportement unique qu'une personne peut lire en une phrase. Un score construit sur sept signaux pondérés ne se discute pas, ne se débogue pas, et se fait ignorer la première fois qu'il se trompe.",
+      ),
+      t(
+        "Decide what happens when someone crosses it, before you start counting. A PQL nobody contacts and no in-app offer greets is a database column, not a growth mechanism.",
+        "Décide de ce qui se passe quand quelqu'un le franchit, avant de commencer à compter. Un PQL que personne ne contacte et qu'aucune offre dans l'app n'accueille est une colonne de base de données, pas un mécanisme de croissance.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "act-2",
+      body: t(
+        "The Tour asks whether you know the percentage of users who reach your activation moment, for 20 points. A PQL threshold is that same measurement pointed at a commercial decision: both ask which behaviour separates the users who got it from the ones who did not, and a team that can answer 20 already owns most of the work. The order matters — defining a PQL before knowing your activation event usually produces a threshold chosen for how easy it is to query, which is exactly the mistake the activation rate page warns about.",
+        "Le Tour demande si tu connais le pourcentage d'utilisateurs qui atteignent ton moment d'activation, pour 20 points. Un seuil de PQL est cette même mesure pointée vers une décision commerciale : les deux cherchent quel comportement sépare ceux qui ont compris de ceux qui n'ont pas compris, et une équipe qui répond 20 a déjà fait l'essentiel du travail. L'ordre compte — définir un PQL avant de connaître son événement d'activation produit en général un seuil choisi pour sa facilité d'extraction, exactement l'erreur contre laquelle la page sur le taux d'activation met en garde.",
+      ),
+    },
+    faq: [
+      {
+        question: t("PQL or MQL?", "PQL ou MQL ?"),
+        answer: t(
+          "They answer different questions and can coexist. An MQL says someone showed interest in the category; a PQL says someone got value from your product. If you have a free tier or a trial, the second is available to you and is far more predictive — the user has already done the thing a demo would have tried to convince them to do.",
+          "Ils répondent à des questions différentes et peuvent coexister. Un MQL dit que quelqu'un s'est intéressé à la catégorie ; un PQL dit que quelqu'un a tiré de la valeur de ton produit. Si tu as un palier gratuit ou un essai, le second t'est accessible et prédit bien mieux — l'utilisateur a déjà fait ce qu'une démo aurait essayé de le convaincre de faire.",
+        ),
+      },
+      {
+        question: t("How do I choose the threshold?", "Comment choisir le seuil ?"),
+        answer: t(
+          "Backwards, from your converted users. List what they did early that non-converters did not, then compute lift and list size for each candidate. Three or four candidates is usually enough to find one that is both predictive and workable, and the exercise takes an afternoon with a database.",
+          "À l'envers, en partant de tes clients convertis. Liste ce qu'ils ont fait tôt et que les non-convertis n'ont pas fait, puis calcule le lift et la taille de liste pour chaque candidat. Trois ou quatre candidats suffisent en général pour en trouver un à la fois prédictif et travaillable, et l'exercice prend un après-midi avec une base de données.",
+        ),
+      },
+      {
+        question: t("Do I need a sales team to use PQLs?", "Faut-il une équipe commerciale pour utiliser les PQL ?"),
+        answer: t(
+          "No. The threshold can trigger an in-app offer, an email, or a change in what the product shows — all of which scale without anyone picking up a phone. A sales team lets you use a smaller, higher-lift threshold, but the mechanism works without one.",
+          "Non. Le seuil peut déclencher une offre dans l'app, un e-mail, ou un changement dans ce que le produit affiche — autant de choses qui passent à l'échelle sans que personne décroche un téléphone. Une équipe commerciale permet d'utiliser un seuil plus rare et à plus fort lift, mais le mécanisme fonctionne sans elle.",
+        ),
+      },
+      {
+        question: t("How many PQLs should we have?", "Combien de PQL faut-il avoir ?"),
+        answer: t(
+          "As many as whoever acts on them can actually handle, which is a capacity question rather than a marketing one. Set the threshold so the weekly list matches the follow-up you can genuinely do; a threshold producing three times that capacity is producing a backlog and a false sense of pipeline.",
+          "Autant que ce que peut réellement traiter la personne qui agit dessus, ce qui est une question de capacité et non de marketing. Règle le seuil pour que la liste hebdomadaire corresponde au suivi que tu peux honnêtement assurer ; un seuil qui produit le triple de cette capacité produit un arriéré et une fausse impression de pipeline.",
         ),
       },
     ],
