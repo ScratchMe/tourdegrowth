@@ -47,6 +47,15 @@ describe("client bundles (REVIEW-02.md R2-14)", () => {
     expect(offenders).toEqual([]);
   });
 
+  it("no Client Component imports lib/og — server-only: node:crypto, the dictionary, and the share-image token", () => {
+    // The share image's versioned address is minted on the server and handed
+    // to `ResultView` as a prop (`lib/og/share-image.ts`, 2026-09-14). A
+    // client import would drag the dictionary in transitively, which the
+    // direct-import check above cannot see.
+    const offenders = CLIENT.filter((f) => /from ["']@\/lib\/og\//.test(f.source)).map((f) => f.path);
+    expect(offenders).toEqual([]);
+  });
+
   it("nothing under components/ imports the server-side glossary", () => {
     const offenders = FILES.filter(
       (f) => f.path.startsWith("components/") && /from ["']@\/content\/glossary(-deep)?["']/.test(f.source),

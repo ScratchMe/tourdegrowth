@@ -73,19 +73,15 @@ export function ShareCard({
           and would put a second render pass in front of it. */}
       {/* And lazy. Until extension 03 this PNG was fetched only by social
           crawlers; putting it on the page made it one request per view of the
-          screen the whole sharing loop leads to — measured at 72 972 bytes
-          and ~150ms of Satori render, with `max-age=0, must-revalidate` and
-          no ETag, so nothing to revalidate against and every request a full
-          re-render. On a phone the block sits ~1700px down, so most readers
-          never reach it and now never pay for it.
+          screen the whole sharing loop leads to. On a phone the block sits
+          ~1700px down, so most readers never reach it and never pay for it.
 
-          A CDN `s-maxage` was tried and reverted: `max-age=0,
-          must-revalidate` sends the browser back to the shared cache, which
-          answers from `s-maxage` — so the owner who has just finished a Deep
-          dive would keep seeing the old badge, and this route is not ISR, so
-          `revalidateTag` cannot purge it. Doing it properly means a version
-          token in the image URL, which also means overriding the metadata
-          route Next generates. Not worth it until the render cost is real. */}
+          Since 2026-09-14 the address carries a version token and the CDN
+          caches it as immutable (`lib/og/share-image.ts`): a repeat view
+          costs the origin nothing, and an owner who has just finished a Deep
+          dive still sees the new badge, because the address changed with it.
+          (A plain `s-maxage` on the old address had been tried and reverted
+          for exactly that staleness.) */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img className={styles.image} src={src} alt={alt} width={1200} height={630} loading="lazy" />
       <div className={styles.actions}>

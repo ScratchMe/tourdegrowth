@@ -53,8 +53,8 @@ export interface QuickVerdicts {
  * twelve short strings instead of shipping the whole copy library to the
  * browser.
  *
- * Note the deliberate asymmetry with the OG image, which still uses the
- * submission's OWN locale (`opengraph-image.tsx`): a social crawler doesn't
+ * Note the deliberate asymmetry with the share image, which still uses the
+ * submission's OWN locale (`lib/og/share-image.ts`): a social crawler doesn't
  * send the sharer's cookies, so there is no viewer locale to speak of there.
  */
 export function buildQuickVerdicts(

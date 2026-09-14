@@ -132,7 +132,9 @@ test.describe("the share block", () => {
     await expect(card).toBeVisible();
 
     const img = card.locator("img");
-    await expect(img).toHaveAttribute("src", "/r/sample/opengraph-image");
+    // A versioned address (`lib/og/share-image.ts`): the CDN caches it as
+    // immutable, and it changes exactly when the picture would.
+    await expect(img).toHaveAttribute("src", /^\/r\/sample\/share\/[a-f0-9]{12}\.png$/);
     // An alt that repeated the caption would tell a screen-reader user
     // nothing about THIS result.
     await expect(img).toHaveAttribute("alt", /74\/100/);

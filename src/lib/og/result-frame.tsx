@@ -1,7 +1,6 @@
 import { ImageResponse } from "next/og";
-import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
-import type { Locale } from "@/lib/i18n/locale";
-import { loadOgFonts } from "@/lib/og/fonts";
+import type { OgFonts } from "@/lib/og/fonts";
+import type { ShareImageModel, ShareImageStrings } from "@/lib/og/share-image";
 import {
   OG_INK as INK,
   OG_INK_SOFT as INK_SOFT,
@@ -11,101 +10,26 @@ import {
   OG_SIZE,
   OG_STONE as STONE,
 } from "@/lib/og/tokens";
-import type { Pillar } from "@/lib/scoring/pillars";
-import { getCachedSubmissionById } from "@/lib/submissions/cached-repository";
-import { isValidSubmissionId } from "@/lib/submissions/referral";
-import { getSampleNextMove, SAMPLE_RESULT } from "@/lib/submissions/sample";
-import { primaryBottleneck, resolveBottleneck } from "@/lib/scoring/bottleneck";
-import { stallSentence } from "@/lib/submissions/stall-sentence";
-import { resolveNextMove } from "@/lib/scoring/next-move";
-import { SITE_DOMAIN_LABEL } from "@/lib/site";
 
 // DESIGN-BRIEF.md §03 — "highest care". Exact 1200x630 frame, Stardos
 // Stencil embedded (never a system fallback — the stencil numeral IS the
 // image). Fonts and colour tokens live in `src/lib/og/` since the landing
 // page got a share image of its own: one copy, two images.
+//
+// This used to be `src/app/(app)/r/[id]/opengraph-image.tsx`. It moved here,
+// unchanged in what it draws, the day the address got a version token
+// (`share-image.ts`): the file convention owns an uncacheable URL, a route
+// handler can serve a cacheable one. `src/lib/og/fonts.test.ts` lists every
+// string this frame draws — adding text here means adding it there.
 
-export const size = OG_SIZE;
-export const contentType = "image/png";
-export const alt = "Tour de Growth — AARRR growth check-up result";
-
-interface OgData {
-  total: number;
-  /** The stage the action belongs to, and its score. Null when nothing is behind — see `lib/scoring/bottleneck.ts`. */
-  bottleneck: { pillar: Pillar; score: number } | null;
-  /**
-   * The action, from `content/next-moves.ts` — NEVER the Deep dive's
-   * `priorityAction`, even when one exists.
-   *
-   * Two reasons. The library caps at 144 characters, which is exactly what
-   * this card is sized for (five lines at Inter 600 28px in ~490px); a
-   * Gemini sentence has no cap and would overflow or force the type down.
-   * And a link preview is the one surface that must render identically for
-   * everyone who sees it — deterministic beats personalised here.
-   */
-  nextMove: string;
-  locale: Locale;
-  roast: boolean;
-  /** SPEC-ADDENDUM-01.md §2.6 — swaps the checkup badge's text, no other gabarit change. */
-  deepDive: boolean;
-}
-
-/** Shared by both branches so the sample cannot drift from the real path. */
-function bottleneckOf(pillars: { pillar: Pillar; score: number }[]) {
-  const view = resolveBottleneck(pillars);
-  const pillar = primaryBottleneck(view);
-  return pillar ? { pillar, score: view.pillars[0]!.score } : null;
-}
-
-async function loadOgData(id: string): Promise<OgData | null> {
-  if (id === "sample") {
-    return {
-      total: SAMPLE_RESULT.total,
-      bottleneck: bottleneckOf(SAMPLE_RESULT.pillars),
-      nextMove: getSampleNextMove("en"),
-      locale: "en",
-      roast: false,
-      deepDive: false, // SPEC.md §12: the sample is never enriched
-    };
-  }
-
-  // REVIEW-02.md R2-19: an id that cannot be ours is a 404 before it is a read.
-  if (!isValidSubmissionId(id)) return null;
-
-  const submission = await getCachedSubmissionById(id);
-  // REVIEW.md R-14: a dead link used to render a real-looking "0/100" frame,
-  // so a mistyped or deleted result previewed as a genuine, terrible score.
-  // `null` here becomes a 404 below — no image is better than a false one.
-  if (!submission) return null;
-
-  return {
-    total: submission.total,
-    bottleneck: bottleneckOf(submission.pillars),
-    // The AUTHOR's locale, like everything else in this image: a social
-    // crawler doesn't send the sharer's cookies, so there is no reader to
-    // localise for (the asymmetry R-09 documented).
-    nextMove: resolveNextMove(
-      submission.locale,
-      submission.pillars,
-      submission.weakestPillar,
-      submission.answers,
-    ),
-    locale: submission.locale,
-    roast: submission.tone === "roast",
-    deepDive: submission.deepDive !== null,
-  };
-}
-
-export default async function OgImage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const [data, fonts] = await Promise.all([loadOgData(id), loadOgFonts()]);
-  if (!data) return new Response(null, { status: 404 });
-  const { total, bottleneck, nextMove, locale, roast, deepDive } = data;
+export function renderResultShareImage(
+  model: ShareImageModel,
+  strings: ShareImageStrings,
+  fonts: OgFonts,
+  headers: Record<string, string>,
+): ImageResponse {
+  const { total, roast, nextMove } = model;
   const accent = roast ? RED : INK;
-
-  // No stage is behind, so the hook cannot name one — the same honesty rule
-  // the Bottleneck block applies on the page itself.
-  const bottomSentence = stallSentence(locale, bottleneck?.pillar ?? null);
 
   return new ImageResponse(
     (
@@ -158,7 +82,7 @@ export default async function OgImage({ params }: { params: Promise<{ id: string
                 padding: "8px 16px",
               }}
             >
-              {tc(UI_STRINGS.og.roastBadge, locale)}
+              {strings.badge}
             </div>
           ) : (
             <div
@@ -176,7 +100,7 @@ export default async function OgImage({ params }: { params: Promise<{ id: string
                 padding: "8px 16px",
               }}
             >
-              {tc(deepDive ? UI_STRINGS.og.checkupBadgeDeepDive : UI_STRINGS.og.checkupBadge, locale)}
+              {strings.badge}
             </div>
           )}
         </div>
@@ -196,7 +120,7 @@ export default async function OgImage({ params }: { params: Promise<{ id: string
                 marginBottom: 8,
               }}
             >
-              {tc(UI_STRINGS.og.scoreLabel, locale)}
+              {strings.scoreLabel}
             </div>
             {/* 12px of air: the stencil digits sit taller than the 0.85 line box
                 and were touching the label above once the font actually loaded. */}
@@ -245,12 +169,8 @@ export default async function OgImage({ params }: { params: Promise<{ id: string
                 color: RED_INK,
               }}
             >
-              <span>{tc(UI_STRINGS.result.nextMoveLabel, locale)}</span>
-              {bottleneck ? (
-                <span style={{ color: INK_SOFT }}>
-                  {tc(UI_STRINGS.pillars[bottleneck.pillar], locale).toUpperCase()} · {bottleneck.score}/20
-                </span>
-              ) : null}
+              <span>{strings.nextMoveLabel}</span>
+              {strings.bottleneckLabel ? <span style={{ color: INK_SOFT }}>{strings.bottleneckLabel}</span> : null}
             </div>
             <div
               style={{
@@ -271,8 +191,8 @@ export default async function OgImage({ params }: { params: Promise<{ id: string
         {/* bottom row */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
           <div style={{ display: "flex", flexDirection: "column", fontFamily: "Inter", fontWeight: 600, fontSize: 30, maxWidth: 640, lineHeight: 1.25 }}>
-            <span style={{ color: INK }}>{bottomSentence}</span>
-            <span style={{ color: INK_SOFT }}>{tc(UI_STRINGS.og.whereDoesYours, locale)}</span>
+            <span style={{ color: INK }}>{strings.stall}</span>
+            <span style={{ color: INK_SOFT }}>{strings.whereDoesYours}</span>
           </div>
           <div
             style={{
@@ -287,11 +207,11 @@ export default async function OgImage({ params }: { params: Promise<{ id: string
               whiteSpace: "nowrap",
             }}
           >
-            {SITE_DOMAIN_LABEL}
+            {strings.domain}
           </div>
         </div>
       </div>
     ),
-    { ...size, fonts },
+    { ...OG_SIZE, fonts, headers },
   );
 }

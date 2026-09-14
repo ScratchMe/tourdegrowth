@@ -11,6 +11,7 @@ import { stallSentence } from "@/lib/submissions/stall-sentence";
 import { buildQuickVerdicts, toDeepDiveView, toPillarViews } from "@/lib/submissions/view-model";
 import { primaryBottleneck, resolveBottleneck } from "@/lib/scoring/bottleneck";
 import { resolveNextMove } from "@/lib/scoring/next-move";
+import { sampleShareImageModel, SHARE_IMAGE_ALT, shareImageModel, shareImageSrc } from "@/lib/og/share-image";
 import { QUESTIONS } from "@/content/copy-library";
 import type { BreakdownData } from "./ScoreBreakdown";
 import type { Locale } from "@/lib/i18n/locale";
@@ -50,14 +51,19 @@ function rejectImplausibleId(id: string): void {
  * work, and the text beside it was wasted.
  *
  * Resolved in the SUBMISSION's locale, not the reader's — deliberately the
- * same rule as the OG image (see `opengraph-image.tsx`): a social crawler
- * sends no cookies, so there is no reader locale to honour here. The `title`
- * is kept language-neutral ("74/100 — Tour de Growth") so it reads correctly
- * as a browser tab title in either language.
+ * same rule as the share image (see `lib/og/share-image.ts`): a social
+ * crawler sends no cookies, so there is no reader locale to honour here. The
+ * `title` is kept language-neutral ("74/100 — Tour de Growth") so it reads
+ * correctly as a browser tab title in either language.
+ *
+ * `imageUrl` is the share image's versioned address. Declared here, config
+ * style, rather than by the `opengraph-image.tsx` file convention: the
+ * convention always wins over these fields and serves an uncacheable URL —
+ * the whole point of the token (2026-09-14).
  */
-function resultMetadata(total: number, stalling: Pillar | null, locale: Locale, isSample: boolean): Metadata {
+function resultMetadata(total: number, stalling: Pillar | null, locale: Locale, isSample: boolean, imageUrl: string): Metadata {
   // `stalling` is null when no stage is behind — the same call the share
-  // image makes (`opengraph-image.tsx`, lot 3). The two sit side by side in
+  // image makes (`lib/og/share-image.ts`, lot 3). The two sit side by side in
   // a link preview, so a description naming a stall next to an image saying
   // nothing is stalling would contradict itself in the one place the product
   // gets a first impression.
@@ -70,8 +76,8 @@ function resultMetadata(total: number, stalling: Pillar | null, locale: Locale, 
   return {
     title,
     description,
-    openGraph: { title, description, locale },
-    twitter: { card: "summary_large_image", title, description },
+    openGraph: { title, description, locale, images: [{ url: imageUrl, width: 1200, height: 630, alt: SHARE_IMAGE_ALT }] },
+    twitter: { card: "summary_large_image", title, description, images: [imageUrl] },
     // SPEC-ADDENDUM-02.md §3.3, non-negotiable: individual result pages
     // (this whole route, sample included — see CLAUDE.md) never get
     // indexed. A `noindex` meta tag, not a robots.txt disallow: shared
@@ -89,9 +95,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   rejectImplausibleId(id);
 
   if (id === "sample") {
-    // The sample's OG image is fixed to English (see opengraph-image.tsx), so
-    // its preview text matches rather than contradicting the picture.
-    return resultMetadata(SAMPLE_RESULT.total, primaryBottleneck(resolveBottleneck(SAMPLE_RESULT.pillars)), "en", true);
+    // The sample's share image is fixed to English (`sampleShareImageModel`),
+    // so its preview text matches rather than contradicting the picture.
+    return resultMetadata(
+      SAMPLE_RESULT.total,
+      primaryBottleneck(resolveBottleneck(SAMPLE_RESULT.pillars)),
+      "en",
+      true,
+      shareImageSrc("sample", sampleShareImageModel()),
+    );
   }
 
   // A read that FAILS (as opposed to one that finds nothing) must not throw
@@ -113,6 +125,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     primaryBottleneck(resolveBottleneck(toPillarViews(submission.pillars))),
     submission.locale,
     false,
+    shareImageSrc(submission.id, shareImageModel(submission)),
   );
 }
 
@@ -159,6 +172,7 @@ export default async function ResultPage({ params }: PageProps) {
         verdicts={getSampleVerdicts(locale)}
         bottleneck={resolveBottleneck(SAMPLE_RESULT.pillars)}
         nextMove={getSampleNextMove(locale)}
+        shareImageSrc={shareImageSrc("sample", sampleShareImageModel())}
         initialTone="neutral"
         isSample
       />
@@ -210,6 +224,9 @@ export default async function ResultPage({ params }: PageProps) {
       // they have nothing on their device to derive it from.
       bottleneck={resolveBottleneck(pillars)}
       nextMove={resolveNextMove(locale, pillars, submission.weakestPillar, submission.answers)}
+      // Minted here, on the server, so the CDN can cache the picture as
+      // immutable (`lib/og/share-image.ts`); the view only displays it.
+      shareImageSrc={shareImageSrc(submission.id, shareImageModel(submission))}
       initialTone={submission.tone}
       breakdown={buildBreakdownData(locale)}
       // REVIEW.md R-02: only the generated verdicts cross to the client.

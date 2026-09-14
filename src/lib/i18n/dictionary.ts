@@ -516,7 +516,7 @@ export const UI_STRINGS = {
     },
   },
 
-  /** OG share image only (DESIGN-BRIEF.md §03) — rendered by Satori (src/app/r/[id]/opengraph-image.tsx), a separate pipeline from the rest of the UI. */
+  /** OG share image only (DESIGN-BRIEF.md §03) — rendered by Satori (`lib/og/result-frame.tsx`), a separate pipeline from the rest of the UI. */
   /**
    * `<title>`, description and Open Graph text of the indexable content pages
    * (landing, How it works, glossary). Until now every page carried the root

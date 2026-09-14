@@ -40,7 +40,7 @@ const FONT_FILES = {
   mono600: new URL("./fonts/ibm-plex-mono-600.ttf", import.meta.url),
 };
 
-type OgFonts = Awaited<ReturnType<typeof readOgFonts>>;
+export type OgFonts = Awaited<ReturnType<typeof readOgFonts>>;
 let fontsPromise: Promise<OgFonts> | null = null;
 
 /**
