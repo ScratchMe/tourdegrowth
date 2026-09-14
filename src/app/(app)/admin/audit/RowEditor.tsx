@@ -1,0 +1,225 @@
+"use client";
+
+import { useState } from "react";
+import { Button } from "@/components/core/Button";
+import { Card } from "@/components/core/Card";
+import { Disclosure } from "@/components/core/Disclosure";
+import { MetaLabel } from "@/components/brand/MetaLabel";
+import { TextArea } from "@/components/core/TextArea";
+import type { AuditCatalogRow } from "@/content/audit-catalog";
+import { entryFieldGroups, selectableStatuses } from "@/lib/audit/entry-fields";
+import {
+  ABSENT_CAUSES,
+  DEFAULT_ABSENT_CAUSE,
+  REPAIR_SCALES,
+  SYSTEM_CAUSES,
+  VALUE_STATUSES,
+  normalizeEntry,
+  type AbsentCause,
+  type Entry,
+  type RepairScale,
+  type SystemCause,
+  type ValueStatus,
+} from "@/lib/audit/schema";
+import { Field } from "./_ui/Field";
+import { Select } from "./_ui/Select";
+import {
+  ABSENT_CAUSE_LABELS,
+  REPAIR_SCALE_LABELS,
+  SYSTEM_CAUSE_LABELS,
+  VALUE_STATUS_HINTS,
+  VALUE_STATUS_LABELS,
+  optionsFrom,
+} from "./labels";
+import styles from "./page.module.css";
+
+/**
+ * L'éditeur d'une ligne, en deux colonnes : à gauche la fiche du catalogue
+ * (ce que la ligne mesure, son piège, où la trouver, ce que son absence dit),
+ * à droite la saisie.
+ *
+ * **La fiche est à gauche parce qu'elle est la raison d'être de l'outil.**
+ * Un questionnaire de 25 lignes sans contexte se remplit au jugé ; ce sont
+ * le piège et la décision en jeu qui font qu'une ligne est renseignée
+ * correctement plutôt que vite.
+ *
+ * **Les champs visibles dérivent du statut** via `entryFieldGroups`, une
+ * fonction pure testée contre le validateur : un champ montré au mauvais
+ * statut laisserait saisir une donnée que l'export refuserait ensuite.
+ *
+ * Étape 1.3a : statut, absence (cause, coût de réparation, cause système) et
+ * accès. Les définitions versionnées, la série d'observations, le critère,
+ * la décision en jeu, l'exposition et le pilotage arrivent à l'étape 1.3b —
+ * l'écran le dit plutôt que de faire croire que la ligne est complète.
+ */
+export function RowEditor({
+  row,
+  entry,
+  onChange,
+  onClose,
+}: {
+  row: AuditCatalogRow;
+  entry: Entry | undefined;
+  onChange: (entry: Entry) => void;
+  onClose: () => void;
+}) {
+  // `undefined` tant que l'auditeur ne s'est pas prononcé : un statut n'est
+  // jamais défauté, et une ligne pas encore examinée compte comme « en
+  // attente », pas comme absente (cf. `coverage.ts`).
+  const [draft, setDraft] = useState<Entry | undefined>(entry);
+  const groups = draft ? entryFieldGroups(draft.status) : [];
+
+  function setStatus(status: ValueStatus) {
+    const base: Entry = draft ?? { metricId: row.id, status, observations: [] };
+    // `normalizeEntry` pose la cause par défaut en passant à `absent` et la
+    // retire en en sortant — sinon une cause d'absence survivrait à un
+    // changement de statut et partirait telle quelle dans le fichier.
+    setDraft(normalizeEntry({ ...base, status }));
+  }
+
+  function patch(next: Partial<Entry>) {
+    if (!draft) return;
+    setDraft({ ...draft, ...next });
+  }
+
+  return (
+    <section className={styles.screen}>
+      <div className={styles.screenHead}>
+        <div>
+          <MetaLabel size="xs" wide>
+            {row.id} · {row.tier} · {row.pillar}
+          </MetaLabel>
+          <h2 className={styles.h2}>{row.name}</h2>
+        </div>
+        <Button compact variant="secondary" onClick={onClose} data-testid="close-row">
+          Retour à la collecte
+        </Button>
+      </div>
+
+      <div className={styles.rowEditor}>
+        <Card elevation="panel" className={styles.catalogCard} data-testid="catalog-card">
+          <MetaLabel size="xs" wide>
+            La fiche
+          </MetaLabel>
+          <p>{row.definition}</p>
+          {row.trap ? <FicheBlock label="Le piège" text={row.trap} /> : null}
+          {row.where ? <FicheBlock label="Où le trouver" text={row.where} /> : null}
+          {row.decision ? <FicheBlock label="La décision en jeu" text={row.decision} /> : null}
+          {row.absence ? <FicheBlock label="Ce que son absence dit" text={row.absence} /> : null}
+          {row.why ? <FicheBlock label="Pourquoi cette ligne pour ce profil" text={row.why} /> : null}
+          <p className={styles.muted}>Coût de collecte : {row.cost}</p>
+        </Card>
+
+        <Card elevation="panel" className={styles.form} data-testid="entry-form">
+          <Field
+            label="Statut"
+            htmlFor="status"
+            hint={draft ? VALUE_STATUS_HINTS[draft.status] : "Rien n'est présélectionné : une ligne pas encore examinée est « en attente », jamais absente."}
+          >
+            <Select
+              id="status"
+              value={draft?.status ?? ("" as ValueStatus)}
+              options={[
+                ...(draft ? [] : [{ id: "" as ValueStatus, label: "— pas encore examinée —" }]),
+                ...optionsFrom(selectableStatuses(VALUE_STATUSES), VALUE_STATUS_LABELS),
+              ]}
+              onChange={(status) => {
+                if (status) setStatus(status);
+              }}
+            />
+          </Field>
+
+          {groups.includes("absence") ? (
+            <div className={styles.fieldGroup} data-testid="absence-fields">
+              <Field label="Cause de l'absence" htmlFor="absentCause" hint="Le défaut est « pas encore établi » — on ne devine jamais un type d'absence qu'on n'a pas vérifié.">
+                <Select
+                  id="absentCause"
+                  value={draft?.absentCause ?? DEFAULT_ABSENT_CAUSE}
+                  options={optionsFrom(ABSENT_CAUSES, ABSENT_CAUSE_LABELS)}
+                  onChange={(absentCause: AbsentCause) => patch({ absentCause })}
+                />
+              </Field>
+
+              <Field
+                label="Coût de réparation"
+                htmlFor="repairScale"
+                hint="Requis. Une échelle fermée, jamais un nombre d'heures : le catalogue porte un palier, pas une estimation."
+              >
+                <Select
+                  id="repairScale"
+                  value={draft?.repairCost?.scale ?? "sprint"}
+                  options={optionsFrom(REPAIR_SCALES, REPAIR_SCALE_LABELS)}
+                  onChange={(scale: RepairScale) => patch({ repairCost: { ...draft?.repairCost, scale } })}
+                />
+              </Field>
+
+              {/*
+                `TextArea`'s `label` is an ACCESSIBLE NAME only — it renders
+                nothing on screen, by design (R-19: the visible heading lives
+                in a QuestionCard above it on the quiz). Here there is no such
+                heading, so without a `Field` wrapper the operator gets an
+                unexplained box. Found on a screenshot, not in review.
+              */}
+              <Field label="Ce que réparer veut dire concrètement" htmlFor="repairComment" hint="Facultatif, et la partie la plus utile en entretien : « quoi », pas « combien de temps ».">
+                <TextArea
+                  id="repairComment"
+                  label="Ce que réparer veut dire concrètement"
+                  value={draft?.repairCost?.comment ?? ""}
+                  onChange={(comment) =>
+                    patch({ repairCost: { scale: draft?.repairCost?.scale ?? "sprint", ...(comment ? { comment } : {}) } })
+                  }
+                  maxLength={400}
+                />
+              </Field>
+
+              <Field label="Cause système" htmlFor="systemCause" hint="Liste fermée, aucun champ libre : un livrable ne nomme jamais une personne.">
+                <Select
+                  id="systemCause"
+                  value={draft?.systemCause ?? "no-owner"}
+                  options={optionsFrom(SYSTEM_CAUSES, SYSTEM_CAUSE_LABELS)}
+                  onChange={(systemCause: SystemCause) => patch({ systemCause })}
+                />
+              </Field>
+            </div>
+          ) : null}
+
+          {groups.includes("value") ? (
+            <Disclosure summary="Définition et observations" data-testid="value-fields">
+              <p className={styles.muted}>
+                La définition versionnée et la série d&apos;observations arrivent à l&apos;étape 1.3b. Tant qu&apos;elles manquent, l&apos;export
+                signalera cette ligne comme incomplète — c&apos;est voulu : mieux vaut un fichier qui dit ce qui reste à faire qu&apos;un
+                fichier qui a l&apos;air fini.
+              </p>
+            </Disclosure>
+          ) : null}
+
+          {groups.includes("access") ? (
+            <p className={styles.muted} data-testid="access-fields">
+              Le niveau de mandat qui débloquerait cette ligne se saisit à l&apos;étape 1.3b. Une ligne non accessible est un fait sur mon
+              accès, jamais sur eux.
+            </p>
+          ) : null}
+
+          <Button
+            onClick={() => {
+              if (draft) onChange(draft);
+            }}
+            data-testid="save-row"
+            {...(draft ? {} : { disabled: true })}
+          >
+            Enregistrer cette ligne
+          </Button>
+        </Card>
+      </div>
+    </section>
+  );
+}
+
+function FicheBlock({ label, text }: { label: string; text: string }) {
+  return (
+    <div className={styles.ficheBlock}>
+      <MetaLabel size="xs">{label}</MetaLabel>
+      <p>{text}</p>
+    </div>
+  );
+}

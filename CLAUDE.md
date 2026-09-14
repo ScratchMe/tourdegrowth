@@ -2844,6 +2844,73 @@ Playwright** (+10), passe axe verte sur les trois écrans. Le téléchargement
 est un vrai téléchargement de navigateur (`URL.createObjectURL` +
 `<a download>`), relu depuis le disque et repassé au validateur dans le test.
 
+### Instrument d'audit, étape 1.3a : le triage des 25 lignes (2026-09-14)
+
+Le cœur de la phase 1, coupé en deux comme le plan l'autorisait — mais **la
+coupe est décalée d'un cran par rapport à ce qu'il proposait**, et pour une
+raison mécanique : le plan mettait les vues en 1.3b, or sans vue l'éditeur
+n'a aucun point d'entrée. 1.3a livre donc la **liste des lignes** et
+l'éditeur limité au **statut, à l'absence et à l'accès** ; 1.3b prend les
+définitions versionnées, la série d'observations, le critère, la décision en
+jeu, l'exposition, la gouvernance, les dates de pilotage et la vue
+restitution. Ce que ça rend possible dès maintenant : trier les 25 lignes de
+bout en bout et marquer les absences — le cas modal en entreprise financée,
+et la moitié du travail d'une première passe.
+
+**Triées par palier décroissant, pas par pilier.** Une ligne T4 demande un
+mandat et une T3 une file d'analyste : elles doivent partir le premier jour.
+Trier par thème mettrait le travail le plus long en bas de page. La spec
+l'affirme comme un **ordre réel sur les 25 lignes** et non sur la première et
+la dernière, que deux lignes chanceuses satisferaient.
+
+**Rien n'est présélectionné.** Le sélecteur de statut s'ouvre sur « pas
+encore examinée » et le bouton d'enregistrement est désactivé tant que rien
+n'est choisi : une ligne que personne n'a regardée est **en attente**, jamais
+absente — c'est ce qui empêche la couverture de devenir une opinion.
+`not-applicable` n'est jamais proposé : il vient du catalogue via
+`newPass`, et le validateur le refuse sur une ligne applicable, donc l'offrir
+reviendrait à proposer une erreur.
+
+**`lib/audit/entry-fields.ts` — les champs dérivent du statut, et c'est
+testé contre le validateur.** Un champ montré au mauvais statut laisse saisir
+une donnée que l'export refusera, et le seul endroit où ça se voit est un
+message d'erreur des semaines plus tard. La fonction est pure et ses tests
+exercent la règle du validateur plutôt que de la répéter.
+
+**Le test de non-vacuité a trouvé un trou dans mon propre test unitaire.** En
+faisant fuir les champs d'absence dans les statuts « mesuré », **le test
+unitaire est passé** et seule la spec e2e a vu la régression : mes assertions
+utilisaient `toContain`, qui dit ce qui doit être là et rien de ce qui ne
+doit pas y être — or c'est cette moitié-là qui compte. Remplacé par le
+**jeu exact par statut** ; sabotage refait, le test unitaire tombe cette fois.
+Troisième occurrence de la règle « un contrôle de non-vacuité qui passe est
+lui-même un signal ».
+
+**Un défaut vu à l'écran et invisible à la relecture** : le champ de
+commentaire du coût de réparation n'avait **aucun libellé visible**. Le
+`label` de `core/TextArea` est un nom **accessible** seulement, jamais rendu
+— c'est sa conception (R-19 : l'intitulé visible vit dans une `QuestionCard`
+au-dessus, sur le quiz). Ici il n'y a pas de `QuestionCard`, donc l'opérateur
+voyait une boîte sans explication. Enveloppé dans un `Field`. Leçon nº1 de ce
+fichier, encore.
+
+**Signalé plutôt que corrigé** : trois lignes du catalogue citent des chemins
+de fichiers de ce dépôt dans leur texte de piège (`glossary-deep.ts`,
+`growth-stats.ts:30-42`). C'est de la provenance utile pour Antoine, qui a
+relu ces fichiers — mais une plage de lignes se périme. C'est de la copie du
+catalogue, donc la sienne à trancher au bon à tirer nº4, pas la mienne à
+réécrire.
+
+**Décision d'écran à connaître** : quelle mission est ouverte n'est **pas
+persisté**. Un rechargement revient à la liste, et rouvrir coûte un clic —
+même arbitrage que le ton et le segment. Ce qui est persisté, c'est la
+saisie, et une spec le prouve en rechargeant sans rien effacer.
+
+**Vérifié en réel** : `tsc`, `eslint`, **579 tests unitaires** (+7),
+couverture au-dessus des seuils, `next build`, **203 specs Playwright** (+7,
+dont la passe axe sur les deux nouveaux écrans). Captures relues en 1280 et
+390 px, `scrollWidth === clientWidth` aux deux largeurs.
+
 ## État du projet au 2026-09-14 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -2866,7 +2933,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **L'instrument d'audit growth a son schéma** (2026-09-13, `AUDIT.md`) : un outil personnel pour les diagnostics qu'Antoine mène en entreprise, navigateur seulement, jamais Firestore — `src/lib/audit/` + `src/content/audit-catalog.ts`, sans aucune route ni UI encore. Phase 1 (la saisie sous `/admin/audit`) est le prochain chantier, découpée en six PR dans **`AUDIT-PLAN.md`** (2026-09-13) ; phase 3 (tout ce qui ressemble à un produit) reste fermée tant que les entretiens ne sont pas faits et le contrat de travail pas vérifié.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **572 tests unitaires**, **196 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
+**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **579 tests unitaires**, **203 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 
@@ -2886,7 +2953,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Les e2e de composition ne passent que par la branche échantillon | `/r/sample` utilise `getSampleNextMove` et `SAMPLE_RESULT.pillars`, pas le vrai chemin. La garde statique est donc seule à protéger le payload | Un id de fixture derrière une variable d'environnement fermée par défaut. À décider : c'est une porte de test sur la route publique la plus sensible. |
 | Flake `locale-routing.spec.ts:75` | Deux échecs le 2026-09-10 et un le 2026-09-14, toujours en suite complète parallèle, jamais isolée ni à la reprise | La prochaine occurrence en CI laisse une trace (`retries: 1` + `trace: on-first-retry`, rapport téléversé). Ne pas durcir la spec en attendant le cookie : ça masquerait une éventuelle course produit. |
 | TypeScript 7 et ESLint 10 | Tous deux bloqués par des paquets embarqués dans `eslint-config-next` (`typescript-eslint` refuse TS ≥ 6.1 ; `eslint-plugin-react` plante sur ESLint 10). Dependabot les ignore en majeure depuis le 2026-09-08 | Quand `eslint-config-next` suivra. Re-tester en installant, pas en lisant les plages de peer : c'est l'essai qui a montré qu'ESLint 10 plante. |
-| Instrument d'audit : phase 1 (saisie) | Feu vert d'Antoine sur `AUDIT-PLAN.md` le 2026-09-14. **1.1 et 1.2 livrées** — `/admin/audit` crée, exporte, réimporte et purge une mission ; la saisie des lignes est 1.3 | Rien : la suite s'enchaîne dans l'ordre des dépendances, 1.3 (éditeur de ligne, la plus grosse) est la prochaine. |
+| Instrument d'audit : phase 1 (saisie) | Feu vert d'Antoine sur `AUDIT-PLAN.md` le 2026-09-14. **1.1, 1.2 et 1.3a livrées** — `/admin/audit` crée une mission, la trie ligne par ligne, marque les absences, exporte et réimporte. Reste 1.3b (définitions, observations, critère, pilotage, vue restitution) puis 1.4 à 1.6 | Rien : la suite s'enchaîne dans l'ordre des dépendances. |
 | Catalogue de l'instrument d'audit à relire | 39 lignes de texte qui s'imprimeront dans les livrables d'Antoine, sous son nom | Un bon à tirer, même circuit que les précédents. |
 | Vercel Functions Storage | **Réglé** : la politique de rétention posée par Antoine le 2026-09-14 l'a fait passer de 9,24 Go à 397 Mo, et un déploiement pèse 45,5 Mo de fonctions depuis le 2026-09-13 | Rien. |
 | Vercel Fluid Active CPU (36 min / 4 h par mois) | Les deux postes qui dominaient le coût par visite sont corrigés le 2026-09-14 : six préchargements dynamiques par vue de la homepage, et l'image de partage rendue à chaque vue de résultat — confirmé en production, `MISS` puis `HIT` sur l'adresse versionnée. La région des fonctions est passée à `cdg1` le même jour (vérifié : `x-vercel-id: iad1::cdg1::…`) | Relire le compteur dans Vercel une semaine après. |

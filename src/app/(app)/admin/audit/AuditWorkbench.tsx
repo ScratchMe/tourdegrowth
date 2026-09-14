@@ -5,11 +5,13 @@ import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { fileNameFor, parseMissionFile, serializeMission } from "@/lib/audit/io";
 import { purgeMission } from "@/lib/audit/purge";
-import { newMission, newPass, type EmbeddedCatalog, type Mission } from "@/lib/audit/schema";
+import { catalogRow, newMission, newPass, type EmbeddedCatalog, type Entry, type Mission, type Pass } from "@/lib/audit/schema";
 import { deleteMission, loadDraftMeta, loadMissions, markExported, saveMission, type DraftMeta, type SaveResult } from "@/lib/audit/storage";
 import { ImportPanel, type PendingImport } from "./ImportPanel";
 import { MissionBar } from "./MissionBar";
 import { MissionList } from "./MissionList";
+import { RowEditor } from "./RowEditor";
+import { RowList } from "./RowList";
 import { NewMissionForm } from "./NewMissionForm";
 import styles from "./page.module.css";
 import { TextInput } from "./_ui/TextInput";
@@ -36,7 +38,8 @@ type View =
   | { kind: "new" }
   | { kind: "mission"; id: string }
   | { kind: "import"; pending: PendingImport }
-  | { kind: "purge"; id: string };
+  | { kind: "purge"; id: string }
+  | { kind: "row"; id: string; metricId: string };
 
 export function AuditWorkbench({ catalog, today }: { catalog: EmbeddedCatalog; today: string }) {
   const [missions, setMissions] = useState<Mission[]>([]);
@@ -98,7 +101,26 @@ export function AuditWorkbench({ catalog, today }: { catalog: EmbeddedCatalog; t
     else setMeta(loadDraftMeta());
   }
 
-  const current = view.kind === "mission" || view.kind === "purge" ? missions.find((m) => m.id === view.id) : undefined;
+  const current =
+    view.kind === "mission" || view.kind === "purge" || view.kind === "row" ? missions.find((m) => m.id === view.id) : undefined;
+  const currentPass = current?.passes[current.passes.length - 1];
+
+  /**
+   * Écrit une entrée dans la DERNIÈRE passe, en remplaçant celle de même
+   * `metricId` s'il y en a une. Une mission est une série de passes
+   * (AUDIT.md §3) : saisir modifie toujours la passe en cours, jamais une
+   * passe close — l'écran de seconde passe est en phase 2.
+   */
+  function saveEntry(mission: Mission, entry: Entry): boolean {
+    const last = mission.passes[mission.passes.length - 1];
+    if (!last) return false;
+    const entries = last.entries.some((e) => e.metricId === entry.metricId)
+      ? last.entries.map((e) => (e.metricId === entry.metricId ? entry : e))
+      : [...last.entries, entry];
+    const nextPass: Pass = { ...last, entries };
+    const next: Mission = { ...mission, passes: [...mission.passes.slice(0, -1), nextPass] };
+    return persist(next, missions.map((m) => (m.id === next.id ? next : m)));
+  }
 
   // Avant montage, rien : le HTML du serveur et le premier rendu client sont
   // identiques, et la liste apparaît juste après (motif de `/quiz`).
@@ -168,7 +190,7 @@ export function AuditWorkbench({ catalog, today }: { catalog: EmbeddedCatalog; t
         <>
           <MissionBar
             mission={current}
-            pass={current.passes[current.passes.length - 1]}
+            pass={currentPass}
             meta={meta.find((m) => m.missionId === current.id)}
             onExport={() => exportMission(current)}
             // Non destructif : la mission de travail reste intacte. C'est ce
@@ -176,16 +198,32 @@ export function AuditWorkbench({ catalog, today }: { catalog: EmbeddedCatalog; t
             onExportPurged={() => download(purgeMission(current))}
             onClose={() => setView({ kind: "list" })}
           />
+          {currentPass ? (
+            <RowList mission={current} pass={currentPass} onOpenRow={(metricId) => setView({ kind: "row", id: current.id, metricId })} />
+          ) : null}
           <Card elevation="panel" className={styles.placeholder}>
-            <p>La saisie des lignes arrive à l&apos;étape 1.3.</p>
-            <p className={styles.muted}>
-              Cette mission est déjà complète comme fichier : elle s&apos;exporte, se réimporte et se purge dès maintenant.
-            </p>
             <Button compact variant="secondary" onClick={() => setView({ kind: "purge", id: current.id })} data-testid="open-purge">
               Purger et retirer de cet appareil
             </Button>
           </Card>
         </>
+      ) : null}
+
+      {view.kind === "row" && current && currentPass ? (
+        (() => {
+          const row = catalogRow(current.catalog, view.metricId);
+          if (!row) return null;
+          return (
+            <RowEditor
+              row={row}
+              entry={currentPass.entries.find((e) => e.metricId === view.metricId)}
+              onChange={(entry) => {
+                if (saveEntry(current, entry)) setView({ kind: "mission", id: current.id });
+              }}
+              onClose={() => setView({ kind: "mission", id: current.id })}
+            />
+          );
+        })()
       ) : null}
 
       {view.kind === "purge" && current ? (

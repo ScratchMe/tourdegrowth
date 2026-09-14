@@ -244,3 +244,80 @@
     align-items: stretch;
   }
 }
+
+/* --- La vue collecte et l'éditeur de ligne (étape 1.3a) --- */
+
+.rowList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.rowItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-7);
+  flex-wrap: wrap;
+  padding: var(--space-6) var(--space-7);
+}
+
+.rowMain {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.rowName {
+  font: var(--body-md);
+  margin: 0;
+}
+
+.rowStatus {
+  font: var(--meta-sm);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* The catalog card sits LEFT because it is the reason the tool exists: a
+   25-row form with no context gets filled in from memory. Below 960px the
+   two columns stack, fiche first — reading before typing. */
+.rowEditor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-8);
+  align-items: start;
+}
+
+.catalogCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-8);
+  font: var(--body-md);
+}
+
+.catalogCard p {
+  margin: 0;
+}
+
+.ficheBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+@media (max-width: 960px) {
+  .rowEditor {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
