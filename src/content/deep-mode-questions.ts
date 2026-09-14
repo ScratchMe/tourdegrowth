@@ -46,8 +46,8 @@ export const DEEP_MODE_QUESTIONS: readonly DeepModeQuestion[] = [
     options: [
       { contextLabel: { fr: "Moins de 10", en: "Fewer than 10" } },
       { contextLabel: { fr: "10 à 100", en: "10–100" } },
-      { contextLabel: { fr: "100 à 1 000", en: "100–1,000" } },
-      { contextLabel: { fr: "Plus de 1 000", en: "1,000+" } },
+      { contextLabel: { fr: "100 à 1 000", en: "100–1,000" } },
+      { contextLabel: { fr: "Plus de 1 000", en: "1,000+" } },
     ],
   },
 

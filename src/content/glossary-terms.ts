@@ -44,7 +44,13 @@ export type GlossaryTermId =
   // lot 1 described what it earns.
   | "dau-mau"
   | "time-to-value"
-  | "pql";
+  | "pql"
+  // wave 2.2, lot 3 — closes the batch. ARPU replaces "expansion revenue"
+  // (upsell-cross-sell already owns it) and NPS replaces "growth loop vs
+  // funnel" (which belongs to the 2.3 comparison cluster).
+  | "product-led-growth"
+  | "arpu"
+  | "nps";
 
 function same(value: string): Translatable {
   return { fr: value, en: value };
@@ -208,6 +214,27 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
     definition: {
       fr: "Un utilisateur qui a franchi un seuil d'usage choisi parce qu'il prédit l'achat — qualifié par ce qu'il fait, pas par ce qu'il a téléchargé.",
       en: "A user who has crossed a usage threshold chosen because it predicts buying — qualified by what they do, not by what they downloaded.",
+    },
+  },
+  "product-led-growth": {
+    term: { fr: "Product-led growth — croissance portée par le produit", en: "Product-led growth" },
+    definition: {
+      fr: "Un modèle où le produit lui-même fait l'acquisition et la conversion. Le test honnête : quelle part de tes clients paie sans avoir parlé à personne ?",
+      en: "A model where the product itself does the acquiring and the converting. The honest test: what share of your customers pay without talking to anyone?",
+    },
+  },
+  arpu: {
+    term: { fr: "ARPU — revenu moyen par utilisateur", en: "ARPU — average revenue per user" },
+    definition: {
+      fr: "Le revenu d'une période divisé par les utilisateurs actifs. À ne pas confondre avec l'ARPPU, par utilisateur payant, qui peut être vingt fois plus élevé.",
+      en: "Revenue over a period divided by active users. Not to be confused with ARPPU, per paying user, which can be twenty times higher.",
+    },
+  },
+  nps: {
+    term: { fr: "NPS — Net Promoter Score", en: "NPS — Net Promoter Score" },
+    definition: {
+      fr: "Le pourcentage de promoteurs moins celui de détracteurs, sur une question en 0-10. Mesure une intention déclarée, jamais un parrainage réellement fait.",
+      en: "The percentage of promoters minus the percentage of detractors, on a 0-10 question. It measures stated intent, never a referral actually made.",
     },
   },
 };

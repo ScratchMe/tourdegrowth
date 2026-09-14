@@ -63,6 +63,136 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
   // month — 400 customers, €20,000 MRR, 12 cancellations, 8 downgrades, 15
   // upgrades — is the same one `churn`, `revenue` and `upsell-cross-sell`
   // already walk through, read here as a pair of retention rates.
+  nps: {
+    formula: {
+      expression: t(
+        "NPS = (% of promoters, who answered 9-10) − (% of detractors, who answered 0-6). Passives, at 7-8, count for nothing",
+        "NPS = (% de promoteurs, qui ont répondu 9-10) − (% de détracteurs, qui ont répondu 0-6). Les passifs, à 7-8, comptent pour rien",
+      ),
+      terms: [
+        {
+          symbol: t("The question", "La question"),
+          meaning: t(
+            "\"How likely are you to recommend us, from 0 to 10?\" — one question, always the same wording, always at the same moment in the lifecycle. Change any of the three and the series before and after are not comparable.",
+            "« Quelle est la probabilité que tu nous recommandes, de 0 à 10 ? » — une question, toujours la même formulation, toujours au même moment du cycle de vie. Change l'un des trois et les séries avant et après ne sont plus comparables.",
+          ),
+        },
+        {
+          symbol: t("The buckets", "Les paniers"),
+          meaning: t(
+            "Three groups from eleven answers, which throws away most of the information on purpose. A 7 and a 0 are both \"not a promoter\", and only one of them is a person about to leave.",
+            "Trois groupes à partir de onze réponses, ce qui jette volontairement l'essentiel de l'information. Un 7 et un 0 sont tous deux « pas un promoteur », et un seul des deux est une personne sur le point de partir.",
+          ),
+        },
+        {
+          symbol: t("The response rate", "Le taux de réponse"),
+          meaning: t(
+            "The number that has to be published beside the score and almost never is. A score computed on 10% of your users describes the 10% who felt strongly enough to answer.",
+            "Le chiffre qui doit être publié à côté du score et qui ne l'est presque jamais. Un score calculé sur 10 % de tes utilisateurs décrit les 10 % qui avaient assez d'avis pour répondre.",
+          ),
+        },
+      ],
+      note: t(
+        "This is a measure of stated intent, not of referrals made. Someone can answer 10 and never refer a single person; the viral coefficient counts what actually happened. Treating this score as a referral metric is the most common way it gets misused.",
+        "C'est une mesure d'intention déclarée, pas de parrainages réalisés. Quelqu'un peut répondre 10 et ne jamais recommander une seule personne ; le coefficient viral, lui, compte ce qui s'est réellement passé. Prendre ce score pour une métrique de parrainage est la façon la plus courante de le détourner.",
+      ),
+    },
+    example: {
+      title: t("The same score, two opposite companies", "Le même score, deux entreprises opposées"),
+      steps: [
+        t(
+          "Company A: 45% promoters, 35% passives, 20% detractors. NPS = 45 − 20 = +25.",
+          "Entreprise A : 45 % de promoteurs, 35 % de passifs, 20 % de détracteurs. NPS = 45 − 20 = +25.",
+        ),
+        t(
+          "Company B: 30% promoters, 65% passives, 5% detractors. NPS = 30 − 5 = +25. Identical score, and nothing else about them is.",
+          "Entreprise B : 30 % de promoteurs, 65 % de passifs, 5 % de détracteurs. NPS = 30 − 5 = +25. Score identique, et rien d'autre chez elles ne l'est.",
+        ),
+        t(
+          "A has real enthusiasm and a real problem: a fifth of respondents are unhappy enough to say so, and they are worth interviewing this week. B has neither — two thirds of people are indifferent, which is a harder situation and produces no complaint to act on.",
+          "A a un enthousiasme réel et un problème réel : un cinquième des répondants sont assez mécontents pour le dire, et ils valent un entretien cette semaine. B n'a ni l'un ni l'autre — deux tiers des gens sont indifférents, ce qui est une situation plus difficile et ne produit aucune plainte sur laquelle agir.",
+        ),
+        t(
+          "And the trap underneath both: 200 answers out of 2,000 users surveyed is a 10% response rate, and the 1,800 who ignored it are not neutral — disengaged users answer surveys least. The score describes the people still paying attention.",
+          "Et le piège sous les deux : 200 réponses pour 2 000 utilisateurs sollicités, c'est 10 % de taux de réponse, et les 1 800 qui l'ont ignoré ne sont pas neutres — ce sont les utilisateurs désengagés qui répondent le moins aux enquêtes. Le score décrit les gens qui font encore attention.",
+        ),
+      ],
+      takeaway: t(
+        "The score is a summary of a distribution you already have, and the distribution is where the decisions are. Keep the three percentages and the response rate next to the number, and it becomes useful; publish the number alone and it becomes a target to optimise.",
+        "Le score est le résumé d'une distribution que tu as déjà, et c'est dans la distribution que sont les décisions. Garde les trois pourcentages et le taux de réponse à côté du chiffre, et il devient utile ; publie le chiffre seul et il devient une cible à optimiser.",
+      ),
+    },
+    benchmark: [
+      t(
+        "Industry tables of \"good NPS\" are widely quoted and worth very little, because the score depends heavily on how and when you ask. Two companies surveying at different lifecycle moments are comparing survey designs as much as products.",
+        "Les tableaux sectoriels de « bon NPS » sont très cités et valent peu de chose, parce que le score dépend fortement de la façon et du moment où l'on demande. Deux entreprises qui interrogent à des moments différents du cycle de vie comparent autant des méthodes d'enquête que des produits.",
+      ),
+      t(
+        "The defensible use is your own trend, with the question, the timing and the channel all held constant. Change any one of them and you have started a new series, whatever the chart says.",
+        "L'usage défendable est ta propre tendance, à question, moment et canal constants. Change l'un des trois et tu as commencé une nouvelle série, quoi qu'en dise le graphique.",
+      ),
+      t(
+        "A response rate under about 10% makes the score mostly a measure of who answers. That is not a reason to drop the survey — it is a reason to publish the rate, so the number is read with the weight it deserves.",
+        "Un taux de réponse sous les 10 % environ fait du score surtout une mesure de qui répond. Ce n'est pas une raison d'abandonner l'enquête — c'est une raison de publier le taux, pour que le chiffre soit lu avec le poids qu'il mérite.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Publish the response rate and the three percentages next to the score, every time. This is the cheapest change on the list and it prevents the two failure modes above at once.",
+        "Publie le taux de réponse et les trois pourcentages à côté du score, à chaque fois. C'est le changement le moins cher de cette liste et il évite les deux modes d'échec ci-dessus d'un coup.",
+      ),
+      t(
+        "Read the free-text answers and treat the score as the index, not the finding. The sentence a detractor wrote is worth more than the fact that they were one.",
+        "Lis les réponses libres et traite le score comme l'index, pas comme la trouvaille. La phrase qu'a écrite un détracteur vaut plus que le fait qu'il en était un.",
+      ),
+      t(
+        "Ask at a consistent moment in the lifecycle — thirty days after activation, say — rather than to everyone at once. A campaign sent to your whole base mixes people who signed up yesterday with people who have used the product for three years.",
+        "Interroge à un moment constant du cycle de vie — trente jours après l'activation, par exemple — plutôt que tout le monde d'un coup. Une campagne envoyée à toute la base mélange des gens inscrits hier et des gens qui utilisent le produit depuis trois ans.",
+      ),
+      t(
+        "Do not use it as a referral metric. If what you want to know is whether people recommend you, count the referrals: the viral coefficient measures the act, this measures the intention, and the gap between the two is often the whole story.",
+        "Ne l'utilise pas comme métrique de parrainage. Si ce que tu veux savoir est si les gens te recommandent, compte les parrainages : le coefficient viral mesure l'acte, celui-ci mesure l'intention, et l'écart entre les deux est souvent toute l'histoire.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "ref-2",
+      body: t(
+        "The Tour asks whether your sharing or referral mechanism is actually used by customers — 20 points for yes and measured, 7 for a little, 0 for not really. That question and this score are not the same thing, and the difference is the point: a high NPS says people would recommend you, while this asks whether they did. A team quoting a strong score and answering 0 here has measured an intention and never built the path for it to become an act, which is a fixable problem and a very common one.",
+        "Le Tour demande si ton mécanisme de partage ou de parrainage est réellement utilisé par les clients — 20 points pour oui et mesuré, 7 pour un peu, 0 pour pas vraiment. Cette question et ce score ne sont pas la même chose, et la différence est tout l'intérêt : un NPS élevé dit que les gens te recommanderaient, celle-ci demande s'ils l'ont fait. Une équipe qui cite un bon score et répond 0 ici a mesuré une intention sans jamais construire le chemin pour qu'elle devienne un acte, ce qui est un problème réparable et très courant.",
+      ),
+    },
+    faq: [
+      {
+        question: t("What is a good NPS?", "C'est quoi un bon NPS ?"),
+        answer: t(
+          "The question has no answer that survives leaving your own survey, because the score moves with the wording, the timing and the channel far more than most people expect. The version worth asking is whether this quarter beats the last one with all three held constant — and whether the detractors are saying the same thing they said then.",
+          "La question n'a pas de réponse qui survive à la sortie de ta propre enquête, parce que le score bouge avec la formulation, le moment et le canal bien plus que la plupart des gens ne l'imaginent. La version qui vaut la peine d'être posée est : ce trimestre bat-il le précédent, les trois étant constants — et les détracteurs disent-ils la même chose qu'alors ?",
+        ),
+      },
+      {
+        question: t("Does NPS predict referrals?", "Le NPS prédit-il les parrainages ?"),
+        answer: t(
+          "Weakly, and it is worth saying plainly. It measures whether someone says they would recommend you, which is a different act from recommending you — the second needs an occasion, a mechanism and a reason, and a product can score well and provide none of the three. Measure the referrals themselves if that is the question.",
+          "Faiblement, et ça mérite d'être dit clairement. Il mesure si quelqu'un dit qu'il te recommanderait, ce qui est un acte différent de te recommander — le second demande une occasion, un mécanisme et une raison, et un produit peut bien scorer sans fournir aucun des trois. Mesure les parrainages eux-mêmes si c'est la question.",
+        ),
+      },
+      {
+        question: t("NPS or CSAT?", "NPS ou CSAT ?"),
+        answer: t(
+          "CSAT asks about one interaction that just happened and is the better tool for judging a support reply or a feature. NPS asks about the relationship as a whole and is the better tool for a trend across quarters. They are not competitors, and running both is common — the mistake is using either to judge what the other was built for.",
+          "Le CSAT porte sur une interaction qui vient d'avoir lieu et convient mieux pour juger une réponse du support ou une fonctionnalité. Le NPS porte sur la relation dans son ensemble et convient mieux pour une tendance d'un trimestre à l'autre. Ce ne sont pas des concurrents, et faire les deux est courant — l'erreur est d'utiliser l'un pour juger ce pour quoi l'autre a été construit.",
+        ),
+      },
+      {
+        question: t("How often should I ask?", "À quelle fréquence faut-il demander ?"),
+        answer: t(
+          "Rarely enough that answering does not become a chore — twice a year for the same person is plenty, and a rolling survey to a different slice each month gives a continuous series without asking anyone twice. Asking quarterly at scale mostly trains your users to dismiss the dialog.",
+          "Assez rarement pour que répondre ne devienne pas une corvée — deux fois par an pour la même personne suffit largement, et une enquête tournante sur une tranche différente chaque mois donne une série continue sans solliciter personne deux fois. Demander chaque trimestre à tout le monde entraîne surtout tes utilisateurs à fermer la fenêtre.",
+        ),
+      },
+    ],
+  },
+
   "activation-rate": {
     formula: {
       expression: t(
@@ -88,7 +218,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
           symbol: t("Window", "Fenêtre"),
           meaning: t(
             "A cohort of sign-ups, followed for a fixed number of days. \"30% activate\" means nothing without \"within how long\": the same product reads 25% at 24 hours and 40% at 14 days.",
-            "Une cohorte d'inscrits, suivie sur un nombre de jours fixe. « 30 % activent » ne veut rien dire sans « en combien de temps » : le même produit affiche 25 % à 24 heures et 40 % à 14 jours.",
+            "Une cohorte d'inscrits, suivie sur un nombre de jours fixe. « 30 % activent » ne veut rien dire sans « en combien de temps » : le même produit affiche 25 % à 24 heures et 40 % à 14 jours.",
           ),
         },
       ],
@@ -102,24 +232,24 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       steps: [
         t(
           "1,000 sign-ups in September. Activation is defined as \"created a first project AND invited a teammate\" within 14 days.",
-          "1 000 inscriptions en septembre. L'activation est définie comme « a créé un premier projet ET invité un coéquipier » sous 14 jours.",
+          "1 000 inscriptions en septembre. L'activation est définie comme « a créé un premier projet ET invité un coéquipier » sous 14 jours.",
         ),
         t(
           "640 create a project (64%). Of those 640, 310 also invite someone (48%). Activation rate = 310 ÷ 1,000 = 31%.",
-          "640 créent un projet (64 %). Sur ces 640, 310 invitent aussi quelqu'un (48 %). Taux d'activation = 310 ÷ 1 000 = 31 %.",
+          "640 créent un projet (64 %). Sur ces 640, 310 invitent aussi quelqu'un (48 %). Taux d'activation = 310 ÷ 1 000 = 31 %.",
         ),
         t(
           "Had activation been defined as \"created a project\" alone, the same month would read 64%. Same product, same users, double the number.",
-          "Si l'activation avait été définie comme « a créé un projet » seulement, le même mois afficherait 64 %. Même produit, mêmes utilisateurs, chiffre doublé.",
+          "Si l'activation avait été définie comme « a créé un projet » seulement, le même mois afficherait 64 %. Même produit, mêmes utilisateurs, chiffre doublé.",
         ),
         t(
           "The 48% is where the work is. Moving the invite prompt inside project creation — instead of leaving it in a settings page — takes it to 400 of 640. Activation rate: 400 ÷ 1,000 = 40%, nine points, without a single extra sign-up.",
-          "Les 48 % sont l'endroit où il y a du travail. Déplacer l'invitation dans la création de projet — au lieu de la laisser dans une page de réglages — la fait passer à 400 sur 640. Taux d'activation : 400 ÷ 1 000 = 40 %, neuf points, sans une inscription de plus.",
+          "Les 48 % sont l'endroit où il y a du travail. Déplacer l'invitation dans la création de projet — au lieu de la laisser dans une page de réglages — la fait passer à 400 sur 640. Taux d'activation : 400 ÷ 1 000 = 40 %, neuf points, sans une inscription de plus.",
         ),
       ],
       takeaway: t(
         "Breaking the rate into its steps is what made it actionable. \"31% activate\" is a number; \"64% create a project and only half of them invite anyone\" is a thing to go fix on Monday.",
-        "Décomposer le taux en étapes est ce qui l'a rendu actionnable. « 31 % activent » est un chiffre ; « 64 % créent un projet et seule la moitié invite quelqu'un » est quelque chose à aller réparer lundi.",
+        "Décomposer le taux en étapes est ce qui l'a rendu actionnable. « 31 % activent » est un chiffre ; « 64 % créent un projet et seule la moitié invite quelqu'un » est quelque chose à aller réparer lundi.",
       ),
     },
     benchmark: [
@@ -129,7 +259,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       ),
       t(
         "The figure commonly quoted for self-serve SaaS, 20-40%, is only useful as a sanity check on your own definition: above it, the event is probably too shallow to predict anything; far below it, the event may be several actions bundled into one.",
-        "Le chiffre couramment cité pour un SaaS en self-serve, 20-40 %, ne sert qu'à vérifier ta propre définition : au-dessus, l'événement est probablement trop superficiel pour prédire quoi que ce soit ; très en dessous, il regroupe peut-être plusieurs actions en une.",
+        "Le chiffre couramment cité pour un SaaS en self-serve, 20-40 %, ne sert qu'à vérifier ta propre définition : au-dessus, l'événement est probablement trop superficiel pour prédire quoi que ce soit ; très en dessous, il regroupe peut-être plusieurs actions en une.",
       ),
       t(
         "The comparison that does mean something is your own previous cohort, with the definition unchanged. That is also the only comparison a number this definition-dependent can honestly support.",
@@ -236,13 +366,13 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       steps: [
         t(
           "Ads and sponsorships: €18,000. Marketing tools and freelancers: €6,000. Two people on sales and marketing, fully loaded: €36,000. Total: €60,000.",
-          "Publicité et sponsoring : 18 000 €. Outils marketing et freelances : 6 000 €. Deux personnes ventes et marketing, charges comprises : 36 000 €. Total : 60 000 €.",
+          "Publicité et sponsoring : 18 000 €. Outils marketing et freelances : 6 000 €. Deux personnes ventes et marketing, charges comprises : 36 000 €. Total : 60 000 €.",
         ),
         t("New paying customers over the quarter: 120.", "Nouveaux clients payants sur le trimestre : 120."),
-        t("CAC = 60,000 ÷ 120 = €500 per customer.", "CAC = 60 000 ÷ 120 = 500 € par client."),
+        t("CAC = 60,000 ÷ 120 = €500 per customer.", "CAC = 60 000 ÷ 120 = 500 € par client."),
         t(
           "Counting ads alone would have given 18,000 ÷ 120 = €150 — a third of the real number. That gap is the most common CAC mistake.",
-          "Ne compter que la pub aurait donné 18 000 ÷ 120 = 150 € — le tiers du vrai chiffre. Cet écart est l'erreur de CAC la plus fréquente.",
+          "Ne compter que la pub aurait donné 18 000 ÷ 120 = 150 € — le tiers du vrai chiffre. Cet écart est l'erreur de CAC la plus fréquente.",
         ),
       ],
       takeaway: t(
@@ -294,7 +424,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         question: t("Is CAC the same as CPA?", "Le CAC, c'est la même chose que le CPA ?"),
         answer: t(
           "No. CPA (cost per acquisition) usually measures the cost of one action inside a channel — a lead, a sign-up, an install — and is reported by the ad platform. CAC measures the cost of one paying customer, across everything you spent. A €10 CPA on sign-ups with a 5% free-to-paid conversion is a €200 CAC before you add a single salary.",
-          "Non. Le CPA (coût par acquisition) mesure en général le coût d'une action dans un canal — un lead, une inscription, une installation — et c'est la plateforme publicitaire qui le rapporte. Le CAC mesure le coût d'un client payant, sur tout ce que tu as dépensé. Un CPA de 10 € à l'inscription avec 5 % de passage au payant, c'est un CAC de 200 € avant d'ajouter le moindre salaire.",
+          "Non. Le CPA (coût par acquisition) mesure en général le coût d'une action dans un canal — un lead, une inscription, une installation — et c'est la plateforme publicitaire qui le rapporte. Le CAC mesure le coût d'un client payant, sur tout ce que tu as dépensé. Un CPA de 10 € à l'inscription avec 5 % de passage au payant, c'est un CAC de 200 € avant d'ajouter le moindre salaire.",
         ),
       },
       {
@@ -335,7 +465,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
           symbol: t("Gross margin", "Marge brute"),
           meaning: t(
             "What is left of the customer's payment after the direct cost of serving them: hosting, payment fees, support, any usage-based cost. Typically 70-85% in SaaS, much lower in anything with human delivery.",
-            "Ce qu'il reste du paiement du client après le coût direct de sa livraison : hébergement, frais de paiement, support, tout coût lié à l'usage. En général 70-85 % en SaaS, bien moins dès qu'il y a de l'humain dans la livraison.",
+            "Ce qu'il reste du paiement du client après le coût direct de sa livraison : hébergement, frais de paiement, support, tout coût lié à l'usage. En général 70-85 % en SaaS, bien moins dès qu'il y a de l'humain dans la livraison.",
           ),
         },
         {
@@ -356,11 +486,11 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       steps: [
         t(
           "CAC of €500 — the figure the CAC page arrives at: €60,000 of quarterly spend for 120 new customers.",
-          "CAC de 500 € — le chiffre auquel arrive la page CAC : 60 000 € de dépenses trimestrielles pour 120 nouveaux clients.",
+          "CAC de 500 € — le chiffre auquel arrive la page CAC : 60 000 € de dépenses trimestrielles pour 120 nouveaux clients.",
         ),
         t(
           "The customer pays €50 a month at 80% gross margin, so €40 a month actually comes back. Payback = 500 ÷ 40 = 12.5 months.",
-          "Le client paie 50 € par mois à 80 % de marge brute, donc 40 € par mois reviennent réellement. Payback = 500 ÷ 40 = 12,5 mois.",
+          "Le client paie 50 € par mois à 80 % de marge brute, donc 40 € par mois reviennent réellement. Payback = 500 ÷ 40 = 12,5 mois.",
         ),
         t(
           "Computed on revenue instead of margin: 500 ÷ 50 = 10 months. Two and a half months of difference, entirely produced by which number you divide by.",
@@ -368,7 +498,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         ),
         t(
           "At 3% monthly churn the average customer stays about 33 months (1 ÷ 0.03). So after payback there are roughly 20 months of margin left: 20 × €40 = €820 of profit per customer, and an LTV:CAC of about 2.6:1 — under the 3:1 most investors quote.",
-          "À 3 % de churn mensuel, un client reste environ 33 mois (1 ÷ 0,03). Il reste donc à peu près 20 mois de marge après le remboursement : 20 × 40 € = 820 € de profit par client, et un LTV:CAC d'environ 2,6:1 — sous le 3:1 que citent la plupart des investisseurs.",
+          "À 3 % de churn mensuel, un client reste environ 33 mois (1 ÷ 0,03). Il reste donc à peu près 20 mois de marge après le remboursement : 20 × 40 € = 820 € de profit par client, et un LTV:CAC d'environ 2,6:1 — sous le 3:1 que citent la plupart des investisseurs.",
         ),
       ],
       takeaway: t(
@@ -465,7 +595,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
           symbol: t("Gross margin", "Marge brute"),
           meaning: t(
             "The share of that revenue left after the direct cost of serving the customer — hosting, support, payment fees. Skipping it overstates LTV: a 20% margin business and an 80% margin business are not worth the same per customer.",
-            "La part de ce revenu qui reste après le coût direct de service du client — hébergement, support, frais de paiement. L'ignorer surestime la LTV : une activité à 20 % de marge et une à 80 % ne valent pas la même chose par client.",
+            "La part de ce revenu qui reste après le coût direct de service du client — hébergement, support, frais de paiement. L'ignorer surestime la LTV : une activité à 20 % de marge et une à 80 % ne valent pas la même chose par client.",
           ),
         },
         {
@@ -486,15 +616,15 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       steps: [
         t(
           "Customers pay €50 a month on average; gross margin is 80%, so each month is worth €40.",
-          "Les clients paient 50 € par mois en moyenne ; la marge brute est de 80 %, donc chaque mois vaut 40 €.",
+          "Les clients paient 50 € par mois en moyenne ; la marge brute est de 80 %, donc chaque mois vaut 40 €.",
         ),
         t(
           "With 5% monthly churn, expected lifetime is 1 ÷ 0.05 = 20 months. LTV = 40 × 20 = €800.",
-          "Avec 5 % de churn mensuel, la durée de vie attendue est 1 ÷ 0,05 = 20 mois. LTV = 40 × 20 = 800 €.",
+          "Avec 5 % de churn mensuel, la durée de vie attendue est 1 ÷ 0,05 = 20 mois. LTV = 40 × 20 = 800 €.",
         ),
         t(
           "With 2% monthly churn, lifetime becomes 50 months. LTV = 40 × 50 = €2,000.",
-          "Avec 2 % de churn mensuel, la durée de vie passe à 50 mois. LTV = 40 × 50 = 2 000 €.",
+          "Avec 2 % de churn mensuel, la durée de vie passe à 50 mois. LTV = 40 × 50 = 2 000 €.",
         ),
         t(
           "Against the €500 CAC from the CAC example: 1.6:1 in the first case, 4:1 in the second. Same product, same price, same acquisition — retention alone decides whether the business works.",
@@ -503,7 +633,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       ],
       takeaway: t(
         "Note what the 2% case implies: 50 months is more than four years. Most practitioners cap lifetime at three to five years, because a model that pays you back in year six is a model you cannot verify yet.",
-        "Regarde ce qu'implique le cas à 2 % : 50 mois, c'est plus de quatre ans. La plupart des praticiens plafonnent la durée de vie à trois à cinq ans, parce qu'un modèle qui te rembourse la sixième année est un modèle que tu ne peux pas encore vérifier.",
+        "Regarde ce qu'implique le cas à 2 % : 50 mois, c'est plus de quatre ans. La plupart des praticiens plafonnent la durée de vie à trois à cinq ans, parce qu'un modèle qui te rembourse la sixième année est un modèle que tu ne peux pas encore vérifier.",
       ),
     },
     benchmark: [
@@ -584,7 +714,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
           symbol: t("Starting MRR", "MRR de départ"),
           meaning: t(
             "What the customers you already had at the start of the period were paying. New customers won during the period are excluded from both formulas — including them is the single most common way an NRR gets quoted at 140%.",
-            "Ce que payaient les clients déjà présents au début de la période. Les nouveaux clients gagnés pendant la période sont exclus des deux formules — les inclure est de loin la façon la plus fréquente d'annoncer une NRR à 140 %.",
+            "Ce que payaient les clients déjà présents au début de la période. Les nouveaux clients gagnés pendant la période sont exclus des deux formules — les inclure est de loin la façon la plus fréquente d'annoncer une NRR à 140 %.",
           ),
         },
         {
@@ -604,7 +734,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       ],
       note: t(
         "GRR can never exceed 100% — it only subtracts. NRR can, and that is why it is the number quoted in fundraising decks. Reading them as a pair is the point: GRR is the state of the bucket, NRR is the bucket plus the tap.",
-        "La GRR ne peut jamais dépasser 100 % — elle ne fait que soustraire. La NRR le peut, et c'est pour ça qu'elle est le chiffre cité en levée de fonds. Les lire en couple est tout l'intérêt : la GRR est l'état du seau, la NRR le seau plus le robinet.",
+        "La GRR ne peut jamais dépasser 100 % — elle ne fait que soustraire. La NRR le peut, et c'est pour ça qu'elle est le chiffre cité en levée de fonds. Les lire en couple est tout l'intérêt : la GRR est l'état du seau, la NRR le seau plus le robinet.",
       ),
     },
     example: {
@@ -612,34 +742,34 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       steps: [
         t(
           "Start of month: 400 customers, €20,000 MRR — the same month the churn and revenue pages walk through. During it: 12 cancel (−€600), 8 downgrade (−€400), 15 upgrade (+€900).",
-          "Début de mois : 400 clients, 20 000 € de MRR — le même mois que celui des pages churn et revenu. Pendant le mois : 12 résilient (−600 €), 8 rétrogradent (−400 €), 15 montent en gamme (+900 €).",
+          "Début de mois : 400 clients, 20 000 € de MRR — le même mois que celui des pages churn et revenu. Pendant le mois : 12 résilient (−600 €), 8 rétrogradent (−400 €), 15 montent en gamme (+900 €).",
         ),
         t(
           "GRR = (20,000 − 400 − 600) ÷ 20,000 = 95%. Five points of the base leaked, and nothing in this figure can ever offset that.",
-          "GRR = (20 000 − 400 − 600) ÷ 20 000 = 95 %. Cinq points de la base ont fui, et rien dans ce chiffre ne peut compenser ça.",
+          "GRR = (20 000 − 400 − 600) ÷ 20 000 = 95 %. Cinq points de la base ont fui, et rien dans ce chiffre ne peut compenser ça.",
         ),
         t(
           "NRR = (20,000 + 900 − 400 − 600) ÷ 20,000 = 99.5%. Expansion closed four and a half of those five points.",
-          "NRR = (20 000 + 900 − 400 − 600) ÷ 20 000 = 99,5 %. L'expansion a refermé quatre points et demi sur les cinq.",
+          "NRR = (20 000 + 900 − 400 − 600) ÷ 20 000 = 99,5 %. L'expansion a refermé quatre points et demi sur les cinq.",
         ),
         t(
           "The upsell playbook on the expansion page takes that month's expansion from €900 to €1,080. NRR becomes (20,000 + 1,080 − 400 − 600) ÷ 20,000 = 100.4% — above the line at last. GRR is still 95%: not one customer was saved.",
-          "Le playbook d'expansion de la page upsell fait passer l'expansion de ce mois de 900 € à 1 080 €. La NRR devient (20 000 + 1 080 − 400 − 600) ÷ 20 000 = 100,4 % — au-dessus de la barre, enfin. La GRR est toujours de 95 % : pas un client n'a été sauvé.",
+          "Le playbook d'expansion de la page upsell fait passer l'expansion de ce mois de 900 € à 1 080 €. La NRR devient (20 000 + 1 080 − 400 − 600) ÷ 20 000 = 100,4 % — au-dessus de la barre, enfin. La GRR est toujours de 95 % : pas un client n'a été sauvé.",
         ),
       ],
       takeaway: t(
         "That last line is why the two are quoted together. An NRR just over 100% looks like a business whose base grows on its own; the GRR next to it says the base is still leaking 5% a month and a handful of growing accounts is paying for the ones walking out. Both statements are true, and only one of them is in the deck.",
-        "Cette dernière ligne est la raison pour laquelle on cite les deux ensemble. Une NRR juste au-dessus de 100 % ressemble à une base qui grandit toute seule ; la GRR à côté dit que la base fuit toujours de 5 % par mois et qu'une poignée de comptes en croissance paie pour ceux qui s'en vont. Les deux affirmations sont vraies, et une seule est dans le deck.",
+        "Cette dernière ligne est la raison pour laquelle on cite les deux ensemble. Une NRR juste au-dessus de 100 % ressemble à une base qui grandit toute seule ; la GRR à côté dit que la base fuit toujours de 5 % par mois et qu'une poignée de comptes en croissance paie pour ceux qui s'en vont. Les deux affirmations sont vraies, et une seule est dans le deck.",
       ),
     },
     benchmark: [
       t(
         "The figures most often quoted for B2B SaaS: NRR of 110-130% is considered strong, and above 120% is the enterprise territory where seat growth inside big accounts does the work. Under 100% is normal and perfectly healthy in self-serve and SMB, where there is structurally less room to expand.",
-        "Les chiffres les plus souvent cités en SaaS B2B : une NRR de 110-130 % est considérée comme solide, et au-dessus de 120 % on est sur le terrain de l'entreprise, où la croissance en sièges dans les gros comptes fait le travail. Sous 100 %, c'est normal et parfaitement sain en self-serve et en PME, où il y a structurellement moins de place pour l'expansion.",
+        "Les chiffres les plus souvent cités en SaaS B2B : une NRR de 110-130 % est considérée comme solide, et au-dessus de 120 % on est sur le terrain de l'entreprise, où la croissance en sièges dans les gros comptes fait le travail. Sous 100 %, c'est normal et parfaitement sain en self-serve et en PME, où il y a structurellement moins de place pour l'expansion.",
       ),
       t(
         "GRR is commonly quoted at 85-95% annually in B2B, and the number matters more than NRR for judging the product itself: nothing a sales team does can raise GRR, only the product and the service can.",
-        "La GRR est couramment citée à 85-95 % par an en B2B, et ce chiffre compte davantage que la NRR pour juger le produit lui-même : rien de ce que fait une équipe commerciale ne peut monter la GRR, seuls le produit et le service le peuvent.",
+        "La GRR est couramment citée à 85-95 % par an en B2B, et ce chiffre compte davantage que la NRR pour juger le produit lui-même : rien de ce que fait une équipe commerciale ne peut monter la GRR, seuls le produit et le service le peuvent.",
       ),
       t(
         "A pricing model with nowhere to grow — one flat plan, everything unlimited — caps NRR at GRR by construction. That is a pricing decision showing up as a retention number, and it is usually taken by accident.",
@@ -680,7 +810,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         ),
       },
       {
-        question: t("Can NRR be above 100% while the business shrinks?", "La NRR peut-elle dépasser 100 % pendant que l'entreprise rétrécit ?"),
+        question: t("Can NRR be above 100% while the business shrinks?", "La NRR peut-elle dépasser 100 % pendant que l'entreprise rétrécit ?"),
         answer: t(
           "Yes, and it happens more often than the metric's reputation suggests. Lose half your customers, have the survivors double their spend, and NRR reads perfectly healthy on a base that has halved in headcount. That is why logo churn belongs next to it, and why GRR is the honest half of the pair.",
           "Oui, et ça arrive plus souvent que la réputation de la métrique ne le laisse croire. Perds la moitié de tes clients, que les survivants doublent leur dépense, et la NRR affiche une santé parfaite sur une base qui a fondu de moitié en nombre de comptes. C'est pour ça que le churn logo doit figurer à côté, et que la GRR est la moitié honnête du couple.",
@@ -690,14 +820,14 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         question: t("Should new customers be included?", "Faut-il inclure les nouveaux clients ?"),
         answer: t(
           "No, and this is the mistake to watch for when reading someone else's number. Both rates measure what an existing base does over time; adding new customers turns them into a growth rate wearing a retention label, which can read well above 100% for a business losing every cohort it wins.",
-          "Non, et c'est l'erreur à guetter en lisant le chiffre de quelqu'un d'autre. Les deux taux mesurent ce que devient une base existante ; y ajouter les nouveaux clients en fait un taux de croissance déguisé en rétention, qui peut afficher bien plus de 100 % pour une entreprise qui perd chaque cohorte qu'elle gagne.",
+          "Non, et c'est l'erreur à guetter en lisant le chiffre de quelqu'un d'autre. Les deux taux mesurent ce que devient une base existante ; y ajouter les nouveaux clients en fait un taux de croissance déguisé en rétention, qui peut afficher bien plus de 100 % pour une entreprise qui perd chaque cohorte qu'elle gagne.",
         ),
       },
       {
         question: t("Monthly or annual?", "Mensuel ou annuel ?"),
         answer: t(
           "Annual is the convention for comparison, monthly is what you steer with. Careful with the conversion: a monthly NRR of 99.5% is not an annual 99.5% — compounded over twelve months it is about 94%. Rates compound, they do not add.",
-          "L'annuel est la convention pour comparer, le mensuel est ce avec quoi on pilote. Attention à la conversion : une NRR mensuelle de 99,5 % n'est pas une NRR annuelle de 99,5 % — composée sur douze mois, elle vaut environ 94 %. Les taux se composent, ils ne s'additionnent pas.",
+          "L'annuel est la convention pour comparer, le mensuel est ce avec quoi on pilote. Attention à la conversion : une NRR mensuelle de 99,5 % n'est pas une NRR annuelle de 99,5 % — composée sur douze mois, elle vaut environ 94 %. Les taux se composent, ils ne s'additionnent pas.",
         ),
       },
     ],
@@ -734,7 +864,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       ],
       note: t(
         "Churn and retention are two faces of one number: 5% monthly churn is 95% monthly retention. Retention is usually read by cohort over time (D7, D30, month 6); churn is usually read as a rate per period. Same customers, two views.",
-        "Churn et rétention sont les deux faces d'un même chiffre : 5 % de churn mensuel, c'est 95 % de rétention mensuelle. La rétention se lit en général par cohorte dans le temps (J7, J30, mois 6) ; le churn se lit en général comme un taux par période. Mêmes clients, deux lectures.",
+        "Churn et rétention sont les deux faces d'un même chiffre : 5 % de churn mensuel, c'est 95 % de rétention mensuelle. La rétention se lit en général par cohorte dans le temps (J7, J30, mois 6) ; le churn se lit en général comme un taux par période. Mêmes clients, deux lectures.",
       ),
     },
     example: {
@@ -742,28 +872,28 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       steps: [
         t(
           "Start of month: 400 customers, €20,000 MRR. During the month: 12 cancel (€600 MRR), 8 downgrade (−€400 MRR), 15 upgrade (+€900 MRR).",
-          "Début de mois : 400 clients, 20 000 € de MRR. Pendant le mois : 12 résilient (600 € de MRR), 8 rétrogradent (−400 € de MRR), 15 montent en gamme (+900 € de MRR).",
+          "Début de mois : 400 clients, 20 000 € de MRR. Pendant le mois : 12 résilient (600 € de MRR), 8 rétrogradent (−400 € de MRR), 15 montent en gamme (+900 € de MRR).",
         ),
-        t("Logo churn: 12 ÷ 400 = 3%.", "Churn logo : 12 ÷ 400 = 3 %."),
-        t("Gross revenue churn: (600 + 400) ÷ 20,000 = 5%.", "Churn revenu brut : (600 + 400) ÷ 20 000 = 5 %."),
+        t("Logo churn: 12 ÷ 400 = 3%.", "Churn logo : 12 ÷ 400 = 3 %."),
+        t("Gross revenue churn: (600 + 400) ÷ 20,000 = 5%.", "Churn revenu brut : (600 + 400) ÷ 20 000 = 5 %."),
         t(
           "Net revenue churn: (600 + 400 − 900) ÷ 20,000 = 0.5%. Had upgrades brought €1,200 instead of €900, net churn would be −1%: negative churn, a revenue base growing on its own.",
-          "Churn revenu net : (600 + 400 − 900) ÷ 20 000 = 0,5 %. Si les montées en gamme avaient rapporté 1 200 € au lieu de 900 €, le churn net serait de −1 % : du churn négatif, une base de revenu qui grandit toute seule.",
+          "Churn revenu net : (600 + 400 − 900) ÷ 20 000 = 0,5 %. Si les montées en gamme avaient rapporté 1 200 € au lieu de 900 €, le churn net serait de −1 % : du churn négatif, une base de revenu qui grandit toute seule.",
         ),
       ],
       takeaway: t(
         "Three true numbers for one month, from 3% to 0.5%. Whoever reports \"our churn is X\" without saying which one is either simplifying — or choosing the flattering one.",
-        "Trois chiffres vrais pour un même mois, de 3 % à 0,5 %. Qui annonce « notre churn est de X » sans dire lequel simplifie — ou choisit le plus flatteur.",
+        "Trois chiffres vrais pour un même mois, de 3 % à 0,5 %. Qui annonce « notre churn est de X » sans dire lequel simplifie — ou choisit le plus flatteur.",
       ),
     },
     benchmark: [
       t(
         "Commonly cited ranges for B2B SaaS: around 1-2% monthly logo churn is considered healthy for products sold to small businesses; enterprise products aim for single-digit annual churn, because their customers are fewer and each loss is large. B2C subscriptions routinely run far higher and live off re-acquisition.",
-        "Fourchettes couramment citées en SaaS B2B : autour de 1-2 % de churn logo mensuel est considéré comme sain pour des produits vendus aux petites entreprises ; les produits entreprise visent un churn annuel à un chiffre, parce que leurs clients sont moins nombreux et que chaque perte pèse lourd. Les abonnements B2C tournent couramment bien plus haut et vivent de réacquisition.",
+        "Fourchettes couramment citées en SaaS B2B : autour de 1-2 % de churn logo mensuel est considéré comme sain pour des produits vendus aux petites entreprises ; les produits entreprise visent un churn annuel à un chiffre, parce que leurs clients sont moins nombreux et que chaque perte pèse lourd. Les abonnements B2C tournent couramment bien plus haut et vivent de réacquisition.",
       ),
       t(
         "Small monthly numbers compound: 3% a month is not 36% a year but 1 − 0.97¹² ≈ 31% — a third of the customer base gone every year. Read monthly churn in years before deciding it's fine.",
-        "Les petits chiffres mensuels se composent : 3 % par mois, ce n'est pas 36 % par an mais 1 − 0,97¹² ≈ 31 % — un tiers de la base client qui disparaît chaque année. Lis ton churn mensuel à l'échelle de l'année avant de décider que ça va.",
+        "Les petits chiffres mensuels se composent : 3 % par mois, ce n'est pas 36 % par an mais 1 − 0,97¹² ≈ 31 % — un tiers de la base client qui disparaît chaque année. Lis ton churn mensuel à l'échelle de l'année avant de décider que ça va.",
       ),
       t(
         "The best SaaS businesses report negative net revenue churn — existing customers grow faster than the lost ones shrink the base. It is rare, and it is the single strongest signal that a product has become indispensable.",
@@ -803,7 +933,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         ),
         answer: t(
           "Not by multiplying by twelve. Annual churn = 1 − (1 − monthly churn)¹². At 2% monthly that is 1 − 0.98¹² ≈ 21.5%, not 24%; at 5% it is ≈ 46%, not 60%. The gap grows with the rate, and the multiplied version always overstates.",
-          "Pas en multipliant par douze. Churn annuel = 1 − (1 − churn mensuel)¹². À 2 % par mois, ça donne 1 − 0,98¹² ≈ 21,5 %, pas 24 % ; à 5 %, ≈ 46 %, pas 60 %. L'écart grandit avec le taux, et la version multipliée surestime toujours.",
+          "Pas en multipliant par douze. Churn annuel = 1 − (1 − churn mensuel)¹². À 2 % par mois, ça donne 1 − 0,98¹² ≈ 21,5 %, pas 24 % ; à 5 %, ≈ 46 %, pas 60 %. L'écart grandit avec le taux, et la version multipliée surestime toujours.",
         ),
       },
       {
@@ -856,7 +986,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       ],
       note: t(
         "Retention and churn describe the same customers from two sides: 95% monthly retention is 5% monthly churn. Retention is read as a curve over a cohort's life; churn as a rate per period. Use retention to understand the product, churn to run the business.",
-        "Rétention et churn décrivent les mêmes clients de deux côtés : 95 % de rétention mensuelle, c'est 5 % de churn mensuel. La rétention se lit comme une courbe sur la vie d'une cohorte ; le churn comme un taux par période. La rétention pour comprendre le produit, le churn pour piloter l'activité.",
+        "Rétention et churn décrivent les mêmes clients de deux côtés : 95 % de rétention mensuelle, c'est 5 % de churn mensuel. La rétention se lit comme une courbe sur la vie d'une cohorte ; le churn comme un taux par période. La rétention pour comprendre le produit, le churn pour piloter l'activité.",
       ),
     },
     example: {
@@ -864,15 +994,15 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       steps: [
         t(
           "Cohort A: 1,000 sign-ups. Active on D1: 600. D7: 380. D30: 250. D60: 245. D90: 242.",
-          "Cohorte A : 1 000 inscrits. Actifs à J1 : 600. J7 : 380. J30 : 250. J60 : 245. J90 : 242.",
+          "Cohorte A : 1 000 inscrits. Actifs à J1 : 600. J7 : 380. J30 : 250. J60 : 245. J90 : 242.",
         ),
         t(
           "Cohort B: 1,000 sign-ups. D1: 700. D7: 450. D30: 250. D60: 150. D90: 90.",
-          "Cohorte B : 1 000 inscrits. J1 : 700. J7 : 450. J30 : 250. J60 : 150. J90 : 90.",
+          "Cohorte B : 1 000 inscrits. J1 : 700. J7 : 450. J30 : 250. J60 : 150. J90 : 90.",
         ),
         t(
           "Both report \"25% D30 retention\". A's curve flattens at about 24%: a quarter of the people who tried it made it a habit. B's keeps sliding: it will reach zero, just slowly.",
-          "Les deux annoncent « 25 % de rétention à J30 ». La courbe de A s'aplatit vers 24 % : un quart des gens qui ont essayé en ont fait une habitude. Celle de B continue de glisser : elle atteindra zéro, juste lentement.",
+          "Les deux annoncent « 25 % de rétention à J30 ». La courbe de A s'aplatit vers 24 % : un quart des gens qui ont essayé en ont fait une habitude. Celle de B continue de glisser : elle atteindra zéro, juste lentement.",
         ),
         t(
           "A can now spend on acquisition — every 1,000 new users adds about 240 lasting ones. B would be filling a bucket with no bottom; its problem is the product, not the funnel.",
@@ -887,11 +1017,11 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
     benchmark: [
       t(
         "Ranges vary enormously by category, so compare within yours. Widely cited orders of magnitude: consumer mobile apps often keep 20-30% of a cohort at D30 and single digits by D90; SaaS is read in months, and 97-99% monthly customer retention is the range usually called healthy for small-business products, higher again in enterprise.",
-        "Les fourchettes varient énormément selon la catégorie, donc compare dans la tienne. Ordres de grandeur couramment cités : les applis mobiles grand public gardent souvent 20-30 % d'une cohorte à J30 et moins de 10 % à J90 ; le SaaS se lit en mois, et 97-99 % de rétention client mensuelle est la fourchette habituellement qualifiée de saine pour des produits vendus aux petites entreprises, plus haut encore en entreprise.",
+        "Les fourchettes varient énormément selon la catégorie, donc compare dans la tienne. Ordres de grandeur couramment cités : les applis mobiles grand public gardent souvent 20-30 % d'une cohorte à J30 et moins de 10 % à J90 ; le SaaS se lit en mois, et 97-99 % de rétention client mensuelle est la fourchette habituellement qualifiée de saine pour des produits vendus aux petites entreprises, plus haut encore en entreprise.",
       ),
       t(
         "The shape matters more than the level: a curve that flattens at 10% describes a real product with a small core; a curve at 40% still heading down at month three describes a novelty. Investors read the flattening before they read the number.",
-        "La forme compte plus que le niveau : une courbe qui s'aplatit à 10 % décrit un vrai produit avec un petit noyau ; une courbe à 40 % encore en baisse au troisième mois décrit une nouveauté. Les investisseurs lisent l'aplatissement avant de lire le chiffre.",
+        "La forme compte plus que le niveau : une courbe qui s'aplatit à 10 % décrit un vrai produit avec un petit noyau ; une courbe à 40 % encore en baisse au troisième mois décrit une nouveauté. Les investisseurs lisent l'aplatissement avant de lire le chiffre.",
       ),
       t(
         "Retention compounds into everything downstream: it sets LTV, decides which CAC is affordable, and is the precondition for referral — nobody recommends a product they stopped using.",
@@ -935,7 +1065,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         ),
         answer: t(
           "Same customers, opposite sign, different lens. Retention follows a cohort over time and is drawn as a curve; churn is the share lost in a period and is quoted as a rate. 90% monthly retention and 10% monthly churn are one fact. Use retention when you want to know whether the product works, churn when you want to know what the business loses this month.",
-          "Mêmes clients, signe opposé, angle différent. La rétention suit une cohorte dans le temps et se dessine en courbe ; le churn est la part perdue sur une période et se cite en taux. 90 % de rétention mensuelle et 10 % de churn mensuel sont un seul fait. La rétention pour savoir si le produit fonctionne, le churn pour savoir ce que l'activité perd ce mois-ci.",
+          "Mêmes clients, signe opposé, angle différent. La rétention suit une cohorte dans le temps et se dessine en courbe ; le churn est la part perdue sur une période et se cite en taux. 90 % de rétention mensuelle et 10 % de churn mensuel sont un seul fait. La rétention pour savoir si le produit fonctionne, le churn pour savoir ce que l'activité perd ce mois-ci.",
         ),
       },
       {
@@ -997,7 +1127,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       steps: [
         t(
           "A project-management tool looks at the users still active at month three and asks what they all did in their first week. 82% of them had invited at least one teammate; among users who churned in month one, 11% had.",
-          "Un outil de gestion de projet regarde les utilisateurs encore actifs au troisième mois et se demande ce qu'ils ont tous fait la première semaine. 82 % avaient invité au moins un collègue ; parmi ceux partis le premier mois, 11 %.",
+          "Un outil de gestion de projet regarde les utilisateurs encore actifs au troisième mois et se demande ce qu'ils ont tous fait la première semaine. 82 % avaient invité au moins un collègue ; parmi ceux partis le premier mois, 11 %.",
         ),
         t(
           "Aha moment: \"first teammate invited\". Window: 7 days. Definition written down, event instrumented.",
@@ -1005,11 +1135,11 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         ),
         t(
           "Last month: 2,400 sign-ups, 552 invited someone within a week. Activation rate = 552 ÷ 2,400 = 23%.",
-          "Le mois dernier : 2 400 inscrits, 552 ont invité quelqu'un dans la semaine. Taux d'activation = 552 ÷ 2 400 = 23 %.",
+          "Le mois dernier : 2 400 inscrits, 552 ont invité quelqu'un dans la semaine. Taux d'activation = 552 ÷ 2 400 = 23 %.",
         ),
         t(
           "The onboarding used to end on a tour of features. It now ends on the invite screen. Next month: 31%. Same acquisition spend, a third more users who might stay.",
-          "L'onboarding se terminait sur une visite des fonctionnalités. Il se termine maintenant sur l'écran d'invitation. Le mois suivant : 31 %. Même dépense d'acquisition, un tiers d'utilisateurs en plus susceptibles de rester.",
+          "L'onboarding se terminait sur une visite des fonctionnalités. Il se termine maintenant sur l'écran d'invitation. Le mois suivant : 31 %. Même dépense d'acquisition, un tiers d'utilisateurs en plus susceptibles de rester.",
         ),
       ],
       takeaway: t(
@@ -1020,7 +1150,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
     benchmark: [
       t(
         "There is no universal activation rate: the number depends entirely on how demanding your aha moment is. Commonly cited orders of magnitude for SaaS onboarding sit between 20% and 40% of sign-ups — often lower for free trials, higher for invite-only products. Compare month to month, not to a table.",
-        "Il n'y a pas de taux d'activation universel : le chiffre dépend entièrement de l'exigence de ton moment « aha ». Les ordres de grandeur couramment cités pour un onboarding SaaS se situent entre 20 % et 40 % des inscrits — souvent plus bas pour les essais gratuits, plus haut pour les produits sur invitation. Compare d'un mois à l'autre, pas à un tableau.",
+        "Il n'y a pas de taux d'activation universel : le chiffre dépend entièrement de l'exigence de ton moment « aha ». Les ordres de grandeur couramment cités pour un onboarding SaaS se situent entre 20 % et 40 % des inscrits — souvent plus bas pour les essais gratuits, plus haut pour les produits sur invitation. Compare d'un mois à l'autre, pas à un tableau.",
       ),
       t(
         "Time-to-value is the companion metric: how long the median user takes to reach the moment. Minutes for a consumer app, a day or two for a team tool, weeks for software that needs data imported. Halving it usually does more for retention than any feature.",
@@ -1126,19 +1256,19 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       steps: [
         t(
           "January cohort: 25% still active at D30, 22% at D60, 21% at D90, 21% at D120. The curve flattens.",
-          "Cohorte de janvier : 25 % encore actifs à J30, 22 % à J60, 21 % à J90, 21 % à J120. La courbe s'aplatit.",
+          "Cohorte de janvier : 25 % encore actifs à J30, 22 % à J60, 21 % à J90, 21 % à J120. La courbe s'aplatit.",
         ),
         t(
           "April cohort: 25% at D30, 17% at D60, 11% at D90, 6% at D120. The curve slides toward zero.",
-          "Cohorte d'avril : 25 % à J30, 17 % à J60, 11 % à J90, 6 % à J120. La courbe glisse vers zéro.",
+          "Cohorte d'avril : 25 % à J30, 17 % à J60, 11 % à J90, 6 % à J120. La courbe glisse vers zéro.",
         ),
         t(
           "A single blended \"retention rate of 25%\" describes both of them exactly, and hides the only thing that matters: one product keeps a fifth of everyone it ever acquires, the other keeps nobody and is running on new sign-ups.",
-          "Un unique « taux de rétention de 25 % » décrit les deux exactement, et masque la seule chose qui compte : un produit garde un cinquième de tous ceux qu'il acquiert, l'autre ne garde personne et tourne sur les nouvelles inscriptions.",
+          "Un unique « taux de rétention de 25 % » décrit les deux exactement, et masque la seule chose qui compte : un produit garde un cinquième de tous ceux qu'il acquiert, l'autre ne garde personne et tourne sur les nouvelles inscriptions.",
         ),
         t(
           "The flattening level is the number you can multiply: at 1,000 sign-ups a month, the January cohort adds about 210 durable users every month, and they stack. The April cohort adds a spike that is gone by spring.",
-          "Le niveau où la courbe s'aplatit est le chiffre qu'on peut multiplier : à 1 000 inscriptions par mois, la cohorte de janvier ajoute environ 210 utilisateurs durables chaque mois, et ils s'empilent. Celle d'avril ajoute un pic disparu au printemps.",
+          "Le niveau où la courbe s'aplatit est le chiffre qu'on peut multiplier : à 1 000 inscriptions par mois, la cohorte de janvier ajoute environ 210 utilisateurs durables chaque mois, et ils s'empilent. Celle d'avril ajoute un pic disparu au printemps.",
         ),
       ],
       takeaway: t(
@@ -1153,7 +1283,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       ),
       t(
         "Levels vary so widely by category that comparing them across products is close to meaningless: a daily-use consumer app flattening at 20-30% by month three is often cited as strong, while a B2B tool bought by a company would be in trouble at that level. Compare your cohorts to each other, not to someone else's chart.",
-        "Les niveaux varient tellement d'une catégorie à l'autre que les comparer entre produits n'a presque aucun sens : une application grand public à usage quotidien qui s'aplatit à 20-30 % au troisième mois est souvent citée comme solide, là où un outil B2B acheté par une entreprise serait en difficulté à ce niveau. Compare tes cohortes entre elles, pas au graphique de quelqu'un d'autre.",
+        "Les niveaux varient tellement d'une catégorie à l'autre que les comparer entre produits n'a presque aucun sens : une application grand public à usage quotidien qui s'aplatit à 20-30 % au troisième mois est souvent citée comme solide, là où un outil B2B acheté par une entreprise serait en difficulté à ce niveau. Compare tes cohortes entre elles, pas au graphique de quelqu'un d'autre.",
       ),
       t(
         "A cohort small enough that one user is worth more than a percentage point is not a cohort, it is an anecdote with a chart. Below roughly a hundred members, read the direction and ignore the decimals.",
@@ -1257,19 +1387,19 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       steps: [
         t(
           "50,000 MAU, DAU averaging 10,000 over the month. DAU/MAU = 0.20, so the average user shows up six days out of thirty.",
-          "50 000 MAU, des DAU à 10 000 en moyenne sur le mois. DAU/MAU = 0,20, donc l'utilisateur moyen vient six jours sur trente.",
+          "50 000 MAU, des DAU à 10 000 en moyenne sur le mois. DAU/MAU = 0,20, donc l'utilisateur moyen vient six jours sur trente.",
         ),
         t(
           "Split the base and there is no such user. 8,000 people open it about 22 days a month; the other 42,000 open it about 3.",
-          "Découpe la base et cet utilisateur n'existe pas. 8 000 personnes l'ouvrent environ 22 jours par mois ; les 42 000 autres, environ 3.",
+          "Découpe la base et cet utilisateur n'existe pas. 8 000 personnes l'ouvrent environ 22 jours par mois ; les 42 000 autres, environ 3.",
         ),
         t(
           "Check the arithmetic: (8,000 × 22) + (42,000 × 3) = 302,000 user-days, ÷ 30 = about 10,000 DAU. The same 0.20, from two populations that share nothing.",
-          "Vérifie l'arithmétique : (8 000 × 22) + (42 000 × 3) = 302 000 jours-utilisateurs, ÷ 30 = environ 10 000 DAU. Le même 0,20, produit par deux populations qui n'ont rien en commun.",
+          "Vérifie l'arithmétique : (8 000 × 22) + (42 000 × 3) = 302 000 jours-utilisateurs, ÷ 30 = environ 10 000 DAU. Le même 0,20, produit par deux populations qui n'ont rien en commun.",
         ),
         t(
           "The two groups need opposite decisions. The 8,000 are a daily habit to protect and to learn from; the 42,000 are either a weekly product misread as a daily one, or a group that never found the habit at all — and only looking at what they do differently answers which.",
-          "Les deux groupes appellent des décisions opposées. Les 8 000 sont une habitude quotidienne à protéger et dont il faut s'inspirer ; les 42 000 sont soit un produit hebdomadaire lu comme quotidien, soit un groupe qui n'a jamais trouvé l'habitude — et seul l'examen de ce qu'ils font différemment le dira.",
+          "Les deux groupes appellent des décisions opposées. Les 8 000 sont une habitude quotidienne à protéger et dont il faut s'inspirer ; les 42 000 sont soit un produit hebdomadaire lu comme quotidien, soit un groupe qui n'a jamais trouvé l'habitude — et seul l'examen de ce qu'ils font différemment le dira.",
         ),
       ],
       takeaway: t(
@@ -1280,7 +1410,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
     benchmark: [
       t(
         "The threshold most often quoted is 20% for consumer social products, with 50%+ treated as exceptional — figures that come from a category where daily use is the whole point. Quoting them at a product not meant to be opened daily is comparing ambitions, not performance.",
-        "Le seuil le plus souvent cité est 20 % pour les produits sociaux grand public, 50 % et plus étant considéré comme exceptionnel — des chiffres issus d'une catégorie où l'usage quotidien est toute la raison d'être. Les citer pour un produit qui n'est pas fait pour être ouvert tous les jours compare des ambitions, pas des performances.",
+        "Le seuil le plus souvent cité est 20 % pour les produits sociaux grand public, 50 % et plus étant considéré comme exceptionnel — des chiffres issus d'une catégorie où l'usage quotidien est toute la raison d'être. Les citer pour un produit qui n'est pas fait pour être ouvert tous les jours compare des ambitions, pas des performances.",
       ),
       t(
         "A payroll tool at 0.05 — a day and a half a month — is not failing; it is being used exactly when payroll runs. The first question is never \"is the ratio high\" but \"should this product be opened daily at all\", and answering it honestly retires the metric for a good share of B2B software.",
@@ -1366,14 +1496,14 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
           symbol: t("Conversion rate", "Taux de conversion"),
           meaning: t(
             "The share of those exposures that become a new user — not a click, a user. A shared result that gets 100 views and 4 new sign-ups converts at 4%.",
-            "La part de ces expositions qui deviennent un nouvel utilisateur — pas un clic, un utilisateur. Un résultat partagé qui fait 100 vues et 4 nouvelles inscriptions convertit à 4 %.",
+            "La part de ces expositions qui deviennent un nouvel utilisateur — pas un clic, un utilisateur. Un résultat partagé qui fait 100 vues et 4 nouvelles inscriptions convertit à 4 %.",
           ),
         },
         {
           symbol: t("K", "K"),
           meaning: t(
             "New users each existing user brings, on average. K = 0.3 means every 100 users bring 30 more, who bring 9, who bring about 3 — a finite boost of about 43%. K > 1 means the chain never ends on its own.",
-            "Le nombre de nouveaux utilisateurs que chaque utilisateur existant amène, en moyenne. K = 0,3 veut dire que 100 utilisateurs en amènent 30, qui en amènent 9, qui en amènent environ 3 — un gain fini d'environ 43 %. K > 1 veut dire que la chaîne ne s'arrête jamais d'elle-même.",
+            "Le nombre de nouveaux utilisateurs que chaque utilisateur existant amène, en moyenne. K = 0,3 veut dire que 100 utilisateurs en amènent 30, qui en amènent 9, qui en amènent environ 3 — un gain fini d'environ 43 %. K > 1 veut dire que la chaîne ne s'arrête jamais d'elle-même.",
           ),
         },
       ],
@@ -1387,16 +1517,16 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       steps: [
         t(
           "1,000 users. 20% of them share once; each share is seen by 15 people on average: 1,000 × 0.2 × 15 = 3,000 exposures, i.e. 3 per user.",
-          "1 000 utilisateurs. 20 % partagent une fois ; chaque partage est vu par 15 personnes en moyenne : 1 000 × 0,2 × 15 = 3 000 expositions, soit 3 par utilisateur.",
+          "1 000 utilisateurs. 20 % partagent une fois ; chaque partage est vu par 15 personnes en moyenne : 1 000 × 0,2 × 15 = 3 000 expositions, soit 3 par utilisateur.",
         ),
-        t("5% of exposures become a user: K = 3 × 0.05 = 0.15.", "5 % des expositions deviennent un utilisateur : K = 3 × 0,05 = 0,15."),
+        t("5% of exposures become a user: K = 3 × 0.05 = 0.15.", "5 % des expositions deviennent un utilisateur : K = 3 × 0,05 = 0,15."),
         t(
           "Total users the loop eventually yields from those 1,000: 1,000 ÷ (1 − 0.15) ≈ 1,176. Referral added 17.6% on top of whatever acquisition paid for.",
-          "Total d'utilisateurs que la boucle finit par produire à partir de ces 1 000 : 1 000 ÷ (1 − 0,15) ≈ 1 176. Le parrainage a ajouté 17,6 % à ce que l'acquisition a payé.",
+          "Total d'utilisateurs que la boucle finit par produire à partir de ces 1 000 : 1 000 ÷ (1 − 0,15) ≈ 1 176. Le parrainage a ajouté 17,6 % à ce que l'acquisition a payé.",
         ),
         t(
           "Double the share of users who share (40%) and K becomes 0.3: 1,000 ÷ 0.7 ≈ 1,429, +43%. At a €500 CAC, that loop is worth about €215 of acquisition per paid user.",
-          "Double la part d'utilisateurs qui partagent (40 %) et K passe à 0,3 : 1 000 ÷ 0,7 ≈ 1 429, +43 %. À 500 € de CAC, cette boucle vaut environ 215 € d'acquisition par utilisateur payé.",
+          "Double la part d'utilisateurs qui partagent (40 %) et K passe à 0,3 : 1 000 ÷ 0,7 ≈ 1 429, +43 %. À 500 € de CAC, cette boucle vaut environ 215 € d'acquisition par utilisateur payé.",
         ),
       ],
       takeaway: t(
@@ -1458,7 +1588,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         ),
         answer: t(
           "The referral rate is the share of users who refer at least one person; it is one input. K multiplies how many exposures users create by how many of those convert, over all users — it is the output. A 40% referral rate with invitations that never convert gives a K near zero.",
-          "Le taux de parrainage est la part d'utilisateurs qui parrainent au moins une personne ; c'est une entrée. K multiplie le nombre d'expositions créées par les utilisateurs par la part qui convertit, sur tous les utilisateurs — c'est la sortie. Un taux de parrainage de 40 % avec des invitations qui ne convertissent jamais donne un K proche de zéro.",
+          "Le taux de parrainage est la part d'utilisateurs qui parrainent au moins une personne ; c'est une entrée. K multiplie le nombre d'expositions créées par les utilisateurs par la part qui convertit, sur tous les utilisateurs — c'est la sortie. Un taux de parrainage de 40 % avec des invitations qui ne convertissent jamais donne un K proche de zéro.",
         ),
       },
       {
@@ -1512,19 +1642,19 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       steps: [
         t(
           "Paid social: 20,000 visitors a month, 3% sign up (600), 8% of those become customers (48). Cost: €12,000. CAC: €250.",
-          "Social payant : 20 000 visiteurs par mois, 3 % s'inscrivent (600), 8 % d'entre eux deviennent clients (48). Coût : 12 000 €. CAC : 250 €.",
+          "Social payant : 20 000 visiteurs par mois, 3 % s'inscrivent (600), 8 % d'entre eux deviennent clients (48). Coût : 12 000 €. CAC : 250 €.",
         ),
         t(
           "Founder-written articles and SEO: 4,000 visitors, 9% sign up (360), 20% become customers (72). Cost: two days of writing a month, say €2,000 of time. CAC: €28.",
-          "Articles écrits par le fondateur et SEO : 4 000 visiteurs, 9 % s'inscrivent (360), 20 % deviennent clients (72). Coût : deux jours d'écriture par mois, disons 2 000 € de temps. CAC : 28 €.",
+          "Articles écrits par le fondateur et SEO : 4 000 visiteurs, 9 % s'inscrivent (360), 20 % deviennent clients (72). Coût : deux jours d'écriture par mois, disons 2 000 € de temps. CAC : 28 €.",
         ),
         t(
           "Blended: 24,000 visitors, 960 sign-ups, 120 customers, €14,000 — a €117 CAC that describes neither channel.",
-          "Mixte : 24 000 visiteurs, 960 inscrits, 120 clients, 14 000 € — un CAC de 117 € qui ne décrit aucun des deux canaux.",
+          "Mixte : 24 000 visiteurs, 960 inscrits, 120 clients, 14 000 € — un CAC de 117 € qui ne décrit aucun des deux canaux.",
         ),
         t(
           "The channel with a sixth of the traffic brings 60% of the customers, at a ninth of the cost. Without per-channel numbers, the obvious next move — \"more ads, traffic is up\" — is exactly wrong.",
-          "Le canal qui fait un sixième du trafic amène 60 % des clients, pour un neuvième du coût. Sans chiffres par canal, le geste évident — « plus de pub, le trafic monte » — est exactement le mauvais.",
+          "Le canal qui fait un sixième du trafic amène 60 % des clients, pour un neuvième du coût. Sans chiffres par canal, le geste évident — « plus de pub, le trafic monte » — est exactement le mauvais.",
         ),
       ],
       takeaway: t(
@@ -1535,7 +1665,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
     benchmark: [
       t(
         "Most successful products get the bulk of their growth from one or two channels, not ten — the observation behind the \"Bullseye\" method popularised by Traction (Weinberg and Mares): test many cheaply, then concentrate. A spreadsheet of nine channels each bringing 5% is a symptom, not a strategy.",
-        "La plupart des produits qui réussissent tirent l'essentiel de leur croissance d'un ou deux canaux, pas de dix — l'observation derrière la méthode « Bullseye » popularisée par Traction (Weinberg et Mares) : tester beaucoup à bas coût, puis concentrer. Un tableur de neuf canaux à 5 % chacun est un symptôme, pas une stratégie.",
+        "La plupart des produits qui réussissent tirent l'essentiel de leur croissance d'un ou deux canaux, pas de dix — l'observation derrière la méthode « Bullseye » popularisée par Traction (Weinberg et Mares) : tester beaucoup à bas coût, puis concentrer. Un tableur de neuf canaux à 5 % chacun est un symptôme, pas une stratégie.",
       ),
       t(
         "Paid channels scale fast and get more expensive as they scale; organic channels (content, SEO, community, referral) start slow and get cheaper. Early on, paid buys you learning; over time, only the compounding channels keep CAC in check.",
@@ -1543,7 +1673,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       ),
       t(
         "Landing-page sign-up rates are commonly quoted in the 2-5% range for cold paid traffic and well above that for warm traffic (a shared link, a recommendation). If a channel converts far below its peers, the problem is usually the fit between the promise made there and the page, not the page itself.",
-        "Les taux d'inscription d'une page d'accueil se citent couramment entre 2 et 5 % pour du trafic payant froid, et bien au-dessus pour du trafic chaud (un lien partagé, une recommandation). Si un canal convertit très en dessous des autres, le problème est en général l'accord entre la promesse faite là-bas et la page, pas la page elle-même.",
+        "Les taux d'inscription d'une page d'accueil se citent couramment entre 2 et 5 % pour du trafic payant froid, et bien au-dessus pour du trafic chaud (un lien partagé, une recommandation). Si un canal convertit très en dessous des autres, le problème est en général l'accord entre la promesse faite là-bas et la page, pas la page elle-même.",
       ),
     ],
     howToImprove: [
@@ -1561,7 +1691,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       ),
       t(
         "Fix activation before scaling acquisition. Doubling traffic into a product that activates 10% of sign-ups doubles the waste; fixing activation first makes every later channel cheaper.",
-        "Répare l'activation avant de faire grandir l'acquisition. Doubler le trafic vers un produit qui active 10 % des inscrits double le gaspillage ; réparer l'activation d'abord rend chaque canal suivant moins cher.",
+        "Répare l'activation avant de faire grandir l'acquisition. Doubler le trafic vers un produit qui active 10 % des inscrits double le gaspillage ; réparer l'activation d'abord rend chaque canal suivant moins cher.",
       ),
       t(
         "Invest in one compounding channel early, even while paid does the volume: content, a community, a product-led loop. It is the only thing that makes year-three CAC lower than year-one CAC.",
@@ -1639,7 +1769,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       steps: [
         t(
           "A reporting tool notices in its sign-up survey that 30% of new users say \"a colleague showed me a report\". Nothing in the product supports that: reports are PDFs emailed by hand.",
-          "Un outil de reporting remarque dans son questionnaire d'inscription que 30 % des nouveaux utilisateurs disent « un collègue m'a montré un rapport ». Rien dans le produit ne soutient ça : les rapports sont des PDF envoyés à la main.",
+          "Un outil de reporting remarque dans son questionnaire d'inscription que 30 % des nouveaux utilisateurs disent « un collègue m'a montré un rapport ». Rien dans le produit ne soutient ça : les rapports sont des PDF envoyés à la main.",
         ),
         t(
           "It adds a shareable link on every report, with a rich preview and a \"make your own\" button — and a reference on the link so arrivals can be counted.",
@@ -1647,11 +1777,11 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         ),
         t(
           "Three months later: 1,000 new users a month, 410 traced to a shared report. Referral share: 41%, up from an estimated 30% — and now measured instead of surveyed.",
-          "Trois mois plus tard : 1 000 nouveaux utilisateurs par mois, 410 attribués à un rapport partagé. Part du parrainage : 41 %, contre 30 % estimés — et maintenant mesurée au lieu d'être déclarée.",
+          "Trois mois plus tard : 1 000 nouveaux utilisateurs par mois, 410 attribués à un rapport partagé. Part du parrainage : 41 %, contre 30 % estimés — et maintenant mesurée au lieu d'être déclarée.",
         ),
         t(
           "At the tool's €120 blended CAC, those 410 users are worth about €49,000 of acquisition a month — for a share button placed where people were already sharing.",
-          "Au CAC mixte de 120 € de l'outil, ces 410 utilisateurs valent environ 49 000 € d'acquisition par mois — pour un bouton de partage placé là où les gens partageaient déjà.",
+          "Au CAC mixte de 120 € de l'outil, ces 410 utilisateurs valent environ 49 000 € d'acquisition par mois — pour un bouton de partage placé là où les gens partageaient déjà.",
         ),
       ],
       takeaway: t(
@@ -1765,7 +1895,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       steps: [
         t(
           "Start of month: €20,000 MRR from 400 customers (€50 average). New customers: 40 at €50 = +€2,000.",
-          "Début de mois : 20 000 € de MRR pour 400 clients (50 € en moyenne). Nouveaux clients : 40 à 50 € = +2 000 €.",
+          "Début de mois : 20 000 € de MRR pour 400 clients (50 € en moyenne). Nouveaux clients : 40 à 50 € = +2 000 €.",
         ),
         t(
           "Expansion: 15 customers move from the €50 plan to the €110 one, +€900. Contraction: 8 downgrade, −€400. Churn: 12 cancel, −€600.",
@@ -1773,11 +1903,11 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         ),
         t(
           "End of month: 20,000 + 2,000 + 900 − 400 − 600 = €21,900. Growth: +9.5%. Net revenue retention on the existing base: (20,000 + 900 − 400 − 600) ÷ 20,000 = 99.5%.",
-          "Fin de mois : 20 000 + 2 000 + 900 − 400 − 600 = 21 900 €. Croissance : +9,5 %. Rétention nette de revenu sur la base existante : (20 000 + 900 − 400 − 600) ÷ 20 000 = 99,5 %.",
+          "Fin de mois : 20 000 + 2 000 + 900 − 400 − 600 = 21 900 €. Croissance : +9,5 %. Rétention nette de revenu sur la base existante : (20 000 + 900 − 400 − 600) ÷ 20 000 = 99,5 %.",
         ),
         t(
           "Now suppose pricing had been tested and the upper plan priced at €130 instead of €110: the same 15 upgrades bring +€1,200, NRR reaches 101%, and the business grows even in a month with zero new customers.",
-          "Suppose maintenant que le pricing ait été testé et l'offre supérieure fixée à 130 € au lieu de 110 € : les mêmes 15 montées en gamme rapportent +1 200 €, la NRR atteint 101 %, et l'activité grandit même un mois sans aucun nouveau client.",
+          "Suppose maintenant que le pricing ait été testé et l'offre supérieure fixée à 130 € au lieu de 110 € : les mêmes 15 montées en gamme rapportent +1 200 €, la NRR atteint 101 %, et l'activité grandit même un mois sans aucun nouveau client.",
         ),
       ],
       takeaway: t(
@@ -1788,7 +1918,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
     benchmark: [
       t(
         "Net revenue retention is the number SaaS investors read first: above 100% means the existing base grows on its own; the best B2B companies report 110-130%, driven by expansion. Below 90%, growth has to outrun a leaking base.",
-        "La rétention nette de revenu est le chiffre que les investisseurs SaaS lisent en premier : au-dessus de 100 %, la base existante grandit toute seule ; les meilleures entreprises B2B affichent 110-130 %, portées par l'expansion. Sous 90 %, la croissance doit courir plus vite qu'une base qui fuit.",
+        "La rétention nette de revenu est le chiffre que les investisseurs SaaS lisent en premier : au-dessus de 100 %, la base existante grandit toute seule ; les meilleures entreprises B2B affichent 110-130 %, portées par l'expansion. Sous 90 %, la croissance doit courir plus vite qu'une base qui fuit.",
       ),
       t(
         "The LTV:CAC rule of thumb of about 3:1 lives in this pillar too — it is where price, margin and lifetime meet the cost of acquisition. Scoring the pillar on \"has the model been tested?\" rather than on the amount is deliberate: the amount follows from the terms above, not the reverse.",
@@ -1869,7 +1999,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
           symbol: t("The stages multiply", "Les étapes se multiplient"),
           meaning: t(
             "Which is the practical point of the whole model: a 10% improvement at each of four stages is not +40% at the end but 1.1⁴ ≈ +46%, and a stage at zero makes every other stage worthless.",
-            "Ce qui est l'intérêt pratique de tout le modèle : 10 % de mieux à chacune de quatre étapes ne fait pas +40 % à la fin mais 1,1⁴ ≈ +46 %, et une étape à zéro rend toutes les autres inutiles.",
+            "Ce qui est l'intérêt pratique de tout le modèle : 10 % de mieux à chacune de quatre étapes ne fait pas +40 % à la fin mais 1,1⁴ ≈ +46 %, et une étape à zéro rend toutes les autres inutiles.",
           ),
         },
         {
@@ -1890,15 +2020,15 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       steps: [
         t(
           "10,000 visitors acquired. 25% activate (2,500). 40% of those are still active at month three (1,000). 10% of those pay (100 customers).",
-          "10 000 visiteurs acquis. 25 % s'activent (2 500). 40 % d'entre eux sont encore actifs au troisième mois (1 000). 10 % d'entre eux paient (100 clients).",
+          "10 000 visiteurs acquis. 25 % s'activent (2 500). 40 % d'entre eux sont encore actifs au troisième mois (1 000). 10 % d'entre eux paient (100 clients).",
         ),
         t(
           "Option A, the reflex: double acquisition to 20,000 visitors. Result: 200 customers, at double the acquisition cost.",
-          "Option A, le réflexe : doubler l'acquisition à 20 000 visiteurs. Résultat : 200 clients, pour le double du coût d'acquisition.",
+          "Option A, le réflexe : doubler l'acquisition à 20 000 visiteurs. Résultat : 200 clients, pour le double du coût d'acquisition.",
         ),
         t(
           "Option B: leave acquisition alone, take activation from 25% to 35% and retention from 40% to 50% — two onboarding and product changes. 10,000 × 0.35 × 0.5 × 0.1 = 175 customers, at zero extra acquisition cost.",
-          "Option B : ne pas toucher à l'acquisition, passer l'activation de 25 à 35 % et la rétention de 40 à 50 % — deux changements d'onboarding et de produit. 10 000 × 0,35 × 0,5 × 0,1 = 175 clients, pour zéro coût d'acquisition en plus.",
+          "Option B : ne pas toucher à l'acquisition, passer l'activation de 25 à 35 % et la rétention de 40 à 50 % — deux changements d'onboarding et de produit. 10 000 × 0,35 × 0,5 × 0,1 = 175 clients, pour zéro coût d'acquisition en plus.",
         ),
         t(
           "Then double acquisition: 350 customers. The same spend that bought 200 in option A buys 350 after B — because the funnel was fixed before it was fed.",
@@ -2027,7 +2157,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         ),
         t(
           "Candidate \"created an invoice in week 1\": 78% of retained, 35% of churned — lift 2.2. Candidate \"sent an invoice to a real client in week 1\": 64% of retained, 6% of churned — lift 10.7.",
-          "Candidate « a créé une facture en semaine 1 » : 78 % des fidèles, 35 % des partis — levier 2,2. Candidate « a envoyé une facture à un vrai client en semaine 1 » : 64 % des fidèles, 6 % des partis — levier 10,7.",
+          "Candidate « a créé une facture en semaine 1 » : 78 % des fidèles, 35 % des partis — levier 2,2. Candidate « a envoyé une facture à un vrai client en semaine 1 » : 64 % des fidèles, 6 % des partis — levier 10,7.",
         ),
         t(
           "Aha moment: first invoice sent, not created. The onboarding stops ending on a beautifully formatted draft and starts ending on \"send it\". The activation rate is now something worth tracking.",
@@ -2042,11 +2172,11 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
     benchmark: [
       t(
         "The well-known examples are thresholds, not features: Facebook's 7 friends in 10 days, Slack's 2,000 messages sent by a team, Dropbox's one file in one folder on one device. Each is early, countable, and a proxy for \"this thing is now part of how I work\".",
-        "Les exemples connus sont des seuils, pas des fonctionnalités : les 7 amis en 10 jours de Facebook, les 2 000 messages envoyés par une équipe chez Slack, un fichier dans un dossier sur un appareil chez Dropbox. Chacun est précoce, comptable, et un indicateur de « cette chose fait maintenant partie de ma façon de travailler ».",
+        "Les exemples connus sont des seuils, pas des fonctionnalités : les 7 amis en 10 jours de Facebook, les 2 000 messages envoyés par une équipe chez Slack, un fichier dans un dossier sur un appareil chez Dropbox. Chacun est précoce, comptable, et un indicateur de « cette chose fait maintenant partie de ma façon de travailler ».",
       ),
       t(
         "How many users reach it is the activation rate; how long it takes them is time-to-value. Both belong on the same chart, because a moment reached by 60% of users in three weeks and one reached by 35% in ten minutes describe very different onboardings.",
-        "Combien d'utilisateurs l'atteignent, c'est le taux d'activation ; combien de temps ils mettent, c'est le time-to-value. Les deux ont leur place sur le même graphique, parce qu'un moment atteint par 60 % des utilisateurs en trois semaines et un atteint par 35 % en dix minutes décrivent des onboardings très différents.",
+        "Combien d'utilisateurs l'atteignent, c'est le taux d'activation ; combien de temps ils mettent, c'est le time-to-value. Les deux ont leur place sur le même graphique, parce qu'un moment atteint par 60 % des utilisateurs en trois semaines et un atteint par 35 % en dix minutes décrivent des onboardings très différents.",
       ),
       t(
         "A moment that fewer than a fifth of retained users ever reached is not their aha moment, however much the team wishes it were. The data has to nominate it.",
@@ -2148,11 +2278,11 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       steps: [
         t(
           "1,000 sign-ups. 340 activate: 200 within the first hour, 80 within a week (about 3.5 days each), 60 spread over the following two months (about six weeks each).",
-          "1 000 inscriptions. 340 activent : 200 dans la première heure, 80 dans la semaine (environ 3,5 jours chacun), 60 étalés sur les deux mois suivants (environ six semaines chacun).",
+          "1 000 inscriptions. 340 activent : 200 dans la première heure, 80 dans la semaine (environ 3,5 jours chacun), 60 étalés sur les deux mois suivants (environ six semaines chacun).",
         ),
         t(
           "Mean time to value: (200 × 0.5h + 80 × 84h + 60 × 1,000h) ÷ 340 ≈ 197 hours, about 8 days. Median: the 170th and 171st values, both inside the first hour.",
-          "Time to value moyen : (200 × 0,5 h + 80 × 84 h + 60 × 1 000 h) ÷ 340 ≈ 197 heures, soit environ 8 jours. Médiane : les 170ᵉ et 171ᵉ valeurs, toutes deux dans la première heure.",
+          "Time to value moyen : (200 × 0,5 h + 80 × 84 h + 60 × 1 000 h) ÷ 340 ≈ 197 heures, soit environ 8 jours. Médiane : les 170ᵉ et 171ᵉ valeurs, toutes deux dans la première heure.",
         ),
         t(
           "Two numbers, same data, and they describe different companies. The mean describes the 60 stragglers; the median describes what a typical activating user actually lives through.",
@@ -2160,7 +2290,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         ),
         t(
           "Next quarter, nothing is fixed and the 60 stragglers simply stop bothering. Activation falls from 34% to 28%. Mean time to value: (200 × 0.5 + 80 × 84) ÷ 280 ≈ 24 hours — an eightfold \"improvement\", reported the same week the product lost sixty activations.",
-          "Le trimestre suivant, rien n'est corrigé et les 60 traînards cessent simplement d'insister. L'activation tombe de 34 % à 28 %. Time to value moyen : (200 × 0,5 + 80 × 84) ÷ 280 ≈ 24 heures — une « amélioration » d'un facteur huit, annoncée la semaine où le produit a perdu soixante activations.",
+          "Le trimestre suivant, rien n'est corrigé et les 60 traînards cessent simplement d'insister. L'activation tombe de 34 % à 28 %. Time to value moyen : (200 × 0,5 + 80 × 84) ÷ 280 ≈ 24 heures — une « amélioration » d'un facteur huit, annoncée la semaine où le produit a perdu soixante activations.",
         ),
       ],
       takeaway: t(
@@ -2278,7 +2408,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       steps: [
         t(
           "An analytics tool's aha moment: the first chart built on the user's own data. Before: sign-up → 5-step profile form → product tour (9 tooltips) → empty dashboard → \"connect a data source\" buried in settings. Median time-to-value: 4.5 days. Activation: 22%.",
-          "Moment « aha » d'un outil d'analytics : le premier graphique construit sur les données de l'utilisateur. Avant : inscription → formulaire de profil en 5 étapes → visite du produit (9 infobulles) → tableau de bord vide → « connecter une source » enfoui dans les réglages. Time-to-value médian : 4,5 jours. Activation : 22 %.",
+          "Moment « aha » d'un outil d'analytics : le premier graphique construit sur les données de l'utilisateur. Avant : inscription → formulaire de profil en 5 étapes → visite du produit (9 infobulles) → tableau de bord vide → « connecter une source » enfoui dans les réglages. Time-to-value médian : 4,5 jours. Activation : 22 %.",
         ),
         t(
           "Change 1: the first screen after sign-up is \"connect a source\", with a sample dataset one click away for those who can't yet. Change 2: the tour is removed; the two tooltips that mattered move onto the chart builder itself. Change 3: the profile form is asked for later, when the user invites a colleague.",
@@ -2286,7 +2416,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         ),
         t(
           "After one month of cohorts: median time-to-value 38 minutes. Activation: 41%.",
-          "Après un mois de cohortes : time-to-value médian 38 minutes. Activation : 41 %.",
+          "Après un mois de cohortes : time-to-value médian 38 minutes. Activation : 41 %.",
         ),
         t(
           "Nothing was added. Three things were removed or moved. The product didn't change; the distance between the door and the value did.",
@@ -2368,6 +2498,137 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       },
     ],
   },
+  // ——— wave 2.2, lot 3 (2026-09-14) — closes the batch ———
+  "product-led-growth": {
+    formula: {
+      expression: t(
+        "Self-serve share = (customers who reached paid without talking to anyone) ÷ (all new customers in the period)",
+        "Part self-serve = (clients arrivés au payant sans avoir parlé à personne) ÷ (tous les nouveaux clients de la période)",
+      ),
+      terms: [
+        {
+          symbol: t("Without talking to anyone", "Sans avoir parlé à personne"),
+          meaning: t(
+            "No demo, no discovery call, no negotiated quote. A support ticket does not count as a conversation — helping someone who is already buying is not selling to them.",
+            "Pas de démo, pas d'appel de découverte, pas de devis négocié. Un ticket au support ne compte pas comme une conversation — aider quelqu'un qui achète déjà, ce n'est pas lui vendre.",
+          ),
+        },
+        {
+          symbol: t("Customers, and revenue", "Clients, et revenu"),
+          meaning: t(
+            "Compute the share twice, once by customer count and once by revenue. The two answers are usually far apart, and the gap between them is the finding.",
+            "Calcule la part deux fois, une fois en nombre de clients et une fois en revenu. Les deux réponses sont en général très éloignées, et l'écart entre elles est la trouvaille.",
+          ),
+        },
+        {
+          symbol: t("Period", "Période"),
+          meaning: t(
+            "A quarter is usually the right window: long enough to absorb a single large deal, short enough to notice the motion drifting from one quarter to the next.",
+            "Un trimestre est en général la bonne fenêtre : assez longue pour absorber un gros contrat isolé, assez courte pour voir le modèle dériver d'un trimestre à l'autre.",
+          ),
+        },
+      ],
+      note: t(
+        "Product-led growth is a distribution model, not a quality bar. It works where a product can deliver value before a conversation — which is a property of the product and of who buys it, not of how much the team wants it to be true.",
+        "Le product-led growth est un modèle de distribution, pas un gage de qualité. Il fonctionne là où un produit peut délivrer de la valeur avant une conversation — ce qui est une propriété du produit et de qui l'achète, pas de l'envie qu'en a l'équipe.",
+      ),
+    },
+    example: {
+      title: t("A company that calls itself product-led", "Une entreprise qui se dit product-led"),
+      steps: [
+        t(
+          "200 new customers in a quarter. 150 booked a demo from the pricing page; 50 signed up and paid without ever talking to anyone.",
+          "200 nouveaux clients sur un trimestre. 150 ont réservé une démo depuis la page de tarifs ; 50 se sont inscrits et ont payé sans jamais parler à personne.",
+        ),
+        t(
+          "Self-serve share by customer count: 50 ÷ 200 = 25%. Already not what the pitch deck says, but defensible as a motion being built.",
+          "Part self-serve en nombre de clients : 50 ÷ 200 = 25 %. Déjà pas ce que dit le deck, mais défendable comme un modèle en construction.",
+        ),
+        t(
+          "Now by revenue. The 50 self-serve customers average €40 a month (€2,000 MRR); the 150 sales-led average €400 (€60,000 MRR). Self-serve share of revenue: 2,000 ÷ 62,000 ≈ 3%.",
+          "Maintenant en revenu. Les 50 clients self-serve paient 40 € par mois en moyenne (2 000 € de MRR) ; les 150 vendus paient 400 € (60 000 € de MRR). Part self-serve du revenu : 2 000 ÷ 62 000 ≈ 3 %.",
+        ),
+        t(
+          "25% and 3% describe the same quarter, and only one of them should drive the decision. If the question is \"should we invest in the product as a sales channel\", the answer has to be weighed against the 97% of revenue the other motion currently brings.",
+          "25 % et 3 % décrivent le même trimestre, et un seul des deux doit porter la décision. Si la question est « faut-il investir dans le produit comme canal de vente », la réponse doit être pesée contre les 97 % de revenu que l'autre modèle apporte aujourd'hui.",
+        ),
+      ],
+      takeaway: t(
+        "Neither number makes the company good or bad — a sales-led business with a free trial is a perfectly sound business. What the two numbers settle is which one it is, which is a question that has to be answered before deciding where the next year of engineering goes.",
+        "Aucun des deux chiffres ne rend l'entreprise bonne ou mauvaise — une entreprise vendue par des commerciaux avec un essai gratuit est une entreprise parfaitement saine. Ce que les deux chiffres tranchent, c'est laquelle des deux elle est, et cette question doit être réglée avant de décider où va la prochaine année d'ingénierie.",
+      ),
+    },
+    benchmark: [
+      t(
+        "The pattern most often cited is that product-led companies show both a lower acquisition cost and a lower average contract value. Both, which is why neither figure judges the model on its own: the number that does is CAC payback, where the two effects meet.",
+        "Le schéma le plus souvent cité est que les entreprises product-led affichent à la fois un coût d'acquisition plus bas et un panier moyen plus bas. Les deux, et c'est pourquoi aucun des deux chiffres ne juge le modèle seul : celui qui le fait est le CAC payback, là où les deux effets se rencontrent.",
+      ),
+      t(
+        "The model needs a product whose value is visible before a conversation and a buyer who is allowed to buy alone. Sell something that requires a security review and a procurement process and no amount of onboarding polish makes the motion self-serve — that is a constraint of the market, not a failure of execution.",
+        "Le modèle demande un produit dont la valeur est visible avant une conversation et un acheteur autorisé à acheter seul. Vends quelque chose qui exige une revue de sécurité et un processus d'achat, et aucun polissage d'onboarding ne rendra le modèle self-serve — c'est une contrainte du marché, pas un échec d'exécution.",
+      ),
+      t(
+        "Running both motions on the same segment without deciding which one owns it is the common failure, and it shows up as sales people being paid on deals the product had already closed.",
+        "Faire tourner les deux modèles sur le même segment sans décider lequel en a la charge est l'échec courant, et ça se voit quand des commerciaux sont payés sur des contrats que le produit avait déjà conclus.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Measure the self-serve share both ways before claiming the model, and publish both. One number is a slogan; two are a diagnosis.",
+        "Mesure la part self-serve des deux façons avant de revendiquer le modèle, et publie les deux. Un chiffre est un slogan ; deux sont un diagnostic.",
+      ),
+      t(
+        "Make value land before the conversation would have happened. That is the time-to-value question, and in a product-led motion it is not a comfort feature — it is the sales call.",
+        "Fais arriver la valeur avant le moment où la conversation aurait eu lieu. C'est la question du time to value, et dans un modèle product-led ce n'est pas un confort — c'est l'entretien de vente.",
+      ),
+      t(
+        "Put the expansion trigger inside the product rather than in a calendar: a usage threshold that fires an offer is the product doing the selling, which is what the model means in practice.",
+        "Mets le déclencheur d'expansion dans le produit plutôt que dans un calendrier : un seuil d'usage qui déclenche une offre, c'est le produit qui vend, ce que le modèle veut dire concrètement.",
+      ),
+      t(
+        "Decide which motion owns which segment and write it down. Self-serve under a size, sales-led above it, and no overlap — the overlap is where both teams claim the same customer and neither owns the experience.",
+        "Décide quel modèle a la charge de quel segment, et écris-le. Self-serve en dessous d'une taille, vendu au-dessus, et pas de recouvrement — le recouvrement est l'endroit où les deux équipes revendiquent le même client et où personne ne tient l'expérience.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "acq-1",
+      body: t(
+        "The Tour asks whether you have a primary acquisition channel that is identified and measured, for 20 points. It is a pointed question for a product-led team, because the honest answer is often \"the product\" — and a channel you cannot point at is a channel you cannot measure. Teams claiming the model and answering 7 here usually have a free tier and no idea what share of revenue comes through it, which is exactly the figure this page asks for.",
+        "Le Tour demande si tu as un canal d'acquisition principal identifié et mesuré, pour 20 points. C'est une question directe pour une équipe product-led, parce que la réponse honnête est souvent « le produit » — et un canal qu'on ne peut pas désigner est un canal qu'on ne peut pas mesurer. Les équipes qui revendiquent le modèle et répondent 7 ici ont en général un palier gratuit et aucune idée de la part de revenu qui passe par lui, c'est-à-dire exactement le chiffre que cette page réclame.",
+      ),
+    },
+    faq: [
+      {
+        question: t("How do I know if I am actually product-led?", "Comment savoir si je suis réellement product-led ?"),
+        answer: t(
+          "Compute the self-serve share by revenue for last quarter. Not by sign-ups, not by customer count — by revenue. Most companies that describe themselves this way find a number well under a third, which does not make them wrong to aim for it, only wrong to plan as though they had arrived.",
+          "Calcule la part self-serve en revenu sur le dernier trimestre. Pas en inscriptions, pas en nombre de clients — en revenu. La plupart des entreprises qui se décrivent ainsi trouvent un chiffre bien sous le tiers, ce qui ne leur donne pas tort de viser le modèle, seulement de planifier comme si elles y étaient.",
+        ),
+      },
+      {
+        question: t("Do I need a free tier?", "Faut-il un palier gratuit ?"),
+        answer: t(
+          "You need a way for someone to reach value before paying, which a free tier, a trial, or a genuinely useful demo environment can all provide. The free tier is the most common form and the most expensive one — it commits you to serving users who may never pay, and that cost belongs in your gross margin.",
+          "Il te faut un moyen d'atteindre la valeur avant de payer, ce qu'un palier gratuit, un essai ou un environnement de démonstration réellement utile peuvent tous fournir. Le palier gratuit est la forme la plus courante et la plus coûteuse — il t'engage à servir des utilisateurs qui ne paieront peut-être jamais, et ce coût appartient à ta marge brute.",
+        ),
+      },
+      {
+        question: t("Is product-led growth cheaper?", "Le product-led growth coûte-t-il moins cher ?"),
+        answer: t(
+          "Per customer, usually yes; per euro of revenue, not necessarily, because the contracts are smaller. The comparison that settles it is CAC payback, which folds both effects into one number. A motion with a €200 CAC and a €20 monthly margin pays back in ten months; one with a €5,000 CAC and a €900 margin pays back in six.",
+          "Par client, en général oui ; par euro de revenu, pas nécessairement, parce que les contrats sont plus petits. La comparaison qui tranche est le CAC payback, qui rassemble les deux effets en un seul chiffre. Un modèle à 200 € de CAC et 20 € de marge mensuelle se rembourse en dix mois ; un modèle à 5 000 € de CAC et 900 € de marge, en six.",
+        ),
+      },
+      {
+        question: t("Can both motions coexist?", "Les deux modèles peuvent-ils coexister ?"),
+        answer: t(
+          "Routinely, and most companies that grow past a certain size end up running both. What does not work is running them on the same customers without a rule: the rule can be company size, plan, or geography, but there has to be one, written down, or the two motions spend their time re-selling each other's customers.",
+          "Couramment, et la plupart des entreprises qui dépassent une certaine taille finissent par faire tourner les deux. Ce qui ne marche pas, c'est de les faire tourner sur les mêmes clients sans règle : la règle peut être la taille d'entreprise, l'offre ou la géographie, mais il en faut une, écrite, sinon les deux modèles passent leur temps à revendre les clients l'un de l'autre.",
+        ),
+      },
+    ],
+  },
+
   "growth-loop": {
     formula: {
       expression: t(
@@ -2415,7 +2676,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         ),
         t(
           "Suppose 20% of Tours are shared, a shared page is read by 12 people, and 6% of readers start their own: 0.2 × 12 × 0.06 = 0.144 new Tours per Tour. Multiplier 0.144; every 100 Tours from outside eventually yield about 117.",
-          "Suppose que 20 % des Tours soient partagés, qu'une page partagée soit lue par 12 personnes, et que 6 % des lecteurs lancent le leur : 0,2 × 12 × 0,06 = 0,144 nouveau Tour par Tour. Multiplicateur 0,144 ; chaque centaine de Tours venue de l'extérieur en produit finalement environ 117.",
+          "Suppose que 20 % des Tours soient partagés, qu'une page partagée soit lue par 12 personnes, et que 6 % des lecteurs lancent le leur : 0,2 × 12 × 0,06 = 0,144 nouveau Tour par Tour. Multiplicateur 0,144 ; chaque centaine de Tours venue de l'extérieur en produit finalement environ 117.",
         ),
         t(
           "Cycle time is hours, not months: a result is shared the day it is created, and read within days. That is why even a modest multiplier matters here — it compounds fast.",
@@ -2495,6 +2756,136 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
     ],
   },
 
+  arpu: {
+    formula: {
+      expression: t(
+        "ARPU = (revenue over a period) ÷ (average active users over that period) — and ARPPU = the same revenue ÷ PAYING users only",
+        "ARPU = (revenu d'une période) ÷ (moyenne des utilisateurs actifs sur cette période) — et l'ARPPU = le même revenu ÷ les seuls utilisateurs PAYANTS",
+      ),
+      terms: [
+        {
+          symbol: t("Revenue", "Revenu"),
+          meaning: t(
+            "Decide once whether this is recurring revenue only or everything, and never switch. Mixing a one-off setup fee into one month makes that month's ARPU a spike nobody can explain a quarter later.",
+            "Décide une fois s'il s'agit du seul revenu récurrent ou de tout, et n'en change plus. Mélanger des frais de mise en place ponctuels dans un mois fait de l'ARPU de ce mois un pic que personne ne saura expliquer un trimestre plus tard.",
+          ),
+        },
+        {
+          symbol: t("Users", "Utilisateurs"),
+          meaning: t(
+            "Active users, not registered ones. Dividing by everyone who ever created an account produces a number that falls every month by construction, and says nothing about anything.",
+            "Les utilisateurs actifs, pas les inscrits. Diviser par tous ceux qui ont un jour créé un compte produit un chiffre qui baisse chaque mois par construction, et ne dit rien de rien.",
+          ),
+        },
+        {
+          symbol: t("Which of the two", "Laquelle des deux"),
+          meaning: t(
+            "ARPU answers \"what is a new sign-up worth\", which is what you compare acquisition spend against. ARPPU answers \"what is a customer worth\", which is what you compare a price change against. Both get called ARPU, in different decks, on the same week.",
+            "L'ARPU répond à « combien vaut une nouvelle inscription », ce que l'on compare à une dépense d'acquisition. L'ARPPU répond à « combien vaut un client », ce que l'on compare à un changement de prix. Les deux se font appeler ARPU, dans des documents différents, la même semaine.",
+          ),
+        },
+      ],
+      note: t(
+        "ARPU is a rate, LTV is a total: LTV ≈ ARPU × gross margin × average lifetime. A customer at €50 a month with an 80% margin who stays 33 months is worth about €1,320 — the figure the CAC payback page uses, built from exactly this number.",
+        "L'ARPU est un taux, la LTV est un total : LTV ≈ ARPU × marge brute × durée de vie moyenne. Un client à 50 € par mois avec 80 % de marge qui reste 33 mois vaut environ 1 320 € — le chiffre qu'utilise la page CAC payback, construit précisément à partir de celui-ci.",
+      ),
+    },
+    example: {
+      title: t("Two numbers, twenty-five times apart", "Deux chiffres, vingt-cinq fois d'écart"),
+      steps: [
+        t(
+          "A freemium tool: 100,000 active users, 4,000 of whom pay. Monthly revenue: €80,000.",
+          "Un outil freemium : 100 000 utilisateurs actifs, dont 4 000 paient. Revenu mensuel : 80 000 €.",
+        ),
+        t(
+          "ARPU = 80,000 ÷ 100,000 = €0.80. ARPPU = 80,000 ÷ 4,000 = €20. Same month, same revenue, and a factor of twenty-five between the two.",
+          "ARPU = 80 000 ÷ 100 000 = 0,80 €. ARPPU = 80 000 ÷ 4 000 = 20 €. Le même mois, le même revenu, et un facteur vingt-cinq entre les deux.",
+        ),
+        t(
+          "Now lift conversion from 4% to 5% without touching the price: 5,000 payers × €20 = €100,000. ARPU goes from €0.80 to €1.00, up 25%. ARPPU has not moved at all.",
+          "Fais maintenant passer la conversion de 4 % à 5 % sans toucher au prix : 5 000 payants × 20 € = 100 000 €. L'ARPU passe de 0,80 € à 1,00 €, soit +25 %. L'ARPPU, lui, n'a pas bougé d'un centime.",
+        ),
+        t(
+          "Raise the price by 25% instead, with conversion unchanged: ARPPU goes to €25 and ARPU to €1.00 as well. Two completely different projects, identical in one number and distinguishable only by the other.",
+          "Augmente plutôt le prix de 25 %, à conversion inchangée : l'ARPPU passe à 25 € et l'ARPU à 1,00 € lui aussi. Deux projets complètement différents, identiques sur un chiffre et distinguables uniquement par l'autre.",
+        ),
+      ],
+      takeaway: t(
+        "Quoting one of them without saying which is how a conversion win and a price rise end up reported as the same result. Say which, every time, and put the user count next to it.",
+        "Citer l'un des deux sans dire lequel est la façon dont un gain de conversion et une hausse de prix finissent rapportés comme le même résultat. Dis lequel, à chaque fois, et mets le nombre d'utilisateurs à côté.",
+      ),
+    },
+    benchmark: [
+      t(
+        "ARPU varies by three orders of magnitude across categories — cents a month for a consumer app, thousands for enterprise software — so a cross-company comparison compares business models rather than performance. There is no useful table here.",
+        "L'ARPU varie de trois ordres de grandeur d'une catégorie à l'autre — quelques centimes par mois pour une application grand public, des milliers pour un logiciel d'entreprise — donc une comparaison inter-entreprises compare des modèles économiques et non des performances. Il n'y a pas de tableau utile ici.",
+      ),
+      t(
+        "The comparison that means something is your own trend, decomposed. An ARPU up 10% can be a price rise, a conversion win, or simply a mix shift toward larger customers — three different results reported by one number, and only the decomposition tells them apart.",
+        "La comparaison qui a du sens est ta propre tendance, décomposée. Un ARPU en hausse de 10 % peut être une hausse de prix, un gain de conversion, ou simplement un glissement du mix vers de plus gros clients — trois résultats différents rapportés par un seul chiffre, et seule la décomposition les distingue.",
+      ),
+      t(
+        "A rising ARPU on a falling user count is usually small users churning, not a win. It is the same mechanical trap as the DAU/MAU ratio, and it is why neither is ever quoted without the denominator beside it.",
+        "Un ARPU qui monte sur un nombre d'utilisateurs qui baisse, ce sont en général les petits utilisateurs qui partent, pas une victoire. C'est le même piège mécanique que le ratio DAU/MAU, et c'est pourquoi ni l'un ni l'autre ne se cite sans son dénominateur à côté.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Say which of the two you mean, in the label, every time. \"ARPU (paying)\" costs one word and settles most of the arguments this metric causes.",
+        "Dis laquelle des deux tu utilises, dans l'intitulé, à chaque fois. « ARPU (payants) » coûte un mot et règle la plupart des désaccords que cette métrique provoque.",
+      ),
+      t(
+        "Decompose every movement into price, mix and conversion before reporting it. A number that moved for three reasons at once is not a result yet.",
+        "Décompose chaque variation en prix, mix et conversion avant de la rapporter. Un chiffre qui a bougé pour trois raisons à la fois n'est pas encore un résultat.",
+      ),
+      t(
+        "Segment it. A blended ARPU over a base that contains both a €9 plan and a €900 plan describes neither, and the segment-level numbers are the ones a pricing decision actually needs.",
+        "Segmente-le. Un ARPU global sur une base qui contient à la fois une offre à 9 € et une à 900 € ne décrit ni l'une ni l'autre, et ce sont les chiffres par segment dont une décision de pricing a réellement besoin.",
+      ),
+      t(
+        "Publish it next to the active user count, always — the pair is what makes a rise readable as growth rather than as attrition.",
+        "Publie-le à côté du nombre d'utilisateurs actifs, toujours — c'est le couple qui rend une hausse lisible comme de la croissance plutôt que comme de l'attrition.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "rev-2",
+      body: t(
+        "The Tour asks whether you know your LTV, even roughly — 20 points for yes, 7 for an order of magnitude, 0 for no. ARPU is the first of the three inputs, and the easiest: most teams who cannot answer the LTV question could compute their ARPU this afternoon, because the revenue and the user count are both already in a dashboard. What is usually missing is the average lifetime, which needs a churn rate — which is why the 0-point answer here so often travels with a 0 on the retention questions.",
+        "Le Tour demande si tu connais ta LTV, même approximativement — 20 points pour oui, 7 pour un ordre de grandeur, 0 pour non. L'ARPU est la première des trois entrées, et la plus facile : la plupart des équipes qui ne savent pas répondre à la question de la LTV pourraient calculer leur ARPU cet après-midi, parce que le revenu et le nombre d'utilisateurs sont déjà tous les deux dans un tableau de bord. Ce qui manque en général, c'est la durée de vie moyenne, qui demande un taux de churn — et c'est pourquoi la réponse à 0 point voyage si souvent avec un 0 sur les questions de rétention.",
+      ),
+    },
+    faq: [
+      {
+        question: t("ARPU or ARPPU — which should I use?", "ARPU ou ARPPU — lequel utiliser ?"),
+        answer: t(
+          "Whichever matches the decision. Judging acquisition spend needs ARPU, because you pay to acquire sign-ups and only some of them convert. Judging a price change needs ARPPU, because free users are not affected by it. Using the wrong one makes a freemium product look either unaffordable to acquire or implausibly lucrative.",
+          "Celui qui correspond à la décision. Juger une dépense d'acquisition demande l'ARPU, parce qu'on paie pour acquérir des inscriptions dont une partie seulement convertit. Juger un changement de prix demande l'ARPPU, parce que les utilisateurs gratuits n'en sont pas affectés. Prendre le mauvais fait passer un produit freemium soit pour inabordable à acquérir, soit pour invraisemblablement lucratif.",
+        ),
+      },
+      {
+        question: t("What is the difference with LTV?", "Quelle différence avec la LTV ?"),
+        answer: t(
+          "ARPU is per period, LTV is over a lifetime: multiply ARPU by gross margin and by the average number of periods a customer stays. That makes ARPU the reliable half of the pair — it is measured, while the lifetime is projected, and the projection is where most LTV disagreements actually live.",
+          "L'ARPU est par période, la LTV sur une durée de vie : multiplie l'ARPU par la marge brute et par le nombre moyen de périodes pendant lesquelles un client reste. Ce qui fait de l'ARPU la moitié fiable du couple — il est mesuré, là où la durée de vie est projetée, et c'est dans cette projection que vivent la plupart des désaccords sur la LTV.",
+        ),
+      },
+      {
+        question: t("Does a rising ARPU mean the business is growing?", "Un ARPU en hausse veut-il dire que l'entreprise grandit ?"),
+        answer: t(
+          "Not on its own. Lose your smallest users and the average of those remaining rises without a single euro being added. Read it with the active user count and with total revenue: growth is all three moving the right way, and ARPU alone can move the right way while the other two do not.",
+          "Pas en soi. Perds tes plus petits utilisateurs et la moyenne de ceux qui restent monte sans qu'un euro ait été ajouté. Lis-le avec le nombre d'utilisateurs actifs et le revenu total : la croissance, c'est les trois qui vont dans le bon sens, et l'ARPU seul peut y aller pendant que les deux autres non.",
+        ),
+      },
+      {
+        question: t("Monthly or annual?", "Mensuel ou annuel ?"),
+        answer: t(
+          "Monthly for steering, and stated as such. Where contracts are annual, the monthly equivalent is the comparable figure, and mixing an annual ARPU into a monthly series produces a twelve-fold step that reads like a spectacular quarter.",
+          "Mensuel pour piloter, et annoncé comme tel. Là où les contrats sont annuels, l'équivalent mensuel est le chiffre comparable, et mélanger un ARPU annuel dans une série mensuelle produit une marche d'un facteur douze qui se lit comme un trimestre spectaculaire.",
+        ),
+      },
+    ],
+  },
+
   "north-star-metric": {
     formula: {
       expression: t(
@@ -2542,11 +2933,11 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         ),
         t(
           "Decomposed: 1,200 sending accounts × 1.8 reports a week × 3.1 recipients each. Three teams, three inputs: onboarding owns the first, product owns the second, sharing owns the third.",
-          "Décomposée : 1 200 comptes qui envoient × 1,8 rapport par semaine × 3,1 destinataires chacun. Trois équipes, trois entrées : l'onboarding porte la première, le produit la deuxième, le partage la troisième.",
+          "Décomposée : 1 200 comptes qui envoient × 1,8 rapport par semaine × 3,1 destinataires chacun. Trois équipes, trois entrées : l'onboarding porte la première, le produit la deuxième, le partage la troisième.",
         ),
         t(
           "Two quarters later, revenue grows 30% — and the North Star had shown it a quarter earlier, when sending accounts crossed 1,500 while revenue was still flat.",
-          "Deux trimestres plus tard, le revenu croît de 30 % — et la North Star l'avait montré un trimestre plus tôt, quand les comptes qui envoient ont passé 1 500 alors que le revenu était encore plat.",
+          "Deux trimestres plus tard, le revenu croît de 30 % — et la North Star l'avait montré un trimestre plus tôt, quand les comptes qui envoient ont passé 1 500 alors que le revenu était encore plat.",
         ),
       ],
       takeaway: t(
@@ -2605,7 +2996,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         question: t("North Star Metric vs. OKRs — how do they fit together?", "North Star et OKR, comment ça s'articule ?"),
         answer: t(
           "The North Star is the long-lived measure of value the company optimises; OKRs are quarterly commitments to move specific input metrics beneath it. A good OKR names an input (activation rate from 23% to 30%) and can explain, in one sentence, how it moves the star. OKRs that can't are activity dressed as outcomes.",
-          "La North Star est la mesure durable de valeur que l'entreprise optimise ; les OKR sont des engagements trimestriels à faire bouger des métriques d'entrée précises en dessous. Un bon OKR nomme une entrée (taux d'activation de 23 % à 30 %) et peut expliquer, en une phrase, comment il fait bouger l'étoile. Les OKR qui ne le peuvent pas sont de l'activité déguisée en résultat.",
+          "La North Star est la mesure durable de valeur que l'entreprise optimise ; les OKR sont des engagements trimestriels à faire bouger des métriques d'entrée précises en dessous. Un bon OKR nomme une entrée (taux d'activation de 23 % à 30 %) et peut expliquer, en une phrase, comment il fait bouger l'étoile. Les OKR qui ne le peuvent pas sont de l'activité déguisée en résultat.",
         ),
       },
       {
@@ -2660,19 +3051,19 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       steps: [
         t(
           "5,000 free sign-ups in a quarter, 300 of whom convert to paid: a 6% baseline.",
-          "5 000 inscriptions gratuites sur un trimestre, dont 300 passent au payant : une base de 6 %.",
+          "5 000 inscriptions gratuites sur un trimestre, dont 300 passent au payant : une base de 6 %.",
         ),
         t(
           "Threshold A, \"invited a teammate\": 900 users qualify and 135 convert (15%); the other 4,100 produce 165 conversions (4.0%). Lift = 15 ÷ 4.0 ≈ 3.7×.",
-          "Seuil A, « a invité un coéquipier » : 900 utilisateurs qualifient et 135 convertissent (15 %) ; les 4 100 autres produisent 165 conversions (4,0 %). Lift = 15 ÷ 4,0 ≈ 3,7×.",
+          "Seuil A, « a invité un coéquipier » : 900 utilisateurs qualifient et 135 convertissent (15 %) ; les 4 100 autres produisent 165 conversions (4,0 %). Lift = 15 ÷ 4,0 ≈ 3,7×.",
         ),
         t(
           "Threshold B, \"logged in three times\": 3,200 qualify and 260 convert (8.1%); the other 1,800 produce 40 conversions (2.2%). Lift = 8.1 ÷ 2.2 ≈ 3.7× — identical.",
-          "Seuil B, « s'est connecté trois fois » : 3 200 qualifient et 260 convertissent (8,1 %) ; les 1 800 autres produisent 40 conversions (2,2 %). Lift = 8,1 ÷ 2,2 ≈ 3,7× — identique.",
+          "Seuil B, « s'est connecté trois fois » : 3 200 qualifient et 260 convertissent (8,1 %) ; les 1 800 autres produisent 40 conversions (2,2 %). Lift = 8,1 ÷ 2,2 ≈ 3,7× — identique.",
         ),
         t(
           "Same lift, and only one of them is a list. A is 900 people a quarter converting at 15%: about ten contacts a day, each with better-than-even odds of being worth the call. B is 3,200 people at 8%, which is a mailing list with extra steps.",
-          "Le même lift, et une seule des deux est une liste. A, c'est 900 personnes par trimestre qui convertissent à 15 % : une dizaine de contacts par jour, chacun avec une chance sérieuse d'en valoir la peine. B, c'est 3 200 personnes à 8 %, autrement dit une liste de diffusion avec des étapes en plus.",
+          "Le même lift, et une seule des deux est une liste. A, c'est 900 personnes par trimestre qui convertissent à 15 % : une dizaine de contacts par jour, chacun avec une chance sérieuse d'en valoir la peine. B, c'est 3 200 personnes à 8 %, autrement dit une liste de diffusion avec des étapes en plus.",
         ),
       ],
       takeaway: t(
@@ -2790,7 +3181,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       steps: [
         t(
           "A project tool with a €50 plan (5 seats) and a €110 plan (15 seats). 400 customers, €20,000 MRR. Until now, upgrades happen when a customer hits the seat limit and finds the pricing page on their own.",
-          "Un outil de projet avec une offre à 50 € (5 sièges) et une à 110 € (15 sièges). 400 clients, 20 000 € de MRR. Jusqu'ici, les montées en gamme arrivent quand un client atteint la limite de sièges et trouve la page de tarifs tout seul.",
+          "Un outil de projet avec une offre à 50 € (5 sièges) et une à 110 € (15 sièges). 400 clients, 20 000 € de MRR. Jusqu'ici, les montées en gamme arrivent quand un client atteint la limite de sièges et trouve la page de tarifs tout seul.",
         ),
         t(
           "Playbook, three lines: (1) at 4 of 5 seats used and at least 30 days of activity, show an in-app note explaining the next tier — never before day 30; (2) at 5 of 5, the founder sends one personal email; (3) any account that added a second project type gets offered the reporting module.",
@@ -2798,11 +3189,11 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         ),
         t(
           "Before: about 8 upgrades a month, +€480. After a quarter: 15 upgrades (+€900) and 6 module sales at €30 (+€180). Expansion rate: from 2.4% to 5.4% of opening MRR.",
-          "Avant : environ 8 montées en gamme par mois, +480 €. Après un trimestre : 15 montées (+900 €) et 6 ventes de module à 30 € (+180 €). Taux d'expansion : de 2,4 % à 5,4 % du MRR de départ.",
+          "Avant : environ 8 montées en gamme par mois, +480 €. Après un trimestre : 15 montées (+900 €) et 6 ventes de module à 30 € (+180 €). Taux d'expansion : de 2,4 % à 5,4 % du MRR de départ.",
         ),
         t(
           "Gross revenue churn that month: 5%. Net revenue churn went from +2.6% to −0.4%: the existing base now grows by itself, before counting a single new customer.",
-          "Churn revenu brut ce mois-là : 5 %. Le churn revenu net est passé de +2,6 % à −0,4 % : la base existante grandit maintenant toute seule, avant de compter le moindre nouveau client.",
+          "Churn revenu brut ce mois-là : 5 %. Le churn revenu net est passé de +2,6 % à −0,4 % : la base existante grandit maintenant toute seule, avant de compter le moindre nouveau client.",
         ),
       ],
       takeaway: t(
@@ -2813,7 +3204,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
     benchmark: [
       t(
         "The best B2B SaaS companies report net revenue retention of 110-130%, which means expansion outruns churn by 10-30 points a year; below 100%, every year starts with a smaller base than the last. Expansion is where most of that gap is made.",
-        "Les meilleures entreprises SaaS B2B affichent une rétention nette de revenu de 110-130 %, c'est-à-dire une expansion qui dépasse le churn de 10 à 30 points par an ; sous 100 %, chaque année commence avec une base plus petite que la précédente. L'expansion est là où l'essentiel de cet écart se fait.",
+        "Les meilleures entreprises SaaS B2B affichent une rétention nette de revenu de 110-130 %, c'est-à-dire une expansion qui dépasse le churn de 10 à 30 points par an ; sous 100 %, chaque année commence avec une base plus petite que la précédente. L'expansion est là où l'essentiel de cet écart se fait.",
       ),
       t(
         "A commonly cited pattern: winning an expansion from an existing customer costs a fraction of winning a new one — figures of a quarter to a third of the CAC are often quoted, and the exact number matters less than the direction.",
