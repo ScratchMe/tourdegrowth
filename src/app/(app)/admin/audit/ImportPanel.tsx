@@ -14,6 +14,14 @@ export interface PendingImport {
   result: ParseResult;
   /** True when a mission with the same id is already on this device. */
   collides: boolean;
+  /**
+   * True when the incoming file is a purged copy and the one already here is
+   * not. `purgeMission` keeps the id, so a purged export ALWAYS collides with
+   * the mission it came from — and replacing would silently trade the full
+   * work for a copy with no company name and no values. Found by a spec that
+   * imported a purged copy and then could not find the original.
+   */
+  purgedOverFull: boolean;
 }
 
 /**
@@ -41,7 +49,7 @@ export function ImportPanel({
   onCancel: () => void;
   onConfirm: (mission: Mission, mode: "replace" | "keep-both") => void;
 }) {
-  const [mode, setMode] = useState<"replace" | "keep-both">("replace");
+  const [mode, setMode] = useState<"replace" | "keep-both">(pending.purgedOverFull ? "keep-both" : "replace");
   const mission = pending.result.mission;
   const errors = pending.result.ok ? [] : pending.result.errors;
 
@@ -102,7 +110,12 @@ export function ImportPanel({
 
             {pending.collides ? (
               <div className={styles.checkboxRow} data-testid="import-collision">
-                <p className={styles.alert}>Une mission de même identifiant est déjà sur cet appareil.</p>
+                <p className={styles.alert}>
+                  Une mission de même identifiant est déjà sur cet appareil.
+                  {pending.purgedOverFull
+                    ? " Ce fichier est une copie purgée : la remplacer échangerait tout le travail contre une copie sans nom ni valeurs."
+                    : ""}
+                </p>
                 <Button compact variant={mode === "replace" ? "primary" : "secondary"} onClick={() => setMode("replace")}>
                   Remplacer
                 </Button>

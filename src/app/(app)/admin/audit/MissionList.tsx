@@ -90,7 +90,7 @@ export function MissionList({
                       {last ? `exportée le ${last.slice(0, 10)}` : "jamais exportée"}
                     </p>
                   </div>
-                  <Button compact variant="secondary" onClick={() => onOpen(mission.id)} data-testid={`open-${mission.id}`}>
+                  <Button compact variant="secondary" onClick={() => onOpen(mission.id)} data-testid="open-mission">
                     Ouvrir
                   </Button>
                 </Card>

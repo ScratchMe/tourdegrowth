@@ -137,6 +137,32 @@ test.describe("the audit instrument's missions", () => {
     await expect(page.getByText("Aucune mission sur cet appareil.")).toBeVisible();
   });
 
+  /**
+   * An imported purged example has no company name left to retype, so
+   * without a fallback its delete button would stay disabled forever — a
+   * mission you could never get rid of. Found by re-reading the gate, not by
+   * a failing test: `expected.length > 0` made `matches` permanently false.
+   */
+  test("an already-purged mission can still be removed from the device", async ({ page }) => {
+    await createMission(page, "Acme Analytics");
+    const download = await Promise.all([page.waitForEvent("download"), page.getByTestId("export-purged").click()]).then(([d]) => d);
+    const path = await download.path();
+
+    await page.getByTestId("close-mission").click();
+    await page.getByTestId("import-file").setInputFiles(path);
+    await page.getByTestId("confirm-import").click();
+    await page.getByTestId("open-purge").click();
+
+    const confirm = page.getByTestId("confirm-purge");
+    await expect(confirm).toBeDisabled();
+    await page.locator("#purge-confirm").fill("PURGER");
+    await expect(confirm).toBeEnabled();
+    await confirm.click();
+
+    // The original working mission is still there — only the purged copy went.
+    await expect(page.getByTestId("mission-list")).toContainText("Acme Analytics");
+  });
+
   test("a file it cannot read is refused rather than opened with errors", async ({ page }) => {
     await page.goto("/admin/audit");
     await page.getByTestId("import-file").setInputFiles({

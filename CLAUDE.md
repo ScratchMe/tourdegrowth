@@ -2810,6 +2810,26 @@ donc `markExported` et `saveMission` ont chacune leur test de non-écrasement
 exportée » est traité comme le cas le plus dangereux, pas comme une
 exception : c'est celui où un vidage des données du site perd tout.
 
+**Trois défauts trouvés en me relisant, pas en voyant rouge.** Ils valent
+d'être nommés parce qu'aucun n'aurait fait échouer quoi que ce soit :
+1. **Une mission purgée ne pouvait jamais être retirée de l'appareil.** La
+   confirmation demande de retaper le nom de l'entreprise ; une mission
+   purgée n'en a plus, donc `matches` restait faux pour toujours et le bouton
+   désactivé. C'est le cas d'un exemple purgé qu'on importe pour le montrer
+   et dont on veut se débarrasser. Repli : retaper « PURGER ».
+2. **Réimporter une copie purgée écrasait la mission de travail.**
+   `purgeMission` garde l'`id`, donc une copie purgée entre TOUJOURS en
+   collision avec la mission dont elle vient, et le défaut « Remplacer »
+   échangeait silencieusement tout le travail contre une copie sans nom ni
+   valeurs. Le défaut bascule sur « Garder les deux » dans ce cas précis, et
+   l'écran dit pourquoi. Trouvé par la spec du point 1, qui ne retrouvait
+   plus l'original — le test cherchait autre chose et a buté dessus.
+3. **Le téléchargement était fragile** : un anchor détaché ne déclenche pas
+   le téléchargement partout, et révoquer l'URL dans la même pile peut couper
+   un transfert qui n'a pas démarré. C'est le seul chemin par lequel le
+   travail quitte l'appareil ; il est maintenant dans le document, et l'URL
+   est révoquée plus tard.
+
 **Prérequis CI, comme le plan l'annonçait** : il n'existait aucune spec sur
 `/admin/*`, qui **échoue fermé** (sans `ADMIN_DASHBOARD_PASSWORD`, tout
 `/admin` est un 401 pour tout le monde). `ci.yml` pose donc `e2e-admin` au
@@ -2819,8 +2839,8 @@ vertes (le piège de R-11) ni faussement rouges (son inverse de R2-26).
 Vérifié dans les deux sens.
 
 **Vérifié en réel** : `tsc`, `eslint`, 572 tests unitaires, couverture
-au-dessus des seuils, `next build` (`ƒ /admin/audit`), **195 specs
-Playwright** (+9), passe axe verte sur les trois écrans. Le téléchargement
+au-dessus des seuils, `next build` (`ƒ /admin/audit`), **196 specs
+Playwright** (+10), passe axe verte sur les trois écrans. Le téléchargement
 est un vrai téléchargement de navigateur (`URL.createObjectURL` +
 `<a download>`), relu depuis le disque et repassé au validateur dans le test.
 
@@ -2846,7 +2866,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **L'instrument d'audit growth a son schéma** (2026-09-13, `AUDIT.md`) : un outil personnel pour les diagnostics qu'Antoine mène en entreprise, navigateur seulement, jamais Firestore — `src/lib/audit/` + `src/content/audit-catalog.ts`, sans aucune route ni UI encore. Phase 1 (la saisie sous `/admin/audit`) est le prochain chantier, découpée en six PR dans **`AUDIT-PLAN.md`** (2026-09-13) ; phase 3 (tout ce qui ressemble à un produit) reste fermée tant que les entretiens ne sont pas faits et le contrat de travail pas vérifié.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **572 tests unitaires**, **195 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
+**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **572 tests unitaires**, **196 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 
@@ -2864,7 +2884,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Les deux nouveaux événements A4 (`retake_started`, `landing_return`) | Vérifiés en e2e, jamais contre le vrai GoatCounter (le proxy du bac à sable bloque `*.goatcounter.com`) | Un regard d'Antoine sur `/admin/stats` après déploiement : deux lignes de plus dans la section funnel, et la ligne « Value actions per result ». |
 | R2-30 (fenêtre Tour de France, SPEC.md §10) | Reporté d'un commun accord : pas d'urgence | À construire **avant** juin 2027, pour que le post parte pendant le vrai Tour et pas après. |
 | Les e2e de composition ne passent que par la branche échantillon | `/r/sample` utilise `getSampleNextMove` et `SAMPLE_RESULT.pillars`, pas le vrai chemin. La garde statique est donc seule à protéger le payload | Un id de fixture derrière une variable d'environnement fermée par défaut. À décider : c'est une porte de test sur la route publique la plus sensible. |
-| Flake `locale-routing.spec.ts:75` | Deux échecs le 2026-09-10, toujours en suite complète parallèle, jamais isolée (8/8) | La prochaine occurrence en CI laisse une trace (`retries: 1` + `trace: on-first-retry`, rapport téléversé). Ne pas durcir la spec en attendant le cookie : ça masquerait une éventuelle course produit. |
+| Flake `locale-routing.spec.ts:75` | Deux échecs le 2026-09-10 et un le 2026-09-14, toujours en suite complète parallèle, jamais isolée ni à la reprise | La prochaine occurrence en CI laisse une trace (`retries: 1` + `trace: on-first-retry`, rapport téléversé). Ne pas durcir la spec en attendant le cookie : ça masquerait une éventuelle course produit. |
 | TypeScript 7 et ESLint 10 | Tous deux bloqués par des paquets embarqués dans `eslint-config-next` (`typescript-eslint` refuse TS ≥ 6.1 ; `eslint-plugin-react` plante sur ESLint 10). Dependabot les ignore en majeure depuis le 2026-09-08 | Quand `eslint-config-next` suivra. Re-tester en installant, pas en lisant les plages de peer : c'est l'essai qui a montré qu'ESLint 10 plante. |
 | Instrument d'audit : phase 1 (saisie) | Feu vert d'Antoine sur `AUDIT-PLAN.md` le 2026-09-14. **1.1 et 1.2 livrées** — `/admin/audit` crée, exporte, réimporte et purge une mission ; la saisie des lignes est 1.3 | Rien : la suite s'enchaîne dans l'ordre des dépendances, 1.3 (éditeur de ligne, la plus grosse) est la prochaine. |
 | Catalogue de l'instrument d'audit à relire | 39 lignes de texte qui s'imprimeront dans les livrables d'Antoine, sous son nom | Un bon à tirer, même circuit que les précédents. |

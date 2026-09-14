@@ -78,8 +78,14 @@ export function AuditWorkbench({ catalog, today }: { catalog: EmbeddedCatalog; t
     const link = document.createElement("a");
     link.href = url;
     link.download = fileNameFor(mission);
+    // Dans le document, et révoqué plus tard : un anchor détaché ne déclenche
+    // pas le téléchargement sur tous les navigateurs, et révoquer l'URL dans
+    // la même pile peut couper un téléchargement qui n'a pas encore démarré.
+    // C'est le seul chemin par lequel le travail d'Antoine quitte l'appareil.
+    document.body.append(link);
     link.click();
-    URL.revokeObjectURL(url);
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
   }
 
   function exportMission(mission: Mission) {
@@ -115,8 +121,16 @@ export function AuditWorkbench({ catalog, today }: { catalog: EmbeddedCatalog; t
           onImport={(file) => {
             void file.text().then((text) => {
               const result = parseMissionFile(text);
-              const collides = result.mission !== null && missions.some((m) => m.id === result.mission!.id);
-              setView({ kind: "import", pending: { fileName: file.name, result, collides } });
+              const existing = result.mission ? missions.find((m) => m.id === result.mission!.id) : undefined;
+              setView({
+                kind: "import",
+                pending: {
+                  fileName: file.name,
+                  result,
+                  collides: existing !== undefined,
+                  purgedOverFull: existing !== undefined && result.mission?.purged === true && existing.purged !== true,
+                },
+              });
             });
           }}
         />
@@ -201,8 +215,12 @@ export function AuditWorkbench({ catalog, today }: { catalog: EmbeddedCatalog; t
  */
 function PurgeConfirm({ mission, onCancel, onConfirm }: { mission: Mission; onCancel: () => void; onConfirm: () => void }) {
   const [typed, setTyped] = useState("");
-  const expected = mission.header.company;
-  const matches = typed.trim() === expected && expected.length > 0;
+  // Une mission déjà purgée n'a plus de nom d'entreprise à retaper : sans ce
+  // repli, elle ne pourrait JAMAIS être retirée de l'appareil (le bouton
+  // resterait désactivé pour toujours). C'est le cas d'un exemple purgé
+  // importé pour être montré, puis dont on veut se débarrasser.
+  const expected = mission.header.company || "PURGER";
+  const matches = typed.trim() === expected;
 
   return (
     <section className={styles.screen}>
