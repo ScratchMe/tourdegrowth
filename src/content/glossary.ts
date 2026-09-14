@@ -92,7 +92,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "La retention se lit sur une courbe, pas sur un seul chiffre : le signe à chercher, c'est qu'elle finisse par s'aplatir plutôt que de continuer à descendre vers zéro (une courbe qui se stabilise dit que le produit a trouvé un usage régulier pour un noyau d'utilisateurs). C'est aussi le pilier le plus rentable à réparer avant de pousser l'acquisition : faire grandir un entonnoir qui fuit revient à courir plus vite sur un tapis roulant. L'inverse de la retention, c'est le churn — les deux se lisent toujours ensemble.",
       en: "Retention is read as a curve, not a single number: the sign to look for is that it eventually flattens rather than sliding toward zero (a curve that stabilizes means the product found regular use with a core of users). It's also the highest-leverage pillar to fix before pushing acquisition harder — growing a leaking funnel is just running faster on a treadmill. The inverse of retention is churn — the two are always read together.",
     },
-    related: ["churn", "ltv", "onboarding", "aarrr"],
+    related: ["churn", "cohort-analysis", "onboarding", "aarrr"],
   },
   referral: {
     ...GLOSSARY_TERMS.referral,
@@ -122,7 +122,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "L'exemple le plus cité vient de Facebook : les équipes croissance avaient trouvé qu'un nouvel utilisateur qui atteignait 7 amis en 10 jours restait presque toujours par la suite — ce seuil précis est devenu leur boussole d'onboarding pendant des années. Trouver son propre moment « aha » demande de regarder en arrière, pas en avant : quelle action, faite tôt, les utilisateurs qui sont restés ont-ils tous en commun ? C'est rarement la fonctionnalité la plus mise en avant dans l'interface — souvent une action secondaire que personne ne pousse assez.",
       en: "The most-cited example comes from Facebook: growth teams found that a new user who reached 7 friends in 10 days almost always stuck around afterward — that specific threshold became their onboarding compass for years. Finding your own aha moment means looking backward, not forward: what early action do all the users who stayed have in common? It's rarely the most prominently featured part of the interface — often a secondary action nobody pushes hard enough.",
     },
-    related: ["activation", "onboarding", "retention"],
+    related: ["activation", "onboarding", "retention", "activation-rate"],
   },
   cac: {
     ...GLOSSARY_TERMS.cac,
@@ -132,7 +132,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "Le calcul de base : dépenses totales de vente et marketing sur une période, divisées par le nombre de nouveaux clients obtenus sur cette même période. Le piège le plus fréquent est d'oublier d'y inclure les salaires de l'équipe commerciale/marketing et le coût des outils — un CAC qui ne compte que la pub payante est presque toujours sous-estimé. Le CAC n'a de sens qu'à côté de la LTV : un CAC bas sur un produit à faible valeur peut coûter plus cher qu'un CAC élevé sur un produit à forte rétention.",
       en: "The basic calculation: total sales and marketing spend over a period, divided by the number of new customers acquired in that same period. The most common trap is forgetting to include sales/marketing salaries and tool costs — a CAC that only counts paid ad spend is almost always underestimated. CAC only means something next to LTV: a low CAC on a low-value product can end up costing more than a high CAC on a highly retentive one.",
     },
-    related: ["ltv", "revenue", "acquisition"],
+    related: ["ltv", "revenue", "acquisition", "cac-payback"],
   },
   ltv: {
     ...GLOSSARY_TERMS.ltv,
@@ -142,7 +142,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "Une estimation courante en SaaS : revenu mensuel moyen par client, divisé par le taux de churn mensuel. Un churn de 5 %/mois donne mécaniquement une durée de vie moyenne de 20 mois — ce qui montre à quel point la LTV dépend directement de la retention, pas seulement du prix. Augmenter son prix sans travailler la retention gonfle la LTV sur le papier sans rien changer à la réalité si les clients partent toujours aussi vite. C'est pour ça que ce pilier et Retention se lisent toujours ensemble, jamais isolément.",
       en: "A common SaaS estimate: average monthly revenue per customer, divided by the monthly churn rate. A 5%/month churn rate mechanically implies an average 20-month lifetime — which shows how directly LTV depends on retention, not just price. Raising your price without working on retention inflates LTV on paper without changing anything in reality if customers still leave just as fast. That's why this pillar and Retention are always read together, never in isolation.",
     },
-    related: ["cac", "churn", "revenue"],
+    related: ["cac", "churn", "revenue", "cac-payback"],
   },
   churn: {
     ...GLOSSARY_TERMS.churn,
@@ -152,7 +152,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "Deux churns à distinguer : le churn logo (nombre de clients perdus) et le churn revenu (montant perdu) — un client qui downgrade sans partir compte dans le second, pas dans le premier. Une autre distinction utile : le churn volontaire (le client décide de partir) contre le churn involontaire (un paiement qui échoue), ce dernier se corrige souvent avec de la simple mécanique de facturation. Le meilleur signe de santé qu'une équipe SaaS puisse viser est un « churn négatif » : l'expansion revenue des clients existants (upsell) dépasse ce que le churn fait perdre.",
       en: "Two churns worth telling apart: logo churn (number of customers lost) and revenue churn (amount lost) — a customer who downgrades without leaving counts in the second, not the first. Another useful split: voluntary churn (the customer decides to leave) vs. involuntary churn (a failed payment) — the latter is often fixed with plain billing mechanics. The strongest health signal a SaaS team can aim for is \"negative churn\": expansion revenue from existing customers (upsell) outpacing what churn takes away.",
     },
-    related: ["retention", "ltv", "upsell-cross-sell"],
+    related: ["retention", "ltv", "upsell-cross-sell", "nrr-grr"],
   },
   "viral-coefficient": {
     ...GLOSSARY_TERMS["viral-coefficient"],
@@ -178,7 +178,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "L'onboarding est le chemin, l'activation est la destination — les deux se confondent souvent à tort. L'erreur la plus fréquente est de tout expliquer d'un coup dès la première visite plutôt que de révéler les choses progressivement, au moment où l'utilisateur en a réellement besoin. Un bon onboarding se mesure à une seule question : combien de temps sépare l'inscription du moment « aha » — plus ce délai est court, mieux le parcours est calibré.",
       en: "Onboarding is the path, activation is the destination — the two are often wrongly treated as the same thing. The most common mistake is explaining everything at once on the first visit instead of revealing things progressively, right when the user actually needs them. A good onboarding is measured by one question: how much time separates sign-up from the aha moment — the shorter that gap, the better calibrated the path.",
     },
-    related: ["activation", "aha-moment", "retention"],
+    related: ["activation", "aha-moment", "retention", "activation-rate"],
   },
   "upsell-cross-sell": {
     ...GLOSSARY_TERMS["upsell-cross-sell"],
@@ -188,7 +188,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "Les deux sont des leviers d'expansion revenue — la manière la plus fiable de faire du « churn négatif » (voir Churn), parce qu'il est presque toujours moins cher de vendre plus à un client déjà convaincu que d'en acquérir un nouveau. Le timing compte plus que la technique : proposer un upsell avant que le client n'ait atteint son moment « aha » sur l'offre de base se lit comme de l'agressivité commerciale, pas comme de la valeur ajoutée.",
       en: "Both are expansion-revenue levers — the most reliable way to achieve \"negative churn\" (see Churn), because it's almost always cheaper to sell more to an already-convinced customer than to acquire a new one. Timing matters more than technique: pitching an upsell before the customer has reached their aha moment on the base plan reads as pushy sales, not added value.",
     },
-    related: ["revenue", "churn", "ltv"],
+    related: ["revenue", "churn", "ltv", "nrr-grr"],
   },
   "growth-loop": {
     ...GLOSSARY_TERMS["growth-loop"],
@@ -208,6 +208,50 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "Les exemples les plus connus : Airbnb a longtemps suivi les « nuits réservées » plutôt que le nombre d'inscriptions, Facebook a suivi les utilisateurs actifs mensuels plutôt que le nombre de comptes créés. Le point commun : dans les deux cas, la métrique capture de la valeur réellement délivrée, pas une action facile à gonfler artificiellement. Une bonne North Star Metric doit répondre à une question simple : si elle grimpe sans que rien d'autre ne bouge, est-ce que l'entreprise va vraiment mieux ? Si la réponse n'est pas clairement oui, ce n'est pas la bonne métrique.",
       en: "The best-known examples: Airbnb tracked \"nights booked\" for years rather than sign-ups, Facebook tracked monthly active users rather than accounts created. The common thread: in both cases the metric captures value actually delivered, not an easily-inflated vanity action. A good North Star Metric has to answer one simple question: if it goes up and nothing else changes, is the business actually better off? If the answer isn't a clear yes, it's the wrong metric.",
     },
-    related: ["aarrr", "retention", "activation"],
+    related: ["aarrr", "retention", "activation", "cohort-analysis"],
+  },
+  // ——— GROWTH-PLAN.md wave 2.2, lot 1 (2026-09-14) ———
+  // Premier jet de la session de code, comme les `extended` de 2026-08-29
+  // avant leur validation : de la copie de fond qui porte le nom d'Antoine,
+  // à relire ligne à ligne. TODO: à relire.
+  "activation-rate": {
+    ...GLOSSARY_TERMS["activation-rate"],
+    deep: GLOSSARY_DEEP["activation-rate"],
+    updatedAt: "2026-09-14", // GROWTH-PLAN.md 2.2, lot 1 — created
+    extended: {
+      fr: "C'est la métrique la plus dépendante de sa propre définition de tout le cadre AARRR : deux équipes avec le même produit et le même onboarding peuvent afficher 25 % et 60 % simplement parce qu'elles n'appellent pas « activation » la même chose. D'où la seule discipline qui compte ici — choisir l'événement une fois, sur la corrélation avec la rétention à quatre semaines et non sur la facilité à le logguer, puis ne plus y toucher. Un taux d'activation qui grimpe après un changement de définition n'est pas une amélioration, c'est un changement d'unité de mesure. L'autre erreur courante est de le lire comme un chiffre unique alors qu'il cache un escalier : c'est la marche la plus basse, pas le taux global, qui indique quoi réparer.",
+      en: "This is the most definition-dependent metric in the whole AARRR framework: two teams with the same product and the same onboarding can report 25% and 60% purely because they don't call the same thing \"activation\". Hence the one discipline that matters here — pick the event once, on its correlation with four-week retention rather than on how easy it is to log, then leave it alone. An activation rate that climbs after a definition change isn't an improvement, it's a change of measuring unit. The other common mistake is reading it as a single figure when it hides a staircase: it's the lowest step, not the overall rate, that tells you what to go fix.",
+    },
+    related: ["activation", "aha-moment", "onboarding", "cohort-analysis"],
+  },
+  "cac-payback": {
+    ...GLOSSARY_TERMS["cac-payback"],
+    deep: GLOSSARY_DEEP["cac-payback"],
+    updatedAt: "2026-09-14", // GROWTH-PLAN.md 2.2, lot 1 — created
+    extended: {
+      fr: "Le ratio LTV:CAC est la métrique d'acquisition la plus citée ; le CAC payback est celle qui contraint réellement une entreprise qui n'a pas trois ans de trésorerie devant elle. La différence tient en un mot : le LTV:CAC est une prévision, construite sur un taux de churn projeté des années en avant — le chiffre le moins fiable que possède une jeune entreprise —, alors que le payback est une date, calculée uniquement à partir de chiffres déjà connus. Les deux se calculent depuis les mêmes trois données et peuvent parfaitement se contredire : une économie unitaire excellente sur cinq ans ne dit rien sur la capacité à financer le mois prochain. Quand ils divergent, c'est la date que le compte en banque respecte.",
+      en: "The LTV:CAC ratio is the most-quoted acquisition metric; CAC payback is the one that actually binds a company without three years of cash in the bank. The difference comes down to one word: LTV:CAC is a forecast, built on a churn rate projected years out — the least reliable number a young company owns — while payback is a date, computed only from figures you already have. Both come from the same three inputs and can flatly contradict each other: excellent unit economics over five years say nothing about your ability to fund next month. When they disagree, the date is the one your bank account respects.",
+    },
+    related: ["cac", "ltv", "revenue", "nrr-grr"],
+  },
+  "nrr-grr": {
+    ...GLOSSARY_TERMS["nrr-grr"],
+    deep: GLOSSARY_DEEP["nrr-grr"],
+    updatedAt: "2026-09-14", // GROWTH-PLAN.md 2.2, lot 1 — created
+    extended: {
+      fr: "Ces deux taux ne s'écrivent presque jamais l'un sans l'autre, et c'est volontaire : la NRR est le chiffre qu'on met dans un deck, la GRR celui qui dit ce que le produit retient vraiment. La GRR ne compte que les pertes — résiliations et rétrogradations — donc elle ne peut jamais dépasser 100 % ; la NRR y ajoute l'expansion et le peut. L'écart entre les deux est exactement ce que l'expansion achète. Une NRR à 105 % avec une GRR à 90 % décrit une base qui fuit pendant qu'une poignée de gros comptes paie pour ceux qui partent : c'est tenable quelques trimestres, jamais quelques années, et ça se découvre en général au moment où le plus gros compte cesse de grandir. Lire les deux ensemble est le seul moyen de voir venir cette situation.",
+      en: "These two rates are almost never written one without the other, and that's deliberate: NRR is the figure that goes in a deck, GRR is the one that says what the product actually keeps. GRR counts only losses — cancellations and downgrades — so it can never exceed 100%; NRR adds expansion on top and can. The gap between them is exactly what expansion buys. An NRR of 105% next to a GRR of 90% describes a leaking base where a handful of large accounts pays for the ones walking out: sustainable for a few quarters, never for a few years, and usually discovered the moment the biggest account stops growing. Reading both together is the only way to see that coming.",
+    },
+    related: ["churn", "upsell-cross-sell", "revenue", "cohort-analysis"],
+  },
+  "cohort-analysis": {
+    ...GLOSSARY_TERMS["cohort-analysis"],
+    deep: GLOSSARY_DEEP["cohort-analysis"],
+    updatedAt: "2026-09-14", // GROWTH-PLAN.md 2.2, lot 1 — created
+    extended: {
+      fr: "L'analyse de cohortes ne demande aucune nouvelle mesure : ce sont les mêmes événements, groupés par date d'arrivée au lieu d'être moyennés ensemble. Ce simple regroupement change pourtant ce qu'on peut lire, parce qu'une moyenne globale mélange des groupes qui vont parfois en sens opposés — deux cohortes au même taux à trente jours peuvent finir l'une à 21 %, l'autre à 6 %. Ce qu'on cherche sur une courbe de cohorte n'est pas sa hauteur mais sa forme : une courbe qui finit par s'aplatir dit qu'une part de chaque cohorte a trouvé une raison durable de rester, et c'est le signal mesurable le plus proche de l'adéquation produit-marché. Une courbe encore en chute à la sixième période décrit un produit qui loue ses utilisateurs au lieu de les accumuler.",
+      en: "Cohort analysis needs no new measurement: it's the same events, grouped by arrival date instead of averaged together. That regrouping alone changes what you can read, because a blended average mixes groups that sometimes move in opposite directions — two cohorts at the same thirty-day rate can end up at 21% and 6%. What you look for on a cohort curve isn't its height but its shape: a curve that eventually flattens says a share of every cohort found a lasting reason to stay, and that's the closest thing to a measurable product-market-fit signal. A curve still falling at period six describes a product renting its users rather than accumulating them.",
+    },
+    related: ["retention", "churn", "activation-rate", "north-star-metric"],
   },
 };

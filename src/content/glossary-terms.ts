@@ -31,7 +31,15 @@ export type GlossaryTermId =
   | "onboarding"
   | "upsell-cross-sell"
   | "growth-loop"
-  | "north-star-metric";
+  | "north-star-metric"
+  // GROWTH-PLAN.md wave 2.2, lot 1 — chosen on the Search Console queries the
+  // existing pages already brush against (short definitional searches:
+  // "activation", "what is an activation", "définition ltv"), each a child of
+  // a page that already gets impressions.
+  | "activation-rate"
+  | "cac-payback"
+  | "nrr-grr"
+  | "cohort-analysis";
 
 function same(value: string): Translatable {
   return { fr: value, en: value };
@@ -146,6 +154,34 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
     definition: {
       fr: "L'indicateur unique qu'une équipe choisit de suivre en priorité, parce qu'il capture le mieux la valeur réelle livrée aux utilisateurs.",
       en: "The single metric a team chooses to prioritize, because it best captures the real value delivered to users.",
+    },
+  },
+  "activation-rate": {
+    term: { fr: "Taux d'activation", en: "Activation rate" },
+    definition: {
+      fr: "La part des nouvelles inscriptions qui atteignent ton événement d'activation — le moment où la valeur arrive vraiment, pas celui où le compte est créé.",
+      en: "The share of new sign-ups who reach your activation event — the moment value actually lands, not the moment an account gets created.",
+    },
+  },
+  "cac-payback": {
+    term: { fr: "CAC payback — délai de remboursement", en: "CAC payback period" },
+    definition: {
+      fr: "Le nombre de mois de marge brute d'un client qu'il faut pour rembourser ce que son acquisition a coûté. Une date, là où le ratio LTV:CAC est une prévision.",
+      en: "How many months of one customer's gross margin it takes to earn back what winning them cost. A date, where the LTV:CAC ratio is a forecast.",
+    },
+  },
+  "nrr-grr": {
+    term: { fr: "NRR / GRR — rétention de revenu", en: "NRR / GRR" },
+    definition: {
+      fr: "Deux lectures de ce que les clients de l'an dernier valent cette année : la rétention brute ignore l'expansion, la rétention nette la compte.",
+      en: "Two ways to read what last year's customers are worth this year: gross revenue retention ignores expansion, net revenue retention counts it.",
+    },
+  },
+  "cohort-analysis": {
+    term: { fr: "Analyse de cohortes", en: "Cohort analysis" },
+    definition: {
+      fr: "Lire une métrique par groupe d'utilisateurs arrivés en même temps, au lieu d'une moyenne globale qui peut masquer deux tendances opposées.",
+      en: "Reading a metric by group of users who arrived at the same time, instead of one blended average that can hide two opposite trends.",
     },
   },
 };
