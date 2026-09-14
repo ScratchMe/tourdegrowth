@@ -2488,9 +2488,73 @@ résultat après un merge repaie un rendu. À trafic réel, c'est exactement le
 comportement voulu ; à cinq merges par jour, c'est un argument de plus pour
 grouper.
 
-**À confirmer après déploiement** : `x-vercel-cache: HIT` sur l'adresse
-déclarée par `/r/sample` rechargée deux fois, et un aperçu LinkedIn/X
-correct sur un lien partagé avant ce changement (les anciennes adresses).
+**Confirmé en production le jour même** : `x-vercel-cache: MISS` au premier
+appel de l'adresse déclarée par `/r/sample`, `HIT` aux suivants, en
+`max-age=31536000, immutable` ; les anciennes adresses répondent, cachées
+une heure. Reste à voir de visu un aperçu LinkedIn/X sur un lien partagé
+avant ce changement.
+
+### Les stats privées, lisibles par la session sans qu'un secret entre dans la conversation (2026-09-14)
+
+Deux questions d'Antoine le même après-midi : « qu'est-ce que tu veux
+exactement de la Search Console ? » et « on ne peut pas faire en sorte que
+tu lises `/admin/stats` par toi-même ? ». La réponse aux deux est la même
+mécanique, et elle a un piège qu'il faut nommer d'abord : **le dépôt est
+public, donc les logs et les artefacts d'un workflow GitHub sont lisibles
+par n'importe qui.** Imprimer `/admin/stats` dans un log défait exactement
+la protection posée sur cette page le 2026-08-29.
+
+**Le mécanisme.** `.github/workflows/stats.yml`, `workflow_dispatch`
+seulement, lit le tableau de bord avec `ADMIN_DASHBOARD_PASSWORD` et la
+Search Console avec `GSC_SERVICE_ACCOUNT_JSON` (deux secrets GitHub, un
+compte de service ajouté comme utilisateur **restreint** de la propriété),
+puis **chiffre le rapport avec `age`** vers une clé publique éphémère passée
+en input du déclenchement. Seul le texte chiffré atteint le log. Côté
+session : `age-keygen` dans le scratchpad, déclenchement par l'API GitHub
+avec la clé publique en `recipient`, lecture du log de la job,
+`scripts/stats-decrypt.sh` avec la clé privée que personne n'a stockée. Une
+nouvelle session régénère la sienne. Même principe que `verify-live.yml`
+(les clés restent où elles sont) et mêmes règles : jamais `pull_request`,
+`contents: read`, actions épinglées par SHA, plus `age` v1.2.1 téléchargé
+depuis sa release et vérifié par `sha256sum`.
+
+- **`/admin/stats/json`** : la vue JSON du tableau de bord, derrière la même
+  Basic Auth du proxy (`startsWith("/admin")`), `no-store`, code d'erreur
+  `STATS_FAILED` (contrat R-04). La page HTML et la route lisent le même
+  `lib/submissions/dashboard.ts#loadDashboard()`, pour qu'un chiffre ne
+  puisse pas être calculé différemment aux deux endroits.
+- **`scripts/gsc-report.mjs`** : JWT RS256 signé en `node:crypto`, échange
+  au token endpoint, `sites.list` (propriété `sc-domain:` préférée, sinon
+  la première contenant « tourdegrowth », sinon `GSC_SITE`), puis
+  `searchAnalytics.query` : totaux, 250 requêtes et 100 pages sur 28 et
+  90 jours, 250 couples requête × page sur 90 jours, `dataState: final`,
+  fenêtres qui s'arrêtent trois jours avant aujourd'hui (le retard des
+  données finales). C'est ce qu'il faut pour choisir les termes de la vague 2
+  (requêtes déjà en position 10-50) et mesurer un lancement.
+- **Le test de contrat** (`stats-workflow.test.ts`) tient la partie qui
+  rend le log public inoffensif : déclenchement manuel seul, lecture seule,
+  SHA sur les actions, regex du `recipient`, checksum d'`age`, et **aucune
+  ligne qui référence `report/admin.json` ou `report/gsc.json` en dehors des
+  trois formes autorisées** (écriture par `curl -o`, redirection, `wc -c <`).
+  Non-vacuité mesurée : un `cat` du clair, la suppression de l'étape `age -r`
+  et l'ajout d'un déclencheur `pull_request` font chacun tomber le test.
+
+**Vérifié en réel** : `tsc`, `eslint`, 543 tests unitaires (+13), seuils de
+couverture, `next build` (`ƒ /admin/stats/json`), sur un serveur avec un mot
+de passe de test : 401 sans identifiants, 401 avec le mauvais, 502
+`STATS_FAILED` avec le bon (pas de Firestore ici), et **l'aller-retour de
+chiffrement en local** : clé éphémère, faux rapport, `age -r`, faux log avec
+le préfixe horodaté de l'API GitHub, `stats-decrypt.sh` rend les deux
+fichiers intacts. La signature JWT est vérifiée dans le test avec la clé
+publique d'une paire générée sur place ; l'appel réel à Google, lui, ne peut
+se voir qu'au premier run.
+
+**Piège de session, à connaître** : le garde-fou du mode auto a refusé
+toute commande shell dès que ce workflow a été conçu (des secrets, un
+chiffrement, un log), en disant explicitement que c'était le contenu de la
+conversation et non l'action, et qu'il continuerait. Antoine a sorti la
+session du mode auto pour finir. Un travail qui manipule des secrets se
+fait donc hors mode auto dès le départ.
 
 ## État du projet au 2026-09-14 — à lire en premier dans une nouvelle session
 
@@ -2514,7 +2578,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **L'instrument d'audit growth a son schéma** (2026-09-13, `AUDIT.md`) : un outil personnel pour les diagnostics qu'Antoine mène en entreprise, navigateur seulement, jamais Firestore — `src/lib/audit/` + `src/content/audit-catalog.ts`, sans aucune route ni UI encore. Phase 1 (la saisie sous `/admin/audit`) est le prochain chantier, découpée en six PR dans **`AUDIT-PLAN.md`** (2026-09-13) ; phase 3 (tout ce qui ressemble à un produit) reste fermée tant que les entretiens ne sont pas faits et le contrat de travail pas vérifié.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **528 tests unitaires**, **186 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
+**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **543 tests unitaires**, **186 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 
@@ -2538,7 +2602,8 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Instrument d'audit : phase 1 (saisie) | Le schéma est livré (`AUDIT.md`), rien n'est visible dans l'app. **Le plan complet est dans `AUDIT-PLAN.md`** (phases, six PR de la phase 1, critères de sortie, Go/No-Go) | Le feu vert d'Antoine sur le plan, puis la PR 1.1 (découplage `lib/audit` ↔ contenu + stockage, sans écran). La politique de rétention Vercel doit être en place avant, chaque merge déployant la production. |
 | Catalogue de l'instrument d'audit à relire | 39 lignes de texte qui s'imprimeront dans les livrables d'Antoine, sous son nom | Un bon à tirer, même circuit que les précédents. |
 | Vercel Functions Storage | **Réglé** : la politique de rétention posée par Antoine le 2026-09-14 l'a fait passer de 9,24 Go à 397 Mo, et un déploiement pèse 45,5 Mo de fonctions depuis le 2026-09-13 | Rien. |
-| Vercel Fluid Active CPU (36 min / 4 h par mois) | Les deux postes qui dominaient le coût par visite sont corrigés le 2026-09-14 : six préchargements dynamiques par vue de la homepage, et l'image de partage rendue à chaque vue de résultat (désormais cachée par le CDN sous une adresse versionnée) | Relire le compteur dans Vercel une semaine après, et vérifier `x-vercel-cache: HIT` sur l'image d'un résultat rechargé. La région des fonctions (`iad1` alors que Firestore est en `eur3`) est un réglage de projet à changer par Antoine — latence, pas CPU. |
+| Vercel Fluid Active CPU (36 min / 4 h par mois) | Les deux postes qui dominaient le coût par visite sont corrigés le 2026-09-14 : six préchargements dynamiques par vue de la homepage, et l'image de partage rendue à chaque vue de résultat — confirmé en production, `MISS` puis `HIT` sur l'adresse versionnée. La région des fonctions est passée à `cdg1` le même jour (vérifié : `x-vercel-id: iad1::cdg1::…`) | Relire le compteur dans Vercel une semaine après. |
+| Lecture des stats par la session | Le workflow chiffré est en place (2026-09-14) et les deux secrets GitHub sont posés ; le premier run réel est le prochain pas | Un run : il donne la ligne de départ du plan de distribution (item 0.1) et remplace l'export Search Console (2.7). |
 
 Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et le payant sont dans **`GROWTH-PLAN.md`** (2026-09-13 — sans LinkedIn, sans nom ; cinq vagues, la moitié menable par la session seule ; la part autonome de la vague 0 est livrée : IndexNow, UTM, kit et textes dans `marketing/`) ; le SEO a été livré en grande partie par le lot C de cette revue, et sa suite est la vague 2 de ce plan.
 
