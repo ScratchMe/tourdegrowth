@@ -3132,6 +3132,81 @@ la bonne ; une colonne ajoutée qui ne touche pas les lignes → **une**, celle
 qui tient l'invariant qu'aucun type n'impose (autant de cellules que de
 colonnes).
 
+### Instrument d'audit 1.3b-iii : le repère, la décision, le pilotage (2026-09-14) — clôt 1.3b
+
+Dernier temps de 1.3b. Une entrée porte maintenant tout ce que le schéma
+prévoit ; il reste le Tour de l'auditeur (1.4) et les constats (1.5).
+
+**Le contexte s'applique à TOUS les statuts, `absent` compris — et c'est là
+qu'il porte le plus.** Une ligne que l'entreprise n'a pas, dont personne
+n'est propriétaire et qui n'a jamais servi dans une décision est le constat
+type de cet outil. Le bloc est donc replié parce qu'il est facultatif, jamais
+masqué parce qu'il serait hors sujet. Seul le **repère** vit avec la valeur :
+sans chiffre à comparer, il n'a rien à dire.
+
+**Deux niveaux d'exigence sur un repère, volontairement distincts à l'écran.**
+Le validateur n'exige qu'une chose (q5) : l'argument d'un seuil argumenté —
+affiché en rouge, il refusera le fichier. La **provenance** d'un repère public
+(source, population, année) est du **conseil** — en gris, « le fichier
+l'accepte, une réunion moins ». Les confondre ferait bloquer sur ce qui n'est
+pas bloquant, ou taire ce qui l'est ; un test épingle les deux en faisant
+tourner le validateur plutôt qu'en redisant sa règle.
+
+**Changer de sorte de repère jette ce qui n'a plus de sens.** Une
+justification collée à un repère public partirait telle quelle dans le fichier
+sans que rien ne l'affiche — exactement le genre de champ qu'on retrouve un
+mois plus tard sans savoir d'où il vient. La valeur, elle, est conservée :
+c'est le même seuil, lu autrement.
+
+**L'horloge de relance repart à la relance, pas à la demande.** « Demandé il y
+a dix jours, relancé hier » et « demandé il y a dix jours, jamais relancé »
+sont deux situations différentes, et seule la seconde appelle une action.
+Confondre les deux ferait remonter en tête de la liste une ligne dont on vient
+de s'occuper, et l'auditeur relancerait deux fois le même interlocuteur. Le
+seuil (7 jours) est une constante en clair : un diagnostic se mène en jours,
+et une demande sans réponse au bout d'une semaine est un fait sur l'accès —
+ce que `not-accessible` finit par dire.
+
+**Une date illisible ou dans le futur n'invente pas un retard.** Sans
+certitude, la ligne reste « en attente » plutôt que d'être remontée en tête
+d'une liste d'actions — une alarme qu'on ne peut pas justifier est pire
+qu'aucune (même raisonnement que l'avertissement d'export de 1.2).
+
+**La vue collecte gagne trois choses, et chacune répond à une question que
+l'auteur se pose vraiment** : les compteurs par palier sont des **restes**, pas
+des totaux (« reste 1 ligne T4, 2 lignes T3 » dit combien de temps il faut
+encore, « il y a 25 lignes » ne dit rien) ; la liste « à relancer », la plus
+ancienne d'abord, avec l'interlocuteur ; et le groupement **par interlocuteur,
+sinon par système source** — parce qu'une collecte se prépare par réunion
+(« tout ce que je dois demander au DAF ») ou par export (« tout ce qui sort de
+Stripe »). Un groupement par pilier serait la vue du livrable, pas celle du
+travail. « Non attribué » ferme toujours la marche : c'est le tas dans lequel
+on pioche, pas une réunion.
+
+**Un raccourci plutôt qu'une valeur par défaut** : la décision en jeu peut être
+reprise de la fiche du catalogue d'un clic, et le bouton disparaît dès qu'il y
+a quelque chose — il n'écraserait plus, il détruirait. La pré-remplir
+automatiquement aurait fait passer le texte du catalogue pour une observation
+de l'auditeur.
+
+**Piège de spec, coûté trois échecs à 30 s** : `getByRole("group", { name })`
+sur un `Disclosure` n'a jamais matché — le composant enveloppe son résumé dans
+un `<span>` et pose un marqueur en `::before`, donc le nom accessible n'est pas
+celui qu'on lit. Il accepte un `data-testid`, qui est la convention du repo ;
+s'en servir plutôt que deviner une forme de nom accessible.
+
+**Vérifié en réel** : `tsc`, `eslint`, **627 tests unitaires** (+22), couverture
+au-dessus des seuils (lignes 91,2 %), `next build`, **232 specs Playwright**
+(+6). Captures relues en 1280 et 390 px, `scrollWidth === clientWidth` aux deux
+largeurs sur les trois écrans.
+
+**Non-vacuité mesurée finement, six sabotages, un test tombé chacun** : côté
+unitaire — l'horloge qui ne repart pas à la relance, « non attribué » qui n'est
+plus poussé en dernier, la provenance qui devient bloquante ; côté écran — le
+changement de sorte qui garde tout, les compteurs qui deviennent des totaux, et
+la même horloge vue depuis la liste. Aucun sabotage n'en a fait tomber deux, ce
+qui est le signe que les règles sont testées séparément.
+
 ## État du projet au 2026-09-14 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -3154,7 +3229,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **L'instrument d'audit growth a son schéma** (2026-09-13, `AUDIT.md`) : un outil personnel pour les diagnostics qu'Antoine mène en entreprise, navigateur seulement, jamais Firestore — `src/lib/audit/` + `src/content/audit-catalog.ts`, sans aucune route ni UI encore. Phase 1 (la saisie sous `/admin/audit`) est le prochain chantier, découpée en six PR dans **`AUDIT-PLAN.md`** (2026-09-13) ; phase 3 (tout ce qui ressemble à un produit) reste fermée tant que les entretiens ne sont pas faits et le contrat de travail pas vérifié.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **605 tests unitaires**, **226 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
+**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **627 tests unitaires**, **232 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 
@@ -3174,7 +3249,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Les e2e de composition ne passent que par la branche échantillon | `/r/sample` utilise `getSampleNextMove` et `SAMPLE_RESULT.pillars`, pas le vrai chemin. La garde statique est donc seule à protéger le payload | Un id de fixture derrière une variable d'environnement fermée par défaut. À décider : c'est une porte de test sur la route publique la plus sensible. |
 | Flake `locale-routing.spec.ts:75` | Deux échecs le 2026-09-10 et un le 2026-09-14, toujours en suite complète parallèle, jamais isolée ni à la reprise | La prochaine occurrence en CI laisse une trace (`retries: 1` + `trace: on-first-retry`, rapport téléversé). Ne pas durcir la spec en attendant le cookie : ça masquerait une éventuelle course produit. |
 | TypeScript 7 et ESLint 10 | Tous deux bloqués par des paquets embarqués dans `eslint-config-next` (`typescript-eslint` refuse TS ≥ 6.1 ; `eslint-plugin-react` plante sur ESLint 10). Dependabot les ignore en majeure depuis le 2026-09-08 | Quand `eslint-config-next` suivra. Re-tester en installant, pas en lisant les plages de peer : c'est l'essai qui a montré qu'ESLint 10 plante. |
-| Instrument d'audit : phase 1 (saisie) | Feu vert d'Antoine sur `AUDIT-PLAN.md` le 2026-09-14. **1.1, 1.2, 1.3a, 1.3b-i et 1.3b-ii livrées** — `/admin/audit` crée une mission, la trie ligne par ligne, marque les absences, pose une définition versionnée et sa série d'observations, exporte et réimporte. Reste 1.3b-iii (critère, pilotage, vues) puis 1.4 à 1.6 | Rien : la suite s'enchaîne dans l'ordre des dépendances. |
+| Instrument d'audit : phase 1 (saisie) | Feu vert d'Antoine sur `AUDIT-PLAN.md` le 2026-09-14. **1.1, 1.2 et tout 1.3 livrées** — `/admin/audit` crée une mission, la trie ligne par ligne, marque les absences, pose une définition versionnée, sa série d'observations, son repère, sa décision en jeu et son pilotage, groupe la collecte par interlocuteur, exporte et réimporte. Reste 1.4 (le Tour de l'auditeur), 1.5 (les constats) et 1.6 (la recette) | Rien : la suite s'enchaîne dans l'ordre des dépendances. |
 | Catalogue de l'instrument d'audit à relire | 39 lignes de texte qui s'imprimeront dans les livrables d'Antoine, sous son nom | Un bon à tirer, même circuit que les précédents. |
 | Vercel Functions Storage | **Réglé** : la politique de rétention posée par Antoine le 2026-09-14 l'a fait passer de 9,24 Go à 397 Mo, et un déploiement pèse 45,5 Mo de fonctions depuis le 2026-09-13 | Rien. |
 | Vercel Fluid Active CPU (36 min / 4 h par mois) | Les deux postes qui dominaient le coût par visite sont corrigés le 2026-09-14 : six préchargements dynamiques par vue de la homepage, et l'image de partage rendue à chaque vue de résultat — confirmé en production, `MISS` puis `HIT` sur l'adresse versionnée. La région des fonctions est passée à `cdg1` le même jour (vérifié : `x-vercel-id: iad1::cdg1::…`) | Relire le compteur dans Vercel une semaine après. |

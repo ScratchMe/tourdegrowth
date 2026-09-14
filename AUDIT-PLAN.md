@@ -324,7 +324,7 @@ fichier — même si aucune ligne n'est encore saisissable.*
 - **Fini quand** : la mission AB Tasty peut être créée, exportée, réimportée
   sur le vrai build.
 
-#### 1.3 — L'éditeur de ligne, et les deux vues — 🟡 1.3a, 1.3b-i et 1.3b-ii livrés le 2026-09-14, 1.3b-iii à venir
+#### 1.3 — L'éditeur de ligne, et les deux vues — ✅ livré le 2026-09-14 (1.3a, 1.3b-i, -ii, -iii)
 
 *Le cœur de la phase. La plus grosse PR ; si elle dépasse ce qu'une revue
 peut relire, la couper en 1.3a et 1.3b.*
@@ -353,10 +353,15 @@ compteurs par palier et la vue restitution.
   `observationGaps` qui dit ce qui manque avant que le validateur ne le dise,
   la confiance dérivée affichée à côté de chaque observation, `contradicts`
   limité aux autres observations de la même ligne.
-- **1.3b-iii — le reste de l'entrée et les vues** : critère, écart à la
-  convention canonique, décision en jeu, exposition, gouvernance, dates de
-  pilotage, groupement par interlocuteur et par système source, compteurs par
-  palier, vue restitution.
+- **1.3b-iii — le reste de l'entrée et la vue collecte** (livré). Repère
+  (`criterion-fields.ts` : l'argument d'un seuil argumenté est bloquant, la
+  provenance d'un repère public est du conseil), écart à la convention
+  canonique, décision en jeu (reprise de la fiche d'un clic), exposition,
+  gouvernance, pilotage (`tracking.ts` : l'horloge de relance repart à la
+  relance), compteurs de **restes** par palier, liste à relancer, groupement
+  par interlocuteur puis par système source. **La vue restitution part en
+  1.4** : son intérêt est le croisement méthode × réalité, qui a besoin du
+  Tour de l'auditeur.
 
 - **Livre — la vue collecte** (la vue par défaut d'une mission ouverte,
   grille §8) : les lignes applicables **triées par palier décroissant**

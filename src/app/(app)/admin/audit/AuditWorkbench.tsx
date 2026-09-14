@@ -247,7 +247,7 @@ export function AuditWorkbench({ catalog, today }: { catalog: EmbeddedCatalog; t
             onClose={() => goTo({ kind: "list" })}
           />
           {currentPass ? (
-            <RowList mission={current} pass={currentPass} onOpenRow={(metricId) => goTo({ kind: "row", id: current.id, metricId })} />
+            <RowList mission={current} pass={currentPass} today={today} onOpenRow={(metricId) => goTo({ kind: "row", id: current.id, metricId })} />
           ) : null}
           <Card elevation="panel" className={styles.placeholder}>
             <Button compact variant="secondary" onClick={() => goTo({ kind: "purge", id: current.id })} data-testid="open-purge">
@@ -268,6 +268,7 @@ export function AuditWorkbench({ catalog, today }: { catalog: EmbeddedCatalog; t
               entry={entry}
               definition={definitionFor(current, entry?.definitionRef)}
               defaultScope={current.header.scope}
+              today={today}
               onChange={(next, definition) => {
                 // `setView` et non `goTo` : c'est le seul retour d'écran qui
                 // doit CONSERVER l'avis, puisque c'est lui qui vient de le
