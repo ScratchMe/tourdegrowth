@@ -104,7 +104,7 @@ export const AUDIT_CATALOG: readonly AuditCatalogRow[] = [
     cost: "T1 — libre-service, ~30 min (un export), plus une question au DAF pour trancher la base",
     definition:
       "Revenu récurrent mensuel du dernier mois clos, sur une base explicitement choisie parmi quatre : signatures (bookings), facturé (billings), revenu reconnu, MRR normalisé. Contrats pluriannuels ramenés au douzième, frais de mise en service exclus, net de remises, à taux de change constant. La base fait partie de la valeur : « 1,2 M€ » sans elle n'est pas une donnée.",
-    trap: "Quatre nombres différents que toute la maison appelle « le revenu », avec un écart courant de 15 à 40 % dès qu'il y a de l'annuel prépayé et du setup. C'est le premier endroit où deux interlocuteurs donnent deux valeurs en croyant parler de la même chose. Sous-piège : le contrat annuel comptabilisé au mois de signature plutôt que lissé, qui fabrique un MRR en dents de scie et rend toute série temporelle illisible.",
+    trap: "Quatre nombres différents que toute la maison appelle « le revenu », avec un écart courant de 15 à 40 % dès qu'il y a de l'annuel prépayé et du setup. C'est le premier endroit où deux interlocuteurs donnent deux valeurs en croyant parler de la même chose. Sous-piège : le contrat annuel comptabilisé au mois de signature plutôt que lissé, qui fabrique un MRR en dents de scie et rend toute série temporelle illisible.",
     where:
       "Export de facturation (Stripe, Chargebee, ERP) tiré soi-même si l'accès existe, sinon une demande au DAF. Demander la même chose au growth et à la finance : l'écart est une donnée, pas une erreur.",
     decision:
@@ -143,12 +143,12 @@ export const AUDIT_CATALOG: readonly AuditCatalogRow[] = [
     tier: "T2",
     cost: "T2 si le rapport existe déjà (board pack), T3 — file d'analyste 2-5 j — sinon ; à lancer le premier jour",
     definition:
-      "Sur une cohorte fermée de clients présents en M, leur revenu en M+12 ÷ leur revenu en M. NRR : expansion incluse, sans plafond, peut légitimement dépasser 100 %. GRR : même calcul plafonné client par client au niveau de départ, donc ≤ 100 %. Calcul par client puis agrégation, jamais somme agrégée d'abord. Une seule ligne, deux valeurs — elles ne se demandent jamais séparément, sinon deux définitions divergent entre les deux demandes.",
-    trap: "Publier le NRR seul. Un NRR à 110 % avec une GRR à 82 % décrit une entreprise qui perd un client sur cinq et le masque avec l'expansion des survivants. L'écart normal est de 15 à 25 points ; au-delà de 30, il signale une concentration du revenu sur quelques comptes et non une performance. Troisième piège : le revenu variable, qui déplace la GRR de 5 à 8 points à NRR identique quand il pèse un quart de la facture — comparer à un repère externe sans dire la part de variable n'a aucun sens.",
+      "Sur une cohorte fermée de clients présents en M, leur revenu en M+12 ÷ leur revenu en M. NRR : expansion incluse, sans plafond, peut légitimement dépasser 100 %. GRR : même calcul plafonné client par client au niveau de départ, donc ≤ 100 %. Calcul par client puis agrégation, jamais somme agrégée d'abord. Une seule ligne, deux valeurs — elles ne se demandent jamais séparément, sinon deux définitions divergent entre les deux demandes.",
+    trap: "Publier le NRR seul. Un NRR à 110 % avec une GRR à 82 % décrit une entreprise qui perd un client sur cinq et le masque avec l'expansion des survivants. L'écart normal est de 15 à 25 points ; au-delà de 30, il signale une concentration du revenu sur quelques comptes et non une performance. Troisième piège : le revenu variable, qui déplace la GRR de 5 à 8 points à NRR identique quand il pèse un quart de la facture — comparer à un repère externe sans dire la part de variable n'a aucun sens.",
     where:
       "Facturation et finance, deux arrêtés à 12 mois d'écart sur la même cohorte. Demander la SÉRIE sur huit trimestres et pas un point : une agrégation annuelle masque un mauvais trimestre.",
     decision:
-      "Financer l'acquisition ou la rétention le prochain trimestre. Une GRR sous 85 % rend la moitié de chaque euro d'acquisition perdue d'avance, et c'est l'argument qui fait réallouer un budget en séance plutôt qu'au trimestre suivant.",
+      "Financer l'acquisition ou la rétention le prochain trimestre. Une GRR sous 85 % rend la moitié de chaque euro d'acquisition perdue d'avance, et c'est l'argument qui fait réallouer un budget en séance plutôt qu'au trimestre suivant.",
     absence:
       "Rarement absent dans une boîte financée : le statut modal est `communiqué sans définition`. Un NRR existe, il vient du board pack, il est juste, et personne dans l'entreprise ne sait dire s'il inclut les nouveaux clients ni s'il plafonne l'expansion. C'est le constat le plus rentable de la grille — le chiffre est piloté par le conseil et l'équipe qui décide chaque semaine ne peut pas le reconstruire.",
     glossary: "upsell-cross-sell",
@@ -164,7 +164,7 @@ export const AUDIT_CATALOG: readonly AuditCatalogRow[] = [
     cost: "T1 — libre-service, ~30 min, depuis le même export que la ligne 1",
     definition:
       "Clients perdus sur la période ÷ clients présents en début de période. Unité : le logo, jamais l'euro, jamais l'utilisateur. Base mensuelle, composée en annuel par 1 − (1 − m)¹². Règle écrite sur trois cas limites : le client en préavis, le client migré vers une autre entité, le non-renouvellement tacite.",
-    trap: "Le churn mensuel multiplié par douze : 3 %/mois donne 31 %/an et non 36 %. Le dénominateur pris en clients moyens ou en clôture plutôt qu'en ouverture, qui flatte mécaniquement en croissance. Et le churn « non regrettable » (hors ICP) exclu sans que l'exclusion soit écrite — on ne compare alors plus rien à rien.",
+    trap: "Le churn mensuel multiplié par douze : 3 %/mois donne 31 %/an et non 36 %. Le dénominateur pris en clients moyens ou en clôture plutôt qu'en ouverture, qui flatte mécaniquement en croissance. Et le churn « non regrettable » (hors ICP) exclu sans que l'exclusion soit écrite — on ne compare alors plus rien à rien.",
     where:
       "Facturation, export des résiliations sur 12 mois glissants. En contrats annuels, le chiffre honnête n'est pas un churn mensuel reconstitué mais le taux de renouvellement de la cohorte échue — c'est la ligne 14, pas celle-ci.",
     decision:
@@ -223,7 +223,7 @@ export const AUDIT_CATALOG: readonly AuditCatalogRow[] = [
     cost: "T4 — mandat requis : une ventilation de masse salariale par fonction ne se demande pas sans sponsor",
     definition:
       "Toutes les dépenses ventes et marketing d'un trimestre : média, outils, agences, contenu, ET la masse salariale chargée des personnes qui vendent et qui font le marketing, variable inclus. Le périmètre inclus et le périmètre exclu sont écrits, pas supposés. La clé de répartition des salaires est une convention explicite : une estimation assumée et datée vaut mieux qu'un zéro implicite.",
-    trap: "Le média seul. Le repo chiffre l'écart sur un même trimestre : 18 000 € de média contre 60 000 € chargés, soit 150 € ou 500 € de CAC pour la même entreprise (glossary-deep.ts, entrée `cac`). En vente assistée, le coût est dominé par la masse salariale — un CAC qui l'exclut ne mesure pas ce qu'il prétend mesurer. Piège inverse en amorçage : compter 100 % des salaires alors qu'une partie du temps de ces personnes va au produit.",
+    trap: "Le média seul. Le repo chiffre l'écart sur un même trimestre : 18 000 € de média contre 60 000 € chargés, soit 150 € ou 500 € de CAC pour la même entreprise (glossary-deep.ts, entrée `cac`). En vente assistée, le coût est dominé par la masse salariale — un CAC qui l'exclut ne mesure pas ce qu'il prétend mesurer. Piège inverse en amorçage : compter 100 % des salaires alors qu'une partie du temps de ces personnes va au produit.",
     where:
       "Finance uniquement, jamais la régie (qui ne connaît que sa propre ligne). Maille trimestrielle, parce que les factures d'agence arrivent avec un trimestre de retard.",
     decision:
@@ -247,7 +247,7 @@ export const AUDIT_CATALOG: readonly AuditCatalogRow[] = [
     where:
       "Finance. Demander le détail des postes inclus, pas seulement le pourcentage — c'est le détail qui rend la ligne exploitable.",
     decision:
-      "Entrée du CAC payback. Toute conclusion d'efficacité d'acquisition calculée sur le chiffre d'affaires au lieu de la marge est optimiste d'exactement le complément de la marge — à 75 % de marge, un payback annoncé à 10 mois en est à 13,3.",
+      "Entrée du CAC payback. Toute conclusion d'efficacité d'acquisition calculée sur le chiffre d'affaires au lieu de la marge est optimiste d'exactement le complément de la marge — à 75 % de marge, un payback annoncé à 10 mois en est à 13,3.",
     absence:
       "Quand le growth ne connaît pas la marge brute, il optimise le chiffre d'affaires et pas la valeur : un canal apparemment rentable peut détruire de la marge sans que personne le voie. Si elle n'est pas disponible par ligne de produit, c'est que le coût de service n'est pas réparti — l'entreprise ne sait pas quelle offre est rentable, et c'est un constat qui dépasse largement le growth.",
     glossary: "ltv",
@@ -284,13 +284,13 @@ export const AUDIT_CATALOG: readonly AuditCatalogRow[] = [
     cost: "T2 — une session avec l'administrateur du CRM, 1-3 h",
     definition:
       "Répartition des clients payants gagnés sur 12 mois par source de premier contact, en part du VOLUME et en part du REVENU, plus la part portée par la première source. Sources mutuellement exclusives, une seule par client, arbitrage écrit en cas de multi-touche. Le taux de remplissage du champ fait partie de la valeur.",
-    trap: "Répartir les leads ou le trafic plutôt que les clients payants : le canal qui apporte le plus de volume est rarement celui qui apporte le plus de revenu, et un second canal à 30 % du trafic pour 4 % des clients n'est pas une diversification, c'est un coût. Second piège : additionner des canaux définis à des grains différents (« SEO » face à « LinkedIn Ads » face à « bouche-à-oreille »), ce qui fait varier la part du premier de vingt points selon le regroupement. Troisième : les régies revendiquent chacune le même client, donc un mix dont les parts dépassent 100 % en cumulé n'est pas un mix mais une somme de revendications commerciales.",
+    trap: "Répartir les leads ou le trafic plutôt que les clients payants : le canal qui apporte le plus de volume est rarement celui qui apporte le plus de revenu, et un second canal à 30 % du trafic pour 4 % des clients n'est pas une diversification, c'est un coût. Second piège : additionner des canaux définis à des grains différents (« SEO » face à « LinkedIn Ads » face à « bouche-à-oreille »), ce qui fait varier la part du premier de vingt points selon le regroupement. Troisième : les régies revendiquent chacune le même client, donc un mix dont les parts dépassent 100 % en cumulé n'est pas un mix mais une somme de revendications commerciales.",
     where:
       "CRM, champ source de l'opportunité ; ou le champ déclaratif à la signature. En vente assistée, le déclaratif rempli par le commercial est plus fiable qu'une attribution technique — à condition d'écrire que c'est déclaratif.",
     decision:
-      "Deux décisions pour une seule collecte : ouvrir un second canal ou creuser le premier (au-delà d'environ 70 % sur une source, c'est un risque de dépendance à présenter comme tel, pas une réussite d'efficacité), et quel canal est sous-financé au regard de ce qu'il produit en revenu.",
+      "Deux décisions pour une seule collecte : ouvrir un second canal ou creuser le premier (au-delà d'environ 70 % sur une source, c'est un risque de dépendance à présenter comme tel, pas une réussite d'efficacité), et quel canal est sous-financé au regard de ce qu'il produit en revenu.",
     absence:
-      "Un champ source vide à plus de 40 % ne veut pas dire « on ne sait pas » : il veut dire que personne ne s'en sert pour décider, sinon il serait rempli. Le taux de remplissage mesure ici la maturité mieux que la répartition elle-même. Et sans lui aucun CAC par canal n'est calculable : l'absence se propage à la ligne 9.",
+      "Un champ source vide à plus de 40 % ne veut pas dire « on ne sait pas » : il veut dire que personne ne s'en sert pour décider, sinon il serait rempli. Le taux de remplissage mesure ici la maturité mieux que la répartition elle-même. Et sans lui aucun CAC par canal n'est calculable : l'absence se propage à la ligne 9.",
     glossary: "acquisition",
     tourQuestionId: "acq-1",
     appliesTo: ["b2b-assiste", "b2b-selfserve", "b2c", "marketplace"],
@@ -326,7 +326,7 @@ export const AUDIT_CATALOG: readonly AuditCatalogRow[] = [
     cost: "T3 — file d'analyste, 2-5 j ouvrés : à demander le PREMIER jour, avec la définition déjà écrite pour éviter un aller-retour",
     definition:
       "Part d'une cohorte d'entrants (inscrits en self-serve, comptes livrés en assisté) qui atteint l'événement de la ligne 11 dans une fenêtre fixe et déclarée. L'unité, la fenêtre et le dénominateur (tous les entrants, ou les seuls entrants dans la cible) font partie intégrante de la définition et se saisissent avec la valeur.",
-    trap: "Trois axes changent le nombre sans que personne ne le dise : l'événement retenu, la longueur de la fenêtre et le dénominateur — un taux passe couramment de 23 % à 45 % en excluant les inscriptions hors cible. Piège de restitution, plus grave : ce taux ne se compare JAMAIS à une autre entreprise, puisque l'événement diffère par construction. Il ne se compare qu'à lui-même dans le temps, et le readout doit l'interdire face à un repère externe.",
+    trap: "Trois axes changent le nombre sans que personne ne le dise : l'événement retenu, la longueur de la fenêtre et le dénominateur — un taux passe couramment de 23 % à 45 % en excluant les inscriptions hors cible. Piège de restitution, plus grave : ce taux ne se compare JAMAIS à une autre entreprise, puisque l'événement diffère par construction. Il ne se compare qu'à lui-même dans le temps, et le readout doit l'interdire face à un repère externe.",
     where:
       "Analytics produit (Amplitude, Mixpanel, GA4) ou entrepôt de données. Première ligne de la grille qui exige typiquement une requête d'analyste.",
     decision:
@@ -388,7 +388,7 @@ export const AUDIT_CATALOG: readonly AuditCatalogRow[] = [
     cost: "T2 — 1-3 h ; le seul vrai travail est de recoller l'identifiant de compte entre les deux systèmes",
     definition:
       "Part de ce qui est payé qui est effectivement consommé, sur 30 jours ou sur la période contractuelle, PAR COMPTE, avec la distribution en déciles et pas seulement la moyenne. L'unité est un champ déclaré et suit le modèle de facturation : sièges, sessions, crédits, requêtes API, volume, GMV. « Consommé » se définit par l'événement de la ligne 11, jamais par la connexion.",
-    trap: "L'unité codée en dur. « Sièges actifs ÷ sièges vendus » ne parle qu'aux SaaS vendus au siège et devient non applicable dès qu'on facture à l'usage — alors que la donnée existe par construction puisqu'elle sert à facturer. Second piège : la moyenne d'entreprise, qui cache exactement les comptes à 15 % de consommation qui ne renouvelleront pas. Troisième : « actif » défini comme une connexion, ce qui double le chiffre et détruit toute valeur prédictive (un SSO d'entreprise fabrique des connexions sans usage).",
+    trap: "L'unité codée en dur. « Sièges actifs ÷ sièges vendus » ne parle qu'aux SaaS vendus au siège et devient non applicable dès qu'on facture à l'usage — alors que la donnée existe par construction puisqu'elle sert à facturer. Second piège : la moyenne d'entreprise, qui cache exactement les comptes à 15 % de consommation qui ne renouvelleront pas. Troisième : « actif » défini comme une connexion, ce qui double le chiffre et détruit toute valeur prédictive (un SSO d'entreprise fabrique des connexions sans usage).",
     where:
       "Facturation pour le dénominateur — elle compte déjà, c'est ce qui facture — et analytics ou plateforme pour le numérateur. Ne passe PAS par la finance : c'est une des rares lignes à forte valeur accessible sans mandat.",
     decision:
@@ -432,7 +432,7 @@ export const AUDIT_CATALOG: readonly AuditCatalogRow[] = [
     where:
       "CRM, champ source filtré sur les valeurs de recommandation. En vente assistée, demander aux commerciaux l'origine de leurs dix derniers deals gagnés donne une réponse plus fiable que l'export, en vingt minutes — ils la connaissent.",
     decision:
-      "Financer un programme de recommandation client, un programme partenaires, ou ni l'un ni l'autre — et la décision se prend en part de REVENU, pas en part de volume. Un referral déjà à 20 % du volume sans aucun mécanisme est le meilleur retour sur investissement de la grille ; à 2 % dans un produit sans boucle, ce n'est pas un chantier, c'est une caractéristique du modèle qu'il faut arrêter de vouloir corriger.",
+      "Financer un programme de recommandation client, un programme partenaires, ou ni l'un ni l'autre — et la décision se prend en part de REVENU, pas en part de volume. Un referral déjà à 20 % du volume sans aucun mécanisme est le meilleur retour sur investissement de la grille ; à 2 % dans un produit sans boucle, ce n'est pas un chantier, c'est une caractéristique du modèle qu'il faut arrêter de vouloir corriger.",
     absence:
       "Attention au faux négatif : en vente assistée, un zéro veut presque toujours dire « personne ne l'a jamais compté », pas « ça n'arrive pas ». Et le pilier Referral du Tour, qui exige un mécanisme intégré au produit (copy-library.ts:178-214, ref-1 à ref-3), donne mécaniquement 0 à 2/20 à tout éditeur vendu en devis — 18 points amputés avant la moindre question de fond. Ce défaut de la grille publique ne doit jamais atterrir tel quel dans un livrable de direction, et le readout le neutralise explicitement (voir readout_spec).",
     glossary: "referral",
@@ -501,7 +501,7 @@ export const AUDIT_CATALOG: readonly AuditCatalogRow[] = [
     cost: "T2 — variante de profil : même source que les lignes du socle du même pilier",
     definition:
       "Deals gagnés ÷ deals conclus (gagnés + perdus) sur la même cohorte des 12 derniers mois, découpé par segment ou tranche d'ACV ; et délai médian entre création de l'opportunité et signature. Médiane obligatoire — une affaire à 400 jours déplace la moyenne de plusieurs semaines.",
-    why: "Un win rate global sur une base hétérogène ne décrit aucune réalité (l'ordre de grandeur va de 25-35 % en PME à 12-18 % en enterprise) et le cycle médian est ce qui fixe le décalage temporel de TOUS les CAC de la grille — sans lui, la ligne 9 repose sur une hypothèse implicite de cycle court que personne n'a validée. Absorbe au passage le taux MQL→SQL, qui n'est qu'une étape du même entonnoir.",
+    why: "Un win rate global sur une base hétérogène ne décrit aucune réalité (l'ordre de grandeur va de 25-35 % en PME à 12-18 % en enterprise) et le cycle médian est ce qui fixe le décalage temporel de TOUS les CAC de la grille — sans lui, la ligne 9 repose sur une hypothèse implicite de cycle court que personne n'a validée. Absorbe au passage le taux MQL→SQL, qui n'est qu'une étape du même entonnoir.",
     appliesTo: ["b2b-assiste"],
     betterWhen: "higher",
     valueShape: "couple",
@@ -526,7 +526,7 @@ export const AUDIT_CATALOG: readonly AuditCatalogRow[] = [
     tier: "T2",
     cost: "T2 — variante de profil : même source que les lignes du socle du même pilier",
     definition:
-      "Écart entre prix de grille en vigueur à la signature et prix réellement facturé, sur les deals des 12 derniers mois : moyenne, médiane, et part des deals au-delà de 20 % de remise. Les remises non tarifaires (mois offerts, sièges gratuits, services inclus) sont incluses.",
+      "Écart entre prix de grille en vigueur à la signature et prix réellement facturé, sur les deals des 12 derniers mois : moyenne, médiane, et part des deals au-delà de 20 % de remise. Les remises non tarifaires (mois offerts, sièges gratuits, services inclus) sont incluses.",
     why: "Un produit self-serve a un prix public et une remise quasi nulle ; en vente assistée, la remise est la forme dominante et elle n'apparaît jamais dans le champ « discount » du CRM. Décide si la grille tarifaire est réelle ou décorative — donc si un chantier de pricing produira quoi que ce soit : au-delà d'un tiers de deals fortement remisés, retravailler la grille ne changera rien tant que la discipline n'est pas rétablie.",
     appliesTo: ["b2b-assiste"],
     betterWhen: "lower",
@@ -579,7 +579,7 @@ export const AUDIT_CATALOG: readonly AuditCatalogRow[] = [
     cost: "T2 — variante de profil : même source que les lignes du socle du même pilier",
     definition:
       "Part d'une cohorte d'inscrits gratuits qui devient payante, et délai médian entre l'inscription et le premier paiement. Lecture par cohorte d'entrée, jamais en ratio de période.",
-    why: "Le ratio de période mélange plusieurs générations et bouge fortement sans que rien n'ait bougé. Et le taux sans le délai ne décide rien : 25 % en trois semaines et 25 % en sept mois n'ont pas le même besoin de trésorerie. C'est la charnière du modèle self-serve, et elle n'existe pas en vente assistée où il n'y a pas de gratuit à convertir.",
+    why: "Le ratio de période mélange plusieurs générations et bouge fortement sans que rien n'ait bougé. Et le taux sans le délai ne décide rien : 25 % en trois semaines et 25 % en sept mois n'ont pas le même besoin de trésorerie. C'est la charnière du modèle self-serve, et elle n'existe pas en vente assistée où il n'y a pas de gratuit à convertir.",
     appliesTo: ["b2b-selfserve"],
     betterWhen: "higher",
     valueShape: "couple",
@@ -592,7 +592,7 @@ export const AUDIT_CATALOG: readonly AuditCatalogRow[] = [
     cost: "T2 — variante de profil : même source que les lignes du socle du même pilier",
     definition:
       "Part des utilisateurs franchissant chaque étape du parcours, dans l'ordre, sur une cohorte d'inscription donnée, affichée en taux conditionnel ET en taux cumulé.",
-    why: "C'est la seule ligne qui désigne directement un écran à retravailler, et elle n'a de sens que là où l'onboarding est un parcours produit plutôt qu'un projet d'intégration. Lire les étapes comme indépendantes est le piège : une étape à 90 % placée après une étape à 30 % ne concerne que 30 % des inscrits.",
+    why: "C'est la seule ligne qui désigne directement un écran à retravailler, et elle n'a de sens que là où l'onboarding est un parcours produit plutôt qu'un projet d'intégration. Lire les étapes comme indépendantes est le piège : une étape à 90 % placée après une étape à 30 % ne concerne que 30 % des inscrits.",
     tourQuestionId: "act-3",
     appliesTo: ["b2b-selfserve"],
     betterWhen: "higher",
@@ -674,7 +674,7 @@ export const AUDIT_CATALOG: readonly AuditCatalogRow[] = [
     tier: "T2",
     cost: "T2 — variante de profil : même source que les lignes du socle du même pilier",
     definition:
-      "Part du revenu de la période apportée par les 1 % d'utilisateurs les plus dépensiers, et par les 10 %.",
+      "Part du revenu de la période apportée par les 1 % d'utilisateurs les plus dépensiers, et par les 10 %.",
     why: "Le pendant B2C de la concentration du revenu du socle : là où le B2B concentre sur quelques logos, le B2C concentre sur une frange d'utilisateurs, et le chiffre décide si le plan de monétisation vise l'élargissement de la base payante ou l'approfondissement de la frange. Une ARPU moyenne le cache entièrement.",
     appliesTo: ["b2c"],
     betterWhen: "lower",

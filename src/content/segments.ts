@@ -33,7 +33,7 @@ export const SEGMENT_STAGES: SegmentOption<SegmentStage>[] = [
   { value: "pre-launch", label: t("Pas encore lancé", "Not launched yet") },
   { value: "first-customers", label: t("Premiers clients", "First customers") },
   { value: "scaling", label: t("Plus de 100 clients", "More than 100 customers") },
-  { value: "established", label: t("Plus de 1 000 clients", "More than 1,000 customers") },
+  { value: "established", label: t("Plus de 1 000 clients", "More than 1,000 customers") },
   { value: "unknown", label: t("Je préfère ne pas dire", "I'd rather not say") },
 ];
 

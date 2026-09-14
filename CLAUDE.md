@@ -3654,6 +3654,71 @@ mobile, là où les calculs en ligne risquaient le plus de casser la mise en pag
 **Copie neuve, donc `TODO: à relire`** — les trois entrées s'ajoutent au lot 1
 dans le bon à tirer nº5.
 
+### Glossaire, lot 3 — la vague 2.2 est complète, et un défaut de typographie française trouvé en regardant une page (2026-09-14)
+
+`product-led-growth`, `arpu`, `nps`. Le glossaire passe de 15 à **25 termes**,
+soit 50 pages indexables dans les deux langues, et la vague 2.2 du plan de
+distribution est close.
+
+**ARPU et NPS remplacent** « expansion revenue » (doublon de
+`upsell-cross-sell`) et « growth loop vs funnel » (parti en 2.3) — écarts
+décidés au lot 1. Les trois angles : PLG reçoit un **test mesurable** à la place
+d'une revendication (part self-serve, calculée en clients *et* en revenu : 25 %
+et 3 % sur le même trimestre de l'exemple) ; ARPU reçoit la confusion ARPPU
+(0,80 € et 20 € le même mois, facteur 25) ; NPS reçoit le correctif qui
+intéresse ce site — **ce n'est pas une mesure de parrainage**, ce que `ref-2`
+mesure réellement, et deux distributions opposées donnent le même +25.
+
+**Le vrai enseignement de ce lot n'est pas le contenu.** En regardant
+`/fr/glossary/arpu` à 390 px, « 5 000 payants » se coupait en fin de ligne, le
+« 5 » seul. Cause : **tout le corpus français utilisait des espaces ordinaires**
+dans les groupes de chiffres et avant les « % » — 96 groupes et 169 pourcentages
+dans `glossary-deep.ts` seul, tous relus et validés. Le défaut était donc latent
+**partout** où un nombre tombait près d'une fin de ligne, et aucune capture d'une
+page donnée ne pouvait en prouver l'absence.
+
+- **Corrigé avec U+00A0, pas U+202F** (l'espace fine insécable que la
+  typographie française préférerait) : ce dépôt a déjà livré un carré vide une
+  fois, quand U+2116 s'est révélé absent d'un sous-ensemble de police OG. U+00A0
+  est dans toutes les polices. Le compromis est écrit dans la spec.
+- **Aucun mot n'a changé**, seulement le caractère d'espace — c'est pourquoi
+  toucher de la copie déjà validée était acceptable ici. Vérifié qu'aucune
+  chaîne **anglaise** n'est touchée : l'anglais écrit « 100,000 » et « 25% »,
+  donc le motif ne peut pas les atteindre. Les deux occurrences restantes du
+  motif sont dans des **commentaires de code** (`copy-library.ts`,
+  `verdict.ts`), qui ne rendent rien.
+- **La spec a trouvé un trou dans mon propre correctif.** Après restauration,
+  `nrr-grr at 1280px` échouait toujours : j'avais corrigé `glossary-deep.ts` et
+  oublié `glossary.ts`, où vit la copie `extended`. Sans la spec, ça partait en
+  production.
+- **Non-vacuité mesurée** : en remettant les espaces ordinaires, **3 des 6 specs
+  tombent** — et deux d'entre elles à 1 280 px, donc ce n'était jamais un
+  problème seulement mobile. Les 3 qui passent sont celles dont les pages n'ont,
+  par chance, aucun nombre près d'une fin de ligne : c'est exactement la raison
+  pour laquelle la spec mesure la **géométrie rendue** (plusieurs rectangles
+  clients pour une même plage) plutôt que les caractères de la source. Une
+  source pleine d'U+00A0 qu'une future CSS recasserait passerait un test de
+  chaîne.
+
+**Le test de longueur d'extrait a fait son travail** au passage : la définition
+française d'ARPU sortait à 161 caractères pour une fenêtre de 160. Raccourcie
+d'un groupe de mots redondant plutôt que contournée par un `metaDescription`.
+
+**Maillage** : il restait trois créneaux libres après le lot 2, dont deux
+utilisables (`growth-loop` → PLG, `viral-coefficient` → NPS), donc **quatre
+échanges** et non six. Mon affirmation du lot 2 — « le glossaire sera saturé » —
+était donc un peu forte : il reste un créneau, sur `aarrr`. Les 25 termes ont
+tous au moins 2 liens entrants, les cibles déplacées en gardent 3 à 6.
+
+**Vérifié en réel** : lint, tsc, **662 tests unitaires**, couverture au-dessus
+des seuils, `next build`, **270 specs Playwright** (+6). Mesuré : 963-1 167 mots
+par langue et par terme, extraits 128-153 caractères. Le flake connu de
+`locale-routing.spec.ts:75` s'est produit une fois de plus en suite complète et
+repasse isolé (21/21) — **quatrième occurrence**, toujours jamais en isolation.
+
+**Copie neuve, donc `TODO: à relire`** — les trois entrées ferment le lot des
+dix termes à soumettre au bon à tirer nº5.
+
 ## État du projet au 2026-09-14 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -3694,7 +3759,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Les deux nouveaux événements A4 (`retake_started`, `landing_return`) | Vérifiés en e2e, jamais contre le vrai GoatCounter (le proxy du bac à sable bloque `*.goatcounter.com`) | Un regard d'Antoine sur `/admin/stats` après déploiement : deux lignes de plus dans la section funnel, et la ligne « Value actions per result ». |
 | R2-30 (fenêtre Tour de France, SPEC.md §10) | Reporté d'un commun accord : pas d'urgence | À construire **avant** juin 2027, pour que le post parte pendant le vrai Tour et pas après. |
 | Les e2e de composition ne passent que par la branche échantillon | `/r/sample` utilise `getSampleNextMove` et `SAMPLE_RESULT.pillars`, pas le vrai chemin. La garde statique est donc seule à protéger le payload | Un id de fixture derrière une variable d'environnement fermée par défaut. À décider : c'est une porte de test sur la route publique la plus sensible. |
-| Flake `locale-routing.spec.ts:75` | Deux échecs le 2026-09-10 et un le 2026-09-14, toujours en suite complète parallèle, jamais isolée ni à la reprise | La prochaine occurrence en CI laisse une trace (`retries: 1` + `trace: on-first-retry`, rapport téléversé). Ne pas durcir la spec en attendant le cookie : ça masquerait une éventuelle course produit. |
+| Flake `locale-routing.spec.ts:75` | **Quatrième occurrence** le 2026-09-14, toujours en suite complète parallèle, jamais isolée (21/21 à la reprise) ni au second passage | La prochaine occurrence en CI laisse une trace (`retries: 1` + `trace: on-first-retry`, rapport téléversé). Ne pas durcir la spec en attendant le cookie : ça masquerait une éventuelle course produit. |
 | TypeScript 7 et ESLint 10 | Tous deux bloqués par des paquets embarqués dans `eslint-config-next` (`typescript-eslint` refuse TS ≥ 6.1 ; `eslint-plugin-react` plante sur ESLint 10). Dependabot les ignore en majeure depuis le 2026-09-08 | Quand `eslint-config-next` suivra. Re-tester en installant, pas en lisant les plages de peer : c'est l'essai qui a montré qu'ESLint 10 plante. |
 | Instrument d'audit : phase 1 (saisie) | **Close le 2026-09-14** (PR #131 à #153). `/admin/audit` crée une mission, trie 25 lignes par palier, saisit tout ce que le schéma prévoit, produit `m19` depuis le Tour de l'auditeur, croise méthode × réalité, rédige les constats et le bloc de tête, exporte, réimporte et purge. La spec canari prouve qu'aucune requête ne porte un octet de la mission ; la recette vérifie le critère de sortie sur un vrai build, `localStorage` réellement vidé entre l'export et l'import | Rien côté code. |
 | Instrument d'audit : phase 1 bis (la vraie mission) | **Le prochain chantier, et il est côté Antoine** : mener AB Tasty dans l'outil jusqu'à `pending = 0`, en tenant le journal des frictions | C'est ce journal qui dira ce que la phase 2 (les readouts) doit construire — il n'y a aucune façon de le deviner d'ici. |
@@ -3703,7 +3768,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Vercel Fluid Active CPU (36 min / 4 h par mois) | Les deux postes qui dominaient le coût par visite sont corrigés le 2026-09-14 : six préchargements dynamiques par vue de la homepage, et l'image de partage rendue à chaque vue de résultat — confirmé en production, `MISS` puis `HIT` sur l'adresse versionnée. La région des fonctions est passée à `cdg1` le même jour (vérifié : `x-vercel-id: iad1::cdg1::…`) | Relire le compteur dans Vercel une semaine après. |
 | Lecture des stats par la session | **Les deux moitiés marchent** (trois runs réels le 2026-09-14 : tableau de bord et Search Console, déchiffrés par la session ; ligne de départ du plan relevée, tenue hors du dépôt public). À surveiller au prochain run Search Console : `/en/glossary/*` doit remplacer les anciennes URL non préfixées dans les pages créditées | Rien : un `age-keygen` puis un run (`admin`, `gsc` ou `both`) quand une session a besoin des chiffres. |
 
-Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et le payant sont dans **`GROWTH-PLAN.md`** (2026-09-13 — sans LinkedIn, sans nom ; cinq vagues, la moitié menable par la session seule ; la part autonome de la vague 0 est livrée : IndexNow, UTM, kit et textes dans `marketing/`) ; le SEO a été livré en grande partie par le lot C de cette revue, et sa suite est la vague 2 de ce plan, dont **2.1 et 2.4 sont faites** (les deux pages « porte ouverte » et leur maillage, 2026-09-14) et **2.2 est aux deux tiers** (lots 1 et 2 : `activation-rate`, `cac-payback`, `nrr-grr`, `cohort-analysis`, puis `dau-mau`, `time-to-value`, `pql` — choisis sur le rapport Search Console du jour). Restent, menables par une session seule : **le lot 3 de 2.2** (`product-led-growth`, `arpu`, `nps`) et **2.3** (le cluster « frameworks comparés »). **2.5** attend les 50 soumissions de `stats/global`.
+Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et le payant sont dans **`GROWTH-PLAN.md`** (2026-09-13 — sans LinkedIn, sans nom ; cinq vagues, la moitié menable par la session seule ; la part autonome de la vague 0 est livrée : IndexNow, UTM, kit et textes dans `marketing/`) ; le SEO a été livré en grande partie par le lot C de cette revue, et sa suite est la vague 2 de ce plan, dont **2.1 et 2.4 sont faites** (les deux pages « porte ouverte » et leur maillage, 2026-09-14) et **2.2 est close** (les dix termes, en trois lots, choisis sur le rapport Search Console du jour — le glossaire passe de 15 à 25 termes, soit 50 pages indexables). Reste, menable par une session seule : **2.3** (le cluster « frameworks comparés »). **2.5** attend les 50 soumissions de `stats/global`.
 
 **Coût Gemini, mesuré plutôt qu'estimé au doigt mouillé** (clé passée en palier payant Tier 1 le 2026-09-07, avec plafonds de dépense) : un Deep dive = 4 générations (2 tons × 2 langues), prompt réel ~5 300 caractères, sorties mesurées par la sonde entre 765 et 2 801 tokens de réflexion et ~450-530 de réponse. Soit **~0,04 à 0,06 $ par Deep dive en 2026**, le double à partir de 2027 (les tarifs Flash doublent au 1ᵉʳ janvier). Le mode Quick ne coûte rien du tout — il n'appelle plus Gemini depuis SPEC-ADDENDUM-01 §0. La limite de 5 Deep dive/h/IP borne un abus à ~2,4 $/jour dans le pire cas.
 
