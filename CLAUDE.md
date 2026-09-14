@@ -3596,6 +3596,64 @@ avec : le titre FR `cac-payback` donne « CAC payback — délai de remboursemen
 Glossaire Tour de Growth » dans la balise `<title>`, deux tirets longs. C'est le
 même motif que `north-star-metric`, déjà validé, mais il mérite un regard.
 
+### Glossaire, lot 2 : ce qui se mesure quand on lit un chiffre de travers (2026-09-14)
+
+`dau-mau`, `time-to-value`, `pql`. Là où le lot 1 décrivait ce qu'un produit
+**rapporte**, ces trois décrivent comment il est **utilisé** — et les trois
+exemples chiffrés portent le même genre de leçon : une métrique qui a l'air
+d'aller mieux pendant que le produit va moins bien.
+
+- **DAU/MAU** : un ratio de 0,20 sur 50 000 MAU ne décrit personne. En
+  découpant, 8 000 personnes ouvrent l'outil 22 jours par mois et 42 000 en
+  ouvrent 3 — (8 000 × 22 + 42 000 × 3) ÷ 30 ≈ 10 000 DAU, le même 0,20, deux
+  populations qui n'ont rien en commun. Et la traduction qui rend la métrique
+  utilisable : **ratio × 30 = jours d'usage par mois**, ce qui suffit en général
+  à trancher si le chiffre est bon, parce qu'une équipe sait à quoi sert son
+  produit. C'est aussi ce qui retire toute valeur au seuil des 20 % hors du
+  grand public : un outil de paie à 0,05 n'échoue pas, il sert quand la paie
+  tombe.
+- **Time to value** : le trimestre où la moyenne passe de 8,2 jours à 1,0 jour
+  **parce que les traînards ont abandonné** — l'activation tombe de 34 % à 28 %
+  au même moment. Vérifié : (200 × 0,5 + 80 × 84 + 60 × 1 000) ÷ 340 ≈ 197 h,
+  puis (200 × 0,5 + 80 × 84) ÷ 280 ≈ 24 h. La médiane, elle, n'aurait pas bougé.
+  D'où les deux règles de la page, qui ne coûtent rien : médiane, et taux
+  d'activation publié juste à côté.
+- **PQL** : deux seuils au **lift identique de 3,7×** dont un seul est une
+  liste — 900 personnes à 15 % (une dizaine de contacts par jour) contre 3 200 à
+  8 % (une liste de diffusion déguisée). Le lift seul les aurait notés à
+  égalité ; c'est le second axe, la taille de la liste, que toutes les
+  définitions oublient.
+
+**Toute l'arithmétique a été recalculée avant d'être écrite**, pas relue après.
+Une imprécision attrapée en regardant la page : la médiane de 340 valeurs n'est
+pas « la 170ᵉ valeur » mais les 170ᵉ et 171ᵉ — les deux tombent dans la première
+heure, donc la conclusion tenait, mais la phrase était fausse. Corrigée dans les
+deux langues.
+
+**Le maillage a coûté plus cher que sur le lot 1, et c'est instructif.** Il ne
+restait que trois créneaux libres dans tout le glossaire (`aarrr`,
+`viral-coefficient`, `growth-loop`) et **aucun des trois n'était un parent
+sémantique** des nouveaux termes. Plutôt que de desserrer le plafond de 2-4
+liens, chacun des six liens entrants **échange un lien redondant contre un lien
+plus serré** : `cohort-analysis` → `dau-mau` (même leçon, autre axe),
+`onboarding` et `aha-moment` → `time-to-value`, `activation-rate` et
+`upsell-cross-sell` → `pql` (les « signaux » sur lesquels son playbook se
+déclenche *sont* un seuil de PQL). Vérifié après coup plutôt que supposé : aucun
+des 22 termes ne descend sous 2 liens entrants, et les cibles déplacées en
+gardent 3 à 7. À la prochaine livraison le glossaire sera saturé — le lot 3
+devra soit échanger encore, soit poser la question du plafond, et ce sera alors
+une vraie décision et non un contournement.
+
+**Vérifié en réel** : lint, tsc, **662 tests unitaires**, couverture au-dessus
+des seuils, `next build`, **264 specs Playwright**. Mesuré : 999-1 141 mots par
+langue et par terme, extraits de recherche 126-154 caractères,
+`scrollWidth === clientWidth` en 390 px et 1 280 px. Captures relues sur
+l'exemple PQL (desktop) et sur les exemples DAU/MAU et time-to-value en français
+mobile, là où les calculs en ligne risquaient le plus de casser la mise en page.
+
+**Copie neuve, donc `TODO: à relire`** — les trois entrées s'ajoutent au lot 1
+dans le bon à tirer nº5.
+
 ## État du projet au 2026-09-14 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -3645,7 +3703,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Vercel Fluid Active CPU (36 min / 4 h par mois) | Les deux postes qui dominaient le coût par visite sont corrigés le 2026-09-14 : six préchargements dynamiques par vue de la homepage, et l'image de partage rendue à chaque vue de résultat — confirmé en production, `MISS` puis `HIT` sur l'adresse versionnée. La région des fonctions est passée à `cdg1` le même jour (vérifié : `x-vercel-id: iad1::cdg1::…`) | Relire le compteur dans Vercel une semaine après. |
 | Lecture des stats par la session | **Les deux moitiés marchent** (trois runs réels le 2026-09-14 : tableau de bord et Search Console, déchiffrés par la session ; ligne de départ du plan relevée, tenue hors du dépôt public). À surveiller au prochain run Search Console : `/en/glossary/*` doit remplacer les anciennes URL non préfixées dans les pages créditées | Rien : un `age-keygen` puis un run (`admin`, `gsc` ou `both`) quand une session a besoin des chiffres. |
 
-Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et le payant sont dans **`GROWTH-PLAN.md`** (2026-09-13 — sans LinkedIn, sans nom ; cinq vagues, la moitié menable par la session seule ; la part autonome de la vague 0 est livrée : IndexNow, UTM, kit et textes dans `marketing/`) ; le SEO a été livré en grande partie par le lot C de cette revue, et sa suite est la vague 2 de ce plan, dont **2.1 et 2.4 sont faites** (les deux pages « porte ouverte » et leur maillage, 2026-09-14) et **2.2 est entamée** (lot 1 de 3 : `activation-rate`, `cac-payback`, `nrr-grr`, `cohort-analysis`, choisis sur le rapport Search Console du jour). Restent, menables par une session seule : **les lots 2 et 3 de 2.2** (`dau-mau`, `time-to-value`, `pql`, puis `product-led-growth`, `arpu`, `nps`) et **2.3** (le cluster « frameworks comparés »). **2.5** attend les 50 soumissions de `stats/global`.
+Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et le payant sont dans **`GROWTH-PLAN.md`** (2026-09-13 — sans LinkedIn, sans nom ; cinq vagues, la moitié menable par la session seule ; la part autonome de la vague 0 est livrée : IndexNow, UTM, kit et textes dans `marketing/`) ; le SEO a été livré en grande partie par le lot C de cette revue, et sa suite est la vague 2 de ce plan, dont **2.1 et 2.4 sont faites** (les deux pages « porte ouverte » et leur maillage, 2026-09-14) et **2.2 est aux deux tiers** (lots 1 et 2 : `activation-rate`, `cac-payback`, `nrr-grr`, `cohort-analysis`, puis `dau-mau`, `time-to-value`, `pql` — choisis sur le rapport Search Console du jour). Restent, menables par une session seule : **le lot 3 de 2.2** (`product-led-growth`, `arpu`, `nps`) et **2.3** (le cluster « frameworks comparés »). **2.5** attend les 50 soumissions de `stats/global`.
 
 **Coût Gemini, mesuré plutôt qu'estimé au doigt mouillé** (clé passée en palier payant Tier 1 le 2026-09-07, avec plafonds de dépense) : un Deep dive = 4 générations (2 tons × 2 langues), prompt réel ~5 300 caractères, sorties mesurées par la sonde entre 765 et 2 801 tokens de réflexion et ~450-530 de réponse. Soit **~0,04 à 0,06 $ par Deep dive en 2026**, le double à partir de 2027 (les tarifs Flash doublent au 1ᵉʳ janvier). Le mode Quick ne coûte rien du tout — il n'appelle plus Gemini depuis SPEC-ADDENDUM-01 §0. La limite de 5 Deep dive/h/IP borne un abus à ~2,4 $/jour dans le pire cas.
 
