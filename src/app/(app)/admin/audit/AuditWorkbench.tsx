@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
+import { definitionFor, missingDefinitionFields, upsertDefinition, type DefinitionDraft } from "@/lib/audit/definitions";
 import { fileNameFor, parseMissionFile, serializeMission } from "@/lib/audit/io";
 import { purgeMission } from "@/lib/audit/purge";
 import { catalogRow, newMission, newPass, type EmbeddedCatalog, type Entry, type Mission, type Pass } from "@/lib/audit/schema";
@@ -52,6 +53,17 @@ export function AuditWorkbench({ catalog, today }: { catalog: EmbeddedCatalog; t
    * trois minutes d'un questionnaire.
    */
   const [writeError, setWriteError] = useState<string | null>(null);
+  /**
+   * Ce que la dernière action a fait de non évident — aujourd'hui : une
+   * nouvelle version de définition frappée. Une définition est immuable, donc
+   * la modifier ne remplace rien : le dire est la seule façon que l'auditeur
+   * ne croie pas avoir corrigé l'ancienne.
+   *
+   * Il ne survit pas à un changement d'écran (`goTo`) : un avis qui reste
+   * affiché pendant qu'on navigue finit par décrire une action qu'on ne se
+   * rappelle plus avoir faite.
+   */
+  const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
     // `localStorage` n'existe pas côté serveur, donc semer ces états au
@@ -62,6 +74,12 @@ export function AuditWorkbench({ catalog, today }: { catalog: EmbeddedCatalog; t
     setMeta(loadDraftMeta());
     setLoaded(true);
   }, []);
+
+  /** Change d'écran et efface l'avis de la dernière action. */
+  function goTo(next: View) {
+    setNotice(null);
+    setView(next);
+  }
 
   function persist(mission: Mission, next?: Mission[]): boolean {
     const result: SaveResult = saveMission(mission);
@@ -106,6 +124,30 @@ export function AuditWorkbench({ catalog, today }: { catalog: EmbeddedCatalog; t
   const currentPass = current?.passes[current.passes.length - 1];
 
   /**
+   * Enregistre une ligne et, quand son statut en demande une, la définition
+   * qui va avec. `upsertDefinition` décide seul s'il y a une version à
+   * frapper : identique au contenu déjà posé → même référence.
+   *
+   * Une définition INCOMPLÈTE n'est pas enregistrée et ne retire pas la
+   * référence existante — l'entrée part alors telle quelle et l'export la
+   * signale, ce qui est le comportement voulu (un fichier qui dit ce qui
+   * reste à faire).
+   */
+  function saveRow(mission: Mission, entry: Entry, definition?: DefinitionDraft): boolean {
+    if (!definition || missingDefinitionFields(definition).length > 0) {
+      setNotice(null);
+      return saveEntry(mission, entry);
+    }
+    const { mission: next, ref, bumped } = upsertDefinition(mission, definition);
+    setNotice(
+      bumped
+        ? `Définition ${ref} frappée. La version précédente reste dans la mission : les observations qui la référencent gardent leur sens.`
+        : null,
+    );
+    return saveEntry(next, { ...entry, definitionRef: ref });
+  }
+
+  /**
    * Écrit une entrée dans la DERNIÈRE passe, en remplaçant celle de même
    * `metricId` s'il y en a une. Une mission est une série de passes
    * (AUDIT.md §3) : saisir modifie toujours la passe en cours, jamais une
@@ -134,12 +176,18 @@ export function AuditWorkbench({ catalog, today }: { catalog: EmbeddedCatalog; t
         </Card>
       ) : null}
 
+      {notice ? (
+        <Card elevation="panel" className={styles.placeholder} data-testid="notice">
+          <p className={styles.muted}>{notice}</p>
+        </Card>
+      ) : null}
+
       {view.kind === "list" ? (
         <MissionList
           missions={missions}
           meta={meta}
-          onOpen={(id) => setView({ kind: "mission", id })}
-          onNew={() => setView({ kind: "new" })}
+          onOpen={(id) => goTo({ kind: "mission", id })}
+          onNew={() => goTo({ kind: "new" })}
           onImport={(file) => {
             void file.text().then((text) => {
               const result = parseMissionFile(text);
@@ -196,13 +244,13 @@ export function AuditWorkbench({ catalog, today }: { catalog: EmbeddedCatalog; t
             // Non destructif : la mission de travail reste intacte. C'est ce
             // qui produit un exemple montrable (décision 3 du §3.3).
             onExportPurged={() => download(purgeMission(current))}
-            onClose={() => setView({ kind: "list" })}
+            onClose={() => goTo({ kind: "list" })}
           />
           {currentPass ? (
-            <RowList mission={current} pass={currentPass} onOpenRow={(metricId) => setView({ kind: "row", id: current.id, metricId })} />
+            <RowList mission={current} pass={currentPass} onOpenRow={(metricId) => goTo({ kind: "row", id: current.id, metricId })} />
           ) : null}
           <Card elevation="panel" className={styles.placeholder}>
-            <Button compact variant="secondary" onClick={() => setView({ kind: "purge", id: current.id })} data-testid="open-purge">
+            <Button compact variant="secondary" onClick={() => goTo({ kind: "purge", id: current.id })} data-testid="open-purge">
               Purger et retirer de cet appareil
             </Button>
           </Card>
@@ -213,14 +261,20 @@ export function AuditWorkbench({ catalog, today }: { catalog: EmbeddedCatalog; t
         (() => {
           const row = catalogRow(current.catalog, view.metricId);
           if (!row) return null;
+          const entry = currentPass.entries.find((e) => e.metricId === view.metricId);
           return (
             <RowEditor
               row={row}
-              entry={currentPass.entries.find((e) => e.metricId === view.metricId)}
-              onChange={(entry) => {
-                if (saveEntry(current, entry)) setView({ kind: "mission", id: current.id });
+              entry={entry}
+              definition={definitionFor(current, entry?.definitionRef)}
+              defaultScope={current.header.scope}
+              onChange={(next, definition) => {
+                // `setView` et non `goTo` : c'est le seul retour d'écran qui
+                // doit CONSERVER l'avis, puisque c'est lui qui vient de le
+                // poser. Les autres navigations l'effacent.
+                if (saveRow(current, next, definition)) setView({ kind: "mission", id: current.id });
               }}
-              onClose={() => setView({ kind: "mission", id: current.id })}
+              onClose={() => goTo({ kind: "mission", id: current.id })}
             />
           );
         })()

@@ -176,11 +176,20 @@ test.describe("the audit instrument's missions", () => {
 
   test("the collect view and the row editor pass axe at serious and critical", async ({ page }) => {
     await createMission(page, "Acme Analytics");
-    for (const step of ["list", "editor"] as const) {
-      if (step === "editor") {
+    for (const step of ["list", "absent", "definition"] as const) {
+      if (step === "absent") {
         await page.getByTestId("row-list").locator("> li").first().getByRole("button", { name: "Renseigner" }).click();
         // With a status chosen, so the conditional fields are in the pass too.
         await page.locator("#status").selectOption("absent");
+      }
+      if (step === "definition") {
+        // The definition form is a whole second set of controls — a select, a
+        // checkbox, three textareas — and axe only sees what is visible, so
+        // the optional axes are unfolded rather than left inside a closed
+        // `<details>` where the pass would say nothing about them.
+        await page.locator("#status").selectOption("measured");
+        await page.getByTestId("definition-fields").getByRole("group").click();
+        await expect(page.locator("#def-horizon")).toBeVisible();
       }
       const results = await new AxeBuilder({ page }).analyze();
       const serious = results.violations.filter((v) => v.impact === "serious" || v.impact === "critical");
