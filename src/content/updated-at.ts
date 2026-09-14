@@ -17,6 +17,11 @@ export const CONTENT_UPDATED_AT: Record<string, string> = {
   "/glossary": "2026-09-14", // dix termes ajoutés à l'index (GROWTH-PLAN.md wave 2.2, lots 1 à 3)
   "/growth-audit-checklist": "2026-09-14", // created (GROWTH-PLAN.md wave 2.1)
   "/startup-growth-diagnostic": "2026-09-14", // created (GROWTH-PLAN.md wave 2.1)
+  // Le cluster « frameworks comparés » (GROWTH-PLAN.md vague 2.3).
+  "/aarrr-vs-north-star-metric": "2026-09-14",
+  "/aarrr-vs-rarra": "2026-09-14",
+  "/aarrr-vs-growth-loops": "2026-09-14",
+  "/aarrr-vs-okr": "2026-09-14",
 };
 
 /** The day the long-form `extended` copy of every term was approved. */

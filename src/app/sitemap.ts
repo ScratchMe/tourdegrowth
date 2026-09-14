@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { COMPARISON_ORDER } from "@/content/comparisons";
 import { GLOSSARY } from "@/content/glossary";
 import { PRIVACY, TERMS } from "@/content/legal";
 import { CONTENT_UPDATED_AT, GLOSSARY_UPDATED_AT } from "@/content/updated-at";
@@ -34,6 +35,15 @@ const CONTENT_PATHS: { path: string; changeFrequency: "monthly" | "yearly"; prio
     priority: 0.8,
     lastModified: CONTENT_UPDATED_AT["/startup-growth-diagnostic"]!,
   },
+  // Le cluster « frameworks comparés » (GROWTH-PLAN.md vague 2.3) : même
+  // priorité que les pages « porte ouverte », pour la même raison — ce sont
+  // des premiers contacts de quelqu'un qui cherche le sujet, pas l'outil.
+  ...COMPARISON_ORDER.map((slug) => ({
+    path: `/${slug}`,
+    changeFrequency: "monthly" as const,
+    priority: 0.8,
+    lastModified: CONTENT_UPDATED_AT[`/${slug}`]!,
+  })),
   { path: "/glossary", changeFrequency: "monthly", priority: 0.6, lastModified: CONTENT_UPDATED_AT["/glossary"]! },
   // The legal pages carry their own date — it is printed on the page, so the
   // sitemap reads the same value rather than a second copy that could drift.

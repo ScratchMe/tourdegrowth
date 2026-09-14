@@ -78,7 +78,7 @@ export const CHECKLIST: OpenDoorPage = {
         },
         {
           fr: "Trois réponses possibles par question, et une seule règle : la réponse haute demande que ce soit à la fois en place ET suivi. « On a un canal principal » sans chiffre en face n'est pas la réponse haute — c'est celle du milieu, et l'écart entre les deux est tout le sujet.",
-          en: "Three possible answers per question, and one rule: the top answer requires the thing to be both in place AND measured. « We have a main channel » with no number behind it is not the top answer — it's the middle one, and the gap between the two is the whole point.",
+          en: "Three possible answers per question, and one rule: the top answer requires the thing to be both in place AND measured. \"We have a main channel\" with no number behind it is not the top answer — it's the middle one, and the gap between the two is the whole point.",
         },
       ],
     },
@@ -131,7 +131,7 @@ export const DIAGNOSTIC: OpenDoorPage = {
   },
   intro: {
     fr: "Un diagnostic de croissance n'est pas un tableau de bord de plus. Un tableau de bord répond à « où en est-on ? » ; un diagnostic répond à « qu'est-ce qui nous empêche d'aller plus vite, et comment le sait-on ? ». La différence tient en un mot : un diagnostic doit pouvoir se tromper.",
-    en: "A growth diagnostic is not another dashboard. A dashboard answers « where are we? »; a diagnostic answers « what is stopping us going faster, and how do we know? ». The difference comes down to one word: a diagnostic has to be able to be wrong.",
+    en: "A growth diagnostic is not another dashboard. A dashboard answers \"where are we?\"; a diagnostic answers \"what is stopping us going faster, and how do we know?\". The difference comes down to one word: a diagnostic has to be able to be wrong.",
   },
   sections: [
     {
@@ -169,7 +169,7 @@ export const DIAGNOSTIC: OpenDoorPage = {
         },
         {
           fr: "Les pratiques, elles, se comparent : « suis-tu ton taux d'activation ? » a la même réponse chez tout le monde, quelle que soit la définition retenue. C'est pour ça qu'un diagnostic de pratiques se tient d'une entreprise à l'autre là où un diagnostic de résultats ne se tient pas — et c'est ce que les quinze questions mesurent.",
-          en: "Practices, on the other hand, do compare: « do you track your activation rate? » has the same answer everywhere, whatever definition is used. That's why a diagnostic of practices holds up from one company to the next where a diagnostic of results does not — and it's what the fifteen questions measure.",
+          en: "Practices, on the other hand, do compare: \"do you track your activation rate?\" has the same answer everywhere, whatever definition is used. That's why a diagnostic of practices holds up from one company to the next where a diagnostic of results does not — and it's what the fifteen questions measure.",
         },
       ],
     },
@@ -182,7 +182,7 @@ export const DIAGNOSTIC: OpenDoorPage = {
         },
         {
           fr: "Et cette action doit être vérifiable dans un délai court. « Améliorer la rétention » n'en est pas une ; « poser un événement d'activation et lire la cohorte de la semaine prochaine » en est une, parce qu'on saura dans huit jours si elle a été faite.",
-          en: "And that action has to be checkable within a short window. « Improve retention » isn't one; « instrument an activation event and read next week's cohort » is, because in eight days you'll know whether it happened.",
+          en: "And that action has to be checkable within a short window. \"Improve retention\" isn't one; \"instrument an activation event and read next week's cohort\" is, because in eight days you'll know whether it happened.",
         },
       ],
     },

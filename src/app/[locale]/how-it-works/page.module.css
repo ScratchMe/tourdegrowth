@@ -153,3 +153,28 @@
   text-decoration: underline;
   text-underline-offset: 0.15em;
 }
+
+/* GROWTH-PLAN.md 2.3 — les quatre liens du cluster « frameworks comparés ».
+   Même langage que les liens du bas d'une page de comparaison. */
+.comparisonLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.comparisonLink {
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  color: var(--text-link);
+  text-decoration: none;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-button);
+  border: var(--border-solid);
+  background: var(--surface-sunken);
+}
+
+.comparisonLink:hover,
+.comparisonLink:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}

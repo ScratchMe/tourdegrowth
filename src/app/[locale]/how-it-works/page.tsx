@@ -6,6 +6,7 @@ import { MetaLabel } from "@/components/brand/MetaLabel";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { QUESTIONS } from "@/content/copy-library";
+import { COMPARISON_ORDER, COMPARISONS } from "@/content/comparisons";
 import { HOW_IT_WORKS } from "@/content/how-it-works";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
@@ -119,6 +120,23 @@ export default async function HowItWorksPage({ params }: PageProps) {
               {tc(UI_STRINGS.openDoor.diagnosticLink, locale)}
             </Link>
           </p>
+        </section>
+
+        {/* GROWTH-PLAN.md 2.3 : le cluster « frameworks comparés » est lié
+            depuis ici parce que c'est LA page qui explique AARRR — quatre
+            liens y sont du sujet, pas du remplissage. Le pied de page, lui,
+            porte déjà six liens : un septième n'en mettrait plus aucun en
+            avant. Les quatre pages se lient aussi entre elles, donc le
+            cluster se parcourt depuis n'importe laquelle de ses entrées. */}
+        <section className={styles.proseSection} data-testid="framework-comparisons">
+          <p className={styles.sectionBody}>{tc(UI_STRINGS.comparisonPage.fromHowItWorks, locale)}</p>
+          <div className={styles.comparisonLinks}>
+            {COMPARISON_ORDER.map((slug) => (
+              <Link key={slug} href={localePath(locale, `/${slug}`)} className={styles.comparisonLink}>
+                {tc(COMPARISONS[slug].title, locale)}
+              </Link>
+            ))}
+          </div>
         </section>
 
         <Card tone="paper" className={styles.limitationCard}>

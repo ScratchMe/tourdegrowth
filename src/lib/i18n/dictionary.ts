@@ -225,6 +225,27 @@ export const UI_STRINGS = {
     diagnosticLink: { en: "The startup growth diagnostic method", fr: "La méthode du diagnostic de croissance" },
   },
 
+  /**
+   * `/aarrr-vs-*` (GROWTH-PLAN.md vague 2.3) — le chrome des quatre pages du
+   * cluster. Le contenu lui-même vit dans `content/comparisons.ts`.
+   * TODO: à relire (convention 6).
+   */
+  comparisonPage: {
+    atAGlance: { en: "At a glance", fr: "En un coup d'œil" },
+    verdictHeading: { en: "Which to use, and when", fr: "Lequel utiliser, et quand" },
+    glossaryHeading: { en: "The terms behind this", fr: "Les termes derrière tout ça" },
+    othersHeading: { en: "The other comparisons", fr: "Les autres comparaisons" },
+    ctaLead: {
+      en: "Whichever framework you settle on, the first question is the same one: which of the five stages is holding the others back? Fifteen questions, three minutes, no signup.",
+      fr: "Quel que soit le cadre retenu, la première question est la même : laquelle des cinq étapes retient les autres ? Quinze questions, trois minutes, sans inscription.",
+    },
+    // Le chapeau de la section « frameworks comparés » sur /how-it-works.
+    fromHowItWorks: {
+      en: "Wondering how AARRR sits next to the other frameworks?",
+      fr: "Tu te demandes comment AARRR se situe face aux autres cadres ?",
+    },
+  },
+
   howItWorksPage: {
     exampleQuestionLabel: { en: "Example question:", fr: "Exemple de question :" },
     // Relu et validé par Antoine (2026-09-09) — R2-17. Eyebrow of each pillar card: the
