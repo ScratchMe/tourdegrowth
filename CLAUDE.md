@@ -2430,6 +2430,68 @@ que soit la cause, c'est le coût par visite qui était réductible.
 c'est ce qui donne 1 à 1,3 s à ces requêtes dans le HAR. C'est un réglage
 de projet Vercel (Function Region), à faire par Antoine ; `cdg1` ou `fra1`.
 
+### L'image de partage a une adresse versionnée, et le CDN la garde (2026-09-14)
+
+Seconde moitié du chantier Fluid Active CPU. Depuis l'extension 03 la page
+de résultat affiche sa propre image de partage, donc **chaque vue d'un
+résultat était un rendu Satori** — la chose la plus chère que l'app fait par
+requête (185 ms de CPU à chaud, 530 ms sur une instance froide, mesuré le
+matin même) — sur une adresse en `max-age=0, must-revalidate` sans ETag.
+Y compris `/r/sample`, lié depuis la landing, dont l'image est la même pour
+tout le monde. Un `s-maxage` seul avait été essayé et annulé le 2026-09-10 :
+le propriétaire qui venait de finir son Deep dive gardait l'ancien badge, et
+une route de métadonnées n'étant pas ISR, rien ne pouvait la purger.
+
+**Le mécanisme : un jeton dans l'adresse, pas une durée sur l'adresse.**
+`lib/og/share-image.ts` calcule un jeton (SHA-256 sur une constante de
+version, le modèle de l'image et **la copie résolue**, 12 hex) ; l'adresse
+`/r/<id>/share/<jeton>.png` change donc exactement quand l'image changerait
+— un Deep dive terminé, un changement de texte — et jamais autrement. Le
+jeton courant est servi `immutable` un an, navigateur et CDN ; tout autre
+jeton (le `legacy` vers lequel les deux anciennes adresses sont réécrites,
+ou un jeton périmé scrapé avant un Deep dive) rend l'image **courante**
+cachée une heure, parce qu'un partage déjà scrapé doit continuer à
+prévisualiser (SPEC.md §12) mais que son contenu peut encore bouger ; un
+segment qui n'est pas un jeton est un 404.
+
+**Ce que ça a coûté en structure.** La convention `opengraph-image.tsx`
+possède son URL et ses en-têtes, sans moyen de changer l'un ou l'autre :
+l'image devient un route handler (`/r/[id]/share/[token]`), le gabarit part
+tel quel dans `lib/og/result-frame.tsx`, et `og:image`/`twitter:image` sont
+déclarés en config dans `generateMetadata`. L'image de la page et le lien
+« Enregistrer » utilisent la même adresse : un rendu, une entrée de cache.
+
+Deux choix à connaître :
+- **La copie fait partie du hash.** Sans ça, corriger un mot de l'image
+  aurait laissé l'ancienne version en cache un an sur toutes les adresses
+  déjà servies, et personne n'aurait pensé à incrémenter
+  `SHARE_IMAGE_VERSION`. Cette constante reste pour le cas que le hash ne
+  voit pas : un changement du gabarit lui-même (mise en page, polices,
+  couleurs).
+- **Le modèle passe par `toPillarViews`** avant d'être haché (R2-24) : un
+  jeton qui varierait avec `rawPoints` les ferait fuir par l'adresse.
+
+**Vérifié en réel** sur le build : jeton courant en
+`public, max-age=31536000, s-maxage=31536000, immutable` ; les deux anciennes
+adresses (`/opengraph-image`, `/opengraph-image-1u74ed?…`) et un jeton
+périmé en `s-maxage=3600` ; quatre formes de non-jeton en 404 ; l'image
+rendue par la nouvelle route est **identique octet pour octet** à celle de
+l'ancienne, et relue à l'écran. 528 tests unitaires (+8), **186 specs
+Playwright** (+1), lint/tsc/build propres. Non-vacuité : en remplaçant
+l'en-tête immutable par l'en-tête bref, seule la spec « cacheable » tombe.
+
+**Ce que ça ne change pas, dit franchement** : le proxy tourne toujours
+avant le cache sur chaque requête (Vercel exécute le middleware avant de
+consulter son cache), à ~2 ms l'appel ; et le cache de réponses de fonction
+de Vercel est **vidé à chaque déploiement**, donc la première vue de chaque
+résultat après un merge repaie un rendu. À trafic réel, c'est exactement le
+comportement voulu ; à cinq merges par jour, c'est un argument de plus pour
+grouper.
+
+**À confirmer après déploiement** : `x-vercel-cache: HIT` sur l'adresse
+déclarée par `/r/sample` rechargée deux fois, et un aperçu LinkedIn/X
+correct sur un lien partagé avant ce changement (les anciennes adresses).
+
 ## État du projet au 2026-09-14 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -2452,7 +2514,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **L'instrument d'audit growth a son schéma** (2026-09-13, `AUDIT.md`) : un outil personnel pour les diagnostics qu'Antoine mène en entreprise, navigateur seulement, jamais Firestore — `src/lib/audit/` + `src/content/audit-catalog.ts`, sans aucune route ni UI encore. Phase 1 (la saisie sous `/admin/audit`) est le prochain chantier, découpée en six PR dans **`AUDIT-PLAN.md`** (2026-09-13) ; phase 3 (tout ce qui ressemble à un produit) reste fermée tant que les entretiens ne sont pas faits et le contrat de travail pas vérifié.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **520 tests unitaires**, **185 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
+**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **528 tests unitaires**, **186 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 
@@ -2476,7 +2538,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Instrument d'audit : phase 1 (saisie) | Le schéma est livré (`AUDIT.md`), rien n'est visible dans l'app. **Le plan complet est dans `AUDIT-PLAN.md`** (phases, six PR de la phase 1, critères de sortie, Go/No-Go) | Le feu vert d'Antoine sur le plan, puis la PR 1.1 (découplage `lib/audit` ↔ contenu + stockage, sans écran). La politique de rétention Vercel doit être en place avant, chaque merge déployant la production. |
 | Catalogue de l'instrument d'audit à relire | 39 lignes de texte qui s'imprimeront dans les livrables d'Antoine, sous son nom | Un bon à tirer, même circuit que les précédents. |
 | Vercel Functions Storage | **Réglé** : la politique de rétention posée par Antoine le 2026-09-14 l'a fait passer de 9,24 Go à 397 Mo, et un déploiement pèse 45,5 Mo de fonctions depuis le 2026-09-13 | Rien. |
-| Vercel Fluid Active CPU (36 min / 4 h par mois) | Le coût par visite était dominé par des rendus inutiles : six préchargements dynamiques par vue de la homepage (corrigés le 2026-09-14) et l'image de partage rendue à chaque vue de résultat (~185 ms, 530 ms à froid) | La PR « cache CDN de l'image de partage » (jeton de version dans l'URL). Puis relire le compteur dans Vercel une semaine après. La région des fonctions (`iad1` alors que Firestore est en `eur3`) est un réglage de projet à changer par Antoine — latence, pas CPU. |
+| Vercel Fluid Active CPU (36 min / 4 h par mois) | Les deux postes qui dominaient le coût par visite sont corrigés le 2026-09-14 : six préchargements dynamiques par vue de la homepage, et l'image de partage rendue à chaque vue de résultat (désormais cachée par le CDN sous une adresse versionnée) | Relire le compteur dans Vercel une semaine après, et vérifier `x-vercel-cache: HIT` sur l'image d'un résultat rechargé. La région des fonctions (`iad1` alors que Firestore est en `eur3`) est un réglage de projet à changer par Antoine — latence, pas CPU. |
 
 Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et le payant sont dans **`GROWTH-PLAN.md`** (2026-09-13 — sans LinkedIn, sans nom ; cinq vagues, la moitié menable par la session seule ; la part autonome de la vague 0 est livrée : IndexNow, UTM, kit et textes dans `marketing/`) ; le SEO a été livré en grande partie par le lot C de cette revue, et sa suite est la vague 2 de ce plan.
 
@@ -2505,7 +2567,7 @@ src/app/(app)/           quiz, résultat, deep dive, admin — dynamiques, sans 
 src/app/api/             deux routes POST : création de soumission, Deep dive
 src/components/          core / brand / quiz / result / glossary — le design system porté
 src/content/             toute la copie du site, validée (agent produit pour l'origine, Antoine le 2026-09-06 et le 2026-09-09 pour le reste)
-src/lib/                 scoring (pur), i18n (dont meta.ts), seo (JSON-LD), og (polices + tokens des images de partage), gemini, submissions (dont segment.ts, benchmark.ts), metrics, analytics
+src/lib/                 scoring (pur), i18n (dont meta.ts), seo (JSON-LD), og (polices, tokens, gabarit et adresse versionnée de l'image de résultat), gemini, submissions (dont segment.ts, benchmark.ts), metrics, analytics
 src/lib/audit/           l'instrument d'audit growth (AUDIT.md = le schéma, AUDIT-PLAN.md = le plan par phases) — pur, navigateur seulement, jamais Firestore ; son catalogue est dans src/content/audit-catalog.ts
 GROWTH-PLAN.md           le plan de distribution (sans LinkedIn, sans nom) ; marketing/ son kit (textes de lancement, captures, annuaires) ; REVIEW*.md les revues ; AUDIT*.md l'instrument d'audit
 design/                  brief d'origine, briefs et bundles de retour des extensions 01 et 03 (le brief 02 n'est jamais parti)
