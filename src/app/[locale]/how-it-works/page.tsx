@@ -108,7 +108,7 @@ export default async function HowItWorksPage({ params }: PageProps) {
         </Card>
 
         <div className={styles.ctaWrap}>
-          <Button size="lg" href="/quiz">
+          <Button size="lg" href="/quiz" hard>
             {tc(HOW_IT_WORKS.cta, locale)}
           </Button>
         </div>

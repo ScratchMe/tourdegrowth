@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { LANDING_RETURN_EVENT, RETAKE_NUDGE_EVENT, trackEvent } from "@/lib/analytics/goatcounter";
 import { latestProgression, type Progression, retakeNudge, type RetakeNudge } from "@/lib/quiz/progression";
@@ -50,7 +49,6 @@ export function LastResult({ withScore, withoutScore, progression, nudge }: Last
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLast(results[0] ?? null);
     setProgress(latestProgression(results));
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStale(retakeNudge(results, Date.now()));
 
     // REVIEW-03.md A4 — "someone with a result loaded the landing again".
@@ -70,11 +68,16 @@ export function LastResult({ withScore, withoutScore, progression, nudge }: Last
   // the way back, so those fall back rather than being hidden.
   const label = typeof last.total === "number" ? withScore.replace("{score}", String(last.total)) : withoutScore;
 
+  // Bare anchors, not `next/link`: both targets live under the app tree's
+  // root layout, so the navigation is a full page load whatever the element
+  // (REVIEW.md R-24) — and a `<Link>` would prefetch `/r/<id>` (a Firestore
+  // read on the server) the moment this line renders, for a click that may
+  // never come. See `Button`'s `hard` prop for the measured cost.
   return (
     <span className={styles.wrap}>
-      <Link href={`/r/${last.id}`} className={styles.link} data-testid="last-result-link">
+      <a href={`/r/${last.id}`} className={styles.link} data-testid="last-result-link">
         {label}
-      </Link>
+      </a>
       {/* REVIEW-02.md R2-27 — only once there are two scored Tours to
           compare; a first-time finisher sees the link alone. */}
       {progress ? (
@@ -90,14 +93,15 @@ export function LastResult({ withScore, withoutScore, progression, nudge }: Last
         <span className={styles.nudge} data-testid="retake-nudge">
           {(stale.unit === "weeks" ? nudge.weeks : nudge.months).replace("{n}", String(stale.value))}
           {" — "}
-          <Link
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- the rule wants next/link; this link crosses a root layout (R-24), see above */}
+          <a
             href="/quiz"
             className={styles.nudgeLink}
             data-testid="retake-nudge-link"
             onClick={() => trackEvent(RETAKE_NUDGE_EVENT)}
           >
             {nudge.cta}
-          </Link>
+          </a>
         </span>
       ) : null}
     </span>
