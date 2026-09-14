@@ -117,6 +117,17 @@ export type Gap = (typeof GAPS)[number];
 export const PERIOD_TYPES = ["month", "quarter", "year", "rolling-12m", "point"] as const;
 export type PeriodType = (typeof PERIOD_TYPES)[number];
 
+/**
+ * Tranches d'**Annual Contract Value** — le montant annuel d'un contrat
+ * client type. L'acronyme est écrit en toutes lettres ici et dans le champ
+ * de saisie parce qu'il en désigne d'autres ailleurs (valeur à neuf en
+ * assurance, notamment) : signalé par Antoine le 2026-09-14 sur l'écran de
+ * création de mission, où il n'était pas développé.
+ *
+ * Les bornes sont sans devise : la devise de la mission est déclarée à
+ * côté (`MissionHeader.currency`), et une tranche par devise multiplierait
+ * le vocabulaire sans rien apprendre au readout.
+ */
 export const ACV_BANDS = ["lt-5k", "5k-25k", "25k-100k", "100k-250k", "gt-250k", "not-applicable"] as const;
 export type AcvBand = (typeof ACV_BANDS)[number];
 

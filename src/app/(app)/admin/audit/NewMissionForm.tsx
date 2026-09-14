@@ -78,7 +78,11 @@ export function NewMissionForm({
           <Select id="model" value={model} options={optionsFrom(AUDIT_PROFILE_MODELS, PROFILE_MODEL_LABELS)} onChange={setModel} />
         </Field>
 
-        <Field label="Tranche d'ACV" htmlFor="acv">
+        <Field
+          label="Tranche d'ACV"
+          htmlFor="acv"
+          hint="Annual Contract Value : le montant annuel d'un contrat client type, dans la devise déclarée plus bas. Sert de repère à la couverture de pipeline. « Sans objet » pour un modèle sans contrat annuel."
+        >
           <Select id="acv" value={acvBand} options={optionsFrom(ACV_BANDS, ACV_BAND_LABELS)} onChange={setAcvBand} />
         </Field>
 

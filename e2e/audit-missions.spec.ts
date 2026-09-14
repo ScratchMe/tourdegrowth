@@ -22,6 +22,27 @@ test.describe("the audit instrument's missions", () => {
     await expect(page.getByTestId("coverage-counters")).toBeVisible();
   }
 
+  /**
+   * Signalé par Antoine le 2026-09-14: "ACV, c'est bien pour Annual Contract
+   * Value ? Tu aurais pu le préciser, l'acronyme peut correspondre à d'autres
+   * définitions." He is right — it also means actual cash value in insurance,
+   * and this form is the only place in the instrument where a label is an
+   * acronym on its own (checked by listing every Field label).
+   *
+   * The assertion is on the hint the field actually renders, not on a string
+   * in a module: the expansion is only useful if it reaches the screen next
+   * to the control it explains.
+   */
+  test("the ACV band field spells the acronym out", async ({ page }) => {
+    await page.goto("/admin/audit");
+    await page.getByTestId("new-mission").click();
+
+    const field = page.locator("#acv").locator("xpath=..");
+    await expect(field).toContainText("Annual Contract Value");
+    // And says which currency it is in — the bounds themselves carry none.
+    await expect(field).toContainText("devise");
+  });
+
   test("a new mission opens with its first pass, and every applicable row starts pending", async ({ page }) => {
     await createMission(page, "Acme Analytics");
 

@@ -202,7 +202,7 @@ export const AUDIT_CATALOG: readonly AuditCatalogRow[] = [
     tier: "T1",
     cost: "T1 — libre-service, ~15 min, même fichier",
     definition:
-      "Revenu moyen ET médian par compte payant sur le mois clos, avec les déciles. Unité déclarée (compte facturé, logo, siège) et identique à celle du dénominateur du CAC.",
+      "Revenu moyen par compte (ARPA) ET médian par compte payant sur le mois clos, avec les déciles ; ou la valeur annuelle d'un contrat (ACV, Annual Contract Value) quand l'entreprise pilote en contrats plutôt qu'en mois. Unité déclarée (compte facturé, logo, siège) et identique à celle du dénominateur du CAC.",
     trap: "La moyenne seule sur une distribution presque toujours asymétrique en B2B : elle ne décrit aucun client réel, et toutes les valeurs qui en découlent deviennent des fictions. Second piège : mélanger les cohortes de signature — les clients signés avant le dernier changement de grille tirent la médiane vers le bas, ce qui fait condamner une hausse de prix qui avait pourtant pris.",
     where:
       "Le même export de facturation que les lignes 1, 4 et 5. Le découpage par cohorte de signature est le seul point de friction.",
