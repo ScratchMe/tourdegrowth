@@ -53,6 +53,11 @@ test("a visitor with no history sees nothing at all", async ({ page }) => {
 test("the sample result never shows a progression — it is nobody's Tour", async ({ page }) => {
   await seed(page, TWO_TOURS);
   await page.goto("/r/sample");
-  await expect(page.getByRole("heading", { level: 1 }).or(page.locator("main"))).toBeVisible();
+  // "The page rendered" — asserted on something the page actually draws.
+  // This used to fall back to the `<h1>`, which since 2026-09-14 exists but is
+  // visually hidden (see `e2e/document-headings.spec.ts`), so `toBeVisible`
+  // was false for it and the check failed for a reason that had nothing to do
+  // with what this spec is about.
+  await expect(page.getByTestId("bottleneck")).toBeVisible();
   await expect(page.getByTestId("result-progression")).toHaveCount(0);
 });

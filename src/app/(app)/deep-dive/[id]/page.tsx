@@ -178,7 +178,25 @@ export default function DeepDivePage() {
 
   // Nothing renders until ownership is settled — a flash of the first Deep
   // dive question before redirecting would be worse than a blank moment.
-  if (!ownershipChecked) return null;
+  /**
+   * Même raison que `/quiz` : l'enveloppe part toujours, le corps attend la
+   * vérification de propriété. Cette page est `noindex`, mais un document
+   * sans titre reste un défaut de structure pour un lecteur d'écran.
+   */
+  if (!ownershipChecked) {
+    return (
+      <>
+        <header className={styles.header}>
+          <div className={styles.headerInner}>
+            <WordmarkLink locale={locale} />
+          </div>
+        </header>
+        <main className={styles.main}>
+          <h1 className="tdg-visually-hidden">{tc(UI_STRINGS.meta.deepDiveHeading, locale)}</h1>
+        </main>
+      </>
+    );
+  }
 
   const questionCounter = tc(dd.questionCounterTemplate, locale)
     .replace("{n}", String(currentIndex + 1))
@@ -196,6 +214,8 @@ export default function DeepDivePage() {
       </header>
 
       <main className={styles.main}>
+        {/* Voir `/quiz` : le document porte un titre que l'écran ne peint pas. */}
+        <h1 className="tdg-visually-hidden">{tc(UI_STRINGS.meta.deepDiveHeading, locale)}</h1>
         {phase === "answering" && (
           <div
             ref={questionRegionRef}

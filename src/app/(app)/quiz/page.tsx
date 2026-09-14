@@ -132,7 +132,33 @@ export default function QuizPage() {
     questionRegionRef.current?.focus();
   }, [currentIndex, phase]);
 
-  if (!mounted) return null;
+  /**
+   * Avant montage, le document n'était PAS vide par accident : il était vide
+   * tout court (`return null`). Un moteur — Bing l'a signalé le 2026-09-14 —
+   * recevait donc zéro contenu sur la page que R2-08 a délibérément laissée
+   * indexable, et qui reçoit plus de liens internes qu'aucune autre.
+   *
+   * Le corps du questionnaire ne peut pas être rendu côté serveur sans casser
+   * la reprise : il dépend de `localStorage`, que le serveur ne voit pas
+   * (leçon de l'étape 4). Mais l'enveloppe, elle, n'en dépend pas — wordmark,
+   * titre du document, langue. Elle part donc toujours, et le premier rendu
+   * client est identique au HTML du serveur, donc aucun mismatch n'est
+   * introduit : c'est ce même rendu-là qui était `null` avant.
+   */
+  if (!mounted) {
+    return (
+      <>
+        <header className={styles.header}>
+          <div className={styles.headerInner}>
+            <WordmarkLink locale={locale} />
+          </div>
+        </header>
+        <main className={styles.main}>
+          <h1 className="tdg-visually-hidden">{tc(UI_STRINGS.meta.quizHeading, locale)}</h1>
+        </main>
+      </>
+    );
+  }
 
   const currentQuestion = QUESTIONS[currentIndex]!;
   const currentStage = phase === "answering" ? stageOfQuestion(currentIndex) : STAGE_COUNT;
@@ -284,6 +310,14 @@ export default function QuizPage() {
       </header>
 
       <main className={styles.main}>
+        {/*
+          Le titre du document. Non peint — le design ne prévoit rien au-dessus
+          de la barre d'étapes — mais présent pour les moteurs et pour la
+          navigation par titres d'un lecteur d'écran. Stable pendant tout le
+          parcours : la question, elle, change quinze fois et son annonce est
+          déjà portée par le `role="group"` ci-dessous (R-19).
+        */}
+        <h1 className="tdg-visually-hidden">{tc(UI_STRINGS.meta.quizHeading, locale)}</h1>
         <StageProgress current={currentStage + 1} total={STAGE_COUNT} size={size} aria-label={stageLabel} />
         {phase === "answering" && <MetaLabel>{stageLabel}</MetaLabel>}
 

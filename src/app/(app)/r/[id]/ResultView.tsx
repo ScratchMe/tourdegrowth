@@ -298,6 +298,14 @@ export function ResultView({
       </header>
 
       <main className={styles.main}>
+        {/*
+          Le titre du document. Non peint : le premier élément dessiné est le
+          numéral du score, et en faire un `<h1>` demanderait de changer
+          `ScoreDisplay`, un composant du design system que la carte d'aperçu
+          de la landing réutilise — où un second `<h1>` serait faux. Le score
+          est dans le texte du titre, donc rien n'est perdu.
+        */}
+        <h1 className="tdg-visually-hidden">{tc(UI_STRINGS.meta.resultHeading, locale).replace("{score}", String(total))}</h1>
         {isSample && (
           <MetaLabel size="xs" wide tone="alert" className={styles.sampleBadge}>
             {tc(t.sampleBadge, locale)}
