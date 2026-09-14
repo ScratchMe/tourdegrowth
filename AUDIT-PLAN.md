@@ -324,7 +324,7 @@ fichier — même si aucune ligne n'est encore saisissable.*
 - **Fini quand** : la mission AB Tasty peut être créée, exportée, réimportée
   sur le vrai build.
 
-#### 1.3 — L'éditeur de ligne, et les deux vues — 🟡 1.3a et 1.3b-i livrés le 2026-09-14, 1.3b-ii et -iii à venir
+#### 1.3 — L'éditeur de ligne, et les deux vues — 🟡 1.3a, 1.3b-i et 1.3b-ii livrés le 2026-09-14, 1.3b-iii à venir
 
 *Le cœur de la phase. La plus grosse PR ; si elle dépasse ce qu'une revue
 peut relire, la couper en 1.3a et 1.3b.*
@@ -348,8 +348,11 @@ compteurs par palier et la vue restitution.
   fait qu'un champ vide de formulaire n'est pas un champ du schéma,
   `missingDefinitionFields` dit ce qui manque. `DefinitionEditor` à l'écran,
   et l'atelier annonce la version frappée.
-- **1.3b-ii — les observations** : la série, les quatre éditeurs de valeur
-  pour les six `valueShape`, la confiance dérivée, `contradicts`.
+- **1.3b-ii — les observations** (livré). La série, les quatre éditeurs de
+  valeur pour les six `valueShape` (`observation-fields.ts#valueEditorFor`),
+  `observationGaps` qui dit ce qui manque avant que le validateur ne le dise,
+  la confiance dérivée affichée à côté de chaque observation, `contradicts`
+  limité aux autres observations de la même ligne.
 - **1.3b-iii — le reste de l'entrée et les vues** : critère, écart à la
   convention canonique, décision en jeu, exposition, gouvernance, dates de
   pilotage, groupement par interlocuteur et par système source, compteurs par

@@ -479,8 +479,17 @@ export function latestObservation(entry: Entry): Observation | undefined {
  * et la complétude de la définition : un extrait brut avec une définition
  * complète est `high` ; un chiffre entendu en réunion est `low` quoi qu'il
  * arrive ; entre les deux, `medium`.
+ *
+ * Le paramètre est volontairement RÉDUIT aux quatre champs lus : l'écran de
+ * saisie veut la confiance d'une observation pendant que la définition est
+ * encore un brouillon, et un brouillon n'a pas de version. Exiger une
+ * `MetricDefinition` entière obligerait à en fabriquer une avec un numéro de
+ * version faux, qui finirait par fuir quelque part.
  */
-export function confidenceOf(observation: Observation, definition: MetricDefinition | undefined): Confidence {
+export function confidenceOf(
+  observation: Observation,
+  definition: Pick<MetricDefinition, "unit" | "numeratorPopulation" | "denominatorPopulation" | "scope"> | undefined,
+): Confidence {
   const rank = SOURCE_KINDS.indexOf(observation.sourceKind);
   const complete =
     definition !== undefined &&
