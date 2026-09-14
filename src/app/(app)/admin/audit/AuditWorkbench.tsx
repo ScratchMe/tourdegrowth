@@ -36,6 +36,7 @@ import { RowList } from "./RowList";
 import { TourScreen } from "./TourScreen";
 import { NewMissionForm } from "./NewMissionForm";
 import styles from "./page.module.css";
+import { Field } from "./_ui/Field";
 import { TextInput } from "./_ui/TextInput";
 
 /**
@@ -510,10 +511,13 @@ function PurgeConfirm({ mission, onCancel, onConfirm }: { mission: Mission; onCa
         <p>
           Cette mission sera retirée de ce navigateur. Le fichier que tu as exporté, lui, reste — c&apos;est la seule copie qui survivra.
         </p>
-        <p className={styles.muted}>
-          Retape <strong>{expected}</strong> pour confirmer.
-        </p>
-        <TextInput id="purge-confirm" value={typed} onChange={setTyped} autoFocus />
+        {/* Enveloppé dans un `Field` : sans lui le champ n'a AUCUN nom
+            accessible — la phrase au-dessus est un `<p>`, pas un `<label>`.
+            Trouvé par la passe axe une fois étendue à cet écran (1.6), qui
+            n'était traversé par aucune spec jusque-là. */}
+        <Field label={`Retape « ${expected} » pour confirmer`} htmlFor="purge-confirm">
+          <TextInput id="purge-confirm" value={typed} onChange={setTyped} autoFocus />
+        </Field>
         <div className={styles.screenActions}>
           <Button compact variant="secondary" onClick={onCancel}>
             Annuler

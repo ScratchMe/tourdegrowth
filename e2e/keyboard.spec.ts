@@ -1,4 +1,4 @@
-import { answerAllQuestions, expect, stubSubmissions, test } from "./helpers";
+import { ADMIN_PASSWORD, SKIP_ADMIN_REASON, adminCredentials, answerAllQuestions, expect, stubSubmissions, test } from "./helpers";
 
 /**
  * REVIEW.md R-19 — what axe structurally cannot see.
@@ -76,5 +76,93 @@ test.describe("keyboard and screen-reader flow", () => {
     await expect(page.getByRole("dialog")).toHaveCount(0);
     // Focus must come back to what opened it, not to <body>.
     await expect(page.locator(":focus")).toHaveAttribute("aria-label", /Definition:/i);
+  });
+});
+
+/**
+ * AUDIT-PLAN.md §3.1 — le parcours de l'instrument d'audit se fait au
+ * clavier, même exigence que R-19 pour le questionnaire.
+ *
+ * Ce que ces specs affirment est un COMPORTEMENT, pas la présence d'un
+ * attribut : une ligne se renseigne et s'enregistre sans toucher la souris.
+ * Un `tabindex` correct sur chaque champ ne dit rien de ça — il suffit qu'un
+ * conteneur intercale un piège, ou qu'un bouton soit rendu hors de l'ordre
+ * du document, pour que le parcours casse alors que tous les attributs sont
+ * justes.
+ */
+test.describe("the audit instrument at the keyboard", () => {
+  test.skip(ADMIN_PASSWORD === "", SKIP_ADMIN_REASON);
+  test.use({ httpCredentials: adminCredentials });
+
+  type Page = import("@playwright/test").Page;
+
+  /** L'ordre de tabulation à partir du focus courant, sur `count` pressions. */
+  async function tabOrder(page: Page, count: number): Promise<string[]> {
+    const order: string[] = [];
+    for (let i = 0; i < count; i++) {
+      await page.keyboard.press("Tab");
+      order.push(
+        await page.evaluate(() => {
+          const el = document.activeElement as HTMLElement | null;
+          if (!el || el === document.body) return "body";
+          return el.id || el.getAttribute("data-testid") || el.tagName.toLowerCase();
+        }),
+      );
+    }
+    return order;
+  }
+
+  test("a row is filled in and saved without touching the mouse", async ({ page }) => {
+    await page.goto("/admin/audit");
+    await page.getByTestId("new-mission").focus();
+    await page.keyboard.press("Enter");
+    await page.locator("#company").fill("Acme Analytics");
+    await page.getByTestId("create-mission").focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByTestId("row-list")).toBeVisible();
+
+    await page.getByTestId("open-row-m01").focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByTestId("entry-form")).toBeVisible();
+
+    // Le sélecteur de statut est atteignable en tabulant depuis le haut du
+    // formulaire, et c'est lui qui débloque tout le reste de la saisie.
+    await page.getByTestId("close-row").focus();
+    const order = await tabOrder(page, 12);
+    expect(order).toContain("status");
+
+    await page.locator("#status").focus();
+    await page.locator("#status").selectOption("absent");
+    await expect(page.getByTestId("absence-fields")).toBeVisible();
+
+    // Les champs qu'un statut fait apparaître entrent dans l'ordre de
+    // tabulation ; sinon un utilisateur clavier verrait un formulaire qu'il
+    // ne peut pas remplir.
+    const afterStatus = await tabOrder(page, 10);
+    expect(afterStatus).toContain("absentCause");
+    expect(afterStatus).toContain("repairScale");
+
+    await page.locator("#absentCause").selectOption("not-instrumented");
+    await page.locator("#repairScale").selectOption("quarter");
+    await page.getByTestId("save-row").focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByTestId("status-m01")).toHaveText("L'entreprise ne l'a pas");
+  });
+
+  test("the optional block opens at the keyboard — a disclosure nobody can open hides its fields", async ({ page }) => {
+    await page.goto("/admin/audit");
+    await page.getByTestId("new-mission").click();
+    await page.locator("#company").fill("Acme Analytics");
+    await page.getByTestId("create-mission").click();
+    await page.getByTestId("open-row-m01").click();
+    await page.locator("#status").selectOption("measured");
+
+    await expect(page.locator("#decisionAtStake")).toBeHidden();
+    // Le `<summary>` natif, pas un rôle : `Disclosure` enveloppe son libellé
+    // dans un `<span>` et ajoute un marqueur `::before`, donc le nom
+    // accessible n'est pas le texte visible — piège déjà rencontré en 1.3b.
+    await page.getByTestId("context-disclosure").locator("summary").focus();
+    await page.keyboard.press("Enter");
+    await expect(page.locator("#decisionAtStake")).toBeVisible();
   });
 });

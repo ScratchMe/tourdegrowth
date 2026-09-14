@@ -3371,6 +3371,82 @@ rendu → 1 spec, la bonne ; l'exclusivité de la priorité remplacée par un
 simple marquage → 1 spec, la bonne aussi. Aucun sabotage n'en a fait tomber
 deux.
 
+### Instrument d'audit, étape 1.6 : la recette, le canari — la phase 1 est close (2026-09-14)
+
+Les cinq étapes précédentes couvrent chacune un écran. Celle-ci couvre la
+**promesse**, et c'est pour ça qu'elle trouve des choses qu'aucune d'elles
+n'aurait pu voir.
+
+**La spec canari** (`e2e/audit-canary.spec.ts`). `AUDIT.md` et
+`content/legal.ts` promettent la même chose : rien ne quitte le navigateur.
+Une garde statique vérifie qu'aucun module serveur n'est importé, mais elle
+ne dit rien d'un `fetch` écrit à la main, d'un `<img>` à l'URL construite, ou
+d'un formulaire qui partirait un jour par erreur. Des chaînes canari uniques
+sont semées dans le nom de l'entreprise, une valeur d'observation et un texte
+de constat ; tout le parcours est joué ; **toutes** les requêtes du navigateur
+sont enregistrées. Trois assertions : aucune ne porte un canari, aucune
+requête non-`GET` de toute la session (celle-là attrape une fuite même
+encodée, hachée ou coupée en morceaux — trois façons dont une recherche de
+sous-chaîne ne verrait rien), et **le fichier exporté contient bien les
+canaris**, sans quoi une spec qui aurait cessé de saisir quoi que ce soit
+passerait en ne prouvant rien. Non-vacuité faite avec une vraie fuite (un
+`fetch` POST de la mission dans `persist`) : la spec la voit.
+
+**La recette du critère de sortie** (`e2e/audit-acceptance.spec.ts`). Le
+§3.1 du plan demande qu'une mission renseignée sur une ligne de chaque
+statut survive à un export, un vidage des données du site et une
+réimportation. La spec **vide réellement le `localStorage`** entre les deux :
+sans ça on vérifierait que l'état React a survécu à un clic, pas que le
+fichier porte le travail — et le fichier est la seule copie qui survit. Les
+compteurs sont comparés au caractère près, le `validateMission` importé est
+celui de l'app (pas une réimplémentation), et la copie purgée est vérifiée
+absolu par absolu pendant que la mission de travail, elle, ne bouge pas.
+
+**Trois défauts trouvés par la recette, aucun visible à la relecture :**
+1. **Le champ de confirmation de purge n'avait aucun nom accessible.** La
+   phrase au-dessus est un `<p>`, pas un `<label>`. Cet écran — le seul de
+   l'outil qui détruit du travail — n'était traversé par aucune spec avant
+   que la passe axe soit étendue à toute la route. Enveloppé dans un `Field`.
+   C'est la troisième fois que ce défaut exact apparaît (1.3a, 1.4, ici) :
+   `core/TextArea` et `_ui/TextInput` ne rendent **jamais** de libellé
+   visible, donc tout champ hors `Field` est anonyme.
+2. **Une observation neuve part sans ses dates**, et le validateur les exige.
+   C'est le bon comportement (une observation sans période ne se compare à
+   rien) — la recette fait ce que l'auditeur fait, elle les remplit. Noté
+   parce que c'était mon premier réflexe de croire à un bug de l'app.
+3. **Le `<summary>` de `Disclosure` ne s'atteint pas par son rôle.** Le
+   composant enveloppe son libellé dans un `<span>` et ajoute un marqueur
+   `::before`, donc le nom accessible n'est pas le texte visible. Troisième
+   rencontre ; écrit dans les specs cette fois plutôt que redécouvert.
+
+**Le parcours clavier** (`e2e/keyboard.spec.ts`, bloc audit) affirme un
+comportement et non des attributs : une ligne se renseigne et s'enregistre
+**sans souris**, et les champs qu'un statut fait apparaître entrent dans
+l'ordre de tabulation. Un `tabindex` correct sur chaque champ ne dit rien de
+ça — il suffit d'un conteneur qui intercale un piège pour que le parcours
+casse alors que tous les attributs sont justes.
+
+**La phase 1 est close.** `/admin/audit` fait tout ce que `AUDIT-PLAN.md` §3
+demandait : créer une mission, trier 25 lignes par palier, saisir statut,
+absence, définition versionnée, observations, repère, décision en jeu,
+exposition et pilotage, remplir le Tour de l'auditeur, lire le croisement
+méthode × réalité, écrire les constats et le bloc de tête, exporter,
+réimporter, purger — sans qu'un octet parte au serveur.
+
+**Le prochain chantier n'est pas du code : c'est la phase 1 bis**, et elle
+est côté Antoine. Mener la vraie mission AB Tasty dans l'outil, en tenant le
+journal des frictions. C'est lui qui dira ce que la phase 2 (les readouts)
+doit construire, et il n'y a aucune façon de le deviner d'ici.
+
+**Vérifié en réel** : lint, tsc, **662 tests unitaires**, couverture
+au-dessus des seuils, `next build`, **256 specs Playwright** (+7). Capture du
+seul écran neuf relue en 390 px.
+
+**Non-vacuité, trois sabotages** : une vraie fuite réseau → la spec canari
+tombe ; le libellé du champ de purge retiré → la passe axe tombe ; les
+constats retirés du fichier sérialisé → la recette d'aller-retour tombe.
+Chacun exactement une spec.
+
 ## État du projet au 2026-09-14 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -3393,7 +3469,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **L'instrument d'audit growth a son schéma** (2026-09-13, `AUDIT.md`) : un outil personnel pour les diagnostics qu'Antoine mène en entreprise, navigateur seulement, jamais Firestore — `src/lib/audit/` + `src/content/audit-catalog.ts`, sans aucune route ni UI encore. Phase 1 (la saisie sous `/admin/audit`) est le prochain chantier, découpée en six PR dans **`AUDIT-PLAN.md`** (2026-09-13) ; phase 3 (tout ce qui ressemble à un produit) reste fermée tant que les entretiens ne sont pas faits et le contrat de travail pas vérifié.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **662 tests unitaires**, **249 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
+**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **662 tests unitaires**, **256 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 
@@ -3413,7 +3489,8 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Les e2e de composition ne passent que par la branche échantillon | `/r/sample` utilise `getSampleNextMove` et `SAMPLE_RESULT.pillars`, pas le vrai chemin. La garde statique est donc seule à protéger le payload | Un id de fixture derrière une variable d'environnement fermée par défaut. À décider : c'est une porte de test sur la route publique la plus sensible. |
 | Flake `locale-routing.spec.ts:75` | Deux échecs le 2026-09-10 et un le 2026-09-14, toujours en suite complète parallèle, jamais isolée ni à la reprise | La prochaine occurrence en CI laisse une trace (`retries: 1` + `trace: on-first-retry`, rapport téléversé). Ne pas durcir la spec en attendant le cookie : ça masquerait une éventuelle course produit. |
 | TypeScript 7 et ESLint 10 | Tous deux bloqués par des paquets embarqués dans `eslint-config-next` (`typescript-eslint` refuse TS ≥ 6.1 ; `eslint-plugin-react` plante sur ESLint 10). Dependabot les ignore en majeure depuis le 2026-09-08 | Quand `eslint-config-next` suivra. Re-tester en installant, pas en lisant les plages de peer : c'est l'essai qui a montré qu'ESLint 10 plante. |
-| Instrument d'audit : phase 1 (saisie) | Feu vert d'Antoine sur `AUDIT-PLAN.md` le 2026-09-14. **1.1 à 1.5 livrées** — `/admin/audit` crée une mission, la trie ligne par ligne, marque les absences, pose une définition versionnée, sa série d'observations, son repère, sa décision en jeu et son pilotage, groupe la collecte par interlocuteur, exporte et réimporte ; le Tour de l'auditeur produit `m19` à 15/15, la vue restitution croise méthode × réalité avec les angles morts en tête, et les constats se rédigent (5C, Decision Ledger, plafond des « à la une », action prioritaire exclusive, bloc de tête avec son budget de mots). Reste 1.6 (la recette de bout en bout) | Rien : la suite s'enchaîne dans l'ordre des dépendances. |
+| Instrument d'audit : phase 1 (saisie) | **Close le 2026-09-14** (PR #131 à #153). `/admin/audit` crée une mission, trie 25 lignes par palier, saisit tout ce que le schéma prévoit, produit `m19` depuis le Tour de l'auditeur, croise méthode × réalité, rédige les constats et le bloc de tête, exporte, réimporte et purge. La spec canari prouve qu'aucune requête ne porte un octet de la mission ; la recette vérifie le critère de sortie sur un vrai build, `localStorage` réellement vidé entre l'export et l'import | Rien côté code. |
+| Instrument d'audit : phase 1 bis (la vraie mission) | **Le prochain chantier, et il est côté Antoine** : mener AB Tasty dans l'outil jusqu'à `pending = 0`, en tenant le journal des frictions | C'est ce journal qui dira ce que la phase 2 (les readouts) doit construire — il n'y a aucune façon de le deviner d'ici. |
 | Catalogue de l'instrument d'audit à relire | 39 lignes de texte qui s'imprimeront dans les livrables d'Antoine, sous son nom | Un bon à tirer, même circuit que les précédents. |
 | Vercel Functions Storage | **Réglé** : la politique de rétention posée par Antoine le 2026-09-14 l'a fait passer de 9,24 Go à 397 Mo, et un déploiement pèse 45,5 Mo de fonctions depuis le 2026-09-13 | Rien. |
 | Vercel Fluid Active CPU (36 min / 4 h par mois) | Les deux postes qui dominaient le coût par visite sont corrigés le 2026-09-14 : six préchargements dynamiques par vue de la homepage, et l'image de partage rendue à chaque vue de résultat — confirmé en production, `MISS` puis `HIT` sur l'adresse versionnée. La région des fonctions est passée à `cdg1` le même jour (vérifié : `x-vercel-id: iad1::cdg1::…`) | Relire le compteur dans Vercel une semaine après. |

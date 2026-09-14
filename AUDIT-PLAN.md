@@ -19,8 +19,8 @@ c'est ce fichier qui a raison, et c'est lui qu'on corrige si le plan change.*
 | Phase | Ce qu'elle produit | Déclencheur | Critère de sortie | Qui | État |
 |---|---|---|---|---|---|
 | **0 — Schéma** | `src/lib/audit/` (types, validateur, compteurs, promotion, quadrants, diff, purge), `src/content/audit-catalog.ts` (39 lignes), garde de frontière, `AUDIT.md` | Les dix réponses d'Antoine à la grille | Les cinq décisions irrattrapables prises et testées | Session | **Livrée** (PR #129, 2026-09-13) |
-| **1 — Saisie** | La route `/admin/audit` : créer une mission, renseigner les lignes, enregistrer les définitions, remplir le Tour, écrire les constats, exporter/importer/purger un fichier JSON — sans qu'un octet parte au serveur | Feu vert d'Antoine sur ce plan | Une mission complète fait l'aller-retour fichier ; la spec « canari » prouve que rien ne sort du navigateur | Session | **À faire — prochain chantier** |
-| **1 bis — Première mission réelle** | Un fichier de mission AB Tasty, sans mandat, `pending = 0`, exporté ; un journal des frictions ; les entretiens lancés | Phase 1 mergée | Le fichier est valide et complet ; la liste des frictions est écrite | Antoine (la mission), session (les correctifs) | Après la phase 1 |
+| **1 — Saisie** | La route `/admin/audit` : créer une mission, renseigner les lignes, enregistrer les définitions, remplir le Tour, écrire les constats, exporter/importer/purger un fichier JSON — sans qu'un octet parte au serveur | Feu vert d'Antoine sur ce plan | Une mission complète fait l'aller-retour fichier ; la spec « canari » prouve que rien ne sort du navigateur | Session | **Livrée** (2026-09-14) |
+| **1 bis — Première mission réelle** | Un fichier de mission AB Tasty, sans mandat, `pending = 0`, exporté ; un journal des frictions ; les entretiens lancés | Phase 1 mergée | Le fichier est valide et complet ; la liste des frictions est écrite | Antoine (la mission), session (les correctifs) | **Prochain chantier — côté Antoine** |
 | **2 — Readouts** | Les quatre artefacts du §6 d'`AUDIT.md`, générés depuis le JSON sans édition manuelle ; les passes multiples et leur diff | Phase 1 bis terminée **et** bon à tirer nº4 signé | Le readout AB Tasty sort de l'outil tel quel et sert en réunion | Session | Après la phase 1 bis |
 | **2 bis — Trois à cinq missions réelles** | Autant de fichiers, un journal par mission (source dominante, lignes toujours absentes, ce que la présentation a obtenu) | Phase 2 livrée | Les données du Go/No-Go existent | Antoine | 2-3 mois après la phase 2 |
 | **Go / No-Go** | Une décision écrite ici | Phase 2 bis terminée, entretiens faits, contrat de travail vérifié | La décision et ses raisons sont dans ce fichier | Antoine | — |
@@ -370,6 +370,10 @@ compteurs par palier et la vue restitution.
   promouvables, le formulaire 5C + Decision Ledger + action convenue, les
   bascules « à la une » (plafonnée) et « action prioritaire » (exclusive), et
   le bloc de tête avec son budget de mots. Détail et écarts au §1.5.
+- **1.6 — la recette, le canari, la documentation** (livré). La spec canari
+  (§3.6), la recette du critère de sortie (§3.1) avec vidage réel du
+  stockage, la passe axe étendue aux deux derniers écrans, le parcours
+  clavier de l'éditeur de ligne. Détail au §1.6.
 
 - **Livre — la vue collecte** (la vue par défaut d'une mission ouverte,
   grille §8) : les lignes applicables **triées par palier décroissant**
@@ -513,7 +517,7 @@ compteurs par palier et la vue restitution.
     compter ferait lire « 1 sur 15 renseignées » à quelqu'un qui n'en a
     rempli qu'une. Défaut vu à la capture, pas à la relecture.
 
-#### 1.6 — Recette de bout en bout, canari, documentation
+#### 1.6 — Recette de bout en bout, canari, documentation (livré)
 
 - **Livre** : `e2e/audit-canary.spec.ts` (§3.6) ; la passe axe étendue à
   tous les écrans de la route ; `e2e/keyboard.spec.ts` étendu à l'éditeur de
@@ -523,6 +527,20 @@ compteurs par palier et la vue restitution.
   `AUDIT.md` §7 et ce fichier mis à jour ; l'entrée de journal dans
   `CLAUDE.md` avec les chiffres de référence.
 - **Fini quand** : tout le §3.1 est vérifié sur le vrai build.
+- **Ce que la recette a trouvé** (et qu'aucune spec d'étape n'aurait vu, par
+  construction : chacune couvre un écran, celle-ci couvre la promesse) :
+  - **Le champ de confirmation de purge n'avait aucun nom accessible.** La
+    phrase au-dessus est un `<p>`, pas un `<label>`. Cet écran n'était
+    traversé par aucune spec avant que la passe axe soit étendue à toute la
+    route.
+  - **Une observation neuve part sans ses dates**, et le validateur les
+    exige. C'est le bon comportement (une observation sans période ne se
+    compare à rien) ; la recette fait ce que l'auditeur fait, elle les
+    remplit.
+  - **Le `<summary>` de `Disclosure` ne s'atteint pas par son rôle** — le
+    composant enveloppe son libellé dans un `<span>` et ajoute un marqueur
+    `::before`, donc le nom accessible n'est pas le texte visible. Piège
+    rencontré une troisième fois ; écrit dans les specs cette fois.
 
 ### 3.5 Ce que la phase 1 ne fait pas
 
