@@ -264,24 +264,48 @@ du schéma ; celui-là dit dans quel ordre on construit et pourquoi. Résumé :
 | Phase | Contenu | État |
 |---|---|---|
 | **0 — Schéma** | Types, validateur, compteurs, promotion, quadrants, diff, purge, catalogue versionné et embarqué, garde de frontière, ce document | **Livrée** (PR #129, 2026-09-13) |
-| **1 — Saisie** | Route `/admin/audit` derrière le Basic Auth existant, import/export JSON, purge — six PR détaillées dans `AUDIT-PLAN.md` §3 | À faire — c'est le prochain chantier |
-| **1 bis — Première mission réelle** | AB Tasty, sans mandat, `pending = 0`, journal des frictions | Après la phase 1 |
+| **1 — Saisie** | Route `/admin/audit` derrière le Basic Auth existant, import/export JSON, purge — six PR détaillées dans `AUDIT-PLAN.md` §3 | **Livrée** (PR #131 à #153, 2026-09-14) |
+| **1 bis — Première mission réelle** | AB Tasty, sans mandat, `pending = 0`, journal des frictions | **C'est le prochain chantier**, et il est côté Antoine |
 | **2 — Readouts** | Les quatre artefacts du §6 ; passes multiples et diff ; catalogue en anglais si un livrable EN existe | Après la phase 1 bis **et** le bon à tirer nº4 |
 | **2 bis → Go/No-Go → 3** | Trois à cinq missions réelles, une décision écrite, puis seulement ce qui ressemble à un produit | Fermée tant que : entretiens non faits, contrat de travail non vérifié |
 
-Côté Antoine, hors code : relire les 39 lignes du catalogue (elles portent
-son nom dans les livrables — `TODO: à relire` en tête du fichier), répondre
-aux questions 6 et 7 si les défauts ne conviennent pas, et mener les
-entretiens avant toute phase 3.
+Côté Antoine, hors code : mener la mission AB Tasty dans l'outil (phase 1
+bis), en tenant le journal des frictions — c'est lui qui dira ce que la
+phase 2 doit construire, et il n'y a aucune façon de le deviner d'ici. Puis
+les entretiens, avant toute phase 3.
 
 ---
 
 ## 8. Vérification
 
 `src/lib/audit/__tests__/` (schema, validate, coverage, findings, quadrants,
-diff, purge), `src/content/__tests__/audit-catalog.test.ts`,
-`src/__tests__/audit-boundary.test.ts`. Ce que les tests ont trouvé en
-écrivant la phase 0, plutôt que la relecture : le demi-point qui disparaissait
-(§2), le fichier purgé qui ne se rouvrait pas (§2), et une assertion de purge
-trop large — le catalogue embarqué cite légitimement « Stripe », ce qui doit
-être propre est ce que la mission a *ajouté* au catalogue.
+diff, purge, definitions, entry-fields, observation-fields, criterion-fields,
+tracking, restitution, tour-entry, finding-draft, storage, io),
+`src/content/__tests__/audit-catalog.test.ts`,
+`src/__tests__/audit-boundary.test.ts`. Côté écran, `e2e/audit-*.spec.ts`
+contre un vrai build de production.
+
+**Trois specs valent plus que les autres**, parce qu'elles tiennent des
+promesses que ce document fait et qu'aucun attribut ne prouve :
+
+- `e2e/audit-canary.spec.ts` — des chaînes canari semées dans le nom de
+  l'entreprise, une valeur et un texte de constat, tout le parcours joué,
+  **toutes** les requêtes du navigateur enregistrées. Assertions : aucune ne
+  porte un canari, aucune requête non-`GET` de toute la session, et le
+  fichier exporté contient bien les canaris — sans cette dernière, une spec
+  qui aurait cessé de saisir quoi que ce soit passerait en ne prouvant rien.
+- `e2e/audit-acceptance.spec.ts` — le critère de sortie du §3.1 du plan : le
+  `localStorage` est **réellement vidé** entre l'export et l'import, et les
+  compteurs sont comparés au caractère près. Sans le vidage, on vérifierait
+  que l'état React a survécu à un clic, pas que le fichier porte le travail.
+- `e2e/keyboard.spec.ts` (bloc audit) — une ligne se renseigne et
+  s'enregistre sans souris. Un `tabindex` correct sur chaque champ ne dit
+  rien de ça.
+
+Ce que les tests ont trouvé plutôt que la relecture : le demi-point qui
+disparaissait (§2), le fichier purgé qui ne se rouvrait pas (§2), une
+assertion de purge trop large — le catalogue embarqué cite légitimement
+« Stripe » —, la ligne `m19` qui gardait une cause d'absence périmée, le
+champ de confirmation de purge sans nom accessible (trouvé en étendant la
+passe axe à un écran qu'aucune spec ne traversait), et le compteur de lignes
+renseignées qui comptait les entrées semées d'office.
