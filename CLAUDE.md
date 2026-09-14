@@ -2800,6 +2800,16 @@ suite a tourné contre l'ancien build. Un sabotage doit compiler pour prouver
 quoi que ce soit — et il faut lire le code retour du build avant de lire
 celui des tests.
 
+**Un avertissement qui ne ment pas.** `AUDIT-PLAN.md` §3.2 demande un
+« modifications non exportées depuis … » affiché en permanence. Le poser
+demandait une date de dernière écriture (`DraftMeta.lastSavedAt`) : sans
+elle, l'avertissement aurait été une supposition, et une alarme qu'on ne peut
+pas justifier est pire qu'aucune. Les deux dates vivent dans la même entrée,
+donc `markExported` et `saveMission` ont chacune leur test de non-écrasement
+— sinon l'avertissement s'allumerait ou s'éteindrait tout seul. « Jamais
+exportée » est traité comme le cas le plus dangereux, pas comme une
+exception : c'est celui où un vidage des données du site perd tout.
+
 **Prérequis CI, comme le plan l'annonçait** : il n'existait aucune spec sur
 `/admin/*`, qui **échoue fermé** (sans `ADMIN_DASHBOARD_PASSWORD`, tout
 `/admin` est un 401 pour tout le monde). `ci.yml` pose donc `e2e-admin` au
@@ -2808,9 +2818,9 @@ et sans la variable elles **sautent avec un message** — jamais faussement
 vertes (le piège de R-11) ni faussement rouges (son inverse de R2-26).
 Vérifié dans les deux sens.
 
-**Vérifié en réel** : `tsc`, `eslint`, 570 tests unitaires, couverture
-au-dessus des seuils, `next build` (`ƒ /admin/audit`), **194 specs
-Playwright** (+8), passe axe verte sur les trois écrans. Le téléchargement
+**Vérifié en réel** : `tsc`, `eslint`, 572 tests unitaires, couverture
+au-dessus des seuils, `next build` (`ƒ /admin/audit`), **195 specs
+Playwright** (+9), passe axe verte sur les trois écrans. Le téléchargement
 est un vrai téléchargement de navigateur (`URL.createObjectURL` +
 `<a download>`), relu depuis le disque et repassé au validateur dans le test.
 
@@ -2836,7 +2846,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **L'instrument d'audit growth a son schéma** (2026-09-13, `AUDIT.md`) : un outil personnel pour les diagnostics qu'Antoine mène en entreprise, navigateur seulement, jamais Firestore — `src/lib/audit/` + `src/content/audit-catalog.ts`, sans aucune route ni UI encore. Phase 1 (la saisie sous `/admin/audit`) est le prochain chantier, découpée en six PR dans **`AUDIT-PLAN.md`** (2026-09-13) ; phase 3 (tout ce qui ressemble à un produit) reste fermée tant que les entretiens ne sont pas faits et le contrat de travail pas vérifié.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **570 tests unitaires**, **194 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
+**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **572 tests unitaires**, **195 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 

@@ -60,6 +60,19 @@ test.describe("the audit instrument's missions", () => {
     await expect(page.getByTestId("mission-list")).toContainText("Acme Analytics");
   });
 
+  /**
+   * AUDIT-PLAN.md §3.2 asks for a permanent "unexported changes" indicator.
+   * It compares two REAL dates (last write vs last export) rather than
+   * guessing — an alarm you cannot justify is worse than none.
+   */
+  test("says so, permanently, while work has not been carried out to a file", async ({ page }) => {
+    await createMission(page, "Acme Analytics");
+    await expect(page.getByTestId("unexported-warning")).toContainText("jamais quitté ce navigateur");
+
+    await Promise.all([page.waitForEvent("download"), page.getByTestId("export-mission").click()]);
+    await expect(page.getByTestId("unexported-warning")).toHaveCount(0);
+  });
+
   test("the file round-trips: export, wipe the device, import, find the same mission", async ({ page, context }) => {
     await createMission(page, "Acme Analytics");
 

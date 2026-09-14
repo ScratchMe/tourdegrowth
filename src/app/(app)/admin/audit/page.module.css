@@ -221,6 +221,12 @@
   margin: 0;
 }
 
+.unexported {
+  font: var(--meta-sm);
+  color: var(--text-alert);
+  margin: 0;
+}
+
 .deliverableTitle {
   font: var(--meta-sm);
   color: var(--text-body);

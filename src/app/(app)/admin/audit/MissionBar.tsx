@@ -3,6 +3,7 @@
 import { computeCoverage, formatFraction } from "@/lib/audit/coverage";
 import { deliverableVocabulary } from "@/lib/audit/findings";
 import type { Mission, Pass } from "@/lib/audit/schema";
+import { hasUnexportedChanges, type DraftMeta } from "@/lib/audit/storage";
 import { Button } from "@/components/core/Button";
 import styles from "./page.module.css";
 
@@ -22,12 +23,14 @@ import styles from "./page.module.css";
 export function MissionBar({
   mission,
   pass,
+  meta,
   onExport,
   onExportPurged,
   onClose,
 }: {
   mission: Mission;
   pass: Pass | undefined;
+  meta: DraftMeta | undefined;
   onExport: () => void;
   onExportPurged: () => void;
   onClose: () => void;
@@ -47,6 +50,11 @@ export function MissionBar({
             <span> · l&apos;entreprise n&apos;en a pas {formatFraction(coverage.companyLacks, coverage.denominator)}</span>
             <span> · sans accès {formatFraction(coverage.noAccess, coverage.denominator)}</span>
             <span> · en attente {formatFraction(coverage.pending, coverage.denominator)}</span>
+          </p>
+        ) : null}
+        {hasUnexportedChanges(meta) ? (
+          <p className={styles.unexported} data-testid="unexported-warning">
+            Modifications non exportées{meta?.lastExportedAt ? ` depuis le ${meta.lastExportedAt.slice(0, 10)}` : " — cette mission n'a jamais quitté ce navigateur"}.
           </p>
         ) : null}
         {vocabulary ? (

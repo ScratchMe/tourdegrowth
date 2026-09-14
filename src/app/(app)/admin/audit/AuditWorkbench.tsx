@@ -68,6 +68,7 @@ export function AuditWorkbench({ catalog, today }: { catalog: EmbeddedCatalog; t
     }
     setWriteError(null);
     setMissions(next ?? loadMissions());
+    setMeta(loadDraftMeta());
     return true;
   }
 
@@ -154,6 +155,7 @@ export function AuditWorkbench({ catalog, today }: { catalog: EmbeddedCatalog; t
           <MissionBar
             mission={current}
             pass={current.passes[current.passes.length - 1]}
+            meta={meta.find((m) => m.missionId === current.id)}
             onExport={() => exportMission(current)}
             // Non destructif : la mission de travail reste intacte. C'est ce
             // qui produit un exemple montrable (décision 3 du §3.3).
