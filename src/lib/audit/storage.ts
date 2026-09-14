@@ -27,6 +27,13 @@ export interface DraftMeta {
   missionId: string;
   /** ISO, posé par `markExported` — jamais dérivé, jamais deviné. */
   lastExportedAt: string | null;
+  /**
+   * ISO de la dernière écriture sur l'appareil. Il n'existe que pour une
+   * chose : pouvoir dire « modifications non exportées » SANS le deviner
+   * (AUDIT-PLAN.md §3.2). Un avertissement qu'on ne peut pas justifier est
+   * pire qu'aucun — celui-ci compare deux dates réelles.
+   */
+  lastSavedAt?: string;
 }
 
 const META_KEY = "tdg.audit.exports.v1";
@@ -64,7 +71,7 @@ export function loadMissions(): Mission[] {
  * Écrit une mission — remplace celle de même `id`, ajoute sinon. L'échec est
  * RENVOYÉ, jamais avalé (voir l'en-tête).
  */
-export function saveMission(mission: Mission): SaveResult {
+export function saveMission(mission: Mission, at = new Date().toISOString()): SaveResult {
   const store = storage();
   if (!store) return { ok: false, reason: "unavailable", message: "Le stockage du navigateur n'est pas accessible." };
   const missions = loadMissions();
@@ -72,6 +79,7 @@ export function saveMission(mission: Mission): SaveResult {
   const next = index >= 0 ? missions.map((m, i) => (i === index ? mission : m)) : [...missions, mission];
   try {
     store.setItem(STORAGE_KEY, JSON.stringify(next));
+    touchMeta(store, mission.id, (meta) => ({ ...meta, lastSavedAt: at }));
     return { ok: true };
   } catch (err) {
     // `QuotaExceededError` est le cas qui compte : une mission à 25 lignes,
@@ -116,13 +124,36 @@ export function loadDraftMeta(): DraftMeta[] {
 export function markExported(missionId: string, at: string): SaveResult {
   const store = storage();
   if (!store) return { ok: false, reason: "unavailable", message: "Le stockage du navigateur n'est pas accessible." };
-  const metas = loadDraftMeta().filter((m) => m.missionId !== missionId);
   try {
-    store.setItem(META_KEY, JSON.stringify([...metas, { missionId, lastExportedAt: at }]));
+    touchMeta(store, missionId, (meta) => ({ ...meta, lastExportedAt: at }));
     return { ok: true };
   } catch (err) {
     return { ok: false, reason: "unknown", message: err instanceof Error ? err.message : "Écriture refusée par le navigateur." };
   }
+}
+
+/**
+ * Les deux dates d'une mission vivent dans la même entrée, donc une écriture
+ * ne doit jamais écraser l'autre date. `markExported` posé après une
+ * sauvegarde doit garder `lastSavedAt`, et l'inverse aussi — sans quoi
+ * l'avertissement « non exportées » s'allume ou s'éteint tout seul.
+ */
+function touchMeta(store: Storage, missionId: string, update: (meta: DraftMeta) => DraftMeta): void {
+  const metas = loadDraftMeta();
+  const existing = metas.find((m) => m.missionId === missionId) ?? { missionId, lastExportedAt: null };
+  const next = [...metas.filter((m) => m.missionId !== missionId), update(existing)];
+  store.setItem(META_KEY, JSON.stringify(next));
+}
+
+/**
+ * Vrai quand l'appareil porte des modifications plus récentes que le dernier
+ * fichier emporté — y compris « jamais exportée », qui est le cas le plus
+ * dangereux et pas une exception.
+ */
+export function hasUnexportedChanges(meta: DraftMeta | undefined): boolean {
+  if (!meta?.lastSavedAt) return false;
+  if (!meta.lastExportedAt) return true;
+  return meta.lastSavedAt > meta.lastExportedAt;
 }
 
 /**

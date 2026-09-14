@@ -1,0 +1,246 @@
+/*
+ * /admin/audit — un outil de bureau à un utilisateur. Volontairement plus
+ * dense que le produit : des lignes, des compteurs, peu d'air. Les tokens du
+ * design system, et rien d'inventé.
+ *
+ * Français uniquement, comme /admin/stats est anglais uniquement : ce sont
+ * des surfaces internes, pas des surfaces produit, donc la règle bilingue du
+ * projet ne s'y applique pas.
+ */
+.page {
+  min-height: 100%;
+  padding: 0 var(--space-7) var(--space-12);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-7);
+  padding-block: var(--space-7);
+  border-bottom: var(--border-rule);
+  margin-bottom: var(--space-9);
+}
+
+.nav {
+  display: flex;
+  gap: var(--space-7);
+}
+
+.navLink {
+  font: var(--meta-sm);
+  color: var(--text-link);
+}
+
+.main {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.h1 {
+  font: var(--display-hero-mobile);
+  margin: 0 0 var(--space-4);
+}
+
+.lede {
+  font: var(--body-md);
+  color: var(--text-muted);
+  margin: 0 0 var(--space-11);
+  max-width: 62ch;
+}
+
+.h2 {
+  font: var(--display-section);
+  margin: 0;
+}
+
+.workbench {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.screenHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-7);
+  flex-wrap: wrap;
+}
+
+.screenActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+}
+
+/* The file input itself is hidden; the label is the control. Never
+   `display: none` on the input — that removes it from the accessibility
+   tree, so the label would announce nothing to a screen reader. */
+.importLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  font: var(--meta-sm);
+  color: var(--text-link);
+  cursor: pointer;
+}
+
+.importLabel:focus-within {
+  outline: var(--focus-width) solid var(--paint-red);
+  outline-offset: var(--focus-offset);
+}
+
+.fileInput {
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  position: absolute;
+}
+
+.missionList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.missionRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-7);
+  flex-wrap: wrap;
+  padding: var(--space-7);
+}
+
+.missionRowTitle {
+  font: var(--body-lg);
+  margin: 0 0 var(--space-2);
+}
+
+.purgedBadge {
+  font: var(--meta-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  border: var(--border-dashed);
+  border-radius: var(--radius-tag);
+  padding: 2px var(--space-2);
+  margin-left: var(--space-3);
+}
+
+.muted {
+  font: var(--meta-sm);
+  color: var(--text-muted);
+  margin: var(--space-2) 0 0;
+}
+
+.alert {
+  font: var(--body-md);
+  color: var(--text-alert);
+  margin: 0;
+}
+
+.empty,
+.placeholder,
+.writeError {
+  padding: var(--space-8);
+}
+
+.writeError {
+  border-color: var(--border-alert);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding: var(--space-9);
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  font: var(--body-md);
+}
+
+.errorList {
+  font: var(--meta-sm);
+  color: var(--text-muted);
+  margin: var(--space-4) 0 0;
+  padding-left: var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.missionBar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-7);
+  flex-wrap: wrap;
+  padding: var(--space-7);
+  background: var(--surface-sunken);
+  border: var(--border-solid);
+  border-radius: var(--radius-card);
+}
+
+.missionBarMain {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.missionBarActions {
+  display: flex;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+}
+
+.missionCompany {
+  font: var(--body-lg);
+  margin: 0;
+}
+
+.counters {
+  font: var(--meta-sm);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.unexported {
+  font: var(--meta-sm);
+  color: var(--text-alert);
+  margin: 0;
+}
+
+.deliverableTitle {
+  font: var(--meta-sm);
+  color: var(--text-body);
+  margin: 0;
+  max-width: 72ch;
+}
+
+@media (max-width: 760px) {
+  .page {
+    padding-inline: var(--space-5);
+  }
+  .missionRow,
+  .missionBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

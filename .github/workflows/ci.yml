@@ -30,6 +30,12 @@ env:
   # nothing. Nothing is ever sent anywhere: the fixture intercepts the
   # script request, so no spec reaches gc.zgo.at or this made-up site.
   NEXT_PUBLIC_GOATCOUNTER_CODE: "e2e-stub"
+  # `/admin/*` is behind Basic Auth in proxy.ts and FAILS CLOSED: with no
+  # password set, every admin request is a 401 for everyone. The audit
+  # instrument lives there, so its specs need a password the test browser can
+  # send. A made-up value — nothing real is behind it in CI, and the real one
+  # lives only in Vercel.
+  ADMIN_DASHBOARD_PASSWORD: "e2e-admin"
 
 jobs:
   check:

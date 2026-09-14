@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { Mission } from "../schema";
-import { deleteMission, loadDraftMeta, loadMissions, markExported, saveMission } from "../storage";
+import { deleteMission, hasUnexportedChanges, loadDraftMeta, loadMissions, markExported, saveMission } from "../storage";
 import { mission } from "./fixtures";
 
 /**
@@ -63,7 +63,6 @@ describe("audit mission storage", () => {
   });
 
   it("records the export date per mission, replacing the previous one", () => {
-    saveMission(mission());
     markExported("mission-1", "2026-09-14T09:00:00.000Z");
     markExported("mission-1", "2026-09-14T18:00:00.000Z");
     markExported("mission-2", "2026-09-13T08:00:00.000Z");
@@ -71,6 +70,40 @@ describe("audit mission storage", () => {
       { missionId: "mission-1", lastExportedAt: "2026-09-14T18:00:00.000Z" },
       { missionId: "mission-2", lastExportedAt: "2026-09-13T08:00:00.000Z" },
     ]);
+  });
+
+  /**
+   * The two dates share one entry, so neither write may clobber the other.
+   * If it did, the "unexported changes" warning would switch itself on or
+   * off — and a warning you cannot justify is worse than none.
+   */
+  it("keeps both dates: saving after an export does not erase the export date, and the reverse", () => {
+    markExported("mission-1", "2026-09-14T09:00:00.000Z");
+    saveMission(mission(), "2026-09-14T10:00:00.000Z");
+    expect(loadDraftMeta()[0]).toEqual({
+      missionId: "mission-1",
+      lastExportedAt: "2026-09-14T09:00:00.000Z",
+      lastSavedAt: "2026-09-14T10:00:00.000Z",
+    });
+
+    markExported("mission-1", "2026-09-14T11:00:00.000Z");
+    expect(loadDraftMeta()[0]).toEqual({
+      missionId: "mission-1",
+      lastExportedAt: "2026-09-14T11:00:00.000Z",
+      lastSavedAt: "2026-09-14T10:00:00.000Z",
+    });
+  });
+
+  it("warns about unexported work — never exported is the dangerous case, not an exception", () => {
+    expect(hasUnexportedChanges(undefined)).toBe(false);
+    expect(hasUnexportedChanges({ missionId: "m", lastExportedAt: null })).toBe(false);
+    expect(hasUnexportedChanges({ missionId: "m", lastExportedAt: null, lastSavedAt: "2026-09-14T10:00:00.000Z" })).toBe(true);
+    expect(
+      hasUnexportedChanges({ missionId: "m", lastExportedAt: "2026-09-14T11:00:00.000Z", lastSavedAt: "2026-09-14T10:00:00.000Z" }),
+    ).toBe(false);
+    expect(
+      hasUnexportedChanges({ missionId: "m", lastExportedAt: "2026-09-14T10:00:00.000Z", lastSavedAt: "2026-09-14T11:00:00.000Z" }),
+    ).toBe(true);
   });
 
   /**

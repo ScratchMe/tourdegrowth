@@ -1,0 +1,44 @@
+/*
+ * Les primitives de saisie de /admin/audit, aux tokens du design system et
+ * à rien d'autre. Voir _ui/Field.tsx pour pourquoi elles vivent ici et non
+ * dans src/components/.
+ */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.label {
+  /* The typography tokens are `font` SHORTHANDS, not sizes — `font-size:
+     var(--meta-xs)` would be silently invalid, the same trap as
+     `--border-rule` being a full border shorthand (CLAUDE.md). */
+  font: var(--meta-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.control {
+  font: var(--body-md);
+  color: var(--text-body);
+  background: var(--surface-card);
+  border: var(--border-solid);
+  border-radius: var(--radius-button);
+  padding: var(--space-4) var(--space-5);
+  width: 100%;
+  /* A native select paints its own chrome on some platforms; keep the field
+     the same height and edge as the text inputs beside it. */
+  min-height: 44px;
+}
+
+.control:focus-visible {
+  outline: var(--focus-width) solid var(--paint-red);
+  outline-offset: var(--focus-offset-tight);
+}
+
+.hint {
+  font: var(--meta-xs);
+  color: var(--text-faint);
+  margin: 0;
+}
