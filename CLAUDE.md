@@ -2556,6 +2556,62 @@ conversation et non l'action, et qu'il continuerait. Antoine a sorti la
 session du mode auto pour finir. Un travail qui manipule des secrets se
 fait donc hors mode auto dès le départ.
 
+### Premier run réel du workflow de stats : le circuit tient, la Search Console attend une API (2026-09-14)
+
+Antoine a posé les deux secrets et ajouté le compte de service à la Search
+Console ; deux runs dans le quart d'heure qui a suivi (nº1 `both`, nº2
+`admin`).
+
+**Le circuit fonctionne de bout en bout.** La clé éphémère générée dans le
+scratchpad de la session, le rapport chiffré par le runner vers cette clé,
+le log relu par l'API GitHub, `stats-decrypt.sh` qui rend `admin.json`
+intact — rien de tout ça n'avait été exercé contre la vraie chaîne avant.
+**La moitié tableau de bord est donc lisible par la session**, et c'est ce
+qui donne la ligne de départ du plan de distribution (item 0.1).
+
+**Les chiffres eux-mêmes ne sont pas écrits ici, et ne doivent pas l'être.**
+Le dépôt est public ; ce workflow existe précisément pour que le contenu de
+`/admin/stats` n'apparaisse pas dans un log public, et le recopier dans ce
+fichier défait le même mot de passe par un autre chemin. La ligne de départ
+n'a pas besoin d'être figée pour être comparable : chaque soumission porte
+son `createdAt` et GoatCounter garde son historique, donc « avant le
+lancement » se recalcule à volonté à partir de la **date**. Ce qui se dit
+sans rien révéler : l'ordre de grandeur est celui d'un site que personne n'a
+encore trouvé, et tout ce qui entre dans le ratio « actions de valeur par
+résultat » (A4) existe déjà en base, à un chiffre — la mesure est prête, il
+manque le trafic.
+
+**Deux choses apprises par le run, pas par la relecture :**
+1. **Un 404 transitoire de GoatCounter.** Au run nº1, la fenêtre « All-time »
+   du funnel est revenue en `GoatCounter API returned 404` pendant que
+   « Last 30 days », même requête à un paramètre près, répondait. Avant de
+   toucher au code, la source de GoatCounter a été lue (le handler `hits`
+   n'a aucune règle de plage qui produise un 404 ; `zhttp` ne mappe en 404
+   qu'un `sql.ErrNoRows`, qu'aucune lecture de ce chemin ne lève) et le run
+   nº2, cinq minutes plus tard, a rendu les deux fenêtres — **identiques**,
+   puisque tout l'historique GoatCounter du site tient dans les 30 derniers
+   jours. Rien à corriger ; en cas de récidive, relancer avant d'enquêter.
+2. **La Search Console répond 403 sur `sites.list`**, alors que l'échange de
+   jeton a réussi (sinon l'erreur aurait nommé cette étape). Ce n'est pas le
+   compte de service qui manque à la propriété — dans ce cas Google renvoie
+   200 avec une liste vide, et `pickSite` l'aurait dit. Un 403 sur la
+   première lecture est ce que produit une **API non activée sur le projet
+   Cloud** qui porte le compte de service (`accessNotConfigured`). Le script
+   n'imprimait que le statut ; il imprime maintenant le `reason` et le
+   message de Google (`describeFailure`, tronqués à 300 caractères, deux
+   formes de corps — jeton et API), pour que le prochain run le dise
+   lui-même au lieu de laisser deviner.
+
+**Action côté Antoine** : activer « Google Search Console API » sur le projet
+Google Cloud où le compte de service a été créé (console Cloud → API et
+services → Bibliothèque), puis relancer le workflow en `gsc` — c'est le seul
+pas restant pour la moitié Search Console.
+
+**Vérifié en réel** : deux runs du workflow contre la production, deux
+déchiffrements ; lint, tsc, 547 tests unitaires (+4 : le 403 de `sites.list`
+avec un corps à la forme de Google, les deux formes de corps d'erreur, la
+troncature).
+
 ## État du projet au 2026-09-14 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -2578,7 +2634,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **L'instrument d'audit growth a son schéma** (2026-09-13, `AUDIT.md`) : un outil personnel pour les diagnostics qu'Antoine mène en entreprise, navigateur seulement, jamais Firestore — `src/lib/audit/` + `src/content/audit-catalog.ts`, sans aucune route ni UI encore. Phase 1 (la saisie sous `/admin/audit`) est le prochain chantier, découpée en six PR dans **`AUDIT-PLAN.md`** (2026-09-13) ; phase 3 (tout ce qui ressemble à un produit) reste fermée tant que les entretiens ne sont pas faits et le contrat de travail pas vérifié.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **543 tests unitaires**, **186 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
+**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **547 tests unitaires**, **186 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 
@@ -2603,7 +2659,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Catalogue de l'instrument d'audit à relire | 39 lignes de texte qui s'imprimeront dans les livrables d'Antoine, sous son nom | Un bon à tirer, même circuit que les précédents. |
 | Vercel Functions Storage | **Réglé** : la politique de rétention posée par Antoine le 2026-09-14 l'a fait passer de 9,24 Go à 397 Mo, et un déploiement pèse 45,5 Mo de fonctions depuis le 2026-09-13 | Rien. |
 | Vercel Fluid Active CPU (36 min / 4 h par mois) | Les deux postes qui dominaient le coût par visite sont corrigés le 2026-09-14 : six préchargements dynamiques par vue de la homepage, et l'image de partage rendue à chaque vue de résultat — confirmé en production, `MISS` puis `HIT` sur l'adresse versionnée. La région des fonctions est passée à `cdg1` le même jour (vérifié : `x-vercel-id: iad1::cdg1::…`) | Relire le compteur dans Vercel une semaine après. |
-| Lecture des stats par la session | Le workflow chiffré est en place (2026-09-14) et les deux secrets GitHub sont posés ; le premier run réel est le prochain pas | Un run : il donne la ligne de départ du plan de distribution (item 0.1) et remplace l'export Search Console (2.7). |
+| Lecture des stats par la session | **La moitié tableau de bord marche** (deux runs réels le 2026-09-14, déchiffrés par la session ; ligne de départ du plan relevée, tenue hors du dépôt public). La moitié Search Console répond 403 sur `sites.list` : l'API n'est pas activée sur le projet Cloud du compte de service | Antoine active « Google Search Console API » sur ce projet, puis un run en `gsc` — le log nomme désormais la cause exacte s'il en reste une. |
 
 Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et le payant sont dans **`GROWTH-PLAN.md`** (2026-09-13 — sans LinkedIn, sans nom ; cinq vagues, la moitié menable par la session seule ; la part autonome de la vague 0 est livrée : IndexNow, UTM, kit et textes dans `marketing/`) ; le SEO a été livré en grande partie par le lot C de cette revue, et sa suite est la vague 2 de ce plan.
 
