@@ -387,3 +387,105 @@
   flex-direction: column;
   gap: var(--space-4);
 }
+
+/* --- Le Tour de l'auditeur et la restitution (étape 1.4) --- */
+
+.viewSwitch {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  padding: var(--space-6) var(--space-7);
+}
+
+/* Les 15 questions d'une traite : ce formulaire se remplit par morceaux
+   entre deux entretiens, pas d'un trait comme /quiz. */
+.tourList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-9);
+}
+
+.tourQuestion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+}
+
+/* 12px entre les réponses — le rythme du questionnaire (DESIGN-BRIEF §05),
+   repris tel quel pour que l'écran reste reconnaissable. */
+.tourOptions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* Le barème est VISIBLE ici (l'auditeur note), mais il reste subordonné au
+   libellé : c'est la réponse qu'on lit, pas le nombre de points. */
+.tourPoints {
+  font: var(--meta-xs);
+  letter-spacing: var(--meta-tracking);
+  color: var(--text-muted);
+}
+
+.tourScore {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-7);
+}
+
+/* Le numéral stencil du produit, mais à la taille d'un titre et non d'un
+   écran de résultat : ici le détail par pilier vaut autant que le total, et
+   un 110px écraserait les cinq lignes qui le rendent défendable. */
+.tourTotal {
+  font: var(--display-title);
+  letter-spacing: var(--display-letter-spacing);
+  margin: 0;
+}
+
+.tourPillars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  font: var(--meta-sm);
+  color: var(--text-muted);
+}
+
+.tourPillars li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-6);
+  border-bottom: var(--border-rule);
+  padding-bottom: var(--space-3);
+}
+
+.restitutionGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* La seule carte rouge de l'écran. `tone="alert"` du design system plutôt
+   qu'un `border-color` local : le système dit que c'est le ton d'« une
+   faiblesse diagnostiquée », ce qu'un angle mort est exactement — et une
+   couleur posée à une seule classe se battrait à égalité de spécificité
+   avec celle de `Card`, dont l'issue dépend de l'ordre d'émission des
+   feuilles (leçon nº2 de CLAUDE.md, R-21). */
+.blindSpots {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-7);
+}
+
+.quadrantAlert {
+  font: var(--meta-sm);
+  color: var(--text-alert);
+  margin: 0;
+}

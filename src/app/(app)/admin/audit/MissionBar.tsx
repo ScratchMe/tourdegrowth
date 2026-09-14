@@ -8,7 +8,9 @@ import { Button } from "@/components/core/Button";
 import styles from "./page.module.css";
 
 /**
- * La barre présente sur tous les écrans d'une mission ouverte.
+ * La barre de l'écran d'accueil d'une mission — pas des écrans qu'on ouvre
+ * depuis lui (l'éditeur de ligne, le Tour, la restitution), qui portent
+ * chacun leur propre en-tête et leur retour.
  *
  * Les compteurs sont TOUJOURS des fractions (`formatFraction`) : « 8 sur 25 »
  * et jamais « 32 % ». Un pourcentage sur 25 lignes donne une précision que
@@ -24,6 +26,7 @@ export function MissionBar({
   mission,
   pass,
   meta,
+  weakestStage,
   onExport,
   onExportPurged,
   onClose,
@@ -31,14 +34,18 @@ export function MissionBar({
   mission: Mission;
   pass: Pass | undefined;
   meta: DraftMeta | undefined;
+  /** L'étape la plus faible du Tour, quand les 15 réponses sont là. */
+  weakestStage?: string;
   onExport: () => void;
   onExportPurged: () => void;
   onClose: () => void;
 }) {
   const coverage = pass ? computeCoverage(pass, mission) : null;
-  // `weakestStage` sert au titre d'escalade ; tant que rien n'est scoré, la
-  // formule reste vraie sans nommer d'étape (le quadrant arrive en 1.4).
-  const vocabulary = coverage ? deliverableVocabulary(mission.header.mandate, coverage, "cette étape") : null;
+  // Le titre d'escalade nomme l'étape sur laquelle le diagnostic ne peut pas
+  // conclure. Tant que le Tour n'est pas complet, aucune étape n'est
+  // désignable : la formule reste vraie avec « cette étape » plutôt que de
+  // nommer au hasard un pilier que rien ne classe encore.
+  const vocabulary = coverage ? deliverableVocabulary(mission.header.mandate, coverage, weakestStage ?? "cette étape") : null;
 
   return (
     <div className={styles.missionBar}>

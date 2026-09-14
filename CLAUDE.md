@@ -3207,6 +3207,95 @@ changement de sorte qui garde tout, les compteurs qui deviennent des totaux, et
 la même horloge vue depuis la liste. Aucun sabotage n'en a fait tomber deux, ce
 qui est le signe que les règles sont testées séparément.
 
+### Instrument d'audit, étape 1.4 : le Tour de l'auditeur, et ce qu'il révèle (2026-09-14)
+
+L'étape qui rend l'outil différent d'un formulaire de 25 lignes. Jusqu'ici la
+couverture disait ce que l'entreprise peut **montrer** ; le Tour ajoute l'autre
+axe — ce qu'elle déclare **mesurer** — et c'est le croisement des deux qui
+structure tout le readout.
+
+**Le quadrant qui vaut le déplacement.** Une réponse à 20 points (« oui, notre
+CAC est clairement identifié et suivi ») posée à côté d'une ligne CAC marquée
+absente est un **angle mort** : la maturité déclarée est haute, le système réel
+ne suit pas. C'est un constat qu'aucun des deux axes ne produit seul — ni un
+questionnaire de maturité, ni un inventaire de chiffres.
+
+**Un angle mort ne demande PAS les 15 réponses, et c'est le point de
+conception de l'écran.** Le croisement se fait question par question
+(`row.tourQuestionId`), donc une seule réponse à 20 points en révèle un ; seul
+le SCORE attend le Tour complet. Lier les deux ferait attendre la fin des
+entretiens pour voir ce qui se voyait dès le premier — et une spec l'épingle
+dans les deux sens (une réponse suffit, zéro réponse n'établit rien).
+
+**`m19` est produite, jamais saisie.** À la quinzième réponse, la ligne passe
+en `measured` avec une observation valuée (`raw-extract-self`, période
+`point` : le Tour photographie des pratiques, il ne couvre pas un intervalle)
+et **sa définition**. Sans elle le validateur refuserait précisément la ligne
+que l'outil produit le mieux. Tout part en **une seule écriture** : une réponse
+posée sans son `m19` sur un quota plein laisserait la mission dans un état que
+rien ne rattrape.
+
+**Deux règles du produit public volontairement inversées ici**, signalées
+plutôt qu'absorbées :
+- **Les 15 questions sur un seul écran**, là où `/quiz` en montre une à la
+  fois. Ce n'est pas un parcours de trois minutes : c'est un formulaire qu'on
+  remplit par morceaux entre deux entretiens, et une question à la fois
+  obligerait à traverser quatorze écrans pour corriger la quinzième.
+- **Les points sont affichés**, là où `AnswerOption.prompt.md` dit « never
+  label an option with its score — scoring stays invisible to the user ».
+  Cette règle vaut pour le questionnaire public, où voir le barème fausserait
+  les réponses. Ici c'est l'auditeur qui note : lui cacher le barème
+  reviendrait à lui demander de noter à l'aveugle.
+
+**Un écart de plan corrigé en écrivant.** `buildTourEntry` utilisait
+`registerDefinition`, qui **lève** si la même référence existe avec un contenu
+différent — or la définition du Tour porte le périmètre de la mission. Passé à
+`upsertDefinition`, c'est-à-dire exactement ce que `saveRow` fait déjà pour la
+saisie manuelle : le module pur dit le contenu voulu, l'appelant qui connaît la
+mission décide de la version.
+
+**Le titre d'escalade nomme enfin une étape.** `deliverableVocabulary` recevait
+« cette étape » en dur depuis 1.3b. Il reçoit maintenant l'étape la plus faible
+— mais **seulement à 15/15** : le départage à égalité suit l'ordre canonique
+AARRR (SPEC.md §6), donc l'appliquer à un Tour partiel désignerait une étape
+par un artefact d'ordre de déclaration plutôt que par une mesure.
+
+**Deux défauts trouvés en essayant d'utiliser l'écran, pas en le relisant** —
+le script de capture s'est arrêté sur un bouton qui n'existait pas :
+1. **La restitution était un cul-de-sac.** Aucun retour vers la mission. La
+   `MissionBar` n'est rendue que sur l'écran d'accueil d'une mission, donc rien
+   ne ramenait en arrière. Bouton ajouté, plus une spec qui vérifie les deux
+   écrans.
+2. **Le docblock de `MissionBar` mentait** depuis 1.3a : « la barre présente
+   sur tous les écrans d'une mission ouverte » — elle n'a jamais été sur
+   l'éditeur de ligne non plus. Corrigé, parce qu'un commentaire faux est ce
+   qui envoie la prochaine session chercher un bug ailleurs.
+
+**Piège CSS évité en regardant la capture.** Ma carte d'angles morts posait
+`border-color: var(--paint-red)` — un sélecteur à une classe, à égalité de
+spécificité avec celui de `Card`, donc l'issue dépendait de l'ordre d'émission
+des feuilles (leçon nº2, et R-21 l'a déjà montré une fois). Et le rouge ne
+s'affichait effectivement pas. Remplacé par `tone="alert"` du design system,
+dont la doc dit exactement « marks a diagnosed weakness » — ce qu'un angle mort
+est. La spec axe **exige maintenant que cette carte soit visible pendant la
+passe** : c'est la seule surface rouge de l'outil, donc le seul endroit où une
+régression de contraste pourrait se cacher.
+
+**Vérifié en réel** : lint, tsc, **646 tests unitaires** (+20), couverture
+au-dessus des seuils, `next build`, **242 specs Playwright** (+10, dont la
+passe axe sur les deux écrans). Captures relues en 1280 et 390 px,
+`scrollWidth === clientWidth` mesuré sur les deux écrans aux deux largeurs.
+
+**Non-vacuité mesurée finement, deux sabotages** : en n'ajoutant pas l'entrée
+produite à la passe, **3 specs tombent** — exactement les trois qui affirment
+que `m19` est écrite — et les 7 autres passent, ce qui est correct pour des
+assertions compagnes. En vidant la liste des angles morts, **1 spec e2e et 3
+tests unitaires** tombent, et les deux assertions d'ABSENCE d'angle mort
+passent dans les deux états. Fait notable du second sabotage : le quadrant
+affiché sur la ligne restait juste (« Angle mort ») pendant que la liste de
+tête était vide — les deux chemins sont bien indépendants, et la spec affirme
+les deux.
+
 ## État du projet au 2026-09-14 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -3229,7 +3318,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **L'instrument d'audit growth a son schéma** (2026-09-13, `AUDIT.md`) : un outil personnel pour les diagnostics qu'Antoine mène en entreprise, navigateur seulement, jamais Firestore — `src/lib/audit/` + `src/content/audit-catalog.ts`, sans aucune route ni UI encore. Phase 1 (la saisie sous `/admin/audit`) est le prochain chantier, découpée en six PR dans **`AUDIT-PLAN.md`** (2026-09-13) ; phase 3 (tout ce qui ressemble à un produit) reste fermée tant que les entretiens ne sont pas faits et le contrat de travail pas vérifié.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **627 tests unitaires**, **232 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
+**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **646 tests unitaires**, **242 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 
@@ -3249,7 +3338,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Les e2e de composition ne passent que par la branche échantillon | `/r/sample` utilise `getSampleNextMove` et `SAMPLE_RESULT.pillars`, pas le vrai chemin. La garde statique est donc seule à protéger le payload | Un id de fixture derrière une variable d'environnement fermée par défaut. À décider : c'est une porte de test sur la route publique la plus sensible. |
 | Flake `locale-routing.spec.ts:75` | Deux échecs le 2026-09-10 et un le 2026-09-14, toujours en suite complète parallèle, jamais isolée ni à la reprise | La prochaine occurrence en CI laisse une trace (`retries: 1` + `trace: on-first-retry`, rapport téléversé). Ne pas durcir la spec en attendant le cookie : ça masquerait une éventuelle course produit. |
 | TypeScript 7 et ESLint 10 | Tous deux bloqués par des paquets embarqués dans `eslint-config-next` (`typescript-eslint` refuse TS ≥ 6.1 ; `eslint-plugin-react` plante sur ESLint 10). Dependabot les ignore en majeure depuis le 2026-09-08 | Quand `eslint-config-next` suivra. Re-tester en installant, pas en lisant les plages de peer : c'est l'essai qui a montré qu'ESLint 10 plante. |
-| Instrument d'audit : phase 1 (saisie) | Feu vert d'Antoine sur `AUDIT-PLAN.md` le 2026-09-14. **1.1, 1.2 et tout 1.3 livrées** — `/admin/audit` crée une mission, la trie ligne par ligne, marque les absences, pose une définition versionnée, sa série d'observations, son repère, sa décision en jeu et son pilotage, groupe la collecte par interlocuteur, exporte et réimporte. Reste 1.4 (le Tour de l'auditeur), 1.5 (les constats) et 1.6 (la recette) | Rien : la suite s'enchaîne dans l'ordre des dépendances. |
+| Instrument d'audit : phase 1 (saisie) | Feu vert d'Antoine sur `AUDIT-PLAN.md` le 2026-09-14. **1.1 à 1.4 livrées** — `/admin/audit` crée une mission, la trie ligne par ligne, marque les absences, pose une définition versionnée, sa série d'observations, son repère, sa décision en jeu et son pilotage, groupe la collecte par interlocuteur, exporte et réimporte ; le Tour de l'auditeur produit `m19` à 15/15 et la vue restitution croise méthode × réalité avec les angles morts en tête. Reste 1.5 (les constats) et 1.6 (la recette) | Rien : la suite s'enchaîne dans l'ordre des dépendances. |
 | Catalogue de l'instrument d'audit à relire | 39 lignes de texte qui s'imprimeront dans les livrables d'Antoine, sous son nom | Un bon à tirer, même circuit que les précédents. |
 | Vercel Functions Storage | **Réglé** : la politique de rétention posée par Antoine le 2026-09-14 l'a fait passer de 9,24 Go à 397 Mo, et un déploiement pèse 45,5 Mo de fonctions depuis le 2026-09-13 | Rien. |
 | Vercel Fluid Active CPU (36 min / 4 h par mois) | Les deux postes qui dominaient le coût par visite sont corrigés le 2026-09-14 : six préchargements dynamiques par vue de la homepage, et l'image de partage rendue à chaque vue de résultat — confirmé en production, `MISS` puis `HIT` sur l'adresse versionnée. La région des fonctions est passée à `cdg1` le même jour (vérifié : `x-vercel-id: iad1::cdg1::…`) | Relire le compteur dans Vercel une semaine après. |
