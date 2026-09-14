@@ -103,6 +103,24 @@ export default async function HowItWorksPage({ params }: PageProps) {
           </div>
         </section>
 
+        {/* GROWTH-PLAN.md 2.4 : chaque nouvelle page reçoit un lien depuis au
+            moins deux pages existantes. Cette page explique le cadre ; les
+            deux autres donnent la liste et la méthode. */}
+        <section className={styles.proseSection}>
+          <p className={styles.sectionBody}>
+            {tc(UI_STRINGS.openDoor.checklistLead, locale)}{" "}
+            <Link href={localePath(locale, "/growth-audit-checklist")} data-testid="checklist-link">
+              {tc(UI_STRINGS.openDoor.checklistLink, locale)}
+            </Link>
+          </p>
+          <p className={styles.sectionBody}>
+            {tc(UI_STRINGS.openDoor.diagnosticLead, locale)}{" "}
+            <Link href={localePath(locale, "/startup-growth-diagnostic")} data-testid="diagnostic-link">
+              {tc(UI_STRINGS.openDoor.diagnosticLink, locale)}
+            </Link>
+          </p>
+        </section>
+
         <Card tone="paper" className={styles.limitationCard}>
           <p className={styles.limitationText}>{tc(HOW_IT_WORKS.limitationNotice.long, locale)}</p>
         </Card>

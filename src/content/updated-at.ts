@@ -15,6 +15,8 @@ export const CONTENT_UPDATED_AT: Record<string, string> = {
   "/how-it-works": "2026-09-06", // stage eyebrows (R2-17)
   "/about": "2026-09-06", // created (R2-04)
   "/glossary": "2026-08-29", // the 15 short definitions have not moved since the extended copy shipped
+  "/growth-audit-checklist": "2026-09-14", // created (GROWTH-PLAN.md wave 2.1)
+  "/startup-growth-diagnostic": "2026-09-14", // created (GROWTH-PLAN.md wave 2.1)
 };
 
 /** The day the long-form `extended` copy of every term was approved. */
