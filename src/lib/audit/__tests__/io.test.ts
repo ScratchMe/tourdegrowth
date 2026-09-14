@@ -76,7 +76,8 @@ describe("parseMissionFile", () => {
    * of the entry, so it comes back WITH its errors.
    */
   it("accepts a well-shaped file the validator rejects, and hands back both the mission and the errors", () => {
-    const broken = { ...mission(), schemaVersion: 99 } as unknown as Mission;
+    const m = mission();
+    const broken = { ...m, header: { ...m.header, mandate: "pas-un-mandat" } } as unknown as Mission;
     expect(validateMission(broken).ok).toBe(false);
 
     const result = parseMissionFile(serializeMission(broken));
@@ -86,6 +87,19 @@ describe("parseMissionFile", () => {
       expect(result.mission!.header.company).toBe("Acme Analytics");
       expect(result.errors.length).toBeGreaterThan(0);
     }
+  });
+
+  /**
+   * A file from a FUTURE schema version is refused at the shape gate, not
+   * opened with errors (AUDIT-PLAN.md §3.3, decision 2): we cannot read it,
+   * so offering to work on it would mean working on a mission we are
+   * misinterpreting. Tolerance is for our own half-finished drafts.
+   */
+  it("refuses a file from a schema version it cannot read, rather than opening it with errors", () => {
+    const future = { ...mission(), schemaVersion: 99 } as unknown as Mission;
+    const result = parseMissionFile(serializeMission(future));
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.mission).toBeNull();
   });
 
   it("reads a purged file — the validator relaxes exactly two rules for one, and the company is gone", () => {

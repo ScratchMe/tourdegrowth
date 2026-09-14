@@ -1,4 +1,4 @@
-import type { Mission } from "./schema";
+import { AUDIT_SCHEMA_VERSION, type Mission } from "./schema";
 import { validateMission, type ValidationResult } from "./validate";
 
 /**
@@ -101,6 +101,11 @@ export function parseMissionFile(text: string): ParseResult {
 function looksLikeMission(value: unknown): boolean {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
   const m = value as Record<string, unknown>;
+  // La version de schéma est un contrôle de FORME et non de validité
+  // (AUDIT-PLAN.md §3.3, décision 2) : un fichier d'une version future, on
+  // ne sait pas le lire, donc on ne prétend pas l'ouvrir « avec des erreurs »
+  // — ce serait offrir de travailler sur une mission qu'on interprète mal.
+  if (m.schemaVersion !== AUDIT_SCHEMA_VERSION) return false;
   if (typeof m.id !== "string" || !Array.isArray(m.passes)) return false;
   const header = m.header;
   return typeof header === "object" && header !== null && typeof (header as Record<string, unknown>).company === "string";

@@ -2684,7 +2684,11 @@ gardent leur ordre, qui est de la donnée. `parseMissionFile` ne lève jamais
 et, surtout, **rend quand même une mission bien formée que le validateur
 refuse**, avec ses erreurs : une mission à moitié saisie est exactement ce
 qu'on transporte entre deux appareils, et refuser de l'ouvrir ferait perdre
-le reste.
+le reste. La tolérance s'arrête à la **version de schéma**, qui est un
+contrôle de forme et non de validité (décision 2 du §3.3, relue en cours de
+route et pas appliquée du premier coup) : un fichier d'une version future,
+on ne sait pas le lire, donc on ne prétend pas l'ouvrir « avec des erreurs »
+— ce serait offrir de travailler sur une mission qu'on interprète mal.
 
 **La garde transitive, et ce qu'elle a trouvé.** `audit-boundary.test.ts`
 marche maintenant les imports depuis `AuditWorkbench.tsx` (posé vide dans
@@ -2713,7 +2717,7 @@ sabotage qui passe doit d'abord prouver qu'il a été appliqué : refait avec un
 `assert s != before`, exactement un test tombe. Une vérification qui ne trouve
 rien doit prouver qu'elle a regardé quelque part.
 
-**Vérifié en réel** : `tsc`, `eslint`, **569 tests unitaires** (+22),
+**Vérifié en réel** : `tsc`, `eslint`, **570 tests unitaires** (+23),
 couverture au-dessus des seuils, `next build`, **186 specs Playwright**
 inchangées.
 
@@ -2739,7 +2743,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **L'instrument d'audit growth a son schéma** (2026-09-13, `AUDIT.md`) : un outil personnel pour les diagnostics qu'Antoine mène en entreprise, navigateur seulement, jamais Firestore — `src/lib/audit/` + `src/content/audit-catalog.ts`, sans aucune route ni UI encore. Phase 1 (la saisie sous `/admin/audit`) est le prochain chantier, découpée en six PR dans **`AUDIT-PLAN.md`** (2026-09-13) ; phase 3 (tout ce qui ressemble à un produit) reste fermée tant que les entretiens ne sont pas faits et le contrat de travail pas vérifié.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **569 tests unitaires**, **186 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
+**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **570 tests unitaires**, **186 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 
