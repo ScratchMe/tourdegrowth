@@ -179,8 +179,8 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       {
         question: t("NPS or CSAT?", "NPS ou CSAT ?"),
         answer: t(
-          "CSAT asks about one interaction that just happened and is the better tool for judging a support reply or a feature. NPS asks about the relationship as a whole and is the better tool for a trend across quarters. They are not competitors, and running both is common — the mistake is using either to judge what the other was built for.",
-          "Le CSAT porte sur une interaction qui vient d'avoir lieu et convient mieux pour juger une réponse du support ou une fonctionnalité. Le NPS porte sur la relation dans son ensemble et convient mieux pour une tendance d'un trimestre à l'autre. Ce ne sont pas des concurrents, et faire les deux est courant — l'erreur est d'utiliser l'un pour juger ce pour quoi l'autre a été construit.",
+          "CSAT — customer satisfaction score — asks about one interaction that just happened and is the better tool for judging a support reply or a feature. NPS asks about the relationship as a whole and is the better tool for a trend across quarters. They are not competitors, and running both is common — the mistake is using either to judge what the other was built for.",
+          "Le CSAT, pour customer satisfaction score, porte sur une interaction qui vient d'avoir lieu et convient mieux pour juger une réponse du support ou une fonctionnalité. Le NPS porte sur la relation dans son ensemble et convient mieux pour une tendance d'un trimestre à l'autre. Ce ne sont pas des concurrents, et faire les deux est courant — l'erreur est d'utiliser l'un pour juger ce pour quoi l'autre a été construit.",
         ),
       },
       {
@@ -1417,8 +1417,8 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         "Un outil de paie à 0,05 — un jour et demi par mois — n'échoue pas ; il est utilisé exactement quand la paie tombe. La première question n'est jamais « le ratio est-il élevé » mais « ce produit doit-il être ouvert tous les jours », et y répondre honnêtement met la métrique de côté pour une bonne part des logiciels B2B.",
       ),
       t(
-        "For a weekly-cycle product, WAU/MAU is the same idea at the right grain and is far more readable. Reading a weekly product on a daily ratio produces a number that is always low and never actionable.",
-        "Pour un produit à cycle hebdomadaire, WAU/MAU est la même idée à la bonne maille et se lit bien mieux. Lire un produit hebdomadaire sur un ratio quotidien produit un chiffre toujours bas et jamais actionnable.",
+        "For a weekly-cycle product, WAU/MAU — weekly over monthly active users — is the same idea at the right grain and is far more readable. Reading a weekly product on a daily ratio produces a number that is always low and never actionable.",
+        "Pour un produit à cycle hebdomadaire, WAU/MAU — les actifs hebdomadaires sur les mensuels — est la même idée à la bonne maille et se lit bien mieux. Lire un produit hebdomadaire sur un ratio quotidien produit un chiffre toujours bas et jamais actionnable.",
       ),
     ],
     howToImprove: [
@@ -1968,8 +1968,8 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       {
         question: t("What's the difference between MRR, ARR and revenue?", "Quelle différence entre MRR, ARR et chiffre d'affaires ?"),
         answer: t(
-          "MRR is monthly recurring revenue: the subscription income you can expect next month if nothing changes, excluding one-off fees. ARR is MRR × 12, used for annual contracts and fundraising. Revenue, in accounting terms, is what was actually recognised in a period, one-offs included. Growth teams steer on MRR because it moves fast enough to learn from.",
-          "Le MRR est le revenu récurrent mensuel : ce que les abonnements rapporteront le mois prochain si rien ne change, hors frais ponctuels. L'ARR est le MRR × 12, utilisé pour les contrats annuels et les levées de fonds. Le chiffre d'affaires, au sens comptable, est ce qui a réellement été reconnu sur une période, ponctuels compris. Les équipes growth pilotent au MRR parce qu'il bouge assez vite pour en apprendre quelque chose.",
+          "MRR is monthly recurring revenue: the subscription income you can expect next month if nothing changes, excluding one-off fees. ARR, annual recurring revenue, is MRR × 12, used for annual contracts and fundraising. Revenue, in accounting terms, is what was actually recognised in a period, one-offs included. Growth teams steer on MRR because it moves fast enough to learn from.",
+          "Le MRR est le revenu récurrent mensuel : ce que les abonnements rapporteront le mois prochain si rien ne change, hors frais ponctuels. L'ARR, le revenu récurrent annuel, est le MRR × 12, utilisé pour les contrats annuels et les levées de fonds. Le chiffre d'affaires, au sens comptable, est ce qui a réellement été reconnu sur une période, ponctuels compris. Les équipes growth pilotent au MRR parce qu'il bouge assez vite pour en apprendre quelque chose.",
         ),
       },
       {
