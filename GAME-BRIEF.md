@@ -1,6 +1,6 @@
 # Brief · « Le côté obscur » de Tour de Growth
 
-Version 1 · 14 septembre 2026 · rédigé à partir du prototype validé par Antoine Berthaud en quatre itérations.
+Version 1.1 · 14 septembre 2026 · rédigé à partir du prototype validé par Antoine Berthaud en quatre itérations ; la version 1.1 ajoute la section 13, drapeau d'activation et points d'entrée depuis le Tour.
 Destinataire : l'agent ou le développeur qui implémente le jeu dans ce dépôt.
 Prototype de référence : `design/game/prototype-s-ils-reviennent.html`, jouable tel quel dans un navigateur, un seul fichier, sans dépendance. Toute règle décrite ici y est implémentée ; en cas de doute, le prototype fait foi, sauf mention contraire dans la section 10.
 
@@ -14,7 +14,7 @@ Tour de Growth explique la croissance sans jargon en cinq zones : comment on vou
 
 Le premier niveau, « S'ils reviennent », couvre la résiliation d'abonnement : une année en quatre trimestres, un DG en visio qui donne des ordres, deux actions par trimestre nommées comme en réunion (« Alléger la page abonnement », jamais « enterrer le bouton »), un dashboard qui montre les résiliations mais cache la confiance des abonnés et le radar de la DGCCRF, puis en décembre la révélation, ou les applaudissements pour qui a tenu, et le catalogue complet des huit dark patterns avec leur vrai nom, la loi, un cas public et le repère pour les reconnaître.
 
-Le jeu est purement client, sans serveur, bilingue dès la conception, et chaque niveau est de la donnée. Quatre autres niveaux sont esquissés en section 11, un par zone.
+Le jeu est purement client, sans serveur, bilingue dès la conception, et chaque niveau est de la donnée. Quatre autres niveaux sont esquissés en section 11, un par zone. Pendant son développement, la feature est fermée derrière un drapeau et ouverte en prévisualisation pour Antoine ; son premier point d'entrée est la fin du Tour, quand le goulot est la rétention (section 13).
 
 ---
 
@@ -123,6 +123,8 @@ Le jeu est purement client, sans serveur, bilingue dès la conception, et chaque
 | Le partage reste, en bas, en second plan | « Pas sûr que les utilisateurs aimeront partager leur score, mais pourquoi pas, à tester » |
 | Le jeu vit dans Tour de Growth, sur ses cinq zones | « On devrait le faire rentrer dans Tour de Growth… une bonne façon de distiller de la connaissance supplémentaire » |
 | Chiffres du jeu, jamais présentés comme une étude | Cohérent avec la ligne d'honnêteté du Tour |
+| La feature est fermée par un drapeau tant qu'elle se peaufine, avec une prévisualisation en production pour Antoine | Demande d'Antoine ; même mécanisme que `METRICS_PAGE_ENABLED`, lu à chaque requête |
+| Le premier point d'entrée est la fin du Tour, sous l'action prioritaire, seulement quand le goulot est la rétention | Idée d'Antoine : le lecteur vient d'apprendre que la rétention le freine, le jeu lui montre ce qu'il ne faut pas faire. L'encart ne concurrence ni le partage ni le Deep dive |
 
 ---
 
@@ -460,6 +462,16 @@ Tout test est bloquant pour la mise en production. Les tests unitaires portent s
 - C6 Les marques citées dans `cas` appartiennent à la liste blanche du niveau (Basic-Fit, Amazon, Adobe, Google, deceptive.design) ; toute nouvelle marque exige une décision.
 - C7 Garde de bundle, dans `src/__tests__/client-bundles.test.ts` ou à côté : aucun Client Component hors `app/[locale]/game/**` n'importe `content/game/**` ni `lib/game/**` ; le jeu n'importe jamais `lib/i18n/dictionary`.
 
+**Série G · drapeau et points d'entrée** (`src/lib/game/__tests__/access.test.ts` et `src/__tests__/proxy.test.ts`)
+
+- G1 `resolveGameAccess({ env, cookie })` : ouvert si `env === "true"` ; ouvert si le cookie de prévisualisation vaut `1` quel que soit `env` ; fermé sinon ; fermé si `env` est absent (fail closed, comme `METRICS_PAGE_ENABLED`).
+- G2 Proxy, drapeau fermé, sans cookie : `/fr/game` et `/en/game/retention` sont réécrits vers la page introuvable de la langue, statut 404 ; `/fr/glossary` n'est pas touché.
+- G3 Proxy, drapeau fermé, `?game=preview` : la réponse pose le cookie `tdg_game_preview=1` (HttpOnly, SameSite Lax, un an) et laisse passer la requête ; les requêtes suivantes avec ce cookie passent aussi.
+- G4 Proxy, `?game=off` : le cookie est effacé et la requête est réécrite vers la page introuvable si le drapeau est fermé.
+- G5 Proxy, drapeau ouvert : aucune réécriture, aucun cookie posé sans paramètre.
+- G6 `gameEntryFor({ bottleneck, access, levels })` : renvoie l'entrée du niveau « retention » quand le goulot principal est `retention`, l'accès ouvert et le niveau présent dans `GAME_LEVELS_BY_PILLAR` ; `null` pour tout autre pilier, pour un goulot « level » (aucun pilier ne se détache), ou si l'accès est fermé.
+- G7 Vocabulaire analytique : `GAME_ENTRY_EVENT` et ses détails (`result/retention`, `deep_dive/retention`, `footer`, `hub`) sont présents dans `ALL_PATHS` de `goatcounter-api.ts`, comme les événements existants.
+
 ### 7.2 Tests de bout en bout (Playwright, `e2e/game-*.spec.ts`, fixture `e2e/helpers.ts`)
 
 Chaque scénario part d'une page vierge, stockage local vidé, sauf mention contraire. Les hooks sont des `data-testid` (`game-call`, `game-hangup`, `game-listen`, `game-card-{id}`, `game-run`, `game-dash-churn`, `game-dash-patience`, `game-report-{q}`, `game-ending`, `game-catalogue`, `game-replay`, `game-share`).
@@ -486,6 +498,11 @@ Chaque scénario part d'une page vierge, stockage local vidé, sauf mention cont
 - P20 **Analytique.** Via `trackedEvents(page)` : `game_started/retention`, `game_hangup/{q}`, `game_voice/{mood}`, `game_quarter/{q}`, `game_order/{obeyed|refused}`, `game_ending/{id}`, `game_catalogue_open`, `game_replay`, `game_share`, dans l'ordre attendu du parcours A.
 - P21 **Accessibilité automatisée.** Les pages du hub et du niveau, à l'ouverture et sur la page de décembre, passent `@axe-core/playwright` sans violation critique ni sérieuse, comme `e2e/accessibility.spec.ts`.
 - P22 **Performance.** Aucune requête réseau pendant la partie hors polices et GoatCounter ; le JS propre au niveau ≤ 60 ko compressés.
+- P23 **Point d'entrée, goulot rétention.** Sur `/r/sample` rendu avec un goulot rétention (fixture de résultat dédiée, comme `CREATED_ID` pour le stub de soumission), l'encart `game-entry` est présent sous `priority-move` et avant `take-again-cta`, avec le lien `/{locale}/game/retention?from=result` ; le clic émet `game_entry_clicked/result/retention` puis ouvre le niveau, dont la page lit `from=result` sans le laisser dans l'URL partagée.
+- P24 **Point d'entrée, autre goulot.** Sur un résultat dont le goulot est l'acquisition, aucun encart `game-entry` ; idem sur un board « level ».
+- P25 **Deep dive.** Sur un résultat avec Deep dive et goulot rétention, l'encart est présent une seule fois, sous l'action prioritaire, avec la variante de texte du Deep dive.
+- P26 **Prévisualisation.** `/fr/game?game=preview` pose le cookie `tdg_game_preview` ; `/fr/game?game=off` l'efface. La CI tourne drapeau ouvert (`GAME_ENABLED: "true"` au niveau du workflow, comme `NEXT_PUBLIC_GOATCOUNTER_CODE`) : l'état fermé est couvert par la série G, pas en bout en bout.
+- P27 **Pied de page et sitemap.** Drapeau ouvert au build, le pied de page porte le lien vers `/{locale}/game` et le sitemap liste `/game` et `/game/retention` dans les deux langues ; un test unitaire sur `sitemap.ts` vérifie l'absence des deux entrées quand le drapeau est fermé au build.
 
 ### 7.3 Recette manuelle avant lancement, par Antoine
 
@@ -574,6 +591,7 @@ Le moteur est pur : des fonctions `(state, action) → state` sans DOM ni React.
 ### 9.3 Routes et langue
 
 - Ajouter `game` à `LOCALIZED_ROOTS`. URLs : `/fr/game`, `/en/game`, `/fr/game/retention`, `/en/game/retention`. Les segments restent en anglais comme `glossary` et `how-it-works` ; le titre affiché est dans la langue de la page.
+- Les routes du jeu sont gardées par le drapeau de la section 13, dans le proxy, pour rester prérendues.
 - Le sélecteur de langue existant (`LocaleSwitcher`) fonctionne tel quel ; l'état de la partie, dans `localStorage`, survit au changement d'URL.
 - `contentMetadata` pour le titre et la description ; hreflang et canonical viennent avec.
 - Sitemap : deux entrées (`/game`, `/game/retention`) avec `CONTENT_UPDATED_AT`.
@@ -595,7 +613,7 @@ Le moteur est pur : des fonctions `(state, action) → state` sans DOM ni React.
 
 ### 9.6 Analytique
 
-Événements GoatCounter, déclarés dans `src/lib/game/events.ts` et ajoutés à `ALL_PATHS` de `goatcounter-api.ts` : `game_started/{level}`, `game_hangup/{q}`, `game_voice/{mood}`, `game_quarter/{q}`, `game_order/{obeyed|refused}`, `game_ending/{endingId}`, `game_catalogue_open`, `game_replay`, `game_share`. Les indicateurs de 2.3 se lisent dans GoatCounter et dans le dashboard admin existant.
+Événements GoatCounter, déclarés dans `src/lib/game/events.ts` et ajoutés à `ALL_PATHS` de `goatcounter-api.ts` : `game_entry_clicked/{result|deep_dive}/{pillar}`, `game_entry_clicked/{footer|hub}`, `game_started/{level}/{from}`, `game_hangup/{q}`, `game_voice/{mood}`, `game_quarter/{q}`, `game_order/{obeyed|refused}`, `game_ending/{endingId}`, `game_catalogue_open`, `game_replay`, `game_share`. Les indicateurs de 2.3 se lisent dans GoatCounter et dans le dashboard admin existant, qui gagne une ligne « entrées dans le jeu » par origine.
 
 ### 9.7 Accessibilité
 
@@ -639,6 +657,7 @@ Le jeu introduit un monde visuel que le système actuel n'a pas : un fond nuit p
 - Test automatique des mots interdits sur les cartes (la règle existe, le test non).
 - Relire le message du DG une fois raccroché : ajouter un lien « Relire le message du DG » dans la main.
 - `data-testid` sur les éléments listés en 7.2.
+- Le drapeau, la prévisualisation et les points d'entrée de la section 13 : ils n'ont de sens que dans le site.
 
 ---
 
@@ -701,19 +720,77 @@ Le modèle numérique est le même que celui du niveau 1, avec deux constantes r
 | Jalon | Contenu | Critère de sortie |
 |---|---|---|
 | J0 · Brief design | `design/DS-EXTENSION-BRIEF-04.md` rédigé et envoyé à Claude Design | Retour reçu, tokens ajoutés |
-| J1 · Moteur | `lib/game/` complet, `content/game/retention.ts`, fixtures | Séries S, H, R, M, Q, E, F, C vertes en CI |
+| J1 · Moteur et drapeau | `lib/game/` complet, `content/game/retention.ts`, fixtures, `GAME_ENABLED` et la prévisualisation dans le proxy | Séries S, H, R, M, Q, E, F, C, G vertes en CI, routes fermées en production dès la première mise en ligne |
 | J2 · Interface FR | Composants, deux mondes, téléphone, visio SVG, voix, route `[locale]/game/retention` | P1 à P14, P16, P17, P21 verts |
 | J3 · Bilingue, persistance, hub | Textes EN relus, reprise, `[locale]/game` | P15, P18 verts, C2 vert |
-| J4 · Instrumentation et SEO | Événements, `opengraph-image`, sitemap, JSON-LD | P19, P20, P22 verts, dashboard admin à jour |
+| J4 · Instrumentation, SEO, points d'entrée | Événements, `opengraph-image`, sitemap, JSON-LD, encart sur la page de résultat, lien de pied de page | P19, P20, P22 à P27 verts, dashboard admin à jour |
 | J5 · Recette | Relecture d'Antoine, cinq testeurs, relecture juridique du catalogue | 7.3 validée, aucun texte modifié après |
-| J6 · Lancement | Mise en ligne, annonce, suivi des indicateurs de 2.3 pendant un mois | Rapport d'indicateurs |
+| J6 · Lancement | Ouverture du drapeau, rebuild, annonce, suivi des indicateurs de 2.3 et de 13.5 pendant un mois | Rapport d'indicateurs, décision sur la place de l'encart |
 | J7+ · Niveaux 2 à 5 | Une `LevelDefinition` par niveau, mêmes tests, mêmes fixtures | Un niveau par sprint |
 
 Définition de terminé pour la première version : J0 à J6, toutes les séries de tests vertes en CI, la recette signée par Antoine, l'entrée ajoutée au `CLAUDE.md`.
 
 ---
 
-## 13. Références
+## 13. Drapeau d'activation et points d'entrée depuis le Tour
+
+Ajouté en version 1.1 à la demande d'Antoine : pouvoir ouvrir et fermer la feature pendant qu'elle se peaufine, et proposer le jeu à qui vient d'apprendre que la rétention le freine.
+
+### 13.1 Le drapeau
+
+- **Variable** : `GAME_ENABLED`, côté serveur, jamais `NEXT_PUBLIC_`. Ouvert si sa valeur est exactement `"true"`, fermé sinon, fermé si elle est absente. Documentée dans `.env.local.example`, dans le bloc optionnel, sur le modèle de `METRICS_PAGE_ENABLED`.
+- **Lue à chaque requête**, donc basculable dans l'hébergeur sans redéploiement pour tout ce qui est servi dynamiquement (les routes via le proxy, la page de résultat). Ce qui est décidé au build, sitemap, hreflang, lien de pied de page, suit la valeur du drapeau **au moment du build** : ouvrir la feature pour de bon, c'est poser la variable puis redéployer.
+- **Prévisualisation** : `?game=preview` sur n'importe quelle URL pose un cookie `tdg_game_preview=1` (HttpOnly, SameSite Lax, un an) dans le proxy, comme `?lang=` pose le cookie de langue, avec la même astuce de réécriture de l'en-tête Cookie entrant pour que la requête courante en profite. Avec ce cookie, tout se comporte comme si le drapeau était ouvert : routes, encart de résultat, hub. `?game=off` efface le cookie. Le cookie ne vaut que pour le navigateur qui l'a posé : c'est la façon dont Antoine teste en production pendant que le jeu reste fermé pour tout le monde.
+- **Résolveur pur** : `resolveGameAccess({ env, cookie }): "open" | "closed"` dans `src/lib/game/access.ts`, sans dépendance à Next.js, comme `resolveLocale`. Le proxy et la page de résultat l'appellent ; personne ne relit `process.env` ailleurs.
+
+### 13.2 Ce que « fermé » veut dire
+
+| Surface | Fermé | Ouvert |
+|---|---|---|
+| `/{locale}/game` et `/{locale}/game/{niveau}` | réécrites par le proxy vers un chemin inexistant sous le même préfixe de langue, donc la page introuvable localisée, statut 404, pages toujours prérendues | servies |
+| Encart sur la page de résultat | non rendu ; `/r/[id]` est dynamique et lit le drapeau et le cookie à la requête, puis passe `gameEntry` à `ResultView` | rendu selon 13.3 |
+| Sitemap, hreflang | absents | présents |
+| Lien de pied de page | absent | « Le jeu » / « The game », dans `NAV_STRINGS` |
+| Événements analytiques | aucun n'est émis | émis |
+
+Aucune donnée n'est jamais écrite : fermer la feature ne perd rien pour personne. Une partie en cours dans `localStorage` reste là ; si le drapeau se ferme, la page 404 ne la mentionne pas.
+
+### 13.3 Les points d'entrée
+
+**A · La fin du Tour, sur la page de résultat.** C'est le point d'entrée principal, contextuel.
+
+- **Condition** : le goulot principal (`bottleneck.pillars[0]`, jamais `weakestPillar`, pour la même raison que le partage) est un pilier qui a un niveau dans `GAME_LEVELS_BY_PILLAR` et l'accès est ouvert. Au lancement, seule la rétention y figure : quatre lecteurs sur cinq ne voient rien, c'est voulu. Un board « level », où aucun pilier ne se détache, n'affiche rien.
+- **Place** : sous le bloc « Prochaine action » (`priority-move`) et son appel au Deep dive, avant « Refaire le Tour » (`take-again-cta`). Jamais au-dessus du partage ni du Deep dive, qui sont le cœur de la boucle. Un encart secondaire, avec le style d'une carte d'aperçu et non d'un bouton principal ; le composant s'appelle `GameEntry`, `data-testid="game-entry"`.
+- **Lien** : `/{locale}/game/retention?from=result`. La page du niveau lit `from`, émet `game_started/retention/result`, puis retire le paramètre de l'URL pour que le lien partagé reste propre.
+- **Texte**, à relire par Antoine avant toute mise en ligne, marqué « à relire » dans le module :
+  - FR, titre : « Le côté obscur de la rétention ». Corps : « Tu sais maintenant quoi faire. Voici ce qu'il ne faut pas faire : joue une année comme PM growth d'une appli de streaming, un DG qui veut du chiffre, et huit astuces que tu reconnaîtras ensuite partout. » Bouton : « Jouer le niveau « S'ils reviennent » ». Mention : « vingt minutes, gratuit ».
+  - EN, titre : « The dark side of retention ». Corps : « Now you know what to do. Here is what not to do: play a year as the growth PM of a streaming app, with a CEO who wants the number, and eight tricks you will recognise everywhere afterwards. » Bouton : « Play the level “If they come back” ». Mention : « twenty minutes, free ».
+- **Variante Deep dive** : quand le résultat porte un Deep dive, l'encart reste au même endroit, une seule fois, et sa première phrase devient « Tes recommandations sont au-dessus. » / « Your recommendations are above. ». Aucun texte de l'encart n'est jamais généré par Gemini.
+- **Événement** : `game_entry_clicked/result/retention`, ou `game_entry_clicked/deep_dive/retention` quand un Deep dive est présent.
+
+**B · Le pied de page**, une fois le drapeau ouvert au build : un lien « Le jeu » vers `/{locale}/game`, à côté de « Comment ça marche » et « Glossaire », événement `game_entry_clicked/footer`. C'est l'entrée pour les lecteurs dont le goulot n'est pas la rétention.
+
+**C · Le hub** `/{locale}/game` : les cinq zones, événement `game_entry_clicked/hub` sur le bouton du niveau.
+
+**D · La boucle inverse**, déjà en 11.5 : en fin de niveau, « Où en est ta croissance ? » renvoie vers le Tour, pour ceux qui arrivent par le jeu. Le lien porte `?ref=` comme les autres entrées du Tour si un identifiant de résultat est connu, sinon rien.
+
+### 13.4 La table pilier → niveau
+
+`GAME_LEVELS_BY_PILLAR: Partial<Record<Pillar, { slug: string; enabled: boolean }>>` dans `src/lib/game/levels.ts`. Au lancement : `{ retention: { slug: "retention", enabled: true } }`. Ajouter un niveau, c'est ajouter une entrée ; l'encart de résultat, le hub et le sitemap la lisent tous les trois. Un niveau `enabled: false` apparaît sur le hub comme « bientôt » et ne déclenche jamais l'encart.
+
+### 13.5 Mesure et règle de décision
+
+- Le dashboard admin gagne une ligne par origine d'entrée (résultat, Deep dive, pied de page, hub) et le taux de passage résultat → jeu quand le goulot est la rétention.
+- **Ce qu'on surveille** : le taux de clic vers le Deep dive et le taux de partage sur les résultats à goulot rétention, un mois avant et un mois après l'ouverture de l'encart, dans le dashboard existant. L'encart ne doit pas les faire baisser.
+- **Règle** : si le passage au Deep dive baisse sur ces résultats, l'encart descend sous « Refaire le Tour » ; s'il baisse encore, il ne s'affiche plus que sur les résultats qui ont déjà un Deep dive. Décision d'Antoine, sur les chiffres, pas sur une intuition.
+
+### 13.6 Tests
+
+Série G en 7.1, scénarios P23 à P27 en 7.2. La CI tourne drapeau ouvert ; l'état fermé est couvert par les tests unitaires du résolveur et du proxy, comme la porte `/admin` l'est aujourd'hui.
+
+---
+
+## 14. Références
 
 - Prototype : `design/game/prototype-s-ils-reviennent.html`.
 - Tour de Growth : https://www.tourdegrowth.com
