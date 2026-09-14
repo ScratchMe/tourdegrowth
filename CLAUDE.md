@@ -1014,7 +1014,7 @@ Première PR du plan de `REVIEW-02.md`. `components/brand/ContentHeader` remplac
 
 **`main` avait bougé sous l'audit.** En dressant la liste des branches (demande d'Antoine), deux PR d'une autre session sont apparues, mergées pendant l'audit : #58 (métadonnées et Open Graph localisés sur les pages de contenu, JSON-LD par langue avec `author`, polices OG déplacées dans `lib/og/`) et #59 (glyphe « № », test de couverture des polices, 255 tests unitaires). R2-06, R2-07 et R2-15 étaient donc en partie déjà traités au moment où le plan a démarré : revérifiés sur le build de `main` (`curl` des balises, image OG en 200) et leur statut corrigé dans `REVIEW-02.md` plutôt que de refaire un travail déjà livré. Leçon : quand un audit dure plus d'une heure, refaire `git fetch` et relire `git log origin/main` avant d'écrire un statut.
 
-**Audit des branches (R2-31)** : onze branches distantes, toutes issues de PR mergées (#1 à #60), aucun travail non repris — vérifié par l'API GitHub (PR par branche) et non d'après les noms. La suppression revient à Antoine ; il a activé la suppression automatique des branches de tête, donc celles de ce plan disparaîtront seules.
+**Audit des branches (R2-31)** : onze branches distantes, toutes issues de PR mergées (#1 à #60), aucun travail non repris — vérifié par l'API GitHub (PR par branche) et non d'après les noms. La suppression revient à Antoine ; il a activé la suppression automatique des branches de tête, donc celles de ce plan disparaîtront seules. **Clos le 2026-09-14** : `git ls-remote --heads` ne renvoie plus que `main` et la branche de travail du jour — la suppression automatique a bien tout nettoyé. Constaté depuis GitHub, pas depuis un clone (convention 10).
 
 **Vérifié en réel** : lint, tsc, 255 tests unitaires, `next build`, **86 specs Playwright** (+6), captures du header sur `/en/how-it-works` desktop et `/fr/glossary/cac` mobile.
 
@@ -2721,6 +2721,25 @@ rien doit prouver qu'elle a regardé quelque part.
 couverture au-dessus des seuils, `next build`, **186 specs Playwright**
 inchangées.
 
+### Bing branché, branches nettoyées, comptes de lancement créés (2026-09-14)
+
+Trois faits venus d'Antoine, consignés parce que deux d'entre eux fermaient
+des lignes du tableau des points ouverts et qu'une ligne périmée est pire
+qu'une ligne absente.
+
+- **Bing Webmaster Tools est branché** (`GROWTH-PLAN.md` 2.6). IndexNow
+  suffisait à l'indexation depuis le 2026-09-13 ; ceci ajoute la mesure côté
+  Bing, en plus de la Search Console côté Google.
+- **Les branches distantes obsolètes n'existent plus** (R2-31). Vérifié à la
+  source plutôt que d'après un document : `git ls-remote --heads` ne renvoie
+  que `main` et la branche de travail du jour. La suppression automatique des
+  branches de tête, qu'Antoine avait activée, a fait le travail seule. Ligne
+  retirée du tableau.
+- **Les comptes de marque du lancement sont créés** et Antoine lance les
+  communications. La vague 1 de `GROWTH-PLAN.md` passe donc de « à préparer »
+  à « en cours, côté Antoine » ; les textes et le kit l'attendaient dans
+  `marketing/` depuis le 2026-09-13.
+
 ## État du projet au 2026-09-14 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -2760,7 +2779,6 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Les composants `Bottleneck` et `ShareCard` n'ont pas de test unitaire | Le runner ne peut pas rendre un composant (`.ts` seulement, environnement `node`, ni jsdom ni RTL) — c'est la convention du repo | Rien : leurs assertions vivent dans `e2e/result-composition.spec.ts` et `e2e/landing-preview.spec.ts`. |
 | Les deux nouveaux événements A4 (`retake_started`, `landing_return`) | Vérifiés en e2e, jamais contre le vrai GoatCounter (le proxy du bac à sable bloque `*.goatcounter.com`) | Un regard d'Antoine sur `/admin/stats` après déploiement : deux lignes de plus dans la section funnel, et la ligne « Value actions per result ». |
 | R2-30 (fenêtre Tour de France, SPEC.md §10) | Reporté d'un commun accord : pas d'urgence | À construire **avant** juin 2027, pour que le post parte pendant le vrai Tour et pas après. |
-| 10 branches distantes obsolètes (R2-31) | Toutes issues de PR mergées avant l'activation de la suppression automatique, qui fonctionne depuis | La suppression, par Antoine, dans l'interface GitHub. |
 | Les e2e de composition ne passent que par la branche échantillon | `/r/sample` utilise `getSampleNextMove` et `SAMPLE_RESULT.pillars`, pas le vrai chemin. La garde statique est donc seule à protéger le payload | Un id de fixture derrière une variable d'environnement fermée par défaut. À décider : c'est une porte de test sur la route publique la plus sensible. |
 | Flake `locale-routing.spec.ts:75` | Deux échecs le 2026-09-10, toujours en suite complète parallèle, jamais isolée (8/8) | La prochaine occurrence en CI laisse une trace (`retries: 1` + `trace: on-first-retry`, rapport téléversé). Ne pas durcir la spec en attendant le cookie : ça masquerait une éventuelle course produit. |
 | TypeScript 7 et ESLint 10 | Tous deux bloqués par des paquets embarqués dans `eslint-config-next` (`typescript-eslint` refuse TS ≥ 6.1 ; `eslint-plugin-react` plante sur ESLint 10). Dependabot les ignore en majeure depuis le 2026-09-08 | Quand `eslint-config-next` suivra. Re-tester en installant, pas en lisant les plages de peer : c'est l'essai qui a montré qu'ESLint 10 plante. |
