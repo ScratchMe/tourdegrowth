@@ -122,7 +122,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "L'exemple le plus cité vient de Facebook : les équipes croissance avaient trouvé qu'un nouvel utilisateur qui atteignait 7 amis en 10 jours restait presque toujours par la suite — ce seuil précis est devenu leur boussole d'onboarding pendant des années. Trouver son propre moment « aha » demande de regarder en arrière, pas en avant : quelle action, faite tôt, les utilisateurs qui sont restés ont-ils tous en commun ? C'est rarement la fonctionnalité la plus mise en avant dans l'interface — souvent une action secondaire que personne ne pousse assez.",
       en: "The most-cited example comes from Facebook: growth teams found that a new user who reached 7 friends in 10 days almost always stuck around afterward — that specific threshold became their onboarding compass for years. Finding your own aha moment means looking backward, not forward: what early action do all the users who stayed have in common? It's rarely the most prominently featured part of the interface — often a secondary action nobody pushes hard enough.",
     },
-    related: ["activation", "onboarding", "time-to-value", "activation-rate"],
+    related: ["activation", "onboarding", "time-to-value"],
   },
   cac: {
     ...GLOSSARY_TERMS.cac,
@@ -178,7 +178,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "L'onboarding est le chemin, l'activation est la destination — les deux se confondent souvent à tort. L'erreur la plus fréquente est de tout expliquer d'un coup dès la première visite plutôt que de révéler les choses progressivement, au moment où l'utilisateur en a réellement besoin. Un bon onboarding se mesure à une seule question : combien de temps sépare l'inscription du moment « aha » — plus ce délai est court, mieux le parcours est calibré.",
       en: "Onboarding is the path, activation is the destination — the two are often wrongly treated as the same thing. The most common mistake is explaining everything at once on the first visit instead of revealing things progressively, right when the user actually needs them. A good onboarding is measured by one question: how much time separates sign-up from the aha moment — the shorter that gap, the better calibrated the path.",
     },
-    related: ["activation", "aha-moment", "time-to-value", "activation-rate"],
+    related: ["activation", "aha-moment", "time-to-value"],
   },
   "upsell-cross-sell": {
     ...GLOSSARY_TERMS["upsell-cross-sell"],
@@ -214,16 +214,6 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   // Premier jet de la session de code, comme les `extended` de 2026-08-29
   // avant leur validation : de la copie de fond qui porte le nom d'Antoine,
   // à relire ligne à ligne. TODO: à relire.
-  "activation-rate": {
-    ...GLOSSARY_TERMS["activation-rate"],
-    deep: GLOSSARY_DEEP["activation-rate"],
-    updatedAt: "2026-09-14", // GROWTH-PLAN.md 2.2, lot 1 — created
-    extended: {
-      fr: "C'est la métrique la plus dépendante de sa propre définition de tout le cadre AARRR : deux équipes avec le même produit et le même onboarding peuvent afficher 25 % et 60 % simplement parce qu'elles n'appellent pas « activation » la même chose. D'où la seule discipline qui compte ici — choisir l'événement une fois, sur la corrélation avec la rétention à quatre semaines et non sur la facilité à le logguer, puis ne plus y toucher. Un taux d'activation qui grimpe après un changement de définition n'est pas une amélioration, c'est un changement d'unité de mesure. L'autre erreur courante est de le lire comme un chiffre unique alors qu'il cache un escalier : c'est la marche la plus basse, pas le taux global, qui indique quoi réparer.",
-      en: "This is the most definition-dependent metric in the whole AARRR framework: two teams with the same product and the same onboarding can report 25% and 60% purely because they don't call the same thing \"activation\". Hence the one discipline that matters here — pick the event once, on its correlation with four-week retention rather than on how easy it is to log, then leave it alone. An activation rate that climbs after a definition change isn't an improvement, it's a change of measuring unit. The other common mistake is reading it as a single figure when it hides a staircase: it's the lowest step, not the overall rate, that tells you what to go fix.",
-    },
-    related: ["activation", "aha-moment", "onboarding", "pql"],
-  },
   "cac-payback": {
     ...GLOSSARY_TERMS["cac-payback"],
     deep: GLOSSARY_DEEP["cac-payback"],
@@ -252,7 +242,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "L'analyse de cohortes ne demande aucune nouvelle mesure : ce sont les mêmes événements, groupés par date d'arrivée au lieu d'être moyennés ensemble. Ce simple regroupement change pourtant ce qu'on peut lire, parce qu'une moyenne globale mélange des groupes qui vont parfois en sens opposés — deux cohortes au même taux à trente jours peuvent finir l'une à 21 %, l'autre à 6 %. Ce qu'on cherche sur une courbe de cohorte n'est pas sa hauteur mais sa forme : une courbe qui finit par s'aplatir dit qu'une part de chaque cohorte a trouvé une raison durable de rester, et c'est le signal mesurable le plus proche de l'adéquation produit-marché. Une courbe encore en chute à la sixième période décrit un produit qui loue ses utilisateurs au lieu de les accumuler.",
       en: "Cohort analysis needs no new measurement: it's the same events, grouped by arrival date instead of averaged together. That regrouping alone changes what you can read, because a blended average mixes groups that sometimes move in opposite directions — two cohorts at the same thirty-day rate can end up at 21% and 6%. What you look for on a cohort curve isn't its height but its shape: a curve that eventually flattens says a share of every cohort found a lasting reason to stay, and that's the closest thing to a measurable product-market-fit signal. A curve still falling at period six describes a product renting its users rather than accumulating them.",
     },
-    related: ["retention", "churn", "activation-rate", "dau-mau"],
+    related: ["retention", "churn", "activation", "dau-mau"],
   },
   // ——— wave 2.2, lot 2 (2026-09-14) — premier jet, TODO: à relire ———
   "dau-mau": {
@@ -263,7 +253,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "La seule chose à retenir de ce ratio est qu'il se traduit : multiplié par 30, il donne le nombre de jours par mois où un utilisateur moyen revient. Un DAU/MAU de 0,2, ce sont six jours sur trente — dit comme ça, une équipe sait immédiatement si c'est bon, parce qu'elle sait à quoi sert son produit. C'est aussi ce qui rend le seuil des 20 % souvent cité à peu près inutile hors de son contexte d'origine, les produits sociaux grand public : un outil de paie à 0,05 n'échoue pas, il est utilisé quand la paie tombe. Deux pièges à connaître. Le ratio est une moyenne sur une population souvent bimodale, donc il décrit rarement quelqu'un de réel. Et il monte mécaniquement quand les utilisateurs occasionnels partent — d'où la règle de ne jamais le lire sans le nombre de MAU à côté.",
       en: "The one thing worth remembering about this ratio is that it translates: multiplied by 30, it gives the number of days a month the average user comes back. A DAU/MAU of 0.2 is six days out of thirty — put that way, a team immediately knows whether it's good, because it knows what its product is for. That's also what makes the often-quoted 20% threshold close to useless outside the category it came from, consumer social: a payroll tool at 0.05 isn't failing, it's being used when payroll runs. Two traps to know. The ratio is an average over a population that is often bimodal, so it rarely describes anyone real. And it climbs mechanically when casual users leave — hence the rule never to read it without the MAU count next to it.",
     },
-    related: ["retention", "cohort-analysis", "activation-rate", "north-star-metric"],
+    related: ["retention", "cohort-analysis", "activation", "north-star-metric"],
   },
   "time-to-value": {
     ...GLOSSARY_TERMS["time-to-value"],
@@ -273,7 +263,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "Cette métrique a un bord dangereux qu'il faut connaître avant de la piloter : calculée sur les seuls utilisateurs qui finissent par activer, elle s'améliore quand les plus lents abandonnent. Le chiffre progresse précisément parce que le produit a régressé, et rien à l'intérieur ne le montre. D'où deux règles qui ne coûtent rien — utiliser la médiane plutôt que la moyenne, qu'une poignée de traînards suffit à tripler, et publier systématiquement le taux d'activation juste à côté. L'autre confusion fréquente est avec la durée de l'onboarding : ce sont deux choses différentes, et l'écart entre elles est souvent la trouvaille. Un parcours bouclé en deux minutes peut très bien avoir un time to value de six jours si la valeur n'arrive qu'une fois qu'un collègue a validé une intégration — auquel cas polir l'interface ne changera rien.",
       en: "This metric has a dangerous edge worth knowing before you steer by it: computed on the users who eventually activate, it improves when the slowest ones give up. The figure gets better precisely because the product got worse, and nothing inside it shows that. Hence two rules that cost nothing — use the median rather than the mean, which a handful of stragglers is enough to triple, and always publish the activation rate right beside it. The other common confusion is with onboarding length: they are different things, and the gap between them is often the finding. A flow finished in two minutes can still have a six-day time to value if value only arrives once a colleague approves an integration — in which case polishing the interface changes nothing.",
     },
-    related: ["onboarding", "aha-moment", "activation-rate", "activation"],
+    related: ["onboarding", "aha-moment", "activation"],
   },
   pql: {
     ...GLOSSARY_TERMS.pql,
@@ -283,7 +273,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "Un PQL qualifie sur un comportement dans le produit plutôt que sur une taille d'entreprise ou un intitulé de poste — c'est toute la différence avec un MQL, un lead qualifié par le marketing, et la raison pour laquelle il prédit mieux : la personne a déjà fait ce qu'une démo aurait essayé de la convaincre de faire. La partie que la plupart des définitions ratent est qu'un bon seuil doit tenir sur deux axes, pas un. Le lift — à quel point le groupe qualifié convertit mieux — est celui qu'on mesure toujours ; la taille de la liste est celui qu'on oublie, et deux seuils au lift identique peuvent produire l'un une dizaine de contacts par jour à forte densité, l'autre une liste de diffusion déguisée. Enfin, un seuil se périme : quand le produit change, le comportement qui était un signal fort devient banal, et le recalculer chaque trimestre est de l'entretien normal.",
       en: "A PQL qualifies on a behaviour inside the product rather than on a company size or a job title — that's the whole difference from an MQL, a marketing-qualified lead, and the reason it predicts better: the person has already done what a demo would have tried to convince them to do. The part most definitions miss is that a good threshold has to hold on two axes, not one. Lift — how much better the qualified group converts — is the one everybody measures; list size is the one everybody forgets, and two thresholds with identical lift can produce, respectively, about ten high-density contacts a day and a mailing list in disguise. Finally, a threshold expires: when the product changes, the behaviour that used to be a strong signal becomes routine, and re-deriving it quarterly is ordinary maintenance.",
     },
-    related: ["activation-rate", "product-led-growth", "upsell-cross-sell", "revenue"],
+    related: ["activation", "product-led-growth", "upsell-cross-sell", "revenue"],
   },
   // ——— wave 2.2, lot 3 (2026-09-14) — clôt la vague. Premier jet, TODO: à relire ———
   "product-led-growth": {

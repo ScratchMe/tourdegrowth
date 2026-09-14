@@ -95,6 +95,32 @@ const nextConfig = {
     ];
   },
 
+  /**
+   * Un terme de glossaire retiré garde son adresse vivante.
+   *
+   * `/glossary/activation-rate` a été publié le 2026-09-14 et soumis à
+   * IndexNow le matin même ; il est coupé le soir comme quasi-doublon de
+   * `/glossary/activation` (même formule, même forme d'exemple, deux
+   * questions de FAQ identiques au mot près — décision d'Antoine). Sans
+   * cette redirection l'URL renverrait 404, parce que `dynamicParams =
+   * false` refuse tout segment qui n'est plus dans `generateStaticParams`.
+   *
+   * 308 et non 307 : la page ne reviendra pas, et c'est ce qui transfère le
+   * signal au terme qui garde le contenu. L'adresse non préfixée
+   * (`/glossary/activation-rate`) passe d'abord par la 308 du proxy vers sa
+   * forme localisée, puis par celle-ci — deux sauts, dans ce que Google
+   * tolère et ce que ce dépôt pratique déjà pour les URL d'avant R-13.
+   */
+  async redirects() {
+    return [
+      {
+        source: "/:locale(en|fr)/glossary/activation-rate",
+        destination: "/:locale/glossary/activation",
+        permanent: true,
+      },
+    ];
+  },
+
   async rewrites() {
     return [
       /**

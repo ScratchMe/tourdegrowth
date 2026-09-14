@@ -36,7 +36,6 @@ export type GlossaryTermId =
   // existing pages already brush against (short definitional searches:
   // "activation", "what is an activation", "définition ltv"), each a child of
   // a page that already gets impressions.
-  | "activation-rate"
   | "cac-payback"
   | "nrr-grr"
   | "cohort-analysis"
@@ -165,13 +164,6 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
     definition: {
       fr: "L'indicateur unique qu'une équipe choisit de suivre en priorité, parce qu'il capture le mieux la valeur réelle livrée aux utilisateurs.",
       en: "The single metric a team chooses to prioritize, because it best captures the real value delivered to users.",
-    },
-  },
-  "activation-rate": {
-    term: { fr: "Taux d'activation", en: "Activation rate" },
-    definition: {
-      fr: "La part des nouvelles inscriptions qui atteignent ton événement d'activation — le moment où la valeur arrive vraiment, pas celui où le compte est créé.",
-      en: "The share of new sign-ups who reach your activation event — the moment value actually lands, not the moment an account gets created.",
     },
   },
   "cac-payback": {
