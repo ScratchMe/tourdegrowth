@@ -1,0 +1,787 @@
+<title>Labyrinthe de résiliation</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --ink:#0E1420; --panel:#16202E; --panel-2:#1E2A3A; --line:#2B394C; --text:#E6EBF2; --muted:#9AA7B8;
+  --amber:#F5B301; --amber-ink:#3A2B00; --coral:#FF6A3D; --crimson:#E5484D; --mint:#3DD68C;
+  --paper:#EDF0F4; --paper-panel:#FFFFFF; --paper-ink:#151B24; --paper-muted:#5B6572; --paper-line:#D5DBE3; --stamp:#B42318; --leaf:#1E6B3A;
+  --app-ink:#151B24; --app-muted:#6B7480; --app-line:#E3E7EC; --app-brand:#2F55D4;
+  --display:"Archivo","Archivo Narrow","Arial Narrow",Arial,sans-serif;
+  --body:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+  --mono:"IBM Plex Mono","SFMono-Regular",Consolas,monospace;
+  --r:10px;
+}
+html{color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.5;padding-inline:16px;padding-block:28px 72px}
+.wrap{max-width:1120px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);font-stretch:88%;text-wrap:balance;margin:0;line-height:1.05}
+h1{font-size:clamp(2.1rem,6vw,3.4rem);font-weight:800;letter-spacing:-.01em}
+h2{font-size:clamp(1.5rem,4vw,2.2rem);font-weight:800}
+h3{font-size:1.12rem;font-weight:700;font-stretch:100%}
+p{margin:0}
+.eyebrow{font-family:var(--mono);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--amber)}
+.muted{color:var(--muted)}
+.mono{font-family:var(--mono)}
+.tour{display:flex;flex-wrap:wrap;gap:6px 14px;font-family:var(--mono);font-size:.76rem;color:var(--muted);margin-bottom:22px}
+.tour span{padding:4px 0;border-bottom:2px solid transparent}
+.tour span.on{color:var(--amber);border-color:var(--amber)}
+.brief{display:grid;gap:14px;max-width:760px;margin-bottom:26px}
+.brief .lead{font-size:1.08rem;max-width:64ch}
+
+/* dashboard strip */
+.dash{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin-bottom:22px}
+@media (max-width:980px){.dash{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:560px){.dash{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:6px;align-content:start}
+.tile .k{font-size:.78rem;color:var(--muted);display:grid;gap:2px}
+.tile .k .tag{font-family:var(--mono);font-size:.64rem;letter-spacing:.06em;text-transform:uppercase}
+.tile .v{font-family:var(--mono);font-size:1.45rem;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.1}
+.tile .sub{font-size:.76rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.tile .bar{height:6px;border-radius:3px;background:#0B1119;overflow:hidden}
+.tile .bar i{display:block;height:100%;width:0;border-radius:3px;background:var(--amber);transition:width .5s ease}
+.tile.patience .bar i{background:var(--mint)}
+.tile.patience.low .bar i{background:var(--coral)}
+.tile.trust .bar i{background:var(--mint)}
+.tile.radar .bar i{background:var(--crimson)}
+.tile.fog .v,.tile.fog .bar{filter:blur(6px);opacity:.5}
+.tile.fog .v{user-select:none}
+
+/* board */
+.board{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.85fr);gap:22px;align-items:start}
+@media (max-width:920px){.board{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+.panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:12px}
+.panel-head .count{font-family:var(--mono);font-size:.8rem;color:var(--muted)}
+.visio{margin-bottom:16px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#0B0F16}
+.vframe{position:relative;aspect-ratio:16/8;max-width:100%;background:#1B2533}
+.vframe svg{position:absolute;inset:0;width:100%;height:100%}
+.vtag{position:absolute;left:10px;bottom:10px;font-family:var(--mono);font-size:.72rem;background:rgba(0,0,0,.55);color:#fff;padding:4px 8px;border-radius:6px;display:flex;align-items:center;gap:6px}
+.vtag .live{width:7px;height:7px;border-radius:50%;background:var(--crimson);display:inline-block;animation:pulse 1.6s infinite}
+.vtime{position:absolute;right:10px;top:10px;font-family:var(--mono);font-size:.72rem;background:rgba(0,0,0,.55);color:#fff;padding:4px 8px;border-radius:6px}
+.captions{position:absolute;left:50%;transform:translateX(-50%);bottom:40px;width:min(92%,560px);text-align:center;font-size:.95rem;line-height:1.4;color:#fff;background:rgba(0,0,0,.62);padding:8px 12px;border-radius:8px;text-wrap:balance}
+.vbar{display:flex;justify-content:space-between;gap:8px;padding:10px 12px;background:#0B0F16}
+.vbtn{font:inherit;font-size:.86rem;font-weight:600;border:1px solid var(--line);background:var(--panel-2);color:var(--text);border-radius:8px;padding:8px 12px;cursor:pointer}
+.vbtn:hover{border-color:#5A6C86}
+.vbtn:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.vbtn.primary{background:var(--crimson);border-color:var(--crimson);color:#fff}
+.vbtn.primary:hover{background:#F05A5F}
+.vbtn[hidden]{display:none}
+.ended .vframe{filter:grayscale(1) brightness(.6)}
+.vframe::after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 0 rgba(229,72,77,0);transition:box-shadow .6s}
+.mood-angry .vframe::after{box-shadow:inset 0 0 90px rgba(229,72,77,.45)}
+.mood-angry .skin{fill:#D48A6E}
+.mood-angry .dg .eyes{animation:none;transform:scaleY(.72)}
+.mood-firm .dg .eyes{transform:scaleY(.88)}
+.mood-angry .captions{border-left:3px solid var(--crimson)}
+.mood-angry .vtag .live{animation-duration:.7s}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.dg .eyes{transform-box:fill-box;transform-origin:center;animation:blink 4.5s infinite}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.08)}}
+.dg .mouth{transform-box:fill-box;transform-origin:center}
+.speaking .dg .mouth{animation:talk .22s infinite alternate}
+@keyframes talk{from{transform:scaleY(1)}to{transform:scaleY(3.2)}}
+.card .order{font-family:var(--mono);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--crimson)}
+.card.locked{opacity:.5}
+.q .fx{margin:0;padding-left:18px;display:grid;gap:3px;font-size:.9rem;color:var(--muted)}
+.q .fx b{color:var(--text);font-weight:600}
+.q .dgmail{font-style:italic}
+.hand{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:560px){.hand{grid-template-columns:1fr}}
+.card{display:grid;grid-template-columns:1fr;gap:4px;text-align:left;width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r);padding:12px 13px;color:var(--text);font:inherit;cursor:pointer;transition:border-color .15s,background .15s}
+.card:hover{border-color:#3E5270}
+.card:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.card[aria-pressed="true"]{border-color:var(--amber);background:#2A2B1E}
+.card[disabled]{opacity:.45;cursor:not-allowed}
+.card .name{font-family:var(--display);font-stretch:92%;font-weight:700;font-size:1.02rem}
+.card .pitch{color:var(--muted);font-size:.9rem;line-height:1.4;margin-top:2px}
+.card .prev{display:none}
+.prod{margin-top:14px;font-size:.84rem;color:var(--muted)}
+.prod b{color:var(--text);font-weight:600}
+.actions{display:grid;gap:8px;margin-top:16px}
+.btn{font:inherit;font-family:var(--display);font-stretch:92%;font-weight:800;font-size:1.05rem;letter-spacing:.01em;border:0;border-radius:var(--r);padding:14px 18px;cursor:pointer;background:var(--amber);color:var(--amber-ink);width:100%}
+.btn:hover{background:#FFC733}
+.btn:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.btn[disabled]{background:#3A4356;color:#8B95A6;cursor:not-allowed}
+.btn.secondary{background:transparent;border:1px solid var(--line);color:var(--text)}
+.btn.secondary:hover{border-color:#5A6C86}
+.hint{font-size:.82rem;color:var(--muted);text-align:center}
+
+/* phone */
+.phone{width:min(100%,330px);margin:0 auto;background:#070A10;border:1px solid var(--line);border-radius:30px;padding:12px;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+.screen{background:#FFFFFF;color:var(--app-ink);border-radius:20px;min-height:430px;padding:18px 16px 20px;display:flex;flex-direction:column;gap:12px;font-size:.92rem}
+.app-bar{display:flex;justify-content:space-between;align-items:center;font-family:var(--display);font-weight:800;font-size:1.05rem}
+.app-bar .dot{width:10px;height:10px;border-radius:50%;background:var(--app-brand);display:inline-block;margin-right:8px;vertical-align:middle}
+.app-bar .time{font-family:var(--mono);font-size:.75rem;color:var(--app-muted);font-weight:400}
+.crumbs{font-family:var(--mono);font-size:.72rem;color:var(--app-muted);line-height:1.6}
+.sub-card{border:1px solid var(--app-line);border-radius:12px;padding:12px}
+.sub-card .plan{font-weight:600}
+.sub-card .price{color:var(--app-muted);font-size:.86rem}
+.social{background:#F2F5FF;color:#2E3A8C;border-radius:10px;padding:9px 11px;font-size:.86rem}
+.social .avatars{display:inline-flex;margin-right:8px;vertical-align:middle}
+.social .avatars i{width:18px;height:18px;border-radius:50%;background:#B9C4F5;border:2px solid #fff;margin-left:-6px;display:inline-block}
+.social .avatars i:first-child{margin-left:0}
+.btn-app{border:0;border-radius:10px;padding:12px 14px;font:inherit;font-weight:600;width:100%;cursor:default}
+.btn-app.primary{background:var(--app-brand);color:#fff}
+.btn-app.danger{background:#FFF0EE;color:#B42318;border:1px solid #F5C6C0}
+.tiny-link{font-size:.72rem;color:#9AA0A8;text-decoration:underline;text-align:right}
+.call{background:#FFF8E5;border:1px solid #F3DFA3;border-radius:10px;padding:10px 12px;font-size:.86rem;line-height:1.45}
+.call b{font-family:var(--mono);font-weight:600}
+.mini-modal{border:1px solid var(--app-line);border-radius:10px;padding:10px 12px;background:#FAFBFC;box-shadow:0 4px 12px rgba(0,0,0,.06)}
+.mini-modal .t{font-weight:600;font-size:.86rem}
+.mini-modal .row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:6px}
+.mini-modal .stay{background:var(--app-brand);color:#fff;border-radius:8px;padding:6px 10px;font-size:.8rem;font-weight:600}
+.mini-modal .no{font-size:.78rem;color:var(--app-muted);text-decoration:underline}
+.modal-stack{display:grid;gap:8px}
+.notice{font-size:.76rem;color:#8A5F00;background:#FFF8E5;border-radius:8px;padding:8px 10px;line-height:1.4}
+.notice.ok{background:#EEF6EE;color:#1E5631}
+.push{font-size:.78rem;background:#111827;color:#fff;border-radius:10px;padding:8px 10px;display:flex;gap:8px;align-items:center}
+.push i{width:16px;height:16px;border-radius:4px;background:var(--app-brand);display:inline-block;flex:none}
+.screen .spacer{flex:1}
+.clicks{display:flex;justify-content:center;margin-top:12px}
+.pill{font-family:var(--mono);font-size:.82rem;border:1px solid var(--line);border-radius:999px;padding:6px 12px;color:var(--muted)}
+.pill b{color:var(--text);font-weight:600}
+.pill.bad b{color:var(--coral)}
+
+/* quarter log */
+.log{margin-top:26px;display:grid;gap:12px}
+.q{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:10px}
+.q .qh{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:baseline}
+.q .qh .m{font-family:var(--mono);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.q .nums{display:flex;flex-wrap:wrap;gap:8px 18px;font-family:var(--mono);font-size:.86rem;font-variant-numeric:tabular-nums}
+.q .nums b{font-weight:600}
+.q .good{color:var(--mint)}.q .bad{color:var(--coral)}.q .worse{color:var(--crimson)}
+.q ul{margin:0;padding-left:18px;display:grid;gap:4px;font-size:.92rem}
+.q .ev{color:var(--coral)}
+.q .ev.good{color:var(--mint)}
+
+/* ending: paper world */
+.paper{margin-top:40px;background:var(--paper);color:var(--paper-ink);border-radius:18px;padding:clamp(22px,4vw,44px)}
+.paper .eyebrow{color:var(--stamp)}
+.paper.win .eyebrow{color:var(--leaf)}
+.paper .muted{color:var(--paper-muted)}
+.paper h2.big{font-size:clamp(2rem,6vw,3.6rem);font-weight:900;font-stretch:80%;margin-top:8px}
+.paper .lead{max-width:64ch;font-size:1.05rem;margin-top:12px}
+.charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:24px}
+@media (max-width:700px){.charts{grid-template-columns:1fr}}
+.chart{background:var(--paper-panel);border:1px solid var(--paper-line);border-radius:14px;padding:14px 16px 10px}
+.chart .t{font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--paper-muted);margin-bottom:6px}
+.chart svg{width:100%;height:auto;display:block}
+.chart .cap{font-size:.8rem;color:var(--paper-muted);margin-top:4px}
+.reveal{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
+@media (max-width:700px){.reveal{grid-template-columns:1fr}}
+.reveal .cell{background:var(--paper-panel);border:1px solid var(--paper-line);border-radius:12px;padding:12px 14px;display:grid;gap:4px}
+.reveal .cell .k{font-size:.8rem;color:var(--paper-muted)}
+.reveal .cell .v{font-family:var(--mono);font-size:1.4rem;font-weight:600;font-variant-numeric:tabular-nums}
+.playbook{margin-top:26px;background:var(--paper-panel);border:1px solid var(--paper-line);border-radius:14px;padding:20px}
+.playbook ul{margin:10px 0 0;padding-left:18px;display:grid;gap:6px;max-width:64ch}
+.cat{margin-top:30px}
+.cat .lead{margin-top:8px}
+.group{margin-top:18px}
+.group h3{font-family:var(--mono);font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--paper-muted);font-weight:600;margin-bottom:8px}
+details.pattern{background:var(--paper-panel);border:1px solid var(--paper-line);border-radius:12px;padding:0;margin-bottom:8px}
+details.pattern summary{cursor:pointer;list-style:none;display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px;padding:14px 16px;font-family:var(--display);font-weight:700;font-size:1.05rem}
+details.pattern summary::-webkit-details-marker{display:none}
+details.pattern summary .official{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--stamp);font-weight:400}
+details.pattern summary .st{margin-left:auto;font-family:var(--mono);font-size:.72rem;color:var(--paper-muted);font-weight:400}
+details.pattern[open] summary{border-bottom:1px solid var(--paper-line)}
+details.pattern dl{display:grid;grid-template-columns:110px 1fr;gap:8px 16px;margin:0;padding:14px 16px}
+@media (max-width:560px){details.pattern dl{grid-template-columns:1fr}}
+details.pattern dt{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--paper-muted);padding-top:4px}
+details.pattern dd{margin:0;max-width:64ch}
+details.pattern dd.tell{font-weight:600}
+.share{margin-top:26px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;border-top:1px solid var(--paper-line);padding-top:18px}
+.btn.paper-btn{width:auto;background:var(--paper-ink);color:#fff;font-size:.95rem;padding:11px 14px}
+.btn.paper-btn:hover{background:#2A3444}
+.btn.paper-btn.ghost{background:transparent;color:var(--paper-ink);border:1px solid var(--paper-line)}
+.copied{font-family:var(--mono);font-size:.8rem;color:var(--paper-muted)}
+.next{margin-top:22px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-top:1px solid var(--paper-line);padding-top:18px}
+.next .lock{font-family:var(--mono);font-size:.8rem;color:var(--paper-muted)}
+footer{margin-top:28px;font-size:.8rem;color:var(--muted);max-width:70ch}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<main class="wrap">
+  <nav class="tour" aria-label="Les cinq zones de Tour de Growth">
+    <span>Comment les gens vous trouvent</span><span>Comment ils comprennent ce que vous apportez</span><span class="on">S'ils reviennent</span><span>S'ils vous recommandent</span><span>Comment vous gagnez de l'argent</span>
+  </nav>
+  <header class="brief">
+    <span class="eyebrow">Tour de Growth · le côté obscur · niveau « S'ils reviennent »</span>
+    <h1>Une année chez Flixo</h1>
+    <p class="lead">Tu es le PM growth de Flixo, une appli de streaming à 12,99 € par mois. Cent mille abonnés, et 6 % d'entre eux résilient chaque mois. Le board veut 4 % d'ici décembre. Chaque trimestre, le DG t'appelle en visio, puis tu as droit à deux actions, nommées comme on les nomme en réunion. Tu ne sauras ce qu'elles valent qu'une fois le trimestre passé. Le DG, lui, sait déjà ce qu'il veut.</p>
+  </header>
+
+  <section class="dash" aria-label="Ton dashboard" aria-live="polite">
+    <div class="tile"><div class="k"><span>Résiliations</span><span class="tag">par mois</span></div><div class="v" id="t-churn">6,0 %</div><div class="sub" id="t-target">objectif du trimestre : 5,5 %</div></div>
+    <div class="tile"><div class="k"><span>Abonnés</span></div><div class="v" id="t-subs">100 000</div><div class="sub" id="t-subs-d">janvier</div></div>
+    <div class="tile"><div class="k"><span>Revenu mensuel</span></div><div class="v" id="t-mrr">1,30 M€</div><div class="sub" id="t-mrr-d">&nbsp;</div></div>
+    <div class="tile patience"><div class="k"><span>Patience du DG</span></div><div class="v" id="t-pat">55</div><div class="bar"><i id="b-pat" style="width:55%"></i></div></div>
+    <div class="tile trust fog" id="tile-trust"><div class="k"><span>Confiance des abonnés</span><span class="tag">pas sur ton dashboard</span></div><div class="v" id="t-trust">—</div><div class="bar"><i id="b-trust"></i></div></div>
+    <div class="tile radar fog" id="tile-radar"><div class="k"><span>Radar DGCCRF</span><span class="tag">pas sur ton dashboard</span></div><div class="v" id="t-radar">—</div><div class="bar"><i id="b-radar"></i></div></div>
+  </section>
+
+  <section class="board" id="board">
+    <div class="panel">
+      <div class="visio" id="visio" aria-label="Visio avec le DG">
+        <div class="vframe">
+          <svg class="dg" viewBox="0 0 320 160" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+            <rect width="320" height="160" fill="#1B2533"/>
+            <rect x="222" y="18" width="80" height="96" rx="3" fill="#22304A"/>
+            <rect x="230" y="26" width="14" height="40" fill="#3A4A66"/><rect x="248" y="26" width="10" height="40" fill="#5B4A3A"/><rect x="262" y="26" width="16" height="40" fill="#2E5BFF" opacity=".5"/><rect x="230" y="72" width="30" height="34" fill="#3A4A66"/><rect x="264" y="72" width="12" height="34" fill="#8A5F00" opacity=".6"/>
+            <rect x="0" y="118" width="320" height="42" fill="#141C29"/>
+            <path d="M80 160 Q160 96 240 160Z" fill="#2E3A52"/>
+            <path d="M143 104 L160 126 L177 104 Z" fill="#E6EBF2"/>
+            <path d="M156 110 L160 150 L164 110 Z" fill="#8A2A2E"/>
+            <ellipse class="skin" cx="160" cy="66" rx="30" ry="36" fill="#C89B7B"/>
+            <path d="M130 56 Q160 14 190 56 Q182 38 160 36 Q138 38 130 56Z" fill="#3A2A22"/>
+            <path d="M118 60 Q118 44 132 40 L132 78 Q120 74 118 60Z" fill="#3A2A22" opacity=".8"/><path d="M202 60 Q202 44 188 40 L188 78 Q200 74 202 60Z" fill="#3A2A22" opacity=".8"/>
+            <g class="eyes"><ellipse cx="148" cy="64" rx="3.2" ry="3.2" fill="#1B1B1B"/><ellipse cx="172" cy="64" rx="3.2" ry="3.2" fill="#1B1B1B"/></g>
+            <path id="browL" d="M140 55 L154 52" stroke="#3A2A22" stroke-width="2.6" stroke-linecap="round"/><path id="browR" d="M166 52 L180 55" stroke="#3A2A22" stroke-width="2.6" stroke-linecap="round"/>
+            <path id="mouthShape" d="M151 84 Q160 86 169 84" stroke="#7A4A3A" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+            <rect class="mouth" x="153" y="83" width="14" height="2.5" rx="1.2" fill="#7A4A3A"/>
+          </svg>
+          <div class="vtag"><span class="live"></span>DG · Flixo</div>
+          <div class="vtime" id="vtime">00:00</div>
+          <div class="captions" id="bossMsg"></div>
+        </div>
+        <div class="vbar">
+          <button class="vbtn" id="listen" type="button">Écouter le DG</button>
+          <button class="vbtn primary" id="hangup" type="button">Quitter la visio</button>
+        </div>
+      </div>
+      <div class="panel-head"><h3 id="handTitle">Trimestre 1 · tes deux actions</h3><span class="count" id="count">0 / 2</span></div>
+      <div class="hand" id="hand"></div>
+      <p class="prod" id="prod"></p>
+      <div class="actions">
+        <button class="btn" id="run" disabled>Lancer le trimestre</button>
+        <p class="hint" id="hint">Choisis deux actions.</p>
+      </div>
+    </div>
+    <div>
+      <div class="phone" aria-label="L'écran de résiliation tel que les abonnés le voient"><div class="screen" id="screen"></div></div>
+      <div class="clicks"><span class="pill" id="clicks"><b>2</b> clics pour résilier</span></div>
+    </div>
+  </section>
+
+  <section class="log" id="log" aria-live="polite"></section>
+
+  <section class="paper" id="ending" hidden>
+    <span class="eyebrow" id="endEyebrow">Décembre</span>
+    <h2 class="big" id="endTitle"></h2>
+    <p class="lead" id="endText"></p>
+    <div class="reveal" id="revealCells"></div>
+    <div class="charts">
+      <div class="chart"><div class="t">Résiliations par mois</div><div id="chartChurn"></div><div class="cap">La ligne pointillée est l'objectif de décembre.</div></div>
+      <div class="chart"><div class="t">Confiance des abonnés, le compteur que personne n'affichait</div><div id="chartTrust"></div><div class="cap">De 0 à 100. Sous 40, les gens partent en le racontant.</div></div>
+    </div>
+    <div class="playbook" id="playbook" hidden></div>
+    <div class="cat">
+      <span class="eyebrow">Le catalogue complet</span>
+      <h2 style="margin-top:8px">Les huit astuces de ce niveau, avec leurs vrais noms</h2>
+      <p class="lead muted">Celles que tu as utilisées, celles que tu as refusées, et celles qui ne te sont jamais passées sous la main. En réunion, elles portent des noms tranquilles. Voici les vrais, et ce que dit la loi.</p>
+      <div id="catalogue"></div>
+    </div>
+    <div class="share">
+      <button class="btn paper-btn" id="replay">Rejouer l'année</button>
+      <button class="btn paper-btn ghost" id="share">Copier un lien avec ton résultat</button>
+      <span class="copied" id="copied"></span>
+    </div>
+    <div class="next">
+      <div><span class="eyebrow">Niveau suivant</span><h3 style="margin-top:4px">« Comment les gens vous trouvent » : le compte à rebours, le prix qui gonfle, le faux stock</h3></div>
+      <span class="lock">verrouillé · prototype</span>
+    </div>
+  </section>
+
+  <footer>Prototype pour tester l'idée. Les chiffres sont ceux du jeu, un modèle simple écrit dans la page, pas une étude. Les lois et les cas cités dans le catalogue sont publics.</footer>
+</main>
+
+<script>
+(function(){
+  const PRICE = 12.99, SUBS0 = 100000, CHURN0 = 0.06, ACQ0 = 5000;
+  const TARGETS = [0.056, 0.051, 0.046, 0.04];
+  const MONTHS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+
+  const CARDS = [
+    // honnêtes
+    { id:'pause', kind:'h', perm:true, name:'Offre de pause', pitch:'Trois mois sans prélèvement, proposés une fois sur la page de résiliation.', red:.04, ramp:.07, trust:4, radar:-2 },
+    { id:'survey', kind:'h', perm:false, name:'Questionnaire de sortie', pitch:'Une question facultative aux abonnés qui résilient.', insight:true, trust:2 },
+    { id:'onboard', kind:'h', perm:true, name:'Chantier onboarding', pitch:'Retravailler la première semaine des nouveaux abonnés.', red:0, ramp:.09, trust:3 },
+    { id:'annual', kind:'h', perm:true, name:'Offre annuelle', pitch:'Douze mois pour le prix de dix, sur la page abonnement.', red:.02, ramp:.06, mrr:.97, trust:3 },
+    { id:'remind', kind:'h', perm:true, name:'Rappel avant prélèvement', pitch:'Un e-mail trois jours avant chaque échéance.', red:-.01, trust:8, radar:-8 },
+    { id:'reco', kind:'h', perm:true, name:'Chantier recommandations', pitch:'Retravailler ce que l\'appli propose de regarder le soir.', red:0, ramp:.06, trust:3 },
+    { id:'three', kind:'h', perm:true, name:'Résiliation en trois clics', pitch:'Un bouton sur la page abonnement, une confirmation, la date d\'effet.', red:-.02, temp:true, trust:10, radar:-20 },
+    { id:'present', kind:'h', perm:false, name:'Point données avec le DG', pitch:'Une réunion de trente minutes avec les chiffres du trimestre.', present:true },
+    { id:'clean', kind:'h', perm:false, name:'Retrait des changements', pitch:'Revenir au parcours de résiliation d\'origine.', clean:true, onlyIfDark:true, trust:6, radar:-25 },
+    // astuces, nommées comme on les nomme en réunion
+    { id:'bury', kind:'d', perm:true, name:'Alléger la page abonnement', pitch:'Le lien « Résilier » passe dans Paramètres › Compte › Autres options.', red:.08, trust:-5, radar:15, clicks:3,
+      official:'Obstruction', law:"Depuis le 1er juin 2023, un abonnement souscrit en ligne doit pouvoir être résilié en ligne, par un parcours direct et facile. C'est l'article L215-1-1 du Code de la consommation, la loi dite « des trois clics ».", cas:"Basic-Fit a écopé de 68 500 € d'amende de la DGCCRF pour un parcours de résiliation non conforme.", tell:"Si tu cherches le bouton depuis plus de dix secondes, ce n'est pas toi. C'est voulu." },
+    { id:'call', kind:'d', perm:true, name:'Résiliation accompagnée', pitch:'La résiliation se fait par téléphone, du lundi au vendredi, le matin.', red:.14, trust:-10, radar:25, clicks:Infinity,
+      official:'Action forcée', law:"Le même article impose une résiliation par voie électronique quand la souscription s'est faite en ligne. Le téléphone obligatoire est hors-jeu.", cas:"Aux États-Unis, Amazon a accepté en 2025 de payer 2,5 milliards de dollars, en partie pour son parcours de désabonnement Prime, baptisé en interne « Iliad », du nom d'une épopée qui n'en finit pas.", tell:"On t'a vendu en un clic, on te retient au téléphone." },
+    { id:'cascade', kind:'d', perm:true, name:'Offres de rétention', pitch:'Trois offres successives présentées avant la confirmation.', red:.06, trust:-3, radar:8, clicks:3,
+      official:"Harcèlement d'interface", law:"Le règlement européen sur les services numériques, le DSA, interdit aux plateformes en ligne les interfaces conçues pour tromper ou manipuler, y compris en redemandant ce qui a déjà été refusé.", cas:"Le site deceptive.design en recense des dizaines d'exemples dans son hall of shame, Amazon et Google en tête.", tell:"Chaque « Non merci » ouvre une nouvelle porte." },
+    { id:'shame', kind:'d', perm:true, name:'Bouton de refus personnalisé', pitch:"Le bouton pour décliner l'offre dit « Non merci, je préfère m'ennuyer ».", red:.02, trust:-2, radar:3, clicks:0,
+      official:'Confirmshaming', law:"Pas d'interdiction directe en France, mais la CNIL le classe parmi les designs trompeurs, et il pèse dans l'appréciation d'une pratique déloyale.", cas:"C'est le dark pattern le plus documenté en ligne : le bouton de refus qui te fait passer pour un idiot.", tell:"Le bouton refuse à ta place, avec tes mots." },
+    { id:'social', kind:'d', perm:true, name:'Preuve sociale en sortie', pitch:'« Léa, Karim et 2 amis continuent sans vous », affiché au-dessus du bouton.', red:.03, trust:-5, radar:12, clicks:0,
+      official:'Fausse preuve sociale', law:"Inventer des amis ou des chiffres pour influencer une décision est une pratique commerciale trompeuse, article L121-2 du Code de la consommation.", cas:"Les fausses jauges de stock et les faux compteurs de visiteurs font partie des pratiques que la DGCCRF contrôle sur les sites marchands.", tell:"Des prénoms que tu ne connais pas, des chiffres ronds qui tombent bien." },
+    { id:'notice', kind:'d', perm:true, name:'Préavis contractuel', pitch:'La résiliation prend effet trente jours après la demande.', red:0, extra:true, trust:-5, radar:12, clicks:1,
+      official:'Coût caché', law:"Les conditions de résiliation, préavis compris, doivent être annoncées avant la souscription, pas au moment de partir. Article L221-5 du Code de la consommation.", cas:"Adobe a accepté en 2026 de payer 150 millions de dollars aux États-Unis pour des frais de résiliation anticipée mal annoncés.", tell:"Un dernier prélèvement dont personne ne t'avait parlé." },
+    { id:'pdef', kind:'d', perm:true, name:'Pause mise en avant', pitch:'Le bouton principal devient « Mettre en pause ». Résilier passe en lien secondaire.', red:.09, trust:-4, radar:10, clicks:1,
+      official:'Présélection et interférence visuelle', law:"La CNIL décrit ce détournement de l'attention dans ses ressources sur le design trompeur : le bouton mis en avant n'est pas celui que l'utilisateur cherche.", cas:"Proposer la pause avant la sortie est devenu la norme du streaming. La réactiver sans prévenir, c'est autre chose.", tell:"Le gros bouton n'est pas celui que tu cherches." },
+    { id:'streak', kind:'d', perm:true, name:'Notifications de série', pitch:'« Votre série de 12 soirs va s\'arrêter », envoyé chaque soir.', red:.04, trust:-4, radar:4, clicks:0,
+      official:'Design addictif', law:"Le futur Digital Fairness Act européen, attendu fin 2026, vise explicitement les mécanismes addictifs, séries et notifications de culpabilisation compris. La France les cite déjà dans ses travaux sur les écrans des mineurs.", cas:"Les séries quotidiennes ont fait la fortune des applis d'apprentissage et de jeu. Elles marchent parce qu'elles reposent sur la peur de perdre, pas sur l'envie de revenir.", tell:"L'appli te parle de ce que tu vas perdre, jamais de ce que tu vas trouver." },
+  ];
+  const byId = Object.fromEntries(CARDS.map(c => [c.id, c]));
+  const HONEST_ORDER = ['pause','survey','onboard','annual','present','remind','reco','three','clean'];
+  const DARK_ORDER = ['pdef','bury','cascade','shame','call','social','notice','streak'];
+  const DARK_T1 = ['pdef','bury','cascade','shame'];
+
+  let S;
+  function fresh(){
+    return { q:0, month:0, subs:SUBS0, churn:CHURN0, mrr:SUBS0*PRICE, trust:60, radar:10, patience:55,
+      lagTrust:60, callOpen:true, order:null, orders:[], obeyed:[], refused:[], active:[], since:{}, everDark:[], removedDark:[], seenDark:[], insight:false, presented:0, picks:[],
+      history:[{m:0, churn:CHURN0, trust:60, subs:SUBS0}], log:[], sanction:false, fired:false, over:false, ending:null, spike:0, press:0 };
+  }
+  S = fresh();
+
+  const $ = (id) => document.getElementById(id);
+  const fmtPct = (x) => (Math.round(x * 1000) / 10).toLocaleString('fr-FR', { minimumFractionDigits:1, maximumFractionDigits:1 }) + ' %';
+  const fmtInt = (n) => Math.round(n).toLocaleString('fr-FR');
+  const fmtM = (n) => (Math.round(n / 10000) / 100).toLocaleString('fr-FR', { minimumFractionDigits:2, maximumFractionDigits:2 }) + ' M€';
+  const fmtEur = (n) => fmtInt(n) + ' €';
+  const activeCards = () => S.active.map(id => byId[id]);
+  const activeDark = () => activeCards().filter(c => c.kind === 'd');
+  const hasDark = () => activeDark().length > 0;
+  const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- hand ---------- */
+  function handIds(){
+    const h = HONEST_ORDER.filter(id => {
+      const c = byId[id];
+      if (S.active.includes(id)) return false;
+      if (id === 'survey' && S.insight) return false;
+      if (id === 'present' && S.presented > S.q) return false;
+      if (c.onlyIfDark && !hasDark()) return false;
+      return true;
+    });
+    const hh = [...h.filter(id => id === 'clean'), ...h.filter(id => id !== 'clean').slice(0, 6)];
+    let d = DARK_ORDER.filter(id => !S.active.includes(id));
+    if (S.q === 0) d = d.filter(id => DARK_T1.includes(id));
+    d = d.slice(0, 5);
+    d.forEach(id => { if (!S.seenDark.includes(id)) S.seenDark.push(id); });
+    // l'ordre du DG en tête, puis alternance, sans aucun chiffre annoncé
+    const rest = []; const dd = d.filter(id => id !== S.order), hh2 = hh.filter(id => id !== S.order);
+    for (let i = 0; i < Math.max(dd.length, hh2.length); i++) { if (dd[i]) rest.push(dd[i]); if (hh2[i]) rest.push(hh2[i]); }
+    return [...(S.order && (d.includes(S.order)) ? [S.order] : []), ...rest];
+  }
+  function renderHand(){
+    const box = $('hand'); box.innerHTML = '';
+    if (S.over) {
+      $('handTitle').textContent = S.fired ? 'Année interrompue' : 'Année terminée';
+      $('count').textContent = '';
+      $('prod').innerHTML = '';
+      $('run').hidden = true;
+      $('hint').textContent = 'Le bilan est en bas de page.';
+      return;
+    }
+    $('run').hidden = false;
+    const ids = handIds();
+    const full = S.picks.length >= 2;
+    ids.forEach(id => {
+      const c = byId[id];
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'card'; b.id = 'card-' + id;
+      const on = S.picks.includes(id);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      if (S.over || S.callOpen || (full && !on)) b.disabled = true;
+      if (S.callOpen) b.classList.add('locked');
+      b.innerHTML = `${id === S.order ? '<span class="order">Demandé par le DG</span>' : ''}<span class="name">${c.name}</span><span class="pitch">${c.pitch}</span>`;
+      b.addEventListener('click', () => {
+        if (S.picks.includes(id)) S.picks = S.picks.filter(x => x !== id);
+        else if (S.picks.length < 2) S.picks.push(id);
+        renderAll();
+      });
+      box.appendChild(b);
+    });
+    $('count').textContent = `${S.picks.length} / 2`;
+    $('handTitle').textContent = `Trimestre ${S.q + 1} · tes deux actions`;
+    const prod = activeCards();
+    $('prod').innerHTML = prod.length ? `En production : ${prod.map(c => '<b>' + c.name + '</b>').join(', ')}.` : 'Rien en production pour l\'instant. Le parcours actuel : un bouton, deux clics.';
+    $('run').disabled = S.over || S.callOpen || S.picks.length < 2;
+    $('hint').textContent = S.over ? 'L\'année est finie. Fais défiler.' : S.callOpen ? 'Le DG parle. Quitte la visio pour choisir.' : S.picks.length < 2 ? 'Choisis deux actions. Tu verras leur effet à la fin du trimestre.' : 'Trois mois vont passer. Regarde les chiffres.';
+  }
+
+  /* ---------- phone ---------- */
+  function screenHtml(ids, preview){
+    const s = (id) => ids.includes(id);
+    let h = `<div class="app-bar"><span><span class="dot"></span>Flixo</span><span class="time">21:04</span></div>`;
+    if (s('streak')) h += `<div class="push"><i></i>Votre série de 12 soirs va s'arrêter ce soir.</div>`;
+    h += s('bury') ? `<div class="crumbs">Paramètres › Compte › Gérer mon abonnement › Autres options › Aide</div>` : `<div class="crumbs">Compte › Mon abonnement</div>`;
+    h += `<div class="sub-card"><div class="plan">Flixo ${s('annual') ? 'Premium annuel' : 'Premium'}</div><div class="price">${s('annual') ? '129,90 € par an · résiliable en ligne' : '12,99 € par mois · prochain prélèvement le 3'}</div></div>`;
+    if (s('social')) h += `<div class="social"><span class="avatars"><i></i><i></i><i></i></span>Léa, Karim et 2 amis continuent sans vous.</div>`;
+    if (s('remind')) h += `<div class="notice ok">Rappel envoyé trois jours avant chaque prélèvement.</div>`;
+    if (s('call')) h += `<div class="call">Pour résilier, appelez le <b>09 70 00 00 00</b> du lundi au vendredi, de 9 h à 12 h. Temps d'attente moyen : 23 min.</div>`;
+    else if (s('pdef')) { h += `<button class="btn-app primary" tabindex="-1">Mettre en pause 3 mois</button><div class="tiny-link">${s('bury') ? 'demander la résiliation' : 'ou résilier'}</div>`; }
+    else if (s('bury')) h += `<div class="tiny-link">demander la résiliation</div>`;
+    else h += `<button class="btn-app danger" tabindex="-1">Résilier mon abonnement</button>`;
+    if (s('pause') && !s('pdef') && !s('call')) h += `<div class="mini-modal"><div class="t">Envie d'une pause plutôt ? 3 mois sans prélèvement, vos réglages gardés.</div><div class="row"><span class="stay">Mettre en pause</span><span class="no">Non, résilier</span></div></div>`;
+    if (s('cascade')) {
+      const no = s('shame') ? "Non merci, je préfère m'ennuyer" : 'Non merci';
+      h += `<div class="modal-stack"><div class="mini-modal"><div class="t">Attendez ! 3 mois à −50 %</div><div class="row"><span class="stay">Je reste</span><span class="no">${no}</span></div></div><div class="mini-modal"><div class="t">Vous perdrez vos 214 films sauvegardés</div><div class="row"><span class="stay">Je reste</span><span class="no">${no}</span></div></div><div class="mini-modal"><div class="t">Dernière chance : 1 mois offert</div><div class="row"><span class="stay">Je reste</span><span class="no">${no}</span></div></div></div>`;
+    } else if (s('shame') && !s('call')) h += `<div class="mini-modal"><div class="t">Vous êtes sûr ?</div><div class="row"><span class="stay">Je reste</span><span class="no">Non merci, je préfère m'ennuyer</span></div></div>`;
+    if (s('survey')) h += `<div class="mini-modal"><div class="t">Pourquoi partez-vous ? Facultatif.</div><div class="row"><span class="no">Trop cher</span><span class="no">Rien à regarder</span><span class="no">Autre</span></div></div>`;
+    h += `<div class="spacer"></div>`;
+    if (s('notice')) h += `<div class="notice">Votre résiliation prendra effet dans 30 jours. Un dernier prélèvement de 12,99 € sera effectué.</div>`;
+    else if (s('three')) h += `<div class="notice ok">Résiliation effective aujourd'hui. Aucun prélèvement le 3. Accès conservé jusqu'à la fin du mois.</div>`;
+    return h;
+  }
+  function renderScreen(){
+    const ids = [...S.active, ...S.picks];
+    $('screen').innerHTML = screenHtml(ids);
+    const d = ids.map(id => byId[id]).filter(c => c.kind === 'd');
+    const inf = d.some(c => c.clicks === Infinity);
+    let n = 2 + d.reduce((a, c) => a + (c.clicks === Infinity ? 0 : (c.clicks || 0)), 0);
+    if (ids.includes('pause')) n += 1;
+    if (ids.includes('three')) n = Math.min(n, 3);
+    const pill = $('clicks');
+    pill.classList.toggle('bad', inf || n > 3);
+    pill.innerHTML = inf ? `<b>∞</b> clics pour résilier · il faut téléphoner` : `<b>${n}</b> clics pour résilier${n > 3 ? ' · la loi attend un parcours direct' : ''}`;
+  }
+
+  /* ---------- dashboard ---------- */
+  function renderDash(){
+    $('t-churn').textContent = fmtPct(S.churn);
+    const t = TARGETS[Math.min(S.q, 3)];
+    $('t-target').textContent = S.over ? 'objectif du board : 4,0 %' : `objectif du trimestre : ${fmtPct(t)}`;
+    $('t-subs').textContent = fmtInt(S.subs);
+    $('t-subs-d').textContent = MONTHS[Math.min(S.month, 11)] + (S.month === 0 ? '' : ', fin de mois');
+    $('t-mrr').textContent = fmtM(S.mrr);
+    $('t-mrr-d').textContent = S.month ? (S.mrr >= SUBS0 * PRICE ? '+' : '−') + fmtM(Math.abs(S.mrr - SUBS0 * PRICE)) + ' vs janvier' : ' ';
+    $('t-pat').textContent = Math.round(S.patience);
+    $('b-pat').style.width = Math.max(0, Math.min(100, S.patience)) + '%';
+    document.querySelector('.tile.patience').classList.toggle('low', S.patience < 35);
+    const revealed = S.over;
+    $('tile-trust').classList.toggle('fog', !revealed); $('tile-radar').classList.toggle('fog', !revealed);
+    $('t-trust').textContent = revealed ? Math.round(S.trust) : '—';
+    $('t-radar').textContent = revealed ? Math.round(S.radar) : '—';
+    $('b-trust').style.width = (revealed ? Math.max(0, Math.min(100, S.trust)) : 0) + '%';
+    $('b-radar').style.width = (revealed ? Math.max(0, Math.min(100, S.radar)) : 0) + '%';
+  }
+
+  /* ---------- boss ---------- */
+  const ORDER_POOL = ['pdef', 'call', 'bury', 'cascade', 'notice'];
+  function pickOrder(){
+    if (S.q === 0) return null;
+    const wanted = ['pdef', 'call', 'bury'][S.q - 1];
+    const cands = [wanted, ...ORDER_POOL].filter(id => !S.active.includes(id) && !(S.sanction && ['call','bury'].includes(id)));
+    return cands[0] || null;
+  }
+  const ORDER_TEXT = {
+    pdef: "tu mets la pause en avant, en gros, et le bouton résilier… disons, plus discret. Le concurrent le fait.",
+    call: "on résilie par téléphone, du lundi au vendredi, comme le concurrent. Ses chiffres sont insolents.",
+    bury: "tu enterres le bouton résilier dans les paramètres. Personne ne regarde en fin d'année.",
+    cascade: "avant de laisser partir quelqu'un, tu lui fais trois offres. Trois. Pas une.",
+    notice: "un préavis de trente jours à la résiliation, avec un dernier prélèvement. C'est écrit quelque part dans les conditions, non ?",
+  };
+  function bossMessage(){
+    if (S.q === 0) return "Bonjour. Je vais être direct : le board veut 4 % de résiliations en décembre, et je leur ai promis. Fin mars, je veux voir 5,6 %. Pas 5,7. Tu as deux chantiers ce trimestre. Je ne veux pas savoir comment, je veux le chiffre.";
+    const last = S.log[S.log.length - 1];
+    const gap = last.churnEnd - TARGETS[S.q - 1];
+    const t = fmtPct(TARGETS[S.q]);
+    const order = S.order ? " Et ce trimestre, " + ORDER_TEXT[S.order] + " Ce n'est pas une idée, c'est une demande." : "";
+    if (S.q === 1) return (gap <= 0 ? `${fmtPct(last.churnEnd)}, c'est bien. Mars, c'était l'échauffement. Fin juin, ${t}.` : `Tu m'as fait mentir en comité. ${fmtPct(last.churnEnd)} au lieu de 5,6. Ça n'arrivera pas deux fois. Fin juin, ${t}.`) + order;
+    if (S.q === 2) return (gap <= 0 ? `On tient. La marche est plus haute maintenant : ${t} fin septembre.` : `Deux trimestres ratés. Le board m'a demandé si tu étais la bonne personne. J'ai dit oui. Prouve-le : ${t} fin septembre.`) + order;
+    return (gap <= 0 ? `Dernière ligne droite. 4 % fin décembre et on fête ça.` : `C'est ton dernier trimestre, tu le sais. 4 % en décembre, ou je présente quelqu'un d'autre au board en janvier.`) + order;
+  }
+
+  /* ---------- simulation ---------- */
+  function cardReduction(c){
+    const age = S.month - (S.since[c.id] ?? S.month);
+    let r = c.red || 0;
+    if (c.ramp && age >= 4) r = c.ramp;
+    if (c.temp && age >= 3) r = 0;
+    if (S.insight && c.kind === 'h' && r > 0) r *= 1.2;
+    if (c.kind === 'd') r *= (age >= 3 ? .7 : 1);
+    return r;
+  }
+  function visibleEffect(c){
+    if (c.insight) return "des réponses de sortie, et des chiffres à montrer au DG";
+    if (c.present) return S.insight ? "le DG t'a donné du temps" : "sans données, le DG a hoché la tête poliment";
+    if (c.clean) return "astuces retirées, les résiliations remontent un peu";
+    if (c.extra) return "un mois de plus facturé à chaque partant";
+    const r = cardReduction(c);
+    if (r > 0) return "−" + Math.round(r * 100) + " % de résiliations ce trimestre" + (c.ramp && r < c.ramp ? ", l'effet monte encore" : "");
+    if (r < 0) return "+" + Math.round(-r * 100) + " % de résiliations ce trimestre, moins de litiges";
+    return "rien de visible ce trimestre";
+  }
+  function monthlyReduction(){
+    let hr = 0, dr = 0, mrrMult = 1, extra = false;
+    activeCards().forEach(c => {
+      const age = S.month - (S.since[c.id] ?? S.month);
+      let r = c.red || 0;
+      if (c.ramp && age >= 4) r = c.ramp;
+      if (c.temp && age >= 3) r = 0;
+      if (S.insight && c.kind === 'h' && r > 0) r *= 1.2;
+      if (c.kind === 'h') hr += r; else dr += r * (age >= 3 ? .7 : 1);
+      if (c.mrr) mrrMult *= c.mrr;
+      if (c.extra) extra = true;
+    });
+    return { hr: Math.min(.30, hr), dr: Math.min(.45, dr), mrrMult, extra };
+  }
+  function stepMonth(){
+    S.month += 1;
+    const { hr, dr, mrrMult, extra } = monthlyReduction();
+    const lag = S.lagTrust;
+    const trustMult = lag < 60 ? 1 + (60 - lag) / 150 : 1 - (lag - 60) / 300;
+    let churn = CHURN0 * (1 - hr) * (1 - dr) * trustMult + S.spike;
+    if (S.month >= 4 && S.month <= 6) churn += .003; // un concurrent lance une offre agressive au printemps
+    S.spike = Math.max(0, S.spike - .005);
+    churn = Math.max(.012, churn);
+    const cancels = S.subs * churn;
+    const acq = ACQ0 * (1 + (S.trust - 60) / 150) * (S.press > 0 ? 1.2 : 1);
+    S.press = Math.max(0, S.press - 1);
+    S.subs = S.subs - cancels + acq;
+    S.churn = churn;
+    S.mrr = S.subs * PRICE * mrrMult + (extra ? cancels * PRICE : 0);
+    if (!activeDark().length) S.radar = Math.max(0, S.radar - 3);
+    S.history.push({ m:S.month, churn, trust:S.trust, subs:S.subs });
+  }
+  function applyPicks(){
+    S.picks.forEach(id => {
+      const c = byId[id];
+      if (c.clean) { activeDark().forEach(d => { S.removedDark.push(d.id); }); S.active = S.active.filter(x => byId[x].kind !== 'd'); }
+      if (c.insight) S.insight = true;
+      if (c.present) { S.presented = S.q + 1; S.patience += S.insight ? 15 : 3; }
+      if (c.trust) S.trust += c.trust;
+      if (c.radar) S.radar += c.radar;
+      if (c.perm) { S.active.push(id); S.since[id] = S.month; }
+      if (c.kind === 'd' && !S.everDark.includes(id)) S.everDark.push(id);
+    });
+    S.trust = Math.max(0, Math.min(100, S.trust)); S.radar = Math.max(0, Math.min(100, S.radar));
+  }
+  function runQuarter(){
+    if (S.over || S.picks.length < 2) return;
+    const picked = S.picks.map(id => byId[id]);
+    const churnStart = S.churn;
+    S.lagTrust = S.trust;
+    const orderId = S.order;
+    const obeyed = !!(orderId && S.picks.includes(orderId));
+    if (orderId) { S.orders.push(orderId); (obeyed ? S.obeyed : S.refused).push(orderId); }
+    applyPicks();
+    const midChurn = () => S.history[S.history.length - 2].churn;
+    const presentedNow = picked.some(c => c.present);
+    for (let i = 0; i < 3; i++) stepMonth();
+    const target = TARGETS[S.q];
+    const gap = S.churn - target;
+    const events = [];
+    if (gap <= 0) { S.patience += 12; } else { S.patience -= Math.min(32, Math.round(2800 * gap)); }
+    if (orderId) S.patience += obeyed ? 10 : -8;
+    events.push({ mail:true, t: midChurn() > target ? "Message du DG, à mi-trimestre : « Je vois les chiffres de la semaine. Ça ne bouge pas assez. »" : "Message du DG, à mi-trimestre : « Ça bouge. Continue. »" });
+    if (presentedNow) events.push({ good:true, t: S.insight ? "Ta présentation au DG a tenu : des données, une courbe, une demande de temps. Il t'en donne." : "Ta présentation au DG : sans données, il a hoché la tête poliment." });
+    if (S.radar >= 75) {
+      S.sanction = true; const fine = 60000 + Math.round(S.radar) * 500;
+      events.push({ t:`Contrôle de la DGCCRF, article dans la presse, amende de ${fmtEur(fine)}. Le DG te demande de tout retirer avant vendredi. ${fmtInt(S.subs * .015)} abonnés partent dans la foulée, en le racontant.` });
+      activeDark().forEach(d => { if (!S.removedDark.includes(d.id)) S.removedDark.push(d.id); });
+      S.active = S.active.filter(x => byId[x].kind !== 'd');
+      S.radar = 20; S.trust -= 10; S.patience -= 15; S.spike += .015;
+    } else if (S.radar >= 45) {
+      events.push({ t:"Des dizaines de signalements sur SignalConso. Un journaliste pose des questions au service presse." });
+      S.patience -= 5; S.trust -= 3;
+    }
+    if (S.trust <= 35) { events.push({ t:"Un fil viral : « J'ai essayé de résilier Flixo, voici mes trois heures. » Les départs s'accélèrent." }); S.spike += .01; S.patience -= 5; }
+    if (S.trust >= 80) { events.push({ good:true, t:"Un article : « Flixo, l'appli qui laisse partir ses abonnés, et qui les voit revenir. » Les inscriptions montent." }); S.press = 3; S.patience += 8; }
+    if (S.q === 1) events.push({ t:"Un concurrent a lancé une offre agressive au printemps. Tout le monde a perdu des abonnés ce trimestre, toi compris." });
+    S.trust = Math.max(0, Math.min(100, S.trust)); S.radar = Math.max(0, Math.min(100, S.radar)); S.patience = Math.max(0, Math.min(100, S.patience));
+    let bossLine = gap <= 0 ? "« Bien joué. »" : S.patience < 35 ? "« Je ne sais pas combien de temps je peux te couvrir. »" : "« Ce n'est pas ce qu'on avait dit. »";
+    if (orderId) bossLine += obeyed ? " « Merci d'avoir fait ce que j'ai demandé. »" : " « Tu n'as pas fait ce que j'ai demandé. Je l'ai noté. »";
+    const fx = picked.map(c => ({ name:c.name, t: visibleEffect(c) }));
+    S.log.push({ q:S.q, picked: picked.map(c => c.name), fx, churnStart, churnEnd:S.churn, target, gap, subs:S.subs, mrr:S.mrr, events, bossLine, patience:S.patience });
+    S.picks = [];
+    if (S.patience < 25 && S.q < 3) { S.fired = true; S.over = true; }
+    S.q += 1;
+    if (S.q >= 4) S.over = true;
+    S.order = S.over ? null : pickOrder();
+    S.callOpen = !S.over;
+    if (S.over) S.ending = computeEnding();
+    renderAll();
+    renderLog(true);
+    if (S.over) renderEnding();
+  }
+
+  /* ---------- log ---------- */
+  function renderLog(scroll){
+    const box = $('log'); box.innerHTML = '';
+    S.log.forEach(l => {
+      const el = document.createElement('article'); el.className = 'q';
+      const cls = l.gap <= 0 ? 'good' : l.gap > .01 ? 'worse' : 'bad';
+      el.innerHTML = `<div class="qh"><span class="m">Trimestre ${l.q + 1} · ${MONTHS[l.q * 3]} à ${MONTHS[l.q * 3 + 2]}</span><span class="mono muted">${l.picked.join(' + ')}</span></div>
+        <div class="nums"><span>Résiliations <b class="${cls}">${fmtPct(l.churnEnd)}</b> <span class="muted">objectif ${fmtPct(l.target)}</span></span><span>Abonnés <b>${fmtInt(l.subs)}</b></span><span>Revenu <b>${fmtM(l.mrr)}</b></span><span>Patience du DG <b>${Math.round(l.patience)}</b></span></div>
+        <ul class="fx">${(l.fx || []).map(x => `<li><b>${x.name}</b> : ${x.t}</li>`).join('')}</ul>
+        ${l.events.length ? '<ul>' + l.events.map(e => `<li class="${e.mail ? 'dgmail muted' : 'ev' + (e.good ? ' good' : '')}">${e.t}</li>`).join('') + '</ul>' : ''}
+        <p class="muted">Le DG : ${l.bossLine}</p>`;
+      box.appendChild(el);
+    });
+    if (scroll && S.log.length) { const last = box.lastElementChild; last.scrollIntoView({ behavior: reduce() ? 'auto' : 'smooth', block: 'nearest' }); }
+  }
+
+  /* ---------- ending ---------- */
+  function computeEnding(){
+    const usedDark = S.everDark.length > 0;
+    const stillDark = activeDark().length > 0;
+    const win = S.churn <= .041;
+    if (S.fired) return usedDark ? 'firedDark' : 'firedClean';
+    if (!usedDark) return win ? 'applause' : 'cleanMiss';
+    if (S.sanction) return 'fine';
+    if (!stillDark && S.removedDark.length) return 'repentant';
+    return 'labyrinth';
+  }
+  const ENDINGS = {
+    applause: { win:true, eyebrow:'Décembre · applaudissements', title:'Tu as tenu. Et ça a marché.',
+      text:() => `Résiliations à ${fmtPct(S.churn)}, ${fmtInt(S.subs)} abonnés, une confiance à ${Math.round(S.trust)} que personne ne mesurait, et pas un seul abonné n'a eu à appeler un numéro le lundi matin. Le DG t'a pressé trois fois. Tu as répondu avec des chiffres. C'est exactement le métier.` },
+    cleanMiss: { win:true, eyebrow:'Décembre · droit dans tes bottes', title:'Pas encore 4 %. Mais tout est propre.',
+      text:() => `Résiliations à ${fmtPct(S.churn)}, confiance à ${Math.round(S.trust)}. La courbe descend encore, parce que les effets lents ne s'arrêtent pas en décembre. Le board voulait un chiffre, tu as construit une pente. Regarde la confiance : c'est elle qui fera le 4 % au printemps.` },
+    firedClean: { win:false, eyebrow:'Licencié · mais propre', title:'Viré. Sans une seule astuce.',
+      text:() => `La patience du DG est tombée à ${Math.round(S.patience)} avant que tes effets lents n'arrivent. Tu es parti avec ton test A/B sous le bras et une confiance à ${Math.round(S.trust)}. L'année suivante, ton remplaçant a fait ce que tu refusais. L'amende est arrivée en septembre. Le jeu ne récompense pas toujours ceux qui ont raison trop tôt. La vraie vie non plus. Rejoue, et présente tes données plus tôt.` },
+    firedDark: { win:false, eyebrow:'Licencié', title:'Viré, et pour rien.',
+      text:() => `Tu as pris des astuces, et la patience du DG est quand même tombée à ${Math.round(S.patience)}. Confiance à ${Math.round(S.trust)}, radar à ${Math.round(S.radar)}. Le labyrinthe ne t'a même pas sauvé ton poste : ce que le DG voulait, c'était le chiffre, tout de suite, et il ne se souvient pas de ce qu'il a demandé.` },
+    fine: { win:false, eyebrow:'Décembre · la révélation', title:'Voici ce que tu as fait.',
+      text:() => `Le radar est monté jusqu'au contrôle, l'amende est tombée, la presse a écrit. Résiliations à ${fmtPct(S.churn)}, confiance à ${Math.round(S.trust)}. Les abonnés retenus de force au printemps sont partis à l'automne, en le racontant. Ce que tu as mis en production a des noms. Ils sont en dessous.` },
+    labyrinth: { win:false, eyebrow:'Décembre · la révélation', title:'Le labyrinthe tient. Regarde ce qu\'il coûte.',
+      text:() => `Pas de contrôle cette année. Résiliations à ${fmtPct(S.churn)}, et une confiance à ${Math.round(S.trust)} que ton dashboard ne t'a jamais montrée. Les gens que tu retiens ne reviennent pas, ne recommandent pas, et attendent le jour où ils sauront à qui écrire. Le radar est à ${Math.round(S.radar)}. Il ne redescend pas tout seul.` },
+    repentant: { win:false, eyebrow:'Décembre · le repenti', title:'Tu as essayé, puis tu as nettoyé.',
+      text:() => `Tu as mis des astuces en production, puis tu les as retirées. Résiliations à ${fmtPct(S.churn)}, confiance à ${Math.round(S.trust)}, radar à ${Math.round(S.radar)}. La confiance remonte plus lentement qu'elle ne tombe. C'est la seule règle du jeu qui est aussi celle de la vraie vie.` },
+  };
+  function sparkline(series, opts){
+    const W = 420, H = 150, L = 34, R = 14, T = 12, B = 26;
+    const min = opts.min, max = opts.max;
+    const x = (i) => L + (i / (series.length - 1)) * (W - L - R);
+    const y = (v) => T + (1 - (v - min) / (max - min)) * (H - T - B);
+    const pts = series.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+    let grid = '';
+    opts.ticks.forEach(tv => { grid += `<line x1="${L}" x2="${W - R}" y1="${y(tv).toFixed(1)}" y2="${y(tv).toFixed(1)}" stroke="#D5DBE3" stroke-width="1"/><text x="${L - 6}" y="${(y(tv) + 4).toFixed(1)}" text-anchor="end" font-size="11" fill="#5B6572" font-family="IBM Plex Mono, monospace">${opts.fmt(tv)}</text>`; });
+    let ref = '';
+    if (opts.ref != null) ref = `<line x1="${L}" x2="${W - R}" y1="${y(opts.ref).toFixed(1)}" y2="${y(opts.ref).toFixed(1)}" stroke="#B42318" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+    const last = series[series.length - 1];
+    const months = ['J','F','M','A','M','J','J','A','S','O','N','D'];
+    let xl = '';
+    series.forEach((v, i) => { if (i > 0) xl += `<text x="${x(i).toFixed(1)}" y="${H - 8}" text-anchor="middle" font-size="10" fill="#5B6572" font-family="IBM Plex Mono, monospace">${months[i - 1]}</text>`; });
+    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${opts.label}">${grid}${ref}${xl}<polyline points="${pts}" fill="none" stroke="${opts.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${x(series.length - 1).toFixed(1)}" cy="${y(last).toFixed(1)}" r="4" fill="${opts.color}" stroke="#fff" stroke-width="2"/><text x="${(x(series.length - 1) - 6).toFixed(1)}" y="${(y(last) - 9).toFixed(1)}" text-anchor="end" font-size="11" font-weight="600" fill="#151B24" font-family="IBM Plex Mono, monospace">${opts.fmt(last)}</text></svg>`;
+  }
+  function renderEnding(){
+    const e = ENDINGS[S.ending];
+    const sec = $('ending'); sec.hidden = false; sec.classList.toggle('win', !!e.win);
+    $('endEyebrow').textContent = e.eyebrow; $('endTitle').textContent = e.title; $('endText').textContent = e.text();
+    const cells = $('revealCells'); cells.innerHTML = '';
+    [['Résiliations en décembre', fmtPct(S.churn)], ['Confiance des abonnés', Math.round(S.trust) + ' / 100'], ['Radar DGCCRF', Math.round(S.radar) + ' / 100']].forEach(([k, v]) => {
+      const d = document.createElement('div'); d.className = 'cell'; d.innerHTML = `<span class="k">${k}</span><span class="v">${v}</span>`; cells.appendChild(d);
+    });
+    const churnS = S.history.map(h => h.churn * 100), trustS = S.history.map(h => h.trust);
+    $('chartChurn').innerHTML = sparkline(churnS, { min:2, max:9, ticks:[3,5,7,9], ref:4, color:'#8A5F00', fmt:(v) => v.toLocaleString('fr-FR') + ' %', label:'Résiliations mensuelles sur l\'année' });
+    $('chartTrust').innerHTML = sparkline(trustS, { min:0, max:100, ticks:[25,50,75,100], ref:null, color:'#1E6B3A', fmt:(v) => String(Math.round(v)), label:'Confiance des abonnés sur l\'année' });
+    const pb = $('playbook');
+    const honestUsed = S.log.flatMap(l => l.picked).filter(n => CARDS.find(c => c.name === n && c.kind === 'h'));
+    if (honestUsed.length) {
+      pb.hidden = false;
+      pb.innerHTML = `<span class="eyebrow" style="color:var(--leaf)">Ce que tu as fait de propre</span><h3 style="margin-top:6px">${e.win ? 'Le playbook qui a marché' : 'Ce qui aurait pu suffire, avec du temps'}</h3><p class="muted" style="margin-top:6px">Ordres du DG refusés : ${S.refused.length} sur ${S.orders.length}.</p><ul>${[...new Set(honestUsed)].map(n => { const c = CARDS.find(x => x.name === n); return `<li>${n}${c && c.trust ? ' · confiance +' + c.trust : ''}${c && c.radar ? ', radar ' + c.radar : ''}</li>`; }).join('')}</ul><p class="muted" style="margin-top:12px;max-width:62ch">Dans le jeu, chaque action honnête rapporte moins ce trimestre et davantage sur l'année, parce qu'elle fait monter un compteur que le dashboard n'affiche pas. Dans la vraie vie, c'est exactement le genre de chose qui se teste.</p>`;
+    } else pb.hidden = true;
+    const cat = $('catalogue'); cat.innerHTML = '';
+    const dark = CARDS.filter(c => c.kind === 'd');
+    const groups = [
+      ['Celles que tu as utilisées', dark.filter(c => S.everDark.includes(c.id))],
+      ['Celles que tu as refusées', dark.filter(c => !S.everDark.includes(c.id) && S.seenDark.includes(c.id))],
+      ['Celles qui ne te sont jamais passées sous la main', dark.filter(c => !S.everDark.includes(c.id) && !S.seenDark.includes(c.id))],
+    ];
+    groups.forEach(([title, list]) => {
+      if (!list.length) return;
+      const g = document.createElement('div'); g.className = 'group'; g.innerHTML = `<h3>${title}</h3>`;
+      list.forEach(c => {
+        const d = document.createElement('details'); d.className = 'pattern'; if (S.everDark.includes(c.id)) d.open = true;
+        d.innerHTML = `<summary><span class="official">${c.official}</span>${c.name}<span class="st">${S.removedDark.includes(c.id) ? 'retirée' : S.everDark.includes(c.id) ? 'en production' : ''}</span></summary><dl><dt>Effet caché</dt><dd>Confiance ${c.trust} par trimestre où elle entre, radar +${c.radar}. Les résiliations évitées s'érodent de 30 % après trois mois.</dd><dt>Ce que dit la loi</dt><dd>${c.law}</dd><dt>Un cas réel</dt><dd>${c.cas}</dd><dt>Le repère</dt><dd class="tell">${c.tell}</dd></dl>`;
+        g.appendChild(d);
+      });
+      cat.appendChild(g);
+    });
+    sec.scrollIntoView({ behavior: reduce() ? 'auto' : 'smooth', block: 'start' });
+  }
+  function share(){
+    const e = ENDINGS[S.ending] || {};
+    const text = `Une année chez Flixo : ${e.title || ''} Résiliations à ${fmtPct(S.churn)}, confiance à ${Math.round(S.trust)}. Et toi, tu tiendrais ? ${location.href.split('#')[0]}`;
+    const done = (ok) => { $('copied').textContent = ok ? 'Copié.' : text; };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(() => done(true), () => done(false)); else done(false);
+  }
+  function replay(){ S = fresh(); lastCallKey = ''; $('ending').hidden = true; $('log').innerHTML = ''; renderAll(); window.scrollTo({ top:0, behavior: reduce() ? 'auto' : 'smooth' }); }
+
+  /* ---------- glue ---------- */
+  let typer = null, timer = null, callStart = 0;
+  const BROWS = {
+    calm:  ['M140 55 L154 52', 'M166 52 L180 55', 'M151 84 Q160 86 169 84'],
+    firm:  ['M140 54 L154 54', 'M166 54 L180 54', 'M151 84 L169 84'],
+    angry: ['M139 49 L155 57', 'M165 57 L181 49', 'M151 86 Q160 81 169 86'],
+    cold:  ['M140 56 L154 56', 'M166 56 L180 56', 'M151 85 Q160 83 169 85'],
+  };
+  function moodNow(){
+    if (S.over) return S.fired ? 'cold' : 'firm';
+    if (S.q === 0) return 'firm';
+    const last = S.log[S.log.length - 1];
+    const missed = last.gap > 0;
+    const missedBefore = S.log.length > 1 && S.log[S.log.length - 2].gap > 0;
+    if (missed && (missedBefore || S.patience < 40 || S.q >= 3)) return 'angry';
+    if (missed) return 'angry';
+    return S.q >= 2 ? 'firm' : 'calm';
+  }
+  function applyMood(mood){
+    const v = $('visio'); v.classList.remove('mood-calm', 'mood-firm', 'mood-angry', 'mood-cold'); v.classList.add('mood-' + mood);
+    const b = BROWS[mood] || BROWS.calm;
+    document.getElementById('browL').setAttribute('d', b[0]); document.getElementById('browR').setAttribute('d', b[1]); document.getElementById('mouthShape').setAttribute('d', b[2]);
+  }
+  function currentBossText(){ return S.over ? (S.fired ? "On va s'arrêter là. Merci pour tout." : "On fait le point en janvier.") : bossMessage(); }
+  function showCall(text){
+    const cap = $('bossMsg'); const v = $('visio');
+    if (typer) { clearInterval(typer); typer = null; }
+    v.classList.remove('speaking');
+    const mood = moodNow(); applyMood(mood);
+    const speed = mood === 'angry' ? 18 : 28;
+    if (reduce() || !S.callOpen) { cap.textContent = text; }
+    else {
+      cap.textContent = ''; let i = 0; v.classList.add('speaking');
+      typer = setInterval(() => { i += 2; cap.textContent = text.slice(0, i); if (i >= text.length) { clearInterval(typer); typer = null; v.classList.remove('speaking'); } }, speed);
+    }
+    $('hangup').hidden = !S.callOpen; $('listen').hidden = !('speechSynthesis' in window) || S.over;
+    v.classList.toggle('ended', S.over);
+    if (S.callOpen) { callStart = Date.now(); if (timer) clearInterval(timer); timer = setInterval(() => { const s = Math.floor((Date.now() - callStart) / 1000); $('vtime').textContent = String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); }, 1000); }
+    else { if (timer) { clearInterval(timer); timer = null; } $('vtime').textContent = S.over ? 'terminé' : 'raccroché'; }
+  }
+  function hangup(){ S.callOpen = false; if ('speechSynthesis' in window) speechSynthesis.cancel(); renderAll(); }
+  function listen(){
+    if (!('speechSynthesis' in window)) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(currentBossText()); u.lang = 'fr-FR';
+    const mood = moodNow();
+    u.rate = mood === 'angry' ? 1.18 : mood === 'cold' ? .92 : 1.02;
+    u.pitch = mood === 'angry' ? .62 : mood === 'firm' ? .78 : mood === 'cold' ? .7 : .85;
+    u.volume = mood === 'angry' ? 1 : .9;
+    const voices = speechSynthesis.getVoices().filter(v => /^fr/i.test(v.lang)); if (voices.length) u.voice = voices[0];
+    const v = $('visio'); u.onstart = () => v.classList.add('speaking'); u.onend = () => v.classList.remove('speaking'); u.onerror = () => v.classList.remove('speaking');
+    speechSynthesis.speak(u);
+  }
+  let lastCallKey = '';
+  function renderAll(){
+    renderDash();
+    const key = S.q + '|' + S.over + '|' + S.callOpen;
+    if (key !== lastCallKey) { lastCallKey = key; showCall(currentBossText()); }
+    renderHand(); renderScreen(); snapshot();
+  }
+  function snapshot(){ try { window.claude?.hot?.snapshot?.(() => JSON.parse(JSON.stringify(S))); } catch (e) {} }
+  function start(data){
+    if (data && typeof data === 'object' && data.history && Array.isArray(data.history)) { try { S = Object.assign(fresh(), data); } catch (e) { S = fresh(); } }
+    $('run').addEventListener('click', runQuarter);
+    $('hangup').addEventListener('click', hangup);
+    $('listen').addEventListener('click', listen);
+    $('share').addEventListener('click', share);
+    $('replay').addEventListener('click', replay);
+    renderAll(); renderLog(false);
+    if (S.over && S.ending) renderEnding();
+  }
+  try { if (window.claude?.hot?.ready) window.claude.hot.ready(start); else start(window.claude?.hot?.data ?? {}); } catch (e) { start({}); }
+})();
+</script>
