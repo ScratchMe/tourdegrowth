@@ -70,10 +70,12 @@ pitch ne le nomme ni ne renvoie vers le CV.
 
 ## 1. La ligne de départ, mesurée là où c'était possible
 
-- **Recherche** : la donnée Search Console n'était pas accessible depuis
-  cette session (l'outil SEO Gets répond « abonnement requis »). Dernier
-  relevé connu, revue 02 du 2026-09-06 : **1 clic, ~50 impressions** du 15/08
-  au 04/09, le glossaire indexé en position 70-95. Les deux requêtes que
+- **Recherche** : la donnée Search Console est lisible par la session
+  depuis le 2026-09-14 (`stats.yml`, scope `gsc`). Relevé du jour : **1 clic,
+  86 impressions, position moyenne 76** du 15/08 au 11/09, le glossaire
+  indexé en position 60-98 sauf trois requêtes (« valeur totale client » en
+  4ᵉ, « cross-sell » en 21ᵉ, « airbnb north star metric » en 32ᵉ), et
+  Google crédite encore les URL d'avant R-13. Les deux requêtes que
   cette recherche a testées ont une **SERP sans concurrent direct** —
   « diagnostic croissance startup gratuit questionnaire AARRR » ne renvoie
   que des articles explicatifs, aucun outil ; « growth audit template » ne
@@ -216,7 +218,7 @@ mois.*
 | 2.4 | **Maillage** : chaque nouvelle page reçoit un lien depuis au moins deux pages existantes (index du glossaire, `/how-it-works`, pied de page pour la checklist) | La règle de R2-13, appliquée d'emblée |
 | 2.5 | **Le benchmark des pratiques** — dès que `stats/global` ≥ 50 : ouvrir `/metrics` (`METRICS_PAGE_ENABLED`) et publier une page narrative « l'étape qui freine le plus souvent » (C2 de `REVIEW-03.md`) | La seule donnée que personne d'autre ne peut publier : tous les benchmarks mesurent des résultats, aucun ne mesure les *pratiques* du pré-1 M$. Immunisée au problème de définition puisque l'échelle est la nôtre. Et c'est un vrai lien à obtenir |
 | 2.6 | **Bing Webmaster Tools** | Toi (compte Microsoft) — 10 min ; IndexNow suffit à l'indexation, ceci ajoute la mesure |
-| 2.7 | **Search Console** : soit réactiver l'accès SEO Gets, soit m'exporter les requêtes toutes les deux semaines | Sans ça, 2.2 et 2.3 se choisissent au jugé. Avec, on écrit ce que Google frôle déjà | **Câblé le 2026-09-14** : le même workflow lit la Search Console par compte de service (`scripts/gsc-report.mjs`), plus d'export à faire. Reste un clic : activer « Google Search Console API » sur le projet Cloud du compte de service (premier run : 403 sur `sites.list`).
+| 2.7 | **Search Console** : soit réactiver l'accès SEO Gets, soit m'exporter les requêtes toutes les deux semaines | Sans ça, 2.2 et 2.3 se choisissent au jugé. Avec, on écrit ce que Google frôle déjà | **Réglé le 2026-09-14** : le même workflow lit la Search Console par compte de service (`scripts/gsc-report.mjs`), plus d'export à faire — premier rapport réel le jour même, une fois l'API activée sur le projet Cloud.
 
 ### Vague 3 — La boucle produit (en parallèle, autonome, du code)
 
@@ -317,7 +319,7 @@ lise). Tout ce que je prépare est écrit pour être collé tel quel.
 | 2026-09-13 | Plan écrit. Baseline connue : 1 clic / ~50 impressions GSC (15/08-04/09), `stats/global` = 4 début septembre, GitHub 1 étoile sans description | À relever : `/admin/stats` du jour |
 | 2026-09-13 | Option A tranchée (site signé, promotion anonyme). Vague 0 : IndexNow (clé + workflow quotidien) et vocabulaire UTM refait sans `linkedin`, avec familles ouvertes `directory:`/`newsletter:` | — |
 | 2026-09-13 | Premier envoi IndexNow réel : 42 URL, **HTTP 202** de `api.indexnow.org` (run nº1 du workflow, déclenché à la main). Kit de soumission et textes de lancement livrés dans `marketing/` ; reste de la vague 0 côté Antoine : relevé de `/admin/stats`, réglages GitHub, comptes de marque, rétention Vercel | — |
-| 2026-09-14 | **0.1 relevé** par la session elle-même (`stats.yml`, deux runs, rapport déchiffré). Les chiffres restent dans la conversation et non ici : ce document est public, le tableau de bord ne l'est pas, et la ligne de départ se recalcule par date. Réglages GitHub et rétention Vercel faits. 2.7 : le compte de service est en place, il manque l'activation de l'API Search Console sur le projet Cloud (403 sur `sites.list`) | Ligne de départ : un site que personne n'a encore trouvé — tout le funnel est mesuré, à un chiffre |
+| 2026-09-14 | **0.1 relevé** par la session elle-même (`stats.yml`, deux runs, rapport déchiffré). Les chiffres restent dans la conversation et non ici : ce document est public, le tableau de bord ne l'est pas, et la ligne de départ se recalcule par date. Réglages GitHub et rétention Vercel faits. 2.7 réglé dans l'heure : API activée, premier rapport Search Console lu par la session | Ligne de départ : un site que personne n'a encore trouvé — tout le funnel est mesuré, à un chiffre. Recherche : 1 clic / 86 impressions / position 76 sur 28 jours, Google crédite encore les URL d'avant R-13 |
 
 ---
 

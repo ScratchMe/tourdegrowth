@@ -2607,6 +2607,32 @@ Google Cloud où le compte de service a été créé (console Cloud → API et
 services → Bibliothèque), puis relancer le workflow en `gsc` — c'est le seul
 pas restant pour la moitié Search Console.
 
+**Fait dans l'heure (run nº3, `gsc`).** Le diagnostic était le bon : une
+fois l'API activée, `sites.list` a rendu la propriété de domaine
+`sc-domain:tourdegrowth.com` et le rapport entier est revenu en deux
+secondes. **Les deux moitiés du workflow sont donc opérationnelles**, et une
+session peut lire à la demande le tableau de bord, la Search Console, ou
+les deux.
+
+Ce que la Search Console dit, en agrégat (les requêtes une à une restent
+dans la conversation) : sur 28 jours à fin de données finales (15/08 →
+11/09), **86 impressions, 1 clic, position moyenne 76** — et la fenêtre de
+90 jours donne exactement la même chose, parce que l'historique indexé du
+site est plus jeune que 28 jours. Deux faits à retenir plutôt que les
+chiffres eux-mêmes :
+- **Google crédite encore les anciennes adresses.** Toutes les impressions
+  anglaises portent sur `/glossary/<terme>` **sans préfixe** — les URL
+  d'avant R-13, qui répondent 308 vers `/en/glossary/<terme>` depuis le
+  2026-09-05 — et pas une seule URL `/en/…` n'apparaît. Les URL `/fr/…`, qui
+  n'ont jamais existé sous une autre forme, sont bien là. Rien à corriger
+  (308, canonical et hreflang sont en place) ; c'est le délai de recrawl.
+  **À surveiller au prochain run** : `/en/glossary/*` doit finir par
+  remplacer `/glossary/*` dans la liste des pages. S'il ne le fait pas en
+  quelques semaines, c'est un sujet.
+- **Les pages longues du glossaire (2026-09-06) ne sont pas encore dans la
+  mesure** : la fenêtre s'arrête au 11/09 et Google a recrawlé après. Leur
+  effet, s'il y en a un, se lira au run suivant, pas à celui-ci.
+
 **Vérifié en réel** : deux runs du workflow contre la production, deux
 déchiffrements ; lint, tsc, 547 tests unitaires (+4 : le 403 de `sites.list`
 avec un corps à la forme de Google, les deux formes de corps d'erreur, la
@@ -2659,7 +2685,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Catalogue de l'instrument d'audit à relire | 39 lignes de texte qui s'imprimeront dans les livrables d'Antoine, sous son nom | Un bon à tirer, même circuit que les précédents. |
 | Vercel Functions Storage | **Réglé** : la politique de rétention posée par Antoine le 2026-09-14 l'a fait passer de 9,24 Go à 397 Mo, et un déploiement pèse 45,5 Mo de fonctions depuis le 2026-09-13 | Rien. |
 | Vercel Fluid Active CPU (36 min / 4 h par mois) | Les deux postes qui dominaient le coût par visite sont corrigés le 2026-09-14 : six préchargements dynamiques par vue de la homepage, et l'image de partage rendue à chaque vue de résultat — confirmé en production, `MISS` puis `HIT` sur l'adresse versionnée. La région des fonctions est passée à `cdg1` le même jour (vérifié : `x-vercel-id: iad1::cdg1::…`) | Relire le compteur dans Vercel une semaine après. |
-| Lecture des stats par la session | **La moitié tableau de bord marche** (deux runs réels le 2026-09-14, déchiffrés par la session ; ligne de départ du plan relevée, tenue hors du dépôt public). La moitié Search Console répond 403 sur `sites.list` : l'API n'est pas activée sur le projet Cloud du compte de service | Antoine active « Google Search Console API » sur ce projet, puis un run en `gsc` — le log nomme désormais la cause exacte s'il en reste une. |
+| Lecture des stats par la session | **Les deux moitiés marchent** (trois runs réels le 2026-09-14 : tableau de bord et Search Console, déchiffrés par la session ; ligne de départ du plan relevée, tenue hors du dépôt public). À surveiller au prochain run Search Console : `/en/glossary/*` doit remplacer les anciennes URL non préfixées dans les pages créditées | Rien : un `age-keygen` puis un run (`admin`, `gsc` ou `both`) quand une session a besoin des chiffres. |
 
 Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et le payant sont dans **`GROWTH-PLAN.md`** (2026-09-13 — sans LinkedIn, sans nom ; cinq vagues, la moitié menable par la session seule ; la part autonome de la vague 0 est livrée : IndexNow, UTM, kit et textes dans `marketing/`) ; le SEO a été livré en grande partie par le lot C de cette revue, et sa suite est la vague 2 de ce plan.
 
