@@ -73,10 +73,46 @@ export function windowDates(days, today = new Date()) {
   return { start: isoDate(start), end: isoDate(end) };
 }
 
+/**
+ * What Google said about a non-2xx response, so the workflow log names the
+ * cause instead of a bare status: `accessNotConfigured` (the Search Console
+ * API is not enabled on the service account's Cloud project) reads very
+ * differently from an empty property list (the account was not added in
+ * Search Console), and both came back as "HTTP 403" on the first real run.
+ *
+ * Two shapes: the token endpoint answers `{error, error_description}`, the
+ * APIs answer `{error: {code, message, status, errors: [{reason}]}}`. Only
+ * Google's own fields are echoed, truncated to 300 characters — the same
+ * discipline as the Gemini error body (REVIEW-02.md R2-24). Nothing of
+ * ours is in a response body, but it is still text we did not write.
+ */
+export async function describeFailure(res) {
+  let text = "";
+  try {
+    text = await res.text();
+  } catch {
+    return `HTTP ${res.status}`;
+  }
+  try {
+    const json = JSON.parse(text);
+    const e = json.error;
+    if (typeof e === "string") {
+      return `HTTP ${res.status} ${e}${json.error_description ? `: ${json.error_description}` : ""}`.slice(0, 300);
+    }
+    if (e && typeof e === "object") {
+      const reason = e.errors?.[0]?.reason ?? e.status ?? "";
+      return `HTTP ${res.status}${reason ? ` ${reason}` : ""}${e.message ? `: ${e.message}` : ""}`.slice(0, 300);
+    }
+  } catch {
+    // Not JSON — fall through to the raw text.
+  }
+  return `HTTP ${res.status}${text ? `: ${text.slice(0, 200)}` : ""}`;
+}
+
 async function getToken(account, fetchImpl) {
   const body = new URLSearchParams({ grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer", assertion: buildJwt(account) });
   const res = await fetchImpl(TOKEN_URL, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body });
-  if (!res.ok) throw new Error(`token exchange failed: HTTP ${res.status}`);
+  if (!res.ok) throw new Error(`token exchange failed: ${await describeFailure(res)}`);
   const json = await res.json();
   if (!json.access_token) throw new Error("token exchange returned no access_token");
   return json.access_token;
@@ -88,7 +124,7 @@ async function query(fetchImpl, token, site, body) {
     headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
     body: JSON.stringify({ dataState: "final", ...body }),
   });
-  if (!res.ok) throw new Error(`searchAnalytics.query failed: HTTP ${res.status}`);
+  if (!res.ok) throw new Error(`searchAnalytics.query failed: ${await describeFailure(res)}`);
   const json = await res.json();
   return (json.rows ?? []).map((r) => ({
     keys: r.keys ?? [],
@@ -103,7 +139,7 @@ async function query(fetchImpl, token, site, body) {
 export async function buildReport(account, { fetchImpl = fetch, preferredSite = "", today = new Date() } = {}) {
   const token = await getToken(account, fetchImpl);
   const sitesRes = await fetchImpl(`${API}/sites`, { headers: { authorization: `Bearer ${token}` } });
-  if (!sitesRes.ok) throw new Error(`sites.list failed: HTTP ${sitesRes.status}`);
+  if (!sitesRes.ok) throw new Error(`sites.list failed: ${await describeFailure(sitesRes)}`);
   const site = pickSite((await sitesRes.json()).siteEntry ?? [], preferredSite);
 
   const windows = {};
@@ -147,7 +183,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   buildReport(account, { preferredSite: process.env.GSC_SITE ?? "" })
     .then((report) => process.stdout.write(JSON.stringify(report)))
     .catch((err) => {
-      // The message never contains the key; it names an endpoint and a status.
+      // The message never contains the key; it names an endpoint, a status
+      // and what Google said about it (describeFailure).
       console.error(`gsc-report: ${err instanceof Error ? err.message : String(err)}`);
       process.exit(1);
     });
