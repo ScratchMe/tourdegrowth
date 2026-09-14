@@ -174,6 +174,20 @@ test.describe("the audit instrument's missions", () => {
     await expect(page.getByTestId("confirm-import")).toHaveCount(0);
   });
 
+  test("the collect view and the row editor pass axe at serious and critical", async ({ page }) => {
+    await createMission(page, "Acme Analytics");
+    for (const step of ["list", "editor"] as const) {
+      if (step === "editor") {
+        await page.getByTestId("row-list").locator("> li").first().getByRole("button", { name: "Renseigner" }).click();
+        // With a status chosen, so the conditional fields are in the pass too.
+        await page.locator("#status").selectOption("absent");
+      }
+      const results = await new AxeBuilder({ page }).analyze();
+      const serious = results.violations.filter((v) => v.impact === "serious" || v.impact === "critical");
+      expect(serious.map((v) => `${step} — ${v.id}: ${v.nodes.length}`)).toEqual([]);
+    }
+  });
+
   test("the three screens pass axe at serious and critical", async ({ page }) => {
     await page.goto("/admin/audit");
     for (const open of [null, "new-mission"] as const) {

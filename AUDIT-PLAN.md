@@ -324,11 +324,21 @@ fichier — même si aucune ligne n'est encore saisissable.*
 - **Fini quand** : la mission AB Tasty peut être créée, exportée, réimportée
   sur le vrai build.
 
-#### 1.3 — L'éditeur de ligne, et les deux vues
+#### 1.3 — L'éditeur de ligne, et les deux vues — 🟡 1.3a livré le 2026-09-14, 1.3b à venir
 
 *Le cœur de la phase. La plus grosse PR ; si elle dépasse ce qu'une revue
-peut relire, la couper en 1.3a (statuts, absence, définitions, observations)
-et 1.3b (critère, décision, exposition, gouvernance, pilotage, vues).*
+peut relire, la couper en 1.3a et 1.3b.*
+
+**Coupe retenue au livrer, décalée d'un cran par rapport à la proposition
+ci-dessus.** Le plan suggérait de mettre définitions et observations dans
+1.3a et les vues dans 1.3b. Mais sans vue, l'éditeur n'a aucun point
+d'entrée : 1.3a livre donc la **liste des lignes triée par palier** et
+l'éditeur limité au **statut, à l'absence et à l'accès** — ce qui rend le
+triage des 25 lignes possible de bout en bout, l'absence étant le cas modal
+en entreprise financée. 1.3b prend les définitions versionnées, la série
+d'observations, le critère, la décision en jeu, l'exposition, la
+gouvernance, les dates de pilotage, le groupement par interlocuteur, les
+compteurs par palier et la vue restitution.
 
 - **Livre — la vue collecte** (la vue par défaut d'une mission ouverte,
   grille §8) : les lignes applicables **triées par palier décroissant**
