@@ -3657,7 +3657,8 @@ dans le bon à tirer nº5.
 ### Glossaire, lot 3 — la vague 2.2 est complète, et un défaut de typographie française trouvé en regardant une page (2026-09-14)
 
 `product-led-growth`, `arpu`, `nps`. Le glossaire passe de 15 à **25 termes**,
-soit 50 pages indexables dans les deux langues, et la vague 2.2 du plan de
+soit 50 pages indexables dans les deux langues (24 et 48 depuis la coupe
+d'`activation-rate` le soir même), et la vague 2.2 du plan de
 distribution est close.
 
 **ARPU et NPS remplacent** « expansion revenue » (doublon de
@@ -3707,7 +3708,7 @@ d'un groupe de mots redondant plutôt que contournée par un `metaDescription`.
 **Maillage** : il restait trois créneaux libres après le lot 2, dont deux
 utilisables (`growth-loop` → PLG, `viral-coefficient` → NPS), donc **quatre
 échanges** et non six. Mon affirmation du lot 2 — « le glossaire sera saturé » —
-était donc un peu forte : il reste un créneau, sur `aarrr`. Les 25 termes ont
+était donc un peu forte : il reste un créneau, sur `aarrr`. Les termes ont
 tous au moins 2 liens entrants, les cibles déplacées en gardent 3 à 6.
 
 **Vérifié en réel** : lint, tsc, **662 tests unitaires**, couverture au-dessus
@@ -3951,6 +3952,80 @@ une clé de dictionnaire comme `comparisonPage.glossaryHeading` est un jeton
 insécable qui poussait la carte 41 px hors d'un écran de 390 (`minmax(0,1fr)`
 sur la piste de grille, `overflow-wrap:anywhere` sur le titre).
 
+### `activation-rate` est coupé : deux pages enseignaient la même métrique (2026-09-14)
+
+Antoine, en lisant le bon à tirer nº5 : « la page de glossaire activation et
+la page "taux d'activation" parlent de la même chose, non ? » Vérifié en
+comparant les deux depuis les vrais modules plutôt que de mémoire, et c'est
+plus net que « ça se ressemble » :
+
+| | `activation` | `activation-rate` |
+|---|---|---|
+| Formule | `Taux d'activation = …` | `Taux d'activation = …` |
+| Exemple | un outil d'équipe, un mois d'inscriptions | un outil d'équipe, un mois d'inscriptions |
+| FAQ | « pas simplement le taux de conversion ? » | « Taux d'activation ou taux de conversion ? » |
+| FAQ | « plusieurs métriques d'activation ? » | « un événement ou plusieurs ? » |
+
+La seule ligne de partage tenable était `act-1` (définir le moment) contre
+`act-2` (le mesurer) — mais la page `activation` porte déjà la formule du
+taux, donc elle ne la tient pas. C'est exactement le quasi-doublon que la
+vague 2.1 avait pris soin d'éviter **entre** les deux pages « porte
+ouverte », et que je n'avais pas testé **à l'intérieur** du glossaire. Deux
+pages qui se cannibalisent : ni l'une ni l'autre ne classe. Décision
+d'Antoine : couper `activation-rate`.
+
+**Une URL publiée ne meurt pas ici, même vieille d'un jour.**
+`/glossary/activation-rate` a été mis en ligne le matin et soumis à IndexNow
+dans la foulée. Sans redirection il renverrait 404, parce que
+`dynamicParams = false` (R-26) refuse tout segment absent de
+`generateStaticParams`. D'où une 308 dans `next.config.mjs` vers
+`/glossary/activation` : permanente parce que la page ne revient pas, et
+c'est ce qui transfère le signal au terme qui garde le contenu. L'adresse
+non préfixée passe d'abord par la 308 du proxy, donc deux sauts — ce que ce
+dépôt pratique déjà pour les URL d'avant R-13.
+
+**Les six liens entrants vont à `activation`**, pas nulle part : là où elle
+était déjà citée le lien tombe (3 liés restent, dans la fenêtre 2-4 du
+test), sinon il est remplacé. Mesuré après coup plutôt que supposé : 24
+termes, **aucun sous 2 liens entrants**.
+
+**Ce qui disparaît et qui n'est pas dans `activation`**, dit franchement
+plutôt que folé en silence dans de la copie déjà validée (convention 6) :
+l'exemple qui montre le taux passer de 31 % à 64 % selon l'événement retenu,
+le levier « compte les étapes entre l'inscription et l'événement, puis
+supprimes-en une », la FAQ sur la longueur de la fenêtre, et le rattachement
+à `act-2`. À dire si l'un doit être repris — `activation` est de la copie
+approuvée le 2026-09-09, donc l'y fondre est une décision, pas un effet de
+bord de cette coupe.
+
+**Deux ratés de ma part dans cette heure, tous deux instructifs.**
+
+1. **La CI est passée au rouge sur ma tête, et c'était évitable.**
+   `structured-data.spec.ts` affirmait `term.name === "CAC"` ; le balayage
+   des acronymes a développé ce titre. J'avais lancé lint, `tsc`, les 706
+   tests, les seuils de couverture et `next build` — **mais pas la suite
+   Playwright**, après un changement qui touche de la copie rendue. Le
+   correctif est la discipline que ce fichier applique déjà deux lignes plus
+   haut : lire le titre depuis `GLOSSARY` plutôt que le recopier. Le test du
+   sitemap portait le même défaut (`toHaveLength(74)` écrit à la main) — il
+   dérive maintenant son compte du glossaire et du cluster comparatif, parce
+   qu'un nombre qu'on retouche à chaque lot finit par être retouché sans
+   être lu.
+2. **J'ai supprimé deux entrées de `glossary-deep.ts` au lieu d'une**, et
+   `tsc` l'a dit (« Property 'cac' is missing »). Cause : j'avais relevé les
+   bornes avec un `grep` qui ne cherchait **que les deux clés que je lui
+   avais nommées** — donc il ne pouvait pas me montrer la troisième, `cac`,
+   assise entre elles. C'est la leçon du run nº8 sous une autre forme : une
+   recherche ne prouve que ce qu'elle a regardé. Refait en listant **toutes**
+   les clés de premier niveau, puis en assertant qu'aucune autre n'entre dans
+   l'intervalle avant de couper.
+
+**Vérifié en réel** : lint, tsc, **706 tests unitaires**, seuils de
+couverture, `next build` (les pages de terme passent de 50 à 48, en `●`),
+**286 specs Playwright** (+1). Non-vacuité : en retirant la redirection et
+en reconstruisant, **exactement la nouvelle spec tombe**, les 21 autres du
+fichier passent.
+
 ## État du projet au 2026-09-14 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -3973,7 +4048,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **L'instrument d'audit growth a son schéma** (2026-09-13, `AUDIT.md`) : un outil personnel pour les diagnostics qu'Antoine mène en entreprise, navigateur seulement, jamais Firestore — `src/lib/audit/` + `src/content/audit-catalog.ts`, sans aucune route ni UI encore. Phase 1 (la saisie sous `/admin/audit`) est le prochain chantier, découpée en six PR dans **`AUDIT-PLAN.md`** (2026-09-13) ; phase 3 (tout ce qui ressemble à un produit) reste fermée tant que les entretiens ne sont pas faits et le contrat de travail pas vérifié.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **662 tests unitaires**, **264 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
+**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **706 tests unitaires**, **286 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 
@@ -4000,7 +4075,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Vercel Fluid Active CPU (36 min / 4 h par mois) | Les deux postes qui dominaient le coût par visite sont corrigés le 2026-09-14 : six préchargements dynamiques par vue de la homepage, et l'image de partage rendue à chaque vue de résultat — confirmé en production, `MISS` puis `HIT` sur l'adresse versionnée. La région des fonctions est passée à `cdg1` le même jour (vérifié : `x-vercel-id: iad1::cdg1::…`) | Relire le compteur dans Vercel une semaine après. |
 | Lecture des stats par la session | **Les deux moitiés marchent** (trois runs réels le 2026-09-14 : tableau de bord et Search Console, déchiffrés par la session ; ligne de départ du plan relevée, tenue hors du dépôt public). À surveiller au prochain run Search Console : `/en/glossary/*` doit remplacer les anciennes URL non préfixées dans les pages créditées | Rien : un `age-keygen` puis un run (`admin`, `gsc` ou `both`) quand une session a besoin des chiffres. |
 
-Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et le payant sont dans **`GROWTH-PLAN.md`** (2026-09-13 — sans LinkedIn, sans nom ; cinq vagues, la moitié menable par la session seule ; la part autonome de la vague 0 est livrée : IndexNow, UTM, kit et textes dans `marketing/`) ; le SEO a été livré en grande partie par le lot C de cette revue, et sa suite est la vague 2 de ce plan, dont **2.1 et 2.4 sont faites** (les deux pages « porte ouverte » et leur maillage, 2026-09-14) et **2.2 est close** (les dix termes, en trois lots, choisis sur le rapport Search Console du jour — le glossaire passe de 15 à 25 termes, soit 50 pages indexables). Reste, menable par une session seule : **2.3** (le cluster « frameworks comparés »). **2.5** attend les 50 soumissions de `stats/global`.
+Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et le payant sont dans **`GROWTH-PLAN.md`** (2026-09-13 — sans LinkedIn, sans nom ; cinq vagues, la moitié menable par la session seule ; la part autonome de la vague 0 est livrée : IndexNow, UTM, kit et textes dans `marketing/`) ; le SEO a été livré en grande partie par le lot C de cette revue, et sa suite est la vague 2 de ce plan, dont **2.1 et 2.4 sont faites** (les deux pages « porte ouverte » et leur maillage, 2026-09-14) et **2.2 est close** (les dix termes, en trois lots, choisis sur le rapport Search Console du jour — le glossaire passe de 15 à 25 termes, puis 24 après la coupe d'`activation-rate`, soit 48 pages indexables) et **2.3 est faite** (le cluster « AARRR vs X », quatre pages aux deux langues). Reste. **2.5** attend les 50 soumissions de `stats/global`.
 
 **Coût Gemini, mesuré plutôt qu'estimé au doigt mouillé** (clé passée en palier payant Tier 1 le 2026-09-07, avec plafonds de dépense) : un Deep dive = 4 générations (2 tons × 2 langues), prompt réel ~5 300 caractères, sorties mesurées par la sonde entre 765 et 2 801 tokens de réflexion et ~450-530 de réponse. Soit **~0,04 à 0,06 $ par Deep dive en 2026**, le double à partir de 2027 (les tarifs Flash doublent au 1ᵉʳ janvier). Le mode Quick ne coûte rien du tout — il n'appelle plus Gemini depuis SPEC-ADDENDUM-01 §0. La limite de 5 Deep dive/h/IP borne un abus à ~2,4 $/jour dans le pire cas.
 

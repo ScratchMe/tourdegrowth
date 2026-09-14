@@ -267,3 +267,20 @@ test("the language redirect says it depends on the browser (Vary: Accept-Languag
   expect(en.status()).toBe(200);
   expect(en.headers().vary ?? "").not.toMatch(/accept-language/i);
 });
+
+test("a glossary term that was cut keeps its address instead of going 404", async ({ page }) => {
+  // `/glossary/activation-rate` a vécu une journée : publié le 2026-09-14 et
+  // soumis à IndexNow le matin, coupé le soir comme doublon d'`activation`.
+  // `dynamicParams = false` en ferait un 404 sans la redirection de
+  // `next.config.mjs` — et une URL déjà soumise aux moteurs qui meurt est
+  // exactement ce que SPEC.md §12 interdit.
+  for (const locale of ["en", "fr"]) {
+    const res = await page.request.get(`/${locale}/glossary/activation-rate`, { maxRedirects: 0 });
+    expect(res.status(), locale).toBe(308);
+    expect(res.headers().location, locale).toBe(`/${locale}/glossary/activation`);
+  }
+  // Et la destination répond vraiment, plutôt que de rediriger dans le vide.
+  const landed = await page.request.get("/en/glossary/activation-rate");
+  expect(landed.status()).toBe(200);
+  expect(landed.url()).toMatch(/\/en\/glossary\/activation$/);
+});
