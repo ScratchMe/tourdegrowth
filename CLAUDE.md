@@ -2339,7 +2339,98 @@ segmentation (R2-26) s'intercale ; et la carte d'aperçu roast dit
 « Retention is freewheeling » / « roule en roue libre », qui est une bonne
 ligne à citer dans les posts.
 
-## État du projet au 2026-09-13 — à lire en premier dans une nouvelle session
+### Fluid Active CPU : ce qu'une vue de la homepage coûtait en fonctions (2026-09-14)
+
+La rétention Vercel posée par Antoine a vidé le Functions Storage (397 Mo).
+Le compteur le plus proche de sa limite est devenu **Fluid Active CPU**
+(36 min 46 s sur 4 h par mois, 15 %), avec une hausse ×4-5 la veille, et
+Antoine a joint un export HAR d'un chargement de la homepage. Le chiffre est
+petit parce que le trafic l'est ; c'est le coût **par visite** qu'il fallait
+réduire, avant le lancement.
+
+**Ce que le HAR montre.** Une seule vue de la homepage, c'est la 308 du
+proxy, la page en `HIT` CDN, puis la machinerie de préchargement de
+`next/link` : quatorze préchargements de pages de contenu (tous `HIT`,
+donc gratuits) et **six rendus dynamiques** dans `iad1` — `/quiz`,
+`/r/sample` et `/r/<dernier résultat de l'appareil>`, chacun **deux fois**
+(un préchargement `/_tree` du cache de segments, puis un « metadata-only »),
+tous en `MISS`, entre 190 ms et 1,3 s chacun. Avant que quiconque ait
+cliqué. Et ces six réponses ne pouvaient **jamais servir** : depuis R-24 les
+pages de contenu et les routes applicatives ont deux layouts racine, donc la
+navigation est un chargement complet du document quoi qu'il arrive. Next ne
+l'apprend qu'en lisant l'arbre de route qu'il vient de télécharger
+(`ppr-navigations.js`, `isNavigatingToNewRootLayout`) : il précharge, puis
+retélécharge au clic, puis recharge la page.
+
+**Mesuré, pas supposé** — build de production local, CPU de tout l'arbre de
+processus lu dans `/proc/<pid>/stat` (piège : le parent `next start` affiche
+0 ms, c'est le worker enfant qui rend ; sommer l'arbre) :
+
+| Requête | 1ʳᵉ fois (instance froide) | à chaud |
+|---|---|---|
+| Démarrage du runtime, avant toute requête | 510 ms | — |
+| `/quiz` en RSC (le préchargement) | 210 ms | 40 ms |
+| `/r/sample` en RSC | 340 ms | 40 ms |
+| Image de partage d'un résultat (Satori) | 530 ms | ~185 ms |
+| Page de contenu prérendue | 20 ms | 0 |
+| Le proxy seul (la 308) | sous le tick de 10 ms | — |
+
+À trafic quasi nul, chaque visite paie donc une fonction applicative froide
+que la landing réveillait pour rien. Le rendu de la landing elle-même ne
+coûte rien : elle est servie par le CDN.
+
+**Le correctif.** `Button` gagne un prop `hard` (rend un `<a>` nu au lieu
+de `next/link`), posé sur les sept CTA des pages de contenu vers `/quiz` et
+`/r/sample` ; les deux liens de `LastResult` deviennent des `<a>`. Même
+précédent que le sélecteur de langue de R-13. Les liens **dans** un même
+arbre gardent `Link` : `/r/<id>` → `/quiz?ref=` est une navigation client,
+et son préchargement est ce qui rend ce clic instantané.
+
+**Ce qui tient la règle** : `src/__tests__/cross-root-links.test.ts`
+(garde statique : tout `Button` du dossier `[locale]` vers une route
+applicative est `hard`, aucun `Link` n'y pointe, avec un plancher de sept
+liens trouvés pour qu'une dérive de motif ne passe pas en ne trouvant
+rien) et `e2e/cross-root-links.spec.ts` (4 specs qui enregistrent **toutes**
+les requêtes du navigateur, chaque lien amené dans le viewport et le CTA
+survolé — et qui prouvent d'abord que le préchargement tourne, en
+constatant celui d'une page de contenu, avant d'affirmer qu'aucune route
+applicative n'a été touchée). Non-vacuité : correctif retiré, **les 4
+specs tombent** en listant exactement les six requêtes du HAR, et 2 des 3
+tests de la garde tombent (le plancher passe dans les deux états, c'est une
+assertion compagne).
+
+**Piège de spec** : la première version attendait `networkidle` après le
+défilement ; dans la suite complète en parallèle elle a expiré une fois à
+30 s (le serveur `next start` est partagé par les workers). Playwright
+déconseille lui-même `networkidle`. Remplacé par l'attente du signal
+positif (la requête de préchargement d'une page de contenu) et une
+attente bornée de 500 ms après le survol, puisqu'un `<a>` nu n'émet rien
+qu'on puisse attendre. Rejouée trois fois en isolation et une fois dans la
+suite complète : **185 specs vertes**.
+
+**Piège de lint** : `@next/next/no-html-link-for-pages` se déclenche sur
+un `<a href="/quiz">` littéral et réclame `next/link` — précisément ce
+qu'on ne veut pas ici. Désactivé sur cette seule ligne, avec la raison.
+
+**Pas couvert, volontairement** : les liens dans l'autre sens (app →
+contenu : `WordmarkLink`, la nav des en-têtes, le pied de page sur `/r/<id>`)
+préchargent des pages statiques en `HIT` CDN, donc ~0 CPU ; laissés. Et
+l'image de partage, ~185 ms par vue de résultat : c'est la PR suivante.
+
+**Sur le ×4-5 de la veille** : pas démontrable d'ici (pas de ventilation par
+fonction sur le plan Hobby). Deux candidats plausibles, tous deux de mon
+fait : cinq déploiements de production le même jour (chacun recycle toutes
+les instances, donc les visites suivantes repaient un démarrage à froid),
+et le premier envoi IndexNow, qui amène des robots qui **rendent** les
+pages (Bing le fait) et déclenchent donc les mêmes préchargements. Quelle
+que soit la cause, c'est le coût par visite qui était réductible.
+
+**Signalé, pas corrigé (pas du CPU)** : les fonctions tournent dans `iad1`
+(Washington) alors que Firestore est en `eur3` et les lecteurs en Europe —
+c'est ce qui donne 1 à 1,3 s à ces requêtes dans le HAR. C'est un réglage
+de projet Vercel (Function Region), à faire par Antoine ; `cdg1` ou `fra1`.
+
+## État du projet au 2026-09-14 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
 
@@ -2361,7 +2452,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **L'instrument d'audit growth a son schéma** (2026-09-13, `AUDIT.md`) : un outil personnel pour les diagnostics qu'Antoine mène en entreprise, navigateur seulement, jamais Firestore — `src/lib/audit/` + `src/content/audit-catalog.ts`, sans aucune route ni UI encore. Phase 1 (la saisie sous `/admin/audit`) est le prochain chantier, découpée en six PR dans **`AUDIT-PLAN.md`** (2026-09-13) ; phase 3 (tout ce qui ressemble à un produit) reste fermée tant que les entretiens ne sont pas faits et le contrat de travail pas vérifié.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **499 tests unitaires**, **181 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
+**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **520 tests unitaires**, **185 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 
@@ -2384,7 +2475,8 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | TypeScript 7 et ESLint 10 | Tous deux bloqués par des paquets embarqués dans `eslint-config-next` (`typescript-eslint` refuse TS ≥ 6.1 ; `eslint-plugin-react` plante sur ESLint 10). Dependabot les ignore en majeure depuis le 2026-09-08 | Quand `eslint-config-next` suivra. Re-tester en installant, pas en lisant les plages de peer : c'est l'essai qui a montré qu'ESLint 10 plante. |
 | Instrument d'audit : phase 1 (saisie) | Le schéma est livré (`AUDIT.md`), rien n'est visible dans l'app. **Le plan complet est dans `AUDIT-PLAN.md`** (phases, six PR de la phase 1, critères de sortie, Go/No-Go) | Le feu vert d'Antoine sur le plan, puis la PR 1.1 (découplage `lib/audit` ↔ contenu + stockage, sans écran). La politique de rétention Vercel doit être en place avant, chaque merge déployant la production. |
 | Catalogue de l'instrument d'audit à relire | 39 lignes de texte qui s'imprimeront dans les livrables d'Antoine, sous son nom | Un bon à tirer, même circuit que les précédents. |
-| Vercel Functions Storage à 9,24 / 10 Go | Un déploiement passe de 241 à 45,5 Mo de fonctions (sharp puis le rendu Edge de next/og sortis, 2026-09-13) — mais ça n'allège que les déploiements à venir | **Action d'Antoine dans le dashboard Vercel** : une politique de rétention des déploiements (et une suppression des anciens pour libérer tout de suite). Le compteur doit redescendre nettement sous 5 Go ; sinon, chercher un second poste que la mesure locale ne voit pas. |
+| Vercel Functions Storage | **Réglé** : la politique de rétention posée par Antoine le 2026-09-14 l'a fait passer de 9,24 Go à 397 Mo, et un déploiement pèse 45,5 Mo de fonctions depuis le 2026-09-13 | Rien. |
+| Vercel Fluid Active CPU (36 min / 4 h par mois) | Le coût par visite était dominé par des rendus inutiles : six préchargements dynamiques par vue de la homepage (corrigés le 2026-09-14) et l'image de partage rendue à chaque vue de résultat (~185 ms, 530 ms à froid) | La PR « cache CDN de l'image de partage » (jeton de version dans l'URL). Puis relire le compteur dans Vercel une semaine après. La région des fonctions (`iad1` alors que Firestore est en `eur3`) est un réglage de projet à changer par Antoine — latence, pas CPU. |
 
 Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et le payant sont dans **`GROWTH-PLAN.md`** (2026-09-13 — sans LinkedIn, sans nom ; cinq vagues, la moitié menable par la session seule ; la part autonome de la vague 0 est livrée : IndexNow, UTM, kit et textes dans `marketing/`) ; le SEO a été livré en grande partie par le lot C de cette revue, et sa suite est la vague 2 de ce plan.
 

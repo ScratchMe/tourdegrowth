@@ -63,7 +63,7 @@ export default async function GlossaryIndexPage({ params }: PageProps) {
         </div>
 
         <div className={styles.ctaWrap}>
-          <Button size="lg" href="/quiz">
+          <Button size="lg" href="/quiz" hard>
             {tc(UI_STRINGS.landing.ctaPrimary, locale)}
           </Button>
         </div>

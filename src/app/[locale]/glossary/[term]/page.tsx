@@ -95,7 +95,7 @@ export default async function GlossaryTermPage({ params }: PageProps) {
         )}
 
         <div className={styles.ctaRow}>
-          <Button size="lg" href="/quiz">
+          <Button size="lg" href="/quiz" hard>
             {tc(UI_STRINGS.landing.ctaPrimary, locale)}
           </Button>
           <Button size="lg" variant="secondary" href={localePath(locale, "/how-it-works")}>

@@ -132,7 +132,7 @@ export default async function AboutPage({ params }: PageProps) {
         </section>
 
         <div className={styles.ctaWrap}>
-          <Button size="lg" href="/quiz">
+          <Button size="lg" href="/quiz" hard>
             {tc(ABOUT.cta, locale)}
           </Button>
         </div>
