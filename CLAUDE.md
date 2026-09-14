@@ -2911,6 +2911,88 @@ couverture au-dessus des seuils, `next build`, **203 specs Playwright** (+7,
 dont la passe axe sur les deux nouveaux écrans). Captures relues en 1280 et
 390 px, `scrollWidth === clientWidth` aux deux largeurs.
 
+### Instrument d'audit, étape 1.3b-i : la définition versionnée (2026-09-14)
+
+1.3b a été coupée en trois pour la même raison que 1.3 l'avait été en deux :
+une PR qu'une revue ne peut pas tenir n'est pas relue, elle est approuvée.
+Ce premier temps ne livre que la définition — la série d'observations et le
+reste de l'entrée suivent.
+
+**Ce que ce module décide, et pourquoi il existe.** Une `MetricDefinition`
+est immuable et adressée par `id@version` (AUDIT.md §3). La raison n'est pas
+la pureté : une observation référence une version précise, donc éditer une
+définition en place changerait **rétroactivement** ce que des chiffres déjà
+relevés veulent dire, et personne ne s'en apercevrait. `registerDefinition`
+refusait déjà d'écraser une référence avec un autre contenu ;
+`lib/audit/definitions.ts` est ce qui décide, à l'écran, quelle version
+écrire. Trois cas dans cet ordre : contenu identique → on réutilise la
+référence ; aucune version → v1 ; contenu différent → max + 1, l'ancienne
+reste.
+
+**Le max, pas le compte.** Une v3 suit une v2 même si la v1 a disparu du
+fichier — compter les versions donnerait un `id@2` déjà pris. Un test dédié,
+parce que c'est le genre d'erreur qui ne se voit qu'au moment où elle jette
+une exception chez l'utilisateur.
+
+**La règle ne tient que grâce à `normalizeDraft`, et c'est le test de
+non-vacuité qui me l'a appris.** Un `<input>` rend `""` là où le schéma n'a
+rien : sans normalisation, rouvrir un formulaire et l'enregistrer frapperait
+une v2 dont le seul contenu serait des chaînes vides. J'avais écrit la spec
+e2e « rouvrir et enregistrer sans rien changer ne frappe pas de v2 » — et
+**elle est passée avec la normalisation retirée**. Cause : le brouillon est
+seedé depuis la définition ENREGISTRÉE, déjà normalisée, donc il n'y a aucun
+vide à normaliser sur ce chemin-là. Le geste qui produit vraiment le bug est
+autre : commencer à taper dans un axe optionnel puis se raviser, ou coller
+une valeur avec une espace au bout. La spec exécute maintenant ces deux
+gestes-là, et le même sabotage la fait tomber. **Une non-vacuité qui passe
+est un signal** (convention 5) — troisième fois que ça sert dans ce projet.
+
+**La normalisation est à la frontière, pas aux points d'appel** : `""`,
+`[]` et les espaces de bord sont retirés par `upsertDefinition` lui-même,
+donc l'écran peut être négligent sans que la règle cède. C'est la leçon des
+deux fuites `rawPoints` (#110 puis #115), où une garde nominale ne couvrait
+que le champ auquel on avait pensé.
+
+**L'écran.** `DefinitionEditor` : les quatre champs que le validateur exige
+(unité, population au numérateur, population au dénominateur, périmètre —
+ce dernier pré-rempli au périmètre de la mission, jamais vide), puis les neuf
+axes qui font qu'un chiffre veut dire deux choses derrière un dépliant. Ce
+n'est pas l'outil qui dit lesquels comptent pour une ligne donnée : c'est le
+**piège de la fiche**, à gauche, écrit ligne par ligne par le catalogue.
+Prétendre le deviner ici serait inventer du contenu.
+
+**Une définition incomplète n'est pas enregistrée, et ne bloque pas la
+ligne.** L'écran nomme ce qui manque, la ligne s'enregistre quand même, et le
+fichier signale l'incomplétude. Le contraire — un bouton désactivé — perdrait
+le statut et le reste de la saisie pour un champ qu'on ira chercher demain.
+Une définition incomplète ne retire pas non plus la référence déjà posée.
+
+**Un avis, pas un silence** : frapper une v2 affiche « Définition m07@2
+frappée. La version précédente reste dans la mission. » Sans ça, l'auditeur
+croit avoir corrigé l'ancienne, ce qui est exactement l'inverse de ce qui
+s'est passé. L'avis ne survit pas à un changement d'écran (`goTo`) : un
+message qui reste affiché pendant qu'on navigue finit par décrire une action
+qu'on ne se rappelle plus avoir faite.
+
+**Deux corrections venues de la capture, pas de la relecture** : la phrase
+sous la case « réglage par défaut de l'outil » interpolait le nom de la ligne
+et donnait « … le vrai constat de la ligne — dépense ventes & marketing
+chargée compris » ; et l'aide disait « sans eux, l'export refusera la ligne »,
+ce qui est faux — l'export écrit le fichier, c'est le validateur qui signale.
+Le texte dit maintenant ce que le code fait.
+
+**Vérifié en réel** : `tsc`, `eslint`, **598 tests unitaires** (+19),
+couverture au-dessus des seuils (lignes 90,7 %), `next build`, **207 specs
+Playwright** (+4), passe axe étendue au formulaire de définition avec ses
+axes dépliés (axe ne voit que le visible : un `<details>` fermé n'aurait rien
+prouvé, donc la spec l'ouvre et l'assert). Captures relues en 1280 et 390 px,
+`scrollWidth === clientWidth` aux deux largeurs. Non-vacuité mesurée
+finement : normalisation retirée → **une seule** spec tombe, la bonne ;
+référence non posée sur l'entrée → trois tombent et celle qui ne porte que
+sur le formulaire passe ; et côté unitaire, retirer le court-circuit
+« contenu identique » en fait tomber trois, retirer le tri des clés une
+seule, remplacer le max par le compte une seule.
+
 ## État du projet au 2026-09-14 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -2933,7 +3015,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **L'instrument d'audit growth a son schéma** (2026-09-13, `AUDIT.md`) : un outil personnel pour les diagnostics qu'Antoine mène en entreprise, navigateur seulement, jamais Firestore — `src/lib/audit/` + `src/content/audit-catalog.ts`, sans aucune route ni UI encore. Phase 1 (la saisie sous `/admin/audit`) est le prochain chantier, découpée en six PR dans **`AUDIT-PLAN.md`** (2026-09-13) ; phase 3 (tout ce qui ressemble à un produit) reste fermée tant que les entretiens ne sont pas faits et le contrat de travail pas vérifié.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **579 tests unitaires**, **203 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
+**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **598 tests unitaires**, **207 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 
@@ -2953,7 +3035,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Les e2e de composition ne passent que par la branche échantillon | `/r/sample` utilise `getSampleNextMove` et `SAMPLE_RESULT.pillars`, pas le vrai chemin. La garde statique est donc seule à protéger le payload | Un id de fixture derrière une variable d'environnement fermée par défaut. À décider : c'est une porte de test sur la route publique la plus sensible. |
 | Flake `locale-routing.spec.ts:75` | Deux échecs le 2026-09-10 et un le 2026-09-14, toujours en suite complète parallèle, jamais isolée ni à la reprise | La prochaine occurrence en CI laisse une trace (`retries: 1` + `trace: on-first-retry`, rapport téléversé). Ne pas durcir la spec en attendant le cookie : ça masquerait une éventuelle course produit. |
 | TypeScript 7 et ESLint 10 | Tous deux bloqués par des paquets embarqués dans `eslint-config-next` (`typescript-eslint` refuse TS ≥ 6.1 ; `eslint-plugin-react` plante sur ESLint 10). Dependabot les ignore en majeure depuis le 2026-09-08 | Quand `eslint-config-next` suivra. Re-tester en installant, pas en lisant les plages de peer : c'est l'essai qui a montré qu'ESLint 10 plante. |
-| Instrument d'audit : phase 1 (saisie) | Feu vert d'Antoine sur `AUDIT-PLAN.md` le 2026-09-14. **1.1, 1.2 et 1.3a livrées** — `/admin/audit` crée une mission, la trie ligne par ligne, marque les absences, exporte et réimporte. Reste 1.3b (définitions, observations, critère, pilotage, vue restitution) puis 1.4 à 1.6 | Rien : la suite s'enchaîne dans l'ordre des dépendances. |
+| Instrument d'audit : phase 1 (saisie) | Feu vert d'Antoine sur `AUDIT-PLAN.md` le 2026-09-14. **1.1, 1.2, 1.3a et 1.3b-i livrées** — `/admin/audit` crée une mission, la trie ligne par ligne, marque les absences, pose une définition versionnée, exporte et réimporte. Reste 1.3b-ii (observations), 1.3b-iii (critère, pilotage, vues) puis 1.4 à 1.6 | Rien : la suite s'enchaîne dans l'ordre des dépendances. |
 | Catalogue de l'instrument d'audit à relire | 39 lignes de texte qui s'imprimeront dans les livrables d'Antoine, sous son nom | Un bon à tirer, même circuit que les précédents. |
 | Vercel Functions Storage | **Réglé** : la politique de rétention posée par Antoine le 2026-09-14 l'a fait passer de 9,24 Go à 397 Mo, et un déploiement pèse 45,5 Mo de fonctions depuis le 2026-09-13 | Rien. |
 | Vercel Fluid Active CPU (36 min / 4 h par mois) | Les deux postes qui dominaient le coût par visite sont corrigés le 2026-09-14 : six préchargements dynamiques par vue de la homepage, et l'image de partage rendue à chaque vue de résultat — confirmé en production, `MISS` puis `HIT` sur l'adresse versionnée. La région des fonctions est passée à `cdg1` le même jour (vérifié : `x-vercel-id: iad1::cdg1::…`) | Relire le compteur dans Vercel une semaine après. |

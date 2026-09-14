@@ -7,6 +7,7 @@ import { Disclosure } from "@/components/core/Disclosure";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import { TextArea } from "@/components/core/TextArea";
 import type { AuditCatalogRow } from "@/content/audit-catalog";
+import type { DefinitionDraft } from "@/lib/audit/definitions";
 import { entryFieldGroups, selectableStatuses } from "@/lib/audit/entry-fields";
 import {
   ABSENT_CAUSES,
@@ -17,10 +18,12 @@ import {
   normalizeEntry,
   type AbsentCause,
   type Entry,
+  type MetricDefinition,
   type RepairScale,
   type SystemCause,
   type ValueStatus,
 } from "@/lib/audit/schema";
+import { DefinitionEditor } from "./DefinitionEditor";
 import { Field } from "./_ui/Field";
 import { Select } from "./_ui/Select";
 import {
@@ -48,25 +51,39 @@ import styles from "./page.module.css";
  * statut laisserait saisir une donnée que l'export refuserait ensuite.
  *
  * Étape 1.3a : statut, absence (cause, coût de réparation, cause système) et
- * accès. Les définitions versionnées, la série d'observations, le critère,
- * la décision en jeu, l'exposition et le pilotage arrivent à l'étape 1.3b —
- * l'écran le dit plutôt que de faire croire que la ligne est complète.
+ * accès. Étape 1.3b, premier temps : la définition versionnée. La série
+ * d'observations, le critère, la décision en jeu, l'exposition et le pilotage
+ * suivent — l'écran le dit plutôt que de faire croire que la ligne est
+ * complète.
  */
 export function RowEditor({
   row,
   entry,
+  definition,
+  defaultScope,
   onChange,
   onClose,
 }: {
   row: AuditCatalogRow;
   entry: Entry | undefined;
-  onChange: (entry: Entry) => void;
+  /** La définition que l'entrée référence déjà, résolue par l'appelant. */
+  definition: MetricDefinition | undefined;
+  /** Le périmètre de la mission — le défaut d'une définition neuve, jamais vide. */
+  defaultScope: string;
+  onChange: (entry: Entry, definition?: DefinitionDraft) => void;
   onClose: () => void;
 }) {
   // `undefined` tant que l'auditeur ne s'est pas prononcé : un statut n'est
   // jamais défauté, et une ligne pas encore examinée compte comme « en
   // attente », pas comme absente (cf. `coverage.ts`).
   const [draft, setDraft] = useState<Entry | undefined>(entry);
+  /**
+   * Le brouillon de définition, seedé depuis celle en vigueur quand il y en a
+   * une. Il n'écrase JAMAIS l'enregistrement : `upsertDefinition`, appelé par
+   * l'atelier en enregistrant, compare le contenu et décide s'il y a une
+   * version à frapper. Fermer cet écran sans rien changer ne frappe rien.
+   */
+  const [definitionDraft, setDefinitionDraft] = useState<DefinitionDraft>(() => seedDefinition(row.id, definition, defaultScope));
   const groups = draft ? entryFieldGroups(draft.status) : [];
 
   function setStatus(status: ValueStatus) {
@@ -184,13 +201,16 @@ export function RowEditor({
           ) : null}
 
           {groups.includes("value") ? (
-            <Disclosure summary="Définition et observations" data-testid="value-fields">
-              <p className={styles.muted}>
-                La définition versionnée et la série d&apos;observations arrivent à l&apos;étape 1.3b. Tant qu&apos;elles manquent, l&apos;export
-                signalera cette ligne comme incomplète — c&apos;est voulu : mieux vaut un fichier qui dit ce qui reste à faire qu&apos;un
-                fichier qui a l&apos;air fini.
-              </p>
-            </Disclosure>
+            <div className={styles.fieldGroup} data-testid="value-fields">
+              <DefinitionEditor draft={definitionDraft} currentRef={draft?.definitionRef} onChange={setDefinitionDraft} />
+              <Disclosure summary="Observations">
+                <p className={styles.muted}>
+                  La série d&apos;observations — la valeur, sa période, sa source, la date à laquelle elle a été tirée — arrive au temps
+                  suivant de l&apos;étape 1.3b. Tant qu&apos;elle manque, l&apos;export signalera cette ligne comme incomplète : mieux vaut un
+                  fichier qui dit ce qui reste à faire qu&apos;un fichier qui a l&apos;air fini.
+                </p>
+              </Disclosure>
+            </div>
           ) : null}
 
           {groups.includes("access") ? (
@@ -202,7 +222,11 @@ export function RowEditor({
 
           <Button
             onClick={() => {
-              if (draft) onChange(draft);
+              // Le brouillon de définition n'est transmis que quand le statut
+              // en demande une : une ligne absente n'a pas de définition à
+              // frapper, et en poser une du seul fait qu'on a ouvert l'écran
+              // enregistrerait du vide dans la mission.
+              if (draft) onChange(draft, groups.includes("value") ? definitionDraft : undefined);
             }}
             data-testid="save-row"
             {...(draft ? {} : { disabled: true })}
@@ -213,6 +237,19 @@ export function RowEditor({
       </div>
     </section>
   );
+}
+
+/**
+ * Le brouillon de départ. Depuis la définition en vigueur quand il y en a une
+ * — sans elle, rouvrir l'écran et enregistrer frapperait une version dont le
+ * seul contenu serait les champs vides du formulaire.
+ */
+function seedDefinition(metricId: string, definition: MetricDefinition | undefined, defaultScope: string): DefinitionDraft {
+  if (definition) {
+    const { version: _version, ...rest } = definition;
+    return rest;
+  }
+  return { metricId, unit: "", numeratorPopulation: "", denominatorPopulation: "", scope: defaultScope };
 }
 
 function FicheBlock({ label, text }: { label: string; text: string }) {

@@ -1,4 +1,4 @@
-import type { AbsentCause, AcvBand, ContractTerm, Mandate, RepairScale, SystemCause, ValueStatus } from "@/lib/audit/schema";
+import type { AbsentCause, AcvBand, ContractTerm, Mandate, MetricDefinition, RepairScale, SystemCause, ValueStatus } from "@/lib/audit/schema";
 import type { AuditProfileModel } from "@/lib/audit/profiles";
 
 /**
@@ -95,3 +95,24 @@ export const REPAIR_SCALE_LABELS: Record<RepairScale, string> = {
   sprint: "Un sprint",
   quarter: "Un trimestre",
 };
+
+/**
+ * Les champs d'une `MetricDefinition`. Les quatre premiers sont requis par le
+ * validateur (`REQUIRED_DEFINITION_FIELDS`) ; les suivants sont les axes qui
+ * font qu'un même chiffre veut dire deux choses.
+ */
+export const DEFINITION_FIELD_LABELS = {
+  unit: "Unité",
+  numeratorPopulation: "Population au numérateur",
+  denominatorPopulation: "Population au dénominateur",
+  scope: "Périmètre",
+  grossOrNet: "Brut ou net",
+  cohortOrSnapshot: "Cohorte ou photo",
+  countingRule: "Règle de comptage",
+  attributionModel: "Modèle d'attribution",
+  attributionWindow: "Fenêtre d'attribution",
+  costsIncluded: "Coûts inclus",
+  costsExcluded: "Coûts exclus",
+  horizon: "Horizon",
+  toolDefault: "C'est le réglage par défaut de l'outil, que personne n'a choisi",
+} as const satisfies Record<keyof Omit<MetricDefinition, "id" | "version" | "metricId">, string>;
