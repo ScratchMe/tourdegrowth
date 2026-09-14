@@ -7,6 +7,7 @@ import type {
   AcvBand,
   Confidence,
   ContractTerm,
+  Gap,
   Mandate,
   CriterionKind,
   MandateLevel,
@@ -246,4 +247,17 @@ export const AUDIT_PILLAR_LABELS: Record<AuditPillar, string> = {
   referral: "Referral",
   revenue: "Revenue",
   transverse: "Transverse",
+};
+
+/**
+ * Les quatre écarts du cadre de restitution (document de l'expert §6). Les
+ * libellés disent ce qui manque, pas un jugement : « la preuve manque » est
+ * une phrase qu'on peut poser sur la table d'une réunion, « les données sont
+ * mauvaises » ne l'est pas.
+ */
+export const GAP_LABELS: Record<Gap, string> = {
+  capability: "Capacité — l'équipe ne sait pas encore faire",
+  evidence: "Preuve — le chiffre manque ou ne tient pas",
+  decision: "Décision — le chiffre existe, rien ne s'en sert",
+  learning: "Apprentissage — on a décidé sans jamais mesurer le résultat",
 };

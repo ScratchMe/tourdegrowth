@@ -10,11 +10,15 @@ import {
   catalogRow,
   newMission,
   newPass,
+  type Brief,
   type EmbeddedCatalog,
   type Entry,
+  type Finding,
   type Mission,
   type Pass,
 } from "@/lib/audit/schema";
+import { draftOf, emptyDraft, type FindingDraft } from "@/lib/audit/finding-draft";
+import { canMarkHeadline, setPriority } from "@/lib/audit/findings";
 import { tourScore } from "@/lib/audit/quadrants";
 import type { TourQuestionView } from "@/lib/audit/server";
 import { buildTourEntry, TOUR_METRIC_ID } from "@/lib/audit/tour-entry";
@@ -24,6 +28,8 @@ import { ImportPanel, type PendingImport } from "./ImportPanel";
 import { AUDIT_PILLAR_LABELS } from "./labels";
 import { MissionBar } from "./MissionBar";
 import { MissionList } from "./MissionList";
+import { FindingEditor } from "./FindingEditor";
+import { FindingsView } from "./FindingsView";
 import { RestitutionView } from "./RestitutionView";
 import { RowEditor } from "./RowEditor";
 import { RowList } from "./RowList";
@@ -57,7 +63,9 @@ type View =
   | { kind: "purge"; id: string }
   | { kind: "row"; id: string; metricId: string }
   | { kind: "tour"; id: string }
-  | { kind: "restitution"; id: string };
+  | { kind: "restitution"; id: string }
+  | { kind: "findings"; id: string }
+  | { kind: "finding"; id: string; draft: FindingDraft };
 
 export function AuditWorkbench({
   catalog,
@@ -241,6 +249,30 @@ export function AuditWorkbench({
     return persist(next, missions.map((m) => (m.id === next.id ? next : m)));
   }
 
+  /** Écrit la dernière passe modifiée par `change`, et persiste. */
+  function savePass(mission: Mission, change: (pass: Pass) => Pass): boolean {
+    const last = mission.passes[mission.passes.length - 1];
+    if (!last) return false;
+    const next: Mission = { ...mission, passes: [...mission.passes.slice(0, -1), change(last)] };
+    return persist(next, missions.map((m) => (m.id === next.id ? next : m)));
+  }
+
+  /**
+   * Enregistre un constat — remplace celui de même id, ou l'ajoute.
+   *
+   * Un constat neuf arrive avec `headline: false` et `priority: false` : les
+   * deux marques se posent depuis la LISTE, où l'on voit combien il y en a
+   * déjà. Les offrir dans le formulaire ferait marquer sans voir le plafond.
+   */
+  function saveFinding(mission: Mission, finding: Finding): boolean {
+    return savePass(mission, (pass) => ({
+      ...pass,
+      findings: pass.findings.some((f) => f.id === finding.id)
+        ? pass.findings.map((f) => (f.id === finding.id ? finding : f))
+        : [...pass.findings, finding],
+    }));
+  }
+
   // Avant montage, rien : le HTML du serveur et le premier rendu client sont
   // identiques, et la liste apparaît juste après (motif de `/quiz`).
   if (!loaded) return null;
@@ -331,6 +363,9 @@ export function AuditWorkbench({
             <Button compact variant="secondary" onClick={() => goTo({ kind: "restitution", id: current.id })} data-testid="open-restitution">
               Restitution
             </Button>
+            <Button compact variant="secondary" onClick={() => goTo({ kind: "findings", id: current.id })} data-testid="open-findings">
+              Constats ({currentPass?.findings.length ?? 0})
+            </Button>
           </Card>
           {currentPass ? (
             <RowList mission={current} pass={currentPass} today={today} onOpenRow={(metricId) => goTo({ kind: "row", id: current.id, metricId })} />
@@ -384,6 +419,53 @@ export function AuditWorkbench({
           onOpenRow={(metricId) => goTo({ kind: "row", id: current.id, metricId })}
           onOpenTour={() => goTo({ kind: "tour", id: current.id })}
           onClose={() => goTo({ kind: "mission", id: current.id })}
+        />
+      ) : null}
+
+      {view.kind === "findings" && current && currentPass ? (
+        <FindingsView
+          mission={current}
+          pass={currentPass}
+          onNewFinding={(metricIds) => goTo({ kind: "finding", id: current.id, draft: emptyDraft(crypto.randomUUID(), metricIds) })}
+          onOpenFinding={(id) => {
+            const finding = currentPass.findings.find((f) => f.id === id);
+            if (finding) goTo({ kind: "finding", id: current.id, draft: draftOf(finding) });
+          }}
+          onToggleHeadline={(id) =>
+            savePass(current, (pass) => ({
+              ...pass,
+              findings: pass.findings.map((f) => {
+                if (f.id !== id) return f;
+                // Retirer de la une retire aussi la priorité : une action
+                // prioritaire qui ne serait pas à la une n'a pas de sens, et
+                // le validateur la compterait quand même comme priorité.
+                if (f.headline) return { ...f, headline: false, priority: false };
+                // Le plafond est déjà tenu par le bouton désactivé, qui est
+                // la seule couche qu'un test d'écran peut atteindre (un
+                // bouton désactivé ne dispatche pas). Cette garde-ci couvre
+                // le chemin non-UI : un import, un fichier écrit à la main,
+                // ou un futur raccourci clavier. Elle est redondante par
+                // construction, et c'est voulu — le validateur refuserait un
+                // neuvième à l'export, et une erreur découverte là est une
+                // heure de travail perdue.
+                return canMarkHeadline(pass.findings, id) ? { ...f, headline: true } : f;
+              }),
+            }))
+          }
+          onSetPriority={(id) => savePass(current, (pass) => ({ ...pass, findings: setPriority(pass.findings, id) }))}
+          onBriefChange={(brief: Brief) => savePass(current, (pass) => ({ ...pass, brief }))}
+          onClose={() => goTo({ kind: "mission", id: current.id })}
+        />
+      ) : null}
+
+      {view.kind === "finding" && current ? (
+        <FindingEditor
+          draft={view.draft}
+          rowNames={new Map(current.catalog.rows.map((row) => [row.id, row.name]))}
+          onSave={(finding) => {
+            if (saveFinding(current, finding)) setView({ kind: "findings", id: current.id });
+          }}
+          onClose={() => goTo({ kind: "findings", id: current.id })}
         />
       ) : null}
 

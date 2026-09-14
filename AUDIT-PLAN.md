@@ -366,6 +366,10 @@ compteurs par palier et la vue restitution.
   rempli par l'auditeur, le score à 15/15 avec son détail par pilier, la
   ligne `m19` produite avec sa définition, et la vue restitution groupée par
   étape AARRR avec les angles morts en tête. Détail et écarts au §1.4.
+- **1.5 — les constats et le bloc de tête** (livré). La liste des lignes
+  promouvables, le formulaire 5C + Decision Ledger + action convenue, les
+  bascules « à la une » (plafonnée) et « action prioritaire » (exclusive), et
+  le bloc de tête avec son budget de mots. Détail et écarts au §1.5.
 
 - **Livre — la vue collecte** (la vue par défaut d'une mission ouverte,
   grille §8) : les lignes applicables **triées par palier décroissant**
@@ -467,7 +471,7 @@ compteurs par palier et la vue restitution.
     départage à égalité suit l'ordre canonique AARRR et qu'appliqué à un Tour
     partiel il désignerait une étape par un artefact d'ordre.
 
-#### 1.5 — Les constats et le bloc de tête
+#### 1.5 — Les constats et le bloc de tête (livré)
 
 - **Livre** : l'écran des constats — la liste des lignes **promouvables**
   (`isPromotable` : critère + décision en jeu), « nouveau constat » depuis
@@ -488,6 +492,26 @@ compteurs par palier et la vue restitution.
   et son dépassement.
 - **Fini quand** : la mission AB Tasty a ses constats et son bloc de tête
   dans le fichier.
+- **Écarts assumés au moment de livrer** :
+  - **Trois champs seulement bloquent** (`missingFindingFields`) : les
+    valeurs référencées, l'écart et la cause système. Le reste du 5C et le
+    Ledger partent en chaînes vides — le fichier dit ce qui reste à faire
+    plutôt que d'interdire de l'enregistrer, comme partout ailleurs ici.
+    L'écart et la cause bloquent parce que ce sont des vocabulaires FERMÉS :
+    il n'existe pas de « vide » valide, et les défauter écrirait à la place
+    de l'auditeur une phrase qui s'imprimera.
+  - **Les marques se posent depuis la LISTE, pas depuis le formulaire** : on
+    ne met une chose à la une qu'en voyant combien il y en a déjà.
+  - **Retirer de la une retire aussi la priorité.** Une action prioritaire
+    qui ne serait pas à la une n'a pas de sens, et le validateur la
+    compterait quand même comme priorité.
+  - **Le budget du bloc de tête porte sur le BLOC**, pas par champ (§4.1 du
+    readout) : le dépassement se calcule sur les trois mis bout à bout dans
+    l'ordre de lecture.
+  - **Le dénominateur des lignes renseignées exclut les entrées semées.**
+    `newPass` pose d'office un `not-applicable` par ligne hors profil ; les
+    compter ferait lire « 1 sur 15 renseignées » à quelqu'un qui n'en a
+    rempli qu'une. Défaut vu à la capture, pas à la relecture.
 
 #### 1.6 — Recette de bout en bout, canari, documentation
 

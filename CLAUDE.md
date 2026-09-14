@@ -3296,6 +3296,81 @@ affiché sur la ligne restait juste (« Angle mort ») pendant que la liste de
 tête était vide — les deux chemins sont bien indépendants, et la spec affirme
 les deux.
 
+### Instrument d'audit, étape 1.5 : les constats et le bloc de tête (2026-09-14)
+
+Ce qui transforme 25 lignes renseignées en un document qu'on peut poser sur
+une table. `findings.ts` posait les règles depuis la phase 0 ; cet écran est
+le premier à les faire tenir.
+
+**Seules les lignes promouvables** — un repère ET une décision en jeu
+(`isPromotable`). Sans repère, un nombre reste un nombre et se range en
+annexe ; sans décision en jeu, il est intéressant et ne fait rien bouger.
+L'écran montre les deux moitiés : ce qui est prêt, et combien de lignes n'y
+sont pas.
+
+**Trois champs seulement bloquent** (`missingFindingFields` : les valeurs
+référencées, l'écart, la cause système). Le reste du 5C et le Decision Ledger
+partent en chaînes vides — le fichier dit ce qui reste à faire plutôt que
+d'interdire de l'enregistrer, comme partout ailleurs ici. L'écart et la cause
+bloquent pour une raison précise : ce sont des **vocabulaires fermés**, donc
+il n'existe pas de « vide » valide, et en défauter un reviendrait à écrire à
+la place de l'auditeur une phrase qui s'imprimera dans un livrable (la règle
+du statut d'une ligne, 1.3a).
+
+**Trois choses ne sont jamais écrites**, chacune testée : `actual`,
+`learning` et `next` du Ledger (ils se remplissent à la passe suivante ; les
+poser vides en ferait des cases à remplir à la rédaction, l'inverse de leur
+usage) ; une action convenue vide (un objet vide promettrait un accord qui
+n'a pas eu lieu) ; et un nom de personne, puisque la cause système est une
+liste fermée — « personne n'en est propriétaire » est un constat sur
+l'organisation, « Marc ne l'a jamais fait » est un constat sur Marc.
+
+**La rareté est structurelle, et l'écran la montre au lieu de l'expliquer.**
+La bascule « à la une » se grise au plafond de 8 ; marquer une seconde action
+prioritaire démarque la première sous les yeux. Retirer de la une retire
+aussi la priorité — une action prioritaire qui ne serait pas à la une n'a pas
+de sens, et le validateur la compterait quand même.
+
+**Le budget du bloc de tête porte sur le BLOC**, pas sur chacun de ses trois
+champs : le §4.1 du readout donne 400 mots au bloc entier. Le dépassement se
+calcule donc sur les trois mis bout à bout dans l'ordre de lecture, et ce qui
+dépasse est **montré** comme ce qui basculera en annexe — jamais coupé. Un
+texte tronqué en silence dans un livrable est la pire des issues.
+
+**Ce que le test de non-vacuité a appris, et que je n'aurais pas deviné.**
+J'ai d'abord saboté la garde de plafond dans le *gestionnaire* : **les 7
+specs sont passées**. Le plafond vit à deux endroits, et un test d'écran ne
+peut atteindre que le premier — un bouton désactivé ne dispatche pas, donc la
+garde du gestionnaire est **inatteignable depuis l'UI**. Refait sur le rendu
+(bouton toujours actif) : exactement 1 spec tombe, la bonne. Deux
+conséquences écrites plutôt que sous-entendues : la spec affirme maintenant
+aussi le **résultat** (le compteur reste à 8 après un clic forcé), pour
+qu'elle attrape encore un état hors plafond si quelqu'un retire un jour le
+`disabled` ; et le commentaire du gestionnaire dit que sa garde est
+redondante **par construction** et couvre le chemin non-UI (un import, un
+fichier écrit à la main). Troisième fois que « un contrôle de non-vacuité qui
+passe est lui-même un signal » rend quelque chose.
+
+**Défaut vu à la capture, invisible à la relecture** : « 1 sur 15 lignes
+renseignées » comptait les entrées que `newPass` sème d'office
+(`not-applicable` pour chaque ligne hors profil). Quelqu'un qui en a rempli
+une seule lisait qu'il en avait quinze. Le dénominateur ne compte plus que
+les lignes applicables, et une spec l'épingle. Les libellés du 5C portaient
+aussi leur explication (« Critère — ce à quoi on compare, et d'où il
+vient ») ; passés en libellé court + indice, la convention des autres champs
+de l'outil.
+
+**Vérifié en réel** : lint, tsc, **662 tests unitaires** (+16), couverture
+au-dessus des seuils, `next build`, **249 specs Playwright** (+7, dont la
+passe axe sur les deux écrans). Captures relues en 1280 et 390 px,
+`scrollWidth === clientWidth` sur les deux écrans aux deux largeurs.
+
+**Non-vacuité, trois sabotages** : la garde de plafond côté gestionnaire → 0
+spec (voir plus haut, c'est le résultat qui compte) ; le même plafond côté
+rendu → 1 spec, la bonne ; l'exclusivité de la priorité remplacée par un
+simple marquage → 1 spec, la bonne aussi. Aucun sabotage n'en a fait tomber
+deux.
+
 ## État du projet au 2026-09-14 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -3318,7 +3393,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **L'instrument d'audit growth a son schéma** (2026-09-13, `AUDIT.md`) : un outil personnel pour les diagnostics qu'Antoine mène en entreprise, navigateur seulement, jamais Firestore — `src/lib/audit/` + `src/content/audit-catalog.ts`, sans aucune route ni UI encore. Phase 1 (la saisie sous `/admin/audit`) est le prochain chantier, découpée en six PR dans **`AUDIT-PLAN.md`** (2026-09-13) ; phase 3 (tout ce qui ressemble à un produit) reste fermée tant que les entretiens ne sont pas faits et le contrat de travail pas vérifié.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **646 tests unitaires**, **242 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
+**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **662 tests unitaires**, **249 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 
@@ -3338,7 +3413,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Les e2e de composition ne passent que par la branche échantillon | `/r/sample` utilise `getSampleNextMove` et `SAMPLE_RESULT.pillars`, pas le vrai chemin. La garde statique est donc seule à protéger le payload | Un id de fixture derrière une variable d'environnement fermée par défaut. À décider : c'est une porte de test sur la route publique la plus sensible. |
 | Flake `locale-routing.spec.ts:75` | Deux échecs le 2026-09-10 et un le 2026-09-14, toujours en suite complète parallèle, jamais isolée ni à la reprise | La prochaine occurrence en CI laisse une trace (`retries: 1` + `trace: on-first-retry`, rapport téléversé). Ne pas durcir la spec en attendant le cookie : ça masquerait une éventuelle course produit. |
 | TypeScript 7 et ESLint 10 | Tous deux bloqués par des paquets embarqués dans `eslint-config-next` (`typescript-eslint` refuse TS ≥ 6.1 ; `eslint-plugin-react` plante sur ESLint 10). Dependabot les ignore en majeure depuis le 2026-09-08 | Quand `eslint-config-next` suivra. Re-tester en installant, pas en lisant les plages de peer : c'est l'essai qui a montré qu'ESLint 10 plante. |
-| Instrument d'audit : phase 1 (saisie) | Feu vert d'Antoine sur `AUDIT-PLAN.md` le 2026-09-14. **1.1 à 1.4 livrées** — `/admin/audit` crée une mission, la trie ligne par ligne, marque les absences, pose une définition versionnée, sa série d'observations, son repère, sa décision en jeu et son pilotage, groupe la collecte par interlocuteur, exporte et réimporte ; le Tour de l'auditeur produit `m19` à 15/15 et la vue restitution croise méthode × réalité avec les angles morts en tête. Reste 1.5 (les constats) et 1.6 (la recette) | Rien : la suite s'enchaîne dans l'ordre des dépendances. |
+| Instrument d'audit : phase 1 (saisie) | Feu vert d'Antoine sur `AUDIT-PLAN.md` le 2026-09-14. **1.1 à 1.5 livrées** — `/admin/audit` crée une mission, la trie ligne par ligne, marque les absences, pose une définition versionnée, sa série d'observations, son repère, sa décision en jeu et son pilotage, groupe la collecte par interlocuteur, exporte et réimporte ; le Tour de l'auditeur produit `m19` à 15/15, la vue restitution croise méthode × réalité avec les angles morts en tête, et les constats se rédigent (5C, Decision Ledger, plafond des « à la une », action prioritaire exclusive, bloc de tête avec son budget de mots). Reste 1.6 (la recette de bout en bout) | Rien : la suite s'enchaîne dans l'ordre des dépendances. |
 | Catalogue de l'instrument d'audit à relire | 39 lignes de texte qui s'imprimeront dans les livrables d'Antoine, sous son nom | Un bon à tirer, même circuit que les précédents. |
 | Vercel Functions Storage | **Réglé** : la politique de rétention posée par Antoine le 2026-09-14 l'a fait passer de 9,24 Go à 397 Mo, et un déploiement pèse 45,5 Mo de fonctions depuis le 2026-09-13 | Rien. |
 | Vercel Fluid Active CPU (36 min / 4 h par mois) | Les deux postes qui dominaient le coût par visite sont corrigés le 2026-09-14 : six préchargements dynamiques par vue de la homepage, et l'image de partage rendue à chaque vue de résultat — confirmé en production, `MISS` puis `HIT` sur l'adresse versionnée. La région des fonctions est passée à `cdg1` le même jour (vérifié : `x-vercel-id: iad1::cdg1::…`) | Relire le compteur dans Vercel une semaine après. |
