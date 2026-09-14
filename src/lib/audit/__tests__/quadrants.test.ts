@@ -9,17 +9,17 @@ const row = (id: string) => AUDIT_CATALOG.find((r) => r.id === id)!;
 
 describe("the method axis reads the Tour answer the auditor recorded", () => {
   it("maps the answer index to its points, and nothing without an answer", () => {
-    expect(practicePoints("acq-3", { "acq-3": 0 })).toBe(20);
-    expect(practicePoints("acq-3", { "acq-3": 1 })).toBe(7);
-    expect(practicePoints("acq-3", { "acq-3": 2 })).toBe(0);
-    expect(practicePoints("acq-3", {})).toBeNull();
-    expect(practicePoints("nope", { nope: 0 } as Partial<Answers>)).toBeNull();
+    expect(practicePoints("acq-3", { "acq-3": 0 }, QUESTIONS)).toBe(20);
+    expect(practicePoints("acq-3", { "acq-3": 1 }, QUESTIONS)).toBe(7);
+    expect(practicePoints("acq-3", { "acq-3": 2 }, QUESTIONS)).toBe(0);
+    expect(practicePoints("acq-3", {}, QUESTIONS)).toBeNull();
+    expect(practicePoints("nope", { nope: 0 } as Partial<Answers>, QUESTIONS)).toBeNull();
   });
 
   it("only a 20-point answer declares « we measure this »", () => {
-    expect(declaresMeasured("acq-3", { "acq-3": 0 })).toBe(true);
-    expect(declaresMeasured("acq-3", { "acq-3": 1 })).toBe(false);
-    expect(declaresMeasured(undefined, { "acq-3": 0 })).toBe(false);
+    expect(declaresMeasured("acq-3", { "acq-3": 0 }, QUESTIONS)).toBe(true);
+    expect(declaresMeasured("acq-3", { "acq-3": 1 }, QUESTIONS)).toBe(false);
+    expect(declaresMeasured(undefined, { "acq-3": 0 }, QUESTIONS)).toBe(false);
   });
 });
 
@@ -59,37 +59,37 @@ describe("methodVsReality — every quadrant is reachable, and blind-spot needs 
   it("reaches all eight states", () => {
     const seen = new Map<Quadrant, boolean>();
     const mark = (q: Quadrant) => seen.set(q, true);
-    mark(methodVsReality(m12, measured(0.4, 0.3), {}));
-    mark(methodVsReality(m12, measured(0.2, 0.3), {}));
-    mark(methodVsReality(m12, measured(0.2), {}));
-    mark(methodVsReality(m12, entry("m12", "absent"), { "act-2": 0 }));
-    mark(methodVsReality(m12, entry("m12", "absent"), { "act-2": 1 }));
-    mark(methodVsReality(m12, entry("m12", "not-accessible"), { "act-2": 0 }));
-    mark(methodVsReality(m12, entry("m12", "not-applicable"), {}));
-    mark(methodVsReality(m12, undefined, {}));
+    mark(methodVsReality(m12, measured(0.4, 0.3), {}, QUESTIONS));
+    mark(methodVsReality(m12, measured(0.2, 0.3), {}, QUESTIONS));
+    mark(methodVsReality(m12, measured(0.2), {}, QUESTIONS));
+    mark(methodVsReality(m12, entry("m12", "absent"), { "act-2": 0 }, QUESTIONS));
+    mark(methodVsReality(m12, entry("m12", "absent"), { "act-2": 1 }, QUESTIONS));
+    mark(methodVsReality(m12, entry("m12", "not-accessible"), { "act-2": 0 }, QUESTIONS));
+    mark(methodVsReality(m12, entry("m12", "not-applicable"), {}, QUESTIONS));
+    mark(methodVsReality(m12, undefined, {}, QUESTIONS));
     expect([...seen.keys()].sort()).toEqual([...QUADRANTS].sort());
   });
 
   it("a blind spot is « we measure this » (20 points) with nothing to show — a 7 or a missing answer is a known gap", () => {
-    expect(methodVsReality(m12, entry("m12", "absent"), { "act-2": 0 })).toBe("blind-spot");
-    expect(methodVsReality(m12, entry("m12", "contested"), { "act-2": 0 })).toBe("blind-spot");
-    expect(methodVsReality(m12, entry("m12", "absent"), { "act-2": 1 })).toBe("known-gap");
-    expect(methodVsReality(m12, entry("m12", "absent"), {})).toBe("known-gap");
+    expect(methodVsReality(m12, entry("m12", "absent"), { "act-2": 0 }, QUESTIONS)).toBe("blind-spot");
+    expect(methodVsReality(m12, entry("m12", "contested"), { "act-2": 0 }, QUESTIONS)).toBe("blind-spot");
+    expect(methodVsReality(m12, entry("m12", "absent"), { "act-2": 1 }, QUESTIONS)).toBe("known-gap");
+    expect(methodVsReality(m12, entry("m12", "absent"), {}, QUESTIONS)).toBe("known-gap");
   });
 
   it("a row with no Tour question can never be a blind spot", () => {
     const m13 = row("m13");
     expect(m13.tourQuestionId).toBeUndefined();
-    expect(methodVsReality(m13, entry("m13", "absent"), { "act-2": 0 })).toBe("known-gap");
+    expect(methodVsReality(m13, entry("m13", "absent"), { "act-2": 0 }, QUESTIONS)).toBe("known-gap");
   });
 
   it("not accessible is about my access, not their system", () => {
-    expect(methodVsReality(m12, entry("m12", "not-accessible"), { "act-2": 0 })).toBe("unverifiable");
+    expect(methodVsReality(m12, entry("m12", "not-accessible"), { "act-2": 0 }, QUESTIONS)).toBe("unverifiable");
   });
 
   it("reported without a definition is documented for the quadrant, with the benchmark rule applied", () => {
     const e = entry("m12", "reported-without-definition", { observations: [observation(0.4)], criterion: { kind: "internal-trend", value: 0.3 } });
-    expect(methodVsReality(m12, e, {})).toBe("measured-good");
+    expect(methodVsReality(m12, e, {}, QUESTIONS)).toBe("measured-good");
   });
 });
 
@@ -97,9 +97,9 @@ describe("tourScore — only once the auditor has all 15 answers", () => {
   it("is null while partial, then the deterministic score", () => {
     const m = mission();
     const partial = { ...pass(m), tourAnswers: { "acq-1": 0 } as Partial<Answers> };
-    expect(tourScore(partial)).toBeNull();
+    expect(tourScore(partial, QUESTIONS)).toBeNull();
     const full = Object.fromEntries(QUESTIONS.map((q) => [q.id, 1 as const])) as Answers;
-    const result = tourScore({ ...pass(m), tourAnswers: full });
+    const result = tourScore({ ...pass(m), tourAnswers: full }, QUESTIONS);
     expect(result?.total).toBe(35); // 5 pillars × round(21/3) = 7
   });
 });

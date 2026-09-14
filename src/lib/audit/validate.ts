@@ -1,4 +1,4 @@
-import { AUDIT_PROFILE_MODELS } from "@/content/audit-catalog";
+import { AUDIT_PROFILE_MODELS } from "./profiles";
 import { LOCALES } from "@/lib/i18n/locale";
 import {
   ABSENT_CAUSES,

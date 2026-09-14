@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { AUDIT_CATALOG, AUDIT_CATALOG_VERSION } from "@/content/audit-catalog";
+import { snapshotCatalog } from "../server";
 import {
   DEFAULT_ABSENT_CAUSE,
   applicableRows,
@@ -15,14 +16,14 @@ import { definition, entry, header, mission, observation } from "./fixtures";
 
 describe("newMission — the catalog is embedded, not referenced", () => {
   it("copies the current catalog with its version into the mission", () => {
-    const m = newMission({ id: "m", createdAt: "2026-09-13T00:00:00.000Z", header: header() });
+    const m = newMission({ id: "m", createdAt: "2026-09-13T00:00:00.000Z", header: header(), catalog: snapshotCatalog() });
     expect(m.catalog.version).toBe(AUDIT_CATALOG_VERSION);
     expect(m.catalog.rows).toHaveLength(AUDIT_CATALOG.length);
     expect(m.catalog.rows.map((r) => r.id)).toEqual(AUDIT_CATALOG.map((r) => r.id));
   });
 
   it("mutating the embedded copy never touches the live catalog", () => {
-    const m = newMission({ id: "m", createdAt: "2026-09-13T00:00:00.000Z", header: header() });
+    const m = newMission({ id: "m", createdAt: "2026-09-13T00:00:00.000Z", header: header(), catalog: snapshotCatalog() });
     m.catalog.rows[0]!.name = "changed";
     (m.catalog.rows[0]!.appliesTo as string[]).push("b2c");
     expect(AUDIT_CATALOG[0]!.name).not.toBe("changed");
@@ -31,7 +32,7 @@ describe("newMission — the catalog is embedded, not referenced", () => {
   });
 
   it("starts with no passes and no definitions", () => {
-    const m = newMission({ id: "m", createdAt: "2026-09-13T00:00:00.000Z", header: header() });
+    const m = newMission({ id: "m", createdAt: "2026-09-13T00:00:00.000Z", header: header(), catalog: snapshotCatalog() });
     expect(m.passes).toEqual([]);
     expect(m.definitions).toEqual({});
   });
@@ -87,18 +88,18 @@ describe("normalizeEntry — the one default, and it is the non-guess", () => {
 
 describe("registerDefinition — immutable, addressed by version", () => {
   it("adds a definition under `id@version`", () => {
-    const m = registerDefinition(newMission({ id: "m", createdAt: "x", header: header() }), definition("m01", "mrr", 1));
+    const m = registerDefinition(newMission({ id: "m", createdAt: "x", header: header(), catalog: snapshotCatalog() }), definition("m01", "mrr", 1));
     expect(Object.keys(m.definitions)).toEqual(["mrr@1"]);
   });
 
   it("refuses to overwrite an existing version with different content", () => {
-    const m = registerDefinition(newMission({ id: "m", createdAt: "x", header: header() }), definition("m01", "mrr", 1));
+    const m = registerDefinition(newMission({ id: "m", createdAt: "x", header: header(), catalog: snapshotCatalog() }), definition("m01", "mrr", 1));
     expect(() => registerDefinition(m, { ...definition("m01", "mrr", 1), unit: "logo" })).toThrow(/bump the version/);
     expect(() => registerDefinition(m, { ...definition("m01", "mrr", 2), unit: "logo" })).not.toThrow();
   });
 
   it("re-registering identical content is a no-op", () => {
-    const m = registerDefinition(newMission({ id: "m", createdAt: "x", header: header() }), definition("m01", "mrr", 1));
+    const m = registerDefinition(newMission({ id: "m", createdAt: "x", header: header(), catalog: snapshotCatalog() }), definition("m01", "mrr", 1));
     expect(registerDefinition(m, definition("m01", "mrr", 1))).toBe(m);
   });
 
