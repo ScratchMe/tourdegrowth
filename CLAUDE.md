@@ -3719,6 +3719,32 @@ repasse isolé (21/21) — **quatrième occurrence**, toujours jamais en isolati
 **Copie neuve, donc `TODO: à relire`** — les trois entrées ferment le lot des
 dix termes à soumettre au bon à tirer nº5.
 
+### « ACV », développé là où il se lit (2026-09-14, signalé par Antoine)
+
+Question d'Antoine sur l'écran de création de mission de `/admin/audit` : « ACV,
+c'est bien pour Annual Contract Value ? Tu aurais pu le préciser, l'acronyme
+peut correspondre à d'autres définitions. » Il a raison — ACV désigne aussi la
+valeur à neuf en assurance, et rien dans l'outil ne disait laquelle.
+
+**Balayage avant correctif, plutôt qu'un patch d'une ligne** : la liste de tous
+les libellés de `Field` de la route (49 au total) confirme que « Tranche d'ACV »
+est **le seul** libellé réduit à un acronyme — les autres sont en toutes lettres
+ou portent leur symbole entre parenthèses (« Population (N) », « Taille de
+l'échantillon (n) »). C'était donc bien un cas isolé, et le savoir vaut mieux
+que le supposer.
+
+Développé à trois endroits, chacun pour un lecteur différent : l'indice du champ
+(pour Antoine à la saisie), un docblock sur `ACV_BANDS` (pour la prochaine
+session), et la définition de la ligne `m06` du catalogue, seule autre occurrence
+— elle écrivait « ARPA / ACV » sans développer ni l'un ni l'autre. L'indice dit
+aussi **dans quelle devise** : les bornes n'en portent aucune, et la devise de la
+mission se déclare deux champs plus bas.
+
+**Vérifié à l'écran, pas dans un module** : la spec lit l'indice réellement rendu
+à côté du sélecteur, puisqu'une expansion n'a de valeur que si elle atteint
+l'écran. Non-vacuité mesurée — indice retiré et reconstruit, **exactement cette
+spec tombe**, les 11 autres du fichier passent.
+
 ## État du projet au 2026-09-14 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
