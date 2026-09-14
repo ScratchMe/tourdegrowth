@@ -232,6 +232,120 @@ test.describe("the audit instrument's rows", () => {
     await expect(page.getByTestId("notice")).toHaveCount(0);
   });
 
+  /**
+   * The series, AUDIT.md §3 decision 1: a value is a series, never a scalar.
+   * A NRR steady at 105% and a NRR down from 120% are two different
+   * companies, so the screen adds observations rather than replacing "the"
+   * value.
+   */
+  test("a measured row says a value is still missing until one is entered", async ({ page }) => {
+    await openMission(page);
+    await page.getByTestId("open-row-m01").click();
+    await page.locator("#status").selectOption("measured");
+    await fillDefinition(page);
+
+    await expect(page.getByTestId("observation-gaps")).toContainText("au moins une observation qui porte une valeur");
+    await page.getByTestId("add-observation").click();
+    // An observation with no value yet is legitimate — "asked for, not
+    // received" — so adding one does not silence the warning.
+    await expect(page.getByTestId("observation-gaps")).toBeVisible();
+    await page.locator("#obs-0-value").fill("1200000");
+    await expect(page.getByTestId("observation-gaps")).toHaveCount(0);
+  });
+
+  test("contested keeps both figures: the screen asks for the second before the validator does", async ({ page }) => {
+    await openMission(page);
+    await page.getByTestId("open-row-m01").click();
+    await page.locator("#status").selectOption("contested");
+    await page.getByTestId("add-observation").click();
+    await expect(page.getByTestId("observation-gaps")).toContainText("il en faut une seconde");
+    await page.getByTestId("add-observation").click();
+    await expect(page.getByTestId("observation-gaps")).toHaveCount(0);
+    // Two observations, so each can now name the other as the one it
+    // contradicts — the link between them IS the finding.
+    await expect(page.locator("#obs-0-contradicts")).toBeVisible();
+  });
+
+  /**
+   * Confidence is DERIVED, never entered (`confidenceOf`). A "confidence:
+   * high" box filled in on a hunch is a field nobody can defend in a meeting.
+   * Asserted by moving the source kind and watching the label follow.
+   */
+  test("the confidence follows the source, and is never a field", async ({ page }) => {
+    await openMission(page);
+    await page.getByTestId("open-row-m01").click();
+    await page.locator("#status").selectOption("measured");
+    await fillDefinition(page);
+    await page.getByTestId("add-observation").click();
+
+    // Raw extract pulled by me + a complete definition — the best case.
+    await expect(page.getByTestId("confidence-0")).toHaveText("Confiance haute");
+    await page.locator("#obs-0-kind").selectOption("aggregated-report");
+    await expect(page.getByTestId("confidence-0")).toHaveText("Confiance moyenne");
+    // Heard in a meeting is low whatever else is true.
+    await page.locator("#obs-0-kind").selectOption("stated-orally");
+    await expect(page.getByTestId("confidence-0")).toHaveText("Confiance basse");
+    // And there is no way to set it: no control carries that name.
+    await expect(page.getByLabel(/Confiance/)).toHaveCount(0);
+  });
+
+  test("the exported file carries the observation, with the pull date distinct from the period end", async ({ page }) => {
+    await openMission(page);
+    await page.getByTestId("open-row-m01").click();
+    await page.locator("#status").selectOption("measured");
+    await fillDefinition(page);
+    await page.getByTestId("add-observation").click();
+    await page.locator("#obs-0-value").fill("1200000");
+    await page.locator("#obs-0-start").fill("2026-08-01");
+    await page.locator("#obs-0-end").fill("2026-08-31");
+    await page.locator("#obs-0-asof").fill("2026-09-05");
+    await page.locator("#obs-0-system").fill("Stripe");
+    await page.getByTestId("save-row").click();
+
+    const parsed = await exportedJson(page);
+    const entry = parsed.passes[0].entries.find((e: { metricId: string }) => e.metricId === "m01");
+    expect(entry.observations).toHaveLength(1);
+    expect(entry.observations[0]).toMatchObject({
+      value: 1200000,
+      periodStart: "2026-08-01",
+      periodEnd: "2026-08-31",
+      // The date the figure was pulled, deliberately its own field: an August
+      // month pulled on 2 September has not finished moving.
+      asOf: "2026-09-05",
+      sourceSystem: "Stripe",
+    });
+    expect(entry.observations[0].id).toBeTruthy();
+  });
+
+  /**
+   * A couple, a distribution and a composite are the same matrix reduced to
+   * one row (AUDIT-PLAN.md §3.3, decision 5). Nothing in the `Matrix` type
+   * stops a row from having fewer cells than there are columns, so the
+   * editor has to keep them in step — and that is what this checks.
+   */
+  test("the couple editor keeps cells in step with columns", async ({ page }) => {
+    await openMission(page);
+    await page.getByTestId("open-row-m03").click(); // NRR et GRR, toujours en couple
+    await page.locator("#status").selectOption("measured");
+    await fillDefinition(page);
+    await page.getByTestId("add-observation").click();
+
+    await page.locator("#obs-0-col-0").fill("NRR");
+    await page.locator("#obs-0-col-1").fill("GRR");
+    await page.locator("#obs-0-cell-0-0").fill("105");
+    await page.locator("#obs-0-cell-0-1").fill("92");
+    await page.getByTestId("add-column-obs-0").click();
+    await page.locator("#obs-0-col-2").fill("Churn");
+    await expect(page.locator("#obs-0-cell-0-2")).toBeVisible();
+    await page.getByTestId("save-row").click();
+
+    const parsed = await exportedJson(page);
+    const entry = parsed.passes[0].entries.find((e: { metricId: string }) => e.metricId === "m03");
+    expect(entry.observations[0].value.columns).toEqual(["NRR", "GRR", "Churn"]);
+    expect(entry.observations[0].value.rows).toHaveLength(1);
+    expect(entry.observations[0].value.rows[0].cells).toEqual([105, 92, null]);
+  });
+
   test("the exported file carries the entry, and the validator reads it back", async ({ page }) => {
     await openMission(page);
     await page.getByTestId("row-list").locator("> li").first().getByRole("button", { name: "Renseigner" }).click();

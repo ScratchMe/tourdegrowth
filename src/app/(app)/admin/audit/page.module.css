@@ -321,3 +321,69 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Une observation : une carte dans la série, pas une ligne de tableau. Un
+   tableau supposerait des colonnes fixes, alors que la valeur elle-même
+   change de forme d'une ligne du catalogue à l'autre (un nombre, un texte,
+   une matrice). */
+.observation {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  padding: var(--space-7);
+}
+
+.observationHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+}
+
+/* Trois champs par rangée quand la place le permet, empilés sinon. Le
+   `minmax(0, …)` évite qu'un `<select>` à long libellé pousse la rangée
+   au-delà de la carte. */
+.observationRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: var(--space-7);
+  align-items: start;
+}
+
+.matrix {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  padding: var(--space-7);
+  background: var(--surface-sunken);
+  border: var(--border-solid);
+  border-radius: var(--radius-card);
+}
+
+/* 132px et non 200 comme `.observationRow` : la colonne de saisie de
+   l'éditeur fait ~350px de large, et à 200 le couple tombe sur deux rangées —
+   or « NRR et GRR, toujours en couple » est précisément ce que la ligne du
+   catalogue demande de lire ensemble. Les cellules sont des nombres courts,
+   elles tiennent. Mesuré, pas jugé à l'œil. */
+.matrixColumns,
+.matrixCells {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(132px, 100%), 1fr));
+  gap: var(--space-6);
+  align-items: end;
+}
+
+/* Une ligne de matrice : son N d'abord, sur toute la largeur, puis ses
+   cellules dans leur propre grille. */
+.matrixRowBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.matrixColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}

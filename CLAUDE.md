@@ -3062,6 +3062,76 @@ suffixe de marque : un `<h1>` nomme la page, il ne répète pas le nom du site.
 les quatre URL du rapport plus `/deep-dive/sample` : un `h1` chacune, dans la
 langue du lecteur, avec le score pour la page de résultat.
 
+### Instrument d'audit 1.3b-ii : la série d'observations (2026-09-14)
+
+Second temps de 1.3b. Une valeur est une **série**, jamais un scalaire
+(AUDIT.md §3, décision 1) : un NRR stable à 105 % et un NRR qui descend de
+120 % sont deux entreprises. L'écran reflète ça — on ajoute des observations,
+on ne remplace pas « la » valeur.
+
+**Six formes de valeur, quatre éditeurs**, comme la décision 5 d'`AUDIT-PLAN.md`
+le prévoyait. `lib/audit/observation-fields.ts#valueEditorFor` : `scalar` → un
+nombre, `qualitative` → un texte, `matrix` → la matrice, et `couple` /
+`distribution` / `composite` → **la même matrice réduite à une ligne**. Un test
+compte les lignes du catalogue par éditeur et vérifie que les quatre servent —
+et que l'éditeur « ligne » est le plus employé des quatre, ce qui est
+exactement la raison de ne pas l'avoir écrit trois fois. `ObservationValue`
+accepte déjà `Matrix` : aucun changement de schéma.
+
+**`observationGaps` dit ce qui manque, et rien de plus.** Liste fermée, testée
+en faisant **tourner le validateur** plutôt qu'en redisant sa règle : une ligne
+mesurée sans observation valuée est refusée, un contesté à une seule
+observation aussi, et — le cas qu'on aurait pu croire symétrique — un contesté
+n'exige **pas** de valeur non nulle : deux observations en attente restent un
+désaccord documenté, et le validateur ne l'exige pas non plus.
+
+**Un défaut trouvé en capture, pas à la relecture.** Sur une ligne scalaire,
+l'écran disait bien « il manque une valeur » ; sur une ligne matrice, non.
+Cause : `blankObservation` posait une matrice vide comme valeur de départ, et
+une matrice de cellules vides n'est pas `null`, donc elle compte comme une
+valeur pour le validateur. La valeur part maintenant à `null` dans tous les
+cas, et la matrice affichée avant saisie est **locale** — elle n'est écrite
+qu'au premier changement.
+
+**Un second défaut, purement visuel, et lui aussi vu en capture.** La ligne de
+matrice mettait le N et les cellules dans la même grille ; la phrase d'aide du
+N le rend deux fois plus haut qu'une cellule, donc GRR passait à la rangée
+suivante et le couple ne se lisait plus côte à côte — ce qui est précisément ce
+que la ligne du catalogue (« NRR et GRR, toujours en couple ») demande. Le N a
+maintenant sa propre ligne pleine largeur : il décrit la ligne, il n'en est pas
+une valeur. Vérifié par **mesure** et non à l'œil : les deux cellules ont le
+même `y` en 1280 px, des `y` différents en 390 px, aucun débordement aux deux
+largeurs.
+
+**La confiance est dérivée et affichée, jamais saisie.** `confidenceOf` lit la
+sorte de source et la complétude de la définition. Sa signature a été
+**réduite** aux quatre champs qu'elle lit réellement (`Pick<MetricDefinition, …>`)
+plutôt qu'une `MetricDefinition` entière : l'écran veut la confiance pendant
+que la définition est encore un brouillon, et un brouillon n'a pas de numéro de
+version — exiger l'objet complet aurait obligé à en fabriquer un avec une
+version fausse, qui aurait fini par fuir. Tous les appelants existants
+compilent sans changement.
+
+**Trois pièges de saisie tenus par l'écran** : la date de tirage (`asOf`) est un
+champ distinct de la fin de période, avec la phrase qui dit pourquoi (un mois
+d'août tiré le 2 septembre n'a pas fini de bouger) ; le rôle du fournisseur est
+un **rôle**, jamais un nom ; et `contradicts` ne propose que les autres
+observations de la même ligne, parce que le lien entre deux chiffres qui
+divergent **est** le constat.
+
+**Aucune date n'est pré-remplie** sur une observation neuve : deviner un mois
+clos enregistrerait une période que personne n'a choisie, et c'est exactement
+le genre de défaut qui finit dans un livrable.
+
+**Vérifié en réel** : `tsc`, `eslint`, **605 tests unitaires** (+7), couverture
+au-dessus des seuils (lignes 90,8 %), `next build`, **226 specs Playwright**
+(+5). Captures relues en 1280 et 390 px, `scrollWidth === clientWidth` aux
+deux largeurs. Non-vacuité mesurée finement : `observationGaps` qui ne rend
+jamais rien → **deux** specs tombent ; confiance figée à « haute » → **une**,
+la bonne ; une colonne ajoutée qui ne touche pas les lignes → **une**, celle
+qui tient l'invariant qu'aucun type n'impose (autant de cellules que de
+colonnes).
+
 ## État du projet au 2026-09-14 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -3084,7 +3154,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **L'instrument d'audit growth a son schéma** (2026-09-13, `AUDIT.md`) : un outil personnel pour les diagnostics qu'Antoine mène en entreprise, navigateur seulement, jamais Firestore — `src/lib/audit/` + `src/content/audit-catalog.ts`, sans aucune route ni UI encore. Phase 1 (la saisie sous `/admin/audit`) est le prochain chantier, découpée en six PR dans **`AUDIT-PLAN.md`** (2026-09-13) ; phase 3 (tout ce qui ressemble à un produit) reste fermée tant que les entretiens ne sont pas faits et le contrat de travail pas vérifié.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **598 tests unitaires**, **221 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
+**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **605 tests unitaires**, **226 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 
@@ -3104,7 +3174,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Les e2e de composition ne passent que par la branche échantillon | `/r/sample` utilise `getSampleNextMove` et `SAMPLE_RESULT.pillars`, pas le vrai chemin. La garde statique est donc seule à protéger le payload | Un id de fixture derrière une variable d'environnement fermée par défaut. À décider : c'est une porte de test sur la route publique la plus sensible. |
 | Flake `locale-routing.spec.ts:75` | Deux échecs le 2026-09-10 et un le 2026-09-14, toujours en suite complète parallèle, jamais isolée ni à la reprise | La prochaine occurrence en CI laisse une trace (`retries: 1` + `trace: on-first-retry`, rapport téléversé). Ne pas durcir la spec en attendant le cookie : ça masquerait une éventuelle course produit. |
 | TypeScript 7 et ESLint 10 | Tous deux bloqués par des paquets embarqués dans `eslint-config-next` (`typescript-eslint` refuse TS ≥ 6.1 ; `eslint-plugin-react` plante sur ESLint 10). Dependabot les ignore en majeure depuis le 2026-09-08 | Quand `eslint-config-next` suivra. Re-tester en installant, pas en lisant les plages de peer : c'est l'essai qui a montré qu'ESLint 10 plante. |
-| Instrument d'audit : phase 1 (saisie) | Feu vert d'Antoine sur `AUDIT-PLAN.md` le 2026-09-14. **1.1, 1.2, 1.3a et 1.3b-i livrées** — `/admin/audit` crée une mission, la trie ligne par ligne, marque les absences, pose une définition versionnée, exporte et réimporte. Reste 1.3b-ii (observations), 1.3b-iii (critère, pilotage, vues) puis 1.4 à 1.6 | Rien : la suite s'enchaîne dans l'ordre des dépendances. |
+| Instrument d'audit : phase 1 (saisie) | Feu vert d'Antoine sur `AUDIT-PLAN.md` le 2026-09-14. **1.1, 1.2, 1.3a, 1.3b-i et 1.3b-ii livrées** — `/admin/audit` crée une mission, la trie ligne par ligne, marque les absences, pose une définition versionnée et sa série d'observations, exporte et réimporte. Reste 1.3b-iii (critère, pilotage, vues) puis 1.4 à 1.6 | Rien : la suite s'enchaîne dans l'ordre des dépendances. |
 | Catalogue de l'instrument d'audit à relire | 39 lignes de texte qui s'imprimeront dans les livrables d'Antoine, sous son nom | Un bon à tirer, même circuit que les précédents. |
 | Vercel Functions Storage | **Réglé** : la politique de rétention posée par Antoine le 2026-09-14 l'a fait passer de 9,24 Go à 397 Mo, et un déploiement pèse 45,5 Mo de fonctions depuis le 2026-09-13 | Rien. |
 | Vercel Fluid Active CPU (36 min / 4 h par mois) | Les deux postes qui dominaient le coût par visite sont corrigés le 2026-09-14 : six préchargements dynamiques par vue de la homepage, et l'image de partage rendue à chaque vue de résultat — confirmé en production, `MISS` puis `HIT` sur l'adresse versionnée. La région des fonctions est passée à `cdg1` le même jour (vérifié : `x-vercel-id: iad1::cdg1::…`) | Relire le compteur dans Vercel une semaine après. |

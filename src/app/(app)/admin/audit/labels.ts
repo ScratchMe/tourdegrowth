@@ -1,4 +1,18 @@
-import type { AbsentCause, AcvBand, ContractTerm, Mandate, MetricDefinition, RepairScale, SystemCause, ValueStatus } from "@/lib/audit/schema";
+import type { ObservationGap } from "@/lib/audit/observation-fields";
+import type {
+  AbsentCause,
+  AcvBand,
+  Confidence,
+  ContractTerm,
+  Mandate,
+  MetricDefinition,
+  ObtainedHow,
+  PeriodType,
+  RepairScale,
+  SourceKind,
+  SystemCause,
+  ValueStatus,
+} from "@/lib/audit/schema";
 import type { AuditProfileModel } from "@/lib/audit/profiles";
 
 /**
@@ -116,3 +130,50 @@ export const DEFINITION_FIELD_LABELS = {
   horizon: "Horizon",
   toolDefault: "C'est le réglage par défaut de l'outil, que personne n'a choisi",
 } as const satisfies Record<keyof Omit<MetricDefinition, "id" | "version" | "metricId">, string>;
+
+export const PERIOD_TYPE_LABELS: Record<PeriodType, string> = {
+  month: "Un mois",
+  quarter: "Un trimestre",
+  year: "Une année",
+  "rolling-12m": "12 mois glissants",
+  point: "Un instant (photo)",
+};
+
+/**
+ * Les sortes de source, DANS L'ORDRE du schéma — du plus fiable au moins
+ * fiable, et cet ordre est ce que `confidenceOf` lit. Les libellés disent
+ * qui a produit le chiffre, parce que c'est ça qui fait la fiabilité : un
+ * export tiré par quelqu'un d'autre peut être filtré sans qu'on le sache.
+ */
+export const SOURCE_KIND_LABELS: Record<SourceKind, string> = {
+  "raw-extract-self": "Extrait brut, tiré par moi",
+  "export-by-other": "Export fourni par quelqu'un d'autre",
+  "aggregated-report": "Rapport déjà agrégé",
+  "homemade-spreadsheet": "Tableur maison",
+  "stated-orally": "Dit à l'oral",
+  "interested-party": "Donné par une partie intéressée",
+};
+
+export const OBTAINED_HOW_LABELS: Record<ObtainedHow, string> = {
+  "self-service": "En libre-service",
+  "export-received": "Export reçu",
+  oral: "À l'oral",
+  "dashboard-capture": "Capture d'un tableau de bord",
+};
+
+/** Affichée, jamais saisie : une confiance notée au ressenti ne se défend pas en réunion. */
+export const CONFIDENCE_LABELS: Record<Confidence, string> = {
+  high: "Confiance haute",
+  medium: "Confiance moyenne",
+  low: "Confiance basse",
+};
+
+/**
+ * Ce qui manque encore à une série, dit à l'auditeur plutôt qu'au validateur.
+ * Liste fermée côté `observation-fields.ts` : l'écran choisit sa phrase, il
+ * n'invente pas de manque.
+ */
+export const OBSERVATION_GAP_TEXT: Record<ObservationGap, string> = {
+  "needs-value": "Il manque au moins une observation qui porte une valeur — une observation en attente ne suffit pas à dire « mesuré ».",
+  "needs-second": "Contesté garde les deux chiffres côte à côte : il en faut une seconde. Un seul chiffre n'est pas un désaccord.",
+};

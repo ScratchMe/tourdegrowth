@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
-import { Disclosure } from "@/components/core/Disclosure";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import { TextArea } from "@/components/core/TextArea";
 import type { AuditCatalogRow } from "@/content/audit-catalog";
 import type { DefinitionDraft } from "@/lib/audit/definitions";
 import { entryFieldGroups, selectableStatuses } from "@/lib/audit/entry-fields";
+import { valueEditorFor } from "@/lib/audit/observation-fields";
 import {
   ABSENT_CAUSES,
   DEFAULT_ABSENT_CAUSE,
@@ -24,6 +24,7 @@ import {
   type ValueStatus,
 } from "@/lib/audit/schema";
 import { DefinitionEditor } from "./DefinitionEditor";
+import { ObservationList } from "./ObservationList";
 import { Field } from "./_ui/Field";
 import { Select } from "./_ui/Select";
 import {
@@ -51,10 +52,9 @@ import styles from "./page.module.css";
  * statut laisserait saisir une donnée que l'export refuserait ensuite.
  *
  * Étape 1.3a : statut, absence (cause, coût de réparation, cause système) et
- * accès. Étape 1.3b, premier temps : la définition versionnée. La série
- * d'observations, le critère, la décision en jeu, l'exposition et le pilotage
- * suivent — l'écran le dit plutôt que de faire croire que la ligne est
- * complète.
+ * accès. Étape 1.3b : la définition versionnée, puis la série d'observations.
+ * Le critère, la décision en jeu, l'exposition et le pilotage suivent —
+ * l'écran le dit plutôt que de faire croire que la ligne est complète.
  */
 export function RowEditor({
   row,
@@ -200,16 +200,24 @@ export function RowEditor({
             </div>
           ) : null}
 
-          {groups.includes("value") ? (
+          {draft && groups.includes("value") ? (
             <div className={styles.fieldGroup} data-testid="value-fields">
-              <DefinitionEditor draft={definitionDraft} currentRef={draft?.definitionRef} onChange={setDefinitionDraft} />
-              <Disclosure summary="Observations">
-                <p className={styles.muted}>
-                  La série d&apos;observations — la valeur, sa période, sa source, la date à laquelle elle a été tirée — arrive au temps
-                  suivant de l&apos;étape 1.3b. Tant qu&apos;elle manque, l&apos;export signalera cette ligne comme incomplète : mieux vaut un
-                  fichier qui dit ce qui reste à faire qu&apos;un fichier qui a l&apos;air fini.
-                </p>
-              </Disclosure>
+              <DefinitionEditor draft={definitionDraft} currentRef={draft.definitionRef} onChange={setDefinitionDraft} />
+              {/*
+                Les observations ne sont PAS repliées : sur une ligne qui a une
+                valeur, elles sont le travail. Seuls les axes optionnels de la
+                définition le sont, parce qu'ils sont facultatifs.
+              */}
+              <MetaLabel size="xs" wide>
+                Observations
+              </MetaLabel>
+              <ObservationList
+                status={draft.status}
+                observations={draft.observations}
+                editor={valueEditorFor(row.valueShape)}
+                definition={definitionDraft}
+                onChange={(observations) => patch({ observations })}
+              />
             </div>
           ) : null}
 
