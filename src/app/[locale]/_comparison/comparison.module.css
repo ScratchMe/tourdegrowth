@@ -1,0 +1,89 @@
+/* Le tableau côte à côte, sans `<table>` — voir le commentaire du composant.
+   Chaque ligne est un intitulé puis deux blocs qui portent le nom du cadre. */
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.aspect {
+  font: var(--title-card);
+  font-size: 17px;
+  color: var(--text-body);
+  margin: 0;
+}
+
+.sides {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.side {
+  flex: 1;
+  padding: var(--space-6);
+  border-radius: var(--radius-panel);
+  border: var(--border-solid);
+  background: var(--surface-sunken);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sideBody {
+  font: var(--body-sm);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.verdict {
+  font: var(--body-md);
+  color: var(--text-body);
+  margin: 0;
+}
+
+.linkRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.pill {
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  color: var(--text-link);
+  text-decoration: none;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-button);
+  border: var(--border-solid);
+  background: var(--surface-sunken);
+}
+
+.pill:hover,
+.pill:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+@media (min-width: 761px) {
+  .sides {
+    flex-direction: row;
+  }
+}
+
+/* Même correctif que les pages « porte ouverte » et la page Confidentialité :
+   « AARRR ou North Star metric » à 62 px déborde d'un téléphone. Sélecteur
+   ÉLÉMENT + classe (0,1,1) plutôt qu'une seule classe : la règle à battre
+   vient d'un AUTRE module CSS, donc à égalité de spécificité le gagnant
+   dépendrait de l'ordre d'émission des feuilles (leçon nº2, R-21). */
+@media (max-width: 760px) {
+  h1.title {
+    font: var(--display-hero-mobile);
+  }
+}

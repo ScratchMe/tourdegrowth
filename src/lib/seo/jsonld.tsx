@@ -4,6 +4,7 @@ import { GLOSSARY, type GlossaryTermId } from "@/content/glossary";
 import { ANTOINE_LINKS, QUICK_CREDIT } from "@/content/antoine-credit";
 import { HOW_IT_WORKS } from "@/content/how-it-works";
 import { PRIVACY, TERMS } from "@/content/legal";
+import { COMPARISONS, type ComparisonSlug } from "@/content/comparisons";
 import { CHECKLIST, DIAGNOSTIC } from "@/content/open-door";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import type { Locale } from "@/lib/i18n/locale";
@@ -164,6 +165,7 @@ export const CRUMBS = {
   terms: (locale: Locale) => ({ name: tc(TERMS.title, locale), path: "/terms" }),
   checklist: (locale: Locale) => ({ name: tc(CHECKLIST.title, locale), path: "/growth-audit-checklist" }),
   diagnostic: (locale: Locale) => ({ name: tc(DIAGNOSTIC.title, locale), path: "/startup-growth-diagnostic" }),
+  comparison: (locale: Locale, slug: ComparisonSlug) => ({ name: tc(COMPARISONS[slug].title, locale), path: `/${slug}` }),
 };
 
 /**

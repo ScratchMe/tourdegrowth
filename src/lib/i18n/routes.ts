@@ -30,6 +30,13 @@ const LOCALIZED_ROOTS = [
   "metrics",
   "growth-audit-checklist",
   "startup-growth-diagnostic",
+  // GROWTH-PLAN.md vague 2.3 — le cluster « frameworks comparés ». Slugs
+  // plats et anglais dans les deux langues (R2-16) : ils portent la requête
+  // telle qu'elle se tape.
+  "aarrr-vs-north-star-metric",
+  "aarrr-vs-rarra",
+  "aarrr-vs-growth-loops",
+  "aarrr-vs-okr",
 ] as const;
 
 export function localePath(locale: Locale, path = "/"): string {

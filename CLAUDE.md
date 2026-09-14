@@ -3745,6 +3745,84 @@ mission se déclare deux champs plus bas.
 l'écran. Non-vacuité mesurée — indice retiré et reconstruit, **exactement cette
 spec tombe**, les 11 autres du fichier passent.
 
+### Le cluster « frameworks comparés » (2026-09-14) — clôt la vague 2.2/2.3 du plan
+
+Dernier item SEO menable par une session seule. Quatre pages « AARRR vs X »,
+aux deux langues, à un slug plat portant la requête telle qu'elle se tape :
+`/aarrr-vs-north-star-metric`, `/aarrr-vs-rarra`, `/aarrr-vs-growth-loops`,
+`/aarrr-vs-okr`. L'angle vient de `GROWTH-PLAN.md` 2.3 : le concurrent le
+mieux placé sur « AARRR » en anglais se classe précisément avec des pages
+comparatives — c'est le seul angle du sujet qui ne soit pas saturé de
+définitions.
+
+**Ce qui empêche quatre variantes du même texte**, qui est le risque réel
+d'un cluster : chacun des quatre cadres est confondu avec AARRR pour une
+raison **différente**, et c'est la raison qui fait la page. North Star →
+deux couches distinctes (une carte et une boussole). RARRA → les mêmes cinq
+étapes dans un autre ordre, donc un débat sur le séquencement et pas sur le
+modèle. Growth loops → la même chose dessinée en cercle, c'est-à-dire un
+entonnoir dont on a joint les bouts. OKR → un modèle de mesure contre un
+rituel de décision, dont les défauts classiques sont le travail l'un de
+l'autre. Un test compare les `<h2>` des quatre pages dans les deux langues
+et exige zéro intersection.
+
+**Quatre dossiers de route plutôt qu'un segment dynamique**, et c'est un
+choix, pas une facilité : un `[comparison]` à la racine de `[locale]`
+entrerait en collision avec `glossary`, `about` et tous les autres segments
+statiques ; et un préfixe `/compare/` laisserait un chemin orphelin tout en
+allongeant l'URL. Chaque route est un fichier de vingt lignes ; le rendu est
+partagé (`_comparison/ComparisonView`), le contenu vit dans
+`content/comparisons.ts`.
+
+**Le tableau côte à côte n'est pas un `<table>`.** Trois colonnes de prose à
+390 px donnent ~114 px par colonne, et les parades habituelles (en-têtes
+masqués, libellés injectés en `::before`) mettent du texte dans la CSS, où il
+ne se traduit pas. Chaque ligne est donc un `<h3>` suivi de deux blocs qui
+portent le nom du cadre **en clair dans le DOM** — côte à côte en desktop,
+empilés en mobile, et le nom reste lisible même quand l'en-tête a défilé.
+L'ordre des titres est vérifié en réel (h1, h2, h3×4 sous « En un coup
+d'œil », puis les h2 des sections) et la page entre dans la passe axe.
+
+**Maillage (règle 2.4)** : les quatre sont liées depuis `/how-it-works` — la
+page qui explique le cadre, donc quatre liens y sont du sujet et pas du
+remplissage — et se lient entre elles, donc le cluster se parcourt depuis
+n'importe laquelle de ses entrées. Pas de septième lien au pied de page : à
+six, il cesse d'en mettre aucun en avant. Chaque page sort aussi vers trois
+ou quatre termes de glossaire.
+
+**Deux défauts trouvés par la vérification, pas par la relecture :**
+
+1. **Six des huit descriptions de recherche dépassaient la fenêtre de 160
+   caractères** (jusqu'à 198 en français). Le test ne rapporte que la
+   première : il a fallu mesurer les huit avant de conclure. Hors fenêtre,
+   Google réécrit la description et la page perd la ligne qu'elle avait
+   choisie pour elle-même.
+2. **La copie anglaise citait ses phrases entre guillemets français** — «
+   always start with retention » — alors que tout le reste du corpus anglais
+   utilise des guillemets droits (`"negative churn"`, `"nights booked"`).
+   Vu sur la capture de `/en/aarrr-vs-rarra`, invisible à la relecture :
+   `Translatable` est deux chaînes, et les deux étaient valides. Six phrases
+   sur deux fichiers, `content/open-door.ts` compris — même défaut, même
+   brouillon, corrigé des deux côtés. **Le garde est un balayage du corpus**
+   (`src/__tests__/copy-typography.test.ts`) et non une assertion sur une
+   page : une seule page ne prouve rien des quarante-neuf autres, et le
+   défaut est dans la copie, pas dans le rendu. Le test vérifie d'abord
+   qu'il balaie un corpus non vide — sinon il passerait en ne regardant
+   rien.
+
+**Vérifié en réel** : lint, tsc, **673 tests unitaires** (+11), couverture
+au-dessus des seuils, `next build` (les huit pages sortent en `●`, donc
+servies par le CDN — c'est tout l'intérêt pour des pages qui existent pour
+être trouvées), **280 specs Playwright** (+10). Mesuré plutôt que supposé :
+**563 à 700 mots** par page et par langue, descriptions de 144 à 158
+caractères, `scrollWidth === clientWidth` à 390 px sur les quatre pages en
+français. Captures relues en EN desktop et FR mobile. Non-vacuité du garde de
+typographie prouvée en réinsérant des guillemets dans une chaîne anglaise :
+exactement ce test tombe.
+
+**Toute la copie est neuve, donc `TODO: à relire`** (convention 6) :
+`content/comparisons.ts` plus six chaînes de chrome dans `dictionary.ts`.
+
 ## État du projet au 2026-09-14 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.

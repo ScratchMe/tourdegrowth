@@ -37,6 +37,10 @@ const PAGES: [name: string, path: string][] = [
   // Added with design system extension 01, which turned this into a real
   // screen (DetourCard) rather than the framework's bare error document.
   ["not found", "/nonsense"],
+  // GROWTH-PLAN.md 2.3 — la seule page du site dont la structure est un
+  // tableau comparatif sans `<table>` : l'ordre des titres (h1, h2, h3 sous
+  // le h2 « En un coup d'oeil ») est exactement ce qu'axe sait vérifier.
+  ["framework comparison (fr)", "/fr/aarrr-vs-rarra"],
 ];
 
 interface ContrastData {
