@@ -2638,6 +2638,85 @@ déchiffrements ; lint, tsc, 547 tests unitaires (+4 : le 403 de `sites.list`
 avec un corps à la forme de Google, les deux formes de corps d'erreur, la
 troncature).
 
+### Instrument d'audit, étape 1.1 : découpler avant de construire (2026-09-14)
+
+Première PR de la phase 1 (`AUDIT-PLAN.md` §3.4). **Aucun écran** : elle
+existe pour que le premier écran soit possible sans casser la règle « le
+serveur résout, le client reçoit des props ».
+
+**Le problème, chiffré.** `schema.ts#snapshotCatalog` lisait `AUDIT_CATALOG`
+(39 lignes de prose française), `validate.ts` lisait `AUDIT_PROFILE_MODELS`
+dans le même module, et `quadrants.ts` lisait `QUESTIONS` de
+`copy-library.ts`. Un îlot qui aurait importé `lib/audit` tel quel embarquait
+les deux dans son bundle — et la garde « aucun Client Component n'importe le
+catalogue » ne regardait que les **imports directs**, donc ne l'aurait pas
+vu. C'est exactement R2-14, où trois chemins distincts ramenaient le
+dictionnaire après qu'on l'avait sorti.
+
+**Écart assumé par rapport au plan, et pourquoi.** `AUDIT-PLAN.md` demandait
+`computeScoreFrom(answers, questions)` **dans `score.ts`**. L'y mettre
+n'aurait rien changé : `score.ts` importe `QUESTIONS` au niveau du module,
+donc quiconque importe la formule tire aussi la bibliothèque de copie — le
+but de l'étape était manqué. La formule et ses types partent donc dans
+`lib/scoring/compute.ts`, qui n'importe que `./pillars` ; `score.ts` la
+réexporte et n'ajoute que `computeScore`, l'appel avec les 15 vraies
+questions. **Aucun importeur existant ne change, et les 42 tests du moteur
+passent sans qu'une ligne de test soit touchée** — c'était le critère.
+
+**Le reste du découplage** : `AUDIT_PROFILE_MODELS` et son type déménagent
+dans `lib/audit/profiles.ts`, un module qui n'importe rien (le catalogue les
+réexporte pour rester le point d'entrée côté contenu) ; `snapshotCatalog()`
+et un nouveau `tourQuestions()` partent dans `lib/audit/server.ts`, le SEUL
+module de l'instrument qui lit du contenu ; `newMission` reçoit le catalogue
+en paramètre ; `quadrants.ts` reçoit les questions en paramètre.
+`lib/audit` n'importe plus du catalogue que des **types**, effacés à la
+compilation.
+
+**Deux modules neufs.** `storage.ts` (navigateur seulement, une seule clé
+`tdg.audit.v1`, un tableau de missions) : **une écriture qui échoue est
+RENVOYÉE, jamais avalée** — différence assumée avec `quiz/storage.ts`, où
+perdre des réponses coûte trois minutes alors qu'ici perdre la saisie coûte
+des heures d'entretiens ; le message d'un quota plein nomme la seule sortie,
+exporter le fichier. `io.ts` (pur) : `serializeMission` indente **et trie les
+clés** — sans ça, deux exports de la même mission diffèrent sur l'ordre
+d'insertion des propriétés et un diff Git devient du bruit ; les tableaux
+gardent leur ordre, qui est de la donnée. `parseMissionFile` ne lève jamais
+et, surtout, **rend quand même une mission bien formée que le validateur
+refuse**, avec ses erreurs : une mission à moitié saisie est exactement ce
+qu'on transporte entre deux appareils, et refuser de l'ouvrir ferait perdre
+le reste.
+
+**La garde transitive, et ce qu'elle a trouvé.** `audit-boundary.test.ts`
+marche maintenant les imports depuis `AuditWorkbench.tsx` (posé vide dans
+cette PR, pour que la garde existe avant le premier écran) et échoue si un
+**import de valeur** atteint `content/`, à n'importe quelle profondeur. Les
+`import type` ne sont pas des arêtes, puisque le compilateur les efface —
+avec un test compagnon qui le prouve dans les deux sens, sans quoi une marche
+qui ne marche pas passerait en ne prouvant rien.
+
+En vérifiant le cas type-only, l'ancienne règle « aucun Client Component
+n'importe le catalogue » s'est révélée **trop stricte** : elle rougissait sur
+un `import type` pourtant effacé, donc inoffensif — et l'étape 1.2 en aura
+besoin pour typer les props de l'îlot. Corrigée maintenant plutôt que laissée
+en piège : elle ne regarde plus que les imports de valeur.
+
+**Non-vacuité mesurée finement.** Îlot → `server.ts` → contenu (deux sauts) :
+la marche nomme les deux modules ; un `import type` dans l'îlot : elle passe,
+c'est correct. Écriture avalée à la manière du quiz : seul le test de quota
+tombe. Tri des clés retiré : seul le test de stabilité tombe.
+
+*Piège de vérification, troisième occurrence dans ce projet* : ma première
+tentative de sabotage du tri **n'a rien modifié** — un `python3 -c "…"` entre
+guillemets doubles transforme le `\n` du motif recherché en vraie nouvelle
+ligne, donc le `replace` n'a rien trouvé, et les 11 tests sont passés. Un
+sabotage qui passe doit d'abord prouver qu'il a été appliqué : refait avec un
+`assert s != before`, exactement un test tombe. Une vérification qui ne trouve
+rien doit prouver qu'elle a regardé quelque part.
+
+**Vérifié en réel** : `tsc`, `eslint`, **569 tests unitaires** (+22),
+couverture au-dessus des seuils, `next build`, **186 specs Playwright**
+inchangées.
+
 ## État du projet au 2026-09-14 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -2660,7 +2739,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **L'instrument d'audit growth a son schéma** (2026-09-13, `AUDIT.md`) : un outil personnel pour les diagnostics qu'Antoine mène en entreprise, navigateur seulement, jamais Firestore — `src/lib/audit/` + `src/content/audit-catalog.ts`, sans aucune route ni UI encore. Phase 1 (la saisie sous `/admin/audit`) est le prochain chantier, découpée en six PR dans **`AUDIT-PLAN.md`** (2026-09-13) ; phase 3 (tout ce qui ressemble à un produit) reste fermée tant que les entretiens ne sont pas faits et le contrat de travail pas vérifié.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **547 tests unitaires**, **186 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
+**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **569 tests unitaires**, **186 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 
@@ -2681,7 +2760,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Les e2e de composition ne passent que par la branche échantillon | `/r/sample` utilise `getSampleNextMove` et `SAMPLE_RESULT.pillars`, pas le vrai chemin. La garde statique est donc seule à protéger le payload | Un id de fixture derrière une variable d'environnement fermée par défaut. À décider : c'est une porte de test sur la route publique la plus sensible. |
 | Flake `locale-routing.spec.ts:75` | Deux échecs le 2026-09-10, toujours en suite complète parallèle, jamais isolée (8/8) | La prochaine occurrence en CI laisse une trace (`retries: 1` + `trace: on-first-retry`, rapport téléversé). Ne pas durcir la spec en attendant le cookie : ça masquerait une éventuelle course produit. |
 | TypeScript 7 et ESLint 10 | Tous deux bloqués par des paquets embarqués dans `eslint-config-next` (`typescript-eslint` refuse TS ≥ 6.1 ; `eslint-plugin-react` plante sur ESLint 10). Dependabot les ignore en majeure depuis le 2026-09-08 | Quand `eslint-config-next` suivra. Re-tester en installant, pas en lisant les plages de peer : c'est l'essai qui a montré qu'ESLint 10 plante. |
-| Instrument d'audit : phase 1 (saisie) | Le schéma est livré (`AUDIT.md`), rien n'est visible dans l'app. **Le plan complet est dans `AUDIT-PLAN.md`** (phases, six PR de la phase 1, critères de sortie, Go/No-Go) | Le feu vert d'Antoine sur le plan, puis la PR 1.1 (découplage `lib/audit` ↔ contenu + stockage, sans écran). La politique de rétention Vercel doit être en place avant, chaque merge déployant la production. |
+| Instrument d'audit : phase 1 (saisie) | Feu vert d'Antoine sur `AUDIT-PLAN.md` le 2026-09-14. **1.1 livrée** (découplage `lib/audit` ↔ contenu, stockage, io, garde transitive — sans écran). Reste 1.2 à 1.6 | Rien : la suite s'enchaîne dans l'ordre des dépendances, 1.2 (route, missions, fichier) est la prochaine. |
 | Catalogue de l'instrument d'audit à relire | 39 lignes de texte qui s'imprimeront dans les livrables d'Antoine, sous son nom | Un bon à tirer, même circuit que les précédents. |
 | Vercel Functions Storage | **Réglé** : la politique de rétention posée par Antoine le 2026-09-14 l'a fait passer de 9,24 Go à 397 Mo, et un déploiement pèse 45,5 Mo de fonctions depuis le 2026-09-13 | Rien. |
 | Vercel Fluid Active CPU (36 min / 4 h par mois) | Les deux postes qui dominaient le coût par visite sont corrigés le 2026-09-14 : six préchargements dynamiques par vue de la homepage, et l'image de partage rendue à chaque vue de résultat — confirmé en production, `MISS` puis `HIT` sur l'adresse versionnée. La région des fonctions est passée à `cdg1` le même jour (vérifié : `x-vercel-id: iad1::cdg1::…`) | Relire le compteur dans Vercel une semaine après. |

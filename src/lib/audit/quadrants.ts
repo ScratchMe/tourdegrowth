@@ -1,6 +1,5 @@
 import type { AuditCatalogRow } from "@/content/audit-catalog";
-import { QUESTIONS } from "@/content/copy-library";
-import { computeScore, type Answers, type ScoringResult } from "@/lib/scoring/score";
+import { computeScoreFrom, type Answers, type ScoredQuestion, type ScoringResult } from "@/lib/scoring/compute";
 import { latestObservation, type Entry, type Pass } from "./schema";
 
 /**
@@ -24,6 +23,12 @@ import { latestObservation, type Entry, type Pass } from "./schema";
  *   Tour ne porte dessus) ;
  * - `unverifiable` : non accessible — un fait sur mon accès, pas sur eux ;
  * - `not-applicable` et `pending` : hors profil, ou pas encore examiné.
+ *
+ * Les 15 questions du Tour arrivent en PARAMÈTRE et ne sont jamais lues
+ * ici : ce module doit rester sans dépendance au contenu pour que l'îlot de
+ * `/admin/audit` n'embarque pas `copy-library.ts` (AUDIT-PLAN.md §3.4/1.1).
+ * L'appelant les obtient de `./server#tourQuestions` côté serveur, ou de
+ * `QUESTIONS` dans un test.
  */
 export const QUADRANTS = [
   "measured-good",
@@ -40,17 +45,25 @@ export type Quadrant = (typeof QUADRANTS)[number];
 export type CriterionVerdict = "good" | "bad" | null;
 
 /** Le point de la réponse choisie (20, 7 ou 0), ou `null` sans réponse. */
-export function practicePoints(questionId: string, answers: Partial<Answers>): number | null {
-  const question = QUESTIONS.find((q) => q.id === questionId);
+export function practicePoints(
+  questionId: string,
+  answers: Partial<Answers>,
+  questions: readonly ScoredQuestion[],
+): number | null {
+  const question = questions.find((q) => q.id === questionId);
   const index = answers[questionId];
   if (!question || index === undefined) return null;
-  return question.options[index].points;
+  return question.options[index]?.points ?? null;
 }
 
 /** Une réponse à 20 points = « nous mesurons ceci ». */
-export function declaresMeasured(questionId: string | undefined, answers: Partial<Answers>): boolean {
+export function declaresMeasured(
+  questionId: string | undefined,
+  answers: Partial<Answers>,
+  questions: readonly ScoredQuestion[],
+): boolean {
   if (!questionId) return false;
-  return practicePoints(questionId, answers) === 20;
+  return practicePoints(questionId, answers, questions) === 20;
 }
 
 /**
@@ -68,7 +81,12 @@ export function criterionVerdict(row: AuditCatalogRow, entry: Entry): CriterionV
   return better ? "good" : "bad";
 }
 
-export function methodVsReality(row: AuditCatalogRow, entry: Entry | undefined, answers: Partial<Answers>): Quadrant {
+export function methodVsReality(
+  row: AuditCatalogRow,
+  entry: Entry | undefined,
+  answers: Partial<Answers>,
+  questions: readonly ScoredQuestion[],
+): Quadrant {
   if (!entry) return "pending";
   switch (entry.status) {
     case "not-applicable":
@@ -83,13 +101,13 @@ export function methodVsReality(row: AuditCatalogRow, entry: Entry | undefined, 
       return "unverifiable";
     case "absent":
     case "contested":
-      return declaresMeasured(row.tourQuestionId, answers) ? "blind-spot" : "known-gap";
+      return declaresMeasured(row.tourQuestionId, answers, questions) ? "blind-spot" : "known-gap";
   }
 }
 
 /** Le score du Tour de cette passe — `null` tant que les 15 réponses ne sont pas là. */
-export function tourScore(pass: Pass): ScoringResult | null {
+export function tourScore(pass: Pass, questions: readonly ScoredQuestion[]): ScoringResult | null {
   const answered = Object.keys(pass.tourAnswers).length;
-  if (answered < QUESTIONS.length) return null;
-  return computeScore(pass.tourAnswers as Answers);
+  if (answered < questions.length) return null;
+  return computeScoreFrom(pass.tourAnswers as Answers, questions);
 }

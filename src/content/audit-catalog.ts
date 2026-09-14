@@ -1,3 +1,4 @@
+import type { AuditProfileModel } from "@/lib/audit/profiles";
 import type { GlossaryTermId } from "./glossary-terms";
 import type { Pillar } from "@/lib/scoring/pillars";
 
@@ -44,16 +45,15 @@ import type { Pillar } from "@/lib/scoring/pillars";
  * `deliverableLocale` de la mission) demandera sa traduction — Phase 2.
  */
 
-/** Les quatre profils de mission. Plus fins que `SegmentModel` (R2-26) parce
- * qu'un B2B vendu par des commerciaux et un B2B self-serve ne mesurent pas
- * l'activation ni la rétention avec les mêmes lignes. */
-export const AUDIT_PROFILE_MODELS = [
-  "b2b-assiste",
-  "b2b-selfserve",
-  "b2c",
-  "marketplace",
-] as const;
-export type AuditProfileModel = (typeof AUDIT_PROFILE_MODELS)[number];
+/**
+ * Les quatre profils de mission vivent dans `lib/audit/profiles.ts`, un
+ * module sans aucun import : `validate.ts` a besoin de la LISTE (une valeur),
+ * et la lire ici ferait entrer les 39 lignes de prose de ce fichier dans le
+ * bundle de tout îlot qui importe `lib/audit`. Réexportés ici pour que le
+ * catalogue reste le point d'entrée naturel côté contenu.
+ */
+export { AUDIT_PROFILE_MODELS } from "@/lib/audit/profiles";
+export type { AuditProfileModel } from "@/lib/audit/profiles";
 
 export type AuditPillar = Pillar | "transverse";
 /** Coût de collecte : T0 produit par l'audit lui-même, T1 libre-service, T2 une session avec un tiers, T3 file d'analyste, T4 mandat requis. */

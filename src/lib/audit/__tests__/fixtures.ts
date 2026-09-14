@@ -1,4 +1,5 @@
-import type { AuditProfileModel } from "@/content/audit-catalog";
+import type { AuditProfileModel } from "@/lib/audit/profiles";
+import { snapshotCatalog } from "../server";
 import {
   applicableRows,
   definitionRef,
@@ -120,6 +121,7 @@ export function mission(model: AuditProfileModel = "b2b-selfserve", overrides: P
     id: "mission-1",
     createdAt: "2026-09-13T10:00:00.000Z",
     header: header({ profile: { model, acvBand: "5k-25k", contractTerm: "annual" }, ...overrides }),
+    catalog: snapshotCatalog(),
   });
   for (const row of m.catalog.rows) m = registerDefinition(m, definition(row.id));
   return m;

@@ -1,11 +1,7 @@
-import {
-  AUDIT_CATALOG,
-  AUDIT_CATALOG_VERSION,
-  type AuditCatalogRow,
-  type AuditProfileModel,
-} from "@/content/audit-catalog";
+import type { AuditCatalogRow } from "@/content/audit-catalog";
 import type { Locale } from "@/lib/i18n/locale";
-import type { Answers } from "@/lib/scoring/score";
+import type { Answers } from "@/lib/scoring/compute";
+import type { AuditProfileModel } from "./profiles";
 
 /**
  * schema.ts — le modèle de données de l'instrument d'audit growth (AUDIT.md).
@@ -397,21 +393,30 @@ export function notApplicableReasonFor(row: AuditCatalogRow, model: AuditProfile
   return `Hors profil « ${model} » : cette ligne s'applique à ${row.appliesTo.join(", ")}.`;
 }
 
-export function snapshotCatalog(): EmbeddedCatalog {
-  return {
-    version: AUDIT_CATALOG_VERSION,
-    rows: AUDIT_CATALOG.map((row) => ({ ...row, appliesTo: [...row.appliesTo] })),
-  };
-}
-
-/** Une mission neuve, avec le catalogue du jour embarqué. `id`/`createdAt` sont injectés pour rester pur. */
-export function newMission(input: { id: string; createdAt: string; header: MissionHeader }): Mission {
+/**
+ * Une mission neuve, avec un catalogue embarqué — une COPIE, jamais une
+ * référence : deux missions se comparent sur le catalogue qui les a
+ * produites, pas sur celui du jour.
+ *
+ * `catalog` est un paramètre et non une lecture directe de
+ * `AUDIT_CATALOG` : ce module doit rester sans dépendance au contenu pour
+ * que l'îlot de `/admin/audit` ne l'embarque pas (AUDIT-PLAN.md §3.4/1.1).
+ * Le Server Component appelle `snapshotCatalog()` de `./server` et passe le
+ * résultat en props. `id`/`createdAt` sont injectés pour la même raison de
+ * pureté.
+ */
+export function newMission(input: {
+  id: string;
+  createdAt: string;
+  header: MissionHeader;
+  catalog: EmbeddedCatalog;
+}): Mission {
   return {
     schemaVersion: AUDIT_SCHEMA_VERSION,
     id: input.id,
     createdAt: input.createdAt,
     header: input.header,
-    catalog: snapshotCatalog(),
+    catalog: input.catalog,
     definitions: {},
     passes: [],
   };

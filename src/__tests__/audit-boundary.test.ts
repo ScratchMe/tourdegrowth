@@ -15,6 +15,12 @@ import { describe, expect, it } from "vitest";
  *    `/admin/audit` may touch a mission. The allow-list is the instrument's
  *    own directory, its tests, and the admin route that will host it.
  *
+ * 3. The island of `/admin/audit` does not REACH the catalog, however many
+ *    hops away. Rules 1 and 2 only look at direct imports; R2-14 showed
+ *    three separate paths that brought the dictionary back into a bundle
+ *    after it had supposedly been taken out, and none of them was a direct
+ *    import. So this one walks.
+ *
  * Same method as `client-bundles.test.ts`: import specifiers, read from the
  * real files, so the rule fails a build instead of surviving as a comment.
  */
@@ -45,6 +51,57 @@ const FORBIDDEN_INSIDE = [
 
 const ALLOWED_IMPORTERS = [/^lib\/audit\//, /^content\/audit-catalog\.ts$/, /^content\/__tests__\/audit-catalog\.test\.ts$/, /^app\/\(app\)\/admin\/audit\//, /^__tests__\//];
 
+const BY_PATH = new Map(FILES.map((f) => [f.path, f.source]));
+
+/**
+ * Import specifiers that survive compilation. `import type { X } from "y"`
+ * is erased by TypeScript and never reaches the bundler, so it is NOT an
+ * edge for this walk — that is exactly how `lib/audit` keeps the catalog's
+ * row type while leaving its 39 rows of prose on the server.
+ */
+function valueImports(source: string): string[] {
+  return [...source.matchAll(/(^|\n)\s*(?:import|export)(\s+type)?\s[^;]*?from\s+["']([^"']+)["']/g)]
+    .filter((m) => !m[2])
+    .map((m) => m[3]!);
+}
+
+/** A specifier resolved to a repo path under `src/`, or null when it leaves the repo. */
+function resolveSpecifier(fromPath: string, spec: string): string | null {
+  let base: string;
+  if (spec.startsWith("@/")) base = spec.slice(2);
+  else if (spec.startsWith(".")) {
+    const dir = fromPath.split("/").slice(0, -1);
+    for (const part of spec.split("/")) {
+      if (part === ".") continue;
+      else if (part === "..") dir.pop();
+      else dir.push(part);
+    }
+    base = dir.join("/");
+  } else return null; // a package — not our source tree
+  for (const candidate of [base, `${base}.ts`, `${base}.tsx`, `${base}/index.ts`, `${base}/index.tsx`]) {
+    if (BY_PATH.has(candidate)) return candidate;
+  }
+  return null;
+}
+
+/** Every module the given entry points reach through value imports. */
+function reachable(entries: string[]): Set<string> {
+  const seen = new Set<string>();
+  const queue = [...entries];
+  while (queue.length) {
+    const current = queue.pop()!;
+    if (seen.has(current)) continue;
+    seen.add(current);
+    const source = BY_PATH.get(current);
+    if (!source) continue;
+    for (const spec of valueImports(source)) {
+      const resolved = resolveSpecifier(current, spec);
+      if (resolved && !seen.has(resolved)) queue.push(resolved);
+    }
+  }
+  return seen;
+}
+
 describe("audit instrument boundary (AUDIT.md §5)", () => {
   it("the instrument exists and is not empty — otherwise the rules below pass vacuously", () => {
     expect(INSTRUMENT.filter((f) => !f.path.includes("__tests__")).length).toBeGreaterThanOrEqual(7);
@@ -68,9 +125,46 @@ describe("audit instrument boundary (AUDIT.md §5)", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("no Client Component imports the catalog — the server resolves rows and passes props", () => {
+  it("the island exists — otherwise the transitive walk below has nothing to walk", () => {
+    expect(BY_PATH.has("app/(app)/admin/audit/AuditWorkbench.tsx")).toBe(true);
+  });
+
+  /**
+   * The rule that AUDIT-PLAN.md §3.4/1.1 exists for: whatever the island
+   * ends up importing, no chain of value imports from it may land in
+   * `content/`. `lib/audit/server.ts` is the one module of the instrument
+   * that reads content, and the island must never reach it — the Server
+   * Component calls it and passes props down.
+   *
+   * Non-vacuity: add `import { AUDIT_CATALOG } from "@/content/audit-catalog"`
+   * to AuditWorkbench.tsx and this test names it.
+   */
+  it("nothing the island reaches, at any depth, is under content/", () => {
+    const reached = reachable(["app/(app)/admin/audit/AuditWorkbench.tsx"]);
+    expect([...reached].filter((p) => p.startsWith("content/")).sort()).toEqual([]);
+  });
+
+  it("the walk follows value imports and ignores erased type-only ones", () => {
+    // lib/audit/server.ts DOES read the catalog — it is the designated
+    // server-side module — so the walk must find it from there. If this
+    // fails, the walk is not walking and the test above proves nothing.
+    expect([...reachable(["lib/audit/server.ts"])]).toContain("content/audit-catalog.ts");
+    // schema.ts names the catalog's row type with `import type`, which the
+    // compiler erases — so it must NOT count as an edge.
+    expect(BY_PATH.get("lib/audit/schema.ts")).toMatch(/import type \{ AuditCatalogRow \}/);
+    expect([...reachable(["lib/audit/schema.ts"])]).not.toContain("content/audit-catalog.ts");
+  });
+
+  /**
+   * VALUE imports only. A Client Component naming `AuditCatalogRow` to type
+   * a prop it receives is exactly the shape this architecture wants, and the
+   * compiler erases that import — the 39 rows never reach the browser. The
+   * bundle rule is the transitive walk above; this one stays as the direct,
+   * fast-failing statement of the same intent.
+   */
+  it("no Client Component imports a catalog VALUE — the server resolves rows and passes props", () => {
     const offenders = FILES.filter(
-      (f) => /^\s*["']use client["'];?/m.test(f.source.split("\n").slice(0, 3).join("\n")) && IMPORTS(f.source).some((spec) => /^@\/content\/audit-catalog$/.test(spec)),
+      (f) => /^\s*["']use client["'];?/m.test(f.source.split("\n").slice(0, 3).join("\n")) && valueImports(f.source).some((spec) => /^@\/content\/audit-catalog$/.test(spec)),
     ).map((f) => f.path);
     expect(offenders).toEqual([]);
   });

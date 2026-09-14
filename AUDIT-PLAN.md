@@ -224,7 +224,7 @@ avant que le stockage et la frontière soient tenus ; les écrans dans l'ordre
 où une mission réelle en a besoin (créer → collecter → renseigner → scorer →
 conclure).
 
-#### 1.1 — Découpler `lib/audit` du contenu, et le stockage
+#### 1.1 — Découpler `lib/audit` du contenu, et le stockage — ✅ livré le 2026-09-14
 
 *Sans écran. C'est la PR qui rend l'îlot possible sans casser la règle « le
 serveur résout, le client reçoit des props ».*
@@ -246,10 +246,13 @@ imports directs et ne le verrait pas.
     avec `tourQuestions()` (id, pilier, texte FR, options avec points) ;
     `newMission` reçoit `catalog` en paramètre.
   - `quadrants.ts` reçoit les questions en paramètre (`practicePoints`,
-    `declaresMeasured`, `tourScore`) ; `lib/scoring/score.ts` gagne
-    `computeScoreFrom(answers, questions)`, dont `computeScore` devient un
-    appel avec `QUESTIONS` — refactor mécanique, **aucun test du moteur ne
-    change**, c'est le critère.
+    `declaresMeasured`, `tourScore`) ; `computeScoreFrom(answers, questions)`
+    — refactor mécanique, **aucun test du moteur ne change**, c'est le
+    critère. *Écart au livrer : la fonction est dans un `lib/scoring/compute.ts`
+    neuf et non dans `score.ts`, qui importe `QUESTIONS` au niveau du module
+    et aurait donc continué à tirer la bibliothèque de copie — le but de
+    l'étape. `score.ts` réexporte tout et n'ajoute que `computeScore` ; aucun
+    importeur existant ne change.*
   - `lib/audit/storage.ts` (navigateur seulement) : `loadMissions()`,
     `saveMission()`, `deleteMission()`, `loadDraftMeta()` (date du dernier
     export par mission). Une seule clé `tdg.audit.v1`, un tableau de
