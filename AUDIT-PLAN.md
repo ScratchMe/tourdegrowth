@@ -276,7 +276,7 @@ imports directs et ne le verrait pas.
   vert avec un `AuditWorkbench.tsx` vide (posé dans cette PR pour que la
   garde existe avant le premier écran).
 
-#### 1.2 — La route, les missions, le fichier
+#### 1.2 — La route, les missions, le fichier — ✅ livré le 2026-09-14
 
 *Après cette PR, Antoine peut créer la mission AB Tasty et emporter le
 fichier — même si aucune ligne n'est encore saisissable.*

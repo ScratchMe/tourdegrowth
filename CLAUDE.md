@@ -2739,6 +2739,80 @@ qu'une ligne absente.
   communications. La vague 1 de `GROWTH-PLAN.md` passe donc de « à préparer »
   à « en cours, côté Antoine » ; les textes et le kit l'attendaient dans
   `marketing/` depuis le 2026-09-13.
+### Instrument d'audit, étape 1.2 : la route, les missions, le fichier (2026-09-14)
+
+`/admin/audit` existe. Antoine peut créer la mission AB Tasty, l'emporter
+dans un fichier, la réimporter, en sortir une copie purgée — **avant même
+qu'une seule ligne soit saisissable** (c'est 1.3). C'est l'ordre voulu par
+`AUDIT-PLAN.md` §3.4 : rien de visible avant que le stockage et la frontière
+soient tenus, puis les écrans dans l'ordre où une mission réelle en a besoin.
+
+**Ce qui est à l'écran.** La liste des missions **de cet appareil** (la
+phrase est écrite en toutes lettres : il n'y a pas de serveur, donc vider les
+données du site perd ce qui n'a pas été exporté, d'où la date du dernier
+export affichée à côté de chacune) ; la création d'une mission et de sa
+passe 1 dans le même geste ; la barre de mission avec ses **trois compteurs
+en fraction** et le titre que prendrait le livrable aujourd'hui ; l'import
+avec son écran de confirmation ; les deux purges.
+
+**Les compteurs sont toujours des fractions, jamais des pourcentages.**
+« 8 sur 25 » sur 25 lignes ; un pourcentage donnerait une précision que
+l'échantillon ne porte pas, et c'est la forme dans laquelle ce chiffre
+s'imprime dans le livrable. Le titre vient de `deliverableVocabulary`, donc
+**le titre d'escalade apparaît de lui-même** dès que la couverture passe sous
+le tiers : l'auditeur voit le coût de l'absence pendant qu'il collecte, pas
+au moment d'écrire. Une spec vérifie aussi qu'un livrable sans mandat ne
+contient jamais le mot « audit ».
+
+**Les primitives de saisie sont locales à la route** (`_ui/`, le `_` en fait
+un dossier privé pour Next), jamais dans `src/components/`, jamais
+synchronisées vers Claude Design — décision 1 du §3.3, prise parce que le
+système n'a **aucun `<input>`** et qu'un brief coûterait plusieurs jours pour
+un outil à un utilisateur. `Segmented` sert aux vocabulaires à deux ou trois
+valeurs, un `<select>` natif au-delà (son propre prompt le dit : « past that
+it is a list, not a control »).
+
+**Deux pièges de tokens attrapés en écrivant le CSS**, tous deux du genre qui
+ne lève aucune erreur : les tokens de typographie sont des raccourcis `font`
+et non des tailles (`font-size: var(--meta-xs)` serait silencieusement
+invalide, exactement comme `--border-rule` qui est un raccourci `border`
+complet), et `--font-body` n'existe pas — c'est `--font-ui`. Vérifiés en
+lisant un module existant plutôt qu'en supposant.
+
+**Le vrai enseignement de cette étape est un trou dans mes propres specs,
+trouvé par le test de non-vacuité et par rien d'autre.** Avec `saveMission`
+neutralisé (il écrit une liste vide), **les 7 specs passaient toujours** — y
+compris celle qui vide le stockage, recharge et réimporte. Raison : chaque
+spec relisait la mission depuis l'état React, jamais depuis l'appareil ; et
+« vider puis recharger montre une liste vide » est vrai que la persistance
+marche ou non. Autrement dit je vérifiais le parcours en mémoire et le
+fichier, jamais l'écriture.
+
+Corrigé par la seule assertion qui la prouve : **recharger sans rien
+effacer**. Sabotage refait : exactement les 2 specs de persistance tombent,
+les 6 autres passent — ce qui est correct, ce sont des assertions
+compagnes. Sans ce contrôle, cette PR partait avec une couverture qui avait
+l'air complète et ne tenait rien.
+
+*Piège d'outillage au passage* : mon premier sabotage (`return` anticipé dans
+`saveMission`) a fait échouer le build sur du code inatteignable, donc la
+suite a tourné contre l'ancien build. Un sabotage doit compiler pour prouver
+quoi que ce soit — et il faut lire le code retour du build avant de lire
+celui des tests.
+
+**Prérequis CI, comme le plan l'annonçait** : il n'existait aucune spec sur
+`/admin/*`, qui **échoue fermé** (sans `ADMIN_DASHBOARD_PASSWORD`, tout
+`/admin` est un 401 pour tout le monde). `ci.yml` pose donc `e2e-admin` au
+niveau du workflow, les specs admin utilisent `test.use({ httpCredentials })`,
+et sans la variable elles **sautent avec un message** — jamais faussement
+vertes (le piège de R-11) ni faussement rouges (son inverse de R2-26).
+Vérifié dans les deux sens.
+
+**Vérifié en réel** : `tsc`, `eslint`, 570 tests unitaires, couverture
+au-dessus des seuils, `next build` (`ƒ /admin/audit`), **194 specs
+Playwright** (+8), passe axe verte sur les trois écrans. Le téléchargement
+est un vrai téléchargement de navigateur (`URL.createObjectURL` +
+`<a download>`), relu depuis le disque et repassé au validateur dans le test.
 
 ## État du projet au 2026-09-14 — à lire en premier dans une nouvelle session
 
@@ -2762,7 +2836,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **L'instrument d'audit growth a son schéma** (2026-09-13, `AUDIT.md`) : un outil personnel pour les diagnostics qu'Antoine mène en entreprise, navigateur seulement, jamais Firestore — `src/lib/audit/` + `src/content/audit-catalog.ts`, sans aucune route ni UI encore. Phase 1 (la saisie sous `/admin/audit`) est le prochain chantier, découpée en six PR dans **`AUDIT-PLAN.md`** (2026-09-13) ; phase 3 (tout ce qui ressemble à un produit) reste fermée tant que les entretiens ne sont pas faits et le contrat de travail pas vérifié.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **570 tests unitaires**, **186 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
+**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **570 tests unitaires**, **194 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 
@@ -2782,7 +2856,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Les e2e de composition ne passent que par la branche échantillon | `/r/sample` utilise `getSampleNextMove` et `SAMPLE_RESULT.pillars`, pas le vrai chemin. La garde statique est donc seule à protéger le payload | Un id de fixture derrière une variable d'environnement fermée par défaut. À décider : c'est une porte de test sur la route publique la plus sensible. |
 | Flake `locale-routing.spec.ts:75` | Deux échecs le 2026-09-10, toujours en suite complète parallèle, jamais isolée (8/8) | La prochaine occurrence en CI laisse une trace (`retries: 1` + `trace: on-first-retry`, rapport téléversé). Ne pas durcir la spec en attendant le cookie : ça masquerait une éventuelle course produit. |
 | TypeScript 7 et ESLint 10 | Tous deux bloqués par des paquets embarqués dans `eslint-config-next` (`typescript-eslint` refuse TS ≥ 6.1 ; `eslint-plugin-react` plante sur ESLint 10). Dependabot les ignore en majeure depuis le 2026-09-08 | Quand `eslint-config-next` suivra. Re-tester en installant, pas en lisant les plages de peer : c'est l'essai qui a montré qu'ESLint 10 plante. |
-| Instrument d'audit : phase 1 (saisie) | Feu vert d'Antoine sur `AUDIT-PLAN.md` le 2026-09-14. **1.1 livrée** (découplage `lib/audit` ↔ contenu, stockage, io, garde transitive — sans écran). Reste 1.2 à 1.6 | Rien : la suite s'enchaîne dans l'ordre des dépendances, 1.2 (route, missions, fichier) est la prochaine. |
+| Instrument d'audit : phase 1 (saisie) | Feu vert d'Antoine sur `AUDIT-PLAN.md` le 2026-09-14. **1.1 et 1.2 livrées** — `/admin/audit` crée, exporte, réimporte et purge une mission ; la saisie des lignes est 1.3 | Rien : la suite s'enchaîne dans l'ordre des dépendances, 1.3 (éditeur de ligne, la plus grosse) est la prochaine. |
 | Catalogue de l'instrument d'audit à relire | 39 lignes de texte qui s'imprimeront dans les livrables d'Antoine, sous son nom | Un bon à tirer, même circuit que les précédents. |
 | Vercel Functions Storage | **Réglé** : la politique de rétention posée par Antoine le 2026-09-14 l'a fait passer de 9,24 Go à 397 Mo, et un déploiement pèse 45,5 Mo de fonctions depuis le 2026-09-13 | Rien. |
 | Vercel Fluid Active CPU (36 min / 4 h par mois) | Les deux postes qui dominaient le coût par visite sont corrigés le 2026-09-14 : six préchargements dynamiques par vue de la homepage, et l'image de partage rendue à chaque vue de résultat — confirmé en production, `MISS` puis `HIT` sur l'adresse versionnée. La région des fonctions est passée à `cdg1` le même jour (vérifié : `x-vercel-id: iad1::cdg1::…`) | Relire le compteur dans Vercel une semaine après. |

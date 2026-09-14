@@ -160,3 +160,22 @@ export async function stubDeepDive(page: Page, status = 200): Promise<Record<str
   return calls;
 }
 
+
+/**
+ * The admin routes sit behind Basic Auth in `proxy.ts`, which FAILS CLOSED:
+ * with no `ADMIN_DASHBOARD_PASSWORD` in the server's environment, every
+ * `/admin/*` request is a 401 for everyone, by design (CLAUDE.md, 2026-08-29).
+ *
+ * So an admin spec can only be meaningful when the server under test has that
+ * variable. CI sets it at the workflow level, like `NEXT_PUBLIC_GOATCOUNTER_CODE`.
+ * Locally, without it, these specs SKIP with a message that says how to run
+ * them — never falsely green (the R-11 trap, where an assertion passed while
+ * proving nothing) and never falsely red (its R2-26 mirror, where a missing
+ * build-time variable made healthy specs fail).
+ */
+export const ADMIN_PASSWORD = process.env.ADMIN_DASHBOARD_PASSWORD ?? "";
+
+export const adminCredentials = { username: "admin", password: ADMIN_PASSWORD };
+
+export const SKIP_ADMIN_REASON =
+  "ADMIN_DASHBOARD_PASSWORD is not set — /admin/* is 401 for everyone (fail-closed). Build and start with it set to run these.";
