@@ -6,7 +6,8 @@ import { MetaLabel } from "@/components/brand/MetaLabel";
 import type { AuditCatalogRow } from "@/content/audit-catalog";
 import { applicableRows, type Entry, type Mission, type Pass } from "@/lib/audit/schema";
 import { chaseState, groupForCollect, toChase, UNASSIGNED_GROUP } from "@/lib/audit/tracking";
-import { CHASE_STATE_LABELS, VALUE_STATUS_LABELS } from "./labels";
+import { Disclosure } from "@/components/core/Disclosure";
+import { AUDIT_PILLAR_LABELS, CHASE_STATE_LABELS, TIER_EXPLANATION, TIER_GLOSS, TIER_SCALE, VALUE_STATUS_LABELS } from "./labels";
 import styles from "./page.module.css";
 
 /**
@@ -63,13 +64,38 @@ export function RowList({
     <section className={styles.screen}>
       <h2 className={styles.h2}>Collecte</h2>
       <p className={styles.muted}>
-        {rows.length} lignes applicables au profil, du palier le plus coûteux au moins coûteux. Les T4 et T3 demandent un mandat ou une file
-        d&apos;analyste : ce sont celles qui doivent partir en premier.
+        {rows.length} lignes applicables au profil, du palier le plus coûteux au moins coûteux : ce sont celles qui doivent partir en
+        premier.
       </p>
+
+      {/* La légende, plutôt qu'une phrase qui n'explique que les deux paliers
+          les plus chers. Le code T0-T4 s'affiche sur chaque carte, dans les
+          compteurs et dans l'en-tête de l'éditeur : il ne vivait jusqu'ici que
+          dans un commentaire de `content/audit-catalog.ts`. */}
+      <Disclosure summary="Les paliers T0 à T4, et ce qu'ils coûtent" data-testid="tier-legend">
+        <dl className={styles.legend}>
+          {TIER_SCALE.map((tier) => (
+            <div key={tier} className={styles.legendRow}>
+              <dt className={styles.legendTerm}>
+                {tier} — {TIER_GLOSS[tier]}
+              </dt>
+              <dd className={styles.legendBody}>{TIER_EXPLANATION[tier]}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className={styles.muted}>
+          La légende va du moins cher au plus cher ; la liste ci-dessous trie dans l&apos;autre sens, parce qu&apos;une ligne T4 ou T3 met
+          des jours à revenir et doit être demandée le premier jour.
+        </p>
+      </Disclosure>
 
       {remaining.length ? (
         <p className={styles.muted} data-testid="tier-remaining">
-          Reste {remaining.map(({ tier, count }) => `${count} ${count > 1 ? "lignes" : "ligne"} ${tier}`).join(", ")}.
+          Reste{" "}
+          {remaining
+            .map(({ tier, count }) => `${count} ${count > 1 ? "lignes" : "ligne"} ${tier} (${TIER_GLOSS[tier]})`)
+            .join(", ")}
+          .
         </p>
       ) : null}
 
@@ -112,8 +138,11 @@ function RowItem({ row, entry, today, onOpen }: { row: AuditCatalogRow; entry: E
     <li>
       <Card elevation="panel" className={styles.rowItem} data-testid={`row-${row.id}`}>
         <div className={styles.rowMain}>
+          {/* Le code seul n'apprend rien ; la glose répétée sur chaque carte,
+              si. Et le pilier passe par son libellé, comme partout ailleurs
+              dans l'outil — il s'affichait brut ici et dans l'éditeur. */}
           <MetaLabel size="xs" wide>
-            {row.tier} · {row.pillar}
+            {row.tier} · {TIER_GLOSS[row.tier]} · {AUDIT_PILLAR_LABELS[row.pillar]}
           </MetaLabel>
           <p className={styles.rowName}>{row.name}</p>
           <p className={styles.rowStatus} data-testid={`status-${row.id}`}>

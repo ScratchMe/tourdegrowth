@@ -3823,6 +3823,74 @@ exactement ce test tombe.
 **Toute la copie est neuve, donc `TODO: à relire`** (convention 6) :
 `content/comparisons.ts` plus six chaînes de chrome dans `dictionary.ts`.
 
+### Les codes de l'instrument d'audit ne s'affichent plus seuls (2026-09-14, signalé par Antoine)
+
+Deux signalements dans la même heure — « ACV, c'est bien pour Annual Contract
+Value ? » puis « il faut aussi que tu expliques les T1, T2, etc., les M7,
+M12, etc. C'est du travail très bâclé que tu me rends là. » Le second
+reproche est fondé, et il décrit une **classe**, pas un cas de plus : j'avais
+corrigé l'ACV par un patch d'une ligne sans regarder si le même défaut
+existait ailleurs. Il existait, trois fois.
+
+**Ce que le balayage a trouvé**, cette fois avant de corriger :
+
+1. **L'échelle T0-T4 ne vivait que dans un commentaire** de
+   `content/audit-catalog.ts`. Elle s'affiche pourtant sur les 25 cartes de
+   la collecte, dans les compteurs de reste et dans l'en-tête de l'éditeur de
+   ligne. La seule phrase qui l'approchait à l'écran n'expliquait que les
+   deux paliers les plus chers.
+2. **Le pilier s'affichait BRUT** (`revenue`, en minuscules) sur ces mêmes
+   cartes et dans l'en-tête de l'éditeur — alors qu'`AUDIT_PILLAR_LABELS`
+   existe et sert partout ailleurs dans l'outil (`RestitutionView`,
+   `TourScreen`). Une incohérence, pas un choix.
+3. **`m06` n'était expliqué nulle part**, alors qu'on ne peut pas le masquer :
+   le fichier de mission, les constats et les définitions (`m06@2`) le
+   référencent.
+
+**Le correctif est à deux registres, parce qu'ils servent à deux endroits.**
+La **glose** (« libre-service », « file d'analyste ») tient sur une carte à
+côté du code — c'est la répétition sur 25 cartes qui fait apprendre un code —
+et le compteur la reprend (« reste 1 ligne T4 (mandat requis) »).
+L'**explication** complète vit une fois, dans une légende dépliable qui dit
+aussi pourquoi elle se lit du moins cher au plus cher alors que la liste trie
+dans l'autre sens : les deux ordres sont voulus, et sans cette phrase l'écart
+se lit comme un bug.
+
+**Une glose corrigée par son propre test.** J'avais écrit « une session » pour
+T2. Le test qui compare la glose aux vraies chaînes `cost` du catalogue a
+échoué, et il avait raison : plusieurs lignes T2 ne sont pas une session (un
+board pack déjà écrit, des conventions à lire seul). La glose est devenue
+« quelques heures », qui tient sur les dix lignes T2. J'ai ensuite **retiré ce
+test** : comparer mot à mot une glose de cinq mots à 39 lignes de prose libre
+est un détecteur de coïncidences, pas un invariant. Il est remplacé par
+celui qui en est un — **le `cost` de chaque ligne s'ouvre sur le palier de
+cette ligne** (vérifié : vrai sur les 39), parce que c'est le désaccord qui
+tromperait vraiment, les deux s'affichant à deux centimètres l'un de l'autre.
+
+**Le contrôle de non-vacuité a prouvé une limite de mon propre garde, plutôt
+que de la suggérer.** Le test statique (`src/__tests__/audit-vocabulary.test.ts`)
+exige qu'un fichier qui rend un code importe aussi sa table de libellés. En
+remettant le pilier brut sur la carte, il tombe. En remettant le **palier**
+brut, **il passe quand même** — parce que la légende dépliable, dans le même
+fichier, importe `TIER_GLOSS` de son côté. Ce sont donc les specs e2e qui
+portent la glose du palier ; le test statique est un filet pour la classe, pas
+la garantie. C'est écrit dans le fichier de test plutôt que laissé à
+supposer. (Premier sabotage raté au passage : retirer l'import cassait la
+compilation — un sabotage doit compiler pour prouver quoi que ce soit.)
+
+**Vérifié en réel** : lint, tsc, 668 tests unitaires (+6), `next build`, **275
+specs Playwright** (+4). Et surtout **à l'écran**, ce qui manquait à la
+première passe : collecte en 1280 et 390 px (`T4 · MANDAT REQUIS ·
+ACQUISITION`, légende dépliée, compteur glosé), éditeur de ligne (`M07 · T4 ·
+MANDAT REQUIS · ACQUISITION` plus la note qui dit ce qu'est `m07`),
+`scrollWidth === clientWidth` aux deux largeurs.
+
+**Leçon de méthode, la vraie** : quand un signalement porte sur un code
+inexpliqué, la première action est de **lister tous les codes affichés par
+l'écran** — pas de corriger celui qui a été nommé. La liste des 49 libellés
+de `Field` faite pour l'ACV était le bon geste ; je ne l'avais pas étendue
+aux valeurs rendues dans les cartes, où était l'essentiel du problème.
+
 ## État du projet au 2026-09-14 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.

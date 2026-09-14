@@ -49,6 +49,76 @@ test.describe("the audit instrument's rows", () => {
     expect(new Set(statuses)).toEqual(new Set(["En attente"]));
   });
 
+  /**
+   * Signalé par Antoine le 2026-09-14 : « il faut aussi que tu expliques les
+   * T1, T2, etc., les M7, M12, etc. » L'échelle T0-T4 ne vivait que dans un
+   * commentaire de `content/audit-catalog.ts` ; le pilier s'affichait brut
+   * (`revenue`) alors qu'`AUDIT_PILLAR_LABELS` existait et servait partout
+   * ailleurs ; et `m06` n'était expliqué nulle part alors que le fichier, les
+   * constats et les définitions le référencent.
+   *
+   * Ces specs portent sur ce que l'ÉCRAN montre. Le garde statique
+   * (`src/__tests__/audit-vocabulary.test.ts`) vérifie qu'une table de
+   * libellés est importée ; lui seul ne dirait pas si la glose est lisible à
+   * côté du code.
+   */
+  test("a row card never shows a bare code: the tier carries its gloss, the pillar its label", async ({ page }) => {
+    await openMission(page);
+    const badges = await page.getByTestId("row-list").locator("> li").allInnerTexts();
+
+    for (const text of badges) {
+      const tier = text.slice(0, 2);
+      // La glose, sur la même ligne que le code — c'est la répétition sur 25
+      // cartes qui fait apprendre un code.
+      expect(text, tier).toMatch(
+        /^T[0-4] · (PRODUIT PAR L'AUDIT|LIBRE-SERVICE|QUELQUES HEURES|FILE D'ANALYSTE|MANDAT REQUIS) · /,
+      );
+      // Et jamais l'identifiant brut du pilier en minuscules.
+      expect(text.split("\n")[0], tier).not.toMatch(/ · (acquisition|activation|retention|referral|revenue|transverse)\b/);
+    }
+  });
+
+  test("the tier legend explains all five, and says why it reads in the other order", async ({ page }) => {
+    await openMission(page);
+    const legend = page.getByTestId("tier-legend");
+    await expect(legend).toBeVisible();
+
+    // Fermée par défaut — la légende ne doit pas pousser la première ligne
+    // hors de l'écran — mais son contenu est là dès qu'on l'ouvre.
+    await legend.locator("summary").click();
+    const text = await legend.innerText();
+    for (const tier of ["T0", "T1", "T2", "T3", "T4"]) expect(text, tier).toContain(tier);
+    expect(text).toContain("file d'analyste");
+    expect(text).toContain("mandat");
+    // Les deux ordres sont voulus : la légende monte, la liste descend.
+    expect(text).toContain("l'autre sens");
+  });
+
+  test("the remaining-rows counter glosses its tiers too", async ({ page }) => {
+    await openMission(page);
+    const counter = await page.getByTestId("tier-remaining").innerText();
+    expect(counter).toMatch(/T[0-4] \(/);
+  });
+
+  test("the row editor says what its identifier is", async ({ page }) => {
+    await openMission(page);
+    // Le testid est porté par la Card À L'INTÉRIEUR du <li>, pas par le <li>.
+    const firstId = await page
+      .getByTestId("row-list")
+      .locator('> li [data-testid^="row-"]')
+      .first()
+      .getAttribute("data-testid");
+    await page.getByTestId("row-list").locator("> li").first().getByRole("button", { name: /Renseigner|Modifier/ }).click();
+
+    const note = page.getByTestId("row-id-note");
+    await expect(note).toBeVisible();
+    // Il nomme CET identifiant, pas un exemple générique.
+    const id = (firstId ?? "").replace(/^row-/, "");
+    expect(id).toMatch(/^m\d+$/);
+    await expect(note).toContainText(id);
+    await expect(note).toContainText("catalogue");
+  });
+
   test("the editor shows the catalog card, and asks nothing until a status is chosen", async ({ page }) => {
     await openMission(page);
     const firstRow = page.getByTestId("row-list").locator("> li").first();

@@ -489,3 +489,32 @@
   color: var(--text-alert);
   margin: 0;
 }
+
+/* La légende des paliers T0-T4 (vue collecte). Une liste de définitions
+   plutôt qu'un tableau : deux colonnes de prose à 390 px ne tiennent pas, et
+   le code doit rester collé à sa glose. */
+.legend {
+  margin: 0 0 var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.legendRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.legendTerm {
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  color: var(--text-body);
+  text-transform: uppercase;
+}
+
+.legendBody {
+  font: var(--body-sm);
+  color: var(--text-muted);
+  margin: 0;
+}
