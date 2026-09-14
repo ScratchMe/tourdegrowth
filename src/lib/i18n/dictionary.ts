@@ -541,6 +541,19 @@ export const UI_STRINGS = {
     // Relu et validé par Antoine (2026-09-09) — R2-08. `/quiz` used to inherit the root
     // title and no description while being the most-linked page of the site.
     quizTitle: { en: "The Tour — 15 questions, 3 minutes — Tour de Growth", fr: "Le Tour — 15 questions, 3 minutes — Tour de Growth" },
+    /*
+     * Les titres de document des trois écrans applicatifs. Ils ne sont pas
+     * peints — le design ne prévoit rien au-dessus de la carte de question ni
+     * du numéral du score — mais le document en porte un (voir
+     * `.tdg-visually-hidden` dans `globals.css`). Distincts des `*Title`
+     * ci-dessus, qui portent le suffixe de marque : un `<h1>` nomme la page,
+     * il ne répète pas le nom du site.
+     *
+     * TODO: à relire — copie neuve (convention 6 de CLAUDE.md).
+     */
+    quizHeading: { en: "The Tour — 15 questions", fr: "Le Tour — 15 questions" },
+    resultHeading: { en: "Tour result — {score}/100", fr: "Résultat du Tour — {score}/100" },
+    deepDiveHeading: { en: "Deep dive — 10 more questions", fr: "Diagnostic approfondi — 10 questions de plus" },
     quizDescription: {
       en: "Answer 15 questions about how your product acquires, activates, retains, refers and monetises — and get an AARRR growth score out of 100 you can share.",
       fr: "Réponds à 15 questions sur la façon dont ton produit acquiert, active, retient, fait recommander et monétise — et obtiens un score growth AARRR sur 100 à partager.",

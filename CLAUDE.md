@@ -2993,6 +2993,75 @@ sur le formulaire passe ; et côté unitaire, retirer le court-circuit
 « contenu identique » en fait tomber trois, retirer le tri des clés une
 seule, remplacer le max par le compte une seule.
 
+### Trois écrans sans titre de document, et `/quiz` qui n'envoyait rien du tout (2026-09-14)
+
+Antoine, via Bing Webmaster Tools : quatre URL sans `<h1>` — `/r/sample` sous
+ses trois formes et `/quiz`. Vérifié sur le build avant de corriger quoi que
+ce soit, parce qu'un rapport d'outil se relit contre le HTML réellement
+servi : les neuf pages de contenu en ont bien exactement un, et les **trois**
+écrans applicatifs (`/quiz`, `/r/[id]`, `/deep-dive/[id]`) n'ont **aucun**
+titre, ni `h1` ni `h2`. Bing n'en signalait que deux parce que le troisième
+est `noindex` et redirige un visiteur.
+
+**Le vrai défaut était plus grand que le symptôme.** En regardant pourquoi
+`/quiz` n'avait pas de titre, le document servi fait 12 ko dont **zéro
+contenu** : `if (!mounted) return null`, la garde d'hydratation de l'étape 4,
+renvoie `null` pour tout le composant. Un moteur reçoit donc une page vide sur
+celle que R2-08 a délibérément laissée indexable et qui reçoit plus de liens
+internes qu'aucune autre — en-tête et pied de page de chaque page de contenu y
+pointent. Le `<h1>` manquant n'était qu'une conséquence.
+
+**Correctif, et sa limite dite franchement.** L'enveloppe ne dépend pas de
+`localStorage` : wordmark, titre, langue. Elle part donc toujours, et le corps
+attend le montage comme avant. Le premier rendu client est identique au HTML
+du serveur — c'est ce même rendu qui valait `null` — donc aucun mismatch n'est
+introduit. Ce que ça **ne** règle pas : le corps du questionnaire reste
+client-only. Le rendre côté serveur demanderait de peindre la question 1 puis
+de corriger après montage pour qui reprend un parcours, c'est-à-dire un flash
+visible sur l'écran que tout le funnel existe pour faire terminer. Il n'existe
+pas de moyen d'avoir les deux (`useSyncExternalStore` a exactement le même
+flash, son snapshot serveur étant vide par définition). **C'est un arbitrage
+produit, pas une implémentation** — posé à Antoine plutôt que tranché ici.
+
+**Le titre est visuellement masqué, et c'est un choix argumenté.** Ces trois
+écrans n'ont pas de titre dessiné : leur premier élément peint est une carte
+de question ou le numéral du score, et le design ne prévoit rien au-dessus. En
+ajouter un visible changerait une maquette livrée. Sur `/r/[id]`, le candidat
+visible existe pourtant — le numéral — mais en faire un `<h1>` demanderait de
+changer `ScoreDisplay`, que la carte d'aperçu de la landing réutilise, où un
+second `<h1>` serait faux. Le score est dans le texte du titre masqué
+(« Résultat du Tour — 74/100 »), donc rien n'est perdu.
+
+`clip-path` et non `display: none` : les deux autres retirent l'élément de
+l'arbre d'accessibilité, donc masqueraient le titre aux lecteurs d'écran
+aussi — ce qui reviendrait à ne pas en avoir mis. C'est exactement ce que la
+spec vérifie, par le **nom accessible** et pas par la propriété CSS.
+
+**Ce que la spec tient, et la preuve qu'elle le tient.** `document-headings.spec.ts`
+lit le **HTML brut en HTTP**, pas le DOM — sur ces trois routes précisément,
+ce sont deux choses différentes, et un crawler ne fait pas tourner les effets.
+Non-vacuité mesurée en deux temps : retirer le `h1` partout fait tomber trois
+specs ; le retirer **seulement de l'enveloppe** en le gardant après montage en
+fait tomber **deux** (les deux lectures HTTP) pendant que la spec DOM passe —
+c'est la distinction que la spec revendique, prouvée plutôt qu'affirmée.
+
+**Une spec existante corrigée, pas assouplie** : `progression.spec.ts`
+utilisait `getByRole("heading", { level: 1 }).or(locator("main"))` comme
+contrôle « la page a chargé ». Il n'y avait pas de `h1`, donc la branche
+`main` gagnait ; il y en a un maintenant et il n'est pas visible, donc le
+contrôle échouait pour une raison étrangère au sujet de la spec. Remplacé par
+une assertion sur ce que cette page dessine vraiment (`bottleneck`).
+
+**Trois chaînes neuves, statut « à relire »** (convention 6) :
+`meta.quizHeading`, `meta.resultHeading` (gabarit `{score}`),
+`meta.deepDiveHeading`. Distinctes des `meta.*Title` existants, qui portent le
+suffixe de marque : un `<h1>` nomme la page, il ne répète pas le nom du site.
+
+**Vérifié en réel** : `tsc`, `eslint`, 598 tests unitaires, `next build`,
+**221 specs Playwright** (+14), passe axe inchangée. Et par requête HTTP sur
+les quatre URL du rapport plus `/deep-dive/sample` : un `h1` chacune, dans la
+langue du lecteur, avec le score pour la page de résultat.
+
 ## État du projet au 2026-09-14 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -3015,7 +3084,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **L'instrument d'audit growth a son schéma** (2026-09-13, `AUDIT.md`) : un outil personnel pour les diagnostics qu'Antoine mène en entreprise, navigateur seulement, jamais Firestore — `src/lib/audit/` + `src/content/audit-catalog.ts`, sans aucune route ni UI encore. Phase 1 (la saisie sous `/admin/audit`) est le prochain chantier, découpée en six PR dans **`AUDIT-PLAN.md`** (2026-09-13) ; phase 3 (tout ce qui ressemble à un produit) reste fermée tant que les entretiens ne sont pas faits et le contrat de travail pas vérifié.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **598 tests unitaires**, **207 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
+**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **598 tests unitaires**, **221 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 

@@ -67,3 +67,29 @@ body {
     transition: none !important;
   }
 }
+
+/**
+ * Un titre que le document porte sans le peindre.
+ *
+ * Les trois écrans applicatifs (`/quiz`, `/r/[id]`, `/deep-dive/[id]`) n'ont
+ * pas de titre dessiné : leur premier élément est une carte de question ou le
+ * numéral du score, et le design ne prévoit rien au-dessus. Ils n'avaient donc
+ * AUCUN titre de document — signalé par Bing Webmaster Tools le 2026-09-14, et
+ * vrai aussi pour un lecteur d'écran, qui ne pouvait pas naviguer par titres.
+ *
+ * `clip-path` plutôt que `display: none` ou `visibility: hidden` : ces deux-là
+ * retirent l'élément de l'arbre d'accessibilité, donc masqueraient le titre
+ * aux lecteurs d'écran aussi — ce qui reviendrait à ne pas l'avoir mis. Le
+ * carré de 1px reste dans le flux, invisible et lu.
+ */
+.tdg-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  border: 0;
+  clip-path: inset(50%);
+}
