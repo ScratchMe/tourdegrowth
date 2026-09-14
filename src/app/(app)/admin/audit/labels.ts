@@ -1,4 +1,4 @@
-import type { AuditPillar } from "@/content/audit-catalog";
+import type { AuditPillar, AuditTier } from "@/content/audit-catalog";
 import type { ObservationGap } from "@/lib/audit/observation-fields";
 import type { Quadrant } from "@/lib/audit/quadrants";
 import type { ChaseState } from "@/lib/audit/tracking";
@@ -32,6 +32,45 @@ import type { AuditProfileModel } from "@/lib/audit/profiles";
  * Chaque table est typée `Record<T, string>` : ajouter une valeur au schéma
  * sans lui donner de libellé ne compile pas.
  */
+/**
+ * Le palier de coût de collecte d'une ligne (`AuditCatalogRow.tier`).
+ *
+ * L'échelle n'existait que dans un commentaire de `content/audit-catalog.ts`
+ * et n'atteignait jamais l'écran, alors que le code s'affiche sur les 25
+ * cartes de la collecte, dans les compteurs de reste, et dans l'en-tête de
+ * l'éditeur de ligne. Signalé par Antoine le 2026-09-14 : « il faut aussi
+ * que tu expliques les T1, T2, etc. »
+ *
+ * Deux registres, parce qu'ils servent à deux endroits : la GLOSE tient sur
+ * une carte à côté du code (c'est la répétition sur 25 cartes qui fait
+ * apprendre un code), l'EXPLICATION vit dans la légende dépliable, une fois.
+ * Les deux sont tirées des vraies chaînes `cost` du catalogue, pas inventées.
+ */
+export const TIER_GLOSS: Record<AuditTier, string> = {
+  T0: "produit par l'audit",
+  T1: "libre-service",
+  T2: "quelques heures",
+  T3: "file d'analyste",
+  T4: "mandat requis",
+};
+
+export const TIER_EXPLANATION: Record<AuditTier, string> = {
+  T0: "Produit par l'audit lui-même — entretiens, relecture de dossiers, Tour de l'auditeur. Rien à demander à l'entreprise.",
+  T1: "La donnée est dans un outil auquel tu as déjà accès. Des minutes, pas des heures, et aucune demande à poser.",
+  T2: "Une à trois heures : soit une session avec la personne qui tient le système (facturation, CRM, produit), soit une lecture de document quand il existe déjà.",
+  T3: "Une file d'analyste : deux à cinq jours ouvrés. À demander le PREMIER jour, définition déjà écrite, pour éviter un aller-retour.",
+  T4: "Ne se demande pas sans sponsor — une ventilation de masse salariale par fonction, par exemple. Sans mandat, la ligne restera absente.",
+};
+
+/**
+ * L'échelle dans l'ordre CROISSANT du coût : c'est l'ordre dans lequel on
+ * explique une échelle. La liste de collecte, elle, trie dans l'autre sens
+ * (le plus coûteux d'abord, parce que c'est ce qui doit partir le premier
+ * jour) — les deux ordres sont voulus, et la légende le dit pour que l'écart
+ * ne se lise pas comme un bug.
+ */
+export const TIER_SCALE: AuditTier[] = ["T0", "T1", "T2", "T3", "T4"];
+
 export const MANDATE_LABELS: Record<Mandate, string> = {
   "no-mandate": "Sans mandat",
   mandated: "Avec mandat",

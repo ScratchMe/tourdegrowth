@@ -32,7 +32,9 @@ import { Field } from "./_ui/Field";
 import { Select } from "./_ui/Select";
 import {
   ABSENT_CAUSE_LABELS,
+  AUDIT_PILLAR_LABELS,
   REPAIR_SCALE_LABELS,
+  TIER_GLOSS,
   SYSTEM_CAUSE_LABELS,
   VALUE_STATUS_HINTS,
   VALUE_STATUS_LABELS,
@@ -115,9 +117,17 @@ export function RowEditor({
       <div className={styles.screenHead}>
         <div>
           <MetaLabel size="xs" wide>
-            {row.id} · {row.tier} · {row.pillar}
+            {row.id} · {row.tier} · {TIER_GLOSS[row.tier]} · {AUDIT_PILLAR_LABELS[row.pillar]}
           </MetaLabel>
           <h2 className={styles.h2}>{row.name}</h2>
+          {/* `m06` est référencé par le fichier, les constats et les
+              définitions (`m06@2` dans l'éditeur de définition), donc on ne
+              peut pas le masquer — il fallait le dire. Signalé par Antoine le
+              2026-09-14. */}
+          <p className={styles.muted} data-testid="row-id-note">
+            <strong>{row.id}</strong> est l&apos;identifiant de cette ligne dans le catalogue : c&apos;est lui que le fichier de mission, les
+            constats et les définitions référencent. Il ne change pas, même si le nom de la ligne est réécrit.
+          </p>
         </div>
         <Button compact variant="secondary" onClick={onClose} data-testid="close-row">
           Retour à la collecte
