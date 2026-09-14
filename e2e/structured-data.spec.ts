@@ -36,7 +36,10 @@ test("a term page is a DefinedTerm tied to the set, with a three-step breadcrumb
   const blocks = await jsonLdBlocks(page, "/en/glossary/cac");
   const term = blocks.find((b) => b["@type"] === "DefinedTerm") as Record<string, unknown>;
   expect(term).toBeDefined();
-  expect(term.name).toBe("CAC");
+  // Dérivé, jamais un littéral — la même discipline que le compte ci-dessus,
+  // que je n'avais pas appliquée ici : le titre du terme est de la copie, et
+  // le développer en « CAC — Customer Acquisition Cost » a fait rougir la CI.
+  expect(term.name).toBe(GLOSSARY.cac.term.en);
   expect(String((term.inDefinedTermSet as Record<string, unknown>)["@id"])).toMatch(/\/en\/glossary#set$/);
   const crumbs = blocks.find((b) => b["@type"] === "BreadcrumbList") as Record<string, unknown>;
   expect((crumbs.itemListElement as unknown[]).length).toBe(3);

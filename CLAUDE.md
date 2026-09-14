@@ -3891,6 +3891,66 @@ l'écran** — pas de corriger celui qui a été nommé. La liste des 49 libell�
 de `Field` faite pour l'ACV était le bon geste ; je ne l'avais pas étendue
 aux valeurs rendues dans les cartes, où était l'essentiel du problème.
 
+### Bon à tirer nº5, et le bug qui rendait les décisions du nº4 invisibles (2026-09-14)
+
+Les dix marqueurs `TODO: à relire` restants partent en relecture :
+[bon à tirer nº5](https://claude.ai/code/artifact/6236cd38-cfbb-4b4c-89c4-fb35a8bca84f)
+— 31 cartes, 16 pages de fond (les dix termes de glossaire de la vague 2.2,
+les deux pages « porte ouverte », les quatre comparaisons « AARRR vs X ») plus
+les 15 libellés de chrome qui les entourent.
+
+**Le document est reconstruit depuis `grep -rn "TODO: à relire" src/`, jamais
+de mémoire** (convention 6) — et pour la troisième fois d'affilée c'est le grep
+qui a corrigé un compte annoncé ici : l'état du projet disait « six marqueurs »,
+il y en avait **dix**. Les textes eux-mêmes sont exportés depuis les vrais
+modules par une sonde jetable lancée avec une config Vitest du bac à sable
+(le seul runner qui résout TypeScript et l'alias `@/`), jamais retapés : relire
+une copie qui aurait dérivé du code serait pire que ne pas relire.
+
+**Bilingue, avec un défaut assumé** : le français est affiché, l'anglais est à
+un clic par carte (ou partout d'un coup). 15 800 mots de français et autant
+d'anglais est un barrage, et un barrage veut dire que la relecture ne se fait
+pas. C'est écrit en tête de l'artifact plutôt que caché : la relecture d'Antoine
+porte sur le fond et la voix, la mienne sur le parallèle et la typographie.
+
+**Le vrai enseignement est ailleurs.** En vérifiant le contrat `db` avant de
+publier — obligatoire avant de déclarer une capability — j'ai trouvé que le
+gabarit du nº4, que je recopiais, lit un instantané de collection comme un
+**tableau de documents portant leurs champs** :
+
+```js
+db.collection("lines").onSnapshot(function(docs){ (docs || []).forEach(…) })
+```
+
+Or `onSnapshot` sur une collection délivre un **`QuerySnapshot`** — `snap.docs`,
+et le corps de chaque document derrière `data()`. Le callback levait donc
+`TypeError: docs.forEach is not a function` à la première livraison : les
+décisions étaient **écrites** (le chemin `doc().set()` est correct) et **jamais
+relues**. Quelqu'un qui tranche dix cartes, ferme l'onglet et revient retrouve
+une page vierge — la façon la plus sûre de faire abandonner une relecture.
+
+**Et ma propre affirmation « le nº4 n'a jamais été ouvert » était fausse.**
+Je l'avais vérifiée sur la collection `reviews/`, le nom des nº1 à nº3 ; le nº4
+écrit dans `lines/`. Il contenait bien une décision d'Antoine (`m07`, « ça
+passe », 2026-09-13). Vérifier une absence dans le mauvais tiroir, c'est ne
+rien avoir vérifié — quatrième occurrence de cette leçon dans ce projet.
+
+Corrigé dans les deux artifacts, avec en plus un message « Reprise de N
+décisions déjà enregistrées » (repris du nº1, qui avait la bonne forme depuis
+le début) : un rechargement silencieux ne dit pas s'il a retrouvé quelque chose.
+
+**Non-vacuité mesurée** : en remettant exactement la forme du nº4 sur un faux
+`db` conforme au contrat, `TypeError: docs.forEach is not a function`, zéro
+décision restaurée, et les écritures continuent de passer — exactement le
+symptôme qui rendait le défaut invisible. Le correctif du nº4 a ensuite été
+rejoué contre la vraie décision `m07` lue en base : restaurée.
+
+**Vérifié** : rendu réel dans Chromium (desktop 1280 et mobile 390),
+`scrollWidth === clientWidth` aux deux largeurs — un défaut corrigé au passage,
+une clé de dictionnaire comme `comparisonPage.glossaryHeading` est un jeton
+insécable qui poussait la carte 41 px hors d'un écran de 390 (`minmax(0,1fr)`
+sur la piste de grille, `overflow-wrap:anywhere` sur le titre).
+
 ## État du projet au 2026-09-14 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -3935,7 +3995,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | TypeScript 7 et ESLint 10 | Tous deux bloqués par des paquets embarqués dans `eslint-config-next` (`typescript-eslint` refuse TS ≥ 6.1 ; `eslint-plugin-react` plante sur ESLint 10). Dependabot les ignore en majeure depuis le 2026-09-08 | Quand `eslint-config-next` suivra. Re-tester en installant, pas en lisant les plages de peer : c'est l'essai qui a montré qu'ESLint 10 plante. |
 | Instrument d'audit : phase 1 (saisie) | **Close le 2026-09-14** (PR #131 à #153). `/admin/audit` crée une mission, trie 25 lignes par palier, saisit tout ce que le schéma prévoit, produit `m19` depuis le Tour de l'auditeur, croise méthode × réalité, rédige les constats et le bloc de tête, exporte, réimporte et purge. La spec canari prouve qu'aucune requête ne porte un octet de la mission ; la recette vérifie le critère de sortie sur un vrai build, `localStorage` réellement vidé entre l'export et l'import | Rien côté code. |
 | Instrument d'audit : phase 1 bis (la vraie mission) | **Le prochain chantier, et il est côté Antoine** : mener AB Tasty dans l'outil jusqu'à `pending = 0`, en tenant le journal des frictions | C'est ce journal qui dira ce que la phase 2 (les readouts) doit construire — il n'y a aucune façon de le deviner d'ici. |
-| Copie à relire (bon à tirer nº5) | Six marqueurs dans `src/`, relevés au grep : les 39 lignes du catalogue d'audit (elles s'impriment dans les livrables d'Antoine, sous son nom) ; les deux pages « porte ouverte » (`content/open-door.ts`) ; les 5 chaînes `openDoor` de `dictionary.ts` ; **les 3 titres de document invisibles** posés par le correctif h1 du 2026-09-14 (`meta.quizHeading`/`resultHeading`/`deepDiveHeading`) ; le libellé de pied de page `nav-strings.checklist` ; et **les quatre termes de glossaire du lot 1** (2.2) | Un bon à tirer, même circuit que les précédents. Le document se reconstruit depuis `grep -rn "TODO: à relire" src/`, jamais de mémoire — et c'est encore ce grep qui a rattrapé les trois titres invisibles, que j'avais oubliés en écrivant cette ligne une première fois. |
+| Copie à relire | **Deux bons à tirer ouverts en parallèle**, et ils ne se recouvrent pas. [Nº5](https://claude.ai/code/artifact/6236cd38-cfbb-4b4c-89c4-fb35a8bca84f) (2026-09-14) porte les dix marqueurs relevés au grep : les dix termes de glossaire de la vague 2.2, les deux pages « porte ouverte », les quatre comparaisons « AARRR vs X », et les 15 libellés de chrome (`openDoor`, `comparisonPage`, les 3 titres de document invisibles, `nav-strings.checklist`). [Nº4](https://claude.ai/code/artifact/d45d5d7d-fdfa-4155-ba0d-76290e331dc8) porte les 39 lignes du catalogue d'audit — **1 carte tranchée sur 39** | La relecture d'Antoine. Le prochain document se reconstruit depuis `grep -rn "TODO: à relire" src/`, jamais de mémoire ni depuis un compte écrit ici : trois fois de suite ce grep a rattrapé un oubli, et la dernière il a corrigé « six » en « dix ». Les décisions vivent dans la base de chaque artifact — nº4 dans `lines/`, nº5 dans `cards/` ; lire le bon tiroir avant de conclure qu'un artifact n'a pas été ouvert. |
 | Vercel Functions Storage | **Réglé** : la politique de rétention posée par Antoine le 2026-09-14 l'a fait passer de 9,24 Go à 397 Mo, et un déploiement pèse 45,5 Mo de fonctions depuis le 2026-09-13 | Rien. |
 | Vercel Fluid Active CPU (36 min / 4 h par mois) | Les deux postes qui dominaient le coût par visite sont corrigés le 2026-09-14 : six préchargements dynamiques par vue de la homepage, et l'image de partage rendue à chaque vue de résultat — confirmé en production, `MISS` puis `HIT` sur l'adresse versionnée. La région des fonctions est passée à `cdg1` le même jour (vérifié : `x-vercel-id: iad1::cdg1::…`) | Relire le compteur dans Vercel une semaine après. |
 | Lecture des stats par la session | **Les deux moitiés marchent** (trois runs réels le 2026-09-14 : tableau de bord et Search Console, déchiffrés par la session ; ligne de départ du plan relevée, tenue hors du dépôt public). À surveiller au prochain run Search Console : `/en/glossary/*` doit remplacer les anciennes URL non préfixées dans les pages créditées | Rien : un `age-keygen` puis un run (`admin`, `gsc` ou `both`) quand une session a besoin des chiffres. |

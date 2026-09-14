@@ -110,7 +110,7 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
   cac: {
     // Relu et validé par Antoine (2026-09-09) — R2-16: the French head query is "coût
     // d'acquisition client" and it appeared in neither the H1 nor the title.
-    term: { fr: "CAC — Coût d'Acquisition Client", en: "CAC" },
+    term: { fr: "CAC — Coût d'Acquisition Client", en: "CAC — Customer Acquisition Cost" },
     definition: {
       fr: "Coût d'Acquisition Client : combien tu dépenses en moyenne pour obtenir un nouveau client.",
       en: "Customer Acquisition Cost: how much you spend on average to acquire one new customer.",
@@ -118,7 +118,7 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
   },
   ltv: {
     // Relu et validé par Antoine (2026-09-09) — R2-16.
-    term: { fr: "LTV — Lifetime Value", en: "LTV" },
+    term: { fr: "LTV — Lifetime Value", en: "LTV — Lifetime Value" },
     definition: {
       fr: "Lifetime Value : la valeur totale qu'un client génère en moyenne sur toute sa relation avec ton produit.",
       en: "Lifetime Value: the total value an average customer generates over their whole relationship with your product.",
@@ -182,9 +182,9 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
     },
   },
   "nrr-grr": {
-    term: { fr: "NRR / GRR — rétention de revenu", en: "NRR / GRR" },
+    term: { fr: "NRR / GRR — Net et Gross Revenue Retention", en: "NRR / GRR — Net and Gross Revenue Retention" },
     definition: {
-      fr: "Deux lectures de ce que les clients de l'an dernier valent cette année : la rétention brute ignore l'expansion, la rétention nette la compte.",
+      fr: "Les deux taux de rétention de revenu : sur ce que les clients de l'an dernier valent cette année, la brute ignore l'expansion, la nette la compte.",
       en: "Two ways to read what last year's customers are worth this year: gross revenue retention ignores expansion, net revenue retention counts it.",
     },
   },
@@ -196,9 +196,9 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
     },
   },
   "dau-mau": {
-    term: { fr: "DAU/MAU — ratio d'adhérence", en: "DAU/MAU ratio" },
+    term: { fr: "DAU/MAU — Daily et Monthly Active Users", en: "DAU/MAU — Daily and Monthly Active Users" },
     definition: {
-      fr: "Le rapport entre utilisateurs actifs quotidiens et mensuels. Multiplié par 30, il donne le nombre de jours par mois où un utilisateur moyen revient.",
+      fr: "Le ratio d'adhérence : les utilisateurs actifs quotidiens sur les mensuels. Multiplié par 30, il donne les jours par mois où un utilisateur moyen revient.",
       en: "The ratio of daily to monthly active users. Multiplied by 30, it gives the number of days a month the average user comes back.",
     },
   },
@@ -210,9 +210,9 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
     },
   },
   pql: {
-    term: { fr: "PQL — lead qualifié par le produit", en: "PQL — product-qualified lead" },
+    term: { fr: "PQL — Product-Qualified Lead", en: "PQL — Product-Qualified Lead" },
     definition: {
-      fr: "Un utilisateur qui a franchi un seuil d'usage choisi parce qu'il prédit l'achat — qualifié par ce qu'il fait, pas par ce qu'il a téléchargé.",
+      fr: "Un lead qualifié par le produit : quelqu'un qui a franchi un seuil d'usage qui prédit l'achat — qualifié par ce qu'il fait, pas par ce qu'il a téléchargé.",
       en: "A user who has crossed a usage threshold chosen because it predicts buying — qualified by what they do, not by what they downloaded.",
     },
   },
@@ -224,7 +224,7 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
     },
   },
   arpu: {
-    term: { fr: "ARPU — revenu moyen par utilisateur", en: "ARPU — average revenue per user" },
+    term: { fr: "ARPU — Average Revenue Per User", en: "ARPU — Average Revenue Per User" },
     definition: {
       fr: "Le revenu d'une période divisé par les utilisateurs actifs. À ne pas confondre avec l'ARPPU, par utilisateur payant, qui peut être vingt fois plus élevé.",
       en: "Revenue over a period divided by active users. Not to be confused with ARPPU, per paying user, which can be twenty times higher.",
