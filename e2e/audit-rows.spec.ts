@@ -346,6 +346,121 @@ test.describe("the audit instrument's rows", () => {
     expect(entry.observations[0].value.rows[0].cells).toEqual([105, 92, null]);
   });
 
+  /**
+   * The context block applies to EVERY status, absent included — that is
+   * where it carries the most: a line the company does not have, that nobody
+   * owns and that has never fed a decision is this tool's archetypal finding.
+   * It is folded because it is optional, never hidden because it would be
+   * off-topic.
+   */
+  test("the context block is there on an absent row, not just a measured one", async ({ page }) => {
+    await openMission(page);
+    await page.getByTestId("open-row-m01").click();
+    await page.locator("#status").selectOption("absent");
+    await page.getByTestId("context-disclosure").click();
+    await expect(page.getByTestId("context-fields")).toBeVisible();
+    await expect(page.getByTestId("tracking-fields")).toBeVisible();
+    // The criterion belongs to the value, so it is NOT here.
+    await expect(page.getByTestId("criterion-fields")).toHaveCount(0);
+  });
+
+  /**
+   * The one rule the validator carries on a criterion (q5): an argued
+   * threshold carries its argument. The screen has to distinguish that from
+   * the provenance of a public benchmark, which is advice — blocking on what
+   * is not blocking is as wrong as staying silent on what is.
+   */
+  test("an argued threshold is told it needs its argument; a benchmark is only advised", async ({ page }) => {
+    await openMission(page);
+    await page.getByTestId("open-row-m01").click();
+    await page.locator("#status").selectOption("measured");
+    await page.locator("#criterionKind").selectOption("argued-threshold");
+    await expect(page.getByTestId("criterion-missing")).toBeVisible();
+    await page.locator("#criterionJustification").fill("Sous 85 %, la moitié de chaque euro d'acquisition est perdue d'avance.");
+    await expect(page.getByTestId("criterion-missing")).toHaveCount(0);
+
+    await page.locator("#criterionKind").selectOption("public-benchmark");
+    // Never blocking — but the missing provenance is named.
+    await expect(page.getByTestId("criterion-missing")).toHaveCount(0);
+    await expect(page.getByTestId("criterion-weak")).toContainText("source");
+    await page.locator("#criterionSource").fill("OpenView 2026");
+    await expect(page.getByTestId("criterion-weak")).not.toContainText("source");
+  });
+
+  test("changing the criterion kind keeps the value and drops what no longer applies", async ({ page }) => {
+    await openMission(page);
+    await page.getByTestId("open-row-m01").click();
+    await page.locator("#status").selectOption("measured");
+    await fillDefinition(page);
+    await page.locator("#criterionKind").selectOption("argued-threshold");
+    await page.locator("#criterionValue").fill("85");
+    await page.locator("#criterionJustification").fill("Un argument qui ne doit pas suivre un repère public.");
+    await page.locator("#criterionKind").selectOption("public-benchmark");
+    await expect(page.locator("#criterionValue")).toHaveValue("85");
+    await page.getByTestId("save-row").click();
+
+    const parsed = await exportedJson(page);
+    const entry = parsed.passes[0].entries.find((e: { metricId: string }) => e.metricId === "m01");
+    expect(entry.criterion).toEqual({ kind: "public-benchmark", value: 85 });
+    // The justification would have shipped in the file with nothing showing
+    // it — that is exactly what the switch has to prevent.
+    expect(entry.criterion.justification).toBeUndefined();
+  });
+
+  /**
+   * The chase clock restarts at the chase, not at the request. Without that,
+   * a line you have just followed up on stays at the top of the action list
+   * and the auditor chases the same person twice.
+   */
+  test("an old request is listed to chase, and a fresh chase takes it off the list", async ({ page }) => {
+    await openMission(page);
+    await page.getByTestId("open-row-m01").click();
+    await page.locator("#status").selectOption("not-accessible");
+    await page.getByTestId("context-disclosure").click();
+    const old = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    await page.locator("#requestedOn").fill(old);
+    await page.locator("#routedTo").fill("DAF");
+    await expect(page.getByTestId("chase-state")).toHaveText("À relancer");
+    await page.getByTestId("save-row").click();
+
+    await expect(page.getByTestId("chase-list")).toContainText("DAF");
+    await expect(page.getByTestId("collect-groups")).toContainText("DAF (1)");
+
+    await page.getByTestId("open-row-m01").click();
+    await page.getByTestId("context-disclosure").click();
+    await page.locator("#chasedOn").fill(new Date().toISOString().slice(0, 10));
+    await expect(page.getByTestId("chase-state")).toHaveText("En attente");
+    await page.getByTestId("save-row").click();
+    await expect(page.getByTestId("chase-list")).toHaveCount(0);
+  });
+
+  test("the tier counters are what is LEFT, not the totals", async ({ page }) => {
+    await openMission(page);
+    // 25 applicable rows for the default profile: one T4, and the counter has
+    // to lose it once that row is filled in.
+    await expect(page.getByTestId("tier-remaining")).toContainText("1 ligne T4");
+    await page.getByTestId("open-row-m07").click(); // the T4 row
+    await page.locator("#status").selectOption("absent");
+    await page.getByTestId("save-row").click();
+    await expect(page.getByTestId("tier-remaining")).not.toContainText("T4");
+  });
+
+  test("the decision at stake can be taken from the catalog rather than retyped", async ({ page }) => {
+    await openMission(page);
+    await page.getByTestId("open-row-m01").click();
+    await page.locator("#status").selectOption("absent");
+    await page.getByTestId("context-disclosure").click();
+    await page.getByTestId("use-catalog-decision").click();
+    await expect(page.locator("#decisionAtStake")).not.toHaveValue("");
+    // Once filled, the shortcut is gone — it would only overwrite.
+    await expect(page.getByTestId("use-catalog-decision")).toHaveCount(0);
+    await page.getByTestId("save-row").click();
+
+    const parsed = await exportedJson(page);
+    const entry = parsed.passes[0].entries.find((e: { metricId: string }) => e.metricId === "m01");
+    expect(entry.decisionAtStake).toContain("base fait référence");
+  });
+
   test("the exported file carries the entry, and the validator reads it back", async ({ page }) => {
     await openMission(page);
     await page.getByTestId("row-list").locator("> li").first().getByRole("button", { name: "Renseigner" }).click();

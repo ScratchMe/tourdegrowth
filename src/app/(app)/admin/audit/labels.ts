@@ -1,10 +1,13 @@
 import type { ObservationGap } from "@/lib/audit/observation-fields";
+import type { ChaseState } from "@/lib/audit/tracking";
 import type {
   AbsentCause,
   AcvBand,
   Confidence,
   ContractTerm,
   Mandate,
+  CriterionKind,
+  MandateLevel,
   MetricDefinition,
   ObtainedHow,
   PeriodType,
@@ -176,4 +179,31 @@ export const CONFIDENCE_LABELS: Record<Confidence, string> = {
 export const OBSERVATION_GAP_TEXT: Record<ObservationGap, string> = {
   "needs-value": "Il manque au moins une observation qui porte une valeur — une observation en attente ne suffit pas à dire « mesuré ».",
   "needs-second": "Contesté garde les deux chiffres côte à côte : il en faut une seconde. Un seul chiffre n'est pas un désaccord.",
+};
+
+/**
+ * Les trois sortes de repère. Les libellés disent D'OÙ vient le seuil, parce
+ * que c'est ça qui décide s'il est opposable : un chiffre de rapport public,
+ * un seuil de praticien qu'on assume et qu'on argumente (q5), ou l'entreprise
+ * comparée à elle-même.
+ */
+export const CRITERION_KIND_LABELS: Record<CriterionKind, string> = {
+  "public-benchmark": "Repère public (rapport, étude)",
+  "argued-threshold": "Seuil argumenté (praticien)",
+  "internal-trend": "Tendance interne (eux contre eux-mêmes)",
+};
+
+/** Ce qui débloquerait une ligne — politique, jamais technique. */
+export const MANDATE_LEVEL_LABELS: Record<MandateLevel, string> = {
+  none: "Rien à débloquer",
+  peer: "Un pair",
+  director: "Un directeur",
+  exec: "Le comité de direction",
+};
+
+export const CHASE_STATE_LABELS: Record<ChaseState, string> = {
+  "not-requested": "Pas encore demandé",
+  waiting: "En attente",
+  overdue: "À relancer",
+  received: "Reçu",
 };

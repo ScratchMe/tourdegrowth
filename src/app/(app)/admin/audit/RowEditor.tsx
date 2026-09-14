@@ -9,6 +9,7 @@ import type { AuditCatalogRow } from "@/content/audit-catalog";
 import type { DefinitionDraft } from "@/lib/audit/definitions";
 import { entryFieldGroups, selectableStatuses } from "@/lib/audit/entry-fields";
 import { valueEditorFor } from "@/lib/audit/observation-fields";
+import { Disclosure } from "@/components/core/Disclosure";
 import {
   ABSENT_CAUSES,
   DEFAULT_ABSENT_CAUSE,
@@ -23,6 +24,8 @@ import {
   type SystemCause,
   type ValueStatus,
 } from "@/lib/audit/schema";
+import { ContextEditor } from "./ContextEditor";
+import { CriterionEditor } from "./CriterionEditor";
 import { DefinitionEditor } from "./DefinitionEditor";
 import { ObservationList } from "./ObservationList";
 import { Field } from "./_ui/Field";
@@ -52,15 +55,21 @@ import styles from "./page.module.css";
  * statut laisserait saisir une donnée que l'export refuserait ensuite.
  *
  * Étape 1.3a : statut, absence (cause, coût de réparation, cause système) et
- * accès. Étape 1.3b : la définition versionnée, puis la série d'observations.
- * Le critère, la décision en jeu, l'exposition et le pilotage suivent —
- * l'écran le dit plutôt que de faire croire que la ligne est complète.
+ * accès. Étape 1.3b : la définition versionnée, la série d'observations, puis
+ * le repère, la décision en jeu, l'exposition, la gouvernance et le pilotage.
+ *
+ * **Le contexte s'applique à tous les statuts**, y compris `absent` — c'est
+ * même là qu'il porte le plus : une ligne que l'entreprise n'a pas, dont
+ * personne n'est propriétaire et qui n'a jamais servi dans une décision est
+ * le constat type de cet outil. Il est replié parce qu'il est facultatif,
+ * jamais masqué parce qu'il serait hors sujet.
  */
 export function RowEditor({
   row,
   entry,
   definition,
   defaultScope,
+  today,
   onChange,
   onClose,
 }: {
@@ -70,6 +79,8 @@ export function RowEditor({
   definition: MetricDefinition | undefined;
   /** Le périmètre de la mission — le défaut d'une définition neuve, jamais vide. */
   defaultScope: string;
+  /** La date du jour, en ISO — passée plutôt que lue, pour que l'état de relance soit testable. */
+  today: string;
   onChange: (entry: Entry, definition?: DefinitionDraft) => void;
   onClose: () => void;
 }) {
@@ -218,7 +229,14 @@ export function RowEditor({
                 definition={definitionDraft}
                 onChange={(observations) => patch({ observations })}
               />
+              <CriterionEditor criterion={draft.criterion} onChange={(criterion) => patch({ criterion })} />
             </div>
+          ) : null}
+
+          {draft ? (
+            <Disclosure summary="Décision, exposition, gouvernance, pilotage" data-testid="context-disclosure">
+              <ContextEditor entry={draft} defaultDecision={row.decision} today={today} onChange={patch} />
+            </Disclosure>
           ) : null}
 
           {groups.includes("access") ? (
