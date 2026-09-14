@@ -171,7 +171,7 @@ est autonome.*
 
 | # | Action | Qui | Détail |
 |---|---|---|---|
-| 0.1 | **Relever `/admin/stats`** : analyses totales, partages, K, `take_own_tour`, funnel | Toi | L'avant, sans quoi rien ne se mesure. Coller les chiffres ici, §7 |
+| 0.1 | **Relever `/admin/stats`** : analyses totales, partages, K, `take_own_tour`, funnel | Toi | L'avant, sans quoi rien ne se mesure. Coller les chiffres ici, §7 | **Depuis le 2026-09-14, la session le fait seule** : `.github/workflows/stats.yml`, rapport chiffré vers une clé éphémère, voir `CLAUDE.md`.
 | 0.2 | **Dépôt GitHub** : description (« A 3-minute AARRR growth check-up — deterministic score, roast mode, open source »), homepage `https://www.tourdegrowth.com`, topics (`aarrr`, `growth`, `saas`, `startup`, `nextjs`, `gemini`, `open-source`, `quiz`, `pirate-metrics`) | Toi (2 min, Settings) | Je ne peux pas régler ça par l'API dont je dispose. Le README reste tel quel sous l'hypothèse A |
 | 0.3 | **IndexNow** : fichier de clé sous `public/`, workflow GitHub quotidien + manuel qui soumet les 42 URL du sitemap à `api.indexnow.org` (Bing, Yandex, Naver, Seznam en une requête) | **Moi** — PR | **Livré le 2026-09-13** (`.github/workflows/indexnow.yml`, `src/__tests__/indexnow.test.ts`). Google n'utilise pas IndexNow ; Bing/DuckDuckGo si. Gratuit, sans compte, sans secret : la clé est publique par construction. Premier envoi réel à déclencher à la main après le déploiement |
 | 0.4 | **Nomenclature UTM** : retirer `linkedin`, `network_dm`, `podcast`, `paid_linkedin` ; ajouter `reddit_sideproject`, `reddit_roastmystartup`, `reddit_imadethis`, `reddit_entrepreneur`, `bluesky`, `directory:<slug>` par annuaire, `newsletter:<slug>` | **Moi** — même PR | **Livré le 2026-09-13** (`scripts/utm-channels.mjs`, testé : un canal exclu ne peut pas revenir). Sans ça, la semaine 2 ne dit pas ce qui a marché (leçon du plan d'août) |
@@ -216,7 +216,7 @@ mois.*
 | 2.4 | **Maillage** : chaque nouvelle page reçoit un lien depuis au moins deux pages existantes (index du glossaire, `/how-it-works`, pied de page pour la checklist) | La règle de R2-13, appliquée d'emblée |
 | 2.5 | **Le benchmark des pratiques** — dès que `stats/global` ≥ 50 : ouvrir `/metrics` (`METRICS_PAGE_ENABLED`) et publier une page narrative « l'étape qui freine le plus souvent » (C2 de `REVIEW-03.md`) | La seule donnée que personne d'autre ne peut publier : tous les benchmarks mesurent des résultats, aucun ne mesure les *pratiques* du pré-1 M$. Immunisée au problème de définition puisque l'échelle est la nôtre. Et c'est un vrai lien à obtenir |
 | 2.6 | **Bing Webmaster Tools** | Toi (compte Microsoft) — 10 min ; IndexNow suffit à l'indexation, ceci ajoute la mesure |
-| 2.7 | **Search Console** : soit réactiver l'accès SEO Gets, soit m'exporter les requêtes toutes les deux semaines | Sans ça, 2.2 et 2.3 se choisissent au jugé. Avec, on écrit ce que Google frôle déjà |
+| 2.7 | **Search Console** : soit réactiver l'accès SEO Gets, soit m'exporter les requêtes toutes les deux semaines | Sans ça, 2.2 et 2.3 se choisissent au jugé. Avec, on écrit ce que Google frôle déjà | **Réglé le 2026-09-14** : le même workflow lit la Search Console par compte de service (`scripts/gsc-report.mjs`), plus d'export à faire.
 
 ### Vague 3 — La boucle produit (en parallèle, autonome, du code)
 

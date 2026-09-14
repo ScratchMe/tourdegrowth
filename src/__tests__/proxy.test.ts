@@ -84,6 +84,11 @@ describe("proxy (admin gate)", () => {
     expect(response.headers.get("WWW-Authenticate")).toMatch(/^Basic realm=/);
   });
 
+  it("gates the JSON twin of the dashboard exactly like the page — /admin/stats/json is under /admin", async () => {
+    expect(proxy(requestWithAuth("/admin/stats/json")).status).toBe(401);
+    expect(proxy(requestWithAuth("/admin/stats/json", basicHeader("admin:correct-horse-battery-staple"))).status).not.toBe(401);
+  });
+
   it("lets an authorized /admin request through (not a 401)", async () => {
     const response = proxy(requestWithAuth("/admin/stats", basicHeader("admin:correct-horse-battery-staple")));
     expect(response.status).not.toBe(401);

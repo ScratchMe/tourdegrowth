@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Card } from "@/components/core/Card";
 import { MetaLabel } from "@/components/brand/MetaLabel";
-import { fetchFunnelStats, type FunnelWindow } from "@/lib/analytics/goatcounter-api";
-import { computeGrowthStats } from "@/lib/submissions/growth-stats";
+import type { FunnelWindow } from "@/lib/analytics/goatcounter-api";
+import { loadDashboard } from "@/lib/submissions/dashboard";
 import styles from "./page.module.css";
 
 // Real submission volume/K-factor numbers — never cache this behind Next's
@@ -134,14 +134,10 @@ function FunnelBreakdown({ window }: { window: FunnelWindow }) {
  * engineering at this volume.
  */
 export default async function AdminStatsPage() {
-  const [stats, funnelWindows] = await Promise.all([computeGrowthStats(), fetchFunnelStats()]);
-  // Conversion per share — REVIEW-02.md R2-01. Firestore knows who was
-  // referred; only GoatCounter knows how many times a result was shared. The
-  // all-time window is the one whose share count matches an all-time referral
-  // count; null when GoatCounter is unavailable or nothing was shared yet.
+  // One loader for this page and for `/admin/stats/json` (`lib/submissions/
+  // dashboard.ts`), so the two can never compute a number differently.
+  const { growth: stats, funnel: funnelWindows, conversionPerShare } = await loadDashboard();
   const allTimeShares = funnelWindows.find((w) => w.label === "All-time")?.stats?.shares ?? null;
-  const conversionPerShare =
-    allTimeShares !== null && allTimeShares > 0 ? stats.referredSubmissions / allTimeShares : null;
 
   return (
     <main className={styles.main}>
