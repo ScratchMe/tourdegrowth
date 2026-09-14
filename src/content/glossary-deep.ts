@@ -56,6 +56,147 @@ export interface DeepGlossaryContent {
 const t = (en: string, fr: string): Translatable => ({ en, fr });
 
 export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
+  // ——— GROWTH-PLAN.md wave 2.2, lot 1 (2026-09-14) ———
+  // Each of these four is a child of a page that already earns impressions
+  // (activation, cac, revenue, retention), and each reuses that parent's
+  // worked example rather than inventing its own set of numbers: the shared
+  // month — 400 customers, €20,000 MRR, 12 cancellations, 8 downgrades, 15
+  // upgrades — is the same one `churn`, `revenue` and `upsell-cross-sell`
+  // already walk through, read here as a pair of retention rates.
+  "activation-rate": {
+    formula: {
+      expression: t(
+        "Activation rate = (users who reached the activation event) ÷ (users who signed up in the same window)",
+        "Taux d'activation = (utilisateurs ayant atteint l'événement d'activation) ÷ (inscrits sur la même fenêtre)",
+      ),
+      terms: [
+        {
+          symbol: t("Activation event", "Événement d'activation"),
+          meaning: t(
+            "The one action that means value landed — a first project shared, a first invoice sent, a first teammate invited. One event, not a checklist: a rate built on five conditions tells you something failed, never which one.",
+            "L'action unique qui signifie que la valeur est arrivée — un premier projet partagé, une première facture envoyée, un premier coéquipier invité. Un événement, pas une liste : un taux construit sur cinq conditions te dit que quelque chose a échoué, jamais quoi.",
+          ),
+        },
+        {
+          symbol: t("Sign-ups", "Inscrits"),
+          meaning: t(
+            "Everyone who created an account in the window — including the ones who never came back. Dropping them is the most common way this number gets flattered.",
+            "Tous ceux qui ont créé un compte sur la fenêtre — y compris ceux qui ne sont jamais revenus. Les retirer est la façon la plus courante de flatter ce chiffre.",
+          ),
+        },
+        {
+          symbol: t("Window", "Fenêtre"),
+          meaning: t(
+            "A cohort of sign-ups, followed for a fixed number of days. \"30% activate\" means nothing without \"within how long\": the same product reads 25% at 24 hours and 40% at 14 days.",
+            "Une cohorte d'inscrits, suivie sur un nombre de jours fixe. « 30 % activent » ne veut rien dire sans « en combien de temps » : le même produit affiche 25 % à 24 heures et 40 % à 14 jours.",
+          ),
+        },
+      ],
+      note: t(
+        "Freeze the definition before you start improving the number. Every change to the event or the window moves the rate without anything changing in the product — which is also the easiest way to report progress that isn't real.",
+        "Fige la définition avant de chercher à améliorer le chiffre. Chaque changement d'événement ou de fenêtre déplace le taux sans que rien ne bouge dans le produit — c'est aussi la façon la plus simple d'annoncer un progrès qui n'existe pas.",
+      ),
+    },
+    example: {
+      title: t("A team tool, one month of sign-ups", "Un outil d'équipe, un mois d'inscriptions"),
+      steps: [
+        t(
+          "1,000 sign-ups in September. Activation is defined as \"created a first project AND invited a teammate\" within 14 days.",
+          "1 000 inscriptions en septembre. L'activation est définie comme « a créé un premier projet ET invité un coéquipier » sous 14 jours.",
+        ),
+        t(
+          "640 create a project (64%). Of those 640, 310 also invite someone (48%). Activation rate = 310 ÷ 1,000 = 31%.",
+          "640 créent un projet (64 %). Sur ces 640, 310 invitent aussi quelqu'un (48 %). Taux d'activation = 310 ÷ 1 000 = 31 %.",
+        ),
+        t(
+          "Had activation been defined as \"created a project\" alone, the same month would read 64%. Same product, same users, double the number.",
+          "Si l'activation avait été définie comme « a créé un projet » seulement, le même mois afficherait 64 %. Même produit, mêmes utilisateurs, chiffre doublé.",
+        ),
+        t(
+          "The 48% is where the work is. Moving the invite prompt inside project creation — instead of leaving it in a settings page — takes it to 400 of 640. Activation rate: 400 ÷ 1,000 = 40%, nine points, without a single extra sign-up.",
+          "Les 48 % sont l'endroit où il y a du travail. Déplacer l'invitation dans la création de projet — au lieu de la laisser dans une page de réglages — la fait passer à 400 sur 640. Taux d'activation : 400 ÷ 1 000 = 40 %, neuf points, sans une inscription de plus.",
+        ),
+      ],
+      takeaway: t(
+        "Breaking the rate into its steps is what made it actionable. \"31% activate\" is a number; \"64% create a project and only half of them invite anyone\" is a thing to go fix on Monday.",
+        "Décomposer le taux en étapes est ce qui l'a rendu actionnable. « 31 % activent » est un chiffre ; « 64 % créent un projet et seule la moitié invite quelqu'un » est quelque chose à aller réparer lundi.",
+      ),
+    },
+    benchmark: [
+      t(
+        "There is no cross-company benchmark for this one, and anyone quoting one is comparing definitions rather than products. A team that calls activation \"confirmed their email\" and a team that calls it \"ran a first payroll\" are not measuring the same thing on the same scale.",
+        "Il n'y a pas de référence inter-entreprises pour celui-là, et quiconque en cite une compare des définitions plutôt que des produits. Une équipe qui appelle activation « a confirmé son e-mail » et une autre « a fait une première paie » ne mesurent pas la même chose sur la même échelle.",
+      ),
+      t(
+        "The figure commonly quoted for self-serve SaaS, 20-40%, is only useful as a sanity check on your own definition: above it, the event is probably too shallow to predict anything; far below it, the event may be several actions bundled into one.",
+        "Le chiffre couramment cité pour un SaaS en self-serve, 20-40 %, ne sert qu'à vérifier ta propre définition : au-dessus, l'événement est probablement trop superficiel pour prédire quoi que ce soit ; très en dessous, il regroupe peut-être plusieurs actions en une.",
+      ),
+      t(
+        "The comparison that does mean something is your own previous cohort, with the definition unchanged. That is also the only comparison a number this definition-dependent can honestly support.",
+        "La comparaison qui a du sens est ta propre cohorte précédente, à définition inchangée. C'est aussi la seule qu'un chiffre aussi dépendant de sa définition peut honnêtement porter.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Pick the event by correlation, not by convenience: the action whose presence in week one best separates the users still there at week four from the ones who left. See the aha moment for how to find it.",
+        "Choisis l'événement par corrélation, pas par commodité : l'action dont la présence en semaine 1 sépare le mieux les utilisateurs encore là en semaine 4 de ceux qui sont partis. Voir le moment « aha » pour la méthode.",
+      ),
+      t(
+        "Count the steps between sign-up and that event, then delete one. Not make it prettier — delete it.",
+        "Compte les étapes entre l'inscription et cet événement, puis supprimes-en une. Pas l'embellir — la supprimer.",
+      ),
+      t(
+        "Measure the drop at each step, not just the end-to-end rate. The rate tells you there is a leak; the steps tell you where.",
+        "Mesure la chute à chaque étape, pas seulement le taux de bout en bout. Le taux te dit qu'il y a une fuite ; les étapes te disent où.",
+      ),
+      t(
+        "Split \"reached it\" from \"reached it in the first session\". The second is the number that predicts retention; the first mostly measures patience.",
+        "Sépare « l'a atteint » de « l'a atteint dès la première session ». Le second est le chiffre qui prédit la rétention ; le premier mesure surtout la patience.",
+      ),
+      t(
+        "Re-measure with the definition frozen for at least three cohorts before claiming an improvement.",
+        "Re-mesure à définition figée sur au moins trois cohortes avant d'annoncer une amélioration.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "act-2",
+      body: t(
+        "This is the question the Tour asks word for word. Knowing the percentage is worth 20 points, a rough idea 7, and not knowing it 0 — and the gap between 20 and 7 is exactly the gap between a number you can move and an impression you can argue about. Activation is also the pillar where a low score costs the most downstream: every euro of acquisition spend runs through it before it reaches retention or revenue.",
+        "C'est la question que le Tour pose mot pour mot. Connaître le pourcentage vaut 20 points, en avoir une idée approximative 7, ne pas savoir 0 — et l'écart entre 20 et 7 est exactement celui entre un chiffre qu'on peut déplacer et une impression dont on peut débattre. L'activation est aussi le pilier où une note basse coûte le plus en aval : chaque euro d'acquisition la traverse avant d'atteindre la rétention ou le revenu.",
+      ),
+    },
+    faq: [
+      {
+        question: t("What is a good activation rate?", "C'est quoi un bon taux d'activation ?"),
+        answer: t(
+          "There is no answer that survives leaving your own product, because the number is a property of your definition as much as of your onboarding. The useful version of the question is: is this cohort better than the last one, with the event and the window unchanged?",
+          "Il n'y a pas de réponse qui survive à la sortie de ton produit, parce que le chiffre est autant une propriété de ta définition que de ton onboarding. La version utile de la question est : cette cohorte est-elle meilleure que la précédente, à événement et fenêtre inchangés ?",
+        ),
+      },
+      {
+        question: t("Activation rate or conversion rate?", "Taux d'activation ou taux de conversion ?"),
+        answer: t(
+          "Conversion usually means reaching payment; activation means reaching value. They come apart in both directions — a user can pay before getting value (common in B2B, where someone else signs) and get value long before paying (common in freemium). Tracking only conversion hides the first case until renewal.",
+          "La conversion désigne en général le passage au paiement ; l'activation, l'arrivée de la valeur. Les deux se séparent dans les deux sens — on peut payer avant d'avoir de la valeur (courant en B2B, où c'est quelqu'un d'autre qui signe) et recevoir de la valeur bien avant de payer (courant en freemium). Ne suivre que la conversion masque le premier cas jusqu'au renouvellement.",
+        ),
+      },
+      {
+        question: t("Should activation be one event or several?", "L'activation, un événement ou plusieurs ?"),
+        answer: t(
+          "One, if you want to act on the result. A rate built on several conditions falls when any of them fails, and the rate itself never tells you which — you end up rebuilding the breakdown anyway. Measure the steps separately and call the last one activation.",
+          "Un seul, si tu veux agir sur le résultat. Un taux construit sur plusieurs conditions chute dès que l'une échoue, et le taux ne dit jamais laquelle — tu finis par reconstruire le détail de toute façon. Mesure les étapes séparément et appelle la dernière l'activation.",
+        ),
+      },
+      {
+        question: t("How long should the window be?", "Quelle durée pour la fenêtre ?"),
+        answer: t(
+          "Long enough to cover one natural usage cycle of your product, no longer. A daily tool can read activation at 48 hours; a tool used at month-end cannot say anything before five or six weeks. Picking a window shorter than the cycle measures eagerness, not activation.",
+          "Assez longue pour couvrir un cycle d'usage naturel de ton produit, pas plus. Un outil quotidien peut lire l'activation à 48 heures ; un outil utilisé en fin de mois ne peut rien dire avant cinq ou six semaines. Une fenêtre plus courte que le cycle mesure l'empressement, pas l'activation.",
+        ),
+      },
+    ],
+  },
+
   cac: {
     formula: {
       expression: t(
@@ -171,6 +312,136 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         answer: t(
           "Lag the customers, not the spend: divide this quarter's spend by the customers who signed in the following quarter, or by the cohort that entered as leads this quarter and eventually closed. Either beats dividing today's spend by today's customers, which for a long cycle mostly measures last quarter's marketing.",
           "Décale les clients, pas la dépense : divise la dépense de ce trimestre par les clients signés le trimestre suivant, ou par la cohorte entrée comme leads ce trimestre et finalement convertie. L'un ou l'autre vaut mieux que diviser la dépense d'aujourd'hui par les clients d'aujourd'hui, qui pour un cycle long mesure surtout le marketing du trimestre précédent.",
+        ),
+      },
+    ],
+  },
+
+  "cac-payback": {
+    formula: {
+      expression: t(
+        "CAC payback (months) = CAC ÷ (monthly revenue per customer × gross margin)",
+        "CAC payback (mois) = CAC ÷ (revenu mensuel par client × marge brute)",
+      ),
+      terms: [
+        {
+          symbol: t("CAC", "CAC"),
+          meaning: t(
+            "The fully loaded cost of winning one customer — ads, tools, agencies, content and the salaries of the people selling and marketing. The CAC page walks through why leaving the salaries out is the most common mistake.",
+            "Le coût complet d'acquisition d'un client — publicité, outils, agences, contenu et les salaires des personnes qui vendent et font le marketing. La page CAC détaille pourquoi oublier les salaires est l'erreur la plus fréquente.",
+          ),
+        },
+        {
+          symbol: t("Gross margin", "Marge brute"),
+          meaning: t(
+            "What is left of the customer's payment after the direct cost of serving them: hosting, payment fees, support, any usage-based cost. Typically 70-85% in SaaS, much lower in anything with human delivery.",
+            "Ce qu'il reste du paiement du client après le coût direct de sa livraison : hébergement, frais de paiement, support, tout coût lié à l'usage. En général 70-85 % en SaaS, bien moins dès qu'il y a de l'humain dans la livraison.",
+          ),
+        },
+        {
+          symbol: t("Monthly revenue per customer", "Revenu mensuel par client"),
+          meaning: t(
+            "What one customer pays per month. For annual contracts, use the monthly equivalent for the calculation and read the FAQ on prepayment, which changes the cash answer completely.",
+            "Ce qu'un client paie par mois. Pour un contrat annuel, utilise l'équivalent mensuel pour le calcul et lis la FAQ sur le prépaiement, qui change complètement la réponse côté trésorerie.",
+          ),
+        },
+      ],
+      note: t(
+        "Using revenue instead of gross margin is the version that flatters you, and it is the version most often quoted in a board deck. Margin is what actually pays the CAC back; revenue has the hosting bill still to pay out of it.",
+        "Utiliser le revenu au lieu de la marge brute est la version qui flatte, et c'est celle qu'on cite le plus souvent en comité. C'est la marge qui rembourse réellement le CAC ; le revenu, lui, doit encore payer la facture d'hébergement.",
+      ),
+    },
+    example: {
+      title: t("The same €500 customer, followed forward", "Le même client à 500 €, suivi dans le temps"),
+      steps: [
+        t(
+          "CAC of €500 — the figure the CAC page arrives at: €60,000 of quarterly spend for 120 new customers.",
+          "CAC de 500 € — le chiffre auquel arrive la page CAC : 60 000 € de dépenses trimestrielles pour 120 nouveaux clients.",
+        ),
+        t(
+          "The customer pays €50 a month at 80% gross margin, so €40 a month actually comes back. Payback = 500 ÷ 40 = 12.5 months.",
+          "Le client paie 50 € par mois à 80 % de marge brute, donc 40 € par mois reviennent réellement. Payback = 500 ÷ 40 = 12,5 mois.",
+        ),
+        t(
+          "Computed on revenue instead of margin: 500 ÷ 50 = 10 months. Two and a half months of difference, entirely produced by which number you divide by.",
+          "Calculé sur le revenu au lieu de la marge : 500 ÷ 50 = 10 mois. Deux mois et demi d'écart, entièrement produits par le choix du diviseur.",
+        ),
+        t(
+          "At 3% monthly churn the average customer stays about 33 months (1 ÷ 0.03). So after payback there are roughly 20 months of margin left: 20 × €40 = €820 of profit per customer, and an LTV:CAC of about 2.6:1 — under the 3:1 most investors quote.",
+          "À 3 % de churn mensuel, un client reste environ 33 mois (1 ÷ 0,03). Il reste donc à peu près 20 mois de marge après le remboursement : 20 × 40 € = 820 € de profit par client, et un LTV:CAC d'environ 2,6:1 — sous le 3:1 que citent la plupart des investisseurs.",
+        ),
+      ],
+      takeaway: t(
+        "Payback and LTV:CAC were computed from the same three numbers and say different things. Payback says when the cash comes back; LTV:CAC says whether it was worth it at all. A company short on cash is bound by the first long before the second.",
+        "Payback et LTV:CAC ont été calculés à partir des trois mêmes chiffres et disent des choses différentes. Le payback dit quand la trésorerie revient ; le LTV:CAC dit si ça valait le coup. Une entreprise à court de trésorerie est contrainte par le premier bien avant le second.",
+      ),
+    },
+    benchmark: [
+      t(
+        "The targets most commonly quoted: under 12 months for SaaS sold to small businesses, and 18-24 months in enterprise sales, where contracts are larger and longer and the money is usually collected up front. Both are rules of thumb from a decade of venture-funded SaaS, not laws.",
+        "Les cibles les plus couramment citées : moins de 12 mois pour un SaaS vendu aux petites entreprises, 18-24 mois en vente entreprise, où les contrats sont plus gros, plus longs et généralement encaissés d'avance. Deux règles empiriques issues d'une décennie de SaaS financé, pas des lois.",
+      ),
+      t(
+        "The comparison that decides whether a payback is survivable is with your runway, not with a benchmark. A 14-month payback is fine with three years of cash and fatal with nine months of it — the same number, two different companies.",
+        "La comparaison qui décide si un payback est tenable est celle avec ta trésorerie, pas avec une référence. Un payback de 14 mois va très bien avec trois ans de cash et se révèle fatal avec neuf mois — le même chiffre, deux entreprises différentes.",
+      ),
+      t(
+        "A payback longer than the average customer lifetime is not a slow business, it is a business that loses money on every sale. That check takes one division and is skipped surprisingly often.",
+        "Un payback plus long que la durée de vie moyenne d'un client n'est pas une entreprise lente, c'est une entreprise qui perd de l'argent à chaque vente. Cette vérification tient en une division et se saute étonnamment souvent.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Bill annually, with a discount if needed. Collecting twelve months up front can take payback to the day of signature — the strongest lever on this number, and the only one that works without changing the product or the funnel.",
+        "Facture à l'année, avec une remise s'il le faut. Encaisser douze mois d'avance peut ramener le payback au jour de la signature — le levier le plus fort sur ce chiffre, et le seul qui marche sans toucher au produit ni au tunnel.",
+      ),
+      t(
+        "Work the margin before the price: a support cost or an infrastructure bill cut in half moves the denominator just as surely as a price rise, and nobody churns over it.",
+        "Travaille la marge avant le prix : un coût de support ou une facture d'infrastructure divisé par deux déplace le dénominateur aussi sûrement qu'une hausse de prix, et personne ne résilie à cause de ça.",
+      ),
+      t(
+        "Compute payback per channel, not blended. The blended number is an average over channels that often differ by a factor of five, and it hides both the channel to stop and the one to pour into.",
+        "Calcule le payback par canal, pas en mixte. Le chiffre mixte est une moyenne sur des canaux qui diffèrent souvent d'un facteur cinq, et il masque à la fois le canal à arrêter et celui où appuyer.",
+      ),
+      t(
+        "Shorten the sales cycle. Time between the spend and the first payment is dead money that the formula does not show, and a cycle cut from ten weeks to four is worth more than most pricing changes.",
+        "Raccourcis le cycle de vente. Le temps entre la dépense et le premier paiement est de l'argent mort que la formule ne montre pas, et un cycle ramené de dix semaines à quatre vaut plus que la plupart des changements de prix.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "acq-3",
+      body: t(
+        "The Tour asks whether you know your CAC at all, even roughly — worth 20 points, against 7 for an order of magnitude and 0 for no idea. Payback is the next question after that one, and it is why the Tour asks: a CAC on its own is a number, a CAC next to a monthly margin is a decision about whether to spend more next month. Teams that answer 0 here are usually not bad at arithmetic; they have simply never put the two figures side by side.",
+        "Le Tour demande si tu connais ton CAC, même approximativement — 20 points, contre 7 pour un ordre de grandeur et 0 pour aucune idée. Le payback est la question suivante, et c'est pour ça que le Tour pose celle-là : un CAC seul est un chiffre, un CAC à côté d'une marge mensuelle est une décision sur le fait de dépenser plus le mois prochain. Les équipes qui répondent 0 ne sont en général pas mauvaises en arithmétique ; elles n'ont simplement jamais mis les deux chiffres côte à côte.",
+      ),
+    },
+    faq: [
+      {
+        question: t("CAC payback or LTV:CAC — which one should I watch?", "CAC payback ou LTV:CAC — lequel suivre ?"),
+        answer: t(
+          "Both, and they answer different questions. LTV:CAC is a forecast: it depends on a churn rate projected years out, which is the least reliable number a young company owns. Payback is a date, built from figures you already have. When the two disagree, the date is the one your bank account will respect.",
+          "Les deux, et ils répondent à des questions différentes. Le LTV:CAC est une prévision : il dépend d'un taux de churn projeté sur des années, le chiffre le moins fiable que possède une jeune entreprise. Le payback est une date, construite sur des chiffres que tu as déjà. Quand les deux divergent, c'est la date que ton compte en banque respectera.",
+        ),
+      },
+      {
+        question: t("Should I use gross margin or revenue?", "Marge brute ou revenu ?"),
+        answer: t(
+          "Gross margin. Revenue has not yet paid for hosting, payment processing or support, so a payback computed on it claims money back that is already spent. Whichever you pick, write it down next to the number: most disagreements about payback turn out to be two people using two formulas.",
+          "La marge brute. Le revenu n'a pas encore payé l'hébergement, les frais de paiement ni le support, donc un payback calculé dessus réclame un argent déjà dépensé. Quel que soit ton choix, écris-le à côté du chiffre : la plupart des désaccords sur le payback sont deux personnes qui utilisent deux formules.",
+        ),
+      },
+      {
+        question: t("What changes if customers prepay a year?", "Qu'est-ce qui change si les clients paient un an d'avance ?"),
+        answer: t(
+          "The cash payback can drop to zero — the money is in the bank before the CAC invoice clears — while the accounting payback is unchanged. Both are true and they are used for different decisions: cash payback for how fast you can reinvest, accounting payback for whether the unit economics work.",
+          "Le payback trésorerie peut tomber à zéro — l'argent est encaissé avant même que la facture de CAC ne soit réglée — pendant que le payback comptable ne bouge pas. Les deux sont vrais et servent à des décisions différentes : le premier pour savoir à quelle vitesse réinvestir, le second pour savoir si l'économie unitaire tient.",
+        ),
+      },
+      {
+        question: t("Does payback include the sales cycle?", "Le payback inclut-il le cycle de vente ?"),
+        answer: t(
+          "The standard formula does not, which is fine for self-serve and misleading for anything with a long cycle. If three months pass between the spend and the first euro collected, add them: a 12-month payback that is really 15 is the kind of gap that only shows up as an unexplained cash shortfall.",
+          "La formule standard ne l'inclut pas, ce qui va très bien en self-serve et trompe dès que le cycle est long. Si trois mois s'écoulent entre la dépense et le premier euro encaissé, ajoute-les : un payback de 12 mois qui en fait 15 est le genre d'écart qui n'apparaît que comme un trou de trésorerie inexpliqué.",
         ),
       },
     ],
@@ -297,6 +568,136 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         answer: t(
           "Because churn isn't constant. A cohort view follows the customers who started in a given month and adds up what they actually paid over time; it captures the early cliff (many leave in month one or two) and the long flat tail (those who survive stay for years). The formula averages those two behaviours into one number that describes neither. Use the formula to start, cohorts to decide.",
           "Parce que le churn n'est pas constant. Une vue par cohortes suit les clients arrivés un mois donné et additionne ce qu'ils ont réellement payé au fil du temps ; elle capture la falaise du début (beaucoup partent au premier ou au deuxième mois) et la longue traîne plate (ceux qui survivent restent des années). La formule moyenne ces deux comportements en un chiffre qui ne décrit ni l'un ni l'autre. La formule pour commencer, les cohortes pour décider.",
+        ),
+      },
+    ],
+  },
+
+  "nrr-grr": {
+    formula: {
+      expression: t(
+        "NRR = (starting MRR + expansion − contraction − churn) ÷ starting MRR, and GRR = the same line without the expansion term",
+        "NRR = (MRR de départ + expansion − contraction − churn) ÷ MRR de départ, et GRR = la même ligne sans le terme d'expansion",
+      ),
+      terms: [
+        {
+          symbol: t("Starting MRR", "MRR de départ"),
+          meaning: t(
+            "What the customers you already had at the start of the period were paying. New customers won during the period are excluded from both formulas — including them is the single most common way an NRR gets quoted at 140%.",
+            "Ce que payaient les clients déjà présents au début de la période. Les nouveaux clients gagnés pendant la période sont exclus des deux formules — les inclure est de loin la façon la plus fréquente d'annoncer une NRR à 140 %.",
+          ),
+        },
+        {
+          symbol: t("Expansion", "Expansion"),
+          meaning: t(
+            "Upgrades, extra seats, usage above a plan, modules bought — money from customers who were already there. It appears in NRR and never in GRR, which is the entire difference between the two.",
+            "Montées en gamme, sièges supplémentaires, usage au-dessus d'un forfait, modules achetés — de l'argent venu de clients déjà présents. Il apparaît dans la NRR et jamais dans la GRR, ce qui est toute la différence entre les deux.",
+          ),
+        },
+        {
+          symbol: t("Contraction and churn", "Contraction et churn"),
+          meaning: t(
+            "Contraction is a customer who stays and pays less; churn is a customer who leaves. Both are losses, they have different cures, and lumping them together hides which one you have.",
+            "La contraction est un client qui reste et paie moins ; le churn est un client qui part. Les deux sont des pertes, elles se soignent différemment, et les confondre masque laquelle tu as.",
+          ),
+        },
+      ],
+      note: t(
+        "GRR can never exceed 100% — it only subtracts. NRR can, and that is why it is the number quoted in fundraising decks. Reading them as a pair is the point: GRR is the state of the bucket, NRR is the bucket plus the tap.",
+        "La GRR ne peut jamais dépasser 100 % — elle ne fait que soustraire. La NRR le peut, et c'est pour ça qu'elle est le chiffre cité en levée de fonds. Les lire en couple est tout l'intérêt : la GRR est l'état du seau, la NRR le seau plus le robinet.",
+      ),
+    },
+    example: {
+      title: t("One month, read twice", "Un mois, lu deux fois"),
+      steps: [
+        t(
+          "Start of month: 400 customers, €20,000 MRR — the same month the churn and revenue pages walk through. During it: 12 cancel (−€600), 8 downgrade (−€400), 15 upgrade (+€900).",
+          "Début de mois : 400 clients, 20 000 € de MRR — le même mois que celui des pages churn et revenu. Pendant le mois : 12 résilient (−600 €), 8 rétrogradent (−400 €), 15 montent en gamme (+900 €).",
+        ),
+        t(
+          "GRR = (20,000 − 400 − 600) ÷ 20,000 = 95%. Five points of the base leaked, and nothing in this figure can ever offset that.",
+          "GRR = (20 000 − 400 − 600) ÷ 20 000 = 95 %. Cinq points de la base ont fui, et rien dans ce chiffre ne peut compenser ça.",
+        ),
+        t(
+          "NRR = (20,000 + 900 − 400 − 600) ÷ 20,000 = 99.5%. Expansion closed four and a half of those five points.",
+          "NRR = (20 000 + 900 − 400 − 600) ÷ 20 000 = 99,5 %. L'expansion a refermé quatre points et demi sur les cinq.",
+        ),
+        t(
+          "The upsell playbook on the expansion page takes that month's expansion from €900 to €1,080. NRR becomes (20,000 + 1,080 − 400 − 600) ÷ 20,000 = 100.4% — above the line at last. GRR is still 95%: not one customer was saved.",
+          "Le playbook d'expansion de la page upsell fait passer l'expansion de ce mois de 900 € à 1 080 €. La NRR devient (20 000 + 1 080 − 400 − 600) ÷ 20 000 = 100,4 % — au-dessus de la barre, enfin. La GRR est toujours de 95 % : pas un client n'a été sauvé.",
+        ),
+      ],
+      takeaway: t(
+        "That last line is why the two are quoted together. An NRR just over 100% looks like a business whose base grows on its own; the GRR next to it says the base is still leaking 5% a month and a handful of growing accounts is paying for the ones walking out. Both statements are true, and only one of them is in the deck.",
+        "Cette dernière ligne est la raison pour laquelle on cite les deux ensemble. Une NRR juste au-dessus de 100 % ressemble à une base qui grandit toute seule ; la GRR à côté dit que la base fuit toujours de 5 % par mois et qu'une poignée de comptes en croissance paie pour ceux qui s'en vont. Les deux affirmations sont vraies, et une seule est dans le deck.",
+      ),
+    },
+    benchmark: [
+      t(
+        "The figures most often quoted for B2B SaaS: NRR of 110-130% is considered strong, and above 120% is the enterprise territory where seat growth inside big accounts does the work. Under 100% is normal and perfectly healthy in self-serve and SMB, where there is structurally less room to expand.",
+        "Les chiffres les plus souvent cités en SaaS B2B : une NRR de 110-130 % est considérée comme solide, et au-dessus de 120 % on est sur le terrain de l'entreprise, où la croissance en sièges dans les gros comptes fait le travail. Sous 100 %, c'est normal et parfaitement sain en self-serve et en PME, où il y a structurellement moins de place pour l'expansion.",
+      ),
+      t(
+        "GRR is commonly quoted at 85-95% annually in B2B, and the number matters more than NRR for judging the product itself: nothing a sales team does can raise GRR, only the product and the service can.",
+        "La GRR est couramment citée à 85-95 % par an en B2B, et ce chiffre compte davantage que la NRR pour juger le produit lui-même : rien de ce que fait une équipe commerciale ne peut monter la GRR, seuls le produit et le service le peuvent.",
+      ),
+      t(
+        "A pricing model with nowhere to grow — one flat plan, everything unlimited — caps NRR at GRR by construction. That is a pricing decision showing up as a retention number, and it is usually taken by accident.",
+        "Un modèle de prix sans place pour grandir — une offre unique, tout illimité — plafonne la NRR au niveau de la GRR par construction. C'est une décision de pricing qui ressort en chiffre de rétention, et elle est en général prise par accident.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Read GRR first, always. Expansion can outrun a leak for a few quarters and never for a few years, and a team that only watches NRR finds out at the moment the biggest account stops growing.",
+        "Lis la GRR en premier, toujours. L'expansion peut distancer une fuite quelques trimestres et jamais quelques années, et une équipe qui ne regarde que la NRR l'apprend au moment où le plus gros compte cesse de grandir.",
+      ),
+      t(
+        "Segment both by cohort size. One account doubling can carry a whole month's NRR, which means the headline number describes that one account rather than your customer base.",
+        "Segmente les deux par taille de compte. Un seul compte qui double peut porter la NRR d'un mois entier, ce qui veut dire que le chiffre global décrit ce compte-là plutôt que ta base de clients.",
+      ),
+      t(
+        "Split contraction from churn in the reporting. They are the same subtraction and opposite problems: contraction usually means the pricing tiers are wrong, churn usually means the product or the onboarding is.",
+        "Sépare contraction et churn dans le reporting. C'est la même soustraction et deux problèmes opposés : la contraction signale en général un mauvais découpage des offres, le churn un problème de produit ou d'onboarding.",
+      ),
+      t(
+        "Measure both on the same cohort definition and the same period length, month after month. An NRR computed annually and a GRR computed monthly are not a pair, they are two unrelated numbers printed next to each other.",
+        "Mesure les deux sur la même définition de cohorte et la même durée, mois après mois. Une NRR annuelle et une GRR mensuelle ne forment pas un couple, ce sont deux chiffres sans rapport imprimés côte à côte.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "rev-3",
+      body: t(
+        "The Tour asks whether you have an expansion playbook — 20 points for a systematic one, 7 for \"some ideas, nothing systematic\", 0 for none. NRR is the number that answers it from the other end: a team with no playbook has an NRR pinned to its GRR, and usually does not know either figure. The 7-point answer is the interesting one, because ideas never show up on the expansion line — which is exactly what the gap between these two rates measures.",
+        "Le Tour demande si tu as un playbook d'expansion — 20 points pour un playbook systématique, 7 pour « quelques idées, rien de systématique », 0 pour aucun. La NRR est le chiffre qui répond par l'autre bout : une équipe sans playbook a une NRR collée à sa GRR, et ne connaît en général ni l'une ni l'autre. La réponse à 7 points est la plus intéressante, parce que des idées n'apparaissent jamais sur la ligne d'expansion — ce que mesure précisément l'écart entre ces deux taux.",
+      ),
+    },
+    faq: [
+      {
+        question: t("Is NRR the same as net dollar retention?", "NRR et net dollar retention, c'est pareil ?"),
+        answer: t(
+          "Yes. Net revenue retention, net dollar retention and NDR are the same calculation under three names, and you will meet all three in the same funding round. Net revenue retention is the version that survives a change of currency.",
+          "Oui. Net revenue retention, net dollar retention et NDR sont le même calcul sous trois noms, et tu croiseras les trois dans la même levée. « Rétention nette de revenu » est la version qui survit à un changement de devise.",
+        ),
+      },
+      {
+        question: t("Can NRR be above 100% while the business shrinks?", "La NRR peut-elle dépasser 100 % pendant que l'entreprise rétrécit ?"),
+        answer: t(
+          "Yes, and it happens more often than the metric's reputation suggests. Lose half your customers, have the survivors double their spend, and NRR reads perfectly healthy on a base that has halved in headcount. That is why logo churn belongs next to it, and why GRR is the honest half of the pair.",
+          "Oui, et ça arrive plus souvent que la réputation de la métrique ne le laisse croire. Perds la moitié de tes clients, que les survivants doublent leur dépense, et la NRR affiche une santé parfaite sur une base qui a fondu de moitié en nombre de comptes. C'est pour ça que le churn logo doit figurer à côté, et que la GRR est la moitié honnête du couple.",
+        ),
+      },
+      {
+        question: t("Should new customers be included?", "Faut-il inclure les nouveaux clients ?"),
+        answer: t(
+          "No, and this is the mistake to watch for when reading someone else's number. Both rates measure what an existing base does over time; adding new customers turns them into a growth rate wearing a retention label, which can read well above 100% for a business losing every cohort it wins.",
+          "Non, et c'est l'erreur à guetter en lisant le chiffre de quelqu'un d'autre. Les deux taux mesurent ce que devient une base existante ; y ajouter les nouveaux clients en fait un taux de croissance déguisé en rétention, qui peut afficher bien plus de 100 % pour une entreprise qui perd chaque cohorte qu'elle gagne.",
+        ),
+      },
+      {
+        question: t("Monthly or annual?", "Mensuel ou annuel ?"),
+        answer: t(
+          "Annual is the convention for comparison, monthly is what you steer with. Careful with the conversion: a monthly NRR of 99.5% is not an annual 99.5% — compounded over twelve months it is about 94%. Rates compound, they do not add.",
+          "L'annuel est la convention pour comparer, le mensuel est ce avec quoi on pilote. Attention à la conversion : une NRR mensuelle de 99,5 % n'est pas une NRR annuelle de 99,5 % — composée sur douze mois, elle vaut environ 94 %. Les taux se composent, ils ne s'additionnent pas.",
         ),
       },
     ],
@@ -681,6 +1082,136 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         answer: t(
           "It can have several segments with different moments — a solo user and a team admin rarely get value from the same action — but each segment should have one. A single product with three activation metrics for the same user usually means nobody has decided which one matters, and the onboarding tries to do all three.",
           "Il peut avoir plusieurs segments avec des moments différents — un utilisateur seul et un administrateur d'équipe obtiennent rarement la valeur par la même action — mais chaque segment devrait en avoir une. Un même produit avec trois métriques d'activation pour le même utilisateur veut en général dire que personne n'a décidé laquelle compte, et l'onboarding essaie de faire les trois.",
+        ),
+      },
+    ],
+  },
+
+  "cohort-analysis": {
+    formula: {
+      expression: t(
+        "Retention(cohort C, period n) = (members of C still active in period n) ÷ (size of C at period 0)",
+        "Rétention(cohorte C, période n) = (membres de C encore actifs en période n) ÷ (taille de C en période 0)",
+      ),
+      terms: [
+        {
+          symbol: t("Cohort", "Cohorte"),
+          meaning: t(
+            "Everyone who arrived in the same window — the January sign-ups, the users from one campaign. What defines a cohort is when its members started, which is what makes two of them comparable at the same age.",
+            "Tous ceux arrivés sur la même fenêtre — les inscrits de janvier, les utilisateurs d'une campagne. Ce qui définit une cohorte, c'est le moment où ses membres ont commencé, et c'est ce qui rend deux cohortes comparables au même âge.",
+          ),
+        },
+        {
+          symbol: t("Period n", "Période n"),
+          meaning: t(
+            "Age, not date. Period 1 for the January cohort is February and for the April cohort is May — reading them side by side means reading them at the same age, not in the same month.",
+            "L'âge, pas la date. La période 1 de la cohorte de janvier est février, celle de la cohorte d'avril est mai — les lire côte à côte, c'est les lire au même âge, pas au même mois.",
+          ),
+        },
+        {
+          symbol: t("Still active", "Encore actif"),
+          meaning: t(
+            "Whatever \"using the product\" means for you, defined once and never changed mid-analysis. Logging in is the weakest version; the action your product exists for is the useful one.",
+            "Ce que « utiliser le produit » veut dire chez toi, défini une fois et jamais changé en cours d'analyse. La connexion est la version la plus faible ; l'action pour laquelle ton produit existe est la version utile.",
+          ),
+        },
+      ],
+      note: t(
+        "The same arithmetic works on revenue, on orders, on anything per cohort. Retention is just the version everybody draws first, because its shape is the one that answers whether the product works at all.",
+        "La même arithmétique marche sur le revenu, sur les commandes, sur n'importe quoi par cohorte. La rétention n'est que la version que tout le monde trace en premier, parce que sa forme répond à la question de savoir si le produit fonctionne.",
+      ),
+    },
+    example: {
+      title: t("Two cohorts, the same D30, opposite businesses", "Deux cohortes, le même J30, deux entreprises opposées"),
+      steps: [
+        t(
+          "January cohort: 25% still active at D30, 22% at D60, 21% at D90, 21% at D120. The curve flattens.",
+          "Cohorte de janvier : 25 % encore actifs à J30, 22 % à J60, 21 % à J90, 21 % à J120. La courbe s'aplatit.",
+        ),
+        t(
+          "April cohort: 25% at D30, 17% at D60, 11% at D90, 6% at D120. The curve slides toward zero.",
+          "Cohorte d'avril : 25 % à J30, 17 % à J60, 11 % à J90, 6 % à J120. La courbe glisse vers zéro.",
+        ),
+        t(
+          "A single blended \"retention rate of 25%\" describes both of them exactly, and hides the only thing that matters: one product keeps a fifth of everyone it ever acquires, the other keeps nobody and is running on new sign-ups.",
+          "Un unique « taux de rétention de 25 % » décrit les deux exactement, et masque la seule chose qui compte : un produit garde un cinquième de tous ceux qu'il acquiert, l'autre ne garde personne et tourne sur les nouvelles inscriptions.",
+        ),
+        t(
+          "The flattening level is the number you can multiply: at 1,000 sign-ups a month, the January cohort adds about 210 durable users every month, and they stack. The April cohort adds a spike that is gone by spring.",
+          "Le niveau où la courbe s'aplatit est le chiffre qu'on peut multiplier : à 1 000 inscriptions par mois, la cohorte de janvier ajoute environ 210 utilisateurs durables chaque mois, et ils s'empilent. Celle d'avril ajoute un pic disparu au printemps.",
+        ),
+      ],
+      takeaway: t(
+        "Nothing here needed a new measurement — the same events, grouped by arrival date instead of averaged, turned one meaningless number into a decision about whether to spend on acquisition at all.",
+        "Rien ici n'a demandé une nouvelle mesure — les mêmes événements, groupés par date d'arrivée au lieu d'être moyennés, ont transformé un chiffre sans signification en une décision sur le fait de dépenser en acquisition.",
+      ),
+    },
+    benchmark: [
+      t(
+        "The signal to look for is the shape, not the level: a curve that flattens at all means a group of users found a lasting reason to stay, and that is the closest thing to a measurable product-market-fit signal. A curve still falling at period six has not found it yet, whatever height it starts from.",
+        "Le signal à chercher est la forme, pas le niveau : une courbe qui s'aplatit, quelle qu'en soit la hauteur, veut dire qu'un groupe d'utilisateurs a trouvé une raison durable de rester, et c'est ce qui ressemble le plus à un signal mesurable d'adéquation produit-marché. Une courbe encore en chute à la sixième période ne l'a pas trouvée.",
+      ),
+      t(
+        "Levels vary so widely by category that comparing them across products is close to meaningless: a daily-use consumer app flattening at 20-30% by month three is often cited as strong, while a B2B tool bought by a company would be in trouble at that level. Compare your cohorts to each other, not to someone else's chart.",
+        "Les niveaux varient tellement d'une catégorie à l'autre que les comparer entre produits n'a presque aucun sens : une application grand public à usage quotidien qui s'aplatit à 20-30 % au troisième mois est souvent citée comme solide, là où un outil B2B acheté par une entreprise serait en difficulté à ce niveau. Compare tes cohortes entre elles, pas au graphique de quelqu'un d'autre.",
+      ),
+      t(
+        "A cohort small enough that one user is worth more than a percentage point is not a cohort, it is an anecdote with a chart. Below roughly a hundred members, read the direction and ignore the decimals.",
+        "Une cohorte assez petite pour qu'un seul utilisateur vaille plus d'un point de pourcentage n'est pas une cohorte, c'est une anecdote avec un graphique. En dessous d'une centaine de membres, lis la direction et ignore les décimales.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Plot by sign-up cohort before anything else. A single blended line is an average over groups that can be moving in opposite directions, and it is the default in most dashboards.",
+        "Trace par cohorte d'inscription avant toute chose. Une ligne globale unique est une moyenne sur des groupes qui peuvent aller en sens opposés, et c'est ce que proposent par défaut la plupart des tableaux de bord.",
+      ),
+      t(
+        "Follow at least six periods. A flattening cannot show in three, and three periods is exactly long enough to mistake a slow slide for a plateau.",
+        "Suis au moins six périodes. Un aplatissement ne peut pas apparaître en trois, et trois périodes suffisent exactement à confondre une glissade lente avec un plateau.",
+      ),
+      t(
+        "Cut cohorts by acquisition channel too, not only by date. Two channels with the same CAC and different curves are two different decisions, and the blended view makes them look like one.",
+        "Découpe aussi les cohortes par canal d'acquisition, pas seulement par date. Deux canaux au même CAC et aux courbes différentes sont deux décisions différentes, que la vue globale fait passer pour une seule.",
+      ),
+      t(
+        "Mark your product changes on the chart. A cohort that behaves differently is only informative if you can say what was different about the product it met.",
+        "Marque tes changements de produit sur le graphique. Une cohorte qui se comporte différemment n'apprend quelque chose que si tu peux dire ce qui était différent dans le produit qu'elle a rencontré.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "ret-1",
+      body: t(
+        "The Tour asks whether you track a retention rate at all — D7, D30 or similar — for 20 points, against 7 for watching it loosely and 0 for not tracking it. Cohorts are what turns that yes into something usable: a team can answer 20 with one blended figure and still be unable to say whether the product is getting better or worse, because a blended rate mixes the cohort that arrived last week with the one that arrived last year. If you track a rate but have never plotted it by cohort, you are closer to the 7-point answer than the score suggests.",
+        "Le Tour demande si tu suis un taux de rétention — J7, J30 ou équivalent — pour 20 points, contre 7 si tu le regardes de loin et 0 si tu ne le suis pas. Les cohortes sont ce qui transforme ce oui en quelque chose d'exploitable : une équipe peut répondre 20 avec un chiffre global unique et rester incapable de dire si le produit s'améliore ou se dégrade, parce qu'un taux global mélange la cohorte arrivée la semaine dernière et celle de l'an dernier. Si tu suis un taux sans jamais l'avoir tracé par cohorte, tu es plus proche de la réponse à 7 points que la note ne le laisse croire.",
+      ),
+    },
+    faq: [
+      {
+        question: t("What is the difference between a cohort and a segment?", "Quelle différence entre une cohorte et un segment ?"),
+        answer: t(
+          "A cohort is defined by when its members arrived; a segment by what they are — country, plan, company size. They answer different questions and are strongest together: segmenting cohorts is how you find out that the curve only flattens for one type of customer, which is usually the most useful finding in the whole exercise.",
+          "Une cohorte est définie par le moment où ses membres sont arrivés ; un segment par ce qu'ils sont — pays, offre, taille d'entreprise. Ils répondent à des questions différentes et se combinent très bien : segmenter des cohortes est la façon de découvrir que la courbe ne s'aplatit que pour un type de client, ce qui est en général la trouvaille la plus utile de tout l'exercice.",
+        ),
+      },
+      {
+        question: t("Weekly or monthly cohorts?", "Cohortes hebdomadaires ou mensuelles ?"),
+        answer: t(
+          "Match your product's natural usage cycle, and pick the grain that gives you cohorts big enough to read. A daily tool wants weekly cohorts; something used at month-end can only be read monthly, and reading it weekly produces a sawtooth that looks like a retention problem and is a calendar.",
+          "Suis le cycle d'usage naturel de ton produit, et choisis la maille qui donne des cohortes assez grandes pour être lues. Un outil quotidien veut des cohortes hebdomadaires ; un outil utilisé en fin de mois ne se lit qu'au mois, et le lire à la semaine produit une dent de scie qui ressemble à un problème de rétention et n'est qu'un calendrier.",
+        ),
+      },
+      {
+        question: t("What does a flattening curve actually mean?", "Que veut dire concrètement une courbe qui s'aplatit ?"),
+        answer: t(
+          "That a share of each cohort stopped leaving. Those users found a reason to stay that does not wear off, and their number is what acquisition multiplies. It is the difference between a product that accumulates users and one that rents them.",
+          "Qu'une part de chaque cohorte a cessé de partir. Ces utilisateurs ont trouvé une raison de rester qui ne s'use pas, et leur nombre est ce que l'acquisition multiplie. C'est la différence entre un produit qui accumule des utilisateurs et un produit qui les loue.",
+        ),
+      },
+      {
+        question: t("How big does a cohort need to be?", "Quelle taille minimale pour une cohorte ?"),
+        answer: t(
+          "Big enough that losing one member does not move the line by a visible amount — around a hundred is the usual floor. Below that, widen the window rather than chase precision: two months of sign-ups read together beat four weekly cohorts that each swing ten points on noise.",
+          "Assez grande pour que perdre un membre ne déplace pas la courbe de façon visible — une centaine est le plancher habituel. En dessous, élargis la fenêtre plutôt que de chercher la précision : deux mois d'inscriptions lus ensemble valent mieux que quatre cohortes hebdomadaires qui oscillent chacune de dix points sur du bruit.",
         ),
       },
     ],

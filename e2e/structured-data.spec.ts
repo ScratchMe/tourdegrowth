@@ -1,4 +1,5 @@
 import { expect, test } from "./helpers";
+import { GLOSSARY } from "@/content/glossary";
 
 /**
  * REVIEW-02.md R2-15 — the JSON-LD the content pages actually emit. Read
@@ -24,7 +25,10 @@ test("the glossary index is one DefinedTermSet holding every term, with a breadc
   const blocks = await jsonLdBlocks(page, "/en/glossary");
   const set = blocks.find((b) => b["@type"] === "DefinedTermSet") as Record<string, unknown>;
   expect(set).toBeDefined();
-  expect((set.hasDefinedTerm as unknown[]).length).toBe(15);
+  // Derived, not a literal: the assertion claims "every term", so it has to
+  // read the glossary rather than a number that has to be edited by hand
+  // every time a term ships (GROWTH-PLAN.md wave 2.2 adds them in batches).
+  expect((set.hasDefinedTerm as unknown[]).length).toBe(Object.keys(GLOSSARY).length);
   expect(blocks.some((b) => b["@type"] === "BreadcrumbList")).toBe(true);
 });
 

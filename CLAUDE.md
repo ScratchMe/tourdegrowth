@@ -3518,6 +3518,84 @@ clientWidth` mesuré aux deux largeurs.
 une dans `nav-strings.ts`. À passer au prochain bon à tirer, avec les 39
 lignes du catalogue d'audit.
 
+### Glossaire, lot 1 : quatre termes choisis sur les vraies requêtes (2026-09-14)
+
+Première brique de la vague 2.2 du plan de distribution, découpée en lots de
+trois ou quatre comme R2-11 l'avait été — relire dix termes de prose d'un coup
+n'est pas relire.
+
+**Les termes sont choisis sur des données, pas au jugé**, ce que 2.7 existait
+précisément pour rendre possible : le rapport Search Console tiré le matin même
+(86 impressions, 20 requêtes) montre que ce qui atteint ces pages, ce sont des
+recherches **définitionnelles courtes** — « activation », « what is an
+activation », « activation definition », « définition ltv », « definition
+cac ». Les quatre livrés sont donc chacun l'enfant d'une page qui reçoit déjà
+des impressions : `activation-rate` (12 impressions sur la grappe
+« activation »), `cac-payback`, `nrr-grr`, `cohort-analysis`. Nuance honnête
+sur ce que la donnée peut et ne peut pas dire : l'absence d'impressions sur
+« CAC payback » ou « cohorte » n'est pas un argument contre ces termes, le site
+n'ayant aucune page pour en recevoir. Ce que la donnée établit, c'est la
+**forme** des requêtes qui arrivent — d'où des FAQ écrites sur les variantes
+définitionnelles plutôt que sur des questions d'expert.
+
+**Deux écarts à la liste du plan, assumés :**
+- **« expansion revenue » est retiré.** La page `upsell-cross-sell` le couvre
+  déjà — 48 occurrences, et sa formule *est* l'identité du MRR. Une page dédiée
+  aurait été exactement le quasi-doublon que 2.1 avait pris soin d'éviter.
+  Remplacé par **ARPU** au lot 3, qui ne recoupe rien et se lie naturellement à
+  `ltv`, une page que Google classe déjà (« valeur totale client », position 4).
+- **« growth loop vs funnel » part en 2.3**, où vit le cluster « frameworks
+  comparés » ; le laisser ici l'aurait mis en concurrence avec sa propre page.
+  Remplacé par **NPS**, qui a du volume, ne recoupe rien, et permet de corriger
+  une confusion utile (le NPS n'est pas une mesure de parrainage).
+
+**Les exemples chiffrés prolongent ceux des pages parentes plutôt que
+d'inventer un nouveau jeu de nombres.** Le mois partagé par `churn`, `revenue`
+et `upsell-cross-sell` — 400 clients, 20 000 € de MRR, 12 résiliations, 8
+rétrogradations, 15 montées en gamme — se lit ici comme un **couple de taux** :
+GRR 95 %, NRR 99,5 %, puis 100,4 % une fois appliqué le playbook d'expansion de
+la page upsell, **la GRR n'ayant pas bougé d'un point**. C'est toute la thèse de
+la page en trois lignes, et elle n'aurait pas tenu avec des chiffres inventés.
+Le CAC de 500 € vient de la page CAC. Arithmétique recalculée à la main avant
+d'être écrite : 0,995¹² ≈ 94 %, 1 ÷ 0,03 ≈ 33 mois, LTV:CAC 2,6:1, 12,5 mois de
+payback contre 10 sur le revenu seul.
+
+**Un défaut trouvé en regardant la page, pas en relisant le code.** Les deux
+formules de `nrr-grr` étaient jointes par un « · » — qui, dans un bloc de
+formule en chasse fixe, se lit comme une **multiplication**. Le composant ne
+préserve pas les retours à la ligne (`.formula` n'a pas de `white-space`), donc
+plutôt que de changer le CSS de tous les termes pour un seul, la relation est
+maintenant énoncée : « et GRR = la même ligne sans le terme d'expansion ». Plus
+court, sans ambiguïté d'opérateur, et meilleur contenu — le lecteur n'a plus à
+diffier deux chaînes presque identiques. Leçon nº1 de ce fichier, encore : le
+code avait l'air correct.
+
+**Maillage (règle 2.4)** : chaque nouveau terme reçoit 2 à 4 liens entrants de
+pages existantes (mesuré : 3, 2, 3 et 4). `retention` était au plafond de 4,
+donc `ltv` y cède sa place à `cohort-analysis` **plutôt que de desserrer le
+test** — retention → analyse de cohortes est un lien plus serré que
+retention → LTV, et LTV reste atteignable depuis `churn`, `cac` et `revenue`.
+
+**Une assertion corrigée pour dire ce qu'elle prétend dire** :
+`structured-data.spec.ts` affirmait « le set contient TOUS les termes » en
+codant `15` en dur. Elle lit maintenant le glossaire — sinon chaque lot demande
+une retouche d'un nombre, ce qui finit par transformer une garantie en
+formalité.
+
+**Vérifié en réel** : lint, tsc, **662 tests unitaires**, couverture au-dessus
+des seuils, `next build` (38 pages de termes en `●`, donc servies par le CDN),
+**264 specs Playwright**. Mesuré plutôt que supposé : **909 à 1 160 mots par
+langue et par terme** (plancher 500, termes existants 770-1 140), extraits de
+recherche 130-155 caractères (fenêtre 70-160), `scrollWidth === clientWidth` en
+390 px et 1 280 px sur les quatre pages, et la carte « Dans le Tour » relue en
+capture pour vérifier qu'elle rend bien la vraie question et ses trois réponses.
+
+**Copie neuve, donc `TODO: à relire`** (convention 6) : les quatre entrées de
+`glossary-terms.ts`, `glossary.ts` et `glossary-deep.ts`. Point à soumettre
+avec : le titre FR `cac-payback` donne « CAC payback — délai de remboursement —
+Glossaire Tour de Growth » dans la balise `<title>`, deux tirets longs. C'est le
+même motif que `north-star-metric`, déjà validé, mais il mérite un regard.
+
 ## État du projet au 2026-09-14 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -3562,12 +3640,12 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | TypeScript 7 et ESLint 10 | Tous deux bloqués par des paquets embarqués dans `eslint-config-next` (`typescript-eslint` refuse TS ≥ 6.1 ; `eslint-plugin-react` plante sur ESLint 10). Dependabot les ignore en majeure depuis le 2026-09-08 | Quand `eslint-config-next` suivra. Re-tester en installant, pas en lisant les plages de peer : c'est l'essai qui a montré qu'ESLint 10 plante. |
 | Instrument d'audit : phase 1 (saisie) | **Close le 2026-09-14** (PR #131 à #153). `/admin/audit` crée une mission, trie 25 lignes par palier, saisit tout ce que le schéma prévoit, produit `m19` depuis le Tour de l'auditeur, croise méthode × réalité, rédige les constats et le bloc de tête, exporte, réimporte et purge. La spec canari prouve qu'aucune requête ne porte un octet de la mission ; la recette vérifie le critère de sortie sur un vrai build, `localStorage` réellement vidé entre l'export et l'import | Rien côté code. |
 | Instrument d'audit : phase 1 bis (la vraie mission) | **Le prochain chantier, et il est côté Antoine** : mener AB Tasty dans l'outil jusqu'à `pending = 0`, en tenant le journal des frictions | C'est ce journal qui dira ce que la phase 2 (les readouts) doit construire — il n'y a aucune façon de le deviner d'ici. |
-| Copie à relire (bon à tirer nº5) | Cinq marqueurs dans `src/`, relevés au grep : les 39 lignes du catalogue d'audit (elles s'impriment dans les livrables d'Antoine, sous son nom) ; les deux pages « porte ouverte » (`content/open-door.ts`) ; les 5 chaînes `openDoor` de `dictionary.ts` ; **les 3 titres de document invisibles** posés par le correctif h1 du 2026-09-14 (`meta.quizHeading`/`resultHeading`/`deepDiveHeading`) ; et le libellé de pied de page `nav-strings.checklist` | Un bon à tirer, même circuit que les précédents. Le document se reconstruit depuis `grep -rn "TODO: à relire" src/`, jamais de mémoire — et c'est encore ce grep qui a rattrapé les trois titres invisibles, que j'avais oubliés en écrivant cette ligne une première fois. |
+| Copie à relire (bon à tirer nº5) | Six marqueurs dans `src/`, relevés au grep : les 39 lignes du catalogue d'audit (elles s'impriment dans les livrables d'Antoine, sous son nom) ; les deux pages « porte ouverte » (`content/open-door.ts`) ; les 5 chaînes `openDoor` de `dictionary.ts` ; **les 3 titres de document invisibles** posés par le correctif h1 du 2026-09-14 (`meta.quizHeading`/`resultHeading`/`deepDiveHeading`) ; le libellé de pied de page `nav-strings.checklist` ; et **les quatre termes de glossaire du lot 1** (2.2) | Un bon à tirer, même circuit que les précédents. Le document se reconstruit depuis `grep -rn "TODO: à relire" src/`, jamais de mémoire — et c'est encore ce grep qui a rattrapé les trois titres invisibles, que j'avais oubliés en écrivant cette ligne une première fois. |
 | Vercel Functions Storage | **Réglé** : la politique de rétention posée par Antoine le 2026-09-14 l'a fait passer de 9,24 Go à 397 Mo, et un déploiement pèse 45,5 Mo de fonctions depuis le 2026-09-13 | Rien. |
 | Vercel Fluid Active CPU (36 min / 4 h par mois) | Les deux postes qui dominaient le coût par visite sont corrigés le 2026-09-14 : six préchargements dynamiques par vue de la homepage, et l'image de partage rendue à chaque vue de résultat — confirmé en production, `MISS` puis `HIT` sur l'adresse versionnée. La région des fonctions est passée à `cdg1` le même jour (vérifié : `x-vercel-id: iad1::cdg1::…`) | Relire le compteur dans Vercel une semaine après. |
 | Lecture des stats par la session | **Les deux moitiés marchent** (trois runs réels le 2026-09-14 : tableau de bord et Search Console, déchiffrés par la session ; ligne de départ du plan relevée, tenue hors du dépôt public). À surveiller au prochain run Search Console : `/en/glossary/*` doit remplacer les anciennes URL non préfixées dans les pages créditées | Rien : un `age-keygen` puis un run (`admin`, `gsc` ou `both`) quand une session a besoin des chiffres. |
 
-Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et le payant sont dans **`GROWTH-PLAN.md`** (2026-09-13 — sans LinkedIn, sans nom ; cinq vagues, la moitié menable par la session seule ; la part autonome de la vague 0 est livrée : IndexNow, UTM, kit et textes dans `marketing/`) ; le SEO a été livré en grande partie par le lot C de cette revue, et sa suite est la vague 2 de ce plan, dont **2.1 et 2.4 sont faites** (les deux pages « porte ouverte » et leur maillage, 2026-09-14). Restent, menables par une session seule : **2.2** (dix termes de glossaire de plus) et **2.3** (le cluster « frameworks comparés »). **2.5** attend les 50 soumissions de `stats/global`.
+Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et le payant sont dans **`GROWTH-PLAN.md`** (2026-09-13 — sans LinkedIn, sans nom ; cinq vagues, la moitié menable par la session seule ; la part autonome de la vague 0 est livrée : IndexNow, UTM, kit et textes dans `marketing/`) ; le SEO a été livré en grande partie par le lot C de cette revue, et sa suite est la vague 2 de ce plan, dont **2.1 et 2.4 sont faites** (les deux pages « porte ouverte » et leur maillage, 2026-09-14) et **2.2 est entamée** (lot 1 de 3 : `activation-rate`, `cac-payback`, `nrr-grr`, `cohort-analysis`, choisis sur le rapport Search Console du jour). Restent, menables par une session seule : **les lots 2 et 3 de 2.2** (`dau-mau`, `time-to-value`, `pql`, puis `product-led-growth`, `arpu`, `nps`) et **2.3** (le cluster « frameworks comparés »). **2.5** attend les 50 soumissions de `stats/global`.
 
 **Coût Gemini, mesuré plutôt qu'estimé au doigt mouillé** (clé passée en palier payant Tier 1 le 2026-09-07, avec plafonds de dépense) : un Deep dive = 4 générations (2 tons × 2 langues), prompt réel ~5 300 caractères, sorties mesurées par la sonde entre 765 et 2 801 tokens de réflexion et ~450-530 de réponse. Soit **~0,04 à 0,06 $ par Deep dive en 2026**, le double à partir de 2027 (les tarifs Flash doublent au 1ᵉʳ janvier). Le mode Quick ne coûte rien du tout — il n'appelle plus Gemini depuis SPEC-ADDENDUM-01 §0. La limite de 5 Deep dive/h/IP borne un abus à ~2,4 $/jour dans le pire cas.
 
