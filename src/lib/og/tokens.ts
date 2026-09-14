@@ -3,8 +3,8 @@
  * pipeline entirely separate from the app's CSS — no custom properties, no
  * shared classes. Source of truth: `src/app/globals.css` and
  * `design/ds-extension-01-return/tokens/colors.css`; re-sync here if a token
- * changes. Shared by every `opengraph-image.tsx` so the two images can't
- * drift from each other.
+ * changes. Shared by both share images (`src/app/[locale]/opengraph-image.tsx`
+ * and `lib/og/result-frame.tsx`) so the two can't drift from each other.
  */
 export const OG_INK = "#211c15";
 export const OG_INK_SOFT = "#5b5346";

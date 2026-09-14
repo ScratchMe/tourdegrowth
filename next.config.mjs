@@ -98,30 +98,24 @@ const nextConfig = {
   async rewrites() {
     return [
       /**
-       * Legacy alias for the result OG image — REVIEW.md R-24.
+       * The two addresses a result's share image has had, kept alive for the
+       * shares already scraped under them — SPEC.md §12 is explicit that a
+       * URL dying months after a share breaks the growth loop.
        *
-       * Moving the app routes into the `(app)` route group renamed this
-       * metadata route: Next appends a hash to any `opengraph-image` whose
-       * parent path contains a group segment, to keep two groups from
-       * colliding (`next/dist/lib/metadata/get-metadata-route.js`,
-       * `getMetadataRouteSuffix`). So `/r/<id>/opengraph-image` became
-       * `/r/<id>/opengraph-image-1u74ed`.
-       *
-       * The `og:image` tag points at the new address, so every fresh scrape
-       * is correct. This alias is for the shares already out there, scraped
-       * before the rename — SPEC.md §12 is explicit that a URL dying months
-       * after a share breaks the growth loop.
-       *
-       * The suffix is hard-coded because it is generated at build time. That
-       * is only safe because a spec pins it: `e2e/locale-routing.spec.ts`
-       * fetches this legacy path and requires a real PNG, so if Next ever
-       * changes the hash the suite goes red instead of the alias silently
-       * pointing at nothing.
+       * `/r/<id>/opengraph-image` is from before the `(app)` route group
+       * (REVIEW.md R-24); `/r/<id>/opengraph-image-1u74ed` is the hashed
+       * name Next gave the metadata route inside the group (it appends a
+       * hash to any `opengraph-image` whose parent path contains a group
+       * segment — `next/dist/lib/metadata/get-metadata-route.js`). Since
+       * 2026-09-14 the image is a route handler with a version token in its
+       * path (`lib/og/share-image.ts`), and both old addresses map to the
+       * `legacy` token, which renders the current picture and is cached for
+       * an hour rather than as immutable, because its content can still
+       * change. `e2e/locale-routing.spec.ts` requests both and expects a
+       * PNG, so neither alias can rot silently.
        */
-      {
-        source: "/r/:id/opengraph-image",
-        destination: "/r/:id/opengraph-image-1u74ed",
-      },
+      { source: "/r/:id/opengraph-image", destination: "/r/:id/share/legacy.png" },
+      { source: "/r/:id/opengraph-image-1u74ed", destination: "/r/:id/share/legacy.png" },
     ];
   },
 };

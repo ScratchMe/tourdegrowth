@@ -51,6 +51,8 @@ const [FOOTER_CV_DETAIL, CARD_CV_DETAIL, CARD_LINKEDIN_DETAIL] = PROFILE_CLICK_D
 interface ResultViewProps {
   /** This result's own id — used to attribute whoever starts their own Tour from here (SPEC.md §7), and to link to the Deep dive flow. Omitted for the fixed sample (no real submission to attribute to, and no Deep dive on a sample — SPEC.md §12: "jamais recalculé"). */
   id?: string;
+  /** The share image's versioned address, minted on the server (`lib/og/share-image.ts`) so the CDN can cache it as immutable. */
+  shareImageSrc: string;
   total: number;
   pillars: { pillar: Pillar; score: number }[];
   weakestPillar: Pillar;
@@ -107,6 +109,7 @@ function benchmarkLine(benchmark: Benchmark, segment: SegmentAnswers | null, loc
  */
 export function ResultView({
   id,
+  shareImageSrc,
   total,
   pillars,
   weakestPillar,
@@ -187,8 +190,6 @@ export function ResultView({
         ? tc(UI_STRINGS.bottleneck.clear, locale)
         : tc(UI_STRINGS.bottleneck.shared, locale).replace("{n}", String(bottleneck.pillars.length));
 
-  /** Rewritten by `next.config.mjs` to the hashed metadata route (REVIEW.md R-24). */
-  const shareImageSrc = id ? `/r/${id}/opengraph-image` : "/r/sample/opengraph-image";
   const shareImageAlt = bottleneckPrimary
     ? tc(t.shareCardAltTemplate, locale)
         .replace("{total}", String(total))

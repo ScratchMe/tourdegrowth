@@ -16,8 +16,9 @@ import { SITE_DOMAIN_LABEL } from "@/lib/site";
  * them with Twemoji, not with these fonts.
  *
  * The strings below mirror what `src/app/[locale]/opengraph-image.tsx` and
- * `src/app/(app)/r/[id]/opengraph-image.tsx` actually render, family by
- * family. Adding text to an image means adding it here too.
+ * `src/lib/og/result-frame.tsx` (the result image, served by
+ * `/r/[id]/share/[token]`) actually render, family by family. Adding text to
+ * an image means adding it here too.
  */
 
 const WORDMARK = "TOUR DE GROWTH";
