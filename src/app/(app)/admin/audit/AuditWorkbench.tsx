@@ -6,13 +6,28 @@ import { Card } from "@/components/core/Card";
 import { definitionFor, missingDefinitionFields, upsertDefinition, type DefinitionDraft } from "@/lib/audit/definitions";
 import { fileNameFor, parseMissionFile, serializeMission } from "@/lib/audit/io";
 import { purgeMission } from "@/lib/audit/purge";
-import { catalogRow, newMission, newPass, type EmbeddedCatalog, type Entry, type Mission, type Pass } from "@/lib/audit/schema";
+import {
+  catalogRow,
+  newMission,
+  newPass,
+  type EmbeddedCatalog,
+  type Entry,
+  type Mission,
+  type Pass,
+} from "@/lib/audit/schema";
+import { tourScore } from "@/lib/audit/quadrants";
+import type { TourQuestionView } from "@/lib/audit/server";
+import { buildTourEntry, TOUR_METRIC_ID } from "@/lib/audit/tour-entry";
+import type { AnswerIndex } from "@/lib/scoring/compute";
 import { deleteMission, loadDraftMeta, loadMissions, markExported, saveMission, type DraftMeta, type SaveResult } from "@/lib/audit/storage";
 import { ImportPanel, type PendingImport } from "./ImportPanel";
+import { AUDIT_PILLAR_LABELS } from "./labels";
 import { MissionBar } from "./MissionBar";
 import { MissionList } from "./MissionList";
+import { RestitutionView } from "./RestitutionView";
 import { RowEditor } from "./RowEditor";
 import { RowList } from "./RowList";
+import { TourScreen } from "./TourScreen";
 import { NewMissionForm } from "./NewMissionForm";
 import styles from "./page.module.css";
 import { TextInput } from "./_ui/TextInput";
@@ -40,9 +55,19 @@ type View =
   | { kind: "mission"; id: string }
   | { kind: "import"; pending: PendingImport }
   | { kind: "purge"; id: string }
-  | { kind: "row"; id: string; metricId: string };
+  | { kind: "row"; id: string; metricId: string }
+  | { kind: "tour"; id: string }
+  | { kind: "restitution"; id: string };
 
-export function AuditWorkbench({ catalog, today }: { catalog: EmbeddedCatalog; today: string }) {
+export function AuditWorkbench({
+  catalog,
+  questions,
+  today,
+}: {
+  catalog: EmbeddedCatalog;
+  questions: TourQuestionView[];
+  today: string;
+}) {
   const [missions, setMissions] = useState<Mission[]>([]);
   const [meta, setMeta] = useState<DraftMeta[]>([]);
   const [view, setView] = useState<View>({ kind: "list" });
@@ -119,9 +144,17 @@ export function AuditWorkbench({ catalog, today }: { catalog: EmbeddedCatalog; t
     else setMeta(loadDraftMeta());
   }
 
-  const current =
-    view.kind === "mission" || view.kind === "purge" || view.kind === "row" ? missions.find((m) => m.id === view.id) : undefined;
+  const current = "id" in view ? missions.find((m) => m.id === view.id) : undefined;
   const currentPass = current?.passes[current.passes.length - 1];
+  /**
+   * L'étape que le titre d'escalade nomme — seulement quand le Tour est
+   * complet. C'est le seul endroit du produit où ce classement a un sens :
+   * il départage à égalité par l'ordre canonique AARRR (SPEC.md §6), donc
+   * l'appliquer à un Tour partiel désignerait une étape par un artefact
+   * d'ordre plutôt que par une mesure.
+   */
+  const weakest = currentPass ? tourScore(currentPass, questions)?.weakestPillar : undefined;
+  const weakestStage = weakest ? `l'étape ${AUDIT_PILLAR_LABELS[weakest]}` : undefined;
 
   /**
    * Enregistre une ligne et, quand son statut en demande une, la définition
@@ -161,6 +194,50 @@ export function AuditWorkbench({ catalog, today }: { catalog: EmbeddedCatalog; t
       : [...last.entries, entry];
     const nextPass: Pass = { ...last, entries };
     const next: Mission = { ...mission, passes: [...mission.passes.slice(0, -1), nextPass] };
+    return persist(next, missions.map((m) => (m.id === next.id ? next : m)));
+  }
+
+  /**
+   * Pose une réponse du Tour et, quand la quinzième arrive, écrit `m19`.
+   *
+   * L'entrée `m19` n'est jamais saisie : elle est PRODUITE par l'audit, donc
+   * elle se pose ici ou nulle part. Sa définition part avec elle
+   * (`buildTourEntry`) parce que le validateur exige d'une ligne mesurée une
+   * définition enregistrée — sans ça, l'export refuserait précisément la
+   * ligne que l'outil produit le mieux.
+   *
+   * Une passe partielle n'écrit rien d'autre que la réponse : un score
+   * intermédiaire ferait entrer dans la couverture une ligne dont le chiffre
+   * changera encore, ce que « documenté » ne doit jamais vouloir dire.
+   *
+   * Tout est enregistré en UNE écriture, jamais deux : une réponse posée
+   * sans son `m19` (ou l'inverse) sur un quota plein laisserait la mission
+   * dans un état que rien ne rattrape.
+   */
+  function answerTour(mission: Mission, questionId: string, index: AnswerIndex): boolean {
+    const last = mission.passes[mission.passes.length - 1];
+    if (!last) return false;
+    const nextPass: Pass = { ...last, tourAnswers: { ...last.tourAnswers, [questionId]: index } };
+
+    let next: Mission = { ...mission, passes: [...mission.passes.slice(0, -1), nextPass] };
+    const existing = last.entries.find((e) => e.metricId === TOUR_METRIC_ID);
+    const built = buildTourEntry(nextPass.tourAnswers, questions, mission.header.scope, today, existing);
+
+    if (built) {
+      // `upsertDefinition` et non `registerDefinition` : la définition du
+      // Tour porte le périmètre de la mission, donc son contenu peut changer
+      // si ce périmètre change un jour. La règle d'immuabilité est la même
+      // que pour toute autre ligne — frapper `@2`, jamais éditer `@1` — et
+      // c'est exactement ce que `saveRow` fait déjà pour la saisie manuelle.
+      const { version: _version, ...draft } = built.definition;
+      const upserted = upsertDefinition(next, draft);
+      next = upserted.mission;
+      const entry: Entry = { ...built.entry, definitionRef: upserted.ref };
+      const entries = nextPass.entries.some((e) => e.metricId === entry.metricId)
+        ? nextPass.entries.map((e) => (e.metricId === entry.metricId ? entry : e))
+        : [...nextPass.entries, entry];
+      next = { ...next, passes: [...next.passes.slice(0, -1), { ...nextPass, entries }] };
+    }
     return persist(next, missions.map((m) => (m.id === next.id ? next : m)));
   }
 
@@ -240,12 +317,21 @@ export function AuditWorkbench({ catalog, today }: { catalog: EmbeddedCatalog; t
             mission={current}
             pass={currentPass}
             meta={meta.find((m) => m.missionId === current.id)}
+            weakestStage={weakestStage}
             onExport={() => exportMission(current)}
             // Non destructif : la mission de travail reste intacte. C'est ce
             // qui produit un exemple montrable (décision 3 du §3.3).
             onExportPurged={() => download(purgeMission(current))}
             onClose={() => goTo({ kind: "list" })}
           />
+          <Card elevation="panel" className={styles.viewSwitch}>
+            <Button compact variant="secondary" onClick={() => goTo({ kind: "tour", id: current.id })} data-testid="open-tour">
+              Le Tour ({Object.keys(currentPass?.tourAnswers ?? {}).length} / {questions.length})
+            </Button>
+            <Button compact variant="secondary" onClick={() => goTo({ kind: "restitution", id: current.id })} data-testid="open-restitution">
+              Restitution
+            </Button>
+          </Card>
           {currentPass ? (
             <RowList mission={current} pass={currentPass} today={today} onOpenRow={(metricId) => goTo({ kind: "row", id: current.id, metricId })} />
           ) : null}
@@ -279,6 +365,26 @@ export function AuditWorkbench({ catalog, today }: { catalog: EmbeddedCatalog; t
             />
           );
         })()
+      ) : null}
+
+      {view.kind === "tour" && current && currentPass ? (
+        <TourScreen
+          questions={questions}
+          pass={currentPass}
+          onAnswer={(questionId, index) => answerTour(current, questionId, index)}
+          onClose={() => goTo({ kind: "mission", id: current.id })}
+        />
+      ) : null}
+
+      {view.kind === "restitution" && current && currentPass ? (
+        <RestitutionView
+          mission={current}
+          pass={currentPass}
+          questions={questions}
+          onOpenRow={(metricId) => goTo({ kind: "row", id: current.id, metricId })}
+          onOpenTour={() => goTo({ kind: "tour", id: current.id })}
+          onClose={() => goTo({ kind: "mission", id: current.id })}
+        />
       ) : null}
 
       {view.kind === "purge" && current ? (

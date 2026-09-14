@@ -1,5 +1,6 @@
 import { AUDIT_CATALOG, AUDIT_CATALOG_VERSION } from "@/content/audit-catalog";
 import { QUESTIONS } from "@/content/copy-library";
+import type { Pillar } from "@/lib/scoring/pillars";
 import { tc } from "@/lib/i18n/translatable";
 import type { EmbeddedCatalog } from "./schema";
 
@@ -28,7 +29,13 @@ export function snapshotCatalog(): EmbeddedCatalog {
 /** Une question du Tour telle que l'écran de l'auditeur l'affiche (étape 1.4). */
 export interface TourQuestionView {
   id: string;
-  pillar: string;
+  /**
+   * Typé `Pillar` et non `string` pour qu'un `TourQuestionView[]` soit
+   * directement un `ScoredQuestion[]` : sans ça, l'îlot devrait caster pour
+   * appeler `tourScore` ou `methodVsReality`, et un cast est exactement
+   * l'endroit où une question mal formée passerait sans bruit.
+   */
+  pillar: Pillar;
   question: string;
   options: { label: string; points: number }[];
 }

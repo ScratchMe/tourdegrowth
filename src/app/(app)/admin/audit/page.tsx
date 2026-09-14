@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { WordmarkLink } from "@/components/brand/WordmarkLink";
-import { snapshotCatalog } from "@/lib/audit/server";
+import { snapshotCatalog, tourQuestions } from "@/lib/audit/server";
 import { AuditWorkbench } from "./AuditWorkbench";
 import styles from "./page.module.css";
 
@@ -30,6 +30,10 @@ export const metadata: Metadata = {
 
 export default function AuditPage() {
   const catalog = snapshotCatalog();
+  // Les 15 questions résolues ici, comme le catalogue : l'îlot ne lit aucun
+  // module de `content/` (`audit-boundary.test.ts` marche ses imports), sans
+  // quoi `copy-library.ts` entrerait dans son bundle (R2-14).
+  const questions = tourQuestions();
   const today = new Date().toISOString().slice(0, 10);
 
   return (
@@ -48,7 +52,7 @@ export default function AuditPage() {
           Outil interne. Les missions vivent dans ce navigateur et dans les fichiers que tu exportes — jamais sur un serveur, jamais dans
           Firestore.
         </p>
-        <AuditWorkbench catalog={catalog} today={today} />
+        <AuditWorkbench catalog={catalog} questions={questions} today={today} />
       </main>
     </div>
   );

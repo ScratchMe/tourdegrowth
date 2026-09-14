@@ -362,6 +362,10 @@ compteurs par palier et la vue restitution.
   par interlocuteur puis par système source. **La vue restitution part en
   1.4** : son intérêt est le croisement méthode × réalité, qui a besoin du
   Tour de l'auditeur.
+- **1.4 — le Tour et le croisement** (livré). L'écran des 15 questions
+  rempli par l'auditeur, le score à 15/15 avec son détail par pilier, la
+  ligne `m19` produite avec sa définition, et la vue restitution groupée par
+  étape AARRR avec les angles morts en tête. Détail et écarts au §1.4.
 
 - **Livre — la vue collecte** (la vue par défaut d'une mission ouverte,
   grille §8) : les lignes applicables **triées par palier décroissant**
@@ -419,7 +423,7 @@ compteurs par palier et la vue restitution.
   jusqu'à `pending = 0` sur le vrai build, et une mission complète exportée
   est `ok: true`.
 
-#### 1.4 — Le Tour, et le croisement méthode × réalité
+#### 1.4 — Le Tour, et le croisement méthode × réalité (livré)
 
 - **Livre** : l'écran des 15 questions avec les composants du questionnaire
   (`QuestionCard`, `AnswerOption` — les textes arrivent en props, comme sur
@@ -439,6 +443,29 @@ compteurs par palier et la vue restitution.
   `blind-spot` ; les 15 réponses font apparaître le score et m19 ; 14
   réponses ne le font pas.
 - **Fini quand** : le Tour AB Tasty est rempli et les angles morts listés.
+- **Écarts assumés au moment de livrer**, pour ne pas les redécouvrir :
+  - **Les 15 questions sur un seul écran**, pas une à la fois comme `/quiz` :
+    ce formulaire se remplit par morceaux entre deux entretiens, et une
+    question à la fois obligerait à traverser quatorze écrans pour corriger
+    la quinzième.
+  - **Les points sont affichés** sur chaque option, là où `AnswerOption`
+    l'interdit (« scoring stays invisible to the user »). Cette règle vaut
+    pour le questionnaire public, où voir le barème fausserait les réponses ;
+    ici c'est l'auditeur qui note, et lui cacher le barème reviendrait à lui
+    demander de noter à l'aveugle.
+  - **Un angle mort ne demande pas les 15 réponses.** Le croisement se fait
+    question par question, donc une seule réponse à 20 points en révèle un ;
+    seul le score attend le Tour complet. Les lier ferait attendre la fin des
+    entretiens pour voir ce qui se voyait dès le premier entretien.
+  - **La définition du Tour passe par `upsertDefinition`**, pas
+    `registerDefinition` : elle porte le périmètre de la mission, donc son
+    contenu peut changer, et la règle d'immuabilité est la même que partout
+    ailleurs (frapper `@2`, jamais éditer `@1`).
+  - **Le titre d'escalade nomme enfin une étape.** `deliverableVocabulary`
+    recevait « cette étape » en dur depuis 1.3b ; il reçoit maintenant
+    l'étape la plus faible du Tour — mais seulement à 15/15, parce que le
+    départage à égalité suit l'ordre canonique AARRR et qu'appliqué à un Tour
+    partiel il désignerait une étape par un artefact d'ordre.
 
 #### 1.5 — Les constats et le bloc de tête
 

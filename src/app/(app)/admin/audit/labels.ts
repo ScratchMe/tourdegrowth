@@ -1,4 +1,6 @@
+import type { AuditPillar } from "@/content/audit-catalog";
 import type { ObservationGap } from "@/lib/audit/observation-fields";
+import type { Quadrant } from "@/lib/audit/quadrants";
 import type { ChaseState } from "@/lib/audit/tracking";
 import type {
   AbsentCause,
@@ -206,4 +208,42 @@ export const CHASE_STATE_LABELS: Record<ChaseState, string> = {
   waiting: "En attente",
   overdue: "À relancer",
   received: "Reçu",
+};
+
+/**
+ * Les huit quadrants méthode × réalité, dits comme on les dirait en réunion.
+ *
+ * Deux choix d'écriture qui portent tout le sens de cet écran :
+ * - **« angle mort » nomme le croisement, pas la ligne.** Ce n'est pas un
+ *   reproche sur le chiffre manquant, c'est l'écart entre ce que l'équipe
+ *   croit mesurer et ce qu'elle peut montrer — et c'est cet écart qui vaut
+ *   le déplacement.
+ * - **« non vérifiable » est un fait sur mon accès, jamais sur eux.** La
+ *   ligne existe peut-être très bien ; c'est moi qui n'ai pas pu la voir, et
+ *   le livrable doit le dire dans ce sens-là.
+ */
+export const QUADRANT_LABELS: Record<Quadrant, string> = {
+  "measured-good": "Documenté, le repère est tenu",
+  "measured-bad": "Documenté, le repère n'est pas tenu",
+  "measured-no-benchmark": "Documenté, aucun repère ne tranche",
+  "blind-spot": "Angle mort — déclaré mesuré, rien ne le documente",
+  "known-gap": "Écart connu",
+  "unverifiable": "Non vérifiable — pas d'accès de mon côté",
+  "not-applicable": "Hors profil",
+  pending: "Pas encore examiné",
+};
+
+/**
+ * Les noms d'étape restent en anglais dans les deux langues du produit, pour
+ * préserver l'acronyme AARRR (convention du projet, SPEC.md l'emploie ainsi
+ * dans sa propre prose française). Seul `transverse`, qui n'est pas une
+ * étape du cadre, se dit en français.
+ */
+export const AUDIT_PILLAR_LABELS: Record<AuditPillar, string> = {
+  acquisition: "Acquisition",
+  activation: "Activation",
+  retention: "Retention",
+  referral: "Referral",
+  revenue: "Revenue",
+  transverse: "Transverse",
 };
