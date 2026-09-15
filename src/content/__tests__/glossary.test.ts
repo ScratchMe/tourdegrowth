@@ -81,9 +81,8 @@ describe("long-form term pages (REVIEW-02.md R2-11)", () => {
     expect(DEEP_IDS.sort()).toEqual([...ALL_IDS].sort());
   });
 
-  it("every deep entry is wired into GLOSSARY, dated, and points at a real Tour question", () => {
+  it("every deep entry is dated and points at a real Tour question", () => {
     for (const id of DEEP_IDS) {
-      expect(GLOSSARY[id].deep, id).toBe(GLOSSARY_DEEP[id]);
       expect(GLOSSARY[id].updatedAt, id).toMatch(/^\d{4}-\d{2}-\d{2}$/);
       const { questionId } = GLOSSARY_DEEP[id]!.inTheTour;
       expect(QUESTIONS.map((q) => q.id), `${id} → ${questionId}`).toContain(questionId);

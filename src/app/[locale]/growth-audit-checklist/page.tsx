@@ -12,7 +12,7 @@ import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { localePath } from "@/lib/i18n/routes";
 import { contentMetadata } from "@/lib/i18n/meta";
-import { articleSchema, breadcrumbSchema, CRUMBS, JsonLd } from "@/lib/seo/jsonld";
+import { articleSchema, breadcrumbSchema, JsonLd } from "@/lib/seo/jsonld";
 import styles from "../how-it-works/page.module.css";
 import own from "./page.module.css";
 
@@ -54,7 +54,7 @@ export default async function ChecklistPage({ params }: PageProps) {
 
   return (
     <>
-      <JsonLd data={breadcrumbSchema(locale, [CRUMBS.checklist(locale)])} />
+      <JsonLd data={breadcrumbSchema(locale, [{ name: tc(CHECKLIST.title, locale), path: "/growth-audit-checklist" }])} />
       <JsonLd
         data={articleSchema(locale, "/growth-audit-checklist", tc(CHECKLIST.title, locale), tc(CHECKLIST.metaDescription, locale))}
       />

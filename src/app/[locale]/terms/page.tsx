@@ -4,7 +4,7 @@ import { TERMS } from "@/content/legal";
 import { tc } from "@/lib/i18n/translatable";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { contentMetadata } from "@/lib/i18n/meta";
-import { breadcrumbSchema, CRUMBS, JsonLd } from "@/lib/seo/jsonld";
+import { breadcrumbSchema, JsonLd } from "@/lib/seo/jsonld";
 
 interface PageProps {
   params: Promise<{ locale: string }>;
@@ -21,7 +21,7 @@ export default async function TermsPage({ params }: PageProps) {
   const locale = (await params).locale as Locale;
   return (
     <>
-      <JsonLd data={breadcrumbSchema(locale, [CRUMBS.terms(locale)])} />
+      <JsonLd data={breadcrumbSchema(locale, [{ name: tc(TERMS.title, locale), path: "/terms" }])} />
       <LegalPage document={TERMS} path="/terms" locale={locale} />
     </>
   );

@@ -4238,9 +4238,94 @@ La cadence est le terme dominant, et c'est une convention déjà écrite le
 
 **Rien n'a été poussé ni déployé pour cette mesure** (consigne d'Antoine : le
 moindre déploiement peut être de trop). Tout a été fait avec `vercel build`
-hors ligne, sur un `.vercel/project.json` fabriqué — **`.vercel` n'est pas
-dans `.gitignore`**, donc il doit être supprimé après chaque mesure, avec
-`git status` vérifié propre.
+hors ligne, sur un `.vercel/project.json` fabriqué. `.vercel` **est** désormais
+dans `.gitignore` et dans les ignores d'ESLint (corrigé le jour même, voir
+l'entrée suivante) ; le supprimer après chaque mesure reste la bonne hygiène,
+mais un oubli ne peut plus être committé.
+
+### Déduplication du chunk de contenu : 7,9 → 5,74 Mo par route de contenu (2026-09-15)
+
+Suite directe du diagnostic ci-dessus. Le constat était juste — six chunks SSR
+identiques portant toute la bibliothèque de contenu — mais aucune des « pistes
+à explorer » que j'avais listées (import dynamique, paquet local,
+`serverExternalPackages`) n'était la bonne. **Il n'y avait rien à contourner :
+c'était trois fan-in de notre propre code.**
+
+**Fix 1 — `glossary.ts` n'importe plus `glossary-deep.ts`.** L'interface
+`GlossaryEntry` portait un champ `deep` renseigné sur les 24 termes, que
+**seule** la page de terme lisait. Un module que quatre routes importaient
+tirait donc **300 Ko** de prose longue dans chacune. La page de terme lit
+maintenant `GLOSSARY_DEEP[term]` directement ; le champ, ses 24 lignes de
+câblage et l'assertion de test qui vérifiait le câblage disparaissent.
+
+**Fix 2 — `lib/seo/jsonld.tsx` perd son helper `CRUMBS`.** Il construisait les
+fils d'Ariane des neuf familles de pages, donc importait `how-it-works`,
+`legal`, `comparisons`, `open-door`, `about` et le glossaire. Or ce module est
+traversé par **toutes** les pages de contenu : chacune emportait le contenu des
+huit autres. Chaque page construit maintenant son propre fil, en une ligne,
+depuis le module qu'elle importait déjà de toute façon — vérifié avant de
+toucher quoi que ce soit pour les neuf.
+
+**Fix 3 — ce que la mesure a trouvé et que la lecture n'avait pas vu.** Après
+Fix 1 et 2, `glossary.ts` (la copie `extended`, 39 Ko) restait dans **cinq**
+chunks. Deux importeurs n'en avaient aucun besoin : `definedTermSetSchema` et
+`definedTermSchema` ne lisent que `term` et `definition`, et l'index du
+glossaire non plus. Les deux passent sur `content/glossary-terms.ts` (12 Ko),
+la moitié courte que R2-14 avait déjà extraite **pour le navigateur** — la même
+scission vaut côté serveur, pour la même raison, à un niveau différent.
+
+**Mesuré à chaque étape, jamais déduit** (`npm run build`, sondes de chaîne
+uniques à chaque module dans `.next/server/chunks/`, puis `vercel build` hors
+ligne) :
+
+| | Chunks portant `glossary-deep` | Chunks portant `glossary.ts` | Fonction de contenu | Disque total |
+|---|---|---|---|---|
+| Avant | 6 | 5 | 7,9 Mo | 47,3 Mo |
+| Fix 1 | **1** | 5 | 6,5 Mo | 45,7 Mo |
+| Fix 1+2+3 | **1** | **2** | **5,74 Mo** | **43,55 Mo** |
+
+Plus aucun groupe de chunks identiques à l'octet au-dessus de 50 Ko. Les deux
+chunks restants pour `glossary.ts` sont les deux routes qui la rendent
+vraiment : la page de terme, et le sitemap (qui lit `updatedAt`).
+
+**Ce que ça vaut côté facture, dit comme une extrapolation et pas comme une
+mesure** : Vercel compte par route, et son export rapportait 4,36 Mo là où ma
+mesure locale donnait 7,9 (rapport 0,55 — la mienne somme le `filePathMap` non
+compressé). Au même rapport, 5,74 Mo local ≈ **3,2 Mo par route de contenu**,
+soit ~−27 % sur le poste qui représentait 94 % du déploiement. Le chiffre réel
+ne se lira que sur l'export du prochain déploiement.
+
+**Le garde : `src/__tests__/content-fan-in.test.ts`.** Le garde de R2-14 ne
+regarde que les Client Components, et **aucun des trois fan-in n'était un
+Client Component** — c'est exactement le trou. Celui-ci mesure l'**atteinte** :
+pour chaque module de contenu volumineux, combien des 38 points d'entrée de
+l'App Router le rejoignent en suivant les imports de valeur (un `import type`
+n'est pas une arête, TypeScript l'efface). Un budget par module, avec sa
+raison, plus la règle qui aurait attrapé `CRUMBS` : le module JSON-LD ne peut
+importer que du contenu que **chaque** page émet.
+
+Non-vacuité mesurée finement, trois sabotages : remettre l'import
+`glossary-deep` dans `glossary.ts` → 1 test tombe ; remettre un module de
+contenu propre à une page dans `jsonld.tsx` → 2 tombent (le budget **et** la
+liste, ce qui est correct : l'un dit le symptôme, l'autre la cause) ; remettre
+l'index du glossaire sur la copie longue → 1 tombe.
+
+**Trouvé en route, sans rapport avec le sujet : `npm run lint` sortait
+2 366 problèmes.** Pas une régression — `.vercel/` (le Build Output de mes
+mesures) n'était ni dans `.gitignore`, ni dans les ignores d'ESLint, donc
+ESLint analysait des bundles minifiés (colonnes à `1:10753`, ce qui est le
+signe). Les deux ajoutés ; `lint` ressort à 0. **La leçon vaut au-delà du
+correctif** : un compteur de lint qui explose après une manipulation d'outil se
+lit d'abord en regardant *quels fichiers* sont signalés (`cut -d/ -f1 | sort |
+uniq -c`), pas en lisant les règles.
+
+**Ce qui reste, non fait ici** : `content/comparisons.ts` (39 Ko) est atteint
+par 6 routes et `copy-library.ts` (34 Ko) par 11. Les deux sont légitimes —
+chaque page de comparaison rend son entrée, et les onze pages qui lisent
+`copy-library` citent vraiment des questions — mais ce sont les deux prochains
+postes si le compteur redevient un sujet. Le garde fixe leur budget actuel
+comme plafond, donc une nouvelle route qui les tirerait sans les rendre fera
+rougir la CI.
 
 ## État du projet au 2026-09-15 — à lire en premier dans une nouvelle session
 
@@ -4264,7 +4349,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **L'instrument d'audit growth a son schéma** (2026-09-13, `AUDIT.md`) : un outil personnel pour les diagnostics qu'Antoine mène en entreprise, navigateur seulement, jamais Firestore — `src/lib/audit/` + `src/content/audit-catalog.ts`, sans aucune route ni UI encore. Phase 1 (la saisie sous `/admin/audit`) est le prochain chantier, découpée en six PR dans **`AUDIT-PLAN.md`** (2026-09-13) ; phase 3 (tout ce qui ressemble à un produit) reste fermée tant que les entretiens ne sont pas faits et le contrat de travail pas vérifié.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **706 tests unitaires**, **286 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
+**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **709 tests unitaires**, **286 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 
@@ -4287,7 +4372,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Instrument d'audit : phase 1 (saisie) | **Close le 2026-09-14** (PR #131 à #153). `/admin/audit` crée une mission, trie 25 lignes par palier, saisit tout ce que le schéma prévoit, produit `m19` depuis le Tour de l'auditeur, croise méthode × réalité, rédige les constats et le bloc de tête, exporte, réimporte et purge. La spec canari prouve qu'aucune requête ne porte un octet de la mission ; la recette vérifie le critère de sortie sur un vrai build, `localStorage` réellement vidé entre l'export et l'import | Rien côté code. |
 | Instrument d'audit : phase 1 bis (la vraie mission) | **Le prochain chantier, et il est côté Antoine** : mener AB Tasty dans l'outil jusqu'à `pending = 0`, en tenant le journal des frictions | C'est ce journal qui dira ce que la phase 2 (les readouts) doit construire — il n'y a aucune façon de le deviner d'ici. |
 | Copie à relire | **Deux bons à tirer ouverts en parallèle**, et ils ne se recouvrent pas. [Nº5](https://claude.ai/code/artifact/6236cd38-cfbb-4b4c-89c4-fb35a8bca84f) (2026-09-14) porte les dix marqueurs relevés au grep : les dix termes de glossaire de la vague 2.2, les deux pages « porte ouverte », les quatre comparaisons « AARRR vs X », et les 15 libellés de chrome (`openDoor`, `comparisonPage`, les 3 titres de document invisibles, `nav-strings.checklist`). [Nº4](https://claude.ai/code/artifact/d45d5d7d-fdfa-4155-ba0d-76290e331dc8) porte les 39 lignes du catalogue d'audit — **1 carte tranchée sur 39** | La relecture d'Antoine. Le prochain document se reconstruit depuis `grep -rn "TODO: à relire" src/`, jamais de mémoire ni depuis un compte écrit ici : trois fois de suite ce grep a rattrapé un oubli, et la dernière il a corrigé « six » en « dix ». Les décisions vivent dans la base de chaque artifact — nº4 dans `lines/`, nº5 dans `cards/` ; lire le bon tiroir avant de conclure qu'un artifact n'a pas été ouvert. |
-| Vercel Functions Storage | **Ouvert, premier sujet d'infrastructure.** Somme glissante sur 30 jours, insensible à la suppression des déploiements (vérifié par Antoine auprès de Vercel le 2026-09-15). L'export de production montre que **Vercel compte par route** : la fonction des pages de contenu pèse 4,36 Mo et est comptée **92 fois**, soit 94 % des 428,9 Mo d'un déploiement. Et **~2,0 Mo de ces 4,36 sont six copies identiques de notre bibliothèque de contenu** (Turbopack, une par groupe de routes) | Le chantier est de dédupliquer ce chunk — pistes non vérifiées dans l'entrée du 2026-09-15. Deux correctifs secondaires mesurés et non appliqués : unifier `maxDuration` (6 → 5 fonctions) et sauter les déploiements « doc seule » (26 sur 154). Et tenir la cadence de merges (convention 13) |
+| Vercel Functions Storage | **Ouvert, mais le gros poste est traité.** Somme glissante sur 30 jours, insensible à la suppression des déploiements (vérifié par Antoine auprès de Vercel le 2026-09-15). **Vercel compte par route** : la fonction des pages de contenu était à 4,36 Mo comptée 92 fois, soit 94 % des 428,9 Mo d'un déploiement — dont ~2,0 Mo de copies identiques de notre bibliothèque de contenu. **La déduplication est faite** (trois fan-in de notre propre code, pas une limite de Turbopack) : 7,9 → 5,74 Mo local, 47,3 → 43,55 Mo sur disque, soit ~−27 % par route en extrapolant le rapport de l'export | Lire l'export du prochain déploiement pour le chiffre réel. Deux correctifs secondaires mesurés et **non appliqués, en attente de l'accord d'Antoine** : unifier `maxDuration` (6 → 5 fonctions) et sauter les déploiements « doc seule » (26 sur 154). Et tenir la cadence de merges (convention 13) |
 | Vercel Fluid Active CPU (36 min / 4 h par mois) | Les deux postes qui dominaient le coût par visite sont corrigés le 2026-09-14 : six préchargements dynamiques par vue de la homepage, et l'image de partage rendue à chaque vue de résultat — confirmé en production, `MISS` puis `HIT` sur l'adresse versionnée. La région des fonctions est passée à `cdg1` le même jour (vérifié : `x-vercel-id: iad1::cdg1::…`) | Relire le compteur dans Vercel une semaine après. |
 | Lecture des stats par la session | **Les deux moitiés marchent** (trois runs réels le 2026-09-14 : tableau de bord et Search Console, déchiffrés par la session ; ligne de départ du plan relevée, tenue hors du dépôt public). À surveiller au prochain run Search Console : `/en/glossary/*` doit remplacer les anciennes URL non préfixées dans les pages créditées | Rien : un `age-keygen` puis un run (`admin`, `gsc` ou `both`) quand une session a besoin des chiffres. |
 

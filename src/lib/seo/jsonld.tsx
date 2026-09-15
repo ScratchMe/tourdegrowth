@@ -1,11 +1,14 @@
 import type { ReactElement } from "react";
 import { ABOUT } from "@/content/about";
-import { GLOSSARY, type GlossaryTermId } from "@/content/glossary";
+/*
+ * `glossary-terms` and not `glossary`: these two builders read only `term`
+ * and `definition`, and this module is imported by all nine content page
+ * families. Reaching for the full entry would pull the long-form `extended`
+ * copy — ~50 KB of SSR chunk — into every one of them. Same reasoning as
+ * REVIEW-02.md R2-14, one level up: a server fan-in costs per route.
+ */
+import { GLOSSARY_TERMS, type GlossaryTermId } from "@/content/glossary-terms";
 import { ANTOINE_LINKS, QUICK_CREDIT } from "@/content/antoine-credit";
-import { HOW_IT_WORKS } from "@/content/how-it-works";
-import { PRIVACY, TERMS } from "@/content/legal";
-import { COMPARISONS, type ComparisonSlug } from "@/content/comparisons";
-import { CHECKLIST, DIAGNOSTIC } from "@/content/open-door";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import type { Locale } from "@/lib/i18n/locale";
 import { localePath } from "@/lib/i18n/routes";
@@ -114,10 +117,10 @@ export function definedTermSetSchema(locale: Locale) {
     url: absolute(locale, "/glossary"),
     inLanguage: locale,
     author: personNode(),
-    hasDefinedTerm: (Object.keys(GLOSSARY) as GlossaryTermId[]).map((id) => ({
+    hasDefinedTerm: (Object.keys(GLOSSARY_TERMS) as GlossaryTermId[]).map((id) => ({
       "@type": "DefinedTerm",
       "@id": absolute(locale, `/glossary/${id}`),
-      name: tc(GLOSSARY[id].term, locale),
+      name: tc(GLOSSARY_TERMS[id].term, locale),
       url: absolute(locale, `/glossary/${id}`),
     })),
   };
@@ -125,7 +128,7 @@ export function definedTermSetSchema(locale: Locale) {
 
 /** One term page: the term, its short definition, and the set it belongs to. */
 export function definedTermSchema(locale: Locale, id: GlossaryTermId) {
-  const entry = GLOSSARY[id];
+  const entry = GLOSSARY_TERMS[id];
   return {
     "@context": "https://schema.org",
     "@type": "DefinedTerm",
@@ -154,19 +157,6 @@ export function aboutPageSchema(locale: Locale) {
     mainEntity: { ...personNode(), jobTitle: "Senior Growth Product Manager" },
   };
 }
-
-/** Localized breadcrumb names for the content areas. */
-export const CRUMBS = {
-  glossary: (locale: Locale) => ({ name: tc(UI_STRINGS.glossaryPage.indexTitle, locale), path: "/glossary" }),
-  term: (locale: Locale, id: GlossaryTermId) => ({ name: tc(GLOSSARY[id].term, locale), path: `/glossary/${id}` }),
-  howItWorks: (locale: Locale) => ({ name: tc(HOW_IT_WORKS.title, locale), path: "/how-it-works" }),
-  about: (locale: Locale) => ({ name: tc(ABOUT.title, locale), path: "/about" }),
-  privacy: (locale: Locale) => ({ name: tc(PRIVACY.title, locale), path: "/privacy" }),
-  terms: (locale: Locale) => ({ name: tc(TERMS.title, locale), path: "/terms" }),
-  checklist: (locale: Locale) => ({ name: tc(CHECKLIST.title, locale), path: "/growth-audit-checklist" }),
-  diagnostic: (locale: Locale) => ({ name: tc(DIAGNOSTIC.title, locale), path: "/startup-growth-diagnostic" }),
-  comparison: (locale: Locale, slug: ComparisonSlug) => ({ name: tc(COMPARISONS[slug].title, locale), path: `/${slug}` }),
-};
 
 /**
  * Renders one JSON-LD block. `<` is escaped so a value containing

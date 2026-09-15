@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { GLOSSARY } from "@/content/glossary";
-import { breadcrumbSchema, CRUMBS, definedTermSchema, definedTermSetSchema, webApplicationSchema } from "../jsonld";
+import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
+import { breadcrumbSchema, definedTermSchema, definedTermSetSchema, webApplicationSchema } from "../jsonld";
 
 // REVIEW-02.md R2-15 — one JSON-LD block existed, identical on /en and /fr,
 // with a `url` that was not the page's own. These are the shapes we now emit.
@@ -34,7 +35,12 @@ describe("structured data", () => {
   });
 
   it("builds breadcrumbs from the home page down, positions counted from 1", () => {
-    const crumbs = breadcrumbSchema("fr", [CRUMBS.glossary("fr"), CRUMBS.term("fr", "cac")]);
+    // Le fil est construit par la page qui le rend, depuis son propre module de
+    // contenu — donc le test le construit pareil, plutôt que via un helper partagé.
+    const crumbs = breadcrumbSchema("fr", [
+      { name: tc(UI_STRINGS.glossaryPage.indexTitle, "fr"), path: "/glossary" },
+      { name: tc(GLOSSARY.cac.term, "fr"), path: "/glossary/cac" },
+    ]);
     expect(crumbs.itemListElement.map((i) => i.position)).toEqual([1, 2, 3]);
     expect(crumbs.itemListElement[0]?.item).toMatch(/\/fr$/);
     expect(crumbs.itemListElement[2]?.name).toBe(GLOSSARY.cac.term.fr);
