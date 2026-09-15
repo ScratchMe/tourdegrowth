@@ -4026,7 +4026,223 @@ couverture, `next build` (les pages de terme passent de 50 à 48, en `●`),
 en reconstruisant, **exactement la nouvelle spec tombe**, les 21 autres du
 fichier passent.
 
-## État du projet au 2026-09-14 — à lire en premier dans une nouvelle session
+### Functions Storage : le modèle était faux, et la mesure aussi (2026-09-15)
+
+Antoine a vérifié auprès de Vercel après un compteur qui ne redescendait pas.
+**Deux notes de ce fichier étaient fausses, et elles se corrigeaient l'une
+l'autre.**
+
+**1. La rétention des déploiements ne fait rien pour ce compteur.** Functions
+Storage est une **somme glissante sur 30 jours** : chaque déploiement ajoute
+le poids de ses fonctions, et sort du calcul 30 jours plus tard —
+**supprimé ou non**. L'entrée du 2026-09-13 attribuait les 9,24 Go aux
+« déploiements retenus » et présentait la politique de rétention comme le
+correctif ; c'est faux sur les deux points. Le « 397 Mo » observé ensuite
+était un couac côté Vercel, pas un effet de la rétention.
+
+La formule réelle :
+
+```
+Functions Storage = poids des fonctions × déploiements des 30 derniers jours
+```
+
+**2. La note « un déploiement, c'est six fonctions » était juste, mais pour
+une raison qu'il faut connaître avant de mesurer.** Le Build Output contient
+~430 entrées `.func` — dont **6 seulement sont des répertoires physiques**,
+les autres étant des liens symboliques vers elles. Et depuis Vercel CLI 59,
+un `.func` physique ne contient que 5 fichiers : la liste réelle des fichiers
+tracés vit dans **`filePathMap` de son `.vc-config.json`** (116 Ko pour la
+route Deep dive). Conséquences pour qui remesure :
+
+- `du` sur `.vercel/output/functions` ne mesure **rien** (j'ai obtenu 6 Mo,
+  puis 13 Mo, pour un déploiement qui en pèse 47) ;
+- sommer tous les `.func` donne 3,4 Go, ce qui est absurde (on compte 430
+  fois les mêmes 6 bundles) ;
+- la seule mesure juste est : pour chaque `.func` **non-symlink**, sommer les
+  tailles des fichiers listés dans son `filePathMap`.
+
+**Mesuré sur `main` au 2026-09-15** (`vercel build` hors ligne, jamais
+déployé) : **47,3 Mo par déploiement**, et 154 squash-merges sur 30 jours,
+donc **7,29 Go sur 10** — 73 %. Le plafond au poids actuel est de
+**211 déploiements par 30 jours** ; la journée du 6 septembre en a produit 41
+à elle seule.
+
+Où part le poids :
+
+| Poste | Poids | Présent dans |
+|---|---|---|
+| Runtime Next.js | 19,5 Mo (41 %) | 6/6 fonctions |
+| Notre code applicatif | 10,0 Mo (21 %) | 6/6 |
+| Pile gRPC de Firestore (`google-gax`, `@grpc/grpc-js`, `protobufjs`) | 7,3 Mo (15 %) | 3/6 |
+| Firestore, auth, polyfills | 6,8 Mo (14 %) | 3/6 |
+
+#### La piste gRPC est fermée, et cette fois c'est prouvé
+
+Firestore sait parler REST (`preferRest`, activable jusqu'en variable
+d'environnement `FIRESTORE_PREFER_REST`). Exclure les trois paquets gRPC du
+tracing fait bien tomber le déploiement à **39,0 Mo** (−17,5 %).
+
+**Mais le module ne se charge plus.** `google-gax/build/src/index.js:53` fait
+un `require("@grpc/grpc-js")` **au niveau module**, et le graphe tire
+`protobufjs` de la même façon. Vérifié en déplaçant physiquement les paquets
+hors de `node_modules` — la technique employée pour `sharp` le 2026-09-13 :
+
+```
+les trois retirés  → MODULE_NOT_FOUND: Cannot find module 'protobufjs'
+seul @grpc retiré  → MODULE_NOT_FOUND: Cannot find module '@grpc/grpc-js'
+tout restauré      → module chargé OK
+```
+
+Aucun sous-ensemble n'est excluable. Le mode d'échec aurait été celui que
+`next.config.mjs` documente déjà pour satori — un build vert qui casse la
+production — mais sur **toutes** les routes Firestore au lieu des aperçus de
+liens. Ne pas y revenir sans que `google-gax` ait changé de structure.
+
+#### Ce qui marche : 6 fonctions → 5, par alignement de `maxDuration`
+
+La règle de regroupement de Vercel, lue dans les `.vc-config.json` plutôt que
+supposée : les routes sont groupées par **`operationType`** (`ISR` pour les
+pages de contenu, `Page` pour les pages applicatives, `API` pour les Route
+Handlers et les images de métadonnées) × **arbre de layout racine** ×
+**configuration identique**.
+
+D'où les six groupes, et surtout : **la fonction Deep dive n'est séparée que
+parce qu'elle déclare `maxDuration = 120`** (R-15) et que les autres Route
+Handlers n'en déclarent aucun. En posant le même `maxDuration` sur
+`/api/submissions`, `/admin/stats/json` et `/r/[id]/share/[token]`, les deux
+groupes fusionnent :
+
+| | Fonctions | Par déploiement | Sur 30 jours à 154 déploiements |
+|---|---|---|---|
+| Aujourd'hui | 6 | 47,3 Mo | 7,29 Go (73 %) |
+| `maxDuration` unifié | **5** | **38,7 Mo** | **5,97 Go** (60 %) |
+
+Les 8,6 Mo de la fonction Deep dive étaient presque intégralement du runtime
+Next et de la pile Firestore déjà présents dans la fonction voisine.
+
+**Le compromis, à décider et non à glisser** : `maxDuration` est un plafond,
+pas une réservation, et Vercel facture le CPU actif — donc une route rapide
+avec un plafond haut ne coûte rien de plus. Ce qui change est le **chemin
+d'échec** : un appel Firestore qui pend sur `/api/submissions` tiendrait
+jusqu'à 120 s avant de rendre `SCORING_FAILED`, au lieu d'être coupé par le
+défaut de la plateforme. L'écran de chargement est conçu pour une attente
+indéfinie depuis l'étape 12bis, donc le coût réel est une erreur qui met plus
+longtemps à s'afficher.
+
+**Cinq est le plancher de cette architecture.** Descendre à quatre
+demanderait de fusionner les pages de contenu (`ISR`) avec les pages
+applicatives (`Page`), c'est-à-dire de revenir aux deux layouts racine de
+R-24 — ce qui coûterait le prérendu CDN des 48 pages de contenu. Mauvais
+échange, et à ne pas reproposer.
+
+
+#### Correction du modèle par l'export Vercel : on compte par ROUTE
+
+Antoine a fourni l'export du dernier déploiement de production. Il contredit
+ma mesure locale sur le point décisif : **Vercel attribue le poids du bundle
+à chaque route, pas à chaque bundle physique.**
+
+| Bundle | Taille | Routes | Cumul |
+|---|---|---|---|
+| **Pages de contenu** | **4,36 Mo** | **92** | **401 Mo (94 %)** |
+| Images OG | 3,31 Mo | 7 | 23 Mo |
+| Deep dive | 2,18 Mo | 1 | 2,2 Mo |
+| Proxy | 0,56 Mo | 1 | 0,6 Mo |
+| **Total** | | **165** | **428,9 Mo** |
+
+Deux conséquences qui changent les priorités :
+
+1. **La fonction des pages de contenu est multipliée par 92.** Tout gramme
+   qu'on lui retire compte 92 fois ; tout gramme retiré ailleurs compte une
+   ou sept fois. C'est le seul endroit où il faut travailler.
+2. **Le gain « 6 → 5 fonctions » est marginal dans cette comptabilité** :
+   fusionner la fonction Deep dive économise une route à 2,18 Mo, pas les
+   8,6 Mo de disque que ma mesure locale laissait espérer. Le correctif reste
+   bon à prendre — il est gratuit — mais ce n'est plus le levier principal.
+
+**Je ne sais pas réconcilier exactement 428,9 Mo/déploiement avec les ~7 Go
+observés sur 30 jours** (154 déploiements donneraient 66 Go) : Vercel
+déduplique probablement les bundles identiques entre routes, ou entre
+déploiements successifs. À demander à leur support plutôt qu'à deviner — mais
+le classement relatif des postes, lui, est sûr, et c'est ce qui guide l'action.
+
+#### La vraie cause du 2,2 → 4,4 Mo : notre contenu est recopié six fois
+
+Constat d'Antoine : la fonction des pages est passée de 2,2 à 4,36 Mo.
+Cherché dans le build plutôt que supposé — `.next/server/chunks/ssr/`
+contient **six fichiers de 397 589 octets, à l'octet près**. Comparés deux à
+deux : **cinq octets de différence, uniquement le nom du fichier de source
+map**. Ce sont des copies identiques.
+
+```
+cmp -l src_1knjr0h._.js src_1k9ffd4._.js  →  5 octets, offset 397576
+                                              (//# sourceMappingURL=…)
+```
+
+Chaque copie contient **toute la bibliothèque de contenu** — vérifié par
+marqueurs : `glossary-deep`, les `extended` du glossaire, `copy-library`,
+`comparisons`, `legal`, le crédit Antoine, plus le JSON-LD. Turbopack en émet
+**une copie par groupe de routes**, et nous avons ajouté des groupes sans
+arrêt depuis le 6 septembre : 4 pages de comparaison, 2 pages « porte
+ouverte », 2 pages légales, `/about`.
+
+**Donc ~2,0 Mo des 4,36 Mo de cette fonction sont de la duplication pure** —
+et ils sont comptés 92 fois. C'est, de loin, le premier poste à traiter.
+
+Ordre de grandeur des sources : `glossary-deep.ts` pèse **300 Ko** à lui
+seul (24 termes × 2 langues de prose longue), devant `audit-catalog.ts`
+(64 Ko), `glossary.ts` et `comparisons.ts` (40 Ko chacun).
+
+**Conséquence à retenir pour la suite du plan de croissance** : chaque terme
+de glossaire long ajouté grossit un module qui est recopié six fois, puis
+compté quatre-vingt-douze fois. La vague 2 du `GROWTH-PLAN.md` a un coût
+d'infrastructure que personne n'avait chiffré.
+
+**Pistes à explorer, aucune vérifiée** (c'est le prochain chantier, pas une
+conclusion) : import dynamique du contenu depuis les pages pour forcer un
+chunk asynchrone partagé ; sortir `src/content/` derrière une frontière que
+Next traite en externe (`serverExternalPackages` ne s'applique qu'à
+`node_modules`, donc il faudrait un paquet local) ; ou vérifier si le
+regroupement change hors Turbopack. À mesurer de la même façon : `npm run
+build`, puis comparer les tailles dans `.next/server/chunks/ssr/`.
+
+#### Le levier le plus gros n'est pas le poids : c'est le nombre
+
+À 47,3 Mo, **26 des 154 déploiements (17 %) ne touchaient que `*.md`,
+`.github/`, `marketing/`, `design/` ou `scripts/live/`** — site servi
+rigoureusement identique, 1,23 Go de compteur dépensés pour rien. Vérifié
+qu'aucun de ces chemins n'entre dans le build : aucun `.md` n'est lu au
+build, et rien sous `src/` n'importe `marketing/` ni `design/`.
+
+`vercel.json` porte déjà un `ignoreCommand` (2026-09-07) qui saute les builds
+hors production. Il peut aussi sauter la production quand le diff ne touche
+aucune entrée de build. **Règle non négociable dans son écriture** : en cas
+de doute — clone superficiel, `HEAD^` indisponible, erreur git — il doit
+**construire** (`exit 1`), jamais sauter. Un déploiement sauté à tort veut
+dire qu'un correctif ne part pas en production, ce qui est bien pire que
+47 Mo de compteur. `src/__tests__/vercel-config.test.ts` existe parce qu'un
+`vercel.json` invalide fait échouer *tous* les déploiements, production
+comprise : toute évolution de ce fichier passe par ce test.
+
+Projection combinée :
+
+| Scénario | Consommation | % de 10 Go |
+|---|---|---|
+| Aujourd'hui | 7,29 Go | 73 % |
+| 5 fonctions | 5,97 Go | 60 % |
+| 5 fonctions + saut des déploiements « doc seule » | 4,96 Go | 50 % |
+| + merges groupés (~60 déploiements de code/mois) | 2,32 Go | **23 %** |
+
+La cadence est le terme dominant, et c'est une convention déjà écrite le
+2026-09-07 que nous ne tenons pas : 41 merges le 6 septembre, 27 le 14.
+
+**Rien n'a été poussé ni déployé pour cette mesure** (consigne d'Antoine : le
+moindre déploiement peut être de trop). Tout a été fait avec `vercel build`
+hors ligne, sur un `.vercel/project.json` fabriqué — **`.vercel` n'est pas
+dans `.gitignore`**, donc il doit être supprimé après chaque mesure, avec
+`git status` vérifié propre.
+
+## État du projet au 2026-09-15 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
 
@@ -4071,7 +4287,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Instrument d'audit : phase 1 (saisie) | **Close le 2026-09-14** (PR #131 à #153). `/admin/audit` crée une mission, trie 25 lignes par palier, saisit tout ce que le schéma prévoit, produit `m19` depuis le Tour de l'auditeur, croise méthode × réalité, rédige les constats et le bloc de tête, exporte, réimporte et purge. La spec canari prouve qu'aucune requête ne porte un octet de la mission ; la recette vérifie le critère de sortie sur un vrai build, `localStorage` réellement vidé entre l'export et l'import | Rien côté code. |
 | Instrument d'audit : phase 1 bis (la vraie mission) | **Le prochain chantier, et il est côté Antoine** : mener AB Tasty dans l'outil jusqu'à `pending = 0`, en tenant le journal des frictions | C'est ce journal qui dira ce que la phase 2 (les readouts) doit construire — il n'y a aucune façon de le deviner d'ici. |
 | Copie à relire | **Deux bons à tirer ouverts en parallèle**, et ils ne se recouvrent pas. [Nº5](https://claude.ai/code/artifact/6236cd38-cfbb-4b4c-89c4-fb35a8bca84f) (2026-09-14) porte les dix marqueurs relevés au grep : les dix termes de glossaire de la vague 2.2, les deux pages « porte ouverte », les quatre comparaisons « AARRR vs X », et les 15 libellés de chrome (`openDoor`, `comparisonPage`, les 3 titres de document invisibles, `nav-strings.checklist`). [Nº4](https://claude.ai/code/artifact/d45d5d7d-fdfa-4155-ba0d-76290e331dc8) porte les 39 lignes du catalogue d'audit — **1 carte tranchée sur 39** | La relecture d'Antoine. Le prochain document se reconstruit depuis `grep -rn "TODO: à relire" src/`, jamais de mémoire ni depuis un compte écrit ici : trois fois de suite ce grep a rattrapé un oubli, et la dernière il a corrigé « six » en « dix ». Les décisions vivent dans la base de chaque artifact — nº4 dans `lines/`, nº5 dans `cards/` ; lire le bon tiroir avant de conclure qu'un artifact n'a pas été ouvert. |
-| Vercel Functions Storage | **Réglé** : la politique de rétention posée par Antoine le 2026-09-14 l'a fait passer de 9,24 Go à 397 Mo, et un déploiement pèse 45,5 Mo de fonctions depuis le 2026-09-13 | Rien. |
+| Vercel Functions Storage | **Ouvert, premier sujet d'infrastructure.** Somme glissante sur 30 jours, insensible à la suppression des déploiements (vérifié par Antoine auprès de Vercel le 2026-09-15). L'export de production montre que **Vercel compte par route** : la fonction des pages de contenu pèse 4,36 Mo et est comptée **92 fois**, soit 94 % des 428,9 Mo d'un déploiement. Et **~2,0 Mo de ces 4,36 sont six copies identiques de notre bibliothèque de contenu** (Turbopack, une par groupe de routes) | Le chantier est de dédupliquer ce chunk — pistes non vérifiées dans l'entrée du 2026-09-15. Deux correctifs secondaires mesurés et non appliqués : unifier `maxDuration` (6 → 5 fonctions) et sauter les déploiements « doc seule » (26 sur 154). Et tenir la cadence de merges (convention 13) |
 | Vercel Fluid Active CPU (36 min / 4 h par mois) | Les deux postes qui dominaient le coût par visite sont corrigés le 2026-09-14 : six préchargements dynamiques par vue de la homepage, et l'image de partage rendue à chaque vue de résultat — confirmé en production, `MISS` puis `HIT` sur l'adresse versionnée. La région des fonctions est passée à `cdg1` le même jour (vérifié : `x-vercel-id: iad1::cdg1::…`) | Relire le compteur dans Vercel une semaine après. |
 | Lecture des stats par la session | **Les deux moitiés marchent** (trois runs réels le 2026-09-14 : tableau de bord et Search Console, déchiffrés par la session ; ligne de départ du plan relevée, tenue hors du dépôt public). À surveiller au prochain run Search Console : `/en/glossary/*` doit remplacer les anciennes URL non préfixées dans les pages créditées | Rien : un `age-keygen` puis un run (`admin`, `gsc` ou `both`) quand une session a besoin des chiffres. |
 
@@ -4093,6 +4309,7 @@ Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et 
 10. **Un état de dépôt s'énonce d'après GitHub, jamais d'après un clone ou un document.** Le 2026-09-08, deux affirmations fausses sont parties dans une PR : « 35 branches » (les refs `origin/*` d'un clone jamais élagué — `git fetch --prune` avant tout comptage, ou l'API) et « le check CI n'est pas obligatoire » (un statut de `REVIEW.md` vieux de trois jours, relu comme un fait présent alors que `main` était déjà `protected: true`). Ce qui est écrit dans un document est ce qui était vrai quand il a été écrit.
 11. **Une garde de payload compte ce qui traverse, elle ne nomme pas des props.** Les deux fuites `rawPoints` (#110 puis #115) sont la même erreur à un cran d'écart : la seconde fois la frontière existait et la garde était nominale, donc aveugle au prop suivant. Même chose pour une borne annoncée : la calculer pour **toutes** les variantes, y compris celles qu'aucun e2e ne peut rendre.
 12. **Une branche empilée se rebase avec `git rebase --onto origin/main <ancienne-base> <branche>`** après le merge de la PR du dessous, jamais avec un simple `git rebase main` (qui rejoue aussi les commits déjà squashés et crée des conflits fantômes).
+13. **Chaque merge sur `main` coûte ~47 Mo de Functions Storage pendant 30 jours.** Ce n'est plus une question de confort de déploiement : le compteur est une somme glissante que rien ne purge, le plafond est de ~211 merges par 30 jours au poids actuel, et nous étions à 154 le 2026-09-15. Grouper les pushes sur une branche (une vérification complète, un push) et espacer les merges est donc une contrainte chiffrée. Un merge qui ne touche que de la doc coûte autant qu'un merge de code tant que l'`ignoreCommand` n'a pas été étendu.
 
 ### Carte du repo
 
