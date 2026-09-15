@@ -10,6 +10,38 @@ Les seules choses non négociables sont listées plus bas, parce que ce sont des
 
 **Lis dans cet ordre :** ce fichier → `SPEC.md` (surtout §12, qui répartit clairement ce qui est déjà tranché de ce qui doit encore remonter à l'agent produit) → `design/DESIGN-BRIEF.md`.
 
+## Les fichiers d'outil — à ouvrir sur déclencheur, pas au démarrage
+
+Les pièges et conventions propres à **chaque outil** vivent dans leur propre
+fichier, pour deux raisons : garder celui-ci lisible, et pouvoir **retransmettre
+ces apprentissages à un autre projet** qui utilise le même outil. Chacun est
+découpé en « ce qui vaut partout » (portable) et « propre à Tour de Growth »
+(ne voyage pas).
+
+**Seul `CLAUDE.md` est chargé automatiquement.** Les six autres ne le sont pas —
+d'où cette table, qui ne contient pas les règles mais **le moment d'aller les
+lire**. Si un déclencheur ci-dessous est réuni, ouvrir le fichier avant d'agir,
+pas après.
+
+| Fichier | Déclencheur — ouvrir AVANT d'agir |
+|---|---|
+| **`VERCEL.md`** | Tout merge sur `main` · toucher `vercel.json` ou `next.config.mjs` · affirmer quoi que ce soit sur une facture ou un compteur Vercel · mesurer le poids d'un déploiement |
+| **`NEXTJS.md`** | Toucher aux layouts racine, au proxy, aux routes de métadonnées, au 404 · voir des chunks dupliqués · conclure qu'un comportement de rendu est un bug de notre code |
+| **`TESTING.md`** | Écrire un test censé protéger une correction · **annoncer que quelque chose est vérifié** · une suite qui rougit ou verdit de façon inattendue |
+| **`GITHUB.md`** | Merger · annoncer qu'un item est livré · écrire ou modifier un workflow · affirmer quoi que ce soit sur l'état du dépôt |
+| **`GEMINI.md`** | Toucher au client de génération ou au prompt · conclure qu'un échec vient du modèle |
+| **`FIRESTORE.md`** | Ajouter une lecture sur un chemin public, un compteur, ou une écriture qui peut entrer en concurrence |
+
+**Pourquoi cette table plutôt qu'un simple lien** : la convention sur la cadence
+de merges était *déjà* dans `CLAUDE.md`, écrite par moi, et je ne l'ai pas suivie
+(2026-09-15). Déplacer une règle dans un fichier non chargé sans dire **quand**
+aller la chercher, c'est l'enterrer. Le déclencheur est la moitié utile.
+
+Les autres documents de la racine sont des **plans et des revues**, pas des
+conventions : `SPEC.md` et ses addenda (le produit), `REVIEW*.md` (les trois
+revues, closes), `AUDIT.md` + `AUDIT-PLAN.md` (l'instrument d'audit),
+`GROWTH-PLAN.md` (la distribution).
+
 ## Ce qui est non négociable (décisions produit, pas des goûts d'ingé)
 
 - **Bilingue FR/EN dès le premier commit fonctionnel.** Pas une couche ajoutée après coup — l'i18n coûte toujours plus cher a posteriori qu'anticipée dès l'architecture.
@@ -4327,6 +4359,61 @@ postes si le compteur redevient un sujet. Le garde fixe leur budget actuel
 comme plafond, donc une nouvelle route qui les tirerait sans les rendre fera
 rougir la CI.
 
+### Les conventions sont rangées par outil, et la sémantique d'`ignoreCommand` est vérifiée (2026-09-15)
+
+Deux demandes d'Antoine pendant le gel (aucun développement applicatif, aucun
+déploiement jusqu'au 26 — un push de branche ne construit rien, donc ceci coûte
+zéro).
+
+**1. La vérification de doc que j'avais annoncée.** Ma question était : que fait
+Vercel sur un code de sortie autre que 0 ou 1 ? La page de référence
+`vercel.json` ne dit que « code 0 ignores the build, while code 1 continues
+it », ce qui est **insuffisant pour écrire la commande en sécurité**. C'est
+l'article du centre d'aide qui tranche : « If the command returns '0', the build
+will be skipped. If, however, a code **'1' or greater** is returned, then a new
+deployment will be built. » Donc `exit 0` est la **seule** valeur qui saute : un
+crash, une erreur git, une variable non définie construisent tous. Mon
+inquiétude était infondée — et elle est maintenant vérifiée plutôt que supposée,
+ce qui n'est pas la même chose.
+
+Trois trouvailles que je ne cherchais pas, toutes dans `VERCEL.md` §1.6 :
+`VERCEL_GIT_PREVIOUS_SHA` (SHA du dernier déploiement **réussi**) vaut mieux que
+`HEAD^` dans un cas précis — un merge de code qui **échoue au build** suivi d'un
+merge sans effet ferait sauter le second et le code ne partirait jamais ; le
+clone est superficiel (`--depth=10`) ; et surtout **un build sauté ne crée aucun
+déploiement**, donc aucune fonction, donc l'économie sur Functions Storage est
+réelle. Ce dernier point pouvait annuler tout le correctif : une recherche
+annonçait que « canceled builds count as full deployments », mais ça vise les
+builds annulés **en cours**, qui ont déjà exécuté la commande de build.
+
+**2. Six fichiers d'outil, et une table de déclencheurs.** Les conventions et
+pièges propres à chaque outil quittent ce fichier pour `VERCEL.md`, `NEXTJS.md`,
+`TESTING.md`, `GITHUB.md`, `GEMINI.md` et `FIRESTORE.md`. Objectif explicite
+d'Antoine : **pouvoir retransmettre ces apprentissages à un autre projet** qui
+utilise le même outil. Chaque fichier est donc coupé en deux — « ce qui vaut
+partout » (portable) et « propre à Tour de Growth » (les chiffres, les routes,
+qui ne voyagent pas).
+
+**Le piège que cette forme existe pour éviter.** La convention sur la cadence de
+merges était *déjà* dans `CLAUDE.md`, écrite par moi, et je ne l'ai pas suivie.
+La déplacer dans `VERCEL.md` ne l'aurait pas sauvée — au contraire : **seul
+`CLAUDE.md` est chargé automatiquement**. Sortir une règle sans dire *quand*
+aller la chercher, c'est l'enterrer. D'où la **table de déclencheurs** en tête de
+ce fichier, qui ne contient pas les règles mais le moment de les ouvrir
+(« avant tout merge → `VERCEL.md` »), et les treize conventions qui restent ici
+en index d'une ligne avec un renvoi vers le détail.
+
+**Le journal ne se découpe pas** : il est chronologique et narratif, le trier par
+outil le détruirait. Seules les règles distillées partent.
+
+**Vérifié** : les dix renvois `FICHIER §x` introduits résolvent tous vers un
+titre réel. Au passage, mon premier vérificateur a rapporté cinq renvois cassés
+dont quatre étaient **un bug de ma regex** (elle exigeait une espace après le
+numéro là où les titres ont un point) et un visait une autre convention de
+numérotation. Exactement la leçon de `TESTING.md` §2.1 — une vérification qui
+rapporte une anomalie doit d'abord prouver qu'elle a regardé le bon endroit —
+appliquée au vérificateur lui-même.
+
 ## État du projet au 2026-09-15 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -4372,7 +4459,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Instrument d'audit : phase 1 (saisie) | **Close le 2026-09-14** (PR #131 à #153). `/admin/audit` crée une mission, trie 25 lignes par palier, saisit tout ce que le schéma prévoit, produit `m19` depuis le Tour de l'auditeur, croise méthode × réalité, rédige les constats et le bloc de tête, exporte, réimporte et purge. La spec canari prouve qu'aucune requête ne porte un octet de la mission ; la recette vérifie le critère de sortie sur un vrai build, `localStorage` réellement vidé entre l'export et l'import | Rien côté code. |
 | Instrument d'audit : phase 1 bis (la vraie mission) | **Le prochain chantier, et il est côté Antoine** : mener AB Tasty dans l'outil jusqu'à `pending = 0`, en tenant le journal des frictions | C'est ce journal qui dira ce que la phase 2 (les readouts) doit construire — il n'y a aucune façon de le deviner d'ici. |
 | Copie à relire | **Deux bons à tirer ouverts en parallèle**, et ils ne se recouvrent pas. [Nº5](https://claude.ai/code/artifact/6236cd38-cfbb-4b4c-89c4-fb35a8bca84f) (2026-09-14) porte les dix marqueurs relevés au grep : les dix termes de glossaire de la vague 2.2, les deux pages « porte ouverte », les quatre comparaisons « AARRR vs X », et les 15 libellés de chrome (`openDoor`, `comparisonPage`, les 3 titres de document invisibles, `nav-strings.checklist`). [Nº4](https://claude.ai/code/artifact/d45d5d7d-fdfa-4155-ba0d-76290e331dc8) porte les 39 lignes du catalogue d'audit — **1 carte tranchée sur 39** | La relecture d'Antoine. Le prochain document se reconstruit depuis `grep -rn "TODO: à relire" src/`, jamais de mémoire ni depuis un compte écrit ici : trois fois de suite ce grep a rattrapé un oubli, et la dernière il a corrigé « six » en « dix ». Les décisions vivent dans la base de chaque artifact — nº4 dans `lines/`, nº5 dans `cards/` ; lire le bon tiroir avant de conclure qu'un artifact n'a pas été ouvert. |
-| Vercel Functions Storage | **Ouvert, mais le gros poste est traité.** Somme glissante sur 30 jours, insensible à la suppression des déploiements (vérifié par Antoine auprès de Vercel le 2026-09-15). **Vercel compte par route** : la fonction des pages de contenu était à 4,36 Mo comptée 92 fois, soit 94 % des 428,9 Mo d'un déploiement — dont ~2,0 Mo de copies identiques de notre bibliothèque de contenu. **La déduplication est faite** (trois fan-in de notre propre code, pas une limite de Turbopack) : 7,9 → 5,74 Mo local, 47,3 → 43,55 Mo sur disque, soit ~−27 % par route en extrapolant le rapport de l'export | Lire l'export du prochain déploiement pour le chiffre réel. Deux correctifs secondaires mesurés et **non appliqués, en attente de l'accord d'Antoine** : unifier `maxDuration` (6 → 5 fonctions) et sauter les déploiements « doc seule » (26 sur 154). Et tenir la cadence de merges (convention 13) |
+| Vercel Functions Storage | **Ouvert, mais le gros poste est traité.** Somme glissante sur 30 jours, insensible à la suppression des déploiements (vérifié par Antoine auprès de Vercel le 2026-09-15). **Vercel compte par route** : la fonction des pages de contenu était à 4,36 Mo comptée 92 fois, soit 94 % des 428,9 Mo d'un déploiement — dont ~2,0 Mo de copies identiques de notre bibliothèque de contenu. **La déduplication est faite** (trois fan-in de notre propre code, pas une limite de Turbopack) : 7,9 → 5,74 Mo local, 47,3 → 43,55 Mo sur disque, soit ~−27 % par route en extrapolant le rapport de l'export | Lire l'export du prochain déploiement pour le chiffre réel. **Les deux correctifs secondaires sont tranchés** (2026-09-15) : `maxDuration` **non** unifié (0,5 % du total facturé contre une dégradation du chemin d'échec de `/api/submissions`) ; `ignoreCommand` étendu aux merges « doc seule » **oui**, conception arrêtée et sémantique vérifiée à la source, **à implémenter après le 26**. Détail : `VERCEL.md` §1.6 et §2.2. Et tenir la cadence de merges (convention 13) |
 | Vercel Fluid Active CPU (36 min / 4 h par mois) | Les deux postes qui dominaient le coût par visite sont corrigés le 2026-09-14 : six préchargements dynamiques par vue de la homepage, et l'image de partage rendue à chaque vue de résultat — confirmé en production, `MISS` puis `HIT` sur l'adresse versionnée. La région des fonctions est passée à `cdg1` le même jour (vérifié : `x-vercel-id: iad1::cdg1::…`) | Relire le compteur dans Vercel une semaine après. |
 | Lecture des stats par la session | **Les deux moitiés marchent** (trois runs réels le 2026-09-14 : tableau de bord et Search Console, déchiffrés par la session ; ligne de départ du plan relevée, tenue hors du dépôt public). À surveiller au prochain run Search Console : `/en/glossary/*` doit remplacer les anciennes URL non préfixées dans les pages créditées | Rien : un `age-keygen` puis un run (`admin`, `gsc` ou `both`) quand une session a besoin des chiffres. |
 
@@ -4382,19 +4469,25 @@ Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et 
 
 ### Les conventions qui comptent pour la suite
 
-1. **Vérifier qu'un merge n'est pas vide** (`git show --stat <sha>`) **avant d'annoncer un item livré.** Une CI verte sur une PR vide est verte pour la mauvaise raison — ça s'est produit le 2026-09-06 avec la PR #50, et le bug est resté une demi-journée de plus.
-2. **`git checkout -B <branche>` AVANT d'éditer**, jamais après. C'est la cause du point 1.
-3. **`ci.yml` est la barrière, `verify-live.yml` est une sonde.** Ne jamais rendre la seconde obligatoire : elle ne rapporte aucun statut sur une PR, donc l'exiger bloquerait les merges en permanence.
-4. **Relancer la sonde Gemini sur la branche avant tout changement à `lib/gemini/deep-dive.ts` ou `client.ts`.** Un `responseSchema` mal formé renvoie 400, non retriable : tous les Deep dive casseraient jusqu'à correction, et aucun test hors ligne ne peut le voir.
-5. **Un test de non-vacuité qui passe est lui-même un signal.** Deux fois le 2026-09-06 il a révélé autre chose que ce qu'il cherchait : un bug de CSS dé-scopé, puis le fait qu'un durcissement n'était pas observable. Ne pas le traiter comme une formalité.
-6. **Toute nouvelle chaîne de copie repart au statut « à relire ».** Le contenu de `dictionary.ts` et `content/glossary.ts` a été validé par Antoine le 2026-09-06 ; un fichier approuvé est exactement l'endroit où de la copie non relue se glisse sans se voir.
-7. **Le contraste est vérifié par la CI, sans aucune exception restante.** `KNOWN_CONTRAST_GAPS` est vide dans `e2e/accessibility.spec.ts`. Une nuance plus discrète demande un token qui passe AA, pas une exception — et une couleur translucide se compose **sur son fond réel** avant d'être mesurée.
-8. **Un numéro de PR écrit dans les docs avant la création se vérifie après.** Dependabot a pris #67 à #70 et #72 au milieu du plan et décalé toutes les prédictions ; les statuts de `REVIEW-02.md` ont dû être corrigés une fois. Créer la PR, lire le numéro renvoyé, puis seulement l'écrire.
-9. **`expectedHeadSha` au merge, c'est le SHA complet de `git rev-parse <branche>`**, jamais retapé de mémoire : un SHA inventé a fait rejeter le merge de la PR #80 en 409, ce qui est le bon comportement — mais il aurait suffi d'une coïncidence pour merger la mauvaise tête.
-10. **Un état de dépôt s'énonce d'après GitHub, jamais d'après un clone ou un document.** Le 2026-09-08, deux affirmations fausses sont parties dans une PR : « 35 branches » (les refs `origin/*` d'un clone jamais élagué — `git fetch --prune` avant tout comptage, ou l'API) et « le check CI n'est pas obligatoire » (un statut de `REVIEW.md` vieux de trois jours, relu comme un fait présent alors que `main` était déjà `protected: true`). Ce qui est écrit dans un document est ce qui était vrai quand il a été écrit.
-11. **Une garde de payload compte ce qui traverse, elle ne nomme pas des props.** Les deux fuites `rawPoints` (#110 puis #115) sont la même erreur à un cran d'écart : la seconde fois la frontière existait et la garde était nominale, donc aveugle au prop suivant. Même chose pour une borne annoncée : la calculer pour **toutes** les variantes, y compris celles qu'aucun e2e ne peut rendre.
-12. **Une branche empilée se rebase avec `git rebase --onto origin/main <ancienne-base> <branche>`** après le merge de la PR du dessous, jamais avec un simple `git rebase main` (qui rejoue aussi les commits déjà squashés et crée des conflits fantômes).
-13. **Chaque merge sur `main` coûte ~47 Mo de Functions Storage pendant 30 jours.** Ce n'est plus une question de confort de déploiement : le compteur est une somme glissante que rien ne purge, le plafond est de ~211 merges par 30 jours au poids actuel, et nous étions à 154 le 2026-09-15. Grouper les pushes sur une branche (une vérification complète, un push) et espacer les merges est donc une contrainte chiffrée. Un merge qui ne touche que de la doc coûte autant qu'un merge de code tant que l'`ignoreCommand` n'a pas été étendu.
+*Ces treize lignes sont l'index : la règle en une phrase, toujours chargée au
+démarrage. Le raisonnement, les variantes et la méthode de vérification vivent
+dans le fichier d'outil indiqué en fin de ligne (voir la table de déclencheurs
+en tête de ce fichier). Quand les deux semblent diverger, c'est le fichier
+d'outil qui a le détail à jour.*
+
+1. **Vérifier qu'un merge n'est pas vide** (`git show --stat <sha>`) **avant d'annoncer un item livré.** Une CI verte sur une PR vide est verte pour la mauvaise raison — ça s'est produit le 2026-09-06 avec la PR #50, et le bug est resté une demi-journée de plus. → `GITHUB.md` §1.1
+2. **`git checkout -B <branche>` AVANT d'éditer**, jamais après. C'est la cause du point 1. → `GITHUB.md` §1.1
+3. **`ci.yml` est la barrière, `verify-live.yml` est une sonde.** Ne jamais rendre la seconde obligatoire : elle ne rapporte aucun statut sur une PR, donc l'exiger bloquerait les merges en permanence. → `GITHUB.md` §1.4
+4. **Relancer la sonde Gemini sur la branche avant tout changement à `lib/gemini/deep-dive.ts` ou `client.ts`.** Un `responseSchema` mal formé renvoie 400, non retriable : tous les Deep dive casseraient jusqu'à correction, et aucun test hors ligne ne peut le voir. → `GEMINI.md` §1.6 et §2
+5. **Un test de non-vacuité qui passe est lui-même un signal.** Deux fois le 2026-09-06 il a révélé autre chose que ce qu'il cherchait : un bug de CSS dé-scopé, puis le fait qu'un durcissement n'était pas observable. Ne pas le traiter comme une formalité. → `TESTING.md` §1.2
+6. **Toute nouvelle chaîne de copie repart au statut « à relire ».** Le contenu de `dictionary.ts` et `content/glossary.ts` a été validé par Antoine le 2026-09-06 ; un fichier approuvé est exactement l'endroit où de la copie non relue se glisse sans se voir. → propre au projet — reste ici
+7. **Le contraste est vérifié par la CI, sans aucune exception restante.** `KNOWN_CONTRAST_GAPS` est vide dans `e2e/accessibility.spec.ts`. Une nuance plus discrète demande un token qui passe AA, pas une exception — et une couleur translucide se compose **sur son fond réel** avant d'être mesurée. → propre au projet — reste ici
+8. **Un numéro de PR écrit dans les docs avant la création se vérifie après.** Dependabot a pris #67 à #70 et #72 au milieu du plan et décalé toutes les prédictions ; les statuts de `REVIEW-02.md` ont dû être corrigés une fois. Créer la PR, lire le numéro renvoyé, puis seulement l'écrire. → `GITHUB.md` §1.1
+9. **`expectedHeadSha` au merge, c'est le SHA complet de `git rev-parse <branche>`**, jamais retapé de mémoire : un SHA inventé a fait rejeter le merge de la PR #80 en 409, ce qui est le bon comportement — mais il aurait suffi d'une coïncidence pour merger la mauvaise tête. → `GITHUB.md` §1.1
+10. **Un état de dépôt s'énonce d'après GitHub, jamais d'après un clone ou un document.** Le 2026-09-08, deux affirmations fausses sont parties dans une PR : « 35 branches » (les refs `origin/*` d'un clone jamais élagué — `git fetch --prune` avant tout comptage, ou l'API) et « le check CI n'est pas obligatoire » (un statut de `REVIEW.md` vieux de trois jours, relu comme un fait présent alors que `main` était déjà `protected: true`). Ce qui est écrit dans un document est ce qui était vrai quand il a été écrit. → `GITHUB.md` §1.2
+11. **Une garde de payload compte ce qui traverse, elle ne nomme pas des props.** Les deux fuites `rawPoints` (#110 puis #115) sont la même erreur à un cran d'écart : la seconde fois la frontière existait et la garde était nominale, donc aveugle au prop suivant. Même chose pour une borne annoncée : la calculer pour **toutes** les variantes, y compris celles qu'aucun e2e ne peut rendre. → `NEXTJS.md` §1.8, `TESTING.md` §2.8
+12. **Une branche empilée se rebase avec `git rebase --onto origin/main <ancienne-base> <branche>`** après le merge de la PR du dessous, jamais avec un simple `git rebase main` (qui rejoue aussi les commits déjà squashés et crée des conflits fantômes). → `GITHUB.md` §1.1
+13. **Chaque merge sur `main` coûte ~47 Mo de Functions Storage pendant 30 jours.** Ce n'est plus une question de confort de déploiement : le compteur est une somme glissante que rien ne purge, le plafond est de ~211 merges par 30 jours au poids actuel, et nous étions à 154 le 2026-09-15. Grouper les pushes sur une branche (une vérification complète, un push) et espacer les merges est donc une contrainte chiffrée. Un merge qui ne touche que de la doc coûte autant qu'un merge de code tant que l'`ignoreCommand` n'a pas été étendu. → `VERCEL.md` §1.1 et §2.3
 
 ### Carte du repo
 
@@ -4406,6 +4499,9 @@ src/components/          core / brand / quiz / result / glossary — le design s
 src/content/             toute la copie du site, validée (agent produit pour l'origine, Antoine le 2026-09-06 et le 2026-09-09 pour le reste)
 src/lib/                 scoring (pur), i18n (dont meta.ts), seo (JSON-LD), og (polices, tokens, gabarit et adresse versionnée de l'image de résultat), gemini, submissions (dont segment.ts, benchmark.ts), metrics, analytics
 src/lib/audit/           l'instrument d'audit growth (AUDIT.md = le schéma, AUDIT-PLAN.md = le plan par phases) — pur, navigateur seulement, jamais Firestore ; son catalogue est dans src/content/audit-catalog.ts
+VERCEL.md NEXTJS.md      conventions et pièges par outil, ouverts sur déclencheur (table en tête de ce fichier)
+TESTING.md GITHUB.md      — chacun coupé en « portable » / « propre à Tour de Growth »
+GEMINI.md FIRESTORE.md
 GROWTH-PLAN.md           le plan de distribution (sans LinkedIn, sans nom) ; marketing/ son kit (textes de lancement, captures, annuaires) ; REVIEW*.md les revues ; AUDIT*.md l'instrument d'audit
 design/                  brief d'origine, briefs et bundles de retour des extensions 01 et 03 (le brief 02 n'est jamais parti)
 e2e/                     170 specs Playwright contre un build de production
