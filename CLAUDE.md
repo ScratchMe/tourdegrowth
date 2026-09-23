@@ -4473,6 +4473,24 @@ fichier entier, tous verts. Donc toujours dépendant de la charge, toujours pas
 un défaut produit, et sans rapport avec des modifications qui ne touchent que
 des chaînes de contenu. **Non durcie**, conformément à la règle déjà posée.
 
+**Mergé et vérifié en production le jour même** (`7ff07aa`, PR #163 — un seul
+merge pour tout ce que le gel avait accumulé : la déduplication du chunk de
+contenu, les six fichiers de conventions par outil, ces réécritures). Les huit
+sites de réécriture ont été contrôlés sur le site déployé, dans les deux
+langues et **dans les deux sens** — le nouveau texte présent et l'ancien
+absent.
+
+**Et c'est ce contrôle qui a produit le piège le plus utile de la journée**,
+consigné en `TESTING.md` §2.3bis : ma première sonde a rapporté « le renvoi
+est encore là » sur `nrr-grr`, ce qui était **faux**. React échappe
+l'apostrophe en `&#x27;` dans le HTML servi, donc trois de mes quatre sondes
+ne pouvaient mécaniquement rien matcher — et sur de la copie française, une
+sonde sur deux porte une apostrophe. Le vice est que la sonde cherchant une
+*absence* rend alors un faux « c'est corrigé », et qu'une requête qui échoue
+(j'en ai eu une à 0 octet) satisfait d'un coup toutes les assertions
+d'absence. Décoder les entités avant de chercher, et asserter que le corps a
+une taille plausible avant de conclure quoi que ce soit.
+
 **Les quatre réponses sont écrites sous les notes d'Antoine dans l'artifact**
 (champ `reply`), pas dans le salon — la conversation de relecture vit avec la
 décision. Elles disent aussi ce que je n'ai **pas** touché : la dernière phrase
