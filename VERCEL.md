@@ -238,13 +238,17 @@ Deux faits à garder en tête :
 
 ### 1.9 Deux limites d'outillage à connaître d'avance
 
-- **L'outil MCP Vercel d'une session agent ne voit pas forcément le compte ou
-  l'équipe où l'utilisateur crée ses projets.** Chez nous l'unique équipe
-  visible est restée vide même après création, sur deux projets différents.
-  Conséquence : **la configuration se fait à la main dans le tableau de bord**,
-  et **l'agent ne peut pas lire les compteurs de consommation**. Il faut les
-  demander à l'humain. En tirer la règle : *quand une ressource que je ne peux
-  pas lire est en jeu, je demande le chiffre avant d'agir, pas après.*
+- **L'outil MCP Vercel d'une session agent ne donne pas forcément accès à ce
+  qu'on croit.** L'état à re-tester plutôt qu'à supposer, parce qu'il a déjà
+  changé une fois : chez nous, l'équipe était d'abord totalement invisible
+  (2026-09, sur deux projets), puis `list_projects` a fini par résoudre le
+  projet **alors que `list_deployments` répond `403 forbidden`** (2026-09-23).
+  Le périmètre est donc par *permission*, pas par visibilité de compte — et il
+  bouge. Ce qui ne bouge pas : **les compteurs de consommation ne sont pas
+  lisibles par l'agent**, et la configuration se fait à la main dans le tableau
+  de bord. En tirer la règle : *quand une ressource que je ne peux pas lire est
+  en jeu, je demande le chiffre avant d'agir, pas après* — et retester l'accès
+  plutôt que citer une note d'il y a deux semaines.
 - **La région des fonctions est un réglage de projet**, pas de code. Une région
   par défaut aux États-Unis avec une base de données en Europe ajoute 1 s et
   plus par requête. Le vérifier avec `x-vercel-id` sur une vraie réponse.
