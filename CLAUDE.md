@@ -4414,7 +4414,73 @@ numérotation. Exactement la leçon de `TESTING.md` §2.1 — une vérification 
 rapporte une anomalie doit d'abord prouver qu'elle a regardé le bon endroit —
 appliquée au vérificateur lui-même.
 
-## État du projet au 2026-09-15 — à lire en premier dans une nouvelle session
+### Les quatre réécritures du bon à tirer nº5, et la classe que l'une d'elles désignait (2026-09-23)
+
+Les quatre cartes qu'Antoine avait marquées « à changer » en clôturant le nº5,
+traitées ensemble parce que trois d'entre elles sont le même genre de défaut.
+
+**Le fait qui compte, et qu'une note de relecture ne pouvait pas dire :
+deux des trois défauts existaient aussi ailleurs que là où il les a vus.**
+
+- Le « deck » de `g-product-led-growth` (« Quel deck ? De quoi tu parles ? »)
+  était **dans les deux langues** — l'anglais disait « not what the pitch deck
+  says » alors que l'exemple s'intitule « A company that calls itself
+  product-led » et ne mentionne aucun deck. Antoine relit le français ; une
+  chaîne `Translatable` est deux textes, et rien ne garantit que la moitié
+  qu'il ne lit pas soit saine. Remplacé des deux côtés par la comparaison à ce
+  que l'entreprise dit d'elle-même.
+- « un bord dangereux » (calque de « a dangerous edge ») apparaissait **deux
+  fois sur le même terme** : dans la copie courte qu'il citait, et dans la
+  fiche de formule de la page longue. Corriger seulement celle qui est citée,
+  c'est l'erreur exacte de l'ACV la semaine dernière — patcher l'instance
+  nommée et laisser la classe.
+
+**Le balayage a trouvé six renvois inter-pages, pas cinq.** La ligne du tableau
+des points ouverts, que j'avais écrite moi-même, en annonçait cinq. Le sixième
+— la fiche de formule du CAC payback, « La page CAC détaille pourquoi… » — n'a
+été vu qu'en relançant la recherche avec un motif de forme différente. C'est la
+leçon du run nº8 (« une recherche ne prouve que ce qu'elle a regardé »),
+appliquée cette fois à une **liste que j'avais écrite et que je relisais comme
+un fait établi**. Deux motifs valent mieux qu'un, et l'union des deux vaut
+mieux que la confiance dans le premier.
+
+**La forme du correctif, telle qu'Antoine l'a validée** : le **pointeur** part,
+les **chiffres partagés** restent. Ils ne coûtent rien à quelqu'un qui arrive
+par le SEO pour une définition, et ils restent cohérents pour qui lit plusieurs
+pages — c'est le pointeur, pas le chiffre, qui suppose que tout le glossaire se
+lit d'un bloc. Un seul demandait une vraie réécriture, celui du playbook
+d'expansion, parce que le renvoi nommait la page d'où il venait : il décrit
+maintenant son déclencheur (l'offre au moment où un compte atteint sa limite de
+sièges). Celui du PQL était en plus **mort** depuis la coupe
+d'`activation-rate` le 2026-09-14 — le retirer corrige les deux défauts d'un
+coup.
+
+**Vérifié en réel** : lint, tsc, 709 tests unitaires, seuils de couverture,
+`next build`, **286 specs Playwright**. Débordement horizontal **mesuré** à 390
+et 1280 px sur les neuf pages touchées (aucun), et les deux passages les plus
+réécrits relus en capture — ce qui a confirmé un effet que je n'avais pas prévu
+en écrivant : nommer « L'argument » au lieu de « Il » rétablit le parallèle
+avec « L'argument est le plus fort » deux paragraphes plus haut, qui était
+manifestement l'intention d'origine.
+
+**Le flake de `locale-routing.spec.ts:75` a une cinquième occurrence, et elle
+est plus large.** Pour la première fois il a rougi **au niveau du fichier** et
+pas seulement en suite complète, ce que ce fichier annonçait comme impossible.
+Avant de conclure quoi que ce soit, le mécanisme lui-même a été vérifié en HTTP
+direct contre le build : `/en` pose `tdg_locale=en`, `/fr` le bascule en `fr`,
+`/quiz` rend bien `<html lang="fr">`. Puis 5 passages du seul test et 3 du
+fichier entier, tous verts. Donc toujours dépendant de la charge, toujours pas
+un défaut produit, et sans rapport avec des modifications qui ne touchent que
+des chaînes de contenu. **Non durcie**, conformément à la règle déjà posée.
+
+**Les quatre réponses sont écrites sous les notes d'Antoine dans l'artifact**
+(champ `reply`), pas dans le salon — la conversation de relecture vit avec la
+décision. Elles disent aussi ce que je n'ai **pas** touché : la dernière phrase
+de l'encadré de `g-nrr-grr` finit par « et une seule est dans le deck », un
+autre « deck » que celui de la page product-led (ici générique, le board deck)
+qu'il avait lu sans le relever. À lui de trancher en un mot.
+
+## État du projet au 2026-09-23 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
 
@@ -4456,12 +4522,11 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Les deux nouveaux événements A4 (`retake_started`, `landing_return`) | Vérifiés en e2e, jamais contre le vrai GoatCounter (le proxy du bac à sable bloque `*.goatcounter.com`) | Un regard d'Antoine sur `/admin/stats` après déploiement : deux lignes de plus dans la section funnel, et la ligne « Value actions per result ». |
 | R2-30 (fenêtre Tour de France, SPEC.md §10) | Reporté d'un commun accord : pas d'urgence | À construire **avant** juin 2027, pour que le post parte pendant le vrai Tour et pas après. |
 | Les e2e de composition ne passent que par la branche échantillon | `/r/sample` utilise `getSampleNextMove` et `SAMPLE_RESULT.pillars`, pas le vrai chemin. La garde statique est donc seule à protéger le payload | Un id de fixture derrière une variable d'environnement fermée par défaut. À décider : c'est une porte de test sur la route publique la plus sensible. |
-| Flake `locale-routing.spec.ts:75` | **Quatrième occurrence** le 2026-09-14, toujours en suite complète parallèle, jamais isolée (21/21 à la reprise) ni au second passage | La prochaine occurrence en CI laisse une trace (`retries: 1` + `trace: on-first-retry`, rapport téléversé). Ne pas durcir la spec en attendant le cookie : ça masquerait une éventuelle course produit. |
+| Flake `locale-routing.spec.ts:75` | **Cinquième occurrence** le 2026-09-23, et plus large qu'annoncé : pour la première fois il a rougi **au niveau du fichier** et pas seulement en suite complète. Le mécanisme lui-même a été vérifié sain en HTTP direct contre le build (`/en` pose le cookie `en`, `/fr` le bascule en `fr`, `/quiz` rend `<html lang="fr">`), puis 5 passages du seul test et 3 du fichier entier, tous verts | La prochaine occurrence en CI laisse une trace (`retries: 1` + `trace: on-first-retry`, rapport téléversé). Ne pas durcir la spec en attendant le cookie : ça masquerait une éventuelle course produit. |
 | TypeScript 7 et ESLint 10 | Tous deux bloqués par des paquets embarqués dans `eslint-config-next` (`typescript-eslint` refuse TS ≥ 6.1 ; `eslint-plugin-react` plante sur ESLint 10). Dependabot les ignore en majeure depuis le 2026-09-08 | Quand `eslint-config-next` suivra. Re-tester en installant, pas en lisant les plages de peer : c'est l'essai qui a montré qu'ESLint 10 plante. |
 | Instrument d'audit : phase 1 (saisie) | **Close le 2026-09-14** (PR #131 à #153). `/admin/audit` crée une mission, trie 25 lignes par palier, saisit tout ce que le schéma prévoit, produit `m19` depuis le Tour de l'auditeur, croise méthode × réalité, rédige les constats et le bloc de tête, exporte, réimporte et purge. La spec canari prouve qu'aucune requête ne porte un octet de la mission ; la recette vérifie le critère de sortie sur un vrai build, `localStorage` réellement vidé entre l'export et l'import | Rien côté code. |
 | Instrument d'audit : phase 1 bis (la vraie mission) | **Le prochain chantier, et il est côté Antoine** : mener AB Tasty dans l'outil jusqu'à `pending = 0`, en tenant le journal des frictions | C'est ce journal qui dira ce que la phase 2 (les readouts) doit construire — il n'y a aucune façon de le deviner d'ici. |
-| Renvois d'une page de glossaire à une autre | **Relevé par Antoine sur `g-nrr-grr` au bon à tirer nº5** (2026-09-17) : « Pourquoi préciser "le même mois que celui des pages churn et revenu" ? Ça fait très IA qui considère que toutes les pages du glossaire vont être lues ensemble. Alors qu'un utilisateur peut arriver sur le site par SEO juste pour avoir une définition. » Son argument vaut pour une **classe**, pas pour la carte qu'il a signalée : balayage fait, **cinq renvois** dans les deux langues — `cac-payback` (« le chiffre auquel arrive la page CAC »), `nrr-grr` ×2 (le mois partagé, « le playbook de la page upsell »), `arpu` (« le chiffre qu'utilise la page CAC payback ») et `pql`. Ce dernier est en plus **mort** depuis la coupe d'`activation-rate` le 2026-09-14 (« la page sur le taux d'activation ») — donc retirer le renvoi corrige les deux défauts d'un coup, et la ligne qui suivait ce seul cas n'a plus lieu d'être. Il avait par ailleurs validé `g-arpu`, `g-cac-payback` et `g-pql` en « ok » ; **étendre à la classe est validé par Antoine le 2026-09-22** | **Après le 26/09** : retirer le **pointeur** partout (FR et EN), garder les **chiffres** partagés — ils ne coûtent rien et restent cohérents pour qui lit plusieurs pages ; seule la phrase qui désigne l'autre page part. `:623` demande une vraie reformulation (le renvoi y nomme d'où vient le playbook). Copie déjà relue, donc bouger `updatedAt` des quatre termes touchés. |
-| Copie à relire | **Le bon à tirer nº5 est clos** (2026-09-22) : 30 cartes sur 30 tranchées, **26 « ok », 4 « à changer »** — `cmp-aarrr-vs-rarra` (deux phrases illisibles en français), `g-product-led-growth` (trois notes : un « deck » qui sort de nulle part, un « Les deux, et c'est pourquoi » sans antécédent, un « planifier » sans objet), `g-time-to-value` (« un bord dangereux », calque de l'anglais) et `g-nrr-grr` (le renvoi inter-pages, voir la ligne au-dessus). Les trois premières sont de la réécriture française pure, à faire après le 26. [Nº4](https://claude.ai/code/artifact/d45d5d7d-fdfa-4155-ba0d-76290e331dc8) reste ouvert : les 39 lignes du catalogue d'audit, **1 carte tranchée sur 39** (`m07`, 2026-09-13) — c'est le texte qui s'imprime dans ses livrables sous son nom, et il ferme la phase 2 de l'instrument d'audit | La relecture d'Antoine sur le nº4. Le prochain document se reconstruit depuis `grep -rn "TODO: à relire" src/`, jamais de mémoire ni depuis un compte écrit ici : trois fois de suite ce grep a rattrapé un oubli, et la dernière il a corrigé « six » en « dix ». Les décisions vivent dans la base de chaque artifact — nº4 dans `lines/`, nº5 dans `cards/` ; lire le bon tiroir avant de conclure qu'un artifact n'a pas été ouvert. |
+| Copie à relire | **Le bon à tirer nº5 est entièrement clos** : 30 cartes sur 30 tranchées le 2026-09-22 (26 « ok », 4 « à changer »), et les quatre réécritures livrées le 2026-09-23 avec une réponse écrite sous chaque note dans l'artifact. [Nº4](https://claude.ai/code/artifact/d45d5d7d-fdfa-4155-ba0d-76290e331dc8) reste ouvert : les 39 lignes du catalogue d'audit, **1 carte tranchée sur 39** (`m07`, 2026-09-13) — c'est le texte qui s'imprime dans ses livrables sous son nom, et il ferme la phase 2 de l'instrument d'audit | La relecture d'Antoine sur le nº4. Le prochain document se reconstruit depuis `grep -rn "TODO: à relire" src/`, jamais de mémoire ni depuis un compte écrit ici : trois fois de suite ce grep a rattrapé un oubli, et la dernière il a corrigé « six » en « dix ». Les décisions vivent dans la base de chaque artifact — nº4 dans `lines/`, nº5 dans `cards/` ; lire le bon tiroir avant de conclure qu'un artifact n'a pas été ouvert. |
 | Vercel Functions Storage | **Ouvert, mais le gros poste est traité.** Somme glissante sur 30 jours, insensible à la suppression des déploiements (vérifié par Antoine auprès de Vercel le 2026-09-15). **Vercel compte par route** : la fonction des pages de contenu était à 4,36 Mo comptée 92 fois, soit 94 % des 428,9 Mo d'un déploiement — dont ~2,0 Mo de copies identiques de notre bibliothèque de contenu. **La déduplication est faite** (trois fan-in de notre propre code, pas une limite de Turbopack) : 7,9 → 5,74 Mo local, 47,3 → 43,55 Mo sur disque, soit ~−27 % par route en extrapolant le rapport de l'export | Lire l'export du prochain déploiement pour le chiffre réel. **Les deux correctifs secondaires sont tranchés** (2026-09-15) : `maxDuration` **non** unifié (0,5 % du total facturé contre une dégradation du chemin d'échec de `/api/submissions`) ; `ignoreCommand` étendu aux merges « doc seule » **oui**, conception arrêtée et sémantique vérifiée à la source, **à implémenter après le 26**. Détail : `VERCEL.md` §1.6 et §2.2. Et tenir la cadence de merges (convention 13) |
 | Vercel Fluid Active CPU (36 min / 4 h par mois) | Les deux postes qui dominaient le coût par visite sont corrigés le 2026-09-14 : six préchargements dynamiques par vue de la homepage, et l'image de partage rendue à chaque vue de résultat — confirmé en production, `MISS` puis `HIT` sur l'adresse versionnée. La région des fonctions est passée à `cdg1` le même jour (vérifié : `x-vercel-id: iad1::cdg1::…`) | Relire le compteur dans Vercel une semaine après. |
 | Lecture des stats par la session | **Les deux moitiés marchent** (trois runs réels le 2026-09-14 : tableau de bord et Search Console, déchiffrés par la session ; ligne de départ du plan relevée, tenue hors du dépôt public). À surveiller au prochain run Search Console : `/en/glossary/*` doit remplacer les anciennes URL non préfixées dans les pages créditées | Rien : un `age-keygen` puis un run (`admin`, `gsc` ou `both`) quand une session a besoin des chiffres. |
