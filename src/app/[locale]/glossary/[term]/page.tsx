@@ -7,9 +7,9 @@ import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { GLOSSARY, type GlossaryTermId } from "@/content/glossary";
 import { QUESTIONS } from "@/content/copy-library";
-import type { DeepGlossaryContent } from "@/content/glossary-deep";
+import { GLOSSARY_DEEP, type DeepGlossaryContent } from "@/content/glossary-deep";
 import { MetaLabel } from "@/components/brand/MetaLabel";
-import { breadcrumbSchema, CRUMBS, definedTermSchema, JsonLd } from "@/lib/seo/jsonld";
+import { breadcrumbSchema, definedTermSchema, JsonLd } from "@/lib/seo/jsonld";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { isLocale, LOCALES, type Locale } from "@/lib/i18n/locale";
 import { contentMetadata } from "@/lib/i18n/meta";
@@ -60,7 +60,12 @@ export default async function GlossaryTermPage({ params }: PageProps) {
     <>
       {/* REVIEW-02.md R2-15: the term, its set, and the trail that leads here. */}
       <JsonLd data={definedTermSchema(locale, term)} />
-      <JsonLd data={breadcrumbSchema(locale, [CRUMBS.glossary(locale), CRUMBS.term(locale, term)])} />
+      <JsonLd
+        data={breadcrumbSchema(locale, [
+          { name: tc(UI_STRINGS.glossaryPage.indexTitle, locale), path: "/glossary" },
+          { name: tc(entry.term, locale), path: `/glossary/${term}` },
+        ])}
+      />
       <ContentHeader locale={locale} path={`/glossary/${term}`} />
 
       <main className={styles.main}>
@@ -79,7 +84,7 @@ export default async function GlossaryTermPage({ params }: PageProps) {
           <p className={styles.extended}>{tc(entry.extended, locale)}</p>
         </section>
 
-        {entry.deep && <DeepSections deep={entry.deep} locale={locale} />}
+        {GLOSSARY_DEEP[term] && <DeepSections deep={GLOSSARY_DEEP[term]} locale={locale} />}
 
         {entry.related.length > 0 && (
           <section className={styles.relatedSection}>

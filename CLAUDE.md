@@ -10,6 +10,38 @@ Les seules choses non négociables sont listées plus bas, parce que ce sont des
 
 **Lis dans cet ordre :** ce fichier → `SPEC.md` (surtout §12, qui répartit clairement ce qui est déjà tranché de ce qui doit encore remonter à l'agent produit) → `design/DESIGN-BRIEF.md`.
 
+## Les fichiers d'outil — à ouvrir sur déclencheur, pas au démarrage
+
+Les pièges et conventions propres à **chaque outil** vivent dans leur propre
+fichier, pour deux raisons : garder celui-ci lisible, et pouvoir **retransmettre
+ces apprentissages à un autre projet** qui utilise le même outil. Chacun est
+découpé en « ce qui vaut partout » (portable) et « propre à Tour de Growth »
+(ne voyage pas).
+
+**Seul `CLAUDE.md` est chargé automatiquement.** Les six autres ne le sont pas —
+d'où cette table, qui ne contient pas les règles mais **le moment d'aller les
+lire**. Si un déclencheur ci-dessous est réuni, ouvrir le fichier avant d'agir,
+pas après.
+
+| Fichier | Déclencheur — ouvrir AVANT d'agir |
+|---|---|
+| **`VERCEL.md`** | Tout merge sur `main` · toucher `vercel.json` ou `next.config.mjs` · affirmer quoi que ce soit sur une facture ou un compteur Vercel · mesurer le poids d'un déploiement |
+| **`NEXTJS.md`** | Toucher aux layouts racine, au proxy, aux routes de métadonnées, au 404 · voir des chunks dupliqués · conclure qu'un comportement de rendu est un bug de notre code |
+| **`TESTING.md`** | Écrire un test censé protéger une correction · **annoncer que quelque chose est vérifié** · une suite qui rougit ou verdit de façon inattendue |
+| **`GITHUB.md`** | Merger · annoncer qu'un item est livré · écrire ou modifier un workflow · affirmer quoi que ce soit sur l'état du dépôt |
+| **`GEMINI.md`** | Toucher au client de génération ou au prompt · conclure qu'un échec vient du modèle |
+| **`FIRESTORE.md`** | Ajouter une lecture sur un chemin public, un compteur, ou une écriture qui peut entrer en concurrence |
+
+**Pourquoi cette table plutôt qu'un simple lien** : la convention sur la cadence
+de merges était *déjà* dans `CLAUDE.md`, écrite par moi, et je ne l'ai pas suivie
+(2026-09-15). Déplacer une règle dans un fichier non chargé sans dire **quand**
+aller la chercher, c'est l'enterrer. Le déclencheur est la moitié utile.
+
+Les autres documents de la racine sont des **plans et des revues**, pas des
+conventions : `SPEC.md` et ses addenda (le produit), `REVIEW*.md` (les trois
+revues, closes), `AUDIT.md` + `AUDIT-PLAN.md` (l'instrument d'audit),
+`GROWTH-PLAN.md` (la distribution).
+
 ## Ce qui est non négociable (décisions produit, pas des goûts d'ingé)
 
 - **Bilingue FR/EN dès le premier commit fonctionnel.** Pas une couche ajoutée après coup — l'i18n coûte toujours plus cher a posteriori qu'anticipée dès l'architecture.
@@ -2130,7 +2162,7 @@ Antoine signale que le plan Hobby « approche dangereusement » d'une limite de 
 
 **Correctif** : `images: { unoptimized: true }` (l'intention : aucune route `/_next/image` à servir) et `outputFileTracingExcludes` sur `sharp` et `@img/**` (ce qui retire réellement les octets). Même build, même mesure : **14,1 Mo**, sharp absent de la trace. Puis la mesure qui compte, avec `vercel build` hors ligne (le Build Output que la plateforme stocke — l'outil accepte un `.vercel/project.json` fabriqué, jamais committé) : **un déploiement, c'est six fonctions**, et quatre d'entre elles portaient chacune les 48 Mo de sharp — **241 Mo par déploiement avant, 48 Mo après**. À 241 Mo, 9,24 Go correspondent à une quarantaine de déploiements retenus, ce qui est à peu près le nombre de merges du mois. Vérifié à l'exécution et pas seulement à la trace : `sharp` et `@img` renommés hors de `node_modules`, `next start` sur le build, pages et les deux images de partage en 200 (PNG 1200×630 valides). `src/__tests__/next-config.test.ts` épingle les deux réglages et l'absence de `next/image` sous `src/`, pour qu'un futur `next/image` soit une décision et pas 48 Mo de plus par fonction.
 
-**Ce que le code ne peut pas faire, et qui compte davantage.** Les 9,24 Go sont le cumul des déploiements **déjà retenus** ; alléger le bundle ne réduit que les suivants. C'est dans le dashboard Vercel que ça se règle : une **politique de rétention des déploiements** (Project Settings → Deployment Retention — production, preview, annulés, en erreur) fait supprimer les anciens automatiquement, et une suppression manuelle des anciens déploiements libère l'espace tout de suite. L'outil MCP Vercel de cette session ne voit pas l'équipe d'Antoine (piège déjà documenté à l'étape 12), donc c'est une action à lui.
+**Ce que le code ne peut pas faire, et qui compte davantage.** Les 9,24 Go sont le cumul des déploiements **déjà retenus** ; alléger le bundle ne réduit que les suivants. C'est dans le dashboard Vercel que ça se règle : une **politique de rétention des déploiements** (Project Settings → Deployment Retention — production, preview, annulés, en erreur) fait supprimer les anciens automatiquement, et une suppression manuelle des anciens déploiements libère l'espace tout de suite. L'outil MCP Vercel de cette session ne voit pas l'équipe d'Antoine (piège déjà documenté à l'étape 12 — **partiellement levé le 2026-09-23, voir `VERCEL.md` §1.9** : le projet est désormais listable, les déploiements restent refusés en 403), donc c'est une action à lui.
 
 **Leçon de méthode, la même que d'habitude** : j'avais une hypothèse cohérente, une mesure qui la confortait (`x-vercel-cache: MISS` sur l'image) et un correctif prêt — et le compteur n'était pas celui-là. Une capture du tableau de bord aurait dû être la première chose demandée, pas la première chose reçue par hasard. Quand une limite est nommée par son montant, demander **le libellé exact** avant de raisonner.
 
@@ -4026,7 +4058,429 @@ couverture, `next build` (les pages de terme passent de 50 à 48, en `●`),
 en reconstruisant, **exactement la nouvelle spec tombe**, les 21 autres du
 fichier passent.
 
-## État du projet au 2026-09-14 — à lire en premier dans une nouvelle session
+### Functions Storage : le modèle était faux, et la mesure aussi (2026-09-15)
+
+Antoine a vérifié auprès de Vercel après un compteur qui ne redescendait pas.
+**Deux notes de ce fichier étaient fausses, et elles se corrigeaient l'une
+l'autre.**
+
+**1. La rétention des déploiements ne fait rien pour ce compteur.** Functions
+Storage est une **somme glissante sur 30 jours** : chaque déploiement ajoute
+le poids de ses fonctions, et sort du calcul 30 jours plus tard —
+**supprimé ou non**. L'entrée du 2026-09-13 attribuait les 9,24 Go aux
+« déploiements retenus » et présentait la politique de rétention comme le
+correctif ; c'est faux sur les deux points. Le « 397 Mo » observé ensuite
+était un couac côté Vercel, pas un effet de la rétention.
+
+La formule réelle :
+
+```
+Functions Storage = poids des fonctions × déploiements des 30 derniers jours
+```
+
+**2. La note « un déploiement, c'est six fonctions » était juste, mais pour
+une raison qu'il faut connaître avant de mesurer.** Le Build Output contient
+~430 entrées `.func` — dont **6 seulement sont des répertoires physiques**,
+les autres étant des liens symboliques vers elles. Et depuis Vercel CLI 59,
+un `.func` physique ne contient que 5 fichiers : la liste réelle des fichiers
+tracés vit dans **`filePathMap` de son `.vc-config.json`** (116 Ko pour la
+route Deep dive). Conséquences pour qui remesure :
+
+- `du` sur `.vercel/output/functions` ne mesure **rien** (j'ai obtenu 6 Mo,
+  puis 13 Mo, pour un déploiement qui en pèse 47) ;
+- sommer tous les `.func` donne 3,4 Go, ce qui est absurde (on compte 430
+  fois les mêmes 6 bundles) ;
+- la seule mesure juste est : pour chaque `.func` **non-symlink**, sommer les
+  tailles des fichiers listés dans son `filePathMap`.
+
+**Mesuré sur `main` au 2026-09-15** (`vercel build` hors ligne, jamais
+déployé) : **47,3 Mo par déploiement**, et 154 squash-merges sur 30 jours,
+donc **7,29 Go sur 10** — 73 %. Le plafond au poids actuel est de
+**211 déploiements par 30 jours** ; la journée du 6 septembre en a produit 41
+à elle seule.
+
+Où part le poids :
+
+| Poste | Poids | Présent dans |
+|---|---|---|
+| Runtime Next.js | 19,5 Mo (41 %) | 6/6 fonctions |
+| Notre code applicatif | 10,0 Mo (21 %) | 6/6 |
+| Pile gRPC de Firestore (`google-gax`, `@grpc/grpc-js`, `protobufjs`) | 7,3 Mo (15 %) | 3/6 |
+| Firestore, auth, polyfills | 6,8 Mo (14 %) | 3/6 |
+
+#### La piste gRPC est fermée, et cette fois c'est prouvé
+
+Firestore sait parler REST (`preferRest`, activable jusqu'en variable
+d'environnement `FIRESTORE_PREFER_REST`). Exclure les trois paquets gRPC du
+tracing fait bien tomber le déploiement à **39,0 Mo** (−17,5 %).
+
+**Mais le module ne se charge plus.** `google-gax/build/src/index.js:53` fait
+un `require("@grpc/grpc-js")` **au niveau module**, et le graphe tire
+`protobufjs` de la même façon. Vérifié en déplaçant physiquement les paquets
+hors de `node_modules` — la technique employée pour `sharp` le 2026-09-13 :
+
+```
+les trois retirés  → MODULE_NOT_FOUND: Cannot find module 'protobufjs'
+seul @grpc retiré  → MODULE_NOT_FOUND: Cannot find module '@grpc/grpc-js'
+tout restauré      → module chargé OK
+```
+
+Aucun sous-ensemble n'est excluable. Le mode d'échec aurait été celui que
+`next.config.mjs` documente déjà pour satori — un build vert qui casse la
+production — mais sur **toutes** les routes Firestore au lieu des aperçus de
+liens. Ne pas y revenir sans que `google-gax` ait changé de structure.
+
+#### Ce qui marche : 6 fonctions → 5, par alignement de `maxDuration`
+
+La règle de regroupement de Vercel, lue dans les `.vc-config.json` plutôt que
+supposée : les routes sont groupées par **`operationType`** (`ISR` pour les
+pages de contenu, `Page` pour les pages applicatives, `API` pour les Route
+Handlers et les images de métadonnées) × **arbre de layout racine** ×
+**configuration identique**.
+
+D'où les six groupes, et surtout : **la fonction Deep dive n'est séparée que
+parce qu'elle déclare `maxDuration = 120`** (R-15) et que les autres Route
+Handlers n'en déclarent aucun. En posant le même `maxDuration` sur
+`/api/submissions`, `/admin/stats/json` et `/r/[id]/share/[token]`, les deux
+groupes fusionnent :
+
+| | Fonctions | Par déploiement | Sur 30 jours à 154 déploiements |
+|---|---|---|---|
+| Aujourd'hui | 6 | 47,3 Mo | 7,29 Go (73 %) |
+| `maxDuration` unifié | **5** | **38,7 Mo** | **5,97 Go** (60 %) |
+
+Les 8,6 Mo de la fonction Deep dive étaient presque intégralement du runtime
+Next et de la pile Firestore déjà présents dans la fonction voisine.
+
+**Le compromis, à décider et non à glisser** : `maxDuration` est un plafond,
+pas une réservation, et Vercel facture le CPU actif — donc une route rapide
+avec un plafond haut ne coûte rien de plus. Ce qui change est le **chemin
+d'échec** : un appel Firestore qui pend sur `/api/submissions` tiendrait
+jusqu'à 120 s avant de rendre `SCORING_FAILED`, au lieu d'être coupé par le
+défaut de la plateforme. L'écran de chargement est conçu pour une attente
+indéfinie depuis l'étape 12bis, donc le coût réel est une erreur qui met plus
+longtemps à s'afficher.
+
+**Cinq est le plancher de cette architecture.** Descendre à quatre
+demanderait de fusionner les pages de contenu (`ISR`) avec les pages
+applicatives (`Page`), c'est-à-dire de revenir aux deux layouts racine de
+R-24 — ce qui coûterait le prérendu CDN des 48 pages de contenu. Mauvais
+échange, et à ne pas reproposer.
+
+
+#### Correction du modèle par l'export Vercel : on compte par ROUTE
+
+Antoine a fourni l'export du dernier déploiement de production. Il contredit
+ma mesure locale sur le point décisif : **Vercel attribue le poids du bundle
+à chaque route, pas à chaque bundle physique.**
+
+| Bundle | Taille | Routes | Cumul |
+|---|---|---|---|
+| **Pages de contenu** | **4,36 Mo** | **92** | **401 Mo (94 %)** |
+| Images OG | 3,31 Mo | 7 | 23 Mo |
+| Deep dive | 2,18 Mo | 1 | 2,2 Mo |
+| Proxy | 0,56 Mo | 1 | 0,6 Mo |
+| **Total** | | **165** | **428,9 Mo** |
+
+Deux conséquences qui changent les priorités :
+
+1. **La fonction des pages de contenu est multipliée par 92.** Tout gramme
+   qu'on lui retire compte 92 fois ; tout gramme retiré ailleurs compte une
+   ou sept fois. C'est le seul endroit où il faut travailler.
+2. **Le gain « 6 → 5 fonctions » est marginal dans cette comptabilité** :
+   fusionner la fonction Deep dive économise une route à 2,18 Mo, pas les
+   8,6 Mo de disque que ma mesure locale laissait espérer. Le correctif reste
+   bon à prendre — il est gratuit — mais ce n'est plus le levier principal.
+
+**Je ne sais pas réconcilier exactement 428,9 Mo/déploiement avec les ~7 Go
+observés sur 30 jours** (154 déploiements donneraient 66 Go) : Vercel
+déduplique probablement les bundles identiques entre routes, ou entre
+déploiements successifs. À demander à leur support plutôt qu'à deviner — mais
+le classement relatif des postes, lui, est sûr, et c'est ce qui guide l'action.
+
+#### La vraie cause du 2,2 → 4,4 Mo : notre contenu est recopié six fois
+
+Constat d'Antoine : la fonction des pages est passée de 2,2 à 4,36 Mo.
+Cherché dans le build plutôt que supposé — `.next/server/chunks/ssr/`
+contient **six fichiers de 397 589 octets, à l'octet près**. Comparés deux à
+deux : **cinq octets de différence, uniquement le nom du fichier de source
+map**. Ce sont des copies identiques.
+
+```
+cmp -l src_1knjr0h._.js src_1k9ffd4._.js  →  5 octets, offset 397576
+                                              (//# sourceMappingURL=…)
+```
+
+Chaque copie contient **toute la bibliothèque de contenu** — vérifié par
+marqueurs : `glossary-deep`, les `extended` du glossaire, `copy-library`,
+`comparisons`, `legal`, le crédit Antoine, plus le JSON-LD. Turbopack en émet
+**une copie par groupe de routes**, et nous avons ajouté des groupes sans
+arrêt depuis le 6 septembre : 4 pages de comparaison, 2 pages « porte
+ouverte », 2 pages légales, `/about`.
+
+**Donc ~2,0 Mo des 4,36 Mo de cette fonction sont de la duplication pure** —
+et ils sont comptés 92 fois. C'est, de loin, le premier poste à traiter.
+
+Ordre de grandeur des sources : `glossary-deep.ts` pèse **300 Ko** à lui
+seul (24 termes × 2 langues de prose longue), devant `audit-catalog.ts`
+(64 Ko), `glossary.ts` et `comparisons.ts` (40 Ko chacun).
+
+**Conséquence à retenir pour la suite du plan de croissance** : chaque terme
+de glossaire long ajouté grossit un module qui est recopié six fois, puis
+compté quatre-vingt-douze fois. La vague 2 du `GROWTH-PLAN.md` a un coût
+d'infrastructure que personne n'avait chiffré.
+
+**Pistes à explorer, aucune vérifiée** (c'est le prochain chantier, pas une
+conclusion) : import dynamique du contenu depuis les pages pour forcer un
+chunk asynchrone partagé ; sortir `src/content/` derrière une frontière que
+Next traite en externe (`serverExternalPackages` ne s'applique qu'à
+`node_modules`, donc il faudrait un paquet local) ; ou vérifier si le
+regroupement change hors Turbopack. À mesurer de la même façon : `npm run
+build`, puis comparer les tailles dans `.next/server/chunks/ssr/`.
+
+#### Le levier le plus gros n'est pas le poids : c'est le nombre
+
+À 47,3 Mo, **26 des 154 déploiements (17 %) ne touchaient que `*.md`,
+`.github/`, `marketing/`, `design/` ou `scripts/live/`** — site servi
+rigoureusement identique, 1,23 Go de compteur dépensés pour rien. Vérifié
+qu'aucun de ces chemins n'entre dans le build : aucun `.md` n'est lu au
+build, et rien sous `src/` n'importe `marketing/` ni `design/`.
+
+`vercel.json` porte déjà un `ignoreCommand` (2026-09-07) qui saute les builds
+hors production. Il peut aussi sauter la production quand le diff ne touche
+aucune entrée de build. **Règle non négociable dans son écriture** : en cas
+de doute — clone superficiel, `HEAD^` indisponible, erreur git — il doit
+**construire** (`exit 1`), jamais sauter. Un déploiement sauté à tort veut
+dire qu'un correctif ne part pas en production, ce qui est bien pire que
+47 Mo de compteur. `src/__tests__/vercel-config.test.ts` existe parce qu'un
+`vercel.json` invalide fait échouer *tous* les déploiements, production
+comprise : toute évolution de ce fichier passe par ce test.
+
+Projection combinée :
+
+| Scénario | Consommation | % de 10 Go |
+|---|---|---|
+| Aujourd'hui | 7,29 Go | 73 % |
+| 5 fonctions | 5,97 Go | 60 % |
+| 5 fonctions + saut des déploiements « doc seule » | 4,96 Go | 50 % |
+| + merges groupés (~60 déploiements de code/mois) | 2,32 Go | **23 %** |
+
+La cadence est le terme dominant, et c'est une convention déjà écrite le
+2026-09-07 que nous ne tenons pas : 41 merges le 6 septembre, 27 le 14.
+
+**Rien n'a été poussé ni déployé pour cette mesure** (consigne d'Antoine : le
+moindre déploiement peut être de trop). Tout a été fait avec `vercel build`
+hors ligne, sur un `.vercel/project.json` fabriqué. `.vercel` **est** désormais
+dans `.gitignore` et dans les ignores d'ESLint (corrigé le jour même, voir
+l'entrée suivante) ; le supprimer après chaque mesure reste la bonne hygiène,
+mais un oubli ne peut plus être committé.
+
+### Déduplication du chunk de contenu : 7,9 → 5,74 Mo par route de contenu (2026-09-15)
+
+Suite directe du diagnostic ci-dessus. Le constat était juste — six chunks SSR
+identiques portant toute la bibliothèque de contenu — mais aucune des « pistes
+à explorer » que j'avais listées (import dynamique, paquet local,
+`serverExternalPackages`) n'était la bonne. **Il n'y avait rien à contourner :
+c'était trois fan-in de notre propre code.**
+
+**Fix 1 — `glossary.ts` n'importe plus `glossary-deep.ts`.** L'interface
+`GlossaryEntry` portait un champ `deep` renseigné sur les 24 termes, que
+**seule** la page de terme lisait. Un module que quatre routes importaient
+tirait donc **300 Ko** de prose longue dans chacune. La page de terme lit
+maintenant `GLOSSARY_DEEP[term]` directement ; le champ, ses 24 lignes de
+câblage et l'assertion de test qui vérifiait le câblage disparaissent.
+
+**Fix 2 — `lib/seo/jsonld.tsx` perd son helper `CRUMBS`.** Il construisait les
+fils d'Ariane des neuf familles de pages, donc importait `how-it-works`,
+`legal`, `comparisons`, `open-door`, `about` et le glossaire. Or ce module est
+traversé par **toutes** les pages de contenu : chacune emportait le contenu des
+huit autres. Chaque page construit maintenant son propre fil, en une ligne,
+depuis le module qu'elle importait déjà de toute façon — vérifié avant de
+toucher quoi que ce soit pour les neuf.
+
+**Fix 3 — ce que la mesure a trouvé et que la lecture n'avait pas vu.** Après
+Fix 1 et 2, `glossary.ts` (la copie `extended`, 39 Ko) restait dans **cinq**
+chunks. Deux importeurs n'en avaient aucun besoin : `definedTermSetSchema` et
+`definedTermSchema` ne lisent que `term` et `definition`, et l'index du
+glossaire non plus. Les deux passent sur `content/glossary-terms.ts` (12 Ko),
+la moitié courte que R2-14 avait déjà extraite **pour le navigateur** — la même
+scission vaut côté serveur, pour la même raison, à un niveau différent.
+
+**Mesuré à chaque étape, jamais déduit** (`npm run build`, sondes de chaîne
+uniques à chaque module dans `.next/server/chunks/`, puis `vercel build` hors
+ligne) :
+
+| | Chunks portant `glossary-deep` | Chunks portant `glossary.ts` | Fonction de contenu | Disque total |
+|---|---|---|---|---|
+| Avant | 6 | 5 | 7,9 Mo | 47,3 Mo |
+| Fix 1 | **1** | 5 | 6,5 Mo | 45,7 Mo |
+| Fix 1+2+3 | **1** | **2** | **5,74 Mo** | **43,55 Mo** |
+
+Plus aucun groupe de chunks identiques à l'octet au-dessus de 50 Ko. Les deux
+chunks restants pour `glossary.ts` sont les deux routes qui la rendent
+vraiment : la page de terme, et le sitemap (qui lit `updatedAt`).
+
+**Ce que ça vaut côté facture, dit comme une extrapolation et pas comme une
+mesure** : Vercel compte par route, et son export rapportait 4,36 Mo là où ma
+mesure locale donnait 7,9 (rapport 0,55 — la mienne somme le `filePathMap` non
+compressé). Au même rapport, 5,74 Mo local ≈ **3,2 Mo par route de contenu**,
+soit ~−27 % sur le poste qui représentait 94 % du déploiement. Le chiffre réel
+ne se lira que sur l'export du prochain déploiement.
+
+**Le garde : `src/__tests__/content-fan-in.test.ts`.** Le garde de R2-14 ne
+regarde que les Client Components, et **aucun des trois fan-in n'était un
+Client Component** — c'est exactement le trou. Celui-ci mesure l'**atteinte** :
+pour chaque module de contenu volumineux, combien des 38 points d'entrée de
+l'App Router le rejoignent en suivant les imports de valeur (un `import type`
+n'est pas une arête, TypeScript l'efface). Un budget par module, avec sa
+raison, plus la règle qui aurait attrapé `CRUMBS` : le module JSON-LD ne peut
+importer que du contenu que **chaque** page émet.
+
+Non-vacuité mesurée finement, trois sabotages : remettre l'import
+`glossary-deep` dans `glossary.ts` → 1 test tombe ; remettre un module de
+contenu propre à une page dans `jsonld.tsx` → 2 tombent (le budget **et** la
+liste, ce qui est correct : l'un dit le symptôme, l'autre la cause) ; remettre
+l'index du glossaire sur la copie longue → 1 tombe.
+
+**Trouvé en route, sans rapport avec le sujet : `npm run lint` sortait
+2 366 problèmes.** Pas une régression — `.vercel/` (le Build Output de mes
+mesures) n'était ni dans `.gitignore`, ni dans les ignores d'ESLint, donc
+ESLint analysait des bundles minifiés (colonnes à `1:10753`, ce qui est le
+signe). Les deux ajoutés ; `lint` ressort à 0. **La leçon vaut au-delà du
+correctif** : un compteur de lint qui explose après une manipulation d'outil se
+lit d'abord en regardant *quels fichiers* sont signalés (`cut -d/ -f1 | sort |
+uniq -c`), pas en lisant les règles.
+
+**Ce qui reste, non fait ici** : `content/comparisons.ts` (39 Ko) est atteint
+par 6 routes et `copy-library.ts` (34 Ko) par 11. Les deux sont légitimes —
+chaque page de comparaison rend son entrée, et les onze pages qui lisent
+`copy-library` citent vraiment des questions — mais ce sont les deux prochains
+postes si le compteur redevient un sujet. Le garde fixe leur budget actuel
+comme plafond, donc une nouvelle route qui les tirerait sans les rendre fera
+rougir la CI.
+
+### Les conventions sont rangées par outil, et la sémantique d'`ignoreCommand` est vérifiée (2026-09-15)
+
+Deux demandes d'Antoine pendant le gel (aucun développement applicatif, aucun
+déploiement jusqu'au 26 — un push de branche ne construit rien, donc ceci coûte
+zéro).
+
+**1. La vérification de doc que j'avais annoncée.** Ma question était : que fait
+Vercel sur un code de sortie autre que 0 ou 1 ? La page de référence
+`vercel.json` ne dit que « code 0 ignores the build, while code 1 continues
+it », ce qui est **insuffisant pour écrire la commande en sécurité**. C'est
+l'article du centre d'aide qui tranche : « If the command returns '0', the build
+will be skipped. If, however, a code **'1' or greater** is returned, then a new
+deployment will be built. » Donc `exit 0` est la **seule** valeur qui saute : un
+crash, une erreur git, une variable non définie construisent tous. Mon
+inquiétude était infondée — et elle est maintenant vérifiée plutôt que supposée,
+ce qui n'est pas la même chose.
+
+Trois trouvailles que je ne cherchais pas, toutes dans `VERCEL.md` §1.6 :
+`VERCEL_GIT_PREVIOUS_SHA` (SHA du dernier déploiement **réussi**) vaut mieux que
+`HEAD^` dans un cas précis — un merge de code qui **échoue au build** suivi d'un
+merge sans effet ferait sauter le second et le code ne partirait jamais ; le
+clone est superficiel (`--depth=10`) ; et surtout **un build sauté ne crée aucun
+déploiement**, donc aucune fonction, donc l'économie sur Functions Storage est
+réelle. Ce dernier point pouvait annuler tout le correctif : une recherche
+annonçait que « canceled builds count as full deployments », mais ça vise les
+builds annulés **en cours**, qui ont déjà exécuté la commande de build.
+
+**2. Six fichiers d'outil, et une table de déclencheurs.** Les conventions et
+pièges propres à chaque outil quittent ce fichier pour `VERCEL.md`, `NEXTJS.md`,
+`TESTING.md`, `GITHUB.md`, `GEMINI.md` et `FIRESTORE.md`. Objectif explicite
+d'Antoine : **pouvoir retransmettre ces apprentissages à un autre projet** qui
+utilise le même outil. Chaque fichier est donc coupé en deux — « ce qui vaut
+partout » (portable) et « propre à Tour de Growth » (les chiffres, les routes,
+qui ne voyagent pas).
+
+**Le piège que cette forme existe pour éviter.** La convention sur la cadence de
+merges était *déjà* dans `CLAUDE.md`, écrite par moi, et je ne l'ai pas suivie.
+La déplacer dans `VERCEL.md` ne l'aurait pas sauvée — au contraire : **seul
+`CLAUDE.md` est chargé automatiquement**. Sortir une règle sans dire *quand*
+aller la chercher, c'est l'enterrer. D'où la **table de déclencheurs** en tête de
+ce fichier, qui ne contient pas les règles mais le moment de les ouvrir
+(« avant tout merge → `VERCEL.md` »), et les treize conventions qui restent ici
+en index d'une ligne avec un renvoi vers le détail.
+
+**Le journal ne se découpe pas** : il est chronologique et narratif, le trier par
+outil le détruirait. Seules les règles distillées partent.
+
+**Vérifié** : les dix renvois `FICHIER §x` introduits résolvent tous vers un
+titre réel. Au passage, mon premier vérificateur a rapporté cinq renvois cassés
+dont quatre étaient **un bug de ma regex** (elle exigeait une espace après le
+numéro là où les titres ont un point) et un visait une autre convention de
+numérotation. Exactement la leçon de `TESTING.md` §2.1 — une vérification qui
+rapporte une anomalie doit d'abord prouver qu'elle a regardé le bon endroit —
+appliquée au vérificateur lui-même.
+
+### Les quatre réécritures du bon à tirer nº5, et la classe que l'une d'elles désignait (2026-09-23)
+
+Les quatre cartes qu'Antoine avait marquées « à changer » en clôturant le nº5,
+traitées ensemble parce que trois d'entre elles sont le même genre de défaut.
+
+**Le fait qui compte, et qu'une note de relecture ne pouvait pas dire :
+deux des trois défauts existaient aussi ailleurs que là où il les a vus.**
+
+- Le « deck » de `g-product-led-growth` (« Quel deck ? De quoi tu parles ? »)
+  était **dans les deux langues** — l'anglais disait « not what the pitch deck
+  says » alors que l'exemple s'intitule « A company that calls itself
+  product-led » et ne mentionne aucun deck. Antoine relit le français ; une
+  chaîne `Translatable` est deux textes, et rien ne garantit que la moitié
+  qu'il ne lit pas soit saine. Remplacé des deux côtés par la comparaison à ce
+  que l'entreprise dit d'elle-même.
+- « un bord dangereux » (calque de « a dangerous edge ») apparaissait **deux
+  fois sur le même terme** : dans la copie courte qu'il citait, et dans la
+  fiche de formule de la page longue. Corriger seulement celle qui est citée,
+  c'est l'erreur exacte de l'ACV la semaine dernière — patcher l'instance
+  nommée et laisser la classe.
+
+**Le balayage a trouvé six renvois inter-pages, pas cinq.** La ligne du tableau
+des points ouverts, que j'avais écrite moi-même, en annonçait cinq. Le sixième
+— la fiche de formule du CAC payback, « La page CAC détaille pourquoi… » — n'a
+été vu qu'en relançant la recherche avec un motif de forme différente. C'est la
+leçon du run nº8 (« une recherche ne prouve que ce qu'elle a regardé »),
+appliquée cette fois à une **liste que j'avais écrite et que je relisais comme
+un fait établi**. Deux motifs valent mieux qu'un, et l'union des deux vaut
+mieux que la confiance dans le premier.
+
+**La forme du correctif, telle qu'Antoine l'a validée** : le **pointeur** part,
+les **chiffres partagés** restent. Ils ne coûtent rien à quelqu'un qui arrive
+par le SEO pour une définition, et ils restent cohérents pour qui lit plusieurs
+pages — c'est le pointeur, pas le chiffre, qui suppose que tout le glossaire se
+lit d'un bloc. Un seul demandait une vraie réécriture, celui du playbook
+d'expansion, parce que le renvoi nommait la page d'où il venait : il décrit
+maintenant son déclencheur (l'offre au moment où un compte atteint sa limite de
+sièges). Celui du PQL était en plus **mort** depuis la coupe
+d'`activation-rate` le 2026-09-14 — le retirer corrige les deux défauts d'un
+coup.
+
+**Vérifié en réel** : lint, tsc, 709 tests unitaires, seuils de couverture,
+`next build`, **286 specs Playwright**. Débordement horizontal **mesuré** à 390
+et 1280 px sur les neuf pages touchées (aucun), et les deux passages les plus
+réécrits relus en capture — ce qui a confirmé un effet que je n'avais pas prévu
+en écrivant : nommer « L'argument » au lieu de « Il » rétablit le parallèle
+avec « L'argument est le plus fort » deux paragraphes plus haut, qui était
+manifestement l'intention d'origine.
+
+**Le flake de `locale-routing.spec.ts:75` a une cinquième occurrence, et elle
+est plus large.** Pour la première fois il a rougi **au niveau du fichier** et
+pas seulement en suite complète, ce que ce fichier annonçait comme impossible.
+Avant de conclure quoi que ce soit, le mécanisme lui-même a été vérifié en HTTP
+direct contre le build : `/en` pose `tdg_locale=en`, `/fr` le bascule en `fr`,
+`/quiz` rend bien `<html lang="fr">`. Puis 5 passages du seul test et 3 du
+fichier entier, tous verts. Donc toujours dépendant de la charge, toujours pas
+un défaut produit, et sans rapport avec des modifications qui ne touchent que
+des chaînes de contenu. **Non durcie**, conformément à la règle déjà posée.
+
+**Les quatre réponses sont écrites sous les notes d'Antoine dans l'artifact**
+(champ `reply`), pas dans le salon — la conversation de relecture vit avec la
+décision. Elles disent aussi ce que je n'ai **pas** touché : la dernière phrase
+de l'encadré de `g-nrr-grr` finit par « et une seule est dans le deck », un
+autre « deck » que celui de la page product-led (ici générique, le board deck)
+qu'il avait lu sans le relever. À lui de trancher en un mot.
+
+## État du projet au 2026-09-23 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
 
@@ -4048,12 +4502,14 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **L'instrument d'audit growth a son schéma** (2026-09-13, `AUDIT.md`) : un outil personnel pour les diagnostics qu'Antoine mène en entreprise, navigateur seulement, jamais Firestore — `src/lib/audit/` + `src/content/audit-catalog.ts`, sans aucune route ni UI encore. Phase 1 (la saisie sous `/admin/audit`) est le prochain chantier, découpée en six PR dans **`AUDIT-PLAN.md`** (2026-09-13) ; phase 3 (tout ce qui ressemble à un produit) reste fermée tant que les entretiens ne sont pas faits et le contrat de travail pas vérifié.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **706 tests unitaires**, **286 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
+**Chiffres de référence** (à comparer, pas à recopier aveuglément) : **709 tests unitaires**, **286 specs Playwright**, `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 
 | Sujet | État | Ce qui le déclencherait |
 |---|---|---|
+| **Hygiène de dépôt public** | Le dépôt est public depuis le 2026-09-05 et personne n'a jamais passé en revue ce que ça implique. **Déjà fait par Antoine le 2026-09-17**, vérifié depuis GitHub : description, 9 topics, homepage sur `tourdegrowth.com` (elle pointait encore sur `tourdegrowth.vercel.app`), licence AGPL-3.0 reconnue. **Posture tranchée le même jour** : « lecture bienvenue, PR non attendues » — donc une ligne dans le `README`, **pas** de `CONTRIBUTING.md` ni de templates d'issue/PR, qui promettraient un processus qui n'existe pas. `SECURITY.md` reste non optionnel (adresse existante : `contact@tourdegrowth.com`). Inventaire local : `LICENSE`, `README.md`, `.github/dependabot.yml` présents ; `SECURITY.md`, `CODEOWNERS` absents. Reste à établir **depuis GitHub** (convention 10) : le ruleset de `main`, les permissions des workflows, les secrets, l'analyse de secrets et la protection au push, et le fait que l'historique soit propre. Trois réglages vus au passage et à soumettre : `has_issues: true`, `has_projects: true`, `has_discussions: false` — cohérents ou non avec la posture, c'est son arbitrage | **À la reprise le 26/09, avant tout le reste** — demande explicite d'Antoine. Établir l'état réel, proposer la liste des manques, attendre son arbitrage avant d'écrire quoi que ce soit. Le rappel du 26 porte déjà cette consigne. |
+| **L'alerte CodeQL restante** | Scan lancé par Antoine le 2026-09-17 (default setup, deux analyses : `javascript-typescript` et `actions`), **deux avertissements, zéro vulnérabilité**. **Reste `create-submission.ts:243`, chaîne de format contrôlée de l'extérieur** — non exploitable (`locale` est filtré par identité contre `"en"`/`"fr"` dans la route avant d'atteindre `completeDeepDiveFlow`, et `l` vient de la constante `LOCALES` ; CodeQL ne reconnaît pas le prédicat de type comme barrière). **Close** : `e2e/document-headings.spec.ts:32` (sanitization incomplète), rejetée par Antoine le 2026-09-17 en « Used in tests » — code de test jamais bundlé, entrée = notre propre HTML, sortie jetée dans un `expect(…).not.toBe("")`. Balayage de classe fait pour les deux : un seul `console.*(gabarit, arg)` dans tout le dépôt, et deux regex à chevrons dont celle du code livré (`jsonld.tsx:168`) est la bonne forme — un caractère unique échappé, ce que la fiche CodeQL recommande, et elle n'est pas signalée | **Après le 26** : une ligne, passer les deux valeurs en `%s` plutôt qu'en interpolation — pas pour l'exploit mais parce que depuis R-04 ce `console.error` est le **seul** endroit où la cause d'un échec de Deep dive est enregistrée, et un gabarit garbled consommerait `err` comme argument de formatage. |
 | Limite de débit en mémoire (R-15) | Par instance serverless, arrête le cas naïf | Un abus réel. Passer alors sur un store partagé (Upstash) ou le pare-feu Vercel. |
 | Deep dive à ~70 s | Quatre générations en parallèle depuis le bilingue ; l'écran de chargement est conçu pour une attente longue | Si ça devient la norme, regarder le **nombre** de générations, pas le plafond de temps. |
 | `/r/<id>` déborde de 37 px à 320 px | Hors contrat (DESIGN-BRIEF fixe 390 et exige 375-430) ; c'est le `PillarChip` | Une décision de design, pas un correctif évident. Antoine a choisi de laisser. |
@@ -4066,12 +4522,12 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 | Les deux nouveaux événements A4 (`retake_started`, `landing_return`) | Vérifiés en e2e, jamais contre le vrai GoatCounter (le proxy du bac à sable bloque `*.goatcounter.com`) | Un regard d'Antoine sur `/admin/stats` après déploiement : deux lignes de plus dans la section funnel, et la ligne « Value actions per result ». |
 | R2-30 (fenêtre Tour de France, SPEC.md §10) | Reporté d'un commun accord : pas d'urgence | À construire **avant** juin 2027, pour que le post parte pendant le vrai Tour et pas après. |
 | Les e2e de composition ne passent que par la branche échantillon | `/r/sample` utilise `getSampleNextMove` et `SAMPLE_RESULT.pillars`, pas le vrai chemin. La garde statique est donc seule à protéger le payload | Un id de fixture derrière une variable d'environnement fermée par défaut. À décider : c'est une porte de test sur la route publique la plus sensible. |
-| Flake `locale-routing.spec.ts:75` | **Quatrième occurrence** le 2026-09-14, toujours en suite complète parallèle, jamais isolée (21/21 à la reprise) ni au second passage | La prochaine occurrence en CI laisse une trace (`retries: 1` + `trace: on-first-retry`, rapport téléversé). Ne pas durcir la spec en attendant le cookie : ça masquerait une éventuelle course produit. |
+| Flake `locale-routing.spec.ts:75` | **Cinquième occurrence** le 2026-09-23, et plus large qu'annoncé : pour la première fois il a rougi **au niveau du fichier** et pas seulement en suite complète. Le mécanisme lui-même a été vérifié sain en HTTP direct contre le build (`/en` pose le cookie `en`, `/fr` le bascule en `fr`, `/quiz` rend `<html lang="fr">`), puis 5 passages du seul test et 3 du fichier entier, tous verts | La prochaine occurrence en CI laisse une trace (`retries: 1` + `trace: on-first-retry`, rapport téléversé). Ne pas durcir la spec en attendant le cookie : ça masquerait une éventuelle course produit. |
 | TypeScript 7 et ESLint 10 | Tous deux bloqués par des paquets embarqués dans `eslint-config-next` (`typescript-eslint` refuse TS ≥ 6.1 ; `eslint-plugin-react` plante sur ESLint 10). Dependabot les ignore en majeure depuis le 2026-09-08 | Quand `eslint-config-next` suivra. Re-tester en installant, pas en lisant les plages de peer : c'est l'essai qui a montré qu'ESLint 10 plante. |
 | Instrument d'audit : phase 1 (saisie) | **Close le 2026-09-14** (PR #131 à #153). `/admin/audit` crée une mission, trie 25 lignes par palier, saisit tout ce que le schéma prévoit, produit `m19` depuis le Tour de l'auditeur, croise méthode × réalité, rédige les constats et le bloc de tête, exporte, réimporte et purge. La spec canari prouve qu'aucune requête ne porte un octet de la mission ; la recette vérifie le critère de sortie sur un vrai build, `localStorage` réellement vidé entre l'export et l'import | Rien côté code. |
 | Instrument d'audit : phase 1 bis (la vraie mission) | **Le prochain chantier, et il est côté Antoine** : mener AB Tasty dans l'outil jusqu'à `pending = 0`, en tenant le journal des frictions | C'est ce journal qui dira ce que la phase 2 (les readouts) doit construire — il n'y a aucune façon de le deviner d'ici. |
-| Copie à relire | **Deux bons à tirer ouverts en parallèle**, et ils ne se recouvrent pas. [Nº5](https://claude.ai/code/artifact/6236cd38-cfbb-4b4c-89c4-fb35a8bca84f) (2026-09-14) porte les dix marqueurs relevés au grep : les dix termes de glossaire de la vague 2.2, les deux pages « porte ouverte », les quatre comparaisons « AARRR vs X », et les 15 libellés de chrome (`openDoor`, `comparisonPage`, les 3 titres de document invisibles, `nav-strings.checklist`). [Nº4](https://claude.ai/code/artifact/d45d5d7d-fdfa-4155-ba0d-76290e331dc8) porte les 39 lignes du catalogue d'audit — **1 carte tranchée sur 39** | La relecture d'Antoine. Le prochain document se reconstruit depuis `grep -rn "TODO: à relire" src/`, jamais de mémoire ni depuis un compte écrit ici : trois fois de suite ce grep a rattrapé un oubli, et la dernière il a corrigé « six » en « dix ». Les décisions vivent dans la base de chaque artifact — nº4 dans `lines/`, nº5 dans `cards/` ; lire le bon tiroir avant de conclure qu'un artifact n'a pas été ouvert. |
-| Vercel Functions Storage | **Réglé** : la politique de rétention posée par Antoine le 2026-09-14 l'a fait passer de 9,24 Go à 397 Mo, et un déploiement pèse 45,5 Mo de fonctions depuis le 2026-09-13 | Rien. |
+| Copie à relire | **Le bon à tirer nº5 est entièrement clos** : 30 cartes sur 30 tranchées le 2026-09-22 (26 « ok », 4 « à changer »), et les quatre réécritures livrées le 2026-09-23 avec une réponse écrite sous chaque note dans l'artifact. [Nº4](https://claude.ai/code/artifact/d45d5d7d-fdfa-4155-ba0d-76290e331dc8) reste ouvert : les 39 lignes du catalogue d'audit, **1 carte tranchée sur 39** (`m07`, 2026-09-13) — c'est le texte qui s'imprime dans ses livrables sous son nom, et il ferme la phase 2 de l'instrument d'audit | La relecture d'Antoine sur le nº4. Le prochain document se reconstruit depuis `grep -rn "TODO: à relire" src/`, jamais de mémoire ni depuis un compte écrit ici : trois fois de suite ce grep a rattrapé un oubli, et la dernière il a corrigé « six » en « dix ». Les décisions vivent dans la base de chaque artifact — nº4 dans `lines/`, nº5 dans `cards/` ; lire le bon tiroir avant de conclure qu'un artifact n'a pas été ouvert. |
+| Vercel Functions Storage | **Ouvert, mais le gros poste est traité.** Somme glissante sur 30 jours, insensible à la suppression des déploiements (vérifié par Antoine auprès de Vercel le 2026-09-15). **Vercel compte par route** : la fonction des pages de contenu était à 4,36 Mo comptée 92 fois, soit 94 % des 428,9 Mo d'un déploiement — dont ~2,0 Mo de copies identiques de notre bibliothèque de contenu. **La déduplication est faite** (trois fan-in de notre propre code, pas une limite de Turbopack) : 7,9 → 5,74 Mo local, 47,3 → 43,55 Mo sur disque, soit ~−27 % par route en extrapolant le rapport de l'export | Lire l'export du prochain déploiement pour le chiffre réel. **Les deux correctifs secondaires sont tranchés** (2026-09-15) : `maxDuration` **non** unifié (0,5 % du total facturé contre une dégradation du chemin d'échec de `/api/submissions`) ; `ignoreCommand` étendu aux merges « doc seule » **oui**, conception arrêtée et sémantique vérifiée à la source, **à implémenter après le 26**. Détail : `VERCEL.md` §1.6 et §2.2. Et tenir la cadence de merges (convention 13) |
 | Vercel Fluid Active CPU (36 min / 4 h par mois) | Les deux postes qui dominaient le coût par visite sont corrigés le 2026-09-14 : six préchargements dynamiques par vue de la homepage, et l'image de partage rendue à chaque vue de résultat — confirmé en production, `MISS` puis `HIT` sur l'adresse versionnée. La région des fonctions est passée à `cdg1` le même jour (vérifié : `x-vercel-id: iad1::cdg1::…`) | Relire le compteur dans Vercel une semaine après. |
 | Lecture des stats par la session | **Les deux moitiés marchent** (trois runs réels le 2026-09-14 : tableau de bord et Search Console, déchiffrés par la session ; ligne de départ du plan relevée, tenue hors du dépôt public). À surveiller au prochain run Search Console : `/en/glossary/*` doit remplacer les anciennes URL non préfixées dans les pages créditées | Rien : un `age-keygen` puis un run (`admin`, `gsc` ou `both`) quand une session a besoin des chiffres. |
 
@@ -4081,18 +4537,25 @@ Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et 
 
 ### Les conventions qui comptent pour la suite
 
-1. **Vérifier qu'un merge n'est pas vide** (`git show --stat <sha>`) **avant d'annoncer un item livré.** Une CI verte sur une PR vide est verte pour la mauvaise raison — ça s'est produit le 2026-09-06 avec la PR #50, et le bug est resté une demi-journée de plus.
-2. **`git checkout -B <branche>` AVANT d'éditer**, jamais après. C'est la cause du point 1.
-3. **`ci.yml` est la barrière, `verify-live.yml` est une sonde.** Ne jamais rendre la seconde obligatoire : elle ne rapporte aucun statut sur une PR, donc l'exiger bloquerait les merges en permanence.
-4. **Relancer la sonde Gemini sur la branche avant tout changement à `lib/gemini/deep-dive.ts` ou `client.ts`.** Un `responseSchema` mal formé renvoie 400, non retriable : tous les Deep dive casseraient jusqu'à correction, et aucun test hors ligne ne peut le voir.
-5. **Un test de non-vacuité qui passe est lui-même un signal.** Deux fois le 2026-09-06 il a révélé autre chose que ce qu'il cherchait : un bug de CSS dé-scopé, puis le fait qu'un durcissement n'était pas observable. Ne pas le traiter comme une formalité.
-6. **Toute nouvelle chaîne de copie repart au statut « à relire ».** Le contenu de `dictionary.ts` et `content/glossary.ts` a été validé par Antoine le 2026-09-06 ; un fichier approuvé est exactement l'endroit où de la copie non relue se glisse sans se voir.
-7. **Le contraste est vérifié par la CI, sans aucune exception restante.** `KNOWN_CONTRAST_GAPS` est vide dans `e2e/accessibility.spec.ts`. Une nuance plus discrète demande un token qui passe AA, pas une exception — et une couleur translucide se compose **sur son fond réel** avant d'être mesurée.
-8. **Un numéro de PR écrit dans les docs avant la création se vérifie après.** Dependabot a pris #67 à #70 et #72 au milieu du plan et décalé toutes les prédictions ; les statuts de `REVIEW-02.md` ont dû être corrigés une fois. Créer la PR, lire le numéro renvoyé, puis seulement l'écrire.
-9. **`expectedHeadSha` au merge, c'est le SHA complet de `git rev-parse <branche>`**, jamais retapé de mémoire : un SHA inventé a fait rejeter le merge de la PR #80 en 409, ce qui est le bon comportement — mais il aurait suffi d'une coïncidence pour merger la mauvaise tête.
-10. **Un état de dépôt s'énonce d'après GitHub, jamais d'après un clone ou un document.** Le 2026-09-08, deux affirmations fausses sont parties dans une PR : « 35 branches » (les refs `origin/*` d'un clone jamais élagué — `git fetch --prune` avant tout comptage, ou l'API) et « le check CI n'est pas obligatoire » (un statut de `REVIEW.md` vieux de trois jours, relu comme un fait présent alors que `main` était déjà `protected: true`). Ce qui est écrit dans un document est ce qui était vrai quand il a été écrit.
-11. **Une garde de payload compte ce qui traverse, elle ne nomme pas des props.** Les deux fuites `rawPoints` (#110 puis #115) sont la même erreur à un cran d'écart : la seconde fois la frontière existait et la garde était nominale, donc aveugle au prop suivant. Même chose pour une borne annoncée : la calculer pour **toutes** les variantes, y compris celles qu'aucun e2e ne peut rendre.
-12. **Une branche empilée se rebase avec `git rebase --onto origin/main <ancienne-base> <branche>`** après le merge de la PR du dessous, jamais avec un simple `git rebase main` (qui rejoue aussi les commits déjà squashés et crée des conflits fantômes).
+*Ces treize lignes sont l'index : la règle en une phrase, toujours chargée au
+démarrage. Le raisonnement, les variantes et la méthode de vérification vivent
+dans le fichier d'outil indiqué en fin de ligne (voir la table de déclencheurs
+en tête de ce fichier). Quand les deux semblent diverger, c'est le fichier
+d'outil qui a le détail à jour.*
+
+1. **Vérifier qu'un merge n'est pas vide** (`git show --stat <sha>`) **avant d'annoncer un item livré.** Une CI verte sur une PR vide est verte pour la mauvaise raison — ça s'est produit le 2026-09-06 avec la PR #50, et le bug est resté une demi-journée de plus. → `GITHUB.md` §1.1
+2. **`git checkout -B <branche>` AVANT d'éditer**, jamais après. C'est la cause du point 1. → `GITHUB.md` §1.1
+3. **`ci.yml` est la barrière, `verify-live.yml` est une sonde.** Ne jamais rendre la seconde obligatoire : elle ne rapporte aucun statut sur une PR, donc l'exiger bloquerait les merges en permanence. → `GITHUB.md` §1.4
+4. **Relancer la sonde Gemini sur la branche avant tout changement à `lib/gemini/deep-dive.ts` ou `client.ts`.** Un `responseSchema` mal formé renvoie 400, non retriable : tous les Deep dive casseraient jusqu'à correction, et aucun test hors ligne ne peut le voir. → `GEMINI.md` §1.6 et §2
+5. **Un test de non-vacuité qui passe est lui-même un signal.** Deux fois le 2026-09-06 il a révélé autre chose que ce qu'il cherchait : un bug de CSS dé-scopé, puis le fait qu'un durcissement n'était pas observable. Ne pas le traiter comme une formalité. → `TESTING.md` §1.2
+6. **Toute nouvelle chaîne de copie repart au statut « à relire ».** Le contenu de `dictionary.ts` et `content/glossary.ts` a été validé par Antoine le 2026-09-06 ; un fichier approuvé est exactement l'endroit où de la copie non relue se glisse sans se voir. → propre au projet — reste ici
+7. **Le contraste est vérifié par la CI, sans aucune exception restante.** `KNOWN_CONTRAST_GAPS` est vide dans `e2e/accessibility.spec.ts`. Une nuance plus discrète demande un token qui passe AA, pas une exception — et une couleur translucide se compose **sur son fond réel** avant d'être mesurée. → propre au projet — reste ici
+8. **Un numéro de PR écrit dans les docs avant la création se vérifie après.** Dependabot a pris #67 à #70 et #72 au milieu du plan et décalé toutes les prédictions ; les statuts de `REVIEW-02.md` ont dû être corrigés une fois. Créer la PR, lire le numéro renvoyé, puis seulement l'écrire. → `GITHUB.md` §1.1
+9. **`expectedHeadSha` au merge, c'est le SHA complet de `git rev-parse <branche>`**, jamais retapé de mémoire : un SHA inventé a fait rejeter le merge de la PR #80 en 409, ce qui est le bon comportement — mais il aurait suffi d'une coïncidence pour merger la mauvaise tête. → `GITHUB.md` §1.1
+10. **Un état de dépôt s'énonce d'après GitHub, jamais d'après un clone ou un document.** Le 2026-09-08, deux affirmations fausses sont parties dans une PR : « 35 branches » (les refs `origin/*` d'un clone jamais élagué — `git fetch --prune` avant tout comptage, ou l'API) et « le check CI n'est pas obligatoire » (un statut de `REVIEW.md` vieux de trois jours, relu comme un fait présent alors que `main` était déjà `protected: true`). Ce qui est écrit dans un document est ce qui était vrai quand il a été écrit. → `GITHUB.md` §1.2
+11. **Une garde de payload compte ce qui traverse, elle ne nomme pas des props.** Les deux fuites `rawPoints` (#110 puis #115) sont la même erreur à un cran d'écart : la seconde fois la frontière existait et la garde était nominale, donc aveugle au prop suivant. Même chose pour une borne annoncée : la calculer pour **toutes** les variantes, y compris celles qu'aucun e2e ne peut rendre. → `NEXTJS.md` §1.8, `TESTING.md` §2.8
+12. **Une branche empilée se rebase avec `git rebase --onto origin/main <ancienne-base> <branche>`** après le merge de la PR du dessous, jamais avec un simple `git rebase main` (qui rejoue aussi les commits déjà squashés et crée des conflits fantômes). → `GITHUB.md` §1.1
+13. **Chaque merge sur `main` coûte ~47 Mo de Functions Storage pendant 30 jours.** Ce n'est plus une question de confort de déploiement : le compteur est une somme glissante que rien ne purge, le plafond est de ~211 merges par 30 jours au poids actuel, et nous étions à 154 le 2026-09-15. Grouper les pushes sur une branche (une vérification complète, un push) et espacer les merges est donc une contrainte chiffrée. Un merge qui ne touche que de la doc coûte autant qu'un merge de code tant que l'`ignoreCommand` n'a pas été étendu. → `VERCEL.md` §1.1 et §2.3
 
 ### Carte du repo
 
@@ -4104,6 +4567,9 @@ src/components/          core / brand / quiz / result / glossary — le design s
 src/content/             toute la copie du site, validée (agent produit pour l'origine, Antoine le 2026-09-06 et le 2026-09-09 pour le reste)
 src/lib/                 scoring (pur), i18n (dont meta.ts), seo (JSON-LD), og (polices, tokens, gabarit et adresse versionnée de l'image de résultat), gemini, submissions (dont segment.ts, benchmark.ts), metrics, analytics
 src/lib/audit/           l'instrument d'audit growth (AUDIT.md = le schéma, AUDIT-PLAN.md = le plan par phases) — pur, navigateur seulement, jamais Firestore ; son catalogue est dans src/content/audit-catalog.ts
+VERCEL.md NEXTJS.md      conventions et pièges par outil, ouverts sur déclencheur (table en tête de ce fichier)
+TESTING.md GITHUB.md      — chacun coupé en « portable » / « propre à Tour de Growth »
+GEMINI.md FIRESTORE.md
 GROWTH-PLAN.md           le plan de distribution (sans LinkedIn, sans nom) ; marketing/ son kit (textes de lancement, captures, annuaires) ; REVIEW*.md les revues ; AUDIT*.md l'instrument d'audit
 design/                  brief d'origine, briefs et bundles de retour des extensions 01 et 03 (le brief 02 n'est jamais parti)
 e2e/                     170 specs Playwright contre un build de production

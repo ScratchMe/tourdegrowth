@@ -1,6 +1,5 @@
 import type { Translatable } from "@/lib/i18n/dictionary";
 import { GLOSSARY_TERMS, type GlossaryTermId } from "./glossary-terms";
-import { GLOSSARY_DEEP, type DeepGlossaryContent } from "./glossary-deep";
 
 /**
  * glossary.ts — Tour de Growth
@@ -38,19 +37,11 @@ export interface GlossaryEntry {
   metaDescription?: Translatable;
   /** When this term's long-form copy last changed (sitemap `lastmod`); falls back to `GLOSSARY_UPDATED_AT`. */
   updatedAt?: string;
-  /**
-   * The long-form sections — formula, worked example, benchmarks, levers, the
-   * Tour question that measures it, FAQ (REVIEW-02.md R2-11). Lives in
-   * `glossary-deep.ts`; every term has one since the fifth batch. The page
-   * still renders without it, so a future term can ship short first.
-   */
-  deep?: DeepGlossaryContent;
 }
 
 export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   aarrr: {
     ...GLOSSARY_TERMS.aarrr,
-    deep: GLOSSARY_DEEP.aarrr,
     updatedAt: "2026-09-06", // R2-11, lot 4
     extended: {
       fr: "Dave McClure (500 Startups) a présenté ce cadre en 2007 pour répondre à un problème simple : les fondateurs suivaient trop de métriques sans savoir lesquelles comptaient vraiment à chaque étape. L'ordre n'est pas arbitraire — c'est un entonnoir. Un produit qui dépense en acquisition alors que son activation fuit remplit un seau percé : chaque euro dépensé en amont perd de la valeur en aval. La plupart des équipes découvrent qu'un seul pilier tire toute la note vers le bas ; c'est exactement ce que ce test calcule, pilier par pilier, plutôt que de donner une impression générale.",
@@ -60,7 +51,6 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   acquisition: {
     ...GLOSSARY_TERMS.acquisition,
-    deep: GLOSSARY_DEEP.acquisition,
     updatedAt: "2026-09-08", // R2-11, lot 3 — formula terms reworded after review (PR #99)
     extended: {
       fr: "L'acquisition couvre tous les canaux par lesquels quelqu'un arrive chez toi pour la première fois : SEO, publicité payante, bouche-à-oreille, contenu, communautés, partenariats. Le piège classique : juger un canal uniquement sur le volume qu'il apporte, sans se demander s'il est reproductible et si son coût est connu (voir CAC). Un canal qui a bien marché une fois par chance n'est pas une stratégie d'acquisition, c'est un coup de chance. Et l'acquisition seule ne dit rien de la santé du produit — un pic de nouveaux visiteurs qui n'activent jamais n'est qu'un chiffre de vanité.",
@@ -76,7 +66,6 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   activation: {
     ...GLOSSARY_TERMS.activation,
-    deep: GLOSSARY_DEEP.activation,
     updatedAt: "2026-09-06", // R2-11, lot 2
     extended: {
       fr: "La plupart des équipes confondent activation et inscription. Ce sont deux choses différentes : l'inscription est une action administrative, l'activation est le moment où l'utilisateur comprend enfin pourquoi il est là (voir Moment « aha »). Bien définir son activation demande de regarder, parmi les utilisateurs qui reviennent des mois plus tard, quelle action ils ont tous faite tôt — c'est souvent contre-intuitif, rarement la première chose qu'on montre dans l'onboarding. Une activation mal définie fausse tout le reste : on optimise le mauvais moment du parcours.",
@@ -86,7 +75,6 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   retention: {
     ...GLOSSARY_TERMS.retention,
-    deep: GLOSSARY_DEEP.retention,
     updatedAt: "2026-09-06", // R2-11, lot 2
     extended: {
       fr: "La retention se lit sur une courbe, pas sur un seul chiffre : le signe à chercher, c'est qu'elle finisse par s'aplatir plutôt que de continuer à descendre vers zéro (une courbe qui se stabilise dit que le produit a trouvé un usage régulier pour un noyau d'utilisateurs). C'est aussi le pilier le plus rentable à réparer avant de pousser l'acquisition : faire grandir un entonnoir qui fuit revient à courir plus vite sur un tapis roulant. L'inverse de la retention, c'est le churn — les deux se lisent toujours ensemble.",
@@ -96,7 +84,6 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   referral: {
     ...GLOSSARY_TERMS.referral,
-    deep: GLOSSARY_DEEP.referral,
     updatedAt: "2026-09-06", // R2-11, lot 3
     extended: {
       fr: "Le referral existe avec ou sans programme de parrainage formel — un utilisateur satisfait qui en parle spontanément à un collègue compte tout autant. Ce qui distingue un produit à fort referral, c'est qu'il devient moins cher à faire grandir avec le temps : chaque nouvel utilisateur en amène d'autres, contrairement à l'acquisition payante dont le coût reste stable (voir CAC). Un score NPS élevé est souvent le signal précoce qu'un mécanisme de referral, une fois construit, aura un vrai effet — un mauvais NPS prédit l'inverse, quel que soit le mécanisme.",
@@ -106,7 +93,6 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   revenue: {
     ...GLOSSARY_TERMS.revenue,
-    deep: GLOSSARY_DEEP.revenue,
     updatedAt: "2026-09-09", // R2-11, lot 3 — expansion term reworded after review
     extended: {
       fr: "Ce pilier ne juge pas le montant encaissé, mais si le modèle de revenu a été réellement testé face à de vrais clients — beaucoup de produits ont un plan de monétisation « pour plus tard » qui n'a jamais rencontré une carte bancaire. Une référence souvent citée dans le SaaS est un ratio LTV:CAC autour de 3:1 comme seuil de viabilité (voir LTV et CAC) — à prendre comme repère directionnel, pas comme une règle absolue selon ton marché. L'upsell et le cross-sell sont les deux leviers les plus rapides une fois le modèle de base validé.",
@@ -116,7 +102,6 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   "aha-moment": {
     ...GLOSSARY_TERMS["aha-moment"],
-    deep: GLOSSARY_DEEP["aha-moment"],
     updatedAt: "2026-09-09", // R2-11, lot 4 — cohort definition and three FR sentences reworded after review
     extended: {
       fr: "L'exemple le plus cité vient de Facebook : les équipes croissance avaient trouvé qu'un nouvel utilisateur qui atteignait 7 amis en 10 jours restait presque toujours par la suite — ce seuil précis est devenu leur boussole d'onboarding pendant des années. Trouver son propre moment « aha » demande de regarder en arrière, pas en avant : quelle action, faite tôt, les utilisateurs qui sont restés ont-ils tous en commun ? C'est rarement la fonctionnalité la plus mise en avant dans l'interface — souvent une action secondaire que personne ne pousse assez.",
@@ -126,7 +111,6 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   cac: {
     ...GLOSSARY_TERMS.cac,
-    deep: GLOSSARY_DEEP.cac,
     updatedAt: "2026-09-06", // R2-11, lot 1
     extended: {
       fr: "Le calcul de base : dépenses totales de vente et marketing sur une période, divisées par le nombre de nouveaux clients obtenus sur cette même période. Le piège le plus fréquent est d'oublier d'y inclure les salaires de l'équipe commerciale/marketing et le coût des outils — un CAC qui ne compte que la pub payante est presque toujours sous-estimé. Le CAC n'a de sens qu'à côté de la LTV : un CAC bas sur un produit à faible valeur peut coûter plus cher qu'un CAC élevé sur un produit à forte rétention.",
@@ -136,7 +120,6 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   ltv: {
     ...GLOSSARY_TERMS.ltv,
-    deep: GLOSSARY_DEEP.ltv,
     updatedAt: "2026-09-06", // R2-11, lot 1
     extended: {
       fr: "Une estimation courante en SaaS : revenu mensuel moyen par client, divisé par le taux de churn mensuel. Un churn de 5 %/mois donne mécaniquement une durée de vie moyenne de 20 mois — ce qui montre à quel point la LTV dépend directement de la retention, pas seulement du prix. Augmenter son prix sans travailler la retention gonfle la LTV sur le papier sans rien changer à la réalité si les clients partent toujours aussi vite. C'est pour ça que ce pilier et Retention se lisent toujours ensemble, jamais isolément.",
@@ -146,7 +129,6 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   churn: {
     ...GLOSSARY_TERMS.churn,
-    deep: GLOSSARY_DEEP.churn,
     updatedAt: "2026-09-06", // R2-11, lot 1
     extended: {
       fr: "Deux churns à distinguer : le churn logo (nombre de clients perdus) et le churn revenu (montant perdu) — un client qui downgrade sans partir compte dans le second, pas dans le premier. Une autre distinction utile : le churn volontaire (le client décide de partir) contre le churn involontaire (un paiement qui échoue), ce dernier se corrige souvent avec de la simple mécanique de facturation. Le meilleur signe de santé qu'une équipe SaaS puisse viser est un « churn négatif » : l'expansion revenue des clients existants (upsell) dépasse ce que le churn fait perdre.",
@@ -156,7 +138,6 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   "viral-coefficient": {
     ...GLOSSARY_TERMS["viral-coefficient"],
-    deep: GLOSSARY_DEEP["viral-coefficient"],
     updatedAt: "2026-09-06", // R2-11, lot 2
     extended: {
       fr: "Formule standard, souvent notée K : nombre moyen d'invitations envoyées par utilisateur, multiplié par leur taux de conversion. K > 1 veut dire que chaque utilisateur en amène plus d'un autre en moyenne — la croissance s'auto-alimente sans dépenser plus en acquisition. En pratique, K > 1 durable est rare et précieux ; la plupart des produits visent plutôt un K qui réduit sensiblement le CAC effectif sans prétendre à la viralité pure. Ce tableau de bord Growth calcule d'ailleurs son propre K-factor en continu, exactement selon cette formule, sur les vraies analyses complétées.",
@@ -172,7 +153,6 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   onboarding: {
     ...GLOSSARY_TERMS.onboarding,
-    deep: GLOSSARY_DEEP.onboarding,
     updatedAt: "2026-09-06", // R2-11, lot 4
     extended: {
       fr: "L'onboarding est le chemin, l'activation est la destination — les deux se confondent souvent à tort. L'erreur la plus fréquente est de tout expliquer d'un coup dès la première visite plutôt que de révéler les choses progressivement, au moment où l'utilisateur en a réellement besoin. Un bon onboarding se mesure à une seule question : combien de temps sépare l'inscription du moment « aha » — plus ce délai est court, mieux le parcours est calibré.",
@@ -182,7 +162,6 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   "upsell-cross-sell": {
     ...GLOSSARY_TERMS["upsell-cross-sell"],
-    deep: GLOSSARY_DEEP["upsell-cross-sell"],
     updatedAt: "2026-09-06", // R2-11, lot 5
     extended: {
       fr: "Les deux sont des leviers d'expansion revenue — la manière la plus fiable de faire du « churn négatif » (voir Churn), parce qu'il est presque toujours moins cher de vendre plus à un client déjà convaincu que d'en acquérir un nouveau. Le timing compte plus que la technique : proposer un upsell avant que le client n'ait atteint son moment « aha » sur l'offre de base se lit comme de l'agressivité commerciale, pas comme de la valeur ajoutée.",
@@ -192,7 +171,6 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   "growth-loop": {
     ...GLOSSARY_TERMS["growth-loop"],
-    deep: GLOSSARY_DEEP["growth-loop"],
     updatedAt: "2026-09-06", // R2-11, lot 5
     extended: {
       fr: "Un entonnoir classique se termine à la conversion ; une boucle de croissance, elle, réinjecte la sortie comme entrée du cycle suivant. C'est exactement le mécanisme de ce test : chaque résultat partagé (voir Referral) amène potentiellement un nouveau visiteur, qui complète à son tour son propre test et le partage. On distingue généralement trois familles de boucles : les boucles de contenu (le contenu généré attire du trafic organique), les boucles virales (le partage amène directement de nouveaux utilisateurs) et les boucles payantes (le revenu généré finance l'acquisition suivante).",
@@ -202,7 +180,6 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   "north-star-metric": {
     ...GLOSSARY_TERMS["north-star-metric"],
-    deep: GLOSSARY_DEEP["north-star-metric"],
     updatedAt: "2026-09-09", // R2-11, lot 5 — the "doubling test" paragraph reworded after review
     extended: {
       fr: "Les exemples les plus connus : Airbnb a longtemps suivi les « nuits réservées » plutôt que le nombre d'inscriptions, Facebook a suivi les utilisateurs actifs mensuels plutôt que le nombre de comptes créés. Le point commun : dans les deux cas, la métrique capture de la valeur réellement délivrée, pas une action facile à gonfler artificiellement. Une bonne North Star Metric doit répondre à une question simple : si elle grimpe sans que rien d'autre ne bouge, est-ce que l'entreprise va vraiment mieux ? Si la réponse n'est pas clairement oui, ce n'est pas la bonne métrique.",
@@ -216,8 +193,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   // à relire ligne à ligne. TODO: à relire.
   "cac-payback": {
     ...GLOSSARY_TERMS["cac-payback"],
-    deep: GLOSSARY_DEEP["cac-payback"],
-    updatedAt: "2026-09-14", // GROWTH-PLAN.md 2.2, lot 1 — created
+    updatedAt: "2026-09-23", // bon à tirer nº5 — réécritures demandées par Antoine
     extended: {
       fr: "Le ratio LTV:CAC est la métrique d'acquisition la plus citée ; le CAC payback est celle qui contraint réellement une entreprise qui n'a pas trois ans de trésorerie devant elle. La différence tient en un mot : le LTV:CAC est une prévision, construite sur un taux de churn projeté des années en avant — le chiffre le moins fiable que possède une jeune entreprise —, alors que le payback est une date, calculée uniquement à partir de chiffres déjà connus. Les deux se calculent depuis les mêmes trois données et peuvent parfaitement se contredire : une économie unitaire excellente sur cinq ans ne dit rien sur la capacité à financer le mois prochain. Quand ils divergent, c'est la date que le compte en banque respecte.",
       en: "The LTV:CAC ratio is the most-quoted acquisition metric; CAC payback is the one that actually binds a company without three years of cash in the bank. The difference comes down to one word: LTV:CAC is a forecast, built on a churn rate projected years out — the least reliable number a young company owns — while payback is a date, computed only from figures you already have. Both come from the same three inputs and can flatly contradict each other: excellent unit economics over five years say nothing about your ability to fund next month. When they disagree, the date is the one your bank account respects.",
@@ -226,8 +202,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   "nrr-grr": {
     ...GLOSSARY_TERMS["nrr-grr"],
-    deep: GLOSSARY_DEEP["nrr-grr"],
-    updatedAt: "2026-09-14", // GROWTH-PLAN.md 2.2, lot 1 — created
+    updatedAt: "2026-09-23", // bon à tirer nº5 — réécritures demandées par Antoine
     extended: {
       fr: "Ces deux taux ne s'écrivent presque jamais l'un sans l'autre, et c'est volontaire : la NRR est le chiffre qu'on met dans un deck, la GRR celui qui dit ce que le produit retient vraiment. La GRR ne compte que les pertes — résiliations et rétrogradations — donc elle ne peut jamais dépasser 100 % ; la NRR y ajoute l'expansion et le peut. L'écart entre les deux est exactement ce que l'expansion achète. Une NRR à 105 % avec une GRR à 90 % décrit une base qui fuit pendant qu'une poignée de gros comptes paie pour ceux qui partent : c'est tenable quelques trimestres, jamais quelques années, et ça se découvre en général au moment où le plus gros compte cesse de grandir. Lire les deux ensemble est le seul moyen de voir venir cette situation.",
       en: "These two rates are almost never written one without the other, and that's deliberate: NRR is the figure that goes in a deck, GRR is the one that says what the product actually keeps. GRR counts only losses — cancellations and downgrades — so it can never exceed 100%; NRR adds expansion on top and can. The gap between them is exactly what expansion buys. An NRR of 105% next to a GRR of 90% describes a leaking base where a handful of large accounts pays for the ones walking out: sustainable for a few quarters, never for a few years, and usually discovered the moment the biggest account stops growing. Reading both together is the only way to see that coming.",
@@ -236,7 +211,6 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   "cohort-analysis": {
     ...GLOSSARY_TERMS["cohort-analysis"],
-    deep: GLOSSARY_DEEP["cohort-analysis"],
     updatedAt: "2026-09-14", // GROWTH-PLAN.md 2.2, lot 1 — created
     extended: {
       fr: "L'analyse de cohortes ne demande aucune nouvelle mesure : ce sont les mêmes événements, groupés par date d'arrivée au lieu d'être moyennés ensemble. Ce simple regroupement change pourtant ce qu'on peut lire, parce qu'une moyenne globale mélange des groupes qui vont parfois en sens opposés — deux cohortes au même taux à trente jours peuvent finir l'une à 21 %, l'autre à 6 %. Ce qu'on cherche sur une courbe de cohorte n'est pas sa hauteur mais sa forme : une courbe qui finit par s'aplatir dit qu'une part de chaque cohorte a trouvé une raison durable de rester, et c'est le signal mesurable le plus proche de l'adéquation produit-marché. Une courbe encore en chute à la sixième période décrit un produit qui loue ses utilisateurs au lieu de les accumuler.",
@@ -247,7 +221,6 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   // ——— wave 2.2, lot 2 (2026-09-14) — premier jet, TODO: à relire ———
   "dau-mau": {
     ...GLOSSARY_TERMS["dau-mau"],
-    deep: GLOSSARY_DEEP["dau-mau"],
     updatedAt: "2026-09-14", // GROWTH-PLAN.md 2.2, lot 2 — created
     extended: {
       fr: "La seule chose à retenir de ce ratio est qu'il se traduit : multiplié par 30, il donne le nombre de jours par mois où un utilisateur moyen revient. Un DAU/MAU de 0,2, ce sont six jours sur trente — dit comme ça, une équipe sait immédiatement si c'est bon, parce qu'elle sait à quoi sert son produit. C'est aussi ce qui rend le seuil des 20 % souvent cité à peu près inutile hors de son contexte d'origine, les produits sociaux grand public : un outil de paie à 0,05 n'échoue pas, il est utilisé quand la paie tombe. Deux pièges à connaître. Le ratio est une moyenne sur une population souvent bimodale, donc il décrit rarement quelqu'un de réel. Et il monte mécaniquement quand les utilisateurs occasionnels partent — d'où la règle de ne jamais le lire sans le nombre de MAU à côté.",
@@ -257,18 +230,16 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   "time-to-value": {
     ...GLOSSARY_TERMS["time-to-value"],
-    deep: GLOSSARY_DEEP["time-to-value"],
-    updatedAt: "2026-09-14", // GROWTH-PLAN.md 2.2, lot 2 — created
+    updatedAt: "2026-09-23", // bon à tirer nº5 — réécritures demandées par Antoine
     extended: {
-      fr: "Cette métrique a un bord dangereux qu'il faut connaître avant de la piloter : calculée sur les seuls utilisateurs qui finissent par activer, elle s'améliore quand les plus lents abandonnent. Le chiffre progresse précisément parce que le produit a régressé, et rien à l'intérieur ne le montre. D'où deux règles qui ne coûtent rien — utiliser la médiane plutôt que la moyenne, qu'une poignée de traînards suffit à tripler, et publier systématiquement le taux d'activation juste à côté. L'autre confusion fréquente est avec la durée de l'onboarding : ce sont deux choses différentes, et l'écart entre elles est souvent la trouvaille. Un parcours bouclé en deux minutes peut très bien avoir un time to value de six jours si la valeur n'arrive qu'une fois qu'un collègue a validé une intégration — auquel cas polir l'interface ne changera rien.",
+      fr: "Cette métrique a un piège qu'il faut connaître avant d'en faire un indicateur de pilotage : calculée sur les seuls utilisateurs qui finissent par activer, elle s'améliore quand les plus lents abandonnent. Le chiffre progresse précisément parce que le produit a régressé, et rien à l'intérieur ne le montre. D'où deux règles qui ne coûtent rien — utiliser la médiane plutôt que la moyenne, qu'une poignée de traînards suffit à tripler, et publier systématiquement le taux d'activation juste à côté. L'autre confusion fréquente est avec la durée de l'onboarding : ce sont deux choses différentes, et l'écart entre elles est souvent la trouvaille. Un parcours bouclé en deux minutes peut très bien avoir un time to value de six jours si la valeur n'arrive qu'une fois qu'un collègue a validé une intégration — auquel cas polir l'interface ne changera rien.",
       en: "This metric has a dangerous edge worth knowing before you steer by it: computed on the users who eventually activate, it improves when the slowest ones give up. The figure gets better precisely because the product got worse, and nothing inside it shows that. Hence two rules that cost nothing — use the median rather than the mean, which a handful of stragglers is enough to triple, and always publish the activation rate right beside it. The other common confusion is with onboarding length: they are different things, and the gap between them is often the finding. A flow finished in two minutes can still have a six-day time to value if value only arrives once a colleague approves an integration — in which case polishing the interface changes nothing.",
     },
     related: ["onboarding", "aha-moment", "activation"],
   },
   pql: {
     ...GLOSSARY_TERMS.pql,
-    deep: GLOSSARY_DEEP.pql,
-    updatedAt: "2026-09-14", // GROWTH-PLAN.md 2.2, lot 2 — created
+    updatedAt: "2026-09-23", // bon à tirer nº5 — réécritures demandées par Antoine
     extended: {
       fr: "Un PQL qualifie sur un comportement dans le produit plutôt que sur une taille d'entreprise ou un intitulé de poste — c'est toute la différence avec un MQL, un lead qualifié par le marketing, et la raison pour laquelle il prédit mieux : la personne a déjà fait ce qu'une démo aurait essayé de la convaincre de faire. La partie que la plupart des définitions ratent est qu'un bon seuil doit tenir sur deux axes, pas un. Le lift — à quel point le groupe qualifié convertit mieux — est celui qu'on mesure toujours ; la taille de la liste est celui qu'on oublie, et deux seuils au lift identique peuvent produire l'un une dizaine de contacts par jour à forte densité, l'autre une liste de diffusion déguisée. Enfin, un seuil se périme : quand le produit change, le comportement qui était un signal fort devient banal, et le recalculer chaque trimestre est de l'entretien normal.",
       en: "A PQL qualifies on a behaviour inside the product rather than on a company size or a job title — that's the whole difference from an MQL, a marketing-qualified lead, and the reason it predicts better: the person has already done what a demo would have tried to convince them to do. The part most definitions miss is that a good threshold has to hold on two axes, not one. Lift — how much better the qualified group converts — is the one everybody measures; list size is the one everybody forgets, and two thresholds with identical lift can produce, respectively, about ten high-density contacts a day and a mailing list in disguise. Finally, a threshold expires: when the product changes, the behaviour that used to be a strong signal becomes routine, and re-deriving it quarterly is ordinary maintenance.",
@@ -278,8 +249,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   // ——— wave 2.2, lot 3 (2026-09-14) — clôt la vague. Premier jet, TODO: à relire ———
   "product-led-growth": {
     ...GLOSSARY_TERMS["product-led-growth"],
-    deep: GLOSSARY_DEEP["product-led-growth"],
-    updatedAt: "2026-09-14", // GROWTH-PLAN.md 2.2, lot 3 — created
+    updatedAt: "2026-09-23", // bon à tirer nº5 — réécritures demandées par Antoine
     extended: {
       fr: "Le product-led growth est un modèle de distribution, pas un gage de qualité : il fonctionne là où un produit peut délivrer de la valeur avant une conversation, ce qui est une propriété du produit et de son acheteur, pas de l'envie qu'en a l'équipe. D'où l'intérêt d'un test mesurable plutôt que d'une revendication — la part de clients arrivés au payant sans avoir parlé à personne. Et de la calculer deux fois, en nombre de clients et en revenu, parce que l'écart entre les deux est presque toujours la trouvaille : une entreprise peut être à 25 % en clients et à 3 % en revenu, auquel cas le modèle existe mais ne paie encore rien. Ni l'un ni l'autre chiffre ne rend l'entreprise bonne ou mauvaise ; ils tranchent seulement laquelle des deux elle est, ce qu'il faut savoir avant de décider où va la prochaine année d'ingénierie.",
       en: "Product-led growth is a distribution model, not a quality bar: it works where a product can deliver value before a conversation, which is a property of the product and of who buys it rather than of how much the team wants it to be true. Hence the value of a measurable test instead of a claim — the share of customers who reached paid without talking to anyone. And of computing it twice, by customer count and by revenue, because the gap between the two is almost always the finding: a company can be at 25% by customers and 3% by revenue, in which case the motion exists but is not yet paying for anything. Neither figure makes the company good or bad; they only settle which of the two it is, which has to be known before deciding where the next year of engineering goes.",
@@ -288,8 +258,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   arpu: {
     ...GLOSSARY_TERMS.arpu,
-    deep: GLOSSARY_DEEP.arpu,
-    updatedAt: "2026-09-14", // GROWTH-PLAN.md 2.2, lot 3 — created
+    updatedAt: "2026-09-23", // bon à tirer nº5 — réécritures demandées par Antoine
     extended: {
       fr: "La confusion à évacuer avant tout le reste est celle avec l'ARPPU, le revenu moyen par utilisateur **payant**. Sur un produit freemium, les deux peuvent être vingt-cinq fois différents — 0,80 € et 20 € le même mois — et les deux se font appeler « ARPU » dans des documents différents la même semaine. Le bon choix dépend de la décision : l'ARPU pour juger une dépense d'acquisition, puisqu'on paie pour des inscriptions dont une partie seulement convertit ; l'ARPPU pour juger un changement de prix, qui ne touche pas les utilisateurs gratuits. La seconde chose à savoir est qu'un ARPU en hausse n'est pas une victoire en soi : perds tes plus petits utilisateurs et la moyenne de ceux qui restent monte sans qu'un euro ait été ajouté. C'est le même piège mécanique que le ratio DAU/MAU, et le même remède — publier le dénominateur à côté.",
       en: "The confusion to clear before anything else is with ARPPU, average revenue per **paying** user. On a freemium product the two can differ twenty-five fold — €0.80 and €20 in the same month — and both get called \"ARPU\", in different decks, in the same week. Which one is right depends on the decision: ARPU for judging acquisition spend, since you pay for sign-ups and only some convert; ARPPU for judging a price change, which free users are unaffected by. The second thing to know is that a rising ARPU is not a win in itself: lose your smallest users and the average of those remaining climbs without a euro being added. It is the same mechanical trap as the DAU/MAU ratio, and it has the same cure — publish the denominator beside it.",
@@ -298,7 +267,6 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   nps: {
     ...GLOSSARY_TERMS.nps,
-    deep: GLOSSARY_DEEP.nps,
     updatedAt: "2026-09-14", // GROWTH-PLAN.md 2.2, lot 3 — created
     extended: {
       fr: "Le NPS mesure une intention déclarée, jamais un parrainage réalisé — c'est la distinction qui compte le plus ici, parce que c'est celle qui se perd le plus souvent. Quelqu'un peut répondre 10 et ne jamais recommander personne : l'acte demande une occasion, un mécanisme et une raison, et un produit peut très bien scorer sans fournir aucun des trois. Deux autres limites valent d'être connues avant de piloter dessus. Le score écrase onze réponses en trois paniers, donc deux distributions opposées peuvent donner le même chiffre — 45/35/20 et 30/65/5 valent toutes deux +25, et appellent des décisions contraires. Et il est calculé sur ceux qui répondent, or les utilisateurs désengagés répondent le moins : un score sur 10 % de la base décrit les 10 % qui font encore attention. D'où la règle, qui ne coûte rien : publier le taux de réponse et les trois pourcentages à côté du chiffre.",

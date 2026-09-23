@@ -4,8 +4,10 @@ import { SiteFooter } from "@/components/brand/SiteFooter";
 import { ContentHeader } from "@/components/brand/ContentHeader";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
-import { GLOSSARY } from "@/content/glossary";
-import { breadcrumbSchema, CRUMBS, definedTermSetSchema, JsonLd } from "@/lib/seo/jsonld";
+// `glossary-terms` and not `glossary`: the index shows only the term and its
+// short definition. The long-form copy belongs to the term pages (R2-14).
+import { GLOSSARY_TERMS } from "@/content/glossary-terms";
+import { breadcrumbSchema, definedTermSetSchema, JsonLd } from "@/lib/seo/jsonld";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { contentMetadata } from "@/lib/i18n/meta";
@@ -42,7 +44,7 @@ export default async function GlossaryIndexPage({ params }: PageProps) {
     <>
       {/* REVIEW-02.md R2-15: the glossary as one vocabulary, and its place in the site. */}
       <JsonLd data={definedTermSetSchema(locale)} />
-      <JsonLd data={breadcrumbSchema(locale, [CRUMBS.glossary(locale)])} />
+      <JsonLd data={breadcrumbSchema(locale, [{ name: tc(UI_STRINGS.glossaryPage.indexTitle, locale), path: "/glossary" }])} />
       <ContentHeader locale={locale} path="/glossary" />
 
       <main className={styles.main}>
@@ -52,7 +54,7 @@ export default async function GlossaryIndexPage({ params }: PageProps) {
         </div>
 
         <div className={styles.list}>
-          {Object.entries(GLOSSARY).map(([id, entry]) => (
+          {Object.entries(GLOSSARY_TERMS).map(([id, entry]) => (
             <Link key={id} href={localePath(locale, `/glossary/${id}`)} className={styles.itemLink}>
               <Card elevation="flat" tone="paper" className={styles.item}>
                 <h2 className={styles.term}>{tc(entry.term, locale)}</h2>

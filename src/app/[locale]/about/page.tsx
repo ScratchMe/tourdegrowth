@@ -12,7 +12,7 @@ import { PROFILE_CLICK_DETAILS } from "@/lib/analytics/goatcounter";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { contentMetadata } from "@/lib/i18n/meta";
-import { aboutPageSchema, breadcrumbSchema, CRUMBS, JsonLd } from "@/lib/seo/jsonld";
+import { aboutPageSchema, breadcrumbSchema, JsonLd } from "@/lib/seo/jsonld";
 import { PILLARS } from "@/lib/scoring/pillars";
 import styles from "../how-it-works/page.module.css";
 import own from "./page.module.css";
@@ -46,7 +46,7 @@ export default async function AboutPage({ params }: PageProps) {
   return (
     <>
       <JsonLd data={aboutPageSchema(locale)} />
-      <JsonLd data={breadcrumbSchema(locale, [CRUMBS.about(locale)])} />
+      <JsonLd data={breadcrumbSchema(locale, [{ name: tc(ABOUT.title, locale), path: "/about" }])} />
       <ContentHeader locale={locale} path="/about" />
 
       <main className={styles.main}>

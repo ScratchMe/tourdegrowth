@@ -2,6 +2,12 @@
 /.next/
 /out/
 
+# Vercel CLI Build Output (`vercel build`, run offline to measure function
+# weight — see CLAUDE.md). It is build output like /.next/, and its minified
+# bundles also make ESLint report ~2,300 phantom problems if it is left in
+# the tree, so it is ignored by eslint.config.mjs too.
+/.vercel/
+
 # Dependencies
 /node_modules/
 

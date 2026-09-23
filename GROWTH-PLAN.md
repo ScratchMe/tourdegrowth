@@ -81,18 +81,27 @@ pitch ne le nomme ni ne renvoie vers le CV.
   que des articles explicatifs, aucun outil ; « growth audit template » ne
   renvoie que des audits de site web ou de réseaux sociaux. Ce sont deux
   portes ouvertes.
-- **Usage** : `stats/global` valait `count: 4` début septembre ; le chiffre
-  du jour est sur `/admin/stats`, que je ne peux pas lire d'ici (mot de
-  passe dans Vercel). **Première action de la semaine : relever ce
-  tableau** (analyses, partages, K, `take_own_tour`), pour avoir un avant.
-- **GitHub** : dépôt public, AGPL, **1 étoile, aucune description, aucun
-  topic, homepage `tourdegrowth.vercel.app`** (l'ancienne URL). C'est un
-  canal anonyme par construction, et il est vide.
+- **Usage** : le tableau de bord est lisible par la session depuis le
+  2026-09-14 (`stats.yml`, scope `admin`), et il a été relevé le jour même —
+  ligne de départ acquise. **Les chiffres ne sont volontairement écrits
+  nulle part dans ce dépôt**, qui est public : c'est précisément ce que le
+  chiffrement du rapport existe pour éviter. Ils se relèvent à la demande
+  par un run du workflow, et « l'avant » se recalcule de toute façon à
+  partir des dates (chaque soumission porte son `createdAt`, GoatCounter
+  garde son historique).
+- **GitHub** : dépôt public, AGPL, 1 étoile. Description, 9 topics et
+  homepage sur `tourdegrowth.com` posés par Antoine le 2026-09-17 (elle
+  pointait encore sur `tourdegrowth.vercel.app`), vérifiés depuis GitHub.
+  C'est un canal anonyme par construction, et il est maintenant renseigné —
+  reste à voir s'il amène quoi que ce soit.
 - **Le produit est prêt** : boucle `?ref=` instrumentée, carte de partage
-  avec l'action sur l'image, K-factor honnête, 42 URL indexables en deux
-  langues, `/metrics` construite et fermée sous 50 soumissions.
-- **Ce qui existe déjà pour mesurer** : `scripts/utm-link.mjs` (la
-  nomenclature UTM, à mettre à jour — elle contient `linkedin`), GoatCounter
+  avec l'action sur l'image, K-factor honnête, **72 URL indexables** en deux
+  langues (42 le 13/09 : neuf termes de glossaire nets, deux pages « porte
+  ouverte » et le cluster « AARRR vs X » sont arrivés depuis), `/metrics`
+  construite et fermée sous 50 soumissions.
+- **Ce qui existe déjà pour mesurer** : `scripts/utm-channels.mjs` (la
+  nomenclature UTM, refaite le 2026-09-13 — `linkedin` y est désormais dans
+  `EXCLUDED`, et un test refuse tout canal que ce plan exclut), GoatCounter
   (referrers + campagnes), `/admin/stats` (funnel complet).
 
 ---

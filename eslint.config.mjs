@@ -36,6 +36,7 @@ const config = [
      */
     ignores: [
       ".next/**",
+      ".vercel/**",
       "node_modules/**",
       "next-env.d.ts",
       "public/**",
