@@ -224,7 +224,7 @@ const RARRA: Comparison = {
       body: [
         {
           en: "Every criticism RARRA makes of AARRR is a criticism of how AARRR gets used: as a to-do list read top to bottom, which puts acquisition first by accident of the acronym. The original framing never claimed to be a work order — it described the path, which really does start with someone finding you. Read as a description, AARRR says nothing about where to spend Monday.",
-          fr: "Toutes les critiques que RARRA adresse à AARRR visent la façon dont AARRR est utilisé : comme une liste de tâches lue de haut en bas, ce qui met l'acquisition en premier par accident de l'acronyme. Le cadre d'origine n'a jamais prétendu être un ordre de travail — il décrivait le chemin, qui commence effectivement par quelqu'un qui te trouve. Lu comme une description, AARRR ne dit rien de l'emploi du lundi matin.",
+          fr: "Toutes les critiques que RARRA adresse à AARRR visent la façon dont AARRR est utilisé : comme une liste de tâches lue de haut en bas, ce qui met l'acquisition en premier par accident de l'acronyme. Le cadre d'origine n'a jamais prétendu être un ordre de travail — il décrivait le chemin, qui commence effectivement par quelqu'un qui te trouve. Lu comme une description, AARRR ne dit rien de ce qu'il faut faire lundi matin.",
         },
         {
           en: "That is why the two cannot really contradict each other. RARRA is a claim about priority dressed as a claim about structure, and the structure it borrows is the one it is arguing with. Anyone who says they have switched from AARRR to RARRA has changed what they work on first, not what they measure.",
@@ -241,7 +241,7 @@ const RARRA: Comparison = {
         },
         {
           en: "It is weakest at the very beginning, and in anything sold rather than self-served. You cannot measure retention on a cohort of zero, and a product with fifty users has a retention curve made mostly of noise — the earlier honest signal there is activation. And a tool sold on an annual contract produces its first real renewal number a year after you needed it; starting with retention there means starting with a number you will not have for four quarters.",
-          fr: "Il est le plus faible tout au début, et dans tout ce qui se vend plutôt que de se servir seul. On ne mesure pas une rétention sur une cohorte de zéro, et un produit à cinquante utilisateurs a une courbe de rétention faite surtout de bruit — le signal honnête plus tôt, là, c'est l'activation. Et un outil vendu en contrat annuel ne produit son premier vrai chiffre de renouvellement qu'un an après le moment où il aurait servi ; commencer par la rétention y revient à commencer par un chiffre qu'on n'aura pas avant quatre trimestres.",
+          fr: "L'argument est le plus faible tout au début, et dans tout ce qui se vend plutôt que de se distribuer en self-serve. On ne mesure pas une rétention sur une cohorte de zéro, et un produit à cinquante utilisateurs a une courbe de rétention faite surtout de bruit — le signal honnête plus tôt, là, c'est l'activation. Et un outil vendu en contrat annuel ne produit son premier vrai chiffre de renouvellement qu'un an après le moment où il aurait servi ; commencer par la rétention y revient à commencer par un chiffre qu'on n'aura pas avant quatre trimestres.",
         },
       ],
     },

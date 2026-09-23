@@ -323,8 +323,8 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         {
           symbol: t("CAC", "CAC"),
           meaning: t(
-            "The fully loaded cost of winning one customer — ads, tools, agencies, content and the salaries of the people selling and marketing. The CAC page walks through why leaving the salaries out is the most common mistake.",
-            "Le coût complet d'acquisition d'un client — publicité, outils, agences, contenu et les salaires des personnes qui vendent et font le marketing. La page CAC détaille pourquoi oublier les salaires est l'erreur la plus fréquente.",
+            "The fully loaded cost of winning one customer — ads, tools, agencies, content and the salaries of the people selling and marketing. Leaving the salaries out is the most common mistake.",
+            "Le coût complet d'acquisition d'un client — publicité, outils, agences, contenu et les salaires des personnes qui vendent et font le marketing. Oublier les salaires est l'erreur la plus fréquente.",
           ),
         },
         {
@@ -351,8 +351,8 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       title: t("The same €500 customer, followed forward", "Le même client à 500 €, suivi dans le temps"),
       steps: [
         t(
-          "CAC of €500 — the figure the CAC page arrives at: €60,000 of quarterly spend for 120 new customers.",
-          "CAC de 500 € — le chiffre auquel arrive la page CAC : 60 000 € de dépenses trimestrielles pour 120 nouveaux clients.",
+          "CAC of €500: €60,000 of quarterly spend for 120 new customers.",
+          "CAC de 500 € : 60 000 € de dépenses trimestrielles pour 120 nouveaux clients.",
         ),
         t(
           "The customer pays €50 a month at 80% gross margin, so €40 a month actually comes back. Payback = 500 ÷ 40 = 12.5 months.",
@@ -607,8 +607,8 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       title: t("One month, read twice", "Un mois, lu deux fois"),
       steps: [
         t(
-          "Start of month: 400 customers, €20,000 MRR — the same month the churn and revenue pages walk through. During it: 12 cancel (−€600), 8 downgrade (−€400), 15 upgrade (+€900).",
-          "Début de mois : 400 clients, 20 000 € de MRR — le même mois que celui des pages churn et revenu. Pendant le mois : 12 résilient (−600 €), 8 rétrogradent (−400 €), 15 montent en gamme (+900 €).",
+          "Start of month: 400 customers, €20,000 MRR. During it: 12 cancel (−€600), 8 downgrade (−€400), 15 upgrade (+€900).",
+          "Début de mois : 400 clients, 20 000 € de MRR. Pendant le mois : 12 résilient (−600 €), 8 rétrogradent (−400 €), 15 montent en gamme (+900 €).",
         ),
         t(
           "GRR = (20,000 − 400 − 600) ÷ 20,000 = 95%. Five points of the base leaked, and nothing in this figure can ever offset that.",
@@ -619,8 +619,8 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
           "NRR = (20 000 + 900 − 400 − 600) ÷ 20 000 = 99,5 %. L'expansion a refermé quatre points et demi sur les cinq.",
         ),
         t(
-          "The upsell playbook on the expansion page takes that month's expansion from €900 to €1,080. NRR becomes (20,000 + 1,080 − 400 − 600) ÷ 20,000 = 100.4% — above the line at last. GRR is still 95%: not one customer was saved.",
-          "Le playbook d'expansion de la page upsell fait passer l'expansion de ce mois de 900 € à 1 080 €. La NRR devient (20 000 + 1 080 − 400 − 600) ÷ 20 000 = 100,4 % — au-dessus de la barre, enfin. La GRR est toujours de 95 % : pas un client n'a été sauvé.",
+          "An expansion playbook — the upgrade offered the moment an account hits its seat limit, instead of waiting for it to find the pricing page — takes that month's expansion from €900 to €1,080. NRR becomes (20,000 + 1,080 − 400 − 600) ÷ 20,000 = 100.4% — above the line at last. GRR is still 95%: not one customer was saved.",
+          "Un playbook d'expansion — la montée en gamme proposée au moment où un compte atteint sa limite de sièges, au lieu d'attendre qu'il trouve la page de tarifs — fait passer l'expansion de ce mois de 900 € à 1 080 €. La NRR devient (20 000 + 1 080 − 400 − 600) ÷ 20 000 = 100,4 % — au-dessus de la barre, enfin. La GRR est toujours de 95 % : pas un client n'a été sauvé.",
         ),
       ],
       takeaway: t(
@@ -2130,7 +2130,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
           symbol: t("Users who reached it", "Ceux qui l'ont atteint"),
           meaning: t(
             "Users who never activate have no time to measure, so they are excluded by construction. That exclusion is the metric's dangerous edge, and the reason the activation rate has to be published next to it.",
-            "Ceux qui n'activent jamais n'ont pas de délai à mesurer, donc ils sont exclus par construction. Cette exclusion est le bord dangereux de la métrique, et la raison pour laquelle le taux d'activation doit être publié à côté.",
+            "Ceux qui n'activent jamais n'ont pas de délai à mesurer, donc ils sont exclus par construction. Cette exclusion est précisément ce qui rend la métrique dangereuse, et la raison pour laquelle le taux d'activation doit être publié à côté.",
           ),
         },
       ],
@@ -2407,8 +2407,8 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
           "200 nouveaux clients sur un trimestre. 150 ont réservé une démo depuis la page de tarifs ; 50 se sont inscrits et ont payé sans jamais parler à personne.",
         ),
         t(
-          "Self-serve share by customer count: 50 ÷ 200 = 25%. Already not what the pitch deck says, but defensible as a motion being built.",
-          "Part self-serve en nombre de clients : 50 ÷ 200 = 25 %. Déjà pas ce que dit le deck, mais défendable comme un modèle en construction.",
+          "Self-serve share by customer count: 50 ÷ 200 = 25%. Already less product-led than the company describes itself, but defensible as a motion being built.",
+          "Part self-serve en nombre de clients : 50 ÷ 200 = 25 %. Déjà moins product-led que l'entreprise ne se décrit, mais défendable comme un modèle en construction.",
         ),
         t(
           "Now by revenue. The 50 self-serve customers average €40 a month (€2,000 MRR); the 150 sales-led average €400 (€60,000 MRR). Self-serve share of revenue: 2,000 ÷ 62,000 ≈ 3%.",
@@ -2427,7 +2427,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
     benchmark: [
       t(
         "The pattern most often cited is that product-led companies show both a lower acquisition cost and a lower average contract value. Both, which is why neither figure judges the model on its own: the number that does is CAC payback, where the two effects meet.",
-        "Le schéma le plus souvent cité est que les entreprises product-led affichent à la fois un coût d'acquisition plus bas et un panier moyen plus bas. Les deux, et c'est pourquoi aucun des deux chiffres ne juge le modèle seul : celui qui le fait est le CAC payback, là où les deux effets se rencontrent.",
+        "Le schéma le plus souvent cité est que les entreprises product-led affichent à la fois un coût d'acquisition plus bas et un panier moyen plus bas. Les deux baissent ensemble, et c'est pourquoi aucun des deux chiffres ne juge le modèle seul : celui qui le fait est le CAC payback, là où les deux effets se rencontrent.",
       ),
       t(
         "The model needs a product whose value is visible before a conversation and a buyer who is allowed to buy alone. Sell something that requires a security review and a procurement process and no amount of onboarding polish makes the motion self-serve — that is a constraint of the market, not a failure of execution.",
@@ -2468,7 +2468,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         question: t("How do I know if I am actually product-led?", "Comment savoir si je suis réellement product-led ?"),
         answer: t(
           "Compute the self-serve share by revenue for last quarter. Not by sign-ups, not by customer count — by revenue. Most companies that describe themselves this way find a number well under a third, which does not make them wrong to aim for it, only wrong to plan as though they had arrived.",
-          "Calcule la part self-serve en revenu sur le dernier trimestre. Pas en inscriptions, pas en nombre de clients — en revenu. La plupart des entreprises qui se décrivent ainsi trouvent un chiffre bien sous le tiers, ce qui ne leur donne pas tort de viser le modèle, seulement de planifier comme si elles y étaient.",
+          "Calcule la part self-serve en revenu sur le dernier trimestre. Pas en inscriptions, pas en nombre de clients — en revenu. La plupart des entreprises qui se décrivent ainsi trouvent un chiffre bien sous le tiers, ce qui ne leur donne pas tort de viser le modèle, seulement de bâtir leurs plans comme si elles y étaient déjà.",
         ),
       },
       {
@@ -2652,8 +2652,8 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         },
       ],
       note: t(
-        "ARPU is a rate, LTV is a total: LTV ≈ ARPU × gross margin × average lifetime. A customer at €50 a month with an 80% margin who stays 33 months is worth about €1,320 — the figure the CAC payback page uses, built from exactly this number.",
-        "L'ARPU est un taux, la LTV est un total : LTV ≈ ARPU × marge brute × durée de vie moyenne. Un client à 50 € par mois avec 80 % de marge qui reste 33 mois vaut environ 1 320 € — le chiffre qu'utilise la page CAC payback, construit précisément à partir de celui-ci.",
+        "ARPU is a rate, LTV is a total: LTV ≈ ARPU × gross margin × average lifetime. A customer at €50 a month with an 80% margin who stays 33 months is worth about €1,320 — a total built from exactly this rate.",
+        "L'ARPU est un taux, la LTV est un total : LTV ≈ ARPU × marge brute × durée de vie moyenne. Un client à 50 € par mois avec 80 % de marge qui reste 33 mois vaut environ 1 320 € — un total construit précisément à partir de ce taux.",
       ),
     },
     example: {
@@ -2972,8 +2972,8 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
     inTheTour: {
       questionId: "act-2",
       body: t(
-        "The Tour asks whether you know the percentage of users who reach your activation moment, for 20 points. A PQL threshold is that same measurement pointed at a commercial decision: both ask which behaviour separates the users who got it from the ones who did not, and a team that can answer 20 already owns most of the work. The order matters — defining a PQL before knowing your activation event usually produces a threshold chosen for how easy it is to query, which is exactly the mistake the activation rate page warns about.",
-        "Le Tour demande si tu connais le pourcentage d'utilisateurs qui atteignent ton moment d'activation, pour 20 points. Un seuil de PQL est cette même mesure pointée vers une décision commerciale : les deux cherchent quel comportement sépare ceux qui ont compris de ceux qui n'ont pas compris, et une équipe qui répond 20 a déjà fait l'essentiel du travail. L'ordre compte — définir un PQL avant de connaître son événement d'activation produit en général un seuil choisi pour sa facilité d'extraction, exactement l'erreur contre laquelle la page sur le taux d'activation met en garde.",
+        "The Tour asks whether you know the percentage of users who reach your activation moment, for 20 points. A PQL threshold is that same measurement pointed at a commercial decision: both ask which behaviour separates the users who got it from the ones who did not, and a team that can answer 20 already owns most of the work. The order matters — defining a PQL before knowing your activation event usually produces a threshold chosen for how easy it is to query rather than for what it predicts.",
+        "Le Tour demande si tu connais le pourcentage d'utilisateurs qui atteignent ton moment d'activation, pour 20 points. Un seuil de PQL est cette même mesure pointée vers une décision commerciale : les deux cherchent quel comportement sépare ceux qui ont compris de ceux qui n'ont pas compris, et une équipe qui répond 20 a déjà fait l'essentiel du travail. L'ordre compte — définir un PQL avant de connaître son événement d'activation produit en général un seuil choisi pour sa facilité d'extraction plutôt que pour ce qu'il prédit.",
       ),
     },
     faq: [

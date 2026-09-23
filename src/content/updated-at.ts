@@ -19,7 +19,7 @@ export const CONTENT_UPDATED_AT: Record<string, string> = {
   "/startup-growth-diagnostic": "2026-09-14", // created (GROWTH-PLAN.md wave 2.1)
   // Le cluster « frameworks comparés » (GROWTH-PLAN.md vague 2.3).
   "/aarrr-vs-north-star-metric": "2026-09-14",
-  "/aarrr-vs-rarra": "2026-09-14",
+  "/aarrr-vs-rarra": "2026-09-23", // deux phrases FR réécrites (bon à tirer nº5)
   "/aarrr-vs-growth-loops": "2026-09-14",
   "/aarrr-vs-okr": "2026-09-14",
 };
