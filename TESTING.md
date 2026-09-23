@@ -123,6 +123,31 @@ trois specs ; le retirer **seulement de l'enveloppe rendue côté serveur** en
 fait tomber deux — les deux lectures HTTP — pendant que la spec DOM passe.
 C'est exactement la distinction que les specs revendiquent.
 
+### 2.3bis L'apostrophe française ne survit pas à un `grep` sur du HTML servi
+
+Coûté une conclusion fausse le 2026-09-23, en vérifiant en production que les
+renvois inter-pages étaient bien partis. React échappe l'apostrophe en
+`&#x27;` dans le HTML rendu côté serveur. Donc une sonde `grep -F` contenant
+une apostrophe **ne peut jamais matcher** une page servie — et comme une sonde
+« l'ancien texte est-il encore là ? » cherche une absence, elle rend un faux
+« c'est corrigé » pour la même raison qu'elle rendrait un faux « c'est
+présent » dans l'autre sens.
+
+Ça mord particulièrement ici parce que **la copie française est pleine
+d'apostrophes** : sur huit sondes d'un premier passage, les trois qui en
+portaient une n'ont rien prouvé, et la seule qui n'en avait pas a rapporté
+l'ancien texte encore présent — ce qui était vrai à cette seconde-là (le
+déploiement n'avait pas fini) mais que je n'aurais pas su distinguer d'un
+défaut.
+
+**Décoder avant de chercher** : `html.unescape(body)` en Python, jamais un
+`grep` direct sur le corps. Et sur chaque page, assurer **les deux sens** —
+le nouveau texte présent ET l'ancien absent : une page vide satisfait à elle
+seule toutes les assertions d'absence (c'est arrivé au même passage, une
+requête a rendu 0 octet et deux « ✓ ancien » trompeurs). D'où la règle
+compagne, qui est §2.1 sous une autre forme : **assert d'abord que le corps
+fait une taille plausible**, sinon la sonde prouve qu'elle n'a rien lu.
+
 ### 2.4 Une assertion se lit depuis la source de vérité
 
 Deux formes du même défaut :
