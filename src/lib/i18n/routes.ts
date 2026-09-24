@@ -37,6 +37,10 @@ const LOCALIZED_ROOTS = [
   "aarrr-vs-rarra",
   "aarrr-vs-growth-loops",
   "aarrr-vs-okr",
+  // Le moteur de croissance (engine spec D2) : l'adresse non préfixée
+  // redirige comme les autres, drapeau ouvert ou fermé — c'est la page
+  // localisée qui répond 404 tant que ENGINE_ENABLED est fermé.
+  "aarrr-funnel-template",
 ] as const;
 
 export function localePath(locale: Locale, path = "/"): string {
