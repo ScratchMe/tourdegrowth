@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { add, div, interval, isPoint, mapBounds, mul, point, scale, sub } from "../interval";
 
-// Engine spec §13.1 "interval". Non-vacuity: making `mul` return the naive
-// corners {lo: a.lo*b.lo, hi: a.hi*b.hi} fails the exhaustive-grid test only;
-// making `div` accept a divisor that touches 0 fails the division test only;
-// the point/inverted-bounds test passes in both cases.
+// Engine spec §13.1 "interval". Non-vacuity, measured: keeping only two of
+// `mul`'s four corners fails the grid test AND the division test (div is
+// built on mul); letting `div` accept a divisor whose bound is exactly 0
+// fails the division test only. The bounds/point test passes in both.
 
 const BOUNDS = [-3, -1, -0.5, 0, 0.5, 2, 7];
 const GRID = BOUNDS.flatMap((lo) => BOUNDS.filter((hi) => hi >= lo).map((hi) => ({ lo, hi })));

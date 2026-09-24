@@ -4,12 +4,11 @@ import { buildPeloton, chainOf } from "../peloton";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
 import { EXAMPLE_EXPECTED, estimated, exampleState, measured, missing, ratio, withEntry } from "./fixtures";
 
-// Engine spec §13.1 "peloton". Non-vacuity: turning an unknown column into
-// {lo: 0, hi: 0} fails "never 0" and the example (d30 must be null); dropping
-// the sign-ups anchor in `chainOf` (treating a leading unknown as a
-// tail-break) fails the chainOf test's [false, true, true] case only; using
-// the CAC's denominator instead of the sign-up rate for the upstream line
-// fails the example's "~3 200" only.
+// Engine spec §13.1 "peloton". Non-vacuity, measured: drawing an unknown
+// column as {lo: 0, hi: 0} fails "never 0", the example, the chains built
+// from states — and downstream the findings and every peloton title of the
+// deck (an unknown read as 0 is a KNOWN zero everywhere); swapping gap and
+// tail-break fails chainOf, the example, the states and four deck titles.
 
 const amplitude = { kind: "tool", tool: "amplitude" } as const;
 

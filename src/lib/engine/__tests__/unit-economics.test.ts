@@ -4,11 +4,10 @@ import { lifetimeMonths, unitEconomics } from "../unit-economics";
 import { CTX_FR } from "./props";
 import { exampleState, measured, ratio, withEntry } from "./fixtures";
 
-// Engine spec §13.1 "unit-economics". Non-vacuity: falling back on ARPA when
-// the margin is missing (monthlyMargin = arpa) fails "margin unknown" only —
-// the flattering 500 ÷ 120 = 4.2 months would then appear; removing the
-// Math.min cap fails "capped at 36 months" and the known-case LTV; dropping
-// `cacVariant` fails the variant assertion only.
+// Engine spec §13.1 "unit-economics". Non-vacuity, measured: falling back
+// on ARPA when the margin is missing (the flattering 500 ÷ 120 = 4.2
+// months) fails 6 tests — "margin unknown" here, the example's findings,
+// and four deck tests whose unit-economics slide would suddenly conclude.
 
 const tool = { kind: "tool", tool: "stripe" } as const;
 

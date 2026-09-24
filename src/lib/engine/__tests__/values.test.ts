@@ -6,11 +6,9 @@ import { CTX_FR } from "./props";
 import { EXAMPLE_TODAY, estimated, exampleState, measured, missing, ratio, withEntry } from "./fixtures";
 
 // Engine spec §13.1 "values / confiance". Confidence is DERIVED, never
-// entered. Non-vacuity: returning "solid" for every measured entry fails
-// the shortcut, person and immature rows (three assertions of the table
-// test and the cohort test); dropping the maturity check in `knownOf` fails
-// the cohort test only; treating a text as a known NUMBER fails "a known
-// status without a number is not a known number" only.
+// entered. Non-vacuity, measured: dropping the maturity grading in `knownOf`
+// fails the immature-cohort test only — the confidence table grades entries
+// alone and passes, which is why maturity has its own test.
 
 const at = "2026-09-20T10:00:00.000Z";
 const tool = { kind: "tool", tool: "amplitude" } as const;

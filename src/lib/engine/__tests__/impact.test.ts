@@ -5,12 +5,10 @@ import type { EngineState, Impact } from "../types";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
 import { EXAMPLE_EXPECTED, estimated, exampleState, measured, ratio, withEntry } from "./fixtures";
 
-// Engine spec §13.1 "impact". Non-vacuity: building the "then" line from the
-// EXACT rate (18.0) instead of the displayed one passes the example but
-// fails the recompute grid (rates under 10 print 2 significant digits);
-// pricing the exact 4.67 customers instead of the displayed +5 fails the
-// example (560 € instead of ~600 €) and the grid; dropping the "fewer than
-// one" branch fails that test only.
+// Engine spec §13.1 "impact". Non-vacuity, measured: building the chain
+// from the EXACT rate instead of the displayed one fails the recompute grid
+// only — the example passes, because 144/800 is exactly 18; that is why the
+// grid includes rates like 3.1538 that print as "3.2".
 
 const tool = { kind: "tool", tool: "stripe" } as const;
 const lineOf = (impact: Impact, key: string) => impact.lines.find((l) => l.key === key)!;

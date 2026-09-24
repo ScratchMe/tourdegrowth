@@ -6,11 +6,10 @@ import type { MetricEntry, MirrorVerdict, TrackingLevel } from "../types";
 import { FR } from "./props";
 import { exampleState, tourResult, withEntry } from "./fixtures";
 
-// Engine spec §13.1 "bridge". Non-vacuity: giving todo/requested a verdict
-// (found "unknown") fails "no verdict for what nobody has looked for" and the
-// example's k-factor row; sorting by array order instead of date fails
-// "latest with answers" only; a ninth bridge in the shapes fails the pinned
-// list only.
+// Engine spec §13.1 "bridge". Non-vacuity, measured: giving todo/requested/
+// not-applicable a verdict (found "unknown") fails "no verdict for what
+// nobody has looked for" and the example's counts; taking the first result
+// with answers instead of the most recent fails "latest with answers" only.
 
 describe("the declared × found matrix (§6.11)", () => {
   const expected: Record<TrackingLevel, Record<TrackingLevel, MirrorVerdict>> = {

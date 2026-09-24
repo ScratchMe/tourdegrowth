@@ -5,11 +5,12 @@ import { CTX_FR, FR } from "./props";
 import { exampleState, measured, missing, ratio, tourResult, withEntry } from "./fixtures";
 
 // Engine spec §13.1 "findings" — a table case → kinds, and stable ranks.
-// Non-vacuity: raising a chain-break for a column that is only "todo" fails
-// "in progress is not a finding" only; dropping the event/rate merge fails
-// "a missing event is one finding" only; sorting by kind alone (no rank)
-// passes — the kind order already follows the ranks — so the rank sort is
-// pinned by "ranks never decrease" together with the explicit order.
+// Non-vacuity, measured: raising a chain-break for a column that is only
+// "todo" fails "in progress is not a finding" only; dropping the event/rate
+// merge fails "a missing event is one finding" only. Removing the final
+// sort entirely passes EVERY test: findings are built in rank order, so the
+// sort is a guard against a future block added out of place, and the
+// explicit order below is what would catch that block.
 
 const tool = { kind: "tool", tool: "stripe" } as const;
 const derive = (state: EngineState, result = null as ReturnType<typeof tourResult> | null) =>

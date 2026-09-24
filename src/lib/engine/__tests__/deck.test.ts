@@ -8,10 +8,11 @@ import { EXAMPLE_EXPECTED, emptyState, exampleState, measured, missing, ratio, t
 // Engine spec §13.1 "deck" — §9.2 presence and order, `visibility` first
 // under two ★, one case that triggers each title template and one that
 // doesn't, and the leak's title and body quoting the same formatted amount.
-// Non-vacuity: recomputing the title amount from `mrrPerMonth` (exact 560)
-// instead of reading the chain's line fails "title and body agree" only;
+// Non-vacuity, measured: formatting the title amount from the ranking's
+// exact 560 € instead of reading the chain's "× ARPA" line fails "title and
+// body agree", the French title sentence and the text export (3 tests);
 // dropping the two-★ rule fails "visibility leads" only; defaulting the
-// mirror to included fails the §9.2 table only.
+// mirror to included fails "unchecked by default" only.
 
 const tool = { kind: "tool", tool: "stripe" } as const;
 const props = { fr: { ...FR, ctx: CTX_FR }, en: { ...EN, ctx: CTX_EN } };

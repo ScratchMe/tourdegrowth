@@ -16,11 +16,11 @@ import {
 import { EXAMPLE_TODAY, exampleState } from "./fixtures";
 
 // Engine spec §13.1 "cohort". `today` is always injected and read as a LOCAL
-// calendar date. Non-vacuity: writing the maturity rule as `<` instead of
-// `≤` (a month whose last sign-up has had exactly the window is mature)
-// fails "exactly the window" only; computing the last day as day 31 of every
-// month fails the February / leap-year tests only; the four 24/09 examples
-// pass under the second sabotage (July, June, May all have 30-31 days).
+// calendar date. Non-vacuity, measured: requiring one day MORE than the
+// window (`>=` instead of `>` in the loop) fails the four boundary tests
+// (exactly the window, 30/31-day months, February and the leap year, the
+// zero window) while the four 24/09 examples still pass — none of them sits
+// on a boundary, which is why the boundaries are tested on their own.
 
 describe("months", () => {
   it("validates YYYY-MM and steps across the year boundary", () => {

@@ -6,10 +6,9 @@ import { CTX_FR, FR } from "./props";
 import { estimated, exampleState, measured, ratio, withEntry } from "./fixtures";
 
 // Engine spec §13.1 "sanity" — one case that triggers and one that doesn't,
-// per check. Non-vacuity: firing on ANY overlap instead of the whole interval
-// (e.g. `churn.hi > 30`) fails the churn "estimate" no-trigger case only;
-// swapping `lo`/`hi` in the reconcile band test fails the out-of-band case
-// only; the example's "no alert" passes both ways (its ratio overlaps).
+// per check. Non-vacuity, measured: firing on ANY overlap instead of the
+// whole interval (`churn.hi > 30`) fails the churn test only, through its
+// 20-40 % estimate — the measured 35 % triggers either way.
 
 const tool = { kind: "tool", tool: "amplitude" } as const;
 const ids = (state: EngineState): SanityId[] => sanityChecks(state, CTX_FR, FR.strings.units).map((c) => c.id);

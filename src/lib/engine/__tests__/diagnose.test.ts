@@ -7,16 +7,16 @@ import { CTX_FR } from "./props";
 import { EXAMPLE_EXPECTED, estimated, exampleState, measured, ratio, withEntry, withTarget } from "./fixtures";
 
 // Engine spec §13.1 "diagnose". Non-vacuity, each measured on its own:
-// - letting a designating reference name a value INSIDE it (positionOf's
-//   `v.hi < c.lo` written `v.lo < c.hi`) fails "within never below" and
-//   "level";
-// - stamping maybe-below as below fails "maybe-below" only;
+// - letting a reference name a value INSIDE it (positionOf's `v.hi < c.lo`
+//   written `v.lo < c.hi`) fails 6 tests: within, maybe-below, not-enough,
+//   level, the unpriced stages, and the deck's `leakLevel`;
+// - stamping maybe-below as below (`v.lo < c.lo` → below) fails
+//   "maybe-below" only;
 // - removing the float tolerance of `clearlyAbove` fails the 600-vs-480
 //   boundary only (600.0000000000003 > 600);
 // - capping `named` at two fails "shared names the whole group" only;
-// - ranking flows by `mrr.lo / gap` instead of the same quantity breaks the
-//   € == relative-gap grid only;
-// - letting `designates: false` count fails "non-designating" only.
+// - letting `designates: false` designate fails 4: the example's positions,
+//   not-enough, "non-designating", and the deck's `leakNotEnoughBelow`.
 
 const tool = { kind: "tool", tool: "stripe" } as const;
 

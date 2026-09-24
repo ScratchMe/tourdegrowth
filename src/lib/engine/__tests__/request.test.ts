@@ -6,11 +6,8 @@ import { EXAMPLE_NOW_ISO, exampleState, measured, ratio, withEntry } from "./fix
 
 // Engine spec §13.1 "request". The copied message says what to pull, for
 // which period, under which definition — and carries NO value the user
-// entered. Non-vacuity: interpolating the entry's value into `what` fails
-// "no entered value" only; restarting the clock at `requestedAt` instead of
-// `remindedAt` fails "the clock restarts at the reminder" only; overwriting
-// a running request's date on a second copy fails "copying again is not a
-// new request" only.
+// entered. Non-vacuity, measured: restarting the clock at `requestedAt`
+// instead of `remindedAt` fails "the clock restarts at the reminder" only.
 
 const tool = { kind: "tool", tool: "amplitude" } as const;
 

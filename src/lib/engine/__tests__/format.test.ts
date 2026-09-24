@@ -24,12 +24,12 @@ import type { Currency } from "../types";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
 
 // Engine spec §13.1 "format" — the §6.2 table in both languages, and the
-// glyph sweep of §10.4. Non-vacuity: removing the U+202F → U+00A0 step in
-// `normalise` fails the French table tests AND the sweep (the sweep names
-// the glyph); dropping the "≥ 10 → integer" branch of `roundDisplay` fails
-// "rates" only; making `range` always print two bounds fails "a range whose
-// rounded bounds agree prints once" only. The English table passes under
-// the first sabotage — which is why French is tested separately.
+// glyph sweep of §10.4. Non-vacuity, measured: removing the U+202F → U+00A0
+// step fails 7 tests — the French amounts, approximations and ranges, the
+// sweep (which names the glyph), and the French figures in the impact,
+// peloton and deck tests; every English test passes, which is why French is
+// tested on its own. Rounding with a bare Math.round (no half-up nudge)
+// fails "half away from zero" only: 0.145 would print 0.14.
 
 const NBSP = " ";
 const uF = FR.strings.units;
@@ -97,6 +97,13 @@ describe("format — §6.2 in English", () => {
     expect(formatApproxMoney(560, "EUR", "en", uE)).toBe("~€560");
     expect(formatApproxNumber(3_170.7, "en", uE)).toBe("~3,200");
     expect(formatRatio(0.153, "en")).toBe("0.15");
+  });
+
+  it("half away from zero on the number as written — what a reader's calculator does", () => {
+    // 0.145 is stored 0.14499…, and 0.145 × 100 is 14.4999…: both toPrecision and a bare Math.round say 0.14.
+    expect(formatPercent(0.145, "en")).toBe("0.15%");
+    expect(formatPercent(3.15, "en")).toBe("3.2%");
+    expect(formatPercent(-3.15, "en")).toBe("-3.2%");
   });
 
   it("ranges and durations use the copy's en dash", () => {

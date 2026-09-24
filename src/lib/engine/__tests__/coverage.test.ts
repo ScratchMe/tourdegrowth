@@ -6,11 +6,11 @@ import { exampleState } from "./fixtures";
 
 // Engine spec §13.1 "coverage". The invariant that lost half a point in the
 // audit instrument: found + approximate + missing + inProgress ===
-// denominator, for every combination of statuses. Non-vacuity: counting
-// "conflicting" nowhere fails both invariant tests and the example; letting
-// "not-applicable" stay in the denominator fails the invariant tests and
-// "only not-applicable moves the denominator", while the example passes
-// (it has no not-applicable) — which is why the invariant is swept.
+// denominator, for every combination of statuses. Non-vacuity, measured:
+// counting "conflicting" nowhere fails the two invariant sweeps only — the
+// example has no conflict and passes; keeping "not-applicable" in the
+// denominator fails the two sweeps and "only not-applicable moves the
+// denominator". The example alone would have caught neither.
 
 const STATUSES: MetricStatus[] = ["todo", "requested", "measured", "estimated", "conflicting", "missing", "not-applicable"];
 const at = "2026-09-24T00:00:00.000Z";
