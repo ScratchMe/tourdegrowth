@@ -297,7 +297,7 @@ export function ResultView({
         </div>
       </header>
 
-      <main className={styles.main}>
+      <main id="main" className={styles.main}>
         {/*
           Le titre du document. Non peint : le premier élément dessiné est le
           numéral du score, et en faire un `<h1>` demanderait de changer

@@ -47,7 +47,7 @@ export default async function HowItWorksPage({ params }: PageProps) {
       <JsonLd data={breadcrumbSchema(locale, [{ name: tc(HOW_IT_WORKS.title, locale), path: "/how-it-works" }])} />
       <ContentHeader locale={locale} path="/how-it-works" />
 
-      <main className={styles.main}>
+      <main id="main" className={styles.main}>
         <div className={styles.intro}>
           <h1 className={styles.title}>{tc(HOW_IT_WORKS.title, locale)}</h1>
           <p className={styles.subtitle}>{tc(HOW_IT_WORKS.intro, locale)}</p>

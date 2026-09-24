@@ -191,7 +191,7 @@ export default function DeepDivePage() {
             <WordmarkLink locale={locale} />
           </div>
         </header>
-        <main className={styles.main}>
+        <main id="main" className={styles.main}>
           <h1 className="tdg-visually-hidden">{tc(UI_STRINGS.meta.deepDiveHeading, locale)}</h1>
         </main>
       </>
@@ -213,7 +213,7 @@ export default function DeepDivePage() {
         </div>
       </header>
 
-      <main className={styles.main}>
+      <main id="main" className={styles.main}>
         {/* Voir `/quiz` : le document porte un titre que l'écran ne peint pas. */}
         <h1 className="tdg-visually-hidden">{tc(UI_STRINGS.meta.deepDiveHeading, locale)}</h1>
         {phase === "answering" && (

@@ -153,7 +153,7 @@ export default function QuizPage() {
             <WordmarkLink locale={locale} />
           </div>
         </header>
-        <main className={styles.main}>
+        <main id="main" className={styles.main}>
           <h1 className="tdg-visually-hidden">{tc(UI_STRINGS.meta.quizHeading, locale)}</h1>
         </main>
       </>
@@ -309,7 +309,7 @@ export default function QuizPage() {
         </div>
       </header>
 
-      <main className={styles.main}>
+      <main id="main" className={styles.main}>
         {/*
           Le titre du document. Non peint — le design ne prévoit rien au-dessus
           de la barre d'étapes — mais présent pour les moteurs et pour la

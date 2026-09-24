@@ -68,7 +68,7 @@ export default async function GlossaryTermPage({ params }: PageProps) {
       />
       <ContentHeader locale={locale} path={`/glossary/${term}`} />
 
-      <main className={styles.main}>
+      <main id="main" className={styles.main}>
         <Link href={localePath(locale, "/glossary")} className={styles.backLink}>
           {tc(t.backToIndex, locale)}
         </Link>

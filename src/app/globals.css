@@ -47,10 +47,87 @@ body {
   background-color: var(--surface-page);
   background-image: var(--ground-lift);
   background-repeat: no-repeat;
+  /*
+   * `fixed` — the second half of the same seam, found 2026-09-24.
+   *
+   * The body's background does not paint on the body: it propagates to the
+   * canvas and is positioned on the ROOT element's box (CSS Backgrounds
+   * §2.11.2), and `html` is `height: 100%`, one window tall. `no-repeat`
+   * stopped the tiling above, but the gradients still ended at that box's
+   * bottom edge — a ~7/255 step at y = window height, on the right half of
+   * every page, where the shadow lift at `88% 74%` is still visible.
+   *
+   * Attaching the lift to the viewport removes the edge rather than moving
+   * it, and it is the right metaphor anyway: the ground is lit, and light
+   * stays where the window is.
+   */
+  background-attachment: fixed;
   color: var(--text-body);
   font-family: var(--font-ui), system-ui, sans-serif;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+/*
+ * A base colour for every link — ds-critique H-4, 2026-09-24.
+ *
+ * There was none, so any `<a>` without a class of its own fell back to the
+ * browser's #0000EE: three prose links on the content pages shipped in
+ * browser blue (and visited purple). The CI never saw it because that blue
+ * passes AA on paper — it is a brand defect, not a contrast one.
+ *
+ * `:where()` keeps both rules at zero specificity, and that is the point:
+ * every component that styles its own link (buttons rendered as `<a>`, the
+ * wordmark, footer links, glossary chips) must keep winning with a single
+ * class, in either stylesheet order. A plain `a:hover` would be 0,1,1 and
+ * would repaint a primary button's label on hover. `--text-link` is
+ * `--paint-red-deep`: 5.42:1 on --paper-1, 6.72:1 on --paper-0.
+ */
+:where(a) {
+  color: var(--text-link);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+:where(a:hover) {
+  color: var(--text-link-hover);
+}
+
+/*
+ * No widowed last word on a page title (ds-critique L-1): "How it / works",
+ * "Coût d'Acquisition / Client". Zero specificity, so a module that sets its
+ * own `text-wrap` still decides; `DetourCard` already balanced its title.
+ */
+:where(h1) {
+  text-wrap: balance;
+}
+
+/*
+ * The skip link (ds-critique L-9), rendered first in `<body>` by RootShell
+ * and pointing at the page's `<main id="main">`. Off-screen until it takes
+ * keyboard focus — translated, never `display: none`, which would take it out
+ * of the tab order it exists to lead. Every header in this product carries a
+ * nav or a language switch, so without it a keyboard reader tabs through
+ * those on every page before reaching the content.
+ */
+.tdg-skip {
+  position: fixed;
+  top: var(--space-5);
+  left: var(--space-5);
+  z-index: 100;
+  padding: var(--space-4) var(--space-7);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font: var(--label-button);
+  border: var(--border-solid);
+  border-radius: var(--radius-button);
+  box-shadow: var(--shadow-panel);
+  text-decoration: none;
+  transform: translateY(calc(-100% - var(--space-11)));
+}
+
+.tdg-skip:focus {
+  transform: none;
 }
 
 /* Every interactive element must show a visible focus ring. */
