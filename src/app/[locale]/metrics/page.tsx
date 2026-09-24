@@ -52,7 +52,7 @@ export default async function MetricsPage({ params }: PageProps) {
   return (
     <>
       <ContentHeader locale={locale} path="/metrics" />
-      <main className={frame.main}>
+      <main id="main" className={frame.main}>
         <div className={frame.intro}>
           <h1 className={frame.title}>{tc(METRICS.title, locale)}</h1>
           <p className={frame.subtitle}>{tc(METRICS.intro, locale)}</p>

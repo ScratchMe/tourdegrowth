@@ -47,7 +47,7 @@ export default async function GlossaryIndexPage({ params }: PageProps) {
       <JsonLd data={breadcrumbSchema(locale, [{ name: tc(UI_STRINGS.glossaryPage.indexTitle, locale), path: "/glossary" }])} />
       <ContentHeader locale={locale} path="/glossary" />
 
-      <main className={styles.main}>
+      <main id="main" className={styles.main}>
         <div className={styles.intro}>
           <h1 className={styles.title}>{tc(t.indexTitle, locale)}</h1>
           <p className={styles.subtitle}>{tc(t.indexIntro, locale)}</p>

@@ -140,7 +140,7 @@ export default async function AdminStatsPage() {
   const allTimeShares = funnelWindows.find((w) => w.label === "All-time")?.stats?.shares ?? null;
 
   return (
-    <main className={styles.main}>
+    <main id="main" className={styles.main}>
       <h1 className={styles.title}>Growth stats</h1>
       <p className={styles.subtitle}>Live from Firestore — reloads recompute everything, nothing is cached.</p>
 

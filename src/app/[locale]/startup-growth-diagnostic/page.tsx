@@ -56,7 +56,7 @@ export default async function DiagnosticPage({ params }: PageProps) {
       />
       <ContentHeader locale={locale} path="/startup-growth-diagnostic" />
 
-      <main className={styles.main}>
+      <main id="main" className={styles.main}>
         <div className={styles.intro}>
           <h1 className={`${styles.title} ${own.title}`}>{tc(DIAGNOSTIC.title, locale)}</h1>
           <p className={styles.subtitle}>{tc(DIAGNOSTIC.intro, locale)}</p>

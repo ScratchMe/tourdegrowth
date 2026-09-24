@@ -21,4 +21,9 @@ export const NAV_STRINGS = {
   // de page à sept liens cesse d'en mettre aucun en avant.
   // TODO: à relire (convention 6).
   checklist: { en: "Growth checklist", fr: "Checklist growth" },
+  // Le lien d'évitement de RootShell (ds-critique L-9, 2026-09-24). Ici
+  // plutôt que dans le dictionnaire : RootShell est le chrome de chaque page,
+  // et ce module est le seul à rester petit par construction (R2-14).
+  // TODO: à relire (convention 6).
+  skipToContent: { en: "Skip to content", fr: "Aller au contenu" },
 } as const satisfies Record<string, Translatable>;
