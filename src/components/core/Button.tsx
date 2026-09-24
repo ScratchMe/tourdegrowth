@@ -11,7 +11,7 @@ interface SharedProps {
   /** md = desktop (14px 24px) · lg = mobile full-width (16px) */
   size?: Size;
   fullWidth?: boolean;
-  /** Smaller inline sizing for the header CTA — not part of the DS bundle's own variant matrix, see Button.module.css. */
+  /** Smaller inline sizing for the header CTA — not part of the DS bundle's own variant matrix, see Button.module.css. Font is --label-button-sm. */
   compact?: boolean;
   className?: string;
   children: ReactNode;
@@ -37,10 +37,16 @@ type LinkButtonProps = SharedProps & {
   hard?: boolean;
 } & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href" | "children" | "className">;
 
-type PlainButtonProps = SharedProps & { href?: undefined } & Omit<
-    ButtonHTMLAttributes<HTMLButtonElement>,
-    "children" | "className"
-  >;
+type PlainButtonProps = SharedProps & {
+  href?: undefined;
+  /**
+   * A request this button started is in flight: `aria-busy` plus `disabled`,
+   * so it says why and cannot be sent twice; the label stays and gains an
+   * ellipsis (Button.module.css). Buttons only — a link that is "loading" is
+   * a navigation, and the browser already shows that.
+   */
+  loading?: boolean;
+} & Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children" | "className">;
 
 type ButtonProps = LinkButtonProps | PlainButtonProps;
 
@@ -80,10 +86,26 @@ export function Button(props: ButtonProps) {
     );
   }
 
-  const { href: _h, variant: _v2, size: _s2, fullWidth: _fw2, compact: _c2, className: _cn2, children, ...rest } =
-    props;
+  const {
+    href: _h,
+    variant: _v2,
+    size: _s2,
+    fullWidth: _fw2,
+    compact: _c2,
+    className: _cn2,
+    loading = false,
+    disabled,
+    children,
+    ...rest
+  } = props;
   return (
-    <button type="button" className={className} {...rest}>
+    <button
+      type="button"
+      className={className}
+      {...rest}
+      disabled={loading || disabled}
+      aria-busy={loading || undefined}
+    >
       {children}
     </button>
   );

@@ -14,7 +14,7 @@
 
 .button:disabled {
   cursor: not-allowed;
-  opacity: 0.45;
+  opacity: var(--state-disabled-opacity);
 }
 
 .md {
@@ -58,6 +58,59 @@
 }
 
 /*
+ * States (ds-critique H-6). The transition above animated box-shadow and
+ * transform since the bundle, and nothing ever changed either: the button had
+ * no hover, no press. In the sticker grammar: hover peels it up and to the
+ * left over a hard ink shadow, press flattens it back onto the page. Quiet is
+ * an underlined link and keeps its underline as its only affordance.
+ *
+ * `:not(:disabled)` so a disabled button does not lift under the cursor — the
+ * one state that must look like it will not respond.
+ */
+.primary:not(:disabled):hover,
+.secondary:not(:disabled):hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--state-hover-shadow);
+}
+
+.primary:not(:disabled):active,
+.secondary:not(:disabled):active {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Where nothing hovers, a tap would leave the button peeled up until the next
+   tap elsewhere. Press still flattens it; there is just nothing to undo. */
+@media (hover: none) {
+  .primary:not(:disabled):hover,
+  .secondary:not(:disabled):hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/*
+ * Loading: `aria-busy` and `disabled` together (Button.tsx), so it cannot be
+ * sent twice and says why. No spinner — the system has no icons — the label
+ * stays and gains an ellipsis. The alternative text after the slash keeps
+ * that ellipsis out of the accessible name ("Get my score…" would be a
+ * different button to a screen reader); the first declaration is the
+ * fallback for engines that do not read the second. Busy is not broken, so
+ * it keeps full opacity instead of the disabled fade.
+ */
+.button[aria-busy="true"] {
+  cursor: var(--state-busy-cursor);
+  opacity: 1;
+}
+
+.button[aria-busy="true"]::after {
+  content: "…";
+  content: "…" / "";
+  /* Sits against the label, not the flex gap away from it. */
+  margin-left: -6px;
+}
+
+/*
  * Not part of the DS bundle's Button (which only defines md/lg) — kept from
  * the app's original "compact" size for the one place that still needs it:
  * the landing/quiz header's inline CTA, which sits next to the wordmark in
@@ -65,7 +118,7 @@
  * inline button. A real, already-shipped need, not a new design decision.
  */
 .compact {
-  font-size: 13px;
+  font: var(--label-button-sm);
   padding: 11px 20px;
   min-height: auto;
 }

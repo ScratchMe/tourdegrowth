@@ -60,13 +60,27 @@
   padding: 9px 14px;
   cursor: pointer;
   min-height: var(--hit-min);
+  transition:
+    box-shadow var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
 }
 
+/* Same selection language as the answers and the tone cards (ds-critique
+   H-5): hover lifts the shadow and leaves the fill alone — a sunken hover
+   fill next to an ink selected fill was a third look for "this one". */
 .option:hover {
-  background: var(--surface-sunken);
+  box-shadow: var(--state-hover-shadow);
 }
 
-.selected {
+@media (hover: none) {
+  .option:hover {
+    box-shadow: none;
+  }
+}
+
+/* Two classes: must beat `.option`'s fill in any stylesheet order. */
+.option.selected {
   background: var(--state-selected-bg);
   color: var(--state-selected-text);
   border-color: var(--state-selected-bg);
