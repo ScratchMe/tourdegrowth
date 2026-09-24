@@ -2083,7 +2083,7 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       questionId: "act-1",
       body: t(
         "\"Have you defined a specific aha moment for new users?\" opens the Activation stage: 20 if it is defined and measured, 7 if it exists but isn't measured, 0 if not really. The two questions after it — what share of users reach it, has onboarding been iterated on data — cannot be answered well if this one scores 0, which is why an undefined moment usually drags the whole stage into the weak band.",
-        "« As-tu défini un moment \"aha\" précis pour tes nouveaux utilisateurs ? » ouvre l'étape Activation : 20 s'il est défini et mesuré, 7 s'il existe sans être mesuré, 0 si pas vraiment. Les deux questions suivantes — quelle part d'utilisateurs l'atteint, l'onboarding a-t-il été itéré sur des données — ne peuvent pas être bien répondues si celle-ci vaut 0, et c'est pour ça qu'un moment non défini tire en général toute l'étape dans la bande faible.",
+        "« As-tu défini un moment “aha” précis pour tes nouveaux utilisateurs ? » ouvre l'étape Activation : 20 s'il est défini et mesuré, 7 s'il existe sans être mesuré, 0 si pas vraiment. Les deux questions suivantes — quelle part d'utilisateurs l'atteint, l'onboarding a-t-il été itéré sur des données — ne peuvent pas être bien répondues si celle-ci vaut 0, et c'est pour ça qu'un moment non défini tire en général toute l'étape dans la bande faible.",
       ),
     },
     faq: [

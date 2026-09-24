@@ -86,7 +86,8 @@ export const NEXT_MOVES: Record<string, Record<ActionablePoints, Translatable>> 
     },
     0: {
       en: "Test one second channel small and on purpose — a single channel is a single point of failure.",
-      fr: "Teste un second canal, petit et délibéré — un canal unique est un point de défaillance unique.",
+      // TODO: à relire — revue de copie v1 (2026-09-24), §3.2 : calque de *small and on purpose*.
+      fr: "Teste un second canal, à petite échelle et exprès — un canal unique est un point de défaillance unique.",
     },
   },
   "acq-3": {
@@ -146,7 +147,8 @@ export const NEXT_MOVES: Record<string, Record<ActionablePoints, Translatable>> 
   "ret-2": {
     7: {
       en: "Compare your re-engagement message against sending nothing at all — basic and untested is a guess with a schedule.",
-      fr: "Compare ton message de réengagement au fait de ne rien envoyer du tout — basique et non testé, c'est une supposition avec un calendrier.",
+      // TODO: à relire — revue de copie v1 (2026-09-24), §3.2 : calque de *a guess with a schedule*.
+      fr: "Compare ton message de réengagement au fait de ne rien envoyer du tout — basique et non testé, c'est une intuition qu'on envoie à heure fixe.",
     },
     0: {
       en: "Send one message to users who went quiet last month, and see how many come back.",
@@ -224,7 +226,8 @@ export const NEXT_MOVES: Record<string, Record<ActionablePoints, Translatable>> 
     },
     0: {
       en: "Look at the customers who already outgrew their plan and offer them the next one on purpose.",
-      fr: "Regarde les clients qui ont déjà dépassé leur offre, et propose-leur délibérément la suivante.",
+      // TODO: à relire — revue de copie v1 (2026-09-24), §3.2 : calque de *on purpose*.
+      fr: "Regarde les clients qui ont déjà dépassé leur offre, et propose-leur exprès l'offre au-dessus.",
     },
   },
 };

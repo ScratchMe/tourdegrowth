@@ -65,8 +65,9 @@ export const CHECKLIST: OpenDoorPage = {
     en: "The fifteen questions of an AARRR growth audit, with what a good answer looks like and what its absence costs. Work through it on paper, or take the interactive version in three minutes.",
   },
   intro: {
-    fr: "Quinze questions, trois par étape du cadre AARRR. Elles ne mesurent pas tes résultats — elles mesurent si tu peux les voir. C'est une distinction qui décide de tout le reste : une équipe qui ne fait pas et une équipe qui fait sans pouvoir le prouver ont le même tableau de bord vide, et deux plans d'action opposés.",
-    en: "Fifteen questions, three per stage of the AARRR framework. They don't measure your results — they measure whether you can see them. That distinction decides everything downstream: a team that isn't doing the work and a team doing it without being able to prove it have the same empty dashboard and two opposite action plans.",
+    // TODO: à relire — revue de copie v1 (2026-09-24), §3.1 : « une distinction qui décide de tout le reste », emphase abstraite.
+    fr: "Quinze questions, trois par étape du cadre AARRR. Elles ne mesurent pas tes résultats — elles mesurent si tu peux les voir. Et ça change tout : une équipe qui ne fait pas et une équipe qui fait sans pouvoir le prouver ont le même tableau de bord vide, et deux plans d'action opposés.",
+    en: "Fifteen questions, three per stage of the AARRR framework. They don't measure your results — they measure whether you can see them. And that changes everything: a team that isn't doing the work and a team doing it without being able to prove it have the same empty dashboard and two opposite action plans.",
   },
   sections: [
     {
@@ -77,8 +78,9 @@ export const CHECKLIST: OpenDoorPage = {
           en: "Answer all fifteen in one sitting, without going to look anything up. What you know off the top of your head is exactly what counts: a metric that takes half a day to reconstruct is not a metric your team steers by.",
         },
         {
-          fr: "Trois réponses possibles par question, et une seule règle : la réponse haute demande que ce soit à la fois en place ET suivi. « On a un canal principal » sans chiffre en face n'est pas la réponse haute — c'est celle du milieu, et l'écart entre les deux est tout le sujet.",
-          en: "Three possible answers per question, and one rule: the top answer requires the thing to be both in place AND measured. \"We have a main channel\" with no number behind it is not the top answer — it's the middle one, and the gap between the two is the whole point.",
+          // TODO: à relire — revue de copie v1 (2026-09-24), §3.1 : « tout le sujet ».
+          fr: "Trois réponses possibles par question, et une seule règle : la réponse haute demande que ce soit à la fois en place ET suivi. « On a un canal principal » sans chiffre en face n'est pas la réponse haute — c'est celle du milieu, et c'est cet écart que la checklist mesure.",
+          en: "Three possible answers per question, and one rule: the top answer requires the thing to be both in place AND measured. \"We have a main channel\" with no number behind it is not the top answer — it's the middle one, and that gap is what the checklist measures.",
         },
       ],
     },
@@ -131,8 +133,9 @@ export const DIAGNOSTIC: OpenDoorPage = {
     en: "How to run a growth diagnostic in a week: where to start, what order to look at the five stages in, and why measuring practices is not the same as measuring results.",
   },
   intro: {
-    fr: "Un diagnostic de croissance n'est pas un tableau de bord de plus. Un tableau de bord répond à « où en est-on ? » ; un diagnostic répond à « qu'est-ce qui nous empêche d'aller plus vite, et comment le sait-on ? ». La différence tient en un mot : un diagnostic doit pouvoir se tromper.",
-    en: "A growth diagnostic is not another dashboard. A dashboard answers \"where are we?\"; a diagnostic answers \"what is stopping us going faster, and how do we know?\". The difference comes down to one word: a diagnostic has to be able to be wrong.",
+    // TODO: à relire — revue de copie v1 (2026-09-24), §3.1 : le « mot » annoncé n'était pas un mot.
+    fr: "Un diagnostic de croissance n'est pas un tableau de bord de plus. Un tableau de bord répond à « où en est-on ? » ; un diagnostic répond à « qu'est-ce qui nous empêche d'aller plus vite, et comment le sait-on ? ». Un diagnostic, lui, doit pouvoir se tromper.",
+    en: "A growth diagnostic is not another dashboard. A dashboard answers \"where are we?\"; a diagnostic answers \"what is stopping us going faster, and how do we know?\". A diagnostic, unlike a dashboard, has to be able to be wrong.",
   },
   sections: [
     {

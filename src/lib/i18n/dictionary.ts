@@ -563,7 +563,8 @@ export const UI_STRINGS = {
     pointsTemplate: { en: "{n} pts", fr: "{n} pts" },
     ownerOnlyNote: {
       en: "Only visible to you — your answers are stored on this device, never on the shared page.",
-      fr: "Visible par toi seul — tes réponses sont sur cet appareil, jamais sur la page partagée.",
+      // TODO: à relire — revue de copie v1 (2026-09-24), §3.3 : « toi seul » supposait un lecteur masculin.
+      fr: "Visible sur cet appareil uniquement — tes réponses sont stockées ici, jamais sur la page partagée.",
     },
   },
 
