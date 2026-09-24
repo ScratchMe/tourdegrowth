@@ -1,0 +1,33 @@
+/* Game plan §2.6 — two quiet actions, never ahead of the catalogue. */
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4) var(--space-8);
+}
+
+.status {
+  margin: 0;
+  font: var(--meta-sm);
+  color: var(--state-good-text);
+}
+
+/* The share text, for a clipboard that said no: recessed, selectable, whole. */
+.fallback {
+  margin: 0;
+  max-width: var(--measure-read);
+  padding: var(--space-5) var(--space-6);
+  font: var(--meta-md);
+  color: var(--text-body);
+  background: var(--surface-sunken);
+  border-radius: var(--radius-button);
+  overflow-wrap: anywhere;
+  user-select: all;
+}

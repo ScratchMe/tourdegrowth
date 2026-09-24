@@ -1,0 +1,27 @@
+/* Game plan §2.6 — three equal tiles: a dashboard row, read on paper. */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.cells {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+.note {
+  margin: 0;
+  font: var(--chart-note);
+  color: var(--text-muted);
+}
+
+/* Three columns of a phone's width would wrap every label onto three lines. */
+@media (max-width: 560px) {
+  .cells {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-4);
+  }
+}
