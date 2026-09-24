@@ -1,8 +1,8 @@
 # Tour de Growth
 
-A guided AARRR growth check-up: fifteen questions, a scored diagnosis across
-Acquisition, Activation, Retention, Referral and Revenue, and a verdict you
-can share — in French or English.
+A guided AARRR growth check-up: fifteen questions, a score out of 100 across
+the five stages — Acquisition, Activation, Retention, Referral and Revenue —
+and a result you can share, in French or English.
 
 **[www.tourdegrowth.com](https://www.tourdegrowth.com)** · a side project by
 [Antoine Berthaud](https://cv.antoine.berthaud.me/), Senior Growth PM.
@@ -10,14 +10,15 @@ can share — in French or English.
 ## What it does
 
 - **A deterministic score.** Fifteen questions, three answers each, fixed
-  points, rounded per pillar before summing. No model decides a number — a
+  points, rounded per stage before summing. No model decides a number — a
   shared score has to be re-explainable in ten seconds, and the result page
   shows the full arithmetic to whoever took the Tour.
-- **Two tones.** "Straight up" or "Roast me", chosen by the user, with an
-  anti-mockery guardrail hard-coded into the prompt rather than left to the
-  model's discretion.
+- **Two tones.** "Straight up" or "Roast me", chosen by the user. The roast
+  goes after the strategy, never the person: the quick result's roast is a
+  library of pre-written, reviewed sentences, and the Deep dive has the rule
+  hard-coded into its prompt rather than left to the model's discretion.
 - **A Deep dive.** Ten more questions and an optional free-text field turn the
-  static verdict into recommendations generated per pillar — the only place
+  static verdict into recommendations generated per stage — the only place
   the product calls an LLM.
 - **Bilingual throughout**, including the generated text: a shared result
   renders in the *reader's* language, not the author's.

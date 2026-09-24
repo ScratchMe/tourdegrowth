@@ -33,7 +33,7 @@ qu'un seul champ de formulaire soit rempli.*
 ## Description — 300 caractères
 
 - **EN** : `Tour de Growth is a free, 3-minute growth check-up for founders and product teams. Fifteen questions across Acquisition, Activation, Retention, Referral and Revenue; a deterministic score out of 100; the one stage holding you back and one concrete next move. Two tones: straight up, or roast.` (296)
-- **FR** : `Tour de Growth est un diagnostic growth gratuit en 3 minutes pour fondateurs et équipes produit. Quinze questions sur l'Acquisition, l'Activation, la Rétention, le Referral et le Revenue ; un score déterministe sur 100 ; l'étape qui te freine et une action concrète. Deux tons : neutre, ou roast.` (298)
+- **FR** : `Tour de Growth est un diagnostic growth gratuit en 3 minutes pour fondateurs et équipes produit. Quinze questions sur l'Acquisition, l'Activation, la Retention, le Referral et le Revenue ; un score déterministe sur 100 ; l'étape qui te freine et une action concrète. Deux tons : neutre, ou roast.` (298)
 
 ## Description — 800 caractères
 
@@ -43,12 +43,12 @@ qu'un seul champ de formulaire soit rempli.*
 ## Les faits qu'on peut avancer (tous vérifiables dans le dépôt)
 
 - Le score n'est jamais décidé par un modèle : `src/lib/scoring/score.ts`, pur, testé ; 20 / 7 / 0 points par réponse, arrondi par étape avant la somme.
-- Le modèle (Gemini, avec une chaîne de repli sur quatre versions) n'écrit que le **roast** et le **Deep dive** ; le résultat rapide est une bibliothèque de textes relus, servie sans appel réseau.
-- Le garde-fou anti-moquerie est codé en dur dans le prompt : le roast vise la stratégie, jamais la personne.
+- Le modèle (Gemini, avec une chaîne de repli sur quatre versions) n'écrit que le **Deep dive** ; le résultat rapide, **roast compris**, est une bibliothèque de textes relus (`src/content/copy-library.ts`), servie sans appel réseau.
+- Le roast vise la stratégie, jamais la personne : la règle est codée en dur dans le prompt du Deep dive, et tenue par relecture dans les phrases pré-écrites du résultat rapide.
 - Un résultat partagé se rend dans la **langue du lecteur**, pas de l'auteur ; l'image de partage porte le score, l'étape qui freine et l'action.
 - Aucun compte, aucun e-mail ; les réponses du Tour ne quittent le navigateur que pour calculer le score ; GoatCounter sans cookie ; pages légales complètes.
 - Open source, AGPL-3.0, 500+ tests unitaires et 180+ specs Playwright en CI.
-- Le glossaire : 15 termes AARRR expliqués longuement dans les deux langues, avec pour chacun la question du Tour qui le mesure.
+- Le glossaire : 24 termes AARRR expliqués longuement dans les deux langues, avec pour chacun la question du Tour qui le mesure.
 
 **À ne pas avancer** : un nombre d'utilisateurs, un pourcentage de quoi que ce soit, une comparaison nommée à un concurrent, une promesse chiffrée d'amélioration.
 

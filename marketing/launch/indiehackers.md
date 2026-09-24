@@ -22,7 +22,7 @@ vérifiable.*
 >
 > **1. My K-factor was mathematically flattering.** The first version divided referred sign-ups by "unique sharers" — but the only sharers Firestore could see were the ones who had *already converted someone*. Every result in the denominator contributed at least one to the numerator, so K ≥ 1 by construction. A single user retaking the Tour three times produced K = 3.00. Now: referred ÷ all results, first-touch, self-referrals excluded. Honest K is lower and worth more.
 >
-> **2. The free result stopped calling the LLM — and got better.** The quick result used to ask Gemini for a verdict. Replacing it with a library of 60 pre-written verdicts (stage × score band × tone) made it instant, deterministic, and — after enumerating all 59,049 reachable score boards — provably non-contradictory with the card above it. The LLM now only writes the roast and the optional deep dive.
+> **2. The free result stopped calling the LLM — and got better.** The quick result used to ask Gemini for a verdict. Replacing it with a library of 62 pre-written verdicts (a headline and a per-stage sentence for every stage × score band × tone, plus one for a board where nothing is behind) made it instant, deterministic, and — after enumerating all 59,049 reachable score boards — provably non-contradictory with the card above it. The roast is part of that library. The LLM now only writes the optional deep dive.
 >
 > **3. The share loop is the product.** Every result has its own share image (score, weak stage, next move on the image), the shared link renders in the *reader's* language, and the visitor's primary CTA is "take your own Tour" with a referral tag. A shared result with no reason to click is a dead end; the next move is the reason.
 >
