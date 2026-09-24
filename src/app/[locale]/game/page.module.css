@@ -1,0 +1,82 @@
+/* The hub: five zones, one open. The frame (column, intro, section titles)
+   comes from `/how-it-works`, the family of prose pages this one belongs to;
+   only what the hub adds lives here. */
+
+.zones {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+/* Own boxes rather than `Card` with an override: a closed zone wants the
+   dashed border (the system's "not yet"), which none of Card's tones carry,
+   and overriding Card's border from another module would depend on the
+   order stylesheets are emitted in (lesson nº2). Both rules live here. */
+.zone {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--pad-card);
+  border-radius: var(--radius-card);
+  background: var(--surface-card);
+}
+
+.zoneOpen {
+  border: var(--border-solid);
+  box-shadow: var(--shadow-card);
+}
+
+.zoneSoon {
+  border: var(--border-dashed);
+}
+
+.zoneName {
+  font: var(--title-card);
+  color: var(--text-body);
+  margin: 0;
+}
+
+.zoneSoon .zoneName,
+.company {
+  color: var(--text-muted);
+}
+
+.company {
+  font: var(--body-md);
+  margin: 0;
+}
+
+.play {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-5);
+  margin-top: var(--space-3);
+}
+
+.progress {
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  color: var(--text-body);
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  /* Element + class: the rule it replaces comes from another module
+     (how-it-works), and at equal specificity the winner would depend on
+     stylesheet order — same fix as the open-door pages. */
+  h1.title {
+    font: var(--display-hero-mobile);
+  }
+
+  .zone {
+    padding: var(--pad-card-mobile);
+  }
+
+  .play > * {
+    width: 100%;
+  }
+}

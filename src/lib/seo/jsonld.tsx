@@ -159,6 +159,76 @@ export function aboutPageSchema(locale: Locale) {
 }
 
 /**
+ * A level of « Le côté obscur » — `Game`, per the SEO audit (seo-audit §4.1,
+ * point 2): not `VideoGame`, which is shaped for titles with an app-store
+ * listing, and not `HowTo`, whose rich results Google has mostly withdrawn
+ * (the same restraint this module already shows about `FAQPage`).
+ *
+ * Its data arrives as PARAMETERS, never imported: this module is crossed by
+ * every content page, and `content-fan-in.test.ts` keeps it that way — the
+ * `CRUMBS` lesson.
+ */
+export function gameSchema(
+  locale: Locale,
+  { path, name, description }: { path: string; name: string; description: string },
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Game",
+    "@id": `${absolute(locale, path)}#game`,
+    name,
+    description,
+    url: absolute(locale, path),
+    inLanguage: locale,
+    genre: "Educational",
+    gamePlatform: "Web browser",
+    isAccessibleForFree: true,
+    // What the game teaches to recognise. A `Thing` rather than a link to a
+    // page of ours: there is no dark-pattern page yet (seo-audit §3.2).
+    about: { "@type": "Thing", name: "Dark pattern" },
+    author: personNode(),
+    isPartOf: { "@type": "WebSite", name: SITE_NAME, url: absolute(locale) },
+  };
+}
+
+/**
+ * The hub: a `CollectionPage` whose `mainEntity` lists the playable levels.
+ * Only playable ones — a level that is « bientôt » has no page to point to.
+ */
+export function gameHubSchema(
+  locale: Locale,
+  {
+    path,
+    name,
+    description,
+    levels,
+  }: { path: string; name: string; description: string; levels: { path: string; name: string }[] },
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name,
+    description,
+    url: absolute(locale, path),
+    inLanguage: locale,
+    author: personNode(),
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: levels.map((level, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        item: {
+          "@type": "Game",
+          "@id": `${absolute(locale, level.path)}#game`,
+          name: level.name,
+          url: absolute(locale, level.path),
+        },
+      })),
+    },
+  };
+}
+
+/**
  * Renders one JSON-LD block. `<` is escaped so a value containing
  * `</script>` could never end the tag early — every value here is
  * developer-authored copy, so this is belt-and-braces, not a live risk.

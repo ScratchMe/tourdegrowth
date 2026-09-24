@@ -10,6 +10,16 @@ import styles from "./SiteFooter.module.css";
 
 const SITE_FOOTER_CV_DETAIL = PROFILE_CLICK_DETAILS[3];
 
+/*
+ * The game link exists only if the game was open when the site was built
+ * (GAME-BRIEF 13.2). Read from the value `next.config.mjs` inlines, not from
+ * GAME_ENABLED: this footer also renders inside the error boundaries, which
+ * are Client Components, and a server variable would be undefined there — the
+ * link would vanish from exactly those pages. Written as a literal
+ * `process.env.X` access on purpose: that is the only form Next inlines.
+ */
+const GAME_LINKED = process.env.TDG_GAME_OPEN_AT_BUILD === "1";
+
 export interface SiteFooterProps {
   locale: Locale;
   /**
@@ -68,6 +78,20 @@ export function SiteFooter({ locale, width = "wide" }: SiteFooterProps) {
           <Link href={localePath(locale, "/glossary")} className={styles.navLink}>
             {tc(NAV_STRINGS.glossary, locale)}
           </Link>
+          {GAME_LINKED && (
+            // `game_entry_clicked/footer` — the entry for readers whose
+            // bottleneck is not retention (GAME-BRIEF 13.3 B). The event name
+            // matches the vocabulary `lib/game/events.ts` declares.
+            <TrackedLink
+              href={localePath(locale, "/game")}
+              className={styles.navLink}
+              event="game_entry_clicked"
+              detail="footer"
+              data-testid="footer-game-link"
+            >
+              {tc(NAV_STRINGS.game, locale)}
+            </TrackedLink>
+          )}
           <Link href={localePath(locale, "/about")} className={styles.navLink}>
             {tc(NAV_STRINGS.about, locale)}
           </Link>

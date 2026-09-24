@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { GLOSSARY } from "@/content/glossary";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
-import { breadcrumbSchema, definedTermSchema, definedTermSetSchema, webApplicationSchema } from "../jsonld";
+import {
+  breadcrumbSchema,
+  definedTermSchema,
+  definedTermSetSchema,
+  gameHubSchema,
+  gameSchema,
+  webApplicationSchema,
+} from "../jsonld";
 
 // REVIEW-02.md R2-15 — one JSON-LD block existed, identical on /en and /fr,
 // with a `url` that was not the page's own. These are the shapes we now emit.
@@ -45,5 +52,33 @@ describe("structured data", () => {
     expect(crumbs.itemListElement[0]?.item).toMatch(/\/fr$/);
     expect(crumbs.itemListElement[2]?.name).toBe(GLOSSARY.cac.term.fr);
     expect(crumbs.itemListElement[2]?.item).toMatch(/\/fr\/glossary\/cac$/);
+  });
+});
+
+// « Le côté obscur » — seo-audit §4.1, point 2: `Game`, never `VideoGame`
+// (app-store shaped) nor `HowTo` (rich result withdrawn).
+describe("the game's structured data", () => {
+  it("describes a level as a free, educational browser Game at its own URL, by the same author", () => {
+    const game = gameSchema("fr", { path: "/game/retention", name: "Une année chez Flixo", description: "d" });
+    expect(game["@type"]).toBe("Game");
+    expect(game.url).toMatch(/\/fr\/game\/retention$/);
+    expect(game.inLanguage).toBe("fr");
+    expect(game.isAccessibleForFree).toBe(true);
+    expect(game.gamePlatform).toBe("Web browser");
+    expect(game.author["@id"]).toBe("https://cv.antoine.berthaud.me/#person");
+  });
+
+  it("describes the hub as a collection whose items are the level Games, same @id", () => {
+    const hub = gameHubSchema("en", {
+      path: "/game",
+      name: "The dark side",
+      description: "d",
+      levels: [{ path: "/game/retention", name: "A year at Flixo" }],
+    });
+    expect(hub["@type"]).toBe("CollectionPage");
+    expect(hub.mainEntity.itemListElement).toHaveLength(1);
+    const item = hub.mainEntity.itemListElement[0]!.item;
+    expect(item["@type"]).toBe("Game");
+    expect(item["@id"]).toBe(gameSchema("en", { path: "/game/retention", name: "x", description: "y" })["@id"]);
   });
 });

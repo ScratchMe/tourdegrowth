@@ -20,6 +20,13 @@ export interface LocaleSwitcherProps {
    * choice carries on to `/quiz` afterwards too.
    */
   path?: string;
+  /**
+   * A query string (without `?`) carried by both links — the game level asks
+   * for `resume=1`, so the page in the other language restores the year in
+   * progress without offering to restart it (plan §3.7, P18). Content pages
+   * only; ignored when `path` is omitted, where the query already IS the link.
+   */
+  switchQuery?: string;
 }
 
 /**
@@ -44,7 +51,8 @@ export interface LocaleSwitcherProps {
  * render, but wrong for screen readers and for browser translation. A real
  * navigation costs one page load on an action nobody performs twice.
  */
-export function LocaleSwitcher({ locale, path }: LocaleSwitcherProps) {
+export function LocaleSwitcher({ locale, path, switchQuery }: LocaleSwitcherProps) {
+  const suffix = switchQuery ? `?${switchQuery}` : "";
   return (
     <Segmented
       as="a"
@@ -57,7 +65,7 @@ export function LocaleSwitcher({ locale, path }: LocaleSwitcherProps) {
         lang: candidate,
         // A query-only href resolves against the current URL, so the path is
         // preserved without this component having to know it.
-        href: path === undefined ? `?lang=${candidate}` : localePath(candidate, path),
+        href: path === undefined ? `?lang=${candidate}` : `${localePath(candidate, path)}${suffix}`,
       }))}
     />
   );
