@@ -1,0 +1,39 @@
+/* Game plan §2.6 — `--border-dashed`, the system's grammar for "not yet". */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--pad-card);
+  border: var(--border-dashed);
+  border-radius: var(--radius-card);
+}
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.eyebrow {
+  margin: 0;
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.title {
+  margin: 0;
+  font: var(--title-card);
+  color: var(--text-body);
+  text-wrap: balance;
+}
+
+@media (max-width: 760px) {
+  .card {
+    padding: var(--pad-card-mobile);
+  }
+}

@@ -1,0 +1,71 @@
+/* Game plan §2.6 — `Card flat`, prose at reading measure. */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.eyebrow {
+  margin: 0;
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.title {
+  margin: 0;
+  font: var(--display-section);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+  text-wrap: balance;
+  color: var(--text-body);
+}
+
+.refused {
+  margin: 0;
+  font: var(--meta-md);
+  font-variant-numeric: var(--tabular);
+  color: var(--text-body);
+}
+
+/* The route rule the rest of the system draws between steps: a list read in order. */
+.list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-bottom: var(--border-rule);
+}
+
+.item {
+  padding: var(--space-4) 0;
+  border-top: var(--border-rule);
+  font: var(--body-md);
+  color: var(--text-body);
+}
+
+.name {
+  font-weight: 600;
+}
+
+.effects {
+  font: var(--meta-md);
+  font-variant-numeric: var(--tabular);
+  color: var(--text-muted);
+}
+
+.closing {
+  margin: 0;
+  max-width: var(--measure-read);
+  font: var(--body-read);
+  color: var(--text-body);
+}
+
+@media (max-width: 760px) {
+  .closing {
+    font: var(--body-read-mobile);
+  }
+}

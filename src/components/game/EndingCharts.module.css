@@ -1,0 +1,19 @@
+/*
+ * Game plan §2.6 and §2.8 — two frames side by side from the desktop width,
+ * stacked below it: a curve squeezed into half of a phone is a curve nobody
+ * reads (P17).
+ */
+
+.charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-10);
+  align-items: start;
+}
+
+@media (max-width: 760px) {
+  .charts {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-9);
+  }
+}

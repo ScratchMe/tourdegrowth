@@ -1,0 +1,20 @@
+/* Game plan §2.6 — the route rule above it: the last stage of the page, like a step of the Tour. */
+
+.loop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5) var(--space-8);
+  padding-top: var(--space-9);
+  border-top: var(--border-rule);
+}
+
+.question {
+  margin: 0;
+  font: var(--display-section);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+  text-wrap: balance;
+  color: var(--text-body);
+}
