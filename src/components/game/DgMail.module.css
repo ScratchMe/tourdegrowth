@@ -1,0 +1,28 @@
+/* game/DgMail — game plan §2.6. */
+
+.mail {
+  margin: 0;
+  background: var(--surface-card);
+  border: var(--border-solid);
+  border-radius: var(--radius-panel);
+  overflow: hidden;
+}
+
+.header {
+  padding: var(--space-3) var(--space-6);
+  font: var(--meta-sm);
+  color: var(--text-muted);
+  border-bottom: var(--border-rule);
+}
+
+.body {
+  margin: 0;
+  padding: var(--space-6);
+}
+
+.body p {
+  margin: 0;
+  font: var(--body-md);
+  font-style: italic;
+  color: var(--text-body);
+}

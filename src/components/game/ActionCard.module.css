@@ -1,0 +1,128 @@
+/*
+ * game/ActionCard — game plan §2.6. Semantic tokens only; the night rebinds
+ * them (world-night.css), the game's own night additions come from game.css.
+ */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  height: 100%;
+  min-height: var(--hit-option);
+  padding: var(--pad-option);
+  text-align: left;
+  font: inherit;
+  color: var(--text-body);
+  background: var(--surface-card);
+  border: var(--border-solid);
+  border-radius: var(--radius-panel);
+  cursor: pointer;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+
+/*
+ * Hover at night cannot live in the shadow (black on --night-1 is 1.20:1),
+ * so it is a lighter edge and a 2px lift — game.css. It never touches the
+ * fill: a hover that sticks after a tap must not look like a choice (DS v3
+ * §5.4). The fallbacks are the paper behaviour, should a card ever be drawn
+ * outside the night.
+ */
+.card:not(:disabled):hover {
+  border-color: var(--game-hover-border, var(--border-hard));
+  transform: translateY(var(--game-hover-lift, 0));
+}
+
+@media (hover: none) {
+  .card:not(:disabled):hover {
+    border-color: var(--border-hard);
+    transform: none;
+  }
+}
+
+.card:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+/* Ticked: the inverse fill, and everything inside reads on it. */
+.card.pressed {
+  background: var(--state-selected-bg);
+  border-color: var(--state-selected-bg);
+}
+
+.card.pressed,
+.card.pressed * {
+  color: var(--state-selected-text);
+}
+
+/*
+ * Locked while the CEO talks: disabled, contrast unchanged (R4). Only the
+ * cursor and the hint above the hand say so.
+ */
+.locked {
+  cursor: not-allowed;
+}
+
+/* Out of the round: quieter text, a decorative edge (a disabled control is exempt from 1.4.11). */
+.unavailable {
+  color: var(--text-muted);
+  border-color: var(--border-divider);
+  cursor: not-allowed;
+}
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+/*
+ * "Asked for by the CEO": the action red with paper text (4.65:1), its edge
+ * 3.57:1 against the night card. On a ticked card red on amber would be
+ * 2.63, so the badge turns into an outline in the selection's own ink.
+ */
+.order {
+  font: var(--meta-2xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  padding: var(--pad-tag);
+  border-radius: var(--radius-tag);
+  background: var(--game-order-bg, var(--action-primary-bg));
+  color: var(--game-order-text, var(--action-primary-text));
+  border: 2px solid var(--game-order-bg, var(--action-primary-bg));
+}
+
+.card.pressed .order {
+  background: transparent;
+  color: var(--game-order-on-selected, var(--state-selected-text));
+  border-color: var(--game-order-on-selected, var(--state-selected-text));
+}
+
+.chosen {
+  margin-left: auto;
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+}
+
+.name {
+  display: block;
+  font: var(--title-card);
+}
+
+.pitch {
+  display: block;
+  font: var(--body-sm);
+  color: var(--text-muted);
+}
+
+/* A muted pitch has no pairing on amber: on a ticked card it takes the selection's ink like the rest. */
+.card.pressed .pitch {
+  color: var(--state-selected-text);
+}

@@ -1,0 +1,71 @@
+/* game/GameJournal — game plan §2.6. */
+
+.journal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.title {
+  margin: 0;
+  font: var(--title-card);
+  color: var(--text-body);
+}
+
+.entries {
+  display: flex;
+  flex-direction: column;
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-6);
+}
+
+.period {
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+}
+
+.result {
+  font: var(--chart-label);
+  font-variant-numeric: var(--tabular);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.good {
+  color: var(--state-good-text);
+}
+
+.bad {
+  color: var(--state-bad-text);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.picked {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding-left: var(--space-8);
+  font: var(--body-sm);
+  color: var(--text-body);
+}
