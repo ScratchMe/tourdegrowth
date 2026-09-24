@@ -8,6 +8,7 @@
   "buildCmd": "npx tsc -p .design-sync/tsconfig.dts.json && node .design-sync/relativize-dts.mjs",
   "readmeHeader": "./.design-sync/conventions.md",
   "extraEntries": [
+    "./.design-sync/shims/process-env.ts",
     "./.design-sync/shims/ds-styles.ts"
   ],
   "componentSrcMap": {
