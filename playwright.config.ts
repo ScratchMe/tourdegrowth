@@ -14,7 +14,9 @@ import { defineConfig, devices } from "@playwright/test";
  * differently between the two. Run `npm run build` first; CI does that as its
  * own step so a build failure reports as a build failure.
  */
-const PORT = 3210;
+// E2E_PORT lets parallel checkouts (worktrees) run their suites side by side:
+// with reuseExistingServer, two suites on one port would test each other's build.
+const PORT = Number(process.env.E2E_PORT ?? 3210);
 
 export default defineConfig({
   testDir: "./e2e",
