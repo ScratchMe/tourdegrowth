@@ -20,7 +20,11 @@ export function gameMetadata(
   description: string,
   open: boolean = isGameOpenAtBuild(),
 ): Metadata {
-  const base = contentMetadata(locale, path, title, description);
+  // Both game pages carry their own share image (`opengraph-image.tsx`, plan
+  // §3.9). Without `ownShareImage` the landing's picture would be declared in
+  // config — and a config image REPLACES the file-based one (lib/i18n/meta.ts),
+  // so a game link would unfurl as the Tour's questionnaire.
+  const base = contentMetadata(locale, path, title, description, { ownShareImage: true });
   if (open) return base;
   const { alternates: _hreflang, ...closed } = base;
   return { ...closed, robots: gamePageRobots(false) };

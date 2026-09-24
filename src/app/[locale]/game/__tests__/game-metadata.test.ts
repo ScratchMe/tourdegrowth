@@ -25,6 +25,16 @@ describe("gameMetadata", () => {
     expect(open.alternates?.languages).toMatchObject({ en: "/en/game", fr: "/fr/game", "x-default": "/en/game" });
   });
 
+  it("declares no share image in config — the game's own opengraph-image files must win (G4b)", () => {
+    // A config image REPLACES the file-based one (lib/i18n/meta.ts): with it,
+    // a link to the game would unfurl as the landing's questionnaire picture.
+    for (const open of [true, false]) {
+      const metadata = gameMetadata("fr", "/game", "t", "d", open);
+      expect(metadata.openGraph?.images).toBeUndefined();
+      expect(metadata.twitter?.images).toBeUndefined();
+    }
+  });
+
   it("drops the hreflang set and asks for noindex, nofollow when closed", () => {
     const closed = gameMetadata("fr", "/game", "t", "d", false);
     expect(closed.robots).toEqual({ index: false, follow: false });

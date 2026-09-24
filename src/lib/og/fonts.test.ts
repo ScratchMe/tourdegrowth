@@ -3,6 +3,8 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { LEVEL_MOVE, NEXT_MOVES } from "@/content/next-moves";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
+import { gameHubShareText } from "@/lib/og/game-hub-share-text";
+import { gameLevelShareText } from "@/lib/og/game-level-share-text";
 import { LOCALES, type Locale } from "@/lib/i18n/locale";
 import { PILLARS } from "@/lib/scoring/pillars";
 import { SITE_DOMAIN_LABEL } from "@/lib/site";
@@ -20,6 +22,12 @@ import { SITE_DOMAIN_LABEL } from "@/lib/site";
  * `src/lib/og/result-frame.tsx` (the result image, served by
  * `/r/[id]/share/[token]`) actually render, family by family. Adding text to
  * an image means adding it here too.
+ *
+ * The game's two images (`lib/og/game-frame.tsx`) are read through the very
+ * functions the images call (`gameHubShareText`, `gameLevelShareText`), so
+ * their list cannot drift from what is drawn: the capitals of the titles
+ * (« LE CÔTÉ OBSCUR », « UNE ANNÉE ») and the churn figure, whose French
+ * form puts a U+00A0 and a « % » in the STENCIL, are checked as drawn.
  */
 
 const WORDMARK = "TOUR DE GROWTH";
@@ -29,6 +37,8 @@ function textsByFamily(locale: Locale) {
   const landing = UI_STRINGS.landing;
   const og = UI_STRINGS.og;
   const pillars = PILLARS.map((pillar) => tc(UI_STRINGS.pillars[pillar], locale));
+  const hub = gameHubShareText(locale);
+  const level = gameLevelShareText(locale);
   return {
     stardos: [
       WORDMARK,
@@ -38,6 +48,10 @@ function textsByFamily(locale: Locale) {
       // SEO audit v1 §1.1 — the headline of the `/quiz` share image.
       tc(UI_STRINGS.meta.quizHeading, locale),
       NUMERALS,
+      // « Le côté obscur » — the two titles and the churn figure.
+      hub.title,
+      level.title,
+      ...level.tiles.flatMap((tile) => (tile.value ? [tile.value] : [])),
     ],
     inter: [
       tc(landing.subtitle, locale),
@@ -54,6 +68,9 @@ function textsByFamily(locale: Locale) {
         Object.values(byPoints).map((move) => tc(move, locale)),
       ),
       tc(LEVEL_MOVE, locale),
+      // « Le côté obscur » — the zone questions and the line under the tiles.
+      ...hub.zones.map((zone) => zone.question),
+      level.sentence,
     ],
     mono: [
       tc(landing.bibTag, locale),
@@ -65,6 +82,13 @@ function textsByFamily(locale: Locale) {
       tc(UI_STRINGS.result.nextMoveLabel, locale),
       SITE_DOMAIN_LABEL,
       NUMERALS,
+      // « Le côté obscur » — kickers, zone names and states, tile labels.
+      hub.kicker,
+      hub.zonesLabel,
+      ...hub.zones.flatMap((zone) => [zone.name, zone.state]),
+      level.kicker,
+      ...level.tiles.flatMap((tile) => [tile.label, ...(tile.unit ? [tile.unit] : [])]),
+      level.hidden,
     ],
   };
 }

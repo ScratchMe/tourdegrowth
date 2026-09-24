@@ -87,11 +87,11 @@ const BUDGETS: { module: string; max: number; why: string }[] = [
     why:
       "Les quinze questions du Tour : onze routes les citaient au 2026-09-15 ; la page du moteur est la douzième (spec du moteur §10.3), pour les huit questions du pont Tour × moteur — une décision, pas un contournement.",
   },
-  // Le jeu (plan §3.4). Le texte du niveau lui-même (`content/game/retention.ts`,
-  // budget 2 : la page du niveau et son image OG) et l'encart du résultat
-  // (`content/game/entry.ts`, budget 1 : `r/[id]/page.tsx`) prendront leur
-  // ligne ici avec les chantiers qui les créent — un budget sur un module qui
-  // n'existe pas encore ferait échouer ce test pour la mauvaise raison.
+  // Le jeu (plan §3.4). L'encart du résultat (`content/game/entry.ts`, budget
+  // 1 : `r/[id]/page.tsx`) prendra sa ligne ici avec le chantier qui le crée —
+  // un budget sur un module qui n'existe pas encore ferait échouer ce test
+  // pour la mauvaise raison. Le texte du niveau a la sienne depuis que son
+  // image de partage l'atteint (G4b).
   {
     module: "content/game/meta.ts",
     max: 4,
@@ -99,8 +99,13 @@ const BUDGETS: { module: string; max: number; why: string }[] = [
   },
   {
     module: "content/game/hub.ts",
+    max: 3,
+    why: "Le hub, la page du niveau dont la navigation des zones reprend les cinq questions, et l'image de partage du hub qui dessine les cinq zones (chantier G4b). Écart au plan (qui disait 1) : une seconde copie des zones dériverait. L'image du NIVEAU ne l'atteint pas, et ne doit pas.",
+  },
+  {
+    module: "content/game/retention.ts",
     max: 2,
-    why: "Le hub, et la page du niveau dont la navigation des zones reprend les cinq questions. Écart au plan (qui disait 1) : une seconde copie des zones dériverait.",
+    why: "Les 49 Ko de texte du niveau : la page du niveau (îlot, G8a) et son image de partage, qui reprend les libellés du dashboard (G4b). Jamais l'image du hub.",
   },
 ];
 
