@@ -44,13 +44,13 @@
 }
 
 .done {
-  border: 2px solid var(--ink-0);
-  background: var(--ink-0);
+  border: 2px solid var(--surface-inverse);
+  background: var(--surface-inverse);
 }
 
 .current {
-  border: 2px solid var(--paint-red);
-  background: var(--paint-red);
+  border: 2px solid var(--accent-mark);
+  background: var(--accent-mark);
   /* tdg-pulse is defined once, globally, in tokens/motion.css. */
   animation: tdg-pulse var(--dur-pulse) var(--ease-out) both;
 }

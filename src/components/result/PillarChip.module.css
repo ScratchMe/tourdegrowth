@@ -33,7 +33,7 @@
 }
 
 .weak {
-  border: 2px dashed var(--paint-red);
+  border: 2px dashed var(--border-alert);
   background: var(--surface-alert);
   color: var(--text-alert);
 }

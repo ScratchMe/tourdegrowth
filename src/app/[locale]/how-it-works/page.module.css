@@ -107,14 +107,14 @@
   color: var(--text-muted);
 }
 
-/* The one use of --paint-red on this page, border-only per
+/* The one use of the road-paint red (--border-alert) on this page, border-only per
    DESIGN-BRIEF-ADDENDUM-01.md — deliberately not --surface-alert (that's
    the discrete weak-pillar wash used elsewhere; this encart should stand
    out, not blend into that quieter language). Not one of Card's own 4
    tones (none combine a solid red border with a paper background), so this
    is a small local override, same pattern as ResultView's roast score card. */
 .limitationCard {
-  border-color: var(--paint-red) !important;
+  border-color: var(--border-alert) !important;
 }
 
 .limitationText {

@@ -67,9 +67,9 @@
 }
 
 .selected {
-  background: var(--ink-0);
-  color: var(--text-inverse);
-  border-color: var(--ink-0);
+  background: var(--state-selected-bg);
+  color: var(--state-selected-text);
+  border-color: var(--state-selected-bg);
 }
 
 .hint {

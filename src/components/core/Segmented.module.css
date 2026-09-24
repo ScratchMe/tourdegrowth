@@ -69,20 +69,20 @@
 }
 
 .on {
-  background: var(--ink-0);
-  color: var(--text-inverse);
+  background: var(--state-selected-bg);
+  color: var(--state-selected-text);
   cursor: default;
 }
 
 /*
  * The one exception to the ink fill: the roast tone (Segmented.prompt.md).
  *
- * `--paint-red-action`, not `--paint-red`: the label here is the same
- * 600/15px as a primary button, so it is the same pair REVIEW.md R-22
- * measured at 4.42:1 and darkened 3% to clear AA (4.65:1). The prompt names
- * `--paint-red` because that token predates the split; the split is what the
- * contrast gate now enforces.
+ * The primary-action fill (`--paint-red-action`), not the road-paint accent:
+ * the label here is the same 600/15px as a primary button, so it is the same
+ * pair REVIEW.md R-22 measured at 4.42:1 and darkened 3% to clear AA
+ * (4.65:1). The prompt names `--paint-red` because that token predates the
+ * split; the split is what the contrast gate now enforces.
  */
 .onAccent {
-  background: var(--paint-red-action);
+  background: var(--action-primary-bg);
 }

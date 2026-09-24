@@ -59,11 +59,11 @@
   font: var(--display-section);
 }
 
-/* --paint-red rather than the AA-safe --paint-red-deep: at 36px/30px stencil
+/* --accent-mark (road-paint red) rather than the AA-safe --text-alert: at 36px/30px stencil
    700 this is large text, where the AA floor is 3:1 and this pair measures
    4.42:1. Same reasoning as the landing H1's accent. */
 .pillarRoast {
-  color: var(--paint-red);
+  color: var(--accent-mark);
 }
 
 .score {
