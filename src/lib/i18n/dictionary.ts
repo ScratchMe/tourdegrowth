@@ -38,7 +38,10 @@ export const UI_STRINGS = {
   landing: {
     bibTag: {
       en: "№ 15 questions — 3 min — free entry",
-      fr: "№ 15 questions — 3 min — entrée gratuite",
+      // TODO: à relire — revue de copie v1 (2026-09-24) : « entrée gratuite »
+      // passait sur deux lignes à 390 px, « GRATUITE » orpheline (critique DS
+      // L-2). « gratuit » tient sur une ligne ; « entrée libre » coupait encore.
+      fr: "№ 15 questions — 3 min — gratuit",
     },
     // Split so each locale can break the headline across two lines on its
     // own terms: line 1 is always plain, line 2 is an optional plain lead-in
@@ -49,10 +52,17 @@ export const UI_STRINGS = {
     h1Line2: { en: "your growth ", fr: "" },
     h1Accent: { en: "stall?", fr: "cale-t-elle ?" },
     subtitle: {
-      // Relu et validé par Antoine (2026-09-09) — R2-12: "AARRR" added. The framework's name
-      // appeared nowhere in the landing's visible copy, only in its metadata.
-      en: "A guided AARRR check-up across Acquisition, Activation, Retention, Referral and Revenue — scored, explained, and built to share.",
-      fr: "Un diagnostic AARRR guidé sur l'Acquisition, l'Activation, la Retention, le Referral et le Revenue — noté, expliqué, et pensé pour être partagé.",
+      // R2-12 put "AARRR" in the visible copy (the framework's name appeared
+      // only in the metadata); it stays, once, in brackets.
+      // TODO: à relire — revue de copie v1 (2026-09-24), changement nº1. The
+      // old line listed five English stage names behind French articles —
+      // four lines on a phone that say nothing to someone who doesn't already
+      // know AARRR, which is most of the launch audience. It now says what
+      // the five stages ARE in plain words; the names themselves are in the
+      // preview card right next to it. Also drops the French Oxford comma
+      // ("expliqué, et pensé") and the calque "pensé pour être partagé".
+      en: "Fifteen questions across the five stages of your growth, from how people find you to how you make money (the AARRR framework).",
+      fr: "Quinze questions sur les cinq étapes de ta croissance, de la façon dont on te trouve à la façon dont tu gagnes de l'argent (le cadre AARRR).",
     },
     /**
      * Design system extension 03 §5 / REVIEW-03.md B4 — two lines above the
@@ -88,8 +98,12 @@ export const UI_STRINGS = {
       * Relu et validé par Antoine (2026-09-11).
       */
     promise: {
-      en: "You leave with the one stage holding you back — and one action to take.",
-      fr: "Tu repars avec l'étape qui te freine — et une action à mener.",
+      // TODO: à relire — revue de copie v1 (2026-09-24), changement nº1: the
+      // score out of 100 joins the deliverable — it is the very object people
+      // share, and the preview card beside this line shows it at 120 px. Still
+      // says only what you leave WITH; the subtitle says what you do.
+      en: "You leave with a score out of 100, the one stage holding you back, and one action to take.",
+      fr: "Tu repars avec un score sur 100, l'étape qui te freine et une action à mener.",
     },
     ctaPrimary: { en: "Start your Tour →", fr: "Démarre ton Tour →" },
     ctaSecondary: { en: "See a sample result", fr: "Voir un résultat d'exemple" },
