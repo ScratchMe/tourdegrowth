@@ -11,16 +11,16 @@
  * (`content/legal.ts`, `updatedAt`), and the sitemap reads that one.
  */
 export const CONTENT_UPDATED_AT: Record<string, string> = {
-  "/": "2026-09-06", // title and share text (PR #58), visitor-facing copy
-  "/how-it-works": "2026-09-06", // stage eyebrows (R2-17)
-  "/about": "2026-09-06", // created (R2-04)
-  "/glossary": "2026-09-14", // dix termes ajoutés (GROWTH-PLAN.md 2.2, lots 1-3), puis activation-rate coupé comme doublon d'activation
-  "/growth-audit-checklist": "2026-09-14", // created (GROWTH-PLAN.md wave 2.1)
-  "/startup-growth-diagnostic": "2026-09-14", // created (GROWTH-PLAN.md wave 2.1)
+  "/": "2026-09-24", // sous-titre, promesse et dossard (revue de copie v1)
+  "/how-it-works": "2026-09-24", // « étape », intro et CTA (revue de copie v1)
+  "/about": "2026-09-24", // questions, calcul et CTA (revue de copie v1)
+  "/glossary": "2026-09-24", // définition d'AARRR (revue de copie v1)
+  "/growth-audit-checklist": "2026-09-24", // intro, section et CTA (revue de copie v1)
+  "/startup-growth-diagnostic": "2026-09-24", // intro et CTA (revue de copie v1)
   // Le cluster « frameworks comparés » (GROWTH-PLAN.md vague 2.3).
-  "/aarrr-vs-north-star-metric": "2026-09-14",
+  "/aarrr-vs-north-star-metric": "2026-09-24", // deux phrases (revue de copie v1)
   "/aarrr-vs-rarra": "2026-09-23", // deux phrases FR réécrites (bon à tirer nº5)
-  "/aarrr-vs-growth-loops": "2026-09-14",
+  "/aarrr-vs-growth-loops": "2026-09-24", // deux phrases (revue de copie v1)
   "/aarrr-vs-okr": "2026-09-14",
   "/aarrr-vs-heart": "2026-09-24", // created (audit SEO v1 §3.1)
   // Le jeu (GAME-BRIEF 9.3). Listed in the sitemap only when the game is

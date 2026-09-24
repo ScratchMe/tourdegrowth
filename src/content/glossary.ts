@@ -53,7 +53,7 @@ export interface GlossaryEntry {
 export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   aarrr: {
     ...GLOSSARY_TERMS.aarrr,
-    updatedAt: "2026-09-06", // R2-11, lot 4
+    updatedAt: "2026-09-24", // revue de copie v1 (2026-09-24) — « étape » au lieu de « pilier », calques corrigés
     extended: {
       // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
       fr: "Dave McClure (500 Startups) a présenté ce cadre en 2007 pour répondre à un problème simple : les fondateurs suivaient trop de métriques sans savoir lesquelles comptaient vraiment à chaque étape. L'ordre n'est pas arbitraire — c'est un entonnoir. Un produit qui dépense en acquisition alors que son activation fuit remplit un seau percé : chaque euro dépensé en amont perd de la valeur en aval. La plupart des équipes découvrent qu'une seule étape tire toute la note vers le bas ; c'est exactement ce que ce test calcule, étape par étape, plutôt que de donner une impression générale.",
@@ -63,7 +63,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   acquisition: {
     ...GLOSSARY_TERMS.acquisition,
-    updatedAt: "2026-09-08", // R2-11, lot 3 — formula terms reworded after review (PR #99)
+    updatedAt: "2026-09-24", // revue de copie v1 (2026-09-24) — « étape » au lieu de « pilier », calques corrigés
     extended: {
       fr: "L'acquisition couvre tous les canaux par lesquels quelqu'un arrive chez toi pour la première fois : SEO, publicité payante, bouche-à-oreille, contenu, communautés, partenariats. Le piège classique : juger un canal uniquement sur le volume qu'il apporte, sans se demander s'il est reproductible et si son coût est connu (voir CAC). Un canal qui a bien marché une fois par chance n'est pas une stratégie d'acquisition, c'est un coup de chance. Et l'acquisition seule ne dit rien de la santé du produit — un pic de nouveaux visiteurs qui n'activent jamais n'est qu'un chiffre de vanité.",
       en: "Acquisition covers every channel through which someone finds you for the first time: SEO, paid ads, word of mouth, content, communities, partnerships. The classic trap: judging a channel purely on volume, without asking whether it's repeatable and whether its cost is even known (see CAC). A channel that worked once by luck isn't an acquisition strategy, it's a lucky break. And acquisition alone says nothing about product health — a spike of new visitors who never activate is just a vanity number.",
@@ -78,7 +78,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   activation: {
     ...GLOSSARY_TERMS.activation,
-    updatedAt: "2026-09-06", // R2-11, lot 2
+    updatedAt: "2026-09-24", // revue de copie v1 (2026-09-24) — « étape » au lieu de « pilier », calques corrigés
     extended: {
       fr: "La plupart des équipes confondent activation et inscription. Ce sont deux choses différentes : l'inscription est une action administrative, l'activation est le moment où l'utilisateur comprend enfin pourquoi il est là (voir Moment « aha »). Bien définir son activation demande de regarder, parmi les utilisateurs qui reviennent des mois plus tard, quelle action ils ont tous faite tôt — c'est souvent contre-intuitif, rarement la première chose qu'on montre dans l'onboarding. Une activation mal définie fausse tout le reste : on optimise le mauvais moment du parcours.",
       en: "Most teams confuse activation with sign-up. They're two different things: sign-up is an administrative action, activation is the moment the user finally understands why they're there (see Aha moment). Defining activation correctly means looking at users who are still around months later and finding the one early action they all took — it's often counter-intuitive, rarely the first thing shown in onboarding. A poorly defined activation moment skews everything downstream: you end up optimizing the wrong point in the journey.",
@@ -87,7 +87,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   retention: {
     ...GLOSSARY_TERMS.retention,
-    updatedAt: "2026-09-06", // R2-11, lot 2
+    updatedAt: "2026-09-24", // revue de copie v1 (2026-09-24) — « étape » au lieu de « pilier », calques corrigés
     extended: {
       // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
       fr: "La retention se lit sur une courbe, pas sur un seul chiffre : le signe à chercher, c'est qu'elle finisse par s'aplatir plutôt que de continuer à descendre vers zéro (une courbe qui se stabilise dit que le produit a trouvé un usage régulier pour un noyau d'utilisateurs). C'est aussi l'étape la plus rentable à réparer avant de pousser l'acquisition : faire grandir un entonnoir qui fuit revient à courir plus vite sur un tapis roulant. L'inverse de la retention, c'est le churn — les deux se lisent toujours ensemble.",
@@ -97,7 +97,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   referral: {
     ...GLOSSARY_TERMS.referral,
-    updatedAt: "2026-09-06", // R2-11, lot 3
+    updatedAt: "2026-09-24", // revue de copie v1 (2026-09-24) — « étape » au lieu de « pilier », calques corrigés
     extended: {
       fr: "Le referral existe avec ou sans programme de parrainage formel — un utilisateur satisfait qui en parle spontanément à un collègue compte tout autant. Ce qui distingue un produit à fort referral, c'est qu'il devient moins cher à faire grandir avec le temps : chaque nouvel utilisateur en amène d'autres, contrairement à l'acquisition payante dont le coût reste stable (voir CAC). Un score NPS élevé est souvent le signal précoce qu'un mécanisme de referral, une fois construit, aura un vrai effet — un mauvais NPS prédit l'inverse, quel que soit le mécanisme.",
       en: "Referral exists with or without a formal referral program — a happy user who spontaneously tells a colleague counts just as much. What sets a high-referral product apart is that it gets cheaper to grow over time: every new user brings in others, unlike paid acquisition where the cost stays flat (see CAC). A high NPS score is often the early signal that a referral mechanism, once built, will actually work — a poor NPS predicts the opposite, whatever the mechanism.",
@@ -106,7 +106,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   revenue: {
     ...GLOSSARY_TERMS.revenue,
-    updatedAt: "2026-09-09", // R2-11, lot 3 — expansion term reworded after review
+    updatedAt: "2026-09-24", // revue de copie v1 (2026-09-24) — « étape » au lieu de « pilier », calques corrigés
     extended: {
       // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
       fr: "Cette étape ne juge pas le montant encaissé, mais si le modèle de revenu a été réellement testé face à de vrais clients — beaucoup de produits ont un plan de monétisation « pour plus tard » qui n'a jamais rencontré une carte bancaire. Une référence souvent citée dans le SaaS est un ratio LTV:CAC autour de 3:1 comme seuil de viabilité (voir LTV et CAC) — à prendre comme repère directionnel, pas comme une règle absolue selon ton marché. L'upsell et le cross-sell sont les deux leviers les plus rapides une fois le modèle de base validé.",
@@ -116,7 +116,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   "aha-moment": {
     ...GLOSSARY_TERMS["aha-moment"],
-    updatedAt: "2026-09-09", // R2-11, lot 4 — cohort definition and three FR sentences reworded after review
+    updatedAt: "2026-09-24", // revue de copie v1 (2026-09-24) — « étape » au lieu de « pilier », calques corrigés
     extended: {
       fr: "L'exemple le plus cité vient de Facebook : les équipes croissance avaient trouvé qu'un nouvel utilisateur qui atteignait 7 amis en 10 jours restait presque toujours par la suite — ce seuil précis est devenu leur boussole d'onboarding pendant des années. Trouver son propre moment « aha » demande de regarder en arrière, pas en avant : quelle action, faite tôt, les utilisateurs qui sont restés ont-ils tous en commun ? C'est rarement la fonctionnalité la plus mise en avant dans l'interface — souvent une action secondaire que personne ne pousse assez.",
       en: "The most-cited example comes from Facebook: growth teams found that a new user who reached 7 friends in 10 days almost always stuck around afterward — that specific threshold became their onboarding compass for years. Finding your own aha moment means looking backward, not forward: what early action do all the users who stayed have in common? It's rarely the most prominently featured part of the interface — often a secondary action nobody pushes hard enough.",
@@ -134,7 +134,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   ltv: {
     ...GLOSSARY_TERMS.ltv,
-    updatedAt: "2026-09-06", // R2-11, lot 1
+    updatedAt: "2026-09-24", // revue de copie v1 (2026-09-24) — « étape » au lieu de « pilier », calques corrigés
     extended: {
       // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
       fr: "Une estimation courante en SaaS : revenu mensuel moyen par client, divisé par le taux de churn mensuel. Un churn de 5 %/mois donne mécaniquement une durée de vie moyenne de 20 mois — ce qui montre à quel point la LTV dépend directement de la retention, pas seulement du prix. Augmenter son prix sans travailler la retention gonfle la LTV sur le papier sans rien changer à la réalité si les clients partent toujours aussi vite. C'est pour ça que cette étape et Retention se lisent toujours ensemble, jamais isolément.",
@@ -153,7 +153,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   "viral-coefficient": {
     ...GLOSSARY_TERMS["viral-coefficient"],
-    updatedAt: "2026-09-06", // R2-11, lot 2
+    updatedAt: "2026-09-24", // revue de copie v1 (2026-09-24) — « étape » au lieu de « pilier », calques corrigés
     extended: {
       fr: "Formule standard, souvent notée K : nombre moyen d'invitations envoyées par utilisateur, multiplié par leur taux de conversion. K > 1 veut dire que chaque utilisateur en amène plus d'un autre en moyenne — la croissance s'auto-alimente sans dépenser plus en acquisition. En pratique, K > 1 durable est rare et précieux ; la plupart des produits visent plutôt un K qui réduit sensiblement le CAC effectif sans prétendre à la viralité pure. Ce tableau de bord Growth calcule d'ailleurs son propre K-factor en continu, exactement selon cette formule, sur les vraies analyses complétées.",
       en: "Standard formula, often written K: the average number of invitations sent per user, multiplied by their conversion rate. K > 1 means each user brings in more than one other on average — growth that feeds itself without spending more on acquisition. In practice, a sustained K > 1 is rare and valuable; most products instead aim for a K that meaningfully lowers effective CAC without claiming pure virality. This tool's own growth dashboard computes its K-factor continuously, using exactly this formula, on real completed analyses.",
