@@ -68,6 +68,68 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/*
+ * A base colour for every link — ds-critique H-4, 2026-09-24.
+ *
+ * There was none, so any `<a>` without a class of its own fell back to the
+ * browser's #0000EE: three prose links on the content pages shipped in
+ * browser blue (and visited purple). The CI never saw it because that blue
+ * passes AA on paper — it is a brand defect, not a contrast one.
+ *
+ * `:where()` keeps both rules at zero specificity, and that is the point:
+ * every component that styles its own link (buttons rendered as `<a>`, the
+ * wordmark, footer links, glossary chips) must keep winning with a single
+ * class, in either stylesheet order. A plain `a:hover` would be 0,1,1 and
+ * would repaint a primary button's label on hover. `--text-link` is
+ * `--paint-red-deep`: 5.42:1 on --paper-1, 6.72:1 on --paper-0.
+ */
+:where(a) {
+  color: var(--text-link);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+:where(a:hover) {
+  color: var(--text-link-hover);
+}
+
+/*
+ * No widowed last word on a page title (ds-critique L-1): "How it / works",
+ * "Coût d'Acquisition / Client". Zero specificity, so a module that sets its
+ * own `text-wrap` still decides; `DetourCard` already balanced its title.
+ */
+:where(h1) {
+  text-wrap: balance;
+}
+
+/*
+ * The skip link (ds-critique L-9), rendered first in `<body>` by RootShell
+ * and pointing at the page's `<main id="main">`. Off-screen until it takes
+ * keyboard focus — translated, never `display: none`, which would take it out
+ * of the tab order it exists to lead. Every header in this product carries a
+ * nav or a language switch, so without it a keyboard reader tabs through
+ * those on every page before reaching the content.
+ */
+.tdg-skip {
+  position: fixed;
+  top: var(--space-5);
+  left: var(--space-5);
+  z-index: 100;
+  padding: var(--space-4) var(--space-7);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font: var(--label-button);
+  border: var(--border-solid);
+  border-radius: var(--radius-button);
+  box-shadow: var(--shadow-panel);
+  text-decoration: none;
+  transform: translateY(calc(-100% - var(--space-11)));
+}
+
+.tdg-skip:focus {
+  transform: none;
+}
+
 /* Every interactive element must show a visible focus ring. */
 :focus-visible {
   outline: var(--focus-width) solid var(--focus-ring);

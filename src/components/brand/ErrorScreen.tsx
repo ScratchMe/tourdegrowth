@@ -43,7 +43,7 @@ export function ErrorScreen({ locale, error, reset }: ErrorScreenProps) {
 
   return (
     <>
-      <main className={styles.main}>
+      <main id="main" className={styles.main}>
         <WordmarkLink locale={locale} />
 
         <DetourCard tone="fault" eyebrow={tc(t.errorEyebrow, locale)} title={tc(t.errorTitle, locale)}>

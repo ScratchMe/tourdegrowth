@@ -20,7 +20,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
   return (
     <html lang="en">
       <body>
-        <main className={styles.main}>
+        <main id="main" className={styles.main}>
           <DetourCard tone="fault" eyebrow={tc(t.errorEyebrow, "en")} title={tc(t.errorTitle, "en")}>
             {tc(t.errorBody, "en")}
             {error.digest ? ` (${error.digest})` : null}
