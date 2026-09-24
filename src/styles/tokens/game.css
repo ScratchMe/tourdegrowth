@@ -1,0 +1,151 @@
+/*
+ * Tokens of the game "Le côté obscur" — game plan §2.3–§2.5 and §2.8.
+ *
+ * Three things live here, and only here:
+ *
+ *   1. Two ISLANDS, --dg-* (the CEO's face and the call's backdrop) and
+ *      --app-* / --phone-* (Flixo's phone app). They are illustration and
+ *      someone else's product, drawn: read only by their own components
+ *      (DgFace, VideoCall, PhoneMock), declared once on :root and NEVER
+ *      rebound by a world. The phone is white inside the night on purpose —
+ *      "a real app screen, with its own little system" (GAME-BRIEF §9.9).
+ *   2. The game's additions to the night world (`[data-world="night"]`):
+ *      the order badge, hidden tiles, the night hover.
+ *   3. The game's type, motion and layout constants — the few values the
+ *      design system does not already name.
+ *
+ * Every contrast quoted below is asserted by game-token-contrast.test.ts,
+ * composed on the ground it actually lands on. No hex outside this file for
+ * the game (game-no-hex.test.ts, X22): a game component that needs a color
+ * this file does not name gets a token here, measured, not a literal.
+ */
+
+/* --- 1. Islands --- */
+:root {
+  /*
+   * The face and the call. The contrasts that matter are the strokes that
+   * carry the expression against the skin (≥ 3:1, WCAG 1.4.11).
+   */
+  --dg-skin: #c89b7b; /* 6.15 against --dg-wall */
+  --dg-skin-angry: #d48a6e; /* from the prototype */
+  --dg-hair: #3a2a22; /* hair AND brows — the expression: 5.50 / 4.99 on skin / angry skin */
+  --dg-eye: #1b1b1b; /* 6.91 / 6.28 */
+  /* The prototype's #7a4a3a was 2.94 / 2.67 — the mouth, the most expressive
+     stroke, was the one under 3:1. */
+  --dg-mouth: #6a3a2c; /* 3.74 / 3.40 */
+  --dg-shirt: var(--night-text);
+  --dg-tie: var(--paint-red-deep); /* a quiet echo of the brand */
+  --dg-suit: #4a4034; /* 1.51 against the wall: a silhouette, decorative */
+  --dg-wall: #2b241b; /* one notch warmer than --night-1 */
+  /* The shelf: light ink, muted amber, rule — no more electric #2E5BFF. */
+  --dg-shelf-1: #5b5346;
+  --dg-shelf-2: #7a5c26;
+  --dg-shelf-3: #3a3328;
+
+  /*
+   * Subtitle band, "● DG · Flixo" chip, timer: 72% black. --night-text on it,
+   * composed over the wall: 17.20. The live dot against the same chip: 4.24
+   * (the plan quoted 4.13, measured on a 60% chip that no token declares).
+   */
+  --visio-scrim: rgba(0, 0, 0, 0.72);
+  --visio-halo-angry: rgba(210, 64, 44, 0.45); /* --paint-red at 45%, decorative */
+  --visio-live: var(--paint-red); /* a shape, never text */
+
+  /*
+   * The phone: Flixo's brand is a blue, deliberately foreign to Tour de
+   * Growth — it is somebody else's product.
+   */
+  --app-bg: #ffffff;
+  --app-ink: #151b24; /* 17.30 */
+  --app-muted: #5f6874; /* 5.65 on --app-bg, 5.45 on --app-modal-bg */
+  /*
+   * The "request cancellation" link, 11.5px underlined. The prototype's
+   * #9aa0a8 was 2.64:1: teaching interfaces that hide by building one that
+   * cannot be read. Discreet by size, place and grey — 4.74 — never by
+   * illegibility.
+   */
+  --app-faint: #6b7480;
+  --app-line: #e3e7ec; /* 1.24, decorative */
+  --app-brand: #2f55d4; /* 6.23: white on it, and it as text on white */
+  --app-on-brand: #ffffff;
+  --app-danger-bg: #fff0ee;
+  --app-danger-text: #b42318; /* 5.93 */
+  --app-danger-line: #f5c6c0;
+  --app-warn-bg: #fff8e5;
+  --app-warn-text: #7a5200; /* 6.53 (the prototype's #8a5f00: 5.33) ; ink on this ground 16.32 */
+  --app-warn-line: #f3dfa3;
+  --app-ok-bg: #eef6ee;
+  --app-ok-text: #1e5631; /* 7.84 */
+  --app-social-bg: #f2f5ff;
+  --app-social-text: #2e3a8c; /* 9.18 */
+  --app-social-avatar: #b9c4f5;
+  --app-push-bg: #111827;
+  --app-push-text: #ffffff; /* 17.74 */
+  --app-modal-bg: #fafbfc;
+
+  /* The bezel is 1.06:1 against --night-0: its outline carries the edge. */
+  --phone-bezel: #0b0907;
+  --phone-bezel-line: var(--night-line); /* 3.99 */
+  --phone-radius: 30px;
+  --phone-screen-radius: 20px;
+}
+
+/* --- 2. The game's night additions --- */
+[data-world="night"] {
+  /* "Asked for by the CEO" on an unticked card: 4.65 text; edge 3.57 on --night-1. */
+  --game-order-bg: var(--paint-red-action);
+  --game-order-text: var(--paper-0);
+  /* The same badge on a ticked (amber) card: red on amber would be 2.63. */
+  --game-order-on-selected: var(--night-0); /* outline + text, 10.13 on amber */
+  /* Hidden tiles: the value is dimmed and blurred — and never actually
+     rendered (plan §2.7). Composed on --night-1: 4.70. */
+  --game-hidden-opacity: 0.5;
+  --game-hidden-blur: 6px;
+  /*
+   * Hover at night. The shadow is black (1.20:1): hover cannot live in it.
+   * A lighter edge and a 2px lift instead — the night variant of
+   * --state-hover-shadow the plan asks the design system to adopt.
+   */
+  --game-hover-border: var(--night-muted); /* 7.70 on --night-1 */
+  --game-hover-lift: -2px;
+}
+
+/* --- 3. Type, motion, layout --- */
+:root {
+  /* The Churn tile's hero value on a phone; desktop uses --chart-value-xl. */
+  --game-value-hero-mobile: 700 30px/1 var(--font-display);
+  /* Other tile values on a compact phone row; desktop uses --chart-value. */
+  --game-value-compact: 600 17px/1.1 var(--font-mono);
+  /* The CEO's subtitles: legibility first, neither italic nor mono. */
+  --game-subtitle: var(--body-lg);
+  /* The phone speaks the app's language (Inter), at its own sizes. */
+  --app-text-md: 500 15px/1.4 var(--font-ui);
+  --app-text-sm: 500 13px/1.4 var(--font-ui);
+  --app-text-link: 500 11.5px/1.3 var(--font-ui); /* never under 11px */
+
+  /*
+   * Motion. All of it is switched off by the reduced-motion rule of
+   * motion.css; JS-driven motion (typewriter, the months rolling) lives in
+   * lib/game/ui-timing.ts, where the tests can read it.
+   */
+  --game-dur-speak: 220ms; /* mouth scaleY while talking, alternate */
+  --game-dur-blink: 4.5s; /* calm blink */
+  --game-dur-live: 1.6s; /* live dot */
+  --game-dur-live-angry: 0.7s;
+  --game-dur-ring: 1.2s; /* incoming call, frame pulse */
+  --game-dur-enter: 200ms; /* report: fade + rise */
+  --game-enter-rise: 8px;
+  --game-dur-flash: 600ms; /* phone diff flash */
+  --game-dur-trace: 800ms; /* December curves, stroke-dashoffset */
+  /* December unblur. Proposed to motion.css (plan §2.5); here until it lands. */
+  --dur-reveal: 600ms;
+
+  /* Layout (plan §2.8): the desktop split and the phone frame. */
+  --game-col-main: 600px;
+  --game-col-side: 400px;
+  --game-gutter-mobile: var(--space-7); /* 16px minimum */
+  --phone-width: 330px;
+  --phone-width-mobile: 300px;
+  --phone-min-height: 430px;
+  --phone-min-height-mobile: 360px;
+}

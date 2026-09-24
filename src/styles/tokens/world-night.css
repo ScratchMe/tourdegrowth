@@ -1,0 +1,187 @@
+/*
+ * The night world — DS v3 §5.3–§5.5 (phase 1 design-system critique), the
+ * ground of the game "Le côté obscur": dashboard, video call, hand of cards.
+ *
+ * Derived from the brand's ink — asphalt at night, not the prototype's
+ * blue-grey (#0E1420) — so the brand is still recognisable when the world
+ * changes, which is the whole point of the December "back to paper" beat.
+ *
+ * How a world works (colors.css header): it rebinds the SEMANTIC layer and
+ * nothing else. The derived layer (`:root, [data-world]` in colors.css and
+ * shape.css) is redeclared on every world container, so --state-selected-*,
+ * --field-bg, --shadow-card, --border-solid… re-resolve here on their own —
+ * they are deliberately NOT repeated below. Components never read a
+ * --night-* primitive (no-primitives.test.ts); they read the semantic names
+ * and inherit this world from `<NightSurface>`.
+ *
+ * Every semantic token of the paper block is rebound here, even the ones
+ * whose value does not change (the primary button): a token left out would
+ * silently inherit its PAPER value inside the night, and paper values on a
+ * night ground are exactly the pairings nobody measured.
+ * night-token-sources.test.ts holds that rule, and night-token-contrast.test.ts
+ * asserts every ratio quoted below, composed on the ground it lands on.
+ *
+ * Three rules of this world, each the result of a measurement:
+ *   1. --paint-red is never TEXT at night (3.76:1 on --night-1). Red text is
+ *      --night-bad (6.19:1). The primary button does not change: its label
+ *      sits on its own fill (4.65:1), and that fill's edge against the night
+ *      is 3.57:1 ≥ 3.
+ *   2. The prototype's coral and crimson merge into --night-bad: simulated
+ *      under deuteranopia they are ΔE 6.9 apart — one meaning, one token.
+ *   3. A hidden tile blurs its VALUE only (filter + opacity .5). Text at 50%
+ *      on --night-2 falls to 4.47:1, so the label that says why it is hidden
+ *      stays outside the dimmed block, at full opacity. (The critique says
+ *      4.46: two channels compose to exactly x.5, which Python rounds to
+ *      even and a browser — like the tests here — rounds up. Under AA either
+ *      way, which is the only thing the rule depends on.)
+ *
+ * `src/styles/tokens/tokens.ts` carries the same values (NIGHT_PRIMITIVES,
+ * NIGHT_WORLD) for Satori and anything rendered to an image.
+ */
+
+/* PRIMITIVES — the night palette. :root only, never read by a component. */
+:root {
+  --night-0: #14110d; /* page ground */
+  --night-1: #1d1913; /* panel: tiles, the call */
+  --night-2: #2a241c; /* raised panel: selected card, the report */
+  --night-text: #f3efe4; /* 16.38 / 15.22 / 13.37 on night-0/1/2 */
+  --night-muted: #b5ab98; /* 8.28 / 7.70 / 6.76 */
+  /*
+   * Not in the §5.3 table: the night counterpart of --ink-faint (the credit
+   * line, "quieter than muted"). The same idea as on paper — the text ink,
+   * translucent — at the lowest alpha that still clears AA on the darkest
+   * AND the lightest night ground: 5.55 / 5.43 / 5.09, below --night-muted
+   * everywhere, so the hierarchy survives the change of world.
+   */
+  --night-faint: rgba(243, 239, 228, 0.55);
+  --night-line: #7d7260; /* component edges, axes — 3.99 / 3.70 / 3.25, ≥ 3 everywhere */
+  --night-rule: #3a3328; /* dashed separators — 1.51 / 1.40 / 1.23, decorative */
+  --night-amber: #f0b43c; /* key figure, selection — 10.13 / 9.41 / 8.26 */
+  --night-good: #5fcf8e; /* 9.68 / 9.00 / 7.90 */
+  --night-bad: #ff6a52; /* red TEXT and "bad" marks — 6.66 / 6.19 / 5.44 */
+  /*
+   * Not in the §5.3 table either: --surface-alert (the red wash under a weak
+   * pillar or a problem card) has no night value there, and its paper value
+   * (#f3d9d2) under --night-text would be 1.2:1. A dark ember instead: body
+   * text 13.66, --night-bad text 5.56, muted 6.91, and its --border-alert
+   * edge (--paint-red) 3.37 against it — an alert card still reads as one.
+   */
+  --night-red-wash: #3a1a14;
+}
+
+/* SEMANTIC — the night world rebinds this layer, and only this layer. */
+[data-world="night"] {
+  --surface-page: var(--night-0);
+  --surface-card: var(--night-1);
+  --surface-sunken: var(--night-2);
+  /* "The darkest neutral ground" — at night the page already is. */
+  --surface-desk: var(--night-0);
+  --surface-alert: var(--night-red-wash);
+  /* The selection fill: amber, with the night itself as its text (10.13:1). */
+  --surface-inverse: var(--night-amber);
+
+  --text-body: var(--night-text);
+  --text-muted: var(--night-muted);
+  /*
+   * --text-inverse is the label ON a red fill (Tag red, the stamped pillar,
+   * the roast badge): the fill stays --paint-red at night, so its label stays
+   * paper — same 4.42:1 as in the paper world, not a new pairing.
+   * --text-on-inverse is the label on --surface-inverse, which is now amber.
+   */
+  --text-inverse: var(--paper-0);
+  --text-on-inverse: var(--night-0);
+  --text-alert: var(--night-bad); /* rule 1: never --paint-red */
+  --text-link: var(--night-amber); /* 9.41 on night-1 */
+  --text-link-hover: var(--night-text);
+  --text-faint: var(--night-faint);
+
+  --border-hard: var(--night-line);
+  --border-soft: var(--night-line);
+  --border-alert: var(--paint-red); /* a mark: 4.04 / 3.76 / 3.30 */
+  --border-divider: var(--night-rule);
+
+  --accent-mark: var(--paint-red); /* 3.76 on night-1: a mark, FORBIDDEN as text */
+
+  /*
+   * Hard shadows stay hard at night (no blur, ever — critique §6); only their
+   * color changes. Black on --night-1 is 1.20:1: decorative. A card's edge
+   * (≥ 3:1) is carried by --border-hard, never by its shadow — which is also
+   * why hover cannot rely on the shadow in this world (see game.css).
+   */
+  --shadow-color: #000000;
+  --texture-ink: rgba(243, 239, 228, 0.05);
+
+  --state-bad-text: var(--night-bad);
+  --state-good-text: var(--night-good);
+  --state-warn-text: var(--night-amber);
+
+  /* Rule 1: the primary button is the same object in both worlds. */
+  --action-primary-bg: var(--paint-red-action);
+  --action-primary-text: var(--paper-0);
+  --action-secondary-text: var(--night-text);
+
+  --focus-ring: var(--night-text); /* 15.22 on night-1 */
+  /* The red ring of option buttons: a mark, 4.04 / 3.76 / 3.30 — still ≥ 3. */
+  --focus-ring-invert: var(--paint-red);
+
+  --field-border-alert: var(--paint-red);
+
+  /* --- Data-viz, night world (DS v3 §5.5). Same doctrine as paper. --- */
+  --viz-ink: var(--night-text);
+  --viz-axis: var(--night-muted);
+  /* Gridlines: decorative on purpose, 1.43:1 once composed on --night-0. */
+  --viz-grid: rgba(243, 239, 228, 0.14);
+  --viz-highlight: var(--night-bad);
+  --viz-highlight-text: var(--night-bad); /* bright enough to be its own label here */
+  --viz-unknown: var(--night-muted);
+  /* ΔE min 46.1 normal, 17.7 deuteranopia, 12.9 protanopia, 10.9 tritanopia:
+     dash patterns and direct labels stay mandatory, as on paper. */
+  --viz-cat-1: #6cb4e8;
+  --viz-cat-2: #3fc59a;
+  --viz-cat-3: var(--night-amber);
+  --viz-cat-4: #e08cc0;
+  --viz-cat-5: var(--night-text);
+
+  /*
+   * Sequential, amber rising out of the night. Step 3 was #8a6a2c (4.37:1
+   * with the night text, 3.75:1 with the night ground — no label passed);
+   * darkened to #7a5c26. Neighbours are 1.38–2.08 apart: cells keep their
+   * separating rule, as on paper.
+   */
+  --viz-seq-1: #3a3226;
+  --viz-seq-2: #5a4a2c;
+  --viz-seq-3: #7a5c26;
+  --viz-seq-4: #c08c30;
+  --viz-seq-5: var(--night-amber);
+  --viz-seq-1-text: var(--night-text); /* 10.98 */
+  --viz-seq-2-text: var(--night-text); /* 7.46 */
+  --viz-seq-3-text: var(--night-text); /* 5.40 */
+  --viz-seq-4-text: var(--night-0); /* 6.31 */
+  --viz-seq-5-text: var(--night-0); /* 10.13 */
+
+  /*
+   * The page ground is not a color token (shape.css declares it once, on
+   * :root), so rebinding the semantic layer cannot reach it — and its paper
+   * value is a 45% WHITE lift, a floodlight on asphalt. Overridden by name:
+   * a faint lamp of the night text, and a deeper shade where paper had its
+   * soft shadow. Same geometry, so the two worlds are lit the same way.
+   */
+  --ground-lift: radial-gradient(circle at 16% 12%, rgba(243, 239, 228, 0.06), transparent 42%),
+    radial-gradient(circle at 88% 74%, rgba(0, 0, 0, 0.35), transparent 46%);
+}
+
+/*
+ * --ground-lift has no paper-world block of its own (it lives on :root), so
+ * paper nested INSIDE the night — the game's press clippings, December —
+ * would inherit the night's lamp. Capture the paper value where it is
+ * declared and hand it back to every paper container. `var()` resolves at
+ * :root, so --ground-lift-paper inherits as the finished paper gradient:
+ * no second copy of the literal that could drift from shape.css.
+ */
+:root {
+  --ground-lift-paper: var(--ground-lift);
+}
+
+[data-world="paper"] {
+  --ground-lift: var(--ground-lift-paper);
+}
