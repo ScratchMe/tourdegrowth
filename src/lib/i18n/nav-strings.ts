@@ -26,4 +26,8 @@ export const NAV_STRINGS = {
   // et ce module est le seul à rester petit par construction (R2-14).
   // TODO: à relire (convention 6).
   skipToContent: { en: "Skip to content", fr: "Aller au contenu" },
+  // Le lien de pied de page vers le jeu (GAME-BRIEF 13.3 B), affiché seulement
+  // quand le jeu est ouvert au build. Libellé fourni par le brief.
+  // TODO: à relire (convention 6).
+  game: { en: "The game", fr: "Le jeu" },
 } as const satisfies Record<string, Translatable>;

@@ -22,6 +22,10 @@ export const CONTENT_UPDATED_AT: Record<string, string> = {
   "/aarrr-vs-rarra": "2026-09-23", // deux phrases FR réécrites (bon à tirer nº5)
   "/aarrr-vs-growth-loops": "2026-09-14",
   "/aarrr-vs-okr": "2026-09-14",
+  // Le jeu (GAME-BRIEF 9.3). Listed in the sitemap only when the game is
+  // open at build (lib/game/build-flag.ts); dated here like every other page.
+  "/game": "2026-09-24", // created (hub)
+  "/game/retention": "2026-09-24", // created (level page, intro only until the island lands)
 };
 
 /** The day the long-form `extended` copy of every term was approved. */
