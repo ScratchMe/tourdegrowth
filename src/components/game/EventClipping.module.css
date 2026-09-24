@@ -1,0 +1,66 @@
+/*
+ * game/EventClipping — game plan §2.6. Everything here reads the PAPER world:
+ * the figure carries data-world="paper", so these semantic tokens resolve to
+ * their paper values even deep inside the night.
+ */
+
+.clipping {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-7) var(--space-8);
+  /* Ground and ink are inherited as computed night values otherwise (NightSurface's note). */
+  background: var(--surface-card);
+  color: var(--text-body);
+  border: var(--border-solid);
+  border-radius: var(--radius-tag);
+  transform: rotate(-1deg);
+}
+
+/* A second clipping leans the other way: two cut-outs on a desk, not a stack of cards. */
+.clipping + .clipping {
+  transform: rotate(0.6deg);
+}
+
+.masthead,
+.handle {
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding-bottom: var(--space-3);
+  border-bottom: var(--border-rule);
+}
+
+/* The regulator's clipping is the bad news of the year: deep red, the paper world's red TEXT (6.72:1). */
+.clipping[data-kind="control"] .masthead {
+  color: var(--text-alert);
+}
+
+/* The one kind article. */
+.clipping[data-kind="press"] .masthead {
+  color: var(--state-good-text);
+}
+
+.handle {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.headline {
+  margin: 0;
+  font: var(--title-card);
+  color: var(--text-body);
+}
+
+.text,
+.post {
+  margin: 0;
+  font: var(--body-sm);
+  color: var(--text-body);
+}
+
+.post {
+  font: var(--body-md);
+}

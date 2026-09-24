@@ -1,0 +1,189 @@
+/* game/QuarterReport — game plan §2.6. Night world, raised panel (--night-2). */
+
+.report {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-9);
+  padding: var(--space-10) var(--space-11);
+  background: var(--surface-sunken);
+  color: var(--text-body);
+  border: var(--border-solid);
+  border-radius: var(--radius-card);
+  animation: tdg-game-report-enter var(--game-dur-enter, 200ms) var(--ease-out) both;
+}
+
+/* Fades and rises into the call's place; off under reduced motion (motion.css). */
+@keyframes tdg-game-report-enter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--game-enter-rise, 8px));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.period {
+  margin: 0;
+  font: var(--meta-md);
+  letter-spacing: var(--meta-tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-body);
+}
+
+/* Focused by the island when the report opens: no ring for a focus nobody tabbed to. */
+.period:focus {
+  outline: none;
+}
+
+.picked {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.figures {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-7);
+  padding: var(--space-7) 0;
+  border-top: var(--border-rule);
+  border-bottom: var(--border-rule);
+}
+
+.figure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.figureLabel {
+  font: var(--chart-label);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.figureValue {
+  font: var(--chart-value);
+  font-variant-numeric: var(--tabular);
+  color: var(--text-body);
+  overflow-wrap: anywhere;
+}
+
+.figureNote {
+  font: var(--chart-label);
+  color: var(--text-muted);
+}
+
+.status {
+  font: var(--chart-label);
+}
+
+.good {
+  color: var(--state-good-text);
+}
+
+.bad {
+  color: var(--state-bad-text);
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.blockTitle {
+  margin: 0;
+  font: var(--title-card);
+}
+
+.lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding-left: var(--space-8);
+  font: var(--body-md);
+}
+
+.note {
+  color: var(--text-muted);
+}
+
+.clippings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  /* The tilt pushes a corner out by a few pixels: room so it never touches the next block. */
+  padding: var(--space-2) var(--space-2) 0;
+}
+
+.boss {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  padding: var(--space-6);
+  background: var(--surface-card);
+  border-left: 3px solid var(--border-hard);
+  border-radius: var(--radius-tag);
+}
+
+/* An angry CEO: the same edge the call's subtitle band takes (plan §2.6). */
+.angry {
+  border-left-color: var(--state-bad-text);
+}
+
+.face {
+  flex: none;
+  display: inline-flex;
+  width: 40px;
+  height: 40px;
+}
+
+.bossLine {
+  margin: 0;
+  font: var(--body-md);
+}
+
+.next {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 760px) {
+  .report {
+    gap: var(--space-8);
+    padding: var(--space-8) var(--space-7);
+  }
+
+  .figures {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-6);
+  }
+
+  /* Churn and its status lead the pair grid, across both columns. */
+  .figure:first-child {
+    grid-column: span 2;
+  }
+
+  .next {
+    justify-content: stretch;
+  }
+
+  .next > * {
+    flex: 1;
+  }
+}
