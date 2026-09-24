@@ -10,6 +10,14 @@ import {
   previewRequest,
   resolveGameAccess,
 } from "@/lib/game/access";
+import {
+  ENGINE_PREVIEW_COOKIE,
+  ENGINE_PREVIEW_PARAM,
+  engineEnvFlag,
+  isEnginePath,
+  previewRequest as enginePreviewRequest,
+  resolveEngineAccess,
+} from "@/lib/engine/access";
 
 const ONE_YEAR = 60 * 60 * 24 * 365;
 
@@ -219,15 +227,32 @@ export function proxy(request: NextRequest) {
       cookie: request.cookies.get(GAME_PREVIEW_COOKIE)?.value,
     }) === "closed";
 
+  // The growth engine's flag (engine spec §11.2), the same mechanism as the
+  // game's, on its own cookie: `?engine=preview` opens it for this browser
+  // until `?engine=off`, and `ENGINE_ENABLED` opens it for everybody. The
+  // page stays prerendered either way — closing it is a rewrite, not a
+  // dynamic render.
+  const enginePreview = enginePreviewRequest(request.nextUrl.searchParams.get(ENGINE_PREVIEW_PARAM));
+  if (enginePreview === "preview") request.cookies.set(ENGINE_PREVIEW_COOKIE, "1");
+  if (enginePreview === "off") request.cookies.delete(ENGINE_PREVIEW_COOKIE);
+  const engineClosed =
+    fromUrl !== null &&
+    isEnginePath(fromUrl.rest) &&
+    resolveEngineAccess({
+      env: engineEnvFlag(),
+      cookie: request.cookies.get(ENGINE_PREVIEW_COOKIE)?.value,
+    }) === "closed";
+
   // The root layout can't read the URL, so hand it the answer.
   const headers = new Headers(request.headers);
   headers.set(LOCALE_HEADER, locale);
 
-  // A closed game page is rewritten to an address no route matches, under
-  // the same language prefix: the reader gets the localized 404 with a 404
-  // status, and the game pages themselves stay prerendered (13.2).
-  const response = gameClosed
-    ? NextResponse.rewrite(new URL(localePath(locale, "/game-unavailable"), request.url), {
+  // A closed game or engine page is rewritten to an address no route
+  // matches, under the same language prefix: the reader gets the localized
+  // 404 with a 404 status, and the pages themselves stay prerendered (13.2).
+  const unavailable = gameClosed ? "/game-unavailable" : engineClosed ? "/engine-unavailable" : null;
+  const response = unavailable
+    ? NextResponse.rewrite(new URL(localePath(locale, unavailable), request.url), {
         request: { headers },
       })
     : NextResponse.next({ request: { headers } });
@@ -241,6 +266,15 @@ export function proxy(request: NextRequest) {
     });
   }
   if (preview === "off") response.cookies.delete(GAME_PREVIEW_COOKIE);
+  if (enginePreview === "preview") {
+    response.cookies.set(ENGINE_PREVIEW_COOKIE, "1", {
+      path: "/",
+      maxAge: ONE_YEAR,
+      sameSite: "lax",
+      httpOnly: true,
+    });
+  }
+  if (enginePreview === "off") response.cookies.delete(ENGINE_PREVIEW_COOKIE);
 
   if (explicitChoice) {
     response.cookies.set(LOCALE_COOKIE, explicitChoice, {

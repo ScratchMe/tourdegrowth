@@ -281,3 +281,92 @@ describe("proxy (game flag and preview cookie)", () => {
     expect(rewriteOf(proxy(request("/quiz")))).toBeNull();
   });
 });
+
+/**
+ * Engine spec §11.2 — the growth engine is closed by default, like the game,
+ * on its own env var and its own cookie. The two flags must never leak into
+ * each other: a game preview does not open the engine, and vice versa.
+ */
+describe("proxy (engine flag and preview cookie)", () => {
+  const ORIGINAL = process.env.ENGINE_ENABLED;
+  const ORIGINAL_GAME = process.env.GAME_ENABLED;
+  afterEach(() => {
+    if (ORIGINAL === undefined) delete process.env.ENGINE_ENABLED;
+    else process.env.ENGINE_ENABLED = ORIGINAL;
+    if (ORIGINAL_GAME === undefined) delete process.env.GAME_ENABLED;
+    else process.env.GAME_ENABLED = ORIGINAL_GAME;
+  });
+
+  function request(url: string, cookie?: string): NextRequest {
+    const headers = cookie ? { cookie } : undefined;
+    return new NextRequest(`https://tourdegrowth.com${url}`, { headers });
+  }
+  const rewriteOf = (res: Response) => res.headers.get("x-middleware-rewrite");
+
+  it("rewrites the closed engine page to an unmatched address under the same language", () => {
+    delete process.env.ENGINE_ENABLED;
+    expect(rewriteOf(proxy(request("/fr/aarrr-funnel-template")))).toBe(
+      "https://tourdegrowth.com/fr/engine-unavailable",
+    );
+    expect(rewriteOf(proxy(request("/en/aarrr-funnel-template")))).toBe(
+      "https://tourdegrowth.com/en/engine-unavailable",
+    );
+  });
+
+  it("serves the engine when ENGINE_ENABLED is exactly \"true\", and only then", () => {
+    process.env.ENGINE_ENABLED = "true";
+    expect(rewriteOf(proxy(request("/fr/aarrr-funnel-template")))).toBeNull();
+    process.env.ENGINE_ENABLED = "yes";
+    expect(rewriteOf(proxy(request("/fr/aarrr-funnel-template")))).not.toBeNull();
+  });
+
+  it("serves it to a browser holding the preview cookie while closed for everybody else", () => {
+    delete process.env.ENGINE_ENABLED;
+    expect(rewriteOf(proxy(request("/en/aarrr-funnel-template", "tdg_engine_preview=1")))).toBeNull();
+  });
+
+  it("?engine=preview sets an HttpOnly cookie and opens the engine on this very request", () => {
+    delete process.env.ENGINE_ENABLED;
+    const res = proxy(request("/fr/aarrr-funnel-template?engine=preview"));
+    expect(rewriteOf(res)).toBeNull();
+    const cookie = res.headers.get("set-cookie") ?? "";
+    expect(cookie).toMatch(/tdg_engine_preview=1/);
+    expect(cookie.toLowerCase()).toContain("httponly");
+  });
+
+  it("?engine=off clears the cookie and closes the engine on this very request", () => {
+    delete process.env.ENGINE_ENABLED;
+    const res = proxy(request("/fr/aarrr-funnel-template?engine=off", "tdg_engine_preview=1"));
+    expect(rewriteOf(res)).toBe("https://tourdegrowth.com/fr/engine-unavailable");
+    expect(res.headers.get("set-cookie") ?? "").toMatch(/tdg_engine_preview=;/);
+  });
+
+  it("keeps the two flags apart: a game preview never opens the engine, an engine preview never opens the game", () => {
+    delete process.env.ENGINE_ENABLED;
+    delete process.env.GAME_ENABLED;
+    expect(rewriteOf(proxy(request("/fr/aarrr-funnel-template", "tdg_game_preview=1")))).toBe(
+      "https://tourdegrowth.com/fr/engine-unavailable",
+    );
+    expect(rewriteOf(proxy(request("/fr/game", "tdg_engine_preview=1")))).toBe(
+      "https://tourdegrowth.com/fr/game-unavailable",
+    );
+    process.env.GAME_ENABLED = "true";
+    expect(rewriteOf(proxy(request("/fr/aarrr-funnel-template")))).not.toBeNull();
+  });
+
+  it("never touches a page that is not the engine", () => {
+    delete process.env.ENGINE_ENABLED;
+    expect(rewriteOf(proxy(request("/fr/aarrr-vs-okr")))).toBeNull();
+    expect(rewriteOf(proxy(request("/fr/glossary/cac")))).toBeNull();
+    expect(rewriteOf(proxy(request("/quiz")))).toBeNull();
+  });
+
+  it("redirects the unprefixed address to its localized form (308), like every content page", () => {
+    delete process.env.ENGINE_ENABLED;
+    const res = proxy(new NextRequest("https://tourdegrowth.com/aarrr-funnel-template?engine=preview", {
+      headers: { "accept-language": "fr" },
+    }));
+    expect(res.status).toBe(308);
+    expect(res.headers.get("location")).toBe("https://tourdegrowth.com/fr/aarrr-funnel-template?engine=preview");
+  });
+});
