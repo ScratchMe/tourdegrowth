@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ContentHeader } from "@/components/brand/ContentHeader";
 import { MetaLabel } from "@/components/brand/MetaLabel";
-import { SiteFooter } from "@/components/brand/SiteFooter";
+import { ProsePage, ProseSection, ProseText } from "@/components/brand/ProsePage";
 import { ZoneNav } from "@/components/game/ZoneNav";
 import { GAME_HUB } from "@/content/game/hub";
 import { GAME_META, RETENTION_INTRO } from "@/content/game/meta";
@@ -13,7 +12,6 @@ import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { localePath } from "@/lib/i18n/routes";
 import { PILLARS } from "@/lib/scoring/pillars";
 import { breadcrumbSchema, gameSchema, JsonLd } from "@/lib/seo/jsonld";
-import frame from "../../how-it-works/page.module.css";
 import { gameMetadata } from "../game-metadata";
 import { GameIslandSlot } from "./GameIslandSlot";
 import own from "./page.module.css";
@@ -88,19 +86,15 @@ export default async function RetentionLevelPage({ params }: PageProps) {
           description: tc(GAME_META.retention.description, locale),
         })}
       />
-      <ContentHeader locale={locale} path={PATH} switchQuery="resume=1" />
-
-      <main id="main" className={frame.main}>
-        <div className={frame.intro}>
-          <MetaLabel size="xs">{tc(intro.eyebrow, locale)}</MetaLabel>
-          <h1 className={`${frame.title} ${own.title}`}>{tc(intro.title, locale)}</h1>
-          <p className={frame.subtitle}>{tc(intro.lead, locale)}</p>
-        </div>
-
-        <section className={frame.proseSection} aria-labelledby="game-steps">
-          <h2 id="game-steps" className={frame.sectionTitle}>
-            {tc(intro.stepsTitle, locale)}
-          </h2>
+      <ProsePage
+        locale={locale}
+        path={PATH}
+        switchQuery="resume=1"
+        title={tc(intro.title, locale)}
+        kicker={<MetaLabel size="xs">{tc(intro.eyebrow, locale)}</MetaLabel>}
+        lead={tc(intro.lead, locale)}
+      >
+        <ProseSection heading={tc(intro.stepsTitle, locale)}>
           <ol className={own.steps}>
             {intro.steps.map((step, index) => (
               <li key={index} className={own.step}>
@@ -113,19 +107,17 @@ export default async function RetentionLevelPage({ params }: PageProps) {
               </li>
             ))}
           </ol>
-          <p className={frame.sectionBody}>
+          <ProseText>
             {tc(intro.glossaryLead, locale)}{" "}
             <Link href={localePath(locale, "/glossary/churn")}>{tc(GLOSSARY_TERMS.churn.term, locale)}</Link>,{" "}
             <Link href={localePath(locale, "/glossary/retention")}>{tc(GLOSSARY_TERMS.retention.term, locale)}</Link>.
-          </p>
-        </section>
+          </ProseText>
+        </ProseSection>
 
         <ZoneNav label={tc(GAME_HUB.zonesTitle, locale)} items={zones} compactLabel={compactLabel} />
 
         <GameIslandSlot title={tc(intro.pendingTitle, locale)} body={tc(intro.pendingBody, locale)} />
-      </main>
-
-      <SiteFooter locale={locale} width="reading" />
+      </ProsePage>
     </>
   );
 }

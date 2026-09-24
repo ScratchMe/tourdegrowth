@@ -1,6 +1,6 @@
 /* The hub: five zones, one open. The frame (column, intro, section titles)
-   comes from `/how-it-works`, the family of prose pages this one belongs to;
-   only what the hub adds lives here. */
+   is ProsePage's, the family of prose pages this one belongs to; only what
+   the hub adds lives here. */
 
 .zones {
   list-style: none;
@@ -65,13 +65,6 @@
 }
 
 @media (max-width: 760px) {
-  /* Element + class: the rule it replaces comes from another module
-     (how-it-works), and at equal specificity the winner would depend on
-     stylesheet order — same fix as the open-door pages. */
-  h1.title {
-    font: var(--display-hero-mobile);
-  }
-
   .zone {
     padding: var(--pad-card-mobile);
   }

@@ -1,5 +1,5 @@
-/* The level page's paper-world intro (plan §2.1). The frame comes from
-   `/how-it-works`; this module adds the three steps and the provisional slot. */
+/* The level page's paper-world intro (plan §2.1). The frame is ProsePage's;
+   this module adds the three steps and the provisional slot. */
 
 .steps {
   list-style: none;
@@ -60,12 +60,6 @@
 }
 
 @media (max-width: 760px) {
-  /* Element + class, for the same reason as the hub: the rule it replaces
-     lives in another module. */
-  h1.title {
-    font: var(--display-hero-mobile);
-  }
-
   .slot {
     padding: var(--pad-card-mobile);
   }

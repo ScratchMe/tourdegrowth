@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { ContentHeader } from "@/components/brand/ContentHeader";
 import { MetaLabel } from "@/components/brand/MetaLabel";
-import { SiteFooter } from "@/components/brand/SiteFooter";
+import { ProsePage, ProseSection, ProseText } from "@/components/brand/ProsePage";
 import { Button } from "@/components/core/Button";
 import { GAME_HUB } from "@/content/game/hub";
 import { GAME_META } from "@/content/game/meta";
@@ -11,7 +10,6 @@ import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { localePath } from "@/lib/i18n/routes";
 import { PILLARS } from "@/lib/scoring/pillars";
 import { breadcrumbSchema, gameHubSchema, JsonLd } from "@/lib/seo/jsonld";
-import frame from "../how-it-works/page.module.css";
 import { gameMetadata } from "./game-metadata";
 import { HubProgress } from "./HubProgress";
 import { PlayLevelLink } from "./PlayLevelLink";
@@ -64,19 +62,14 @@ export default async function GameHubPage({ params }: PageProps) {
           })),
         })}
       />
-      <ContentHeader locale={locale} path="/game" />
-
-      <main id="main" className={frame.main}>
-        <div className={frame.intro}>
-          <MetaLabel size="xs">{tc(GAME_HUB.eyebrow, locale)}</MetaLabel>
-          <h1 className={`${frame.title} ${own.title}`}>{tc(GAME_HUB.title, locale)}</h1>
-          <p className={frame.subtitle}>{tc(GAME_HUB.lead, locale)}</p>
-        </div>
-
-        <section className={frame.proseSection} aria-labelledby="game-zones">
-          <h2 id="game-zones" className={frame.sectionTitle}>
-            {tc(GAME_HUB.zonesTitle, locale)}
-          </h2>
+      <ProsePage
+        locale={locale}
+        path="/game"
+        title={tc(GAME_HUB.title, locale)}
+        kicker={<MetaLabel size="xs">{tc(GAME_HUB.eyebrow, locale)}</MetaLabel>}
+        lead={tc(GAME_HUB.lead, locale)}
+      >
+        <ProseSection heading={tc(GAME_HUB.zonesTitle, locale)}>
           <ol className={own.zones} data-testid="game-hub-zones">
             {PILLARS.map((pillar, index) => {
               const level = GAME_LEVELS_BY_PILLAR[pillar];
@@ -115,24 +108,21 @@ export default async function GameHubPage({ params }: PageProps) {
               );
             })}
           </ol>
-        </section>
+        </ProseSection>
 
         {/* GAME-BRIEF 11.5 and 13.3 D: the way back to the Tour, for those who
             arrived by the game. A bare anchor — `/quiz` is under the other
             root layout (cross-root-links.test.ts). Secondary: the play button
             is this screen's one primary. */}
-        <section className={frame.proseSection} data-testid="game-tour-loop">
-          <h2 className={frame.sectionTitle}>{tc(GAME_HUB.tourLoopTitle, locale)}</h2>
-          <p className={frame.sectionBody}>{tc(GAME_HUB.tourLoopBody, locale)}</p>
+        <ProseSection heading={tc(GAME_HUB.tourLoopTitle, locale)} data-testid="game-tour-loop">
+          <ProseText>{tc(GAME_HUB.tourLoopBody, locale)}</ProseText>
           <div>
             <Button href="/quiz" hard variant="secondary">
               {tc(GAME_HUB.tourLoopCta, locale)}
             </Button>
           </div>
-        </section>
-      </main>
-
-      <SiteFooter locale={locale} width="reading" />
+        </ProseSection>
+      </ProsePage>
     </>
   );
 }

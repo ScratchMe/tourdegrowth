@@ -24,6 +24,11 @@ export interface ProsePageProps {
   note?: ReactNode;
   /** Extra class on `<main>` — for a page that adds something the frame doesn't have. */
   className?: string;
+  /**
+   * Query string the language switch carries to the other language's URL
+   * (e.g. the game's `resume=1`, so a year in progress survives the switch).
+   */
+  switchQuery?: string;
   children: ReactNode;
 }
 
@@ -53,11 +58,12 @@ export function ProsePage({
   kicker,
   note,
   className,
+  switchQuery,
   children,
 }: ProsePageProps) {
   return (
     <>
-      <ContentHeader locale={locale} path={path} />
+      <ContentHeader locale={locale} path={path} switchQuery={switchQuery} />
 
       <main id="main" className={[styles.main, className ?? ""].filter(Boolean).join(" ")}>
         <div className={styles.intro}>
