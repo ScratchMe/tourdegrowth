@@ -1,5 +1,5 @@
-/* /about — REVIEW-02.md R2-04. Shares how-it-works/page.module.css for the
-   page frame; only what this page has and that one doesn't lives here. */
+/* /about — REVIEW-02.md R2-04. The frame is ProsePage; only what this page
+   has and the frame doesn't lives here. */
 .questionGroups {
   display: flex;
   flex-direction: column;
@@ -21,14 +21,6 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-}
-
-.rules {
-  margin: 0;
-  padding-left: 1.25em;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
 }
 
 .example {

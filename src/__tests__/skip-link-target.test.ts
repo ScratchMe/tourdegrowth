@@ -8,8 +8,8 @@ import { describe, expect, it } from "vitest";
  *
  * `RootShell` renders `<a href="#main">` first in every `<body>`, and it
  * cannot know where a page's content starts — the id lives on each page's
- * own `<main>`, twenty of them across the two trees. A page added tomorrow
- * with a bare `<main>` would give the one link a keyboard reader relies on
+ * own `<main>` — or its frame's: ProsePage renders the one `<main>` of nine
+ * page families. A page added tomorrow with a bare `<main>` would give the one link a keyboard reader relies on
  * a target that does not exist, and nothing would look broken: the link
  * would simply do nothing. `e2e/skip-link.spec.ts` checks the behaviour on
  * real pages; this checks every page, including the ones no spec renders.
@@ -35,9 +35,12 @@ const MAIN_TAGS = FILES.flatMap((f) => [...f.source.matchAll(/<main\b[^>]*>/g)].
 
 describe("skip link ↔ <main id=\"main\"> (ds-critique L-9)", () => {
   it("finds the <main> elements it polices — a floor, so a regex drift cannot pass by matching nothing", () => {
-    // Twenty on 2026-09-24: the quiz and the deep dive each render two
-    // (pre-mount shell and the real screen), everything else one.
-    expect(MAIN_TAGS.length).toBeGreaterThanOrEqual(20);
+    // Twelve on 2026-09-24: the quiz and the deep dive each render two
+    // (pre-mount shell and the real screen), everything else one. It was
+    // twenty until the nine prose page families moved into
+    // `components/brand/ProsePage`, which renders their one `<main>` —
+    // fewer tags, same pages covered.
+    expect(MAIN_TAGS.length).toBeGreaterThanOrEqual(12);
   });
 
   it("every <main> carries id=\"main\"", () => {

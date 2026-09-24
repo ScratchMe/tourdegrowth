@@ -1,4 +1,4 @@
-/* /metrics — REVIEW-02.md R2-28. Page frame comes from how-it-works;
+/* /metrics — REVIEW-02.md R2-28. The frame is ProsePage;
    only the figure tiles and the distribution bars live here. */
 .figures {
   display: grid;
@@ -71,12 +71,4 @@
   height: 100%;
   background: var(--accent-mark);
   min-width: 0;
-}
-
-.caveats {
-  margin: 0;
-  padding-left: 1.25em;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
 }
