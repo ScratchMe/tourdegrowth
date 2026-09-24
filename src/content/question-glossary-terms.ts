@@ -20,7 +20,7 @@ export interface QuestionGlossaryTerm {
 }
 
 export const QUESTION_GLOSSARY_TERMS: Record<string, QuestionGlossaryTerm> = {
-  "act-1": { termId: "aha-moment", anchor: { en: '"aha" moment', fr: "moment « aha »" } },
+  "act-1": { termId: "aha-moment", anchor: { en: '"aha" moment', fr: "moment « aha »" } },
   "acq-3": { termId: "cac", anchor: { en: "customer acquisition cost", fr: "coût d'acquisition" } },
   "ret-3": { termId: "churn", anchor: { en: "churn", fr: "churn" } },
   "ref-3": { termId: "viral-coefficient", anchor: { en: "viral coefficient", fr: "coefficient viral" } },

@@ -72,7 +72,7 @@ export const NEXT_MOVES: Record<string, Record<ActionablePoints, Translatable>> 
   "acq-1": {
     7: {
       en: "Put one number on your main channel this month — signups it brought, and what it cost.",
-      fr: "Mets un chiffre sur ton canal principal ce mois-ci : les inscriptions qu'il a amenées, et ce qu'il a coûté.",
+      fr: "Mets un chiffre sur ton canal principal ce mois-ci : les inscriptions qu'il a amenées, et ce qu'il a coûté.",
     },
     0: {
       en: "Pick the single channel that brought your last ten customers, and give it your full attention for one cycle.",
@@ -93,7 +93,7 @@ export const NEXT_MOVES: Record<string, Record<ActionablePoints, Translatable>> 
   "acq-3": {
     7: {
       en: "Turn your estimate into a real number: total spend divided by customers won, for one clean month.",
-      fr: "Transforme ton estimation en vrai chiffre : dépense totale divisée par clients gagnés, sur un mois propre.",
+      fr: "Transforme ton estimation en vrai chiffre : dépense totale divisée par clients gagnés, sur un mois propre.",
     },
     0: {
       en: "Add up everything you spent to win customers last month and divide by how many you won.",
@@ -105,7 +105,7 @@ export const NEXT_MOVES: Record<string, Record<ActionablePoints, Translatable>> 
   "act-1": {
     7: {
       en: "Write your aha moment as a single event you could log, then log it — a moment you can't count isn't defined yet.",
-      fr: "Écris ton moment « aha » comme un événement que tu pourrais tracer, puis trace-le — un moment qu'on ne peut pas compter n'est pas encore défini.",
+      fr: "Écris ton moment « aha » comme un événement que tu pourrais tracer, puis trace-le — un moment qu'on ne peut pas compter n'est pas encore défini.",
     },
     0: {
       en: "Ask your five most loyal customers what made them stay, and look for the action they all took early.",
@@ -119,7 +119,7 @@ export const NEXT_MOVES: Record<string, Record<ActionablePoints, Translatable>> 
     },
     0: {
       en: "Instrument the one event that marks your aha moment, and read the rate before changing anything else.",
-      fr: "Instrumente l'unique événement qui marque ton moment « aha », et lis le taux avant de changer quoi que ce soit d'autre.",
+      fr: "Instrumente l'unique événement qui marque ton moment « aha », et lis le taux avant de changer quoi que ce soit d'autre.",
     },
   },
   "act-3": {
@@ -162,7 +162,7 @@ export const NEXT_MOVES: Record<string, Record<ActionablePoints, Translatable>> 
     },
     0: {
       en: "Ask every departing customer one question — why now? — and read the answers together at the end of the month.",
-      fr: "Pose une seule question à chaque client qui part — pourquoi maintenant ? — et relis les réponses ensemble en fin de mois.",
+      fr: "Pose une seule question à chaque client qui part — pourquoi maintenant ? — et relis les réponses ensemble en fin de mois.",
     },
   },
 
@@ -190,7 +190,7 @@ export const NEXT_MOVES: Record<string, Record<ActionablePoints, Translatable>> 
   "ref-3": {
     7: {
       en: "Count it properly: new customers who arrived through an existing one, divided by all your customers.",
-      fr: "Compte-le vraiment : nouveaux clients arrivés via un client existant, divisés par l'ensemble de tes clients.",
+      fr: "Compte-le vraiment : nouveaux clients arrivés via un client existant, divisés par l'ensemble de tes clients.",
     },
     0: {
       en: "Tag every referred signup at the source so the number exists next month without any archaeology.",
@@ -222,7 +222,7 @@ export const NEXT_MOVES: Record<string, Record<ActionablePoints, Translatable>> 
   "rev-3": {
     7: {
       en: "Turn your best expansion idea into a written trigger — who gets offered what, and when.",
-      fr: "Transforme ta meilleure idée d'expansion en déclencheur écrit : qui reçoit quoi, et quand.",
+      fr: "Transforme ta meilleure idée d'expansion en déclencheur écrit : qui reçoit quoi, et quand.",
     },
     0: {
       en: "Look at the customers who already outgrew their plan and offer them the next one on purpose.",

@@ -74,7 +74,7 @@ export function splitOnEmail(text: string): string[] {
 
 /** The one line of chrome the legal pages need beyond their own copy. */
 export const LEGAL_UI: { updatedAt: Translatable } = {
-  updatedAt: { fr: "Dernière mise à jour :", en: "Last updated:" },
+  updatedAt: { fr: "Dernière mise à jour :", en: "Last updated:" },
 };
 
 export type LegalBlock =
@@ -172,14 +172,14 @@ export const PRIVACY: LegalDocument = {
             {
               term: t("D'où tu viens, si c'est d'un partage", "Where you came from, if it was a share"),
               text: t(
-                "Si tu as ouvert Tour de Growth depuis le lien de résultat de quelqu'un d'autre, l'identifiant de ce résultat est enregistré avec le tien. C'est ce qui permet de mesurer si l'outil se propage — le coefficient viral — et rien d'autre : il ne dit pas qui a partagé, seulement quel résultat.",
+                "Si tu as ouvert Tour de Growth depuis le lien de résultat de quelqu'un d'autre, l'identifiant de ce résultat est enregistré avec le tien. C'est ce qui permet de mesurer si l'outil se propage — le coefficient viral — et rien d'autre : il ne dit pas qui a partagé, seulement quel résultat.",
                 "If you opened Tour de Growth from someone else's result link, that result's identifier is recorded with yours. It is what lets us measure whether the tool spreads — the viral coefficient — and nothing more: it does not say who shared, only which result.",
               ),
             },
             {
               term: t("Le Deep dive, si tu le fais", "The Deep dive, if you take it"),
               text: t(
-                "Les recommandations générées, dans les deux tons et les deux langues, et le nom du modèle qui les a écrites. Tes dix réponses de contexte et le texte libre que tu as éventuellement saisi servent à écrire ces recommandations et ne sont pas conservés ensuite : seul le fait que le champ libre ait été rempli ou non est gardé.",
+                "Les recommandations générées, dans les deux tons et les deux langues, et le nom du modèle qui les a écrites. Tes dix réponses de contexte et le texte libre que tu as éventuellement saisi servent à écrire ces recommandations et ne sont pas conservés ensuite : seul le fait que le champ libre ait été rempli ou non est gardé.",
                 "The generated recommendations, in both tones and both languages, and the name of the model that wrote them. Your ten context answers and any free text you typed are used to write those recommendations and are not kept afterwards: only whether the free-text field was filled in is retained.",
               ),
             },
@@ -193,7 +193,7 @@ export const PRIVACY: LegalDocument = {
           ],
         },
         p(
-          "La base légale est l'exécution du service que tu demandes en lançant le calcul. Pour la mesure d'audience et de propagation décrites ci-dessous, c'est notre intérêt légitime : savoir si l'outil est utilisé et se propage, ce qui est précisément ce qu'il existe pour démontrer.",
+          "La base légale est l'exécution du service que tu demandes en lançant le calcul. Pour la mesure d'audience et de propagation décrites ci-dessous, c'est notre intérêt légitime : savoir si l'outil est utilisé et se propage, ce qui est précisément ce qu'il existe pour démontrer.",
           "The legal basis is the performance of the service you request when you start the calculation. For the audience and spread measurement described below, it is our legitimate interest: knowing whether the tool is used and spreads, which is exactly what it exists to demonstrate.",
         ),
       ],
@@ -237,7 +237,7 @@ export const PRIVACY: LegalDocument = {
       heading: t("Mesure d'audience", "Audience measurement"),
       blocks: [
         p(
-          "Les pages vues et quelques événements (Tour commencé, étape terminée, résultat créé, partage, Deep dive) sont comptés avec GoatCounter, un service de mesure d'audience sans cookie et sans identifiant individuel. Il ne permet pas de te suivre d'un site à l'autre ni de savoir qui tu es. C'est pourquoi aucune bannière de consentement ne t'est présentée : il n'y a rien à consentir.",
+          "Les pages vues et quelques événements (Tour commencé, étape terminée, résultat créé, partage, Deep dive) sont comptés avec GoatCounter, un service de mesure d'audience sans cookie et sans identifiant individuel. Il ne permet pas de te suivre d'un site à l'autre ni de savoir qui tu es. C'est pourquoi aucune bannière de consentement ne t'est présentée : il n'y a rien à consentir.",
           "Page views and a few events (Tour started, stage finished, result created, share, Deep dive) are counted with GoatCounter, a cookie-free audience measurement service with no individual identifier. It cannot follow you across sites or tell who you are. That is why no consent banner is shown: there is nothing to consent to.",
         ),
       ],
@@ -256,7 +256,7 @@ export const PRIVACY: LegalDocument = {
             {
               term: t("Google (API Gemini)", "Google (Gemini API)"),
               text: {
-                fr: `Uniquement si tu fais le Deep dive : tes vingt-cinq réponses, ton score et ton éventuel texte libre lui sont envoyés pour rédiger tes recommandations. ${geminiUse.fr}`,
+                fr: `Uniquement si tu fais le Deep dive : tes vingt-cinq réponses, ton score et ton éventuel texte libre lui sont envoyés pour rédiger tes recommandations. ${geminiUse.fr}`,
                 en: `Only if you take the Deep dive: your twenty-five answers, your score and any free text are sent to it to write your recommendations. ${geminiUse.en}`,
               },
             },
@@ -271,7 +271,7 @@ export const PRIVACY: LegalDocument = {
           ],
         },
         p(
-          "Aucun de ces prestataires ne reçoit tes données à d'autres fins que celle indiquée, et aucune application tierce ne peut lire la base : ses règles d'accès refusent tout accès direct, seul le serveur de Tour de Growth y écrit et y lit.",
+          "Aucun de ces prestataires ne reçoit tes données à d'autres fins que celle indiquée, et aucune application tierce ne peut lire la base : ses règles d'accès refusent tout accès direct, seul le serveur de Tour de Growth y écrit et y lit.",
           "None of these providers receives your data for any purpose other than the one stated, and no third-party application can read the database: its access rules refuse any direct access; only Tour de Growth's server writes to and reads from it.",
         ),
       ],
@@ -283,7 +283,7 @@ export const PRIVACY: LegalDocument = {
           kind: "bullets",
           items: [
             t(
-              "Ton résultat (réponses, scores, ton, langue, recommandations du Deep dive) est conservé sans limite de durée : son lien est fait pour être partagé, et un lien qui meurt des mois après un partage casserait ce pour quoi tu l'as envoyé. Tu peux en demander la suppression à tout moment (voir plus bas).",
+              "Ton résultat (réponses, scores, ton, langue, recommandations du Deep dive) est conservé sans limite de durée : son lien est fait pour être partagé, et un lien qui meurt des mois après un partage casserait ce pour quoi tu l'as envoyé. Tu peux en demander la suppression à tout moment (voir plus bas).",
               "Your result (answers, scores, tone, language, Deep dive recommendations) is kept with no time limit: its link is meant to be shared, and a link that dies months after a share would break the very thing you sent it for. You can ask for it to be deleted at any time (see below).",
             ),
             t(
@@ -306,7 +306,7 @@ export const PRIVACY: LegalDocument = {
           "Under the GDPR, you have the right to access, rectify, erase, port, restrict and object to the processing of your data.",
         ),
         p(
-          "Comme il n'y a pas de compte, la seule preuve que tu es l'auteur d'un résultat est son lien : pour demander la suppression ou une copie d'un résultat, écris à {email} en joignant l'adresse de la page (https://www.tourdegrowth.com/r/…). Nous répondons dans un délai d'un mois.",
+          "Comme il n'y a pas de compte, la seule preuve que tu es l'auteur d'un résultat est son lien : pour demander la suppression ou une copie d'un résultat, écris à {email} en joignant l'adresse de la page (https://www.tourdegrowth.com/r/…). Nous répondons dans un délai d'un mois.",
           "Since there is no account, the only proof that you authored a result is its link: to ask for a result to be deleted or copied, write to {email} with the page's address (https://www.tourdegrowth.com/r/…). We answer within a month.",
         ),
         p(
@@ -356,22 +356,22 @@ export const TERMS: LegalDocument = {
       heading: t("Ce que le score est, et ce qu'il n'est pas", "What the score is, and what it is not"),
       blocks: [
         p(
-          "Le score est le résultat d'une règle fixe appliquée à tes propres réponses : chaque réponse vaut un nombre de points connu, rien n'est pondéré à la volée et aucune IA n'y touche. Il est reproductible et ré-explicable — la page « À propos » donne la règle complète.",
+          "Le score est le résultat d'une règle fixe appliquée à tes propres réponses : chaque réponse vaut un nombre de points connu, rien n'est pondéré à la volée et aucune IA n'y touche. Il est reproductible et ré-explicable — la page « À propos » donne la règle complète.",
           "The score is the result of a fixed rule applied to your own answers: each answer is worth a known number of points, nothing is weighted on the fly and no AI touches it. It is reproducible and explainable — the About page gives the full rule.",
         ),
         {
           kind: "bullets",
           items: [
             t(
-              "C'est une estimation rapide et directionnelle, pas un audit : il reflète ce que tu déclares, pas ce que tes données diraient.",
+              "C'est une estimation rapide et directionnelle, pas un audit : il reflète ce que tu déclares, pas ce que tes données diraient.",
               "It is a fast, directional estimate, not an audit: it reflects what you declare, not what your data would say.",
             ),
             t(
-              "Les recommandations du Deep dive sont générées par un modèle de langage à partir de tes réponses. Elles peuvent être imprécises, incomplètes ou inadaptées à ta situation ; elles sont un point de départ de réflexion, pas un conseil professionnel.",
+              "Les recommandations du Deep dive sont générées par un modèle de langage à partir de tes réponses. Elles peuvent être imprécises, incomplètes ou inadaptées à ta situation ; elles sont un point de départ de réflexion, pas un conseil professionnel.",
               "The Deep dive's recommendations are generated by a language model from your answers. They may be imprecise, incomplete or ill-suited to your situation; they are a starting point for thinking, not professional advice.",
             ),
             t(
-              "Le ton « roast » est un choix explicite de ta part. Il vise la stratégie décrite par tes réponses, jamais la personne — c'est une règle codée en dur, et si un texte la franchit, signale-le.",
+              "Le ton « roast » est un choix explicite de ta part. Il vise la stratégie décrite par tes réponses, jamais la personne — c'est une règle codée en dur, et si un texte la franchit, signale-le.",
               "The \"roast\" tone is an explicit choice on your part. It targets the strategy your answers describe, never the person — that rule is hard-coded, and if a text crosses it, report it.",
             ),
           ],
@@ -382,7 +382,7 @@ export const TERMS: LegalDocument = {
       heading: t("Ta page de résultat", "Your result page"),
       blocks: [
         p(
-          "Chaque résultat a une adresse unique, publique, sans mot de passe : toute personne qui a le lien peut la voir. C'est fait pour être partagé ; ne partage donc que ce que tu es prêt à rendre visible. Le champ libre du Deep dive façonne les recommandations qui s'affichent sur cette page — ce que tu y écris peut donc transparaître dans un texte que tu partageras ensuite.",
+          "Chaque résultat a une adresse unique, publique, sans mot de passe : toute personne qui a le lien peut la voir. C'est fait pour être partagé ; ne partage donc que ce que tu es prêt à rendre visible. Le champ libre du Deep dive façonne les recommandations qui s'affichent sur cette page — ce que tu y écris peut donc transparaître dans un texte que tu partageras ensuite.",
           "Each result has a unique, public address with no password: anyone with the link can see it. It is made to be shared, so only share what you are ready to make visible. The Deep dive's free-text field shapes the recommendations shown on that page — what you write there may therefore surface in a text you later share.",
         ),
       ],
@@ -398,7 +398,7 @@ export const TERMS: LegalDocument = {
               "Try to run the Deep dive on a result that is not yours, or circumvent the service's protections.",
             ),
             t(
-              "Perturber le fonctionnement du service, notamment par des requêtes automatisées massives ; des limites de débit s'appliquent.",
+              "Perturber le fonctionnement du service, notamment par des requêtes automatisées massives ; des limites de débit s'appliquent.",
               "Disrupt the service, in particular through mass automated requests; rate limits apply.",
             ),
             t(
@@ -431,7 +431,7 @@ export const TERMS: LegalDocument = {
       heading: t("Propriété intellectuelle", "Intellectual property"),
       blocks: [
         p(
-          "Le code du service est publié sous licence AGPL-3.0 : tu peux le lire, l'exécuter, le modifier et le redistribuer aux conditions de cette licence. Le nom « Tour de Growth », son logotype et son identité visuelle n'en font pas partie et restent la propriété de son éditeur.",
+          "Le code du service est publié sous licence AGPL-3.0 : tu peux le lire, l'exécuter, le modifier et le redistribuer aux conditions de cette licence. Le nom « Tour de Growth », son logotype et son identité visuelle n'en font pas partie et restent la propriété de son éditeur.",
           "The service's code is published under the AGPL-3.0 licence: you may read, run, modify and redistribute it under that licence's terms. The name \"Tour de Growth\", its wordmark and its visual identity are not part of it and remain the property of its publisher.",
         ),
         p(
@@ -462,11 +462,11 @@ export const TERMS: LegalDocument = {
       heading: t("Éditeur et hébergeur", "Publisher and host"),
       blocks: [
         p(
-          `Tour de Growth est édité par ${PUBLISHER_NAME}, à titre non professionnel et sans but lucratif. Contact : {email}.`,
+          `Tour de Growth est édité par ${PUBLISHER_NAME}, à titre non professionnel et sans but lucratif. Contact : {email}.`,
           `Tour de Growth is published by ${PUBLISHER_NAME} on a non-professional, non-commercial basis. Contact: {email}.`,
         ),
         p(
-          `Hébergement du site : ${HOST.name}, ${HOST.address}. Hébergement des données : Google Cloud (Firestore).`,
+          `Hébergement du site : ${HOST.name}, ${HOST.address}. Hébergement des données : Google Cloud (Firestore).`,
           `Site hosting: ${HOST.name}, ${HOST.address}. Data hosting: Google Cloud (Firestore).`,
         ),
         p(

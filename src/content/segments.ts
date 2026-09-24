@@ -51,13 +51,13 @@ export const SEGMENT_SCREEN = {
     "Elles ne comptent pas dans ton score — elles servent seulement à te situer face à des produits comparables au tien plutôt qu'à la moyenne de tout le monde.",
     "They don't count towards your score — they only place you against products like yours rather than against everyone's average.",
   ),
-  stageLabel: t("Où en est ton produit ?", "Where is your product?"),
-  modelLabel: t("Tu vends à qui ?", "Who do you sell to?"),
+  stageLabel: t("Où en est ton produit ?", "Where is your product?"),
+  modelLabel: t("Tu vends à qui ?", "Who do you sell to?"),
   submit: t("Continuer →", "Continue →"),
   /** Shown under the button: says plainly that skipping costs nothing. */
   optional: t(
     // TODO: à relire — revue de copie v1 (2026-09-24), §3.3 : « tu seras comparé » supposait un lecteur masculin.
-    "Les deux sont facultatives : sans réponse, la comparaison se fait avec la moyenne générale.",
+    "Les deux sont facultatives : sans réponse, la comparaison se fait avec la moyenne générale.",
     "Both are optional: leave them and you'll be compared to the overall average.",
   ),
 } satisfies Record<string, Translatable>;

@@ -74,7 +74,8 @@ describe("the text the native share sheet carries", () => {
       "I scored 74/100 on my AARRR growth check-up. Retention is where this growth stalls. Where does yours?",
     );
     expect(shareText("fr", 74, "retention")).toBe(
-      "J'ai fait 74/100 à mon diagnostic growth AARRR. Retention est là où cette croissance cale. Et la tienne ?",
+      // U+00A0 before "?" (copy review v1, French typography fixed at the source).
+      "J'ai fait 74/100 à mon diagnostic growth AARRR. Retention est là où cette croissance cale. Et la tienne\u00a0?",
     );
   });
 });

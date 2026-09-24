@@ -90,11 +90,12 @@ function DeepDiveLoadingScreen({ locale }: { locale: Locale }) {
         {messages.map((msg, i) => {
           const active = i === step;
           const state = active ? styles.active : i === step + 1 ? styles.next : styles.pending;
-          // The copy itself already ends in "..." (see dictionary.ts) — once
-          // settled in the persistent "still working" state, that fixed
+          // The copy itself already ends in an ellipsis (see dictionary.ts) —
+          // once settled in the persistent "still working" state, that fixed
           // ellipsis is stripped and replaced by the ticking one below, so
-          // the two never pile up into "report......".
-          const text = active && stillWorking ? tc(msg, locale).replace(/\.+$/, "") : tc(msg, locale);
+          // the two never pile up into "report......". Three dots in English,
+          // the single character "…" in French since copy review v1: both go.
+          const text = active && stillWorking ? tc(msg, locale).replace(/(?:\.+|…)$/, "") : tc(msg, locale);
           return (
             <span key={i} className={`${styles.message} ${state}`}>
               {text}

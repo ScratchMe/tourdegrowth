@@ -39,7 +39,7 @@ test("a drop is shown as a drop, in French too", async ({ page }) => {
     { ...TWO_TOURS[1]!, total: 60 },
   ]);
   await page.goto("/fr");
-  await expect(page.getByTestId("progression")).toHaveText(/Tour précédent : 60 → 51, -9/);
+  await expect(page.getByTestId("progression")).toHaveText(/Tour précédent\u00a0: 60 → 51, -9/);
 });
 
 test("a visitor with no history sees nothing at all", async ({ page }) => {

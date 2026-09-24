@@ -11,7 +11,7 @@ import type { Translatable } from "@/lib/i18n/dictionary";
  */
 export const FREE_CONTEXT = {
   label: {
-    fr: "Un contexte particulier qu'on devrait connaître ? (optionnel)",
+    fr: "Un contexte particulier qu'on devrait connaître ? (optionnel)",
     en: "Any specific context we should know about? (optional)",
   },
   // TODO: à relire — revue de copie v1 (2026-09-24), changement nº10. The one
@@ -23,7 +23,7 @@ export const FREE_CONTEXT = {
     en: "The more you tell us, the more the recommendation fits your case. Two or three sentences are enough.",
   },
   placeholder: {
-    fr: "Ex. : on vend à des cabinets comptables, cycle de vente long, le vrai frein c'est la confiance plus que le prix...",
+    fr: "Ex. : on vend à des cabinets comptables, cycle de vente long, le vrai frein c'est la confiance plus que le prix…",
     en: "E.g.: we sell to accounting firms, long sales cycle, trust is a bigger blocker than price...",
   },
   /**

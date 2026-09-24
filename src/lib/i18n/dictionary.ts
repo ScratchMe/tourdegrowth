@@ -50,7 +50,7 @@ export const UI_STRINGS = {
     // in red) — FR reads naturally with an empty h1Line2 instead.
     h1Line1: { en: "Where does", fr: "Où ta croissance" },
     h1Line2: { en: "your growth ", fr: "" },
-    h1Accent: { en: "stall?", fr: "cale-t-elle ?" },
+    h1Accent: { en: "stall?", fr: "cale-t-elle ?" },
     subtitle: {
       // R2-12 put "AARRR" in the visible copy (the framework's name appeared
       // only in the metadata); it stays, once, in brackets.
@@ -135,13 +135,13 @@ export const UI_STRINGS = {
    * sample.
    */
   benchmark: {
-    line: { en: "Average of every Tour: {score}/100", fr: "Moyenne de tous les Tours : {score}/100" },
+    line: { en: "Average of every Tour: {score}/100", fr: "Moyenne de tous les Tours : {score}/100" },
     // Relu et validé par Antoine (2026-09-09) — R2-26. Shown instead of the line above
     // once the reader's own segment has enough Tours of its own; `{segment}`
     // is built from content/segments.ts ("B2B, first customers").
     segmentLine: {
       en: "Average for {segment}: {score}/100",
-      fr: "Moyenne pour {segment} : {score}/100",
+      fr: "Moyenne pour {segment} : {score}/100",
     },
     segmentJoin: { en: "{model}, {stage}", fr: "{model}, {stage}" },
   },
@@ -158,7 +158,7 @@ export const UI_STRINGS = {
   lastResult: {
     withScore: {
       en: "Your last score: {score}/100 — see it again →",
-      fr: "Ton dernier score : {score}/100 — le revoir →",
+      fr: "Ton dernier score : {score}/100 — le revoir →",
     },
     withoutScore: { en: "See your last result →", fr: "Revoir ton dernier résultat →" },
     /**
@@ -184,7 +184,7 @@ export const UI_STRINGS = {
       en: "Your last Tour was {n} months ago",
       fr: "Ton dernier Tour date de {n} mois",
     },
-    retakeNudgeCta: { en: "take it again?", fr: "le refaire ?" },
+    retakeNudgeCta: { en: "take it again?", fr: "le refaire ?" },
   },
 
   /** The score card recipe is shared by the landing preview and the real
@@ -215,7 +215,7 @@ export const UI_STRINGS = {
    * definitions themselves live in content/glossary.ts, this is just the
    * trigger's accessible label and the mobile sheet's close button. */
   glossary: {
-    definitionLabelTemplate: { en: "Definition: {term}", fr: "Définition : {term}" },
+    definitionLabelTemplate: { en: "Definition: {term}", fr: "Définition : {term}" },
     closeLabel: { en: "Close", fr: "Fermer" },
     // Relu et validé par Antoine (2026-09-09) — R2-13. The popover's way out, to the term's own page.
     moreLabel: { en: "Learn more →", fr: "En savoir plus →" },
@@ -233,9 +233,9 @@ export const UI_STRINGS = {
    */
   openDoor: {
     stagesHeading: { en: "The five stages, one page each", fr: "Les cinq étapes, une page chacune" },
-    checklistLead: { en: "Want the list itself, ready to work through?", fr: "Tu veux la liste elle-même, prête à dérouler ?" },
+    checklistLead: { en: "Want the list itself, ready to work through?", fr: "Tu veux la liste elle-même, prête à dérouler ?" },
     checklistLink: { en: "The 15-point growth audit checklist", fr: "La checklist d'audit growth en 15 points" },
-    diagnosticLead: { en: "Wondering how to run one from start to finish?", fr: "Tu te demandes comment en mener un de bout en bout ?" },
+    diagnosticLead: { en: "Wondering how to run one from start to finish?", fr: "Tu te demandes comment en mener un de bout en bout ?" },
     diagnosticLink: { en: "The startup growth diagnostic method", fr: "La méthode du diagnostic de croissance" },
   },
 
@@ -251,17 +251,17 @@ export const UI_STRINGS = {
     othersHeading: { en: "The other comparisons", fr: "Les autres comparaisons" },
     ctaLead: {
       en: "Whichever framework you settle on, the first question is the same one: which of the five stages is holding the others back? Fifteen questions, three minutes, no signup.",
-      fr: "Quel que soit le cadre retenu, la première question est la même : laquelle des cinq étapes retient les autres ? Quinze questions, trois minutes, sans inscription.",
+      fr: "Quel que soit le cadre retenu, la première question est la même : laquelle des cinq étapes retient les autres ? Quinze questions, trois minutes, sans inscription.",
     },
     // Le chapeau de la section « frameworks comparés » sur /how-it-works.
     fromHowItWorks: {
       en: "Wondering how AARRR sits next to the other frameworks?",
-      fr: "Tu te demandes comment AARRR se situe face aux autres cadres ?",
+      fr: "Tu te demandes comment AARRR se situe face aux autres cadres ?",
     },
   },
 
   howItWorksPage: {
-    exampleQuestionLabel: { en: "Example question:", fr: "Exemple de question :" },
+    exampleQuestionLabel: { en: "Example question:", fr: "Exemple de question :" },
     // Relu et validé par Antoine (2026-09-09) — R2-17. Eyebrow of each pillar card: the
     // stage number, since the <h2> right under it already names the pillar.
     stageEyebrowTemplate: { en: "Stage {n} of 5", fr: "Étape {n} sur 5" },
@@ -319,7 +319,7 @@ export const UI_STRINGS = {
    * neutral is the explicit default. */
   toneSelector: {
     headerLabel: { en: "15 / 15 answered", fr: "15 / 15 répondues" },
-    title: { en: "How do you want your results?", fr: "Comment veux-tu tes résultats ?" },
+    title: { en: "How do you want your results?", fr: "Comment veux-tu tes résultats ?" },
     neutralTitle: { en: "Straight up", fr: "Neutre" },
     neutralDescription: {
       en: "Clear, constructive, no sugar-coating.",
@@ -348,7 +348,7 @@ export const UI_STRINGS = {
     // is true whichever card is selected.
     switchHint: {
       en: "Roast isn't final: you can switch back to straight up on your result.",
-      fr: "Le roast n'est pas définitif : tu pourras repasser en neutre sur ton résultat.",
+      fr: "Le roast n'est pas définitif : tu pourras repasser en neutre sur ton résultat.",
     },
   },
 
@@ -357,9 +357,9 @@ export const UI_STRINGS = {
    * left to narrate); the Deep dive keeps the full 3-message sequence,
    * since it still makes a real Gemini call. */
   loading: {
-    message1: { en: "Reviewing your answers...", fr: "Relecture de tes réponses..." },
-    message2: { en: "Calculating your stage times...", fr: "Calcul de tes temps par étape..." },
-    message3: { en: "Drafting your race report...", fr: "Rédaction de ton rapport de course..." },
+    message1: { en: "Reviewing your answers...", fr: "Relecture de tes réponses…" },
+    message2: { en: "Calculating your stage times...", fr: "Calcul de tes temps par étape…" },
+    message3: { en: "Drafting your race report...", fr: "Rédaction de ton rapport de course…" },
     // Relu et validé par Antoine (2026-09-09) — R2-09. Shown once the three messages have
     // run their course and the Deep dive is still generating: a real Deep
     // dive was measured at ~70 s in production, and nothing on this screen
@@ -442,9 +442,9 @@ export const UI_STRINGS = {
    * session avait oublié de le mettre — R2-27.
    */
   progression: {
-    landingUp: { en: "Previous Tour: {prev} → {score}, +{delta}", fr: "Tour précédent : {prev} → {score}, +{delta}" },
-    landingDown: { en: "Previous Tour: {prev} → {score}, {delta}", fr: "Tour précédent : {prev} → {score}, {delta}" },
-    landingFlat: { en: "Previous Tour: {prev} — same score", fr: "Tour précédent : {prev} — même score" },
+    landingUp: { en: "Previous Tour: {prev} → {score}, +{delta}", fr: "Tour précédent : {prev} → {score}, +{delta}" },
+    landingDown: { en: "Previous Tour: {prev} → {score}, {delta}", fr: "Tour précédent : {prev} → {score}, {delta}" },
+    landingFlat: { en: "Previous Tour: {prev} — same score", fr: "Tour précédent : {prev} — même score" },
     resultUp: { en: "+{delta} points since your previous Tour ({prev}/100).", fr: "+{delta} points depuis ton Tour précédent ({prev}/100)." },
     resultDown: { en: "{delta} points since your previous Tour ({prev}/100).", fr: "{delta} points depuis ton Tour précédent ({prev}/100)." },
     resultFlat: { en: "Same score as your previous Tour.", fr: "Même score qu'à ton Tour précédent." },
@@ -525,11 +525,11 @@ export const UI_STRINGS = {
        about THIS result. Relu et validé par Antoine (2026-09-11). */
     shareCardAltTemplate: {
       en: "Share image: {total}/100, with {pillar} named as the stage holding this growth back.",
-      fr: "Image de partage : {total}/100, avec {pillar} désignée comme l'étape qui freine cette croissance.",
+      fr: "Image de partage : {total}/100, avec {pillar} désignée comme l'étape qui freine cette croissance.",
     },
     shareCardAltLevelTemplate: {
       en: "Share image: {total}/100, with no stage named as a bottleneck.",
-      fr: "Image de partage : {total}/100, sans étape désignée comme frein.",
+      fr: "Image de partage : {total}/100, sans étape désignée comme frein.",
     },
     // Roast-only stamped tag on the weakest pillar (DESIGN-BRIEF.md §04: "08/20 RETENTION — dead last").
     stampedSuffix: { en: "dead last", fr: "bon dernier" },
@@ -590,7 +590,7 @@ export const UI_STRINGS = {
       // « bilan » → « diagnostic », le nom du produit en français partout
       // ailleurs (landing, <title>). C'est la phrase que l'utilisateur publie
       // en son nom : elle ne doit pas donner au produit un quatrième nom.
-      fr: "J'ai fait {total}/100 à mon diagnostic growth AARRR. {stall} Et la tienne ?",
+      fr: "J'ai fait {total}/100 à mon diagnostic growth AARRR. {stall} Et la tienne ?",
     },
   },
 
@@ -641,7 +641,7 @@ export const UI_STRINGS = {
     // for the people who can't see it.
     shareImageAlt: {
       en: "Tour de Growth — Where does your growth stall? A guided AARRR check-up, 15 questions, 3 minutes.",
-      fr: "Tour de Growth — Où ta croissance cale-t-elle ? Un diagnostic AARRR guidé, 15 questions, 3 minutes.",
+      fr: "Tour de Growth — Où ta croissance cale-t-elle ? Un diagnostic AARRR guidé, 15 questions, 3 minutes.",
     },
   },
 
@@ -667,6 +667,6 @@ export const UI_STRINGS = {
       en: "No single stage is stalling this growth.",
       fr: "Aucune étape ne freine cette croissance.",
     },
-    whereDoesYours: { en: "Where does yours?", fr: "Et la tienne ?" },
+    whereDoesYours: { en: "Where does yours?", fr: "Et la tienne ?" },
   },
 } as const satisfies Record<string, Record<string, Translatable>>;
