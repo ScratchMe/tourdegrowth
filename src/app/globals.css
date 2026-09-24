@@ -47,6 +47,21 @@ body {
   background-color: var(--surface-page);
   background-image: var(--ground-lift);
   background-repeat: no-repeat;
+  /*
+   * `fixed` — the second half of the same seam, found 2026-09-24.
+   *
+   * The body's background does not paint on the body: it propagates to the
+   * canvas and is positioned on the ROOT element's box (CSS Backgrounds
+   * §2.11.2), and `html` is `height: 100%`, one window tall. `no-repeat`
+   * stopped the tiling above, but the gradients still ended at that box's
+   * bottom edge — a ~7/255 step at y = window height, on the right half of
+   * every page, where the shadow lift at `88% 74%` is still visible.
+   *
+   * Attaching the lift to the viewport removes the edge rather than moving
+   * it, and it is the right metaphor anyway: the ground is lit, and light
+   * stays where the window is.
+   */
+  background-attachment: fixed;
   color: var(--text-body);
   font-family: var(--font-ui), system-ui, sans-serif;
   line-height: 1.5;
