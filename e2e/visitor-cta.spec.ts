@@ -49,6 +49,14 @@ test.describe("a visitor on a shared result", () => {
     // column, then the right — and it is an adjacent swap at the foot of the
     // page, not a scattering. What a reader experiences is the visual order,
     // so that is what this now pins.
+    //
+    // …on a phone, where there is one column and "before" means one thing.
+    // Since the game card (game plan G5b) sits in the right column above the
+    // CTA row, a desktop with the game open puts the primary ~30px LOWER
+    // than the share button in the other column — two columns side by side,
+    // not an order. Measured at 1280×720 on 2026-09-24 and reported rather
+    // than papered over; the single-column order is the claim that holds.
+    await page.setViewportSize({ width: 390, height: 844 });
     const own = (await page.getByTestId("own-tour-cta").boundingBox())!;
     const share = (await page.getByTestId("share-button").boundingBox())!;
     expect(own.y).toBeLessThan(share.y);
