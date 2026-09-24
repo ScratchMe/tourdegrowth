@@ -38,7 +38,10 @@ export const UI_STRINGS = {
   landing: {
     bibTag: {
       en: "№ 15 questions — 3 min — free entry",
-      fr: "№ 15 questions — 3 min — entrée gratuite",
+      // TODO: à relire — revue de copie v1 (2026-09-24) : « entrée gratuite »
+      // passait sur deux lignes à 390 px, « GRATUITE » orpheline (critique DS
+      // L-2). « gratuit » tient sur une ligne ; « entrée libre » coupait encore.
+      fr: "№ 15 questions — 3 min — gratuit",
     },
     // Split so each locale can break the headline across two lines on its
     // own terms: line 1 is always plain, line 2 is an optional plain lead-in
@@ -47,12 +50,19 @@ export const UI_STRINGS = {
     // in red) — FR reads naturally with an empty h1Line2 instead.
     h1Line1: { en: "Where does", fr: "Où ta croissance" },
     h1Line2: { en: "your growth ", fr: "" },
-    h1Accent: { en: "stall?", fr: "cale-t-elle ?" },
+    h1Accent: { en: "stall?", fr: "cale-t-elle ?" },
     subtitle: {
-      // Relu et validé par Antoine (2026-09-09) — R2-12: "AARRR" added. The framework's name
-      // appeared nowhere in the landing's visible copy, only in its metadata.
-      en: "A guided AARRR check-up across Acquisition, Activation, Retention, Referral and Revenue — scored, explained, and built to share.",
-      fr: "Un diagnostic AARRR guidé sur l'Acquisition, l'Activation, la Retention, le Referral et le Revenue — noté, expliqué, et pensé pour être partagé.",
+      // R2-12 put "AARRR" in the visible copy (the framework's name appeared
+      // only in the metadata); it stays, once, in brackets.
+      // TODO: à relire — revue de copie v1 (2026-09-24), changement nº1. The
+      // old line listed five English stage names behind French articles —
+      // four lines on a phone that say nothing to someone who doesn't already
+      // know AARRR, which is most of the launch audience. It now says what
+      // the five stages ARE in plain words; the names themselves are in the
+      // preview card right next to it. Also drops the French Oxford comma
+      // ("expliqué, et pensé") and the calque "pensé pour être partagé".
+      en: "Fifteen questions across the five stages of your growth, from how people find you to how you make money (the AARRR framework).",
+      fr: "Quinze questions sur les cinq étapes de ta croissance, de la façon dont on te trouve à la façon dont tu gagnes de l'argent (le cadre AARRR).",
     },
     /**
      * Design system extension 03 §5 / REVIEW-03.md B4 — two lines above the
@@ -88,8 +98,12 @@ export const UI_STRINGS = {
       * Relu et validé par Antoine (2026-09-11).
       */
     promise: {
-      en: "You leave with the one stage holding you back — and one action to take.",
-      fr: "Tu repars avec l'étape qui te freine — et une action à mener.",
+      // TODO: à relire — revue de copie v1 (2026-09-24), changement nº1: the
+      // score out of 100 joins the deliverable — it is the very object people
+      // share, and the preview card beside this line shows it at 120 px. Still
+      // says only what you leave WITH; the subtitle says what you do.
+      en: "You leave with a score out of 100, the one stage holding you back, and one action to take.",
+      fr: "Tu repars avec un score sur 100, l'étape qui te freine et une action à mener.",
     },
     ctaPrimary: { en: "Start your Tour →", fr: "Démarre ton Tour →" },
     ctaSecondary: { en: "See a sample result", fr: "Voir un résultat d'exemple" },
@@ -121,13 +135,13 @@ export const UI_STRINGS = {
    * sample.
    */
   benchmark: {
-    line: { en: "Average of every Tour: {score}/100", fr: "Moyenne de tous les Tours : {score}/100" },
+    line: { en: "Average of every Tour: {score}/100", fr: "Moyenne de tous les Tours : {score}/100" },
     // Relu et validé par Antoine (2026-09-09) — R2-26. Shown instead of the line above
     // once the reader's own segment has enough Tours of its own; `{segment}`
     // is built from content/segments.ts ("B2B, first customers").
     segmentLine: {
       en: "Average for {segment}: {score}/100",
-      fr: "Moyenne pour {segment} : {score}/100",
+      fr: "Moyenne pour {segment} : {score}/100",
     },
     segmentJoin: { en: "{model}, {stage}", fr: "{model}, {stage}" },
   },
@@ -144,7 +158,7 @@ export const UI_STRINGS = {
   lastResult: {
     withScore: {
       en: "Your last score: {score}/100 — see it again →",
-      fr: "Ton dernier score : {score}/100 — le revoir →",
+      fr: "Ton dernier score : {score}/100 — le revoir →",
     },
     withoutScore: { en: "See your last result →", fr: "Revoir ton dernier résultat →" },
     /**
@@ -170,7 +184,7 @@ export const UI_STRINGS = {
       en: "Your last Tour was {n} months ago",
       fr: "Ton dernier Tour date de {n} mois",
     },
-    retakeNudgeCta: { en: "take it again?", fr: "le refaire ?" },
+    retakeNudgeCta: { en: "take it again?", fr: "le refaire ?" },
   },
 
   /** The score card recipe is shared by the landing preview and the real
@@ -201,7 +215,7 @@ export const UI_STRINGS = {
    * definitions themselves live in content/glossary.ts, this is just the
    * trigger's accessible label and the mobile sheet's close button. */
   glossary: {
-    definitionLabelTemplate: { en: "Definition: {term}", fr: "Définition : {term}" },
+    definitionLabelTemplate: { en: "Definition: {term}", fr: "Définition : {term}" },
     closeLabel: { en: "Close", fr: "Fermer" },
     // Relu et validé par Antoine (2026-09-09) — R2-13. The popover's way out, to the term's own page.
     moreLabel: { en: "Learn more →", fr: "En savoir plus →" },
@@ -219,9 +233,9 @@ export const UI_STRINGS = {
    */
   openDoor: {
     stagesHeading: { en: "The five stages, one page each", fr: "Les cinq étapes, une page chacune" },
-    checklistLead: { en: "Want the list itself, ready to work through?", fr: "Tu veux la liste elle-même, prête à dérouler ?" },
+    checklistLead: { en: "Want the list itself, ready to work through?", fr: "Tu veux la liste elle-même, prête à dérouler ?" },
     checklistLink: { en: "The 15-point growth audit checklist", fr: "La checklist d'audit growth en 15 points" },
-    diagnosticLead: { en: "Wondering how to run one from start to finish?", fr: "Tu te demandes comment en mener un de bout en bout ?" },
+    diagnosticLead: { en: "Wondering how to run one from start to finish?", fr: "Tu te demandes comment en mener un de bout en bout ?" },
     diagnosticLink: { en: "The startup growth diagnostic method", fr: "La méthode du diagnostic de croissance" },
   },
 
@@ -237,17 +251,17 @@ export const UI_STRINGS = {
     othersHeading: { en: "The other comparisons", fr: "Les autres comparaisons" },
     ctaLead: {
       en: "Whichever framework you settle on, the first question is the same one: which of the five stages is holding the others back? Fifteen questions, three minutes, no signup.",
-      fr: "Quel que soit le cadre retenu, la première question est la même : laquelle des cinq étapes retient les autres ? Quinze questions, trois minutes, sans inscription.",
+      fr: "Quel que soit le cadre retenu, la première question est la même : laquelle des cinq étapes retient les autres ? Quinze questions, trois minutes, sans inscription.",
     },
     // Le chapeau de la section « frameworks comparés » sur /how-it-works.
     fromHowItWorks: {
       en: "Wondering how AARRR sits next to the other frameworks?",
-      fr: "Tu te demandes comment AARRR se situe face aux autres cadres ?",
+      fr: "Tu te demandes comment AARRR se situe face aux autres cadres ?",
     },
   },
 
   howItWorksPage: {
-    exampleQuestionLabel: { en: "Example question:", fr: "Exemple de question :" },
+    exampleQuestionLabel: { en: "Example question:", fr: "Exemple de question :" },
     // Relu et validé par Antoine (2026-09-09) — R2-17. Eyebrow of each pillar card: the
     // stage number, since the <h2> right under it already names the pillar.
     stageEyebrowTemplate: { en: "Stage {n} of 5", fr: "Étape {n} sur 5" },
@@ -305,7 +319,7 @@ export const UI_STRINGS = {
    * neutral is the explicit default. */
   toneSelector: {
     headerLabel: { en: "15 / 15 answered", fr: "15 / 15 répondues" },
-    title: { en: "How do you want your results?", fr: "Comment veux-tu tes résultats ?" },
+    title: { en: "How do you want your results?", fr: "Comment veux-tu tes résultats ?" },
     neutralTitle: { en: "Straight up", fr: "Neutre" },
     neutralDescription: {
       en: "Clear, constructive, no sugar-coating.",
@@ -321,10 +335,20 @@ export const UI_STRINGS = {
       en: "Same insights, sharper tongue. All in good fun.",
       fr: "Mêmes constats, un ton plus mordant. Toujours bienveillant.",
     },
-    cta: { en: "Get my score →", fr: "Obtiens ton score →" },
+    // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique :
+    // an arrow CTA speaks to the reader in both languages, so "your", as the
+    // French « Obtiens ton score » already did.
+    cta: { en: "Get your score →", fr: "Obtiens ton score →" },
+    // TODO: à relire — revue de copie v1 (2026-09-24), changement nº3 et
+    // critique DS M-6. The old line promised a tone switch on the result
+    // page, which only exists for an owner in roast ("Switch to straight
+    // up"); someone who keeps the default neutral tone — the majority —
+    // never finds one. The symmetric button stays refused (step 7, R-23), so
+    // the sentence follows the product: it describes the roast option, and
+    // is true whichever card is selected.
     switchHint: {
-      en: "You can switch tone on the result page.",
-      fr: "Tu pourras changer de ton sur la page de résultat.",
+      en: "Roast isn't final: you can switch back to straight up on your result.",
+      fr: "Le roast n'est pas définitif : tu pourras repasser en neutre sur ton résultat.",
     },
   },
 
@@ -333,9 +357,9 @@ export const UI_STRINGS = {
    * left to narrate); the Deep dive keeps the full 3-message sequence,
    * since it still makes a real Gemini call. */
   loading: {
-    message1: { en: "Reviewing your answers...", fr: "Relecture de tes réponses..." },
-    message2: { en: "Calculating your stage times...", fr: "Calcul de tes temps par étape..." },
-    message3: { en: "Drafting your race report...", fr: "Rédaction de ton rapport de course..." },
+    message1: { en: "Reviewing your answers...", fr: "Relecture de tes réponses…" },
+    message2: { en: "Calculating your stage times...", fr: "Calcul de tes temps par étape…" },
+    message3: { en: "Drafting your race report...", fr: "Rédaction de ton rapport de course…" },
     // Relu et validé par Antoine (2026-09-09) — R2-09. Shown once the three messages have
     // run their course and the Deep dive is still generating: a real Deep
     // dive was measured at ~70 s in production, and nothing on this screen
@@ -362,17 +386,25 @@ export const UI_STRINGS = {
    *
    * Relu et validé par Antoine (2026-09-11). */
   deepDive: {
+    // TODO: à relire — revue de copie v1 (2026-09-24), §3.2 et fiche
+    // terminologique : « spécifique à » est le calque de *specific to*, et
+    // un CTA à flèche est à l'impératif, à la deuxième personne, dans les
+    // deux langues (« Obtiens ton score », « Démarre ton Tour »).
     upgradeText: {
       en: "Make this specific to your business — 10 more questions, about a minute.",
-      fr: "Rends-la spécifique à ton entreprise — 10 questions de plus, environ une minute.",
+      fr: "Adapte-la à ton entreprise — 10 questions de plus, environ une minute.",
     },
     upgradeCta: {
-      en: "Make it specific to my business →",
-      fr: "La rendre spécifique à mon entreprise →",
+      en: "Make it specific to your business →",
+      fr: "Adapte-la à ton entreprise →",
     },
+    // TODO: à relire — revue de copie v1 (2026-09-24), changement nº5 : le
+    // mode avait trois noms en français (Deep dive sur le badge,
+    // Approfondissement ici, Diagnostic approfondi dans le titre du
+    // document). « Deep dive » est un nom propre, invariable, comme le badge.
     questionCounterTemplate: {
       en: "Deep dive · Question {n} of {total}",
-      fr: "Approfondissement · Question {n} sur {total}",
+      fr: "Deep dive · Question {n} sur {total}",
     },
     // The mode badge itself stays "Deep dive" in both locales, same
     // treatment as the AARRR pillar names and the roast 🔥 badge — a
@@ -389,9 +421,13 @@ export const UI_STRINGS = {
     // the text goes, that it is not kept, and that it can show through in
     // the recommendation on a page the person may share (a fact the first
     // live probe established — see CLAUDE.md, 2026-09-05).
+    // TODO: à relire — revue de copie v1 (2026-09-24), changement nº10 :
+    // « façonner » était le calque de *shape* ; « se retrouver dans » dit le
+    // fait établi par la sonde du 2026-09-05 (Gemini reprend le contexte dans
+    // ses recommandations), sans l'euphémiser. L'anglais ne change pas.
     freeContextPrivacy: {
       en: "Sent to Google's Gemini to write your recommendation, not stored afterwards. It can shape the text shown on your result page.",
-      fr: "Envoyé à Gemini (Google) pour rédiger ta recommandation, pas conservé ensuite. Il peut façonner le texte affiché sur ta page de résultat.",
+      fr: "Envoyé à Gemini (Google) pour rédiger ta recommandation, pas conservé ensuite. Il peut se retrouver dans le texte affiché sur ta page de résultat.",
     },
     freeContextPrivacyLink: { en: "Privacy policy →", fr: "Politique de confidentialité →" },
   },
@@ -406,9 +442,9 @@ export const UI_STRINGS = {
    * session avait oublié de le mettre — R2-27.
    */
   progression: {
-    landingUp: { en: "Previous Tour: {prev} → {score}, +{delta}", fr: "Tour précédent : {prev} → {score}, +{delta}" },
-    landingDown: { en: "Previous Tour: {prev} → {score}, {delta}", fr: "Tour précédent : {prev} → {score}, {delta}" },
-    landingFlat: { en: "Previous Tour: {prev} — same score", fr: "Tour précédent : {prev} — même score" },
+    landingUp: { en: "Previous Tour: {prev} → {score}, +{delta}", fr: "Tour précédent : {prev} → {score}, +{delta}" },
+    landingDown: { en: "Previous Tour: {prev} → {score}, {delta}", fr: "Tour précédent : {prev} → {score}, {delta}" },
+    landingFlat: { en: "Previous Tour: {prev} — same score", fr: "Tour précédent : {prev} — même score" },
     resultUp: { en: "+{delta} points since your previous Tour ({prev}/100).", fr: "+{delta} points depuis ton Tour précédent ({prev}/100)." },
     resultDown: { en: "{delta} points since your previous Tour ({prev}/100).", fr: "{delta} points depuis ton Tour précédent ({prev}/100)." },
     resultFlat: { en: "Same score as your previous Tour.", fr: "Même score qu'à ton Tour précédent." },
@@ -489,11 +525,11 @@ export const UI_STRINGS = {
        about THIS result. Relu et validé par Antoine (2026-09-11). */
     shareCardAltTemplate: {
       en: "Share image: {total}/100, with {pillar} named as the stage holding this growth back.",
-      fr: "Image de partage : {total}/100, avec {pillar} désignée comme l'étape qui freine cette croissance.",
+      fr: "Image de partage : {total}/100, avec {pillar} désignée comme l'étape qui freine cette croissance.",
     },
     shareCardAltLevelTemplate: {
       en: "Share image: {total}/100, with no stage named as a bottleneck.",
-      fr: "Image de partage : {total}/100, sans étape désignée comme frein.",
+      fr: "Image de partage : {total}/100, sans étape désignée comme frein.",
     },
     // Roast-only stamped tag on the weakest pillar (DESIGN-BRIEF.md §04: "08/20 RETENTION — dead last").
     stampedSuffix: { en: "dead last", fr: "bon dernier" },
@@ -527,7 +563,8 @@ export const UI_STRINGS = {
     pointsTemplate: { en: "{n} pts", fr: "{n} pts" },
     ownerOnlyNote: {
       en: "Only visible to you — your answers are stored on this device, never on the shared page.",
-      fr: "Visible par toi seul — tes réponses sont sur cet appareil, jamais sur la page partagée.",
+      // TODO: à relire — revue de copie v1 (2026-09-24), §3.3 : « toi seul » supposait un lecteur masculin.
+      fr: "Visible sur cet appareil uniquement — tes réponses sont stockées ici, jamais sur la page partagée.",
     },
   },
 
@@ -549,7 +586,11 @@ export const UI_STRINGS = {
        reader sees are unchanged. */
     textTemplate: {
       en: "I scored {total}/100 on my AARRR growth check-up. {stall} Where does yours?",
-      fr: "J'ai fait {total}/100 à mon bilan growth AARRR. {stall} Et la tienne ?",
+      // TODO: à relire — revue de copie v1 (2026-09-24), changement nº5 :
+      // « bilan » → « diagnostic », le nom du produit en français partout
+      // ailleurs (landing, <title>). C'est la phrase que l'utilisateur publie
+      // en son nom : elle ne doit pas donner au produit un quatrième nom.
+      fr: "J'ai fait {total}/100 à mon diagnostic growth AARRR. {stall} Et la tienne ?",
     },
   },
 
@@ -590,7 +631,8 @@ export const UI_STRINGS = {
      */
     quizHeading: { en: "The Tour — 15 questions", fr: "Le Tour — 15 questions" },
     resultHeading: { en: "Tour result — {score}/100", fr: "Résultat du Tour — {score}/100" },
-    deepDiveHeading: { en: "Deep dive — 10 more questions", fr: "Diagnostic approfondi — 10 questions de plus" },
+    // Revue de copie v1 (2026-09-24), changement nº5 : même nom que le badge.
+    deepDiveHeading: { en: "Deep dive — 10 more questions", fr: "Deep dive — 10 questions de plus" },
     quizDescription: {
       en: "Answer 15 questions about how your product acquires, activates, retains, refers and monetises — and get an AARRR growth score out of 100 you can share.",
       fr: "Réponds à 15 questions sur la façon dont ton produit acquiert, active, retient, fait recommander et monétise — et obtiens un score growth AARRR sur 100 à partager.",
@@ -599,17 +641,21 @@ export const UI_STRINGS = {
     // for the people who can't see it.
     shareImageAlt: {
       en: "Tour de Growth — Where does your growth stall? A guided AARRR check-up, 15 questions, 3 minutes.",
-      fr: "Tour de Growth — Où ta croissance cale-t-elle ? Un diagnostic AARRR guidé, 15 questions, 3 minutes.",
+      fr: "Tour de Growth — Où ta croissance cale-t-elle ? Un diagnostic AARRR guidé, 15 questions, 3 minutes.",
     },
   },
 
   og: {
-    checkupBadge: { en: "AARRR check-up — 3 min", fr: "Bilan AARRR — 3 min" },
+    // TODO: à relire — revue de copie v1 (2026-09-24), changement nº5 :
+    // « Bilan » → « Diagnostic », le nom du produit en français partout
+    // ailleurs. Mesuré dans l'image rendue avant d'être gardé : le badge tient
+    // sur sa ligne à côté du wordmark.
+    checkupBadge: { en: "AARRR check-up — 3 min", fr: "Diagnostic AARRR — 3 min" },
     // SPEC-ADDENDUM-01.md §2.6: the same badge becomes this once the result
     // has been enriched by a Deep dive — same gabarit otherwise, just this
     // one string. (Only the non-roast badge; the roast badge below doesn't
     // get a Deep dive variant per the addendum's own scope.)
-    checkupBadgeDeepDive: { en: "AARRR check-up — Deep dive", fr: "Bilan AARRR — Deep dive" },
+    checkupBadgeDeepDive: { en: "AARRR check-up — Deep dive", fr: "Diagnostic AARRR — Deep dive" },
     roastBadge: { en: "🔥 ROAST MODE", fr: "🔥 ROAST MODE" },
     scoreLabel: { en: "Overall Growth Score", fr: "Score growth global" },
     stallSentenceTemplate: { en: "{pillar} is where this growth stalls.", fr: "{pillar} est là où cette croissance cale." },
@@ -621,6 +667,6 @@ export const UI_STRINGS = {
       en: "No single stage is stalling this growth.",
       fr: "Aucune étape ne freine cette croissance.",
     },
-    whereDoesYours: { en: "Where does yours?", fr: "Et la tienne ?" },
+    whereDoesYours: { en: "Where does yours?", fr: "Et la tienne ?" },
   },
 } as const satisfies Record<string, Record<string, Translatable>>;

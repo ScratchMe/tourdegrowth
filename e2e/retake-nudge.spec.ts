@@ -46,7 +46,7 @@ test("past two months it counts in months instead", async ({ page }) => {
 test("the nudge is translated, not just the landing around it", async ({ page }) => {
   await seed(page, [result(40)], "/fr");
   await expect(page.getByTestId("retake-nudge")).toHaveText(/Ton dernier Tour date de 5 semaines/);
-  await expect(page.getByTestId("retake-nudge-link")).toHaveText("le refaire ?");
+  await expect(page.getByTestId("retake-nudge-link")).toHaveText("le refaire\u00a0?");
 });
 
 /* `retake_started` alone cannot say whether the nudge works — it counts every

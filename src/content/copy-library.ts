@@ -55,7 +55,7 @@ export const QUESTIONS: readonly CopyLibraryQuestion[] = [
     id: "acq-1",
     pillar: "acquisition",
     question: {
-      fr: "As-tu un canal d'acquisition principal identifié et mesuré ?",
+      fr: "As-tu un canal d'acquisition principal identifié et mesuré ?",
       en: "Do you have a primary acquisition channel that's identified and measured?",
     },
     options: [
@@ -68,7 +68,7 @@ export const QUESTIONS: readonly CopyLibraryQuestion[] = [
     id: "acq-2",
     pillar: "acquisition",
     question: {
-      fr: "As-tu testé plus d'un canal d'acquisition ?",
+      fr: "As-tu testé plus d'un canal d'acquisition ?",
       en: "Have you tested more than one acquisition channel?",
     },
     options: [
@@ -81,7 +81,7 @@ export const QUESTIONS: readonly CopyLibraryQuestion[] = [
     id: "acq-3",
     pillar: "acquisition",
     question: {
-      fr: "Connais-tu ton coût d'acquisition, même approximatif ?",
+      fr: "Connais-tu ton coût d'acquisition, même approximatif ?",
       en: "Do you know your customer acquisition cost, even roughly?",
     },
     options: [
@@ -96,7 +96,8 @@ export const QUESTIONS: readonly CopyLibraryQuestion[] = [
     id: "act-1",
     pillar: "activation",
     question: {
-      fr: 'As-tu défini un moment "aha" précis pour tes nouveaux utilisateurs ?',
+      // TODO: à relire — revue de copie v1 (2026-09-24), §3.2 : guillemets français en français, comme partout ailleurs.
+      fr: "As-tu défini un moment « aha » précis pour tes nouveaux utilisateurs ?",
       en: 'Have you defined a specific "aha" moment for new users?',
     },
     options: [
@@ -109,7 +110,7 @@ export const QUESTIONS: readonly CopyLibraryQuestion[] = [
     id: "act-2",
     pillar: "activation",
     question: {
-      fr: "Sais-tu quel pourcentage d'utilisateurs atteint ce moment ?",
+      fr: "Sais-tu quel pourcentage d'utilisateurs atteint ce moment ?",
       en: "Do you know what percentage of users reach that moment?",
     },
     options: [
@@ -122,7 +123,7 @@ export const QUESTIONS: readonly CopyLibraryQuestion[] = [
     id: "act-3",
     pillar: "activation",
     question: {
-      fr: "Ton onboarding a-t-il été testé ou itéré au moins une fois ?",
+      fr: "Ton onboarding a-t-il été testé ou itéré au moins une fois ?",
       en: "Has your onboarding been tested or iterated on at least once?",
     },
     options: [
@@ -137,7 +138,7 @@ export const QUESTIONS: readonly CopyLibraryQuestion[] = [
     id: "ret-1",
     pillar: "retention",
     question: {
-      fr: "Suis-tu un taux de rétention (J7/J30 ou équivalent) ?",
+      fr: "Suis-tu un taux de rétention (J7/J30 ou équivalent) ?",
       en: "Do you track a retention rate (D7/D30 or similar)?",
     },
     options: [
@@ -150,7 +151,7 @@ export const QUESTIONS: readonly CopyLibraryQuestion[] = [
     id: "ret-2",
     pillar: "retention",
     question: {
-      fr: "As-tu un mécanisme de réengagement (email, notification...) ?",
+      fr: "As-tu un mécanisme de réengagement (email, notification…) ?",
       en: "Do you have a re-engagement mechanism (email, notification...)?",
     },
     options: [
@@ -163,7 +164,7 @@ export const QUESTIONS: readonly CopyLibraryQuestion[] = [
     id: "ret-3",
     pillar: "retention",
     question: {
-      fr: "Connais-tu ta principale cause de churn ?",
+      fr: "Connais-tu ta principale cause de churn ?",
       en: "Do you know your main cause of churn?",
     },
     options: [
@@ -178,7 +179,7 @@ export const QUESTIONS: readonly CopyLibraryQuestion[] = [
     id: "ref-1",
     pillar: "referral",
     question: {
-      fr: "Ton produit a-t-il un mécanisme de partage ou de parrainage ?",
+      fr: "Ton produit a-t-il un mécanisme de partage ou de parrainage ?",
       en: "Does your product have a sharing or referral mechanism?",
     },
     options: [
@@ -191,7 +192,7 @@ export const QUESTIONS: readonly CopyLibraryQuestion[] = [
     id: "ref-2",
     pillar: "referral",
     question: {
-      fr: "S'il existe, est-il réellement utilisé par les clients ?",
+      fr: "S'il existe, est-il réellement utilisé par les clients ?",
       en: "If it exists, is it actually used by customers?",
     },
     options: [
@@ -204,7 +205,7 @@ export const QUESTIONS: readonly CopyLibraryQuestion[] = [
     id: "ref-3",
     pillar: "referral",
     question: {
-      fr: "Mesures-tu un coefficient viral ou équivalent ?",
+      fr: "Mesures-tu un coefficient viral ou équivalent ?",
       en: "Do you measure a viral coefficient or equivalent?",
     },
     options: [
@@ -219,7 +220,7 @@ export const QUESTIONS: readonly CopyLibraryQuestion[] = [
     id: "rev-1",
     pillar: "revenue",
     question: {
-      fr: "Ton modèle de pricing a-t-il été testé, pas juste choisi ?",
+      fr: "Ton modèle de pricing a-t-il été testé, pas juste choisi ?",
       en: "Has your pricing model been tested, not just chosen?",
     },
     options: [
@@ -232,7 +233,7 @@ export const QUESTIONS: readonly CopyLibraryQuestion[] = [
     id: "rev-2",
     pillar: "revenue",
     question: {
-      fr: "Connais-tu ta LTV, même grossièrement ?",
+      fr: "Connais-tu ta LTV, même grossièrement ?",
       en: "Do you know your LTV, even roughly?",
     },
     options: [
@@ -245,7 +246,7 @@ export const QUESTIONS: readonly CopyLibraryQuestion[] = [
     id: "rev-3",
     pillar: "revenue",
     question: {
-      fr: "As-tu un playbook d'expansion (upsell/cross-sell) ?",
+      fr: "As-tu un playbook d'expansion (upsell/cross-sell) ?",
       en: "Do you have an expansion playbook (upsell/cross-sell)?",
     },
     options: [
@@ -302,13 +303,13 @@ export const PILLAR_VERDICTS: Record<Pillar, Record<ScoreBand, Record<Tone, Tran
         en: "No clear acquisition channel yet — normal at this stage, but worth picking one and sticking with it before testing a second.",
       },
       roast: {
-        fr: "Ton acquisition ressemble à une échappée sans plan de course : on pédale, on ne sait pas trop vers où.",
+        fr: "Ton acquisition ressemble à une échappée sans plan de course : on pédale, on ne sait pas trop vers où.",
         en: "Your acquisition is a breakaway with no race plan — pedaling hard, unclear destination.",
       },
     },
     developing: {
       neutral: {
-        fr: "Un canal existe et fonctionne un peu, mais sans vraie mesure ou comparaison. Prochaine étape logique : chiffrer avant d'ajouter un deuxième canal.",
+        fr: "Un canal existe et fonctionne un peu, mais sans vraie mesure ou comparaison. Prochaine étape logique : chiffrer avant d'ajouter un deuxième canal.",
         en: "A channel exists and works somewhat, but without real measurement or comparison. Logical next step: quantify it before adding a second channel.",
       },
       roast: {
@@ -330,17 +331,19 @@ export const PILLAR_VERDICTS: Record<Pillar, Record<ScoreBand, Record<Tone, Tran
   activation: {
     weak: {
       neutral: {
-        fr: 'Pas de moment "aha" identifié — sans lui, difficile de savoir ce qu\'il faut optimiser dans l\'onboarding.',
+        // TODO: à relire — revue de copie v1 (2026-09-24), §3.2 : guillemets français.
+        fr: "Pas de moment « aha » identifié — sans lui, difficile de savoir ce qu'il faut optimiser dans l'onboarding.",
         en: 'No identified "aha" moment — without one, it\'s hard to know what to optimize in onboarding.',
       },
       roast: {
-        fr: "Ton activation, c'est le sprint final sans ligne d'arrivée visible : personne ne sait quand on a gagné.",
+        fr: "Ton activation, c'est le sprint final sans ligne d'arrivée visible : personne ne sait quand on a gagné.",
         en: "Your activation is the final sprint with no visible finish line — nobody knows when they've won.",
       },
     },
     developing: {
       neutral: {
-        fr: "Le moment clé existe dans les grandes lignes, mais son taux d'atteinte n'est pas encore suivi — la prochaine itération d'onboarding devrait viser à le mesurer.",
+        // TODO: à relire — revue de copie v1 (2026-09-24), §3.2 : calque de *should aim to*.
+        fr: "Le moment clé existe dans les grandes lignes, mais son taux d'atteinte n'est pas encore suivi — la prochaine version de l'onboarding doit le mesurer.",
         en: "The key moment exists in broad strokes, but its completion rate isn't tracked yet — the next onboarding iteration should aim to measure it.",
       },
       roast: {
@@ -350,7 +353,8 @@ export const PILLAR_VERDICTS: Record<Pillar, Record<ScoreBand, Record<Tone, Tran
     },
     strong: {
       neutral: {
-        fr: 'Moment "aha" clair, mesuré, et un onboarding déjà itéré sur cette base — un vrai socle pour la suite.',
+        // TODO: à relire — revue de copie v1 (2026-09-24), §3.2 : guillemets français.
+        fr: "Moment « aha » clair, mesuré, et un onboarding déjà itéré sur cette base — un vrai socle pour la suite.",
         en: 'Clear "aha" moment, measured, and an onboarding already iterated on that basis — a real foundation to build on.',
       },
       roast: {
@@ -382,7 +386,8 @@ export const PILLAR_VERDICTS: Record<Pillar, Record<ScoreBand, Record<Tone, Tran
     },
     strong: {
       neutral: {
-        fr: "Rétention suivie, cause de churn connue, mécanisme de réengagement actif — un pilier solide de ta croissance.",
+        // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
+        fr: "Rétention suivie, cause de churn connue, mécanisme de réengagement actif — une étape solide de ta croissance.",
         en: "Retention tracked, churn cause known, re-engagement mechanism active — a solid pillar of your growth.",
       },
       roast: {
@@ -414,8 +419,9 @@ export const PILLAR_VERDICTS: Record<Pillar, Record<ScoreBand, Record<Tone, Tran
     },
     strong: {
       neutral: {
-        fr: "Mécanisme de partage intégré et mesuré — le pilier le plus rare à ce niveau, probablement ton meilleur atout.",
-        en: "Sharing mechanism built in and measured — the rarest pillar at this level, probably your best asset.",
+        // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
+        fr: "Mécanisme de partage intégré et mesuré — l'étape la plus rare à ce niveau, probablement ton meilleur atout.",
+        en: "Sharing mechanism built in and measured — the rarest stage at this level, probably your best asset.",
       },
       roast: {
         fr: "Ton referral roule en échappée. Le reste du peloton growth aimerait bien savoir comment tu as fait.",
@@ -446,8 +452,9 @@ export const PILLAR_VERDICTS: Record<Pillar, Record<ScoreBand, Record<Tone, Tran
     },
     strong: {
       neutral: {
-        fr: "Pricing testé, LTV connue, playbook d'expansion actif — un pilier revenue qui tient déjà la comparaison avec des équipes bien plus établies.",
-        en: "Pricing tested, LTV known, expansion playbook active — a revenue pillar that already holds up against much more established teams.",
+        // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
+        fr: "Pricing testé, LTV connue, playbook d'expansion actif — une étape Revenue qui tient déjà la comparaison avec des équipes bien plus établies.",
+        en: "Pricing tested, LTV known, expansion playbook active — a Revenue stage that already holds up against much more established teams.",
       },
       roast: {
         fr: "Ton revenue a le calme d'un coureur qui sait exactement combien de temps il a en réserve avant l'arrivée.",
@@ -515,7 +522,7 @@ export const SUMMARY_HEADLINES: Record<Pillar, Record<BoardBand, Record<Tone, Tr
   acquisition: {
     solid: {
       neutral: {
-        fr: "Le reste du moteur tient. Ce qui te limite, c'est l'acquisition : d'où viennent tes clients, et à quel prix.",
+        fr: "Le reste du moteur tient. Ce qui te limite, c'est l'acquisition : d'où viennent tes clients, et à quel prix.",
         en: "The rest of the engine holds. Acquisition is what's limiting you: where customers come from, and at what cost.",
       },
       roast: {
@@ -525,7 +532,7 @@ export const SUMMARY_HEADLINES: Record<Pillar, Record<BoardBand, Record<Tone, Tr
     },
     mixed: {
       neutral: {
-        fr: "L'acquisition est en retard, et le reste ne prend pas le relais : tout ce qui suit dépend de ce qui entre.",
+        fr: "L'acquisition est en retard, et le reste ne prend pas le relais : tout ce qui suit dépend de ce qui entre.",
         en: "Acquisition is behind, and the rest isn't taking up the slack: what follows depends on what comes in.",
       },
       roast: {
@@ -535,7 +542,7 @@ export const SUMMARY_HEADLINES: Record<Pillar, Record<BoardBand, Record<Tone, Tr
     },
     floor: {
       neutral: {
-        fr: "Aucune étape n'est encore solide, acquisition comprise : ce qui entre rend tout le reste mesurable.",
+        fr: "Aucune étape n'est encore solide, acquisition comprise : ce qui entre rend tout le reste mesurable.",
         en: "No stage is solid yet, acquisition included: what comes in is what makes everything else measurable.",
       },
       roast: {
@@ -561,7 +568,7 @@ export const SUMMARY_HEADLINES: Record<Pillar, Record<BoardBand, Record<Tone, Tr
         en: "Activation is behind, and the rest isn't solid enough to make up for what happens at the door.",
       },
       roast: {
-        fr: "Ce qui marche ailleurs ne suffit pas à couvrir ça : c'est l'entrée du parcours qui est restée en arrière.",
+        fr: "Ce qui marche ailleurs ne suffit pas à couvrir ça : c'est l'entrée du parcours qui est restée en arrière.",
         en: "What works elsewhere doesn't cover this: it's the way in that's been left behind.",
       },
     },
@@ -611,7 +618,7 @@ export const SUMMARY_HEADLINES: Record<Pillar, Record<BoardBand, Record<Tone, Tr
   referral: {
     solid: {
       neutral: {
-        fr: "Le reste du moteur tient. C'est le bouche-à-oreille qui ne suit pas : tes clients pourraient t'en amener plus.",
+        fr: "Le reste du moteur tient. C'est le bouche-à-oreille qui ne suit pas : tes clients pourraient t'en amener plus.",
         en: "The rest of the engine holds. Word-of-mouth isn't keeping up — your customers could be bringing you more.",
       },
       roast: {
@@ -638,7 +645,7 @@ export const SUMMARY_HEADLINES: Record<Pillar, Record<BoardBand, Record<Tone, Tr
     },
     floor: {
       neutral: {
-        fr: "Aucune étape n'est encore solide. Le bouche-à-oreille ne s'achète pas : il se construit dans le produit.",
+        fr: "Aucune étape n'est encore solide. Le bouche-à-oreille ne s'achète pas : il se construit dans le produit.",
         en: "No stage is solid yet. Word-of-mouth can't be bought — it gets built into the product.",
       },
       roast: {

@@ -34,7 +34,7 @@ test("/fr/glossary/ltv renders the same sections in French", async ({ page }) =>
   await expect(main.getByRole("heading", { level: 2, name: "La formule" })).toBeVisible();
   await expect(main.getByRole("heading", { level: 2, name: "Exemple chiffré" })).toBeVisible();
   await expect(main.getByRole("heading", { level: 2, name: "Questions fréquentes" })).toBeVisible();
-  await expect(page.getByTestId("in-the-tour")).toContainText("Connais-tu ta LTV, même grossièrement ?");
+  await expect(page.getByTestId("in-the-tour")).toContainText("Connais-tu ta LTV, même grossièrement\u00a0?");
 });
 
 test("/en/glossary/retention quotes the retention question (lot 2)", async ({ page }) => {
@@ -81,7 +81,7 @@ test("the last three terms have the long page too (lot 5)", async ({ page }) => 
   await page.goto("/en/glossary/upsell-cross-sell");
   await expect(page.getByTestId("in-the-tour")).toContainText("Do you have an expansion playbook (upsell/cross-sell)?");
   await page.goto("/fr/glossary/north-star-metric");
-  await expect(page.getByTestId("in-the-tour")).toContainText("Sais-tu quel pourcentage d'utilisateurs atteint ce moment ?");
+  await expect(page.getByTestId("in-the-tour")).toContainText("Sais-tu quel pourcentage d'utilisateurs atteint ce moment\u00a0?");
   await page.setViewportSize({ width: 390, height: 800 });
   await page.goto("/fr/glossary/growth-loop");
   await page.getByTestId("faq").waitFor();

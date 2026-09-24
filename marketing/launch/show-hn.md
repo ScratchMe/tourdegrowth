@@ -11,7 +11,7 @@ Jour : mardi à jeudi, 14h-16h heure de Paris (matin côte Est).*
 
 1. `Show HN: A 3-minute AARRR growth check-up with a deterministic score` (66) ← préféré
 2. `Show HN: Where does your growth stall? 15 questions, a score, one next move` (75)
-3. `Show HN: An open-source growth check-up where the LLM only writes the roast` (74)
+3. `Show HN: An open-source growth check-up where no model ever touches the score` (77)
 
 **URL** : `https://www.tourdegrowth.com/en?utm_source=hackernews&utm_campaign=launch_week`
 
@@ -24,7 +24,7 @@ Jour : mardi à jeudi, 14h-16h heure de Paris (matin côte Est).*
 > A few decisions that might interest this crowd:
 >
 > - **The score is deterministic.** 20/7/0 points per answer, rounded per stage before summing. No model decides a number. The result page shows the full arithmetic, because a score you'll share has to be re-explainable in ten seconds.
-> - **The LLM only writes the roast and the optional deep dive.** The quick result is a library of pre-written verdicts (60 of them, one per stage × score band × tone), served with zero network calls. Gemini is behind a four-model fallback chain with a hard timeout, and the anti-mockery guardrail is in the system prompt, not left to the model's mood.
+> - **The LLM only writes the optional deep dive.** The quick result, roast included, is a library of pre-written verdicts (62 of them: a headline and a per-stage sentence for every stage × score band × tone, plus one for a board where nothing is behind), served with zero network calls. For the deep dive, Gemini is behind a four-model fallback chain with a hard timeout, and the anti-mockery guardrail is in the system prompt, not left to the model's mood.
 > - **Two tones, your choice.** "Straight up", or "roast me" — the roast goes after the strategy, never the person.
 > - **The shared result renders in the reader's language**, not the author's (EN/FR), and the share image carries the score, the weak stage and the next move.
 > - **No account, no email.** Cookie-less analytics (GoatCounter). Answers only leave the browser to compute the score. It's open source (AGPL) if you want to read exactly what happens: github.com/ScratchMe/tourdegrowth
@@ -40,8 +40,8 @@ Jour : mardi à jeudi, 14h-16h heure de Paris (matin côte Est).*
 | **"It's just a quiz."** | Yes — deliberately. The insight isn't in the questions, it's in the scoring rule and the "one stage, one move" output. A quiz you can finish is worth more than an audit you never start. |
 | **"Self-reported answers are worthless."** | They measure practice maturity, not performance — whether you *know* your CAC, not what it is. That's the honest scope of a 3-minute tool, and it's stated on the result page ("a quick estimate, not an audit"). |
 | **"Why not ask for the actual numbers?"** | Because three churn definitions coexist on the same month in our own glossary. Aggregating free-typed numbers would measure definitions, not performance. Practices are comparable; numbers without definitions aren't. |
-| **"The roast is a gimmick."** | It's opt-in, off by default, and constrained by a hard-coded guardrail. It exists because a sharp verdict gets shared and a polite one gets closed — and sharing is how a free tool survives. |
-| **"Why is an LLM in there at all?"** | Only for the two places where prose has to be specific to *your* answers: the roast tone and the deep dive's per-stage recommendations. Everything that produces a number is deterministic and tested. |
+| **"The roast is a gimmick."** | It's opt-in, off by default, and constrained by a rule: it goes after the strategy, never the person — hard-coded in the prompt for the deep dive, and enforced by review in the pre-written verdicts. It exists because a sharp verdict gets shared and a polite one gets closed — and sharing is how a free tool survives. |
+| **"Why is an LLM in there at all?"** | Only in the optional deep dive, the one place where the prose has to be specific to *your* business. The roast in the free result is pre-written, like the rest of it. Everything that produces a number is deterministic and tested. |
 | **"Privacy?"** | No account, no email, no cookies. Fifteen answers go to the server to compute and store the score behind an unguessable id; the free-text field of the deep dive is sent to the model and not stored. Legal pages spell it out. |
 | **"Why AGPL?"** | The only scenario that would cost anything is someone deploying a copy as a service; AGPL covers exactly that and bothers nobody who just wants to read the code. |
 | **"Why Gemini?"** | Price/latency for short generations, and a documented fallback alias. The client is provider-agnostic in shape; swapping is a small PR. |

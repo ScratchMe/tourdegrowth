@@ -224,7 +224,8 @@ describe("completeDeepDiveFlow (Deep dive — still calls Gemini)", () => {
     expect(english).toHaveLength(2);
     expect(french).toHaveLength(2);
     for (const prompt of english) expect(prompt).toContain("What's your primary acquisition channel today?");
-    for (const prompt of french) expect(prompt).toContain("Quel est ton canal d'acquisition principal aujourd'hui ?");
+    // U+00A0 before "?": French typography is fixed at the source (copy review v1).
+    for (const prompt of french) expect(prompt).toContain("Quel est ton canal d'acquisition principal aujourd'hui\u00a0?");
   });
 
   it("stores the free-text context on the result and forwards it into the Gemini prompt (SPEC-ADDENDUM-02.md §1)", async () => {

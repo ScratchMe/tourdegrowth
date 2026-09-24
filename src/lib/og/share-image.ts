@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
-import type { Locale } from "@/lib/i18n/locale";
+import { LOCALES, type Locale } from "@/lib/i18n/locale";
 import { primaryBottleneck, resolveBottleneck } from "@/lib/scoring/bottleneck";
 import { resolveNextMove } from "@/lib/scoring/next-move";
 import type { Pillar } from "@/lib/scoring/pillars";
@@ -65,7 +65,17 @@ export interface ShareImageModel {
    * everyone who sees it — deterministic beats personalised here.
    */
   nextMove: string;
-  /** The AUTHOR's locale: a social crawler sends no cookies, so there is no reader to localise for (the asymmetry R-09 documented). */
+  /**
+   * The language the frame is drawn in. For the address a page DECLARES to
+   * crawlers (`og:image`) this is the AUTHOR's locale — a social crawler sends
+   * no cookies, so there is no reader to localise for (the asymmetry R-09
+   * documented), and the sample is fixed to English. The picture shown INSIDE
+   * the page is another matter: someone reading `/r/sample?lang=fr` was
+   * looking at an entirely English image under a French caption, which read
+   * as an oversight (copy review v1, DS critique L-5, 2026-09-24). That one
+   * follows the reader. Being part of the model, the locale is part of the
+   * token, so the two languages are two addresses and two cache entries.
+   */
   locale: Locale;
   roast: boolean;
   /** SPEC-ADDENDUM-01.md §2.6 — swaps the checkup badge's text, no other gabarit change. */
@@ -109,7 +119,8 @@ function bottleneckOf(pillars: readonly { pillar: Pillar; score: number }[]): Sh
   return pillar ? { pillar, score: view.pillars[0]!.score } : null;
 }
 
-export function shareImageModel(submission: Submission): ShareImageModel {
+/** `locale` defaults to the author's: that is the picture a crawler gets. Pass the reader's for the one shown in the page. */
+export function shareImageModel(submission: Submission, locale: Locale = submission.locale): ShareImageModel {
   // Through the narrowing (REVIEW-02.md R2-24): the model is hashed and
   // rendered, never serialised to a client, but `rawPoints` has no business
   // in a hash input either — a token that changed with the raw points would
@@ -118,23 +129,43 @@ export function shareImageModel(submission: Submission): ShareImageModel {
   return {
     total: submission.total,
     bottleneck: bottleneckOf(pillars),
-    nextMove: resolveNextMove(submission.locale, pillars, submission.weakestPillar, submission.answers),
-    locale: submission.locale,
+    nextMove: resolveNextMove(locale, pillars, submission.weakestPillar, submission.answers),
+    locale,
     roast: submission.tone === "roast",
     deepDive: submission.deepDive !== null,
   };
 }
 
-/** `/r/sample` — fixed to English, never enriched (SPEC.md §12). */
-export function sampleShareImageModel(): ShareImageModel {
+/** `/r/sample` — English by default for crawlers, never enriched (SPEC.md §12). */
+export function sampleShareImageModel(locale: Locale = "en"): ShareImageModel {
   return {
     total: SAMPLE_RESULT.total,
     bottleneck: bottleneckOf(SAMPLE_RESULT.pillars),
-    nextMove: getSampleNextMove("en"),
-    locale: "en",
+    nextMove: getSampleNextMove(locale),
+    locale,
     roast: false,
     deepDive: false,
   };
+}
+
+/**
+ * Which picture a token asks for, given a way to build the result's model in
+ * each language. The token is a hash of the model, locale included, so
+ * matching it against every locale's current token IS reading the language
+ * off the address — no query string (the proxy treats `?lang=` as a reader's
+ * choice and would answer an image with a `Set-Cookie`), no second path
+ * shape, and the two legacy addresses keep working unchanged.
+ *
+ * `current` is null when the token matches no language's CURRENT picture: a
+ * legacy address, or a token minted before a Deep dive finished. The route
+ * then renders the declared (author's) picture and caches it briefly.
+ */
+export function matchShareToken(token: string, build: (locale: Locale) => ShareImageModel): ShareImageModel | null {
+  for (const locale of LOCALES) {
+    const model = build(locale);
+    if (shareImageToken(model) === token) return model;
+  }
+  return null;
 }
 
 /** Twelve hex characters of SHA-256 over the version, the model and the resolved copy. */

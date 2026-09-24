@@ -59,7 +59,8 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
   aarrr: {
     term: same("AARRR"),
     definition: {
-      fr: "Le cadre en 5 étapes utilisé pour évaluer un produit : Acquisition, Activation, Rétention, Parrainage (Referral), Revenu. Popularisé par Dave McClure en 2007.",
+      // TODO: à relire — revue de copie v1 (2026-09-24) : nom d'étape « Retention » sans accent, comme partout ailleurs (R2-12) ; l'accent reste au nom commun.
+      fr: "Le cadre en 5 étapes pour évaluer un produit : Acquisition, Activation, Retention, Referral (parrainage), Revenue (revenu). Popularisé par Dave McClure en 2007.",
       en: "The 5-stage framework used to evaluate a product: Acquisition, Activation, Retention, Referral, Revenue. Popularized by Dave McClure in 2007.",
     },
   },
@@ -100,7 +101,7 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
   },
   "aha-moment": {
     // R2-16: French quotation marks, as the file's own comment always said.
-    term: { fr: "Moment « aha »", en: '"Aha" moment' },
+    term: { fr: "Moment « aha »", en: '"Aha" moment' },
     definition: {
       fr: "L'instant précis où un nouvel utilisateur comprend enfin pourquoi ton produit lui est utile.",
       en: "The precise instant a new user finally understands why your product is useful to them.",
@@ -111,7 +112,7 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
     // d'acquisition client" and it appeared in neither the H1 nor the title.
     term: { fr: "CAC — Coût d'Acquisition Client", en: "CAC — Customer Acquisition Cost" },
     definition: {
-      fr: "Coût d'Acquisition Client : combien tu dépenses en moyenne pour obtenir un nouveau client.",
+      fr: "Coût d'Acquisition Client : combien tu dépenses en moyenne pour obtenir un nouveau client.",
       en: "Customer Acquisition Cost: how much you spend on average to acquire one new customer.",
     },
   },
@@ -119,7 +120,7 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
     // Relu et validé par Antoine (2026-09-09) — R2-16.
     term: { fr: "LTV — Lifetime Value", en: "LTV — Lifetime Value" },
     definition: {
-      fr: "Lifetime Value : la valeur totale qu'un client génère en moyenne sur toute sa relation avec ton produit.",
+      fr: "Lifetime Value : la valeur totale qu'un client génère en moyenne sur toute sa relation avec ton produit.",
       en: "Lifetime Value: the total value an average customer generates over their whole relationship with your product.",
     },
   },
@@ -147,7 +148,7 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
   "upsell-cross-sell": {
     term: same("Upsell / Cross-sell"),
     definition: {
-      fr: "Upsell : faire monter un client vers une offre plus chère. Cross-sell : lui vendre un produit ou service complémentaire.",
+      fr: "Upsell : faire monter un client vers une offre plus chère. Cross-sell : lui vendre un produit ou service complémentaire.",
       en: "Upsell: moving a customer to a more expensive plan. Cross-sell: selling them a complementary product or service.",
     },
   },
@@ -176,7 +177,7 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
   "nrr-grr": {
     term: { fr: "NRR / GRR — Net et Gross Revenue Retention", en: "NRR / GRR — Net and Gross Revenue Retention" },
     definition: {
-      fr: "Les deux taux de rétention de revenu : sur ce que les clients de l'an dernier valent cette année, la brute ignore l'expansion, la nette la compte.",
+      fr: "Les deux taux de rétention de revenu : sur ce que les clients de l'an dernier valent cette année, la brute ignore l'expansion, la nette la compte.",
       en: "Two ways to read what last year's customers are worth this year: gross revenue retention ignores expansion, net revenue retention counts it.",
     },
   },
@@ -190,7 +191,7 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
   "dau-mau": {
     term: { fr: "DAU/MAU — Daily et Monthly Active Users", en: "DAU/MAU — Daily and Monthly Active Users" },
     definition: {
-      fr: "Le ratio d'adhérence : les utilisateurs actifs quotidiens sur les mensuels. Multiplié par 30, il donne les jours par mois où un utilisateur moyen revient.",
+      fr: "Le ratio d'adhérence : les utilisateurs actifs quotidiens sur les mensuels. Multiplié par 30, il donne les jours par mois où un utilisateur moyen revient.",
       en: "The ratio of daily to monthly active users. Multiplied by 30, it gives the number of days a month the average user comes back.",
     },
   },
@@ -204,14 +205,14 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
   pql: {
     term: { fr: "PQL — Product-Qualified Lead", en: "PQL — Product-Qualified Lead" },
     definition: {
-      fr: "Un lead qualifié par le produit : quelqu'un qui a franchi un seuil d'usage qui prédit l'achat — qualifié par ce qu'il fait, pas par ce qu'il a téléchargé.",
+      fr: "Un lead qualifié par le produit : quelqu'un qui a franchi un seuil d'usage qui prédit l'achat — qualifié par ce qu'il fait, pas par ce qu'il a téléchargé.",
       en: "A user who has crossed a usage threshold chosen because it predicts buying — qualified by what they do, not by what they downloaded.",
     },
   },
   "product-led-growth": {
     term: { fr: "Product-led growth — croissance portée par le produit", en: "Product-led growth" },
     definition: {
-      fr: "Un modèle où le produit lui-même fait l'acquisition et la conversion. Le test honnête : quelle part de tes clients paie sans avoir parlé à personne ?",
+      fr: "Un modèle où le produit lui-même fait l'acquisition et la conversion. Le test honnête : quelle part de tes clients paie sans avoir parlé à personne ?",
       en: "A model where the product itself does the acquiring and the converting. The honest test: what share of your customers pay without talking to anyone?",
     },
   },

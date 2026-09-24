@@ -26,7 +26,7 @@ export const DEEP_MODE_QUESTIONS: readonly DeepModeQuestion[] = [
   {
     id: "deep-acq-1",
     pillar: "acquisition",
-    question: { fr: "Quel est ton canal d'acquisition principal aujourd'hui ?", en: "What's your primary acquisition channel today?" },
+    question: { fr: "Quel est ton canal d'acquisition principal aujourd'hui ?", en: "What's your primary acquisition channel today?" },
     options: [
       { contextLabel: { fr: "Publicité payante", en: "Paid ads" } },
       { contextLabel: { fr: "SEO / contenu", en: "SEO / content" } },
@@ -40,7 +40,7 @@ export const DEEP_MODE_QUESTIONS: readonly DeepModeQuestion[] = [
     id: "deep-acq-2",
     pillar: "acquisition",
     question: {
-      fr: "Approximativement, combien de nouveaux utilisateurs/clients par mois ?",
+      fr: "Approximativement, combien de nouveaux utilisateurs/clients par mois ?",
       en: "Roughly, how many new users/customers per month?",
     },
     options: [
@@ -55,7 +55,7 @@ export const DEEP_MODE_QUESTIONS: readonly DeepModeQuestion[] = [
   {
     id: "deep-act-1",
     pillar: "activation",
-    question: { fr: "Comment décrirais-tu ton onboarding aujourd'hui ?", en: "How would you describe your onboarding today?" },
+    question: { fr: "Comment décrirais-tu ton onboarding aujourd'hui ?", en: "How would you describe your onboarding today?" },
     options: [
       { contextLabel: { fr: "Autonome, sans guidage", en: "Self-serve, no guidance" } },
       { contextLabel: { fr: "Autonome avec guidage intégré", en: "Self-serve with in-app guidance" } },
@@ -67,7 +67,7 @@ export const DEEP_MODE_QUESTIONS: readonly DeepModeQuestion[] = [
     id: "deep-act-2",
     pillar: "activation",
     question: {
-      fr: "Comment les utilisateurs découvrent-ils la valeur de ton produit ?",
+      fr: "Comment les utilisateurs découvrent-ils la valeur de ton produit ?",
       en: "How do users typically discover your product's value?",
     },
     options: [
@@ -82,7 +82,7 @@ export const DEEP_MODE_QUESTIONS: readonly DeepModeQuestion[] = [
   {
     id: "deep-ret-1",
     pillar: "retention",
-    question: { fr: "Quelle fréquence d'usage décrit le mieux ton produit ?", en: "Which usage frequency best matches your product?" },
+    question: { fr: "Quelle fréquence d'usage décrit le mieux ton produit ?", en: "Which usage frequency best matches your product?" },
     options: [
       { contextLabel: { fr: "Outil d'usage quotidien", en: "Daily-use tool" } },
       { contextLabel: { fr: "Outil d'usage hebdomadaire", en: "Weekly-use tool" } },
@@ -94,7 +94,7 @@ export const DEEP_MODE_QUESTIONS: readonly DeepModeQuestion[] = [
     id: "deep-ret-2",
     pillar: "retention",
     question: {
-      fr: "À quel moment du cycle de vie le churn est-il le plus fréquent ?",
+      fr: "À quel moment du cycle de vie le churn est-il le plus fréquent ?",
       en: "When in the user lifecycle does churn happen most?",
     },
     options: [
@@ -109,7 +109,7 @@ export const DEEP_MODE_QUESTIONS: readonly DeepModeQuestion[] = [
   {
     id: "deep-ref-1",
     pillar: "referral",
-    question: { fr: "Tes clients interagissent-ils entre eux via le produit ?", en: "Do your customers interact with each other through the product?" },
+    question: { fr: "Tes clients interagissent-ils entre eux via le produit ?", en: "Do your customers interact with each other through the product?" },
     options: [
       { contextLabel: { fr: "Oui, directement", en: "Yes, directly" } },
       { contextLabel: { fr: "Indirectement (ex. contenu partagé)", en: "Indirectly (e.g. shared content)" } },
@@ -120,7 +120,7 @@ export const DEEP_MODE_QUESTIONS: readonly DeepModeQuestion[] = [
     id: "deep-ref-2",
     pillar: "referral",
     question: {
-      fr: "As-tu déjà explicitement demandé une recommandation à un client satisfait ?",
+      fr: "As-tu déjà explicitement demandé une recommandation à un client satisfait ?",
       en: "Have you ever explicitly asked a happy customer to refer someone?",
     },
     options: [
@@ -134,7 +134,7 @@ export const DEEP_MODE_QUESTIONS: readonly DeepModeQuestion[] = [
   {
     id: "deep-rev-1",
     pillar: "revenue",
-    question: { fr: "Quel est ton modèle de pricing ?", en: "What's your pricing model?" },
+    question: { fr: "Quel est ton modèle de pricing ?", en: "What's your pricing model?" },
     options: [
       { contextLabel: { fr: "Gratuit / financé par la pub", en: "Free / ad-supported" } },
       { contextLabel: { fr: "Freemium", en: "Freemium" } },
@@ -146,7 +146,7 @@ export const DEEP_MODE_QUESTIONS: readonly DeepModeQuestion[] = [
   {
     id: "deep-rev-2",
     pillar: "revenue",
-    question: { fr: "Combien de clients payants as-tu approximativement ?", en: "Roughly how many paying customers do you have?" },
+    question: { fr: "Combien de clients payants as-tu approximativement ?", en: "Roughly how many paying customers do you have?" },
     options: [
       { contextLabel: { fr: "0", en: "0" } },
       { contextLabel: { fr: "1 à 10", en: "1–10" } },

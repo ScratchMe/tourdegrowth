@@ -12,13 +12,18 @@ import type { Translatable } from "./translatable";
  */
 export const ERROR_SCREEN_STRINGS = {
   errorEyebrow: { en: "Detour", fr: "Détour" },
+  // TODO: à relire — revue de copie v1 (2026-09-24), changement nº8. The
+  // French was a calque of the brief's English (*took a wrong turn*,
+  // *something broke*): « prendre un mauvais virage » is rare in the figurative
+  // sense and « quelque chose a cassé » reads translated. Same road metaphor,
+  // in the French that says it. The English does not change.
   errorTitle: {
     en: "Your results took a wrong turn.",
-    fr: "Tes résultats ont pris un mauvais virage.",
+    fr: "Tes résultats ont fait fausse route.",
   },
   errorBody: {
     en: "Something broke on our end — try again in a moment.",
-    fr: "Quelque chose a cassé de notre côté — réessaie dans un instant.",
+    fr: "Ça a coincé de notre côté — réessaie dans un instant.",
   },
   errorRetry: { en: "Try again", fr: "Réessayer" },
 } as const satisfies Record<string, Translatable>;

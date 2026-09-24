@@ -21,8 +21,9 @@ export const HOW_IT_WORKS = {
   // five stages of the framework and its meta description promises "the AARRR
   // framework explained", but the word never appeared in the page itself.
   intro: {
-    fr: "Quinze questions, trois minutes, un score AARRR honnête. Voici précisément ce qu'on mesure, et pourquoi — et la seule chose à garder en tête avant de prendre ce chiffre trop au sérieux.",
-    en: "Fifteen questions, three minutes, one honest AARRR score. Here's exactly what we're measuring, and why — plus the one thing you should know before you take it too seriously.",
+    // TODO: à relire — revue de copie v1 (2026-09-24), §3.1 : « précisément », « la seule chose » — emphase de modèle.
+    fr: "Quinze questions, trois minutes, un score AARRR honnête. Voici ce qu'on mesure, pourquoi, et la limite à garder en tête avant de prendre ce chiffre trop au sérieux.",
+    en: "Fifteen questions, three minutes, one honest AARRR score. Here's what we measure, why, and the limit to keep in mind before you take the number too seriously.",
   },
 
   pillars: [
@@ -37,24 +38,27 @@ export const HOW_IT_WORKS = {
     {
       pillar: "activation",
       explanation: {
-        fr: "L'écart entre s'inscrire et vraiment comprendre — le moment où ton produit fait tilt pour quelqu'un de nouveau.",
-        en: "The gap between signing up and actually getting it — the moment your product clicks for someone new.",
+        // TODO: à relire — revue de copie v1 (2026-09-24), §3.1 : « vraiment »/"actually" quatre fois en quatre phrases ; gardé une fois (Revenue).
+        fr: "L'écart entre s'inscrire et comprendre pour de bon — le moment où ton produit fait tilt pour quelqu'un de nouveau.",
+        en: "The gap between signing up and getting it — the moment your product clicks for someone new.",
       },
       exampleQuestionId: "act-1",
     },
     {
       pillar: "retention",
       explanation: {
-        fr: "Est-ce que les gens restent vraiment, ou disparaissent discrètement après un premier essai.",
-        en: "Whether people actually stick around, or quietly disappear after the first try.",
+        // TODO: à relire — revue de copie v1 (2026-09-24), §3.1.
+        fr: "Est-ce que les gens restent, ou disparaissent discrètement après un premier essai.",
+        en: "Whether people stick around, or quietly disappear after the first try.",
       },
       exampleQuestionId: "ret-1",
     },
     {
       pillar: "referral",
       explanation: {
-        fr: "Est-ce que tes utilisateurs les plus satisfaits t'en amènent vraiment de nouveaux — ou sont juste satisfaits en silence.",
-        en: "Whether your happiest users are actually bringing you new ones — or just being happy quietly.",
+        // TODO: à relire — revue de copie v1 (2026-09-24), §3.1.
+        fr: "Est-ce que tes utilisateurs les plus satisfaits t'en amènent de nouveaux — ou sont juste satisfaits en silence.",
+        en: "Whether your happiest users are bringing you new ones — or just being happy quietly.",
       },
       exampleQuestionId: "ref-1",
     },
@@ -71,15 +75,20 @@ export const HOW_IT_WORKS = {
   scoringSection: {
     title: { fr: "Comment le score est calculé", en: "How the score is calculated" },
     body: {
-      fr: "Quinze questions, trois par pilier. Chaque réponse vaut un nombre de points fixe — rien de subjectif, rien qu'une IA ne décide à la volée. Tes cinq scores de pilier (sur 20 chacun) s'additionnent pour ton total (sur 100). Le texte de ton résultat vient d'un ensemble de verdicts pré-écrits, choisis selon ton score — la même transparence, à chaque fois, pour tout le monde.",
-      en: "Fifteen questions, three per pillar. Each answer is worth a fixed number of points — nothing subjective, nothing an AI decides on the fly. Your five pillar scores (out of 20 each) add up to your total (out of 100). The wording of your results comes from a set of pre-written verdicts matched to your score — same transparency, every time, for everyone.",
+      // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code. Aussi : « la même transparence, à chaque fois, pour tout le monde » était une triade creuse (§3.1).
+      fr: "Quinze questions, trois par étape. Chaque réponse vaut un nombre de points fixe — rien de subjectif, rien qu'une IA ne décide à la volée. Tes cinq scores d'étape (sur 20 chacun) s'additionnent pour ton total (sur 100). Le texte de ton résultat vient d'un ensemble de verdicts pré-écrits, choisis selon ton score — les mêmes textes pour tout le monde, à score égal.",
+      en: "Fifteen questions, three per stage. Each answer is worth a fixed number of points — nothing subjective, nothing an AI decides on the fly. Your five stage scores (out of 20 each) add up to your total (out of 100). The wording of your results comes from a set of pre-written verdicts matched to your score — the same wording for everyone with the same score.",
     },
   },
 
   tonesSection: {
     title: { fr: "Les deux tons", en: "The two tones" },
     straightUp: {
-      label: { fr: "Straight up", en: "Straight up" },
+      // TODO: à relire — revue de copie v1 (2026-09-24), changement nº6 : le
+      // sélecteur de ton, la page de résultat et la carte d'aperçu disent
+      // « Neutre » ; cette page était la seule à dire « Straight up » en
+      // français, un nom que le lecteur ne retrouvait nulle part ensuite.
+      label: { fr: "Neutre", en: "Straight up" },
       body: {
         fr: "Un retour clair et constructif, sans enrobage — mais sans dureté inutile non plus.",
         en: "Clear, constructive feedback with no sugar-coating — but no unnecessary harshness either.",
@@ -96,7 +105,8 @@ export const HOW_IT_WORKS = {
 
   limitationNotice: {
     long: {
-      fr: "Tour de Growth donne une estimation rapide et directionnelle, pas un audit professionnel. Le score reflète tes propres réponses à 15 questions — utile comme point de départ de conversation, pas comme verdict définitif.",
+      // TODO: à relire — revue de copie v1 (2026-09-24), §3.2 : « point de départ de conversation », calque de *conversation starter*.
+      fr: "Tour de Growth donne une estimation rapide et directionnelle, pas un audit professionnel. Le score reflète tes propres réponses à 15 questions — utile pour ouvrir la discussion, pas comme verdict définitif.",
       en: "Tour de Growth gives a fast, directional estimate — not a professional audit. The score reflects your own answers to 15 questions, useful as a conversation starter, not a final verdict.",
     },
     short: {
@@ -107,5 +117,6 @@ export const HOW_IT_WORKS = {
     },
   },
 
-  cta: { fr: "Commencer mon Tour →", en: "Start your Tour →" },
+  // TODO: à relire — revue de copie v1 (2026-09-24), changement nº7 et critique DS L-3 : un seul libellé vers /quiz, « Démarre ton Tour → » / "Start your Tour →", comme le CTA de la landing. Seul le visiteur d'un résultat partagé garde « Fais ton propre Tour → ».
+  cta: { fr: "Démarre ton Tour →", en: "Start your Tour →" },
 };
