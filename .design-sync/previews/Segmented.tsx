@@ -45,7 +45,11 @@ export const Links = () => (
   />
 );
 
-/** `compact` is the header scale: a 32px track inside a 44px touch target. */
+/**
+ * `compact` is the header scale: a 32px track, and each segment's touch
+ * target reaches 44px on the segment itself, into the 6px of room the group
+ * keeps above and below — never strip that room to tighten a header.
+ */
 export const Compact = () => {
   const [tone, setTone] = React.useState<"neutral" | "roast">("neutral");
   return (

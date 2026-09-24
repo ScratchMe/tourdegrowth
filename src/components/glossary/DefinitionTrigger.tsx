@@ -13,7 +13,8 @@ export interface DefinitionTriggerProps extends Omit<ButtonHTMLAttributes<HTMLBu
 }
 
 /**
- * The 16px dashed "?" that opens a glossary definition. Always a real
+ * The 16px dashed "?" that opens a glossary definition — 16px drawn, 44px
+ * tapped (a transparent disc around it takes the hit). Always a real
  * `<button>`: keyboard-reachable and screen-reader labelled, never a `<span>`
  * with a click handler. Use immediately after a jargon term — first
  * occurrence per screen only, never on every repeat — and pair it with
