@@ -335,7 +335,10 @@ export const UI_STRINGS = {
       en: "Same insights, sharper tongue. All in good fun.",
       fr: "Mêmes constats, un ton plus mordant. Toujours bienveillant.",
     },
-    cta: { en: "Get my score →", fr: "Obtiens ton score →" },
+    // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique :
+    // an arrow CTA speaks to the reader in both languages, so "your", as the
+    // French « Obtiens ton score » already did.
+    cta: { en: "Get your score →", fr: "Obtiens ton score →" },
     // TODO: à relire — revue de copie v1 (2026-09-24), changement nº3 et
     // critique DS M-6. The old line promised a tone switch on the result
     // page, which only exists for an owner in roast ("Switch to straight
@@ -383,17 +386,25 @@ export const UI_STRINGS = {
    *
    * Relu et validé par Antoine (2026-09-11). */
   deepDive: {
+    // TODO: à relire — revue de copie v1 (2026-09-24), §3.2 et fiche
+    // terminologique : « spécifique à » est le calque de *specific to*, et
+    // un CTA à flèche est à l'impératif, à la deuxième personne, dans les
+    // deux langues (« Obtiens ton score », « Démarre ton Tour »).
     upgradeText: {
       en: "Make this specific to your business — 10 more questions, about a minute.",
-      fr: "Rends-la spécifique à ton entreprise — 10 questions de plus, environ une minute.",
+      fr: "Adapte-la à ton entreprise — 10 questions de plus, environ une minute.",
     },
     upgradeCta: {
-      en: "Make it specific to my business →",
-      fr: "La rendre spécifique à mon entreprise →",
+      en: "Make it specific to your business →",
+      fr: "Adapte-la à ton entreprise →",
     },
+    // TODO: à relire — revue de copie v1 (2026-09-24), changement nº5 : le
+    // mode avait trois noms en français (Deep dive sur le badge,
+    // Approfondissement ici, Diagnostic approfondi dans le titre du
+    // document). « Deep dive » est un nom propre, invariable, comme le badge.
     questionCounterTemplate: {
       en: "Deep dive · Question {n} of {total}",
-      fr: "Approfondissement · Question {n} sur {total}",
+      fr: "Deep dive · Question {n} sur {total}",
     },
     // The mode badge itself stays "Deep dive" in both locales, same
     // treatment as the AARRR pillar names and the roast 🔥 badge — a
@@ -570,7 +581,11 @@ export const UI_STRINGS = {
        reader sees are unchanged. */
     textTemplate: {
       en: "I scored {total}/100 on my AARRR growth check-up. {stall} Where does yours?",
-      fr: "J'ai fait {total}/100 à mon bilan growth AARRR. {stall} Et la tienne ?",
+      // TODO: à relire — revue de copie v1 (2026-09-24), changement nº5 :
+      // « bilan » → « diagnostic », le nom du produit en français partout
+      // ailleurs (landing, <title>). C'est la phrase que l'utilisateur publie
+      // en son nom : elle ne doit pas donner au produit un quatrième nom.
+      fr: "J'ai fait {total}/100 à mon diagnostic growth AARRR. {stall} Et la tienne ?",
     },
   },
 
@@ -611,7 +626,8 @@ export const UI_STRINGS = {
      */
     quizHeading: { en: "The Tour — 15 questions", fr: "Le Tour — 15 questions" },
     resultHeading: { en: "Tour result — {score}/100", fr: "Résultat du Tour — {score}/100" },
-    deepDiveHeading: { en: "Deep dive — 10 more questions", fr: "Diagnostic approfondi — 10 questions de plus" },
+    // Revue de copie v1 (2026-09-24), changement nº5 : même nom que le badge.
+    deepDiveHeading: { en: "Deep dive — 10 more questions", fr: "Deep dive — 10 questions de plus" },
     quizDescription: {
       en: "Answer 15 questions about how your product acquires, activates, retains, refers and monetises — and get an AARRR growth score out of 100 you can share.",
       fr: "Réponds à 15 questions sur la façon dont ton produit acquiert, active, retient, fait recommander et monétise — et obtiens un score growth AARRR sur 100 à partager.",
@@ -625,12 +641,16 @@ export const UI_STRINGS = {
   },
 
   og: {
-    checkupBadge: { en: "AARRR check-up — 3 min", fr: "Bilan AARRR — 3 min" },
+    // TODO: à relire — revue de copie v1 (2026-09-24), changement nº5 :
+    // « Bilan » → « Diagnostic », le nom du produit en français partout
+    // ailleurs. Mesuré dans l'image rendue avant d'être gardé : le badge tient
+    // sur sa ligne à côté du wordmark.
+    checkupBadge: { en: "AARRR check-up — 3 min", fr: "Diagnostic AARRR — 3 min" },
     // SPEC-ADDENDUM-01.md §2.6: the same badge becomes this once the result
     // has been enriched by a Deep dive — same gabarit otherwise, just this
     // one string. (Only the non-roast badge; the roast badge below doesn't
     // get a Deep dive variant per the addendum's own scope.)
-    checkupBadgeDeepDive: { en: "AARRR check-up — Deep dive", fr: "Bilan AARRR — Deep dive" },
+    checkupBadgeDeepDive: { en: "AARRR check-up — Deep dive", fr: "Diagnostic AARRR — Deep dive" },
     roastBadge: { en: "🔥 ROAST MODE", fr: "🔥 ROAST MODE" },
     scoreLabel: { en: "Overall Growth Score", fr: "Score growth global" },
     stallSentenceTemplate: { en: "{pillar} is where this growth stalls.", fr: "{pillar} est là où cette croissance cale." },

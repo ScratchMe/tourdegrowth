@@ -29,7 +29,14 @@ export const FREE_CONTEXT = {
    * a delivered string is the product agent's call, not ours.
    */
   skip: { fr: "Skip", en: "Skip" },
-  submit: { fr: "Obtenir mon diagnostic →", en: "Get my results →" },
+  /**
+   * TODO: à relire — revue de copie v1 (2026-09-24), changement nº5. The
+   * button used to promise a « diagnostic » in French and "results" in
+   * English, while the line right above it says we are writing your
+   * RECOMMENDATIONS — which is what the Deep dive returns. Imperative and
+   * second person, like every other arrow CTA.
+   */
+  submit: { fr: "Obtiens tes recommandations →", en: "Get your recommendations →" },
 } satisfies Record<string, Translatable>;
 
 /** SPEC-ADDENDUM-02.md §1.2/§1.4: client-side limit, enforced again server-side (see the deep-dive API route) — never trust the client alone. */
