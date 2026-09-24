@@ -89,7 +89,7 @@ test.describe("the two open-door pages", () => {
     await expect(page.getByTestId("diagnostic-link")).toHaveAttribute("href", "/en/startup-growth-diagnostic");
 
     // Le CTA est un `<a>` nu, pas un `next/link` : cross-root.
-    const cta = page.getByRole("link", { name: /Take the Tour/ });
+    const cta = page.getByRole("link", { name: /Start your Tour/ });
     await expect(cta).toHaveAttribute("href", "/quiz");
   });
 

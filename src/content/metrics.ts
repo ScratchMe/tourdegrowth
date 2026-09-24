@@ -76,5 +76,6 @@ export const METRICS = {
     "Ils sont calculés directement sur les résultats enregistrés, par le même code que le tableau de bord privé — la page publique n'en montre qu'une partie choisie, jamais un chiffre reconstruit pour l'occasion. Le code est ouvert : la fonction qui les calcule s'appelle summarizeSubmissions.",
     "They are computed straight from the stored results, by the same code as the private dashboard — the public page shows a chosen subset of it, never a figure rebuilt for the occasion. The code is open: the function that computes them is called summarizeSubmissions.",
   ),
-  cta: t("Fais ton propre Tour →", "Take your own Tour →"),
+  // TODO: à relire — revue de copie v1 (2026-09-24), changement nº7 et critique DS L-3 : un seul libellé vers /quiz, « Démarre ton Tour → » / "Start your Tour →", comme le CTA de la landing. Seul le visiteur d'un résultat partagé garde « Fais ton propre Tour → ».
+  cta: t("Démarre ton Tour →", "Start your Tour →"),
 } satisfies Record<string, unknown>;

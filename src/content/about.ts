@@ -93,7 +93,8 @@ export const ABOUT = {
     after: { fr: ".", en: "." },
   },
 
-  cta: { fr: "Faire mon Tour →", en: "Take the Tour →" },
+  // TODO: à relire — revue de copie v1 (2026-09-24), changement nº7 et critique DS L-3 : un seul libellé vers /quiz, « Démarre ton Tour → » / "Start your Tour →", comme le CTA de la landing. Seul le visiteur d'un résultat partagé garde « Fais ton propre Tour → ».
+  cta: { fr: "Démarre ton Tour →", en: "Start your Tour →" },
 } as const;
 
 /**

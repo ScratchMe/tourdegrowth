@@ -113,7 +113,8 @@ export const CHECKLIST: OpenDoorPage = {
     fr: "La même checklist, en trois minutes, avec le score calculé et l'étape qui te freine nommée :",
     en: "The same checklist, in three minutes, with the score worked out and the stage that's holding you back named:",
   },
-  ctaLabel: { fr: "Faire le Tour →", en: "Take the Tour →" },
+  // TODO: à relire — revue de copie v1 (2026-09-24), changement nº7 et critique DS L-3 : un seul libellé vers /quiz.
+  ctaLabel: { fr: "Démarre ton Tour →", en: "Start your Tour →" },
 };
 
 export const DIAGNOSTIC: OpenDoorPage = {
@@ -191,5 +192,6 @@ export const DIAGNOSTIC: OpenDoorPage = {
     fr: "Les quinze questions de la méthode, en trois minutes, avec l'étape qui te freine nommée et une action à mener :",
     en: "The method's fifteen questions, in three minutes, with the stage that's holding you back named and one action to take:",
   },
-  ctaLabel: { fr: "Faire le Tour →", en: "Take the Tour →" },
+  // TODO: à relire — revue de copie v1 (2026-09-24), changement nº7 et critique DS L-3 : un seul libellé vers /quiz.
+  ctaLabel: { fr: "Démarre ton Tour →", en: "Start your Tour →" },
 };
