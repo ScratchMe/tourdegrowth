@@ -537,8 +537,9 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
     inTheTour: {
       questionId: "rev-2",
       body: t(
-        "\"Do you know your LTV, even roughly?\" is the second Revenue question. \"A solid estimate\" scores 20, \"a very rough guess\" 7, \"no idea\" 0, averaged with your pricing and expansion answers into the Revenue stage score. Revenue is often the pillar founders score lowest on — not because they don't charge, but because they have never connected what they charge to how long people stay.",
-        "« Connais-tu ta LTV, même grossièrement ? » est la deuxième question Revenue. « Une estimation solide » vaut 20, « une estimation très approximative » 7, « aucune idée » 0, la moyenne avec tes réponses sur le pricing et l'expansion donnant le score de l'étape Revenue. Revenue est souvent le pilier où les fondateurs scorent le plus bas — non pas qu'ils ne facturent pas, mais parce qu'ils n'ont jamais relié ce qu'ils facturent au temps que les gens restent.",
+        // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
+        "\"Do you know your LTV, even roughly?\" is the second Revenue question. \"A solid estimate\" scores 20, \"a very rough guess\" 7, \"no idea\" 0, averaged with your pricing and expansion answers into the Revenue stage score. Revenue is often the stage founders score lowest on — not because they don't charge, but because they have never connected what they charge to how long people stay.",
+        "« Connais-tu ta LTV, même grossièrement ? » est la deuxième question Revenue. « Une estimation solide » vaut 20, « une estimation très approximative » 7, « aucune idée » 0, la moyenne avec tes réponses sur le pricing et l'expansion donnant le score de l'étape Revenue. Revenue est souvent l'étape où les fondateurs scorent le plus bas — non pas qu'ils ne facturent pas, mais parce qu'ils n'ont jamais relié ce qu'ils facturent au temps que les gens restent.",
       ),
     },
     faq: [
@@ -919,8 +920,9 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
     inTheTour: {
       questionId: "ret-1",
       body: t(
-        "The first Retention question is the simplest and the most discriminating: \"Do you track a retention rate (D7/D30 or similar)?\" — 20 for tracked and reviewed regularly, 7 for \"we can pull it, but rarely look\", 0 for no. It is averaged with the re-engagement mechanism and the cause of churn. Retention is the pillar whose weak band (0-9) costs the most elsewhere: LTV, an affordable CAC and referral all sit downstream of it.",
-        "La première question Retention est la plus simple et la plus discriminante : « Suis-tu un taux de rétention (J7/J30 ou équivalent) ? » — 20 pour suivi et revu régulièrement, 7 pour « on peut le sortir, mais on regarde rarement », 0 pour non. Elle fait moyenne avec le mécanisme de réengagement et la cause du churn. Retention est le pilier dont la bande faible (0-9) coûte le plus ailleurs : la LTV, un CAC supportable et le parrainage sont tous en aval.",
+        // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
+        "The first Retention question is the simplest and the most discriminating: \"Do you track a retention rate (D7/D30 or similar)?\" — 20 for tracked and reviewed regularly, 7 for \"we can pull it, but rarely look\", 0 for no. It is averaged with the re-engagement mechanism and the cause of churn. Retention is the stage whose weak band (0-9) costs the most elsewhere: LTV, an affordable CAC and referral all sit downstream of it.",
+        "La première question Retention est la plus simple et la plus discriminante : « Suis-tu un taux de rétention (J7/J30 ou équivalent) ? » — 20 pour suivi et revu régulièrement, 7 pour « on peut le sortir, mais on regarde rarement », 0 pour non. Elle fait moyenne avec le mécanisme de réengagement et la cause du churn. Retention est l'étape dont la bande faible (0-9) coûte le plus ailleurs : la LTV, un CAC supportable et le parrainage sont tous en aval.",
       ),
     },
     faq: [
@@ -1023,8 +1025,9 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         "Le time-to-value est la métrique compagne : combien de temps l'utilisateur médian met à atteindre le moment. Des minutes pour une appli grand public, un jour ou deux pour un outil d'équipe, des semaines pour un logiciel qui demande d'importer des données. Le diviser par deux fait en général plus pour la rétention que n'importe quelle fonctionnalité.",
       ),
       t(
-        "Activation is the cheapest pillar to move: it happens inside a flow you fully control, with users who already chose to come. A ten-point gain here is worth more than a ten-point gain in sign-up conversion, because every activated user carries into retention.",
-        "L'activation est le pilier le moins cher à faire bouger : ça se passe dans un parcours que tu contrôles entièrement, avec des utilisateurs qui ont déjà choisi de venir. Dix points gagnés ici valent plus que dix points de conversion à l'inscription, parce que chaque utilisateur activé se prolonge dans la rétention.",
+        // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
+        "Activation is the cheapest stage to move: it happens inside a flow you fully control, with users who already chose to come. A ten-point gain here is worth more than a ten-point gain in sign-up conversion, because every activated user carries into retention.",
+        "L'activation est l'étape la moins chère à faire bouger : ça se passe dans un parcours que tu contrôles entièrement, avec des utilisateurs qui ont déjà choisi de venir. Dix points gagnés ici valent plus que dix points de conversion à l'inscription, parce que chaque utilisateur activé se prolonge dans la rétention.",
       ),
     ],
     howToImprove: [
@@ -1059,8 +1062,9 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
           "L'activation, ce n'est pas simplement le taux de conversion à l'inscription ?",
         ),
         answer: t(
-          "No, and confusing the two is the most expensive mistake in this pillar. Sign-up conversion is visitors → accounts; it lives on the landing page and measures the promise. Activation is accounts → people who got the value; it lives in the product and measures whether the promise was kept. You can double the first while the second stays flat, and the business won't move.",
-          "Non, et confondre les deux est l'erreur la plus coûteuse de ce pilier. La conversion à l'inscription, c'est visiteurs → comptes ; elle se joue sur la page d'accueil et mesure la promesse. L'activation, c'est comptes → personnes qui ont obtenu la valeur ; elle se joue dans le produit et mesure si la promesse a été tenue. Tu peux doubler la première pendant que la seconde reste plate, et l'activité ne bougera pas.",
+          // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
+          "No, and confusing the two is the most expensive mistake in this stage. Sign-up conversion is visitors → accounts; it lives on the landing page and measures the promise. Activation is accounts → people who got the value; it lives in the product and measures whether the promise was kept. You can double the first while the second stays flat, and the business won't move.",
+          "Non, et confondre les deux est l'erreur la plus coûteuse de cette étape. La conversion à l'inscription, c'est visiteurs → comptes ; elle se joue sur la page d'accueil et mesure la promesse. L'activation, c'est comptes → personnes qui ont obtenu la valeur ; elle se joue dans le produit et mesure si la promesse a été tenue. Tu peux doubler la première pendant que la seconde reste plate, et l'activité ne bougera pas.",
         ),
       },
       {
@@ -1435,8 +1439,9 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
     inTheTour: {
       questionId: "ref-3",
       body: t(
-        "\"Do you measure a viral coefficient or equivalent?\" is the third Referral question — 20 for tracked, 7 for vaguely aware of it, 0 for never measured — after whether a sharing mechanism exists in the product and whether customers actually use it. Referral is the pillar many teams score lowest on, and the one where a 0 is most often honest: the mechanism was never built, so there was nothing to measure.",
-        "« Mesures-tu un coefficient viral ou équivalent ? » est la troisième question Referral — 20 pour suivi, 7 pour vaguement conscient de son existence, 0 pour jamais mesuré — après l'existence d'un mécanisme de partage dans le produit et son usage réel par les clients. Referral est le pilier où beaucoup d'équipes scorent le plus bas, et celui où un 0 est le plus souvent honnête : le mécanisme n'a jamais été construit, donc il n'y avait rien à mesurer.",
+        // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
+        "\"Do you measure a viral coefficient or equivalent?\" is the third Referral question — 20 for tracked, 7 for vaguely aware of it, 0 for never measured — after whether a sharing mechanism exists in the product and whether customers actually use it. Referral is the stage many teams score lowest on, and the one where a 0 is most often honest: the mechanism was never built, so there was nothing to measure.",
+        "« Mesures-tu un coefficient viral ou équivalent ? » est la troisième question Referral — 20 pour suivi, 7 pour vaguement conscient de son existence, 0 pour jamais mesuré — après l'existence d'un mécanisme de partage dans le produit et son usage réel par les clients. Referral est l'étape où beaucoup d'équipes scorent le plus bas, et celui où un 0 est le plus souvent honnête : le mécanisme n'a jamais été construit, donc il n'y avait rien à mesurer.",
       ),
     },
     faq: [
@@ -1499,8 +1504,9 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         },
       ],
       note: t(
-        "Multiply the three and you get the channel's yield; divide the channel's cost by that yield and you get its CAC. Acquisition is the pillar where a single blended number hides the most: the whole point is to know this per channel.",
-        "Multiplie les trois et tu as le rendement du canal ; divise le coût du canal par ce rendement et tu as son CAC. L'acquisition est le pilier où un chiffre mixte cache le plus de choses : tout l'intérêt est de connaître ça par canal.",
+        // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
+        "Multiply the three and you get the channel's yield; divide the channel's cost by that yield and you get its CAC. Acquisition is the stage where a single blended number hides the most: the whole point is to know this per channel.",
+        "Multiplie les trois et tu as le rendement du canal ; divise le coût du canal par ce rendement et tu as son CAC. L'acquisition est l'étape où un chiffre mixte cache le plus de choses : tout l'intérêt est de connaître ça par canal.",
       ),
     },
     example: {
@@ -1690,16 +1696,18 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
     inTheTour: {
       questionId: "ref-1",
       body: t(
-        "The three Referral questions climb one ladder: does a sharing or referral mechanism exist in the product (20 / 7 if it only lives in your communication / 0); is it actually used by customers, meaningfully; and is a viral coefficient or equivalent measured. It is the pillar where a 0/20 stage is common and, unlike the others, often a decision rather than a blind spot — many good products simply never built one. The Tour's own share button, and the \"take your own Tour\" link on every shared result, are its answer to the first question.",
-        "Les trois questions Referral gravissent une même échelle : un mécanisme de partage ou de parrainage existe-t-il dans le produit (20 / 7 s'il ne vit que dans ta communication / 0) ; est-il réellement utilisé par les clients, de façon significative ; et un coefficient viral ou équivalent est-il mesuré. C'est le pilier où une étape à 0/20 est courante et, contrairement aux autres, souvent une décision plutôt qu'un angle mort — beaucoup de bons produits n'en ont simplement jamais construit. Le bouton de partage du Tour, et le lien « fais ton propre Tour » sur chaque résultat partagé, sont sa réponse à la première question.",
+        // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
+        "The three Referral questions climb one ladder: does a sharing or referral mechanism exist in the product (20 / 7 if it only lives in your communication / 0); is it actually used by customers, meaningfully; and is a viral coefficient or equivalent measured. It is the stage where a 0/20 is common and, unlike the others, often a decision rather than a blind spot — many good products simply never built one. The Tour's own share button, and the \"take your own Tour\" link on every shared result, are its answer to the first question.",
+        "Les trois questions Referral gravissent une même échelle : un mécanisme de partage ou de parrainage existe-t-il dans le produit (20 / 7 s'il ne vit que dans ta communication / 0) ; est-il réellement utilisé par les clients, de façon significative ; et un coefficient viral ou équivalent est-il mesuré. C'est l'étape où un 0/20 est courant et, contrairement aux autres, souvent une décision plutôt qu'un angle mort — beaucoup de bons produits n'en ont simplement jamais construit. Le bouton de partage du Tour, et le lien « fais ton propre Tour » sur chaque résultat partagé, sont sa réponse à la première question.",
       ),
     },
     faq: [
       {
         question: t("Is referral the same as word of mouth?", "Le parrainage, c'est le bouche-à-oreille ?"),
         answer: t(
-          "Word of mouth is referral you can't see: recommendations made in conversations, without a link or a code. Referral as a growth pillar is the effort to make that behaviour easier, more frequent and measurable. A product with strong word of mouth and no mechanism is leaving its cheapest channel unmanaged.",
-          "Le bouche-à-oreille est du parrainage que tu ne vois pas : des recommandations faites en conversation, sans lien ni code. Le parrainage comme pilier de croissance, c'est l'effort pour rendre ce comportement plus facile, plus fréquent et mesurable. Un produit avec un fort bouche-à-oreille et aucun mécanisme laisse son canal le moins cher sans pilotage.",
+          // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
+          "Word of mouth is referral you can't see: recommendations made in conversations, without a link or a code. Referral as a growth stage is the effort to make that behaviour easier, more frequent and measurable. A product with strong word of mouth and no mechanism is leaving its cheapest channel unmanaged.",
+          "Le bouche-à-oreille est du parrainage que tu ne vois pas : des recommandations faites en conversation, sans lien ni code. Le parrainage comme étape de croissance, c'est l'effort pour rendre ce comportement plus facile, plus fréquent et mesurable. Un produit avec un fort bouche-à-oreille et aucun mécanisme laisse son canal le moins cher sans pilotage.",
         ),
       },
       {
@@ -1752,12 +1760,14 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         },
       ],
       note: t(
-        "Pricing sets the size of every term. A price chosen \"a bit arbitrarily\" is the single most common unforced error in this pillar: it caps new MRR, leaves no room for expansion, and is almost never revisited because changing it feels risky. Testing it is what the Tour's first Revenue question asks about.",
-        "Le pricing fixe la taille de chaque terme. Un prix choisi « un peu arbitrairement » est l'erreur non forcée la plus courante de ce pilier : il plafonne le nouveau MRR, ne laisse aucune place à l'expansion, et n'est presque jamais revu parce que le changer paraît risqué. Le tester, c'est ce que demande la première question Revenue du Tour.",
+        // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
+        "Pricing sets the size of every term. A price chosen \"a bit arbitrarily\" is the single most common unforced error in this stage: it caps new MRR, leaves no room for expansion, and is almost never revisited because changing it feels risky. Testing it is what the Tour's first Revenue question asks about.",
+        "Le pricing fixe la taille de chaque terme. Un prix choisi « un peu arbitrairement » est l'erreur non forcée la plus courante de cette étape : il plafonne le nouveau MRR, ne laisse aucune place à l'expansion, et n'est presque jamais revu parce que le changer paraît risqué. Le tester, c'est ce que demande la première question Revenue du Tour.",
       ),
     },
     example: {
-      title: t("The same month, read as a revenue pillar", "Le même mois, lu comme un pilier Revenue"),
+      // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
+      title: t("The same month, read as the Revenue stage", "Le même mois, lu comme l'étape Revenue"),
       steps: [
         t(
           "Start of month: €20,000 MRR from 400 customers (€50 average). New customers: 40 at €50 = +€2,000.",
@@ -1787,8 +1797,9 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         "La rétention nette de revenu est le chiffre que les investisseurs SaaS lisent en premier : au-dessus de 100 %, la base existante grandit toute seule ; les meilleures entreprises B2B affichent 110-130 %, portées par l'expansion. Sous 90 %, la croissance doit courir plus vite qu'une base qui fuit.",
       ),
       t(
-        "The LTV:CAC rule of thumb of about 3:1 lives in this pillar too — it is where price, margin and lifetime meet the cost of acquisition. Scoring the pillar on \"has the model been tested?\" rather than on the amount is deliberate: the amount follows from the terms above, not the reverse.",
-        "La règle empirique LTV:CAC d'environ 3:1 vit aussi dans ce pilier — c'est là que prix, marge et durée de vie rencontrent le coût d'acquisition. Noter le pilier sur « le modèle a-t-il été testé ? » plutôt que sur le montant est délibéré : le montant découle des termes ci-dessus, pas l'inverse.",
+        // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
+        "The LTV:CAC rule of thumb of about 3:1 lives in this stage too — it is where price, margin and lifetime meet the cost of acquisition. Scoring the stage on \"has the model been tested?\" rather than on the amount is deliberate: the amount follows from the terms above, not the reverse.",
+        "La règle empirique LTV:CAC d'environ 3:1 vit aussi dans cette étape — c'est là que prix, marge et durée de vie rencontrent le coût d'acquisition. Noter l'étape sur « le modèle a-t-il été testé ? » plutôt que sur le montant est délibéré : le montant découle des termes ci-dessus, pas l'inverse.",
       ),
       t(
         "Pricing changes are less dangerous than they feel: most price increases on a product people rely on lose a small share of customers and gain far more in revenue, and grandfathering existing customers removes most of the risk. The costly move is never testing.",
@@ -1950,7 +1961,8 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
         question: t("What does AARRR stand for?", "Que veut dire AARRR ?"),
         answer: t(
           "Acquisition, Activation, Retention, Referral, Revenue: the five stages a user goes through, from first hearing of a product to paying for it and bringing others. Dave McClure coined it in 2007 as \"pirate metrics\" because the acronym sounds like one. Some versions put Revenue before Referral; the order of the last two matters less than the idea that each stage is a share of the previous one.",
-          "Acquisition, Activation, Rétention, Referral (parrainage), Revenue (revenu) : les cinq étapes qu'un utilisateur traverse, de la première fois qu'il entend parler d'un produit au moment où il paie et en amène d'autres. Dave McClure l'a forgé en 2007 sous le nom de « pirate metrics » parce que l'acronyme sonne comme un cri de pirate. Certaines versions mettent Revenue avant Referral ; l'ordre des deux dernières compte moins que l'idée que chaque étape est une part de la précédente.",
+          // TODO: à relire — revue de copie v1 (2026-09-24) : nom d'étape « Retention » sans accent, comme partout ailleurs (R2-12) ; l'accent reste au nom commun.
+          "Acquisition, Activation, Retention, Referral (parrainage), Revenue (revenu) : les cinq étapes qu'un utilisateur traverse, de la première fois qu'il entend parler d'un produit au moment où il paie et en amène d'autres. Dave McClure l'a forgé en 2007 sous le nom de « pirate metrics » parce que l'acronyme sonne comme un cri de pirate. Certaines versions mettent Revenue avant Referral ; l'ordre des deux dernières compte moins que l'idée que chaque étape est une part de la précédente.",
         ),
       },
       {

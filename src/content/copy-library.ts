@@ -382,7 +382,8 @@ export const PILLAR_VERDICTS: Record<Pillar, Record<ScoreBand, Record<Tone, Tran
     },
     strong: {
       neutral: {
-        fr: "Rétention suivie, cause de churn connue, mécanisme de réengagement actif — un pilier solide de ta croissance.",
+        // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
+        fr: "Rétention suivie, cause de churn connue, mécanisme de réengagement actif — une étape solide de ta croissance.",
         en: "Retention tracked, churn cause known, re-engagement mechanism active — a solid pillar of your growth.",
       },
       roast: {
@@ -414,8 +415,9 @@ export const PILLAR_VERDICTS: Record<Pillar, Record<ScoreBand, Record<Tone, Tran
     },
     strong: {
       neutral: {
-        fr: "Mécanisme de partage intégré et mesuré — le pilier le plus rare à ce niveau, probablement ton meilleur atout.",
-        en: "Sharing mechanism built in and measured — the rarest pillar at this level, probably your best asset.",
+        // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
+        fr: "Mécanisme de partage intégré et mesuré — l'étape la plus rare à ce niveau, probablement ton meilleur atout.",
+        en: "Sharing mechanism built in and measured — the rarest stage at this level, probably your best asset.",
       },
       roast: {
         fr: "Ton referral roule en échappée. Le reste du peloton growth aimerait bien savoir comment tu as fait.",
@@ -446,8 +448,9 @@ export const PILLAR_VERDICTS: Record<Pillar, Record<ScoreBand, Record<Tone, Tran
     },
     strong: {
       neutral: {
-        fr: "Pricing testé, LTV connue, playbook d'expansion actif — un pilier revenue qui tient déjà la comparaison avec des équipes bien plus établies.",
-        en: "Pricing tested, LTV known, expansion playbook active — a revenue pillar that already holds up against much more established teams.",
+        // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
+        fr: "Pricing testé, LTV connue, playbook d'expansion actif — une étape Revenue qui tient déjà la comparaison avec des équipes bien plus établies.",
+        en: "Pricing tested, LTV known, expansion playbook active — a Revenue stage that already holds up against much more established teams.",
       },
       roast: {
         fr: "Ton revenue a le calme d'un coureur qui sait exactement combien de temps il a en réserve avant l'arrivée.",

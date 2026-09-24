@@ -71,8 +71,9 @@ export const HOW_IT_WORKS = {
   scoringSection: {
     title: { fr: "Comment le score est calculé", en: "How the score is calculated" },
     body: {
-      fr: "Quinze questions, trois par pilier. Chaque réponse vaut un nombre de points fixe — rien de subjectif, rien qu'une IA ne décide à la volée. Tes cinq scores de pilier (sur 20 chacun) s'additionnent pour ton total (sur 100). Le texte de ton résultat vient d'un ensemble de verdicts pré-écrits, choisis selon ton score — la même transparence, à chaque fois, pour tout le monde.",
-      en: "Fifteen questions, three per pillar. Each answer is worth a fixed number of points — nothing subjective, nothing an AI decides on the fly. Your five pillar scores (out of 20 each) add up to your total (out of 100). The wording of your results comes from a set of pre-written verdicts matched to your score — same transparency, every time, for everyone.",
+      // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code. Aussi : « la même transparence, à chaque fois, pour tout le monde » était une triade creuse (§3.1).
+      fr: "Quinze questions, trois par étape. Chaque réponse vaut un nombre de points fixe — rien de subjectif, rien qu'une IA ne décide à la volée. Tes cinq scores d'étape (sur 20 chacun) s'additionnent pour ton total (sur 100). Le texte de ton résultat vient d'un ensemble de verdicts pré-écrits, choisis selon ton score — les mêmes textes pour tout le monde, à score égal.",
+      en: "Fifteen questions, three per stage. Each answer is worth a fixed number of points — nothing subjective, nothing an AI decides on the fly. Your five stage scores (out of 20 each) add up to your total (out of 100). The wording of your results comes from a set of pre-written verdicts matched to your score — the same wording for everyone with the same score.",
     },
   },
 
