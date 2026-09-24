@@ -118,12 +118,13 @@ function stripComments(source: string): string {
 const NETWORK = [/\bfetch\s*\(/, /\bXMLHttpRequest\b/, /\bsendBeacon\b/, /\bWebSocket\b/, /\bEventSource\b/, /<form[\s>]/, /\bnew\s+Image\s*\(/];
 
 /**
- * A floor on how much the walk from the island covers. 1 today: the island is
- * the P0 skeleton and imports nothing of ours by value yet. The spec's rule 6
- * asks for ≥ 10 once the screens exist — P4 raises this constant in the PR
- * that wires them, so a walk that silently stops walking goes red.
+ * A floor on how much the walk from the island covers. The spec's rule 6 asks
+ * for ≥ 10 once the screens exist; P4 wired them and the walk measured 48
+ * modules (2026-09-24). The floor sits well under that so a refactor that
+ * merges files does not trip it, and well over 10 so a walk that silently
+ * stops following the island's imports goes red.
  */
-const MIN_ISLAND_MODULES = 1;
+const MIN_ISLAND_MODULES = 30;
 
 describe("growth engine boundary (engine spec §11.4)", () => {
   it("rule 6 — the engine's code exists and the island is where the spec puts it", () => {
