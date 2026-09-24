@@ -336,9 +336,16 @@ export const UI_STRINGS = {
       fr: "Mêmes constats, un ton plus mordant. Toujours bienveillant.",
     },
     cta: { en: "Get my score →", fr: "Obtiens ton score →" },
+    // TODO: à relire — revue de copie v1 (2026-09-24), changement nº3 et
+    // critique DS M-6. The old line promised a tone switch on the result
+    // page, which only exists for an owner in roast ("Switch to straight
+    // up"); someone who keeps the default neutral tone — the majority —
+    // never finds one. The symmetric button stays refused (step 7, R-23), so
+    // the sentence follows the product: it describes the roast option, and
+    // is true whichever card is selected.
     switchHint: {
-      en: "You can switch tone on the result page.",
-      fr: "Tu pourras changer de ton sur la page de résultat.",
+      en: "Roast isn't final: you can switch back to straight up on your result.",
+      fr: "Le roast n'est pas définitif : tu pourras repasser en neutre sur ton résultat.",
     },
   },
 
