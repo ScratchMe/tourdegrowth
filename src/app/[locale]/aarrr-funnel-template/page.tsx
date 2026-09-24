@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { ContentHeader } from "@/components/brand/ContentHeader";
 import { MetaLabel } from "@/components/brand/MetaLabel";
-import { SiteFooter } from "@/components/brand/SiteFooter";
-import { Card } from "@/components/core/Card";
+import { ProsePage, ProseSection, ProseText } from "@/components/brand/ProsePage";
+import { Callout } from "@/components/core/Callout";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { isEngineOpenAtBuild } from "@/lib/engine/access";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
@@ -10,7 +9,6 @@ import { contentMetadata } from "@/lib/i18n/meta";
 import { tc } from "@/lib/i18n/translatable";
 import { EngineWorkbench } from "./EngineWorkbench";
 import { resolveEngineProps } from "./engine-props";
-import frame from "../how-it-works/page.module.css";
 
 const PATH = "/aarrr-funnel-template";
 
@@ -53,31 +51,29 @@ export default async function EnginePage({ params }: PageProps) {
   const props = resolveEngineProps(locale);
   const t = props.strings.page;
 
+  // On the prose frame for now (ds-critique M-9: no page borrows another
+  // page's stylesheet any more); P5 owns the tool's own wider layout.
   return (
-    <>
-      <ContentHeader locale={locale} path={PATH} />
+    <ProsePage
+      locale={locale}
+      path={PATH}
+      title={t.title}
+      kicker={<MetaLabel size="xs">{t.eyebrow}</MetaLabel>}
+      lead={t.positioning}
+    >
+      <ProseText>{t.promise}</ProseText>
 
-      <main id="main" className={frame.main}>
-        <div className={frame.intro}>
-          <MetaLabel size="xs">{t.eyebrow}</MetaLabel>
-          <h1 className={frame.title}>{t.title}</h1>
-          <p className={frame.subtitle}>{t.positioning}</p>
-          <p className={frame.sectionBody}>{t.promise}</p>
-        </div>
+      <Callout tone="caveat" data-testid="engine-privacy">
+        <ProseSection heading={t.privacyTitle}>
+          <ProseText>{t.privacyBody}</ProseText>
+        </ProseSection>
+      </Callout>
 
-        <Card tone="paper" className={frame.limitationCard} data-testid="engine-privacy">
-          <h2 className={frame.sectionTitle}>{t.privacyTitle}</h2>
-          <p className={frame.limitationText}>{t.privacyBody}</p>
-        </Card>
+      <noscript>
+        <ProseText>{t.noscript}</ProseText>
+      </noscript>
 
-        <noscript>
-          <p className={frame.sectionBody}>{t.noscript}</p>
-        </noscript>
-
-        <EngineWorkbench {...props} />
-      </main>
-
-      <SiteFooter locale={locale} width="reading" />
-    </>
+      <EngineWorkbench {...props} />
+    </ProsePage>
   );
 }
