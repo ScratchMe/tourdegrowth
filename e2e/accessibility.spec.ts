@@ -46,6 +46,10 @@ const PAGES: [name: string, path: string][] = [
   // tableau comparatif sans `<table>` : l'ordre des titres (h1, h2, h3 sous
   // le h2 « En un coup d'oeil ») est exactement ce qu'axe sait vérifier.
   ["framework comparison (fr)", "/fr/aarrr-vs-rarra"],
+  // The growth engine (engine spec §11.4), behind ENGINE_ENABLED: the
+  // preview parameter is how the closed page is reached before bon à tirer
+  // nº6, exactly as Antoine will test it.
+  ["growth engine (fr, preview)", "/fr/aarrr-funnel-template?engine=preview"],
 ];
 
 interface ContrastData {

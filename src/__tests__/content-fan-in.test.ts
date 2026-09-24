@@ -124,6 +124,26 @@ const BUDGETS: { module: string; max: number; why: string }[] = [
     max: 6,
     why: "Les quatre pages du cluster, /how-it-works qui les liste, le sitemap.",
   },
+  // Le moteur de croissance (spec du moteur §10.3) : sa prose ne sert qu'à sa
+  // propre page, qui la résout au build et la passe à l'îlot en props.
+  // Atteinte par une deuxième route, elle partirait dans une fonction de plus
+  // — et comptée par route (VERCEL.md §2.2).
+  {
+    module: "content/engine-catalog.ts",
+    max: 1,
+    why: "La prose des quinze chiffres : seule /{locale}/aarrr-funnel-template la rend.",
+  },
+  {
+    module: "content/engine-copy.ts",
+    max: 1,
+    why: "Toute la copie d'interface du moteur : seule sa page la résout.",
+  },
+  {
+    module: "content/copy-library.ts",
+    max: 12,
+    why:
+      "Les quinze questions du Tour : onze routes les citaient au 2026-09-15 ; la page du moteur est la douzième (spec du moteur §10.3), pour les huit questions du pont Tour × moteur — une décision, pas un contournement.",
+  },
 ];
 
 describe("fan-in de contenu côté serveur (le coût se compte par route)", () => {
