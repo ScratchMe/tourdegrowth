@@ -10,6 +10,7 @@
 @import "../styles/tokens/shape.css";
 @import "../styles/tokens/motion.css";
 @import "../styles/tokens/world-night.css";
+@import "../styles/tokens/game.css";
 
 *,
 *::before,
