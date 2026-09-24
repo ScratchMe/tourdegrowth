@@ -1,14 +1,29 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { ContentHeader } from "@/components/brand/ContentHeader";
 import { MetaLabel } from "@/components/brand/MetaLabel";
-import { ProsePage, ProseSection, ProseText } from "@/components/brand/ProsePage";
+import { SiteFooter } from "@/components/brand/SiteFooter";
+import { Button } from "@/components/core/Button";
 import { Callout } from "@/components/core/Callout";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { isEngineOpenAtBuild } from "@/lib/engine/access";
+import {
+  DERIVED_SHAPES,
+  ENGINE_CATALOG_VERSION,
+  METRIC_SHAPES,
+  type Benchmark,
+  type MetricShape,
+} from "@/lib/engine/catalog-shape";
+import { EFFORT_KEY, type EngineStrings } from "@/lib/engine/strings";
+import { PILLARS } from "@/lib/scoring/pillars";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { contentMetadata } from "@/lib/i18n/meta";
 import { tc } from "@/lib/i18n/translatable";
 import { EngineWorkbench } from "./EngineWorkbench";
 import { resolveEngineProps } from "./engine-props";
+import { formatInterval } from "./_engine/format-stub";
+import { fill, monthLabel, stageLabel } from "./_engine/visual-model";
+import styles from "./page.module.css";
 
 const PATH = "/aarrr-funnel-template";
 
@@ -34,46 +49,247 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 /**
+ * The catalogue prints formulas without a setup: no activation event has
+ * been named, no window chosen. Its placeholders get generic words so the
+ * sentence still reads ("… ayant fait l'événement d'activation sous n
+ * jours"), never a raw `{event}`.
+ */
+function staticFills(t: EngineStrings["visual"]): Record<string, string> {
+  return {
+    event: t.staticEvent,
+    n: t.staticWindow,
+    cohort: t.staticCohort,
+    month: t.staticMonth,
+    variant: t.staticVariant,
+  };
+}
+
+/** A reference, in the metric's own unit — the same rule the sheet will print (§7 E3). */
+function referenceRange(benchmark: Benchmark, unit: "percent" | "ratio" | "months", strings: EngineStrings, locale: Locale) {
+  const ctx = { locale, today: new Date(0) };
+  if (unit === "months") return fill(strings.units.months, { n: formatInterval(benchmark, "ratio", ctx, strings.units) });
+  return formatInterval(benchmark, unit === "percent" ? "percent" : "ratio", ctx, strings.units);
+}
+
+function referenceLine(
+  shape: MetricShape,
+  caveat: string | undefined,
+  noReferenceReason: string | undefined,
+  strings: EngineStrings,
+  locale: Locale,
+): string | null {
+  if (shape.benchmark) {
+    const range = referenceRange(shape.benchmark, shape.unit === "percent" ? "percent" : "ratio", strings, locale);
+    const template = shape.benchmark.designates ? strings.sheet.referenceDesignates : strings.sheet.referenceContext;
+    return fill(template, { range, caveat: caveat ?? "" });
+  }
+  if (noReferenceReason) return fill(strings.sheet.noReference, { reason: noReferenceReason });
+  return null;
+}
+
+/**
  * `/{locale}/aarrr-funnel-template` — the growth engine (engine spec §7 E0).
  *
- * P0 SKELETON: the prerendered shell (one `<h1>`, the privacy promise that
- * is never collapsible, D16) and the client island mounted with its full
- * props contract. The static SEO body — the fifteen numbers, the FAQ, the
- * CTA — is P5's; the island's screens are P4's and P6's.
+ * The page is two things on purpose. **The tool** is the client island
+ * (`EngineWorkbench`), mounted in a frame as wide as the app shell: the
+ * peloton needs four grids side by side and the board a drawer next to its
+ * rows, which the 760px prose column cannot hold. **The page around it** is
+ * prerendered prose that reads without JavaScript and is what a search
+ * engine indexes: the fifteen numbers with their formula, where to find each
+ * one and what to know before quoting it, the three computed ones, the FAQ,
+ * and a way to the Tour. It is built from the SAME resolved catalogue the
+ * island receives, so the page cannot describe a number the tool does not
+ * ask for.
  *
- * Server Component, prerendered (●) like every content page (R-24): the
- * island's props are resolved here, at build time, and nothing reads a
- * header or a cookie. Behind `ENGINE_ENABLED` — the proxy rewrites a closed
- * page to a 404, so the page itself never has to become dynamic.
+ * Server Component, prerendered (●) like every content page (R-24):
+ * nothing here reads a header or a cookie. Behind `ENGINE_ENABLED` — the
+ * proxy rewrites a closed page to a 404, so the page never has to become
+ * dynamic to stay closed.
  */
 export default async function EnginePage({ params }: PageProps) {
   const locale = (await params).locale as Locale;
   const props = resolveEngineProps(locale);
-  const t = props.strings.page;
+  const { strings } = props;
+  const t = strings.page;
+  const fills = staticFills(strings.visual);
+  const metricOf = (id: MetricShape["id"]) => props.metrics.find((m) => m.id === id)!;
 
-  // On the prose frame for now (ds-critique M-9: no page borrows another
-  // page's stylesheet any more); P5 owns the tool's own wider layout.
   return (
-    <ProsePage
-      locale={locale}
-      path={PATH}
-      title={t.title}
-      kicker={<MetaLabel size="xs">{t.eyebrow}</MetaLabel>}
-      lead={t.positioning}
-    >
-      <ProseText>{t.promise}</ProseText>
+    <>
+      <ContentHeader locale={locale} path={PATH} width="wide" />
 
-      <Callout tone="caveat" data-testid="engine-privacy">
-        <ProseSection heading={t.privacyTitle}>
-          <ProseText>{t.privacyBody}</ProseText>
-        </ProseSection>
-      </Callout>
+      <main id="main" className={styles.main}>
+        <div className={styles.intro}>
+          <MetaLabel size="xs">{t.eyebrow}</MetaLabel>
+          <h1 className={styles.title}>{t.title}</h1>
+          <p className={styles.lead}>{t.positioning}</p>
+          <p className={styles.text}>{t.promise}</p>
 
-      <noscript>
-        <ProseText>{t.noscript}</ProseText>
-      </noscript>
+          {/* The promise comes BEFORE the call to action and never folds
+              away (D16): it is the condition under which anyone types an
+              employer's numbers into a web page. */}
+          <Callout tone="caveat" data-testid="engine-privacy" className={styles.privacy}>
+            <h2 className={styles.privacyTitle}>{t.privacyTitle}</h2>
+            <p>{t.privacyBody}</p>
+          </Callout>
 
-      <EngineWorkbench {...props} />
-    </ProsePage>
+          <div className={styles.cta}>
+            {/* An in-page anchor to the island, not a route: without
+                JavaScript it still lands on the tool's section and its
+                noscript line. `hard` renders a bare <a>. */}
+            <Button href="#engine" hard size="lg" data-testid="engine-cta">
+              {t.cta}
+            </Button>
+            <p className={styles.ctaNote}>{t.ctaNote}</p>
+          </div>
+        </div>
+
+        <section id="engine" className={styles.tool} aria-label={t.eyebrow}>
+          <noscript>
+            <p className={styles.text}>{t.noscript}</p>
+          </noscript>
+          <EngineWorkbench {...props} />
+        </section>
+
+        <section className={styles.catalogue} aria-labelledby="engine-catalogue" data-testid="engine-catalogue">
+          <div className={styles.sectionHead}>
+            <h2 id="engine-catalogue" className={styles.heading}>
+              {t.catalogueTitle}
+            </h2>
+            <p className={styles.text}>{t.catalogueIntro}</p>
+            <p className={styles.note}>
+              {fill(t.catalogueVerified, { month: monthLabel(ENGINE_CATALOG_VERSION, locale) })}
+            </p>
+          </div>
+
+          {PILLARS.map((pillar, index) => (
+            <div key={pillar} className={styles.stage} data-testid={`engine-stage-${pillar}`}>
+              <MetaLabel size="xs">
+                {fill(strings.sheet.stageEyebrow, { i: String(index + 1), stage: stageLabel(pillar) })}
+              </MetaLabel>
+              <h3 className={styles.stageName}>{stageLabel(pillar)}</h3>
+              <div className={styles.metrics}>
+                {METRIC_SHAPES.filter((s) => s.stage === pillar)
+                  .sort((a, b) => Number(b.primary) - Number(a.primary))
+                  .map((shape) => {
+                    const metric = metricOf(shape.id);
+                    const reference = referenceLine(
+                      shape,
+                      metric.benchmarkCaveat,
+                      metric.noReferenceReason,
+                      strings,
+                      locale,
+                    );
+                    return (
+                      <article key={shape.id} className={styles.metric} data-metric={shape.id}>
+                        {shape.primary ? <p className={styles.primary}>{strings.visual.primaryNumber}</p> : null}
+                        <h4 className={styles.metricName}>{metric.name}</h4>
+                        <p className={styles.oneLiner}>{metric.oneLiner}</p>
+                        <dl className={styles.facts}>
+                          <dt>{strings.sheet.formula}</dt>
+                          <dd className={styles.formula}>{fill(metric.formula, fills)}</dd>
+                          <dt>{strings.sheet.whereTitle}</dt>
+                          <dd>
+                            <ul className={styles.where}>
+                              {metric.where.map((w) => (
+                                <li key={`${w.label}-${w.path}`}>
+                                  <span className={styles.whereTool}>{w.label}</span> — {fill(w.path, fills)}
+                                </li>
+                              ))}
+                            </ul>
+                          </dd>
+                          <dt>{strings.sheet.trapTitle}</dt>
+                          <dd>{fill(metric.trap, fills)}</dd>
+                          {reference ? (
+                            <>
+                              <dt>{strings.sheet.reference}</dt>
+                              <dd>{reference}</dd>
+                            </>
+                          ) : null}
+                          <dt>{strings.visual.effort}</dt>
+                          <dd>{strings.effort[EFFORT_KEY[shape.effort]]}</dd>
+                        </dl>
+                        <Link href={metric.glossaryHref} className={styles.glossary}>
+                          {strings.sheet.definition}
+                        </Link>
+                      </article>
+                    );
+                  })}
+              </div>
+            </div>
+          ))}
+
+          <div className={styles.stage} data-testid="engine-stage-computed">
+            <h3 className={styles.stageName}>{t.catalogueComputedTitle}</h3>
+            <div className={styles.metrics}>
+              {DERIVED_SHAPES.map((shape) => {
+                const d = props.derived.find((x) => x.id === shape.id)!;
+                const unit = shape.id === "rev.cac-payback" ? "months" : "ratio";
+                const reference = shape.benchmark
+                  ? fill(strings.sheet.referenceContext, {
+                      range: referenceRange(shape.benchmark, unit, strings, locale),
+                      caveat: d.caveat ?? d.capNote ?? "",
+                    })
+                  : null;
+                return (
+                  <article key={shape.id} className={styles.metric} data-metric={shape.id}>
+                    <h4 className={styles.metricName}>{d.name}</h4>
+                    <dl className={styles.facts}>
+                      <dt>{strings.sheet.formula}</dt>
+                      <dd className={styles.formula}>{d.formula}</dd>
+                      {d.capNote ? (
+                        <>
+                          <dt>{strings.sheet.trapTitle}</dt>
+                          <dd>{d.capNote}</dd>
+                        </>
+                      ) : null}
+                      {reference ? (
+                        <>
+                          <dt>{strings.sheet.reference}</dt>
+                          <dd>{reference}</dd>
+                        </>
+                      ) : null}
+                    </dl>
+                    <Link href={d.glossaryHref} className={styles.glossary}>
+                      {strings.sheet.definition}
+                    </Link>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section className={styles.faq} aria-labelledby="engine-faq" data-testid="engine-faq">
+          <h2 id="engine-faq" className={styles.heading}>
+            {t.faqTitle}
+          </h2>
+          {strings.faq.map((item) => (
+            <div key={item.q} className={styles.faqItem}>
+              <h3 className={styles.faqQuestion}>{item.q}</h3>
+              <p className={styles.text}>{item.a}</p>
+            </div>
+          ))}
+        </section>
+
+        {/* `hard`: /quiz lives under the app's root layout, so next/link
+            would prefetch a dynamic route it can never use
+            (`cross-root-links.test.ts`). */}
+        <Callout
+          tone="cta"
+          className={styles.tour}
+          action={
+            <Button variant="secondary" size="lg" href="/quiz" hard data-testid="engine-tour-link">
+              {t.tourFirst}
+            </Button>
+          }
+        >
+          <h2 className={styles.tourTitle}>{strings.visual.tourTitle}</h2>
+          <p>{strings.mirror.noTour}</p>
+        </Callout>
+      </main>
+
+      <SiteFooter locale={locale} width="wide" />
+    </>
   );
 }

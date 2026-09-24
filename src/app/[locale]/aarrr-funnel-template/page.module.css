@@ -1,0 +1,270 @@
+/*
+ * /{locale}/aarrr-funnel-template — the growth engine (engine spec §7 E0).
+ *
+ * Wider than the prose frame on purpose: the peloton draws four 10×10 grids
+ * side by side and the board puts a drawer next to its rows, which the
+ * 760px reading column cannot hold. So the FRAME is the app shell's width
+ * (--content-max-width) and every block of running text inside it is
+ * capped at --measure-read — the same two-level rule ProsePage applies
+ * (ds-critique M-3), just with a wider outer box.
+ *
+ * Own module, not ProsePage.module.css: `page-styles-scope.test.ts` forbids
+ * importing another folder's page stylesheet, and this page's layout is not
+ * a variant of that one.
+ */
+.main {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: var(--space-14) var(--gutter-desktop) 80px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-14);
+  min-width: 0;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  max-width: var(--width-reading);
+}
+
+.title {
+  font: var(--display-hero);
+  color: var(--text-body);
+}
+
+/* The standfirst: grey and at the larger UI size, read once (ProsePage). */
+.lead {
+  font: var(--body-lg);
+  color: var(--text-muted);
+  max-width: var(--measure-read);
+}
+
+.text {
+  font: var(--body-read);
+  color: var(--text-body);
+  max-width: var(--measure-read);
+}
+
+.note {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+  max-width: var(--measure-read);
+}
+
+.privacy {
+  max-width: var(--measure-read);
+}
+
+.privacyTitle {
+  font: var(--body-md);
+  font-weight: 600;
+  color: var(--text-body);
+}
+
+.cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.ctaNote {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+/* The island's section. `scroll-margin-top` so the in-page anchor from the
+   CTA does not land the tool's first line under the top edge. */
+.tool {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  min-width: 0;
+  scroll-margin-top: var(--space-8);
+}
+
+/* ---- The static catalogue: the fifteen numbers, readable without JS ---- */
+
+.catalogue {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  border-top: var(--border-rule);
+  padding-top: var(--space-12);
+}
+
+.sectionHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.heading {
+  font: var(--display-section);
+  color: var(--text-body);
+}
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.stageName {
+  font: var(--title-card);
+  color: var(--text-body);
+}
+
+/* auto-fit rather than a fixed count: three sheets at 1280 (every stage has
+   exactly three, so a 2 + 1 layout would orphan one), one at 390, with no
+   breakpoint to keep in step with the card's own content. 280px was chosen
+   by measuring the 960px frame: 320px gave two columns. */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: var(--space-7);
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-8);
+  border: var(--border-solid);
+  border-radius: var(--radius-panel);
+  background: var(--surface-card);
+  min-width: 0;
+}
+
+.primary {
+  font: var(--meta-2xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-alert);
+}
+
+.metricName {
+  font: var(--body-lg);
+  font-weight: 600;
+  color: var(--text-body);
+}
+
+.oneLiner {
+  font: var(--body-sm);
+  color: var(--text-body);
+}
+
+/* The sheet's facts: label above value, never a two-column table that would
+   squeeze a formula into 150px on a phone. */
+.facts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.facts dt {
+  font: var(--meta-2xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-top: var(--space-3);
+}
+
+.facts dt:first-child {
+  margin-top: 0;
+}
+
+.facts dd {
+  font: var(--body-sm);
+  color: var(--text-body);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Two classes: `.facts dd` above also sets `font`, and the formula must win
+   deterministically, not by source order. */
+.facts .formula {
+  font: var(--meta-sm);
+  font-variant-numeric: var(--tabular);
+  background: var(--surface-sunken);
+  border-radius: var(--radius-button);
+  padding: var(--space-3) var(--space-4);
+}
+
+.where {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.whereTool {
+  font-weight: 600;
+}
+
+.glossary {
+  font: var(--meta-xs);
+  color: var(--text-link);
+  margin-top: auto;
+  align-self: flex-start;
+}
+
+.glossary:hover,
+.glossary:focus-visible {
+  text-underline-offset: 0.15em;
+}
+
+/* ---- FAQ and the way to the Tour ---- */
+
+.faq {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  border-top: var(--border-rule);
+  padding-top: var(--space-12);
+}
+
+.faqItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.faqQuestion {
+  font: var(--body-lg);
+  font-weight: 600;
+  color: var(--text-body);
+  max-width: var(--measure-read);
+}
+
+.tour {
+  max-width: var(--width-reading);
+}
+
+.tourTitle {
+  font: var(--title-card);
+  color: var(--text-body);
+}
+
+@media (max-width: 760px) {
+  .main {
+    padding: var(--space-10) var(--gutter-mobile) 64px;
+    gap: var(--space-12);
+  }
+
+  /* Element + class (0,1,1): the hero size would put a French title on six
+     lines at 390px — the same fix the open-door pages carry. */
+  h1.title {
+    font: var(--display-hero-mobile);
+  }
+
+  .cta > * {
+    width: 100%;
+  }
+
+  .metric {
+    padding: var(--space-7);
+  }
+}
