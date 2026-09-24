@@ -1,0 +1,216 @@
+/*
+ * The call, inside the night world: it reads the world's semantic tokens
+ * (--surface-*, --text-*, --border-*) for its chrome, and the --dg-* /
+ * --visio-* island (game.css) for the picture and its overlays. It must sit
+ * inside a `data-world="night"` container — its chip, timer and band are
+ * night text on a black scrim.
+ */
+
+.call {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--surface-card);
+  border: var(--border-solid);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  color: var(--text-body);
+}
+
+/* The island focuses the call when it opens; the focus ring stays visible on the night. */
+.call:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: var(--dg-wall);
+  transition: filter var(--dur-stamp) var(--ease-out);
+}
+
+/* A decorative layer over the picture: the angry halo, the ringing pulse. */
+.frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 transparent;
+  transition: box-shadow var(--dur-stamp) var(--ease-out);
+}
+
+.call[data-mood="angry"] .frame::after {
+  box-shadow: inset 0 0 90px var(--visio-halo-angry);
+}
+
+/* Cold, or the year is over: the picture goes grey. The chip and timer on top of it stay legible — they are not part of the filtered layer. */
+.call[data-mood="cold"] .frame :where(svg),
+.call[data-state="ended"] .frame :where(svg) {
+  filter: grayscale(1) brightness(0.6);
+}
+
+/*
+ * Ringing: the picture waits in the dark, and an amber rim pulses around it
+ * — the selection colour of this world, the same amber as a ticked card:
+ * « this is what you act on next ». Under reduced motion the rim simply
+ * stays lit, which still says it.
+ */
+.call[data-state="ringing"] .frame :where(svg) {
+  filter: brightness(0.45);
+}
+
+.call[data-state="ringing"] .frame::after {
+  box-shadow: inset 0 0 0 3px var(--state-selected-bg);
+  animation: visio-ring var(--game-dur-ring) ease-in-out infinite;
+}
+
+.chip,
+.timer {
+  position: absolute;
+  top: var(--space-4);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-tag);
+  background: var(--visio-scrim);
+  color: var(--text-body);
+  font: var(--meta-sm);
+  font-variant-numeric: var(--tabular);
+}
+
+.chip {
+  left: var(--space-4);
+}
+
+.timer {
+  right: var(--space-4);
+}
+
+/* The « live » dot: a shape, never text (4.24:1 against the chip). */
+.live {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-round);
+  background: var(--visio-live);
+  animation: visio-live var(--game-dur-live) infinite;
+}
+
+.call[data-mood="angry"] .live {
+  animation-duration: var(--game-dur-live-angry);
+}
+
+.call[data-state="hungUp"] .live,
+.call[data-state="ended"] .live {
+  animation: none;
+  opacity: 0.4;
+}
+
+/*
+ * The subtitle band. Under the picture, height set by its text — never on
+ * the face (plan R2). The scrim over the panel keeps the band one step
+ * darker than the call's chrome, like a caption strip.
+ */
+.band {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-7);
+  background-color: var(--surface-card);
+  background-image: linear-gradient(var(--visio-scrim), var(--visio-scrim));
+  border-top: var(--border-rule);
+}
+
+/* Angry: a red rule down the band's edge, beside the words — the colour repeats what the CEO says, it never replaces it. */
+.call[data-mood="angry"] .band {
+  box-shadow: inset 3px 0 0 var(--state-bad-text);
+}
+
+.caption {
+  margin: 0;
+  font: var(--game-subtitle);
+  color: var(--text-body);
+  text-wrap: pretty;
+}
+
+.ghost {
+  visibility: hidden;
+}
+
+.eyebrow {
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.ringingTitle {
+  margin: 0;
+  font: var(--title-card);
+  color: var(--text-body);
+}
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-5) var(--space-7);
+  border-top: var(--border-rule);
+}
+
+/* The call's one primary action sits at the far right, as in every call app. */
+.push {
+  margin-left: auto;
+}
+
+.reread {
+  padding: var(--space-2) var(--space-7) var(--space-3);
+  border-top: var(--border-rule);
+}
+
+.rereadText {
+  margin: 0;
+  font: var(--body-md);
+  color: var(--text-body);
+}
+
+/* On a phone the two buttons share the row equally; if a label is too long for that, each takes the full width. */
+@media (max-width: 760px) {
+  .band {
+    padding: var(--space-5);
+  }
+
+  .bar {
+    padding: var(--space-5);
+  }
+
+  .bar > * {
+    flex: 1 1 auto;
+  }
+
+  .reread {
+    padding: var(--space-1) var(--space-5) var(--space-2);
+  }
+}
+
+@keyframes visio-live {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes visio-ring {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
