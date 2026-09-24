@@ -1,0 +1,13 @@
+/*
+ * The night's ground and ink. Both are needed because the body painted
+ * paper and set `color` from paper, and a descendant inherits the COMPUTED
+ * color — rebinding --text-body on this container changes nothing for text
+ * that does not name it. Same ground recipe as the body (colors.css +
+ * shape.css), read through the night's bindings.
+ */
+.surface {
+  background-color: var(--surface-page);
+  background-image: var(--ground-lift);
+  background-repeat: no-repeat;
+  color: var(--text-body);
+}
