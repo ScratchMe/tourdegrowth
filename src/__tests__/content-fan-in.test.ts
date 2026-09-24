@@ -1,5 +1,4 @@
-import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
+import { BY_PATH, FILES, reachable, resolveSpecifier, valueImports } from "./helpers/import-graph";
 import { describe, expect, it } from "vitest";
 
 /**
@@ -24,65 +23,9 @@ import { describe, expect, it } from "vitest";
  * Le test mesure l'ATTEINTE, pas le style d'import : pour chaque module de
  * contenu volumineux, combien de points d'entrée de route le rejoignent en
  * suivant les imports de valeur. Une borne par module, avec la raison. Un
- * `import type` n'est pas une arête — TypeScript l'efface.
+ * `import type` n'est pas une arête — TypeScript l'efface. La marche elle-même
+ * vit dans `helpers/import-graph.ts`, partagée avec `game-bundles.test.ts`.
  */
-const SRC = join(process.cwd(), "src");
-
-function walk(dir: string): string[] {
-  return readdirSync(dir).flatMap((name) => {
-    const full = join(dir, name);
-    if (statSync(full).isDirectory()) return walk(full);
-    return /\.(ts|tsx)$/.test(name) ? [full] : [];
-  });
-}
-
-const FILES = walk(SRC).map((full) => ({
-  path: relative(SRC, full).replaceAll("\\", "/"),
-  source: readFileSync(full, "utf8"),
-}));
-const BY_PATH = new Map(FILES.map((f) => [f.path, f.source]));
-
-/** Les imports qui survivent à la compilation — `import type` est effacé. */
-function valueImports(source: string): string[] {
-  return [...source.matchAll(/(^|\n)\s*(?:import|export)(\s+type)?\s[^;]*?from\s+["']([^"']+)["']/g)]
-    .filter((m) => !m[2])
-    .map((m) => m[3]!);
-}
-
-function resolveSpecifier(fromPath: string, spec: string): string | null {
-  let base: string;
-  if (spec.startsWith("@/")) base = spec.slice(2);
-  else if (spec.startsWith(".")) {
-    const dir = fromPath.split("/").slice(0, -1);
-    for (const part of spec.split("/")) {
-      if (part === ".") continue;
-      else if (part === "..") dir.pop();
-      else dir.push(part);
-    }
-    base = dir.join("/");
-  } else return null; // un paquet — hors de notre arbre
-  for (const candidate of [base, `${base}.ts`, `${base}.tsx`, `${base}/index.ts`, `${base}/index.tsx`]) {
-    if (BY_PATH.has(candidate)) return candidate;
-  }
-  return null;
-}
-
-function reachable(entry: string): Set<string> {
-  const seen = new Set<string>();
-  const queue = [entry];
-  while (queue.length) {
-    const current = queue.pop()!;
-    if (seen.has(current)) continue;
-    seen.add(current);
-    const source = BY_PATH.get(current);
-    if (!source) continue;
-    for (const spec of valueImports(source)) {
-      const resolved = resolveSpecifier(current, spec);
-      if (resolved && !seen.has(resolved)) queue.push(resolved);
-    }
-  }
-  return seen;
-}
 
 /** Ce que Next compile en fonction : les fichiers de convention de l'App Router. */
 const ENTRY_POINTS = FILES.map((f) => f.path).filter(
@@ -123,6 +66,21 @@ const BUDGETS: { module: string; max: number; why: string }[] = [
     module: "content/comparisons.ts",
     max: 6,
     why: "Les quatre pages du cluster, /how-it-works qui les liste, le sitemap.",
+  },
+  // Le jeu (plan §3.4). Le texte du niveau lui-même (`content/game/retention.ts`,
+  // budget 2 : la page du niveau et son image OG) et l'encart du résultat
+  // (`content/game/entry.ts`, budget 1 : `r/[id]/page.tsx`) prendront leur
+  // ligne ici avec les chantiers qui les créent — un budget sur un module qui
+  // n'existe pas encore ferait échouer ce test pour la mauvaise raison.
+  {
+    module: "content/game/meta.ts",
+    max: 4,
+    why: "Titres, descriptions, intro du niveau : le hub, la page du niveau, et leurs deux images OG (chantier G4b). Pas le sitemap, qui ne lit que des chemins et des dates.",
+  },
+  {
+    module: "content/game/hub.ts",
+    max: 2,
+    why: "Le hub, et la page du niveau dont la navigation des zones reprend les cinq questions. Écart au plan (qui disait 1) : une seconde copie des zones dériverait.",
   },
 ];
 
