@@ -1,0 +1,123 @@
+/* DS v3 §5.7 — viz/ChartFrame. A figure, not a card: it takes the surface it sits on. */
+
+.frame {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-width: 0;
+  margin: 0;
+  color: var(--text-body);
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.title {
+  margin: 0;
+  font: var(--chart-title);
+  color: var(--text-body);
+  text-wrap: balance;
+}
+
+.subtitle {
+  margin: 0;
+  font: var(--body-sm);
+  color: var(--text-muted);
+}
+
+.unit {
+  font: var(--chart-label);
+}
+
+.chart {
+  min-width: 0;
+}
+
+/* Empty: the pending grammar of the system — dashed, never a blank box that looks broken. */
+.empty {
+  margin: 0;
+  padding: var(--space-8);
+  font: var(--body-sm);
+  color: var(--text-muted);
+  border: var(--border-dashed);
+  border-radius: var(--radius-panel);
+}
+
+/*
+ * Error: our failure, so the red edge — the same grammar as DetourCard's
+ * `fault`, without its raised shadow: a chart that failed is not the one
+ * thing the screen is about.
+ */
+.error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  padding: var(--space-7);
+  border: 2px solid var(--border-alert);
+  border-radius: var(--radius-panel);
+}
+
+.errorMessage {
+  margin: 0;
+  font: var(--body-sm);
+  color: var(--text-alert);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font: var(--chart-label);
+  color: var(--text-body);
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.swatch {
+  flex: none;
+  display: inline-block;
+  width: 18px;
+}
+
+.line {
+  border-top: 2px solid var(--viz-ink);
+}
+
+.reference {
+  border-top: 2px dashed var(--viz-highlight);
+}
+
+.bar,
+.highlight {
+  height: 10px;
+  border-radius: 2px;
+}
+
+.bar {
+  background: var(--viz-ink);
+}
+
+.highlight {
+  background: var(--viz-highlight);
+}
+
+.source {
+  font: var(--chart-note);
+  color: var(--text-muted);
+}
+
+.data {
+  margin-top: calc(-1 * var(--space-2));
+}

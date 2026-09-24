@@ -1,0 +1,47 @@
+/* DS v3 §5.7 — viz/BulletChart. */
+
+.wrap {
+  /* Room above and below the track for the target tick, which is taller. */
+  padding: var(--space-2) 0;
+}
+
+.track {
+  position: relative;
+  background: var(--surface-sunken);
+  border-radius: var(--radius-tag);
+}
+
+.mini .track {
+  height: 8px;
+}
+
+.md .track {
+  height: 12px;
+}
+
+.value {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--viz-ink);
+  border-radius: var(--radius-tag);
+}
+
+/* Past the domain: the end becomes a point, "further than this". */
+.value.overflow {
+  border-radius: var(--radius-tag) 0 0 var(--radius-tag);
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 0 100%);
+}
+
+/*
+ * 3px, taller than the track by 4px each side. --viz-highlight is a mark
+ * (4.42:1 on the card, 3.22:1 on the sunken track — both ≥ 3:1), never text.
+ */
+.target {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 3px;
+  transform: translateX(-50%);
+  background: var(--viz-highlight);
+  border-radius: 1px;
+}

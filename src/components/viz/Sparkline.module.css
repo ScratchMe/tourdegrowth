@@ -1,0 +1,233 @@
+/*
+ * DS v3 §5.7 — viz/Sparkline. Layout: an optional tick column, the plot, and
+ * a row of x labels under the plot only. Every position inside the plot is a
+ * percentage of `.canvas`, the same 0–100 space the SVG path is drawn in.
+ */
+
+.wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "plot"
+    "x";
+  column-gap: var(--space-3);
+  row-gap: var(--space-2);
+  min-width: 0;
+}
+
+.withTicks {
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    "ticks plot"
+    ". x";
+}
+
+.md {
+  --plot-h: 160px;
+}
+
+.sm {
+  --plot-h: 64px;
+}
+
+.plot {
+  grid-area: plot;
+  position: relative;
+  height: var(--plot-h);
+  min-width: 0;
+}
+
+/*
+ * The inset leaves room for the end marker and the 2px stroke at the extremes:
+ * a point at x=100 or y=0 sits on the canvas edge, not outside the box.
+ */
+.canvas {
+  position: absolute;
+  inset: var(--space-3) var(--space-3) var(--space-3) var(--space-2);
+}
+
+/* --- Axis: labels in their own column, lines in the canvas --- */
+
+.ticks {
+  grid-area: ticks;
+  position: relative;
+  /* Same vertical inset as .canvas, so a label sits on its gridline. */
+  margin: var(--space-3) 0;
+  height: calc(var(--plot-h) - 2 * var(--space-3));
+}
+
+.tick {
+  position: absolute;
+  right: 0;
+  transform: translateY(-50%);
+  font: var(--chart-label);
+  font-variant-numeric: var(--tabular);
+  color: var(--viz-axis);
+  white-space: nowrap;
+}
+
+.tickSizer {
+  display: block;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  font: var(--chart-label);
+  font-variant-numeric: var(--tabular);
+  white-space: nowrap;
+}
+
+/* Decorative on purpose (1.33:1 on paper): the gridline orients, it does not inform. */
+.gridline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--viz-grid);
+}
+
+/* --- The series --- */
+
+.line {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.line path {
+  fill: none;
+  stroke: var(--viz-ink);
+  stroke-width: 2px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/*
+ * 8px marker with a 2px ring of the card surface, so it separates from the
+ * line it sits on (the mark spacer rule).
+ */
+.endDot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  transform: translate(-50%, -50%);
+  background: var(--viz-ink);
+  border-radius: var(--radius-round);
+  box-shadow: 0 0 0 2px var(--surface-card);
+}
+
+/* Drawn on the edge because the value is past it: hollow, so it does not claim to be the value. */
+.endDot.overflow {
+  background: var(--surface-card);
+  border: 2px solid var(--viz-ink);
+}
+
+.endLabel {
+  position: absolute;
+  font: var(--chart-value);
+  font-variant-numeric: var(--tabular);
+  color: var(--text-body);
+  white-space: nowrap;
+}
+
+.sm .endLabel {
+  font: var(--chart-label);
+  font-variant-numeric: var(--tabular);
+  color: var(--text-body);
+}
+
+/* Offsets from the marker; the placement is decided in lib/viz/sparkline.ts. */
+.endLabel.right {
+  transform: translateX(8px);
+}
+
+.endLabel.left {
+  transform: translateX(calc(-100% - 8px));
+}
+
+.endLabel.above {
+  margin-top: calc(-1 * var(--space-2));
+  translate: 0 -100%;
+}
+
+.endLabel.below {
+  margin-top: var(--space-2);
+}
+
+/* --- Reference: the dash is red, its label is red TEXT (the deep red, AA) --- */
+
+.reference {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 2px dashed var(--viz-highlight);
+}
+
+.referenceLabel {
+  position: absolute;
+  left: 0;
+  font: var(--chart-label);
+  color: var(--viz-highlight-text);
+  white-space: nowrap;
+}
+
+.referenceLabel.above {
+  translate: 0 calc(-100% - 2px);
+}
+
+.referenceLabel.below {
+  translate: 0 4px;
+}
+
+/* --- x labels, on the same slots as the points --- */
+
+.xLabels {
+  grid-area: x;
+  position: relative;
+  height: 1.4em;
+  margin: 0 var(--space-3) 0 var(--space-2);
+  font: var(--chart-label);
+}
+
+.xLabel {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  color: var(--viz-axis);
+  white-space: nowrap;
+}
+
+/* --- Drawing in: a left-to-right reveal; the marker and label land after --- */
+
+.draw {
+  animation: tdg-viz-draw 800ms var(--ease-out) both;
+}
+
+.late {
+  animation: tdg-viz-late 200ms var(--ease-out) 700ms both;
+}
+
+@keyframes tdg-viz-draw {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes tdg-viz-late {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .draw,
+  .late {
+    animation: none;
+  }
+}

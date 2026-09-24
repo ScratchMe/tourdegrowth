@@ -1,0 +1,122 @@
+/* DS v3 §5.7 — the ruled table. Filets, never boxes (M-4). */
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--text-body);
+}
+
+.caption {
+  font: var(--chart-title);
+  text-align: left;
+  padding-bottom: var(--space-5);
+}
+
+.table thead th {
+  font: var(--chart-label);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-align: left;
+  vertical-align: bottom;
+  border-bottom: var(--border-solid);
+}
+
+.table tbody th,
+.table tbody td {
+  text-align: left;
+  vertical-align: baseline;
+  border-bottom: 1px dashed var(--border-divider);
+}
+
+.table tbody tr:last-child th,
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* The row's name reads as body text, not as a bolded header. */
+.table tbody th {
+  font: var(--body-sm);
+}
+
+.table tbody td {
+  font: var(--body-sm);
+}
+
+.md th,
+.md td {
+  padding: var(--space-4) var(--space-5);
+}
+
+.sm th,
+.sm td {
+  padding: var(--space-2) var(--space-4);
+}
+
+/* Edge cells align with the table edge, not with an indent. */
+.table th:first-child,
+.table td:first-child {
+  padding-left: 0;
+}
+
+.table th:last-child,
+.table td:last-child {
+  padding-right: 0;
+}
+
+/*
+ * Two classes (`.table .numeric`, 0,2,0) so the mono face beats
+ * `.table tbody td` (0,1,2) on specificity, not on source order.
+ */
+.table .numeric {
+  text-align: right;
+  font: var(--meta-md);
+  font-variant-numeric: var(--tabular);
+}
+
+.table thead .numeric {
+  font: var(--chart-label);
+}
+
+/*
+ * The whole header cell is the target, at the system's 44px floor — a sort
+ * control shrunk to its 12px label would be a 16px-tall button.
+ */
+.sortButton {
+  display: inline-flex;
+  /* Text at the bottom of the 44px target, on the same line as a plain header beside it. */
+  align-items: flex-end;
+  gap: var(--space-2);
+  min-height: var(--hit-min);
+  padding: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.numeric .sortButton {
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.sortButton:hover {
+  color: var(--text-body);
+}
+
+.sortButton:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset-tight);
+}
+
+.sortMark {
+  font-variant-numeric: normal;
+}
+
+.table th[aria-sort="ascending"] .sortButton,
+.table th[aria-sort="descending"] .sortButton {
+  color: var(--text-body);
+}
