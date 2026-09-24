@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fetchFunnelStats, fetchFunnelWindow } from "../goatcounter-api";
+import { gameEventPaths } from "@/lib/game/events";
 
 function jsonResponse(body: unknown, ok = true, status = 200): Response {
   return {
@@ -201,6 +202,68 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
     const result = await fetchFunnelWindow("2024-01-01T00:00:00Z", "All-time");
     expect(result.stats).toBeNull();
     expect(result.error).toMatch(/network down/);
+  });
+
+  it("asks for every game path exactly once, and no path twice overall (X15, G7)", async () => {
+    // include_paths matches exact names: a game path missing here is an
+    // event GoatCounter counts and /admin/stats never shows (REVIEW.md R-11).
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({ total: 0, more: false, hits: [] }));
+    await fetchFunnelWindow("2024-01-01T00:00:00Z", "All-time");
+    const requested = new URL(fetchMock.mock.calls[0]![0] as string);
+    const paths = requested.searchParams.get("include_paths")!.split(",");
+
+    expect(new Set(paths).size).toBe(paths.length);
+    for (const path of gameEventPaths()) expect(paths).toContain(path);
+    // G7, spelled out rather than derived: the four entry doors the brief names.
+    for (const path of [
+      "game_entry_clicked/result/retention",
+      "game_entry_clicked/deep_dive/retention",
+      "game_entry_clicked/footer",
+      "game_entry_clicked/hub",
+    ]) {
+      expect(paths).toContain(path);
+    }
+    expect(Number(requested.searchParams.get("limit"))).toBeGreaterThan(paths.length);
+    // A GET URL well under the ~8 KB proxies start refusing; the plan budgets 3 KB.
+    expect(requested.toString().length).toBeLessThan(3_000);
+  });
+
+  it("reads the game block from the same response", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({
+        total: 0,
+        more: false,
+        hits: [
+          { path: "game_entry_clicked/result/retention", count: 7, event: true },
+          { path: "game_entry_clicked/footer", count: 2, event: true },
+          { path: "game_started/retention/result", count: 6, event: true },
+          { path: "game_started/retention/direct", count: 4, event: true },
+          { path: "game_quarter/1", count: 9, event: true },
+          { path: "game_quarter/4", count: 3, event: true },
+          { path: "game_hangup/2", count: 5, event: true },
+          { path: "game_ending/firedDark", count: 2, event: true },
+          { path: "game_order/refused", count: 1, event: true },
+          { path: "game_voice/angry", count: 4, event: true },
+          { path: "game_resume/restart", count: 2, event: true },
+          { path: "game_catalogue_open", count: 3, event: true },
+          { path: "game_replay", count: 1, event: true },
+          { path: "game_share", count: 2, event: true },
+        ],
+      }),
+    );
+
+    const game = (await fetchFunnelWindow("2024-01-01T00:00:00Z", "All-time")).stats!.game;
+
+    expect(game.entries).toEqual({ "result/retention": 7, "deep_dive/retention": 0, footer: 2, hub: 0 });
+    expect(game.started).toEqual({ direct: 4, result: 6, deep_dive: 0, hub: 0 });
+    expect(game.quartersRun).toEqual([9, 0, 0, 3]);
+    expect(game.hangups).toEqual([0, 5, 0, 0]);
+    expect(game.endings.firedDark).toBe(2);
+    expect(game.endings.applause).toBe(0);
+    expect(game.orders).toEqual({ obeyed: 0, refused: 1 });
+    expect(game.voices.angry).toBe(4);
+    expect(game.resume).toEqual({ resume: 0, restart: 2 });
+    expect([game.catalogueOpened, game.replays, game.shares]).toEqual([3, 1, 2]);
   });
 
   it("fetchFunnelStats resolves both an all-time and a last-30-days window", async () => {
