@@ -37,6 +37,7 @@ const LOCALIZED_ROOTS = [
   "aarrr-vs-rarra",
   "aarrr-vs-growth-loops",
   "aarrr-vs-okr",
+  "aarrr-vs-heart", // audit SEO v1 §3.1 (2026-09-24)
   // Le moteur de croissance (engine spec D2) : l'adresse non préfixée
   // redirige comme les autres, drapeau ouvert ou fermé — c'est la page
   // localisée qui répond 404 tant que ENGINE_ENABLED est fermé.

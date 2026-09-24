@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ProseActions, ProseList, ProsePage, ProseSection, ProseText } from "@/components/brand/ProsePage";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
+import { COMPARISON_ORDER, COMPARISON_TITLES } from "@/content/comparison-index";
 import { GLOSSARY, type GlossaryTermId } from "@/content/glossary";
 import { QUESTIONS } from "@/content/copy-library";
 import { GLOSSARY_DEEP, type DeepGlossaryContent } from "@/content/glossary-deep";
@@ -11,7 +12,7 @@ import { MetaLabel } from "@/components/brand/MetaLabel";
 import { breadcrumbSchema, definedTermSchema, JsonLd } from "@/lib/seo/jsonld";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { isLocale, LOCALES, type Locale } from "@/lib/i18n/locale";
-import { contentMetadata } from "@/lib/i18n/meta";
+import { contentMetadata, glossaryTermTitle } from "@/lib/i18n/meta";
 import { localePath } from "@/lib/i18n/routes";
 import styles from "./page.module.css";
 
@@ -37,8 +38,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return contentMetadata(
     resolved,
     `/glossary/${term}`,
-    `${tc(entry.term, resolved)} — ${tc(UI_STRINGS.meta.glossaryTermSuffix, resolved)}`,
+    glossaryTermTitle(entry, resolved),
     tc(entry.metaDescription ?? entry.definition, resolved),
+    { ownShareImage: true },
   );
 }
 
@@ -95,6 +97,21 @@ export default async function GlossaryTermPage({ params }: PageProps) {
               {entry.related.map((relatedId) => (
                 <Link key={relatedId} href={localePath(locale, `/glossary/${relatedId}`)} className={styles.relatedLink}>
                   {tc(GLOSSARY[relatedId].term, locale)}
+                </Link>
+              ))}
+            </div>
+          </ProseSection>
+        )}
+
+        {/* SEO audit v1 §1.7: the term the cluster is about — and the glossary
+            page with the most inbound links — never pointed at the "AARRR vs X"
+            pages. Outside `related`, whose 2-4 slots are for glossary terms. */}
+        {term === "aarrr" && (
+          <ProseSection heading={tc(t.comparedWithLabel, locale)} headingStyle="label" data-testid="compared-with">
+            <div className={styles.relatedList}>
+              {COMPARISON_ORDER.map((slug) => (
+                <Link key={slug} href={localePath(locale, `/${slug}`)} className={styles.relatedLink}>
+                  {tc(COMPARISON_TITLES[slug], locale)}
                 </Link>
               ))}
             </div>

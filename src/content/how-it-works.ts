@@ -26,6 +26,17 @@ export const HOW_IT_WORKS = {
     en: "Fifteen questions, three minutes, one honest AARRR score. Here's what we measure, why, and the limit to keep in mind before you take the number too seriously.",
   },
 
+  /**
+   * SEO audit v1 §1.2 — the search snippet, until now the `intro` above: a
+   * paragraph written to be read on the page, which runs past 160 characters in
+   * French — the length at which Google rewrites a snippet.
+   * TODO: à relire — audit SEO v1 (2026-09-24) — copie neuve.
+   */
+  metaDescription: {
+    fr: "Comment marche le score de Tour de Growth : quinze questions sur les cinq étapes AARRR, une règle de calcul fixe sans IA et la limite à garder en tête.",
+    en: "How the Tour de Growth score works: fifteen questions across the five AARRR stages, a fixed scoring rule with no AI, and the one limit to keep in mind.",
+  },
+
   pillars: [
     {
       pillar: "acquisition",
