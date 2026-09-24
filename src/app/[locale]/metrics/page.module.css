@@ -69,7 +69,7 @@
 .barFill {
   display: block;
   height: 100%;
-  background: var(--paint-red);
+  background: var(--accent-mark);
   min-width: 0;
 }
 

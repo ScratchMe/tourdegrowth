@@ -15,7 +15,7 @@
 }
 
 .deep {
-  background: var(--ink-0);
-  color: var(--text-inverse);
-  border: 2px solid var(--ink-0);
+  background: var(--surface-inverse);
+  color: var(--text-on-inverse);
+  border: 2px solid var(--surface-inverse);
 }

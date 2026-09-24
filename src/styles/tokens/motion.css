@@ -4,7 +4,13 @@
  */
 :root {
   --ease-out: cubic-bezier(0.2, 0.7, 0.3, 1);
+  /* DESIGN-BRIEF "Motion": the stamp overshoots — .26s cubic-bezier(.2,1.4,.4,1).
+     Not yet applied: ScoreDisplay still animates with --dur-stamp and
+     --ease-out, and changing the pair is a visible motion change that
+     belongs with the component that adopts it, not with the token layer. */
+  --ease-stamp: cubic-bezier(0.2, 1.4, 0.4, 1);
   --dur-fast: 120ms; /* hover, press */
+  --dur-exit: 80ms; /* leaving is faster than arriving (~65% of --dur-fast) */
   --dur-stamp: 380ms; /* score stamp-in */
   --dur-pulse: 400ms; /* progress segment fill */
   --dur-message: 1300ms; /* loading message dwell (deep dive only) */

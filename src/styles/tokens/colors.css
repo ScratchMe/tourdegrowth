@@ -4,7 +4,28 @@
  * bundle; values are byte-identical to the ones this app already shipped
  * under the old --stone/--ink/--red names (see git history), just renamed
  * onto the design system's own semantic scale. No color was invented here.
+ *
+ * DS v3 (phase 1 design-system critique, §5): three layers, three blocks.
+ *
+ *   1. PRIMITIVES  — `:root` only. Raw values, never rebound. Components do
+ *      not read these (C-1); only the two blocks below do.
+ *   2. SEMANTIC    — `:root, [data-world="paper"]`. Each token is a literal
+ *      or a reference to a primitive. A world (`data-world="night"`, another
+ *      file) rebinds THIS layer and nothing else.
+ *   3. DERIVED     — `:root, [data-world]`. Tokens built from other semantic
+ *      tokens. They are redeclared on every world container on purpose: a
+ *      custom property that uses var() is resolved where it is DECLARED and
+ *      inherited as a finished value, so a `--field-bg: var(--surface-card)`
+ *      declared on :root alone would stay paper inside a night section even
+ *      after the night world rebinds --surface-card. Redeclaring it on
+ *      `[data-world]` makes it re-resolve against the world's own values.
+ *
+ * `src/styles/tokens/tokens.ts` holds the same color values as typed data
+ * (for Satori, charts rendered to images, and the contrast test);
+ * `src/__tests__/token-sources.test.ts` fails the moment the two disagree.
  */
+
+/* PRIMITIVES */
 :root {
   /* --- Base palette: paper, ink, road paint --- */
   --paper-0: #fbf9f2; /* raised card face, the brightest surface */
@@ -29,26 +50,6 @@
   --paint-red-deep: #a32e1f; /* red text on light grounds (AA on --paper-0) */
   --paint-red-wash: #f3d9d2; /* soft red surface: weak pillar, problem cards */
 
-  /* --- Semantic aliases: use these in components --- */
-  --surface-page: var(--paper-1);
-  --surface-card: var(--paper-0);
-  --surface-sunken: var(--paper-2);
-  --surface-desk: var(--paper-3);
-  --surface-alert: var(--paint-red-wash);
-
-  --text-body: var(--ink-0);
-  --text-muted: var(--ink-1);
-  --text-inverse: var(--paper-0);
-  --text-alert: var(--paint-red-deep);
-  /*
-   * REVIEW.md R-22. Was --paint-red, which is 3.57:1 on --paper-1 and 4.42:1
-   * on --paper-0 — under AA on both grounds this token is ever used on. The
-   * deep red exists precisely for "red text on light grounds" (see its
-   * comment above), and every --text-link usage IS red text on paper.
-   */
-  --text-link: var(--paint-red-deep);
-  --text-link-hover: var(--ink-0);
-
   /*
    * SPEC-ADDENDUM-02.md §2.1 names a fainter tone than --text-muted for the
    * single line of "Built by Antoine Berthaud" credit in the score card's
@@ -65,15 +66,66 @@
    * become "unreadable", on the one line that points at Antoine's CV. 0.62
    * is the minimum that clears AA (4.67:1); 0.65 gives 5.18:1 and still
    * sits visibly lighter than --text-muted (#5b5346), so the hierarchy the
-   * addendum asks for (fainter than muted) survives.
+   * addendum asks for (fainter than muted) survives. (4.72:1 on --paper-1:
+   * a translucent color is measured on the ground it actually lands on.)
    */
   --ink-faint: rgba(33, 28, 21, 0.65);
+}
+
+/* SEMANTIC — the paper world, and the layer a world rebinds */
+:root,
+[data-world="paper"] {
+  --surface-page: var(--paper-1);
+  --surface-card: var(--paper-0);
+  --surface-sunken: var(--paper-2);
+  /*
+   * L-10: --text-muted on this ground measures 4.505:1 — AA by 0.005. Nothing
+   * uses it today, and token-contrast.test.ts keeps it that way rather than
+   * nudging a bundle value: any first use has to re-measure its text first.
+   */
+  --surface-desk: var(--paper-3);
+  --surface-alert: var(--paint-red-wash);
+  /* Ink chips, the active segment — a filled mark on paper. 16.06:1 with its text. */
+  --surface-inverse: var(--ink-0);
+
+  --text-body: var(--ink-0);
+  --text-muted: var(--ink-1);
+  --text-inverse: var(--paper-0);
+  --text-on-inverse: var(--paper-0);
+  --text-alert: var(--paint-red-deep);
+  /*
+   * REVIEW.md R-22. Was --paint-red, which is 3.57:1 on --paper-1 and 4.42:1
+   * on --paper-0 — under AA on both grounds this token is ever used on. The
+   * deep red exists precisely for "red text on light grounds" (see its
+   * comment above), and every --text-link usage IS red text on paper.
+   */
+  --text-link: var(--paint-red-deep);
+  --text-link-hover: var(--ink-0);
   --text-faint: var(--ink-faint);
 
   --border-hard: var(--ink-0); /* 2px solid — a real edge */
   --border-soft: var(--ink-1); /* 2px dashed — pending / secondary */
   --border-alert: var(--paint-red);
   --border-divider: rgba(33, 28, 21, 0.22); /* 1-2px dashed rules */
+
+  /* Non-text red marks: borders, segments, the wordmark accent. 3.57:1 on
+     --paper-1 — a mark (≥ 3:1), never body text. */
+  --accent-mark: var(--paint-red);
+
+  /* The color every hard shadow is cast in (shape.css). */
+  --shadow-color: var(--ink-0);
+  /* The stencil spray stripe (shape.css --texture-spray), 5.5% ink. */
+  --texture-ink: rgba(33, 28, 21, 0.055);
+
+  /*
+   * Status text. Bad is the deep red — "red means diagnosis" already.
+   * Good and warn are new (DS v3 §5.1), measured 6.17/4.98 and 6.57/5.31 on
+   * --paper-0/--paper-1. On --paper-2, --state-good-text is 4.49:1: bold
+   * text ≥ 14px only there (large-text rule), never regular body.
+   */
+  --state-bad-text: var(--paint-red-deep);
+  --state-good-text: #1f6b3f;
+  --state-warn-text: #7a5200;
 
   --action-primary-bg: var(--paint-red-action);
   --action-primary-text: var(--paper-0);
@@ -82,9 +134,70 @@
   --focus-ring: var(--ink-0); /* on light grounds */
   --focus-ring-invert: var(--paint-red); /* on --paper-2 option buttons */
 
+  /* Solid red outline past the limit — diagnosis, not advice (TextArea.prompt.md). */
+  --field-border-alert: var(--paint-red);
+
+  /*
+   * --- Data-viz, paper world (DS v3 §5.5) ---
+   * Doctrine, in order of preference: every mark in --viz-ink with ONE red
+   * highlight on the step that stalls (labelled in text, never red alone);
+   * the sequential ramp for an intensity; the categorical set only for
+   * nominal series (cohorts, channels, periods) — never the five pillars,
+   * which are ordered stages: they are named, not colored.
+   */
+  --viz-ink: var(--ink-0); /* default series, strong axes — 16.06 / 12.97 / 11.68 */
+  --viz-axis: var(--ink-1); /* axes, ticks, axis labels — 7.20 / 5.81 / 5.23 */
+  /* Gridlines: decorative on purpose, 1.33:1 once composed on --paper-0. */
+  --viz-grid: rgba(33, 28, 21, 0.14);
+  --viz-highlight: var(--paint-red); /* diagnosis mark, non-text — 4.42 / 3.57 / 3.22 */
+  --viz-highlight-text: var(--paint-red-deep); /* its label — 6.72 / 5.42 / 4.89 */
+  --viz-unknown: var(--ink-1); /* "not measured": hatch + dash, 7.20 on --paper-0 */
+
+  /*
+   * Categorical, derived from Okabe-Ito with red excluded (it is reserved).
+   * Each passes 4.5:1 as TEXT on --paper-0 and --paper-1, so a series can be
+   * labelled directly in its own color; on --paper-2, cat-2 and cat-3 drop
+   * under 4.5 — no colored label on a sunken ground. Worst CIE76 distance
+   * under deuteranopia is 12.3: distinguishable, not comfortable, so every
+   * series ALSO carries a dash pattern and a direct label.
+   */
+  --viz-cat-1: #1f5f8b; /* blue */
+  --viz-cat-2: #1c6e57; /* green */
+  --viz-cat-3: #855500; /* ochre */
+  --viz-cat-4: #8a3f6e; /* plum */
+  --viz-cat-5: var(--ink-0);
+
+  /*
+   * Sequential, ink on paper, five steps. Neighbouring steps are only
+   * 1.34–2.11:1 apart — under 1.4.11 — so cells are always separated by a
+   * 2px paper rule (the brand's tile pattern), never butted together. Each
+   * step names the ink its label takes.
+   */
+  --viz-seq-1: #f1ebdc;
+  --viz-seq-2: #d8ccb0;
+  --viz-seq-3: #b2a283;
+  --viz-seq-4: #7f705a;
+  --viz-seq-5: #4a4034;
+  --viz-seq-1-text: var(--ink-0); /* 14.22 */
+  --viz-seq-2-text: var(--ink-0); /* 10.62 */
+  --viz-seq-3-text: var(--ink-0); /* 6.76 */
+  --viz-seq-4-text: var(--paper-0); /* 4.56 */
+  --viz-seq-5-text: var(--paper-0); /* 9.61 */
+}
+
+/* DERIVED — redeclared on every world container (see the header) */
+:root,
+[data-world] {
   /* --- Fields (design system extension 01): the one place a person types --- */
   --field-bg: var(--surface-card);
   --field-placeholder: var(--text-muted);
-  /* Solid red outline past the limit — diagnosis, not advice (TextArea.prompt.md). */
-  --field-border-alert: var(--paint-red);
+
+  /*
+   * --- Interaction states (DS v3 §5.4) --- one selection language for the
+   * whole tunnel: selected = the inverse fill with its own text; hover only
+   * lifts the shadow, it never touches the fill (a stuck touch hover must
+   * not look selected).
+   */
+  --state-selected-bg: var(--surface-inverse);
+  --state-selected-text: var(--text-on-inverse);
 }

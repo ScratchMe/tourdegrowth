@@ -5,12 +5,17 @@
 }
 
 /*
- * `compact` is header scale: 32px visual height, and the transparent 6px
- * outer pad is what makes the 44px hit. Do not strip it to "tighten" a
- * header (Segmented.prompt.md).
+ * `compact` is header scale: 32px visual height (a 28px option inside the
+ * track's 2px border). The bundle said the 6px outer pad "is what makes the
+ * 44px hit" — measured, it did not: the pad belongs to this div, and
+ * elementFromPoint in it returned the div, never the option. The hit is now
+ * extended on the option itself (`.compact .option::before` below); this pad
+ * only reserves the room that extension reaches into, so it lands on nothing
+ * else. Pad + track border = --hit-extend-compact, which is why it is written
+ * as that difference. Do not strip it to "tighten" a header.
  */
 .compact.group {
-  padding: 6px 0;
+  padding: calc(var(--hit-extend-compact) - var(--border-width)) 0;
 }
 
 .track {
@@ -23,8 +28,23 @@
   border-radius: var(--radius-button);
 }
 
+/*
+ * `overflow: hidden` clipped the selected fill into the rounded border — and
+ * would clip the hit extension too, so the compact track lets it out and
+ * rounds its two end options instead: outer radius minus the border, which
+ * is exactly the curve the clip used to draw.
+ */
 .compact .track {
   border-radius: var(--radius-tag);
+  overflow: visible;
+}
+
+.compact .option:first-child {
+  border-radius: calc(var(--radius-tag) - var(--border-width)) 0 0 calc(var(--radius-tag) - var(--border-width));
+}
+
+.compact .option:last-child {
+  border-radius: 0 calc(var(--radius-tag) - var(--border-width)) calc(var(--radius-tag) - var(--border-width)) 0;
 }
 
 .option {
@@ -57,6 +77,23 @@
   padding: 0 10px;
   min-width: 40px;
   min-height: calc(var(--hit-compact) - 4px);
+  position: relative;
+}
+
+/* The touch target, on the option itself: 28 + 2 × 8 = 44px tall, reaching
+   exactly to the edge of the group's pad. Sideways it also takes the 2px of
+   border to its left — the track's own edge for the first option, the divider
+   for the others — and the last one takes the track's right edge, so a tap
+   anywhere in the group's box lands on an option, never on a dead column. */
+.compact .option::before {
+  content: "";
+  position: absolute;
+  inset: calc(-1 * var(--hit-extend-compact)) 0 calc(-1 * var(--hit-extend-compact))
+    calc(-1 * var(--border-width));
+}
+
+.compact .option:last-child::before {
+  right: calc(-1 * var(--border-width));
 }
 
 .option:hover:not(.on) {
@@ -69,20 +106,20 @@
 }
 
 .on {
-  background: var(--ink-0);
-  color: var(--text-inverse);
+  background: var(--state-selected-bg);
+  color: var(--state-selected-text);
   cursor: default;
 }
 
 /*
  * The one exception to the ink fill: the roast tone (Segmented.prompt.md).
  *
- * `--paint-red-action`, not `--paint-red`: the label here is the same
- * 600/15px as a primary button, so it is the same pair REVIEW.md R-22
- * measured at 4.42:1 and darkened 3% to clear AA (4.65:1). The prompt names
- * `--paint-red` because that token predates the split; the split is what the
- * contrast gate now enforces.
+ * The primary-action fill (`--paint-red-action`), not the road-paint accent:
+ * the label here is the same 600/15px as a primary button, so it is the same
+ * pair REVIEW.md R-22 measured at 4.42:1 and darkened 3% to clear AA
+ * (4.65:1). The prompt names `--paint-red` because that token predates the
+ * split; the split is what the contrast gate now enforces.
  */
 .onAccent {
-  background: var(--paint-red-action);
+  background: var(--action-primary-bg);
 }

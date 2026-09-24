@@ -24,7 +24,7 @@
   font-weight: 600;
   text-transform: uppercase;
   color: var(--text-inverse);
-  background: var(--paint-red);
+  background: var(--accent-mark);
   border-radius: var(--radius-tag);
   padding: 6px 10px;
   transform: rotate(-1.5deg);
@@ -41,7 +41,7 @@
 
 .sampleBadge {
   background: var(--surface-alert);
-  border: 2px dashed var(--paint-red);
+  border: 2px dashed var(--border-alert);
   border-radius: var(--radius-tag);
   padding: 8px 12px;
   display: inline-block;
@@ -52,12 +52,12 @@
  * Roast-mode score card: border/shadow swap from ink to red. Not part of
  * the v2 design system's Card tone matrix (paper/sunken/alert/outlineAlert)
  * — those are about diagnosis vs advice, not about which tone the whole
- * result is in — so this stays a small local override, same --paint-red
+ * result is in — so this stays a small local override, same road-paint red
  * 7px offset shadow the app has always used here (see --shadow-card-roast
  * in tokens/shape.css).
  */
 .scoreCardRoast {
-  border-color: var(--paint-red) !important;
+  border-color: var(--border-alert) !important;
   box-shadow: var(--shadow-card-roast) !important;
 }
 

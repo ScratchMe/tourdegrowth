@@ -16,7 +16,12 @@ interface SegmentedBaseProps<Id extends string> {
   value: Id;
   /** Accessible group name, localized by the caller. */
   label: string;
-  /** `md` is the ToneToggle scale; `compact` is header scale. */
+  /**
+   * `md` is the ToneToggle scale (44px tall). `compact` is header scale: a
+   * 32px track, with each option's touch target extended to 44px on the
+   * option itself — into 6px of room the group keeps above and below, so
+   * never collapse that room to tighten a header.
+   */
   size?: "md" | "compact";
   /** Returns true for an option whose selected fill is red rather than ink — the roast tone only. */
   accent?: (id: Id) => boolean;

@@ -1,6 +1,12 @@
 /*
  * Radii, borders, hard shadows, spray texture, page ground — transcribed
  * from tokens/shape.css in the Claude Design bundle.
+ *
+ * DS v3: the shorthands that carry a color (borders, shadows, spray) sit in
+ * a `:root, [data-world]` block of their own, for the reason colors.css
+ * gives in its header — a var() is resolved where it is declared, so they
+ * must be redeclared on each world container to pick up that world's
+ * --border-hard or --shadow-color. Everything else here is world-invariant.
  */
 :root {
   /* --- Radii: four steps, by element size --- */
@@ -10,16 +16,8 @@
   --radius-card: 10px; /* main cards, device frames */
   --radius-round: 50%; /* definition trigger */
 
-  /* --- Borders: the system has exactly three --- */
+  /* --- Borders: exactly three, declared in the world block below --- */
   --border-width: 2px;
-  --border-solid: 2px solid var(--border-hard);
-  --border-dashed: 2px dashed var(--border-soft);
-  --border-rule: 2px dashed var(--border-divider);
-
-  /* --- Hard offset shadows, no blur, always --ink-0 --- */
-  --shadow-card: 7px 7px 0 var(--ink-0); /* primary card: score, question */
-  --shadow-panel: 5px 5px 0 var(--ink-0); /* popover, secondary card */
-  --shadow-hover: 4px 4px 0 var(--ink-0); /* option button on hover */
   --shadow-none: none;
 
   /*
@@ -38,11 +36,41 @@
   --focus-offset: 3px;
   --focus-offset-tight: 2px; /* on the 16px definition trigger */
 
-  /* --- Stencil spray texture: overlay on large display numerals only --- */
-  --texture-spray: repeating-linear-gradient(115deg, transparent 0 3px, rgba(33, 28, 21, 0.055) 3px 4px);
-  --texture-spray-strong: repeating-linear-gradient(115deg, transparent 0 3px, rgba(33, 28, 21, 0.05) 3px 4px);
+  /* --- States (DS v3 §5.4) --- */
+  --state-disabled-opacity: 0.45; /* the value core/Button already uses */
+  --state-busy-cursor: progress;
 
   /* --- Page ground: two soft radial lifts, never a linear gradient --- */
   --ground-lift: radial-gradient(circle at 16% 12%, rgba(255, 255, 255, 0.45), transparent 42%),
     radial-gradient(circle at 88% 74%, rgba(0, 0, 0, 0.05), transparent 46%);
+}
+
+/* Color-bearing shorthands — redeclared per world (see the header). */
+:root,
+[data-world] {
+  /* --- Borders: the system has exactly three --- */
+  --border-solid: 2px solid var(--border-hard);
+  --border-dashed: 2px dashed var(--border-soft);
+  --border-rule: 2px dashed var(--border-divider);
+
+  /* --- Hard offset shadows, no blur, always the world's --shadow-color --- */
+  --shadow-card: 7px 7px 0 var(--shadow-color); /* primary card: score, question */
+  --shadow-panel: 5px 5px 0 var(--shadow-color); /* popover, secondary card */
+  --shadow-hover: 4px 4px 0 var(--shadow-color); /* option button on hover */
+  /* Hover lifts the shadow only; the fill never changes (DS v3 §5.4). */
+  --state-hover-shadow: var(--shadow-hover);
+
+  /*
+   * --- Stencil spray texture: overlay on large display numerals only ---
+   * Both variants read --texture-ink. `-strong` was transcribed at 0.05 —
+   * LIGHTER than the plain 0.055, despite its name — and nothing in the app
+   * uses it; it now shares the one ink rather than keeping a second literal
+   * that no world would rebind.
+   */
+  --texture-spray: repeating-linear-gradient(115deg, transparent 0 3px, var(--texture-ink) 3px 4px);
+  --texture-spray-strong: var(--texture-spray);
+
+  /* "Not measured" in a chart (DS v3 §5.5): a hatch, never an empty bar —
+     an empty bar reads as zero, and zero is a measurement. */
+  --viz-unknown-fill: repeating-linear-gradient(45deg, var(--viz-unknown) 0 2px, transparent 2px 6px);
 }
