@@ -225,3 +225,59 @@ describe("proxy (Vary: Accept-Language on the language redirect, 2026-09-06)", (
     }
   });
 });
+
+/**
+ * GAME-BRIEF.md 13.1-13.2 — the game is closed by default and opens per
+ * request, from the env var or from one browser's preview cookie.
+ */
+describe("proxy (game flag and preview cookie)", () => {
+  const ORIGINAL = process.env.GAME_ENABLED;
+  afterEach(() => {
+    if (ORIGINAL === undefined) delete process.env.GAME_ENABLED;
+    else process.env.GAME_ENABLED = ORIGINAL;
+  });
+
+  function request(url: string, cookie?: string): NextRequest {
+    const headers = cookie ? { cookie } : undefined;
+    return new NextRequest(`https://tourdegrowth.com${url}`, { headers });
+  }
+  const rewriteOf = (res: Response) => res.headers.get("x-middleware-rewrite");
+
+  it("rewrites a closed game page to an unmatched address under the same language", () => {
+    delete process.env.GAME_ENABLED;
+    expect(rewriteOf(proxy(request("/fr/game")))).toBe("https://tourdegrowth.com/fr/game-unavailable");
+    expect(rewriteOf(proxy(request("/en/game/retention")))).toBe("https://tourdegrowth.com/en/game-unavailable");
+  });
+
+  it("serves the game when GAME_ENABLED is \"true\"", () => {
+    process.env.GAME_ENABLED = "true";
+    expect(rewriteOf(proxy(request("/fr/game/retention")))).toBeNull();
+  });
+
+  it("serves it to a browser holding the preview cookie while closed for everybody else", () => {
+    delete process.env.GAME_ENABLED;
+    expect(rewriteOf(proxy(request("/en/game", "tdg_game_preview=1")))).toBeNull();
+  });
+
+  it("?game=preview sets an HttpOnly cookie and opens the game on this very request", () => {
+    delete process.env.GAME_ENABLED;
+    const res = proxy(request("/fr/game?game=preview"));
+    expect(rewriteOf(res)).toBeNull();
+    const cookie = res.headers.get("set-cookie") ?? "";
+    expect(cookie).toMatch(/tdg_game_preview=1/);
+    expect(cookie.toLowerCase()).toContain("httponly");
+  });
+
+  it("?game=off clears the cookie and closes the game on this very request", () => {
+    delete process.env.GAME_ENABLED;
+    const res = proxy(request("/fr/game?game=off", "tdg_game_preview=1"));
+    expect(rewriteOf(res)).toBe("https://tourdegrowth.com/fr/game-unavailable");
+    expect(res.headers.get("set-cookie") ?? "").toMatch(/tdg_game_preview=;/);
+  });
+
+  it("never touches a page that is not the game", () => {
+    delete process.env.GAME_ENABLED;
+    expect(rewriteOf(proxy(request("/fr/glossary/cac")))).toBeNull();
+    expect(rewriteOf(proxy(request("/quiz")))).toBeNull();
+  });
+});

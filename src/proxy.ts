@@ -3,6 +3,13 @@ import type { NextRequest } from "next/server";
 import { LOCALE_COOKIE, isLocale, resolveLocale } from "@/lib/i18n/locale";
 import { isLocalizableContentPath, localePath, splitLocalePath } from "@/lib/i18n/routes";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
+import {
+  GAME_PREVIEW_COOKIE,
+  GAME_PREVIEW_PARAM,
+  isGamePath,
+  previewRequest,
+  resolveGameAccess,
+} from "@/lib/game/access";
 
 const ONE_YEAR = 60 * 60 * 24 * 365;
 
@@ -197,11 +204,43 @@ export function proxy(request: NextRequest) {
     request.cookies.set(LOCALE_COOKIE, explicitChoice);
   }
 
+  // The game's preview cookie (GAME-BRIEF.md 13.1): `?game=preview` opens the
+  // game for this browser only, `?game=off` closes it again. Same trick as
+  // the locale cookie — rewrite the incoming Cookie header so this very
+  // request already sees the new state.
+  const preview = previewRequest(request.nextUrl.searchParams.get(GAME_PREVIEW_PARAM));
+  if (preview === "preview") request.cookies.set(GAME_PREVIEW_COOKIE, "1");
+  if (preview === "off") request.cookies.delete(GAME_PREVIEW_COOKIE);
+  const gameClosed =
+    fromUrl !== null &&
+    isGamePath(fromUrl.rest) &&
+    resolveGameAccess({
+      env: process.env.GAME_ENABLED,
+      cookie: request.cookies.get(GAME_PREVIEW_COOKIE)?.value,
+    }) === "closed";
+
   // The root layout can't read the URL, so hand it the answer.
   const headers = new Headers(request.headers);
   headers.set(LOCALE_HEADER, locale);
 
-  const response = NextResponse.next({ request: { headers } });
+  // A closed game page is rewritten to an address no route matches, under
+  // the same language prefix: the reader gets the localized 404 with a 404
+  // status, and the game pages themselves stay prerendered (13.2).
+  const response = gameClosed
+    ? NextResponse.rewrite(new URL(localePath(locale, "/game-unavailable"), request.url), {
+        request: { headers },
+      })
+    : NextResponse.next({ request: { headers } });
+
+  if (preview === "preview") {
+    response.cookies.set(GAME_PREVIEW_COOKIE, "1", {
+      path: "/",
+      maxAge: ONE_YEAR,
+      sameSite: "lax",
+      httpOnly: true,
+    });
+  }
+  if (preview === "off") response.cookies.delete(GAME_PREVIEW_COOKIE);
 
   if (explicitChoice) {
     response.cookies.set(LOCALE_COOKIE, explicitChoice, {
