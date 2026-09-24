@@ -2,7 +2,7 @@
    assez large pour qu'on puisse la cocher à l'écran sans se perdre. */
 .stages {
   list-style: none;
-  margin: 0 0 var(--space-12);
+  margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
@@ -71,17 +71,18 @@
   flex: none;
 }
 
-/* Le H1 de ces deux pages est plus long que celui de `/how-it-works` (« la
-   méthode » et « les 15 points » s'ajoutent à un sujet déjà long), et en
-   français il prend six lignes à 62 px sur un téléphone. Même correctif que
-   la page Confidentialité, et même raison.
-
-   Sélecteur ÉLÉMENT + classe (0,1,1) plutôt qu'une seule classe : la règle
-   qu'il doit battre vient d'un AUTRE module CSS, donc à égalité de
-   spécificité le gagnant dépendrait de l'ordre d'émission des feuilles
-   (leçon nº2 de CLAUDE.md, R-21). `/how-it-works` n'est pas touché. */
-@media (max-width: 760px) {
-  h1.title {
-    font: var(--display-hero-mobile);
-  }
+/* L'étape est un lien vers sa page de glossaire (R2-13), habillé comme le
+   titre qu'il est : pas de soulignement avant le survol. */
+.pillarLink {
+  color: inherit;
+  text-decoration: none;
 }
+
+.pillarLink:hover,
+.pillarLink:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+/* Le H1 réduit sur téléphone vit maintenant dans le cadre (ProsePage) : ce
+   module n'a plus à battre la règle d'une autre feuille (ds-critique M-9). */

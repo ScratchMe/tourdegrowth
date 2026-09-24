@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { SiteFooter } from "@/components/brand/SiteFooter";
-import { ContentHeader } from "@/components/brand/ContentHeader";
+import { ProseActions, ProseList, ProsePage, ProseSection, ProseText } from "@/components/brand/ProsePage";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { GLOSSARY, type GlossaryTermId } from "@/content/glossary";
@@ -66,29 +65,32 @@ export default async function GlossaryTermPage({ params }: PageProps) {
           { name: tc(entry.term, locale), path: `/glossary/${term}` },
         ])}
       />
-      <ContentHeader locale={locale} path={`/glossary/${term}`} />
-
-      <main id="main" className={styles.main}>
-        <Link href={localePath(locale, "/glossary")} className={styles.backLink}>
-          {tc(t.backToIndex, locale)}
-        </Link>
-
-        <h1 className={styles.title}>{tc(entry.term, locale)}</h1>
-
+      <ProsePage
+        locale={locale}
+        path={`/glossary/${term}`}
+        title={tc(entry.term, locale)}
+        titleSize="term"
+        kicker={
+          <Link href={localePath(locale, "/glossary")} className={styles.backLink}>
+            {tc(t.backToIndex, locale)}
+          </Link>
+        }
+      >
+        {/* The one raised card on the page: the definition is what the reader
+            came for. The worked example below used to be raised too — two
+            loud things on 48 pages (ds-critique M-1). */}
         <Card elevation="raised">
           <p className={styles.definition}>{tc(entry.definition, locale)}</p>
         </Card>
 
-        <section className={styles.extendedSection}>
-          <h2 className={styles.sectionLabel}>{tc(t.inPracticeLabel, locale)}</h2>
-          <p className={styles.extended}>{tc(entry.extended, locale)}</p>
-        </section>
+        <ProseSection heading={tc(t.inPracticeLabel, locale)} headingStyle="label">
+          <ProseText>{tc(entry.extended, locale)}</ProseText>
+        </ProseSection>
 
         {GLOSSARY_DEEP[term] && <DeepSections deep={GLOSSARY_DEEP[term]} locale={locale} />}
 
         {entry.related.length > 0 && (
-          <section className={styles.relatedSection}>
-            <h2 className={styles.sectionLabel}>{tc(t.relatedLabel, locale)}</h2>
+          <ProseSection heading={tc(t.relatedLabel, locale)} headingStyle="label">
             <div className={styles.relatedList}>
               {entry.related.map((relatedId) => (
                 <Link key={relatedId} href={localePath(locale, `/glossary/${relatedId}`)} className={styles.relatedLink}>
@@ -96,20 +98,18 @@ export default async function GlossaryTermPage({ params }: PageProps) {
                 </Link>
               ))}
             </div>
-          </section>
+          </ProseSection>
         )}
 
-        <div className={styles.ctaRow}>
+        <ProseActions>
           <Button size="lg" href="/quiz" hard>
             {tc(UI_STRINGS.landing.ctaPrimary, locale)}
           </Button>
           <Button size="lg" variant="secondary" href={localePath(locale, "/how-it-works")}>
             {tc(UI_STRINGS.nav.howItWorks, locale)}
           </Button>
-        </div>
-      </main>
-
-      <SiteFooter locale={locale} width="reading" />
+        </ProseActions>
+      </ProsePage>
     </>
   );
 }
@@ -126,59 +126,54 @@ function DeepSections({ deep, locale }: { deep: DeepGlossaryContent; locale: Loc
 
   return (
     <>
-      <section className={styles.deepSection}>
-        <h2 className={styles.sectionLabel}>{tc(t.formulaLabel, locale)}</h2>
+      <ProseSection heading={tc(t.formulaLabel, locale)} headingStyle="label">
         <p className={styles.formula}>{tc(deep.formula.expression, locale)}</p>
         <dl className={styles.formulaTerms}>
           {deep.formula.terms.map((term, i) => (
             <div key={i} className={styles.formulaTerm}>
               <dt className={styles.formulaSymbol}>{tc(term.symbol, locale)}</dt>
-              <dd className={styles.body}>{tc(term.meaning, locale)}</dd>
+              <dd>
+                <ProseText>{tc(term.meaning, locale)}</ProseText>
+              </dd>
             </div>
           ))}
         </dl>
-        {deep.formula.note && <p className={styles.body}>{tc(deep.formula.note, locale)}</p>}
-      </section>
+        {deep.formula.note && <ProseText>{tc(deep.formula.note, locale)}</ProseText>}
+      </ProseSection>
 
-      <section className={styles.deepSection}>
-        <h2 className={styles.sectionLabel}>{tc(t.exampleLabel, locale)}</h2>
-        <Card elevation="raised" className={styles.exampleCard}>
+      {/* ds-critique M-1/M-5: a worked example is quoted material, so it is
+          recessed — sunken, no edge, no shadow. It was a second raised card. */}
+      <ProseSection heading={tc(t.exampleLabel, locale)} headingStyle="label">
+        <div className={styles.example}>
           <p className={styles.exampleTitle}>{tc(deep.example.title, locale)}</p>
-          <ol className={styles.steps}>
+          <ProseList ordered>
             {deep.example.steps.map((step, i) => (
-              <li key={i} className={styles.body}>
-                {tc(step, locale)}
-              </li>
+              <li key={i}>{tc(step, locale)}</li>
             ))}
-          </ol>
-          <p className={styles.takeaway}>{tc(deep.example.takeaway, locale)}</p>
-        </Card>
-      </section>
+          </ProseList>
+          <ProseText>
+            <strong>{tc(deep.example.takeaway, locale)}</strong>
+          </ProseText>
+        </div>
+      </ProseSection>
 
-      <section className={styles.deepSection}>
-        <h2 className={styles.sectionLabel}>{tc(t.benchmarkLabel, locale)}</h2>
-        <ul className={styles.bullets}>
+      <ProseSection heading={tc(t.benchmarkLabel, locale)} headingStyle="label">
+        <ProseList>
           {deep.benchmark.map((item, i) => (
-            <li key={i} className={styles.body}>
-              {tc(item, locale)}
-            </li>
+            <li key={i}>{tc(item, locale)}</li>
           ))}
-        </ul>
-      </section>
+        </ProseList>
+      </ProseSection>
 
-      <section className={styles.deepSection}>
-        <h2 className={styles.sectionLabel}>{tc(t.improveLabel, locale)}</h2>
-        <ul className={styles.bullets}>
+      <ProseSection heading={tc(t.improveLabel, locale)} headingStyle="label">
+        <ProseList>
           {deep.howToImprove.map((item, i) => (
-            <li key={i} className={styles.body}>
-              {tc(item, locale)}
-            </li>
+            <li key={i}>{tc(item, locale)}</li>
           ))}
-        </ul>
-      </section>
+        </ProseList>
+      </ProseSection>
 
-      <section className={styles.deepSection} data-testid="in-the-tour">
-        <h2 className={styles.sectionLabel}>{tc(t.inTheTourLabel, locale)}</h2>
+      <ProseSection heading={tc(t.inTheTourLabel, locale)} headingStyle="label" data-testid="in-the-tour">
         {question && (
           <Card tone="outlineAlert" className={styles.tourCard}>
             <MetaLabel size="xs">{tc(t.inTheTourQuestionLabel, locale)}</MetaLabel>
@@ -195,20 +190,19 @@ function DeepSections({ deep, locale }: { deep: DeepGlossaryContent; locale: Loc
             </ul>
           </Card>
         )}
-        <p className={styles.body}>{tc(deep.inTheTour.body, locale)}</p>
-      </section>
+        <ProseText>{tc(deep.inTheTour.body, locale)}</ProseText>
+      </ProseSection>
 
-      <section className={styles.deepSection} data-testid="faq">
-        <h2 className={styles.sectionLabel}>{tc(t.faqLabel, locale)}</h2>
+      <ProseSection heading={tc(t.faqLabel, locale)} headingStyle="label" data-testid="faq">
         <div className={styles.faqList}>
           {deep.faq.map((item, i) => (
             <div key={i} className={styles.faqItem}>
               <h3 className={styles.faqQuestion}>{tc(item.question, locale)}</h3>
-              <p className={styles.body}>{tc(item.answer, locale)}</p>
+              <ProseText>{tc(item.answer, locale)}</ProseText>
             </div>
           ))}
         </div>
-      </section>
+      </ProseSection>
     </>
   );
 }

@@ -63,9 +63,14 @@
      header/hero grid, which the DS bundle's boards don't relayout. */
   --content-max-width: var(--width-desktop);
 
-  /* Long-form reading measure (DS v3 §5.2): ~68 characters a line, inside
-     the 60-75 band, where the prose pages ran at 84-93. */
-  --measure-read: 68ch;
+  /* Long-form reading measure (DS v3 §5.2): 60-75 characters a line, where
+     the prose pages ran at 84-93. In em, not ch: `ch` is the width of "0",
+     which in Inter is wider than an average letter, so 68ch at 17px came to
+     714px — wider than the 712px column, a cap that capped nothing (measured
+     2026-09-24: still 70-80 characters a line). 36em measures ~65 on average,
+     ~75 at the longest line, in both languages; on a phone it is wider than
+     the column and changes nothing, which is right. */
+  --measure-read: 36em;
 
   /* Stacking — one scale instead of 30/39/40 written inline. The popover
      sits under any overlay; a toast sits over everything. */

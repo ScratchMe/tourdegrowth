@@ -1,51 +1,51 @@
-/* Le tableau côte à côte, sans `<table>` — voir le commentaire du composant.
-   Chaque ligne est un intitulé puis deux blocs qui portent le nom du cadre. */
+/* The side-by-side, without a `<table>` — see the component comment. It was
+   eight bordered sunken cells: the exact recipe of an AnswerOption at rest,
+   so it read as eight buttons (ds-critique M-4/M-5). It is a ruled table
+   now: a dashed route rule under each row, no boxes, and each cell still
+   carries its framework's name in the DOM. */
 .rows {
   display: flex;
   flex-direction: column;
-  gap: var(--space-8);
+  border-top: var(--border-rule);
 }
 
 .row {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+  padding: var(--space-7) 0;
+  border-bottom: var(--border-rule);
 }
 
 .aspect {
-  font: var(--title-card);
-  font-size: 17px;
+  font: var(--body-lg);
+  font-weight: 600;
   color: var(--text-body);
-  margin: 0;
 }
 
+/* Two columns at every width: the cells are short phrases (≤ 60 characters,
+   measured on the content), which fit two abreast even at 390 px — and the
+   pair side by side IS the comparison. */
 .sides {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-8);
 }
 
 .side {
-  flex: 1;
-  padding: var(--space-6);
-  border-radius: var(--radius-panel);
-  border: var(--border-solid);
-  background: var(--surface-sunken);
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-2);
 }
 
 .sideBody {
-  font: var(--body-sm);
-  color: var(--text-muted);
-  margin: 0;
+  font: var(--body-md);
+  color: var(--text-body);
 }
 
 .verdict {
-  font: var(--body-md);
+  font: var(--body-lg);
   color: var(--text-body);
-  margin: 0;
 }
 
 .linkRow {
@@ -54,6 +54,8 @@
   gap: var(--space-4);
 }
 
+/* Links, so they keep the control recipe — sunken + solid edge — that the
+   static cells above gave up (ds-critique M-5). */
 .pill {
   font: var(--meta-sm);
   letter-spacing: var(--meta-tracking);
@@ -71,19 +73,13 @@
   text-underline-offset: 0.15em;
 }
 
+/* Desktop: the aspect becomes the first column of the table, so a row reads
+   left to right — what, then AARRR, then the other. */
 @media (min-width: 761px) {
-  .sides {
-    flex-direction: row;
-  }
-}
-
-/* Même correctif que les pages « porte ouverte » et la page Confidentialité :
-   « AARRR ou North Star metric » à 62 px déborde d'un téléphone. Sélecteur
-   ÉLÉMENT + classe (0,1,1) plutôt qu'une seule classe : la règle à battre
-   vient d'un AUTRE module CSS, donc à égalité de spécificité le gagnant
-   dépendrait de l'ordre d'émission des feuilles (leçon nº2, R-21). */
-@media (max-width: 760px) {
-  h1.title {
-    font: var(--display-hero-mobile);
+  .row {
+    display: grid;
+    grid-template-columns: 11rem minmax(0, 1fr);
+    gap: var(--space-8);
+    align-items: baseline;
   }
 }

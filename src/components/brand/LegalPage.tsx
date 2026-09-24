@@ -1,10 +1,8 @@
-import { ContentHeader } from "@/components/brand/ContentHeader";
 import { MetaLabel } from "@/components/brand/MetaLabel";
-import { SiteFooter } from "@/components/brand/SiteFooter";
+import { ProseList, ProsePage, ProseSection, ProseText } from "@/components/brand/ProsePage";
 import { CONTACT_EMAIL, EMAIL_PLACEHOLDER, LEGAL_UI, splitOnEmail, type LegalBlock, type LegalDocument } from "@/content/legal";
 import type { Locale } from "@/lib/i18n/locale";
 import { tc } from "@/lib/i18n/translatable";
-import frame from "@/app/[locale]/how-it-works/page.module.css";
 import styles from "./LegalPage.module.css";
 
 /**
@@ -13,9 +11,10 @@ import styles from "./LegalPage.module.css";
  * passed as DATA, not JSX: a legal page is re-read and amended paragraph by
  * paragraph, and nobody should have to wade through markup to do it.
  *
- * Same frame as `/how-it-works` and `/about` (their stylesheet, deliberately
- * shared): these are the prose pages of the site, one family. Server
- * Component, prerendered like the rest of the `[locale]` tree.
+ * Same `ProsePage` frame as `/how-it-works` and `/about`: these are the prose
+ * pages of the site, one family. (It used to import how-it-works's page
+ * stylesheet to get there — ds-critique M-9.) Server Component, prerendered
+ * like the rest of the `[locale]` tree.
  *
  * `{email}` in the copy becomes a real `mailto:` link here, from the one
  * constant that holds the address — so the address lives in exactly one
@@ -23,47 +22,40 @@ import styles from "./LegalPage.module.css";
  */
 export function LegalPage({ document, path, locale }: { document: LegalDocument; path: string; locale: Locale }) {
   return (
-    <>
-      <ContentHeader locale={locale} path={path} />
-
-      <main id="main" className={`${frame.main} ${styles.legal}`}>
-        <div className={frame.intro}>
-          <MetaLabel size="xs" uppercase={false}>
-            {tc(LEGAL_UI.updatedAt, locale)} {formatDate(document.updatedAt, locale)}
-          </MetaLabel>
-          <h1 className={`${frame.title} ${styles.title}`}>{tc(document.title, locale)}</h1>
-          <p className={frame.subtitle}>{tc(document.intro, locale)}</p>
-        </div>
-
-        {document.sections.map((section) => (
-          <section key={tc(section.heading, "en")} className={frame.proseSection}>
-            <h2 className={frame.sectionTitle}>{tc(section.heading, locale)}</h2>
-            {section.blocks.map((block, index) => (
-              <LegalBlockView key={index} block={block} locale={locale} />
-            ))}
-          </section>
-        ))}
-      </main>
-
-      <SiteFooter locale={locale} width="reading" />
-    </>
+    <ProsePage
+      locale={locale}
+      path={path}
+      title={tc(document.title, locale)}
+      lead={tc(document.intro, locale)}
+      kicker={
+        <MetaLabel size="xs" uppercase={false}>
+          {tc(LEGAL_UI.updatedAt, locale)} {formatDate(document.updatedAt, locale)}
+        </MetaLabel>
+      }
+    >
+      {document.sections.map((section) => (
+        <ProseSection key={tc(section.heading, "en")} heading={tc(section.heading, locale)}>
+          {section.blocks.map((block, index) => (
+            <LegalBlockView key={index} block={block} locale={locale} />
+          ))}
+        </ProseSection>
+      ))}
+    </ProsePage>
   );
 }
 
 function LegalBlockView({ block, locale }: { block: LegalBlock; locale: Locale }) {
   if (block.kind === "paragraph") {
-    return <p className={frame.sectionBody}>{withEmail(tc(block.text, locale))}</p>;
+    return <ProseText>{withEmail(tc(block.text, locale))}</ProseText>;
   }
 
   if (block.kind === "bullets") {
     return (
-      <ul className={styles.list}>
+      <ProseList>
         {block.items.map((item, index) => (
-          <li key={index} className={frame.sectionBody}>
-            {withEmail(tc(item, locale))}
-          </li>
+          <li key={index}>{withEmail(tc(item, locale))}</li>
         ))}
-      </ul>
+      </ProseList>
     );
   }
 
@@ -72,7 +64,9 @@ function LegalBlockView({ block, locale }: { block: LegalBlock; locale: Locale }
       {block.items.map((item, index) => (
         <div key={index} className={styles.definition}>
           <dt className={styles.term}>{tc(item.term, locale)}</dt>
-          <dd className={frame.sectionBody}>{withEmail(tc(item.text, locale))}</dd>
+          <dd>
+            <ProseText>{withEmail(tc(item.text, locale))}</ProseText>
+          </dd>
         </div>
       ))}
     </dl>

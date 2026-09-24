@@ -1,0 +1,42 @@
+.callout {
+  border-radius: var(--radius-card);
+  padding: var(--pad-card);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+/* Dashed ink on the page ground — the route's "read this first" rule. No
+   fill, no shadow: it frames a sentence, it is not a surface to act on. */
+.caveat {
+  border: var(--border-dashed);
+}
+
+/* Paper and a real edge, no red: the button inside is the loud thing. */
+.cta {
+  background: var(--surface-card);
+  border: var(--border-solid);
+}
+
+.body {
+  font: var(--body-lg);
+  color: var(--text-body);
+}
+
+.body > * + * {
+  margin-top: var(--space-5);
+}
+
+.action {
+  display: flex;
+}
+
+@media (max-width: 760px) {
+  .callout {
+    padding: var(--pad-card-mobile);
+  }
+
+  .action > * {
+    width: 100%;
+  }
+}

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { ContentHeader } from "@/components/brand/ContentHeader";
 import { MetaLabel } from "@/components/brand/MetaLabel";
-import { SiteFooter } from "@/components/brand/SiteFooter";
+import { ProseActions, ProseList, ProsePage, ProseSection, ProseText } from "@/components/brand/ProsePage";
 import { TrackedLink } from "@/components/brand/TrackedLink";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
@@ -14,7 +13,6 @@ import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { contentMetadata } from "@/lib/i18n/meta";
 import { aboutPageSchema, breadcrumbSchema, JsonLd } from "@/lib/seo/jsonld";
 import { PILLARS } from "@/lib/scoring/pillars";
-import styles from "../how-it-works/page.module.css";
 import own from "./page.module.css";
 
 interface PageProps {
@@ -35,9 +33,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
  * `/about` — REVIEW-02.md R2-04. Until this page, nothing on the 36
  * indexable pages said who built the tool or why, the scoring rule was
  * explained in full only to a result's owner (R-12), and there was no page
- * a search engine could attach a Person entity to. Server Component, same
- * shell as `/how-it-works`, whose stylesheet it deliberately shares: the two
- * are one family of prose pages. The fifteen questions are rendered from the
+ * a search engine could attach a Person entity to. Server Component, in the
+ * same `ProsePage` frame as `/how-it-works`: the two are one family of prose
+ * pages. The fifteen questions are rendered from the
  * copy library — no second copy of them to drift.
  */
 export default async function AboutPage({ params }: PageProps) {
@@ -47,17 +45,9 @@ export default async function AboutPage({ params }: PageProps) {
     <>
       <JsonLd data={aboutPageSchema(locale)} />
       <JsonLd data={breadcrumbSchema(locale, [{ name: tc(ABOUT.title, locale), path: "/about" }])} />
-      <ContentHeader locale={locale} path="/about" />
-
-      <main id="main" className={styles.main}>
-        <div className={styles.intro}>
-          <h1 className={styles.title}>{tc(ABOUT.title, locale)}</h1>
-          <p className={styles.subtitle}>{tc(ABOUT.intro, locale)}</p>
-        </div>
-
-        <section className={styles.proseSection}>
-          <h2 className={styles.sectionTitle}>{tc(ABOUT.questionsSection.title, locale)}</h2>
-          <p className={styles.sectionBody}>{tc(ABOUT.questionsSection.body, locale)}</p>
+      <ProsePage locale={locale} path="/about" title={tc(ABOUT.title, locale)} lead={tc(ABOUT.intro, locale)}>
+        <ProseSection heading={tc(ABOUT.questionsSection.title, locale)}>
+          <ProseText>{tc(ABOUT.questionsSection.body, locale)}</ProseText>
           <div className={own.questionGroups}>
             {PILLARS.map((pillar) => (
               <Card key={pillar} elevation="flat" tone="paper" className={own.questionGroup}>
@@ -70,41 +60,35 @@ export default async function AboutPage({ params }: PageProps) {
               </Card>
             ))}
           </div>
-        </section>
+        </ProseSection>
 
-        <section className={styles.proseSection}>
-          <h2 className={styles.sectionTitle}>{tc(ABOUT.scoringSection.title, locale)}</h2>
-          <ol className={own.rules}>
+        <ProseSection heading={tc(ABOUT.scoringSection.title, locale)}>
+          <ProseList ordered>
             {ABOUT.scoringSection.rules.map((rule, i) => (
-              <li key={i} className={styles.sectionBody}>
-                {tc(rule, locale)}
-              </li>
+              <li key={i}>{tc(rule, locale)}</li>
             ))}
-          </ol>
+          </ProseList>
           <Card elevation="raised" className={own.example}>
             <MetaLabel size="xs">{tc(ABOUT.scoringSection.exampleLabel, locale)}</MetaLabel>
             <p className={own.exampleText}>{tc(ABOUT.scoringSection.example, locale)}</p>
           </Card>
-        </section>
+        </ProseSection>
 
-        <section className={styles.proseSection}>
-          <h2 className={styles.sectionTitle}>{tc(ABOUT.aiSection.title, locale)}</h2>
-          <p className={styles.sectionBody}>{tc(ABOUT.aiSection.body, locale)}</p>
-        </section>
+        <ProseSection heading={tc(ABOUT.aiSection.title, locale)}>
+          <ProseText>{tc(ABOUT.aiSection.body, locale)}</ProseText>
+        </ProseSection>
 
-        <section className={styles.proseSection}>
-          <h2 className={styles.sectionTitle}>{tc(ABOUT.openSection.title, locale)}</h2>
-          <p className={styles.sectionBody}>
+        <ProseSection heading={tc(ABOUT.openSection.title, locale)}>
+          <ProseText>
             {tc(ABOUT.openSection.body, locale)}{" "}
             <a href={REPO_URL} target="_blank" rel="noopener" className={own.link}>
               {tc(ABOUT.openSection.repoLinkText, locale)}
             </a>
-          </p>
-        </section>
+          </ProseText>
+        </ProseSection>
 
-        <section className={styles.proseSection}>
-          <h2 className={styles.sectionTitle}>{tc(ABOUT.contactSection.title, locale)}</h2>
-          <p className={styles.sectionBody}>
+        <ProseSection heading={tc(ABOUT.contactSection.title, locale)}>
+          <ProseText>
             {tc(ABOUT.contactSection.body, locale)}
             <TrackedLink
               href={ANTOINE_LINKS.linkedin}
@@ -128,17 +112,15 @@ export default async function AboutPage({ params }: PageProps) {
               {tc(ABOUT.contactSection.cvLinkText, locale)}
             </TrackedLink>
             {tc(ABOUT.contactSection.after, locale)}
-          </p>
-        </section>
+          </ProseText>
+        </ProseSection>
 
-        <div className={styles.ctaWrap}>
+        <ProseActions>
           <Button size="lg" href="/quiz" hard>
             {tc(ABOUT.cta, locale)}
           </Button>
-        </div>
-      </main>
-
-      <SiteFooter locale={locale} width="reading" />
+        </ProseActions>
+      </ProsePage>
     </>
   );
 }
