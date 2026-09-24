@@ -4,13 +4,15 @@ import { describe, expect, it } from "vitest";
 // next-config.test.ts: widen the specifier so the import is untyped.
 const mod = (await import("../../scripts/utm-channels.mjs" as string)) as {
   CAMPAIGNS: string[];
+  WAVE_CAMPAIGNS: string[];
+  LAUNCH_CAMPAIGNS: string[];
   EXCLUDED: string[];
   CHANNELS: Record<string, { source: string; campaign: string }>;
   DYNAMIC_PREFIXES: Record<string, { campaign: string }>;
   KNOWN_DIRECTORIES: string[];
   DEFAULT_SITE_URL: string;
   resolveChannel: (key: string) => { source: string; campaign: string } | null;
-  buildUtmUrl: (key: string, path?: string, siteUrl?: string) => string | null;
+  buildUtmUrl: (key: string, path?: string, siteUrl?: string, campaign?: string) => string | null;
 };
 
 /**
@@ -80,5 +82,44 @@ describe("resolveChannel / buildUtmUrl", () => {
     for (const slug of mod.KNOWN_DIRECTORIES) {
       expect(mod.resolveChannel(`directory:${slug}`), slug).not.toBeNull();
     }
+  });
+});
+
+/**
+ * marketing/campaigns/README.md sequences three launches through the same
+ * communities. The source says WHERE a visit came from, the campaign says
+ * WHICH launch sent it — so the override is what lets GoatCounter tell the
+ * engine's Show HN from the Tour's, and it must refuse a campaign it does
+ * not know rather than mint a new row.
+ */
+describe("launch campaigns", () => {
+  it("names the three sequenced launches, all inside the campaign vocabulary", () => {
+    expect(mod.LAUNCH_CAMPAIGNS).toEqual(["relaunch_tour", "launch_engine", "launch_game"]);
+    for (const campaign of mod.LAUNCH_CAMPAIGNS) {
+      expect(mod.CAMPAIGNS, campaign).toContain(campaign);
+      expect(campaign).toMatch(/^[a-z0-9_]+$/);
+      expect(mod.WAVE_CAMPAIGNS, campaign).not.toContain(campaign);
+    }
+  });
+
+  it("overrides the channel's wave with a known campaign, and keeps the source", () => {
+    expect(mod.buildUtmUrl("hackernews", "/en/aarrr-funnel-template", undefined, "launch_engine")).toBe(
+      "https://www.tourdegrowth.com/en/aarrr-funnel-template?utm_source=hackernews&utm_campaign=launch_engine",
+    );
+    expect(mod.buildUtmUrl("directory:uneed", "/fr/game", undefined, "launch_game")).toBe(
+      "https://www.tourdegrowth.com/fr/game?utm_source=directory_uneed&utm_campaign=launch_game",
+    );
+  });
+
+  it("falls back to the channel's own wave when no campaign is given", () => {
+    expect(mod.buildUtmUrl("hackernews", "/en")).toBe(
+      "https://www.tourdegrowth.com/en?utm_source=hackernews&utm_campaign=launch_week",
+    );
+  });
+
+  it("refuses an unknown campaign instead of minting a new GoatCounter row", () => {
+    expect(mod.buildUtmUrl("hackernews", "/en", undefined, "launch_week2")).toBeNull();
+    expect(mod.buildUtmUrl("hackernews", "/en", undefined, "Launch_Engine")).toBeNull();
+    expect(mod.buildUtmUrl("hackernews", "/en", undefined, "")).toBeNull();
   });
 });
