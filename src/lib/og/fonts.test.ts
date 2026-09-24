@@ -15,7 +15,8 @@ import { SITE_DOMAIN_LABEL } from "@/lib/site";
  * Plex Mono subset stopped at Latin). Emoji are excluded: next/og draws
  * them with Twemoji, not with these fonts.
  *
- * The strings below mirror what `src/app/[locale]/opengraph-image.tsx` and
+ * The strings below mirror what `src/lib/og/content-frame.tsx` (the landing
+ * image and the `/quiz` image, `quiz/share/[locale]`) and
  * `src/lib/og/result-frame.tsx` (the result image, served by
  * `/r/[id]/share/[token]`) actually render, family by family. Adding text to
  * an image means adding it here too.
@@ -29,9 +30,19 @@ function textsByFamily(locale: Locale) {
   const og = UI_STRINGS.og;
   const pillars = PILLARS.map((pillar) => tc(UI_STRINGS.pillars[pillar], locale));
   return {
-    stardos: [WORDMARK, tc(landing.h1Line1, locale), tc(landing.h1Line2, locale), tc(landing.h1Accent, locale), NUMERALS],
+    stardos: [
+      WORDMARK,
+      tc(landing.h1Line1, locale),
+      tc(landing.h1Line2, locale),
+      tc(landing.h1Accent, locale),
+      // SEO audit v1 §1.1 — the headline of the `/quiz` share image.
+      tc(UI_STRINGS.meta.quizHeading, locale),
+      NUMERALS,
+    ],
     inter: [
       tc(landing.subtitle, locale),
+      // …and the line under it.
+      tc(landing.promise, locale),
       ...pillars.map((label) => tc(og.stallSentenceTemplate, locale).replace("{pillar}", label)),
       tc(og.stallSentenceLevel, locale),
       tc(og.whereDoesYours, locale),

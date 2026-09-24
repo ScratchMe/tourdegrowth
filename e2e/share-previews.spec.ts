@@ -1,0 +1,69 @@
+import { expect, test } from "./helpers";
+
+/**
+ * What a link preview and a search result are built from — SEO audit v1.
+ *
+ * None of it is painted on the page, so none of it is caught by looking at
+ * the page: `/quiz`, the most-linked page of the site and the one the launch
+ * posts point at, unfurled with no picture and no canonical for weeks while
+ * every screenshot of it looked right. These specs read the HTML the server
+ * sends — what a crawler reads — and fetch the image it declares.
+ */
+
+/** The value of a `<meta>` or `<link>` in raw HTML, entities decoded (React escapes `'` as `&#x27;`). */
+function attr(html: string, pattern: RegExp): string | null {
+  const raw = pattern.exec(html)?.[1];
+  if (raw === undefined) return null;
+  return raw
+    .replace(/&#x27;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+}
+
+const OG_IMAGE = /<meta property="og:image" content="([^"]*)"/;
+const TWITTER_IMAGE = /<meta name="twitter:image" content="([^"]*)"/;
+const CANONICAL = /<link rel="canonical" href="([^"]*)"/;
+
+test.describe("/quiz share preview (SEO audit v1 §1.1, §1.4)", () => {
+  for (const [lang, heading] of [
+    ["en", "The Tour"],
+    ["fr", "Le Tour"],
+  ] as const) {
+    test(`${lang}: declares an image in the reader's language, and that image is a real PNG`, async ({ request }) => {
+      const html = await (await request.get(`/quiz?lang=${lang}`)).text();
+      // A length floor before any absence-shaped conclusion: a failed fetch
+      // would satisfy every "not there" at once (TESTING.md §2.3bis).
+      expect(html.length).toBeGreaterThan(2000);
+
+      const og = attr(html, OG_IMAGE);
+      expect(og, "og:image").not.toBeNull();
+      expect(new URL(og!).pathname).toBe(`/quiz/share/${lang}`);
+      expect(attr(html, TWITTER_IMAGE)).toBe(og);
+      expect(html).toContain('<meta name="twitter:card" content="summary_large_image"');
+      expect(attr(html, /<meta property="og:title" content="([^"]*)"/)).toContain(heading);
+
+      const image = await request.get(new URL(og!).pathname);
+      expect(image.status()).toBe(200);
+      expect(image.headers()["content-type"]).toContain("image/png");
+      const body = await image.body();
+      // PNG signature, and a real 1200×630 frame rather than an error body.
+      expect(body.subarray(0, 8).toString("hex")).toBe("89504e470d0a1a0a");
+      expect(body.readUInt32BE(16)).toBe(1200);
+      expect(body.readUInt32BE(20)).toBe(630);
+    });
+  }
+
+  test("the canonical is the bare path — the same one whatever the reader's language", async ({ request }) => {
+    for (const lang of ["en", "fr"]) {
+      const html = await (await request.get(`/quiz?lang=${lang}&ref=00000000-0000-4000-8000-000000000000`)).text();
+      expect(new URL(attr(html, CANONICAL)!).pathname).toBe("/quiz");
+      expect(new URL(attr(html, CANONICAL)!).search).toBe("");
+    }
+  });
+
+  test("an image address that is not a language is a 404, not a render", async ({ request }) => {
+    expect((await request.get("/quiz/share/de")).status()).toBe(404);
+  });
+});

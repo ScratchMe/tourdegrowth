@@ -643,6 +643,13 @@ export const UI_STRINGS = {
       en: "Tour de Growth — Where does your growth stall? A guided AARRR check-up, 15 questions, 3 minutes.",
       fr: "Tour de Growth — Où ta croissance cale-t-elle ? Un diagnostic AARRR guidé, 15 questions, 3 minutes.",
     },
+    // Alt text of the `/quiz` share image (`quiz/share/[locale]/route.ts`,
+    // SEO audit v1 §1.1): the two lines it draws, said once.
+    // TODO: à relire — copie neuve (convention 6 de CLAUDE.md).
+    quizShareImageAlt: {
+      en: "Tour de Growth — the Tour, 15 questions. You leave with a score out of 100, the stage holding you back, and one action to take.",
+      fr: "Tour de Growth — le Tour, 15 questions. Tu repars avec un score sur 100, l'étape qui te freine et une action à mener.",
+    },
   },
 
   og: {
