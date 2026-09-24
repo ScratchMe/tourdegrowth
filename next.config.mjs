@@ -8,6 +8,25 @@ const nextConfig = {
   agentRules: false,
 
   /**
+   * The game's flag as it stood at build — GAME-BRIEF.md 13.1-13.2.
+   *
+   * The footer shows « Le jeu » only when the game is open, and the footer is
+   * also rendered by the error boundaries, which are Client Components: they
+   * cannot read a server variable, so the link would be missing on exactly
+   * those pages (the dead end `/metrics` hit on 2026-09-07). `env` inlines a
+   * value at build into both bundles. What is inlined is a derived "1"/"0",
+   * never `GAME_ENABLED` itself, which stays server-only (13.1).
+   *
+   * The rule is written here and not imported from `src/lib/game/build-flag.ts`
+   * because this file is plain ESM that Node loads before anything compiles
+   * TypeScript. `src/__tests__/next-config.test.ts` holds the two to the same
+   * answer for every value of the variable, so they cannot drift.
+   */
+  env: {
+    TDG_GAME_OPEN_AT_BUILD: process.env.GAME_ENABLED === "true" ? "1" : "0",
+  },
+
+  /**
    * Keep `sharp` out of the serverless function — 2026-09-13.
    *
    * The Hobby plan caps "Functions Storage" — the summed size of the function

@@ -37,6 +37,10 @@ const LOCALIZED_ROOTS = [
   "aarrr-vs-rarra",
   "aarrr-vs-growth-loops",
   "aarrr-vs-okr",
+  // Le jeu « Le côté obscur » (GAME-BRIEF 9.3) : /{locale}/game et ses
+  // niveaux. L'adresse non préfixée redirige comme les autres ; si le jeu
+  // est fermé, le proxy réécrit ensuite la forme localisée en 404.
+  "game",
 ] as const;
 
 export function localePath(locale: Locale, path = "/"): string {

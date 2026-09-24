@@ -46,6 +46,12 @@ describe("isLocalizableContentPath", () => {
     expect(isLocalizableContentPath("/terms")).toBe(true);
   });
 
+  it("covers the game's hub and levels (X17), and nothing that merely starts with 'game'", () => {
+    expect(isLocalizableContentPath("/game")).toBe(true);
+    expect(isLocalizableContentPath("/game/retention")).toBe(true);
+    expect(isLocalizableContentPath("/gamers")).toBe(false);
+  });
+
   it("leaves app routes alone", () => {
     for (const path of ["/quiz", "/r/abc", "/deep-dive/abc", "/api/submissions", "/admin/stats", "/sitemap.xml"]) {
       expect(isLocalizableContentPath(path)).toBe(false);
