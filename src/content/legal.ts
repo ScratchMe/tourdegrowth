@@ -133,7 +133,8 @@ export const PRIVACY: LegalDocument = {
     "Ce que Tour de Growth enregistre quand tu fais le Tour, où ça va, combien de temps ça reste, et ce que tu peux demander.",
     "What Tour de Growth records when you take the Tour, where it goes, how long it stays, and what you can ask for.",
   ),
-  updatedAt: "2026-09-08",
+  // Moved for the growth engine (engine spec §11.5): two paragraphs added.
+  updatedAt: "2026-09-24",
   intro: t(
     "Tour de Growth enregistre le strict nécessaire pour calculer ton score, te le redonner par son lien, et mesurer si l'outil fonctionne. Cette page dit précisément quoi, pourquoi, pendant combien de temps, et ce que tu peux exiger.",
     "Tour de Growth records the bare minimum needed to compute your score, hand it back to you through its link, and measure whether the tool works. This page says exactly what, why, for how long, and what you can ask for.",
@@ -231,6 +232,13 @@ export const PRIVACY: LegalDocument = {
           "Ton navigateur garde, dans son stockage local, tes réponses en cours (pour qu'un rechargement ne te fasse pas recommencer), l'identifiant du résultat qui t'a éventuellement amené ici, la liste des résultats que tu as créés avec leur jeton de propriété, et la progression d'un Deep dive en cours. Rien de tout ça ne quitte ton appareil autrement que par les requêtes décrites plus haut, et effacer les données du site dans ton navigateur l'efface entièrement — y compris la possibilité de lancer le Deep dive d'un résultat déjà créé.",
           "Your browser keeps, in its local storage, your answers in progress (so a reload doesn't make you start over), the identifier of the result that may have brought you here, the list of results you created with their ownership token, and the progress of a Deep dive under way. None of it leaves your device other than through the requests described above, and clearing the site's data in your browser clears it entirely — including the ability to run the Deep dive on a result already created.",
         ),
+        // TODO: à relire — copie neuve (engine spec §11.5). Without it, the list
+        // above (« Ton navigateur garde… ») stops being the whole list the day the
+        // growth engine opens.
+        p(
+          "Si tu utilises le moteur de croissance, ton navigateur garde aussi, au même endroit, les chiffres et les textes que tu y saisis. Rien de tout cela n'est envoyé, ni à nous ni à personne : les seules sorties sont les fichiers que tu télécharges et ce que tu copies toi-même. Effacer les données du site efface aussi ton moteur, sauf si tu l'as sauvegardé dans un fichier.",
+          "If you use the growth engine, your browser also keeps, in the same place, the numbers and text you enter there. None of it is sent, to us or to anyone: the only ways out are the files you download and what you copy yourself. Clearing the site's data also clears your engine, unless you saved it to a file.",
+        ),
       ],
     },
     {
@@ -239,6 +247,11 @@ export const PRIVACY: LegalDocument = {
         p(
           "Les pages vues et quelques événements (Tour commencé, étape terminée, résultat créé, partage, Deep dive) sont comptés avec GoatCounter, un service de mesure d'audience sans cookie et sans identifiant individuel. Il ne permet pas de te suivre d'un site à l'autre ni de savoir qui tu es. C'est pourquoi aucune bannière de consentement ne t'est présentée : il n'y a rien à consentir.",
           "Page views and a few events (Tour started, stage finished, result created, share, Deep dive) are counted with GoatCounter, a cookie-free audience measurement service with no individual identifier. It cannot follow you across sites or tell who you are. That is why no consent banner is shown: there is nothing to consent to.",
+        ),
+        // TODO: à relire — copie neuve (engine spec §11.6: event paths only, never a value).
+        p(
+          "Sur le moteur de croissance, seuls sont comptés l'ouverture de la page, le premier chiffre enregistré dans chaque étape, la copie d'une demande, le rapprochement avec ton Tour, et l'ouverture ou l'export des slides — jamais un chiffre, un statut ni un texte que tu y saisis.",
+          "On the growth engine, the only things counted are the page being opened, the first number saved in each stage, a request being copied, the link with your Tour, and the slides being opened or exported — never a number, a status or any text you enter.",
         ),
       ],
     },
