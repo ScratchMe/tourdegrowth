@@ -79,6 +79,9 @@ function ToneOption({
     <button
       type="button"
       data-testid="tone-option"
+      // The fill and the dot are visual; this is the state a screen reader
+      // hears, the same attribute the answers and the segment chips carry.
+      aria-pressed={selected}
       className={`${styles.option} ${selected ? styles.selected : ""}`}
       onClick={onClick}
     >
