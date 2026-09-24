@@ -1,0 +1,299 @@
+/*
+ * Flixo's phone. The bezel and caption belong to the night (semantic
+ * tokens); the screen is another company's app and reads only the --app-*
+ * island (game.css), white inside the night on purpose. Every text pairing
+ * below is one game-token-contrast.test.ts measures.
+ */
+
+.phone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  width: min(100%, var(--phone-width));
+  margin: 0 auto;
+}
+
+.caption {
+  align-self: stretch;
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* The bezel is as dark as the night itself (1.06:1): its outline carries the edge. */
+.bezel {
+  width: 100%;
+  padding: var(--space-5);
+  background: var(--phone-bezel);
+  border: 1px solid var(--phone-bezel-line);
+  border-radius: var(--phone-radius);
+}
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-height: var(--phone-min-height);
+  padding: var(--space-8) var(--space-7);
+  background: var(--app-bg);
+  color: var(--app-ink);
+  border-radius: var(--phone-screen-radius);
+  font: var(--app-text-md);
+}
+
+.appBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-weight: 700;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-round);
+  background: var(--app-brand);
+}
+
+.time {
+  font: var(--app-text-sm);
+  font-family: var(--font-mono);
+  color: var(--app-muted);
+}
+
+.push {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-panel);
+  background: var(--app-push-bg);
+  color: var(--app-push-text);
+  font: var(--app-text-sm);
+}
+
+.pushIcon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--space-1);
+  background: var(--app-brand);
+}
+
+/* The path to the setting, in the app's small print. Buried, it is five screens long — and reads like it. */
+.crumbs {
+  font: var(--app-text-sm);
+  font-family: var(--font-mono);
+  color: var(--app-muted);
+  overflow-wrap: anywhere;
+}
+
+.planCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-5);
+  border: 1px solid var(--app-line);
+  border-radius: var(--radius-panel);
+}
+
+.planName {
+  font-weight: 600;
+}
+
+.planPrice {
+  font: var(--app-text-sm);
+  color: var(--app-muted);
+}
+
+.social {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-panel);
+  background: var(--app-social-bg);
+  color: var(--app-social-text);
+  font: var(--app-text-sm);
+}
+
+.avatars {
+  display: inline-flex;
+  flex: none;
+}
+
+.avatars > span {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-round);
+  background: var(--app-social-avatar);
+  border: 2px solid var(--app-bg);
+}
+
+.avatars > span + span {
+  margin-left: -6px;
+}
+
+.notice {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-panel);
+  font: var(--app-text-sm);
+}
+
+.ok {
+  background: var(--app-ok-bg);
+  color: var(--app-ok-text);
+}
+
+.warn {
+  background: var(--app-warn-bg);
+  color: var(--app-warn-text);
+}
+
+/* The two end-of-path notices sit at the bottom of the screen, where a confirmation lives. */
+.bottom {
+  margin-top: auto;
+}
+
+.callBox {
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--app-warn-line);
+  border-radius: var(--radius-panel);
+  background: var(--app-warn-bg);
+  color: var(--app-ink);
+  font: var(--app-text-sm);
+}
+
+.number {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Spans styled as the app's buttons: drawn, never pressable (plan R14). */
+.appButton {
+  display: block;
+  padding: var(--space-5) var(--space-6);
+  border-radius: var(--radius-panel);
+  text-align: center;
+  font-weight: 600;
+}
+
+.brandButton {
+  background: var(--app-brand);
+  color: var(--app-on-brand);
+}
+
+.dangerButton {
+  background: var(--app-danger-bg);
+  color: var(--app-danger-text);
+  border: 1px solid var(--app-danger-line);
+}
+
+/*
+ * The way out, once buried: small, grey, pushed to the right — discreet the
+ * way the dark pattern makes it discreet — and still 4.74:1. The prototype's
+ * version was 2.64:1; a game about interfaces that hide should not ship one
+ * that cannot be read (plan R8).
+ */
+.tinyLink {
+  align-self: flex-end;
+  font: var(--app-text-link);
+  color: var(--app-faint);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-align: right;
+}
+
+.modalStack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.modal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--app-line);
+  border-radius: var(--radius-panel);
+  background: var(--app-modal-bg);
+}
+
+.modalTitle {
+  font: var(--app-text-sm);
+  font-weight: 600;
+  color: var(--app-ink);
+}
+
+.modalRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.stay {
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-button);
+  background: var(--app-brand);
+  color: var(--app-on-brand);
+  font: var(--app-text-sm);
+  font-weight: 600;
+}
+
+.no {
+  font: var(--app-text-sm);
+  color: var(--app-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/*
+ * What a ticked card just did. The night's selection amber — the fill of
+ * the ticked card itself — outlines the element it changed, then fades.
+ * Decorative (the change itself is the information); off under reduced
+ * motion with every other animation.
+ */
+.flash {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  animation: phone-flash var(--game-dur-flash) var(--ease-out);
+}
+
+@keyframes phone-flash {
+  from {
+    outline-color: var(--state-selected-bg);
+  }
+  to {
+    outline-color: transparent;
+  }
+}
+
+@media (max-width: 760px) {
+  .phone {
+    width: min(100%, var(--phone-width-mobile));
+  }
+
+  .screen {
+    min-height: var(--phone-min-height-mobile);
+    padding: var(--space-7) var(--space-6);
+  }
+}

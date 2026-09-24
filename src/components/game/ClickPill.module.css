@@ -1,0 +1,42 @@
+/*
+ * The clicks pill — night world, semantic tokens only. Over the legal line
+ * the figure and the reason turn to the world's alert text (the night's red
+ * at 6.19:1 on --night-1): the words already say it, the colour repeats it.
+ */
+
+.pill {
+  display: inline-block;
+  max-width: 100%;
+  margin: 0;
+  padding: var(--space-2) var(--space-5);
+  border: 1px solid var(--border-hard);
+  border-radius: var(--radius-tag);
+  background: var(--surface-card);
+  color: var(--text-body);
+  text-align: center;
+  /* Under a 300px phone the legal reason wraps: two even lines read as one sentence, a lone word on the second does not. */
+  text-wrap: balance;
+}
+
+.md {
+  font: var(--meta-md);
+}
+
+.compact {
+  padding: var(--space-1) var(--space-4);
+  font: var(--meta-sm);
+}
+
+.figure {
+  font-weight: 700;
+  font-variant-numeric: var(--tabular);
+}
+
+.over {
+  border-color: var(--border-alert);
+}
+
+.over .figure,
+.over .suffix {
+  color: var(--text-alert);
+}
