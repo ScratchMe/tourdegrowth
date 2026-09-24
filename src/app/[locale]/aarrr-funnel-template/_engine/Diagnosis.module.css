@@ -1,0 +1,85 @@
+/* The diagnosis — engine spec §8.4, Bottleneck's grammar without its props. */
+.diagnosis {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding-top: var(--space-7);
+  border-top: var(--border-rule);
+  min-width: 0;
+}
+
+.eyebrow {
+  font: var(--meta-2xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* A stage is named: the line is a flag, in the red text token (AA at 11px). */
+.eyebrowNamed {
+  color: var(--text-alert);
+}
+
+.names {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  list-style: none;
+}
+
+.name {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* 36px stencil 700 is large text: the road-paint red passes its 3:1 floor
+   (4.42:1 on --paper-0, 3.57:1 on --paper-1). Same reasoning as Bottleneck. */
+.stage {
+  font: var(--display-title);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+  color: var(--accent-mark);
+}
+
+.metric {
+  font: var(--meta-sm);
+  color: var(--text-muted);
+}
+
+.sentence,
+.body {
+  font: var(--body-md);
+  color: var(--text-body);
+  max-width: var(--measure-read);
+}
+
+.note {
+  font: var(--body-sm);
+  color: var(--text-muted);
+  max-width: var(--measure-read);
+}
+
+.blind {
+  font: var(--body-sm);
+  font-weight: 600;
+  color: var(--text-alert);
+  max-width: var(--measure-read);
+}
+
+.fixed {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+  max-width: var(--measure-read);
+}
+
+@media (max-width: 760px) {
+  .stage {
+    font: var(--display-section);
+  }
+
+  .sentence,
+  .body {
+    font: var(--body-sm);
+  }
+}
