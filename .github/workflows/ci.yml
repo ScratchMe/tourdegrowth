@@ -36,6 +36,12 @@ env:
   # send. A made-up value — nothing real is behind it in CI, and the real one
   # lives only in Vercel.
   ADMIN_DASHBOARD_PASSWORD: "e2e-admin"
+  # The game (GAME-BRIEF.md 13.6): CI builds and tests it OPEN, so the
+  # footer link, the sitemap entries and the game pages are all exercised
+  # end to end. The closed state is covered where it can be pinned exactly —
+  # the unit tests of the resolver, the proxy and the build flag — the same
+  # split the /admin gate uses.
+  GAME_ENABLED: "true"
 
 jobs:
   check:

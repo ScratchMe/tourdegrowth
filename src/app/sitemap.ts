@@ -3,6 +3,7 @@ import { COMPARISON_ORDER } from "@/content/comparisons";
 import { GLOSSARY } from "@/content/glossary";
 import { PRIVACY, TERMS } from "@/content/legal";
 import { CONTENT_UPDATED_AT, GLOSSARY_UPDATED_AT } from "@/content/updated-at";
+import { gameSitemapPaths, isGameOpenAtBuild } from "@/lib/game/build-flag";
 import { DEFAULT_LOCALE, LOCALES } from "@/lib/i18n/locale";
 import { localePath } from "@/lib/i18n/routes";
 import { SITE_URL } from "@/lib/site";
@@ -58,13 +59,31 @@ const CONTENT_PATHS: { path: string; changeFrequency: "monthly" | "yearly"; prio
 ];
 
 /**
+ * The game's pages, only when the game is open at build (GAME-BRIEF 13.2):
+ * a closed game must not advertise URLs that answer 404. Evaluated inside
+ * `sitemap()` rather than at module load, so a test can flip the variable.
+ *
+ * Priority 0.6, under the landing, the Tour's explainer and the open-door
+ * pages: the game serves discovery more than conversion and should not
+ * compete with them (seo-audit §4.1, point 5).
+ */
+function gamePaths(): typeof CONTENT_PATHS {
+  return gameSitemapPaths(isGameOpenAtBuild()).map((path) => ({
+    path,
+    changeFrequency: "monthly" as const,
+    priority: 0.6,
+    lastModified: CONTENT_UPDATED_AT[path]!,
+  }));
+}
+
+/**
  * `lastModified` is the one field here Google actually reads (REVIEW-02.md
  * R2-08); `changeFrequency` and `priority` are kept for other consumers but
  * have been ignored by Google for years. `x-default` mirrors the `<head>`
  * alternates (`lib/i18n/routes.ts`), so the two never disagree.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-  return CONTENT_PATHS.flatMap(({ path, changeFrequency, priority, lastModified }) =>
+  return [...CONTENT_PATHS, ...gamePaths()].flatMap(({ path, changeFrequency, priority, lastModified }) =>
     LOCALES.map((locale) => ({
       url: `${SITE_URL}${localePath(locale, path)}`,
       lastModified,

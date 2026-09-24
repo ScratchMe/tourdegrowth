@@ -1,4 +1,4 @@
-import { scoreBand } from "@/content/copy-library";
+import { scoreBand } from "./bands";
 import type { Pillar } from "./pillars";
 import { rankPillarsAscending, type Ranked } from "./rank";
 

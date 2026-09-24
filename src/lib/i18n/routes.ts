@@ -41,6 +41,10 @@ const LOCALIZED_ROOTS = [
   // redirige comme les autres, drapeau ouvert ou fermé — c'est la page
   // localisée qui répond 404 tant que ENGINE_ENABLED est fermé.
   "aarrr-funnel-template",
+  // Le jeu « Le côté obscur » (GAME-BRIEF 9.3) : /{locale}/game et ses
+  // niveaux. L'adresse non préfixée redirige comme les autres ; si le jeu
+  // est fermé, le proxy réécrit ensuite la forme localisée en 404.
+  "game",
 ] as const;
 
 export function localePath(locale: Locale, path = "/"): string {

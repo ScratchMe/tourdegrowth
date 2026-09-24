@@ -9,7 +9,9 @@ import {
   resumeMode,
   saveGame,
 } from "../storage";
-import { GAME_COLLECTION_KEY, GAME_SAVE_KEY } from "../storage-keys";
+import { GAME_COLLECTION_KEY, GAME_SAVE_KEYS } from "../storage-keys";
+
+const GAME_SAVE_KEY = GAME_SAVE_KEYS.retention;
 import type { GameState, LevelDefinition } from "../types";
 
 // Plan §4.2, G3 — X13 (save) and X14 (collection). The engine's real

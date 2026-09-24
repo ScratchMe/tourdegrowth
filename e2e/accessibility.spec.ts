@@ -50,6 +50,11 @@ const PAGES: [name: string, path: string][] = [
   // preview parameter is how the closed page is reached before bon à tirer
   // nº6, exactly as Antoine will test it.
   ["growth engine (fr, preview)", "/fr/aarrr-funnel-template?engine=preview"],
+  // GAME-BRIEF 13.6 : CI construit le jeu OUVERT, donc ces deux adresses
+  // rendent le hub et la coquille du niveau. Fermé (build local sans
+  // GAME_ENABLED), elles rendent la 404 localisée — scannée aussi, sans faux rouge.
+  ["game hub (fr)", "/fr/game"],
+  ["game level shell", "/en/game/retention"],
 ];
 
 interface ContrastData {

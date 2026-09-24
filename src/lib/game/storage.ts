@@ -1,5 +1,5 @@
 import { GAME_ENDINGS } from "./events";
-import { GAME_COLLECTION_KEY, GAME_SAVE_KEY } from "./storage-keys";
+import { GAME_COLLECTION_KEY, GAME_SAVE_KEYS, type GameCollection } from "./storage-keys";
 import type { EndingId, GameState, LevelDefinition, LevelSlug } from "./types";
 
 /**
@@ -21,7 +21,7 @@ import type { EndingId, GameState, LevelDefinition, LevelSlug } from "./types";
  * the saved-game key is a public contract with every browser that already
  * holds one, not something to derive by accident.
  */
-const SAVE_KEYS: Record<LevelSlug, string> = { retention: GAME_SAVE_KEY };
+const SAVE_KEYS: Record<LevelSlug, string> = GAME_SAVE_KEYS;
 
 export interface SavedGame<Id extends string = string> {
   /** ISO 8601, client clock — shown in the resume prompt, never compared across devices. */
@@ -191,18 +191,9 @@ export function isGameState<Id extends string>(level: LevelDefinition<Id>, value
 // The collection — GAME-BRIEF.md §9.4 and §11.5
 // ---------------------------------------------------------------------------
 
-/**
- * « Ce que tu sais reconnaître », across levels. Written from v1 even though
- * the hub does not show it yet (§9.4): a player who finishes the year today
- * should find it filled in the day the hub starts displaying it.
- *
- * `seen` and `used` are card ids; `endings` keeps the latest year-end of each
- * level with its date, which is what the hub's « fin obtenue » line shows.
- */
-export interface GameCollection {
-  patterns: Partial<Record<LevelSlug, { seen: string[]; used: string[] }>>;
-  endings: Partial<Record<LevelSlug, { id: EndingId; at: string }>>;
-}
+// « Ce que tu sais reconnaître », across levels — the GameCollection shape lives
+// in storage-keys.ts, next to its key, because the hub reads it too (§9.4).
+export type { GameCollection } from "./storage-keys";
 
 function emptyCollection(): GameCollection {
   return { patterns: {}, endings: {} };

@@ -1,6 +1,7 @@
 import type { Translatable } from "@/lib/i18n/dictionary";
 import type { Pillar } from "@/lib/scoring/pillars";
 import type { Tone } from "@/lib/quiz/tone";
+import { scoreBand, type ScoreBand } from "@/lib/scoring/bands";
 
 /**
  * copy-library.ts — Tour de Growth
@@ -262,14 +263,9 @@ export const QUESTIONS: readonly CopyLibraryQuestion[] = [
 //    "Strengths" reads pillars in the "strong" band; "Where you're losing
 //    time" reads pillars in "weak" (and sometimes "developing").
 // ---------------------------------------------------------------------------
-export type ScoreBand = "weak" | "developing" | "strong";
-
-/** Pillar score bands, out of 20 (after rounding — see SPEC.md §6). */
-export function scoreBand(score: number): ScoreBand {
-  if (score <= 9) return "weak";
-  if (score <= 15) return "developing";
-  return "strong";
-}
+// The bands themselves are scoring logic and live in lib/scoring/bands.ts;
+// re-exported here so the verdict tables and their readers keep one import.
+export { scoreBand, type ScoreBand };
 
 /**
  * How the REST of the board is doing, given which stage is being named.
