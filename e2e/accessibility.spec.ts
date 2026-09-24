@@ -46,6 +46,11 @@ const PAGES: [name: string, path: string][] = [
   // tableau comparatif sans `<table>` : l'ordre des titres (h1, h2, h3 sous
   // le h2 « En un coup d'oeil ») est exactement ce qu'axe sait vérifier.
   ["framework comparison (fr)", "/fr/aarrr-vs-rarra"],
+  // GAME-BRIEF 13.6 : CI construit le jeu OUVERT, donc ces deux adresses
+  // rendent le hub et la coquille du niveau. Fermé (build local sans
+  // GAME_ENABLED), elles rendent la 404 localisée — scannée aussi, sans faux rouge.
+  ["game hub (fr)", "/fr/game"],
+  ["game level shell", "/en/game/retention"],
 ];
 
 interface ContrastData {
