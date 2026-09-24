@@ -3,6 +3,7 @@ import { Card } from "@/components/core/Card";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import type { FunnelWindow } from "@/lib/analytics/goatcounter-api";
 import { loadDashboard } from "@/lib/submissions/dashboard";
+import { GameSection } from "./GameSection";
 import styles from "./page.module.css";
 
 // Real submission volume/K-factor numbers — never cache this behind Next's
@@ -228,6 +229,8 @@ export default async function AdminStatsPage() {
           <FunnelBreakdown key={window.label} window={window} />
         ))}
       </section>
+
+      <GameSection windows={funnelWindows} growth={stats} />
 
       <section className={styles.breakdownRow}>
         <Card elevation="panel" className={styles.breakdown}>
