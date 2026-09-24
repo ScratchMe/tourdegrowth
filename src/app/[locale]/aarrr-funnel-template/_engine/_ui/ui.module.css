@@ -1,0 +1,204 @@
+/*
+ * The growth engine's input primitives, on the design system's semantic
+ * tokens and nothing else. See _ui/Field.tsx for why they live here and not
+ * in src/components/.
+ */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.label,
+.legend {
+  /* The typography tokens are `font` SHORTHANDS, not sizes — `font-size:
+     var(--meta-xs)` would be silently invalid (CLAUDE.md, audit 1.2). */
+  font: var(--meta-xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.legend {
+  padding: 0;
+  margin-bottom: var(--space-3);
+}
+
+.control {
+  font: var(--body-md);
+  color: var(--text-body);
+  background: var(--field-bg);
+  border: var(--border-solid);
+  border-radius: var(--radius-button);
+  padding: var(--space-4) var(--space-5);
+  width: 100%;
+  min-width: 0;
+  min-height: var(--hit-min);
+}
+
+.control::placeholder {
+  color: var(--field-placeholder);
+}
+
+.control:focus-visible,
+.choice:has(.radio:focus-visible),
+.check:has(.checkbox:focus-visible) {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset-tight);
+}
+
+.control[aria-invalid="true"],
+.controlOver {
+  border-color: var(--field-border-alert);
+}
+
+.numberRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.unit {
+  font: var(--meta-md);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.hint {
+  font: var(--meta-xs);
+  color: var(--text-faint);
+  margin: 0;
+}
+
+.error {
+  font: var(--meta-xs);
+  color: var(--text-alert);
+  margin: 0;
+}
+
+.counter {
+  font: var(--meta-2xs);
+  color: var(--text-faint);
+  align-self: flex-end;
+}
+
+.counterOver {
+  color: var(--text-alert);
+}
+
+.fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+.choices {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+
+/* The status question's 2×2 (spec §7 E3). One column on a phone, where two
+   labels side by side would wrap to three lines each. */
+@media (min-width: 761px) {
+  .choicesTwo {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.choice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  font: var(--body-md);
+  color: var(--text-body);
+  background: var(--surface-card);
+  border: var(--border-dashed);
+  border-radius: var(--radius-button);
+  padding: var(--space-4) var(--space-5);
+  min-height: var(--hit-min);
+  cursor: pointer;
+}
+
+/* Selected is a solid edge on a sunken fill: the same "this one" the rest of
+   the system draws with a hard border, never with colour alone. */
+.choice:has(.radio:checked) {
+  border: var(--border-solid);
+  background: var(--surface-sunken);
+}
+
+.choiceDisabled {
+  cursor: not-allowed;
+  opacity: var(--state-disabled-opacity);
+}
+
+.radio,
+.checkbox {
+  /* Native controls, tinted to the ink rather than the platform blue. */
+  accent-color: var(--text-body);
+  margin: 3px 0 0;
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.choiceText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.choiceNote {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+/* Read, not seen: clip-path rather than display:none, which would remove it
+   from the accessibility tree too (the /quiz h1 lesson, 2026-09-14). */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* A text-styled button: "I only have the rate", "Close". Underlined so it
+   reads as an action without competing with the screen's one red button. */
+.linkButton {
+  font: var(--meta-sm);
+  color: var(--text-link);
+  background: none;
+  border: none;
+  padding: var(--space-2) 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  align-self: flex-start;
+  min-height: var(--hit-compact);
+}
+
+.linkButton:hover {
+  color: var(--text-link-hover);
+}
+
+.linkButton:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset-tight);
+}
+
+.check {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  font: var(--body-md);
+  color: var(--text-body);
+  cursor: pointer;
+  min-height: var(--hit-min);
+  padding: var(--space-2) 0;
+}

@@ -334,6 +334,44 @@ export const ENGINE_COPY = {
     empty: { fr: "Plus rien à aller chercher.", en: "Nothing left to go and get." },
   },
 
+  /**
+   * The collection screens' own chrome (P4) — labels and messages the spec's
+   * §14 inventory did not list but the screens need: a visible label for
+   * every control, a message for every refusal. TODO: à relire — copie neuve
+   * (convention 6), rédigée par la session de code ; P3 may reword freely.
+   */
+  workbench: {
+    tabsLabel: { fr: "Vues du moteur", en: "Engine views" },
+    choose: { fr: "Choisir…", en: "Choose…" },
+    notANumber: { fr: "Ce n'est pas un nombre lisible.", en: "That isn't a readable number." },
+    notAWholeNumber: { fr: "Un nombre entier : on compte des personnes.", en: "A whole number: these are people." },
+    sourceRole: { fr: "Qui te l'a donné ?", en: "Who gave it to you?" },
+    countsBack: { fr: "J'ai les deux comptes", en: "I have both counts" },
+    durationUnit: { fr: "Unité", en: "Unit" },
+    hours: { fr: "heures", en: "hours" },
+    days: { fr: "jours", en: "days" },
+    saved: { fr: "Enregistré", en: "Saved" },
+    saveNeeds: { fr: "Pour enregistrer, il manque : {fields}", en: "To save, still missing: {fields}" },
+    percentRange: { fr: "Un taux se situe entre 0 et 100 %.", en: "A rate sits between 0 and 100%." },
+    denominatorZero: { fr: "Le second compte ne peut pas valoir zéro.", en: "The second count can't be zero." },
+    copyFailed: {
+      fr: "La copie n'a pas marché dans ce navigateur : sélectionne le texte ci-dessous.",
+      en: "Copying didn't work in this browser: select the text below.",
+    },
+    lastVisit: { fr: "dernière visite il y a {n} jours", en: "last visit {n} days ago" },
+    lastVisitOne: { fr: "dernière visite hier", en: "last visit yesterday" },
+    importOpen: { fr: "Ouvrir ce fichier", en: "Open this file" },
+    noCompany: { fr: "Sans nom", en: "Unnamed" },
+    /** The model as the board's eyebrow says it — the setup's labels are sentences, too long for a mono line. */
+    modelShort: {
+      selfserve: { fr: "libre-service", en: "self-serve" },
+    },
+    /** The mark on the comparison strip's target line, written beside the track, never inside it (§8.3). */
+    targetMark: { fr: "ta cible", en: "your target" },
+    /** The source list's second group: the tools this number is not usually found in, still offered. */
+    otherTools: { fr: "Autres outils", en: "Other tools" },
+  },
+
   // --- Diagnosis and "what if" (§14.6) -------------------------------------
   diagnosis: {
     clear: { fr: "Une étape freine le moteur", en: "One stage holds the engine back" },
