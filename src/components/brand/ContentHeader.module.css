@@ -13,11 +13,19 @@
 }
 
 .inner {
-  max-width: var(--width-reading);
   margin: 0 auto;
   padding: 0 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+}
+
+/* Two classes deep so the width can never lose to `.inner` on emission order. */
+.inner.reading {
+  max-width: var(--width-reading);
+}
+
+.inner.wide {
+  max-width: var(--content-max-width);
 }

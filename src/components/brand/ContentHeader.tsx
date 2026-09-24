@@ -7,6 +7,13 @@ export interface ContentHeaderProps {
   locale: Locale;
   /** This page's path without the locale prefix, e.g. "/glossary/cac" — what the language switch links to in the other language. */
   path: string;
+  /**
+   * The width the header's inner row aligns to — the page's own content
+   * column, like `SiteFooter`'s. `reading` (760px) for the prose pages;
+   * `wide` (the app shell's 1040px) for a page whose body is a tool, where a
+   * header narrower than the content under it reads as misaligned.
+   */
+  width?: "reading" | "wide";
 }
 
 /**
@@ -16,10 +23,10 @@ export interface ContentHeaderProps {
  * link, a CTA — is added once and laid out once. Server Component: nothing
  * here is interactive.
  */
-export function ContentHeader({ locale, path }: ContentHeaderProps) {
+export function ContentHeader({ locale, path, width = "reading" }: ContentHeaderProps) {
   return (
     <header className={styles.header}>
-      <div className={styles.inner}>
+      <div className={`${styles.inner} ${styles[width]}`}>
         <WordmarkLink locale={locale} />
         <LocaleSwitcher locale={locale} path={path} />
       </div>
