@@ -17,7 +17,9 @@
  * are spelled exactly as in the CSS — `var(--x)` for a reference — so the
  * equality test compares strings, not interpretations.
  *
- * Paper world only. The night world is its own file and its own map.
+ * The paper world is colors.css; the night world is world-night.css, and
+ * has its own two maps below (NIGHT_PRIMITIVES, NIGHT_WORLD), held equal to
+ * that file by night-token-sources.test.ts.
  */
 
 type Hex = `#${string}`;
@@ -111,6 +113,115 @@ export const DERIVED = {
 
 export const COLOR_TOKENS = { ...PRIMITIVES, ...SEMANTIC, ...DERIVED };
 export type ColorToken = keyof typeof COLOR_TOKENS;
+
+/**
+ * The night world (world-night.css, DS v3 §5.3–§5.5). Its own palette, and
+ * a rebinding of EVERY semantic token — see that file's header for why none
+ * may be left to inherit its paper value. Derived tokens are not repeated:
+ * they re-resolve against these bindings, and resolveNightColor does the
+ * same.
+ */
+export const NIGHT_PRIMITIVES = {
+  "night-0": "#14110d",
+  "night-1": "#1d1913",
+  "night-2": "#2a241c",
+  "night-text": "#f3efe4",
+  "night-muted": "#b5ab98",
+  "night-faint": "rgba(243, 239, 228, 0.55)",
+  "night-line": "#7d7260",
+  "night-rule": "#3a3328",
+  "night-amber": "#f0b43c",
+  "night-good": "#5fcf8e",
+  "night-bad": "#ff6a52",
+  "night-red-wash": "#3a1a14",
+} as const satisfies Record<string, Hex | Rgba>;
+
+export const NIGHT_WORLD = {
+  "surface-page": "var(--night-0)",
+  "surface-card": "var(--night-1)",
+  "surface-sunken": "var(--night-2)",
+  "surface-desk": "var(--night-0)",
+  "surface-alert": "var(--night-red-wash)",
+  "surface-inverse": "var(--night-amber)",
+
+  "text-body": "var(--night-text)",
+  "text-muted": "var(--night-muted)",
+  "text-inverse": "var(--paper-0)",
+  "text-on-inverse": "var(--night-0)",
+  "text-alert": "var(--night-bad)",
+  "text-link": "var(--night-amber)",
+  "text-link-hover": "var(--night-text)",
+  "text-faint": "var(--night-faint)",
+
+  "border-hard": "var(--night-line)",
+  "border-soft": "var(--night-line)",
+  "border-alert": "var(--paint-red)",
+  "border-divider": "var(--night-rule)",
+
+  "accent-mark": "var(--paint-red)",
+  "shadow-color": "#000000",
+  "texture-ink": "rgba(243, 239, 228, 0.05)",
+
+  "state-bad-text": "var(--night-bad)",
+  "state-good-text": "var(--night-good)",
+  "state-warn-text": "var(--night-amber)",
+
+  "action-primary-bg": "var(--paint-red-action)",
+  "action-primary-text": "var(--paper-0)",
+  "action-secondary-text": "var(--night-text)",
+
+  "focus-ring": "var(--night-text)",
+  "focus-ring-invert": "var(--paint-red)",
+
+  "field-border-alert": "var(--paint-red)",
+
+  // Data-viz, night world (DS v3 §5.5).
+  "viz-ink": "var(--night-text)",
+  "viz-axis": "var(--night-muted)",
+  "viz-grid": "rgba(243, 239, 228, 0.14)",
+  "viz-highlight": "var(--night-bad)",
+  "viz-highlight-text": "var(--night-bad)",
+  "viz-unknown": "var(--night-muted)",
+  "viz-cat-1": "#6cb4e8",
+  "viz-cat-2": "#3fc59a",
+  "viz-cat-3": "var(--night-amber)",
+  "viz-cat-4": "#e08cc0",
+  "viz-cat-5": "var(--night-text)",
+  "viz-seq-1": "#3a3226",
+  "viz-seq-2": "#5a4a2c",
+  "viz-seq-3": "#7a5c26",
+  "viz-seq-4": "#c08c30",
+  "viz-seq-5": "var(--night-amber)",
+  "viz-seq-1-text": "var(--night-text)",
+  "viz-seq-2-text": "var(--night-text)",
+  "viz-seq-3-text": "var(--night-text)",
+  "viz-seq-4-text": "var(--night-0)",
+  "viz-seq-5-text": "var(--night-0)",
+} as const satisfies Record<keyof typeof SEMANTIC, ColorValue>;
+
+export type NightColorToken = keyof typeof NIGHT_PRIMITIVES | keyof typeof SEMANTIC | keyof typeof DERIVED;
+
+/**
+ * resolveColor for a surface inside `data-world="night"`: the night's own
+ * bindings, the derived layer re-resolved against them (as the
+ * `:root, [data-world]` block does in CSS), and both palettes — the night
+ * still paints with a few paper primitives (the primary button, the red
+ * marks). Throws like resolveColor, for the same reason.
+ */
+export function resolveNightColor(name: NightColorToken): Hex | Rgba {
+  const table: Record<string, string> = { ...PRIMITIVES, ...NIGHT_PRIMITIVES, ...DERIVED, ...NIGHT_WORLD };
+  const seen = new Set<string>();
+  let current: string = name;
+  for (;;) {
+    if (seen.has(current)) throw new Error(`Token cycle through --${current}`);
+    seen.add(current);
+    const value = table[current];
+    if (value === undefined) throw new Error(`Unknown night color token --${current}`);
+    const next = /^var\(--([a-z0-9-]+)\)$/.exec(value)?.[1];
+    if (next === undefined) return value as Hex | Rgba;
+    current = next;
+  }
+}
 
 /**
  * Follows `var(--x)` references down to the literal a token paints with.
