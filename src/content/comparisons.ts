@@ -1,5 +1,6 @@
 import type { GlossaryTermId } from "./glossary-terms";
 import type { Translatable } from "@/lib/i18n/translatable";
+import { COMPARISON_TITLES, type ComparisonSlug } from "./comparison-index";
 
 /**
  * comparisons.ts — le cluster « frameworks comparés » du plan de
@@ -10,10 +11,10 @@ import type { Translatable } from "@/lib/i18n/translatable";
  * validation. Ce sont des pages de fond qui portent le nom d'Antoine ; à
  * passer au prochain bon à tirer.
  *
- * **Pourquoi ces quatre-là.** Le concurrent le mieux placé sur « AARRR » en
+ * **Pourquoi ces cinq-là.** Le concurrent le mieux placé sur « AARRR » en
  * anglais se classe précisément avec des pages « X vs Y » : la requête
  * comparative est le seul angle de ce sujet qui ne soit pas déjà saturé par
- * des définitions. Les quatre choisis sont les quatre cadres avec lesquels
+ * des définitions. Les cinq choisis sont les cinq cadres avec lesquels
  * AARRR est réellement confondu, et chacun l'est pour une raison
  * différente — c'est ce qui les empêche d'être quatre variantes du même
  * texte :
@@ -21,7 +22,10 @@ import type { Translatable } from "@/lib/i18n/translatable";
  * - **North Star** : deux couches distinctes (une carte et une boussole) ;
  * - **RARRA** : les mêmes cinq étapes, dans un autre ordre ;
  * - **growth loops** : la même chose, dessinée en cercle plutôt qu'en ligne ;
- * - **OKR** : un modèle de mesure contre un rituel de décision.
+ * - **OKR** : un modèle de mesure contre un rituel de décision ;
+ * - **HEART** : la même lettre (Retention) pour deux questions — l'entreprise
+ *   d'un côté, l'expérience d'une fonctionnalité de l'autre (audit SEO v1 §3.1,
+ *   ajoutée le 2026-09-24).
  *
  * **Chaque page finit sur « mesure la tienne »**, ce qui est la seule chose
  * qu'un site adossé à un outil qui marche peut dire de plus qu'un article.
@@ -36,11 +40,9 @@ import type { Translatable } from "@/lib/i18n/translatable";
  * portent la requête telle qu'elle se tape.
  */
 
-export type ComparisonSlug =
-  | "aarrr-vs-north-star-metric"
-  | "aarrr-vs-rarra"
-  | "aarrr-vs-growth-loops"
-  | "aarrr-vs-okr";
+// Slugs, ordre et titres vivent dans `comparison-index.ts`, que les pages qui
+// ne font que LISTER le cluster importent sans tirer toute la prose d'ici.
+export { COMPARISON_ORDER, type ComparisonSlug } from "./comparison-index";
 
 /** Une ligne du tableau côte à côte. Quatre par page : au-delà, on relit une liste, plus une comparaison. */
 export interface ComparisonRow {
@@ -70,23 +72,13 @@ export interface Comparison {
   glossary: GlossaryTermId[];
 }
 
-/** L'ordre d'affichage des liens croisés. Du plus recherché au moins recherché. */
-export const COMPARISON_ORDER: ComparisonSlug[] = [
-  "aarrr-vs-north-star-metric",
-  "aarrr-vs-rarra",
-  "aarrr-vs-growth-loops",
-  "aarrr-vs-okr",
-];
-
 const NORTH_STAR: Comparison = {
   other: { en: "North Star metric", fr: "North Star metric" },
-  title: {
-    en: "AARRR vs North Star metric",
-    fr: "AARRR ou North Star metric",
-  },
+  title: COMPARISON_TITLES["aarrr-vs-north-star-metric"],
+  // TODO: à relire — audit SEO v1 (2026-09-24), §1.3 : 62 et 68 caractères, coupés dans un résultat de recherche.
   metaTitle: {
-    en: "AARRR vs North Star metric — a map and a compass, not a choice",
-    fr: "AARRR ou North Star metric — une carte et une boussole, pas un choix",
+    en: "AARRR vs North Star metric — a map and a compass",
+    fr: "AARRR ou North Star metric — une carte et une boussole",
   },
   metaDescription: {
     en: "AARRR is a five-stage map; a North Star is one number the company steers by. They sit at different layers, and each one's failure mode is the other one's job.",
@@ -168,10 +160,7 @@ const NORTH_STAR: Comparison = {
 
 const RARRA: Comparison = {
   other: { en: "RARRA", fr: "RARRA" },
-  title: {
-    en: "AARRR vs RARRA",
-    fr: "AARRR ou RARRA",
-  },
+  title: COMPARISON_TITLES["aarrr-vs-rarra"],
   metaTitle: {
     en: "AARRR vs RARRA — the same five stages, a different order",
     fr: "AARRR ou RARRA — les mêmes cinq étapes, dans un autre ordre",
@@ -268,13 +257,11 @@ const RARRA: Comparison = {
 
 const GROWTH_LOOPS: Comparison = {
   other: { en: "Growth loops", fr: "Growth loops" },
-  title: {
-    en: "AARRR vs growth loops",
-    fr: "AARRR ou growth loops",
-  },
+  title: COMPARISON_TITLES["aarrr-vs-growth-loops"],
+  // TODO: à relire — audit SEO v1 (2026-09-24), §1.3 : 69 et 77 caractères, coupés dans un résultat de recherche.
   metaTitle: {
-    en: "AARRR vs growth loops — a funnel is a loop with the last edge missing",
-    fr: "AARRR ou growth loops — un entonnoir est une boucle à qui il manque une arête",
+    en: "AARRR vs growth loops — a funnel is a loop missing an edge",
+    fr: "AARRR ou growth loops — un entonnoir est une boucle ouverte",
   },
   metaDescription: {
     en: "A funnel is a line, a loop is a circle. But a loop runs through the same five stages — it refuses to stop at the end. Diagnose with one, plan with the other.",
@@ -356,10 +343,7 @@ const GROWTH_LOOPS: Comparison = {
 
 const OKR: Comparison = {
   other: { en: "OKR", fr: "OKR" },
-  title: {
-    en: "AARRR vs OKR",
-    fr: "AARRR ou OKR",
-  },
+  title: COMPARISON_TITLES["aarrr-vs-okr"],
   metaTitle: {
     en: "AARRR vs OKR — a measurement model and a decision ritual",
     fr: "AARRR ou OKR — un modèle de mesure et un rituel de décision",
@@ -442,11 +426,104 @@ const OKR: Comparison = {
   glossary: ["north-star-metric", "activation", "aarrr", "retention"],
 };
 
+// TODO: à relire — audit SEO v1 (2026-09-24), §3.1 : cinquième page du cluster, premier jet de la session de code (titres, descriptions, tableau, sections et verdict).
+const HEART: Comparison = {
+  other: { en: "HEART", fr: "HEART" },
+  title: COMPARISON_TITLES["aarrr-vs-heart"],
+  metaTitle: {
+    en: "AARRR vs HEART — a business funnel and a UX scorecard",
+    fr: "AARRR ou HEART — un entonnoir et une grille d'expérience",
+  },
+  metaDescription: {
+    en: "AARRR measures where the business funnel leaks; HEART measures whether the experience is good. Both track retention, but not the same way. When to use which.",
+    fr: "AARRR mesure où l'entonnoir de l'entreprise fuit ; HEART, si l'expérience est bonne. Les deux suivent la rétention, mais pas de la même façon. Lequel choisir.",
+  },
+  intro: {
+    en: "These two get compared because both are five-letter acronyms with Retention in the middle, and that is about all they share. AARRR asks whether the business grows, stage by stage, from a first visit to a payment. HEART, published by a Google research team, asks whether the experience of using a product is any good — Happiness, Engagement, Adoption, Retention, Task success. Same users, two different questions, and a team usually needs the first answer before the second one is worth asking.",
+    fr: "Ces deux-là sont comparés parce que ce sont deux acronymes de cinq lettres avec la Retention au milieu, et c'est à peu près tout ce qu'ils partagent. AARRR demande si l'entreprise grandit, étape par étape, de la première visite au paiement. HEART, publié par une équipe de recherche de Google, demande si l'expérience d'utilisation d'un produit est bonne — Happiness, Engagement, Adoption, Retention, Task success. Les mêmes utilisateurs, deux questions différentes, et une équipe a généralement besoin de la première réponse avant que la seconde vaille la peine d'être posée.",
+  },
+  rows: [
+    {
+      aspect: { en: "What it measures", fr: "Ce que ça mesure" },
+      aarrr: { en: "Whether the business grows, stage by stage", fr: "Si l'entreprise grandit, étape par étape" },
+      other: { en: "Whether the experience is good, for one product or feature", fr: "Si l'expérience est bonne, pour un produit ou une fonctionnalité" },
+    },
+    {
+      aspect: { en: "The unit", fr: "L'unité de mesure" },
+      aarrr: { en: "A customer moving through the funnel", fr: "Un client qui traverse l'entonnoir" },
+      other: { en: "A user doing a task in the product", fr: "Un utilisateur qui accomplit une tâche dans le produit" },
+    },
+    {
+      aspect: { en: "Where it comes from", fr: "D'où ça vient" },
+      aarrr: {
+        en: "Dave McClure's startup metrics talk, built for founders and investors",
+        fr: "La présentation de Dave McClure sur les métriques de startup, pour les fondateurs et les investisseurs",
+      },
+      other: {
+        en: "A Google research team (Kerry Rodden and colleagues), built for UX teams",
+        fr: "Une équipe de recherche de Google (Kerry Rodden et ses collègues), pour les équipes UX",
+      },
+    },
+    {
+      aspect: { en: "What it cannot see", fr: "Ce que ça ne voit pas" },
+      aarrr: { en: "Why a stage is weak from the user's side", fr: "Pourquoi une étape est faible du point de vue de l'utilisateur" },
+      other: { en: "Whether a better experience earns any money", fr: "Si une meilleure expérience rapporte de l'argent" },
+    },
+  ],
+  sections: [
+    {
+      heading: { en: "Two different questions about the same users", fr: "Deux questions différentes sur les mêmes utilisateurs" },
+      body: [
+        {
+          en: "AARRR is written from the company's side of the table. Each stage is a step in a revenue story — a visitor becomes a user, a user becomes a regular, a regular brings someone else and eventually pays. A stage is weak when that story stalls, whatever the reason. The model does not ask whether people enjoy the product; it asks whether they come back and whether the business can count on it.",
+          fr: "AARRR est écrit du côté de l'entreprise. Chaque étape est un moment d'une histoire de revenu — un visiteur devient utilisateur, un utilisateur devient un habitué, un habitué en amène un autre et finit par payer. Une étape est faible quand cette histoire cale, quelle qu'en soit la raison. Le modèle ne se demande pas si les gens aiment le produit ; il se demande s'ils reviennent et si l'entreprise peut compter dessus.",
+        },
+        {
+          en: "HEART is written from the user's side. It was designed to give UX teams something better than page views to argue with, and it comes with a small process, Goals-Signals-Metrics: state what the product should achieve for a user, find the behaviour that would show it, then pick the number. It is usually applied to one product or one feature at a time — a new editor, a checkout flow — rather than to the whole company. That is its strength: it can tell apart two versions of a screen that AARRR would score exactly the same.",
+          fr: "HEART est écrit du côté de l'utilisateur. Il a été conçu pour donner aux équipes UX mieux que des pages vues pour argumenter, et il vient avec une petite méthode, Goals-Signals-Metrics : dire ce que le produit doit accomplir pour un utilisateur, trouver le comportement qui le montrerait, puis choisir le chiffre. On l'applique en général à un produit ou à une fonctionnalité à la fois — un nouvel éditeur, un tunnel de paiement — plutôt qu'à toute l'entreprise. C'est sa force : il sait distinguer deux versions d'un écran qu'AARRR noterait exactement pareil.",
+        },
+      ],
+    },
+    {
+      heading: { en: "Where they overlap: retention, measured two ways", fr: "Là où ils se recouvrent : la rétention, mesurée deux fois" },
+      body: [
+        {
+          en: "Retention is the one letter the two share, and it is the source of most of the confusion. In AARRR it means customers who keep using the product and keep paying for it, read as cohort curves over months. In HEART it usually means users who come back to a specific product or feature, read over days or weeks. A team can have a feature with excellent HEART retention inside a business with poor AARRR retention: the people who use the new report love it, and most accounts still churn before they ever find it.",
+          fr: "La Retention est la seule lettre que les deux partagent, et c'est la source de la plupart des confusions. Dans AARRR, elle désigne les clients qui continuent d'utiliser le produit et de le payer, lus en courbes de cohortes sur des mois. Dans HEART, elle désigne le plus souvent les utilisateurs qui reviennent à un produit ou à une fonctionnalité précise, lus sur des jours ou des semaines. Une équipe peut avoir une fonctionnalité à l'excellente rétention HEART dans une entreprise à la rétention AARRR médiocre : ceux qui utilisent le nouveau rapport l'adorent, et la plupart des comptes partent quand même avant de l'avoir trouvé.",
+        },
+        {
+          en: "Adoption and Activation look alike too, and differ in the same way. HEART's Adoption counts new users of a feature; AARRR's Activation asks whether a new customer reached the moment the product becomes worth keeping. The first is a count, the second is a threshold, and a launch can move the count without moving the threshold at all. When the two frameworks disagree on the same word, the disagreement is information: it usually means the feature and the business are not being measured on the same population.",
+          fr: "Adoption et Activation se ressemblent aussi, et divergent de la même façon. L'Adoption de HEART compte les nouveaux utilisateurs d'une fonctionnalité ; l'Activation d'AARRR demande si un nouveau client a atteint le moment où le produit vaut d'être gardé. La première est un décompte, la seconde un seuil, et un lancement peut faire bouger le décompte sans toucher au seuil. Quand les deux cadres ne sont pas d'accord sur le même mot, le désaccord est une information : il signifie en général que la fonctionnalité et l'entreprise ne sont pas mesurées sur la même population.",
+        },
+      ],
+    },
+    {
+      heading: { en: "The funnel picks the stage, HEART inspects it", fr: "L'entonnoir désigne l'étape, HEART l'inspecte" },
+      body: [
+        {
+          en: "Used together, the two nest rather than compete. AARRR works at the level of the business and answers where growth stalls. Once it has named a stage, say Activation, HEART is a good way to look inside it: which task in the first session fails, how long it takes, whether the people who finish it are happier than those who give up. Task success and Happiness in particular have no equivalent in AARRR, and they are exactly what a team needs once it knows which stage to fix.",
+          fr: "Utilisés ensemble, les deux s'emboîtent plutôt qu'ils ne s'opposent. AARRR travaille au niveau de l'entreprise et dit où la croissance cale. Une fois qu'il a désigné une étape, disons l'Activation, HEART est un bon moyen de regarder à l'intérieur : quelle tâche de la première session échoue, combien de temps elle prend, si ceux qui la terminent sont plus satisfaits que ceux qui abandonnent. Task success et Happiness, en particulier, n'ont aucun équivalent dans AARRR, et c'est exactement ce dont une équipe a besoin une fois qu'elle sait quelle étape réparer.",
+        },
+        {
+          en: "The reverse order wastes effort. A HEART scorecard for every feature, built before anyone knows which stage of the business is weak, produces a lot of honest measurement about screens that were never the problem. The questionnaire on this site does the first half of the job: it names the stage in three minutes, from fifteen questions about practices rather than about screens. What it cannot do is watch your users — that is the part HEART is built for.",
+          fr: "L'ordre inverse gaspille des efforts. Une grille HEART pour chaque fonctionnalité, construite avant que quiconque sache quelle étape de l'entreprise est faible, produit beaucoup de mesures honnêtes sur des écrans qui n'ont jamais été le problème. Le questionnaire de ce site fait la première moitié du travail : il désigne l'étape en trois minutes, à partir de quinze questions sur les pratiques plutôt que sur les écrans. Ce qu'il ne peut pas faire, c'est observer tes utilisateurs — c'est la partie pour laquelle HEART est fait.",
+        },
+      ],
+    },
+  ],
+  verdict: {
+    en: "Different layers, not rivals. Use AARRR to find the stage where growth stalls, then use HEART, with its Goals-Signals-Metrics discipline, to measure the experience inside that stage. If a team has time for only one this quarter and has never diagnosed its funnel, it should start with AARRR: a perfect UX scorecard on the wrong stage is still the wrong stage.",
+    fr: "Des couches différentes, pas des rivaux. Utilise AARRR pour trouver l'étape où la croissance cale, puis HEART, avec sa discipline Goals-Signals-Metrics, pour mesurer l'expérience à l'intérieur de cette étape. Si une équipe n'a le temps que pour l'un des deux ce trimestre et n'a jamais diagnostiqué son entonnoir, qu'elle commence par AARRR : une grille UX parfaite sur la mauvaise étape reste la mauvaise étape.",
+  },
+  glossary: ["retention", "activation", "nps", "aarrr"],
+};
+
 export const COMPARISONS: Record<ComparisonSlug, Comparison> = {
   "aarrr-vs-north-star-metric": NORTH_STAR,
   "aarrr-vs-rarra": RARRA,
   "aarrr-vs-growth-loops": GROWTH_LOOPS,
   "aarrr-vs-okr": OKR,
+  "aarrr-vs-heart": HEART,
 };
 
 export function isComparisonSlug(value: string): value is ComparisonSlug {

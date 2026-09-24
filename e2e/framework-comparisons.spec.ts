@@ -6,12 +6,16 @@ import { COMPARISON_ORDER, COMPARISONS } from "../src/content/comparisons";
  *
  * Ce que ces specs tiennent :
  *
- * 1. **Les quatre pages existent aux deux langues, à un slug plat**, et
+ * 1. **Chaque page du cluster existe aux deux langues, à un slug plat**, et
  *    l'adresse non préfixée redirige — sans le slug dans `LOCALIZED_ROOTS`
  *    elle tomberait dans les routes applicatives et rendrait un 404, en
  *    silence, sur une URL qu'on aurait déjà publiée.
  * 2. **Le cluster se parcourt depuis n'importe laquelle de ses entrées** :
- *    chaque page sort vers les trois autres, jamais vers elle-même.
+ *    chaque page sort vers toutes les autres, jamais vers elle-même.
+ *
+ * Aucun compte n'est écrit en dur : il dérive de `COMPARISON_ORDER`, sinon
+ * chaque page ajoutée au cluster (la cinquième, HEART, audit SEO v1 §3.1)
+ * demanderait de retoucher des nombres qu'on finit par retoucher sans les lire.
  * 3. **Chacune reçoit son lien entrant** depuis `/how-it-works`, la page qui
  *    explique le cadre (règle 2.4).
  * 4. **Chacune tranche** — le bloc verdict est ce qu'un lecteur venu d'une
@@ -24,7 +28,7 @@ import { COMPARISON_ORDER, COMPARISONS } from "../src/content/comparisons";
  */
 test.describe("the compared-frameworks cluster", () => {
   for (const locale of ["en", "fr"] as const) {
-    test(`the four pages exist in ${locale}, each with its own title and description`, async ({ page }) => {
+    test(`every page of the cluster exists in ${locale}, each with its own title and description`, async ({ page }) => {
       const titles = new Set<string>();
       for (const slug of COMPARISON_ORDER) {
         const response = await page.goto(`/${locale}/${slug}`);
@@ -33,14 +37,14 @@ test.describe("the compared-frameworks cluster", () => {
 
         const h1 = await page.locator("h1").innerText();
         expect(h1).toBe(COMPARISONS[slug].title[locale]);
-        // Four pages on one topic: the titles have to be four different pages.
+        // Several pages on one topic: each title has to be a different page.
         expect(titles.has(h1), `${slug} repeats a title`).toBe(false);
         titles.add(h1);
 
         const description = await page.locator('meta[name="description"]').getAttribute("content");
         expect(description, slug).toBe(COMPARISONS[slug].metaDescription[locale]);
       }
-      expect(titles.size).toBe(4);
+      expect(titles.size).toBe(COMPARISON_ORDER.length);
     });
   }
 
@@ -67,11 +71,11 @@ test.describe("the compared-frameworks cluster", () => {
     }
   });
 
-  test("the cluster is walkable from any of its four entries, and no page links to itself", async ({ page }) => {
+  test("the cluster is walkable from any of its entries, and no page links to itself", async ({ page }) => {
     for (const slug of COMPARISON_ORDER) {
       await page.goto(`/en/${slug}`);
       const links = page.getByTestId("other-comparisons").locator("a");
-      await expect(links).toHaveCount(3);
+      await expect(links).toHaveCount(COMPARISON_ORDER.length - 1);
       const hrefs = await links.evaluateAll((els) => els.map((el) => el.getAttribute("href")));
       expect(hrefs, slug).not.toContain(`/en/${slug}`);
       for (const other of COMPARISON_ORDER.filter((id) => id !== slug)) {
@@ -91,10 +95,10 @@ test.describe("the compared-frameworks cluster", () => {
     }
   });
 
-  test("how it works links to all four — the page that explains the framework", async ({ page }) => {
+  test("how it works links to every comparison — the page that explains the framework", async ({ page }) => {
     await page.goto("/fr/how-it-works");
     const links = page.getByTestId("framework-comparisons").locator("a");
-    await expect(links).toHaveCount(4);
+    await expect(links).toHaveCount(COMPARISON_ORDER.length);
     const hrefs = await links.evaluateAll((els) => els.map((el) => el.getAttribute("href")));
     for (const slug of COMPARISON_ORDER) expect(hrefs).toContain(`/fr/${slug}`);
   });

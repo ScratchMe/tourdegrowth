@@ -277,6 +277,9 @@ export const UI_STRINGS = {
     backToIndex: { en: "← Glossary", fr: "← Glossaire" },
     inPracticeLabel: { en: "In practice", fr: "En pratique" },
     relatedLabel: { en: "Related terms", fr: "Termes liés" },
+    // SEO audit v1 §1.7 — the block that links the AARRR term page to the
+    // "AARRR vs X" cluster. TODO: à relire — copie neuve (convention 6).
+    comparedWithLabel: { en: "AARRR compared with other frameworks", fr: "AARRR comparé à d'autres cadres" },
     // Relu et validé par Antoine (2026-09-09) — R2-11. Section labels of the long-form
     // term pages; the sections themselves are content/glossary-deep.ts.
     formulaLabel: { en: "The formula", fr: "La formule" },
@@ -635,13 +638,21 @@ export const UI_STRINGS = {
     deepDiveHeading: { en: "Deep dive — 10 more questions", fr: "Deep dive — 10 questions de plus" },
     quizDescription: {
       en: "Answer 15 questions about how your product acquires, activates, retains, refers and monetises — and get an AARRR growth score out of 100 you can share.",
-      fr: "Réponds à 15 questions sur la façon dont ton produit acquiert, active, retient, fait recommander et monétise — et obtiens un score growth AARRR sur 100 à partager.",
+      // TODO: à relire — audit SEO v1 (2026-09-24), §1.2 : 163 caractères depuis la revue de copie ; « growth » part, le reste ne bouge pas.
+      fr: "Réponds à 15 questions sur la façon dont ton produit acquiert, active, retient, fait recommander et monétise — et obtiens un score AARRR sur 100 à partager.",
     },
     // Alt text of the landing share image (opengraph-image.tsx): what it shows,
     // for the people who can't see it.
     shareImageAlt: {
       en: "Tour de Growth — Where does your growth stall? A guided AARRR check-up, 15 questions, 3 minutes.",
       fr: "Tour de Growth — Où ta croissance cale-t-elle ? Un diagnostic AARRR guidé, 15 questions, 3 minutes.",
+    },
+    // Alt text of the `/quiz` share image (`quiz/share/[locale]/route.ts`,
+    // SEO audit v1 §1.1): the two lines it draws, said once.
+    // TODO: à relire — copie neuve (convention 6 de CLAUDE.md).
+    quizShareImageAlt: {
+      en: "Tour de Growth — the Tour, 15 questions. You leave with a score out of 100, the stage holding you back, and one action to take.",
+      fr: "Tour de Growth — le Tour, 15 questions. Tu repars avec un score sur 100, l'étape qui te freine et une action à mener.",
     },
   },
 

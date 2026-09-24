@@ -68,18 +68,33 @@ export function webApplicationSchema(locale: Locale) {
   };
 }
 
-/** Breadcrumbs, as rendered visually ("← Glossary") but until now never declared. */
 /**
  * Un `Article` pour les pages de fond qui ne sont ni l'application, ni un
  * terme de glossaire — les deux pages « porte ouverte » du plan de
- * distribution (vague 2.1).
+ * distribution (vague 2.1) et le cluster « AARRR vs X » (vague 2.3).
  *
- * Pas de `datePublished`/`dateModified` : ces dates vivent déjà dans
- * `content/updated-at.ts`, qui alimente le `<lastmod>` du sitemap, et les
- * dupliquer ici créerait deux sources qui divergeraient au premier oubli —
- * exactement ce que R2-08 a corrigé en refusant un `new Date()` de build.
+ * **Les dates arrivent en paramètre** (audit SEO v1 §1.5) : `datePublished`
+ * est ce que Google demande pour un `Article`, `dateModified` ce qu'il
+ * recommande. Elles viennent de `content/updated-at.ts#articleDates`, la même
+ * source que le `<lastmod>` du sitemap — jamais un `new Date()` de build
+ * (R2-08), et jamais importées ici : ce module est traversé par toutes les
+ * pages de contenu, et un module partagé reçoit les données de la page au lieu
+ * de les tirer (`content-fan-in.test.ts`, la leçon de `CRUMBS`).
+ *
+ * **`publisher` reste la personne, pas une `Organization`** (audit SEO v1
+ * §1.6, décision : ne pas corriger). Tour de Growth n'est pas une entreprise,
+ * c'est le projet d'une personne, et le même nœud `Person` répété partout est
+ * le signal cohérent que R2-15 a construit. Une `Organization` inventée pour
+ * cocher la case des résultats enrichis introduirait une incohérence pire que
+ * le gain — un test l'épingle pour que personne ne la « corrige » par réflexe.
  */
-export function articleSchema(locale: Locale, path: string, headline: string, description: string) {
+export function articleSchema(
+  locale: Locale,
+  path: string,
+  headline: string,
+  description: string,
+  dates: { published: string; modified: string },
+) {
   return {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -87,12 +102,15 @@ export function articleSchema(locale: Locale, path: string, headline: string, de
     description,
     url: absolute(locale, path),
     inLanguage: locale,
+    datePublished: dates.published,
+    dateModified: dates.modified,
     author: personNode(),
     publisher: personNode(),
     isPartOf: { "@type": "WebSite", name: SITE_NAME, url: absolute(locale) },
   };
 }
 
+/** Breadcrumbs, as rendered visually ("← Glossary") but until now never declared. */
 export function breadcrumbSchema(locale: Locale, trail: { name: string; path: string }[]) {
   return {
     "@context": "https://schema.org",

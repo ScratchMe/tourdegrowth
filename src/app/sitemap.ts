@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { COMPARISON_ORDER } from "@/content/comparisons";
+import { COMPARISON_ORDER } from "@/content/comparison-index";
 import { GLOSSARY } from "@/content/glossary";
 import { PRIVACY, TERMS } from "@/content/legal";
 import { CONTENT_UPDATED_AT, GLOSSARY_UPDATED_AT } from "@/content/updated-at";

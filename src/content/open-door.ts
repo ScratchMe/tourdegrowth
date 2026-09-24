@@ -57,12 +57,14 @@ export const CHECKLIST: OpenDoorPage = {
     en: "Growth audit checklist: the 15 points",
   },
   metaTitle: {
-    fr: "Checklist d'audit growth — 15 points, gratuite, sans inscription",
+    // TODO: à relire — audit SEO v1 (2026-09-24), §1.3 : 64 caractères en français.
+    fr: "Checklist d'audit growth — 15 points, gratuite, sans compte",
     en: "Growth audit checklist — 15 points, free, no signup",
   },
+  // TODO: à relire — audit SEO v1 (2026-09-24), §1.2 : 191 et 186 caractères, que Google réécrit.
   metaDescription: {
-    fr: "Les quinze questions d'un audit growth AARRR, avec ce à quoi ressemble une bonne réponse et ce que coûte son absence. À travailler sur papier, ou en trois minutes dans la version interactive.",
-    en: "The fifteen questions of an AARRR growth audit, with what a good answer looks like and what its absence costs. Work through it on paper, or take the interactive version in three minutes.",
+    fr: "Les quinze questions d'un audit growth AARRR, ce à quoi ressemble une bonne réponse et ce que coûte son absence. Sur papier, ou en trois minutes en ligne.",
+    en: "The fifteen questions of an AARRR growth audit, what a good answer looks like, and what its absence costs. On paper, or interactive in three minutes.",
   },
   intro: {
     // TODO: à relire — revue de copie v1 (2026-09-24), §3.1 : « une distinction qui décide de tout le reste », emphase abstraite.
@@ -128,9 +130,10 @@ export const DIAGNOSTIC: OpenDoorPage = {
     fr: "Diagnostic croissance startup — la méthode, gratuite",
     en: "Startup growth diagnostic — the method, free",
   },
+  // TODO: à relire — audit SEO v1 (2026-09-24), §1.2 : 187 et 165 caractères.
   metaDescription: {
-    fr: "Comment mener un diagnostic de croissance en une semaine : par quoi commencer, dans quel ordre regarder les cinq étapes, et pourquoi mesurer des pratiques n'est pas mesurer des résultats.",
-    en: "How to run a growth diagnostic in a week: where to start, what order to look at the five stages in, and why measuring practices is not the same as measuring results.",
+    fr: "Mener un diagnostic de croissance en une semaine : par où commencer, dans quel ordre lire les cinq étapes et pourquoi des pratiques ne sont pas des résultats.",
+    en: "How to run a growth diagnostic in a week: where to start, what order to look at the five stages in, and why measuring practices is not measuring results.",
   },
   intro: {
     // TODO: à relire — revue de copie v1 (2026-09-24), §3.1 : le « mot » annoncé n'était pas un mot.

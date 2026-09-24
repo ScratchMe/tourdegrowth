@@ -5,7 +5,7 @@ import { ProseActions, ProsePage, ProseSection, ProseText } from "@/components/b
 import { Button } from "@/components/core/Button";
 import { Callout } from "@/components/core/Callout";
 import { QUESTIONS } from "@/content/copy-library";
-import { COMPARISON_ORDER, COMPARISONS } from "@/content/comparisons";
+import { COMPARISON_ORDER, COMPARISON_TITLES } from "@/content/comparison-index";
 import { HOW_IT_WORKS } from "@/content/how-it-works";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
@@ -21,13 +21,15 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = await params;
   const resolved: Locale = isLocale(locale) ? locale : "en";
-  // Title/description in the page's own language (the page's own intro,
-  // already validated copy), hreflang set (REVIEW.md R-13), Open Graph text.
+  // Title/description in the page's own language, hreflang set (REVIEW.md
+  // R-13), Open Graph text. The description is its own field since the SEO
+  // audit v1 (§1.2): the intro, reused until then, ran past 160 characters.
   return contentMetadata(
     resolved,
     "/how-it-works",
     tc(UI_STRINGS.meta.howItWorksTitle, resolved),
-    tc(HOW_IT_WORKS.intro, resolved),
+    tc(HOW_IT_WORKS.metaDescription, resolved),
+    { ownShareImage: true },
   );
 }
 
@@ -133,7 +135,7 @@ export default async function HowItWorksPage({ params }: PageProps) {
           <div className={styles.comparisonLinks}>
             {COMPARISON_ORDER.map((slug) => (
               <Link key={slug} href={localePath(locale, `/${slug}`)} className={styles.comparisonLink}>
-                {tc(COMPARISONS[slug].title, locale)}
+                {tc(COMPARISON_TITLES[slug], locale)}
               </Link>
             ))}
           </div>

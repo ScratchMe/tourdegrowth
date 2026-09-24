@@ -1,4 +1,5 @@
 import { expect, test } from "./helpers";
+import { COMPARISON_ORDER } from "@/content/comparison-index";
 
 /**
  * REVIEW-02.md R2-13 — the glossary was linked from nowhere that had any
@@ -35,4 +36,24 @@ test("the definition popover on a result page offers the term's own page", async
 test("every pillar's glossary page links the framework it belongs to", async ({ page }) => {
   await page.goto("/en/glossary/retention");
   await expect(page.getByRole("link", { name: "AARRR" })).toHaveAttribute("href", "/en/glossary/aarrr");
+});
+
+/**
+ * SEO audit v1 §1.7 — the AARRR term page is the closest page to the
+ * "AARRR vs X" cluster and the glossary page with the most inbound links, and
+ * it pointed at none of them. It now lists every comparison, read from the
+ * cluster's own order so a new comparison is covered the day it ships; the
+ * other term pages do not grow the block.
+ */
+test("the AARRR term page links to every comparison page, in both languages", async ({ page }) => {
+  for (const locale of ["en", "fr"]) {
+    await page.goto(`/${locale}/glossary/aarrr`);
+    const hrefs = await page
+      .getByTestId("compared-with")
+      .locator("a")
+      .evaluateAll((els) => els.map((el) => el.getAttribute("href")));
+    expect(hrefs).toEqual(COMPARISON_ORDER.map((slug) => `/${locale}/${slug}`));
+  }
+  await page.goto("/en/glossary/cac");
+  await expect(page.getByTestId("compared-with")).toHaveCount(0);
 });
