@@ -6,7 +6,7 @@ import { MetaLabel } from "@/components/brand/MetaLabel";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { QUESTIONS } from "@/content/copy-library";
-import { COMPARISON_ORDER, COMPARISONS } from "@/content/comparisons";
+import { COMPARISON_ORDER, COMPARISON_TITLES } from "@/content/comparison-index";
 import { HOW_IT_WORKS } from "@/content/how-it-works";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
@@ -135,7 +135,7 @@ export default async function HowItWorksPage({ params }: PageProps) {
           <div className={styles.comparisonLinks}>
             {COMPARISON_ORDER.map((slug) => (
               <Link key={slug} href={localePath(locale, `/${slug}`)} className={styles.comparisonLink}>
-                {tc(COMPARISONS[slug].title, locale)}
+                {tc(COMPARISON_TITLES[slug], locale)}
               </Link>
             ))}
           </div>

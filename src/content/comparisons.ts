@@ -1,5 +1,6 @@
 import type { GlossaryTermId } from "./glossary-terms";
 import type { Translatable } from "@/lib/i18n/translatable";
+import { COMPARISON_TITLES, type ComparisonSlug } from "./comparison-index";
 
 /**
  * comparisons.ts — le cluster « frameworks comparés » du plan de
@@ -36,11 +37,9 @@ import type { Translatable } from "@/lib/i18n/translatable";
  * portent la requête telle qu'elle se tape.
  */
 
-export type ComparisonSlug =
-  | "aarrr-vs-north-star-metric"
-  | "aarrr-vs-rarra"
-  | "aarrr-vs-growth-loops"
-  | "aarrr-vs-okr";
+// Slugs, ordre et titres vivent dans `comparison-index.ts`, que les pages qui
+// ne font que LISTER le cluster importent sans tirer toute la prose d'ici.
+export { COMPARISON_ORDER, type ComparisonSlug } from "./comparison-index";
 
 /** Une ligne du tableau côte à côte. Quatre par page : au-delà, on relit une liste, plus une comparaison. */
 export interface ComparisonRow {
@@ -70,20 +69,9 @@ export interface Comparison {
   glossary: GlossaryTermId[];
 }
 
-/** L'ordre d'affichage des liens croisés. Du plus recherché au moins recherché. */
-export const COMPARISON_ORDER: ComparisonSlug[] = [
-  "aarrr-vs-north-star-metric",
-  "aarrr-vs-rarra",
-  "aarrr-vs-growth-loops",
-  "aarrr-vs-okr",
-];
-
 const NORTH_STAR: Comparison = {
   other: { en: "North Star metric", fr: "North Star metric" },
-  title: {
-    en: "AARRR vs North Star metric",
-    fr: "AARRR ou North Star metric",
-  },
+  title: COMPARISON_TITLES["aarrr-vs-north-star-metric"],
   // TODO: à relire — audit SEO v1 (2026-09-24), §1.3 : 62 et 68 caractères, coupés dans un résultat de recherche.
   metaTitle: {
     en: "AARRR vs North Star metric — a map and a compass",
@@ -169,10 +157,7 @@ const NORTH_STAR: Comparison = {
 
 const RARRA: Comparison = {
   other: { en: "RARRA", fr: "RARRA" },
-  title: {
-    en: "AARRR vs RARRA",
-    fr: "AARRR ou RARRA",
-  },
+  title: COMPARISON_TITLES["aarrr-vs-rarra"],
   metaTitle: {
     en: "AARRR vs RARRA — the same five stages, a different order",
     fr: "AARRR ou RARRA — les mêmes cinq étapes, dans un autre ordre",
@@ -269,10 +254,7 @@ const RARRA: Comparison = {
 
 const GROWTH_LOOPS: Comparison = {
   other: { en: "Growth loops", fr: "Growth loops" },
-  title: {
-    en: "AARRR vs growth loops",
-    fr: "AARRR ou growth loops",
-  },
+  title: COMPARISON_TITLES["aarrr-vs-growth-loops"],
   // TODO: à relire — audit SEO v1 (2026-09-24), §1.3 : 69 et 77 caractères, coupés dans un résultat de recherche.
   metaTitle: {
     en: "AARRR vs growth loops — a funnel is a loop missing an edge",
@@ -358,10 +340,7 @@ const GROWTH_LOOPS: Comparison = {
 
 const OKR: Comparison = {
   other: { en: "OKR", fr: "OKR" },
-  title: {
-    en: "AARRR vs OKR",
-    fr: "AARRR ou OKR",
-  },
+  title: COMPARISON_TITLES["aarrr-vs-okr"],
   metaTitle: {
     en: "AARRR vs OKR — a measurement model and a decision ritual",
     fr: "AARRR ou OKR — un modèle de mesure et un rituel de décision",

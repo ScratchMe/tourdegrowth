@@ -277,6 +277,9 @@ export const UI_STRINGS = {
     backToIndex: { en: "← Glossary", fr: "← Glossaire" },
     inPracticeLabel: { en: "In practice", fr: "En pratique" },
     relatedLabel: { en: "Related terms", fr: "Termes liés" },
+    // SEO audit v1 §1.7 — the block that links the AARRR term page to the
+    // "AARRR vs X" cluster. TODO: à relire — copie neuve (convention 6).
+    comparedWithLabel: { en: "AARRR compared with other frameworks", fr: "AARRR comparé à d'autres cadres" },
     // Relu et validé par Antoine (2026-09-09) — R2-11. Section labels of the long-form
     // term pages; the sections themselves are content/glossary-deep.ts.
     formulaLabel: { en: "The formula", fr: "La formule" },
