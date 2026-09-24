@@ -125,10 +125,10 @@ export default async function HowItWorksPage({ params }: PageProps) {
         </ProseSection>
 
         {/* GROWTH-PLAN.md 2.3 : le cluster « frameworks comparés » est lié
-            depuis ici parce que c'est LA page qui explique AARRR — quatre
+            depuis ici parce que c'est LA page qui explique AARRR — ces
             liens y sont du sujet, pas du remplissage. Le pied de page, lui,
             porte déjà six liens : un septième n'en mettrait plus aucun en
-            avant. Les quatre pages se lient aussi entre elles, donc le
+            avant. Les pages du cluster se lient aussi entre elles, donc le
             cluster se parcourt depuis n'importe laquelle de ses entrées. */}
         <ProseSection data-testid="framework-comparisons">
           <ProseText>{tc(UI_STRINGS.comparisonPage.fromHowItWorks, locale)}</ProseText>

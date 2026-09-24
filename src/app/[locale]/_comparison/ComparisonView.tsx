@@ -14,9 +14,10 @@ import { articleDates } from "@/content/updated-at";
 import own from "./comparison.module.css";
 
 /**
- * Le rendu partagé des quatre pages « AARRR vs X » (`GROWTH-PLAN.md` vague
- * 2.3). Les quatre routes sont des fichiers de dix lignes qui appellent
- * ceci ; le contenu vit dans `content/comparisons.ts`.
+ * Le rendu partagé des pages « AARRR vs X » (`GROWTH-PLAN.md` vague 2.3, et
+ * HEART, cinquième, ajoutée par l'audit SEO v1 §3.1). Chaque route est un
+ * fichier de dix lignes qui appelle ceci ; le contenu vit dans
+ * `content/comparisons.ts`.
  *
  * **Quatre dossiers de route plutôt qu'un segment dynamique.** Un
  * `[comparison]` à la racine de `[locale]` entrerait en collision avec
@@ -87,8 +88,8 @@ export function ComparisonView({ slug, locale }: { slug: ComparisonSlug; locale:
         </ProseSection>
 
         {/* GROWTH-PLAN.md 2.4 : chaque page sort vers le glossaire et vers
-            les trois autres comparaisons, donc le cluster est parcourable
-            depuis n'importe laquelle de ses quatre entrées. */}
+            toutes les autres comparaisons, donc le cluster est parcourable
+            depuis n'importe laquelle de ses entrées. */}
         <ProseSection heading={tc(t.glossaryHeading, locale)} data-testid="comparison-glossary">
           <div className={own.linkRow}>
             {entry.glossary.map((id) => (
