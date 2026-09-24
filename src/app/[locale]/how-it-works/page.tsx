@@ -22,13 +22,14 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = await params;
   const resolved: Locale = isLocale(locale) ? locale : "en";
-  // Title/description in the page's own language (the page's own intro,
-  // already validated copy), hreflang set (REVIEW.md R-13), Open Graph text.
+  // Title/description in the page's own language, hreflang set (REVIEW.md
+  // R-13), Open Graph text. The description is its own field since the SEO
+  // audit v1 (§1.2): the intro, reused until then, ran past 160 characters.
   return contentMetadata(
     resolved,
     "/how-it-works",
     tc(UI_STRINGS.meta.howItWorksTitle, resolved),
-    tc(HOW_IT_WORKS.intro, resolved),
+    tc(HOW_IT_WORKS.metaDescription, resolved),
     { ownShareImage: true },
   );
 }

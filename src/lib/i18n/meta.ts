@@ -3,6 +3,7 @@ import { LOCALES, type Locale } from "./locale";
 import { contentAlternates } from "./routes";
 import { OG_SIZE } from "@/lib/og/tokens";
 import { tc, UI_STRINGS } from "./dictionary";
+import type { Translatable } from "./translatable";
 
 /** Open Graph wants the territory form; the app only knows the language. */
 const OG_LOCALE: Record<Locale, string> = { en: "en_US", fr: "fr_FR" };
@@ -102,4 +103,26 @@ export function appMetadata(
     openGraph: { ...shared.openGraph, images },
     twitter: { ...shared.twitter, images },
   };
+}
+
+/**
+ * The search-snippet window every indexable page is held to — SEO audit v1
+ * §1.2/§1.3. Past ~60 characters a title starts being cut in a result (Google
+ * measures pixels, not characters, so this is the safe side of it); outside
+ * 70-160 a description is truncated mid-phrase or rewritten from the page,
+ * and the page loses the one line it chose for itself. The content modules
+ * are checked against these in `content/__tests__/page-meta.test.ts`, and the
+ * rendered HTML of every sitemap URL in `e2e/share-previews.spec.ts`.
+ */
+export const SEARCH_TITLE_MAX = 60;
+export const SEARCH_DESCRIPTION_MIN = 70;
+export const SEARCH_DESCRIPTION_MAX = 160;
+
+/**
+ * `<title>` of `/glossary/[term]`: the term (or its shorter `metaTitle` in
+ * that language), then the glossary's name. One builder for the page and the
+ * length test, so the test measures what the page renders.
+ */
+export function glossaryTermTitle(entry: { term: Translatable; metaTitle?: Partial<Translatable> }, locale: Locale): string {
+  return `${entry.metaTitle?.[locale] ?? tc(entry.term, locale)} — ${tc(UI_STRINGS.meta.glossaryTermSuffix, locale)}`;
 }

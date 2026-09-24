@@ -12,7 +12,7 @@ import { MetaLabel } from "@/components/brand/MetaLabel";
 import { breadcrumbSchema, definedTermSchema, JsonLd } from "@/lib/seo/jsonld";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { isLocale, LOCALES, type Locale } from "@/lib/i18n/locale";
-import { contentMetadata } from "@/lib/i18n/meta";
+import { contentMetadata, glossaryTermTitle } from "@/lib/i18n/meta";
 import { localePath } from "@/lib/i18n/routes";
 import styles from "./page.module.css";
 
@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return contentMetadata(
     resolved,
     `/glossary/${term}`,
-    `${tc(entry.term, resolved)} — ${tc(UI_STRINGS.meta.glossaryTermSuffix, resolved)}`,
+    glossaryTermTitle(entry, resolved),
     tc(entry.metaDescription ?? entry.definition, resolved),
     { ownShareImage: true },
   );

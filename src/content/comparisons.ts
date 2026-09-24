@@ -84,9 +84,10 @@ const NORTH_STAR: Comparison = {
     en: "AARRR vs North Star metric",
     fr: "AARRR ou North Star metric",
   },
+  // TODO: à relire — audit SEO v1 (2026-09-24), §1.3 : 62 et 68 caractères, coupés dans un résultat de recherche.
   metaTitle: {
-    en: "AARRR vs North Star metric — a map and a compass, not a choice",
-    fr: "AARRR ou North Star metric — une carte et une boussole, pas un choix",
+    en: "AARRR vs North Star metric — a map and a compass",
+    fr: "AARRR ou North Star metric — une carte et une boussole",
   },
   metaDescription: {
     en: "AARRR is a five-stage map; a North Star is one number the company steers by. They sit at different layers, and each one's failure mode is the other one's job.",
@@ -272,9 +273,10 @@ const GROWTH_LOOPS: Comparison = {
     en: "AARRR vs growth loops",
     fr: "AARRR ou growth loops",
   },
+  // TODO: à relire — audit SEO v1 (2026-09-24), §1.3 : 69 et 77 caractères, coupés dans un résultat de recherche.
   metaTitle: {
-    en: "AARRR vs growth loops — a funnel is a loop with the last edge missing",
-    fr: "AARRR ou growth loops — un entonnoir est une boucle à qui il manque une arête",
+    en: "AARRR vs growth loops — a funnel is a loop missing an edge",
+    fr: "AARRR ou growth loops — un entonnoir est une boucle ouverte",
   },
   metaDescription: {
     en: "A funnel is a line, a loop is a circle. But a loop runs through the same five stages — it refuses to stop at the end. Diagnose with one, plan with the other.",

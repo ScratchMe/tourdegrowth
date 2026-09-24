@@ -1,4 +1,5 @@
 import { expect, test } from "./helpers";
+import { SEARCH_DESCRIPTION_MAX, SEARCH_DESCRIPTION_MIN, SEARCH_TITLE_MAX } from "@/lib/i18n/meta";
 
 /**
  * What a link preview and a search result are built from — SEO audit v1.
@@ -57,6 +58,29 @@ test("every sitemap page declares exactly one share image, and it is a real PNG"
     }
     expect(checked.get(image), `${path} → ${image}`).toBe(true);
   }
+});
+
+/**
+ * SEO audit v1 §1.2/§1.3, on what the server actually sends. The unit test
+ * (`content/__tests__/page-meta.test.ts`) checks the content modules and names
+ * the source; this one checks the rendered `<title>` and description of every
+ * sitemap URL, so a page whose `generateMetadata` composes its text differently
+ * from what the unit test assumes still gets caught.
+ */
+test("every sitemap page's title and description fit a search result", async ({ request }) => {
+  test.setTimeout(120_000);
+  const off: string[] = [];
+  // `/quiz` is not in the sitemap (an app page) but is indexable on purpose (R2-08).
+  for (const path of [...(await sitemapPaths(request)), "/quiz?lang=en", "/quiz?lang=fr"]) {
+    const html = await (await request.get(path)).text();
+    const title = attr(html, /<title>([^<]*)<\/title>/) ?? "";
+    const description = attr(html, /<meta name="description" content="([^"]*)"/) ?? "";
+    if (title.length === 0 || title.length > SEARCH_TITLE_MAX) off.push(`${path} title (${title.length}): ${title}`);
+    if (description.length < SEARCH_DESCRIPTION_MIN || description.length > SEARCH_DESCRIPTION_MAX) {
+      off.push(`${path} description (${description.length}): ${description}`);
+    }
+  }
+  expect(off).toEqual([]);
 });
 
 /**

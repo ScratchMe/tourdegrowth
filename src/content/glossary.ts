@@ -35,6 +35,17 @@ export interface GlossaryEntry {
    * Only set where the definition falls outside that — the test enforces it.
    */
   metaDescription?: Translatable;
+  /**
+   * What replaces `term` in `/glossary/[term]`'s `<title>` when the full
+   * display form pushes the title past ~60 characters (SEO audit v1 §1.3) —
+   * the point where a search result starts cutting it, and where what gets
+   * cut is precisely the spelled-out name that serves the long tail. The H1
+   * and the popover keep `term` unchanged (the acronym expansions are there
+   * on purpose, `acronyms.test.ts`). Per language, because it is almost
+   * always only the French form that runs long; the test enforces that an
+   * override exists only where the default title does not fit.
+   */
+  metaTitle?: Partial<Translatable>;
   /** When this term's long-form copy last changed (sitemap `lastmod`); falls back to `GLOSSARY_UPDATED_AT`. */
   updatedAt?: string;
 }
@@ -184,6 +195,8 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   "north-star-metric": {
     ...GLOSSARY_TERMS["north-star-metric"],
+    // TODO: à relire — audit SEO v1 (2026-09-24), §1.3 : titre de recherche court.
+    metaTitle: { fr: "Métrique phare (North Star)" },
     updatedAt: "2026-09-09", // R2-11, lot 5 — the "doubling test" paragraph reworded after review
     extended: {
       fr: "Les exemples les plus connus : Airbnb a longtemps suivi les « nuits réservées » plutôt que le nombre d'inscriptions, Facebook a suivi les utilisateurs actifs mensuels plutôt que le nombre de comptes créés. Le point commun : dans les deux cas, la métrique capture de la valeur réellement délivrée, pas une action facile à gonfler artificiellement. Une bonne North Star Metric doit répondre à une question simple : si elle grimpe sans que rien d'autre ne bouge, est-ce que l'entreprise va vraiment mieux ? Si la réponse n'est pas clairement oui, ce n'est pas la bonne métrique.",
@@ -197,6 +210,8 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   // à relire ligne à ligne. TODO: à relire.
   "cac-payback": {
     ...GLOSSARY_TERMS["cac-payback"],
+    // TODO: à relire — audit SEO v1 (2026-09-24), §1.3 : titre de recherche court.
+    metaTitle: { fr: "Délai de remboursement du CAC" },
     updatedAt: "2026-09-23", // bon à tirer nº5 — réécritures demandées par Antoine
     extended: {
       fr: "Le ratio LTV:CAC est la métrique d'acquisition la plus citée ; le CAC payback est celle qui contraint réellement une entreprise qui n'a pas trois ans de trésorerie devant elle. La différence tient en un mot : le LTV:CAC est une prévision, construite sur un taux de churn projeté des années en avant — le chiffre le moins fiable que possède une jeune entreprise —, alors que le payback est une date, calculée uniquement à partir de chiffres déjà connus. Les deux se calculent depuis les mêmes trois données et peuvent parfaitement se contredire : une économie unitaire excellente sur cinq ans ne dit rien sur la capacité à financer le mois prochain. Quand ils divergent, c'est la date que le compte en banque respecte.",
@@ -206,6 +221,8 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   "nrr-grr": {
     ...GLOSSARY_TERMS["nrr-grr"],
+    // TODO: à relire — audit SEO v1 (2026-09-24), §1.3 : titre de recherche court.
+    metaTitle: { en: "NRR & GRR — net revenue retention", fr: "NRR et GRR — rétention du revenu" },
     updatedAt: "2026-09-23", // bon à tirer nº5 — réécritures demandées par Antoine
     extended: {
       fr: "Ces deux taux ne s'écrivent presque jamais l'un sans l'autre, et c'est volontaire : la NRR est le chiffre qu'on met dans un deck, la GRR celui qui dit ce que le produit retient vraiment. La GRR ne compte que les pertes — résiliations et rétrogradations — donc elle ne peut jamais dépasser 100 % ; la NRR y ajoute l'expansion et le peut. L'écart entre les deux est exactement ce que l'expansion achète. Une NRR à 105 % avec une GRR à 90 % décrit une base qui fuit pendant qu'une poignée de gros comptes paie pour ceux qui partent : c'est tenable quelques trimestres, jamais quelques années, et ça se découvre en général au moment où le plus gros compte cesse de grandir. Lire les deux ensemble est le seul moyen de voir venir cette situation.",
@@ -225,6 +242,8 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   // ——— wave 2.2, lot 2 (2026-09-14) — premier jet, TODO: à relire ———
   "dau-mau": {
     ...GLOSSARY_TERMS["dau-mau"],
+    // TODO: à relire — audit SEO v1 (2026-09-24), §1.3 : titre de recherche court.
+    metaTitle: { en: "DAU/MAU ratio", fr: "Ratio DAU/MAU" },
     updatedAt: "2026-09-14", // GROWTH-PLAN.md 2.2, lot 2 — created
     extended: {
       fr: "La seule chose à retenir de ce ratio est qu'il se traduit : multiplié par 30, il donne le nombre de jours par mois où un utilisateur moyen revient. Un DAU/MAU de 0,2, ce sont six jours sur trente — dit comme ça, une équipe sait immédiatement si c'est bon, parce qu'elle sait à quoi sert son produit. C'est aussi ce qui rend le seuil des 20 % souvent cité à peu près inutile hors de son contexte d'origine, les produits sociaux grand public : un outil de paie à 0,05 n'échoue pas, il est utilisé quand la paie tombe. Deux pièges à connaître. Le ratio est une moyenne sur une population souvent bimodale, donc il décrit rarement quelqu'un de réel. Et il monte mécaniquement quand les utilisateurs occasionnels partent — d'où la règle de ne jamais le lire sans le nombre de MAU à côté.",
@@ -234,6 +253,8 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   "time-to-value": {
     ...GLOSSARY_TERMS["time-to-value"],
+    // TODO: à relire — audit SEO v1 (2026-09-24), §1.3 : titre de recherche court.
+    metaTitle: { fr: "Time to value" },
     updatedAt: "2026-09-23", // bon à tirer nº5 — réécritures demandées par Antoine
     extended: {
       fr: "Cette métrique a un piège qu'il faut connaître avant d'en faire un indicateur de pilotage : calculée sur les seuls utilisateurs qui finissent par activer, elle s'améliore quand les plus lents abandonnent. Le chiffre progresse précisément parce que le produit a régressé, et rien à l'intérieur ne le montre. D'où deux règles qui ne coûtent rien — utiliser la médiane plutôt que la moyenne, qu'une poignée de traînards suffit à tripler, et publier systématiquement le taux d'activation juste à côté. L'autre confusion fréquente est avec la durée de l'onboarding : ce sont deux choses différentes, et l'écart entre elles est souvent la trouvaille. Un parcours bouclé en deux minutes peut très bien avoir un time to value de six jours si la valeur n'arrive qu'une fois qu'un collègue a validé une intégration — auquel cas polir l'interface ne changera rien.",
@@ -253,6 +274,8 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   // ——— wave 2.2, lot 3 (2026-09-14) — clôt la vague. Premier jet, TODO: à relire ———
   "product-led-growth": {
     ...GLOSSARY_TERMS["product-led-growth"],
+    // TODO: à relire — audit SEO v1 (2026-09-24), §1.3 : titre de recherche court.
+    metaTitle: { fr: "Product-led growth (PLG)" },
     updatedAt: "2026-09-23", // bon à tirer nº5 — réécritures demandées par Antoine
     extended: {
       fr: "Le product-led growth est un modèle de distribution, pas un gage de qualité : il fonctionne là où un produit peut délivrer de la valeur avant une conversation, ce qui est une propriété du produit et de son acheteur, pas de l'envie qu'en a l'équipe. D'où l'intérêt d'un test mesurable plutôt que d'une revendication — la part de clients arrivés au payant sans avoir parlé à personne. Et de la calculer deux fois, en nombre de clients et en revenu, parce que l'écart entre les deux est presque toujours la trouvaille : une entreprise peut être à 25 % en clients et à 3 % en revenu, auquel cas le modèle existe mais ne paie encore rien. Ni l'un ni l'autre chiffre ne rend l'entreprise bonne ou mauvaise ; ils tranchent seulement laquelle des deux elle est, ce qu'il faut savoir avant de décider où va la prochaine année d'ingénierie.",

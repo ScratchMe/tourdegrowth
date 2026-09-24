@@ -635,7 +635,8 @@ export const UI_STRINGS = {
     deepDiveHeading: { en: "Deep dive — 10 more questions", fr: "Deep dive — 10 questions de plus" },
     quizDescription: {
       en: "Answer 15 questions about how your product acquires, activates, retains, refers and monetises — and get an AARRR growth score out of 100 you can share.",
-      fr: "Réponds à 15 questions sur la façon dont ton produit acquiert, active, retient, fait recommander et monétise — et obtiens un score growth AARRR sur 100 à partager.",
+      // TODO: à relire — audit SEO v1 (2026-09-24), §1.2 : 163 caractères depuis la revue de copie ; « growth » part, le reste ne bouge pas.
+      fr: "Réponds à 15 questions sur la façon dont ton produit acquiert, active, retient, fait recommander et monétise — et obtiens un score AARRR sur 100 à partager.",
     },
     // Alt text of the landing share image (opengraph-image.tsx): what it shows,
     // for the people who can't see it.

@@ -15,7 +15,8 @@ import type { Translatable } from "@/lib/i18n/translatable";
 export const ABOUT = {
   title: { fr: "À propos de Tour de Growth", en: "About Tour de Growth" },
   metaDescription: {
-    fr: "Qui a construit Tour de Growth et pourquoi, ce que mesurent les quinze questions AARRR, et comment le score est calculé exactement — sans qu'aucune IA touche au chiffre.",
+    // TODO: à relire — audit SEO v1 (2026-09-24), §1.2 : 169 caractères ; « exactement » part, le reste ne bouge pas.
+    fr: "Qui a construit Tour de Growth et pourquoi, ce que mesurent les quinze questions AARRR, et comment le score est calculé — sans qu'aucune IA touche au chiffre.",
     en: "Who built Tour de Growth and why, what the fifteen AARRR questions measure, and exactly how the score is calculated — with no AI touching the number.",
   },
   intro: {
