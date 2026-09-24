@@ -249,6 +249,17 @@ describe("proxy (game flag and preview cookie)", () => {
     expect(rewriteOf(proxy(request("/en/game/retention")))).toBe("https://tourdegrowth.com/en/game-unavailable");
   });
 
+  it("closes the game's share images with the pages (X20, chantier G4b)", () => {
+    // A closed game must not unfurl: the image addresses are game paths too,
+    // so they get the same 404 as the pages — and open with the same cookie.
+    delete process.env.GAME_ENABLED;
+    for (const path of ["/fr/game/opengraph-image/fr", "/en/game/retention/opengraph-image/en"]) {
+      const locale = path.slice(1, 3);
+      expect(rewriteOf(proxy(request(path)))).toBe(`https://tourdegrowth.com/${locale}/game-unavailable`);
+      expect(rewriteOf(proxy(request(path, "tdg_game_preview=1")))).toBeNull();
+    }
+  });
+
   it("serves the game when GAME_ENABLED is \"true\"", () => {
     process.env.GAME_ENABLED = "true";
     expect(rewriteOf(proxy(request("/fr/game/retention")))).toBeNull();
