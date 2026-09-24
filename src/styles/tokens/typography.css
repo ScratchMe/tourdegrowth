@@ -18,8 +18,10 @@
   --font-mono: "IBM Plex Mono", ui-monospace, monospace; /* labels, scores, meta */
 
   /* --- Display: stencil, always uppercase, tight --- */
-  --display-score-xl: 700 144px/0.86 var(--font-display); /* desktop score numeral */
-  --display-score-lg: 700 110px/0.88 var(--font-display); /* mobile score numeral */
+  --size-score-xl: 144px; /* the numeral alone, for components that set size without the shorthand */
+  --size-score-lg: 110px;
+  --display-score-xl: 700 var(--size-score-xl) / 0.86 var(--font-display); /* desktop score numeral */
+  --display-score-lg: 700 var(--size-score-lg) / 0.88 var(--font-display); /* mobile score numeral */
   --display-hero: 700 62px/1.02 var(--font-display);
   --display-hero-mobile: 700 40px/1.03 var(--font-display);
   --display-section: 700 30px/1.1 var(--font-display);
@@ -34,6 +36,7 @@
   --body-lg: 500 17px/1.55 var(--font-ui);
   --body-md: 500 15px/1.55 var(--font-ui);
   --body-sm: 500 14.5px/1.5 var(--font-ui);
+  --label-button-sm: 600 13px/1 var(--font-ui); /* compact button, until now written inline */
   --label-button: 600 15px/1 var(--font-ui);
   --label-button-lg: 600 16px/1 var(--font-ui);
   --label-nav: 500 13.5px/1 var(--font-ui);
@@ -45,4 +48,26 @@
   --meta-2xs: 600 11px/1 var(--font-mono);
   --meta-tracking: 0.08em; /* uppercase mono labels */
   --meta-tracking-wide: 0.12em; /* section eyebrows */
+
+  /*
+   * --- Long-form reading (DS v3 §5.2) --- the 60 prose pages ran Inter 500
+   * at 15px. Reading wants 400 and air; 500 stays with the UI (buttons,
+   * options), where it is right. 16px is the mobile floor for body text.
+   */
+  --body-read: 400 17px/1.65 var(--font-ui);
+  --body-read-mobile: 400 16px/1.6 var(--font-ui);
+
+  /*
+   * --- Chart typography (DS v3 §5.5) --- mono for data, sans for labels,
+   * which is already the system's split. Chart labels never go below 12px
+   * (--meta-2xs is 11px, fine for tracked capitals, not for axis numbers).
+   * --tabular is a font-variant-numeric value, not part of a font shorthand:
+   * set it alongside --chart-value so digits line up in tiles and tables.
+   */
+  --tabular: tabular-nums;
+  --chart-value-xl: 700 48px/1 var(--font-display); /* the hero figure of a tile: a race bib */
+  --chart-value: 600 20px/1.1 var(--font-mono);
+  --chart-label: 500 12px/1.4 var(--font-mono);
+  --chart-title: var(--title-card); /* a chart title is a sentence that says the insight */
+  --chart-note: var(--meta-xs); /* source, date, granularity */
 }
