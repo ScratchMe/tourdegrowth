@@ -79,7 +79,11 @@ export const HOW_IT_WORKS = {
   tonesSection: {
     title: { fr: "Les deux tons", en: "The two tones" },
     straightUp: {
-      label: { fr: "Straight up", en: "Straight up" },
+      // TODO: à relire — revue de copie v1 (2026-09-24), changement nº6 : le
+      // sélecteur de ton, la page de résultat et la carte d'aperçu disent
+      // « Neutre » ; cette page était la seule à dire « Straight up » en
+      // français, un nom que le lecteur ne retrouvait nulle part ensuite.
+      label: { fr: "Neutre", en: "Straight up" },
       body: {
         fr: "Un retour clair et constructif, sans enrobage — mais sans dureté inutile non plus.",
         en: "Clear, constructive feedback with no sugar-coating — but no unnecessary harshness either.",
