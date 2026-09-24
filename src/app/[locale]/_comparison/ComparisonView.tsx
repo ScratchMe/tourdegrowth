@@ -10,6 +10,7 @@ import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import type { Locale } from "@/lib/i18n/locale";
 import { localePath } from "@/lib/i18n/routes";
 import { articleSchema, breadcrumbSchema, JsonLd } from "@/lib/seo/jsonld";
+import { articleDates } from "@/content/updated-at";
 import styles from "../how-it-works/page.module.css";
 import own from "./comparison.module.css";
 
@@ -44,7 +45,9 @@ export function ComparisonView({ slug, locale }: { slug: ComparisonSlug; locale:
   return (
     <>
       <JsonLd data={breadcrumbSchema(locale, [{ name: tc(COMPARISONS[slug].title, locale), path: `/${slug}` }])} />
-      <JsonLd data={articleSchema(locale, `/${slug}`, tc(entry.title, locale), tc(entry.metaDescription, locale))} />
+      <JsonLd
+        data={articleSchema(locale, `/${slug}`, tc(entry.title, locale), tc(entry.metaDescription, locale), articleDates(`/${slug}`))}
+      />
       <ContentHeader locale={locale} path={`/${slug}`} />
 
       <main className={styles.main}>

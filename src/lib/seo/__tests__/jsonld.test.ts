@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { GLOSSARY } from "@/content/glossary";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
-import { breadcrumbSchema, definedTermSchema, definedTermSetSchema, webApplicationSchema } from "../jsonld";
+import { articleSchema, breadcrumbSchema, definedTermSchema, definedTermSetSchema, webApplicationSchema } from "../jsonld";
 
 // REVIEW-02.md R2-15 — one JSON-LD block existed, identical on /en and /fr,
 // with a `url` that was not the page's own. These are the shapes we now emit.
@@ -32,6 +32,24 @@ describe("structured data", () => {
     expect(term.description).toBe(GLOSSARY.churn.definition.en);
     expect(term.inDefinedTermSet["@id"]).toBe(definedTermSetSchema("en")["@id"]);
     expect(term.url).toMatch(/\/en\/glossary\/churn$/);
+  });
+
+  it("gives an Article the dates it is handed, and the same Person as author AND publisher (SEO audit v1 §1.5, §1.6)", () => {
+    const article = articleSchema("fr", "/aarrr-vs-okr", "AARRR ou OKR", "Description.", {
+      published: "2026-09-14",
+      modified: "2026-09-23",
+    });
+    expect(article["@type"]).toBe("Article");
+    expect(article.datePublished).toBe("2026-09-14");
+    expect(article.dateModified).toBe("2026-09-23");
+    expect(article.url).toMatch(/\/fr\/aarrr-vs-okr$/);
+    // §1.6, décidé : ne PAS remplacer par une Organization. Tour de Growth est
+    // le projet d'une personne ; un nœud inventé casserait le signal cohérent
+    // de R2-15. Si ce test gêne un jour, c'est une décision à reprendre, pas
+    // une assertion à assouplir.
+    expect(article.publisher).toEqual(article.author);
+    expect(article.publisher["@type"]).toBe("Person");
+    expect(article.publisher["@id"]).toBe("https://cv.antoine.berthaud.me/#person");
   });
 
   it("builds breadcrumbs from the home page down, positions counted from 1", () => {

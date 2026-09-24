@@ -13,6 +13,7 @@ import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { localePath } from "@/lib/i18n/routes";
 import { contentMetadata } from "@/lib/i18n/meta";
 import { articleSchema, breadcrumbSchema, JsonLd } from "@/lib/seo/jsonld";
+import { articleDates } from "@/content/updated-at";
 import styles from "../how-it-works/page.module.css";
 import own from "./page.module.css";
 
@@ -56,7 +57,13 @@ export default async function ChecklistPage({ params }: PageProps) {
     <>
       <JsonLd data={breadcrumbSchema(locale, [{ name: tc(CHECKLIST.title, locale), path: "/growth-audit-checklist" }])} />
       <JsonLd
-        data={articleSchema(locale, "/growth-audit-checklist", tc(CHECKLIST.title, locale), tc(CHECKLIST.metaDescription, locale))}
+        data={articleSchema(
+          locale,
+          "/growth-audit-checklist",
+          tc(CHECKLIST.title, locale),
+          tc(CHECKLIST.metaDescription, locale),
+          articleDates("/growth-audit-checklist"),
+        )}
       />
       <ContentHeader locale={locale} path="/growth-audit-checklist" />
 
