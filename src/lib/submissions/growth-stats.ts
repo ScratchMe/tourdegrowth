@@ -1,6 +1,7 @@
 import { getDb } from "@/lib/firebase/admin";
 import type { Locale } from "@/lib/i18n/locale";
 import type { Tone } from "@/lib/quiz/tone";
+import { resolveBottleneck } from "@/lib/scoring/bottleneck";
 import type { Submission } from "./types";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -49,6 +50,14 @@ export interface GrowthStats {
    * anyone reading published metrics wants to know (REVIEW-02.md R2-28).
    */
   scoreBands: Record<ScoreBandId, number>;
+  /**
+   * Results whose bottleneck group includes retention — the population the
+   * game's result card is shown to (GAME-BRIEF.md §13.3, orchestrator
+   * decision 2: a shared bottleneck counts, a "level" board never does).
+   * The denominator of the result → game pass rate (§13.5), in the two
+   * windows the GoatCounter numbers are read over.
+   */
+  retentionBottleneckResults: { allTime: number; last30Days: number };
 }
 
 /** Bands over the 0-100 total, low to high. */
@@ -87,6 +96,7 @@ export function summarizeSubmissions(submissions: readonly Submission[], now: nu
   let freeContextProvided = 0;
   let referredSubmissions = 0;
   const scoreBands: Record<ScoreBandId, number> = { "0-39": 0, "40-59": 0, "60-79": 0, "80-100": 0 };
+  const retentionBottleneckResults = { allTime: 0, last30Days: 0 };
 
   for (const s of submissions) {
     scoreBands[scoreBandOf(s.total)] += 1;
@@ -95,7 +105,15 @@ export function summarizeSubmissions(submissions: readonly Submission[], now: nu
     totalScore += s.total;
 
     if (isWithin(s.createdAt, 7 * DAY_MS, now)) last7Days += 1;
-    if (isWithin(s.createdAt, 30 * DAY_MS, now)) last30Days += 1;
+    const within30Days = isWithin(s.createdAt, 30 * DAY_MS, now);
+    if (within30Days) last30Days += 1;
+
+    // Firestore documents are read with a cast, not validated: one malformed
+    // `pillars` must cost this one count, not the whole dashboard.
+    if (Array.isArray(s.pillars) && resolveBottleneck(s.pillars).pillars.some((p) => p.pillar === "retention")) {
+      retentionBottleneckResults.allTime += 1;
+      if (within30Days) retentionBottleneckResults.last30Days += 1;
+    }
 
     if (s.deepDive) {
       deepDiveCompleted += 1;
@@ -128,6 +146,7 @@ export function summarizeSubmissions(submissions: readonly Submission[], now: nu
     kFactor: totalSubmissions ? referredSubmissions / totalSubmissions : 0,
     referralsPerConvertingResult: convertingResults ? referredSubmissions / convertingResults : 0,
     scoreBands,
+    retentionBottleneckResults,
   };
 }
 
