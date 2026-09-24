@@ -1,0 +1,212 @@
+/*
+ * DS v3 §5.7 — viz/StatTile. Semantic tokens only (--surface-*, --text-*,
+ * --border-*, --viz-*, --state-*), so a world rebinding them is enough.
+ */
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  background: var(--surface-card);
+  border: var(--border-solid);
+  border-radius: var(--radius-panel);
+  color: var(--text-body);
+}
+
+.hero {
+  padding: var(--space-7);
+}
+
+.md {
+  padding: var(--space-6);
+}
+
+.compact {
+  gap: var(--space-2);
+  padding: var(--space-4);
+}
+
+/* Never below 12px (DS v3 L-8): --chart-label is the floor for data labels. */
+.label {
+  font: var(--chart-label);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.figure {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--space-5);
+  row-gap: var(--space-1);
+  min-width: 0;
+}
+
+/* Digits don't jump width while a value ticks from month to month. */
+.value {
+  font-variant-numeric: var(--tabular);
+  overflow-wrap: anywhere;
+}
+
+.hero .value {
+  font: var(--chart-value-xl);
+  letter-spacing: var(--display-letter-spacing);
+}
+
+.md .value {
+  font: var(--chart-value);
+}
+
+/*
+ * 17px mono: the game plan's compact mobile tile (§2.4). There is no chart
+ * token at this size yet; the value is written here, once, rather than as a
+ * new token nobody else uses.
+ */
+.compact .value {
+  font: var(--chart-value);
+  font-size: 17px;
+}
+
+@media (max-width: 760px) {
+  /* The race-bib figure steps down like the score numeral does. */
+  .hero .value {
+    font: var(--display-section);
+  }
+}
+
+.dash {
+  color: var(--text-muted);
+}
+
+.unknownLabel {
+  font: var(--chart-label);
+  color: var(--text-muted);
+}
+
+.delta {
+  font: var(--chart-label);
+  font-variant-numeric: var(--tabular);
+  color: var(--text-muted);
+}
+
+.compact .delta {
+  flex-basis: 100%;
+}
+
+.delta.good {
+  color: var(--state-good-text);
+}
+
+.delta.bad {
+  color: var(--state-bad-text);
+}
+
+/* --- Meter: a 6px track, the fill anchored left --- */
+
+.track {
+  position: relative;
+  height: 6px;
+  overflow: hidden;
+  background: var(--surface-sunken);
+  border-radius: var(--radius-tag);
+}
+
+.fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: var(--radius-tag);
+}
+
+.fill.neutral {
+  background: var(--viz-ink);
+}
+
+.fill.good {
+  background: var(--state-good-text);
+}
+
+.fill.bad {
+  background: var(--state-bad-text);
+}
+
+/* Not measured: a hatch across the whole track — an empty track would read as zero. */
+.hatch {
+  position: absolute;
+  inset: 0;
+  background: var(--viz-unknown-fill);
+}
+
+.sub {
+  font: var(--chart-note);
+  color: var(--text-muted);
+}
+
+/* --- Hidden: the decoy is blurred, the label beside it is not --- */
+
+.decoy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  filter: blur(6px);
+  opacity: 0.5;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Each block is a digit's footprint in the tile's own figure size (em). */
+.decoyFigure {
+  display: inline-flex;
+  gap: 0.08em;
+  height: 1em;
+  align-items: center;
+}
+
+.decoyFigure > span {
+  display: block;
+  width: 0.55em;
+  height: 0.78em;
+  background: var(--viz-ink);
+  border-radius: 0.14em;
+}
+
+.decoyBar {
+  display: block;
+  height: 6px;
+  width: 60%;
+  background: var(--viz-ink);
+  border-radius: var(--radius-tag);
+}
+
+/*
+ * Full opacity, outside the blurred block: text at 50% falls under AA on a
+ * raised night panel (4.46:1 measured, DS v3 §5.3 rule 3).
+ */
+.hiddenLabel {
+  font: var(--chart-label);
+  color: var(--text-muted);
+}
+
+/* --- Reveal: the blur lifts once, then the tile is an ordinary known tile --- */
+
+.revealing {
+  animation: tdg-viz-reveal var(--dur-reveal, 600ms) var(--ease-out) both;
+}
+
+@keyframes tdg-viz-reveal {
+  from {
+    filter: blur(6px);
+    opacity: 0.5;
+  }
+  to {
+    filter: none;
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .revealing {
+    animation: none;
+  }
+}
