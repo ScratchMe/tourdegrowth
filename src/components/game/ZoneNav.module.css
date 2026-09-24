@@ -1,0 +1,116 @@
+/* game/ZoneNav — game plan §2.6, R13. Paper world: it belongs to the Tour, not to Flixo. */
+
+.nav {
+  min-width: 0;
+}
+
+.list {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-7);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.zone {
+  min-width: 0;
+}
+
+.link,
+.static {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  color: var(--text-body);
+  text-decoration: none;
+}
+
+.pillar {
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.title {
+  font: var(--body-sm);
+}
+
+/* The zone you are in: the red mark under its title, the Tour's accent — a mark, never text. */
+.current .title {
+  text-decoration: underline;
+  text-decoration-color: var(--accent-mark);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 5px;
+}
+
+.link:hover .title {
+  color: var(--text-link-hover);
+}
+
+.link:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.static {
+  color: var(--text-muted);
+}
+
+.soon {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+.compact {
+  display: none;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.compactLine {
+  margin: 0;
+  font: var(--body-sm);
+  color: var(--text-body);
+}
+
+.position {
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+}
+
+.compactLine .link {
+  display: inline;
+  text-decoration: underline;
+  text-decoration-color: var(--accent-mark);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.segments {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.segment {
+  display: block;
+  border-top: var(--border-rule);
+}
+
+.segmentCurrent {
+  border-top: 4px solid var(--accent-mark);
+}
+
+/* At 390px the five titles wrapped over four lines (R13): one line and five segments instead. */
+@media (max-width: 760px) {
+  .list {
+    display: none;
+  }
+
+  .compact {
+    display: flex;
+  }
+}

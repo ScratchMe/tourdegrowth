@@ -1,0 +1,90 @@
+/* game/QuarterTimeline — game plan §2.6. */
+
+.timeline {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.segment {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+/*
+ * The road marking: solid when played, thick amber now, dashed ahead. The box
+ * is the same 5px for all three, the border inside it only changes weight, so
+ * the labels under the current quarter do not sit 3px lower than their
+ * neighbours.
+ */
+.rule {
+  display: block;
+  box-sizing: border-box;
+  height: 5px;
+  margin-bottom: var(--space-2);
+  border-top: 2px solid var(--border-hard);
+}
+
+.done .rule {
+  border-top-style: solid;
+}
+
+.current .rule {
+  border-top: 5px solid var(--state-selected-bg);
+}
+
+.upcoming .rule {
+  border-top: var(--border-rule);
+}
+
+.title {
+  font: var(--chart-label);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-body);
+}
+
+.upcoming .title {
+  color: var(--text-muted);
+}
+
+.range {
+  font: var(--chart-label);
+  color: var(--text-muted);
+}
+
+.result {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--space-2);
+  font: var(--chart-label);
+}
+
+.value {
+  font-variant-numeric: var(--tabular);
+  color: var(--text-body);
+}
+
+.hit {
+  color: var(--state-good-text);
+}
+
+.missed {
+  color: var(--state-bad-text);
+}
+
+/* Compact at phone width: five columns of ~66px hold a title and a result, not a month range. */
+@media (max-width: 760px) {
+  .timeline {
+    gap: var(--space-3);
+  }
+
+  .range {
+    display: none;
+  }
+}

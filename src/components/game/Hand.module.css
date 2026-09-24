@@ -1,0 +1,73 @@
+.hand {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  min-width: 0;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.titleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-5);
+}
+
+.title {
+  margin: 0;
+  font: var(--title-card);
+  color: var(--text-body);
+}
+
+/* Focused programmatically when the hand phase opens: no ring for a focus nobody tabbed to. */
+.title:focus {
+  outline: none;
+}
+
+.count {
+  font: var(--chart-value);
+  font-variant-numeric: var(--tabular);
+  color: var(--text-body);
+}
+
+.hint {
+  margin: 0;
+  font: var(--body-sm);
+  color: var(--text-muted);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 761px) {
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.item {
+  display: flex;
+  min-width: 0;
+}
+
+.production {
+  margin: 0;
+  font: var(--meta-sm);
+  color: var(--text-muted);
+}
+
+.aside {
+  min-width: 0;
+}
