@@ -1,11 +1,12 @@
 import { loadOgFonts } from "@/lib/og/fonts";
 import { renderResultShareImage } from "@/lib/og/result-frame";
+import type { Locale } from "@/lib/i18n/locale";
 import {
+  matchShareToken,
   parseShareToken,
   sampleShareImageModel,
   shareImageModel,
   shareImageStrings,
-  shareImageToken,
   type ShareImageModel,
 } from "@/lib/og/share-image";
 import { getCachedSubmissionById } from "@/lib/submissions/cached-repository";
@@ -20,10 +21,13 @@ import { isValidSubmissionId } from "@/lib/submissions/referral";
  * must-revalidate` and no way to change either. Here the picture is the same
  * as before; what changes is the caching:
  *
- * - The CURRENT token (the one the page declares) is immutable for a year,
- *   in the browser and on the CDN. It cannot go stale: anything that would
- *   change the picture changes the token, and the page then declares the
- *   new address. A repeat view of a result costs the origin nothing.
+ * - The CURRENT token of either language is immutable for a year, in the
+ *   browser and on the CDN: the author's language (the one the page declares
+ *   in `og:image`) and the reader's (the picture in the page's share block,
+ *   copy review v1 L-5). The language is read off the token itself
+ *   (`matchShareToken`). It cannot go stale: anything that would change the
+ *   picture changes the token, and the page then shows the new address. A
+ *   repeat view of a result costs the origin nothing.
  * - Any OTHER token — the `legacy` one the two old addresses rewrite to, or
  *   a token minted before a Deep dive finished — still renders the current
  *   picture (a scraped share must keep previewing, SPEC.md §12), cached for
@@ -35,11 +39,19 @@ import { isValidSubmissionId } from "@/lib/submissions/referral";
 const IMMUTABLE = "public, max-age=31536000, s-maxage=31536000, immutable";
 const BRIEF = "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400";
 
-async function loadModel(id: string): Promise<ShareImageModel | null> {
-  if (id === "sample") return sampleShareImageModel();
+/** The declared (author's) model, and how to build the same result in any language. */
+interface ShareModels {
+  declared: ShareImageModel;
+  build: (locale: Locale) => ShareImageModel;
+}
+
+async function loadModels(id: string): Promise<ShareModels | null> {
+  if (id === "sample") return { declared: sampleShareImageModel(), build: sampleShareImageModel };
   if (!isValidSubmissionId(id)) return null;
   const submission = await getCachedSubmissionById(id);
-  return submission ? shareImageModel(submission) : null;
+  return submission
+    ? { declared: shareImageModel(submission), build: (locale) => shareImageModel(submission, locale) }
+    : null;
 }
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string; token: string }> }) {
@@ -47,10 +59,11 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   const token = parseShareToken(segment);
   if (!token) return new Response(null, { status: 404 });
 
-  const [model, fonts] = await Promise.all([loadModel(id), loadOgFonts()]);
-  if (!model) return new Response(null, { status: 404 });
+  const [models, fonts] = await Promise.all([loadModels(id), loadOgFonts()]);
+  if (!models) return new Response(null, { status: 404 });
 
-  const current = token === shareImageToken(model);
+  const current = matchShareToken(token, models.build);
+  const model = current ?? models.declared;
   return renderResultShareImage(model, shareImageStrings(model), fonts, {
     "Cache-Control": current ? IMMUTABLE : BRIEF,
   });

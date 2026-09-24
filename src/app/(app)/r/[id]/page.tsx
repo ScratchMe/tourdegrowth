@@ -172,7 +172,9 @@ export default async function ResultPage({ params }: PageProps) {
         verdicts={getSampleVerdicts(locale)}
         bottleneck={resolveBottleneck(SAMPLE_RESULT.pillars)}
         nextMove={getSampleNextMove(locale)}
-        shareImageSrc={shareImageSrc("sample", sampleShareImageModel())}
+        // The picture IN the page follows the reader (copy review v1, DS
+        // critique L-5); the one declared to crawlers above stays English.
+        shareImageSrc={shareImageSrc("sample", sampleShareImageModel(locale))}
         initialTone="neutral"
         isSample
       />
@@ -225,8 +227,10 @@ export default async function ResultPage({ params }: PageProps) {
       bottleneck={resolveBottleneck(pillars)}
       nextMove={resolveNextMove(locale, pillars, submission.weakestPillar, submission.answers)}
       // Minted here, on the server, so the CDN can cache the picture as
-      // immutable (`lib/og/share-image.ts`); the view only displays it.
-      shareImageSrc={shareImageSrc(submission.id, shareImageModel(submission))}
+      // immutable (`lib/og/share-image.ts`); the view only displays it. In
+      // the READER's language, like the rest of this page (copy review v1,
+      // DS critique L-5) — `og:image`, above, stays in the author's.
+      shareImageSrc={shareImageSrc(submission.id, shareImageModel(submission, locale))}
       initialTone={submission.tone}
       breakdown={buildBreakdownData(locale)}
       // REVIEW.md R-02: only the generated verdicts cross to the client.
