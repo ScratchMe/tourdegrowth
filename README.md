@@ -71,6 +71,15 @@ the code:
 | [`REVIEW.md`](REVIEW.md) | A full technical and functional review — 26 findings, each with its status and what remains open |
 | [`design/DS-EXTENSION-BRIEF-01.md`](design/DS-EXTENSION-BRIEF-01.md) | The brief that took five interface pieces built outside the design system back into it, and `design/ds-extension-01-return/` is what came back |
 
+## Contributing
+
+Reading is welcome — the code and the reasoning are here to be read.
+Pull requests are not expected: this is a one-person portfolio project, and
+every change goes through a review trail that lives in the documents above.
+
+If you spot a bug, an issue is the right place. If it is a security problem,
+please do not open an issue — see [`SECURITY.md`](SECURITY.md).
+
 ## Licence
 
 [AGPL-3.0](LICENSE). You are free to read, run, modify and redistribute this
