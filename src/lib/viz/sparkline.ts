@@ -40,6 +40,13 @@ export interface SparklineGeometry {
 /** How close to an edge (in the 0–100 space) a label may sit before it flips to the other side. */
 export const LABEL_EDGE = 18;
 
+/**
+ * The clear space between the end marker and its label (Sparkline.module.css
+ * offsets the label by `--space-2`, ~4 units of a 160px plot). A line passing
+ * that close to the marker runs under the gap, not through the text.
+ */
+export const LABEL_GAP = 3;
+
 const round = (n: number) => Math.round(n * 100) / 100;
 
 /** x of the i-th of `count` evenly spaced slots. One slot sits in the middle. */
@@ -59,13 +66,35 @@ export function valueY(value: number, domain: Domain): number {
  * it avoids the line that arrives at the point: if the previous point is
  * higher on screen, the line comes down from above, so the label goes below —
  * unless that would push it past an edge, which wins.
+ *
+ * Then the reference line, when there is one: the dashed line runs the full
+ * width of the plot, so a label on its side of the point sat ON it — the
+ * « fine » ending's trust ends flat at 19 with the viral threshold at 35, and
+ * « 19 / 100 » was printed across the red dashes. The label takes the other
+ * side if that side is clear of the line; otherwise it stays where it was.
+ * The frame edges are never traded for it: a label cut off by the edge is
+ * worse than a dash under one.
  */
-export function endLabelPlacement(end: PlotPoint, previous: PlotPoint | null): LabelPlacement {
+export function endLabelPlacement(
+  end: PlotPoint,
+  previous: PlotPoint | null,
+  referenceY: number | null = null,
+): LabelPlacement {
   const horizontal = end.x > 60 ? "left" : "right";
   if (end.y < LABEL_EDGE) return { horizontal, vertical: "below" };
   if (end.y > 100 - LABEL_EDGE) return { horizontal, vertical: "above" };
   const fromAbove = previous !== null && previous.y < end.y;
-  return { horizontal, vertical: fromAbove ? "below" : "above" };
+  const preferred: LabelPlacement["vertical"] = fromAbove ? "below" : "above";
+  if (referenceY === null || !lineCrossesLabel(end.y, preferred, referenceY)) return { horizontal, vertical: preferred };
+  const other: LabelPlacement["vertical"] = preferred === "above" ? "below" : "above";
+  return { horizontal, vertical: lineCrossesLabel(end.y, other, referenceY) ? preferred : other };
+}
+
+/** Whether a horizontal line at `lineY` runs through the band a label takes on `side` of a point at `y`. */
+function lineCrossesLabel(y: number, side: LabelPlacement["vertical"], lineY: number): boolean {
+  return side === "above"
+    ? lineY > y - LABEL_EDGE && lineY < y - LABEL_GAP
+    : lineY > y + LABEL_GAP && lineY < y + LABEL_EDGE;
 }
 
 /** A reference line's label sits above the line, unless the line hugs the top of the frame. */
@@ -85,7 +114,16 @@ export function linePath(runs: readonly (readonly PlotPoint[])[]): string {
     .join(" ");
 }
 
-export function sparklineGeometry(values: readonly (number | null)[], domain: Domain): SparklineGeometry {
+/**
+ * `reference` is the value of the chart's dashed line, if it draws one: the
+ * end label steps out of its way (`endLabelPlacement`). A reference outside
+ * the frame is not drawn, so it constrains nothing.
+ */
+export function sparklineGeometry(
+  values: readonly (number | null)[],
+  domain: Domain,
+  reference: number | null = null,
+): SparklineGeometry {
   const points: PlotPoint[] = [];
   const runs: PlotPoint[][] = [];
   let run: PlotPoint[] = [];
@@ -115,7 +153,9 @@ export function sparklineGeometry(values: readonly (number | null)[], domain: Do
     points,
     path: linePath(runs),
     end,
-    endLabel: end ? endLabelPlacement(end, previous) : { horizontal: "right", vertical: "above" },
+    endLabel: end
+      ? endLabelPlacement(end, previous, reference === null ? null : (referenceGeometry(reference, domain)?.y ?? null))
+      : { horizontal: "right", vertical: "above" },
   };
 }
 
