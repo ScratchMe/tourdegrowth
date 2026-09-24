@@ -14,9 +14,13 @@ export const FREE_CONTEXT = {
     fr: "Un contexte particulier qu'on devrait connaître ? (optionnel)",
     en: "Any specific context we should know about? (optional)",
   },
+  // TODO: à relire — revue de copie v1 (2026-09-24), changement nº10. The one
+  // screen that asks for writing, so the one where the copy weighs most on the
+  // output. "Two or three sentences are enough" lowers the bar (the field takes
+  // 500 characters) and replaces "not just another X", a model-writing tic.
   pitch: {
-    fr: "Plus tu nous en dis, plus la recommandation qui suit sera précise et vraiment utile — pas un conseil générique de plus.",
-    en: "The more you tell us, the sharper and more useful the recommendation that follows — not just another generic tip.",
+    fr: "Plus tu en dis, plus la recommandation colle à ton cas. Deux ou trois phrases suffisent.",
+    en: "The more you tell us, the more the recommendation fits your case. Two or three sentences are enough.",
   },
   placeholder: {
     fr: "Ex. : on vend à des cabinets comptables, cycle de vente long, le vrai frein c'est la confiance plus que le prix...",

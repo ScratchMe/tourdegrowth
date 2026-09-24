@@ -421,9 +421,13 @@ export const UI_STRINGS = {
     // the text goes, that it is not kept, and that it can show through in
     // the recommendation on a page the person may share (a fact the first
     // live probe established — see CLAUDE.md, 2026-09-05).
+    // TODO: à relire — revue de copie v1 (2026-09-24), changement nº10 :
+    // « façonner » était le calque de *shape* ; « se retrouver dans » dit le
+    // fait établi par la sonde du 2026-09-05 (Gemini reprend le contexte dans
+    // ses recommandations), sans l'euphémiser. L'anglais ne change pas.
     freeContextPrivacy: {
       en: "Sent to Google's Gemini to write your recommendation, not stored afterwards. It can shape the text shown on your result page.",
-      fr: "Envoyé à Gemini (Google) pour rédiger ta recommandation, pas conservé ensuite. Il peut façonner le texte affiché sur ta page de résultat.",
+      fr: "Envoyé à Gemini (Google) pour rédiger ta recommandation, pas conservé ensuite. Il peut se retrouver dans le texte affiché sur ta page de résultat.",
     },
     freeContextPrivacyLink: { en: "Privacy policy →", fr: "Politique de confidentialité →" },
   },
