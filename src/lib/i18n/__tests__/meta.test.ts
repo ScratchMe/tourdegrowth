@@ -15,6 +15,34 @@ describe("contentMetadata", () => {
     expect(meta.openGraph).toMatchObject({ title: "Titre", url: "/fr/about", locale: "fr_FR", alternateLocale: ["en_US"] });
     expect(meta.twitter).toMatchObject({ card: "summary_large_image", title: "Titre" });
   });
+
+  /**
+   * The fallback image: the landing's, in the page's language. A page with
+   * its own `opengraph-image` file overrides it (file-based metadata wins);
+   * every other content page used to unfurl with no picture at all.
+   */
+  it("falls back to the landing image of the page's own language", () => {
+    for (const locale of ["en", "fr"] as const) {
+      const meta = contentMetadata(locale, "/aarrr-vs-okr", "T", "D");
+      for (const images of [meta.openGraph?.images, meta.twitter?.images]) {
+        expect(images).toMatchObject([
+          { url: `/${locale}/opengraph-image/${locale}`, width: 1200, height: 630, type: "image/png" },
+        ]);
+      }
+    }
+  });
+
+  /**
+   * An image declared in the config replaces the file-based one (measured on
+   * the build), so a page that carries its own `opengraph-image` must not get
+   * the fallback — it would lose the file's cache-busting hash.
+   */
+  it("declares no image for a page that carries its own file", () => {
+    const meta = contentMetadata("en", "/how-it-works", "T", "D", { ownShareImage: true });
+    expect(meta.openGraph).not.toHaveProperty("images");
+    expect(meta.twitter).not.toHaveProperty("images");
+    expect(meta.openGraph).toMatchObject({ title: "T", url: "/en/how-it-works" });
+  });
 });
 
 describe("appMetadata (SEO audit v1 §1.1, §1.4)", () => {

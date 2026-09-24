@@ -26,6 +26,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     "/glossary",
     tc(UI_STRINGS.meta.glossaryTitle, resolved),
     tc(UI_STRINGS.meta.glossaryDescription, resolved),
+    { ownShareImage: true },
   );
 }
 

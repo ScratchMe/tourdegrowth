@@ -29,6 +29,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     "/how-it-works",
     tc(UI_STRINGS.meta.howItWorksTitle, resolved),
     tc(HOW_IT_WORKS.intro, resolved),
+    { ownShareImage: true },
   );
 }
 

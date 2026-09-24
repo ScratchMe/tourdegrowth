@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { LOCALES, type Locale } from "./locale";
 import { contentAlternates } from "./routes";
 import { OG_SIZE } from "@/lib/og/tokens";
+import { tc, UI_STRINGS } from "./dictionary";
 
 /** Open Graph wants the territory form; the app only knows the language. */
 const OG_LOCALE: Record<Locale, string> = { en: "en_US", fr: "fr_FR" };
@@ -27,15 +28,46 @@ function shareText(locale: Locale, url: string, title: string, description: stri
  * description in the page's own language, the hreflang/canonical set
  * (REVIEW.md R-13), and the Open Graph / Twitter text a share preview shows.
  *
- * The share IMAGE is not set here: `src/app/[locale]/opengraph-image.tsx`
- * is the file convention Next.js picks up for the whole `[locale]` subtree,
- * and it appends the `og:image`/`twitter:image` tags (with their cache-busting
- * hash) itself. Declaring an image URL by hand here would drift from that
- * hash — the same trap `next.config.mjs` documents for the result image.
+ * **The share image, as a fallback.** `src/app/[locale]/opengraph-image.tsx`
+ * is the landing's image, and Next.js does NOT inherit it down the tree: a
+ * segment gets an `og:image` only if it carries its own file (the landing,
+ * How it works and the glossary re-export it). Every other content page —
+ * About, the two open-door pages, the comparison cluster, the legal pages —
+ * unfurled with no picture at all, the same hole the SEO audit found on
+ * `/quiz`. So the landing image is declared here by its address.
+ *
+ * **A page that carries its own file must say so** (`ownShareImage`).
+ * Measured on the build, against what the docs suggest: an image declared in
+ * the config REPLACES the file-based one rather than yielding to it. Those
+ * pages would lose the cache-busting hash the file convention appends — the
+ * thing that makes a platform re-fetch the picture when its copy changes.
+ * Opting out rather than in keeps the safe default for the next page: one
+ * that forgets gets a picture, not none.
+ *
+ * Pointing at the image rather than giving each page a re-export file is
+ * deliberate: every file is one more image route counted in Functions Storage
+ * on every deploy (VERCEL.md), for the very same picture.
  */
-export function contentMetadata(locale: Locale, path: string, title: string, description: string): Metadata {
+export function contentMetadata(
+  locale: Locale,
+  path: string,
+  title: string,
+  description: string,
+  { ownShareImage = false }: { ownShareImage?: boolean } = {},
+): Metadata {
   const alternates = contentAlternates(locale, path);
-  return { title, description, alternates, ...shareText(locale, alternates.canonical, title, description) };
+  const shared = shareText(locale, alternates.canonical, title, description);
+  if (ownShareImage) return { title, description, alternates, ...shared };
+  const images = [
+    { url: `/${locale}/opengraph-image/${locale}`, ...OG_SIZE, alt: tc(UI_STRINGS.meta.shareImageAlt, locale), type: "image/png" },
+  ];
+  return {
+    title,
+    description,
+    alternates,
+    openGraph: { ...shared.openGraph, images },
+    twitter: { ...shared.twitter, images },
+  };
 }
 
 /**

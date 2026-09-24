@@ -26,6 +26,58 @@ const OG_IMAGE = /<meta property="og:image" content="([^"]*)"/;
 const TWITTER_IMAGE = /<meta name="twitter:image" content="([^"]*)"/;
 const CANONICAL = /<link rel="canonical" href="([^"]*)"/;
 
+/** Every indexable page, read from the sitemap rather than listed here — a page added tomorrow is covered. */
+async function sitemapPaths(request: import("@playwright/test").APIRequestContext): Promise<string[]> {
+  const xml = await (await request.get("/sitemap.xml")).text();
+  const paths = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]!).pathname);
+  // Floor: a sitemap that parsed to nothing would make every loop below pass.
+  expect(paths.length).toBeGreaterThan(60);
+  return paths;
+}
+
+/**
+ * Next.js does not inherit an `opengraph-image` down the tree, so About, the
+ * open-door pages, the comparison cluster and the legal pages used to unfurl
+ * with no picture — found while fixing `/quiz`, the same hole one level up.
+ * `contentMetadata` now declares the landing image as a fallback; a page with
+ * its own file keeps that one. Exactly one tag either way: two `og:image`
+ * tags would let each platform pick a different picture.
+ */
+test("every sitemap page declares exactly one share image, and it is a real PNG", async ({ request }) => {
+  test.setTimeout(120_000);
+  const checked = new Map<string, boolean>();
+  for (const path of await sitemapPaths(request)) {
+    const html = await (await request.get(path)).text();
+    const tags = html.match(/<meta property="og:image" content="/g) ?? [];
+    expect(tags, `${path} og:image count`).toHaveLength(1);
+    const image = new URL(attr(html, OG_IMAGE)!).pathname;
+    if (!checked.has(image)) {
+      const response = await request.get(image);
+      checked.set(image, response.status() === 200 && (response.headers()["content-type"] ?? "").includes("image/png"));
+    }
+    expect(checked.get(image), `${path} → ${image}`).toBe(true);
+  }
+});
+
+/**
+ * The pages that carry their own `opengraph-image` file keep ITS address —
+ * the one with the cache-busting hash. An image declared in the config
+ * replaces the file-based one (measured, against what the docs suggest), so
+ * these pages opt out of the fallback; this pins that they still do.
+ */
+test("pages with their own share-image file keep the file's hashed address", async ({ request }) => {
+  for (const [path, own] of [
+    ["/fr", "/fr/opengraph-image/fr"],
+    ["/en/how-it-works", "/en/how-it-works/opengraph-image/en"],
+    ["/fr/glossary", "/fr/glossary/opengraph-image/fr"],
+    ["/en/glossary/cac", "/en/glossary/cac/opengraph-image/en"],
+  ] as const) {
+    const og = new URL(attr(await (await request.get(path)).text(), OG_IMAGE)!);
+    expect(og.pathname, path).toBe(own);
+    expect(og.search, `${path} keeps its hash`).toMatch(/^\?[0-9a-f]+$/);
+  }
+});
+
 test.describe("/quiz share preview (SEO audit v1 §1.1, §1.4)", () => {
   for (const [lang, heading] of [
     ["en", "The Tour"],
