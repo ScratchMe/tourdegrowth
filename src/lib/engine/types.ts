@@ -396,20 +396,30 @@ export interface Mirror {
  * §6.12 / §9. The deck is a MODEL: `deck.ts` picks the slides, their order,
  * the key of each title template and every number already formatted. Slide
  * components only place these strings (D10: data titles are not editable).
- * `titleKey` indexes `EngineStrings["slideTitles"]`.
+ * `title.key` indexes `EngineStrings["slideTitles"]`; the same templates
+ * give the board its verdict title (§7 E2), so screen and slide cannot word
+ * one diagnosis two ways.
+ *
+ * Grammatical number is a key, never string surgery: `…One` is the singular
+ * form (one stage unmeasured, one number missing), the bare key the general
+ * one — the same convention as `coverage.found` / `coverage.foundOne`.
  */
 export type SlideTitleKey =
   | "pelotonComplete"
   | "pelotonGap"
+  | "pelotonGapOne"
   | "pelotonTailBreak"
+  | "pelotonTailBreakOne"
   | "pelotonEmpty"
-  | "leakClearMrr"
+  | "leakClearMrrNew"
+  | "leakClearMrrRetained"
   | "leakClearCustomers"
   | "leakClearPerHundred"
   | "leakShared"
   | "leakNotEnoughBelow"
   | "leakLevel"
   | "visibility"
+  | "visibilityOne"
   | "visibilityAllDocumented"
   | "unitEconomics"
   | "unitEconomicsUnknown"

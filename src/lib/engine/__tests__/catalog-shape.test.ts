@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { GLOSSARY_TERMS } from "@/content/glossary-terms";
 import { QUESTIONS } from "@/content/copy-library";
+import { ENGINE_CATALOG, ENGINE_DERIVED_CATALOG } from "@/content/engine-catalog";
 import { PILLARS } from "@/lib/scoring/pillars";
 import {
   CANDIDATE_IDS,
@@ -102,6 +103,50 @@ describe("ENGINE_BRIDGES (§6.11)", () => {
       expect(question, questionId).toBeDefined();
       const stage = metric.startsWith("rev.ltv") ? derivedShapeOf("rev.ltv").stage : shapeOf(metric as never).stage;
       expect(question!.pillar, `${questionId} → ${metric}`).toBe(stage);
+    }
+  });
+});
+
+/**
+ * The contract between the two halves of the catalogue (§4.4): the shape
+ * the browser computes with, and the prose the server resolves. A metric in
+ * one and not the other is a sheet with no name or a name with no maths.
+ * The finer content checks (placeholders, reference anti-drift, glyphs) are
+ * the content PR's, in src/content/__tests__/.
+ */
+describe("shape ↔ prose", () => {
+  it("has exactly the same ids on both sides, computed figures included", () => {
+    expect(Object.keys(ENGINE_CATALOG).sort()).toEqual(METRIC_SHAPES.map((s) => s.id).sort());
+    expect(Object.keys(ENGINE_DERIVED_CATALOG).sort()).toEqual(DERIVED_SHAPES.map((s) => s.id).sort());
+  });
+
+  it("labels exactly the closed-list ids the shape declares", () => {
+    for (const shape of METRIC_SHAPES) {
+      const prose = ENGINE_CATALOG[shape.id];
+      expect(prose.variants?.map((v) => v.id), `${shape.id} variants`).toEqual(shape.variants);
+      expect(prose.naReasons?.map((v) => v.id), `${shape.id} naReasons`).toEqual(shape.naReasons);
+      expect(prose.choices?.map((v) => v.id), `${shape.id} choices`).toEqual(shape.choices);
+    }
+  });
+
+  it("prints a caveat next to every reference, and never a 'no reference' reason next to one", () => {
+    for (const shape of METRIC_SHAPES) {
+      const prose = ENGINE_CATALOG[shape.id];
+      if (shape.benchmark) {
+        expect(prose.benchmarkCaveat, shape.id).toBeDefined();
+        expect(prose.noReferenceReason, shape.id).toBeUndefined();
+      } else {
+        expect(prose.benchmarkCaveat, shape.id).toBeUndefined();
+      }
+    }
+  });
+
+  it("names the two counts of every metric entered as counts, and at most three places to look", () => {
+    for (const shape of METRIC_SHAPES) {
+      const prose = ENGINE_CATALOG[shape.id];
+      if (shape.valueKinds.includes("ratio")) expect(prose.inputs, shape.id).toBeDefined();
+      expect(prose.where.length, shape.id).toBeGreaterThan(0);
+      expect(prose.where.length, shape.id).toBeLessThanOrEqual(3);
     }
   });
 });
