@@ -1,3 +1,6 @@
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import { RETENTION_LEVEL, type RetentionCardId } from "../levels/retention";
@@ -166,5 +169,43 @@ describe("X1 — no engine function mutates its input", () => {
     expect(a).toEqual(b);
     expect(a).not.toBe(b);
     expect(a.history).not.toBe(b.history);
+  });
+});
+
+describe("the engine loads without the @/ alias", () => {
+  // Plan §3.1: e2e specs import the engine (seeded saves come from paths.ts)
+  // and Playwright does not resolve `@/`. A value import from `@/` anywhere
+  // in what they load fails at spec start-up, far from the line that did it.
+  // Types are fine: TypeScript erases them.
+  const IMPORT = /(?:^|\n)\s*(?:import|export)\s+(type\s+)?(?:[^"';]*?\s+from\s+)?["']([^"']+)["']/g;
+
+  function imports(file: string): { spec: string; type: boolean }[] {
+    const source = readFileSync(file, "utf8");
+    return [...source.matchAll(IMPORT)].map((m) => ({ spec: m[2] ?? "", type: Boolean(m[1]) }));
+  }
+
+  function walk(entry: string, seen: Set<string>): void {
+    if (seen.has(entry)) return;
+    seen.add(entry);
+    for (const { spec, type } of imports(entry)) {
+      if (type || !spec.startsWith(".")) continue;
+      const base = resolve(dirname(entry), spec);
+      const file = [`${base}.ts`, `${base}.tsx`, join(base, "index.ts")].find((f) => existsSync(f));
+      if (file) walk(file, seen);
+    }
+  }
+
+  it("what an e2e spec would import reaches `@/` for types only", () => {
+    const game = resolve(__dirname, "..");
+    const reached = new Set<string>();
+    for (const entry of ["__tests__/paths.ts", "view.ts", "format.ts", "ui-timing.ts"]) walk(join(game, entry), reached);
+    // paths, levels/retention, model, reducer, view, format, ui-timing — or
+    // the walk has stopped following imports and proves nothing.
+    expect(reached.size).toBeGreaterThanOrEqual(7);
+    for (const file of reached) {
+      for (const { spec, type } of imports(file)) {
+        if (spec.startsWith("@/")) expect(type, `${file} imports a value from ${spec}`).toBe(true);
+      }
+    }
   });
 });
