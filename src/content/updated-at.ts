@@ -22,6 +22,7 @@ export const CONTENT_UPDATED_AT: Record<string, string> = {
   "/aarrr-vs-rarra": "2026-09-23", // deux phrases FR réécrites (bon à tirer nº5)
   "/aarrr-vs-growth-loops": "2026-09-14",
   "/aarrr-vs-okr": "2026-09-14",
+  "/aarrr-vs-heart": "2026-09-24", // created (audit SEO v1 §3.1)
 };
 
 /** The day the long-form `extended` copy of every term was approved. */
@@ -40,6 +41,7 @@ export const CONTENT_PUBLISHED_AT: Record<string, string> = {
   "/aarrr-vs-rarra": "2026-09-14",
   "/aarrr-vs-growth-loops": "2026-09-14",
   "/aarrr-vs-okr": "2026-09-14",
+  "/aarrr-vs-heart": "2026-09-24", // created (audit SEO v1 §3.1)
 };
 
 /**

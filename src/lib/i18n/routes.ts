@@ -37,6 +37,7 @@ const LOCALIZED_ROOTS = [
   "aarrr-vs-rarra",
   "aarrr-vs-growth-loops",
   "aarrr-vs-okr",
+  "aarrr-vs-heart", // audit SEO v1 §3.1 (2026-09-24)
 ] as const;
 
 export function localePath(locale: Locale, path = "/"): string {

@@ -16,7 +16,8 @@ export type ComparisonSlug =
   | "aarrr-vs-north-star-metric"
   | "aarrr-vs-rarra"
   | "aarrr-vs-growth-loops"
-  | "aarrr-vs-okr";
+  | "aarrr-vs-okr"
+  | "aarrr-vs-heart";
 
 /** L'ordre d'affichage des liens croisés. Du plus recherché au moins recherché. */
 export const COMPARISON_ORDER: ComparisonSlug[] = [
@@ -24,6 +25,7 @@ export const COMPARISON_ORDER: ComparisonSlug[] = [
   "aarrr-vs-rarra",
   "aarrr-vs-growth-loops",
   "aarrr-vs-okr",
+  "aarrr-vs-heart",
 ];
 
 /** The H1 of each page, and the label of every link to it. */
@@ -32,4 +34,6 @@ export const COMPARISON_TITLES: Record<ComparisonSlug, Translatable> = {
   "aarrr-vs-rarra": { en: "AARRR vs RARRA", fr: "AARRR ou RARRA" },
   "aarrr-vs-growth-loops": { en: "AARRR vs growth loops", fr: "AARRR ou growth loops" },
   "aarrr-vs-okr": { en: "AARRR vs OKR", fr: "AARRR ou OKR" },
+  // TODO: à relire — audit SEO v1 (2026-09-24), §3.1 : titre de la cinquième page du cluster.
+  "aarrr-vs-heart": { en: "AARRR vs HEART", fr: "AARRR ou HEART" },
 };

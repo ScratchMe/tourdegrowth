@@ -121,8 +121,8 @@ const BUDGETS: { module: string; max: number; why: string }[] = [
   },
   {
     module: "content/comparisons.ts",
-    max: 4,
-    why: "Les quatre pages du cluster, et elles seules. Qui ne fait que LISTER le cluster (/how-it-works, le terme AARRR, le sitemap) lit content/comparison-index.ts — ~40 Ko de prose en moins sur chacune, 48 routes pour le seul glossaire.",
+    max: 5,
+    why: "Les cinq pages du cluster (HEART ajoutée par l'audit SEO v1 §3.1), et elles seules. Qui ne fait que LISTER le cluster (/how-it-works, le terme AARRR, le sitemap) lit content/comparison-index.ts — ~40 Ko de prose en moins sur chacune, 48 routes pour le seul glossaire.",
   },
 ];
 
