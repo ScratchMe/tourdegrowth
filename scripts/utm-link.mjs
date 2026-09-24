@@ -13,9 +13,17 @@
  *   node scripts/utm-link.mjs reddit_roastmystartup
  *   node scripts/utm-link.mjs directory:uneed /en
  *   node scripts/utm-link.mjs newsletter:growthunhinged /en/glossary/aarrr
+ *   node scripts/utm-link.mjs hackernews /en/aarrr-funnel-template --campaign launch_engine
  *   node scripts/utm-link.mjs --list
  */
-import { buildUtmUrl, CHANNELS, DEFAULT_SITE_URL, DYNAMIC_PREFIXES, KNOWN_DIRECTORIES } from "./utm-channels.mjs";
+import {
+  buildUtmUrl,
+  CHANNELS,
+  DEFAULT_SITE_URL,
+  DYNAMIC_PREFIXES,
+  KNOWN_DIRECTORIES,
+  LAUNCH_CAMPAIGNS,
+} from "./utm-channels.mjs";
 
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? DEFAULT_SITE_URL).replace(/\/$/, "");
 
@@ -29,19 +37,24 @@ function printList() {
     console.log(`  ${`${prefix}:<slug>`.padEnd(24)} ${prefix}_<slug> → ${campaign}`);
   }
   console.log(`\nDirectories named in GROWTH-PLAN.md: ${KNOWN_DIRECTORIES.map((d) => `directory:${d}`).join(", ")}`);
-  console.log("\nUsage: node scripts/utm-link.mjs <channel> [path]");
+  console.log(`\nLaunch campaigns (--campaign): ${LAUNCH_CAMPAIGNS.join(", ")}`);
+  console.log("\nUsage: node scripts/utm-link.mjs <channel> [path] [--campaign <campaign>]");
 }
 
-const [, , channelArg, pathArg] = process.argv;
+const args = process.argv.slice(2);
+const campaignFlag = args.indexOf("--campaign");
+const campaignArg = campaignFlag === -1 ? undefined : args[campaignFlag + 1];
+if (campaignFlag !== -1) args.splice(campaignFlag, 2);
+const [channelArg, pathArg] = args;
 
 if (!channelArg || channelArg === "--list" || channelArg === "-l") {
   printList();
   process.exit(channelArg ? 0 : 1);
 }
 
-const url = buildUtmUrl(channelArg, pathArg ?? "/", SITE_URL);
+const url = buildUtmUrl(channelArg, pathArg ?? "/", SITE_URL, campaignArg);
 if (!url) {
-  console.error(`Unknown channel "${channelArg}".\n`);
+  console.error(`Unknown channel "${channelArg}" or campaign "${campaignArg ?? ""}".\n`);
   printList();
   process.exit(1);
 }
