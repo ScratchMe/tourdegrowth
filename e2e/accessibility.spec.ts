@@ -10,6 +10,11 @@ import { expect, test } from "./helpers";
  *
  * Scoped to serious/critical impact so the gate stays meaningful rather than
  * becoming a wall of advisories nobody triages.
+ *
+ * Runs twice: in the default project at 1280 and in the `mobile` project at
+ * 390 × 844 (playwright.config.ts, ds-critique M-7). The phone width has its
+ * own type sizes and restacked layouts, so "zero known contrast gap" has to
+ * hold there too — at 1280 alone every `max-width: 760px` rule went unchecked.
  */
 
 /**
@@ -49,6 +54,19 @@ interface ContrastData {
   contrastRatio?: number;
 }
 
+/**
+ * The logotype, and only the logotype. WCAG 1.4.3 exempts "text that is part
+ * of a logo or brand name" from contrast minimums, and the wordmark's red
+ * GROWTH is exactly that: 3.56:1 on the page ground, which passes as large
+ * text at the 19px desktop size and not at the 15px mobile one. Matched on
+ * the element's own markup (its text and tag), never on its colour pair —
+ * `--paint-red` on `--paper-1` in small body text is precisely the mistake
+ * R-22 exists to catch, and a colour-pair exception would wave it through.
+ */
+function isLogotype(html: string): boolean {
+  return /^<span[^>]*>GROWTH<\/span>$/.test(html.trim());
+}
+
 function isKnownGap(data: ContrastData | undefined): boolean {
   if (!data?.fgColor || !data?.bgColor) return false;
   return KNOWN_CONTRAST_GAPS.some(
@@ -63,6 +81,17 @@ for (const [name, path] of PAGES) {
     // hydration choice), so wait for real content before scanning.
     await page.locator("main").waitFor();
 
+    // The page ground is a gradient (`--ground-lift`), and axe cannot compute
+    // contrast over a gradient: it files every such node under "incomplete",
+    // never under "violations". Measured on 2026-09-24, that was ~20 text
+    // nodes per page — the header nav, the hero, every prose paragraph that
+    // sits directly on the page — so the "no known gap" promise below never
+    // covered them at all. Flattening the ground to its base colour
+    // (`--surface-page`) lets axe measure them. The lifts move that ground by
+    // a few percent at most, so this can overstate a ratio slightly at the
+    // single darkest point; it is still a measurement where there was none.
+    await page.addStyleTag({ content: "body { background-image: none !important; }" });
+
     const { violations } = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
       .analyze();
@@ -73,7 +102,7 @@ for (const [name, path] of PAGES) {
 
       for (const node of violation.nodes) {
         const data = node.any[0]?.data as ContrastData | undefined;
-        if (violation.id === "color-contrast" && isKnownGap(data)) continue;
+        if (violation.id === "color-contrast" && (isKnownGap(data) || isLogotype(node.html))) continue;
         unexpected.push(
           `${violation.id} (${violation.impact}) on \`${node.target.join(" ")}\` — ${violation.help}`,
         );

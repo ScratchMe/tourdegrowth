@@ -14,8 +14,9 @@ import { defineConfig, devices } from "@playwright/test";
  * differently between the two. Run `npm run build` first; CI does that as its
  * own step so a build failure reports as a build failure.
  */
-// E2E_PORT lets parallel checkouts (worktrees) run their suites side by side:
-// with reuseExistingServer, two suites on one port would test each other's build.
+// `E2E_PORT` lets several checkouts run the suite side by side on one
+// machine without sharing a port — and so without `reuseExistingServer`
+// silently serving another checkout's build (CLAUDE.md, R-09).
 const PORT = Number(process.env.E2E_PORT ?? 3210);
 
 export default defineConfig({
@@ -29,7 +30,21 @@ export default defineConfig({
     baseURL: `http://localhost:${PORT}`,
     trace: "on-first-retry",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
+    // The accessibility pass again, at the phone width DESIGN-BRIEF fixes
+    // (ds-critique M-7, 2026-09-24). Every `@media (max-width: 760px)` rule
+    // — smaller type, restacked cards, different colour pairs — used to
+    // escape the "no known contrast gap" guarantee, because the only project
+    // ran at 1280. Scoped to that one spec: the rest of the suite already
+    // sets its own mobile viewports where layout is what it tests, and
+    // running everything twice would double CI for no new signal.
+    {
+      name: "mobile",
+      testMatch: /accessibility\.spec\.ts$/,
+      use: { ...devices["Desktop Chrome"], viewport: { width: 390, height: 844 } },
+    },
+  ],
   webServer: {
     command: `npm run start -- -p ${PORT}`,
     url: `http://localhost:${PORT}/how-it-works`,

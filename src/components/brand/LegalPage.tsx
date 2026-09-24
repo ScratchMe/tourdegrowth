@@ -26,7 +26,7 @@ export function LegalPage({ document, path, locale }: { document: LegalDocument;
     <>
       <ContentHeader locale={locale} path={path} />
 
-      <main className={`${frame.main} ${styles.legal}`}>
+      <main id="main" className={`${frame.main} ${styles.legal}`}>
         <div className={frame.intro}>
           <MetaLabel size="xs" uppercase={false}>
             {tc(LEGAL_UI.updatedAt, locale)} {formatDate(document.updatedAt, locale)}

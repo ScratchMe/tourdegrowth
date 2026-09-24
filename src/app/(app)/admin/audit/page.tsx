@@ -46,7 +46,7 @@ export default function AuditPage() {
           </Link>
         </nav>
       </header>
-      <main className={styles.main}>
+      <main id="main" className={styles.main}>
         <h1 className={styles.h1}>Diagnostic growth</h1>
         <p className={styles.lede}>
           Outil interne. Les missions vivent dans ce navigateur et dans les fichiers que tu exportes — jamais sur un serveur, jamais dans

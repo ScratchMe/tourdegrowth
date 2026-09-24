@@ -76,7 +76,7 @@ export default async function LandingPage({ params }: PageProps) {
         </div>
       </header>
 
-      <main className={styles.main}>
+      <main id="main" className={styles.main}>
         <div className={styles.hero}>
           <div className={styles.heroLeft}>
             <span className={styles.bibTag}>{tc(t.bibTag, locale)}</span>

@@ -47,7 +47,7 @@ export function ComparisonView({ slug, locale }: { slug: ComparisonSlug; locale:
       <JsonLd data={articleSchema(locale, `/${slug}`, tc(entry.title, locale), tc(entry.metaDescription, locale))} />
       <ContentHeader locale={locale} path={`/${slug}`} />
 
-      <main className={styles.main}>
+      <main id="main" className={styles.main}>
         <div className={styles.intro}>
           <h1 className={`${styles.title} ${own.title}`}>{tc(entry.title, locale)}</h1>
           <p className={styles.subtitle}>{tc(entry.intro, locale)}</p>

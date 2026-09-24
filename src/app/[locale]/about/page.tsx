@@ -49,7 +49,7 @@ export default async function AboutPage({ params }: PageProps) {
       <JsonLd data={breadcrumbSchema(locale, [{ name: tc(ABOUT.title, locale), path: "/about" }])} />
       <ContentHeader locale={locale} path="/about" />
 
-      <main className={styles.main}>
+      <main id="main" className={styles.main}>
         <div className={styles.intro}>
           <h1 className={styles.title}>{tc(ABOUT.title, locale)}</h1>
           <p className={styles.subtitle}>{tc(ABOUT.intro, locale)}</p>

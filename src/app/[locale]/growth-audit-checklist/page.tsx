@@ -60,7 +60,7 @@ export default async function ChecklistPage({ params }: PageProps) {
       />
       <ContentHeader locale={locale} path="/growth-audit-checklist" />
 
-      <main className={styles.main}>
+      <main id="main" className={styles.main}>
         <div className={styles.intro}>
           <h1 className={`${styles.title} ${own.title}`}>{tc(CHECKLIST.title, locale)}</h1>
           <p className={styles.subtitle}>{tc(CHECKLIST.intro, locale)}</p>
