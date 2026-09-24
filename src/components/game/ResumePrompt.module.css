@@ -1,0 +1,75 @@
+/*
+ * Game plan §2.6 — in the call's slot, in the night. Semantic tokens only:
+ * inside `data-world="night"` they already resolve to the night's panel,
+ * text and edges, so there is no night variant to write.
+ */
+
+.prompt {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  padding: var(--pad-card);
+  background: var(--surface-card);
+  border: var(--border-solid);
+  border-radius: var(--radius-card);
+  color: var(--text-body);
+}
+
+.title {
+  margin: 0;
+  font: var(--display-section);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.title:focus {
+  outline: none;
+}
+
+.previously {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.previouslyTitle {
+  margin: 0;
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.lines {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-bottom: var(--border-rule);
+}
+
+.line {
+  padding: var(--space-3) 0;
+  border-top: var(--border-rule);
+  font: var(--body-md);
+  font-variant-numeric: var(--tabular);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+@media (max-width: 760px) {
+  .prompt {
+    padding: var(--pad-card-mobile);
+  }
+
+  /* Full-width buttons stack: two thumbs' worth of target each. */
+  .actions > * {
+    flex: 1 1 100%;
+  }
+}
