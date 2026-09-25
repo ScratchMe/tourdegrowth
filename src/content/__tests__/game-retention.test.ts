@@ -5,6 +5,7 @@ import { LEVEL_COPY_TEMPLATES, resolveLevelCopy, type RetentionCopy } from "@/li
 import * as retentionLevel from "@/lib/game/levels/retention";
 import { RETENTION_DARK_IDS, RETENTION_HONEST_IDS } from "@/lib/game/levels/retention";
 import type { Translatable } from "@/lib/i18n/translatable";
+import { RETENTION_INTRO } from "../game/meta";
 import { RETENTION_CONTENT } from "../game/retention";
 
 /**
@@ -93,13 +94,15 @@ describe("C2 · parity between the two languages", () => {
     }
   });
 
-  it("has twelve months, twelve initials, four quarter ranges and five zones", () => {
+  it("has twelve months, twelve initials and four quarter ranges", () => {
     expect(RETENTION_CONTENT.months).toHaveLength(12);
     expect(RETENTION_CONTENT.monthInitials).toHaveLength(12);
     expect(RETENTION_CONTENT.timeline.ranges).toHaveLength(4);
-    expect(RETENTION_CONTENT.zones.titles).toHaveLength(5);
-    // The level's own zone is the third, in AARRR order.
-    expect(RETENTION_CONTENT.zones.titles[2]!.fr).toBe("S'ils reviennent");
+  });
+
+  it("keeps no second copy of the intro or of the zones — the page renders meta.ts and hub.ts (review R8)", () => {
+    expect(Object.keys(RETENTION_CONTENT)).not.toContain("intro");
+    expect(Object.keys(RETENTION_CONTENT)).not.toContain("zones");
   });
 });
 
@@ -206,14 +209,14 @@ const LEVEL = Object.values(retentionLevel as Record<string, unknown>).find(isLe
 
 describe("C4 · the targets the copy states", () => {
   it("agree with each other across both languages", () => {
-    const { boss, dashboard, intro } = RETENTION_CONTENT;
+    const { boss, dashboard } = RETENTION_CONTENT;
     // The first quarter's target is written out in the T1 message, and again in T2's reproach.
     expect(boss.t1.fr).toContain("5,6 %");
     expect(boss.t1.en).toContain("5.6%");
     expect(boss.t2Miss.fr).toContain("au lieu de 5,6.");
     expect(boss.t2Miss.en).toContain("instead of 5.6.");
     // The board's target, 4 %, everywhere it is stated rather than templated.
-    for (const text of [boss.t1, boss.t4Hit, boss.t4Miss, intro.lead]) {
+    for (const text of [boss.t1, boss.t4Hit, boss.t4Miss, RETENTION_INTRO.lead]) {
       expect(text.fr).toContain("4 %");
       expect(text.en).toContain("4%");
     }
@@ -444,11 +447,6 @@ const PROTO_MONTHS = (SCRIPT.match(/const MONTHS = (\[[^\]]*\]);/)?.[1] ?? "[]")
  * here is checked against the prototype below.
  */
 const NOT_FROM_PROTOTYPE: Record<string, string> = {
-  "intro.howTitle": "new — plan §5 nº3",
-  "intro.howSteps.*": "new — plan §5 nº3",
-  "zones.current": "new — orchestrator decision 4",
-  "zones.soon": "new — plan §2.6",
-  "zones.position": "new — plan R13",
   "timeline.*": "new — plan §1.3",
   "dashboard.patienceLow": "new — plan §2.6",
   "dashboard.hiddenValue": "new — plan §2.6",
@@ -553,6 +551,12 @@ describe("C11 · the prototype's French, word for word", () => {
       expect(normalise(content.title.fr), id).toBe(normalise(ending.title));
       expect(normalise(content.text.fr), id).toBe(normalise(ending.text()));
     }
+  });
+
+  it("keeps the level's lead paragraph — rendered from meta.ts — as the prototype wrote it", () => {
+    // The one prototype string that lives outside this module since review
+    // R8: the walk below does not reach it, so it is checked by name.
+    expect(missingClauses(RETENTION_INTRO.lead.fr)).toEqual([]);
   });
 
   it("keeps the months exactly", () => {

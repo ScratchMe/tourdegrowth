@@ -67,25 +67,14 @@ export interface EndingCopy {
   win: boolean;
 }
 
+/**
+ * The level's paper intro and the five zones of the Tour are NOT part of a
+ * level's copy: the page renders them on the server from `content/game/meta.ts`
+ * (`RETENTION_INTRO`) and `content/game/hub.ts` (`GAME_HUB`). An earlier draft
+ * kept a second copy of both here, which nothing rendered and which was
+ * already drifting from the one on screen (review R8).
+ */
 export interface LevelCopy<CardId extends string = string, DarkId extends CardId = CardId, OrderId extends DarkId = DarkId> {
-  /** Paper world, above the game: the part search engines read. */
-  intro: {
-    eyebrow: string;
-    title: string;
-    lead: string;
-    howTitle: string;
-    howSteps: readonly { title: string; text: string }[];
-  };
-  /** The five zones of the Tour, in AARRR order (plan §6.4-4: pillar name AND zone title). */
-  zones: {
-    navLabel: string;
-    titles: readonly string[];
-    /** "{pillar} — {title}" — the pillar name stays untranslated, as everywhere in the Tour. */
-    current: string;
-    soon: string;
-    /** Compact mobile form, "Zone {n}/{total}". */
-    position: string;
-  };
   /** Twelve month names, January first, as they appear inside a sentence. */
   months: readonly string[];
   /** Twelve x-axis initials for the December charts. */
@@ -161,12 +150,14 @@ export interface LevelCopy<CardId extends string = string, DarkId extends CardId
     production: string;
     productionEmpty: string;
     run: string;
-    hintInitial: string;
     hintCallOpen: string;
     hintPick: string;
     hintReady: string;
+    /** Where the hand stood, once the year is over: « Année interrompue » (fired) or « Année terminée » (brief §7.2 P9). */
     yearInterrupted: string;
     yearOver: string;
+    /** Under that title: the year's review is December, further down (the prototype's `renderHand`). */
+    yearClosedHint: string;
   };
   cards: Readonly<Record<CardId, CardCopy>>;
   patterns: Readonly<Record<DarkId, PatternCopy>>;
@@ -356,13 +347,12 @@ export type RetentionCopy = LevelCopy<RetentionCardId, RetentionDarkId, Retentio
  * names and fails on anything left over.
  */
 export const LEVEL_COPY_TEMPLATES: Readonly<Record<string, readonly string[]>> = {
-  "zones.current": ["pillar", "title"],
-  "zones.position": ["n", "total"],
   quarterPeriod: ["q", "from", "to"],
   "timeline.quarter": ["q"],
   "dashboard.quarterTarget": ["target"],
   "dashboard.boardTarget": ["target"],
   "dashboard.monthEnd": ["month"],
+  "dashboard.revealed": ["month"],
   "dashboard.mrrDelta": ["delta"],
   "dashboard.delta": ["delta"],
   "boss.t2Hit": ["churn", "target"],
@@ -384,6 +374,7 @@ export const LEVEL_COPY_TEMPLATES: Readonly<Record<string, readonly string[]>> =
   "effects.up": ["pct"],
   "events.control": ["fine", "leavers"],
   "endings.*.text": ["churn", "subs", "trust", "radar", "patience"],
+  "december.cells.churn": ["month"],
   "december.cells.outOf": ["value"],
   "december.churnChart.reference": ["target"],
   "december.trend": ["label", "from", "to", "month", "min", "max"],

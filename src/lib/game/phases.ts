@@ -126,6 +126,21 @@ function samePhase(a: UiPhase, b: UiPhase): boolean {
 
 // ------------------------------------------------------ what each shows ---
 
+/**
+ * The year the desk and the dashboard draw. Behind « Reprendre l'année en
+ * cours ? » it is the SAVED year — its tiles, its timeline, its phone, its
+ * journal, as the player left them — so the question is asked in front of
+ * what it is about, not in front of a fresh January the player never chose.
+ *
+ * Displaying is not restoring: the committed year stays fresh until
+ * « Reprendre » puts the save back, and nothing on the desk can act on the
+ * saved one — in this phase the hand and the action bar are absent
+ * (`handVisible`), the slot holds the prompt, and the journal only folds.
+ */
+export function yearOnDesk<T>(phase: UiPhase, committed: T, saved: T | null): T {
+  return phase.kind === "resumePrompt" && saved ? saved : committed;
+}
+
 /** The call's four states (the `VideoCall` contract), or null when something else holds its place. */
 export type CallView = "ringing" | "open" | "hungUp" | "ended";
 

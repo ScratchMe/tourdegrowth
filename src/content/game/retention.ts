@@ -68,64 +68,14 @@ import type { Translatable } from "@/lib/i18n/translatable";
  */
 const t = (fr: string, en: string): Translatable => ({ fr, en });
 
+/*
+ * The level page's paper intro and the five zones are not here: the intro is
+ * `RETENTION_INTRO` (content/game/meta.ts), the zones are `GAME_HUB`
+ * (content/game/hub.ts), both rendered by the server page. This file is the
+ * year itself, the part the island receives — one copy of each text, so the
+ * two cannot drift apart under two separate reviews (review R8).
+ */
 export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
-  intro: {
-    eyebrow: t(
-      "Tour de Growth · le côté obscur · niveau « S'ils reviennent »",
-      'Tour de Growth · the dark side · level "If they come back"',
-    ),
-    title: t("Une année chez Flixo", "A year at Flixo"),
-    lead: t(
-      "Tu es le PM growth de Flixo, une appli de streaming à 12,99 € par mois. Cent mille abonnés, et 6 % d'entre eux résilient chaque mois. Le board veut 4 % d'ici décembre. Chaque trimestre, le DG t'appelle en visio, puis tu as droit à deux actions, nommées comme on les nomme en réunion. Tu ne sauras ce qu'elles valent qu'une fois le trimestre passé. Le DG, lui, sait déjà ce qu'il veut.",
-      "You're the growth PM at Flixo, a streaming app at €12.99 a month. A hundred thousand subscribers, and 6% of them cancel every month. The board wants 4% by December. Every quarter, the CEO calls you on video, then you get two actions, named the way people name them in meetings. You'll only find out what they're worth once the quarter is over. The CEO already knows what he wants.",
-    ),
-    // TODO: à relire — nouveau (plan §5, nº3) : remplace le tutoriel à halos écarté au §1.4.
-    howTitle: t("Comment se joue une année", "How a year plays out"),
-    howSteps: [
-      {
-        // TODO: à relire — nouveau (plan §5, nº3).
-        title: t("Le DG t'appelle", "The CEO calls you"),
-        text: t(
-          "Chaque trimestre commence par une visio. Il dit ce qu'il veut, parfois comment l'obtenir.",
-          "Every quarter starts with a video call. He says what he wants, sometimes how to get it.",
-        ),
-      },
-      {
-        // TODO: à relire — nouveau (plan §5, nº3).
-        title: t("Tu choisis deux actions", "You pick two actions"),
-        text: t(
-          "Elles portent les noms qu'on leur donne en réunion. Aucune ne dit ce qu'elle rapporte.",
-          "They carry the names people give them in meetings. None of them tells you what it pays.",
-        ),
-      },
-      {
-        // TODO: à relire — nouveau (plan §5, nº3).
-        title: t("Trois mois passent", "Three months go by"),
-        text: t(
-          "Le dashboard bouge et le DG réagit. Certains compteurs n'y figurent pas : tu les verras en décembre.",
-          "The dashboard moves and the CEO reacts. Some counters aren't on it: you'll see them in December.",
-        ),
-      },
-    ],
-  },
-
-  zones: {
-    navLabel: t("Les cinq zones de Tour de Growth", "The five zones of the Tour de Growth"),
-    titles: [
-      t("Comment les gens vous trouvent", "How people find you"),
-      t("Comment ils comprennent ce que vous apportez", "How they understand what you bring"),
-      t("S'ils reviennent", "If they come back"),
-      t("S'ils vous recommandent", "If they recommend you"),
-      t("Comment vous gagnez de l'argent", "How you make money"),
-    ],
-    // TODO: à relire — nouveau (décision 4 de l'orchestrateur : le nom d'étape du Tour ET le titre de la zone).
-    current: t("{pillar} — {title}", "{pillar} — {title}"),
-    // TODO: à relire — nouveau (plan §2.6, ZoneNav).
-    soon: t("bientôt", "coming soon"),
-    // TODO: à relire — nouveau (plan R13, ZoneNav compacte).
-    position: t("Zone {n}/{total}", "Zone {n}/{total}"),
-  },
-
   months: [
     t("janvier", "January"),
     t("février", "February"),
@@ -184,8 +134,9 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
     notOnDashboard: t("pas sur ton dashboard", "not on your dashboard"),
     // TODO: à relire — nouveau (plan §2.6, tuile cachée : le texte que lit un lecteur d'écran).
     hiddenValue: t("Masquée jusqu'en décembre", "Hidden until December"),
-    // TODO: à relire — nouveau (plan §2.6).
-    revealed: t("révélée en décembre", "revealed in December"),
+    // TODO: à relire — nouveau (plan §2.6). {month} est le mois où l'année s'est close :
+    // décembre d'ordinaire, juin pour un licenciement après le T2 (une année coupée ne dit pas « décembre »).
+    revealed: t("révélée en {month}", "revealed in {month}"),
     // TODO: à relire — nouveau (plan §1.3, deltas sur les tuiles).
     delta: t("{delta} ce trimestre", "{delta} this quarter"),
   },
@@ -277,7 +228,6 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
       "Nothing in production yet. The current flow: one button, two clicks.",
     ),
     run: t("Lancer le trimestre", "Run the quarter"),
-    hintInitial: t("Choisis deux actions.", "Pick two actions."),
     hintCallOpen: t("Le DG parle. Quitte la visio pour choisir.", "The CEO is talking. Leave the call to choose."),
     hintPick: t(
       "Choisis deux actions. Tu verras leur effet à la fin du trimestre.",
@@ -286,6 +236,9 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
     hintReady: t("Trois mois vont passer. Regarde les chiffres.", "Three months are about to pass. Watch the numbers."),
     yearInterrupted: t("Année interrompue", "Year cut short"),
     yearOver: t("Année terminée", "Year over"),
+    // TODO: à relire — l'anglais est nouveau (le français est celui du prototype, renderHand) :
+    // la phrase qui prend la place de la main une fois l'année close (brief §7.2 P9).
+    yearClosedHint: t("Le bilan est en bas de page.", "The review is further down the page."),
   },
 
   cards: {
@@ -752,7 +705,9 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
 
   december: {
     cells: {
-      churn: t("Résiliations en décembre", "Churn in December"),
+      // TODO: à relire — le prototype disait « en décembre » ; {month} est le mois où l'année
+      // s'est close, pour qu'une année coupée en juin ne dise pas « décembre ».
+      churn: t("Résiliations en {month}", "Churn in {month}"),
       trust: t("Confiance des abonnés", "Subscriber trust"),
       radar: t("Radar DGCCRF", "Regulator radar"),
       outOf: t("{value} / 100", "{value} / 100"),

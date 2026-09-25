@@ -199,8 +199,15 @@
 
 /* --- Drawing in: a left-to-right reveal; the marker and label land after --- */
 
+/*
+ * `backwards`, not `both`: the clip holds before and during the draw, and is
+ * gone after it. Kept on (`both`), its last frame — inset(0 0 0 0) — clipped
+ * the SVG to its own box for good, cutting in half the round caps at x=0 and
+ * x=100 and any stroke on a clamped edge, which `overflow: visible` on
+ * `.line` and the canvas inset exist to keep (review R16).
+ */
 .draw {
-  animation: tdg-viz-draw 800ms var(--ease-out) both;
+  animation: tdg-viz-draw 800ms var(--ease-out) backwards;
 }
 
 .late {

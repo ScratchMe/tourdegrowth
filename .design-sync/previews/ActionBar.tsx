@@ -2,10 +2,10 @@ import { ActionBar, NightSurface } from "tour-de-growth";
 
 /*
  * The quarter's one action, under the hand. What these cards show is the
- * DESKTOP form: the primary button full width and the hint under it. On a
- * phone viewport (under 760px) the same component becomes a bar stuck to the
- * bottom of the screen, adds the counter and the clicks pill, and drops the
- * hint — that form depends on the viewport, not on the card width, so this
+ * DESKTOP form: the primary button full width. It carries no hint: the hand's
+ * header already says what happens next, at every width. On a phone viewport
+ * (under 760px) the same component becomes a bar stuck to the bottom of the
+ * screen and adds the counter and the clicks pill — that form depends on the viewport, not on the card width, so this
  * canvas cannot draw it; `count` and `clicks` are passed here only because
  * the contract requires them. "Run the quarter" is enabled only with
  * exactly two cards ticked and the call closed — the island decides
@@ -21,7 +21,6 @@ export const Ready = () => (
     <ActionBar
       count="2 / 2"
       clicks={{ text: "2 clicks to cancel", alert: false }}
-      hint="Three months are about to pass. Watch the numbers."
       runLabel="Run the quarter"
       canRun
       onRun={noop}
@@ -29,13 +28,12 @@ export const Ready = () => (
   </NightSurface>
 );
 
-/** Not ready: one card of two, so the button is disabled and the hint says what is missing. */
+/** Not ready: one card of two, so the button is disabled (the hand header says what is missing). */
 export const NotReady = () => (
   <NightSurface as="div" style={box}>
     <ActionBar
       count="1 / 2"
       clicks={{ text: "6 clicks to cancel", alert: true }}
-      hint="Pick two actions. You'll see their effect at the end of the quarter."
       runLabel="Run the quarter"
       canRun={false}
       onRun={noop}
@@ -49,7 +47,6 @@ export const French = () => (
     <ActionBar
       count="2 / 2"
       clicks={{ text: "5 clics pour résilier", alert: true }}
-      hint="Trois mois vont passer. Regarde les chiffres."
       runLabel="Lancer le trimestre"
       canRun
       onRun={noop}

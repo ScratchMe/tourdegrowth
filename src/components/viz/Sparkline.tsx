@@ -83,9 +83,9 @@ export function Sparkline({
   "data-testid": testId,
 }: SparklineProps) {
   const domain = [min, max] as const;
-  const geometry = sparklineGeometry(values, domain, reference?.value ?? null);
+  const geometry = sparklineGeometry(values, domain, reference?.value ?? null, size);
   const gridlines = axisTicks(ticks, domain);
-  const ref = reference ? referenceGeometry(reference.value, domain) : null;
+  const ref = reference ? referenceGeometry(reference.value, domain, size) : null;
   const end = geometry.end;
   const hasTicks = gridlines.length > 0;
 

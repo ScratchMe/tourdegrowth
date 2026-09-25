@@ -49,7 +49,7 @@ export type DashboardSecretTile =
       hidden: false;
       label: string;
       value: string;
-      /** « révélée en décembre ». */
+      /** « révélée en décembre » — or the month a year cut short closed in (« révélée en juin »). */
       sub: string;
       /** 0 to 100. */
       bar: number;

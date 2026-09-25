@@ -53,11 +53,11 @@ import {
 import type { Locale } from "@/lib/i18n/locale";
 
 /**
- * What the island receives: the level's copy minus what the page renders
- * itself on the server (the intro, the zones, the footer note) — those are
- * the indexable part of the page and never need the browser.
+ * What the island receives: the level's copy minus the footer note, which the
+ * page renders itself on the server with the intro and the zones — the
+ * indexable part of the page, which never needs the browser.
  */
-export type IslandCopy = Omit<RetentionCopy, "intro" | "zones" | "footer">;
+export type IslandCopy = Omit<RetentionCopy, "footer">;
 
 type Id = RetentionCardId;
 type State = GameState<Id>;
@@ -175,12 +175,25 @@ function tileDelta({ copy, locale }: IslandContext, kind: DeltaKind, d: Delta): 
   };
 }
 
+/**
+ * The month the year closed in, as a word: December for a year that ran its
+ * course, the month of the firing for one cut short. The reveal and the
+ * December cells name it, so a year that ended in June does not say
+ * « décembre » (review, 2026-09-25).
+ */
+export function closingMonth({ copy }: IslandContext, state: State): string {
+  const last = state.history.at(-1)?.m ?? 12;
+  return copy.months[Math.max(0, Math.min(11, last - 1))] ?? "";
+}
+
 function secretTile(
-  { copy, locale }: IslandContext,
+  ctx: IslandContext,
   label: string,
   value: { hidden: true } | { hidden: false; value: number },
   reveal: DashboardReveal,
+  month: string,
 ): DashboardSecretTile {
+  const { copy, locale } = ctx;
   if (value.hidden || reveal === "hidden") {
     return { hidden: true, label, hiddenLabel: copy.dashboard.notOnDashboard, hiddenNote: copy.dashboard.hiddenValue };
   }
@@ -188,7 +201,7 @@ function secretTile(
     hidden: false,
     label,
     value: formatInt(locale, value.value),
-    sub: copy.dashboard.revealed,
+    sub: fill(copy.dashboard.revealed, { month }),
     bar: Math.max(0, Math.min(100, value.value)),
     revealing: reveal === "revealing",
   };
@@ -257,8 +270,8 @@ export function dashboardProps(ctx: IslandContext, state: State, prev: State | u
       bar: v.patienceBar,
       low: v.patienceLow,
     },
-    trust: secretTile(ctx, copy.dashboard.trust, v.trust, reveal),
-    radar: secretTile(ctx, copy.dashboard.radar, v.radar, reveal),
+    trust: secretTile(ctx, copy.dashboard.trust, v.trust, reveal, closingMonth(ctx, state)),
+    radar: secretTile(ctx, copy.dashboard.radar, v.radar, reveal, closingMonth(ctx, state)),
   };
 }
 
@@ -322,6 +335,18 @@ export function handView(ctx: IslandContext, state: State, hint: HandHint): Hand
     production: active.length ? fill(copy.hand.production, { cards: active.join(", ") }) : copy.hand.productionEmpty,
     canRun: !state.callOpen && !state.over && state.picks.length === max,
   };
+}
+
+/**
+ * The pill's whole sentence, as the one live region says it when a ticked or
+ * unticked card changes the count (plan E5): the figure AND, past the legal
+ * path, why it is a problem — the same words the pill shows, never a
+ * paraphrase of them.
+ */
+export function clicksSentence({ copy, locale }: IslandContext, clicks: number | "phone"): string {
+  if (clicks === "phone") return `${copy.clicks.infinite} · ${copy.clicks.phoneSuffix}`;
+  const count = fill(copy.clicks.count, { n: formatInt(locale, clicks) });
+  return clicksOverLaw(clicks) ? `${count} · ${copy.clicks.lawSuffix}` : count;
 }
 
 /** The pill's abbreviated form for the action bar: the same words, and whether they read as a legal problem. */
@@ -403,15 +428,43 @@ export function reportContent(ctx: IslandContext, state: State, q: number): Repo
   };
 }
 
-/** Every quarter played, in the page's language — the journal is structured, so a language switch re-renders it whole (R10). */
+/**
+ * What takes the hand's place once the year is over (brief §7.2 P9, the
+ * prototype's `renderHand`): the hand does not just vanish — its heading says
+ * the year is closed, and whether it ran its course or was cut short, and
+ * points down the page to December. There is nothing to run: no card, no
+ * « Lancer le trimestre ».
+ */
+export function yearClosedView({ copy }: IslandContext, state: State): { title: string; hint: string; fired: boolean } {
+  return {
+    title: state.fired ? copy.hand.yearInterrupted : copy.hand.yearOver,
+    hint: copy.hand.yearClosedHint,
+    fired: state.fired,
+  };
+}
+
+/**
+ * Every quarter played, in the page's language — the journal is structured,
+ * so a language switch re-renders it whole (R10).
+ *
+ * It is also the only place the LAST quarter's report survives a reload: a
+ * year saved after its fourth quarter (or after the firing) reopens straight
+ * on December (`settledPhase`), and the report is not shown again. So an
+ * entry carries everything that report said except what December's own tiles
+ * already show — the picks, the effects, the events, the CEO's line, and the
+ * quarter's target next to the verdict, which a « target hit » alone does
+ * not give back. `island-view.test.ts` checks the last report against the
+ * last entry, field by field.
+ */
 export function journalEntries(ctx: IslandContext, state: State): JournalEntry[] {
-  const { locale } = ctx;
+  const { copy, locale } = ctx;
   return state.log.map((log, i) => {
     const verdict = statusText(ctx, log);
+    const target = fill(copy.report.target, { target: formatPct(locale, log.target) });
     return {
       q: i + 1,
       period: quarterPeriod(ctx, i),
-      result: { text: `${formatPct(locale, log.churnEnd)} · ${verdict.text}`, tone: verdict.hit ? "good" : "bad" },
+      result: { text: `${formatPct(locale, log.churnEnd)} · ${target} · ${verdict.text}`, tone: verdict.hit ? "good" : "bad" },
       picked: log.picked.map((id) => cardName(ctx, id)),
       lines: [
         ...log.fx.map(({ card, effect }) =>
@@ -542,7 +595,11 @@ export function decemberContent(ctx: IslandContext, state: State): DecemberConte
     figures,
     // The three labels, not the whole `cells` block: its `outOf` is a template
     // the figures above already went through, never something to print.
-    cellLabels: { churn: copy.december.cells.churn, trust: copy.december.cells.trust, radar: copy.december.cells.radar },
+    cellLabels: {
+      churn: fill(copy.december.cells.churn, { month: closingMonth(ctx, state) }),
+      trust: copy.december.cells.trust,
+      radar: copy.december.cells.radar,
+    },
     note: copy.december.gameNumbers,
     view,
     churnChart: {

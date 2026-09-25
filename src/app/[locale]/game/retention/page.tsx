@@ -26,12 +26,12 @@ const PILLAR = "retention" as const;
 const MODEL_SOURCE_URL = `${REPO_URL}/blob/main/src/lib/game/model.ts`;
 
 /**
- * What the island needs, and nothing it doesn't: the intro, the zones and the
- * footnote are rendered here, on the server, where they are indexable. The
- * rest crosses as one prop, in one language (plan E3).
+ * What the island needs, and nothing it doesn't: the footnote is rendered
+ * here, on the server, with the intro and the zones (which never were level
+ * copy). The rest crosses as one prop, in one language (plan E3).
  */
 function islandCopy(copy: RetentionCopy): IslandCopy {
-  const { intro: _intro, zones: _zones, footer: _footer, ...rest } = copy;
+  const { footer: _footer, ...rest } = copy;
   return rest;
 }
 

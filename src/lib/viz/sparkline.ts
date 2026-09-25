@@ -37,15 +37,54 @@ export interface SparklineGeometry {
   endLabel: LabelPlacement;
 }
 
-/** How close to an edge (in the 0–100 space) a label may sit before it flips to the other side. */
-export const LABEL_EDGE = 18;
+export type SparklineSize = "md" | "sm";
 
 /**
- * The clear space between the end marker and its label (Sparkline.module.css
- * offsets the label by `--space-2`, ~4 units of a 160px plot). A line passing
- * that close to the marker runs under the gap, not through the text.
+ * What the labels around the plot take up, in CSS pixels, as
+ * `Sparkline.module.css` and the tokens draw them. A test parses those files
+ * and fails when they disagree with this table, because the placement rules
+ * below are only as true as these numbers: the first version used one
+ * percentage for both sizes, right for the 144px canvas of `md` and wrong by
+ * half a label for the 48px canvas of `sm`, whose labels then spilled out of
+ * the component (review R15).
  */
-export const LABEL_GAP = 3;
+export const SPARKLINE_PX = {
+  /** `--plot-h` of each size. */
+  plot: { md: 160, sm: 64 },
+  /** `.canvas` top and bottom inset (`--space-3`): room a label may use past the frame, still inside the plot. */
+  inset: 8,
+  /** `.endLabel.above` / `.below` margin (`--space-2`). */
+  endGap: 6,
+  /** One line of the end label: `--chart-value` (20px/1.1) on `md`, `--chart-label` (12px/1.4) on `sm`. */
+  endLine: { md: 22, sm: 16.8 },
+  /** One line of a reference label (`--chart-label`), and its offset off the line when it sits above. */
+  referenceLine: 16.8,
+  referenceGap: 2,
+} as const;
+
+/** The same measures in the 0–100 space of one size's canvas. */
+export interface LabelMetrics {
+  /** Clear space between the end marker and its label: a line that close to the marker runs under the gap, not the text. */
+  gap: number;
+  /** The band an end label takes on one side of its point, gap included. */
+  band: number;
+  /** How close to an edge the point may sit and still take its label on that side. */
+  edge: number;
+  /** How close to the top a reference line may sit and still take its label above. */
+  referenceEdge: number;
+}
+
+export function labelMetrics(size: SparklineSize = "md"): LabelMetrics {
+  const px = SPARKLINE_PX;
+  const unit = 100 / (px.plot[size] - 2 * px.inset);
+  const band = (px.endGap + px.endLine[size]) * unit;
+  return {
+    gap: round(px.endGap * unit),
+    band: round(band),
+    edge: round(band - px.inset * unit),
+    referenceEdge: round((px.referenceLine + px.referenceGap - px.inset) * unit),
+  };
+}
 
 const round = (n: number) => Math.round(n * 100) / 100;
 
@@ -79,27 +118,28 @@ export function endLabelPlacement(
   end: PlotPoint,
   previous: PlotPoint | null,
   referenceY: number | null = null,
+  metrics: LabelMetrics = labelMetrics(),
 ): LabelPlacement {
   const horizontal = end.x > 60 ? "left" : "right";
-  if (end.y < LABEL_EDGE) return { horizontal, vertical: "below" };
-  if (end.y > 100 - LABEL_EDGE) return { horizontal, vertical: "above" };
+  if (end.y < metrics.edge) return { horizontal, vertical: "below" };
+  if (end.y > 100 - metrics.edge) return { horizontal, vertical: "above" };
   const fromAbove = previous !== null && previous.y < end.y;
   const preferred: LabelPlacement["vertical"] = fromAbove ? "below" : "above";
-  if (referenceY === null || !lineCrossesLabel(end.y, preferred, referenceY)) return { horizontal, vertical: preferred };
+  if (referenceY === null || !lineCrossesLabel(end.y, preferred, referenceY, metrics)) {
+    return { horizontal, vertical: preferred };
+  }
   const other: LabelPlacement["vertical"] = preferred === "above" ? "below" : "above";
-  return { horizontal, vertical: lineCrossesLabel(end.y, other, referenceY) ? preferred : other };
+  return { horizontal, vertical: lineCrossesLabel(end.y, other, referenceY, metrics) ? preferred : other };
 }
 
 /** Whether a horizontal line at `lineY` runs through the band a label takes on `side` of a point at `y`. */
-function lineCrossesLabel(y: number, side: LabelPlacement["vertical"], lineY: number): boolean {
-  return side === "above"
-    ? lineY > y - LABEL_EDGE && lineY < y - LABEL_GAP
-    : lineY > y + LABEL_GAP && lineY < y + LABEL_EDGE;
+function lineCrossesLabel(y: number, side: LabelPlacement["vertical"], lineY: number, m: LabelMetrics): boolean {
+  return side === "above" ? lineY > y - m.band && lineY < y - m.gap : lineY > y + m.gap && lineY < y + m.band;
 }
 
-/** A reference line's label sits above the line, unless the line hugs the top of the frame. */
-export function referencePlacement(y: number): "above" | "below" {
-  return y < LABEL_EDGE ? "below" : "above";
+/** A reference line's label sits above the line, unless the line is too close to the top for it. */
+export function referencePlacement(y: number, metrics: LabelMetrics = labelMetrics()): "above" | "below" {
+  return y < metrics.referenceEdge ? "below" : "above";
 }
 
 /** Path data for runs of known points; each run starts with `M`. A lone point becomes a zero-length stroke, which a round cap draws as a dot. */
@@ -123,7 +163,9 @@ export function sparklineGeometry(
   values: readonly (number | null)[],
   domain: Domain,
   reference: number | null = null,
+  size: SparklineSize = "md",
 ): SparklineGeometry {
+  const metrics = labelMetrics(size);
   const points: PlotPoint[] = [];
   const runs: PlotPoint[][] = [];
   let run: PlotPoint[] = [];
@@ -154,7 +196,12 @@ export function sparklineGeometry(
     path: linePath(runs),
     end,
     endLabel: end
-      ? endLabelPlacement(end, previous, reference === null ? null : (referenceGeometry(reference, domain)?.y ?? null))
+      ? endLabelPlacement(
+          end,
+          previous,
+          reference === null ? null : (referenceGeometry(reference, domain, size)?.y ?? null),
+          metrics,
+        )
       : { horizontal: "right", vertical: "above" },
   };
 }
@@ -188,8 +235,12 @@ export interface ReferenceGeometry {
  * wants it visible widens `[min, max]` — that is a choice about the scale, and
  * it belongs to the caller (R16).
  */
-export function referenceGeometry(value: number, domain: Domain): ReferenceGeometry | null {
+export function referenceGeometry(
+  value: number,
+  domain: Domain,
+  size: SparklineSize = "md",
+): ReferenceGeometry | null {
   if (!Number.isFinite(value) || overflowOf(value, domain) !== null) return null;
   const y = valueY(value, domain);
-  return { y, label: referencePlacement(y) };
+  return { y, label: referencePlacement(y, labelMetrics(size)) };
 }

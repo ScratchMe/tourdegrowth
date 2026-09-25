@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 import { expect, test, trackedEvents } from "./helpers";
 import { LEVEL_PATH, axeSeriousOrCritical, hangUp, pickUpCall, playQuarter, seedGame } from "./game-helpers";
-import { PATH_A, PATH_C, playPath } from "../src/lib/game/__tests__/paths";
+import { PATH_A, PATH_C, PATH_D, playPath } from "../src/lib/game/__tests__/paths";
 
 /**
  * The island, smoke-tested on a production build (game plan G8a): the first
@@ -73,6 +73,34 @@ test.describe("one quarter", () => {
     await expect(page.getByTestId("game-journal-1")).toBeVisible();
   });
 
+  test("one live region: a card that lengthens the path is said there, the pill stays silent (plan E5)", async ({ page }) => {
+    await page.goto(LEVEL_PATH.en);
+    await hangUp(page);
+    // The island's region is the only one in the night band.
+    await expect(page.getByTestId("game-island").locator("[aria-live]")).toHaveCount(1);
+    await expect(page.getByTestId("game-clicks")).not.toHaveAttribute("aria-live", /.*/);
+
+    await page.getByTestId("game-card-bury").click();
+    await expect(page.getByTestId("game-clicks")).toHaveAttribute("data-clicks", "5");
+    await expect(page.getByTestId("game-live")).toContainText("5 clicks to cancel · the law expects a direct path");
+    await page.getByTestId("game-card-bury").click();
+    await expect(page.getByTestId("game-live")).toContainText("2 clicks to cancel");
+  });
+
+  for (const width of [1280, 390]) {
+    test(`the sentence about what happens next is said once, by the hand (${width}px)`, async ({ page }) => {
+      await page.setViewportSize({ width, height: width === 390 ? 844 : 900 });
+      await page.goto(LEVEL_PATH.en);
+      await hangUp(page);
+      const next = page.getByTestId("game-island").getByText("Three months are about to pass", { exact: false });
+      // Fewer than two cards: nothing says the months are about to pass.
+      await expect(next).toHaveCount(0);
+      for (const card of PATH_A[0]!) await page.getByTestId(`game-card-${card}`).click();
+      await expect(next).toHaveCount(1);
+      await expect(page.locator("#game-hand-hint")).toContainText("Three months are about to pass");
+    });
+  }
+
   async function playQuarterFromHand(page: Page, picks: readonly [string, string]) {
     for (const card of picks) await page.getByTestId(`game-card-${card}`).click();
     await expect(page.getByTestId("game-run")).toBeEnabled();
@@ -101,8 +129,15 @@ test.describe("coming back to a year", () => {
   test("a reload asks « Reprendre ? », and resuming lands on the last report", async ({ page }) => {
     await page.goto(LEVEL_PATH.fr);
     await playQuarter(page, PATH_A[0]!);
+    const churnAfterQ1 = (await page.getByTestId("game-dash-churn").textContent()) ?? "";
+    // Not January's 6,0 %: otherwise the comparison below would pass on a fresh year.
+    expect(churnAfterQ1).toContain("5,7");
     await page.reload();
     await expect(page.getByTestId("game-resume")).toBeVisible();
+    // The question is asked in front of the saved year, not a fresh January:
+    // the tiles and the journal read as the player left them.
+    await expect(page.getByTestId("game-dash-churn")).toHaveText(churnAfterQ1);
+    await expect(page.getByTestId("game-journal-1")).toBeVisible();
     await page.getByTestId("game-resume-accept").click();
     await expect(page.getByTestId("game-report-1")).toBeVisible();
     await expect.poll(() => trackedEvents(page)).toContain("game_resume/resume");
@@ -142,6 +177,18 @@ test.describe("coming back to a year", () => {
     await expect(page.getByTestId("game-ending")).toBeVisible();
     await expect(page.getByTestId("game-call")).toHaveAttribute("data-state", "ended");
     await expect(page.getByTestId("game-hand")).toHaveCount(0);
+    // Where the hand stood: the year is closed, nothing to run (brief P9).
+    await expect(page.getByTestId("game-year-closed")).toContainText("Year over");
+    await expect(page.getByTestId("game-run")).toHaveCount(0);
+  });
+
+  test("a year cut short says so where the hand stood (brief P9)", async ({ page }) => {
+    await seedGame(page, playPath(PATH_D).at(-1)!);
+    await page.getByTestId("game-resume-accept").click();
+    await expect(page.getByTestId("game-ending")).toBeVisible();
+    await expect(page.getByTestId("game-year-closed")).toHaveAttribute("data-fired", "true");
+    await expect(page.getByTestId("game-year-closed")).toContainText("Année interrompue");
+    await expect(page.getByTestId("game-run")).toHaveCount(0);
   });
 });
 

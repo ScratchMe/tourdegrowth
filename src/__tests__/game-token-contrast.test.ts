@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { DERIVED, SEMANTIC } from "@/styles/tokens/tokens";
 import {
@@ -64,7 +66,17 @@ function contrast({ fg, bg, over, alpha = 1 }: Pick<Pair, "fg" | "bg" | "over" |
   return ratio({ ...f, a: f.a * alpha }, ground);
 }
 
-const HIDDEN = Number(GAME_NIGHT.get("game-hidden-opacity"));
+/*
+ * The hidden tile's dim is the design system's, read where StatTile reads it
+ * (shape.css): a copy in game.css used to be measured here while the tile
+ * drew its own literal, so the ratio below held for a value nothing rendered.
+ */
+const SHAPE_ROOT = declsOf(parseBlocks("shape.css"), ":root");
+const HIDDEN = Number(SHAPE_ROOT.get("viz-hidden-opacity"));
+const STAT_TILE_CSS = readFileSync(path.join(process.cwd(), "src/components/viz/StatTile.module.css"), "utf8").replace(
+  /\/\*[\s\S]*?\*\//g,
+  "",
+);
 
 const PAIRS: Pair[] = [
   // --- The face: strokes against the skin ---
@@ -108,12 +120,14 @@ const PAIRS: Pair[] = [
   { fg: "game-order-on-selected", bg: "state-selected-bg", stated: 10.13, role: "text", why: "the badge on a ticked card" },
   { fg: "game-order-bg", bg: "state-selected-bg", stated: 2.63, role: "under", bar: 3, why: "why that variant exists" },
   {
-    fg: "text-body",
+    // The decoy is two digit-shaped blocks and a bar in --viz-ink, never text:
+    // decorative, and never the real value (§2.7).
+    fg: "viz-ink",
     bg: "surface-card",
     alpha: HIDDEN,
     stated: 4.7,
     role: "decorative",
-    why: "a dimmed value — never the real one (§2.7)",
+    why: "the hidden tile's dimmed decoy",
   },
   { fg: "game-hover-border", bg: "surface-card", stated: 7.7, role: "mark", why: "night hover: the edge, not the shadow" },
 ];
@@ -140,8 +154,14 @@ describe("every stated game-token contrast ratio holds", () => {
     expect(assertRole(value, pair.role, pair.bar)).toBeNull();
   });
 
-  it("reads the hidden-tile opacity from game.css, not from a copy", () => {
+  it("measures the hidden tile at the dim StatTile actually draws — the token, not a copy of it", () => {
     expect(HIDDEN).toBe(0.5);
+    // The decoy and the reveal's first frame both read the pair; a literal
+    // left in either would drift from the ratio above without a test noticing.
+    expect(STAT_TILE_CSS.match(/opacity:\s*var\(--viz-hidden-opacity\)/g) ?? []).toHaveLength(2);
+    expect(STAT_TILE_CSS.match(/filter:\s*blur\(var\(--viz-hidden-blur\)\)/g) ?? []).toHaveLength(2);
+    expect(STAT_TILE_CSS).not.toMatch(/blur\(\d/);
+    expect(STAT_TILE_CSS).not.toMatch(/opacity:\s*0\.\d/);
   });
 
   it("measures every color token of game.css, or says why not", () => {

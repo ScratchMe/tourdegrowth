@@ -54,6 +54,7 @@ import {
   resumeContent,
   shareText,
   timelineSegments,
+  yearClosedView,
   type IslandContext,
   type IslandCopy,
 } from "./island-view";
@@ -146,6 +147,7 @@ export function GameIsland({ copy, locale }: GameIslandProps) {
 
   const december = phase.kind === "december" && game.over && game.ending ? decemberContent(ctx, game) : null;
   const reveal = december ? (g.enteredDecember ? "revealing" : "shown") : "hidden";
+  const closed = phase.kind === "december" && game.over ? yearClosedView(ctx, game) : null;
   // December is only ever drawn after mount — the prerendered page is the
   // first call — so the address is the browser's, in the page's language.
   const shareUrl = typeof window === "undefined" ? "" : `${window.location.origin}${window.location.pathname}`;
@@ -167,7 +169,8 @@ export function GameIsland({ copy, locale }: GameIslandProps) {
 
             <div className={styles.side}>
               <PhoneMock items={phoneView(L, ids)} labels={copy.phone} />
-              <ClickPill clicks={clicks} overLaw={clicksOverLaw(clicks)} labels={copy.clicks} />
+              {/* Silent here: the island says a new count in its own region (plan E5). */}
+              <ClickPill clicks={clicks} overLaw={clicksOverLaw(clicks)} labels={copy.clicks} announce={false} />
             </div>
 
             {handVisible(phase) ? (
@@ -191,13 +194,28 @@ export function GameIsland({ copy, locale }: GameIslandProps) {
                   <ActionBar
                     count={hand.count}
                     clicks={clicksLabel(ctx, clicks)}
-                    hint={copy.hand.hintReady}
                     runLabel={copy.hand.run}
                     canRun={hand.canRun}
                     onRun={g.run}
                   />
                 ) : null}
               </div>
+            ) : null}
+
+            {closed ? (
+              // Where the hand stood: the year is closed, and December is
+              // further down (brief §7.2 P9). No card, nothing to run.
+              <section
+                className={styles.yearClosed}
+                aria-labelledby="game-year-closed-title"
+                data-testid="game-year-closed"
+                data-fired={closed.fired ? "true" : "false"}
+              >
+                <h2 id="game-year-closed-title" className={styles.yearClosedTitle}>
+                  {closed.title}
+                </h2>
+                <p className={styles.yearClosedHint}>{closed.hint}</p>
+              </section>
             ) : null}
           </div>
 
