@@ -53,11 +53,11 @@ import {
 import type { Locale } from "@/lib/i18n/locale";
 
 /**
- * What the island receives: the level's copy minus what the page renders
- * itself on the server (the intro, the zones, the footer note) — those are
- * the indexable part of the page and never need the browser.
+ * What the island receives: the level's copy minus the footer note, which the
+ * page renders itself on the server with the intro and the zones — the
+ * indexable part of the page, which never needs the browser.
  */
-export type IslandCopy = Omit<RetentionCopy, "intro" | "zones" | "footer">;
+export type IslandCopy = Omit<RetentionCopy, "footer">;
 
 type Id = RetentionCardId;
 type State = GameState<Id>;
