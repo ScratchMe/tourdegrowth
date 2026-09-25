@@ -294,6 +294,17 @@ describe("December's lists", () => {
     const lab = patternCatalogue(L, endingState("labyrinth"));
     expect(lab.some((p) => p.status === "live")).toBe(true);
   });
+
+  it("a pattern cleaned out and then shipped again is « live », not « removed »", () => {
+    // `clean` pulls pdef out of production, and nothing stops the hand from
+    // dealing it again. Played, not written: the catalogue must agree with
+    // the ending on the same December screen, which sees a live pattern.
+    const s = finalState([["pause", "survey"], ["pdef", "onboard"], ["clean", "present"], ["pdef", "annual"]]);
+    expect(s.active).toContain("pdef");
+    expect(s.removedDark).toContain("pdef");
+    expect(s.ending).toBe("labyrinth");
+    expect(patternCatalogue(L, s).find((p) => p.id === "pdef")).toEqual({ id: "pdef", group: "used", status: "live" });
+  });
 });
 
 describe("X10 — the CEO's voice (§5.10)", () => {
