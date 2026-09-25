@@ -10,8 +10,9 @@ import { computeGrowthStats, type GrowthStats, type ScoreBandId } from "@/lib/su
  *
  *  - `isPublicMetricsEnabled()` — SHOULD this page exist at all? Antoine's
  *    call (2026-09-07): build it, keep it closed until the numbers are worth
- *    reading. Read per request (the page is dynamic), so flipping the Vercel
- *    env var opens or closes it without a deploy.
+ *    reading. Read per request (the page is dynamic), but on Vercel a
+ *    changed env var only reaches new deployments: opening or closing it
+ *    still takes a redeploy — just no code change.
  *  - `MIN_SUBMISSIONS_TO_PUBLISH` — are the numbers meaningful YET? Below it
  *    the page still renders, and says plainly that it is too early. A ratio
  *    computed over nine Tours is noise presented as fact, and publishing it

@@ -1,14 +1,23 @@
 /**
  * What the game's flag was when the site was BUILT — GAME-BRIEF.md 13.1-13.2.
  *
- * `access.ts` answers per request (the proxy and the result page read it on
- * every hit, so the flag flips without a redeploy). Some surfaces cannot ask
- * per request because they are decided at build time: the sitemap, the
- * hreflang set of prerendered pages, and the footer link — the footer is also
- * rendered by the error boundaries, which are Client Components and cannot
- * read a server variable (the same dead end `/metrics` hit on 2026-09-07).
- * Those follow the flag as it stood during `next build`: opening the game for
- * good means setting the variable, then redeploying.
+ * `access.ts` answers per request: the proxy (the game's own routes) and the
+ * result page (`readGameAccess` in `app/(app)/r/[id]/page.tsx`, the entry
+ * card) call it with `process.env.GAME_ENABLED` on every hit — which is what
+ * lets the preview cookie work, since the cookie is per request. Some surfaces
+ * cannot ask per request because they are decided at build time: the sitemap
+ * and the prerendered pages' hreflang and robots (through this module), and
+ * the footer link (through the "1"/"0" `next.config.mjs` inlines — the footer
+ * is also rendered by the error boundaries, which are Client Components and
+ * cannot read a server variable, the dead end `/metrics` hit on 2026-09-07).
+ *
+ * "Read per request" does NOT mean "flips without a redeploy". On Vercel a
+ * changed environment variable only reaches new deployments; the running one
+ * keeps the value it was deployed with. So any change to `GAME_ENABLED` —
+ * opening the game, or closing it in a hurry — takes a redeploy, and that
+ * redeploy moves the per-request readers and the build-time ones together.
+ * The "built open, closed at runtime" split only exists locally, when
+ * `next start` runs with a different variable than `next build` saw.
  *
  * One rule, not two: "open at build" is `resolveGameAccess` with no preview
  * cookie. A build has no browser, so it cannot hold one.

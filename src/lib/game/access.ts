@@ -3,7 +3,9 @@
  *
  * `GAME_ENABLED` is read on every request (server-side, never
  * `NEXT_PUBLIC_`): open only when it is exactly `"true"`, closed otherwise,
- * closed when absent — the same contract as `METRICS_PAGE_ENABLED`.
+ * closed when absent — the same contract as `METRICS_PAGE_ENABLED`. Read per
+ * request, but on Vercel the value itself only changes with a redeploy: a
+ * changed variable reaches new deployments only (see `build-flag.ts`).
  *
  * The preview cookie lets one browser see the game while it stays closed for
  * everybody else: `?game=preview` on any URL sets it (in the proxy),
@@ -11,7 +13,10 @@
  * feature is being polished.
  *
  * Pure and framework-free, like `resolveLocale`: the proxy and the result
- * page call it, nobody else reads `process.env.GAME_ENABLED`.
+ * page call it per request, `build-flag.ts` calls it at build with no cookie.
+ * The one other reader of `process.env.GAME_ENABLED` is `next.config.mjs`,
+ * which cannot import TypeScript and inlines the same rule as "1"/"0" for the
+ * footer (`next-config.test.ts` holds the two to the same answer).
  */
 
 export type GameAccess = "open" | "closed";
