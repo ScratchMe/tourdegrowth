@@ -37,12 +37,6 @@
   border-color: var(--state-bad-text);
 }
 
-.hint {
-  margin: 0;
-  font: var(--body-sm);
-  color: var(--text-muted);
-}
-
 /*
  * Phone: stuck to the bottom of the screen while the hand scrolls under it.
  * Sticky, not fixed — it keeps its place in the flow right after the last
@@ -64,10 +58,6 @@
   .status {
     display: flex;
     justify-content: space-between;
-  }
-
-  .hint {
-    display: none;
   }
 
   /*

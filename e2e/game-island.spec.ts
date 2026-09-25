@@ -105,6 +105,20 @@ test.describe("one quarter", () => {
     await expect(page.getByTestId("game-live")).toContainText("2 clicks to cancel");
   });
 
+  for (const width of [1280, 390]) {
+    test(`the sentence about what happens next is said once, by the hand (${width}px)`, async ({ page }) => {
+      await page.setViewportSize({ width, height: width === 390 ? 844 : 900 });
+      await page.goto(LEVEL_PATH.en);
+      await hangUp(page);
+      const next = page.getByTestId("game-island").getByText("Three months are about to pass", { exact: false });
+      // Fewer than two cards: nothing says the months are about to pass.
+      await expect(next).toHaveCount(0);
+      for (const card of PATH_A[0]!) await page.getByTestId(`game-card-${card}`).click();
+      await expect(next).toHaveCount(1);
+      await expect(page.locator("#game-hand-hint")).toContainText("Three months are about to pass");
+    });
+  }
+
   async function playQuarterFromHand(page: Page, picks: readonly [string, string]) {
     for (const card of picks) await page.getByTestId(`game-card-${card}`).click();
     await expect(page.getByTestId("game-run")).toBeEnabled();

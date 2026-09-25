@@ -191,7 +191,6 @@ export function GameIsland({ copy, locale }: GameIslandProps) {
                   <ActionBar
                     count={hand.count}
                     clicks={clicksLabel(ctx, clicks)}
-                    hint={copy.hand.hintReady}
                     runLabel={copy.hand.run}
                     canRun={hand.canRun}
                     onRun={g.run}

@@ -10,8 +10,6 @@ export interface ActionBarProps {
    * the text already says it, the colour only repeats it.
    */
   clicks: { text: string; alert: boolean };
-  /** « Trois mois vont passer… » — under the button on a desktop; the hand's hint carries it on a phone. */
-  hint: string;
   runLabel: string;
   /** Exactly two cards ticked and the call closed. */
   canRun: boolean;
@@ -21,8 +19,7 @@ export interface ActionBarProps {
 /**
  * The quarter's one action — game plan §2.6, §2.8.
  *
- * Desktop: a block under the hand, the primary button full width and a
- * sentence under it. Phone: a bar stuck to the bottom of the screen with the
+ * Desktop: a block under the hand, the primary button full width. Phone: a bar stuck to the bottom of the screen with the
  * counter, the clicks pill and the button, because twelve cards in one
  * column push all three out of view exactly while the player is choosing
  * (plan R3). `position: sticky` rather than `fixed`: the bar lives in the
@@ -35,8 +32,15 @@ export interface ActionBarProps {
  *
  * The island renders it only in the `hand` phase (plan §3.5): it is not
  * hidden by CSS during the call, the report or December — it is absent.
+ *
+ * No hint of its own. It used to carry « Trois mois vont passer… » under the
+ * button on a desktop — where the hand's header already says it once two
+ * cards are ticked, and where, with fewer, it contradicted the header
+ * (« Choisis-en deux » above, « trois mois vont passer » below a disabled
+ * button). The hand's hint is the one sentence about what happens next, at
+ * every width.
  */
-export function ActionBar({ count, clicks, hint, runLabel, canRun, onRun }: ActionBarProps) {
+export function ActionBar({ count, clicks, runLabel, canRun, onRun }: ActionBarProps) {
   return (
     <div className={styles.bar} data-testid="game-actionbar">
       <div className={styles.status}>
@@ -48,7 +52,6 @@ export function ActionBar({ count, clicks, hint, runLabel, canRun, onRun }: Acti
       <Button fullWidth disabled={!canRun} onClick={onRun} data-testid="game-run" className={styles.run}>
         {runLabel}
       </Button>
-      <p className={styles.hint}>{hint}</p>
     </div>
   );
 }
