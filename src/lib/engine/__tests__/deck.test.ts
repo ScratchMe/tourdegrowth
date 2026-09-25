@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildDeck, deckMarkdown, renderTitle } from "../deck";
+import { buildDeck, deckMarkdown, renderTitle, slideGlyphs } from "../deck";
 import { deriveEngine } from "../derive";
 import type { DeckModel, EngineState, SlideId, SlideTitleKey } from "../types";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
@@ -252,5 +252,132 @@ describe("deckMarkdown", () => {
     expect(md).toContain("> ");
     // A title-only slide is not followed by an empty body: never two blank lines in a row.
     expect(md).not.toContain("\n\n\n");
+  });
+});
+
+// The slides' open issues, held in the model where the words are chosen.
+// Non-vacuity, measured: making `know.current` depend on the `ask` title
+// again fails the first test; reading the verdict counts' plural key
+// unconditionally fails the second; dropping `lowerFirst` from the metric
+// row's status (or the annex's basis source) fails the third; formatting
+// the Tour footer with the score template whatever the total fails the
+// fourth, and sentences-guard's "no undefined" with it.
+describe("the model's words, where the slides used to assemble them", () => {
+  it("ask: a measured success metric shows its current value under the « measure first » title too", () => {
+    const s = exampleState();
+    s.deck.ask = { what: "", bullets: [], measureFirst: [], successMetric: "act.rate", successTarget: 25 };
+    const ask = slide(deck(s), "ask");
+    expect(ask.title.key).toBe("askMeasureFirst");
+    const know = ask.lines.find((l) => l.row === "know")!;
+    expect(know.current).toBe("18 %");
+    expect(know.target).toBe("25 %");
+  });
+
+  it("mirror: each count's label agrees with it, and a bridge's tag is singular", () => {
+    const result = tourResult({ "ret-1": 0, "acq-1": 0, "act-1": 1 });
+    const linked: EngineState = { ...exampleState(), tourLink: { resultId: result.id, linkedAt: "x" } };
+    for (const locale of ["fr", "en"] as const) {
+      const mirror = slide(deck(linked, locale, result), "mirror");
+      const counts = mirror.lines.filter((l) => l.row === "verdictCount");
+      const one = props[locale].strings.mirror;
+      // Blind spots lead (§8.5); a verdict nobody reached is no line.
+      expect(counts.map((l) => [l.id, l.value])).toEqual([
+        ["blind-spot", "1"],
+        ["better", "1"],
+        ["coherent", "1"],
+      ]);
+      expect(counts.map((l) => l.label)).toEqual([one.blindSpotOne, one.betterOne, one.coherentOne]);
+      const bridges = mirror.lines.filter((l) => l.row === "bridge");
+      expect(bridges[0]).toMatchObject({ verdict: "blind-spot", tag: one.blindSpotOne });
+    }
+    // Two of a kind take the plural: the top channel missing too makes two declared-but-not-found.
+    const two = tourResult({ "ret-1": 0, "acq-1": 0 });
+    const both: EngineState = {
+      ...withEntry(exampleState(), "acq.top-channel-share", missing("not-tracked", "sprint")),
+      tourLink: { resultId: two.id, linkedAt: "x" },
+    };
+    for (const locale of ["fr", "en"] as const) {
+      const counts = slide(deck(both, locale, two), "mirror").lines.filter((l) => l.row === "verdictCount");
+      expect(counts[0]).toMatchObject({ id: "blind-spot", value: "2", label: props[locale].strings.mirror.blindSpot });
+    }
+  });
+
+  it("a « · » line goes on in lower case: status, variant and a basis are not capitalised mid-line", () => {
+    // A tool or a role keeps its capital (« Amplitude », « Finance »): those are names, not words the model capitalised.
+    for (const locale of ["fr", "en"] as const) {
+      const words = props[locale].strings;
+      const lines = deck(exampleState(), locale).slides.flatMap((s) => s.lines);
+      for (const l of lines.filter((x) => x.row === "metric")) expect(l.text!.split(" · ")[1], l.text).toMatch(/^\p{Ll}/u);
+      expect(lines.find((l) => l.row === "cac")!.text).toBe(locale === "fr" ? "500 € · média seul" : "€500 · media only");
+      const statuses = Object.values(words.status);
+      const bases = Object.values(words.basis);
+      for (const l of lines.filter((x) => x.row === "annex")) {
+        const parts = l.text!.split(" · ");
+        expect(parts.filter((p) => statuses.includes(p) || bases.includes(p) || p === words.source.other), l.text).toEqual([]);
+      }
+    }
+  });
+
+  it("the Tour footer never prints « /100 » without a score", () => {
+    const result = tourResult({ "ret-1": 0 }, { total: undefined });
+    const linked: EngineState = { ...exampleState(), tourLink: { resultId: result.id, linkedAt: "x" } };
+    for (const locale of ["fr", "en"] as const) {
+      const footer = slide(deck(linked, locale, result), "mirror").lines.find((l) => l.row === "tourFooter")!;
+      expect(footer.text).not.toContain("/100");
+      expect(footer.text).toContain(locale === "fr" ? "1er septembre 2026" : "September 1, 2026");
+    }
+  });
+});
+
+// Engine spec §10.4 prescribes the glyphs of the COPY; this is what a user's
+// own words get. Non-vacuity, measured: returning the text unchanged fails
+// every case but the plain one; dropping the Latin fold fails « Škoda »
+// only; keeping every letter-less character fails the emoji case and the
+// test of the model applying it.
+describe("slideGlyphs — the user's words in the slide fonts", () => {
+  /** §10.4: printable Latin-1 (U+00A0 included) plus – — ’ « » … € · × ÷ ±, and the two arrows SlideText draws. */
+  const SLIDE = /^[ -~ -ÿ–—’«»…€·×÷±→←]*$/u;
+
+  it("leaves ordinary words alone", () => {
+    expect(slideGlyphs("Refaire l'onboarding · 2 sprints à 24 000 €")).toBe("Refaire l'onboarding · 2 sprints à 24 000 €");
+  });
+
+  it("drops emoji, pictographs and their joiners, and trims what they leave", () => {
+    expect(slideGlyphs("🚀 Relancer l'onboarding 👩‍💻✨")).toBe("Relancer l'onboarding");
+    expect(slideGlyphs("Acme ™ ®")).toBe("Acme ®");
+  });
+
+  it("turns typed look-alikes into the glyphs the fonts carry", () => {
+    // A French keyboard's narrow no-break space (U+202F) before « : » and inside « » — absent from Stardos and Plex.
+    expect(slideGlyphs("« a créé un projet » :")).toBe("« a créé un projet » :");
+    expect(slideGlyphs("“quoted” ≥ 3 ≈ 5 • cœur")).toBe('"quoted" >= 3 ~ 5 · coeur');
+    expect(slideGlyphs("été")).toBe("été");
+  });
+
+  it("folds a Latin accent the fonts lack, keeps a name in another script whole", () => {
+    // « ó » is Latin-1 and stays; « Š » and « ź » fold; « Ł » has no decomposition, so it stays as typed.
+    expect(slideGlyphs("Škoda Łódź")).toBe("Skoda Łódz");
+    expect(slideGlyphs("株式会社 Growth")).toBe("株式会社 Growth");
+  });
+
+  it("the model applies it to every user-written field, so slide and text export agree", () => {
+    let s = withEntry(exampleState(), "act.rate", measured(ratio(144, 800), undefined, { definitionNote: "🚀 un projet édité" }));
+    // The activation event is the user's own name for it: it reaches the annex through the formula.
+    s = withEntry(s, "act.event", measured({ kind: "text", text: "a créé un projet ✨" }, { kind: "other" }));
+    s.setup.companyLabel = "Acme 🚀";
+    s.deck.showCompany = true;
+    s.deck.ask = { what: "deux sprints 🔥", bullets: ["💡 refaire l'onboarding"], measureFirst: [] };
+    const model = deck(s);
+    expect(model.kicker.company).toBe("Acme · ");
+    const ask = slide(model, "ask");
+    expect(ask.title.values.what).toBe("deux sprints");
+    expect(ask.lines.find((l) => l.row === "bullet")!.text).toBe("refaire l'onboarding");
+    const annex = slide(model, "annex").lines.find((l) => l.id === "act.rate")!;
+    expect(annex.definition).toBe("un projet édité");
+    expect(annex.formula).not.toContain("✨");
+    for (const text of [deckMarkdown(model, FR.strings), JSON.stringify(model.slides.map((x) => x.lines))]) {
+      const outside = [...new Set([...text.replace(/\\n|\n/g, " ")].filter((c) => !SLIDE.test(c)))];
+      expect(outside).toEqual([]);
+    }
   });
 });

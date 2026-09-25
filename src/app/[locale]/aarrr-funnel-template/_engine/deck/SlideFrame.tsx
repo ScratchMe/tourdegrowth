@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { fillTemplate } from "@/lib/engine/format";
+import { fillSegments } from "@/lib/engine/phrases";
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
 import type { DeckModel, DeckSlide, EngineCalcContext, EngineDerived, EngineState } from "@/lib/engine/types";
 import type { Locale } from "@/lib/i18n/locale";
-import { SlideText, segments } from "./slide-text";
+import { SlideText } from "./slide-text";
 import styles from "./deck.module.css";
 
 /** A slide is laid out at projector size and scaled for the screen by its PARENT, never by itself (§10.2). */
@@ -86,7 +87,8 @@ export function SlideFrame({
     a: model.dataPill.approximate,
     x: model.dataPill.missing,
   });
-  const sources = segments(footer ?? fillTemplate(strings.slide.footer, model.footer));
+  // The model finishes every footer (an empty slot dropped whole, never « sources : » left dangling).
+  const sources = footer ?? model.footer.text ?? fillSegments(strings.slide.footer, model.footer);
   const credit = model.footer.credit ?? "";
   const titleId = `slide-title-${slide.id}`;
 

@@ -50,6 +50,7 @@ import type {
   Impact,
   ImpactLine,
   MetricId,
+  MirrorVerdict,
   MissingCause,
   Peloton,
   RepairScale,
@@ -128,6 +129,90 @@ export function sourceLabel(source: SourceRef | null | undefined, strings: Words
   return strings.source.other;
 }
 
+// --- User words on a slide (§10.4) ---------------------------------------------
+
+/** Typed look-alikes of glyphs the slide fonts carry, and the few symbols people type for them. */
+const GLYPH_SUBSTITUTES: Readonly<Record<string, string>> = {
+  "\u202f": "\u00a0", // narrow no-break (a French keyboard's space before « : ») — absent from Stardos and Plex
+  "\u2007": "\u00a0",
+  "\u3000": " ",
+  "“": '"',
+  "”": '"',
+  "„": '"',
+  "‟": '"',
+  "‘": "’",
+  "‚": ",",
+  "‛": "’",
+  "‹": "«",
+  "›": "»",
+  "‐": "-",
+  "‑": "-",
+  "‒": "–",
+  "―": "—",
+  "−": "-",
+  "≤": "<=",
+  "≥": ">=",
+  "≈": "~",
+  "≠": "!=",
+  "•": "·",
+  "‣": "·",
+  "∙": "·",
+  "⇒": "→",
+  "⟶": "→",
+  "➔": "→",
+  "➜": "→",
+  "⇐": "←",
+  "⟵": "←",
+  œ: "oe",
+  Œ: "OE",
+};
+
+/** What the three slide families draw (§10.4): printable Latin-1 plus – — ’ « » … € · × ÷ ±, and the two arrows `SlideText` draws. */
+const SLIDE_GLYPH = /^[ -~\u00a0-\u00ff–—’«»…€·×÷±→←]$/u;
+
+/**
+ * The user's own words — the company label, the ask, its bullets, the
+ * activation event's name, a definition — as the slide fonts can print them.
+ * §10.4 whitelists the glyphs of the COPY and says nothing about what a
+ * person types; this is the minimal behaviour that keeps a typed emoji or a
+ * narrow no-break space from being drawn in a fallback face (on screen) or
+ * embedded as DejaVu or Noto (in the PDF), which is the defect that list
+ * exists to prevent:
+ *
+ * - typographic look-alikes become the glyph the fonts carry (NFC first, so
+ *   a decomposed « é » is one letter again);
+ * - a Latin letter outside Latin-1 loses its accent (« Škoda » → « Skoda »):
+ *   readable in the brand face beats exact in a system one;
+ * - emoji, pictographs, symbols and invisible joiners go — they carry nothing
+ *   a leadership slide needs;
+ * - a letter or digit of another script is KEPT: a name is data, and a slide
+ *   that erased « 株式会社 » would say something false. It prints in a system
+ *   face, which is the lesser harm.
+ *
+ * Applied in the model, not in the components, so the text export says what
+ * the slides say.
+ */
+export function slideGlyphs(text: string): string {
+  let out = "";
+  for (const ch of text.normalize("NFC")) {
+    const substitute = GLYPH_SUBSTITUTES[ch];
+    if (substitute !== undefined) {
+      out += substitute;
+    } else if (SLIDE_GLYPH.test(ch)) {
+      out += ch;
+    } else if (/\p{Script=Latin}/u.test(ch)) {
+      const folded = ch.normalize("NFD").replace(/\p{M}/gu, "");
+      out += [...folded].every((c) => SLIDE_GLYPH.test(c)) ? folded : ch;
+    } else if (/[\p{L}\p{N}]/u.test(ch)) {
+      out += ch;
+    } else if (/\s/u.test(ch)) {
+      out += " ";
+    }
+    // Everything else — pictographs, symbols, joiners, variation selectors, controls — is dropped.
+  }
+  return out.replace(/[ \u00a0]{2,}/g, (run) => (run.includes("\u00a0") ? "\u00a0" : " ")).trim();
+}
+
 // --- Slide 1: the peloton ----------------------------------------------------
 
 const CLAUSES = [
@@ -170,7 +255,7 @@ function pelotonLines(state: EngineState, peloton: Peloton, strings: Words, ctx:
   const source = sourceLabel(peloton.upstreamSource, strings);
   const month = peloton.upstreamPeriod ? formatMonth(peloton.upstreamPeriod, ctx.locale) : "";
   const lines: Row[] = [
-    { row: "upstream", n, source, month, text: visitors ? fillSegments(strings.peloton.upstream, { n, source, month }) : strings.visual.upstreamUnknown },
+    { row: "upstream", text: visitors ? fillSegments(strings.peloton.upstream, { n, source, month }) : strings.visual.upstreamUnknown },
   ];
 
   const referred = knownIn(state, "ref.referred-share", ctx);
@@ -197,7 +282,9 @@ function pelotonLines(state: EngineState, peloton: Peloton, strings: Words, ctx:
       row: "column",
       id: c.metric,
       label: labels[c.metric],
-      value: k.kind === "known" ? formatPerHundredCount(k.value, ctx, strings.units) : "",
+      // The numeral over the grid: under half a person in 100 it is « moins de 1 », never the
+      // per-thousand sentence (that one is in `text`) and never « 0 », which would be a measurement.
+      value: k.kind !== "known" ? "" : k.value.hi > 0 && k.value.hi < 0.5 ? strings.visual.lessThanOne : formatPerHundredCount(k.value, ctx, strings.units),
       source: [where, period].filter(Boolean).join(" · "),
       text: k.kind === "known" ? [formatPerHundred(k.value, ctx, strings.units), where, period].filter(Boolean).join(" · ") : strings.slide.noNumber,
     });
@@ -318,7 +405,7 @@ function buildLeak(state: EngineState, derived: Omit<EngineDerived, "findings">,
       [text, ranking] = [side, position === "maybe-below" ? fillTemplate(r.maybe, { side }) : side];
     }
     const name = metricOf(metrics, id).name;
-    lines.push({ row: "aside", id, label: name, metric: name, text, tone });
+    lines.push({ row: "aside", id, label: name, text, tone });
     if (diagnosis.state === "clear") notes.push(fillTemplate(strings.notes.whyNot, { stage: subject(id), ranking: capitalise(ranking) }));
   }
   const blind = blindSentence(diagnosis.blind, strings, metrics);
@@ -364,7 +451,8 @@ function buildVisibility(state: EngineState, derived: Omit<EngineDerived, "findi
   const lines: Row[] = METRIC_SHAPES.map((s) => {
     const name = metricOf(metrics, s.id).name;
     const status = strings.status[STATUS_KEY[statusOf(entryOf(snapshot, s.id))]];
-    return { row: "metric", id: s.id, label: strings.stages[s.stage], metric: name, status, text: `${name} · ${status}` };
+    // `label` is the stage (the text export groups by it), `metric` the number's own name; the slide groups by the id's stage.
+    return { row: "metric", id: s.id, label: strings.stages[s.stage], metric: name, status, text: `${name} · ${lowerFirst(status)}` };
   });
   for (const u of undocumented) {
     const status = statusOf(u.entry);
@@ -374,7 +462,7 @@ function buildVisibility(state: EngineState, derived: Omit<EngineDerived, "findi
     // A role, never a person (§9.1).
     const role = u.entry?.missing?.ownerRole ? strings.role[ROLE_KEY[u.entry.missing.ownerRole]] : u.entry?.request ? strings.role[ROLE_KEY[u.entry.request.role]] : "";
     const fix = strings.repair[REPAIR_KEY[u.repair]];
-    lines.push({ row: "missing", id: u.id, label: name, metric: name, cause, role, repair: fix, text: [cause, role, fix].filter(Boolean).join(" · ") });
+    lines.push({ row: "missing", id: u.id, label: name, repair: fix, text: [cause, role, fix].filter(Boolean).join(" · ") });
   }
   return { title, lines };
 }
@@ -431,7 +519,7 @@ function buildUnitEconomics(
     return { row, id, label: d?.name ?? "", value, note, text: value || note || strings.slide.noNumber };
   };
   const lines: Row[] = [
-    { row: "cac", id: "acq.cac", label: metricOf(metrics, "acq.cac").name, value: cacValue, variant, text: cacValue ? [cacValue, variant].filter(Boolean).join(" · ") : strings.slide.noNumber },
+    { row: "cac", id: "acq.cac", label: metricOf(metrics, "acq.cac").name, value: cacValue, variant, text: cacValue ? [cacValue, lowerFirst(variant)].filter(Boolean).join(" · ") : strings.slide.noNumber },
     figure("payback", "rev.cac-payback", unit.payback.kind === "known" ? formatDurationInterval(unit.payback.value, "months", ctx, strings.units) : "", unit.payback.kind === "uncomputable" ? unit.payback.missing : null),
     figure("ltv", "rev.ltv", unit.ltv.kind === "known" ? formatApproxMoneyInterval(unit.ltv.value, currency, ctx, strings.units) : "", unit.ltv.kind === "uncomputable" ? unit.ltv.missing : null),
     figure(
@@ -458,7 +546,8 @@ function buildAsk(
   const snapshot = currentSnapshot(state);
   const ask = state.deck.ask;
   const currency = state.setup.currency;
-  const what = ask.what.trim();
+  // The ask is the user's own words: reduced to what the slide fonts draw (§10.4), trimmed after.
+  const what = slideGlyphs(ask.what);
   const metricText = (id: MetricId, value: number | undefined) =>
     value === undefined ? "" : formatInterval(point(value), shapeOf(id).unit, ctx, strings.units, { currency });
 
@@ -498,7 +587,7 @@ function buildAsk(
     title = { key: "askPlain", values: { what } };
   }
 
-  const lines: Row[] = ask.bullets.filter((b) => b.trim()).map((text) => ({ row: "bullet", text }));
+  const lines: Row[] = ask.bullets.map(slideGlyphs).filter(Boolean).map((text) => ({ row: "bullet", text }));
   if (ask.cost) {
     lines.push({
       row: "cost",
@@ -509,7 +598,7 @@ function buildAsk(
     const [year, month] = nextMonth(currentMonth(ctx.today)).split("-").map(Number) as [number, number];
     const checkpoint = fillTemplate(strings.slide.askCheckpoint, { date: formatDay(new Date(year, month - 1, 1), ctx.locale) });
     const name = metricOf(metrics, id).name;
-    lines.push({ row: "know", id, label: name, metric: name, current, target, checkpoint, text: [capitalise(goal), checkpoint].join(" · ") });
+    lines.push({ row: "know", id, label: name, current, target, checkpoint, text: [capitalise(goal), checkpoint].join(" · ") });
   }
   // A title that says « pour mesurer d'abord ce qui manque (rétention à J30) » must show that number below it:
   // with no pick of the team's own, the one the title named is the list.
@@ -519,7 +608,7 @@ function buildAsk(
     const repair = strings.repair[REPAIR_KEY[entry?.missing?.repair ?? shapeOf(m).defaultRepair]];
     const role = strings.role[ROLE_KEY[entry?.missing?.ownerRole ?? shapeOf(m).defaultRole]];
     const name = metricOf(metrics, m).name;
-    lines.push({ row: "measure", id: m, label: name, metric: name, repair, role, text: [repair, role].join(" · ") });
+    lines.push({ row: "measure", id: m, label: name, text: [repair, role].join(" · ") });
   }
   return { present, title, lines };
 }
@@ -533,24 +622,50 @@ const FOUND_STATUS: Record<TrackingLevel, "measured" | "estimated" | "missing"> 
   unknown: "missing",
 };
 
+/** Blind spots first: they are why this slide would be shown at all (§8.5, D13) — the board's order. */
+const VERDICT_ORDER: readonly MirrorVerdict[] = ["blind-spot", "blind-spot-light", "known-gap", "better", "coherent"];
+
+const VERDICT_KEY: Record<MirrorVerdict, "blindSpot" | "blindSpotLight" | "knownGap" | "better" | "coherent"> = {
+  "blind-spot": "blindSpot",
+  "blind-spot-light": "blindSpotLight",
+  "known-gap": "knownGap",
+  better: "better",
+  coherent: "coherent",
+};
+
+/** A verdict's name in the grammatical number of `count` (« 1 angle mort », « 2 angles morts »). */
+function verdictLabel(verdict: MirrorVerdict, count: number, strings: Words, locale: EngineCalcContext["locale"]): string {
+  return strings.mirror[numbered(VERDICT_KEY[verdict], point(count), locale)];
+}
+
 function mirrorLines(mirror: NonNullable<EngineDerived["mirror"]>, strings: Words, metrics: ResolvedMetric[], ctx: EngineCalcContext, prose: DeckProse): Row[] {
   const isDerived = (id: MetricId | DerivedId): id is DerivedId => DERIVED_SHAPES.some((s) => s.id === id);
-  const lines: Row[] = mirror.rows.map((row) => {
+  // The counts lead, blind spots first; a verdict nobody reached is not a line.
+  const lines: Row[] = VERDICT_ORDER.filter((verdict) => mirror.counts[verdict] > 0).map((verdict) => ({
+    row: "verdictCount",
+    id: verdict,
+    value: String(mirror.counts[verdict]),
+    label: verdictLabel(verdict, mirror.counts[verdict], strings, ctx.locale),
+  }));
+  // Then one line per bridge, in the same order — a bridge nobody has a verdict for yet goes last.
+  const rank = (verdict: MirrorVerdict | null) => (verdict ? VERDICT_ORDER.indexOf(verdict) : VERDICT_ORDER.length);
+  const bridges = [...mirror.rows].sort((a, b) => rank(a.verdict) - rank(b.verdict));
+  for (const row of bridges) {
     const label = isDerived(row.metric) ? (prose.derived?.find((d) => d.id === row.metric)?.name ?? "") : metricOf(metrics, row.metric).name;
     const answer = prose.bridges?.find((b) => b.questionId === row.questionId)?.options.find((o) => o.points === row.declaredPoints)?.label;
     // Nobody has looked yet (to do, requested): « à renseigner », not a verdict.
     const found = lowerFirst(strings.status[row.found ? FOUND_STATUS[row.found] : "todo"]);
-    return {
+    lines.push({
       row: "bridge",
       id: row.metric,
       questionId: row.questionId,
       label,
-      points: String(row.declaredPoints),
-      found: row.found ?? "",
       verdict: row.verdict ?? "",
+      // The one bridge's verdict, in the singular: the slide's tag on its row.
+      tag: row.verdict ? verdictLabel(row.verdict, 1, strings, ctx.locale) : "",
       text: answer ? fillTemplate(strings.mirror.card, { answer, points: String(row.declaredPoints), found }) : found,
-    };
-  });
+    });
+  }
   const takenAt = Date.parse(mirror.takenAt);
   if (!Number.isNaN(takenAt)) {
     const date = formatDay(new Date(takenAt), ctx.locale);
@@ -573,20 +688,26 @@ function buildAnnex(state: EngineState, strings: Words, metrics: ResolvedMetric[
     const days = windowDaysOf(shape, state.setup);
     const known = knownIn(state, shape.id, ctx);
     const confidence = known.kind === "known" ? known.confidence : entry ? confidenceOf(entry) : "unknown";
-    return {
+    const cells = {
       row: "annex",
       id: shape.id,
-      number: metric.name,
+      label: metric.name,
       // The same words the request and the sheet fill: « ayant déclenché l'événement « a créé un premier projet » ».
-      formula: fillTemplate(metric.formula, catalogueValues(state, shape.id, strings, metrics, ctx)),
+      // The event is the user's own name for it, so the formula goes through the slide glyphs.
+      formula: slideGlyphs(fillTemplate(metric.formula, catalogueValues(state, shape.id, strings, metrics, ctx))),
       window: days > 0 ? formatDuration(days, "days", ctx, strings.units) : "",
       period: period ? formatMonth(period, ctx.locale) : "",
       source: entry?.status === "measured" ? sourceLabel(entry.source, strings) : entry?.status === "estimated" && entry.estimate ? strings.basis[BASIS_KEY[entry.estimate.basis]] : "",
       status: strings.status[STATUS_KEY[statusOf(entry)]],
       confidence: strings.slide.confidence[confidence],
       // The user's own definition may travel; their private note NEVER does (§4.1).
-      definition: entry?.definitionNote?.trim() ?? "",
+      definition: slideGlyphs(entry?.definitionNote ?? ""),
     };
+    // The table reads the columns; the text export reads one line, where words go on in lower case — a
+    // tool or a role keeps its capital (it is a name), an estimate's basis or « Autre » does not.
+    const named = entry?.status === "measured" && (entry.source?.kind === "tool" || entry.source?.kind === "person");
+    const source = named ? cells.source : lowerFirst(cells.source);
+    return { ...cells, text: [cells.formula, cells.definition, cells.window, cells.period, source, lowerFirst(cells.status), cells.confidence].filter(Boolean).join(" · ") };
   });
 }
 
@@ -662,7 +783,8 @@ export function buildDeck(state: EngineState, derived: EngineDerived, strings: W
   const month = formatMonth(snapshot.referenceMonth, ctx.locale);
   const cohort = formatMonth(snapshot.cohortMonth, ctx.locale);
   const toolList = joinList(tools, strings.grammar);
-  const company = state.deck.showCompany && state.setup.companyLabel?.trim() ? `${state.setup.companyLabel.trim()} · ` : "";
+  const label = state.deck.showCompany ? slideGlyphs(state.setup.companyLabel ?? "") : "";
+  const company = label ? `${label} · ` : "";
 
   return {
     slides,
@@ -681,7 +803,7 @@ export function buildDeck(state: EngineState, derived: EngineDerived, strings: W
 }
 
 /** Machine keys: ids and states a slide maps to its own words, never printed as they are. */
-const MACHINE_KEYS: ReadonlySet<string> = new Set(["row", "key", "id", "questionId", "tone", "found", "verdict", "points"]);
+const MACHINE_KEYS: ReadonlySet<string> = new Set(["row", "key", "id", "questionId", "tone", "verdict"]);
 
 /** The value of a line in the text export: its sentence (after its label) when it has one, else its fields. */
 function lineText(line: Row): string {

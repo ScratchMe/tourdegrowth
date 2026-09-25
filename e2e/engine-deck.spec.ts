@@ -130,6 +130,47 @@ for (const locale of ["fr", "en"] as const) {
     });
 
     /**
+     * The route in and out, through the board's own button rather than a
+     * mounted deck: the slides are a screen of the engine, reached from the
+     * board and left back to it. Structure only — every included slide has a
+     * title and at least one line in its body, so a slide whose rows came back
+     * empty from the model (the shape the rows once drifted into) shows here
+     * as an empty body, not as a pretty frame around nothing.
+     */
+    test("board → slides → back: the heading takes the focus, every included slide has a title and a body", async ({ page }) => {
+      await seed(page);
+      await page.goto(`/${locale}/aarrr-funnel-template?engine=preview`);
+      await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
+      await expect(page.getByTestId("engine-board")).toBeVisible();
+      await expect(page.getByTestId("engine-deck")).toHaveCount(0);
+
+      await page.getByTestId("engine-open-deck").click();
+      await expect(page.getByTestId("engine-deck")).toBeVisible();
+      await expect(page.getByTestId("engine-board")).toHaveCount(0);
+      await expect(page.locator("#engine-deck-title")).toBeFocused();
+
+      const slides = await page.locator('[data-print="thumb"][data-included="true"] [data-slide]').evaluateAll((els) =>
+        els.map((el) => {
+          const title = el.querySelector("h3")?.textContent?.trim() ?? "";
+          const body = el.querySelector("footer")?.previousElementSibling as HTMLElement | null;
+          const lines = (body?.innerText ?? "").split("\n").map((l) => l.trim()).filter(Boolean);
+          return { id: el.getAttribute("data-slide"), title, lines: lines.length };
+        }),
+      );
+      // Non-vacuity: the six slides §6.0 includes, not an empty list that passes by being empty.
+      expect(slides.map((s) => s.id)).toEqual(["peloton", "leak", "visibility", "unit-economics", "ask", "annex"]);
+      for (const s of slides) {
+        expect(s.title, `${s.id} has no title`).not.toBe("");
+        expect(s.lines, `${s.id} has an empty body`).toBeGreaterThan(0);
+      }
+
+      await page.getByTestId("engine-deck-back").click();
+      await expect(page.getByTestId("engine-board")).toBeVisible();
+      await expect(page.getByTestId("engine-deck")).toHaveCount(0);
+      await expect(page.getByTestId("engine-verdict")).toBeFocused();
+    });
+
+    /**
      * What a slide may print, whatever the copy says: every template filled,
      * every accent mark consumed, no "undefined" or "NaN" from a value that
      * didn't arrive, and only the glyphs the three embedded families carry

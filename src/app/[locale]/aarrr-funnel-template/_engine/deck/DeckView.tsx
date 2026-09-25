@@ -4,10 +4,11 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalS
 import { Button } from "@/components/core/Button";
 import { Callout } from "@/components/core/Callout";
 import { buildDeck, deckMarkdown } from "@/lib/engine/deck";
-import { fillTemplate, formatNumber } from "@/lib/engine/format";
+import { fillTemplate } from "@/lib/engine/format";
+import { sanityText } from "@/lib/engine/sentences";
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
-import type { DeckSlide, EngineAsk, EngineCalcContext, EngineDeck, EngineDerived, EngineState, SanityCheck, SanityId, SlideId } from "@/lib/engine/types";
-import { countsOf, currentSnapshot } from "@/lib/engine/values";
+import type { DeckSlide, EngineAsk, EngineCalcContext, EngineDeck, EngineDerived, EngineState, SanityCheck, SlideId } from "@/lib/engine/types";
+import { currentSnapshot } from "@/lib/engine/values";
 import type { Locale } from "@/lib/i18n/locale";
 import { AskForm } from "./AskForm";
 import { askDefaults, isPristineAsk } from "./ask-defaults";
@@ -62,17 +63,6 @@ const SLIDES: Record<SlideId, ComponentType<SlideProps>> = {
   annex: SlideAnnex,
 };
 
-const SANITY_KEY = {
-  "num-gt-den": "numGtDen",
-  "retained-gt-activated": "retainedGtActivated",
-  "paid-gt-retained": "paidGtRetained",
-  "churn-high": "churnHigh",
-  "margin-odd": "marginOdd",
-  "ttv-mean": "ttvMean",
-  "cohort-mismatch": "cohortMismatch",
-  "reconcile-gap": "reconcileGap",
-} as const satisfies Record<SanityId, keyof EngineStrings["sanity"]>;
-
 /**
  * The print sheet — engine spec §10.2.
  *
@@ -114,6 +104,24 @@ const PRINT_CSS = `
 const subscribeNever = () => () => {};
 function useCanCopyImage(): boolean {
   return useSyncExternalStore(subscribeNever, canCopyImage, () => false);
+}
+
+const PDF_HINT_ID = "engine-deck-pdf-hint";
+/** The width under which deck.module.css shows the PDF's phone warning (`.fieldHint.phoneOnly`). */
+const PHONE_QUERY = "(max-width: 760px)";
+function subscribePhone(onChange: () => void) {
+  const query = window.matchMedia(PHONE_QUERY);
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+}
+/**
+ * Whether the phone warning is on screen. The CSS decides what is shown; this
+ * only keeps `aria-describedby` in step with it — a description is read even
+ * from a hidden element, and on a computer "more reliable from a computer"
+ * would describe the button as the opposite of what the reader is doing.
+ */
+function usePhone(): boolean {
+  return useSyncExternalStore(subscribePhone, () => window.matchMedia(PHONE_QUERY).matches, () => false);
 }
 
 /**
@@ -195,6 +203,7 @@ export function DeckView({
   const [status, setStatus] = useState<Status>(null);
   const [enlarged, setEnlarged] = useState<SlideId | null>(null);
   const canCopy = useCanCopyImage();
+  const phone = usePhone();
 
   // Proposed once per visit, from the state the screen opened on.
   const [proposal] = useState<EngineAsk | null>(() => (isPristineAsk(state.deck.ask) ? askDefaults(state, derived) : null));
@@ -202,8 +211,9 @@ export function DeckView({
   const ask = proposal && !askTouched && isPristineAsk(state.deck.ask) ? proposal : state.deck.ask;
   const deck: EngineDeck = useMemo(() => ({ ...state.deck, ask }), [state.deck, ask]);
   const model = useMemo(
-    () => buildDeck({ ...state, deck }, derived, strings, metrics, ctx),
-    [state, deck, derived, strings, metrics, ctx],
+    // With the prose: without it the computed figures and the Tour bridges are written with empty labels.
+    () => buildDeck({ ...state, deck }, derived, strings, metrics, ctx, { derived: derivedCopy, bridges }),
+    [state, deck, derived, strings, metrics, ctx, derivedCopy, bridges],
   );
 
   // Arriving on this screen is a change of view: focus its heading, so a
@@ -265,19 +275,14 @@ export function DeckView({
     if (ok) onExported?.("text");
   };
 
-  // The one check the model leaves unfilled: `num-gt-den` names two counts
-  // the sheet would have refused (a file can still carry them). Filled with
-  // the engine's own number formatter, never with a local one.
+  // The check's sentence is the engine's (`sanityText`: its counts carried
+  // formatted by the check itself, its noun agreeing with them). `num-gt-den`
+  // says "the first count" without naming the number, and a screen listing
+  // several checks must say which: its name leads, as a label — a dash rather
+  // than a colon, so the line reads right in both languages without a
+  // typography rule here.
   const checkText = (check: SanityCheck) => {
-    const values = { ...check.values };
-    if (check.id === "num-gt-den") {
-      const counts = countsOf(currentSnapshot(state).metrics[check.metrics[0]!]);
-      if (counts) Object.assign(values, { num: formatNumber(counts.numerator, locale), den: formatNumber(counts.denominator, locale) });
-    }
-    const message = fillTemplate(strings.sanity[SANITY_KEY[check.id]], values);
-    // Its sentence says "the first count" without naming the number, so the
-    // number's name leads, as a label — a dash rather than a colon, so the
-    // same line reads right in both languages without a typography rule here.
+    const message = sanityText(check, strings, locale);
     const name = check.id === "num-gt-den" ? metrics.find((m) => m.id === check.metrics[0])?.name : undefined;
     return name ? `${name} — ${message}` : message;
   };
@@ -359,9 +364,21 @@ export function DeckView({
             {u.exportsTitle}
           </h3>
           <div className={styles.exportActions}>
-            <Button onClick={exportPdf} disabled={included.length === 0} data-testid="deck-pdf">
-              {t.pdf}
-            </Button>
+            {/* The phone warning is about the PDF, so it sits under that button and describes it —
+                read under both buttons, it could pass for a note about the copied text. */}
+            <div className={styles.exportPdf}>
+              <Button
+                onClick={exportPdf}
+                disabled={included.length === 0}
+                aria-describedby={phone ? PDF_HINT_ID : undefined}
+                data-testid="deck-pdf"
+              >
+                {t.pdf}
+              </Button>
+              <p id={PDF_HINT_ID} className={`${styles.fieldHint} ${styles.phoneOnly}`} data-testid="deck-pdf-hint">
+                {t.pdfMobile}
+              </p>
+            </div>
             <Button variant="secondary" onClick={exportText} data-testid="deck-copy-text">
               {t.copyText}
             </Button>
@@ -371,9 +388,6 @@ export function DeckView({
               </Button>
             ) : null}
           </div>
-          <p className={`${styles.fieldHint} ${styles.phoneOnly}`} data-testid="deck-pdf-hint">
-            {t.pdfMobile}
-          </p>
           <label className={styles.check}>
             <input type="checkbox" checked={hd} onChange={(e) => setHd(e.target.checked)} data-testid="deck-hd" />
             <span>{t.pngHd}</span>
