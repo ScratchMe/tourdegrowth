@@ -70,4 +70,26 @@
   --chart-label: 500 12px/1.4 var(--font-mono);
   --chart-title: var(--title-card); /* a chart title is a sentence that says the insight */
   --chart-note: var(--meta-xs); /* source, date, granularity */
+
+  /*
+   * --- Slides (growth engine deck, engine spec §9.1) --- a slide is laid out
+   * at 1920×1080 CSS pixels and projected on a wall, so it has its own scale:
+   * the app's type read from three metres away, not from a laptop. Same three
+   * families and the same split as everywhere else — stencil for the claim,
+   * Inter for the prose, mono for the meta — only larger. The title is one
+   * sentence that carries the number; `-long` is the step down for the few
+   * that run past three lines at full size (the Ask with a long request).
+   */
+  --slide-kicker: 500 20px/1.4 var(--font-mono);
+  --slide-title: 700 78px/1.04 var(--font-display);
+  --slide-title-long: 700 62px/1.06 var(--font-display);
+  --slide-title-xlong: 700 52px/1.08 var(--font-display);
+  --slide-numeral: 700 104px/0.9 var(--font-display);
+  --slide-label: 700 30px/1.1 var(--font-display);
+  --slide-heading: 600 22px/1.3 var(--font-mono);
+  --slide-body: 500 30px/1.35 var(--font-ui);
+  --slide-body-sm: 500 24px/1.4 var(--font-ui);
+  --slide-meta: 500 18px/1.45 var(--font-mono);
+  --slide-table: 500 17px/1.35 var(--font-ui);
+  --slide-tracking: 0.12em;
 }
