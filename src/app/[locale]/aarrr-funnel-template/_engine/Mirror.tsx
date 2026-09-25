@@ -3,6 +3,8 @@ import { Card } from "@/components/core/Card";
 import type { Locale } from "@/lib/i18n/locale";
 import type { BridgeRow, DerivedId, MetricId, Mirror as MirrorModel, MirrorVerdict, TrackingLevel } from "@/lib/engine/types";
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
+import { point } from "@/lib/engine/interval";
+import { numbered } from "@/lib/engine/phrases";
 import { fill } from "./visual-model";
 import styles from "./Mirror.module.css";
 
@@ -21,7 +23,8 @@ export interface MirrorProps {
 /** Blind spots first: the argument the section exists for (§8.5). */
 const VERDICT_ORDER: readonly MirrorVerdict[] = ["blind-spot", "blind-spot-light", "known-gap", "better", "coherent"];
 
-const VERDICT_KEY: Record<MirrorVerdict, keyof EngineStrings["mirror"]> = {
+/** Each verdict's label: the general form under its count (agreeing with it), `…One` on the one card it names. */
+const VERDICT_KEY: Record<MirrorVerdict, "blindSpot" | "blindSpotLight" | "knownGap" | "better" | "coherent"> = {
   "blind-spot": "blindSpot",
   "blind-spot-light": "blindSpotLight",
   "known-gap": "knownGap",
@@ -110,7 +113,7 @@ export function Mirror({ mirror, gone = false, strings, locale, bridges, metrics
               data-verdict={verdict}
             >
               <span className={styles.count}>{count}</span>
-              <span className={styles.countLabel}>{m[VERDICT_KEY[verdict]]}</span>
+              <span className={styles.countLabel}>{m[numbered(VERDICT_KEY[verdict], point(count), locale)]}</span>
             </li>
           );
         })}
@@ -130,7 +133,7 @@ export function Mirror({ mirror, gone = false, strings, locale, bridges, metrics
                   data-testid={`mirror-card-${row.questionId}`}
                   data-verdict={row.verdict}
                 >
-                  <p className={styles.cardEyebrow}>{m[VERDICT_KEY[row.verdict]]}</p>
+                  <p className={styles.cardEyebrow}>{m[`${VERDICT_KEY[row.verdict]}One`]}</p>
                   <h4 className={styles.cardTitle}>{nameOf(row.metric)}</h4>
                   {bridge ? (
                     <p className={styles.question}>

@@ -689,11 +689,23 @@ export const ENGINE_COPY = {
       fr: "Ce que tu as déclaré au Tour × ce que tu retrouves ici",
       en: "What you declared in the Tour × what you find here",
     },
+    /**
+     * A verdict next to its count (« 2 angles morts », « 1 angle mort ») and,
+     * in the singular, on the one bridge it names. The general form is the
+     * plural, the `One` key the singular — French takes it under 2, so a
+     * count of 0 reads « 0 angle mort » (this file's header convention).
+     * TODO: à relire — the `One` forms and « Cohérents » are new copy (convention 6).
+     */
     blindSpot: { fr: "Angles morts", en: "Blind spots" },
+    blindSpotOne: { fr: "Angle mort", en: "Blind spot" },
     blindSpotLight: { fr: "Angles morts légers", en: "Minor blind spots" },
-    coherent: { fr: "Cohérent", en: "Consistent" },
+    blindSpotLightOne: { fr: "Angle mort léger", en: "Minor blind spot" },
+    coherent: { fr: "Cohérents", en: "Consistent" },
+    coherentOne: { fr: "Cohérent", en: "Consistent" },
     better: { fr: "Mieux que déclaré", en: "Better than declared" },
+    betterOne: { fr: "Mieux que déclaré", en: "Better than declared" },
     knownGap: { fr: "Lacunes connues", en: "Known gaps" },
+    knownGapOne: { fr: "Lacune connue", en: "Known gap" },
     card: {
       fr: "Au Tour : « {answer} » ({points} pts). Ici : {found}.",
       en: "In the Tour: \"{answer}\" ({points} pts). Here: {found}.",
