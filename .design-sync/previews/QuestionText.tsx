@@ -63,10 +63,10 @@ export const French = () => (
   <Screen
     questionId="ret-3"
     locale="fr"
-    text="Connais-tu ta principale cause de churn ?"
+    text="Connais-tu ta principale cause de churn ?"
     labels={{
       glossaryCloseLabel: "Fermer",
-      glossaryLabelTemplate: "Définition : {term}",
+      glossaryLabelTemplate: "Définition : {term}",
       glossaryMoreLabel: "En savoir plus →",
     }}
   />
