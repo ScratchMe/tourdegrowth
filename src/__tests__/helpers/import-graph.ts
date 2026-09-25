@@ -26,11 +26,35 @@ export const FILES = walk(SRC).map((full) => ({
 
 export const BY_PATH = new Map(FILES.map((f) => [f.path, f.source]));
 
-/** The imports that survive compilation — `import type` is erased. */
+/** Comments name the imports they talk about; only code counts. `//` after `:` or a quote is a URL, not a comment. */
+export function stripComments(source: string): string {
+  return source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:"'`])\/\/.*$/gm, "$1");
+}
+
+/**
+ * The imports that survive compilation — `import type` is erased. Three
+ * forms, all value edges (engine spec R21):
+ *
+ * - `import … from "x"` / `export … from "x"` — the one this helper matched
+ *   alone until the engine's review: a guard that only read this form could
+ *   be walked around by any of the two below;
+ * - `import("x")` — a dynamic import lands in its own chunk, but it is still
+ *   downloaded by the page that runs it, so for a "what can this page reach"
+ *   walk it is an edge. `typeof import("x")` is a TYPE and is not;
+ * - `import "x"` — a bare side-effect import (a stylesheet, a polyfill).
+ *
+ * The two new forms are read on comment-stripped source (a comment that
+ * says `import("html-to-image")` is not an import); the first keeps reading
+ * the raw text, so no existing guard's count moves.
+ */
 export function valueImports(source: string): string[] {
-  return [...source.matchAll(/(^|\n)\s*(?:import|export)(\s+type)?\s[^;]*?from\s+["']([^"']+)["']/g)]
+  const fromEdges = [...source.matchAll(/(^|\n)\s*(?:import|export)(\s+type)?\s[^;]*?from\s+["']([^"']+)["']/g)]
     .filter((m) => !m[2])
     .map((m) => m[3]!);
+  const code = stripComments(source);
+  const dynamic = [...code.matchAll(/(?<!\btypeof\s*)\bimport\(\s*["']([^"']+)["']\s*\)/g)].map((m) => m[1]!);
+  const bare = [...code.matchAll(/(?:^|\n|;)\s*import\s+["']([^"']+)["']/g)].map((m) => m[1]!);
+  return [...fromEdges, ...dynamic, ...bare];
 }
 
 export function resolveSpecifier(fromPath: string, spec: string): string | null {
@@ -51,10 +75,10 @@ export function resolveSpecifier(fromPath: string, spec: string): string | null 
   return null;
 }
 
-/** Every module reachable from `entry` through value imports, `entry` included. */
-export function reachable(entry: string): Set<string> {
+/** Every module reachable from `entry` (or several entries) through value imports, the entries included. */
+export function reachable(entry: string | readonly string[]): Set<string> {
   const seen = new Set<string>();
-  const queue = [entry];
+  const queue = typeof entry === "string" ? [entry] : [...entry];
   while (queue.length) {
     const current = queue.pop()!;
     if (seen.has(current)) continue;
