@@ -1,11 +1,9 @@
 import { fillTemplate } from "@/lib/engine/format";
-import { BASIS_KEY, CAUSE_KEY, STATUS_KEY } from "@/lib/engine/strings";
-import type { CandidateId, PelotonColumn } from "@/lib/engine/types";
-import { currentSnapshot } from "@/lib/engine/values";
-import { columnGrid, columnNumeral, numeralText, signupsGrid, type GridModel } from "../visual-model";
+import type { CandidateId } from "@/lib/engine/types";
+import { columnGrid, signupsGrid, type GridModel } from "../visual-model";
 import { rowOf, rowsOf } from "./deck-rows";
 import { SlideFrame, type SlideProps } from "./SlideFrame";
-import { Arrow, SlideText, segments } from "./slide-text";
+import { Arrow, SlideText } from "./slide-text";
 import styles from "./deck.module.css";
 
 const DOT_CLASS = {
@@ -53,17 +51,22 @@ function DotGrid({ grid, highlighted, label }: { grid: GridModel; highlighted: b
  * numeral → label → grid → source — a numeral under the grid touches the
  * dots (the mistake the spec's own mock-up made).
  *
+ * Every word is the model's (`column`, `upstream`, `legendReferred` rows):
+ * the numeral is the row's `value` — "" for an unknown column, which the
+ * slide draws as "?", never as a 0 — and the caption is the row's `source`,
+ * or its whole `text` when there is no number to cite a source for. The grid
+ * is the one thing drawn from the derived intervals: a position, not words.
+ *
  * The one red is the diagnosis: the column the diagnosis names takes it on
  * its dots and carries the stamp, which says it in words beside the numeral
  * — never on top of the grid, where it would hide the dots it is about.
  */
 export function SlidePeloton({ slide, context }: SlideProps) {
-  const { strings, derived, state, model } = context;
+  const { strings, derived, model } = context;
   const t = strings.peloton;
-  const v = strings.visual;
-  const snapshot = currentSnapshot(state);
   const rows = rowsOf(slide, "column");
   const upstream = rowOf(slide, "upstream");
+  const referred = rowOf(slide, "legendReferred");
 
   const named = derived.diagnosis.state === "clear" || derived.diagnosis.state === "shared" ? derived.diagnosis.named : [];
   const stampOf = (metric: CandidateId): string | null => {
@@ -71,43 +74,31 @@ export function SlidePeloton({ slide, context }: SlideProps) {
     return derived.diagnosis.positions[metric]?.comparator?.kind === "target" ? strings.diagnosis.stampTarget : strings.diagnosis.stampReference;
   };
 
-  const referred = derived.peloton.referredPerHundred ? columnNumeral(derived.peloton.referredPerHundred) : null;
-  const referredText = referred ? numeralText(referred, strings.units, v.lessThanOne) : null;
-  const cohort = model.footer.cohort ?? "";
-
-  const labelOf: Record<PelotonColumn["metric"], string> = {
-    "act.rate": t.activated,
-    "ret.d30": t.d30,
-    "rev.paid-conversion": fillTemplate(t.paid, { n: state.setup.paidWindowDays }),
-  };
-
-  const upstreamText = upstream?.n ? segments(fillTemplate(t.upstream, upstream)) : v.upstreamUnknown;
-
-  const columns = derived.peloton.columns.map((col) => {
-    const row = rows.find((r) => r.metric === col.metric);
-    const entry = snapshot.metrics[col.metric];
-    const numeral = columnNumeral(col.perHundred);
-    const unknown = numeral.kind === "unknown" || !row?.n;
-    // The model's finished count, except where it rounds a measured rate to 0:
-    // a 0 is a measurement, so it says "fewer than 1" (the title gives the per-thousand).
-    const text = unknown ? "?" : numeral.kind === "less-than-one" ? v.lessThanOne : row!.n;
-    const status = strings.status[STATUS_KEY[entry?.status ?? "todo"]];
-    const where = row?.source || (entry?.status === "estimated" && entry.estimate ? strings.basis[BASIS_KEY[entry.estimate.basis]] : "");
-    const why = entry?.status === "missing" && entry.missing ? strings.cause[CAUSE_KEY[entry.missing.cause]] : "";
-    const source = unknown ? segments(`${status} · ${why}`) : segments(`${where || t.legendRange} · ${row?.period ?? ""}`);
-    const population = labelOf[col.metric].charAt(0).toLowerCase() + labelOf[col.metric].slice(1);
-    const aria = unknown
-      ? `${labelOf[col.metric]} — ${t.legendUnknown}`
-      : fillTemplate(t.aria, { n: text, population, status, source: where || t.legendRange, cohort: row?.period || cohort });
-    return { metric: col.metric, text, unknown, source, aria, grid: columnGrid(unknown ? null : col.perHundred), stamp: stampOf(col.metric) };
+  // The columns in the peloton's own order; each placed from its model row.
+  const columns = derived.peloton.columns.flatMap((col) => {
+    const row = rows.find((r) => r.id === col.metric);
+    if (!row) return [];
+    const unknown = row.value === "";
+    return [
+      {
+        metric: col.metric,
+        row,
+        unknown,
+        caption: unknown ? row.text : row.source,
+        grid: columnGrid(unknown ? null : col.perHundred),
+        stamp: stampOf(col.metric),
+      },
+    ];
   });
 
   return (
     <SlideFrame slide={slide} context={context}>
-      <p className={styles.upstream}>
-        <Arrow direction="down" className={styles.upstreamArrow} />
-        <SlideText text={upstreamText} accent={false} />
-      </p>
+      {upstream ? (
+        <p className={styles.upstream}>
+          <Arrow direction="down" className={styles.upstreamArrow} />
+          <SlideText text={upstream.text} accent={false} />
+        </p>
+      ) : null}
 
       <div className={styles.peloton}>
         <section className={styles.column} data-column="signups">
@@ -118,16 +109,16 @@ export function SlidePeloton({ slide, context }: SlideProps) {
           <DotGrid
             grid={signupsGrid(derived.peloton.referredPerHundred)}
             highlighted={false}
-            label={referredText ? `${t.signups} — 100, ${fillTemplate(t.legendReferred, { n: referredText })}` : `${t.signups} — 100`}
+            label={referred ? `${referred.label} — 100, ${referred.text}` : `${t.signups} — 100`}
           />
-          <p className={styles.columnSource}>{fillTemplate(v.cohortOf, { cohort })}</p>
+          <p className={styles.columnSource}>{fillTemplate(strings.visual.cohortOf, { cohort: model.footer.cohort ?? "" })}</p>
         </section>
 
         {columns.map((c) => (
           <section key={c.metric} className={styles.column} data-column={c.metric} data-unknown={c.unknown || undefined}>
             <div className={styles.numeralRow}>
               <p className={[styles.numeral, c.unknown ? styles.numeralUnknown : ""].filter(Boolean).join(" ")} data-testid={`slide-numeral-${c.metric}`}>
-                <SlideText text={c.text} accent={false} />
+                <SlideText text={c.unknown ? "?" : c.row.value} accent={false} />
               </p>
               {c.stamp ? (
                 <span className={styles.stamp} data-testid="slide-stamp">
@@ -135,10 +126,10 @@ export function SlidePeloton({ slide, context }: SlideProps) {
                 </span>
               ) : null}
             </div>
-            <h4 className={styles.columnLabel}>{labelOf[c.metric]}</h4>
-            <DotGrid grid={c.grid} highlighted={Boolean(c.stamp)} label={c.aria} />
+            <h4 className={styles.columnLabel}>{c.row.label}</h4>
+            <DotGrid grid={c.grid} highlighted={Boolean(c.stamp)} label={`${c.row.label} — ${c.row.text}`} />
             <p className={styles.columnSource}>
-              <SlideText text={c.source} accent={false} />
+              <SlideText text={c.caption} accent={false} />
             </p>
           </section>
         ))}
@@ -146,10 +137,10 @@ export function SlidePeloton({ slide, context }: SlideProps) {
 
       <div className={styles.legend}>
         <ul className={styles.legendItems} aria-hidden="true">
-          {referredText ? (
+          {referred ? (
             <li>
               <span className={`${styles.swatch} ${styles.dotReferred}`} />
-              {fillTemplate(t.legendReferred, { n: referredText })}
+              {referred.text}
             </li>
           ) : null}
           <li>

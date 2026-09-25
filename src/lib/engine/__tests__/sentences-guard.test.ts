@@ -39,8 +39,9 @@ import { emptyState, estimated, exampleState, measured, missing, ratio, tourResu
  * repère », « sources: » without its no-break space, "sources :" in English,
  * « ni ta cible », `numbered` always plural, and "with a {n}-day" put back in
  * the catalogue (the static page prints "a n-day"). Two breaks first PASSED, and
- * both said something: `slide.leakAside` is copy no code prints (so a glyph
- * there reaches no slide), and the example's months are consonant-initial
+ * both said something: `slide.leakAside` is copy the MODEL never writes (the
+ * leak slide prints it as a heading, so its glyphs are the content test's to
+ * sweep, not this one's), and the example's months are consonant-initial
  * (hence the vowel-month scenario).
  */
 
@@ -206,7 +207,7 @@ const SCENARIOS: { name: string; build: () => { state: EngineState; result?: Ret
 // --- The sweep ---------------------------------------------------------------
 
 /** Keys a slide maps to its own words — never printed as they are. */
-const MACHINE_KEYS = new Set(["row", "key", "id", "questionId", "tone", "found", "verdict", "points"]);
+const MACHINE_KEYS = new Set(["row", "key", "id", "questionId", "tone", "verdict"]);
 
 interface Sweep {
   samples: Sample[];

@@ -1,3 +1,4 @@
+import { METRIC_SHAPES } from "@/lib/engine/catalog-shape";
 import { STATUS_KEY } from "@/lib/engine/strings";
 import type { MetricStatus } from "@/lib/engine/types";
 import { PILLARS, type Pillar } from "@/lib/scoring/pillars";
@@ -24,6 +25,9 @@ const PIP: Record<MetricStatus, string | undefined> = {
 
 const LEGEND: readonly MetricStatus[] = ["measured", "estimated", "missing", "requested", "not-applicable"];
 
+/** A number's stage, from its id — structure, not words (the catalogue shape is pure). */
+const STAGE_OF: ReadonlyMap<string, Pillar> = new Map(METRIC_SHAPES.map((s) => [s.id, s.stage]));
+
 /**
  * Slide 3 — "what we can see, what we can't" (§9.3). It doubles as the
  * evidence slide, so it is always in the deck: on the left the fifteen
@@ -31,9 +35,12 @@ const LEGEND: readonly MetricStatus[] = ["measured", "estimated", "missing", "re
  * the right what is not documented yet, quickest to slowest to repair, each
  * with its cause and the ROLE that holds it — never a person.
  *
- * Every word comes from the model's rows; the pip is the one thing drawn,
- * and it is picked from the status label the row carries, read back through
- * the same closed vocabulary that wrote it.
+ * Every word comes from the model's rows: a `metric` row's name and status
+ * label, a `missing` row's name (`label`) and its finished line (`text`,
+ * « aucune mesure · Data · un sprint »). What the slide derives is structure
+ * only — the stage each number sits under, read from its `id` through the
+ * catalogue shape, and the pip, read back from the status label through the
+ * same closed vocabulary that wrote it.
  */
 export function SlideVisibility({ slide, context }: SlideProps) {
   const { strings } = context;
@@ -41,7 +48,7 @@ export function SlideVisibility({ slide, context }: SlideProps) {
   const missing = rowsOf(slide, "missing");
   const statusOf = (label: string): MetricStatus =>
     (Object.keys(STATUS_KEY) as MetricStatus[]).find((status) => strings.status[STATUS_KEY[status]] === label) ?? "todo";
-  const byStage = (stage: Pillar) => seen.filter((row) => row.stage === stage);
+  const byStage = (stage: Pillar) => seen.filter((row) => STAGE_OF.get(row.id) === stage);
 
   return (
     <SlideFrame slide={slide} context={context}>
@@ -56,7 +63,7 @@ export function SlideVisibility({ slide, context }: SlideProps) {
                   {byStage(stage).map((row) => {
                     const status = statusOf(row.status);
                     return (
-                      <li key={row.metric} className={styles.stageMetric} data-status={status}>
+                      <li key={row.id} className={styles.stageMetric} data-status={status}>
                         <span className={[styles.pip, PIP[status]].filter(Boolean).join(" ")} aria-hidden="true" />
                         <span className={styles.stageMetricName}>
                           <SlideText text={row.metric} accent={false} />
@@ -84,11 +91,13 @@ export function SlideVisibility({ slide, context }: SlideProps) {
           {missing.length > 0 ? (
             <ol className={styles.missingList}>
               {missing.map((row) => (
-                <li key={row.metric} className={styles.missingRow}>
+                <li key={row.id} className={styles.missingRow}>
                   <span className={styles.missingName}>
-                    <SlideText text={row.metric} accent={false} />
+                    <SlideText text={row.label} accent={false} />
                   </span>
-                  <span className={styles.missingMeta}>{[row.repair, row.cause, row.role].filter(Boolean).join(" · ")}</span>
+                  <span className={styles.missingMeta}>
+                    <SlideText text={row.text} accent={false} />
+                  </span>
                 </li>
               ))}
             </ol>

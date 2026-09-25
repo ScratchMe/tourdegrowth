@@ -13,8 +13,8 @@ type AnnexRow = DeckRows["annex"];
  */
 const DENSE_ABOVE = 12;
 
-/** The table's columns, in the order of `slide.annexCols` (§14.8). */
-const COLUMNS = ["number", "formula", "window", "period", "source", "status", "confidence"] as const satisfies readonly (keyof AnnexRow)[];
+/** The table's columns, in the order of `slide.annexCols` (§14.8); the row's `label` is the "Number" column. */
+const COLUMNS = ["label", "formula", "window", "period", "source", "status", "confidence"] as const satisfies readonly (keyof AnnexRow)[];
 
 /**
  * The appendix — "definitions and sources" (§9.3). Always in the deck: it is
@@ -40,18 +40,18 @@ export function SlideAnnex({ slide, context }: SlideProps) {
           <tr>
             {COLUMNS.map((col) => (
               <th key={col} scope="col" data-column={col}>
-                {strings.slide.annexCols[col]}
+                {strings.slide.annexCols[col === "label" ? "number" : col]}
               </th>
             ))}
           </tr>
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.number}>
+            <tr key={row.id}>
               {COLUMNS.map((col) =>
-                col === "number" ? (
+                col === "label" ? (
                   <th key={col} scope="row">
-                    <SlideText text={row.number} accent={false} />
+                    <SlideText text={row.label} accent={false} />
                   </th>
                 ) : (
                   <td key={col} data-column={col} data-empty={row[col] === "" || undefined}>

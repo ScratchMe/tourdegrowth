@@ -60,22 +60,3 @@ export function SlideText({ text, accent = true }: { text: string; accent?: bool
     </>
   );
 }
-
-/** The plain-text form of a title: the accent marks dropped (aria labels, the ask preview's comparisons). */
-export function plainText(text: string): string {
-  return text.replaceAll("**", "");
-}
-
-/**
- * A " · "-separated line with its empty parts dropped — a footer whose
- * template has a slot the model left empty (no tool named yet, no caveat)
- * must not print "· ·" or end on "sources : ". A part that is only a label
- * waiting for its value ("sources : ", "sources: ") goes too.
- */
-export function segments(text: string): string {
-  return text
-    .split(" · ")
-    .map((part) => part.trim())
-    .filter((part) => part !== "" && !/:$/.test(part))
-    .join(" · ");
-}

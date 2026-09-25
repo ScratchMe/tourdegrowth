@@ -1,4 +1,3 @@
-import type { CandidateId } from "@/lib/engine/types";
 import { rowOf, rowsOf } from "./deck-rows";
 import { SlideFrame, type SlideProps } from "./SlideFrame";
 import { SlideText } from "./slide-text";
@@ -15,29 +14,25 @@ const CHAIN_STEPS = new Set(["today", "if", "then", "times"]);
  * the title's amount was read from (`buildDeck` takes the title's figure from
  * the chain's "× ARPA" line), which is the whole point: the angles'
  * `s2-export.png` printed "+2 à +3 k€" in its title and "+1 400 à +2 600 €"
- * in its body. Right, every other candidate and where it stands — the
- * unmeasured ones said to be "can't be ruled out", never left out.
+ * in its body. Right, under « À côté » / "Alongside" (the heading §9.3 gives
+ * that column), every other candidate and where it stands — the unmeasured
+ * ones said to be "can't be ruled out", never left out. Each of those rows
+ * carries its candidate's name (`label`), its standing (`text`) and its
+ * emphasis (`tone`): the model decided all three, the slide draws them.
  *
  * The assumptions ("all else being equal", "paying customers are among the
  * activated") are printed on the slide, never kept for the speaker: a slide
- * is forwarded without its speaker.
+ * is forwarded without its speaker. The model says them once, in the
+ * `footer` row that replaces this slide's common footer.
  */
 export function SlideLeak({ slide, context }: SlideProps) {
-  const { strings, metrics, derived } = context;
+  const { strings } = context;
   const calc = rowsOf(slide, "calc");
   const chain = calc.filter((row) => CHAIN_STEPS.has(row.key));
   const after = calc.filter((row) => !CHAIN_STEPS.has(row.key));
-  const assumption = rowOf(slide, "assumption")?.text;
   const blind = rowOf(slide, "blind")?.text;
   const footer = rowOf(slide, "footer")?.text;
   const aside = rowsOf(slide, "aside");
-
-  // An aside names its candidate by its catalogue name; the diagnosis says
-  // where it stands, which decides only the emphasis, never the words.
-  const positionOf = (name: string) => {
-    const id = metrics.find((m) => m.name === name)?.id as CandidateId | undefined;
-    return id ? derived.diagnosis.positions[id]?.position : undefined;
-  };
 
   return (
     <SlideFrame slide={slide} context={context} footer={footer}>
@@ -66,7 +61,6 @@ export function SlideLeak({ slide, context }: SlideProps) {
                 <SlideText text={row.text} accent={false} />
               </p>
             ))}
-            {assumption ? <p className={styles.calcNote}>{assumption}</p> : null}
           </section>
         ) : null}
 
@@ -74,18 +68,14 @@ export function SlideLeak({ slide, context }: SlideProps) {
           <section className={styles.asideCard}>
             <h4 className={styles.cardEyebrow}>{strings.slide.leakAside}</h4>
             <ul className={styles.asideList}>
-              {aside.map((row) => {
-                const position = positionOf(row.metric);
-                const tone = position === "below" ? "below" : position === "unknown" ? "unknown" : "neutral";
-                return (
-                  <li key={row.metric} className={styles.asideRow} data-tone={tone}>
-                    <span className={styles.asideStage}>{row.metric}</span>
-                    <span className={styles.asideText}>
-                      <SlideText text={row.text} accent={false} />
-                    </span>
-                  </li>
-                );
-              })}
+              {aside.map((row) => (
+                <li key={row.id} className={styles.asideRow} data-tone={row.tone}>
+                  <span className={styles.asideStage}>{row.label}</span>
+                  <span className={styles.asideText}>
+                    <SlideText text={row.text} accent={false} />
+                  </span>
+                </li>
+              ))}
             </ul>
           </section>
         ) : null}

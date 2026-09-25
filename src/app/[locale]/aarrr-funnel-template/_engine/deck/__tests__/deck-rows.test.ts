@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { exampleState, tourResult, withTarget } from "@/lib/engine/__tests__/fixtures";
+import { exampleState, measured, ratio, tourResult, withEntry, withTarget } from "@/lib/engine/__tests__/fixtures";
 import { CTX_EN, CTX_FR, EN, FR } from "@/lib/engine/__tests__/props";
 import { buildDeck } from "@/lib/engine/deck";
 import { deriveEngine } from "@/lib/engine/derive";
@@ -18,11 +18,17 @@ import { ROW_FIELDS, type RowKind } from "../deck-rows";
  * least once — and asserts that it did: a contract checked on a subset of
  * the kinds would pass while saying nothing about the others.
  *
+ * The model is built the way the slide screen builds it — WITH the prose
+ * (the computed figures' names, the Tour bridges' answers): without it the
+ * unit-economics tiles and the mirror's rows are written with empty labels,
+ * which is the blank this contract exists to catch.
+ *
  * Non-vacuity, measured: renaming `repair` to `repairCost` in ROW_FIELDS.missing
  * fails "every record matches its kind" in both languages (2 tests, the
  * other 4 pass); dropping `filledAsk` from `STATES` fails "every kind is
  * exercised" in both languages, naming bullet, know and measure — the rows
- * only a written ask produces.
+ * only a written ask produces; dropping `margin` fails it naming cap — the
+ * lifetime cap is written only when an LTV exists to be capped.
  */
 
 const props = { fr: { ...FR, ctx: CTX_FR }, en: { ...EN, ctx: CTX_EN } } as const;
@@ -55,13 +61,18 @@ function teamAsk(): EngineState {
   return s;
 }
 
-const STATES: Record<string, () => EngineState> = { example: exampleState, linked, filledAsk, teamAsk };
+/** A gross margin: the LTV becomes computable, and only then is its 36-month cap written. */
+function margin(): EngineState {
+  return withEntry(exampleState(), "rev.gross-margin", measured(ratio(80, 100), { kind: "tool", tool: "stripe" }));
+}
+
+const STATES: Record<string, () => EngineState> = { example: exampleState, linked, filledAsk, teamAsk, margin };
 
 function model(state: EngineState, locale: "fr" | "en"): DeckModel {
   const p = props[locale];
   const result = state.tourLink ? RESULT : null;
   const derived = deriveEngine(state, p.ctx, result, p.bridges, p.strings.units);
-  return buildDeck(state, derived, p.strings, p.metrics, p.ctx);
+  return buildDeck(state, derived, p.strings, p.metrics, p.ctx, { derived: p.derived, bridges: p.bridges });
 }
 
 const KINDS = Object.keys(ROW_FIELDS) as RowKind[];
