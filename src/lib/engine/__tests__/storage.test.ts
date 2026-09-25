@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { clearEngine, loadEngine, requestPersistence, saveEngine } from "../storage";
 import { ENGINE_STORAGE_KEY } from "../types";
-import { fullState } from "./fixtures";
+import { fullState } from "./storage-fixtures";
 
 /**
  * Two rules, both about never losing someone's numbers (spec §4.3, D15):

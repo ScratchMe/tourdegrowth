@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { TEXT_LIMITS, shapeOf } from "../catalog-shape";
 import type { EngineState, MetricEntry } from "../types";
 import { defaultDeck, newEngineState, validateEngine, validateEntry } from "../validate";
-import { SETUP, fullState } from "./fixtures";
+import { SETUP, fullState } from "./storage-fixtures";
 
 /**
  * The rules that keep an unknown from being read as a zero (engine spec §4.1).

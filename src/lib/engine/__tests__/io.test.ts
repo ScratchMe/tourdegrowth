@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { engineFileName, parseEngineFile, serializeEngine } from "../io";
 import type { EngineState } from "../types";
-import { fullState } from "./fixtures";
+import { fullState } from "./storage-fixtures";
 
 /**
  * The file is the engine's only durable copy (spec §4.3). What these tests
