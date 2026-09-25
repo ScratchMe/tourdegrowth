@@ -3,7 +3,14 @@ import AxeBuilder from "@axe-core/playwright";
 import type { Page, Request } from "@playwright/test";
 import { QUESTIONS } from "../src/content/copy-library";
 import { exampleState, tourResult } from "../src/lib/engine/__tests__/fixtures";
-import { expect, test } from "./helpers";
+import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
+
+// The page ships closed (engine-flag.spec.ts): every test opens it with the
+// owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
+test.skip(!ADMIN_PASSWORD, SKIP_ADMIN_REASON);
+test.beforeEach(async ({ context }) => {
+  await grantOwnerPreview(context.request, "engine");
+});
 
 /**
  * The CODIR / COMEX deck — engine spec §9 (the slides), §10 (the exports),
@@ -58,7 +65,7 @@ async function seed(page: Page) {
  */
 async function openDeck(page: Page, locale: "fr" | "en") {
   await seed(page);
-  await page.goto(`/${locale}/aarrr-funnel-template?engine=preview`);
+  await page.goto(`/${locale}/aarrr-funnel-template`);
   await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
   const opener = page.getByTestId("engine-open-deck");
   const deck = page.getByTestId("engine-deck");
@@ -139,7 +146,7 @@ for (const locale of ["fr", "en"] as const) {
      */
     test("board → slides → back: the heading takes the focus, every included slide has a title and a body", async ({ page }) => {
       await seed(page);
-      await page.goto(`/${locale}/aarrr-funnel-template?engine=preview`);
+      await page.goto(`/${locale}/aarrr-funnel-template`);
       await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
       await expect(page.getByTestId("engine-board")).toBeVisible();
       await expect(page.getByTestId("engine-deck")).toHaveCount(0);

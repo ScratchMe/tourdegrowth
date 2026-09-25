@@ -45,8 +45,13 @@ describe("the game card's wiring (P24/P25 hold on the page, not just on the reso
     expect(PAGE.match(/gameEntry=/g)).toHaveLength(2);
   });
 
-  it("the page reads access from the flag and the preview cookie, the proxy's way", () => {
-    expect(PAGE).toMatch(/resolveGameAccess\(\{\s*env:\s*process\.env\.GAME_ENABLED,\s*cookie:[^}]*GAME_PREVIEW_COOKIE/);
+  it("the page reads access from the flag and the VERIFIED preview cookie, the proxy's way", () => {
+    expect(PAGE).toMatch(
+      /resolveGameAccess\(\{\s*env:\s*process\.env\.GAME_ENABLED,\s*ownerPreview:\s*await hasOwnerPreview\("game",[^}]*GAME_PREVIEW_COOKIE/,
+    );
+    // The cookie is a signature since 2026-09-25: a page that trusted its mere
+    // presence, or the old value "1", would reopen the public preview.
+    expect(PAGE).not.toMatch(/GAME_PREVIEW_COOKIE\)\?\.value\s*===/);
     const calls = [...PAGE.matchAll(/resultGameEntry\(\{[\s\S]*?\}\)/g)].map((m) => m[0]);
     expect(calls).toHaveLength(2);
     for (const call of calls) expect(call).toMatch(/access:\s*await readGameAccess\(\)/);

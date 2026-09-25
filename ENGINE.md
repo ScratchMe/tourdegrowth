@@ -5,7 +5,7 @@ répertoire de travail d'une session, qui disparaît avec son conteneur ; c'est 
 même raison qui a fait entrer `AUDIT.md` et `AUDIT-PLAN.md` dans le dépôt.*
 
 **Où en est le moteur.** Construit derrière `ENGINE_ENABLED` (fermé ; Antoine le
-teste avec `?engine=preview`), route `/{locale}/aarrr-funnel-template`, code dans
+teste avec l'aperçu propriétaire de `/admin/preview`), route `/{locale}/aarrr-funnel-template`, code dans
 `src/lib/engine/` (pur), `src/content/engine-copy.ts` et `engine-catalog.ts`
 (toute la copie, `TODO: à relire` jusqu'au bon à tirer nº6) et
 `src/app/[locale]/aarrr-funnel-template/` (l'îlot, le tableau de bord, les
@@ -1513,6 +1513,15 @@ sous la citation d'Antoine, deux cartes secondaires, `copy-review.md` §4.1) ;
 
 ### 11.2 Le drapeau (`src/lib/engine/access.ts`)
 
+> **Mise à jour 2026-09-25 — l'aperçu est au propriétaire seul.** Le paramètre
+> `?engine=preview` décrit plus bas était public (écrit dans ce dépôt public,
+> donc ouvrable par n'importe quel lecteur). Il est **inerte** : le cookie
+> `tdg_engine_preview` vaut désormais une signature HMAC-SHA256 sous
+> `ADMIN_DASHBOARD_PASSWORD`, posée uniquement par `POST /admin/preview`
+> derrière la Basic Auth (`src/lib/owner-preview.ts`), et
+> `resolveEngineAccess({ env, ownerPreview })` reçoit le verdict vérifié.
+> Les specs passent par `grantOwnerPreview` (`e2e/helpers.ts`).
+
 Copie conforme de `lib/game/access.ts` : `resolveEngineAccess({ env, cookie })`
 (`"open"` seulement si `ENGINE_ENABLED === "true"` ou cookie `tdg_engine_preview
 = "1"`), `previewRequest("preview" | "off")`, `isEnginePath(rest)` (vrai pour
@@ -1709,7 +1718,7 @@ inchangé mais couvrant la nouvelle page. Non-vacuité mesurée pour chacune : u
 ### 13.3 E2E (Playwright, build de production, Chromium)
 
 Helper `openEngine(page, locale)` : visite
-`/{locale}/aarrr-funnel-template?engine=preview` (la CI ne pose pas
+`/{locale}/aarrr-funnel-template` après `grantOwnerPreview` (la CI ne pose pas
 `ENGINE_ENABLED` : c'est le vrai défaut fermé qui est testé) ;
 `seedTourResult(page, answers)` : écrit un résultat **avec** `answers` dans
 `tdg.results.v1`.
@@ -1748,8 +1757,9 @@ Helper `openEngine(page, locale)` : visite
   seulement** (§10.4) ; PNG téléchargé = PNG valide 1920×1080 (IHDR lu dans le
   test) et 3840×2160 en haute définition ; slide `mirror` absente par défaut,
   présente après coche ; une slide décochée n'est pas imprimée.
-- **`engine-flag.spec.ts`** : sans cookie ⇒ 404 ; `?engine=preview` ⇒ 200 et
-  le cookie est posé ; `?engine=off` ⇒ 404 de nouveau ; `/aarrr-funnel-template`
+- **`engine-flag.spec.ts`** : sans cookie ⇒ 404 ; `?engine=preview` et un
+  cookie deviné (`1`) ⇒ 404 ; `/admin/preview` ⇒ cookie signé, 200 ; « Refermer »
+  ⇒ 404 de nouveau ; `/aarrr-funnel-template`
   non préfixé ⇒ 308 vers la forme localisée (en preview).
 - **`engine-mobile.spec.ts`** : 320 (hors contrat, mesuré seulement), 360, 390,
   430 × FR/EN : `scrollWidth === clientWidth` sur E0, E1, E2, tiroir ouvert, E4,

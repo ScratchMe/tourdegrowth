@@ -3,7 +3,14 @@ import AxeBuilder from "@axe-core/playwright";
 import type { Locator, Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { EXAMPLE_EXPECTED, exampleState } from "../src/lib/engine/__tests__/fixtures";
-import { expect, test, trackedEvents } from "./helpers";
+import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test, trackedEvents } from "./helpers";
+
+// The page ships closed (engine-flag.spec.ts): every test opens it with the
+// owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
+test.skip(!ADMIN_PASSWORD, SKIP_ADMIN_REASON);
+test.beforeEach(async ({ context }) => {
+  await grantOwnerPreview(context.request, "engine");
+});
 
 /**
  * The growth engine's collection UI (engine spec §7 E1-E4, E6, E7): setup,
@@ -15,8 +22,8 @@ import { expect, test, trackedEvents } from "./helpers";
  * device really keeps after a reload WITHOUT clearing storage, what the
  * clipboard really holds, and what a keyboard alone can reach.
  *
- * The page ships closed (engine-flag.spec.ts): every test opens it with
- * `?engine=preview`. The helpers below are local on purpose — e2e/helpers.ts
+ * The page ships closed (engine-flag.spec.ts): every test opens it with the
+ * owner's signed preview (the beforeEach above). The helpers below are local on purpose — e2e/helpers.ts
  * belongs to the integration step — and only the GoatCounter stub fixture is
  * imported from it.
  *
@@ -61,7 +68,7 @@ async function dotCounts(grid: Locator): Promise<Record<string, number>> {
 }
 
 async function openEngine(page: Page, locale: "en" | "fr" = "en"): Promise<Locator> {
-  await page.goto(`/${locale}/aarrr-funnel-template?engine=preview`);
+  await page.goto(`/${locale}/aarrr-funnel-template`);
   const island = page.getByTestId("engine-workbench");
   await expect(island).toHaveAttribute("data-state", "ready");
   return island;

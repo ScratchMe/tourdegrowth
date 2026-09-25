@@ -1,0 +1,86 @@
+/*
+ * /admin/preview — the owner's switchboard. Tokens of the design system, and
+ * nothing invented; the same reading width as /admin/stats.
+ */
+.page {
+  min-height: 100%;
+  padding: 0 var(--space-7) var(--space-12);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-7);
+  padding-block: var(--space-7);
+  border-bottom: var(--border-rule);
+  margin-bottom: var(--space-9);
+}
+
+.main {
+  max-width: var(--width-reading);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.h1 {
+  font: var(--display-hero-mobile);
+  color: var(--text-body);
+  margin: 0;
+}
+
+.lede {
+  font: var(--body-md);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.h2 {
+  font: var(--display-section);
+  color: var(--text-body);
+  margin: 0;
+}
+
+.state {
+  font: var(--meta-sm);
+  color: var(--text-body);
+  margin: 0;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  margin: 0;
+}
+
+.link {
+  font: var(--meta-sm);
+  color: var(--text-link);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+}
+
+.note {
+  font: var(--body-sm);
+  color: var(--text-muted);
+  margin: 0;
+}

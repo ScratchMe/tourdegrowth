@@ -470,10 +470,10 @@ Tout test est bloquant pour la mise en production. Les tests unitaires portent s
 
 **Série G · drapeau et points d'entrée** (`src/lib/game/__tests__/access.test.ts` et `src/__tests__/proxy.test.ts`)
 
-- G1 `resolveGameAccess({ env, cookie })` : ouvert si `env === "true"` ; ouvert si le cookie de prévisualisation vaut `1` quel que soit `env` ; fermé sinon ; fermé si `env` est absent (fail closed, comme `METRICS_PAGE_ENABLED`).
+- G1 `resolveGameAccess({ env, ownerPreview })` : ouvert si `env === "true"` ; ouvert si l'aperçu propriétaire est vérifié quel que soit `env` ; fermé sinon ; fermé si `env` est absent (fail closed, comme `METRICS_PAGE_ENABLED`).
 - G2 Proxy, drapeau fermé, sans cookie : `/fr/game` et `/en/game/retention` sont réécrits vers la page introuvable de la langue, statut 404 ; `/fr/glossary` n'est pas touché.
-- G3 Proxy, drapeau fermé, `?game=preview` : la réponse pose le cookie `tdg_game_preview=1` (HttpOnly, SameSite Lax, un an) et laisse passer la requête ; les requêtes suivantes avec ce cookie passent aussi.
-- G4 Proxy, `?game=off` : le cookie est effacé et la requête est réécrite vers la page introuvable si le drapeau est fermé.
+- G3 Proxy, drapeau fermé : `?game=preview` et un cookie deviné (`1`) laissent la page en 404 ; `POST /admin/preview?game=on`, derrière la Basic Auth, pose le cookie signé (HttpOnly, Secure, SameSite Lax, un an), et les requêtes qui le portent passent.
+- G4 Proxy, `POST /admin/preview?game=off` : le cookie est effacé ; une signature faite pour le moteur, ou sous un autre mot de passe, n'ouvre pas le jeu.
 - G5 Proxy, drapeau ouvert : aucune réécriture, aucun cookie posé sans paramètre.
 - G6 `gameEntryFor({ bottleneck, access, levels })` : renvoie l'entrée du niveau « retention » quand le goulot principal est `retention`, l'accès ouvert et le niveau présent dans `GAME_LEVELS_BY_PILLAR` ; `null` pour tout autre pilier, pour un goulot « level » (aucun pilier ne se détache), ou si l'accès est fermé.
 - G7 Vocabulaire analytique : `GAME_ENTRY_EVENT` et ses détails (`result/retention`, `deep_dive/retention`, `footer`, `hub`) sont présents dans `ALL_PATHS` de `goatcounter-api.ts`, comme les événements existants.
@@ -507,7 +507,7 @@ Chaque scénario part d'une page vierge, stockage local vidé, sauf mention cont
 - P23 **Point d'entrée, goulot rétention.** Sur `/r/sample` rendu avec un goulot rétention (fixture de résultat dédiée, comme `CREATED_ID` pour le stub de soumission), l'encart `game-entry` est présent sous `priority-move` et avant `take-again-cta`, avec le lien `/{locale}/game/retention?from=result` ; le clic émet `game_entry_clicked/result/retention` puis ouvre le niveau, dont la page lit `from=result` sans le laisser dans l'URL partagée.
 - P24 **Point d'entrée, autre goulot.** Sur un résultat dont le goulot est l'acquisition, aucun encart `game-entry` ; idem sur un board « level ».
 - P25 **Deep dive.** Sur un résultat avec Deep dive et goulot rétention, l'encart est présent une seule fois, sous l'action prioritaire, avec la variante de texte du Deep dive.
-- P26 **Prévisualisation.** `/fr/game?game=preview` pose le cookie `tdg_game_preview` ; `/fr/game?game=off` l'efface. La CI tourne drapeau ouvert (`GAME_ENABLED: "true"` au niveau du workflow, comme `NEXT_PUBLIC_GOATCOUNTER_CODE`) : l'état fermé est couvert par la série G, pas en bout en bout.
+- P26 **Prévisualisation.** `/fr/game?game=preview` ne pose aucun cookie ; `/admin/preview` pose et efface le cookie signé `tdg_game_preview`. La CI tourne drapeau ouvert (`GAME_ENABLED: "true"` au niveau du workflow, comme `NEXT_PUBLIC_GOATCOUNTER_CODE`) : l'état fermé est couvert par la série G, pas en bout en bout.
 - P27 **Pied de page et sitemap.** Drapeau ouvert au build, le pied de page porte le lien vers `/{locale}/game` et le sitemap liste `/game` et `/game/retention` dans les deux langues ; un test unitaire sur `sitemap.ts` vérifie l'absence des deux entrées quand le drapeau est fermé au build.
 
 ### 7.3 Recette manuelle avant lancement, par Antoine
@@ -744,6 +744,8 @@ Ajouté en version 1.1 à la demande d'Antoine : pouvoir ouvrir et fermer la fea
 
 ### 13.1 Le drapeau
 
+ *(Mise à jour 2026-09-25 : l'aperçu est au propriétaire seul. `?game=preview` était public — écrit dans ce dépôt public — et il est désormais inerte. Le cookie `tdg_game_preview` vaut une signature HMAC-SHA256 sous `ADMIN_DASHBOARD_PASSWORD`, posée uniquement par `POST /admin/preview` derrière la Basic Auth ; `src/lib/owner-preview.ts` la vérifie, et `resolveGameAccess({ env, ownerPreview })` reçoit le verdict.)*
+
 - **Variable** : `GAME_ENABLED`, côté serveur, jamais `NEXT_PUBLIC_`. Ouvert si sa valeur est exactement `"true"`, fermé sinon, fermé si elle est absente. Documentée dans `.env.local.example`, dans le bloc optionnel, sur le modèle de `METRICS_PAGE_ENABLED`.
 - **Lue à chaque requête** pour tout ce qui est servi dynamiquement (les routes via le proxy, la page de résultat), ce qui permet au cookie de prévisualisation de jouer requête par requête. Ce qui est décidé au build, sitemap, hreflang, lien de pied de page, suit la valeur du drapeau **au moment du build**. **Sur Vercel, toute modification de la variable exige un redéploiement**, dans un sens comme dans l'autre : une variable modifiée n'atteint que les nouveaux déploiements, le déploiement en cours garde sa valeur. Ouvrir la feature, ou la fermer en urgence, c'est donc poser la variable puis redéployer — et ce redéploiement déplace ensemble les lecteurs par requête et ceux du build. *(Corrigé le 2026-09-25 : la version 1.1 disait « basculable sans redéploiement », ce qui est faux sur Vercel.)*
 - **Prévisualisation** : `?game=preview` sur n'importe quelle URL pose un cookie `tdg_game_preview=1` (HttpOnly, SameSite Lax, un an) dans le proxy, comme `?lang=` pose le cookie de langue, avec la même astuce de réécriture de l'en-tête Cookie entrant pour que la requête courante en profite. Avec ce cookie, tout se comporte comme si le drapeau était ouvert : routes, encart de résultat, hub. `?game=off` efface le cookie. Le cookie ne vaut que pour le navigateur qui l'a posé : c'est la façon dont Antoine teste en production pendant que le jeu reste fermé pour tout le monde.
@@ -866,5 +868,5 @@ Le hub et le niveau ont chacun leur image, une par langue, choisie par le segmen
 
 - `GAME_ENABLED` vaut `"true"` ou le jeu est fermé ; jamais exposé au navigateur ; seul un booléen dérivé au build (`TDG_GAME_OPEN_AT_BUILD`) l'est, pour le lien du pied de page.
 - **Chaque bascule exige un redéploiement Vercel**, dans un sens comme dans l'autre (13.1) : ouvrir, c'est poser la variable puis redéployer ; fermer en urgence aussi. Le redéploiement déplace ensemble ce qui se lit à la requête (routes, encart) et ce qui se décide au build (sitemap, hreflang, pied de page).
-- `?game=preview` ouvre tout pour un seul navigateur, `?game=off` referme ; c'est le moyen de tester en production pendant que le jeu reste fermé pour tous.
+- L'aperçu propriétaire (`/admin/preview`) ouvre tout pour un seul navigateur, « Refermer » referme ; c'est le moyen de tester en production pendant que le jeu reste fermé pour tous.
 - La CI tourne drapeau ouvert ; l'état fermé est couvert par les tests unitaires du résolveur et du proxy.

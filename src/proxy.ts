@@ -3,21 +3,20 @@ import type { NextRequest } from "next/server";
 import { LOCALE_COOKIE, isLocale, resolveLocale } from "@/lib/i18n/locale";
 import { isLocalizableContentPath, localePath, splitLocalePath } from "@/lib/i18n/routes";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
+import { GAME_PREVIEW_COOKIE, isGamePath, resolveGameAccess } from "@/lib/game/access";
+import { ENGINE_PREVIEW_COOKIE, engineEnvFlag, isEnginePath, resolveEngineAccess } from "@/lib/engine/access";
+import { constantTimeEqual } from "@/lib/constant-time";
 import {
-  GAME_PREVIEW_COOKIE,
-  GAME_PREVIEW_PARAM,
-  isGamePath,
-  previewRequest,
-  resolveGameAccess,
-} from "@/lib/game/access";
-import {
-  ENGINE_PREVIEW_COOKIE,
-  ENGINE_PREVIEW_PARAM,
-  engineEnvFlag,
-  isEnginePath,
-  previewRequest as enginePreviewRequest,
-  resolveEngineAccess,
-} from "@/lib/engine/access";
+  OWNER_PREVIEW_PATH,
+  PREVIEW_COOKIES,
+  PREVIEW_FEATURES,
+  hasOwnerPreview,
+  ownerPreviewSecret,
+  ownerPreviewToken,
+  previewAction,
+} from "@/lib/owner-preview";
+
+export { constantTimeEqual };
 
 const ONE_YEAR = 60 * 60 * 24 * 365;
 
@@ -54,25 +53,6 @@ export function isAuthorizedForAdmin(request: NextRequest): boolean {
   // so a password containing ":" isn't truncated.
   const password = decoded.slice(decoded.indexOf(":") + 1);
   return constantTimeEqual(password, expected);
-}
-
-/**
- * Byte-by-byte comparison whose duration does not depend on WHERE two
- * strings differ — REVIEW-02.md R2-22. A plain `===` returns at the first
- * mismatching character, which is a timing side channel on a secret. Not
- * realistically exploitable through an edge's jitter, but the codebase
- * already does this right for the owner token (`owner-token.ts`,
- * `timingSafeEqual`), and an inconsistency is the kind that gets copied.
- * Runtime-agnostic (no `node:crypto`): the proxy must not depend on Node.
- * Only the LENGTH can leak, as with `timingSafeEqual`'s own precondition.
- */
-export function constantTimeEqual(a: string, b: string): boolean {
-  const x = new TextEncoder().encode(a);
-  const y = new TextEncoder().encode(b);
-  let diff = x.length ^ y.length;
-  const n = Math.max(x.length, y.length);
-  for (let i = 0; i < n; i += 1) diff |= (x[i] ?? 0) ^ (y[i] ?? 0);
-  return diff === 0;
 }
 
 /**
@@ -131,6 +111,34 @@ function unauthorizedResponse(): NextResponse {
 }
 
 /**
+ * `POST /admin/preview?game=on|off&engine=on|off` — the only way to open or
+ * close a preview (`lib/owner-preview.ts`). Reached only once the admin gate
+ * above has let the request through, so only the owner can mint the signed
+ * cookie. POST, not GET: a toggle is an action, and a GET would be fired by
+ * any link prefetch or unfurler that saw the URL. Answers 303 to the page, so
+ * a reload never re-submits and the page reads the new cookies.
+ */
+async function ownerPreviewResponse(request: NextRequest): Promise<NextResponse> {
+  const response = NextResponse.redirect(new URL(OWNER_PREVIEW_PATH, request.url), 303);
+  // Non-null here: the admin gate already failed closed without it.
+  const secret = ownerPreviewSecret();
+  for (const feature of PREVIEW_FEATURES) {
+    const action = previewAction(request.nextUrl.searchParams.get(feature));
+    if (action === "on" && secret) {
+      response.cookies.set(PREVIEW_COOKIES[feature], await ownerPreviewToken(feature, secret), {
+        path: "/",
+        maxAge: ONE_YEAR,
+        sameSite: "lax",
+        httpOnly: true,
+        secure: request.nextUrl.protocol === "https:",
+      });
+    }
+    if (action === "off") response.cookies.delete(PREVIEW_COOKIES[feature]);
+  }
+  return response;
+}
+
+/**
  * The header the root layout reads to know the request's language — REVIEW.md
  * R-13. It exists because `<html lang>` lives in the root layout, which
  * cannot see the URL: without this, `/fr/glossary/cac` would be served with
@@ -163,9 +171,13 @@ export const LOCALE_HEADER = "x-tdg-locale";
  * documented way to make a proxy-set cookie visible immediately downstream
  * in the same request.
  */
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest): Promise<NextResponse> {
   if (request.nextUrl.pathname.startsWith("/admin") && !isAuthorizedForAdmin(request)) {
     return unauthorizedResponse();
+  }
+
+  if (request.nextUrl.pathname === OWNER_PREVIEW_PATH && request.method === "POST") {
+    return ownerPreviewResponse(request);
   }
 
   if (isResultReadPath(request.nextUrl.pathname)) {
@@ -212,35 +224,26 @@ export function proxy(request: NextRequest) {
     request.cookies.set(LOCALE_COOKIE, explicitChoice);
   }
 
-  // The game's preview cookie (GAME-BRIEF.md 13.1): `?game=preview` opens the
-  // game for this browser only, `?game=off` closes it again. Same trick as
-  // the locale cookie — rewrite the incoming Cookie header so this very
-  // request already sees the new state.
-  const preview = previewRequest(request.nextUrl.searchParams.get(GAME_PREVIEW_PARAM));
-  if (preview === "preview") request.cookies.set(GAME_PREVIEW_COOKIE, "1");
-  if (preview === "off") request.cookies.delete(GAME_PREVIEW_COOKIE);
+  // The game's flag (GAME-BRIEF.md 13.1) and the growth engine's (engine
+  // spec §11.2): open for everybody when the variable is exactly "true", open
+  // for the owner's browser alone when it carries the signed preview cookie
+  // (`lib/owner-preview.ts`), closed for everyone else. Each on its own
+  // cookie, and each signature namespaced to its feature, so a game preview
+  // never opens the engine. The pages stay prerendered either way — closing
+  // one is a rewrite, not a dynamic render.
   const gameClosed =
     fromUrl !== null &&
     isGamePath(fromUrl.rest) &&
     resolveGameAccess({
       env: process.env.GAME_ENABLED,
-      cookie: request.cookies.get(GAME_PREVIEW_COOKIE)?.value,
+      ownerPreview: await hasOwnerPreview("game", request.cookies.get(GAME_PREVIEW_COOKIE)?.value),
     }) === "closed";
-
-  // The growth engine's flag (engine spec §11.2), the same mechanism as the
-  // game's, on its own cookie: `?engine=preview` opens it for this browser
-  // until `?engine=off`, and `ENGINE_ENABLED` opens it for everybody. The
-  // page stays prerendered either way — closing it is a rewrite, not a
-  // dynamic render.
-  const enginePreview = enginePreviewRequest(request.nextUrl.searchParams.get(ENGINE_PREVIEW_PARAM));
-  if (enginePreview === "preview") request.cookies.set(ENGINE_PREVIEW_COOKIE, "1");
-  if (enginePreview === "off") request.cookies.delete(ENGINE_PREVIEW_COOKIE);
   const engineClosed =
     fromUrl !== null &&
     isEnginePath(fromUrl.rest) &&
     resolveEngineAccess({
       env: engineEnvFlag(),
-      cookie: request.cookies.get(ENGINE_PREVIEW_COOKIE)?.value,
+      ownerPreview: await hasOwnerPreview("engine", request.cookies.get(ENGINE_PREVIEW_COOKIE)?.value),
     }) === "closed";
 
   // The root layout can't read the URL, so hand it the answer.
@@ -256,25 +259,6 @@ export function proxy(request: NextRequest) {
         request: { headers },
       })
     : NextResponse.next({ request: { headers } });
-
-  if (preview === "preview") {
-    response.cookies.set(GAME_PREVIEW_COOKIE, "1", {
-      path: "/",
-      maxAge: ONE_YEAR,
-      sameSite: "lax",
-      httpOnly: true,
-    });
-  }
-  if (preview === "off") response.cookies.delete(GAME_PREVIEW_COOKIE);
-  if (enginePreview === "preview") {
-    response.cookies.set(ENGINE_PREVIEW_COOKIE, "1", {
-      path: "/",
-      maxAge: ONE_YEAR,
-      sameSite: "lax",
-      httpOnly: true,
-    });
-  }
-  if (enginePreview === "off") response.cookies.delete(ENGINE_PREVIEW_COOKIE);
 
   if (explicitChoice) {
     response.cookies.set(LOCALE_COOKIE, explicitChoice, {

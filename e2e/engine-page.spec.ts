@@ -1,4 +1,11 @@
-import { expect, test } from "./helpers";
+import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
+
+// The page ships closed (engine-flag.spec.ts): every test opens it with the
+// owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
+test.skip(!ADMIN_PASSWORD, SKIP_ADMIN_REASON);
+test.beforeEach(async ({ context }) => {
+  await grantOwnerPreview(context.request, "engine");
+});
 
 /**
  * The growth engine's page body, E0 (engine spec §7): the part that reads
@@ -16,8 +23,9 @@ for (const locale of ["en", "fr"] as const) {
     browser,
   }) => {
     const context = await browser.newContext({ javaScriptEnabled: false });
+    await grantOwnerPreview(context.request, "engine");
     const page = await context.newPage();
-    const res = await page.goto(`/${locale}/aarrr-funnel-template?engine=preview`);
+    const res = await page.goto(`/${locale}/aarrr-funnel-template`);
     expect(res?.status()).toBe(200);
 
     const catalogue = page.getByTestId("engine-catalogue");
@@ -50,7 +58,7 @@ test("the way to the Tour is one document load of /quiz — never a router fetch
   page.on("request", (r) => {
     if (new URL(r.url()).pathname === "/quiz") quiz.push({ type: r.resourceType(), rsc: r.headers()["rsc"] });
   });
-  await page.goto("/fr/aarrr-funnel-template?engine=preview");
+  await page.goto("/fr/aarrr-funnel-template");
   const link = page.getByTestId("engine-tour-link");
   await expect(link).toHaveAttribute("href", "/quiz");
   await link.scrollIntoViewIfNeeded();
@@ -62,7 +70,7 @@ test("the way to the Tour is one document load of /quiz — never a router fetch
 });
 
 test("the privacy promise comes before the call to action", async ({ page }) => {
-  await page.goto("/en/aarrr-funnel-template?engine=preview");
+  await page.goto("/en/aarrr-funnel-template");
   const privacy = await page.getByTestId("engine-privacy").boundingBox();
   const cta = await page.getByTestId("engine-cta").boundingBox();
   expect(privacy && cta && privacy.y + privacy.height <= cta.y).toBe(true);
@@ -70,7 +78,7 @@ test("the privacy promise comes before the call to action", async ({ page }) => 
 
 test("the catalogue reads three sheets to a row at 1280 and one at 390", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto("/en/aarrr-funnel-template?engine=preview");
+  await page.goto("/en/aarrr-funnel-template");
   const tops = await page
     .getByTestId("engine-stage-acquisition")
     .locator("article")

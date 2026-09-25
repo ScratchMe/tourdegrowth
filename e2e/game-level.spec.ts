@@ -436,8 +436,9 @@ test.describe("P17/X31 — a phone, 390 wide, at every phase", () => {
 
 test.describe("arriving from a result", () => {
   test("the card on /r/sample leads to the level, which counts game_started/retention/result", async ({ page }) => {
-    // The preview parameter makes the card independent of the build's flag.
-    await page.goto("/r/sample?lang=fr&game=preview");
+    // This file runs with the game open (see the skip at the top), so the
+    // card shows without any preview.
+    await page.goto("/r/sample?lang=fr");
     const cta = page.getByTestId("game-entry-cta");
     await expect(cta).toHaveAttribute("href", "/fr/game/retention?from=result");
     await cta.click();

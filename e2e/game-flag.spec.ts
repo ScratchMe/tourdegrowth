@@ -1,4 +1,4 @@
-import { expect, test } from "./helpers";
+import { ADMIN_PASSWORD, adminCredentials, expect, SKIP_ADMIN_REASON, test } from "./helpers";
 
 /**
  * The game's routes, flag and discovery surfaces — GAME-BRIEF.md 9.3 and 13,
@@ -20,23 +20,37 @@ test.skip(!GAME_OPEN, "GAME_ENABLED is not \"true\" for this run — the game is
 
 const PILLAR_ORDER = ["acquisition", "activation", "retention", "referral", "revenue"] as const;
 
-test.describe("P26 — the preview cookie", () => {
-  test("?game=preview sets it for a year, ?game=off clears it", async ({ page, context }) => {
+test.describe("P26 — the owner preview", () => {
+  test("?game=preview is inert now: it sets no cookie", async ({ page, context }) => {
+    // The parameter is written in this public repository; since 2026-09-25
+    // only /admin/preview, behind the admin password, mints the cookie.
     await page.goto("/fr/game?game=preview");
-    const set = (await context.cookies()).find((c) => c.name === "tdg_game_preview");
-    expect(set?.value).toBe("1");
-    expect(set?.httpOnly).toBe(true);
-    // A year, give or take the seconds the request took.
-    expect(set!.expires - Date.now() / 1000).toBeGreaterThan(360 * 24 * 3600);
-
-    await page.goto("/fr/game?game=off");
-    const cleared = (await context.cookies()).find((c) => c.name === "tdg_game_preview");
-    expect(cleared).toBeUndefined();
+    expect((await context.cookies()).find((c) => c.name === "tdg_game_preview")).toBeUndefined();
   });
 
-  test("a stray value changes nothing", async ({ page, context }) => {
-    await page.goto("/en/game?game=yes");
-    expect((await context.cookies()).find((c) => c.name === "tdg_game_preview")).toBeUndefined();
+  test.describe("the switchboard at /admin/preview", () => {
+    test.skip(!ADMIN_PASSWORD, SKIP_ADMIN_REASON);
+    test.use({ httpCredentials: adminCredentials });
+
+    test("says the game is open for everyone, and still sets and clears a signed cookie for a year", async ({ page, context }) => {
+      await page.goto("/admin/preview");
+      // This file runs with GAME_ENABLED="true" (the skip at the top).
+      await expect(page.getByTestId("preview-state-game")).toHaveAttribute("data-state", "everyone");
+
+      await page.getByTestId("preview-on-game").click();
+      // The state reads "everyone" before and after, so wait on the cookie
+      // itself rather than on the page.
+      const cookie = async () => (await context.cookies()).find((c) => c.name === "tdg_game_preview");
+      await expect.poll(cookie).toBeDefined();
+      const set = await cookie();
+      expect(set?.value).toMatch(/^[A-Za-z0-9_-]{43}$/);
+      expect(set?.httpOnly).toBe(true);
+      // A year, give or take the seconds the request took.
+      expect(set!.expires - Date.now() / 1000).toBeGreaterThan(360 * 24 * 3600);
+
+      await page.getByTestId("preview-off-game").click();
+      await expect.poll(cookie).toBeUndefined();
+    });
   });
 });
 

@@ -1,11 +1,11 @@
-import { expect, test } from "./helpers";
+import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
 import type { APIResponse } from "@playwright/test";
 
 /**
  * The game's two share images — plan §4.2 (G4b), X20 and X21.
  *
  * X20: both image routes answer a real 1200×630 PNG when the game is open,
- * and a 404 when it is closed and the request carries no preview cookie.
+ * and a 404 when it is closed and the request carries no owner preview.
  * X21: the `og:image` (and `twitter:image`) each game page declares points to
  * an address that answers that PNG — the page's own image, not the landing's.
  *
@@ -63,15 +63,23 @@ test.describe("X20 — the image routes, game closed", () => {
   test.skip(GAME_OPEN, "GAME_ENABLED is \"true\" for this run — the closed state is pinned in proxy.test.ts.");
 
   for (const { page, image } of IMAGES) {
-    test(`${page}: 404 without the preview cookie, the PNG with it`, async ({ playwright, baseURL }) => {
+    test(`${page}: 404 without the owner's preview (or with a guessed cookie), the PNG with it`, async ({ playwright, baseURL }) => {
+      test.skip(!ADMIN_PASSWORD, SKIP_ADMIN_REASON);
       const anonymous = await playwright.request.newContext({ baseURL });
       expect((await anonymous.get(image("fr"))).status()).toBe(404);
       await anonymous.dispose();
 
-      const preview = await playwright.request.newContext({
+      // "1" was the preview's value until 2026-09-25, written in this public
+      // repository: it must open nothing now.
+      const guessed = await playwright.request.newContext({
         baseURL,
         extraHTTPHeaders: { cookie: "tdg_game_preview=1" },
       });
+      expect((await guessed.get(image("fr"))).status()).toBe(404);
+      await guessed.dispose();
+
+      const preview = await playwright.request.newContext({ baseURL });
+      await grantOwnerPreview(preview, "game");
       const res = await preview.get(image("fr"));
       expect(res.status()).toBe(200);
       expect(await pngSize(res)).toEqual({ width: 1200, height: 630 });

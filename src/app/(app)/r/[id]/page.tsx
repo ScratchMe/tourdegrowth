@@ -18,6 +18,7 @@ import type { BreakdownData } from "./ScoreBreakdown";
 import type { Locale } from "@/lib/i18n/locale";
 import type { Pillar } from "@/lib/scoring/pillars";
 import { GAME_PREVIEW_COOKIE, resolveGameAccess, type GameAccess } from "@/lib/game/access";
+import { hasOwnerPreview } from "@/lib/owner-preview";
 import { resultGameEntry } from "./game-entry";
 import { ResultView } from "./ResultView";
 
@@ -157,11 +158,10 @@ function buildBreakdownData(locale: Locale): BreakdownData {
 /**
  * Whether this reader may see the game — GAME-BRIEF.md 13.1-13.2. Read on
  * every request, exactly as the proxy reads it for the game's own routes
- * (`GAME_ENABLED`, or this browser's preview cookie): this page is dynamic
- * anyway, so the preview cookie works here per request. `GAME_ENABLED` itself
- * only changes with a redeploy on Vercel (`lib/game/build-flag.ts`). The proxy has already
- * folded `?game=preview` into the incoming Cookie header by the time this
- * runs, so the very request that sets the cookie sees the card.
+ * (`GAME_ENABLED`, or the owner's signed preview cookie, verified here the
+ * same way — `lib/owner-preview.ts`): this page is dynamic anyway, so the
+ * preview works here per request. `GAME_ENABLED` itself only changes with a
+ * redeploy on Vercel (`lib/game/build-flag.ts`).
  *
  * A closed game must leave NO trace in the payload: a card that links to a
  * 404 is a bug, and the card's text in the RSC stream of a closed page would
@@ -171,7 +171,7 @@ function buildBreakdownData(locale: Locale): BreakdownData {
 async function readGameAccess(): Promise<GameAccess> {
   return resolveGameAccess({
     env: process.env.GAME_ENABLED,
-    cookie: (await cookies()).get(GAME_PREVIEW_COOKIE)?.value,
+    ownerPreview: await hasOwnerPreview("game", (await cookies()).get(GAME_PREVIEW_COOKIE)?.value),
   });
 }
 

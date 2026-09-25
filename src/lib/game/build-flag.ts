@@ -40,7 +40,7 @@ export const GAME_OPEN_AT_BUILD_ENV = "TDG_GAME_OPEN_AT_BUILD";
  * then silently read the real environment instead.
  */
 export function gameOpenWith(env: string | undefined): boolean {
-  return resolveGameAccess({ env, cookie: null }) === "open";
+  return resolveGameAccess({ env, ownerPreview: false }) === "open";
 }
 
 /** The flag as this build sees it. */

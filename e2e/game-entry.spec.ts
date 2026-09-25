@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import type { Page } from "@playwright/test";
-import { expect, test, trackedEvents } from "./helpers";
+import { ADMIN_PASSWORD, SKIP_ADMIN_REASON, expect, grantOwnerPreview, test, trackedEvents } from "./helpers";
 
 /**
  * The game card on the result page — GAME-BRIEF.md 13.3 A, game plan G5b:
@@ -18,6 +18,11 @@ import { expect, test, trackedEvents } from "./helpers";
  * the game OPEN (`GAME_ENABLED: "true"` at workflow level, like
  * game-flag.spec.ts), so the "closed" specs skip there with a message; a local
  * run without the variable exercises them. The preview specs hold in both.
+ *
+ * The preview is the owner's since 2026-09-25 (`lib/owner-preview.ts`): a
+ * signed cookie minted by `POST /admin/preview` behind the admin password.
+ * The public `?game=preview` these specs used to append is inert now — one
+ * spec below pins exactly that.
  */
 const GAME_OPEN = process.env.GAME_ENABLED === "true";
 
@@ -52,23 +57,42 @@ test.describe("closed game — no card, and no trace of one", () => {
     }
   });
 
-  test("?game=off clears the preview, and the card goes with it", async ({ page, context }) => {
+  test("?game=preview no longer opens anything: no card, no cookie", async ({ page, context }) => {
+    // The parameter is written in this public repository; it used to open the
+    // game for anyone who had read it.
     await page.goto("/r/sample?lang=en&game=preview");
-    await expect(page.getByTestId("game-entry")).toBeVisible();
-    await page.goto("/r/sample?lang=en&game=off");
+    await expect(page.getByTestId("bottleneck")).toBeVisible();
+    await expect(page.getByTestId("game-entry")).toHaveCount(0);
     expect((await context.cookies()).find((c) => c.name === "tdg_game_preview")).toBeUndefined();
+  });
+
+  test("closing the owner preview takes the card away", async ({ page, context }) => {
+    test.skip(!ADMIN_PASSWORD, SKIP_ADMIN_REASON);
+    await grantOwnerPreview(context.request, "game");
+    await page.goto("/r/sample?lang=en");
+    await expect(page.getByTestId("game-entry")).toBeVisible();
+    const off = await context.request.post("/admin/preview?game=off", {
+      headers: { authorization: `Basic ${Buffer.from(`admin:${ADMIN_PASSWORD}`).toString("base64")}` },
+      maxRedirects: 0,
+    });
+    expect(off.status()).toBe(303);
+    expect((await context.cookies()).find((c) => c.name === "tdg_game_preview")).toBeUndefined();
+    await page.goto("/r/sample?lang=en");
     await expect(page.getByTestId("game-entry")).toHaveCount(0);
   });
 });
 
-test.describe("the preview cookie opens the card for this browser", () => {
-  test("?game=preview shows it on the same request, and the cookie keeps it", async ({ page, context }) => {
-    // The proxy folds the parameter into the incoming Cookie header, so the
-    // very request that sets the cookie already renders the card.
-    await page.goto("/r/sample?lang=en&game=preview");
-    await expect(page.getByTestId("game-entry")).toBeVisible();
-    expect((await context.cookies()).find((c) => c.name === "tdg_game_preview")?.value).toBe("1");
+test.describe("the owner's preview opens the card for this browser", () => {
+  test.skip(!ADMIN_PASSWORD, SKIP_ADMIN_REASON);
 
+  test("a signed, HttpOnly cookie — never the guessable \"1\" — and it carries across languages", async ({ page, context }) => {
+    await grantOwnerPreview(context.request, "game");
+    const cookie = (await context.cookies()).find((c) => c.name === "tdg_game_preview");
+    expect(cookie?.httpOnly).toBe(true);
+    expect(cookie?.value).toMatch(/^[A-Za-z0-9_-]{43}$/);
+
+    await page.goto("/r/sample?lang=en");
+    await expect(page.getByTestId("game-entry")).toBeVisible();
     await page.goto("/r/sample?lang=fr");
     await expect(page.getByTestId("game-entry")).toBeVisible();
     await expect(page.getByTestId("game-entry").getByRole("heading", { level: 2 })).toHaveText(TITLE.fr);
@@ -76,12 +100,16 @@ test.describe("the preview cookie opens the card for this browser", () => {
 });
 
 test.describe("P23 — the card on the sample's retention bottleneck", () => {
-  // With the flag on, no cookie is needed; without it, the preview stands in.
-  const suffix = GAME_OPEN ? "" : "&game=preview";
+  // With the flag on, no cookie is needed; without it, the owner's preview
+  // stands in.
+  test.skip(!GAME_OPEN && !ADMIN_PASSWORD, SKIP_ADMIN_REASON);
+  test.beforeEach(async ({ context }) => {
+    if (!GAME_OPEN) await grantOwnerPreview(context.request, "game");
+  });
 
   for (const locale of ["en", "fr"] as const) {
     test(`links to the ${locale} level with from=result, as a bare anchor`, async ({ page }) => {
-      await page.goto(`/r/sample?lang=${locale}${suffix}`);
+      await page.goto(`/r/sample?lang=${locale}`);
       const card = page.getByTestId("game-entry");
       await expect(card).toBeVisible();
       await expect(card.getByRole("heading", { level: 2 })).toHaveText(TITLE[locale]);
@@ -96,7 +124,7 @@ test.describe("P23 — the card on the sample's retention bottleneck", () => {
   }
 
   test("clicking fires game_entry_clicked/result/retention", async ({ page }) => {
-    await page.goto(`/r/sample?lang=en${suffix}`);
+    await page.goto(`/r/sample?lang=en`);
     // The level lives under the other root layout, so the click is a full
     // document load; hold it once to read the event where it was emitted.
     await page.evaluate(() =>
@@ -108,7 +136,7 @@ test.describe("P23 — the card on the sample's retention bottleneck", () => {
 
   test("desktop: in the right column, after the evidence and before the CTA row", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto(`/r/sample?lang=en${suffix}`);
+    await page.goto(`/r/sample?lang=en`);
     const move = await box(page, "priority-move");
     const entry = await box(page, "game-entry");
     const cta = await box(page, "own-tour-cta");
@@ -120,14 +148,14 @@ test.describe("P23 — the card on the sample's retention bottleneck", () => {
     expect(entry.y + entry.height).toBeLessThan(cta.y);
     // Wide enough for the band on one line, separator included — in the
     // longer language.
-    await page.goto(`/r/sample?lang=fr${suffix}`);
+    await page.goto(`/r/sample?lang=fr`);
     await expect(page.getByTestId("game-entry-band-sep")).toBeVisible();
     expect((await box(page, "game-entry-band")).height).toBeLessThanOrEqual(44);
   });
 
   test("phone: right after the share card, and nothing overflows", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto(`/r/sample?lang=fr${suffix}`);
+    await page.goto(`/r/sample?lang=fr`);
     const share = await box(page, "share-card");
     const entry = await box(page, "game-entry");
     const cta = await box(page, "own-tour-cta");
@@ -147,7 +175,10 @@ test.describe("P23 — the card on the sample's retention bottleneck", () => {
 });
 
 test.describe("accessibility with the card on screen", () => {
-  const suffix = GAME_OPEN ? "" : "&game=preview";
+  test.skip(!GAME_OPEN && !ADMIN_PASSWORD, SKIP_ADMIN_REASON);
+  test.beforeEach(async ({ context }) => {
+    if (!GAME_OPEN) await grantOwnerPreview(context.request, "game");
+  });
 
   for (const [name, viewport] of [
     ["desktop", { width: 1280, height: 900 }],
@@ -155,7 +186,7 @@ test.describe("accessibility with the card on screen", () => {
   ] as const) {
     test(`axe finds no serious or critical violation in the card (${name})`, async ({ page }) => {
       await page.setViewportSize(viewport);
-      await page.goto(`/r/sample?lang=fr${suffix}`);
+      await page.goto(`/r/sample?lang=fr`);
       await expect(page.getByTestId("game-entry")).toBeVisible();
       const results = await new AxeBuilder({ page }).include('[data-testid="game-entry"]').analyze();
       const serious = results.violations.filter((v) => v.impact === "serious" || v.impact === "critical");

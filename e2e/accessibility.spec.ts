@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "./helpers";
+import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
 
 /**
  * An automated accessibility floor, not a substitute for the real work:
@@ -46,10 +46,10 @@ const PAGES: [name: string, path: string][] = [
   // tableau comparatif sans `<table>` : l'ordre des titres (h1, h2, h3 sous
   // le h2 « En un coup d'oeil ») est exactement ce qu'axe sait vérifier.
   ["framework comparison (fr)", "/fr/aarrr-vs-rarra"],
-  // The growth engine (engine spec §11.4), behind ENGINE_ENABLED: the
-  // preview parameter is how the closed page is reached before bon à tirer
-  // nº6, exactly as Antoine will test it.
-  ["growth engine (fr, preview)", "/fr/aarrr-funnel-template?engine=preview"],
+  // The growth engine (engine spec §11.4), behind ENGINE_ENABLED: reached
+  // with the owner's signed preview (`OWNER_PREVIEW` below), exactly as
+  // Antoine tests it before bon à tirer nº6.
+  ["growth engine (fr, preview)", "/fr/aarrr-funnel-template"],
   // GAME-BRIEF 13.6 : CI construit le jeu OUVERT, donc ces deux adresses
   // rendent le hub et le niveau (sa première visio, prérendue). Fermé (build
   // local sans GAME_ENABLED), elles rendent la 404 localisée — scannée aussi,
@@ -85,8 +85,20 @@ function isKnownGap(data: ContrastData | undefined): boolean {
   );
 }
 
+/**
+ * The pages that ship closed and are reached with the owner's signed preview
+ * (`lib/owner-preview.ts`) — minted through /admin/preview, so they need the
+ * admin password on the server and skip without it, like the admin specs.
+ */
+const OWNER_PREVIEW: Record<string, "engine"> = { "/fr/aarrr-funnel-template": "engine" };
+
 for (const [name, path] of PAGES) {
-  test(`${name} has no unknown serious or critical accessibility violations`, async ({ page }) => {
+  test(`${name} has no unknown serious or critical accessibility violations`, async ({ page, context }) => {
+    const preview = OWNER_PREVIEW[path];
+    if (preview) {
+      test.skip(!ADMIN_PASSWORD, SKIP_ADMIN_REASON);
+      await grantOwnerPreview(context.request, preview);
+    }
     await page.goto(path);
     // The quiz renders nothing until it has read localStorage (a deliberate
     // hydration choice), so wait for real content before scanning.

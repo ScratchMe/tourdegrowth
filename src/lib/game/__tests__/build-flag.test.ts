@@ -5,7 +5,7 @@ import { gameOpenWith, gamePageRobots, gameSitemapPaths, isGameOpenAtBuild } fro
 describe("gameOpenWith", () => {
   it("follows resolveGameAccess with no preview cookie — one rule, not two", () => {
     for (const env of ["true", undefined, "", "TRUE", "1", "yes", "true "]) {
-      expect(gameOpenWith(env), String(env)).toBe(resolveGameAccess({ env, cookie: null }) === "open");
+      expect(gameOpenWith(env), String(env)).toBe(resolveGameAccess({ env, ownerPreview: false }) === "open");
     }
     expect(gameOpenWith("true")).toBe(true);
     expect(gameOpenWith(undefined)).toBe(false);

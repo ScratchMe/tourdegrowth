@@ -64,7 +64,7 @@ qui sert à **vérifier** un texte avant de le poster.*
 |---|---|
 | Nom | **Moteur de croissance** / **Growth engine** |
 | URL | `/fr/aarrr-funnel-template`, `/en/aarrr-funnel-template` — définitive une fois ouverte (une URL publiée ne meurt pas ici) |
-| Portier | Bon à tirer nº6 signé, puis `ENGINE_ENABLED` ; d'ici là, prévisualisation seule (`?engine=preview`) |
+| Portier | Bon à tirer nº6 signé, puis `ENGINE_ENABLED` ; d'ici là, aperçu propriétaire seul (`/admin/preview`, derrière le mot de passe admin) |
 | Campagne UTM | `launch_engine` (`--campaign launch_engine`) |
 | Catégories | Analytics · Productivity · SaaS tools · Startup tools · Marketing — **jamais** un annuaire d'IA |
 

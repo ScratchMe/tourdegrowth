@@ -2,7 +2,14 @@ import { readFile } from "node:fs/promises";
 import type { Locator, Page, Request } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { engineEventPaths } from "@/lib/analytics/goatcounter";
-import { expect, test, trackedEvents } from "./helpers";
+import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test, trackedEvents } from "./helpers";
+
+// The page ships closed (engine-flag.spec.ts): every test opens it with the
+// owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
+test.skip(!ADMIN_PASSWORD, SKIP_ADMIN_REASON);
+test.beforeEach(async ({ context }) => {
+  await grantOwnerPreview(context.request, "engine");
+});
 
 /**
  * Engine spec §13.3 and D16 — the canary. Modelled on `audit-canary.spec.ts`.
@@ -50,7 +57,7 @@ test.describe("the growth engine keeps everything in the browser (D16)", () => {
     page.on("request", (request) => seen.push(request));
 
     // --- Setup ---------------------------------------------------------------
-    await page.goto("/en/aarrr-funnel-template?engine=preview");
+    await page.goto("/en/aarrr-funnel-template");
     await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
     await page.getByLabel(ENGINE_COPY.setup.companyLabel.en).fill(COMPANY);
     await page.getByTestId("engine-setup-start").click();
