@@ -1,0 +1,109 @@
+/*
+ * The level's night band and December (game plan §2.1, §2.8).
+ *
+ * Desktop 1280: the desk container is --width-desktop (1 040), a 600 column
+ * for the slot and the hand, a 400 column beside it for the phone, which
+ * stays in view (sticky) while the hand scrolls — the phone is what the
+ * cards change, so it has to be on screen when a card is ticked.
+ *
+ * Phone 390: one column in reading order — timeline, dashboard, slot, phone
+ * and its pill, hand, the sticky action bar, the journal. The DOM is written
+ * in that order; the desktop grid only places it.
+ */
+
+.band {
+  padding: var(--space-12) 24px var(--space-14);
+}
+
+.inner {
+  max-width: var(--width-desktop);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-11);
+}
+
+/* Focused by the island when a quarter starts (plan §3.5), never by Tab: a
+   region that takes the focus programmatically shows no ring (R-19). */
+.dashboard:focus {
+  outline: none;
+}
+
+.desk {
+  display: grid;
+  grid-template-columns: minmax(0, var(--game-col-main)) minmax(0, var(--game-col-side));
+  grid-template-areas:
+    "slot side"
+    "hand side";
+  justify-content: space-between;
+  align-items: start;
+  column-gap: var(--space-12);
+  row-gap: var(--space-11);
+}
+
+.slot {
+  grid-area: slot;
+  min-width: 0;
+}
+
+.side {
+  grid-area: side;
+  position: sticky;
+  top: var(--space-9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.handWrap {
+  grid-area: hand;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  min-width: 0;
+}
+
+/* December, back on paper: the year told with its truth, one column. */
+.december {
+  padding: var(--space-14) 24px var(--space-14);
+}
+
+.decemberInner {
+  max-width: var(--width-desktop);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-13);
+}
+
+@media (max-width: 760px) {
+  .band {
+    padding: var(--space-11) var(--game-gutter-mobile) var(--space-12);
+  }
+
+  .inner {
+    gap: var(--space-10);
+  }
+
+  .desk {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-10);
+  }
+
+  /* On a phone the phone mock is read in its turn, between the call and the
+     hand; sticking it would cover the cards it describes. */
+  .side {
+    position: static;
+  }
+
+  .december {
+    padding: var(--space-12) var(--game-gutter-mobile) var(--space-13);
+  }
+
+  .decemberInner {
+    gap: var(--space-12);
+  }
+}

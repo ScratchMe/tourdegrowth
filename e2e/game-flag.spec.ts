@@ -135,12 +135,12 @@ test.describe("X19 — the hub", () => {
   });
 });
 
-test.describe("the level shell", () => {
-  test("renders the intro, the zone nav and the island slot", async ({ page }) => {
+test.describe("the level page", () => {
+  test("renders the intro, the zone nav and the year's first call", async ({ page }) => {
     await page.goto("/en/game/retention");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("A year at Flixo");
     await expect(page.getByTestId("game-zone-nav")).toBeVisible();
-    await expect(page.getByTestId("game-island-slot")).toBeVisible();
+    await expect(page.getByTestId("game-call")).toHaveAttribute("data-state", "open");
   });
 
   test("the language switch carries resume=1", async ({ page }) => {

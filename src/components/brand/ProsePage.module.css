@@ -13,6 +13,19 @@
   gap: var(--space-12);
 }
 
+/* A page with a band (the game level): the column above, then a band as
+   wide as the screen — the band sets its own inner width and gutters. The
+   column closes on the band's gap rather than on the page's 80px foot. */
+.withBand {
+  display: flex;
+  flex-direction: column;
+}
+
+.withBand > .main {
+  width: 100%;
+  padding-bottom: var(--space-12);
+}
+
 .intro {
   display: flex;
   flex-direction: column;

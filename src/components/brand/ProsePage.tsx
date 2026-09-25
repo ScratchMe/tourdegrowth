@@ -29,6 +29,12 @@ export interface ProsePageProps {
    * (e.g. the game's `resume=1`, so a year in progress survives the switch).
    */
   switchQuery?: string;
+  /**
+   * A full-width band after the reading column, still inside `<main>` — the
+   * game level's night desk, which no reading column can hold (game plan
+   * §2.1). The footer widens to the desk's width with it.
+   */
+  band?: ReactNode;
   children: ReactNode;
 }
 
@@ -59,24 +65,40 @@ export function ProsePage({
   note,
   className,
   switchQuery,
+  band,
   children,
 }: ProsePageProps) {
+  const column = (
+    <>
+      <div className={styles.intro}>
+        {kicker}
+        <h1 className={`${styles.title} ${styles[titleSize]}`}>{title}</h1>
+        {lead && <p className={styles.lead}>{lead}</p>}
+        {note}
+      </div>
+
+      {children}
+    </>
+  );
+
   return (
     <>
       <ContentHeader locale={locale} path={path} switchQuery={switchQuery} />
 
-      <main id="main" className={[styles.main, className ?? ""].filter(Boolean).join(" ")}>
-        <div className={styles.intro}>
-          {kicker}
-          <h1 className={`${styles.title} ${styles[titleSize]}`}>{title}</h1>
-          {lead && <p className={styles.lead}>{lead}</p>}
-          {note}
-        </div>
+      {band ? (
+        // The column keeps its own box, so a page with a band reads exactly
+        // like one without until the band starts.
+        <main id="main" className={[styles.withBand, className ?? ""].filter(Boolean).join(" ")}>
+          <div className={styles.main}>{column}</div>
+          {band}
+        </main>
+      ) : (
+        <main id="main" className={[styles.main, className ?? ""].filter(Boolean).join(" ")}>
+          {column}
+        </main>
+      )}
 
-        {children}
-      </main>
-
-      <SiteFooter locale={locale} width="reading" />
+      <SiteFooter locale={locale} width={band ? "wide" : "reading"} />
     </>
   );
 }

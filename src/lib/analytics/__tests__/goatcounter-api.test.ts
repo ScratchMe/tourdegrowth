@@ -248,6 +248,7 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
           { path: "game_catalogue_open", count: 3, event: true },
           { path: "game_replay", count: 1, event: true },
           { path: "game_share", count: 2, event: true },
+          { path: "game_tour_loop", count: 5, event: true },
         ],
       }),
     );
@@ -264,6 +265,7 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
     expect(game.voices.angry).toBe(4);
     expect(game.resume).toEqual({ resume: 0, restart: 2 });
     expect([game.catalogueOpened, game.replays, game.shares]).toEqual([3, 1, 2]);
+    expect(game.tourLoops).toBe(5);
   });
 
   it("fetchFunnelStats resolves both an all-time and a last-30-days window", async () => {

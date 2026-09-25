@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   LABEL_EDGE,
+  LABEL_GAP,
   axisTicks,
   endLabelPlacement,
   linePath,
@@ -99,6 +100,40 @@ describe("endLabelPlacement", () => {
     expect(endLabelPlacement(at(100, LABEL_EDGE - 1), at(90, 60)).vertical).toBe("below");
     // Falling into the bottom edge: "below" would leave the frame.
     expect(endLabelPlacement(at(100, 100 - LABEL_EDGE + 1), at(90, 40)).vertical).toBe("above");
+  });
+
+  it("steps off the reference line when the line runs through its side", () => {
+    // Flat end, the reference 16 units above the point: « above » would sit on the dashes.
+    expect(endLabelPlacement(at(100, 81), at(90, 81), 65).vertical).toBe("below");
+    // Coming down from above (so « below » first), the reference just under the point.
+    expect(endLabelPlacement(at(100, 50), at(90, 30), 60).vertical).toBe("above");
+  });
+
+  it("keeps its side when the reference is clear of it — or runs under the marker's gap", () => {
+    expect(endLabelPlacement(at(100, 50), at(90, 50), 20).vertical).toBe("above");
+    expect(endLabelPlacement(at(100, 50), at(90, 50), 90).vertical).toBe("above");
+    // A target the curve ends on: the line passes through the marker, not the text.
+    expect(endLabelPlacement(at(100, 71.57), at(90, 71.57), 71.43).vertical).toBe("above");
+    expect(endLabelPlacement(at(100, 50), at(90, 50), 50 - LABEL_GAP).vertical).toBe("above");
+  });
+
+  it("never trades a frame edge for the reference", () => {
+    // Near the top the label must go below, even with the dashes there.
+    expect(endLabelPlacement(at(100, LABEL_EDGE - 1), at(90, 60), LABEL_EDGE + 5).vertical).toBe("below");
+    expect(endLabelPlacement(at(100, 100 - LABEL_EDGE + 1), at(90, 40), 100 - LABEL_EDGE - 5).vertical).toBe("above");
+  });
+});
+
+describe("sparklineGeometry with a reference", () => {
+  it("places the end label off the dashed line — the « fine » ending's trust, 19 against 35", () => {
+    // Trust flat at 19 over the last months, the viral threshold at 35, on 0-100.
+    const values = [60, 55, 50, 45, 40, 35, 30, 25, 22, 20, 19, 19, 19];
+    expect(sparklineGeometry(values, [0, 100]).endLabel.vertical).toBe("above");
+    expect(sparklineGeometry(values, [0, 100], 35).endLabel.vertical).toBe("below");
+  });
+
+  it("ignores a reference outside the frame — it is not drawn, so it is in nobody's way", () => {
+    expect(sparklineGeometry([5, 5], [0, 10], 12).endLabel.vertical).toBe("above");
   });
 });
 

@@ -84,12 +84,4 @@ export const RETENTION_INTRO = {
   // Plan §1.4 (23): the context help is ordinary links to the glossary, not a
   // popover — and these two pages are the ones whose readers already care.
   glossaryLead: t("Les deux mots du jeu, s'ils te manquent :", "The game's two words, if you need them:"),
-  // Provisional (plan §4.2 G4a): what the page shows where the game will be,
-  // until the island replaces this slot. Seen only with the preview cookie —
-  // the game stays closed in production until then.
-  pendingTitle: t("Le bureau de Flixo ouvre bientôt", "Flixo's office opens soon"),
-  pendingBody: t(
-    "La partie se jouera ici : le dashboard, la visio du DG, tes deux actions par trimestre. Cette page n'en montre encore que la porte.",
-    "The year will be played here: the dashboard, the CEO's video call, your two actions a quarter. This page only shows the door for now.",
-  ),
 } as const;
