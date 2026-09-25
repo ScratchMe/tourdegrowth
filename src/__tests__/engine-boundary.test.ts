@@ -3,9 +3,8 @@ import { join, relative } from "node:path";
 import { describe, expect, it } from "vitest";
 
 /**
- * Engine spec §11.4 — the growth engine's boundary, rules 1-3 and 6. (Rule 4,
- * no static `html-to-image` import, lands with the deck; rule 5, the closed
- * analytics vocabulary, with the analytics wiring.)
+ * Engine spec §11.4 — the growth engine's boundary, rules 1-4 and 6. (Rule 5,
+ * the closed analytics vocabulary, lands with the analytics wiring.)
  *
  * The promise the page makes in writing (D16) is that no number and no text
  * the user types leaves the browser. A canary spec proves it end to end once
@@ -20,6 +19,9 @@ import { describe, expect, it } from "vitest";
  *    R2-14 found three separate paths that brought the dictionary back into
  *    a bundle after it had supposedly been taken out, none of them direct.
  * 3. No network or form primitive is written anywhere in the engine's code.
+ * 4. `html-to-image` is never imported statically, anywhere in `src/`: it is
+ *    reached only by the deck's `import()` on the first export click (§10.3),
+ *    so it lands in its own chunk and no page downloads it for nothing.
  * 6. The rules are not vacuous: the island exists and the walk walks.
  *
  * Same method as `audit-boundary.test.ts`: import specifiers read from the
@@ -27,6 +29,14 @@ import { describe, expect, it } from "vitest";
  */
 const SRC = join(process.cwd(), "src");
 const ISLAND = "app/[locale]/aarrr-funnel-template/EngineWorkbench.tsx";
+/**
+ * The deck screen, walked from on its own: it is a Client Component that the
+ * island will mount (P4), and until it does, a walk from the island alone
+ * would not reach it — rule 2 would then say nothing about the one screen
+ * that renders every number the user typed.
+ */
+const DECK = "app/[locale]/aarrr-funnel-template/_engine/deck/DeckView.tsx";
+const PNG_EXPORT = "app/[locale]/aarrr-funnel-template/_engine/deck/export-png.ts";
 
 function walk(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {
@@ -169,8 +179,13 @@ describe("growth engine boundary (engine spec §11.4)", () => {
    * this test names content/engine-copy.ts; import `./engine-props` instead
    * and it names engine-props.ts AND the three content modules behind it.
    */
-  it("rule 2 — nothing the island reaches, at any depth, is content, a copy-pulling scoring module, or the server-side resolver", () => {
-    const reached = [...reachable([ISLAND])];
+  it("rule 2 — nothing the island (or the deck it mounts) reaches, at any depth, is content, a copy-pulling scoring module, or the server-side resolver", () => {
+    expect(BY_PATH.get(DECK)!, "the deck screen must be a Client Component").toMatch(/^\s*["']use client["']/);
+    // Non-vacuity: the deck's walk reaches its slides and its PNG export.
+    const fromDeck = reachable([DECK]);
+    expect([...fromDeck]).toContain(PNG_EXPORT);
+    expect([...fromDeck]).toContain("app/[locale]/aarrr-funnel-template/_engine/deck/SlidePeloton.tsx");
+    const reached = [...reachable([ISLAND, DECK])];
     expect(reached.filter((p) => UNREACHABLE.some((re) => re.test(p))).sort()).toEqual([]);
   });
 
@@ -180,6 +195,22 @@ describe("growth engine boundary (engine spec §11.4)", () => {
       return NETWORK.filter((re) => re.test(code)).map((re) => `${f.path} → ${re}`);
     });
     expect(offenders).toEqual([]);
+  });
+
+  /**
+   * Non-vacuity, measured when this rule was written: add
+   * `import { toBlob } from "html-to-image";` to export-png.ts and the first
+   * assertion names it; replace its `import("html-to-image")` with a static
+   * import and the second one fails too — the guard can't pass by finding
+   * no deck at all.
+   */
+  it("rule 4 — html-to-image is never imported statically in src/, only through the deck's import() on click", () => {
+    const staticImport =
+      /(?:^|\n)\s*(?:import|export)\b[^;]*?from\s+["']html-to-image["']|\bimport\s+["']html-to-image["']|\brequire\(\s*["']html-to-image["']\s*\)/;
+    const offenders = FILES.filter((f) => staticImport.test(stripComments(f.source))).map((f) => f.path);
+    expect(offenders).toEqual([]);
+    const dynamic = FILES.filter((f) => /\bimport\(\s*["']html-to-image["']\s*\)/.test(stripComments(f.source))).map((f) => f.path);
+    expect(dynamic).toEqual([PNG_EXPORT]);
   });
 
   it("the flag has one reader: only lib/engine/access.ts reads ENGINE_ENABLED", () => {
