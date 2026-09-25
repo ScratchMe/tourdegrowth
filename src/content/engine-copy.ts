@@ -528,6 +528,44 @@ export const ENGINE_COPY = {
     bullets: { fr: "Ce que ça finance (3 puces au plus)", en: "What it funds (3 bullets at most)" },
     measureFirst: { fr: "Ce qu'il faut d'abord mesurer", en: "What to measure first" },
   },
+  /**
+   * The slide screen's own controls (P6), beyond the keys the spec listed in
+   * §14.8. TODO: à relire — copie neuve (convention 6).
+   */
+  deckUi: {
+    back: { fr: "Revenir au moteur", en: "Back to the engine" },
+    settingsTitle: { fr: "Réglages du deck", en: "Deck settings" },
+    exportsTitle: { fr: "Exporter", en: "Export" },
+    imageCopied: { fr: "Image copiée", en: "Image copied" },
+    copyFailed: {
+      fr: "La copie n'a pas marché dans ce navigateur. Le PDF et l'image fonctionnent.",
+      en: "Copying didn't work in this browser. The PDF and the image work.",
+    },
+    pngFileName: { fr: "moteur-{slide}-{month}.png", en: "engine-{slide}-{month}.png" },
+    enlarge: { fr: "Agrandir l'aperçu", en: "Enlarge the preview" },
+    shrink: { fr: "Réduire l'aperçu", en: "Shrink the preview" },
+    excluded: { fr: "Pas dans le deck", en: "Not in the deck" },
+    slidePosition: { fr: "Slide {i} sur {n}", en: "Slide {i} of {n}" },
+    nothingMissing: { fr: "Rien ne manque.", en: "Nothing is missing." },
+    askPreview: { fr: "Titre de la slide :", en: "Slide title:" },
+    askCostNone: { fr: "Pas encore chiffré", en: "Not priced yet" },
+    askCostTeamOption: { fr: "Une équipe", en: "A team" },
+    askAmount: { fr: "Montant ({currency})", en: "Amount ({currency})" },
+    askWeeks: { fr: "Semaines", en: "Weeks" },
+    askPeople: { fr: "Personnes", en: "People" },
+    askHorizonNone: { fr: "Pas d'échéance", en: "No deadline" },
+    askSuccessNone: { fr: "Aucune", en: "None" },
+    askTarget: { fr: "Cible visée", en: "Target" },
+    askBullet: { fr: "Puce {n}", en: "Bullet {n}" },
+    askMeasureFirstHint: {
+      fr: "Trois au plus. Les moins chers à réparer sont cochés d'abord.",
+      en: "Three at most. The cheapest to fix are checked first.",
+    },
+    askMeasureFirstEmpty: {
+      fr: "Aucun chiffre introuvable : rien à mesurer d'abord.",
+      en: "No missing number: nothing to measure first.",
+    },
+  },
   slide: {
     kicker: {
       fr: "Moteur de croissance · {company}{month} · données internes",

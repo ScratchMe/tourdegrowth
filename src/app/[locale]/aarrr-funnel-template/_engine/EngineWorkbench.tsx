@@ -2,7 +2,6 @@
 
 import { useSyncExternalStore } from "react";
 import type { Locale } from "@/lib/i18n/locale";
-import { DeckHarness } from "./_engine/deck/__preview__/DeckHarness";
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
 
 /**
@@ -37,16 +36,11 @@ const noopSubscribe = () => () => {};
  * hydration rule every screen of the engine has to keep (step 4's lesson,
  * spec R15). End-to-end helpers wait on it before touching anything.
  */
-export function EngineWorkbench(props: EngineWorkbenchProps) {
-  const { locale } = props;
+export function EngineWorkbench({ locale }: EngineWorkbenchProps) {
   const hydrated = useSyncExternalStore(
     noopSubscribe,
     () => true,
     () => false,
   );
-  return (
-    <div data-testid="engine-workbench" data-state={hydrated ? "ready" : "ssr"} data-locale={locale}>
-      {hydrated ? <DeckHarness {...props} /> : null}
-    </div>
-  );
+  return <div data-testid="engine-workbench" data-state={hydrated ? "ready" : "ssr"} data-locale={locale} />;
 }
