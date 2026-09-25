@@ -40,6 +40,18 @@
   --state-disabled-opacity: 0.45; /* the value core/Button already uses */
   --state-busy-cursor: progress;
 
+  /*
+   * --- A value that exists but is not shown (DS v3 §5.7, viz/StatTile) ---
+   * The hidden tile's decoy is blurred and dimmed by these two, and its
+   * reveal starts from them. They live here, with the component that draws
+   * them, rather than in a world or in the game's own file: StatTile renders
+   * in both worlds, and a copy of the pair anywhere else would be a value
+   * nothing renders — the contrast test would measure it while the screen
+   * drew something else. Not colors: they hold in either world.
+   */
+  --viz-hidden-blur: 6px;
+  --viz-hidden-opacity: 0.5;
+
   /* --- Page ground: two soft radial lifts, never a linear gradient --- */
   --ground-lift: radial-gradient(circle at 16% 12%, rgba(255, 255, 255, 0.45), transparent 42%),
     radial-gradient(circle at 88% 74%, rgba(0, 0, 0, 0.05), transparent 46%);

@@ -171,8 +171,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  filter: blur(6px);
-  opacity: 0.5;
+  filter: blur(var(--viz-hidden-blur));
+  opacity: var(--viz-hidden-opacity);
   user-select: none;
   pointer-events: none;
 }
@@ -218,8 +218,8 @@
 
 @keyframes tdg-viz-reveal {
   from {
-    filter: blur(6px);
-    opacity: 0.5;
+    filter: blur(var(--viz-hidden-blur));
+    opacity: var(--viz-hidden-opacity);
   }
   to {
     filter: none;

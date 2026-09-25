@@ -97,10 +97,6 @@
   --game-order-text: var(--paper-0);
   /* The same badge on a ticked (amber) card: red on amber would be 2.63. */
   --game-order-on-selected: var(--night-0); /* outline + text, 10.13 on amber */
-  /* Hidden tiles: the value is dimmed and blurred — and never actually
-     rendered (plan §2.7). Composed on --night-1: 4.70. */
-  --game-hidden-opacity: 0.5;
-  --game-hidden-blur: 6px;
   /*
    * Hover at night. The shadow is black (1.20:1): hover cannot live in it.
    * A lighter edge and a 2px lift instead — the night variant of
