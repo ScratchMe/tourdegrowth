@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
+import AxeBuilder from "@axe-core/playwright";
 import type { Page, Request } from "@playwright/test";
 import { QUESTIONS } from "../src/content/copy-library";
+import { exampleState, tourResult } from "../src/lib/engine/__tests__/fixtures";
 import { expect, test } from "./helpers";
 
 /**
@@ -10,76 +12,31 @@ import { expect, test } from "./helpers";
  * text really put on the clipboard, and every request the page really sends
  * while doing it.
  *
- * Seeded with the §6.0 example (the one every engine test uses): three
- * numbers missing, day-30 retention among them, a Tour linked. The company
+ * Seeded with the §6.0 example from the engine's own fixtures (the data set
+ * every engine test uses, so a number checked here is the one checked in the
+ * unit tests), plus a linked Tour so the mirror slide exists. The company
  * label and the ask carry canaries — strings that exist nowhere else — so
  * "nothing the user typed leaves the browser" is checked on the bytes of
  * every request, not on a list of endpoints someone thought of.
  *
- * Needs the island to mount the deck (P4, engine spec §7 E5): the specs look
- * for the board's "Prepare my slides" button and skip, saying so, until it
- * exists — a skip that names its reason, never a pass that proves nothing.
+ * Structure, order and glyphs are asserted; sentences are not. The copy is
+ * still "à relire" (convention 6) and a spec that pinned it would have to be
+ * rewritten by whoever signs it off.
  */
 
 const COMPANY_CANARY = "CANARY-CO-7Q3X";
 const ASK_CANARY = "CANARY-ASK-9K2W";
-const SKIP_REASON = "the island doesn't mount the deck yet (engine P4 wires DeckView behind `engine-open-deck`)";
 
-const AT = "2026-09-01T09:00:00.000Z";
-const m = (entry: Record<string, unknown>) => ({ ...entry, updatedAt: AT });
+/** Every answer given, so `tdg.results.v1` accepts it and the mirror has a verdict per bridge. */
+const TOUR = tourResult(Object.fromEntries(QUESTIONS.map((q, i) => [q.id, (i % 3) as 0 | 1 | 2])));
 
-/** Engine spec §6.0, verbatim: self-serve, flows of August 2026, the July cohort, EUR. */
 function exampleStore() {
-  return {
-    schemaVersion: 1,
-    state: {
-      schemaVersion: 1,
-      id: "e2e-engine",
-      createdAt: AT,
-      updatedAt: AT,
-      setup: { profile: "selfserve", currency: "EUR", activationWindowDays: 7, paidWindowDays: 30, companyLabel: COMPANY_CANARY },
-      snapshots: [
-        {
-          id: "s1",
-          referenceMonth: "2026-08",
-          cohortMonth: "2026-07",
-          createdAt: AT,
-          targets: {},
-          metrics: {
-            "acq.signup-rate": m({ status: "measured", value: { kind: "ratio", numerator: 820, denominator: 26000 }, source: { kind: "tool", tool: "ga4" } }),
-            "acq.top-channel-share": m({ status: "measured", value: { kind: "ratio", numerator: 410, denominator: 820 }, source: { kind: "tool", tool: "ga4" }, label: "Recherche naturelle" }),
-            "acq.cac": m({ status: "measured", value: { kind: "ratio", numerator: 21000, denominator: 42 }, source: { kind: "person", role: "finance" }, variant: "media-only" }),
-            "act.event": m({ status: "measured", value: { kind: "text", text: "a créé un premier projet" } }),
-            "act.rate": m({ status: "measured", value: { kind: "ratio", numerator: 144, denominator: 800 }, source: { kind: "tool", tool: "amplitude" } }),
-            "act.ttv": m({ status: "estimated", estimate: { low: 1, high: 3, basis: "team-hunch" } }),
-            "ret.d30": m({ status: "missing", missing: { cause: "not-tracked", repair: "sprint", ownerRole: "data" } }),
-            "ret.logo-churn": m({ status: "measured", value: { kind: "ratio", numerator: 10, denominator: 400 }, source: { kind: "tool", tool: "stripe" } }),
-            "ret.churn-cause": m({ status: "missing", missing: { cause: "no-definition", repair: "meeting" } }),
-            "ref.mechanism": m({ status: "measured", value: { kind: "choice", choice: "in-product" } }),
-            "ref.referred-share": m({ status: "measured", value: { kind: "ratio", numerator: 48, denominator: 800 }, source: { kind: "tool", tool: "product-db" } }),
-            "ref.k-factor": m({ status: "requested", request: { role: "data", requestedAt: AT } }),
-            "rev.paid-conversion": m({ status: "estimated", estimate: { low: 6, high: 9, basis: "old-number" } }),
-            "rev.arpa": m({ status: "measured", value: { kind: "ratio", numerator: 48000, denominator: 400 }, source: { kind: "tool", tool: "stripe" } }),
-            "rev.gross-margin": m({ status: "missing", missing: { cause: "no-access", repair: "meeting", ownerRole: "finance" } }),
-          },
-        },
-      ],
-      tourLink: { resultId: "e2e-tour", linkedAt: AT },
-      deck: { include: {}, showCompany: true, showSiteCredit: true, ask: { what: "", bullets: [], measureFirst: [] } },
-    },
-  };
+  const state = exampleState();
+  state.setup.companyLabel = COMPANY_CANARY;
+  state.deck.showCompany = true;
+  state.tourLink = { resultId: TOUR.id, linkedAt: "2026-09-24T09:00:00.000Z" };
+  return { schemaVersion: 1, state };
 }
-
-/** The linked Tour, kept on the device like any other result (the engine READS it, D13). */
-const TOUR = [
-  {
-    id: "e2e-tour",
-    ownerToken: "e2e-owner-token",
-    createdAt: AT,
-    total: 58,
-    answers: Object.fromEntries(QUESTIONS.map((q, i) => [q.id, i % 3])),
-  },
-];
 
 /** Seeds once per test: a reload must keep what the test changed, not re-seed over it. */
 async function seed(page: Page) {
@@ -87,28 +44,27 @@ async function seed(page: Page) {
     ([store, tour]) => {
       if (sessionStorage.getItem("e2e-engine-seeded")) return;
       localStorage.setItem("tdg.engine.v1", JSON.stringify(store));
-      localStorage.setItem("tdg.results.v1", JSON.stringify(tour));
+      localStorage.setItem("tdg.results.v1", JSON.stringify([tour]));
       sessionStorage.setItem("e2e-engine-seeded", "1");
     },
     [exampleStore(), TOUR] as const,
   );
 }
 
+/**
+ * Opens the slide screen. On the full island (P4) that is the board's
+ * "prepare my slides" button; until then the island mounts the deck
+ * directly. Either way the spec reaches the same DeckView — it never skips.
+ */
 async function openDeck(page: Page, locale: "fr" | "en") {
   await seed(page);
   await page.goto(`/${locale}/aarrr-funnel-template?engine=preview`);
   await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
-  const open = page
-    .getByTestId("engine-open-deck")
-    .or(page.getByRole("button", { name: /Préparer mes slides|Prepare my slides/ }))
-    .first();
-  const present = await open
-    .waitFor({ timeout: 5_000 })
-    .then(() => true)
-    .catch(() => false);
-  test.skip(!present, SKIP_REASON);
-  await open.click();
-  await expect(page.getByTestId("engine-deck")).toBeVisible();
+  const opener = page.getByTestId("engine-open-deck");
+  const deck = page.getByTestId("engine-deck");
+  await expect(opener.or(deck).first()).toBeVisible();
+  if (await opener.isVisible()) await opener.click();
+  await expect(deck).toBeVisible();
   await page.evaluate(() => document.fonts.ready.then(() => undefined));
 }
 
@@ -145,12 +101,24 @@ for (const locale of ["fr", "en"] as const) {
       await expect(page.getByTestId("deck-include-mirror")).not.toBeChecked();
       await expect(page.getByTestId("deck-show-mirror")).not.toBeChecked();
       await expect(page.getByTestId("deck-show-credit")).toBeChecked();
-      // Every included slide is numbered i/N, N counting only what will print.
+      // §9.2: the slides in the model's order, the mirror offered among them.
+      const order = await page.locator('[data-print="thumb"]').evaluateAll((els) => els.map((el) => el.getAttribute("data-testid")));
+      expect(order).toEqual(
+        ["peloton", "leak", "visibility", "unit-economics", "mirror", "ask", "annex"].map((id) => `deck-thumb-${id}`),
+      );
+      // Every included slide is numbered i/N, N counting only what will print; the excluded mirror has no number.
       const n = await includedCount(page);
-      expect(n).toBeGreaterThanOrEqual(5);
-      await expect(page.getByTestId("slide-annex").locator("footer")).toContainText(`${n}/${n}`);
-      // The title carries the number (§9.1): 18 of 100 reach first value.
+      expect(n).toBe(6);
+      await expect(page.getByTestId("slide-page-peloton")).toHaveText(`1/${n}`);
+      await expect(page.getByTestId("slide-page-annex")).toHaveText(`${n}/${n}`);
+      await expect(page.getByTestId("slide-page-mirror")).toHaveCount(0);
+      // The title carries the number (§9.1): 18 of 100 reach first value, and the peloton says so in its column.
       await expect(page.getByTestId("slide-peloton").locator("h3")).toContainText("18");
+      await expect(page.getByTestId("slide-numeral-act.rate")).toHaveText("18");
+      // §6.0: day-30 retention is unmeasured — a "?", never a 0 — and activation is the named stage.
+      await expect(page.getByTestId("slide-numeral-ret.d30")).toHaveText("?");
+      await expect(page.getByTestId("slide-peloton").getByTestId("slide-stamp")).toHaveCount(1);
+      await expect(page.locator('[data-column="act.rate"]').getByTestId("slide-stamp")).toBeVisible();
       // The company label is on the slides because showCompany is on.
       await expect(page.getByTestId("slide-peloton")).toContainText(COMPANY_CANARY);
       // A blank ask is prefilled once (§7 E5): the success target comes from
@@ -159,6 +127,78 @@ for (const locale of ["fr", "en"] as const) {
       // draft once hid a default that had reached the state.
       await expect(page.getByTestId("deck-ask-target")).toHaveValue("20");
       await expect(page.getByTestId("deck-ask-form").locator('input[type="checkbox"]:checked')).toHaveCount(3);
+    });
+
+    /**
+     * What a slide may print, whatever the copy says: every template filled,
+     * every accent mark consumed, no "undefined" or "NaN" from a value that
+     * didn't arrive, and only the glyphs the three embedded families carry
+     * (engine spec §10.4 — the same whitelist as `lib/engine/deck.test.ts`,
+     * checked here on the RENDERED slide, where a component's own string
+     * could slip one in). Arrows are drawn, so "→" must never reach the text.
+     */
+    test("every slide prints filled templates in the brand's glyphs only", async ({ page }) => {
+      await openDeck(page, locale);
+      await page.getByTestId("deck-include-mirror").check();
+      const texts = await page.locator("[data-slide]").evaluateAll((els) =>
+        els.map((el) => [el.getAttribute("data-slide"), (el as HTMLElement).innerText] as const),
+      );
+      expect(texts.map(([id]) => id)).toEqual(["peloton", "leak", "visibility", "unit-economics", "mirror", "ask", "annex"]);
+      const allowed = /^[\n\t -~ -ÿ–—’«»…€·×÷±]*$/u;
+      for (const [id, text] of texts) {
+        expect(text.length, `${id} is empty`).toBeGreaterThan(80);
+        expect(text, `${id} leaks a placeholder`).not.toMatch(/\{[a-zA-Z]+\}/);
+        expect(text, `${id} prints accent marks`).not.toContain("**");
+        expect(text, `${id} prints a missing value`).not.toMatch(/\bundefined\b|\bNaN\b|\bnull\b/);
+        const outside = [...new Set([...text].filter((ch) => !allowed.test(ch)))];
+        expect(outside, `${id} prints glyphs outside the three families`).toEqual([]);
+      }
+    });
+
+    /**
+     * A slide is a fixed 1920 × 1080 page with `overflow: hidden`: content
+     * that doesn't fit runs under the footer on screen and is cut from the
+     * PDF, without an error anywhere. Measured on the rendered slides — the
+     * leak's list of other candidates, the visibility slide's last card and
+     * the fifteen-row appendix all ran into the footer before their layouts
+     * were tightened — so this is the check that keeps them tight.
+     */
+    test("every slide's body ends above its footer", async ({ page }) => {
+      await openDeck(page, locale);
+      await page.getByTestId("deck-include-mirror").check();
+      const clashes = await page.locator("[data-slide]").evaluateAll((slides) =>
+        slides.flatMap((slide) => {
+          const box = slide.getBoundingClientRect();
+          const scale = box.width / 1920;
+          const y = (el: Element) => (el.getBoundingClientRect().bottom - box.top) / scale;
+          const foot = slide.querySelector("footer")!;
+          const footTop = (foot.getBoundingClientRect().top - box.top) / scale;
+          const body = foot.previousElementSibling!;
+          const deepest = Math.max(...[...body.querySelectorAll("*")].map(y));
+          return deepest > footTop ? [`${slide.getAttribute("data-slide")}: body ends at ${Math.round(deepest)}, footer starts at ${Math.round(footTop)}`] : [];
+        }),
+      );
+      expect(clashes).toEqual([]);
+    });
+
+    /**
+     * The deck screen scanned by axe with a real engine in it: the page's own
+     * accessibility pass (accessibility.spec.ts) opens the engine with no
+     * stored numbers, so the slide screen — the ask form, the export panel,
+     * seven scaled slides — never reaches it. Same scope and same flattened
+     * ground as that pass.
+     */
+    test("the deck screen has no serious or critical accessibility violations", async ({ page }) => {
+      await openDeck(page, locale);
+      await page.addStyleTag({ content: "body { background-image: none !important; }" });
+      const { violations } = await new AxeBuilder({ page })
+        .include('[data-testid="engine-deck"]')
+        .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+        .analyze();
+      const serious = violations
+        .filter((v) => v.impact === "serious" || v.impact === "critical")
+        .flatMap((v) => v.nodes.filter((n) => !/^<span[^>]*>GROWTH<\/span>$/.test(n.html.trim())).map((n) => `${v.id} on ${n.target.join(" ")}`));
+      expect(serious).toEqual([]);
     });
 
     test("PDF: one 16:9 page per included slide, and only the three brand families embedded", async ({ page }) => {
@@ -211,15 +251,29 @@ for (const locale of ["fr", "en"] as const) {
       expect(pngSize(readFileSync((await (await second).path())!))).toEqual([3840, 2160]);
     });
 
-    test("copy the text: every included title and its notes, without the accent marks", async ({ page, context }) => {
+    /**
+     * The copied text is Markdown (§10, `deckMarkdown`): a slide's accent
+     * travels as **bold**, which is what a doc or a chat renders it as. So
+     * the check is that every INCLUDED slide's title is there, in order, as a
+     * numbered heading — and nothing excluded is — with its bold marks
+     * paired and no template left unfilled.
+     */
+    test("copy the text: every included title as a numbered Markdown heading, in order", async ({ page, context }) => {
       await context.grantPermissions(["clipboard-read", "clipboard-write"]);
       await openDeck(page, locale);
       await page.getByTestId("deck-copy-text").click();
       await expect(page.getByTestId("deck-status")).not.toBeEmpty();
       const text = await page.evaluate(() => navigator.clipboard.readText());
-      const title = (await page.getByTestId("slide-peloton").locator("h3").textContent())!.trim();
-      expect(text).toContain(title);
-      expect(text).not.toContain("**");
+
+      const headings = [...text.matchAll(/^## (\d+)\. (.+)$/gm)].map((m) => [Number(m[1]), m[2]!.replaceAll("**", "").trim()] as const);
+      const included = await page.locator('[data-print="thumb"][data-included="true"] [data-slide] h3').allTextContents();
+      expect(headings.map(([i]) => i)).toEqual(included.map((_, i) => i + 1));
+      expect(headings.map(([, title]) => title)).toEqual(included.map((t) => t.trim()));
+      // The mirror is offered but unchecked: its title must not travel.
+      const mirror = (await page.getByTestId("slide-mirror").locator("h3").textContent())!.trim();
+      expect(text.replaceAll("**", "")).not.toContain(mirror);
+      expect((text.match(/\*\*/g) ?? []).length % 2).toBe(0);
+      expect(text).not.toMatch(/\{[a-zA-Z]+\}/);
     });
 
     /**
@@ -282,7 +336,8 @@ for (const locale of ["fr", "en"] as const) {
       await expect(page.getByTestId("deck-thumb-visibility")).toHaveAttribute("data-included", "false");
       await expect(page.getByTestId("slide-visibility")).toBeVisible();
       expect(await includedCount(page)).toBe(before - 1);
-      await expect(page.getByTestId("slide-annex").locator("footer")).toContainText(`${before - 1}/${before - 1}`);
+      await expect(page.getByTestId("slide-page-annex")).toHaveText(`${before - 1}/${before - 1}`);
+      await expect(page.getByTestId("slide-page-visibility")).toHaveCount(0);
     });
 
     test("removing the tourdegrowth.com credit removes it from every slide", async ({ page }) => {
@@ -303,5 +358,15 @@ for (const locale of ["fr", "en"] as const) {
         expect(scroll).toBe(client);
       });
     }
+
+    // "More reliable from a computer" is a phone warning (engine spec E5). On
+    // a computer it would say the opposite of what the reader is doing.
+    test("the PDF's phone warning shows on a phone and never on a computer", async ({ page }) => {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await openDeck(page, locale);
+      await expect(page.getByTestId("deck-pdf-hint")).toBeVisible();
+      await page.setViewportSize({ width: 1280, height: 800 });
+      await expect(page.getByTestId("deck-pdf-hint")).toBeHidden();
+    });
   });
 }
