@@ -310,8 +310,13 @@ test.describe("coming back mid-quarter", () => {
 
   test("« Recommencer » empties the device and the dashboard is January's again", async ({ page }) => {
     await seedGame(page, playPath(PATH_C)[2]!);
-    await expect(tileValue(page, "game-dash-churn")).toHaveText("6,0 %");
+    // Behind « Reprendre ? » the desk shows the SAVED year, read-only: the
+    // numbers behind a resume question are the ones it offers to resume
+    // (C.churn[1], the second report of path C, written the French way).
+    await expect(page.getByTestId("game-resume")).toBeVisible();
+    await expect(tileValue(page, "game-dash-churn")).toHaveText("5,0 %");
     await page.getByTestId("game-resume-restart").click();
+    await expect(tileValue(page, "game-dash-churn")).toHaveText("6,0 %");
     await expect(page.getByTestId("game-call")).toHaveAttribute("data-state", "open");
     await expect(page.getByTestId("game-call")).toBeFocused();
     await expect.poll(() => page.evaluate((k) => window.localStorage.getItem(k), GAME_SAVE_KEYS.retention)).toBeNull();
