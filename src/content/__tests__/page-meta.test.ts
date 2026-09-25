@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ABOUT } from "../about";
 import { COMPARISONS, type ComparisonSlug } from "../comparisons";
+import { ENGINE_COPY } from "../engine-copy";
 import { GLOSSARY, type GlossaryTermId } from "../glossary";
 import { HOW_IT_WORKS } from "../how-it-works";
 import { PRIVACY, TERMS } from "../legal";
@@ -49,12 +50,21 @@ function pages(locale: Locale): { path: string; title: string; description: stri
     { path: "/metrics", title: tc(METRICS.title, locale), description: tc(METRICS.metaDescription, locale) },
     // An app page, but indexable on purpose (R2-08).
     { path: "/quiz", title: tc(meta.quizTitle, locale), description: tc(meta.quizDescription, locale) },
+    // The growth engine: behind ENGINE_ENABLED and out of the sitemap until it
+    // opens, but written now for the day it does — the same bargain as
+    // /metrics. The title is the expression its page.tsx builds (engine
+    // review R13: the first wording ran past 60 with the suffix).
+    {
+      path: "/aarrr-funnel-template",
+      title: `${tc(ENGINE_COPY.meta.title, locale)} — Tour de Growth`,
+      description: tc(ENGINE_COPY.meta.description, locale),
+    },
   ];
 }
 
 describe("search snippets of every indexable page (SEO audit v1 §1.2, §1.3)", () => {
   it("covers every page family — a list that shrank would pass by checking less", () => {
-    expect(pages("en").length).toBe(Object.keys(GLOSSARY).length + Object.keys(COMPARISONS).length + 10);
+    expect(pages("en").length).toBe(Object.keys(GLOSSARY).length + Object.keys(COMPARISONS).length + 11);
   });
 
   for (const locale of LOCALES) {

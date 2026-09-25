@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import sitemap from "../sitemap";
 import { COMPARISON_ORDER } from "@/content/comparisons";
 import { GLOSSARY } from "@/content/glossary";
+import { isEngineOpenAtBuild } from "@/lib/engine/access";
 import { gameSitemapPaths, isGameOpenAtBuild } from "@/lib/game/build-flag";
 import { LOCALES } from "@/lib/i18n/locale";
 
@@ -20,7 +21,8 @@ describe("sitemap", () => {
     // (la CI le construit ouvert — GAME_ENABLED au niveau du workflow).
     const fixed = 8;
     const game = gameSitemapPaths(isGameOpenAtBuild()).length;
-    const expected = (fixed + COMPARISON_ORDER.length + Object.keys(GLOSSARY).length + game) * LOCALES.length;
+    const engine = isEngineOpenAtBuild() ? 1 : 0;
+    const expected = (fixed + COMPARISON_ORDER.length + Object.keys(GLOSSARY).length + game + engine) * LOCALES.length;
     expect(entries).toHaveLength(expected);
   });
 
@@ -70,5 +72,36 @@ describe("sitemap and the game's build flag (P27)", () => {
       expect(entry.lastModified, entry.url).toMatch(/^\d{4}-\d{2}-\d{2}$/);
       expect(entry.priority, entry.url).toBeLessThan(0.7);
     }
+  });
+});
+
+/**
+ * Engine spec §11.1: the growth engine follows the game's rule — in the
+ * sitemap only when ENGINE_ENABLED is open at build. Non-vacuity, measured
+ * 2026-09-25: drop the flag check from `enginePaths()` and the "closed" case
+ * fails with both locales listed (and so does the page count above); the
+ * "open" case passes either way, as a companion assertion should.
+ */
+describe("sitemap and the engine's build flag (engine spec §11.1)", () => {
+  const previous = process.env.ENGINE_ENABLED;
+  afterEach(() => {
+    if (previous === undefined) delete process.env.ENGINE_ENABLED;
+    else process.env.ENGINE_ENABLED = previous;
+  });
+
+  const engineEntries = () => sitemap().filter((e) => /\/(en|fr)\/aarrr-funnel-template$/.test(e.url));
+
+  it("lists no engine page while the flag is closed at build — nor for any value but \"true\"", () => {
+    delete process.env.ENGINE_ENABLED;
+    expect(engineEntries()).toEqual([]);
+    process.env.ENGINE_ENABLED = "1";
+    expect(engineEntries()).toEqual([]);
+  });
+
+  it("lists the page in both languages when open, dated by hand", () => {
+    process.env.ENGINE_ENABLED = "true";
+    const engine = engineEntries();
+    expect(engine).toHaveLength(LOCALES.length);
+    for (const entry of engine) expect(entry.lastModified, entry.url).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 });

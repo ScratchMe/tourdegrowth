@@ -19,6 +19,7 @@ import { EFFORT_KEY, type EngineStrings } from "@/lib/engine/strings";
 import { PILLARS } from "@/lib/scoring/pillars";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { contentMetadata } from "@/lib/i18n/meta";
+import { breadcrumbSchema, JsonLd, webApplicationSchema } from "@/lib/seo/jsonld";
 import { tc } from "@/lib/i18n/translatable";
 import { EngineWorkbench } from "./EngineWorkbench";
 import { resolveEngineProps } from "./engine-props";
@@ -104,6 +105,17 @@ export default async function EnginePage({ params }: PageProps) {
 
   return (
     <>
+      {/* §11.3: a WebApplication (free, no rating) and its breadcrumb — no HowTo nor
+          FAQPage, whose rich results Google has withdrawn. Name and description are
+          the page's own copy, handed to the builder rather than imported by it. */}
+      <JsonLd
+        data={webApplicationSchema(locale, {
+          path: PATH,
+          name: tc(ENGINE_COPY.meta.breadcrumb, locale),
+          description: tc(ENGINE_COPY.meta.description, locale),
+        })}
+      />
+      <JsonLd data={breadcrumbSchema(locale, [{ name: tc(ENGINE_COPY.meta.breadcrumb, locale), path: PATH }])} />
       <ContentHeader locale={locale} path={PATH} width="wide" />
 
       <main id="main" className={styles.main}>

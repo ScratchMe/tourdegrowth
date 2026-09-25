@@ -27,6 +27,9 @@ export const CONTENT_UPDATED_AT: Record<string, string> = {
   // open at build (lib/game/build-flag.ts); dated here like every other page.
   "/game": "2026-09-24", // created (hub)
   "/game/retention": "2026-09-24", // created (level page, intro only until the island lands)
+  // Le moteur de croissance (engine spec §11.1). Same rule as the game: in the
+  // sitemap only when ENGINE_ENABLED is open at build (app/sitemap.ts).
+  "/aarrr-funnel-template": "2026-09-25", // created
 };
 
 /** The day the long-form `extended` copy of every term was approved. */

@@ -59,7 +59,15 @@ import type { CandidateId, SlideTitleKey, ToolId, UnitInputId } from "@/lib/engi
 
 export const ENGINE_COPY = {
   meta: {
-    title: { fr: "Modèle de funnel AARRR — tes chiffres, en local", en: "AARRR funnel template — your numbers, kept local" },
+    /*
+     * Plus « — Tour de Growth », added by the page: the whole `<title>` must
+     * stay within SEARCH_TITLE_MAX (60, `lib/i18n/meta.ts`). The first
+     * wording ran to 64 FR / 65 EN (review R13). Kept: the query itself
+     * (« modèle de funnel AARRR » / "AARRR funnel template") first, and the
+     * promise that the numbers stay local. A colon rather than a second em
+     * dash, so the title does not read as three fragments. TODO: à relire.
+     */
+    title: { fr: "Modèle de funnel AARRR : chiffres en local", en: "AARRR funnel template: numbers kept local" },
     description: {
       fr: "Entre les chiffres de tes cinq étapes AARRR, vois où tu perds le plus de monde et exporte des slides pour ton CODIR. Rien n'est envoyé.",
       en: "Enter the numbers for your five AARRR stages, see where you lose the most people and export slides for your leadership meeting. Nothing is sent.",
