@@ -41,6 +41,7 @@ import {
   INITIAL_PHASE,
   focusFor,
   lastQuarterStart,
+  yearOnDesk,
   nextPhase,
   runFrame,
   settledPhase,
@@ -102,8 +103,8 @@ export interface Game {
   /**
    * What the desk shows — the timeline, the phone, the hand, the call, the
    * journal. The year as it stood when « Lancer » was pressed while the
-   * months scroll (the quarter is not over yet on screen), the committed
-   * year otherwise.
+   * months scroll (the quarter is not over yet on screen), the saved year —
+   * read-only — behind « Reprendre ? », the committed year otherwise.
    */
   desk: State;
   /** What the dashboard shows, and the reading its deltas compare against. */
@@ -381,9 +382,11 @@ export function useGame(ctx: IslandContext, refs: GameRefs): Game {
 
   // ----------------------------------------------------------- the views
 
-  const desk = running && run ? run.from : game;
+  // Behind « Reprendre ? », the saved year, read-only (phases.ts#yearOnDesk).
+  const shown = yearOnDesk(phase, game, saved?.state ?? null);
+  const desk = running && run ? run.from : shown;
   const point = running && run ? run.frames[frame] : undefined;
-  const dash = point && run ? { state: runFrame(run.from, point), prev: undefined } : { state: game, prev: lastQuarterStart(L, game) };
+  const dash = point && run ? { state: runFrame(run.from, point), prev: undefined } : { state: shown, prev: lastQuarterStart(L, shown) };
 
   return {
     game,

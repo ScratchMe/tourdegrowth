@@ -133,8 +133,13 @@ test.describe("coming back to a year", () => {
   test("a reload asks « Reprendre ? », and resuming lands on the last report", async ({ page }) => {
     await page.goto(LEVEL_PATH.fr);
     await playQuarter(page, PATH_A[0]!);
+    const churnAfterQ1 = await page.getByTestId("game-dash-churn").innerText();
     await page.reload();
     await expect(page.getByTestId("game-resume")).toBeVisible();
+    // The question is asked in front of the saved year, not a fresh January:
+    // the tiles and the journal read as the player left them.
+    await expect(page.getByTestId("game-dash-churn")).toHaveText(churnAfterQ1);
+    await expect(page.getByTestId("game-journal-1")).toBeVisible();
     await page.getByTestId("game-resume-accept").click();
     await expect(page.getByTestId("game-report-1")).toBeVisible();
     await expect.poll(() => trackedEvents(page)).toContain("game_resume/resume");

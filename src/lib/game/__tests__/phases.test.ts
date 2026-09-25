@@ -14,6 +14,7 @@ import {
   runFrame,
   settledPhase,
   yearFacts,
+  yearOnDesk,
   type UiPhase,
   type UiPhaseKind,
 } from "../phases";
@@ -211,6 +212,20 @@ describe("X27 — what each screen shows", () => {
     expect(handHint({ kind: "hand" }, 0, 2)).toBe("pick");
     expect(handHint({ kind: "hand" }, 1, 2)).toBe("pick");
     expect(handHint({ kind: "hand" }, 2, 2)).toBe("ready");
+  });
+
+  it("behind « Reprendre ? » the desk draws the saved year, and nowhere else", () => {
+    const committed = fresh(L);
+    const saved = playPath(PATH_A)[2]!;
+    expect(yearOnDesk({ kind: "resumePrompt" }, committed, saved)).toBe(saved);
+    // No save found: nothing to show but the committed year.
+    expect(yearOnDesk({ kind: "resumePrompt" }, committed, null)).toBe(committed);
+    for (const p of all.filter((p) => p.kind !== "resumePrompt")) {
+      expect(yearOnDesk(p, committed, saved), p.kind).toBe(committed);
+    }
+    // Displaying is not restoring: in this phase nothing on the desk can act.
+    expect(handVisible({ kind: "resumePrompt" })).toBe(false);
+    expect(actionBarVisible({ kind: "resumePrompt" })).toBe(false);
   });
 
   it("focus follows the screen the player just opened (plan §3.5)", () => {
