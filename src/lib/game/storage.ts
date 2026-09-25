@@ -156,7 +156,10 @@ export function isGameState<Id extends string>(level: LevelDefinition<Id>, value
   for (const k of ["orders", "obeyed", "refused", "active", "everDark", "removedDark", "seenDark", "picks"]) {
     if (!isIdList(value[k])) return false;
   }
-  if ((value.picks as Id[]).length > level.constants.picksPerQuarter) return false;
+  const picks = value.picks as Id[];
+  // Whether each pick is in the hand takes the level's rules to decide, and
+  // the reducer's `restore` does it; a duplicate is plain corruption.
+  if (picks.length > level.constants.picksPerQuarter || new Set(picks).size !== picks.length) return false;
 
   if (!isRecord(value.since)) return false;
   for (const [id, month] of Object.entries(value.since)) {

@@ -14,7 +14,11 @@
  *   node scripts/utm-link.mjs directory:uneed /en
  *   node scripts/utm-link.mjs newsletter:growthunhinged /en/glossary/aarrr
  *   node scripts/utm-link.mjs hackernews /en/aarrr-funnel-template --campaign launch_engine
+ *   node scripts/utm-link.mjs hackernews /en/game/retention --campaign=launch_game
  *   node scripts/utm-link.mjs --list
+ *
+ * An option it does not understand, or a --campaign with no value, exits 1:
+ * a link that looks right but lands in the wrong campaign is worse than none.
  */
 import {
   buildUtmUrl,
@@ -23,6 +27,7 @@ import {
   DYNAMIC_PREFIXES,
   KNOWN_DIRECTORIES,
   LAUNCH_CAMPAIGNS,
+  parseUtmArgs,
 } from "./utm-channels.mjs";
 
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? DEFAULT_SITE_URL).replace(/\/$/, "");
@@ -38,23 +43,24 @@ function printList() {
   }
   console.log(`\nDirectories named in GROWTH-PLAN.md: ${KNOWN_DIRECTORIES.map((d) => `directory:${d}`).join(", ")}`);
   console.log(`\nLaunch campaigns (--campaign): ${LAUNCH_CAMPAIGNS.join(", ")}`);
-  console.log("\nUsage: node scripts/utm-link.mjs <channel> [path] [--campaign <campaign>]");
+  console.log("\nUsage: node scripts/utm-link.mjs <channel> [path] [--campaign <campaign> | --campaign=<campaign>]");
 }
 
-const args = process.argv.slice(2);
-const campaignFlag = args.indexOf("--campaign");
-const campaignArg = campaignFlag === -1 ? undefined : args[campaignFlag + 1];
-if (campaignFlag !== -1) args.splice(campaignFlag, 2);
-const [channelArg, pathArg] = args;
+const parsed = parseUtmArgs(process.argv.slice(2));
 
-if (!channelArg || channelArg === "--list" || channelArg === "-l") {
+if (parsed.list) {
   printList();
-  process.exit(channelArg ? 0 : 1);
+  process.exit(0);
+}
+if (parsed.error) {
+  console.error(`${parsed.error}\n`);
+  printList();
+  process.exit(1);
 }
 
-const url = buildUtmUrl(channelArg, pathArg ?? "/", SITE_URL, campaignArg);
+const url = buildUtmUrl(parsed.channel, parsed.path ?? "/", SITE_URL, parsed.campaign);
 if (!url) {
-  console.error(`Unknown channel "${channelArg}" or campaign "${campaignArg ?? ""}".\n`);
+  console.error(`Unknown channel "${parsed.channel}" or campaign "${parsed.campaign ?? ""}".\n`);
   printList();
   process.exit(1);
 }

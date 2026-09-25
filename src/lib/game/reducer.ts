@@ -10,7 +10,7 @@
  *
  * Relative imports only — see model.ts.
  */
-import { fresh, handIds, runQuarter } from "./model";
+import { fresh, handIds, picksInHand, runQuarter } from "./model";
 import type { GameAction, GameState, LevelDefinition } from "./types";
 
 export function gameReducer<Id extends string>(level: LevelDefinition<Id>) {
@@ -34,6 +34,10 @@ export function gameReducer<Id extends string>(level: LevelDefinition<Id>) {
 
       case "run":
         if (state.over || state.callOpen || state.picks.length !== level.constants.picksPerQuarter) return state;
+        // `toggle` only ever builds picks from the hand, but a state can
+        // arrive without it; without this, `call` in Q1 went into production
+        // twice and its trust and radar hits landed twice.
+        if (!picksInHand(level, state)) return state;
         return runQuarter(level, state);
 
       case "reset":
@@ -43,6 +47,14 @@ export function gameReducer<Id extends string>(level: LevelDefinition<Id>) {
         // Shape is the storage layer's job (isGameState); this only refuses a
         // save that belongs to another level or another state version.
         if (action.state.level !== level.slug || action.state.v !== 1) return state;
+        // The hand is not part of the shape check (it takes the level's
+        // rules to deal it). A pick outside it could be neither run nor
+        // unpicked — `toggle` refuses it — so it is dropped, not the year.
+        if (!picksInHand(level, action.state)) {
+          const hand = handIds(level, action.state);
+          const picks = action.state.picks.filter((id, i, all) => hand.includes(id) && all.indexOf(id) === i);
+          return { ...action.state, picks };
+        }
         return action.state;
     }
   };

@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { spawnSync } from "node:child_process";
+import { join } from "node:path";
 
 // A JS module in an `allowJs: false` project — same trick as
 // next-config.test.ts: widen the specifier so the import is untyped.
@@ -121,5 +123,51 @@ describe("launch campaigns", () => {
     expect(mod.buildUtmUrl("hackernews", "/en", undefined, "launch_week2")).toBeNull();
     expect(mod.buildUtmUrl("hackernews", "/en", undefined, "Launch_Engine")).toBeNull();
     expect(mod.buildUtmUrl("hackernews", "/en", undefined, "")).toBeNull();
+  });
+});
+
+/**
+ * The command line is where a launch link is actually made, so a flag it
+ * does not understand is the same failure as an unknown campaign: a link
+ * that looks right, lands in `launch_week` and splits the launch's row in
+ * GoatCounter. `--campaign=launch_game` (the common spelling) and a bare
+ * trailing `--campaign` used to do exactly that, with exit code 0.
+ */
+describe("the command line (scripts/utm-link.mjs)", () => {
+  const parse = (argv: string[]) =>
+    (mod as unknown as { parseUtmArgs: (argv: string[]) => Record<string, unknown> }).parseUtmArgs(argv);
+
+  it("reads the campaign in both spellings", () => {
+    expect(parse(["hackernews", "/en", "--campaign", "launch_game"])).toEqual({ channel: "hackernews", path: "/en", campaign: "launch_game" });
+    expect(parse(["hackernews", "/en", "--campaign=launch_game"])).toEqual({ channel: "hackernews", path: "/en", campaign: "launch_game" });
+    expect(parse(["--campaign", "launch_game", "hackernews"])).toEqual({ channel: "hackernews", path: undefined, campaign: "launch_game" });
+  });
+
+  it("refuses a campaign flag with no value, an unknown flag, and a third positional", () => {
+    expect(parse(["hackernews", "/en", "--campaign"])).toHaveProperty("error");
+    expect(parse(["hackernews", "/en", "--campaign="])).toHaveProperty("error");
+    expect(parse(["hackernews", "--campaign", "--list"])).toHaveProperty("error");
+    expect(parse(["hackernews", "/en", "--campain=launch_game"])).toHaveProperty("error");
+    expect(parse(["hackernews", "/en", "launch_game"])).toHaveProperty("error");
+  });
+
+  it("still answers --list", () => {
+    expect(parse(["--list"])).toEqual({ list: true });
+    expect(parse(["-l"])).toEqual({ list: true });
+  });
+
+  // End to end: the wiring, not just the parser — exit code and output.
+  const run = (...args: string[]) =>
+    spawnSync(process.execPath, [join(process.cwd(), "scripts/utm-link.mjs"), ...args], { encoding: "utf8" });
+
+  it("prints the tagged link for --campaign=<x>, and exits 1 instead of mistagging", () => {
+    const ok = run("hackernews", "/en/game/retention", "--campaign=launch_game");
+    expect(ok.status).toBe(0);
+    expect(ok.stdout.trim()).toBe("https://www.tourdegrowth.com/en/game/retention?utm_source=hackernews&utm_campaign=launch_game");
+    for (const bad of [["hackernews", "/en", "--campaign"], ["hackernews", "/en", "--campain=launch_game"]]) {
+      const res = run(...bad);
+      expect(res.status, bad.join(" ")).toBe(1);
+      expect(res.stdout, bad.join(" ")).not.toContain("utm_campaign=");
+    }
   });
 });

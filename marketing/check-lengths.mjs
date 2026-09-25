@@ -24,8 +24,11 @@ import { fileURLToPath } from "node:url";
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const FIX = process.argv.includes("--fix");
 
+// Every folder that holds drafts with stated lengths — launch/ included: it
+// was edited alongside the campaigns but never scanned, and already held a
+// wrong count while this script reported « 0 problem(s) ».
 const files = ["kit.md"];
-for (const dir of ["campaigns/engine", "campaigns/game"]) {
+for (const dir of ["launch", "campaigns/engine", "campaigns/game"]) {
   for (const f of readdirSync(join(ROOT, dir)).sort()) {
     if (f.endsWith(".md")) files.push(`${dir}/${f}`);
   }
@@ -65,7 +68,8 @@ for (const rel of files) {
       return whole;
     });
     if (rel.endsWith("social.md")) {
-      const post = line.match(/^\s*\d+\. > (.+)$/);
+      // campaigns/ quote their posts (« 1. > … »), launch/ does not (« 1. … »).
+      const post = line.match(/^\s*\d+\. (?:> )?(.+)$/);
       if (post) {
         checked += 1;
         const x = [...post[1].replace(/\[(link|lien)\]/g, "x".repeat(23))].length;

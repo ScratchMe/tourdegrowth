@@ -43,7 +43,7 @@ l'avoir vérifiée serait écrire de mémoire des noms qu'on n'a pas ouverts.
 1. `Un jeu où c'est toi qui caches le bouton résilier` (49)
 2. `Vingt minutes dans la peau d'un PM growth` (41)
 
-**Aperçu** : `Gratuit, sans compte, rien n'est envoyé. Une capture jointe.`
+**Aperçu** : `Gratuit, sans compte, ta partie reste chez toi. Une capture jointe.`
 
 > Bonjour [prénom],
 >
@@ -65,7 +65,7 @@ l'avoir vérifiée serait écrire de mémoire des noms qu'on n'a pas ouverts.
 1. `A game where you're the one hiding Cancel` (41)
 2. `Twenty minutes as a growth PM with a CEO` (40)
 
-**Aperçu** : `Free, no account, nothing sent. One screenshot attached.`
+**Aperçu** : `Free, no account, your save stays on your device. One screenshot attached.`
 
 > Hi [name],
 >

@@ -345,7 +345,10 @@ export function patternCatalogue<Id extends string>(
   return level.darkOrder.map((id) => {
     const used = state.everDark.includes(id);
     const group: PatternGroup = used ? "used" : state.seenDark.includes(id) ? "refused" : "unseen";
-    const status = state.removedDark.includes(id) ? "removed" : used ? "live" : null;
+    // Production first: `removedDark` remembers every cleaning and never
+    // forgets, so a pattern cleaned out then shipped again is in both lists —
+    // and it is the running one that December's ending counts.
+    const status = state.active.includes(id) ? "live" : state.removedDark.includes(id) ? "removed" : used ? "live" : null;
     return { id, group, status };
   });
 }

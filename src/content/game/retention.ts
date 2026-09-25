@@ -20,7 +20,9 @@ import type { Translatable } from "@/lib/i18n/translatable";
  * - **Corrections the plan lists**: R6 (the trust chart said « sous 40 »
  *   while the viral thread fires at 35 or less), R7 (« Effet caché » said the
  *   trust hit repeats every quarter; it applies once, on the day the card is
- *   picked), R15 (the prototype's footer and its « verrouillé · prototype »).
+ *   picked), R15 (the prototype's footer and its « verrouillé · prototype »),
+ *   and three statements of fact the prototype got wrong about a real brand
+ *   or a law (Basic-Fit, the DSA, Adobe — review of 2026-09-25).
  * - **New strings** the finished game needs and the prototype never had
  *   (plan §5): « Comment se joue une année », the ringing call, the report's
  *   statuses and headers, the clippings, the timeline, the resume prompt,
@@ -397,9 +399,13 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
         "Depuis le 1er juin 2023, un abonnement souscrit en ligne doit pouvoir être résilié en ligne, par un parcours direct et facile. C'est l'article L215-1-1 du Code de la consommation, la loi dite « des trois clics ».",
         'Since 1 June 2023, French law has required that a subscription taken out online can be cancelled online, through a direct and easy path. It is article L215-1-1 of the French Consumer Code, known as the "three-click" law.',
       ),
+      // TODO: à relire — correction factuelle (revue du 2026-09-25) : la sanction de 2023
+      // porte sur des manquements d'information, dont les conditions de résiliation
+      // annoncées avant la souscription, pour une enquête (mars 2022-janvier 2023)
+      // antérieure à L215-1-1. Pas sur un parcours de résiliation en ligne.
       cas: t(
-        "Basic-Fit a écopé de 68 500 € d'amende de la DGCCRF pour un parcours de résiliation non conforme.",
-        "Basic-Fit was fined €68,500 by the DGCCRF, France's consumer protection authority, for a cancellation path that did not comply.",
+        "Basic-Fit a écopé en 2023 de 68 500 € d'amende de la DGCCRF pour des faits antérieurs à cette loi, notamment des conditions de résiliation mal annoncées avant la souscription.",
+        "Basic-Fit was fined €68,500 in 2023 by the DGCCRF, France's consumer protection authority, for conduct that predates this law, notably cancellation terms not properly disclosed before people subscribed.",
       ),
       tell: t(
         "Si tu cherches le bouton depuis plus de dix secondes, ce n'est pas toi. C'est voulu.",
@@ -423,9 +429,14 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
     },
     cascade: {
       official: t("Harcèlement d'interface", "Nagging"),
+      // TODO: à relire — correction juridique (revue du 2026-09-25) : l'art. 25 du DSA
+      // ne s'applique pas aux pratiques couvertes par la directive sur les pratiques
+      // commerciales déloyales (25.2), donc pas à la résiliation d'un abonnement grand
+      // public ; la demande répétée n'y figure qu'en exemple (considérant 67, 25.3.b).
+      // La règle qui s'applique à Flixo est celle des pratiques agressives, L121-6.
       law: t(
-        "Le règlement européen sur les services numériques, le DSA, interdit aux plateformes en ligne les interfaces conçues pour tromper ou manipuler, y compris en redemandant ce qui a déjà été refusé.",
-        "The EU's Digital Services Act, the DSA, bans online platforms from interfaces designed to deceive or manipulate, including asking again for something already refused.",
+        "Des sollicitations répétées et insistantes qui entravent l'exercice d'un droit, comme celui de résilier, sont une pratique commerciale agressive : article L121-6 du Code de la consommation. Pour les plateformes en ligne, le règlement européen DSA cite aussi en exemple le fait de redemander un choix déjà fait.",
+        "Repeated and insistent solicitations that hinder the exercise of a right, such as the right to cancel, are an aggressive commercial practice under French law, article L121-6 of the Consumer Code. For online platforms, the EU's Digital Services Act also gives asking again for a choice already made as an example.",
       ),
       cas: t(
         "Le site deceptive.design en recense des dizaines d'exemples dans son hall of shame, Amazon et Google en tête.",
@@ -466,9 +477,12 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
         "Les conditions de résiliation, préavis compris, doivent être annoncées avant la souscription, pas au moment de partir. Article L221-5 du Code de la consommation.",
         "Cancellation terms, notice period included, must be stated before you subscribe, not when you try to leave. Article L221-5 of the French Consumer Code.",
       ),
+      // TODO: à relire — correction factuelle (revue du 2026-09-25) : les 150 M$ du
+      // communiqué du ministère de la Justice (13 mars 2026) sont 75 M$ d'amende
+      // civile et 75 M$ de services gratuits, et des faits allégués, pas reconnus.
       cas: t(
-        "Adobe a accepté en 2026 de payer 150 millions de dollars aux États-Unis pour des frais de résiliation anticipée mal annoncés.",
-        "Adobe agreed in 2026 to pay $150 million in the United States over early termination fees it had not properly disclosed.",
+        "Aux États-Unis, Adobe a conclu en 2026 un accord de 150 millions de dollars, pour moitié une amende civile et pour moitié des services gratuits, afin de clore des poursuites l'accusant d'avoir mal annoncé ses frais de résiliation anticipée.",
+        "In the United States, Adobe agreed in 2026 to a $150 million settlement, half a civil penalty and half free services, to resolve claims that it had not properly disclosed its early termination fees.",
       ),
       tell: t("Un dernier prélèvement dont personne ne t'avait parlé.", "One last charge nobody had told you about."),
     },

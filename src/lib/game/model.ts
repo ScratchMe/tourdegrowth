@@ -177,6 +177,17 @@ export function dealHand<Id extends string>(level: Level<Id>, state: State<Id>):
   return { ...state, seenDark };
 }
 
+/**
+ * Whether the picks are a set drawn from this quarter's hand. `toggle` can
+ * only ever produce such picks; this is for every state that arrives another
+ * way — a restored save, a stale one — which would otherwise put a card in
+ * production that was never dealt, or the same card twice.
+ */
+export function picksInHand<Id extends string>(level: Level<Id>, state: State<Id>): boolean {
+  const hand = handIds(level, state);
+  return new Set(state.picks).size === state.picks.length && state.picks.every((id) => hand.includes(id));
+}
+
 // ----------------------------------------------------------- reductions ---
 
 /**
@@ -387,7 +398,10 @@ export function computeEnding<Id extends string>(level: Level<Id>, state: State<
  * or the press, the competitor, clamps, the CEO's line, firing, and the next
  * quarter's order and hand. Refuses (returns the state unchanged) unless
  * exactly two cards are picked and the year is still running; the reducer
- * checks the same, this is the engine not trusting its caller.
+ * checks the same, this is the engine not trusting its caller. Whether the
+ * picks are in the hand is the reducer's rule (`picksInHand`), not this
+ * function's: the engine's own tests play arbitrary pairs to isolate one
+ * mechanic at a time.
  */
 export function runQuarter<Id extends string>(level: Level<Id>, state: State<Id>): State<Id> {
   const c = level.constants;

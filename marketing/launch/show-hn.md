@@ -9,7 +9,7 @@ Jour : mardi à jeudi, 14h-16h heure de Paris (matin côte Est).*
 
 ## Titre (≤ 80 caractères — choisir un)
 
-1. `Show HN: A 3-minute AARRR growth check-up with a deterministic score` (66) ← préféré
+1. `Show HN: A 3-minute AARRR growth check-up with a deterministic score` (68) ← préféré
 2. `Show HN: Where does your growth stall? 15 questions, a score, one next move` (75)
 3. `Show HN: An open-source growth check-up where no model ever touches the score` (77)
 
