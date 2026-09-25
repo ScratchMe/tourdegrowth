@@ -230,7 +230,7 @@ describe("island-view — what the words must say", () => {
     expect(closingMonth(fr, cutShort)).toBe("juin");
     const d = decemberContent(fr, cutShort);
     expect(d.cellLabels.churn).toBe("Résiliations en juin");
-    const tiles = dashboardProps(fr, cutShort, lastQuarterStart(L, cutShort), true);
+    const tiles = dashboardProps(fr, cutShort, lastQuarterStart(L, cutShort), "revealing");
     for (const tile of [tiles.trust, tiles.radar]) {
       expect(tile.hidden).toBe(false);
       if (!tile.hidden) expect(tile.sub).toBe("révélée en juin");
@@ -242,7 +242,7 @@ describe("island-view — what the words must say", () => {
     // A year that ran its course still says December.
     const full = years.at(-1)!;
     expect(decemberContent(fr, full).cellLabels.churn).toBe("Résiliations en décembre");
-    const fullTiles = dashboardProps(en, full, lastQuarterStart(L, full), true);
+    const fullTiles = dashboardProps(en, full, lastQuarterStart(L, full), "revealing");
     if (!fullTiles.trust.hidden) expect(fullTiles.trust.sub).toBe("revealed in December");
   });
 
@@ -259,7 +259,7 @@ describe("island-view — what the words must say", () => {
         const last = year.log.length - 1;
         const report = reportContent(ctx, year, last);
         const entry = journalEntries(ctx, year)[last]!;
-        const tiles = dashboardProps(ctx, year, lastQuarterStart(L, year), true);
+        const tiles = dashboardProps(ctx, year, lastQuarterStart(L, year), "revealing");
         const label = `${ctx.locale} · ${name}`;
 
         expect(entry.picked, label).toEqual(report.picked);
