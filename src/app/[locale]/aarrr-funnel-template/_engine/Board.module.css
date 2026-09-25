@@ -1,0 +1,421 @@
+/*
+ * The board (spec §7 E2) — semantic tokens only (no-primitives.test.ts).
+ *
+ * From 960px the board BREAKS OUT of the page's 760px reading column to the
+ * app width, so the side drawer has room (§7 E2: rows at left, sticky drawer
+ * at right). The breakout is written to be a no-op once the page itself is
+ * that wide: margin = (container − board) / 2 is zero when they match, so a
+ * wider page layout (P5) needs no change here. Board.tsx switches the drawer
+ * at the SAME 960px — keep the two in step.
+ */
+.board {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  min-width: 0;
+}
+
+/* The peloton's raised card: min-width 0 so its four grids shrink with the
+   column instead of pushing the board wider than the phone. */
+.pelotonCard {
+  min-width: 0;
+}
+
+@media (min-width: 960px) {
+  .board {
+    --board-width: min(var(--width-desktop), calc(100vw - 2 * var(--gutter-desktop)));
+    width: var(--board-width);
+    margin-inline: calc((100% - var(--board-width)) / 2);
+  }
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.eyebrow {
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* --display-hero-mobile at every width: the full hero size is the landing's
+   (§7 E2.2). Its accent is large text, where --accent-mark passes 3:1. */
+.verdict {
+  font: var(--display-hero-mobile);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+  color: var(--text-body);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Focused by script on arrival (R-19), never reachable by Tab: no ring. */
+.verdict:focus {
+  outline: none;
+}
+
+.verdictAccent {
+  color: var(--accent-mark);
+}
+
+/* --- Coverage chips: fractions, never a percentage (§6.4) ---------------- */
+.coverage {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.chip {
+  font: var(--meta-sm);
+  color: var(--text-body);
+  background: var(--surface-card);
+  border-radius: var(--radius-tag);
+  padding: var(--space-2) var(--space-4);
+}
+
+.chipFound {
+  border: var(--border-solid);
+}
+
+.chipApprox,
+.chipProgress {
+  border: var(--border-dashed);
+}
+
+.chipMissing {
+  border: 2px solid var(--border-alert);
+  color: var(--text-alert);
+}
+
+.tabs {
+  align-self: flex-start;
+  max-width: 100%;
+}
+
+.writeFailed {
+  font: var(--body-md);
+  color: var(--text-alert);
+  margin: 0;
+}
+
+/* --- Stage rows and drawer --------------------------------------------- */
+.stages {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+@media (min-width: 960px) {
+  .stages {
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    column-gap: var(--space-9);
+    /* Five rows at their own height, then a sixth track that takes whatever
+       the drawer adds: without it the grid shares the drawer's height across
+       the five rows and they drift apart down the page. */
+    grid-template-rows: repeat(5, auto) 1fr;
+  }
+
+  .stages > .row {
+    grid-column: 1;
+  }
+
+  /* Wherever it sits in the DOM (right after its row), the drawer is lifted
+     into the right-hand column, over the height of all six tracks. */
+  .stages > .drawer {
+    grid-column: 2;
+    grid-row: 1 / -1;
+    position: sticky;
+    top: var(--space-7);
+  }
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "stage value"
+    "pills label"
+    "comparator comparator";
+  column-gap: var(--space-5);
+  row-gap: var(--space-2);
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+  font: inherit;
+  color: var(--text-body);
+  background: var(--surface-card);
+  border: var(--border-solid);
+  border-radius: var(--radius-panel);
+  padding: var(--space-5) var(--space-6);
+  cursor: pointer;
+}
+
+/* On a phone the stage name takes the whole first line: beside the value, a
+   30px stencil "ACQUISITION" had ~170px and broke mid-word (« ACQUISITI / ON »,
+   seen at 390). The value and its label sit under it, right-aligned. */
+@media (max-width: 760px) {
+  .row {
+    grid-template-areas:
+      "stage stage"
+      "pills value"
+      "pills label"
+      "comparator comparator";
+  }
+}
+
+.row:hover {
+  box-shadow: var(--state-hover-shadow);
+}
+
+.row:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.rowOpen {
+  background: var(--surface-sunken);
+}
+
+/* Below its comparator: the only red surface of the board — a diagnosis,
+   said in text too ("below the reference"), never by colour alone. */
+.rowBelow {
+  background: var(--surface-alert);
+  border-color: var(--border-alert);
+}
+
+.rowMaybe {
+  border: var(--border-dashed);
+}
+
+.rowStage {
+  grid-area: stage;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.rowIndex {
+  font: var(--meta-sm);
+  color: var(--text-muted);
+}
+
+.rowName {
+  font: var(--display-section);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.rowValue {
+  grid-area: value;
+  font: var(--display-section);
+  letter-spacing: var(--display-letter-spacing);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.rowValue[data-unknown="true"] {
+  color: var(--text-alert);
+}
+
+.rowLabel {
+  grid-area: label;
+  font: var(--meta-xs);
+  color: var(--text-muted);
+  text-align: right;
+  max-width: 22ch;
+}
+
+.rowComparator {
+  grid-area: comparator;
+  font: var(--meta-xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Small red text is the deep red (--text-alert, 5.28:1 on the alert wash) —
+   --accent-mark is for large text and marks only (§8.2). */
+.rowComparatorBelow {
+  color: var(--text-alert);
+}
+
+.pills {
+  grid-area: pills;
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.pill {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-round);
+  box-sizing: border-box;
+}
+
+.pillFound {
+  background: var(--viz-ink);
+}
+
+.pillApprox {
+  border: 2px solid var(--viz-ink);
+  background: repeating-linear-gradient(45deg, var(--viz-ink) 0 2px, transparent 2px 4px);
+}
+
+.pillMissing {
+  border: 2px dashed var(--viz-highlight);
+}
+
+.pillProgress {
+  border: 2px solid var(--viz-ink);
+}
+
+.pillNa {
+  height: 2px;
+  border-radius: 0;
+  background: var(--viz-ink);
+}
+
+.drawer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
+  background: var(--surface-card);
+  border: var(--border-solid);
+  border-radius: var(--radius-card);
+  padding: var(--pad-card);
+}
+
+@media (max-width: 760px) {
+  .drawer {
+    padding: var(--pad-card-mobile);
+  }
+}
+
+.drawerHead {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "eyebrow close"
+    "title title";
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.drawerEyebrow {
+  grid-area: eyebrow;
+  font: var(--meta-xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.drawerTitle {
+  grid-area: title;
+  font: var(--display-section);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.drawerTitle:focus {
+  outline: none;
+}
+
+.drawerClose {
+  grid-area: close;
+}
+
+.metric {
+  border-top: var(--border-rule);
+  padding-top: var(--space-5);
+  min-width: 0;
+}
+
+.metricHeading {
+  margin: 0;
+  font: inherit;
+}
+
+.metricToggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  min-height: var(--hit-min);
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0;
+  font: var(--title-card);
+  color: var(--text-body);
+  cursor: pointer;
+}
+
+.metricToggle:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset-tight);
+}
+
+.metricName {
+  flex: 1;
+  min-width: 0;
+}
+
+.metricStatus {
+  flex: none;
+}
+
+/* The disclosure's typographic marker, as in core/Disclosure: a sunken mono
+   chip carrying + / −, the chip the affordance, the glyph the state. */
+.metricMarker {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: var(--meta-md);
+  background: var(--surface-sunken);
+  border-radius: var(--radius-tag);
+}
+
+.metricMarker::before {
+  content: "+" / "";
+}
+
+.metricMarker[data-open="true"]::before {
+  content: "\2212" / "";
+}
+
+.metricBody {
+  padding-top: var(--space-5);
+}
+
+/* --- Actions ----------------------------------------------------------- */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+@media (max-width: 760px) {
+  .actions > :first-child {
+    width: 100%;
+  }
+}

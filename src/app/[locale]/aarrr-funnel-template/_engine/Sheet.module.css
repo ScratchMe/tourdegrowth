@@ -1,0 +1,355 @@
+/*
+ * The metric sheet and its editors (spec §7 E3, E3bis, §8.3) — semantic
+ * tokens only. The sheet sits in the drawer's column: ~390px wide at 1280,
+ * the full phone width below 960, so nothing here assumes a width.
+ */
+.sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  min-width: 0;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.definitionLink {
+  font: var(--meta-sm);
+  color: var(--text-link);
+  text-underline-offset: 3px;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--hit-compact);
+}
+
+.definitionLink:hover {
+  color: var(--text-link-hover);
+}
+
+.definitionLink:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset-tight);
+}
+
+.oneLiner {
+  font: var(--body-md);
+  color: var(--text-body);
+  margin: 0;
+}
+
+.formulaBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.formula {
+  font: var(--meta-md);
+  color: var(--text-body);
+  background: var(--surface-sunken);
+  border-radius: var(--radius-button);
+  padding: var(--space-4) var(--space-5);
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.cohort,
+.caveat {
+  font: var(--body-sm);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+/* The two counts with "out of" between them — one line from a phone up;
+   each box keeps half the width, the word takes what it needs. */
+.counts {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: end;
+  gap: var(--space-4);
+}
+
+.over {
+  font: var(--meta-sm);
+  color: var(--text-muted);
+  /* Aligned with the boxes, not with their labels. */
+  padding-bottom: var(--space-5);
+}
+
+.live {
+  font: var(--meta-md);
+  color: var(--text-body);
+  margin: 0;
+}
+
+.duration {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.where {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  border-top: var(--border-rule);
+  padding-top: var(--space-5);
+}
+
+.whereToggle {
+  align-self: flex-start;
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-body);
+  background: none;
+  border: none;
+  padding: 0;
+  min-height: var(--hit-compact);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.whereToggle::after {
+  content: "+" / "";
+  font: var(--meta-md);
+  background: var(--surface-sunken);
+  border-radius: var(--radius-tag);
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.whereToggle[aria-expanded="true"]::after {
+  content: "\2212" / "";
+}
+
+.whereToggle:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset-tight);
+}
+
+.whereBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.whereList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  font: var(--body-sm);
+}
+
+.whereSource {
+  font-weight: 600;
+}
+
+.wherePath {
+  display: block;
+  font: var(--meta-xs);
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.trap {
+  font: var(--body-sm);
+  margin: 0;
+}
+
+.alsoIn {
+  font: var(--body-sm);
+  margin: 0;
+}
+
+.reference {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  border-top: var(--border-rule);
+  padding-top: var(--space-5);
+}
+
+.referenceText {
+  font: var(--body-sm);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.position {
+  font: var(--meta-xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-body);
+  margin: 0;
+}
+
+.positionBelow {
+  color: var(--text-alert);
+}
+
+.declared {
+  font: var(--body-sm);
+  color: var(--text-body);
+  background: var(--surface-sunken);
+  border-radius: var(--radius-button);
+  padding: var(--space-4) var(--space-5);
+  margin: 0;
+}
+
+.saveRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.saved {
+  font: var(--meta-sm);
+  color: var(--text-body);
+  margin: 0;
+}
+
+/* --- Request ----------------------------------------------------------- */
+.request {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+
+.requestStatus {
+  font: var(--meta-sm);
+  color: var(--text-body);
+  margin: 0;
+  min-height: 1em;
+}
+
+.requestFallback {
+  font: var(--meta-sm);
+  white-space: pre-wrap;
+  resize: vertical;
+}
+
+/* --- Conflict readings ------------------------------------------------- */
+.readings {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+}
+
+.reading {
+  border-left: var(--border-rule);
+  padding-left: var(--space-5);
+}
+
+.readingInvalid {
+  border-left: 2px solid var(--border-alert);
+}
+
+.readingBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* --- Comparison strip (§8.3) ------------------------------------------- */
+.strip {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* The target's label lives ABOVE the track — nothing is ever written in it. */
+.stripMarks {
+  position: relative;
+  height: 1.4em;
+  font: var(--meta-2xs);
+  color: var(--text-body);
+}
+
+.stripTargetLabel {
+  position: absolute;
+  bottom: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.stripTrack {
+  position: relative;
+  height: 12px;
+  background: var(--surface-sunken);
+  border-radius: var(--radius-tag);
+}
+
+/* The reference band: dashed ink over a translucent wash, drawn above the value. */
+.stripReference {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  border: 2px dashed var(--viz-unknown);
+  border-radius: var(--radius-tag);
+  background: var(--texture-ink);
+}
+
+.stripValue {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 4px;
+  transform: translateX(-50%);
+  background: var(--viz-ink);
+}
+
+.stripRange {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(45deg, var(--viz-ink) 0 2px, transparent 2px 5px);
+  border: 2px solid var(--viz-ink);
+}
+
+.stripBelow {
+  background-color: var(--viz-highlight);
+  border-color: var(--viz-highlight);
+}
+
+.stripValue.stripBelow {
+  background: var(--viz-highlight);
+}
+
+.stripTarget {
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  width: 2px;
+  transform: translateX(-50%);
+  background: var(--viz-ink);
+}
+
+.stripBounds {
+  display: flex;
+  justify-content: space-between;
+  font: var(--meta-2xs);
+  color: var(--text-muted);
+}

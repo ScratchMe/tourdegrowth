@@ -1,0 +1,255 @@
+/*
+ * The engine's screens other than the board: setup (E1), collect (E4),
+ * resume (E6), import and erase (E7), the backup band and the slides' slot.
+ * Semantic tokens only.
+ */
+
+/* --- Shared panel ------------------------------------------------------ */
+.panel,
+.setup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  min-width: 0;
+}
+
+/* One card, ≤ 560px, identical at both widths (§7 E1). */
+.setup {
+  max-width: 560px;
+}
+
+.panelTitle {
+  font: var(--display-section);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+  color: var(--text-body);
+  margin: 0;
+}
+
+/* Focused by script when the screen opens (R-19), never reachable by Tab. */
+.panelTitle:focus {
+  outline: none;
+}
+
+.panelActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+@media (max-width: 760px) {
+  .panelActions > :first-child {
+    width: 100%;
+  }
+}
+
+.lead {
+  font: var(--body-md);
+  color: var(--text-body);
+  margin: 0;
+}
+
+/* --- Setup ------------------------------------------------------------- */
+.setupGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-7);
+}
+
+@media (min-width: 761px) {
+  .setupGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.tour {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  border-top: var(--border-rule);
+  padding-top: var(--space-5);
+}
+
+.tourText {
+  font: var(--body-sm);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* --- Import ------------------------------------------------------------ */
+.file {
+  padding: var(--space-3);
+}
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  background: var(--surface-sunken);
+  border-radius: var(--radius-button);
+  padding: var(--space-5);
+}
+
+.previewLine {
+  font: var(--meta-md);
+  color: var(--text-body);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.warnings {
+  font: var(--meta-xs);
+  color: var(--text-body);
+}
+
+.warnings p,
+.warnings ul {
+  margin: 0;
+}
+
+.warnings ul {
+  padding-left: 1.25em;
+  overflow-wrap: anywhere;
+}
+
+/* --- Collect (E4) ------------------------------------------------------ */
+.collect {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.sectionTitle {
+  font: var(--display-section);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.collectColumns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-9);
+}
+
+/* Two columns from the board's own breakout width; "to ask for" stays first. */
+@media (min-width: 960px) {
+  .collectColumns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.collectColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  min-width: 0;
+}
+
+.columnTitle {
+  font: var(--title-card);
+  margin: 0;
+}
+
+.roleGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  background: var(--surface-card);
+  border: var(--border-solid);
+  border-radius: var(--radius-panel);
+  padding: var(--space-5) var(--space-6);
+}
+
+.roleTitle {
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  min-width: 0;
+}
+
+.itemName {
+  font: var(--body-md);
+  color: var(--text-body);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.itemMeta {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+.itemStale {
+  font: var(--meta-xs);
+  color: var(--text-alert);
+}
+
+.groupActions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+
+/* --- Resume (E6) ------------------------------------------------------- */
+.resume {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  border: var(--border-dashed);
+  border-radius: var(--radius-card);
+  padding: var(--space-6);
+}
+
+.resumeText {
+  font: var(--body-md);
+  color: var(--text-body);
+  margin: 0;
+}
+
+.resumeActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: flex-start;
+}
+
+/* --- Backup band ------------------------------------------------------- */
+.backupText {
+  margin: 0;
+}
+
+.backupMeta {
+  font: var(--meta-sm);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* --- Unreadable storage, and the slides' slot -------------------------- */
+.notice {
+  font: var(--body-md);
+  color: var(--text-alert);
+  margin: 0;
+}
