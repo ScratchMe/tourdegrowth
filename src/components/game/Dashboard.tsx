@@ -66,12 +66,6 @@ export interface DashboardProps {
   patience: DashboardPatienceTile;
   trust: DashboardSecretTile;
   radar: DashboardSecretTile;
-  /**
-   * While the three months scroll by, the tiles change every 600 ms: `busy`
-   * tells assistive technology to hold its announcements until they settle,
-   * instead of reading three dashboards in a row.
-   */
-  busy?: boolean;
 }
 
 function SecretTile({ tile, testId }: { tile: DashboardSecretTile; testId: string }) {
@@ -79,7 +73,7 @@ function SecretTile({ tile, testId }: { tile: DashboardSecretTile; testId: strin
     return (
       <StatTile
         hidden
-        size="compact"
+        size="responsive"
         label={tile.label}
         hiddenLabel={tile.hiddenLabel}
         hiddenNote={tile.hiddenNote}
@@ -90,7 +84,7 @@ function SecretTile({ tile, testId }: { tile: DashboardSecretTile; testId: strin
   }
   return (
     <StatTile
-      size="compact"
+      size="responsive"
       label={tile.label}
       value={tile.value}
       sub={tile.sub}
@@ -110,18 +104,21 @@ function SecretTile({ tile, testId }: { tile: DashboardSecretTile; testId: strin
  * quarter's target), then subscribers, revenue, the CEO's patience, and the
  * two tiles the dashboard does not show — trust and the regulator's radar.
  *
- * The other five tiles are `compact` at every width. `StatTile` takes its
- * size as a prop and this system never switches a prop on a width read in
- * JavaScript, so one size has to hold at 1280 AND in a third of a 390px
- * screen, and only `compact` does (a « 1,30 M€ » at 20px overflows 114px).
+ * The other five tiles are `responsive`: the 20px `md` figure on a desktop,
+ * the 17px `compact` one under 760px, switched in CSS (a « 1,30 M€ » at 20px
+ * overflows the 114px a tile gets on a 390px screen).
+ *
+ * Not a live region (plan E5). Six tiles re-rendered at every month of a
+ * quarter would be a burst of announcements; the island says what a quarter
+ * did ONCE, in its single live region, when the report opens.
  */
-export function Dashboard({ label, churn, subs, mrr, patience, trust, radar, busy = false }: DashboardProps) {
+export function Dashboard({ label, churn, subs, mrr, patience, trust, radar }: DashboardProps) {
   return (
     <section className={styles.dashboard} aria-labelledby="game-dashboard-title">
       <h2 id="game-dashboard-title" className={styles.title}>
         {label}
       </h2>
-      <div className={styles.grid} aria-live="polite" aria-busy={busy || undefined}>
+      <div className={styles.grid}>
         <StatTile
           size="hero"
           label={churn.label}
@@ -139,7 +136,7 @@ export function Dashboard({ label, churn, subs, mrr, patience, trust, radar, bus
           />
         </StatTile>
         <StatTile
-          size="compact"
+          size="responsive"
           label={subs.label}
           value={subs.value}
           sub={subs.sub}
@@ -148,7 +145,7 @@ export function Dashboard({ label, churn, subs, mrr, patience, trust, radar, bus
           data-testid="game-dash-subs"
         />
         <StatTile
-          size="compact"
+          size="responsive"
           label={mrr.label}
           value={mrr.value}
           sub={mrr.sub}
@@ -157,7 +154,7 @@ export function Dashboard({ label, churn, subs, mrr, patience, trust, radar, bus
           data-testid="game-dash-mrr"
         />
         <StatTile
-          size="compact"
+          size="responsive"
           label={patience.label}
           value={patience.value}
           sub={patience.sub}

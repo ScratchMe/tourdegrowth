@@ -29,6 +29,7 @@ import {
   GAME_SHARE_EVENT,
   GAME_START_FROM,
   GAME_STARTED_EVENT,
+  GAME_TOUR_LOOP_EVENT,
   GAME_VOICE_EVENT,
   gameEventPaths,
   gameStartedDetail,
@@ -111,6 +112,8 @@ export interface GameFunnelStats {
   catalogueOpened: number;
   replays: number;
   shares: number;
+  /** December's loop back to the Tour (`game_tour_loop`) — readers the game sends to the quiz. */
+  tourLoops: number;
 }
 
 export interface FunnelStats {
@@ -300,6 +303,7 @@ function gameStats(count: (path: string) => number): GameFunnelStats {
     catalogueOpened: count(GAME_CATALOGUE_OPEN_EVENT),
     replays: count(GAME_REPLAY_EVENT),
     shares: count(GAME_SHARE_EVENT),
+    tourLoops: count(GAME_TOUR_LOOP_EVENT),
   };
 }
 

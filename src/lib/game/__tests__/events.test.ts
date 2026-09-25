@@ -39,6 +39,12 @@ describe("game analytics vocabulary (plan §3.8)", () => {
     for (const from of GAME_START_FROM) expect(paths).toContain(`game_started/retention/${from}`);
   });
 
+  it("counts the way back to the Tour, not only the ways in", () => {
+    // December's TourLoop fires this; a name missing from the list would be
+    // counted by GoatCounter and never asked for by /admin/stats (R-11).
+    expect(gameEventPaths()).toContain("game_tour_loop");
+  });
+
   it("builds the game_started detail from the level and origin", () => {
     expect(gameStartedDetail("retention", "result")).toBe("retention/result");
   });

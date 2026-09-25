@@ -79,7 +79,8 @@ function GameCard({ window, growth }: { window: FunnelWindow; growth: Pick<Growt
       </ul>
 
       <p className={styles.detail}>
-        Catalogue opened {game.catalogueOpened} · replays {game.replays} · shares {game.shares}
+        Catalogue opened {game.catalogueOpened} · replays {game.replays} · shares {game.shares} · back to the Tour{" "}
+        {game.tourLoops}
       </p>
     </Card>
   );

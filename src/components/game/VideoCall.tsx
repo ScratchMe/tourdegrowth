@@ -55,6 +55,12 @@ export interface VideoCallProps {
   onHangUp?: () => void;
   onPickUp?: () => void;
   /**
+   * « Écouter » was pressed — for the island's `game_voice/<mood>` event
+   * (plan §3.8). Fired on the press, whether or not a voice then speaks:
+   * what the dashboard counts is the reader asking to hear him.
+   */
+  onListen?: () => void;
+  /**
    * The island moves focus here on `call` (plan §3.5), hence `tabIndex=-1`:
    * the region is a target for focus, never a stop in the tab order.
    */
@@ -91,6 +97,7 @@ export function VideoCall({
   callKey = "",
   onHangUp,
   onPickUp,
+  onListen,
   ref,
 }: VideoCallProps) {
   const reduced = useReducedMotion();
@@ -187,7 +194,10 @@ export function VideoCall({
           {canListen ? (
             <Button
               variant="secondary"
-              onClick={() => voice && speech.speak(message, voice)}
+              onClick={() => {
+                if (voice) speech.speak(message, voice);
+                onListen?.();
+              }}
               data-testid="game-listen"
             >
               {labels.listen}

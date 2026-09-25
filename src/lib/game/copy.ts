@@ -218,6 +218,12 @@ export interface LevelCopy<CardId extends string = string, DarkId extends CardId
     mrr: string;
     patience: string;
     statusHit: string;
+    /**
+     * « manqué de {gap} ». `{gap}` is `formatPoints` output and carries its
+     * own unit (« 0,1 pt », « 0.1 pts »): the template never repeats it, or
+     * the report would read « 0,1 pt pt » — and in English « pt » beside the
+     * formatter's « pts ».
+     */
     statusMissed: string;
     effectsHeading: string;
     effectLine: string;
@@ -226,6 +232,8 @@ export interface LevelCopy<CardId extends string = string, DarkId extends CardId
     next: string;
     toDecember: string;
   };
+  /** The year so far, under the desk — one disclosure per quarter played (plan §2.6). */
+  journal: { title: string };
   /** One per `VisibleEffect` kind — `down` splits on `rising`. */
   effects: {
     insight: string;
@@ -273,6 +281,14 @@ export interface LevelCopy<CardId extends string = string, DarkId extends CardId
     gameNumbers: string;
     churnChart: { title: string; caption: string; label: string; reference: string };
     trustChart: { title: string; caption: string; label: string; reference: string };
+    /**
+     * A curve's text equivalent — where it starts, where it ends, and its
+     * range — filled with the chart's `label`. The Sparkline contract asks
+     * for the TREND, not a description of the picture: « Résiliations
+     * mensuelles sur l'année » alone told a screen reader there was a chart
+     * and nothing of what it showed.
+     */
+    trend: string;
     dataToggle: string;
     table: { month: string; churn: string; trust: string };
   };
@@ -370,6 +386,7 @@ export const LEVEL_COPY_TEMPLATES: Readonly<Record<string, readonly string[]>> =
   "endings.*.text": ["churn", "subs", "trust", "radar", "patience"],
   "december.cells.outOf": ["value"],
   "december.churnChart.reference": ["target"],
+  "december.trend": ["label", "from", "to", "month", "min", "max"],
   "playbook.refused": ["refused", "total"],
   "playbook.trust": ["trust"],
   "playbook.radar": ["radar"],

@@ -568,8 +568,9 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
     patience: t("Patience du DG", "CEO's patience"),
     // TODO: à relire — nouveau (plan §2.6, QuarterReport : le statut dit en mots).
     statusHit: t("objectif atteint", "target hit"),
-    // TODO: à relire — nouveau (plan §2.6).
-    statusMissed: t("manqué de {gap} pt", "missed by {gap} pt"),
+    // TODO: à relire — nouveau (plan §2.6). {gap} arrive avec son unité (formatPoints : « 0,1 pt »,
+    // « 0.1 pts ») : le gabarit ne la répète pas, sinon « manqué de 0,1 pt pt ».
+    statusMissed: t("manqué de {gap}", "missed by {gap}"),
     // TODO: à relire — nouveau (plan §2.6).
     effectsHeading: t("Ce que tes actions ont fait", "What your actions did"),
     effectLine: t("{card} : {effect}", "{card}: {effect}"),
@@ -581,6 +582,9 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
     // TODO: à relire — nouveau (plan §1.3).
     toDecember: t("Voir le bilan de l'année →", "See the year's review →"),
   },
+
+  // TODO: à relire — nouveau (plan §2.6, GameJournal : le titre n'avait pas de clé).
+  journal: { title: t("Journal de l'année", "The year so far") },
 
   effects: {
     insight: t("des réponses de sortie, et des chiffres à montrer au DG", "exit answers, and numbers to show the CEO"),
@@ -765,6 +769,11 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
       // TODO: à relire — nouveau (plan §2.6 : le repère à 35, nommé par ce qui s'y déclenche).
       reference: t("fil viral", "viral thread"),
     },
+    // TODO: à relire — nouveau (plan §2.6 : une courbe dit sa tendance, pas seulement qu'elle existe).
+    trend: t(
+      "{label} : {from} le 1er janvier, {to} fin {month} ; au plus bas {min}, au plus haut {max}.",
+      "{label}: {from} on January 1st, {to} at the end of {month}; lowest {min}, highest {max}.",
+    ),
     // TODO: à relire — nouveau (plan §3.6, ChartFrame → DataTable) : le bouton et les en-têtes du tableau.
     dataToggle: t("Voir les données", "See the data"),
     table: {

@@ -27,6 +27,12 @@
   padding: var(--space-4);
 }
 
+/* `responsive`: the `md` tile above 760px, the `compact` one below (see the
+   media block further down, which mirrors `.compact` exactly). */
+.responsive {
+  padding: var(--space-6);
+}
+
 /* Never below 12px (DS v3 L-8): --chart-label is the floor for data labels. */
 .label {
   font: var(--chart-label);
@@ -55,7 +61,8 @@
   letter-spacing: var(--display-letter-spacing);
 }
 
-.md .value {
+.md .value,
+.responsive .value {
   font: var(--chart-value);
 }
 
@@ -73,6 +80,21 @@
   /* The race-bib figure steps down like the score numeral does. */
   .hero .value {
     font: var(--display-section);
+  }
+
+  /* `responsive` becomes `compact`: same padding, gap, figure and delta row. */
+  .responsive {
+    gap: var(--space-2);
+    padding: var(--space-4);
+  }
+
+  .responsive .value {
+    font: var(--chart-value);
+    font-size: 17px;
+  }
+
+  .responsive .delta {
+    flex-basis: 100%;
   }
 }
 

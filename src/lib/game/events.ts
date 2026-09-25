@@ -78,7 +78,19 @@ export type GameResumeDetail = (typeof GAME_RESUME_DETAILS)[number];
 export const GAME_CATALOGUE_OPEN_EVENT = "game_catalogue_open";
 export const GAME_REPLAY_EVENT = "game_replay";
 export const GAME_SHARE_EVENT = "game_share";
-export const GAME_SIMPLE_EVENTS = [GAME_CATALOGUE_OPEN_EVENT, GAME_REPLAY_EVENT, GAME_SHARE_EVENT] as const;
+/**
+ * `game_tour_loop` — December's « Où en est ta croissance ? » was followed
+ * to the Tour. The game's other door, the way out (GAME-BRIEF §13.3 D): the
+ * dashboard counts readers who came in through the Tour, and without this it
+ * could not count the ones the game sends back to it.
+ */
+export const GAME_TOUR_LOOP_EVENT = "game_tour_loop";
+export const GAME_SIMPLE_EVENTS = [
+  GAME_CATALOGUE_OPEN_EVENT,
+  GAME_REPLAY_EVENT,
+  GAME_SHARE_EVENT,
+  GAME_TOUR_LOOP_EVENT,
+] as const;
 
 /** The detail for `game_started`, typed so a caller cannot invent a `from`. */
 export function gameStartedDetail(level: LevelSlug, from: GameStartFrom): string {
