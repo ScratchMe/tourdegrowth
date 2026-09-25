@@ -154,6 +154,7 @@ describe("isGameState", () => {
     ["an unknown order", (s) => ({ ...s, order: "teleport" })],
     ["an unknown id as a `since` key", (s) => ({ ...s, since: { teleport: 1 } })],
     ["more picks than a quarter allows", (s) => ({ ...s, picks: ["pause", "survey", "onboard"] })],
+    ["the same card picked twice", (s) => ({ ...s, picks: ["call", "call"] })],
     ["an unknown ending", (s) => ({ ...s, ending: "winner" })],
     ["no history point", (s) => ({ ...s, history: [] })],
     ["a journal out of step with the quarter", (s) => ({ ...s, q: 2 })],

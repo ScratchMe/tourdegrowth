@@ -72,6 +72,18 @@ describe("X3 — two cards, no more, no less", () => {
     expect(reduce(none, { type: "run" })).toBe(none);
   });
 
+  it("refuses to run picks that were never on the table, or the same card twice", () => {
+    // Only `toggle` checks the hand; a state that arrives any other way (a
+    // restored save, a stale one) must not be able to play past it. Q1's
+    // dark hand is pdef/bury/cascade/shame, so `call` cannot be in it.
+    const s = hungUp();
+    expect(handIds(L, s)).not.toContain("call");
+    const outside = { ...s, picks: ["call", "pause"] as Id[] };
+    expect(reduce(outside, { type: "run" })).toBe(outside);
+    const twice = { ...s, picks: ["pause", "pause"] as Id[] };
+    expect(reduce(twice, { type: "run" })).toBe(twice);
+  });
+
   it("runs the quarter with exactly two", () => {
     let s = hungUp();
     s = reduce(s, { type: "toggle", card: "pause" });
@@ -108,6 +120,19 @@ describe("X3 — once the year is over", () => {
     expect(reduce(start, { type: "restore", state: alien })).toBe(start);
     const future = { ...saved, v: 2 } as unknown as GameState<Id>;
     expect(reduce(start, { type: "restore", state: future })).toBe(start);
+  });
+
+  it("restore keeps the year but drops picks that are not in the restored hand", () => {
+    // Stuck otherwise: `toggle` refuses a card outside the hand, so a save
+    // holding one could neither unpick it nor run. Losing two clicks beats
+    // losing the year.
+    const saved = { ...hungUp(), picks: ["call", "call"] as Id[] };
+    const restored = reduce(fresh(L), { type: "restore", state: saved });
+    expect(restored.picks).toEqual([]);
+    expect(restored.q).toBe(0);
+    expect(reduce(restored, { type: "run" })).toBe(restored);
+    const kept = { ...hungUp(), picks: ["pause", "call"] as Id[] };
+    expect(reduce(fresh(L), { type: "restore", state: kept }).picks).toEqual(["pause"]);
   });
 });
 
