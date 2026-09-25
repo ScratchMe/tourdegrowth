@@ -610,6 +610,13 @@ export const ENGINE_COPY = {
     d30: { fr: "Actifs à J30", en: "Active at day 30" },
     paid: { fr: "Payants à J{n}", en: "Paying by day {n}" },
     legendReferred: { fr: "venus par recommandation ({n})", en: "came through a referral ({n})" },
+    /**
+     * The same count as a slide's text line, next to « Activés · 18 sur 100 ». The
+     * legend's bare « (6) » reads as a footnote once the bar is gone, and « {n}
+     * venus » would have to agree with a count that can print « 1 » or « moins
+     * de 1 sur 100 »: the phrase before the colon carries no agreement at all.
+     */
+    slideReferred: { fr: "par recommandation : {share}", en: "through a referral: {share}" },
     legendMeasured: { fr: "mesuré", en: "measured" },
     legendRange: { fr: "fourchette estimée", en: "estimated range" },
     legendUnknown: { fr: "non mesuré", en: "not measured" },

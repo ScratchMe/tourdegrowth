@@ -178,7 +178,7 @@ function pelotonLines(state: EngineState, peloton: Peloton, strings: Words, ctx:
     lines.push({
       row: "legendReferred",
       label: strings.peloton.signups,
-      text: fillTemplate(strings.peloton.legendReferred, { n: formatPerHundredCount(referred.value, ctx, strings.units) }),
+      text: fillTemplate(strings.peloton.slideReferred, { share: formatPerHundred(referred.value, ctx, strings.units) }),
     });
   }
 
