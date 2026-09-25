@@ -181,6 +181,22 @@ describe("scripts/vercel-ignore.sh", () => {
     expect(run(dir, { ...PROD, VERCEL_GIT_PREVIOUS_SHA: head })).not.toBe(SKIP);
   });
 
+  // The skip decision is "grep selected nothing outside the list". Reading only
+  // grep's OUTPUT made a broken grep (exit 2 on an I/O error, 127 when missing)
+  // look exactly like that: empty output, so a code merge was skipped. A fake
+  // `grep` first on PATH stands in for the broken one; git stays the real one.
+  it.each([
+    ["errors (exit 2)", 2],
+    ["is missing (exit 127)", 127],
+  ])("builds a code merge when grep %s", (_label, code) => {
+    const dir = repo();
+    commit(dir, { "src/app/page.tsx": "export default 2;\n" });
+    const bin = mkdtempSync(join(tmpdir(), "tdg-ignore-bin-"));
+    repos.push(bin);
+    writeFileSync(join(bin, "grep"), `#!/bin/sh\nexit ${code}\n`, { mode: 0o755 });
+    expect(run(dir, { ...PROD, PATH: `${bin}:${process.env.PATH ?? ""}` })).not.toBe(SKIP);
+  });
+
   it("builds when run outside a git repository", () => {
     const dir = mkdtempSync(join(tmpdir(), "tdg-ignore-nogit-"));
     repos.push(dir);

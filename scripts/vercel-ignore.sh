@@ -40,7 +40,16 @@ files=$(git diff --no-renames --name-only "$base" HEAD) || exit 1
 [ -n "$files" ] || exit 1
 
 # Any path outside the build-irrelevant list means "build".
+#
+# Decide on grep's EXIT STATUS, not only on its output: a grep that fails (2
+# on an error, 127 when missing) prints nothing, which reads exactly like
+# "every path is on the list" and would skip a code merge. grep exits 1 only
+# when it selected no line — the one status that means "skip". The status of
+# `var=$(pipeline)` is the pipeline's, i.e. grep's (no pipefail needed: grep
+# is last). The output check below stays as a second line of defence.
 outside=$(printf '%s\n' "$files" | grep -Ev '^([^/]+\.md|LICENSE|\.github/.+|marketing/.+|design/.+|\.design-sync/.+|scripts/live/.+)$')
+grep_status=$?
+[ "$grep_status" -eq 1 ] || exit 1
 [ -n "$outside" ] && exit 1
 
 echo "Ignored build step: only build-irrelevant files changed since $base."
