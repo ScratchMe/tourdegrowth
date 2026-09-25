@@ -1,7 +1,8 @@
 import type { Locale } from "@/lib/i18n/locale";
 import type { Diagnosis, Peloton as PelotonModel, PelotonColumn, YearMonth } from "@/lib/engine/types";
 import type { EngineStrings } from "@/lib/engine/strings";
-import { formatNumber } from "./format-stub";
+import { formatNumber } from "@/lib/engine/format";
+import { positionLabel } from "@/lib/engine/phrases";
 import {
   columnGrid,
   columnNumeral,
@@ -67,11 +68,13 @@ export function Peloton({ peloton, strings, locale, cohortMonth, paidWindowDays,
   const cohort = monthLabel(cohortMonth, locale);
 
   const named = new Set(diagnosis && (diagnosis.state === "clear" || diagnosis.state === "shared") ? diagnosis.named : []);
+  // The same label the board row and the sheet print (phrases.ts#positionLabel):
+  // the peloton's columns are all higher-is-better today, but the words follow
+  // the metric's direction rather than assuming it.
   const stampOf = (metric: PelotonColumn["metric"]): string | null => {
     if (!named.has(metric) || !diagnosis) return null;
-    return diagnosis.positions[metric]?.comparator?.kind === "target"
-      ? strings.diagnosis.stampTarget
-      : strings.diagnosis.stampReference;
+    const at = diagnosis.positions[metric];
+    return at ? positionLabel(at.position, at.comparator, strings) : null;
   };
 
   const referred = peloton.referredPerHundred ? columnNumeral(peloton.referredPerHundred) : null;

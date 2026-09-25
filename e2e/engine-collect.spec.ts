@@ -354,6 +354,24 @@ test.describe("the §6.0 example on the board", () => {
     });
   }
 
+  /**
+   * P7a/P7c: the example's churn (10/400 = 2.5% against a 1-2% reference) is
+   * BEHIND, and for a lower-is-better metric behind is above. The sheet used
+   * to print a direction-blind « Sous le repère » here. Read from the copy,
+   * not retyped, and in both languages.
+   */
+  for (const locale of ["en", "fr"] as const) {
+    test(`${locale}: churn behind its reference is labelled above it on its sheet`, async ({ page }) => {
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await openExample(page, locale);
+      const sheet = await openSheet(page, "retention", "ret-logo-churn");
+      const above = ENGINE_COPY.side.overReference[locale];
+      const label = above.charAt(0).toUpperCase() + above.slice(1);
+      await expect(sheet.getByTestId("engine-position")).toHaveText(label);
+      await expect(sheet.getByTestId("engine-position")).not.toContainText(ENGINE_COPY.diagnosis.stampReference[locale]);
+    });
+  }
+
   test("fr at 390px: the example board, the activation drawer and its what-if scroll only downward", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openExample(page, "fr");

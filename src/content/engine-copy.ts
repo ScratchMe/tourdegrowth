@@ -59,7 +59,15 @@ import type { CandidateId, SlideTitleKey, ToolId, UnitInputId } from "@/lib/engi
 
 export const ENGINE_COPY = {
   meta: {
-    title: { fr: "Modèle de funnel AARRR — tes chiffres, en local", en: "AARRR funnel template — your numbers, kept local" },
+    /*
+     * Plus « — Tour de Growth », added by the page: the whole `<title>` must
+     * stay within SEARCH_TITLE_MAX (60, `lib/i18n/meta.ts`). The first
+     * wording ran to 64 FR / 65 EN (review R13). Kept: the query itself
+     * (« modèle de funnel AARRR » / "AARRR funnel template") first, and the
+     * promise that the numbers stay local. A colon rather than a second em
+     * dash, so the title does not read as three fragments. TODO: à relire.
+     */
+    title: { fr: "Modèle de funnel AARRR : chiffres en local", en: "AARRR funnel template: numbers kept local" },
     description: {
       fr: "Entre les chiffres de tes cinq étapes AARRR, vois où tu perds le plus de monde et exporte des slides pour ton CODIR. Rien n'est envoyé.",
       en: "Enter the numbers for your five AARRR stages, see where you lose the most people and export slides for your leadership meeting. Nothing is sent.",
@@ -569,15 +577,15 @@ export const ENGINE_COPY = {
       en: "The biggest loss in numbers is always at the top of the funnel; that's not what names the stage holding you back.",
     },
     /**
-     * The four below are DIRECTION-BLIND (« sous », « au-dessus ») and only
-     * right for a higher-is-better metric: the peloton's columns. Anywhere
-     * churn can appear, `phrases.ts#sideText` / `stampText` pick from `side`.
+     * The two below are DIRECTION-BLIND (« sous ») and only right for a
+     * higher-is-better metric: the peloton slide's columns still read them.
+     * The board no longer does — its row, its sheet and its peloton go
+     * through `phrases.ts#positionLabel`, which picks from `side` by the
+     * metric's direction; `maybeBelowShort`, `within` and `above` went with
+     * that change (P7c), nothing read them any more.
      */
     stampReference: { fr: "Sous le repère", en: "Below reference" },
     stampTarget: { fr: "Sous la cible", en: "Below target" },
-    maybeBelowShort: { fr: "peut-être sous le repère", en: "possibly below the reference" },
-    within: { fr: "dans le repère", en: "within the reference" },
-    above: { fr: "au-dessus du repère", en: "above the reference" },
     noComparator: { fr: "sans repère · fixe une cible", en: "no reference · set a target" },
   },
   whatIf: {

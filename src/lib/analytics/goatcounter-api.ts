@@ -9,6 +9,15 @@ import {
   RETAKE_STARTED_EVENT,
   LANDING_RETURN_EVENT,
   RETAKE_NUDGE_EVENT,
+  ENGINE_DECK_OPENED_EVENT,
+  ENGINE_EXPORT_FORMATS,
+  ENGINE_EXPORTED_EVENT,
+  ENGINE_OPENED_EVENT,
+  ENGINE_REQUEST_COPIED_EVENT,
+  ENGINE_STAGE_SAVED_EVENT,
+  ENGINE_STAGES,
+  ENGINE_TOUR_LINKED_EVENT,
+  engineEventPaths,
 } from "./goatcounter";
 import {
   GAME_CATALOGUE_OPEN_EVENT,
@@ -88,6 +97,9 @@ const ALL_PATHS = [
   // The game (GAME-BRIEF.md §9.6) — built from the same lists the island
   // fires from, so a path cannot exist on one side only.
   ...gameEventPaths(),
+  // The growth engine (engine spec §11.6) — same reason: the island builds
+  // its paths from these lists, so a path cannot exist on one side only.
+  ...engineEventPaths(),
 ];
 
 /**
@@ -114,6 +126,24 @@ export interface GameFunnelStats {
   shares: number;
   /** December's loop back to the Tour (`game_tour_loop`) — readers the game sends to the quiz. */
   tourLoops: number;
+}
+
+/**
+ * The growth engine's numbers (engine spec §11.6). Paths only, by design: the
+ * page promises that nothing typed leaves the browser, so this is how many
+ * people used each part of it — never what they found. Everything reads zero
+ * until the engine is opened.
+ */
+export interface EngineFunnelStats {
+  /** `engine_opened` — the island's first view in a session. */
+  opened: number;
+  /** `engine_stage_saved/<stage>` — first number saved in that stage, once a session. */
+  stagesSaved: Record<(typeof ENGINE_STAGES)[number], number>;
+  requestsCopied: number;
+  deckOpened: number;
+  /** `engine_exported/<format>` — files downloaded, or the deck's text copied. */
+  exported: Record<(typeof ENGINE_EXPORT_FORMATS)[number], number>;
+  tourLinked: number;
 }
 
 export interface FunnelStats {
@@ -167,6 +197,7 @@ export interface FunnelStats {
    */
   valueActionsPerResult: number | null;
   game: GameFunnelStats;
+  engine: EngineFunnelStats;
 }
 
 export interface FunnelWindow {
@@ -280,6 +311,7 @@ export async function fetchFunnelWindow(startISO: string, label: string): Promis
       retakeNudgeClicked: counts.get(RETAKE_NUDGE_EVENT) ?? 0,
       valueActionsPerResult: submissionsCompleted > 0 ? valueActions / submissionsCompleted : null,
       game: gameStats((path) => counts.get(path) ?? 0),
+      engine: engineStats((path) => counts.get(path) ?? 0),
     },
   };
 }
@@ -304,6 +336,17 @@ function gameStats(count: (path: string) => number): GameFunnelStats {
     replays: count(GAME_REPLAY_EVENT),
     shares: count(GAME_SHARE_EVENT),
     tourLoops: count(GAME_TOUR_LOOP_EVENT),
+  };
+}
+
+function engineStats(count: (path: string) => number): EngineFunnelStats {
+  return {
+    opened: count(ENGINE_OPENED_EVENT),
+    stagesSaved: tally(ENGINE_STAGES, (stage) => count(`${ENGINE_STAGE_SAVED_EVENT}/${stage}`)),
+    requestsCopied: count(ENGINE_REQUEST_COPIED_EVENT),
+    deckOpened: count(ENGINE_DECK_OPENED_EVENT),
+    exported: tally(ENGINE_EXPORT_FORMATS, (format) => count(`${ENGINE_EXPORTED_EVENT}/${format}`)),
+    tourLinked: count(ENGINE_TOUR_LINKED_EVENT),
   };
 }
 

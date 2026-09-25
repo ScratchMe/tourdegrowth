@@ -1,4 +1,5 @@
 import { metricsOfStage } from "@/lib/engine/catalog-shape";
+import { positionLabel } from "@/lib/engine/phrases";
 import { knownIn } from "@/lib/engine/values";
 import { STATUS_KEY, type EngineStrings, type ResolvedMetric } from "@/lib/engine/strings";
 import type { CandidateId, Diagnosis, EngineCalcContext, EngineState } from "@/lib/engine/types";
@@ -66,29 +67,11 @@ export function StageRow({
   // Every ★ is one of the six candidates, so it always has a position.
   const position = diagnosis.positions[star.id as CandidateId];
 
-  let comparator: string | null = null;
-  let tone: "below" | "maybe" | null = null;
-  if (known.kind === "known" && position) {
-    switch (position.position) {
-      case "below":
-        tone = "below";
-        comparator = position.comparator?.kind === "target" ? strings.diagnosis.stampTarget : strings.diagnosis.stampReference;
-        break;
-      case "maybe-below":
-        tone = "maybe";
-        comparator = strings.diagnosis.maybeBelowShort;
-        break;
-      case "within":
-        comparator = strings.diagnosis.within;
-        break;
-      case "above":
-        comparator = strings.diagnosis.above;
-        break;
-      case "no-comparator":
-        comparator = strings.diagnosis.noComparator;
-        break;
-    }
-  }
+  // Said physically, from the metric's direction (phrases.ts#positionLabel):
+  // the tone is good-or-bad, the words are where the value sits.
+  const at = known.kind === "known" ? position?.position : undefined;
+  const comparator = at && position ? positionLabel(at, position.comparator, strings) : null;
+  const tone: "below" | "maybe" | null = at === "below" ? "below" : at === "maybe-below" ? "maybe" : null;
 
   const value =
     known.kind === "known"

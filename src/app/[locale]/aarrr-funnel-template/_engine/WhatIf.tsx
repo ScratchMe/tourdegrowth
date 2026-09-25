@@ -5,7 +5,7 @@ import { Card } from "@/components/core/Card";
 import type { Locale } from "@/lib/i18n/locale";
 import type { CandidateId, Comparator, Impact, Interval } from "@/lib/engine/types";
 import type { EngineStrings } from "@/lib/engine/strings";
-import { formatPercent } from "./format-stub";
+import { formatPercent } from "@/lib/engine/format";
 import { fill, nearestIndex, targetLadder, whatIfTemplate } from "./visual-model";
 import styles from "./WhatIf.module.css";
 

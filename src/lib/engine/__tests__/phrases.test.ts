@@ -14,6 +14,7 @@ import {
   notEnoughBelowSentence,
   notEnoughBelowValues,
   numbered,
+  positionLabel,
   sideKey,
   sideText,
   sourceInSentence,
@@ -160,6 +161,32 @@ describe("where a value sits is said physically, from the metric's direction", (
     expect(stampText("below", down("reference"), FR.strings)).toBe("Au-dessus du repère");
     expect(stampText("below", up("target"), EN.strings)).toBe("Below the target");
     expect(stampText("unknown", up("target"), EN.strings)).toBeNull();
+  });
+
+  /**
+   * P7a open issue: the board's labels outside the diagnosis picked from
+   * direction-blind strings, so churn behind its reference read « Sous le
+   * repère ». On the §6.0 example itself (churn 10/400 = 2,5 % against 1-2 %),
+   * read through the real diagnosis rather than a hand-built comparator.
+   * Non-vacuity, measured 2026-09-25: make positionLabel return
+   * `strings.diagnosis.stampReference` for "below" (the old board behaviour)
+   * and this test fails on its first churn assertion: « Sous le repère ».
+   */
+  it("a position as a label: churn behind its reference is ABOVE it, in both languages", () => {
+    const derivedFr = deriveEngine(exampleState(), CTX_FR, null, FR.bridges, FR.strings.units);
+    const churn = derivedFr.diagnosis.positions["ret.logo-churn"];
+    expect(churn.position).toBe("below");
+    expect(positionLabel(churn.position, churn.comparator, FR.strings)).toBe("Au-dessus du repère");
+    const derivedEn = deriveEngine(exampleState(), CTX_EN, null, EN.bridges, EN.strings.units);
+    const churnEn = derivedEn.diagnosis.positions["ret.logo-churn"];
+    expect(positionLabel(churnEn.position, churnEn.comparator, EN.strings)).toBe("Above the reference");
+    // A flow behind is still under, and the other positions take their own words.
+    const act = derivedEn.diagnosis.positions["act.rate"];
+    expect(positionLabel(act.position, act.comparator, EN.strings)).toBe("Below the reference");
+    expect(positionLabel("within", down("reference"), FR.strings)).toBe("Dans le repère");
+    expect(positionLabel("above", down("reference"), FR.strings)).toBe("Sous le repère");
+    expect(positionLabel("no-comparator", undefined, FR.strings)).toBe(FR.strings.diagnosis.noComparator);
+    expect(positionLabel("unknown", down("reference"), FR.strings)).toBeNull();
   });
 
   it("the board's sentence under a named stage: churn « au-dessus de », a flow « sous »", () => {

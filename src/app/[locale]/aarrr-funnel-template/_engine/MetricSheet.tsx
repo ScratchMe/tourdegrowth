@@ -13,6 +13,7 @@ import { formatInterval } from "@/lib/engine/format";
 import { whatIf } from "@/lib/engine/impact";
 import { isRequestStale } from "@/lib/engine/request";
 import { blockingCheck } from "@/lib/engine/sanity";
+import { positionLabel } from "@/lib/engine/phrases";
 import { knownIn } from "@/lib/engine/values";
 import { ComparisonStrip } from "./ComparisonStrip";
 import { MissingTriage } from "./MissingTriage";
@@ -130,23 +131,9 @@ export function MetricSheet({ id, view, actions }: { id: MetricId; view: EngineV
   const position = isCandidate ? view.derived.diagnosis.positions[id as CandidateId]?.position : undefined;
   const target = snapshot.targets[id];
   const bench = shape.benchmark;
-  // The strip is decorative; this sentence is what it says, in words.
-  const positionText =
-    known.kind !== "known" || !position
-      ? null
-      : position === "below"
-        ? comparator?.kind === "target"
-          ? strings.diagnosis.stampTarget
-          : strings.diagnosis.stampReference
-        : position === "maybe-below"
-          ? strings.diagnosis.maybeBelowShort
-          : position === "within"
-            ? strings.diagnosis.within
-            : position === "above"
-              ? strings.diagnosis.above
-              : position === "no-comparator"
-                ? strings.diagnosis.noComparator
-                : null;
+  // The strip is decorative; this sentence is what it says, in words — said
+  // physically, so churn behind its reference reads « au-dessus » (P7a).
+  const positionText = known.kind !== "known" || !position ? null : positionLabel(position, comparator, strings);
   const formatBound = (v: number) => formatInterval({ lo: v, hi: v }, shape.unit === "percent" ? "percent" : "ratio", ctx, strings.units);
 
   const bridge = view.bridges.find((b) => b.metric === id);

@@ -3,6 +3,7 @@ import { COMPARISON_ORDER } from "@/content/comparison-index";
 import { GLOSSARY } from "@/content/glossary";
 import { PRIVACY, TERMS } from "@/content/legal";
 import { CONTENT_UPDATED_AT, GLOSSARY_UPDATED_AT } from "@/content/updated-at";
+import { ENGINE_PATH, isEngineOpenAtBuild } from "@/lib/engine/access";
 import { gameSitemapPaths, isGameOpenAtBuild } from "@/lib/game/build-flag";
 import { DEFAULT_LOCALE, LOCALES } from "@/lib/i18n/locale";
 import { localePath } from "@/lib/i18n/routes";
@@ -77,13 +78,33 @@ function gamePaths(): typeof CONTENT_PATHS {
 }
 
 /**
+ * The growth engine's page, under the game's rule (engine spec §11.1): only
+ * when the flag is open at build, so a closed engine never advertises a URL
+ * that answers 404. The page's `robots` follows the same build-time flag
+ * (`isEngineOpenAtBuild` in its `generateMetadata`); a preview cookie opens
+ * neither. Priority 0.8, with the open-door pages: it is a first contact for
+ * someone searching "AARRR funnel template", not an aside.
+ */
+function enginePaths(): typeof CONTENT_PATHS {
+  if (!isEngineOpenAtBuild()) return [];
+  return [
+    {
+      path: ENGINE_PATH,
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+      lastModified: CONTENT_UPDATED_AT[ENGINE_PATH]!,
+    },
+  ];
+}
+
+/**
  * `lastModified` is the one field here Google actually reads (REVIEW-02.md
  * R2-08); `changeFrequency` and `priority` are kept for other consumers but
  * have been ignored by Google for years. `x-default` mirrors the `<head>`
  * alternates (`lib/i18n/routes.ts`), so the two never disagree.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [...CONTENT_PATHS, ...gamePaths()].flatMap(({ path, changeFrequency, priority, lastModified }) =>
+  return [...CONTENT_PATHS, ...gamePaths(), ...enginePaths()].flatMap(({ path, changeFrequency, priority, lastModified }) =>
     LOCALES.map((locale) => ({
       url: `${SITE_URL}${localePath(locale, path)}`,
       lastModified,

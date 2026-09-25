@@ -9,7 +9,7 @@ import {
   notEnoughBelowSentence,
   unpricedSentence,
 } from "@/lib/engine/phrases";
-import { formatInterval, formatPercent } from "./format-stub";
+import { formatInterval, formatPercent } from "@/lib/engine/format";
 import { fill, stageLabel } from "./visual-model";
 import styles from "./Diagnosis.module.css";
 

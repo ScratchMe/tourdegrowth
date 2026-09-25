@@ -7,6 +7,7 @@ import { Button } from "@/components/core/Button";
 import { Callout } from "@/components/core/Callout";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { isEngineOpenAtBuild } from "@/lib/engine/access";
+import { formatInterval } from "@/lib/engine/format";
 import { staticCatalogueValues } from "@/lib/engine/phrases";
 import {
   DERIVED_SHAPES,
@@ -19,10 +20,10 @@ import { EFFORT_KEY, type EngineStrings } from "@/lib/engine/strings";
 import { PILLARS } from "@/lib/scoring/pillars";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { contentMetadata } from "@/lib/i18n/meta";
+import { breadcrumbSchema, JsonLd, webApplicationSchema } from "@/lib/seo/jsonld";
 import { tc } from "@/lib/i18n/translatable";
 import { EngineWorkbench } from "./EngineWorkbench";
 import { resolveEngineProps } from "./engine-props";
-import { formatInterval } from "./_engine/format-stub";
 import { fill, monthLabel, stageLabel } from "./_engine/visual-model";
 import styles from "./page.module.css";
 
@@ -104,6 +105,17 @@ export default async function EnginePage({ params }: PageProps) {
 
   return (
     <>
+      {/* §11.3: a WebApplication (free, no rating) and its breadcrumb — no HowTo nor
+          FAQPage, whose rich results Google has withdrawn. Name and description are
+          the page's own copy, handed to the builder rather than imported by it. */}
+      <JsonLd
+        data={webApplicationSchema(locale, {
+          path: PATH,
+          name: tc(ENGINE_COPY.meta.breadcrumb, locale),
+          description: tc(ENGINE_COPY.meta.description, locale),
+        })}
+      />
+      <JsonLd data={breadcrumbSchema(locale, [{ name: tc(ENGINE_COPY.meta.breadcrumb, locale), path: PATH }])} />
       <ContentHeader locale={locale} path={PATH} width="wide" />
 
       <main id="main" className={styles.main}>

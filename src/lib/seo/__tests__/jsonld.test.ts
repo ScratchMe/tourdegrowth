@@ -26,6 +26,27 @@ describe("structured data", () => {
     expect(fr.author["@id"]).toBe("https://cv.antoine.berthaud.me/#person");
   });
 
+  /**
+   * Engine spec §11.3: the growth engine is a second WebApplication of the
+   * site, free, with no rating (SPEC-ADDENDUM-02 §3.2 — none until there is
+   * honest volume), at its own URL and tied back to the site.
+   */
+  it("describes another application of the site at its own URL, free, unrated, part of the site", () => {
+    const engine = webApplicationSchema("fr", { path: "/aarrr-funnel-template", name: "Moteur de croissance", description: "d" });
+    expect(engine["@type"]).toBe("WebApplication");
+    expect(engine.name).toBe("Moteur de croissance");
+    expect(engine.url).toMatch(/\/fr\/aarrr-funnel-template$/);
+    expect(engine.applicationCategory).toBe("BusinessApplication");
+    expect(engine.isAccessibleForFree).toBe(true);
+    expect(engine).not.toHaveProperty("aggregateRating");
+    expect(engine.isPartOf).toMatchObject({ "@type": "WebSite", name: "Tour de Growth" });
+    expect(engine.isPartOf?.url).toMatch(/\/fr$/);
+    // The landing's own block is untouched by the new parameter: no isPartOf, the site's name.
+    const landing = webApplicationSchema("fr");
+    expect(landing.name).toBe("Tour de Growth");
+    expect(landing).not.toHaveProperty("isPartOf");
+  });
+
   it("declares the glossary as one term set holding all fifteen terms, localized", () => {
     const set = definedTermSetSchema("fr");
     expect(set["@type"]).toBe("DefinedTermSet");

@@ -50,21 +50,34 @@ export function personNode() {
   };
 }
 
-/** `WebApplication`, not `Person`: Tour de Growth is the product being described, not Antoine. Built per language. */
-export function webApplicationSchema(locale: Locale) {
+/**
+ * `WebApplication`, not `Person`: Tour de Growth is the product being
+ * described, not Antoine. Built per language.
+ *
+ * Without `app`, the landing's own block — the Tour itself. With it, another
+ * application of the site (the growth engine, engine spec §11.3): its path,
+ * name and description arrive as PARAMETERS, never imported, because this
+ * module is crossed by every content page and may only import content that
+ * every page emits (`content-fan-in.test.ts`, the `CRUMBS` lesson). Such a
+ * block says it is part of the site, so a search engine does not read two
+ * unrelated products.
+ */
+export function webApplicationSchema(locale: Locale, app?: { path: string; name: string; description: string }) {
   return {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    name: SITE_NAME,
-    description: tc(UI_STRINGS.landing.subtitle, locale),
+    name: app?.name ?? SITE_NAME,
+    description: app?.description ?? tc(UI_STRINGS.landing.subtitle, locale),
     // This page's own address, not the bare site URL — the French page used
     // to declare a `url` that was not itself.
-    url: absolute(locale),
+    url: absolute(locale, app?.path),
     inLanguage: locale,
     applicationCategory: "BusinessApplication",
     // Free, and built in France for a European first audience: EUR, not USD.
     offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
+    isAccessibleForFree: true,
     author: personNode(),
+    ...(app ? { isPartOf: { "@type": "WebSite", name: SITE_NAME, url: absolute(locale) } } : {}),
   };
 }
 
