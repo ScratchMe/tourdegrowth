@@ -3,14 +3,19 @@
 import { useSyncExternalStore } from "react";
 import { Button } from "@/components/core/Button";
 import { Callout } from "@/components/core/Callout";
+import { Card } from "@/components/core/Card";
 import { Segmented } from "@/components/core/Segmented";
-import { METRIC_SHAPES, metricsOfStage } from "@/lib/engine/catalog-shape";
-import type { MetricId, SlideTitle } from "@/lib/engine/types";
+import { CANDIDATE_IDS, METRIC_SHAPES, metricsOfStage } from "@/lib/engine/catalog-shape";
+import type { CandidateId, Interval, MetricId, SlideTitle } from "@/lib/engine/types";
+import { knownIn } from "@/lib/engine/values";
 import { PILLARS, type Pillar } from "@/lib/scoring/pillars";
 import { BackupBar } from "./BackupBar";
 import type { CollectPlan } from "./collect";
 import { CollectHub } from "./CollectHub";
 import { Coverage } from "./Coverage";
+import { Diagnosis } from "./Diagnosis";
+import { Mirror } from "./Mirror";
+import { Peloton } from "./Peloton";
 import { ResumeBand } from "./ResumeBand";
 import { StageDrawer } from "./StageDrawer";
 import { StageRow } from "./StageRow";
@@ -46,15 +51,16 @@ export function defaultStage(view: EngineView): Pillar {
 }
 
 /**
- * The board (spec §7 E2), minus the peloton and the diagnosis — P5's —
- * whose slots are marked below so P7 can mount them without moving
- * anything else.
+ * The board (spec §7 E2). Top to bottom: the eyebrow, the verdict title (the
+ * board's h2 and its focus target), the coverage in fractions, the two tabs,
+ * then either — on the engine tab — the diagnosis, the peloton in the
+ * screen's one raised card, the five stage rows with their drawer and the
+ * declared × measured mirror, or the collect plan; then the actions and the
+ * backup band. On a phone the tabs sit under the coverage, as everywhere else.
  *
- * Top to bottom: the eyebrow, the verdict title (the board's h2 and its
- * focus target), the coverage in fractions, the two tabs, then either the
- * five stage rows with their drawer or the collect plan, then the actions
- * and the backup band. On a phone the tabs sit under the coverage, as
- * everywhere else.
+ * The four visuals are P5's components, fed here from the SAME derived object
+ * the verdict and the slides read (`view.derived`): the diagnosis cannot name
+ * a stage the peloton does not stamp.
  */
 export function Board({
   view,
@@ -93,6 +99,13 @@ export function Board({
   onErase: () => void;
 }) {
   const { strings, state, ctx, derived } = view;
+  // The diagnosis prints each named stage's value next to its comparator; the Diagnosis
+  // object carries positions, not values. knownIn — the same reading the rows make.
+  const candidateValues: Partial<Record<CandidateId, Interval>> = {};
+  for (const id of CANDIDATE_IDS) {
+    const known = knownIn(state, id, ctx);
+    if (known.kind === "known") candidateValues[id] = known.value;
+  }
   const snapshot = state.snapshots[state.snapshots.length - 1]!;
   const wide = useSyncExternalStore(subscribeWide, () => window.matchMedia(WIDE_QUERY).matches, () => false);
   const current = wide ? (selected ?? defaultStage(view)) : selected;
@@ -131,10 +144,18 @@ export function Board({
 
       {tab === "engine" ? (
         <>
-          {/* P5 SLOT — Diagnosis (§8.4). P7 mounts Diagnosis.tsx here, between the tabs and the peloton. */}
-          <div data-engine-slot="diagnosis" />
-          {/* P5 SLOT — Peloton (§8.1), in a raised Card. P7 mounts Peloton.tsx here. */}
-          <div data-engine-slot="peloton" />
+          <Diagnosis diagnosis={derived.diagnosis} strings={strings} locale={ctx.locale} metrics={view.metrics} values={candidateValues} />
+          {/* The screen's one raised card (Card's own rule): the peloton is what the board is about. */}
+          <Card elevation="raised" className={styles.pelotonCard}>
+            <Peloton
+              peloton={derived.peloton}
+              strings={strings}
+              locale={ctx.locale}
+              cohortMonth={snapshot.cohortMonth}
+              paidWindowDays={state.setup.paidWindowDays}
+              diagnosis={derived.diagnosis}
+            />
+          </Card>
 
           {derived.peloton.smallCohort ? (
             <Callout tone="caveat" data-testid="engine-small-cohort">
@@ -163,8 +184,22 @@ export function Board({
             })}
           </div>
 
-          {/* P5 SLOT — Declared × measured (§8.5). P7 mounts Mirror.tsx here, under the stage rows. */}
-          <div data-engine-slot="mirror" />
+          {/* Declared × measured (§8.5): the linked Tour's mirror, or "that Tour is gone" when its
+              result left the device, or — with no Tour here at all — the invitation to take one.
+              A Tour on the device the person chose not to link: nothing (their choice, D13). */}
+          {state.tourLink ? (
+            <Mirror
+              mirror={derived.mirror}
+              gone={derived.mirror === null}
+              strings={strings}
+              locale={ctx.locale}
+              bridges={view.bridges}
+              metrics={view.metrics}
+              derived={view.derivedCopy}
+            />
+          ) : !view.tourOnDevice ? (
+            <Mirror mirror={null} strings={strings} locale={ctx.locale} bridges={view.bridges} metrics={view.metrics} derived={view.derivedCopy} />
+          ) : null}
         </>
       ) : (
         <CollectHub plan={plan} view={view} actions={actions} />

@@ -15,10 +15,10 @@
   min-width: 0;
 }
 
-/* The P5 slots are empty until P7 mounts them; an empty flex item would still
-   take a gap. */
-.board > [data-engine-slot]:empty {
-  display: none;
+/* The peloton's raised card: min-width 0 so its four grids shrink with the
+   column instead of pushing the board wider than the phone. */
+.pelotonCard {
+  min-width: 0;
 }
 
 @media (min-width: 960px) {
