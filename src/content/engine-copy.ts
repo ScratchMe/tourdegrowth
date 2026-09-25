@@ -650,7 +650,7 @@ export const ENGINE_COPY = {
    */
   deckUi: {
     back: { fr: "Revenir au moteur", en: "Back to the engine" },
-    settingsTitle: { fr: "Réglages du deck", en: "Deck settings" },
+    settingsTitle: { fr: "Réglages des slides", en: "Slide settings" },
     exportsTitle: { fr: "Exporter", en: "Export" },
     imageCopied: { fr: "Image copiée", en: "Image copied" },
     copyFailed: {
@@ -660,7 +660,7 @@ export const ENGINE_COPY = {
     pngFileName: { fr: "moteur-{slide}-{month}.png", en: "engine-{slide}-{month}.png" },
     enlarge: { fr: "Agrandir l'aperçu", en: "Enlarge the preview" },
     shrink: { fr: "Réduire l'aperçu", en: "Shrink the preview" },
-    excluded: { fr: "Pas dans le deck", en: "Not in the deck" },
+    excluded: { fr: "Pas dans les slides", en: "Not in the slides" },
     slidePosition: { fr: "Slide {i} sur {n}", en: "Slide {i} of {n}" },
     nothingMissing: { fr: "Rien ne manque.", en: "Nothing is missing." },
     askPreview: { fr: "Titre de la slide :", en: "Slide title:" },

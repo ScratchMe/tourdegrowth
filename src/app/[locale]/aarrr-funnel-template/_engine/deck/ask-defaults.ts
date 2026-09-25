@@ -1,5 +1,7 @@
 import { CANDIDATE_IDS, METRIC_SHAPES, TEXT_LIMITS } from "@/lib/engine/catalog-shape";
+import { impactTarget } from "@/lib/engine/diagnose";
 import type { EngineAsk, EngineDerived, EngineState, MetricId, RepairScale, YearMonth } from "@/lib/engine/types";
+import { currentSnapshot } from "@/lib/engine/values";
 
 /**
  * What the "What you're asking for" form starts from — engine spec §7 E5.
@@ -16,7 +18,7 @@ const REPAIR_ORDER: readonly RepairScale[] = ["meeting", "afternoon", "sprint", 
  * always make is the one that costs a meeting.
  */
 export function missingByRepairCost(state: EngineState): MetricId[] {
-  const entries = state.snapshots[0]?.metrics ?? {};
+  const entries = currentSnapshot(state).metrics;
   return METRIC_SHAPES.map((shape, index) => ({ id: shape.id, index, repair: entries[shape.id]?.missing?.repair }))
     .filter((m): m is { id: MetricId; index: number; repair: RepairScale } =>
       entries[m.id]?.status === "missing" && m.repair !== undefined,
@@ -28,8 +30,10 @@ export function missingByRepairCost(state: EngineState): MetricId[] {
 /**
  * The success metric and target the diagnosis already points at: the named
  * stage and the value its comparator sets — the team's target when there is
- * one, otherwise the low end of a designating reference (the most prudent
- * bound, the same one the "what if" starts from, §6.6-§6.7). Nothing when
+ * one, otherwise the cautious bound of a designating reference — the same
+ * bound the "what if" starts from, read from `impactTarget` rather than
+ * re-derived here so the form and the slide can't suggest two targets
+ * (§6.6-§6.7). Nothing when
  * the diagnosis names nothing: a suggested target without a named leak would
  * be the tool deciding for the user.
  */
@@ -40,8 +44,7 @@ export function suggestedSuccess(derived: EngineDerived): Pick<EngineAsk, "succe
   if (!metric) return {};
   const comparator = positions[metric]?.comparator;
   if (!comparator) return { successMetric: metric };
-  const target = comparator.kind === "target" || comparator.direction === "higher" ? comparator.lo : comparator.hi;
-  return { successMetric: metric, successTarget: target };
+  return { successMetric: metric, successTarget: impactTarget(comparator) };
 }
 
 /** An ask nobody has touched yet — the only one the defaults may be written into. */

@@ -1,20 +1,31 @@
 "use client";
 
 import { useId, useState, type InputHTMLAttributes, type ReactNode } from "react";
-import { TEXT_LIMITS } from "@/lib/engine/catalog-shape";
+import { TEXT_LIMITS, shapeOf } from "@/lib/engine/catalog-shape";
+import { fillTemplate } from "@/lib/engine/format";
 import { REPAIR_KEY } from "@/lib/engine/strings";
 import type { EngineStrings, ResolvedMetric } from "@/lib/engine/strings";
 import type { EngineAsk, EngineState, MetricId } from "@/lib/engine/types";
+import { currentSnapshot } from "@/lib/engine/values";
+import type { Locale } from "@/lib/i18n/locale";
 import { SUCCESS_METRICS, horizonOptions, missingByRepairCost } from "./ask-defaults";
-import { SlideText, fill } from "./slide-text";
+import { SlideText } from "./slide-text";
 import styles from "./deck.module.css";
 
 type CostKind = "none" | "money" | "team";
 
 export interface AskFormProps {
+  locale: Locale;
   strings: EngineStrings;
   metrics: ResolvedMetric[];
+  /** Read for the currency and the snapshot the form's choices hang on — never for the ask itself. */
   state: EngineState;
+  /**
+   * The ask the slides show right now. Not `state.deck.ask`: on a pristine
+   * ask it is the engine's in-memory proposal (DeckView), which the form
+   * must show — and edit from — before anything is stored.
+   */
+  ask: EngineAsk;
   /** The ask slide's finished title, from the model — the live preview (§7 E5). */
   titlePreview: string | null;
   /** The island persists; this component only says what changed. */
@@ -85,9 +96,8 @@ function parseNumber(raw: string): number | undefined {
  * the engine's boundary test forbids the element outright (rule 3) so that no
  * future edit can turn a field into a request.
  */
-export function AskForm({ strings, metrics, state, titlePreview, onAskChange }: AskFormProps) {
+export function AskForm({ locale, strings, metrics, state, ask, titlePreview, onAskChange }: AskFormProps) {
   const uid = useId();
-  const ask = state.deck.ask;
   const t = strings.ask;
   const u = strings.deckUi;
   const nameOf = (id: MetricId) => metrics.find((m) => m.id === id)?.name ?? id;
@@ -111,14 +121,16 @@ export function AskForm({ strings, metrics, state, titlePreview, onAskChange }: 
   };
 
   const currencySymbol =
-    new Intl.NumberFormat(undefined, { style: "currency", currency: state.setup.currency })
+    // The page's language, not the browser's: the label must match the slide it previews.
+    new Intl.NumberFormat(locale, { style: "currency", currency: state.setup.currency })
       .formatToParts(0)
       .find((part) => part.type === "currency")?.value ?? state.setup.currency;
 
-  const quarters = horizonOptions(state.snapshots[0]?.referenceMonth ?? "2026-01");
+  const snapshot = currentSnapshot(state);
+  const quarters = horizonOptions(snapshot.referenceMonth);
   const horizonValue = ask.horizon ? `${ask.horizon.year}-${ask.horizon.quarter}` : "";
   const missing = missingByRepairCost(state);
-  const entries = state.snapshots[0]?.metrics ?? {};
+  const entries = snapshot.metrics;
   const full = ask.measureFirst.length >= TEXT_LIMITS.askMeasureFirst;
 
   return (
@@ -180,7 +192,7 @@ export function AskForm({ strings, metrics, state, titlePreview, onAskChange }: 
           ))}
         </div>
         {costKind === "money" ? (
-          <Field id={`${uid}-amount`} label={fill(u.askAmount, { currency: currencySymbol })}>
+          <Field id={`${uid}-amount`} label={fillTemplate(u.askAmount, { currency: currencySymbol })}>
             <input
               id={`${uid}-amount`}
               className={styles.control}
@@ -231,7 +243,7 @@ export function AskForm({ strings, metrics, state, titlePreview, onAskChange }: 
           <option value="">{u.askHorizonNone}</option>
           {quarters.map((q) => (
             <option key={`${q.year}-${q.quarter}`} value={`${q.year}-${q.quarter}`}>
-              {fill(strings.units.quarter, { q: q.quarter, year: q.year })}
+              {fillTemplate(strings.units.quarter, { q: q.quarter, year: q.year })}
             </option>
           ))}
         </select>
@@ -255,8 +267,9 @@ export function AskForm({ strings, metrics, state, titlePreview, onAskChange }: 
             ))}
           </select>
         </Field>
+        {/* The unit in the label: every metric offered here is a rate, typed "20" for 20 % — never "0.2". */}
         {ask.successMetric ? (
-          <Field id={`${uid}-target`} label={u.askTarget}>
+          <Field id={`${uid}-target`} label={shapeOf(ask.successMetric).unit === "percent" ? `${u.askTarget} (%)` : u.askTarget}>
             <DraftInput
               key={String(ask.successTarget ?? "")}
               id={`${uid}-target`}
@@ -281,7 +294,7 @@ export function AskForm({ strings, metrics, state, titlePreview, onAskChange }: 
             className={styles.control}
             type="text"
             maxLength={TEXT_LIMITS.askBullet}
-            aria-label={fill(u.askBullet, { n: i + 1 })}
+            aria-label={fillTemplate(u.askBullet, { n: i + 1 })}
             initial={ask.bullets[i] ?? ""}
             onCommit={(value) =>
               update({

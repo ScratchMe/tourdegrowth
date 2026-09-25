@@ -1,34 +1,19 @@
 "use client";
 
-import {
-  useEffect,
-  useId,
-  useLayoutEffect,
-  useRef,
-  useState,
-  useSyncExternalStore,
-  type ComponentType,
-  type ReactNode,
-} from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ComponentType, type ReactNode } from "react";
 import { Button } from "@/components/core/Button";
 import { Callout } from "@/components/core/Callout";
-import type { Locale } from "@/lib/i18n/locale";
+import { buildDeck, deckMarkdown } from "@/lib/engine/deck";
+import { fillTemplate, formatNumber } from "@/lib/engine/format";
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
-import type {
-  DeckModel,
-  DeckSlide,
-  EngineAsk,
-  EngineDeck,
-  EngineDerived,
-  EngineState,
-  SanityId,
-  SlideId,
-} from "@/lib/engine/types";
+import type { DeckSlide, EngineAsk, EngineCalcContext, EngineDeck, EngineDerived, EngineState, SanityCheck, SanityId, SlideId } from "@/lib/engine/types";
+import { countsOf, currentSnapshot } from "@/lib/engine/values";
+import type { Locale } from "@/lib/i18n/locale";
 import { AskForm } from "./AskForm";
 import { askDefaults, isPristineAsk } from "./ask-defaults";
 import { copyText } from "./copy-text";
 import { canCopyImage, copyPng, downloadBlob, renderSlidePng } from "./export-png";
-import { SLIDE_WIDTH, slideTitle, type SlideContext, type SlideProps } from "./SlideFrame";
+import { SLIDE_HEIGHT, SLIDE_WIDTH, slideTitle, type SlideContext, type SlideProps } from "./SlideFrame";
 import { SlideAnnex } from "./SlideAnnex";
 import { SlideAsk } from "./SlideAsk";
 import { SlideLeak } from "./SlideLeak";
@@ -36,28 +21,33 @@ import { SlideMirror } from "./SlideMirror";
 import { SlidePeloton } from "./SlidePeloton";
 import { SlideUnitEconomics } from "./SlideUnitEconomics";
 import { SlideVisibility } from "./SlideVisibility";
-import { fill } from "./slide-text";
 import styles from "./deck.module.css";
 
-/** What the island tells analytics — `engine_exported/<kind>` (§11). A copied image is a PNG export. */
+/** What the island tells analytics — `engine_exported/<kind>` (§11.6). A copied image counts as a PNG export. */
 export type DeckExportKind = "png" | "pdf" | "text";
 
+/**
+ * What the island hands the slide screen. Everything is what the island
+ * already holds once the board is on screen — the stored state, the derived
+ * model computed from it, the calculation context — plus the resolved words.
+ * The screen builds the deck model itself (`buildDeck`), because the ask it
+ * shows may be a proposal that isn't stored yet (see `DeckView`).
+ */
 export interface DeckViewProps {
   locale: Locale;
   strings: EngineStrings;
   metrics: ResolvedMetric[];
+  /** The three computed figures' prose (the unit-economics tiles, the mirror's LTV row). */
   derivedCopy: ResolvedDerived[];
   bridges: ResolvedBridge[];
   state: EngineState;
+  /** `deriveEngine(state, ctx, tourResult, bridges, strings.units)` — the same object the board renders. */
   derived: EngineDerived;
-  /** `buildDeck(state, derived, …)` — every slide's title and lines, already formatted (lib/engine/deck.ts). */
-  model: DeckModel;
-  /** `deckMarkdown(model, strings)` — the "copy the text and notes" payload (§9.4). */
-  markdown: string;
-  /** The island persists; this screen only says what the deck settings became. */
+  ctx: EngineCalcContext;
+  /** The island persists: this screen only says what the deck settings became. */
   onDeckChange: (deck: EngineDeck) => void;
   onBack?: () => void;
-  /** The island's own ".json" download (§4.3); the button is shown only when it is wired. */
+  /** The island's own ".json" download (§4.3); the button shows only when it is wired. */
   onSaveJson?: () => void;
   onExported?: (kind: DeckExportKind) => void;
 }
@@ -81,17 +71,16 @@ const SANITY_KEY = {
   "ttv-mean": "ttvMean",
   "cohort-mismatch": "cohortMismatch",
   "reconcile-gap": "reconcileGap",
-} as const satisfies Record<SanityId, string>;
+} as const satisfies Record<SanityId, keyof EngineStrings["sanity"]>;
 
 /**
  * The print sheet — engine spec §10.2.
  *
- * Global on purpose, and injected only while this screen is mounted: a CSS
- * Module may not hold a selector without a local class in it (`body *`
- * would be refused as impure), and a print rule that hid "everything but the
- * deck" living in globals.css would also hide every other page the day
- * someone printed it. Here it exists exactly as long as there is a deck to
- * print.
+ * Global on purpose, and in the document only while this screen is mounted:
+ * a CSS Module may not hold a selector without a local class in it (`body *`
+ * is refused as impure), and a print rule that hid "everything but the deck"
+ * living in globals.css would also blank every other page the day someone
+ * printed it. Here it exists exactly as long as there is a deck to print.
  *
  * Everything that is not the deck, or an ancestor of it, is removed; the
  * ancestors lose their box (padding, max-width, grid gaps) so the slides
@@ -104,7 +93,7 @@ const SANITY_KEY = {
  * peloton's dots: browsers drop backgrounds when printing by default.
  */
 const PRINT_CSS = `
-@page { size: ${SLIDE_WIDTH}px 1080px; margin: 0; }
+@page { size: ${SLIDE_WIDTH}px ${SLIDE_HEIGHT}px; margin: 0; }
 @media print {
   html, body { margin: 0 !important; padding: 0 !important; min-height: 0 !important; height: auto !important; background: none !important; }
   body *:not(:has(#engine-deck)):not(#engine-deck):not(#engine-deck *) { display: none !important; }
@@ -115,7 +104,7 @@ const PRINT_CSS = `
   #engine-deck [data-print="thumb"] { display: block !important; margin: 0 !important; padding: 0 !important; border: 0 !important; box-shadow: none !important; background: none !important; break-inside: avoid; break-after: page; }
   #engine-deck [data-print="thumb"][data-last="true"] { break-after: auto; }
   #engine-deck [data-print="thumb"][data-included="false"] { display: none !important; }
-  #engine-deck [data-print="viewport"] { width: ${SLIDE_WIDTH}px !important; height: 1080px !important; aspect-ratio: auto !important; overflow: hidden !important; border: 0 !important; box-shadow: none !important; }
+  #engine-deck [data-print="viewport"] { width: ${SLIDE_WIDTH}px !important; height: ${SLIDE_HEIGHT}px !important; aspect-ratio: auto !important; overflow: hidden !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
   #engine-deck [data-print="scaler"] { transform: none !important; }
   #engine-deck, #engine-deck * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }
@@ -168,13 +157,20 @@ type Status = { text: string; tone: "ok" | "error" } | null;
  * E5 — the slide screen (engine spec §7 E5, §9, §10).
  *
  * Every word on a slide was written by `lib/engine/deck.ts` (titles and
- * lines, already formatted) or by the user (the ask); this screen places
+ * rows, already formatted) or by the user (the ask); this screen places
  * them, lets the user choose which slides go, and exports — PDF through the
  * browser's own print, PNG through html-to-image loaded on the first click,
  * a copied image where the browser allows it, and the Markdown with the
  * speaker notes. Nothing here sends anything anywhere: every export is a
  * file or the clipboard, and the engine's boundary test forbids the calls
  * that would change that.
+ *
+ * The ask starts from what the engine can justify (§7 E5): the stage the
+ * diagnosis names and its target, the cheapest missing numbers checked. That
+ * proposal lives in memory and is what the slides show until the user edits
+ * the ask — then the whole ask, proposal included, is handed to the island
+ * to store. Opening the screen never writes: a visit that changes the stored
+ * engine would raise the "not saved since" band for nothing.
  */
 export function DeckView({
   locale,
@@ -184,8 +180,7 @@ export function DeckView({
   bridges,
   state,
   derived,
-  model,
-  markdown,
+  ctx,
   onDeckChange,
   onBack,
   onSaveJson,
@@ -193,7 +188,6 @@ export function DeckView({
 }: DeckViewProps) {
   const t = strings.deck;
   const u = strings.deckUi;
-  const uid = useId();
   const heading = useRef<HTMLHeadingElement>(null);
   const thumbs = useRef<Partial<Record<SlideId, HTMLElement | null>>>({});
   const [hd, setHd] = useState(false);
@@ -201,8 +195,16 @@ export function DeckView({
   const [status, setStatus] = useState<Status>(null);
   const [enlarged, setEnlarged] = useState<SlideId | null>(null);
   const canCopy = useCanCopyImage();
-  const deck = state.deck;
-  const referenceMonth = state.snapshots[0]?.referenceMonth ?? "";
+
+  // Proposed once per visit, from the state the screen opened on.
+  const [proposal] = useState<EngineAsk | null>(() => (isPristineAsk(state.deck.ask) ? askDefaults(state, derived) : null));
+  const [askTouched, setAskTouched] = useState(false);
+  const ask = proposal && !askTouched && isPristineAsk(state.deck.ask) ? proposal : state.deck.ask;
+  const deck: EngineDeck = useMemo(() => ({ ...state.deck, ask }), [state.deck, ask]);
+  const model = useMemo(
+    () => buildDeck({ ...state, deck }, derived, strings, metrics, ctx),
+    [state, deck, derived, strings, metrics, ctx],
+  );
 
   // Arriving on this screen is a change of view: focus its heading, so a
   // screen reader says where it is and a keyboard starts from the top (R-19).
@@ -210,30 +212,20 @@ export function DeckView({
     heading.current?.focus();
   }, []);
 
-  // The ask starts from what the engine can justify — the success metric the
-  // diagnosis names, and the cheapest missing numbers checked (§7 E5) — but
-  // only while nobody has touched it: a default must never overwrite a word
-  // the user wrote. Once per mount.
-  const prefilled = useRef(false);
-  useEffect(() => {
-    if (prefilled.current) return;
-    prefilled.current = true;
-    if (!isPristineAsk(deck.ask)) return;
-    const defaults = askDefaults(state, derived);
-    if (JSON.stringify(defaults) !== JSON.stringify(deck.ask)) onDeckChange({ ...deck, ask: defaults });
-  }, [deck, state, derived, onDeckChange]);
-
-  const context: SlideContext = { locale, strings, metrics, derivedCopy, bridges, state, derived, model };
+  const context: SlideContext = { locale, strings, metrics, derivedCopy, bridges, state: { ...state, deck }, derived, model, ctx };
   const shown = model.slides.filter((s) => s.present);
   const included = shown.filter((s) => s.included);
-  const total = included.length;
   const lastIncluded = included[included.length - 1]?.id;
   const askSlide = model.slides.find((s) => s.id === "ask");
   const mirrorSlide = model.slides.find((s) => s.id === "mirror" && s.present);
+  const referenceMonth = currentSnapshot(state).referenceMonth;
 
-  const setInclude = (id: SlideId, value: boolean) =>
-    onDeckChange({ ...deck, include: { ...deck.include, [id]: value } });
-  const setAsk = (ask: EngineAsk) => onDeckChange({ ...deck, ask });
+  const change = (next: Partial<EngineDeck>) => onDeckChange({ ...state.deck, ...next });
+  const setInclude = (id: SlideId, value: boolean) => change({ include: { ...state.deck.include, [id]: value } });
+  const setAsk = (next: EngineAsk) => {
+    setAskTouched(true);
+    change({ ask: next });
+  };
 
   const slideNode = (id: SlideId) => thumbs.current[id]?.querySelector<HTMLElement>("[data-slide]") ?? null;
 
@@ -248,7 +240,7 @@ export function DeckView({
         await copyPng(blob);
         setStatus({ text: u.imageCopied, tone: "ok" });
       } else {
-        downloadBlob(blob, fill(u.pngFileName, { slide: slide.id, month: referenceMonth }));
+        downloadBlob(blob, fillTemplate(u.pngFileName, { slide: slide.id, month: referenceMonth }));
       }
       onExported?.("png");
     } catch {
@@ -268,38 +260,53 @@ export function DeckView({
   };
 
   const exportText = async () => {
-    const ok = await copyText(markdown);
+    const ok = await copyText(deckMarkdown(model, strings));
     setStatus(ok ? { text: t.textCopied, tone: "ok" } : { text: u.copyFailed, tone: "error" });
     if (ok) onExported?.("text");
   };
 
-  const checks = model.checks;
+  // The one check the model leaves unfilled: `num-gt-den` names two counts
+  // the sheet would have refused (a file can still carry them). Filled with
+  // the engine's own number formatter, never with a local one.
+  const checkText = (check: SanityCheck) => {
+    const values = { ...check.values };
+    if (check.id === "num-gt-den") {
+      const counts = countsOf(currentSnapshot(state).metrics[check.metrics[0]!]);
+      if (counts) Object.assign(values, { num: formatNumber(counts.numerator, locale), den: formatNumber(counts.denominator, locale) });
+    }
+    const message = fillTemplate(strings.sanity[SANITY_KEY[check.id]], values);
+    // Its sentence says "the first count" without naming the number, so the
+    // number's name leads, as a label — a dash rather than a colon, so the
+    // same line reads right in both languages without a typography rule here.
+    const name = check.id === "num-gt-den" ? metrics.find((m) => m.id === check.metrics[0])?.name : undefined;
+    return name ? `${name} — ${message}` : message;
+  };
 
   return (
-    <section id="engine-deck" className={styles.deckView} aria-labelledby={`${uid}-title`} data-testid="engine-deck">
+    <section id="engine-deck" className={styles.deckView} aria-labelledby="engine-deck-title" data-testid="engine-deck">
       <style>{PRINT_CSS}</style>
 
       <div className={styles.deckHead} data-print="off">
-        {onBack ? (
-          <Button variant="quiet" onClick={onBack} data-testid="deck-back">
-            {u.back}
-          </Button>
-        ) : null}
-        <h2 id={`${uid}-title`} ref={heading} tabIndex={-1} className={styles.deckTitle}>
+        <h2 id="engine-deck-title" ref={heading} tabIndex={-1} className={styles.deckTitle}>
           {t.title}
         </h2>
         <p className={styles.deckNote}>{t.containsData}</p>
+        {onBack ? (
+          <Button variant="quiet" onClick={onBack} data-testid="engine-deck-back">
+            {u.back}
+          </Button>
+        ) : null}
       </div>
 
-      {checks.length > 0 ? (
+      {model.checks.length > 0 ? (
         <div data-print="off">
           <Callout tone="caveat" data-testid="deck-checks">
             <p className={styles.checksTitle}>
-              {checks.length === 1 ? t.checksOne : fill(t.checks, { n: checks.length })}
+              {model.checks.length === 1 ? t.checksOne : fillTemplate(t.checks, { n: model.checks.length })}
             </p>
             <ul className={styles.checksList}>
-              {checks.map((check, i) => (
-                <li key={`${check.id}-${i}`}>{fill(strings.sanity[SANITY_KEY[check.id]], check.values)}</li>
+              {model.checks.map((check, i) => (
+                <li key={`${check.id}-${i}`}>{checkText(check)}</li>
               ))}
             </ul>
           </Callout>
@@ -307,16 +314,16 @@ export function DeckView({
       ) : null}
 
       <div className={styles.deckPanels} data-print="off">
-        <section className={styles.panel} aria-labelledby={`${uid}-settings`}>
-          <h3 id={`${uid}-settings`} className={styles.panelTitle}>
+        <section className={styles.panel} aria-labelledby="engine-deck-settings">
+          <h3 id="engine-deck-settings" className={styles.panelTitle}>
             {u.settingsTitle}
           </h3>
           {state.setup.companyLabel ? (
             <label className={styles.check}>
               <input
                 type="checkbox"
-                checked={deck.showCompany}
-                onChange={(e) => onDeckChange({ ...deck, showCompany: e.target.checked })}
+                checked={state.deck.showCompany}
+                onChange={(e) => change({ showCompany: e.target.checked })}
                 data-testid="deck-show-company"
               />
               <span>{t.showCompany}</span>
@@ -325,8 +332,8 @@ export function DeckView({
           <label className={styles.check}>
             <input
               type="checkbox"
-              checked={deck.showSiteCredit}
-              onChange={(e) => onDeckChange({ ...deck, showSiteCredit: e.target.checked })}
+              checked={state.deck.showSiteCredit}
+              onChange={(e) => change({ showSiteCredit: e.target.checked })}
               data-testid="deck-show-credit"
             />
             <span>{t.showCredit}</span>
@@ -347,12 +354,12 @@ export function DeckView({
           ) : null}
         </section>
 
-        <section className={styles.panel} aria-labelledby={`${uid}-exports`}>
-          <h3 id={`${uid}-exports`} className={styles.panelTitle}>
+        <section className={styles.panel} aria-labelledby="engine-deck-exports">
+          <h3 id="engine-deck-exports" className={styles.panelTitle}>
             {u.exportsTitle}
           </h3>
           <div className={styles.exportActions}>
-            <Button onClick={exportPdf} disabled={total === 0} data-testid="deck-pdf">
+            <Button onClick={exportPdf} disabled={included.length === 0} data-testid="deck-pdf">
               {t.pdf}
             </Button>
             <Button variant="secondary" onClick={exportText} data-testid="deck-copy-text">
@@ -364,19 +371,15 @@ export function DeckView({
               </Button>
             ) : null}
           </div>
-          <p className={styles.fieldHint}>{t.pdfMobile}</p>
+          <p className={`${styles.fieldHint} ${styles.phoneOnly}`} data-testid="deck-pdf-hint">
+            {t.pdfMobile}
+          </p>
           <label className={styles.check}>
             <input type="checkbox" checked={hd} onChange={(e) => setHd(e.target.checked)} data-testid="deck-hd" />
             <span>{t.pngHd}</span>
           </label>
           <p className={styles.fieldHint}>{t.otherLanguageHint}</p>
-          <p
-            className={styles.status}
-            role="status"
-            aria-live="polite"
-            data-tone={status?.tone}
-            data-testid="deck-status"
-          >
+          <p className={styles.status} role="status" aria-live="polite" data-tone={status?.tone} data-testid="deck-status">
             {status?.text ?? ""}
           </p>
         </section>
@@ -384,13 +387,7 @@ export function DeckView({
 
       {askSlide ? (
         <div data-print="off">
-          <AskForm
-            strings={strings}
-            metrics={metrics}
-            state={state}
-            titlePreview={slideTitle(askSlide, strings)}
-            onAskChange={setAsk}
-          />
+          <AskForm locale={locale} strings={strings} metrics={metrics} state={state} ask={ask} titlePreview={slideTitle(askSlide, strings)} onAskChange={setAsk} />
         </div>
       ) : null}
 
@@ -422,7 +419,7 @@ export function DeckView({
                   <span>{t.include}</span>
                 </label>
                 <span className={styles.thumbPosition}>
-                  {slide.index !== null ? fill(u.slidePosition, { i: slide.index, n: total }) : u.excluded}
+                  {slide.index !== null ? fillTemplate(u.slidePosition, { i: slide.index, n: included.length }) : u.excluded}
                 </span>
               </div>
 
@@ -467,3 +464,4 @@ export function DeckView({
     </section>
   );
 }
+
