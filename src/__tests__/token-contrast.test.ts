@@ -120,10 +120,11 @@ const PAIRS: Pair[] = [
 
   // --- §5.1 / §5.4: inverse and states ---
   { fg: "text-on-inverse", bg: "surface-inverse", stated: 16.06, role: "text", why: "ink chip, active segment" },
+  { fg: "text-inverse", bg: "surface-accent", stated: 4.65, role: "text", why: "small label on a red fill: Tag red, stamped pillar, roast badge" },
   { fg: "state-selected-text", bg: "state-selected-bg", stated: 16.06, role: "text", why: "one selection language (H-5)" },
   { fg: "state-good-text", bg: P0, stated: 6.17, role: "text", why: "status good" },
   { fg: "state-good-text", bg: P1, stated: 4.98, role: "text", why: "status good" },
-  { fg: "state-good-text", bg: P2, stated: 4.49, role: "large", why: "bold ≥ 14px only on a sunken ground" },
+  { fg: "state-good-text", bg: P2, stated: 4.49, role: "large", why: "large text only on a sunken ground (≥ 24px, or ≥ 18.66px bold)" },
   { fg: "state-warn-text", bg: P0, stated: 6.57, role: "text", why: "status warn" },
   { fg: "state-warn-text", bg: P1, stated: 5.31, role: "text", why: "status warn" },
   { fg: "state-warn-text", bg: P2, stated: 4.78, role: "text", why: "status warn" },

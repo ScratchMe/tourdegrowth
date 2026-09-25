@@ -24,7 +24,7 @@
   font-weight: 600;
   text-transform: uppercase;
   color: var(--text-inverse);
-  background: var(--accent-mark);
+  background: var(--surface-accent);
   border-radius: var(--radius-tag);
   padding: 6px 10px;
   transform: rotate(-1.5deg);

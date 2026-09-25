@@ -27,7 +27,7 @@
 }
 
 .red {
-  background: var(--accent-mark);
+  background: var(--surface-accent);
   color: var(--text-inverse);
-  border: 2px solid var(--accent-mark);
+  border: 2px solid var(--surface-accent);
 }

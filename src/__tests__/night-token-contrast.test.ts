@@ -111,7 +111,7 @@ const PAIRS: Pair[] = [
   ...on3("focus-ring-invert", [4.04, 3.76, 3.3], "mark", "red ring of option buttons"),
   { fg: "field-border-alert", bg: N1, stated: 3.76, role: "mark", why: "a field past its limit" },
   { fg: "border-soft", bg: N1, stated: 3.7, role: "mark", why: "dashed edge: same line as the hard one" },
-  { fg: "text-inverse", bg: "accent-mark", stated: 4.42, role: "large", why: "label on a red fill — unchanged from paper" },
+  { fg: "text-inverse", bg: "surface-accent", stated: 4.65, role: "text", why: "small label on a red fill — unchanged from paper" },
   { fg: "text-link-hover", bg: N1, stated: 15.22, role: "text", why: "hovered link" },
   { fg: "action-secondary-text", bg: N1, stated: 15.22, role: "text", why: "secondary button label" },
   { fg: "state-warn-text", bg: N1, stated: 9.41, role: "text", why: "status warn" },

@@ -87,6 +87,14 @@
   --surface-alert: var(--paint-red-wash);
   /* Ink chips, the active segment — a filled mark on paper. 16.06:1 with its text. */
   --surface-inverse: var(--ink-0);
+  /*
+   * The red FILL under a small white label: Tag red, the stamped pillar, the
+   * roast badge. Those labels are 11-12px, so they need 4.5:1, and --paint-red
+   * gives 4.42 (R-22). --paint-red-action gives 4.65 and is the same red to the
+   * eye. --accent-mark stays the red of marks and large type, never a fill
+   * under small text.
+   */
+  --surface-accent: var(--paint-red-action);
 
   --text-body: var(--ink-0);
   --text-muted: var(--ink-1);
@@ -120,8 +128,8 @@
   /*
    * Status text. Bad is the deep red — "red means diagnosis" already.
    * Good and warn are new (DS v3 §5.1), measured 6.17/4.98 and 6.57/5.31 on
-   * --paper-0/--paper-1. On --paper-2, --state-good-text is 4.49:1: bold
-   * text ≥ 14px only there (large-text rule), never regular body.
+   * --paper-0/--paper-1. On --paper-2, --state-good-text is 4.49:1: large
+   * text only there (≥ 24px, or ≥ 18.66px bold — WCAG's 14pt), never body.
    */
   --state-bad-text: var(--paint-red-deep);
   --state-good-text: #1f6b3f;

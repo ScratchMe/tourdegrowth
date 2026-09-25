@@ -48,6 +48,7 @@ export const SEMANTIC = {
   "surface-desk": "var(--paper-3)",
   "surface-alert": "var(--paint-red-wash)",
   "surface-inverse": "var(--ink-0)",
+  "surface-accent": "var(--paint-red-action)",
 
   "text-body": "var(--ink-0)",
   "text-muted": "var(--ink-1)",
@@ -143,6 +144,7 @@ export const NIGHT_WORLD = {
   "surface-desk": "var(--night-0)",
   "surface-alert": "var(--night-red-wash)",
   "surface-inverse": "var(--night-amber)",
+  "surface-accent": "var(--paint-red-action)",
 
   "text-body": "var(--night-text)",
   "text-muted": "var(--night-muted)",

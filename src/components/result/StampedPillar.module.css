@@ -6,7 +6,7 @@
   font: var(--meta-sm);
   font-weight: 600;
   color: var(--text-inverse);
-  background: var(--accent-mark);
+  background: var(--surface-accent);
   border-radius: var(--radius-tag);
   padding: 8px 12px;
   transform: rotate(-1deg);

@@ -79,13 +79,16 @@
   --surface-alert: var(--night-red-wash);
   /* The selection fill: amber, with the night itself as its text (10.13:1). */
   --surface-inverse: var(--night-amber);
+  /* The red fill under a white label stays the paper one: 4.65 with its text. */
+  --surface-accent: var(--paint-red-action);
 
   --text-body: var(--night-text);
   --text-muted: var(--night-muted);
   /*
    * --text-inverse is the label ON a red fill (Tag red, the stamped pillar,
-   * the roast badge): the fill stays --paint-red at night, so its label stays
-   * paper — same 4.42:1 as in the paper world, not a new pairing.
+   * the roast badge): the fill, --surface-accent, stays the paper world's
+   * --paint-red-action at night, so its label stays paper — 4.65:1 in both
+   * worlds, not a new pairing.
    * --text-on-inverse is the label on --surface-inverse, which is now amber.
    */
   --text-inverse: var(--paper-0);
