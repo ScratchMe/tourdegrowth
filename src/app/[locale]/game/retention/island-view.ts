@@ -404,6 +404,21 @@ export function reportContent(ctx: IslandContext, state: State, q: number): Repo
   };
 }
 
+/**
+ * What takes the hand's place once the year is over (brief §7.2 P9, the
+ * prototype's `renderHand`): the hand does not just vanish — its heading says
+ * the year is closed, and whether it ran its course or was cut short, and
+ * points down the page to December. There is nothing to run: no card, no
+ * « Lancer le trimestre ».
+ */
+export function yearClosedView({ copy }: IslandContext, state: State): { title: string; hint: string; fired: boolean } {
+  return {
+    title: state.fired ? copy.hand.yearInterrupted : copy.hand.yearOver,
+    hint: copy.hand.yearClosedHint,
+    fired: state.fired,
+  };
+}
+
 /** Every quarter played, in the page's language — the journal is structured, so a language switch re-renders it whole (R10). */
 export function journalEntries(ctx: IslandContext, state: State): JournalEntry[] {
   const { locale } = ctx;

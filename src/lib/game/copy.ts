@@ -150,12 +150,14 @@ export interface LevelCopy<CardId extends string = string, DarkId extends CardId
     production: string;
     productionEmpty: string;
     run: string;
-    hintInitial: string;
     hintCallOpen: string;
     hintPick: string;
     hintReady: string;
+    /** Where the hand stood, once the year is over: « Année interrompue » (fired) or « Année terminée » (brief §7.2 P9). */
     yearInterrupted: string;
     yearOver: string;
+    /** Under that title: the year's review is December, further down (the prototype's `renderHand`). */
+    yearClosedHint: string;
   };
   cards: Readonly<Record<CardId, CardCopy>>;
   patterns: Readonly<Record<DarkId, PatternCopy>>;

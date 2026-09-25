@@ -227,7 +227,6 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
       "Nothing in production yet. The current flow: one button, two clicks.",
     ),
     run: t("Lancer le trimestre", "Run the quarter"),
-    hintInitial: t("Choisis deux actions.", "Pick two actions."),
     hintCallOpen: t("Le DG parle. Quitte la visio pour choisir.", "The CEO is talking. Leave the call to choose."),
     hintPick: t(
       "Choisis deux actions. Tu verras leur effet à la fin du trimestre.",
@@ -236,6 +235,9 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
     hintReady: t("Trois mois vont passer. Regarde les chiffres.", "Three months are about to pass. Watch the numbers."),
     yearInterrupted: t("Année interrompue", "Year cut short"),
     yearOver: t("Année terminée", "Year over"),
+    // TODO: à relire — l'anglais est nouveau (le français est celui du prototype, renderHand) :
+    // la phrase qui prend la place de la main une fois l'année close (brief §7.2 P9).
+    yearClosedHint: t("Le bilan est en bas de page.", "The review is further down the page."),
   },
 
   cards: {

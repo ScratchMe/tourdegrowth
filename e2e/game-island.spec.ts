@@ -2,7 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import type { Page } from "@playwright/test";
 import { expect, test, trackedEvents } from "./helpers";
 import { LEVEL_PATH, hangUp, pickUpCall, playQuarter, seedGame } from "./game-helpers";
-import { PATH_A, PATH_C, playPath } from "../src/lib/game/__tests__/paths";
+import { PATH_A, PATH_C, PATH_D, playPath } from "../src/lib/game/__tests__/paths";
 
 /**
  * The island, smoke-tested on a production build (game plan G8a): the first
@@ -193,6 +193,18 @@ test.describe("coming back to a year", () => {
     await expect(page.getByTestId("game-ending")).toBeVisible();
     await expect(page.getByTestId("game-call")).toHaveAttribute("data-state", "ended");
     await expect(page.getByTestId("game-hand")).toHaveCount(0);
+    // Where the hand stood: the year is closed, nothing to run (brief P9).
+    await expect(page.getByTestId("game-year-closed")).toContainText("Year over");
+    await expect(page.getByTestId("game-run")).toHaveCount(0);
+  });
+
+  test("a year cut short says so where the hand stood (brief P9)", async ({ page }) => {
+    await seedGame(page, playPath(PATH_D).at(-1)!);
+    await page.getByTestId("game-resume-accept").click();
+    await expect(page.getByTestId("game-ending")).toBeVisible();
+    await expect(page.getByTestId("game-year-closed")).toHaveAttribute("data-fired", "true");
+    await expect(page.getByTestId("game-year-closed")).toContainText("Année interrompue");
+    await expect(page.getByTestId("game-run")).toHaveCount(0);
   });
 });
 

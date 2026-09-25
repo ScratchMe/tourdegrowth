@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { ClickPill } from "@/components/game/ClickPill";
 import { RETENTION_CONTENT } from "@/content/game/retention";
-import { ENDING_PATHS, PATH_A, PATH_C, PATH_M, playPath } from "@/lib/game/__tests__/paths";
+import { ENDING_PATHS, PATH_A, PATH_C, PATH_D, PATH_M, playPath } from "@/lib/game/__tests__/paths";
 import { resolveLevelCopy, type RetentionCopy } from "@/lib/game/copy";
 import { RETENTION_LEVEL, type RetentionCardId } from "@/lib/game/levels/retention";
 import { handIds } from "@/lib/game/model";
@@ -25,6 +25,7 @@ import {
   resumeContent,
   shareText,
   timelineSegments,
+  yearClosedView,
   type IslandContext,
 } from "../island-view";
 
@@ -108,6 +109,7 @@ describe("island-view — every screen of every reference year, in both language
           });
           if (state.over) {
             check(`${label} december`, decemberContent(ctx, state));
+            check(`${label} year closed`, yearClosedView(ctx, state));
             check(`${label} share`, shareText(ctx, state, "https://www.tourdegrowth.com/fr/game/retention"));
           }
         }
@@ -193,6 +195,22 @@ describe("island-view — what the words must say", () => {
     expect(text).toContain(d.hero.title);
     expect(text).toContain(d.figures.churn);
     expect(text).toContain(d.figures.trust);
+  });
+
+  it("where the hand stood, December says whether the year ran its course or was cut short (brief P9)", () => {
+    for (const [name, path] of Object.entries(ENDING_PATHS)) {
+      const last = playPath(path).at(-1)!;
+      const closed = yearClosedView(fr, last);
+      expect(closed.title, name).toBe(last.fired ? fr.copy.hand.yearInterrupted : fr.copy.hand.yearOver);
+      expect(closed.fired, name).toBe(last.fired);
+      expect(closed.hint, name).toBe(fr.copy.hand.yearClosedHint);
+    }
+    // The walk must reach both titles, or the loop above proves half of it.
+    const fired = Object.values(ENDING_PATHS).map((p) => playPath(p).at(-1)!.fired);
+    expect(fired).toContain(true);
+    expect(fired).toContain(false);
+    expect(yearClosedView(fr, playPath(PATH_D).at(-1)!).title).toBe("Année interrompue");
+    expect(yearClosedView(en, years.at(-1)!).title).toBe("Year over");
   });
 
   it("the resume prompt lists one line per quarter played, and a finished year offers to review it", () => {
