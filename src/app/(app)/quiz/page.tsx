@@ -25,7 +25,9 @@ import {
 import { RETAKE_STARTED_EVENT, trackEvent } from "@/lib/analytics/goatcounter";
 import {
   clearRefId,
+  clearStoredAnswers,
   isOwnResult,
+  isSubmittedTour,
   loadRefId,
   loadStoredAnswers,
   loadStoredResults,
@@ -93,7 +95,15 @@ export default function QuizPage() {
   // store) — done in an effect, after mount, rather than in the initial
   // state, so the server-rendered HTML and the first client render match.
   useEffect(() => {
-    const stored = loadStoredAnswers();
+    let stored = loadStoredAnswers();
+    // A Tour already turned into a result is not a Tour in progress: "Start
+    // your Tour" on a return visit starts a new one, from question 1. Only
+    // browsers from before the success path cleared the store can still hold
+    // one (see `isSubmittedTour`).
+    if (isSubmittedTour(stored, loadStoredResults())) {
+      clearStoredAnswers();
+      stored = {};
+    }
     // localStorage does not exist during SSR, so this state cannot be
     // seeded in the initial render without guaranteeing a hydration
     // mismatch (CLAUDE.md, step 4's lesson) — reading it after mount and
@@ -268,6 +278,13 @@ export default function QuizPage() {
       // Clearing it means a second Tour from this browser starts clean
       // instead of silently inheriting the first one's credit.
       clearRefId();
+      // The Tour is now a result, kept with its answers in `tdg.results.v1`
+      // (R-12). The in-progress store has done its job — resuming after a
+      // reload or a failure — and must not survive it: kept, it would send
+      // this visitor's next "Start your Tour" straight to the last screen
+      // with these answers (2026-09-25). A failure never reaches this line,
+      // so the retry promise of SPEC.md §4 is untouched.
+      clearStoredAnswers();
       trackEvent("submission_completed", tone); // SPEC.md §8: one custom event per completed analysis
       router.push(`/r/${created.id}`);
     } catch (err) {
