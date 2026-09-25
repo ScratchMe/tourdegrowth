@@ -9,21 +9,41 @@ import { clamp, fractionOf, overflowOf, type Domain, type Overflow } from "./sca
 export interface BulletGeometry {
   /** Width of the value bar, 0–100 (% of the track). */
   valuePct: number;
-  /** Left edge of the target marker, 0–100. */
-  targetPct: number;
-  /** A value outside the domain fills the track to the edge — this says which one, so it can be marked. */
+  /**
+   * Centre of the target marker, 0–100 — or `null` when there is no marker to
+   * draw: a target outside the domain, or one that is not a number. The rule
+   * lives here and not in the component so it cannot be forgotten by the next
+   * one: a `left: NaN%` is rejected by CSS and falls back to the track's
+   * start, which would draw a red objective of 0 that nobody set.
+   */
+  targetPct: number | null;
+  /**
+   * A value outside the domain is clamped to the edge — this says which one,
+   * so it can be marked. `null` for a value inside the domain AND for one that
+   * is not a number: an absent reading is an empty track, never a claim that
+   * it went past an edge.
+   */
   valueOverflow: Overflow;
   targetOverflow: Overflow;
 }
 
 const pct = (value: number, domain: Domain) => Math.round(clamp(fractionOf(value, domain), 0, 1) * 10000) / 100;
 
+/**
+ * Not a number, or ±Infinity: both come from a missing field or a division by
+ * zero upstream, never from a measurement, so neither is drawn as one — the
+ * same rule as `meterPct`. The chart's aria-label, written by the caller from
+ * the same data, is where "no reading" gets said in words.
+ */
 export function bulletGeometry(value: number, target: number, domain: Domain): BulletGeometry {
+  const valueKnown = Number.isFinite(value);
+  const targetKnown = Number.isFinite(target);
+  const targetOverflow = targetKnown ? overflowOf(target, domain) : null;
   return {
-    valuePct: pct(value, domain),
-    targetPct: pct(target, domain),
-    valueOverflow: overflowOf(value, domain),
-    targetOverflow: overflowOf(target, domain),
+    valuePct: valueKnown ? pct(value, domain) : 0,
+    targetPct: targetKnown && targetOverflow === null ? pct(target, domain) : null,
+    valueOverflow: valueKnown ? overflowOf(value, domain) : null,
+    targetOverflow,
   };
 }
 

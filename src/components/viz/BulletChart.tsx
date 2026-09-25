@@ -3,7 +3,7 @@ import styles from "./BulletChart.module.css";
 
 export interface BulletChartProps {
   value: number;
-  /** The objective. Drawn as a 3px `--viz-highlight` tick; outside `domain` it is not drawn at all. */
+  /** The objective. Drawn as a 3px `--viz-highlight` tick; outside `domain`, or not a number, it is not drawn at all. */
   target: number;
   /**
    * The track's scale, from the caller. A value past it fills the track to
@@ -59,7 +59,7 @@ export function BulletChart({
           style={{ width: `${g.valuePct}%` }}
           data-overflow={g.valueOverflow ?? undefined}
         />
-        {g.targetOverflow === null ? <span className={styles.target} style={{ left: `${g.targetPct}%` }} /> : null}
+        {g.targetPct !== null ? <span className={styles.target} style={{ left: `${g.targetPct}%` }} /> : null}
       </div>
     </div>
   );
