@@ -7,6 +7,7 @@ import { Button } from "@/components/core/Button";
 import { Callout } from "@/components/core/Callout";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { isEngineOpenAtBuild } from "@/lib/engine/access";
+import { formatInterval } from "@/lib/engine/format";
 import { staticCatalogueValues } from "@/lib/engine/phrases";
 import {
   DERIVED_SHAPES,
@@ -23,7 +24,6 @@ import { breadcrumbSchema, JsonLd, webApplicationSchema } from "@/lib/seo/jsonld
 import { tc } from "@/lib/i18n/translatable";
 import { EngineWorkbench } from "./EngineWorkbench";
 import { resolveEngineProps } from "./engine-props";
-import { formatInterval } from "./_engine/format-stub";
 import { fill, monthLabel, stageLabel } from "./_engine/visual-model";
 import styles from "./page.module.css";
 

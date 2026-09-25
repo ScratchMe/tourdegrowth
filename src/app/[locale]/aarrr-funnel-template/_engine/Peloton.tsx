@@ -1,7 +1,7 @@
 import type { Locale } from "@/lib/i18n/locale";
 import type { Diagnosis, Peloton as PelotonModel, PelotonColumn, YearMonth } from "@/lib/engine/types";
 import type { EngineStrings } from "@/lib/engine/strings";
-import { formatNumber } from "./format-stub";
+import { formatNumber } from "@/lib/engine/format";
 import {
   columnGrid,
   columnNumeral,
