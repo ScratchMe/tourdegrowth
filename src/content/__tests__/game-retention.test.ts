@@ -472,6 +472,11 @@ const NOT_FROM_PROTOTYPE: Record<string, string> = {
   "december.dataToggle": "new — plan §3.6",
   "december.table.*": "new — plan §3.6",
   "catalogue.hiddenEffect": "R7",
+  // A real brand or a law stated as fact: the prototype's wording was wrong,
+  // and being faithful to it is not a reason to print it (review 2026-09-25).
+  "patterns.bury.cas": "fact check — Basic-Fit's 2023 fine was about disclosure, not a cancellation path",
+  "patterns.cascade.law": "legal check — DSA art. 25.2 excludes practices covered by the UCPD",
+  "patterns.notice.cas": "fact check — Adobe's $150M is half penalty, half free services",
   "nextLevel.status": "R15",
   "footer.*": "R15",
   "tourLoop.*": "new — brief §13.3 D",
@@ -526,6 +531,7 @@ describe("C11 · the prototype's French, word for word", () => {
     for (const card of PROTO_CARDS.filter((c) => c.kind === "d")) {
       const pattern = RETENTION_CONTENT.patterns[card.id as keyof typeof RETENTION_CONTENT.patterns];
       for (const field of ["official", "law", "cas", "tell"] as const) {
+        if (exceptionFor(`patterns.${card.id}.${field}`)) continue;
         expect(normalise(pattern[field].fr), `${card.id}.${field}`).toBe(normalise(card[field]!));
       }
     }
