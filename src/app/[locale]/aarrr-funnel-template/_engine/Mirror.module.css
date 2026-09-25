@@ -1,0 +1,118 @@
+/* Declared × measured — engine spec §8.5. */
+.mirror {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  min-width: 0;
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.title {
+  font: var(--title-card);
+  color: var(--text-body);
+}
+
+.meta {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+.lead {
+  font: var(--body-md);
+  color: var(--text-body);
+  max-width: var(--measure-read);
+}
+
+.counters {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-5);
+  list-style: none;
+}
+
+.counter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-6);
+  border: var(--border-dashed);
+  border-radius: var(--radius-panel);
+}
+
+/* The blind-spot counter, when it counts something, is the diagnosis of
+   this section: the alert surface, labelled in words as well. */
+.counterAlert {
+  background: var(--surface-alert);
+  border: 2px solid var(--border-alert);
+}
+
+.count {
+  font: var(--chart-value-xl);
+  font-variant-numeric: var(--tabular);
+  color: var(--text-body);
+}
+
+.countLabel {
+  font: var(--meta-xs);
+  color: var(--text-body);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-7);
+  list-style: none;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  height: 100%;
+}
+
+.cardEyebrow {
+  font: var(--meta-2xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-alert);
+}
+
+.cardTitle {
+  font: var(--title-card);
+  color: var(--text-body);
+}
+
+.question {
+  font: var(--body-sm);
+  color: var(--text-muted);
+}
+
+.questionLabel {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+.cardBody {
+  font: var(--body-md);
+  color: var(--text-body);
+}
+
+@media (max-width: 760px) {
+  .counters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .count {
+    font: var(--display-section);
+  }
+
+  .cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

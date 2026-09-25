@@ -565,6 +565,41 @@ export const ENGINE_COPY = {
     },
   },
 
+  /**
+   * Words the visuals (P5) and the static page need that §14 didn't list.
+   * TODO: à relire — copie neuve (convention 6). Kept in one block so the
+   * content PR (P3) can fold it into its sections without hunting.
+   */
+  visual: {
+    /** Under the sign-ups grid: the cohort those 100 people come from. */
+    cohortOf: { fr: "cohorte de {cohort}", en: "{cohort} cohort" },
+    upstreamUnknown: {
+      fr: "Visiteurs pour 100 inscrits : non mesuré",
+      en: "Visitors for 100 sign-ups: not measured",
+    },
+    /** The numeral of a column measured but rounded under 1 in 100 — never « 0 », which would be a measurement. */
+    lessThanOne: { fr: "moins de 1", en: "fewer than 1" },
+    tableColumn: { fr: "Colonne", en: "Column" },
+    tablePerHundred: { fr: "Sur 100 inscrits", en: "Out of 100 sign-ups" },
+    tableStatus: { fr: "Statut", en: "Status" },
+    tableSource: { fr: "Source", en: "Source" },
+    whatIfMove: { fr: "Déplace le curseur pour tester une cible.", en: "Move the slider to try a target." },
+    mirrorCounts: { fr: "Sur les chiffres que le Tour te faisait déclarer", en: "Across the numbers the Tour asked you about" },
+    /** Which Tour is read — the spec shows its date (§6.11): a result can be months old. */
+    mirrorTakenAt: { fr: "Tour du {date} · {score}/100", en: "Tour taken {date} · {score}/100" },
+    mirrorTakenAtNoScore: { fr: "Tour du {date}", en: "Tour taken {date}" },
+    mirrorQuestion: { fr: "La question du Tour", en: "The Tour's question" },
+    /** The static page (E0) prints the catalogue's formulas without a setup: generic words fill their placeholders. */
+    staticEvent: { fr: "l'événement d'activation", en: "the activation event" },
+    staticWindow: { fr: "n", en: "n" },
+    staticCohort: { fr: "la cohorte", en: "the cohort" },
+    staticMonth: { fr: "le mois", en: "the month" },
+    staticVariant: { fr: "la variante choisie", en: "the chosen variant" },
+    primaryNumber: { fr: "Le chiffre de l'étape", en: "The stage's number" },
+    effort: { fr: "Effort", en: "Effort" },
+    tourTitle: { fr: "Pas encore fait le Tour ?", en: "Haven't taken the Tour yet?" },
+  },
+
   // --- Slide screen, slide chrome, slide titles (§14.8, §9.3) --------------
   deck: {
     title: { fr: "Tes slides", en: "Your slides" },
