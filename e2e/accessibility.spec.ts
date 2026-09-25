@@ -51,10 +51,12 @@ const PAGES: [name: string, path: string][] = [
   // nº6, exactly as Antoine will test it.
   ["growth engine (fr, preview)", "/fr/aarrr-funnel-template?engine=preview"],
   // GAME-BRIEF 13.6 : CI construit le jeu OUVERT, donc ces deux adresses
-  // rendent le hub et la coquille du niveau. Fermé (build local sans
-  // GAME_ENABLED), elles rendent la 404 localisée — scannée aussi, sans faux rouge.
+  // rendent le hub et le niveau (sa première visio, prérendue). Fermé (build
+  // local sans GAME_ENABLED), elles rendent la 404 localisée — scannée aussi,
+  // sans faux rouge. Le rapport et décembre ne s'atteignent pas par une
+  // adresse : e2e/game-island.spec.ts les scanne après avoir semé une année.
   ["game hub (fr)", "/fr/game"],
-  ["game level shell", "/en/game/retention"],
+  ["game level", "/en/game/retention"],
 ];
 
 interface ContrastData {
@@ -99,7 +101,10 @@ for (const [name, path] of PAGES) {
     // (`--surface-page`) lets axe measure them. The lifts move that ground by
     // a few percent at most, so this can overstate a ratio slightly at the
     // single darkest point; it is still a measurement where there was none.
-    await page.addStyleTag({ content: "body { background-image: none !important; }" });
+    // The game's night band (`[data-world]`, NightSurface) paints the same
+    // kind of ground over its own region: flattened too, or its text would
+    // stay "incomplete" for the same reason.
+    await page.addStyleTag({ content: "body, [data-world] { background-image: none !important; }" });
 
     const { violations } = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
