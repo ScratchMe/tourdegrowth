@@ -56,6 +56,6 @@ export const Tones = () => (
 export const Localized = () => (
   <p style={line}>
     Connais-tu ta principale cause de churn{" "}
-    <DefinitionTrigger term="churn" label="Définition : churn" /> ?
+    <DefinitionTrigger term="churn" label="Définition : churn" /> ?
   </p>
 );

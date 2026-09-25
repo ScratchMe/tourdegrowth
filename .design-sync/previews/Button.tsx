@@ -40,6 +40,46 @@ export const Compact = () => (
 );
 
 /**
+ * The three states a still can show: resting, `loading` and disabled.
+ * `loading` sets `aria-busy` and `disabled` together so the request cannot be
+ * sent twice, keeps full opacity (busy is not broken) and adds an ellipsis to
+ * the label — there is no spinner, the system has no icons. Disabled fades
+ * and never lifts. Buttons only: a link is never "loading".
+ */
+export const States = () => (
+  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, max-content)", gap: 12, alignItems: "center" }}>
+    <Button variant="primary">Get my score</Button>
+    <Button variant="primary" loading>
+      Get my score
+    </Button>
+    <Button variant="primary" disabled>
+      Get my score
+    </Button>
+    <Button variant="secondary">Try again</Button>
+    <Button variant="secondary" loading>
+      Try again
+    </Button>
+    <Button variant="secondary" disabled>
+      Try again
+    </Button>
+  </div>
+);
+
+/**
+ * Hover and press, live — a screenshot cannot show them. Hover peels the
+ * button up and to the left over a hard ink shadow; press flattens it back
+ * onto the page. Neither happens on a touch screen, where a stuck hover would
+ * read as a state. `quiet` keeps its underline as its only affordance.
+ */
+export const HoverAndPress = () => (
+  <div style={{ display: "flex", gap: 16, alignItems: "center", padding: 8 }}>
+    <Button variant="primary">Run the quarter</Button>
+    <Button variant="secondary">See the data</Button>
+    <Button variant="quiet">Switch to straight up</Button>
+  </div>
+);
+
+/**
  * With `href` it renders an anchor instead of a button — same look. In the app
  * that is a Next `Link`; in the bundle it is the plain `<a href>` that Link
  * renders anyway (see `.design-sync/shims/next-link.tsx`).

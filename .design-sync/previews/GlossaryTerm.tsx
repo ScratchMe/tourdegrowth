@@ -67,7 +67,7 @@ export const French = () => {
         openId={open}
         onOpenChange={(id) => setOpen(id ?? "")}
         closeLabel="Fermer"
-        labelTemplate="Définition : {term}"
+        labelTemplate="Définition : {term}"
         moreLabel="En savoir plus →"
       />{" "}
       ?

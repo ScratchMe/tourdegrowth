@@ -49,7 +49,7 @@ export const French = () => (
   <div style={{ maxWidth: 420 }}>
     <ShareCard
       src={shareSample}
-      alt="Tour de Growth — Où ta croissance cale-t-elle ? Un diagnostic AARRR guidé, 15 questions, 3 minutes."
+      alt="Tour de Growth — Où ta croissance cale-t-elle ? Un diagnostic AARRR guidé, 15 questions, 3 minutes."
       caption="Ce que montre un lien partagé"
       shareLabel="Partager ce résultat"
       saveLabel="Enregistrer l'image"

@@ -25,9 +25,11 @@ repo. Consequences, all already encoded in `config.json`:
   a failure.
 - **`srcDir` is `src/components`, not `src`.** Scanning all of `src/` sweeps
   in every page component (`ResultPage`, `RootShell`, `PreviewCard`, …). The
-  five subdirectories become the five groups the repo already uses —
-  `brand`, `core`, `glossary`, `quiz`, `result` — because `GENERIC_DIR` in
-  `lib/source-kit.mjs` skips a `components/` level.
+  seven subdirectories become the seven groups the repo already uses —
+  `brand`, `core`, `game`, `glossary`, `quiz`, `result`, `viz` — because
+  `GENERIC_DIR` in `lib/source-kit.mjs` skips a `components/` level. The
+  game's engine components live under `src/app/**/_engine` and are out of
+  `srcDir` on purpose: they read game state, they are not primitives.
 - **`cfg.buildCmd` emits declarations, and it is load-bearing.** It runs
   `npx tsc -p .design-sync/tsconfig.dts.json`, which writes real `.d.ts` into
   `dist/types/`. That is where the emitted contracts come from — see
@@ -148,6 +150,36 @@ inline destructured prop type instead of a named `<Name>Props` interface, so
 that says nothing. It also imports a page-level CSS module. It renders whole
 legal documents from data and is not a design primitive.
 
+## Every component is pinned in `componentSrcMap` — and a guard keeps it so
+
+The converter has a trap that looks like a config typo. In synth-from-src
+mode (`--entry` absent, see above), `lib/source-kit.mjs#resolvePackage`
+derives the component list from `srcDir` **only if `componentSrcMap` adds
+nothing non-null**. The moment one entry pins a file, the pinned entries
+become the WHOLE list. The first DS v3 pass pinned four components to fix
+their contracts and the bundle silently shrank from 70 components to 4 —
+with 36 previews left pointing at components that no longer existed.
+
+So `componentSrcMap` now pins all 70 exported components to their file
+(`"LegalPage": null` stays), and `.design-sync/check-inventory.mjs`, chained
+last in `cfg.buildCmd`, fails the build if a component exported from
+`src/components/**` is missing from the map, pinned to the wrong file, or
+pinned but no longer exported. Its success line is
+`[inventory] 70 components pinned, 1 excluded on purpose, none missing`.
+Adding a component therefore means adding it to the map, which is the point:
+a new component shows up in Claude Design by decision, not by accident.
+
+## `process-env.ts` must stay first in `extraEntries`
+
+`SiteFooter` reads `process.env.TDG_GAME_OPEN_AT_BUILD` at module scope (the
+form Next inlines at build time). The converter's esbuild defines only
+`NODE_ENV`, so in the IIFE that was a read of a global that does not exist
+in a browser: a `ReferenceError` while the bundle evaluates, before
+`window.TourDeGrowth` is assigned — every preview blank, one cause.
+`.design-sync/shims/process-env.ts` installs an empty `process.env` and is
+listed FIRST in `cfg.extraEntries` (ES modules evaluate in import order). The
+file's header says the same; do not reorder the list.
+
 ## The two standing validate warnings
 
 Both are non-blocking and both are expected:
@@ -163,11 +195,41 @@ Both are non-blocking and both are expected:
   also keeps the card under `compare.mjs`'s `[PORTAL?]` monitoring, which
   `single` would exempt it from.
 
+Wide components get `cardMode: "column"` in `cfg.overrides` (one full-width
+card per story) — 21 of them now: most of `game`, the two charts, `Button`
+(its `States` grid) and `GlossaryTerm`. Add one when validate prints
+`[GRID_OVERFLOW] … stories render wider than their grid cells`; that warning
+is always a real crop. `QuarterReport` and `Hand` were not flagged but still
+need it: squeezed into a third-width cell, their desktop layout (chosen by a
+viewport media query, not the cell) overlapped its own figure labels.
+
 ## Previews are all repo-owned
 
-All 34 live in `.design-sync/previews/` — none are generated. Copy is the
-product's own, pulled from `dictionary.ts`, `copy-library.ts` and
-`how-it-works.ts` rather than invented, so the cards read as the real product.
+All 70 live in `.design-sync/previews/` (215 story cells) — none are
+generated. Copy is the product's own, pulled from `dictionary.ts`,
+`copy-library.ts`, `how-it-works.ts` and, for the game, `content/game/*.ts`
+rather than invented, so the cards read as the real product. The game's
+numbers follow the real level (`lib/game/levels/retention.ts`: 100,000
+subscribers, 6.0% churn, targets 5.6/5.1/4.6/4.0%, each card's trust and
+radar effects) and are formatted the way `lib/game/format.ts` formats them.
+French strings carry U+00A0 before `: ; ! ? % »`, after `«`, in digit groups
+and before units. Check it in Python (`re` on each `"…"` literal, looking for
+`[0-9A-Za-zé] [:;!?%»]`, `« ` and `\d \d{3}`), not with `grep -P`: in byte
+mode `»`'s first byte is also U+00A0's, so grep reports every correct
+insécable as a hit.
+
+Game components that live at night are previewed inside `NightSurface`, so
+they get the night tokens exactly as in the page; `EventClipping` stays paper
+inside the night, which is its whole point. The paper ones (`ZoneNav`, the
+December components) are previewed bare.
+
+Three kinds of state a still cannot show, and each story says so rather than
+pretending: **viewport** forms (`ActionBar`'s phone bar with counter and
+clicks pill, `ZoneNav`'s compact line, `RevealCells` stacking — all chosen by
+`@media`, not by the card width), **closed disclosures** (`ChartFrame`'s
+data table, `GameJournal`'s entries, `PatternCatalogue`'s turned-down and
+unseen groups), and **hover/press/animation** (`Button`'s `HoverAndPress`,
+`VideoCall`'s typing and clock, the December unblur and stamp).
 
 `ShareCard.tsx` imports `share-sample.png`, a real 1200×630 render of
 `/r/sample` captured from a production build; esbuild inlines it as a data URI
@@ -184,7 +246,13 @@ doc comment says why the layout uses an auto margin rather than
 ## Synced
 
 Project `23b9671c-a55b-452e-aa41-39906ee71ba8` ("Tour de Growth"), pinned as
-`projectId` in `config.json`. 182 files, 34 components, 116 story cells.
+`projectId` in `config.json`. Last upload (2026-09-11): 182 files, 34
+components, 116 story cells.
+
+**Not uploaded yet:** the DS v3 inputs (70 components, 215 story cells,
+~360 files, the night world, `viz`, `game`, the prose family). The bundle
+builds and validates clean from this directory; the upload is Antoine's next
+`/design-sync` run — sessions do not upload.
 
 The authorization that blocked the first attempt is obtained by running
 `/design-login` once from an interactive Claude Code session on this machine;
@@ -228,6 +296,13 @@ alone because both previews pass the literal shape (`{ pillar, score }`,
 so the agent has the shape from the code that actually runs. Hand-writing the
 bodies would duplicate the contract and silently rot.
 
+Seven components **are** pinned in `cfg.dtsPropsFor`: `NotFoundScreen`
+(below), `ProseText`, `ProseActions`, `StatTile` (a union of known / unknown /
+hidden), `Sparkline`, `EventClipping` (a discriminated union on `kind`) and
+`PhoneMock`. Other named object types (`HandCard`, `DashboardChurnTile`,
+`DataTableColumn`, `ChartLegendItem`, `TypingPace`, …) still print as bare
+names; their previews pass the literal shape. Each pin is a drift risk.
+
 `cfg.dtsPropsFor.NotFoundScreen` **is** pinned, because that one had neither:
 four props typed `Translatable` (a `Record`, so never expanded) and examples
 that spread a `{...UNKNOWN_PAGE}` constant defined off-screen. **Drift risk:** a
@@ -236,7 +311,7 @@ is updated by hand.
 
 ## Per-component docs are deliberately NOT wired
 
-`[DOCS_UNMAPPED]` lists all 34, and that is correct — do not "fix" it by
+`[DOCS_UNMAPPED]` lists all 70, and that is correct — do not "fix" it by
 pointing `cfg.docsDir` at `design/ds-extension-0{1,3}-return/`. Those 29
 handoff `.prompt.md` files describe the API the design asked for, not the one
 that shipped, and 25 of them would *replace* a synthesized doc that is strictly
@@ -273,6 +348,28 @@ which reaches the element through the component's `...rest`. That is not in
 skip dot-directories, so `.design-sync/previews/**` is outside the repo's
 `tsc`. If that ever changes, this line errors.
 
+Because the repo's `tsc` never sees the previews, type-check them by hand
+after writing one: a scratch `tsconfig.json` that extends the repo's, maps
+`tour-de-growth` to an index re-exporting every file in `componentSrcMap`,
+and includes `.design-sync/previews/*.tsx`. Keep only lines starting with
+`.design-sync` (component files error on CSS-module types without
+`next-env.d.ts`, which is noise here). Expected residue: the two `Disclosure`
+`open` lines above and `ShareCard`'s `.png` import. Anything else is a real
+contract mismatch — this is what caught an undefined month in `ChartFrame`.
+
+### Found in the DS v3 pass, all by reading the screenshots
+
+- **`ActionBar`'s counter and pill are phone-only.** The first stories were
+  named for the red "over the law" pill; the desktop canvas never draws it.
+- **`GameJournal` entries are closed disclosures**, so "the two cards and
+  what happened" were not on the card the doc described.
+- **`PatternCatalogue`'s `ThreeGroups` showed two groups** until an unseen
+  entry was added — a group with no member is not drawn.
+- **Invented numbers creep in.** Hidden effects in `Playbook` and
+  `PatternCatalogue` were first written by hand; they now match the level's
+  constants. Same for copy: a catalogue `tell` was paraphrased until checked
+  against `retention.ts`.
+
 ## Re-sync risks
 
 - **`cfg.buildCmd` is two commands now**, and the second one is load-bearing.
@@ -281,15 +378,17 @@ skip dot-directories, so `.design-sync/previews/**` is outside the repo's
   build change, spot-check that
   `ds-bundle/components/brand/ContentHeader/ContentHeader.d.ts` says
   `locale: "en" | "fr"` and not `locale: Locale`.
-- **`cfg.dtsPropsFor.NotFoundScreen` is hand-written** and will not follow the
-  component. If that component gains or renames a prop, update the config entry
+- **The seven `cfg.dtsPropsFor` entries are hand-written** and will not follow
+  their components. If one gains or renames a prop, update the config entry
   or the contract lies.
+- **`componentSrcMap` is the component list** (see above). `check-inventory`
+  fails the build on drift; do not weaken it to a warning.
 - **The Chromium build is pinned by the repo's `playwright-core`.** Bump that
   dependency and the cached browser stops matching (`browserType.launch:
   Executable doesn't exist`); re-run `npx playwright install chromium`.
 - **The grades in `.design-sync/.cache/` are not committed.** What makes
   verification durable is the uploaded `_ds_sync.json`. If that anchor is ever
-  lost or the project is recreated, all 34 components re-verify from scratch —
+  lost or the project is recreated, all 70 components re-verify from scratch —
   which is a few hours of reading sheets, not minutes.
 - **The `--entry ./dist/index.js` trick breaks the day the repo gains a real
   `dist/`.** If a build is ever added, drop the flag and set `cfg.buildCmd`.
