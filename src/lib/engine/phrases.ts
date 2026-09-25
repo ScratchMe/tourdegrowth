@@ -199,6 +199,20 @@ export function stampText(position: Position, comparator: Comparator | undefined
 }
 
 /**
+ * A position as a label of its own — the board row's comparator, the metric
+ * sheet's position line, the peloton's stamp: « Au-dessus du repère »,
+ * « Dans le repère », « Sans repère · fixe une cible ». Null when the value is
+ * unknown. The screens used to pick from four direction-blind strings
+ * (`diagnosis.stampReference` & co.), so the §6.0 example's churn — 2,5 %
+ * against 1 to 2 % — was labelled « Sous le repère » while it sat above it.
+ * One function, so the board cannot word a position two ways.
+ */
+export function positionLabel(position: Position, comparator: Comparator | undefined, strings: Words): string | null {
+  if (position === "no-comparator") return strings.diagnosis.noComparator;
+  return stampText(position, comparator, strings);
+}
+
+/**
  * The board's sentence under a NAMED stage: « 18 %, sous l'ordre de grandeur
  * couramment cité (20 à 40 %) » — or, for churn, « au-dessus de … ».
  * `value` and `comparatorText` arrive formatted.

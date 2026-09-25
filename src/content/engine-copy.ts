@@ -577,15 +577,15 @@ export const ENGINE_COPY = {
       en: "The biggest loss in numbers is always at the top of the funnel; that's not what names the stage holding you back.",
     },
     /**
-     * The four below are DIRECTION-BLIND (« sous », « au-dessus ») and only
-     * right for a higher-is-better metric: the peloton's columns. Anywhere
-     * churn can appear, `phrases.ts#sideText` / `stampText` pick from `side`.
+     * The two below are DIRECTION-BLIND (« sous ») and only right for a
+     * higher-is-better metric: the peloton slide's columns still read them.
+     * The board no longer does — its row, its sheet and its peloton go
+     * through `phrases.ts#positionLabel`, which picks from `side` by the
+     * metric's direction; `maybeBelowShort`, `within` and `above` went with
+     * that change (P7c), nothing read them any more.
      */
     stampReference: { fr: "Sous le repère", en: "Below reference" },
     stampTarget: { fr: "Sous la cible", en: "Below target" },
-    maybeBelowShort: { fr: "peut-être sous le repère", en: "possibly below the reference" },
-    within: { fr: "dans le repère", en: "within the reference" },
-    above: { fr: "au-dessus du repère", en: "above the reference" },
     noComparator: { fr: "sans repère · fixe une cible", en: "no reference · set a target" },
   },
   whatIf: {
