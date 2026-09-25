@@ -1,7 +1,7 @@
 // TODO: à relire — copie neuve (convention 6), rédigée par la session de code
 import type { Translatable } from "@/lib/i18n/translatable";
 import type { Pillar } from "@/lib/scoring/pillars";
-import type { CandidateId, SlideTitleKey, ToolId } from "@/lib/engine/types";
+import type { CandidateId, SlideTitleKey, ToolId, UnitInputId } from "@/lib/engine/types";
 
 /**
  * engine-copy.ts — every interface string of the growth engine (engine spec
@@ -40,8 +40,16 @@ import type { CandidateId, SlideTitleKey, ToolId } from "@/lib/engine/types";
  * - a metric's catalogue NAME (capitalised, no article: « Marge brute ») is
  *   only ever used as a label — after a colon or in parentheses — so French
  *   never has to agree with it; inside a sentence the templates take a
- *   `subject` phrase (« l'activation ») or a peloton `unmeasured` phrase,
- *   both written with their article;
+ *   phrase written with its article: `subject` (« l'activation »), a
+ *   peloton `unmeasured` phrase, `unitInput` (« la marge brute ») or
+ *   `event` (« l'événement « a créé un projet » »). `lib/engine/phrases.ts`
+ *   picks them, so a consumer never has to;
+ * - where a value sits against its comparator is `side`, chosen from the
+ *   DIRECTION of the metric: churn, where lower is better, is « au-dessus du
+ *   repère » when it is behind it, never « sous »;
+ * - a count that a noun agrees with has a `xOne` sibling, picked from the
+ *   PRINTED number by the language's own rule — French takes the singular
+ *   under 2 (« 1,5 payant »), English only for exactly 1;
  * - French never writes « de {month} » / « de {cohort} »: a month may start
  *   with a vowel (avril, août, octobre) and a template cannot elide;
  * - glyphs that can reach a slide stay inside the three fonts' coverage
@@ -89,18 +97,6 @@ export const ENGINE_COPY = {
     },
     catalogueComputedTitle: { fr: "Et trois chiffres calculés", en: "And three computed numbers" },
     catalogueVerified: { fr: "Recettes relues en {month}.", en: "Recipes checked in {month}." },
-    /**
-     * What the static list prints in the catalogue's placeholders, before the
-     * reader has set anything up. Words, not sample values: a made-up « août »
-     * on a public page would read as a fact.
-     */
-    catalogueFill: {
-      month: { fr: "le mois", en: "the month" },
-      cohort: { fr: "la cohorte", en: "the cohort" },
-      n: { fr: "N", en: "N" },
-      event: { fr: "l'événement d'activation", en: "the activation event" },
-      variant: { fr: "variante choisie", en: "chosen variant" },
-    },
     faqTitle: { fr: "Questions fréquentes", en: "Frequently asked questions" },
   },
 
@@ -206,6 +202,64 @@ export const ENGINE_COPY = {
     "ref.referred-share": { fr: "la part des inscrits recommandés", en: "the referred share of sign-ups" },
     "ret.logo-churn": { fr: "le churn logo", en: "logo churn" },
   } satisfies Record<CandidateId, Translatable>,
+  /**
+   * The activation event inside a sentence — what the catalogue's `{event}`
+   * receives in formulas, recipes and requests. The user's own words are
+   * quoted and introduced, never spliced in bare: « combien ont déclenché
+   * l'événement « a créé un premier projet » » reads; « combien ont fait a créé
+   * un premier projet » doesn't. `unnamed` before anyone has named it.
+   */
+  event: {
+    named: { fr: "l'événement « {name} »", en: "the \"{name}\" event" },
+    unnamed: { fr: "l'événement d'activation", en: "the activation event" },
+  },
+  /**
+   * An input of the three computed figures after « il manque » / "missing:" —
+   * with its article in French (« il manque la marge brute », never « il manque
+   * marge brute »). Keyed by the only four ids `DERIVED_SHAPES` names as inputs.
+   */
+  unitInput: {
+    "acq.cac": { fr: "le CAC", en: "CAC" },
+    "rev.arpa": { fr: "l'ARPA mensuel", en: "monthly ARPA" },
+    "rev.gross-margin": { fr: "la marge brute", en: "gross margin" },
+    "ret.logo-churn": { fr: "le churn logo", en: "logo churn" },
+  } satisfies Record<UnitInputId, Translatable>,
+  /**
+   * Where a value sits against its comparator, in the words of the page — a
+   * reference (« le repère ») or the team's target (« la cible », never « ta
+   * cible »: these reach a slide). Physical, not good-or-bad: the code maps a
+   * position to one of them through the metric's direction, so churn behind
+   * its reference is « au-dessus du repère ». Gender-free on purpose, so they
+   * follow any stage phrase: « le churn logo est au-dessus du repère ».
+   */
+  side: {
+    underReference: { fr: "sous le repère", en: "below the reference" },
+    overReference: { fr: "au-dessus du repère", en: "above the reference" },
+    withinReference: { fr: "dans le repère", en: "within the reference" },
+    maybeUnderReference: { fr: "peut-être sous le repère", en: "possibly below the reference" },
+    maybeOverReference: { fr: "peut-être au-dessus du repère", en: "possibly above the reference" },
+    underTarget: { fr: "sous la cible", en: "below the target" },
+    overTarget: { fr: "au-dessus de la cible", en: "above the target" },
+    atTarget: { fr: "à la cible", en: "at the target" },
+    maybeUnderTarget: { fr: "peut-être sous la cible", en: "possibly below the target" },
+    maybeOverTarget: { fr: "peut-être au-dessus de la cible", en: "possibly above the target" },
+  },
+  /**
+   * What closing a gap is worth, as a phrase — the slide's « À côté » list and
+   * the speaker note that compares a stage with the one named. Read from the
+   * SAME `whatIf` chain the calculation prints, never recomputed.
+   */
+  worth: {
+    newMrr: { fr: "{amount} de MRR nouveau par mois", en: "{amount} of new MRR a month" },
+    retainedMrr: { fr: "{amount} de MRR préservé par mois", en: "{amount} of retained MRR a month" },
+    customers: { fr: "{n} clients payants de plus par mois", en: "{n} more paying customers a month" },
+    customersOne: { fr: "{n} client payant de plus par mois", en: "{n} more paying customer a month" },
+    kept: { fr: "{n} clients gardés par mois", en: "{n} customers kept a month" },
+    keptOne: { fr: "{n} client gardé par mois", en: "{n} customer kept a month" },
+    perHundred: { fr: "{n} payants de plus pour 100 inscrits", en: "{n} more paying customers per 100 sign-ups" },
+    perHundredOne: { fr: "{n} payant de plus pour 100 inscrits", en: "{n} more paying customer per 100 sign-ups" },
+    lessThanOne: { fr: "moins d'un client de plus par mois", en: "less than one more customer a month" },
+  },
 
   // --- Closed vocabularies (§14.4) -----------------------------------------
   status: {
@@ -254,6 +308,8 @@ export const ENGINE_COPY = {
   source: {
     someoneTold: { fr: "Quelqu'un me l'a donné", en: "Someone gave it to me" },
     other: { fr: "Autre", en: "Other" },
+    /** « Autre » is a label; after « selon » / "according to", a source reads as a phrase. */
+    otherInSentence: { fr: "une autre source", en: "another source" },
   },
   /** Display names of the tools a source can name. Proper nouns, except the two generic ones. */
   tools: {
@@ -275,7 +331,11 @@ export const ENGINE_COPY = {
     spreadsheet: { fr: "Tableur", en: "Spreadsheet" },
   } satisfies Record<ToolId, Translatable>,
 
-  /** The numeric grammar `format.ts` needs, kept here so every word the reader sees is in one reviewable place. */
+  /**
+   * The numeric grammar `format.ts` needs, kept here so every word the reader sees is in one reviewable place.
+   * French binds a unit to its number with U+00A0 (« 7 jours », « 2,6 fois », « T1 2027 »): a slide
+   * title wraps wherever it likes, and a number alone at the end of a line reads as a different number.
+   */
   units: {
     range: { fr: "{lo} à {hi}", en: "{lo}–{hi}" },
     perHundred: { fr: "{n} sur 100", en: "{n} in 100" },
@@ -283,12 +343,12 @@ export const ENGINE_COPY = {
     approx: { fr: "~{n}", en: "~{n}" },
     days: { fr: "{n} jours", en: "{n} days" },
     daysOne: { fr: "1 jour", en: "1 day" },
-    hours: { fr: "{n} heures", en: "{n} hours" },
-    hoursOne: { fr: "1 heure", en: "1 hour" },
+    hours: { fr: "{n} heures", en: "{n} hours" },
+    hoursOne: { fr: "1 heure", en: "1 hour" },
     months: { fr: "{n} mois", en: "{n} months" },
     monthsOne: { fr: "1 mois", en: "1 month" },
-    times: { fr: "{n} fois", en: "{n}×" },
-    quarter: { fr: "T{q} {year}", en: "Q{q} {year}" },
+    times: { fr: "{n} fois", en: "{n}×" },
+    quarter: { fr: "T{q} {year}", en: "Q{q} {year}" },
   },
 
   grammar: {
@@ -417,6 +477,12 @@ export const ENGINE_COPY = {
       en: "{value}, below the commonly cited range ({range})",
     },
     belowTarget: { fr: "{value}, sous ta cible ({target})", en: "{value}, below your target ({target})" },
+    /** Churn behind its comparator: lower is better, so behind is ABOVE. Picked by `phrases.ts#behindSentence`. */
+    aboveReference: {
+      fr: "{value}, au-dessus de l'ordre de grandeur couramment cité ({range})",
+      en: "{value}, above the commonly cited range ({range})",
+    },
+    aboveTarget: { fr: "{value}, au-dessus de ta cible ({target})", en: "{value}, above your target ({target})" },
     maybeBelow: {
       fr: "{value} : peut-être sous le repère ({range})",
       en: "{value}: possibly below the reference ({range})",
@@ -425,34 +491,50 @@ export const ENGINE_COPY = {
       fr: "Fixe une cible sur au moins deux étapes : c'est ce qui permet de dire laquelle freine.",
       en: "Set a target on at least two stages: that's what lets us say which one holds you back.",
     },
+    /** `{stage}` is a subject phrase, capitalised by the code; `{side}` a `side` phrase. */
     notEnoughBelow: {
-      fr: "Sous son repère : {stage}. Sans cible sur les autres étapes, impossible de dire si c'est la plus grosse fuite.",
-      en: "Below its reference: {stage}. Without targets on the other stages, we can't say whether it's the biggest leak.",
+      fr: "{stage} est {side}. Sans cible sur les autres étapes, impossible de dire si c'est la plus grosse fuite.",
+      en: "{stage} sits {side}. Without targets on the other stages, we can't say whether it's the biggest leak.",
     },
     levelBody: {
-      fr: "Aucune étape n'est sous sa cible ni sous son repère : le levier est le volume ou le prix.",
-      en: "No stage is below its target or its reference: the lever is volume or price.",
+      fr: "Aucune étape n'est en retard sur sa cible ni sur son repère : le levier est le volume ou le prix.",
+      en: "No stage trails its target or its reference: the lever is volume or price.",
     },
     blindOne: {
       fr: "Sans chiffre pour {stages}, l'étape qui freine vraiment peut s'y cacher.",
-      en: "With no number for {stages}, the stage really holding you back may be hiding there.",
+      en: "With no number for {stages}, the stage really holding the engine back may be hiding there.",
     },
+    /**
+     * « s'y » rather than « dans l'une d'elles »: the list mixes « le taux d'inscription » and « la rétention », and « s'y » has no gender.
+     * The blind line also reaches the leak slide, read out to a room: « the engine », never "you".
+     */
     blind: {
-      fr: "Sans chiffre pour {stages}, l'étape qui freine vraiment peut se cacher dans l'une d'elles.",
-      en: "With no number for {stages}, the stage really holding you back may be hiding in one of them.",
+      fr: "Sans chiffre pour {stages}, l'étape qui freine vraiment peut s'y cacher.",
+      en: "With no number for {stages}, the stage really holding the engine back may be hiding in one of them.",
     },
+    /** `{stages}`: catalogue names after the colon. Neither « sous » nor « la cible »: churn can be one of them, and a reference can be what it trails. */
     unpriced: {
-      fr: "Aussi sous la cible, sans montant calculé : {stages}",
-      en: "Also below target, with no amount computed: {stages}",
+      fr: "Aussi en retard, sans montant calculable : {stages}",
+      en: "Also behind, with no amount that can be computed: {stages}",
     },
+    /**
+     * Churn is behind but the ranking is by relative gap: the flows have no
+     * amount (no ARPA, OR no monthly volume), so there is nothing to put
+     * churn's money next to. « Sans ARPA » would be false half the time.
+     */
     noArpa: {
-      fr: "Sans ARPA, le churn ne se compare pas aux autres étapes.",
-      en: "Without ARPA, churn can't be compared with the other stages.",
+      fr: "Sans montant commun, le churn ne se compare pas aux autres étapes.",
+      en: "With no amount in common, churn can't be compared with the other stages.",
     },
     topOfFunnel: {
       fr: "La plus grosse perte en nombre est toujours en haut du funnel ; ce n'est pas ce qui désigne l'étape qui freine.",
       en: "The biggest loss in numbers is always at the top of the funnel; that's not what names the stage holding you back.",
     },
+    /**
+     * The four below are DIRECTION-BLIND (« sous », « au-dessus ») and only
+     * right for a higher-is-better metric: the peloton's columns. Anywhere
+     * churn can appear, `phrases.ts#sideText` / `stampText` pick from `side`.
+     */
     stampReference: { fr: "Sous le repère", en: "Below reference" },
     stampTarget: { fr: "Sous la cible", en: "Below target" },
     maybeBelowShort: { fr: "peut-être sous le repère", en: "possibly below the reference" },
@@ -467,6 +549,10 @@ export const ENGINE_COPY = {
     then: { fr: "Alors", en: "Then" },
     times: { fr: "× ARPA", en: "× ARPA" },
     todayFlow: { fr: "{rate}, soit {n} nouveaux payants par mois", en: "{rate}, i.e. {n} new paying customers a month" },
+    todayFlowOne: { fr: "{rate}, soit {n} nouveau payant par mois", en: "{rate}, i.e. {n} new paying customer a month" },
+    /** No monthly volume: the chain is read per 100 sign-ups, so « par mois » would be false. */
+    todayPerHundred: { fr: "{rate}, soit {n} payants pour 100 inscrits", en: "{rate}, i.e. {n} paying customers per 100 sign-ups" },
+    todayPerHundredOne: { fr: "{rate}, soit {n} payant pour 100 inscrits", en: "{rate}, i.e. {n} paying customer per 100 sign-ups" },
     ifFlow: { fr: "{stage} atteint {target}", en: "{stage} reaches {target}" },
     thenFlow: { fr: "{n} × {target}/{rate} = {m} (+{delta})", en: "{n} × {target}/{rate} = {m} (+{delta})" },
     timesFlow: {
@@ -477,6 +563,10 @@ export const ENGINE_COPY = {
     thenChurn: {
       fr: "{base} × ({churn} – {target}) = {n} clients gardés par mois",
       en: "{base} × ({churn} – {target}) = {n} customers kept a month",
+    },
+    thenChurnOne: {
+      fr: "{base} × ({churn} – {target}) = {n} client gardé par mois",
+      en: "{base} × ({churn} – {target}) = {n} customer kept a month",
     },
     timesChurn: {
       fr: "{arpa} par client, soit {amount} de MRR préservé chaque mois",
@@ -500,6 +590,11 @@ export const ENGINE_COPY = {
       fr: "{value} (bas de l'ordre de grandeur couramment cité)",
       en: "{value} (low end of the commonly cited range)",
     },
+    /** Churn is measured to the reference's cautious bound, which for a lower-is-better metric is its HIGH end. */
+    targetReferenceHigh: {
+      fr: "{value} (haut de l'ordre de grandeur couramment cité)",
+      en: "{value} (high end of the commonly cited range)",
+    },
     targetTeam: { fr: "{value} (cible de l'équipe)", en: "{value} (team target)" },
     slider: { fr: "Cible à tester pour {stage}", en: "Target to try for {stage}" },
   },
@@ -515,6 +610,13 @@ export const ENGINE_COPY = {
     d30: { fr: "Actifs à J30", en: "Active at day 30" },
     paid: { fr: "Payants à J{n}", en: "Paying by day {n}" },
     legendReferred: { fr: "venus par recommandation ({n})", en: "came through a referral ({n})" },
+    /**
+     * The same count as a slide's text line, next to « Activés · 18 sur 100 ». The
+     * legend's bare « (6) » reads as a footnote once the bar is gone, and « {n}
+     * venus » would have to agree with a count that can print « 1 » or « moins
+     * de 1 sur 100 »: the phrase before the colon carries no agreement at all.
+     */
+    slideReferred: { fr: "par recommandation : {share}", en: "through a referral: {share}" },
     legendMeasured: { fr: "mesuré", en: "measured" },
     legendRange: { fr: "fourchette estimée", en: "estimated range" },
     legendUnknown: { fr: "non mesuré", en: "not measured" },
@@ -529,8 +631,11 @@ export const ENGINE_COPY = {
     tableCaption: { fr: "Le peloton, en chiffres", en: "The peloton, in numbers" },
     /** Clauses of the verdict title (§9.3, slide 1), joined with `grammar`. */
     clauseActivated: { fr: "{a} atteignent la première valeur", en: "{a} reach first value" },
+    clauseActivatedOne: { fr: "{a} atteint la première valeur", en: "{a} reaches first value" },
     clauseD30: { fr: "{r} sont encore là à J30", en: "{r} are still active at day 30" },
+    clauseD30One: { fr: "{r} est encore là à J30", en: "{r} is still active at day 30" },
     clausePaid: { fr: "{p} paient", en: "{p} pay" },
+    clausePaidOne: { fr: "{p} paie", en: "{p} pays" },
     /**
      * A column's stage as the subject of "… isn't measured". All three are
      * feminine on purpose: the slide titles agree « mesurée(s) » with them.
@@ -592,8 +697,9 @@ export const ENGINE_COPY = {
     /** The static page (E0) prints the catalogue's formulas without a setup: generic words fill their placeholders. */
     staticEvent: { fr: "l'événement d'activation", en: "the activation event" },
     staticWindow: { fr: "n", en: "n" },
-    staticCohort: { fr: "la cohorte", en: "the cohort" },
-    staticMonth: { fr: "le mois", en: "the month" },
+    /** Bracketed slots: « créés en [mois] » reads as a blank to fill, « créés en le mois » as a typo. */
+    staticCohort: { fr: "[mois de cohorte]", en: "[cohort month]" },
+    staticMonth: { fr: "[mois]", en: "[month]" },
     staticVariant: { fr: "la variante choisie", en: "the chosen variant" },
     primaryNumber: { fr: "Le chiffre de l'étape", en: "The stage's number" },
     effort: { fr: "Effort", en: "Effort" },
@@ -696,13 +802,36 @@ export const ENGINE_COPY = {
       en: "{cohort} sign-ups · {month} flows · sources: {tools}",
     },
     credit: { fr: "tourdegrowth.com", en: "tourdegrowth.com" },
+    /** Segments whose value is empty are dropped whole, separator included (`phrases.ts#fillSegments`). */
     leakFooter: {
       fr: "Toutes choses égales par ailleurs · {assumption} · {caveat}",
       en: "All else being equal · {assumption} · {caveat}",
     },
+    /** The footer's `{assumption}` when activation is named: a clause, lower-case, no full stop. */
+    leakAssumption: { fr: "les payants sont supposés parmi les activés", en: "paying customers are assumed to be among the activated" },
+    /** The footer's `{caveat}`: the designating reference's range, then its caveat from the catalogue. */
+    leakCaveat: { fr: "repère {range} {caveat}", en: "reference {range} {caveat}" },
     leakAside: { fr: "À côté", en: "Alongside" },
-    withinReference: { fr: "dans le repère", en: "within the reference" },
-    cannotExclude: { fr: "non mesuré — ne peut pas être exclu", en: "not measured — can't be ruled out" },
+    /** A peloton column or a candidate nobody measured. Gender-free: it follows a label of either gender. */
+    noNumber: { fr: "pas de chiffre", en: "no number" },
+    cannotExclude: { fr: "pas de chiffre — impossible à exclure", en: "no number — can't be ruled out" },
+    /** A candidate with no designating reference and no team target. No « fixe une cible »: a slide never gives the reader orders. */
+    noComparator: { fr: "sans repère ni cible", en: "no reference, no target" },
+    unpricedShort: { fr: "sans montant calculable", en: "no amount can be computed" },
+    /**
+     * Why a number is missing, as a slide says it. The screen's `cause`
+     * labels are the reader's own voice (« je n'y ai pas accès »); a slide is
+     * read out by that reader to a room, so it says the fact, not « je ».
+     */
+    cause: {
+      notTracked: { fr: "aucune mesure", en: "not tracked" },
+      notComputed: { fr: "calcul jamais fait", en: "never computed" },
+      noAccess: { fr: "accès manquant", en: "no access" },
+      noDefinition: { fr: "pas de définition partagée", en: "no shared definition" },
+    },
+    /** `visibility`'s documented count: French takes the singular under 2 (« 0 chiffre sur 15 », « 1 chiffre sur 15 »). */
+    documented: { fr: "{n} chiffres sur {N}", en: "{n} of {N} numbers" },
+    documentedOne: { fr: "{n} chiffre sur {N}", en: "{n} of {N} numbers" },
     calcTitle: { fr: "Le calcul", en: "The calculation" },
     visibilityLeft: { fr: "Ce qu'on voit", en: "What we can see" },
     visibilityRight: {
@@ -720,6 +849,10 @@ export const ENGINE_COPY = {
       fr: "relevé mensuel, premier point le {date}",
       en: "monthly reading, first checkpoint on {date}",
     },
+    /** The ask's goal, built from what the team filled in: `{metric}` is a catalogue name, lower-cased by the code. */
+    askGoal: { fr: "{metric} de {current} à {target}", en: "{metric} from {current} to {target}" },
+    askGoalNoCurrent: { fr: "{metric} à {target}", en: "{metric} to {target}" },
+    askGoalHorizon: { fr: "{goal} d'ici {horizon}", en: "{goal} by {horizon}" },
     annexTitle: { fr: "Définitions et sources", en: "Definitions and sources" },
     annexCols: {
       number: { fr: "Chiffre", en: "Number" },
@@ -739,9 +872,10 @@ export const ENGINE_COPY = {
   },
   /** One template per case and grammatical number (§9.3). `**…**` is the red accent. */
   slideTitles: {
+    /** Each value is a filled `peloton.clause*` — the verb agreeing with its own count (« 1 paie », « 6 à 9 paient »). */
     pelotonComplete: {
-      fr: "Sur 100 inscrits, {a} atteignent la première valeur, {r} sont encore là à J30 et **{p} paient**.",
-      en: "Out of 100 sign-ups, {a} reach first value, {r} are still active at day 30 and **{p} pay**.",
+      fr: "Sur 100 inscrits, {activated}, {d30} et **{paid}**.",
+      en: "Out of 100 sign-ups, {activated}, {d30} and **{paid}**.",
     },
     pelotonGap: {
       fr: "Sur 100 inscrits, {clauses}. **Entre les deux, on ne voit rien : {stages} ne sont pas mesurées.**",
@@ -775,29 +909,49 @@ export const ENGINE_COPY = {
       fr: "Ramener {stage} à {target} ajouterait **{n} clients payants** par mois.",
       en: "Bringing {stage} to {target} would add **{n} paying customers** a month.",
     },
+    leakClearCustomersOne: {
+      fr: "Ramener {stage} à {target} ajouterait **{n} client payant** par mois.",
+      en: "Bringing {stage} to {target} would add **{n} paying customer** a month.",
+    },
+    /** Churn without ARPA: its chain counts customers KEPT, and the title says the same thing as its body. */
+    leakClearKept: {
+      fr: "Ramener {stage} à {target} garderait **{n} clients payants** de plus par mois.",
+      en: "Bringing {stage} to {target} would keep **{n} more paying customers** a month.",
+    },
+    leakClearKeptOne: {
+      fr: "Ramener {stage} à {target} garderait **{n} client payant** de plus par mois.",
+      en: "Bringing {stage} to {target} would keep **{n} more paying customer** a month.",
+    },
     leakClearPerHundred: {
       fr: "Ramener {stage} à {target} ajouterait **{n} payants pour 100 inscrits**.",
       en: "Bringing {stage} to {target} would add **{n} paying customers per 100 sign-ups**.",
     },
-    leakShared: {
-      fr: "**{n} étapes** sont sous leur cible sans que l'une pèse nettement plus : {list}.",
-      en: "**{n} stages** sit below their target, none clearly heavier: {list}.",
+    leakClearPerHundredOne: {
+      fr: "Ramener {stage} à {target} ajouterait **{n} payant pour 100 inscrits**.",
+      en: "Bringing {stage} to {target} would add **{n} paying customer per 100 sign-ups**.",
     },
+    /** « En retard sur », not « sous »: the group can hold churn, which trails its reference by being ABOVE it. */
+    leakShared: {
+      fr: "**{n} étapes** sont en retard sur leur repère ou leur cible, sans que l'une pèse nettement plus : {list}.",
+      en: "**{n} stages** trail their reference or target, none clearly heavier: {list}.",
+    },
+    /** `{stage}`: a subject phrase, capitalised by the code; `{side}`: a `side` phrase, which knows churn's direction. */
     leakNotEnoughBelow: {
-      fr: "**Sous son repère : {stage}.** Sans cible sur les autres étapes, impossible de dire si c'est la plus grosse fuite.",
-      en: "**Below its reference: {stage}.** Without targets on the other stages, we can't say whether it's the biggest leak.",
+      fr: "**{stage} est {side}.** Sans cible sur les autres étapes, impossible de dire si c'est la plus grosse fuite.",
+      en: "**{stage} sits {side}.** Without targets on the other stages, we can't say whether it's the biggest leak.",
     },
     leakLevel: {
-      fr: "Aucune étape n'est sous sa cible ni sous son repère : **le levier est le volume ou le prix**.",
-      en: "No stage sits below its target or its reference: **the lever is volume or price**.",
+      fr: "Aucune étape n'est en retard sur sa cible ni sur son repère : **le levier est le volume ou le prix**.",
+      en: "No stage trails its target or its reference: **the lever is volume or price**.",
     },
+    /** `{documented}` is `slide.documented` filled: « 0 chiffre sur 15 » agrees where « {n} chiffres » could not. */
     visibility: {
-      fr: "On documente **{n} chiffres sur {N}**. Les {k} qui manquent se réparent {repair}.",
-      en: "We document **{n} of {N} numbers**. The {k} missing ones take {repair} to fix.",
+      fr: "On documente **{documented}**. Les {k} qui manquent se réparent {repair}.",
+      en: "We document **{documented}**. The {k} missing ones take {repair} to fix.",
     },
     visibilityOne: {
-      fr: "On documente **{n} chiffres sur {N}**. Celui qui manque se répare {repair}.",
-      en: "We document **{n} of {N} numbers**. The missing one takes {repair} to fix.",
+      fr: "On documente **{documented}**. Celui qui manque se répare {repair}.",
+      en: "We document **{documented}**. The missing one takes {repair} to fix.",
     },
     visibilityAllDocumented: {
       fr: "Les **{N} chiffres** du moteur sont documentés.",
@@ -807,18 +961,21 @@ export const ENGINE_COPY = {
       fr: "Un client rembourse son coût d'acquisition en **{m}** et rapporte **{x}** ce qu'il coûte.",
       en: "A customer pays back their acquisition cost in **{m}** and brings in **{x}** what they cost.",
     },
+    /** `{input}`: `unitInput` phrases, with their article in French (« Il manque la marge brute. »). */
     unitEconomicsUnknown: {
-      fr: "**On ne peut pas encore dire ce que rapporte un client.** Il manque : {input}.",
+      fr: "**On ne peut pas encore dire ce que rapporte un client.** Il manque {input}.",
       en: "**We can't yet say what a customer is worth.** Missing: {input}.",
     },
     mirror: {
       fr: "L'équipe déclare suivre **{k}** de ces chiffres ; on a pu en sortir **{m}**.",
       en: "The team says it tracks **{k}** of these numbers; we could pull **{m}**.",
     },
+    /** `{goal}`: `slide.askGoal*` filled — only the parts the team wrote, so never « de  à  d'ici ». */
     ask: {
-      fr: "Nous demandons **{what}** — objectif : {metric} de {current} à {target} d'ici {horizon}.",
-      en: "We're asking for **{what}** — goal: {metric} from {current} to {target} by {horizon}.",
+      fr: "Nous demandons **{what}** — objectif : {goal}.",
+      en: "We're asking for **{what}** — goal: {goal}.",
     },
+    askPlain: { fr: "Nous demandons **{what}**.", en: "We're asking for **{what}**." },
     askMeasureFirst: {
       fr: "Nous demandons **{cost}** pour mesurer d'abord ce qui manque ({metric}), avant de décider où investir.",
       en: "We're asking for **{cost}** to measure what's missing first ({metric}), before deciding where to invest.",
@@ -828,15 +985,35 @@ export const ENGINE_COPY = {
   /** Speaker notes (§9.4), pre-written against the classic objections. */
   notes: {
     compared: { fr: "Comparé à quoi ? — {comparator}.", en: "Compared with what? — {comparator}." },
+    /** One per measured peloton column. The column's period IS its cohort month: said once. */
     source: {
-      fr: "D'où vient ce chiffre ? — {tool}, {period}, inscrits en {cohort}.",
-      en: "Where does this number come from? — {tool}, {period}, {cohort} cohort.",
+      fr: "D'où vient ce chiffre ? — {metric} : {tool}, inscrits en {cohort}.",
+      en: "Where does this number come from? — {metric}: {tool}, {cohort} cohort.",
     },
     seasonal: {
       fr: "Et si c'est saisonnier ? — Un seul mois est mesuré pour l'instant ; la comparaison d'un mois à l'autre viendra avec le suivant.",
       en: "What if it's seasonal? — Only one month is measured so far; the month-on-month comparison comes with the next one.",
     },
+    /** `{stage}`: a subject phrase; `{ranking}`: one of `ranking`, capitalised by the code. */
     whyNot: { fr: "Pourquoi pas {stage} ? — {ranking}.", en: "Why not {stage}? — {ranking}." },
+    /** Why a stage is not the one the slide names — each a clause `whyNot` closes with a full stop. */
+    ranking: {
+      unknown: { fr: "pas de chiffre : impossible de l'exclure", en: "no number: it can't be ruled out" },
+      noComparator: {
+        fr: "sans repère publiable ni cible d'équipe, aucun classement possible",
+        en: "no reference worth publishing and no team target, so it can't be ranked",
+      },
+      maybe: { fr: "{side} : sa fourchette chevauche le seuil", en: "{side}: its range straddles the line" },
+      belowWorth: {
+        fr: "{side} aussi, mais l'écart vaut {worth}, contre {top}",
+        en: "{side} too, but the gap is worth {worth}, against {top}",
+      },
+      belowUnpriced: { fr: "{side} aussi, sans montant calculable", en: "{side} too, with no amount that can be computed" },
+      belowNoArpa: {
+        fr: "{side} aussi, mais sans montant commun, le churn ne se compare pas aux autres étapes",
+        en: "{side} too, but with no amount in common, churn can't be compared with the other stages",
+      },
+    },
   },
 
   // --- Findings and sanity checks (§14.9, §14.10) --------------------------
@@ -864,17 +1041,24 @@ export const ENGINE_COPY = {
       en: "{metric}: the Tour says this number is tracked, but we couldn't pull it.",
     },
     belowComparator: { fr: "{metric} : {value}, sous {comparator}.", en: "{metric}: {value}, below {comparator}." },
+    /** Churn behind its comparator is ABOVE it (lower is better). */
+    aboveComparator: { fr: "{metric} : {value}, au-dessus de {comparator}.", en: "{metric}: {value}, above {comparator}." },
     conflict: {
       fr: "{metric} : {a} selon {sourceA}, {b} selon {sourceB}.",
       en: "{metric}: {a} according to {sourceA}, {b} according to {sourceB}.",
     },
     unitEcon: {
-      fr: "Impossible de dire en combien de mois un client rembourse son coût d'acquisition. Il manque : {input}.",
+      fr: "Impossible de dire en combien de mois un client rembourse son coût d'acquisition. Il manque {input}.",
       en: "We can't say how many months a customer takes to pay back their acquisition cost. Missing: {input}.",
     },
     reconcile: {
       fr: "Ta chaîne prédit ~{p} nouveaux payants en {month} ; ta facturation en compte {n}. Au moins une définition ne porte pas sur la même population.",
       en: "Your chain predicts ~{p} new paying customers in {month}; your billing counts {n}. At least one definition doesn't cover the same population.",
+    },
+    /** A small company can predict one payer: the noun agrees with `finding.count`, as printed. */
+    reconcileOne: {
+      fr: "Ta chaîne prédit ~{p} nouveau payant en {month} ; ta facturation en compte {n}. Au moins une définition ne porte pas sur la même population.",
+      en: "Your chain predicts ~{p} new paying customer in {month}; your billing counts {n}. At least one definition doesn't cover the same population.",
     },
     smallCohort: {
       fr: "Moins de 100 inscrits dans la cohorte : chaque inscrit pèse plus d'un point de pourcentage.",
@@ -911,6 +1095,10 @@ export const ENGINE_COPY = {
     reconcileGap: {
       fr: "Ta chaîne prédit ~{p} nouveaux payants en {month} ; ta facturation en compte {n}. Au moins une définition ne porte pas sur la même population.",
       en: "Your chain predicts ~{p} new paying customers in {month}; your billing counts {n}. At least one definition doesn't cover the same population.",
+    },
+    reconcileGapOne: {
+      fr: "Ta chaîne prédit ~{p} nouveau payant en {month} ; ta facturation en compte {n}. Au moins une définition ne porte pas sur la même population.",
+      en: "Your chain predicts ~{p} new paying customer in {month}; your billing counts {n}. At least one definition doesn't cover the same population.",
     },
     toCheck: { fr: "à vérifier", en: "to check" },
   },

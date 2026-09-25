@@ -37,9 +37,13 @@ import type { DerivedId, MetricId, SourceRef } from "@/lib/engine/types";
  * Placeholders, filled on the client from the engine's setup and the entry:
  * `{month}` (the flows' month, formatted: « août 2026 » / "August 2026"),
  * `{cohort}` (the followed cohort, same format), `{n}` (a window in days),
- * `{event}` (the user's activation event, or `page.catalogueFill.event`
- * when none is set yet), `{variant}` (the CAC variant's label). Every string
- * of this file may carry any of the five, and a consumer fills all of them.
+ * `{event}` (a whole noun phrase with its article — `event.named`, the
+ * user's own words quoted: « l'événement « a créé un premier projet » », or
+ * `event.unnamed` before anyone has named it — so a template writes « ayant
+ * déclenché {event} », never « ayant fait {event} »), `{variant}` (the CAC
+ * variant's label, lower-cased mid-sentence). Every string of this file may
+ * carry any of the five; `lib/engine/phrases.ts#catalogueValues` fills all
+ * of them, for the requests, the annex and the sheet alike.
  */
 
 export interface EngineCatalogEntry {
@@ -281,8 +285,8 @@ export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
       en: "The share of sign-ups who reach first value in time.",
     },
     formula: {
-      fr: "inscrits de la cohorte ayant fait {event} sous {n} jours ÷ inscrits de la cohorte",
-      en: "cohort sign-ups who did {event} within {n} days ÷ cohort sign-ups",
+      fr: "inscrits de la cohorte ayant déclenché {event} sous {n} jours ÷ inscrits de la cohorte",
+      en: "cohort sign-ups who triggered {event} within {n} days ÷ cohort sign-ups",
     },
     inputs: {
       numerator: { fr: "Activés sous {n} jours", en: "Activated within {n} days" },
@@ -302,7 +306,8 @@ export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
         label: { fr: "Mixpanel ou PostHog", en: "Mixpanel or PostHog" },
         path: {
           fr: "un entonnoir inscription puis {event}, avec une fenêtre de conversion de {n} jours",
-          en: "a sign-up then {event} funnel, with a {n}-day conversion window",
+          // No article before {n}: the static catalogue page fills it with the letter "n", and "a n-day" is wrong.
+          en: "a funnel from sign-up to {event}, with a conversion window of {n} days",
         },
       },
       {
@@ -319,12 +324,12 @@ export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
       en: "Change the chosen action and the rate can double or halve. Write your definition down, and keep it from one month to the next.",
     },
     request: {
-      fr: "pour les inscrits en {cohort}, combien ont fait {event} sous {n} jours, et combien d'inscrits au total",
-      en: "for the sign-ups from {cohort}, how many did {event} within {n} days, and how many sign-ups in total",
+      fr: "pour les inscrits en {cohort}, combien ont déclenché {event} sous {n} jours, et combien d'inscrits au total",
+      en: "for the sign-ups from {cohort}, how many triggered {event} within {n} days, and how many sign-ups in total",
     },
     benchmarkCaveat: {
-      fr: "pour un onboarding SaaS, souvent plus bas en essai gratuit ; tout dépend de l'exigence de ton événement",
-      en: "for SaaS onboarding, often lower for free trials; it all depends on how demanding your event is",
+      fr: "pour un onboarding SaaS, souvent plus bas en essai gratuit ; tout dépend de l'exigence de l'événement retenu",
+      en: "for SaaS onboarding, often lower for free trials; it all depends on how demanding the chosen event is",
     },
   },
   "act.ttv": {
@@ -799,7 +804,7 @@ export const ENGINE_DERIVED_CATALOG: Record<DerivedId, EngineDerivedEntry> = {
       fr: "ARPA × marge brute × durée de vie (1 ÷ churn mensuel, au plus 36 mois)",
       en: "ARPA × gross margin × lifetime (1 ÷ monthly churn, at most 36 months)",
     },
-    uncomputable: { fr: "incalculable — il manque : {input}", en: "can't be computed — missing: {input}" },
+    uncomputable: { fr: "incalculable — il manque {input}", en: "can't be computed — missing: {input}" },
     capNote: {
       fr: "durée de vie plafonnée à 36 mois : la plupart des praticiens plafonnent entre trois et cinq ans, on prend le bas",
       en: "lifetime capped at 36 months: most practitioners cap it between three and five years, we take the low end",
@@ -808,7 +813,7 @@ export const ENGINE_DERIVED_CATALOG: Record<DerivedId, EngineDerivedEntry> = {
   "rev.cac-payback": {
     name: { fr: "CAC payback", en: "CAC payback" },
     formula: { fr: "CAC ÷ (ARPA × marge brute), en mois", en: "CAC ÷ (ARPA × gross margin), in months" },
-    uncomputable: { fr: "incalculable — il manque : {input}", en: "can't be computed — missing: {input}" },
+    uncomputable: { fr: "incalculable — il manque {input}", en: "can't be computed — missing: {input}" },
     caveat: {
       fr: "repère couramment cité, pas une loi : la vraie comparaison reste la trésorerie",
       en: "a commonly cited reference, not a law: the real comparison is still the cash in the bank",
@@ -817,7 +822,7 @@ export const ENGINE_DERIVED_CATALOG: Record<DerivedId, EngineDerivedEntry> = {
   "rev.ltv-cac": {
     name: { fr: "LTV:CAC", en: "LTV:CAC" },
     formula: { fr: "LTV ÷ CAC", en: "LTV ÷ CAC" },
-    uncomputable: { fr: "incalculable — il manque : {input}", en: "can't be computed — missing: {input}" },
+    uncomputable: { fr: "incalculable — il manque {input}", en: "can't be computed — missing: {input}" },
     caveat: { fr: "un repère, pas une loi", en: "a rule of thumb, not a law" },
   },
 };

@@ -19,11 +19,19 @@ describe("sanity checks", () => {
   });
 
   it("num-gt-den blocks, on bounded shares only", () => {
-    expect(blockingCheck(measured(ratio(900, 800), tool), shapeOf("act.rate"))).toEqual({ id: "num-gt-den", blocking: true, metrics: ["act.rate"], values: {} });
-    expect(blockingCheck(measured(ratio(800, 800), tool), shapeOf("act.rate"))).toBeNull();
-    expect(blockingCheck(measured(ratio(21_000, 42), tool), shapeOf("acq.cac"))).toBeNull();
+    // The message quotes both counts (« Le premier compte ({num}) dépasse le second ({den}) »): the check carries them.
+    expect(blockingCheck(measured(ratio(900, 800), tool), shapeOf("act.rate"), "fr")).toEqual({
+      id: "num-gt-den",
+      blocking: true,
+      metrics: ["act.rate"],
+      values: { num: "900", den: "800" },
+    });
+    expect(blockingCheck(measured(ratio(12_000, 8_000), tool), shapeOf("act.rate"), "fr")?.values).toEqual({ num: "12\u00a0000", den: "8\u00a0000" });
+    expect(blockingCheck(measured(ratio(800, 800), tool), shapeOf("act.rate"), "fr")).toBeNull();
+    expect(blockingCheck(measured(ratio(21_000, 42), tool), shapeOf("acq.cac"), "fr")).toBeNull();
     const conflict = { status: "conflicting", conflict: { a: { value: ratio(1, 10), source: tool }, b: { value: ratio(12, 10), source: tool } }, updatedAt: "x" } as const;
-    expect(blockingCheck(conflict, shapeOf("act.rate"))?.blocking).toBe(true);
+    // The reading that breaks the rule is the one quoted, not the first one.
+    expect(blockingCheck(conflict, shapeOf("act.rate"), "en")?.values).toEqual({ num: "12", den: "10" });
     // An imported file can carry what the sheet would have refused: it shows.
     expect(ids(withEntry(exampleState(), "act.rate", measured(ratio(900, 800), tool)))).toContain("num-gt-den");
   });

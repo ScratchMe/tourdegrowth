@@ -106,7 +106,8 @@ describe("whatIf — edges", () => {
     const noArpa = whatIf(withEntry(exampleState(), "rev.arpa", undefined), "act.rate", 20, CTX_FR, FR.strings.units)!;
     expect(noArpa.kind).toBe("customers");
     expect(noArpa.lines.map((l) => l.key)).toEqual(["today", "if", "then"]);
-    expect(impactHeadline(noArpa)).toEqual({ n: "5" });
+    // The count travels with the figure: the noun of the title and of the chain agree with it as printed.
+    expect(impactHeadline(noArpa)).toEqual({ n: "5", count: { lo: 5, hi: 5 } });
     let noN = withEntry(exampleState(), "acq.cac", measured({ kind: "amount", amount: 500 }, tool));
     noN = withEntry(noN, "acq.signup-rate", measured({ kind: "rate", percent: 3.2 }));
     expect(newPayersPerMonth(noN, CTX_FR)).toBeNull();

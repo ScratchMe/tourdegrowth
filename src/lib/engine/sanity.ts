@@ -26,11 +26,22 @@ function readings(entry: MetricEntry): MetricValue[] {
   return [];
 }
 
-/** The one check that blocks a save: a share whose numerator exceeds its denominator. Values are left to the input labels. */
-export function blockingCheck(entry: MetricEntry, shape: MetricShape): SanityCheck | null {
+/**
+ * The one check that blocks a save: a share whose numerator exceeds its
+ * denominator. It carries the two counts, formatted: its message quotes them
+ * (« Le premier compte (900) dépasse le second (800) »), and an imported file
+ * can put this check on the slide screen, where no input label sits beside it.
+ */
+export function blockingCheck(entry: MetricEntry, shape: MetricShape, locale: EngineCalcContext["locale"]): SanityCheck | null {
   if (!shape.bounded) return null;
-  const broken = readings(entry).some((v) => v.kind === "ratio" && v.numerator > v.denominator);
-  return broken ? { id: "num-gt-den", blocking: true, metrics: [shape.id], values: {} } : null;
+  const broken = readings(entry).find((v) => v.kind === "ratio" && v.numerator > v.denominator);
+  if (!broken || broken.kind !== "ratio") return null;
+  return {
+    id: "num-gt-den",
+    blocking: true,
+    metrics: [shape.id],
+    values: { num: formatNumber(broken.numerator, locale), den: formatNumber(broken.denominator, locale) },
+  };
 }
 
 function knownValue(state: EngineState, id: MetricId, ctx: EngineCalcContext): Interval | null {
@@ -57,12 +68,12 @@ export function reconcile(state: EngineState, ctx: EngineCalcContext): { predict
 export function sanityChecks(state: EngineState, ctx: EngineCalcContext, words: UnitWords): SanityCheck[] {
   const snapshot = currentSnapshot(state);
   const checks: SanityCheck[] = [];
-  const add = (id: SanityCheck["id"], metrics: MetricId[], values: Record<string, string> = {}) =>
-    checks.push({ id, blocking: false, metrics, values });
+  const add = (id: SanityCheck["id"], metrics: MetricId[], values: Record<string, string> = {}, count?: Interval) =>
+    checks.push({ id, blocking: false, metrics, values, ...(count ? { count } : {}) });
 
   for (const shape of METRIC_SHAPES) {
     const entry = entryOf(snapshot, shape.id);
-    const blocking = entry ? blockingCheck(entry, shape) : null;
+    const blocking = entry ? blockingCheck(entry, shape, ctx.locale) : null;
     if (blocking) checks.push(blocking); // an imported file can carry what the sheet would have refused
   }
 
@@ -90,11 +101,17 @@ export function sanityChecks(state: EngineState, ctx: EngineCalcContext, words: 
 
   const r = reconcile(state, ctx);
   if (r && (r.ratio.hi < RECONCILE_BAND.lo || r.ratio.lo > RECONCILE_BAND.hi)) {
-    add("reconcile-gap", ["acq.signup-rate", "rev.paid-conversion", "acq.cac"], {
-      p: formatCountInterval(r.predicted, ctx, words),
-      n: formatNumber(r.billed, ctx.locale),
-      month: formatMonth(snapshot.referenceMonth, ctx.locale),
-    });
+    // « ~1 nouveau payant », « ~12 nouveaux payants »: the noun follows the predicted count as printed (rounded).
+    add(
+      "reconcile-gap",
+      ["acq.signup-rate", "rev.paid-conversion", "acq.cac"],
+      {
+        p: formatCountInterval(r.predicted, ctx, words),
+        n: formatNumber(r.billed, ctx.locale),
+        month: formatMonth(snapshot.referenceMonth, ctx.locale),
+      },
+      mapBounds(r.predicted, Math.round),
+    );
   }
   return checks;
 }

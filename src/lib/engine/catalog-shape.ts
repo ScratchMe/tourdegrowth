@@ -32,7 +32,13 @@ import type {
  * Every other one is context — shown, never used to name a bottleneck.
  */
 
-export const ENGINE_CATALOG_VERSION = "2026-10";
+/**
+ * The month the recipes (formulas, "where to find it", traps) were last
+ * checked against the tools they name. The static page prints it as
+ * « Recettes relues en {month} », so it is a claim about the past, never a
+ * release date: it moves only when someone re-reads the recipes.
+ */
+export const ENGINE_CATALOG_VERSION = "2026-09";
 
 export interface Benchmark {
   term: GlossaryTermId;

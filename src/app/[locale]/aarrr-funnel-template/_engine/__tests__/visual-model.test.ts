@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { EngineStrings } from "@/lib/engine/strings";
-import type { ImpactLine } from "@/lib/engine/types";
+import type { ImpactLine, Interval } from "@/lib/engine/types";
 import {
   columnGrid,
   columnNumeral,
@@ -163,34 +163,54 @@ describe("whatIfTemplate — which sentence a line of the chain is printed with"
       "then",
       "times",
       "todayFlow",
+      "todayFlowOne",
+      "todayPerHundred",
+      "todayPerHundredOne",
       "ifFlow",
       "thenFlow",
       "timesFlow",
       "todayChurn",
       "thenChurn",
+      "thenChurnOne",
       "timesChurn",
       "annual",
       "lessThanOne",
     ].map((k) => [k, k]),
   ) as unknown as EngineStrings["whatIf"];
-  const line = (key: ImpactLine["key"]): ImpactLine => ({ key, values: {} });
+  const line = (key: ImpactLine["key"], count?: Interval): ImpactLine => ({ key, values: {}, ...(count ? { count } : {}) });
+  const flow = { metric: "act.rate", kind: "new-mrr" } as const;
+  const churn = { metric: "ret.logo-churn", kind: "retained-mrr" } as const;
+  const many: Interval = { lo: 12, hi: 12 };
 
   it("a flow metric uses the flow sentences, with a label on every step", () => {
-    expect(whatIfTemplate(line("today"), "act.rate", words)).toEqual({ label: "today", template: "todayFlow" });
-    expect(whatIfTemplate(line("if"), "act.rate", words)).toEqual({ label: "if", template: "ifFlow" });
-    expect(whatIfTemplate(line("then"), "act.rate", words)).toEqual({ label: "then", template: "thenFlow" });
-    expect(whatIfTemplate(line("times"), "act.rate", words)).toEqual({ label: "times", template: "timesFlow" });
+    expect(whatIfTemplate(line("today", many), flow, words, "en")).toEqual({ label: "today", template: "todayFlow" });
+    expect(whatIfTemplate(line("if"), flow, words, "en")).toEqual({ label: "if", template: "ifFlow" });
+    expect(whatIfTemplate(line("then"), flow, words, "en")).toEqual({ label: "then", template: "thenFlow" });
+    expect(whatIfTemplate(line("times"), flow, words, "en")).toEqual({ label: "times", template: "timesFlow" });
   });
 
   it("churn has its own sentences (the chain counts customers kept, not added)", () => {
-    expect(whatIfTemplate(line("today"), "ret.logo-churn", words).template).toBe("todayChurn");
-    expect(whatIfTemplate(line("then"), "ret.logo-churn", words).template).toBe("thenChurn");
-    expect(whatIfTemplate(line("times"), "ret.logo-churn", words).template).toBe("timesChurn");
+    expect(whatIfTemplate(line("today"), churn, words, "en").template).toBe("todayChurn");
+    expect(whatIfTemplate(line("then", many), churn, words, "en").template).toBe("thenChurn");
+    expect(whatIfTemplate(line("times"), churn, words, "en").template).toBe("timesChurn");
+  });
+
+  it("a chain with no monthly volume is read per 100 sign-ups — « par mois » would be false", () => {
+    expect(whatIfTemplate(line("today", many), { metric: "act.rate", kind: "per-hundred" }, words, "fr").template).toBe(
+      "todayPerHundred",
+    );
+  });
+
+  it("a noun agrees with the count the line prints: French singular under 2, English only for exactly 1", () => {
+    const oneAndAHalf: Interval = { lo: 1.5, hi: 1.5 };
+    expect(whatIfTemplate(line("today", oneAndAHalf), flow, words, "fr").template).toBe("todayFlowOne");
+    expect(whatIfTemplate(line("today", oneAndAHalf), flow, words, "en").template).toBe("todayFlow");
+    expect(whatIfTemplate(line("then", { lo: 1, hi: 1 }), churn, words, "en").template).toBe("thenChurnOne");
   });
 
   it("the annual line and « less than one » conclude the chain: no step label", () => {
-    expect(whatIfTemplate(line("annual"), "ret.logo-churn", words)).toEqual({ label: null, template: "annual" });
-    expect(whatIfTemplate(line("less-than-one"), "act.rate", words)).toEqual({
+    expect(whatIfTemplate(line("annual"), churn, words, "en")).toEqual({ label: null, template: "annual" });
+    expect(whatIfTemplate(line("less-than-one"), flow, words, "en")).toEqual({
       label: null,
       template: "lessThanOne",
     });

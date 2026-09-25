@@ -73,7 +73,7 @@ export function WhatIf({ metric, strings, locale, from, comparator, stageName, c
   const showLines = moved || !startIsCurrent;
   const rendered = (i: Impact) =>
     i.lines.map((line) => {
-      const { label, template } = whatIfTemplate(line, metric, w);
+      const { label, template } = whatIfTemplate(line, i, w, locale);
       return { key: line.key, label, text: fill(template, { stage: stageName, ...line.values }) };
     });
 

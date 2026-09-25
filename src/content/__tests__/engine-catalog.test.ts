@@ -170,11 +170,17 @@ describe("placeholders", () => {
     expect(mismatched).toEqual([]);
   });
 
-  it("leaves no brace behind once the static page fills them (page.catalogueFill)", () => {
+  it("leaves no brace behind once the static page fills them (visual.static*)", () => {
     for (const locale of LOCALES) {
-      const values = Object.fromEntries(
-        Object.entries(ENGINE_COPY.page.catalogueFill).map(([k, v]) => [k, v[locale]]),
-      );
+      const v = ENGINE_COPY.visual;
+      // The same five slots `lib/engine/phrases.ts#staticCatalogueValues` fills on the static page.
+      const values = {
+        event: v.staticEvent[locale],
+        n: v.staticWindow[locale],
+        cohort: v.staticCohort[locale],
+        month: v.staticMonth[locale],
+        variant: v.staticVariant[locale],
+      };
       for (const [path, t] of allPairs()) {
         if (path.endsWith(".uncomputable")) continue;
         expect(fillTemplate(t[locale], values), path).not.toMatch(/[{}]/);
