@@ -114,6 +114,7 @@
 }
 
 .source {
+  margin: 0;
   font: var(--chart-note);
   color: var(--text-muted);
 }

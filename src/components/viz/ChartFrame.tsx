@@ -68,7 +68,11 @@ export interface ChartFrameProps {
  * The table is the chart's text equivalent, which is why it lives in the
  * frame and not in each chart: no chart ships without its numbers.
  *
- * A `<figure>` labelled by its title. Not a card — no border, no shadow —
+ * A `<figure>` labelled by its title, and captioned by its head (title,
+ * subtitle, unit) — the FIRST child, in every state. The source note is a
+ * plain paragraph: HTML allows one `<figcaption>`, first or last, and a
+ * source note followed by the data disclosure was neither (invalid markup
+ * that assistive technology may not tie to the figure). Not a card — no border, no shadow —
  * so a frame sits inside whatever surface the screen gives it (paper, or a
  * night panel) and reads in both worlds from the semantic tokens alone.
  *
@@ -100,7 +104,7 @@ export function ChartFrame({
       data-testid={testId}
       data-state={state.kind}
     >
-      <div className={styles.head}>
+      <figcaption className={styles.head}>
         <Title id={titleId} className={styles.title}>
           {title}
         </Title>
@@ -111,7 +115,7 @@ export function ChartFrame({
             {unit ? <span className={styles.unit}>{unit}</span> : null}
           </p>
         ) : null}
-      </div>
+      </figcaption>
 
       {state.kind === "ready" ? <div className={styles.chart}>{children}</div> : null}
 
@@ -139,7 +143,7 @@ export function ChartFrame({
         </ul>
       ) : null}
 
-      {source ? <figcaption className={styles.source}>{source}</figcaption> : null}
+      {source ? <p className={styles.source}>{source}</p> : null}
 
       {state.kind === "ready" && data ? (
         <Disclosure summary={data.label} size="sm" className={styles.data} data-testid={`${id}-data`}>
