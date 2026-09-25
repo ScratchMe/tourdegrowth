@@ -23,7 +23,7 @@ Aucun post ne dépasse 280 caractères (X) ; Bluesky en accepte 300.
    *(visuel : le dashboard, deux tuiles floutées)*
 4. > En décembre, le jeu nomme les huit pratiques : obstruction, action forcée, confirmshaming, fausse preuve sociale… Avec la loi et le repère pour les reconnaître dans les applis que tu utilises.
 5. > Et on peut tenir l'année sans une seule astuce. C'est plus long. Mais ça marche.
-6. > Vingt minutes, gratuit, sans compte, rien n'est envoyé. [lien]
+6. > Vingt minutes, gratuit, sans compte, ta partie reste dans ton navigateur. [lien]
    *(visuel : la page de décembre)*
 
 ## Fil EN (6 posts)
@@ -35,7 +35,7 @@ Aucun post ne dépasse 280 caractères (X) ; Bluesky en accepte 300.
    *(visual: the dashboard, two blurred tiles)*
 4. > In December the game names all eight patterns: obstruction, forced action, confirmshaming, fake social proof… with the law behind each and the tell to spot it in the apps you use.
 5. > And you can make it through the year without a single trick. It's slower. It works.
-6. > Twenty minutes, free, no account, nothing sent anywhere. [link]
+6. > Twenty minutes, free, no account, your save stays in your browser. [link]
    *(visual: the December page)*
 
 *Note* : les noms de cartes anglais sont des traductions de travail ; les

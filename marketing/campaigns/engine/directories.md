@@ -25,8 +25,8 @@ présenter comme un outil d'IA serait faux.
 
 ## Description — 140 caractères
 
-- **EN** : `Fifteen numbers, where you lose the most people, and slides for your leadership meeting. Runs in your browser; nothing is sent.` (127)
-- **FR** : `Quinze chiffres, là où tu perds le plus de monde, et des slides pour ton CODIR. Tourne dans ton navigateur ; rien n'est envoyé.` (127)
+- **EN** : `Fifteen numbers, where you lose the most people, and slides for your leadership meeting. Runs in your browser; nothing you type is sent.` (136)
+- **FR** : `Quinze chiffres, là où tu perds le plus de monde, et des slides pour ton CODIR. Tes chiffres ne quittent pas ton navigateur.` (124)
 
 ## Description — 300 caractères
 

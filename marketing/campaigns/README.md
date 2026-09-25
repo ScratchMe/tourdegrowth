@@ -149,7 +149,7 @@ ne faut pas faire, de l'intérieur. »* (Revue de copie §4.2.)
 | Le coût arrive plus tard, comme dans la vraie vie | La confiance des abonnés et le radar de la DGCCRF sont floutés jusqu'en décembre | `GAME-BRIEF.md` §5.3 ; **[portier]** implémentation |
 | On peut gagner en restant droit | Trois fins propres, dont « Tu as tenu. Et ça a marché. » | `GAME-BRIEF.md` §5.11 |
 | Tu repars avec les huit noms officiels, la loi et un cas réel | Catalogue final : obstruction, action forcée, harcèlement d'interface, confirmshaming, fausse preuve sociale, coût caché, présélection, design addictif | `design/game/prototype-s-ils-reviennent.html` (`CARDS`) ; **[portier]** relecture juridique |
-| Rien n'est envoyé, rien n'est gardé ailleurs que chez toi | Jeu 100 % client, aucune fonction serveur, aucune lecture Firestore ; sauvegarde locale seulement | `GAME-BRIEF.md` §9.1, §9.5 ; **[portier]** garde de bundle du jeu |
+| Ta partie n'est gardée que chez toi ; seuls des libellés fixes partent vers la mesure d'audience | Jeu 100 % client, aucune fonction serveur, aucune lecture Firestore ; sauvegarde locale seulement. GoatCounter reçoit une liste fermée d'événements, dont la fin atteinte et l'ordre du DG suivi ou refusé, jamais un texte libre ni un chiffre produit par le joueur | `GAME-BRIEF.md` §9.1, §9.5 ; `src/lib/game/events.ts` ; **[portier]** garde de bundle du jeu |
 | Les chiffres sont ceux d'un jeu | Mention sur le bilan : « chiffres du jeu, modèle simple écrit dans le code » | `GAME-BRIEF.md` §3.3 |
 
 **L'accroche d'actualité, à ne pas surjouer** : la résiliation « en trois

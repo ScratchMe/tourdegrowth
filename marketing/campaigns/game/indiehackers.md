@@ -28,7 +28,7 @@ growth PM who ships the dark patterns. »
 >
 > **4. One quarter was too easy.** There was no stake. The cost only appears over months, so the game is a year long — about twenty minutes. A rushed player gets fired in June; the ending says so kindly.
 >
-> **5. The CEO is what makes it real.** He calls on video every quarter and names one specific project he wants; obeying helps the number, refusing costs his patience. His drawn face and his voice (the browser's speech synthesis, optional, subtitles always on) get firmer or angrier as the year goes.
+> **5. The CEO is what makes it real.** He calls on video every quarter, and from the second one he names a specific project he wants; obeying helps the number, refusing costs his patience. His drawn face and his voice (the browser's speech synthesis, optional, subtitles always on) get firmer or angrier as the year goes.
 >
 > Stack: Next.js and TypeScript, no server at all — pre-rendered pages, one client island, the save in localStorage. Levels are data; the other four stages of the funnel are sketched, retention is the only playable one.
 >

@@ -34,7 +34,7 @@ une adresse personnelle trouvée ailleurs.
 1. `A funnel template that never sees your numbers` (46)
 2. `Your AARRR funnel, as a deck, in your browser` (45)
 
-**Aperçu** : `Free, open source, nothing sent. One slide attached.`
+**Aperçu** : `Free, open source, nothing you type is sent. One slide attached.`
 
 > Hi [name],
 >
@@ -56,7 +56,7 @@ une adresse personnelle trouvée ailleurs.
 1. `Un modèle de funnel qui ne voit pas tes chiffres` (48)
 2. `Ton funnel AARRR en slides, sans rien envoyer` (45)
 
-**Aperçu** : `Gratuit, open source, rien n'est envoyé. Une slide jointe.`
+**Aperçu** : `Gratuit, open source, rien de ce que tu saisis n'est envoyé. Une slide jointe.`
 
 > Bonjour [prénom],
 >
