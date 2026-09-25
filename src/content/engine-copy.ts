@@ -577,15 +577,11 @@ export const ENGINE_COPY = {
       en: "The biggest loss in numbers is always at the top of the funnel; that's not what names the stage holding you back.",
     },
     /**
-     * The two below are DIRECTION-BLIND (« sous ») and only right for a
-     * higher-is-better metric: the peloton slide's columns still read them.
-     * The board no longer does — its row, its sheet and its peloton go
-     * through `phrases.ts#positionLabel`, which picks from `side` by the
-     * metric's direction; `maybeBelowShort`, `within` and `above` went with
-     * that change (P7c), nothing read them any more.
+     * No stamp keys here: a position is worded by `phrases.ts#positionLabel`,
+     * which picks from `side` by the metric's direction — on the board, the
+     * sheet and the peloton slide alike. The direction-blind « Sous le repère »
+     * keys went with that change; churn behind its reference sits ABOVE it.
      */
-    stampReference: { fr: "Sous le repère", en: "Below reference" },
-    stampTarget: { fr: "Sous la cible", en: "Below target" },
     noComparator: { fr: "sans repère · fixe une cible", en: "no reference · set a target" },
   },
   whatIf: {
@@ -1164,8 +1160,8 @@ export const ENGINE_COPY = {
   // --- Storage, file, resume, erase (§14.11) -------------------------------
   storage: {
     backupWarning: {
-      fr: "Ton moteur n'existe que dans ce navigateur. Safari peut effacer les données d'un site que tu n'as pas ouvert depuis sept jours : sauvegarde-le dans un fichier.",
-      en: "Your engine only exists in this browser. Safari may erase the data of a site you haven't opened for seven days: save it to a file.",
+      fr: "Ton moteur n'existe que dans ce navigateur. Safari peut effacer les données d'un site après sept jours d'utilisation de Safari sans passage sur ce site : sauvegarde-le dans un fichier.",
+      en: "Your engine only exists in this browser. Safari may erase a site's data after seven days of Safari use without a visit to that site: save it to a file.",
     },
     neverExported: { fr: "Jamais sauvegardé", en: "Never saved" },
     lastExported: { fr: "Dernière sauvegarde : {date}", en: "Last saved: {date}" },

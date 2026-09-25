@@ -368,7 +368,7 @@ test.describe("the §6.0 example on the board", () => {
       const above = ENGINE_COPY.side.overReference[locale];
       const label = above.charAt(0).toUpperCase() + above.slice(1);
       await expect(sheet.getByTestId("engine-position")).toHaveText(label);
-      await expect(sheet.getByTestId("engine-position")).not.toContainText(ENGINE_COPY.diagnosis.stampReference[locale]);
+      await expect(sheet.getByTestId("engine-position")).not.toContainText(locale === "fr" ? "Sous le repère" : "Below");
     });
   }
 

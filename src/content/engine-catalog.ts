@@ -99,8 +99,8 @@ export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
         source: tool("ga4"),
         label: { fr: "GA4", en: "GA4" },
         path: {
-          fr: "le rapport Acquisition de trafic sur le mois : la colonne Utilisateurs pour les visiteurs (pas Sessions)",
-          en: "the Traffic acquisition report over the month: the Users column for visitors (not Sessions)",
+          fr: "le total Utilisateurs du mois (la métrique Utilisateurs, à ajouter au rapport Acquisition de trafic si elle n'y est pas), pas Sessions",
+          en: "the month's total Users (the Users metric; add it to the Traffic acquisition report if it isn't there), not Sessions",
         },
       },
       {
@@ -152,7 +152,7 @@ export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
         source: tool("ga4"),
         label: { fr: "GA4", en: "GA4" },
         path: {
-          fr: "le rapport Acquisition d'utilisateurs, dimension « Groupe de canaux par défaut du premier utilisateur »",
+          fr: "le rapport Acquisition d'utilisateurs, dimension « Groupe de canaux par défaut pour le premier utilisateur »",
           en: "the User acquisition report, dimension \"First user default channel group\"",
         },
       },
@@ -174,8 +174,8 @@ export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
       },
     ],
     trap: {
-      fr: "Dans GA4, « Referral » veut dire site référent, pas recommandation d'un client ; et « Direct » ramasse tout ce qui n'a pas pu être attribué.",
-      en: "In GA4, \"Referral\" means a referring website, not a customer's recommendation; and \"Direct\" collects everything that couldn't be attributed.",
+      fr: "Dans GA4, « Referral » veut dire site référent, pas recommandation d'un client ; et « Direct » regroupe les visites arrivées sans source connue (favori, adresse tapée, lien sans référent).",
+      en: "In GA4, \"Referral\" means a referring website, not a customer's recommendation; and \"Direct\" groups visits that arrived with no known source (bookmark, typed address, link without a referrer).",
     },
     request: {
       fr: "le nombre d'inscrits en {month}, ventilé par canal d'origine",
@@ -806,8 +806,8 @@ export const ENGINE_DERIVED_CATALOG: Record<DerivedId, EngineDerivedEntry> = {
     },
     uncomputable: { fr: "incalculable — il manque {input}", en: "can't be computed — missing: {input}" },
     capNote: {
-      fr: "durée de vie plafonnée à 36 mois : la plupart des praticiens plafonnent entre trois et cinq ans, on prend le bas",
-      en: "lifetime capped at 36 months: most practitioners cap it between three and five years, we take the low end",
+      fr: "durée de vie plafonnée à 36 mois : beaucoup de praticiens plafonnent entre trois et cinq ans, on prend le bas",
+      en: "lifetime capped at 36 months: many practitioners cap it between three and five years, we take the low end",
     },
   },
   "rev.cac-payback": {
