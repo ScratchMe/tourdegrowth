@@ -1,10 +1,10 @@
 # Show HN
 
 *TODO: à relire. Posté depuis le compte HN `tourdegrowth`, jamais un compte
-personnel. Règles ([news.ycombinator.com/showhn.html](https://news.ycombinator.com/showhn.html)) :
-l'URL dans le champ URL, le champ texte **vide**, l'histoire dans le premier
-commentaire ; être là **trois heures** pour répondre ; ne demander d'upvote à
-personne. Un seul essai propre — pas de second Show HN sans refonte majeure.
+personnel. Règle ([news.ycombinator.com/showhn.html](https://news.ycombinator.com/showhn.html)) :
+ne demander à personne de voter ni de commenter. Usage, pas règle : l'URL dans
+le champ URL, le champ texte **vide**, l'histoire dans le premier commentaire ;
+être là **trois heures** pour répondre. Un seul essai propre — pas de second Show HN sans refonte majeure.
 Jour : mardi à jeudi, 14h-16h heure de Paris (matin côte Est).*
 
 ## Titre (≤ 80 caractères — choisir un)
@@ -27,7 +27,7 @@ Jour : mardi à jeudi, 14h-16h heure de Paris (matin côte Est).*
 > - **The LLM only writes the optional deep dive.** The quick result, roast included, is a library of pre-written verdicts (62 of them: a headline and a per-stage sentence for every stage × score band × tone, plus one for a board where nothing is behind), served with zero network calls. For the deep dive, Gemini is behind a four-model fallback chain with a hard timeout, and the anti-mockery guardrail is in the system prompt, not left to the model's mood.
 > - **Two tones, your choice.** "Straight up", or "roast me" — the roast goes after the strategy, never the person.
 > - **The shared result renders in the reader's language**, not the author's (EN/FR), and the share image carries the score, the weak stage and the next move.
-> - **No account, no email.** Cookie-less analytics (GoatCounter). Answers only leave the browser to compute the score. It's open source (AGPL) if you want to read exactly what happens: github.com/ScratchMe/tourdegrowth
+> - **No account, no email.** Cookie-less analytics (GoatCounter). Answers are sent to compute the score and kept with the result under an unguessable id, with no identity attached. It's open source (AGPL) if you want to read exactly what happens: github.com/ScratchMe/tourdegrowth
 >
 > Known limits, so you don't have to find them: it's self-reported, so it measures whether you *know* your numbers, not the numbers themselves — that's on purpose, and it's why the questions are about practices ("do you track a retention rate?") rather than values. The sample size is small, so there's no benchmark yet; I'd rather show nothing than a fake percentile.
 >

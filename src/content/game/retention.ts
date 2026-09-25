@@ -355,10 +355,12 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
       // TODO: à relire — correction factuelle (revue du 2026-09-25) : la sanction de 2023
       // porte sur des manquements d'information, dont les conditions de résiliation
       // annoncées avant la souscription, pour une enquête (mars 2022-janvier 2023)
-      // antérieure à L215-1-1. Pas sur un parcours de résiliation en ligne.
+      // antérieure à L215-1-1. Pas sur un parcours de résiliation en ligne. Puis
+      // vérification des faits (même jour) : l'amende du 18 juillet 2023 est prononcée
+      // par la DDPP du Nord, sous l'autorité du préfet, pas par la DGCCRF nationale.
       cas: t(
-        "Basic-Fit a écopé en 2023 de 68 500 € d'amende de la DGCCRF pour des faits antérieurs à cette loi, notamment des conditions de résiliation mal annoncées avant la souscription.",
-        "Basic-Fit was fined €68,500 in 2023 by the DGCCRF, France's consumer protection authority, for conduct that predates this law, notably cancellation terms not properly disclosed before people subscribed.",
+        "Basic-Fit a écopé en 2023 d'une amende administrative de 68 500 €, prononcée par la direction de la protection des populations du Nord, pour des faits antérieurs à cette loi, notamment des conditions de résiliation mal annoncées avant la souscription.",
+        "In 2023, Basic-Fit was fined €68,500 by the consumer protection office of France's Nord département, for conduct that predates this law, notably cancellation terms not properly disclosed before people subscribed.",
       ),
       tell: t(
         "Si tu cherches le bouton depuis plus de dix secondes, ce n'est pas toi. C'est voulu.",
@@ -391,21 +393,30 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
         "Des sollicitations répétées et insistantes qui entravent l'exercice d'un droit, comme celui de résilier, sont une pratique commerciale agressive : article L121-6 du Code de la consommation. Pour les plateformes en ligne, le règlement européen DSA cite aussi en exemple le fait de redemander un choix déjà fait.",
         "Repeated and insistent solicitations that hinder the exercise of a right, such as the right to cancel, are an aggressive commercial practice under French law, article L121-6 of the Consumer Code. For online platforms, the EU's Digital Services Act also gives asking again for a choice already made as an example.",
       ),
+      // TODO: à relire — vérification des faits (2026-09-25) : le hall of shame ne
+      // classe qu'une quinzaine d'exemples sous « nagging », Amazon n'en fait pas
+      // partie ; « Amazon et Google en tête » ne valait que pour le hall of shame
+      // entier.
       cas: t(
-        "Le site deceptive.design en recense des dizaines d'exemples dans son hall of shame, Amazon et Google en tête.",
-        "The site deceptive.design lists dozens of examples in its hall of shame, with Amazon and Google at the top.",
+        "Le site deceptive.design en recense des exemples dans son hall of shame, dont certains chez Google.",
+        "The site deceptive.design lists examples of it in its hall of shame, including some from Google.",
       ),
       tell: t("Chaque « Non merci » ouvre une nouvelle porte.", 'Every "No thanks" opens another door.'),
     },
     shame: {
       official: t("Confirmshaming", "Confirmshaming"),
+      // TODO: à relire — vérification des faits (2026-09-25) : aucune source pour « il
+      // pèse dans l'appréciation d'une pratique déloyale » ; la CNIL ne juge pas les
+      // pratiques commerciales.
       law: t(
-        "Pas d'interdiction directe en France, mais la CNIL le classe parmi les designs trompeurs, et il pèse dans l'appréciation d'une pratique déloyale.",
-        "Not banned outright in France, but the CNIL, France's data protection authority, lists it among deceptive designs, and it weighs when a practice is judged unfair.",
+        "Pas d'interdiction spécifique en France, mais la CNIL le range parmi les designs trompeurs, sous le nom de « chantage émotionnel ».",
+        "Not specifically banned in France, but the CNIL, France's data protection authority, lists it among deceptive designs, under the name \"emotional blackmail\".",
       ),
+      // TODO: à relire — vérification des faits (2026-09-25) : pas « le plus documenté
+      // » ; deceptive.design en compte 21 contre 135 pour la résiliation difficile.
       cas: t(
-        "C'est le dark pattern le plus documenté en ligne : le bouton de refus qui te fait passer pour un idiot.",
-        "It is the most documented dark pattern online: the decline button that makes you look like a fool.",
+        "C'est l'un des dark patterns les plus connus : le bouton de refus qui te fait passer pour un idiot.",
+        "It is one of the best-known dark patterns: the decline button that makes you look like a fool.",
       ),
       tell: t("Le bouton refuse à ta place, avec tes mots.", "The button says no for you, in words it puts in your mouth."),
     },
@@ -445,21 +456,30 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
         "La CNIL décrit ce détournement de l'attention dans ses ressources sur le design trompeur : le bouton mis en avant n'est pas celui que l'utilisateur cherche.",
         "The CNIL, France's data protection authority, describes this diversion of attention in its resources on deceptive design: the button pushed forward is not the one the user is looking for.",
       ),
+      // TODO: à relire — vérification des faits (2026-09-25) : « la norme » n'est
+      // établi par aucune source ; « courant » l'est.
       cas: t(
-        "Proposer la pause avant la sortie est devenu la norme du streaming. La réactiver sans prévenir, c'est autre chose.",
-        "Offering a pause before the exit has become the norm in streaming. Switching it back on without warning is something else.",
+        "Proposer une pause avant la résiliation est devenu courant dans le streaming. La réactiver sans prévenir, c'est autre chose.",
+        "Offering a pause before cancellation has become common in streaming. Switching it back on without warning is something else.",
       ),
       tell: t("Le gros bouton n'est pas celui que tu cherches.", "The big button isn't the one you're looking for."),
     },
     streak: {
       official: t("Design addictif", "Addictive design"),
+      // TODO: à relire — vérification des faits (2026-09-25) : aucun texte n'est encore
+      // proposé, donc il ne « vise » rien ; c'est la consultation qui cite la série.
+      // Aucune source pour les « notifications de culpabilisation » ; le rapport
+      // français de 2024 parle de designs addictogènes et de notifications infinies,
+      // pas de séries.
       law: t(
-        "Le futur Digital Fairness Act européen, attendu fin 2026, vise explicitement les mécanismes addictifs, séries et notifications de culpabilisation compris. La France les cite déjà dans ses travaux sur les écrans des mineurs.",
-        "The EU's upcoming Digital Fairness Act, expected at the end of 2026, explicitly targets addictive mechanisms, streaks and guilt-tripping notifications included. France already names them in its work on children and screens.",
+        "Le futur Digital Fairness Act européen, dont la proposition est attendue fin 2026, doit traiter le design addictif ; la consultation de la Commission cite en exemple la perte d'une série. En France, la commission « Enfants et écrans » dénonçait déjà en 2024 les designs addictifs et les notifications sans fin.",
+        "The EU's upcoming Digital Fairness Act, with a proposal expected at the end of 2026, is set to address addictive design; the Commission's consultation gives losing a streak as an example. In France, the 2024 \"Children and screens\" expert commission already denounced addictive designs and endless notifications.",
       ),
+      // TODO: à relire — vérification des faits (2026-09-25) : « ont fait la fortune »
+      // est une causalité sans source.
       cas: t(
-        "Les séries quotidiennes ont fait la fortune des applis d'apprentissage et de jeu. Elles marchent parce qu'elles reposent sur la peur de perdre, pas sur l'envie de revenir.",
-        "Daily streaks made the fortune of learning and gaming apps. They work because they run on the fear of losing, not on the wish to come back.",
+        "Les séries quotidiennes sont devenues un ressort central de nombreuses applis d'apprentissage et de jeu. Elles jouent sur la peur de perdre, pas sur l'envie de revenir.",
+        "Daily streaks have become a central hook in many learning and gaming apps. They play on the fear of losing, not on the wish to come back.",
       ),
       tell: t(
         "L'appli te parle de ce que tu vas perdre, jamais de ce que tu vas trouver.",

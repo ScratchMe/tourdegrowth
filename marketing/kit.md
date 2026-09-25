@@ -154,7 +154,8 @@ l'utilise attend que la case soit cochée dans `campaigns/engine/show-hn.md`.
 - Les accroches légales, avec leur source : résiliation « en trois clics »
   obligatoire en France depuis le 1ᵉʳ juin 2023 (article L215-1-1 du Code de
   la consommation) ; interfaces trompeuses interdites aux plateformes par le
-  DSA (article 25).
+  DSA (article 25), hors pratiques déjà couvertes par la directive sur les
+  pratiques commerciales déloyales ou le RGPD.
 
 **À ne pas avancer** :
 - **le nom d'une entreprise réelle**, dans aucun post, même condamnée, même
@@ -166,8 +167,9 @@ l'utilise attend que la case soit cochée dans `campaigns/engine/show-hn.md`.
   **pas** ce jeu ;
 - les chiffres du jeu comme ceux d'une étude : « chiffres du jeu, modèle
   simple écrit dans le code » ;
-- une date pour le Digital Fairness Act : il est « attendu fin 2026 », rien
-  de plus ;
+- une date pour le Digital Fairness Act : la proposition de la Commission
+  est annoncée pour le quatrième trimestre 2026, rien de plus — pas le texte
+  adopté, qui prendra des années ;
 - « vingt minutes » tant que la recette ne l'a pas mesuré (décision 5 du
   2026-09-24) ;
 - un mode classe, un guide enseignant ou une offre entreprise : hors
@@ -214,7 +216,7 @@ laissait ouvrir) ; le reste est à confirmer au moment de remplir.
 |---|---|---|---|---|---|
 | **Launching Next** | `launchingnext.com/submit/` | Non (un e-mail) | Oui ; 99 $ pour passer en 1 jour | Nom, URL, titre 5-8 mots, description ≤ 2 500 car., 5-10 tags, type « side project », budget marketing 90 j, **nom + e-mail du soumetteur** | **Premier à faire.** Soumetteur : « Tour de Growth », `contact@` |
 | **Uneed** | `uneed.best/submit-a-tool` | Pas pour commencer ; inscription pour enregistrer | Oui (file d'attente) ; « fast-track » payant | Nom + URL, le reste est aspiré de la page | À faire ; l'inscription se fait avec `contact@` |
-| **Fazier** | `fazier.com/submit` | Probable | Oui (« reviewed & listed within 30 days ») ; 29 / 49 / 139 $ | Le formulaire n'était pas visible ; le plan gratuit **exige un backlink** vers Fazier | À faire si le backlink retour est acceptable (un lien dans le pied de page ? non — plutôt dans `/about`, ou refuser) |
+| **Fazier** | `fazier.com/submit` | Probable | Oui (« reviewed & listed within 30 days ») ; 29 / 49 / 139 $ | Le formulaire n'était pas visible ; le plan gratuit **exige un backlink** vers Fazier, sur la page d'accueil ou dans le pied de page | À faire seulement si ce lien retour est acceptable — `/about` ne suffit pas ; sinon refuser |
 | **BetaList** | `betalist.com/submit` | **Oui** (X ou lien magique) | Oui + option payante | Non vu (page de connexion) | À faire avec le compte de marque X |
 | **Smol Launch** | `smollaunch.com` | À vérifier | Annoncé gratuit et dofollow | À vérifier | À faire |
 | **DevHunt** | `devhunt.org` | Compte GitHub | Gratuit | Outils pour développeurs | **Écarter sauf sous un compte GitHub de marque** : le compte `ScratchMe` est le dépôt de l'auteur |
@@ -226,7 +228,7 @@ laissait ouvrir) ; le reste est à confirmer au moment de remplir.
 | **There's An AI For That** | `theresanaiforthat.com/submit/` | À vérifier (la page refuse les robots) | Historiquement payant pour un passage rapide | — | À vérifier ; n'y aller que si une file gratuite existe |
 | **Futurepedia** | `futurepedia.io/submit-tool` | — | **Non** : 247 $ (épuisé) / 497 $ | — | **Écarter** |
 | **Toolify** | `toolify.ai` | À vérifier | À vérifier | — | À vérifier en dernier |
-| **Product Hunt** | — | Vrai nom exigé pour un maker | — | — | Dernier de la liste, sans maker déclaré, si jamais |
+| **Product Hunt** | — | Nom complet exigé pour tout compte, comptes d'entreprise refusés | — | — | Dernier de la liste, sans maker déclaré, si jamais |
 
 Règle pour tous : le champ « description » reçoit la version 300 (ou 140 si
 le champ est court), le champ « tagline » la tagline, le lien est celui de

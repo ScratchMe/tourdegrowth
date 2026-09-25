@@ -155,8 +155,10 @@ ne faut pas faire, de l'intérieur. »* (Revue de copie §4.2.)
 **L'accroche d'actualité, à ne pas surjouer** : la résiliation « en trois
 clics » est obligatoire en France depuis le 1ᵉʳ juin 2023 (article L215-1-1
 du Code de la consommation) ; le DSA (article 25) interdit aux plateformes en
-ligne les interfaces conçues pour tromper ; le Digital Fairness Act est
-**attendu** fin 2026. Le jour où la Commission publie sa proposition, c'est un
+ligne les interfaces trompeuses, hors pratiques déjà couvertes par la directive
+sur les pratiques commerciales déloyales ou le RGPD ; la **proposition** de la
+Commission sur le Digital Fairness Act est annoncée pour le quatrième trimestre
+2026. Le jour où la Commission publie sa proposition, c'est un
 créneau réactif (§5, dernière ligne) — jamais une promesse de date dans un
 post.
 
@@ -184,7 +186,7 @@ signal.
 | **Newsletters** (depuis `contact@`) | — | ● | ● | Un pitch d'un paragraphe ; B aux newsletters growth, C aux newsletters design et tech, FR et EN | Moyen |
 | **IndexNow** | ● | ● | ● | Automatique (workflow quotidien) dès que la page entre au sitemap | Nul |
 | LinkedIn, presse, podcasts, messages directs | ✕ | ✕ | ✕ | Exclus (`GROWTH-PLAN.md` §0) | — |
-| Product Hunt | ✕ | ✕ | ✕ | Vrai nom exigé pour un maker | — |
+| Product Hunt | ✕ | ✕ | ✕ | Nom complet exigé pour tout compte, comptes d'entreprise refusés | — |
 
 ● = canal principal · ○ = conditionnel · — = pas pour ce lancement · ✕ = exclu
 

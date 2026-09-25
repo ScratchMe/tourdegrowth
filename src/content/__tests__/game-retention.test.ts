@@ -270,7 +270,7 @@ const BRANDS = ["Basic-Fit", "Amazon", "Adobe", "Google", "deceptive.design"];
 const NOT_BRANDS = new Set([
   "Aux", "C'est", "DGCCRF", "Elles", "La", "Le", "Les", "Proposer", "États-Unis",
   "Daily", "Fake", "France's", "In", "It", "Offering", "Switching", "The", "They", "United", "States",
-  "Prime", "Iliad",
+  "Prime", "Iliad", "Nord",
 ]);
 
 const CAPITALISED = /(?<![\p{L}'-])\p{Lu}[\p{L}'’-]*/gu;
@@ -477,6 +477,14 @@ const NOT_FROM_PROTOTYPE: Record<string, string> = {
   "patterns.bury.cas": "fact check — Basic-Fit's 2023 fine was about disclosure, not a cancellation path",
   "patterns.cascade.law": "legal check — DSA art. 25.2 excludes practices covered by the UCPD",
   "patterns.notice.cas": "fact check — Adobe's $150M is half penalty, half free services",
+  // The fact check of the same day, against primary sources: a superlative or a
+  // causal claim no source supports is softened, a count that doesn't hold is dropped.
+  "patterns.cascade.cas": "fact check — deceptive.design tags ~15 nagging examples, none of them Amazon's",
+  "patterns.shame.law": "fact check — no source says it weighs in an unfair-practice ruling",
+  "patterns.shame.cas": "fact check — not the most documented: 21 examples against 135 for hard to cancel",
+  "patterns.pdef.cas": "fact check — « common », not « the norm »",
+  "patterns.streak.law": "fact check — no DFA text exists yet; the consultation, not the act, names streaks",
+  "patterns.streak.cas": "fact check — « made the fortune » is a causal claim with no source",
   "nextLevel.status": "R15",
   "footer.*": "R15",
   "tourLoop.*": "new — brief §13.3 D",

@@ -1,9 +1,10 @@
 # Show HN — le moteur de croissance (lancement B)
 
-*TODO: à relire. Compte HN `tourdegrowth`, jamais un compte personnel. Règles
-de [Show HN](https://news.ycombinator.com/showhn.html) : l'URL dans le champ
-URL, le champ texte **vide**, l'histoire dans le premier commentaire ; rester
-**trois heures** pour répondre ; ne demander de vote à personne. Mardi ou
+*TODO: à relire. Compte HN `tourdegrowth`, jamais un compte personnel. Règle
+de [Show HN](https://news.ycombinator.com/showhn.html) : ne demander à personne
+de voter ni de commenter. Usage, pas règle : l'URL dans le champ URL, le champ
+texte **vide**, l'histoire dans le premier commentaire ; rester
+**trois heures** pour répondre. Mardi ou
 mercredi, 14-16 h heure de Paris. C'est le premier des **deux** Show HN de ce
 pseudonyme au plus (le jeu suit à trois semaines au minimum) : le Tour n'y
 retourne pas (décision D1 du brief).*
@@ -53,7 +54,7 @@ sent » (82 caractères, trop long).
 > - **It won't name a leak without a reference.** A stage is only called "the leak" against a target you set, or against one of two published ranges it can cite, with the caveat printed on the slide. Otherwise it says it can't tell — and tells you what to measure first.
 > - **Export without a server.** PDF is the browser's print (zero JavaScript); PNG loads a small library only when you click. The deck credits the site in its footer by default; it's your deck, so you can turn that off.
 >
-> Known limits, so you don't have to find them: v1 assumes a self-serve SaaS (freemium or trial); sales-led B2B, consumer apps and marketplaces aren't modelled yet. There's no PowerPoint export — the display font can't be embedded, and a deck in the wrong font is worse than a PDF.
+> Known limits, so you don't have to find them: v1 assumes a self-serve SaaS (freemium or trial); sales-led B2B, consumer apps and marketplaces aren't modelled yet. There's no PowerPoint export yet — a deck generated in the browser can't carry the display font, and a deck in a substitute font is worse than a PDF.
 >
 > It sits next to a 3-minute check-up that asks whether you *measure* each stage; this one asks what the numbers *say*. Code is open (AGPL): github.com/ScratchMe/tourdegrowth
 >
@@ -69,7 +70,7 @@ sent » (82 caractères, trop long).
 | **"Benchmarks are meaningless across companies."** | Agreed, which is why there are only two, each printed with its caveat, and the default comparison is a target *you* set. Most stages say "no publishable reference — set a target". |
 | **"Why counts instead of rates?"** | Because a rate without its denominator can't be checked, and half of funnel arguments are two people using two denominators. |
 | **"Your funnel math is naive."** | Tell me where. The one deliberate simplification is written on the slide itself: "all else equal, paying customers are assumed to come from activated users." The arithmetic behind every title is shown line by line. |
-| **"No PowerPoint?"** | Not in v1. The display font can't be embedded in PPTX, and every hatch and dotted line would need redrawing as shapes. PNG per slide pastes into your own deck template, which is what most people do with a leadership deck anyway. |
+| **"No PowerPoint?"** | Not in v1. A PPTX generated in the browser can't carry the display font, and every hatch and dotted line would need redrawing as shapes. PNG per slide pastes into your own deck template, which is what most people do with a leadership deck anyway. |
 | **"Only self-serve SaaS?"** | For now. The fifteen numbers and where to find them differ for sales-led B2B and marketplaces; I'd rather ship one profile that's right than four that are vague. |
 | **"Is there AI in it?"** | No. Every sentence in the tool and on the slides is written in advance and chosen by rules; nothing is generated. |
 | **"Business model?"** | It's free and there's no account system to sell you anything through. The deck credits the site by default, and you can remove that. |

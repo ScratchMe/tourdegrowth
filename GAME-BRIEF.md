@@ -4,7 +4,7 @@ Version 1.2 · 25 septembre 2026 · rédigé à partir du prototype validé par 
 
 **Journal des versions**
 
-- **1.2 · 25 septembre 2026.** Section 15 nouvelle : les seize écarts assumés au brief (E1 à E16), les trois mondes de la page, la région vivante unique, l'encart du résultat (place et règle du goulot partagé), les images de partage, et ce que le drapeau veut dire sur Vercel. Corrigés en place pour ne plus contredire la section 15 : 9.6 (événements), 9.7 (région vivante), 9.9 (brief de design remplacé), P6, P9, P15, P16, 13.3 (place de l'encart).
+- **1.2 · 25 septembre 2026.** Section 15 nouvelle : les seize écarts assumés au brief (E1 à E16), les trois mondes de la page, la région vivante unique, l'encart du résultat (place et règle du goulot partagé), les images de partage, et ce que le drapeau veut dire sur Vercel. Corrigés en place pour ne plus contredire la section 15 : 9.6 (événements), 9.7 (région vivante), 9.9 (brief de design remplacé), P6, P9, P15, P16, 13.3 (place de l'encart). Le même jour, 1.3 vérifié contre les sources primaires (communiqués de la FTC et du ministère américain de la Justice, Légifrance, règlement DSA) : Basic-Fit, DSA et Adobe corrigés, comme leur version imprimée dans le catalogue du jeu.
 - **1.1 · 14 septembre 2026.** Section 13, drapeau d'activation et points d'entrée. 13.1 corrigé le 25 septembre : une variable Vercel modifiée exige un redéploiement.
 - **1.0.** Brief issu du prototype.
 Destinataire : l'agent ou le développeur qui implémente le jeu dans ce dépôt.
@@ -42,9 +42,9 @@ Le jeu est purement client, sans serveur, bilingue dès la conception, et chaque
 
 ### 1.3 Pourquoi maintenant
 
-- France : résiliation « en trois clics » obligatoire depuis le 1er juin 2023 (article L215-1-1 du Code de la consommation) ; amende DGCCRF de 68 500 € contre Basic-Fit pour un parcours non conforme.
-- Union européenne : le DSA (article 25) interdit aux plateformes en ligne les interfaces conçues pour tromper ou manipuler ; le Digital Fairness Act, attendu fin 2026, vise explicitement les mécanismes addictifs et la résiliation aussi simple que la souscription.
-- États-Unis : Amazon a accepté en 2025 de payer 2,5 milliards de dollars, en partie pour son parcours de désabonnement Prime baptisé « Iliad » ; Adobe, 150 millions de dollars en 2026 pour des frais de résiliation anticipée mal annoncés.
+- France : résiliation « en trois clics » obligatoire depuis le 1er juin 2023 (article L215-1-1 du Code de la consommation) ; amende administrative de 68 500 € prononcée en 2023 par la DDPP du Nord contre Basic-Fit, pour des faits antérieurs à cette loi, notamment des conditions de résiliation mal annoncées avant la souscription (pas pour un parcours de résiliation).
+- Union européenne : le DSA (article 25) interdit aux plateformes en ligne les interfaces conçues pour tromper ou manipuler, hors pratiques déjà couvertes par la directive sur les pratiques commerciales déloyales ou le RGPD (25.2) — ce qui exclut la résiliation d'un abonnement grand public, d'où l'article L121-6 dans le jeu ; la proposition de Digital Fairness Act est attendue au quatrième trimestre 2026 et doit traiter le design addictif et la résiliation.
+- États-Unis : Amazon a accepté en 2025 de payer 2,5 milliards de dollars, en partie pour son parcours de désabonnement Prime baptisé « Iliad » ; Adobe a conclu en 2026 un accord de 150 millions de dollars (75 d'amende civile, 75 de services gratuits) pour clore des poursuites sur ses frais de résiliation anticipée et son parcours de résiliation, sans reconnaissance des faits.
 - Éducation : l'éducation aux médias et à l'information est au programme, les compétences Pix couvrent la protection des données. Les enseignants ont un mandat et peu d'outils.
 
 ### 1.4 Ce que le jeu n'est pas

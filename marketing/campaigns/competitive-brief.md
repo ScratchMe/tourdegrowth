@@ -96,7 +96,7 @@ taux, ni ne refuse de conclure quand il manque une donnée.
 - La référence : taxonomie (le vocabulaire « deceptive patterns », dark
   patterns auparavant), « hall of shame » par marque, base de lois,
   publications 2026 sur la réglementation et les patterns de l'IA.
-- **Aucun jeu.** Force : l'autorité, citée jusque dans la législation.
+- **Aucun jeu.** Force : l'autorité ; c'est lui qui a fixé le vocabulaire.
   C'est une source, pas un rival : le jeu y renvoie par son vocabulaire.
 
 **Dark Patterns Detective** (`games.productartistry.com`, **Show HN du

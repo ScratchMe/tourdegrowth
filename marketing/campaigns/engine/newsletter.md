@@ -26,7 +26,8 @@ une adresse personnelle trouvée ailleurs.
 
 - EN : Growth Unhinged, Demand Curve, Product-Led Alliance, la newsletter
   d'Elena Verna, les mentions « tools » de Lenny's Newsletter.
-- FR : Growth Makers, Kiosque, GrowthList, Le Growth Club.
+- FR : Growth Makers (devenue Mantra), Le Growth Club. « Kiosque » reste à
+  identifier ; GrowthList retirée (c'est une base de données, pas une newsletter).
 
 ## EN
 
