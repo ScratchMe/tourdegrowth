@@ -1161,6 +1161,14 @@
   color: var(--text-muted);
 }
 
+/* The PDF button with its phone warning directly under it: the warning is about that export only. */
+.exportPdf {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
 /*
  * "More reliable from a computer" is a warning for phones only (engine spec
  * E5: iOS's print sheet is unpredictable; the PDF is announced, never
