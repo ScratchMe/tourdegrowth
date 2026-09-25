@@ -3,9 +3,12 @@ import Link from "next/link";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import { ProsePage, ProseSection, ProseText } from "@/components/brand/ProsePage";
 import { ZoneNav } from "@/components/game/ZoneNav";
+import { REPO_URL } from "@/content/about";
 import { GAME_HUB } from "@/content/game/hub";
 import { GAME_META, RETENTION_INTRO } from "@/content/game/meta";
+import { RETENTION_CONTENT } from "@/content/game/retention";
 import { GLOSSARY_TERMS } from "@/content/glossary-terms";
+import { resolveLevelCopy, type RetentionCopy } from "@/lib/game/copy";
 import { GAME_LEVELS_BY_PILLAR } from "@/lib/game/levels";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
@@ -13,11 +16,24 @@ import { localePath } from "@/lib/i18n/routes";
 import { PILLARS } from "@/lib/scoring/pillars";
 import { breadcrumbSchema, gameSchema, JsonLd } from "@/lib/seo/jsonld";
 import { gameMetadata } from "../game-metadata";
-import { GameIslandSlot } from "./GameIslandSlot";
+import { GameIsland } from "./GameIsland";
+import type { IslandCopy } from "./island-view";
 import own from "./page.module.css";
 
 const PATH = "/game/retention";
 const PILLAR = "retention" as const;
+/** The file the footnote points to: the model is written, and anyone can read it (plan §2.7, P19). */
+const MODEL_SOURCE_URL = `${REPO_URL}/blob/main/src/lib/game/model.ts`;
+
+/**
+ * What the island needs, and nothing it doesn't: the intro, the zones and the
+ * footnote are rendered here, on the server, where they are indexable. The
+ * rest crosses as one prop, in one language (plan E3).
+ */
+function islandCopy(copy: RetentionCopy): IslandCopy {
+  const { intro: _intro, zones: _zones, footer: _footer, ...rest } = copy;
+  return rest;
+}
 
 interface PageProps {
   params: Promise<{ locale: string }>;
@@ -35,9 +51,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 /**
- * `/{locale}/game/retention` — level 1, « S'ils reviennent ». The SHELL
- * (plan §4.2 G4a): the paper-world intro, the zone nav and the slot the
- * island will fill.
+ * `/{locale}/game/retention` — level 1, « S'ils reviennent »: the paper-world
+ * intro and the zone nav, then the year itself — the island, a night band as
+ * wide as the desk (plan §2.1) — and the footnote that says what the numbers
+ * are.
  *
  * Prerendered, like every content page: the intro is the indexable part of
  * the level, read by search engines and by anyone before they play (plan
@@ -50,6 +67,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function RetentionLevelPage({ params }: PageProps) {
   const locale = (await params).locale as Locale;
   const intro = RETENTION_INTRO;
+  const copy = resolveLevelCopy<RetentionCopy>(RETENTION_CONTENT, locale);
   const hubHref = localePath(locale, "/game");
 
   const zones = PILLARS.map((pillar) => {
@@ -93,6 +111,17 @@ export default async function RetentionLevelPage({ params }: PageProps) {
         title={tc(intro.title, locale)}
         kicker={<MetaLabel size="xs">{tc(intro.eyebrow, locale)}</MetaLabel>}
         lead={tc(intro.lead, locale)}
+        band={
+          <>
+            <GameIsland copy={islandCopy(copy)} locale={locale} />
+            <p className={own.footnote} data-testid="game-footnote">
+              {copy.footer.note}{" "}
+              <a href={MODEL_SOURCE_URL} target="_blank" rel="noopener">
+                {copy.footer.codeLink}
+              </a>
+            </p>
+          </>
+        }
       >
         <ProseSection heading={tc(intro.stepsTitle, locale)}>
           <ol className={own.steps}>
@@ -116,7 +145,6 @@ export default async function RetentionLevelPage({ params }: PageProps) {
 
         <ZoneNav label={tc(GAME_HUB.zonesTitle, locale)} items={zones} compactLabel={compactLabel} />
 
-        <GameIslandSlot title={tc(intro.pendingTitle, locale)} body={tc(intro.pendingBody, locale)} />
       </ProsePage>
     </>
   );

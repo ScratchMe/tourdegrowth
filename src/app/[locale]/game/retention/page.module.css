@@ -1,5 +1,5 @@
 /* The level page's paper-world intro (plan §2.1). The frame is ProsePage's;
-   this module adds the three steps and the provisional slot. */
+   this module adds the three steps and the footnote under the year. */
 
 .steps {
   list-style: none;
@@ -36,31 +36,19 @@
   color: var(--text-body);
 }
 
-/* PROVISIONAL — see GameIslandSlot. Dashed: the system's "pending". */
-.slot {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--pad-card);
-  border: var(--border-dashed);
-  border-radius: var(--radius-card);
-  background: var(--surface-sunken);
-}
-
-.slotTitle {
-  font: var(--title-card);
-  color: var(--text-body);
-  margin: 0;
-}
-
-.slotBody {
-  font: var(--body-md);
+/* Under the year, on paper: what the numbers are, and where the model that
+   produced them is written (plan §2.7, P19). As wide as the desk above. */
+.footnote {
+  max-width: var(--width-desktop);
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--space-12) 24px 0;
+  font: var(--body-sm);
   color: var(--text-muted);
-  margin: 0;
 }
 
 @media (max-width: 760px) {
-  .slot {
-    padding: var(--pad-card-mobile);
+  .footnote {
+    padding: var(--space-11) var(--game-gutter-mobile) 0;
   }
 }
