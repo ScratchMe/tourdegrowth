@@ -306,7 +306,8 @@ export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
         label: { fr: "Mixpanel ou PostHog", en: "Mixpanel or PostHog" },
         path: {
           fr: "un entonnoir inscription puis {event}, avec une fenêtre de conversion de {n} jours",
-          en: "a sign-up then {event} funnel, with a {n}-day conversion window",
+          // No article before {n}: the static catalogue page fills it with the letter "n", and "a n-day" is wrong.
+          en: "a funnel from sign-up to {event}, with a conversion window of {n} days",
         },
       },
       {

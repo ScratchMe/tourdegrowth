@@ -5,7 +5,7 @@ import { deriveEngine } from "../derive";
 import { comparatorOf, impactTarget } from "../diagnose";
 import { fillTemplate, formatInterval } from "../format";
 import { whatIf } from "../impact";
-import { behindSentence, blindSentence, notEnoughBelowSentence, staticCatalogueValues, subjectOf, unpricedSentence } from "../phrases";
+import { behindSentence, blindSentence, catalogueValues, notEnoughBelowSentence, staticCatalogueValues, subjectOf, unpricedSentence } from "../phrases";
 import { buildRequest } from "../request";
 import { findingText, sanityText } from "../sentences";
 import { SLIDE_ORDER } from "../types";
@@ -37,7 +37,8 @@ import { emptyState, estimated, exampleState, measured, missing, ratio, tourResu
  * empty segments (empty clause AND dangling « sources : »), a capitalised
  * stage in `blindSentence`, « Inscrits de {cohort} », « au-dessus de le
  * repère », « sources: » without its no-break space, "sources :" in English,
- * « ni ta cible », and `numbered` always plural. Two breaks first PASSED, and
+ * « ni ta cible », `numbered` always plural, and "with a {n}-day" put back in
+ * the catalogue (the static page prints "a n-day"). Two breaks first PASSED, and
  * both said something: `slide.leakAside` is copy no code prints (so a glyph
  * there reaches no slide), and the example's months are consonant-initial
  * (hence the vowel-month scenario).
@@ -276,6 +277,13 @@ function sweep(): Sweep {
       // The request a reader copies to a colleague: every number at once.
       add("request", buildRequest("data", METRIC_SHAPES.map((s) => s.id), p.strings, p.metrics, state, p.ctx), false);
 
+      // The sheet: each number's recipe filled with THIS state's month, cohort, window and event.
+      for (const m of p.metrics) {
+        const fills = catalogueValues(state, m.id, p.strings, p.metrics, p.ctx);
+        for (const [key, value] of Object.entries({ formula: m.formula, request: m.request })) add(`sheet ${m.id}.${key}`, fillTemplate(value, fills), false);
+        for (const w of m.where) add(`sheet ${m.id}.where`, fillTemplate(w.path, fills), false);
+      }
+
       // The static catalogue page (once per language: it has no state).
       if (scenario === SCENARIOS[0]) {
         const fills = staticCatalogueValues(p.strings);
@@ -390,6 +398,13 @@ const RULES: Rule[] = [
     name: "English typography: no space before ; : ! ? %, no guillemets",
     applies: (s) => s.locale === "en",
     check: (s) => s.text.match(/.{0,20}(?:[  ][;:!?%]|[«»]).{0,20}/)?.[0] ?? null,
+  },
+  {
+    // Only what a template can see: a vowel letter, 8, 11, 18, or the static page's "n-" (its window is the
+    // letter n). The windows a state can hold (7/14/30, 30/60/90) all take "a"; "a one-off" is right too.
+    name: "English: « an » before a vowel sound (\"an 8-day\", \"an n-day\")",
+    applies: (s) => s.locale === "en",
+    check: (s) => unquoted(s.text).match(/.{0,20}(?<![\p{L}\d'’-])[Aa] (?:[aei]|o(?!ne|nce)|8|1[18](?![\d.,])|n-).{0,20}/u)?.[0] ?? null,
   },
   {
     name: "a slide never addresses the reader (« ta cible », \"your\")",
