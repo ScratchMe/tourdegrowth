@@ -99,6 +99,43 @@ describe("trackEvent — events fired before the script has loaded", () => {
     expect(count).not.toHaveBeenCalled();
   });
 
+  it("an event fired after the script arrived, before the poller ticked, does not overtake the queue", () => {
+    vi.useFakeTimers();
+    const win: { goatcounter?: { count: ReturnType<typeof vi.fn> } } = {};
+    (globalThis as { window?: unknown }).window = win;
+
+    // A mount event, fired before count.js loaded…
+    trackEvent("game_started", "retention/direct");
+    const count = vi.fn();
+    win.goatcounter = { count };
+    // …then a click, inside the poller's 150 ms gap.
+    trackEvent("game_hangup", "1");
+
+    // Nothing waits for the tick: both go out now, in the order they happened.
+    expect(count.mock.calls.map((c) => (c[0] as { path: string }).path)).toEqual([
+      "game_started/retention/direct",
+      "game_hangup/1",
+    ]);
+    vi.advanceTimersByTime(200);
+    expect(count).toHaveBeenCalledTimes(2);
+  });
+
+  // Non-vacuity: without the flush at the top of trackEvent, the test above
+  // fails and this one still passes — a companion that pins the other branch
+  // (script still missing), not a guarantee on its own.
+  it("an event fired while the script is still missing joins the queue behind the earlier ones", () => {
+    vi.useFakeTimers();
+    const win: { goatcounter?: { count: ReturnType<typeof vi.fn> } } = {};
+    (globalThis as { window?: unknown }).window = win;
+
+    trackEvent("a");
+    trackEvent("b");
+    const count = vi.fn();
+    win.goatcounter = { count };
+    vi.advanceTimersByTime(200);
+    expect(count.mock.calls.map((c) => (c[0] as { path: string }).path)).toEqual(["a", "b"]);
+  });
+
   it("still delivers immediately when the script is already there", () => {
     vi.useFakeTimers();
     const count = vi.fn();

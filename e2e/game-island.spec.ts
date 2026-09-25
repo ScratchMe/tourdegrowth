@@ -1,7 +1,6 @@
-import AxeBuilder from "@axe-core/playwright";
 import type { Page } from "@playwright/test";
 import { expect, test, trackedEvents } from "./helpers";
-import { LEVEL_PATH, hangUp, pickUpCall, playQuarter, seedGame } from "./game-helpers";
+import { LEVEL_PATH, axeSeriousOrCritical, hangUp, pickUpCall, playQuarter, seedGame } from "./game-helpers";
 import { PATH_A, PATH_C, playPath } from "../src/lib/game/__tests__/paths";
 
 /**
@@ -18,23 +17,6 @@ import { PATH_A, PATH_C, playPath } from "../src/lib/game/__tests__/paths";
  */
 const GAME_OPEN = process.env.GAME_ENABLED === "true";
 test.skip(!GAME_OPEN, "GAME_ENABLED is not \"true\" for this run — the level page is closed.");
-
-async function axeSeriousOrCritical(page: Page): Promise<string[]> {
-  // Both grounds are gradients (the page's and the night band's): axe files
-  // text over a gradient as "incomplete", never as a violation. Flattened to
-  // their base colour, it measures them (accessibility.spec.ts explains).
-  await page.addStyleTag({ content: "body, [data-world] { background-image: none !important; }" });
-  const { violations } = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
-  return violations
-    .filter((v) => v.impact === "serious" || v.impact === "critical")
-    .flatMap((v) =>
-      v.nodes
-        // The logotype's red GROWTH, exempt under WCAG 1.4.3 and matched on its
-        // own markup, never on its colour pair (accessibility.spec.ts).
-        .filter((n) => !(v.id === "color-contrast" && /^<span[^>]*>GROWTH<\/span>$/.test(n.html.trim())))
-        .map((n) => `${v.id} on ${n.target.join(" ")}`),
-    );
-}
 
 test.describe("the first screen, as prerendered", () => {
   test("the first call is open, the hand is locked, the two secret tiles carry no value", async ({ page, request }) => {

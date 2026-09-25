@@ -37,6 +37,14 @@ declare global {
 export function trackEvent(name: string, detail?: string): void {
   if (typeof window === "undefined") return;
   const path = detail ? `${name}/${detail}` : name;
+  // An event still waiting for the script goes out first. The poller only
+  // ticks every RETRY_MS, so without this a click in that gap overtook the
+  // mount event queued before it (`game_hangup/1` before `game_started`,
+  // seen in the game's e2e): counts were right, the session's order was not.
+  if (PENDING.length > 0 && !flushPending()) {
+    queue(path);
+    return;
+  }
   if (!send(path)) queue(path);
 }
 
@@ -83,17 +91,20 @@ function queue(path: string): void {
     waitedMs += RETRY_MS;
     const ready = typeof window !== "undefined" && Boolean(window.goatcounter?.count);
     if (!ready && waitedMs < GIVE_UP_MS) return;
-
-    if (ready) {
-      // Splice as we go: a send that somehow throws must not replay the
-      // whole queue on the next tick.
-      while (PENDING.length > 0) send(PENDING.shift()!);
-    } else {
-      PENDING.length = 0;
-    }
+    // Ready: the queue goes out. Budget spent: it is dropped.
+    if (!flushPending()) PENDING.length = 0;
     clearInterval(timer!);
     timer = null;
   }, RETRY_MS);
+}
+
+/** Sends the whole queue, in order, if the script is there; `false` when it is not yet. */
+function flushPending(): boolean {
+  if (typeof window === "undefined" || !window.goatcounter?.count) return false;
+  // Splice as we go: a send that somehow throws must not replay the whole
+  // queue on the next tick.
+  while (PENDING.length > 0) send(PENDING.shift()!);
+  return true;
 }
 
 /** Test-only: drops any queued event and stops the poller between cases. */
