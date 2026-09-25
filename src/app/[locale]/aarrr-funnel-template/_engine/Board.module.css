@@ -118,6 +118,10 @@
   .stages {
     grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
     column-gap: var(--space-9);
+    /* Five rows at their own height, then a sixth track that takes whatever
+       the drawer adds: without it the grid shares the drawer's height across
+       the five rows and they drift apart down the page. */
+    grid-template-rows: repeat(5, auto) 1fr;
   }
 
   .stages > .row {
@@ -125,10 +129,10 @@
   }
 
   /* Wherever it sits in the DOM (right after its row), the drawer is lifted
-     into the right-hand column, over the height of all five rows. */
+     into the right-hand column, over the height of all six tracks. */
   .stages > .drawer {
     grid-column: 2;
-    grid-row: 1 / span 5;
+    grid-row: 1 / -1;
     position: sticky;
     top: var(--space-7);
   }
@@ -378,11 +382,11 @@
 }
 
 .metricMarker::before {
-  content: "+";
+  content: "+" / "";
 }
 
 .metricMarker[data-open="true"]::before {
-  content: "\2212";
+  content: "\2212" / "";
 }
 
 .metricBody {

@@ -81,7 +81,6 @@ export function MetricSheet({ id, view, actions }: { id: MetricId; view: EngineV
   // problem disappears the moment it is fixed — never a stale red line.
   const problems: DraftProblem[] = attempted ? entryFromDraft(draft, shape, ctx.today.toISOString(), options).problems : [];
   const rules = problems.filter(isRule);
-  const missing = [...new Set(problems.filter((p) => !isRule(p)).map((p) => missingLabel(p, metric, strings)))];
 
   function save() {
     setAttempted(true);
@@ -97,6 +96,13 @@ export function MetricSheet({ id, view, actions }: { id: MetricId; view: EngineV
   const windowDays = windowDaysOf(shape.window, state);
   const variantLabel = metric.variants?.find((v) => v.id === (entry?.variant ?? draft.variant))?.label;
   const fillCatalog = (text: string) => catalogFill(text, { state, locale, strings, metrics: view.metrics, windowDays, variantLabel });
+  // The count labels carry the same placeholders as the formula ({n},
+  // {cohort}, {event}): resolved once here, so the value editor and the two
+  // conflicting readings never print a raw "{n}" as a field label.
+  const filledMetric = metric.inputs
+    ? { ...metric, inputs: { numerator: fillCatalog(metric.inputs.numerator), denominator: fillCatalog(metric.inputs.denominator) } }
+    : metric;
+  const missing = [...new Set(problems.filter((p) => !isRule(p)).map((p) => missingLabel(p, filledMetric, strings)))];
 
   const modes: { id: SheetMode; label: string }[] = [
     { id: "have", label: strings.sheet.haveIt },
@@ -189,7 +195,7 @@ export function MetricSheet({ id, view, actions }: { id: MetricId; view: EngineV
 
       {draft.mode === "have" ? (
         <>
-          <ValueEditor idPrefix={prefix} draft={draft} update={update} shape={shape} metric={metric} view={view} problems={problems} />
+          <ValueEditor idPrefix={prefix} draft={draft} update={update} shape={shape} metric={filledMetric} view={view} problems={problems} />
           <DefinitionNote prefix={prefix} draft={draft} update={update} view={view} error={problems.includes("definition-too-long")} />
         </>
       ) : null}
@@ -283,7 +289,7 @@ export function MetricSheet({ id, view, actions }: { id: MetricId; view: EngineV
           draft={draft}
           update={update}
           shape={shape}
-          metric={metric}
+          metric={filledMetric}
           view={view}
           problems={problems}
           onRequested={(role) => actions.markRequested([id], role)}
@@ -376,7 +382,7 @@ export function MetricSheet({ id, view, actions }: { id: MetricId; view: EngineV
         </p>
       ) : null}
 
-      <Field label={strings.sheet.note} hint={strings.sheet.noteHint} htmlFor={`${prefix}-note`} error={problems.includes("note-too-long") ? ruleMessage("note-too-long", metric, strings, locale) : null}>
+      <Field label={strings.sheet.note} hint={strings.sheet.noteHint} htmlFor={`${prefix}-note`} error={problems.includes("note-too-long") ? ruleMessage("note-too-long", filledMetric, strings, locale) : null}>
         <TextArea
           id={`${prefix}-note`}
           value={draft.note}
@@ -407,7 +413,7 @@ export function MetricSheet({ id, view, actions }: { id: MetricId; view: EngineV
         .filter((p) => p !== "num-gt-den" && p !== "denominator-zero")
         .map((p) => (
           <p key={p} className={ui.error}>
-            {ruleMessage(p, metric, strings, locale)}
+            {ruleMessage(p, filledMetric, strings, locale)}
           </p>
         ))}
       {outcome === "quota" || outcome === "unavailable" ? (
