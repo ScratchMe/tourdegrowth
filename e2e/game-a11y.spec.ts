@@ -26,6 +26,10 @@ import { MONTH_STEP_MS } from "../src/lib/game/ui-timing";
  * <body> (R-19).
  *
  * The game must be OPEN for this run (`GAME_ENABLED: "true"`, as in CI).
+ *
+ * Non-vacuity, measured: dropping the focus move after « Lancer » under
+ * reduced motion fails the keyboard spec on the report's heading, and no axe
+ * spec — they measure different things, as they should.
  */
 test.skip(process.env.GAME_ENABLED !== "true", "GAME_ENABLED is not \"true\" for this run — the level page is closed.");
 

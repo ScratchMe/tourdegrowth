@@ -32,6 +32,10 @@ import { GAME_SAVE_KEYS } from "../src/lib/game/storage-keys";
  * The game must be OPEN for this run (`GAME_ENABLED: "true"`, as in CI);
  * without it the level page is a 404, so the specs skip rather than fail for
  * a reason that says nothing about the game (R-11).
+ *
+ * Non-vacuity, measured: a `data-trust={game.trust}` slipped onto the
+ * dashboard wrapper — invisible on screen — fails the four specs that walk
+ * the year (`div data-trust="60"` in the report), and nothing else here.
  */
 test.skip(process.env.GAME_ENABLED !== "true", "GAME_ENABLED is not \"true\" for this run — the level page is closed.");
 test.use({ contextOptions: { reducedMotion: "reduce" } });

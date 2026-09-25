@@ -28,6 +28,11 @@ import type { EndingId } from "../src/lib/game/types";
  * game-level.spec.ts do not already prove.
  *
  * The game must be OPEN for this run (`GAME_ENABLED: "true"`, as in CI).
+ *
+ * Non-vacuity, measured: without the island's once-only guard on
+ * `game_catalogue_open`, the catalogue spec fails on its second opening. P20
+ * opens a single sheet and so passes either way — it guards the ORDER, not
+ * the once-only rule.
  */
 test.skip(process.env.GAME_ENABLED !== "true", "GAME_ENABLED is not \"true\" for this run — the level page is closed.");
 test.use({ contextOptions: { reducedMotion: "reduce" } });
