@@ -2,27 +2,18 @@ import { Fragment, type ReactNode } from "react";
 import styles from "./deck.module.css";
 
 /**
- * Placing the deck's strings — never formatting them.
- *
- * `fill` only substitutes placeholders with values that arrive FINISHED
- * (lib/engine/format.ts made them). It does no number work, so it cannot
- * disagree with the formatter; an unknown placeholder is left visible
- * (`{n}`) rather than silently blanked, because a blank reads as a sentence
- * and a raw brace reads as a bug, which it is.
+ * Placing the deck's strings — never formatting them. Templates are filled
+ * with `fillTemplate` from lib/engine/format.ts, the engine's one filler, so
+ * a placeholder left unfilled stays visible (`{n}`) the same way everywhere.
  */
-export function fill(template: string, values: Record<string, string | number>): string {
-  return template.replace(/\{(\w+)\}/g, (whole, name: string) =>
-    Object.prototype.hasOwnProperty.call(values, name) ? String(values[name]) : whole,
-  );
-}
 
 /**
  * An arrow drawn, never typed. Engine spec §10.4, measured in Chromium on
  * the build: "→" and "←" are in none of the three families, so a typed arrow
  * falls back to a system font — a different face on screen, and in the PDF
  * an embedded `DejaVuSans` or `LiberationSans`, the exact defect found in
- * the angles' `slide.pdf`. The copy may still write "→" (it reads well in a
- * template); this is where it becomes a shape.
+ * the angles' `slide.pdf`. The copy that reaches a slide is written without
+ * arrows; any that slips through becomes this shape.
  */
 export function Arrow({ direction = "right", className }: { direction?: "right" | "left" | "down"; className?: string }) {
   const rotate = direction === "left" ? 180 : direction === "down" ? 90 : 0;
@@ -48,8 +39,8 @@ function withArrows(text: string, keyBase: string): ReactNode[] {
 }
 
 /**
- * A finished sentence, with its `**…**` accent in red and its arrows drawn.
- * `**` is the copy's convention for the one accent a slide title carries
+ * A finished sentence, with its `**…**` accent in red and any arrow drawn.
+ * `**` is the copy's convention for the accent a slide title carries
  * (engine-copy.ts header); outside a title it is simply removed, so a stray
  * pair never prints as asterisks.
  */
@@ -70,7 +61,21 @@ export function SlideText({ text, accent = true }: { text: string; accent?: bool
   );
 }
 
-/** The plain-text form of a title or line: accents dropped, arrows kept as characters (for aria labels and the Markdown). */
+/** The plain-text form of a title: the accent marks dropped (aria labels, the ask preview's comparisons). */
 export function plainText(text: string): string {
   return text.replaceAll("**", "");
+}
+
+/**
+ * A " · "-separated line with its empty parts dropped — a footer whose
+ * template has a slot the model left empty (no tool named yet, no caveat)
+ * must not print "· ·" or end on "sources : ". A part that is only a label
+ * waiting for its value ("sources : ", "sources: ") goes too.
+ */
+export function segments(text: string): string {
+  return text
+    .split(" · ")
+    .map((part) => part.trim())
+    .filter((part) => part !== "" && !/:$/.test(part))
+    .join(" · ");
 }

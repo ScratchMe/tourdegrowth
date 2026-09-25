@@ -1,183 +1,167 @@
-import { STATUS_KEY } from "@/lib/engine/strings";
-import type { CandidateId, Interval, MetricStatus, PelotonColumn } from "@/lib/engine/types";
-import { linesOf, lineOf } from "./deck-lines";
+import { fillTemplate } from "@/lib/engine/format";
+import { BASIS_KEY, CAUSE_KEY, STATUS_KEY } from "@/lib/engine/strings";
+import type { CandidateId, PelotonColumn } from "@/lib/engine/types";
+import { currentSnapshot } from "@/lib/engine/values";
+import { columnGrid, columnNumeral, numeralText, signupsGrid, type GridModel } from "../visual-model";
+import { rowOf, rowsOf } from "./deck-rows";
 import { SlideFrame, type SlideProps } from "./SlideFrame";
-import { Arrow, SlideText, fill } from "./slide-text";
+import { Arrow, SlideText, segments } from "./slide-text";
 import styles from "./deck.module.css";
 
-type ColumnId = "signups" | PelotonColumn["metric"];
+const DOT_CLASS = {
+  filled: styles.dotFilled,
+  referred: styles.dotReferred,
+  range: styles.dotRange,
+  referredRange: styles.dotReferredRange,
+  empty: styles.dotEmpty,
+} as const;
 
 /**
- * A 10 × 10 grid of the same 100 sign-ups — engine spec §8.1, D5.
+ * A 10 × 10 grid of the same 100 sign-ups — engine spec §8.1, D5 — drawn
+ * from the board's own model (`visual-model.ts`), so the screen and the
+ * slide can't draw one column two ways.
  *
  * Counts, not lengths: there is no scale to defend, and an unknown has a
- * shape of its own — the whole grid in dashed red with a "?" on a paper disc
- * — instead of an empty bar that would read as zero. A range is hatched from
- * its low to its high bound, so "6 à 9" is six solid dots and three striped
- * ones, never "7.5".
+ * shape of its own — the whole grid hatched, a dashed edge, a "?" on a paper
+ * disc — instead of an empty grid that would read as zero. A range is solid
+ * to its low bound and hatched to its high one, so "6 à 9" is six solid dots
+ * and three striped ones, never "7.5".
  */
-export function DotGrid({
-  filled,
-  hatched = 0,
-  referred = 0,
-  unknown = false,
-  label,
-}: {
-  filled: number;
-  hatched?: number;
-  referred?: number;
-  unknown?: boolean;
-  label: string;
-}) {
-  const dots = Array.from({ length: 100 }, (_, i) => {
-    if (unknown) return styles.dotUnknown;
-    if (i < referred) return styles.dotReferred;
-    if (i < filled) return styles.dotFilled;
-    if (i < filled + hatched) return styles.dotRange;
-    return styles.dotEmpty;
-  });
-  return (
-    <div className={styles.gridWrap} role="img" aria-label={label}>
-      <div className={styles.grid} aria-hidden="true">
-        {dots.map((cls, i) => (
-          <span key={i} className={`${styles.dot} ${cls}`} />
-        ))}
-      </div>
-      {unknown ? (
-        <span className={styles.gridUnknown} aria-hidden="true">
+function DotGrid({ grid, highlighted, label }: { grid: GridModel; highlighted: boolean; label: string }) {
+  if (grid.kind === "unknown") {
+    return (
+      <div className={`${styles.grid} ${styles.gridUnknown}`} role="img" aria-label={label}>
+        <span className={styles.gridQuestion} aria-hidden="true">
           ?
         </span>
-      ) : null}
+      </div>
+    );
+  }
+  return (
+    <div className={[styles.grid, highlighted ? styles.gridHighlighted : ""].filter(Boolean).join(" ")} role="img" aria-label={label}>
+      {grid.dots.map((dot, i) => (
+        <span key={i} className={`${styles.dot} ${DOT_CLASS[dot]}`} aria-hidden="true" />
+      ))}
     </div>
   );
 }
 
-/** Integers under 100: the one number a grid shows that needs no formatter — a count of dots. */
-function dotsOf(perHundred: Interval | null): { filled: number; hatched: number } | null {
-  if (!perHundred) return null;
-  const lo = Math.max(0, Math.min(100, Math.round(perHundred.lo)));
-  const hi = Math.max(lo, Math.min(100, Math.round(perHundred.hi)));
-  return { filled: lo, hatched: hi - lo };
-}
-
 /**
  * Slide 1 — "where the engine stands" (§9.3). Four columns counted on the
- * same 100 sign-ups: sign-ups (with the referred ones in red), activated,
- * active at day 30, paying. Order inside a column is the reference slide's:
+ * same 100 sign-ups: sign-ups (the referred ones ringed), activated, active
+ * at day 30, paying. Inside a column the order is the reference slide's:
  * numeral → label → grid → source — a numeral under the grid touches the
  * dots (the mistake the spec's own mock-up made).
+ *
+ * The one red is the diagnosis: the column the diagnosis names takes it on
+ * its dots and carries the stamp, which says it in words beside the numeral
+ * — never on top of the grid, where it would hide the dots it is about.
  */
 export function SlidePeloton({ slide, context }: SlideProps) {
-  const { strings, derived, state } = context;
-  const snapshot = state.snapshots[0];
+  const { strings, derived, state, model } = context;
   const t = strings.peloton;
-  const columnLines = linesOf(slide, "column");
-  const upstream = lineOf(slide, "upstream")?.text;
+  const v = strings.visual;
+  const snapshot = currentSnapshot(state);
+  const rows = rowsOf(slide, "column");
+  const upstream = rowOf(slide, "upstream");
 
   const named = derived.diagnosis.state === "clear" || derived.diagnosis.state === "shared" ? derived.diagnosis.named : [];
-  const stampFor = (metric: CandidateId): string | null => {
+  const stampOf = (metric: CandidateId): string | null => {
     if (!named.includes(metric)) return null;
-    const kind = derived.diagnosis.positions[metric]?.comparator?.kind;
-    return kind === "target" ? strings.diagnosis.stampTarget : strings.diagnosis.stampReference;
+    return derived.diagnosis.positions[metric]?.comparator?.kind === "target" ? strings.diagnosis.stampTarget : strings.diagnosis.stampReference;
   };
 
-  const referredDots = dotsOf(derived.peloton.referredPerHundred);
-  const referredLegend =
-    lineOf(slide, "legendReferred")?.text ??
-    (referredDots ? fill(t.legendReferred, { n: referredDots.filled }) : null);
+  const referred = derived.peloton.referredPerHundred ? columnNumeral(derived.peloton.referredPerHundred) : null;
+  const referredText = referred ? numeralText(referred, strings.units, v.lessThanOne) : null;
+  const cohort = model.footer.cohort ?? "";
 
-  const labels: Record<ColumnId, string> = {
-    signups: t.signups,
+  const labelOf: Record<PelotonColumn["metric"], string> = {
     "act.rate": t.activated,
     "ret.d30": t.d30,
-    "rev.paid-conversion": fill(t.paid, { n: state.setup.paidWindowDays }),
+    "rev.paid-conversion": fillTemplate(t.paid, { n: state.setup.paidWindowDays }),
   };
 
-  const columns: { id: ColumnId; dots: { filled: number; hatched: number } | null; status: MetricStatus | null }[] = [
-    { id: "signups", dots: { filled: 100, hatched: 0 }, status: null },
-    ...derived.peloton.columns.map((c) => ({
-      id: c.metric as ColumnId,
-      dots: dotsOf(c.perHundred),
-      status: snapshot?.metrics[c.metric]?.status ?? "todo",
-    })),
-  ];
+  const upstreamText = upstream?.n ? segments(fillTemplate(t.upstream, upstream)) : v.upstreamUnknown;
+
+  const columns = derived.peloton.columns.map((col) => {
+    const row = rows.find((r) => r.metric === col.metric);
+    const entry = snapshot.metrics[col.metric];
+    const numeral = columnNumeral(col.perHundred);
+    const unknown = numeral.kind === "unknown" || !row?.n;
+    // The model's finished count, except where it rounds a measured rate to 0:
+    // a 0 is a measurement, so it says "fewer than 1" (the title gives the per-thousand).
+    const text = unknown ? "?" : numeral.kind === "less-than-one" ? v.lessThanOne : row!.n;
+    const status = strings.status[STATUS_KEY[entry?.status ?? "todo"]];
+    const where = row?.source || (entry?.status === "estimated" && entry.estimate ? strings.basis[BASIS_KEY[entry.estimate.basis]] : "");
+    const why = entry?.status === "missing" && entry.missing ? strings.cause[CAUSE_KEY[entry.missing.cause]] : "";
+    const source = unknown ? segments(`${status} · ${why}`) : segments(`${where || t.legendRange} · ${row?.period ?? ""}`);
+    const population = labelOf[col.metric].charAt(0).toLowerCase() + labelOf[col.metric].slice(1);
+    const aria = unknown
+      ? `${labelOf[col.metric]} — ${t.legendUnknown}`
+      : fillTemplate(t.aria, { n: text, population, status, source: where || t.legendRange, cohort: row?.period || cohort });
+    return { metric: col.metric, text, unknown, source, aria, grid: columnGrid(unknown ? null : col.perHundred), stamp: stampOf(col.metric) };
+  });
 
   return (
     <SlideFrame slide={slide} context={context}>
-      {upstream ? (
-        <p className={styles.upstream}>
-          <Arrow direction="down" className={styles.upstreamArrow} />
-          <SlideText text={upstream} accent={false} />
-        </p>
-      ) : null}
+      <p className={styles.upstream}>
+        <Arrow direction="down" className={styles.upstreamArrow} />
+        <SlideText text={upstreamText} accent={false} />
+      </p>
 
       <div className={styles.peloton}>
-        {columns.map((column) => {
-          const line = columnLines.find((l) => l.metric === column.id);
-          const unknown = column.dots === null;
-          // The numeral is the model's finished string; failing that, a
-          // dot count is the one figure a grid can state by itself.
-          const numeral =
-            line?.value ??
-            (unknown
-              ? "?"
-              : column.dots!.hatched === 0
-                ? String(column.dots!.filled)
-                : fill(strings.units.range, { lo: column.dots!.filled, hi: column.dots!.filled + column.dots!.hatched }));
-          const source = line?.source ?? (unknown ? t.legendUnknown : "");
-          const stamp = column.id === "signups" ? null : stampFor(column.id);
-          const status = column.status ? strings.status[STATUS_KEY[column.status]] : "";
-          const aria = fill(t.aria, {
-            n: numeral,
-            population: labels[column.id].toLowerCase(),
-            status,
-            source,
-            cohort: context.model.footer.cohort ?? "",
-          });
-          return (
-            <section key={column.id} className={styles.column} data-column={column.id} data-unknown={unknown || undefined}>
-              <p className={[styles.numeral, unknown ? styles.numeralUnknown : ""].join(" ")}>
-                <SlideText text={numeral} accent={false} />
+        <section className={styles.column} data-column="signups">
+          <div className={styles.numeralRow}>
+            <p className={styles.numeral}>100</p>
+          </div>
+          <h4 className={styles.columnLabel}>{t.signups}</h4>
+          <DotGrid
+            grid={signupsGrid(derived.peloton.referredPerHundred)}
+            highlighted={false}
+            label={referredText ? `${t.signups} — 100, ${fillTemplate(t.legendReferred, { n: referredText })}` : `${t.signups} — 100`}
+          />
+          <p className={styles.columnSource}>{fillTemplate(v.cohortOf, { cohort })}</p>
+        </section>
+
+        {columns.map((c) => (
+          <section key={c.metric} className={styles.column} data-column={c.metric} data-unknown={c.unknown || undefined}>
+            <div className={styles.numeralRow}>
+              <p className={[styles.numeral, c.unknown ? styles.numeralUnknown : ""].filter(Boolean).join(" ")} data-testid={`slide-numeral-${c.metric}`}>
+                <SlideText text={c.text} accent={false} />
               </p>
-              <h4 className={styles.columnLabel}>{labels[column.id]}</h4>
-              <div className={styles.gridSlot}>
-                <DotGrid
-                  filled={column.dots?.filled ?? 0}
-                  hatched={column.dots?.hatched ?? 0}
-                  referred={column.id === "signups" ? (referredDots?.filled ?? 0) : 0}
-                  unknown={unknown}
-                  label={column.id === "signups" ? `${numeral} — ${labels.signups}` : aria}
-                />
-                {stamp ? <span className={styles.stamp}>{stamp}</span> : null}
-              </div>
-              {source ? (
-                <p className={styles.columnSource}>
-                  <SlideText text={source} accent={false} />
-                </p>
+              {c.stamp ? (
+                <span className={styles.stamp} data-testid="slide-stamp">
+                  {c.stamp}
+                </span>
               ) : null}
-            </section>
-          );
-        })}
+            </div>
+            <h4 className={styles.columnLabel}>{labelOf[c.metric]}</h4>
+            <DotGrid grid={c.grid} highlighted={Boolean(c.stamp)} label={c.aria} />
+            <p className={styles.columnSource}>
+              <SlideText text={c.source} accent={false} />
+            </p>
+          </section>
+        ))}
       </div>
 
       <div className={styles.legend}>
-        <ul className={styles.legendItems}>
-          {referredLegend ? (
+        <ul className={styles.legendItems} aria-hidden="true">
+          {referredText ? (
             <li>
-              <span className={`${styles.dot} ${styles.dotReferred} ${styles.legendDot}`} aria-hidden="true" />
-              {referredLegend}
+              <span className={`${styles.swatch} ${styles.dotReferred}`} />
+              {fillTemplate(t.legendReferred, { n: referredText })}
             </li>
           ) : null}
           <li>
-            <span className={`${styles.dot} ${styles.dotFilled} ${styles.legendDot}`} aria-hidden="true" />
+            <span className={`${styles.swatch} ${styles.dotFilled}`} />
             {t.legendMeasured}
           </li>
           <li>
-            <span className={`${styles.dot} ${styles.dotRange} ${styles.legendDot}`} aria-hidden="true" />
+            <span className={`${styles.swatch} ${styles.dotRange}`} />
             {t.legendRange}
           </li>
           <li>
-            <span className={`${styles.dot} ${styles.dotUnknown} ${styles.legendDot}`} aria-hidden="true" />
+            <span className={`${styles.swatch} ${styles.swatchUnknown}`} />
             {t.legendUnknown}
           </li>
         </ul>
