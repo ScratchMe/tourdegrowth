@@ -134,8 +134,9 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
     notOnDashboard: t("pas sur ton dashboard", "not on your dashboard"),
     // TODO: à relire — nouveau (plan §2.6, tuile cachée : le texte que lit un lecteur d'écran).
     hiddenValue: t("Masquée jusqu'en décembre", "Hidden until December"),
-    // TODO: à relire — nouveau (plan §2.6).
-    revealed: t("révélée en décembre", "revealed in December"),
+    // TODO: à relire — nouveau (plan §2.6). {month} est le mois où l'année s'est close :
+    // décembre d'ordinaire, juin pour un licenciement après le T2 (une année coupée ne dit pas « décembre »).
+    revealed: t("révélée en {month}", "revealed in {month}"),
     // TODO: à relire — nouveau (plan §1.3, deltas sur les tuiles).
     delta: t("{delta} ce trimestre", "{delta} this quarter"),
   },
@@ -704,7 +705,9 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
 
   december: {
     cells: {
-      churn: t("Résiliations en décembre", "Churn in December"),
+      // TODO: à relire — le prototype disait « en décembre » ; {month} est le mois où l'année
+      // s'est close, pour qu'une année coupée en juin ne dise pas « décembre ».
+      churn: t("Résiliations en {month}", "Churn in {month}"),
       trust: t("Confiance des abonnés", "Subscriber trust"),
       radar: t("Radar DGCCRF", "Regulator radar"),
       outOf: t("{value} / 100", "{value} / 100"),

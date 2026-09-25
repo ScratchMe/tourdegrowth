@@ -15,6 +15,7 @@ import { LOCALES, type Locale } from "@/lib/i18n/locale";
 import {
   bossMessage,
   clicksLabel,
+  closingMonth,
   clicksSentence,
   dashboardProps,
   decemberContent,
@@ -211,6 +212,28 @@ describe("island-view — what the words must say", () => {
     expect(fired).toContain(false);
     expect(yearClosedView(fr, playPath(PATH_D).at(-1)!).title).toBe("Année interrompue");
     expect(yearClosedView(en, years.at(-1)!).title).toBe("Year over");
+  });
+
+  it("a year cut short never says December: the reveal and the churn cell name the month it closed in", () => {
+    const cutShort = playPath(PATH_D).at(-1)!;
+    expect(cutShort.fired).toBe(true);
+    expect(closingMonth(fr, cutShort)).toBe("juin");
+    const d = decemberContent(fr, cutShort);
+    expect(d.cellLabels.churn).toBe("Résiliations en juin");
+    const tiles = dashboardProps(fr, cutShort, lastQuarterStart(L, cutShort), true);
+    for (const tile of [tiles.trust, tiles.radar]) {
+      expect(tile.hidden).toBe(false);
+      if (!tile.hidden) expect(tile.sub).toBe("révélée en juin");
+    }
+    expect(decemberContent(en, cutShort).cellLabels.churn).toBe("Churn in June");
+    // Nothing on the cut-short year's December names the month it never reached.
+    expect(strings({ d, tiles }).map((s) => s.text).filter((t) => /décembre/.test(t) && !/objectif de décembre/.test(t))).toEqual([]);
+
+    // A year that ran its course still says December.
+    const full = years.at(-1)!;
+    expect(decemberContent(fr, full).cellLabels.churn).toBe("Résiliations en décembre");
+    const fullTiles = dashboardProps(en, full, lastQuarterStart(L, full), true);
+    if (!fullTiles.trust.hidden) expect(fullTiles.trust.sub).toBe("revealed in December");
   });
 
   it("the resume prompt lists one line per quarter played, and a finished year offers to review it", () => {

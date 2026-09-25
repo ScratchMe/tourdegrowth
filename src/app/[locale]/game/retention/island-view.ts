@@ -175,12 +175,25 @@ function tileDelta({ copy, locale }: IslandContext, kind: DeltaKind, d: Delta): 
   };
 }
 
+/**
+ * The month the year closed in, as a word: December for a year that ran its
+ * course, the month of the firing for one cut short. The reveal and the
+ * December cells name it, so a year that ended in June does not say
+ * « décembre » (review, 2026-09-25).
+ */
+export function closingMonth({ copy }: IslandContext, state: State): string {
+  const last = state.history.at(-1)?.m ?? 12;
+  return copy.months[Math.max(0, Math.min(11, last - 1))] ?? "";
+}
+
 function secretTile(
-  { copy, locale }: IslandContext,
+  ctx: IslandContext,
   label: string,
   value: { hidden: true } | { hidden: false; value: number },
   revealing: boolean,
+  month: string,
 ): DashboardSecretTile {
+  const { copy, locale } = ctx;
   if (value.hidden) {
     return { hidden: true, label, hiddenLabel: copy.dashboard.notOnDashboard, hiddenNote: copy.dashboard.hiddenValue };
   }
@@ -188,7 +201,7 @@ function secretTile(
     hidden: false,
     label,
     value: formatInt(locale, value.value),
-    sub: copy.dashboard.revealed,
+    sub: fill(copy.dashboard.revealed, { month }),
     bar: Math.max(0, Math.min(100, value.value)),
     revealing,
   };
@@ -246,8 +259,8 @@ export function dashboardProps(ctx: IslandContext, state: State, prev: State | u
       bar: v.patienceBar,
       low: v.patienceLow,
     },
-    trust: secretTile(ctx, copy.dashboard.trust, v.trust, revealing),
-    radar: secretTile(ctx, copy.dashboard.radar, v.radar, revealing),
+    trust: secretTile(ctx, copy.dashboard.trust, v.trust, revealing, closingMonth(ctx, state)),
+    radar: secretTile(ctx, copy.dashboard.radar, v.radar, revealing, closingMonth(ctx, state)),
   };
 }
 
@@ -558,7 +571,11 @@ export function decemberContent(ctx: IslandContext, state: State): DecemberConte
     figures,
     // The three labels, not the whole `cells` block: its `outOf` is a template
     // the figures above already went through, never something to print.
-    cellLabels: { churn: copy.december.cells.churn, trust: copy.december.cells.trust, radar: copy.december.cells.radar },
+    cellLabels: {
+      churn: fill(copy.december.cells.churn, { month: closingMonth(ctx, state) }),
+      trust: copy.december.cells.trust,
+      radar: copy.december.cells.radar,
+    },
     note: copy.december.gameNumbers,
     view,
     churnChart: {
