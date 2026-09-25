@@ -90,6 +90,66 @@
   "overrides": {
     "GlossaryTerm": {
       "cardMode": "column"
+    },
+    "ChartFrame": {
+      "cardMode": "column"
+    },
+    "Sparkline": {
+      "cardMode": "column"
+    },
+    "GameEntry": {
+      "cardMode": "column"
+    },
+    "Button": {
+      "cardMode": "column"
+    },
+    "Dashboard": {
+      "cardMode": "column"
+    },
+    "DgFace": {
+      "cardMode": "column"
+    },
+    "EndingCharts": {
+      "cardMode": "column"
+    },
+    "EndingHero": {
+      "cardMode": "column"
+    },
+    "PatternCatalogue": {
+      "cardMode": "column"
+    },
+    "QuarterReport": {
+      "cardMode": "column"
+    },
+    "Hand": {
+      "cardMode": "column"
+    },
+    "ActionBar": {
+      "cardMode": "column"
+    },
+    "QuarterTimeline": {
+      "cardMode": "column"
+    },
+    "ZoneNav": {
+      "cardMode": "column"
+    },
+    "EventClipping": {
+      "cardMode": "column"
+    },
+    "GameJournal": {
+      "cardMode": "column"
+    },
+    "Playbook": {
+      "cardMode": "column"
+    },
+    "RevealCells": {
+      "cardMode": "column"
+    },
+    "ResumePrompt": {
+      "cardMode": "column"
+    },
+    "VideoCall": {
+      "cardMode": "column"
     }
   },
   "dtsPropsFor": {
