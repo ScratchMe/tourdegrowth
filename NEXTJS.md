@@ -219,6 +219,12 @@ plus bas dans le même fichier** par un prop qui n'existait pas encore.
   un budget : mesurer sur disque, ou chercher une chaîne connue dans les chunks
   réellement référencés par le HTML servi. Attention au chemin : les chunks
   sont servis sous `/_next/static/immutable/chunks/`.
+- **Un dossier `.next` recopié ou laissé dans un worktree** fait échouer
+  `next build` sur « next/font/google queries have exactly one entry », pour
+  chaque police — ce qui ressemble à une panne réseau. `rm -rf .next`.
+- **Après la suppression d'une route**, `tsc --noEmit` échoue sur
+  `.next/types/validator.ts` (types générés par le build précédent) jusqu'au
+  prochain build. Ce n'est pas une erreur du code.
 
 ### 1.10 `next/og` et Satori — quatre pièges de police
 

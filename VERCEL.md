@@ -266,6 +266,15 @@ prévisualisations ne servent à rien et consomment le quota :
 construit plus rien**. Travailler et pousser sur une branche devient gratuit ;
 seul le merge coûte.
 
+### 1.11 Une variable d'environnement modifiée n'atteint que les nouveaux déploiements
+
+La documentation le dit (« not applied to previous deployments ») : changer une
+variable dans le tableau de bord ne change **rien** au déploiement en cours. Un
+drapeau « lu à chaque requête » ne s'ouvre donc pas sans redéploiement — et
+chaque bascule coûte un déploiement de Functions Storage (§1.6). Écrire « sans
+redéploiement » à côté d'un tel drapeau est faux, même quand le code le lit
+bien par requête.
+
 ---
 
 ## 2. Propre à Tour de Growth
@@ -307,7 +316,11 @@ Répartition du poids : runtime Next.js 19,5 Mo (41 %), notre code 10,0 Mo
   que `*.md` à la racine, `LICENSE`, `.github/`, `marketing/`, `design/`,
   `.design-sync/` ou `scripts/live/` — aucun n'entre dans le build, vérifié.
   Conception arrêtée : `VERCEL_GIT_PREVIOUS_SHA` en premier, `HEAD^` en repli,
-  `exit 1` sur tout le reste. Glob racine (`*.md`), **jamais** `**/*.md`.
+  `exit 1` sur tout le reste. Glob racine (`*.md`), **jamais** `**/*.md`. Dans le
+  script, le statut de `grep` compte : 0 = au moins une ligne retenue, 1 = aucune,
+  ≥ 2 = erreur — et une erreur doit **construire**, jamais sauter. Le statut de
+  `var=$(pipeline)` est celui de la dernière commande, donc pas besoin de
+  `pipefail`.
 - **Cinq fonctions est le plancher de cette architecture.** Descendre à quatre
   demanderait de fusionner les pages de contenu (`ISR`) avec les pages
   applicatives (`Page`), donc de revenir aux deux layouts racine — ce qui
