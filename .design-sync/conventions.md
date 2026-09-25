@@ -90,6 +90,12 @@ Target 390px. Nothing may scroll horizontally at 360px.
   as a `DataTable`. Five tiles and a chart are still flat, on one surface.
 - A result screen shows **exactly two** calls to action. Sharing lives in
   `ShareCard`, whose button is never primary — the image sells the share.
+  The offer to play the game (`GameEntry`) is not a third: a flat paper card
+  with a secondary button, and a thin band of night across its top.
+- The `game` group is presentation only. Every string arrives resolved, and
+  every number arrives formatted — a game component never computes a score,
+  a date or a sentence. They are drawn inside a `NightSurface` except the
+  ones that are paper on purpose (`EventClipping`, `GameEntry`'s body).
 
 ## Accessibility, where it is load-bearing
 
