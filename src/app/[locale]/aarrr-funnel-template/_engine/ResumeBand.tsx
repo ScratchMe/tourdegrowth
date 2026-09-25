@@ -16,10 +16,12 @@ import styles from "./Screens.module.css";
  * screen visited": one source of truth, the stored statuses, the same rule
  * as the Tour's resume. "Follow up" re-copies the oldest group's request.
  *
- * Composed from three short pieces rather than `resume.band`'s one sentence:
- * that template bakes in "{days} days" and a pending clause, which reads
- * "1 days" the day after and has nothing to say when nothing is pending —
- * reported to P3 as a copy gap rather than patched by string surgery here.
+ * The copy's one sentence (`resume.band`, with its `bandOne` / `bandToday`
+ * forms for yesterday and today) when there is something pending to say and
+ * the count reads as a plural; otherwise three short pieces joined by a
+ * middle dot. The sentence needs a pending clause (it ends on one) and says
+ * "{n} numbers" — "1 numbers", or « 0 chiffres » where French writes the
+ * singular, would be string surgery the copy did not ask for.
  */
 export function ResumeBand({
   returningFrom,
@@ -49,9 +51,23 @@ export function ResumeBand({
       })
     : null;
 
+  // Back the same day, nothing waiting, nothing left to fill: the band would only repeat the
+  // coverage line two centimetres above it. Seen on the §6.0 example at its own date.
+  if (!visit && !pending && !next) return null;
+
+  const sentence =
+    pending && cov.found >= 2
+      ? fill(days === 0 ? strings.resume.bandToday : days === 1 ? strings.resume.bandOne : strings.resume.band, {
+          n: cov.found,
+          N: cov.denominator,
+          days,
+          pending,
+        })
+      : [found, visit, pending].filter(Boolean).join(" · ");
+
   return (
     <div className={styles.resume} data-testid="engine-resume">
-      <p className={styles.resumeText}>{[found, visit, pending].filter(Boolean).join(" · ")}</p>
+      <p className={styles.resumeText}>{sentence}</p>
       <div className={styles.resumeActions}>
         {next ? (
           <Button variant="secondary" onClick={() => actions.openMetric(next)} data-testid="engine-resume-continue">

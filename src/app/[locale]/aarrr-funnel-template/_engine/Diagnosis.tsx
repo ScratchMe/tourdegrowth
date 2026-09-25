@@ -1,7 +1,7 @@
 import type { Locale } from "@/lib/i18n/locale";
 import type { CandidateId, Diagnosis as DiagnosisModel, Interval, MetricId } from "@/lib/engine/types";
 import type { EngineStrings, ResolvedMetric } from "@/lib/engine/strings";
-import { PELOTON_METRICS, shapeOf } from "@/lib/engine/catalog-shape";
+import { CANDIDATE_IDS, shapeOf } from "@/lib/engine/catalog-shape";
 import { formatInterval, formatPercent, joinList } from "./format-stub";
 import { fill, stageLabel } from "./visual-model";
 import styles from "./Diagnosis.module.css";
@@ -21,13 +21,6 @@ export interface DiagnosisProps {
   className?: string;
 }
 
-const PELOTON_SUBJECT: Record<(typeof PELOTON_METRICS)[number], keyof EngineStrings["peloton"]["unmeasured"]> = {
-  "act.rate": "activated",
-  "ret.d30": "d30",
-  "rev.paid-conversion": "paid",
-};
-
-const capitalise = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 /**
  * The diagnosis block — engine spec §8.4 (D18).
@@ -85,13 +78,15 @@ export function Diagnosis({ diagnosis, strings, locale, metrics, values, classNa
         )?.[0]
       : undefined;
 
+  // `{stages}` sits mid-sentence (« Sans chiffre pour {stages}, … »): each unmeasured number as
+  // the SUBJECT phrase, article included and lower-case — « la rétention à J30 », « le churn
+  // logo » — never its capitalised catalogue name, which read « pour La rétention à J30 ».
+  // Every id the diagnosis can call blind is a candidate (diagnose.ts BLIND_WATCH).
   const blindSubjects = diagnosis.blind.map((id) =>
-    id in PELOTON_SUBJECT
-      ? strings.peloton.unmeasured[PELOTON_SUBJECT[id as keyof typeof PELOTON_SUBJECT]]
-      : nameOf(id),
+    (CANDIDATE_IDS as readonly string[]).includes(id) ? strings.subject[id as CandidateId] : nameOf(id),
   );
   const blindSentence = blindSubjects.length
-    ? fill(blindSubjects.length === 1 ? d.blindOne : d.blind, { stages: capitalise(list(blindSubjects)) })
+    ? fill(blindSubjects.length === 1 ? d.blindOne : d.blind, { stages: list(blindSubjects) })
     : null;
 
   const churnBelow = diagnosis.positions["ret.logo-churn"]?.position === "below";

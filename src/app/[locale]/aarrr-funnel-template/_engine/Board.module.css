@@ -160,6 +160,19 @@
   cursor: pointer;
 }
 
+/* On a phone the stage name takes the whole first line: beside the value, a
+   30px stencil "ACQUISITION" had ~170px and broke mid-word (« ACQUISITI / ON »,
+   seen at 390). The value and its label sit under it, right-aligned. */
+@media (max-width: 760px) {
+  .row {
+    grid-template-areas:
+      "stage stage"
+      "pills value"
+      "pills label"
+      "comparator comparator";
+  }
+}
+
 .row:hover {
   box-shadow: var(--state-hover-shadow);
 }
