@@ -179,9 +179,9 @@ function secretTile(
   { copy, locale }: IslandContext,
   label: string,
   value: { hidden: true } | { hidden: false; value: number },
-  revealing: boolean,
+  reveal: DashboardReveal,
 ): DashboardSecretTile {
-  if (value.hidden) {
+  if (value.hidden || reveal === "hidden") {
     return { hidden: true, label, hiddenLabel: copy.dashboard.notOnDashboard, hiddenNote: copy.dashboard.hiddenValue };
   }
   return {
@@ -190,16 +190,27 @@ function secretTile(
     value: formatInt(locale, value.value),
     sub: copy.dashboard.revealed,
     bar: Math.max(0, Math.min(100, value.value)),
-    revealing,
+    revealing: reveal === "revealing",
   };
 }
+
+/**
+ * Whether trust and radar may show, and how: `hidden` until December is on
+ * screen, `revealing` the one time it is entered (the unblur plays), `shown`
+ * for a finished year reopened. The engine's `over` is not enough on its own:
+ * the year is over as soon as the last quarter runs, and its report comes
+ * BEFORE December — a report that already printed both counters would spoil
+ * the reveal and then unblur a figure the player had already read (brief
+ * §5.11: the dashboard unblurs with the December cells).
+ */
+export type DashboardReveal = "hidden" | "revealing" | "shown";
 
 /**
  * The six tiles. `prev` is the reading the deltas compare against (the start
  * of the last quarter, `lastQuarterStart`); absent while the months scroll
  * and before the first quarter.
  */
-export function dashboardProps(ctx: IslandContext, state: State, prev: State | undefined, revealing: boolean): DashboardProps {
+export function dashboardProps(ctx: IslandContext, state: State, prev: State | undefined, reveal: DashboardReveal): DashboardProps {
   const { copy, locale } = ctx;
   const v = dashboardView(L, state, prev);
   const churnValue = formatPct(locale, v.churn);
@@ -246,8 +257,8 @@ export function dashboardProps(ctx: IslandContext, state: State, prev: State | u
       bar: v.patienceBar,
       low: v.patienceLow,
     },
-    trust: secretTile(ctx, copy.dashboard.trust, v.trust, revealing),
-    radar: secretTile(ctx, copy.dashboard.radar, v.radar, revealing),
+    trust: secretTile(ctx, copy.dashboard.trust, v.trust, reveal),
+    radar: secretTile(ctx, copy.dashboard.radar, v.radar, reveal),
   };
 }
 

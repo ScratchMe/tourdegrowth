@@ -145,6 +145,7 @@ export function GameIsland({ copy, locale }: GameIslandProps) {
   }
 
   const december = phase.kind === "december" && game.over && game.ending ? decemberContent(ctx, game) : null;
+  const reveal = december ? (g.enteredDecember ? "revealing" : "shown") : "hidden";
   // December is only ever drawn after mount — the prerendered page is the
   // first call — so the address is the browser's, in the page's language.
   const shareUrl = typeof window === "undefined" ? "" : `${window.location.origin}${window.location.pathname}`;
@@ -158,7 +159,7 @@ export function GameIsland({ copy, locale }: GameIslandProps) {
           {/* The quarter happens here while its months scroll: the focus comes
               to it, never by Tab (a region, not a control). */}
           <div ref={dashboardRef} tabIndex={-1} className={styles.dashboard} data-testid="game-dashboard">
-            <Dashboard {...dashboardProps(ctx, g.dash.state, g.dash.prev, g.enteredDecember)} />
+            <Dashboard {...dashboardProps(ctx, g.dash.state, g.dash.prev, reveal)} />
           </div>
 
           <div className={styles.desk} data-testid="game-desk" data-phase={phase.kind}>

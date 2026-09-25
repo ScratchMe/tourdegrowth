@@ -91,7 +91,7 @@ describe("island-view — every screen of every reference year, in both language
         const check = (label: string, value: unknown) => found.push(...defects(value).map((d) => `${label} ${d}`));
         for (const { label, state, prev } of screensOf(path)) {
           check(`${label} boss`, bossMessage(ctx, state));
-          check(`${label} dashboard`, dashboardProps(ctx, state, prev, false));
+          check(`${label} dashboard`, dashboardProps(ctx, state, prev, "hidden"));
           check(`${label} timeline`, timelineSegments(ctx, state));
           for (const hint of ["callOpen", "pick", "ready"] as const) check(`${label} hand`, handView(ctx, state, hint));
           check(`${label} clicks`, clicksLabel(ctx, clicksFor(L, phoneIds(state))));
@@ -156,15 +156,25 @@ describe("island-view — what the words must say", () => {
   });
 
   it("the dashboard never carries trust or radar before December, in any string", () => {
-    for (const state of years.slice(0, -1)) {
-      const props = dashboardProps(fr, state, lastQuarterStart(L, state), false);
+    // The finished year included: its last report is read BEFORE December,
+    // and the engine already says `over` there (found by the e2e, G8b).
+    for (const state of years) {
+      const props = dashboardProps(fr, state, lastQuarterStart(L, state), "hidden");
       expect(props.trust.hidden).toBe(true);
       expect(props.radar.hidden).toBe(true);
       const all = strings(props).map((s) => s.text).join(" ");
       expect(all).not.toContain(String(Math.round(state.trust)));
     }
     const last = years.at(-1)!;
-    expect(dashboardProps(fr, last, lastQuarterStart(L, last), true).trust.hidden).toBe(false);
+    const revealing = dashboardProps(fr, last, lastQuarterStart(L, last), "revealing");
+    expect(revealing.trust.hidden).toBe(false);
+    expect(!revealing.trust.hidden && revealing.trust.revealing).toBe(true);
+    // A finished year reopened shows the figures without replaying the unblur.
+    const shown = dashboardProps(fr, last, lastQuarterStart(L, last), "shown");
+    expect(!shown.trust.hidden && shown.trust.revealing).toBe(false);
+    // And a year still running never shows them, whatever the caller asks.
+    const running = years[1]!;
+    expect(dashboardProps(fr, running, lastQuarterStart(L, running), "shown").trust.hidden).toBe(true);
   });
 
   it("a report after the last quarter points to December; the others to the next call", () => {
