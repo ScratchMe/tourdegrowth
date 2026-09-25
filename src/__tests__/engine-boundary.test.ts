@@ -119,12 +119,26 @@ const NETWORK = [/\bfetch\s*\(/, /\bXMLHttpRequest\b/, /\bsendBeacon\b/, /\bWebS
 
 /**
  * A floor on how much the walk from the island covers. The spec's rule 6 asks
- * for ≥ 10 once the screens exist; P4 wired them and the walk measured 48
- * modules (2026-09-24). The floor sits well under that so a refactor that
- * merges files does not trip it, and well over 10 so a walk that silently
- * stops following the island's imports goes red.
+ * for ≥ 10 once the screens exist. With the collection screens on the real
+ * pure engine and P5's four visuals mounted, the walk measured 71 modules
+ * (2026-09-25; 48 while P4 still ran on a stand-in barrel). The floor sits
+ * under that so a refactor that merges a few files does not trip it, and far
+ * over 10 so a walk that silently stops following the island's imports —
+ * or an island that stops mounting the engine — goes red.
  */
-const MIN_ISLAND_MODULES = 30;
+const MIN_ISLAND_MODULES = 60;
+
+/** What the island must reach by value: the pure engine that computes, and the four visuals that draw it. */
+const ISLAND_MUST_REACH = [
+  "lib/engine/derive.ts",
+  "lib/engine/impact.ts",
+  "lib/engine/deck.ts",
+  "lib/engine/storage.ts",
+  "app/[locale]/aarrr-funnel-template/_engine/Peloton.tsx",
+  "app/[locale]/aarrr-funnel-template/_engine/Diagnosis.tsx",
+  "app/[locale]/aarrr-funnel-template/_engine/WhatIf.tsx",
+  "app/[locale]/aarrr-funnel-template/_engine/Mirror.tsx",
+] as const;
 
 describe("growth engine boundary (engine spec §11.4)", () => {
   it("rule 6 — the engine's code exists and the island is where the spec puts it", () => {
@@ -143,7 +157,12 @@ describe("growth engine boundary (engine spec §11.4)", () => {
     expect(BY_PATH.get("lib/engine/strings.ts")).toMatch(/import type \{ ENGINE_COPY \}/);
     expect([...reachable(["lib/engine/strings.ts"])]).not.toContain("content/engine-copy.ts");
     // And the island's own walk covers at least the floor.
-    expect(reachable([ISLAND]).size).toBeGreaterThanOrEqual(MIN_ISLAND_MODULES);
+    const walk = reachable([ISLAND]);
+    expect(walk.size).toBeGreaterThanOrEqual(MIN_ISLAND_MODULES);
+    // The island computes with the REAL pure engine and mounts the real visuals — not a
+    // stand-in barrel (P4 built against one while P1 was in flight; it is gone, and a new
+    // one would make the board and the slides compute the same numbers two ways).
+    for (const reached of ISLAND_MUST_REACH) expect([...walk], reached).toContain(reached);
   });
 
   it("rule 1 — nothing in the engine imports Firebase, Gemini, submissions, the audit instrument, the OG pipeline or the dictionary", () => {
