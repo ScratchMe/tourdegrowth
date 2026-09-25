@@ -9,6 +9,7 @@ import { MetaLabel } from "@/components/brand/MetaLabel";
 import { ModeTag } from "@/components/brand/ModeTag";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
+import { GameEntry, type GameEntryView } from "@/components/game/GameEntry";
 import { GlossaryTerm } from "@/components/glossary/GlossaryTerm";
 import { Bottleneck } from "@/components/result/Bottleneck";
 import { Disclaimer } from "@/components/result/Disclaimer";
@@ -74,6 +75,13 @@ interface ResultViewProps {
   benchmark?: Benchmark | null;
   /** The reader's own segment, only used to name it in the line above. */
   segment?: SegmentAnswers | null;
+  /**
+   * The offer to play the game (GAME-BRIEF.md 13.3 A), fully resolved on the
+   * server by `game-entry.ts` — or null, which is what a closed game, a
+   * "level" board and a bottleneck with no level all come to. This view never
+   * decides whether the card exists; it only renders the one it is given.
+   */
+  gameEntry?: GameEntryView | null;
 }
 
 /**
@@ -122,6 +130,7 @@ export function ResultView({
   breakdown = null,
   benchmark = null,
   segment = null,
+  gameEntry = null,
 }: ResultViewProps) {
   const { locale } = useLocale();
   const [tone, setTone] = useState<Tone>(initialTone);
@@ -297,7 +306,7 @@ export function ResultView({
         </div>
       </header>
 
-      <main className={styles.main}>
+      <main id="main" className={styles.main}>
         {/*
           Le titre du document. Non peint : le premier élément dessiné est le
           numéral du score, et en faire un `<h1>` demanderait de changer
@@ -512,6 +521,16 @@ export function ResultView({
                   </p>
               </Card>
             ) : null}
+
+            {/* The game card (game plan §3.10, orchestrator decision 1): in
+                the right column on desktop, after the evidence and before the
+                CTA row — so it never sits above the share block (left column)
+                nor above the Deep dive offer (inside the action card at the
+                top of this column). On a phone it goes right after the share
+                card instead; `.slotGame` in the stylesheet says why the two
+                layouts need two orders. Secondary by construction: flat
+                paper, outline button, never the page's primary. */}
+            {gameEntry ? <GameEntry {...gameEntry} className={styles.slotGame} /> : null}
 
             {/* Whose CTAs these are still depends on who is looking
                 (REVIEW-02.md R2-02): a visitor's primary is their own Tour,

@@ -1,0 +1,146 @@
+/*
+ * Game plan §2.6 — the catalogue is reading, so it keeps the reading measure
+ * (--measure-read, 68ch at 17px), whatever the column width.
+ */
+
+.catalogue {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: var(--measure-read);
+}
+
+.eyebrow {
+  margin: 0;
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.title {
+  margin: 0;
+  font: var(--display-section);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+  text-wrap: balance;
+  color: var(--text-body);
+}
+
+.lead {
+  margin: 0;
+  font: var(--body-read);
+  color: var(--text-body);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+.groupTitle {
+  margin: 0;
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-body);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/*
+ * A used trick is printed open under the same dashed rule a closed
+ * Disclosure draws, so the three groups read as one list of the same
+ * objects in two states.
+ */
+.open {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-6) 0;
+  border-top: var(--border-rule);
+}
+
+/*
+ * Inside a Disclosure the summary row is uppercase mono with wide tracking,
+ * and both are inherited: without this reset the meeting name would read as
+ * a label in one group and as a title in the other.
+ */
+.head {
+  text-transform: none;
+  letter-spacing: normal;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-4);
+}
+
+/* The real name, in the red a diagnosis wears — 6.72:1 on paper as --text-alert. */
+.official {
+  font: var(--meta-md);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-alert);
+}
+
+.meeting {
+  font: var(--title-card);
+  color: var(--text-body);
+}
+
+.status {
+  align-self: center;
+}
+
+.facts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: 0;
+}
+
+.fact {
+  display: grid;
+  grid-template-columns: 11em minmax(0, 1fr);
+  gap: var(--space-5);
+}
+
+.term {
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.value {
+  margin: 0;
+  font: var(--body-md);
+  color: var(--text-body);
+}
+
+.lead,
+.value {
+  text-wrap: pretty;
+}
+
+@media (max-width: 760px) {
+  .lead {
+    font: var(--body-read-mobile);
+  }
+}
+
+/* One column: a label beside a legal paragraph leaves the paragraph ten words wide on a phone. */
+@media (max-width: 560px) {
+  .fact {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-1);
+  }
+}

@@ -1,0 +1,151 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { MetaLabel } from "@/components/brand/MetaLabel";
+import { ProsePage, ProseSection, ProseText } from "@/components/brand/ProsePage";
+import { ZoneNav } from "@/components/game/ZoneNav";
+import { REPO_URL } from "@/content/about";
+import { GAME_HUB } from "@/content/game/hub";
+import { GAME_META, RETENTION_INTRO } from "@/content/game/meta";
+import { RETENTION_CONTENT } from "@/content/game/retention";
+import { GLOSSARY_TERMS } from "@/content/glossary-terms";
+import { resolveLevelCopy, type RetentionCopy } from "@/lib/game/copy";
+import { GAME_LEVELS_BY_PILLAR } from "@/lib/game/levels";
+import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
+import { isLocale, type Locale } from "@/lib/i18n/locale";
+import { localePath } from "@/lib/i18n/routes";
+import { PILLARS } from "@/lib/scoring/pillars";
+import { breadcrumbSchema, gameSchema, JsonLd } from "@/lib/seo/jsonld";
+import { gameMetadata } from "../game-metadata";
+import { GameIsland } from "./GameIsland";
+import type { IslandCopy } from "./island-view";
+import own from "./page.module.css";
+
+const PATH = "/game/retention";
+const PILLAR = "retention" as const;
+/** The file the footnote points to: the model is written, and anyone can read it (plan §2.7, P19). */
+const MODEL_SOURCE_URL = `${REPO_URL}/blob/main/src/lib/game/model.ts`;
+
+/**
+ * What the island needs, and nothing it doesn't: the footnote is rendered
+ * here, on the server, with the intro and the zones (which never were level
+ * copy). The rest crosses as one prop, in one language (plan E3).
+ */
+function islandCopy(copy: RetentionCopy): IslandCopy {
+  const { footer: _footer, ...rest } = copy;
+  return rest;
+}
+
+interface PageProps {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const resolved: Locale = isLocale(locale) ? locale : "en";
+  return gameMetadata(
+    resolved,
+    PATH,
+    tc(GAME_META.retention.title, resolved),
+    tc(GAME_META.retention.description, resolved),
+  );
+}
+
+/**
+ * `/{locale}/game/retention` — level 1, « S'ils reviennent »: the paper-world
+ * intro and the zone nav, then the year itself — the island, a night band as
+ * wide as the desk (plan §2.1) — and the footnote that says what the numbers
+ * are.
+ *
+ * Prerendered, like every content page: the intro is the indexable part of
+ * the level, read by search engines and by anyone before they play (plan
+ * §2.1). The flag lives in the proxy, so the page never becomes dynamic.
+ *
+ * The language switch carries `resume=1` (plan §3.7, P18): switching language
+ * in the middle of a year is a full page load under the other locale, and the
+ * island will read that flag to restore the year without asking.
+ */
+export default async function RetentionLevelPage({ params }: PageProps) {
+  const locale = (await params).locale as Locale;
+  const intro = RETENTION_INTRO;
+  const copy = resolveLevelCopy<RetentionCopy>(RETENTION_CONTENT, locale);
+  const hubHref = localePath(locale, "/game");
+
+  const zones = PILLARS.map((pillar) => {
+    const level = GAME_LEVELS_BY_PILLAR[pillar];
+    const current = pillar === PILLAR;
+    return {
+      id: pillar,
+      pillar: tc(UI_STRINGS.pillars[pillar], locale),
+      question: tc(GAME_HUB.zones[pillar].question, locale),
+      current,
+      // The zone being played leads back to the hub; the others are text.
+      href: current ? hubHref : undefined,
+      soonLabel: level?.enabled ? undefined : tc(GAME_HUB.soon, locale),
+    };
+  });
+  const position = PILLARS.indexOf(PILLAR) + 1;
+  const compactLabel = `${tc(GAME_HUB.zoneCounter, locale).replace("{n}", String(position))} · ${tc(
+    UI_STRINGS.pillars[PILLAR],
+    locale,
+  )} — ${tc(GAME_HUB.zones[PILLAR].question, locale)}`;
+
+  return (
+    <>
+      <JsonLd
+        data={breadcrumbSchema(locale, [
+          { name: tc(GAME_META.hub.breadcrumb, locale), path: "/game" },
+          { name: tc(GAME_META.retention.breadcrumb, locale), path: PATH },
+        ])}
+      />
+      <JsonLd
+        data={gameSchema(locale, {
+          path: PATH,
+          name: tc(intro.title, locale),
+          description: tc(GAME_META.retention.description, locale),
+        })}
+      />
+      <ProsePage
+        locale={locale}
+        path={PATH}
+        switchQuery="resume=1"
+        title={tc(intro.title, locale)}
+        kicker={<MetaLabel size="xs">{tc(intro.eyebrow, locale)}</MetaLabel>}
+        lead={tc(intro.lead, locale)}
+        band={
+          <>
+            <GameIsland copy={islandCopy(copy)} locale={locale} />
+            <p className={own.footnote} data-testid="game-footnote">
+              {copy.footer.note}{" "}
+              <a href={MODEL_SOURCE_URL} target="_blank" rel="noopener">
+                {copy.footer.codeLink}
+              </a>
+            </p>
+          </>
+        }
+      >
+        <ProseSection heading={tc(intro.stepsTitle, locale)}>
+          <ol className={own.steps}>
+            {intro.steps.map((step, index) => (
+              <li key={index} className={own.step}>
+                <span className={own.stepNumber} aria-hidden="true">
+                  {index + 1}
+                </span>
+                <p className={own.stepText}>
+                  <strong className={own.stepTitle}>{tc(step.title, locale)}</strong> {tc(step.body, locale)}
+                </p>
+              </li>
+            ))}
+          </ol>
+          <ProseText>
+            {tc(intro.glossaryLead, locale)}{" "}
+            <Link href={localePath(locale, "/glossary/churn")}>{tc(GLOSSARY_TERMS.churn.term, locale)}</Link>,{" "}
+            <Link href={localePath(locale, "/glossary/retention")}>{tc(GLOSSARY_TERMS.retention.term, locale)}</Link>.
+          </ProseText>
+        </ProseSection>
+
+        <ZoneNav label={tc(GAME_HUB.zonesTitle, locale)} items={zones} compactLabel={compactLabel} />
+
+      </ProsePage>
+    </>
+  );
+}

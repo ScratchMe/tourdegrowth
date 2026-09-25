@@ -1,0 +1,149 @@
+/*
+ * The CEO's face. Colours from the --dg-* island (game.css), never a world
+ * token: he is an illustration and looks the same whatever the page does
+ * around him. Contrasts that matter — brows, eyes and mouth against the
+ * skin, ≥ 3:1 in both moods — are asserted in game-token-contrast.test.ts.
+ */
+
+.face {
+  display: block;
+}
+
+.frame {
+  width: 100%;
+  height: 100%;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: var(--radius-round);
+}
+
+.wall {
+  fill: var(--dg-wall);
+}
+
+.shelfBack,
+.desk {
+  fill: var(--dg-shelf-3);
+}
+
+.bookLight {
+  fill: var(--dg-shelf-1);
+}
+
+.bookAmber {
+  fill: var(--dg-shelf-2);
+}
+
+.suit {
+  fill: var(--dg-suit);
+}
+
+.shirt {
+  fill: var(--dg-shirt);
+}
+
+.tie {
+  fill: var(--dg-tie);
+}
+
+.skin {
+  fill: var(--dg-skin);
+  transition: fill var(--dur-stamp) var(--ease-out);
+}
+
+.face[data-mood="angry"] .skin {
+  fill: var(--dg-skin-angry);
+}
+
+.hair {
+  fill: var(--dg-hair);
+}
+
+/* The sides sit a shade back from the crown, as in the prototype. */
+.hairSide {
+  fill: var(--dg-hair);
+  fill-opacity: 0.8;
+}
+
+.eye {
+  fill: var(--dg-eye);
+}
+
+/*
+ * Brows and mouth morph between moods: the `d` ATTRIBUTE changes (P10 reads
+ * it) and Chromium transitions the matching CSS property. Where `d` is not a
+ * CSS property (Safari) the change is instant — no loss, the table is the
+ * same either way. Paths with different commands (the firm mouth is a line,
+ * the others curves) cannot interpolate and also switch instantly.
+ */
+.brow {
+  fill: none;
+  stroke: var(--dg-hair);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  transition: d var(--dur-stamp) var(--ease-out);
+}
+
+.mouthLine {
+  fill: none;
+  stroke: var(--dg-mouth);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  transition: d var(--dur-stamp) var(--ease-out);
+}
+
+.mouth {
+  fill: var(--dg-mouth);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.face[data-speaking="true"] .mouth {
+  animation: dg-talk var(--game-dur-speak) infinite alternate;
+}
+
+/*
+ * Eyes: the calm CEO blinks; the firm one narrows them; the angry one
+ * narrows them further and stops blinking — the stare IS the mood. The cold
+ * one, whose call is over, simply looks.
+ */
+.eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.face[data-mood="calm"] .eyes {
+  animation: dg-blink var(--game-dur-blink) infinite;
+}
+
+.face[data-mood="firm"] .eyes {
+  transform: scaleY(0.88);
+}
+
+.face[data-mood="angry"] .eyes {
+  transform: scaleY(0.72);
+}
+
+@keyframes dg-talk {
+  from {
+    transform: scaleY(1);
+  }
+  to {
+    transform: scaleY(3.2);
+  }
+}
+
+@keyframes dg-blink {
+  0%,
+  93%,
+  100% {
+    transform: scaleY(1);
+  }
+  96% {
+    transform: scaleY(0.08);
+  }
+}

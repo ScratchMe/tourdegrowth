@@ -1,5 +1,7 @@
 import { expect, test } from "./helpers";
+import { COMPARISON_ORDER } from "@/content/comparisons";
 import { GLOSSARY } from "@/content/glossary";
+import { CONTENT_PUBLISHED_AT, CONTENT_UPDATED_AT } from "@/content/updated-at";
 
 /**
  * REVIEW-02.md R2-15 — the JSON-LD the content pages actually emit. Read
@@ -43,4 +45,23 @@ test("a term page is a DefinedTerm tied to the set, with a three-step breadcrumb
   expect(String((term.inDefinedTermSet as Record<string, unknown>)["@id"])).toMatch(/\/en\/glossary#set$/);
   const crumbs = blocks.find((b) => b["@type"] === "BreadcrumbList") as Record<string, unknown>;
   expect((crumbs.itemListElement as unknown[]).length).toBe(3);
+});
+
+/**
+ * SEO audit v1 §1.5/§1.6 — every Article carries its dates, from the same
+ * table as the sitemap's `<lastmod>`, and the Person as publisher. Read from
+ * the served HTML of each Article page, in both languages.
+ */
+test("every Article page declares its dates and the author as publisher", async ({ page }) => {
+  const paths = ["/growth-audit-checklist", "/startup-growth-diagnostic", ...COMPARISON_ORDER.map((slug) => `/${slug}`)];
+  for (const locale of ["en", "fr"]) {
+    for (const path of paths) {
+      const blocks = await jsonLdBlocks(page, `/${locale}${path}`);
+      const article = blocks.find((b) => b["@type"] === "Article") as Record<string, unknown>;
+      expect(article, `${locale}${path}`).toBeDefined();
+      expect(article.datePublished, `${locale}${path}`).toBe(CONTENT_PUBLISHED_AT[path]);
+      expect(article.dateModified, `${locale}${path}`).toBe(CONTENT_UPDATED_AT[path]);
+      expect((article.publisher as Record<string, unknown>)["@type"]).toBe("Person");
+    }
+  }
 });

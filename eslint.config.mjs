@@ -46,6 +46,9 @@ const config = [
       ".ds-sync/**",
       "ds-bundle/**",
       "dist/**",
+      // Claude Code workflow worktrees: full copies of the repo, linted in
+      // their own checkout, never here.
+      ".claude/**",
     ],
   },
 

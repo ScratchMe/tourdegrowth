@@ -1,26 +1,13 @@
 /* Les cinq étapes en ligne : c'est un rappel de maillage, pas une section
-   de contenu — elles ont chacune leur page. */
+   de contenu — elles ont chacune leur page. Des liens ordinaires (la règle
+   de base de globals.css) : empruntée à /how-it-works, la classe d'un titre
+   de pilier les rendait indiscernables du texte (ds-critique M-9). */
 .stageLinks {
   list-style: none;
-  margin: 0 0 var(--space-8);
+  margin: 0;
   padding: 0;
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-5) var(--space-8);
   font: var(--body-md);
-}
-
-/* Le H1 de ces deux pages est plus long que celui de `/how-it-works` (« la
-   méthode » et « les 15 points » s'ajoutent à un sujet déjà long), et en
-   français il prend six lignes à 62 px sur un téléphone. Même correctif que
-   la page Confidentialité, et même raison.
-
-   Sélecteur ÉLÉMENT + classe (0,1,1) plutôt qu'une seule classe : la règle
-   qu'il doit battre vient d'un AUTRE module CSS, donc à égalité de
-   spécificité le gagnant dépendrait de l'ordre d'émission des feuilles
-   (leçon nº2 de CLAUDE.md, R-21). `/how-it-works` n'est pas touché. */
-@media (max-width: 760px) {
-  h1.title {
-    font: var(--display-hero-mobile);
-  }
 }

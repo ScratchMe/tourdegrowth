@@ -1,0 +1,80 @@
+/* game/ActionBar — game plan §2.6, §2.8. */
+
+.bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Desktop: the counter and the pill already sit beside the hand and under the phone. */
+.status {
+  display: none;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-5);
+}
+
+.count {
+  font: var(--chart-value);
+  font-variant-numeric: var(--tabular);
+  color: var(--text-body);
+}
+
+.pill {
+  font: var(--chart-label);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  font-variant-numeric: var(--tabular);
+  padding: var(--space-1) var(--space-4);
+  border: var(--border-solid);
+  border-radius: var(--radius-tag);
+  color: var(--text-body);
+}
+
+/* Past the legal path: the text says so already; the colour repeats it. */
+.pill.alert {
+  color: var(--state-bad-text);
+  border-color: var(--state-bad-text);
+}
+
+/*
+ * Phone: stuck to the bottom of the screen while the hand scrolls under it.
+ * Sticky, not fixed — it keeps its place in the flow right after the last
+ * card, so at the end of the hand it sits below that card instead of over it.
+ * The bottom padding clears the iOS home indicator.
+ */
+@media (max-width: 760px) {
+  .bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    gap: var(--space-4);
+    padding: var(--space-5) var(--space-6) calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
+    background: var(--surface-sunken);
+    border-top: var(--border-solid);
+    border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+  }
+
+  .status {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /*
+   * The browser does not know the bar is over the bottom of the screen: a
+   * card that Tab moves the focus to is left where it is as long as some of
+   * it is inside the window — under the bar, focus ring included (measured:
+   * 9 of 33 tab stops in the hand, WCAG 2.4.11). `scroll-padding` on the page
+   * is what focus scrolling reads to decide what "visible" means; set only
+   * while a bar is on the page, since the island renders it only in the hand
+   * phase. A `scroll-margin` on the cards was tried first and does nothing
+   * for focus: it only applies once the browser has already decided to scroll.
+   */
+  :global(html):has(.bar) {
+    scroll-padding-bottom: calc(var(--space-15) + var(--space-13));
+  }
+}
+
+.run {
+  min-width: 0;
+}

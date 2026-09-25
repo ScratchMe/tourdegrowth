@@ -9,7 +9,45 @@ import {
   RETAKE_STARTED_EVENT,
   LANDING_RETURN_EVENT,
   RETAKE_NUDGE_EVENT,
+  ENGINE_DECK_OPENED_EVENT,
+  ENGINE_EXPORT_FORMATS,
+  ENGINE_EXPORTED_EVENT,
+  ENGINE_OPENED_EVENT,
+  ENGINE_REQUEST_COPIED_EVENT,
+  ENGINE_STAGE_SAVED_EVENT,
+  ENGINE_STAGES,
+  ENGINE_TOUR_LINKED_EVENT,
+  engineEventPaths,
 } from "./goatcounter";
+import {
+  GAME_CATALOGUE_OPEN_EVENT,
+  GAME_ENDING_EVENT,
+  GAME_ENDINGS,
+  GAME_ENTRY_DETAILS,
+  GAME_ENTRY_EVENT,
+  GAME_HANGUP_EVENT,
+  GAME_LEVEL_SLUGS,
+  GAME_MOODS,
+  GAME_ORDER_EVENT,
+  GAME_ORDER_OUTCOMES,
+  GAME_QUARTER_EVENT,
+  GAME_QUARTERS,
+  GAME_REPLAY_EVENT,
+  GAME_RESUME_DETAILS,
+  GAME_RESUME_EVENT,
+  GAME_SHARE_EVENT,
+  GAME_START_FROM,
+  GAME_STARTED_EVENT,
+  GAME_TOUR_LOOP_EVENT,
+  GAME_VOICE_EVENT,
+  gameEventPaths,
+  gameStartedDetail,
+  type GameEntryDetail,
+  type GameOrderOutcome,
+  type GameResumeDetail,
+  type GameStartFrom,
+} from "@/lib/game/events";
+import type { EndingId, Mood } from "@/lib/game/types";
 
 // Server-only — never import this from a "use client" component.
 // GOATCOUNTER_API_TOKEN is a GoatCounter API key with the "read stats"
@@ -56,7 +94,57 @@ const ALL_PATHS = [
   RETAKE_STARTED_EVENT,
   LANDING_RETURN_EVENT,
   RETAKE_NUDGE_EVENT,
+  // The game (GAME-BRIEF.md §9.6) — built from the same lists the island
+  // fires from, so a path cannot exist on one side only.
+  ...gameEventPaths(),
+  // The growth engine (engine spec §11.6) — same reason: the island builds
+  // its paths from these lists, so a path cannot exist on one side only.
+  ...engineEventPaths(),
 ];
+
+/**
+ * The game's numbers, straight from the same response as the funnel — plan
+ * §3.8 and GAME-BRIEF.md §13.5. Every count is a sum over exact paths; a
+ * path missing from `gameEventPaths()` would read as zero here, which is why
+ * the island and this block share one vocabulary.
+ */
+export interface GameFunnelStats {
+  /** `game_entry_clicked/<detail>` — the four doors into the game. */
+  entries: Record<GameEntryDetail, number>;
+  /** `game_started/<level>/<from>`, summed over levels: fresh years only, never a resume. */
+  started: Record<GameStartFrom, number>;
+  /** Quarters 1-4 run (`game_quarter/<q>`), in order — where players stop. */
+  quartersRun: number[];
+  /** CEO calls hung up per quarter (`game_hangup/<q>`). */
+  hangups: number[];
+  endings: Record<EndingId, number>;
+  orders: Record<GameOrderOutcome, number>;
+  voices: Record<Mood, number>;
+  resume: Record<GameResumeDetail, number>;
+  catalogueOpened: number;
+  replays: number;
+  shares: number;
+  /** December's loop back to the Tour (`game_tour_loop`) — readers the game sends to the quiz. */
+  tourLoops: number;
+}
+
+/**
+ * The growth engine's numbers (engine spec §11.6). Paths only, by design: the
+ * page promises that nothing typed leaves the browser, so this is how many
+ * people used each part of it — never what they found. Everything reads zero
+ * until the engine is opened.
+ */
+export interface EngineFunnelStats {
+  /** `engine_opened` — the island's first view in a session. */
+  opened: number;
+  /** `engine_stage_saved/<stage>` — first number saved in that stage, once a session. */
+  stagesSaved: Record<(typeof ENGINE_STAGES)[number], number>;
+  requestsCopied: number;
+  deckOpened: number;
+  /** `engine_exported/<format>` — files downloaded, or the deck's text copied. */
+  exported: Record<(typeof ENGINE_EXPORT_FORMATS)[number], number>;
+  tourLinked: number;
+}
 
 export interface FunnelStats {
   /** Pageviews on "/" in the requested window. */
@@ -108,6 +196,8 @@ export interface FunnelStats {
    * understate this number by however many people block scripts.
    */
   valueActionsPerResult: number | null;
+  game: GameFunnelStats;
+  engine: EngineFunnelStats;
 }
 
 export interface FunnelWindow {
@@ -220,7 +310,43 @@ export async function fetchFunnelWindow(startISO: string, label: string): Promis
       landingReturn: counts.get(LANDING_RETURN_EVENT) ?? 0,
       retakeNudgeClicked: counts.get(RETAKE_NUDGE_EVENT) ?? 0,
       valueActionsPerResult: submissionsCompleted > 0 ? valueActions / submissionsCompleted : null,
+      game: gameStats((path) => counts.get(path) ?? 0),
+      engine: engineStats((path) => counts.get(path) ?? 0),
     },
+  };
+}
+
+function tally<K extends string>(keys: readonly K[], countOf: (key: K) => number): Record<K, number> {
+  return Object.fromEntries(keys.map((k) => [k, countOf(k)])) as Record<K, number>;
+}
+
+function gameStats(count: (path: string) => number): GameFunnelStats {
+  return {
+    entries: tally(GAME_ENTRY_DETAILS, (d) => count(`${GAME_ENTRY_EVENT}/${d}`)),
+    started: tally(GAME_START_FROM, (from) =>
+      GAME_LEVEL_SLUGS.reduce((n, slug) => n + count(`${GAME_STARTED_EVENT}/${gameStartedDetail(slug, from)}`), 0),
+    ),
+    quartersRun: GAME_QUARTERS.map((q) => count(`${GAME_QUARTER_EVENT}/${q}`)),
+    hangups: GAME_QUARTERS.map((q) => count(`${GAME_HANGUP_EVENT}/${q}`)),
+    endings: tally(GAME_ENDINGS, (e) => count(`${GAME_ENDING_EVENT}/${e}`)),
+    orders: tally(GAME_ORDER_OUTCOMES, (o) => count(`${GAME_ORDER_EVENT}/${o}`)),
+    voices: tally(GAME_MOODS, (m) => count(`${GAME_VOICE_EVENT}/${m}`)),
+    resume: tally(GAME_RESUME_DETAILS, (d) => count(`${GAME_RESUME_EVENT}/${d}`)),
+    catalogueOpened: count(GAME_CATALOGUE_OPEN_EVENT),
+    replays: count(GAME_REPLAY_EVENT),
+    shares: count(GAME_SHARE_EVENT),
+    tourLoops: count(GAME_TOUR_LOOP_EVENT),
+  };
+}
+
+function engineStats(count: (path: string) => number): EngineFunnelStats {
+  return {
+    opened: count(ENGINE_OPENED_EVENT),
+    stagesSaved: tally(ENGINE_STAGES, (stage) => count(`${ENGINE_STAGE_SAVED_EVENT}/${stage}`)),
+    requestsCopied: count(ENGINE_REQUEST_COPIED_EVENT),
+    deckOpened: count(ENGINE_DECK_OPENED_EVENT),
+    exported: tally(ENGINE_EXPORT_FORMATS, (format) => count(`${ENGINE_EXPORTED_EVENT}/${format}`)),
+    tourLinked: count(ENGINE_TOUR_LINKED_EVENT),
   };
 }
 

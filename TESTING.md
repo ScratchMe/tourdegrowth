@@ -123,6 +123,31 @@ trois specs ; le retirer **seulement de l'enveloppe rendue côté serveur** en
 fait tomber deux — les deux lectures HTTP — pendant que la spec DOM passe.
 C'est exactement la distinction que les specs revendiquent.
 
+### 2.3bis L'apostrophe française ne survit pas à un `grep` sur du HTML servi
+
+Coûté une conclusion fausse le 2026-09-23, en vérifiant en production que les
+renvois inter-pages étaient bien partis. React échappe l'apostrophe en
+`&#x27;` dans le HTML rendu côté serveur. Donc une sonde `grep -F` contenant
+une apostrophe **ne peut jamais matcher** une page servie — et comme une sonde
+« l'ancien texte est-il encore là ? » cherche une absence, elle rend un faux
+« c'est corrigé » pour la même raison qu'elle rendrait un faux « c'est
+présent » dans l'autre sens.
+
+Ça mord particulièrement ici parce que **la copie française est pleine
+d'apostrophes** : sur huit sondes d'un premier passage, les trois qui en
+portaient une n'ont rien prouvé, et la seule qui n'en avait pas a rapporté
+l'ancien texte encore présent — ce qui était vrai à cette seconde-là (le
+déploiement n'avait pas fini) mais que je n'aurais pas su distinguer d'un
+défaut.
+
+**Décoder avant de chercher** : `html.unescape(body)` en Python, jamais un
+`grep` direct sur le corps. Et sur chaque page, assurer **les deux sens** —
+le nouveau texte présent ET l'ancien absent : une page vide satisfait à elle
+seule toutes les assertions d'absence (c'est arrivé au même passage, une
+requête a rendu 0 octet et deux « ✓ ancien » trompeurs). D'où la règle
+compagne, qui est §2.1 sous une autre forme : **assert d'abord que le corps
+fait une taille plausible**, sinon la sonde prouve qu'elle n'a rien lu.
+
 ### 2.4 Une assertion se lit depuis la source de vérité
 
 Deux formes du même défaut :
@@ -245,6 +270,34 @@ serrée des deux côtés (un écart qui **grandit** est autant une régression q
   fichiers qu'un test importe. Un fichier jamais importé n'apparaît pas à 0 % :
   il n'apparaît pas du tout. C'est comme ça qu'un module au cœur d'une
   métrique est resté sans aucun test.
+- **`vitest --coverage` n'écrit aucun rapport dès qu'un test échoue**, donc
+  les seuils ne sont jamais évalués et un rouge sans rapport ne dit rien de la
+  couverture. `--coverage.reportOnFailure` pour les voir quand même.
+- **Vitest sait rendre un composant sans DOM.** `renderToStaticMarkup` de
+  `react-dom/server` n'a besoin de rien, et Vite rend les classes CSS Modules
+  hachées en environnement `node` : l'arbre qu'un composant émet se teste en
+  unitaire. Seul l'**interactif** (focus, clics, états) demande un navigateur.
+- **Une « absence de chiffre dans le DOM » doit ignorer `class` et `style`** :
+  les classes CSS Modules sont hachées avec des chiffres. Et tester nom **et**
+  valeur d'un attribut ensemble, sinon `data-score="60"` passe (la valeur seule,
+  « 60 », ne nomme rien).
+- **Un drapeau lu au build et à l'exécution se teste en séparant les deux** :
+  construire fermé, servir ouvert, et vérifier que tombent exactement les specs
+  du drapeau de build. Ce qui est figé au build (métadonnées, pied de page,
+  sitemap) se lit sur le HTML prérendu, jamais sur un serveur lancé avec la
+  variable.
+- **Deux modules écrits en parallèle ne se rencontrent qu'à l'intégration.**
+  Quand un consommateur écarte en silence ce qu'il ne reconnaît pas (un
+  `rowsOf()` qui saute une ligne mal formée), seul un **test de contrat** qui
+  exécute le vrai producteur et exige que chaque sorte de sortie soit exercée
+  dit que l'autre côté a changé de forme.
+- **Identifier son propre serveur** : le processus `next-server` ne porte pas
+  le port dans sa ligne de commande (seul son parent `sh -c next start -p N` le
+  porte). Comparer `readlink /proc/<pid>/cwd` au dossier de travail, puis tuer
+  par PID.
+- **`innerText` et `toHaveText` ne comparent pas la même chose** : prendre
+  `textContent`, et vérifier que la valeur capturée n'est pas la valeur
+  triviale — sinon la comparaison passe sur le bug qu'elle devait attraper.
 
 ---
 

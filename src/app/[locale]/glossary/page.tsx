@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { SiteFooter } from "@/components/brand/SiteFooter";
-import { ContentHeader } from "@/components/brand/ContentHeader";
+import { ProseActions, ProsePage } from "@/components/brand/ProsePage";
 import { Button } from "@/components/core/Button";
-import { Card } from "@/components/core/Card";
 // `glossary-terms` and not `glossary`: the index shows only the term and its
 // short definition. The long-form copy belongs to the term pages (R2-14).
 import { GLOSSARY_TERMS } from "@/content/glossary-terms";
@@ -26,6 +24,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     "/glossary",
     tc(UI_STRINGS.meta.glossaryTitle, resolved),
     tc(UI_STRINGS.meta.glossaryDescription, resolved),
+    { ownShareImage: true },
   );
 }
 
@@ -45,33 +44,27 @@ export default async function GlossaryIndexPage({ params }: PageProps) {
       {/* REVIEW-02.md R2-15: the glossary as one vocabulary, and its place in the site. */}
       <JsonLd data={definedTermSetSchema(locale)} />
       <JsonLd data={breadcrumbSchema(locale, [{ name: tc(UI_STRINGS.glossaryPage.indexTitle, locale), path: "/glossary" }])} />
-      <ContentHeader locale={locale} path="/glossary" />
-
-      <main className={styles.main}>
-        <div className={styles.intro}>
-          <h1 className={styles.title}>{tc(t.indexTitle, locale)}</h1>
-          <p className={styles.subtitle}>{tc(t.indexIntro, locale)}</p>
-        </div>
-
-        <div className={styles.list}>
+      <ProsePage locale={locale} path="/glossary" title={tc(t.indexTitle, locale)} lead={tc(t.indexIntro, locale)}>
+        {/* ds-critique M-4: twenty-four bordered cards read as twenty-four
+            things to press. A glossary is a list — ruled rows, the dashed
+            route rule between them, and the whole row still one link. */}
+        <ul className={styles.list}>
           {Object.entries(GLOSSARY_TERMS).map(([id, entry]) => (
-            <Link key={id} href={localePath(locale, `/glossary/${id}`)} className={styles.itemLink}>
-              <Card elevation="flat" tone="paper" className={styles.item}>
+            <li key={id} className={styles.row}>
+              <Link href={localePath(locale, `/glossary/${id}`)} className={styles.itemLink}>
                 <h2 className={styles.term}>{tc(entry.term, locale)}</h2>
                 <p className={styles.definition}>{tc(entry.definition, locale)}</p>
-              </Card>
-            </Link>
+              </Link>
+            </li>
           ))}
-        </div>
+        </ul>
 
-        <div className={styles.ctaWrap}>
+        <ProseActions>
           <Button size="lg" href="/quiz" hard>
             {tc(UI_STRINGS.landing.ctaPrimary, locale)}
           </Button>
-        </div>
-      </main>
-
-      <SiteFooter locale={locale} width="reading" />
+        </ProseActions>
+      </ProsePage>
     </>
   );
 }

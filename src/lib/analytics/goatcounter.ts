@@ -37,6 +37,14 @@ declare global {
 export function trackEvent(name: string, detail?: string): void {
   if (typeof window === "undefined") return;
   const path = detail ? `${name}/${detail}` : name;
+  // An event still waiting for the script goes out first. The poller only
+  // ticks every RETRY_MS, so without this a click in that gap overtook the
+  // mount event queued before it (`game_hangup/1` before `game_started`,
+  // seen in the game's e2e): counts were right, the session's order was not.
+  if (PENDING.length > 0 && !flushPending()) {
+    queue(path);
+    return;
+  }
   if (!send(path)) queue(path);
 }
 
@@ -83,17 +91,20 @@ function queue(path: string): void {
     waitedMs += RETRY_MS;
     const ready = typeof window !== "undefined" && Boolean(window.goatcounter?.count);
     if (!ready && waitedMs < GIVE_UP_MS) return;
-
-    if (ready) {
-      // Splice as we go: a send that somehow throws must not replay the
-      // whole queue on the next tick.
-      while (PENDING.length > 0) send(PENDING.shift()!);
-    } else {
-      PENDING.length = 0;
-    }
+    // Ready: the queue goes out. Budget spent: it is dropped.
+    if (!flushPending()) PENDING.length = 0;
     clearInterval(timer!);
     timer = null;
   }, RETRY_MS);
+}
+
+/** Sends the whole queue, in order, if the script is there; `false` when it is not yet. */
+function flushPending(): boolean {
+  if (typeof window === "undefined" || !window.goatcounter?.count) return false;
+  // Splice as we go: a send that somehow throws must not replay the whole
+  // queue on the next tick.
+  while (PENDING.length > 0) send(PENDING.shift()!);
+  return true;
 }
 
 /** Test-only: drops any queued event and stops the poller between cases. */
@@ -207,3 +218,55 @@ export const LANDING_RETURN_EVENT = "landing_return";
  * against `landing_return` as the denominator.
  */
 export const RETAKE_NUDGE_EVENT = "retake_nudge_clicked";
+
+/**
+ * ---------------------------------------------------------------------------
+ * The growth engine's vocabulary — engine spec §11.6.
+ * ---------------------------------------------------------------------------
+ *
+ *   engine_opened                               the island's first view in a session
+ *   engine_stage_saved/<stage>                  first number saved in that stage, once a session
+ *   engine_request_copied                       a request was put on the clipboard
+ *   engine_deck_opened                          the slide screen was opened
+ *   engine_exported/<png|pdf|text|json>         a file downloaded, or the deck's text copied
+ *   engine_tour_linked                          the engine was tied to a Tour result on the device
+ *
+ * PATHS ONLY, and every segment comes from the lists below. The page
+ * promises in writing that nothing typed leaves the browser (D16), and an
+ * event path is a way out like any other: never a diagnosis state, a status,
+ * a number or a label someone entered. `engine-boundary.test.ts` rule 5
+ * checks every call site under the engine's folders against these lists.
+ *
+ * Here rather than in the engine's folder for the R-11 reason: the
+ * dashboard (`goatcounter-api.ts`) asks GoatCounter for exact paths, and a
+ * path spelled on one side only is an event counted and never shown.
+ */
+export const ENGINE_OPENED_EVENT = "engine_opened";
+export const ENGINE_STAGE_SAVED_EVENT = "engine_stage_saved";
+export const ENGINE_REQUEST_COPIED_EVENT = "engine_request_copied";
+export const ENGINE_DECK_OPENED_EVENT = "engine_deck_opened";
+export const ENGINE_EXPORTED_EVENT = "engine_exported";
+export const ENGINE_TOUR_LINKED_EVENT = "engine_tour_linked";
+
+/** `engine_stage_saved/<stage>` — the five AARRR stages, in the product's canonical order. */
+export const ENGINE_STAGES = ["acquisition", "activation", "retention", "referral", "revenue"] as const;
+
+/** `engine_exported/<format>` — the four ways a file (or the deck's text) leaves: none of them sends anything. */
+export const ENGINE_EXPORT_FORMATS = ["png", "pdf", "text", "json"] as const;
+
+/** The events that carry no detail at all. */
+export const ENGINE_SIMPLE_EVENTS = [
+  ENGINE_OPENED_EVENT,
+  ENGINE_REQUEST_COPIED_EVENT,
+  ENGINE_DECK_OPENED_EVENT,
+  ENGINE_TOUR_LINKED_EVENT,
+] as const;
+
+/** Every path the engine can emit, built from the lists above — the island and the dashboard read the same. */
+export function engineEventPaths(): string[] {
+  return [
+    ...ENGINE_SIMPLE_EVENTS,
+    ...ENGINE_STAGES.map((stage) => `${ENGINE_STAGE_SAVED_EVENT}/${stage}`),
+    ...ENGINE_EXPORT_FORMATS.map((format) => `${ENGINE_EXPORTED_EVENT}/${format}`),
+  ];
+}

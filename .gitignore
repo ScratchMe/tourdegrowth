@@ -44,3 +44,7 @@ npm-debug.log*
 /.design-sync/.cache/
 /.design-sync/learnings/
 /.design-sync/node_modules
+
+# Claude Code — per-machine settings and the git worktrees its workflows create
+/.claude/settings.local.json
+/.claude/worktrees/

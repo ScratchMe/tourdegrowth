@@ -1,38 +1,21 @@
-.main {
-  max-width: var(--width-reading);
-  margin: 0 auto;
-  padding: 56px 24px 80px;
-  display: flex;
-  flex-direction: column;
-  gap: 44px;
-}
+/* /how-it-works — only what this page has and the prose frame doesn't
+   (components/brand/ProsePage): the five steps, the two tones, the cluster
+   links. No other page imports this file any more (ds-critique M-9). */
 
-.intro {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.title {
-  font: var(--display-hero);
-  color: var(--text-body);
-}
-
-.subtitle {
-  font: var(--body-lg);
-  color: var(--text-muted);
-}
-
+/* The five stages as one sequence: a dashed route rule above each step, the
+   same rule the header and footer draw — a road, not five stickers. */
 .pillarStack {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  border-bottom: var(--border-rule);
 }
 
-.pillarCard {
+.pillarStep {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--space-4);
+  padding: var(--space-10) 0;
+  border-top: var(--border-rule);
 }
 
 .pillarName {
@@ -40,90 +23,60 @@
   color: var(--text-body);
 }
 
-.pillarExplanation {
-  font: var(--body-sm);
-  color: var(--text-muted);
+/* REVIEW-02.md R2-13 — the pillar name is a link to its glossary page, styled as
+   the heading it sits in: no underline until hover, so the step reads as a title. */
+.pillarLink {
+  color: inherit;
+  text-decoration: none;
+}
+.pillarLink:hover,
+.pillarLink:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
 }
 
+/* A quoted question, recessed — no edge: it is read, not pressed. */
 .exampleBox {
   background: var(--surface-sunken);
   border-radius: var(--radius-button);
-  padding: 12px;
+  padding: var(--space-5) var(--space-6);
   display: flex;
   flex-direction: column;
-  gap: 4px;
-}
-
-.exampleLabel {
-  color: var(--text-muted);
+  gap: var(--space-1);
+  max-width: var(--measure-read);
 }
 
 .exampleQuestion {
   font: var(--meta-md);
-  font-size: 13px;
   color: var(--text-body);
-}
-
-.proseSection {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.sectionTitle {
-  font: var(--title-card);
-  color: var(--text-body);
-}
-
-.sectionBody {
-  font: var(--body-md);
-  color: var(--text-muted);
 }
 
 .toneGrid {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-5);
 }
 
+/* ds-critique M-5: sunken WITHOUT the solid ink edge. Sunken + edge + radius 8
+   is the recipe of an AnswerOption at rest, and these are descriptions. */
 .toneBlock {
-  padding: 20px;
+  padding: var(--space-8);
   border-radius: var(--radius-panel);
-  border: var(--border-solid);
   background: var(--surface-sunken);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-2);
 }
 
 .toneTitle {
-  font: var(--title-card);
-  font-size: 17px;
+  font: var(--body-lg);
+  font-weight: 600;
   color: var(--text-body);
 }
 
 .toneBody {
   font: var(--body-sm);
-  color: var(--text-muted);
-}
-
-/* The one use of --paint-red on this page, border-only per
-   DESIGN-BRIEF-ADDENDUM-01.md — deliberately not --surface-alert (that's
-   the discrete weak-pillar wash used elsewhere; this encart should stand
-   out, not blend into that quieter language). Not one of Card's own 4
-   tones (none combine a solid red border with a paper background), so this
-   is a small local override, same pattern as ResultView's roast score card. */
-.limitationCard {
-  border-color: var(--paint-red) !important;
-}
-
-.limitationText {
-  font: var(--body-md);
   color: var(--text-body);
-}
-
-.ctaWrap {
-  display: flex;
 }
 
 @media (min-width: 761px) {
@@ -136,26 +89,10 @@
   }
 }
 
-@media (max-width: 760px) {
-  .ctaWrap > * {
-    width: 100%;
-  }
-}
-
-/* REVIEW-02.md R2-13 — the pillar name is a link to its glossary page, styled as
-   the heading it sits in: no underline until hover, so the card reads as before. */
-.pillarLink {
-  color: inherit;
-  text-decoration: none;
-}
-.pillarLink:hover,
-.pillarLink:focus-visible {
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
-}
-
-/* GROWTH-PLAN.md 2.3 — les quatre liens du cluster « frameworks comparés ».
-   Même langage que les liens du bas d'une page de comparaison. */
+/* GROWTH-PLAN.md 2.3 — les liens du cluster « frameworks comparés ».
+   Même langage que les liens du bas d'une page de comparaison. Ce sont des
+   liens : ils gardent le couple fond creusé + bord plein, que le reste de la
+   page n'emploie plus (ds-critique M-5). */
 .comparisonLinks {
   display: flex;
   flex-wrap: wrap;

@@ -1,4 +1,4 @@
-import { expect, test as base, type Page, type Route } from "@playwright/test";
+import { expect, test as base, type APIRequestContext, type Page, type Route } from "@playwright/test";
 
 /**
  * Every spec runs with GoatCounter's script replaced by a local stub that
@@ -179,3 +179,28 @@ export const adminCredentials = { username: "admin", password: ADMIN_PASSWORD };
 
 export const SKIP_ADMIN_REASON =
   "ADMIN_DASHBOARD_PASSWORD is not set — /admin/* is 401 for everyone (fail-closed). Build and start with it set to run these.";
+
+/**
+ * Opens the game or the engine — both ship closed — for ONE request context,
+ * the owner's way: `POST /admin/preview?<feature>=on` with the admin password
+ * (`lib/owner-preview.ts`, 2026-09-25). The proxy answers with a signed,
+ * HttpOnly cookie, which lands in the jar of `request` — pass
+ * `context.request` to open the feature for that browser context's pages.
+ *
+ * Replaces the public `?engine=preview` / `?game=preview` these specs used
+ * to append: that parameter is inert now, and a spec that still relied on it
+ * would 404 rather than pass on nothing. Needs `ADMIN_PASSWORD`, so a spec
+ * that calls it skips with `SKIP_ADMIN_REASON` without one, like the admin
+ * specs.
+ */
+export async function grantOwnerPreview(
+  request: APIRequestContext,
+  ...features: ("game" | "engine")[]
+): Promise<void> {
+  const query = features.map((feature) => `${feature}=on`).join("&");
+  const res = await request.post(`/admin/preview?${query}`, {
+    headers: { authorization: `Basic ${Buffer.from(`admin:${ADMIN_PASSWORD}`).toString("base64")}` },
+    maxRedirects: 0,
+  });
+  expect(res.status(), "POST /admin/preview must answer 303 — is ADMIN_DASHBOARD_PASSWORD set on the server?").toBe(303);
+}

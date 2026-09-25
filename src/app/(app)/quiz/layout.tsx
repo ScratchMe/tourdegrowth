@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
+import { appMetadata } from "@/lib/i18n/meta";
 import { resolveRequestLocale } from "@/lib/i18n/resolve-request-locale";
 
 /**
@@ -16,13 +17,17 @@ import { resolveRequestLocale } from "@/lib/i18n/resolve-request-locale";
  * competing with the landing under the same name. The language is the
  * reader's (no locale prefix here, see `lib/i18n/routes.ts`), from the
  * header the proxy resolved.
+ *
+ * SEO audit v1 §1.1/§1.4: it also carries its share preview (the link the
+ * launch posts point at unfurled bare) and a self-referencing canonical. The
+ * image address carries the same language as the text beside it.
  */
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await resolveRequestLocale();
-  return {
-    title: tc(UI_STRINGS.meta.quizTitle, locale),
-    description: tc(UI_STRINGS.meta.quizDescription, locale),
-  };
+  return appMetadata(locale, "/quiz", tc(UI_STRINGS.meta.quizTitle, locale), tc(UI_STRINGS.meta.quizDescription, locale), {
+    url: `/quiz/share/${locale}`,
+    alt: tc(UI_STRINGS.meta.quizShareImageAlt, locale),
+  });
 }
 
 export default function QuizLayout({ children }: { children: ReactNode }) {

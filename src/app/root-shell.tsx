@@ -4,6 +4,8 @@ import Script from "next/script";
 import type { ReactNode } from "react";
 import { LocaleProvider } from "@/lib/i18n/locale-context";
 import type { Locale } from "@/lib/i18n/locale";
+import { NAV_STRINGS } from "@/lib/i18n/nav-strings";
+import { tc } from "@/lib/i18n/translatable";
 import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
@@ -90,6 +92,17 @@ export function RootShell({ locale, children }: { locale: Locale; children: Reac
   return (
     <html lang={locale}>
       <body className={`${inter.variable} ${plexMono.variable} ${stardos.variable}`}>
+        {/*
+          First focusable thing on every page (ds-critique L-9). Its target is
+          the `<main id="main">` each page renders — the id lives on the
+          pages, not here, because the shell cannot know where the content
+          starts; `src/__tests__/skip-link-target.test.ts` holds every `<main>`
+          to it. A plain `<a>`: a fragment on the current document, nothing
+          for the router to do.
+        */}
+        <a className="tdg-skip" href="#main">
+          {tc(NAV_STRINGS.skipToContent, locale)}
+        </a>
         <LocaleProvider initialLocale={locale}>{children}</LocaleProvider>
         {GOATCOUNTER_CODE ? (
           <Script

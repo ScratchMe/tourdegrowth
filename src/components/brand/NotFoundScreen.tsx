@@ -35,7 +35,7 @@ export interface NotFoundScreenProps {
 export function NotFoundScreen({ locale, eyebrow, title, body, cta }: NotFoundScreenProps) {
   return (
     <>
-      <main className={styles.main}>
+      <main id="main" className={styles.main}>
         <WordmarkLink locale={locale} />
 
         <DetourCard eyebrow={tc(eyebrow, locale)} title={tc(title, locale)}>

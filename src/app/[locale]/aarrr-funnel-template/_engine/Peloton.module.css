@@ -1,0 +1,267 @@
+/*
+ * The peloton — engine spec §8.1. Sizes are the ones the spec measured
+ * legible at both widths: dots ~17px with a 4px gap (a grid ≤ 210px) on
+ * desktop, a 118px mini-grid on the left of each row at 390px.
+ */
+.peloton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  min-width: 0;
+}
+
+.upstream {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  font: var(--meta-sm);
+  color: var(--text-muted);
+}
+
+/* An SVG, never a glyph: no arrow exists in Stardos Stencil (spec §10.4). */
+.arrow {
+  flex: none;
+  width: 28px;
+  height: 12px;
+  margin-top: 4px;
+  color: var(--viz-ink);
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-11);
+}
+
+/*
+ * Numeral → label → grid → source, in that order. The spec's own mock put
+ * the numeral under the grid and it touched the dots; the gap below keeps
+ * a clear band between the two at every width.
+ */
+.column {
+  display: grid;
+  grid-template-areas:
+    "numeral"
+    "label"
+    "grid"
+    "source";
+  grid-template-rows: auto auto auto 1fr;
+  row-gap: var(--space-4);
+  min-width: 0;
+  align-content: start;
+}
+
+.numeral {
+  grid-area: numeral;
+  font: var(--chart-value-xl);
+  letter-spacing: var(--display-letter-spacing);
+  font-variant-numeric: var(--tabular);
+  color: var(--text-body);
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+
+.label {
+  grid-area: label;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  font: var(--display-wordmark);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+  color: var(--text-body);
+  margin-bottom: var(--space-3);
+}
+
+/* StampedPillar's grammar (a painted, slightly rotated tag). The action red,
+   not the road-paint red: white 12px text on --paint-red is 4.42:1, under
+   AA; the action fill clears it at 4.65:1. */
+.stamp {
+  display: inline-block;
+  font: var(--meta-2xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--action-primary-text);
+  background: var(--action-primary-bg);
+  border-radius: var(--radius-tag);
+  padding: var(--space-1) var(--space-3);
+  transform: rotate(-1.5deg);
+  white-space: nowrap;
+}
+
+.grid {
+  grid-area: grid;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 4px;
+  width: 100%;
+  max-width: 210px;
+  aspect-ratio: 1;
+}
+
+.dot {
+  display: block;
+  border-radius: var(--radius-round);
+  aspect-ratio: 1;
+}
+
+.filled {
+  background: var(--viz-ink);
+}
+
+/* The bottleneck's column: its measured dots take the one red (the stamp
+   says it in words too, so the color is never alone). */
+.highlighted .filled {
+  background: var(--viz-highlight);
+}
+
+/* A referred sign-up: an ink ring around a paper core — distinct from a
+   plain measured dot, and not red, which belongs to the bottleneck. */
+.referred {
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 4px var(--viz-ink);
+}
+
+.referredRange {
+  background: var(--viz-unknown-fill), var(--surface-card);
+  box-shadow: inset 0 0 0 4px var(--viz-ink);
+}
+
+/* An estimated range: hatched, from lo to hi. */
+.range {
+  background: var(--viz-unknown-fill);
+  box-shadow: inset 0 0 0 1.5px var(--viz-axis);
+}
+
+.empty {
+  box-shadow: inset 0 0 0 1.5px var(--viz-axis);
+}
+
+/* Not measured: the whole grid is one hatched, dashed panel — a shape of its
+   own, never 100 empty dots (which would read as "nobody"). */
+.unknownGrid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--viz-unknown-fill);
+  border: var(--border-dashed);
+  border-radius: var(--radius-panel);
+}
+
+/* The « ? » sits on its own paper disk so it never overlaps a mark. */
+.unknownMark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38%;
+  aspect-ratio: 1;
+  border-radius: var(--radius-round);
+  background: var(--surface-card);
+  border: var(--border-solid);
+  font: var(--chart-value-xl);
+  color: var(--text-body);
+}
+
+.source {
+  grid-area: source;
+  font: var(--meta-xs);
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.sameHundred {
+  font: var(--body-sm);
+  color: var(--text-body);
+  padding-top: var(--space-5);
+  border-top: var(--border-rule);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-8);
+  list-style: none;
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-round);
+}
+
+.swatch.referred {
+  box-shadow: inset 0 0 0 3px var(--viz-ink);
+}
+
+.unknownSwatch {
+  background: var(--viz-unknown-fill);
+  outline: 1.5px dashed var(--viz-axis);
+  border-radius: 2px;
+}
+
+@media (max-width: 760px) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  /* One row per column: the mini-grid on the left, the words on the right. */
+  .column {
+    grid-template-columns: 118px minmax(0, 1fr);
+    grid-template-areas:
+      "grid numeral"
+      "grid label"
+      "grid source";
+    grid-template-rows: auto auto 1fr;
+    column-gap: var(--space-7);
+    row-gap: var(--space-2);
+    padding: var(--space-7) 0;
+    border-bottom: var(--border-rule);
+  }
+
+  .column:first-child {
+    padding-top: 0;
+  }
+
+  .grid {
+    max-width: 118px;
+    gap: 2px;
+    align-self: start;
+  }
+
+  .numeral {
+    font: var(--display-section);
+  }
+
+  .label {
+    font: var(--label-button);
+    text-transform: uppercase;
+    letter-spacing: var(--meta-tracking);
+    margin-bottom: 0;
+  }
+
+  .referred,
+  .referredRange {
+    box-shadow: inset 0 0 0 2.5px var(--viz-ink);
+  }
+
+  .range,
+  .empty {
+    box-shadow: inset 0 0 0 1px var(--viz-axis);
+  }
+
+  .unknownMark {
+    font: var(--display-section);
+  }
+}

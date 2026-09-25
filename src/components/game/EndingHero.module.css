@@ -1,0 +1,64 @@
+/* Game plan §2.4 and §2.6 — December's headline, back on paper. */
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: var(--measure-read);
+}
+
+.eyebrow {
+  margin: 0;
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+}
+
+/* 6.17:1 on the page ground, 4.98 on a raised one — plan §2.6. */
+.win {
+  color: var(--state-good-text);
+}
+
+.lose {
+  color: var(--text-alert);
+}
+
+.title {
+  margin: 0;
+  font: var(--display-hero);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+  text-wrap: balance;
+  color: var(--text-body);
+}
+
+/*
+ * Focus arrives here from the island, never from a user's Tab (tabIndex −1):
+ * a ring would announce a control where there is none.
+ */
+.title:focus {
+  outline: none;
+}
+
+/* The score numeral's gesture: the stamp lands once. Off under reduced motion (motion.css). */
+.stamp {
+  transform-origin: left center;
+  animation: tdg-stamp var(--dur-stamp) var(--ease-stamp) both;
+}
+
+.text {
+  margin: 0;
+  font: var(--body-read);
+  color: var(--text-body);
+}
+
+@media (max-width: 760px) {
+  .title {
+    font: var(--display-hero-mobile);
+    letter-spacing: var(--display-letter-spacing);
+  }
+
+  .text {
+    font: var(--body-read-mobile);
+  }
+}

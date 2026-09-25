@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ContentHeader } from "@/components/brand/ContentHeader";
 import { MetaLabel } from "@/components/brand/MetaLabel";
-import { SiteFooter } from "@/components/brand/SiteFooter";
+import { ProseActions, ProseList, ProsePage, ProseSection, ProseText } from "@/components/brand/ProsePage";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { METRICS } from "@/content/metrics";
@@ -12,7 +11,6 @@ import { contentMetadata } from "@/lib/i18n/meta";
 import { localePath } from "@/lib/i18n/routes";
 import { getPublicMetrics, isPublicMetricsEnabled, MIN_SUBMISSIONS_TO_PUBLISH } from "@/lib/metrics/public-metrics";
 import type { ScoreBandId } from "@/lib/submissions/growth-stats";
-import frame from "../how-it-works/page.module.css";
 import own from "./page.module.css";
 
 interface PageProps {
@@ -50,23 +48,21 @@ export default async function MetricsPage({ params }: PageProps) {
   const m = await getPublicMetrics();
 
   return (
-    <>
-      <ContentHeader locale={locale} path="/metrics" />
-      <main className={frame.main}>
-        <div className={frame.intro}>
-          <h1 className={frame.title}>{tc(METRICS.title, locale)}</h1>
-          <p className={frame.subtitle}>{tc(METRICS.intro, locale)}</p>
-          <MetaLabel size="xs" uppercase={false}>
-            {tc(METRICS.freshness, locale)}
-          </MetaLabel>
-        </div>
-
+    <ProsePage
+      locale={locale}
+      path="/metrics"
+      title={tc(METRICS.title, locale)}
+      lead={tc(METRICS.intro, locale)}
+      note={
+        <MetaLabel size="xs" uppercase={false}>
+          {tc(METRICS.freshness, locale)}
+        </MetaLabel>
+      }
+    >
         {!m.meaningful && (
           <Card elevation="raised" tone="outlineAlert" className={own.tooEarly}>
             <MetaLabel size="xs">{tc(METRICS.tooEarlyTitle, locale)}</MetaLabel>
-            <p className={frame.sectionBody}>
-              {tc(METRICS.tooEarly, locale).replace("{min}", String(MIN_SUBMISSIONS_TO_PUBLISH))}
-            </p>
+            <ProseText>{tc(METRICS.tooEarly, locale).replace("{min}", String(MIN_SUBMISSIONS_TO_PUBLISH))}</ProseText>
           </Card>
         )}
 
@@ -84,11 +80,10 @@ export default async function MetricsPage({ params }: PageProps) {
 
         {m.meaningful && (
           <>
-            <section className={frame.proseSection}>
-              <h2 className={frame.sectionTitle}>{tc(METRICS.distributionTitle, locale)}</h2>
-              <p className={frame.sectionBody}>{tc(METRICS.distributionHelp, locale)}</p>
+            <ProseSection heading={tc(METRICS.distributionTitle, locale)}>
+              <ProseText>{tc(METRICS.distributionHelp, locale)}</ProseText>
               <Distribution bands={m.scoreBands} total={m.tours} />
-            </section>
+            </ProseSection>
 
             <section className={own.figures}>
               <Figure
@@ -105,30 +100,24 @@ export default async function MetricsPage({ params }: PageProps) {
           </>
         )}
 
-        <section className={frame.proseSection}>
-          <h2 className={frame.sectionTitle}>{tc(METRICS.caveatsTitle, locale)}</h2>
-          <ul className={own.caveats}>
+        <ProseSection heading={tc(METRICS.caveatsTitle, locale)}>
+          <ProseList>
             {METRICS.caveats.map((c, i) => (
-              <li key={i} className={frame.sectionBody}>
-                {tc(c, locale)}
-              </li>
+              <li key={i}>{tc(c, locale)}</li>
             ))}
-          </ul>
-        </section>
+          </ProseList>
+        </ProseSection>
 
-        <section className={frame.proseSection}>
-          <h2 className={frame.sectionTitle}>{tc(METRICS.methodTitle, locale)}</h2>
-          <p className={frame.sectionBody}>{tc(METRICS.method, locale)}</p>
-        </section>
+        <ProseSection heading={tc(METRICS.methodTitle, locale)}>
+          <ProseText>{tc(METRICS.method, locale)}</ProseText>
+        </ProseSection>
 
-        <div className={frame.ctaWrap}>
+        <ProseActions>
           <Button size="lg" href={localePath(locale, "/")}>
             {tc(METRICS.cta, locale)}
           </Button>
-        </div>
-      </main>
-      <SiteFooter locale={locale} width="reading" />
-    </>
+        </ProseActions>
+    </ProsePage>
   );
 }
 

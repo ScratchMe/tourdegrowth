@@ -11,15 +11,19 @@ import type { Translatable } from "@/lib/i18n/dictionary";
  */
 export const FREE_CONTEXT = {
   label: {
-    fr: "Un contexte particulier qu'on devrait connaître ? (optionnel)",
+    fr: "Un contexte particulier qu'on devrait connaître ? (optionnel)",
     en: "Any specific context we should know about? (optional)",
   },
+  // TODO: à relire — revue de copie v1 (2026-09-24), changement nº10. The one
+  // screen that asks for writing, so the one where the copy weighs most on the
+  // output. "Two or three sentences are enough" lowers the bar (the field takes
+  // 500 characters) and replaces "not just another X", a model-writing tic.
   pitch: {
-    fr: "Plus tu nous en dis, plus la recommandation qui suit sera précise et vraiment utile — pas un conseil générique de plus.",
-    en: "The more you tell us, the sharper and more useful the recommendation that follows — not just another generic tip.",
+    fr: "Plus tu en dis, plus la recommandation colle à ton cas. Deux ou trois phrases suffisent.",
+    en: "The more you tell us, the more the recommendation fits your case. Two or three sentences are enough.",
   },
   placeholder: {
-    fr: "Ex. : on vend à des cabinets comptables, cycle de vente long, le vrai frein c'est la confiance plus que le prix...",
+    fr: "Ex. : on vend à des cabinets comptables, cycle de vente long, le vrai frein c'est la confiance plus que le prix…",
     en: "E.g.: we sell to accounting firms, long sales cycle, trust is a bigger blocker than price...",
   },
   /**
@@ -29,7 +33,14 @@ export const FREE_CONTEXT = {
    * a delivered string is the product agent's call, not ours.
    */
   skip: { fr: "Skip", en: "Skip" },
-  submit: { fr: "Obtenir mon diagnostic →", en: "Get my results →" },
+  /**
+   * TODO: à relire — revue de copie v1 (2026-09-24), changement nº5. The
+   * button used to promise a « diagnostic » in French and "results" in
+   * English, while the line right above it says we are writing your
+   * RECOMMENDATIONS — which is what the Deep dive returns. Imperative and
+   * second person, like every other arrow CTA.
+   */
+  submit: { fr: "Obtiens tes recommandations →", en: "Get your recommendations →" },
 } satisfies Record<string, Translatable>;
 
 /** SPEC-ADDENDUM-02.md §1.2/§1.4: client-side limit, enforced again server-side (see the deep-dive API route) — never trust the client alone. */

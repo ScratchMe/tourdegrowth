@@ -12,6 +12,23 @@
   font: var(--meta-2xs);
   line-height: 1;
   cursor: pointer;
+  position: relative;
+}
+
+/*
+ * The 16px circle is right visually — it sits inside a line of text or a
+ * pillar chip — but it was the whole target too, 16×16 with nothing around
+ * it (DS v3 H-3). A transparent 44px disc centred on it takes the taps: the
+ * inset is measured from the padding box, so it is half of (44 − 16) plus
+ * the 2px border it has to clear. A disc rather than a square keeps the
+ * reach off the words beside it, and two triggers stay apart as long as
+ * their centres are 44px apart — which e2e/targets.spec.ts measures.
+ */
+.trigger::before {
+  content: "";
+  position: absolute;
+  inset: calc((var(--hit-min) - 16px) / -2 - var(--border-width));
+  border-radius: var(--radius-round);
 }
 
 .muted {

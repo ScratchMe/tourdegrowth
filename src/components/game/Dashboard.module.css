@@ -1,0 +1,53 @@
+/* game/Dashboard — GAME-BRIEF §5.3, game plan §2.6 and §2.8. */
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Desktop: the hero tile a little wider than the five others, one row. */
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) repeat(5, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+.churn,
+.tile,
+.secret {
+  min-width: 0;
+}
+
+/*
+ * Phone: churn on its own row (its target sentence would wrap over three
+ * lines in a third of the screen), then the three visible counters, then the
+ * two hidden ones side by side — the pair the year is really about.
+ */
+@media (max-width: 760px) {
+  .grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+
+  .churn {
+    grid-column: span 6;
+  }
+
+  .tile {
+    grid-column: span 2;
+  }
+
+  .secret {
+    grid-column: span 3;
+  }
+}

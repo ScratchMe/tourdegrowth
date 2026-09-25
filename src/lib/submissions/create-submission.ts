@@ -240,7 +240,11 @@ export async function completeDeepDiveFlow(
   const [primary, ...rest] = await Promise.all([
     forLocale(locale),
     ...others.map((l) => forLocale(l).catch((err: unknown) => {
-      console.error(`Deep dive generation failed for locale "${l}" (the ${locale} one is kept):`, err);
+      // Values go through %s, never into the format string itself: this line
+      // is the only record of why a secondary language failed (R-04 hides the
+      // cause from the browser), and a stray % in an interpolated value would
+      // consume `err` as a format argument (CodeQL js/tainted-format-string).
+      console.error('Deep dive generation failed for locale "%s" (the %s one is kept):', l, locale, err);
       return null;
     })),
   ]);

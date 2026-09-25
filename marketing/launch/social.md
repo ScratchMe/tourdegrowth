@@ -14,7 +14,7 @@ vie propre.*
    *(image : `assets/og-en.png`)*
 2. **Acquisition.** Do you have one channel that's identified and measured? Not "we post on socials" — one channel, one number.
 3. **Activation.** Is there a specific "aha" moment, and do you know what % of new users reach it? Most teams know the first and not the second.
-4. **Retention.** D7 / D30 tracked and *looked at*? "We can pull it, but rarely look" scores 7 out of 20 — and it's the most common answer.
+4. **Retention.** D7 / D30 tracked and *looked at*? "We can pull it, but rarely look" scores 7 out of 20.
 5. **Referral.** Is sharing built into the product, or only in your communication? The difference is the whole growth loop.
 6. **Revenue.** Was your pricing tested, or chosen? Do you know your LTV, even roughly? Is there an expansion playbook?
 7. Fifteen questions, a deterministic score out of 100, the one stage holding you back, one next move. Two tones — straight up, or roast. Free, no sign-up, open source. [link]

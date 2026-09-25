@@ -50,7 +50,7 @@ Relire les règles **dans le sub** le jour même : elles bougent.
 >
 > **Why**: growth rarely stalls everywhere at once. It stalls at one stage and the four that work hide it. I wanted something a founder finishes in three minutes and can argue with.
 >
-> **Stack**: Next.js 16, TypeScript, CSS Modules on design tokens, Firestore, Gemini behind a 4-model fallback (only for the roast + the optional deep dive — the score itself is deterministic and tested), GoatCounter for cookie-less analytics, Vercel. Open source, AGPL: github.com/ScratchMe/tourdegrowth
+> **Stack**: Next.js 16, TypeScript, CSS Modules on design tokens, Firestore, Gemini behind a 4-model fallback (only for the optional deep dive — the score and the quick result, roast included, are deterministic and tested), GoatCounter for cookie-less analytics, Vercel. Open source, AGPL: github.com/ScratchMe/tourdegrowth
 >
 > **What I'd like feedback on**: whether the 15 questions fit *your* kind of product (B2C? marketplace?), and whether the next move is actually useful or just sounds good.
 >
@@ -62,9 +62,9 @@ Relire les règles **dans le sub** le jour même : elles bougent.
 
 **Lien** : `https://www.tourdegrowth.com/en?utm_source=reddit_imadethis&utm_campaign=launch_week`
 
-**Titre** : `Made a "where does your growth stall?" check-up — 15 questions, a deterministic score, and a roast mode with a hard-coded anti-mockery rule`
+**Titre** : `Made a "where does your growth stall?" check-up — 15 questions, a deterministic score, and a roast mode that goes after the strategy, never the person`
 
-**Corps** : la version courte du post r/SideProject (les deux premiers paragraphes + le lien), plus une phrase sur le garde-fou : « the roast goes after the strategy, never the person — that's in the system prompt, not left to the model ».
+**Corps** : la version courte du post r/SideProject (les deux premiers paragraphes + le lien), plus une phrase sur le garde-fou : « the roast goes after the strategy, never the person — the quick roast is pre-written and reviewed line by line, and the deep dive has the rule hard-coded in its system prompt ». *(Ne pas écrire que le modèle écrit le roast : le roast du résultat rapide est une bibliothèque de phrases relues, `src/content/copy-library.ts`.)*
 
 ---
 
@@ -84,7 +84,7 @@ Court : c'est un commentaire dans un fil, pas un post. Répondre à trois autres
 
 Le sub tolère le produit **en arrière-plan d'une décision technique racontée**, pas en titre. Le texte doit être le meilleur des cinq.
 
-**Titre** : `Why we made the growth score deterministic and let the LLM write only the roast`
+**Titre** : `Why we made the growth score deterministic and let the LLM write only the optional deep dive`
 
 **Corps** :
 
@@ -92,7 +92,7 @@ Le sub tolère le produit **en arrière-plan d'une décision technique racontée
 >
 > The score is 15 questions × fixed points (20/7/0), rounded per stage, summed. Boring on purpose. A score you'll share has to be re-explainable in ten seconds, and "the AI said 74" isn't an explanation. The result page shows the arithmetic.
 >
-> What the LLM *does* write: the roast tone (opt-in), and an optional deep dive with per-stage recommendations. Two things we learned running it in production:
+> What the LLM *does* write: an optional deep dive with per-stage recommendations. Everything in the free result, the opt-in roast included, is a library of pre-written, reviewed sentences. Two things we learned running it in production:
 >
 > 1. **Truncated responses look like valid ones.** Our extractor checked `finishReason` only when the text was empty. A response cut at `MAX_TOKENS` still carries the partial text, so it sailed through and blew up three frames later in `JSON.parse`. Check the finish reason *before* the text.
 > 2. **A fallback chain without backoff protects against "this model is down", not "the API is overloaded for two seconds."** Four models failed in under a second, together. Exponential backoff with full jitter fixed it — jitter matters when you fire four generations in parallel.

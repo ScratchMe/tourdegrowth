@@ -17,7 +17,19 @@
  */
 
 /** The waves of GROWTH-PLAN.md §4 that a link can belong to. */
-export const CAMPAIGNS = ["launch_week", "seo_content", "directories", "seeding", "paid"];
+export const WAVE_CAMPAIGNS = ["launch_week", "seo_content", "directories", "seeding", "paid"];
+
+/**
+ * The three sequenced launches of `marketing/campaigns/README.md`: the Tour
+ * relaunched with its reviewed copy, the growth engine, the game. They reuse
+ * the same communities as the first wave — a Hacker News link is still
+ * `utm_source=hackernews` — so what tells them apart in GoatCounter is the
+ * campaign. Without it, the second Show HN would land in the same
+ * `launch_week` row as the first one and neither could be read on its own.
+ */
+export const LAUNCH_CAMPAIGNS = ["relaunch_tour", "launch_engine", "launch_game"];
+
+export const CAMPAIGNS = [...WAVE_CAMPAIGNS, ...LAUNCH_CAMPAIGNS];
 
 /**
  * Channels the plan excludes. A source or key containing one of these is
@@ -37,6 +49,10 @@ export const CHANNELS = {
   reddit_startups: { source: "reddit_startups", campaign: "launch_week" },
   reddit_growthhacking: { source: "reddit_growthhacking", campaign: "launch_week" },
   reddit_entrepreneur: { source: "reddit_entrepreneur", campaign: "launch_week" },
+  // The game's audience (designers, researchers) is not in the first wave's
+  // subreddits. r/UXDesign's rules are NOT documented in GROWTH-PLAN.md:
+  // the draft that uses this key says to read the sidebar before posting.
+  reddit_uxdesign: { source: "reddit_uxdesign", campaign: "launch_week" },
   twitter: { source: "twitter", campaign: "launch_week" },
   bluesky: { source: "bluesky", campaign: "launch_week" },
   // Product Hunt without a declared maker (real names are mandatory there):
@@ -100,12 +116,56 @@ export function resolveChannel(key) {
   return { source: `${match[1]}_${match[2]}`, campaign: family.campaign };
 }
 
-export function buildUtmUrl(key, path = "/", siteUrl = DEFAULT_SITE_URL) {
+/**
+ * `campaign` overrides the channel's default wave — how a launch link is
+ * made (`buildUtmUrl("hackernews", "/en/aarrr-funnel-template", undefined,
+ * "launch_engine")`). It must be a known campaign: an ad hoc spelling here
+ * would split one launch into several GoatCounter rows, the exact failure
+ * this vocabulary exists to prevent, so an unknown one yields no link at all
+ * rather than a quietly mistagged one.
+ */
+export function buildUtmUrl(key, path = "/", siteUrl = DEFAULT_SITE_URL, campaign) {
   const channel = resolveChannel(key);
   if (!channel) return null;
+  if (campaign !== undefined && !CAMPAIGNS.includes(campaign)) return null;
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
   const url = new URL(siteUrl.replace(/\/$/, "") + normalizedPath);
   url.searchParams.set("utm_source", channel.source);
-  url.searchParams.set("utm_campaign", channel.campaign);
+  url.searchParams.set("utm_campaign", campaign ?? channel.campaign);
   return url.toString();
+}
+
+/**
+ * Parses the command line of `utm-link.mjs`: `<channel> [path]`, plus
+ * `--campaign <x>` or `--campaign=<x>`, or `--list` / `-l` alone. Returns
+ * `{ channel, path, campaign }`, `{ list: true }`, or `{ error }`.
+ *
+ * Anything it does not understand is an error, never ignored: an ignored
+ * `--campaign=launch_game` used to print a `launch_week` link with exit 0,
+ * which is a quietly mistagged launch — the one failure this vocabulary
+ * exists to prevent.
+ */
+export function parseUtmArgs(argv) {
+  const positionals = [];
+  let campaign;
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg === "--list" || arg === "-l") {
+      if (argv.length !== 1) return { error: `${arg} takes no other argument.` };
+      return { list: true };
+    }
+    if (arg === "--campaign" || arg.startsWith("--campaign=")) {
+      if (campaign !== undefined) return { error: "--campaign given twice." };
+      const value = arg === "--campaign" ? argv[++i] : arg.slice("--campaign=".length);
+      if (!value || value.startsWith("-")) return { error: "--campaign needs a value." };
+      campaign = value;
+      continue;
+    }
+    if (arg.startsWith("-")) return { error: `Unknown option "${arg}".` };
+    positionals.push(arg);
+  }
+  if (positionals.length === 0) return { error: "Missing channel." };
+  if (positionals.length > 2) return { error: `Unexpected argument "${positionals[2]}".` };
+  const [channel, path] = positionals;
+  return { channel, path, campaign };
 }

@@ -21,4 +21,13 @@ export const NAV_STRINGS = {
   // de page à sept liens cesse d'en mettre aucun en avant.
   // TODO: à relire (convention 6).
   checklist: { en: "Growth checklist", fr: "Checklist growth" },
+  // Le lien d'évitement de RootShell (ds-critique L-9, 2026-09-24). Ici
+  // plutôt que dans le dictionnaire : RootShell est le chrome de chaque page,
+  // et ce module est le seul à rester petit par construction (R2-14).
+  // TODO: à relire (convention 6).
+  skipToContent: { en: "Skip to content", fr: "Aller au contenu" },
+  // Le lien de pied de page vers le jeu (GAME-BRIEF 13.3 B), affiché seulement
+  // quand le jeu est ouvert au build. Libellé fourni par le brief.
+  // TODO: à relire (convention 6).
+  game: { en: "The game", fr: "Le jeu" },
 } as const satisfies Record<string, Translatable>;

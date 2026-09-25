@@ -1,48 +1,24 @@
-.main {
-  max-width: var(--width-reading);
-  margin: 0 auto;
-  padding: 56px 24px 80px;
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-}
-
-.intro {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.title {
-  font: var(--display-hero);
-  color: var(--text-body);
-}
-
-.subtitle {
-  font: var(--body-lg);
-  color: var(--text-muted);
-}
-
+/* /glossary — the frame is ProsePage; this is the term list only. */
 .list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  list-style: none;
+  border-top: var(--border-rule);
 }
 
+.row {
+  border-bottom: var(--border-rule);
+}
+
+/* The whole row is the link, as the card was: a big target, one tab stop.
+   `display: flex` rather than `contents` — a link with `display: contents`
+   generates no box and Chromium drops it from the tab order (see the
+   landing preview chips, 2026-09-10). */
 .itemLink {
-  text-decoration: none;
-}
-
-.item {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  transition: box-shadow var(--dur-fast) var(--ease-out);
-}
-
-.itemLink:hover .item,
-.itemLink:focus-visible .item {
-  box-shadow: var(--shadow-hover);
+  gap: var(--space-2);
+  padding: var(--space-7) 0;
+  color: inherit;
+  text-decoration: none;
 }
 
 .term {
@@ -50,17 +26,14 @@
   color: var(--text-body);
 }
 
+.itemLink:hover .term,
+.itemLink:focus-visible .term {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
 .definition {
   font: var(--body-sm);
   color: var(--text-muted);
-}
-
-.ctaWrap {
-  display: flex;
-}
-
-@media (max-width: 760px) {
-  .ctaWrap > * {
-    width: 100%;
-  }
+  max-width: var(--measure-read);
 }

@@ -140,7 +140,10 @@ describe("resolveBottleneck (design system extension 03, §1)", () => {
     expect(shared).toBeGreaterThan(0);
     expect(level).toBeGreaterThan(0);
     expect(clear + shared + level).toBe(ACHIEVABLE.length ** PILLARS.length);
-  });
+    // 59,049 boards take ~4 s alone and past Vitest's 5 s default under
+    // coverage on a loaded machine — a timeout here says nothing about the
+    // invariants, so the budget is explicit rather than left to the default.
+  }, 30_000);
 });
 
 describe("the bottleneck block and the next move agree", () => {

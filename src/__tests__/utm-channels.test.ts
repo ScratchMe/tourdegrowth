@@ -1,16 +1,20 @@
 import { describe, expect, it } from "vitest";
+import { spawnSync } from "node:child_process";
+import { join } from "node:path";
 
 // A JS module in an `allowJs: false` project — same trick as
 // next-config.test.ts: widen the specifier so the import is untyped.
 const mod = (await import("../../scripts/utm-channels.mjs" as string)) as {
   CAMPAIGNS: string[];
+  WAVE_CAMPAIGNS: string[];
+  LAUNCH_CAMPAIGNS: string[];
   EXCLUDED: string[];
   CHANNELS: Record<string, { source: string; campaign: string }>;
   DYNAMIC_PREFIXES: Record<string, { campaign: string }>;
   KNOWN_DIRECTORIES: string[];
   DEFAULT_SITE_URL: string;
   resolveChannel: (key: string) => { source: string; campaign: string } | null;
-  buildUtmUrl: (key: string, path?: string, siteUrl?: string) => string | null;
+  buildUtmUrl: (key: string, path?: string, siteUrl?: string, campaign?: string) => string | null;
 };
 
 /**
@@ -79,6 +83,91 @@ describe("resolveChannel / buildUtmUrl", () => {
     expect(mod.KNOWN_DIRECTORIES.length).toBeGreaterThanOrEqual(10);
     for (const slug of mod.KNOWN_DIRECTORIES) {
       expect(mod.resolveChannel(`directory:${slug}`), slug).not.toBeNull();
+    }
+  });
+});
+
+/**
+ * marketing/campaigns/README.md sequences three launches through the same
+ * communities. The source says WHERE a visit came from, the campaign says
+ * WHICH launch sent it — so the override is what lets GoatCounter tell the
+ * engine's Show HN from the Tour's, and it must refuse a campaign it does
+ * not know rather than mint a new row.
+ */
+describe("launch campaigns", () => {
+  it("names the three sequenced launches, all inside the campaign vocabulary", () => {
+    expect(mod.LAUNCH_CAMPAIGNS).toEqual(["relaunch_tour", "launch_engine", "launch_game"]);
+    for (const campaign of mod.LAUNCH_CAMPAIGNS) {
+      expect(mod.CAMPAIGNS, campaign).toContain(campaign);
+      expect(campaign).toMatch(/^[a-z0-9_]+$/);
+      expect(mod.WAVE_CAMPAIGNS, campaign).not.toContain(campaign);
+    }
+  });
+
+  it("overrides the channel's wave with a known campaign, and keeps the source", () => {
+    expect(mod.buildUtmUrl("hackernews", "/en/aarrr-funnel-template", undefined, "launch_engine")).toBe(
+      "https://www.tourdegrowth.com/en/aarrr-funnel-template?utm_source=hackernews&utm_campaign=launch_engine",
+    );
+    expect(mod.buildUtmUrl("directory:uneed", "/fr/game", undefined, "launch_game")).toBe(
+      "https://www.tourdegrowth.com/fr/game?utm_source=directory_uneed&utm_campaign=launch_game",
+    );
+  });
+
+  it("falls back to the channel's own wave when no campaign is given", () => {
+    expect(mod.buildUtmUrl("hackernews", "/en")).toBe(
+      "https://www.tourdegrowth.com/en?utm_source=hackernews&utm_campaign=launch_week",
+    );
+  });
+
+  it("refuses an unknown campaign instead of minting a new GoatCounter row", () => {
+    expect(mod.buildUtmUrl("hackernews", "/en", undefined, "launch_week2")).toBeNull();
+    expect(mod.buildUtmUrl("hackernews", "/en", undefined, "Launch_Engine")).toBeNull();
+    expect(mod.buildUtmUrl("hackernews", "/en", undefined, "")).toBeNull();
+  });
+});
+
+/**
+ * The command line is where a launch link is actually made, so a flag it
+ * does not understand is the same failure as an unknown campaign: a link
+ * that looks right, lands in `launch_week` and splits the launch's row in
+ * GoatCounter. `--campaign=launch_game` (the common spelling) and a bare
+ * trailing `--campaign` used to do exactly that, with exit code 0.
+ */
+describe("the command line (scripts/utm-link.mjs)", () => {
+  const parse = (argv: string[]) =>
+    (mod as unknown as { parseUtmArgs: (argv: string[]) => Record<string, unknown> }).parseUtmArgs(argv);
+
+  it("reads the campaign in both spellings", () => {
+    expect(parse(["hackernews", "/en", "--campaign", "launch_game"])).toEqual({ channel: "hackernews", path: "/en", campaign: "launch_game" });
+    expect(parse(["hackernews", "/en", "--campaign=launch_game"])).toEqual({ channel: "hackernews", path: "/en", campaign: "launch_game" });
+    expect(parse(["--campaign", "launch_game", "hackernews"])).toEqual({ channel: "hackernews", path: undefined, campaign: "launch_game" });
+  });
+
+  it("refuses a campaign flag with no value, an unknown flag, and a third positional", () => {
+    expect(parse(["hackernews", "/en", "--campaign"])).toHaveProperty("error");
+    expect(parse(["hackernews", "/en", "--campaign="])).toHaveProperty("error");
+    expect(parse(["hackernews", "--campaign", "--list"])).toHaveProperty("error");
+    expect(parse(["hackernews", "/en", "--campain=launch_game"])).toHaveProperty("error");
+    expect(parse(["hackernews", "/en", "launch_game"])).toHaveProperty("error");
+  });
+
+  it("still answers --list", () => {
+    expect(parse(["--list"])).toEqual({ list: true });
+    expect(parse(["-l"])).toEqual({ list: true });
+  });
+
+  // End to end: the wiring, not just the parser — exit code and output.
+  const run = (...args: string[]) =>
+    spawnSync(process.execPath, [join(process.cwd(), "scripts/utm-link.mjs"), ...args], { encoding: "utf8" });
+
+  it("prints the tagged link for --campaign=<x>, and exits 1 instead of mistagging", () => {
+    const ok = run("hackernews", "/en/game/retention", "--campaign=launch_game");
+    expect(ok.status).toBe(0);
+    expect(ok.stdout.trim()).toBe("https://www.tourdegrowth.com/en/game/retention?utm_source=hackernews&utm_campaign=launch_game");
+    for (const bad of [["hackernews", "/en", "--campaign"], ["hackernews", "/en", "--campain=launch_game"]]) {
+      const res = run(...bad);
+      expect(res.status, bad.join(" ")).toBe(1);
+      expect(res.stdout, bad.join(" ")).not.toContain("utm_campaign=");
     }
   });
 });

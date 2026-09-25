@@ -1,0 +1,122 @@
+/*
+ * The prose page — ds-critique M-3 / M-9. The reading column is
+ * --width-reading (760px) so a table, a card or a code-like formula can use
+ * all of it; running text inside is capped at --measure-read, which is what
+ * brings a line back into the 60–75 character band the eye can track.
+ */
+.main {
+  max-width: var(--width-reading);
+  margin: 0 auto;
+  padding: var(--space-14) 24px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
+/* A page with a band (the game level): the column above, then a band as
+   wide as the screen — the band sets its own inner width and gutters. The
+   column closes on the band's gap rather than on the page's 80px foot. */
+.withBand {
+  display: flex;
+  flex-direction: column;
+}
+
+.withBand > .main {
+  width: 100%;
+  padding-bottom: var(--space-12);
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.title {
+  color: var(--text-body);
+}
+
+.page {
+  font: var(--display-hero);
+}
+
+.term {
+  font: var(--display-hero-mobile);
+}
+
+/* The standfirst stays grey and at the larger UI size: it is a lead, read
+   once, and the contrast with the body text below is the point. */
+.lead {
+  font: var(--body-lg);
+  color: var(--text-muted);
+  max-width: var(--measure-read);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.heading {
+  font: var(--title-card);
+  color: var(--text-body);
+}
+
+.headingLabel {
+  font: var(--meta-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--meta-tracking-wide);
+  color: var(--text-muted);
+}
+
+/*
+ * Running text: 400 weight, 17px/1.65, full ink. The 500 weight stays with
+ * the UI (buttons, options), where it is right; body copy at 500 in
+ * --text-muted was grey-on-beige for 60 pages (ds-critique M-3).
+ */
+.text,
+.list > li {
+  font: var(--body-read);
+  color: var(--text-body);
+  max-width: var(--measure-read);
+}
+
+.list {
+  padding-left: 1.25em;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+}
+
+@media (max-width: 760px) {
+  .main {
+    gap: var(--space-11);
+  }
+
+  /* The mobile hero for every page title, as on the landing. Two classes
+     (0,2,0): the frame owns both, so no page module has to out-specify it
+     any more — that was the `h1.title` patch four pages carried. */
+  .title.page {
+    font: var(--display-hero-mobile);
+  }
+
+  .text,
+  .list > li {
+    font: var(--body-read-mobile);
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .actions > * {
+    width: 100%;
+  }
+}

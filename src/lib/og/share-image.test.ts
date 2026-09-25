@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   LEGACY_SHARE_TOKEN,
+  matchShareToken,
   parseShareToken,
   sampleShareImageModel,
   SHARE_IMAGE_VERSION,
@@ -100,5 +101,34 @@ describe("shareImageModel", () => {
 
   it("the sample model is the fixed English sample, never enriched", () => {
     expect(sampleShareImageModel()).toMatchObject({ total: SAMPLE_RESULT.total, locale: "en", roast: false, deepDive: false });
+  });
+
+  // Copy review v1, DS critique L-5: the picture shown IN the page follows
+  // the reader; the one declared to crawlers keeps the author's language.
+  it("can be drawn in the reader's language, action included, on its own address", () => {
+    const author = shareImageModel(submission);
+    const reader = shareImageModel(submission, "en");
+    expect(reader.locale).toBe("en");
+    expect(reader.nextMove).not.toBe(author.nextMove);
+    expect({ ...reader, locale: author.locale, nextMove: author.nextMove }).toEqual(author);
+    expect(shareImageToken(reader)).not.toBe(shareImageToken(author));
+    expect(sampleShareImageModel("fr")).toMatchObject({ locale: "fr", total: SAMPLE_RESULT.total });
+    expect(sampleShareImageModel("fr").nextMove).not.toBe(sampleShareImageModel().nextMove);
+  });
+});
+
+describe("matchShareToken", () => {
+  const build = (locale: "en" | "fr") => sampleShareImageModel(locale);
+
+  it("reads the language off the token: each locale's current token finds that locale's model", () => {
+    for (const locale of ["en", "fr"] as const) {
+      expect(matchShareToken(shareImageToken(build(locale)), build)).toEqual(build(locale));
+    }
+  });
+
+  it("finds nothing for a token that is no language's current picture", () => {
+    expect(matchShareToken(LEGACY_SHARE_TOKEN, build)).toBeNull();
+    expect(matchShareToken("000000000000", build)).toBeNull();
+    expect(matchShareToken(shareImageToken({ ...build("fr"), deepDive: true }), build)).toBeNull();
   });
 });

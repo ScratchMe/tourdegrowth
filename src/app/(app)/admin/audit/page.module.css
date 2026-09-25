@@ -94,7 +94,7 @@
 }
 
 .importLabel:focus-within {
-  outline: var(--focus-width) solid var(--paint-red);
+  outline: var(--focus-width) solid var(--focus-ring-invert);
   outline-offset: var(--focus-offset);
 }
 

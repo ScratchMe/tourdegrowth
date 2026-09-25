@@ -158,3 +158,28 @@ describe("summarizeSubmissions — the rest of the dashboard", () => {
     expect(stats.freeContextRate).toBe(0);
   });
 });
+
+describe("summarizeSubmissions — results the game card is shown to (GAME-BRIEF.md §13.5)", () => {
+  function board(acq: number, act: number, ret: number, refl: number, rev: number): Submission["pillars"] {
+    const scores = { acquisition: acq, activation: act, retention: ret, referral: refl, revenue: rev };
+    return Object.entries(scores).map(([pillar, score]) => ({ pillar, score, rawPoints: 0 })) as Submission["pillars"];
+  }
+
+  it("counts a clear or shared retention bottleneck, never a level board or another pillar's", () => {
+    const stats = summarizeSubmissions(
+      [
+        submission({ id: "clear", pillars: board(16, 16, 5, 16, 16) }),
+        // Shared bottom group with retention in it — orchestrator decision 2.
+        submission({ id: "shared", pillars: board(5, 16, 5, 16, 16) }),
+        // Old enough to fall out of the 30-day window.
+        submission({ id: "old", createdAt: daysAgo(45), pillars: board(16, 16, 2, 16, 16) }),
+        submission({ id: "acq", pillars: board(2, 16, 16, 16, 16) }),
+        submission({ id: "level", pillars: board(16, 16, 16, 16, 16) }),
+        // A malformed document costs its own count, never the dashboard.
+        submission({ id: "odd", pillars: { retention: 0 } as unknown as Submission["pillars"] }),
+      ],
+      NOW,
+    );
+    expect(stats.retentionBottleneckResults).toEqual({ allTime: 3, last30Days: 2 });
+  });
+});

@@ -1,0 +1,111 @@
+/* « Et si » — dashed red is advice (Card tone="outlineAlert"). */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  min-width: 0;
+}
+
+.title {
+  font: var(--meta-2xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font: var(--body-sm);
+  color: var(--text-body);
+}
+
+.value {
+  font: var(--chart-value);
+  font-variant-numeric: var(--tabular);
+  color: var(--text-body);
+}
+
+/* The native range, drawn in the ink the rest of the system uses. Its thumb
+   is the hit target: ≥ 44px of height through the track's padding. */
+.slider {
+  width: 100%;
+  min-height: var(--hit-min);
+  accent-color: var(--viz-ink);
+  cursor: pointer;
+}
+
+.slider:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset-tight);
+}
+
+.result {
+  min-height: var(--hit-min);
+}
+
+.hint {
+  font: var(--body-sm);
+  color: var(--text-muted);
+}
+
+.lines {
+  display: flex;
+  flex-direction: column;
+}
+
+.line {
+  display: grid;
+  grid-template-columns: 7.5em minmax(0, 1fr);
+  gap: var(--space-5);
+  padding: var(--space-4) 0;
+  border-bottom: var(--border-rule);
+}
+
+.line:first-child {
+  padding-top: 0;
+}
+
+.lineLabel {
+  font: var(--meta-sm);
+  font-weight: 600;
+  color: var(--text-alert);
+}
+
+/* Mono with tabular digits: each line is a calculation to redo by hand, so
+   its numbers line up the way a column of figures would. */
+.lineText {
+  font: var(--meta-md);
+  font-variant-numeric: var(--tabular);
+  color: var(--text-body);
+  overflow-wrap: anywhere;
+}
+
+.conclusion {
+  margin-top: var(--space-5);
+  font: var(--body-md);
+  font-weight: 600;
+  color: var(--text-body);
+}
+
+.note {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+  max-width: var(--measure-read);
+}
+
+@media (max-width: 760px) {
+  .line {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-1);
+  }
+}

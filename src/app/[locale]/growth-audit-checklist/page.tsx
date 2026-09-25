@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ContentHeader } from "@/components/brand/ContentHeader";
-import { SiteFooter } from "@/components/brand/SiteFooter";
 import { MetaLabel } from "@/components/brand/MetaLabel";
+import { ProsePage, ProseSection, ProseText } from "@/components/brand/ProsePage";
 import { Button } from "@/components/core/Button";
-import { Card } from "@/components/core/Card";
+import { Callout } from "@/components/core/Callout";
 import { QUESTIONS } from "@/content/copy-library";
 import { CHECKLIST } from "@/content/open-door";
 import { PILLARS } from "@/lib/scoring/pillars";
@@ -13,7 +12,7 @@ import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { localePath } from "@/lib/i18n/routes";
 import { contentMetadata } from "@/lib/i18n/meta";
 import { articleSchema, breadcrumbSchema, JsonLd } from "@/lib/seo/jsonld";
-import styles from "../how-it-works/page.module.css";
+import { articleDates } from "@/content/updated-at";
 import own from "./page.module.css";
 
 interface PageProps {
@@ -56,16 +55,20 @@ export default async function ChecklistPage({ params }: PageProps) {
     <>
       <JsonLd data={breadcrumbSchema(locale, [{ name: tc(CHECKLIST.title, locale), path: "/growth-audit-checklist" }])} />
       <JsonLd
-        data={articleSchema(locale, "/growth-audit-checklist", tc(CHECKLIST.title, locale), tc(CHECKLIST.metaDescription, locale))}
+        data={articleSchema(
+          locale,
+          "/growth-audit-checklist",
+          tc(CHECKLIST.title, locale),
+          tc(CHECKLIST.metaDescription, locale),
+          articleDates("/growth-audit-checklist"),
+        )}
       />
-      <ContentHeader locale={locale} path="/growth-audit-checklist" />
-
-      <main className={styles.main}>
-        <div className={styles.intro}>
-          <h1 className={`${styles.title} ${own.title}`}>{tc(CHECKLIST.title, locale)}</h1>
-          <p className={styles.subtitle}>{tc(CHECKLIST.intro, locale)}</p>
-        </div>
-
+      <ProsePage
+        locale={locale}
+        path="/growth-audit-checklist"
+        title={tc(CHECKLIST.title, locale)}
+        lead={tc(CHECKLIST.intro, locale)}
+      >
         <ol className={own.stages}>
           {byPillar.map(({ pillar, questions }, index) => (
             <li key={pillar} className={own.stage} data-testid={`checklist-${pillar}`}>
@@ -75,7 +78,7 @@ export default async function ChecklistPage({ params }: PageProps) {
               {/* Chaque étape pointe vers sa page de glossaire : la règle de
                   maillage de R2-13, appliquée d'emblée. */}
               <h2 className={own.stageName}>
-                <Link href={localePath(locale, `/glossary/${pillar}`)} className={styles.pillarLink}>
+                <Link href={localePath(locale, `/glossary/${pillar}`)} className={own.pillarLink}>
                   {tc(UI_STRINGS.pillars[pillar], locale)}
                 </Link>
               </h2>
@@ -99,43 +102,39 @@ export default async function ChecklistPage({ params }: PageProps) {
         </ol>
 
         {CHECKLIST.sections.map((section) => (
-          <section key={section.heading.en} className={styles.proseSection}>
-            <h2 className={styles.sectionTitle}>{tc(section.heading, locale)}</h2>
+          <ProseSection key={section.heading.en} heading={tc(section.heading, locale)}>
             {section.body.map((paragraph) => (
-              <p key={paragraph.en} className={styles.sectionBody}>
-                {tc(paragraph, locale)}
-              </p>
+              <ProseText key={paragraph.en}>{tc(paragraph, locale)}</ProseText>
             ))}
-          </section>
+          </ProseSection>
         ))}
 
         {/* Le lien réciproque vers la méthode : les deux pages répondent à
             deux intentions différentes, donc chacune envoie vers l'autre
             plutôt que de la redire (R2-13, appliqué d'emblée). */}
-        <section className={styles.proseSection}>
-          <p className={styles.sectionBody}>
+        <ProseSection>
+          <ProseText>
             {tc(UI_STRINGS.openDoor.diagnosticLead, locale)}{" "}
             <Link href={localePath(locale, "/startup-growth-diagnostic")} data-testid="diagnostic-link">
               {tc(UI_STRINGS.openDoor.diagnosticLink, locale)}
             </Link>
-          </p>
-        </section>
+          </ProseText>
+        </ProseSection>
 
-        <Card tone="paper" className={styles.limitationCard}>
-          <p className={styles.limitationText}>{tc(CHECKLIST.ctaLead, locale)}</p>
-        </Card>
-
-        <div className={styles.ctaWrap}>
-          {/* `hard` : la landing et `/quiz` vivent sous deux layouts racine
-              différents, donc `next/link` préchargerait une route dynamique
-              pour rien (voir `cross-root-links.test.ts`). */}
-          <Button size="lg" href="/quiz" hard>
-            {tc(CHECKLIST.ctaLabel, locale)}
-          </Button>
-        </div>
-      </main>
-
-      <SiteFooter locale={locale} width="reading" />
+        {/* `hard` : la landing et `/quiz` vivent sous deux layouts racine
+            différents, donc `next/link` préchargerait une route dynamique
+            pour rien (voir `cross-root-links.test.ts`). */}
+        <Callout
+          tone="cta"
+          action={
+            <Button size="lg" href="/quiz" hard>
+              {tc(CHECKLIST.ctaLabel, locale)}
+            </Button>
+          }
+        >
+          <p>{tc(CHECKLIST.ctaLead, locale)}</p>
+        </Callout>
+      </ProsePage>
     </>
   );
 }

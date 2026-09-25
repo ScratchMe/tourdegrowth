@@ -29,7 +29,7 @@ describe("COMPARISONS (GROWTH-PLAN.md wave 2.3: the compared-frameworks cluster)
     expect(new Set(COMPARISON_ORDER).size).toBe(COMPARISON_ORDER.length);
   });
 
-  it("isComparisonSlug accepts the four and refuses anything else", () => {
+  it("isComparisonSlug accepts every slug and refuses anything else", () => {
     for (const slug of SLUGS) expect(isComparisonSlug(slug)).toBe(true);
     for (const other of ["aarrr", "glossary", "aarrr-vs-", "__proto__", ""]) {
       expect(isComparisonSlug(other), other).toBe(false);
@@ -53,7 +53,7 @@ describe("COMPARISONS (GROWTH-PLAN.md wave 2.3: the compared-frameworks cluster)
   });
 
   /**
-   * The four pages must not be four variants of one text — that is the
+   * The pages must not be variants of one text — that is the
    * near-duplicate the plan warned about when it dropped "expansion revenue"
    * from wave 2.2. Section headings are the cheapest proxy for "did this page
    * make its own argument".

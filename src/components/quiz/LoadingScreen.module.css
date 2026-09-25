@@ -15,7 +15,9 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: repeating-linear-gradient(115deg, transparent 0 3px, rgba(33, 28, 21, 0.055) 3px 4px);
+  /* The same spray ScoreDisplay's numeral wears — the token, not a copy of
+     it, so a world that rebinds --texture-ink reaches this one too. */
+  background: var(--texture-spray);
   mix-blend-mode: multiply;
   pointer-events: none;
 }
@@ -97,8 +99,8 @@
 }
 
 .filled {
-  border: 2px solid var(--paint-red);
-  background: var(--paint-red);
+  border: 2px solid var(--accent-mark);
+  background: var(--accent-mark);
 }
 
 /* The currently-active segment keeps a slow pulse once the screen has

@@ -160,6 +160,32 @@ test("the OG image URL the page declares is the one that serves it, and it is ca
 });
 
 /**
+ * Copy review v1, DS critique L-5. On `/r/sample?lang=fr` the picture in the
+ * share block used to be the English crawler image under a French caption.
+ * It now follows the reader, on its OWN versioned address (the locale is part
+ * of the token), served as immutable like the declared one — while
+ * `og:image` keeps the documented rule and stays English.
+ */
+test("the share picture in the page follows the reader; og:image keeps the author's language", async ({ page, request }) => {
+  await page.goto("/r/sample?lang=fr");
+  const declared = new URL((await page.locator('meta[property="og:image"]').getAttribute("content"))!).pathname;
+  const shown = await page.getByTestId("share-card").locator("img").getAttribute("src");
+
+  expect(shown).toMatch(/^\/r\/sample\/share\/[a-f0-9]{12}\.png$/);
+  expect(shown).not.toBe(declared);
+  expect(await page.getByTestId("share-card").getByRole("link", { name: /enregistrer/i }).getAttribute("href")).toBe(shown);
+
+  const image = await request.get(shown!);
+  expect(image.status()).toBe(200);
+  expect(image.headers()["content-type"]).toContain("image/png");
+  expect(image.headers()["cache-control"]).toContain("immutable");
+
+  // Back in English, the page shows exactly the declared picture again.
+  await page.goto("/r/sample?lang=en");
+  expect(await page.getByTestId("share-card").locator("img").getAttribute("src")).toBe(declared);
+});
+
+/**
  * What the token route does with an address that is not the current one.
  * A token minted before a Deep dive finished (or forged) still renders the
  * result's current picture — a scraped share must keep previewing — but is

@@ -50,36 +50,64 @@ export function personNode() {
   };
 }
 
-/** `WebApplication`, not `Person`: Tour de Growth is the product being described, not Antoine. Built per language. */
-export function webApplicationSchema(locale: Locale) {
+/**
+ * `WebApplication`, not `Person`: Tour de Growth is the product being
+ * described, not Antoine. Built per language.
+ *
+ * Without `app`, the landing's own block — the Tour itself. With it, another
+ * application of the site (the growth engine, engine spec §11.3): its path,
+ * name and description arrive as PARAMETERS, never imported, because this
+ * module is crossed by every content page and may only import content that
+ * every page emits (`content-fan-in.test.ts`, the `CRUMBS` lesson). Such a
+ * block says it is part of the site, so a search engine does not read two
+ * unrelated products.
+ */
+export function webApplicationSchema(locale: Locale, app?: { path: string; name: string; description: string }) {
   return {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    name: SITE_NAME,
-    description: tc(UI_STRINGS.landing.subtitle, locale),
+    name: app?.name ?? SITE_NAME,
+    description: app?.description ?? tc(UI_STRINGS.landing.subtitle, locale),
     // This page's own address, not the bare site URL — the French page used
     // to declare a `url` that was not itself.
-    url: absolute(locale),
+    url: absolute(locale, app?.path),
     inLanguage: locale,
     applicationCategory: "BusinessApplication",
     // Free, and built in France for a European first audience: EUR, not USD.
     offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
+    isAccessibleForFree: true,
     author: personNode(),
+    ...(app ? { isPartOf: { "@type": "WebSite", name: SITE_NAME, url: absolute(locale) } } : {}),
   };
 }
 
-/** Breadcrumbs, as rendered visually ("← Glossary") but until now never declared. */
 /**
  * Un `Article` pour les pages de fond qui ne sont ni l'application, ni un
  * terme de glossaire — les deux pages « porte ouverte » du plan de
- * distribution (vague 2.1).
+ * distribution (vague 2.1) et le cluster « AARRR vs X » (vague 2.3).
  *
- * Pas de `datePublished`/`dateModified` : ces dates vivent déjà dans
- * `content/updated-at.ts`, qui alimente le `<lastmod>` du sitemap, et les
- * dupliquer ici créerait deux sources qui divergeraient au premier oubli —
- * exactement ce que R2-08 a corrigé en refusant un `new Date()` de build.
+ * **Les dates arrivent en paramètre** (audit SEO v1 §1.5) : `datePublished`
+ * est ce que Google demande pour un `Article`, `dateModified` ce qu'il
+ * recommande. Elles viennent de `content/updated-at.ts#articleDates`, la même
+ * source que le `<lastmod>` du sitemap — jamais un `new Date()` de build
+ * (R2-08), et jamais importées ici : ce module est traversé par toutes les
+ * pages de contenu, et un module partagé reçoit les données de la page au lieu
+ * de les tirer (`content-fan-in.test.ts`, la leçon de `CRUMBS`).
+ *
+ * **`publisher` reste la personne, pas une `Organization`** (audit SEO v1
+ * §1.6, décision : ne pas corriger). Tour de Growth n'est pas une entreprise,
+ * c'est le projet d'une personne, et le même nœud `Person` répété partout est
+ * le signal cohérent que R2-15 a construit. Une `Organization` inventée pour
+ * cocher la case des résultats enrichis introduirait une incohérence pire que
+ * le gain — un test l'épingle pour que personne ne la « corrige » par réflexe.
  */
-export function articleSchema(locale: Locale, path: string, headline: string, description: string) {
+export function articleSchema(
+  locale: Locale,
+  path: string,
+  headline: string,
+  description: string,
+  dates: { published: string; modified: string },
+) {
   return {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -87,12 +115,15 @@ export function articleSchema(locale: Locale, path: string, headline: string, de
     description,
     url: absolute(locale, path),
     inLanguage: locale,
+    datePublished: dates.published,
+    dateModified: dates.modified,
     author: personNode(),
     publisher: personNode(),
     isPartOf: { "@type": "WebSite", name: SITE_NAME, url: absolute(locale) },
   };
 }
 
+/** Breadcrumbs, as rendered visually ("← Glossary") but until now never declared. */
 export function breadcrumbSchema(locale: Locale, trail: { name: string; path: string }[]) {
   return {
     "@context": "https://schema.org",
@@ -155,6 +186,76 @@ export function aboutPageSchema(locale: Locale) {
     inLanguage: locale,
     about: { "@type": "WebApplication", name: SITE_NAME, url: absolute(locale) },
     mainEntity: { ...personNode(), jobTitle: "Senior Growth Product Manager" },
+  };
+}
+
+/**
+ * A level of « Le côté obscur » — `Game`, per the SEO audit (seo-audit §4.1,
+ * point 2): not `VideoGame`, which is shaped for titles with an app-store
+ * listing, and not `HowTo`, whose rich results Google has mostly withdrawn
+ * (the same restraint this module already shows about `FAQPage`).
+ *
+ * Its data arrives as PARAMETERS, never imported: this module is crossed by
+ * every content page, and `content-fan-in.test.ts` keeps it that way — the
+ * `CRUMBS` lesson.
+ */
+export function gameSchema(
+  locale: Locale,
+  { path, name, description }: { path: string; name: string; description: string },
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Game",
+    "@id": `${absolute(locale, path)}#game`,
+    name,
+    description,
+    url: absolute(locale, path),
+    inLanguage: locale,
+    genre: "Educational",
+    gamePlatform: "Web browser",
+    isAccessibleForFree: true,
+    // What the game teaches to recognise. A `Thing` rather than a link to a
+    // page of ours: there is no dark-pattern page yet (seo-audit §3.2).
+    about: { "@type": "Thing", name: "Dark pattern" },
+    author: personNode(),
+    isPartOf: { "@type": "WebSite", name: SITE_NAME, url: absolute(locale) },
+  };
+}
+
+/**
+ * The hub: a `CollectionPage` whose `mainEntity` lists the playable levels.
+ * Only playable ones — a level that is « bientôt » has no page to point to.
+ */
+export function gameHubSchema(
+  locale: Locale,
+  {
+    path,
+    name,
+    description,
+    levels,
+  }: { path: string; name: string; description: string; levels: { path: string; name: string }[] },
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name,
+    description,
+    url: absolute(locale, path),
+    inLanguage: locale,
+    author: personNode(),
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: levels.map((level, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        item: {
+          "@type": "Game",
+          "@id": `${absolute(locale, level.path)}#game`,
+          name: level.name,
+          url: absolute(locale, level.path),
+        },
+      })),
+    },
   };
 }
 

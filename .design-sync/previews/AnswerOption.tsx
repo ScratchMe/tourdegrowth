@@ -28,7 +28,14 @@ export const Unselected = () => (
   </div>
 );
 
-/** After an answer, or after going back to a question already answered. */
+/**
+ * After an answer, or after going back to a question already answered.
+ * Selected is the inverse fill with its own text (`--state-selected-*`), the
+ * one selection language of the whole product — a ticked game card is the
+ * same state at night. Hover is a different thing and never touches the
+ * fill: it only lifts the hard shadow (see Interactive), and it is off on
+ * touch screens, where a stuck hover would pass for a choice.
+ */
 export const Selected = () => (
   <div style={stack}>
     {OPTIONS.map((o, i) => (
@@ -39,16 +46,19 @@ export const Selected = () => (
   </div>
 );
 
-/** Live, so the hit area and the selected treatment can be felt rather than read. */
+/**
+ * Live, so the hit area and the two treatments can be felt rather than read:
+ * hover an option (shadow only), then click it (the fill inverts).
+ */
 export const Interactive = () => {
   const [chosen, setChosen] = React.useState<number | null>(null);
   return (
     <div style={stack}>
       <QuestionCard>Do you track a retention rate (D7/D30 or similar)?</QuestionCard>
       {OPTIONS.map((o, i) => (
-        <div key={o} onClick={() => setChosen(i)} style={{ cursor: "pointer" }}>
-          <AnswerOption selected={chosen === i}>{o}</AnswerOption>
-        </div>
+        <AnswerOption key={o} selected={chosen === i} onClick={() => setChosen(i)}>
+          {o}
+        </AnswerOption>
       ))}
     </div>
   );

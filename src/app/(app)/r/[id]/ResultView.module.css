@@ -24,7 +24,7 @@
   font-weight: 600;
   text-transform: uppercase;
   color: var(--text-inverse);
-  background: var(--paint-red);
+  background: var(--surface-accent);
   border-radius: var(--radius-tag);
   padding: 6px 10px;
   transform: rotate(-1.5deg);
@@ -41,7 +41,7 @@
 
 .sampleBadge {
   background: var(--surface-alert);
-  border: 2px dashed var(--paint-red);
+  border: 2px dashed var(--border-alert);
   border-radius: var(--radius-tag);
   padding: 8px 12px;
   display: inline-block;
@@ -52,12 +52,12 @@
  * Roast-mode score card: border/shadow swap from ink to red. Not part of
  * the v2 design system's Card tone matrix (paper/sunken/alert/outlineAlert)
  * — those are about diagnosis vs advice, not about which tone the whole
- * result is in — so this stays a small local override, same --paint-red
+ * result is in — so this stays a small local override, same road-paint red
  * 7px offset shadow the app has always used here (see --shadow-card-roast
  * in tokens/shape.css).
  */
 .scoreCardRoast {
-  border-color: var(--paint-red) !important;
+  border-color: var(--border-alert) !important;
   box-shadow: var(--shadow-card-roast) !important;
 }
 
@@ -124,7 +124,7 @@
  * directly under the score card, and the share block after the CTA:
  *
  *   score+bottleneck · next move · pillars · strengths · losing time ·
- *   [credit] · CTA · share · disclaimer · [breakdown]
+ *   [credit] · CTA · share · [game] · disclaimer · [breakdown]
  *
  * Two columns cannot produce that by source order, so on mobile the columns
  * step out of the box tree (`display: contents`) and their children become
@@ -144,8 +144,8 @@
  * the one item that has to cross, so it is lifted OUT of both columns and
  * placed by its own grid area at the breakpoint. Source order becomes
  *
- *   score · pillars | move · strengths · losing time · [credit] · CTA ·
- *   disclaimer · [breakdown] | share
+ *   score · pillars | move · strengths · losing time · [credit] · [game] ·
+ *   CTA · disclaimer · [breakdown] | share
  *
  * which leaves two disagreements instead of a scatter: `move` and `pillars`
  * swap (adjacent), and `share` is announced last rather than before the
@@ -154,9 +154,12 @@
  * The worst displacement is 1 for a VISITOR — every shared link, and so the
  * case the growth loop runs on — and 2 for the OWNER, whose page also
  * renders the score breakdown, which lands in source order between the
- * disclaimer and the share block. `src/__tests__/result-reading-order.test.ts`
- * computes that from this file and the JSX for all four variants, including
- * the two no e2e can render without Firestore, and pins the exact numbers;
+ * disclaimer and the share block. The game card, when a result shows it
+ * (`.slotGame`, after the share block on a phone, in the right column before
+ * the CTA row in the source), costs one place more on every variant: 2 for a
+ * visitor, 3 for the owner. `src/__tests__/result-reading-order.test.ts`
+ * computes all of that from this file and the JSX for all eight variants,
+ * including those no e2e can render without Firestore, and pins the numbers;
  * `e2e/result-composition.spec.ts` proves the browser really behaves that
  * way on the one variant it can reach.
  *
@@ -166,8 +169,8 @@
  * column under the disclaimer on every owner's desktop. Not worth it.
  *
  * The `order` values are also correct WITHIN each desktop column — 1,3 on the
- * left and 2,4,5,6,7,9,10 on the right are both ascending — so nothing has to
- * be reset at the breakpoint, and the two layouts cannot disagree.
+ * left and 2,4,5,6,7,10,11 on the right are both ascending — so only the game
+ * card's value has to be reset at the breakpoint (see the desktop block).
  *
  * `.layout`'s gap is the same 22px `.left`/`.right` carry, so collapsing them
  * changes the order and nothing else.
@@ -185,8 +188,9 @@
 .slotCredit { order: 6; }
 .slotCta { order: 7; }
 .slotShare { order: 8; }
-.slotDisclaimer { order: 9; }
-.slotBreakdown { order: 10; }
+.slotGame { order: 9; }
+.slotDisclaimer { order: 10; }
+.slotBreakdown { order: 11; }
 
 .pillarGrid {
   display: grid;
@@ -292,9 +296,21 @@
     align-self: start;
   }
 
+  /* The game card is the one slot whose place differs between the two
+     layouts (orchestrator decision 1): after the share block on a phone, but
+     between "Where you're losing time" and the CTA row on desktop, where the
+     share block is in the other column. It takes the credit's value here, and
+     equal `order` values keep source order (CSS Flexbox §5.4), so the right
+     column reads credit · game · CTA — which is also its source order. The
+     reading-order test checks that, on desktop, every column's visual order
+     IS its source order. */
+  .slotGame {
+    order: 6;
+  }
+
   /* The columns come back as boxes here — see the `display: contents` note
-     above. `order` needs no reset: the same values are ascending inside each
-     column. */
+     above. Apart from `.slotGame` just above, `order` needs no reset: the
+     same values are ascending inside each column. */
   .left,
   .right {
     display: flex;

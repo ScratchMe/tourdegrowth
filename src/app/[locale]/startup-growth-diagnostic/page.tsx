@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ContentHeader } from "@/components/brand/ContentHeader";
-import { SiteFooter } from "@/components/brand/SiteFooter";
+import { ProsePage, ProseSection, ProseText } from "@/components/brand/ProsePage";
 import { Button } from "@/components/core/Button";
-import { Card } from "@/components/core/Card";
+import { Callout } from "@/components/core/Callout";
 import { DIAGNOSTIC } from "@/content/open-door";
 import { PILLARS } from "@/lib/scoring/pillars";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
@@ -11,7 +10,7 @@ import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { localePath } from "@/lib/i18n/routes";
 import { contentMetadata } from "@/lib/i18n/meta";
 import { articleSchema, breadcrumbSchema, JsonLd } from "@/lib/seo/jsonld";
-import styles from "../how-it-works/page.module.css";
+import { articleDates } from "@/content/updated-at";
 import own from "./page.module.css";
 
 interface PageProps {
@@ -52,60 +51,54 @@ export default async function DiagnosticPage({ params }: PageProps) {
           "/startup-growth-diagnostic",
           tc(DIAGNOSTIC.title, locale),
           tc(DIAGNOSTIC.metaDescription, locale),
+          articleDates("/startup-growth-diagnostic"),
         )}
       />
-      <ContentHeader locale={locale} path="/startup-growth-diagnostic" />
-
-      <main className={styles.main}>
-        <div className={styles.intro}>
-          <h1 className={`${styles.title} ${own.title}`}>{tc(DIAGNOSTIC.title, locale)}</h1>
-          <p className={styles.subtitle}>{tc(DIAGNOSTIC.intro, locale)}</p>
-        </div>
-
+      <ProsePage
+        locale={locale}
+        path="/startup-growth-diagnostic"
+        title={tc(DIAGNOSTIC.title, locale)}
+        lead={tc(DIAGNOSTIC.intro, locale)}
+      >
         {DIAGNOSTIC.sections.map((section) => (
-          <section key={section.heading.en} className={styles.proseSection}>
-            <h2 className={styles.sectionTitle}>{tc(section.heading, locale)}</h2>
+          <ProseSection key={section.heading.en} heading={tc(section.heading, locale)}>
             {section.body.map((paragraph) => (
-              <p key={paragraph.en} className={styles.sectionBody}>
-                {tc(paragraph, locale)}
-              </p>
+              <ProseText key={paragraph.en}>{tc(paragraph, locale)}</ProseText>
             ))}
-          </section>
+          </ProseSection>
         ))}
 
         {/* Maillage (R2-13, appliqué d'emblée) : les cinq étapes vers leur
             page de glossaire, et un lien vers l'artefact. */}
-        <section className={styles.proseSection}>
-          <h2 className={styles.sectionTitle}>{tc(UI_STRINGS.openDoor.stagesHeading, locale)}</h2>
+        <ProseSection heading={tc(UI_STRINGS.openDoor.stagesHeading, locale)}>
           <ul className={own.stageLinks} data-testid="stage-links">
             {PILLARS.map((pillar) => (
               <li key={pillar}>
-                <Link href={localePath(locale, `/glossary/${pillar}`)} className={styles.pillarLink}>
+                <Link href={localePath(locale, `/glossary/${pillar}`)}>
                   {tc(UI_STRINGS.pillars[pillar], locale)}
                 </Link>
               </li>
             ))}
           </ul>
-          <p className={styles.sectionBody}>
+          <ProseText>
             {tc(UI_STRINGS.openDoor.checklistLead, locale)}{" "}
             <Link href={localePath(locale, "/growth-audit-checklist")} data-testid="checklist-link">
               {tc(UI_STRINGS.openDoor.checklistLink, locale)}
             </Link>
-          </p>
-        </section>
+          </ProseText>
+        </ProseSection>
 
-        <Card tone="paper" className={styles.limitationCard}>
-          <p className={styles.limitationText}>{tc(DIAGNOSTIC.ctaLead, locale)}</p>
-        </Card>
-
-        <div className={styles.ctaWrap}>
-          <Button size="lg" href="/quiz" hard>
-            {tc(DIAGNOSTIC.ctaLabel, locale)}
-          </Button>
-        </div>
-      </main>
-
-      <SiteFooter locale={locale} width="reading" />
+        <Callout
+          tone="cta"
+          action={
+            <Button size="lg" href="/quiz" hard>
+              {tc(DIAGNOSTIC.ctaLabel, locale)}
+            </Button>
+          }
+        >
+          <p>{tc(DIAGNOSTIC.ctaLead, locale)}</p>
+        </Callout>
+      </ProsePage>
     </>
   );
 }

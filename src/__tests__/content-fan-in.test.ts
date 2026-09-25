@@ -1,5 +1,4 @@
-import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
+import { BY_PATH, FILES, reachable, resolveSpecifier, valueImports } from "./helpers/import-graph";
 import { describe, expect, it } from "vitest";
 
 /**
@@ -24,65 +23,9 @@ import { describe, expect, it } from "vitest";
  * Le test mesure l'ATTEINTE, pas le style d'import : pour chaque module de
  * contenu volumineux, combien de points d'entrée de route le rejoignent en
  * suivant les imports de valeur. Une borne par module, avec la raison. Un
- * `import type` n'est pas une arête — TypeScript l'efface.
+ * `import type` n'est pas une arête — TypeScript l'efface. La marche elle-même
+ * vit dans `helpers/import-graph.ts`, partagée avec `game-bundles.test.ts`.
  */
-const SRC = join(process.cwd(), "src");
-
-function walk(dir: string): string[] {
-  return readdirSync(dir).flatMap((name) => {
-    const full = join(dir, name);
-    if (statSync(full).isDirectory()) return walk(full);
-    return /\.(ts|tsx)$/.test(name) ? [full] : [];
-  });
-}
-
-const FILES = walk(SRC).map((full) => ({
-  path: relative(SRC, full).replaceAll("\\", "/"),
-  source: readFileSync(full, "utf8"),
-}));
-const BY_PATH = new Map(FILES.map((f) => [f.path, f.source]));
-
-/** Les imports qui survivent à la compilation — `import type` est effacé. */
-function valueImports(source: string): string[] {
-  return [...source.matchAll(/(^|\n)\s*(?:import|export)(\s+type)?\s[^;]*?from\s+["']([^"']+)["']/g)]
-    .filter((m) => !m[2])
-    .map((m) => m[3]!);
-}
-
-function resolveSpecifier(fromPath: string, spec: string): string | null {
-  let base: string;
-  if (spec.startsWith("@/")) base = spec.slice(2);
-  else if (spec.startsWith(".")) {
-    const dir = fromPath.split("/").slice(0, -1);
-    for (const part of spec.split("/")) {
-      if (part === ".") continue;
-      else if (part === "..") dir.pop();
-      else dir.push(part);
-    }
-    base = dir.join("/");
-  } else return null; // un paquet — hors de notre arbre
-  for (const candidate of [base, `${base}.ts`, `${base}.tsx`, `${base}/index.ts`, `${base}/index.tsx`]) {
-    if (BY_PATH.has(candidate)) return candidate;
-  }
-  return null;
-}
-
-function reachable(entry: string): Set<string> {
-  const seen = new Set<string>();
-  const queue = [entry];
-  while (queue.length) {
-    const current = queue.pop()!;
-    if (seen.has(current)) continue;
-    seen.add(current);
-    const source = BY_PATH.get(current);
-    if (!source) continue;
-    for (const spec of valueImports(source)) {
-      const resolved = resolveSpecifier(current, spec);
-      if (resolved && !seen.has(resolved)) queue.push(resolved);
-    }
-  }
-  return seen;
-}
 
 /** Ce que Next compile en fonction : les fichiers de convention de l'App Router. */
 const ENTRY_POINTS = FILES.map((f) => f.path).filter(
@@ -121,8 +64,51 @@ const BUDGETS: { module: string; max: number; why: string }[] = [
   },
   {
     module: "content/comparisons.ts",
-    max: 6,
-    why: "Les quatre pages du cluster, /how-it-works qui les liste, le sitemap.",
+    max: 5,
+    why: "Les cinq pages du cluster (HEART ajoutée par l'audit SEO v1 §3.1), et elles seules. Qui ne fait que LISTER le cluster (/how-it-works, le terme AARRR, le sitemap) lit content/comparison-index.ts — ~40 Ko de prose en moins sur chacune, 48 routes pour le seul glossaire.",
+  },
+  // Le moteur de croissance (spec du moteur §10.3) : sa prose ne sert qu'à sa
+  // propre page, qui la résout au build et la passe à l'îlot en props.
+  // Atteinte par une deuxième route, elle partirait dans une fonction de plus
+  // — et comptée par route (VERCEL.md §2.2).
+  {
+    module: "content/engine-catalog.ts",
+    max: 1,
+    why: "La prose des quinze chiffres : seule /{locale}/aarrr-funnel-template la rend.",
+  },
+  {
+    module: "content/engine-copy.ts",
+    max: 1,
+    why: "Toute la copie d'interface du moteur : seule sa page la résout.",
+  },
+  {
+    module: "content/copy-library.ts",
+    max: 12,
+    why:
+      "Les quinze questions du Tour : onze routes les citaient au 2026-09-15 ; la page du moteur est la douzième (spec du moteur §10.3), pour les huit questions du pont Tour × moteur — une décision, pas un contournement.",
+  },
+  // Le jeu (plan §3.4). Chaque module de texte du jeu a sa ligne dès qu'une
+  // route l'atteint : l'encart du résultat depuis G5b, le texte du niveau
+  // depuis que son image de partage l'atteint (G4b).
+  {
+    module: "content/game/entry.ts",
+    max: 1,
+    why: "L'encart du jeu sur la page de résultat (chantier G5b) : `r/[id]/page.tsx` seule le résout et n'en passe que les chaînes. Atteint ailleurs, il partirait dans une fonction de plus.",
+  },
+  {
+    module: "content/game/meta.ts",
+    max: 4,
+    why: "Titres, descriptions, intro du niveau : le hub, la page du niveau, et leurs deux images OG (chantier G4b). Pas le sitemap, qui ne lit que des chemins et des dates.",
+  },
+  {
+    module: "content/game/hub.ts",
+    max: 3,
+    why: "Le hub, la page du niveau dont la navigation des zones reprend les cinq questions, et l'image de partage du hub qui dessine les cinq zones (chantier G4b). Écart au plan (qui disait 1) : une seconde copie des zones dériverait. L'image du NIVEAU ne l'atteint pas, et ne doit pas.",
+  },
+  {
+    module: "content/game/retention.ts",
+    max: 2,
+    why: "Les 49 Ko de texte du niveau : la page du niveau (îlot, G8a) et son image de partage, qui reprend les libellés du dashboard (G4b). Jamais l'image du hub.",
   },
 ];
 

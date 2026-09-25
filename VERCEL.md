@@ -35,20 +35,19 @@ corrigé le 2026-09-15) :
   poids du bundle. À poids constant, diviser les merges par deux divise le
   compteur par deux. C'est souvent le levier le plus gros et le moins cher.
 
-**Vercel compte le poids d'un bundle une fois par ROUTE, pas une fois par
-bundle physique.** Un bundle de 4 Mo partagé par 92 routes est facturé
-~368 Mo. Conséquence directe sur les priorités : **tout gramme retiré du
-bundle le plus partagé compte N fois**, et un gramme retiré d'une fonction
-mono-route compte une fois. Regarder le nombre de routes avant de choisir où
-optimiser.
+**Le compteur suit le poids DISQUE d'un déploiement, pas le poids par route.**
+Réconcilié le 2026-09-23 : 154 déploiements × 47,3 Mo (poids disque mesuré
+hors ligne, §1.2) = 7,28 Go, pour ~7,29 Go affichés. L'export de Vercel
+attribue bien le poids d'un bundle à chacune des routes qui le partagent
+(4,36 Mo × 92 routes, 428,9 Mo « par déploiement »), mais **ce n'est pas ce
+qui est facturé** : 154 × 428,9 Mo ferait 66 Go. L'export dit quelle route
+porte quel bundle ; la facture compte les octets une fois.
 
-> ⚠️ **Point non réconcilié, à ne pas présenter comme un fait.** Notre export
-> donnait 428,9 Mo par déploiement, ce qui sur 154 déploiements ferait 66 Go
-> alors que le compteur affichait ~7 Go. Vercel déduplique probablement les
-> bundles identiques entre routes ou entre déploiements successifs. Le
-> **classement relatif** des postes, lui, est fiable et suffit à décider. Si
-> le chiffre absolu compte pour une décision, demander à leur support plutôt
-> que de modéliser.
+Conséquence sur les priorités, et c'est l'inverse de ce que nous avons cru
+pendant une semaine : **ajouter des routes ne coûte presque rien, ajouter du
+code ou une dépendance à un bundle serveur coûte à chaque déploiement.** Une
+page de contenu de plus réutilise la fonction existante ; une bibliothèque
+tirée côté serveur grossit tous les déploiements pendant 30 jours.
 
 ### 1.2 Mesurer le poids réel — trois pièges en série
 
@@ -267,6 +266,15 @@ prévisualisations ne servent à rien et consomment le quota :
 construit plus rien**. Travailler et pousser sur une branche devient gratuit ;
 seul le merge coûte.
 
+### 1.11 Une variable d'environnement modifiée n'atteint que les nouveaux déploiements
+
+La documentation le dit (« not applied to previous deployments ») : changer une
+variable dans le tableau de bord ne change **rien** au déploiement en cours. Un
+drapeau « lu à chaque requête » ne s'ouvre donc pas sans redéploiement — et
+chaque bascule coûte un déploiement de Functions Storage (§1.6). Écrire « sans
+redéploiement » à côté d'un tel drapeau est faux, même quand le code le lit
+bien par requête.
+
 ---
 
 ## 2. Propre à Tour de Growth
@@ -279,7 +287,7 @@ seul le merge coûte.
 |---|---|
 | Fonctions physiques par déploiement | 6 |
 | Poids disque par déploiement | 43,55 Mo (47,3 avant la déduplication de contenu) |
-| Routes facturées | ~92 sur la fonction des pages de contenu |
+| Routes attribuées par l'export | ~92 sur la fonction des pages de contenu (attribution, pas facturation — §1.1) |
 | Pages de contenu au sitemap | 72 |
 | Merges sur 30 jours | 154 |
 | Functions Storage | ~7,29 Go sur 10 (73 %) |
@@ -302,12 +310,17 @@ Répartition du poids : runtime Next.js 19,5 Mo (41 %), notre code 10,0 Mo
   qui crée chaque résultat. Et recopier ce plafond ferait dire au code quelque
   chose de faux : ces routes ne peuvent pas légitimement durer deux minutes.
   Réversible en dix minutes si le compteur redevient critique.
-- **`ignoreCommand` étendu aux merges « doc seule » : OUI**, pas encore
-  implémenté (gel jusqu'au 2026-09-26). 26 des 154 déploiements ne touchaient
+- **`ignoreCommand` étendu aux merges « doc seule » : OUI, fait le
+  2026-09-24** (`scripts/vercel-ignore.sh`, exécuté par
+  `src/__tests__/vercel-config.test.ts` contre de vrais dépôts git). 26 des 154 déploiements ne touchaient
   que `*.md` à la racine, `LICENSE`, `.github/`, `marketing/`, `design/`,
   `.design-sync/` ou `scripts/live/` — aucun n'entre dans le build, vérifié.
   Conception arrêtée : `VERCEL_GIT_PREVIOUS_SHA` en premier, `HEAD^` en repli,
-  `exit 1` sur tout le reste. Glob racine (`*.md`), **jamais** `**/*.md`.
+  `exit 1` sur tout le reste. Glob racine (`*.md`), **jamais** `**/*.md`. Dans le
+  script, le statut de `grep` compte : 0 = au moins une ligne retenue, 1 = aucune,
+  ≥ 2 = erreur — et une erreur doit **construire**, jamais sauter. Le statut de
+  `var=$(pipeline)` est celui de la dernière commande, donc pas besoin de
+  `pipefail`.
 - **Cinq fonctions est le plancher de cette architecture.** Descendre à quatre
   demanderait de fusionner les pages de contenu (`ISR`) avec les pages
   applicatives (`Page`), donc de revenir aux deux layouts racine — ce qui

@@ -1,0 +1,135 @@
+/*
+ * Game plan §2.6 `GameEntry` — a flat paper card with a strip of the night
+ * across its top. Semantic tokens only: inside the band, `data-world="night"`
+ * (NightSurface) rebinds them to the night's ground, text and edges.
+ *
+ * The card clips its own corners so the band follows the card's radius
+ * instead of painting square corners over it.
+ */
+.card {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  container: game-entry / inline-size;
+}
+
+/*
+ * 44px is the plan's height for the band, as a floor rather than a height:
+ * in French at 390px the two items wrap onto two lines, and a fixed height
+ * would clip the second one.
+ */
+.band {
+  min-height: 44px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--space-4);
+  row-gap: var(--space-1);
+  padding: var(--space-3) var(--space-10);
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  font-variant-numeric: var(--tabular);
+}
+
+.bandItem {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.bandSep {
+  color: var(--text-muted);
+}
+
+.bandMuted {
+  color: var(--text-muted);
+}
+
+/*
+ * The number that is not on the dashboard: an empty cell with a real edge
+ * (--border-hard at night is ≥ 3:1 against the ground — a graphic, not text).
+ * Drawn rather than typed, so no font subset can render it as a tofu box.
+ */
+.missing {
+  display: inline-block;
+  width: 1.4em;
+  height: 1em;
+  border: 1px solid var(--border-hard);
+  border-radius: 2px;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--pad-card);
+}
+
+.title {
+  margin: 0;
+  font: var(--title-card);
+  color: var(--text-body);
+  text-wrap: balance;
+}
+
+.text {
+  margin: 0;
+  font: var(--body-md);
+  color: var(--text-body);
+}
+
+/*
+ * Button and mention side by side on desktop, stacked on a phone. The button
+ * keeps its own width on desktop (it is secondary, and a full-width outline
+ * would out-shout the CTA row below it); on a phone the column stretches it,
+ * like every other button in the result's stack — the width comes from the
+ * container, so no rule here has to outrank Button's own module.
+ */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4) var(--space-6);
+}
+
+.meta {
+  font: var(--meta-xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/*
+ * The band on one line needs ~500px (the French one, measured at 1280). Below
+ * that the two items stack instead of wrapping: a wrap left the "·" dangling
+ * at the end of the first line (seen at 390px). A container query rather than
+ * a media query, because what decides is the CARD's width, and the right
+ * column is narrow on small desktops too (761-1000px), not only on phones.
+ */
+@container game-entry (max-width: 519px) {
+  .band {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .bandSep {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .band {
+    padding: var(--space-3) var(--space-8);
+  }
+
+  .body {
+    padding: var(--pad-card-mobile);
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

@@ -1,0 +1,1361 @@
+/*
+ * The CODIR / COMEX deck — engine spec §9 (the slides) and §7 E5 (the
+ * screen around them).
+ *
+ * Two scales live in this file and must not be confused:
+ *   - the SLIDE rules (`.slide` and everything under it) are written at
+ *     projector size, 1920 × 1080 CSS px, in the --slide-* type tokens. A
+ *     slide is never restyled for a phone: the screen scales the whole slide
+ *     down (`.scaler`), so what the thumbnail shows is exactly what the PDF
+ *     and the PNG contain.
+ *   - the SCREEN rules (the panels, the ask form, the thumbnails) use the
+ *     app's ordinary tokens and follow its 760px breakpoint.
+ *
+ * The print sheet is not here: it has to hide everything that is NOT the
+ * deck, which no CSS Module selector can name (see DeckView.tsx, PRINT_CSS).
+ *
+ * Red on a slide means one of three things, as everywhere in the system:
+ * the accent of the title (large text, --accent-mark), a diagnosis (the
+ * stamp and the named column's dots, a stage below its comparator, a blind
+ * spot), or advice (the dashed red card of "the calculation" and of "what to
+ * measure first"). An unknown is NOT red: it has its own shape — hatched,
+ * dashed ink, a "?" on a paper disc — the board's vocabulary (DS v3: every
+ * mark in ink, one red), so the one red left on a slide is the finding.
+ * Small red text is always --text-alert, the red that passes AA as body text.
+ */
+
+/* ── The slide frame (§9.1) ─────────────────────────────────────────── */
+
+.slide {
+  position: relative;
+  box-sizing: border-box;
+  width: 1920px;
+  height: 1080px;
+  padding: 96px 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  overflow: hidden;
+  text-align: left;
+  color: var(--text-body);
+  font: var(--slide-body);
+  background-color: var(--surface-page);
+  background-image: var(--ground-lift);
+  background-repeat: no-repeat;
+}
+
+.slideTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 40px;
+}
+
+.kicker {
+  margin: 0;
+  font: var(--slide-kicker);
+  letter-spacing: var(--slide-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* The data pill: every slide says how much of the engine it stands on. */
+.dataPill {
+  margin: 0;
+  flex: none;
+  padding: 8px 18px;
+  border: var(--border-dashed);
+  border-radius: var(--radius-tag);
+  font: var(--slide-meta);
+  white-space: nowrap;
+  color: var(--text-body);
+}
+
+.slideTitle {
+  margin: 0;
+  max-width: 1600px;
+  font: var(--slide-title);
+  text-wrap: balance;
+}
+
+/* Declared after .slideTitle in the same module, so they win on order. */
+.slideTitleLong {
+  font: var(--slide-title-long);
+}
+
+/* A long ask: the user's own words inside the template (§7 E5). */
+.slideTitleXLong {
+  font: var(--slide-title-xlong);
+}
+
+/* The one accent a title carries: large text, so the brand red passes (3:1). */
+.accent {
+  color: var(--accent-mark);
+}
+
+.slideBody {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.slideFoot {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 40px;
+  padding-top: 20px;
+  border-top: var(--border-rule);
+  font: var(--slide-meta);
+  color: var(--text-muted);
+}
+
+.slideSources {
+  margin: 0;
+  max-width: 1180px;
+}
+
+.slideSign {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  white-space: nowrap;
+}
+
+/* Two classes: the Wordmark's own `.sm` lives in another module, and a tie on one class would be decided by stylesheet order. */
+.slideSign .slideWordmark {
+  font-size: 26px;
+}
+
+.slideDomain {
+  font: var(--slide-meta);
+}
+
+.pageNumber {
+  font: var(--slide-meta);
+  color: var(--text-body);
+  font-variant-numeric: tabular-nums;
+}
+
+/* A drawn arrow sits on the text's own baseline and takes its colour. */
+.arrow {
+  display: inline-block;
+  width: 1em;
+  height: 0.5em;
+  margin: 0 0.15em;
+  vertical-align: middle;
+  overflow: visible;
+}
+
+.cardEyebrow {
+  margin: 0;
+  font: var(--slide-heading);
+  letter-spacing: var(--slide-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ── Slide 1 — the peloton (§8.1, §9.3) ─────────────────────────────── */
+
+.upstream {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font: var(--slide-meta);
+  color: var(--text-muted);
+}
+
+.upstreamArrow {
+  width: 28px;
+  height: 14px;
+  margin: 0;
+}
+
+.peloton {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 56px;
+  align-items: start;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* The numeral and, on the named column, the stamp beside it — never over the grid. */
+.numeralRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.numeral {
+  margin: 0;
+  font: var(--slide-numeral);
+  /* One step under the token: numeral, label, grid and source must fit the
+     body under a three-line title (measured on the §6.0 example). */
+  font-size: 92px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.numeralUnknown {
+  color: var(--text-muted);
+}
+
+.columnLabel {
+  margin: 0;
+  font: var(--slide-label);
+}
+
+.grid {
+  box-sizing: border-box;
+  width: 200px;
+  aspect-ratio: 1;
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.dot {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: var(--radius-round);
+}
+
+.dotFilled {
+  background: var(--viz-ink);
+}
+
+/* The bottleneck's column: its measured dots take the one red; the stamp says it in words too. */
+.gridHighlighted .dotFilled {
+  background: var(--viz-highlight);
+}
+
+/* A referred sign-up: an ink ring around a paper core — not red, which belongs to the bottleneck (the board's grammar, Peloton.module.css). */
+.dotReferred {
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 4px var(--viz-ink);
+}
+
+.dotReferredRange {
+  background: var(--viz-unknown-fill), var(--surface-card);
+  box-shadow: inset 0 0 0 4px var(--viz-ink);
+}
+
+/* A range's upper part: hatched, "counted, not certain". */
+.dotRange {
+  background: var(--viz-unknown-fill);
+  box-shadow: inset 0 0 0 2px var(--viz-axis);
+}
+
+.dotEmpty {
+  box-shadow: inset 0 0 0 2px var(--viz-axis);
+}
+
+/*
+ * Not measured: the whole grid is one hatched, dashed panel — a shape of its
+ * own, never 100 empty dots, which would read as "nobody", and zero is a
+ * measurement. Declared after .grid in the same module, so its display wins.
+ */
+.gridUnknown {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--viz-unknown-fill);
+  border: var(--border-dashed);
+  border-radius: var(--radius-panel);
+}
+
+/* The « ? » sits on its own paper disc so it never overlaps a mark. */
+.gridQuestion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38%;
+  aspect-ratio: 1;
+  border: var(--border-solid);
+  border-radius: var(--radius-round);
+  background: var(--surface-card);
+  font: var(--slide-label);
+  font-size: 44px;
+  color: var(--text-body);
+}
+
+/*
+ * The diagnosis stamp on the named column, beside its numeral. The action
+ * fill, as on the board: bold and large enough to be large text, and it
+ * passes as body text too, so the same tag reads at a PNG thumbnail's size.
+ */
+.stamp {
+  flex: none;
+  padding: 6px 16px;
+  border-radius: var(--radius-tag);
+  background: var(--action-primary-bg);
+  color: var(--action-primary-text);
+  font: var(--slide-heading);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transform: rotate(-2deg);
+  white-space: nowrap;
+}
+
+.columnSource {
+  margin: 0;
+  font: var(--slide-meta);
+  color: var(--text-muted);
+}
+
+.legend {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 32px;
+  font: var(--slide-meta);
+  color: var(--text-muted);
+}
+
+.legendItems {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 32px;
+}
+
+.legendItems li {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.swatch {
+  display: inline-block;
+  flex: none;
+  box-sizing: border-box;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-round);
+}
+
+.swatchUnknown {
+  border-radius: 3px;
+  background: var(--viz-unknown-fill);
+  outline: 2px dashed var(--viz-axis);
+  outline-offset: -2px;
+}
+
+.legendNote {
+  margin: 0;
+}
+
+/* ── Slide 2 — the leak (§6.7, §9.3) ────────────────────────────────── */
+
+.blindLine {
+  margin: 0;
+  font: var(--slide-body-sm);
+  color: var(--text-alert);
+}
+
+.leak {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 56px;
+  align-items: start;
+}
+
+/* Dashed red: this card is advice, the same grammar as PriorityMove on the result page. */
+.calcCard {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px 30px;
+  border: var(--border-width) dashed var(--border-alert);
+  border-radius: var(--radius-card);
+  background: var(--surface-card);
+}
+
+.calcLines {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.calcLine {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 20px;
+  align-items: baseline;
+}
+
+.calcStep {
+  font: var(--slide-meta);
+  letter-spacing: var(--slide-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.calcValue {
+  margin: 0;
+  font: var(--slide-body-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.calcAnnual {
+  margin: 0;
+  padding-top: 16px;
+  border-top: var(--border-rule);
+  font: var(--slide-body-sm);
+  font-weight: 600;
+}
+
+.calcNote {
+  margin: 0;
+  font: var(--slide-meta);
+  color: var(--text-muted);
+}
+
+.asideCard {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 22px 30px;
+  border: var(--border-solid);
+  border-radius: var(--radius-card);
+  background: var(--surface-card);
+}
+
+.asideList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/*
+ * The stage and where it stands on one line: the model lists every other
+ * candidate (five on the §6.0 example), and stacked two lines each they ran
+ * the card into the footer. The text column wraps when a verdict is long.
+ */
+.asideRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: baseline;
+  padding-bottom: 10px;
+  border-bottom: var(--border-rule);
+}
+
+.asideRow:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.asideStage {
+  font: var(--slide-label);
+  font-size: 24px;
+}
+
+.asideRow[data-tone="below"] .asideStage {
+  color: var(--text-alert);
+}
+
+.asideText {
+  font: var(--slide-meta);
+  font-family: var(--font-ui);
+  font-size: 20px;
+}
+
+.asideRow[data-tone="unknown"] .asideText {
+  color: var(--text-muted);
+}
+
+/* ── Slide 3 — visibility (§9.3) ────────────────────────────────────── */
+
+.visibility {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 56px;
+}
+
+.visibilitySeen,
+.visibilityMissing {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.stageList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stageRow {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  gap: 16px;
+  align-items: baseline;
+  padding-bottom: 10px;
+  border-bottom: var(--border-rule);
+}
+
+.stageName {
+  font: var(--slide-label);
+  font-size: 26px;
+  /* The pillar ids are lower-case; their names are the AARRR words, never translated. */
+  text-transform: capitalize;
+}
+
+.stageMetrics {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 26px;
+}
+
+.stageMetric {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stageMetricName {
+  font: var(--slide-meta);
+  font-family: var(--font-ui);
+  font-size: 20px;
+}
+
+/* Pips: status by shape, never by colour alone (WCAG 1.4.1) — the board's vocabulary (§8.2). */
+.pip {
+  display: inline-block;
+  flex: none;
+  box-sizing: border-box;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-round);
+}
+
+.pipFound {
+  background: var(--viz-ink);
+}
+
+.pipApprox {
+  border: 2px solid var(--viz-ink);
+  background: var(--viz-unknown-fill);
+}
+
+.pipMissing {
+  border: 2px dashed var(--viz-axis);
+}
+
+.pipPending {
+  border: 2px solid var(--viz-ink);
+}
+
+.pipNa {
+  height: 4px;
+  border-radius: 0;
+  background: var(--viz-axis);
+}
+
+.pipLegend {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 24px;
+  font: var(--slide-meta);
+  color: var(--text-muted);
+}
+
+.pipLegend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.missingList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.missingRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 18px;
+  border: var(--border-width) dashed var(--border-alert);
+  border-radius: var(--radius-panel);
+  background: var(--surface-card);
+}
+
+.missingName {
+  font: var(--slide-body-sm);
+  font-weight: 600;
+}
+
+.missingMeta {
+  font: var(--slide-meta);
+  color: var(--text-muted);
+}
+
+.nothingMissing {
+  margin: 0;
+  font: var(--slide-body-sm);
+}
+
+/* ── Slide 4 — unit economics (§6.8, §9.3) ──────────────────────────── */
+
+.unit {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 52px;
+}
+
+.figureRow {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 28px;
+}
+
+.figure {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 24px 28px;
+  border: var(--border-solid);
+  border-radius: var(--radius-card);
+  background: var(--surface-card);
+}
+
+/*
+ * An uncomputable figure: dashed ink and a "?", never a zero and never red —
+ * it is not a finding. Not hatched: a tile holds text, and hatching under
+ * text made the missing input unreadable in the PNG (the timeline below
+ * carries the hatched shape, where there is no text to cover).
+ */
+.figure:not([data-known]) {
+  border: var(--border-dashed);
+}
+
+.figureLabel {
+  font: var(--slide-heading);
+  letter-spacing: var(--slide-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.figureValue {
+  font: var(--slide-numeral);
+  font-size: 64px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.figureUnknown {
+  color: var(--text-muted);
+}
+
+.figureNote {
+  font: var(--slide-meta);
+  color: var(--text-muted);
+}
+
+.timeline {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.timelineTrack {
+  position: relative;
+  height: 48px;
+  border: var(--border-solid);
+  border-radius: var(--radius-tag);
+  background: var(--surface-card);
+}
+
+.timelinePayback {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: var(--viz-ink);
+}
+
+.timelineRange {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--viz-unknown-fill);
+}
+
+.timelineUnknown {
+  border: var(--border-dashed);
+  background: var(--viz-unknown-fill);
+}
+
+/* The same paper disc as the peloton's unknown grid: one shape for "not measured" everywhere. */
+.timelineQuestion {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border: var(--border-solid);
+  border-radius: var(--radius-round);
+  background: var(--surface-card);
+  font: var(--slide-label);
+  font-size: 40px;
+  color: var(--text-body);
+}
+
+/* The commonly cited reference: a dashed ink tick, never a pass mark in red or green. */
+.timelineTick {
+  position: absolute;
+  top: -14px;
+  bottom: -14px;
+  width: 0;
+  border-left: 3px dashed var(--viz-axis);
+}
+
+.timelineScale {
+  position: relative;
+  height: 28px;
+  font: var(--slide-meta);
+  color: var(--text-muted);
+}
+
+.timelineScale > span {
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
+}
+
+.timelineScale > span:first-child {
+  left: 0;
+}
+
+.timelineTickLabel {
+  transform: translateX(-50%);
+}
+
+.timelineCap {
+  right: 0;
+}
+
+/* ── Slide 5 — the mirror (§8.5, D13) ───────────────────────────────── */
+
+.mirror {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.mirrorCounts {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+
+.mirrorCount {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 12px 22px;
+  border: var(--border-solid);
+  border-radius: var(--radius-panel);
+  background: var(--surface-card);
+}
+
+.mirrorCount[data-verdict="blind-spot"],
+.mirrorCount[data-verdict="blind-spot-light"] {
+  border-color: var(--border-alert);
+}
+
+.mirrorCountValue {
+  font: var(--slide-label);
+  font-size: 44px;
+}
+
+.mirrorCountLabel {
+  font: var(--slide-meta);
+}
+
+.mirrorRows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mirrorRow {
+  display: grid;
+  grid-template-columns: 290px 300px minmax(0, 1fr);
+  gap: 24px;
+  align-items: baseline;
+  padding-bottom: 14px;
+  border-bottom: var(--border-rule);
+}
+
+.mirrorVerdict {
+  font: var(--slide-heading);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.mirrorRow[data-verdict="blind-spot"] .mirrorVerdict,
+.mirrorRow[data-verdict="blind-spot-light"] .mirrorVerdict {
+  color: var(--text-alert);
+}
+
+.mirrorMetric {
+  font: var(--slide-body-sm);
+  font-weight: 600;
+}
+
+.mirrorAnswer {
+  font: var(--slide-meta);
+  font-family: var(--font-ui);
+  font-size: 21px;
+}
+
+/* ── Slide 6 — the ask (§9.3) ───────────────────────────────────────── */
+
+.ask {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 40px;
+  align-content: start;
+}
+
+.askBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 28px 32px;
+  border: var(--border-solid);
+  border-radius: var(--radius-card);
+  background: var(--surface-card);
+}
+
+/* After .askBlock in the same module: the advice card takes the dashed red edge. */
+.askMeasure {
+  border: var(--border-width) dashed var(--border-alert);
+}
+
+.askList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font: var(--slide-body-sm);
+}
+
+/*
+ * Drawn bullets, not list markers: html-to-image rendered the native disc as
+ * a hollow circle in the PNG while the PDF kept a filled one — one slide, two
+ * looks. A marker is also a glyph, and a glyph is a font the PDF must embed.
+ */
+.askList > li {
+  position: relative;
+  padding-left: 1em;
+}
+
+.askList > li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 0.35em;
+  height: 0.35em;
+  border-radius: var(--radius-round);
+  background: currentColor;
+}
+
+/* The cost line leads the funded block: the number a CODIR reads first. */
+.askCost {
+  margin: 0;
+  font: var(--slide-label);
+  font-size: 34px;
+}
+
+.askKnow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 14px;
+  border-bottom: var(--border-rule);
+}
+
+.askKnow:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.askKnow > p {
+  margin: 0;
+}
+
+/* Current → target, the arrow drawn so it never depends on a glyph the PDF must embed. */
+.askMove {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font: var(--slide-label);
+  font-size: 40px;
+  font-variant-numeric: tabular-nums;
+}
+
+.askArrow {
+  width: 40px;
+  height: 20px;
+  margin: 0;
+}
+
+.askMetric {
+  display: block;
+  font-weight: 600;
+}
+
+.askMeta {
+  display: block;
+  font: var(--slide-meta);
+  color: var(--text-muted);
+}
+
+/* ── Appendix — definitions and sources (§9.3) ──────────────────────── */
+
+.annex {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font: var(--slide-table);
+}
+
+.annex th,
+.annex td {
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border-divider);
+  overflow-wrap: anywhere;
+}
+
+.annex thead th {
+  font: var(--slide-meta);
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: var(--border-solid);
+}
+
+/* The formula is the long column: the others hold a month, a tool, a word. */
+.annex thead th:nth-child(1) {
+  width: 17%;
+}
+
+.annex thead th:nth-child(2) {
+  width: 37%;
+}
+
+.annex thead th:nth-child(3) {
+  width: 8%;
+}
+
+.annex thead th:nth-child(4),
+.annex thead th:nth-child(5) {
+  width: 11%;
+}
+
+.annex thead th:nth-child(6),
+.annex thead th:nth-child(7) {
+  width: 8%;
+}
+
+.annex tbody th {
+  font-weight: 600;
+}
+
+.annexDefinition {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-muted);
+}
+
+/* Past twelve rows the whole appendix still fits one page: a step down, never a second page. */
+.annexDense th,
+.annexDense td {
+  padding: 4px 10px;
+  font-size: 15px;
+}
+
+/* ── The screen around the slides (§7 E5) ───────────────────────────── */
+
+.deckView {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-11);
+}
+
+.deckHead {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.deckTitle {
+  margin: 0;
+  font: var(--display-section);
+}
+
+/* Focused by the code when the screen opens (R-19), never reachable by Tab: no ring. */
+.deckTitle:focus {
+  outline: none;
+}
+
+.deckNote {
+  margin: 0;
+  font: var(--body-md);
+  color: var(--text-muted);
+}
+
+.checksTitle {
+  margin: 0 0 var(--space-3);
+  font: var(--title-card);
+}
+
+.checksList {
+  margin: 0;
+  padding-left: 1.2em;
+  font: var(--body-sm);
+}
+
+.deckPanels {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-8);
+}
+
+.panel,
+.askForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-width: 0;
+  padding: var(--pad-card-mobile);
+  border: var(--border-solid);
+  border-radius: var(--radius-card);
+  background: var(--surface-card);
+}
+
+.askForm {
+  gap: var(--space-8);
+}
+
+.panelTitle {
+  margin: 0;
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: var(--hit-min);
+  font: var(--body-md);
+  cursor: pointer;
+}
+
+.check input {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--text-body);
+}
+
+.check input:disabled + span {
+  color: var(--text-muted);
+}
+
+.checkHint {
+  display: block;
+  font: var(--body-sm);
+  color: var(--text-muted);
+}
+
+.checkMeta {
+  color: var(--text-muted);
+}
+
+.exportActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.fieldHint {
+  margin: 0;
+  font: var(--body-sm);
+  color: var(--text-muted);
+}
+
+/* The PDF button with its phone warning directly under it: the warning is about that export only. */
+.exportPdf {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+/*
+ * "More reliable from a computer" is a warning for phones only (engine spec
+ * E5: iOS's print sheet is unpredictable; the PDF is announced, never
+ * blocked). Read on a computer it says the opposite of what the reader is
+ * doing. Two classes so it beats .fieldHint's display whatever order the
+ * sheets are emitted in.
+ */
+.fieldHint.phoneOnly {
+  display: none;
+}
+
+.status {
+  margin: 0;
+  min-height: 1.5em;
+  font: var(--body-sm);
+}
+
+.status[data-tone="error"] {
+  color: var(--text-alert);
+}
+
+.askPreview {
+  margin: 0;
+  padding: var(--space-5) var(--space-6);
+  border: var(--border-rule);
+  border-radius: var(--radius-panel);
+  font: var(--title-card);
+}
+
+/* The title's accent at reading size: the red that passes as body text. */
+.askPreview .accent {
+  color: var(--text-alert);
+}
+
+.askPreviewLabel {
+  display: block;
+  margin-bottom: var(--space-2);
+  font: var(--meta-xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.fieldLabel {
+  padding: 0;
+  font: var(--meta-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.control {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: var(--hit-min);
+  padding: var(--space-4) var(--space-5);
+  font: var(--body-md);
+  color: var(--text-body);
+  background: var(--field-bg);
+  border: var(--border-solid);
+  border-radius: var(--radius-button);
+}
+
+.control:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring-invert);
+  outline-offset: var(--focus-offset-tight);
+}
+
+.inlineFields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+}
+
+.checkGroup {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.radioRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-8);
+}
+
+.thumbs {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-11);
+}
+
+.thumb {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.thumbHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.thumbPosition {
+  font: var(--meta-sm);
+  color: var(--text-muted);
+}
+
+.viewport {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: var(--border-solid);
+  border-radius: var(--radius-panel);
+  background: var(--surface-page);
+}
+
+/* An excluded slide is still editable, so it stays; its dashed frame says it won't be exported. Never dimmed: dimming text fails contrast. */
+.thumb[data-included="false"] .viewport {
+  border-style: dashed;
+}
+
+.scaler {
+  width: 1920px;
+  height: 1080px;
+  transform-origin: 0 0;
+}
+
+.thumbActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.thumbActions .enlarge {
+  margin-left: auto;
+}
+
+@media (max-width: 760px) {
+  /* One column already: there is nothing to enlarge into. */
+  .thumbActions .enlarge {
+    display: none;
+  }
+
+  .fieldHint.phoneOnly {
+    display: block;
+  }
+}
+
+@media (min-width: 761px) {
+  .deckPanels {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .panel,
+  .askForm {
+    padding: var(--pad-card);
+  }
+
+  .inlineFields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .thumbs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .thumb[data-enlarged] {
+    grid-column: 1 / -1;
+  }
+}

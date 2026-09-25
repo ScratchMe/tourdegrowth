@@ -3,6 +3,8 @@ import { Card } from "@/components/core/Card";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import type { FunnelWindow } from "@/lib/analytics/goatcounter-api";
 import { loadDashboard } from "@/lib/submissions/dashboard";
+import { EngineSection } from "./EngineSection";
+import { GameSection } from "./GameSection";
 import styles from "./page.module.css";
 
 // Real submission volume/K-factor numbers — never cache this behind Next's
@@ -140,7 +142,7 @@ export default async function AdminStatsPage() {
   const allTimeShares = funnelWindows.find((w) => w.label === "All-time")?.stats?.shares ?? null;
 
   return (
-    <main className={styles.main}>
+    <main id="main" className={styles.main}>
       <h1 className={styles.title}>Growth stats</h1>
       <p className={styles.subtitle}>Live from Firestore — reloads recompute everything, nothing is cached.</p>
 
@@ -228,6 +230,10 @@ export default async function AdminStatsPage() {
           <FunnelBreakdown key={window.label} window={window} />
         ))}
       </section>
+
+      <GameSection windows={funnelWindows} growth={stats} />
+
+      <EngineSection windows={funnelWindows} />
 
       <section className={styles.breakdownRow}>
         <Card elevation="panel" className={styles.breakdown}>

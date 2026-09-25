@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
@@ -16,6 +17,9 @@ import { QUESTIONS } from "@/content/copy-library";
 import type { BreakdownData } from "./ScoreBreakdown";
 import type { Locale } from "@/lib/i18n/locale";
 import type { Pillar } from "@/lib/scoring/pillars";
+import { GAME_PREVIEW_COOKIE, resolveGameAccess, type GameAccess } from "@/lib/game/access";
+import { hasOwnerPreview } from "@/lib/owner-preview";
+import { resultGameEntry } from "./game-entry";
 import { ResultView } from "./ResultView";
 
 interface PageProps {
@@ -151,6 +155,26 @@ function buildBreakdownData(locale: Locale): BreakdownData {
   };
 }
 
+/**
+ * Whether this reader may see the game — GAME-BRIEF.md 13.1-13.2. Read on
+ * every request, exactly as the proxy reads it for the game's own routes
+ * (`GAME_ENABLED`, or the owner's signed preview cookie, verified here the
+ * same way — `lib/owner-preview.ts`): this page is dynamic anyway, so the
+ * preview works here per request. `GAME_ENABLED` itself only changes with a
+ * redeploy on Vercel (`lib/game/build-flag.ts`).
+ *
+ * A closed game must leave NO trace in the payload: a card that links to a
+ * 404 is a bug, and the card's text in the RSC stream of a closed page would
+ * announce a feature that does not exist yet. Closed access makes
+ * `resultGameEntry` return null, and null is all that crosses.
+ */
+async function readGameAccess(): Promise<GameAccess> {
+  return resolveGameAccess({
+    env: process.env.GAME_ENABLED,
+    ownerPreview: await hasOwnerPreview("game", (await cookies()).get(GAME_PREVIEW_COOKIE)?.value),
+  });
+}
+
 // `/r/sample` is the fixed, hard-coded "See a sample result" screen
 // (SPEC.md §12) — never a real Firestore lookup, never recalculated.
 export default async function ResultPage({ params }: PageProps) {
@@ -163,6 +187,7 @@ export default async function ResultPage({ params }: PageProps) {
     // the fixed sample verdict's language matches everything else on first
     // paint, without needing a client fetch just for demo copy.
     const locale = await resolveRequestLocale();
+    const sampleBottleneck = resolveBottleneck(SAMPLE_RESULT.pillars);
 
     return (
       <ResultView
@@ -170,11 +195,22 @@ export default async function ResultPage({ params }: PageProps) {
         pillars={SAMPLE_RESULT.pillars}
         weakestPillar={SAMPLE_RESULT.weakestPillar}
         verdicts={getSampleVerdicts(locale)}
-        bottleneck={resolveBottleneck(SAMPLE_RESULT.pillars)}
+        bottleneck={sampleBottleneck}
         nextMove={getSampleNextMove(locale)}
-        shareImageSrc={shareImageSrc("sample", sampleShareImageModel())}
+        // The picture IN the page follows the reader (copy review v1, DS
+        // critique L-5); the one declared to crawlers above stays English.
+        shareImageSrc={shareImageSrc("sample", sampleShareImageModel(locale))}
         initialTone="neutral"
         isSample
+        // The sample's own board has a clear retention bottleneck (8 against
+        // 12 and up), so it is where the card is seen before any real result
+        // exists — and the only result page an e2e can render.
+        gameEntry={resultGameEntry({
+          bottleneck: sampleBottleneck,
+          access: await readGameAccess(),
+          locale,
+          hasDeepDive: false,
+        })}
       />
     );
   }
@@ -208,6 +244,12 @@ export default async function ResultPage({ params }: PageProps) {
   // this file goes through `toPillarViews` — and pinned by the guard in
   // `src/__tests__/client-bundles.test.ts`.
   const pillars = toPillarViews(submission.pillars);
+  const bottleneck = resolveBottleneck(pillars);
+  // REVIEW.md R-02: only the generated verdicts cross to the client.
+  // `deepDive` also holds the founder's free-text context and their 10
+  // Deep dive answers, which would otherwise ride along in this public
+  // page's RSC payload without ever being rendered.
+  const deepDive = toDeepDiveView(submission.deepDive, locale);
 
   return (
     <ResultView
@@ -222,20 +264,28 @@ export default async function ResultPage({ params }: PageProps) {
       // the action library to the browser. A VISITOR therefore sees the
       // action too — they are the numerator of the whole sharing loop, and
       // they have nothing on their device to derive it from.
-      bottleneck={resolveBottleneck(pillars)}
+      bottleneck={bottleneck}
       nextMove={resolveNextMove(locale, pillars, submission.weakestPillar, submission.answers)}
       // Minted here, on the server, so the CDN can cache the picture as
-      // immutable (`lib/og/share-image.ts`); the view only displays it.
-      shareImageSrc={shareImageSrc(submission.id, shareImageModel(submission))}
+      // immutable (`lib/og/share-image.ts`); the view only displays it. In
+      // the READER's language, like the rest of this page (copy review v1,
+      // DS critique L-5) — `og:image`, above, stays in the author's.
+      shareImageSrc={shareImageSrc(submission.id, shareImageModel(submission, locale))}
       initialTone={submission.tone}
       breakdown={buildBreakdownData(locale)}
-      // REVIEW.md R-02: only the generated verdicts cross to the client.
-      // `deepDive` also holds the founder's free-text context and their 10
-      // Deep dive answers, which would otherwise ride along in this public
-      // page's RSC payload without ever being rendered.
-      deepDive={toDeepDiveView(submission.deepDive, locale)}
+      deepDive={deepDive}
       benchmark={benchmark}
       segment={submission.segment ?? null}
+      // GAME-BRIEF.md 13.3 A. Same rule for the owner and for a visitor who
+      // arrived through a shared link — a reader is a reader. The Deep dive
+      // variant is keyed on what the page SHOWS (the view above), so the card
+      // never says "your recommendations are above" when none are.
+      gameEntry={resultGameEntry({
+        bottleneck,
+        access: await readGameAccess(),
+        locale,
+        hasDeepDive: deepDive !== null,
+      })}
     />
   );
 }

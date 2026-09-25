@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "./helpers";
+import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
 
 /**
  * An automated accessibility floor, not a substitute for the real work:
@@ -10,6 +10,11 @@ import { expect, test } from "./helpers";
  *
  * Scoped to serious/critical impact so the gate stays meaningful rather than
  * becoming a wall of advisories nobody triages.
+ *
+ * Runs twice: in the default project at 1280 and in the `mobile` project at
+ * 390 × 844 (playwright.config.ts, ds-critique M-7). The phone width has its
+ * own type sizes and restacked layouts, so "zero known contrast gap" has to
+ * hold there too — at 1280 alone every `max-width: 760px` rule went unchecked.
  */
 
 /**
@@ -41,12 +46,36 @@ const PAGES: [name: string, path: string][] = [
   // tableau comparatif sans `<table>` : l'ordre des titres (h1, h2, h3 sous
   // le h2 « En un coup d'oeil ») est exactement ce qu'axe sait vérifier.
   ["framework comparison (fr)", "/fr/aarrr-vs-rarra"],
+  // The growth engine (engine spec §11.4), behind ENGINE_ENABLED: reached
+  // with the owner's signed preview (`OWNER_PREVIEW` below), exactly as
+  // Antoine tests it before bon à tirer nº6.
+  ["growth engine (fr, preview)", "/fr/aarrr-funnel-template"],
+  // GAME-BRIEF 13.6 : CI construit le jeu OUVERT, donc ces deux adresses
+  // rendent le hub et le niveau (sa première visio, prérendue). Fermé (build
+  // local sans GAME_ENABLED), elles rendent la 404 localisée — scannée aussi,
+  // sans faux rouge. Le rapport et décembre ne s'atteignent pas par une
+  // adresse : e2e/game-island.spec.ts les scanne après avoir semé une année.
+  ["game hub (fr)", "/fr/game"],
+  ["game level", "/en/game/retention"],
 ];
 
 interface ContrastData {
   fgColor?: string;
   bgColor?: string;
   contrastRatio?: number;
+}
+
+/**
+ * The logotype, and only the logotype. WCAG 1.4.3 exempts "text that is part
+ * of a logo or brand name" from contrast minimums, and the wordmark's red
+ * GROWTH is exactly that: 3.56:1 on the page ground, which passes as large
+ * text at the 19px desktop size and not at the 15px mobile one. Matched on
+ * the element's own markup (its text and tag), never on its colour pair —
+ * `--paint-red` on `--paper-1` in small body text is precisely the mistake
+ * R-22 exists to catch, and a colour-pair exception would wave it through.
+ */
+function isLogotype(html: string): boolean {
+  return /^<span[^>]*>GROWTH<\/span>$/.test(html.trim());
 }
 
 function isKnownGap(data: ContrastData | undefined): boolean {
@@ -56,12 +85,38 @@ function isKnownGap(data: ContrastData | undefined): boolean {
   );
 }
 
+/**
+ * The pages that ship closed and are reached with the owner's signed preview
+ * (`lib/owner-preview.ts`) — minted through /admin/preview, so they need the
+ * admin password on the server and skip without it, like the admin specs.
+ */
+const OWNER_PREVIEW: Record<string, "engine"> = { "/fr/aarrr-funnel-template": "engine" };
+
 for (const [name, path] of PAGES) {
-  test(`${name} has no unknown serious or critical accessibility violations`, async ({ page }) => {
+  test(`${name} has no unknown serious or critical accessibility violations`, async ({ page, context }) => {
+    const preview = OWNER_PREVIEW[path];
+    if (preview) {
+      test.skip(!ADMIN_PASSWORD, SKIP_ADMIN_REASON);
+      await grantOwnerPreview(context.request, preview);
+    }
     await page.goto(path);
     // The quiz renders nothing until it has read localStorage (a deliberate
     // hydration choice), so wait for real content before scanning.
     await page.locator("main").waitFor();
+
+    // The page ground is a gradient (`--ground-lift`), and axe cannot compute
+    // contrast over a gradient: it files every such node under "incomplete",
+    // never under "violations". Measured on 2026-09-24, that was ~20 text
+    // nodes per page — the header nav, the hero, every prose paragraph that
+    // sits directly on the page — so the "no known gap" promise below never
+    // covered them at all. Flattening the ground to its base colour
+    // (`--surface-page`) lets axe measure them. The lifts move that ground by
+    // a few percent at most, so this can overstate a ratio slightly at the
+    // single darkest point; it is still a measurement where there was none.
+    // The game's night band (`[data-world]`, NightSurface) paints the same
+    // kind of ground over its own region: flattened too, or its text would
+    // stay "incomplete" for the same reason.
+    await page.addStyleTag({ content: "body, [data-world] { background-image: none !important; }" });
 
     const { violations } = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
@@ -73,7 +128,7 @@ for (const [name, path] of PAGES) {
 
       for (const node of violation.nodes) {
         const data = node.any[0]?.data as ContrastData | undefined;
-        if (violation.id === "color-contrast" && isKnownGap(data)) continue;
+        if (violation.id === "color-contrast" && (isKnownGap(data) || isLogotype(node.html))) continue;
         unexpected.push(
           `${violation.id} (${violation.impact}) on \`${node.target.join(" ")}\` — ${violation.help}`,
         );

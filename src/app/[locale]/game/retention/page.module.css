@@ -1,0 +1,54 @@
+/* The level page's paper-world intro (plan §2.1). The frame is ProsePage's;
+   this module adds the three steps and the footnote under the year. */
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.step {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-5);
+}
+
+/* The step number in stencil, like the Tour's numerals — decorative (the
+   list is already ordered for assistive tech), hence aria-hidden. */
+.stepNumber {
+  font: var(--display-section);
+  letter-spacing: var(--display-letter-spacing);
+  color: var(--accent-mark);
+  min-width: 1ch;
+}
+
+.stepText {
+  font: var(--body-md);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.stepTitle {
+  font-weight: 600;
+  color: var(--text-body);
+}
+
+/* Under the year, on paper: what the numbers are, and where the model that
+   produced them is written (plan §2.7, P19). As wide as the desk above. */
+.footnote {
+  max-width: var(--width-desktop);
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--space-12) 24px 0;
+  font: var(--body-sm);
+  color: var(--text-muted);
+}
+
+@media (max-width: 760px) {
+  .footnote {
+    padding: var(--space-11) var(--game-gutter-mobile) 0;
+  }
+}

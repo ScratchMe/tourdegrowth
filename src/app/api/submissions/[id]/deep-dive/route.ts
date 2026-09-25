@@ -140,7 +140,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       // Lost a race with a concurrent completion (REVIEW-02.md R2-21): the
       // other request's Deep dive is the one on the document, and it is just
       // as valid. Nothing to invalidate here — the winner did.
-      console.warn(`Deep dive for ${id} was completed concurrently; keeping the first write.`);
+      console.warn("Deep dive for %s was completed concurrently; keeping the first write.", id);
       return NextResponse.json({ id }, { status: 200 });
     }
     // The one moment a submission changes — drop the cached copy so the

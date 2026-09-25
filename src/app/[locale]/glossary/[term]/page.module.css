@@ -1,11 +1,5 @@
-.main {
-  max-width: var(--width-reading);
-  margin: 0 auto;
-  padding: 56px 24px 80px;
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
-}
+/* /glossary/[term] — the frame and the running text are ProsePage's; what
+   lives here is what only a term page has. */
 
 .backLink {
   font: var(--meta-md);
@@ -15,39 +9,15 @@
   width: fit-content;
 }
 
-.title {
-  font: var(--display-hero-mobile);
-  color: var(--text-body);
-}
-
 .definition {
   font: var(--body-lg);
-  color: var(--text-body);
-}
-
-.extendedSection,
-.relatedSection {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.sectionLabel {
-  font: var(--meta-sm);
-  text-transform: uppercase;
-  letter-spacing: var(--meta-tracking-wide);
-  color: var(--text-muted);
-}
-
-.extended {
-  font: var(--body-md);
   color: var(--text-body);
 }
 
 .relatedList {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: var(--space-4);
 }
 
 .relatedLink {
@@ -61,40 +31,20 @@
   color: var(--text-link-hover);
 }
 
-/* --- Long-form sections (REVIEW-02.md R2-11) ------------------------------
-   Same section label as "In practice"; body copy in --text-body like the
-   extended paragraph, since this IS the article, not a caption. */
-.deepSection {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.body {
-  font: var(--body-md);
-  color: var(--text-body);
-  margin: 0;
-}
-
-/* The formula: mono, in the same sunken box /how-it-works uses for its
-   example question — a formula is a quoted thing, not prose. */
+/* The formula: mono, recessed — a formula is a quoted thing, not prose. */
 .formula {
   font: var(--meta-md);
-  font-size: 14px;
-  line-height: 1.5;
   color: var(--text-body);
   background: var(--surface-sunken);
   border-radius: var(--radius-button);
-  padding: 12px 14px;
-  margin: 0;
+  padding: var(--space-5) var(--space-6);
   overflow-wrap: anywhere;
 }
 
 .formulaTerms {
-  margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--space-4);
 }
 
 .formulaTerm {
@@ -103,43 +53,29 @@
   gap: 2px;
 }
 
-.formulaTerm dd {
-  margin: 0;
-}
-
 .formulaSymbol {
   font: var(--body-md);
   font-weight: 600;
   color: var(--text-body);
 }
 
-.exampleCard {
+/* The worked example: sunken, no edge (ds-critique M-5 — sunken + a solid
+   edge is the recipe of a control at rest, and this is read, not pressed). */
+.example {
+  background: var(--surface-sunken);
+  border-radius: var(--radius-panel);
+  padding: var(--pad-card);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-5);
 }
 
-.exampleTitle {
-  font: var(--title-card);
-  font-size: 17px;
-  color: var(--text-body);
-  margin: 0;
-}
-
-.steps,
-.bullets {
-  margin: 0;
-  padding-left: 1.25em;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.takeaway {
-  font: var(--body-md);
+.exampleTitle,
+.tourQuestion,
+.faqQuestion {
+  font: var(--body-lg);
   font-weight: 600;
   color: var(--text-body);
-  margin: 0;
 }
 
 /* Dashed red on paper: the system's "advice" tone (Card.tone=outlineAlert),
@@ -147,29 +83,20 @@
 .tourCard {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-
-.tourQuestion {
-  font: var(--title-card);
-  font-size: 17px;
-  color: var(--text-body);
-  margin: 0;
+  gap: var(--space-4);
 }
 
 .tourOptions {
   list-style: none;
-  margin: 0;
-  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-2);
 }
 
 .tourOption {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-5);
   font: var(--body-sm);
   color: var(--text-body);
 }
@@ -183,29 +110,17 @@
 .faqList {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: var(--space-9);
 }
 
 .faqItem {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-}
-
-.faqQuestion {
-  font: var(--title-card);
-  font-size: 17px;
-  color: var(--text-body);
-  margin: 0;
-}
-
-.ctaRow {
-  display: flex;
-  gap: 14px;
+  gap: var(--space-2);
 }
 
 @media (max-width: 760px) {
-  .ctaRow {
-    flex-direction: column;
+  .example {
+    padding: var(--pad-card-mobile);
   }
 }

@@ -10,13 +10,41 @@
   cursor: pointer;
   transition:
     box-shadow var(--dur-fast) var(--ease-out),
-    background var(--dur-fast) var(--ease-out);
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
 }
 
-.option:hover,
+/*
+ * One selection language for the whole tunnel (ds-critique H-5, DS v3 §5.4):
+ * selected is the inverse fill, the same as the segment chips and the tone
+ * cards. Hover used to be this very rule — lift to paper, 4px shadow — so on
+ * a touch screen, where the hover sticks after the tap, "the one I touched"
+ * and "the one I chose" looked identical. Hover now only lifts the shadow and
+ * never touches the fill, and is switched off where nothing can hover.
+ */
+.option:hover {
+  box-shadow: var(--state-hover-shadow);
+}
+
+@media (hover: none) {
+  .option:hover {
+    box-shadow: none;
+  }
+}
+
+/*
+ * Two classes, and the descendants too: a caller that puts muted text inside
+ * an option (the audit Tour's "— 7 pts") would otherwise keep --text-muted on
+ * the ink fill, which does not pass. Everything inside a selected option
+ * reads on the inverse.
+ */
 .option.selected {
-  background: var(--surface-card);
-  box-shadow: var(--shadow-hover);
+  background: var(--state-selected-bg);
+}
+
+.option.selected,
+.option.selected * {
+  color: var(--state-selected-text);
 }
 
 /* "desktop" shrinks to the "mobile" figure below the app's breakpoint on

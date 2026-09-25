@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { SiteFooter } from "@/components/brand/SiteFooter";
-import { ContentHeader } from "@/components/brand/ContentHeader";
 import { MetaLabel } from "@/components/brand/MetaLabel";
+import { ProseActions, ProsePage, ProseSection, ProseText } from "@/components/brand/ProsePage";
 import { Button } from "@/components/core/Button";
-import { Card } from "@/components/core/Card";
+import { Callout } from "@/components/core/Callout";
 import { QUESTIONS } from "@/content/copy-library";
-import { COMPARISON_ORDER, COMPARISONS } from "@/content/comparisons";
+import { COMPARISON_ORDER, COMPARISON_TITLES } from "@/content/comparison-index";
 import { HOW_IT_WORKS } from "@/content/how-it-works";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
@@ -22,13 +21,15 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = await params;
   const resolved: Locale = isLocale(locale) ? locale : "en";
-  // Title/description in the page's own language (the page's own intro,
-  // already validated copy), hreflang set (REVIEW.md R-13), Open Graph text.
+  // Title/description in the page's own language, hreflang set (REVIEW.md
+  // R-13), Open Graph text. The description is its own field since the SEO
+  // audit v1 (§1.2): the intro, reused until then, ran past 160 characters.
   return contentMetadata(
     resolved,
     "/how-it-works",
     tc(UI_STRINGS.meta.howItWorksTitle, resolved),
-    tc(HOW_IT_WORKS.intro, resolved),
+    tc(HOW_IT_WORKS.metaDescription, resolved),
+    { ownShareImage: true },
   );
 }
 
@@ -45,19 +46,21 @@ export default async function HowItWorksPage({ params }: PageProps) {
   return (
     <>
       <JsonLd data={breadcrumbSchema(locale, [{ name: tc(HOW_IT_WORKS.title, locale), path: "/how-it-works" }])} />
-      <ContentHeader locale={locale} path="/how-it-works" />
-
-      <main className={styles.main}>
-        <div className={styles.intro}>
-          <h1 className={styles.title}>{tc(HOW_IT_WORKS.title, locale)}</h1>
-          <p className={styles.subtitle}>{tc(HOW_IT_WORKS.intro, locale)}</p>
-        </div>
-
+      <ProsePage
+        locale={locale}
+        path="/how-it-works"
+        title={tc(HOW_IT_WORKS.title, locale)}
+        lead={tc(HOW_IT_WORKS.intro, locale)}
+      >
+        {/* ds-critique M-1: these were five raised cards — "one loud thing per
+            screen" broken five times, on the page that explains the system.
+            They are five steps of one sequence, so they read as one: a dashed
+            route rule between them and no shadow at all. */}
         <div className={styles.pillarStack}>
           {HOW_IT_WORKS.pillars.map((block, index) => {
             const example = QUESTIONS.find((q) => q.id === block.exampleQuestionId);
             return (
-              <Card key={block.pillar} elevation="raised" className={styles.pillarCard}>
+              <div key={block.pillar} className={styles.pillarStep}>
                 {/* REVIEW-02.md R2-17: this used to repeat the pillar name the
                     <h2> below already carries ("ACQUISITION / Acquisition").
                     The stage number is the one thing the heading doesn't say. */}
@@ -71,27 +74,26 @@ export default async function HowItWorksPage({ params }: PageProps) {
                     {tc(UI_STRINGS.pillars[block.pillar], locale)}
                   </Link>
                 </h2>
-                <p className={styles.pillarExplanation}>{tc(block.explanation, locale)}</p>
+                <ProseText>{tc(block.explanation, locale)}</ProseText>
                 {example && (
                   <div className={styles.exampleBox}>
-                    <MetaLabel size="xs" className={styles.exampleLabel}>
-                      {tc(UI_STRINGS.howItWorksPage.exampleQuestionLabel, locale)}
-                    </MetaLabel>
+                    <MetaLabel size="xs">{tc(UI_STRINGS.howItWorksPage.exampleQuestionLabel, locale)}</MetaLabel>
                     <p className={styles.exampleQuestion}>{tc(example.question, locale)}</p>
                   </div>
                 )}
-              </Card>
+              </div>
             );
           })}
         </div>
 
-        <section className={styles.proseSection}>
-          <h2 className={styles.sectionTitle}>{tc(HOW_IT_WORKS.scoringSection.title, locale)}</h2>
-          <p className={styles.sectionBody}>{tc(HOW_IT_WORKS.scoringSection.body, locale)}</p>
-        </section>
+        <ProseSection heading={tc(HOW_IT_WORKS.scoringSection.title, locale)}>
+          <ProseText>{tc(HOW_IT_WORKS.scoringSection.body, locale)}</ProseText>
+        </ProseSection>
 
-        <section className={styles.proseSection}>
-          <h2 className={styles.sectionTitle}>{tc(HOW_IT_WORKS.tonesSection.title, locale)}</h2>
+        <ProseSection heading={tc(HOW_IT_WORKS.tonesSection.title, locale)}>
+          {/* ds-critique M-5: sunken + a solid ink edge + radius 8 is exactly an
+              AnswerOption at rest, so these two read as buttons to press. They
+              describe the tones; they are not the control that picks one. */}
           <div className={styles.toneGrid}>
             <div className={styles.toneBlock}>
               <h3 className={styles.toneTitle}>{tc(HOW_IT_WORKS.tonesSection.straightUp.label, locale)}</h3>
@@ -102,55 +104,55 @@ export default async function HowItWorksPage({ params }: PageProps) {
               <p className={styles.toneBody}>{tc(HOW_IT_WORKS.tonesSection.roast.body, locale)}</p>
             </div>
           </div>
-        </section>
+        </ProseSection>
 
         {/* GROWTH-PLAN.md 2.4 : chaque nouvelle page reçoit un lien depuis au
             moins deux pages existantes. Cette page explique le cadre ; les
             deux autres donnent la liste et la méthode. */}
-        <section className={styles.proseSection}>
-          <p className={styles.sectionBody}>
+        <ProseSection>
+          <ProseText>
             {tc(UI_STRINGS.openDoor.checklistLead, locale)}{" "}
             <Link href={localePath(locale, "/growth-audit-checklist")} data-testid="checklist-link">
               {tc(UI_STRINGS.openDoor.checklistLink, locale)}
             </Link>
-          </p>
-          <p className={styles.sectionBody}>
+          </ProseText>
+          <ProseText>
             {tc(UI_STRINGS.openDoor.diagnosticLead, locale)}{" "}
             <Link href={localePath(locale, "/startup-growth-diagnostic")} data-testid="diagnostic-link">
               {tc(UI_STRINGS.openDoor.diagnosticLink, locale)}
             </Link>
-          </p>
-        </section>
+          </ProseText>
+        </ProseSection>
 
         {/* GROWTH-PLAN.md 2.3 : le cluster « frameworks comparés » est lié
-            depuis ici parce que c'est LA page qui explique AARRR — quatre
+            depuis ici parce que c'est LA page qui explique AARRR — ces
             liens y sont du sujet, pas du remplissage. Le pied de page, lui,
             porte déjà six liens : un septième n'en mettrait plus aucun en
-            avant. Les quatre pages se lient aussi entre elles, donc le
+            avant. Les pages du cluster se lient aussi entre elles, donc le
             cluster se parcourt depuis n'importe laquelle de ses entrées. */}
-        <section className={styles.proseSection} data-testid="framework-comparisons">
-          <p className={styles.sectionBody}>{tc(UI_STRINGS.comparisonPage.fromHowItWorks, locale)}</p>
+        <ProseSection data-testid="framework-comparisons">
+          <ProseText>{tc(UI_STRINGS.comparisonPage.fromHowItWorks, locale)}</ProseText>
           <div className={styles.comparisonLinks}>
             {COMPARISON_ORDER.map((slug) => (
               <Link key={slug} href={localePath(locale, `/${slug}`)} className={styles.comparisonLink}>
-                {tc(COMPARISONS[slug].title, locale)}
+                {tc(COMPARISON_TITLES[slug], locale)}
               </Link>
             ))}
           </div>
-        </section>
+        </ProseSection>
 
-        <Card tone="paper" className={styles.limitationCard}>
-          <p className={styles.limitationText}>{tc(HOW_IT_WORKS.limitationNotice.long, locale)}</p>
-        </Card>
+        {/* The one thing to know before taking the score seriously — a caveat,
+            not a diagnosis, so ink and dashed rather than red (ds-critique M-2). */}
+        <Callout tone="caveat">
+          <p>{tc(HOW_IT_WORKS.limitationNotice.long, locale)}</p>
+        </Callout>
 
-        <div className={styles.ctaWrap}>
+        <ProseActions>
           <Button size="lg" href="/quiz" hard>
             {tc(HOW_IT_WORKS.cta, locale)}
           </Button>
-        </div>
-      </main>
-
-      <SiteFooter locale={locale} width="reading" />
+        </ProseActions>
+      </ProsePage>
     </>
   );
 }

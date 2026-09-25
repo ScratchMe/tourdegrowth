@@ -1,6 +1,12 @@
 # Brief · « Le côté obscur » de Tour de Growth
 
-Version 1.1 · 14 septembre 2026 · rédigé à partir du prototype validé par Antoine Berthaud en quatre itérations ; la version 1.1 ajoute la section 13, drapeau d'activation et points d'entrée depuis le Tour.
+Version 1.2 · 25 septembre 2026 · rédigé à partir du prototype validé par Antoine Berthaud en quatre itérations ; la version 1.1 ajoute la section 13, drapeau d'activation et points d'entrée depuis le Tour ; la version 1.2 reporte ce que l'implémentation a tranché (section 15).
+
+**Journal des versions**
+
+- **1.2 · 25 septembre 2026.** Section 15 nouvelle : les seize écarts assumés au brief (E1 à E16), les trois mondes de la page, la région vivante unique, l'encart du résultat (place et règle du goulot partagé), les images de partage, et ce que le drapeau veut dire sur Vercel. Corrigés en place pour ne plus contredire la section 15 : 9.6 (événements), 9.7 (région vivante), 9.9 (brief de design remplacé), P6, P9, P15, P16, 13.3 (place de l'encart). Le même jour, 1.3 vérifié contre les sources primaires (communiqués de la FTC et du ministère américain de la Justice, Légifrance, règlement DSA) : Basic-Fit, DSA et Adobe corrigés, comme leur version imprimée dans le catalogue du jeu.
+- **1.1 · 14 septembre 2026.** Section 13, drapeau d'activation et points d'entrée. 13.1 corrigé le 25 septembre : une variable Vercel modifiée exige un redéploiement.
+- **1.0.** Brief issu du prototype.
 Destinataire : l'agent ou le développeur qui implémente le jeu dans ce dépôt.
 Prototype de référence : `design/game/prototype-s-ils-reviennent.html`, jouable tel quel dans un navigateur, un seul fichier, sans dépendance. Toute règle décrite ici y est implémentée ; en cas de doute, le prototype fait foi, sauf mention contraire dans la section 10.
 
@@ -36,9 +42,9 @@ Le jeu est purement client, sans serveur, bilingue dès la conception, et chaque
 
 ### 1.3 Pourquoi maintenant
 
-- France : résiliation « en trois clics » obligatoire depuis le 1er juin 2023 (article L215-1-1 du Code de la consommation) ; amende DGCCRF de 68 500 € contre Basic-Fit pour un parcours non conforme.
-- Union européenne : le DSA (article 25) interdit aux plateformes en ligne les interfaces conçues pour tromper ou manipuler ; le Digital Fairness Act, attendu fin 2026, vise explicitement les mécanismes addictifs et la résiliation aussi simple que la souscription.
-- États-Unis : Amazon a accepté en 2025 de payer 2,5 milliards de dollars, en partie pour son parcours de désabonnement Prime baptisé « Iliad » ; Adobe, 150 millions de dollars en 2026 pour des frais de résiliation anticipée mal annoncés.
+- France : résiliation « en trois clics » obligatoire depuis le 1er juin 2023 (article L215-1-1 du Code de la consommation) ; amende administrative de 68 500 € prononcée en 2023 par la DDPP du Nord contre Basic-Fit, pour des faits antérieurs à cette loi, notamment des conditions de résiliation mal annoncées avant la souscription (pas pour un parcours de résiliation).
+- Union européenne : le DSA (article 25) interdit aux plateformes en ligne les interfaces conçues pour tromper ou manipuler, hors pratiques déjà couvertes par la directive sur les pratiques commerciales déloyales ou le RGPD (25.2) — ce qui exclut la résiliation d'un abonnement grand public, d'où l'article L121-6 dans le jeu ; la proposition de Digital Fairness Act est attendue au quatrième trimestre 2026 et doit traiter le design addictif et la résiliation.
+- États-Unis : Amazon a accepté en 2025 de payer 2,5 milliards de dollars, en partie pour son parcours de désabonnement Prime baptisé « Iliad » ; Adobe a conclu en 2026 un accord de 150 millions de dollars (75 d'amende civile, 75 de services gratuits) pour clore des poursuites sur ses frais de résiliation anticipée et son parcours de résiliation, sans reconnaissance des faits.
 - Éducation : l'éducation aux médias et à l'information est au programme, les compétences Pix couvrent la protection des données. Les enseignants ont un mandat et peu d'outils.
 
 ### 1.4 Ce que le jeu n'est pas
@@ -464,10 +470,10 @@ Tout test est bloquant pour la mise en production. Les tests unitaires portent s
 
 **Série G · drapeau et points d'entrée** (`src/lib/game/__tests__/access.test.ts` et `src/__tests__/proxy.test.ts`)
 
-- G1 `resolveGameAccess({ env, cookie })` : ouvert si `env === "true"` ; ouvert si le cookie de prévisualisation vaut `1` quel que soit `env` ; fermé sinon ; fermé si `env` est absent (fail closed, comme `METRICS_PAGE_ENABLED`).
+- G1 `resolveGameAccess({ env, ownerPreview })` : ouvert si `env === "true"` ; ouvert si l'aperçu propriétaire est vérifié quel que soit `env` ; fermé sinon ; fermé si `env` est absent (fail closed, comme `METRICS_PAGE_ENABLED`).
 - G2 Proxy, drapeau fermé, sans cookie : `/fr/game` et `/en/game/retention` sont réécrits vers la page introuvable de la langue, statut 404 ; `/fr/glossary` n'est pas touché.
-- G3 Proxy, drapeau fermé, `?game=preview` : la réponse pose le cookie `tdg_game_preview=1` (HttpOnly, SameSite Lax, un an) et laisse passer la requête ; les requêtes suivantes avec ce cookie passent aussi.
-- G4 Proxy, `?game=off` : le cookie est effacé et la requête est réécrite vers la page introuvable si le drapeau est fermé.
+- G3 Proxy, drapeau fermé : `?game=preview` et un cookie deviné (`1`) laissent la page en 404 ; `POST /admin/preview?game=on`, derrière la Basic Auth, pose le cookie signé (HttpOnly, Secure, SameSite Lax, un an), et les requêtes qui le portent passent.
+- G4 Proxy, `POST /admin/preview?game=off` : le cookie est effacé ; une signature faite pour le moteur, ou sous un autre mot de passe, n'ouvre pas le jeu.
 - G5 Proxy, drapeau ouvert : aucune réécriture, aucun cookie posé sans paramètre.
 - G6 `gameEntryFor({ bottleneck, access, levels })` : renvoie l'entrée du niveau « retention » quand le goulot principal est `retention`, l'accès ouvert et le niveau présent dans `GAME_LEVELS_BY_PILLAR` ; `null` pour tout autre pilier, pour un goulot « level » (aucun pilier ne se détache), ou si l'accès est fermé.
 - G7 Vocabulaire analytique : `GAME_ENTRY_EVENT` et ses détails (`result/retention`, `deep_dive/retention`, `footer`, `hub`) sont présents dans `ALL_PATHS` de `goatcounter-api.ts`, comme les événements existants.
@@ -481,17 +487,17 @@ Chaque scénario part d'une page vierge, stockage local vidé, sauf mention cont
 - P3 **Raccrocher.** Après « Quitter la visio », les cartes sont activées, le minuteur affiche « raccroché », le bouton disparaît.
 - P4 **Deux choix, pas plus.** Cocher deux cartes désactive les autres ; décocher réactive ; le compteur affiche « 2 / 2 » ; « Lancer le trimestre » n'est actif qu'à deux cartes.
 - P5 **Le téléphone suit les choix.** Cocher `bury` change le fil d'Ariane et remplace le bouton par un petit lien ; la pastille passe à 5 clics avec la mention légale ; décocher rétablit 2 clics.
-- P6 **Trimestre 1 honnête.** Jouer `pause + survey` puis lancer : un rapport « Trimestre 1 · janvier à mars » apparaît avec « Offre de pause : −5 % de résiliations ce trimestre, l'effet monte encore » et « Questionnaire de sortie : des réponses de sortie… », le courriel du DG, la réplique « Ce n'est pas ce qu'on avait dit. » ; le dashboard affiche 5,7 % et patience 52 ; la visio se rouvre avec le message T2 raté, humeur `angry`, badge « Demandé par le DG » sur « Pause mise en avant », en première position.
+- P6 **Trimestre 1 honnête.** *(1.2, E1 : le rapport vient d'abord, seul, puis « Le DG t'appelle », puis la visio.)* Jouer `pause + survey` puis lancer : un rapport « Trimestre 1 · janvier à mars » apparaît avec « Offre de pause : −5 % de résiliations ce trimestre, l'effet monte encore » et « Questionnaire de sortie : des réponses de sortie… », le courriel du DG, la réplique « Ce n'est pas ce qu'on avait dit. » ; le dashboard affiche 5,7 % et patience 52 ; après « Le DG t'appelle » et « Décrocher », la visio se rouvre avec le message T2 raté, humeur `angry`, badge « Demandé par le DG » sur « Pause mise en avant », en première position.
 - P7 **Parcours A complet.** La page de décembre porte « Décembre · applaudissements », « Tu as tenu. Et ça a marché. », confiance 83 et radar 0, le dashboard défloutés, le playbook « Le playbook qui a marché » avec « Offre de pause · confiance +4, radar −2 » et « Ordres du DG refusés : 3 sur 3 », deux courbes SVG avec `role="img"`, un catalogue sans entrée dans « utilisées ».
 - P8 **Parcours C complet.** Le rapport du T3 contient « Contrôle de la DGCCRF… » ; au T4 l'ordre n'est ni `call` ni `bury` ; la fin est « Voici ce que tu as fait. » ; les six astuces jouées sont dans « utilisées », dépliées, statut « retirée », « Effet caché » visible.
-- P9 **Parcours D.** Après le T2 : « Année interrompue », bouton « Lancer le trimestre » masqué, visio « On va s'arrêter là. Merci pour tout. » en `cold`, fin « Viré. Sans une seule astuce. »
+- P9 **Parcours D.** Après le T2 : « Année interrompue » à la place de la main (`game-year-closed`, avec « Le bilan est en bas de page. » ; « Année terminée » pour une année allée au bout), bouton « Lancer le trimestre » absent, visio « On va s'arrêter là. Merci pour tout. » en `cold`, fin « Viré. Sans une seule astuce. »
 - P10 **Humeurs et visage.** Aux ouvertures de visio des parcours A et C, la classe d'humeur et les attributs `d` de `browL`, `browR`, `mouthShape` correspondent à la table de 5.10.
 - P11 **Sous-titres.** Sans `prefers-reduced-motion`, le texte s'écrit progressivement et la classe `speaking` est présente puis retirée ; avec `reduce`, le texte complet est affiché immédiatement et aucune animation ne tourne.
 - P12 **Voix.** Avec `speechSynthesis` présent, « Écouter le DG » est visible ; stubbé absent, masqué. Au clic, `speechSynthesis.speak` reçoit `lang = fr-FR` (`en-US` en anglais) et les paramètres de l'humeur courante.
 - P13 **Rejouer.** Depuis une fin, « Rejouer l'année » remet l'état initial, vide le journal, remonte en haut de page.
 - P14 **Partage.** Le bouton écrit dans le presse-papiers le texte de 5.11 ; si le presse-papiers est refusé, le texte s'affiche à côté.
-- P15 **Reprise après rechargement.** Après un trimestre joué, recharger propose de reprendre ; accepter restaure le trimestre, le journal et la maquette ; refuser repart de zéro.
-- P16 **Clavier seul.** Le parcours A est jouable au clavier ; focus visible ; `aria-pressed` reflète les choix ; le dashboard est en `aria-live="polite"`. Même approche que `e2e/keyboard.spec.ts`.
+- P15 **Reprise après rechargement.** Après un trimestre joué, recharger propose de reprendre ; derrière la question, le dashboard, la frise, le téléphone et le journal montrent l'année sauvegardée, en lecture seule (la main et la barre d'action sont absentes) ; accepter restaure le trimestre, le journal et la maquette ; refuser repart de zéro. Une année sauvegardée après son dernier trimestre se rouvre sur décembre, sans réafficher le dernier rapport : son journal porte tout ce que ce rapport disait, objectif du trimestre compris.
+- P16 **Clavier seul.** Le parcours A est jouable au clavier ; focus visible ; `aria-pressed` reflète les choix ; la région vivante unique dit la fin de chaque trimestre (E5 — le dashboard n'est pas en `aria-live`). Même approche que `e2e/keyboard.spec.ts`.
 - P17 **Mobile 390 px.** Aucun défilement horizontal, gouttière de 16 px minimum, la maquette du téléphone passe en premier, les cartes en une colonne, les courbes de fin lisibles.
 - P18 **Bilingue.** `/en/game/retention` affiche cartes, messages du DG, rapports et fins en anglais ; le sélecteur de langue conserve l'état de la partie ; le lien copié pointe vers l'URL de la langue courante ; hreflang et canonical comme les autres pages de contenu (`e2e/locale-routing.spec.ts` étendu).
 - P19 **Contenu légal.** Le catalogue final ne contient aucune marque hors liste blanche ; le pied de page contient « chiffres du jeu ».
@@ -501,7 +507,7 @@ Chaque scénario part d'une page vierge, stockage local vidé, sauf mention cont
 - P23 **Point d'entrée, goulot rétention.** Sur `/r/sample` rendu avec un goulot rétention (fixture de résultat dédiée, comme `CREATED_ID` pour le stub de soumission), l'encart `game-entry` est présent sous `priority-move` et avant `take-again-cta`, avec le lien `/{locale}/game/retention?from=result` ; le clic émet `game_entry_clicked/result/retention` puis ouvre le niveau, dont la page lit `from=result` sans le laisser dans l'URL partagée.
 - P24 **Point d'entrée, autre goulot.** Sur un résultat dont le goulot est l'acquisition, aucun encart `game-entry` ; idem sur un board « level ».
 - P25 **Deep dive.** Sur un résultat avec Deep dive et goulot rétention, l'encart est présent une seule fois, sous l'action prioritaire, avec la variante de texte du Deep dive.
-- P26 **Prévisualisation.** `/fr/game?game=preview` pose le cookie `tdg_game_preview` ; `/fr/game?game=off` l'efface. La CI tourne drapeau ouvert (`GAME_ENABLED: "true"` au niveau du workflow, comme `NEXT_PUBLIC_GOATCOUNTER_CODE`) : l'état fermé est couvert par la série G, pas en bout en bout.
+- P26 **Prévisualisation.** `/fr/game?game=preview` ne pose aucun cookie ; `/admin/preview` pose et efface le cookie signé `tdg_game_preview`. La CI tourne drapeau ouvert (`GAME_ENABLED: "true"` au niveau du workflow, comme `NEXT_PUBLIC_GOATCOUNTER_CODE`) : l'état fermé est couvert par la série G, pas en bout en bout.
 - P27 **Pied de page et sitemap.** Drapeau ouvert au build, le pied de page porte le lien vers `/{locale}/game` et le sitemap liste `/game` et `/game/retention` dans les deux langues ; un test unitaire sur `sitemap.ts` vérifie l'absence des deux entrées quand le drapeau est fermé au build.
 
 ### 7.3 Recette manuelle avant lancement, par Antoine
@@ -613,12 +619,12 @@ Le moteur est pur : des fonctions `(state, action) → state` sans DOM ni React.
 
 ### 9.6 Analytique
 
-Événements GoatCounter, déclarés dans `src/lib/game/events.ts` et ajoutés à `ALL_PATHS` de `goatcounter-api.ts` : `game_entry_clicked/{result|deep_dive}/{pillar}`, `game_entry_clicked/{footer|hub}`, `game_started/{level}/{from}`, `game_hangup/{q}`, `game_voice/{mood}`, `game_quarter/{q}`, `game_order/{obeyed|refused}`, `game_ending/{endingId}`, `game_catalogue_open`, `game_replay`, `game_share`. Les indicateurs de 2.3 se lisent dans GoatCounter et dans le dashboard admin existant, qui gagne une ligne « entrées dans le jeu » par origine.
+Événements GoatCounter, déclarés dans `src/lib/game/events.ts` et ajoutés à `ALL_PATHS` de `goatcounter-api.ts` : `game_entry_clicked/{result|deep_dive}/{pillar}`, `game_entry_clicked/{footer|hub}`, `game_started/{level}/{from}` (`from` vaut `direct`, `result`, `deep_dive` ou `hub`, émis au montage d'une année neuve, jamais d'une année reprise — E13), `game_hangup/{q}`, `game_voice/{mood}`, `game_quarter/{q}`, `game_order/{obeyed|refused}`, `game_ending/{endingId}`, `game_resume/{resume|restart}` (réponse à « Reprendre ? », ajout 1.2), `game_catalogue_open`, `game_replay`, `game_share`, `game_tour_loop` (clic sur « Où en est ta croissance ? », ajout 1.2). Les indicateurs de 2.3 se lisent dans GoatCounter et dans le dashboard admin existant, qui gagne une ligne « entrées dans le jeu » par origine.
 
 ### 9.7 Accessibilité
 
 - Cartes en `<button aria-pressed>`, focus visible avec les styles de `core/Button`, ordre de tabulation naturel.
-- Dashboard et journal en `aria-live="polite"`. La visio annonce le message une seule fois.
+- ~~Dashboard et journal en `aria-live="polite"`.~~ Une seule région vivante pour tout le niveau (E5, section 15) : elle dit la fin de chaque trimestre en une phrase, le message du DG une fois à l'ouverture de la visio, et le nouveau nombre de clics quand une carte cochée le change. Ni le dashboard, ni le journal, ni la pastille des clics n'ont leur propre `aria-live` dans le niveau. La visio annonce le message une seule fois.
 - Sous-titres toujours affichés ; la voix est un plus.
 - `prefers-reduced-motion` : pas de machine à écrire, pas d'animation de bouche, pas de défilement doux (utiliser les tokens de `motion.css`).
 - Contraste AA sur les deux mondes, couleur jamais seule porteuse d'information.
@@ -634,9 +640,9 @@ Le moteur est pur : des fonctions `(state, action) → state` sans DOM ni React.
 
 Le jeu introduit un monde visuel que le système actuel n'a pas : un fond nuit pour le dashboard, la visio et les cartes, puis le retour au papier pour décembre. Le prototype utilise ses propres couleurs et polices comme stand-in. Pour l'implémentation :
 
-- Rédiger `design/DS-EXTENSION-BRIEF-04.md` pour Claude Design, dans le format des briefs précédents : les composants (VideoCall, DgFace, tuile de dashboard avec variante floutée, ActionCard avec badge d'ordre, PhoneMock, QuarterReport, EndingHero, Sparkline, PatternCatalogue), les deux mondes, les humeurs du DG, mobile 390 et desktop 1280, les deux langues.
+- *(Remplacé en 1.2, E14 : le design a été fait en session, dans le plan d'implémentation, et non par un brief à Claude Design ; les jetons nuit sont ceux du design system v3, et ceux propres au jeu vivent dans `src/styles/tokens/game.css`.)* ~~Rédiger `design/DS-EXTENSION-BRIEF-04.md` pour Claude Design, dans le format des briefs précédents :~~ les composants (VideoCall, DgFace, tuile de dashboard avec variante floutée, ActionCard avec badge d'ordre, PhoneMock, QuarterReport, EndingHero, Sparkline, PatternCatalogue), les deux mondes, les humeurs du DG, mobile 390 et desktop 1280, les deux langues.
 - Les nouveaux tokens (surfaces « nuit », accent ambre du dashboard, corail et vert des états) entrent dans `tokens/*.css` par ce brief, jamais en hexadécimal inline.
-- Le flou des tuiles cachées est un `filter: blur(6px)` avec opacité réduite : on doit voir qu'il y a quelque chose qu'on ne montre pas.
+- Le flou des tuiles cachées est un `filter: blur(6px)` avec opacité réduite : on doit voir qu'il y a quelque chose qu'on ne montre pas. *(1.2 : ces deux valeurs sont les jetons `--viz-hidden-blur` et `--viz-hidden-opacity` de `tokens/shape.css`, lus par la tuile `StatTile` elle-même ; la tuile ne porte jamais de texte flouté, mais un leurre en formes, pour que rien ne se copie ni ne se lise au lecteur d'écran.)*
 - La maquette du téléphone est un vrai écran d'appli, blanc, avec son mini système propre, isolé dans son composant.
 
 ### 9.10 Où vivent les fichiers de ce brief
@@ -738,10 +744,12 @@ Ajouté en version 1.1 à la demande d'Antoine : pouvoir ouvrir et fermer la fea
 
 ### 13.1 Le drapeau
 
+ *(Mise à jour 2026-09-25 : l'aperçu est au propriétaire seul. `?game=preview` était public — écrit dans ce dépôt public — et il est désormais inerte. Le cookie `tdg_game_preview` vaut une signature HMAC-SHA256 sous `ADMIN_DASHBOARD_PASSWORD`, posée uniquement par `POST /admin/preview` derrière la Basic Auth ; `src/lib/owner-preview.ts` la vérifie, et `resolveGameAccess({ env, ownerPreview })` reçoit le verdict.)*
+
 - **Variable** : `GAME_ENABLED`, côté serveur, jamais `NEXT_PUBLIC_`. Ouvert si sa valeur est exactement `"true"`, fermé sinon, fermé si elle est absente. Documentée dans `.env.local.example`, dans le bloc optionnel, sur le modèle de `METRICS_PAGE_ENABLED`.
-- **Lue à chaque requête**, donc basculable dans l'hébergeur sans redéploiement pour tout ce qui est servi dynamiquement (les routes via le proxy, la page de résultat). Ce qui est décidé au build, sitemap, hreflang, lien de pied de page, suit la valeur du drapeau **au moment du build** : ouvrir la feature pour de bon, c'est poser la variable puis redéployer.
+- **Lue à chaque requête** pour tout ce qui est servi dynamiquement (les routes via le proxy, la page de résultat), ce qui permet au cookie de prévisualisation de jouer requête par requête. Ce qui est décidé au build, sitemap, hreflang, lien de pied de page, suit la valeur du drapeau **au moment du build**. **Sur Vercel, toute modification de la variable exige un redéploiement**, dans un sens comme dans l'autre : une variable modifiée n'atteint que les nouveaux déploiements, le déploiement en cours garde sa valeur. Ouvrir la feature, ou la fermer en urgence, c'est donc poser la variable puis redéployer — et ce redéploiement déplace ensemble les lecteurs par requête et ceux du build. *(Corrigé le 2026-09-25 : la version 1.1 disait « basculable sans redéploiement », ce qui est faux sur Vercel.)*
 - **Prévisualisation** : `?game=preview` sur n'importe quelle URL pose un cookie `tdg_game_preview=1` (HttpOnly, SameSite Lax, un an) dans le proxy, comme `?lang=` pose le cookie de langue, avec la même astuce de réécriture de l'en-tête Cookie entrant pour que la requête courante en profite. Avec ce cookie, tout se comporte comme si le drapeau était ouvert : routes, encart de résultat, hub. `?game=off` efface le cookie. Le cookie ne vaut que pour le navigateur qui l'a posé : c'est la façon dont Antoine teste en production pendant que le jeu reste fermé pour tout le monde.
-- **Résolveur pur** : `resolveGameAccess({ env, cookie }): "open" | "closed"` dans `src/lib/game/access.ts`, sans dépendance à Next.js, comme `resolveLocale`. Le proxy et la page de résultat l'appellent ; personne ne relit `process.env` ailleurs.
+- **Résolveur pur** : `resolveGameAccess({ env, cookie }): "open" | "closed"` dans `src/lib/game/access.ts`, sans dépendance à Next.js, comme `resolveLocale`. Le proxy et la page de résultat l'appellent à chaque requête, `lib/game/build-flag.ts` au build sans cookie ; le seul autre lecteur de `process.env.GAME_ENABLED` est `next.config.mjs`, qui en dérive `TDG_GAME_OPEN_AT_BUILD` pour le pied de page.
 
 ### 13.2 Ce que « fermé » veut dire
 
@@ -760,7 +768,7 @@ Aucune donnée n'est jamais écrite : fermer la feature ne perd rien pour person
 **A · La fin du Tour, sur la page de résultat.** C'est le point d'entrée principal, contextuel.
 
 - **Condition** : le goulot principal (`bottleneck.pillars[0]`, jamais `weakestPillar`, pour la même raison que le partage) est un pilier qui a un niveau dans `GAME_LEVELS_BY_PILLAR` et l'accès est ouvert. Au lancement, seule la rétention y figure : quatre lecteurs sur cinq ne voient rien, c'est voulu. Un board « level », où aucun pilier ne se détache, n'affiche rien.
-- **Place** : sous le bloc « Prochaine action » (`priority-move`) et son appel au Deep dive, avant « Refaire le Tour » (`take-again-cta`). Jamais au-dessus du partage ni du Deep dive, qui sont le cœur de la boucle. Un encart secondaire, avec le style d'une carte d'aperçu et non d'un bouton principal ; le composant s'appelle `GameEntry`, `data-testid="game-entry"`.
+- **Place** : sous le bloc « Prochaine action » (`priority-move`) et son appel au Deep dive, avant « Refaire le Tour » (`take-again-cta`). Jamais au-dessus du partage ni du Deep dive, qui sont le cœur de la boucle. *(1.2, E12 : ces deux règles sont incompatibles sur mobile depuis l'extension 03 du design system, où la carte de partage vient après la rangée de boutons. Tranché : sur desktop, colonne de droite entre « Là où tu perds du temps » et la rangée de boutons ; sur mobile, juste après la carte de partage. Voir section 15.)* Un encart secondaire, avec le style d'une carte d'aperçu et non d'un bouton principal ; le composant s'appelle `GameEntry`, `data-testid="game-entry"`.
 - **Lien** : `/{locale}/game/retention?from=result`. La page du niveau lit `from`, émet `game_started/retention/result`, puis retire le paramètre de l'URL pour que le lien partagé reste propre.
 - **Texte**, à relire par Antoine avant toute mise en ligne, marqué « à relire » dans le module :
   - FR, titre : « Le côté obscur de la rétention ». Corps : « Tu sais maintenant quoi faire. Voici ce qu'il ne faut pas faire : joue une année comme PM growth d'une appli de streaming, un DG qui veut du chiffre, et huit astuces que tu reconnaîtras ensuite partout. » Bouton : « Jouer le niveau « S'ils reviennent » ». Mention : « vingt minutes, gratuit ».
@@ -799,3 +807,66 @@ Série G en 7.1, scénarios P23 à P27 en 7.2. La CI tourne drapeau ouvert ; l'�
 - Bad News : https://www.getbadnews.com/ · Cranky Uncle : https://crankyuncle.com/
 - Résiliation en trois clics : https://www.donneespersonnelles.fr/resiliation-en-trois-clics
 - Digital Fairness Act : https://digitalfairnessact.com/
+
+---
+
+## 15. Ce que l'implémentation a tranché (version 1.2)
+
+Ajouté en version 1.2, une fois le niveau 1 construit derrière le drapeau. Rien ici ne rouvre une décision de la section 4 : ce sont des écarts à la lettre du brief, chacun avec sa raison, et ce que le code a dû fixer que le brief laissait ouvert. Là où un paragraphe plus haut contredisait cette section, il a été corrigé en place et le signale.
+
+### 15.1 Les seize écarts assumés
+
+| # | Écart | Raison |
+|---|---|---|
+| E1 | Après « Lancer », le rapport du trimestre s'affiche d'abord, seul ; puis « Le DG t'appelle », un seul bouton, « Décrocher » ; puis la visio. | Dans le prototype, le rapport était enfoui sous la main suivante : le moment de lecture n'existait pas. La règle 4 tient : visio ouverte, cartes verrouillées. |
+| E2 | Les sous-titres du DG sont dans un bandeau sous l'image. | Posés sur l'image, ils descendaient sous le seuil de contraste (mesuré). |
+| E3 | Toute la copie du niveau est résolue côté serveur, dans la langue de la page, et passée à l'îlot en un seul objet. L'îlot n'importe jamais `content/game`. | Une langue expédiée au navigateur au lieu de deux, aucune fonction de gabarit côté client ; la garde C7 est plus stricte que le 9.8. |
+| E4 | Le journal de l'année est structuré (une entrée par trimestre) et non une liste de phrases figées. | Sans ça, changer de langue en cours d'année laissait le journal dans l'ancienne (P18 aurait été faux). |
+| E5 | Une seule région vivante pour le niveau ; ni le dashboard, ni le journal, ni la pastille des clics ne sont en `aria-live`. | Six tuiles sur trois mois animés feraient une rafale d'annonces, et deux régions qui répondent au même geste parlent l'une sur l'autre. La région dit la fin du trimestre en une phrase, le message du DG une fois, et le nouveau nombre de clics — dans les mots exacts de la pastille — quand une carte le change. La pastille garde son `aria-live` partout ailleurs que dans le niveau. |
+| E6 | Les composants de `components/game` n'importent aucune valeur de `lib/game`. | Ils restent réutilisables (encart du résultat, hub, synchronisation du design system) et la garde reste simple. |
+| E7 | Le monde nuit est celui du design system v3 ; deux couleurs d'état, toujours doublées d'un mot, au lieu de trois. | Le corail et le cramoisi du prototype sont indiscernables en deutéranopie. |
+| E8 | Le lien discret du téléphone est à 4,74:1, pas en dessous. | On n'enseigne pas l'obstruction en en fabriquant une vraie. |
+| E9 | Le téléphone est une figure de texte, sans faux boutons. | Des boutons qui ne font rien sont un piège au clavier et au lecteur d'écran. |
+| E10 | Changer de langue en cours de partie porte `?resume=1`, retiré aussitôt de l'adresse. | La partie continue sans la question « Reprendre ? », qui n'a pas lieu d'être après un simple changement de langue (P18). |
+| E11 | La légende « sous 40 » devient « à 35 ou moins », et le texte de l'« effet caché » est réécrit. | Le texte doit dire ce que fait le modèle : le fil viral part à 35 ou moins, et l'effet caché s'applique une seule fois, au choix de la carte. |
+| E12 | L'encart du résultat n'a pas la même place sur desktop et sur mobile. | Voir 15.4 : la section 13.3 est incompatible avec elle-même sur mobile depuis l'extension 03. |
+| E13 | `game_started/retention/<from>` est émis au montage d'une année neuve, jamais pour une année reprise. | Le 9.6 et P20 différaient sur la forme ; une année reprise n'est pas une année commencée. |
+| E14 | Le design du jeu a été fait en session, dans le plan d'implémentation, et non par un brief à Claude Design. | Décision de la phase 1 ; le 9.9 est remplacé. |
+| E15 | Les nombres sont formatés par un formateur maison et non par `toLocaleString`. | Même rendu serveur et navigateur (pas d'écart d'hydratation), et la typographie du dépôt (espace insécable U+00A0 avant « % »). |
+| E16 | Le message du T1 est prérendu en entier ; la machine à écrire ne joue qu'aux appels suivants. | Pas de flash au chargement, un premier écran lisible sans JavaScript ; P11 se vérifie sur le T2. |
+
+### 15.2 Les trois mondes, dans l'ordre de la page
+
+1. **Papier** : l'en-tête du site, l'introduction (« Une année chez Flixo », le chapeau, « Comment se joue une année »), la navigation des cinq zones. C'est la voix de Tour de Growth, la partie indexable, prérendue.
+2. **Nuit**, une bande pleine largeur : la frise des trimestres, le dashboard, puis le bureau — un seul emplacement qui tient la visio, le rapport ou la question « Reprendre ? », le téléphone et sa pastille à côté, la main et sa barre d'action dessous — et le journal. C'est le bureau de Flixo ; on y entre.
+3. **Papier**, en décembre : le titre tamponné, les cellules, les courbes, le playbook, le catalogue, le partage, le niveau suivant, la boucle vers le Tour. La vérité a la couleur du site.
+4. **Papier** : la note « chiffres du jeu » et le pied de page.
+
+Aucune transition de couleur au défilement. Le monde nuit rebinde chaque jeton sémantique du papier ; un jeton ajouté au papier sans sa valeur nuit fait échouer la compilation.
+
+### 15.3 Des écrans que le brief ne décrivait pas
+
+- **Derrière « Reprendre ? »**, le dashboard, la frise, le téléphone et le journal montrent l'année sauvegardée, telle que le joueur l'a laissée. Montrer n'est pas restaurer : l'année n'est rendue qu'au clic sur « Reprendre », et rien sur le bureau ne peut agir sur elle entre-temps (ni main, ni barre d'action).
+- **En décembre**, là où était la main : « Année terminée » ou « Année interrompue », et « Le bilan est en bas de page. » (le texte du prototype). Rien à lancer.
+- **Une année interrompue ne dit jamais « décembre »** là où ce serait faux : les tuiles révélées disent « révélée en juin », la cellule du bilan « Résiliations en juin ». Le mois est celui où l'année s'est close, lu dans l'historique.
+- **Le dernier rapport n'est pas rejouable** après un rechargement : une année sauvegardée après son dernier trimestre se rouvre sur décembre. Rien de ce que disait ce rapport n'est perdu : chaque entrée du journal porte les cartes jouées, leurs effets, les événements, la réplique du DG, et l'objectif du trimestre à côté du verdict ; les autres chiffres sont ceux du dashboard de décembre.
+- **L'indication de ce qui suit** (« Trois mois vont passer… ») n'est dite qu'une fois, par l'en-tête de la main, à toutes les largeurs. La barre d'action n'a pas de phrase à elle.
+- **Aucune indication « Choisis deux actions. » seule** : le brief ne la prévoyait à aucun écran, la clé a été retirée. Les trois indications restantes sont « le DG parle », « choisis-en deux » et « trois mois vont passer ».
+
+### 15.4 L'encart sur la page de résultat
+
+- **Condition** : l'accès est ouvert, le board n'est pas « level », et **l'un des piliers du goulot** a un niveau ouvert dans `GAME_LEVELS_BY_PILLAR`. Pour un goulot partagé, ce n'est donc pas seulement le premier du groupe dans l'ordre AARRR : si la rétention fait partie du lot qui freine, l'encart s'affiche. Lire `pillars[0]` seul aurait fait dépendre la décision de l'ordre de déclaration des piliers plutôt que des chiffres.
+- **Place** : sur desktop, dans la colonne de droite, entre « Là où tu perds du temps » et la rangée de boutons (la carte de partage est dans l'autre colonne, donc jamais sous l'encart) ; sur mobile, juste après la carte de partage. L'ordre de lecture des quatre variantes de la page est épinglé par un test.
+- **Visiteur ou propriétaire** : même règle ; un visiteur arrivé par un lien partagé à goulot rétention voit l'encart.
+- La mention « vingt minutes, gratuit » est une promesse à mesurer en recette (7.3) avant ouverture.
+
+### 15.5 Les images de partage
+
+Le hub et le niveau ont chacun leur image, une par langue, choisie par le segment de langue (un robot n'envoie pas de cookie). Next.js n'hérite pas d'une image d'un segment parent, d'où deux fichiers. L'image du niveau montre le titre au-dessus des trois tuiles du dashboard : les résiliations à leur chiffre de janvier, et la confiance et le radar comme deux blocs pleins « pas sur ton dashboard » — le moteur d'images ne sait pas flouter. Les deux images sont prérendues, et derrière le drapeau comme les pages : fermé, leur adresse répond 404.
+
+### 15.6 Ce que le drapeau veut dire, en pratique
+
+- `GAME_ENABLED` vaut `"true"` ou le jeu est fermé ; jamais exposé au navigateur ; seul un booléen dérivé au build (`TDG_GAME_OPEN_AT_BUILD`) l'est, pour le lien du pied de page.
+- **Chaque bascule exige un redéploiement Vercel**, dans un sens comme dans l'autre (13.1) : ouvrir, c'est poser la variable puis redéployer ; fermer en urgence aussi. Le redéploiement déplace ensemble ce qui se lit à la requête (routes, encart) et ce qui se décide au build (sitemap, hreflang, pied de page).
+- L'aperçu propriétaire (`/admin/preview`) ouvre tout pour un seul navigateur, « Refermer » referme ; c'est le moyen de tester en production pendant que le jeu reste fermé pour tous.
+- La CI tourne drapeau ouvert ; l'état fermé est couvert par les tests unitaires du résolveur et du proxy.
