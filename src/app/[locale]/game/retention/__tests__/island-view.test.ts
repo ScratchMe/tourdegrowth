@@ -303,7 +303,16 @@ describe("the clicks pill and the one live region", () => {
     renderToStaticMarkup(
       createElement(ClickPill, { clicks, overLaw: clicksOverLaw(clicks), labels: ctx.copy.clicks, announce }),
     );
-  const text = (html: string) => html.replace(/<[^>]+>/g, "");
+  // Stripped until nothing changes, so a tag split by another ("<<b>i>")
+  // cannot survive a single pass.
+  const text = (html: string) => {
+    let out = html;
+    for (let prev = ""; prev !== out; ) {
+      prev = out;
+      out = out.replace(/<[^>]*>/g, "");
+    }
+    return out;
+  };
 
   it("speaks for itself by default, and not when the island speaks for it", () => {
     const [ctx] = contexts;

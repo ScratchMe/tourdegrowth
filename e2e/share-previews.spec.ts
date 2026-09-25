@@ -15,12 +15,13 @@ import { SEARCH_DESCRIPTION_MAX, SEARCH_DESCRIPTION_MIN, SEARCH_TITLE_MAX } from
 function attr(html: string, pattern: RegExp): string | null {
   const raw = pattern.exec(html)?.[1];
   if (raw === undefined) return null;
+  // `&amp;` last: decoded first, it would turn a literal "&amp;lt;" into "<".
   return raw
     .replace(/&#x27;/g, "'")
     .replace(/&quot;/g, '"')
-    .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">");
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
 }
 
 const OG_IMAGE = /<meta property="og:image" content="([^"]*)"/;

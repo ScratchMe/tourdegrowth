@@ -108,10 +108,10 @@ const NETWORK = [
   /\bsendBeacon\b/,
   /\bWebSocket\b/,
   /\bEventSource\b/,
-  /<form[\s>]/,
+  /<form[\s>]/i,
   /\bnew\s+Image\s*\(/,
   /createElement\(\s*["'`](img|script|link|iframe)["'`]\s*\)/,
-  /<(img|script|iframe)[\s>/]/,
+  /<(img|script|iframe)[\s>/]/i,
   /\blocation\.(href|assign|replace)\b/,
   /\bwindow\.open\s*\(/,
 ];

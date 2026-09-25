@@ -238,7 +238,7 @@ describe("SPARKLINE_PX is what Sparkline.module.css and the tokens draw", () => 
   const spacing = read("src/styles/tokens/spacing.css");
   const type = read("src/styles/tokens/typography.css");
   const rule = (selector: string) => {
-    const escaped = selector.replace(/\./g, "\\.").replace(/ /g, "\\s+");
+    const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/ /g, "\\s+");
     const m = css.match(new RegExp(`(?:^|\\})\\s*${escaped}\\s*\\{([^}]*)\\}`));
     expect(m, `rule ${selector}`).not.toBeNull();
     return m![1]!;

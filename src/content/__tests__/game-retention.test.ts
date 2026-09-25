@@ -317,9 +317,14 @@ function placeholders(text: string): string[] {
   return sorted(new Set([...text.matchAll(PLACEHOLDER)].map((m) => m[1]!)));
 }
 
+/** Every regex metacharacter escaped, so a path pattern matches literally except its `*`. */
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function patternFor(path: string): string | undefined {
   return Object.keys(LEVEL_COPY_TEMPLATES).find((pattern) =>
-    new RegExp(`^${pattern.replace(/\./g, "\\.").replace(/\*/g, "[^.]+")}$`).test(path),
+    new RegExp(`^${escapeRegExp(pattern).replace(/\\\*/g, "[^.]+")}$`).test(path),
   );
 }
 
@@ -494,7 +499,7 @@ const NOT_FROM_PROTOTYPE: Record<string, string> = {
 
 function exceptionFor(path: string): string | undefined {
   return Object.keys(NOT_FROM_PROTOTYPE).find((pattern) =>
-    new RegExp(`^${pattern.replace(/\./g, "\\.").replace(/\*/g, ".+")}$`).test(path),
+    new RegExp(`^${escapeRegExp(pattern).replace(/\\\*/g, ".+")}$`).test(path),
   );
 }
 
