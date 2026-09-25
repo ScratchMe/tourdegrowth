@@ -1,29 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Button } from "@/components/core/Button";
 import { Tag } from "@/components/core/Tag";
 import { TextArea } from "@/components/core/TextArea";
-import { CANDIDATE_IDS, TEXT_LIMITS, shapeOf, type MetricShape } from "@/lib/engine/catalog-shape";
+import { CANDIDATE_IDS, TEXT_LIMITS, UNPRICED_CANDIDATES, shapeOf, type MetricShape } from "@/lib/engine/catalog-shape";
 import { BASIS_KEY, EFFORT_KEY, ROLE_KEY, STATUS_KEY, type ResolvedMetric } from "@/lib/engine/strings";
 import type { CandidateId, EstimateBasis, MetricId, RoleId } from "@/lib/engine/types";
-import {
-  blockingCheck,
-  comparatorOf,
-  formatInterval,
-  isImmature,
-  isStale,
-  knownOf,
-  nextMonth,
-} from "./engine-api";
+import { isImmature, nextMonth, windowDaysOf } from "@/lib/engine/cohort";
+import { comparatorOf } from "@/lib/engine/diagnose";
+import { formatInterval } from "@/lib/engine/format";
+import { whatIf } from "@/lib/engine/impact";
+import { isRequestStale } from "@/lib/engine/request";
+import { blockingCheck } from "@/lib/engine/sanity";
+import { knownIn } from "@/lib/engine/values";
 import { ComparisonStrip } from "./ComparisonStrip";
 import { MissingTriage } from "./MissingTriage";
 import { RequestCopy } from "./RequestCopy";
 import { draftFromEntry, entryFromDraft, isWideRange, type DraftProblem, type SheetDraft, type SheetMode } from "./sheet-draft";
 import { isRule, missingLabel, ruleMessage } from "./sheet-problems";
 import { currencySymbol } from "./sources";
-import { catalogFill, daysBetween, domId, fill, formatMonth, joinList, metricById, midSentence, sourceLabel, windowDaysOf } from "./text";
+import { catalogFill, daysBetween, domId, fill, formatMonth, joinList, metricById, midSentence, sourceLabel } from "./text";
 import { ValueEditor } from "./ValueEditor";
+import { WhatIf } from "./WhatIf";
 import type { EngineActions, EngineView } from "./view";
 import { Choices } from "./_ui/Choices";
 import { describedBy, Field } from "./_ui/Field";
@@ -70,7 +69,9 @@ export function MetricSheet({ id, view, actions }: { id: MetricId; view: EngineV
 
   const [draft, setDraft] = useState<SheetDraft>(() => draftFromEntry(entry, shape));
   const [attempted, setAttempted] = useState(false);
-  const [outcome, setOutcome] = useState<"saved" | "quota" | "unavailable" | null>(null);
+  // Every refusal reads the same to the person — the device kept nothing, save a file — whether
+  // it was the quota, storage switched off, or a store another tab left unreadable.
+  const [outcome, setOutcome] = useState<"saved" | "failed" | null>(null);
   const [whereOpen, setWhereOpen] = useState(!entry || entry.status === "todo");
   const update = (patch: Partial<SheetDraft>) => {
     setDraft((current) => ({ ...current, ...patch }));
@@ -90,10 +91,11 @@ export function MetricSheet({ id, view, actions }: { id: MetricId; view: EngineV
     // (more of the part than of the whole) must block here and in an import.
     if (!built.entry || blockingCheck(built.entry, shape)) return;
     const result = actions.saveEntry(id, built.entry);
-    setOutcome(result.ok ? "saved" : result.error);
+    setOutcome(result.ok ? "saved" : "failed");
   }
 
-  const windowDays = windowDaysOf(shape.window, state);
+  // null, not 0, when the definition has no window: the sheet then prints no cohort line at all.
+  const windowDays = shape.window ? windowDaysOf(shape, state.setup) : null;
   const variantLabel = metric.variants?.find((v) => v.id === (entry?.variant ?? draft.variant))?.label;
   const fillCatalog = (text: string) => catalogFill(text, { state, locale, strings, metrics: view.metrics, windowDays, variantLabel });
   // The count labels carry the same placeholders as the formula ({n},
@@ -114,8 +116,17 @@ export function MetricSheet({ id, view, actions }: { id: MetricId; view: EngineV
 
   const eventMeasured = snapshot.metrics["act.event"]?.status === "measured";
   const isCandidate = (CANDIDATE_IDS as readonly MetricId[]).includes(id);
-  const known = knownOf(entry, shape, ctx);
+  // knownIn grades a cohort number entered on an immature month as approximate (§6.3),
+  // exactly as the board row and the peloton read it — one number, one reading.
+  const known = knownIn(state, id, ctx);
   const comparator = isCandidate ? comparatorOf(state, id as CandidateId) : undefined;
+  const whatIfOn = isCandidate && !UNPRICED_CANDIDATES.includes(id as CandidateId);
+  // Stable across renders: WhatIf recomputes in a memo keyed on this function, so a new
+  // function on every render would recompute the chain on every keystroke elsewhere.
+  const computeWhatIf = useCallback(
+    (target: number) => whatIf(state, id as CandidateId, target, ctx, strings.units),
+    [state, id, ctx, strings.units],
+  );
   const position = isCandidate ? view.derived.diagnosis.positions[id as CandidateId]?.position : undefined;
   const target = snapshot.targets[id];
   const bench = shape.benchmark;
@@ -143,7 +154,7 @@ export function MetricSheet({ id, view, actions }: { id: MetricId; view: EngineV
   const declared = bridge && answerIndex !== undefined ? bridge.options[answerIndex] : undefined;
 
   const requestedAt = entry?.request?.remindedAt ?? entry?.request?.requestedAt;
-  const stale = entry?.status === "requested" && requestedAt ? isStale(requestedAt, ctx.today) : false;
+  const stale = isRequestStale(entry, ctx.today);
 
   // "Also in Stripe: ARPA, churn" — the other numbers that sit in the same tool.
   const alsoIn = metric.where
@@ -311,7 +322,7 @@ export function MetricSheet({ id, view, actions }: { id: MetricId; view: EngineV
             <ul className={styles.whereList}>
               {metric.where.map((w) => (
                 <li key={`${w.label}-${w.path}`}>
-                  <span className={styles.whereSource}>{sourceLabel(w.source, strings) ?? w.label}</span>
+                  <span className={styles.whereSource}>{sourceLabel(w.source, strings) || w.label}</span>
                   {w.label && w.label !== sourceLabel(w.source, strings) ? <span> · {w.label}</span> : null}
                   <span className={styles.wherePath}>{fillCatalog(w.path)}</span>
                 </li>
@@ -369,8 +380,21 @@ export function MetricSheet({ id, view, actions }: { id: MetricId; view: EngineV
         </div>
       ) : null}
 
-      {/* P5 SLOT — "What if" (§6.7, ★ only, once a comparator exists). P7 mounts WhatIf.tsx here. */}
-      {shape.primary && comparator ? <div data-engine-slot="what-if" /> : null}
+      {/* "What if" (§6.7): once a comparator exists and the value is known — the chain starts
+          from today's number. Only where the engine can price a change: day-30 retention and the
+          referred share have no chain (UNPRICED_CANDIDATES), so a slider there would move and say
+          nothing. Churn is the priced lever of the Retention stage, so it gets one too. */}
+      {whatIfOn && comparator && known.kind === "known" ? (
+        <WhatIf
+          metric={id as CandidateId}
+          strings={strings}
+          locale={locale}
+          from={known.value}
+          comparator={comparator}
+          stageName={strings.subject[id as CandidateId]}
+          compute={computeWhatIf}
+        />
+      ) : null}
 
       {declared ? (
         <p className={styles.declared} data-testid="engine-declared">
@@ -416,7 +440,7 @@ export function MetricSheet({ id, view, actions }: { id: MetricId; view: EngineV
             {ruleMessage(p, filledMetric, strings, locale)}
           </p>
         ))}
-      {outcome === "quota" || outcome === "unavailable" ? (
+      {outcome === "failed" ? (
         <p className={ui.error} role="alert">
           {strings.storage.writeFailed}
         </p>

@@ -1,4 +1,4 @@
-import type { EngineStrings, ResolvedBridge, ResolvedMetric } from "@/lib/engine/strings";
+import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
 import type { EngineCalcContext, EngineDerived, EngineState, MetricEntry, MetricId, RoleId } from "@/lib/engine/types";
 import type { StoredResult } from "@/lib/quiz/storage";
 import type { CommitResult } from "./engine-store";
@@ -15,10 +15,17 @@ export interface EngineView {
   derived: EngineDerived;
   strings: EngineStrings;
   metrics: ResolvedMetric[];
+  /** The three computed figures' prose (§5.7) — the mirror names a derived figure when a bridge points at one. */
+  derivedCopy: ResolvedDerived[];
   bridges: ResolvedBridge[];
   ctx: EngineCalcContext;
   /** The Tour result the engine is linked to, when it is still on this device (D13: read, never copied). */
   tourResult: StoredResult | null;
+  /**
+   * A Tour with answers is on this device, linked or not. Without one the board invites to take
+   * the Tour (§8.5); with one the person chose not to link, the board says nothing about it.
+   */
+  tourOnDevice: boolean;
 }
 
 /** Every write a screen can ask for. Each one stamps `updatedAt` and goes through the store's `commit`. */

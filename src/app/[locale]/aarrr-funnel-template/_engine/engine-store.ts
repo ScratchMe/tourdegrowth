@@ -1,6 +1,6 @@
+import { clearEngine, loadEngine, saveEngine, type LoadResult, type SaveResult } from "@/lib/engine/storage";
 import type { EngineState } from "@/lib/engine/types";
 import { loadStoredResults, type StoredResult } from "@/lib/quiz/storage";
-import { clearEngine, loadEngine, saveEngine, type LoadResult } from "./engine-api";
 
 /**
  * The engine's one source of truth on this device, read through
@@ -65,14 +65,24 @@ export function getServerSnapshot(): null {
   return null;
 }
 
-export type CommitResult = { ok: true } | { ok: false; error: "quota" | "unavailable" };
+/**
+ * What a write says: done, or why not. `unreadable` is the storage module's
+ * refusal to overwrite a store it cannot read (corrupt, or written by a newer
+ * version) — the only copy of someone's engine must not be flattened by a
+ * save nobody confirmed.
+ */
+export type CommitResult = SaveResult;
 
 /**
  * Writes the state and keeps it on screen whatever the device says.
  * `fresh` for an engine that did not exist a moment ago (setup, import): it
  * has no "last visit", so the resume band must not greet it.
+ * `replace` when the person has just confirmed that this engine takes the
+ * device's place (an import opened over an unreadable store): the store is
+ * cleared first, which is the one way past `saveEngine`'s refusal.
  */
-export function commit(state: EngineState, options: { fresh?: boolean } = {}): CommitResult {
+export function commit(state: EngineState, options: { fresh?: boolean; replace?: boolean } = {}): CommitResult {
+  if (options.replace) clearEngine();
   const current = getClientSnapshot();
   snapshot = { ...current, result: { kind: "ok", state }, returningFrom: options.fresh ? null : current.returningFrom };
   notify();

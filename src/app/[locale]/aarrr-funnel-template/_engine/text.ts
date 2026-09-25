@@ -1,17 +1,20 @@
+import { fillTemplate, formatDay, formatMonth } from "@/lib/engine/format";
 import type { EngineStrings, ResolvedMetric } from "@/lib/engine/strings";
-import type { EngineState, MetricId, SourceRef, YearMonth } from "@/lib/engine/types";
+import type { EngineState, MetricId } from "@/lib/engine/types";
 import type { Pillar } from "@/lib/scoring/pillars";
 
 /**
  * Small text helpers of the collection screens. None of them writes a word
  * of copy: every word arrives resolved in props, these only put formatted
  * values into the `{name}` slots the copy already has.
+ *
+ * What the pure engine already formats is RE-EXPORTED from it rather than
+ * rewritten here — the placeholder filler, the month, the list, a source's
+ * label — so the board, the sheet and the slides cannot print the same
+ * thing two ways (`lib/engine/format.ts`, the "honesty line").
  */
-
-/** Fills `{name}` placeholders. An unknown placeholder is left as is, so a missing value shows instead of vanishing. */
-export function fill(template: string, values: Readonly<Record<string, string | number>>): string {
-  return template.replace(/\{(\w+)\}/g, (whole, name: string) => (name in values ? String(values[name]) : whole));
-}
+export { fillTemplate as fill, formatMonth, joinList } from "@/lib/engine/format";
+export { sourceLabel } from "@/lib/engine/deck";
 
 /**
  * Splits a template's `**…**` accent (engine-copy.ts conventions) into plain
@@ -30,23 +33,14 @@ export function stageName(stage: Pillar): string {
   return stage.charAt(0).toUpperCase() + stage.slice(1);
 }
 
-function monthDate(m: YearMonth): Date {
-  const [y, mo] = m.split("-").map(Number);
-  return new Date(Date.UTC(y!, mo! - 1, 1));
-}
-
-/** "juillet 2026" / "July 2026". UTC on both sides, so a month never slips a day at a time-zone edge. */
-export function formatMonth(m: YearMonth, locale: "en" | "fr"): string {
-  return new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-GB", { month: "long", year: "numeric", timeZone: "UTC" }).format(
-    monthDate(m),
-  );
-}
-
-/** A calendar date for "last saved" and the Tour's date — the reader's day, not UTC. */
+/**
+ * A calendar date for "last saved" and the Tour's date, from a stored ISO
+ * instant. The engine's own day formatter does the formatting; this only
+ * refuses to print "Invalid Date" for a string the store could not parse.
+ */
 export function formatDate(iso: string, locale: "en" | "fr"): string {
   const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  return new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-GB", { day: "numeric", month: "long", year: "numeric" }).format(d);
+  return Number.isNaN(d.getTime()) ? iso : formatDay(d, locale);
 }
 
 /** Whole days between two instants, never negative (a clock set ahead reads as "today"). */
@@ -72,14 +66,6 @@ export function midSentence(label: string, locale: "en" | "fr"): string {
   return label.charAt(0).toLowerCase() + label.slice(1);
 }
 
-/** Which window, in days, is part of a metric's definition (setup's activation or payment window, or a fixed 30). */
-export function windowDaysOf(window: "activation" | "paid" | 30 | undefined, state: EngineState): number | null {
-  if (window === "activation") return state.setup.activationWindowDays;
-  if (window === "paid") return state.setup.paidWindowDays;
-  if (window === 30) return 30;
-  return null;
-}
-
 /**
  * The catalogue prose with its placeholders filled from the engine's own
  * setup: the flows' month, the followed cohort, the window, the user's
@@ -100,7 +86,7 @@ export function catalogFill(
   const event = snap.metrics["act.event"];
   const eventName = event?.value?.kind === "text" ? event.value.text : null;
   const eventMetric = context.metrics.find((m) => m.id === "act.event");
-  return fill(text, {
+  return fillTemplate(text, {
     month: formatMonth(snap.referenceMonth, context.locale),
     cohort: formatMonth(snap.cohortMonth, context.locale),
     ...(context.windowDays !== null ? { n: String(context.windowDays) } : {}),
@@ -113,14 +99,6 @@ export function catalogFill(
   });
 }
 
-/** A source for display: a tool's name, a role, or "other". */
-export function sourceLabel(source: SourceRef | undefined | null, strings: EngineStrings): string | null {
-  if (!source) return null;
-  if (source.kind === "tool") return strings.tools[source.tool];
-  if (source.kind === "person") return strings.role[source.role];
-  return strings.source.other;
-}
-
 export function metricById(metrics: ResolvedMetric[], id: MetricId): ResolvedMetric {
   const m = metrics.find((x) => x.id === id);
   if (!m) throw new Error(`The page did not resolve engine metric ${id}`);
@@ -130,10 +108,4 @@ export function metricById(metrics: ResolvedMetric[], id: MetricId): ResolvedMet
 /** A metric id as a DOM id: dots are legal in an id but not in a CSS selector, and tests select by id. */
 export function domId(id: string): string {
   return id.replace(/\./g, "-");
-}
-
-/** "a, b and c" / "a, b et c" — the copy's own separators, never a comma chosen here. */
-export function joinList(items: readonly string[], grammar: EngineStrings["grammar"]): string {
-  if (items.length <= 1) return items[0] ?? "";
-  return `${items.slice(0, -1).join(grammar.listSeparator)}${grammar.and}${items[items.length - 1]}`;
 }

@@ -10,16 +10,13 @@ import type { Locale } from "@/lib/i18n/locale";
 import type { Pillar } from "@/lib/scoring/pillars";
 import { Board, type BoardTab } from "./_engine/Board";
 import { collectPlan } from "./_engine/collect";
-import {
-  buildDeck,
-  deriveEngine,
-  engineFileName,
-  latestTourWithAnswers,
-  markRequested,
-  newEngineState,
-  requestPersistence,
-  serializeEngine,
-} from "./_engine/engine-api";
+import { latestTourWithAnswers } from "@/lib/engine/bridge";
+import { pelotonTitle } from "@/lib/engine/deck";
+import { deriveEngine } from "@/lib/engine/derive";
+import { engineFileName, serializeEngine } from "@/lib/engine/io";
+import { markReminded, markRequested } from "@/lib/engine/request";
+import { requestPersistence } from "@/lib/engine/storage";
+import { newEngineState } from "@/lib/engine/validate";
 import { trackEngine } from "./_engine/engine-events";
 import { commit, erase, getClientSnapshot, getServerSnapshot, subscribe, type CommitResult } from "./_engine/engine-store";
 import { EraseDialog } from "./_engine/EraseDialog";
@@ -95,7 +92,7 @@ function download(text: string, fileName: string) {
  * screens (R-19): to the verdict on entering the board, to a drawer's title
  * when a row opens, back to the row when it closes — never on first paint.
  */
-export function EngineWorkbench({ locale, strings, metrics, bridges }: EngineWorkbenchProps) {
+export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy, bridges }: EngineWorkbenchProps) {
   const snap = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
   const [screen, setScreen] = useState<Screen>("board");
   const [tab, setTab] = useState<BoardTab>("engine");
@@ -123,18 +120,21 @@ export function EngineWorkbench({ locale, strings, metrics, bridges }: EngineWor
     if (!state || !openedAt) return null;
     const ctx = { today: new Date(openedAt), locale };
     const tourResult = state.tourLink ? (tourResults?.find((r) => r.id === state.tourLink?.resultId) ?? null) : null;
-    const derived = deriveEngine(state, ctx, tourResult, bridges);
-    const deck = buildDeck(state, derived, strings, metrics, ctx);
+    const derived = deriveEngine(state, ctx, tourResult, bridges, strings.units);
+    // The board's title is the peloton slide's title, from the same function (§7 E2, §9.3):
+    // the screen and the slide cannot word one engine two ways.
+    const verdict = pelotonTitle(state, derived.peloton, strings, metrics, ctx);
     const plan = collectPlan(lastSnapshot(state), ctx.today);
-    const view: EngineView = { state, derived, strings, metrics, bridges, ctx, tourResult };
-    return { view, deck, plan };
-  }, [state, openedAt, tourResults, locale, bridges, strings, metrics]);
+    const tourOnDevice = latestTourWithAnswers(tourResults ?? []) !== null;
+    const view: EngineView = { state, derived, strings, metrics, derivedCopy, bridges, ctx, tourResult, tourOnDevice };
+    return { view, verdict, plan };
+  }, [state, openedAt, tourResults, locale, bridges, strings, metrics, derivedCopy]);
 
   const focus = (id: string) => setFocusRequest((current) => ({ id, n: (current?.n ?? 0) + 1 }));
 
-  function persist(next: EngineState, options: { fresh?: boolean; stamp?: boolean } = {}): CommitResult {
+  function persist(next: EngineState, options: { fresh?: boolean; stamp?: boolean; replace?: boolean } = {}): CommitResult {
     const stamped = options.stamp === false ? next : { ...next, updatedAt: new Date().toISOString() };
-    const result = commit(stamped, { fresh: options.fresh });
+    const result = commit(stamped, { fresh: options.fresh, replace: options.replace });
     setWriteFailed(!result.ok);
     if (result.ok && !persistenceAsked) {
       persistenceAsked = true;
@@ -167,7 +167,9 @@ export function EngineWorkbench({ locale, strings, metrics, bridges }: EngineWor
           locale={locale}
           hasEngine={false}
           onOpen={(imported) => {
-            persist(imported, { fresh: true, stamp: false });
+            // Over an unreadable store the device refuses to write (it will not overwrite what it
+            // can't read). Choosing a file here IS the confirmed way past it, so clear first.
+            persist(imported, { fresh: true, stamp: false, replace: snap.result.kind === "unreadable" });
             openBoard();
           }}
           onCancel={() => setScreen("board")}
@@ -218,9 +220,14 @@ export function EngineWorkbench({ locale, strings, metrics, bridges }: EngineWor
         }}
         onStart={(choice: SetupChoice) => {
           const nowIso = new Date().toISOString();
-          const created = newEngineState(choice.setup, nowIso);
+          // The months the setup screen SHOWED, not the engine's fallback: the two can
+          // differ around midnight, and the person chose what they saw.
+          const created = newEngineState(choice.setup, nowIso, {
+            referenceMonth: choice.referenceMonth,
+            cohortMonth: choice.cohortMonth,
+          });
           const next: EngineState = {
-            ...withSnapshot(created, (s) => ({ ...s, referenceMonth: choice.referenceMonth, cohortMonth: choice.cohortMonth })),
+            ...created,
             tourLink: choice.tourResultId ? { resultId: choice.tourResultId, linkedAt: nowIso } : null,
           };
           persist(next, { fresh: true, stamp: false });
@@ -231,7 +238,7 @@ export function EngineWorkbench({ locale, strings, metrics, bridges }: EngineWor
     );
   }
 
-  const { view, deck, plan } = computed;
+  const { view, verdict, plan } = computed;
   const current = state;
 
   const actions: EngineActions = {
@@ -258,17 +265,7 @@ export function EngineWorkbench({ locale, strings, metrics, bridges }: EngineWor
       persist(withSnapshot(current, (s) => markRequested(s, ids, role, new Date().toISOString())));
     },
     markReminded(ids: MetricId[]) {
-      const nowIso = new Date().toISOString();
-      persist(
-        withSnapshot(current, (s) => {
-          const metrics = { ...s.metrics };
-          for (const id of ids) {
-            const entry = metrics[id];
-            if (entry?.request) metrics[id] = { ...entry, request: { ...entry.request, remindedAt: nowIso }, updatedAt: nowIso };
-          }
-          return { ...s, metrics };
-        }),
-      );
+      persist(withSnapshot(current, (s) => markReminded(s, ids, new Date().toISOString())));
     },
     openMetric(id: MetricId) {
       setScreen("board");
@@ -326,7 +323,17 @@ export function EngineWorkbench({ locale, strings, metrics, bridges }: EngineWor
         <h2 id="engine-deck-title" className={screens.panelTitle} tabIndex={-1}>
           {strings.deck.title}
         </h2>
-        {/* P6 SLOT — DeckView (§7 E5): thumbnails, the "ask" form, PNG/PDF/text exports. P7 mounts it here. */}
+        {/*
+          P6 SLOT — DeckView (§7 E5): thumbnails, the "ask" form, PNG/PDF/text exports.
+          Not built here. Whoever mounts it replaces this div and passes, from this component:
+            locale, strings, metrics, derivedCopy, bridges, state (= current), derived (= view.derived),
+            model = buildDeck(current, view.derived, strings, metrics, view.ctx)   — lib/engine/deck.ts
+            markdown = deckMarkdown(model, strings)                                 — lib/engine/deck.ts
+            onDeckChange(deck) => persist({ ...current, deck })
+            onBack = openBoard, onSaveJson = exportJson,
+            onExported(kind) => trackEngine({ name: "engine_exported", detail: kind })
+          html-to-image stays a dynamic import inside DeckView (never in this island's first chunk).
+        */}
         <div data-engine-slot="deck" />
         <div className={screens.panelActions}>
           <Button variant="secondary" onClick={openBoard} data-testid="engine-deck-back">
@@ -336,8 +343,6 @@ export function EngineWorkbench({ locale, strings, metrics, bridges }: EngineWor
       </section>,
     );
   }
-
-  const verdict = deck.slides.find((slide) => slide.id === "peloton")?.title ?? { key: "pelotonEmpty" as const, values: {} };
 
   return shell(
     <Board

@@ -7,7 +7,7 @@ import { TEXT_LIMITS } from "@/lib/engine/catalog-shape";
 import type { EngineStrings } from "@/lib/engine/strings";
 import type { Currency, EngineSetup, YearMonth } from "@/lib/engine/types";
 import type { StoredResult } from "@/lib/quiz/storage";
-import { matureCohortMonth, nextMonth, previousMonth } from "./engine-api";
+import { defaultReferenceMonth, matureCohortMonth, nextMonth } from "@/lib/engine/cohort";
 import { fill, formatDate, formatMonth } from "./text";
 import { CheckField } from "./_ui/CheckField";
 import { Choices } from "./_ui/Choices";
@@ -26,10 +26,6 @@ export interface SetupChoice {
   cohortMonth: YearMonth;
   /** The Tour result to compare with, when the person kept the box ticked. */
   tourResultId: string | null;
-}
-
-function currentMonth(today: Date): YearMonth {
-  return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
 }
 
 /**
@@ -65,7 +61,7 @@ export function Setup({
 }) {
   const s = strings.setup;
   const id = useId();
-  const lastClosed = previousMonth(currentMonth(today));
+  const lastClosed = defaultReferenceMonth(today);
   const [currency, setCurrency] = useState<Currency>("EUR");
   const [activation, setActivation] = useState<EngineSetup["activationWindowDays"]>(7);
   const [paid, setPaid] = useState<EngineSetup["paidWindowDays"]>(30);

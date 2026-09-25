@@ -3,7 +3,7 @@
 import { TEXT_LIMITS, type MetricShape } from "@/lib/engine/catalog-shape";
 import { ROLE_KEY, type ResolvedMetric } from "@/lib/engine/strings";
 import type { RoleId } from "@/lib/engine/types";
-import { formatMoney, formatNumber, formatPercent } from "./engine-api";
+import { formatMoney, formatNumber, formatPercent } from "@/lib/engine/format";
 import type { DraftProblem, SheetDraft, SourceChoice } from "./sheet-draft";
 import { isRule, ruleMessage } from "./sheet-problems";
 import { currencySymbol, sourceOptions } from "./sources";

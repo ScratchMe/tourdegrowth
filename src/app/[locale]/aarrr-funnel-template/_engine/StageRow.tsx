@@ -1,9 +1,9 @@
-import { metricsOfStage, shapeOf } from "@/lib/engine/catalog-shape";
+import { metricsOfStage } from "@/lib/engine/catalog-shape";
+import { knownIn } from "@/lib/engine/values";
 import { STATUS_KEY, type EngineStrings, type ResolvedMetric } from "@/lib/engine/strings";
 import type { CandidateId, Diagnosis, EngineCalcContext, EngineState } from "@/lib/engine/types";
 import type { Pillar } from "@/lib/scoring/pillars";
 import { displayInterval, unknownReason } from "./display";
-import { knownOf } from "./engine-api";
 import { pillOf, type PillKind } from "./keys";
 import { metricById, stageName } from "./text";
 import styles from "./Board.module.css";
@@ -60,7 +60,9 @@ export function StageRow({
   const shapes = metricsOfStage(stage);
   const star = shapes[0]!;
   const starMetric = metricById(metrics, star.id);
-  const known = knownOf(snapshot.metrics[star.id], shapeOf(star.id), ctx);
+  // knownIn, not knownOf: it grades a cohort number entered on a month younger than
+  // its window as approximate (§6.3) — the same reading the peloton and the slides make.
+  const known = knownIn(state, star.id, ctx);
   // Every ★ is one of the six candidates, so it always has a position.
   const position = diagnosis.positions[star.id as CandidateId];
 
@@ -115,7 +117,9 @@ export function StageRow({
         <span className={styles.rowIndex} aria-hidden="true">
           {index}
         </span>
-        <span className={styles.rowName}>{stageName(stage)}</span>
+        <span className={styles.rowName} data-testid={`engine-row-name-${stage}`}>
+          {stageName(stage)}
+        </span>
       </span>
       <span className={styles.rowValue} data-unknown={known.kind === "unknown" && value === "?" ? "true" : undefined}>
         {value}

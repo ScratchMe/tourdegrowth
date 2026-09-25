@@ -1,6 +1,6 @@
 import { METRIC_SHAPES } from "@/lib/engine/catalog-shape";
+import { isRequestStale } from "@/lib/engine/request";
 import type { Effort, MetricId, RoleId, Snapshot } from "@/lib/engine/types";
-import { isStale } from "./engine-api";
 import { EFFORT_ORDER } from "./keys";
 
 /**
@@ -50,8 +50,7 @@ export function collectPlan(snapshot: Snapshot, now: Date): CollectPlan {
     if (status === "requested") {
       const g = group(entry?.request?.role ?? shape.defaultRole);
       g.requested.push(shape.id);
-      const since = entry?.request?.remindedAt ?? entry?.request?.requestedAt;
-      if (since && isStale(since, now)) g.stale.push(shape.id);
+      if (isRequestStale(entry, now)) g.stale.push(shape.id);
     } else if (status === "todo") {
       if (shape.effort === "ask") group(shape.defaultRole).toAsk.push(shape.id);
       else self.set(shape.effort, [...(self.get(shape.effort) ?? []), shape.id]);

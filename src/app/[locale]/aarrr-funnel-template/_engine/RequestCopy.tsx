@@ -3,7 +3,7 @@
 import { useId, useState } from "react";
 import { Button } from "@/components/core/Button";
 import type { MetricId, RoleId } from "@/lib/engine/types";
-import { buildRequest } from "./engine-api";
+import { buildRequest } from "@/lib/engine/request";
 import { trackEngine } from "./engine-events";
 import type { EngineView } from "./view";
 import { Field } from "./_ui/Field";
