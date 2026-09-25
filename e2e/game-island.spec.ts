@@ -91,6 +91,20 @@ test.describe("one quarter", () => {
     await expect(page.getByTestId("game-journal-1")).toBeVisible();
   });
 
+  test("one live region: a card that lengthens the path is said there, the pill stays silent (plan E5)", async ({ page }) => {
+    await page.goto(LEVEL_PATH.en);
+    await hangUp(page);
+    // The island's region is the only one in the night band.
+    await expect(page.getByTestId("game-island").locator("[aria-live]")).toHaveCount(1);
+    await expect(page.getByTestId("game-clicks")).not.toHaveAttribute("aria-live", /.*/);
+
+    await page.getByTestId("game-card-bury").click();
+    await expect(page.getByTestId("game-clicks")).toHaveAttribute("data-clicks", "5");
+    await expect(page.getByTestId("game-live")).toContainText("5 clicks to cancel · the law expects a direct path");
+    await page.getByTestId("game-card-bury").click();
+    await expect(page.getByTestId("game-live")).toContainText("2 clicks to cancel");
+  });
+
   async function playQuarterFromHand(page: Page, picks: readonly [string, string]) {
     for (const card of picks) await page.getByTestId(`game-card-${card}`).click();
     await expect(page.getByTestId("game-run")).toBeEnabled();

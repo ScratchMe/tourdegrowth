@@ -9,6 +9,15 @@ export interface ClickPillProps {
   labels: LevelCopy["clicks"];
   /** `compact` for the sticky action bar on a phone: same words, smaller type. */
   size?: "md" | "compact";
+  /**
+   * Whether the pill speaks for itself (`aria-live="polite"`). On by default:
+   * alone on a page, it is the one change a screen-reader user needs to hear
+   * when a card is ticked. Off inside a screen that already has its own live
+   * region (the level's island, plan E5): two regions answering the same
+   * gesture talk over each other, so that screen says the count itself, in
+   * its one region.
+   */
+  announce?: boolean;
   className?: string;
 }
 
@@ -20,9 +29,10 @@ export interface ClickPillProps {
  *
  * `aria-live="polite"` here and nowhere else on the phone: the count is the
  * one change a screen-reader user needs to hear when ticking a card, and the
- * drawing around it would be noise.
+ * drawing around it would be noise — unless the screen announces it itself
+ * (`announce={false}`).
  */
-export function ClickPill({ clicks, overLaw, labels, size = "md", className }: ClickPillProps) {
+export function ClickPill({ clicks, overLaw, labels, size = "md", announce = true, className }: ClickPillProps) {
   const phone = clicks === "phone";
   const suffix = phone ? labels.phoneSuffix : overLaw ? labels.lawSuffix : null;
   return (
@@ -30,7 +40,7 @@ export function ClickPill({ clicks, overLaw, labels, size = "md", className }: C
       className={[styles.pill, styles[size], overLaw ? styles.over : "", className ?? ""].filter(Boolean).join(" ")}
       data-testid="game-clicks"
       data-clicks={phone ? "phone" : String(clicks)}
-      aria-live="polite"
+      aria-live={announce ? "polite" : undefined}
     >
       {phone ? <Figure template={labels.infinite} value="∞" /> : <Figure template={labels.count} value={String(clicks)} slot="{n}" />}
       {suffix ? <span className={styles.suffix}> · {suffix}</span> : null}

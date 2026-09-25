@@ -166,7 +166,8 @@ export function GameIsland({ copy, locale }: GameIslandProps) {
 
             <div className={styles.side}>
               <PhoneMock items={phoneView(L, ids)} labels={copy.phone} />
-              <ClickPill clicks={clicks} overLaw={clicksOverLaw(clicks)} labels={copy.clicks} />
+              {/* Silent here: the island says a new count in its own region (plan E5). */}
+              <ClickPill clicks={clicks} overLaw={clicksOverLaw(clicks)} labels={copy.clicks} announce={false} />
             </div>
 
             {handVisible(phase) ? (

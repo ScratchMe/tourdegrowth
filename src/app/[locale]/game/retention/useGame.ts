@@ -53,9 +53,9 @@ import { gameReducer } from "@/lib/game/reducer";
 import { clearGame, loadGame, recordYearEnd, resumeMode, saveGame, type SavedGame } from "@/lib/game/storage";
 import type { GameAction, GameState, MonthPoint } from "@/lib/game/types";
 import { MONTH_STEP_MS } from "@/lib/game/ui-timing";
-import { monthFrames } from "@/lib/game/view";
+import { clicksFor, monthFrames, phoneIds } from "@/lib/game/view";
 import { fill } from "@/lib/game/format";
-import { bossMessage, quarterEndAnnouncement, resumeContent, type IslandContext } from "./island-view";
+import { bossMessage, clicksSentence, quarterEndAnnouncement, resumeContent, type IslandContext } from "./island-view";
 
 type Id = RetentionCardId;
 type State = GameState<Id>;
@@ -294,7 +294,14 @@ export function useGame(ctx: IslandContext, refs: GameRefs): Game {
 
   const toggle = (id: string) => {
     // The card's own `aria-pressed` says what happened; focus stays on it.
-    apply({ type: "toggle", card: id as Id });
+    const next = apply({ type: "toggle", card: id as Id });
+    if (!next) return;
+    // What it did to the cancellation path, in the one region (plan E5) —
+    // and only when it did something: most honest cards leave the count
+    // where it was, and a sentence repeated at every tick stops being heard.
+    const before = clicksFor(L, phoneIds(game));
+    const after = clicksFor(L, phoneIds(next));
+    if (after !== before) announce(clicksSentence(ctx, after));
   };
 
   const runQuarter = () => {

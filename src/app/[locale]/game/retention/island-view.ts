@@ -313,6 +313,18 @@ export function handView(ctx: IslandContext, state: State, hint: HandHint): Hand
   };
 }
 
+/**
+ * The pill's whole sentence, as the one live region says it when a ticked or
+ * unticked card changes the count (plan E5): the figure AND, past the legal
+ * path, why it is a problem — the same words the pill shows, never a
+ * paraphrase of them.
+ */
+export function clicksSentence({ copy, locale }: IslandContext, clicks: number | "phone"): string {
+  if (clicks === "phone") return `${copy.clicks.infinite} · ${copy.clicks.phoneSuffix}`;
+  const count = fill(copy.clicks.count, { n: formatInt(locale, clicks) });
+  return clicksOverLaw(clicks) ? `${count} · ${copy.clicks.lawSuffix}` : count;
+}
+
 /** The pill's abbreviated form for the action bar: the same words, and whether they read as a legal problem. */
 export function clicksLabel({ copy, locale }: IslandContext, clicks: number | "phone"): { text: string; alert: boolean } {
   return {

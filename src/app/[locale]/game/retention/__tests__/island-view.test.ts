@@ -1,4 +1,7 @@
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { ClickPill } from "@/components/game/ClickPill";
 import { RETENTION_CONTENT } from "@/content/game/retention";
 import { ENDING_PATHS, PATH_A, PATH_C, PATH_M, playPath } from "@/lib/game/__tests__/paths";
 import { resolveLevelCopy, type RetentionCopy } from "@/lib/game/copy";
@@ -7,11 +10,12 @@ import { handIds } from "@/lib/game/model";
 import { lastQuarterStart, runFrame } from "@/lib/game/phases";
 import { gameReducer } from "@/lib/game/reducer";
 import type { GameState } from "@/lib/game/types";
-import { clicksFor, monthFrames, phoneIds } from "@/lib/game/view";
+import { clicksFor, clicksOverLaw, monthFrames, phoneIds } from "@/lib/game/view";
 import { LOCALES, type Locale } from "@/lib/i18n/locale";
 import {
   bossMessage,
   clicksLabel,
+  clicksSentence,
   dashboardProps,
   decemberContent,
   handView,
@@ -95,6 +99,7 @@ describe("island-view — every screen of every reference year, in both language
           check(`${label} timeline`, timelineSegments(ctx, state));
           for (const hint of ["callOpen", "pick", "ready"] as const) check(`${label} hand`, handView(ctx, state, hint));
           check(`${label} clicks`, clicksLabel(ctx, clicksFor(L, phoneIds(state))));
+          check(`${label} clicks said`, clicksSentence(ctx, clicksFor(L, phoneIds(state))));
           check(`${label} journal`, journalEntries(ctx, state));
           check(`${label} resume`, resumeContent(ctx, state));
           state.log.forEach((_, q) => {
@@ -198,4 +203,36 @@ describe("island-view — what the words must say", () => {
     expect(done.previously).toBeUndefined();
     expect(done.accept).toBe(fr.copy.resume.review);
   });
+});
+
+/**
+ * Plan E5: one live region on the island. The pill keeps its own
+ * `aria-live` wherever it stands alone, and is silent inside the island,
+ * which says the new count in its region instead — in the pill's own words,
+ * so a screen-reader user hears what a sighted one reads.
+ */
+describe("the clicks pill and the one live region", () => {
+  const pill = (ctx: IslandContext, clicks: number | "phone", announce?: boolean) =>
+    renderToStaticMarkup(
+      createElement(ClickPill, { clicks, overLaw: clicksOverLaw(clicks), labels: ctx.copy.clicks, announce }),
+    );
+  const text = (html: string) => html.replace(/<[^>]+>/g, "");
+
+  it("speaks for itself by default, and not when the island speaks for it", () => {
+    const [ctx] = contexts;
+    expect(pill(ctx!, 5)).toContain('aria-live="polite"');
+    expect(pill(ctx!, 5, false)).not.toContain("aria-live");
+  });
+
+  for (const ctx of contexts) {
+    it(`${ctx.locale}: the island says exactly the sentence the pill shows`, () => {
+      for (const clicks of [2, 3, 4, 5, "phone"] as const) {
+        expect(clicksSentence(ctx, clicks), String(clicks)).toBe(text(pill(ctx, clicks, false)));
+      }
+      // Past the legal path the sentence says why, not just how many.
+      expect(clicksSentence(ctx, 5)).toContain(ctx.copy.clicks.lawSuffix);
+      expect(clicksSentence(ctx, "phone")).toContain(ctx.copy.clicks.phoneSuffix);
+      expect(clicksSentence(ctx, 2)).not.toContain(ctx.copy.clicks.lawSuffix);
+    });
+  }
 });
