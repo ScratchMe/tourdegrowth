@@ -352,9 +352,10 @@ const OKR: Comparison = {
     en: "AARRR tells you what is true; OKR decides what to do about it and who owns it. Each one's classic failure is the other one's job. Here is how to chain them.",
     fr: "AARRR dit ce qui est vrai ; OKR décide quoi en faire et qui le porte. Le défaut classique de chacun est le travail de l'autre. Voici comment les enchaîner.",
   },
+  // TODO: à relire — 2026-09-25 : « des quatre » devenu faux avec la cinquième page (HEART) ; formulation qui ne compte plus.
   intro: {
-    en: "This is the largest category error of the four. AARRR is a measurement model — it tells you what is true about the business. OKR is a goal-setting ritual — it decides what to do about it, who owns it, and by when. They sit at different layers, and each one's classic failure mode is precisely the other one's job.",
-    fr: "C'est la plus grosse erreur de catégorie des quatre. AARRR est un modèle de mesure — il dit ce qui est vrai de l'entreprise. OKR est un rituel de fixation d'objectifs — il décide quoi en faire, qui le porte et pour quand. Ils ne sont pas à la même couche, et le défaut classique de chacun est précisément le travail de l'autre.",
+    en: "This is the largest category error in this series. AARRR is a measurement model — it tells you what is true about the business. OKR is a goal-setting ritual — it decides what to do about it, who owns it, and by when. They sit at different layers, and each one's classic failure mode is precisely the other one's job.",
+    fr: "C'est la plus grosse erreur de catégorie de cette série. AARRR est un modèle de mesure — il dit ce qui est vrai de l'entreprise. OKR est un rituel de fixation d'objectifs — il décide quoi en faire, qui le porte et pour quand. Ils ne sont pas à la même couche, et le défaut classique de chacun est précisément le travail de l'autre.",
   },
   rows: [
     {

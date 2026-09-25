@@ -240,7 +240,7 @@ export const UI_STRINGS = {
   },
 
   /**
-   * `/aarrr-vs-*` (GROWTH-PLAN.md vague 2.3) — le chrome des quatre pages du
+   * `/aarrr-vs-*` (GROWTH-PLAN.md vague 2.3) — le chrome des pages du
    * cluster. Le contenu lui-même vit dans `content/comparisons.ts`.
    * TODO: à relire (convention 6).
    */

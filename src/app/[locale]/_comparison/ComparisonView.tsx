@@ -19,7 +19,7 @@ import own from "./comparison.module.css";
  * fichier de dix lignes qui appelle ceci ; le contenu vit dans
  * `content/comparisons.ts`.
  *
- * **Quatre dossiers de route plutôt qu'un segment dynamique.** Un
+ * **Un dossier de route par comparaison plutôt qu'un segment dynamique.** Un
  * `[comparison]` à la racine de `[locale]` entrerait en collision avec
  * `glossary`, `about` et tous les autres segments statiques. Et le slug plat
  * est le point : la requête se tape « aarrr vs rarra », donc l'URL doit être
