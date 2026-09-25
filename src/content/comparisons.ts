@@ -23,7 +23,7 @@ import { COMPARISON_TITLES, type ComparisonSlug } from "./comparison-index";
  * - **RARRA** : les mêmes cinq étapes, dans un autre ordre ;
  * - **growth loops** : la même chose, dessinée en cercle plutôt qu'en ligne ;
  * - **OKR** : un modèle de mesure contre un rituel de décision ;
- * - **HEART** : la même lettre (Retention) pour deux questions — l'entreprise
+ * - **HEART** : le même mot (Retention) pour deux questions — l'entreprise
  *   d'un côté, l'expérience d'une fonctionnalité de l'autre (audit SEO v1 §3.1,
  *   ajoutée le 2026-09-24).
  *
@@ -439,8 +439,8 @@ const HEART: Comparison = {
     fr: "AARRR mesure où l'entonnoir de l'entreprise fuit ; HEART, si l'expérience est bonne. Les deux suivent la rétention, mais pas de la même façon. Lequel choisir.",
   },
   intro: {
-    en: "These two get compared because both are five-letter acronyms with Retention in the middle, and that is about all they share. AARRR asks whether the business grows, stage by stage, from a first visit to a payment. HEART, published by a Google research team, asks whether the experience of using a product is any good — Happiness, Engagement, Adoption, Retention, Task success. Same users, two different questions, and a team usually needs the first answer before the second one is worth asking.",
-    fr: "Ces deux-là sont comparés parce que ce sont deux acronymes de cinq lettres avec la Retention au milieu, et c'est à peu près tout ce qu'ils partagent. AARRR demande si l'entreprise grandit, étape par étape, de la première visite au paiement. HEART, publié par une équipe de recherche de Google, demande si l'expérience d'utilisation d'un produit est bonne — Happiness, Engagement, Adoption, Retention, Task success. Les mêmes utilisateurs, deux questions différentes, et une équipe a généralement besoin de la première réponse avant que la seconde vaille la peine d'être posée.",
+    en: "These two get compared because both are five-letter acronyms that name Retention, and that is about all they share. AARRR asks whether the business grows, stage by stage, from a first visit to a payment. HEART, published by a Google research team, asks whether the experience of using a product is any good — Happiness, Engagement, Adoption, Retention, Task success. Same users, two different questions, and a team usually needs the first answer before the second one is worth asking.",
+    fr: "Ces deux-là sont comparés parce que ce sont deux acronymes de cinq lettres qui nomment tous deux la Retention, et c'est à peu près tout ce qu'ils partagent. AARRR demande si l'entreprise grandit, étape par étape, de la première visite au paiement. HEART, publié par une équipe de recherche de Google, demande si l'expérience d'utilisation d'un produit est bonne — Happiness, Engagement, Adoption, Retention, Task success. Les mêmes utilisateurs, deux questions différentes, et une équipe a généralement besoin de la première réponse avant que la seconde vaille la peine d'être posée.",
   },
   rows: [
     {
@@ -488,8 +488,8 @@ const HEART: Comparison = {
       heading: { en: "Where they overlap: retention, measured two ways", fr: "Là où ils se recouvrent : la rétention, mesurée deux fois" },
       body: [
         {
-          en: "Retention is the one letter the two share, and it is the source of most of the confusion. In AARRR it means customers who keep using the product and keep paying for it, read as cohort curves over months. In HEART it usually means users who come back to a specific product or feature, read over days or weeks. A team can have a feature with excellent HEART retention inside a business with poor AARRR retention: the people who use the new report love it, and most accounts still churn before they ever find it.",
-          fr: "La Retention est la seule lettre que les deux partagent, et c'est la source de la plupart des confusions. Dans AARRR, elle désigne les clients qui continuent d'utiliser le produit et de le payer, lus en courbes de cohortes sur des mois. Dans HEART, elle désigne le plus souvent les utilisateurs qui reviennent à un produit ou à une fonctionnalité précise, lus sur des jours ou des semaines. Une équipe peut avoir une fonctionnalité à l'excellente rétention HEART dans une entreprise à la rétention AARRR médiocre : ceux qui utilisent le nouveau rapport l'adorent, et la plupart des comptes partent quand même avant de l'avoir trouvé.",
+          en: "Retention is the one stage the two name with the same word, and it is the source of most of the confusion. In AARRR it means customers who keep using the product and keep paying for it, read as cohort curves over months. In HEART it usually means users who come back to a specific product or feature, read over days or weeks. A team can have a feature with excellent HEART retention inside a business with poor AARRR retention: the people who use the new report love it, and most accounts still churn before they ever find it.",
+          fr: "La Retention est la seule étape que les deux désignent du même mot, et c'est la source de la plupart des confusions. Dans AARRR, elle désigne les clients qui continuent d'utiliser le produit et de le payer, lus en courbes de cohortes sur des mois. Dans HEART, elle désigne le plus souvent les utilisateurs qui reviennent à un produit ou à une fonctionnalité précise, lus sur des jours ou des semaines. Une équipe peut avoir une fonctionnalité à l'excellente rétention HEART dans une entreprise à la rétention AARRR médiocre : ceux qui utilisent le nouveau rapport l'adorent, et la plupart des comptes partent quand même avant de l'avoir trouvé.",
         },
         {
           en: "Adoption and Activation look alike too, and differ in the same way. HEART's Adoption counts new users of a feature; AARRR's Activation asks whether a new customer reached the moment the product becomes worth keeping. The first is a count, the second is a threshold, and a launch can move the count without moving the threshold at all. When the two frameworks disagree on the same word, the disagreement is information: it usually means the feature and the business are not being measured on the same population.",
