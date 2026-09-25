@@ -275,7 +275,11 @@ export const ENGINE_COPY = {
     spreadsheet: { fr: "Tableur", en: "Spreadsheet" },
   } satisfies Record<ToolId, Translatable>,
 
-  /** The numeric grammar `format.ts` needs, kept here so every word the reader sees is in one reviewable place. */
+  /**
+   * The numeric grammar `format.ts` needs, kept here so every word the reader sees is in one reviewable place.
+   * French binds a unit to its number with U+00A0 (« 7 jours », « 2,6 fois », « T1 2027 »): a slide
+   * title wraps wherever it likes, and a number alone at the end of a line reads as a different number.
+   */
   units: {
     range: { fr: "{lo} à {hi}", en: "{lo}–{hi}" },
     perHundred: { fr: "{n} sur 100", en: "{n} in 100" },
@@ -283,12 +287,12 @@ export const ENGINE_COPY = {
     approx: { fr: "~{n}", en: "~{n}" },
     days: { fr: "{n} jours", en: "{n} days" },
     daysOne: { fr: "1 jour", en: "1 day" },
-    hours: { fr: "{n} heures", en: "{n} hours" },
-    hoursOne: { fr: "1 heure", en: "1 hour" },
+    hours: { fr: "{n} heures", en: "{n} hours" },
+    hoursOne: { fr: "1 heure", en: "1 hour" },
     months: { fr: "{n} mois", en: "{n} months" },
     monthsOne: { fr: "1 mois", en: "1 month" },
-    times: { fr: "{n} fois", en: "{n}×" },
-    quarter: { fr: "T{q} {year}", en: "Q{q} {year}" },
+    times: { fr: "{n} fois", en: "{n}×" },
+    quarter: { fr: "T{q} {year}", en: "Q{q} {year}" },
   },
 
   grammar: {

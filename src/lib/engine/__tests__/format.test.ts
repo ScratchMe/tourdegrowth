@@ -78,13 +78,17 @@ describe("format — §6.2 in French", () => {
   it("ranges, durations, months, days", () => {
     expect(formatInterval({ lo: 6, hi: 9 }, "percent", CTX_FR, uF)).toBe(`6 à 9${NBSP}%`);
     expect(formatInterval({ lo: 21_000, hi: 25_000 }, "money", CTX_FR, uF, { currency: "EUR" })).toBe(`21${NBSP}000${NBSP}€ à 25${NBSP}000${NBSP}€`);
-    expect(formatDurationInterval({ lo: 1, hi: 3 }, "days", CTX_FR, uF)).toBe("1 à 3 jours");
-    expect(formatDuration(1, "days", CTX_FR, uF)).toBe("1 jour");
-    expect(formatDuration(4.2, "months", CTX_FR, uF)).toBe("4 mois");
+    // French binds the unit to its number (U+00A0 in the copy): a slide title can't strand « jours » on the next line.
+    expect(formatDurationInterval({ lo: 1, hi: 3 }, "days", CTX_FR, uF)).toBe(`1 à 3${NBSP}jours`);
+    expect(formatDuration(1, "days", CTX_FR, uF)).toBe(`1${NBSP}jour`);
+    expect(formatDuration(4.2, "months", CTX_FR, uF)).toBe(`4${NBSP}mois`);
     // A positive duration never prints as 0.
-    expect(formatDuration(0.3, "days", CTX_FR, uF)).toBe("0,3 jours");
+    expect(formatDuration(0.3, "days", CTX_FR, uF)).toBe(`0,3${NBSP}jours`);
     expect(formatMonth("2026-07", "fr")).toBe("juillet 2026");
-    expect(formatDay(new Date(2026, 9, 1), "fr")).toBe("1 octobre 2026");
+    // The first of the month is an ordinal in French (« le 1er octobre »), and only the first.
+    expect(formatDay(new Date(2026, 9, 1), "fr")).toBe("1er octobre 2026");
+    expect(formatDay(new Date(2026, 9, 11), "fr")).toBe("11 octobre 2026");
+    expect(formatDay(new Date(2026, 9, 1), "en")).toBe("October 1, 2026");
   });
 });
 

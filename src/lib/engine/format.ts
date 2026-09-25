@@ -249,13 +249,18 @@ export function formatMonth(month: YearMonth, locale: Locale): string {
   );
 }
 
-/** "1 octobre 2026" / "October 1, 2026", from a local calendar date. */
+/**
+ * "1er octobre 2026" / "October 1, 2026", from a local calendar date.
+ * French writes the first of a month as an ordinal (« le 1er octobre »,
+ * never « le 1 octobre »), which Intl doesn't. Plain letters, not the
+ * superscript "ᵉʳ": the slides' fonts don't carry it (§10.4).
+ */
 export function formatDay(date: Date, locale: Locale): string {
-  return normalise(
-    new Intl.DateTimeFormat(intlLocale(locale), { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(
-      new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())),
-    ),
+  const day = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const text = normalise(
+    new Intl.DateTimeFormat(intlLocale(locale), { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(day),
   );
+  return locale === "fr" && day.getUTCDate() === 1 ? text.replace(/^1(?=\s)/, "1er") : text;
 }
 
 /** "a", "a et b", "a, b et c" — the separators are copy, so English gets no Oxford comma unless the copy adds one. */
