@@ -572,7 +572,7 @@ export const ENGINE_COPY = {
    */
   visual: {
     /** Under the sign-ups grid: the cohort those 100 people come from. */
-    cohortOf: { fr: "cohorte de {cohort}", en: "{cohort} cohort" },
+    cohortOf: { fr: "inscrits en {cohort}", en: "{cohort} cohort" },
     upstreamUnknown: {
       fr: "Visiteurs pour 100 inscrits : non mesuré",
       en: "Visitors for 100 sign-ups: not measured",
