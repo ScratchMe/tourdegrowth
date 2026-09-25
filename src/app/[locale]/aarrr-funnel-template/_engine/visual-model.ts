@@ -1,6 +1,8 @@
 import type { Pillar } from "@/lib/scoring/pillars";
-import type { CandidateId, ImpactLine, Interval, SourceRef, YearMonth } from "@/lib/engine/types";
+import type { Impact, ImpactLine, Interval, SourceRef, YearMonth } from "@/lib/engine/types";
 import type { EngineStrings } from "@/lib/engine/strings";
+import type { Locale } from "@/lib/i18n/locale";
+import { chainTemplate } from "@/lib/engine/phrases";
 
 /**
  * The view model behind the engine's visuals (engine spec §8) — pure, so the
@@ -132,25 +134,18 @@ export function nearestIndex(ladder: readonly number[], value: number): number {
   return best;
 }
 
-/** Which template a line of the "what if" chain is printed with. Churn has its own sentences. */
+/**
+ * Which template a line of the "what if" chain is printed with. The choice is
+ * made once, in `lib/engine/phrases.ts#chainTemplate`, for the drawer and the
+ * leak slide alike: churn has its own sentences, a chain with no monthly
+ * volume is read per 100 sign-ups (« par mois » would be false), and a noun
+ * agrees with the count the line prints (« 1 nouveau payant »).
+ */
 export function whatIfTemplate(
   line: ImpactLine,
-  metric: CandidateId,
+  impact: Pick<Impact, "metric" | "kind">,
   words: EngineStrings["whatIf"],
+  locale: Locale,
 ): { label: string | null; template: string } {
-  const churn = metric === "ret.logo-churn";
-  switch (line.key) {
-    case "today":
-      return { label: words.today, template: churn ? words.todayChurn : words.todayFlow };
-    case "if":
-      return { label: words.if, template: words.ifFlow };
-    case "then":
-      return { label: words.then, template: churn ? words.thenChurn : words.thenFlow };
-    case "times":
-      return { label: words.times, template: churn ? words.timesChurn : words.timesFlow };
-    case "annual":
-      return { label: null, template: words.annual };
-    case "less-than-one":
-      return { label: null, template: words.lessThanOne };
-  }
+  return chainTemplate(line, impact, words, locale);
 }

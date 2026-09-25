@@ -7,6 +7,7 @@ import { Button } from "@/components/core/Button";
 import { Callout } from "@/components/core/Callout";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { isEngineOpenAtBuild } from "@/lib/engine/access";
+import { staticCatalogueValues } from "@/lib/engine/phrases";
 import {
   DERIVED_SHAPES,
   ENGINE_CATALOG_VERSION,
@@ -46,22 +47,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   // request meanwhile; a preview cookie must never make it indexable, which
   // is why the build flag reads the env var only (lib/engine/access.ts).
   return isEngineOpenAtBuild() ? base : { ...base, robots: { index: false, follow: true } };
-}
-
-/**
- * The catalogue prints formulas without a setup: no activation event has
- * been named, no window chosen. Its placeholders get generic words so the
- * sentence still reads ("… ayant fait l'événement d'activation sous n
- * jours"), never a raw `{event}`.
- */
-function staticFills(t: EngineStrings["visual"]): Record<string, string> {
-  return {
-    event: t.staticEvent,
-    n: t.staticWindow,
-    cohort: t.staticCohort,
-    month: t.staticMonth,
-    variant: t.staticVariant,
-  };
 }
 
 /** A reference, in the metric's own unit — the same rule the sheet will print (§7 E3). */
@@ -111,7 +96,10 @@ export default async function EnginePage({ params }: PageProps) {
   const props = resolveEngineProps(locale);
   const { strings } = props;
   const t = strings.page;
-  const fills = staticFills(strings.visual);
+  // No setup here: no event named, no window chosen. Generic words and bracketed slots fill the catalogue
+  // (« … ayant déclenché l'événement d'activation sous n jours », « inscrits en [mois de cohorte] »), from the
+  // same helper that fills the requests and the annex with a real setup — never a raw `{event}`.
+  const fills = staticCatalogueValues(strings);
   const metricOf = (id: MetricShape["id"]) => props.metrics.find((m) => m.id === id)!;
 
   return (

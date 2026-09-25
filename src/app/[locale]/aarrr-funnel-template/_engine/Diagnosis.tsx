@@ -1,8 +1,15 @@
 import type { Locale } from "@/lib/i18n/locale";
 import type { CandidateId, Diagnosis as DiagnosisModel, Interval, MetricId } from "@/lib/engine/types";
 import type { EngineStrings, ResolvedMetric } from "@/lib/engine/strings";
-import { PELOTON_METRICS, shapeOf } from "@/lib/engine/catalog-shape";
-import { formatInterval, formatPercent, joinList } from "./format-stub";
+import { shapeOf } from "@/lib/engine/catalog-shape";
+import {
+  behindSentence,
+  blindSentence as blindSentenceOf,
+  churnWithoutCommonAmount,
+  notEnoughBelowSentence,
+  unpricedSentence,
+} from "@/lib/engine/phrases";
+import { formatInterval, formatPercent } from "./format-stub";
 import { fill, stageLabel } from "./visual-model";
 import styles from "./Diagnosis.module.css";
 
@@ -20,14 +27,6 @@ export interface DiagnosisProps {
   values: Partial<Record<CandidateId, Interval>>;
   className?: string;
 }
-
-const PELOTON_SUBJECT: Record<(typeof PELOTON_METRICS)[number], keyof EngineStrings["peloton"]["unmeasured"]> = {
-  "act.rate": "activated",
-  "ret.d30": "d30",
-  "rev.paid-conversion": "paid",
-};
-
-const capitalise = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 /**
  * The diagnosis block — engine spec §8.4 (D18).
@@ -51,7 +50,6 @@ export function Diagnosis({ diagnosis, strings, locale, metrics, values, classNa
   // this component free of `Date.now()` (the engine's time is injected).
   const ctx = { locale, today: new Date(0) };
   const nameOf = (id: MetricId) => metrics.find((m) => m.id === id)?.name ?? id;
-  const list = (items: string[]) => joinList(items, strings.grammar);
 
   const eyebrow =
     diagnosis.state === "clear"
@@ -68,33 +66,21 @@ export function Diagnosis({ diagnosis, strings, locale, metrics, values, classNa
     if (!position?.comparator || !value) return null;
     const c = position.comparator;
     const formatted = formatInterval(value, "percent", ctx, strings.units);
-    if (c.kind === "target") return fill(d.belowTarget, { value: formatted, target: formatPercent(c.lo, locale) });
-    return fill(d.belowReference, {
-      value: formatted,
-      range: formatInterval({ lo: c.lo, hi: c.hi }, "percent", ctx, strings.units),
-    });
+    // The sentence picks « sous » or « au-dessus » from the metric's direction: churn behind its comparator sits ABOVE it.
+    const comparatorText =
+      c.kind === "target" ? formatPercent(c.lo, locale) : formatInterval({ lo: c.lo, hi: c.hi }, "percent", ctx, strings.units);
+    return behindSentence(c, formatted, comparatorText, strings);
   };
 
   const named = diagnosis.state === "clear" || diagnosis.state === "shared" ? diagnosis.named : [];
 
-  // `not-enough` with one candidate below: say which, and say why it can't be ranked.
-  const notEnoughBelow =
-    diagnosis.state === "not-enough"
-      ? (Object.entries(diagnosis.positions) as [CandidateId, DiagnosisModel["positions"][CandidateId]][]).find(
-          ([, p]) => p.position === "below",
-        )?.[0]
-      : undefined;
-
-  const blindSubjects = diagnosis.blind.map((id) =>
-    id in PELOTON_SUBJECT
-      ? strings.peloton.unmeasured[PELOTON_SUBJECT[id as keyof typeof PELOTON_SUBJECT]]
-      : nameOf(id),
-  );
-  const blindSentence = blindSubjects.length
-    ? fill(blindSubjects.length === 1 ? d.blindOne : d.blind, { stages: capitalise(list(blindSubjects)) })
-    : null;
-
-  const churnBelow = diagnosis.positions["ret.logo-churn"]?.position === "below";
+  // The sentences are built in `lib/engine/phrases.ts`, shared with the slides: a stage mid-sentence is a
+  // phrase with its article (« Sans chiffre pour la rétention à J30 », never « pour La rétention »), and where
+  // a value sits follows the metric's direction.
+  // `not-enough` with one candidate behind: say which, where it sits, and why it can't be ranked.
+  const notEnoughBelow = notEnoughBelowSentence(diagnosis, strings, metrics);
+  const blindSentence = blindSentenceOf(diagnosis.blind, strings, metrics);
+  const unpriced = unpricedSentence(diagnosis, strings, metrics);
 
   return (
     <section
@@ -120,15 +106,11 @@ export function Diagnosis({ diagnosis, strings, locale, metrics, values, classNa
 
       {diagnosis.state === "level" ? <p className={styles.body}>{d.levelBody}</p> : null}
       {diagnosis.state === "not-enough" ? (
-        <p className={styles.body}>
-          {notEnoughBelow ? fill(d.notEnoughBelow, { stage: nameOf(notEnoughBelow) }) : d.notEnoughBody}
-        </p>
+        <p className={styles.body}>{notEnoughBelow ?? d.notEnoughBody}</p>
       ) : null}
 
-      {diagnosis.belowUnpriced.length ? (
-        <p className={styles.note}>{fill(d.unpriced, { stages: list(diagnosis.belowUnpriced.map(nameOf)) })}</p>
-      ) : null}
-      {diagnosis.basis === "relative-gap" && churnBelow ? <p className={styles.note}>{d.noArpa}</p> : null}
+      {unpriced ? <p className={styles.note}>{unpriced}</p> : null}
+      {churnWithoutCommonAmount(diagnosis) ? <p className={styles.note}>{d.noArpa}</p> : null}
 
       {blindSentence ? (
         <p className={styles.blind} data-testid="diagnosis-blind">
