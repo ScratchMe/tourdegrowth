@@ -432,15 +432,28 @@ export function yearClosedView({ copy }: IslandContext, state: State): { title: 
   };
 }
 
-/** Every quarter played, in the page's language — the journal is structured, so a language switch re-renders it whole (R10). */
+/**
+ * Every quarter played, in the page's language — the journal is structured,
+ * so a language switch re-renders it whole (R10).
+ *
+ * It is also the only place the LAST quarter's report survives a reload: a
+ * year saved after its fourth quarter (or after the firing) reopens straight
+ * on December (`settledPhase`), and the report is not shown again. So an
+ * entry carries everything that report said except what December's own tiles
+ * already show — the picks, the effects, the events, the CEO's line, and the
+ * quarter's target next to the verdict, which a « target hit » alone does
+ * not give back. `island-view.test.ts` checks the last report against the
+ * last entry, field by field.
+ */
 export function journalEntries(ctx: IslandContext, state: State): JournalEntry[] {
-  const { locale } = ctx;
+  const { copy, locale } = ctx;
   return state.log.map((log, i) => {
     const verdict = statusText(ctx, log);
+    const target = fill(copy.report.target, { target: formatPct(locale, log.target) });
     return {
       q: i + 1,
       period: quarterPeriod(ctx, i),
-      result: { text: `${formatPct(locale, log.churnEnd)} · ${verdict.text}`, tone: verdict.hit ? "good" : "bad" },
+      result: { text: `${formatPct(locale, log.churnEnd)} · ${target} · ${verdict.text}`, tone: verdict.hit ? "good" : "bad" },
       picked: log.picked.map((id) => cardName(ctx, id)),
       lines: [
         ...log.fx.map(({ card, effect }) =>

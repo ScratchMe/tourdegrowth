@@ -236,6 +236,42 @@ describe("island-view — what the words must say", () => {
     if (!fullTiles.trust.hidden) expect(fullTiles.trust.sub).toBe("revealed in December");
   });
 
+  /**
+   * A year saved after its last quarter reopens on December (`settledPhase`):
+   * the last report is not shown again. Accepted — on the condition that
+   * nothing it said is lost. What the report said is either on the last
+   * journal entry or on December's dashboard, for every ending.
+   */
+  it("reopened on December, a year loses nothing its last report said", () => {
+    for (const ctx of contexts) {
+      for (const [name, path] of Object.entries(ENDING_PATHS)) {
+        const year = playPath(path).at(-1)!;
+        const last = year.log.length - 1;
+        const report = reportContent(ctx, year, last);
+        const entry = journalEntries(ctx, year)[last]!;
+        const tiles = dashboardProps(ctx, year, lastQuarterStart(L, year), true);
+        const label = `${ctx.locale} · ${name}`;
+
+        expect(entry.picked, label).toEqual(report.picked);
+        for (const line of [...report.effects, ...report.notes, report.bossLine]) {
+          expect(entry.lines, `${label}: ${line}`).toContain(line);
+        }
+        if (report.mail) expect(entry.lines, label).toContain(report.mail.body);
+        for (const clip of report.clippings) expect(entry.lines, `${label}: ${clip.text}`).toContain(clip.text);
+
+        const [churn, subs, mrr, patience] = report.figures;
+        // The churn figure, its target and the verdict — the target is what a « target hit » alone loses.
+        expect(entry.result.text, label).toContain(churn!.value);
+        expect(entry.result.text, label).toContain(churn!.note!);
+        expect(entry.result.text, label).toContain(churn!.status!.text);
+        // The three others are the year's closing figures, on December's dashboard.
+        expect(tiles.subs.value, label).toBe(subs!.value);
+        expect(tiles.mrr.value, label).toBe(mrr!.value);
+        expect(tiles.patience.value, label).toBe(patience!.value);
+      }
+    }
+  });
+
   it("the resume prompt lists one line per quarter played, and a finished year offers to review it", () => {
     const mid = years[2]!;
     const r = resumeContent(fr, mid);
