@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import * as og from "@/lib/og/tokens";
-import { COLOR_TOKENS, DERIVED, PRIMITIVES, SEMANTIC, resolveColor } from "@/styles/tokens/tokens";
+import { COLOR_TOKENS, DERIVED, NIGHT_PRIMITIVES, PRIMITIVES, SEMANTIC, resolveColor } from "@/styles/tokens/tokens";
 
 /**
  * DS v3 (M-8) — one source of truth for colors, enforced rather than hoped
@@ -141,10 +141,26 @@ describe("lib/og/tokens.ts reads the typed source", () => {
     OG_PAINT_WHITE: "paper-0",
   };
 
+  // The game's two share images paint the night world (plan §3.9, G4b).
+  const expectedNight: Record<string, keyof typeof NIGHT_PRIMITIVES> = {
+    OG_NIGHT_0: "night-0",
+    OG_NIGHT_1: "night-1",
+    OG_NIGHT_2: "night-2",
+    OG_NIGHT_TEXT: "night-text",
+    OG_NIGHT_MUTED: "night-muted",
+    OG_NIGHT_LINE: "night-line",
+    OG_NIGHT_RULE: "night-rule",
+    OG_NIGHT_AMBER: "night-amber",
+    OG_NIGHT_BAD: "night-bad",
+  };
+
   it("every OG color equals its primitive", () => {
     const colors = Object.entries(og).filter(([k]) => k !== "OG_SIZE");
-    expect(colors.map(([k]) => k).sort()).toEqual(Object.keys(expected).sort());
-    for (const [k, v] of colors) expect(v, k).toBe(PRIMITIVES[expected[k] as keyof typeof PRIMITIVES]);
+    expect(colors.map(([k]) => k).sort()).toEqual([...Object.keys(expected), ...Object.keys(expectedNight)].sort());
+    for (const [k, v] of colors) {
+      const night = expectedNight[k];
+      expect(v, k).toBe(night ? NIGHT_PRIMITIVES[night] : PRIMITIVES[expected[k] as keyof typeof PRIMITIVES]);
+    }
   });
 
   it("writes no color literal of its own", () => {
