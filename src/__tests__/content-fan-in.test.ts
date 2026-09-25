@@ -88,10 +88,14 @@ const BUDGETS: { module: string; max: number; why: string }[] = [
       "Les quinze questions du Tour : onze routes les citaient au 2026-09-15 ; la page du moteur est la douzième (spec du moteur §10.3), pour les huit questions du pont Tour × moteur — une décision, pas un contournement.",
   },
   // Le jeu (plan §3.4). Le texte du niveau lui-même (`content/game/retention.ts`,
-  // budget 2 : la page du niveau et son image OG) et l'encart du résultat
-  // (`content/game/entry.ts`, budget 1 : `r/[id]/page.tsx`) prendront leur
-  // ligne ici avec les chantiers qui les créent — un budget sur un module qui
-  // n'existe pas encore ferait échouer ce test pour la mauvaise raison.
+  // budget 2 : la page du niveau et son image OG) prendra sa ligne ici avec le
+  // chantier qui le rend — un budget sur un module qu'aucune route n'atteint
+  // encore ferait échouer ce test pour la mauvaise raison.
+  {
+    module: "content/game/entry.ts",
+    max: 1,
+    why: "L'encart du jeu sur la page de résultat (chantier G5b) : `r/[id]/page.tsx` seule le résout et n'en passe que les chaînes. Atteint ailleurs, il partirait dans une fonction de plus.",
+  },
   {
     module: "content/game/meta.ts",
     max: 4,
