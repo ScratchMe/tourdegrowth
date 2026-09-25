@@ -179,6 +179,36 @@ export function rememberResult(result: StoredResult): void {
   }
 }
 
+/**
+ * Whether these answers are a Tour this browser already turned into a
+ * result — not a Tour in progress.
+ *
+ * The answers store exists for a Tour in progress: it is what lets a reload,
+ * or a retry after a failed submission, resume instead of restarting
+ * (SPEC.md §4). Until 2026-09-25 nothing cleared it once the result was
+ * created, so a returning visitor who pressed "Start your Tour" was sent
+ * straight to the last screen with the previous Tour's fifteen answers —
+ * one click away from submitting them again, and with no sign that a new
+ * Tour had begun. The quiz now clears it on success; this recognises the
+ * answers such a browser still holds from before, by comparing them with
+ * the answers kept alongside each result (R-12). Results stored before R-12
+ * carry none, and then nothing can be recognised: the old behaviour stays,
+ * once, for those.
+ *
+ * Exact equality of all fifteen: a Tour in progress that happens to match
+ * a past one exactly would be reset by a reload before it is submitted, and
+ * would come out at the same score anyway.
+ */
+export function isSubmittedTour(answers: Answers, results: readonly StoredResult[]): boolean {
+  const keys = Object.keys(answers);
+  if (keys.length === 0) return false;
+  return results.some((result) => {
+    const past = result.answers;
+    if (!past || Object.keys(past).length !== keys.length) return false;
+    return keys.every((key) => past[key] === answers[key]);
+  });
+}
+
 /** The owner token for a result created by this browser, or null for someone else's shared link. */
 export function findOwnerToken(id: string): string | null {
   return loadStoredResults().find((r) => r.id === id)?.ownerToken ?? null;

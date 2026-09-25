@@ -6,6 +6,7 @@ import {
   clearStoredAnswers,
   findOwnerToken,
   isOwnResult,
+  isSubmittedTour,
   loadDeepDiveProgress,
   loadRefId,
   loadStoredAnswers,
@@ -290,5 +291,32 @@ describe("stored results: the score kept for the landing", () => {
       JSON.stringify([{ id: "a", ownerToken: "t", createdAt: "2026-01-01T00:00:00Z", total: "74" }]),
     );
     expect(loadStoredResults()).toEqual([]);
+  });
+});
+
+describe("isSubmittedTour", () => {
+  const tour: Answers = { "acq-1": 0, "act-1": 2, "ret-1": 1 };
+  const result = (answers?: Answers) => ({
+    id: "r1",
+    ownerToken: "t",
+    createdAt: "2026-09-20T10:00:00.000Z",
+    ...(answers ? { answers } : {}),
+  });
+
+  it("recognises answers identical to a stored result's", () => {
+    expect(isSubmittedTour(tour, [result({ ...tour })])).toBe(true);
+    expect(isSubmittedTour(tour, [result({ "acq-1": 1, "act-1": 1, "ret-1": 1 }), result({ ...tour })])).toBe(true);
+  });
+
+  it("does not recognise a Tour that differs by one answer, or by one question", () => {
+    expect(isSubmittedTour(tour, [result({ ...tour, "ret-1": 2 })])).toBe(false);
+    expect(isSubmittedTour({ "acq-1": 0, "act-1": 2 }, [result({ ...tour })])).toBe(false);
+    expect(isSubmittedTour(tour, [result({ "acq-1": 0, "act-1": 2 })])).toBe(false);
+  });
+
+  it("never recognises an empty Tour, nor anything against results without answers", () => {
+    expect(isSubmittedTour({}, [result({})])).toBe(false);
+    expect(isSubmittedTour(tour, [result()])).toBe(false);
+    expect(isSubmittedTour(tour, [])).toBe(false);
   });
 });
