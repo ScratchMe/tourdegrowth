@@ -173,6 +173,7 @@ export function whatIf(
       {
         key: "then",
         values: { base: formatCountInterval(point(base), ctx, words), churn: pct(rD), target: pct(point(tD)), n: formatCountInterval(kept, ctx, words) },
+        count: kept,
       },
     );
     const money = priced(kept, tD);
@@ -196,7 +197,7 @@ export function whatIf(
     const mD = { lo: Math.round((nD.lo * tD) / rD.hi), hi: Math.round((nD.hi * tD) / rD.lo) };
     const delta = floorAtZero({ lo: mD.lo - nD.lo, hi: mD.hi - nD.hi });
     lines.push(
-      { key: "today", values: { rate: pct(rD), n: formatCountInterval(nD, ctx, words) } },
+      { key: "today", values: { rate: pct(rD), n: formatCountInterval(nD, ctx, words) }, count: nD },
       { key: "if", values: { target: pct(point(tD)) } },
       {
         key: "then",
@@ -207,6 +208,7 @@ export function whatIf(
           m: formatCountInterval(mD, ctx, words),
           delta: formatCountInterval(delta, ctx, words),
         },
+        count: delta,
       },
     );
     const money = priced(delta, churn ? roundDisplay(churn.hi) : null);
@@ -233,21 +235,27 @@ export function whatIf(
   const delta = floorAtZero(
     candidate === "rev.paid-conversion" ? { lo: tD - rD.hi, hi: tD - rD.lo } : { lo: mD.lo - pD.lo, hi: mD.hi - pD.hi },
   );
+  const deltaD = mapBounds(delta, (v) => roundDisplay(v));
   lines.push(
-    { key: "today", values: { rate: pct(rD), n: bare(pD) } },
+    // Per 100 sign-ups, not per month: the consumer prints this line with `whatIf.todayPerHundred`.
+    { key: "today", values: { rate: pct(rD), n: bare(pD) }, count: pD },
     { key: "if", values: { target: pct(point(tD)) } },
-    { key: "then", values: { n: bare(pD), target: bare(point(tD)), rate: bare(rD), m: bare(mD), delta: bare(mapBounds(delta, (v) => roundDisplay(v))) } },
+    { key: "then", values: { n: bare(pD), target: bare(point(tD)), rate: bare(rD), m: bare(mD), delta: bare(deltaD) }, count: deltaD },
   );
   return { metric: candidate, kind: "per-hundred", from: r, to: target, lines };
 }
 
-/** The formatted figure a slide title quotes, read from the SAME chain its body prints (§6.7): the amount, else the customers. */
-export function impactHeadline(impact: Impact): { amount?: string; n?: string } {
+/**
+ * The formatted figure a slide title quotes, read from the SAME chain its
+ * body prints (§6.7): the amount, else the customers. `count` is that
+ * figure as printed, for the noun that agrees with it ("1 client payant").
+ */
+export function impactHeadline(impact: Impact): { amount?: string; n?: string; count?: Interval } {
   const times = impact.lines.find((l) => l.key === "times");
   const then = impact.lines.find((l) => l.key === "then");
   if (times?.values.amount) return { amount: times.values.amount };
-  if (impact.metric === "ret.logo-churn") return { n: then?.values.n };
-  return { n: then?.values.delta };
+  if (impact.metric === "ret.logo-churn") return { n: then?.values.n, count: then?.count };
+  return { n: then?.values.delta, count: then?.count };
 }
 
 /** Where the "what if" slider starts (§6.7): the target; else the reference's cautious bound when the value is under it; else the value — no gain until the user moves. */

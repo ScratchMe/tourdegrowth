@@ -20,7 +20,7 @@ const props = { fr: { ...FR, ctx: CTX_FR }, en: { ...EN, ctx: CTX_EN } };
 function deck(state: EngineState, locale: "fr" | "en" = "fr", result: ReturnType<typeof tourResult> | null = null): DeckModel {
   const p = props[locale];
   const derived = deriveEngine(state, p.ctx, result, p.bridges, p.strings.units);
-  return buildDeck(state, derived, p.strings, p.metrics, p.ctx);
+  return buildDeck(state, derived, p.strings, p.metrics, p.ctx, { derived: p.derived, bridges: p.bridges });
 }
 const slide = (model: DeckModel, id: SlideId) => model.slides.find((s) => s.id === id)!;
 
@@ -83,6 +83,11 @@ describe("title templates — each one triggered, and not", () => {
     s = withEntry(s, "ref.k-factor", measured(ratio(40, 800), tool));
     return withEntry(s, "rev.gross-margin", measured(ratio(80, 100), tool));
   })();
+  // No monthly volume (CAC and sign-ups as shortcuts); churn within its reference, so activation is named alone.
+  const perHundred = withEntry(withEntry(withEntry(exampleState(), "acq.cac", measured({ kind: "amount", amount: 500 }, tool)), "acq.signup-rate", measured({ kind: "rate", percent: 3.2 })), "ret.logo-churn", measured(ratio(6, 400), tool));
+  const noArpa = withEntry(exampleState(), "rev.arpa", undefined);
+  // Churn named without ARPA: its chain counts customers KEPT. 400 × (2,5 % – 2 %) = 2; 400 × (2,3 % – 2 %) = 1.
+  const kept = withEntry(within, "rev.arpa", undefined);
   const cases: [SlideTitleKey, SlideId, EngineState, EngineState][] = [
     ["pelotonComplete", "peloton", complete, exampleState()],
     ["pelotonGapOne", "peloton", exampleState(), complete],
@@ -92,14 +97,15 @@ describe("title templates — each one triggered, and not", () => {
     ["pelotonEmpty", "peloton", emptyState(), exampleState()],
     ["leakClearMrrNew", "leak", exampleState(), within],
     ["leakClearMrrRetained", "leak", within, exampleState()],
-    ["leakClearCustomers", "leak", withEntry(exampleState(), "rev.arpa", undefined), exampleState()],
-    [
-      "leakClearPerHundred",
-      "leak",
-      // No monthly volume (CAC and sign-ups as shortcuts); churn within its reference, so activation is named alone.
-      withEntry(withEntry(withEntry(exampleState(), "acq.cac", measured({ kind: "amount", amount: 500 }, tool)), "acq.signup-rate", measured({ kind: "rate", percent: 3.2 })), "ret.logo-churn", measured(ratio(6, 400), tool)),
-      exampleState(),
-    ],
+    ["leakClearCustomers", "leak", noArpa, exampleState()],
+    // Ten new payers a month: 10 × 20/18 = 11 (+1) — « 1 client payant », in both languages.
+    ["leakClearCustomersOne", "leak", withEntry(noArpa, "acq.cac", measured(ratio(5_000, 10), tool)), noArpa],
+    ["leakClearKept", "leak", kept, exampleState()],
+    ["leakClearKeptOne", "leak", withEntry(kept, "ret.logo-churn", measured(ratio(9, 400), tool)), kept],
+    // 6 à 9 × 40/18: « 7 à 11 payants ».
+    ["leakClearPerHundred", "leak", withTarget(perHundred, "act.rate", 40), perHundred],
+    // 6 à 9 × 20/18: « 0,7 à 1 payant » — French takes the singular under 2.
+    ["leakClearPerHundredOne", "leak", perHundred, withTarget(perHundred, "act.rate", 40)],
     ["leakShared", "leak", withEntry(exampleState(), "ret.logo-churn", measured(ratio(12, 400), tool)), exampleState()],
     ["leakNotEnoughBelow", "leak", withEntry(exampleState(), "ret.logo-churn", undefined), exampleState()],
     ["leakLevel", "leak", withEntry(within, "ret.logo-churn", measured(ratio(6, 400), tool)), exampleState()],
@@ -117,13 +123,23 @@ describe("title templates — each one triggered, and not", () => {
     });
   }
 
-  it("ask: the team's ask when written", () => {
+  it("ask: the team's ask when written — the goal built from the parts the team filled in", () => {
     const s = withTarget(exampleState(), "act.rate", 25);
     s.deck.ask = { what: "deux sprints produit", bullets: ["refaire l'onboarding"], measureFirst: ["ret.d30"], successMetric: "act.rate", successTarget: 25, horizon: { year: 2027, quarter: 1 } };
     const ask = slide(deck(s), "ask");
-    expect(ask.title).toEqual({ key: "ask", values: { what: "deux sprints produit", metric: "taux d'activation", current: "18 %", target: "25 %", horizon: "T1 2027" } });
+    expect(ask.title).toEqual({ key: "ask", values: { what: "deux sprints produit", goal: "taux d'activation de 18\u00a0% à 25\u00a0% d'ici T1\u00a02027" } });
+    expect(renderTitle(ask.title, FR.strings)).toBe("Nous demandons **deux sprints produit** — objectif\u00a0: taux d'activation de 18\u00a0% à 25\u00a0% d'ici T1\u00a02027.");
     expect(ask.lines.map((l) => l.row)).toEqual(["bullet", "know", "measure"]);
     expect(slide(deck(exampleState()), "ask").title.key).not.toBe("ask");
+    // Only the parts filled in: no metric, no « objectif : de  à  d'ici ».
+    s.deck.ask = { ...s.deck.ask, successMetric: undefined, successTarget: undefined, horizon: undefined };
+    expect(slide(deck(s), "ask").title).toEqual({ key: "askPlain", values: { what: "deux sprints produit" } });
+  });
+
+  it("ask: a slide that asks to measure first lists the number its title names", () => {
+    const ask = slide(deck(exampleState()), "ask");
+    expect(ask.title).toEqual({ key: "askMeasureFirst", values: { cost: "un sprint", metric: "rétention à J30" } });
+    expect(ask.lines.filter((l) => l.row === "measure").map((l) => l.label)).toEqual(["Rétention à J30"]);
   });
 
   it("mirror", () => {
@@ -159,9 +175,15 @@ describe("the §6.0 example, in words", () => {
 
   it("leak: the activation assumption is printed; blind day 30 is said; the others stand alongside", () => {
     const leak = slide(deck(exampleState()), "leak");
-    expect(leak.lines.filter((l) => l.row === "assumption").map((l) => l.text)).toEqual([FR.strings.whatIf.assumptionActivation]);
-    expect(leak.lines.find((l) => l.row === "blind")!.text).toContain("La rétention à J30");
+    // The assumption lives in the footer (§9.3), once — not also as a line of its own.
+    expect(leak.lines.filter((l) => l.row === "assumption")).toEqual([]);
+    expect(leak.lines.find((l) => l.row === "footer")!.text).toContain(FR.strings.slide.leakAssumption);
+    // The stage mid-sentence, with its article, never capitalised: « pour la rétention », not « pour La rétention ».
+    expect(leak.lines.find((l) => l.row === "blind")!.text).toBe("Sans chiffre pour la rétention à J30, l'étape qui freine vraiment peut s'y cacher.");
     expect(leak.lines.filter((l) => l.row === "aside")).toHaveLength(5);
+    // Churn behind its reference is ABOVE it — and priced from the same chain the title of its own slide would quote.
+    expect(leak.lines.find((l) => l.row === "aside" && l.id === "ret.logo-churn")!.text).toBe("au-dessus du repère · ~240\u00a0€ de MRR préservé par mois");
+    expect(leak.notes).toContain("Pourquoi pas le churn logo\u00a0? — Au-dessus du repère aussi, mais l'écart vaut ~240\u00a0€ de MRR préservé par mois, contre ~600\u00a0€ de MRR nouveau par mois.");
     expect(renderTitle(leak.title, FR.strings)).toBe(
       "Ramener l'activation à 20 % (bas de l'ordre de grandeur couramment cité) vaudrait **~600 € de MRR nouveau** chaque mois.",
     );
@@ -169,12 +191,16 @@ describe("the §6.0 example, in words", () => {
 
   it("visibility: 11 of 15 documented, the missing ones sorted from a meeting to a sprint", () => {
     const v = slide(deck(exampleState()), "visibility");
-    expect(v.title).toEqual({ key: "visibility", values: { n: "11", N: "15", k: "4", repair: "entre une réunion et un sprint" } });
+    expect(v.title).toEqual({ key: "visibility", values: { documented: "11 chiffres sur 15", k: "4", repair: "entre une réunion et un sprint" } });
+    expect(renderTitle(v.title, FR.strings)).toBe("On documente **11 chiffres sur 15**. Les 4 qui manquent se réparent entre une réunion et un sprint.");
     expect(v.lines.filter((l) => l.row === "missing").map((l) => l.repair)).toEqual(["une réunion", "une réunion", "un sprint", "un sprint"]);
   });
 
   it("unit economics: the margin is named as missing", () => {
-    expect(slide(deck(exampleState()), "unit-economics").title).toEqual({ key: "unitEconomicsUnknown", values: { input: "marge brute" } });
+    const title = slide(deck(exampleState()), "unit-economics").title;
+    expect(title).toEqual({ key: "unitEconomicsUnknown", values: { input: "la marge brute" } });
+    expect(renderTitle(title, FR.strings)).toBe("**On ne peut pas encore dire ce que rapporte un client.** Il manque la marge brute.");
+    expect(renderTitle(slide(deck(exampleState(), "en"), "unit-economics").title, EN.strings)).toBe("**We can't yet say what a customer is worth.** Missing: gross margin.");
   });
 });
 
@@ -208,7 +234,7 @@ describe("what the deck never carries", () => {
       for (const s of model.slides) {
         for (const v of Object.values(s.title.values)) if (!ALLOWED.test(v)) bad.push(v);
         for (const line of s.lines) {
-          for (const [key, v] of Object.entries(line)) if (!["text", "formula", "metric", "number"].includes(key) && !ALLOWED.test(v)) bad.push(`${key}: ${v}`);
+          for (const [key, v] of Object.entries(line)) if (!["text", "formula", "metric", "number", "label"].includes(key) && !ALLOWED.test(v)) bad.push(`${key}: ${v}`);
         }
       }
     }
@@ -222,7 +248,9 @@ describe("deckMarkdown", () => {
     const titles = md.split("\n").filter((l) => l.startsWith("## "));
     expect(titles.map((t) => t.slice(0, 5))).toEqual(["## 1.", "## 2.", "## 3.", "## 4.", "## 5.", "## 6."]);
     expect(titles[1]).toContain("**~600 € de MRR nouveau**");
-    expect(md).toContain("Données : 9 mesurées · 2 approximatives · 3 introuvables");
+    expect(md).toContain("Données\u00a0: mesurées 9 · approximatives 2 · introuvables 3");
     expect(md).toContain("> ");
+    // A title-only slide is not followed by an empty body: never two blank lines in a row.
+    expect(md).not.toContain("\n\n\n");
   });
 });

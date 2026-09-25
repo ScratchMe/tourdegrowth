@@ -115,7 +115,7 @@ export function findings(state: EngineState, derived: Omit<EngineDerived, "findi
 
   // 3 — the chain and the billing don't describe the same population.
   const gap = derived.sanity.find((c) => c.id === "reconcile-gap");
-  if (gap) add("reconcile-gap", gap.metrics, gap.values);
+  if (gap) out.push({ kind: "reconcile-gap", rank: RANK["reconcile-gap"], metrics: gap.metrics, values: gap.values, ...(gap.count ? { count: gap.count } : {}) });
 
   // 4 — each sign-up weighs more than a point.
   if (derived.peloton.smallCohort) add("small-cohort", []);

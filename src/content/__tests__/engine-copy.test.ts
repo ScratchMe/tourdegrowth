@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ENGINE_COPY } from "../engine-copy";
-import { CANDIDATE_IDS } from "@/lib/engine/catalog-shape";
+import { CANDIDATE_IDS, DERIVED_SHAPES } from "@/lib/engine/catalog-shape";
 import type { SlideTitleKey } from "@/lib/engine/types";
 import { PILLARS } from "@/lib/scoring/pillars";
 import type { Translatable } from "@/lib/i18n/translatable";
@@ -46,8 +46,25 @@ describe("keys the code reads by id", () => {
       for (const l of LOCALES) expect(phrase[l], phrase[l]).toMatch(/^[a-zà-ÿ]/);
   });
 
-  it("offers a static fill for each of the catalogue's five placeholders", () => {
-    expect(Object.keys(ENGINE_COPY.page.catalogueFill).sort()).toEqual(["cohort", "event", "month", "n", "variant"]);
+  it("offers a static fill for each of the catalogue's five placeholders, month slots bracketed as blanks", () => {
+    const v = ENGINE_COPY.visual;
+    for (const slot of [v.staticCohort, v.staticMonth]) for (const l of LOCALES) expect(slot[l]).toMatch(/^\[.+\]$/);
+    for (const slot of [v.staticEvent, v.staticWindow, v.staticVariant]) for (const l of LOCALES) expect(slot[l].trim()).not.toBe("");
+  });
+
+  it("names the activation event as a whole noun phrase, the user's words quoted inside it", () => {
+    for (const l of LOCALES) {
+      expect(placeholdersOf(ENGINE_COPY.event.named[l])).toEqual(["name"]);
+      expect(placeholdersOf(ENGINE_COPY.event.unnamed[l])).toEqual([]);
+    }
+    // French guillemets hug their content with a no-break space, never a plain one.
+    expect(ENGINE_COPY.event.named.fr).toMatch(/«\u00a0\{name\}\u00a0»/);
+  });
+
+  it("gives every input a derived number can lack an article-ful phrase (« Il manque la marge brute »)", () => {
+    const inputs = [...new Set(DERIVED_SHAPES.flatMap((d) => d.inputs))].sort();
+    expect(Object.keys(ENGINE_COPY.unitInput).sort()).toEqual(inputs);
+    for (const phrase of Object.values(ENGINE_COPY.unitInput)) expect(phrase.fr).toMatch(/^(le |la |les |l['’])/);
   });
 
   it("asks five FAQ questions, each answered in both languages", () => {
@@ -87,7 +104,7 @@ describe("placeholders", () => {
    * computes is as much a contract change as one that needs a new value.
    */
   const TITLE_CONTRACT: Record<SlideTitleKey, string[]> = {
-    pelotonComplete: ["a", "p", "r"],
+    pelotonComplete: ["activated", "d30", "paid"],
     pelotonGap: ["clauses", "stages"],
     pelotonGapOne: ["clauses", "stages"],
     pelotonTailBreak: ["clauses", "stages"],
@@ -96,17 +113,22 @@ describe("placeholders", () => {
     leakClearMrrNew: ["amount", "stage", "target"],
     leakClearMrrRetained: ["amount", "stage", "target"],
     leakClearCustomers: ["n", "stage", "target"],
+    leakClearCustomersOne: ["n", "stage", "target"],
+    leakClearKept: ["n", "stage", "target"],
+    leakClearKeptOne: ["n", "stage", "target"],
     leakClearPerHundred: ["n", "stage", "target"],
+    leakClearPerHundredOne: ["n", "stage", "target"],
     leakShared: ["list", "n"],
-    leakNotEnoughBelow: ["stage"],
+    leakNotEnoughBelow: ["side", "stage"],
     leakLevel: [],
-    visibility: ["N", "k", "n", "repair"],
-    visibilityOne: ["N", "n", "repair"],
+    visibility: ["documented", "k", "repair"],
+    visibilityOne: ["documented", "repair"],
     visibilityAllDocumented: ["N"],
     unitEconomics: ["m", "x"],
     unitEconomicsUnknown: ["input"],
     mirror: ["k", "m"],
-    ask: ["current", "horizon", "metric", "target", "what"],
+    ask: ["goal", "what"],
+    askPlain: ["what"],
     askMeasureFirst: ["cost", "metric"],
     annex: [],
   };
@@ -121,7 +143,9 @@ describe("placeholders", () => {
   /** Plausible worst cases, formatted as `format.ts` would, in each language. */
   const SAMPLE: Record<Locale, Record<string, string>> = {
     fr: {
-      a: "18", r: "9 à 12", p: "6 à 9",
+      activated: "18 atteignent la première valeur", d30: "9 à 12 sont encore là à J30", paid: "6 à 9 paient",
+      side: "peut-être au-dessus du repère", documented: "11 chiffres sur 15",
+      goal: "taux d'activation de 18 % à 25 % d'ici T2 2027",
       clauses: "18 atteignent la première valeur et 6 à 9 paient",
       stages: "la rétention à J30 et la conversion en payant",
       stage: "la part des inscrits recommandés",
@@ -132,7 +156,9 @@ describe("placeholders", () => {
       metric: "Taux d'activation", current: "18 %", horizon: "T2 2027", cost: "un sprint",
     },
     en: {
-      a: "18", r: "9–12", p: "6–9",
+      activated: "18 reach first value", d30: "9–12 are still active at day 30", paid: "6–9 pay",
+      side: "possibly above the reference", documented: "11 of 15 numbers",
+      goal: "activation rate from 18% to 25% by Q2 2027",
       clauses: "18 reach first value and 6–9 pay",
       stages: "day-30 retention and paid conversion",
       stage: "the referred share of sign-ups",
@@ -179,6 +205,7 @@ describe("the slides", () => {
   const SLIDE_REACHABLE = [
     "slideTitles", "slide", "notes", "findings", "peloton", "whatIf", "diagnosis", "mirror", "subject", "stages",
     "units", "grammar", "tools", "role", "repair", "cause", "status", "basis", "ask",
+    "side", "worth", "event", "unitInput", "source",
   ];
 
   it("stays inside the three fonts: no arrow, no ≈, no U+2212, no superscript (§10.4)", () => {
@@ -200,7 +227,7 @@ describe("the slides", () => {
    */
   it("never addresses the reader on a slide", () => {
     const onSlide = [
-      ...under("slideTitles", "slide", "notes"),
+      ...under("slideTitles", "slide", "notes", "side", "worth", "unitInput"),
       ...under("peloton").filter(([p]) => /clause|unmeasured/.test(p)),
       ...under("whatIf").filter(([p]) => !/title|slider|multiplication|notForecast/.test(p)),
     ];

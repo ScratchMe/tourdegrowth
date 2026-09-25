@@ -1,6 +1,6 @@
-import { REMIND_AFTER_DAYS, shapeOf } from "./catalog-shape";
-import { windowDaysOf } from "./cohort";
-import { fillTemplate, formatMonth, lowerFirst } from "./format";
+import { REMIND_AFTER_DAYS } from "./catalog-shape";
+import { fillTemplate } from "./format";
+import { catalogueValues } from "./phrases";
 import type { EngineStrings, ResolvedMetric } from "./strings";
 import type { EngineCalcContext, EngineState, MetricEntry, MetricId, RoleId, Snapshot } from "./types";
 import { currentSnapshot, entryOf } from "./values";
@@ -44,25 +44,11 @@ export function buildRequest(
   ctx: EngineCalcContext,
 ): string {
   const snapshot = currentSnapshot(state);
-  const eventEntry = entryOf(snapshot, "act.event");
-  // The event's name is the activation's definition: the recipient can't count "activated" without it.
-  const event =
-    eventEntry?.status === "measured" && eventEntry.value?.kind === "text" && eventEntry.value.text.trim()
-      ? eventEntry.value.text.trim()
-      : lowerFirst(metricById(metrics, "act.event").name);
-
   const items = metricIds.map((id) => {
-    const shape = shapeOf(id);
-    const metric = metricById(metrics, id);
+    // The event's name is the activation's definition: the recipient can't count "activated" without it,
+    // so {event} carries it — quoted and introduced (« l'événement « a créé un premier projet » »).
+    const what = fillTemplate(metricById(metrics, id).request, catalogueValues(state, id, strings, metrics, ctx));
     const entry = entryOf(snapshot, id);
-    const variantId = entry?.variant ?? shape.variants?.[0];
-    const what = fillTemplate(metric.request, {
-      month: formatMonth(snapshot.referenceMonth, ctx.locale),
-      cohort: formatMonth(entry?.cohortMonth ?? snapshot.cohortMonth, ctx.locale),
-      n: String(windowDaysOf(shape, state.setup)),
-      event,
-      variant: metric.variants?.find((v) => v.id === variantId)?.label ?? "",
-    });
     const definition = entry?.definitionNote?.trim();
     return definition
       ? fillTemplate(strings.request.item, { what, definition })

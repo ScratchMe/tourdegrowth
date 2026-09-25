@@ -245,6 +245,13 @@ export type Position = "below" | "maybe-below" | "within" | "above" | "no-compar
 export interface ImpactLine {
   key: "today" | "if" | "then" | "times" | "annual" | "less-than-one";
   values: Record<string, string>;
+  /**
+   * The count this line's noun agrees with, AS PRINTED (rounded like its
+   * `values`): "42 nouveaux payants" / "1 nouveau payant". Set only where the
+   * template counts something with a noun — the grammatical number follows
+   * the printed number, so it is decided from the same rounding, not the raw one.
+   */
+  count?: Interval;
 }
 export interface Impact {
   metric: CandidateId;
@@ -323,6 +330,13 @@ export interface Peloton {
   smallCohort: boolean;
 }
 
+/**
+ * The inputs of the three computed figures (`DERIVED_SHAPES[].inputs`), the
+ * only numbers a sentence names after « il manque » / "missing:". The copy
+ * carries one phrase per id (`unitInput`); a test pins the two sets equal.
+ */
+export type UnitInputId = "acq.cac" | "rev.arpa" | "rev.gross-margin" | "ret.logo-churn";
+
 /** §5.7, §6.8. A computed figure with a missing input is "uncomputable — missing: …", never 0. */
 export type DerivedValue =
   | { kind: "known"; value: Interval; confidence: Exclude<Confidence, "unknown"> }
@@ -351,6 +365,8 @@ export interface SanityCheck {
   metrics: MetricId[];
   /** Placeholders of the message template, already formatted. */
   values: Record<string, string>;
+  /** The count the message's noun agrees with, as printed (`reconcile-gap`: « ~1 nouveau payant »). */
+  count?: Interval;
 }
 
 /** §6.10 — closed list, one rank, no model-generated text. */
@@ -370,6 +386,8 @@ export interface Finding {
   metrics: (MetricId | DerivedId)[];
   /** Placeholders of `findings.*`, already formatted. The sentence never asserts a cause. */
   values: Record<string, string>;
+  /** The count the sentence's noun agrees with, as printed — see `SanityCheck.count`. */
+  count?: Interval;
 }
 
 /** §6.11 — the Tour bridge. Declared from the answer's points, found from the status. */
@@ -414,7 +432,12 @@ export type SlideTitleKey =
   | "leakClearMrrNew"
   | "leakClearMrrRetained"
   | "leakClearCustomers"
+  | "leakClearCustomersOne"
+  /** Churn priced in customers, not money: its chain counts customers KEPT. */
+  | "leakClearKept"
+  | "leakClearKeptOne"
   | "leakClearPerHundred"
+  | "leakClearPerHundredOne"
   | "leakShared"
   | "leakNotEnoughBelow"
   | "leakLevel"
@@ -425,6 +448,8 @@ export type SlideTitleKey =
   | "unitEconomicsUnknown"
   | "mirror"
   | "ask"
+  /** The team wrote what it asks for, but no success metric with a target: the ask alone, no half-empty goal. */
+  | "askPlain"
   | "askMeasureFirst"
   | "annex";
 export interface SlideTitle {

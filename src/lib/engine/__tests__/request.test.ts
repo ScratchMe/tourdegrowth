@@ -20,14 +20,19 @@ describe("buildRequest", () => {
 
   it("period, names and definitions, in the page's language", () => {
     const fr = buildRequest("data", ["act.rate", "ret.d30", "acq.cac"], FR.strings, FR.metrics, state, CTX_FR);
-    expect(fr).toContain("pour la cohorte des inscrits de juillet 2026, combien ont fait a créé un premier projet sous 7 jours");
+    // The event is a noun phrase with its article, the user's words quoted inside it — never « ont fait a créé ».
+    expect(fr).toContain(
+      "pour les inscrits en juillet 2026, combien ont déclenché l'événement «\u00a0a créé un premier projet\u00a0» sous 7\u00a0jours",
+    );
     expect(fr).toContain("(activé = un projet créé)");
-    expect(fr).toContain("combien étaient encore actifs 30 jours après leur inscription");
-    expect(fr).toContain("la dépense d'acquisition de août 2026 (");
+    expect(fr).toContain("combien étaient encore actifs trente jours après leur inscription");
+    // « en août », never « de août »: a month may start with a vowel, and a template cannot elide.
+    expect(fr).toContain("la dépense d'acquisition en août 2026 (média seul)");
+    expect(fr).not.toMatch(/\bde (août|avril|octobre)/);
     expect(fr.startsWith("Bonjour")).toBe(true);
     expect(fr.split("\n").filter((l) => l.startsWith("– "))).toHaveLength(3);
     const en = buildRequest("data", ["act.rate"], EN.strings, EN.metrics, state, CTX_EN);
-    expect(en).toContain("for the July 2026 sign-up cohort");
+    expect(en).toContain('for the sign-ups from July 2026, how many triggered the "a créé un premier projet" event within 7 days');
   });
 
   it("no value the user entered: no count, no amount, no label, no private note", () => {
@@ -37,11 +42,21 @@ describe("buildRequest", () => {
     }
   });
 
-  it("without the user's event, the catalogue's name stands in", () => {
+  it("without the user's event, a generic noun phrase stands in — never the catalogue's label", () => {
     const noEvent = withEntry(state, "act.event", undefined);
     const fr = buildRequest("data", ["act.rate"], FR.strings, FR.metrics, noEvent, CTX_FR);
     expect(fr).not.toContain("a créé un premier projet");
-    expect(fr).toContain(`combien ont fait ${FR.metrics.find((m) => m.id === "act.event")!.name.charAt(0).toLowerCase()}`);
+    expect(fr).toContain("combien ont déclenché l'événement d'activation sous 7\u00a0jours");
+    const en = buildRequest("data", ["act.rate"], EN.strings, EN.metrics, noEvent, CTX_EN);
+    expect(en).toContain("how many triggered the activation event within 7 days");
+  });
+
+  it("quotes the user typed around their own event are not doubled", () => {
+    const quoted = withEntry(state, "act.event", measured({ kind: "text", text: " « a créé un premier projet » " }, tool));
+    const fr = buildRequest("data", ["act.rate"], FR.strings, FR.metrics, quoted, CTX_FR);
+    expect(fr).toContain("l'événement «\u00a0a créé un premier projet\u00a0» sous");
+    const en = buildRequest("data", ["act.rate"], EN.strings, EN.metrics, withEntry(state, "act.event", measured({ kind: "text", text: '"created a project"' }, tool)), CTX_EN);
+    expect(en).toContain('the "created a project" event');
   });
 });
 
