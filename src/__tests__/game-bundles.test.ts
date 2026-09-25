@@ -23,9 +23,9 @@ import { FILES, isClientComponent, reachable, resolveSpecifier, valueImports } f
  *    out, and a direct-import rule sees none of them.
  *
  * Rules 3 and 4 apply to EVERY client component of the game's tree rather
- * than to a list of names: `GameIsland.tsx` does not exist yet (plan G8a),
- * and a guard that names it would pass in silence until it does. The first
- * test makes sure the set is not empty.
+ * than to a list of names, so a new island file is covered the day it is
+ * written. The first test makes sure the set holds the files that matter —
+ * `GameIsland.tsx` reaches the most code, through `island-view.ts`.
  */
 const GAME_TREE = "app/[locale]/game/";
 
@@ -48,7 +48,11 @@ function importLines(source: string): { spec: string; typeOnly: boolean }[] {
 
 describe("C7 — the game's client bundles", () => {
   it("finds the game's client components — otherwise rules 3 and 4 hold over an empty set", () => {
-    expect(GAME_CLIENT.map((f) => f.path)).toContain("app/[locale]/game/HubProgress.tsx");
+    const paths = GAME_CLIENT.map((f) => f.path);
+    expect(paths).toContain("app/[locale]/game/HubProgress.tsx");
+    // The island and its hook: the two files that import the engine by value.
+    expect(paths).toContain("app/[locale]/game/retention/GameIsland.tsx");
+    expect(paths).toContain("app/[locale]/game/retention/useGame.ts");
   });
 
   it("1. no client component outside the game's tree imports lib/game or content/game by value", () => {
