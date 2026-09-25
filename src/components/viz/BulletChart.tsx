@@ -6,9 +6,12 @@ export interface BulletChartProps {
   /** The objective. Drawn as a 3px `--viz-highlight` tick; outside `domain`, or not a number, it is not drawn at all. */
   target: number;
   /**
-   * The track's scale, from the caller. A value past it fills the track to
-   * the edge and the bar's end turns into a point, saying "further than
-   * this" instead of pretending the value sits on the edge.
+   * The track's scale, from the caller. A value past its top fills the track
+   * to the edge and the bar's end turns into a point, saying "further than
+   * this" instead of pretending the value sits on the edge. A value below its
+   * bottom draws no bar at all — an empty track would read as "exactly the
+   * minimum" — but an outlined chevron against the start, pointing out of the
+   * track: "lower than this". Shape, not colour, carries both.
    */
   domain: readonly [number, number];
   /**
@@ -54,11 +57,15 @@ export function BulletChart({
       data-testid={testId}
     >
       <div className={styles.track} aria-hidden="true">
-        <span
-          className={[styles.value, g.valueOverflow === "high" ? styles.overflow : ""].filter(Boolean).join(" ")}
-          style={{ width: `${g.valuePct}%` }}
-          data-overflow={g.valueOverflow ?? undefined}
-        />
+        {g.valueOverflow === "low" ? (
+          <span className={styles.below} data-overflow="low" />
+        ) : (
+          <span
+            className={[styles.value, g.valueOverflow === "high" ? styles.overflow : ""].filter(Boolean).join(" ")}
+            style={{ width: `${g.valuePct}%` }}
+            data-overflow={g.valueOverflow ?? undefined}
+          />
+        )}
         {g.targetPct !== null ? <span className={styles.target} style={{ left: `${g.targetPct}%` }} /> : null}
       </div>
     </div>

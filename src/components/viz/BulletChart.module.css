@@ -33,6 +33,29 @@
 }
 
 /*
+ * Below the domain: no bar (a sliver of fill would claim a small value), an
+ * outlined "<" against the start instead — the mirror of the pointed end
+ * above, and outlined like the Sparkline's hollow marker, because it does
+ * not claim to be the value either. A square's left and bottom borders,
+ * turned 45°, make the chevron.
+ */
+.below {
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  width: 5px;
+  height: 5px;
+  border-left: 2px solid var(--viz-ink);
+  border-bottom: 2px solid var(--viz-ink);
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.md .below {
+  width: 7px;
+  height: 7px;
+}
+
+/*
  * 3px, taller than the track by 4px each side. --viz-highlight is a mark
  * (4.42:1 on the card, 3.22:1 on the sunken track — both ≥ 3:1), never text.
  */

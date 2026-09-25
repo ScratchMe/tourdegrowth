@@ -17,6 +17,17 @@ describe("bulletGeometry", () => {
     expect(g.valueOverflow).toBe("high");
   });
 
+  it("says a value below the domain went LOW, which is not the same as sitting on the minimum", () => {
+    // Both have a 0% bar; only the overflow side tells them apart, and
+    // BulletChart draws its "lower than this" chevron from it.
+    const below = bulletGeometry(3, 5, [4, 6]);
+    expect(below.valuePct).toBe(0);
+    expect(below.valueOverflow).toBe("low");
+    const atMin = bulletGeometry(4, 5, [4, 6]);
+    expect(atMin.valuePct).toBe(0);
+    expect(atMin.valueOverflow).toBeNull();
+  });
+
   it("draws no target marker for a target outside the domain, and says which side it left", () => {
     // Pinned at the edge, a tick would claim an objective of exactly 0.
     const low = bulletGeometry(5, -2, [0, 10]);
