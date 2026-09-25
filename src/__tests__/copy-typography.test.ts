@@ -112,6 +112,10 @@ describe("French typography", () => {
     const strings = await frenchStrings();
     expect(strings.length).toBeGreaterThan(1000);
     expect(new Set(strings.map((s) => s.file)).size).toBeGreaterThan(15);
+    // The growth engine's two modules carry more French than any other page
+    // (engine spec §12, P3): a scan that stopped reaching them would pass on them.
+    for (const file of ["src/content/engine-catalog.ts", "src/content/engine-copy.ts"])
+      expect(strings.filter((s) => s.file === file).length, file).toBeGreaterThan(150);
     // The walk must tell the two languages apart, or it would flag English.
     expect(strings.some((s) => s.text === "Où ta croissance")).toBe(true);
     expect(strings.some((s) => s.text === "Where does")).toBe(false);
