@@ -83,6 +83,19 @@ test.describe("P16 — one quarter with the keyboard alone", () => {
 
     await tabTo(page, "game-run");
     await page.keyboard.press("Enter");
+    // The quarter's news: the focus is on « Suivant → », and Enter reads the
+    // whole screen card by card — the button keeps the focus as it turns into
+    // « Voir le bilan du trimestre → » (Antoine, 2026-09-26).
+    const news = page.getByTestId("game-news");
+    await expect(news).toBeVisible();
+    await expect(page.getByTestId("game-news-next")).toBeFocused();
+    const total = Number(((await page.getByTestId("game-news-count").textContent()) ?? "").match(/(\d+)\D*$/)?.[1]);
+    expect(total).toBeGreaterThan(1);
+    for (let i = 0; i < total; i++) {
+      await expect(page.getByTestId("game-news-next")).toBeFocused();
+      await page.keyboard.press("Enter");
+    }
+    await expect(news).toHaveCount(0);
     const report = page.getByTestId("game-report-1");
     await expect(report).toBeVisible();
     await expect(report.locator("h2").first()).toBeFocused();

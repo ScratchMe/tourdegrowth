@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test";
 import { expect, test, trackedEvents } from "./helpers";
-import { LEVEL_PATH, axeSeriousOrCritical, hangUp, pickAndRun, pickUpCall, playQuarter, seedGame } from "./game-helpers";
+import { LEVEL_PATH, axeSeriousOrCritical, hangUp, pickAndRun, pickUpCall, playQuarter, readNews, seedGame, skipNews } from "./game-helpers";
 import { PATH_A, PATH_C, PATH_D, playPath } from "../src/lib/game/__tests__/paths";
 
 /**
@@ -60,6 +60,9 @@ test.describe("one quarter", () => {
     await expect(page.getByTestId("game-reread")).toHaveCount(1);
 
     await playQuarterFromHand(page, PATH_A[0]!);
+    // The quarter's news comes first, over everything; skipped, the live
+    // region says what reading it would have said (Antoine, 2026-09-26).
+    await skipNews(page);
     const report = page.getByTestId("game-report-1");
     await expect(report).toBeVisible();
     await expect(report.locator("h2").first()).toBeFocused();
@@ -120,8 +123,13 @@ test.describe("the months, with motion on", () => {
     await page.getByTestId("game-run").click();
     await expect(page.getByTestId("game-dashboard")).toBeFocused();
     await expect(page.getByTestId("game-desk")).toHaveAttribute("data-phase", "running");
-    await expect(page.getByTestId("game-report-1")).toBeVisible({ timeout: 5_000 });
+    // When the months end, the news takes the screen and the focus.
+    await expect(page.getByTestId("game-news")).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByTestId("game-desk")).toHaveAttribute("data-phase", "news");
+    await expect(page.getByTestId("game-news-next")).toBeFocused();
+    await readNews(page);
     await expect(page.getByTestId("game-desk")).toHaveAttribute("data-phase", "report");
+    await expect(page.getByTestId("game-report-1").locator("h2").first()).toBeFocused();
   });
 });
 

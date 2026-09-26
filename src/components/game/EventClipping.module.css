@@ -64,3 +64,72 @@
 .post {
   font: var(--body-md);
 }
+
+/*
+ * « Pourquoi ce contrôle » — what the event means, under a rule, still on
+ * the paper. Body type, not the muted meta of the masthead: this is the line
+ * the player needs to act on.
+ */
+.why {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding-top: var(--space-4);
+  border-top: var(--border-rule);
+}
+
+.whyHeading {
+  margin: 0;
+  font: var(--meta-sm);
+  font-weight: 600;
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-body);
+}
+
+.clipping[data-kind="control"] .whyHeading {
+  color: var(--text-alert);
+}
+
+.whyLine {
+  margin: 0;
+  font: var(--body-sm);
+  color: var(--text-body);
+}
+
+/*
+ * The news screen's rubber stamp. Its resting place is its final one — tilted,
+ * in the flow under the article — so with motion off (motion.css) it is simply
+ * there. With motion on, it slams down a beat after the clipping arrives.
+ */
+.stamp {
+  align-self: flex-end;
+  display: inline-block;
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  font: var(--meta-md);
+  font-weight: 700;
+  letter-spacing: var(--meta-tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-alert);
+  border: 3px solid currentColor;
+  border-radius: var(--radius-tag);
+  transform: rotate(-6deg);
+  animation: tdg-game-stamp-slam 380ms var(--ease-stamp) 260ms both;
+}
+
+.stamp[data-tone="good"] {
+  color: var(--state-good-text);
+}
+
+@keyframes tdg-game-stamp-slam {
+  from {
+    opacity: 0;
+    transform: scale(2.4) rotate(-18deg);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-6deg);
+  }
+}

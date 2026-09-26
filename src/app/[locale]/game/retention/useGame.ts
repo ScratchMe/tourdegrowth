@@ -91,6 +91,8 @@ export interface GameRefs {
   call: RefObject<HTMLElement | null>;
   hand: RefObject<HTMLHeadingElement | null>;
   dashboard: RefObject<HTMLDivElement | null>;
+  /** The news screen's primary button — it stays the same element from the first news to the last. */
+  news: RefObject<HTMLButtonElement | null>;
   report: RefObject<HTMLHeadingElement | null>;
   december: RefObject<HTMLHeadingElement | null>;
   resume: RefObject<HTMLHeadingElement | null>;
@@ -123,6 +125,8 @@ export interface Game {
   hangUp: () => void;
   toggle: (id: string) => void;
   run: () => void;
+  /** The news screen is done — read to its end, or skipped: the report it covered takes the screen. */
+  closeNews: (how: "read" | "skipped") => void;
   next: () => void;
   pickUp: () => void;
   listen: () => void;
@@ -257,11 +261,11 @@ export function useGame(ctx: IslandContext, refs: GameRefs): Game {
       setFrame(frame + 1);
       return;
     }
-    const q = phase.kind === "running" ? phase.q : game.log.length - 1;
     setRun(null);
     setPhase((p) => nextPhase(p, { type: "runEnd" }));
-    focus("report");
-    announce(quarterEndAnnouncement(ctx, game, q));
+    // The news screen opens over everything and says the quarter itself: the
+    // live region behind it is inert while it is open.
+    focus("news");
   });
 
   const running = phase.kind === "running";
@@ -313,7 +317,6 @@ export function useGame(ctx: IslandContext, refs: GameRefs): Game {
       trackEvent(GAME_ORDER_EVENT, before.picks.includes(before.order) ? "obeyed" : "refused");
     }
     trackEvent(GAME_QUARTER_EVENT, String(before.q + 1));
-    const q = next.log.length - 1;
     const p = go({ type: "run", year: yearFacts(next), animate: !reduced });
     if (p.kind === "running") {
       setRun({ from: before, frames: monthFrames(before, next) });
@@ -322,9 +325,17 @@ export function useGame(ctx: IslandContext, refs: GameRefs): Game {
       // screens above the « Lancer » button that was just pressed.
       focus("dashboard");
     } else {
-      focus("report");
-      announce(quarterEndAnnouncement(ctx, next, q));
+      focus(focusFor(p));
     }
+  };
+
+  const closeNews = (how: "read" | "skipped") => {
+    const p = go({ type: "newsDone" });
+    if (p.kind !== "report") return;
+    focus("report");
+    // Skipped, the verdict was never read out: the one region says it, once,
+    // the moment the page behind the news is live again.
+    if (how === "skipped") announce(quarterEndAnnouncement(ctx, game, p.q));
   };
 
   const nextStep = () => {
@@ -402,6 +413,7 @@ export function useGame(ctx: IslandContext, refs: GameRefs): Game {
     hangUp,
     toggle,
     run: runQuarter,
+    closeNews,
     next: nextStep,
     pickUp,
     listen,

@@ -24,7 +24,7 @@ import { dashboardView, monthFrames } from "../view";
 import { deepFreeze, endingState, PATH_A, PATH_C, PATH_D, playPath, type Path } from "./paths";
 
 // Plan §4.2 X27 — the island's phases, extracted as a pure function so the
-// loop the player walks (call → hand → months → report → ringing → call …
+// loop the player walks (call → hand → months → news → report → ringing → call …
 // → December) is pinned here, in both motion settings, before any browser
 // plays it. A gesture that makes no sense in the current phase returns the
 // SAME object, exactly like the reducer's refusals.
@@ -53,6 +53,7 @@ function walk(path: Path, animate: boolean): UiPhaseKind[] {
     state = reduce(state, { type: "run" });
     go(nextPhase(phase, { type: "run", year: yearFacts(state), animate }));
     if (phase.kind === "running") go(nextPhase(phase, { type: "runEnd" }));
+    go(nextPhase(phase, { type: "newsDone" }));
     go(nextPhase(phase, { type: "next", year: yearFacts(state) }));
   }
   return seen;
@@ -64,8 +65,8 @@ describe("X27 — the year, screen by screen", () => {
     expect(settledPhase(yearFacts(fresh(L)))).toEqual(INITIAL_PHASE);
   });
 
-  it("a whole honest year: every quarter has its months, its report and its call, then December", () => {
-    const quarter = ["hand", "running", "report"];
+  it("a whole honest year: every quarter has its months, its news, its report and its call, then December", () => {
+    const quarter = ["hand", "running", "news", "report"];
     expect(walk(PATH_A, true)).toEqual([
       "call",
       ...quarter,
@@ -82,10 +83,14 @@ describe("X27 — the year, screen by screen", () => {
     ]);
   });
 
-  it("with reduced motion, « Lancer » goes straight to the report — no screen waits on an animation", () => {
+  it("with reduced motion, « Lancer » skips the months but never the news — the news is content, not motion", () => {
     const kinds = walk(PATH_A, false);
     expect(kinds).not.toContain("running");
+    expect(kinds.filter((k) => k === "news")).toHaveLength(4);
     expect(kinds.filter((k) => k === "report")).toHaveLength(4);
+    // Each quarter's news comes straight after « Lancer », then its report.
+    const firstRun = kinds.indexOf("hand");
+    expect(kinds.slice(firstRun, firstRun + 3)).toEqual(["hand", "news", "report"]);
   });
 
   it("a year cut short by a firing goes from its last report to December, not to another call", () => {
@@ -96,14 +101,16 @@ describe("X27 — the year, screen by screen", () => {
     expect(kinds.filter((k) => k === "ringing")).toHaveLength(1);
   });
 
-  it("the running and report screens carry the quarter they are about", () => {
+  it("the running, news and report screens carry the quarter they are about", () => {
     const [start] = playPath(PATH_C);
     let s = reduce(start!, { type: "hangup" });
     s = reduce(reduce(s, { type: "toggle", card: "pdef" }), { type: "toggle", card: "bury" });
     s = reduce(s, { type: "run" });
     const running = nextPhase({ kind: "hand" }, { type: "run", year: yearFacts(s), animate: true });
     expect(running).toEqual({ kind: "running", q: 0 });
-    expect(nextPhase(running, { type: "runEnd" })).toEqual({ kind: "report", q: 0 });
+    const news = nextPhase(running, { type: "runEnd" });
+    expect(news).toEqual({ kind: "news", q: 0 });
+    expect(nextPhase(news, { type: "newsDone" })).toEqual({ kind: "report", q: 0 });
   });
 });
 
@@ -114,6 +121,7 @@ describe("X27 — gestures that make no sense are refused by identity", () => {
     { kind: "ringing" },
     { kind: "hand" },
     { kind: "running", q: 1 },
+    { kind: "news", q: 1 },
     { kind: "report", q: 1 },
     { kind: "december" },
   ];
@@ -137,6 +145,17 @@ describe("X27 — gestures that make no sense are refused by identity", () => {
     for (const p of phases.filter((x) => x.kind !== "running")) expect(nextPhase(p, { type: "runEnd" })).toBe(p);
     for (const p of phases.filter((x) => x.kind !== "report")) expect(nextPhase(p, { type: "next", year })).toBe(p);
     for (const p of phases.filter((x) => x.kind !== "ringing")) expect(nextPhase(p, { type: "pickUp" })).toBe(p);
+  });
+
+  it("the news closes only from itself — a stale Escape on the report changes nothing", () => {
+    for (const p of phases.filter((x) => x.kind !== "news")) expect(nextPhase(p, { type: "newsDone" })).toBe(p);
+    // The report's button does nothing while the news covers it.
+    const news: UiPhase = { kind: "news", q: 1 };
+    expect(nextPhase(news, { type: "next", year })).toBe(news);
+  });
+
+  it("a reload during the news lands on the report, never on the news again", () => {
+    expect(nextPhase({ kind: "news", q: 1 }, { type: "restore", year })).toEqual({ kind: "report", q: 1 });
   });
 
   it("asking twice, restoring into the same screen and restarting an open first call change nothing", () => {
@@ -186,17 +205,19 @@ describe("X27 — what each screen shows", () => {
     { kind: "ringing" },
     { kind: "hand" },
     { kind: "running", q: 0 },
+    { kind: "news", q: 0 },
     { kind: "report", q: 0 },
     { kind: "december" },
   ];
 
-  it("the call's state in each phase — the report and the prompt take its place", () => {
+  it("the call's state in each phase — the news, the report and the prompt take its place", () => {
     expect(Object.fromEntries(all.map((p) => [p.kind, callViewFor(p)]))).toEqual({
       resumePrompt: null,
       call: "open",
       ringing: "ringing",
       hand: "hungUp",
       running: "hungUp",
+      news: null,
       report: null,
       december: "ended",
     });
@@ -234,6 +255,7 @@ describe("X27 — what each screen shows", () => {
       ringing: "call",
       hand: "hand",
       running: "dashboard",
+      news: "news",
       report: "report",
       december: "december",
     });

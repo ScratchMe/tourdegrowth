@@ -226,17 +226,28 @@
   padding-top: var(--space-12);
 }
 
-.faqItem {
+.faqList {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  max-width: var(--measure-read);
 }
 
+/*
+ * The question is a sentence, not a label: the Disclosure summary sets
+ * uppercase mono for its label rows, and a value declared on this span wins
+ * over what it would inherit, whatever the selectors' weights.
+ */
 .faqQuestion {
+  display: block;
   font: var(--body-lg);
   font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
   color: var(--text-body);
-  max-width: var(--measure-read);
+}
+
+.faqAnswer {
+  padding-bottom: var(--space-5);
 }
 
 .tour {

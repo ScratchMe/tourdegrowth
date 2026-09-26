@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from "react";
+import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode, Ref } from "react";
 import styles from "./Button.module.css";
 
 type Variant = "primary" | "secondary" | "quiet";
@@ -46,6 +46,8 @@ type PlainButtonProps = SharedProps & {
    * a navigation, and the browser already shows that.
    */
   loading?: boolean;
+  /** React 19 passes `ref` as a prop: it reaches the `<button>` with the rest. */
+  ref?: Ref<HTMLButtonElement>;
 } & Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children" | "className">;
 
 type ButtonProps = LinkButtonProps | PlainButtonProps;

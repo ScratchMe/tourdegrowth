@@ -69,7 +69,42 @@ export async function pickAndRun(page: Page, picks: readonly [RetentionCardId, R
   }
   const q = await page.getByTestId("game-desk").evaluate(() => document.querySelectorAll("[data-testid^='game-journal-']").length + 1);
   await page.getByTestId("game-run").click();
+  await skipNews(page);
   await expect(page.getByTestId(`game-report-${q}`)).toBeVisible({ timeout: 10_000 });
+}
+
+/**
+ * The quarter's news (Antoine, 2026-09-26): a modal screen over everything,
+ * one card at a time, between the months and the report. Every spec that runs
+ * a quarter meets it, and nothing behind it can be clicked until it closes —
+ * a modal <dialog> makes the page inert.
+ */
+export async function skipNews(page: Page): Promise<void> {
+  const news = page.getByTestId("game-news");
+  await expect(news).toBeVisible({ timeout: 10_000 });
+  await page.getByTestId("game-news-skip").click();
+  await expect(news).toHaveCount(0);
+}
+
+/**
+ * Reads the news the way a player does, « Suivant → » until « Voir le bilan
+ * du trimestre → », and returns each card's kind in the order it was shown.
+ */
+export async function readNews(page: Page): Promise<string[]> {
+  const news = page.getByTestId("game-news");
+  await expect(news).toBeVisible({ timeout: 10_000 });
+  const count = (await page.getByTestId("game-news-count").textContent()) ?? "";
+  const total = Number(count.match(/(\d+)\D*$/)?.[1]);
+  expect(total).toBeGreaterThan(0);
+  const kinds: string[] = [];
+  for (let i = 0; i < total; i++) {
+    const item = page.getByTestId("game-news-item");
+    await expect(item).toHaveCount(1);
+    kinds.push((await item.getAttribute("data-kind")) ?? "");
+    await page.getByTestId("game-news-next").click();
+  }
+  await expect(news).toHaveCount(0);
+  return kinds;
 }
 
 /** « Reprendre » on the prompt a seeded year with a quarter played opens on. */

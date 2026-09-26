@@ -20,6 +20,7 @@ import type { DecemberFigures } from "@/components/game/RevealCells";
 import type { EventClippingProps } from "@/components/game/EventClipping";
 import type { HandCard } from "@/components/game/Hand";
 import type { JournalEntry } from "@/components/game/GameJournal";
+import type { QuarterNewsItem } from "@/components/game/QuarterNews";
 import type { ReportFigure } from "@/components/game/QuarterReport";
 import type { TimelineSegment } from "@/components/game/QuarterTimeline";
 import type { StatTileDelta } from "@/components/viz/StatTile";
@@ -29,6 +30,7 @@ import {
   formatDelta,
   formatEur,
   formatInt,
+  formatList,
   formatMillions,
   formatPct,
   formatPoints,
@@ -380,6 +382,24 @@ export interface ReportContent {
   nextLabel: string;
 }
 
+/**
+ * What an inspection, or the complaints that announce one, mean for the
+ * player — said on the clipping itself (Antoine, 2026-09-26: « on ne comprend
+ * pas pourquoi ça arrive »). An inspection names the tricks it took down,
+ * which are exactly the ones still in production when it fell.
+ */
+function clippingWhy(ctx: IslandContext, event: GameEvent): EventClippingProps["why"] {
+  const { copy, locale } = ctx;
+  const why = copy.clippings.why;
+  if (event.kind === "reports") return { heading: why.reportsHeading, lines: [why.reports] };
+  if (event.kind !== "control") return undefined;
+  const names = event.removed.map((id) => cardName(ctx, id as Id));
+  return {
+    heading: why.controlHeading,
+    lines: [why.controlRadar, names.length > 0 ? fill(why.controlRemoved, { list: formatList(locale, names) }) : why.controlNone],
+  };
+}
+
 function clipping(ctx: IslandContext, event: GameEvent): EventClippingProps | null {
   const { copy } = ctx;
   const text = eventText(ctx, event);
@@ -388,6 +408,7 @@ function clipping(ctx: IslandContext, event: GameEvent): EventClippingProps | nu
       return { kind: "viral", handle: copy.clippings.viral.handle, text };
     case "control":
     case "reports":
+      return { kind: event.kind, ...copy.clippings[event.kind], text, why: clippingWhy(ctx, event) };
     case "press":
     case "competitor":
       return { kind: event.kind, ...copy.clippings[event.kind], text };
@@ -451,6 +472,77 @@ export function reportContent(ctx: IslandContext, state: State, q: number): Repo
     bossLine: bossLine(ctx, log),
     mood: r.moodAfter,
     nextLabel: isLast ? copy.report.toDecember : copy.report.next,
+  };
+}
+
+// ------------------------------------------------------------- the news ---
+
+export interface NewsContent {
+  q: number;
+  eyebrow: string;
+  period: string;
+  items: QuarterNewsItem[];
+  progress: string[];
+}
+
+/** The rubber stamp a public event takes on the news screen — none for the competitor's offer, which is weather. */
+function newsStamp({ copy, locale }: IslandContext, event: GameEvent): EventClippingProps["stamp"] {
+  const stamps = copy.news.stamps;
+  switch (event.kind) {
+    case "control":
+      return { text: fill(stamps.fine, { fine: formatEur(locale, event.fine) }), tone: "bad" };
+    case "reports":
+      return { text: stamps.reports, tone: "bad" };
+    case "viral":
+      return { text: stamps.viral, tone: "bad" };
+    case "press":
+      return { text: stamps.press, tone: "good" };
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * The quarter's news, in the order it happened (Antoine, 2026-09-26): the
+ * CEO's mail from the middle of the quarter, then the verdict at its end,
+ * what came back inside Flixo, what the outside world printed, and the CEO's
+ * last word. Built from the SAME pieces as the report (`reportContent`), so
+ * the two can never tell the quarter two different ways — the news screen
+ * stages it, the report keeps it.
+ */
+export function newsContent(ctx: IslandContext, state: State, q: number): NewsContent {
+  const { copy } = ctx;
+  const report = reportContent(ctx, state, q);
+  const log = state.log[q]!;
+  const labels = copy.news.labels;
+  const [churn, ...others] = report.figures;
+  const items: QuarterNewsItem[] = [];
+  if (report.mail) items.push({ kind: "mail", label: labels.mail, mail: report.mail });
+  if (churn) {
+    items.push({
+      kind: "result",
+      label: labels.result,
+      metric: churn.label,
+      value: churn.value,
+      note: churn.note ?? "",
+      status: churn.status ?? { text: "", tone: "good" },
+      figures: others.map(({ key, label, value }) => ({ key, label, value })),
+    });
+  }
+  for (const text of report.notes) items.push({ kind: "note", label: labels.team, text });
+  for (const event of log.events) {
+    const c = clipping(ctx, event);
+    if (c) items.push({ kind: "clipping", label: labels.outside, clipping: { ...c, stamp: newsStamp(ctx, event) } });
+  }
+  items.push({ kind: "boss", label: labels.boss, line: report.bossLine, mood: report.mood });
+  return {
+    q: report.q,
+    eyebrow: copy.news.eyebrow,
+    period: report.period,
+    items,
+    progress: items.map((_, i) =>
+      fill(copy.news.progress, { n: formatInt(ctx.locale, i + 1), total: formatInt(ctx.locale, items.length) }),
+    ),
   };
 }
 

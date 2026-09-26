@@ -42,11 +42,29 @@ for (const locale of ["en", "fr"] as const) {
     const formulas = await catalogue.locator("article dd").allInnerTexts();
     expect(formulas.join("\n")).not.toMatch(/\{[a-z]+\}/i);
 
-    await expect(page.getByTestId("engine-faq").locator("h3").first()).toBeVisible();
+    // The FAQ: every question readable, every answer folded — and still in
+    // the HTML, which is what a crawler reads (a closed <details> keeps it).
+    const faq = page.getByTestId("engine-faq-item");
+    const questions = await faq.count();
+    expect(questions).toBeGreaterThanOrEqual(5);
+    for (let i = 0; i < questions; i++) {
+      await expect(faq.nth(i).locator("summary")).toBeVisible();
+      await expect(faq.nth(i).locator("p")).toBeHidden();
+    }
+    expect(await faq.nth(0).locator("p").textContent()).toBeTruthy();
     await expect(page.locator("h1")).toHaveCount(1);
     await context.close();
   });
 }
+
+test("a FAQ question opens its answer, and the rest stay folded", async ({ page }) => {
+  await page.goto("/en/aarrr-funnel-template");
+  const faq = page.getByTestId("engine-faq-item");
+  await faq.nth(1).locator("summary").click();
+  await expect(faq.nth(1).locator("p")).toBeVisible();
+  await expect(faq.nth(0).locator("p")).toBeHidden();
+  await expect(faq.nth(2).locator("p")).toBeHidden();
+});
 
 test("the way to the Tour is one document load of /quiz — never a router fetch first", async ({ page }) => {
   // /quiz lives under the other root layout: a next/link would fetch its RSC

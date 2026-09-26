@@ -4656,6 +4656,28 @@ Et les petits correctifs : l'effacement ignore la casse et le dit, le nom se dit
 
 **Vercel n'est plus une contrainte de cadence** (Antoine, 2026-09-26, en donnant le feu vert de ce merge). La convention 13 tient donc pour mémoire de ce que coûte un merge, plus comme une limite à respecter ; le détail de ce qui a changé côté compte reste à consigner quand il le précisera.
 
+### La fin du trimestre en plein écran, et la FAQ du moteur dépliable (2026-09-26)
+
+Deux retours d'Antoine, après une partie où la DGCCRF lui a retiré ses chantiers sans qu'il comprenne pourquoi : « ce n'est pas assez visible, on ne comprend pas pourquoi ça arrive » ; le bilan convient pour la relecture, mais il faut « un deuxième affichage choc », comme la fin de manche de *La Bataille du budget* — un écran qui masque tout et livre les news une par une. Puis, pour le moteur : « la FAQ aussi, on devrait la rendre dépliable ». Détail côté jeu : `GAME-BRIEF.md` §16.1.
+
+**Une phase de plus, pas un effet par-dessus le bilan.** `lib/game/phases.ts` gagne `news` entre `running` et `report` ; sous `prefers-reduced-motion`, « Lancer » va directement à `news` (l'écran n'est pas sauté, seule son animation l'est). `settledPhase` ne rend jamais `news` : un rechargement pendant les news reprend sur le bilan. La vue (`island-view.ts#newsContent`) est construite depuis `reportContent` — les mêmes mots, jamais une seconde copie — et un test le vérifie carte par carte.
+
+**Pourquoi un `<dialog>` modal et pas un calque.** `showModal()` met l'écran dans la couche supérieure et rend la page derrière inerte : pas de Tab, pas de lecteur d'écran qui y descend, et Échap arrive en `cancel` (traité comme « Passer au bilan »). Le focus reste sur le bouton principal d'une carte à l'autre, donc Entrée lit le trimestre d'un bout à l'autre ; chaque carte est annoncée par la scène, une région `polite` lue en entier. L'annonce « Fin du trimestre… » n'est faite que si les news ont été sautées — lues, elles l'ont déjà dite.
+
+**Ce qu'une spec doit savoir** : une fois l'écran ouvert, rien derrière ne se clique. `e2e/game-helpers.ts` gagne `skipNews` et `readNews`, `pickAndRun` passe les news, et les phases enregistrées deviennent `hand → news → report` (et `hand → running → news → report` avec le mouvement). `e2e/game-news.spec.ts` (7 specs) : l'ordre des cartes, le chiffre du verdict, le contrôle du parcours C (le « pourquoi », les astuces nommées, le tampon « Amende · 106 000 € », le même « pourquoi » dans le bilan), Échap, le rechargement, et axe + débordement horizontal sur **chaque** carte à 1280 et 390 px.
+
+**Deux défauts trouvés à la capture, invisibles à la relecture :**
+- **Le bouton « Suivant → » passait sous la ligne de flottaison** sur la carte du contrôle à 390 px (le « pourquoi » l'allonge). Barre d'action collante au bas du dialogue, et le défilement repart en haut à chaque carte.
+- « Passer au bilan » se coupait sur deux lignes (trois sur téléphone), et les segments de progression sortaient en lentilles : `--radius-round` vaut `50 %`, le rayon d'un disque, pas celui d'un segment (`--radius-tag`, comme `StageProgress`).
+
+**Non-vacuité mesurée** : avec `show()` au lieu de `showModal()`, exactement les 4 specs qui dépendent du mode modal tombent (dont les trois qui ferment par Échap) ; sans la barre collante, seule la spec téléphone tombe, sur `toBeInViewport`.
+
+**La FAQ du moteur** : chaque question devient un `core/Disclosure` fermé, sa réponse dedans. Le texte reste dans le HTML prérendu — un `<details>` fermé le garde, et c'est ce qu'un moteur de recherche lit — ce que la spec sans JavaScript vérifie désormais question par question. La question reprend le corps de texte (pas les capitales mono du résumé de `Disclosure`), pour se lire comme une question.
+
+**Copie neuve, donc `TODO: à relire`** : le « pourquoi » du contrôle et des signalements, et toute la copie de l'écran (`news.*`). **Signalé, pas corrigé** : le mot du DG concatène deux répliques qui peuvent se contredire — au 3ᵉ trimestre du parcours C, « Ce n'est pas ce qu'on avait dit. » suivi de « Merci d'avoir fait ce que j'ai demandé. ». C'est la ligne du bilan telle qu'elle existait (verdict sur l'objectif + réaction à l'ordre) ; l'écran plein ne fait que la rendre plus visible. À trancher dans la copie.
+
+**Vérifié en réel** : `tsc`, lint, **1 986 tests unitaires** (+7) avec les seuils de couverture, `next build` (jeu ouvert comme la CI), **514 specs Playwright** (509 passées, 5 ignorées par construction). Captures relues : FR 1280 (verdict, contrôle, mot du DG), FR et EN 390 (message, verdict, contrôle), FAQ FR 1280 et 390, aucun débordement.
+
 ## État du projet au 2026-09-25 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -4680,7 +4702,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **L'instrument d'audit growth a son schéma** (2026-09-13, `AUDIT.md`) : un outil personnel pour les diagnostics qu'Antoine mène en entreprise, navigateur seulement, jamais Firestore — `src/lib/audit/` + `src/content/audit-catalog.ts`, sans aucune route ni UI encore. Phase 1 (la saisie sous `/admin/audit`) est le prochain chantier, découpée en six PR dans **`AUDIT-PLAN.md`** (2026-09-13) ; phase 3 (tout ce qui ressemble à un produit) reste fermée tant que les entretiens ne sont pas faits et le contrat de travail pas vérifié.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément ; mesurés le 2026-09-26 sur la branche de travail, build avec `GAME_ENABLED=true` comme la CI) : **1 979 tests unitaires**, **506 specs Playwright** (501 passées, 5 ignorées par construction : ce sont les specs « jeu fermé », qui ne tournent que sur un build sans le drapeau ; les specs de l'aperçu propriétaire sautent aussi sans `ADMIN_DASHBOARD_PASSWORD` sur le serveur, que la CI pose), `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
+**Chiffres de référence** (à comparer, pas à recopier aveuglément ; mesurés le 2026-09-26 sur la branche de travail, build avec `GAME_ENABLED=true` comme la CI) : **1 986 tests unitaires**, **514 specs Playwright** (509 passées, 5 ignorées par construction : ce sont les specs « jeu fermé », qui ne tournent que sur un build sans le drapeau ; les specs de l'aperçu propriétaire sautent aussi sans `ADMIN_DASHBOARD_PASSWORD` sur le serveur, que la CI pose), `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 

@@ -505,6 +505,7 @@ const NOT_FROM_PROTOTYPE: Record<string, string> = {
   "tourLoop.*": "new — brief §13.3 D",
   "resume.*": "new — brief §9.5, plan §2.6",
   "a11y.*": "new — plan §3.5",
+  "news.*": "Antoine 2026-09-26 — the quarter's news, one at a time, over everything",
 };
 
 function exceptionFor(path: string): string | undefined {

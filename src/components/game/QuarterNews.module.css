@@ -1,0 +1,392 @@
+/*
+ * game/QuarterNews — the quarter's news over the whole screen (Antoine,
+ * 2026-09-26). Night world: the dialog sits inside the island's NightSurface
+ * in the DOM, so the semantic tokens resolve to their night values; the
+ * clippings rebind to paper themselves (EventClipping).
+ *
+ * Every element's resting style is its final state, and each entrance is a
+ * `from` keyframe: under reduced motion (motion.css) the animations are off
+ * and the cards are simply there.
+ */
+
+.dialog {
+  /* The whole viewport: « un écran qui vient tout masquer ». */
+  position: fixed;
+  inset: 0;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: var(--surface-page);
+  color: var(--text-body);
+  overflow-y: auto;
+  /* A wheel at the end of the dialog does not scroll the page behind it. */
+  overscroll-behavior: contain;
+  animation: tdg-game-news-open 240ms var(--ease-out) both;
+}
+
+/* The dialog paints the whole screen itself; the backdrop has nothing to add. */
+.dialog::backdrop {
+  background: transparent;
+}
+
+@keyframes tdg-game-news-open {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.frame {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  width: min(var(--game-col-main), 100%);
+  min-height: 100%;
+  margin: 0 auto;
+  padding: var(--space-10) var(--space-8);
+}
+
+.top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-6);
+}
+
+.heading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* « Passer au bilan » on one line: the title gives way, never the way out. */
+.top > :last-child {
+  flex: none;
+  white-space: nowrap;
+}
+
+.eyebrow {
+  margin: 0;
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.period {
+  margin: 0;
+  font: var(--display-title);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+  color: var(--text-body);
+}
+
+/* How far into the quarter's news: filled behind, lit on the current one. */
+.dots {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Segments, like StageProgress — `--radius-round` (50%) drew them as lenses. */
+.dot {
+  flex: 1 1 0;
+  height: 4px;
+  background: var(--surface-sunken);
+  border-radius: var(--radius-tag);
+}
+
+.done {
+  background: var(--text-muted);
+}
+
+.current {
+  background: var(--text-body);
+}
+
+/* The stage grows to fill the screen, so the button below does not jump from one card to the next. */
+.stage {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* An inspection shakes the stage once, after its stamp has landed. */
+.shake {
+  animation: tdg-game-news-shake 420ms ease-in-out 620ms both;
+}
+
+@keyframes tdg-game-news-shake {
+  0%,
+  100% {
+    transform: none;
+  }
+  20% {
+    transform: translateX(-10px);
+  }
+  40% {
+    transform: translateX(9px);
+  }
+  60% {
+    transform: translateX(-6px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  animation: tdg-game-news-card 420ms var(--ease-out) both;
+}
+
+@keyframes tdg-game-news-card {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.label {
+  margin: 0;
+  font: var(--meta-md);
+  font-weight: 600;
+  letter-spacing: var(--meta-tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* --- The verdict --- */
+
+.result {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.metric {
+  margin: 0;
+  font: var(--chart-label);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* The number the quarter is judged on, as big as the page can carry it. */
+.value {
+  margin: 0;
+  font: var(--display-score-xl);
+  font-variant-numeric: var(--tabular);
+  line-height: 1;
+  color: var(--text-body);
+  animation: tdg-stamp var(--dur-stamp) var(--ease-stamp) 120ms both;
+}
+
+.note {
+  margin: 0;
+  font: var(--body-lg);
+  color: var(--text-muted);
+}
+
+/* Hit or missed, in words, stamped: the colour repeats what the words say. */
+.verdict {
+  margin: var(--space-3) 0 0;
+  padding: var(--space-2) var(--space-5);
+  font: var(--meta-md);
+  font-weight: 700;
+  letter-spacing: var(--meta-tracking-wide);
+  text-transform: uppercase;
+  border: 3px solid currentColor;
+  border-radius: var(--radius-tag);
+  transform: rotate(-4deg);
+  animation: tdg-game-news-verdict 380ms var(--ease-stamp) 420ms both;
+}
+
+.verdict[data-tone="good"] {
+  color: var(--state-good-text);
+}
+
+.verdict[data-tone="bad"] {
+  color: var(--state-bad-text);
+}
+
+@keyframes tdg-game-news-verdict {
+  from {
+    opacity: 0;
+    transform: scale(2.2) rotate(-14deg);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-4deg);
+  }
+}
+
+.figures {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-6);
+  width: 100%;
+  margin: var(--space-6) 0 0;
+  padding-top: var(--space-6);
+  border-top: var(--border-rule);
+}
+
+.figure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.figure dt {
+  font: var(--chart-label);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.figure dd {
+  margin: 0;
+  font: var(--chart-value);
+  font-variant-numeric: var(--tabular);
+  color: var(--text-body);
+  overflow-wrap: anywhere;
+}
+
+/* --- Inside Flixo --- */
+
+.noteText {
+  margin: 0;
+  font: var(--body-read);
+  color: var(--text-body);
+}
+
+/* --- Outside --- */
+
+.clipping {
+  /* The tilt pushes a corner out by a few pixels. */
+  padding: var(--space-2);
+}
+
+/* --- The CEO --- */
+
+.boss {
+  display: flex;
+  align-items: center;
+  gap: var(--space-7);
+  padding: var(--space-8);
+  background: var(--surface-card);
+  border-left: 4px solid var(--border-hard);
+  border-radius: var(--radius-tag);
+}
+
+.angry {
+  border-left-color: var(--state-bad-text);
+}
+
+.face {
+  flex: none;
+  display: inline-flex;
+  width: 64px;
+  height: 64px;
+}
+
+/* The avatar draws at 40px by its own class; here it fills the larger slot (one class and an element beat one class). */
+.face > svg {
+  width: 100%;
+  height: 100%;
+}
+
+.bossLine {
+  margin: 0;
+  font: var(--body-read);
+  color: var(--text-body);
+}
+
+/*
+ * The one action stays on screen whatever the card's length: an inspection
+ * with its why runs past a phone's fold, and « Suivant → » under the fold
+ * reads as the end of the screen. Sticky to the dialog's own scrollport.
+ */
+.bottom {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  padding-block: var(--space-5);
+  background: var(--surface-page);
+}
+
+.count {
+  margin: 0;
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-variant-numeric: var(--tabular);
+}
+
+@media (max-width: 760px) {
+  .frame {
+    gap: var(--space-7);
+    padding: var(--space-8) var(--game-gutter-mobile);
+  }
+
+  .period {
+    font: var(--display-section);
+    letter-spacing: var(--display-letter-spacing);
+  }
+
+  .value {
+    font: var(--display-score-lg);
+  }
+
+  .noteText,
+  .bossLine {
+    font: var(--body-read-mobile);
+  }
+
+  .figures {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .boss {
+    padding: var(--space-6);
+  }
+
+  .face {
+    width: 48px;
+    height: 48px;
+  }
+
+  /* The button spans the width: the thumb reaches it without aiming. */
+  .bottom {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .bottom > * {
+    width: 100%;
+  }
+}
