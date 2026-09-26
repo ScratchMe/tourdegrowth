@@ -74,10 +74,10 @@ async function openEngine(page: Page, locale: "en" | "fr" = "en"): Promise<Locat
   return island;
 }
 
-/** Setup with its defaults (self-serve, last closed month, EUR). */
+/** Setup with its defaults (self-serve, last closed month, EUR), straight to the board. */
 async function startEngine(page: Page, locale: "en" | "fr" = "en"): Promise<void> {
   await openEngine(page, locale);
-  await page.getByTestId("engine-setup-start").click();
+  await page.getByTestId("engine-setup-board").click();
   await expect(page.getByTestId("engine-board")).toBeVisible();
 }
 
@@ -124,11 +124,11 @@ async function expectNoSeriousA11y(page: Page, label: string): Promise<void> {
 const ENGINE_EVENT = /^engine_(opened|request_copied|deck_opened|tour_linked|stage_saved\/(acquisition|activation|retention|referral|revenue)|exported\/json)$/;
 
 test.describe("setup and first save", () => {
-  test("first visit shows the setup; Start opens the board with nothing found yet", async ({ page }) => {
+  test("first visit shows the setup; « See it all at once » opens the board with nothing found yet", async ({ page }) => {
     await openEngine(page);
     await expect(page.getByTestId("engine-setup")).toBeVisible();
     await expect(page.getByRole("radio", { name: /self-serve/ })).toBeChecked();
-    await page.getByTestId("engine-setup-start").click();
+    await page.getByTestId("engine-setup-board").click();
     await expect(page.getByTestId("engine-coverage")).toContainText("0 of 15 numbers found");
     // Focus follows the screen change to the verdict, never left on <body>.
     await expect(page.locator("#engine-verdict")).toBeFocused();
@@ -221,7 +221,7 @@ test.describe("asking and collecting", () => {
     await openEngine(page);
     // A company name and a number typed first: neither may travel in the copied message.
     await page.getByLabel(ENGINE_COPY.setup.companyLabel.en).fill("Canary Corp 4242");
-    await page.getByTestId("engine-setup-start").click();
+    await page.getByTestId("engine-setup-board").click();
     const found = await openSheet(page, "activation", "act-rate");
     await found.getByRole("radio", { name: "I have it" }).check();
     await found.locator("#engine-act-rate-num").fill("144");
@@ -256,9 +256,11 @@ test.describe("asking and collecting", () => {
     await expect.poll(() => trackedEvents(page)).toContain("engine_request_copied");
   });
 
-  test("the collect tab counts what's left, groups by person, and Fill in opens the sheet", async ({ page }) => {
+  test("the collect list counts what's left, groups by person, and Fill in opens the sheet", async ({ page }) => {
     await startEngine(page);
-    await page.getByRole("button", { name: "To go and get (15)" }).click();
+    const fold = page.getByTestId("engine-collect-disclosure");
+    await expect(fold.locator("summary")).toContainText("(15)");
+    await fold.locator("summary").click();
     const collect = page.getByTestId("engine-collect");
     await expect(collect).toBeVisible();
     await expect(collect.getByTestId("engine-collect-ask")).toBeVisible();
@@ -309,18 +311,20 @@ test.describe("the §6.0 example on the board", () => {
       // Same day, nothing waiting, nothing left to fill: no resume band repeating the coverage.
       await expect(page.getByTestId("engine-resume")).toHaveCount(0);
 
+      // The board's own funnel — the folded « what if » below draws a second one.
+      const peloton = page.getByTestId("engine-board-peloton");
       // Activated: the numeral says 18, the grid holds exactly 18 measured dots.
-      await expect(page.getByTestId("peloton-numeral-act.rate")).toHaveText(EXAMPLE_EXPECTED.activatedPerHundred);
-      expect(await dotCounts(page.getByTestId("peloton-grid-act.rate"))).toEqual({ filled: 18, empty: 82 });
+      await expect(peloton.getByTestId("peloton-numeral-act.rate")).toHaveText(EXAMPLE_EXPECTED.activatedPerHundred);
+      expect(await dotCounts(peloton.getByTestId("peloton-grid-act.rate"))).toEqual({ filled: 18, empty: 82 });
       // Paid, estimated 6 to 9: 6 sure dots, 3 hatched, and the numeral says the range.
-      await expect(page.getByTestId("peloton-numeral-rev.paid-conversion")).toHaveText(EXAMPLE_EXPECTED.paidPerHundred[locale]);
-      expect(await dotCounts(page.getByTestId("peloton-grid-rev.paid-conversion"))).toEqual({ filled: 6, range: 3, empty: 91 });
+      await expect(peloton.getByTestId("peloton-numeral-rev.paid-conversion")).toHaveText(EXAMPLE_EXPECTED.paidPerHundred[locale]);
+      expect(await dotCounts(peloton.getByTestId("peloton-grid-rev.paid-conversion"))).toEqual({ filled: 6, range: 3, empty: 91 });
       // Day-30 retention is not measured: a "?", no dots at all — an unknown is not an empty grid.
-      await expect(page.getByTestId("peloton-numeral-ret.d30")).toHaveText("?");
-      expect(await dotCounts(page.getByTestId("peloton-grid-ret.d30"))).toEqual({});
-      await expect(page.getByTestId("peloton-grid-ret.d30")).toContainText("?");
+      await expect(peloton.getByTestId("peloton-numeral-ret.d30")).toHaveText("?");
+      expect(await dotCounts(peloton.getByTestId("peloton-grid-ret.d30"))).toEqual({});
+      await expect(peloton.getByTestId("peloton-grid-ret.d30")).toContainText("?");
       // Upstream: the visitors per 100 sign-ups, approximated.
-      await expect(page.getByTestId("peloton-upstream")).toContainText(EXAMPLE_EXPECTED.visitorsPerHundred[locale]);
+      await expect(peloton.getByTestId("peloton-upstream")).toContainText(EXAMPLE_EXPECTED.visitorsPerHundred[locale]);
 
       // The diagnosis names activation — one stage, stamped once, on its column — and says retention is blind.
       const diagnosis = page.getByTestId("engine-diagnosis");
@@ -330,20 +334,25 @@ test.describe("the §6.0 example on the board", () => {
       await expect(diagnosis.getByTestId("diagnosis-blind")).toContainText(
         ENGINE_COPY.diagnosis.blindOne[locale].replace("{stages}", ENGINE_COPY.subject["ret.d30"][locale]),
       );
-      await expect(page.getByTestId("peloton-stamp")).toHaveCount(1);
-      await expect(page.locator('[data-metric="act.rate"]').getByTestId("peloton-stamp")).toBeVisible();
+      await expect(peloton.getByTestId("peloton-stamp")).toHaveCount(1);
+      await expect(peloton.locator('[data-metric="act.rate"]').getByTestId("peloton-stamp")).toBeVisible();
 
       // No Tour on this device: the mirror invites to take one.
       await expect(page.getByTestId("engine-mirror")).toHaveAttribute("data-state", "none");
       await noHorizontalScroll(page);
     });
 
-    test(`${locale}: "what if" starts at the reference and recomputes when the slider moves`, async ({ page }) => {
+    test(`${locale}: "what if" starts at the reference, recomputes when the slider moves, and redraws the funnel`, async ({ page }) => {
       await page.setViewportSize({ width: 1280, height: 900 });
       await openExample(page, locale);
       // On a desk the drawer opens on the stage the diagnosis names, its ★ open.
       await expect(page.getByTestId("engine-drawer")).toHaveAttribute("data-stage", "activation");
-      const whatIf = page.getByTestId("engine-whatif");
+      // « What if » is folded on the board, and no longer inside a number's sheet.
+      await expect(page.getByTestId("engine-drawer").getByTestId("engine-whatif")).toHaveCount(0);
+      const fold = page.getByTestId("engine-board-whatif");
+      await fold.locator("summary").click();
+      // It opens on the stage the diagnosis names.
+      const whatIf = fold.getByTestId("engine-whatif");
       await expect(whatIf).toBeVisible();
       const lines = whatIf.getByTestId("whatif-lines");
       // Starts at the low end of the reference (20 %), so the chain is shown at once.
@@ -358,6 +367,10 @@ test.describe("the §6.0 example on the board", () => {
       // Recomputed, not patched: every figure of the chain moved with the target.
       await expect(lines).toContainText("42 × 21/18 = 49 (+7)");
       await expect(lines).not.toContainText(EXAMPLE_EXPECTED.leakChain);
+      // And the funnel next to it is the funnel at 21 %, not today's.
+      const panel = fold.getByTestId("engine-whatif-panel");
+      await expect(panel.getByTestId("peloton-numeral-act.rate")).toHaveText("21");
+      await expect(page.getByTestId("engine-board-peloton").getByTestId("peloton-numeral-act.rate")).toHaveText(EXAMPLE_EXPECTED.activatedPerHundred);
     });
   }
 
@@ -389,8 +402,11 @@ test.describe("the §6.0 example on the board", () => {
       const box = await page.getByTestId(`engine-row-name-${stage}`).boundingBox();
       expect(box!.height, stage).toBeLessThan(45);
     }
-    const sheet = await openSheet(page, "activation", "act-rate");
-    await expect(sheet.getByTestId("engine-whatif")).toBeVisible();
+    await openSheet(page, "activation", "act-rate");
+    await noHorizontalScroll(page);
+    const fold = page.getByTestId("engine-board-whatif");
+    await fold.locator("summary").click();
+    await expect(fold.getByTestId("engine-whatif")).toBeVisible();
     await noHorizontalScroll(page);
   });
 
@@ -464,7 +480,7 @@ test.describe("leaving the device and coming back", () => {
 test.describe("keyboard, languages, widths", () => {
   test("keyboard only: setup, a stage, one sheet, saved", async ({ page }) => {
     await openEngine(page);
-    await tabTo(page, page.getByTestId("engine-setup-start"));
+    await tabTo(page, page.getByTestId("engine-setup-board"));
     await page.keyboard.press("Enter");
     await expect(page.getByTestId("engine-board")).toBeVisible();
 
@@ -557,16 +573,15 @@ test.describe("accessibility of each screen", () => {
   test("setup, board with a sheet, triage, collect, import, erase — no serious or critical issue", async ({ page }) => {
     await openEngine(page);
     await expectNoSeriousA11y(page, "setup");
-    await page.getByTestId("engine-setup-start").click();
+    await page.getByTestId("engine-setup-board").click();
     const sheet = await openSheet(page, "activation", "act-rate");
     await sheet.getByRole("radio", { name: "I have it" }).check();
     await expectNoSeriousA11y(page, "sheet");
     await sheet.getByRole("radio", { name: "I can't find it" }).check();
     await sheet.getByTestId("engine-triage").getByRole("radio").first().check();
     await expectNoSeriousA11y(page, "triage");
-    await page.getByRole("button", { name: /To go and get/ }).click();
+    await page.getByTestId("engine-collect-disclosure").locator("summary").click();
     await expectNoSeriousA11y(page, "collect");
-    await page.getByRole("button", { name: "The engine" }).click();
     await page.getByTestId("engine-import-open-screen").click();
     await expectNoSeriousA11y(page, "import");
     await page.getByTestId("engine-import-cancel").click();
@@ -577,6 +592,7 @@ test.describe("accessibility of each screen", () => {
   test("the example board — diagnosis, peloton, what-if, mirror — has no serious or critical issue", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await openExample(page);
+    await page.getByTestId("engine-board-whatif").locator("summary").click();
     await expect(page.getByTestId("engine-whatif")).toBeVisible();
     await expectNoSeriousA11y(page, "example board");
   });

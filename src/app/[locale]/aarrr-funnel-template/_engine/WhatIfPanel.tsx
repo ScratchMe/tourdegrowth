@@ -38,7 +38,9 @@ export function WhatIfPanel({ view }: { view: EngineView }) {
   const s = strings.steps;
   const available = PRICED.filter((id) => knownIn(state, id, ctx).kind === "known");
   const [chosen, setChosen] = useState<CandidateId | null>(null);
-  const id = chosen && available.includes(chosen) ? chosen : (available[0] ?? null);
+  // Opens on the stage the diagnosis names when it can be priced — the one worth testing first.
+  const named = available.find((c) => (view.derived.diagnosis.named as readonly string[]).includes(c));
+  const id = chosen && available.includes(chosen) ? chosen : (named ?? available[0] ?? null);
   const snapshot = state.snapshots[state.snapshots.length - 1]!;
   const cohortSignups = knownSharedCount(snapshot, "cohortSignups")?.value ?? null;
 

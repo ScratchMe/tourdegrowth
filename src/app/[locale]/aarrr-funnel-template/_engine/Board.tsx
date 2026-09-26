@@ -148,7 +148,7 @@ export function Board({
       <>
           <Diagnosis diagnosis={derived.diagnosis} strings={strings} locale={ctx.locale} metrics={view.metrics} values={candidateValues} />
           {/* The screen's one raised card (Card's own rule): the peloton is what the board is about. */}
-          <Card elevation="raised" className={styles.pelotonCard}>
+          <Card elevation="raised" className={styles.pelotonCard} data-testid="engine-board-peloton">
             <Peloton
               peloton={derived.peloton}
               strings={strings}
@@ -187,12 +187,14 @@ export function Board({
             })}
           </div>
 
-          <section className={styles.whatIf} aria-labelledby="engine-board-whatif" data-testid="engine-board-whatif">
-            <h3 id="engine-board-whatif" className={styles.sectionTitle}>
-              {strings.board.whatIfTitle}
-            </h3>
-            <WhatIfPanel view={view} />
-          </section>
+          {/* Folded on the board: the funnel it redraws is the one just above, and a
+              second full funnel open by default made the longest page of the site
+              longer (Antoine, 2026-09-25). The step-by-step shows it open. */}
+          <Disclosure summary={strings.board.whatIfTitle} data-testid="engine-board-whatif">
+            <div className={styles.whatIf}>
+              <WhatIfPanel view={view} />
+            </div>
+          </Disclosure>
 
           {/* Declared × measured (§8.5): the linked Tour's mirror, or "that Tour is gone" when its
               result left the device, or — with no Tour here at all — the invitation to take one.

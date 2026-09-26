@@ -99,7 +99,7 @@ export function ValueEditor({
     <div className={styles.editor} data-testid="engine-value-editor">
       {draft.kind === "ratio" ? (
         <div className={styles.counts}>
-          <Field label={metric.inputs?.numerator ?? metric.name} htmlFor={numId} hint={sharedHints?.numerator}>
+          <Field label={metric.inputs?.numerator ?? metric.name} htmlFor={numId}>
             <NumberField
               id={numId}
               value={draft.numerator}
@@ -117,7 +117,6 @@ export function ValueEditor({
           <Field
             label={metric.inputs?.denominator ?? metric.name}
             htmlFor={denId}
-            hint={sharedHints?.denominator}
             error={rule("denominator-zero")}
           >
             <NumberField
@@ -130,6 +129,23 @@ export function ValueEditor({
               invalidMessage={w.notAWholeNumber}
             />
           </Field>
+        </div>
+      ) : null}
+      {/* The shared-count hints sit UNDER the pair, not under one field: a hint under
+          one box only lifted it above its neighbour (the grid aligns the boxes' bottoms).
+          Same ids as a Field's own hint, so `describedBy` above still points at them. */}
+      {draft.kind === "ratio" && (sharedHints?.numerator || sharedHints?.denominator) ? (
+        <div className={styles.sharedNotes}>
+          {sharedHints?.numerator ? (
+            <p id={`${numId}-hint`} className={styles.sharedNote}>
+              {sharedHints.numerator}
+            </p>
+          ) : null}
+          {sharedHints?.denominator ? (
+            <p id={`${denId}-hint`} className={styles.sharedNote} data-testid="engine-shared-hint">
+              {sharedHints.denominator}
+            </p>
+          ) : null}
         </div>
       ) : null}
       {draft.kind === "ratio" && (live || rule("num-gt-den")) ? (

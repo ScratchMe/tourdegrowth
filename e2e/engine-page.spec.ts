@@ -76,9 +76,24 @@ test("the privacy promise comes before the call to action", async ({ page }) => 
   expect(privacy && cta && privacy.y + privacy.height <= cta.y).toBe(true);
 });
 
+test("how long it takes comes before the tool; the fifteen cards are folded but in the HTML", async ({ page }) => {
+  await page.goto("/fr/aarrr-funnel-template");
+  const duration = await page.getByTestId("engine-duration").boundingBox();
+  const tool = await page.locator("#engine").boundingBox();
+  expect(duration && tool && duration.y + duration.height <= tool.y).toBe(true);
+  // The split is counted from the catalogue's effort tags: 5 + 5 + 5 today.
+  await expect(page.getByTestId("engine-duration")).toContainText("5 se lisent en cinq minutes, 5 demandent");
+  const fold = page.getByTestId("engine-catalogue-toggle");
+  await expect(fold).not.toHaveAttribute("open", /.*/);
+  await expect(page.getByTestId("engine-stage-acquisition")).toBeHidden();
+  await fold.locator("summary").click();
+  await expect(page.getByTestId("engine-stage-acquisition")).toBeVisible();
+});
+
 test("the catalogue reads three sheets to a row at 1280 and one at 390", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/en/aarrr-funnel-template");
+  await page.getByTestId("engine-catalogue-toggle").locator("summary").click();
   const tops = await page
     .getByTestId("engine-stage-acquisition")
     .locator("article")

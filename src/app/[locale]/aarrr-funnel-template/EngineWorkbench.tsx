@@ -300,8 +300,14 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
         }),
       );
     },
-    setBase(count: SharedCount, value: number) {
-      persist(withSnapshot(current, (s) => withSharedCount(s, count, value)));
+    // Every count in ONE write: two calls in the same tick would both start from the
+    // same `current`, and the second would silently drop the first.
+    setBase(counts: Partial<Record<SharedCount, number>>) {
+      persist(
+        withSnapshot(current, (s) =>
+          (Object.entries(counts) as [SharedCount, number][]).reduce((acc, [count, value]) => withSharedCount(acc, count, value), s),
+        ),
+      );
     },
     markRequested(ids: MetricId[], role: RoleId) {
       persist(withSnapshot(current, (s) => markRequested(s, ids, role, new Date().toISOString())));

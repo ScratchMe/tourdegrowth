@@ -438,10 +438,3 @@
   min-width: 0;
 }
 
-.sectionTitle {
-  font: var(--display-section);
-  letter-spacing: var(--display-letter-spacing);
-  text-transform: uppercase;
-  color: var(--text-body);
-  margin: 0;
-}

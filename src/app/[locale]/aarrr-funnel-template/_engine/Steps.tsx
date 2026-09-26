@@ -211,9 +211,11 @@ function BaseStep({
       ["cohortSignups", cohort],
       ["monthSignups", month],
     ];
+    const changed: Partial<Record<SharedCount, number>> = {};
     for (const [count, n] of pairs) {
-      if (n !== null && Number.isInteger(n) && n > 0 && n !== knownSharedCount(snapshot, count)?.value) actions.setBase(count, n);
+      if (n !== null && Number.isInteger(n) && n > 0 && n !== knownSharedCount(snapshot, count)?.value) changed[count] = n;
     }
+    if (Object.keys(changed).length > 0) actions.setBase(changed);
     onNext();
   }
 

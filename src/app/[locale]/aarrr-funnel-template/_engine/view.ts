@@ -33,7 +33,8 @@ export interface EngineActions {
   saveEntry: (id: MetricId, entry: MetricEntry) => CommitResult;
   setTarget: (id: MetricId, target: number | null) => void;
   /** A count several numbers share, typed once (shared-counts.ts): the base and every entry carrying it. */
-  setBase: (count: SharedCount, value: number) => void;
+  /** One write for all the counts given: see EngineWorkbench. */
+  setBase: (counts: Partial<Record<SharedCount, number>>) => void;
   markRequested: (ids: MetricId[], role: RoleId) => void;
   markReminded: (ids: MetricId[]) => void;
   /** Opens a number's sheet from anywhere — "also in Stripe", the collect list, the resume band. */

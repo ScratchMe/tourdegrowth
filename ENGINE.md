@@ -33,6 +33,45 @@ chacune se renverse en une phrase :
    d'ouverture prévus : `/how-it-works`, les deux pages SEO d'entrée, une section
    de la landing sous la citation — pas de septième lien au pied de page.
 
+**Refonte de la saisie (2026-09-26, sur les premiers retours d'Antoine).** Ce
+qui change par rapport aux §4, §7 et §8 plus bas — le reste tient :
+
+- **Deux façons de remplir.** Après le réglage, « Commencer pas à pas » (par
+  défaut) ou « Tout voir d'un coup » (le tableau, pour qui connaît l'outil).
+  Le pas à pas suit quatre grandes étapes : tes cibles actuelles → ta base
+  (les inscrits) puis un chiffre par écran → « Et si ? » sur tout le funnel →
+  tes slides. Il reprend là où tu t'es arrêté (`steps-model.ts#resumePosition`),
+  et chaque écran a « Voir le tableau complet ».
+- **Une base commune** (`Snapshot.base`, `lib/engine/shared-counts.ts`) : les
+  inscrits de la cohorte (dénominateur de cinq chiffres) et ceux du mois (deux
+  chiffres) se tapent une fois, puis se propagent dans chaque entrée qui les
+  porte — l'entrée reste complète seule, pour le fichier, le deck et le
+  validateur. Une entrée que la nouvelle base rendrait impossible est laissée
+  telle quelle et la fiche dit « compté sur n, pas sur ta base de m ».
+- **« Et si » sort des fiches** et devient un panneau à part
+  (`_engine/WhatIfPanel.tsx`) : on choisit l'étape (celle que le diagnostic
+  nomme par défaut), le curseur redessine le funnel à côté
+  (`lib/engine/projection.ts` : activation et conversion payante ; les payants
+  suivent l'activation) et la chaîne en revenu reste celle du §6.7. Ouvert dans
+  le pas à pas, plié sur le tableau (qui montre déjà le funnel au-dessus).
+- **Explications à la demande** : les quinze fiches statiques de la page sont
+  pliées (toujours dans le HTML prérendu), « où le trouver » est plié dans
+  chaque fiche, la liste « à aller chercher » est pliée sur le tableau, et les
+  onglets du tableau disparaissent.
+- **La durée est dite avant l'outil** : un bloc compte les quinze chiffres par
+  effort, depuis les étiquettes du catalogue (5 en cinq minutes, 5 en une
+  heure, 5 à demander), puis quatre cas (tout sous la main, il faut demander,
+  pas de cible, les slides).
+- **Un exemple rempli** (`lib/engine/example.ts`, le jeu du §6.0) : funnel et
+  slides, en lecture seule — rien n'est écrit sur l'appareil.
+- **Les réglages se modifient après coup** (« Réglages » sur le tableau).
+  Changer une fenêtre renvoie le chiffre qu'elle définit « à faire » (il ne
+  décrit plus la même chose) ; changer un mois garde les entrées et demande
+  de les relire. L'écran le dit avant d'enregistrer.
+- Petits correctifs : la confirmation d'effacement ignore la casse et le dit ;
+  le champ du nom dit « nom de ton SaaS ou de ton entreprise » ; le peloton dit
+  combien d'inscrits réels il ramène à 100, et où changer ce nombre.
+
 ---
 
 # Le moteur de croissance — spécification d'implémentation (v1)
