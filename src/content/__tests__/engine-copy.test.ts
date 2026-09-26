@@ -157,7 +157,7 @@ describe("placeholders", () => {
     },
     en: {
       activated: "18 reach first value", d30: "9–12 are still active at day 30", paid: "6–9 pay",
-      side: "possibly above the reference", documented: "11 of 15 numbers",
+      side: "possibly above the reference", documented: "13 of 17 numbers",
       goal: "activation rate from 18% to 25% by Q2 2027",
       clauses: "18 reach first value and 6–9 pay",
       stages: "day-30 retention and paid conversion",

@@ -29,13 +29,13 @@ for (const locale of ["en", "fr"] as const) {
     expect(res?.status()).toBe(200);
 
     const catalogue = page.getByTestId("engine-catalogue");
-    // Fifteen numbers across the five stages, three each…
+    // Seventeen numbers across the five stages — three each, five for Revenue since the MRR movements (2026-09-26)…
     for (const stage of ["acquisition", "activation", "retention", "referral", "revenue"]) {
-      await expect(page.getByTestId(`engine-stage-${stage}`).locator("article")).toHaveCount(3);
+      await expect(page.getByTestId(`engine-stage-${stage}`).locator("article")).toHaveCount(stage === "revenue" ? 5 : 3);
     }
-    // …plus the three computed ones, never entered.
-    await expect(page.getByTestId("engine-stage-computed").locator("article")).toHaveCount(3);
-    await expect(catalogue.locator("article")).toHaveCount(18);
+    // …plus the five computed ones, never entered.
+    await expect(page.getByTestId("engine-stage-computed").locator("article")).toHaveCount(5);
+    await expect(catalogue.locator("article")).toHaveCount(22);
 
     // Every sheet prints a formula whose placeholders were filled: a raw
     // `{event}` on an indexed page would be a visible template leak.
@@ -99,8 +99,8 @@ test("how long it takes comes before the tool; the fifteen cards are folded but 
   const duration = await page.getByTestId("engine-duration").boundingBox();
   const tool = await page.locator("#engine").boundingBox();
   expect(duration && tool && duration.y + duration.height <= tool.y).toBe(true);
-  // The split is counted from the catalogue's effort tags: 5 + 5 + 5 today.
-  await expect(page.getByTestId("engine-duration")).toContainText("5 se lisent en cinq minutes, 5 demandent");
+  // The split is counted from the catalogue's effort tags: 5 + 7 + 5 since the MRR movements.
+  await expect(page.getByTestId("engine-duration")).toContainText("5 se lisent en cinq minutes, 7 demandent");
   const fold = page.getByTestId("engine-catalogue-toggle");
   await expect(fold).not.toHaveAttribute("open", /.*/);
   await expect(page.getByTestId("engine-stage-acquisition")).toBeHidden();

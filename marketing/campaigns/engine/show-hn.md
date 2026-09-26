@@ -58,7 +58,7 @@ sent » (82 caractères, trop long).
 >
 > It sits next to a 3-minute check-up that asks whether you *measure* each stage; this one asks what the numbers *say*. Code is open (AGPL): github.com/ScratchMe/tourdegrowth
 >
-> What I'd love feedback on: which of the fifteen numbers you couldn't find, and whether the deck would survive your own leadership meeting.
+> What I'd love feedback on: which of the seventeen numbers you couldn't find, and whether the deck would survive your own leadership meeting.
 
 ## FAQ — les objections probables, réponse prête
 
@@ -71,7 +71,7 @@ sent » (82 caractères, trop long).
 | **"Why counts instead of rates?"** | Because a rate without its denominator can't be checked, and half of funnel arguments are two people using two denominators. |
 | **"Your funnel math is naive."** | Tell me where. The one deliberate simplification is written on the slide itself: "all else equal, paying customers are assumed to come from activated users." The arithmetic behind every title is shown line by line. |
 | **"No PowerPoint?"** | Not in v1. A PPTX generated in the browser can't carry the display font, and every hatch and dotted line would need redrawing as shapes. PNG per slide pastes into your own deck template, which is what most people do with a leadership deck anyway. |
-| **"Only self-serve SaaS?"** | For now. The fifteen numbers and where to find them differ for sales-led B2B and marketplaces; I'd rather ship one profile that's right than four that are vague. |
+| **"Only self-serve SaaS?"** | For now. The seventeen numbers and where to find them differ for sales-led B2B and marketplaces; I'd rather ship one profile that's right than four that are vague. |
 | **"Is there AI in it?"** | No. Every sentence in the tool and on the slides is written in advance and chosen by rules; nothing is generated. |
 | **"Business model?"** | It's free and there's no account system to sell you anything through. The deck credits the site by default, and you can remove that. |
 | **"Who's behind this?"** | The site credits its author in the footer; I keep this account pseudonymous. |

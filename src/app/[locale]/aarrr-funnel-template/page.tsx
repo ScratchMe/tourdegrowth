@@ -82,7 +82,7 @@ function referenceLine(
  * peloton needs four grids side by side and the board a drawer next to its
  * rows, which the 760px prose column cannot hold. **The page around it** is
  * prerendered prose that reads without JavaScript and is what a search
- * engine indexes: the fifteen numbers with their formula, where to find each
+ * engine indexes: the seventeen numbers with their formula, where to find each
  * one and what to know before quoting it, the three computed ones, the FAQ,
  * and a way to the Tour. It is built from the SAME resolved catalogue the
  * island receives, so the page cannot describe a number the tool does not

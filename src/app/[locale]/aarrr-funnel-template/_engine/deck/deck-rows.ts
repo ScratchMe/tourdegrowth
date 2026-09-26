@@ -58,6 +58,9 @@ export interface DeckRows {
   payback: { id: string; label: string; value: string; note: string; text: string };
   ltv: { id: string; label: string; value: string; note: string; text: string };
   ltvCac: { id: string; label: string; value: string; note: string; text: string };
+  /** Monthly GRR and NRR (2026-09-26), always approximate — `note` says why, or which input is missing. */
+  grr: { id: string; label: string; value: string; note: string; text: string };
+  nrr: { id: string; label: string; value: string; note: string; text: string };
   /** The 36-month lifetime cap — written only when an LTV exists to be capped. */
   cap: { text: string };
   // Slide 5 — the mirror
@@ -104,6 +107,8 @@ export const ROW_FIELDS: { readonly [K in RowKind]: readonly (keyof DeckRows[K])
   payback: ["id", "label", "value", "note", "text"],
   ltv: ["id", "label", "value", "note", "text"],
   ltvCac: ["id", "label", "value", "note", "text"],
+  grr: ["id", "label", "value", "note", "text"],
+  nrr: ["id", "label", "value", "note", "text"],
   cap: ["text"],
   verdictCount: ["id", "value", "label"],
   bridge: ["id", "questionId", "label", "verdict", "tag", "text"],

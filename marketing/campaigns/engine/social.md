@@ -43,7 +43,7 @@ d'étape, écrire « Acquisition, Activation, Retention, Referral, Revenue ».
 
 ## La cadence après le fil (deux semaines, 2 posts par semaine)
 
-- **Une ligne de la liste des quinze chiffres**, en post nu, pour faire
+- **Une ligne de la liste des dix-sept chiffres**, en post nu, pour faire
   répondre : « Do you know your day-30 retention for last month's sign-ups? —
   data, a guess, or no idea? » / « Tu connais la rétention à J30 de tes
   inscrits du mois dernier ? Données, estimation, ou aucune idée ? »

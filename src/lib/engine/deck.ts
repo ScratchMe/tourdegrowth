@@ -54,7 +54,7 @@ import type {
   MissingCause,
   Peloton,
   RepairScale,
-  SlideId,
+  FixedSlideId,
   SlideTitle,
   SourceRef,
   TrackingLevel,
@@ -94,7 +94,7 @@ export interface DeckProse {
   bridges?: ResolvedBridge[];
 }
 
-const DEFAULT_INCLUDE: Record<SlideId, boolean> = {
+const DEFAULT_INCLUDE: Record<FixedSlideId, boolean> = {
   peloton: true,
   leak: true,
   visibility: true,
@@ -493,7 +493,7 @@ function buildUnitEconomics(
   const { unit } = derived;
   const cac = knownIn(state, "acq.cac", ctx);
   const currency = state.setup.currency;
-  const present = cac.kind === "known" || [unit.ltv, unit.payback, unit.ltvCac].some((d) => d.kind === "known");
+  const present = cac.kind === "known" || [unit.ltv, unit.payback, unit.ltvCac, unit.grr, unit.nrr].some((d) => d.kind === "known");
 
   let title: SlideTitle;
   if (unit.payback.kind === "known" && unit.ltvCac.kind === "known") {
@@ -513,11 +513,14 @@ function buildUnitEconomics(
   const cacValue = cac.kind === "known" ? formatInterval(cac.value, "money", ctx, strings.units, { currency }) : "";
   // Always written: "media-only CAC" and "fully loaded CAC" are two numbers that print the same.
   const variant = metricOf(metrics, "acq.cac").variants?.find((v) => v.id === variantId)?.label ?? "";
-  const figure = (row: string, id: DerivedId, value: string, missing: readonly MetricId[] | null): Row => {
+  const figure = (row: string, id: DerivedId, value: string, missing: readonly MetricId[] | null, caveat = ""): Row => {
     const d = prose.derived?.find((x) => x.id === id);
-    const note = !value && missing && d ? fillTemplate(d.uncomputable, { input: unitInputsPhrase(missing, strings, metrics) }) : "";
-    return { row, id, label: d?.name ?? "", value, note, text: value || note || strings.slide.noNumber };
+    const note = !value && missing && d ? fillTemplate(d.uncomputable, { input: unitInputsPhrase(missing, strings, metrics) }) : value ? caveat : "";
+    return { row, id, label: d?.name ?? "", value, note, text: [value, note].filter(Boolean).join(" · ") || strings.slide.noNumber };
   };
+  // NRR and GRR read logo churn as revenue churn: the slide says so under the figure, every time it prints one.
+  const retentionCaveat = (id: DerivedId) => prose.derived?.find((x) => x.id === id)?.caveat ?? "";
+  const percent = (d: typeof unit.grr) => (d.kind === "known" ? formatInterval(d.value, "percent", ctx, strings.units) : "");
   const lines: Row[] = [
     { row: "cac", id: "acq.cac", label: metricOf(metrics, "acq.cac").name, value: cacValue, variant, text: cacValue ? [cacValue, lowerFirst(variant)].filter(Boolean).join(" · ") : strings.slide.noNumber },
     figure("payback", "rev.cac-payback", unit.payback.kind === "known" ? formatDurationInterval(unit.payback.value, "months", ctx, strings.units) : "", unit.payback.kind === "uncomputable" ? unit.payback.missing : null),
@@ -528,6 +531,8 @@ function buildUnitEconomics(
       unit.ltvCac.kind === "known" ? fillTemplate(strings.units.times, { n: formatInterval(unit.ltvCac.value, "ratio", ctx, strings.units) }) : "",
       unit.ltvCac.kind === "uncomputable" ? unit.ltvCac.missing : null,
     ),
+    figure("grr", "rev.grr", percent(unit.grr), unit.grr.kind === "uncomputable" ? unit.grr.missing : null, retentionCaveat("rev.grr")),
+    figure("nrr", "rev.nrr", percent(unit.nrr), unit.nrr.kind === "uncomputable" ? unit.nrr.missing : null, retentionCaveat("rev.nrr")),
   ];
   // The cap only qualifies a lifetime value that exists.
   if (unit.ltv.kind === "known") lines.push({ row: "cap", text: strings.slide.unitCap });
@@ -737,7 +742,7 @@ export function buildDeck(state: EngineState, derived: EngineDerived, strings: W
       }),
     );
 
-  const built: Record<SlideId, Omit<DeckSlide, "id" | "included" | "index">> = {
+  const built: Record<FixedSlideId, Omit<DeckSlide, "id" | "included" | "index">> = {
     peloton: {
       present: true,
       title: pelotonTitle(state, derived.peloton, strings, metrics, ctx),
@@ -765,7 +770,7 @@ export function buildDeck(state: EngineState, derived: EngineDerived, strings: W
     annex: { present: true, title: { key: "annex", values: {} }, lines: buildAnnex(state, strings, metrics, ctx), notes: [] },
   };
 
-  const order: SlideId[] = blindEngine ? ["visibility", ...SLIDE_ORDER.filter((id) => id !== "visibility")] : [...SLIDE_ORDER];
+  const order: FixedSlideId[] = blindEngine ? ["visibility", ...SLIDE_ORDER.filter((id) => id !== "visibility")] : [...SLIDE_ORDER];
   let index = 0;
   const slides: DeckSlide[] = order.map((id) => {
     const slide = built[id];

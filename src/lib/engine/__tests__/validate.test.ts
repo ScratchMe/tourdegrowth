@@ -81,6 +81,34 @@ describe("validateEngine", () => {
   });
 });
 
+describe("validateEngine — the what-if levers and the MRR base (2026-09-26)", () => {
+  it("accepts levers under test, an MRR with cents in the base, and the what-if slides in the deck", () => {
+    const s = fullState();
+    s.whatIf = { "act.rate": 25, "rev.arpa": 129.5, "ret.logo-churn": 1.5 };
+    s.snapshots[0]!.base = { cohortSignups: 800, mrrEnd: 48_000.5, mrrStart: 46_800 };
+    s.deck.include = { ...s.deck.include, scenario: true, "whatif:act.rate": false };
+    expect(validateEngine(s)).toEqual([]);
+  });
+
+  it("refuses an unknown lever, a negative target, a bounded rate above 100 and an unknown what-if slide", () => {
+    const s = fullState();
+    s.whatIf = { "act.rate": 120, "rev.arpa": -1 } as EngineState["whatIf"];
+    (s.whatIf as Record<string, number>)["acq.cac"] = 300;
+    (s.deck.include as Record<string, boolean>)["whatif:acq.cac"] = true;
+    const errors = validateEngine(s);
+    expect(errors).toContain("whatIf.act.rate: above 100");
+    expect(errors).toContain("whatIf.rev.arpa: not a number >= 0");
+    expect(errors).toContain("whatIf.acq.cac: unknown lever");
+    expect(errors).toContain("deck.include.whatif:acq.cac: unknown slide");
+  });
+
+  it("keeps people whole: sign-ups with a decimal are refused, an MRR with one is not", () => {
+    const s = fullState();
+    s.snapshots[0]!.base = { cohortSignups: 800.5 };
+    expect(validateEngine(s)).toContain("snapshots[0].base.cohortSignups: not a whole number > 0");
+  });
+});
+
 describe("validateEntry — a status without the fields that make it true is refused", () => {
   it("a bounded ratio can't have more on top than below (the one blocking check, D11)", () => {
     const e = entry({ status: "measured", value: { kind: "ratio", numerator: 120, denominator: 100 }, source: { kind: "tool", tool: "ga4" } });

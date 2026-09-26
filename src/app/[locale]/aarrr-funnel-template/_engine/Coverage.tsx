@@ -5,7 +5,7 @@ import styles from "./Board.module.css";
 
 /**
  * The coverage line (§7 E2.3) — always FRACTIONS and counts, never a
- * percentage of completion: "9 of 15 numbers found" says how much is left to
+ * percentage of completion: "11 of 17 numbers found" says how much is left to
  * fetch, "60 %" says nothing a person can act on (§6.4, the audit's rule).
  *
  * The chips sum to the denominator by construction (found + approximate +

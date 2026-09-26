@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { LTV_CAP_MONTHS } from "../catalog-shape";
-import { lifetimeMonths, unitEconomics } from "../unit-economics";
+import { lifetimeMonths, revenueRetention, unitEconomics } from "../unit-economics";
 import { CTX_FR } from "./props";
 import { exampleState, measured, ratio, withEntry } from "./fixtures";
 
@@ -56,5 +56,35 @@ describe("unit economics", () => {
     const span = withEntry(exampleState(), "rev.gross-margin", { status: "estimated", estimate: { low: -5, high: 10, basis: "team-hunch" }, updatedAt: "2026-09-20T10:00:00.000Z" });
     // Every input is known, so the sentence names the one that spans 0 rather than ending on nothing.
     expect(unitEconomics(span, CTX_FR).payback).toEqual({ kind: "uncomputable", missing: ["rev.gross-margin"] });
+  });
+});
+
+describe("GRR and NRR (2026-09-26)", () => {
+  it("the example: churn 2.5 %, contraction 480 / 46 800, expansion 1 440 / 46 800 — monthly, in percent, always approximate", () => {
+    const u = unitEconomics(exampleState(), CTX_FR);
+    if (u.grr.kind !== "known" || u.nrr.kind !== "known") throw new Error("expected known");
+    const contraction = (480 / 46_800) * 100;
+    const expansion = (1_440 / 46_800) * 100;
+    expect(u.grr.value.lo).toBeCloseTo(100 - 2.5 - contraction, 9);
+    expect(u.nrr.value.lo).toBeCloseTo(100 - 2.5 - contraction + expansion, 9);
+    // Every input measured from Stripe, and still approximate: logo churn stands in for revenue churn.
+    expect(u.grr.confidence).toBe("approximate");
+    expect(u.nrr.confidence).toBe("approximate");
+  });
+
+  it("names what is missing: GRR needs churn and contraction, NRR expansion as well — never a 0 for the unknown one", () => {
+    const noExpansion = unitEconomics(withEntry(exampleState(), "rev.expansion", undefined), CTX_FR);
+    expect(noExpansion.grr.kind).toBe("known");
+    expect(noExpansion.nrr).toEqual({ kind: "uncomputable", missing: ["rev.expansion"] });
+    const noContraction = unitEconomics(withEntry(exampleState(), "rev.contraction", undefined), CTX_FR);
+    expect(noContraction.grr).toEqual({ kind: "uncomputable", missing: ["rev.contraction"] });
+    expect(noContraction.nrr).toEqual({ kind: "uncomputable", missing: ["rev.contraction"] });
+  });
+
+  it("ranges swap where they subtract, and GRR never goes below 0", () => {
+    const r = revenueRetention({ lo: 2, hi: 4 }, { lo: 1, hi: 1 }, { lo: 3, hi: 5 });
+    expect(r.grr).toEqual({ lo: 95, hi: 97 });
+    expect(r.nrr).toEqual({ lo: 98, hi: 102 });
+    expect(revenueRetention({ lo: 80, hi: 90 }, { lo: 20, hi: 30 }, null)).toEqual({ grr: { lo: 0, hi: 0 }, nrr: null });
   });
 });

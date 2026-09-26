@@ -139,7 +139,7 @@ export function Setup({
         options={[
           { id: "selfserve", label: s.models.selfserve },
           // Shown, not hidden: saying which funnels are coming tells a sales-led
-          // team why the fifteen numbers below won't fit them yet.
+          // team why the seventeen numbers below won't fit them yet.
           { id: "sales-led", label: s.models.salesLed, note: s.modelSoon, disabled: true },
           { id: "consumer-app", label: s.models.consumerApp, note: s.modelSoon, disabled: true },
           { id: "marketplace", label: s.models.marketplace, note: s.modelSoon, disabled: true },

@@ -1,4 +1,5 @@
-import { METRIC_SHAPES, TEXT_LIMITS, type MetricShape } from "./catalog-shape";
+import { LEVER_IDS, METRIC_SHAPES, TEXT_LIMITS, shapeOf, type MetricShape } from "./catalog-shape";
+import { SHARED_COUNT_IDS } from "./shared-counts";
 import { BASIS_KEY, CAUSE_KEY, REPAIR_KEY, ROLE_KEY, STATUS_KEY } from "./strings";
 import {
   ENGINE_SCHEMA_VERSION,
@@ -9,6 +10,7 @@ import {
   type EngineSetup,
   type EngineState,
   type MetricEntry,
+  type MetricId,
   type ToolId,
   type YearMonth,
 } from "./types";
@@ -270,8 +272,10 @@ function snapshotErrors(path: string, snapshot: unknown): string[] {
     if (!isObj(snapshot.base)) errors.push(`${path}.base: not an object`);
     else
       for (const [key, n] of Object.entries(snapshot.base)) {
-        if (key !== "cohortSignups" && key !== "monthSignups") errors.push(`${path}.base.${key}: unknown count`);
-        else if (!isNum(n) || n <= 0 || !Number.isInteger(n)) errors.push(`${path}.base.${key}: not a whole number > 0`);
+        if (!(SHARED_COUNT_IDS as readonly string[]).includes(key)) errors.push(`${path}.base.${key}: unknown count`);
+        // People are whole; an MRR (2026-09-26) is an amount and may carry cents.
+        else if (!isNum(n) || n <= 0) errors.push(`${path}.base.${key}: not a number > 0`);
+        else if (key.endsWith("Signups") && !Number.isInteger(n)) errors.push(`${path}.base.${key}: not a whole number > 0`);
       }
   }
   return errors;
@@ -283,7 +287,12 @@ function deckErrors(deck: unknown): string[] {
   if (!isObj(deck.include)) errors.push("deck.include: missing");
   else
     for (const [id, on] of Object.entries(deck.include)) {
-      if (!(SLIDE_ORDER as readonly string[]).includes(id)) errors.push(`deck.include.${id}: unknown slide`);
+      // The fixed slides, plus the what-if ones (2026-09-26): « scenario » and one « whatif:<lever> » per lever.
+      const known =
+        (SLIDE_ORDER as readonly string[]).includes(id) ||
+        id === "scenario" ||
+        (id.startsWith("whatif:") && (LEVER_IDS as readonly string[]).includes(id.slice("whatif:".length)));
+      if (!known) errors.push(`deck.include.${id}: unknown slide`);
       else if (!isBool(on)) errors.push(`deck.include.${id}: not a boolean`);
     }
   if (!isBool(deck.showCompany)) errors.push("deck.showCompany: not a boolean");
@@ -347,6 +356,18 @@ export function validateEngine(state: EngineState): string[] {
     if (!isObj(t) || !isStr(t.resultId) || t.resultId === "" || !isIso(t.linkedAt)) errors.push("tourLink: not a result id and a date");
   }
   errors.push(...deckErrors(s.deck));
+
+  // Optional (2026-09-26): absent in every file written before « Et si ? » kept its levers.
+  if (s.whatIf !== undefined) {
+    if (!isObj(s.whatIf)) errors.push("whatIf: not an object");
+    else
+      for (const [id, target] of Object.entries(s.whatIf)) {
+        if (!(LEVER_IDS as readonly string[]).includes(id)) errors.push(`whatIf.${id}: unknown lever`);
+        else if (!isNum(target) || target < 0) errors.push(`whatIf.${id}: not a number >= 0`);
+        else if (shapeOf(id as MetricId).unit === "percent" && target > 100 && shapeOf(id as MetricId).bounded)
+          errors.push(`whatIf.${id}: above 100`);
+      }
+  }
   return errors;
 }
 

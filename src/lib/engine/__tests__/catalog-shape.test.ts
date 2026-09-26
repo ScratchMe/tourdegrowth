@@ -18,12 +18,12 @@ import {
 // Engine spec §5 — the shape half of the catalogue. The prose half is
 // checked against it in src/content/__tests__/engine-catalog.test.ts.
 describe("METRIC_SHAPES", () => {
-  it("has fifteen metrics, three per stage, one ★ per stage — the Tour's own grid", () => {
-    expect(METRIC_SHAPES).toHaveLength(15);
-    expect(new Set(METRIC_SHAPES.map((s) => s.id)).size).toBe(15);
+  it("has seventeen metrics — three per stage, five for Revenue since the MRR movements (2026-09-26) — one ★ per stage", () => {
+    expect(METRIC_SHAPES).toHaveLength(17);
+    expect(new Set(METRIC_SHAPES.map((s) => s.id)).size).toBe(17);
     for (const stage of PILLARS) {
       const ofStage = METRIC_SHAPES.filter((s) => s.stage === stage);
-      expect(ofStage, stage).toHaveLength(3);
+      expect(ofStage, stage).toHaveLength(stage === "revenue" ? 5 : 3);
       expect(ofStage.filter((s) => s.primary), stage).toHaveLength(1);
     }
   });

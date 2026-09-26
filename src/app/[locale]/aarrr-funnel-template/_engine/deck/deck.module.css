@@ -653,8 +653,9 @@
   padding: 0;
   list-style: none;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 28px;
+  /* Six tiles since GRR and NRR (2026-09-26): two rows of three. */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px 28px;
 }
 
 .figure {

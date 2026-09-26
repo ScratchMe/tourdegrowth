@@ -52,6 +52,9 @@ export function exampleMetrics(words: ExampleWords): Partial<Record<MetricId, Me
     "rev.paid-conversion": { status: "estimated", estimate: { low: 6, high: 9, basis: "old-number" }, updatedAt: at },
     "rev.arpa": measured(ratio(48_000, 400), tool("stripe")),
     "rev.gross-margin": { status: "missing", missing: { cause: "no-access", repair: "meeting", ownerRole: "finance" }, updatedAt: at },
+    // MRR movements (2026-09-26), on the MRR of 1 August — 46 800 €, before the month's new customers took it to 48 000.
+    "rev.expansion": measured(ratio(1_440, 46_800), tool("stripe")),
+    "rev.contraction": measured(ratio(480, 46_800), tool("stripe")),
   };
 }
 

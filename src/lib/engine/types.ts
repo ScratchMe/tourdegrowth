@@ -48,9 +48,16 @@ export type MetricId =
   | "ref.k-factor"
   | "rev.paid-conversion"
   | "rev.arpa"
-  | "rev.gross-margin";
-/** The three computed figures (§5.7): never entered, always derived. */
-export type DerivedId = "rev.ltv" | "rev.cac-payback" | "rev.ltv-cac";
+  | "rev.gross-margin"
+  /** MRR movements (Antoine, 2026-09-26): the two that NRR and GRR need and logo churn cannot give. */
+  | "rev.expansion"
+  | "rev.contraction";
+/**
+ * The computed figures (§5.7): never entered, always derived. NRR and GRR
+ * joined the three unit-economics figures on 2026-09-26, with the two MRR
+ * movements they are computed from.
+ */
+export type DerivedId = "rev.ltv" | "rev.cac-payback" | "rev.ltv-cac" | "rev.nrr" | "rev.grr";
 
 export type ToolId =
   | "ga4"
@@ -162,8 +169,29 @@ export interface Snapshot {
   base?: Partial<Record<SharedCount, number>>;
 }
 
-/** A count more than one number is computed on (`lib/engine/shared-counts.ts`). */
-export type SharedCount = "cohortSignups" | "monthSignups";
+/**
+ * A count more than one number is computed on (`lib/engine/shared-counts.ts`).
+ * `mrrEnd` is the MRR at the end of the flows' month (ARPA's numerator, the
+ * gross margin's revenue); `mrrStart` the MRR on its 1st (the base the two
+ * MRR movements are measured on).
+ */
+export type SharedCount = "cohortSignups" | "monthSignups" | "mrrEnd" | "mrrStart";
+
+/**
+ * The levers « Et si ? » can move, together (Antoine, 2026-09-26: the
+ * what-ifs cumulate and compound). Each is a number the engine already
+ * collects; its target is kept in the number's display unit (percent for a
+ * rate, the engine's currency for ARPA).
+ */
+export type LeverId =
+  | "acq.signup-rate"
+  | "ref.referred-share"
+  | "act.rate"
+  | "rev.paid-conversion"
+  | "ret.logo-churn"
+  | "rev.expansion"
+  | "rev.contraction"
+  | "rev.arpa";
 
 export interface EngineSetup {
   profile: EngineProfile;
@@ -174,8 +202,15 @@ export interface EngineSetup {
   companyLabel?: string;
 }
 
-export type SlideId = "peloton" | "leak" | "visibility" | "unit-economics" | "mirror" | "ask" | "annex";
-export const SLIDE_ORDER: readonly SlideId[] = ["peloton", "leak", "visibility", "unit-economics", "mirror", "ask", "annex"];
+/**
+ * The fixed slides, in `SLIDE_ORDER`, plus the what-if ones (2026-09-26):
+ * one per lever the team moved (`whatif:<lever>`) and one that adds them all
+ * up (`scenario`). Those have no fixed place in the list: `deck.ts` puts them
+ * after `leak`, in lever order.
+ */
+export type FixedSlideId = "peloton" | "leak" | "visibility" | "unit-economics" | "mirror" | "ask" | "annex";
+export type SlideId = FixedSlideId | "scenario" | `whatif:${LeverId}`;
+export const SLIDE_ORDER: readonly FixedSlideId[] = ["peloton", "leak", "visibility", "unit-economics", "mirror", "ask", "annex"];
 
 export interface EngineAsk {
   what: string; // ≤ 120
@@ -208,6 +243,13 @@ export interface EngineState {
   /** The Tour is READ, never copied (D13): only the result id lives here. */
   tourLink: { resultId: string; linkedAt: string } | null;
   deck: EngineDeck;
+  /**
+   * « Et si ? » (2026-09-26): the target each lever is being tested at, in
+   * the number's display unit. Absent lever = not moved. Optional: a file
+   * from before has none. Never a team target — `Snapshot.targets` are the
+   * ones that designate a bottleneck; this is a scenario being tried.
+   */
+  whatIf?: Partial<Record<LeverId, number>>;
 }
 
 /** The value stored under ENGINE_STORAGE_KEY. */
@@ -346,7 +388,7 @@ export interface Peloton {
  * only numbers a sentence names after « il manque » / "missing:". The copy
  * carries one phrase per id (`unitInput`); a test pins the two sets equal.
  */
-export type UnitInputId = "acq.cac" | "rev.arpa" | "rev.gross-margin" | "ret.logo-churn";
+export type UnitInputId = "acq.cac" | "rev.arpa" | "rev.gross-margin" | "ret.logo-churn" | "rev.expansion" | "rev.contraction";
 
 /** §5.7, §6.8. A computed figure with a missing input is "uncomputable — missing: …", never 0. */
 export type DerivedValue =
@@ -358,6 +400,14 @@ export interface UnitEconomics {
   ltv: DerivedValue; // months capped at LTV_CAP_MONTHS
   payback: DerivedValue; // months
   ltvCac: DerivedValue; // plain ratio
+  /**
+   * Monthly, in percent. GRR = 100 − revenue churned − contraction; NRR adds
+   * expansion. The churned part is read from LOGO churn — the engine does not
+   * ask for churned MRR — so both are always "approximate": they assume the
+   * customers who left paid the average ARPA.
+   */
+  grr: DerivedValue;
+  nrr: DerivedValue;
 }
 
 /** §6.9. `num-gt-den` blocks the save; every other check is shown "to check", never blocking (D11). */

@@ -39,7 +39,7 @@ describe("§9.2 — presence, default inclusion, order", () => {
       ["ask", true, true, 5],
       ["annex", true, true, 6],
     ]);
-    expect(model.dataPill).toEqual({ measured: 9, approximate: 2, missing: 3 });
+    expect(model.dataPill).toEqual({ measured: 11, approximate: 2, missing: 3 });
   });
 
   it("the mirror exists once a Tour is linked, but is unchecked by default", () => {
@@ -70,7 +70,9 @@ describe("§9.2 — presence, default inclusion, order", () => {
       ["ask", 4],
       ["annex", 5],
     ]);
-    expect(slide(deck(withEntry(exampleState(), "acq.cac", undefined)), "unit-economics").present).toBe(false);
+    // GRR and NRR (2026-09-26) are figures of that slide too: without the CAC AND without the churn, it has nothing to show.
+    expect(slide(deck(withEntry(exampleState(), "acq.cac", undefined)), "unit-economics").present).toBe(true);
+    expect(slide(deck(withEntry(withEntry(exampleState(), "acq.cac", undefined), "ret.logo-churn", undefined)), "unit-economics").present).toBe(false);
   });
 });
 
@@ -189,10 +191,10 @@ describe("the §6.0 example, in words", () => {
     );
   });
 
-  it("visibility: 11 of 15 documented, the missing ones sorted from a meeting to a sprint", () => {
+  it("visibility: 13 of 17 documented, the missing ones sorted from a meeting to a sprint", () => {
     const v = slide(deck(exampleState()), "visibility");
-    expect(v.title).toEqual({ key: "visibility", values: { documented: "11 chiffres sur 15", k: "4", repair: "entre une réunion et un sprint" } });
-    expect(renderTitle(v.title, FR.strings)).toBe("On documente **11 chiffres sur 15**. Les 4 qui manquent se réparent entre une réunion et un sprint.");
+    expect(v.title).toEqual({ key: "visibility", values: { documented: "13 chiffres sur 17", k: "4", repair: "entre une réunion et un sprint" } });
+    expect(renderTitle(v.title, FR.strings)).toBe("On documente **13 chiffres sur 17**. Les 4 qui manquent se réparent entre une réunion et un sprint.");
     expect(v.lines.filter((l) => l.row === "missing").map((l) => l.repair)).toEqual(["une réunion", "une réunion", "un sprint", "un sprint"]);
   });
 
@@ -248,7 +250,7 @@ describe("deckMarkdown", () => {
     const titles = md.split("\n").filter((l) => l.startsWith("## "));
     expect(titles.map((t) => t.slice(0, 5))).toEqual(["## 1.", "## 2.", "## 3.", "## 4.", "## 5.", "## 6."]);
     expect(titles[1]).toContain("**~600 € de MRR nouveau**");
-    expect(md).toContain("Données\u00a0: mesurées 9 · approximatives 2 · introuvables 3");
+    expect(md).toContain("Données\u00a0: mesurées 11 · approximatives 2 · introuvables 3");
     expect(md).toContain("> ");
     // A title-only slide is not followed by an empty body: never two blank lines in a row.
     expect(md).not.toContain("\n\n\n");

@@ -41,7 +41,7 @@ export interface EngineWorkbenchProps {
   locale: Locale;
   /** `ENGINE_COPY` resolved (§14). */
   strings: EngineStrings;
-  /** The fifteen numbers' prose, in catalogue order (`METRIC_SHAPES`). */
+  /** The seventeen numbers' prose, in catalogue order (`METRIC_SHAPES`). */
   metrics: ResolvedMetric[];
   /** The three computed figures (§5.7). */
   derived: ResolvedDerived[];

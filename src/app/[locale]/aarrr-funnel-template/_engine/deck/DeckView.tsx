@@ -7,7 +7,7 @@ import { buildDeck, deckMarkdown } from "@/lib/engine/deck";
 import { fillTemplate } from "@/lib/engine/format";
 import { sanityText } from "@/lib/engine/sentences";
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
-import type { DeckSlide, EngineAsk, EngineCalcContext, EngineDeck, EngineDerived, EngineState, SanityCheck, SlideId } from "@/lib/engine/types";
+import type { DeckSlide, EngineAsk, EngineCalcContext, EngineDeck, EngineDerived, EngineState, FixedSlideId, SanityCheck, SlideId } from "@/lib/engine/types";
 import { currentSnapshot } from "@/lib/engine/values";
 import type { Locale } from "@/lib/i18n/locale";
 import { AskForm } from "./AskForm";
@@ -53,7 +53,7 @@ export interface DeckViewProps {
   onExported?: (kind: DeckExportKind) => void;
 }
 
-const SLIDES: Record<SlideId, ComponentType<SlideProps>> = {
+const SLIDES: Record<FixedSlideId, ComponentType<SlideProps>> = {
   peloton: SlidePeloton,
   leak: SlideLeak,
   visibility: SlideVisibility,
@@ -407,7 +407,7 @@ export function DeckView({
 
       <ol className={styles.thumbs} data-print="thumbs">
         {shown.map((slide) => {
-          const Slide = SLIDES[slide.id];
+          const Slide = SLIDES[slide.id as FixedSlideId];
           const isEnlarged = enlarged === slide.id;
           return (
             <li

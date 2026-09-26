@@ -112,7 +112,7 @@ test("settings can be changed later; a new activation window sends that number b
   await sheet.locator("#engine-act-rate-den").fill("800");
   await sheet.locator("#engine-act-rate-source").selectOption({ label: "Amplitude" });
   await sheet.getByTestId("engine-save-act-rate").click();
-  await expect(page.getByTestId("engine-coverage")).toContainText("1 of 15 numbers found");
+  await expect(page.getByTestId("engine-coverage")).toContainText("1 of 17 numbers found");
 
   await page.getByTestId("engine-open-settings").click();
   const settings = page.getByTestId("engine-settings");
@@ -122,7 +122,7 @@ test("settings can be changed later; a new activation window sends that number b
   await page.getByTestId("engine-settings-save").click();
 
   await expect(page.getByTestId("engine-board")).toBeVisible();
-  await expect(page.getByTestId("engine-coverage")).toContainText("0 of 15 numbers found");
+  await expect(page.getByTestId("engine-coverage")).toContainText("0 of 17 numbers found");
   const after = await stored(page);
   expect(after?.state.setup.activationWindowDays).toBe(14);
   expect(after?.state.snapshots[0]?.metrics["act.rate"]).toBeUndefined();

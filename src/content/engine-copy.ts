@@ -95,14 +95,14 @@ export const ENGINE_COPY = {
     ctaNote: { fr: "Gratuit, sans compte. Tout reste sur ton appareil.", en: "Free, no sign-up. Everything stays on your device." },
     tourFirst: { fr: "Démarre ton Tour d'abord (3 min)", en: "Start your Tour first (3 min)" },
     noscript: {
-      fr: "Le moteur a besoin de JavaScript pour enregistrer tes chiffres. La liste des quinze chiffres, plus bas, se lit sans.",
-      en: "The engine needs JavaScript to save your numbers. The list of fifteen numbers, further down, reads without it.",
+      fr: "Le moteur a besoin de JavaScript pour enregistrer tes chiffres. La liste des dix-sept chiffres, plus bas, se lit sans.",
+      en: "The engine needs JavaScript to save your numbers. The list of seventeen numbers, further down, reads without it.",
     },
     // TODO: à relire — nouveau (2026-09-25, retours d'Antoine sur le moteur).
     durationTitle: { fr: "Combien de temps ça prend", en: "How long it takes" },
     durationIntro: {
-      fr: "Surtout, là où sont tes chiffres. Sur les quinze, {quick} se lisent en cinq minutes, {hour} demandent environ une heure chacun et {ask} sont à demander à quelqu'un.",
-      en: "Mostly, where your numbers are. Of the fifteen, {quick} take five minutes to read, {hour} take about an hour each and {ask} have to be asked of someone.",
+      fr: "Surtout, là où sont tes chiffres. Sur les dix-sept, {quick} se lisent en cinq minutes, {hour} demandent environ une heure chacun et {ask} sont à demander à quelqu'un.",
+      en: "Mostly, where your numbers are. Of the seventeen, {quick} take five minutes to read, {hour} take about an hour each and {ask} have to be asked of someone.",
     },
     durationReadyLabel: { fr: "Tout est sous la main", en: "Everything is at hand" },
     durationReady: {
@@ -122,10 +122,10 @@ export const ENGINE_COPY = {
     durationDeckLabel: { fr: "Les slides", en: "The slides" },
     durationDeck: { fr: "Un quart d'heure, une fois les chiffres là.", en: "A quarter of an hour, once the numbers are in." },
     catalogueToggle: {
-      fr: "Ouvrir les quinze fiches : formule, où le trouver, piège",
-      en: "Open the fifteen cards: formula, where to find it, trap",
+      fr: "Ouvrir les dix-sept fiches : formule, où le trouver, piège",
+      en: "Open the seventeen cards: formula, where to find it, trap",
     },
-    catalogueTitle: { fr: "Les quinze chiffres", en: "The fifteen numbers" },
+    catalogueTitle: { fr: "Les dix-sept chiffres", en: "The seventeen numbers" },
     catalogueIntro: {
       fr: "Trois par étape, comme les trois questions du Tour. Pour chacun : sa formule, où le trouver, et le piège à connaître avant de le citer.",
       en: "Three per stage, like the Tour's three questions. For each: its formula, where to find it, and the trap to know before quoting it.",
@@ -268,6 +268,9 @@ export const ENGINE_COPY = {
     "rev.arpa": { fr: "l'ARPA mensuel", en: "monthly ARPA" },
     "rev.gross-margin": { fr: "la marge brute", en: "gross margin" },
     "ret.logo-churn": { fr: "le churn logo", en: "logo churn" },
+    // TODO: à relire — nouveau (2026-09-26, expansion et rétrogradation).
+    "rev.expansion": { fr: "l'expansion", en: "expansion" },
+    "rev.contraction": { fr: "la rétrogradation", en: "contraction" },
   } satisfies Record<UnitInputId, Translatable>,
   /**
    * Where a value sits against its comparator, in the words of the page — a

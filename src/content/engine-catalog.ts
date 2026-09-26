@@ -3,8 +3,8 @@ import type { Translatable } from "@/lib/i18n/translatable";
 import type { DerivedId, MetricId, SourceRef } from "@/lib/engine/types";
 
 /**
- * engine-catalog.ts — the PROSE of the growth engine's fifteen numbers and
- * three computed ones (engine spec §5, §14.13). Server only: the page
+ * engine-catalog.ts — the PROSE of the growth engine's seventeen numbers and
+ * five computed ones (engine spec §5, §14.13). Server only: the page
  * resolves it to one language with `resolveTree` and hands the island plain
  * strings, so neither language's catalogue ever ships to the browser. The
  * SHAPE (units, bounds, references, sources) lives in
@@ -771,8 +771,9 @@ export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
       en: "(revenue – direct cost of service: hosting, payment fees, support) ÷ revenue",
     },
     inputs: {
-      numerator: { fr: "Marge brute du mois", en: "Gross profit in the month" },
-      denominator: { fr: "Revenu du mois", en: "Revenue in the month" },
+      // TODO: à relire — dénominateur = le MRR du mois depuis 2026-09-26 (base commune avec l'ARPA).
+      numerator: { fr: "Marge brute sur ce MRR", en: "Gross profit on that MRR" },
+      denominator: { fr: "MRR à fin {month}", en: "MRR at the end of {month}" },
     },
     where: [
       {
@@ -796,6 +797,115 @@ export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
       fr: "en SaaS ; bien moins dès qu'il y a de l'humain dans la livraison",
       en: "in SaaS; much lower as soon as people are part of the delivery",
     },
+  },
+  // TODO: à relire — nouveau (2026-09-26) : les deux mouvements de MRR que NRR et GRR demandent.
+  "rev.expansion": {
+    name: { fr: "Expansion mensuelle", en: "Monthly expansion" },
+    oneLiner: {
+      fr: "Le revenu que les clients déjà là ajoutent dans le mois : montées en gamme, sièges, options.",
+      en: "The revenue customers already on board add in the month: upgrades, seats, add-ons.",
+    },
+    formula: {
+      fr: "MRR d'expansion du mois ÷ MRR au 1er du mois",
+      en: "expansion MRR in the month ÷ MRR at the start of the month",
+    },
+    inputs: {
+      numerator: { fr: "MRR d'expansion en {month}", en: "Expansion MRR in {month}" },
+      denominator: { fr: "MRR au 1er {month}", en: "MRR at the start of {month}" },
+    },
+    where: [
+      {
+        source: tool("stripe"),
+        label: { fr: "Stripe", en: "Stripe" },
+        path: {
+          fr: "la page Billing overview : les mouvements de MRR du mois, ligne « expansion »",
+          en: "the Billing overview page: the month's MRR movements, the \"expansion\" line",
+        },
+      },
+      {
+        source: tool("chargebee"),
+        label: { fr: "Chargebee", en: "Chargebee" },
+        path: {
+          fr: "les rapports de mouvements de MRR (RevenueStory, selon ton édition)",
+          en: "the MRR movement reports (RevenueStory, depending on your edition)",
+        },
+      },
+      {
+        source: tool("chartmogul"),
+        label: { fr: "ChartMogul ou Baremetrics", en: "ChartMogul or Baremetrics" },
+        path: {
+          fr: "le graphique des mouvements de MRR, au mois",
+          en: "the MRR movements chart, by month",
+        },
+      },
+    ],
+    trap: {
+      fr: "Le MRR des nouveaux clients n'est pas de l'expansion : seuls comptent ceux qui payaient déjà au 1er du mois.",
+      en: "New customers' MRR is not expansion: only customers already paying at the start of the month count.",
+    },
+    request: {
+      fr: "le MRR au 1er {month} et le MRR d'expansion du mois, sans les nouveaux clients",
+      en: "the MRR at the start of {month} and the month's expansion MRR, without new customers",
+    },
+    noReferenceReason: {
+      fr: "la place pour l'expansion dépend du modèle de prix : forte avec des sièges, faible avec un prix fixe",
+      en: "the room for expansion depends on the pricing model: large with seats, small with a flat price",
+    },
+    naReasons: [{ id: "not-subscription", label: { fr: "Pas d'abonnement", en: "No subscription" } }],
+  },
+  "rev.contraction": {
+    name: { fr: "Rétrogradation mensuelle", en: "Monthly contraction" },
+    oneLiner: {
+      fr: "Le revenu que les clients qui restent retirent dans le mois : offre moins chère, sièges en moins.",
+      en: "The revenue customers who stay take away in the month: a cheaper plan, fewer seats.",
+    },
+    formula: {
+      fr: "MRR perdu en rétrogradations dans le mois ÷ MRR au 1er du mois",
+      en: "MRR lost to downgrades in the month ÷ MRR at the start of the month",
+    },
+    inputs: {
+      numerator: { fr: "MRR perdu en rétrogradations en {month}", en: "MRR lost to downgrades in {month}" },
+      denominator: { fr: "MRR au 1er {month}", en: "MRR at the start of {month}" },
+    },
+    where: [
+      {
+        source: tool("stripe"),
+        label: { fr: "Stripe", en: "Stripe" },
+        path: {
+          fr: "la page Billing overview : les mouvements de MRR du mois, ligne « contraction »",
+          en: "the Billing overview page: the month's MRR movements, the \"contraction\" line",
+        },
+      },
+      {
+        source: tool("chargebee"),
+        label: { fr: "Chargebee", en: "Chargebee" },
+        path: {
+          fr: "les rapports de mouvements de MRR (RevenueStory, selon ton édition)",
+          en: "the MRR movement reports (RevenueStory, depending on your edition)",
+        },
+      },
+      {
+        source: tool("chartmogul"),
+        label: { fr: "ChartMogul ou Baremetrics", en: "ChartMogul or Baremetrics" },
+        path: {
+          fr: "le graphique des mouvements de MRR, au mois",
+          en: "the MRR movements chart, by month",
+        },
+      },
+    ],
+    trap: {
+      fr: "Un client qui part n'est pas une rétrogradation : son MRR relève du churn, compté à part.",
+      en: "A customer who leaves is not a downgrade: their MRR is churn, counted separately.",
+    },
+    request: {
+      fr: "le MRR au 1er {month} et le MRR perdu en rétrogradations pendant le mois, sans les résiliations",
+      en: "the MRR at the start of {month} and the MRR lost to downgrades during the month, without cancellations",
+    },
+    noReferenceReason: {
+      fr: "elle dépend du modèle de prix autant que du produit : aucun ordre de grandeur ne vaut pour tous",
+      en: "it depends on the pricing model as much as on the product: no order of magnitude fits everyone",
+    },
+    naReasons: [{ id: "not-subscription", label: { fr: "Pas d'abonnement", en: "No subscription" } }],
   },
 };
 
@@ -826,5 +936,30 @@ export const ENGINE_DERIVED_CATALOG: Record<DerivedId, EngineDerivedEntry> = {
     formula: { fr: "LTV ÷ CAC", en: "LTV ÷ CAC" },
     uncomputable: { fr: "incalculable — il manque {input}", en: "can't be computed — missing: {input}" },
     caveat: { fr: "un repère, pas une loi", en: "a rule of thumb, not a law" },
+  },
+  // TODO: à relire — nouveau (2026-09-26).
+  "rev.grr": {
+    name: { fr: "GRR mensuelle", en: "Monthly GRR" },
+    formula: {
+      fr: "100 % – churn – rétrogradation, sur le MRR du 1er du mois",
+      en: "100% – churn – contraction, on the MRR at the start of the month",
+    },
+    uncomputable: { fr: "incalculable — il manque {input}", en: "can't be computed — missing: {input}" },
+    caveat: {
+      fr: "approximative : le churn logo tient lieu de churn en revenu, comme si les clients partis payaient l'ARPA moyen",
+      en: "approximate: logo churn stands in for revenue churn, as if the customers who left paid the average ARPA",
+    },
+  },
+  "rev.nrr": {
+    name: { fr: "NRR mensuelle", en: "Monthly NRR" },
+    formula: {
+      fr: "100 % – churn – rétrogradation + expansion, sur le MRR du 1er du mois",
+      en: "100% – churn – contraction + expansion, on the MRR at the start of the month",
+    },
+    uncomputable: { fr: "incalculable — il manque {input}", en: "can't be computed — missing: {input}" },
+    caveat: {
+      fr: "approximative : le churn logo tient lieu de churn en revenu, comme si les clients partis payaient l'ARPA moyen",
+      en: "approximate: logo churn stands in for revenue churn, as if the customers who left paid the average ARPA",
+    },
   },
 };

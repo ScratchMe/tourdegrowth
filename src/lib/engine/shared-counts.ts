@@ -2,7 +2,7 @@ import { shapeOf } from "./catalog-shape";
 import type { MetricEntry, MetricId, SharedCount, Snapshot } from "./types";
 
 /**
- * The counts several of the fifteen numbers are computed on — Antoine,
+ * The counts several of the engine's numbers are computed on — Antoine,
  * 2026-09-25: the sign-ups of the followed cohort were asked for FIVE times
  * (activation, day-30 retention, referred share, K, paid conversion), the
  * month's sign-ups twice. They are one population each, by definition: the
@@ -31,6 +31,17 @@ export const SHARED_COUNTS: Readonly<Record<SharedCount, readonly SharedSlot[]>>
   monthSignups: [
     { metric: "acq.signup-rate", side: "numerator" },
     { metric: "acq.top-channel-share", side: "denominator" },
+  ],
+  // Antoine, 2026-09-26: « dans marge brute, pourquoi on ne reprend pas le MRR
+  // donné au chiffre précédent ? » — the gross margin is read on the month's
+  // recurring revenue, the same MRR ARPA divides.
+  mrrEnd: [
+    { metric: "rev.arpa", side: "numerator" },
+    { metric: "rev.gross-margin", side: "denominator" },
+  ],
+  mrrStart: [
+    { metric: "rev.expansion", side: "denominator" },
+    { metric: "rev.contraction", side: "denominator" },
   ],
 };
 

@@ -129,7 +129,7 @@ test.describe("setup and first save", () => {
     await expect(page.getByTestId("engine-setup")).toBeVisible();
     await expect(page.getByRole("radio", { name: /self-serve/ })).toBeChecked();
     await page.getByTestId("engine-setup-board").click();
-    await expect(page.getByTestId("engine-coverage")).toContainText("0 of 15 numbers found");
+    await expect(page.getByTestId("engine-coverage")).toContainText("0 of 17 numbers found");
     // Focus follows the screen change to the verdict, never left on <body>.
     await expect(page.locator("#engine-verdict")).toBeFocused();
     await expect.poll(() => trackedEvents(page)).toContain("engine_opened");
@@ -145,7 +145,7 @@ test.describe("setup and first save", () => {
     await sheet.locator("#engine-act-rate-source").selectOption({ label: "Amplitude" });
     await sheet.getByTestId("engine-save-act-rate").click();
     await expect(sheet.getByTestId("engine-saved-act-rate")).toBeVisible();
-    await expect(page.getByTestId("engine-coverage")).toContainText("1 of 15 numbers found");
+    await expect(page.getByTestId("engine-coverage")).toContainText("1 of 17 numbers found");
 
     const stored = await storedEngine(page);
     expect(stored?.state.snapshots[0]?.metrics["act.rate"]?.status).toBe("measured");
@@ -154,7 +154,7 @@ test.describe("setup and first save", () => {
 
     await page.reload();
     await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
-    await expect(page.getByTestId("engine-coverage")).toContainText("1 of 15 numbers found");
+    await expect(page.getByTestId("engine-coverage")).toContainText("1 of 17 numbers found");
     const again = await openSheet(page, "activation", "act-rate");
     await expect(again.locator("#engine-act-rate-num")).toHaveValue("144");
     await expect(again.locator("#engine-act-rate-den")).toHaveValue("800");
@@ -172,7 +172,7 @@ test.describe("setup and first save", () => {
     await expect(sheet.getByTestId("engine-saved-act-rate")).toBeEmpty();
     // The refusal takes the live rate's place, under the two counts it is about.
     await expect(sheet.getByTestId("engine-live")).toContainText(ENGINE_COPY.sanity.numGtDen.en.split("{num}")[0]!);
-    await expect(page.getByTestId("engine-coverage")).toContainText("0 of 15 numbers found");
+    await expect(page.getByTestId("engine-coverage")).toContainText("0 of 17 numbers found");
     expect((await storedEngine(page))?.state.snapshots[0]?.metrics["act.rate"]).toBeUndefined();
   });
 
@@ -259,7 +259,7 @@ test.describe("asking and collecting", () => {
   test("the collect list counts what's left, groups by person, and Fill in opens the sheet", async ({ page }) => {
     await startEngine(page);
     const fold = page.getByTestId("engine-collect-disclosure");
-    await expect(fold.locator("summary")).toContainText("(15)");
+    await expect(fold.locator("summary")).toContainText("(17)");
     await fold.locator("summary").click();
     const collect = page.getByTestId("engine-collect");
     await expect(collect).toBeVisible();
@@ -306,7 +306,7 @@ test.describe("the §6.0 example on the board", () => {
     test(`${locale}: the peloton's numerals are its grids, and an unmeasured stage is a "?", never a 0`, async ({ page }) => {
       await page.setViewportSize({ width: 1280, height: 900 });
       await openExample(page, locale);
-      const copy = ENGINE_COPY.coverage.found[locale].replace("{n}", "9").replace("{N}", "15");
+      const copy = ENGINE_COPY.coverage.found[locale].replace("{n}", "11").replace("{N}", "17");
       await expect(page.getByTestId("engine-coverage")).toContainText(copy);
       // Same day, nothing waiting, nothing left to fill: no resume band repeating the coverage.
       await expect(page.getByTestId("engine-resume")).toHaveCount(0);
@@ -415,7 +415,7 @@ test.describe("the §6.0 example on the board", () => {
     await openExample(page, "en", new Date(2026, 8, 27, 12));
     const band = page.getByTestId("engine-resume");
     await expect(band).toBeVisible();
-    await expect(band).toContainText("You've found 9 of 15 numbers. Since your last visit, 3 days ago:");
+    await expect(band).toContainText("You've found 11 of 17 numbers. Since your last visit, 3 days ago:");
     await expect(band).toContainText("to follow up");
   });
 });
@@ -429,7 +429,7 @@ test.describe("leaving the device and coming back", () => {
     await sheet.locator("#engine-act-rate-den").fill("800");
     await sheet.locator("#engine-act-rate-source").selectOption({ label: "Amplitude" });
     await sheet.getByTestId("engine-save-act-rate").click();
-    await expect(page.getByTestId("engine-coverage")).toContainText("1 of 15 numbers found");
+    await expect(page.getByTestId("engine-coverage")).toContainText("1 of 17 numbers found");
 
     const downloadP = page.waitForEvent("download");
     await page.getByTestId("engine-save-json").click();
@@ -447,9 +447,9 @@ test.describe("leaving the device and coming back", () => {
     await expect(page.getByTestId("engine-setup")).toBeVisible();
     await page.getByTestId("engine-setup-import").click();
     await page.getByTestId("engine-import-file").setInputFiles(path);
-    await expect(page.getByTestId("engine-import-preview")).toContainText("1 of 15");
+    await expect(page.getByTestId("engine-import-preview")).toContainText("1 of 17");
     await page.getByTestId("engine-import-open").click();
-    await expect(page.getByTestId("engine-coverage")).toContainText("1 of 15 numbers found");
+    await expect(page.getByTestId("engine-coverage")).toContainText("1 of 17 numbers found");
     expect((await storedEngine(page))?.state.snapshots[0]?.metrics["act.rate"]?.status).toBe("measured");
   });
 
