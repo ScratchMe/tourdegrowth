@@ -50,6 +50,7 @@ function afterQ1(): GameState<RetentionCardId> {
       q: 0, picked: ["pdef", "survey"], order: null, fx: [{ card: "pdef", effect: { kind: "none" } }],
       churnStart: 0.06, churnEnd: 0.055, target: 0.056, gap: -0.001, subs: 98_000, mrr: 1_180_000,
       patience: 60, events: [{ kind: "competitor" }], boss: { verdict: "hit", order: null }, moodAfter: "calm",
+      drivers: { picks: -0.004, production: 0, inspection: 0, word: -0.001, market: 0 },
     }],
   };
 }

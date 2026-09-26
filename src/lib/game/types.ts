@@ -46,7 +46,7 @@ export interface ModelConstants {
   viral: { trust: number; spike: number; patienceHit: number };
   press: { trust: number; months: number; patienceBoost: number; acqBoost: number };
   patience: { hit: number; missPerPoint: number; missCap: number; obeyed: number; refused: number;
-              presentInsight: number; presentBlind: number; fireBelow: number; lowLine: number };
+              present: number; fireBelow: number; lowLine: number };
   competitorQuarter: number;        // 1
 }
 
@@ -69,7 +69,7 @@ export interface MonthPoint { m: number; churn: number; trust: number; subs: num
 
 export type VisibleEffect =
   | { kind: "insight" }
-  | { kind: "present"; insight: boolean }
+  | { kind: "present" }
   | { kind: "clean" }
   | { kind: "extra" }
   | { kind: "down"; pct: number; rising: boolean }
@@ -78,8 +78,11 @@ export type VisibleEffect =
 
 export type GameEvent =
   | { kind: "midMail"; moving: boolean }
-  | { kind: "present"; insight: boolean }
-  | { kind: "control"; fine: number; leavers: number }
+  | { kind: "present" }
+  /** The exit survey picked this quarter: its answers are in, the data review with the CEO is unlocked. */
+  | { kind: "surveyAnswers" }
+  /** `removed`: the patterns the inspection made the team take down — read back by next quarter's drivers. */
+  | { kind: "control"; fine: number; leavers: number; removed: string[] }
   | { kind: "reports" }
   | { kind: "viral" }
   | { kind: "press" }
@@ -87,12 +90,33 @@ export type GameEvent =
 
 export interface BossLine { verdict: "hit" | "cover" | "missed"; order: "obeyed" | "refused" | null }
 
+/**
+ * Why churn moved over one quarter, in churn fraction (0.004 = 0,4 point).
+ * The four sum EXACTLY to `churnEnd - churnStart`: `word` is computed as the
+ * remainder, so a rounding or the churn floor can never make the report's
+ * lines disagree with its tile (Antoine, 2026-09-25: « difficile de
+ * comprendre pourquoi les chiffres ont bougé autant »).
+ */
+export interface ChurnDrivers {
+  /** The two cards picked this quarter, cleaning included. */
+  picks: number;
+  /** What was already in production: ramps coming in, patterns wearing off. */
+  production: number;
+  /** The patterns an inspection forced down at the end of the quarter before: the people they held back leave. */
+  inspection: number;
+  /** What subscribers say — trust, a viral thread, an inspection's rush of leavers. Never the trust figure itself. */
+  word: number;
+  /** The competitor's spring offer coming in or going away. */
+  market: number;
+}
+
 export interface QuarterLog<Id extends string = string> {
   q: number; picked: Id[]; order: Id | null;
   fx: { card: Id; effect: VisibleEffect }[];
   churnStart: number; churnEnd: number; target: number; gap: number;
   subs: number; mrr: number; patience: number;
   events: GameEvent[]; boss: BossLine; moodAfter: Mood;
+  drivers: ChurnDrivers;
 }
 
 /** Quel message le DG dit à l'ouverture de la visio — le texte est résolu par la couche copie. */

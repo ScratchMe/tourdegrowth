@@ -5,10 +5,10 @@ import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { shapeOf } from "@/lib/engine/catalog-shape";
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
-import type { EngineState, MetricEntry, MetricId, RoleId, Snapshot } from "@/lib/engine/types";
+import type { EngineSetup, EngineState, MetricEntry, MetricId, RoleId, SharedCount, Snapshot, YearMonth } from "@/lib/engine/types";
 import type { Locale } from "@/lib/i18n/locale";
 import type { Pillar } from "@/lib/scoring/pillars";
-import { Board, type BoardTab } from "./_engine/Board";
+import { Board } from "./_engine/Board";
 import { DeckView } from "./_engine/deck/DeckView";
 import { collectPlan } from "./_engine/collect";
 import { latestTourWithAnswers } from "@/lib/engine/bridge";
@@ -18,10 +18,14 @@ import { engineFileName, serializeEngine } from "@/lib/engine/io";
 import { markReminded, markRequested } from "@/lib/engine/request";
 import { requestPersistence } from "@/lib/engine/storage";
 import { newEngineState } from "@/lib/engine/validate";
+import { propagateFrom, withSharedCount } from "@/lib/engine/shared-counts";
 import { trackEngine } from "./_engine/engine-events";
 import { commit, erase, getClientSnapshot, getServerSnapshot, subscribe, type CommitResult } from "./_engine/engine-store";
 import { EraseDialog } from "./_engine/EraseDialog";
+import { ExampleView } from "./_engine/ExampleView";
 import { ImportPanel } from "./_engine/ImportPanel";
+import { Steps } from "./_engine/Steps";
+import { resumePosition, type StepPosition } from "./_engine/steps-model";
 import { Setup, type SetupChoice } from "./_engine/Setup";
 import { domId } from "./_engine/text";
 import type { EngineActions, EngineView } from "./_engine/view";
@@ -45,8 +49,13 @@ export interface EngineWorkbenchProps {
   bridges: ResolvedBridge[];
 }
 
-/** The screens of the one route (§7): the board and its tabs, the slides, and the two file screens. The current screen is NOT persisted — reopening costs a click, the entries are what is kept. */
-type Screen = "board" | "deck" | "import" | "erase";
+/**
+ * The screens of the one route (§7): the board, the step-by-step, the
+ * slides, the settings, the example, and the two file screens. The current
+ * screen is NOT persisted — reopening costs a click, the entries are what is
+ * kept; an engine found on arrival opens on the board.
+ */
+type Screen = "board" | "steps" | "deck" | "import" | "erase" | "settings" | "example";
 
 // Once per page session, not per mount (§11.6: "first view of the island in the session").
 let openedTracked = false;
@@ -96,7 +105,7 @@ function download(text: string, fileName: string) {
 export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy, bridges }: EngineWorkbenchProps) {
   const snap = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
   const [screen, setScreen] = useState<Screen>("board");
-  const [tab, setTab] = useState<BoardTab>("engine");
+  const [stepsFrom, setStepsFrom] = useState<StepPosition>({ phase: "targets" });
   const [selected, setSelected] = useState<Pillar | null>(null);
   const [drawerSeq, setDrawerSeq] = useState(0);
   const [focusMetric, setFocusMetric] = useState<MetricId | null>(null);
@@ -146,8 +155,18 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
 
   function openBoard() {
     setScreen("board");
-    setTab("engine");
     focus("engine-verdict");
+  }
+
+  function openSteps(from: StepPosition) {
+    setStepsFrom(from);
+    setScreen("steps");
+    focus("engine-steps-title");
+  }
+
+  function openExample() {
+    setScreen("example");
+    focus("engine-example-title");
   }
 
   const hydrated = snap !== null;
@@ -161,6 +180,21 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
 
   // --- Nothing (usable) on this device: setup, import, or the unreadable notice.
   if (!state || !computed) {
+    if (screen === "example") {
+      return shell(
+        <ExampleView
+          locale={locale}
+          strings={strings}
+          metrics={metrics}
+          derivedCopy={derivedCopy}
+          bridges={bridges}
+          onBack={() => {
+            setScreen("board");
+            focus("engine-setup-title");
+          }}
+        />,
+      );
+    }
     if (screen === "import") {
       return shell(
         <ImportPanel
@@ -219,6 +253,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
           setScreen("import");
           focus("engine-import-title");
         }}
+        onExample={openExample}
         onStart={(choice: SetupChoice) => {
           const nowIso = new Date().toISOString();
           // The months the setup screen SHOWED, not the engine's fallback: the two can
@@ -233,7 +268,8 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
           };
           persist(next, { fresh: true, stamp: false });
           if (choice.tourResultId) trackEngine({ name: "engine_tour_linked" });
-          openBoard();
+          if (choice.start === "steps") openSteps({ phase: "targets" });
+          else openBoard();
         }}
       />,
     );
@@ -244,7 +280,9 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
 
   const actions: EngineActions = {
     saveEntry(id: MetricId, entry: MetricEntry) {
-      const result = persist(withSnapshot(current, (s) => ({ ...s, metrics: { ...s.metrics, [id]: entry } })));
+      // A count this number shares with others (shared-counts.ts) becomes the base and is
+      // written into them: typed once, never contradicting itself across the board.
+      const result = persist(withSnapshot(current, (s) => propagateFrom({ ...s, metrics: { ...s.metrics, [id]: entry } }, id)));
       const stage = shapeOf(id).stage;
       if (result.ok && !savedStages.has(stage)) {
         savedStages.add(stage);
@@ -262,6 +300,15 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
         }),
       );
     },
+    // Every count in ONE write: two calls in the same tick would both start from the
+    // same `current`, and the second would silently drop the first.
+    setBase(counts: Partial<Record<SharedCount, number>>) {
+      persist(
+        withSnapshot(current, (s) =>
+          (Object.entries(counts) as [SharedCount, number][]).reduce((acc, [count, value]) => withSharedCount(acc, count, value), s),
+        ),
+      );
+    },
     markRequested(ids: MetricId[], role: RoleId) {
       persist(withSnapshot(current, (s) => markRequested(s, ids, role, new Date().toISOString())));
     },
@@ -270,7 +317,6 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     },
     openMetric(id: MetricId) {
       setScreen("board");
-      setTab("engine");
       setSelected(shapeOf(id).stage);
       setFocusMetric(id);
       setDrawerSeq((n) => n + 1);
@@ -318,6 +364,52 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     );
   }
 
+  if (screen === "settings") {
+    const snapshot = lastSnapshot(current);
+    return shell(
+      <Setup
+        strings={strings}
+        locale={locale}
+        today={view.ctx.today}
+        tour={null}
+        initial={{ setup: current.setup, referenceMonth: snapshot.referenceMonth, cohortMonth: snapshot.cohortMonth }}
+        existing={{
+          activation: snapshot.metrics["act.rate"] !== undefined,
+          paid: snapshot.metrics["rev.paid-conversion"] !== undefined,
+          any: Object.keys(snapshot.metrics).length > 0,
+        }}
+        onCancel={openBoard}
+        onStart={(choice) => {
+          persist(withSettings(current, choice.setup, choice.referenceMonth, choice.cohortMonth));
+          openBoard();
+        }}
+      />,
+    );
+  }
+
+  if (screen === "example") {
+    return shell(
+      <ExampleView locale={locale} strings={strings} metrics={metrics} derivedCopy={derivedCopy} bridges={bridges} onBack={openBoard} />,
+    );
+  }
+
+  if (screen === "steps") {
+    return shell(
+      <Steps
+        view={view}
+        actions={actions}
+        initial={stepsFrom}
+        onBoard={openBoard}
+        onSave={exportJson}
+        onDeck={() => {
+          setScreen("deck");
+          trackEngine({ name: "engine_deck_opened" });
+          focus("engine-deck-title");
+        }}
+      />,
+    );
+  }
+
   if (screen === "deck") {
     // DeckView owns the section, its heading (focused on arrival) and its back button (§7 E5).
     // html-to-image stays a dynamic import inside it, never in this island's first chunk.
@@ -345,8 +437,6 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
       actions={actions}
       verdict={verdict}
       plan={plan}
-      tab={tab}
-      onTab={setTab}
       selected={selected}
       onSelect={(stage) => {
         const was = selected;
@@ -373,6 +463,35 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
         setScreen("erase");
         focus("engine-erase-title");
       }}
+      onSettings={() => {
+        setScreen("settings");
+        focus("engine-setup-title");
+      }}
+      onSteps={() => openSteps(resumePosition(lastSnapshot(current)))}
     />,
   );
+}
+
+/**
+ * The engine with new settings (Antoine, 2026-09-25: they could not be
+ * changed without erasing everything). A window is part of a number's
+ * definition — activation within n days, paid within n days — so changing
+ * it sends that number back to "to fill in": kept, it would claim a
+ * definition it was not measured on. The settings card says so before the
+ * save. A month changed keeps every entry: the card asks to reread them.
+ */
+function withSettings(state: EngineState, setup: EngineSetup, referenceMonth: YearMonth, cohortMonth: YearMonth): EngineState {
+  const snapshot = lastSnapshot(state);
+  const metrics = { ...snapshot.metrics };
+  if (setup.activationWindowDays !== state.setup.activationWindowDays) delete metrics["act.rate"];
+  if (setup.paidWindowDays !== state.setup.paidWindowDays) delete metrics["rev.paid-conversion"];
+  const hadCompany = Boolean(state.setup.companyLabel);
+  return {
+    ...state,
+    // The model is not editable (one profile in v1), nor is anything the card doesn't show.
+    setup: { ...setup, profile: state.setup.profile },
+    // A name given for the first time goes on the slides, as it does at creation.
+    deck: !hadCompany && setup.companyLabel ? { ...state.deck, showCompany: true } : state.deck,
+    snapshots: [...state.snapshots.slice(0, -1), { ...snapshot, referenceMonth, cohortMonth, metrics }],
+  };
 }

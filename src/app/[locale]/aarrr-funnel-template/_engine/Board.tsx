@@ -4,10 +4,11 @@ import { useSyncExternalStore } from "react";
 import { Button } from "@/components/core/Button";
 import { Callout } from "@/components/core/Callout";
 import { Card } from "@/components/core/Card";
-import { Segmented } from "@/components/core/Segmented";
+import { Disclosure } from "@/components/core/Disclosure";
 import { CANDIDATE_IDS, METRIC_SHAPES, metricsOfStage } from "@/lib/engine/catalog-shape";
 import type { CandidateId, Interval, MetricId, SlideTitle } from "@/lib/engine/types";
 import { knownIn } from "@/lib/engine/values";
+import { knownSharedCount } from "@/lib/engine/shared-counts";
 import { PILLARS, type Pillar } from "@/lib/scoring/pillars";
 import { BackupBar } from "./BackupBar";
 import type { CollectPlan } from "./collect";
@@ -22,6 +23,7 @@ import { StageRow } from "./StageRow";
 import { fill, formatMonth } from "./text";
 import { Verdict } from "./Verdict";
 import type { EngineActions, EngineView } from "./view";
+import { WhatIfPanel } from "./WhatIfPanel";
 import styles from "./Board.module.css";
 
 /**
@@ -38,8 +40,6 @@ function subscribeWide(callback: () => void) {
   return () => media.removeEventListener("change", callback);
 }
 
-export type BoardTab = "engine" | "collect";
-
 /** Where the wide drawer opens when nobody chose (§7 E2): the stage the diagnosis names, else the first with a number to fill. */
 export function defaultStage(view: EngineView): Pillar {
   const named = view.derived.diagnosis.named;
@@ -51,12 +51,15 @@ export function defaultStage(view: EngineView): Pillar {
 }
 
 /**
- * The board (spec §7 E2). Top to bottom: the eyebrow, the verdict title (the
- * board's h2 and its focus target), the coverage in fractions, the two tabs,
- * then either — on the engine tab — the diagnosis, the peloton in the
- * screen's one raised card, the five stage rows with their drawer and the
- * declared × measured mirror, or the collect plan; then the actions and the
- * backup band. On a phone the tabs sit under the coverage, as everywhere else.
+ * The board (spec §7 E2) — « la façon que tu as actuellement, quand tu
+ * connais l'outil » (Antoine, 2026-09-25), next to the step-by-step. Top to
+ * bottom: the eyebrow with the settings and the way back to the steps, the
+ * verdict title (the board's h2 and its focus target), the coverage in
+ * fractions, the diagnosis, the peloton in the screen's one raised card, the
+ * five stage rows with their drawer, « et si » on the whole funnel, the
+ * declared × measured mirror, what is left to go and get (folded — it used to
+ * be a second tab, and two tabs on a long page was one navigation too many),
+ * then the actions and the backup band.
  *
  * The four visuals are P5's components, fed here from the SAME derived object
  * the verdict and the slides read (`view.derived`): the diagnosis cannot name
@@ -67,8 +70,6 @@ export function Board({
   actions,
   verdict,
   plan,
-  tab,
-  onTab,
   selected,
   onSelect,
   drawerSeq,
@@ -79,13 +80,13 @@ export function Board({
   onSave,
   onImport,
   onErase,
+  onSettings,
+  onSteps,
 }: {
   view: EngineView;
   actions: EngineActions;
   verdict: SlideTitle;
   plan: CollectPlan;
-  tab: BoardTab;
-  onTab: (tab: BoardTab) => void;
   selected: Pillar | null;
   onSelect: (stage: Pillar | null) => void;
   /** Bumped when a number is opened from elsewhere, so the drawer remounts with that number open. */
@@ -97,6 +98,8 @@ export function Board({
   onSave: () => void;
   onImport: () => void;
   onErase: () => void;
+  onSettings: () => void;
+  onSteps: () => void;
 }) {
   const { strings, state, ctx, derived } = view;
   // The diagnosis prints each named stage's value next to its comparator; the Diagnosis
@@ -119,19 +122,19 @@ export function Board({
   return (
     <div className={styles.board} data-testid="engine-board">
       <header className={styles.head}>
-        <p className={styles.eyebrow}>{eyebrow}</p>
+        <div className={styles.eyebrowRow}>
+          <p className={styles.eyebrow}>{eyebrow}</p>
+          <div className={styles.headActions}>
+            <Button variant="quiet" onClick={onSteps} data-testid="engine-open-steps">
+              {strings.board.steps}
+            </Button>
+            <Button variant="quiet" onClick={onSettings} data-testid="engine-open-settings">
+              {strings.board.settings}
+            </Button>
+          </div>
+        </div>
         <Verdict title={verdict} strings={strings} />
         <Coverage coverage={derived.coverage} strings={strings} />
-        <Segmented
-          className={styles.tabs}
-          label={strings.workbench.tabsLabel}
-          value={tab}
-          options={[
-            { id: "engine", label: strings.board.tabEngine },
-            { id: "collect", label: fill(strings.board.tabCollect, { n: plan.count }) },
-          ]}
-          onChange={onTab}
-        />
       </header>
 
       {writeFailed ? (
@@ -142,11 +145,10 @@ export function Board({
 
       {returningFrom ? <ResumeBand returningFrom={returningFrom} plan={plan} view={view} actions={actions} /> : null}
 
-      {tab === "engine" ? (
-        <>
+      <>
           <Diagnosis diagnosis={derived.diagnosis} strings={strings} locale={ctx.locale} metrics={view.metrics} values={candidateValues} />
           {/* The screen's one raised card (Card's own rule): the peloton is what the board is about. */}
-          <Card elevation="raised" className={styles.pelotonCard}>
+          <Card elevation="raised" className={styles.pelotonCard} data-testid="engine-board-peloton">
             <Peloton
               peloton={derived.peloton}
               strings={strings}
@@ -154,6 +156,7 @@ export function Board({
               cohortMonth={snapshot.cohortMonth}
               paidWindowDays={state.setup.paidWindowDays}
               diagnosis={derived.diagnosis}
+              cohortSignups={knownSharedCount(snapshot, "cohortSignups")?.value ?? null}
             />
           </Card>
 
@@ -184,6 +187,15 @@ export function Board({
             })}
           </div>
 
+          {/* Folded on the board: the funnel it redraws is the one just above, and a
+              second full funnel open by default made the longest page of the site
+              longer (Antoine, 2026-09-25). The step-by-step shows it open. */}
+          <Disclosure summary={strings.board.whatIfTitle} data-testid="engine-board-whatif">
+            <div className={styles.whatIf}>
+              <WhatIfPanel view={view} />
+            </div>
+          </Disclosure>
+
           {/* Declared × measured (§8.5): the linked Tour's mirror, or "that Tour is gone" when its
               result left the device, or — with no Tour here at all — the invitation to take one.
               A Tour on the device the person chose not to link: nothing (their choice, D13). */}
@@ -200,10 +212,13 @@ export function Board({
           ) : !view.tourOnDevice ? (
             <Mirror mirror={null} strings={strings} locale={ctx.locale} bridges={view.bridges} metrics={view.metrics} derived={view.derivedCopy} />
           ) : null}
-        </>
-      ) : (
-        <CollectHub plan={plan} view={view} actions={actions} />
-      )}
+      </>
+
+      {plan.count > 0 ? (
+        <Disclosure summary={fill(strings.board.collectTitle, { n: plan.count })} data-testid="engine-collect-disclosure">
+          <CollectHub plan={plan} view={view} actions={actions} />
+        </Disclosure>
+      ) : null}
 
       <div className={styles.actions} data-testid="engine-actions">
         <Button onClick={onDeck} data-testid="engine-open-deck">

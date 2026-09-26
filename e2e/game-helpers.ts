@@ -36,7 +36,7 @@ export async function seedGame(page: Page, state: GameState, path: string = LEVE
   await page.reload();
 }
 
-/** « Quitter la visio »: the call hangs up and the hand opens. */
+/** « Raccrocher et choisir tes chantiers »: the call hangs up and the hand opens. */
 export async function hangUp(page: Page): Promise<void> {
   await page.getByTestId("game-hangup").click();
   await expect(page.getByTestId("game-call")).toHaveAttribute("data-state", "hungUp");
@@ -57,6 +57,11 @@ export async function pickUpCall(page: Page): Promise<void> {
  */
 export async function playQuarter(page: Page, picks: readonly [RetentionCardId, RetentionCardId]): Promise<void> {
   await hangUp(page);
+  await pickAndRun(page, picks);
+}
+
+/** From the open hand: tick the two cards, « Lancer », and wait for the quarter's report. */
+export async function pickAndRun(page: Page, picks: readonly [RetentionCardId, RetentionCardId]): Promise<void> {
   for (const card of picks) {
     const button = page.getByTestId(`game-card-${card}`);
     await button.click();

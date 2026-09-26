@@ -36,7 +36,7 @@ import { currentSnapshot, knownIn, statusOf } from "./values";
  *   same deliberate choice as lib/scoring/bottleneck.ts).
  */
 
-function directionOf(id: CandidateId): Comparator["direction"] {
+export function directionOf(id: CandidateId): Comparator["direction"] {
   return id === "ret.logo-churn" ? "lower" : "higher";
 }
 

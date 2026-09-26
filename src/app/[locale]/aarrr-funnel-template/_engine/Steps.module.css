@@ -1,0 +1,111 @@
+/* The step-by-step — semantic tokens only (no-primitives.test.ts). */
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  min-width: 0;
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+}
+
+.phases {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-6);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.phase {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.current {
+  color: var(--text-body);
+}
+
+.phaseNumber {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: var(--border-solid);
+}
+
+.current .phaseNumber {
+  background: var(--state-selected-bg);
+  color: var(--state-selected-text);
+}
+
+.card,
+.whatif {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  min-width: 0;
+}
+
+.card {
+  max-width: 720px;
+}
+
+.title {
+  font: var(--display-section);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+  color: var(--text-body);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Focused by script when a person moves (R-19), never reachable by Tab. */
+.title:focus {
+  outline: none;
+}
+
+.eyebrow {
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.lead {
+  font: var(--body-md);
+  color: var(--text-body);
+  margin: 0;
+}
+
+.targets {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-7);
+}
+
+@media (min-width: 761px) {
+  .targets {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}

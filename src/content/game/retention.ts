@@ -145,7 +145,9 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
     label: t("Visio avec le DG", "Video call with the CEO"),
     tag: t("DG · Flixo", "CEO · Flixo"),
     listen: t("Écouter le DG", "Listen to the CEO"),
-    hangUp: t("Quitter la visio", "Leave the call"),
+    // TODO: à relire — réécrit le 2026-09-25 (retour d'Antoine) : le bouton dit ce qui vient
+    // ensuite, puisque les chantiers n'apparaissent plus qu'une fois la visio quittée.
+    hangUp: t("Raccrocher et choisir tes chantiers", "Hang up and choose your projects"),
     hungUp: t("raccroché", "hung up"),
     ended: t("terminé", "ended"),
     // TODO: à relire — nouveau (plan §1.3, l'appel entrant entre deux trimestres).
@@ -217,23 +219,33 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
   },
 
   hand: {
-    title: t("Trimestre {q} · tes deux actions", "Quarter {q} · your two actions"),
+    // TODO: à relire — « chantiers » plutôt qu'« actions » (2026-09-25) : le mot du DG, et celui
+    // d'une équipe qui livre.
+    title: t("Trimestre {q} · tes deux chantiers", "Quarter {q} · your two projects"),
     count: t("{picked} / {max}", "{picked} / {max}"),
     order: t("Demandé par le DG", "Requested by the CEO"),
     // TODO: à relire — nouveau (plan §2.6 : l'état d'une carte cochée est dit en mots).
     chosen: t("Choisie", "Chosen"),
+    // TODO: à relire — nouveau (2026-09-25) : le badge du point données le trimestre où le
+    // questionnaire le débloque.
+    unlocked: t("Débloqué par le questionnaire", "Unlocked by the survey"),
     production: t("En production : {cards}.", "In production: {cards}."),
     productionEmpty: t(
       "Rien en production pour l'instant. Le parcours actuel : un bouton, deux clics.",
       "Nothing in production yet. The current flow: one button, two clicks.",
     ),
     run: t("Lancer le trimestre", "Run the quarter"),
-    hintCallOpen: t("Le DG parle. Quitte la visio pour choisir.", "The CEO is talking. Leave the call to choose."),
+    // TODO: à relire — réécrit le 2026-09-25 (retour d'Antoine) : dire POURQUOI deux, pas
+    // seulement combien. C'est la capacité de l'équipe, pas une règle du jeu.
     hintPick: t(
-      "Choisis deux actions. Tu verras leur effet à la fin du trimestre.",
-      "Pick two actions. You'll see their effect at the end of the quarter.",
+      "Ton équipe produit peut livrer deux chantiers par trimestre, pas un de plus. Choisis-les : tu verras leur effet à la fin du trimestre.",
+      "Your product team can ship two projects a quarter, not one more. Choose them: you'll see their effect at the end of the quarter.",
     ),
-    hintReady: t("Trois mois vont passer. Regarde les chiffres.", "Three months are about to pass. Watch the numbers."),
+    // TODO: à relire — idem.
+    hintReady: t(
+      "L'équipe est pleine pour le trimestre. Trois mois vont passer : regarde les chiffres.",
+      "The team is fully booked for the quarter. Three months are about to pass: watch the numbers.",
+    ),
     yearInterrupted: t("Année interrompue", "Year cut short"),
     yearOver: t("Année terminée", "Year over"),
     // TODO: à relire — l'anglais est nouveau (le français est celui du prototype, renderHand) :
@@ -561,6 +573,17 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
     // TODO: à relire — nouveau (plan §2.6).
     effectsHeading: t("Ce que tes actions ont fait", "What your actions did"),
     effectLine: t("{card} : {effect}", "{card}: {effect}"),
+    // TODO: à relire — nouveau (2026-09-25, retour d'Antoine : on ne comprenait pas pourquoi le
+    // churn bougeait autant). Les quatre lignes s'additionnent exactement au mouvement du trimestre.
+    driversHeading: t("Pourquoi le churn a bougé : {delta}", "Why churn moved: {delta}"),
+    drivers: {
+      picks: t("Tes deux chantiers de ce trimestre", "Your two projects this quarter"),
+      production: t("Ce qui tournait déjà en production", "What was already in production"),
+      inspection: t("Les astuces retirées après le contrôle", "The tricks taken down after the inspection"),
+      word: t("Ce que tes abonnés disent de Flixo", "What your subscribers say about Flixo"),
+      market: t("L'offre de printemps du concurrent", "The competitor's spring offer"),
+    },
+    driverLine: t("{label} : {delta}", "{label}: {delta}"),
     // TODO: à relire — nouveau (plan §2.6, DgMail).
     mailHeader: t("De : DG · Objet : les chiffres de la semaine", "From: CEO · Subject: this week's numbers"),
     bossLine: t("Le DG : {line}", "The CEO: {line}"),
@@ -574,9 +597,10 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
   journal: { title: t("Journal de l'année", "The year so far") },
 
   effects: {
-    insight: t("des réponses de sortie, et des chiffres à montrer au DG", "exit answers, and numbers to show the CEO"),
-    presentInsight: t("le DG t'a donné du temps", "the CEO gave you time"),
-    presentBlind: t("sans données, le DG a hoché la tête poliment", "with no data, the CEO nodded politely"),
+    // TODO: à relire — réécrit le 2026-09-25 : les réponses arrivent en fin de trimestre, et c'est
+    // l'événement juste en dessous qui dit ce qu'elles débloquent.
+    insight: t("trois mois de réponses, à lire ci-dessous", "three months of answers, below"),
+    present: t("le DG t'a donné du temps", "the CEO gave you time"),
     clean: t("astuces retirées, les résiliations remontent un peu", "tricks removed, churn creeps back up a little"),
     extra: t("un mois de plus facturé à chaque partant", "one more month billed to everyone who leaves"),
     down: t("−{pct} % de résiliations ce trimestre", "−{pct}% churn this quarter"),
@@ -597,13 +621,15 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
       "Message du DG, à mi-trimestre : « Je vois les chiffres de la semaine. Ça ne bouge pas assez. »",
       'Message from the CEO, mid-quarter: "I can see this week\'s numbers. It isn\'t moving enough."',
     ),
-    presentInsight: t(
+    present: t(
       "Ta présentation au DG a tenu : des données, une courbe, une demande de temps. Il t'en donne.",
       "Your presentation to the CEO held up: data, a curve, a request for time. He gives you some.",
     ),
-    presentBlind: t(
-      "Ta présentation au DG : sans données, il a hoché la tête poliment.",
-      "Your presentation to the CEO: with no data, he nodded politely.",
+    // TODO: à relire — nouveau (2026-09-25, retour d'Antoine : le questionnaire doit rapporter
+    // quelque chose de visible au trimestre suivant, et c'est lui qui débloque le point données).
+    surveyAnswers: t(
+      "Les réponses du questionnaire sont arrivées : 4 partants sur 10 n'ont « rien à regarder », 3 sur 10 trouvent Flixo « trop cher ». Tes prochains chantiers viseront plus juste, et tu as enfin de quoi montrer au DG : « Point données avec le DG » est débloqué.",
+      "The exit survey's answers are in: 4 leavers in 10 have \"nothing to watch\", 3 in 10 find Flixo \"too expensive\". Your next projects will aim better, and you finally have something to show the CEO: \"Data review with the CEO\" is unlocked.",
     ),
     control: t(
       "Contrôle de la DGCCRF, article dans la presse, amende de {fine}. Le DG te demande de tout retirer avant vendredi. {leavers} abonnés partent dans la foulée, en le racontant.",

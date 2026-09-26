@@ -152,7 +152,18 @@ export interface Snapshot {
   metrics: Partial<Record<MetricId, MetricEntry>>;
   /** Team targets, display unit (%, currency). They always designate (D8). */
   targets: Partial<Record<MetricId, number>>;
+  /**
+   * The counts several numbers share, typed ONCE (Antoine, 2026-09-25: « si
+   * on l'a déjà saisi une fois, on ne devrait pas avoir à le saisir de
+   * nouveau »). Optional: a file from before has none, and every count it
+   * needs is still in its entries. `lib/engine/shared-counts.ts` keeps this
+   * and the entries that carry the same count in step.
+   */
+  base?: Partial<Record<SharedCount, number>>;
 }
+
+/** A count more than one number is computed on (`lib/engine/shared-counts.ts`). */
+export type SharedCount = "cohortSignups" | "monthSignups";
 
 export interface EngineSetup {
   profile: EngineProfile;

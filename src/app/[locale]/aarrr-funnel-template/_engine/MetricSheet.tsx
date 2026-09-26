@@ -1,20 +1,20 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/core/Button";
 import { Tag } from "@/components/core/Tag";
 import { TextArea } from "@/components/core/TextArea";
-import { CANDIDATE_IDS, TEXT_LIMITS, UNPRICED_CANDIDATES, shapeOf, type MetricShape } from "@/lib/engine/catalog-shape";
+import { CANDIDATE_IDS, TEXT_LIMITS, shapeOf, type MetricShape } from "@/lib/engine/catalog-shape";
 import { BASIS_KEY, EFFORT_KEY, ROLE_KEY, STATUS_KEY, type ResolvedMetric } from "@/lib/engine/strings";
 import type { CandidateId, EstimateBasis, MetricId, RoleId } from "@/lib/engine/types";
 import { isImmature, nextMonth, windowDaysOf } from "@/lib/engine/cohort";
 import { comparatorOf } from "@/lib/engine/diagnose";
 import { formatInterval } from "@/lib/engine/format";
-import { whatIf } from "@/lib/engine/impact";
 import { isRequestStale } from "@/lib/engine/request";
 import { blockingCheck } from "@/lib/engine/sanity";
 import { positionLabel } from "@/lib/engine/phrases";
 import { knownIn } from "@/lib/engine/values";
+import { SHARED_COUNTS, knownSharedCount, sharedCountAt } from "@/lib/engine/shared-counts";
 import { ComparisonStrip } from "./ComparisonStrip";
 import { MissingTriage } from "./MissingTriage";
 import { RequestCopy } from "./RequestCopy";
@@ -23,7 +23,6 @@ import { isRule, missingLabel, ruleMessage } from "./sheet-problems";
 import { currencySymbol } from "./sources";
 import { catalogFill, daysBetween, domId, fill, formatMonth, joinList, metricById, midSentence, sourceLabel } from "./text";
 import { ValueEditor } from "./ValueEditor";
-import { WhatIf } from "./WhatIf";
 import type { EngineActions, EngineView } from "./view";
 import { Choices } from "./_ui/Choices";
 import { describedBy, Field } from "./_ui/Field";
@@ -54,7 +53,24 @@ function unitMark(shape: MetricShape, view: EngineView): string | undefined {
  * merely odd is saved and shown "to check" elsewhere — and it names what is
  * missing rather than reddening boxes before anyone has tried.
  */
-export function MetricSheet({ id, view, actions }: { id: MetricId; view: EngineView; actions: EngineActions }) {
+export function MetricSheet({
+  id,
+  view,
+  actions,
+  variant = "board",
+  onSaved,
+}: {
+  id: MetricId;
+  view: EngineView;
+  actions: EngineActions;
+  /**
+   * `step`: one number per screen in the step-by-step (Antoine, 2026-09-25).
+   * The team target is asked on the step before, so it is not repeated here,
+   * and saving moves on (`onSaved`).
+   */
+  variant?: "board" | "step";
+  onSaved?: () => void;
+}) {
   const { strings, ctx, state } = view;
   const locale = ctx.locale;
   const shape = shapeOf(id);
@@ -68,12 +84,25 @@ export function MetricSheet({ id, view, actions }: { id: MetricId; view: EngineV
     hasNaReasons: Boolean(metric.naReasons?.length),
   };
 
-  const [draft, setDraft] = useState<SheetDraft>(() => draftFromEntry(entry, shape));
+  // A count several numbers share is typed once (shared-counts.ts): an empty side of this
+  // number's counts starts from it, and the field says so.
+  const shared = sharedSides(id, snapshot);
+  const [draft, setDraft] = useState<SheetDraft>(() => {
+    const d = draftFromEntry(entry, shape);
+    if (d.kind !== "ratio") return d;
+    return {
+      ...d,
+      numerator: d.numerator ?? shared.numerator?.value ?? null,
+      denominator: d.denominator ?? shared.denominator?.value ?? null,
+    };
+  });
   const [attempted, setAttempted] = useState(false);
   // Every refusal reads the same to the person — the device kept nothing, save a file — whether
   // it was the quota, storage switched off, or a store another tab left unreadable.
   const [outcome, setOutcome] = useState<"saved" | "failed" | null>(null);
-  const [whereOpen, setWhereOpen] = useState(!entry || entry.status === "todo");
+  // Folded by default, even on a number still to fill in: where to find it and its trap are
+  // read when needed, not scrolled past every time (Antoine, 2026-09-25).
+  const [whereOpen, setWhereOpen] = useState(false);
   const update = (patch: Partial<SheetDraft>) => {
     setDraft((current) => ({ ...current, ...patch }));
     setOutcome(null);
@@ -93,6 +122,7 @@ export function MetricSheet({ id, view, actions }: { id: MetricId; view: EngineV
     if (!built.entry || blockingCheck(built.entry, shape, locale)) return;
     const result = actions.saveEntry(id, built.entry);
     setOutcome(result.ok ? "saved" : "failed");
+    if (result.ok) onSaved?.();
   }
 
   // null, not 0, when the definition has no window: the sheet then prints no cohort line at all.
@@ -121,13 +151,6 @@ export function MetricSheet({ id, view, actions }: { id: MetricId; view: EngineV
   // exactly as the board row and the peloton read it — one number, one reading.
   const known = knownIn(state, id, ctx);
   const comparator = isCandidate ? comparatorOf(state, id as CandidateId) : undefined;
-  const whatIfOn = isCandidate && !UNPRICED_CANDIDATES.includes(id as CandidateId);
-  // Stable across renders: WhatIf recomputes in a memo keyed on this function, so a new
-  // function on every render would recompute the chain on every keystroke elsewhere.
-  const computeWhatIf = useCallback(
-    (target: number) => whatIf(state, id as CandidateId, target, ctx, strings.units),
-    [state, id, ctx, strings.units],
-  );
   const position = isCandidate ? view.derived.diagnosis.positions[id as CandidateId]?.position : undefined;
   const target = snapshot.targets[id];
   const bench = shape.benchmark;
@@ -193,7 +216,19 @@ export function MetricSheet({ id, view, actions }: { id: MetricId; view: EngineV
 
       {draft.mode === "have" ? (
         <>
-          <ValueEditor idPrefix={prefix} draft={draft} update={update} shape={shape} metric={filledMetric} view={view} problems={problems} />
+          <ValueEditor
+            idPrefix={prefix}
+            draft={draft}
+            update={update}
+            shape={shape}
+            metric={filledMetric}
+            view={view}
+            problems={problems}
+            sharedHints={{
+              numerator: shared.numerator ? sharedHint(shared.numerator.others, view) : undefined,
+              denominator: shared.denominator ? sharedHint(shared.denominator.others, view) : undefined,
+            }}
+          />
           <DefinitionNote prefix={prefix} draft={draft} update={update} view={view} error={problems.includes("definition-too-long")} />
         </>
       ) : null}
@@ -356,7 +391,7 @@ export function MetricSheet({ id, view, actions }: { id: MetricId; view: EngineV
                 })
               : fill(strings.sheet.noReference, { reason: metric.noReferenceReason ?? "" })}
           </p>
-          {isCandidate ? (
+          {isCandidate && variant === "board" ? (
             <TargetField id={id} prefix={prefix} target={target} unit={unitMark(shape, view)} view={view} actions={actions} />
           ) : null}
           {positionText ? (
@@ -365,22 +400,6 @@ export function MetricSheet({ id, view, actions }: { id: MetricId; view: EngineV
             </p>
           ) : null}
         </div>
-      ) : null}
-
-      {/* "What if" (§6.7): once a comparator exists and the value is known — the chain starts
-          from today's number. Only where the engine can price a change: day-30 retention and the
-          referred share have no chain (UNPRICED_CANDIDATES), so a slider there would move and say
-          nothing. Churn is the priced lever of the Retention stage, so it gets one too. */}
-      {whatIfOn && comparator && known.kind === "known" ? (
-        <WhatIf
-          metric={id as CandidateId}
-          strings={strings}
-          locale={locale}
-          from={known.value}
-          comparator={comparator}
-          stageName={strings.subject[id as CandidateId]}
-          compute={computeWhatIf}
-        />
       ) : null}
 
       {declared ? (
@@ -405,10 +424,22 @@ export function MetricSheet({ id, view, actions }: { id: MetricId; view: EngineV
       </Field>
 
       {/* The copy button of "I'll ask for it" is that mode's save: the request is what gets recorded. */}
+      {variant === "step" && draft.mode === "ask" ? (
+        <div className={styles.saveRow}>
+          <Button onClick={() => onSaved?.()} data-testid={`engine-continue-${domId(id)}`}>
+            {strings.steps.continue}
+          </Button>
+        </div>
+      ) : null}
       {draft.mode !== "ask" ? (
         <div className={styles.saveRow}>
-          <Button variant="secondary" onClick={save} disabled={draft.mode === null} data-testid={`engine-save-${domId(id)}`}>
-            {strings.sheet.save}
+          <Button
+            variant={variant === "step" ? "primary" : "secondary"}
+            onClick={save}
+            disabled={draft.mode === null}
+            data-testid={`engine-save-${domId(id)}`}
+          >
+            {variant === "step" ? strings.sheet.saveNext : strings.sheet.save}
           </Button>
           <p className={styles.saved} role="status" aria-live="polite" data-testid={`engine-saved-${domId(id)}`}>
             {outcome === "saved" ? strings.workbench.saved : ""}
@@ -520,4 +551,32 @@ function withDefinition(view: EngineView, id: MetricId, definitionNote: string):
   const entry = last.metrics[id] ?? { status: "todo" as const, updatedAt: view.ctx.today.toISOString() };
   const patched = { ...last, metrics: { ...last.metrics, [id]: { ...entry, definitionNote: definitionNote.trim() || undefined } } };
   return { ...view, state: { ...view.state, snapshots: [...snapshots.slice(0, -1), patched] } };
+}
+
+/**
+ * The shared counts on each side of this number's counts: the value already
+ * typed (the base, or another number's entry) and the other numbers that use
+ * it — named in the hint, so « changing it here changes it everywhere » says
+ * where.
+ */
+function sharedSides(
+  id: MetricId,
+  snapshot: EngineView["state"]["snapshots"][number],
+): Partial<Record<"numerator" | "denominator", { value: number | null; others: MetricId[] }>> {
+  const out: Partial<Record<"numerator" | "denominator", { value: number | null; others: MetricId[] }>> = {};
+  for (const side of ["numerator", "denominator"] as const) {
+    const count = sharedCountAt(id, side);
+    if (!count) continue;
+    const known = knownSharedCount(snapshot, count);
+    out[side] = {
+      value: known?.value ?? null,
+      others: SHARED_COUNTS[count].map((slot) => slot.metric).filter((m) => m !== id),
+    };
+  }
+  return out;
+}
+
+function sharedHint(others: MetricId[], view: EngineView): string {
+  const names = others.map((m) => midSentence(metricById(view.metrics, m).name, view.ctx.locale));
+  return fill(view.strings.sheet.sharedHint, { metrics: joinList(names, view.strings.grammar) });
 }

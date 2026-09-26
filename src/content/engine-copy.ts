@@ -98,6 +98,33 @@ export const ENGINE_COPY = {
       fr: "Le moteur a besoin de JavaScript pour enregistrer tes chiffres. La liste des quinze chiffres, plus bas, se lit sans.",
       en: "The engine needs JavaScript to save your numbers. The list of fifteen numbers, further down, reads without it.",
     },
+    // TODO: à relire — nouveau (2026-09-25, retours d'Antoine sur le moteur).
+    durationTitle: { fr: "Combien de temps ça prend", en: "How long it takes" },
+    durationIntro: {
+      fr: "Surtout, là où sont tes chiffres. Sur les quinze, {quick} se lisent en cinq minutes, {hour} demandent environ une heure chacun et {ask} sont à demander à quelqu'un.",
+      en: "Mostly, where your numbers are. Of the fifteen, {quick} take five minutes to read, {hour} take about an hour each and {ask} have to be asked of someone.",
+    },
+    durationReadyLabel: { fr: "Tout est sous la main", en: "Everything is at hand" },
+    durationReady: {
+      fr: "Tu as accès à l'analytics, à la facturation et à la base produit : compte une demi-journée, en plusieurs fois si besoin. Le pas à pas garde ta place.",
+      en: "You have access to analytics, billing and the product database: allow half a day, in several sittings if needed. The step-by-step keeps your place.",
+    },
+    durationAskLabel: { fr: "Il faut demander", en: "You have to ask" },
+    durationAsk: {
+      fr: "Une partie est chez la finance ou la data : compte une à deux semaines d'aller-retour, pour environ une heure de ton temps. Les demandes se copient toutes faites.",
+      en: "Some of it sits with finance or data: allow one to two weeks of back and forth, for about an hour of your own time. The requests come ready to copy.",
+    },
+    durationTargetsLabel: { fr: "Pas encore de cible", en: "No target yet" },
+    durationTargets: {
+      fr: "Ajoute une réunion d'équipe pour en poser, ou avance sans : le moteur compare alors aux deux repères publiés qu'il connaît.",
+      en: "Add a team meeting to set some, or go ahead without: the engine then compares with the two published references it knows.",
+    },
+    durationDeckLabel: { fr: "Les slides", en: "The slides" },
+    durationDeck: { fr: "Un quart d'heure, une fois les chiffres là.", en: "A quarter of an hour, once the numbers are in." },
+    catalogueToggle: {
+      fr: "Ouvrir les quinze fiches : formule, où le trouver, piège",
+      en: "Open the fifteen cards: formula, where to find it, trap",
+    },
     catalogueTitle: { fr: "Les quinze chiffres", en: "The fifteen numbers" },
     catalogueIntro: {
       fr: "Trois par étape, comme les trois questions du Tour. Pour chacun : sa formule, où le trouver, et le piège à connaître avant de le citer.",
@@ -135,14 +162,21 @@ export const ENGINE_COPY = {
     activationWindow: { fr: "Fenêtre d'activation", en: "Activation window" },
     paidWindow: { fr: "Fenêtre de paiement", en: "Payment window" },
     windowDays: { fr: "{n} jours", en: "{n} days" },
-    companyLabel: { fr: "Nom affiché sur les slides (facultatif)", en: "Name shown on the slides (optional)" },
-    companyHint: { fr: "Il reste sur cet appareil, comme le reste.", en: "It stays on this device, like everything else." },
+    // TODO: à relire — réécrit le 2026-09-25 (retour d'Antoine) : dire quel nom.
+    companyLabel: { fr: "Nom de ton SaaS ou de ton entreprise (facultatif)", en: "Your SaaS or company name (optional)" },
+    companyHint: {
+      fr: "Il n'apparaît que sur tes slides, et reste sur cet appareil comme le reste.",
+      en: "It only appears on your slides, and stays on this device like everything else.",
+    },
     tourFound: {
       fr: "Tu as fait le Tour le {date} ({score}/100). On comparera ce que tu y as déclaré à ce que tu retrouves ici — on le lit, on ne le copie pas.",
       en: "You took the Tour on {date} ({score}/100). We'll compare what you declared there with what you find here — we read it, we don't copy it.",
     },
     tourLink: { fr: "Comparer avec ce Tour", en: "Compare with that Tour" },
-    start: { fr: "Lance ton moteur →", en: "Start your engine →" },
+    // TODO: à relire — nouveau (2026-09-25, retours d'Antoine sur le moteur).
+    exampleLink: { fr: "Voir un exemple rempli, funnel et slides →", en: "See a filled-in example, funnel and slides →" },
+    startSteps: { fr: "Commencer pas à pas →", en: "Start step by step →" },
+    startBoard: { fr: "Tout voir d'un coup", en: "See it all at once" },
   },
 
   board: {
@@ -150,8 +184,6 @@ export const ENGINE_COPY = {
       fr: "Ton moteur de croissance · {model} · cohorte : {cohort} · flux : {month}",
       en: "Your growth engine · {model} · {cohort} cohort · {month} flows",
     },
-    tabEngine: { fr: "Le moteur", en: "The engine" },
-    tabCollect: { fr: "À aller chercher ({n})", en: "To go and get ({n})" },
     smallCohort: {
       fr: "Petits effectifs : moins de 100 inscrits dans cette cohorte. Lis la direction, pas les décimales.",
       en: "Small numbers: fewer than 100 sign-ups in this cohort. Read the direction, not the decimals.",
@@ -162,6 +194,11 @@ export const ENGINE_COPY = {
       en: "found: {found} · missing: {missing} · in progress: {inProgress}",
     },
     toFill: { fr: "à renseigner", en: "to fill in" },
+    // TODO: à relire — nouveau (2026-09-25, retours d'Antoine sur le moteur).
+    settings: { fr: "Réglages", en: "Settings" },
+    steps: { fr: "Reprendre le pas à pas", en: "Back to step by step" },
+    collectTitle: { fr: "À aller chercher ({n})", en: "To go and get ({n})" },
+    whatIfTitle: { fr: "Et si ?", en: "What if?" },
   },
 
   coverage: {
@@ -438,6 +475,13 @@ export const ENGINE_COPY = {
     save: { fr: "Enregistrer", en: "Save" },
     close: { fr: "Fermer", en: "Close" },
     tooLong: { fr: "{n} caractères au plus.", en: "{n} characters at most." },
+    // TODO: à relire — nouveau (2026-09-25, retours d'Antoine sur le moteur).
+    sharedHint: {
+      fr: "Même nombre que pour {metrics} : le modifier ici le modifie partout.",
+      en: "Same number as for {metrics}: changing it here changes it everywhere.",
+    },
+    offBase: { fr: "Compté sur {n}, pas sur ta base de {base}.", en: "Counted on {n}, not on your base of {base}." },
+    saveNext: { fr: "Enregistrer et continuer →", en: "Save and continue →" },
   },
   triage: {
     question: { fr: "Pourquoi ?", en: "Why?" },
@@ -481,7 +525,6 @@ export const ENGINE_COPY = {
    * (convention 6), rédigée par la session de code ; P3 may reword freely.
    */
   workbench: {
-    tabsLabel: { fr: "Vues du moteur", en: "Engine views" },
     choose: { fr: "Choisir…", en: "Choose…" },
     notANumber: { fr: "Ce n'est pas un nombre lisible.", en: "That isn't a readable number." },
     notAWholeNumber: { fr: "Un nombre entier : on compte des personnes.", en: "A whole number: these are people." },
@@ -662,10 +705,21 @@ export const ENGINE_COPY = {
     legendMeasured: { fr: "mesuré", en: "measured" },
     legendRange: { fr: "fourchette estimée", en: "estimated range" },
     legendUnknown: { fr: "non mesuré", en: "not measured" },
+    // TODO: à relire — nouveau (2026-09-25, « les 100 inscrits, c'est une vue de l'esprit ? »).
     sameHundred: {
+      fr: "Tes inscrits en {cohort} sont ramenés à 100 pour se lire en pourcentages : chaque colonne est comptée sur ces mêmes 100.",
+      en: "Your {cohort} sign-ups are scaled to 100 so they read as percentages: every column is counted on those same 100.",
+    },
+    sameHundredCount: {
+      fr: "Tes {n} inscrits en {cohort} sont ramenés à 100 pour se lire en pourcentages : chaque colonne est comptée sur ces mêmes 100. Pour changer ce nombre, change tes inscrits de la cohorte, pas le 100.",
+      en: "Your {n} sign-ups from {cohort} are scaled to 100 so they read as percentages: every column is counted on those same 100. To change that number, change your cohort's sign-ups, not the 100.",
+    },
+    /** The slide's line: it is shown to a leadership meeting, so no « tes » (see the header). */
+    slideSameHundred: {
       fr: "Chaque colonne est comptée sur les mêmes 100 inscrits.",
       en: "Every column is counted on the same 100 sign-ups.",
     },
+    cohortOfCount: { fr: "{n} inscrits en {cohort}, ramenés à 100", en: "{n} sign-ups in {cohort}, scaled to 100" },
     aria: {
       fr: "{n} sur 100 inscrits {population} — {status}, {source}, inscrits en {cohort}",
       en: "{n} in 100 sign-ups {population} — {status}, {source}, {cohort} cohort",
@@ -1158,6 +1212,99 @@ export const ENGINE_COPY = {
   },
 
   // --- Storage, file, resume, erase (§14.11) -------------------------------
+  // TODO: à relire — nouveau (2026-09-25, retours d'Antoine) : les réglages modifiables après coup.
+  settings: {
+    title: { fr: "Tes réglages", en: "Your settings" },
+    save: { fr: "Enregistrer les réglages", en: "Save settings" },
+    cancel: { fr: "Annuler", en: "Cancel" },
+    activationReset: {
+      fr: "La fenêtre d'activation fait partie de la définition du taux d'activation : ton chiffre déjà saisi repassera « à faire », pour que tu le remesures sur {n} jours.",
+      en: "The activation window is part of the activation rate's definition: the number you already entered will go back to \"to fill in\", so you can measure it again over {n} days.",
+    },
+    paidReset: {
+      fr: "La fenêtre de paiement fait partie de la définition de la conversion en payant : ton chiffre déjà saisi repassera « à faire », pour que tu le remesures sur {n} jours.",
+      en: "The payment window is part of the paid conversion's definition: the number you already entered will go back to \"to fill in\", so you can measure it again over {n} days.",
+    },
+    monthsChanged: {
+      fr: "Tes chiffres déjà saisis portent sur les mois d'avant. Ils ne sont pas effacés : relis-les.",
+      en: "The numbers you already entered are for the previous months. They are not erased: read them again.",
+    },
+    saved: { fr: "Réglages enregistrés.", en: "Settings saved." },
+  },
+
+  // TODO: à relire — nouveau (2026-09-25, retours d'Antoine) : le pas à pas, en trois grandes étapes.
+  steps: {
+    label: { fr: "Pas à pas", en: "Step by step" },
+    phaseTargets: { fr: "Tes cibles", en: "Your targets" },
+    phaseNumbers: { fr: "Tes chiffres", en: "Your numbers" },
+    phaseWhatIf: { fr: "Et si", en: "What if" },
+    phaseDeck: { fr: "Tes slides", en: "Your slides" },
+    phaseOf: { fr: "Étape {i} sur {n}", en: "Step {i} of {n}" },
+    continue: { fr: "Continuer →", en: "Continue →" },
+    back: { fr: "← Retour", en: "← Back" },
+    toBoard: { fr: "Voir le tableau complet", en: "See the full board" },
+    targetsTitle: { fr: "Tes cibles actuelles", en: "Your current targets" },
+    targetsIntro: {
+      fr: "Si ton équipe s'est fixé une cible sur ces chiffres, entre-la. C'est une cible qui permet de dire, chiffres à l'appui, quelle étape freine. Pas de cible ? Continue : le moteur comparera aux repères publiés quand il en connaît un.",
+      en: "If your team has set a target on these numbers, enter it. A target is what lets the engine say, with numbers, which stage is holding you back. No target? Continue: the engine will compare with published references where it knows one.",
+    },
+    targetFor: { fr: "Cible pour {metric}", en: "Target for {metric}" },
+    baseTitle: { fr: "Ta base : les inscrits", en: "Your base: sign-ups" },
+    baseIntro: {
+      fr: "Deux nombres servent à plusieurs chiffres. Saisis-les une fois ici : on les réutilise partout, et tu peux toujours les modifier.",
+      en: "Two numbers feed several of the others. Enter them once here: they are reused everywhere, and you can always change them.",
+    },
+    baseCohortHint: {
+      fr: "Tous les comptes créés en {cohort}. Ils servent à l'activation, à la rétention à J30, au parrainage et à la conversion en payant.",
+      en: "Every account created in {cohort}. They feed activation, day-30 retention, referral and paid conversion.",
+    },
+    baseMonthHint: {
+      fr: "Tous les comptes créés en {month}. Ils servent au taux d'inscription et à la part du premier canal.",
+      en: "Every account created in {month}. They feed the sign-up rate and the top channel's share.",
+    },
+    numberOf: { fr: "Chiffre {i} sur {n} · {stage}", en: "Number {i} of {n} · {stage}" },
+    skip: { fr: "Passer, j'y reviendrai", en: "Skip, I'll come back to it" },
+    whatIfTitle: { fr: "Et si ?", en: "What if?" },
+    whatIfIntro: {
+      fr: "Choisis une étape et déplace le curseur : le funnel se redessine avec la cible que tu testes, et le gain s'affiche en revenu mensuel.",
+      en: "Pick a stage and move the slider: the funnel redraws with the target you are testing, and the gain shows as monthly revenue.",
+    },
+    whatIfNone: {
+      fr: "Pour tester une cible, il faut d'abord un chiffre sur l'une de ces étapes : taux d'inscription, activation, churn ou conversion en payant.",
+      en: "To test a target, you first need a number on one of these: sign-up rate, activation, churn or paid conversion.",
+    },
+    whatIfStage: { fr: "Étape à tester", en: "Stage to test" },
+    funnelIf: { fr: "Ton funnel si {stage} atteint {target}", en: "Your funnel if {stage} reaches {target}" },
+    funnelIfChurn: {
+      fr: "Le funnel ne montre pas le churn : son effet est dans le revenu, ci-contre.",
+      en: "The funnel doesn't show churn: its effect is in the revenue, alongside.",
+    },
+    funnelIfUpstream: {
+      fr: "Le funnel est compté sur 100 inscrits : un meilleur taux d'inscription t'en donne plus pour le même trafic. Son effet est dans le revenu, ci-contre.",
+      en: "The funnel is counted on 100 sign-ups: a better sign-up rate gives you more of them for the same traffic. Its effect is in the revenue, alongside.",
+    },
+    funnelToday: { fr: "Ton funnel aujourd'hui", en: "Your funnel today" },
+    doneTitle: { fr: "Ton moteur est prêt", en: "Your engine is ready" },
+    doneBody: {
+      fr: "Prépare tes slides maintenant, ou complète plus tard : tout reste sur cet appareil. Pense à sauvegarder un fichier.",
+      en: "Prepare your slides now, or fill in the rest later: everything stays on this device. Remember to save a file.",
+    },
+  },
+
+  // TODO: à relire — nouveau (2026-09-25, retours d'Antoine) : l'exemple rempli.
+  example: {
+    bannerTitle: { fr: "Exemple : une appli SaaS fictive", en: "Example: a fictional SaaS app" },
+    bannerBody: {
+      fr: "Chiffres inventés, pour montrer le funnel et les slides une fois remplis. Rien n'est enregistré, et ça ne touche pas à ton moteur.",
+      en: "Made-up numbers, to show the funnel and the slides once filled in. Nothing is saved, and it doesn't touch your engine.",
+    },
+    back: { fr: "← Revenir", en: "← Back" },
+    deck: { fr: "Voir les slides de l'exemple →", en: "See the example's slides →" },
+    event: { fr: "a créé un premier projet", en: "created a first project" },
+    channel: { fr: "Recherche naturelle", en: "Organic search" },
+    company: { fr: "Exemple SaaS", en: "Example SaaS" },
+  },
+
   storage: {
     backupWarning: {
       fr: "Ton moteur n'existe que dans ce navigateur. Safari peut effacer les données d'un site après sept jours d'utilisation de Safari sans passage sur ce site : sauvegarde-le dans un fichier.",
@@ -1219,7 +1366,14 @@ export const ENGINE_COPY = {
       fr: "Tes chiffres seront supprimés de cet appareil, et rien d'autre ne les garde. Sauvegarde-les d'abord si tu veux les retrouver.",
       en: "Your numbers will be deleted from this device, and nothing else keeps them. Save them first if you want them back.",
     },
-    confirmLabel: { fr: "Tape « {word} » pour confirmer", en: "Type \"{word}\" to confirm" },
+    // TODO: à relire — réécrit le 2026-09-25 (retour d'Antoine) : le mot à retaper était dans un
+    // libellé en capitales, on croyait devoir tout taper en majuscules. La consigne passe en texte
+    // courant, et la casse n'est plus comparée.
+    confirmLabel: { fr: "Confirmation", en: "Confirmation" },
+    confirmPrompt: {
+      fr: "Pour confirmer, tape « {word} » ci-dessous — majuscules ou minuscules, peu importe.",
+      en: "To confirm, type \"{word}\" below — upper or lower case, it doesn't matter.",
+    },
     fallbackWord: { fr: "EFFACER", en: "ERASE" },
     confirm: { fr: "Effacer définitivement", en: "Erase permanently" },
   },

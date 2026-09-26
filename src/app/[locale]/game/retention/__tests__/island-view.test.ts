@@ -99,7 +99,7 @@ describe("island-view — every screen of every reference year, in both language
           check(`${label} boss`, bossMessage(ctx, state));
           check(`${label} dashboard`, dashboardProps(ctx, state, prev, "hidden"));
           check(`${label} timeline`, timelineSegments(ctx, state));
-          for (const hint of ["callOpen", "pick", "ready"] as const) check(`${label} hand`, handView(ctx, state, hint));
+          for (const hint of ["pick", "ready"] as const) check(`${label} hand`, handView(ctx, state, hint));
           check(`${label} clicks`, clicksLabel(ctx, clicksFor(L, phoneIds(state))));
           check(`${label} clicks said`, clicksSentence(ctx, clicksFor(L, phoneIds(state))));
           check(`${label} journal`, journalEntries(ctx, state));
@@ -140,9 +140,11 @@ describe("island-view — what the words must say", () => {
   const [en, fr] = [contexts.find((c) => c.locale === "en")!, contexts.find((c) => c.locale === "fr")!];
   const years = playPath(PATH_C);
 
-  it("the hand lists every card on the table, the ordered one flagged, and locks them while the call is open", () => {
+  it("the hand lists every card on the table, the ordered one flagged, and keeps them locked while the engine still holds the call open", () => {
+    // The island no longer draws the hand during the call (handVisible); the
+    // view still refuses to offer a card the reducer would refuse.
     const start = years[1]!;
-    const view = handView(fr, start, "callOpen");
+    const view = handView(fr, start, "pick");
     expect(view.cards.map((c) => c.id)).toEqual(handIds(L, start));
     expect(view.cards.every((c) => c.state === "locked")).toBe(true);
     expect(view.cards.filter((c) => c.ordered).map((c) => c.id)).toEqual(start.order ? [start.order] : []);
@@ -190,6 +192,33 @@ describe("island-view — what the words must say", () => {
     expect(reportContent(en, last, last.log.length - 1).nextLabel).toBe(en.copy.report.toDecember);
     expect(reportContent(en, last, 0).nextLabel).toBe(en.copy.report.next);
     expect(reportContent(en, years[1]!, 0).nextLabel).toBe(en.copy.report.next);
+  });
+
+  it("the survey's report says its answers are in and what they unlock; the next hand badges the data review, once", () => {
+    // Model v2 (Antoine, 2026-09-25): « trop transparent » before — now said, then shown.
+    const d = playPath(PATH_D);
+    const report = reportContent(fr, d[1]!, 0);
+    expect(report.notes).toContain(fr.copy.events.surveyAnswers);
+    const hand = handView(fr, reduce(d[1]!, { type: "hangup" }), "pick");
+    expect(hand.cards.filter((c) => c.unlocked).map((c) => c.id)).toEqual(["present"]);
+    // A quarter later it is simply part of the hand.
+    const a = playPath(PATH_A);
+    expect(handView(fr, reduce(a[2]!, { type: "hangup" }), "pick").cards.some((c) => c.unlocked)).toBe(false);
+  });
+
+  it("« Pourquoi le churn a bougé »: a heading with the tiles' move, one line per driver that moved", () => {
+    const c = playPath(PATH_C);
+    const last = c.at(-1)!;
+    const report = reportContent(en, last, 3);
+    // The tiles read 5.0 % then 9.1 %: +4.1, and the lines add up to that, not to the unrounded 4.03.
+    expect(report.drivers.heading).toBe("Why churn moved: +4.1\u00a0pts");
+    expect(report.drivers.lines).toEqual([
+      "Your two projects this quarter: −0.2\u00a0pts",
+      "The tricks taken down after the inspection: +2.0\u00a0pts",
+      "What your subscribers say about Flixo: +2.3\u00a0pts",
+    ]);
+    // The first honest quarter: the picks alone.
+    expect(reportContent(fr, playPath(PATH_A)[1]!, 0).drivers.lines).toHaveLength(1);
   });
 
   it("the churn cell and the end of the churn curve are the same string (R5, X34)", () => {

@@ -173,9 +173,9 @@ describe("the dashboard", () => {
     const [start, q1] = playPath(PATH_A);
     if (!start || !q1) throw new Error("path A");
     const { deltas } = dashboardView(L, q1, start);
-    expect(deltas?.churn.sentiment).toBe("good"); // 6,0 → 5,7
-    expect(deltas?.patience.sentiment).toBe("bad"); // 55 → 52
-    expect(deltas?.patience.value).toBe(-3);
+    expect(deltas?.churn.sentiment).toBe("good"); // 6,0 → 5,8
+    expect(deltas?.patience.sentiment).toBe("bad"); // 55 → 51
+    expect(deltas?.patience.value).toBe(-4);
     expect(dashboardView(L, start, start).deltas?.subs.sentiment).toBe("flat");
   });
 
@@ -273,7 +273,7 @@ describe("X12 — one number, one form: the end of a curve is written like its c
 describe("December's lists", () => {
   it("the playbook: honest cards in the order first played, each once", () => {
     expect(playbookCards(L, finalState(PATH_A))).toEqual(["pause", "survey", "onboard", "present", "annual", "reco", "remind"]);
-    expect(playbookCards(L, finalState(PATH_C))).toEqual(["pause", "present"]);
+    expect(playbookCards(L, finalState(PATH_C))).toEqual(["pause", "remind"]);
   });
 
   it("the catalogue: every pattern, grouped as used, refused or never dealt", () => {

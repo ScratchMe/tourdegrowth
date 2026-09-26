@@ -57,7 +57,9 @@ const CARDS = {
 export const RETENTION_LEVEL: LevelDefinition<RetentionCardId> = {
   slug: "retention",
   pillar: "retention",
-  modelVersion: 1,
+  // 2 (2026-09-25): the exit survey's answers land a quarter later and unlock
+  // the data review, which can no longer be held blind.
+  modelVersion: 2,
   constants: {
     price: 12.99,
     subs0: 100_000,
@@ -87,7 +89,7 @@ export const RETENTION_LEVEL: LevelDefinition<RetentionCardId> = {
     press: { trust: 80, months: 3, patienceBoost: 8, acqBoost: 1.2 },
     patience: {
       hit: 12, missPerPoint: 2800, missCap: 32, obeyed: 10, refused: -8,
-      presentInsight: 15, presentBlind: 3, fireBelow: 25, lowLine: 35,
+      present: 15, fireBelow: 25, lowLine: 35,
     },
     competitorQuarter: 1,
   },

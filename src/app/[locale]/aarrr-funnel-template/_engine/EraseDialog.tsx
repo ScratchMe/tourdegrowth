@@ -14,8 +14,16 @@ import styles from "./Screens.module.css";
  * audit's purge guard: retype the company's name, or ERASE / EFFACER when
  * there is none. A single click must never destroy the only copy of a
  * week's collection; retyping a word is the smallest act that cannot happen
- * by accident. Compared trimmed and case-sensitive, like the audit.
+ * by accident. Compared trimmed, with inner spaces collapsed and case
+ * ignored: the word used to sit in an uppercase label, and people retyped it
+ * in capitals (Antoine, 2026-09-25). The instruction is now running text, and
+ * « flixo » for « Flixo » is not the accident this guard exists to stop.
  */
+function sameWord(a: string, b: string): boolean {
+  const norm = (x: string) => x.trim().replace(/\s+/g, " ").toLocaleLowerCase();
+  return norm(a) === norm(b);
+}
+
 export function EraseDialog({
   strings,
   companyLabel,
@@ -30,7 +38,7 @@ export function EraseDialog({
   const inputId = useId();
   const [typed, setTyped] = useState("");
   const word = companyLabel?.trim() || strings.erase.fallbackWord;
-  const matches = typed.trim() === word;
+  const matches = sameWord(typed, word);
 
   return (
     <Card elevation="flat" className={styles.panel} data-testid="engine-erase">
@@ -38,7 +46,10 @@ export function EraseDialog({
         {strings.erase.title}
       </h2>
       <p className={styles.lead}>{strings.erase.body}</p>
-      <Field label={fill(strings.erase.confirmLabel, { word })} htmlFor={inputId}>
+      <p className={styles.lead} data-testid="engine-erase-prompt">
+        {fill(strings.erase.confirmPrompt, { word })}
+      </p>
+      <Field label={strings.erase.confirmLabel} htmlFor={inputId}>
         <TextField id={inputId} value={typed} onChange={setTyped} />
       </Field>
       <div className={styles.panelActions}>

@@ -25,29 +25,32 @@ interface Fixture {
   radar?: number;
 }
 
+// Model v2 (2026-09-25): the exit survey's answers land a quarter later and
+// unlock the data review. A and B lose a quarter of the insight's boost, C
+// and D change their last picks (paths.ts); regenerated, not loosened.
 const FIXTURES: Record<"A" | "B" | "C" | "D", Fixture> = {
   A: {
     path: PATH_A,
-    churn: [5.7, 5.7, 4.6, 4.0],
-    patience: [52, 43, 47, 74],
+    churn: [5.8, 5.7, 4.6, 4.0],
+    patience: [51, 42, 46, 73],
     mood: ["firm", "angry", "angry", "firm"],
     order: [null, "pdef", "call", "bury"],
     ending: "applause",
     trust: 83,
     radar: 0,
   },
-  B: { path: PATH_B, churn: [5.7, 5.5, 4.2, 4.0], patience: [52, 32, 51, 78], ending: "applause", trust: 85, radar: 0 },
+  B: { path: PATH_B, churn: [5.8, 5.5, 4.2, 4.0], patience: [51, 31, 50, 77], ending: "applause", trust: 85, radar: 0 },
   C: {
     path: PATH_C,
-    churn: [5.3, 5.0, 5.0, 9.0],
-    patience: [67, 79, 57, 15],
+    churn: [5.3, 5.0, 5.0, 9.1],
+    patience: [67, 79, 57, 12],
     mood: ["firm", "calm", "firm", "angry"],
     order: [null, "call", "notice", "pdef"],
     ending: "fine",
-    trust: 19,
-    radar: 9,
+    trust: 27,
+    radar: 1,
   },
-  D: { path: PATH_D, churn: [6.0, 6.3], patience: [59, 19], ending: "firedClean", trust: 73 },
+  D: { path: PATH_D, churn: [6.1, 6.2], patience: [42, 19], ending: "firedClean", trust: 73 },
 };
 
 /**

@@ -1,0 +1,50 @@
+/* « Et si » on the whole funnel — semantic tokens only (no-primitives.test.ts). */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  min-width: 0;
+}
+
+.intro {
+  font: var(--body-md);
+  color: var(--text-body);
+  margin: 0;
+  max-width: 62ch;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-8);
+  align-items: start;
+}
+
+/* Side by side once the board has broken out to the app width (Board.module.css, 960px). */
+@media (min-width: 960px) {
+  .grid {
+    grid-template-columns: minmax(300px, 1fr) minmax(0, 2fr);
+  }
+}
+
+.grid > * {
+  min-width: 0;
+}
+
+.funnel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.funnelTitle {
+  font: var(--title-card);
+  color: var(--text-body);
+  margin: 0;
+}
+
+.note {
+  font: var(--meta-sm);
+  color: var(--text-muted);
+  margin: 0;
+}

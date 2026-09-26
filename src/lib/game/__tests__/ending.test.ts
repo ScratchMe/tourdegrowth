@@ -86,8 +86,7 @@ describe("E3 — what each card visibly did (§5.12)", () => {
 
   it("the survey, the meeting, the cleaning and the notice have their own line", () => {
     expect(visibleEffect(L, fresh(L), "survey")).toEqual({ kind: "insight" });
-    expect(visibleEffect(L, { ...fresh(L), insight: true }, "present")).toEqual({ kind: "present", insight: true });
-    expect(visibleEffect(L, fresh(L), "present")).toEqual({ kind: "present", insight: false });
+    expect(visibleEffect(L, { ...fresh(L), insight: true }, "present")).toEqual({ kind: "present" });
     expect(visibleEffect(L, fresh(L), "clean")).toEqual({ kind: "clean" });
     expect(visibleEffect(L, running("notice", 2), "notice")).toEqual({ kind: "extra" });
   });
@@ -110,8 +109,10 @@ describe("E3 — what each card visibly did (§5.12)", () => {
 
   it("is what the journal records, at the quarter's last month", () => {
     const [, q1] = playPath(PATH_A);
+    // −4 %, not −5 %: the survey picked alongside only boosts from NEXT
+    // quarter (model v2), so the line must not show a boost that did not act.
     expect(q1?.log[0]?.fx).toEqual([
-      { card: "pause", effect: { kind: "down", pct: 5, rising: true } },
+      { card: "pause", effect: { kind: "down", pct: 4, rising: true } },
       { card: "survey", effect: { kind: "insight" } },
     ]);
   });

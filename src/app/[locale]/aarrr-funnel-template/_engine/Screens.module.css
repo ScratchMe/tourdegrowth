@@ -253,3 +253,27 @@
   color: var(--text-alert);
   margin: 0;
 }
+
+/* --- Settings: what a change would reset (2026-09-25) ------------------ */
+.resets {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.caveatLine {
+  font: var(--body-sm);
+  color: var(--text-alert);
+  margin: 0;
+}
+
+/* --- The example's banner title (2026-09-25) ---------------------------- */
+.exampleTitle {
+  font: var(--title-card);
+  color: var(--text-body);
+  margin: 0 0 var(--space-3);
+}
+
+.exampleTitle:focus {
+  outline: none;
+}

@@ -4621,6 +4621,41 @@ Un Tour **inachevé** reprend toujours là où il s'était arrêté : le correct
 
 **Vérifié en réel** : 3 tests unitaires sur `isSubmittedTour` (égalité exacte, une réponse ou une question de différence, résultats sans réponses) et `e2e/new-tour.spec.ts` (4 specs) : après un vrai parcours jusqu'au résultat, le stockage est vide et le CTA de la landing ouvre la question 1 ; un navigateur « d'avant » repart de zéro et sa première réponse émet bien `quiz_started` **et** `retake_started` ; un Tour complet non soumis et un Tour face à un résultat sans réponses reprennent sur le dernier écran. **Non-vacuité** : correctif retiré et build refait, exactement les 2 specs du correctif tombent, et les 2 qui protègent la reprise passent dans les deux états (ce sont des assertions compagnes).
 
+### Premiers retours d'Antoine sur le jeu et le moteur (2026-09-25/26)
+
+Antoine a joué une partie et essayé le moteur, puis envoyé une liste de retours : « C'est un début. Si on fixe tout ça, j'y verrai déjà plus clair. » Tout est traité, et reste derrière les deux drapeaux.
+
+**Le jeu passe au modèle v2** (détail : `GAME-BRIEF.md` §16). Les chantiers n'apparaissent qu'une fois l'appel du DG raccroché. La main dit que deux chantiers, c'est ce que l'équipe produit peut livrer. Le questionnaire rend ses réponses dans le rapport du trimestre et débloque « Point données avec le DG », qui n'est plus distribué sans lui. Chaque rapport dit enfin **pourquoi le churn a bougé**, en cinq lignes : les chantiers du trimestre, ce qui tournait déjà, les astuces retirées après un contrôle, le bouche-à-oreille et le marché. L'attribution est séquentielle, avec un résidu, et les lignes s'arrondissent au plus fort reste pour que leur somme tombe exactement sur le mouvement des tuiles.
+
+- **Choix assumé : rendre le mouvement lisible plutôt que le lisser.** Une simulation de ~55 000 années a montré que les sauts viennent du contrecoup différé de la confiance et du retrait forcé des astuces : c'est la leçon du jeu. Lisser reste possible si la lecture ne suffit pas.
+- **Trouvé en route** : le rapport montrait l'effet d'une carte avec le bonus d'un questionnaire joué le même trimestre, qui n'avait pas encore agi (« Offre de pause : −5 % » au lieu de −4 %). Les effets sont maintenant lus avant l'arrivée des réponses, et le test unitaire qui encodait le bug est corrigé.
+- `modelVersion` passe à 2 : une partie sauvegardée sous v1 est ignorée plutôt que reprise dans un monde qui ne tombe plus juste. Les parcours C et D ne sont plus jouables tels quels ; ils ont été remplacés par simulation et les fixtures régénérées.
+
+**Le moteur : refonte de la saisie** (détail en tête d'`ENGINE.md`) :
+- deux façons de remplir, le pas à pas (par défaut) ou le tableau ;
+- une base commune : les inscrits de la cohorte étaient demandés cinq fois, ceux du mois deux fois ; ils se tapent maintenant une fois ;
+- « Et si ? » sorti des fiches pour devenir un panneau qui redessine tout le funnel ;
+- les explications pliées (les quinze fiches, « où le trouver », la liste à aller chercher) et les onglets supprimés ;
+- la durée annoncée avant l'outil, comptée depuis les étiquettes d'effort du catalogue ;
+- un exemple rempli en lecture seule, funnel et slides ;
+- des réglages modifiables après coup.
+
+Et les petits correctifs : l'effacement ignore la casse et le dit, le nom se dit « de ton SaaS ou de ton entreprise », et le peloton dit combien d'inscrits réels il ramène à 100.
+
+**Deux défauts trouvés en vérifiant, pas en relisant :**
+- **La base perdait la moitié de ce qu'on y tapait.** L'écran appelait `setBase` deux fois de suite ; les deux écritures partaient du même état, donc la seconde effaçait la première. C'est l'e2e qui l'a vu : la fiche d'activation ne reprenait pas les 800 inscrits. `setBase` prend maintenant toutes les valeurs en **une seule écriture**, et la spec vérifie la base stockée entière. **À retenir pour tout l'îlot** : une action qui écrit à partir de `current` ne s'appelle jamais deux fois dans le même tick.
+- **Les deux cases de comptage se décalaient** dès qu'une seule avait une indication (« même nombre que pour… ») : la grille aligne le bas des champs, et l'indication soulevait l'une des deux. Les indications passent sous la paire. Vu sur une capture, mesuré ensuite (même `y` à 1280 et 390).
+
+**Deux écarts, écrits plutôt que tus :**
+- Sur le tableau, « Et si » est **plié** : le funnel qu'il redessine est déjà juste au-dessus, et deux funnels complets ouverts rallongeaient la page dont Antoine trouvait déjà qu'elle l'était trop.
+- Le panneau « Et si » passait son curseur au parent par un effet, ce que le compilateur React refusait. Il devient une **render prop** : le curseur possède la cible, et il n'y a rien à garder synchronisé.
+
+**Vérifié en réel** : 1 979 tests unitaires, seuils de couverture tenus, `tsc` et lint propres, `next build`. Côté Playwright, 506 specs : 501 passent et 5 sont ignorées par construction. Parmi elles, `e2e/engine-steps.spec.ts` (4 nouvelles) couvre le pas à pas, la base, l'exemple et les réglages. Les specs du moteur sont passées au nouveau parcours. Captures relues sur 27 écrans (FR desktop, FR et EN à 390 px), aucun défilement horizontal.
+
+**Ce qui reste** : toute la copie neuve porte `TODO: à relire` et devra passer au prochain bon à tirer, en même temps que les nº7 et nº8.
+
+**Vercel n'est plus une contrainte de cadence** (Antoine, 2026-09-26, en donnant le feu vert de ce merge). La convention 13 tient donc pour mémoire de ce que coûte un merge, plus comme une limite à respecter ; le détail de ce qui a changé côté compte reste à consigner quand il le précisera.
+
 ## État du projet au 2026-09-25 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -4645,7 +4680,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **L'instrument d'audit growth a son schéma** (2026-09-13, `AUDIT.md`) : un outil personnel pour les diagnostics qu'Antoine mène en entreprise, navigateur seulement, jamais Firestore — `src/lib/audit/` + `src/content/audit-catalog.ts`, sans aucune route ni UI encore. Phase 1 (la saisie sous `/admin/audit`) est le prochain chantier, découpée en six PR dans **`AUDIT-PLAN.md`** (2026-09-13) ; phase 3 (tout ce qui ressemble à un produit) reste fermée tant que les entretiens ne sont pas faits et le contrat de travail pas vérifié.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément ; mesurés le 2026-09-25 sur la branche de travail, build avec `GAME_ENABLED=true` comme la CI) : **1 955 tests unitaires**, **500 specs Playwright** (495 passées, 5 ignorées par construction : ce sont les specs « jeu fermé », qui ne tournent que sur un build sans le drapeau ; les specs de l'aperçu propriétaire sautent aussi sans `ADMIN_DASHBOARD_PASSWORD` sur le serveur, que la CI pose), `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
+**Chiffres de référence** (à comparer, pas à recopier aveuglément ; mesurés le 2026-09-26 sur la branche de travail, build avec `GAME_ENABLED=true` comme la CI) : **1 979 tests unitaires**, **506 specs Playwright** (501 passées, 5 ignorées par construction : ce sont les specs « jeu fermé », qui ne tournent que sur un build sans le drapeau ; les specs de l'aperçu propriétaire sautent aussi sans `ADMIN_DASHBOARD_PASSWORD` sur le serveur, que la CI pose), `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 
@@ -4701,7 +4736,7 @@ d'outil qui a le détail à jour.*
 10. **Un état de dépôt s'énonce d'après GitHub, jamais d'après un clone ou un document.** Le 2026-09-08, deux affirmations fausses sont parties dans une PR : « 35 branches » (les refs `origin/*` d'un clone jamais élagué — `git fetch --prune` avant tout comptage, ou l'API) et « le check CI n'est pas obligatoire » (un statut de `REVIEW.md` vieux de trois jours, relu comme un fait présent alors que `main` était déjà `protected: true`). Ce qui est écrit dans un document est ce qui était vrai quand il a été écrit. → `GITHUB.md` §1.2
 11. **Une garde de payload compte ce qui traverse, elle ne nomme pas des props.** Les deux fuites `rawPoints` (#110 puis #115) sont la même erreur à un cran d'écart : la seconde fois la frontière existait et la garde était nominale, donc aveugle au prop suivant. Même chose pour une borne annoncée : la calculer pour **toutes** les variantes, y compris celles qu'aucun e2e ne peut rendre. → `NEXTJS.md` §1.8, `TESTING.md` §2.8
 12. **Une branche empilée se rebase avec `git rebase --onto origin/main <ancienne-base> <branche>`** après le merge de la PR du dessous, jamais avec un simple `git rebase main` (qui rejoue aussi les commits déjà squashés et crée des conflits fantômes). → `GITHUB.md` §1.1
-13. **Chaque merge sur `main` coûte ~47 Mo de Functions Storage pendant 30 jours.** Ce n'est plus une question de confort de déploiement : le compteur est une somme glissante que rien ne purge, le plafond est de ~211 merges par 30 jours au poids actuel, et nous étions à 154 le 2026-09-15. Grouper les pushes sur une branche (une vérification complète, un push) et espacer les merges est donc une contrainte chiffrée. Un merge qui ne touche que de la doc ne coûte plus rien depuis le 2026-09-24 (`scripts/vercel-ignore.sh`) — à condition qu'il ne touche QUE de la doc. → `VERCEL.md` §1.1, §1.6 et §2.3
+13. **Chaque merge sur `main` coûte ~47 Mo de Functions Storage pendant 30 jours** — *plus une contrainte depuis le 2026-09-26 (Antoine : « Vercel n'est plus un problème »), gardé comme mémoire du coût.* Ce n'est plus une question de confort de déploiement : le compteur est une somme glissante que rien ne purge, le plafond est de ~211 merges par 30 jours au poids actuel, et nous étions à 154 le 2026-09-15. Grouper les pushes sur une branche (une vérification complète, un push) et espacer les merges est donc une contrainte chiffrée. Un merge qui ne touche que de la doc ne coûte plus rien depuis le 2026-09-24 (`scripts/vercel-ignore.sh`) — à condition qu'il ne touche QUE de la doc. → `VERCEL.md` §1.1, §1.6 et §2.3
 
 ### Carte du repo
 

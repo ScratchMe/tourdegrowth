@@ -39,6 +39,7 @@ export function ValueEditor({
   metric,
   view,
   problems,
+  sharedHints,
 }: {
   idPrefix: string;
   draft: SheetDraft;
@@ -48,6 +49,8 @@ export function ValueEditor({
   view: EngineView;
   /** Only after a save was attempted — nothing turns red before the person has had a chance. */
   problems: readonly DraftProblem[];
+  /** « Même nombre que pour … » under a count several numbers share (shared-counts.ts). */
+  sharedHints?: { numerator?: string; denominator?: string };
 }) {
   const { strings, ctx, state } = view;
   const locale = ctx.locale;
@@ -104,23 +107,45 @@ export function ValueEditor({
               locale={locale}
               integer={shape.unit !== "money"}
               unit={shape.unit === "money" ? currencySymbol(currency, locale) : undefined}
+              describedBy={describedBy(numId, { hint: sharedHints?.numerator })}
               invalidMessage={shape.unit === "money" ? numberInvalid : w.notAWholeNumber}
             />
           </Field>
           <span className={styles.over} aria-hidden="true">
             {strings.sheet.over}
           </span>
-          <Field label={metric.inputs?.denominator ?? metric.name} htmlFor={denId} error={rule("denominator-zero")}>
+          <Field
+            label={metric.inputs?.denominator ?? metric.name}
+            htmlFor={denId}
+            error={rule("denominator-zero")}
+          >
             <NumberField
               id={denId}
               value={draft.denominator}
               onChange={(denominator) => update({ denominator })}
               locale={locale}
               integer
-              describedBy={describedBy(denId, { error: rule("denominator-zero") })}
+              describedBy={describedBy(denId, { hint: sharedHints?.denominator, error: rule("denominator-zero") })}
               invalidMessage={w.notAWholeNumber}
             />
           </Field>
+        </div>
+      ) : null}
+      {/* The shared-count hints sit UNDER the pair, not under one field: a hint under
+          one box only lifted it above its neighbour (the grid aligns the boxes' bottoms).
+          Same ids as a Field's own hint, so `describedBy` above still points at them. */}
+      {draft.kind === "ratio" && (sharedHints?.numerator || sharedHints?.denominator) ? (
+        <div className={styles.sharedNotes}>
+          {sharedHints?.numerator ? (
+            <p id={`${numId}-hint`} className={styles.sharedNote}>
+              {sharedHints.numerator}
+            </p>
+          ) : null}
+          {sharedHints?.denominator ? (
+            <p id={`${denId}-hint`} className={styles.sharedNote} data-testid="engine-shared-hint">
+              {sharedHints.denominator}
+            </p>
+          ) : null}
         </div>
       ) : null}
       {draft.kind === "ratio" && (live || rule("num-gt-den")) ? (

@@ -5,6 +5,7 @@ import { MetaLabel } from "@/components/brand/MetaLabel";
 import { SiteFooter } from "@/components/brand/SiteFooter";
 import { Button } from "@/components/core/Button";
 import { Callout } from "@/components/core/Callout";
+import { Disclosure } from "@/components/core/Disclosure";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { isEngineOpenAtBuild } from "@/lib/engine/access";
 import { formatInterval } from "@/lib/engine/format";
@@ -102,6 +103,7 @@ export default async function EnginePage({ params }: PageProps) {
   // same helper that fills the requests and the annex with a real setup — never a raw `{event}`.
   const fills = staticCatalogueValues(strings);
   const metricOf = (id: MetricShape["id"]) => props.metrics.find((m) => m.id === id)!;
+  const effortCount = (effort: MetricShape["effort"]) => METRIC_SHAPES.filter((s) => s.effort === effort).length;
 
   return (
     <>
@@ -144,6 +146,38 @@ export default async function EnginePage({ params }: PageProps) {
           </div>
         </div>
 
+        {/* How long it takes, said BEFORE the tool (retours d'Antoine
+            2026-09-25): the counts come from the catalogue's own effort
+            tags, so the sentence cannot promise a split the fifteen
+            numbers do not have. */}
+        <section className={styles.duration} aria-labelledby="engine-duration" data-testid="engine-duration">
+          <h2 id="engine-duration" className={styles.durationTitle}>
+            {t.durationTitle}
+          </h2>
+          <p className={styles.text}>
+            {fill(t.durationIntro, {
+              quick: String(effortCount("self-5min")),
+              hour: String(effortCount("self-1h")),
+              ask: String(effortCount("ask")),
+            })}
+          </p>
+          <dl className={styles.durationList}>
+            {(
+              [
+                [t.durationReadyLabel, t.durationReady],
+                [t.durationAskLabel, t.durationAsk],
+                [t.durationTargetsLabel, t.durationTargets],
+                [t.durationDeckLabel, t.durationDeck],
+              ] as const
+            ).map(([label, body]) => (
+              <div key={label} className={styles.durationItem}>
+                <dt>{label}</dt>
+                <dd>{body}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+
         <section id="engine" className={styles.tool} aria-label={t.eyebrow}>
           <noscript>
             <p className={styles.text}>{t.noscript}</p>
@@ -162,102 +196,109 @@ export default async function EnginePage({ params }: PageProps) {
             </p>
           </div>
 
-          {PILLARS.map((pillar, index) => (
-            <div key={pillar} className={styles.stage} data-testid={`engine-stage-${pillar}`}>
-              <MetaLabel size="xs">
-                {fill(strings.sheet.stageEyebrow, { i: String(index + 1), stage: stageLabel(pillar) })}
-              </MetaLabel>
-              <h3 className={styles.stageName}>{stageLabel(pillar)}</h3>
-              <div className={styles.metrics}>
-                {METRIC_SHAPES.filter((s) => s.stage === pillar)
-                  .sort((a, b) => Number(b.primary) - Number(a.primary))
-                  .map((shape) => {
-                    const metric = metricOf(shape.id);
-                    const reference = referenceLine(
-                      shape,
-                      metric.benchmarkCaveat,
-                      metric.noReferenceReason,
-                      strings,
-                      locale,
-                    );
+          {/* Folded by default (retours 2026-09-25: the page was too long).
+              The cards stay in the prerendered HTML — a closed <details>
+              is still read by search engines and by find-in-page. */}
+          <Disclosure summary={t.catalogueToggle} data-testid="engine-catalogue-toggle">
+            <div className={styles.catalogueBody}>
+              {PILLARS.map((pillar, index) => (
+                <div key={pillar} className={styles.stage} data-testid={`engine-stage-${pillar}`}>
+                  <MetaLabel size="xs">
+                    {fill(strings.sheet.stageEyebrow, { i: String(index + 1), stage: stageLabel(pillar) })}
+                  </MetaLabel>
+                  <h3 className={styles.stageName}>{stageLabel(pillar)}</h3>
+                  <div className={styles.metrics}>
+                    {METRIC_SHAPES.filter((s) => s.stage === pillar)
+                      .sort((a, b) => Number(b.primary) - Number(a.primary))
+                      .map((shape) => {
+                        const metric = metricOf(shape.id);
+                        const reference = referenceLine(
+                          shape,
+                          metric.benchmarkCaveat,
+                          metric.noReferenceReason,
+                          strings,
+                          locale,
+                        );
+                        return (
+                          <article key={shape.id} className={styles.metric} data-metric={shape.id}>
+                            {shape.primary ? <p className={styles.primary}>{strings.visual.primaryNumber}</p> : null}
+                            <h4 className={styles.metricName}>{metric.name}</h4>
+                            <p className={styles.oneLiner}>{metric.oneLiner}</p>
+                            <dl className={styles.facts}>
+                              <dt>{strings.sheet.formula}</dt>
+                              <dd className={styles.formula}>{fill(metric.formula, fills)}</dd>
+                              <dt>{strings.sheet.whereTitle}</dt>
+                              <dd>
+                                <ul className={styles.where}>
+                                  {metric.where.map((w) => (
+                                    <li key={`${w.label}-${w.path}`}>
+                                      <span className={styles.whereTool}>{w.label}</span> — {fill(w.path, fills)}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </dd>
+                              <dt>{strings.sheet.trapTitle}</dt>
+                              <dd>{fill(metric.trap, fills)}</dd>
+                              {reference ? (
+                                <>
+                                  <dt>{strings.sheet.reference}</dt>
+                                  <dd>{reference}</dd>
+                                </>
+                              ) : null}
+                              <dt>{strings.visual.effort}</dt>
+                              <dd>{strings.effort[EFFORT_KEY[shape.effort]]}</dd>
+                            </dl>
+                            <Link href={metric.glossaryHref} className={styles.glossary}>
+                              {strings.sheet.definition}
+                            </Link>
+                          </article>
+                        );
+                      })}
+                  </div>
+                </div>
+              ))}
+
+              <div className={styles.stage} data-testid="engine-stage-computed">
+                <h3 className={styles.stageName}>{t.catalogueComputedTitle}</h3>
+                <div className={styles.metrics}>
+                  {DERIVED_SHAPES.map((shape) => {
+                    const d = props.derived.find((x) => x.id === shape.id)!;
+                    const unit = shape.id === "rev.cac-payback" ? "months" : "ratio";
+                    const reference = shape.benchmark
+                      ? fill(strings.sheet.referenceContext, {
+                          range: referenceRange(shape.benchmark, unit, strings, locale),
+                          caveat: d.caveat ?? d.capNote ?? "",
+                        })
+                      : null;
                     return (
                       <article key={shape.id} className={styles.metric} data-metric={shape.id}>
-                        {shape.primary ? <p className={styles.primary}>{strings.visual.primaryNumber}</p> : null}
-                        <h4 className={styles.metricName}>{metric.name}</h4>
-                        <p className={styles.oneLiner}>{metric.oneLiner}</p>
+                        <h4 className={styles.metricName}>{d.name}</h4>
                         <dl className={styles.facts}>
                           <dt>{strings.sheet.formula}</dt>
-                          <dd className={styles.formula}>{fill(metric.formula, fills)}</dd>
-                          <dt>{strings.sheet.whereTitle}</dt>
-                          <dd>
-                            <ul className={styles.where}>
-                              {metric.where.map((w) => (
-                                <li key={`${w.label}-${w.path}`}>
-                                  <span className={styles.whereTool}>{w.label}</span> — {fill(w.path, fills)}
-                                </li>
-                              ))}
-                            </ul>
-                          </dd>
-                          <dt>{strings.sheet.trapTitle}</dt>
-                          <dd>{fill(metric.trap, fills)}</dd>
+                          <dd className={styles.formula}>{d.formula}</dd>
+                          {d.capNote ? (
+                            <>
+                              <dt>{strings.sheet.trapTitle}</dt>
+                              <dd>{d.capNote}</dd>
+                            </>
+                          ) : null}
                           {reference ? (
                             <>
                               <dt>{strings.sheet.reference}</dt>
                               <dd>{reference}</dd>
                             </>
                           ) : null}
-                          <dt>{strings.visual.effort}</dt>
-                          <dd>{strings.effort[EFFORT_KEY[shape.effort]]}</dd>
                         </dl>
-                        <Link href={metric.glossaryHref} className={styles.glossary}>
+                        <Link href={d.glossaryHref} className={styles.glossary}>
                           {strings.sheet.definition}
                         </Link>
                       </article>
                     );
                   })}
+                </div>
               </div>
             </div>
-          ))}
-
-          <div className={styles.stage} data-testid="engine-stage-computed">
-            <h3 className={styles.stageName}>{t.catalogueComputedTitle}</h3>
-            <div className={styles.metrics}>
-              {DERIVED_SHAPES.map((shape) => {
-                const d = props.derived.find((x) => x.id === shape.id)!;
-                const unit = shape.id === "rev.cac-payback" ? "months" : "ratio";
-                const reference = shape.benchmark
-                  ? fill(strings.sheet.referenceContext, {
-                      range: referenceRange(shape.benchmark, unit, strings, locale),
-                      caveat: d.caveat ?? d.capNote ?? "",
-                    })
-                  : null;
-                return (
-                  <article key={shape.id} className={styles.metric} data-metric={shape.id}>
-                    <h4 className={styles.metricName}>{d.name}</h4>
-                    <dl className={styles.facts}>
-                      <dt>{strings.sheet.formula}</dt>
-                      <dd className={styles.formula}>{d.formula}</dd>
-                      {d.capNote ? (
-                        <>
-                          <dt>{strings.sheet.trapTitle}</dt>
-                          <dd>{d.capNote}</dd>
-                        </>
-                      ) : null}
-                      {reference ? (
-                        <>
-                          <dt>{strings.sheet.reference}</dt>
-                          <dd>{reference}</dd>
-                        </>
-                      ) : null}
-                    </dl>
-                    <Link href={d.glossaryHref} className={styles.glossary}>
-                      {strings.sheet.definition}
-                    </Link>
-                  </article>
-                );
-              })}
-            </div>
-          </div>
+          </Disclosure>
         </section>
 
         <section className={styles.faq} aria-labelledby="engine-faq" data-testid="engine-faq">

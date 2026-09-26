@@ -60,7 +60,7 @@ test.describe("the growth engine keeps everything in the browser (D16)", () => {
     await page.goto("/en/aarrr-funnel-template");
     await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
     await page.getByLabel(ENGINE_COPY.setup.companyLabel.en).fill(COMPANY);
-    await page.getByTestId("engine-setup-start").click();
+    await page.getByTestId("engine-setup-board").click();
     await expect(page.getByTestId("engine-board")).toBeVisible();
 
     // --- The activation event: the one number that IS a text ---------------

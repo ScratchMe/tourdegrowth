@@ -6,6 +6,7 @@ import {
   hangUp,
   horizontalOverflow,
   openDecember,
+  pickAndRun,
   pickUpCall,
   playQuarter,
   recordPhases,
@@ -65,16 +66,16 @@ const A: Fixture = {
   path: PATH_A,
   moods: ["firm", "angry", "angry", "firm"],
   orders: [null, "pdef", "call", "bury"],
-  churn: ["5,7 %", "5,7 %", "4,6 %", "4,0 %"],
-  patience: ["52", "43", "47", "74"],
+  churn: ["5,8 %", "5,7 %", "4,6 %", "4,0 %"],
+  patience: ["51", "42", "46", "73"],
 };
 
 const C: Fixture = {
   path: PATH_C,
   moods: ["firm", "calm", "firm", "angry"],
   orders: [null, "call", "notice", "pdef"],
-  churn: ["5.3%", "5.0%", "5.0%", "9.0%"],
-  patience: ["67", "79", "57", "15"],
+  churn: ["5.3%", "5.0%", "5.0%", "9.1%"],
+  patience: ["67", "79", "57", "12"],
 };
 
 /** The figure a tile shows — its value span, not the tile, which also prints targets and deltas. */
@@ -154,7 +155,7 @@ async function expectOrder(page: Page, order: string | null, badge: string) {
 }
 
 test.describe("P1 — the first screen", () => {
-  test("the call is open, the hand locked, the dashboard at January's figures", async ({ page }) => {
+  test("the call is open, no card on the desk yet, the dashboard at January's figures", async ({ page }) => {
     await page.goto(LEVEL_PATH.fr);
     await expect(page.getByTestId("game-desk")).toHaveAttribute("data-phase", "call");
     await expect(tileValue(page, "game-dash-churn")).toHaveText("6,0 %");
@@ -164,12 +165,16 @@ test.describe("P1 — the first screen", () => {
     for (const id of ["game-dash-trust", "game-dash-radar"]) {
       await expect(page.getByTestId(id)).toContainText("pas sur ton dashboard");
     }
+    // Antoine, 2026-09-25: the projects appear once the call is hung up, not
+    // before — cards on the desk that could not be touched read as a bug.
+    await expect(page.getByTestId("game-hand")).toHaveCount(0);
+    await expectSecretsAbsent(page);
+    await hangUp(page);
     const cards = page.locator("[data-testid^='game-card-']");
     expect(await cards.count()).toBeGreaterThan(4);
-    for (const card of await cards.all()) await expect(card).toBeDisabled();
+    for (const card of await cards.all()) await expect(card).toBeEnabled();
     // P2 — nothing on a card says what it pays.
     for (const text of await cards.allInnerTexts()) expect(text).not.toMatch(/%|[+−-]\s?\d/);
-    await expectSecretsAbsent(page);
   });
 });
 
@@ -183,10 +188,11 @@ test.describe("a whole year through the interface", () => {
     await page.goto(LEVEL_PATH.fr);
     // One quarter at a time, the call of each checked as it opens.
     await expectCallMood(page, A.moods[0]);
-    await expectOrder(page, A.orders[0], "Demandé par le DG");
     await expectSecretsAbsent(page);
     for (let q = 1; q <= 4; q++) {
-      await playQuarter(page, A.path[q - 1]!);
+      await hangUp(page);
+      await expectOrder(page, A.orders[q - 1]!, "Demandé par le DG");
+      await pickAndRun(page, A.path[q - 1]!);
       await expect(tileValue(page, "game-dash-churn")).toHaveText(A.churn[q - 1]!);
       await expect(tileValue(page, "game-dash-patience")).toHaveText(A.patience[q - 1]!);
       await expectSecretsAbsent(page);
@@ -194,13 +200,13 @@ test.describe("a whole year through the interface", () => {
         // P6 — what the first honest quarter did, said in the report.
         const report = page.getByTestId("game-report-1");
         await expect(report).toContainText("Trimestre 1 · janvier à mars");
-        await expect(report).toContainText("Offre de pause : −5 % de résiliations ce trimestre, l'effet monte encore");
+        // Model v2: the survey's boost only starts next quarter, so −4 % (v1 printed −5 %).
+        await expect(report).toContainText("Offre de pause : −4 % de résiliations ce trimestre, l'effet monte encore");
         await expect(report).toContainText("« Ce n'est pas ce qu'on avait dit. »");
       }
       if (q < 4) {
         await pickUpCall(page);
         await expectCallMood(page, A.moods[q]!);
-        await expectOrder(page, A.orders[q]!, "Demandé par le DG");
         await expectSecretsAbsent(page);
       }
     }
@@ -237,9 +243,10 @@ test.describe("a whole year through the interface", () => {
   test("path C (en): the CEO obeyed twice, the DGCCRF in Q3, December reveals the tricks", async ({ page }) => {
     await page.goto(LEVEL_PATH.en);
     await expectCallMood(page, C.moods[0]);
-    await expectOrder(page, C.orders[0], "Requested by the CEO");
     for (let q = 1; q <= 4; q++) {
-      await playQuarter(page, C.path[q - 1]!);
+      await hangUp(page);
+      await expectOrder(page, C.orders[q - 1]!, "Requested by the CEO");
+      await pickAndRun(page, C.path[q - 1]!);
       await expect(tileValue(page, "game-dash-churn")).toHaveText(C.churn[q - 1]!);
       await expect(tileValue(page, "game-dash-patience")).toHaveText(C.patience[q - 1]!);
       await expectSecretsAbsent(page);
@@ -251,7 +258,6 @@ test.describe("a whole year through the interface", () => {
       if (q < 4) {
         await pickUpCall(page);
         await expectCallMood(page, C.moods[q]!);
-        await expectOrder(page, C.orders[q]!, "Requested by the CEO");
         await expectSecretsAbsent(page);
       }
     }

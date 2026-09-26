@@ -46,6 +46,7 @@ import {
   decemberView,
   patternCatalogue,
   playbookCards,
+  driverRows,
   reportView,
   type Delta,
   type DecemberView,
@@ -124,7 +125,7 @@ export function effectText({ copy, locale }: IslandContext, effect: VisibleEffec
     case "insight":
       return copy.effects.insight;
     case "present":
-      return effect.insight ? copy.effects.presentInsight : copy.effects.presentBlind;
+      return copy.effects.present;
     case "clean":
       return copy.effects.clean;
     case "extra":
@@ -144,7 +145,9 @@ export function eventText({ copy, locale }: IslandContext, event: GameEvent): st
     case "midMail":
       return event.moving ? copy.events.midMailMoving : copy.events.midMailStalled;
     case "present":
-      return event.insight ? copy.events.presentInsight : copy.events.presentBlind;
+      return copy.events.present;
+    case "surveyAnswers":
+      return copy.events.surveyAnswers;
     case "control":
       return fill(copy.events.control, { fine: formatEur(locale, event.fine), leavers: formatInt(locale, event.leavers) });
     case "reports":
@@ -310,6 +313,8 @@ export function handView(ctx: IslandContext, state: State, hint: HandHint): Hand
   const { copy, locale } = ctx;
   const max = L.constants.picksPerQuarter;
   const full = state.picks.length >= max;
+  // The quarter the exit survey's answers came in, the data review is new in the hand.
+  const unlockedNow = state.log.at(-1)?.events.some((e) => e.kind === "surveyAnswers") ?? false;
   const cards = handIds(L, state).map((id): HandCard => {
     const pressed = state.picks.includes(id);
     return {
@@ -319,11 +324,11 @@ export function handView(ctx: IslandContext, state: State, hint: HandHint): Hand
       pressed,
       state: state.callOpen || state.over ? "locked" : full && !pressed ? "unavailable" : "available",
       ordered: id === state.order,
+      unlocked: unlockedNow && L.cards[id].present === true,
     };
   });
   const active = state.active.map((id) => cardName(ctx, id));
   const hints: Record<HandHint, string> = {
-    callOpen: copy.hand.hintCallOpen,
     pick: copy.hand.hintPick,
     ready: copy.hand.hintReady,
   };
@@ -367,6 +372,7 @@ export interface ReportContent {
   effectsHeading: string;
   effects: string[];
   notes: string[];
+  drivers: { heading: string; lines: string[] };
   mail?: { header: string; body: string };
   clippings: EventClippingProps[];
   bossLine: string;
@@ -387,8 +393,27 @@ function clipping(ctx: IslandContext, event: GameEvent): EventClippingProps | nu
       return { kind: event.kind, ...copy.clippings[event.kind], text };
     case "midMail":
     case "present":
+    case "surveyAnswers":
       return null;
   }
+}
+
+/**
+ * « Pourquoi le churn a bougé » — the quarter's move split four ways, each
+ * line in the tiles' tenth of a point, and the lines adding up to the total
+ * in the heading (`driverRows`). A save from before model v2 has no drivers:
+ * its report says nothing rather than something made up.
+ */
+function driversContent(ctx: IslandContext, log: QuarterLog<Id>): { heading: string; lines: string[] } {
+  const { copy, locale } = ctx;
+  if (!log.drivers) return { heading: "", lines: [] };
+  const { total, rows } = driverRows(log);
+  return {
+    heading: fill(copy.report.driversHeading, { delta: formatDelta(locale, "churn", 0, total) }),
+    lines: rows.map(({ key, value }) =>
+      fill(copy.report.driverLine, { label: copy.report.drivers[key], delta: formatDelta(locale, "churn", 0, value) }),
+    ),
+  };
 }
 
 /** The report of quarter `q` (0-based index into the journal). */
@@ -419,7 +444,8 @@ export function reportContent(ctx: IslandContext, state: State, q: number): Repo
     effects: r.fx.map(({ card, effect }) =>
       fill(copy.report.effectLine, { card: cardName(ctx, card), effect: effectText(ctx, effect) }),
     ),
-    notes: r.events.filter((e) => e.kind === "present").map((e) => eventText(ctx, e)),
+    notes: r.events.filter((e) => e.kind === "present" || e.kind === "surveyAnswers").map((e) => eventText(ctx, e)),
+    drivers: driversContent(ctx, log),
     mail: mail ? { header: copy.report.mailHeader, body: eventText(ctx, mail) } : undefined,
     clippings: r.events.map((e) => clipping(ctx, e)).filter((c): c is EventClippingProps => c !== null),
     bossLine: bossLine(ctx, log),

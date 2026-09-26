@@ -202,16 +202,15 @@ describe("X27 — what each screen shows", () => {
     });
   });
 
-  it("the hand only on the open call and once hung up; the action bar only while choosing", () => {
-    expect(all.filter(handVisible).map((p) => p.kind)).toEqual(["call", "hand"]);
+  it("the hand only once hung up — never during the call (Antoine, 2026-09-25); the action bar only while choosing", () => {
+    expect(all.filter(handVisible).map((p) => p.kind)).toEqual(["hand"]);
     expect(all.filter(actionBarVisible).map((p) => p.kind)).toEqual(["hand"]);
   });
 
-  it("the hint follows the prototype: he talks, pick two, then « trois mois vont passer »", () => {
-    expect(handHint({ kind: "call" }, 0, 2)).toBe("callOpen");
-    expect(handHint({ kind: "hand" }, 0, 2)).toBe("pick");
-    expect(handHint({ kind: "hand" }, 1, 2)).toBe("pick");
-    expect(handHint({ kind: "hand" }, 2, 2)).toBe("ready");
+  it("the hint: pick two, then « trois mois vont passer »", () => {
+    expect(handHint(0, 2)).toBe("pick");
+    expect(handHint(1, 2)).toBe("pick");
+    expect(handHint(2, 2)).toBe("ready");
   });
 
   it("behind « Reprendre ? » the desk draws the saved year, and nowhere else", () => {

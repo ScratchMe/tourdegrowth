@@ -264,6 +264,16 @@ function snapshotErrors(path: string, snapshot: unknown): string[] {
       if (!METRIC_IDS.includes(id)) errors.push(`${path}.targets.${id}: unknown metric`);
       else if (!isNum(target)) errors.push(`${path}.targets.${id}: not a number`);
     }
+
+  // Optional (2026-09-25): absent in every file written before the shared base existed.
+  if (snapshot.base !== undefined) {
+    if (!isObj(snapshot.base)) errors.push(`${path}.base: not an object`);
+    else
+      for (const [key, n] of Object.entries(snapshot.base)) {
+        if (key !== "cohortSignups" && key !== "monthSignups") errors.push(`${path}.base.${key}: unknown count`);
+        else if (!isNum(n) || n <= 0 || !Number.isInteger(n)) errors.push(`${path}.base.${key}: not a whole number > 0`);
+      }
+  }
   return errors;
 }
 
