@@ -451,7 +451,9 @@ test.describe("leaving the device and coming back", () => {
     await page.getByTestId("engine-erase-open").click();
     const confirm = page.getByTestId("engine-erase-confirm");
     await expect(confirm).toBeDisabled();
-    await page.getByLabel('Type "ERASE" to confirm').fill("ERASE");
+    await expect(page.getByTestId("engine-erase-prompt")).toContainText('type "ERASE" below');
+    // Case is not compared (Antoine, 2026-09-25): the word used to sit in an uppercase label.
+    await page.getByLabel("Confirmation").fill("erase");
     await expect(confirm).toBeEnabled();
     await confirm.click();
     await expect(page.getByTestId("engine-setup")).toBeVisible();

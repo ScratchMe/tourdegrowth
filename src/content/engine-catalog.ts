@@ -91,7 +91,9 @@ export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
       en: "sign-ups in the month ÷ unique visitors in the month",
     },
     inputs: {
-      numerator: { fr: "Inscriptions en {month}", en: "Sign-ups in {month}" },
+      // « Inscrits », as the top channel's denominator says it: the same count, typed once
+      // (shared-counts.ts, 2026-09-25), must read the same in both places.
+      numerator: { fr: "Inscrits en {month}", en: "Sign-ups in {month}" },
       denominator: { fr: "Visiteurs uniques en {month}", en: "Unique visitors in {month}" },
     },
     where: [

@@ -39,6 +39,7 @@ export function ValueEditor({
   metric,
   view,
   problems,
+  sharedHints,
 }: {
   idPrefix: string;
   draft: SheetDraft;
@@ -48,6 +49,8 @@ export function ValueEditor({
   view: EngineView;
   /** Only after a save was attempted — nothing turns red before the person has had a chance. */
   problems: readonly DraftProblem[];
+  /** « Même nombre que pour … » under a count several numbers share (shared-counts.ts). */
+  sharedHints?: { numerator?: string; denominator?: string };
 }) {
   const { strings, ctx, state } = view;
   const locale = ctx.locale;
@@ -96,7 +99,7 @@ export function ValueEditor({
     <div className={styles.editor} data-testid="engine-value-editor">
       {draft.kind === "ratio" ? (
         <div className={styles.counts}>
-          <Field label={metric.inputs?.numerator ?? metric.name} htmlFor={numId}>
+          <Field label={metric.inputs?.numerator ?? metric.name} htmlFor={numId} hint={sharedHints?.numerator}>
             <NumberField
               id={numId}
               value={draft.numerator}
@@ -104,20 +107,26 @@ export function ValueEditor({
               locale={locale}
               integer={shape.unit !== "money"}
               unit={shape.unit === "money" ? currencySymbol(currency, locale) : undefined}
+              describedBy={describedBy(numId, { hint: sharedHints?.numerator })}
               invalidMessage={shape.unit === "money" ? numberInvalid : w.notAWholeNumber}
             />
           </Field>
           <span className={styles.over} aria-hidden="true">
             {strings.sheet.over}
           </span>
-          <Field label={metric.inputs?.denominator ?? metric.name} htmlFor={denId} error={rule("denominator-zero")}>
+          <Field
+            label={metric.inputs?.denominator ?? metric.name}
+            htmlFor={denId}
+            hint={sharedHints?.denominator}
+            error={rule("denominator-zero")}
+          >
             <NumberField
               id={denId}
               value={draft.denominator}
               onChange={(denominator) => update({ denominator })}
               locale={locale}
               integer
-              describedBy={describedBy(denId, { error: rule("denominator-zero") })}
+              describedBy={describedBy(denId, { hint: sharedHints?.denominator, error: rule("denominator-zero") })}
               invalidMessage={w.notAWholeNumber}
             />
           </Field>

@@ -1,5 +1,5 @@
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
-import type { EngineCalcContext, EngineDerived, EngineState, MetricEntry, MetricId, RoleId } from "@/lib/engine/types";
+import type { EngineCalcContext, EngineDerived, EngineState, MetricEntry, MetricId, RoleId, SharedCount } from "@/lib/engine/types";
 import type { StoredResult } from "@/lib/quiz/storage";
 import type { CommitResult } from "./engine-store";
 
@@ -32,6 +32,8 @@ export interface EngineView {
 export interface EngineActions {
   saveEntry: (id: MetricId, entry: MetricEntry) => CommitResult;
   setTarget: (id: MetricId, target: number | null) => void;
+  /** A count several numbers share, typed once (shared-counts.ts): the base and every entry carrying it. */
+  setBase: (count: SharedCount, value: number) => void;
   markRequested: (ids: MetricId[], role: RoleId) => void;
   markReminded: (ids: MetricId[]) => void;
   /** Opens a number's sheet from anywhere — "also in Stripe", the collect list, the resume band. */

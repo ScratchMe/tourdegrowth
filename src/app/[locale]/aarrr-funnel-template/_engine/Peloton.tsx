@@ -25,6 +25,13 @@ export interface PelotonProps {
   paidWindowDays: number;
   /** When the diagnosis names a peloton column, that column is stamped and its dots take the one red. */
   diagnosis?: Diagnosis | null;
+  /**
+   * The cohort's real sign-ups, when known (the shared base or a count). The
+   * « 100 » is a scale, not a figure to correct — Antoine read it as one
+   * (« où est-ce que je le change ? »), so the real count is printed next to
+   * it, with where to change it.
+   */
+  cohortSignups?: number | null;
   className?: string;
 }
 
@@ -62,7 +69,7 @@ function twoSignificant(v: number): number {
  * Text equivalent: every grid is a `role="img"` with a full sentence, and a
  * visually hidden table repeats the four columns (number, status, source).
  */
-export function Peloton({ peloton, strings, locale, cohortMonth, paidWindowDays, diagnosis, className }: PelotonProps) {
+export function Peloton({ peloton, strings, locale, cohortMonth, paidWindowDays, diagnosis, cohortSignups, className }: PelotonProps) {
   const w = strings.peloton;
   const v = strings.visual;
   const cohort = monthLabel(cohortMonth, locale);
@@ -134,7 +141,9 @@ export function Peloton({ peloton, strings, locale, cohortMonth, paidWindowDays,
           label={w.signups}
           grid={signupsGrid(peloton.referredPerHundred)}
           aria={signupsAria}
-          source={fill(v.cohortOf, { cohort })}
+          source={
+            cohortSignups ? fill(w.cohortOfCount, { n: formatNumber(cohortSignups, locale), cohort }) : fill(v.cohortOf, { cohort })
+          }
           metric="signups"
         />
         {columns.map((c) => (
@@ -151,7 +160,11 @@ export function Peloton({ peloton, strings, locale, cohortMonth, paidWindowDays,
         ))}
       </div>
 
-      <p className={styles.sameHundred}>{w.sameHundred}</p>
+      <p className={styles.sameHundred} data-testid="peloton-same-hundred">
+        {cohortSignups
+          ? fill(w.sameHundredCount, { n: formatNumber(cohortSignups, locale), cohort })
+          : fill(w.sameHundred, { cohort })}
+      </p>
 
       <ul className={styles.legend} aria-hidden="true">
         {referredText ? (

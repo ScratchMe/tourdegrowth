@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useMemo, useState } from "react";
+import { useId, useMemo, useState, type ReactNode } from "react";
 import { Card } from "@/components/core/Card";
 import type { Locale } from "@/lib/i18n/locale";
 import type { CandidateId, Comparator, Impact, Interval } from "@/lib/engine/types";
@@ -28,6 +28,14 @@ export interface WhatIfProps {
    * calculation two ways.
    */
   compute: (target: number) => Impact | null;
+  /**
+   * Rendered next to the card, from the target the slider stands on — the
+   * « Et si » panel redraws the whole funnel with it (Antoine, 2026-09-25:
+   * « de façon plus visuelle sur le gros funnel »). A render prop rather
+   * than a callback into the parent's state: the slider owns the target, and
+   * nothing has to be kept in step with it.
+   */
+  aside?: (target: number, moved: boolean) => ReactNode;
 }
 
 /**
@@ -47,7 +55,7 @@ export interface WhatIfProps {
  * The ladder is 0.1 point below 10 %, 1 point from 10 % up; churn only moves
  * down (a higher churn is not a "what if" anyone asks).
  */
-export function WhatIf({ metric, strings, locale, from, comparator, stageName, compute }: WhatIfProps) {
+export function WhatIf({ metric, strings, locale, from, comparator, stageName, compute, aside }: WhatIfProps) {
   const w = strings.whatIf;
   const churn = metric === "ret.logo-churn";
   const sliderId = useId();
@@ -77,7 +85,7 @@ export function WhatIf({ metric, strings, locale, from, comparator, stageName, c
       return { key: line.key, label, text: fill(template, { stage: stageName, ...line.values }) };
     });
 
-  return (
+  const card = (
     <Card tone="outlineAlert" className={styles.card} data-testid="engine-whatif">
       <p className={styles.title}>{w.title}</p>
 
@@ -136,5 +144,13 @@ export function WhatIf({ metric, strings, locale, from, comparator, stageName, c
       <p className={styles.note}>{w.multiplication}</p>
       <p className={styles.note}>{w.notForecast}</p>
     </Card>
+  );
+  return aside ? (
+    <>
+      {card}
+      {aside(target, showLines)}
+    </>
+  ) : (
+    card
   );
 }

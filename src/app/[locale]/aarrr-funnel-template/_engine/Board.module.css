@@ -95,11 +95,6 @@
   color: var(--text-alert);
 }
 
-.tabs {
-  align-self: flex-start;
-  max-width: 100%;
-}
-
 .writeFailed {
   font: var(--body-md);
   color: var(--text-alert);
@@ -418,4 +413,35 @@
   .actions > :first-child {
     width: 100%;
   }
+}
+
+/* --- The eyebrow row: settings and the way back to the step-by-step (2026-09-25) --- */
+.eyebrowRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.headActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* --- « Et si » on the whole funnel ------------------------------------ */
+.whatIf {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.sectionTitle {
+  font: var(--display-section);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+  color: var(--text-body);
+  margin: 0;
 }

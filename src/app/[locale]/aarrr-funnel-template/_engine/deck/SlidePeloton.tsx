@@ -159,7 +159,7 @@ export function SlidePeloton({ slide, context }: SlideProps) {
             {t.legendUnknown}
           </li>
         </ul>
-        <p className={styles.legendNote}>{t.sameHundred}</p>
+        <p className={styles.legendNote}>{t.slideSameHundred}</p>
       </div>
     </SlideFrame>
   );

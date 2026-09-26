@@ -26,6 +26,8 @@ export interface SetupChoice {
   cohortMonth: YearMonth;
   /** The Tour result to compare with, when the person kept the box ticked. */
   tourResultId: string | null;
+  /** How to fill it in (Antoine, 2026-09-25): one number at a time, or the whole board. */
+  start: "steps" | "board";
 }
 
 /**
@@ -51,23 +53,39 @@ export function Setup({
   tour,
   onStart,
   onImport,
+  onExample,
+  initial,
+  existing,
+  onCancel,
 }: {
   strings: EngineStrings;
   locale: "en" | "fr";
   today: Date;
   tour: StoredResult | null;
   onStart: (choice: SetupChoice) => void;
-  onImport: () => void;
+  onImport?: () => void;
+  /** « Voir un exemple rempli » — only offered before an engine exists. */
+  onExample?: () => void;
+  /**
+   * Editing the settings of an engine that exists (Antoine, 2026-09-25: they
+   * could not be changed without erasing everything). The card opens on them,
+   * says what a change would reset, and saves or cancels.
+   */
+  initial?: { setup: EngineSetup; referenceMonth: YearMonth; cohortMonth: YearMonth };
+  /** Which numbers a change of window would send back to "to fill in". */
+  existing?: { activation: boolean; paid: boolean; any: boolean };
+  onCancel?: () => void;
 }) {
   const s = strings.setup;
+  const editing = Boolean(initial);
   const id = useId();
   const lastClosed = defaultReferenceMonth(today);
-  const [currency, setCurrency] = useState<Currency>("EUR");
-  const [activation, setActivation] = useState<EngineSetup["activationWindowDays"]>(7);
-  const [paid, setPaid] = useState<EngineSetup["paidWindowDays"]>(30);
-  const [referenceMonth, setReferenceMonth] = useState<YearMonth>(lastClosed);
-  const [chosenCohort, setChosenCohort] = useState<YearMonth | null>(null);
-  const [company, setCompany] = useState("");
+  const [currency, setCurrency] = useState<Currency>(initial?.setup.currency ?? "EUR");
+  const [activation, setActivation] = useState<EngineSetup["activationWindowDays"]>(initial?.setup.activationWindowDays ?? 7);
+  const [paid, setPaid] = useState<EngineSetup["paidWindowDays"]>(initial?.setup.paidWindowDays ?? 30);
+  const [referenceMonth, setReferenceMonth] = useState<YearMonth>(initial?.referenceMonth ?? lastClosed);
+  const [chosenCohort, setChosenCohort] = useState<YearMonth | null>(initial?.cohortMonth ?? null);
+  const [company, setCompany] = useState(initial?.setup.companyLabel ?? "");
   const [linkTour, setLinkTour] = useState(true);
   const [tried, setTried] = useState(false);
 
@@ -75,10 +93,11 @@ export function Setup({
   const cohortMonth = chosenCohort ?? matureCohortMonth(cohortWindow, today);
   const companyTooLong = company.length > TEXT_LIMITS.companyLabel;
 
-  function start() {
+  function start(how: SetupChoice["start"]) {
     setTried(true);
     if (companyTooLong) return;
     onStart({
+      start: how,
       setup: {
         profile: "selfserve",
         currency,
@@ -92,6 +111,14 @@ export function Setup({
     });
   }
 
+  const resets = editing && initial
+    ? [
+        activation !== initial.setup.activationWindowDays && existing?.activation ? fill(strings.settings.activationReset, { n: activation }) : null,
+        paid !== initial.setup.paidWindowDays && existing?.paid ? fill(strings.settings.paidReset, { n: paid }) : null,
+        (referenceMonth !== initial.referenceMonth || cohortMonth !== initial.cohortMonth) && existing?.any ? strings.settings.monthsChanged : null,
+      ].filter((x): x is string => x !== null)
+    : [];
+
   const cohortHint = fill(s.cohortHint, {
     cohort: formatMonth(cohortMonth, locale),
     next: formatMonth(nextMonth(cohortMonth), locale),
@@ -99,9 +126,9 @@ export function Setup({
   });
 
   return (
-    <Card elevation="flat" className={styles.setup} data-testid="engine-setup">
+    <Card elevation="flat" className={styles.setup} data-testid={editing ? "engine-settings" : "engine-setup"}>
       <h2 id="engine-setup-title" className={styles.panelTitle} tabIndex={-1}>
-        {s.title}
+        {editing ? strings.settings.title : s.title}
       </h2>
 
       <Choices
@@ -179,7 +206,7 @@ export function Setup({
         />
       </Field>
 
-      {tour ? (
+      {tour && !editing ? (
         <div className={styles.tour} data-testid="engine-setup-tour">
           <CheckField id={`${id}-tour`} checked={linkTour} onChange={setLinkTour}>
             {s.tourLink}
@@ -190,14 +217,49 @@ export function Setup({
         </div>
       ) : null}
 
-      <div className={styles.panelActions}>
-        <Button onClick={start} data-testid="engine-setup-start">
-          {s.start}
-        </Button>
-        <Button variant="quiet" onClick={onImport} data-testid="engine-setup-import">
-          {strings.actions.import}
-        </Button>
-      </div>
+      {resets.length ? (
+        <div className={styles.resets} role="status" data-testid="engine-settings-resets">
+          {resets.map((line) => (
+            <p key={line} className={styles.caveatLine}>
+              {line}
+            </p>
+          ))}
+        </div>
+      ) : null}
+
+      {editing ? (
+        <div className={styles.panelActions}>
+          <Button onClick={() => start("board")} data-testid="engine-settings-save">
+            {strings.settings.save}
+          </Button>
+          <Button variant="quiet" onClick={onCancel} data-testid="engine-settings-cancel">
+            {strings.settings.cancel}
+          </Button>
+        </div>
+      ) : (
+        <>
+          <div className={styles.panelActions}>
+            <Button onClick={() => start("steps")} data-testid="engine-setup-start">
+              {s.startSteps}
+            </Button>
+            <Button variant="secondary" onClick={() => start("board")} data-testid="engine-setup-board">
+              {s.startBoard}
+            </Button>
+          </div>
+          <div className={styles.panelActions}>
+            {onExample ? (
+              <Button variant="quiet" onClick={onExample} data-testid="engine-setup-example">
+                {s.exampleLink}
+              </Button>
+            ) : null}
+            {onImport ? (
+              <Button variant="quiet" onClick={onImport} data-testid="engine-setup-import">
+                {strings.actions.import}
+              </Button>
+            ) : null}
+          </div>
+        </>
+      )}
     </Card>
   );
 }

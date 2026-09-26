@@ -1,4 +1,5 @@
 import type { StoredResult } from "../../quiz/storage";
+import { exampleEngine, exampleMetrics } from "../example";
 import type { CandidateId, EngineState, MetricEntry, MetricId, MetricValue, SourceRef, ToolId } from "../types";
 
 /**
@@ -38,51 +39,13 @@ export function missing(cause: NonNullable<MetricEntry["missing"]>["cause"], rep
   return { status: "missing", missing: { cause, repair }, updatedAt: at, ...extra };
 }
 
-/** §6.0, entry by entry. */
-export const EXAMPLE_METRICS: Partial<Record<MetricId, MetricEntry>> = {
-  "acq.signup-rate": measured(ratio(820, 26_000), tool("ga4")),
-  "acq.top-channel-share": measured(ratio(410, 820), tool("ga4"), { label: "Recherche naturelle" }),
-  "acq.cac": measured(ratio(21_000, 42), { kind: "person", role: "finance" }, { variant: "media-only" }),
-  "act.event": measured({ kind: "text", text: "a créé un premier projet" }, { kind: "other" }),
-  "act.rate": measured(ratio(144, 800), tool("amplitude")),
-  "act.ttv": { status: "estimated", estimate: { low: 1, high: 3, basis: "team-hunch" }, variant: "median", updatedAt: at },
-  "ret.d30": missing("not-tracked", "sprint", { missing: { cause: "not-tracked", repair: "sprint", ownerRole: "data" } }),
-  "ret.logo-churn": measured(ratio(10, 400), tool("stripe")),
-  "ret.churn-cause": missing("no-definition", "meeting"),
-  "ref.mechanism": measured({ kind: "choice", choice: "product" }, { kind: "other" }),
-  "ref.referred-share": measured(ratio(48, 800), tool("product-db")),
-  "ref.k-factor": { status: "requested", request: { role: "data", requestedAt: "2026-09-20T09:00:00.000Z" }, updatedAt: at },
-  "rev.paid-conversion": estimated(6, 9),
-  "rev.arpa": measured(ratio(48_000, 400), tool("stripe")),
-  "rev.gross-margin": missing("no-access", "meeting", { missing: { cause: "no-access", repair: "meeting", ownerRole: "finance" } }),
-};
+/** §6.0, entry by entry — the page's example (`lib/engine/example.ts`), in French. */
+const EXAMPLE_WORDS = { event: "a créé un premier projet", channel: "Recherche naturelle" };
+export const EXAMPLE_METRICS: Partial<Record<MetricId, MetricEntry>> = exampleMetrics(EXAMPLE_WORDS);
 
 /** A fresh, deep-copied §6.0 state: tests mutate it freely. */
 export function exampleState(): EngineState {
-  return structuredClone({
-    schemaVersion: 1,
-    id: "00000000-0000-4000-8000-000000000060",
-    createdAt: "2026-09-24T08:00:00.000Z",
-    updatedAt: "2026-09-24T09:00:00.000Z",
-    setup: { profile: "selfserve", currency: "EUR", activationWindowDays: 7, paidWindowDays: 30 },
-    snapshots: [
-      {
-        id: "00000000-0000-4000-8000-000000000061",
-        referenceMonth: "2026-08",
-        cohortMonth: "2026-07",
-        createdAt: "2026-09-24T08:00:00.000Z",
-        metrics: EXAMPLE_METRICS,
-        targets: {},
-      },
-    ],
-    tourLink: null,
-    deck: {
-      include: {},
-      showCompany: false,
-      showSiteCredit: true,
-      ask: { what: "", bullets: [], measureFirst: [] },
-    },
-  } satisfies EngineState);
+  return exampleEngine(EXAMPLE_WORDS);
 }
 
 /** The state with one entry replaced (or removed with `undefined`). */
