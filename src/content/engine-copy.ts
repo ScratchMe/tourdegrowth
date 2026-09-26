@@ -1,7 +1,8 @@
 // TODO: à relire — copie neuve (convention 6), rédigée par la session de code
 import type { Translatable } from "@/lib/i18n/translatable";
 import type { Pillar } from "@/lib/scoring/pillars";
-import type { CandidateId, SlideTitleKey, ToolId, UnitInputId } from "@/lib/engine/types";
+import type { CandidateId, LeverId, SlideTitleKey, ToolId, UnitInputId } from "@/lib/engine/types";
+import type { ScenarioAssumption } from "@/lib/engine/scenario";
 
 /**
  * engine-copy.ts — every interface string of the growth engine (engine spec
@@ -688,6 +689,79 @@ export const ENGINE_COPY = {
   },
 
   // --- Peloton and mirror (§14.7) ------------------------------------------
+  /**
+   * TODO: à relire — nouveau (2026-09-26, « Et si » cumulés). Each lever as
+   * the subject of a sentence, with its article — the panel's rows and the
+   * what-if slides' titles (« Si l'activation passait de 18 % à 24 % »).
+   * ARPA names who pays it: the projection applies it to NEW customers.
+   */
+  leverSubject: {
+    "acq.signup-rate": { fr: "le taux d'inscription", en: "the sign-up rate" },
+    "ref.referred-share": { fr: "la part des inscrits recommandés", en: "the referred share of sign-ups" },
+    "act.rate": { fr: "l'activation", en: "activation" },
+    "rev.paid-conversion": { fr: "la conversion en payant", en: "paid conversion" },
+    "ret.logo-churn": { fr: "le churn logo", en: "logo churn" },
+    "rev.contraction": { fr: "la rétrogradation", en: "contraction" },
+    "rev.expansion": { fr: "l'expansion", en: "expansion" },
+    "rev.arpa": { fr: "l'ARPA des nouveaux clients", en: "new customers' ARPA" },
+  } satisfies Record<LeverId, Translatable>,
+  /**
+   * TODO: à relire — nouveau (2026-09-26). « Et si » cumulés : the panel
+   * (all the levers at once, the funnel with its visitors, the growth
+   * numbers) and the what-if slides read the same words.
+   */
+  scenario: {
+    title: { fr: "Et si ?", en: "What if?" },
+    intro: { fr: "Bouge un ou plusieurs leviers : le funnel du mois et tes chiffres de croissance se recalculent ensemble, les effets se cumulent.", en: "Move one lever or several: the month's funnel and your growth numbers recompute together, and the effects add up." },
+    leversTitle: { fr: "Les leviers", en: "The levers" },
+    leverToday: { fr: "aujourd'hui {value}", en: "today {value}" },
+    leverUnknown: { fr: "Saisis d'abord ce chiffre pour le faire varier.", en: "Enter this number first to move it." },
+    reset: { fr: "Remettre à aujourd'hui", en: "Back to today" },
+    resetAll: { fr: "Tout remettre à aujourd'hui", en: "All back to today" },
+    sliderLabel: { fr: "{lever}, cible testée", en: "{lever}, target under test" },
+    funnelToday: { fr: "Ton funnel du mois, aujourd'hui", en: "Your month's funnel, today" },
+    funnelIf: { fr: "Ton funnel du mois, avec tes « Et si »", en: "Your month's funnel, with your what-ifs" },
+    visitors: { fr: "Visiteurs", en: "Visitors" },
+    signups: { fr: "Inscrits", en: "Sign-ups" },
+    referred: { fr: "dont recommandés", en: "of whom referred" },
+    activated: { fr: "Activés", en: "Activated" },
+    d30: { fr: "Actifs à J30", en: "Active at day 30" },
+    paying: { fr: "Nouveaux payants", en: "New paying" },
+    perMonth: { fr: "par mois", en: "a month" },
+    unknownStep: { fr: "inconnu", en: "unknown" },
+    gained: { fr: "+{n} avec tes « Et si »", en: "+{n} with your what-ifs" },
+    lost: { fr: "–{n} avec tes « Et si »", en: "–{n} with your what-ifs" },
+    kpisTitle: { fr: "Tes chiffres de croissance", en: "Your growth numbers" },
+    kpiToday: { fr: "aujourd'hui", en: "today" },
+    kpiIf: { fr: "avec tes « Et si »", en: "with your what-ifs" },
+    kpiMrr12: { fr: "MRR dans 12 mois", en: "MRR in 12 months" },
+    kpiNewMrr: { fr: "Nouveau MRR par mois", en: "New MRR a month" },
+    kpiNrr: { fr: "NRR mensuelle", en: "Monthly NRR" },
+    kpiGrr: { fr: "GRR mensuelle", en: "Monthly GRR" },
+    kpiCac: { fr: "CAC", en: "CAC" },
+    kpiLtv: { fr: "LTV", en: "LTV" },
+    kpiPayback: { fr: "CAC payback", en: "CAC payback" },
+    kpiUnknown: { fr: "il manque {input}", en: "missing: {input}" },
+    aloneTitle: { fr: "Ce que chaque levier rapporte seul, sur le MRR dans 12 mois", en: "What each lever brings on its own, on MRR in 12 months" },
+    aloneRow: { fr: "{lever} : {from} → {to}", en: "{lever}: {from} → {to}" },
+    together: { fr: "Ensemble : {total}, soit {extra} de plus que la somme des leviers pris seuls : c'est l'effet composé.", en: "Together: {total}, {extra} more than the sum of the levers taken alone: that's the compounding." },
+    togetherNoExtra: { fr: "Ensemble : {total}.", en: "Together: {total}." },
+    noneMoved: { fr: "Aucun levier bougé : le funnel et les chiffres sont ceux d'aujourd'hui.", en: "No lever moved: the funnel and the numbers are today's." },
+    noLever: { fr: "Il faut au moins un chiffre saisi pour tester un « Et si ».", en: "You need at least one number entered to test a what-if." },
+    assumptionsTitle: { fr: "Ce que le calcul suppose", en: "What the calculation assumes" },
+    /** One sentence per rule of `lib/engine/scenario.ts`, printed only when it applied. */
+    assumption: {
+      "signup-same-visitors": { fr: "Le taux d'inscription s'applique aux mêmes visiteurs qu'aujourd'hui.", en: "The sign-up rate applies to the same visitors as today." },
+      "referral-on-top": { fr: "Les inscrits recommandés s'ajoutent aux autres, qui restent les mêmes ; ils arrivent par des visiteurs qui s'inscrivent au taux d'aujourd'hui.", en: "Referred sign-ups come on top of the others, who stay the same; they arrive through visitors who sign up at today's rate." },
+      "activation-drives-downstream": { fr: "Les actifs à J30 et les payants font partie des activés : ils suivent l'activation dans la même proportion, sans jamais la dépasser.", en: "Those active at day 30 and those paying are among the activated: they follow activation in the same proportion, never above it." },
+      "arpa-new-customers": { fr: "Le nouvel ARPA s'applique aux nouveaux clients ; le MRR déjà là garde son prix.", en: "The new ARPA applies to new customers; the MRR already there keeps its price." },
+      "same-spend": { fr: "À dépense égale : plus de payants font baisser le CAC dans la même proportion.", en: "Same spend: more paying customers lower the CAC in the same proportion." },
+      "churn-as-revenue": { fr: "Le churn logo tient lieu de churn en revenu, comme si les clients partis payaient l'ARPA moyen.", en: "Logo churn stands in for revenue churn, as if the customers who left paid the average ARPA." },
+      "contraction-unknown": { fr: "La rétrogradation n'est pas renseignée : comptée à 0.", en: "Contraction isn't entered: counted as 0." },
+      "expansion-unknown": { fr: "L'expansion n'est pas renseignée : comptée à 0.", en: "Expansion isn't entered: counted as 0." },
+      "twelve-months": { fr: "Sur 12 mois, au rythme de ce mois : la base retenue à la NRR chaque mois, plus le nouveau MRR du mois. Ni saisonnalité, ni saturation.", en: "Over 12 months, at this month's pace: the base retained at NRR each month, plus the month's new MRR. No seasonality, no saturation." },
+    } satisfies Record<ScenarioAssumption, Translatable>,
+  },
   peloton: {
     upstream: {
       fr: "~{n} visiteurs du mois pour 100 inscrits · {source} · {month}",
@@ -1092,6 +1166,14 @@ export const ENGINE_COPY = {
       en: "We're asking for **{cost}** to measure what's missing first ({metric}), before deciding where to invest.",
     },
     annex: { fr: "Définitions et sources", en: "Definitions and sources" },
+    // TODO: à relire — nouveau (2026-09-26).
+    whatIfLever: { fr: "Si {stage} passait de {from} à {to}, le MRR dans 12 mois gagnerait **{gain}**.", en: "If {stage} went from {from} to {to}, MRR in 12 months would gain **{gain}**." },
+    // TODO: à relire — nouveau (2026-09-26).
+    whatIfLeverPlain: { fr: "**Et si {stage} passait de {from} à {to} ?**", en: "**What if {stage} went from {from} to {to}?**" },
+    // TODO: à relire — nouveau (2026-09-26).
+    scenario: { fr: "Avec les {n} « Et si » ensemble, le MRR dans 12 mois gagnerait **{gain}**.", en: "With the {n} what-ifs together, MRR in 12 months would gain **{gain}**." },
+    // TODO: à relire — nouveau (2026-09-26).
+    scenarioPlain: { fr: "**Les {n} « Et si » ensemble.**", en: "**The {n} what-ifs together.**" },
   } satisfies Record<SlideTitleKey, Translatable>,
   /** Speaker notes (§9.4), pre-written against the classic objections. */
   notes: {

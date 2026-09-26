@@ -512,7 +512,13 @@ export type SlideTitleKey =
   /** The team wrote what it asks for, but no success metric with a target: the ask alone, no half-empty goal. */
   | "askPlain"
   | "askMeasureFirst"
-  | "annex";
+  | "annex"
+  /** « Et si » (2026-09-26): one lever, priced on the MRR in 12 months — or plain when it can't be. */
+  | "whatIfLever"
+  | "whatIfLeverPlain"
+  /** All the levers under test, together. */
+  | "scenario"
+  | "scenarioPlain";
 export interface SlideTitle {
   key: SlideTitleKey;
   /** Placeholders, already formatted; `**…**` in the template marks the red accent. */
