@@ -265,6 +265,40 @@ export interface LevelCopy<CardId extends string = string, DarkId extends CardId
     viral: { handle: string };
     press: { masthead: string; headline: string };
     competitor: { masthead: string; headline: string };
+    /**
+     * Why an inspection fell, said where it falls — on the news screen and in
+     * the report (Antoine, 2026-09-26: « on ne comprend pas pourquoi ça
+     * arrive »). The radar is the dashboard's hidden tile: naming it links
+     * the event to a counter the player has been looking at all year without
+     * seeing it, and says nothing of its value, which only December reveals.
+     */
+    why: {
+      controlHeading: string;
+      controlRadar: string;
+      /** `{list}`: the tricks the inspection took down, already quoted and joined (`formatList`). */
+      controlRemoved: string;
+      /** An inspection with nothing left in production: the radar had not come back down yet. */
+      controlNone: string;
+      reportsHeading: string;
+      reports: string;
+    };
+  };
+  /**
+   * The quarter's news, one at a time, over the whole screen (Antoine,
+   * 2026-09-26, after La Bataille du budget) — the way a quarter is LEARNED;
+   * the report underneath is the way it is re-read.
+   */
+  news: {
+    eyebrow: string;
+    /** « {n} sur {total} ». */
+    progress: string;
+    next: string;
+    finish: string;
+    skip: string;
+    /** The eyebrow over each kind of news. */
+    labels: { result: string; mail: string; team: string; outside: string; boss: string };
+    /** Stamps: `fine` takes `{fine}`, already formatted. */
+    stamps: { fine: string; reports: string; viral: string; press: string };
   };
   /** One per `BossLine` value. */
   bossLines: {
@@ -380,6 +414,9 @@ export const LEVEL_COPY_TEMPLATES: Readonly<Record<string, readonly string[]>> =
   "report.driversHeading": ["delta"],
   "report.driverLine": ["label", "delta"],
   "report.bossLine": ["line"],
+  "clippings.why.controlRemoved": ["list"],
+  "news.progress": ["n", "total"],
+  "news.stamps.fine": ["fine"],
   "effects.down": ["pct"],
   "effects.downRising": ["pct"],
   "effects.up": ["pct"],

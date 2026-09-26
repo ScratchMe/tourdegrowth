@@ -305,12 +305,21 @@ export default async function EnginePage({ params }: PageProps) {
           <h2 id="engine-faq" className={styles.heading}>
             {t.faqTitle}
           </h2>
-          {strings.faq.map((item) => (
-            <div key={item.q} className={styles.faqItem}>
-              <h3 className={styles.faqQuestion}>{item.q}</h3>
-              <p className={styles.text}>{item.a}</p>
-            </div>
-          ))}
+          {/* One row per question, answers folded (Antoine, 2026-09-26: the
+              FAQ too, like the catalogue). The questions stay readable as a
+              list; a closed <details> keeps its answer in the prerendered
+              HTML, so search engines and find-in-page still reach it. */}
+          <div className={styles.faqList}>
+            {strings.faq.map((item) => (
+              <Disclosure
+                key={item.q}
+                summary={<span className={styles.faqQuestion}>{item.q}</span>}
+                data-testid="engine-faq-item"
+              >
+                <p className={[styles.text, styles.faqAnswer].join(" ")}>{item.a}</p>
+              </Disclosure>
+            ))}
+          </div>
         </section>
 
         {/* `hard`: /quiz lives under the app's root layout, so next/link

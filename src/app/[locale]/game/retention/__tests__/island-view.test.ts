@@ -11,6 +11,7 @@ import { lastQuarterStart, runFrame } from "@/lib/game/phases";
 import { gameReducer } from "@/lib/game/reducer";
 import type { GameState } from "@/lib/game/types";
 import { clicksFor, clicksOverLaw, monthFrames, phoneIds } from "@/lib/game/view";
+import { formatEur } from "@/lib/game/format";
 import { LOCALES, type Locale } from "@/lib/i18n/locale";
 import {
   bossMessage,
@@ -21,6 +22,7 @@ import {
   decemberContent,
   handView,
   journalEntries,
+  newsContent,
   quarterEndAnnouncement,
   reportContent,
   resumeContent,
@@ -106,6 +108,7 @@ describe("island-view — every screen of every reference year, in both language
           check(`${label} resume`, resumeContent(ctx, state));
           state.log.forEach((_, q) => {
             check(`${label} report ${q}`, reportContent(ctx, state, q));
+            check(`${label} news ${q}`, newsContent(ctx, state, q));
             check(`${label} announce ${q}`, quarterEndAnnouncement(ctx, state, q));
           });
           if (state.over) {
@@ -327,6 +330,87 @@ describe("island-view — what the words must say", () => {
  * which says the new count in its region instead — in the pill's own words,
  * so a screen-reader user hears what a sighted one reads.
  */
+describe("the quarter's news (Antoine, 2026-09-26)", () => {
+  const fr = contexts.find((c) => c.locale === "fr")!;
+  /** Every quarter of every reference year, with the state it ended in. */
+  const quarters = Object.values(PATHS).flatMap((path) => {
+    const years = playPath(path);
+    const end = years.at(-1)!;
+    return end.log.map((log, q) => ({ state: end, q, log }));
+  });
+
+  it("tells the quarter in the order it happened: the mid-quarter mail, the verdict, … , the CEO's last word", () => {
+    for (const { state, q } of quarters) {
+      const news = newsContent(fr, state, q);
+      const kinds = news.items.map((item) => item.kind);
+      expect(kinds[0], `q${q}`).toBe("mail");
+      expect(kinds[1], `q${q}`).toBe("result");
+      expect(kinds.at(-1), `q${q}`).toBe("boss");
+      // Inside Flixo before the outside world, never interleaved.
+      const lastNote = kinds.lastIndexOf("note");
+      const firstClipping = kinds.indexOf("clipping");
+      if (lastNote >= 0 && firstClipping >= 0) expect(lastNote).toBeLessThan(firstClipping);
+      expect(news.progress).toHaveLength(news.items.length);
+      expect(news.progress[0]).toBe(`1 sur ${news.items.length}`);
+    }
+  });
+
+  it("stages the report's own words — the two can never tell the quarter two ways", () => {
+    for (const { state, q } of quarters) {
+      const report = reportContent(fr, state, q);
+      const news = newsContent(fr, state, q);
+      const result = news.items.find((item) => item.kind === "result");
+      if (result?.kind !== "result") throw new Error("no verdict");
+      expect(result.value).toBe(report.figures[0]!.value);
+      expect(result.status).toEqual(report.figures[0]!.status);
+      expect(result.figures.map((f) => f.value)).toEqual(report.figures.slice(1).map((f) => f.value));
+      const clippings = news.items.flatMap((item) => (item.kind === "clipping" ? [item.clipping] : []));
+      // Same clippings as the report, plus a stamp.
+      expect(clippings.map(({ stamp: _stamp, ...rest }) => rest)).toEqual(report.clippings);
+      const boss = news.items.at(-1);
+      expect(boss?.kind === "boss" && boss.line).toBe(report.bossLine);
+    }
+  });
+
+  it("an inspection says why, names every trick it took down, and is stamped with its fine — in the report too", () => {
+    const inspected = quarters.filter(({ log }) => log.events.some((e) => e.kind === "control"));
+    expect(inspected.length).toBeGreaterThan(0);
+    for (const { state, q, log } of inspected) {
+      const control = log.events.find((e) => e.kind === "control")!;
+      if (control.kind !== "control") throw new Error("unreachable");
+      const item = newsContent(fr, state, q).items.find((i) => i.kind === "clipping" && i.clipping.kind === "control");
+      if (item?.kind !== "clipping") throw new Error("no inspection on the news screen");
+      const why = item.clipping.why!;
+      expect(why.heading).toBe("Pourquoi ce contrôle");
+      expect(why.lines[0]).toContain("radar DGCCRF");
+      for (const id of control.removed) expect(why.lines[1]).toContain(fr.copy.cards[id as Id].name);
+      expect(item.clipping.stamp).toEqual({ text: `Amende · ${formatEur("fr", control.fine)}`, tone: "bad" });
+      const reported = reportContent(fr, state, q).clippings.find((c) => c.kind === "control");
+      expect(reported?.why).toEqual(why);
+    }
+  });
+
+  it("complaints on SignalConso say what they announce", () => {
+    const reported = quarters.filter(({ log }) => log.events.some((e) => e.kind === "reports"));
+    expect(reported.length).toBeGreaterThan(0);
+    for (const { state, q } of reported) {
+      const item = newsContent(fr, state, q).items.find((i) => i.kind === "clipping" && i.clipping.kind === "reports");
+      if (item?.kind !== "clipping") throw new Error("no complaints on the news screen");
+      expect(item.clipping.why?.lines.join(" ")).toContain("seuil du contrôle");
+    }
+  });
+
+  it("the competitor's offer is news without a stamp; the kind article is stamped good", () => {
+    for (const { state, q } of quarters) {
+      for (const item of newsContent(fr, state, q).items) {
+        if (item.kind !== "clipping") continue;
+        if (item.clipping.kind === "competitor") expect(item.clipping.stamp).toBeUndefined();
+        if (item.clipping.kind === "press") expect(item.clipping.stamp?.tone).toBe("good");
+      }
+    }
+  });
+});
+
 describe("the clicks pill and the one live region", () => {
   const pill = (ctx: IslandContext, clicks: number | "phone", announce?: boolean) =>
     renderToStaticMarkup(

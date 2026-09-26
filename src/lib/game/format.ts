@@ -92,6 +92,19 @@ export function formatEur(locale: Locale, n: number): string {
   return locale === "fr" ? `${sign(d, false)}${d.body}${NBSP}€` : `${sign(d, false)}€${d.body}`;
 }
 
+/**
+ * Names in a sentence, each quoted the way the copy quotes a card:
+ * « « A », « B » et « C » » / « "A", "B" and "C" ». Hand-rolled like the
+ * numbers above rather than `Intl.ListFormat`, so the server and every
+ * browser print the same sentence.
+ */
+export function formatList(locale: Locale, items: readonly string[]): string {
+  const quoted = items.map((item) => (locale === "fr" ? `«${NBSP}${item}${NBSP}»` : `"${item}"`));
+  if (quoted.length <= 1) return quoted.join("");
+  const and = locale === "fr" ? " et " : " and ";
+  return `${quoted.slice(0, -1).join(", ")}${and}${quoted.at(-1)}`;
+}
+
 /** A gap in percentage points, from a difference of fractions: 0,012 → « 1,2 pt » / « 1.2 pts ». */
 export function formatPoints(locale: Locale, x: number, decimals = 1): string {
   const d = digits(locale, x, decimals + 2, decimals);

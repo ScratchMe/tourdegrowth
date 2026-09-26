@@ -29,6 +29,7 @@ import { NightSurface } from "@/components/game/NightSurface";
 import { PatternCatalogue } from "@/components/game/PatternCatalogue";
 import { PhoneMock } from "@/components/game/PhoneMock";
 import { Playbook } from "@/components/game/Playbook";
+import { QuarterNews } from "@/components/game/QuarterNews";
 import { QuarterReport } from "@/components/game/QuarterReport";
 import { QuarterTimeline } from "@/components/game/QuarterTimeline";
 import { ResumePrompt } from "@/components/game/ResumePrompt";
@@ -49,6 +50,7 @@ import {
   decemberContent,
   handView,
   journalEntries,
+  newsContent,
   quarterPeriod,
   reportContent,
   resumeContent,
@@ -74,6 +76,7 @@ export function GameIsland({ copy, locale }: GameIslandProps) {
   const callRef = useRef<HTMLElement>(null);
   const handRef = useRef<HTMLHeadingElement>(null);
   const dashboardRef = useRef<HTMLDivElement>(null);
+  const newsRef = useRef<HTMLButtonElement>(null);
   const reportRef = useRef<HTMLHeadingElement>(null);
   const decemberRef = useRef<HTMLHeadingElement>(null);
   const resumeRef = useRef<HTMLHeadingElement>(null);
@@ -81,6 +84,7 @@ export function GameIsland({ copy, locale }: GameIslandProps) {
     call: callRef,
     hand: handRef,
     dashboard: dashboardRef,
+    news: newsRef,
     report: reportRef,
     december: decemberRef,
     resume: resumeRef,
@@ -105,7 +109,9 @@ export function GameIsland({ copy, locale }: GameIslandProps) {
         titleRef={resumeRef}
       />
     );
-  } else if (phase.kind === "report") {
+  } else if (phase.kind === "report" || phase.kind === "news") {
+    // Under the news screen the report is already drawn: closing the news
+    // reveals it in place, and nothing on the desk moves.
     const report = reportContent(ctx, game, phase.q);
     slot = (
       <QuarterReport
@@ -146,6 +152,7 @@ export function GameIsland({ copy, locale }: GameIslandProps) {
     );
   }
 
+  const news = phase.kind === "news" ? newsContent(ctx, game, phase.q) : null;
   const december = phase.kind === "december" && game.over && game.ending ? decemberContent(ctx, game) : null;
   const reveal = december ? (g.enteredDecember ? "revealing" : "shown") : "hidden";
   const closed = phase.kind === "december" && game.over ? yearClosedView(ctx, game) : null;
@@ -223,6 +230,24 @@ export function GameIsland({ copy, locale }: GameIslandProps) {
 
           <GameJournal title={copy.journal.title} entries={journalEntries(ctx, desk)} />
         </div>
+
+        {news ? (
+          // Inside the night band in the DOM, so the dialog reads the night
+          // tokens; `showModal` lifts it into the top layer over everything.
+          <QuarterNews
+            key={news.q}
+            q={news.q}
+            eyebrow={news.eyebrow}
+            period={news.period}
+            items={news.items.map((item) =>
+              item.kind === "boss" ? { ...item, face: <DgFace mood={item.mood} size="avatar" /> } : item,
+            )}
+            progress={news.progress}
+            labels={{ next: copy.news.next, finish: copy.news.finish, skip: copy.news.skip }}
+            primaryRef={newsRef}
+            onDone={g.closeNews}
+          />
+        ) : null}
 
         {/* The one live region (plan E5): what a gesture did, said once. Present
             from the first render — a region that appears with its message is

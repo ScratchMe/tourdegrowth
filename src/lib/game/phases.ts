@@ -30,6 +30,13 @@ export type UiPhase =
   | { kind: "hand" }
   /** Three months scroll by on the dashboard. `q` is the quarter being played, 0-based. */
   | { kind: "running"; q: number }
+  /**
+   * The quarter's news, one at a time, over everything (Antoine, 2026-09-26:
+   * « un écran qui vient tout masquer », La Bataille du budget's end of
+   * round). The report is already drawn underneath; this is how the quarter
+   * is LEARNED, the report is how it is re-read.
+   */
+  | { kind: "news"; q: number }
   /** What quarter `q` (0-based index into the journal) did, before the next call. */
   | { kind: "report"; q: number }
   /** The year is over: the truth, on paper. */
@@ -69,6 +76,8 @@ export type PhaseEvent =
   | { type: "run"; year: YearFacts; animate: boolean }
   /** The three months have finished scrolling. */
   | { type: "runEnd" }
+  /** The news screen was read to its end, skipped, or dismissed with Escape. */
+  | { type: "newsDone" }
   /** The report's button: the next call, or December. */
   | { type: "next"; year: YearFacts }
   | { type: "pickUp" };
@@ -79,7 +88,9 @@ export type PhaseEvent =
  *
  * Between two quarters the engine's state already holds the NEXT call open,
  * and nothing records whether it had been picked up, so a year saved there
- * reopens on the report of the quarter just played. That report is the one
+ * reopens on the report of the quarter just played — never on the news
+ * screen: the news is the moment the quarter lands, and a reload is not that
+ * moment again; the report holds everything it said. That report is the one
  * screen the player could not otherwise get back whole (the journal folds it),
  * and a reader switching language while reading it lands on the same report,
  * in the other language, instead of on a ringing phone.
@@ -108,10 +119,14 @@ export function nextPhase(phase: UiPhase, event: PhaseEvent): UiPhase {
       // returns the same state, no quarter was added, and nothing moves.
       if (phase.kind !== "hand" || event.year.quarters === 0) return phase;
       const q = event.year.quarters - 1;
-      return event.animate ? { kind: "running", q } : { kind: "report", q };
+      // Reduced motion skips the months, never the news: the news is the
+      // content, and its motion is CSS, which motion.css already switches off.
+      return event.animate ? { kind: "running", q } : { kind: "news", q };
     }
     case "runEnd":
-      return phase.kind === "running" ? { kind: "report", q: phase.q } : phase;
+      return phase.kind === "running" ? { kind: "news", q: phase.q } : phase;
+    case "newsDone":
+      return phase.kind === "news" ? { kind: "report", q: phase.q } : phase;
     case "next":
       if (phase.kind !== "report") return phase;
       return event.year.over ? { kind: "december" } : { kind: "ringing" };
@@ -161,6 +176,7 @@ export function callViewFor(phase: UiPhase): CallView | null {
       return "hungUp";
     case "december":
       return "ended";
+    case "news":
     case "report":
     case "resumePrompt":
       return null;
@@ -198,7 +214,7 @@ export function handHint(picks: number, max: number): HandHint {
 }
 
 /** Where the keyboard goes after a gesture — never on arrival (R-19: stealing focus on load is a defect). */
-export type FocusTarget = "call" | "hand" | "dashboard" | "report" | "december" | "resume";
+export type FocusTarget = "call" | "hand" | "dashboard" | "news" | "report" | "december" | "resume";
 
 /**
  * The focus that follows a phase the PLAYER caused (plan §3.5). The call is a
@@ -215,6 +231,8 @@ export function focusFor(phase: UiPhase): FocusTarget {
       return "hand";
     case "running":
       return "dashboard";
+    case "news":
+      return "news";
     case "report":
       return "report";
     case "december":

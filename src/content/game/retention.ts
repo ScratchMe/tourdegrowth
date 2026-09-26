@@ -673,6 +673,51 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
       masthead: t("La Lettre du streaming", "The Streaming Letter"),
       headline: t("Offensive tarifaire au printemps", "A price offensive in the spring"),
     },
+    // TODO: à relire — nouveau (2026-09-26, retour d'Antoine : on ne comprend pas pourquoi le
+    // contrôle arrive). Nomme la tuile masquée du tableau de bord sans en donner la valeur.
+    why: {
+      controlHeading: t("Pourquoi ce contrôle", "Why this inspection"),
+      controlRadar: t(
+        "Chaque astuce mise en production a fait monter le radar DGCCRF, la tuile masquée de ton tableau de bord. Ce trimestre, il a franchi le seuil du contrôle.",
+        "Every trick you put into production pushed up the regulator radar, the hidden tile on your dashboard. This quarter it crossed the inspection threshold.",
+      ),
+      controlRemoved: t(
+        "En production au moment du contrôle : {list}. Tout est retiré d'office, et leur effet s'arrête.",
+        "In production when the inspectors came: {list}. All of it is taken down on the spot, and its effect stops.",
+      ),
+      controlNone: t(
+        "Tes astuces étaient déjà retirées, mais le radar n'était pas encore redescendu sous le seuil.",
+        "Your tricks were already gone, but the radar hadn't come back below the threshold yet.",
+      ),
+      reportsHeading: t("Ce que ça annonce", "What it signals"),
+      reports: t(
+        "Les autorités lisent SignalConso : ton radar DGCCRF, la tuile masquée de ton tableau de bord, approche du seuil du contrôle. Chaque nouvelle astuce l'en rapproche.",
+        "The authorities read SignalConso: your regulator radar, the hidden tile on your dashboard, is nearing the inspection threshold. Every new trick brings it closer.",
+      ),
+    },
+  },
+
+  // TODO: à relire — nouveau (2026-09-26, retour d'Antoine : un écran qui masque tout et livre les
+  // nouvelles du trimestre une par une, comme La Bataille du budget) : tout le bloc.
+  news: {
+    eyebrow: t("Fin du trimestre", "End of the quarter"),
+    progress: t("{n} sur {total}", "{n} of {total}"),
+    next: t("Suivant →", "Next →"),
+    finish: t("Voir le bilan du trimestre →", "See the quarter's report →"),
+    skip: t("Passer au bilan", "Skip to the report"),
+    labels: {
+      result: t("Le verdict", "The verdict"),
+      mail: t("À mi-trimestre", "Mid-quarter"),
+      team: t("Dans ton équipe", "On your team"),
+      outside: t("Pendant ce temps, dehors", "Meanwhile, outside"),
+      boss: t("Le mot du DG", "The CEO's word"),
+    },
+    stamps: {
+      fine: t("Amende · {fine}", "Fined · {fine}"),
+      reports: t("Signalé", "Reported"),
+      viral: t("Viral", "Viral"),
+      press: t("À la une", "Front page"),
+    },
   },
 
   bossLines: {

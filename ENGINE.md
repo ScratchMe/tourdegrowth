@@ -71,6 +71,11 @@ qui change par rapport aux §4, §7 et §8 plus bas — le reste tient :
 - Petits correctifs : la confirmation d'effacement ignore la casse et le dit ;
   le champ du nom dit « nom de ton SaaS ou de ton entreprise » ; le peloton dit
   combien d'inscrits réels il ramène à 100, et où changer ce nombre.
+- **La FAQ se déplie question par question** (même jour, demande d'Antoine) :
+  chaque question est un `core/Disclosure` fermé, avec sa réponse dedans. Le
+  texte des réponses reste dans le HTML prérendu (un `<details>` fermé le
+  garde) — c'est ce qu'un moteur de recherche lit ; la spec sans JavaScript de
+  `e2e/engine-page.spec.ts` le vérifie.
 
 ---
 

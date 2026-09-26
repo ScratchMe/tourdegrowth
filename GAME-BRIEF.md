@@ -883,3 +883,12 @@ Le hub et le niveau ont chacun leur image, une par langue, choisie par le segmen
 
 Trouvé en route : le rapport affichait l'effet d'une carte avec le bonus du questionnaire joué le même trimestre, alors que ce bonus n'avait pas agi (« Offre de pause : −5 % » au lieu de −4 %). Les effets visibles sont maintenant lus avant l'arrivée des réponses.
 
+### 16.1 La fin du trimestre, en plein écran (2026-09-26)
+
+| Retour | Ce qui a changé |
+|---|---|
+| Un contrôle de la DGCCRF qui retire les chantiers n'est pas assez visible, et on ne comprend pas pourquoi il arrive. Il faut un second affichage, « choc », comme la fin de manche de La Bataille du budget : un écran qui masque tout et livre les news du trimestre une par une. | À la fin des trois mois, un écran plein (`components/game/QuarterNews`, un `<dialog>` modal) livre le trimestre carte par carte, au rythme du joueur : le message de mi-trimestre, le verdict (le churn en très grand, tamponné atteint ou manqué, puis abonnés, revenu, patience), ce qui s'est passé dans l'équipe, les coupures de presse, le mot du DG. « Suivant → » avance, « Voir le bilan du trimestre → » ferme ; Échap ou « Passer au bilan » ferme à tout moment. Le bilan reste dessous, inchangé, pour la relecture. Les mots sont ceux du bilan, jamais une seconde copie. |
+| Pourquoi ce contrôle ? | La coupure du contrôle dit maintenant pourquoi, sur l'écran et dans le bilan : chaque astuce mise en production a fait monter le radar DGCCRF (nommé comme la tuile masquée du tableau de bord), il a franchi le seuil ce trimestre, et voici, par leur nom, les astuces en production au moment du contrôle — toutes retirées d'office. Un tampon « Amende · 106 000 € » et une secousse marquent la carte. Les signalements SignalConso préviennent aussi que le seuil approche. |
+
+Trois choix, réversibles en une phrase : l'écran ne défile jamais tout seul (une carte qu'on n'a pas lue ne compte pas) ; il n'est pas sauté pour `prefers-reduced-motion`, seule son animation l'est ; un rechargement pendant les news reprend sur le bilan, jamais sur les news.
+

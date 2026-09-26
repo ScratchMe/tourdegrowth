@@ -12,6 +12,7 @@ import {
   recordPhases,
   recordedPhases,
   seedGame,
+  skipNews,
 } from "./game-helpers";
 import { PATH_A, PATH_C, playPath, type Path } from "../src/lib/game/__tests__/paths";
 import { GAME_SAVE_KEYS } from "../src/lib/game/storage-keys";
@@ -380,7 +381,8 @@ test.describe("reduced motion", () => {
     await page.goto(LEVEL_PATH.fr);
     await playQuarter(page, PATH_A[0]!);
     const phases = await recordedPhases(page);
-    expect(phases).toEqual(["hand", "report"]);
+    // The news screen is never skipped for reduced motion — only its animation is.
+    expect(phases).toEqual(["hand", "news", "report"]);
     // Nothing left moving on the report (X29).
     expect(await page.evaluate(() => document.getAnimations().filter((a) => a.playState === "running").length)).toBe(0);
   });
@@ -393,7 +395,7 @@ test.describe("reduced motion", () => {
       await recordPhases(page);
       await page.goto(LEVEL_PATH.fr);
       await playQuarter(page, PATH_A[0]!);
-      expect(await recordedPhases(page)).toEqual(["hand", "running", "report"]);
+      expect(await recordedPhases(page)).toEqual(["hand", "running", "news", "report"]);
     });
   });
 });
@@ -413,6 +415,8 @@ test.describe("P17/X31 — a phone, 390 wide, at every phase", () => {
     await expect(page.getByTestId("game-actionbar")).toBeVisible();
     await at("hand");
     await page.getByTestId("game-run").click();
+    await at("news");
+    await skipNews(page);
     await at("report");
     await page.getByTestId("game-report-next").click();
     await at("ringing");
@@ -435,7 +439,8 @@ test.describe("P17/X31 — a phone, 390 wide, at every phase", () => {
       await page.getByTestId("game-run").click();
       await expect(page.getByTestId("game-desk")).toHaveAttribute("data-phase", "running");
       expect(await horizontalOverflow(page)).toBe(0);
-      await expect(page.getByTestId("game-report-1")).toBeVisible();
+      await expect(page.getByTestId("game-news")).toBeVisible({ timeout: 10_000 });
+      expect(await horizontalOverflow(page)).toBe(0);
     });
   });
 });
