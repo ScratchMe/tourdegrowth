@@ -12,7 +12,7 @@ import { comparatorOf } from "@/lib/engine/diagnose";
 import { formatInterval } from "@/lib/engine/format";
 import { isRequestStale } from "@/lib/engine/request";
 import { blockingCheck } from "@/lib/engine/sanity";
-import { positionLabel } from "@/lib/engine/phrases";
+import { positionLabel, statusQuestionOf } from "@/lib/engine/phrases";
 import { knownIn } from "@/lib/engine/values";
 import { SHARED_COUNTS, knownSharedCount, sharedCountAt } from "@/lib/engine/shared-counts";
 import { ComparisonStrip } from "./ComparisonStrip";
@@ -207,7 +207,7 @@ export function MetricSheet({
 
       <Choices
         name={`${prefix}-mode`}
-        legend={strings.sheet.statusQuestion}
+        legend={statusQuestionOf(id, strings)}
         value={draft.mode}
         options={modes}
         onChange={(mode) => update({ mode })}

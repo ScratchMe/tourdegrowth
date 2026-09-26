@@ -133,3 +133,116 @@ test("the company field says it is the product's or the company's name", async (
   await expect(page.getByLabel(ENGINE_COPY.setup.companyLabel.fr)).toBeVisible();
   expect(ENGINE_COPY.setup.companyLabel.fr).toMatch(/entreprise|SaaS/);
 });
+
+/**
+ * Antoine, 2026-09-26: « Où en es-tu avec ce chiffre ? » was asked of the
+ * activation event, which is a name. The three answers — activation event,
+ * churn cause, referral mechanism — get their own question, their own eyebrow
+ * in the step-by-step, and no « J'ai deux chiffres qui ne collent pas » in the
+ * triage (its two readings were percent boxes). The numbers keep theirs: the
+ * companion assertions below would pass on a sheet that asked no question at all.
+ */
+test("an answer is asked where you are « sur ce point », never « avec ce chiffre »", async ({ page }) => {
+  await open(page, "fr");
+  const q = ENGINE_COPY.sheet;
+  await page.getByTestId("engine-setup-board").click();
+
+  for (const [stage, metric] of [
+    ["activation", "act-event"],
+    ["retention", "ret-churn-cause"],
+    ["referral", "ref-mechanism"],
+  ] as const) {
+    const sheet = await boardSheet(page, stage, metric);
+    await expect(sheet.getByRole("group", { name: q.statusQuestionAnswer.fr, exact: true })).toBeVisible();
+    await expect(sheet.getByRole("group", { name: q.statusQuestion.fr, exact: true })).toHaveCount(0);
+    await expect(sheet.locator("legend").first()).not.toContainText("chiffre");
+    // « Je ne le trouve pas »: four causes, never two numbers that don't match.
+    await sheet.getByRole("radio", { name: q.cantFind.fr }).check();
+    const triage = sheet.getByTestId("engine-triage");
+    await expect(triage.getByRole("radio")).toHaveCount(4);
+    await expect(triage.getByRole("radio", { name: ENGINE_COPY.cause.conflicting.fr })).toHaveCount(0);
+  }
+
+  // A number keeps « ce chiffre », and its « deux chiffres » triage answer.
+  const rate = await boardSheet(page, "activation", "act-rate");
+  await expect(rate.getByRole("group", { name: q.statusQuestion.fr, exact: true })).toBeVisible();
+  await rate.getByRole("radio", { name: q.cantFind.fr }).check();
+  await expect(rate.getByTestId("engine-triage").getByRole("radio", { name: ENGINE_COPY.cause.conflicting.fr })).toHaveCount(1);
+});
+
+test("the step-by-step calls the activation event « Point 4 sur 15 », not « Chiffre 4 sur 15 »", async ({ page }) => {
+  await open(page, "fr");
+  await page.getByTestId("engine-setup-start").click();
+  await page.getByTestId("engine-steps-next").click();
+  await page.getByTestId("engine-steps-next").click();
+  const number = page.getByTestId("engine-steps-number");
+  const eyebrow = (i: number, key: "numberOf" | "answerOf") =>
+    ENGINE_COPY.steps[key].fr.replace("{i}", String(i)).replace("{n}", "15").replace("{stage}", ENGINE_COPY.stages.acquisition.fr);
+  await expect(number).toHaveAttribute("data-metric", "acq.signup-rate");
+  await expect(number).toContainText(eyebrow(1, "numberOf"));
+  for (let i = 0; i < 3; i += 1) await page.getByTestId("engine-steps-skip").click();
+  await expect(number).toHaveAttribute("data-metric", "act.event");
+  await expect(number).toContainText(
+    ENGINE_COPY.steps.answerOf.fr.replace("{i}", "4").replace("{n}", "15").replace("{stage}", ENGINE_COPY.stages.activation.fr),
+  );
+  await expect(number).not.toContainText("Chiffre 4");
+  await expect(number.getByRole("group", { name: ENGINE_COPY.sheet.statusQuestionAnswer.fr, exact: true })).toBeVisible();
+});
+
+/**
+ * Antoine, 2026-09-26: an MRR of 2 000 000 typed as "2000000" stayed a row of
+ * zeros. The field groups as it goes — U+00A0 in French, a comma in English —
+ * keeps the caret where the person is typing, lets a decimal separator be
+ * typed, and still stores the number. The value is compared with `toBe` on
+ * `inputValue()`, never `toHaveValue`: a NBSP must be proved, not normalised.
+ */
+for (const [locale, big, middle, decimal] of [
+  ["fr", "2 000 000", "129 834", ["12,", "12,5"]],
+  ["en", "2,000,000", "129,834", ["12.", "12.5"]],
+] as const) {
+  test(`${locale}: big numbers group as they are typed, the caret stays put, and 2000000 is saved`, async ({ page }) => {
+    await open(page, locale);
+    await page.getByTestId("engine-setup-start").click();
+
+    // A rate field: a trailing decimal separator is half a number, not something to clean up.
+    const target = page.locator("#engine-step-target-act-rate");
+    await target.pressSequentially(decimal[0]);
+    expect(await target.inputValue()).toBe(decimal[0]);
+    await target.pressSequentially("5");
+    expect(await target.inputValue()).toBe(decimal[1]);
+    await page.getByTestId("engine-steps-next").click();
+    await expect(page.getByTestId("engine-steps")).toHaveAttribute("data-phase", "base");
+
+    // A count, typed digit by digit.
+    const cohort = page.locator("#engine-base-cohort");
+    await cohort.pressSequentially("2000000");
+    expect(await cohort.inputValue()).toBe(big);
+
+    // Typing in the middle: the caret follows the digit just typed, not the end of the box.
+    const month = page.locator("#engine-base-month");
+    await month.pressSequentially("1234");
+    await month.press("ArrowLeft");
+    await month.press("ArrowLeft");
+    await month.pressSequentially("9");
+    expect(await month.evaluate((el: HTMLInputElement) => el.selectionStart)).toBe(4);
+    await month.pressSequentially("8");
+    expect(await month.inputValue()).toBe(middle);
+
+    await page.getByTestId("engine-steps-next").click();
+    await expect(page.getByTestId("engine-steps")).toHaveAttribute("data-phase", "number");
+    const saved = (await stored(page))?.state.snapshots[0];
+    expect(saved?.base).toEqual({ cohortSignups: 2000000, monthSignups: 129834 });
+    expect(saved?.targets["act.rate"]).toBe(12.5);
+  });
+}
+
+/** Opens a stage's drawer if it isn't already the one showing, then one metric's sheet on the board. */
+async function boardSheet(page: Page, stage: string, metricDomId: string) {
+  const row = page.getByTestId(`engine-row-${stage}`);
+  if ((await row.getAttribute("aria-expanded")) !== "true") await row.click();
+  const toggle = page.getByTestId(`engine-metric-${metricDomId}`);
+  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+  const sheet = page.getByTestId(`engine-sheet-${metricDomId}`);
+  await expect(sheet).toBeVisible();
+  return sheet;
+}

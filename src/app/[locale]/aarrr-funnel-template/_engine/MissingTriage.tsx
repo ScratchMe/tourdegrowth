@@ -2,8 +2,16 @@
 
 import { TEXT_LIMITS, type MetricShape } from "@/lib/engine/catalog-shape";
 import { CAUSE_KEY, REPAIR_KEY, ROLE_KEY, type ResolvedMetric } from "@/lib/engine/strings";
-import type { MissingCause, RepairScale, RoleId } from "@/lib/engine/types";
-import { proposedRepair, type DraftProblem, type ReadingDraft, type SheetDraft, type SourceChoice, type TriageAnswer } from "./sheet-draft";
+import type { RepairScale, RoleId } from "@/lib/engine/types";
+import {
+  proposedRepair,
+  triageAnswersFor,
+  type DraftProblem,
+  type ReadingDraft,
+  type SheetDraft,
+  type SourceChoice,
+  type TriageAnswer,
+} from "./sheet-draft";
 import { isRule, ruleMessage } from "./sheet-problems";
 import { currencySymbol, sourceOptions } from "./sources";
 import { RequestCopy } from "./RequestCopy";
@@ -16,7 +24,6 @@ import { TextField } from "./_ui/TextField";
 import styles from "./Sheet.module.css";
 import ui from "./_ui/ui.module.css";
 
-const CAUSES: readonly MissingCause[] = ["not-tracked", "not-computed", "no-access", "no-definition"];
 const REPAIRS = Object.keys(REPAIR_KEY) as RepairScale[];
 const ROLES = Object.keys(ROLE_KEY) as RoleId[];
 
@@ -55,11 +62,11 @@ export function MissingTriage({
   const locale = view.ctx.locale;
   const rule = (p: DraftProblem) => (problems.includes(p) && isRule(p) ? ruleMessage(p, metric, strings, locale) : null);
 
-  const answers: Choice<TriageAnswer>[] = [
-    ...CAUSES.map((cause) => ({ id: cause, label: strings.cause[CAUSE_KEY[cause]] })),
-    { id: "conflicting", label: strings.cause.conflicting },
-    ...(metric.naReasons?.length ? [{ id: "not-applicable" as const, label: strings.cause.notApplicable }] : []),
-  ];
+  // Which answers a metric offers is decided in sheet-draft.ts (no « deux chiffres » for an answer).
+  const answers: Choice<TriageAnswer>[] = triageAnswersFor(shape, Boolean(metric.naReasons?.length)).map((id) => ({
+    id,
+    label: id === "conflicting" ? strings.cause.conflicting : id === "not-applicable" ? strings.cause.notApplicable : strings.cause[CAUSE_KEY[id]],
+  }));
 
   const isMissing = draft.triage !== null && draft.triage !== "conflicting" && draft.triage !== "not-applicable";
   const ownerRole = draft.ownerRole || shape.defaultRole;

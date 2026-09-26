@@ -61,6 +61,24 @@ export function isCandidate(id: MetricId): id is CandidateId {
   return (CANDIDATE_IDS as readonly string[]).includes(id);
 }
 
+// --- Numbers and answers -----------------------------------------------------------
+
+/**
+ * Three of the fifteen are not numbers (Antoine, 2026-09-26: « Où en es-tu avec
+ * ce chiffre ? » was asked of the activation event). The activation event and
+ * the churn cause are words, the referral mechanism is a choice — an ANSWER.
+ * Every wording that would call a metric « ce chiffre » asks this first.
+ */
+export function isAnswerMetric(id: MetricId): boolean {
+  const { unit } = shapeOf(id);
+  return unit === "text" || unit === "choice";
+}
+
+/** The question over the sheet's four status choices: « ce chiffre » for a number, « ce point » for an answer. */
+export function statusQuestionOf(id: MetricId, strings: Words): string {
+  return isAnswerMetric(id) ? strings.sheet.statusQuestionAnswer : strings.sheet.statusQuestion;
+}
+
 // --- Grammatical number --------------------------------------------------------
 
 /**

@@ -415,6 +415,10 @@ export const ENGINE_COPY = {
       en: "This cohort hasn't had its full window yet: the number will be marked approximate.",
     },
     statusQuestion: { fr: "Où en es-tu avec ce chiffre ?", en: "Where are you with this number?" },
+    // TODO: à relire — nouveau (2026-09-26, retour d'Antoine) : trois des quinze ne sont pas des chiffres
+    // (l'événement d'activation et la cause de churn sont des mots, le mécanisme de recommandation un choix).
+    // On ne leur demande pas où on en est « avec ce chiffre ».
+    statusQuestionAnswer: { fr: "Où en es-tu sur ce point ?", en: "Where are you on this?" },
     haveIt: { fr: "Je l'ai", en: "I have it" },
     canEstimate: { fr: "Je peux l'estimer", en: "I can estimate it" },
     willAsk: { fr: "Je le demande", en: "I'll ask for it" },
@@ -502,6 +506,16 @@ export const ENGINE_COPY = {
     message: {
       fr: "Bonjour — je prépare un point sur notre moteur de croissance. Pourrais-tu me sortir :\n{list}\nDes chiffres bruts me suffisent, sans mise en forme. Merci !",
       en: "Hi — I'm preparing a review of our growth engine. Could you pull:\n{list}\nRaw numbers are enough, no formatting needed. Thanks!",
+    },
+    /**
+     * The same request when everything asked for is an answer, not a number (the activation
+     * event, the churn cause, the referral mechanism): « des chiffres bruts » would ask a
+     * colleague for figures there are none of.
+     */
+    // TODO: à relire — nouveau (2026-09-26, retour d'Antoine).
+    messageAnswers: {
+      fr: "Bonjour — je prépare un point sur notre moteur de croissance. Pourrais-tu me dire :\n{list}\nQuelques mots suffisent. Merci !",
+      en: "Hi — I'm preparing a review of our growth engine. Could you tell me:\n{list}\nA few words are enough. Thanks!",
     },
     item: { fr: "– {what} ({definition})", en: "– {what} ({definition})" },
     itemNoDefinition: { fr: "– {what}", en: "– {what}" },
@@ -1263,6 +1277,9 @@ export const ENGINE_COPY = {
       en: "Every account created in {month}. They feed the sign-up rate and the top channel's share.",
     },
     numberOf: { fr: "Chiffre {i} sur {n} · {stage}", en: "Number {i} of {n} · {stage}" },
+    // TODO: à relire — nouveau (2026-09-26, retour d'Antoine) : l'en-tête des trois points qui ne sont pas
+    // des chiffres (événement d'activation, cause de churn, mécanisme de recommandation).
+    answerOf: { fr: "Point {i} sur {n} · {stage}", en: "Item {i} of {n} · {stage}" },
     skip: { fr: "Passer, j'y reviendrai", en: "Skip, I'll come back to it" },
     whatIfTitle: { fr: "Et si ?", en: "What if?" },
     whatIfIntro: {

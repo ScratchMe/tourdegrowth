@@ -1,4 +1,5 @@
 import { TEXT_LIMITS, WIDE_RANGE_FACTOR, type MetricShape } from "@/lib/engine/catalog-shape";
+import { isAnswerMetric } from "@/lib/engine/phrases";
 import type {
   EstimateBasis,
   MetricEntry,
@@ -101,6 +102,26 @@ export type DraftProblem =
   | "definition-too-long"
   | "note-too-long"
   | "comment-too-long";
+
+/** The four causes of a missing value, in the order the triage offers them. */
+export const TRIAGE_CAUSES: readonly MissingCause[] = ["not-tracked", "not-computed", "no-access", "no-definition"];
+
+/**
+ * The triage answers a metric offers, in order (E3bis). « J'ai deux chiffres qui
+ * ne collent pas » is offered for NUMBERS only (Antoine, 2026-09-26): its two
+ * readings are counts, a rate or an amount — for the activation event it drew
+ * two percent boxes. An answer two people give differently, two activation
+ * events or two churn causes, is a definition nobody agrees on, which
+ * `no-definition` already says. "It doesn't apply to us" only where the
+ * catalogue has a closed reason for it.
+ */
+export function triageAnswersFor(shape: MetricShape, hasNaReasons: boolean): TriageAnswer[] {
+  return [
+    ...TRIAGE_CAUSES,
+    ...(isAnswerMetric(shape.id) ? [] : (["conflicting"] as const)),
+    ...(hasNaReasons ? (["not-applicable"] as const) : []),
+  ];
+}
 
 /** The repair cost proposed for each triage answer (E3bis table) — editable, on the closed scale. */
 export function proposedRepair(answer: TriageAnswer, shape: MetricShape): RepairScale {
@@ -358,6 +379,12 @@ export function entryFromDraft(
       break;
     case "cantFind": {
       if (draft.triage === null) {
+        problems.push("triage");
+        break;
+      }
+      // Not offered for an answer (triageAnswersFor): a draft reopened from an entry that
+      // predates that rule has to be answered again rather than saved as two percentages.
+      if (draft.triage === "conflicting" && isAnswerMetric(shape.id)) {
         problems.push("triage");
         break;
       }
