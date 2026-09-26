@@ -4654,6 +4654,8 @@ Et les petits correctifs : l'effacement ignore la casse et le dit, le nom se dit
 
 **Ce qui reste** : toute la copie neuve porte `TODO: à relire` et devra passer au prochain bon à tirer, en même temps que les nº7 et nº8.
 
+**Vercel n'est plus une contrainte de cadence** (Antoine, 2026-09-26, en donnant le feu vert de ce merge). La convention 13 tient donc pour mémoire de ce que coûte un merge, plus comme une limite à respecter ; le détail de ce qui a changé côté compte reste à consigner quand il le précisera.
+
 ## État du projet au 2026-09-25 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -4734,7 +4736,7 @@ d'outil qui a le détail à jour.*
 10. **Un état de dépôt s'énonce d'après GitHub, jamais d'après un clone ou un document.** Le 2026-09-08, deux affirmations fausses sont parties dans une PR : « 35 branches » (les refs `origin/*` d'un clone jamais élagué — `git fetch --prune` avant tout comptage, ou l'API) et « le check CI n'est pas obligatoire » (un statut de `REVIEW.md` vieux de trois jours, relu comme un fait présent alors que `main` était déjà `protected: true`). Ce qui est écrit dans un document est ce qui était vrai quand il a été écrit. → `GITHUB.md` §1.2
 11. **Une garde de payload compte ce qui traverse, elle ne nomme pas des props.** Les deux fuites `rawPoints` (#110 puis #115) sont la même erreur à un cran d'écart : la seconde fois la frontière existait et la garde était nominale, donc aveugle au prop suivant. Même chose pour une borne annoncée : la calculer pour **toutes** les variantes, y compris celles qu'aucun e2e ne peut rendre. → `NEXTJS.md` §1.8, `TESTING.md` §2.8
 12. **Une branche empilée se rebase avec `git rebase --onto origin/main <ancienne-base> <branche>`** après le merge de la PR du dessous, jamais avec un simple `git rebase main` (qui rejoue aussi les commits déjà squashés et crée des conflits fantômes). → `GITHUB.md` §1.1
-13. **Chaque merge sur `main` coûte ~47 Mo de Functions Storage pendant 30 jours.** Ce n'est plus une question de confort de déploiement : le compteur est une somme glissante que rien ne purge, le plafond est de ~211 merges par 30 jours au poids actuel, et nous étions à 154 le 2026-09-15. Grouper les pushes sur une branche (une vérification complète, un push) et espacer les merges est donc une contrainte chiffrée. Un merge qui ne touche que de la doc ne coûte plus rien depuis le 2026-09-24 (`scripts/vercel-ignore.sh`) — à condition qu'il ne touche QUE de la doc. → `VERCEL.md` §1.1, §1.6 et §2.3
+13. **Chaque merge sur `main` coûte ~47 Mo de Functions Storage pendant 30 jours** — *plus une contrainte depuis le 2026-09-26 (Antoine : « Vercel n'est plus un problème »), gardé comme mémoire du coût.* Ce n'est plus une question de confort de déploiement : le compteur est une somme glissante que rien ne purge, le plafond est de ~211 merges par 30 jours au poids actuel, et nous étions à 154 le 2026-09-15. Grouper les pushes sur une branche (une vérification complète, un push) et espacer les merges est donc une contrainte chiffrée. Un merge qui ne touche que de la doc ne coûte plus rien depuis le 2026-09-24 (`scripts/vercel-ignore.sh`) — à condition qu'il ne touche QUE de la doc. → `VERCEL.md` §1.1, §1.6 et §2.3
 
 ### Carte du repo
 
