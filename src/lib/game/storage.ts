@@ -185,6 +185,11 @@ export function isGameState<Id extends string>(level: LevelDefinition<Id>, value
       return false;
     }
     if (!isRecord(entry.boss) || typeof entry.moodAfter !== "string") return false;
+    // Model v2: the report reads the drivers, four numbers.
+    const drivers = entry.drivers;
+    if (!isRecord(drivers) || !["picks", "production", "inspection", "word", "market"].every((k) => isFiniteNumber(drivers[k]))) {
+      return false;
+    }
   }
 
   return true;

@@ -10,21 +10,25 @@ export interface HandCard {
   state: ActionCardState;
   /** The card the CEO asked for this quarter — it comes first in the list (GAME-BRIEF §5.6). */
   ordered: boolean;
+  /** New in the hand this quarter because of an earlier choice (the data review after the survey). */
+  unlocked?: boolean;
 }
 
 export interface HandProps {
-  /** « Trimestre 1 · tes deux actions », already filled. The heading the island focuses in the `hand` phase. */
+  /** « Trimestre 1 · tes deux chantiers », already filled. The heading the island focuses in the `hand` phase. */
   title: string;
   headingRef?: Ref<HTMLHeadingElement>;
   /** « 1 / 2 », already filled. */
   count: string;
   /** Accessible name of the list of cards (« Tes actions du trimestre »). */
   label: string;
-  /** What to do now: « Le DG parle. Quitte la visio pour choisir. », « Choisis deux actions. »… */
+  /** What to do now: « Ton équipe produit peut livrer deux chantiers… »… */
   hint: string;
   /** In the hand's own order — the component never sorts (§5.6: never by effect). */
   cards: readonly HandCard[];
   orderLabel: string;
+  /** « Débloqué par le questionnaire ». */
+  unlockedLabel?: string;
   chosenLabel: string;
   /** « En production : … », or the empty sentence. */
   production: string;
@@ -54,6 +58,7 @@ export function Hand({
   hint,
   cards,
   orderLabel,
+  unlockedLabel,
   chosenLabel,
   production,
   headerAside,
@@ -88,6 +93,7 @@ export function Hand({
               pressed={card.pressed}
               state={card.state}
               orderLabel={card.ordered ? orderLabel : undefined}
+              unlockedLabel={card.unlocked ? unlockedLabel : undefined}
               chosenLabel={chosenLabel}
               describedBy={card.state === "locked" ? hintId : undefined}
               onToggle={() => onToggle(card.id)}

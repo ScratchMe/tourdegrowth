@@ -42,8 +42,13 @@ export interface QuarterReportProps {
   effectsHeading: string;
   /** One filled line per card: « Offre de pause : −5 % de résiliations ce trimestre, l'effet monte encore ». */
   effects: readonly string[];
-  /** Private events of the quarter, one sentence each (the data presentation to the CEO). */
+  /** Private events of the quarter, one sentence each (the data presentation, the survey's answers). */
   notes?: readonly string[];
+  /**
+   * « Pourquoi le churn a bougé : +0,4 pt » and its lines, each already filled
+   * and adding up to the heading. Empty lines: no block.
+   */
+  drivers?: { heading: string; lines: readonly string[] };
   /** The CEO's mid-quarter email. */
   mail?: DgMailProps;
   /** Public events, on paper. */
@@ -78,6 +83,7 @@ export function QuarterReport({
   effectsHeading,
   effects,
   notes = [],
+  drivers,
   mail,
   clippings = [],
   boss,
@@ -149,6 +155,17 @@ export function QuarterReport({
           ))}
         </ul>
       </div>
+
+      {drivers && drivers.lines.length > 0 ? (
+        <div className={styles.block} data-testid={`game-report-${q}-drivers`}>
+          <h3 className={styles.blockTitle}>{drivers.heading}</h3>
+          <ul className={styles.lines}>
+            {drivers.lines.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       {mail ? <DgMail header={mail.header} body={mail.body} /> : null}
 

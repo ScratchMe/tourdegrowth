@@ -91,7 +91,7 @@ export function GameIsland({ copy, locale }: GameIslandProps) {
   const callView = callViewFor(phase);
   const ids = phoneIds(desk);
   const clicks = clicksFor(L, ids);
-  const hand = handView(ctx, desk, handHint(phase, desk.picks.length, L.constants.picksPerQuarter));
+  const hand = handView(ctx, desk, handHint(desk.picks.length, L.constants.picksPerQuarter));
 
   let slot: ReactNode = null;
   if (phase.kind === "resumePrompt" && g.saved) {
@@ -118,6 +118,7 @@ export function GameIsland({ copy, locale }: GameIslandProps) {
         effectsHeading={report.effectsHeading}
         effects={report.effects}
         notes={report.notes}
+        drivers={report.drivers}
         mail={report.mail}
         clippings={report.clippings}
         boss={{ line: report.bossLine, mood: report.mood, face: <DgFace mood={report.mood} size="avatar" /> }}
@@ -186,6 +187,7 @@ export function GameIsland({ copy, locale }: GameIslandProps) {
                   hint={hand.hint}
                   cards={hand.cards}
                   orderLabel={copy.hand.order}
+                  unlockedLabel={copy.hand.unlocked}
                   chosenLabel={copy.hand.chosen}
                   production={hand.production}
                   onToggle={g.toggle}

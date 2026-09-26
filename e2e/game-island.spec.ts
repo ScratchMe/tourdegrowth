@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test";
 import { expect, test, trackedEvents } from "./helpers";
-import { LEVEL_PATH, axeSeriousOrCritical, hangUp, pickUpCall, playQuarter, seedGame } from "./game-helpers";
+import { LEVEL_PATH, axeSeriousOrCritical, hangUp, pickAndRun, pickUpCall, playQuarter, seedGame } from "./game-helpers";
 import { PATH_A, PATH_C, PATH_D, playPath } from "../src/lib/game/__tests__/paths";
 
 /**
@@ -19,7 +19,7 @@ const GAME_OPEN = process.env.GAME_ENABLED === "true";
 test.skip(!GAME_OPEN, "GAME_ENABLED is not \"true\" for this run — the level page is closed.");
 
 test.describe("the first screen, as prerendered", () => {
-  test("the first call is open, the hand is locked, the two secret tiles carry no value", async ({ page, request }) => {
+  test("the first call is open, no card on the desk, the two secret tiles carry no value", async ({ page, request }) => {
     const html = await (await request.get(LEVEL_PATH.fr)).text();
     // The HTML a crawler and a first paint get is the year's first call —
     // not a skeleton, not the resume prompt (plan E16).
@@ -29,7 +29,9 @@ test.describe("the first screen, as prerendered", () => {
 
     await page.goto(LEVEL_PATH.fr);
     await expect(page.getByTestId("game-call")).toHaveAttribute("data-state", "open");
-    await expect(page.getByTestId("game-card-pause")).toBeDisabled();
+    // The projects appear once hung up (Antoine, 2026-09-25) — not before, locked.
+    await expect(page.getByTestId("game-hand")).toHaveCount(0);
+    expect(html).not.toContain('data-testid="game-card-');
     await expect(page.getByTestId("game-actionbar")).toHaveCount(0);
     for (const id of ["game-dash-trust", "game-dash-radar"]) {
       await expect(page.getByTestId(id)).not.toContainText(/\d/);
@@ -123,6 +125,32 @@ test.describe("the months, with motion on", () => {
   });
 });
 
+test.describe("model v2 — what a quarter explains (Antoine, 2026-09-25)", () => {
+  test.use({ contextOptions: { reducedMotion: "reduce" } });
+
+  test("the survey's answers come in with the report, and the data review is dealt next quarter, badged", async ({ page }) => {
+    await page.goto(LEVEL_PATH.fr);
+    await hangUp(page);
+    // No data review before any survey.
+    await expect(page.getByTestId("game-card-present")).toHaveCount(0);
+    await pickAndRun(page, PATH_D[0]!);
+    const report = page.getByTestId("game-report-1");
+    await expect(report).toContainText("Les réponses du questionnaire sont arrivées");
+    await expect(report).toContainText("« Point données avec le DG » est débloqué");
+    // Why churn moved, in lines that add up to the tiles' move.
+    const drivers = page.getByTestId("game-report-1-drivers");
+    await expect(drivers).toContainText("Pourquoi le churn a bougé");
+    await expect(drivers).toContainText("Tes deux chantiers de ce trimestre");
+
+    await pickUpCall(page);
+    await hangUp(page);
+    const present = page.getByTestId("game-card-present");
+    await expect(present).toBeVisible();
+    await expect(present).toContainText("Débloqué par le questionnaire");
+    await expect(page.getByTestId("game-card-survey")).toHaveCount(0);
+  });
+});
+
 test.describe("coming back to a year", () => {
   test.use({ contextOptions: { reducedMotion: "reduce" } });
 
@@ -131,7 +159,7 @@ test.describe("coming back to a year", () => {
     await playQuarter(page, PATH_A[0]!);
     const churnAfterQ1 = (await page.getByTestId("game-dash-churn").textContent()) ?? "";
     // Not January's 6,0 %: otherwise the comparison below would pass on a fresh year.
-    expect(churnAfterQ1).toContain("5,7");
+    expect(churnAfterQ1).toContain("5,8");
     await page.reload();
     await expect(page.getByTestId("game-resume")).toBeVisible();
     // The question is asked in front of the saved year, not a fresh January:

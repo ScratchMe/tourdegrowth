@@ -16,7 +16,7 @@ import type { Locale } from "@/lib/i18n/locale";
 import { deltaSign, type DeltaKind } from "./format";
 import type { RetentionCardId } from "./levels/retention";
 import { targetFor } from "./model";
-import type { GameEvent, GameState, LevelDefinition, Mood, MonthPoint, QuarterLog } from "./types";
+import type { ChurnDrivers, GameEvent, GameState, LevelDefinition, Mood, MonthPoint, QuarterLog } from "./types";
 
 // ------------------------------------------------------------ dashboard ---
 
@@ -212,6 +212,42 @@ export interface ReportView<Id extends string> {
   events: GameEvent[];
   boss: QuarterLog<Id>["boss"];
   moodAfter: Mood;
+}
+
+export type DriverKey = keyof ChurnDrivers;
+/** The order the report reads them: what you did, what was already there, what people say, the market. */
+export const DRIVER_ORDER: readonly DriverKey[] = ["picks", "production", "inspection", "word", "market"];
+
+/**
+ * The quarter's drivers as the report prints them: each rounded to the tenth
+ * of a point the tiles use, and adding up to the move the TILES show
+ * (churn at the quarter's end minus churn at its start, each rounded as
+ * displayed) — largest remainder, so a line and the total never disagree by
+ * a rounding. A driver that rounds to nothing is dropped; the total is kept
+ * even when it is zero. Values stay fractions (0.004 = 0,4 point).
+ */
+export function driverRows(log: Pick<QuarterLog, "churnStart" | "churnEnd" | "drivers">): {
+  total: number;
+  rows: { key: DriverKey; value: number }[];
+} {
+  const tenths = (x: number) => x * 1000;
+  const total = Math.round(tenths(log.churnEnd)) - Math.round(tenths(log.churnStart));
+  const raw = DRIVER_ORDER.map((key) => ({ key, exact: tenths(log.drivers[key]) }));
+  const rounded = raw.map((r) => ({ ...r, value: Math.round(r.exact) }));
+  let gap = total - rounded.reduce((sum, r) => sum + r.value, 0);
+  // Hand the missing tenths to the lines whose rounding lost the most in that direction.
+  const byRemainder = [...rounded].sort((a, b) =>
+    gap > 0 ? b.exact - b.value - (a.exact - a.value) : a.exact - a.value - (b.exact - b.value),
+  );
+  for (let i = 0; gap !== 0 && byRemainder.length > 0; i = (i + 1) % byRemainder.length) {
+    const step = gap > 0 ? 1 : -1;
+    byRemainder[i]!.value += step;
+    gap -= step;
+  }
+  return {
+    total: total / 1000,
+    rows: rounded.filter((r) => r.value !== 0).map((r) => ({ key: r.key, value: r.value / 1000 })),
+  };
 }
 
 export function reportView<Id extends string>(level: LevelDefinition<Id>, log: QuarterLog<Id>): ReportView<Id> {

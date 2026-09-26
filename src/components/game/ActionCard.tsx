@@ -23,6 +23,13 @@ export interface ActionCardProps {
   state: ActionCardState;
   /** The CEO's badge (« Demandé par le DG »), only on the card he asked for. */
   orderLabel?: string;
+  /**
+   * « Débloqué par le questionnaire » — only on a card that joins the hand
+   * because of something the player did (the data review, the quarter the
+   * exit survey's answers come in). Outlined, never filled: it is news, not
+   * a demand.
+   */
+  unlockedLabel?: string;
   /** The word that says the card is ticked (« Choisie ») — the state is never carried by colour alone. */
   chosenLabel: string;
   /** Id of the hand's hint, so a screen reader hears why a card is locked. */
@@ -48,6 +55,7 @@ export function ActionCard({
   pressed,
   state,
   orderLabel,
+  unlockedLabel,
   chosenLabel,
   describedBy,
   onToggle,
@@ -67,9 +75,10 @@ export function ActionCard({
       data-testid={`game-card-${id}`}
       data-state={state}
     >
-      {orderLabel || pressed ? (
+      {orderLabel || unlockedLabel || pressed ? (
         <span className={styles.top}>
           {orderLabel ? <span className={styles.order}>{orderLabel}</span> : null}
+          {unlockedLabel ? <span className={styles.unlocked}>{unlockedLabel}</span> : null}
           {/* aria-pressed already says it; the word is for eyes, not read twice. */}
           {pressed ? (
             <span className={styles.chosen} aria-hidden="true">

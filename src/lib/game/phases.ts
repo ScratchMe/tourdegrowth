@@ -168,13 +168,17 @@ export function callViewFor(phase: UiPhase): CallView | null {
 }
 
 /**
- * The hand is on the desk while the call is open (locked, readable while he
- * talks — brief §4) and once hung up. It is not while the months scroll, the
- * report is read, the phone rings or the year is over: its cards would belong
- * to a quarter the screen is not about, under a hint that no longer applies.
+ * The hand is on the desk once the call is hung up, and only then. Until
+ * 2026-09-25 it was also shown, locked, while the CEO talked (brief §4); in
+ * play that read as cards on the table the player was not allowed to touch —
+ * « frustrating, since they are already there » (Antoine). The call is now
+ * the one thing on the desk until « Raccrocher et choisir », and the hand
+ * follows it. It is not shown while the months scroll, the report is read,
+ * the phone rings or the year is over either: its cards would belong to a
+ * quarter the screen is not about.
  */
 export function handVisible(phase: UiPhase): boolean {
-  return phase.kind === "call" || phase.kind === "hand";
+  return phase.kind === "hand";
 }
 
 /**
@@ -186,11 +190,10 @@ export function actionBarVisible(phase: UiPhase): boolean {
   return phase.kind === "hand";
 }
 
-/** Which of the hand's four hints applies (GAME-BRIEF §10, the prototype's `renderHand`). */
-export type HandHint = "callOpen" | "pick" | "ready";
+/** Which of the hand's hints applies (GAME-BRIEF §10, the prototype's `renderHand`). */
+export type HandHint = "pick" | "ready";
 
-export function handHint(phase: UiPhase, picks: number, max: number): HandHint {
-  if (phase.kind === "call") return "callOpen";
+export function handHint(picks: number, max: number): HandHint {
   return picks >= max ? "ready" : "pick";
 }
 

@@ -20,10 +20,19 @@ export type Path = readonly Pick2[];
 export const PATH_A: Path = [["pause", "survey"], ["onboard", "present"], ["annual", "reco"], ["remind", "present"]];
 /** §6 B — honest, variant. */
 export const PATH_B: Path = [["pause", "survey"], ["onboard", "annual"], ["reco", "present"], ["three", "present"]];
-/** §6 C — obeys everything; the DGCCRF comes in the third quarter. */
-export const PATH_C: Path = [["pdef", "bury"], ["call", "cascade"], ["social", "notice"], ["pause", "present"]];
-/** §6 D — honest with nothing strong: fired in June. */
-export const PATH_D: Path = [["survey", "present"], ["remind", "reco"]];
+/**
+ * §6 C — obeys everything; the DGCCRF comes in the third quarter. Model v2
+ * (2026-09-25): its last quarter was « pause + point données », a meeting
+ * with no survey behind it, which v2 no longer deals; the reminder takes its
+ * place and the year still ends fined.
+ */
+export const PATH_C: Path = [["pdef", "bury"], ["call", "cascade"], ["social", "notice"], ["pause", "remind"]];
+/**
+ * §6 D — honest with nothing strong: fired in June. Model v2: the survey in
+ * the first quarter unlocks the data review in the second, which the player
+ * holds — and is fired anyway. v1 held both in the same quarter.
+ */
+export const PATH_D: Path = [["survey", "remind"], ["present", "reco"]];
 /**
  * Plan annexe M — a pattern, then cleaning. The CEO asks for `call` two
  * quarters running (X4), and the year ends `repentant`.

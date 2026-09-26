@@ -147,10 +147,11 @@ export interface LevelCopy<CardId extends string = string, DarkId extends CardId
     order: string;
     /** Said in words on a picked card, never by colour alone. */
     chosen: string;
+    /** Badge on the data review the quarter the exit survey's answers unlock it. */
+    unlocked: string;
     production: string;
     productionEmpty: string;
     run: string;
-    hintCallOpen: string;
     hintPick: string;
     hintReady: string;
     /** Where the hand stood, once the year is over: « Année interrompue » (fired) or « Année terminée » (brief §7.2 P9). */
@@ -218,6 +219,15 @@ export interface LevelCopy<CardId extends string = string, DarkId extends CardId
     statusMissed: string;
     effectsHeading: string;
     effectLine: string;
+    /**
+     * « Pourquoi le churn a bougé » (Antoine, 2026-09-25). `{delta}` is the
+     * quarter's whole move, signed, with its unit (`formatDelta`).
+     */
+    driversHeading: string;
+    /** One label per `ChurnDrivers` key, in the order the report lists them. */
+    drivers: { picks: string; production: string; inspection: string; word: string; market: string };
+    /** The line template: « {label} : {delta} ». */
+    driverLine: string;
     mailHeader: string;
     bossLine: string;
     next: string;
@@ -228,8 +238,7 @@ export interface LevelCopy<CardId extends string = string, DarkId extends CardId
   /** One per `VisibleEffect` kind — `down` splits on `rising`. */
   effects: {
     insight: string;
-    presentInsight: string;
-    presentBlind: string;
+    present: string;
     clean: string;
     extra: string;
     down: string;
@@ -237,12 +246,12 @@ export interface LevelCopy<CardId extends string = string, DarkId extends CardId
     up: string;
     none: string;
   };
-  /** One per `GameEvent` kind; `midMail` and `present` split on their flag. */
+  /** One per `GameEvent` kind; `midMail` splits on its flag. */
   events: {
     midMailMoving: string;
     midMailStalled: string;
-    presentInsight: string;
-    presentBlind: string;
+    present: string;
+    surveyAnswers: string;
     control: string;
     reports: string;
     viral: string;
@@ -368,6 +377,8 @@ export const LEVEL_COPY_TEMPLATES: Readonly<Record<string, readonly string[]>> =
   "report.target": ["target"],
   "report.statusMissed": ["gap"],
   "report.effectLine": ["card", "effect"],
+  "report.driversHeading": ["delta"],
+  "report.driverLine": ["label", "delta"],
   "report.bossLine": ["line"],
   "effects.down": ["pct"],
   "effects.downRising": ["pct"],

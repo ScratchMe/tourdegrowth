@@ -104,6 +104,16 @@
   border-color: var(--game-order-on-selected, var(--state-selected-text));
 }
 
+/* Unlocked by the player's own earlier choice: outlined in the card's own ink. */
+.unlocked {
+  font: var(--meta-2xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  padding: var(--pad-tag);
+  border-radius: var(--radius-tag);
+  border: 2px solid currentColor;
+}
+
 .chosen {
   margin-left: auto;
   font: var(--meta-sm);

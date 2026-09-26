@@ -345,14 +345,14 @@ Les textes de chaque fin sont dans le prototype (`ENDINGS`) et interpolent churn
 
 ## 6. Parcours de référence (fixtures)
 
-Valeurs du prototype, déterministes. Les churns sont affichés à une décimale, la patience en entier. Ces quatre parcours définissent l'équilibrage et servent de fixtures aux tests (7.1, série F).
+**Modèle v2, 2026-09-25** (retours d'Antoine après sa première partie, détail en 16) : les réponses du questionnaire de sortie arrivent à la fin du trimestre où il est joué — leur bonus d'un cinquième sur les coupes honnêtes ne compte qu'à partir du trimestre suivant — et « Point données avec le DG » n'est distribué qu'une fois ces réponses arrivées. Présenter sans données n'existe plus. C et D ont donc changé de dernier choix, et A et B perdent un trimestre de bonus. Les valeurs ci-dessous sont celles du modèle v2 ; celles du prototype restent dans l'historique git. Les churns sont affichés à une décimale, la patience en entier. Ces quatre parcours définissent l'équilibrage et servent de fixtures aux tests (7.1, série F).
 
 **A · Honnête, refuse les trois ordres, présente ses données** — T1 `pause + survey`, T2 `onboard + present`, T3 `annual + reco`, T4 `remind + present`
 
 | | T1 | T2 | T3 | T4 |
 |---|---|---|---|---|
-| Résiliations | 5,7 % | 5,7 % | 4,6 % | 4,0 % |
-| Patience | 52 | 43 | 47 | 74 |
+| Résiliations | 5,8 % | 5,7 % | 4,6 % | 4,0 % |
+| Patience | 51 | 42 | 46 | 73 |
 | Humeur à l'ouverture | firm | angry | angry | firm |
 | Ordre | — | pdef | call | bury |
 
@@ -362,30 +362,30 @@ Fin : `applause`, confiance 83, radar 0.
 
 | | T1 | T2 | T3 | T4 |
 |---|---|---|---|---|
-| Résiliations | 5,7 % | 5,5 % | 4,2 % | 4,0 % |
-| Patience | 52 | 32 | 51 | 78 |
+| Résiliations | 5,8 % | 5,5 % | 4,2 % | 4,0 % |
+| Patience | 51 | 31 | 50 | 77 |
 
 Fin : `applause`, confiance 85, radar 0.
 
-**C · Obéit à tout** — T1 `pdef + bury`, T2 `call + cascade`, T3 `social + notice`, T4 `pause + present`
+**C · Obéit à tout** — T1 `pdef + bury`, T2 `call + cascade`, T3 `social + notice`, T4 `pause + remind` (v1 : `pause + present`, un point données sans questionnaire)
 
 | | T1 | T2 | T3 | T4 |
 |---|---|---|---|---|
-| Résiliations | 5,3 % | 5,0 % | 5,0 % | 9,0 % |
-| Patience | 67 | 79 | 57 | 15 |
+| Résiliations | 5,3 % | 5,0 % | 5,0 % | 9,1 % |
+| Patience | 67 | 79 | 57 | 12 |
 | Humeur à l'ouverture | firm | calm | firm | angry |
 | Ordre | — | call | notice | pdef |
 
-Contrôle DGCCRF au T3. Fin : `fine`, confiance 19, radar 9.
+Contrôle DGCCRF au T3. Fin : `fine`, confiance 27, radar 1.
 
-**D · Honnête sans rien de fort** — T1 `survey + present`, T2 `remind + reco`
+**D · Honnête sans rien de fort** — T1 `survey + remind`, T2 `present + reco` (v1 : `survey + present` puis `remind + reco`)
 
 | | T1 | T2 |
 |---|---|---|
-| Résiliations | 6,0 % | 6,3 % |
-| Patience | 59 | 19 |
+| Résiliations | 6,1 % | 6,2 % |
+| Patience | 42 | 19 |
 
-Viré en juin. Fin : `firedClean`, confiance 73.
+Viré en juin, malgré le point données. Fin : `firedClean`, confiance 73.
 
 **Invariants d'équilibrage**, ce qui doit rester vrai si l'on retouche le modèle : A et B finissent en `applause` avec une patience minimale entre 30 et 50 et jamais sous 25 ; C subit le contrôle au T3, jamais avant, et finit en `fine` ; D est viré au T2 ; en C, l'objectif est atteint aux T1 et T2 (la tentation paie deux trimestres).
 
@@ -870,3 +870,16 @@ Le hub et le niveau ont chacun leur image, une par langue, choisie par le segmen
 - **Chaque bascule exige un redéploiement Vercel**, dans un sens comme dans l'autre (13.1) : ouvrir, c'est poser la variable puis redéployer ; fermer en urgence aussi. Le redéploiement déplace ensemble ce qui se lit à la requête (routes, encart) et ce qui se décide au build (sitemap, hreflang, pied de page).
 - L'aperçu propriétaire (`/admin/preview`) ouvre tout pour un seul navigateur, « Refermer » referme ; c'est le moyen de tester en production pendant que le jeu reste fermé pour tous.
 - La CI tourne drapeau ouvert ; l'état fermé est couvert par les tests unitaires du résolveur et du proxy.
+
+## 16. Retours de la première partie d'Antoine (modèle v2, 2026-09-25)
+
+| Retour | Ce qui a changé |
+|---|---|
+| Devoir quitter la visio pour choisir des chantiers déjà affichés est frustrant. | Les chantiers ne sont plus affichés pendant l'appel : la main n'apparaît qu'une fois raccroché, et le bouton dit « Raccrocher et choisir tes chantiers ». La règle 4 (« visio ouverte, cartes verrouillées ») devient « visio ouverte, pas de cartes ». |
+| Dire que deux chantiers, c'est ce que l'équipe peut livrer. | La main s'intitule « tes deux chantiers » (le mot du DG), et l'indication dit « Ton équipe produit peut livrer deux chantiers par trimestre, pas un de plus ». |
+| On ne comprend pas pourquoi le churn bouge autant d'un trimestre à l'autre. | Chaque rapport ajoute « Pourquoi le churn a bougé », qui répartit le mouvement du trimestre entre tes deux chantiers, ce qui tournait déjà, les astuces retirées après un contrôle, ce que les abonnés disent de Flixo et l'offre du concurrent. Les lignes s'additionnent exactement au mouvement affiché par les tuiles. Le modèle n'est pas lissé : le contrecoup différé d'une astuce est la leçon du jeu, il est maintenant lisible au lieu d'être caché. La confiance, elle, reste un chiffre qu'on ne découvre qu'en décembre ; seul son effet est dit. |
+| Le questionnaire doit rapporter quelque chose de visible au trimestre suivant. | Ses réponses arrivent à la fin du trimestre, dans le rapport (« 4 partants sur 10 n'ont « rien à regarder »… »), et débloquent « Point données avec le DG », badgé « Débloqué par le questionnaire » dans la main suivante. |
+| Le point données peut-il être disponible sans questionnaire ? | Non : il n'est plus distribué avant l'arrivée des réponses. La patience « sans données, +3 » disparaît. |
+
+Trouvé en route : le rapport affichait l'effet d'une carte avec le bonus du questionnaire joué le même trimestre, alors que ce bonus n'avait pas agi (« Offre de pause : −5 % » au lieu de −4 %). Les effets visibles sont maintenant lus avant l'arrivée des réponses.
+

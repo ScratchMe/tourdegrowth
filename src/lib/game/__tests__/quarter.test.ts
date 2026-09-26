@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { RETENTION_DARK_IDS, RETENTION_HONEST_IDS, RETENTION_LEVEL, type RetentionCardId } from "../levels/retention";
-import { applyPicks, fresh, pickOrder, runQuarter } from "../model";
+import { applyPicks, fresh, handIds, pickOrder, runQuarter } from "../model";
 import type { GameEvent, GameState, LevelDefinition, ModelConstants } from "../types";
 import { deepFreeze, ENDING_PATHS, finalState, PATH_A, PATH_C, PATH_M, playPath, type Pick2 } from "./paths";
 
@@ -82,19 +82,25 @@ describe("Q2 — the CEO's order", () => {
 describe("Q3 — the data meeting pays when the cards are played", () => {
   const level = quiet();
 
-  it("+15 with the survey's insight, +3 without, before any month runs", () => {
+  it("+15 before any month runs — and only ever with the survey's answers in (model v2)", () => {
     const withData = applyPicks(level, picked({ ...fresh(level), insight: true }, ["present", "remind"]));
     expect(withData.patience).toBe(55 + 15);
     expect(withData.month).toBe(0);
-    const blind = applyPicks(level, picked(fresh(level), ["present", "remind"]));
-    expect(blind.patience).toBe(55 + 3);
   });
 
-  it("in pick order: a survey picked first gives the meeting its data, picked second does not", () => {
-    // The prototype's order of operations, kept on purpose and pinned so a
-    // change is a decision: the data arrive when the survey lands.
-    expect(applyPicks(level, picked(fresh(level), ["survey", "present"])).patience).toBe(55 + 15);
-    expect(applyPicks(level, picked(fresh(level), ["present", "survey"])).patience).toBe(55 + 3);
+  it("the survey's answers land at the quarter's END: no insight while its months run, then an event and the meeting dealt", () => {
+    // Model v2 (Antoine, 2026-09-25): a survey is three months of answers,
+    // not a switch — and a data review with no data is no longer offered.
+    expect(handIds(level, fresh(level))).not.toContain("present");
+    expect(applyPicks(level, picked(fresh(level), ["survey", "remind"])).insight).toBe(false);
+    const after = runQuarter(level, picked(fresh(level), ["survey", "remind"]));
+    expect(after.insight).toBe(true);
+    expect(after.log[0]!.events.map((e) => e.kind)).toContain("surveyAnswers");
+    expect(handIds(level, after)).toContain("present");
+    expect(handIds(level, after)).not.toContain("survey");
+    // Once in, the answers never arrive twice.
+    const next = runQuarter(level, picked({ ...after, callOpen: false }, ["present", "remind"]));
+    expect(next.log[1]!.events.map((e) => e.kind)).not.toContain("surveyAnswers");
   });
 
   it("lands every other pick effect too: trust, radar, production, patterns used", () => {
@@ -121,7 +127,12 @@ describe("Q4 — the DGCCRF", () => {
     // radar 57 + bury 15 + shame 3 = 75 at the quarter's end (a live pattern stops the cooling).
     const s = runQuarter(level, picked({ ...fresh(level), radar: 57 }, ["bury", "shame"]));
     const control = s.log[0]?.events.find((e) => e.kind === "control");
-    expect(control).toEqual({ kind: "control", fine: 60_000 + 75 * 500, leavers: Math.round(s.subs * 0.015) });
+    expect(control).toEqual({
+      kind: "control",
+      fine: 60_000 + 75 * 500,
+      leavers: Math.round(s.subs * 0.015),
+      removed: ["bury", "shame"],
+    });
     expect(s.sanction).toBe(true);
     expect(s.active).toEqual([]);
     expect(s.removedDark).toEqual(["bury", "shame"]);
@@ -155,14 +166,15 @@ describe("Q5 — what people say", () => {
   it("trust 35: a viral thread — spike +1 point, patience −5", () => {
     // 30 + survey 2 + onboard 3 = 35.
     const s = runQuarter(level, picked({ ...fresh(level), trust: 30 }, ["survey", "onboard"]));
-    expect(eventKinds(s.log[0]?.events ?? [])).toEqual(["midMail", "viral"]);
+    // The survey's answers land the same quarter-end (model v2).
+    expect(eventKinds(s.log[0]?.events ?? [])).toEqual(["midMail", "surveyAnswers", "viral"]);
     expect(s.spike).toBeCloseTo(0.01, 12);
     expect(s.patience).toBe(55 + 12 - 5);
   });
 
   it("trust 80: a good article — three months of press, patience +8", () => {
     const s = runQuarter(level, picked({ ...fresh(level), trust: 75 }, ["survey", "onboard"]));
-    expect(eventKinds(s.log[0]?.events ?? [])).toEqual(["midMail", "press"]);
+    expect(eventKinds(s.log[0]?.events ?? [])).toEqual(["midMail", "surveyAnswers", "press"]);
     expect(s.press).toBe(3);
     expect(s.patience).toBe(55 + 12 + 8);
   });
@@ -289,7 +301,7 @@ describe("X5 — the journal holds data, never sentences", () => {
   const vocabulary = new Set<string>([
     ...RETENTION_HONEST_IDS,
     ...RETENTION_DARK_IDS,
-    "midMail", "present", "control", "reports", "viral", "press", "competitor",
+    "midMail", "present", "surveyAnswers", "control", "reports", "viral", "press", "competitor",
     "insight", "clean", "extra", "down", "up", "none",
     "hit", "cover", "missed", "obeyed", "refused",
     "calm", "firm", "angry", "cold",

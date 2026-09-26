@@ -19,15 +19,15 @@ function at(path: typeof PATH_A, quarter: number): GameState<Id> {
 }
 
 describe("série H — what the first quarter deals", () => {
-  it("H1 · four first-quarter patterns and the first six honest cards", () => {
+  it("H1 · four first-quarter patterns and the first six honest cards — no data review before any survey (model v2)", () => {
     const hand = handIds(L, fresh(L));
     expect(dark(hand).sort()).toEqual(["bury", "cascade", "pdef", "shame"]);
-    expect(honest(hand).sort()).toEqual(["annual", "onboard", "pause", "present", "remind", "survey"]);
+    expect(honest(hand).sort()).toEqual(["annual", "onboard", "pause", "reco", "remind", "survey"]);
   });
 
   it("H7 · alternates pattern, honest, pattern, honest in list order", () => {
     expect(handIds(L, fresh(L))).toEqual([
-      "pdef", "pause", "bury", "survey", "cascade", "onboard", "shame", "annual", "present", "remind",
+      "pdef", "pause", "bury", "survey", "cascade", "onboard", "shame", "annual", "remind", "reco",
     ]);
   });
 
