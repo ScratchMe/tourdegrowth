@@ -337,6 +337,15 @@ test.describe("the §6.0 example on the board", () => {
       await expect(peloton.getByTestId("peloton-stamp")).toHaveCount(1);
       await expect(peloton.locator('[data-metric="act.rate"]').getByTestId("peloton-stamp")).toBeVisible();
 
+      // The stamp makes its column's label row taller, and the four 10×10 grids still start on
+      // one line (Antoine, 2026-09-26: the named grid used to sit lower than its neighbours).
+      // Measured on the rendered boxes: the four columns share their row tracks (subgrid).
+      const tops = await peloton
+        .locator('[data-testid^="peloton-grid-"]')
+        .evaluateAll((grids) => grids.map((g) => g.getBoundingClientRect().top));
+      expect(tops).toHaveLength(4);
+      expect(Math.max(...tops) - Math.min(...tops), `grid tops: ${tops.join(", ")}`).toBeLessThan(1);
+
       // No Tour on this device: the mirror invites to take one.
       await expect(page.getByTestId("engine-mirror")).toHaveAttribute("data-state", "none");
       await noHorizontalScroll(page);
@@ -396,6 +405,19 @@ test.describe("the §6.0 example on the board", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openExample(page, "fr");
     await noHorizontalScroll(page);
+    // The peloton keeps its phone layout under the shared row tracks of the desktop one
+    // (2026-09-26): one row per column, the mini-grid on the left of its numeral, the rows stacked.
+    const peloton = page.getByTestId("engine-board-peloton");
+    const rows = await peloton.locator("[data-metric]").evaluateAll((columns) =>
+      columns.map((c) => {
+        const grid = c.querySelector('[data-testid^="peloton-grid-"]')!.getBoundingClientRect();
+        const numeral = c.querySelector('[data-testid^="peloton-numeral-"]')!.getBoundingClientRect();
+        return { top: c.getBoundingClientRect().top, gridRight: grid.right, numeralLeft: numeral.left };
+      }),
+    );
+    expect(rows).toHaveLength(4);
+    for (const row of rows) expect(row.gridRight, "mini-grid left of its numeral").toBeLessThanOrEqual(row.numeralLeft);
+    for (let i = 1; i < rows.length; i += 1) expect(rows[i]!.top, "one column under another").toBeGreaterThan(rows[i - 1]!.top);
     // Every stage name on one line, next to a value in each row: a 30px stencil name beside
     // its value once broke mid-word (« ACQUISITI / ON »). One line of 30px/1.1 is 33px.
     for (const stage of ["acquisition", "activation", "retention", "referral", "revenue"]) {

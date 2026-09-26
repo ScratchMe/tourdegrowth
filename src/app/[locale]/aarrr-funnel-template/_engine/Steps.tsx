@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { CANDIDATE_IDS, METRIC_SHAPES } from "@/lib/engine/catalog-shape";
+import { isAnswerMetric } from "@/lib/engine/phrases";
 import { knownSharedCount } from "@/lib/engine/shared-counts";
 import type { MetricId, SharedCount } from "@/lib/engine/types";
 import { MetricSheet } from "./MetricSheet";
@@ -283,7 +284,8 @@ function NumberStep({
   return (
     <Card elevation="flat" className={styles.card} data-testid="engine-steps-number" data-metric={shape.id}>
       <p className={styles.eyebrow}>
-        {fill(s.numberOf, { i: index + 1, n: NUMBER_COUNT, stage: view.strings.stages[shape.stage] })}
+        {/* « Chiffre 4 sur 15 » over the activation event would call a name a number (Antoine, 2026-09-26). */}
+        {fill(isAnswerMetric(shape.id) ? s.answerOf : s.numberOf, { i: index + 1, n: NUMBER_COUNT, stage: view.strings.stages[shape.stage] })}
       </p>
       <h2 id="engine-steps-title" ref={heading} tabIndex={-1} className={styles.title}>
         {metric.name}

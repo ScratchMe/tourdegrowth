@@ -1,6 +1,6 @@
 import { REMIND_AFTER_DAYS } from "./catalog-shape";
 import { fillTemplate } from "./format";
-import { catalogueValues } from "./phrases";
+import { catalogueValues, isAnswerMetric } from "./phrases";
 import type { EngineStrings, ResolvedMetric } from "./strings";
 import type { EngineCalcContext, EngineState, MetricEntry, MetricId, RoleId, Snapshot } from "./types";
 import { currentSnapshot, entryOf } from "./values";
@@ -54,7 +54,10 @@ export function buildRequest(
       ? fillTemplate(strings.request.item, { what, definition })
       : fillTemplate(strings.request.itemNoDefinition, { what });
   });
-  return fillTemplate(strings.request.message, { list: items.join("\n") });
+  // « Des chiffres bruts me suffisent » only when there is a number to send: a request for
+  // answers alone (the activation event, the churn cause, the referral mechanism) asks for words.
+  const template = metricIds.length > 0 && metricIds.every(isAnswerMetric) ? strings.request.messageAnswers : strings.request.message;
+  return fillTemplate(template, { list: items.join("\n") });
 }
 
 /** Whole days between two instants; null when unreadable or in the future (a clock ahead invents no delay). */

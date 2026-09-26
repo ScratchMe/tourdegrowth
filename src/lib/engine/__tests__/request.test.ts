@@ -51,6 +51,18 @@ describe("buildRequest", () => {
     expect(en).toContain("how many triggered the activation event within 7 days");
   });
 
+  it("a request for answers alone asks for a few words, not « des chiffres bruts » (2026-09-26)", () => {
+    const answers = ["act.event", "ret.churn-cause", "ref.mechanism"] as const;
+    const fr = buildRequest("product", [...answers], FR.strings, FR.metrics, state, CTX_FR);
+    expect(fr).not.toMatch(/chiffres/);
+    expect(fr.endsWith(FR.strings.request.messageAnswers.split("{list}")[1]!)).toBe(true);
+    const en = buildRequest("product", ["ret.churn-cause"], EN.strings, EN.metrics, state, CTX_EN);
+    expect(en).not.toMatch(/numbers/i);
+    // One number in the lot and the numbers' message comes back: there is a figure to send.
+    const mixed = buildRequest("product", ["act.event", "act.rate"], FR.strings, FR.metrics, state, CTX_FR);
+    expect(mixed).toContain("Des chiffres bruts me suffisent");
+  });
+
   it("quotes the user typed around their own event are not doubled", () => {
     const quoted = withEntry(state, "act.event", measured({ kind: "text", text: " « a créé un premier projet » " }, tool));
     const fr = buildRequest("data", ["act.rate"], FR.strings, FR.metrics, quoted, CTX_FR);

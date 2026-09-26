@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { METRIC_SHAPES } from "../catalog-shape";
 import { deriveEngine } from "../derive";
 import { comparatorOf } from "../diagnose";
 import { whatIf } from "../impact";
@@ -10,6 +11,7 @@ import {
   churnWithoutCommonAmount,
   eventPhrase,
   fillSegments,
+  isAnswerMetric,
   isSingular,
   notEnoughBelowSentence,
   notEnoughBelowValues,
@@ -20,6 +22,7 @@ import {
   sourceInSentence,
   stagePhrase,
   stampText,
+  statusQuestionOf,
   staticCatalogueValues,
   subjectOf,
   unitInputsPhrase,
@@ -288,5 +291,43 @@ describe("templates of « · »-separated segments", () => {
     expect(fillSegments(t, { cohort: "juillet 2026", month: "août 2026", tools: "GA4" })).toBe("Inscrits en juillet 2026 · flux : août 2026 · sources : GA4");
     // A blank value is empty too, and a segment without placeholders always stays.
     expect(fillSegments("Toutes choses égales · {a} · {b}", { a: "  ", b: "x" })).toBe("Toutes choses égales · x");
+  });
+});
+
+/**
+ * Three of the fifteen are not numbers (Antoine, 2026-09-26: « Où en es-tu avec
+ * ce chiffre ? » was asked of the activation event). The sheet's status
+ * question, the step's eyebrow, the triage and the copied request all ask
+ * `isAnswerMetric` before saying « chiffre ».
+ */
+describe("isAnswerMetric / statusQuestionOf — an answer is not « ce chiffre »", () => {
+  const ANSWERS = ["act.event", "ret.churn-cause", "ref.mechanism"];
+
+  it("names exactly the three metrics whose value is words or a choice", () => {
+    expect(METRIC_SHAPES.filter((s) => isAnswerMetric(s.id)).map((s) => s.id)).toEqual(ANSWERS);
+    // And it reads the shape, not a list: every one of them is text or choice, nothing else is.
+    for (const s of METRIC_SHAPES) expect(isAnswerMetric(s.id), s.id).toBe(s.unit === "text" || s.unit === "choice");
+  });
+
+  it("an answer is asked where you are « on this point », a number where you are « with this number »", () => {
+    for (const p of [FR, EN]) {
+      for (const s of METRIC_SHAPES) {
+        const question = statusQuestionOf(s.id, p.strings);
+        if (ANSWERS.includes(s.id)) {
+          expect(question, s.id).toBe(p.strings.sheet.statusQuestionAnswer);
+          expect(question, s.id).not.toMatch(/chiffre|number/i);
+        } else {
+          expect(question, s.id).toBe(p.strings.sheet.statusQuestion);
+        }
+      }
+    }
+    // The two questions are different sentences in both languages — otherwise the choice above proves nothing.
+    expect(FR.strings.sheet.statusQuestionAnswer).not.toBe(FR.strings.sheet.statusQuestion);
+    expect(EN.strings.sheet.statusQuestionAnswer).not.toBe(EN.strings.sheet.statusQuestion);
+  });
+
+  it("the step-by-step eyebrow for an answer does not call it a number either", () => {
+    expect(FR.strings.steps.answerOf).not.toMatch(/chiffre/i);
+    expect(EN.strings.steps.answerOf).not.toMatch(/number/i);
   });
 });
