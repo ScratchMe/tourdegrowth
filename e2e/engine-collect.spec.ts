@@ -81,10 +81,10 @@ async function startEngine(page: Page, locale: "en" | "fr" = "en"): Promise<void
   await expect(page.getByTestId("engine-board")).toBeVisible();
 }
 
-/** Opens a stage's drawer if it isn't already the one showing, then the metric's sheet. */
+/** Selects a stage's tab if it isn't already the one showing, then unfolds the metric's sheet. */
 async function openSheet(page: Page, stage: string, metricDomId: string): Promise<Locator> {
-  const row = page.getByTestId(`engine-row-${stage}`);
-  if ((await row.getAttribute("aria-expanded")) !== "true") await row.click();
+  const tab = page.getByTestId(`engine-tab-${stage}`);
+  if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click();
   const toggle = page.getByTestId(`engine-metric-${metricDomId}`);
   if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
   const sheet = page.getByTestId(`engine-sheet-${metricDomId}`);
@@ -210,7 +210,10 @@ test.describe("setup and first save", () => {
     const entry = (await storedEngine(page))?.state.snapshots[0]?.metrics["ret.d30"] as { status: string; missing?: { cause: string; repair: string } };
     expect(entry.status).toBe("missing");
     expect(entry.missing).toMatchObject({ cause: "not-tracked", repair: "sprint" });
-    await expect(page.getByTestId("engine-row-retention")).toContainText("Day-30 retention");
+    // The number's own row says it, in words, next to why it can't be found.
+    const row = page.getByTestId("engine-metric-ret-d30");
+    await expect(row).toContainText(ENGINE_COPY.status.missing.en);
+    await expect(row).toContainText(ENGINE_COPY.cause.notTracked.en);
   });
 });
 
@@ -345,10 +348,12 @@ test.describe("the §6.0 example on the board", () => {
     test(`${locale}: "what if" starts at the reference, recomputes when the slider moves, and redraws the funnel`, async ({ page }) => {
       await page.setViewportSize({ width: 1280, height: 900 });
       await openExample(page, locale);
-      // On a desk the drawer opens on the stage the diagnosis names, its ★ open.
-      await expect(page.getByTestId("engine-drawer")).toHaveAttribute("data-stage", "activation");
+      // The board opens on the stage the diagnosis names, every number folded.
+      const stagePanel = page.getByTestId("engine-panel");
+      await expect(stagePanel).toHaveAttribute("data-stage", "activation");
+      await expect(stagePanel.locator('[data-testid^="engine-sheet-"]')).toHaveCount(0);
       // « What if » is folded on the board, and no longer inside a number's sheet.
-      await expect(page.getByTestId("engine-drawer").getByTestId("engine-whatif")).toHaveCount(0);
+      await expect(stagePanel.getByTestId("engine-whatif")).toHaveCount(0);
       const fold = page.getByTestId("engine-board-whatif");
       await fold.locator("summary").click();
       // It opens on the stage the diagnosis names.
@@ -392,15 +397,15 @@ test.describe("the §6.0 example on the board", () => {
     });
   }
 
-  test("fr at 390px: the example board, the activation drawer and its what-if scroll only downward", async ({ page }) => {
+  test("fr at 390px: the example board, the activation panel and its what-if scroll only downward", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openExample(page, "fr");
     await noHorizontalScroll(page);
-    // Every stage name on one line, next to a value in each row: a 30px stencil name beside
-    // its value once broke mid-word (« ACQUISITI / ON »). One line of 30px/1.1 is 33px.
+    // Every stage name on one line: a stencil name that wraps (« ACQUISITI / ON », seen at
+    // 390 on the old rows) would give five tabs five heights. One line of 19px/1 is 19px.
     for (const stage of ["acquisition", "activation", "retention", "referral", "revenue"]) {
-      const box = await page.getByTestId(`engine-row-name-${stage}`).boundingBox();
-      expect(box!.height, stage).toBeLessThan(45);
+      const box = await page.getByTestId(`engine-tab-name-${stage}`).boundingBox();
+      expect(box!.height, stage).toBeLessThan(28);
     }
     await openSheet(page, "activation", "act-rate");
     await noHorizontalScroll(page);
@@ -484,8 +489,12 @@ test.describe("keyboard, languages, widths", () => {
     await page.keyboard.press("Enter");
     await expect(page.getByTestId("engine-board")).toBeVisible();
 
-    await tabTo(page, page.getByTestId("engine-row-activation"));
-    await page.keyboard.press("Enter");
+    // The tab list is ONE Tab stop (roving tabindex): the selected tab, then the arrows.
+    // A fresh engine opens on acquisition, the first stage with a number to fill.
+    await tabTo(page, page.getByTestId("engine-tab-acquisition"));
+    await page.keyboard.press("ArrowRight");
+    await expect(page.getByTestId("engine-tab-activation")).toBeFocused();
+    await expect(page.getByTestId("engine-panel")).toHaveAttribute("data-stage", "activation");
     const toggle = page.getByTestId("engine-metric-act-rate");
     await tabTo(page, toggle);
     if ((await toggle.getAttribute("aria-expanded")) !== "true") await page.keyboard.press("Enter");
@@ -508,42 +517,42 @@ test.describe("keyboard, languages, widths", () => {
     test(`${locale}: every sheet's labels are resolved — no raw {placeholder} anywhere`, async ({ page }) => {
       await startEngine(page, locale);
       for (const stage of ["acquisition", "activation", "retention", "referral", "revenue"]) {
-        const row = page.getByTestId(`engine-row-${stage}`);
-        if ((await row.getAttribute("aria-expanded")) !== "true") await row.click();
-        const drawer = page.getByTestId("engine-drawer");
-        await expect(drawer).toHaveAttribute("data-stage", stage);
-        const toggles = drawer.locator('[data-testid^="engine-metric-"]');
+        const tab = page.getByTestId(`engine-tab-${stage}`);
+        if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click();
+        const panel = page.getByTestId("engine-panel");
+        await expect(panel).toHaveAttribute("data-stage", stage);
+        const toggles = panel.locator('button[data-testid^="engine-metric-"]');
         for (let i = 0; i < (await toggles.count()); i += 1) {
           const t = toggles.nth(i);
           if ((await t.getAttribute("aria-expanded")) !== "true") await t.click();
         }
         // "I have it" is the first mode in every sheet: it reveals the count labels.
-        const haves = drawer.locator('[data-testid^="engine-sheet-"]').getByRole("radio").first();
+        const haves = panel.locator('[data-testid^="engine-sheet-"]').getByRole("radio").first();
         await haves.check();
         await expect(page.getByTestId("engine-workbench")).not.toContainText(/\{[a-zA-Z]+\}/);
       }
     });
 
     for (const width of [390, 1280]) {
-      test(`${locale} at ${width}px: no sideways scroll with a sheet open, and the drawer sits where it should`, async ({ page }) => {
+      test(`${locale} at ${width}px: no sideways scroll with a sheet open, and the panel sits under the tabs`, async ({ page }) => {
         await page.setViewportSize({ width, height: 900 });
         await startEngine(page, locale);
         const sheet = await openSheet(page, "activation", "act-rate");
         await sheet.getByRole("radio").first().check();
         await noHorizontalScroll(page);
-        const row = await page.getByTestId("engine-row-activation").boundingBox();
-        const drawer = await page.getByTestId("engine-drawer").boundingBox();
-        if (!row || !drawer) throw new Error("row or drawer not rendered");
-        if (width < 960) {
-          // Inline on a phone: right under its row, same column.
-          expect(drawer.y).toBeGreaterThanOrEqual(row.y + row.height - 1);
-          expect(Math.abs(drawer.x - row.x)).toBeLessThan(2);
-        } else {
-          // Beside the rows on a desk, and the rows stay a compact list.
-          expect(drawer.x).toBeGreaterThan(row.x + row.width);
-          const first = await page.getByTestId("engine-row-acquisition").boundingBox();
-          const last = await page.getByTestId("engine-row-revenue").boundingBox();
-          expect(last!.y - (first!.y + first!.height)).toBeLessThan(5 * (first!.height + 24));
+        const tabs = await page.getByTestId("engine-tabs").boundingBox();
+        const panel = await page.getByTestId("engine-panel").boundingBox();
+        const first = await page.getByTestId("engine-tab-acquisition").boundingBox();
+        const last = await page.getByTestId("engine-tab-revenue").boundingBox();
+        if (!tabs || !panel || !first || !last) throw new Error("tabs or panel not rendered");
+        // One panel, right under the whole strip, never beside it (no side column any more).
+        expect(panel.y).toBeGreaterThanOrEqual(tabs.y + tabs.height - 1);
+        // One row of tabs at every width: the five sit on the same line.
+        expect(Math.abs(last.y - first.y)).toBeLessThan(2);
+        if (width >= 960) {
+          // On a desk the five share the panel's width, all in view.
+          expect(first.x).toBeGreaterThanOrEqual(panel.x - 1);
+          expect(last.x + last.width).toBeLessThanOrEqual(panel.x + panel.width + 1);
         }
       });
     }

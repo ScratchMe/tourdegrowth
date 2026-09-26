@@ -79,8 +79,8 @@ function referenceLine(
  *
  * The page is two things on purpose. **The tool** is the client island
  * (`EngineWorkbench`), mounted in a frame as wide as the app shell: the
- * peloton needs four grids side by side and the board a drawer next to its
- * rows, which the 760px prose column cannot hold. **The page around it** is
+ * peloton needs four grids side by side and the board its five stage tabs
+ * in one row, which the 760px prose column cannot hold. **The page around it** is
  * prerendered prose that reads without JavaScript and is what a search
  * engine indexes: the fifteen numbers with their formula, where to find each
  * one and what to know before quoting it, the three computed ones, the FAQ,

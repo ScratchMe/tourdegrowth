@@ -2,11 +2,11 @@
  * The board (spec §7 E2) — semantic tokens only (no-primitives.test.ts).
  *
  * From 960px the board BREAKS OUT of the page's 760px reading column to the
- * app width, so the side drawer has room (§7 E2: rows at left, sticky drawer
- * at right). The breakout is written to be a no-op once the page itself is
- * that wide: margin = (container − board) / 2 is zero when they match, so a
- * wider page layout (P5) needs no change here. Board.tsx switches the drawer
- * at the SAME 960px — keep the two in step.
+ * app width: the five stage tabs share one row there, and the « what if »
+ * panel puts its funnel beside its slider (WhatIfPanel.module.css, same
+ * 960px). The breakout is written to be a no-op once the page itself is that
+ * wide: margin = (container − board) / 2 is zero when they match, so a wider
+ * page layout (P5) needs no change here.
  */
 .board {
   display: flex;
@@ -101,49 +101,54 @@
   margin: 0;
 }
 
-/* --- Stage rows and drawer --------------------------------------------- */
+/* --- The stage menu and its panel (StageTabs.tsx, 2026-09-26) ----------- */
 .stages {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: var(--space-4);
-  align-items: start;
+  min-width: 0;
+}
+
+/*
+ * ONE row of tabs at every width. Under 960px the tabs keep their natural
+ * width and the strip scrolls sideways INSIDE its own box — the page never
+ * does (`overflow-x: auto` on the strip, `min-width: 0` up the chain, and the
+ * e2e measures the document's scrollWidth). From 960px the five share the
+ * board's width equally.
+ *
+ * A scroll box clips BOTH axes, so the strip carries its own room for what
+ * draws outside a tab: the focus ring (3px width + 3px offset) and the hover
+ * shadow (4px). The negative margin puts the tabs back on the panel's edges.
+ */
+.tabs {
+  --tabs-room: var(--space-3);
+  display: flex;
+  gap: var(--space-3);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  padding: var(--tabs-room);
+  margin: calc(-1 * var(--tabs-room));
+  margin-bottom: calc(var(--space-4) - var(--tabs-room));
+  min-width: 0;
 }
 
 @media (min-width: 960px) {
-  .stages {
-    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-    column-gap: var(--space-9);
-    /* Five rows at their own height, then a sixth track that takes whatever
-       the drawer adds: without it the grid shares the drawer's height across
-       the five rows and they drift apart down the page. */
-    grid-template-rows: repeat(5, auto) 1fr;
-  }
-
-  .stages > .row {
-    grid-column: 1;
-  }
-
-  /* Wherever it sits in the DOM (right after its row), the drawer is lifted
-     into the right-hand column, over the height of all six tracks. */
-  .stages > .drawer {
-    grid-column: 2;
-    grid-row: 1 / -1;
-    position: sticky;
-    top: var(--space-7);
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
 
-.row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas:
-    "stage value"
-    "pills label"
-    "comparator comparator";
-  column-gap: var(--space-5);
-  row-gap: var(--space-2);
-  align-items: center;
-  width: 100%;
+/* The marks' ink: one custom property, so a selected (ink) tab can turn its
+   marks to paper without restating five rules. */
+.tab {
+  --tab-mark: var(--viz-ink);
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
   min-width: 0;
   text-align: left;
   font: inherit;
@@ -155,99 +160,92 @@
   cursor: pointer;
 }
 
-/* On a phone the stage name takes the whole first line: beside the value, a
-   30px stencil "ACQUISITION" had ~170px and broke mid-word (« ACQUISITI / ON »,
-   seen at 390). The value and its label sit under it, right-aligned. */
-@media (max-width: 760px) {
-  .row {
-    grid-template-areas:
-      "stage stage"
-      "pills value"
-      "pills label"
-      "comparator comparator";
-  }
-}
-
-.row:hover {
+.tab:hover {
   box-shadow: var(--state-hover-shadow);
 }
 
-.row:focus-visible {
+.tab:focus-visible {
   outline: var(--focus-width) solid var(--focus-ring);
   outline-offset: var(--focus-offset);
 }
 
-.rowOpen {
-  background: var(--surface-sunken);
+/* The selected tab: the system's one selection state (ink fill, paper text —
+   answers, segment chips, tone cards). It is what ties the panel below to it. */
+.tab[aria-selected="true"] {
+  --tab-mark: var(--state-selected-text);
+  color: var(--state-selected-text);
+  background: var(--state-selected-bg);
+  border-color: var(--state-selected-bg);
 }
 
-/* Below its comparator: the only red surface of the board — a diagnosis,
-   said in text too ("below the reference"), never by colour alone. */
-.rowBelow {
+/* The stage the diagnosis names: the alert wash and its red edge, as the old
+   stage row had — and the stamp below says it in words (WCAG 1.4.1). */
+.tabNamed {
   background: var(--surface-alert);
   border-color: var(--border-alert);
 }
 
-.rowMaybe {
-  border: var(--border-dashed);
+/* Named AND selected: the selection's ink, the diagnosis's red edge. */
+.tabNamed[aria-selected="true"] {
+  background: var(--state-selected-bg);
+  border-color: var(--border-alert);
 }
 
-.rowStage {
-  grid-area: stage;
+.tabHead {
   display: flex;
   align-items: baseline;
   gap: var(--space-3);
   min-width: 0;
 }
 
-.rowIndex {
+.tabIndex {
   font: var(--meta-sm);
   color: var(--text-muted);
 }
 
-.rowName {
-  font: var(--display-section);
-  letter-spacing: var(--display-letter-spacing);
-  text-transform: uppercase;
-  overflow-wrap: anywhere;
+.tab[aria-selected="true"] .tabIndex,
+.tab[aria-selected="true"] .tabFound {
+  color: inherit;
 }
 
-.rowValue {
-  grid-area: value;
-  font: var(--display-section);
+/* The 19px stencil, on one line: a name that wraps would make five tabs of
+   five heights. The strip scrolls rather than squeezing it. */
+.tabName {
+  font: var(--display-wordmark);
   letter-spacing: var(--display-letter-spacing);
-  text-align: right;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
-.rowValue[data-unknown="true"] {
-  color: var(--text-alert);
+.tabStatus {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
 }
 
-.rowLabel {
-  grid-area: label;
+.tabFound {
   font: var(--meta-xs);
   color: var(--text-muted);
-  text-align: right;
-  max-width: 22ch;
+  white-space: nowrap;
 }
 
-.rowComparator {
-  grid-area: comparator;
-  font: var(--meta-xs);
+/* StampedPillar's grammar, as the peloton's stamp: the action red, not the
+   road-paint red — white 11px text on --paint-red is 4.42:1, under AA; the
+   action fill clears it at 4.65:1. */
+.tabStamp {
+  font: var(--meta-2xs);
   letter-spacing: var(--meta-tracking);
   text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-/* Small red text is the deep red (--text-alert, 5.28:1 on the alert wash) —
-   --accent-mark is for large text and marks only (§8.2). */
-.rowComparatorBelow {
-  color: var(--text-alert);
+  color: var(--action-primary-text);
+  background: var(--action-primary-bg);
+  border-radius: var(--radius-tag);
+  padding: var(--space-1) var(--space-3);
+  transform: rotate(-1.5deg);
+  white-space: nowrap;
 }
 
 .pills {
-  grid-area: pills;
   display: flex;
   gap: var(--space-2);
   align-items: center;
@@ -261,12 +259,12 @@
 }
 
 .pillFound {
-  background: var(--viz-ink);
+  background: var(--tab-mark);
 }
 
 .pillApprox {
-  border: 2px solid var(--viz-ink);
-  background: repeating-linear-gradient(45deg, var(--viz-ink) 0 2px, transparent 2px 4px);
+  border: 2px solid var(--tab-mark);
+  background: repeating-linear-gradient(45deg, var(--tab-mark) 0 2px, transparent 2px 4px);
 }
 
 .pillMissing {
@@ -274,19 +272,19 @@
 }
 
 .pillProgress {
-  border: 2px solid var(--viz-ink);
+  border: 2px solid var(--tab-mark);
 }
 
 .pillNa {
   height: 2px;
   border-radius: 0;
-  background: var(--viz-ink);
+  background: var(--tab-mark);
 }
 
-.drawer {
+/* --- The panel: one stage, its numbers folded ---------------------------- */
+.panel {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
   min-width: 0;
   background: var(--surface-card);
   border: var(--border-solid);
@@ -295,23 +293,25 @@
 }
 
 @media (max-width: 760px) {
-  .drawer {
+  .panel {
     padding: var(--pad-card-mobile);
   }
 }
 
-.drawerHead {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas:
-    "eyebrow close"
-    "title title";
-  gap: var(--space-2);
-  align-items: center;
+/* Reached by Tab right after the tab list (WAI-ARIA tabs pattern). */
+.panel:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
 }
 
-.drawerEyebrow {
-  grid-area: eyebrow;
+.panelHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-bottom: var(--space-5);
+}
+
+.panelTitle {
   font: var(--meta-xs);
   letter-spacing: var(--meta-tracking);
   text-transform: uppercase;
@@ -319,25 +319,30 @@
   margin: 0;
 }
 
-.drawerTitle {
-  grid-area: title;
-  font: var(--display-section);
-  letter-spacing: var(--display-letter-spacing);
-  text-transform: uppercase;
+.panelPositions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  list-style: none;
+  padding: 0;
   margin: 0;
 }
 
-.drawerTitle:focus {
-  outline: none;
+.panelPosition {
+  font: var(--meta-xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
-.drawerClose {
-  grid-area: close;
+/* Small red text is the deep red (--text-alert) — --accent-mark is for large
+   text and marks only (§8.2). */
+.panelPositionNamed {
+  color: var(--text-alert);
 }
 
 .metric {
   border-top: var(--border-rule);
-  padding-top: var(--space-5);
   min-width: 0;
 }
 
@@ -346,19 +351,37 @@
   font: inherit;
 }
 
+/*
+ * A folded row: name, then what it holds (value + status tag), then the
+ * + / − marker. On a desk, one line; on a phone the name takes the line and
+ * what it holds goes under it — beside a long French name, a value and a tag
+ * left the name a few characters per line.
+ */
 .metricToggle {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-areas: "name meta marker";
   align-items: center;
-  gap: var(--space-4);
+  column-gap: var(--space-5);
+  row-gap: var(--space-2);
   width: 100%;
   min-height: var(--hit-min);
   text-align: left;
   background: none;
   border: none;
-  padding: 0;
+  padding: var(--space-4) 0;
   font: var(--title-card);
   color: var(--text-body);
   cursor: pointer;
+}
+
+@media (max-width: 760px) {
+  .metricToggle {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "name marker"
+      "meta marker";
+  }
 }
 
 .metricToggle:focus-visible {
@@ -367,8 +390,51 @@
 }
 
 .metricName {
-  flex: 1;
+  grid-area: name;
   min-width: 0;
+}
+
+.metricMeta {
+  grid-area: meta;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+@media (max-width: 760px) {
+  .metricMeta {
+    justify-content: flex-start;
+  }
+}
+
+/* A number in the board's stencil, as the old row printed it (smaller: the
+   row is folded, not the headline). */
+.metricValue {
+  font: var(--display-wordmark);
+  letter-spacing: var(--display-letter-spacing);
+  white-space: nowrap;
+}
+
+/* The person's own words or picked label: body text, cut to one line — the
+   full text is one click away, in the sheet. */
+.metricValue[data-kind="words"] {
+  font: var(--body-sm);
+  letter-spacing: normal;
+  color: var(--text-muted);
+  max-width: 28ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Why a number could not be found, under its "Missing" tag. */
+.metricValue[data-kind="cause"] {
+  font: var(--meta-xs);
+  letter-spacing: normal;
+  color: var(--text-muted);
+  white-space: normal;
 }
 
 .metricStatus {
@@ -378,6 +444,7 @@
 /* The disclosure's typographic marker, as in core/Disclosure: a sunken mono
    chip carrying + / −, the chip the affordance, the glyph the state. */
 .metricMarker {
+  grid-area: marker;
   flex: none;
   width: 24px;
   height: 24px;
@@ -397,8 +464,11 @@
   content: "\2212" / "";
 }
 
+/* An unfolded sheet keeps a reading width: the panel spans the board (~1000px
+   at a desk), and a form stretched across it is harder to fill, not easier. */
 .metricBody {
-  padding-top: var(--space-5);
+  padding: var(--space-3) 0 var(--space-8);
+  max-width: var(--width-reading);
 }
 
 /* --- Actions ----------------------------------------------------------- */

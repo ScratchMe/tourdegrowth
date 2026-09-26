@@ -99,15 +99,17 @@ function download(text: string, fileName: string) {
  * Every write goes through `persist`: it stamps `updatedAt`, commits (the
  * screen keeps what was typed even if the device refuses — D15), and says
  * so when it did refuse. Focus moves only when a PERSON moved between
- * screens (R-19): to the verdict on entering the board, to a drawer's title
- * when a row opens, back to the row when it closes — never on first paint.
+ * screens (R-19): to the verdict on entering the board, to a number's row
+ * when it is opened from elsewhere — never on first paint. Choosing a stage
+ * tab moves nothing: focus stays on the tab, as the WAI-ARIA tabs pattern
+ * wants.
  */
 export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy, bridges }: EngineWorkbenchProps) {
   const snap = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
   const [screen, setScreen] = useState<Screen>("board");
   const [stepsFrom, setStepsFrom] = useState<StepPosition>({ phase: "targets" });
   const [selected, setSelected] = useState<Pillar | null>(null);
-  const [drawerSeq, setDrawerSeq] = useState(0);
+  const [panelSeq, setPanelSeq] = useState(0);
   const [focusMetric, setFocusMetric] = useState<MetricId | null>(null);
   const [writeFailed, setWriteFailed] = useState(false);
   const [focusRequest, setFocusRequest] = useState<{ id: string; n: number } | null>(null);
@@ -319,7 +321,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
       setScreen("board");
       setSelected(shapeOf(id).stage);
       setFocusMetric(id);
-      setDrawerSeq((n) => n + 1);
+      setPanelSeq((n) => n + 1);
       focus(`engine-metric-${domId(id)}`);
     },
   };
@@ -439,13 +441,10 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
       plan={plan}
       selected={selected}
       onSelect={(stage) => {
-        const was = selected;
         setSelected(stage);
         setFocusMetric(null);
-        if (stage) focus(`engine-drawer-${stage}-title`);
-        else if (was) focus(`engine-row-${was}`);
       }}
-      drawerSeq={drawerSeq}
+      panelSeq={panelSeq}
       focusMetric={focusMetric}
       returningFrom={snap.returningFrom}
       writeFailed={writeFailed}

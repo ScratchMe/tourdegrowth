@@ -188,12 +188,14 @@ export const ENGINE_COPY = {
       fr: "Petits effectifs : moins de 100 inscrits dans cette cohorte. Lis la direction, pas les décimales.",
       en: "Small numbers: fewer than 100 sign-ups in this cohort. Read the direction, not the decimals.",
     },
-    stageRowOpen: { fr: "Ouvrir l'étape {stage}", en: "Open the {stage} stage" },
-    pillsSummary: {
-      fr: "trouvés : {found} · introuvables : {missing} · en cours : {inProgress}",
-      en: "found: {found} · missing: {missing} · in progress: {inProgress}",
-    },
     toFill: { fr: "à renseigner", en: "to fill in" },
+    // TODO: à relire — nouveau (2026-09-26, les étapes en onglets : « c'est rude de devoir scroller autant sur chaque chiffre »).
+    /** The tab list's accessible name: five tabs, one per AARRR stage. */
+    stagesLabel: { fr: "Les cinq étapes", en: "The five stages" },
+    /** Under a tab's name, next to its marks: the coverage line's "found", per stage. Built so 1 reads right (« trouvés : 1/3 »). */
+    tabFound: { fr: "trouvés : {n}/{N}", en: "found: {n}/{N}" },
+    /** The stamp on a stage the diagnosis names — its red said in words too. */
+    tabNamed: { fr: "Freine ici", en: "Holds you back" },
     // TODO: à relire — nouveau (2026-09-25, retours d'Antoine sur le moteur).
     settings: { fr: "Réglages", en: "Settings" },
     steps: { fr: "Reprendre le pas à pas", en: "Back to step by step" },
@@ -473,7 +475,6 @@ export const ENGINE_COPY = {
     note: { fr: "Note pour toi", en: "Note to self" },
     noteHint: { fr: "Jamais sur une slide.", en: "Never on a slide." },
     save: { fr: "Enregistrer", en: "Save" },
-    close: { fr: "Fermer", en: "Close" },
     tooLong: { fr: "{n} caractères au plus.", en: "{n} characters at most." },
     // TODO: à relire — nouveau (2026-09-25, retours d'Antoine sur le moteur).
     sharedHint: {

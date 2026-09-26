@@ -2,8 +2,8 @@
  * /{locale}/aarrr-funnel-template — the growth engine (engine spec §7 E0).
  *
  * Wider than the prose frame on purpose: the peloton draws four 10×10 grids
- * side by side and the board puts a drawer next to its rows, which the
- * 760px reading column cannot hold. So the FRAME is the app shell's width
+ * side by side and the board lays its five stages out as one row of tabs,
+ * which the 760px reading column cannot hold. So the FRAME is the app shell's width
  * (--content-max-width) and every block of running text inside it is
  * capped at --measure-read — the same two-level rule ProsePage applies
  * (ds-critique M-3), just with a wider outer box.
