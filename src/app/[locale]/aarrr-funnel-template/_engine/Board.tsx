@@ -192,7 +192,7 @@ export function Board({
               longer (Antoine, 2026-09-25). The step-by-step shows it open. */}
           <Disclosure summary={strings.board.whatIfTitle} data-testid="engine-board-whatif">
             <div className={styles.whatIf}>
-              <WhatIfPanel view={view} />
+              <WhatIfPanel view={view} onChange={actions.setWhatIf} />
             </div>
           </Disclosure>
 

@@ -52,10 +52,17 @@ export interface LeverView {
   /** Where the slider may go — a range around today, never below 0, never past 100 for a share. */
   min: number;
   max: number;
+  /** The slider's step, the same rule the domain rounds with — so min, max and every target land on it. */
+  step: number;
 }
 
-/** One month of the funnel, in people (or customers). null = unknown, never 0. */
+/**
+ * One month of the funnel, in people (or customers). null = unknown, never 0.
+ * Without the month's sign-ups, the funnel is read on 100 of them
+ * (`perHundred`): the shape still moves, and the money never uses it.
+ */
 export interface ScenarioFunnel {
+  perHundred: boolean;
   visitors: Interval | null;
   signups: Interval | null;
   referred: Interval | null;
@@ -118,19 +125,27 @@ const clampHi = (i: Interval, cap: Interval | number): Interval => {
 const nonNegative = (i: Interval): Interval => mapBounds(i, (v) => Math.max(0, v));
 const round = (v: number, step: number) => Math.round(v / step) * step;
 
+/** The slider's step: a tenth of a point under 10 %, a point above; 1 € under 100 € of ARPA, 5 € above. */
+function stepOf(id: LeverId, mid: number): number {
+  if (id === "rev.arpa") return mid >= 100 ? 5 : 1;
+  return mid >= 10 ? 1 : 0.1;
+}
+
+/** Rounded to the step, without the float residue of 0.1 × 33 (= 3.3000000000000003). */
+function snap(v: number, step: number): number {
+  return Math.round(round(v, step) * 1000) / 1000;
+}
+
 /** The slider's domain: half of today to three times today, in steps a person can read; a share never past 100, churn down to 0. */
-function domain(id: LeverId, today: Interval): { min: number; max: number } {
+function domain(id: LeverId, today: Interval): { min: number; max: number; step: number } {
   const mid = (today.lo + today.hi) / 2;
-  if (id === "rev.arpa") {
-    const step = mid >= 100 ? 5 : 1;
-    return { min: Math.max(step, round(mid / 2, step)), max: Math.max(step * 2, round(mid * 2, step)) };
-  }
+  const step = stepOf(id, mid);
+  if (id === "rev.arpa") return { min: Math.max(step, snap(mid / 2, step)), max: Math.max(step * 2, snap(mid * 2, step)), step };
   const bounded = shapeOf(id).bounded;
   const ceiling = bounded ? 100 : 400;
-  if (LOWER_IS_BETTER.includes(id)) return { min: 0, max: Math.min(ceiling, Math.max(1, round(mid * 2, mid >= 10 ? 1 : 0.1))) };
-  if (id === "rev.expansion") return { min: 0, max: Math.min(ceiling, Math.max(5, round(mid * 3, mid >= 10 ? 1 : 0.1))) };
-  const step = mid >= 10 ? 1 : 0.1;
-  return { min: Math.max(0, round(mid / 2, step)), max: Math.min(ceiling, Math.max(step * 10, round(mid * 3, step))) };
+  if (LOWER_IS_BETTER.includes(id)) return { min: 0, max: Math.min(ceiling, Math.max(1, snap(mid * 2, step))), step };
+  if (id === "rev.expansion") return { min: 0, max: Math.min(ceiling, Math.max(5, snap(mid * 3, step))), step };
+  return { min: Math.max(0, snap(mid / 2, step)), max: Math.min(ceiling, Math.max(step * 10, snap(mid * 3, step))), step };
 }
 
 /** Every lever with its value today and the target under test. A target on an unknown lever is ignored — there is nothing to move from. */
@@ -139,11 +154,11 @@ export function leverViews(state: EngineState, targets: Partial<Record<LeverId, 
     const today = known(state, id, ctx);
     const unit = PERCENT_LEVERS.includes(id) ? "percent" : "money";
     const direction = LOWER_IS_BETTER.includes(id) ? "lower" : "higher";
-    if (!today) return { id, today: null, target: null, direction, unit, min: 0, max: 0 };
-    const { min, max } = domain(id, today);
+    if (!today) return { id, today: null, target: null, direction, unit, min: 0, max: 0, step: 1 };
+    const { min, max, step } = domain(id, today);
     const raw = targets[id];
     const target = raw === undefined || !Number.isFinite(raw) ? null : Math.min(Math.max(raw, 0), unit === "percent" && shapeOf(id).bounded ? 100 : Infinity);
-    return { id, today, target, direction, unit, min: Math.min(min, target ?? min), max: Math.max(max, target ?? max) };
+    return { id, today, target, direction, unit, min: Math.min(min, target ?? min), max: Math.max(max, target ?? max), step };
   });
 }
 
@@ -212,10 +227,12 @@ export function buildScenario(state: EngineState, targets: Partial<Record<LeverI
   const today = (id: LeverId) => valueOf(levers, id, false);
   const target = (id: LeverId) => levers.find((l) => l.id === id && l.target !== null)?.target ?? null;
 
-  const signupsToday = (() => {
+  // The month's real sign-ups feed the money; the funnel falls back on 100 to still show a shape.
+  const monthSignups = (() => {
     const n = knownSharedCount(snapshot, "monthSignups");
     return n ? point(n.value) : null;
   })();
+  const signupsToday = monthSignups ?? point(100);
   const d30Today = known(state, "ret.d30", ctx);
   const cacToday = known(state, "acq.cac", ctx);
   const margin = known(state, "rev.gross-margin", ctx);
@@ -262,12 +279,12 @@ export function buildScenario(state: EngineState, targets: Partial<Record<LeverI
     const d30Rate = d30Today && projected && act && tAct !== null ? clampHi(mul(d30Today, fAct), point(tAct)) : d30Today;
     const paidRate = paid ? (projected ? mapBounds(paid, paidAfter) : paid) : null;
     const of = (rate: Interval | null) => (signups && rate ? mul(signups, scale(rate, 1 / 100)) : null);
-    return { visitors, signups, referred: of(shareNow), activated: of(actNow), d30: of(d30Rate), paying: of(paidRate) };
+    return { perHundred: monthSignups === null, visitors, signups, referred: of(shareNow), activated: of(actNow), d30: of(d30Rate), paying: of(paidRate) };
   }
 
   // --- The money --------------------------------------------------------------------
   function kpis(projected: boolean): ScenarioKpis {
-    const payersToday = newPayers(state, ctx, signupsToday, paid);
+    const payersToday = newPayers(state, ctx, monthSignups, paid);
     const payers = payersToday ? (projected ? mul(payersToday, fPayers) : payersToday) : null;
     const arpa = projected ? valueOf(levers, "rev.arpa", true) : today("rev.arpa");
     if (projected && target("rev.arpa") !== null) assumptions.add("arpa-new-customers");

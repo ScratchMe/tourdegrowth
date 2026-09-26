@@ -725,11 +725,14 @@ export const ENGINE_COPY = {
    * numbers) and the what-if slides read the same words.
    */
   scenario: {
+    /** A difference of two rates is in points, never a percent of a percent (« +1 pt »). */
+    points: { fr: "{n} pt", en: "{n} pt" },
     title: { fr: "Et si ?", en: "What if?" },
     intro: { fr: "Bouge un ou plusieurs leviers : le funnel du mois et tes chiffres de croissance se recalculent ensemble, les effets se cumulent.", en: "Move one lever or several: the month's funnel and your growth numbers recompute together, and the effects add up." },
     leversTitle: { fr: "Les leviers", en: "The levers" },
     leverToday: { fr: "aujourd'hui {value}", en: "today {value}" },
-    leverUnknown: { fr: "Saisis d'abord ce chiffre pour le faire varier.", en: "Enter this number first to move it." },
+    /** `{list}`: the levers not entered, lower-cased catalogue names joined by `grammar`. */
+    unknownLevers: { fr: "Pas encore saisis, donc pas de curseur : {list}.", en: "Not entered yet, so no slider: {list}." },
     reset: { fr: "Remettre à aujourd'hui", en: "Back to today" },
     resetAll: { fr: "Tout remettre à aujourd'hui", en: "All back to today" },
     sliderLabel: { fr: "{lever}, cible testée", en: "{lever}, target under test" },
@@ -744,7 +747,8 @@ export const ENGINE_COPY = {
     perMonth: { fr: "par mois", en: "a month" },
     unknownStep: { fr: "inconnu", en: "unknown" },
     gained: { fr: "+{n} avec tes « Et si »", en: "+{n} with your what-ifs" },
-    lost: { fr: "–{n} avec tes « Et si »", en: "–{n} with your what-ifs" },
+    /** U+2212, the minus sign: StatTile.tsx asks for it, and a hyphen reads as a dash. */
+    lost: { fr: "−{n} avec tes « Et si »", en: "−{n} with your what-ifs" },
     kpisTitle: { fr: "Tes chiffres de croissance", en: "Your growth numbers" },
     kpiToday: { fr: "aujourd'hui", en: "today" },
     kpiIf: { fr: "avec tes « Et si »", en: "with your what-ifs" },
@@ -762,6 +766,20 @@ export const ENGINE_COPY = {
     togetherNoExtra: { fr: "Ensemble : {total}.", en: "Together: {total}." },
     noneMoved: { fr: "Aucun levier bougé : le funnel et les chiffres sont ceux d'aujourd'hui.", en: "No lever moved: the funnel and the numbers are today's." },
     noLever: { fr: "Il faut au moins un chiffre saisi pour tester un « Et si ».", en: "You need at least one number entered to test a what-if." },
+    /** A KPI tile says whether a change is good news in words, never by color alone (StatTile.tsx). */
+    better: { fr: "mieux", en: "better" },
+    worse: { fr: "moins bien", en: "worse" },
+    /** The funnel's dots: what each shape means. `range` reuses the peloton's « fourchette estimée ». */
+    legendThere: { fr: "déjà là aujourd'hui", en: "there today" },
+    legendGained: { fr: "en plus avec tes « Et si »", en: "added by your what-ifs" },
+    legendLost: { fr: "en moins avec tes « Et si »", en: "lost to your what-ifs" },
+    legendUnit: { fr: "Un rond = 1 % des inscrits d'aujourd'hui : au-delà de 100, la grille s'allonge.", en: "One dot = 1% of today's sign-ups: past 100, the grid grows." },
+    perHundredNote: { fr: "Sans le nombre d'inscrits du mois, le funnel se lit pour 100 inscrits.", en: "Without the month's sign-up count, the funnel reads per 100 sign-ups." },
+    /** A grid's text equivalent: `{label}` a step, `{value}` the projection, `{today}` today's count. */
+    gridAria: { fr: "{label} : {value}, contre {today} aujourd'hui", en: "{label}: {value}, against {today} today" },
+    /** The table of what each lever brings alone: its header cells. */
+    aloneLever: { fr: "Levier", en: "Lever" },
+    aloneGain: { fr: "MRR dans 12 mois", en: "MRR in 12 months" },
     assumptionsTitle: { fr: "Ce que le calcul suppose", en: "What the calculation assumes" },
     /** One sentence per rule of `lib/engine/scenario.ts`, printed only when it applied. */
     assumption: {

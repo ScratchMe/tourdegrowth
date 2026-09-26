@@ -25,6 +25,7 @@ describe("buildScenario — nothing moved", () => {
   it("today, read from the example: the funnel in people, the money in euros", () => {
     const { funnel, kpis } = buildScenario(exampleState(), {}, CTX_FR).today;
     expect(funnel.visitors?.lo).toBeCloseTo(26_000, 6);
+    expect(funnel.perHundred).toBe(false);
     expect(funnel.signups).toEqual({ lo: 820, hi: 820 });
     expect(funnel.activated?.lo).toBeCloseTo(147.6, 9);
     expect(funnel.d30).toBeNull(); // unknown, never 0
@@ -112,6 +113,22 @@ describe("buildScenario — one lever at a time", () => {
     const s = buildScenario(noD, { "act.rate": 30 }, CTX_FR);
     expect(s.moved).toEqual([]);
     expect(leverViews(noD, { "act.rate": 30 }, CTX_FR).find((l) => l.id === "act.rate")?.today).toBeNull();
+  });
+});
+
+describe("buildScenario — without the month's sign-ups", () => {
+  it("the funnel is read on 100 sign-ups, and the money never uses that 100", () => {
+    const state = exampleState();
+    const snapshot = state.snapshots[0]!;
+    delete snapshot.metrics["acq.signup-rate"];
+    delete snapshot.metrics["acq.top-channel-share"];
+    const s = buildScenario(state, { "act.rate": 24 }, CTX_FR);
+    expect(s.today.funnel.perHundred).toBe(true);
+    expect(s.today.funnel.signups).toEqual({ lo: 100, hi: 100 });
+    expect(s.projected.funnel.activated?.lo).toBeCloseTo(24, 9);
+    expect(s.today.funnel.visitors).toBeNull();
+    // The CAC's own count of new payers still prices the month: 42, not 100 × a rate.
+    expect(s.today.kpis.newMrr).toEqual({ lo: 5_040, hi: 5_040 });
   });
 });
 

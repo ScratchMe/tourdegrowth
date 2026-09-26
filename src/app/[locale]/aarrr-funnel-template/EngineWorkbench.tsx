@@ -5,7 +5,7 @@ import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { shapeOf } from "@/lib/engine/catalog-shape";
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
-import type { EngineSetup, EngineState, MetricEntry, MetricId, RoleId, SharedCount, Snapshot, YearMonth } from "@/lib/engine/types";
+import type { EngineSetup, EngineState, LeverId, MetricEntry, MetricId, RoleId, SharedCount, Snapshot, YearMonth } from "@/lib/engine/types";
 import type { Locale } from "@/lib/i18n/locale";
 import type { Pillar } from "@/lib/scoring/pillars";
 import { Board } from "./_engine/Board";
@@ -308,6 +308,11 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
           (Object.entries(counts) as [SharedCount, number][]).reduce((acc, [count, value]) => withSharedCount(acc, count, value), s),
         ),
       );
+    },
+    setWhatIf(targets: Partial<Record<LeverId, number>>) {
+      // An empty map is « all back to today »: the field goes, so a file never carries an empty scenario.
+      const { whatIf: _previous, ...rest } = current;
+      persist(Object.keys(targets).length > 0 ? { ...rest, whatIf: targets } : rest);
     },
     markRequested(ids: MetricId[], role: RoleId) {
       persist(withSnapshot(current, (s) => markRequested(s, ids, role, new Date().toISOString())));

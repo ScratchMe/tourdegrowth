@@ -119,7 +119,7 @@ export function Steps({
           <h2 id="engine-steps-title" ref={heading} tabIndex={-1} className={styles.title}>
             {s.whatIfTitle}
           </h2>
-          <WhatIfPanel view={view} />
+          <WhatIfPanel view={view} onChange={actions.setWhatIf} />
           <div className={styles.nav}>
             <Button variant="quiet" onClick={back}>
               {s.back}
