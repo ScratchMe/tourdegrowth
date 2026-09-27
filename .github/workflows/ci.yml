@@ -65,6 +65,14 @@ jobs:
       - name: Type-check
         run: npx tsc --noEmit
 
+      # scripts/installer-un-plugin.mjs opens plug-in archives with `unzip`, and
+      # its test builds them with `zip` and `python3`. The runner image ships
+      # all three; naming them here turns a future image change into a failed
+      # step that says what is missing, instead of a dozen tests that don't.
+      - name: Archive tools
+        # One name at a time: `command -v a b c` exits 0 as soon as one is found.
+        run: for tool in unzip zip python3; do command -v "$tool" || { echo "::error::$tool is missing"; exit 1; }; done
+
       # `--coverage` enforces the floor set in vitest.config.ts (REVIEW-02.md
       # R2-10): a module nobody imports from a test now fails the run instead
       # of silently not counting.

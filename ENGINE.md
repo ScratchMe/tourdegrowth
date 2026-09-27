@@ -10,7 +10,7 @@ teste avec l'aperçu propriétaire de `/admin/preview`), route `/{locale}/aarrr-
 (toute la copie, `TODO: à relire` jusqu'au bon à tirer nº6) et
 `src/app/[locale]/aarrr-funnel-template/` (l'îlot, le tableau de bord, les
 slides). Les écarts que l'implémentation a tranchés par rapport à ce document
-sont consignés dans le journal de `CLAUDE.md`, pas réécrits ici.
+sont consignés dans le journal (`JOURNAL.md`), pas réécrits ici.
 
 **Décisions prises par défaut le 2026-09-24 pour que le travail avance** —
 chacune se renverse en une phrase :

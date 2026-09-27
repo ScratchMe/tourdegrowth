@@ -1,6 +1,6 @@
 # Firestore — règles, compteurs, concurrence, quotas
 
-Extraits du journal de `CLAUDE.md`. La §1 vaut pour n'importe quel projet
+Extraits du journal (`JOURNAL.md`). La §1 vaut pour n'importe quel projet
 Firestore accédé côté serveur ; la §2 est propre à Tour de Growth.
 
 > **Quand lire ce fichier** : avant d'ajouter une lecture sur un chemin public,

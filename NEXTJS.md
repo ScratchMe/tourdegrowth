@@ -1,6 +1,6 @@
 # Next.js (App Router) — pièges rencontrés et leur correctif
 
-Extraits du journal de `CLAUDE.md`, distillés pour être réutilisables. La §1
+Extraits du journal (`JOURNAL.md`), distillés pour être réutilisables. La §1
 vaut sur n'importe quel projet App Router ; la §2 est propre à Tour de Growth.
 
 Version de référence : **Next.js 16 / React 19 / Turbopack**. Les points datés
@@ -8,11 +8,35 @@ d'une rupture d'API sont signalés comme tels.
 
 > **Quand lire ce fichier** : avant de toucher aux layouts racine, au proxy,
 > aux routes de métadonnées, au découpage des chunks, ou avant de conclure
-> qu'un comportement de rendu est un bug de notre code.
+> qu'un comportement de rendu est un bug de notre code. Et avant de se fier à
+> sa mémoire d'une API Next : la doc de la version installée est dans
+> `node_modules/next/dist/docs/` (§1.0).
 
 ---
 
 ## 1. Ce qui vaut sur n'importe quel projet App Router
+
+### 1.0 La doc exacte est déjà sur le disque : la lire avant de conclure
+
+Depuis Next 16, **le paquet `next` embarque sa propre documentation**, celle
+de la version installée : `node_modules/next/dist/docs/` (452 fichiers
+Markdown pour la 16.3.4, dont `01-app/03-api-reference/03-file-conventions/proxy.md`,
+les routes de métadonnées et `revalidateTag`). Plusieurs pièges de ce fichier
+s'y lisaient noir sur blanc : le renommage en `proxy`, `revalidateTag` à deux
+arguments. Avant de conclure qu'un comportement de Next est un bug de notre
+code — ou un bug de Next —, chercher dans cette doc :
+
+```
+grep -rln "revalidateTag" node_modules/next/dist/docs/01-app
+```
+
+Elle a deux avantages sur la mémoire et sur le web : elle correspond **à la
+version du `package-lock.json`**, pas à la dernière publiée, et elle marche
+hors ligne, donc dans une session cloud. C'est aussi ce que sert l'outil
+`nextjs_docs` du serveur MCP officiel (`next-devtools-mcp`) ; on s'en passe,
+puisque ses autres outils demandent un `next dev` qui tourne, alors que ce
+projet vérifie sur `next start` (constaté le 2026-09-27 en jouant le plug-in
+Claude Code Setup).
 
 ### 1.1 Next 16 renomme `middleware` en `proxy`, en silence
 

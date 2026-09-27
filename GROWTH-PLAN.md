@@ -9,7 +9,7 @@ l'histoire du maker — tombent tous les trois sous ces contraintes. Ce qui
 reste est un plan où **le produit est le porte-parole** et où la moitié des
 actions ne demandent aucun humain visible. Même règle de tenue que
 `AUDIT-PLAN.md` : quand une action est faite, sa ligne change ici, et
-`CLAUDE.md` reçoit l'entrée de journal.*
+`JOURNAL.md` reçoit l'entrée de journal.*
 
 *Dernière mise à jour : 2026-09-13 (option A tranchée ; vague 0 : IndexNow, UTM, kit et textes de lancement livrés — le reste de la vague 0 est côté Antoine).*
 
@@ -343,4 +343,4 @@ lise). Tout ce que je prépare est écrit pour être collé tel quel.
 | **Un pic de trafic pendant une panne Gemini** | Le mode Quick n'appelle plus Gemini : la landing, le quiz et le résultat tiennent ; seul le Deep dive tombe, et son écran d'erreur rejoue la requête. La limite de débit en mémoire (R-15) est le seul point faible — acceptable pour un pic HN |
 | **Copie publiée sans relecture** | Tout texte nouveau part « à relire » ; les pages SEO peuvent vivre marquées (le glossaire long l'a fait), les posts publics **non** : ils passent par toi avant d'être collés |
 | **Six PR déploient six fois la production** | Rétention Vercel en place avant (0.8), merges espacés |
-| **Le plan s'oublie** | Ce fichier ; le journal du §7 ; l'entrée `CLAUDE.md` à chaque vague |
+| **Le plan s'oublie** | Ce fichier ; le journal du §7 ; l'entrée `JOURNAL.md` à chaque vague |

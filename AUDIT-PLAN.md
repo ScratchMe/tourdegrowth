@@ -4,9 +4,10 @@
 phase, étape par étape, avec l'ordre à suivre et ce qui déclenche chaque
 passage. Trois documents se partagent le sujet et ne se recouvrent pas :
 `AUDIT.md` dit **ce que c'est** (le schéma, les règles que le code applique) ;
-ce document dit **dans quel ordre on le construit et pourquoi** ; `CLAUDE.md`
-tient **le journal** de ce qui a été livré. Quand une étape est livrée, on met
-à jour sa ligne ici et on écrit l'entrée habituelle dans `CLAUDE.md`. Ce
+ce document dit **dans quel ordre on le construit et pourquoi** ; `JOURNAL.md`
+tient **le journal** de ce qui a été livré (il vivait dans `CLAUDE.md` jusqu'au
+2026-09-27). Quand une étape est livrée, on met à jour sa ligne ici et on écrit
+l'entrée habituelle à la fin de `JOURNAL.md`. Ce
 fichier est la référence : si une session se souvient d'un plan différent,
 c'est ce fichier qui a raison, et c'est lui qu'on corrige si le plan change.*
 
@@ -898,7 +899,7 @@ Liste explicite, pour qu'une session n'ait pas à redécouvrir pourquoi :
 
 - **À chaque étape livrée** : la ligne de la table du §0 passe à « Livrée
   (PR #n, date) », l'étape du §3 ou du §5 reçoit une ligne « *Livrée le …* »
-  avec ce qui a divergé du plan, et `CLAUDE.md` reçoit l'entrée habituelle
+  avec ce qui a divergé du plan, et `JOURNAL.md` reçoit l'entrée habituelle
   (décision, pièges, ce qui a été vérifié en réel).
 - **Quand le plan change** — une étape sautée, réordonnée, ajoutée — on
   modifie ce fichier **avant** de coder, en disant pourquoi. Un plan qui ne
