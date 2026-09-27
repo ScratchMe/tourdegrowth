@@ -7,7 +7,7 @@ import { buildDeck, deckMarkdown } from "@/lib/engine/deck";
 import { fillTemplate } from "@/lib/engine/format";
 import { sanityText } from "@/lib/engine/sentences";
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
-import type { DeckSlide, EngineAsk, EngineCalcContext, EngineDeck, EngineDerived, EngineState, FixedSlideId, SanityCheck, SlideId } from "@/lib/engine/types";
+import type { DeckSlide, EngineAsk, EngineCalcContext, EngineDeck, EngineDerived, EngineState, FixedSlideId, LeverId, SanityCheck, SlideId } from "@/lib/engine/types";
 import { currentSnapshot } from "@/lib/engine/values";
 import type { Locale } from "@/lib/i18n/locale";
 import { AskForm } from "./AskForm";
@@ -20,8 +20,10 @@ import { SlideAsk } from "./SlideAsk";
 import { SlideLeak } from "./SlideLeak";
 import { SlideMirror } from "./SlideMirror";
 import { SlidePeloton } from "./SlidePeloton";
+import { SlideScenario } from "./SlideScenario";
 import { SlideUnitEconomics } from "./SlideUnitEconomics";
 import { SlideVisibility } from "./SlideVisibility";
+import { SlideWhatIf } from "./SlideWhatIf";
 import styles from "./deck.module.css";
 
 /** What the island tells analytics — `engine_exported/<kind>` (§11.6). A copied image counts as a PNG export. */
@@ -62,6 +64,20 @@ const SLIDES: Record<FixedSlideId, ComponentType<SlideProps>> = {
   ask: SlideAsk,
   annex: SlideAnnex,
 };
+
+/**
+ * The what-if slides have no fixed id: one per lever the team moved
+ * (`whatif:<lever>`), then `scenario` when two or more moved together
+ * (lib/engine/deck.ts). Resolved here rather than with a cast, so a new kind
+ * of slide id is a type error instead of an undefined component.
+ */
+const isWhatIfSlide = (id: SlideId): id is `whatif:${LeverId}` => id.startsWith("whatif:");
+
+function slideComponent(id: SlideId): ComponentType<SlideProps> {
+  if (id === "scenario") return SlideScenario;
+  if (isWhatIfSlide(id)) return SlideWhatIf;
+  return SLIDES[id];
+}
 
 /**
  * The print sheet — engine spec §10.2.
@@ -407,7 +423,7 @@ export function DeckView({
 
       <ol className={styles.thumbs} data-print="thumbs">
         {shown.map((slide) => {
-          const Slide = SLIDES[slide.id as FixedSlideId];
+          const Slide = slideComponent(slide.id);
           const isEnlarged = enlarged === slide.id;
           return (
             <li

@@ -39,7 +39,8 @@ describe("stageTabs — the §6.0 example", () => {
       activation: ["found", "found", "approximate"],
       retention: ["missing", "found", "missing"],
       referral: ["found", "found", "inProgress"],
-      revenue: ["approximate", "found", "missing"],
+      // Expansion and contraction since the 17-number base (2026-09-26).
+      revenue: ["approximate", "found", "missing", "found", "found"],
     });
     expect(tabs.find((t) => t.stage === "activation")!.marks[0]!.id).toBe("act.rate");
   });
@@ -50,7 +51,7 @@ describe("stageTabs — the §6.0 example", () => {
       ["activation", 2, 3],
       ["retention", 1, 3],
       ["referral", 2, 3],
-      ["revenue", 1, 3],
+      ["revenue", 3, 5],
     ]);
   });
 

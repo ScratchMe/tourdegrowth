@@ -400,6 +400,13 @@ export const ENGINE_COPY = {
     monthsOne: { fr: "1 mois", en: "1 month" },
     times: { fr: "{n} fois", en: "{n}×" },
     quarter: { fr: "T{q} {year}", en: "Q{q} {year}" },
+    /**
+     * TODO: à relire — nouveau (2026-09-26, slides « Et si »). A change,
+     * signed (`format.ts#formatChange`). The minus is U+2013, the glyph the
+     * copy already writes for a loss: U+2212 is in none of the slide fonts.
+     */
+    plus: { fr: "+{n}", en: "+{n}" },
+    minus: { fr: "–{n}", en: "–{n}" },
   },
 
   grammar: {
@@ -1087,6 +1094,39 @@ export const ENGINE_COPY = {
       unknown: { fr: "inconnu", en: "unknown" },
     },
     tourFooter: { fr: "Tour de Growth : {score}/100, {date}", en: "Tour de Growth: {score}/100, {date}" },
+    /**
+     * TODO: à relire — nouveau (2026-09-26). The what-if slides (one per lever
+     * the team moved, one for all of them together): their two tables, their
+     * column headings, and each row as the text export writes it. The panel's
+     * own words (`scenario.*`) say « tes « Et si » »; a slide is read out to a
+     * room, so it says « cet « Et si » » / « les « Et si » ».
+     */
+    whatIfKpis: { fr: "Les chiffres de croissance", en: "The growth numbers" },
+    whatIfFunnel: { fr: "Le funnel du mois", en: "The month's funnel" },
+    whatIfToday: { fr: "Aujourd'hui", en: "Today" },
+    whatIfWithOne: { fr: "Avec cet « Et si »", en: "With this what-if" },
+    whatIfWithAll: { fr: "Avec les « Et si »", en: "With the what-ifs" },
+    whatIfChange: { fr: "Écart", en: "Change" },
+    /** A figure the what-if leaves where it is: the change column says so in a word, never « 0 ». Gender-free in French. */
+    whatIfStable: { fr: "stable", en: "unchanged" },
+    whatIfRowOne: {
+      fr: "{today} aujourd'hui, {projected} avec cet « Et si » ({change})",
+      en: "{today} today, {projected} with this what-if ({change})",
+    },
+    whatIfRowAll: {
+      fr: "{today} aujourd'hui, {projected} avec les « Et si » ({change})",
+      en: "{today} today, {projected} with the what-ifs ({change})",
+    },
+    whatIfRowStable: { fr: "{today} aujourd'hui, stable", en: "{today} today, unchanged" },
+    /** A change in NRR or GRR, in percentage points. French takes the singular under 2 (« 0,5 point »). */
+    whatIfPoints: { fr: "{n} points", en: "{n} points" },
+    whatIfPointsOne: { fr: "{n} point", en: "{n} point" },
+    /**
+     * A lever of the « together » slide, as the text export writes it. French
+     * never writes « de {from} à {to} »: an estimate is a range (« 6 à 9 % »),
+     * and « de 6 à 9 % à 12 % » can't be read.
+     */
+    whatIfLeverRow: { fr: "à {to} (aujourd'hui : {from}) · {gain}", en: "from {from} to {to} · {gain}" },
   },
   /** One template per case and grammatical number (§9.3). `**…**` is the red accent. */
   slideTitles: {
@@ -1200,9 +1240,9 @@ export const ENGINE_COPY = {
     },
     annex: { fr: "Définitions et sources", en: "Definitions and sources" },
     // TODO: à relire — nouveau (2026-09-26).
-    whatIfLever: { fr: "Si {stage} passait de {from} à {to}, le MRR dans 12 mois gagnerait **{gain}**.", en: "If {stage} went from {from} to {to}, MRR in 12 months would gain **{gain}**." },
+    whatIfLever: { fr: "Si {stage} passait à {to} (aujourd'hui : {from}), le MRR dans 12 mois gagnerait **{gain}**.", en: "If {stage} went from {from} to {to}, MRR in 12 months would gain **{gain}**." },
     // TODO: à relire — nouveau (2026-09-26).
-    whatIfLeverPlain: { fr: "**Et si {stage} passait de {from} à {to} ?**", en: "**What if {stage} went from {from} to {to}?**" },
+    whatIfLeverPlain: { fr: "**Et si {stage} passait à {to} ?** Aujourd'hui : {from}.", en: "**What if {stage} went from {from} to {to}?**" },
     // TODO: à relire — nouveau (2026-09-26).
     scenario: { fr: "Avec les {n} « Et si » ensemble, le MRR dans 12 mois gagnerait **{gain}**.", en: "With the {n} what-ifs together, MRR in 12 months would gain **{gain}**." },
     // TODO: à relire — nouveau (2026-09-26).
@@ -1239,6 +1279,11 @@ export const ENGINE_COPY = {
         fr: "{side} aussi, mais sans montant commun, le churn ne se compare pas aux autres étapes",
         en: "{side} too, but with no amount in common, churn can't be compared with the other stages",
       },
+    },
+    /** TODO: à relire — nouveau (2026-09-26). On every what-if slide: the projection is not a forecast. */
+    whatIf: {
+      fr: "Est-ce une prévision ? — Non : une projection au rythme de ce mois, qui ne tient que si les hypothèses en bas de la slide tiennent.",
+      en: "Is this a forecast? — No: a projection at this month's pace, which only holds if the assumptions at the bottom of the slide hold.",
     },
   },
 

@@ -28,7 +28,8 @@ import { ROW_FIELDS, type RowKind } from "../deck-rows";
  * other 4 pass); dropping `filledAsk` from `STATES` fails "every kind is
  * exercised" in both languages, naming bullet, know and measure — the rows
  * only a written ask produces; dropping `margin` fails it naming cap — the
- * lifetime cap is written only when an LTV exists to be capped.
+ * lifetime cap is written only when an LTV exists to be capped; dropping
+ * `whatIf` fails it naming kpi, funnelStep, lever and together.
  */
 
 const props = { fr: { ...FR, ctx: CTX_FR }, en: { ...EN, ctx: CTX_EN } } as const;
@@ -66,7 +67,16 @@ function margin(): EngineState {
   return withEntry(exampleState(), "rev.gross-margin", measured(ratio(80, 100), { kind: "tool", tool: "stripe" }));
 }
 
-const STATES: Record<string, () => EngineState> = { example: exampleState, linked, filledAsk, teamAsk, margin };
+/**
+ * Two levers moved (2026-09-26): each writes its own slide of kpi and
+ * funnelStep rows, and two or more write the « scenario » slide, the only
+ * one with lever and together rows.
+ */
+function whatIf(): EngineState {
+  return { ...exampleState(), whatIf: { "act.rate": 24, "ret.logo-churn": 1.5 } };
+}
+
+const STATES: Record<string, () => EngineState> = { example: exampleState, linked, filledAsk, teamAsk, margin, whatIf };
 
 function model(state: EngineState, locale: "fr" | "en"): DeckModel {
   const p = props[locale];

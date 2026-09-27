@@ -489,6 +489,193 @@
   color: var(--text-muted);
 }
 
+/* ── The what-if slides (2026-09-26) ────────────────────────────────── */
+
+/*
+ * One slide per lever the team moved, then one with all of them at once.
+ * Every figure is the model's (lib/engine/deck.ts, from scenario.ts); these
+ * rules only place them. No red here that is not the title's accent: a
+ * projected gain is neither a diagnosis nor advice, so a moved figure is
+ * bold ink and an unmoved one is muted — the row's `data-tone` decides,
+ * never a word the eye has to read first.
+ */
+.whatIf {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
+  gap: 56px;
+  align-items: start;
+}
+
+.changeCard {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 22px 30px;
+  border: var(--border-solid);
+  border-radius: var(--radius-card);
+  background: var(--surface-card);
+}
+
+.changeTable {
+  width: 100%;
+  border-collapse: collapse;
+  font: var(--slide-body-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.changeTable th,
+.changeTable td {
+  padding: 7px 0 7px 18px;
+  text-align: right;
+  border-bottom: var(--border-rule);
+}
+
+.changeTable thead th {
+  padding-top: 0;
+  font: var(--slide-meta);
+  letter-spacing: var(--slide-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.changeTable thead td {
+  border-bottom: var(--border-rule);
+}
+
+.changeTable tbody th {
+  padding-left: 0;
+  text-align: left;
+  font-weight: 600;
+}
+
+.changeTable td {
+  white-space: nowrap;
+}
+
+.changeTable tbody tr:last-child th,
+.changeTable tbody tr:last-child td {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+/* Two classes: the row's tone must beat the cell's own weight whatever order the rules land in. */
+.changeTable tr[data-tone="moved"] .changeCell {
+  font-weight: 700;
+}
+
+.changeTable tr[data-tone="stable"] .changeCell,
+.changeTable tr[data-tone="unknown"] td {
+  color: var(--text-muted);
+}
+
+/* The « together » slide: the levers, then the two tables, three columns at a tighter size. */
+.scenario {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.12fr) minmax(0, 1fr);
+  gap: 36px;
+  align-items: start;
+}
+
+.scenario .changeCard {
+  padding: 20px 24px;
+}
+
+.scenario .changeTable {
+  font-size: 20px;
+}
+
+.scenario .changeTable th,
+.scenario .changeTable td {
+  padding-left: 12px;
+}
+
+.scenario .changeTable tbody th {
+  padding-left: 0;
+}
+
+.leverCard {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px 24px;
+  border: var(--border-solid);
+  border-radius: var(--radius-card);
+  background: var(--surface-card);
+}
+
+.leverList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* The lever and what it brings on one line, its move under it. */
+.leverRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "name gain"
+    "move move";
+  gap: 2px 14px;
+  padding-bottom: 10px;
+  border-bottom: var(--border-rule);
+}
+
+.leverRow:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.leverName {
+  grid-area: name;
+  font: var(--slide-body-sm);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.leverMove {
+  grid-area: move;
+  font: var(--slide-meta);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.leverGain {
+  grid-area: gain;
+  font: var(--slide-body-sm);
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Eight levers still end above the footer: a denser step past four. */
+.leverDense .leverList {
+  gap: 6px;
+}
+
+.leverDense .leverRow {
+  padding-bottom: 6px;
+}
+
+.together {
+  margin: 0;
+  padding-top: 12px;
+  border-top: var(--border-rule);
+  font: var(--slide-body-sm);
+  font-size: 20px;
+  font-weight: 600;
+}
+
 /* ── Slide 3 — visibility (§9.3) ────────────────────────────────────── */
 
 .visibility {

@@ -43,7 +43,7 @@ export interface DeckRows {
   // Slide 2 — the leak
   /** A step of the "what if" chain: `key` is today / if / then / times / annual / less-than-one. */
   calc: { key: string; label: string; text: string };
-  /** Replaces the deck's common footer on this slide; it carries the assumptions (§9.3). */
+  /** Replaces the deck's common footer on its slide; it carries the assumptions (§9.3) — the leak's, and each what-if slide's. */
   footer: { text: string };
   /** Another candidate and where it stands; `tone` (below | neutral | unknown) decides the emphasis only. */
   aside: { id: string; label: string; text: string; tone: string };
@@ -74,6 +74,20 @@ export interface DeckRows {
   cost: { text: string };
   know: { id: string; label: string; current: string; target: string; checkpoint: string; text: string };
   measure: { id: string; label: string; text: string };
+  // The what-if slides (2026-09-26) — one per lever moved, one for all of them together
+  /**
+   * One growth figure (MRR in 12 months, new MRR, NRR, GRR, CAC, LTV,
+   * payback): `today`, `projected` and `change` are "" when it can't be
+   * computed (the slide prints "?", never 0); `change` is signed, or the
+   * "unchanged" word. `tone` — unknown | stable | moved — is the emphasis only.
+   */
+  kpi: { id: string; label: string; tone: string; today: string; projected: string; change: string; text: string };
+  /** One step of the month's funnel, in people: the same columns as `kpi`. */
+  funnelStep: { id: string; label: string; tone: string; today: string; projected: string; change: string; text: string };
+  /** A lever of the « together » slide: its name, today's value and the target, and what it brings alone ("" when unpriced). */
+  lever: { id: string; label: string; from: string; to: string; gain: string; text: string };
+  /** The levers together against their sum: the compounding sentence. */
+  together: { text: string };
   // Appendix
   annex: {
     id: string;
@@ -117,6 +131,10 @@ export const ROW_FIELDS: { readonly [K in RowKind]: readonly (keyof DeckRows[K])
   cost: ["text"],
   know: ["id", "label", "current", "target", "checkpoint", "text"],
   measure: ["id", "label", "text"],
+  kpi: ["id", "label", "tone", "today", "projected", "change", "text"],
+  funnelStep: ["id", "label", "tone", "today", "projected", "change", "text"],
+  lever: ["id", "label", "from", "to", "gain", "text"],
+  together: ["text"],
   annex: ["id", "label", "formula", "window", "period", "source", "status", "confidence", "definition", "text"],
 };
 

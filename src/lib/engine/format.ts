@@ -181,6 +181,24 @@ export function formatApproxMoneyInterval(i: Interval, currency: Currency, ctx: 
   return fillTemplate(words.approx, { n: range(lo, hi, words) });
 }
 
+/**
+ * A change, signed — "+~9 400 €", "–1 point", "+16 à 25" (the what-if
+ * slides, 2026-09-26). `print` formats a NON-negative interval in the
+ * change's own unit, so the rounding and the "~" are that unit's, never a
+ * second rule here. The sign is written once, in front, when both bounds
+ * agree; on each bound when the range straddles zero ("–3 à +5"). The sign
+ * glyphs are copy (`units.plus` / `units.minus`), like the "~" of `approx`.
+ * A change of exactly 0 is the caller's to word ("stable"): a "+0" reads as
+ * a measurement of nothing.
+ */
+export function formatChange(i: Interval, print: (magnitude: Interval) => string, words: UnitWords): string {
+  const plus = (m: Interval) => fillTemplate(words.plus, { n: print(m) });
+  const minus = (m: Interval) => fillTemplate(words.minus, { n: print(m) });
+  if (i.lo >= 0) return plus(i);
+  if (i.hi <= 0) return minus({ lo: -i.hi, hi: -i.lo });
+  return fillTemplate(words.range, { lo: minus({ lo: -i.lo, hi: -i.lo }), hi: plus({ lo: i.hi, hi: i.hi }) });
+}
+
 // --- Durations -----------------------------------------------------------------
 
 function roundDuration(v: number): number {

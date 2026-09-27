@@ -383,3 +383,90 @@ describe("slideGlyphs — the user's words in the slide fonts", () => {
     }
   });
 });
+
+// Non-vacuity, measured: pricing every gain (dropping `gain.lo >= 1`) fails
+// "a loss… gets the plain title" only; slide-ing a target that prints as
+// today's value fails "…is no slide" only; a U+2212 minus in the copy fails
+// the fonts check only (it is not in the slide fonts, §10.4).
+describe("the what-if slides (2026-09-26)", () => {
+  const withWhatIf = (targets: EngineState["whatIf"], state = exampleState()): EngineState => ({ ...state, whatIf: targets });
+  const ids = (model: DeckModel) => model.slides.map((s) => s.id);
+  const row = (s: DeckModel["slides"][number], kind: string, id: string) => s.lines.find((l) => l.row === kind && l.id === id)!;
+
+  it("one slide per lever moved, after the leak, in lever order; « scenario » only from two", () => {
+    expect(ids(deck(exampleState())).some((id) => id.startsWith("whatif:") || id === "scenario")).toBe(false);
+    expect(ids(deck(withWhatIf({ "act.rate": 24 })))).toEqual(["peloton", "leak", "whatif:act.rate", "visibility", "unit-economics", "mirror", "ask", "annex"]);
+    // Typed in the reverse order: the deck still follows the levers' order.
+    const two = deck(withWhatIf({ "ret.logo-churn": 1.5, "act.rate": 24 }));
+    expect(ids(two).slice(1, 5)).toEqual(["leak", "whatif:act.rate", "whatif:ret.logo-churn", "scenario"]);
+    expect(two.slides.filter((s) => s.id.startsWith("whatif:") || s.id === "scenario").every((s) => s.present && s.included)).toBe(true);
+  });
+
+  it("a target that prints as today's value, or on a number nobody entered, is no slide", () => {
+    expect(ids(deck(withWhatIf({ "act.rate": 18 })))).not.toContain("whatif:act.rate");
+    const noArpa = withEntry(exampleState(), "rev.arpa", undefined);
+    expect(ids(deck(withWhatIf({ "rev.arpa": 150 }, noArpa)))).not.toContain("whatif:rev.arpa");
+  });
+
+  it("excluding one gives up its number", () => {
+    const state = withWhatIf({ "act.rate": 24, "ret.logo-churn": 1.5 });
+    state.deck.include["whatif:act.rate"] = false;
+    const model = deck(state);
+    expect(slide(model, "whatif:act.rate")).toMatchObject({ included: false, index: null });
+    expect(slide(model, "whatif:ret.logo-churn").index).toBe(3);
+  });
+
+  it("a gain is priced in the title, and the title quotes the same amount the table's first row prints", () => {
+    for (const locale of ["fr", "en"] as const) {
+      const s = slide(deck(withWhatIf({ "act.rate": 24 }), locale), "whatif:act.rate");
+      expect(s.title.key).toBe("whatIfLever");
+      const mrr12 = row(s, "kpi", "mrr12");
+      expect(mrr12.tone).toBe("moved");
+      expect(mrr12.change).toBe(`+${s.title.values.gain}`);
+    }
+  });
+
+  it("a loss, or a gain nobody can price, gets the plain title — never « would gain » a negative", () => {
+    expect(slide(deck(withWhatIf({ "act.rate": 12 })), "whatif:act.rate").title.key).toBe("whatIfLeverPlain");
+    const both = deck(withWhatIf({ "act.rate": 12, "rev.arpa": 90 }));
+    expect(slide(both, "scenario").title).toEqual({ key: "scenarioPlain", values: { n: "2" } });
+  });
+
+  it("activation moves what it feeds, and leaves the visitors and sign-ups alone", () => {
+    const s = slide(deck(withWhatIf({ "act.rate": 24 })), "whatif:act.rate");
+    expect(row(s, "funnelStep", "visitors").tone).toBe("stable");
+    expect(row(s, "funnelStep", "signups").tone).toBe("stable");
+    expect(row(s, "funnelStep", "activated").tone).toBe("moved");
+    expect(row(s, "funnelStep", "paying").tone).toBe("moved");
+    // Churn didn't move: the retention rates say so, in a word.
+    expect(row(s, "kpi", "grr")).toMatchObject({ tone: "stable", change: FR.strings.slide.whatIfStable });
+  });
+
+  it("a figure nobody can compute prints nothing, never 0: the example has no margin, so no LTV", () => {
+    const ltv = row(slide(deck(withWhatIf({ "act.rate": 24 })), "whatif:act.rate"), "kpi", "ltv");
+    expect(ltv).toMatchObject({ tone: "unknown", today: "", projected: "", change: "" });
+  });
+
+  it("together: one line per lever with its own gain, and the compounding said when the whole is worth more than the sum", () => {
+    const s = slide(deck(withWhatIf({ "act.rate": 24, "ret.logo-churn": 1.5 })), "scenario");
+    expect(s.title).toMatchObject({ key: "scenario", values: { n: "2" } });
+    const levers = s.lines.filter((l) => l.row === "lever");
+    expect(levers.map((l) => l.id)).toEqual(["act.rate", "ret.logo-churn"]);
+    expect(levers.every((l) => l.gain?.startsWith("+"))).toBe(true);
+    // More customers activated, each kept longer: the extra is what `together` names.
+    const [before] = FR.strings.scenario.together.split("{total}");
+    expect(s.lines.find((l) => l.row === "together")?.text?.startsWith(before!)).toBe(true);
+  });
+
+  it("every value the what-if slides inject prints in the slides' fonts", () => {
+    const bad: string[] = [];
+    for (const locale of ["fr", "en"] as const) {
+      const model = deck(withWhatIf({ "acq.signup-rate": 4, "act.rate": 24, "ret.logo-churn": 1.5, "rev.arpa": 90 }), locale);
+      for (const s of model.slides.filter((x) => x.id.startsWith("whatif:") || x.id === "scenario")) {
+        for (const v of Object.values(s.title.values)) if (!ALLOWED.test(v)) bad.push(`${s.id} title: ${v}`);
+        for (const line of s.lines) for (const [key, v] of Object.entries(line)) if (!ALLOWED.test(v)) bad.push(`${s.id} ${key}: ${v}`);
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+});
