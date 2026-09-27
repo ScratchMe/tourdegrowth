@@ -235,7 +235,7 @@ describe("the slides", () => {
     const onSlide = [
       ...under("slideTitles", "slide", "notes", "side", "worth", "unitInput"),
       ...under("peloton").filter(([p]) => /clause|unmeasured/.test(p)),
-      ...under("whatIf").filter(([p]) => !/title|slider|multiplication|notForecast/.test(p)),
+      ...under("whatIf").filter(([p]) => !/title|slider/.test(p)),
     ];
     const offenders = onSlide.flatMap(([p, t]) => [
       // Letter boundaries, not \b: « coûte » must not read as « te » after a non-ASCII « û ».

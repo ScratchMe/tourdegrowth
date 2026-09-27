@@ -654,7 +654,6 @@ export const ENGINE_COPY = {
     noComparator: { fr: "sans repère · fixe une cible", en: "no reference · set a target" },
   },
   whatIf: {
-    title: { fr: "Et si · toutes choses égales par ailleurs", en: "What if · all else being equal" },
     today: { fr: "Aujourd'hui", en: "Today" },
     if: { fr: "Si", en: "If" },
     then: { fr: "Alors", en: "Then" },
@@ -688,15 +687,6 @@ export const ENGINE_COPY = {
       en: "That's {amount} more MRR after a year, churn included.",
     },
     lessThanOne: { fr: "Moins d'un client de plus par mois.", en: "Less than one more customer a month." },
-    assumptionActivation: {
-      fr: "Hypothèse : les payants sont parmi les activés.",
-      en: "Assumption: paying customers are among the activated.",
-    },
-    multiplication: {
-      fr: "Dans un funnel, les taux se multiplient : +20 % sur n'importe quelle étape donne +20 % de clients. Ce qui distingue les étapes, c'est leur écart à la cible.",
-      en: "In a funnel, rates multiply: +20% at any stage gives +20% customers. What sets stages apart is their gap to target.",
-    },
-    notForecast: { fr: "Un calcul, pas une prévision.", en: "A calculation, not a forecast." },
     targetReference: {
       fr: "{value} (bas de l'ordre de grandeur couramment cité)",
       en: "{value} (low end of the commonly cited range)",
@@ -707,7 +697,6 @@ export const ENGINE_COPY = {
       en: "{value} (high end of the commonly cited range)",
     },
     targetTeam: { fr: "{value} (cible de l'équipe)", en: "{value} (team target)" },
-    slider: { fr: "Cible à tester pour {stage}", en: "Target to try for {stage}" },
   },
 
   // --- Peloton and mirror (§14.7) ------------------------------------------
@@ -735,7 +724,6 @@ export const ENGINE_COPY = {
   scenario: {
     /** A difference of two rates is in points, never a percent of a percent (« +1 pt »). */
     points: { fr: "{n} pt", en: "{n} pt" },
-    title: { fr: "Et si ?", en: "What if?" },
     intro: { fr: "Bouge un ou plusieurs leviers : le funnel du mois et tes chiffres de croissance se recalculent ensemble, les effets se cumulent.", en: "Move one lever or several: the month's funnel and your growth numbers recompute together, and the effects add up." },
     leversTitle: { fr: "Les leviers", en: "The levers" },
     leverToday: { fr: "aujourd'hui {value}", en: "today {value}" },
@@ -752,7 +740,6 @@ export const ENGINE_COPY = {
     activated: { fr: "Activés", en: "Activated" },
     d30: { fr: "Actifs à J30", en: "Active at day 30" },
     paying: { fr: "Nouveaux payants", en: "New paying" },
-    perMonth: { fr: "par mois", en: "a month" },
     unknownStep: { fr: "inconnu", en: "unknown" },
     gained: { fr: "+{n} avec tes « Et si »", en: "+{n} with your what-ifs" },
     /** U+2212, the minus sign: StatTile.tsx asks for it, and a hyphen reads as a dash. */
@@ -913,7 +900,6 @@ export const ENGINE_COPY = {
     tablePerHundred: { fr: "Sur 100 inscrits", en: "Out of 100 sign-ups" },
     tableStatus: { fr: "Statut", en: "Status" },
     tableSource: { fr: "Source", en: "Source" },
-    whatIfMove: { fr: "Déplace le curseur pour tester une cible.", en: "Move the slider to try a target." },
     mirrorCounts: { fr: "Sur les chiffres que le Tour te faisait déclarer", en: "Across the numbers the Tour asked you about" },
     /** Which Tour is read — the spec shows its date (§6.11): a result can be months old. */
     mirrorTakenAt: { fr: "Tour du {date} · {score}/100", en: "Tour taken {date} · {score}/100" },
@@ -1078,7 +1064,6 @@ export const ENGINE_COPY = {
     askGoal: { fr: "{metric} de {current} à {target}", en: "{metric} from {current} to {target}" },
     askGoalNoCurrent: { fr: "{metric} à {target}", en: "{metric} to {target}" },
     askGoalHorizon: { fr: "{goal} d'ici {horizon}", en: "{goal} by {horizon}" },
-    annexTitle: { fr: "Définitions et sources", en: "Definitions and sources" },
     annexCols: {
       number: { fr: "Chiffre", en: "Number" },
       formula: { fr: "Formule", en: "Formula" },
@@ -1402,7 +1387,6 @@ export const ENGINE_COPY = {
     phaseNumbers: { fr: "Tes chiffres", en: "Your numbers" },
     phaseWhatIf: { fr: "Et si", en: "What if" },
     phaseDeck: { fr: "Tes slides", en: "Your slides" },
-    phaseOf: { fr: "Étape {i} sur {n}", en: "Step {i} of {n}" },
     continue: { fr: "Continuer →", en: "Continue →" },
     back: { fr: "← Retour", en: "← Back" },
     toBoard: { fr: "Voir le tableau complet", en: "See the full board" },
@@ -1431,25 +1415,6 @@ export const ENGINE_COPY = {
     answerOf: { fr: "Point {i} sur {n} · {stage}", en: "Item {i} of {n} · {stage}" },
     skip: { fr: "Passer, j'y reviendrai", en: "Skip, I'll come back to it" },
     whatIfTitle: { fr: "Et si ?", en: "What if?" },
-    whatIfIntro: {
-      fr: "Choisis une étape et déplace le curseur : le funnel se redessine avec la cible que tu testes, et le gain s'affiche en revenu mensuel.",
-      en: "Pick a stage and move the slider: the funnel redraws with the target you are testing, and the gain shows as monthly revenue.",
-    },
-    whatIfNone: {
-      fr: "Pour tester une cible, il faut d'abord un chiffre sur l'une de ces étapes : taux d'inscription, activation, churn ou conversion en payant.",
-      en: "To test a target, you first need a number on one of these: sign-up rate, activation, churn or paid conversion.",
-    },
-    whatIfStage: { fr: "Étape à tester", en: "Stage to test" },
-    funnelIf: { fr: "Ton funnel si {stage} atteint {target}", en: "Your funnel if {stage} reaches {target}" },
-    funnelIfChurn: {
-      fr: "Le funnel ne montre pas le churn : son effet est dans le revenu, ci-contre.",
-      en: "The funnel doesn't show churn: its effect is in the revenue, alongside.",
-    },
-    funnelIfUpstream: {
-      fr: "Le funnel est compté sur 100 inscrits : un meilleur taux d'inscription t'en donne plus pour le même trafic. Son effet est dans le revenu, ci-contre.",
-      en: "The funnel is counted on 100 sign-ups: a better sign-up rate gives you more of them for the same traffic. Its effect is in the revenue, alongside.",
-    },
-    funnelToday: { fr: "Ton funnel aujourd'hui", en: "Your funnel today" },
     doneTitle: { fr: "Ton moteur est prêt", en: "Your engine is ready" },
     doneBody: {
       fr: "Prépare tes slides maintenant, ou complète plus tard : tout reste sur cet appareil. Pense à sauvegarder un fichier.",

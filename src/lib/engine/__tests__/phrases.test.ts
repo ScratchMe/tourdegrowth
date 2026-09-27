@@ -29,7 +29,7 @@ import {
   unpricedSentence,
   worthOf,
 } from "../phrases";
-import type { Comparator, EngineState, ImpactLine } from "../types";
+import type { Comparator, EngineState, ImpactLine, Interval } from "../types";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
 import { exampleState, measured, ratio, withEntry, withTarget } from "./fixtures";
 
@@ -329,5 +329,69 @@ describe("isAnswerMetric / statusQuestionOf — an answer is not « ce chiffre �
   it("the step-by-step eyebrow for an answer does not call it a number either", () => {
     expect(FR.strings.steps.answerOf).not.toMatch(/chiffre/i);
     expect(EN.strings.steps.answerOf).not.toMatch(/number/i);
+  });
+});
+
+describe("chainTemplate — which sentence a line of the chain is printed with", () => {
+  // Moved from the retired « Et si » drawer (visual-model.ts#whatIfTemplate, a pass-through), 2026-09-26.
+  // Each template is its own key name, so the assertion names the mapping itself.
+  const words = Object.fromEntries(
+    [
+      "today",
+      "if",
+      "then",
+      "times",
+      "todayFlow",
+      "todayFlowOne",
+      "todayPerHundred",
+      "todayPerHundredOne",
+      "ifFlow",
+      "thenFlow",
+      "timesFlow",
+      "todayChurn",
+      "thenChurn",
+      "thenChurnOne",
+      "timesChurn",
+      "annual",
+      "lessThanOne",
+    ].map((k) => [k, k]),
+  ) as unknown as typeof FR.strings.whatIf;
+  const line = (key: ImpactLine["key"], count?: Interval): ImpactLine => ({ key, values: {}, ...(count ? { count } : {}) });
+  const flow = { metric: "act.rate", kind: "new-mrr" } as const;
+  const churn = { metric: "ret.logo-churn", kind: "retained-mrr" } as const;
+  const many: Interval = { lo: 12, hi: 12 };
+
+  it("a flow metric uses the flow sentences, with a label on every step", () => {
+    expect(chainTemplate(line("today", many), flow, words, "en")).toEqual({ label: "today", template: "todayFlow" });
+    expect(chainTemplate(line("if"), flow, words, "en")).toEqual({ label: "if", template: "ifFlow" });
+    expect(chainTemplate(line("then"), flow, words, "en")).toEqual({ label: "then", template: "thenFlow" });
+    expect(chainTemplate(line("times"), flow, words, "en")).toEqual({ label: "times", template: "timesFlow" });
+  });
+
+  it("churn has its own sentences (the chain counts customers kept, not added)", () => {
+    expect(chainTemplate(line("today"), churn, words, "en").template).toBe("todayChurn");
+    expect(chainTemplate(line("then", many), churn, words, "en").template).toBe("thenChurn");
+    expect(chainTemplate(line("times"), churn, words, "en").template).toBe("timesChurn");
+  });
+
+  it("a chain with no monthly volume is read per 100 sign-ups — « par mois » would be false", () => {
+    expect(chainTemplate(line("today", many), { metric: "act.rate", kind: "per-hundred" }, words, "fr").template).toBe(
+      "todayPerHundred",
+    );
+  });
+
+  it("a noun agrees with the count the line prints: French singular under 2, English only for exactly 1", () => {
+    const oneAndAHalf: Interval = { lo: 1.5, hi: 1.5 };
+    expect(chainTemplate(line("today", oneAndAHalf), flow, words, "fr").template).toBe("todayFlowOne");
+    expect(chainTemplate(line("today", oneAndAHalf), flow, words, "en").template).toBe("todayFlow");
+    expect(chainTemplate(line("then", { lo: 1, hi: 1 }), churn, words, "en").template).toBe("thenChurnOne");
+  });
+
+  it("the annual line and « less than one » conclude the chain: no step label", () => {
+    expect(chainTemplate(line("annual"), churn, words, "en")).toEqual({ label: null, template: "annual" });
+    expect(chainTemplate(line("less-than-one"), flow, words, "en")).toEqual({
+      label: null,
+      template: "lessThanOne",
+    });
   });
 });
