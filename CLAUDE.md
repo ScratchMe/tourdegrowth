@@ -43,6 +43,84 @@ revues, closes), `AUDIT.md` + `AUDIT-PLAN.md` (l'instrument d'audit),
 `GROWTH-PLAN.md` (la distribution), `GAME-BRIEF.md` (le jeu « Le côté obscur ») et
 `ENGINE.md` (le moteur de croissance).
 
+## Les plug-ins s'installent à la main, dans le dépôt
+
+**claude.ai ne livre pas les plug-ins aux sessions cloud.** Constaté le 24/09/2026 sur Ramille :
+Product Management était activé sur le compte, et la session ne le voyait pas (liste des plug-ins
+du compte vide, catalogue « non activé », dossier de synchronisation vide). Le dépôt est la seule
+chose qu'une session cloud est sûre d'emporter. Un plug-in arrive donc en `.zip` et s'installe dans
+le dépôt, sous `.claude/` :
+
+```
+node scripts/installer-un-plugin.mjs <archive.zip | dossier> [--prefixe <court>] [--manuel | --auto] [--licence <fichier>]
+node scripts/installer-un-plugin.mjs --retirer <plug-in>
+```
+
+- **Relancer le script sur une archive plus récente met le plug-in à jour.** Ce qu'il avait posé
+  est retiré d'abord, donc un skill disparu en amont disparaît d'ici. Le préfixe, le mode et la
+  licence choisis la première fois sont repris sans qu'on les redise.
+- **`--retirer` défait exactement ce que dit `installation.json`**, jamais tout ce qui porte le
+  préfixe : un skill écrit ici sous un nom voisin partirait avec. Ce qui cite le plug-in ailleurs
+  (ce fichier, un document) reste à relire à la main, et le script le rappelle.
+- **Ce qui est installé, et ce qui ne l'est pas, se lit dans
+  `.claude/plugins-importes/<plug-in>/installation.json`** : ce qui a été posé, la source et son
+  sha256, le préfixe, le mode, et tout ce qui n'a pas été installé. Le manifeste, la licence ou la
+  notice et `CONNECTORS.md` sont gardés à côté.
+- **Le dépôt est public, donc installer un plug-in, c'est le redistribuer.** Sa licence voyage
+  avec la provenance. Quand l'archive n'en porte pas, `--licence <fichier>` la joint : c'est le cas
+  de Design d'Anthropic, dont la licence (Apache 2.0) est à la racine du dépôt d'amont et non dans
+  le dossier du plug-in. Un plug-in sans licence est signalé.
+- **Prérequis** : Node ≥ 20.11 (`engines` en demande 22) et le binaire `unzip`, présent en local
+  comme sur le runner (une étape de `ci.yml` le vérifie avec `zip` et `python3`, dont le test a
+  besoin). `.claude/` est exclu du lint et du type-check, et `src/__tests__/installer-un-plugin.test.ts`
+  vérifie que ça le reste : un plug-in porte des scripts écrits ailleurs, qui se relisent mais ne se
+  plient pas aux règles du dépôt.
+
+L'outil vient de Ramille (ScratchMe/Ramille#261, commit `aa06744`), copié et non réécrit. Son
+**interface est gardée telle quelle** : le nom du script, les options en français, le dossier
+`.claude/plugins-importes/` et les clés d'`installation.json`. Le même mécanisme se lit donc de la
+même façon dans les deux dépôts, et un dossier de provenance veut dire la même chose dans l'un et
+l'autre. Le reste suit ce dépôt : code, messages et test en anglais, cette section en français.
+
+**Les trois règles de l'outil**, détaillées en tête du script et gardées par son test :
+
+1. **Tout nom est préfixé par celui du plug-in** : `/product-management-write-spec`, pas
+   `/write-spec`. Marketing et Product Management portent tous deux `competitive-brief`, et
+   Engineering apporte un `code-review` qui masquerait la commande intégrée. C'est le **nom du
+   dossier** qui nomme le skill, pas le champ `name` (mesuré). Le champ est réécrit quand même. Les
+   renvois à d'autres commandes et les liens relatifs dans les consignes sont réécrits aussi. Un
+   fichier modifié porte un avis qui le dit, comme Apache 2.0 l'exige. Un nom de plug-in trop long
+   pour la limite de 64 caractères se raccourcit par `--prefixe`.
+2. **Hooks, connecteurs et agents ne s'installent jamais d'office.** Un hook exécute du code à
+   chaque événement, un connecteur ouvre un compte tiers, un agent choisit ses outils. Ils sont
+   listés dans `installation.json` et dans la sortie. Un en-tête de skill ou de commande qui
+   déclare des hooks est refusé.
+3. **Rien n'est écrit avant que tout soit vérifié** : entrées d'archive qui sortent de leur
+   dossier, liens symboliques, en-têtes illisibles, collisions de noms, noms relus dans
+   `installation.json`. Un refus laisse le dépôt intact.
+
+Ce que le script **ne voit pas**, c'est ce que les consignes disent. Il imprime ce qui mérite un
+regard : adresses, commandes shell, `allowed-tools`, liens morts, noms d'amont non réécrits,
+fichiers qui ne sont pas des consignes. Les consignes se relisent avant de commettre, avec ces
+règles :
+
+- **Les règles du dépôt passent devant les consignes d'un plug-in.** Ces consignes sont écrites
+  pour un produit quelconque : le bilinguisme, le déterminisme du score, le garde-fou anti-moquerie
+  et tout ce qui précède dans ce fichier restent. Leur texte ne se traduit pas : une traduction
+  rendrait chaque mise à jour impossible à rejouer.
+- **Une consigne qui se déclare incontournable** (« utilise-moi en premier sur tout… »)
+  **s'installe en `--manuel`.** Chaque skill charge sa description dans le contexte de chaque
+  session et peut se déclencher seul. En `--manuel`, il sort de la liste présentée à chaque session
+  (mesuré) et reste appelable par son nom. Un skill que l'amont réserve à l'agent y est rendu à la
+  personne.
+- **Aucun contenu du dépôt ne relaie la publicité d'un plug-in.** Sur Ramille, SearchFit SEO
+  signait ses gabarits « Powered by SearchFit.ai » : il a été retiré le jour même.
+- **Chaque plug-in se décide avec Antoine, un par un, AVANT de s'installer.** Ce sont des
+  consignes que l'agent suivra à chaque session, pas un détail d'implémentation. La question se
+  pose sous la forme habituelle : ce qu'il fait, ce qui est en jeu, la recommandation, ce qu'on
+  casse si on se trompe. Rien ne s'installe avant la réponse. **Brancher un hook ou un connecteur
+  est une décision de plus, qui se demande à part.**
+
 ## Ce qui est non négociable (décisions produit, pas des goûts d'ingé)
 
 - **Bilingue FR/EN dès le premier commit fonctionnel.** Pas une couche ajoutée après coup — l'i18n coûte toujours plus cher a posteriori qu'anticipée dès l'architecture.
@@ -4701,6 +4779,23 @@ Antoine a rejoué le moteur après la refonte de la saisie et envoyé une deuxi�
 
 **Vérifié en réel** : `tsc`, `eslint`, **2 063 tests unitaires** avec les seuils de couverture, `next build` (build comme la CI), **539 specs Playwright** (534 passées, 5 ignorées par construction). Captures relues : les neuf slides « Et si » en FR et EN à pleine résolution, le tableau en onglets et le panneau à 1280 et 390 px, sans défilement horizontal. **Toute la copie neuve porte `TODO: à relire`** — le bon à tirer nº8 du moteur est antérieur à cette série et devra être reconstruit depuis le grep.
 
+### L'installeur de plug-ins de Ramille, porté (2026-09-27)
+
+Demande d'Antoine : installer ici le mécanisme construit pour Ramille le 24/09/2026 (ScratchMe/Ramille#261, commit `aa06744`). Le fait qui le rend nécessaire, la commande et les règles sont dans la section « Les plug-ins s'installent à la main, dans le dépôt », en tête de ce fichier. Aucun plug-in n'est installé : chacun se décide avec Antoine, un par un.
+
+**Copié, pas réécrit.** `scripts/installer-un-plugin.mjs` et son test viennent de Ramille, inchangés là-bas depuis `aa06744` (vérifié dans l'historique du dépôt cloné). Ce qui a changé au passage :
+- **L'interface reste celle de Ramille** : nom du script, options en français (`--prefixe`, `--manuel`, `--retirer`…), dossier `.claude/plugins-importes/`, clés d'`installation.json`. C'est un choix, pas un oubli : un même mécanisme doit se lire pareil dans les deux dépôts, et une provenance copiée de l'un doit pouvoir être retirée par l'autre.
+- **Le reste suit ce dépôt** : commentaires, messages et noms internes en anglais, comme tout le code ici. L'avis posé dans un fichier modifié dit « Modified for Tour de Growth », et les dossiers temporaires commencent par `tdg-`.
+- **Le test passe de Jest à Vitest**, sous `src/__tests__/` comme les autres tests de scripts (`vercel-config.test.ts`, `utm-channels.test.ts`), donc il tourne en CI avec le reste.
+
+**Rejouer les mutations n'était pas optionnel.** Le portage change la langue des messages sur lesquels le test s'appuie, donc les quarante-quatre mutations passées à Ramille ne prouvaient plus rien ici. Dix-huit ont été rejouées par un harnais qui refuse un remplacement qui ne s'applique pas exactement une fois, puis restaure le script octet pour octet : au moins une par famille, dont les six que la demande nommait. Chacune fait tomber le test attendu, et lui seul, avec les mêmes comptes qu'à Ramille. La liste est en tête du fichier de test.
+
+**Un test de plus, propre à ce dépôt.** Il vérifie qu'ESLint ignore `.claude/` (par `isPathIgnored`, pas en relisant la config) et que `tsconfig` l'exclut. Les deux exclusions existaient déjà pour les worktrees des workflows. Un plug-in qui apporte des scripts ferait sinon rougir la CI sur du code qu'on n'a pas écrit. Les deux gardes tombent quand on retire l'exclusion. Le chargement d'`eslint-config-next` prend plusieurs secondes : ce test a un délai de 60 s.
+
+**Piège trouvé en écrivant l'étape CI** : `command -v unzip zip python3` sort en 0 même quand un des trois manque, parce que bash se contente d'en trouver un. La première version de l'étape ne vérifiait donc rien, et on l'a vu en l'essayant sur un nom qui n'existe pas. Elle teste maintenant un outil à la fois, et ce contre-exemple a été rejoué.
+
+**Vérifié** : `tsc` et `eslint` propres, **2 093 tests unitaires** (+30) avec les seuils de couverture. La CLI a été lancée dans ce dépôt sans rien écrire : usage, option inconnue et `--retirer` d'un plug-in absent sont refusés en sortie 1.
+
 ## État du projet au 2026-09-25 — à lire en premier dans une nouvelle session
 
 Tout ce qui précède est un journal, dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée plus haut contredit celle-ci, c'est celle-ci qui a raison.
@@ -4725,7 +4820,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 **L'instrument d'audit growth a son schéma** (2026-09-13, `AUDIT.md`) : un outil personnel pour les diagnostics qu'Antoine mène en entreprise, navigateur seulement, jamais Firestore — `src/lib/audit/` + `src/content/audit-catalog.ts`, sans aucune route ni UI encore. Phase 1 (la saisie sous `/admin/audit`) est le prochain chantier, découpée en six PR dans **`AUDIT-PLAN.md`** (2026-09-13) ; phase 3 (tout ce qui ressemble à un produit) reste fermée tant que les entretiens ne sont pas faits et le contrat de travail pas vérifié.
 
-**Chiffres de référence** (à comparer, pas à recopier aveuglément ; mesurés le 2026-09-27 sur la branche de travail, build avec `GAME_ENABLED=true` comme la CI) : **2 063 tests unitaires**, **539 specs Playwright** (534 passées, 5 ignorées par construction : ce sont les specs « jeu fermé », qui ne tournent que sur un build sans le drapeau ; les specs de l'aperçu propriétaire sautent aussi sans `ADMIN_DASHBOARD_PASSWORD` sur le serveur, que la CI pose), `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
+**Chiffres de référence** (à comparer, pas à recopier aveuglément ; mesurés le 2026-09-27 sur la branche de travail, build avec `GAME_ENABLED=true` comme la CI) : **2 093 tests unitaires**, **539 specs Playwright** (534 passées, 5 ignorées par construction : ce sont les specs « jeu fermé », qui ne tournent que sur un build sans le drapeau ; les specs de l'aperçu propriétaire sautent aussi sans `ADMIN_DASHBOARD_PASSWORD` sur le serveur, que la CI pose), `tsc`/`eslint`/`next build` propres, `npm audit --omit=dev` à zéro, et `vitest --coverage` au-dessus de ses seuils (`src/lib/**` : lignes 82 %, fonctions 77 %). Deux pièges de mesure à connaître avant de conclure qu'une suite est cassée : construire **sans** `NEXT_PUBLIC_GOATCOUNTER_CODE` fait échouer 5 specs analytics en local alors que la CI, qui pose `e2e-stub` au niveau du workflow, les voit passer ; et un `next start` laissé tourner sert l'ancien build (`reuseExistingServer` hors CI).
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 
@@ -4804,4 +4899,5 @@ GROWTH-PLAN.md           le plan de distribution (sans LinkedIn, sans nom) ; mar
 design/                  brief d'origine, briefs et bundles de retour des extensions 01 et 03 (le brief 02 n'est jamais parti)
 e2e/                     specs Playwright contre un build de production (dont les canaris audit et moteur)
 scripts/live/            sondes contre les vrais services, lancées à la main
+.claude/plugins-importes/ la provenance des plug-ins installés (scripts/installer-un-plugin.mjs) ; leurs skills et commandes vivent dans .claude/skills/ et .claude/commands/
 ```

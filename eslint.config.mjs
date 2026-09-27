@@ -46,8 +46,12 @@ const config = [
       ".ds-sync/**",
       "ds-bundle/**",
       "dist/**",
-      // Claude Code workflow worktrees: full copies of the repo, linted in
-      // their own checkout, never here.
+      // Claude Code: the workflow worktrees (full copies of the repo, linted
+      // in their own checkout, never here), and the plug-ins installed by
+      // scripts/installer-un-plugin.mjs — third-party instructions and the
+      // scripts they carry, read before committing but never held to this
+      // repository's rules (src/__tests__/installer-un-plugin.test.ts checks
+      // that this stays ignored).
       ".claude/**",
     ],
   },
