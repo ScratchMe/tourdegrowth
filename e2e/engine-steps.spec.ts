@@ -70,8 +70,8 @@ test("« Start step by step » walks targets → base → one number per screen,
   // The board's activation sheet already carries the 800: typed once, reused.
   await page.getByTestId("engine-steps-board").click();
   await expect(page.getByTestId("engine-board")).toBeVisible();
-  const row = page.getByTestId("engine-row-activation");
-  if ((await row.getAttribute("aria-expanded")) !== "true") await row.click();
+  const tab = page.getByTestId("engine-tab-activation");
+  if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click();
   const toggle = page.getByTestId("engine-metric-act-rate");
   if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
   const sheet = page.getByTestId("engine-sheet-act-rate");
@@ -102,8 +102,8 @@ test("the example shows a filled-in funnel and its slides, and writes nothing on
 test("settings can be changed later; a new activation window sends that number back to « to fill in »", async ({ page }) => {
   await open(page);
   await page.getByTestId("engine-setup-board").click();
-  const row = page.getByTestId("engine-row-activation");
-  if ((await row.getAttribute("aria-expanded")) !== "true") await row.click();
+  const tab = page.getByTestId("engine-tab-activation");
+  if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click();
   const toggle = page.getByTestId("engine-metric-act-rate");
   if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
   const sheet = page.getByTestId("engine-sheet-act-rate");

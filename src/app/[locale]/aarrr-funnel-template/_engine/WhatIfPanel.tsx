@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId } from "react";
 import { Button } from "@/components/core/Button";
 import { Callout } from "@/components/core/Callout";
 import { Card } from "@/components/core/Card";
@@ -45,21 +45,17 @@ type Targets = Partial<Record<LeverId, number>>;
  * - with two levers or more, a table of what each brings alone, and the one
  *   sentence that shows the compounding.
  *
- * Without `onChange` (the example), the targets live here and are lost on
- * leaving: the example is read-only, and testing a what-if on it writes
- * nothing.
- *
  * Every number comes from `lib/engine/scenario.ts` through `scenario-view.ts`:
  * nothing is computed here, so the panel and the slides cannot disagree.
  */
-export function WhatIfPanel({ view, onChange }: { view: EngineView; onChange?: (targets: Targets) => void }) {
+export function WhatIfPanel({ view, onChange }: { view: EngineView; onChange: (targets: Targets) => void }) {
   const { state, ctx, strings, metrics } = view;
   const w = strings.scenario;
   const currency = state.setup.currency;
   const idBase = useId();
-  const [local, setLocal] = useState<Targets>(() => state.whatIf ?? {});
-  const targets = onChange ? (state.whatIf ?? {}) : local;
-  const set = (next: Targets) => (onChange ? onChange(next) : setLocal(next));
+  // The state is the one place the targets live: no copy here to keep in step with it.
+  const targets = state.whatIf ?? {};
+  const set = onChange;
 
   const scenario = scenarioFor(state, targets, ctx);
   const levers = leverRows(scenario, ctx, strings, currency, metrics);

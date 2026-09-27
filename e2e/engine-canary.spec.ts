@@ -166,10 +166,10 @@ test.describe("the growth engine keeps everything in the browser (D16)", () => {
   });
 });
 
-/** Opens a stage's drawer if it isn't already the one showing, then the metric's sheet. */
+/** Selects a stage's tab if it isn't already the one showing, then unfolds the metric's sheet. */
 async function openSheet(page: Page, stage: string, metricDomId: string): Promise<Locator> {
-  const row = page.getByTestId(`engine-row-${stage}`);
-  if ((await row.getAttribute("aria-expanded")) !== "true") await row.click();
+  const tab = page.getByTestId(`engine-tab-${stage}`);
+  if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click();
   const toggle = page.getByTestId(`engine-metric-${metricDomId}`);
   if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
   const sheet = page.getByTestId(`engine-sheet-${metricDomId}`);

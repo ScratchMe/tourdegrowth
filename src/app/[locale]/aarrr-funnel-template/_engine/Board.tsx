@@ -1,15 +1,15 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useState } from "react";
 import { Button } from "@/components/core/Button";
 import { Callout } from "@/components/core/Callout";
 import { Card } from "@/components/core/Card";
 import { Disclosure } from "@/components/core/Disclosure";
-import { CANDIDATE_IDS, METRIC_SHAPES, metricsOfStage } from "@/lib/engine/catalog-shape";
+import { CANDIDATE_IDS } from "@/lib/engine/catalog-shape";
 import type { CandidateId, Interval, MetricId, SlideTitle } from "@/lib/engine/types";
 import { knownIn } from "@/lib/engine/values";
 import { knownSharedCount } from "@/lib/engine/shared-counts";
-import { PILLARS, type Pillar } from "@/lib/scoring/pillars";
+import type { Pillar } from "@/lib/scoring/pillars";
 import { BackupBar } from "./BackupBar";
 import type { CollectPlan } from "./collect";
 import { CollectHub } from "./CollectHub";
@@ -18,8 +18,8 @@ import { Diagnosis } from "./Diagnosis";
 import { Mirror } from "./Mirror";
 import { Peloton } from "./Peloton";
 import { ResumeBand } from "./ResumeBand";
-import { StageDrawer } from "./StageDrawer";
-import { StageRow } from "./StageRow";
+import { defaultStage } from "./stage-tabs";
+import { StageTabs } from "./StageTabs";
 import { fill, formatMonth } from "./text";
 import { Verdict } from "./Verdict";
 import type { EngineActions, EngineView } from "./view";
@@ -27,36 +27,13 @@ import { WhatIfPanel } from "./WhatIfPanel";
 import styles from "./Board.module.css";
 
 /**
- * The layout switch, in ONE place for CSS and script alike: from this width
- * the board breaks out of the reading column and the drawer becomes a
- * sticky side column (Board.module.css uses the same 960px). Below it the
- * drawer unfolds under its row.
- */
-const WIDE_QUERY = "(min-width: 960px)";
-
-function subscribeWide(callback: () => void) {
-  const media = window.matchMedia(WIDE_QUERY);
-  media.addEventListener("change", callback);
-  return () => media.removeEventListener("change", callback);
-}
-
-/** Where the wide drawer opens when nobody chose (§7 E2): the stage the diagnosis names, else the first with a number to fill. */
-export function defaultStage(view: EngineView): Pillar {
-  const named = view.derived.diagnosis.named;
-  const snapshot = view.state.snapshots[view.state.snapshots.length - 1]!;
-  const byDiagnosis = PILLARS.find((stage) => named.includes(metricsOfStage(stage)[0]!.id as (typeof named)[number]));
-  if (byDiagnosis) return byDiagnosis;
-  const firstTodo = METRIC_SHAPES.find((s) => (snapshot.metrics[s.id]?.status ?? "todo") === "todo");
-  return firstTodo?.stage ?? "acquisition";
-}
-
-/**
  * The board (spec §7 E2) — « la façon que tu as actuellement, quand tu
  * connais l'outil » (Antoine, 2026-09-25), next to the step-by-step. Top to
  * bottom: the eyebrow with the settings and the way back to the steps, the
  * verdict title (the board's h2 and its focus target), the coverage in
  * fractions, the diagnosis, the peloton in the screen's one raised card, the
- * five stage rows with their drawer, « et si » on the whole funnel, the
+ * five stages as a menu with one panel of folded numbers under it
+ * (`StageTabs`), « et si » on the whole funnel, the
  * declared × measured mirror, what is left to go and get (folded — it used to
  * be a second tab, and two tabs on a long page was one navigation too many),
  * then the actions and the backup band.
@@ -72,7 +49,7 @@ export function Board({
   plan,
   selected,
   onSelect,
-  drawerSeq,
+  panelSeq,
   focusMetric,
   returningFrom,
   writeFailed,
@@ -88,9 +65,9 @@ export function Board({
   verdict: SlideTitle;
   plan: CollectPlan;
   selected: Pillar | null;
-  onSelect: (stage: Pillar | null) => void;
-  /** Bumped when a number is opened from elsewhere, so the drawer remounts with that number open. */
-  drawerSeq: number;
+  onSelect: (stage: Pillar) => void;
+  /** Bumped when a number is opened from elsewhere, so the stage panel remounts with that number open. */
+  panelSeq: number;
   focusMetric: MetricId | null;
   returningFrom: string | null;
   writeFailed: boolean;
@@ -110,8 +87,11 @@ export function Board({
     if (known.kind === "known") candidateValues[id] = known.value;
   }
   const snapshot = state.snapshots[state.snapshots.length - 1]!;
-  const wide = useSyncExternalStore(subscribeWide, () => window.matchMedia(WIDE_QUERY).matches, () => false);
-  const current = wide ? (selected ?? defaultStage(view)) : selected;
+  // Nobody chose yet: the tab the diagnosis names, PINNED when the board mounts. Recomputed on
+  // every render, it would jump under a person's hands the moment a save moved the diagnosis
+  // or filled a stage's last number — and take the sheet they were typing in with it.
+  const [initialStage] = useState(() => defaultStage(snapshot, derived.diagnosis));
+  const current = selected ?? initialStage;
 
   const eyebrow = fill(strings.board.eyebrow, {
     model: strings.workbench.modelShort[state.setup.profile],
@@ -166,26 +146,14 @@ export function Board({
             </Callout>
           ) : null}
 
-          <div className={styles.stages} data-testid="engine-stages">
-            {PILLARS.map((stage, i) => {
-              const drawerId = `engine-drawer-${stage}`;
-              return (
-                <StageBlock
-                  key={stage}
-                  stage={stage}
-                  index={i + 1}
-                  open={current === stage}
-                  drawerId={drawerId}
-                  view={view}
-                  actions={actions}
-                  onToggle={() => onSelect(current === stage && !wide ? null : stage)}
-                  onClose={wide ? undefined : () => onSelect(null)}
-                  drawerKey={`${stage}:${drawerSeq}`}
-                  focusMetric={focusMetric}
-                />
-              );
-            })}
-          </div>
+          <StageTabs
+            view={view}
+            actions={actions}
+            current={current}
+            onSelect={onSelect}
+            panelKey={`${current}:${panelSeq}`}
+            focusMetric={focusMetric}
+          />
 
           {/* Folded on the board: the funnel it redraws is the one just above, and a
               second full funnel open by default made the longest page of the site
@@ -237,60 +205,5 @@ export function Board({
 
       <BackupBar state={state} strings={strings} locale={ctx.locale} onSave={onSave} />
     </div>
-  );
-}
-
-/** A row and, when it is the open one, its drawer right after it — the DOM order a keyboard user follows at every width. */
-function StageBlock({
-  stage,
-  index,
-  open,
-  drawerId,
-  view,
-  actions,
-  onToggle,
-  onClose,
-  drawerKey,
-  focusMetric,
-}: {
-  stage: Pillar;
-  index: number;
-  open: boolean;
-  drawerId: string;
-  view: EngineView;
-  actions: EngineActions;
-  onToggle: () => void;
-  onClose?: () => void;
-  drawerKey: string;
-  focusMetric: MetricId | null;
-}) {
-  const inStage = focusMetric && metricsOfStage(stage).some((s) => s.id === focusMetric) ? focusMetric : null;
-  return (
-    <>
-      <StageRow
-        stage={stage}
-        index={index}
-        state={view.state}
-        diagnosis={view.derived.diagnosis}
-        expanded={open}
-        drawerId={drawerId}
-        onToggle={onToggle}
-        metrics={view.metrics}
-        strings={view.strings}
-        ctx={view.ctx}
-      />
-      {open ? (
-        <StageDrawer
-          key={drawerKey}
-          id={drawerId}
-          stage={stage}
-          index={index}
-          view={view}
-          actions={actions}
-          initiallyOpen={inStage}
-          onClose={onClose}
-        />
-      ) : null}
-    </>
   );
 }

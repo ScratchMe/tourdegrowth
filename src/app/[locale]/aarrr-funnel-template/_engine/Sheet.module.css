@@ -1,7 +1,8 @@
 /*
  * The metric sheet and its editors (spec §7 E3, E3bis, §8.3) — semantic
- * tokens only. The sheet sits in the drawer's column: ~390px wide at 1280,
- * the full phone width below 960, so nothing here assumes a width.
+ * tokens only. The sheet unfolds under its row in the stage panel, capped at
+ * the reading width (Board.module.css `.metricBody`) at a desk and the
+ * panel's full width on a phone, so nothing here assumes a width.
  */
 .sheet {
   display: flex;
