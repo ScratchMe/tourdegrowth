@@ -1,6 +1,6 @@
 # Gemini / API de génération — repli, timeouts, schéma, hygiène de prompt
 
-Extraits du journal de `CLAUDE.md`. La §1 vaut pour n'importe quelle
+Extraits du journal (`JOURNAL.md`). La §1 vaut pour n'importe quelle
 intégration d'un LLM par API ; la §2 est propre à Tour de Growth.
 
 > **Quand lire ce fichier** : avant de toucher au client de génération, au
@@ -209,3 +209,9 @@ intermittent (les réponses tronquées), une faiblesse de conception (la chaîne
 sans pause), un démenti d'une de nos propres théories (le plafond de tokens),
 et la confirmation sur un vrai document de ce qui n'était prouvé que sur
 l'échantillon. **Sa valeur n'est pas d'être verte.**
+
+### 2.2 Le coût, mesuré plutôt qu'estimé
+
+Clé passée en palier payant Tier 1 le 2026-09-07, avec plafonds de dépense. Un Deep dive = 4 générations (2 tons × 2 langues), prompt réel ~5 300 caractères, sorties mesurées par la sonde entre 765 et 2 801 tokens de réflexion et ~450-530 de réponse. Soit **~0,04 à 0,06 $ par Deep dive en 2026**, le double à partir de 2027 (les tarifs Flash doublent au 1ᵉʳ janvier). Le mode Quick ne coûte rien du tout — il n'appelle plus Gemini depuis SPEC-ADDENDUM-01 §0. La limite de 5 Deep dive/h/IP borne un abus à ~2,4 $/jour dans le pire cas.
+
+Déplacé de l'état du projet de `CLAUDE.md` le 2026-09-27 : c'est un fait sur l'outil, pas sur l'état courant.

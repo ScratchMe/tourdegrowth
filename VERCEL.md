@@ -1,11 +1,11 @@
 # Vercel — ce qu'on a appris en payant
 
-Conventions et pièges Vercel, extraits du journal de `CLAUDE.md` et distillés
+Conventions et pièges Vercel, extraits du journal (`JOURNAL.md`) et distillés
 pour être **réutilisables sur un autre projet**. La §1 vaut partout ; la §2
 contient les chiffres et les routes propres à Tour de Growth et ne voyage pas.
 
 Chaque règle cite la date de l'entrée de journal correspondante dans
-`CLAUDE.md` — c'est là qu'est l'histoire, ici il n'y a que la règle.
+`JOURNAL.md` — c'est là qu'est l'histoire, ici il n'y a que la règle.
 
 > **Quand lire ce fichier** : avant tout merge sur `main`, avant de toucher
 > `vercel.json` ou `next.config.mjs`, et avant d'affirmer quoi que ce soit sur

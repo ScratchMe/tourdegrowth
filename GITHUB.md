@@ -1,6 +1,6 @@
 # GitHub — branches, merges, workflows, secrets
 
-Extraits du journal de `CLAUDE.md`. La §1 vaut partout ; la §2 est propre à
+Extraits du journal (`JOURNAL.md`). La §1 vaut partout ; la §2 est propre à
 Tour de Growth.
 
 > **Quand lire ce fichier** : avant de merger, avant d'annoncer qu'un item est

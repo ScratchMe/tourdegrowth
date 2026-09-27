@@ -68,7 +68,8 @@ the code:
 | --- | --- |
 | [`SPEC.md`](SPEC.md) | The product specification — scoring rules, tone, sharing mechanics |
 | [`design/DESIGN-BRIEF.md`](design/DESIGN-BRIEF.md) | The visual system, screen by screen |
-| [`CLAUDE.md`](CLAUDE.md) | Every architectural decision, the traps hit along the way, and what was verified how |
+| [`CLAUDE.md`](CLAUDE.md) | The rules every Claude Code session reads first: what is non-negotiable, when to open which tool file, the current state of the project |
+| [`JOURNAL.md`](JOURNAL.md) | Every architectural decision, the traps hit along the way, and what was verified how, in the order it happened |
 | [`REVIEW.md`](REVIEW.md) | A full technical and functional review — 26 findings, each with its status and what remains open |
 | [`design/DS-EXTENSION-BRIEF-01.md`](design/DS-EXTENSION-BRIEF-01.md) | The brief that took five interface pieces built outside the design system back into it, and `design/ds-extension-01-return/` is what came back |
 
