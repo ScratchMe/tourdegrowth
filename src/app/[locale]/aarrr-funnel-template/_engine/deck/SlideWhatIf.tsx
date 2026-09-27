@@ -70,7 +70,7 @@ export function SlideWhatIf({ slide, context }: SlideProps) {
   const s = context.strings.slide;
   const footer = rowOf(slide, "footer")?.text;
   return (
-    <SlideFrame slide={slide} context={context} footer={footer}>
+    <SlideFrame slide={slide} context={context} footer={footer} footerDense>
       <div className={styles.whatIf}>
         <ChangeTable
           title={s.whatIfKpis}

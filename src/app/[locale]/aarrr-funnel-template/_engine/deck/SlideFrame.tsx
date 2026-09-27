@@ -76,8 +76,9 @@ export function SlideFrame({
   slide,
   context,
   footer,
+  footerDense = false,
   children,
-}: SlideProps & { footer?: string; children: ReactNode }) {
+}: SlideProps & { footer?: string; footerDense?: boolean; children: ReactNode }) {
   const { strings, model, locale } = context;
   const title = slideTitle(slide, strings);
   const total = model.slides.filter((s) => s.included).length;
@@ -115,7 +116,7 @@ export function SlideFrame({
       <div className={styles.slideBody}>{children}</div>
 
       <footer className={styles.slideFoot}>
-        <p className={styles.slideSources}>
+        <p className={[styles.slideSources, footerDense ? styles.slideSourcesDense : ""].filter(Boolean).join(" ")}>
           <SlideText text={sources} accent={false} />
         </p>
         <div className={styles.slideSign}>

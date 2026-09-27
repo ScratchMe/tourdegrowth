@@ -422,7 +422,9 @@ describe("the what-if slides (2026-09-26)", () => {
       expect(s.title.key).toBe("whatIfLever");
       const mrr12 = row(s, "kpi", "mrr12");
       expect(mrr12.tone).toBe("moved");
-      expect(mrr12.change).toBe(`+${s.title.values.gain}`);
+      // The same amount; the change column drops the title's "~" (the "with" column beside it carries it).
+      expect(s.title.values.gain).toMatch(/^~/);
+      expect(mrr12.change).toBe(`+${s.title.values.gain!.slice(1)}`);
     }
   });
 
@@ -430,6 +432,13 @@ describe("the what-if slides (2026-09-26)", () => {
     expect(slide(deck(withWhatIf({ "act.rate": 12 })), "whatif:act.rate").title.key).toBe("whatIfLeverPlain");
     const both = deck(withWhatIf({ "act.rate": 12, "rev.arpa": 90 }));
     expect(slide(both, "scenario").title).toEqual({ key: "scenarioPlain", values: { n: "2" } });
+  });
+
+  it("a change never glues its sign to a tilde: « +1 200 », not « +~1 200 »", () => {
+    const model = deck(withWhatIf({ "ref.referred-share": 10, "rev.paid-conversion": 10 }), "en");
+    const changes = model.slides.filter((s) => s.id.startsWith("whatif:")).flatMap((s) => s.lines.map((l) => l.change ?? ""));
+    expect(changes.filter(Boolean).length).toBeGreaterThan(5);
+    expect(changes.filter((c) => /[+\u2013]~/.test(c))).toEqual([]);
   });
 
   it("activation moves what it feeds, and leaves the visitors and sign-ups alone", () => {

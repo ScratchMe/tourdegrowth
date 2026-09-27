@@ -36,7 +36,7 @@ async function openWith(page: Page, state: EngineState, locale: "en" | "fr" = "e
   });
   await page.reload();
   await expect(page.getByTestId("engine-board")).toBeVisible();
-  await page.getByTestId("engine-board-whatif").locator("summary").click();
+  await page.getByTestId("engine-board-whatif").locator(":scope > summary").click();
   await expect(page.getByTestId("engine-whatif-panel").or(page.getByTestId("engine-whatif-none"))).toBeVisible();
 }
 
@@ -102,7 +102,7 @@ test("the targets are kept in the state: a reload finds them where they were lef
 
   await page.reload();
   await expect(page.getByTestId("engine-board")).toBeVisible();
-  await page.getByTestId("engine-board-whatif").locator("summary").click();
+  await page.getByTestId("engine-board-whatif").locator(":scope > summary").click();
   await expect(page.getByTestId("whatif-value-rev.arpa")).toHaveText(moved!);
   await expect(page.getByTestId("engine-whatif-funnel-title")).toHaveText(W.funnelIf.en);
 });

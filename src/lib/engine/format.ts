@@ -182,7 +182,7 @@ export function formatApproxMoneyInterval(i: Interval, currency: Currency, ctx: 
 }
 
 /**
- * A change, signed — "+~9 400 €", "–1 point", "+16 à 25" (the what-if
+ * A change, signed — "+9 400 €", "–1 point", "+16 à 25" (the what-if
  * slides, 2026-09-26). `print` formats a NON-negative interval in the
  * change's own unit, so the rounding and the "~" are that unit's, never a
  * second rule here. The sign is written once, in front, when both bounds

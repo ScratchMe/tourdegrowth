@@ -117,6 +117,12 @@
   max-width: 1180px;
 }
 
+/* The what-if slides' footer carries the model's assumptions, up to seven sentences: smaller, and wider. */
+.slideSourcesDense {
+  max-width: 1320px;
+  font: 500 15px/1.4 var(--font-mono);
+}
+
 .slideSign {
   display: flex;
   align-items: baseline;
@@ -498,13 +504,20 @@
  * projected gain is neither a diagnosis nor advice, so a moved figure is
  * bold ink and an unmoved one is muted — the row's `data-tone` decides,
  * never a word the eye has to read first.
+ *
+ * Sized against the worst case the deck can print, measured on the rendered
+ * slides (e2e/engine-deck-whatif.spec.ts): a three-line title, an estimate
+ * that turns every money cell into a range (« ~110 000 € à 140 000 € »),
+ * and, on the « together » slide, all eight levers with seven assumptions.
+ * At the deck's usual 24px the growth table alone ran 200px under the
+ * footer; these tables are 20px, and the assumptions take the dense footer.
  */
 .whatIf {
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
-  gap: 56px;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 40px;
   align-items: start;
 }
 
@@ -512,8 +525,8 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 22px 30px;
+  gap: 10px;
+  padding: 18px 26px;
   border: var(--border-solid);
   border-radius: var(--radius-card);
   background: var(--surface-card);
@@ -522,20 +535,21 @@
 .changeTable {
   width: 100%;
   border-collapse: collapse;
-  font: var(--slide-body-sm);
+  font: 500 20px/1.3 var(--font-ui);
   font-variant-numeric: tabular-nums;
 }
 
 .changeTable th,
 .changeTable td {
-  padding: 7px 0 7px 18px;
+  padding: 6px 0 6px 16px;
   text-align: right;
   border-bottom: var(--border-rule);
 }
 
 .changeTable thead th {
   padding-top: 0;
-  font: var(--slide-meta);
+  vertical-align: bottom;
+  font: 500 14px/1.3 var(--font-mono);
   letter-spacing: var(--slide-tracking);
   text-transform: uppercase;
   color: var(--text-muted);
@@ -571,39 +585,34 @@
   color: var(--text-muted);
 }
 
-/* The « together » slide: the levers, then the two tables, three columns at a tighter size. */
+/*
+ * The « together » slide: the levers, then the growth numbers and the
+ * sentence that sets the whole against the sum of its parts. The month's
+ * funnel stays on each lever's slide (and in the text export): three
+ * tables side by side left none of them room for a label on one line.
+ */
 .scenario {
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.12fr) minmax(0, 1fr);
-  gap: 36px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+  gap: 40px;
   align-items: start;
 }
 
-.scenario .changeCard {
-  padding: 20px 24px;
-}
-
-.scenario .changeTable {
-  font-size: 20px;
-}
-
-.scenario .changeTable th,
-.scenario .changeTable td {
-  padding-left: 12px;
-}
-
-.scenario .changeTable tbody th {
-  padding-left: 0;
+.scenarioSide {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
 .leverCard {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 20px 24px;
+  gap: 10px;
+  padding: 18px 26px;
   border: var(--border-solid);
   border-radius: var(--radius-card);
   background: var(--surface-card);
@@ -615,19 +624,20 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 10px;
 }
 
-/* The lever and what it brings on one line, its move under it. */
+/* One line per lever: its name, its move, what it brings alone. */
 .leverRow {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas:
-    "name gain"
-    "move move";
-  gap: 2px 14px;
-  padding-bottom: 10px;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: baseline;
+  gap: 18px;
+  padding: 9px 0;
   border-bottom: var(--border-rule);
+}
+
+.leverRow:first-child {
+  padding-top: 0;
 }
 
 .leverRow:last-child {
@@ -636,44 +646,35 @@
 }
 
 .leverName {
-  grid-area: name;
-  font: var(--slide-body-sm);
-  font-size: 20px;
-  font-weight: 600;
+  font: 600 20px/1.3 var(--font-ui);
 }
 
 .leverMove {
-  grid-area: move;
-  font: var(--slide-meta);
+  font: 500 16px/1.3 var(--font-mono);
   color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-}
-
-.leverGain {
-  grid-area: gain;
-  font: var(--slide-body-sm);
-  font-size: 20px;
-  font-weight: 700;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
-/* Eight levers still end above the footer: a denser step past four. */
-.leverDense .leverList {
-  gap: 6px;
+.leverGain {
+  font: 700 20px/1.3 var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
 }
 
+/* Eight levers still end above the footer: a denser step past four. */
 .leverDense .leverRow {
-  padding-bottom: 6px;
+  padding: 6px 0;
+}
+
+.leverDense .leverRow:first-child {
+  padding-top: 0;
 }
 
 .together {
   margin: 0;
-  padding-top: 12px;
-  border-top: var(--border-rule);
-  font: var(--slide-body-sm);
-  font-size: 20px;
-  font-weight: 600;
+  font: 600 22px/1.35 var(--font-ui);
 }
 
 /* ── Slide 3 — visibility (§9.3) ────────────────────────────────────── */

@@ -1,5 +1,6 @@
 import type { Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
+import { METRIC_SHAPES } from "@/lib/engine/catalog-shape";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
@@ -170,20 +171,23 @@ test("an answer is asked where you are « sur ce point », never « avec ce chif
   await expect(rate.getByTestId("engine-triage").getByRole("radio", { name: ENGINE_COPY.cause.conflicting.fr })).toHaveCount(1);
 });
 
-test("the step-by-step calls the activation event « Point 4 sur 15 », not « Chiffre 4 sur 15 »", async ({ page }) => {
+// The count is the catalogue's (17 since expansion and contraction, 2026-09-26), never retyped.
+const N = String(METRIC_SHAPES.length);
+
+test("the step-by-step calls the activation event « Point 4 sur N », not « Chiffre 4 sur N »", async ({ page }) => {
   await open(page, "fr");
   await page.getByTestId("engine-setup-start").click();
   await page.getByTestId("engine-steps-next").click();
   await page.getByTestId("engine-steps-next").click();
   const number = page.getByTestId("engine-steps-number");
   const eyebrow = (i: number, key: "numberOf" | "answerOf") =>
-    ENGINE_COPY.steps[key].fr.replace("{i}", String(i)).replace("{n}", "15").replace("{stage}", ENGINE_COPY.stages.acquisition.fr);
+    ENGINE_COPY.steps[key].fr.replace("{i}", String(i)).replace("{n}", N).replace("{stage}", ENGINE_COPY.stages.acquisition.fr);
   await expect(number).toHaveAttribute("data-metric", "acq.signup-rate");
   await expect(number).toContainText(eyebrow(1, "numberOf"));
   for (let i = 0; i < 3; i += 1) await page.getByTestId("engine-steps-skip").click();
   await expect(number).toHaveAttribute("data-metric", "act.event");
   await expect(number).toContainText(
-    ENGINE_COPY.steps.answerOf.fr.replace("{i}", "4").replace("{n}", "15").replace("{stage}", ENGINE_COPY.stages.activation.fr),
+    ENGINE_COPY.steps.answerOf.fr.replace("{i}", "4").replace("{n}", N).replace("{stage}", ENGINE_COPY.stages.activation.fr),
   );
   await expect(number).not.toContainText("Chiffre 4");
   await expect(number.getByRole("group", { name: ENGINE_COPY.sheet.statusQuestionAnswer.fr, exact: true })).toBeVisible();
@@ -237,9 +241,10 @@ for (const [locale, big, middle, decimal] of [
 }
 
 /** Opens a stage's drawer if it isn't already the one showing, then one metric's sheet on the board. */
+/** The board has one tab per stage since 2026-09-26: select it, then unfold the number. */
 async function boardSheet(page: Page, stage: string, metricDomId: string) {
-  const row = page.getByTestId(`engine-row-${stage}`);
-  if ((await row.getAttribute("aria-expanded")) !== "true") await row.click();
+  const tab = page.getByTestId(`engine-tab-${stage}`);
+  if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click();
   const toggle = page.getByTestId(`engine-metric-${metricDomId}`);
   if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
   const sheet = page.getByTestId(`engine-sheet-${metricDomId}`);

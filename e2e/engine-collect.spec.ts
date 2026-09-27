@@ -364,7 +364,7 @@ test.describe("the §6.0 example on the board", () => {
       // « What if » is folded on the board, and no longer inside a number's sheet.
       await expect(stagePanel.getByTestId("engine-whatif-panel")).toHaveCount(0);
       const fold = page.getByTestId("engine-board-whatif");
-      await fold.locator("summary").click();
+      await fold.locator(":scope > summary").click();
       const panel = fold.getByTestId("engine-whatif-panel");
       await expect(panel).toBeVisible();
       const w = ENGINE_COPY.scenario;
@@ -437,7 +437,7 @@ test.describe("the §6.0 example on the board", () => {
     await openSheet(page, "activation", "act-rate");
     await noHorizontalScroll(page);
     const fold = page.getByTestId("engine-board-whatif");
-    await fold.locator("summary").click();
+    await fold.locator(":scope > summary").click();
     await expect(fold.getByTestId("engine-whatif-panel")).toBeVisible();
     await noHorizontalScroll(page);
   });
@@ -628,7 +628,7 @@ test.describe("accessibility of each screen", () => {
   test("the example board — diagnosis, peloton, what-if, mirror — has no serious or critical issue", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await openExample(page);
-    await page.getByTestId("engine-board-whatif").locator("summary").click();
+    await page.getByTestId("engine-board-whatif").locator(":scope > summary").click();
     await expect(page.getByTestId("engine-whatif-panel")).toBeVisible();
     // With a lever moved, so the red dots and the better/worse deltas are in the pass.
     await page.getByTestId("whatif-slider-acq.signup-rate").focus();

@@ -812,6 +812,9 @@ function whatIfPrinters(state: EngineState, strings: Words, ctx: EngineCalcConte
   const units = strings.units;
   const currency = state.setup.currency;
   const approxMoney: Print = (i) => formatApproxMoneyInterval(i, currency, ctx, units);
+  // A change of money: rounded the same way, without the "~" — « +~6 600 € » glued a sign to a tilde,
+  // and the "with" column beside it already says the figures are approximate.
+  const roundMoney: Print = (i) => formatApproxMoneyInterval(i, currency, ctx, { ...units, approx: "{n}" });
   const percent: Print = (i) => formatInterval(i, "percent", ctx, units);
   const points: Print = (i) => {
     const printed = mapBounds(i, (v) => roundDisplay(v));
@@ -819,26 +822,28 @@ function whatIfPrinters(state: EngineState, strings: Words, ctx: EngineCalcConte
   };
   const months: Print = (i) => formatDurationInterval(i, "months", ctx, units);
   const people: Print = (i) => formatCountInterval(i, ctx, units);
-  const approxPeople: Print = (i) => fillTemplate(units.approx, { n: formatCountInterval(mapBounds(i, (v) => roundSignificant(v, 2)), ctx, units) });
+  const roundPeople: Print = (i) => formatCountInterval(mapBounds(i, (v) => roundSignificant(v, 2)), ctx, units);
+  const approxPeople: Print = (i) => fillTemplate(units.approx, { n: roundPeople(i) });
   const same = (p: Print): Printers => ({ today: p, projected: p, change: p });
 
+  const money: Printers = { today: approxMoney, projected: approxMoney, change: roundMoney };
   const kpis: Record<(typeof KPI_ROWS)[number][0], Printers> = {
-    mrr12: same(approxMoney),
-    newMrr: same(approxMoney),
+    mrr12: money,
+    newMrr: money,
     nrr: { today: percent, projected: percent, change: points },
     grr: { today: percent, projected: percent, change: points },
-    cac: { today: (i) => formatInterval(i, "money", ctx, units, { currency }), projected: approxMoney, change: approxMoney },
-    ltv: same(approxMoney),
+    cac: { today: (i) => formatInterval(i, "money", ctx, units, { currency }), projected: approxMoney, change: roundMoney },
+    ltv: money,
     payback: same(months),
   };
   const steps: Record<(typeof STEP_ROWS)[number][0], Printers> = {
-    visitors: same(approxPeople),
+    visitors: { today: approxPeople, projected: approxPeople, change: roundPeople },
     signups: same(people),
     activated: same(people),
     d30: same(people),
     paying: same(people),
   };
-  return { kpis, steps, approxMoney };
+  return { kpis, steps, approxMoney, roundMoney };
 }
 
 /**
@@ -915,7 +920,7 @@ type BuiltSlide = Omit<DeckSlide, "id" | "included" | "index">;
 /** The what-if slides, in the order they print: each lever alone, then all of them together when there are two or more. */
 function buildWhatIfSlides(state: EngineState, strings: Words, ctx: EngineCalcContext): { id: SlideId; slide: BuiltSlide }[] {
   const levers = movedLevers(state, strings, ctx);
-  const { approxMoney } = whatIfPrinters(state, strings, ctx);
+  const { approxMoney, roundMoney } = whatIfPrinters(state, strings, ctx);
   const notes = [strings.notes.whatIf, strings.notes.seasonal];
 
   const slides: { id: SlideId; slide: BuiltSlide }[] = levers.map((lever) => {
@@ -937,7 +942,7 @@ function buildWhatIfSlides(state: EngineState, strings: Words, ctx: EngineCalcCo
 
   const leverRows: Row[] = levers.map((lever) => {
     const alone = mrrGain(lever.alone);
-    const own = alone ? formatChange(alone, approxMoney, strings.units) : "";
+    const own = alone ? formatChange(alone, roundMoney, strings.units) : "";
     return {
       row: "lever",
       id: lever.id,
@@ -955,7 +960,7 @@ function buildWhatIfSlides(state: EngineState, strings: Words, ctx: EngineCalcCo
     const alone = levers.map((l) => mrrGain(l.alone)!);
     const sum = alone.reduce((acc, g) => ({ lo: acc.lo + g.lo, hi: acc.hi + g.hi }), { lo: 0, hi: 0 });
     const extra = changeOf(sum, gain);
-    const total = formatChange(gain, approxMoney, strings.units);
+    const total = formatChange(gain, roundMoney, strings.units);
     together.push({
       row: "together",
       text:
