@@ -190,6 +190,13 @@ describe("leverGains — what each lever brings alone, and together", () => {
     expect(g.together! - g.sumAlone!).toBeGreaterThan(1);
   });
 
+  it("rounds a gain to the projection's precision: never « +29 916,28 € » beside « ~130 000 € »", () => {
+    expect(gainText(29_916.28, "EUR", CTX_FR)).toBe("+30\u00a0000\u00a0€");
+    expect(gainText(1_113.4, "EUR", CTX_EN)).toBe("+€1,100");
+    const rows = kpiRows(scenarioFor(exampleState(), { "act.rate": 24 }, CTX_FR), CTX_FR, FR.strings, "EUR", { state: exampleState(), metrics: FR.metrics });
+    for (const r of rows) if (r.delta) expect(r.delta, r.id).not.toMatch(/,\d/);
+  });
+
   it("signs a gain with a real minus", () => {
     expect(gainText(1200, "EUR", CTX_FR)).toBe("+1\u00a0200\u00a0€");
     expect(gainText(-300, "EUR", CTX_EN)).toBe("\u2212€300");

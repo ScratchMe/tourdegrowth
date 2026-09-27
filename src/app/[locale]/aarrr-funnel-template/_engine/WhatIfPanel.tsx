@@ -7,12 +7,13 @@ import { Card } from "@/components/core/Card";
 import { DataTable } from "@/components/core/DataTable";
 import { Disclosure } from "@/components/core/Disclosure";
 import { StatTile } from "@/components/viz/StatTile";
-import { fillTemplate, formatMoney, joinList, lowerFirst } from "@/lib/engine/format";
+import { fillTemplate, joinList, lowerFirst } from "@/lib/engine/format";
 import type { LeverId } from "@/lib/engine/types";
 import {
   dotsInUse,
   funnelSteps,
   gainText,
+  roundedMoney,
   gridAria,
   kpiRows,
   leverGains,
@@ -197,7 +198,7 @@ export function WhatIfPanel({ view, onChange }: { view: EngineView; onChange: (t
               {gains.sumAlone !== null && gains.together - gains.sumAlone >= 1
                 ? fillTemplate(w.together, {
                     total: gainText(gains.together, currency, ctx),
-                    extra: formatMoney(Math.round(gains.together - gains.sumAlone), currency, ctx.locale),
+                    extra: fillTemplate(view.strings.units.approx, { n: roundedMoney(gains.together - gains.sumAlone, currency, ctx) }),
                   })
                 : fillTemplate(w.togetherNoExtra, { total: gainText(gains.together, currency, ctx) })}
             </p>

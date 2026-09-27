@@ -1,4 +1,4 @@
-import { fillTemplate, formatApproxMoneyInterval, formatCountInterval, formatDurationInterval, formatInterval, formatMoney } from "@/lib/engine/format";
+import { fillTemplate, formatApproxMoneyInterval, formatCountInterval, formatDurationInterval, formatInterval, formatMoney, roundSignificant } from "@/lib/engine/format";
 import { unitInputsPhrase } from "@/lib/engine/phrases";
 import { buildScenario, leverAlone, type LeverView, type Scenario, type ScenarioFunnel, type ScenarioKpis } from "@/lib/engine/scenario";
 import type { EngineStrings, ResolvedMetric } from "@/lib/engine/strings";
@@ -162,12 +162,12 @@ export function kpiRows(
   const percent = (i: Interval | null) => (i ? formatInterval(i, "percent", ctx, strings.units) : null);
   const months = (i: Interval | null) => (i ? formatDurationInterval(i, "months", ctx, strings.units) : null);
   const rows: { id: KpiId; label: string; pick: (k: ScenarioKpis) => Interval | null; show: (i: Interval | null) => string | null; delta: (d: number) => string }[] = [
-    { id: "mrr12", label: w.kpiMrr12, pick: (k) => k.mrr12, show: money, delta: (d) => signed(formatMoney(Math.abs(d), currency, ctx.locale), d) },
-    { id: "newMrr", label: w.kpiNewMrr, pick: (k) => k.newMrr, show: money, delta: (d) => signed(formatMoney(Math.abs(d), currency, ctx.locale), d) },
+    { id: "mrr12", label: w.kpiMrr12, pick: (k) => k.mrr12, show: money, delta: (d) => signed(roundedMoney(d, currency, ctx), d) },
+    { id: "newMrr", label: w.kpiNewMrr, pick: (k) => k.newMrr, show: money, delta: (d) => signed(roundedMoney(d, currency, ctx), d) },
     { id: "nrr", label: w.kpiNrr, pick: (k) => k.nrr, show: percent, delta: (d) => signed(points(Math.abs(d), strings, ctx), d) },
     { id: "grr", label: w.kpiGrr, pick: (k) => k.grr, show: percent, delta: (d) => signed(points(Math.abs(d), strings, ctx), d) },
-    { id: "cac", label: w.kpiCac, pick: (k) => k.cac, show: money, delta: (d) => signed(formatMoney(Math.abs(d), currency, ctx.locale), d) },
-    { id: "ltv", label: w.kpiLtv, pick: (k) => k.ltv, show: money, delta: (d) => signed(formatMoney(Math.abs(d), currency, ctx.locale), d) },
+    { id: "cac", label: w.kpiCac, pick: (k) => k.cac, show: money, delta: (d) => signed(roundedMoney(d, currency, ctx), d) },
+    { id: "ltv", label: w.kpiLtv, pick: (k) => k.ltv, show: money, delta: (d) => signed(roundedMoney(d, currency, ctx), d) },
     { id: "payback", label: w.kpiPayback, pick: (k) => k.payback, show: months, delta: (d) => signed(months({ lo: Math.abs(d), hi: Math.abs(d) }) ?? "", d) },
   ];
   return rows.map((row) => {
@@ -309,6 +309,16 @@ export function gridAria(step: FunnelStepView, strings: EngineStrings): string {
 
 /** A gain on the MRR in twelve months, signed: « +12 000 € », « −300 € ». */
 export function gainText(gain: number, currency: Currency, ctx: EngineCalcContext): string {
-  return signed(formatMoney(Math.abs(Math.round(gain)), currency, ctx.locale), gain);
+  return signed(roundedMoney(gain, currency, ctx), gain);
+}
+
+/**
+ * A projected amount of money, unsigned, at the precision the projection
+ * has: two significant digits, as every projected figure beside it
+ * (`formatApproxMoneyInterval`). « +29 916,28 € » under a tile that reads
+ * « ~130 000 € » claimed a precision the model never had (2026-09-27).
+ */
+export function roundedMoney(amount: number, currency: Currency, ctx: EngineCalcContext): string {
+  return formatMoney(roundSignificant(Math.abs(amount), 2), currency, ctx.locale);
 }
 

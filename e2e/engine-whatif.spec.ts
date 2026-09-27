@@ -134,3 +134,12 @@ for (const locale of ["en", "fr"] as const) {
     expect(overflow).toBe(0);
   });
 }
+
+test("at 1280px, the growth numbers stay in view while the last slider moves", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await openWith(page, exampleState());
+  // The last lever sits far below the tiles: without the sticky column, moving it scrolls them away.
+  await nudge(page, "rev.arpa", "ArrowRight", 2);
+  await expect(page.getByTestId("whatif-slider-rev.arpa")).toBeInViewport();
+  await expect(page.getByTestId("whatif-kpi-mrr12")).toBeInViewport();
+});
