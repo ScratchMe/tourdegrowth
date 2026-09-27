@@ -107,6 +107,11 @@ function linked(state: EngineState, answers: Record<string, 0 | 1 | 2>, extra: P
   return { state: { ...state, tourLink: { resultId: result.id, linkedAt: "2026-09-20T10:00:00.000Z" } }, result };
 }
 
+/** The team's what-if targets (2026-09-26): one slide per lever moved, and « scenario » from two. */
+function withWhatIf(state: EngineState, targets: EngineState["whatIf"]): EngineState {
+  return { ...state, whatIf: targets };
+}
+
 const TOUR_ANSWERS = { "acq-1": 0, "acq-3": 2, "act-1": 0, "act-2": 1, "ret-1": 0, "ret-3": 2, "ref-3": 0, "rev-2": 0 } as const;
 
 const SCENARIOS: { name: string; build: () => { state: EngineState; result?: ReturnType<typeof tourResult> } }[] = [
@@ -192,6 +197,11 @@ const SCENARIOS: { name: string; build: () => { state: EngineState; result?: Ret
       return { state: s };
     },
   },
+  // The what-if slides: priced gains (whatIfLever, scenario), then losses (whatIfLeverPlain, scenarioPlain).
+  { name: "what if: two levers, priced", build: () => ({ state: withWhatIf(vowelMonths(exampleState()), { "act.rate": 24, "ret.logo-churn": 1.5 }) }) },
+  { name: "what if: every lever", build: () => ({ state: withWhatIf(allDocumented(), { "acq.signup-rate": 4, "ref.referred-share": 20, "act.rate": 24, "rev.paid-conversion": 10, "ret.logo-churn": 1.5, "rev.expansion": 5, "rev.contraction": 0.5, "rev.arpa": 150 }) }) },
+  { name: "what if: two levers, both a loss", build: () => ({ state: withWhatIf(exampleState(), { "act.rate": 12, "rev.arpa": 90 }) }) },
+  { name: "what if: a lever, no ARPA (unpriced)", build: () => ({ state: withWhatIf(noArpa(), { "act.rate": 24 }) }) },
   {
     name: "company named, credit off",
     build: () => {

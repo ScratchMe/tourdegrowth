@@ -49,19 +49,17 @@ qui change par rapport aux §4, §7 et §8 plus bas — le reste tient :
   validateur. Une entrée que la nouvelle base rendrait impossible est laissée
   telle quelle et la fiche dit « compté sur n, pas sur ta base de m ».
 - **« Et si » sort des fiches** et devient un panneau à part
-  (`_engine/WhatIfPanel.tsx`) : on choisit l'étape (celle que le diagnostic
-  nomme par défaut), le curseur redessine le funnel à côté
-  (`lib/engine/projection.ts` : activation et conversion payante ; les payants
-  suivent l'activation) et la chaîne en revenu reste celle du §6.7. Ouvert dans
-  le pas à pas, plié sur le tableau (qui montre déjà le funnel au-dessus).
-- **Explications à la demande** : les quinze fiches statiques de la page sont
+  (`_engine/WhatIfPanel.tsx`), ouvert dans le pas à pas, plié sur le tableau.
+  *Le panneau à une étape de ce jour-là (et `projection.ts`) a été remplacé le
+  lendemain par les « Et si » cumulés : voir le bloc suivant.*
+- **Explications à la demande** : les fiches statiques de la page (dix-sept
+  depuis le bloc suivant) sont
   pliées (toujours dans le HTML prérendu), « où le trouver » est plié dans
   chaque fiche, la liste « à aller chercher » est pliée sur le tableau, et les
   onglets du tableau disparaissent.
-- **La durée est dite avant l'outil** : un bloc compte les quinze chiffres par
-  effort, depuis les étiquettes du catalogue (5 en cinq minutes, 5 en une
-  heure, 5 à demander), puis quatre cas (tout sous la main, il faut demander,
-  pas de cible, les slides).
+- **La durée est dite avant l'outil** : un bloc compte les chiffres par
+  effort, depuis les étiquettes du catalogue, puis quatre cas (tout sous la
+  main, il faut demander, pas de cible, les slides).
 - **Un exemple rempli** (`lib/engine/example.ts`, le jeu du §6.0) : funnel et
   slides, en lecture seule — rien n'est écrit sur l'appareil.
 - **Les réglages se modifient après coup** (« Réglages » sur le tableau).
@@ -76,6 +74,63 @@ qui change par rapport aux §4, §7 et §8 plus bas — le reste tient :
   texte des réponses reste dans le HTML prérendu (un `<details>` fermé le
   garde) — c'est ce qu'un moteur de recherche lit ; la spec sans JavaScript de
   `e2e/engine-page.spec.ts` le vérifie.
+
+**Deuxième série de retours (2026-09-26/27).** Ce qui change encore, par
+rapport au bloc précédent et aux §5, §6.7, §8.2 et §9 :
+
+- **Dix-sept chiffres** (décision d'Antoine) : l'étape Revenue collecte aussi
+  l'**expansion** et la **rétrogradation** du mois, chacune sur le MRR au
+  1er du mois. Deux calculés en plus : **GRR = 100 − churn − rétrogradation**
+  et **NRR = GRR + expansion**, mensuelles et toujours « approximatives » :
+  le churn logo tient lieu de churn en revenu, et c'est dit sur la slide
+  unit economics. Base commune : le MRR saisi pour l'ARPA est le dénominateur
+  de la marge brute, le MRR au 1er du mois est partagé par l'expansion et la
+  rétrogradation.
+- **Une réponse n'est pas un chiffre.** L'événement d'activation, la cause de
+  churn et le mécanisme de recommandation sont demandés « sur ce point », le
+  pas à pas les titre « Point n sur 17 », et leur triage ne propose plus
+  « deux chiffres qui ne collent pas » (deux réponses divergentes sont une
+  définition que personne ne partage, déjà proposée). Les grands nombres se
+  groupent à la frappe ; les grilles du peloton s'alignent (`subgrid`).
+- **Le tableau en onglets par étape** (`_engine/stage-tabs.ts`, pur, et
+  `StageTabs.tsx`) remplace les lignes d'étape et leur tiroir (§8.2) : un
+  onglet par étape (nom, marques de statut, « trouvés : n/N », tampon
+  « Freine ici » sur l'étape nommée et elle seule), un seul panneau dessous,
+  **tous les chiffres repliés** ; seul un chiffre ouvert depuis ailleurs
+  (« Remplir », « Continuer ») arrive déplié, avec le focus. À 390 px, la
+  bande d'onglets défile dans sa propre boîte plutôt que de passer à la ligne.
+- **« Et si » cumulés** (`lib/engine/scenario.ts`, pur ; vue dans
+  `_engine/scenario-view.ts`) : huit leviers bougent **ensemble** —
+  inscription, parrainage, activation, conversion payante, churn,
+  rétrogradation, expansion, ARPA des nouveaux clients. Les cibles sont
+  gardées dans `EngineState.whatIf` (donc dans le fichier et les slides) ;
+  un levier non saisi n'a pas de curseur, et le panneau le dit. Le funnel du
+  mois commence aux **visiteurs** et se compte en personnes ; ses grilles
+  dépassent 100 points, en rouge, pour ce que les « Et si » ajoutent. Les
+  chiffres de croissance bougent avec les curseurs : MRR dans 12 mois,
+  nouveau MRR, NRR, GRR, CAC, LTV, payback, chacun disant en mots si c'est
+  mieux ou moins bien. Chaque hypothèse du modèle qui a servi est imprimée
+  avec le résultat (mêmes visiteurs pour l'inscription, parrainage par-dessus,
+  J30 et payants qui suivent l'activation sans la dépasser, nouvel ARPA sur
+  les nouveaux clients seulement, CAC à dépense égale, churn logo pour churn
+  en revenu, MRR à 12 mois = base retenue à la NRR + nouveau MRR, ni
+  saisonnalité ni saturation). À partir de deux leviers : ce que chacun
+  rapporte seul, et **l'effet composé** (l'ensemble vaut plus que la somme :
+  les taux du funnel se multiplient). Tout montant projeté est arrondi à deux
+  chiffres significatifs, jamais au centime. `impact.ts#whatIf` (§6.7) reste
+  la chaîne de la slide `leak` et du diagnostic.
+- **Une slide par « Et si »**, après celle de la fuite, dans l'ordre des
+  leviers : les chiffres de croissance et le funnel du mois, aujourd'hui /
+  avec cet « Et si » / écart. Le titre chiffre le gain du MRR à 12 mois
+  (« Si l'activation passait à 24 % (aujourd'hui : 18 %), le MRR dans
+  12 mois gagnerait ~X ») seulement quand c'est un gain d'au moins une unité ;
+  sinon la question simple. À partir de deux leviers, **une slide
+  « ensemble »** : les leviers sur une ligne chacun, les chiffres de
+  croissance avec tous les « Et si », la phrase de l'effet composé. Le funnel
+  n'y figure pas (il est sur chaque slide de levier et dans l'export texte) :
+  trois tableaux côte à côte débordaient. Les hypothèses sont le pied de page,
+  en version dense. Un écart ne colle jamais son signe au tilde (« +6 600 € »).
+  Chaque slide « Et si » est cochée par défaut et se décoche comme les autres.
 
 ---
 
@@ -882,6 +937,10 @@ de plus au bout d'un an ». (Avec un churn à 3 %, préservés = 4, 480 € : 60
 
 ### 6.7 « Et si » (`impact.ts#whatIf`)
 
+*Depuis le 2026-09-26, le panneau « Et si » n'utilise plus cette fonction :
+il lit `scenario.ts` (plusieurs leviers à la fois, voir le bloc en tête).
+Ce qui suit reste vrai pour la slide `leak`.*
+
 `whatIf(state, candidate, target): Impact` — la même fonction pour le tiroir et
 pour la slide `leak`.
 
@@ -1221,6 +1280,10 @@ Référence visuelle : `shots/peloton.png` (slide) et `spec-probe/board-*.png`
 
 ### 8.2 La ligne d'étape (`_engine/StageRow.tsx`)
 
+*Remplacée le 2026-09-26 par les onglets d'étape (`stage-tabs.ts`,
+`StageTabs.tsx`, voir le bloc en tête) ; les pastilles et les états
+ci-dessous vivent maintenant dans l'onglet et en tête de son panneau.*
+
 `[nom d'étape stencil + 3 pastilles de statut] · [comparateur en texte] · [valeur
 stencil + libellé mono]`.
 
@@ -1522,20 +1585,23 @@ src/app/[locale]/aarrr-funnel-template/
   opengraph-image.tsx       ré-export de ../opengraph-image (Next n'hérite pas)
   EngineWorkbench.tsx       "use client" — l'îlot : état, lecture/écriture après montage, vues
   _engine/                  dossier privé (non routé)
-    Setup.tsx  Board.tsx  Verdict.tsx  Coverage.tsx  Diagnosis.tsx  Peloton.tsx  StageRow.tsx
-    StageDrawer.tsx  MetricSheet.tsx  ValueEditor.tsx  MissingTriage.tsx  ComparisonStrip.tsx
-    WhatIf.tsx  Mirror.tsx  CollectHub.tsx  RequestCopy.tsx  ResumeBand.tsx  BackupBar.tsx
-    ImportPanel.tsx  EraseDialog.tsx  *.module.css
+    Setup.tsx  Steps.tsx  Board.tsx  StageTabs.tsx  Verdict.tsx  Coverage.tsx  Diagnosis.tsx
+    Peloton.tsx  MetricSheet.tsx  ValueEditor.tsx  MissingTriage.tsx  ComparisonStrip.tsx
+    WhatIfPanel.tsx  Mirror.tsx  CollectHub.tsx  RequestCopy.tsx  ResumeBand.tsx  BackupBar.tsx
+    ImportPanel.tsx  EraseDialog.tsx  ExampleView.tsx  *.module.css
+    stage-tabs.ts  steps-model.ts  scenario-view.ts  visual-model.ts  …  (vues pures, testées)
     _ui/  Field.tsx  NumberField.tsx  Select.tsx  TextField.tsx  MonthField.tsx  ui.module.css
     deck/ DeckView.tsx  SlideFrame.tsx  SlidePeloton.tsx  SlideLeak.tsx  SlideVisibility.tsx
-          SlideUnitEconomics.tsx  SlideMirror.tsx  SlideAsk.tsx  SlideAnnex.tsx  AskForm.tsx
+          SlideUnitEconomics.tsx  SlideMirror.tsx  SlideAsk.tsx  SlideAnnex.tsx  SlideWhatIf.tsx
+          SlideScenario.tsx  AskForm.tsx  deck-rows.ts
           export-png.ts  copy-text.ts  deck.module.css
 src/lib/engine/             pur, navigateur, testé ; aucun import de valeur depuis content/
   types.ts  strings.ts  catalog-shape.ts  access.ts  storage.ts  io.ts  validate.ts
   interval.ts  format.ts  cohort.ts  values.ts  coverage.ts  peloton.ts  diagnose.ts  impact.ts
-  unit-economics.ts  sanity.ts  findings.ts  bridge.ts  deck.ts  request.ts
+  unit-economics.ts  sanity.ts  findings.ts  bridge.ts  deck.ts  request.ts  scenario.ts
+  shared-counts.ts  phrases.ts  sentences.ts  derive.ts  example.ts
   __tests__/*.test.ts
-src/content/engine-catalog.ts   serveur : prose des 15 chiffres (Translatable) — TODO: à relire
+src/content/engine-catalog.ts   serveur : prose des 17 chiffres (Translatable) — TODO: à relire
 src/content/engine-copy.ts      serveur : UI, gabarits de slides, constats, FAQ — TODO: à relire
 ```
 
@@ -1654,7 +1720,7 @@ vérifier qu'il n'est pas vide (convention 1).
 | **P1 — Moteur pur** | `interval`, `format`, `cohort`, `values`, `coverage`, `peloton`, `diagnose`, `impact`, `unit-economics`, `sanity`, `findings`, `bridge`, `deck`, `request` + tests | `lib/engine/*.ts` sauf P0 et P2 | P0 | 2 |
 | **P2 — Stockage** | `storage`, `io`, `validate` + tests | `lib/engine/{storage,io,validate}.ts` | P0 | 0,5 |
 | **P3 — Contenu** | toute la prose FR+EN (catalogue, UI, gabarits, constats, FAQ, légal), tests de contenu (ids, glossaire, repères anti-dérive, gabarits, glyphes, typographie) | `content/engine-*.ts`, `content/legal.ts`, `content/__tests__/engine-*.test.ts` | P0 | 1,5 |
-| **P4 — Collecte** | îlot (machine à états, persistance), E1, E2 hors peloton/diagnostic, tiroir, fiche, éditeur, triage, demande, E4, E6, E7, `_ui/` | `EngineWorkbench.tsx`, `_engine/{Setup,Board,Verdict,Coverage,StageRow,StageDrawer,MetricSheet,ValueEditor,MissingTriage,ComparisonStrip,RequestCopy,CollectHub,ResumeBand,BackupBar,ImportPanel,EraseDialog}.tsx`, `_engine/_ui/**` | P0 (P1/P2 par interfaces, bouchonnables) | 2 |
+| **P4 — Collecte** | îlot (machine à états, persistance), E1, E2 hors peloton/diagnostic, tiroir, fiche, éditeur, triage, demande, E4, E6, E7, `_ui/` | `EngineWorkbench.tsx`, `_engine/{Setup,Board,Verdict,Coverage,StageRow,StageDrawer (remplacés par StageTabs le 2026-09-26),MetricSheet,ValueEditor,MissingTriage,ComparisonStrip,RequestCopy,CollectHub,ResumeBand,BackupBar,ImportPanel,EraseDialog}.tsx`, `_engine/_ui/**` | P0 (P1/P2 par interfaces, bouchonnables) | 2 |
 | **P5 — Visuel** | peloton, diagnostic, « et si », miroir ; contenu statique de la page | `_engine/{Peloton,Diagnosis,WhatIf,Mirror}.tsx`, `page.tsx` (corps), `page.module.css` | P0 (P1 par interfaces) | 1 |
 | **P6 — Deck** | slides, aperçu, formulaire `ask`, feuille d'impression, PNG, copie, texte ; dépendance `html-to-image` | `_engine/deck/**`, `package.json`, lockfile | P0, P1 (`deck.ts`) | 1,5 |
 | **P7 — Intégration** | branchement final, analytics, `opengraph-image.tsx`, JSON-LD, e2e complets (§13.3), passe axe, captures relues FR/EN × 390/1280, entrée de journal `CLAUDE.md` | `e2e/engine-*.spec.ts`, `e2e/helpers.ts`, `lib/analytics/*`, `lib/seo/jsonld.tsx`, `opengraph-image.tsx`, `client-bundles.test.ts`, `CLAUDE.md` | P1-P6 | 1 |
@@ -2016,7 +2082,7 @@ src/`**, jamais depuis cette liste. Français avec U+00A0 avant `%`, `€`, `:`,
 | `sheet.note` | Note pour toi | Note to self |
 | `sheet.noteHint` | Jamais sur une slide. | Never on a slide. |
 | `sheet.save` | Enregistrer | Save |
-| `sheet.close` | Fermer | Close |
+| ~~`sheet.close`~~ | *retirée le 2026-09-26 : une fiche se replie par l'en-tête de sa ligne* | |
 | `triage.question` | Pourquoi ? | Why? |
 | `triage.repair` | Le réparer prendrait | Fixing it would take |
 | `triage.repairComment` | Précision (facultatif) | Detail (optional) |

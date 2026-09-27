@@ -131,6 +131,10 @@ describe("placeholders", () => {
     askPlain: ["what"],
     askMeasureFirst: ["cost", "metric"],
     annex: [],
+    whatIfLever: ["from", "gain", "stage", "to"],
+    whatIfLeverPlain: ["from", "stage", "to"],
+    scenario: ["gain", "n"],
+    scenarioPlain: ["n"],
   };
 
   it("gives each slide title exactly the values the slide builder provides (§9.3)", () => {
@@ -154,10 +158,11 @@ describe("placeholders", () => {
       N: "15", k: "4", repair: "entre une réunion et un trimestre", m: "14 à 19 mois", x: "2,5 à 3,1 fois",
       input: "la marge brute", what: "80 000 € et deux personnes pendant un trimestre",
       metric: "Taux d'activation", current: "18 %", horizon: "T2 2027", cost: "un sprint",
+      from: "6 à 9 %", to: "12 %", gain: "~12 000 à 18 000 €",
     },
     en: {
       activated: "18 reach first value", d30: "9–12 are still active at day 30", paid: "6–9 pay",
-      side: "possibly above the reference", documented: "11 of 15 numbers",
+      side: "possibly above the reference", documented: "13 of 17 numbers",
       goal: "activation rate from 18% to 25% by Q2 2027",
       clauses: "18 reach first value and 6–9 pay",
       stages: "day-30 retention and paid conversion",
@@ -167,6 +172,7 @@ describe("placeholders", () => {
       N: "15", k: "4", repair: "between a meeting and a quarter", m: "14–19 months", x: "2.5–3.1×",
       input: "gross margin", what: "€80,000 and two people for a quarter",
       metric: "Activation rate", current: "18%", horizon: "Q2 2027", cost: "a sprint",
+      from: "6–9%", to: "12%", gain: "~€12,000–18,000",
     },
   };
 
@@ -229,7 +235,7 @@ describe("the slides", () => {
     const onSlide = [
       ...under("slideTitles", "slide", "notes", "side", "worth", "unitInput"),
       ...under("peloton").filter(([p]) => /clause|unmeasured/.test(p)),
-      ...under("whatIf").filter(([p]) => !/title|slider|multiplication|notForecast/.test(p)),
+      ...under("whatIf").filter(([p]) => !/title|slider/.test(p)),
     ];
     const offenders = onSlide.flatMap(([p, t]) => [
       // Letter boundaries, not \b: « coûte » must not read as « te » after a non-ASCII « û ».
@@ -291,7 +297,7 @@ describe("lengths", () => {
       ...under("actions", "collect.fill", "resume.continue", "erase.confirm", "io.replace", "io.cancel"),
       ...under("request.copy", "request.copyGroup", "request.copied", "request.remind"),
       ...under("deck.png", "deck.pngHd", "deck.copyImage", "deck.pdf", "deck.copyText", "deck.textCopied"),
-      ...under("sheet.save", "sheet.close", "sheet.haveIt", "sheet.canEstimate", "sheet.willAsk", "sheet.cantFind"),
+      ...under("sheet.save", "sheet.haveIt", "sheet.canEstimate", "sheet.willAsk", "sheet.cantFind"),
       ...under("page.cta", "page.tourFirst", "setup.startSteps", "setup.startBoard", "setup.tourLink"),
     ];
     expect(buttons.length).toBeGreaterThan(20);

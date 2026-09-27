@@ -1,5 +1,5 @@
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
-import type { EngineCalcContext, EngineDerived, EngineState, MetricEntry, MetricId, RoleId, SharedCount } from "@/lib/engine/types";
+import type { EngineCalcContext, EngineDerived, EngineState, LeverId, MetricEntry, MetricId, RoleId, SharedCount } from "@/lib/engine/types";
 import type { StoredResult } from "@/lib/quiz/storage";
 import type { CommitResult } from "./engine-store";
 
@@ -35,6 +35,12 @@ export interface EngineActions {
   /** A count several numbers share, typed once (shared-counts.ts): the base and every entry carrying it. */
   /** One write for all the counts given: see EngineWorkbench. */
   setBase: (counts: Partial<Record<SharedCount, number>>) => void;
+  /**
+   * « Et si ? » (2026-09-26): the targets under test, the WHOLE map in one
+   * write (a slider, a reset, « all back to today »). Kept in the state so the
+   * deck prints one slide per lever and the file carries them.
+   */
+  setWhatIf: (targets: Partial<Record<LeverId, number>>) => void;
   markRequested: (ids: MetricId[], role: RoleId) => void;
   markReminded: (ids: MetricId[]) => void;
   /** Opens a number's sheet from anywhere — "also in Stripe", the collect list, the resume band. */

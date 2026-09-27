@@ -99,7 +99,7 @@ describe("deriveEngine", () => {
   it("composes every derived shape", () => {
     const d = derive(exampleState());
     expect(Object.keys(d).sort()).toEqual(["coverage", "diagnosis", "findings", "mirror", "peloton", "sanity", "unit"]);
-    expect(d.coverage.found).toBe(9);
+    expect(d.coverage.found).toBe(11);
     expect(d.peloton.chain).toBe("gap");
     expect(d.diagnosis.state).toBe("clear");
     expect(d.sanity).toEqual([]);

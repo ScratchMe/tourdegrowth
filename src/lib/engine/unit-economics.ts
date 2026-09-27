@@ -6,7 +6,7 @@ import { currentSnapshot, knownIn } from "./values";
 /**
  * unit-economics.ts — what a customer is worth (engine spec §5.7, §6.8).
  *
- * The three computed figures, in intervals, and never 0: an input that
+ * The computed figures, in intervals, and never 0: an input that
  * isn't known makes the figure "uncomputable — missing: …" with the inputs
  * named. **Never a fallback on revenue when the margin is missing**: the
  * glossary says it plainly — revenue pays nothing back, margin does, and the
@@ -54,8 +54,20 @@ export function lifetimeMonths(churnPercent: Interval): Interval {
   return { lo: months(churnPercent.hi), hi: months(churnPercent.lo) };
 }
 
+/**
+ * Monthly GRR and NRR, in percent, from the churn and the two MRR movements
+ * (2026-09-26). GRR = 100 − churn − contraction, floored at 0; NRR = GRR +
+ * expansion. The churn is LOGO churn standing in for revenue churn — the
+ * engine does not ask for churned MRR — so the result is never "solid".
+ * Pure: shared with « Et si ? », which feeds it targets instead of readings.
+ */
+export function revenueRetention(churn: Interval, contraction: Interval, expansion: Interval | null): { grr: Interval; nrr: Interval | null } {
+  const grr = { lo: Math.max(0, 100 - churn.hi - contraction.hi), hi: Math.max(0, 100 - churn.lo - contraction.lo) };
+  return { grr, nrr: expansion ? { lo: grr.lo + expansion.lo, hi: grr.hi + expansion.hi } : null };
+}
+
 export function unitEconomics(state: EngineState, ctx: EngineCalcContext): UnitEconomics {
-  const ids: MetricId[] = ["acq.cac", "rev.arpa", "rev.gross-margin", "ret.logo-churn"];
+  const ids: MetricId[] = ["acq.cac", "rev.arpa", "rev.gross-margin", "ret.logo-churn", "rev.expansion", "rev.contraction"];
   const knowns = Object.fromEntries(ids.map((id) => [id, knownIn(state, id, ctx)])) as Partial<Knowns>;
 
   const cac = known(knowns["acq.cac"]);
@@ -76,11 +88,22 @@ export function unitEconomics(state: EngineState, ctx: EngineCalcContext): UnitE
   const paybackValue = cac && monthlyMargin ? div(cac, monthlyMargin) : null;
   const ltvCacValue = ltvValue && cac ? div(ltvValue, cac) : null;
 
+  const contraction = known(knowns["rev.contraction"]);
+  const expansion = known(knowns["rev.expansion"]);
+  const retention = churn && contraction ? revenueRetention(churn, contraction, expansion) : null;
+  // Logo churn stands in for revenue churn: never solid, whatever the inputs' own confidence.
+  const approximate = (id: DerivedId, value: Interval | null): DerivedValue => {
+    const r = result(id, value);
+    return r.kind === "known" ? { ...r, confidence: "approximate" } : r;
+  };
+
   const entry = currentSnapshot(state).metrics["acq.cac"];
   return {
     cacVariant: entry?.variant ?? null,
     ltv: result("rev.ltv", ltvValue),
     payback: result("rev.cac-payback", paybackValue && mapBounds(paybackValue, (v) => Math.max(0, v))),
     ltvCac: result("rev.ltv-cac", ltvCacValue),
+    grr: approximate("rev.grr", retention?.grr ?? null),
+    nrr: approximate("rev.nrr", retention?.nrr ?? null),
   };
 }

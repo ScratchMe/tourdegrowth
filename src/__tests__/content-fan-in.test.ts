@@ -74,7 +74,7 @@ const BUDGETS: { module: string; max: number; why: string }[] = [
   {
     module: "content/engine-catalog.ts",
     max: 1,
-    why: "La prose des quinze chiffres : seule /{locale}/aarrr-funnel-template la rend.",
+    why: "La prose des dix-sept chiffres : seule /{locale}/aarrr-funnel-template la rend.",
   },
   {
     module: "content/engine-copy.ts",

@@ -4,6 +4,7 @@ import type {
   CandidateId,
   DerivedId,
   Effort,
+  LeverId,
   MetricId,
   MetricValue,
   RepairScale,
@@ -335,6 +336,41 @@ export const METRIC_SHAPES: readonly MetricShape[] = [
     benchmark: { term: "cac-payback", lo: 70, hi: 85, direction: "higher", designates: false },
     defaultRepair: "meeting",
   },
+  // --- MRR movements (2026-09-26) -------------------------------------------
+  // Asked for by Antoine so the engine can say NRR and GRR: logo churn counts
+  // customers, never the revenue that grows or shrinks inside the ones who stay.
+  {
+    id: "rev.expansion",
+    stage: "revenue",
+    primary: false,
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    // An upgrade wave can in principle exceed the base it grows: not bounded.
+    bounded: false,
+    flow: "month",
+    effort: "self-1h",
+    defaultRole: "finance",
+    sources: ["stripe", "chargebee", "chartmogul"],
+    glossary: "nrr-grr",
+    defaultRepair: "afternoon",
+    naReasons: ["not-subscription"],
+  },
+  {
+    id: "rev.contraction",
+    stage: "revenue",
+    primary: false,
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    // A downgrade can only lose what was there on the 1st.
+    bounded: true,
+    flow: "month",
+    effort: "self-1h",
+    defaultRole: "finance",
+    sources: ["stripe", "chargebee", "chartmogul"],
+    glossary: "nrr-grr",
+    defaultRepair: "afternoon",
+    naReasons: ["not-subscription"],
+  },
 ];
 
 /** LTV counts at most this many months of margin: "most practitioners cap at three to five years; we take the low end". */
@@ -364,6 +400,20 @@ export const DERIVED_SHAPES: readonly DerivedShape[] = [
     // "About 3:1 — a rule of thumb, not a law."
     benchmark: { term: "ltv", lo: 3, hi: 3, direction: "higher", designates: false },
   },
+  // Monthly, in percent. No reference: the glossary quotes NRR and GRR over a
+  // year, and comparing a monthly figure with an annual range would mislead.
+  {
+    id: "rev.grr",
+    stage: "revenue",
+    inputs: ["ret.logo-churn", "rev.contraction"],
+    glossary: "nrr-grr",
+  },
+  {
+    id: "rev.nrr",
+    stage: "revenue",
+    inputs: ["ret.logo-churn", "rev.contraction", "rev.expansion"],
+    glossary: "nrr-grr",
+  },
 ];
 
 /** The rates that can be named as the bottleneck (§6.6), churn the only lower-is-better one. */
@@ -374,6 +424,23 @@ export const CANDIDATE_IDS: readonly CandidateId[] = [
   "rev.paid-conversion",
   "ref.referred-share",
   "ret.logo-churn",
+];
+
+/**
+ * The levers « Et si ? » moves together (2026-09-26), in the order the panel
+ * and the deck list them — down the funnel, then the money. Every one is a
+ * number the engine already collects; see `lib/engine/scenario.ts` for how
+ * each one moves the others.
+ */
+export const LEVER_IDS: readonly LeverId[] = [
+  "acq.signup-rate",
+  "ref.referred-share",
+  "act.rate",
+  "rev.paid-conversion",
+  "ret.logo-churn",
+  "rev.contraction",
+  "rev.expansion",
+  "rev.arpa",
 ];
 
 /** Never priced in money in v1: pricing them would need a retention and a loop model (§6.6). */
@@ -436,7 +503,7 @@ export function derivedShapeOf(id: DerivedId): DerivedShape {
   return shape;
 }
 
-/** The three metrics of a stage, ★ first — the order of a stage drawer (§7 E3). */
+/** The metrics of a stage, ★ first — the order of a stage drawer (§7 E3). Three per stage, five for Revenue since 2026-09-26. */
 export function metricsOfStage(stage: Pillar): MetricShape[] {
   return METRIC_SHAPES.filter((s) => s.stage === stage).sort((a, b) => Number(b.primary) - Number(a.primary));
 }

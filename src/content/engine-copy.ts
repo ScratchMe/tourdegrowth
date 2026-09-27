@@ -1,7 +1,8 @@
 // TODO: à relire — copie neuve (convention 6), rédigée par la session de code
 import type { Translatable } from "@/lib/i18n/translatable";
 import type { Pillar } from "@/lib/scoring/pillars";
-import type { CandidateId, SlideTitleKey, ToolId, UnitInputId } from "@/lib/engine/types";
+import type { CandidateId, LeverId, SlideTitleKey, ToolId, UnitInputId } from "@/lib/engine/types";
+import type { ScenarioAssumption } from "@/lib/engine/scenario";
 
 /**
  * engine-copy.ts — every interface string of the growth engine (engine spec
@@ -95,14 +96,14 @@ export const ENGINE_COPY = {
     ctaNote: { fr: "Gratuit, sans compte. Tout reste sur ton appareil.", en: "Free, no sign-up. Everything stays on your device." },
     tourFirst: { fr: "Démarre ton Tour d'abord (3 min)", en: "Start your Tour first (3 min)" },
     noscript: {
-      fr: "Le moteur a besoin de JavaScript pour enregistrer tes chiffres. La liste des quinze chiffres, plus bas, se lit sans.",
-      en: "The engine needs JavaScript to save your numbers. The list of fifteen numbers, further down, reads without it.",
+      fr: "Le moteur a besoin de JavaScript pour enregistrer tes chiffres. La liste des dix-sept chiffres, plus bas, se lit sans.",
+      en: "The engine needs JavaScript to save your numbers. The list of seventeen numbers, further down, reads without it.",
     },
     // TODO: à relire — nouveau (2026-09-25, retours d'Antoine sur le moteur).
     durationTitle: { fr: "Combien de temps ça prend", en: "How long it takes" },
     durationIntro: {
-      fr: "Surtout, là où sont tes chiffres. Sur les quinze, {quick} se lisent en cinq minutes, {hour} demandent environ une heure chacun et {ask} sont à demander à quelqu'un.",
-      en: "Mostly, where your numbers are. Of the fifteen, {quick} take five minutes to read, {hour} take about an hour each and {ask} have to be asked of someone.",
+      fr: "Surtout, là où sont tes chiffres. Sur les dix-sept, {quick} se lisent en cinq minutes, {hour} demandent environ une heure chacun et {ask} sont à demander à quelqu'un.",
+      en: "Mostly, where your numbers are. Of the seventeen, {quick} take five minutes to read, {hour} take about an hour each and {ask} have to be asked of someone.",
     },
     durationReadyLabel: { fr: "Tout est sous la main", en: "Everything is at hand" },
     durationReady: {
@@ -122,10 +123,10 @@ export const ENGINE_COPY = {
     durationDeckLabel: { fr: "Les slides", en: "The slides" },
     durationDeck: { fr: "Un quart d'heure, une fois les chiffres là.", en: "A quarter of an hour, once the numbers are in." },
     catalogueToggle: {
-      fr: "Ouvrir les quinze fiches : formule, où le trouver, piège",
-      en: "Open the fifteen cards: formula, where to find it, trap",
+      fr: "Ouvrir les dix-sept fiches : formule, où le trouver, piège",
+      en: "Open the seventeen cards: formula, where to find it, trap",
     },
-    catalogueTitle: { fr: "Les quinze chiffres", en: "The fifteen numbers" },
+    catalogueTitle: { fr: "Les dix-sept chiffres", en: "The seventeen numbers" },
     catalogueIntro: {
       fr: "Trois par étape, comme les trois questions du Tour. Pour chacun : sa formule, où le trouver, et le piège à connaître avant de le citer.",
       en: "Three per stage, like the Tour's three questions. For each: its formula, where to find it, and the trap to know before quoting it.",
@@ -188,12 +189,14 @@ export const ENGINE_COPY = {
       fr: "Petits effectifs : moins de 100 inscrits dans cette cohorte. Lis la direction, pas les décimales.",
       en: "Small numbers: fewer than 100 sign-ups in this cohort. Read the direction, not the decimals.",
     },
-    stageRowOpen: { fr: "Ouvrir l'étape {stage}", en: "Open the {stage} stage" },
-    pillsSummary: {
-      fr: "trouvés : {found} · introuvables : {missing} · en cours : {inProgress}",
-      en: "found: {found} · missing: {missing} · in progress: {inProgress}",
-    },
     toFill: { fr: "à renseigner", en: "to fill in" },
+    // TODO: à relire — nouveau (2026-09-26, les étapes en onglets : « c'est rude de devoir scroller autant sur chaque chiffre »).
+    /** The tab list's accessible name: five tabs, one per AARRR stage. */
+    stagesLabel: { fr: "Les cinq étapes", en: "The five stages" },
+    /** Under a tab's name, next to its marks: the coverage line's "found", per stage. Built so 1 reads right (« trouvés : 1/3 »). */
+    tabFound: { fr: "trouvés : {n}/{N}", en: "found: {n}/{N}" },
+    /** The stamp on a stage the diagnosis names — its red said in words too. */
+    tabNamed: { fr: "Freine ici", en: "Holds you back" },
     // TODO: à relire — nouveau (2026-09-25, retours d'Antoine sur le moteur).
     settings: { fr: "Réglages", en: "Settings" },
     steps: { fr: "Reprendre le pas à pas", en: "Back to step by step" },
@@ -268,6 +271,9 @@ export const ENGINE_COPY = {
     "rev.arpa": { fr: "l'ARPA mensuel", en: "monthly ARPA" },
     "rev.gross-margin": { fr: "la marge brute", en: "gross margin" },
     "ret.logo-churn": { fr: "le churn logo", en: "logo churn" },
+    // TODO: à relire — nouveau (2026-09-26, expansion et rétrogradation).
+    "rev.expansion": { fr: "l'expansion", en: "expansion" },
+    "rev.contraction": { fr: "la rétrogradation", en: "contraction" },
   } satisfies Record<UnitInputId, Translatable>,
   /**
    * Where a value sits against its comparator, in the words of the page — a
@@ -394,6 +400,13 @@ export const ENGINE_COPY = {
     monthsOne: { fr: "1 mois", en: "1 month" },
     times: { fr: "{n} fois", en: "{n}×" },
     quarter: { fr: "T{q} {year}", en: "Q{q} {year}" },
+    /**
+     * TODO: à relire — nouveau (2026-09-26, slides « Et si »). A change,
+     * signed (`format.ts#formatChange`). The minus is U+2013, the glyph the
+     * copy already writes for a loss: U+2212 is in none of the slide fonts.
+     */
+    plus: { fr: "+{n}", en: "+{n}" },
+    minus: { fr: "–{n}", en: "–{n}" },
   },
 
   grammar: {
@@ -415,6 +428,10 @@ export const ENGINE_COPY = {
       en: "This cohort hasn't had its full window yet: the number will be marked approximate.",
     },
     statusQuestion: { fr: "Où en es-tu avec ce chiffre ?", en: "Where are you with this number?" },
+    // TODO: à relire — nouveau (2026-09-26, retour d'Antoine) : trois des quinze ne sont pas des chiffres
+    // (l'événement d'activation et la cause de churn sont des mots, le mécanisme de recommandation un choix).
+    // On ne leur demande pas où on en est « avec ce chiffre ».
+    statusQuestionAnswer: { fr: "Où en es-tu sur ce point ?", en: "Where are you on this?" },
     haveIt: { fr: "Je l'ai", en: "I have it" },
     canEstimate: { fr: "Je peux l'estimer", en: "I can estimate it" },
     willAsk: { fr: "Je le demande", en: "I'll ask for it" },
@@ -473,7 +490,6 @@ export const ENGINE_COPY = {
     note: { fr: "Note pour toi", en: "Note to self" },
     noteHint: { fr: "Jamais sur une slide.", en: "Never on a slide." },
     save: { fr: "Enregistrer", en: "Save" },
-    close: { fr: "Fermer", en: "Close" },
     tooLong: { fr: "{n} caractères au plus.", en: "{n} characters at most." },
     // TODO: à relire — nouveau (2026-09-25, retours d'Antoine sur le moteur).
     sharedHint: {
@@ -502,6 +518,16 @@ export const ENGINE_COPY = {
     message: {
       fr: "Bonjour — je prépare un point sur notre moteur de croissance. Pourrais-tu me sortir :\n{list}\nDes chiffres bruts me suffisent, sans mise en forme. Merci !",
       en: "Hi — I'm preparing a review of our growth engine. Could you pull:\n{list}\nRaw numbers are enough, no formatting needed. Thanks!",
+    },
+    /**
+     * The same request when everything asked for is an answer, not a number (the activation
+     * event, the churn cause, the referral mechanism): « des chiffres bruts » would ask a
+     * colleague for figures there are none of.
+     */
+    // TODO: à relire — nouveau (2026-09-26, retour d'Antoine).
+    messageAnswers: {
+      fr: "Bonjour — je prépare un point sur notre moteur de croissance. Pourrais-tu me dire :\n{list}\nQuelques mots suffisent. Merci !",
+      en: "Hi — I'm preparing a review of our growth engine. Could you tell me:\n{list}\nA few words are enough. Thanks!",
     },
     item: { fr: "– {what} ({definition})", en: "– {what} ({definition})" },
     itemNoDefinition: { fr: "– {what}", en: "– {what}" },
@@ -628,7 +654,6 @@ export const ENGINE_COPY = {
     noComparator: { fr: "sans repère · fixe une cible", en: "no reference · set a target" },
   },
   whatIf: {
-    title: { fr: "Et si · toutes choses égales par ailleurs", en: "What if · all else being equal" },
     today: { fr: "Aujourd'hui", en: "Today" },
     if: { fr: "Si", en: "If" },
     then: { fr: "Alors", en: "Then" },
@@ -662,15 +687,6 @@ export const ENGINE_COPY = {
       en: "That's {amount} more MRR after a year, churn included.",
     },
     lessThanOne: { fr: "Moins d'un client de plus par mois.", en: "Less than one more customer a month." },
-    assumptionActivation: {
-      fr: "Hypothèse : les payants sont parmi les activés.",
-      en: "Assumption: paying customers are among the activated.",
-    },
-    multiplication: {
-      fr: "Dans un funnel, les taux se multiplient : +20 % sur n'importe quelle étape donne +20 % de clients. Ce qui distingue les étapes, c'est leur écart à la cible.",
-      en: "In a funnel, rates multiply: +20% at any stage gives +20% customers. What sets stages apart is their gap to target.",
-    },
-    notForecast: { fr: "Un calcul, pas une prévision.", en: "A calculation, not a forecast." },
     targetReference: {
       fr: "{value} (bas de l'ordre de grandeur couramment cité)",
       en: "{value} (low end of the commonly cited range)",
@@ -681,10 +697,98 @@ export const ENGINE_COPY = {
       en: "{value} (high end of the commonly cited range)",
     },
     targetTeam: { fr: "{value} (cible de l'équipe)", en: "{value} (team target)" },
-    slider: { fr: "Cible à tester pour {stage}", en: "Target to try for {stage}" },
   },
 
   // --- Peloton and mirror (§14.7) ------------------------------------------
+  /**
+   * TODO: à relire — nouveau (2026-09-26, « Et si » cumulés). Each lever as
+   * the subject of a sentence, with its article — the panel's rows and the
+   * what-if slides' titles (« Si l'activation passait de 18 % à 24 % »).
+   * ARPA names who pays it: the projection applies it to NEW customers.
+   */
+  leverSubject: {
+    "acq.signup-rate": { fr: "le taux d'inscription", en: "the sign-up rate" },
+    "ref.referred-share": { fr: "la part des inscrits recommandés", en: "the referred share of sign-ups" },
+    "act.rate": { fr: "l'activation", en: "activation" },
+    "rev.paid-conversion": { fr: "la conversion en payant", en: "paid conversion" },
+    "ret.logo-churn": { fr: "le churn logo", en: "logo churn" },
+    "rev.contraction": { fr: "la rétrogradation", en: "contraction" },
+    "rev.expansion": { fr: "l'expansion", en: "expansion" },
+    "rev.arpa": { fr: "l'ARPA des nouveaux clients", en: "new customers' ARPA" },
+  } satisfies Record<LeverId, Translatable>,
+  /**
+   * TODO: à relire — nouveau (2026-09-26). « Et si » cumulés : the panel
+   * (all the levers at once, the funnel with its visitors, the growth
+   * numbers) and the what-if slides read the same words.
+   */
+  scenario: {
+    /** A difference of two rates is in points, never a percent of a percent (« +1 pt »). */
+    points: { fr: "{n} pt", en: "{n} pt" },
+    intro: { fr: "Bouge un ou plusieurs leviers : le funnel du mois et tes chiffres de croissance se recalculent ensemble, les effets se cumulent.", en: "Move one lever or several: the month's funnel and your growth numbers recompute together, and the effects add up." },
+    leversTitle: { fr: "Les leviers", en: "The levers" },
+    leverToday: { fr: "aujourd'hui {value}", en: "today {value}" },
+    /** `{list}`: the levers not entered, lower-cased catalogue names joined by `grammar`. */
+    unknownLevers: { fr: "Pas encore saisis, donc pas de curseur : {list}.", en: "Not entered yet, so no slider: {list}." },
+    reset: { fr: "Remettre à aujourd'hui", en: "Back to today" },
+    resetAll: { fr: "Tout remettre à aujourd'hui", en: "All back to today" },
+    sliderLabel: { fr: "{lever}, cible testée", en: "{lever}, target under test" },
+    funnelToday: { fr: "Ton funnel du mois, aujourd'hui", en: "Your month's funnel, today" },
+    funnelIf: { fr: "Ton funnel du mois, avec tes « Et si »", en: "Your month's funnel, with your what-ifs" },
+    visitors: { fr: "Visiteurs", en: "Visitors" },
+    signups: { fr: "Inscrits", en: "Sign-ups" },
+    referred: { fr: "dont recommandés", en: "of whom referred" },
+    activated: { fr: "Activés", en: "Activated" },
+    d30: { fr: "Actifs à J30", en: "Active at day 30" },
+    paying: { fr: "Nouveaux payants", en: "New paying" },
+    unknownStep: { fr: "inconnu", en: "unknown" },
+    gained: { fr: "+{n} avec tes « Et si »", en: "+{n} with your what-ifs" },
+    /** U+2212, the minus sign: StatTile.tsx asks for it, and a hyphen reads as a dash. */
+    lost: { fr: "−{n} avec tes « Et si »", en: "−{n} with your what-ifs" },
+    kpisTitle: { fr: "Tes chiffres de croissance", en: "Your growth numbers" },
+    kpiToday: { fr: "aujourd'hui", en: "today" },
+    kpiIf: { fr: "avec tes « Et si »", en: "with your what-ifs" },
+    kpiMrr12: { fr: "MRR dans 12 mois", en: "MRR in 12 months" },
+    kpiNewMrr: { fr: "Nouveau MRR par mois", en: "New MRR a month" },
+    kpiNrr: { fr: "NRR mensuelle", en: "Monthly NRR" },
+    kpiGrr: { fr: "GRR mensuelle", en: "Monthly GRR" },
+    kpiCac: { fr: "CAC", en: "CAC" },
+    kpiLtv: { fr: "LTV", en: "LTV" },
+    kpiPayback: { fr: "CAC payback", en: "CAC payback" },
+    kpiUnknown: { fr: "il manque {input}", en: "missing: {input}" },
+    aloneTitle: { fr: "Ce que chaque levier rapporte seul, sur le MRR dans 12 mois", en: "What each lever brings on its own, on MRR in 12 months" },
+    aloneRow: { fr: "{lever} : {from} → {to}", en: "{lever}: {from} → {to}" },
+    together: { fr: "Ensemble : {total}, soit {extra} de plus que la somme des leviers pris seuls : c'est l'effet composé.", en: "Together: {total}, {extra} more than the sum of the levers taken alone: that's the compounding." },
+    togetherNoExtra: { fr: "Ensemble : {total}.", en: "Together: {total}." },
+    noneMoved: { fr: "Aucun levier bougé : le funnel et les chiffres sont ceux d'aujourd'hui.", en: "No lever moved: the funnel and the numbers are today's." },
+    noLever: { fr: "Il faut au moins un chiffre saisi pour tester un « Et si ».", en: "You need at least one number entered to test a what-if." },
+    /** A KPI tile says whether a change is good news in words, never by color alone (StatTile.tsx). */
+    better: { fr: "mieux", en: "better" },
+    worse: { fr: "moins bien", en: "worse" },
+    /** The funnel's dots: what each shape means. `range` reuses the peloton's « fourchette estimée ». */
+    legendThere: { fr: "déjà là aujourd'hui", en: "there today" },
+    legendGained: { fr: "en plus avec tes « Et si »", en: "added by your what-ifs" },
+    legendLost: { fr: "en moins avec tes « Et si »", en: "lost to your what-ifs" },
+    legendUnit: { fr: "Un rond = 1 % des inscrits d'aujourd'hui : au-delà de 100, la grille s'allonge.", en: "One dot = 1% of today's sign-ups: past 100, the grid grows." },
+    perHundredNote: { fr: "Sans le nombre d'inscrits du mois, le funnel se lit pour 100 inscrits.", en: "Without the month's sign-up count, the funnel reads per 100 sign-ups." },
+    /** A grid's text equivalent: `{label}` a step, `{value}` the projection, `{today}` today's count. */
+    gridAria: { fr: "{label} : {value}, contre {today} aujourd'hui", en: "{label}: {value}, against {today} today" },
+    /** The table of what each lever brings alone: its header cells. */
+    aloneLever: { fr: "Levier", en: "Lever" },
+    aloneGain: { fr: "MRR dans 12 mois", en: "MRR in 12 months" },
+    assumptionsTitle: { fr: "Ce que le calcul suppose", en: "What the calculation assumes" },
+    /** One sentence per rule of `lib/engine/scenario.ts`, printed only when it applied. */
+    assumption: {
+      "signup-same-visitors": { fr: "Le taux d'inscription s'applique aux mêmes visiteurs qu'aujourd'hui.", en: "The sign-up rate applies to the same visitors as today." },
+      "referral-on-top": { fr: "Les inscrits recommandés s'ajoutent aux autres, qui restent les mêmes ; ils arrivent par des visiteurs qui s'inscrivent au taux d'aujourd'hui.", en: "Referred sign-ups come on top of the others, who stay the same; they arrive through visitors who sign up at today's rate." },
+      "activation-drives-downstream": { fr: "Les actifs à J30 et les payants font partie des activés : ils suivent l'activation dans la même proportion, sans jamais la dépasser.", en: "Those active at day 30 and those paying are among the activated: they follow activation in the same proportion, never above it." },
+      "arpa-new-customers": { fr: "Le nouvel ARPA s'applique aux nouveaux clients ; le MRR déjà là garde son prix.", en: "The new ARPA applies to new customers; the MRR already there keeps its price." },
+      "same-spend": { fr: "À dépense égale : plus de payants font baisser le CAC dans la même proportion.", en: "Same spend: more paying customers lower the CAC in the same proportion." },
+      "churn-as-revenue": { fr: "Le churn logo tient lieu de churn en revenu, comme si les clients partis payaient l'ARPA moyen.", en: "Logo churn stands in for revenue churn, as if the customers who left paid the average ARPA." },
+      "contraction-unknown": { fr: "La rétrogradation n'est pas renseignée : comptée à 0.", en: "Contraction isn't entered: counted as 0." },
+      "expansion-unknown": { fr: "L'expansion n'est pas renseignée : comptée à 0.", en: "Expansion isn't entered: counted as 0." },
+      "twelve-months": { fr: "Sur 12 mois, au rythme de ce mois : la base retenue à la NRR chaque mois, plus le nouveau MRR du mois. Ni saisonnalité, ni saturation.", en: "Over 12 months, at this month's pace: the base retained at NRR each month, plus the month's new MRR. No seasonality, no saturation." },
+    } satisfies Record<ScenarioAssumption, Translatable>,
+  },
   peloton: {
     upstream: {
       fr: "~{n} visiteurs du mois pour 100 inscrits · {source} · {month}",
@@ -796,7 +900,6 @@ export const ENGINE_COPY = {
     tablePerHundred: { fr: "Sur 100 inscrits", en: "Out of 100 sign-ups" },
     tableStatus: { fr: "Statut", en: "Status" },
     tableSource: { fr: "Source", en: "Source" },
-    whatIfMove: { fr: "Déplace le curseur pour tester une cible.", en: "Move the slider to try a target." },
     mirrorCounts: { fr: "Sur les chiffres que le Tour te faisait déclarer", en: "Across the numbers the Tour asked you about" },
     /** Which Tour is read — the spec shows its date (§6.11): a result can be months old. */
     mirrorTakenAt: { fr: "Tour du {date} · {score}/100", en: "Tour taken {date} · {score}/100" },
@@ -961,7 +1064,6 @@ export const ENGINE_COPY = {
     askGoal: { fr: "{metric} de {current} à {target}", en: "{metric} from {current} to {target}" },
     askGoalNoCurrent: { fr: "{metric} à {target}", en: "{metric} to {target}" },
     askGoalHorizon: { fr: "{goal} d'ici {horizon}", en: "{goal} by {horizon}" },
-    annexTitle: { fr: "Définitions et sources", en: "Definitions and sources" },
     annexCols: {
       number: { fr: "Chiffre", en: "Number" },
       formula: { fr: "Formule", en: "Formula" },
@@ -977,6 +1079,39 @@ export const ENGINE_COPY = {
       unknown: { fr: "inconnu", en: "unknown" },
     },
     tourFooter: { fr: "Tour de Growth : {score}/100, {date}", en: "Tour de Growth: {score}/100, {date}" },
+    /**
+     * TODO: à relire — nouveau (2026-09-26). The what-if slides (one per lever
+     * the team moved, one for all of them together): their two tables, their
+     * column headings, and each row as the text export writes it. The panel's
+     * own words (`scenario.*`) say « tes « Et si » »; a slide is read out to a
+     * room, so it says « cet « Et si » » / « les « Et si » ».
+     */
+    whatIfKpis: { fr: "Les chiffres de croissance", en: "The growth numbers" },
+    whatIfFunnel: { fr: "Le funnel du mois", en: "The month's funnel" },
+    whatIfToday: { fr: "Aujourd'hui", en: "Today" },
+    whatIfWithOne: { fr: "Avec cet « Et si »", en: "With this what-if" },
+    whatIfWithAll: { fr: "Avec les « Et si »", en: "With the what-ifs" },
+    whatIfChange: { fr: "Écart", en: "Change" },
+    /** A figure the what-if leaves where it is: the change column says so in a word, never « 0 ». Gender-free in French. */
+    whatIfStable: { fr: "stable", en: "unchanged" },
+    whatIfRowOne: {
+      fr: "{today} aujourd'hui, {projected} avec cet « Et si » ({change})",
+      en: "{today} today, {projected} with this what-if ({change})",
+    },
+    whatIfRowAll: {
+      fr: "{today} aujourd'hui, {projected} avec les « Et si » ({change})",
+      en: "{today} today, {projected} with the what-ifs ({change})",
+    },
+    whatIfRowStable: { fr: "{today} aujourd'hui, stable", en: "{today} today, unchanged" },
+    /** A change in NRR or GRR, in percentage points. French takes the singular under 2 (« 0,5 point »). */
+    whatIfPoints: { fr: "{n} points", en: "{n} points" },
+    whatIfPointsOne: { fr: "{n} point", en: "{n} point" },
+    /**
+     * A lever of the « together » slide, as the text export writes it. French
+     * never writes « de {from} à {to} »: an estimate is a range (« 6 à 9 % »),
+     * and « de 6 à 9 % à 12 % » can't be read.
+     */
+    whatIfLeverRow: { fr: "à {to} (aujourd'hui : {from}) · {gain}", en: "from {from} to {to} · {gain}" },
   },
   /** One template per case and grammatical number (§9.3). `**…**` is the red accent. */
   slideTitles: {
@@ -1089,6 +1224,14 @@ export const ENGINE_COPY = {
       en: "We're asking for **{cost}** to measure what's missing first ({metric}), before deciding where to invest.",
     },
     annex: { fr: "Définitions et sources", en: "Definitions and sources" },
+    // TODO: à relire — nouveau (2026-09-26).
+    whatIfLever: { fr: "Si {stage} passait à {to} (aujourd'hui : {from}), le MRR dans 12 mois gagnerait **{gain}**.", en: "If {stage} went from {from} to {to}, MRR in 12 months would gain **{gain}**." },
+    // TODO: à relire — nouveau (2026-09-26).
+    whatIfLeverPlain: { fr: "**Et si {stage} passait à {to} ?** Aujourd'hui : {from}.", en: "**What if {stage} went from {from} to {to}?**" },
+    // TODO: à relire — nouveau (2026-09-26).
+    scenario: { fr: "Avec les {n} « Et si » ensemble, le MRR dans 12 mois gagnerait **{gain}**.", en: "With the {n} what-ifs together, MRR in 12 months would gain **{gain}**." },
+    // TODO: à relire — nouveau (2026-09-26).
+    scenarioPlain: { fr: "**Les {n} « Et si » ensemble.**", en: "**The {n} what-ifs together.**" },
   } satisfies Record<SlideTitleKey, Translatable>,
   /** Speaker notes (§9.4), pre-written against the classic objections. */
   notes: {
@@ -1121,6 +1264,11 @@ export const ENGINE_COPY = {
         fr: "{side} aussi, mais sans montant commun, le churn ne se compare pas aux autres étapes",
         en: "{side} too, but with no amount in common, churn can't be compared with the other stages",
       },
+    },
+    /** TODO: à relire — nouveau (2026-09-26). On every what-if slide: the projection is not a forecast. */
+    whatIf: {
+      fr: "Est-ce une prévision ? — Non : une projection au rythme de ce mois, qui ne tient que si les hypothèses en bas de la slide tiennent.",
+      en: "Is this a forecast? — No: a projection at this month's pace, which only holds if the assumptions at the bottom of the slide hold.",
     },
   },
 
@@ -1239,7 +1387,6 @@ export const ENGINE_COPY = {
     phaseNumbers: { fr: "Tes chiffres", en: "Your numbers" },
     phaseWhatIf: { fr: "Et si", en: "What if" },
     phaseDeck: { fr: "Tes slides", en: "Your slides" },
-    phaseOf: { fr: "Étape {i} sur {n}", en: "Step {i} of {n}" },
     continue: { fr: "Continuer →", en: "Continue →" },
     back: { fr: "← Retour", en: "← Back" },
     toBoard: { fr: "Voir le tableau complet", en: "See the full board" },
@@ -1263,27 +1410,11 @@ export const ENGINE_COPY = {
       en: "Every account created in {month}. They feed the sign-up rate and the top channel's share.",
     },
     numberOf: { fr: "Chiffre {i} sur {n} · {stage}", en: "Number {i} of {n} · {stage}" },
+    // TODO: à relire — nouveau (2026-09-26, retour d'Antoine) : l'en-tête des trois points qui ne sont pas
+    // des chiffres (événement d'activation, cause de churn, mécanisme de recommandation).
+    answerOf: { fr: "Point {i} sur {n} · {stage}", en: "Item {i} of {n} · {stage}" },
     skip: { fr: "Passer, j'y reviendrai", en: "Skip, I'll come back to it" },
     whatIfTitle: { fr: "Et si ?", en: "What if?" },
-    whatIfIntro: {
-      fr: "Choisis une étape et déplace le curseur : le funnel se redessine avec la cible que tu testes, et le gain s'affiche en revenu mensuel.",
-      en: "Pick a stage and move the slider: the funnel redraws with the target you are testing, and the gain shows as monthly revenue.",
-    },
-    whatIfNone: {
-      fr: "Pour tester une cible, il faut d'abord un chiffre sur l'une de ces étapes : taux d'inscription, activation, churn ou conversion en payant.",
-      en: "To test a target, you first need a number on one of these: sign-up rate, activation, churn or paid conversion.",
-    },
-    whatIfStage: { fr: "Étape à tester", en: "Stage to test" },
-    funnelIf: { fr: "Ton funnel si {stage} atteint {target}", en: "Your funnel if {stage} reaches {target}" },
-    funnelIfChurn: {
-      fr: "Le funnel ne montre pas le churn : son effet est dans le revenu, ci-contre.",
-      en: "The funnel doesn't show churn: its effect is in the revenue, alongside.",
-    },
-    funnelIfUpstream: {
-      fr: "Le funnel est compté sur 100 inscrits : un meilleur taux d'inscription t'en donne plus pour le même trafic. Son effet est dans le revenu, ci-contre.",
-      en: "The funnel is counted on 100 sign-ups: a better sign-up rate gives you more of them for the same traffic. Its effect is in the revenue, alongside.",
-    },
-    funnelToday: { fr: "Ton funnel aujourd'hui", en: "Your funnel today" },
     doneTitle: { fr: "Ton moteur est prêt", en: "Your engine is ready" },
     doneBody: {
       fr: "Prépare tes slides maintenant, ou complète plus tard : tout reste sur cet appareil. Pense à sauvegarder un fichier.",

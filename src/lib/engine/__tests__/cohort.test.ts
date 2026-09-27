@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { shapeOf } from "../catalog-shape";
+import { METRIC_SHAPES, shapeOf } from "../catalog-shape";
 import {
   currentMonth,
   defaultCohortMonth,
@@ -87,7 +87,7 @@ describe("defaults", () => {
     expect(months["ret.d30"]).toBe("2026-07");
     expect(months["acq.signup-rate"]).toBe("2026-08");
     expect(months["rev.arpa"]).toBe("2026-08");
-    expect(Object.keys(months)).toHaveLength(15);
+    expect(Object.keys(months)).toHaveLength(METRIC_SHAPES.length);
   });
 
   it("windows come from the setup; periods from the entry, else the snapshot", () => {

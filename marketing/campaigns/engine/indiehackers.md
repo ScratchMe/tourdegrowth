@@ -35,7 +35,7 @@ même site.
 >
 > Code: github.com/ScratchMe/tourdegrowth · Try it: [link]
 >
-> What I'd like to hear: which of the fifteen numbers you couldn't find in your own tools.
+> What I'd like to hear: which of the seventeen numbers you couldn't find in your own tools.
 
 *Notes pour la relecture* : les points 1, 2 et 4 sont des défauts réellement
 vus dans les maquettes des trois conceptions du moteur (spec, §1, tableau

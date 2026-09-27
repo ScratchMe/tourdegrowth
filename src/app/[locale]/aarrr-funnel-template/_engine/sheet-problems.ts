@@ -1,4 +1,5 @@
 import { TEXT_LIMITS } from "@/lib/engine/catalog-shape";
+import { statusQuestionOf } from "@/lib/engine/phrases";
 import type { EngineStrings, ResolvedMetric } from "@/lib/engine/strings";
 import type { DraftProblem } from "./sheet-draft";
 import { fill, midSentence } from "./text";
@@ -62,7 +63,7 @@ export function ruleMessage(problem: DraftProblem, metric: ResolvedMetric, strin
 export function missingLabel(problem: DraftProblem, metric: ResolvedMetric, strings: EngineStrings): string {
   switch (problem) {
     case "mode":
-      return strings.sheet.statusQuestion;
+      return statusQuestionOf(metric.id, strings);
     case "numerator":
       return metric.inputs?.numerator ?? metric.name;
     case "denominator":

@@ -17,7 +17,7 @@ export interface DiagnosisProps {
   diagnosis: DiagnosisModel;
   strings: EngineStrings;
   locale: Locale;
-  /** The fifteen numbers' names, to say WHICH number of a stage is below its comparator. */
+  /** The seventeen numbers' names, to say WHICH number of a stage is below its comparator. */
   metrics: ResolvedMetric[];
   /**
    * The candidates' known values, in percent. `Diagnosis` carries a position

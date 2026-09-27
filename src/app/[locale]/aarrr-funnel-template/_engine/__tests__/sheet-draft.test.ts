@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { shapeOf, TEXT_LIMITS } from "@/lib/engine/catalog-shape";
 import type { MetricEntry, MetricId } from "@/lib/engine/types";
-import { draftFromEntry, entryFromDraft, isWideRange, proposedRepair, type SheetDraft } from "../sheet-draft";
+import { draftFromEntry, entryFromDraft, isWideRange, proposedRepair, triageAnswersFor, type SheetDraft } from "../sheet-draft";
 
 /**
  * The sheet's save rules (spec §7 E3, §6.9, D11), pinned where they live:
@@ -200,5 +200,41 @@ describe("the helpers the sheet shows beside the form", () => {
     expect(isWideRange(10, 31)).toBe(true);
     expect(isWideRange(0, 50)).toBe(false);
     expect(isWideRange(null, 50)).toBe(false);
+  });
+});
+
+/**
+ * « J'ai deux chiffres qui ne collent pas » is for numbers (Antoine, 2026-09-26):
+ * for the activation event it drew two percent boxes. An answer two people
+ * give differently is a definition nobody agrees on — `no-definition`.
+ */
+describe("triageAnswersFor — no « deux chiffres » for an answer", () => {
+  it("a number offers the four causes, then two readings that don't match", () => {
+    expect(triageAnswersFor(shapeOf("act.rate"), false)).toEqual(["not-tracked", "not-computed", "no-access", "no-definition", "conflicting"]);
+    expect(triageAnswersFor(shapeOf("ret.logo-churn"), true)).toEqual([
+      "not-tracked",
+      "not-computed",
+      "no-access",
+      "no-definition",
+      "conflicting",
+      "not-applicable",
+    ]);
+  });
+
+  it("the activation event, the churn cause and the referral mechanism offer the four causes only", () => {
+    for (const id of ["act.event", "ret.churn-cause", "ref.mechanism"] as const) {
+      expect(triageAnswersFor(shapeOf(id), false), id).toEqual(["not-tracked", "not-computed", "no-access", "no-definition"]);
+    }
+  });
+
+  it("a draft reopened as two readings on an answer is asked again, never saved as two percentages", () => {
+    const { entry, problems } = save("act.event", {
+      mode: "cantFind",
+      triage: "conflicting",
+      readingA: { kind: "rate", numerator: null, denominator: null, percent: 10, amount: null, source: "other", sourceRole: "product" },
+      readingB: { kind: "rate", numerator: null, denominator: null, percent: 20, amount: null, source: "other", sourceRole: "product" },
+    });
+    expect(entry).toBeNull();
+    expect(problems).toEqual(["triage"]);
   });
 });

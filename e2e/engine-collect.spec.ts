@@ -81,10 +81,10 @@ async function startEngine(page: Page, locale: "en" | "fr" = "en"): Promise<void
   await expect(page.getByTestId("engine-board")).toBeVisible();
 }
 
-/** Opens a stage's drawer if it isn't already the one showing, then the metric's sheet. */
+/** Selects a stage's tab if it isn't already the one showing, then unfolds the metric's sheet. */
 async function openSheet(page: Page, stage: string, metricDomId: string): Promise<Locator> {
-  const row = page.getByTestId(`engine-row-${stage}`);
-  if ((await row.getAttribute("aria-expanded")) !== "true") await row.click();
+  const tab = page.getByTestId(`engine-tab-${stage}`);
+  if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click();
   const toggle = page.getByTestId(`engine-metric-${metricDomId}`);
   if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
   const sheet = page.getByTestId(`engine-sheet-${metricDomId}`);
@@ -129,7 +129,7 @@ test.describe("setup and first save", () => {
     await expect(page.getByTestId("engine-setup")).toBeVisible();
     await expect(page.getByRole("radio", { name: /self-serve/ })).toBeChecked();
     await page.getByTestId("engine-setup-board").click();
-    await expect(page.getByTestId("engine-coverage")).toContainText("0 of 15 numbers found");
+    await expect(page.getByTestId("engine-coverage")).toContainText("0 of 17 numbers found");
     // Focus follows the screen change to the verdict, never left on <body>.
     await expect(page.locator("#engine-verdict")).toBeFocused();
     await expect.poll(() => trackedEvents(page)).toContain("engine_opened");
@@ -145,7 +145,7 @@ test.describe("setup and first save", () => {
     await sheet.locator("#engine-act-rate-source").selectOption({ label: "Amplitude" });
     await sheet.getByTestId("engine-save-act-rate").click();
     await expect(sheet.getByTestId("engine-saved-act-rate")).toBeVisible();
-    await expect(page.getByTestId("engine-coverage")).toContainText("1 of 15 numbers found");
+    await expect(page.getByTestId("engine-coverage")).toContainText("1 of 17 numbers found");
 
     const stored = await storedEngine(page);
     expect(stored?.state.snapshots[0]?.metrics["act.rate"]?.status).toBe("measured");
@@ -154,7 +154,7 @@ test.describe("setup and first save", () => {
 
     await page.reload();
     await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
-    await expect(page.getByTestId("engine-coverage")).toContainText("1 of 15 numbers found");
+    await expect(page.getByTestId("engine-coverage")).toContainText("1 of 17 numbers found");
     const again = await openSheet(page, "activation", "act-rate");
     await expect(again.locator("#engine-act-rate-num")).toHaveValue("144");
     await expect(again.locator("#engine-act-rate-den")).toHaveValue("800");
@@ -172,7 +172,7 @@ test.describe("setup and first save", () => {
     await expect(sheet.getByTestId("engine-saved-act-rate")).toBeEmpty();
     // The refusal takes the live rate's place, under the two counts it is about.
     await expect(sheet.getByTestId("engine-live")).toContainText(ENGINE_COPY.sanity.numGtDen.en.split("{num}")[0]!);
-    await expect(page.getByTestId("engine-coverage")).toContainText("0 of 15 numbers found");
+    await expect(page.getByTestId("engine-coverage")).toContainText("0 of 17 numbers found");
     expect((await storedEngine(page))?.state.snapshots[0]?.metrics["act.rate"]).toBeUndefined();
   });
 
@@ -210,7 +210,10 @@ test.describe("setup and first save", () => {
     const entry = (await storedEngine(page))?.state.snapshots[0]?.metrics["ret.d30"] as { status: string; missing?: { cause: string; repair: string } };
     expect(entry.status).toBe("missing");
     expect(entry.missing).toMatchObject({ cause: "not-tracked", repair: "sprint" });
-    await expect(page.getByTestId("engine-row-retention")).toContainText("Day-30 retention");
+    // The number's own row says it, in words, next to why it can't be found.
+    const row = page.getByTestId("engine-metric-ret-d30");
+    await expect(row).toContainText(ENGINE_COPY.status.missing.en);
+    await expect(row).toContainText(ENGINE_COPY.cause.notTracked.en);
   });
 });
 
@@ -259,7 +262,7 @@ test.describe("asking and collecting", () => {
   test("the collect list counts what's left, groups by person, and Fill in opens the sheet", async ({ page }) => {
     await startEngine(page);
     const fold = page.getByTestId("engine-collect-disclosure");
-    await expect(fold.locator("summary")).toContainText("(15)");
+    await expect(fold.locator("summary")).toContainText("(17)");
     await fold.locator("summary").click();
     const collect = page.getByTestId("engine-collect");
     await expect(collect).toBeVisible();
@@ -306,7 +309,7 @@ test.describe("the §6.0 example on the board", () => {
     test(`${locale}: the peloton's numerals are its grids, and an unmeasured stage is a "?", never a 0`, async ({ page }) => {
       await page.setViewportSize({ width: 1280, height: 900 });
       await openExample(page, locale);
-      const copy = ENGINE_COPY.coverage.found[locale].replace("{n}", "9").replace("{N}", "15");
+      const copy = ENGINE_COPY.coverage.found[locale].replace("{n}", "11").replace("{N}", "17");
       await expect(page.getByTestId("engine-coverage")).toContainText(copy);
       // Same day, nothing waiting, nothing left to fill: no resume band repeating the coverage.
       await expect(page.getByTestId("engine-resume")).toHaveCount(0);
@@ -337,39 +340,55 @@ test.describe("the §6.0 example on the board", () => {
       await expect(peloton.getByTestId("peloton-stamp")).toHaveCount(1);
       await expect(peloton.locator('[data-metric="act.rate"]').getByTestId("peloton-stamp")).toBeVisible();
 
+      // The stamp makes its column's label row taller, and the four 10×10 grids still start on
+      // one line (Antoine, 2026-09-26: the named grid used to sit lower than its neighbours).
+      // Measured on the rendered boxes: the four columns share their row tracks (subgrid).
+      const tops = await peloton
+        .locator('[data-testid^="peloton-grid-"]')
+        .evaluateAll((grids) => grids.map((g) => g.getBoundingClientRect().top));
+      expect(tops).toHaveLength(4);
+      expect(Math.max(...tops) - Math.min(...tops), `grid tops: ${tops.join(", ")}`).toBeLessThan(1);
+
       // No Tour on this device: the mirror invites to take one.
       await expect(page.getByTestId("engine-mirror")).toHaveAttribute("data-state", "none");
       await noHorizontalScroll(page);
     });
 
-    test(`${locale}: "what if" starts at the reference, recomputes when the slider moves, and redraws the funnel`, async ({ page }) => {
+    test(`${locale}: "what if" moves a lever, and the growth numbers and the what-if funnel move with it`, async ({ page }) => {
       await page.setViewportSize({ width: 1280, height: 900 });
       await openExample(page, locale);
-      // On a desk the drawer opens on the stage the diagnosis names, its ★ open.
-      await expect(page.getByTestId("engine-drawer")).toHaveAttribute("data-stage", "activation");
+      // The board opens on the stage the diagnosis names, every number folded.
+      const stagePanel = page.getByTestId("engine-panel");
+      await expect(stagePanel).toHaveAttribute("data-stage", "activation");
+      await expect(stagePanel.locator('[data-testid^="engine-sheet-"]')).toHaveCount(0);
       // « What if » is folded on the board, and no longer inside a number's sheet.
-      await expect(page.getByTestId("engine-drawer").getByTestId("engine-whatif")).toHaveCount(0);
+      await expect(stagePanel.getByTestId("engine-whatif-panel")).toHaveCount(0);
       const fold = page.getByTestId("engine-board-whatif");
-      await fold.locator("summary").click();
-      // It opens on the stage the diagnosis names.
-      const whatIf = fold.getByTestId("engine-whatif");
-      await expect(whatIf).toBeVisible();
-      const lines = whatIf.getByTestId("whatif-lines");
-      // Starts at the low end of the reference (20 %), so the chain is shown at once.
-      await expect(lines).toContainText(EXAMPLE_EXPECTED.leakChain);
-      await expect(lines).toContainText(EXAMPLE_EXPECTED.leakAmount[locale]);
-      await expect(lines).toContainText(EXAMPLE_EXPECTED.annualAmount[locale]);
-
-      const slider = whatIf.getByTestId("whatif-slider");
-      await slider.focus();
-      await page.keyboard.press("ArrowRight");
-      await expect(whatIf.getByTestId("whatif-target")).toHaveText(/^21\s?%$/);
-      // Recomputed, not patched: every figure of the chain moved with the target.
-      await expect(lines).toContainText("42 × 21/18 = 49 (+7)");
-      await expect(lines).not.toContainText(EXAMPLE_EXPECTED.leakChain);
-      // And the funnel next to it is the funnel at 21 %, not today's.
+      await fold.locator(":scope > summary").click();
       const panel = fold.getByTestId("engine-whatif-panel");
-      await expect(panel.getByTestId("peloton-numeral-act.rate")).toHaveText("21");
+      await expect(panel).toBeVisible();
+      const w = ENGINE_COPY.scenario;
+
+      // Nothing moved: today's funnel, and no figure claims a change.
+      await expect(panel.getByTestId("engine-whatif-funnel-title")).toHaveText(w.funnelToday[locale]);
+      await expect(panel.getByTestId("whatif-kpis")).not.toContainText(w.better[locale]);
+
+      // Activation 18 → 19 %, one step of the slider.
+      await panel.getByTestId("whatif-slider-act.rate").focus();
+      await page.keyboard.press("ArrowRight");
+      await expect(panel.getByTestId("whatif-value-act.rate")).toHaveText(/^19\s?%$/);
+      await expect(panel.getByTestId("engine-whatif-funnel-title")).toHaveText(w.funnelIf[locale]);
+      // The activated grow, and the payers with them (they are among the activated).
+      await expect(panel.getByTestId("whatif-step-activated")).toContainText("+");
+      await expect(panel.getByTestId("whatif-step-paying")).toContainText("+");
+      // Day 30 is not measured in the example: the unknown shape, never 0 dots.
+      await expect(panel.getByTestId("whatif-step-d30").locator("[data-dot]")).toHaveCount(0);
+      // More new MRR is better, and at the same spend a lower CAC is better too — said in words.
+      await expect(panel.getByTestId("whatif-kpi-newMrr")).toContainText(w.better[locale]);
+      await expect(panel.getByTestId("whatif-kpi-cac")).toContainText(w.better[locale]);
+      // Churn did not move: retention says nothing.
+      await expect(panel.getByTestId("whatif-kpi-grr")).not.toContainText(w.better[locale]);
+      // The board's own funnel is still today's.
       await expect(page.getByTestId("engine-board-peloton").getByTestId("peloton-numeral-act.rate")).toHaveText(EXAMPLE_EXPECTED.activatedPerHundred);
     });
   }
@@ -392,21 +411,34 @@ test.describe("the §6.0 example on the board", () => {
     });
   }
 
-  test("fr at 390px: the example board, the activation drawer and its what-if scroll only downward", async ({ page }) => {
+  test("fr at 390px: the example board, the activation panel and its what-if scroll only downward", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openExample(page, "fr");
     await noHorizontalScroll(page);
-    // Every stage name on one line, next to a value in each row: a 30px stencil name beside
-    // its value once broke mid-word (« ACQUISITI / ON »). One line of 30px/1.1 is 33px.
+    // The peloton keeps its phone layout under the shared row tracks of the desktop one
+    // (2026-09-26): one row per column, the mini-grid on the left of its numeral, the rows stacked.
+    const peloton = page.getByTestId("engine-board-peloton");
+    const rows = await peloton.locator("[data-metric]").evaluateAll((columns) =>
+      columns.map((c) => {
+        const grid = c.querySelector('[data-testid^="peloton-grid-"]')!.getBoundingClientRect();
+        const numeral = c.querySelector('[data-testid^="peloton-numeral-"]')!.getBoundingClientRect();
+        return { top: c.getBoundingClientRect().top, gridRight: grid.right, numeralLeft: numeral.left };
+      }),
+    );
+    expect(rows).toHaveLength(4);
+    for (const row of rows) expect(row.gridRight, "mini-grid left of its numeral").toBeLessThanOrEqual(row.numeralLeft);
+    for (let i = 1; i < rows.length; i += 1) expect(rows[i]!.top, "one column under another").toBeGreaterThan(rows[i - 1]!.top);
+    // Every stage name on one line: a stencil name that wraps (« ACQUISITI / ON », seen at
+    // 390 on the old rows) would give five tabs five heights. One line of 19px/1 is 19px.
     for (const stage of ["acquisition", "activation", "retention", "referral", "revenue"]) {
-      const box = await page.getByTestId(`engine-row-name-${stage}`).boundingBox();
-      expect(box!.height, stage).toBeLessThan(45);
+      const box = await page.getByTestId(`engine-tab-name-${stage}`).boundingBox();
+      expect(box!.height, stage).toBeLessThan(28);
     }
     await openSheet(page, "activation", "act-rate");
     await noHorizontalScroll(page);
     const fold = page.getByTestId("engine-board-whatif");
-    await fold.locator("summary").click();
-    await expect(fold.getByTestId("engine-whatif")).toBeVisible();
+    await fold.locator(":scope > summary").click();
+    await expect(fold.getByTestId("engine-whatif-panel")).toBeVisible();
     await noHorizontalScroll(page);
   });
 
@@ -415,7 +447,7 @@ test.describe("the §6.0 example on the board", () => {
     await openExample(page, "en", new Date(2026, 8, 27, 12));
     const band = page.getByTestId("engine-resume");
     await expect(band).toBeVisible();
-    await expect(band).toContainText("You've found 9 of 15 numbers. Since your last visit, 3 days ago:");
+    await expect(band).toContainText("You've found 11 of 17 numbers. Since your last visit, 3 days ago:");
     await expect(band).toContainText("to follow up");
   });
 });
@@ -429,7 +461,7 @@ test.describe("leaving the device and coming back", () => {
     await sheet.locator("#engine-act-rate-den").fill("800");
     await sheet.locator("#engine-act-rate-source").selectOption({ label: "Amplitude" });
     await sheet.getByTestId("engine-save-act-rate").click();
-    await expect(page.getByTestId("engine-coverage")).toContainText("1 of 15 numbers found");
+    await expect(page.getByTestId("engine-coverage")).toContainText("1 of 17 numbers found");
 
     const downloadP = page.waitForEvent("download");
     await page.getByTestId("engine-save-json").click();
@@ -447,9 +479,9 @@ test.describe("leaving the device and coming back", () => {
     await expect(page.getByTestId("engine-setup")).toBeVisible();
     await page.getByTestId("engine-setup-import").click();
     await page.getByTestId("engine-import-file").setInputFiles(path);
-    await expect(page.getByTestId("engine-import-preview")).toContainText("1 of 15");
+    await expect(page.getByTestId("engine-import-preview")).toContainText("1 of 17");
     await page.getByTestId("engine-import-open").click();
-    await expect(page.getByTestId("engine-coverage")).toContainText("1 of 15 numbers found");
+    await expect(page.getByTestId("engine-coverage")).toContainText("1 of 17 numbers found");
     expect((await storedEngine(page))?.state.snapshots[0]?.metrics["act.rate"]?.status).toBe("measured");
   });
 
@@ -484,8 +516,12 @@ test.describe("keyboard, languages, widths", () => {
     await page.keyboard.press("Enter");
     await expect(page.getByTestId("engine-board")).toBeVisible();
 
-    await tabTo(page, page.getByTestId("engine-row-activation"));
-    await page.keyboard.press("Enter");
+    // The tab list is ONE Tab stop (roving tabindex): the selected tab, then the arrows.
+    // A fresh engine opens on acquisition, the first stage with a number to fill.
+    await tabTo(page, page.getByTestId("engine-tab-acquisition"));
+    await page.keyboard.press("ArrowRight");
+    await expect(page.getByTestId("engine-tab-activation")).toBeFocused();
+    await expect(page.getByTestId("engine-panel")).toHaveAttribute("data-stage", "activation");
     const toggle = page.getByTestId("engine-metric-act-rate");
     await tabTo(page, toggle);
     if ((await toggle.getAttribute("aria-expanded")) !== "true") await page.keyboard.press("Enter");
@@ -508,42 +544,42 @@ test.describe("keyboard, languages, widths", () => {
     test(`${locale}: every sheet's labels are resolved — no raw {placeholder} anywhere`, async ({ page }) => {
       await startEngine(page, locale);
       for (const stage of ["acquisition", "activation", "retention", "referral", "revenue"]) {
-        const row = page.getByTestId(`engine-row-${stage}`);
-        if ((await row.getAttribute("aria-expanded")) !== "true") await row.click();
-        const drawer = page.getByTestId("engine-drawer");
-        await expect(drawer).toHaveAttribute("data-stage", stage);
-        const toggles = drawer.locator('[data-testid^="engine-metric-"]');
+        const tab = page.getByTestId(`engine-tab-${stage}`);
+        if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click();
+        const panel = page.getByTestId("engine-panel");
+        await expect(panel).toHaveAttribute("data-stage", stage);
+        const toggles = panel.locator('button[data-testid^="engine-metric-"]');
         for (let i = 0; i < (await toggles.count()); i += 1) {
           const t = toggles.nth(i);
           if ((await t.getAttribute("aria-expanded")) !== "true") await t.click();
         }
         // "I have it" is the first mode in every sheet: it reveals the count labels.
-        const haves = drawer.locator('[data-testid^="engine-sheet-"]').getByRole("radio").first();
+        const haves = panel.locator('[data-testid^="engine-sheet-"]').getByRole("radio").first();
         await haves.check();
         await expect(page.getByTestId("engine-workbench")).not.toContainText(/\{[a-zA-Z]+\}/);
       }
     });
 
     for (const width of [390, 1280]) {
-      test(`${locale} at ${width}px: no sideways scroll with a sheet open, and the drawer sits where it should`, async ({ page }) => {
+      test(`${locale} at ${width}px: no sideways scroll with a sheet open, and the panel sits under the tabs`, async ({ page }) => {
         await page.setViewportSize({ width, height: 900 });
         await startEngine(page, locale);
         const sheet = await openSheet(page, "activation", "act-rate");
         await sheet.getByRole("radio").first().check();
         await noHorizontalScroll(page);
-        const row = await page.getByTestId("engine-row-activation").boundingBox();
-        const drawer = await page.getByTestId("engine-drawer").boundingBox();
-        if (!row || !drawer) throw new Error("row or drawer not rendered");
-        if (width < 960) {
-          // Inline on a phone: right under its row, same column.
-          expect(drawer.y).toBeGreaterThanOrEqual(row.y + row.height - 1);
-          expect(Math.abs(drawer.x - row.x)).toBeLessThan(2);
-        } else {
-          // Beside the rows on a desk, and the rows stay a compact list.
-          expect(drawer.x).toBeGreaterThan(row.x + row.width);
-          const first = await page.getByTestId("engine-row-acquisition").boundingBox();
-          const last = await page.getByTestId("engine-row-revenue").boundingBox();
-          expect(last!.y - (first!.y + first!.height)).toBeLessThan(5 * (first!.height + 24));
+        const tabs = await page.getByTestId("engine-tabs").boundingBox();
+        const panel = await page.getByTestId("engine-panel").boundingBox();
+        const first = await page.getByTestId("engine-tab-acquisition").boundingBox();
+        const last = await page.getByTestId("engine-tab-revenue").boundingBox();
+        if (!tabs || !panel || !first || !last) throw new Error("tabs or panel not rendered");
+        // One panel, right under the whole strip, never beside it (no side column any more).
+        expect(panel.y).toBeGreaterThanOrEqual(tabs.y + tabs.height - 1);
+        // One row of tabs at every width: the five sit on the same line.
+        expect(Math.abs(last.y - first.y)).toBeLessThan(2);
+        if (width >= 960) {
+          // On a desk the five share the panel's width, all in view.
+          expect(first.x).toBeGreaterThanOrEqual(panel.x - 1);
+          expect(last.x + last.width).toBeLessThanOrEqual(panel.x + panel.width + 1);
         }
       });
     }
@@ -592,8 +628,12 @@ test.describe("accessibility of each screen", () => {
   test("the example board — diagnosis, peloton, what-if, mirror — has no serious or critical issue", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await openExample(page);
-    await page.getByTestId("engine-board-whatif").locator("summary").click();
-    await expect(page.getByTestId("engine-whatif")).toBeVisible();
+    await page.getByTestId("engine-board-whatif").locator(":scope > summary").click();
+    await expect(page.getByTestId("engine-whatif-panel")).toBeVisible();
+    // With a lever moved, so the red dots and the better/worse deltas are in the pass.
+    await page.getByTestId("whatif-slider-acq.signup-rate").focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(page.getByTestId("engine-whatif-funnel-title")).toHaveText(ENGINE_COPY.scenario.funnelIf.en);
     await expectNoSeriousA11y(page, "example board");
   });
 });

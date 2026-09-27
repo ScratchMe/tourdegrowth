@@ -1,8 +1,6 @@
 import type { Pillar } from "@/lib/scoring/pillars";
-import type { Impact, ImpactLine, Interval, SourceRef, YearMonth } from "@/lib/engine/types";
+import type { Interval, SourceRef, YearMonth } from "@/lib/engine/types";
 import type { EngineStrings } from "@/lib/engine/strings";
-import type { Locale } from "@/lib/i18n/locale";
-import { chainTemplate } from "@/lib/engine/phrases";
 
 /**
  * The view model behind the engine's visuals (engine spec §8) — pure, so the
@@ -11,10 +9,9 @@ import { chainTemplate } from "@/lib/engine/phrases";
  * - a peloton grid and its numeral are drawn from the SAME interval, so the
  *   title-says-38-grid-shows-18 defect of the spec's own mock cannot happen
  *   inside a column (§1, `board-1280.png`);
- * - an unknown column is never 0 dots: it is a separate state;
- * - the "what if" slider walks a fixed ladder of targets (1 point above
- *   10 %, 0.1 below — §6.7), so a target is always a number the screen can
- *   print exactly.
+ * - an unknown column is never 0 dots: it is a separate state.
+ *
+ * « Et si » has its own view model since 2026-09-26 (scenario-view.ts).
  *
  * No copy lives here: words come in as `EngineStrings` slices.
  */
@@ -113,39 +110,4 @@ export function numeralText(n: Numeral, words: Pick<EngineStrings["units"], "ran
   if (n.kind === "unknown") return "?";
   if (n.kind === "less-than-one") return lessThanOne;
   return n.lo === n.hi ? String(n.lo) : words.range.replace("{lo}", String(n.lo)).replace("{hi}", String(n.hi));
-}
-
-// --- "What if" ---------------------------------------------------------------
-
-/** The ladder of targets a slider can land on (§6.7): 0.1 point below 10 %, 1 point from 10 % up. */
-export function targetLadder(min: number, max: number): number[] {
-  const out: number[] = [];
-  for (let t = 1; t < 100; t++) out.push(t / 10); // 0.1 … 9.9
-  for (let t = 10; t <= 100; t++) out.push(t);
-  return out.filter((t) => t >= min - 1e-9 && t <= max + 1e-9);
-}
-
-/** The ladder index nearest a value — the slider's position for a target that is not on the ladder. */
-export function nearestIndex(ladder: readonly number[], value: number): number {
-  let best = 0;
-  for (let i = 1; i < ladder.length; i++) {
-    if (Math.abs(ladder[i]! - value) < Math.abs(ladder[best]! - value)) best = i;
-  }
-  return best;
-}
-
-/**
- * Which template a line of the "what if" chain is printed with. The choice is
- * made once, in `lib/engine/phrases.ts#chainTemplate`, for the drawer and the
- * leak slide alike: churn has its own sentences, a chain with no monthly
- * volume is read per 100 sign-ups (« par mois » would be false), and a noun
- * agrees with the count the line prints (« 1 nouveau payant »).
- */
-export function whatIfTemplate(
-  line: ImpactLine,
-  impact: Pick<Impact, "metric" | "kind">,
-  words: EngineStrings["whatIf"],
-  locale: Locale,
-): { label: string | null; template: string } {
-  return chainTemplate(line, impact, words, locale);
 }

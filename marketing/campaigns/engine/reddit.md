@@ -56,7 +56,7 @@ titre.
 C'est un commentaire dans un fil, pas un post. Répondre à trois autres projets
 du fil avant de poster le sien.
 
-> **Growth engine (Tour de Growth)** — a free AARRR funnel template that runs in your browser: fifteen numbers, where you lose the most people, and a short deck for your next leadership meeting. Nothing you type is sent anywhere. Looking for feedback on one thing: which of the fifteen numbers you couldn't find in your own tools. [link]
+> **Growth engine (Tour de Growth)** — a free AARRR funnel template that runs in your browser: seventeen numbers, where you lose the most people, and a short deck for your next leadership meeting. Nothing you type is sent anywhere. Looking for feedback on one thing: which of the seventeen numbers you couldn't find in your own tools. [link]
 
 ---
 
@@ -94,7 +94,7 @@ cliquer) :
 
 **Corps** :
 
-> **What it is**: you enter fifteen numbers from your own tools, three per growth stage. It shows how 100 sign-ups move through your product, where you lose the most people (only against a target you set or a published range it can cite), and what each missing number would cost to measure. Then it exports 4 to 7 slides: PDF, PNG per slide, or text with speaker notes.
+> **What it is**: you enter seventeen numbers from your own tools, stage by stage. It shows how 100 sign-ups move through your product, where you lose the most people (only against a target you set or a published range it can cite), and what each missing number would cost to measure. Then it exports 4 to 7 slides: PDF, PNG per slide, or text with speaker notes.
 >
 > **Why local-only**: these are your employer's numbers. No account, no server, no AI; there's a test in the repo that fails if any request carries something you typed.
 >

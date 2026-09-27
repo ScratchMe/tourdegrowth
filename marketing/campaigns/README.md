@@ -23,7 +23,7 @@ déjà. La ligne de départ de chaque lancement se relève par le workflow
 
 | | A · Le Tour, relancé | B · Le moteur de croissance | C · Le côté obscur |
 |---|---|---|---|
-| Ce que c'est | Le diagnostic AARRR de 3 minutes, avec la copie revue (revue de copie v1) et les correctifs SEO | Un modèle de funnel AARRR **local** : tes quinze chiffres, où tu perds du monde, des slides pour ton CODIR | Un jeu de vingt minutes : une année comme PM growth d'une appli de streaming, un DG qui veut du chiffre, huit dark patterns |
+| Ce que c'est | Le diagnostic AARRR de 3 minutes, avec la copie revue (revue de copie v1) et les correctifs SEO | Un modèle de funnel AARRR **local** : tes dix-sept chiffres, où tu perds du monde, des slides pour ton CODIR | Un jeu de vingt minutes : une année comme PM growth d'une appli de streaming, un DG qui veut du chiffre, huit dark patterns |
 | URL | `/{en,fr}` → `/quiz` | `/{en,fr}/aarrr-funnel-template` | `/{en,fr}/game`, `/{en,fr}/game/retention` |
 | Portier | L'intégration mergée sur `main` | Bon à tirer nº6 signé + `ENGINE_ENABLED` | Recette du jeu signée (GAME-BRIEF §7.3) + relecture juridique du catalogue + `GAME_ENABLED` |
 | Campagne UTM | `relaunch_tour` | `launch_engine` | `launch_game` |
@@ -178,7 +178,7 @@ signal.
 | **r/SaaS** (1 fois / 60 j) | — | ● | — | Le seul post de la fenêtre va au moteur, qui parle le plus directement à ce public | Moyen |
 | **r/SideProject**, **r/IMadeThis** | selon D1 | ● | ● | Autopromotion voulue, à condition de rendre des retours ; espacer d'au moins trois semaines | Faible |
 | **r/startups** (Feedback Friday) | selon D1 | ● | — | Fil hebdomadaire uniquement | Faible |
-| **r/growthhacking** | — | ● | — | Le sub débat du contenu : les quinze chiffres s'y discutent mieux que l'outil | Faible |
+| **r/growthhacking** | — | ● | — | Le sub débat du contenu : les dix-sept chiffres s'y discutent mieux que l'outil | Faible |
 | **r/UXDesign** | — | — | ○ | Le vrai public du jeu, **règles non documentées dans `GROWTH-PLAN.md`** : lire la barre latérale avant ; si l'autopromotion y est interdite, ne pas poster | Faible |
 | **Indie Hackers** | — | ● | ● | Un « build log » par objet ; IH lit des récits de construction | Moyen |
 | **X / Bluesky** (EN + FR) | ● | ● | ● | Point d'ancrage ; le fil FR sert surtout C, dont le sujet est français | Faible |

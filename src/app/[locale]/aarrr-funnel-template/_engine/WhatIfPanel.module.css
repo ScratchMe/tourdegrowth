@@ -1,8 +1,10 @@
-/* « Et si » on the whole funnel — semantic tokens only (no-primitives.test.ts). */
+/* « Et si » cumulated — semantic tokens only (no-primitives.test.ts). The dots
+   reuse the peloton's grammar (Peloton.module.css): ink for what is there,
+   hatched for an estimate, the one red for what the what-ifs change. */
 .panel {
   display: flex;
   flex-direction: column;
-  gap: var(--space-7);
+  gap: var(--space-9);
   min-width: 0;
 }
 
@@ -13,28 +15,172 @@
   max-width: 62ch;
 }
 
-.grid {
+/* Levers | growth numbers, side by side once the board has the app width
+   (Board.module.css, 960px): moving a slider and watching the figures it moves
+   happen on one screen. */
+.top {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-8);
+  gap: var(--space-9);
   align-items: start;
 }
 
-/* Side by side once the board has broken out to the app width (Board.module.css, 960px). */
 @media (min-width: 960px) {
-  .grid {
-    grid-template-columns: minmax(300px, 1fr) minmax(0, 2fr);
+  .top {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  /* Eight sliders run twice as tall as the figures they move: the figures stay in view while the last ones move. */
+  .kpis {
+    position: sticky;
+    top: var(--space-7);
   }
 }
 
-.grid > * {
+.sectionHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-5);
+  margin-bottom: var(--space-5);
+}
+
+.sectionTitle {
+  font: var(--title-card);
+  color: var(--text-body);
+  margin: 0;
+}
+
+.sectionMeta {
+  font: var(--meta-xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.levers,
+.kpis {
   min-width: 0;
 }
+
+.leverList {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lever {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-5) 0;
+  border-bottom: var(--border-rule);
+}
+
+.lever:first-child {
+  padding-top: 0;
+}
+
+.leverHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.leverName {
+  font: var(--body-sm);
+  font-weight: 600;
+  color: var(--text-body);
+  cursor: pointer;
+}
+
+.leverValue {
+  font: var(--chart-value);
+  font-variant-numeric: var(--tabular);
+  color: var(--text-body);
+  white-space: nowrap;
+}
+
+/* A lever under test says so twice: its value in the one red, and a reset beside today's value. */
+.lever[data-moved="true"] .leverValue {
+  color: var(--text-alert);
+}
+
+/* The native range, drawn in the ink the rest of the system uses. Its thumb
+   is the hit target: ≥ 44px of height through the track's padding. */
+.slider {
+  width: 100%;
+  min-height: var(--hit-min);
+  margin: 0;
+  accent-color: var(--viz-ink);
+  cursor: pointer;
+}
+
+.slider:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset-tight);
+}
+
+.leverFoot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+/* A text button, underlined: `Button variant="quiet"` is sized for a screen's
+   actions, and eight of those would out-shout the sliders. 44px tall all the same. */
+.reset {
+  font: var(--meta-xs);
+  color: var(--text-link);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  background: none;
+  border: 0;
+  padding: 0 var(--space-2);
+  min-height: var(--hit-min);
+  cursor: pointer;
+}
+
+.reset:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset-tight);
+}
+
+.note {
+  font: var(--meta-sm);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.levers > .note {
+  margin-top: var(--space-5);
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+.kpis > .note {
+  margin-top: var(--space-5);
+}
+
+/* --- The funnel ---------------------------------------------------------- */
 
 .funnel {
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  gap: var(--space-7);
+  min-width: 0;
 }
 
 .funnelTitle {
@@ -43,8 +189,276 @@
   margin: 0;
 }
 
-.note {
-  font: var(--meta-sm);
+.upstream {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-4);
+}
+
+.arrow {
+  flex: none;
+  align-self: center;
+  width: 28px;
+  height: 12px;
+  color: var(--viz-ink);
+}
+
+.upstreamNumeral {
+  font: var(--chart-value-xl);
+  letter-spacing: var(--display-letter-spacing);
+  font-variant-numeric: var(--tabular);
+  color: var(--text-body);
+  white-space: nowrap;
+}
+
+.upstreamLabel {
+  font: var(--display-wordmark);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+  color: var(--text-body);
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: var(--space-9);
+  row-gap: var(--space-7);
+  align-items: start;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.numeral {
+  font: var(--chart-value-xl);
+  letter-spacing: var(--display-letter-spacing);
+  font-variant-numeric: var(--tabular);
+  color: var(--text-body);
+  white-space: nowrap;
+}
+
+.label {
+  font: var(--display-wordmark);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+  color: var(--text-body);
+  /* One line for « Actifs à J30 » too, so the four grids start on one line. */
+  min-height: 2.4em;
+}
+
+/* No aspect ratio: 100 dots are a square, what the what-ifs add grows it row by row. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 4px;
+  width: 100%;
+  max-width: 190px;
+}
+
+.dot {
+  display: block;
+  border-radius: var(--radius-round);
+  aspect-ratio: 1;
+}
+
+.filled {
+  background: var(--viz-ink);
+}
+
+.range {
+  background: var(--viz-unknown-fill);
+  box-shadow: inset 0 0 0 1.5px var(--viz-axis);
+}
+
+.gained {
+  background: var(--viz-highlight);
+}
+
+.gainedRange {
+  background: var(--viz-unknown-fill);
+  box-shadow: inset 0 0 0 2px var(--viz-highlight);
+}
+
+/* What today had and the projection loses: an outline in the red, never a gap that reads as nobody. */
+.lost {
+  box-shadow: inset 0 0 0 2px var(--viz-highlight);
+}
+
+.empty {
+  box-shadow: inset 0 0 0 1.5px var(--viz-axis);
+}
+
+.unknownGrid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  background: var(--viz-unknown-fill);
+  border: var(--border-dashed);
+  border-radius: var(--radius-panel);
+}
+
+.unknownMark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38%;
+  aspect-ratio: 1;
+  border-radius: var(--radius-round);
+  background: var(--surface-card);
+  border: var(--border-solid);
+  font: var(--chart-value-xl);
+  color: var(--text-body);
+}
+
+.detail {
+  font: var(--meta-xs);
   color: var(--text-muted);
   margin: 0;
+}
+
+.delta {
+  font: var(--meta-sm);
+  font-weight: 600;
+  color: var(--text-body);
+  margin: 0;
+}
+
+.legendWrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-5);
+  border-top: var(--border-rule);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-8);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-round);
+}
+
+/* --- What each lever brings --------------------------------------------- */
+
+.alone {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.together {
+  font: var(--body-md);
+  font-weight: 600;
+  color: var(--text-body);
+  margin: 0;
+  max-width: 62ch;
+}
+
+.assumptions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding-left: var(--space-7);
+  font: var(--body-sm);
+  color: var(--text-body);
+}
+
+@media (max-width: 760px) {
+  /* One row per step, as in the peloton: the grid on the left, the words on the right. */
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 0;
+  }
+
+  .column {
+    display: grid;
+    grid-template-columns: 118px minmax(0, 1fr);
+    grid-template-areas:
+      "grid numeral"
+      "grid label"
+      "grid detail"
+      "grid delta";
+    grid-template-rows: auto auto auto 1fr;
+    column-gap: var(--space-7);
+    row-gap: var(--space-2);
+    padding: var(--space-7) 0;
+    border-bottom: var(--border-rule);
+  }
+
+  .column:first-child {
+    padding-top: 0;
+  }
+
+  .column .grid {
+    grid-area: grid;
+    max-width: 118px;
+    gap: 2px;
+    align-self: start;
+  }
+
+  .column .numeral {
+    grid-area: numeral;
+    font: var(--display-section);
+  }
+
+  .column .label {
+    grid-area: label;
+    font: var(--label-button);
+    text-transform: uppercase;
+    letter-spacing: var(--meta-tracking);
+    min-height: 0;
+  }
+
+  .column .detail {
+    grid-area: detail;
+  }
+
+  .column .delta {
+    grid-area: delta;
+  }
+
+  .upstreamNumeral {
+    font: var(--display-section);
+  }
+
+  .upstreamLabel {
+    font: var(--label-button);
+    text-transform: uppercase;
+    letter-spacing: var(--meta-tracking);
+  }
+
+  .range,
+  .empty {
+    box-shadow: inset 0 0 0 1px var(--viz-axis);
+  }
+
+  .lost,
+  .gainedRange {
+    box-shadow: inset 0 0 0 1.5px var(--viz-highlight);
+  }
 }

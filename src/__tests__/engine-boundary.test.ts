@@ -133,9 +133,11 @@ const ISLAND_MUST_REACH = [
   "lib/engine/impact.ts",
   "lib/engine/deck.ts",
   "lib/engine/storage.ts",
+  // « Et si » cumulated (2026-09-26): the panel replaced the one-stage drawer, on its own model.
+  "lib/engine/scenario.ts",
   "app/[locale]/aarrr-funnel-template/_engine/Peloton.tsx",
   "app/[locale]/aarrr-funnel-template/_engine/Diagnosis.tsx",
-  "app/[locale]/aarrr-funnel-template/_engine/WhatIf.tsx",
+  "app/[locale]/aarrr-funnel-template/_engine/WhatIfPanel.tsx",
   "app/[locale]/aarrr-funnel-template/_engine/Mirror.tsx",
 ] as const;
 

@@ -30,7 +30,7 @@ export type { Resolved };
 /** `ENGINE_COPY` resolved to one language: every `{ en, fr }` leaf is a string. */
 export type EngineStrings = Resolved<typeof ENGINE_COPY>;
 
-/** One of the fifteen numbers, its prose resolved (§4.4). Placeholders ({month}, {cohort}, {n}, {event}, {variant}) are still raw. */
+/** One of the seventeen numbers, its prose resolved (§4.4). Placeholders ({month}, {cohort}, {n}, {event}, {variant}) are still raw. */
 export interface ResolvedMetric {
   id: MetricId;
   name: string;

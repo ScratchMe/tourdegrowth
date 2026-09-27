@@ -11,7 +11,9 @@ const PAYBACK_REFERENCE_MONTHS = DERIVED_SHAPES.find((s) => s.id === "rev.cac-pa
 type Tile = { id: string; label: string; value: string; note: string };
 
 /**
- * Slide 4 — "what a customer brings in" (§9.3). Four tiles, then one bar.
+ * Slide 4 — "what a customer brings in" (§9.3). Six tiles — the CAC, the
+ * three unit-economics figures, and since 2026-09-26 GRR and NRR, with the
+ * caveat that they read logo churn as revenue churn — then one bar.
  *
  * The tiles print the model's rows as they are: its name (`label`), its
  * figure (`value`) and the line under it (`note` — for the CAC its variant,
@@ -37,7 +39,7 @@ export function SlideUnitEconomics({ slide, context }: SlideProps) {
 
   const tiles: Tile[] = [
     cac ? { id: "cac", label: cac.label, value: cac.value, note: cac.variant } : null,
-    ...(["payback", "ltv", "ltvCac"] as const).map((kind) => {
+    ...(["payback", "ltv", "ltvCac", "grr", "nrr"] as const).map((kind) => {
       const row = rowOf(slide, kind);
       return row ? { id: kind === "ltvCac" ? "ltv-cac" : kind, label: row.label, value: row.value, note: row.note } : null;
     }),

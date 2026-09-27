@@ -79,3 +79,19 @@ describe("withSharedCount / propagateFrom", () => {
     expect(validateEngine(state).join()).toContain("base.cohortSignups");
   });
 });
+
+describe("the MRR counts (2026-09-26)", () => {
+  it("the MRR typed for ARPA is the gross margin's base, and the 1st-of-month MRR is shared by expansion and contraction", () => {
+    const snapshot = exampleState().snapshots[0]!;
+    // Gross margin: typed later, its revenue already there.
+    expect(knownSharedCount(snapshot, "mrrEnd")).toEqual({ value: 48_000, from: "rev.arpa" });
+    expect(knownSharedCount(snapshot, "mrrStart")).toEqual({ value: 46_800, from: "rev.expansion" });
+    const withMargin = {
+      ...snapshot,
+      metrics: { ...snapshot.metrics, "rev.gross-margin": { status: "measured" as const, value: { kind: "ratio" as const, numerator: 36_000, denominator: 40_000 }, source: { kind: "other" as const }, updatedAt: "2026-09-26T10:00:00.000Z" } },
+    };
+    const next = propagateFrom(withMargin, "rev.gross-margin");
+    expect(next.base?.mrrEnd).toBe(40_000);
+    expect(next.metrics["rev.arpa"]?.value).toEqual({ kind: "ratio", numerator: 40_000, denominator: 400 });
+  });
+});

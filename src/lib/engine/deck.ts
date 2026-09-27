@@ -1,4 +1,4 @@
-import { CANDIDATE_IDS, DERIVED_SHAPES, METRIC_SHAPES, PELOTON_METRICS, shapeOf } from "./catalog-shape";
+import { CANDIDATE_IDS, DERIVED_SHAPES, LEVER_IDS, METRIC_SHAPES, PELOTON_METRICS, shapeOf } from "./catalog-shape";
 import { nextMonth, currentMonth, periodOf, windowDaysOf } from "./cohort";
 import { comparatorOf, impactTarget } from "./diagnose";
 import { formatComparator } from "./findings";
@@ -6,6 +6,7 @@ import {
   capitalise,
   fillTemplate,
   formatApproxMoneyInterval,
+  formatChange,
   formatCountInterval,
   formatDay,
   formatDuration,
@@ -17,6 +18,7 @@ import {
   formatPerHundredCount,
   joinList,
   lowerFirst,
+  roundDisplay,
   roundSignificant,
 } from "./format";
 import { impactHeadline, whatIf } from "./impact";
@@ -35,6 +37,8 @@ import {
   unitInputsPhrase,
   worthOf,
 } from "./phrases";
+import { buildScenario, leverAlone } from "./scenario";
+import type { Scenario, ScenarioFunnel, ScenarioKpis } from "./scenario";
 import { BASIS_KEY, REPAIR_KEY, ROLE_KEY, STATUS_KEY } from "./strings";
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "./strings";
 import { SLIDE_ORDER } from "./types";
@@ -49,11 +53,14 @@ import type {
   EngineState,
   Impact,
   ImpactLine,
+  Interval,
+  LeverId,
   MetricId,
   MirrorVerdict,
   MissingCause,
   Peloton,
   RepairScale,
+  FixedSlideId,
   SlideId,
   SlideTitle,
   SourceRef,
@@ -94,7 +101,7 @@ export interface DeckProse {
   bridges?: ResolvedBridge[];
 }
 
-const DEFAULT_INCLUDE: Record<SlideId, boolean> = {
+const DEFAULT_INCLUDE: Record<FixedSlideId, boolean> = {
   peloton: true,
   leak: true,
   visibility: true,
@@ -493,7 +500,7 @@ function buildUnitEconomics(
   const { unit } = derived;
   const cac = knownIn(state, "acq.cac", ctx);
   const currency = state.setup.currency;
-  const present = cac.kind === "known" || [unit.ltv, unit.payback, unit.ltvCac].some((d) => d.kind === "known");
+  const present = cac.kind === "known" || [unit.ltv, unit.payback, unit.ltvCac, unit.grr, unit.nrr].some((d) => d.kind === "known");
 
   let title: SlideTitle;
   if (unit.payback.kind === "known" && unit.ltvCac.kind === "known") {
@@ -513,11 +520,14 @@ function buildUnitEconomics(
   const cacValue = cac.kind === "known" ? formatInterval(cac.value, "money", ctx, strings.units, { currency }) : "";
   // Always written: "media-only CAC" and "fully loaded CAC" are two numbers that print the same.
   const variant = metricOf(metrics, "acq.cac").variants?.find((v) => v.id === variantId)?.label ?? "";
-  const figure = (row: string, id: DerivedId, value: string, missing: readonly MetricId[] | null): Row => {
+  const figure = (row: string, id: DerivedId, value: string, missing: readonly MetricId[] | null, caveat = ""): Row => {
     const d = prose.derived?.find((x) => x.id === id);
-    const note = !value && missing && d ? fillTemplate(d.uncomputable, { input: unitInputsPhrase(missing, strings, metrics) }) : "";
-    return { row, id, label: d?.name ?? "", value, note, text: value || note || strings.slide.noNumber };
+    const note = !value && missing && d ? fillTemplate(d.uncomputable, { input: unitInputsPhrase(missing, strings, metrics) }) : value ? caveat : "";
+    return { row, id, label: d?.name ?? "", value, note, text: [value, note].filter(Boolean).join(" · ") || strings.slide.noNumber };
   };
+  // NRR and GRR read logo churn as revenue churn: the slide says so under the figure, every time it prints one.
+  const retentionCaveat = (id: DerivedId) => prose.derived?.find((x) => x.id === id)?.caveat ?? "";
+  const percent = (d: typeof unit.grr) => (d.kind === "known" ? formatInterval(d.value, "percent", ctx, strings.units) : "");
   const lines: Row[] = [
     { row: "cac", id: "acq.cac", label: metricOf(metrics, "acq.cac").name, value: cacValue, variant, text: cacValue ? [cacValue, lowerFirst(variant)].filter(Boolean).join(" · ") : strings.slide.noNumber },
     figure("payback", "rev.cac-payback", unit.payback.kind === "known" ? formatDurationInterval(unit.payback.value, "months", ctx, strings.units) : "", unit.payback.kind === "uncomputable" ? unit.payback.missing : null),
@@ -528,6 +538,8 @@ function buildUnitEconomics(
       unit.ltvCac.kind === "known" ? fillTemplate(strings.units.times, { n: formatInterval(unit.ltvCac.value, "ratio", ctx, strings.units) }) : "",
       unit.ltvCac.kind === "uncomputable" ? unit.ltvCac.missing : null,
     ),
+    figure("grr", "rev.grr", percent(unit.grr), unit.grr.kind === "uncomputable" ? unit.grr.missing : null, retentionCaveat("rev.grr")),
+    figure("nrr", "rev.nrr", percent(unit.nrr), unit.nrr.kind === "uncomputable" ? unit.nrr.missing : null, retentionCaveat("rev.nrr")),
   ];
   // The cap only qualifies a lifetime value that exists.
   if (unit.ltv.kind === "known") lines.push({ row: "cap", text: strings.slide.unitCap });
@@ -711,6 +723,265 @@ function buildAnnex(state: EngineState, strings: Words, metrics: ResolvedMetric[
   });
 }
 
+// --- « Et si ? » (2026-09-26) ----------------------------------------------------
+
+/**
+ * The what-if slides (Antoine, 2026-09-26: « une slide par "Et si ?", et une
+ * slide qui prend en compte tous les "Et si ?" cumulés avec effet sur MRR,
+ * NRR, GRR, CAC, LTV »). One slide per lever the team moved, that lever
+ * alone (`leverAlone`); then, when two or more moved, one slide with all of
+ * them at once (`buildScenario`), which is where the compounding shows. Both
+ * kinds print the same two tables — the growth figures and the month's
+ * funnel, today, with the what-if(s), and the change — and the "together"
+ * slide adds what each lever brings on its own and the sentence that
+ * compares their sum with the whole. The model's assumptions are the
+ * slide's footer, as on the leak: a slide is forwarded without its speaker.
+ *
+ * Every number comes from `scenario.ts`, formatted here once; the title's
+ * gain is read from the same change the table's first row prints.
+ */
+
+type Print = (i: Interval) => string;
+
+/** The growth figures of the table, in the order a leadership meeting reads them, and their row labels. */
+const KPI_ROWS = [
+  ["mrr12", "kpiMrr12"],
+  ["newMrr", "kpiNewMrr"],
+  ["nrr", "kpiNrr"],
+  ["grr", "kpiGrr"],
+  ["cac", "kpiCac"],
+  ["ltv", "kpiLtv"],
+  ["payback", "kpiPayback"],
+] as const satisfies readonly (readonly [Exclude<keyof ScenarioKpis, "mrr">, keyof Words["scenario"]])[];
+
+/** The month's funnel, top to bottom. The referred share is left to the panel: on a slide it is one line too many. */
+const STEP_ROWS = [
+  ["visitors", "visitors"],
+  ["signups", "signups"],
+  ["activated", "activated"],
+  ["d30", "d30"],
+  ["paying", "paying"],
+] as const satisfies readonly (readonly [keyof ScenarioFunnel, keyof Words["scenario"]])[];
+
+/**
+ * Projected minus today, bound by bound. Both columns come from the SAME
+ * uncertain inputs (an estimate at 6 to 9 % is 6 to 9 % in both), and every
+ * function of the model is monotonic in them (scenario.ts), so each bound of
+ * the change is the difference of the same bounds. Subtracting the two
+ * intervals instead would count today's uncertainty twice and turn an exact
+ * "+125" into "+0 to +250".
+ */
+function changeOf(today: Interval, projected: Interval): Interval {
+  const a = projected.lo - today.lo;
+  const b = projected.hi - today.hi;
+  return { lo: Math.min(a, b), hi: Math.max(a, b) };
+}
+
+/** Unchanged: two identical computations, give or take their floating point. */
+function isStable(change: Interval, today: Interval): boolean {
+  const tolerance = 1e-9 * Math.max(1, Math.abs(today.lo), Math.abs(today.hi));
+  return Math.abs(change.lo) <= tolerance && Math.abs(change.hi) <= tolerance;
+}
+
+/** What a what-if does to the MRR in twelve months — the figure every what-if title prices. */
+function mrrGain(s: Scenario): Interval | null {
+  const { mrr12: today } = s.today.kpis;
+  const { mrr12: projected } = s.projected.kpis;
+  return today && projected ? changeOf(today, projected) : null;
+}
+
+/** A gain the title can say « would gain »: at least one unit of currency. A loss, or noise, gets the plain title. */
+const isPricedGain = (gain: Interval | null): gain is Interval => gain !== null && gain.lo >= 1;
+
+interface Printers {
+  today: Print;
+  projected: Print;
+  change: Print;
+}
+
+/**
+ * How each figure prints. A projection is approximate by nature, so its
+ * money is two significant digits and a "~" (`formatApproxMoneyInterval`,
+ * as the LTV on the unit-economics slide); today's CAC is the number the
+ * team measured, printed as the rest of the deck prints it. NRR and GRR are
+ * rates, their change a number of points; the payback, months; the funnel,
+ * people (the visitors to two significant digits, as on the peloton: they
+ * are back-computed from a rounded rate).
+ */
+function whatIfPrinters(state: EngineState, strings: Words, ctx: EngineCalcContext) {
+  const units = strings.units;
+  const currency = state.setup.currency;
+  const approxMoney: Print = (i) => formatApproxMoneyInterval(i, currency, ctx, units);
+  // A change of money: rounded the same way, without the "~" — « +~6 600 € » glued a sign to a tilde,
+  // and the "with" column beside it already says the figures are approximate.
+  const roundMoney: Print = (i) => formatApproxMoneyInterval(i, currency, ctx, { ...units, approx: "{n}" });
+  const percent: Print = (i) => formatInterval(i, "percent", ctx, units);
+  const points: Print = (i) => {
+    const printed = mapBounds(i, (v) => roundDisplay(v));
+    return fillTemplate(strings.slide[numbered("whatIfPoints", printed, ctx.locale)], { n: formatInterval(i, "ratio", ctx, units) });
+  };
+  const months: Print = (i) => formatDurationInterval(i, "months", ctx, units);
+  const people: Print = (i) => formatCountInterval(i, ctx, units);
+  const roundPeople: Print = (i) => formatCountInterval(mapBounds(i, (v) => roundSignificant(v, 2)), ctx, units);
+  const approxPeople: Print = (i) => fillTemplate(units.approx, { n: roundPeople(i) });
+  const same = (p: Print): Printers => ({ today: p, projected: p, change: p });
+
+  const money: Printers = { today: approxMoney, projected: approxMoney, change: roundMoney };
+  const kpis: Record<(typeof KPI_ROWS)[number][0], Printers> = {
+    mrr12: money,
+    newMrr: money,
+    nrr: { today: percent, projected: percent, change: points },
+    grr: { today: percent, projected: percent, change: points },
+    cac: { today: (i) => formatInterval(i, "money", ctx, units, { currency }), projected: approxMoney, change: roundMoney },
+    ltv: money,
+    payback: same(months),
+  };
+  const steps: Record<(typeof STEP_ROWS)[number][0], Printers> = {
+    visitors: { today: approxPeople, projected: approxPeople, change: roundPeople },
+    signups: same(people),
+    activated: same(people),
+    d30: same(people),
+    paying: same(people),
+  };
+  return { kpis, steps, approxMoney, roundMoney };
+}
+
+/**
+ * One row of a table: today, with the what-if(s), the change — each "" when
+ * the figure can't be computed, which the slide prints as "?", never as 0.
+ * A figure the what-if doesn't move says so in a word. `tone` (unknown |
+ * stable | moved) is for the slide's emphasis, never printed; `text` is the
+ * row as the text export writes it.
+ */
+function changeRow(
+  row: "kpi" | "funnelStep",
+  id: string,
+  label: string,
+  today: Interval | null,
+  projected: Interval | null,
+  print: Printers,
+  rowTemplate: string,
+  strings: Words,
+): Row {
+  if (!today || !projected) return { row, id, label, tone: "unknown", today: "", projected: "", change: "", text: strings.slide.noNumber };
+  const change = changeOf(today, projected);
+  const now = print.today(today);
+  if (isStable(change, today)) {
+    const text = fillTemplate(strings.slide.whatIfRowStable, { today: now });
+    return { row, id, label, tone: "stable", today: now, projected: now, change: strings.slide.whatIfStable, text };
+  }
+  const after = print.projected(projected);
+  const moved = formatChange(change, print.change, strings.units);
+  return { row, id, label, tone: "moved", today: now, projected: after, change: moved, text: fillTemplate(rowTemplate, { today: now, projected: after, change: moved }) };
+}
+
+/** The two tables and the footer, for one scenario — a lever alone, or all of them. */
+function scenarioLines(s: Scenario, rowTemplate: string, state: EngineState, strings: Words, ctx: EngineCalcContext): Row[] {
+  const printers = whatIfPrinters(state, strings, ctx);
+  const lines: Row[] = [
+    ...KPI_ROWS.map(([id, label]) => changeRow("kpi", id, strings.scenario[label], s.today.kpis[id], s.projected.kpis[id], printers.kpis[id], rowTemplate, strings)),
+    ...STEP_ROWS.map(([id, label]) =>
+      changeRow("funnelStep", id, strings.scenario[label], s.today.funnel[id], s.projected.funnel[id], printers.steps[id], rowTemplate, strings),
+    ),
+  ];
+  // What the projection takes for granted, only what applied (scenario.ts), as the slide's footer.
+  if (s.assumptions.length) lines.push({ row: "footer", text: s.assumptions.map((a) => strings.scenario.assumption[a]).join(" ") });
+  return lines;
+}
+
+interface MovedLever {
+  id: LeverId;
+  /** Today's value and the target, in the lever's own unit. */
+  from: string;
+  to: string;
+  alone: Scenario;
+}
+
+/**
+ * The levers the team moved, in lever order: a target in `state.whatIf` on a
+ * number that is known (`leverAlone` confirms it moved). A target that prints
+ * as today's value is left out — « de 18 % à 18 % » moves nothing a reader
+ * can see, and is no slide.
+ */
+function movedLevers(state: EngineState, strings: Words, ctx: EngineCalcContext): MovedLever[] {
+  return LEVER_IDS.flatMap((id) => {
+    const alone = leverAlone(state, id, ctx);
+    const lever = alone?.levers.find((l) => l.id === id);
+    if (!alone || !lever?.today || lever.target === null) return [];
+    const print: Print = (i) => formatInterval(i, lever.unit, ctx, strings.units, { currency: state.setup.currency });
+    const from = print(lever.today);
+    const to = print(point(lever.target));
+    return from === to ? [] : [{ id, from, to, alone }];
+  });
+}
+
+type BuiltSlide = Omit<DeckSlide, "id" | "included" | "index">;
+
+/** The what-if slides, in the order they print: each lever alone, then all of them together when there are two or more. */
+function buildWhatIfSlides(state: EngineState, strings: Words, ctx: EngineCalcContext): { id: SlideId; slide: BuiltSlide }[] {
+  const levers = movedLevers(state, strings, ctx);
+  const { approxMoney, roundMoney } = whatIfPrinters(state, strings, ctx);
+  const notes = [strings.notes.whatIf, strings.notes.seasonal];
+
+  const slides: { id: SlideId; slide: BuiltSlide }[] = levers.map((lever) => {
+    const gain = mrrGain(lever.alone);
+    const values = { stage: strings.leverSubject[lever.id], from: lever.from, to: lever.to };
+    const title: SlideTitle = isPricedGain(gain) ? { key: "whatIfLever", values: { ...values, gain: approxMoney(gain) } } : { key: "whatIfLeverPlain", values };
+    return {
+      id: `whatif:${lever.id}`,
+      slide: { present: true, title, lines: scenarioLines(lever.alone, strings.slide.whatIfRowOne, state, strings, ctx), notes },
+    };
+  });
+
+  // One lever is already its own slide: « together » would repeat it.
+  if (levers.length < 2) return slides;
+  const targets: Partial<Record<LeverId, number>> = Object.fromEntries(levers.map((l) => [l.id, state.whatIf![l.id]!]));
+  const all = buildScenario(state, targets, ctx);
+  const gain = mrrGain(all);
+  const n = String(levers.length);
+
+  const leverRows: Row[] = levers.map((lever) => {
+    const alone = mrrGain(lever.alone);
+    const own = alone ? formatChange(alone, roundMoney, strings.units) : "";
+    return {
+      row: "lever",
+      id: lever.id,
+      label: capitalise(strings.leverSubject[lever.id]),
+      from: lever.from,
+      to: lever.to,
+      gain: own,
+      text: fillSegments(strings.slide.whatIfLeverRow, { from: lever.from, to: lever.to, gain: own }),
+    };
+  });
+
+  // The sum of the levers taken alone against the whole: what the whole adds is the compounding (funnel levers multiply).
+  const together: Row[] = [];
+  if (gain) {
+    const alone = levers.map((l) => mrrGain(l.alone)!);
+    const sum = alone.reduce((acc, g) => ({ lo: acc.lo + g.lo, hi: acc.hi + g.hi }), { lo: 0, hi: 0 });
+    const extra = changeOf(sum, gain);
+    const total = formatChange(gain, roundMoney, strings.units);
+    together.push({
+      row: "together",
+      text:
+        gain.lo > 0 && extra.lo >= 1
+          ? fillTemplate(strings.scenario.together, { total, extra: approxMoney(extra) })
+          : fillTemplate(strings.scenario.togetherNoExtra, { total }),
+    });
+  }
+
+  slides.push({
+    id: "scenario",
+    slide: {
+      present: true,
+      title: isPricedGain(gain) ? { key: "scenario", values: { n, gain: approxMoney(gain) } } : { key: "scenarioPlain", values: { n } },
+      lines: [...leverRows, ...together, ...scenarioLines(all, strings.slide.whatIfRowAll, state, strings, ctx)],
+      notes,
+    },
+  });
+  return slides;
+}
+
 // --- The model ----------------------------------------------------------------
 
 export function buildDeck(state: EngineState, derived: EngineDerived, strings: Words, metrics: ResolvedMetric[], ctx: EngineCalcContext, prose: DeckProse = {}): DeckModel {
@@ -737,7 +1008,7 @@ export function buildDeck(state: EngineState, derived: EngineDerived, strings: W
       }),
     );
 
-  const built: Record<SlideId, Omit<DeckSlide, "id" | "included" | "index">> = {
+  const built: Record<FixedSlideId, Omit<DeckSlide, "id" | "included" | "index">> = {
     peloton: {
       present: true,
       title: pelotonTitle(state, derived.peloton, strings, metrics, ctx),
@@ -765,11 +1036,16 @@ export function buildDeck(state: EngineState, derived: EngineDerived, strings: W
     annex: { present: true, title: { key: "annex", values: {} }, lines: buildAnnex(state, strings, metrics, ctx), notes: [] },
   };
 
-  const order: SlideId[] = blindEngine ? ["visibility", ...SLIDE_ORDER.filter((id) => id !== "visibility")] : [...SLIDE_ORDER];
+  const order: FixedSlideId[] = blindEngine ? ["visibility", ...SLIDE_ORDER.filter((id) => id !== "visibility")] : [...SLIDE_ORDER];
+  // The what-if slides have no fixed place: they follow the leak, in lever order, then the « together » one.
+  const whatIfs = buildWhatIfSlides(state, strings, ctx);
+  const entries = order.flatMap((id): { id: SlideId; slide: BuiltSlide; byDefault: boolean }[] => [
+    { id, slide: built[id], byDefault: DEFAULT_INCLUDE[id] },
+    ...(id === "leak" ? whatIfs.map((w) => ({ ...w, byDefault: true })) : []),
+  ]);
   let index = 0;
-  const slides: DeckSlide[] = order.map((id) => {
-    const slide = built[id];
-    const included = slide.present && (state.deck.include[id] ?? DEFAULT_INCLUDE[id]);
+  const slides: DeckSlide[] = entries.map(({ id, slide, byDefault }) => {
+    const included = slide.present && (state.deck.include[id] ?? byDefault);
     return { id, ...slide, included, index: included ? ++index : null };
   });
 

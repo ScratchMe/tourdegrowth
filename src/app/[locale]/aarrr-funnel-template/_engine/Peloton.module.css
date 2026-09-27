@@ -27,10 +27,20 @@
   color: var(--viz-ink);
 }
 
+/*
+ * The four row tracks live HERE, not in each column (Antoine, 2026-09-26): the
+ * « Sous la cible » stamp makes the named column's label row taller, and with
+ * a grid per column that column's 10×10 grid started lower than its
+ * neighbours'. Every column spans the four shared rows as a subgrid, so the
+ * tallest label sets the label row for all four and the grids start on one
+ * line. The row gap is the column's own, set once for the whole peloton.
+ */
 .columns {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--space-11);
+  grid-template-rows: auto auto auto 1fr;
+  column-gap: var(--space-11);
+  row-gap: var(--space-4);
 }
 
 /*
@@ -40,12 +50,13 @@
  */
 .column {
   display: grid;
+  grid-row: span 4;
+  grid-template-rows: subgrid;
   grid-template-areas:
     "numeral"
     "label"
     "grid"
     "source";
-  grid-template-rows: auto auto auto 1fr;
   row-gap: var(--space-4);
   min-width: 0;
   align-content: start;
@@ -63,6 +74,9 @@
 
 .label {
   grid-area: label;
+  /* Top of the shared label row: the names stay on one line across the four columns, and the
+     stamp hangs under its own name rather than pulling the others down to the row's middle. */
+  align-self: start;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -211,13 +225,16 @@
 }
 
 @media (max-width: 760px) {
+  /* One column under another: nothing to align across, so no shared row tracks. */
   .columns {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
     gap: 0;
   }
 
   /* One row per column: the mini-grid on the left, the words on the right. */
   .column {
+    grid-row: auto;
     grid-template-columns: 118px minmax(0, 1fr);
     grid-template-areas:
       "grid numeral"
