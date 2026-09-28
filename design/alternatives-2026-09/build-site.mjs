@@ -6,7 +6,7 @@ const require = createRequire("/home/user/tourdegrowth/package.json");
 const sharp = require("sharp");
 const HERE = new URL(".", import.meta.url).pathname;
 const OUT = join(HERE, "site");
-const DESIGNS = ["current", "i", "a", "b", "h", "e", "f"];
+const DESIGNS = ["current", "ib", "ib-ink", "i", "a", "b", "h", "e", "f"];
 
 function md(src) {
   const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

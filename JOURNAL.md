@@ -4863,3 +4863,24 @@ Le nº8 est reconstruit par un script qui repart des clés de chaque ancienne ca
 - Aucune des polices Google en sous-ensemble latin n'a le №. Une vraie livraison doit l'embarquer : Plex Mono complet, comme aujourd'hui.
 
 **Archive** : `design/alternatives-2026-09/`. On y trouve les surcouches, leurs sources, les images de partage, les fiches, le brief, le harnais et la page. Les captures sont dans la page publiée, les polices se retéléchargent. Rien de tout ça n'est importé par l'application.
+
+## La synthèse I + B (2026-09-28)
+
+**La décision d'Antoine** : I pour la base, avec quatre signes de B, pour « une belle identité avec des points qui restent en tête sans avoir à tout refondre ». Ces signes sont le bandeau des étapes 1 · 2 · 3, le moteur en outremer (plutôt que le millimétré de I), la borne kilométrique et le profil d'étape.
+
+**Ce qui a été maquetté** (`design/alternatives-2026-09/`, ids `ib` et `ib-ink`) :
+- Le bandeau d'étape est accroché sous l'en-tête collant et remplace les dossards de I. Il est rouge pour le Tour, outremer pour le moteur, ocre pour le jeu.
+- La borne porte le score.
+- Le profil d'étape vient du calcul : la hauteur d'un col vaut les points manquants sur 20, et le col qui freine est marqué « HC ».
+- Le hub du jeu montre cinq cols sous la légende « cinq cols, cinq entreprises ».
+- L'image de partage porte la borne et le profil.
+
+`ib-ink` est la même maquette avec le bandeau du Tour à l'encre. Les deux ont été captées sur les sept écrans, aux deux largeurs. L'audit des captures ne trouve aucun texte sous AA en 1280 px et aucun défilement horizontal.
+
+**Deux questions ouvertes pour Antoine** :
+1. Le bandeau du Tour, rouge ou encre ? La recommandation est l'encre, parce que le rouge de I a trois sens et seulement trois : action, diagnostic, conseil.
+2. Le mot « étape », qui sert deux fois. Le bandeau dit « Étape 1/3 » au-dessus de « Étape 1 sur 5 — Acquisition » et d'« Une étape te freine ».
+
+**Piège** : le serveur local des captures meurt quand la session redémarre, et le sous-agent qui capte n'a pas le droit de le relancer. Il faut donc vérifier `curl localhost:3300/fr` avant de relancer une capture.
+
+**Coût d'une vraie mise en œuvre**, d'après la fiche `notes/ib.md` : deux à trois sessions. Il faut des jetons d'espace, deux composants neufs (`StageBand`, `StageProfile`, ce dernier en SVG pur et testable), la borne en CSS seul et le gabarit Satori. La garde de payload devra compter les cinq scores que le profil expose (convention 11).

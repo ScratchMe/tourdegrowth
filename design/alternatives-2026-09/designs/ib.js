@@ -1,0 +1,334 @@
+/*
+ * Direction IB — I's base (« L'existant, en mieux ») with B's signs:
+ * the stage band « 1 · 2 · 3 » under the header (THE sign of the three spaces),
+ * the kilometre marker for the score, the stage profile beside the pillars,
+ * the moteur in ultramarine, the jeu in ochre with its night profile.
+ * Decorative DOM only: no product copy is removed or rewritten.
+ * The same file serves `ib` and `ib-ink` (the variant only changes CSS).
+ */
+(() => {
+  const root = document.documentElement;
+  if (root.dataset.ibDone) return;
+  root.dataset.ibDone = "1";
+  const fr = (root.lang || "fr").toLowerCase().startsWith("fr");
+  const space = root.dataset.space || "tour";
+  const NB = " ";
+
+  const T = fr
+    ? {
+        stage: "Étape",
+        types: { tour: "Plaine", moteur: "Contre-la-montre", jeu: "Montagne" },
+        names: { tour: "Le diagnostic", moteur: "Le moteur", jeu: "Le côté obscur" },
+        race: { tour: "Diagnostic", moteur: "Moteur", jeu: "Côté obscur" },
+        profile: "Profil de l'étape",
+        profileKey: "hauteur = points manquants sur 20",
+        hub: "Profil de la montagne",
+        hubKey: "cinq cols, cinq entreprises",
+        kicker: "Un Tour, trois étapes",
+        strip: [
+          ["Le diagnostic", "15 questions, 3 minutes. Ton score, l'étape qui freine, une action.", "Maintenant"],
+          ["Le moteur", "Tes 17 vrais chiffres, là où ton funnel perd du monde, et des slides pour ton CODIR.", "Ensuite"],
+          ["Le côté obscur", "Cinq étapes, cinq entreprises, un DG qui veut le chiffre. Apprends à reconnaître les astuces avant d'en livrer une.", "Pour finir"],
+        ],
+      }
+    : {
+        stage: "Stage",
+        types: { tour: "Flat", moteur: "Time trial", jeu: "Mountain" },
+        names: { tour: "The check-up", moteur: "The engine", jeu: "The dark side" },
+        race: { tour: "Check-up", moteur: "Engine", jeu: "Dark side" },
+        profile: "Stage profile",
+        profileKey: "height = points missing out of 20",
+        hub: "Mountain profile",
+        hubKey: "five climbs, five companies",
+        kicker: "One Tour, three stages",
+        strip: [
+          ["The check-up", "15 questions, 3 minutes. Your score, the stage that stalls, one action.", "Now"],
+          ["The engine", "Your 17 real numbers, where your funnel leaks, and slides for your leadership meeting.", "Next"],
+          ["The dark side", "Five stages, five companies, one CEO who wants the number. Learn to spot the tricks before you ship one.", "Last"],
+        ],
+      };
+
+  /* ---------- Pictograms: the three stage types of a road book ---------- */
+  const PICTO = {
+    tour: '<svg viewBox="0 0 34 22" aria-hidden="true"><path d="M1 20.5H33" stroke="currentColor" stroke-width="2.2" fill="none"/><path d="M1 19V15.2C5 14.2 8 15.6 12 14.8S20 13.9 24 14.6 30 14.2 33 14.4V19Z" fill="currentColor"/><path d="M28.6 14V4.2" stroke="currentColor" stroke-width="1.8"/><path d="M28.6 4.4H33V8.6H28.6Z" fill="currentColor"/></svg>',
+    moteur: '<svg viewBox="0 0 34 22" aria-hidden="true"><circle cx="17" cy="12.6" r="7.6" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M17 12.6V7.8M14.2 2.2H19.8M17 2.2V5" stroke="currentColor" stroke-width="2.2" fill="none"/><path d="M23.2 6.4L25 4.6" stroke="currentColor" stroke-width="2.2"/><path d="M1 9.5H7M3 13H7.5M1 16.5H7" stroke="currentColor" stroke-width="1.8"/></svg>',
+    jeu: '<svg viewBox="0 0 34 22" aria-hidden="true"><path d="M1 20.5H33" stroke="currentColor" stroke-width="2.2" fill="none"/><path d="M1 19.4L10.4 9.2L14 12.6L20.6 3.2L33 19.4Z" fill="currentColor"/></svg>',
+  };
+  const ORDER = ["tour", "moteur", "jeu"];
+  const h = (tag, cls, html) => {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (html != null) e.innerHTML = html;
+    return e;
+  };
+
+  /* ---------- 1. The stage band, inside the sticky header ---------- */
+  const header = document.querySelector("body > header");
+  if (header && !header.querySelector(".ib-band")) {
+    const n = ORDER.indexOf(space) + 1;
+    const band = h("div", "ib-band");
+    band.setAttribute("aria-hidden", "true");
+    const race = ORDER.map(
+      (s, i) =>
+        `<li class="ib-band__stop${s === space ? " is-on" : ""}" data-s="${s}"><span class="ib-band__mini">${PICTO[s]}</span><span class="ib-band__n">${i + 1}</span><span class="ib-band__lbl">${T.race[s]}</span></li>`,
+    ).join("");
+    band.innerHTML =
+      `<div class="ib-band__in">` +
+      `<span class="ib-band__picto">${PICTO[space]}</span>` +
+      `<span class="ib-band__kicker"><b>${T.stage} ${n}</b>/3 · ${T.types[space]}</span>` +
+      `<span class="ib-band__name">${T.names[space]}</span>` +
+      `<ol class="ib-band__race">${race}</ol>` +
+      `</div>`;
+    const inner = header.firstElementChild;
+    if (inner) {
+      const cs = getComputedStyle(inner);
+      band.style.setProperty("--ib-band-w", cs.maxWidth === "none" ? "1040px" : cs.maxWidth);
+      band.style.setProperty("--ib-band-pad", cs.paddingLeft);
+    }
+    header.append(band);
+  }
+
+  /* ---------- 2. Pillar chips carry a meter (from I) ---------- */
+  for (const chip of document.querySelectorAll(".PillarChip--chip")) {
+    const m = chip.textContent.match(/(\d+)\s*\/\s*20/);
+    if (m) chip.style.setProperty("--ib-pct", `${(Number(m[1]) / 20) * 100}%`);
+  }
+
+  /* ---------- 3. The stage profile (clean line, no poster texture) ---------- */
+  const rnd = (i) => {
+    const x = Math.sin(i * 12.9898 + 78.233) * 43758.5453;
+    return x - Math.floor(x);
+  };
+  const smooth = (t) => t * t * (3 - 2 * t);
+  const PAPER = { fill: "#ece6d8", contour: "rgba(29,24,18,.16)", stroke: "#1d1812", hotFill: "#f3d9d2", hotStroke: "#d2402c", flagBg: "#cc3e2b", flagInk: "#fcfaf4", tag: "#564e41", tagHot: "#a32e1f", axis: "#1d1812", label: "#564e41", labelHot: "#a32e1f", open: "#d99a2b" };
+  const NIGHT = { fill: "#231d16", contour: "rgba(243,239,228,.14)", stroke: "#f3efe4", hotFill: "#3a1a14", hotStroke: "#ff6a52", flagBg: "#f0b43c", flagInk: "#15110d", tag: "#f3efe4", tagHot: "#f0b43c", axis: "#f3efe4", label: "#c9bfae", labelHot: "#f0b43c", open: "#d99a2b" };
+
+  function drawProfile(cols, W, H, o = {}) {
+    const c = o.colors ?? PAPER;
+    const top = o.top ?? 30;
+    const labels = cols.some((k) => k.label);
+    const base = H - (o.bottom ?? (labels ? 24 : 8));
+    const hMax = base - top;
+    const cw = W / cols.length;
+    const floor = o.floor ?? 3;
+    const peaks = cols.map((k) => floor + (k.missing / 20) * (hMax - floor));
+    const xp = (i) => i * cw + cw * (0.5 + (rnd(i + 3) - 0.5) * 0.16);
+    const valley = (i) => (i <= 0 || i >= cols.length ? floor : floor + Math.min(peaks[i - 1], peaks[i]) * 0.12);
+    const alt = (x) => {
+      const i = Math.min(cols.length - 1, Math.floor(x / cw));
+      const x0 = i * cw, p = peaks[i], X = xp(i);
+      const a = x <= X ? valley(i) + (p - valley(i)) * smooth((x - x0) / (X - x0)) : valley(i + 1) + (p - valley(i + 1)) * smooth(1 - (x - X) / (x0 + cw - X));
+      const wob = (Math.sin(x * 0.33 + i) + Math.sin(x * 0.1 + i * 2)) * 0.7;
+      return Math.max(1.5, Math.min(p, a + (Math.abs(x - X) > 6 ? wob : 0)));
+    };
+    const line = (x0, x1) => {
+      let d = "";
+      for (let x = x0; x <= x1 + 0.01; x += 3) d += `${d ? "L" : "M"}${x.toFixed(1)} ${(base - alt(Math.min(x, W - 0.01))).toFixed(1)} `;
+      return d;
+    };
+    const topLine = line(0, W);
+    const area = `${topLine}L${W} ${base} L0 ${base} Z`;
+    const id = "ibp" + Math.round(Math.random() * 1e6);
+    let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true" class="ib-profile__svg">`;
+    s += `<defs><clipPath id="${id}"><path d="${area}"/></clipPath></defs>`;
+    s += `<path d="${area}" fill="${c.fill}"/>`;
+    let contour = "";
+    for (let y = base - 7; y > top - 4; y -= 7) contour += `M0 ${y}H${W}`;
+    s += `<path d="${contour}" stroke="${c.contour}" stroke-width="1" clip-path="url(#${id})"/>`;
+    cols.forEach((k, i) => {
+      if (k.hot) s += `<rect x="${i * cw}" y="0" width="${cw}" height="${H}" fill="${c.hotFill}" clip-path="url(#${id})"/>`;
+      if (k.open) s += `<rect x="${i * cw}" y="0" width="${cw}" height="${H}" fill="${c.open}" clip-path="url(#${id})"/>`;
+    });
+    s += `<path d="${topLine}" fill="none" stroke="${c.stroke}" stroke-width="2" stroke-linejoin="round"/>`;
+    cols.forEach((k, i) => {
+      if (k.hot) s += `<path d="${line(i * cw, (i + 1) * cw)}" fill="none" stroke="${c.hotStroke}" stroke-width="3" stroke-linejoin="round"/>`;
+    });
+    s += `<path d="M0 ${base}H${W}" stroke="${c.axis}" stroke-width="2"/>`;
+    for (let i = 1; i < cols.length; i++) s += `<path d="M${i * cw} ${base}V${base + 4}" stroke="${c.axis}" stroke-width="1.5"/>`;
+    cols.forEach((k, i) => {
+      const X = xp(i), y = base - peaks[i];
+      if (k.flag) {
+        const fw = k.flagW ?? 32;
+        s += `<path d="M${X} ${y - 3}V${y - 14}" stroke="${c.flagBg}" stroke-width="1.5"/>`;
+        s += `<rect x="${X - fw / 2}" y="${y - 31}" width="${fw}" height="17" rx="8.5" fill="${c.flagBg}"/>`;
+        s += `<text x="${X}" y="${y - 19}" text-anchor="middle" class="ib-profile__flag" fill="${c.flagInk}">${k.flag}</text>`;
+        if (k.tag) s += `<text x="${X + fw / 2 + 5}" y="${y - 19}" class="ib-profile__tag" fill="${c.tagHot}">${k.tag}</text>`;
+      } else if (k.tag) {
+        s += `<text x="${X}" y="${y - 7}" text-anchor="middle" class="ib-profile__tag" fill="${c.tag}">${k.tag}</text>`;
+      }
+      if (k.label) s += `<text x="${i * cw + cw / 2}" y="${base + 17}" text-anchor="middle" class="ib-profile__lbl${k.hot ? " is-hot" : ""}" fill="${k.hot ? c.labelHot : c.label}">${k.label}</text>`;
+    });
+    return s + `</svg>`;
+  }
+
+  const ABBR = { acquisition: "Acq.", activation: "Act.", retention: "Ret.", referral: "Ref.", revenue: "Rev." };
+  const grid = document.querySelector(".ResultView--pillarGrid");
+  if (grid && !grid.querySelector(".ib-profile")) {
+    const chips = [...grid.querySelectorAll(".PillarChip--chip")];
+    if (chips.length === 5) {
+      const cols = chips.map((ch) => {
+        const score = parseInt(ch.querySelector("b")?.textContent ?? "0", 10);
+        const name = (ch.querySelector(".PillarChip--label")?.textContent ?? "").trim();
+        const hot = ch.classList.contains("PillarChip--weak");
+        const missing = Math.max(0, 20 - score);
+        const tag = missing ? `−${missing}` : "0";
+        return { missing, hot, flag: hot ? "HC" : null, tag, label: ABBR[name.toLowerCase()] ?? name };
+      });
+      const card = h("div", "ib-profile", `<div class="ib-profile__cap"><span>${T.profile}</span><span>${T.profileKey}</span></div>`);
+      card.setAttribute("aria-hidden", "true");
+      grid.prepend(card);
+      const W = Math.round(card.clientWidth - parseFloat(getComputedStyle(card).paddingLeft) * 2);
+      card.insertAdjacentHTML("beforeend", drawProfile(cols, W, W < 360 ? 118 : 128, { top: 34 }));
+    }
+  }
+
+  /* ---------- 4. Landing: the three stages, wearing the band's sign (from I) ---------- */
+  const hero = document.querySelector(".page--hero");
+  if (space === "tour" && hero && !document.querySelector(".ib-stages")) {
+    const sec = h("section", "ib-stages");
+    sec.setAttribute("aria-hidden", "true");
+    sec.innerHTML =
+      `<p class="ib-kicker">${T.kicker}</p><div class="ib-stage-grid">` +
+      T.strip
+        .map(
+          ([name, text, when], k) =>
+            `<article class="ib-stage" data-s="${ORDER[k]}"><header><span class="ib-stage-chip">${PICTO[ORDER[k]]}<b>${k + 1}</b><i>${T.types[ORDER[k]]}</i></span><span class="ib-stage-when">${when}</span></header><h3>${name}</h3><p>${text}</p></article>`,
+        )
+        .join("") +
+      `</div>`;
+    hero.insertAdjacentElement("afterend", sec);
+  }
+
+  /* ---------- 5. Game hub: the five climbs, a night poster in the intro ---------- */
+  const zones = document.querySelector(".page--zones");
+  const hubIntro = document.querySelector(".ProsePage--intro");
+  if (space === "jeu" && zones && hubIntro && !document.querySelector(".ib-mount")) {
+    const items = [...zones.querySelectorAll(".page--zone")];
+    const mt = h("div", "ib-mount", `<div class="ib-profile__cap"><span>${T.hub}</span><span>${T.hubKey}</span></div>`);
+    mt.setAttribute("aria-hidden", "true");
+    hubIntro.append(mt);
+    const W = Math.round(mt.clientWidth);
+    const heights = [9, 12, 17, 11, 14];
+    const cols = items.map((z, i) => {
+      const open = z.classList.contains("page--zoneOpen");
+      return { missing: heights[i] ?? 10, open, tag: open ? null : String(i + 1), flag: open ? String(i + 1) : null, flagW: 24 };
+    });
+    mt.insertAdjacentHTML("beforeend", drawProfile(cols, W, W < 600 ? 104 : 132, { top: 38, bottom: 10, floor: 4, colors: NIGHT }));
+  }
+
+  /* ---------- 6. Moteur: a clean chronometer beside the intro ---------- */
+  const intro = space === "moteur" && document.querySelector(".page--intro");
+  if (intro && !document.querySelector(".ib-chrono")) {
+    const c = h("div", "ib-chrono");
+    c.setAttribute("aria-hidden", "true");
+    const cx = 150, cy = 172, R = 116;
+    let ticks = "";
+    for (let k = 0; k < 60; k++) {
+      const a = (k / 60) * Math.PI * 2, major = k % 5 === 0;
+      const r1 = R - 18, r0 = major ? R - 34 : R - 25;
+      ticks += `<path d="M${(cx + Math.sin(a) * r0).toFixed(1)} ${(cy - Math.cos(a) * r0).toFixed(1)}L${(cx + Math.sin(a) * r1).toFixed(1)} ${(cy - Math.cos(a) * r1).toFixed(1)}" stroke="#1d1812" stroke-width="${major ? 3.5 : 1.4}" stroke-linecap="round"/>`;
+    }
+    const ang = 0.7 * Math.PI * 2;
+    const r = R - 32, hx = cx + Math.sin(ang) * r, hy = cy - Math.cos(ang) * r;
+    c.innerHTML =
+      `<svg viewBox="0 0 300 310" width="300" height="310" aria-hidden="true">` +
+      `<circle cx="${cx + 7}" cy="${cy + 7}" r="${R}" fill="#1d1812"/>` +
+      `<rect x="${cx - 17}" y="18" width="34" height="18" rx="5" fill="#1d3f8f" stroke="#1d1812" stroke-width="2.5"/>` +
+      `<rect x="${cx - 6}" y="34" width="12" height="16" fill="#1d1812"/>` +
+      `<g transform="rotate(40 ${cx} ${cy})"><rect x="${cx - 8}" y="${cy - R - 18}" width="16" height="14" rx="4" fill="#1d3f8f" stroke="#1d1812" stroke-width="2.5"/></g>` +
+      `<circle cx="${cx}" cy="${cy}" r="${R}" fill="#fcfaf4" stroke="#1d1812" stroke-width="3"/>` +
+      `<circle cx="${cx}" cy="${cy}" r="${R - 8}" fill="none" stroke="#1d3f8f" stroke-width="8"/>` +
+      `<path d="M${cx} ${cy}L${cx} ${cy - r}A${r} ${r} 0 1 1 ${hx.toFixed(1)} ${hy.toFixed(1)}Z" fill="rgba(29,63,143,.14)"/>` +
+      ticks +
+      `<path d="M${cx} ${cy}L${hx.toFixed(1)} ${hy.toFixed(1)}" stroke="#1d1812" stroke-width="5" stroke-linecap="round"/>` +
+      `<circle cx="${cx}" cy="${cy}" r="8" fill="#1d3f8f" stroke="#1d1812" stroke-width="2.5"/>` +
+      `</svg>`;
+    intro.parentElement.prepend(c);
+  }
+
+  /* ---------- 7. Result: the share frame shows this direction's image ---------- */
+  /*POSTER-START*/
+  function posterHTML(lang) {
+    const F = lang === "fr";
+    const N = " ";
+    const t = F
+      ? {
+          stage: "Étape 1 · Le diagnostic",
+          badge: "Diagnostic AARRR — 3 min",
+          cap: "Score growth global",
+          next: "Prochaine action",
+          move: "Prends la cohorte de nouveaux utilisateurs d'un mois et compte combien sont encore actifs trente jours plus tard.",
+          tag1: "Retention est là où cette croissance cale.",
+          tag2: `Et la tienne${N}?`,
+        }
+      : {
+          stage: "Stage 1 · The check-up",
+          badge: "AARRR check-up — 3 min",
+          cap: "Overall growth score",
+          next: "Next move",
+          move: "Take one month's cohort of new users and count how many are still active thirty days later.",
+          tag1: "Retention is where this growth stalls.",
+          tag2: "Where does yours?",
+        };
+    // the sample result: 18 · 12 · 8 · 16 · 20
+    const missing = [2, 8, 12, 4, 0];
+    const labels = ["Acq.", "Act.", "Ret.", "Ref.", "Rev."];
+    const W = 736, H = 178, base = 150, top = 36, cw = W / 5;
+    const pk = missing.map((m) => 3 + (m / 20) * (base - top - 3));
+    const alt = (x) => {
+      const i = Math.min(4, Math.floor(x / cw));
+      const x0 = i * cw, xp = x0 + cw / 2;
+      const v0 = i === 0 ? 3 : 3 + Math.min(pk[i - 1], pk[i]) * 0.12;
+      const v1 = i === 4 ? 3 : 3 + Math.min(pk[i], pk[i + 1]) * 0.12;
+      const s = (u) => u * u * (3 - 2 * u);
+      const a = x <= xp ? v0 + (pk[i] - v0) * s((x - x0) / (xp - x0)) : v1 + (pk[i] - v1) * s(1 - (x - xp) / (x0 + cw - xp));
+      const wob = (Math.sin(x * 0.3 + i) + Math.sin(x * 0.09 + i * 2)) * 0.9;
+      return Math.max(2, Math.min(pk[i], a + (Math.abs(x - xp) > 8 ? wob : 0)));
+    };
+    const path = (x0, x1) => {
+      let d = "";
+      for (let x = x0; x <= x1; x += 4) d += `${d ? "L" : "M"}${x} ${(base - alt(Math.min(x, W - 0.1))).toFixed(1)} `;
+      return d;
+    };
+    const line = path(0, W);
+    const area = `${line}L${W} ${base} L0 ${base} Z`;
+    let contour = "";
+    for (let y = base - 9; y > top; y -= 9) contour += `M0 ${y}H${W}`;
+    const xp = 2 * cw + cw / 2, yp = base - pk[2];
+    const profile =
+      `<svg class="ibP-profile" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true">` +
+      `<defs><clipPath id="ibPc"><path d="${area}"/></clipPath></defs>` +
+      `<path d="${area}" fill="#e1d9c6"/>` +
+      `<path d="${contour}" stroke="rgba(29,24,18,.18)" stroke-width="1.5" clip-path="url(#ibPc)"/>` +
+      `<rect x="${2 * cw}" width="${cw}" height="${H}" fill="#f3d9d2" clip-path="url(#ibPc)"/>` +
+      `<path d="${line}" fill="none" stroke="#1d1812" stroke-width="3" stroke-linejoin="round"/>` +
+      `<path d="${path(2 * cw, 3 * cw)}" fill="none" stroke="#d2402c" stroke-width="4.5" stroke-linejoin="round"/>` +
+      `<path d="M0 ${base}H${W}" stroke="#1d1812" stroke-width="3"/>` +
+      [1, 2, 3, 4].map((i) => `<path d="M${i * cw} ${base}V${base + 6}" stroke="#1d1812" stroke-width="2"/>`).join("") +
+      `<path d="M${xp} ${yp - 4}V${yp - 20}" stroke="#cc3e2b" stroke-width="2.5"/>` +
+      `<rect x="${xp - 28}" y="${yp - 46}" width="56" height="26" rx="13" fill="#cc3e2b"/>` +
+      `<text x="${xp}" y="${yp - 27.5}" text-anchor="middle" class="ibP-flag">HC</text>` +
+      labels.map((l, i) => `<text x="${i * cw + cw / 2}" y="${base + 22}" text-anchor="middle" class="ibP-lbl${i === 2 ? " is-hot" : ""}">${l.toUpperCase()}</text>`).join("") +
+      `</svg>`;
+    return (
+      `<div class="ibP" lang="${lang}"><div class="ibP-wrap">` +
+      `<div class="ibP-top"><div class="ibP-brand">TOUR DE <b>GROWTH</b><span class="ibP-stage">${PICTO.tour}<span>${t.stage}</span></span></div><div class="ibP-badge">${t.badge}</div></div>` +
+      `<div class="ibP-mid">` +
+      `<div class="ibP-left"><div class="ibP-borne"><div class="ibP-cap">${t.cap}</div><div class="ibP-num">74</div><div class="ibP-of">/100</div></div><div class="ibP-plinth"></div></div>` +
+      `<div class="ibP-right"><div class="ibP-move"><div class="ibP-row"><b>${t.next}</b><span>Retention · 8/20</span></div><p>${t.move}</p></div>${profile}</div>` +
+      `</div>` +
+      `<div class="ibP-bottom"><p>${t.tag1}<span>${t.tag2}</span></p><div class="ibP-url">tourdegrowth.com</div></div>` +
+      `</div></div>`
+    );
+  }
+  /*POSTER-END*/
+
+  const frame = document.querySelector(".ShareCard--frame");
+  const img = frame?.querySelector(".ShareCard--image");
+  if (frame && img && !frame.querySelector(".ib-poster")) {
+    const holder = h("div", "ib-poster", `<div class="ib-poster__scale">${posterHTML(fr ? "fr" : "en")}</div>`);
+    holder.setAttribute("aria-hidden", "true");
+    img.after(holder);
+    holder.style.setProperty("--k", String(holder.clientWidth / 1200));
+  }
+})();
