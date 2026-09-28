@@ -4823,3 +4823,27 @@ Antoine a apporté une mission en sept lots, écrite d'après un audit SEO fait 
 - bundle Claude Design reconstruit et validé (71/71), avec le DG dans tous les états de la visio : sonnerie, ouverte, colère avec son halo, raccrochée, terminée en gris.
 
 **Piège** : Turbopack refuse un `node_modules` en lien symbolique qui sort de la racine du projet (« Symlink … points out of the filesystem root »). Pour construire dans une copie de travail, il faut `cp -al` (liens physiques, instantané, sans disque en plus), pas `ln -s`.
+
+### Bons à tirer nº7 et nº8 remis d'accord avec le code (2026-09-28, demandé par Antoine)
+
+**Le constat, mesuré mot à mot et non de mémoire.** Chaque texte des quatre pages ouvertes a été cherché tel quel dans le code. Le nº4 et le nº6 sont fidèles (depuis le nº4, le catalogue d'audit n'a changé que de typographie). Le nº7 et le nº8 ne l'étaient plus : le nº8 affichait 21 textes français qui n'existent plus (« quinze chiffres », l'ancien « Et si », des réglages disparus), et il manquait environ 200 chaînes neuves des retours du 25 au 27 septembre. Au nº7, cinq cartes avaient bougé et la copie neuve des 25-26/09 manquait. **Aucune décision n'était prise** : les trois collections `cards/` étaient vides, et chaque page écrit bien dans `cards/` (vérifié dans son code). Les deux pages ont donc été republiées **aux mêmes adresses**, sans rien perdre.
+
+**La méthode, pour la prochaine fois.** Quatre sondes jetables sous `scripts/live/`, lancées avec `vitest.live.config.ts` puis supprimées (`git status` propre à chaque fois) :
+1. la copie aplatie en `clé → { fr, en }` : `ENGINE_COPY`, le catalogue, la copie du jeu, le dictionnaire ;
+2. le catalogue rempli avec l'exemple §6.0 par `catalogueValues`, et la ligne de repère composée comme dans `MetricSheet` ;
+3. l'export texte des slides (`deckMarkdown`) de l'exemple, seul puis avec deux « Et si » (activation à 24 %, churn logo à 1,5 %) : les exemples des chapôs viennent du vrai moteur (« 13 chiffres sur 17 » remplace « 11 sur 15 ») ;
+4. un exemple de `formatList` pour les astuces nommées par le contrôle.
+
+Le nº8 est reconstruit par un script qui repart des clés de chaque ancienne carte. **Sa fidélité se juge sur ce qu'il n'a pas le droit de changer** : il reproduit à l'identique les 32 cartes dont le texte n'a pas bougé. Les 672 clés d'`ENGINE_COPY` sont toutes placées, et les 1 842 textes de la page sont retrouvés mot pour mot dans le code. Au nº7, 756 textes sont vérifiés ; seuls les exemples de la carte « Unités » n'y sont pas, puisque c'est le formateur qui les produit.
+
+**Ce qui a changé sur les pages :**
+- **nº8, de 67 à 82 cartes** : 15 nouvelles (durée, réglages, pas à pas, exemple rempli, six cartes du panneau « Et si », deux pour les slides « Et si », expansion et rétrogradation), 25 dont le texte a changé et 42 au texte inchangé. Les slides perdent leur numéro dans les titres de carte : les slides « Et si » s'insèrent après la fuite, et la visibilité passe en tête sous deux ★ connus. La carte « À trancher » cite maintenant aussi l'encart de durée et l'écran des cibles, qui dépendent de la même décision. Les exemples anglais du catalogue prennent enfin l'événement en anglais (« created a first project ») : l'ancienne page y mettait le français.
+- **nº7, de 35 à 38 cartes** : 3 nouvelles (la fin du trimestre en plein écran, « pourquoi le churn a bougé », « pourquoi ce contrôle ») et 5 retouchées. Les quatre phrases validées du prototype réécrites à la demande d'Antoine (le bouton de la visio, « chantiers », les deux aides de la main, l'effet du questionnaire) sont montrées avant → après, comme les faits corrigés. La contradiction possible du « mot du DG », signalée le 26/09, est écrite sur la carte de l'écran plein, pour qu'elle se tranche avec la copie.
+
+**Deux pièges de vérification :**
+- **Une comparaison qui normalise les espaces a déclaré les faits corrigés « fidèles »** alors que la page portait des espaces simples là où le code a des insécables (passe typographique du 24/09). Une comparaison exacte les a vus. La page reprend maintenant le texte du code, marques de différence comprises.
+- **Un premier contrôle a signalé à tort les plages de la frise** : la page les joint par « · » en une seule ligne. Il faut comparer les éléments d'une liste, pas la ligne jointe.
+
+**Vérifié** : les deux pages rendues dans Chromium à 1 280 et 390 px, avec `scrollWidth === clientWidth`, aucune carte hors de l'écran et aucune erreur de page. Le payload publié, relu depuis le service, est identique au local (82 et 38 cartes). Ce qui a été regardé à l'écran : la main du nº7 (avant → après), l'écran plein à 390 px, une carte du catalogue et les titres des slides « Et si » du nº8.
+
+**Reste hors de tout bon à tirer** : les deux libellés SEO du 28/09 (`glossaryPage.relatedComparisonLabel`, `applyAarrrLabel`), déjà en ligne.
