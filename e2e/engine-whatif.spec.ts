@@ -151,6 +151,8 @@ test("at 1280px, the growth numbers stay in view while the last slider moves", a
  * Timing is not asserted step by step (a slow runner would make it flaky);
  * what is asserted is the structure — one live region in the block, the
  * summary — and that it says the resting figures, then "today" once reset.
+ * Non-vacuity, checked by sabotage on 2026-09-28: a build with `aria-live`
+ * put back on the tiles fails this test on the live-region count.
  */
 test("the growth numbers are read once, from one summary, not from the tiles (audit S-4)", async ({ page }) => {
   await openWith(page, exampleState());

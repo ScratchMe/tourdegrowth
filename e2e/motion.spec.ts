@@ -17,6 +17,10 @@ import { expect, test } from "./helpers";
  * in Chromium: an element whose `animation-name` has no matching @keyframes
  * returns zero animations, one whose name resolves returns one. So a return
  * of the bug empties the list, and these specs fail.
+ *
+ * Non-vacuity, checked by sabotage on 2026-09-28 (TESTING.md §1.1): a build
+ * with ScoreDisplay back to `animation: tdg-stamp …` fails exactly the stamp
+ * spec; the pulse spec (not sabotaged) and the reduced-motion one pass.
  */
 
 async function animationNames(page: Page): Promise<string[]> {
