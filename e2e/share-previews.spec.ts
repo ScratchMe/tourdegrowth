@@ -43,22 +43,45 @@ async function sitemapPaths(request: import("@playwright/test").APIRequestContex
  * with no picture — found while fixing `/quiz`, the same hole one level up.
  * `contentMetadata` now declares the landing image as a fallback; a page with
  * its own file keeps that one. Exactly one tag either way: two `og:image`
- * tags would let each platform pick a different picture.
+ * tags would let each platform pick a different picture. And the same one
+ * for X, which reads `twitter:image` and falls back to nothing.
+ *
+ * The image itself is checked as a 1200×630 PNG, read from its bytes: a 200
+ * with an error body, or a frame at the wrong size, is what a platform would
+ * crop or refuse.
+ *
+ * Non-vacuity (2026-09-28, SEO lot 1): with the fallback removed from
+ * `contentMetadata`, exactly the 20 pages that rely on it failed (About, the
+ * two open-door pages, the five comparisons, the two legal pages, in both
+ * languages) — and none of the pages with their own file.
  */
-test("every sitemap page declares exactly one share image, and it is a real PNG", async ({ request }) => {
+test("every sitemap page declares exactly one share image, for X too, and it is a real 1200×630 PNG", async ({ request }) => {
   test.setTimeout(120_000);
-  const checked = new Map<string, boolean>();
+  const checked = new Map<string, string>();
+  const off: string[] = [];
   for (const path of await sitemapPaths(request)) {
     const html = await (await request.get(path)).text();
-    const tags = html.match(/<meta property="og:image" content="/g) ?? [];
-    expect(tags, `${path} og:image count`).toHaveLength(1);
+    const og = html.match(/<meta property="og:image" content="/g) ?? [];
+    const twitter = html.match(/<meta name="twitter:image" content="/g) ?? [];
+    if (og.length !== 1 || twitter.length !== 1) {
+      off.push(`${path}: ${og.length} og:image, ${twitter.length} twitter:image`);
+      continue;
+    }
+    if (attr(html, TWITTER_IMAGE) !== attr(html, OG_IMAGE)) off.push(`${path}: twitter:image differs from og:image`);
     const image = new URL(attr(html, OG_IMAGE)!).pathname;
     if (!checked.has(image)) {
       const response = await request.get(image);
-      checked.set(image, response.status() === 200 && (response.headers()["content-type"] ?? "").includes("image/png"));
+      const body = await response.body();
+      const png = body.subarray(0, 8).toString("hex") === "89504e470d0a1a0a";
+      const size = png ? `${body.readUInt32BE(16)}×${body.readUInt32BE(20)}` : "not a PNG";
+      checked.set(
+        image,
+        `${response.status()} ${(response.headers()["content-type"] ?? "").split(";")[0]} ${size}`,
+      );
     }
-    expect(checked.get(image), `${path} → ${image}`).toBe(true);
+    if (checked.get(image) !== "200 image/png 1200×630") off.push(`${path} → ${image}: ${checked.get(image)}`);
   }
+  expect(off).toEqual([]);
 });
 
 /**
@@ -85,10 +108,16 @@ test("every sitemap page's title and description fit a search result", async ({ 
 });
 
 /**
- * The pages that carry their own `opengraph-image` file keep ITS address —
- * the one with the cache-busting hash. An image declared in the config
- * replaces the file-based one (measured, against what the docs suggest), so
- * these pages opt out of the fallback; this pins that they still do.
+ * The pages that carry their own `opengraph-image` file keep ITS address,
+ * query string included. An image declared in the config replaces the
+ * file-based one (measured, against what the docs suggest), so these pages
+ * opt out of the fallback; this pins that they still do.
+ *
+ * That query string is a hash of the segment's SOURCE FILE, not of the
+ * picture (measured 2026-09-28): the two identical re-export files of How it
+ * works and the glossary index share `?1513d546…`, the 48 terms share one,
+ * the landing has its own — for the very same image. It does not change when
+ * the picture does, so it is kept for stability, not as a cache-buster.
  */
 test("pages with their own share-image file keep the file's hashed address", async ({ request }) => {
   for (const [path, own] of [

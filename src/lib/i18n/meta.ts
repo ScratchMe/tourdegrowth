@@ -39,15 +39,19 @@ function shareText(locale: Locale, url: string, title: string, description: stri
  *
  * **A page that carries its own file must say so** (`ownShareImage`).
  * Measured on the build, against what the docs suggest: an image declared in
- * the config REPLACES the file-based one rather than yielding to it. Those
- * pages would lose the cache-busting hash the file convention appends — the
- * thing that makes a platform re-fetch the picture when its copy changes.
- * Opting out rather than in keeps the safe default for the next page: one
- * that forgets gets a picture, not none.
+ * the config REPLACES the file-based one rather than yielding to it, so those
+ * pages would trade their own address for this one. Opting out rather than in
+ * keeps the safe default for the next page: one that forgets gets a picture,
+ * not none.
  *
  * Pointing at the image rather than giving each page a re-export file is
- * deliberate: every file is one more image route counted in Functions Storage
- * on every deploy (VERCEL.md), for the very same picture.
+ * deliberate, and the file would buy nothing (SEO lot 1, 2026-09-28): the
+ * `?<hash>` the file convention appends is a hash of the segment's SOURCE
+ * FILE, not of the picture — identical re-export files share one hash, and it
+ * does not move when the landing image or its copy changes. A re-export per
+ * page would only add identical image routes to render at every build. (The
+ * earlier Functions Storage argument no longer holds either: VERCEL.md §1.1,
+ * routes cost almost nothing, bytes do.)
  */
 export function contentMetadata(
   locale: Locale,
