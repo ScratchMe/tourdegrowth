@@ -133,7 +133,7 @@ Retenu le 2026-09-27 en jouant le plug-in Claude Code Setup (sans l'installer), 
 - **`relecteur-securite`** et **`relecteur-copie`** (`.claude/agents/`) : deux sous-agents en lecture seule, à lancer sur un diff avant une PR.
 - **Un hook** (`.claude/settings.json`) refuse tout Edit ou Write dans ce dépôt tant que la branche courante est `main` (convention 2). Une écriture par Bash passe à travers.
 - **Pas de lint ni de type-check après chaque édition** : environ 7 s par édition, mesuré. La CI et `/livrer` s'en chargent.
-- **Le plug-in Data** (Anthropic, installé en `--manuel` le 2026-09-27) : rien n'est chargé, tout s'appelle par son nom. Utiles ici : `/data-validate-data` avant d'annoncer un chiffre, `/data-statistical-analysis`. Ce qu'ils tirent des chiffres privés reste dans le scratchpad.
+- **Les plug-ins Data et Design** (Anthropic, installés en `--manuel` le 2026-09-27) : rien n'est chargé, tout s'appelle par son nom. Utiles ici : `/data-validate-data` avant d'annoncer un chiffre ; `/design-critique` et `/design-accessibility-review` sur un nouvel écran. Ce qu'ils tirent des chiffres privés reste dans le scratchpad.
 
 ## Ce qui est non négociable (décisions produit, pas des goûts d'ingé)
 
