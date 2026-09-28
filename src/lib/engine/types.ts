@@ -384,7 +384,7 @@ export interface Peloton {
 }
 
 /**
- * The inputs of the three computed figures (`DERIVED_SHAPES[].inputs`), the
+ * The inputs of the five computed figures (`DERIVED_SHAPES[].inputs`), the
  * only numbers a sentence names after « il manque » / "missing:". The copy
  * carries one phrase per id (`unitInput`); a test pins the two sets equal.
  */

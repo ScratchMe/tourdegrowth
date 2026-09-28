@@ -81,7 +81,7 @@ export interface MetricShape {
   choices?: readonly string[];
 }
 
-/** The three computed figures (§5.7). Never entered; an unknown input makes them uncomputable, never 0. */
+/** The five computed figures (§5.7; NRR and GRR since 2026-09-26). Never entered; an unknown input makes them uncomputable, never 0. */
 export interface DerivedShape {
   id: DerivedId;
   stage: Pillar;

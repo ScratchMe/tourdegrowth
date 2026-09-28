@@ -83,9 +83,11 @@ export const ENGINE_COPY = {
       fr: "Ton Tour dit si tu mesures. Le moteur montre ce que disent tes chiffres.",
       en: "Your Tour tells you whether you measure. The engine shows what your numbers say.",
     },
+    // TODO: à relire — réécrit le 2026-09-28 (audit du design kit) : le moteur collecte dix-sept
+    // chiffres depuis le 2026-09-26 (expansion et rétrogradation), la page disait encore quinze.
     promise: {
-      fr: "Quinze chiffres, trois par étape : va les chercher, vois où ton moteur perd du monde et repars avec des slides prêtes pour ton CODIR. Tes chiffres ne sont comparés qu'à toi-même et à ta propre cible, sauf deux repères publiés que la page nomme.",
-      en: "Fifteen numbers, three per stage: go and get them, see where your engine loses people, and leave with slides ready for your leadership meeting. Your numbers are only compared with yourself and your own target, apart from two published references the page names.",
+      fr: "Dix-sept chiffres, trois par étape et cinq pour les revenus : va les chercher, vois où ton moteur perd du monde et repars avec des slides prêtes pour ton CODIR. Tes chiffres ne sont comparés qu'à toi-même et à ta propre cible, sauf deux repères publiés que la page nomme.",
+      en: "Seventeen numbers, three per stage and five for revenue: go and get them, see where your engine loses people, and leave with slides ready for your leadership meeting. Your numbers are only compared with yourself and your own target, apart from two published references the page names.",
     },
     privacyTitle: { fr: "Rien de ce que tu saisis ne sort d'ici", en: "Nothing you enter leaves this page" },
     privacyBody: {
@@ -127,11 +129,13 @@ export const ENGINE_COPY = {
       en: "Open the seventeen cards: formula, where to find it, trap",
     },
     catalogueTitle: { fr: "Les dix-sept chiffres", en: "The seventeen numbers" },
+    // TODO: à relire — réécrit le 2026-09-28 : « trois par étape » ne valait plus pour les revenus (cinq).
     catalogueIntro: {
-      fr: "Trois par étape, comme les trois questions du Tour. Pour chacun : sa formule, où le trouver, et le piège à connaître avant de le citer.",
-      en: "Three per stage, like the Tour's three questions. For each: its formula, where to find it, and the trap to know before quoting it.",
+      fr: "Trois par étape, comme les trois questions du Tour, et cinq pour les revenus, qui portent aussi les mouvements du MRR. Pour chacun : sa formule, où le trouver, et le piège à connaître avant de le citer.",
+      en: "Three per stage, like the Tour's three questions, and five for revenue, which also carries the MRR movements. For each: its formula, where to find it, and the trap to know before quoting it.",
     },
-    catalogueComputedTitle: { fr: "Et trois chiffres calculés", en: "And three computed numbers" },
+    // TODO: à relire — réécrit le 2026-09-28 : la page en liste cinq depuis que NRR et GRR ont rejoint les trois.
+    catalogueComputedTitle: { fr: "Et cinq chiffres calculés", en: "And five computed numbers" },
     catalogueVerified: { fr: "Recettes relues en {month}.", en: "Recipes checked in {month}." },
     faqTitle: { fr: "Questions fréquentes", en: "Frequently asked questions" },
   },
@@ -428,7 +432,7 @@ export const ENGINE_COPY = {
       en: "This cohort hasn't had its full window yet: the number will be marked approximate.",
     },
     statusQuestion: { fr: "Où en es-tu avec ce chiffre ?", en: "Where are you with this number?" },
-    // TODO: à relire — nouveau (2026-09-26, retour d'Antoine) : trois des quinze ne sont pas des chiffres
+    // TODO: à relire — nouveau (2026-09-26, retour d'Antoine) : trois des dix-sept ne sont pas des chiffres
     // (l'événement d'activation et la cause de churn sont des mots, le mécanisme de recommandation un choix).
     // On ne leur demande pas où on en est « avec ce chiffre ».
     statusQuestionAnswer: { fr: "Où en es-tu sur ce point ?", en: "Where are you on this?" },
@@ -764,6 +768,15 @@ export const ENGINE_COPY = {
     /** A KPI tile says whether a change is good news in words, never by color alone (StatTile.tsx). */
     better: { fr: "mieux", en: "better" },
     worse: { fr: "moins bien", en: "worse" },
+    /**
+     * TODO: à relire — nouveau (2026-09-28, audit du design kit S-4). What a
+     * screen reader hears once a slider settles, and only then: the growth
+     * numbers that moved, read once — never the seven tiles at every step.
+     * `{sense}` is `better` or `worse` above.
+     */
+    announce: { fr: "{title}, {context} : {figures}.", en: "{title}, {context}: {figures}." },
+    announceFigure: { fr: "{label} {value}", en: "{label} {value}" },
+    announceChanged: { fr: "{label} {value} ({delta}, {sense})", en: "{label} {value} ({delta}, {sense})" },
     /** The funnel's dots: what each shape means. `range` reuses the peloton's « fourchette estimée ». */
     legendThere: { fr: "déjà là aujourd'hui", en: "there today" },
     legendGained: { fr: "en plus avec tes « Et si »", en: "added by your what-ifs" },

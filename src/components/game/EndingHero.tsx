@@ -29,7 +29,7 @@ export interface EndingHeroProps {
  *
  * The first thing on paper after the night: the eyebrow says which of the
  * seven endings this is, the title lands like the score numeral does
- * (`tdg-stamp`), and the text is the story told with the year's numbers.
+ * (the shared `stamp` of styles/motion.module.css), and the text is the story told with the year's numbers.
  * The reduced-motion rule of motion.css takes the stamp off; the title is
  * then simply there.
  *

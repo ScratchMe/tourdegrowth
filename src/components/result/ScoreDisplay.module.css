@@ -43,8 +43,12 @@
 }
 
 .animate {
-  /* tdg-stamp is defined once, globally, in tokens/motion.css. */
-  animation: tdg-stamp var(--dur-stamp) var(--ease-out) both;
+  /* The stamp's keyframes live in styles/motion.module.css: longhands only
+     here, never the shorthand (it would reset the composed name). */
+  composes: stamp from "../../styles/motion.module.css";
+  animation-duration: var(--dur-stamp);
+  animation-timing-function: var(--ease-out);
+  animation-fill-mode: both;
 }
 
 .suffix {

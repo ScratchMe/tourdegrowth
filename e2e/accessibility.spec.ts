@@ -104,6 +104,19 @@ for (const [name, path] of PAGES) {
     // hydration choice), so wait for real content before scanning.
     await page.locator("main").waitFor();
 
+    // Since 2026-09-28 the brand's stamp really plays (design audit S-1): the
+    // score numeral fades in over --dur-stamp. A scan mid-fade would measure
+    // a half-transparent numeral, so wait for every finite animation to
+    // settle. An infinite one (a ringing call) never finishes and is skipped.
+    await page.evaluate(() =>
+      Promise.all(
+        document
+          .getAnimations()
+          .filter((a) => a.effect?.getComputedTiming().endTime !== Infinity)
+          .map((a) => a.finished.catch(() => undefined)),
+      ),
+    );
+
     // The page ground is a gradient (`--ground-lift`), and axe cannot compute
     // contrast over a gradient: it files every such node under "incomplete",
     // never under "violations". Measured on 2026-09-24, that was ~20 text

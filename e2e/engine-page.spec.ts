@@ -9,8 +9,8 @@ test.beforeEach(async ({ context }) => {
 
 /**
  * The growth engine's page body, E0 (engine spec §7): the part that reads
- * WITHOUT JavaScript and is what a search engine indexes — the fifteen
- * numbers with their formula and where to find them, the three computed
+ * WITHOUT JavaScript and is what a search engine indexes — the seventeen
+ * numbers with their formula and where to find them, the five computed
  * ones, the FAQ, and a way to the Tour.
  *
  * Asserted with JavaScript OFF: the island renders nothing useful before

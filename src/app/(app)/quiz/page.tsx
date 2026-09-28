@@ -202,7 +202,7 @@ export default function QuizPage() {
 
     // The stage-completion pulse (DESIGN-BRIEF.md "Motion") is handled
     // entirely by StageProgress's own CSS since the design-system v2
-    // migration — `.current` carries the `tdg-pulse` animation. A
+    // migration — `.current` composes the shared `pulse` animation. A
     // `pulseStage` state and its timeout survived that migration here,
     // written on every stage change and never read by anything; ESLint's
     // no-unused-vars is what surfaced it (REVIEW.md R-06).

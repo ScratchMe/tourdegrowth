@@ -42,8 +42,11 @@
 
 /* The score numeral's gesture: the stamp lands once. Off under reduced motion (motion.css). */
 .stamp {
+  composes: stamp from "../../styles/motion.module.css";
   transform-origin: left center;
-  animation: tdg-stamp var(--dur-stamp) var(--ease-stamp) both;
+  animation-duration: var(--dur-stamp);
+  animation-timing-function: var(--ease-stamp);
+  animation-fill-mode: both;
 }
 
 .text {

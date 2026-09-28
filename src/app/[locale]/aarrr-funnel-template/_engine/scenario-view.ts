@@ -1,4 +1,4 @@
-import { fillTemplate, formatApproxMoneyInterval, formatCountInterval, formatDurationInterval, formatInterval, formatMoney, roundSignificant } from "@/lib/engine/format";
+import { fillTemplate, formatApproxMoneyInterval, formatCountInterval, formatDurationInterval, formatInterval, formatMoney, joinList, roundSignificant } from "@/lib/engine/format";
 import { unitInputsPhrase } from "@/lib/engine/phrases";
 import { buildScenario, leverAlone, type LeverView, type Scenario, type ScenarioFunnel, type ScenarioKpis } from "@/lib/engine/scenario";
 import type { EngineStrings, ResolvedMetric } from "@/lib/engine/strings";
@@ -12,7 +12,7 @@ import { knownIn } from "@/lib/engine/values";
  * - the funnel is drawn in the peloton's grammar, dots on a 10-wide grid,
  *   one dot per 1 % of today's sign-ups: today's sign-ups fill the familiar
  *   100, and what the what-ifs ADD beyond today's reach grows the grid by
- *   rows, in red — so a better sign-up rate finally shows (Antoine: « le Et
+ *   rows, as ringed dots (ink, never red: audit S-5) — so a better sign-up rate finally shows (Antoine: « le Et
  *   si du taux d'inscription ne bouge rien visuellement »);
  * - an estimate stays a hatched range, an unknown step is the unknown shape,
  *   never 0 dots;
@@ -35,8 +35,8 @@ const count = (v: number) => Math.max(0, Math.round(v));
 /**
  * One step of the funnel as dots, `unit` people per dot (today's sign-ups ÷
  * 100). Projected lo..hi is drawn solid then hatched; what lies beyond
- * today's highest reach is red; what today had and the projection loses is
- * outlined in red. Never fewer than 100 dots, so the columns compare.
+ * today's highest reach is `gained` (a ringed dot); what today had and the
+ * projection loses is `lost` (struck through). Never fewer than 100 dots, so the columns compare.
  */
 export function scenarioGrid(today: Interval | null, projected: Interval | null, unit: number): ScenarioGrid {
   if (!today || !projected || !(unit > 0)) return { kind: "unknown", dots: [] };
@@ -190,6 +190,28 @@ export function kpiRows(
       unknown: unknownText(row.id),
     };
   });
+}
+
+/**
+ * What a screen reader hears once a slider settles (design audit 2026-09-27,
+ * S-4): the growth numbers that moved, in one sentence, read once. The seven
+ * tiles used to sit in a live region of their own, re-read at every step of
+ * every slider. Unmoved and unknown figures stay out — « LTV, missing the
+ * gross margin » at each settle says nothing new. With nothing moved (every
+ * lever back to today), the known figures as they are today. Empty when no
+ * figure is known at all: an empty region announces nothing.
+ */
+export function kpiAnnouncement(kpis: readonly KpiView[], moved: boolean, strings: EngineStrings): string {
+  const w = strings.scenario;
+  const changed = kpis.filter((k) => k.projected !== null && k.delta !== null && k.tone !== null);
+  const shown = changed.length > 0 ? changed : kpis.filter((k) => k.projected !== null);
+  if (shown.length === 0) return "";
+  const figures = shown.map((k) =>
+    k.delta !== null && k.tone !== null
+      ? fillTemplate(w.announceChanged, { label: k.label, value: k.projected ?? "", delta: k.delta, sense: k.tone === "better" ? w.better : w.worse })
+      : fillTemplate(w.announceFigure, { label: k.label, value: k.projected ?? "" }),
+  );
+  return fillTemplate(w.announce, { title: w.kpisTitle, context: moved ? w.kpiIf : w.kpiToday, figures: joinList(figures, strings.grammar) });
 }
 
 /** U+2212 for a minus: StatTile.tsx asks for it, and a hyphen reads as a dash. */

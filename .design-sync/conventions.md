@@ -211,10 +211,16 @@ numbers support:
 
 ## What is not in here
 
-No icon set, no modals, no user-facing dark mode, no chart library, no
-blurred shadows (the night changes the shadow's colour, never its hardness).
-If a design needs one of those, that is a product decision to raise, not a
-component to invent.
+No icon set, no user-facing dark mode, no chart library, no blurred shadows
+(the night changes the shadow's colour, never its hardness). If a design
+needs one of those, that is a product decision to raise, not a component to
+invent.
+
+One modal, and only one: `QuarterNews`, the game's end-of-quarter news
+(Antoine's decision, 2026-09-26). Full screen, a native `<dialog>` opened
+with `showModal()`, Escape means « skip to the report », and the report stays
+underneath for re-reading. A second modal is the same product decision as
+any item of the list above.
 
 ## Contracts: two things to know when reading a `.d.ts`
 

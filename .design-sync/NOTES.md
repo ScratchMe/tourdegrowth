@@ -160,12 +160,16 @@ become the WHOLE list. The first DS v3 pass pinned four components to fix
 their contracts and the bundle silently shrank from 70 components to 4 —
 with 36 previews left pointing at components that no longer existed.
 
-So `componentSrcMap` now pins all 70 exported components to their file
+So `componentSrcMap` now pins all 71 exported components to their file
 (`"LegalPage": null` stays), and `.design-sync/check-inventory.mjs`, chained
 last in `cfg.buildCmd`, fails the build if a component exported from
 `src/components/**` is missing from the map, pinned to the wrong file, or
 pinned but no longer exported. Its success line is
-`[inventory] 70 components pinned, 1 excluded on purpose, none missing`.
+`[inventory] 71 components pinned, 1 excluded on purpose, none missing`.
+`QuarterNews` (the game's news screen, 2026-09-26) shipped without its entry
+and broke this build for two days — caught by the design audit of
+2026-09-27, not by anything that runs on a PR, since CI does not build the
+bundle.
 Adding a component therefore means adding it to the map, which is the point:
 a new component shows up in Claude Design by decision, not by accident.
 
@@ -180,9 +184,9 @@ in a browser: a `ReferenceError` while the bundle evaluates, before
 listed FIRST in `cfg.extraEntries` (ES modules evaluate in import order). The
 file's header says the same; do not reorder the list.
 
-## The two standing validate warnings
+## The three standing validate warnings
 
-Both are non-blocking and both are expected:
+All three are non-blocking and all are expected:
 
 - `[FONT_MISSING] "Impact"` — the system-font fallback above.
 - `[GRID_OVERFLOW] DefinitionPopover (Docked)` — the check is a **property**
@@ -194,6 +198,14 @@ Both are non-blocking and both are expected:
   was **checked in the screenshot** and presents correctly. Keeping the grid
   also keeps the card under `compare.mjs`'s `[PORTAL?]` monitoring, which
   `single` would exempt it from.
+- `[GRID_OVERFLOW] QuarterNews` — the same property test. The component is
+  the system's one modal: `showModal()` lifts it into the top layer, which
+  escapes any transformed ancestor, so every story would cover every other
+  card. The preview's `InFrame` shadows `showModal` on that one dialog
+  instance (a layout effect runs before the component's own effect), the
+  component takes its documented fallback (`open`, a fixed layer), and a
+  transformed, clipped 760×720 frame contains it. Checked in the screenshot
+  on 2026-09-28: three stories, each inside its frame, none over another.
 
 Wide components get `cardMode: "column"` in `cfg.overrides` (one full-width
 card per story) — 21 of them now: most of `game`, the two charts, `Button`
@@ -205,7 +217,7 @@ viewport media query, not the cell) overlapped its own figure labels.
 
 ## Previews are all repo-owned
 
-All 70 live in `.design-sync/previews/` (215 story cells) — none are
+All 71 live in `.design-sync/previews/` (218 story cells) — none are
 generated. Copy is the product's own, pulled from `dictionary.ts`,
 `copy-library.ts`, `how-it-works.ts` and, for the game, `content/game/*.ts`
 rather than invented, so the cards read as the real product. The game's
@@ -249,7 +261,7 @@ Project `23b9671c-a55b-452e-aa41-39906ee71ba8` ("Tour de Growth"), pinned as
 `projectId` in `config.json`. Last upload (2026-09-11): 182 files, 34
 components, 116 story cells.
 
-**Not uploaded yet:** the DS v3 inputs (70 components, 215 story cells,
+**Not uploaded yet:** the DS v3 inputs (71 components, 218 story cells,
 ~360 files, the night world, `viz`, `game`, the prose family). The bundle
 builds and validates clean from this directory; the upload is Antoine's next
 `/design-sync` run — sessions do not upload.
@@ -388,7 +400,7 @@ contract mismatch — this is what caught an undefined month in `ChartFrame`.
   Executable doesn't exist`); re-run `npx playwright install chromium`.
 - **The grades in `.design-sync/.cache/` are not committed.** What makes
   verification durable is the uploaded `_ds_sync.json`. If that anchor is ever
-  lost or the project is recreated, all 70 components re-verify from scratch —
+  lost or the project is recreated, all 71 components re-verify from scratch —
   which is a few hours of reading sheets, not minutes.
 - **The `--entry ./dist/index.js` trick breaks the day the repo gains a real
   `dist/`.** If a build is ever added, drop the flag and set `cfg.buildCmd`.

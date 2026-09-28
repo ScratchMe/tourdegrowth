@@ -1,6 +1,9 @@
 /* « Et si » cumulated — semantic tokens only (no-primitives.test.ts). The dots
    reuse the peloton's grammar (Peloton.module.css): ink for what is there,
-   hatched for an estimate, the one red for what the what-ifs change. */
+   hatched for an estimate. No red here, as on the what-if slides
+   (deck.module.css): a projected change is neither a diagnosis nor advice
+   (Antoine, 2026-09-28, design audit S-5). What the what-ifs change is told
+   by a mark — a ring, a centre, a strike — never by a colour. */
 .panel {
   display: flex;
   flex-direction: column;
@@ -105,9 +108,12 @@
   white-space: nowrap;
 }
 
-/* A lever under test says so twice: its value in the one red, and a reset beside today's value. */
+/* A lever under test says so twice: its value in bold ink over a solid rule
+   (the slides' « moved » row), and a reset beside today's value. */
 .lever[data-moved="true"] .leverValue {
-  color: var(--text-alert);
+  font-weight: 700;
+  text-decoration: underline solid var(--text-body) 2px;
+  text-underline-offset: 4px;
 }
 
 /* The native range, drawn in the ink the rest of the system uses. Its thumb
@@ -275,18 +281,22 @@
   box-shadow: inset 0 0 0 1.5px var(--viz-axis);
 }
 
+/* What the what-ifs add: an ink ring with an ink centre, told apart from the
+   solid dots already there by its shape. On the hatch when it is estimated. */
 .gained {
-  background: var(--viz-highlight);
+  background: radial-gradient(circle, var(--viz-ink) 0 30%, transparent 32%);
+  box-shadow: inset 0 0 0 2px var(--viz-ink);
 }
 
 .gainedRange {
-  background: var(--viz-unknown-fill);
-  box-shadow: inset 0 0 0 2px var(--viz-highlight);
+  background: radial-gradient(circle, var(--viz-ink) 0 30%, transparent 32%), var(--viz-unknown-fill);
+  box-shadow: inset 0 0 0 2px var(--viz-ink);
 }
 
-/* What today had and the projection loses: an outline in the red, never a gap that reads as nobody. */
+/* What today had and the projection loses: an ink ring struck through, never a gap that reads as nobody. */
 .lost {
-  box-shadow: inset 0 0 0 2px var(--viz-highlight);
+  background: linear-gradient(135deg, transparent 0 42%, var(--viz-ink) 42% 58%, transparent 58%);
+  box-shadow: inset 0 0 0 2px var(--viz-ink);
 }
 
 .empty {
@@ -457,8 +467,9 @@
     box-shadow: inset 0 0 0 1px var(--viz-axis);
   }
 
+  .gained,
   .lost,
   .gainedRange {
-    box-shadow: inset 0 0 0 1.5px var(--viz-highlight);
+    box-shadow: inset 0 0 0 1.5px var(--viz-ink);
   }
 }
