@@ -3,7 +3,9 @@
    hatched for an estimate. No red here, as on the what-if slides
    (deck.module.css): a projected change is neither a diagnosis nor advice
    (Antoine, 2026-09-28, design audit S-5). What the what-ifs change is told
-   by a mark — a ring, a centre, a strike — never by a colour. */
+   by a mark — a ring, a centre, a strike — never by a colour. Neither green:
+   the growth tiles' changes are bold ink (StatTile `sentiment="neutral"`),
+   gains and losses alike, as the slides' « change » column. */
 .panel {
   display: flex;
   flex-direction: column;

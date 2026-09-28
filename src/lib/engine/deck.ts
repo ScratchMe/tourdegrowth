@@ -5,6 +5,7 @@ import { formatComparator } from "./findings";
 import {
   capitalise,
   fillTemplate,
+  approxRounding,
   formatApproxMoneyInterval,
   formatChange,
   formatCountInterval,
@@ -18,6 +19,8 @@ import {
   formatPerHundredCount,
   joinList,
   lowerFirst,
+  pairPrecision,
+  rateRounding,
   roundDisplay,
   roundSignificant,
 } from "./format";
@@ -741,7 +744,8 @@ function buildAnnex(state: EngineState, strings: Words, metrics: ResolvedMetric[
  * gain is read from the same change the table's first row prints.
  */
 
-type Print = (i: Interval) => string;
+/** `extra`: digits finer than the figure's usual rounding, for a today → projected pair (`pairPrecision`); change printers ignore it. */
+type Print = (i: Interval, extra?: number) => string;
 
 /** The growth figures of the table, in the order a leadership meeting reads them, and their row labels. */
 const KPI_ROWS = [
@@ -797,6 +801,8 @@ interface Printers {
   today: Print;
   projected: Print;
   change: Print;
+  /** The figure's own rounding, for `pairPrecision`; absent (months, people), the pair keeps the usual precision. */
+  round?: (v: number, extra: number) => number;
 }
 
 /**
@@ -811,33 +817,35 @@ interface Printers {
 function whatIfPrinters(state: EngineState, strings: Words, ctx: EngineCalcContext) {
   const units = strings.units;
   const currency = state.setup.currency;
-  const approxMoney: Print = (i) => formatApproxMoneyInterval(i, currency, ctx, units);
+  const approxMoney: Print = (i, extra = 0) => formatApproxMoneyInterval(i, currency, ctx, units, extra);
   // A change of money: rounded the same way, without the "~" — « +~6 600 € » glued a sign to a tilde,
   // and the "with" column beside it already says the figures are approximate.
   const roundMoney: Print = (i) => formatApproxMoneyInterval(i, currency, ctx, { ...units, approx: "{n}" });
-  const percent: Print = (i) => formatInterval(i, "percent", ctx, units);
+  const percent: Print = (i, extra = 0) => formatInterval(i, "percent", ctx, units, { extra });
   const points: Print = (i) => {
     const printed = mapBounds(i, (v) => roundDisplay(v));
     return fillTemplate(strings.slide[numbered("whatIfPoints", printed, ctx.locale)], { n: formatInterval(i, "ratio", ctx, units) });
   };
   const months: Print = (i) => formatDurationInterval(i, "months", ctx, units);
   const people: Print = (i) => formatCountInterval(i, ctx, units);
-  const roundPeople: Print = (i) => formatCountInterval(mapBounds(i, (v) => roundSignificant(v, 2)), ctx, units);
-  const approxPeople: Print = (i) => fillTemplate(units.approx, { n: roundPeople(i) });
+  const roundPeople: Print = (i, extra = 0) => formatCountInterval(mapBounds(i, (v) => approxRounding(v, extra)), ctx, units);
+  const approxPeople: Print = (i, extra = 0) => fillTemplate(units.approx, { n: roundPeople(i, extra) });
   const same = (p: Print): Printers => ({ today: p, projected: p, change: p });
 
-  const money: Printers = { today: approxMoney, projected: approxMoney, change: roundMoney };
+  const money: Printers = { today: approxMoney, projected: approxMoney, change: roundMoney, round: approxRounding };
+  const rate: Printers = { today: percent, projected: percent, change: points, round: rateRounding };
   const kpis: Record<(typeof KPI_ROWS)[number][0], Printers> = {
     mrr12: money,
     newMrr: money,
-    nrr: { today: percent, projected: percent, change: points },
-    grr: { today: percent, projected: percent, change: points },
-    cac: { today: (i) => formatInterval(i, "money", ctx, units, { currency }), projected: approxMoney, change: roundMoney },
+    nrr: rate,
+    grr: rate,
+    cac: { today: (i) => formatInterval(i, "money", ctx, units, { currency }), projected: approxMoney, change: roundMoney, round: approxRounding },
     ltv: money,
     payback: same(months),
   };
   const steps: Record<(typeof STEP_ROWS)[number][0], Printers> = {
-    visitors: { today: approxPeople, projected: approxPeople, change: roundPeople },
+    // « ~26 000 → ~26 000 · –490 » when the referred share moves: the visitors are a pair like the money.
+    visitors: { today: approxPeople, projected: approxPeople, change: roundPeople, round: approxRounding },
     signups: same(people),
     activated: same(people),
     d30: same(people),
@@ -865,12 +873,17 @@ function changeRow(
 ): Row {
   if (!today || !projected) return { row, id, label, tone: "unknown", today: "", projected: "", change: "", text: strings.slide.noNumber };
   const change = changeOf(today, projected);
-  const now = print.today(today);
-  if (isStable(change, today)) {
+  const mid = (i: Interval) => (i.lo + i.hi) / 2;
+  const extra = print.round ? pairPrecision(mid(today), mid(projected), print.round) : 0;
+  const now = print.today(today, extra);
+  const after = print.projected(projected, extra);
+  // A change too small to print, even two digits finer, is no change — the tile says none either
+  // (scenario-view.ts). A backstop: no lever of the example reaches it once the pairs carry their
+  // precision (swept 2026-09-28), but « 96 % → 96 % · –0,6 point » told the reader two things at once.
+  if (isStable(change, today) || after === now) {
     const text = fillTemplate(strings.slide.whatIfRowStable, { today: now });
     return { row, id, label, tone: "stable", today: now, projected: now, change: strings.slide.whatIfStable, text };
   }
-  const after = print.projected(projected);
   const moved = formatChange(change, print.change, strings.units);
   return { row, id, label, tone: "moved", today: now, projected: after, change: moved, text: fillTemplate(rowTemplate, { today: now, projected: after, change: moved }) };
 }

@@ -125,6 +125,12 @@
   color: var(--state-bad-text);
 }
 
+/* A projection the reader set up: bold ink, the what-if slides' « moved » (deck.module.css). */
+.delta.neutral {
+  color: var(--text-body);
+  font-weight: 700;
+}
+
 /* --- Meter: a 6px track, the fill anchored left --- */
 
 .track {

@@ -15,8 +15,13 @@ export interface StatTileDelta {
    * that goes down is good, a revenue that goes down is bad, and only the
    * caller knows which. `flat` is never colored — nothing changed, so
    * nothing is good or bad. Absent: muted.
+   *
+   * `neutral`: a change that is the news but nobody's verdict — a projection
+   * the reader set up themselves (the engine's « Et si »). Bold ink, neither
+   * green nor red, as the what-if slides print their « change » column: the
+   * sign and the word say which way (Antoine, 2026-09-28).
    */
-  sentiment?: "good" | "bad";
+  sentiment?: "good" | "bad" | "neutral";
 }
 
 export interface StatTileBar {

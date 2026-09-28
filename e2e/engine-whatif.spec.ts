@@ -175,3 +175,34 @@ test("the growth numbers are read once, from one summary, not from the tiles (au
   await page.getByTestId("whatif-reset-all").click();
   await expect(announce).toContainText(`${W.kpisTitle.en}, ${W.kpiToday.en}: `);
 });
+
+/**
+ * The growth tiles' changes are bold ink, gains and losses alike (Antoine,
+ * 2026-09-28): a what-if the reader set up is nobody's verdict, and the
+ * slides of the same scenario already print their « change » column so. S-5
+ * had taken the red off the levers and the dots; the tiles still went green
+ * and red through StatTile's `sentiment`, which whatif-no-red.test.ts, reading
+ * the panel's own stylesheet, could not see. So this reads the colour the
+ * browser paints, against the tile's own ink.
+ * Non-vacuity: both a « better » and a « worse » are on screen when it reads;
+ * and checked by sabotage on 2026-09-28, a build with the tiles back on
+ * `good`/`bad` fails this test only, on the first delta's green.
+ */
+test("the tiles' changes are bold ink, a loss as much as a gain", async ({ page }) => {
+  await openWith(page, exampleState());
+  await nudge(page, "acq.signup-rate", "ArrowRight", 4);
+  await nudge(page, "ret.logo-churn", "ArrowRight", 6);
+  const deltas = page.getByTestId("whatif-kpis").locator("[data-direction]");
+  await expect(deltas.filter({ hasText: W.worse.en })).not.toHaveCount(0);
+  await expect(deltas.filter({ hasText: W.better.en })).not.toHaveCount(0);
+  const painted = await deltas.evaluateAll((els) =>
+    els.map((el) => {
+      const tile = el.closest('[data-testid^="whatif-kpi-"]')!;
+      return { text: el.textContent, color: getComputedStyle(el).color, ink: getComputedStyle(tile).color, weight: getComputedStyle(el).fontWeight };
+    }),
+  );
+  for (const d of painted) {
+    expect(d.color, d.text ?? "").toBe(d.ink);
+    expect(d.weight, d.text ?? "").toBe("700");
+  }
+});

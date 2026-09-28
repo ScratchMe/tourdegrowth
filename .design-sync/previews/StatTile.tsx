@@ -11,7 +11,12 @@ import { BulletChart, NightSurface, StatTile } from "tour-de-growth";
 
 const row = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12, maxWidth: 720 } as const;
 
-/** Known: the caller's formatted string, a signed delta that also says it in a word, a sub line. */
+/**
+ * Known: the caller's formatted string, a signed delta that also says it in a
+ * word, a sub line. The delta is green or red when it is good or bad news,
+ * muted when flat, and bold ink (`neutral`) when it is a projection — the
+ * fourth tile comes from the growth engine, not the game.
+ */
 export const Known = () => (
   <div style={row}>
     <StatTile
@@ -27,6 +32,13 @@ export const Known = () => (
       sub="March, end of month"
     />
     <StatTile label="Subscribers" value="104,210" delta={{ text: "±0 · flat", direction: "flat" }} sub="March, end of month" />
+    {/* The engine's « Et si »: a projection the reader set up is nobody's verdict — bold ink, gains and losses alike. */}
+    <StatTile
+      label="MRR in 12 months"
+      value="~€107,000"
+      delta={{ text: "+€3,000 · better", direction: "up", sentiment: "neutral" }}
+      sub="today ~€104,000"
+    />
   </div>
 );
 

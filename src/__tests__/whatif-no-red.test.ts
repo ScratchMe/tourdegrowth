@@ -18,6 +18,11 @@ import { describe, expect, it } from "vitest";
  * Non-vacuity, checked by sabotage on 2026-09-28: putting
  * `color: var(--text-alert)` back on the moved lever's value fails the test,
  * naming the token.
+ *
+ * What this cannot see: a colour that comes from a component the panel
+ * renders. The growth tiles' changes were still green and red through
+ * StatTile's `sentiment` — they are ink since the same day, and
+ * e2e/engine-whatif.spec.ts reads the colour the browser paints.
  */
 
 const ROOT = process.cwd();
