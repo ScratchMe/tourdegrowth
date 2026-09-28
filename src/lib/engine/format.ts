@@ -67,11 +67,55 @@ export function roundSignificant(v: number, digits = 2): number {
  * up, two significant digits below — "18 %", "3,2 %", "0,42 %". With
  * `noDecimals` (a cohort under 100 sign-ups, §6.2 "petits effectifs"), an
  * integer at every size: each sign-up weighs more than a point, so a
- * decimal would claim a precision the count doesn't have.
+ * decimal would claim a precision the count doesn't have. `extra` digits
+ * finer is for a today → projected pair only (`pairPrecision`); it never
+ * overrides `noDecimals`.
  */
-export function roundDisplay(v: number, opts: { noDecimals?: boolean } = {}): number {
-  if (opts.noDecimals || Math.abs(v) >= 10) return Math.round(v);
-  return roundSignificant(v, 2);
+export function roundDisplay(v: number, opts: { noDecimals?: boolean; extra?: number } = {}): number {
+  const extra = opts.extra ?? 0;
+  if (opts.noDecimals) return Math.round(v);
+  if (Math.abs(v) >= 10) return extra === 0 ? Math.round(v) : roundSignificant(v, integerDigits(v) + extra);
+  return roundSignificant(v, 2 + extra);
+}
+
+function integerDigits(v: number): number {
+  return Math.floor(Math.log10(Math.abs(v))) + 1;
+}
+
+/** The decimals a rate rounded `extra` digits finer carries, trailing zeros included: « 96,0 % » beside « 95,6 % ». */
+function displayDecimals(v: number, extra: number): number {
+  if (extra === 0 || v === 0 || !Number.isFinite(v)) return 0;
+  return Math.abs(v) >= 10 ? extra : Math.max(0, 2 + extra - integerDigits(v));
+}
+
+/** An approximate figure's rounding — a derived amount (`formatApproxMoney*`), a back-computed volume — `extra` digits finer. */
+export const approxRounding = (v: number, extra = 0): number => roundSignificant(v, 2 + extra);
+
+/** A rate's rounding (`formatPercent`, `formatInterval`), `extra` digits finer. */
+export const rateRounding = (v: number, extra = 0): number => roundDisplay(v, { extra });
+
+/**
+ * A figure printed today and with the what-ifs, side by side: how many
+ * digits finer than its usual rounding BOTH sides need so that the move they
+ * print is the move there is (Antoine, 2026-09-28). At the usual two
+ * significant digits, ~104 000 € → ~107 000 € printed « ~100 000 € →
+ * ~110 000 € » over a change of +3 000 €, and a GRR of 96,2 → 95,6 % printed
+ * « 96 % → 96 % » over −0,6 point. So both sides gain a digit, then a
+ * second, until the printed difference is within half the change of the
+ * change itself. Past `maxExtra` the move is noise at the figure's scale and
+ * the pair prints as is — the tile then shows no change, the slide says
+ * stable. `round` is the figure's own rounding (`approxRounding`,
+ * `rateRounding`), so the finer figure is the same figure at a finer grain.
+ * Only a pair: the same figure alone keeps its usual precision everywhere.
+ */
+export function pairPrecision(today: number, projected: number, round: (v: number, extra: number) => number, maxExtra = 2): number {
+  const change = projected - today;
+  if (change === 0 || !Number.isFinite(change)) return 0;
+  for (let extra = 0; extra < maxExtra; extra += 1) {
+    const printed = round(projected, extra) - round(today, extra);
+    if (Math.abs(printed - change) <= Math.abs(change) / 2) return extra;
+  }
+  return maxExtra;
 }
 
 /** A money amount as the user typed it: kept to the cent. */
@@ -81,9 +125,11 @@ export function roundMoney(v: number): number {
 
 // --- Plain numbers -----------------------------------------------------------
 
-function printNumber(v: number, locale: Locale, maximumFractionDigits = 10): string {
+function printNumber(v: number, locale: Locale, maximumFractionDigits = 10, minimumFractionDigits = 0): string {
   // `+ 0` turns -0 into 0: "-0" is not a number anyone should read.
-  return normalise(new Intl.NumberFormat(intlLocale(locale), { maximumFractionDigits }).format(v + 0));
+  return normalise(
+    new Intl.NumberFormat(intlLocale(locale), { maximumFractionDigits: Math.max(maximumFractionDigits, minimumFractionDigits), minimumFractionDigits }).format(v + 0),
+  );
 }
 
 /** Grouped, at most two decimals: counts and amounts as entered. */
@@ -146,14 +192,17 @@ export function formatInterval(
   unit: "percent" | "money" | "ratio" | "duration" | "text" | "choice",
   ctx: EngineCalcContext,
   words: UnitWords,
-  opts: { currency?: Currency; noDecimals?: boolean } = {},
+  opts: { currency?: Currency; noDecimals?: boolean; extra?: number } = {},
 ): string {
   const { locale } = ctx;
   switch (unit) {
     case "percent": {
-      const lo = printNumber(roundDisplay(i.lo, opts), locale);
-      const hi = printNumber(roundDisplay(i.hi, opts), locale);
-      return range(lo, hi, words) + percentSuffix(locale);
+      const extra = opts.noDecimals ? 0 : (opts.extra ?? 0);
+      const bound = (v: number) => {
+        const rounded = roundDisplay(v, opts);
+        return printNumber(rounded, locale, 10, displayDecimals(rounded, extra));
+      };
+      return range(bound(i.lo), bound(i.hi), words) + percentSuffix(locale);
     }
     case "money": {
       const currency = opts.currency ?? "EUR";
@@ -174,10 +223,14 @@ export function formatCountInterval(i: Interval, ctx: EngineCalcContext, words: 
   return range(printNumber(Math.round(i.lo), ctx.locale), printNumber(Math.round(i.hi), ctx.locale), words);
 }
 
-/** A derived amount range, each bound at two significant digits, one "~" for the whole: "~490 à 740 €". */
-export function formatApproxMoneyInterval(i: Interval, currency: Currency, ctx: EngineCalcContext, words: UnitWords): string {
-  const lo = formatMoney(roundSignificant(i.lo, 2), currency, ctx.locale);
-  const hi = formatMoney(roundSignificant(i.hi, 2), currency, ctx.locale);
+/**
+ * A derived amount range, each bound at two significant digits, one "~" for
+ * the whole: "~490 à 740 €". `extra` digits finer for a today → projected
+ * pair only (`pairPrecision`).
+ */
+export function formatApproxMoneyInterval(i: Interval, currency: Currency, ctx: EngineCalcContext, words: UnitWords, extra = 0): string {
+  const lo = formatMoney(approxRounding(i.lo, extra), currency, ctx.locale);
+  const hi = formatMoney(approxRounding(i.hi, extra), currency, ctx.locale);
   return fillTemplate(words.approx, { n: range(lo, hi, words) });
 }
 

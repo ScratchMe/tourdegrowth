@@ -251,9 +251,11 @@ function Kpi({ kpi, better, worse, todayTemplate }: { kpi: KpiView; better: stri
   if (kpi.projected === null) return <StatTile {...common} value={null} unknownLabel={kpi.unknown} />;
   // « aujourd'hui … » only once it differs: the same figure twice says nothing.
   const sub = kpi.today !== null && kpi.today !== kpi.projected ? fillTemplate(todayTemplate, { value: kpi.today }) : undefined;
+  // Bold ink, neither green nor red, like the slides' « change » column: the sign and the word say
+  // which way, and a projection is no verdict (Antoine, 2026-09-28 — green and red read as one).
   const delta =
     kpi.delta && kpi.direction && kpi.tone
-      ? { text: `${kpi.delta} · ${kpi.tone === "better" ? better : worse}`, direction: kpi.direction, sentiment: kpi.tone === "better" ? ("good" as const) : ("bad" as const) }
+      ? { text: `${kpi.delta} · ${kpi.tone === "better" ? better : worse}`, direction: kpi.direction, sentiment: "neutral" as const }
       : undefined;
   return <StatTile {...common} value={kpi.projected} sub={sub} delta={delta} />;
 }

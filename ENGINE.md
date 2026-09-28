@@ -117,7 +117,10 @@ rapport au bloc précédent et aux §5, §6.7, §8.2 et §9 :
   saisonnalité ni saturation). À partir de deux leviers : ce que chacun
   rapporte seul, et **l'effet composé** (l'ensemble vaut plus que la somme :
   les taux du funnel se multiplient). Tout montant projeté est arrondi à deux
-  chiffres significatifs, jamais au centime. `impact.ts#whatIf` (§6.7) reste
+  chiffres significatifs, jamais au centime — sauf quand l'écart est plus fin
+  que l'arrondi : la paire gagne alors un chiffre (§6.2, 2026-09-28 ; « ~100 000 €
+  → ~110 000 € » pour +3 000 €). Les écarts des tuiles sont à l'encre, en gras,
+  gains comme pertes, comme la colonne « écart » des slides. `impact.ts#whatIf` (§6.7) reste
   la chaîne de la slide `leak` et du diagnostic.
 - **Une slide par « Et si »**, après celle de la fuite, dans l'ordre des
   leviers : les chiffres de croissance et le funnel du mois, aujourd'hui /
@@ -794,6 +797,7 @@ l'export texte.
 | Montant dérivé | 2 chiffres significatifs, préfixe « ~ » | « ~600 € » | "~€600" |
 | Fourchette | bornes formatées séparément ; égales après arrondi ⇒ une seule valeur | « 6 à 9 » | "6–9" |
 | Durée | entier + unité | « 1 à 3 jours » | "1–3 days" |
+| Paire aujourd'hui → avec les « Et si » | les deux côtés gagnent un chiffre, puis un second, tant que leur différence imprimée s'écarte de plus de moitié de l'écart réel (`pairPrecision`) ; au-delà, même texte des deux côtés ⇒ pas d'écart | « ~104 000 € → ~107 000 € », « 96,5 % → 95,9 % » | "~€104,000 → ~€107,000", "96.5% → 95.9%" |
 
 - Français : `Intl.NumberFormat("fr-FR")` puis **U+202F → U+00A0** (Stardos
   Stencil et IBM Plex Mono n'ont pas U+202F — mesuré dans les TTF de `lib/og/fonts`

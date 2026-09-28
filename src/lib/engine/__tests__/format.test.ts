@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  approxRounding,
   capitalise,
   fillTemplate,
   formatApproxMoney,
@@ -18,6 +19,8 @@ import {
   formatRatio,
   joinList,
   lowerFirst,
+  pairPrecision,
+  rateRounding,
   roundDisplay,
 } from "../format";
 import type { Currency } from "../types";
@@ -149,6 +152,57 @@ describe("format — shared rules", () => {
   });
 });
 
+/**
+ * A today → projected pair prints the move it has (Antoine, 2026-09-28). The
+ * figures are the « Et si » example's: sign-up rate 3,2 → 3,6 % and logo
+ * churn 2,5 → 3,1 %, where two significant digits printed « ~100 000 € →
+ * ~110 000 € » over « +3 000 € », and « 96 % → 96 % » over « −0,6 point ».
+ * Non-vacuity, measured: `pairPrecision` returning 0 fails the first two
+ * tests and the screen's and the slide's (scenario-view, deck).
+ */
+describe("pairPrecision — a digit more when the change is finer than the rounding", () => {
+  const mrr12 = { today: 104_487.71, projected: 107_485.64 };
+  const grr = { today: 96.474, projected: 95.874 };
+
+  it("the MRR in 12 months: one digit more, and the pair reads « ~104 000 € → ~107 000 € »", () => {
+    const extra = pairPrecision(mrr12.today, mrr12.projected, approxRounding);
+    expect(extra).toBe(1);
+    expect(formatApproxMoneyInterval({ lo: mrr12.today, hi: mrr12.today }, "EUR", CTX_FR, uF, extra)).toBe(`~104${NBSP}000${NBSP}€`);
+    expect(formatApproxMoneyInterval({ lo: mrr12.projected, hi: mrr12.projected }, "EUR", CTX_FR, uF, extra)).toBe(`~107${NBSP}000${NBSP}€`);
+    // Alone, the figure keeps its usual two digits.
+    expect(formatApproxMoneyInterval({ lo: mrr12.today, hi: mrr12.today }, "EUR", CTX_FR, uF)).toBe(`~100${NBSP}000${NBSP}€`);
+  });
+
+  it("a rate: one decimal, trailing zero included, so a -0,6 point move is no longer « 96 % → 96 % »", () => {
+    const extra = pairPrecision(grr.today, grr.projected, rateRounding);
+    expect(extra).toBe(1);
+    expect(formatInterval({ lo: grr.today, hi: grr.today }, "percent", CTX_FR, uF, { extra })).toBe(`96,5${NBSP}%`);
+    expect(formatInterval({ lo: grr.projected, hi: grr.projected }, "percent", CTX_EN, uE, { extra })).toBe("95.9%");
+    expect(formatInterval({ lo: 96, hi: 96 }, "percent", CTX_FR, uF, { extra: 1 })).toBe(`96,0${NBSP}%`);
+    expect(formatInterval({ lo: 3.246, hi: 3.246 }, "percent", CTX_FR, uF, { extra: 1 })).toBe(`3,25${NBSP}%`);
+    // A small cohort stays whole, finer or not (§6.2 « petits effectifs »).
+    expect(formatInterval({ lo: 96.474, hi: 96.474 }, "percent", CTX_FR, uF, { extra: 1, noDecimals: true })).toBe(`96${NBSP}%`);
+  });
+
+  it("a move that already reads at the usual rounding keeps it", () => {
+    // New MRR 5 040 → 5 753 €: « ~5 000 € → ~5 800 € » is within half the change of it.
+    expect(pairPrecision(5040, 5753, approxRounding)).toBe(0);
+    expect(pairPrecision(18, 24, rateRounding)).toBe(0);
+    expect(pairPrecision(500, 500, approxRounding)).toBe(0);
+  });
+
+  it("noise stops at two digits more: the pair then prints the same, which the callers read as no change", () => {
+    expect(pairPrecision(96.474, 96.4741, rateRounding)).toBe(2);
+    expect(rateRounding(96.474, 2)).toBe(rateRounding(96.4741, 2));
+  });
+
+  it("the finer rounding is the same rounding, half away from zero", () => {
+    expect(roundDisplay(96.45, { extra: 1 })).toBe(96.5);
+    expect(roundDisplay(-96.45, { extra: 1 })).toBe(-96.5);
+    expect(approxRounding(104_500, 1)).toBe(105_000);
+  });
+});
+
 describe("format — the glyph sweep (§10.4)", () => {
   it("no output from 10⁻⁴ to 10⁷, in either language, carries a glyph outside the fonts' whitelist", () => {
     const values: number[] = [];
@@ -165,6 +219,7 @@ describe("format — the glyph sweep (§10.4)", () => {
           formatRatio(v, locale),
           formatApproxNumber(v, locale, u),
           formatInterval({ lo: v, hi: v * 2 + 1 }, "percent", ctx, u),
+          formatInterval({ lo: v, hi: v * 2 + 1 }, "percent", ctx, u, { extra: 2 }),
           formatInterval({ lo: v, hi: Math.abs(v) + 1 }, "ratio", ctx, u),
           formatDuration(Math.abs(v), "days", ctx, u),
           formatDurationInterval({ lo: Math.abs(v), hi: Math.abs(v) * 3 }, "months", ctx, u),
@@ -173,6 +228,7 @@ describe("format — the glyph sweep (§10.4)", () => {
             formatMoney(v, c, locale),
             formatApproxMoney(v, c, locale, u),
             formatInterval({ lo: v, hi: Math.abs(v) }, "money", ctx, u, { currency: c }),
+            formatApproxMoneyInterval({ lo: v, hi: Math.abs(v) }, c, ctx, u, 2),
           ]),
         ];
         for (const o of outputs) bad.push(...offending(o));

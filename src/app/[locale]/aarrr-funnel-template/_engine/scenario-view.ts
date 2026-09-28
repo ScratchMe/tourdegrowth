@@ -1,4 +1,16 @@
-import { fillTemplate, formatApproxMoneyInterval, formatCountInterval, formatDurationInterval, formatInterval, formatMoney, joinList, roundSignificant } from "@/lib/engine/format";
+import {
+  approxRounding,
+  fillTemplate,
+  formatApproxMoneyInterval,
+  formatCountInterval,
+  formatDurationInterval,
+  formatInterval,
+  formatMoney,
+  joinList,
+  pairPrecision,
+  rateRounding,
+  roundSignificant,
+} from "@/lib/engine/format";
 import { unitInputsPhrase } from "@/lib/engine/phrases";
 import { buildScenario, leverAlone, type LeverView, type Scenario, type ScenarioFunnel, type ScenarioKpis } from "@/lib/engine/scenario";
 import type { EngineStrings, ResolvedMetric } from "@/lib/engine/strings";
@@ -158,24 +170,38 @@ export function kpiRows(
     // Every input entered and still no figure (the month's sign-ups missing, say): the plain « inconnu ».
     return absent.length > 0 ? fillTemplate(w.kpiUnknown, { input: unitInputsPhrase(absent, strings, missing.metrics) }) : w.unknownStep;
   };
-  const money = (i: Interval | null) => (i ? formatApproxMoneyInterval(i, currency, ctx, strings.units) : null);
-  const percent = (i: Interval | null) => (i ? formatInterval(i, "percent", ctx, strings.units) : null);
+  // `extra`: the digits a today → projected pair needs so its move reads (`pairPrecision`, 2026-09-28).
+  const money = (i: Interval | null, extra = 0) => (i ? formatApproxMoneyInterval(i, currency, ctx, strings.units, extra) : null);
+  const percent = (i: Interval | null, extra = 0) => (i ? formatInterval(i, "percent", ctx, strings.units, { extra }) : null);
   const months = (i: Interval | null) => (i ? formatDurationInterval(i, "months", ctx, strings.units) : null);
-  const rows: { id: KpiId; label: string; pick: (k: ScenarioKpis) => Interval | null; show: (i: Interval | null) => string | null; delta: (d: number) => string }[] = [
-    { id: "mrr12", label: w.kpiMrr12, pick: (k) => k.mrr12, show: money, delta: (d) => signed(roundedMoney(d, currency, ctx), d) },
-    { id: "newMrr", label: w.kpiNewMrr, pick: (k) => k.newMrr, show: money, delta: (d) => signed(roundedMoney(d, currency, ctx), d) },
-    { id: "nrr", label: w.kpiNrr, pick: (k) => k.nrr, show: percent, delta: (d) => signed(points(Math.abs(d), strings, ctx), d) },
-    { id: "grr", label: w.kpiGrr, pick: (k) => k.grr, show: percent, delta: (d) => signed(points(Math.abs(d), strings, ctx), d) },
-    { id: "cac", label: w.kpiCac, pick: (k) => k.cac, show: money, delta: (d) => signed(roundedMoney(d, currency, ctx), d) },
-    { id: "ltv", label: w.kpiLtv, pick: (k) => k.ltv, show: money, delta: (d) => signed(roundedMoney(d, currency, ctx), d) },
+  type Row = {
+    id: KpiId;
+    label: string;
+    pick: (k: ScenarioKpis) => Interval | null;
+    show: (i: Interval | null, extra?: number) => string | null;
+    /** The figure's own rounding, for `pairPrecision`; none (months) keeps the usual precision. */
+    round?: (v: number, extra: number) => number;
+    delta: (d: number) => string;
+  };
+  const moneyRow = { show: money, round: approxRounding, delta: (d: number) => signed(roundedMoney(d, currency, ctx), d) };
+  const rateRow = { show: percent, round: rateRounding, delta: (d: number) => signed(points(Math.abs(d), strings, ctx), d) };
+  const rows: Row[] = [
+    { id: "mrr12", label: w.kpiMrr12, pick: (k) => k.mrr12, ...moneyRow },
+    { id: "newMrr", label: w.kpiNewMrr, pick: (k) => k.newMrr, ...moneyRow },
+    { id: "nrr", label: w.kpiNrr, pick: (k) => k.nrr, ...rateRow },
+    { id: "grr", label: w.kpiGrr, pick: (k) => k.grr, ...rateRow },
+    { id: "cac", label: w.kpiCac, pick: (k) => k.cac, ...moneyRow },
+    { id: "ltv", label: w.kpiLtv, pick: (k) => k.ltv, ...moneyRow },
     { id: "payback", label: w.kpiPayback, pick: (k) => k.payback, show: months, delta: (d) => signed(months({ lo: Math.abs(d), hi: Math.abs(d) }) ?? "", d) },
   ];
+  const mid = (i: Interval) => (i.lo + i.hi) / 2;
   return rows.map((row) => {
     const today = row.pick(scenario.today.kpis);
     const projected = row.pick(scenario.projected.kpis);
-    const d = today && projected ? (projected.lo + projected.hi) / 2 - (today.lo + today.hi) / 2 : 0;
-    const printedToday = row.show(today);
-    const printedProjected = row.show(projected);
+    const d = today && projected ? mid(projected) - mid(today) : 0;
+    const extra = today && projected && row.round ? pairPrecision(mid(today), mid(projected), row.round) : 0;
+    const printedToday = row.show(today, extra);
+    const printedProjected = row.show(projected, extra);
     // A change too small to print (the same text both sides) is no change.
     const moved = printedToday !== null && printedProjected !== null && printedToday !== printedProjected && d !== 0;
     const better = LOWER_IS_BETTER.includes(row.id) ? d < 0 : d > 0;

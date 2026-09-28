@@ -122,6 +122,55 @@ describe("kpiRows — the growth numbers, better or worse in words", () => {
     expect(ltv.unknown).not.toContain("ARPA"); // entered in the example
   });
 
+  /**
+   * The pair prints the move it has (Antoine, 2026-09-28). At two significant
+   * digits this very scenario read « ~100 000 € » today, « ~110 000 € » with
+   * the what-ifs and « +3 000 € » between them, and the GRR « 96 % » on both
+   * sides with no change, while the slide said −0,6 point.
+   */
+  it("today → with the what-ifs: a digit more when the change is finer than the rounding", () => {
+    const s = scenarioFor(exampleState(), { "acq.signup-rate": 3.6, "ret.logo-churn": 3.1 }, CTX_FR);
+    const byId = Object.fromEntries(kpiRows(s, CTX_FR, FR.strings, "EUR", { state: exampleState(), metrics: FR.metrics }).map((r) => [r.id, r]));
+    expect(byId.mrr12).toMatchObject({ today: "~104\u00a0000\u00a0€", projected: "~107\u00a0000\u00a0€", delta: "+3\u00a0000\u00a0€", tone: "better" });
+    expect(byId.grr).toMatchObject({ today: "96,5\u00a0%", projected: "95,9\u00a0%", tone: "worse" });
+    expect(byId.nrr).toMatchObject({ today: "99,6\u00a0%", projected: "99,0\u00a0%", tone: "worse" });
+    // A move that reads at two digits keeps them.
+    expect(byId.newMrr).toMatchObject({ today: "~5\u00a0000\u00a0€", projected: "~5\u00a0800\u00a0€" });
+  });
+
+  it("every lever, across its range: a change shown is a change the two figures print, of about its size", () => {
+    const example = exampleState();
+    const levers = scenarioFor(example, {}, CTX_EN).levers.filter((l) => l.today);
+    // A range (« ~€70,000–€83,000 ») is read at its middle, as the pair's precision is decided.
+    const value = (text: string) => {
+      const bounds = (text.match(/[0-9][0-9,.]*/g) ?? []).map((n) => Number(n.replace(/,/g, "")));
+      return bounds.reduce((a, b) => a + b, 0) / bounds.length;
+    };
+    const checked: string[] = [];
+    for (const lever of levers) {
+      for (let k = 0; k <= 8; k += 1) {
+        const target = lever.min + ((lever.max - lever.min) * k) / 8;
+        const s = scenarioFor(example, { [lever.id]: target }, CTX_EN);
+        for (const r of kpiRows(s, CTX_EN, EN.strings, "EUR", { state: example, metrics: EN.metrics })) {
+          if (r.today === null || r.projected === null || r.id === "payback") continue;
+          const where = `${lever.id}@${target} ${r.id}: ${r.today} → ${r.projected} (${r.delta})`;
+          if (r.delta === null) {
+            expect(r.projected, where).toBe(r.today);
+            continue;
+          }
+          expect(r.projected, where).not.toBe(r.today);
+          const printed = value(r.projected) - value(r.today);
+          const delta = (r.delta.startsWith("−") ? -1 : 1) * value(r.delta);
+          expect(Math.sign(printed), where).toBe(Math.sign(delta));
+          expect(Math.abs(printed - delta), where).toBeLessThanOrEqual(0.6 * Math.abs(delta));
+          checked.push(where);
+        }
+      }
+    }
+    // Non-vacuity: a sweep that shows no change would pass every line above.
+    expect(checked.length).toBeGreaterThan(100);
+  });
+
   it("a churn that goes up is worse, in points", () => {
     const s = scenarioFor(exampleState(), { "ret.logo-churn": 4 }, CTX_EN);
     const grr = kpiRows(s, CTX_EN, EN.strings, "EUR", { state: exampleState(), metrics: EN.metrics }).find((r) => r.id === "grr")!;

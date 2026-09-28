@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildDeck, deckMarkdown, renderTitle, slideGlyphs } from "../deck";
 import { deriveEngine } from "../derive";
+import { buildScenario } from "../scenario";
 import type { DeckModel, EngineState, SlideId, SlideTitleKey } from "../types";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
 import { EXAMPLE_EXPECTED, emptyState, exampleState, measured, missing, ratio, tourResult, withEntry, withTarget } from "./fixtures";
@@ -449,6 +450,36 @@ describe("the what-if slides (2026-09-26)", () => {
     expect(row(s, "funnelStep", "paying").tone).toBe("moved");
     // Churn didn't move: the retention rates say so, in a word.
     expect(row(s, "kpi", "grr")).toMatchObject({ tone: "stable", change: FR.strings.slide.whatIfStable });
+  });
+
+  /**
+   * The slide and the tile print the same pair (Antoine, 2026-09-28): this
+   * scenario's table read « ~100 000 € | ~110 000 € | +3 000 € » and
+   * « GRR 96 % | 96 % | –0,6 point », while the tile showed no change at all.
+   */
+  it("today → with the what-ifs: a digit more when the change is finer than the rounding, as on the tiles", () => {
+    const s = slide(deck(withWhatIf({ "acq.signup-rate": 3.6, "ret.logo-churn": 3.1 })), "scenario");
+    expect(row(s, "kpi", "mrr12")).toMatchObject({ tone: "moved", today: "~104\u00a0000\u00a0€", projected: "~107\u00a0000\u00a0€" });
+    expect(row(s, "kpi", "grr")).toMatchObject({ tone: "moved", today: "96,5\u00a0%", projected: "95,9\u00a0%" });
+    expect(row(s, "kpi", "newMrr")).toMatchObject({ today: "~5\u00a0000\u00a0€", projected: "~5\u00a0800\u00a0€" });
+  });
+
+  // Every lever across its slider's range. Non-vacuity, measured: without the visitors' `round`,
+  // the referred share printed « ~26 000 | ~26 000 | –490 » and this fails on it.
+  it("a row never says a change between two figures that print the same", () => {
+    const moved: string[] = [];
+    for (const lever of buildScenario(exampleState(), {}, CTX_FR).levers.filter((l) => l.today)) {
+      for (let k = 0; k <= 8; k += 1) {
+        const target = lever.min + ((lever.max - lever.min) * k) / 8;
+        for (const s of deck(withWhatIf({ [lever.id]: target })).slides.filter((x) => x.id.startsWith("whatif:"))) {
+          for (const line of s.lines.filter((l) => l.tone === "moved")) {
+            expect(line.projected, `${lever.id}@${target} ${line.id}: ${line.today} → ${line.change}`).not.toBe(line.today);
+            moved.push(`${lever.id}@${target} ${line.id}`);
+          }
+        }
+      }
+    }
+    expect(moved.length).toBeGreaterThan(100);
   });
 
   it("a figure nobody can compute prints nothing, never 0: the example has no margin, so no LTV", () => {
