@@ -211,7 +211,6 @@ describe("proxy (Vary: Accept-Language on the language redirect, 2026-09-06)", (
 
   it("marks the language redirect of an unprefixed content URL as depending on Accept-Language", async () => {
     const response = await proxy(new NextRequest("https://tourdegrowth.com/", { headers: { "accept-language": "fr" } }));
-    expect(response.status).toBe(308);
     expect(response.headers.get("location")).toBe("https://tourdegrowth.com/fr");
     expect(response.headers.get("vary")).toMatch(/accept-language/i);
   });
@@ -219,6 +218,32 @@ describe("proxy (Vary: Accept-Language on the language redirect, 2026-09-06)", (
   it("marks the legacy content URLs' redirects the same way", async () => {
     for (const path of ["/how-it-works", "/glossary", "/glossary/cac", "/about"]) {
       expect(await vary(path), path).toMatch(/accept-language/i);
+    }
+  });
+
+  /**
+   * SEO lot 5 (2026-09-28): `/` goes to the visitor's language, which
+   * changes — a 307, never kept by a browser, whose cache ignores the cookie
+   * the target follows. The legacy content addresses moved for good and stay
+   * 308, but their target follows the same cookie, so they are not kept
+   * either. A referral survives the 307 like it did the 308.
+   */
+  it("sends / with a 307 that no browser keeps, and the legacy addresses with a 308 that none keeps either", async () => {
+    const root = await proxy(new NextRequest("https://tourdegrowth.com/?ref=abc", { headers: { cookie: "tdg_locale=en", "accept-language": "fr" } }));
+    expect(root.status).toBe(307);
+    expect(root.headers.get("location")).toBe("https://tourdegrowth.com/en?ref=abc");
+    expect(root.headers.get("cache-control")).toBe("no-store");
+    for (const path of ["/how-it-works", "/glossary", "/glossary/cac", "/about", "/privacy"]) {
+      const legacy = await proxy(new NextRequest(`https://tourdegrowth.com${path}`));
+      expect(legacy.status, path).toBe(308);
+      expect(legacy.headers.get("cache-control"), path).toBe("no-store");
+    }
+  });
+
+  it("leaves a prefixed content page's caching alone — it is prerendered for the CDN", async () => {
+    for (const path of ["/en", "/fr/glossary/cac"]) {
+      const response = await proxy(new NextRequest(`https://tourdegrowth.com${path}`));
+      expect(response.headers.get("cache-control"), path).toBeNull();
     }
   });
 

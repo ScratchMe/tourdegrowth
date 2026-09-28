@@ -1,3 +1,4 @@
+import { chromium } from "@playwright/test";
 import { expect, test } from "./helpers";
 
 /**
@@ -284,14 +285,60 @@ test.describe("the page that does not exist", () => {
 });
 
 test("the language redirect says it depends on the browser (Vary: Accept-Language)", async ({ request }) => {
-  // The root redirect lands on /en or /fr depending on the browser.
+  // The root redirect lands on /en or /fr depending on the browser: a 307
+  // since SEO lot 5, never kept by a browser. The legacy addresses keep their 308.
   const root = await request.get("/", { maxRedirects: 0 });
-  expect(root.status()).toBe(308);
+  expect(root.status()).toBe(307);
   expect(root.headers().vary ?? "").toMatch(/accept-language/i);
+  expect(root.headers()["cache-control"]).toBe("no-store");
+  const legacy = await request.get("/glossary/cac", { maxRedirects: 0 });
+  expect(legacy.status()).toBe(308);
+  expect(legacy.headers().vary ?? "").toMatch(/accept-language/i);
   // A prefixed page's language is its URL: no Vary, or the CDN cache would fragment per browser.
   const en = await request.get("/en");
   expect(en.status()).toBe(200);
   expect(en.headers().vary ?? "").not.toMatch(/accept-language/i);
+});
+
+/**
+ * SEO lot 5 (2026-09-28) — the scenario the redirect of `/` broke, played by
+ * a real browser with a real disk cache. A reader whose browser is French
+ * chooses English, then types the site's address again: they must land on
+ * `/en`. With a 308 and no `Cache-Control` (what `next start` sent), Chromium
+ * replayed its cached redirect to `/fr` without asking the server — the
+ * cache is keyed on the URL and `Vary`, never on the cookie — and `/fr` then
+ * rewrote the cookie to French.
+ *
+ * Its own persistent context, NOT the `page` fixture: the fixture routes the
+ * GoatCounter script, and any `route()` disables Chromium's HTTP cache — the
+ * test would pass whatever the redirect said. GoatCounter is kept offline by
+ * resolving its hosts to nowhere instead.
+ *
+ * Non-vacuity (2026-09-28): against the previous proxy (308, no
+ * `Cache-Control`), it failed on the last step — `/fr` instead of `/en`.
+ */
+test("a reader who chose English lands on /en when typing the address again, whatever the browser language", async ({ browserName }, testInfo) => {
+  test.skip(browserName !== "chromium", "the persistent-context API used here is Chromium's");
+  const baseURL = testInfo.project.use.baseURL!;
+  const context = await chromium.launchPersistentContext(testInfo.outputPath("profile"), {
+    locale: "fr-FR",
+    args: ["--host-resolver-rules=MAP *.goatcounter.com 0.0.0.0, MAP gc.zgo.at 0.0.0.0"],
+  });
+  try {
+    const page = context.pages()[0] ?? (await context.newPage());
+    await page.goto(`${baseURL}/`);
+    expect(new URL(page.url()).pathname).toBe("/fr");
+
+    await page.getByRole("group", { name: "Langue" }).getByRole("link", { name: "EN" }).click();
+    await page.waitForURL("**/en");
+
+    await page.goto(`${baseURL}/`);
+    expect(new URL(page.url()).pathname).toBe("/en");
+    const cookie = (await context.cookies()).find((c) => c.name === "tdg_locale");
+    expect(cookie?.value).toBe("en");
+  } finally {
+    await context.close();
+  }
 });
 
 test("a glossary term that was cut keeps its address instead of going 404", async ({ page }) => {
