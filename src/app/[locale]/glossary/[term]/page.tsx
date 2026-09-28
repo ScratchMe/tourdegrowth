@@ -111,7 +111,7 @@ export default async function GlossaryTermPage({ params }: PageProps) {
             for glossary terms. */}
         {comparisons && (
           <ProseSection
-            heading={tc(term === "aarrr" ? t.comparedWithLabel : t.comparedWithAarrrLabel, locale)}
+            heading={tc(term === "aarrr" ? t.comparedWithLabel : t.relatedComparisonLabel, locale)}
             headingStyle="label"
             data-testid="compared-with"
           >

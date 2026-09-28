@@ -312,7 +312,7 @@ test("the language redirect says it depends on the browser (Vary: Accept-Languag
  * Its own persistent context, NOT the `page` fixture: the fixture routes the
  * GoatCounter script, and any `route()` disables Chromium's HTTP cache — the
  * test would pass whatever the redirect said. GoatCounter is kept offline by
- * resolving its hosts to nowhere instead.
+ * making its host lookups fail instead.
  *
  * Non-vacuity (2026-09-28): against the previous proxy (308, no
  * `Cache-Control`), it failed on the last step — `/fr` instead of `/en`.
@@ -322,7 +322,8 @@ test("a reader who chose English lands on /en when typing the address again, wha
   const baseURL = testInfo.project.use.baseURL!;
   const context = await chromium.launchPersistentContext(testInfo.outputPath("profile"), {
     locale: "fr-FR",
-    args: ["--host-resolver-rules=MAP *.goatcounter.com 0.0.0.0, MAP gc.zgo.at 0.0.0.0"],
+    // ~NOTFOUND fails the lookup outright; 0.0.0.0 would mean this machine.
+    args: ["--host-resolver-rules=MAP *.goatcounter.com ~NOTFOUND, MAP gc.zgo.at ~NOTFOUND"],
   });
   try {
     const page = context.pages()[0] ?? (await context.newPage());
