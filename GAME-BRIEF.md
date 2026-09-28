@@ -295,13 +295,13 @@ Textes d'ordre, ajoutés au message avec « Et ce trimestre, … Ce n'est pas un
 
 **Humeur** (`moodNow`) : année finie → `cold` si viré, sinon `firm` ; T1 → `firm` ; objectif du trimestre précédent raté → `angry` ; atteint → `firm` à partir du T3, `calm` avant.
 
-**Visage** (SVG, ids `browL`, `browR`, `mouthShape`, groupe `.eyes`, ellipse `.skin`) :
+**Visage** (SVG, ids `browL`, `browR`, `mouthShape`, groupe `.eyes`, tracé `.skin`) — redessiné le 2026-09-28 (cou, col ouvert, veston, lunettes, tempes grises, lumière de l'écran, bureau flou), ajusté à la table ci-dessous, qui n'a pas bougé :
 
 | Humeur | Sourcils gauche / droit | Bouche | Autres |
 |---|---|---|---|
 | calm | M140 55 L154 52 / M166 52 L180 55 | M151 84 Q160 86 169 84 | clignement toutes les 4,5 s |
 | firm | M140 54 L154 54 / M166 54 L180 54 | M151 84 L169 84 | yeux à 88 % |
-| angry | M139 49 L155 57 / M165 57 L181 49 | M151 86 Q160 81 169 86 | yeux à 72 %, plus de clignement, teint #D48A6E, halo rouge intérieur sur le cadre, liseré rouge sur les sous-titres, point « live » plus rapide |
+| angry | M139 49 L155 57 / M165 57 L181 49 | M151 86 Q160 81 169 86 | yeux à 72 %, plus de clignement, joues rougies et pli entre les sourcils (depuis le 2026-09-28 ; avant : teint #D48A6E sur tout le visage), halo rouge intérieur sur le cadre, liseré rouge sur les sous-titres, point « live » plus rapide |
 | cold | M140 56 L154 56 / M166 56 L180 56 | M151 85 Q160 83 169 85 | cadre en gris, visio « terminé » |
 
 Pendant que le texte s'écrit ou que la voix parle, la bouche s'anime (`scaleY` 1 → 3,2, 220 ms, alterné). Sous-titres : 2 caractères toutes les 28 ms, 18 ms en colère ; texte complet d'emblée si `prefers-reduced-motion` ou si la visio est déjà raccrochée.
