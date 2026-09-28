@@ -82,14 +82,14 @@ const PAIRS: Pair[] = [
   // --- The face: strokes against the skin ---
   { fg: "dg-skin", bg: "dg-wall", stated: 6.15, role: "mark", why: "the face against the call's wall" },
   { fg: "dg-hair", bg: "dg-skin", stated: 5.5, role: "mark", why: "hair and brows — the expression" },
-  { fg: "dg-hair", bg: "dg-skin-angry", stated: 4.99, role: "mark", why: "brows, angry" },
   { fg: "dg-eye", bg: "dg-skin", stated: 6.91, role: "mark", why: "eyes" },
-  { fg: "dg-eye", bg: "dg-skin-angry", stated: 6.28, role: "mark", why: "eyes, angry" },
   { fg: "dg-mouth", bg: "dg-skin", stated: 3.74, role: "mark", why: "the mouth" },
-  { fg: "dg-mouth", bg: "dg-skin-angry", stated: 3.4, role: "mark", why: "the mouth, angry" },
   { fg: "#7a4a3a", bg: "dg-skin", stated: 2.94, role: "under", bar: 3, why: "the prototype's mouth, under 3:1" },
-  { fg: "#7a4a3a", bg: "dg-skin-angry", stated: 2.67, role: "under", bar: 3, why: "…and worse angry" },
-  { fg: "dg-suit", bg: "dg-wall", stated: 1.51, role: "decorative", why: "the suit is a silhouette" },
+  // Redrawn 2026-09-28: angry colours the cheeks, no longer the whole face, so the strokes
+  // keep the skin above; the worst case is now the shaded side of the face.
+  { fg: "dg-hair", bg: "dg-skin-shade", stated: 3.67, role: "mark", why: "the right brow's end over the turned cheek" },
+  { fg: "dg-eye", bg: "dg-skin-shade", stated: 4.61, role: "mark", why: "the glasses' rim over the turned cheek" },
+  { fg: "dg-suit", bg: "dg-wall", stated: 1.14, role: "decorative", why: "the jacket is a shape against the office" },
 
   // --- The call's chrome ---
   { fg: "text-body", bg: "visio-scrim", over: "dg-wall", stated: 17.2, role: "text", why: "subtitles on the band" },
@@ -135,7 +135,19 @@ const PAIRS: Pair[] = [
 /** Color tokens of game.css with no ratio of their own, and why. */
 const UNMEASURED: Record<string, string> = {
   "dg-shirt": "a collar, read against the suit it sits in: shape, not signal",
-  "dg-tie": "a quiet echo of the brand, decorative",
+  "dg-shirt-shade": "the collar's shaded side",
+  "dg-skin-light": "the lit forehead, a shade",
+  "dg-flush": "angry cheeks, decorative: the brows and the words carry the mood",
+  "dg-hair-grey": "the temples",
+  "dg-lens": "a faint lens, decorative",
+  "dg-glint": "one glint on the glasses, decorative",
+  "dg-suit-shade": "the jacket's shaded side",
+  "dg-suit-light": "the lit lapel",
+  "dg-wall-deep": "backdrop",
+  "dg-window": "backdrop, out of focus",
+  "dg-city": "backdrop, out of focus",
+  "dg-plant": "backdrop, out of focus",
+  "dg-vignette": "the webcam's falloff, decorative",
   "dg-shelf-1": "backdrop",
   "dg-shelf-2": "backdrop",
   "dg-shelf-3": "backdrop",

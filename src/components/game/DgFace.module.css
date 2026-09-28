@@ -25,8 +25,20 @@
   fill: var(--dg-wall);
 }
 
-.shelfBack,
-.desk {
+.wallLow {
+  fill: var(--dg-wall-deep);
+}
+
+.window {
+  fill: var(--dg-window);
+}
+
+.city {
+  fill: var(--dg-city);
+  opacity: 0.7;
+}
+
+.shelfBack {
   fill: var(--dg-shelf-3);
 }
 
@@ -38,39 +50,120 @@
   fill: var(--dg-shelf-2);
 }
 
+.plant {
+  fill: var(--dg-plant);
+}
+
+.vignetteClear {
+  stop-color: var(--dg-vignette);
+  stop-opacity: 0;
+}
+
+.vignetteDark {
+  stop-color: var(--dg-vignette);
+  stop-opacity: 0.45;
+}
+
 .suit {
   fill: var(--dg-suit);
+}
+
+.suitShade {
+  fill: var(--dg-suit-shade);
+}
+
+.suitLight {
+  fill: var(--dg-suit-light);
 }
 
 .shirt {
   fill: var(--dg-shirt);
 }
 
-.tie {
-  fill: var(--dg-tie);
+.shirtShade {
+  fill: var(--dg-shirt-shade);
 }
 
 .skin {
   fill: var(--dg-skin);
-  transition: fill var(--dur-stamp) var(--ease-out);
 }
 
-.face[data-mood="angry"] .skin {
-  fill: var(--dg-skin-angry);
+.skinShade {
+  fill: var(--dg-skin-shade);
+}
+
+/* The cheek turning away from the screen: the shade, softened over the skin. */
+.skinTurn {
+  fill: var(--dg-skin-shade);
+  fill-opacity: 0.75;
+}
+
+.skinLight {
+  fill: var(--dg-skin-light);
+  fill-opacity: 0.6;
+}
+
+/*
+ * Angry, the cheeks colour and a crease sets between the brows — the face
+ * no longer turns salmon as a whole (the first drawing's tint read as a
+ * rendering fault more than as anger).
+ */
+.flush {
+  fill: var(--dg-flush);
+  opacity: 0;
+  transition: opacity var(--dur-stamp) var(--ease-out);
+}
+
+.crease {
+  fill: none;
+  stroke: var(--dg-skin-shade);
+  stroke-width: 1.2;
+  opacity: 0;
+  transition: opacity var(--dur-stamp) var(--ease-out);
+}
+
+.face[data-mood="angry"] .flush,
+.face[data-mood="angry"] .crease {
+  opacity: 1;
+}
+
+.nose {
+  fill: none;
+  stroke: var(--dg-skin-shade);
+  stroke-width: 1.6;
+  stroke-linecap: round;
 }
 
 .hair {
   fill: var(--dg-hair);
 }
 
-/* The sides sit a shade back from the crown, as in the prototype. */
-.hairSide {
-  fill: var(--dg-hair);
-  fill-opacity: 0.8;
+.hairGrey {
+  fill: var(--dg-hair-grey);
 }
 
 .eye {
   fill: var(--dg-eye);
+}
+
+/* Glasses: the rims in the eyes' ink, a faint lens, one glint from the screen. */
+.lens {
+  fill: var(--dg-lens);
+  stroke: var(--dg-eye);
+  stroke-width: 1.7;
+}
+
+.bridge {
+  fill: none;
+  stroke: var(--dg-eye);
+  stroke-width: 1.5;
+}
+
+.glint {
+  fill: none;
+  stroke: var(--dg-glint);
+  stroke-width: 1.2;
+  stroke-linecap: round;
 }
 
 /*
@@ -83,7 +176,7 @@
 .brow {
   fill: none;
   stroke: var(--dg-hair);
-  stroke-width: 2.6;
+  stroke-width: 3;
   stroke-linecap: round;
   transition: d var(--dur-stamp) var(--ease-out);
 }
@@ -91,7 +184,7 @@
 .mouthLine {
   fill: none;
   stroke: var(--dg-mouth);
-  stroke-width: 2.2;
+  stroke-width: 2.4;
   stroke-linecap: round;
   transition: d var(--dur-stamp) var(--ease-out);
 }

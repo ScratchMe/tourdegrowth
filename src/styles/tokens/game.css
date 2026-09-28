@@ -27,16 +27,30 @@
    * carry the expression against the skin (≥ 3:1, WCAG 1.4.11).
    */
   --dg-skin: #c89b7b; /* 6.15 against --dg-wall */
-  --dg-skin-angry: #d48a6e; /* from the prototype */
-  --dg-hair: #3a2a22; /* hair AND brows — the expression: 5.50 / 4.99 on skin / angry skin */
-  --dg-eye: #1b1b1b; /* 6.91 / 6.28 */
-  /* The prototype's #7a4a3a was 2.94 / 2.67 — the mouth, the most expressive
-     stroke, was the one under 3:1. */
-  --dg-mouth: #6a3a2c; /* 3.74 / 3.40 */
+  /* The CEO redrawn (2026-09-28): light from the screen on his left, shade on his right. */
+  --dg-skin-shade: #a97a5c; /* neck, ears, the far cheek, the nose */
+  --dg-skin-light: #dcb08e; /* the lit forehead */
+  /* Angry: the cheeks, not the whole face (the old --dg-skin-angry). */
+  --dg-flush: rgba(210, 64, 44, 0.3);
+  --dg-hair: #3a2a22; /* hair AND brows — the expression: 5.50 on skin */
+  --dg-hair-grey: #8d857a; /* the temples */
+  --dg-eye: #1b1b1b; /* eyes and the glasses' rims: 6.91 */
+  --dg-lens: rgba(255, 255, 255, 0.06);
+  --dg-glint: rgba(255, 255, 255, 0.35);
+  /* The prototype's #7a4a3a was 2.94 — the mouth, the most expressive stroke,
+     was the one under 3:1. */
+  --dg-mouth: #6a3a2c; /* 3.74 */
   --dg-shirt: var(--night-text);
-  --dg-tie: var(--paint-red-deep); /* a quiet echo of the brand */
-  --dg-suit: #4a4034; /* 1.51 against the wall: a silhouette, decorative */
+  --dg-shirt-shade: #cfc6b8;
+  --dg-suit: #2a2f38; /* a charcoal jacket, 1.22 against the wall: shape, decorative */
+  --dg-suit-shade: #1d2128;
+  --dg-suit-light: #3a404b;
   --dg-wall: #2b241b; /* one notch warmer than --night-1 */
+  --dg-wall-deep: #1d1812;
+  --dg-window: #1b2230; /* the city at night behind him */
+  --dg-city: #f0b43c;
+  --dg-plant: #3f5a3a;
+  --dg-vignette: #000000; /* the webcam's falloff, at 45% */
   /* The shelf: light ink, muted amber, rule — no more electric #2E5BFF. */
   --dg-shelf-1: #5b5346;
   --dg-shelf-2: #7a5c26;
