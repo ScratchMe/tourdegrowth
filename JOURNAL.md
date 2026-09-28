@@ -4884,3 +4884,5 @@ Le nº8 est reconstruit par un script qui repart des clés de chaque ancienne ca
 **Piège** : le serveur local des captures meurt quand la session redémarre, et le sous-agent qui capte n'a pas le droit de le relancer. Il faut donc vérifier `curl localhost:3300/fr` avant de relancer une capture.
 
 **Coût d'une vraie mise en œuvre**, d'après la fiche `notes/ib.md` : deux à trois sessions. Il faut des jetons d'espace, deux composants neufs (`StageBand`, `StageProfile`, ce dernier en SVG pur et testable), la borne en CSS seul et le gabarit Satori. La garde de payload devra compter les cinq scores que le profil expose (convention 11).
+
+**Tranché par Antoine le même jour** : le bandeau du Tour est à l'encre, et le rouge ne reste que sur le pictogramme. Le bandeau dit « 1/3 · Plaine », sans le mot « étape », qui reste réservé aux cinq étapes AARRR. Même règle sur l'image de partage.
