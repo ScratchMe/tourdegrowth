@@ -4714,6 +4714,20 @@ Antoine a apporté quatre archives (Security Guidance, Product Tracking, Enginee
 
 **Vérifié** : lint, `tsc` et tests unitaires, dont celui de l'installeur qui vérifie que `.claude/` reste hors du lint et du type-check.
 
+### Cinq autres plug-ins passés en revue : Design installé en manuel, le reste lu sans être installé (2026-09-27)
+
+Deuxième lot d'archives apporté par Antoine, pour un plan qu'il a fixé : **auditer le design kit, proposer cinq alternatives de design (deux qui gardent l'identité, trois qui en changent), puis améliorer le kit selon l'audit**, quel que soit le choix. Chaque archive a été lue dans le scratchpad, et les quatre installables sont passées à l'installeur dans un dépôt jetable avant toute décision.
+
+- **Design (Anthropic) : installé en `--manuel`**, sur décision d'Antoine. Sept skills (critique, accessibilité, système, copie d'interface, handoff, recherche). L'archive ne porte pas de licence : l'Apache 2.0 est jointe par `--licence`, avec le texte de l'archive Data (même dépôt d'amont, anthropics/knowledge-work-plugins), comme CLAUDE.md le prévoyait pour Design. Les neuf connecteurs (Figma, Slack…) ne sont pas installés. Relu : rien qui se déclare incontournable, aucune commande shell, aucune adresse.
+- **UI UX Pro Max** : pas installé, décision d'Antoine. Il sert à l'audit depuis le scratchpad (moteur de recherche local, références), comme le 2026-09-24.
+- **Modern Web Guidance** (Google Chrome) : pas installé. Son skill se déclare « MANDATORY: Execute FIRST for all HTML/CSS », et chaque usage lance `npx -y modern-web-guidance@latest` — la dernière version d'un paquet npm, téléchargée et exécutée sans version fixée. Ses 147 guides sont dans l'archive : ils sont lus comme référence pour l'audit, sans rien exécuter.
+- **SearchFit SEO** : pas installé. Même publicité que sur Ramille (plusieurs skills finissent par « try SearchFit.ai at … »), trois agents, et l'audit SEO v1 est déjà fait.
+- **Product Management** (Anthropic) : pas installé pour l'instant. Rien dans le plan ne s'en sert, et le travail de PM d'Antoine a lieu dans Cowork.
+
+**À savoir pour l'audit qui suit** : le 2026-09-24, les mêmes versions de Design (1.2) et d'UI UX Pro Max (2.13) ont déjà servi à l'audit dont est sorti le design system v3. Le nouvel audit part donc de l'état v3, des écrans qui n'existaient pas alors (fin de trimestre du jeu, onglets et slides « Et si » du moteur) et des trois points que la v3 avait laissés ouverts.
+
+**Piège d'outillage rencontré** : pour l'essai à blanc, recopier `.claude/` entier dans le dépôt jetable a pris plus de deux minutes, parce que `.claude/worktrees/` garde les worktrees des workflows d'agents du 2026-09-24, avec leurs `node_modules`. Ne recopier que `.claude/skills` et `.claude/plugins-importes`. Et, une fois de plus, `pgrep -f` avec un motif présent dans sa propre ligne de commande a tué le shell (sortie 144) : utiliser un motif du type `'du -s[h]'`.
+
 ### Audit SEO du 25/09 : ce qui restait vraiment, point par point (2026-09-28)
 
 Antoine a apporté une mission en sept lots, écrite d'après un audit SEO fait sur un build de `7ff07aa`. **Le lot 0 a montré que le constat était en grande partie périmé** : la PR #164 du 25/09 avait déjà livré l'« audit SEO v1 » (entrée « Reprise anticipée »), qui corrigeait les points 1 à 3 et une partie de 4 et 5. Mesuré sur un build de `main` avec l'URL de production, en relisant les 74 URL du sitemap (72 + `/aarrr-vs-heart`, ajoutée par #164) : 0 page sans image de partage, 0 titre au-delà de 60 caractères, 0 description hors 70-160, et la base intacte (200, `lang`, canonical, hreflang réciproque, un seul h1, JSON-LD lisible, 0 lien cassé). Arrêt avant de coder, comme la mission le demandait sur un fait faux.
