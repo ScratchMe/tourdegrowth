@@ -29,12 +29,29 @@ const TWITTER_IMAGE = /<meta name="twitter:image" content="([^"]*)"/;
 const CANONICAL = /<link rel="canonical" href="([^"]*)"/;
 
 /** Every indexable page, read from the sitemap rather than listed here — a page added tomorrow is covered. */
-async function sitemapPaths(request: import("@playwright/test").APIRequestContext): Promise<string[]> {
+async function sitemapLocs(request: import("@playwright/test").APIRequestContext): Promise<string[]> {
   const xml = await (await request.get("/sitemap.xml")).text();
-  const paths = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]!).pathname);
+  const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]!);
   // Floor: a sitemap that parsed to nothing would make every loop below pass.
-  expect(paths.length).toBeGreaterThan(60);
-  return paths;
+  expect(locs.length).toBeGreaterThan(60);
+  return locs;
+}
+
+async function sitemapPaths(request: import("@playwright/test").APIRequestContext): Promise<string[]> {
+  return (await sitemapLocs(request)).map((loc) => new URL(loc).pathname);
+}
+
+/** An alternates map as one comparable string, whatever order the tags came in. */
+function sameSet(alt: Record<string, string>): string {
+  return JSON.stringify(Object.entries(alt).sort(([a], [b]) => a.localeCompare(b)));
+}
+
+/** `hreflang → href` of every alternate link in the `<head>`. */
+function alternates(html: string): Record<string, string> {
+  const head = html.split("</head>")[0] ?? "";
+  return Object.fromEntries(
+    [...head.matchAll(/<link rel="alternate" hrefLang="([^"]+)" href="([^"]*)"/g)].map((m) => [m[1]!, m[2]!]),
+  );
 }
 
 /**
@@ -102,6 +119,68 @@ test("every sitemap page's title and description fit a search result", async ({ 
     if (title.length === 0 || title.length > SEARCH_TITLE_MAX) off.push(`${path} title (${title.length}): ${title}`);
     if (description.length < SEARCH_DESCRIPTION_MIN || description.length > SEARCH_DESCRIPTION_MAX) {
       off.push(`${path} description (${description.length}): ${description}`);
+    }
+  }
+  expect(off).toEqual([]);
+});
+
+/**
+ * The rest of what a crawler reads, on every sitemap URL at once (SEO lot 2,
+ * 2026-09-28). Each of these held on the day of the audit, but only a few
+ * pages per family were checked: one `<h1>`, a canonical that is the page's
+ * own sitemap address, the en/fr/x-default trio pointing back at itself and
+ * declared identically by the page in the other language, and JSON-LD that
+ * parses. A new page family, or a layout change, is covered the day it ships.
+ *
+ * Non-vacuity (2026-09-28): one sabotage per check in a single build — a
+ * second `<h1>` on About, a canonical dropping its locale on the legal pages,
+ * `x-default` removed from every page, an unparseable block on the glossary
+ * index — and the list below named exactly those pages, each for its own
+ * reason.
+ */
+test("every sitemap page has one h1, a self canonical, reciprocal hreflang and parseable JSON-LD", async ({ request }) => {
+  test.setTimeout(120_000);
+  const locs = await sitemapLocs(request);
+  const pages = new Map<string, { html: string; alternates: Record<string, string> }>();
+  for (const loc of locs) {
+    const html = await (await request.get(new URL(loc).pathname)).text();
+    pages.set(loc, { html, alternates: alternates(html) });
+  }
+
+  const off: string[] = [];
+  for (const [loc, { html, alternates: alt }] of pages) {
+    const path = new URL(loc).pathname;
+    // A length floor before any conclusion (TESTING.md §2.3bis).
+    if (html.length < 2000) {
+      off.push(`${path}: body of ${html.length} bytes`);
+      continue;
+    }
+    const h1 = (html.match(/<h1[\s>]/g) ?? []).length;
+    if (h1 !== 1) off.push(`${path}: ${h1} <h1>`);
+
+    const canonical = attr(html, CANONICAL);
+    if (canonical !== loc) off.push(`${path}: canonical ${canonical}`);
+
+    const locale = path.split("/")[1]!;
+    const other = locale === "en" ? "fr" : "en";
+    if (Object.keys(alt).sort().join(",") !== "en,fr,x-default") {
+      off.push(`${path}: hreflang set ${Object.keys(alt).sort().join(",") || "(none)"}`);
+    } else {
+      if (alt[locale] !== loc) off.push(`${path}: hreflang ${locale} → ${alt[locale]}`);
+      if (alt["x-default"] !== alt.en) off.push(`${path}: x-default → ${alt["x-default"]}`);
+      const twin = pages.get(alt[other]!);
+      if (!twin) off.push(`${path}: its ${other} version ${alt[other]} is not in the sitemap`);
+      else if (sameSet(twin.alternates) !== sameSet(alt)) off.push(`${path}: hreflang not reciprocal with ${alt[other]}`);
+    }
+
+    const blocks = [...html.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/gs)].map((m) => m[1]!);
+    if (blocks.length === 0) off.push(`${path}: no JSON-LD`);
+    for (const block of blocks) {
+      try {
+        JSON.parse(block);
+      } catch {
+        off.push(`${path}: JSON-LD does not parse: ${block.slice(0, 60)}`);
+      }
     }
   }
   expect(off).toEqual([]);
