@@ -25,6 +25,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     "/startup-growth-diagnostic",
     tc(DIAGNOSTIC.metaTitle, resolved),
     tc(DIAGNOSTIC.metaDescription, resolved),
+    { article: articleDates("/startup-growth-diagnostic") },
   );
 }
 

@@ -136,7 +136,9 @@ test("every sitemap page's title and description fit a search result", async ({ 
  * second `<h1>` on About, a canonical dropping its locale on the legal pages,
  * `x-default` removed from every page, an unparseable block on the glossary
  * index — and the list below named exactly those pages, each for its own
- * reason.
+ * reason. The reciprocity branch, hidden there by the missing `x-default`,
+ * was sabotaged on its own in a second build (French `/terms` announcing
+ * `/en/privacy` as its English version): both `/terms` pages were named.
  */
 test("every sitemap page has one h1, a self canonical, reciprocal hreflang and parseable JSON-LD", async ({ request }) => {
   test.setTimeout(120_000);

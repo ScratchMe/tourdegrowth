@@ -27,6 +27,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     "/growth-audit-checklist",
     tc(CHECKLIST.metaTitle, resolved),
     tc(CHECKLIST.metaDescription, resolved),
+    { article: articleDates("/growth-audit-checklist") },
   );
 }
 

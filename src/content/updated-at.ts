@@ -48,7 +48,9 @@ export const CONTENT_PUBLISHED_AT: Record<string, string> = {
   "/aarrr-vs-rarra": "2026-09-14",
   "/aarrr-vs-growth-loops": "2026-09-14",
   "/aarrr-vs-okr": "2026-09-14",
-  "/aarrr-vs-heart": "2026-09-24", // created (audit SEO v1 §3.1)
+  // Written on a branch on the 24th, public on the 25th (#164): a publication
+  // date is when readers could see it (SEO lot 4, 2026-09-28).
+  "/aarrr-vs-heart": "2026-09-25",
 };
 
 /**

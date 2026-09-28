@@ -49,6 +49,9 @@ test("every pillar's glossary page links the framework it belongs to", async ({ 
  * three terms that are the other side of one comparison — and already draw
  * Search Console impressions — link that one (`TERM_COMPARISONS`). Every
  * other term still has no block: the map, not a habit, decides.
+ *
+ * Non-vacuity (2026-09-28): with the page reading the map for AARRR only,
+ * this test failed on the first of the three new terms.
  */
 test("the terms that draw impressions link their comparison pages, in both languages", async ({ page }) => {
   expect(TERM_COMPARISONS.aarrr).toEqual(COMPARISON_ORDER);

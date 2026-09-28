@@ -4,9 +4,17 @@ import { contentAlternates } from "./routes";
 import { OG_SIZE } from "@/lib/og/tokens";
 import { tc, UI_STRINGS } from "./dictionary";
 import type { Translatable } from "./translatable";
+import { ANTOINE_LINKS } from "@/content/antoine-credit";
 
 /** Open Graph wants the territory form; the app only knows the language. */
 const OG_LOCALE: Record<Locale, string> = { en: "en_US", fr: "fr_FR" };
+
+/**
+ * `article:author` of an Article page — SEO lot 4 (2026-09-28). The CV's
+ * address, the same page the JSON-LD `Person` node points at (`personNode`),
+ * so a share preview and a search engine name the same author.
+ */
+const ARTICLE_AUTHOR = `${ANTOINE_LINKS.cv}/`;
 
 /** The share-preview text both helpers below build the same way. */
 function shareText(locale: Locale, url: string, title: string, description: string) {
@@ -58,11 +66,26 @@ export function contentMetadata(
   path: string,
   title: string,
   description: string,
-  { ownShareImage = false }: { ownShareImage?: boolean } = {},
+  {
+    ownShareImage = false,
+    article,
+  }: { ownShareImage?: boolean; article?: { published: string; modified: string } } = {},
 ): Metadata {
   const alternates = contentAlternates(locale, path);
   const shared = shareText(locale, alternates.canonical, title, description);
-  if (ownShareImage) return { title, description, alternates, ...shared };
+  // An Article page (the open-door pages and the comparison cluster) says so
+  // to the platforms too, with the same two dates as its JSON-LD and the
+  // sitemap (`content/updated-at.ts#articleDates`) — never a build date.
+  const openGraph = article
+    ? {
+        ...shared.openGraph,
+        type: "article" as const,
+        publishedTime: article.published,
+        modifiedTime: article.modified,
+        authors: [ARTICLE_AUTHOR],
+      }
+    : shared.openGraph;
+  if (ownShareImage) return { title, description, alternates, openGraph, twitter: shared.twitter };
   const images = [
     { url: `/${locale}/opengraph-image/${locale}`, ...OG_SIZE, alt: tc(UI_STRINGS.meta.shareImageAlt, locale), type: "image/png" },
   ];
@@ -70,7 +93,7 @@ export function contentMetadata(
     title,
     description,
     alternates,
-    openGraph: { ...shared.openGraph, images },
+    openGraph: { ...openGraph, images },
     twitter: { ...shared.twitter, images },
   };
 }
