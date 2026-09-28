@@ -1,0 +1,32 @@
+{
+ "fr": {
+  "lang": "fr",
+  "kicker": "DIAGNOSTIC AARRR — 3 MIN",
+  "world": "MONDE 1",
+  "scoreLabel": "SCORE GROWTH GLOBAL",
+  "pv": "PV",
+  "moveLabel": "PROCHAINE ACTION",
+  "quest": "QUÊTE",
+  "stage": "RETENTION · 8/20",
+  "move": "Prends la cohorte de nouveaux utilisateurs d'un mois et compte combien sont encore actifs trente jours plus tard.",
+  "h1a": "Retention",
+  "h1b": " est là où cette croissance cale.",
+  "h2": "Et la tienne ?",
+  "boss": "BOSS"
+ },
+ "en": {
+  "lang": "en",
+  "kicker": "AARRR CHECK-UP — 3 MIN",
+  "world": "WORLD 1",
+  "scoreLabel": "OVERALL GROWTH SCORE",
+  "pv": "HP",
+  "moveLabel": "NEXT MOVE",
+  "quest": "QUEST",
+  "stage": "RETENTION · 8/20",
+  "move": "Take one month's cohort of new users and count how many are still active thirty days later.",
+  "h1a": "Retention",
+  "h1b": " is where this growth stalls.",
+  "h2": "Where does yours?",
+  "boss": "BOSS"
+ }
+}

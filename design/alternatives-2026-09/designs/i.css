@@ -1,0 +1,221 @@
+/* ───────── I · L'existant, en mieux ─────────
+   Same brand, two years later: paper, ink, road red with its three meanings,
+   Stardos / Inter / Plex Mono, hard edges. Bolder scale, more air, a sticky
+   glass header, pills, grain — and three bibs that tell the spaces apart. */
+
+html[data-alt="i"] {
+  --paper-0: #fcfaf4;
+  --paper-1: #ebe5d7;
+  --paper-2: #e1d9c6;
+  --paper-3: #d3cab5;
+  --ink-0: #1d1812;
+  --ink-1: #564e41;          /* 7.0:1 on paper-0 */
+  --radius-tag: 999px;
+  --radius-button: 12px;
+  --radius-panel: 14px;
+  --radius-card: 18px;
+  --shadow-card: 6px 6px 0 var(--shadow-color);
+  --shadow-panel: 4px 4px 0 var(--shadow-color);
+  --shadow-hover: 3px 3px 0 var(--shadow-color);
+  --display-hero: 700 clamp(44px, 6.1vw, 80px)/0.92 var(--font-display);
+  --display-hero-mobile: 700 50px/0.92 var(--font-display);
+  --display-section: 700 40px/1 var(--font-display);
+  --meta-tracking: 0.12em;
+  --i-accent: var(--paint-red-deep);
+  --i-accent-fill: var(--paint-red);
+  --i-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .12  0 0 0 0 .1  0 0 0 0 .07  0 0 0 .09 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+html[data-alt="i"][data-space="moteur"] { --i-accent: #1f5f8b; --i-accent-fill: #1f5f8b; }  /* 6.9:1 on paper-0 */
+html[data-alt="i"][data-space="jeu"] { --i-accent: #8a5a00; --i-accent-fill: #f0b43c; }
+
+/* Ground: paper with grain; the engine's ground is graph paper. */
+html[data-alt="i"] body {
+  background-color: var(--surface-page);
+  background-image: var(--i-grain), radial-gradient(1200px 700px at 12% -10%, rgba(255,255,255,.7), transparent 60%);
+  background-size: 160px 160px, auto;
+  background-repeat: repeat, no-repeat;
+}
+html[data-alt="i"][data-space="moteur"] body {
+  background-image: var(--i-grain),
+    linear-gradient(rgba(31,95,139,.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(31,95,139,.07) 1px, transparent 1px),
+    radial-gradient(1200px 700px at 12% -10%, rgba(255,255,255,.7), transparent 60%);
+  background-size: 160px 160px, 24px 24px, 24px 24px, auto;
+  background-repeat: repeat, repeat, repeat, no-repeat;
+}
+/* The game's hub opens on a night band: the level's world, at the door. */
+html[data-alt="i"][data-space="jeu"] .ProsePage--intro { position: relative; padding-bottom: 8px; }
+html[data-alt="i"][data-space="jeu"] .ProsePage--intro::before {
+  content: ""; position: absolute; z-index: -1; top: -160px; bottom: -30px; left: calc(50% - 50vw); right: calc(50% - 50vw);
+  background: var(--i-grain) 0 0/160px 160px, radial-gradient(900px 400px at 70% 0%, rgba(240,180,60,.14), transparent 70%), #15110d;
+}
+
+/* ── Header: sticky glass, hairline, space rule ── */
+html[data-alt="i"] .page--header,
+html[data-alt="i"] .ResultView--header,
+html[data-alt="i"] .ContentHeader--header {
+  position: sticky; top: 0; z-index: 20;
+  background: rgba(252,250,244,.74);
+  backdrop-filter: blur(14px) saturate(1.3);
+  border-bottom: 1px solid rgba(29,24,18,.14);
+  box-shadow: inset 0 -3px 0 var(--i-accent-fill);
+  padding: 16px 0;
+}
+html[data-alt="i"][data-space="jeu"] .ContentHeader--header {
+  background: rgba(21,17,13,.82);
+  border-bottom-color: rgba(243,239,228,.14);
+}
+html[data-alt="i"][data-space="jeu"] .ContentHeader--header .Wordmark--wordmark { color: #f3efe4; }
+html[data-alt="i"][data-space="jeu"] .ContentHeader--header [class*="Segmented--"] { filter: invert(1) hue-rotate(180deg); }
+html[data-alt="i"] .i-markrow { display: flex; align-items: center; gap: 14px; }
+
+/* The bib: a race number pinned with two safety pins. */
+html[data-alt="i"] .i-bib {
+  display: inline-flex; align-items: baseline; gap: 8px;
+  padding: 6px 12px 5px;
+  border: 2px solid var(--ink-0); border-radius: 6px;
+  background:
+    radial-gradient(circle at 9px 7px, var(--ink-0) 0 2px, transparent 2.5px),
+    radial-gradient(circle at calc(100% - 9px) 7px, var(--ink-0) 0 2px, transparent 2.5px),
+    var(--paper-0);
+  transform: rotate(-2deg);
+  box-shadow: 2px 2px 0 var(--ink-0);
+  white-space: nowrap;
+}
+html[data-alt="i"] .i-bib-n { font: 700 17px/1 var(--font-mono); color: var(--i-accent); font-variant-numeric: tabular-nums; }
+html[data-alt="i"] .i-bib-l { font: 600 10.5px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-0); }
+html[data-alt="i"] .i-bib[data-space="moteur"] {
+  background:
+    radial-gradient(circle at 9px 7px, var(--ink-0) 0 2px, transparent 2.5px),
+    radial-gradient(circle at calc(100% - 9px) 7px, var(--ink-0) 0 2px, transparent 2.5px),
+    linear-gradient(rgba(31,95,139,.14) 1px, transparent 1px) 0 0/8px 8px,
+    linear-gradient(90deg, rgba(31,95,139,.14) 1px, transparent 1px) 0 0/8px 8px,
+    var(--paper-0);
+  transform: rotate(1.5deg);
+}
+html[data-alt="i"] .i-bib[data-space="jeu"] {
+  background:
+    radial-gradient(circle at 9px 7px, #f3efe4 0 2px, transparent 2.5px),
+    radial-gradient(circle at calc(100% - 9px) 7px, #f3efe4 0 2px, transparent 2.5px),
+    #15110d;
+  border-color: #f0b43c; box-shadow: 2px 2px 0 #f0b43c;
+}
+html[data-alt="i"] .i-bib[data-space="jeu"] .i-bib-n { color: #f0b43c; }      /* 10.1:1 */
+html[data-alt="i"] .i-bib[data-space="jeu"] .i-bib-l { color: #f3efe4; }      /* 16.4:1 */
+
+/* ── Type ── */
+html[data-alt="i"] .page--h1 { letter-spacing: -0.012em; margin-bottom: 26px; }
+html[data-alt="i"] .page--h1Accent { color: var(--paint-red); }
+html[data-alt="i"] .page--subtitle { font: 500 19px/1.55 var(--font-ui); max-width: 480px; }
+html[data-alt="i"] .page--bibTag {
+  border: 2px solid var(--ink-0); border-radius: 8px; background: var(--paper-0);
+  box-shadow: 3px 3px 0 var(--ink-0); color: var(--ink-0); font-weight: 600;
+  transform: rotate(-2deg);
+}
+
+/* ── Buttons & pills ── */
+html[data-alt="i"] .Button--button { border-radius: 12px; }
+html[data-alt="i"] .Button--primary { box-shadow: 4px 4px 0 var(--ink-0); border: 2px solid var(--ink-0); }
+html[data-alt="i"] .Button--lg { padding: 17px 26px; font-size: 17px; white-space: nowrap; }
+html[data-alt="i"] .Segmented--track { border-radius: 999px; overflow: hidden; }
+html[data-alt="i"] .Segmented--option { border-radius: 999px; }
+
+/* ── Landing: hero + preview + the three stages ── */
+html[data-alt="i"] .page--main { padding-top: 72px; }
+html[data-alt="i"] .page--hero { gap: 64px; align-items: center; }
+html[data-alt="i"] .page--previewCard { border-radius: 20px; box-shadow: 8px 8px 0 var(--ink-0); }
+html[data-alt="i"] .i-stages { margin: 88px 0 24px; }
+html[data-alt="i"] .i-kicker {
+  font: 600 12px/1 var(--font-mono); letter-spacing: .16em; text-transform: uppercase; color: var(--ink-1);
+  display: flex; align-items: center; gap: 12px; margin: 0 0 20px;
+}
+html[data-alt="i"] .i-kicker::after { content: ""; flex: 1; border-top: 2px dashed rgba(29,24,18,.25); }
+html[data-alt="i"] .i-stage-grid { display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 18px; }
+html[data-alt="i"] .i-stage {
+  position: relative; padding: 22px 24px 26px; border: 2px solid var(--ink-0); border-radius: 18px;
+  background: var(--paper-0); min-height: 190px; display: flex; flex-direction: column; gap: 10px;
+}
+html[data-alt="i"] .i-stage[data-k="0"] { box-shadow: 6px 6px 0 var(--ink-0); }
+html[data-alt="i"] .i-stage[data-k="1"] {
+  background: linear-gradient(rgba(31,95,139,.1) 1px, transparent 1px) 0 0/14px 14px,
+              linear-gradient(90deg, rgba(31,95,139,.1) 1px, transparent 1px) 0 0/14px 14px, var(--paper-0);
+}
+html[data-alt="i"] .i-stage[data-k="2"] { background: #15110d; border-color: #15110d; color: #f3efe4; }
+html[data-alt="i"] .i-stage header { display: flex; justify-content: space-between; align-items: center; }
+html[data-alt="i"] .i-stage-bib {
+  font: 700 13px/1 var(--font-mono); padding: 6px 10px; border: 2px solid currentColor; border-radius: 6px;
+  color: var(--paint-red-deep); background: var(--paper-0);
+}
+html[data-alt="i"] .i-stage[data-k="1"] .i-stage-bib { color: #1f5f8b; }
+html[data-alt="i"] .i-stage[data-k="2"] .i-stage-bib { color: #f0b43c; background: transparent; }
+html[data-alt="i"] .i-stage-when { font: 600 11px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-1); }
+html[data-alt="i"] .i-stage[data-k="2"] .i-stage-when { color: #c9bfae; }  /* 9.9:1 on night */
+html[data-alt="i"] .i-stage h3 { font: 700 30px/1 var(--font-display); margin: 8px 0 0; }
+html[data-alt="i"] .i-stage p { font: 500 15.5px/1.5 var(--font-ui); margin: 0; color: inherit; opacity: .92; }
+html[data-alt="i"] .page--founder { margin-top: 56px; }
+html[data-alt="i"] .page--founderQuote { font: 600 24px/1.35 var(--font-ui); letter-spacing: -.01em; max-width: 720px; }
+
+/* ── Score, bottleneck, action: the hero trio ── */
+html[data-alt="i"] .Card--card { border-radius: 18px; }
+html[data-alt="i"] .ScoreDisplay--spray { background: none; }
+html[data-alt="i"] .ScoreDisplay--suffix { color: var(--ink-1); }
+html[data-alt="i"] .Bottleneck--label { letter-spacing: .14em; }
+html[data-alt="i"] .PriorityMove--card {
+  border-radius: 16px; border-width: 2px; background: var(--paper-0);
+  box-shadow: 5px 5px 0 var(--paint-red);
+}
+html[data-alt="i"] .PriorityMove--body { font: 600 18px/1.45 var(--font-ui); letter-spacing: -.005em; }
+
+/* Pillar chips: pills with their own meter. */
+html[data-alt="i"] .PillarChip--chip {
+  position: relative; overflow: hidden; border-radius: 12px; border-style: solid; border-width: 2px;
+  background: var(--paper-0); padding-bottom: 16px;
+}
+html[data-alt="i"] .PillarChip--chip::after {
+  content: ""; position: absolute; left: 12px; right: 12px; bottom: 8px; height: 4px; border-radius: 4px;
+  background: linear-gradient(90deg, var(--ink-0) var(--i-pct, 0%), rgba(29,24,18,.14) var(--i-pct, 0%));
+}
+html[data-alt="i"] .PillarChip--weak { background: var(--paint-red-wash); border-color: var(--paint-red); }
+html[data-alt="i"] .PillarChip--weak::after { background: linear-gradient(90deg, var(--paint-red) var(--i-pct, 0%), rgba(210,64,44,.18) var(--i-pct, 0%)); }
+
+/* Insight cards, game entry, share card: softer corners, same ink. */
+html[data-alt="i"] .InsightCard--card { border-radius: 16px; }
+html[data-alt="i"] .GameEntry--card, html[data-alt="i"] .ShareCard--frame { border-radius: 18px; overflow: hidden; }
+html[data-alt="i"] .ResultView--sampleBadge { border-radius: 999px; padding-inline: 16px; }
+
+/* ── Quiz ── */
+html[data-alt="i"] .StageProgress--segment { border-radius: 999px; height: 10px; }
+html[data-alt="i"] .QuestionCard--card { border-radius: 22px; box-shadow: 8px 8px 0 var(--ink-0); padding: 40px 44px; }
+html[data-alt="i"] .QuestionCard--question { font: 700 34px/1.18 var(--font-ui); letter-spacing: -.02em; }
+html[data-alt="i"] .AnswerOption--option {
+  border-radius: 14px; background: var(--paper-0); display: flex; align-items: center; gap: 16px; min-height: 72px;
+}
+html[data-alt="i"] .AnswerOption--option::before {
+  content: ""; flex: none; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--ink-0); background: var(--paper-0);
+}
+
+/* ── Engine & game headings ── */
+html[data-alt="i"] .ProsePage--title, html[data-alt="i"] .page--title { letter-spacing: -.012em; }
+html[data-alt="i"][data-space="jeu"] .ProsePage--title { color: #f3efe4; }
+html[data-alt="i"][data-space="jeu"] .ProsePage--lead { color: #d9d1c2; }  /* 12.4:1 on night */
+html[data-alt="i"][data-space="jeu"] .ProsePage--intro .MetaLabel--label { color: #f0b43c; }  /* 10.1:1 */
+html[data-alt="i"][data-space="jeu"] .page--zoneOpen { box-shadow: 6px 6px 0 #f0b43c, 6px 6px 0 2px var(--ink-0); }
+
+/* ── Footer: a giant wordmark, the godly way ── */
+html[data-alt="i"] .SiteFooter--footer { border-top: 2px solid var(--ink-0); position: relative; overflow: hidden; padding-bottom: 140px; }
+html[data-alt="i"] .SiteFooter--footer::after {
+  content: "TOUR DE GROWTH"; position: absolute; left: 50%; bottom: -34px; transform: translateX(-50%);
+  font: 700 min(9.4vw, 132px)/1 var(--font-display); color: rgba(29,24,18,.07); white-space: nowrap; pointer-events: none;
+}
+
+/* ── Mobile ── */
+@media (max-width: 760px) {
+  html[data-alt="i"] .i-bib { padding: 5px 8px 4px; gap: 6px; }
+  html[data-alt="i"] .i-bib-l { display: none; }
+  html[data-alt="i"] .i-stage-grid { grid-template-columns: 1fr; }
+  html[data-alt="i"] .i-stage { min-height: 0; }
+  html[data-alt="i"] .QuestionCard--card { padding: 24px 22px; }
+  html[data-alt="i"] .QuestionCard--question { font-size: 25px; }
+  html[data-alt="i"] .SiteFooter--footer::after { font-size: 9.4vw; bottom: -6px; }
+  html[data-alt="i"] .SiteFooter--footer { padding-bottom: 70px; }
+}

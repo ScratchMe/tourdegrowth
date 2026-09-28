@@ -4847,3 +4847,19 @@ Le nº8 est reconstruit par un script qui repart des clés de chaque ancienne ca
 **Vérifié** : les deux pages rendues dans Chromium à 1 280 et 390 px, avec `scrollWidth === clientWidth`, aucune carte hors de l'écran et aucune erreur de page. Le payload publié, relu depuis le service, est identique au local (82 et 38 cartes). Ce qui a été regardé à l'écran : la main du nº7 (avant → après), l'écran plein à 390 px, une carte du catalogue et les titres des slides « Et si » du nº8.
 
 **Reste hors de tout bon à tirer** : les deux libellés SEO du 28/09 (`glossaryPage.relatedComparisonLabel`, `applyAarrrLabel`), déjà en ligne.
+
+### Six directions de design, posées sur le vrai site (2026-09-28)
+
+**La demande** : les cinq directions retenues après l'audit du kit (A, B, H, E, F), plus une sixième qu'Antoine a ajoutée : « l'existant, en mieux », moderne, avec un signe distinctif entre les trois espaces. La contrainte vient de sa décision du matin : « un Tour, trois étapes », et chaque direction doit distinguer le Tour, le moteur et le jeu.
+
+**La méthode** : pas de maquettes hors sol. Chaque direction est une surcouche CSS, plus un peu de DOM décoratif, posée sur le **build de production local**. Les pages, la copie et les chiffres sont donc ceux du produit. Un harnais capture sept écrans (accueil FR et EN, question du quiz, résultat FR et EN, moteur, hub du jeu) en 1280 et 390 px. Chaque direction a aussi son image de partage en HTML et sa fiche : contrastes mesurés, polices, risques, coût. I a été faite dans la session ; A, B, H, E et F par cinq sous-agents, sur un brief commun (`design/alternatives-2026-09/BRIEF.md`), relus un par un. La page de comparaison (artifact privé) montre la grille des trois espaces, chaque écran en entier, le mode « face à aujourd'hui » et les fiches.
+
+**Correction d'Antoine en cours de route** : le jeu ne se décrit jamais par son seul niveau jouable (l'appli de streaming), puisque quatre autres niveaux arrivent. Le brief a été corrigé, les sous-agents prévenus, la carte « № 3 » de I réécrite avec les mots du hub. L'encart du jeu sur le résultat garde sa copie : il ne s'affiche que quand la rétention freine et ouvre ce niveau-là, il est donc juste à sa place.
+
+**Pièges** :
+- Une capture pleine page peint un fond `fixed` sur une seule hauteur d'écran, d'où une couture qu'aucun lecteur ne voit. Le harnais passe le fond en `scroll` pour les captures.
+- Pixelify Sans ferme ses C : « CROISSANCE » se lit « OROISSANOE ». F ne l'emploie donc qu'en minuscules, au-dessus de 32 px.
+- Le « 4 » de pochoir a une barre détachée et se lit « 74· ». B pose les chiffres du score en Big Shoulders plein.
+- Aucune des polices Google en sous-ensemble latin n'a le №. Une vraie livraison doit l'embarquer : Plex Mono complet, comme aujourd'hui.
+
+**Archive** : `design/alternatives-2026-09/`. On y trouve les surcouches, leurs sources, les images de partage, les fiches, le brief, le harnais et la page. Les captures sont dans la page publiée, les polices se retéléchargent. Rien de tout ça n'est importé par l'application.

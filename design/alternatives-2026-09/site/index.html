@@ -1,0 +1,183 @@
+<title>Six directions pour le Tour</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: a lightbox — contact sheet of the three spaces on top, one loupe below with its controls pinned. */
+:root {
+  --ground: #efece5; --sheet: #faf8f3; --ink: #1c1a16; --muted: #5d584e; --rule: #d9d3c6; --accent: #b23a26; --focus: #1c1a16;
+  --chip: #e5e0d4; --chip-on: #1c1a16; --chip-on-ink: #faf8f3;
+  --f-ui: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --ground: #141310; --sheet: #1d1b17; --ink: #efebe2; --muted: #b3ab9c; --rule: #37332b; --accent: #e5775f; --focus: #efebe2;
+  --chip: #2a2721; --chip-on: #efebe2; --chip-on-ink: #141310; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --ground: #141310; --sheet: #1d1b17; --ink: #efebe2; --muted: #b3ab9c; --rule: #37332b; --accent: #e5775f; --focus: #efebe2;
+  --chip: #2a2721; --chip-on: #efebe2; --chip-on-ink: #141310; color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--ground); color: var(--ink); font: 500 16px/1.55 var(--f-ui); margin: 0; }
+.wrap { max-width: 1320px; margin: 0 auto; padding-inline: 20px; padding-block: 36px 80px; }
+h1 { font: 800 clamp(34px, 5vw, 58px)/1 var(--f-ui); letter-spacing: -.03em; margin: 0 0 14px; text-wrap: balance }
+.lede { max-width: 68ch; color: var(--muted); margin: 0 0 8px; }
+.eyebrow { font: 600 12px/1 var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+h2 { font: 700 26px/1.15 var(--f-ui); letter-spacing: -.02em; margin: 56px 0 6px; text-wrap: balance }
+.sub { color: var(--muted); margin: 0 0 18px; max-width: 70ch }
+
+/* Contact sheet of the three spaces */
+.sheet { overflow-x: auto; border: 1px solid var(--rule); border-radius: 10px; background: var(--sheet); }
+.sheet table { border-collapse: collapse; min-width: 980px; width: 100%; }
+.sheet th, .sheet td { border-bottom: 1px solid var(--rule); padding: 10px 12px; vertical-align: middle; text-align: left; }
+.sheet thead th { font: 600 12px/1 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.sheet tbody th { width: 190px; font: 700 15px/1.25 var(--f-ui); }
+.sheet tbody th small { display: block; font: 500 12px/1.3 var(--f-mono); color: var(--muted); margin-top: 4px; letter-spacing: .02em }
+.sheet td img { display: block; width: 100%; height: auto; border-radius: 6px; border: 1px solid var(--rule); aspect-ratio: 1280/300; object-fit: cover; object-position: top }
+.sheet tr { cursor: pointer }
+.sheet tr:hover td img { outline: 2px solid var(--ink); outline-offset: 1px }
+
+/* Controls */
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: color-mix(in srgb, var(--ground) 92%, transparent); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--rule); padding-block: 12px; margin-inline: -20px; padding-inline: 20px; display: grid; gap: 10px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.row .eyebrow { min-width: 88px }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 600 13.5px/1 var(--f-ui); padding: 9px 12px; border-radius: 999px; border: 1px solid var(--rule); background: var(--chip); color: var(--ink); cursor: pointer; display: inline-flex; gap: 8px; align-items: center; }
+.chip[aria-pressed="true"] { background: var(--chip-on); color: var(--chip-on-ink); border-color: var(--chip-on); }
+.chip:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px }
+.chip .dot { width: 10px; height: 10px; border-radius: 50%; border: 1px solid currentColor; }
+.chip:disabled { opacity: .45; cursor: not-allowed }
+.fam { font: 600 11px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; opacity: .7 }
+
+/* Loupe */
+.stage { display: grid; gap: 18px; grid-template-columns: 1fr; margin-top: 18px; align-items: start; }
+.stage.pair { grid-template-columns: 1fr 1fr; }
+.frame { background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; padding: 12px; min-width: 0; }
+.frame header { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; margin-bottom: 10px; }
+.frame header strong { font: 700 16px/1.2 var(--f-ui) }
+.frame header span { font: 500 12px/1 var(--f-mono); color: var(--muted) }
+.shot { display: block; margin: 0 auto; max-width: 100%; height: auto; border-radius: 6px; box-shadow: 0 1px 0 var(--rule), 0 10px 30px rgba(0,0,0,.08); }
+.shot.m { width: 390px }
+.missing { padding: 60px 20px; text-align: center; color: var(--muted); font: 500 14px/1.5 var(--f-mono) }
+
+/* Notes */
+.notes { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; max-width: 900px; }
+.notes h2 { margin-top: 36px }
+.notes h3 { font: 700 19px/1.25 var(--f-ui); margin: 26px 0 6px; }
+.notes p, .notes li { max-width: 72ch }
+.notes code { font: 500 13px/1 var(--f-mono); background: var(--chip); padding: 2px 5px; border-radius: 4px }
+.tbl { overflow-x: auto; border: 1px solid var(--rule); border-radius: 8px; background: var(--sheet); margin: 8px 0 }
+.tbl table { border-collapse: collapse; width: 100%; font-size: 14.5px; font-variant-numeric: tabular-nums }
+.tbl th, .tbl td { padding: 8px 12px; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top }
+.tbl th { font: 600 12px/1.3 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted) }
+footer.foot { margin-top: 64px; color: var(--muted); font: 500 13px/1.6 var(--f-mono); }
+@media (max-width: 820px) { .stage.pair { grid-template-columns: 1fr } .row .eyebrow { min-width: 0; width: 100% } .bar { position: static; backdrop-filter: none } }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important } }
+</style>
+
+<div class="wrap">
+  <p class="eyebrow">Tour de Growth · design · 28 septembre 2026</p>
+  <h1>Six directions pour le Tour</h1>
+  <p class="lede">Chaque direction est posée sur le vrai site, le même build de production, avec les mêmes données d'exemple. Seuls le style et quelques éléments décoratifs changent : la copie, les chiffres et la structure sont ceux du produit. Trois directions gardent l'identité (I, A et B), trois en changent (H, E et F).</p>
+  <p class="lede">Ta décision du jour : <strong>un Tour, trois étapes</strong>. Chaque direction propose donc un signe qui distingue les trois espaces : le Tour, le moteur et le jeu. La première grille les montre côte à côte.</p>
+
+  <h2>Les trois espaces, en tête de page</h2>
+  <p class="sub">Le haut de l'accueil, du moteur et du hub du jeu, sur ordinateur. Clique une ligne pour l'ouvrir en grand plus bas.</p>
+  <div class="sheet"><table id="sheet"><thead><tr><th>Direction</th><th>1 · le Tour</th><th>2 · le moteur</th><th>3 · le jeu</th></tr></thead><tbody></tbody></table></div>
+
+  <h2 id="loupe">À la loupe</h2>
+  <p class="sub">Chaque écran en entier. « Face à aujourd'hui » met la direction à côté du site en production.</p>
+  <div class="bar" role="group" aria-label="Réglages de la loupe">
+    <div class="row"><span class="eyebrow">Direction</span><div class="chips" id="c-design"></div></div>
+    <div class="row"><span class="eyebrow">Écran</span><div class="chips" id="c-screen"></div></div>
+    <div class="row"><span class="eyebrow">Affichage</span><div class="chips" id="c-view"></div></div>
+  </div>
+  <div class="stage" id="stage"></div>
+
+  <section class="notes" id="notes"></section>
+
+  <footer class="foot">Captures : build de production local, Chromium, 1280 px et 390 px, mouvement réduit. Les images de partage sont des maquettes HTML en 1200 × 630, sauf celle d'aujourd'hui, qui sort du produit.</footer>
+</div>
+
+<script src="data.js"></script>
+<script>
+(() => {
+  const D = [
+    { id: "current", name: "Aujourd'hui", fam: "en production", dot: "#d2402c" },
+    { id: "i", name: "I · L'existant, en mieux", fam: "garde l'identité", dot: "#d2402c" },
+    { id: "a", name: "A · Jour de course", fam: "garde l'identité", dot: "#ffd21a" },
+    { id: "b", name: "B · Affiche et carnet de route", fam: "garde l'identité", dot: "#1d3f8f" },
+    { id: "h", name: "H · Heure bleue", fam: "change d'identité", dot: "#dff21b" },
+    { id: "e", name: "E · Le Journal du growth", fam: "change d'identité", dot: "#8e1b3a" },
+    { id: "f", name: "F · L'arcade du côté obscur", fam: "change d'identité", dot: "#ff3e9a" },
+  ].filter((d) => window.DATA.designs[d.id]);
+  const SCREENS = [
+    { id: "landing", name: "Accueil", langs: true },
+    { id: "quiz", name: "Question du quiz" },
+    { id: "result", name: "Résultat", langs: true },
+    { id: "engine", name: "Moteur" },
+    { id: "game", name: "Jeu" },
+    { id: "share", name: "Image de partage", langs: true, fixed: true },
+  ];
+  const state = { d: D.find((d) => d.id === (location.hash.slice(1) || "i"))?.id ?? D[1]?.id ?? "current", s: "result", vp: window.innerWidth < 700 ? "m" : "d", lang: "fr", pair: false };
+  try { const saved = JSON.parse(localStorage.getItem("six-dir") || "{}"); Object.assign(state, saved, location.hash ? { d: state.d } : {}); } catch {}
+  const save = () => { try { localStorage.setItem("six-dir", JSON.stringify(state)); } catch {} };
+
+  const file = (d, s) => {
+    if (s.fixed) return `${s.id}-${state.lang}`;
+    const key = s.langs && state.lang === "en" ? `${s.id}-en` : s.id;
+    return `${key}-${state.vp}`;
+  };
+  const chip = (label, on, fn, opts = {}) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "chip"; b.setAttribute("aria-pressed", String(on));
+    if (opts.dot) b.innerHTML = `<span class="dot" style="background:${opts.dot}"></span>`;
+    b.append(label);
+    if (opts.fam) { const f = document.createElement("span"); f.className = "fam"; f.textContent = opts.fam; b.append(f); }
+    if (opts.disabled) b.disabled = true;
+    b.addEventListener("click", fn);
+    return b;
+  };
+  function frame(did) {
+    const d = D.find((x) => x.id === did); const s = SCREENS.find((x) => x.id === state.s);
+    const name = file(did, s); const meta = window.DATA.designs[did]?.shots?.[name];
+    const el = document.createElement("article"); el.className = "frame";
+    const langNote = s.langs ? state.lang.toUpperCase() : "FR";
+    el.innerHTML = `<header><strong>${d.name}</strong><span>${s.name} · ${s.fixed ? "1200 × 630" : state.vp === "d" ? "1280 px" : "390 px"} · ${langNote}</span></header>`;
+    if (!meta) { el.insertAdjacentHTML("beforeend", `<div class="missing">Pas encore de capture pour cet écran.</div>`); return el; }
+    const img = new Image(); img.src = `img/${did}/${name}.webp`; img.width = meta.w; img.height = meta.h; img.loading = "lazy";
+    img.alt = `${d.name}, ${s.name}`; img.className = "shot" + (state.vp === "m" && !s.fixed ? " m" : "");
+    el.append(img); return el;
+  }
+  function render() {
+    const cd = document.getElementById("c-design"); cd.replaceChildren(...D.map((d) => chip(d.name, d.id === state.d, () => { state.d = d.id; history.replaceState(null, "", "#" + d.id); render(); }, { dot: d.dot })));
+    const cs = document.getElementById("c-screen"); cs.replaceChildren(...SCREENS.map((s) => chip(s.name, s.id === state.s, () => { state.s = s.id; render(); })));
+    const s = SCREENS.find((x) => x.id === state.s);
+    const cv = document.getElementById("c-view");
+    cv.replaceChildren(
+      chip("Ordinateur", state.vp === "d", () => { state.vp = "d"; render(); }, { disabled: s.fixed }),
+      chip("Mobile", state.vp === "m", () => { state.vp = "m"; render(); }, { disabled: s.fixed }),
+      chip("FR", state.lang === "fr", () => { state.lang = "fr"; render(); }, { disabled: !s.langs }),
+      chip("EN", state.lang === "en", () => { state.lang = "en"; render(); }, { disabled: !s.langs }),
+      chip("Face à aujourd'hui", state.pair, () => { state.pair = !state.pair; render(); }, { disabled: state.d === "current" }),
+    );
+    const stage = document.getElementById("stage");
+    const pair = state.pair && state.d !== "current";
+    stage.className = "stage" + (pair ? " pair" : "");
+    stage.replaceChildren(...(pair ? [frame("current"), frame(state.d)] : [frame(state.d)]));
+    const n = document.getElementById("notes");
+    const d = D.find((x) => x.id === state.d);
+    n.innerHTML = state.d === "current" ? "" : `<h2>${d.name}</h2>` + (window.DATA.designs[state.d].notes || "<p>Fiche à venir.</p>");
+    save();
+  }
+  const tb = document.querySelector("#sheet tbody");
+  for (const d of D) {
+    const tr = document.createElement("tr"); tr.tabIndex = 0;
+    tr.innerHTML = `<th>${d.name}<small>${d.fam}</small></th>` + ["landing", "engine", "game"].map((s) => `<td><img loading="lazy" src="img/${d.id}/head-${s}.webp" alt="${d.name}, en-tête ${s === "landing" ? "du Tour" : s === "engine" ? "du moteur" : "du jeu"}" width="1280" height="300"></td>`).join("");
+    const open = () => { state.d = d.id; history.replaceState(null, "", "#" + d.id); render(); document.getElementById("loupe").scrollIntoView({ behavior: "smooth" }); };
+    tr.addEventListener("click", open); tr.addEventListener("keydown", (e) => { if (e.key === "Enter") open(); });
+    tb.append(tr);
+  }
+  render();
+})();
+</script>
