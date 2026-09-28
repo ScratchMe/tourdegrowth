@@ -46,10 +46,10 @@ describe("the engine's copy counts what the catalogue holds", () => {
     // Today: three for four stages, five for revenue. If that changes, this
     // test says which sentence to rewrite.
     expect(perStage).toEqual({ acquisition: 3, activation: 3, retention: 3, referral: 3, revenue: 5 });
-    expect(ENGINE_COPY.page.promise.fr).toContain(`trois par étape et ${word(5, "fr")} pour les revenus`);
-    expect(ENGINE_COPY.page.promise.en).toContain(`three per stage and ${word(5, "en")} for revenue`);
-    expect(ENGINE_COPY.page.catalogueIntro.fr).toContain(`${word(5, "fr")} pour les revenus`);
-    expect(ENGINE_COPY.page.catalogueIntro.en).toContain(`${word(5, "en")} for revenue`);
+    expect(ENGINE_COPY.page.promise.fr).toContain(`trois par étape et ${word(5, "fr")} pour Revenue`);
+    expect(ENGINE_COPY.page.promise.en).toContain(`three per stage and ${word(5, "en")} for Revenue`);
+    expect(ENGINE_COPY.page.catalogueIntro.fr).toContain(`${word(5, "fr")} pour Revenue`);
+    expect(ENGINE_COPY.page.catalogueIntro.en).toContain(`${word(5, "en")} for Revenue`);
   });
 
   it("the computed block's title counts the computed figures", () => {

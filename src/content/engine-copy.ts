@@ -86,8 +86,8 @@ export const ENGINE_COPY = {
     // TODO: à relire — réécrit le 2026-09-28 (audit du design kit) : le moteur collecte dix-sept
     // chiffres depuis le 2026-09-26 (expansion et rétrogradation), la page disait encore quinze.
     promise: {
-      fr: "Dix-sept chiffres, trois par étape et cinq pour les revenus : va les chercher, vois où ton moteur perd du monde et repars avec des slides prêtes pour ton CODIR. Tes chiffres ne sont comparés qu'à toi-même et à ta propre cible, sauf deux repères publiés que la page nomme.",
-      en: "Seventeen numbers, three per stage and five for revenue: go and get them, see where your engine loses people, and leave with slides ready for your leadership meeting. Your numbers are only compared with yourself and your own target, apart from two published references the page names.",
+      fr: "Dix-sept chiffres, trois par étape et cinq pour Revenue : va les chercher, vois où ton moteur perd du monde et repars avec des slides prêtes pour ton CODIR. Tes chiffres ne sont comparés qu'à toi-même et à ta propre cible, sauf deux repères publiés que la page nomme.",
+      en: "Seventeen numbers, three per stage and five for Revenue: go and get them, see where your engine loses people, and leave with slides ready for your leadership meeting. Your numbers are only compared with yourself and your own target, apart from two published references the page names.",
     },
     privacyTitle: { fr: "Rien de ce que tu saisis ne sort d'ici", en: "Nothing you enter leaves this page" },
     privacyBody: {
@@ -129,10 +129,10 @@ export const ENGINE_COPY = {
       en: "Open the seventeen cards: formula, where to find it, trap",
     },
     catalogueTitle: { fr: "Les dix-sept chiffres", en: "The seventeen numbers" },
-    // TODO: à relire — réécrit le 2026-09-28 : « trois par étape » ne valait plus pour les revenus (cinq).
+    // TODO: à relire — réécrit le 2026-09-28 : « trois par étape » ne valait plus pour Revenue (cinq).
     catalogueIntro: {
-      fr: "Trois par étape, comme les trois questions du Tour, et cinq pour les revenus, qui portent aussi les mouvements du MRR. Pour chacun : sa formule, où le trouver, et le piège à connaître avant de le citer.",
-      en: "Three per stage, like the Tour's three questions, and five for revenue, which also carries the MRR movements. For each: its formula, where to find it, and the trap to know before quoting it.",
+      fr: "Trois par étape, comme les trois questions du Tour, et cinq pour Revenue, qui porte aussi les mouvements du MRR. Pour chacun : sa formule, où le trouver, et le piège à connaître avant de le citer.",
+      en: "Three per stage, like the Tour's three questions, and five for Revenue, which also carries the MRR movements. For each: its formula, where to find it, and the trap to know before quoting it.",
     },
     // TODO: à relire — réécrit le 2026-09-28 : la page en liste cinq depuis que NRR et GRR ont rejoint les trois.
     catalogueComputedTitle: { fr: "Et cinq chiffres calculés", en: "And five computed numbers" },
@@ -769,8 +769,8 @@ export const ENGINE_COPY = {
     better: { fr: "mieux", en: "better" },
     worse: { fr: "moins bien", en: "worse" },
     /**
-     * TODO: à relire — nouveau (2026-09-28, audit du design kit S-4). What a
-     * screen reader hears once a slider settles, and only then: the growth
+     * TODO: à relire — nouveau (2026-09-28, audit du design kit S-4) : les trois
+     * clés announce, announceFigure et announceChanged. What a screen reader hears once a slider settles, and only then: the growth
      * numbers that moved, read once — never the seven tiles at every step.
      * `{sense}` is `better` or `worse` above.
      */

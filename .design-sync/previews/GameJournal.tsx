@@ -19,7 +19,7 @@ export const TwoQuarters = () => (
         {
           q: 1,
           period: "Quarter 1 · January to March",
-          result: { text: "5.7% · missed by 0.1 pt", tone: "bad" },
+          result: { text: "5.7% · missed by 0.1 pts", tone: "bad" },
           picked: ["Pause offer", "Exit survey"],
           lines: [
             "Pause offer: −5% churn this quarter, and the effect is still growing",

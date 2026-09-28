@@ -3,9 +3,10 @@ import { NightSurface, QuarterNews } from "tour-de-growth";
 
 /*
  * The quarter's news, one card at a time, over the whole screen (Antoine,
- * 2026-09-26): the verdict first, then what happened inside and outside,
- * then the CEO's word, and only then the report underneath. The system's one
- * modal — a native <dialog>, Escape is « Skip to the report ».
+ * 2026-09-26), in the island's order (island-view.ts): the CEO's mid-quarter
+ * email when he wrote one, the verdict, what happened on the team, the
+ * clippings, then the CEO's word — and only then the report underneath.
+ * The system's one modal — a native <dialog>, Escape is « Skip to the report ».
  *
  * In the product it opens with `showModal()`, which lifts it into the top
  * layer over everything. On a canvas that shows several stories at once,
@@ -17,6 +18,8 @@ import { NightSurface, QuarterNews } from "tour-de-growth";
  *
  * A still shows the FIRST card: the others arrive one by one with Next, and
  * each has its own component and preview (DgMail, EventClipping, DgFace).
+ * So each story starts on the card it is about, and says what the product
+ * would have put before it.
  * The entrance, the shake and the stamp are motion. Copy:
  * content/game/retention.ts; numbers from the real level, as QuarterReport's
  * preview uses them.
@@ -55,9 +58,10 @@ const labels = { next: "Next →", finish: "See the quarter's report →", skip:
 const progressOf = (total: number, word: string) => Array.from({ length: total }, (_, i) => `${i + 1} ${word} ${total}`);
 
 /**
- * Quarter 1, missed by 0.1 pt: the number the quarter is judged on, as big as
- * the screen carries it, its status in words (the colour repeats it), and the
- * three other figures underneath.
+ * Quarter 1, missed by 0.1 pts, in a quarter where the CEO did not write
+ * mid-quarter — so the verdict opens it: the number the quarter is judged
+ * on, as big as the screen carries it, its status in words (the colour
+ * repeats it), and the three other figures underneath.
  */
 export const TheVerdict = () => (
   <InFrame>
@@ -72,17 +76,16 @@ export const TheVerdict = () => (
           metric: "Churn",
           value: "5.7%",
           note: "target 5.6%",
-          status: { text: "missed by 0.1 pt", tone: "bad" },
+          status: { text: "missed by 0.1 pts", tone: "bad" },
           figures: [
             { key: "subs", label: "Subscribers", value: "98,904" },
             { key: "mrr", label: "Revenue", value: "€1.28M" },
             { key: "patience", label: "CEO's patience", value: "58" },
           ],
         },
-        { kind: "mail", label: "Mid-quarter", mail: { header: "From: CEO · Subject: this week's numbers", body: '"It\'s moving. Keep going."' } },
         { kind: "boss", label: "The CEO's word", line: '"That\'s not what we agreed."', mood: "firm" },
       ]}
-      progress={progressOf(3, "of")}
+      progress={progressOf(2, "of")}
       labels={labels}
       onDone={noop}
     />
@@ -90,8 +93,10 @@ export const TheVerdict = () => (
 );
 
 /**
- * An inspection lands: the one card where the screen shakes, with the
- * clipping stamped. Passed as the first card here so a still can show it.
+ * An inspection lands: the one card where the screen shakes, the clipping
+ * stamped, and its « why » on the clipping itself. In the product the verdict
+ * comes before it; passed first here so a still can show it. At the level's
+ * inspection threshold (radar 75) the fine is €60,000 + 75 × €500.
  */
 export const AnInspection = () => (
   <InFrame>
@@ -107,8 +112,15 @@ export const AnInspection = () => (
             kind: "control",
             masthead: "The Business Courier",
             headline: "Flixo caught out by the French consumer watchdog",
-            text: "An inspection by the DGCCRF, France's consumer protection authority, an article in the press, a fine of €450,000.",
-            stamp: { text: "Fined · €450,000", tone: "bad" },
+            text: "An inspection by the DGCCRF, France's consumer protection authority, an article in the press, a fine of €97,500. The CEO asks you to take everything down by Friday. 1,425 subscribers leave on the spot, and tell everyone why.",
+            why: {
+              heading: "Why this inspection",
+              lines: [
+                "Every trick you put into production pushed up the regulator radar, the hidden tile on your dashboard. This quarter it crossed the inspection threshold.",
+                'In production when the inspectors came: "Retention offers" and "Contractual notice". All of it is taken down on the spot, and its effect stops.',
+              ],
+            },
+            stamp: { text: "Fined · €97,500", tone: "bad" },
           },
         },
         { kind: "boss", label: "The CEO's word", line: '"I don\'t know how much longer I can cover for you."', mood: "angry" },
@@ -137,7 +149,7 @@ export const French = () => (
           status: { text: "objectif atteint", tone: "good" },
           figures: [
             { key: "subs", label: "Abonnés", value: "92 140" },
-            { key: "mrr", label: "Revenus", value: "1,24 M€" },
+            { key: "mrr", label: "Revenu", value: "1,24 M€" },
             { key: "patience", label: "Patience du DG", value: "74" },
           ],
         },
