@@ -100,6 +100,17 @@ demande l'ancien chemin et exige une vraie image : le hash est généré au buil
 donc le coder en dur n'est acceptable que si un test rougit quand Next change
 d'algorithme.
 
+**Le `?<hash>` qu'une image-fichier ajoute à son adresse est un hash du
+FICHIER SOURCE, pas de l'image** (mesuré le 2026-09-28). Deux fichiers
+`opengraph-image.tsx` identiques (une réexportation de la même
+implémentation) portent le même hash, un troisième fichier en a un autre, et
+les trois servent la même image. Le hash ne bouge donc pas quand l'image ou
+la copie qu'elle dessine change : ce n'est pas un mécanisme de
+rafraîchissement, et réexporter le fichier dans chaque segment « pour avoir
+le hash » n'apporte rien. Autre fait mesuré au même endroit : une image
+déclarée dans `metadata.openGraph.images` **remplace** l'image-fichier du
+segment au lieu de lui céder la place.
+
 ### 1.4 404 : `global-not-found.tsx`, et `dynamicParams` plutôt que `notFound()`
 
 Deux corrections nécessaires **ensemble** pour qu'une URL inconnue rende votre
