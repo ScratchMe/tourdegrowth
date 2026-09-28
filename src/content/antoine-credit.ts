@@ -1,4 +1,5 @@
 import type { Translatable } from "@/lib/i18n/dictionary";
+import type { Locale } from "@/lib/i18n/locale";
 
 /**
  * antoine-credit.ts — Tour de Growth
@@ -12,6 +13,20 @@ export const ANTOINE_LINKS = {
   cv: "https://cv.antoine.berthaud.me",
   linkedin: "https://www.linkedin.com/in/antoine-berthaud-pm/",
 };
+
+/**
+ * The CV page a VISIBLE link opens, in the language of the page it sits on —
+ * SEO lot 6 (2026-09-28, confirmed by Antoine once `/en/` was online). The
+ * English CV lives at `/en/`; the French one is the bare address, unchanged.
+ *
+ * Only the links a reader clicks go through this. The JSON-LD `Person`
+ * (`personNode`) and `article:author` keep `ANTOINE_LINKS.cv`: that is the
+ * person's identity, not a page in a language, and the CV site declares the
+ * same one.
+ */
+export function cvUrl(locale: Locale): string {
+  return locale === "en" ? `${ANTOINE_LINKS.cv}/en/` : ANTOINE_LINKS.cv;
+}
 
 /** §2.1 — Quick result screen, in the score card's footer. Sober on purpose: "un simple crédit de bas de page", never a bigger promotional element. Also shown on Deep dive results (§2.3) — this is additive to, not replaced by, the §2.2 card below. */
 export const QUICK_CREDIT = {
