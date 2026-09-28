@@ -5,7 +5,7 @@ import { TrackedLink } from "@/components/brand/TrackedLink";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { ABOUT, REPO_URL } from "@/content/about";
-import { ANTOINE_LINKS } from "@/content/antoine-credit";
+import { ANTOINE_LINKS, cvUrl } from "@/content/antoine-credit";
 import { QUESTIONS } from "@/content/copy-library";
 import { PROFILE_CLICK_DETAILS } from "@/lib/analytics/goatcounter";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
@@ -102,7 +102,7 @@ export default async function AboutPage({ params }: PageProps) {
             </TrackedLink>
             {tc(ABOUT.contactSection.between, locale)}
             <TrackedLink
-              href={ANTOINE_LINKS.cv}
+              href={cvUrl(locale)}
               target="_blank"
               rel="noopener"
               className={own.link}

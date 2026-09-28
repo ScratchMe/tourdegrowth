@@ -79,7 +79,8 @@ export function isResultReadPath(pathname: string): boolean {
 
 /**
  * `Vary: Accept-Language` on the one response the proxy authors itself: the
- * 308 that sends `/` (and the pre-R-13 content URLs) to `/en` or `/fr`.
+ * 307 that sends `/` (and the 308 of the pre-R-13 content URLs) to `/en` or
+ * `/fr`.
  * Where it lands depends on the browser's language, absent `?lang=` or a
  * cookie — Google asks locale-adaptive responses to say so, and it is plain
  * HTTP correctness for any cache on the way (raised by a Search Console
@@ -95,6 +96,20 @@ export function isResultReadPath(pathname: string): boolean {
  * would fragment the CDN cache R-24 built, one copy per browser.
  */
 const VARY_ACCEPT_LANGUAGE = "Accept-Language";
+
+/**
+ * SEO lot 5 (2026-09-28): a language redirect is never kept by a browser.
+ * Its destination follows the cookie, and a browser cache is keyed on the URL
+ * and the `Vary` headers — never on the cookie. Kept, the redirect of `/`
+ * sent a French browser whose reader had chosen English back to `/fr`, and
+ * `/fr` then rewrote the cookie: measured in Chromium against `next start`,
+ * which sends a 308 with no `Cache-Control`, so the redirect is fresh forever.
+ * Vercel happened to mask it in production (it adds `max-age=0,
+ * must-revalidate`); saying it ourselves means the site no longer depends on
+ * a host default. On the legacy content redirects too: their target follows
+ * the same cookie.
+ */
+const REDIRECT_CACHE_CONTROL = "no-store";
 
 function tooManyRequestsResponse(retryAfterSeconds: number): NextResponse {
   return new NextResponse("Too many requests.", {
@@ -156,9 +171,10 @@ export const LOCALE_HEADER = "x-tdg-locale";
  * Everywhere else (app pages, which carry no prefix) the old order applies:
  * `?lang=` > cookie > `Accept-Language`.
  *
- * Content URLs published before R-13 (`/`, `/how-it-works`, `/glossary/...`)
- * are redirected 308 to their localized form, so nothing already linked or
- * indexed breaks.
+ * Content URLs published before R-13 (`/how-it-works`, `/glossary/...`) are
+ * redirected 308 to their localized form, so nothing already linked or
+ * indexed breaks; `/` itself is a 307, since its target is the visitor's
+ * language (SEO lot 5).
  *
  * Named `proxy` (not `middleware`) — Next.js 16 renamed the file convention;
  * `middleware.ts` / `export function middleware` are silently ignored now.
@@ -199,13 +215,19 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 
   // A pre-R-13 content URL: send it to its localized address, query string
   // intact (a shared `/?ref=<id>` must still carry its referral through).
+  //
+  // `/` is a 307, not a 308 (SEO lot 5, 2026-09-28): its target is the
+  // visitor's language, which changes, so the redirect is not a permanent
+  // move. The legacy content addresses stay 308 — they did move for good,
+  // and Google has already treated them that way since R-13.
   if (!fromUrl && isLocalizableContentPath(pathname)) {
     const target = request.nextUrl.clone();
     target.pathname = localePath(locale, pathname);
-    const redirect = NextResponse.redirect(target, 308);
+    const redirect = NextResponse.redirect(target, pathname === "/" ? 307 : 308);
     // Where it lands depends on the browser's language (absent `?lang=` or
     // a cookie): say so, for Google and for any cache on the way.
     redirect.headers.set("Vary", VARY_ACCEPT_LANGUAGE);
+    redirect.headers.set("Cache-Control", REDIRECT_CACHE_CONTROL);
     return redirect;
   }
 

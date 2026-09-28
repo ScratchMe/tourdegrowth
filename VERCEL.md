@@ -227,6 +227,18 @@ Mettre **la copie dans le hash**, pas seulement les données : sinon corriger
 un mot laisse l'ancienne version en cache un an sur toutes les adresses déjà
 servies, et personne ne pense à incrémenter la constante de version à la main.
 
+**Vercel pose `cache-control: public, max-age=0, must-revalidate` sur une
+redirection du middleware qui n'en porte pas ; `next start` ne pose rien**
+(relevé le 2026-09-28). La différence n'est pas cosmétique : un 308 sans
+`Cache-Control` est frais pour toujours dans Chromium, et le cache d'un
+navigateur est indexé sur l'URL et `Vary`, jamais sur les cookies. Une
+redirection de langue qui suit un cookie se figeait donc en local et pas en
+production, où ce défaut de l'hébergeur la masquait par hasard. Une réponse
+dont la correction dépend du cache doit dire elle-même son `Cache-Control`,
+et un bug qu'on ne reproduit qu'en local peut être réel mais masqué en
+production — vérifier l'en-tête réellement servi des deux côtés avant de
+conclure dans un sens ou dans l'autre.
+
 Deux faits à garder en tête :
 
 - **Le middleware (`proxy`) tourne avant le cache, à chaque requête.** Vercel

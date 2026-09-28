@@ -280,6 +280,15 @@ export const UI_STRINGS = {
     // SEO audit v1 §1.7 — the block that links the AARRR term page to the
     // "AARRR vs X" cluster. TODO: à relire — copie neuve (convention 6).
     comparedWithLabel: { en: "AARRR compared with other frameworks", fr: "AARRR comparé à d'autres cadres" },
+    // SEO lot 3 (2026-09-28) — the same block on a term that links ONE
+    // comparison (North Star, growth loop, retention). Neutral on purpose:
+    // retention is a stage of AARRR, not the other side of "AARRR vs RARRA",
+    // so « Comparé à AARRR » would have been wrong there.
+    // TODO: à relire — copie neuve (convention 6).
+    relatedComparisonLabel: { en: "Related comparison", fr: "Comparatif lié" },
+    // SEO lot 3 — the AARRR page's link to the diagnostic method.
+    // TODO: à relire — copie neuve (convention 6).
+    applyAarrrLabel: { en: "Putting AARRR to work", fr: "Mettre AARRR en pratique" },
     // Relu et validé par Antoine (2026-09-09) — R2-11. Section labels of the long-form
     // term pages; the sections themselves are content/glossary-deep.ts.
     formulaLabel: { en: "The formula", fr: "La formule" },

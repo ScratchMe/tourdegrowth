@@ -4,6 +4,7 @@ import { COMPARISONS } from "@/content/comparisons";
 import { tc } from "@/lib/i18n/dictionary";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { contentMetadata } from "@/lib/i18n/meta";
+import { articleDates } from "@/content/updated-at";
 
 const SLUG = "aarrr-vs-okr" as const;
 
@@ -15,7 +16,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { locale } = await params;
   const resolved: Locale = isLocale(locale) ? locale : "en";
   const entry = COMPARISONS[SLUG];
-  return contentMetadata(resolved, `/${SLUG}`, tc(entry.metaTitle, resolved), tc(entry.metaDescription, resolved));
+  return contentMetadata(resolved, `/${SLUG}`, tc(entry.metaTitle, resolved), tc(entry.metaDescription, resolved), {
+    article: articleDates(`/${SLUG}`),
+  });
 }
 
 /** GROWTH-PLAN.md vague 2.3 — le rendu est partagé, voir `_comparison/ComparisonView`. */

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ANTOINE_LINKS, SITE_FOOTER_CREDIT } from "@/content/antoine-credit";
+import { cvUrl, SITE_FOOTER_CREDIT } from "@/content/antoine-credit";
 import { PROFILE_CLICK_DETAILS } from "@/lib/analytics/goatcounter";
 import { NAV_STRINGS } from "@/lib/i18n/nav-strings";
 import { tc } from "@/lib/i18n/translatable";
@@ -107,7 +107,7 @@ export function SiteFooter({ locale, width = "wide" }: SiteFooterProps) {
           {tc(SITE_FOOTER_CREDIT.prefix, locale)}
           <TrackedLink
             className={styles.creditLink}
-            href={ANTOINE_LINKS.cv}
+            href={cvUrl(locale)}
             target="_blank"
             // `noopener` only, no `noreferrer`: the point of this link is
             // traffic to the CV site, and `noreferrer` would strip the

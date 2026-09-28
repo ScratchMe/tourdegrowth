@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ProseActions, ProseList, ProsePage, ProseSection, ProseText } from "@/components/brand/ProsePage";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
-import { COMPARISON_ORDER, COMPARISON_TITLES } from "@/content/comparison-index";
+import { COMPARISON_TITLES, TERM_COMPARISONS } from "@/content/comparison-index";
 import { GLOSSARY, type GlossaryTermId } from "@/content/glossary";
 import { QUESTIONS } from "@/content/copy-library";
 import { GLOSSARY_DEEP, type DeepGlossaryContent } from "@/content/glossary-deep";
@@ -56,6 +56,7 @@ export default async function GlossaryTermPage({ params }: PageProps) {
   const entry = GLOSSARY[term];
   const locale = rawLocale as Locale;
   const t = UI_STRINGS.glossaryPage;
+  const comparisons = TERM_COMPARISONS[term];
 
   return (
     <>
@@ -103,17 +104,36 @@ export default async function GlossaryTermPage({ params }: PageProps) {
           </ProseSection>
         )}
 
-        {/* SEO audit v1 §1.7: the term the cluster is about — and the glossary
-            page with the most inbound links — never pointed at the "AARRR vs X"
-            pages. Outside `related`, whose 2-4 slots are for glossary terms. */}
-        {term === "aarrr" && (
-          <ProseSection heading={tc(t.comparedWithLabel, locale)} headingStyle="label" data-testid="compared-with">
+        {/* SEO audit v1 §1.7, widened by SEO lot 3: the terms that draw
+            impressions pass them on to the "AARRR vs X" pages — AARRR to all
+            of them, a term that is the other side of one comparison to that
+            one (`TERM_COMPARISONS`). Outside `related`, whose 2-4 slots are
+            for glossary terms. */}
+        {comparisons && (
+          <ProseSection
+            heading={tc(term === "aarrr" ? t.comparedWithLabel : t.relatedComparisonLabel, locale)}
+            headingStyle="label"
+            data-testid="compared-with"
+          >
             <div className={styles.relatedList}>
-              {COMPARISON_ORDER.map((slug) => (
+              {comparisons.map((slug) => (
                 <Link key={slug} href={localePath(locale, `/${slug}`)} className={styles.relatedLink}>
                   {tc(COMPARISON_TITLES[slug], locale)}
                 </Link>
               ))}
+            </div>
+          </ProseSection>
+        )}
+
+        {/* SEO lot 3: the framework's own page is the natural way into the
+            method page, which had only three inbound pages. The link text is
+            the one How it works already uses. */}
+        {term === "aarrr" && (
+          <ProseSection heading={tc(t.applyAarrrLabel, locale)} headingStyle="label" data-testid="apply-aarrr">
+            <div className={styles.relatedList}>
+              <Link href={localePath(locale, "/startup-growth-diagnostic")} className={styles.relatedLink}>
+                {tc(UI_STRINGS.openDoor.diagnosticLink, locale)}
+              </Link>
             </div>
           </ProseSection>
         )}

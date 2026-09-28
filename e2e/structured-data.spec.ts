@@ -65,3 +65,78 @@ test("every Article page declares its dates and the author as publisher", async 
     }
   }
 });
+
+/**
+ * SEO lot 4 (2026-09-28) — the CV site declares a WebApplication with the id
+ * `https://www.tourdegrowth.com/#app`; the landing declares the same one in
+ * both languages, and About points at it. Derived from the page's own
+ * canonical origin, so the spec holds on any build — on a build with the
+ * production `NEXT_PUBLIC_SITE_URL`, it IS that address.
+ *
+ * Non-vacuity (2026-09-28): an id built per language (`…/en#app`) fails it.
+ */
+test("the Tour's WebApplication carries one site-wide @id, and About points at it", async ({ page }) => {
+  for (const locale of ["en", "fr"]) {
+    const html = await (await page.request.get(`/${locale}`)).text();
+    const origin = new URL(/<link rel="canonical" href="([^"]*)"/.exec(html)![1]!).origin;
+    const blocks = await jsonLdBlocks(page, `/${locale}`);
+    const app = blocks.find((b) => b["@type"] === "WebApplication") as Record<string, unknown>;
+    expect(app["@id"], locale).toBe(`${origin}/#app`);
+    const about = (await jsonLdBlocks(page, `/${locale}/about`)).find((b) => b["@type"] === "AboutPage") as Record<string, unknown>;
+    expect((about.about as Record<string, unknown>)["@id"], `${locale}/about`).toBe(`${origin}/#app`);
+  }
+});
+
+/**
+ * SEO lot 4 — `og:type` is `article` on exactly the Article pages, with
+ * `article:*` dates equal to the JSON-LD's and to the sitemap's `<lastmod>`
+ * for the same URL (one source, `content/updated-at.ts`), a publication date
+ * no later than the update, and the CV as author. Every other sitemap page is
+ * a `website` with no `article:*` tag.
+ *
+ * Non-vacuity (2026-09-28), one build: `/aarrr-vs-okr` stripped of its
+ * article dates and `/aarrr-vs-heart` published after its update — exactly
+ * those four URLs were named, and no other.
+ */
+test("og:type is article on exactly the Article pages, with the sitemap's dates", async ({ page }) => {
+  test.setTimeout(120_000);
+  const xml = await (await page.request.get("/sitemap.xml")).text();
+  // One `<url>` block at a time: the hreflang links sit between `<loc>` and `<lastmod>`.
+  const entries = [...xml.matchAll(/<url>([\s\S]*?)<\/url>/g)].map((m) => ({
+    path: new URL(/<loc>([^<]+)<\/loc>/.exec(m[1]!)![1]!).pathname,
+    lastmod: /<lastmod>([^<]+)<\/lastmod>/.exec(m[1]!)?.[1] ?? "(none)",
+  }));
+  expect(entries.length).toBeGreaterThan(60);
+  const articles = new Set(["/growth-audit-checklist", "/startup-growth-diagnostic", ...COMPARISON_ORDER.map((slug) => `/${slug}`)]);
+  const meta = (html: string, property: string) =>
+    [...html.matchAll(new RegExp(`<meta property="${property}" content="([^"]*)"`, "g"))].map((m) => m[1]!);
+
+  const off: string[] = [];
+  let articlePages = 0;
+  for (const { path, lastmod } of entries) {
+    const html = await (await page.request.get(path)).text();
+    const isArticle = articles.has(path.replace(/^\/(en|fr)/, ""));
+    const type = meta(html, "og:type");
+    if (!isArticle) {
+      if (type.join() !== "website") off.push(`${path}: og:type ${type.join() || "(none)"}`);
+      if (/<meta property="article:/.test(html)) off.push(`${path}: article:* on a non-article page`);
+      continue;
+    }
+    articlePages++;
+    if (type.join() !== "article") off.push(`${path}: og:type ${type.join() || "(none)"}`);
+    const published = meta(html, "article:published_time");
+    const modified = meta(html, "article:modified_time");
+    const author = meta(html, "article:author");
+    const ld = [...html.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/g)]
+      .map((m) => JSON.parse(m[1]!) as Record<string, unknown>)
+      .find((b) => b["@type"] === "Article");
+    if (modified.join() !== lastmod) off.push(`${path}: article:modified_time ${modified.join()} ≠ lastmod ${lastmod}`);
+    if (ld?.dateModified !== lastmod) off.push(`${path}: JSON-LD dateModified ${String(ld?.dateModified)} ≠ lastmod ${lastmod}`);
+    if (published.length !== 1 || published[0] !== ld?.datePublished) off.push(`${path}: article:published_time ${published.join()}`);
+    if (!(published[0]! <= lastmod)) off.push(`${path}: published ${published[0]} after lastmod ${lastmod}`);
+    if (author.join() !== "https://cv.antoine.berthaud.me/") off.push(`${path}: article:author ${author.join()}`);
+  }
+  // Two languages of every Article page: a sitemap that lost them would pass the loop by skipping it.
+  expect(articlePages).toBe(articles.size * 2);
+  expect(off).toEqual([]);
+});

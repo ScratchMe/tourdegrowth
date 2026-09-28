@@ -51,6 +51,17 @@ export function personNode() {
 }
 
 /**
+ * The node id of Tour de Growth itself — SEO lot 4 (2026-09-28). The CV
+ * site's case study declares a `WebApplication` with exactly this `@id` and
+ * its `creator` pointing at the `Person` above; declaring the same id here is
+ * what makes the two sites describe ONE entity. Identical in both languages,
+ * on the site root rather than a localized page: it names the product, not a
+ * page. In production, `https://www.tourdegrowth.com/#app` — do not change it
+ * without changing the CV site.
+ */
+export const APP_ID = `${SITE_URL}/#app`;
+
+/**
  * `WebApplication`, not `Person`: Tour de Growth is the product being
  * described, not Antoine. Built per language.
  *
@@ -66,6 +77,9 @@ export function webApplicationSchema(locale: Locale, app?: { path: string; name:
   return {
     "@context": "https://schema.org",
     "@type": "WebApplication",
+    // The Tour only: the growth engine is another application, and must not
+    // claim the id the CV site uses for this one.
+    ...(app ? {} : { "@id": APP_ID }),
     name: app?.name ?? SITE_NAME,
     description: app?.description ?? tc(UI_STRINGS.landing.subtitle, locale),
     // This page's own address, not the bare site URL — the French page used
@@ -184,7 +198,8 @@ export function aboutPageSchema(locale: Locale) {
     name: tc(ABOUT.title, locale),
     url: absolute(locale, "/about"),
     inLanguage: locale,
-    about: { "@type": "WebApplication", name: SITE_NAME, url: absolute(locale) },
+    // The same node as the landing's block, by its id (SEO lot 4).
+    about: { "@type": "WebApplication", "@id": APP_ID, name: SITE_NAME, url: absolute(locale) },
     mainEntity: { ...personNode(), jobTitle: "Senior Growth Product Manager" },
   };
 }

@@ -19,7 +19,7 @@ import { PriorityMove } from "@/components/result/PriorityMove";
 import { ScoreDisplay } from "@/components/result/ScoreDisplay";
 import { ShareCard } from "@/components/result/ShareCard";
 import { StampedPillar } from "@/components/result/StampedPillar";
-import { ANTOINE_LINKS, DEEP_DIVE_CREDIT, QUICK_CREDIT } from "@/content/antoine-credit";
+import { ANTOINE_LINKS, cvUrl, DEEP_DIVE_CREDIT, QUICK_CREDIT } from "@/content/antoine-credit";
 import { HOW_IT_WORKS } from "@/content/how-it-works";
 import { PROFILE_CLICK_DETAILS, trackEvent } from "@/lib/analytics/goatcounter";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
@@ -375,7 +375,7 @@ export function ResultView({
               <p className={styles.builtByCredit}>
                 {tc(QUICK_CREDIT.prefix, locale)}
                 <a
-                  href={ANTOINE_LINKS.cv}
+                  href={cvUrl(locale)}
                   target="_blank"
                   rel="noopener"
                   onClick={() => trackEvent("profile_click", FOOTER_CV_DETAIL)}
@@ -502,7 +502,7 @@ export function ResultView({
                   <p className={styles.antoineBio}>
                     {tc(DEEP_DIVE_CREDIT.bio, locale)}
                     <a
-                      href={ANTOINE_LINKS.cv}
+                      href={cvUrl(locale)}
                       target="_blank"
                       rel="noopener"
                       onClick={() => trackEvent("profile_click", CARD_CV_DETAIL)}

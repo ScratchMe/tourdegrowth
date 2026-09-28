@@ -295,6 +295,14 @@ serrée des deux côtés (un écart qui **grandit** est autant une régression q
   le port dans sa ligne de commande (seul son parent `sh -c next start -p N` le
   porte). Comparer `readlink /proc/<pid>/cwd` au dossier de travail, puis tuer
   par PID.
+- **Tout `route()` de Playwright désactive le cache HTTP de Chromium**, pour
+  toute la page ou tout le contexte. Un test qui porte sur ce que le
+  navigateur garde en cache (une redirection figée, une ressource servie
+  périmée) passe donc à vide dès qu'une fixture intercepte quoi que ce soit —
+  constaté le 2026-09-28 : le premier essai n'a pas reproduit un bug réel pour
+  cette seule raison. Un tel test lance son propre contexte persistant, sans
+  `route()`, et tient un service tiers hors ligne par
+  `--host-resolver-rules` plutôt que par interception.
 - **`innerText` et `toHaveText` ne comparent pas la même chose** : prendre
   `textContent`, et vérifier que la valeur capturée n'est pas la valeur
   triviale — sinon la comparaison passe sur le bug qu'elle devait attraper.

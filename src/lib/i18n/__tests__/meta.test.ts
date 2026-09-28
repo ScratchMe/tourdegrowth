@@ -35,13 +35,48 @@ describe("contentMetadata", () => {
   /**
    * An image declared in the config replaces the file-based one (measured on
    * the build), so a page that carries its own `opengraph-image` must not get
-   * the fallback — it would lose the file's cache-busting hash.
+   * the fallback — it would trade its own address for the landing's.
    */
   it("declares no image for a page that carries its own file", () => {
     const meta = contentMetadata("en", "/how-it-works", "T", "D", { ownShareImage: true });
     expect(meta.openGraph).not.toHaveProperty("images");
     expect(meta.twitter).not.toHaveProperty("images");
     expect(meta.openGraph).toMatchObject({ title: "T", url: "/en/how-it-works" });
+  });
+});
+
+/**
+ * SEO lot 4 (2026-09-28): an Article page (open-door pages, comparisons) is
+ * an `article` to the platforms too, with the dates it is handed — the same
+ * pair as its JSON-LD and the sitemap — and the CV as author. Every other
+ * content page stays a `website`.
+ */
+describe("contentMetadata for an Article page", () => {
+  const article = { published: "2026-09-14", modified: "2026-09-24" };
+
+  it("declares og:type article with both dates and the author, and keeps the fallback image", () => {
+    const meta = contentMetadata("fr", "/aarrr-vs-okr", "T", "D", { article });
+    expect(meta.openGraph).toMatchObject({
+      type: "article",
+      publishedTime: "2026-09-14",
+      modifiedTime: "2026-09-24",
+      authors: ["https://cv.antoine.berthaud.me/"],
+      url: "/fr/aarrr-vs-okr",
+    });
+    expect(meta.openGraph?.images).toMatchObject([{ url: "/fr/opengraph-image/fr" }]);
+  });
+
+  it("stays a website without dates, and never carries article fields", () => {
+    const meta = contentMetadata("en", "/about", "T", "D");
+    expect(meta.openGraph).toMatchObject({ type: "website" });
+    expect(meta.openGraph).not.toHaveProperty("publishedTime");
+    expect(meta.openGraph).not.toHaveProperty("authors");
+  });
+
+  it("is an article with its own image file too", () => {
+    const meta = contentMetadata("en", "/x", "T", "D", { ownShareImage: true, article });
+    expect(meta.openGraph).toMatchObject({ type: "article", publishedTime: "2026-09-14" });
+    expect(meta.openGraph).not.toHaveProperty("images");
   });
 });
 

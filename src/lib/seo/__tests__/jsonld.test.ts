@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { GLOSSARY } from "@/content/glossary";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
+import { SITE_URL } from "@/lib/site";
 import {
+  aboutPageSchema,
+  APP_ID,
   articleSchema,
   breadcrumbSchema,
   definedTermSchema,
@@ -45,6 +48,22 @@ describe("structured data", () => {
     const landing = webApplicationSchema("fr");
     expect(landing.name).toBe("Tour de Growth");
     expect(landing).not.toHaveProperty("isPartOf");
+  });
+
+  /**
+   * SEO lot 4 (2026-09-28): the CV site's case study declares a
+   * WebApplication with exactly this id and its creator; the landing must
+   * declare the same one, in both languages, for the two sites to describe
+   * one entity. The engine is another application and does not take it.
+   */
+  it("gives the Tour one @id on the site root, shared by both languages and by the About page", () => {
+    expect(APP_ID).toBe(`${SITE_URL}/#app`);
+    expect(webApplicationSchema("en")["@id"]).toBe(APP_ID);
+    expect(webApplicationSchema("fr")["@id"]).toBe(APP_ID);
+    expect(webApplicationSchema("fr", { path: "/aarrr-funnel-template", name: "M", description: "d" })).not.toHaveProperty("@id");
+    for (const locale of ["en", "fr"] as const) {
+      expect(aboutPageSchema(locale).about).toMatchObject({ "@type": "WebApplication", "@id": APP_ID });
+    }
   });
 
   it("declares the glossary as one term set holding all fifteen terms, localized", () => {
