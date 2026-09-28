@@ -4804,6 +4804,26 @@ Antoine a apporté une mission en sept lots, écrite d'après un audit SEO fait 
 
 **Remarqué et laissé** : le CAC d'aujourd'hui s'écrit « ~500 € » sur la tuile et « 500 € » sur la slide. La slide imprime le chiffre mesuré tel quel, ce qu'elle documente ; l'écran l'arrondit comme une projection. C'est antérieur, sans conséquence de lecture.
 
+### Le DG redessiné (2026-09-28)
+
+**La demande d'Antoine** : « on a peut-être possibilité d'avoir un meilleur rendu du DG ? son visuel est un peu raté aujourd'hui ». Diagnostic : une tête en œuf sans cou, deux taches sombres en guise d'oreilles, une cravate qui pend sous un triangle détaché des épaules, des épaules réduites à une bosse fondue dans le bureau. En colère, le visage entier virait au saumon, ce qui se lisait plus comme un défaut de rendu que comme de la colère. Trois esquisses dans le vrai cadre de la visio et en avatar : illustration éditoriale, pochoir sérigraphié, contre-jour. **La première est retenue.**
+
+**Ce qui est livré** : `DgFace` redessiné.
+- Le personnage : cou, col ouvert, veston à revers, lunettes, tempes grises.
+- La lumière : celle de l'écran à sa gauche, l'ombre à sa droite.
+- Le décor : bureau flou derrière (fenêtre sur la ville la nuit, étagère, plante) et vignettage de webcam.
+
+**Le contrat d'expression n'a pas bougé.** Les tracés de `#browL`, `#browR` et `#mouthShape` (table §5.10 de `GAME-BRIEF.md`, lue par P10 et par `game-call.test.ts`) sont restés identiques ; c'est le dessin qui s'y ajuste. Les lunettes sont posées un cran sous les sourcils, pour que ceux de la colère viennent buter contre la monture. Le nez est remonté au-dessus de la bouche. En colère, les joues rougissent et un pli se forme entre les sourcils. Le §5.10 le dit maintenant, en gardant l'ancien teint en mémoire. Les jetons `--dg-*` sont redéfinis : costume anthracite, ombres, fenêtre, ville. `--dg-skin-angry` et `--dg-tie` sont retirés : plus de cravate, le col est ouvert. Chaque nouveau jeton a son contraste mesuré ou sa raison écrite (`game-token-contrast.test.ts`). Le pire cas du nouveau dessin, le bout du sourcil droit et la monture sur la joue dans l'ombre, tient à 3,67 et 4,61.
+
+**Vérifié** :
+- lint et `tsc` propres ;
+- **2 132 tests unitaires** (−4 mesures du teint colère, +2 mesures de la joue dans l'ombre) ;
+- `next build` propre dans une copie de travail séparée : le build principal servait les maquettes des six directions ;
+- **116 specs Playwright** du jeu et d'accessibilité passées (5 ignorées par construction), dont P10 ;
+- bundle Claude Design reconstruit et validé (71/71), avec le DG dans tous les états de la visio : sonnerie, ouverte, colère avec son halo, raccrochée, terminée en gris.
+
+**Piège** : Turbopack refuse un `node_modules` en lien symbolique qui sort de la racine du projet (« Symlink … points out of the filesystem root »). Pour construire dans une copie de travail, il faut `cp -al` (liens physiques, instantané, sans disque en plus), pas `ln -s`.
+
 ### Bons à tirer nº7 et nº8 remis d'accord avec le code (2026-09-28, demandé par Antoine)
 
 **Le constat, mesuré mot à mot et non de mémoire.** Chaque texte des quatre pages ouvertes a été cherché tel quel dans le code. Le nº4 et le nº6 sont fidèles (depuis le nº4, le catalogue d'audit n'a changé que de typographie). Le nº7 et le nº8 ne l'étaient plus : le nº8 affichait 21 textes français qui n'existent plus (« quinze chiffres », l'ancien « Et si », des réglages disparus), et il manquait environ 200 chaînes neuves des retours du 25 au 27 septembre. Au nº7, cinq cartes avaient bougé et la copie neuve des 25-26/09 manquait. **Aucune décision n'était prise** : les trois collections `cards/` étaient vides, et chaque page écrit bien dans `cards/` (vérifié dans son code). Les deux pages ont donc été republiées **aux mêmes adresses**, sans rien perdre.
