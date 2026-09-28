@@ -55,6 +55,7 @@
     "PhoneMock": "src/components/game/PhoneMock.tsx",
     "Playbook": "src/components/game/Playbook.tsx",
     "QuarterReport": "src/components/game/QuarterReport.tsx",
+    "QuarterNews": "src/components/game/QuarterNews.tsx",
     "QuarterTimeline": "src/components/game/QuarterTimeline.tsx",
     "ResumePrompt": "src/components/game/ResumePrompt.tsx",
     "RevealCells": "src/components/game/RevealCells.tsx",
@@ -119,6 +120,9 @@
       "cardMode": "column"
     },
     "QuarterReport": {
+      "cardMode": "column"
+    },
+    "QuarterNews": {
       "cardMode": "column"
     },
     "Hand": {

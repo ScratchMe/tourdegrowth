@@ -51,8 +51,12 @@
 .current {
   border: 2px solid var(--accent-mark);
   background: var(--accent-mark);
-  /* tdg-pulse is defined once, globally, in tokens/motion.css. */
-  animation: tdg-pulse var(--dur-pulse) var(--ease-out) both;
+  /* The pulse's keyframes live in styles/motion.module.css: longhands only
+     here, never the shorthand (it would reset the composed name). */
+  composes: pulse from "../../styles/motion.module.css";
+  animation-duration: var(--dur-pulse);
+  animation-timing-function: var(--ease-out);
+  animation-fill-mode: both;
 }
 
 .pending {

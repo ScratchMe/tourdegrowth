@@ -1,5 +1,5 @@
 /*
- * Easing, durations, keyframes — transcribed from tokens/motion.css in the
+ * Easing and durations — transcribed from tokens/motion.css in the
  * Claude Design bundle.
  */
 :root {
@@ -16,34 +16,9 @@
   --dur-message: 1300ms; /* loading message dwell (deep dive only) */
 }
 
-/* The score lands like a stamp: overshoot, settle, no bounce back up. */
-@keyframes tdg-stamp {
-  0% {
-    transform: scale(1.18) rotate(-3deg);
-    opacity: 0;
-  }
-  60% {
-    transform: scale(0.99) rotate(0.6deg);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1) rotate(0);
-    opacity: 1;
-  }
-}
-
-/* A progress segment thickens once as it fills. */
-@keyframes tdg-pulse {
-  0% {
-    transform: scaleY(1);
-  }
-  50% {
-    transform: scaleY(1.35);
-  }
-  100% {
-    transform: scaleY(1);
-  }
-}
+/* The brand's keyframes (the stamp, the progress pulse) are NOT here: a
+   global @keyframes cannot be named from a CSS Module, whose scoping renames
+   the reference. They live in styles/motion.module.css — see its header. */
 
 @media (prefers-reduced-motion: reduce) {
   *,

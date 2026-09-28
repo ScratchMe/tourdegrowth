@@ -193,12 +193,16 @@
 
 /* The number the quarter is judged on, as big as the page can carry it. */
 .value {
+  composes: stamp from "../../styles/motion.module.css";
   margin: 0;
   font: var(--display-score-xl);
   font-variant-numeric: var(--tabular);
   line-height: 1;
   color: var(--text-body);
-  animation: tdg-stamp var(--dur-stamp) var(--ease-stamp) 120ms both;
+  animation-duration: var(--dur-stamp);
+  animation-timing-function: var(--ease-stamp);
+  animation-delay: 120ms;
+  animation-fill-mode: both;
 }
 
 .note {

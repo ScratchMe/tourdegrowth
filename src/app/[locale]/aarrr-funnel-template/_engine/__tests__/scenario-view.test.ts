@@ -6,6 +6,7 @@ import {
   dotsInUse,
   funnelSteps,
   gainText,
+  kpiAnnouncement,
   kpiRows,
   leverGains,
   leverRows,
@@ -31,7 +32,7 @@ describe("scenarioGrid — one dot per 1 % of today's sign-ups", () => {
     expect(count(g.dots, "empty")).toBe(82);
   });
 
-  it("what the what-ifs add beyond today is red, and the grid grows past 100 in rows of 10", () => {
+  it("what the what-ifs add beyond today is marked gained, and the grid grows past 100 in rows of 10", () => {
     // Sign-ups 100 → 127: the 27 more don't fit in the 100 of today, the grid grows to 130.
     const g = scenarioGrid({ lo: 100, hi: 100 }, { lo: 127, hi: 127 }, 1);
     expect(g.dots).toHaveLength(130);
@@ -40,7 +41,7 @@ describe("scenarioGrid — one dot per 1 % of today's sign-ups", () => {
     expect(count(g.dots, "empty")).toBe(3);
   });
 
-  it("what the projection loses is outlined in red, never a blank that reads as nobody", () => {
+  it("what the projection loses is marked lost, never a blank that reads as nobody", () => {
     const g = scenarioGrid({ lo: 30, hi: 30 }, { lo: 24, hi: 24 }, 1);
     expect(count(g.dots, "filled")).toBe(24);
     expect(count(g.dots, "lost")).toBe(6);
@@ -60,7 +61,7 @@ describe("scenarioGrid — one dot per 1 % of today's sign-ups", () => {
 });
 
 describe("funnelSteps — visitors first, then the four grids", () => {
-  it("a better sign-up rate finally shows: visitors unchanged, sign-ups and every step below in red", () => {
+  it("a better sign-up rate finally shows: visitors unchanged, sign-ups and every step below gained", () => {
     const s = scenarioFor(exampleState(), { "acq.signup-rate": 4 }, CTX_FR);
     const steps = funnelSteps(s, CTX_FR, FR.strings);
     expect(steps.map((x) => x.id)).toEqual(["visitors", "signups", "activated", "d30", "paying"]);
@@ -200,5 +201,49 @@ describe("leverGains — what each lever brings alone, and together", () => {
   it("signs a gain with a real minus", () => {
     expect(gainText(1200, "EUR", CTX_FR)).toBe("+1\u00a0200\u00a0€");
     expect(gainText(-300, "EUR", CTX_EN)).toBe("\u2212€300");
+  });
+});
+
+describe("kpiAnnouncement — the figures, read once when a slider settles (audit S-4)", () => {
+  const rowsFor = (targets: Partial<Record<LeverId, number>>, locale: "fr" | "en") => {
+    const [ctx, bundle] = locale === "fr" ? [CTX_FR, FR] : [CTX_EN, EN];
+    const s = scenarioFor(exampleState(), targets, ctx);
+    return { rows: kpiRows(s, ctx, bundle.strings, "EUR", { state: exampleState(), metrics: bundle.metrics }), moved: s.moved.length > 0, strings: bundle.strings };
+  };
+
+  it("names only the figures that moved, each with its change and whether it is better", () => {
+    const { rows, moved, strings } = rowsFor({ "act.rate": 24 }, "fr");
+    const text = kpiAnnouncement(rows, moved, strings);
+    expect(text.startsWith("Tes chiffres de croissance, avec tes «\u00a0Et si\u00a0»\u00a0: ")).toBe(true);
+    expect(text).toContain("MRR dans 12 mois");
+    expect(text).toContain("CAC");
+    expect(text).toContain("mieux");
+    // Churn did not move: NRR and GRR are not news. LTV is unknown: never read.
+    expect(text).not.toContain("NRR");
+    expect(text).not.toContain("GRR");
+    expect(text).not.toContain("LTV");
+    expect(text.endsWith(".")).toBe(true);
+  });
+
+  it("with every lever back to today, the known figures as they are today, without changes", () => {
+    const { rows, moved, strings } = rowsFor({}, "fr");
+    const text = kpiAnnouncement(rows, moved, strings);
+    expect(text.startsWith("Tes chiffres de croissance, aujourd'hui\u00a0: ")).toBe(true);
+    expect(text).toContain("NRR mensuelle");
+    expect(text).not.toContain("mieux");
+    expect(text).not.toContain("LTV");
+  });
+
+  it("reads in English too, and says worse when it is worse", () => {
+    const { rows, moved, strings } = rowsFor({ "ret.logo-churn": 4 }, "en");
+    const text = kpiAnnouncement(rows, moved, strings);
+    expect(text.startsWith("Your growth numbers, with your what-ifs: ")).toBe(true);
+    expect(text).toContain("Monthly GRR");
+    expect(text).toContain("worse");
+  });
+
+  it("is empty when no figure is known, so the region announces nothing", () => {
+    const { strings } = rowsFor({}, "en");
+    expect(kpiAnnouncement([], false, strings)).toBe("");
   });
 });

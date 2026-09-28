@@ -55,7 +55,7 @@ export interface ResolvedMetric {
   glossaryHref: string;
 }
 
-/** One of the three computed figures, resolved (§5.7). */
+/** One of the five computed figures, resolved (§5.7). */
 export interface ResolvedDerived {
   id: DerivedId;
   name: string;

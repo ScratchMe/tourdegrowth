@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Button } from "@/components/core/Button";
 import { Callout } from "@/components/core/Callout";
 import { Card } from "@/components/core/Card";
@@ -15,6 +15,7 @@ import {
   gainText,
   roundedMoney,
   gridAria,
+  kpiAnnouncement,
   kpiRows,
   leverGains,
   leverRows,
@@ -30,6 +31,9 @@ import styles from "./WhatIfPanel.module.css";
 
 type Targets = Partial<Record<LeverId, number>>;
 
+/** How long a slider must rest before its figures are read (MWG accessibility §8: debounce a changing region). */
+const ANNOUNCE_DELAY_MS = 500;
+
 /**
  * « Et si ? », cumulated — Antoine, 2026-09-26: every lever at once, and the
  * effects compound. It used to be one stage at a time, with the peloton
@@ -39,7 +43,8 @@ type Targets = Partial<Record<LeverId, number>>;
  *   state (`actions.setWhatIf`), so the deck prints one slide per lever and a
  *   file carries them;
  * - the funnel starts at the VISITORS — a better sign-up rate finally shows —
- *   and its grids grow past 100 dots, in red, for what the what-ifs add;
+ *   and its grids grow past 100 dots, ringed, for what the what-ifs add (no red:
+ *   a projected change is not a diagnosis — audit S-5, 2026-09-28);
  * - the growth numbers (MRR in twelve months, new MRR, NRR, GRR, CAC, LTV,
  *   payback) move with the sliders, each saying whether a change is better
  *   or worse in words;
@@ -61,6 +66,24 @@ export function WhatIfPanel({ view, onChange }: { view: EngineView; onChange: (t
   const scenario = scenarioFor(state, targets, ctx);
   const levers = leverRows(scenario, ctx, strings, currency, metrics);
   const knownLevers = levers.filter((l) => l.today !== null);
+  const kpis = kpiRows(scenario, ctx, strings, currency, { state, metrics });
+  const moved = scenario.moved.length > 0;
+
+  // What a screen reader hears, once a slider has settled (design audit S-4).
+  // Nothing for the figures the panel opened with: opening it is not news
+  // (and a ref, not a first-render flag, so React's development double
+  // effect does not announce them either). Each change restarts the wait, so
+  // dragging or holding an arrow key announces the figures once, where they
+  // came to rest — never at every step. Back to today is a change too.
+  const announcement = kpiAnnouncement(kpis, moved, strings);
+  const [announced, setAnnounced] = useState("");
+  const lastSeen = useRef(announcement);
+  useEffect(() => {
+    if (announcement === lastSeen.current) return;
+    lastSeen.current = announcement;
+    const timer = window.setTimeout(() => setAnnounced(announcement), ANNOUNCE_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, [announcement]);
 
   if (knownLevers.length === 0) {
     return (
@@ -72,8 +95,6 @@ export function WhatIfPanel({ view, onChange }: { view: EngineView; onChange: (t
 
   const unknownLevers = levers.filter((l) => l.today === null);
   const steps = funnelSteps(scenario, ctx, strings);
-  const kpis = kpiRows(scenario, ctx, strings, currency, { state, metrics });
-  const moved = scenario.moved.length > 0;
   const gains = scenario.moved.length >= 2 ? leverGains(state, scenario, ctx) : null;
   const inUse = dotsInUse(steps);
   const [visitors, ...columns] = steps;
@@ -107,7 +128,9 @@ export function WhatIfPanel({ view, onChange }: { view: EngineView; onChange: (t
                   <label htmlFor={`${idBase}-${l.id}`} className={styles.leverName}>
                     {l.name}
                   </label>
-                  <output htmlFor={`${idBase}-${l.id}`} className={styles.leverValue} data-testid={`whatif-value-${l.id}`}>
+                  {/* `aria-live="off"`: an <output> is a status region by default, and the
+                      slider's own `aria-valuetext` already says the value at every step. */}
+                  <output htmlFor={`${idBase}-${l.id}`} className={styles.leverValue} aria-live="off" data-testid={`whatif-value-${l.id}`}>
                     {l.valueText}
                   </output>
                 </div>
@@ -149,13 +172,17 @@ export function WhatIfPanel({ view, onChange }: { view: EngineView; onChange: (t
             </h3>
             <span className={styles.sectionMeta}>{moved ? w.kpiIf : w.kpiToday}</span>
           </div>
-          {/* Polite: the figures are announced once a slider settles, never step by step. */}
-          <div className={styles.tiles} aria-live="polite">
+          {/* Not a live region: seven tiles re-read at every step of a slider was
+              the audit's S-4. The one sentence below says what moved, once. */}
+          <div className={styles.tiles}>
             {kpis.map((k) => (
               <Kpi key={k.id} kpi={k} better={w.better} worse={w.worse} todayTemplate={w.leverToday} />
             ))}
           </div>
           {!moved ? <p className={styles.note}>{w.noneMoved}</p> : null}
+          <p className="tdg-visually-hidden" aria-live="polite" aria-atomic="true" data-testid="whatif-announce">
+            {announced}
+          </p>
         </section>
       </div>
 

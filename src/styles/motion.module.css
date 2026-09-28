@@ -1,0 +1,60 @@
+/*
+ * The brand's shared keyframes, as a CSS Module.
+ *
+ * They used to be global @keyframes in tokens/motion.css, named from four
+ * modules. But CSS Modules scope an animation name exactly as they scope a
+ * class (Lightning CSS under Turbopack, esbuild in the design-sync bundle):
+ * `animation: tdg-stamp …` in ScoreDisplay.module.css compiled to
+ * `…ScoreDisplay-module__f12UUa__tdg-stamp`, a keyframe that existed nowhere.
+ * The browser creates no animation for an unknown name, so the score numeral,
+ * the quiz's progress pulse, December's title and the quarter's verdict never
+ * moved — from the DS v2 migration (#14) until 2026-09-28. Lightning CSS has
+ * no `global()` escape for an animation name; it passes it through verbatim.
+ *
+ * The contract, guarded by src/__tests__/motion-keyframes.test.ts:
+ *  - a consumer `composes: stamp from "…/motion.module.css"`, which brings
+ *    ONLY `animation-name`, and sets everything else with longhands
+ *    (duration, timing function, delay, fill mode);
+ *  - a composing class never uses the `animation` shorthand: it resets
+ *    `animation-name` to `none`, and which class won would then depend on
+ *    stylesheet order.
+ *
+ * Reduced motion switches all of this off globally (tokens/motion.css).
+ */
+
+.stamp {
+  animation-name: stamp;
+}
+
+.pulse {
+  animation-name: pulse;
+}
+
+/* The score lands like a stamp: overshoot, settle, no bounce back up. */
+@keyframes stamp {
+  0% {
+    transform: scale(1.18) rotate(-3deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(0.99) rotate(0.6deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+  }
+}
+
+/* A progress segment thickens once as it fills. */
+@keyframes pulse {
+  0% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.35);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}

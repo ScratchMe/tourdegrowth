@@ -24,7 +24,7 @@ export const MissedByALittle = () => (
       period="Quarter 1 · January to March"
       picked={["Pause offer", "Exit survey"]}
       figures={[
-        { key: "churn", label: "Churn", value: "5.7%", note: "target 5.6%", status: { text: "missed by 0.1 pt", tone: "bad" } },
+        { key: "churn", label: "Churn", value: "5.7%", note: "target 5.6%", status: { text: "missed by 0.1 pts", tone: "bad" } },
         { key: "subs", label: "Subscribers", value: "98,904" },
         { key: "mrr", label: "Revenue", value: "€1.28M" },
         { key: "patience", label: "CEO's patience", value: "58" },

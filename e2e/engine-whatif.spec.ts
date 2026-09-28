@@ -49,7 +49,7 @@ async function storedWhatIf(page: Page): Promise<Record<string, number> | undefi
   return page.evaluate((key) => JSON.parse(window.localStorage.getItem(key) ?? "{}").state?.whatIf, STORAGE_KEY);
 }
 
-test("a better sign-up rate finally shows: same visitors, and the sign-up grid grows past 100 in red", async ({ page }) => {
+test("a better sign-up rate finally shows: same visitors, and the sign-up grid grows past 100", async ({ page }) => {
   await openWith(page, exampleState());
   const panel = page.getByTestId("engine-whatif-panel");
   const signups = panel.getByTestId("whatif-step-signups");
@@ -59,7 +59,7 @@ test("a better sign-up rate finally shows: same visitors, and the sign-up grid g
   await nudge(page, "acq.signup-rate", "ArrowRight", 5);
   // The visitors are the same people: no change claimed on them.
   await expect(panel.getByTestId("whatif-step-visitors")).not.toContainText("+");
-  // What the what-ifs add beyond today's 100 is red, and the grid grew by whole rows.
+  // What the what-ifs add beyond today's 100 is marked gained, and the grid grew by whole rows.
   await expect(signups.locator('[data-dot="gained"]').first()).toBeVisible();
   const dots = await signups.locator("[data-dot]").count();
   expect(dots).toBeGreaterThan(100);
@@ -142,4 +142,36 @@ test("at 1280px, the growth numbers stay in view while the last slider moves", a
   await nudge(page, "rev.arpa", "ArrowRight", 2);
   await expect(page.getByTestId("whatif-slider-rev.arpa")).toBeInViewport();
   await expect(page.getByTestId("whatif-kpi-mrr12")).toBeInViewport();
+});
+
+/**
+ * Design audit 2026-09-27, S-4. The seven tiles were themselves a polite live
+ * region, re-read at every step of every slider, while a comment claimed the
+ * opposite. Now one sentence, written once the slider has rested 500 ms.
+ * Timing is not asserted step by step (a slow runner would make it flaky);
+ * what is asserted is the structure — one live region in the block, the
+ * summary — and that it says the resting figures, then "today" once reset.
+ * Non-vacuity, checked by sabotage on 2026-09-28: a build with `aria-live`
+ * put back on the tiles fails this test on the live-region count.
+ */
+test("the growth numbers are read once, from one summary, not from the tiles (audit S-4)", async ({ page }) => {
+  await openWith(page, exampleState());
+  const kpis = page.getByTestId("whatif-kpis");
+  const announce = kpis.getByTestId("whatif-announce");
+  await expect(kpis.locator('[aria-live]:not([aria-live="off"])')).toHaveCount(1);
+  await expect(announce).toHaveAttribute("aria-live", "polite");
+  // Each lever's <output> is a status region by default; the slider's own
+  // aria-valuetext already says the value, so it is switched off.
+  await expect(page.getByTestId("whatif-value-act.rate")).toHaveAttribute("aria-live", "off");
+  // Opening the panel is not news.
+  await expect(announce).toHaveText("");
+
+  await nudge(page, "act.rate", "ArrowRight", 6);
+  await expect(announce).toContainText(`${W.kpisTitle.en}, ${W.kpiIf.en}: `);
+  await expect(announce).toContainText(W.kpiMrr12.en);
+  await expect(announce).toContainText(W.better.en);
+  await expect(announce).not.toContainText(W.kpiNrr.en);
+
+  await page.getByTestId("whatif-reset-all").click();
+  await expect(announce).toContainText(`${W.kpisTitle.en}, ${W.kpiToday.en}: `);
 });
