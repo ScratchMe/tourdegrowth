@@ -5065,3 +5065,79 @@ Restent pour Antoine, au bon à tirer : « cinq cols » (la métaphore du dessin
 - suite Playwright complète : **576 passées, 5 ignorées par construction, aucun échec** ;
 - après les corrections des relecteurs et le passage en requête de conteneur, 71 specs repassées sur le nouveau build : la nouvelle spec, l'accessibilité, l'accueil, les pages de prose, la typographie, les données structurées ;
 - bundle design-sync : 77/77 aperçus rendus, les trois avertissements permanents seulement.
+
+## Kit I + B, 4/4 : le reste de l'audit du kit (2026-09-29)
+
+La dernière des quatre PR de la passe I + B, décidée par Antoine (« Deux PR » : les signes, puis l'audit). Elle solde ce que l'audit statique du kit (2026-09-27) laissait ouvert en dehors des signes : le moteur ramené dans le système, une échelle de mouvement, et les constats faibles. Les constats de l'audit sont cités par leur numéro (S-, M-, L-).
+
+**Le mouvement : une échelle, nommée par usage (S-12, L-6, S-13, S-19, S-21, S-25).**
+- **`motion.css` porte une échelle complète**, nommée par ce que fait le mouvement et non par sa vitesse :
+  - `--dur-fast` (survol, pression) ;
+  - `--dur-close` < `--dur-open` : partir est plus rapide qu'arriver ;
+  - `--dur-state` (un changement sur place) et `--dur-stamp` ;
+  - `--dur-shake`, `--dur-pulse`, `--dur-reveal`, `--dur-draw` ;
+  - trois boucles d'attente (`--dur-wait`, `--dur-breathe`, `--dur-dots`) ;
+  - une distance, `--dist-step` (8 px).
+- **Ce qui a été retiré.**
+  - Les jetons morts (`--dur-exit`, `--dur-message`, `--game-dur-trace`).
+  - Les deux jetons du jeu que l'échelle couvre maintenant (`--game-dur-enter`, `--game-enter-rise`).
+  - `--dur-reveal`, déménagé de `game.css` : le test du jeu l'attendait (« le jour où motion.css l'adopte, il doit quitter ce fichier »).
+  - Les huit copies de `ui-timing.ts` qui recopiaient une durée CSS : aucun fichier ne les importait.
+- **Plus aucune durée littérale** dans un `animation` ou un `transition`. `motion-scale.test.ts` exige aussi que chaque jeton ait un consommateur.
+- **Le tampon (L-6).** Il passe à 260 ms avec `--ease-stamp`, la paire du DESIGN-BRIEF, et ses images clés à deux arrêts. Les trois arrêts d'avant dépassaient déjà la cible, et une accélération qui dépasse, appliquée à chaque segment, faisait rebondir le chiffre deux fois.
+- **Le coup de tampon (S-13) devient une seule image clé partagée, `slam`.** Elle n'anime que `scale` et `opacity`. L'inclinaison de repos est la propriété `rotate` de chaque tampon, donc la même image clé sert au verdict à −4° et à la coupure de presse à −6°. Ces deux copies différaient de quelques degrés.
+- **`QuarterNews` passe sur l'échelle.**
+  - La secousse dure 280 ms, en quatre oscillations dont la première vaut `--dist-step`.
+  - Chaque carte monte de 8 px en 250 ms, sans changement d'échelle (avant : 28 px et `scale(0.97)` en 420 ms).
+  - Un seul effet par carte : le verdict est tamponné, le chiffre ne l'est plus en plus.
+  - La sortie est animée : l'écran s'efface en 150 ms avant que l'îlot ne le démonte.
+- **Les points de suspension du Deep dive (S-19)** sont une boucle CSS, un `clip-path` par paliers, au lieu d'un `setInterval` qui tournait ~70 s hors de toute garde de mouvement réduit.
+- **`color` (et `border-color`) se transitionnent** là où le fond le faisait déjà seul (S-21).
+- **Une seule garde de mouvement réduit**, dans `motion.css` : `globals.css` la répétait mot pour mot (S-25).
+
+**Le piège : la sortie de `QuarterNews` recopiait sa durée.** Première version : une constante `NEWS_CLOSE_MS = 150` dans `ui-timing.ts`, tenue égale à `--dur-close` par un test, plus le crochet de mouvement réduit. `game-bundles.test.ts` l'a refusée, puisqu'un composant du jeu n'importe `lib/game` que pour ses types. La version gardée lit la durée de l'animation sur le dialogue lui-même (`getComputedStyle(…).animationDuration`). Plus aucune copie, et sous mouvement réduit l'animation est coupée : sa durée vaut 0 s et l'écran part aussitôt, sans code pour ce cas.
+
+Un test « `ui-timing.ts` ne recopie aucune durée CSS » a été écrit puis retiré. Comparant des valeurs, il a pris le pas des mois (600 ms) pour une copie de `--dur-reveal` (600 ms). Un contrôle par valeur ne distingue pas une copie d'une coïncidence, et un contrôle par nom serait aveugle au suivant (convention 11). La règle est écrite en tête du fichier.
+
+**Le survol de nuit entre dans le système (S-7).** `--state-hover-border` est un jeton sémantique des deux mondes. Sur papier, c'est le bord qu'un contrôle a déjà, puisque le survol y vit dans l'ombre soulevée. La nuit, où l'ombre noire est à 1,20:1, c'est `--night-muted` (8,28 / 7,70 / 6,76). `Button`, `AnswerOption`, les choix et les onglets du moteur, et `ActionCard` le lisent. `--game-hover-border` et `--game-hover-lift` quittent `game.css`.
+
+**Le moteur ramené dans le système (S-3, S-9, S-14, S-26, S-23, S-24).**
+- **Les choix du moteur** (le modèle, les modes d'un chiffre) sélectionnent par le remplissage encre de tout le reste du site, au lieu d'un bord plein sur fond creux. Leur survol est l'ombre, gardée par `(hover: none)`. Un choix fermé garde son pointillé.
+- **Les trois tampons rouges** (tableau, peloton, slides) lisent `--surface-accent` / `--text-inverse`, le rôle fait pour ça, et non plus les jetons du bouton principal. Le commentaire de `StageTabs.tsx` qui justifiait l'étiquette encre par un 4,42:1 périmé est corrigé.
+- **Les onglets d'étape, les lignes de chiffres et les accordéons** ont un survol gardé et une transition. Le marqueur +/− des lignes est celui de `Disclosure`, par `composes`, et non une copie à 24 px.
+- **Les libellés d'axe de 11 px** passent au `--chart-label` de 12 px. Le compteur de caractères n'est plus à 11 px en encre pâle.
+- **L'utilitaire « visuellement caché »** du moteur cède la place à la classe globale.
+
+**Les constats faibles.**
+- **Requêtes de conteneur (S-18).** Le tableau, le panneau « Et si », le hub de collecte, les tuiles de décembre et le catalogue des pratiques suivent leur propre largeur. Les seuils : 860 px de composant, soit la largeur qu'un tableau avait depuis une fenêtre de 960 px ; 520 px, soit ce qu'une fenêtre de 560 px laissait. Le « Et si » est dans le tableau ET dans le pas-à-pas, à deux largeurs : seule sa propre boîte sait laquelle.
+  - **Le piège vérifié avant** : `container-type` impose une contention de mise en page, donc le conteneur devient le bloc de référence de tout descendant en `position: fixed`. Aucun des cinq ne contient de popover de glossaire, seul élément fixe qui aurait pu s'y trouver ; les dialogues passent en couche supérieure.
+- **Les seuils de fenêtre (L-11)** sont une liste écrite, chacun avec sa raison :
+  - 760, la ligne du téléphone ;
+  - 640, le popover qui se range en bas de la fenêtre ;
+  - 960, une page qui sort de sa colonne ;
+  - 1 100, le chrono du moteur.
+  `breakpoints.test.ts` échoue sur un cinquième tant qu'il n'y est pas ajouté avec sa raison.
+- **Contraste sur le sol composé (L-10, S-20).** Le sol de la page n'est pas le `--paper-1` à plat : `--ground-lift` l'assombrit sous un halo noir à 5 %, là où se posent une ligne de crédit ou le « gagné » de décembre sans carte dessous.
+  - Au point le plus sombre, `--text-faint` mesurait 4,50 et `--state-good-text` 4,47. `--ink-faint` passe de 0,65 à 0,67 (4,79 sous le halo, toujours plus pâle que le gris atténué) et le vert de `#1f6b3f` à `#1e693e` (4,60), la plus petite retouche qui passe.
+  - Le nouveau vert passe même sur `--paper-2` (4,61), où l'ancien était réservé au grand texte.
+  - `token-contrast.test.ts` mesure maintenant chaque encre de texte du papier sous le halo lu dans `shape.css`, pas recopié. Les deux couleurs de série sous 4,5 y sont épinglées comme marques.
+  - Le grain, empilé sur le halo, n'est pas mesuré : il demanderait de changer les rouges de la marque, et un glyphe ne se dessine jamais sur un seul pixel de bruit. Le commentaire de décembre, qui donnait ses deux rapports à l'envers, est corrigé.
+- **La croix de fermeture du popover** fait 44 px (S-22). Des marges négatives rendent la place au padding, donc la ligne ne grandit pas.
+- **Les tailles et les couches.**
+  - `--chart-value-compact` remplace le 17 px écrit deux fois à la main (S-27) ; les deux tailles de valeur du jeu, lues par rien, sont retirées.
+  - Le chiffre du score lit `--size-score-xl` / `--size-score-lg` (M-10).
+  - Chaque `z-index` lit l'échelle (L-7, `z-index.test.ts`) ; `--z-toast`, sans consommateur, est retiré et `--z-raised` ajouté pour la barre d'action du jeu.
+
+**Ce que cette PR ne fait pas, et pourquoi.**
+- **S-6, S-8, S-10, S-11, S-15, S-16, S-17** n'étaient pas dans son périmètre. Les slides gardent leurs 23 tailles littérales (S-8).
+- **Il reste 17 `font-size` littéraux hors des slides.** Dont deux libellés à 10 px, ajoutés par la PR 2 : le drapeau « HC » et la tête de la borne. Ils sont sous le plancher de 11 px. Les remonter change la borne mesurée à 390 px : c'est un sujet à part.
+- **Les opportunités « plateforme » de l'audit (§6)** restent ouvertes : popover en couche supérieure, accordéon animé par `::details-content`, View Transitions entre les écrans du moteur.
+
+**Vérifié avant la PR** :
+- **2 220 tests unitaires**, `tsc`, `eslint` et `next build` propres ; couverture au-dessus de ses seuils ; `npm audit --omit=dev` à zéro.
+- **Suite Playwright complète : 576 passées, 5 ignorées par construction, aucun échec.** Les specs du moteur (onglets, collecte, « Et si », slides), du jeu (nouvelles, îlot, fins), du mouvement et d'accessibilité passent sur les nouvelles règles.
+- **Non-vacuité** de `motion-scale.test.ts`, par sabotage : un jeton ajouté sans consommateur et une durée écrite en dur font tomber exactement les deux cas visés.
+- **Captures du moteur** à 1 280 px (français) et 390 px (anglais) : choix au remplissage encre, choix fermés en pointillés, onglets en grille ou en défilement selon la largeur du tableau, aucun défilement horizontal.
+- **Popover** mesuré dans l'application à 390 px : la croix fait 44 × 44 px, à sa place, et la ligne garde sa hauteur.
+- **Bundle design-sync** : 77/77 aperçus rendus, les trois avertissements permanents seulement.
+- **Relectures non lancées**, et pourquoi : la PR ne touche ni route, ni proxy, ni payload, ni prompt, ni workflow, et n'ajoute aucune copie visible (les seuls textes changés sont des commentaires).
