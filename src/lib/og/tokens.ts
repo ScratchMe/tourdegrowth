@@ -19,6 +19,8 @@ export const OG_INK_SOFT = PRIMITIVES["ink-1"];
 export const OG_STONE = PRIMITIVES["paper-1"];
 export const OG_STONE_2 = PRIMITIVES["paper-2"];
 export const OG_RED = PRIMITIVES["paint-red"];
+/** The red FILL under a small white label (colors.css, R-22): 4.65 with it, where the road-paint red gives 4.42. */
+export const OG_RED_ACTION = PRIMITIVES["paint-red-action"];
 export const OG_RED_INK = PRIMITIVES["paint-red-deep"];
 export const OG_RED_SOFT = PRIMITIVES["paint-red-wash"];
 export const OG_PAINT_WHITE = PRIMITIVES["paper-0"];

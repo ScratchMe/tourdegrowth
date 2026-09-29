@@ -1,4 +1,4 @@
-import type { HTMLAttributes } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 import styles from "./Bottleneck.module.css";
 // Type-only, so it is erased at compile time and this component still pulls
 // nothing from the scoring library into the browser bundle. One declaration
@@ -39,6 +39,19 @@ export interface BottleneckProps extends HTMLAttributes<HTMLDivElement> {
   size?: "desktop" | "mobile";
   /** `roast` paints the pillar name red and does nothing else. */
   tone?: "straight" | "roast";
+  /**
+   * What stands to the left of the label and the names — the score as a
+   * kilometre marker (`ScoreDisplay variant="marker"`), design I + B,
+   * 2026-09-28. The verdict then runs under both, full width. Without it
+   * the block stacks under a `ScoreDisplay` placed before it, as it always
+   * has.
+   *
+   * A slot rather than two siblings laid out by the card: that layout used
+   * `display: contents` on this block in the mockup, which takes the block
+   * out of the box tree — no box to measure, and a test asking whether it
+   * sits inside the card could only fail.
+   */
+  lead?: ReactNode;
 }
 
 /**
@@ -67,19 +80,15 @@ export function Bottleneck({
   verdict,
   size = "desktop",
   tone = "straight",
+  lead,
   className,
   ...rest
 }: BottleneckProps) {
   const desktop = size === "desktop";
   const named = sharpness === "level" ? [] : sharpness === "clear" ? pillars.slice(0, 1) : pillars;
 
-  return (
-    <div
-      className={[styles.wrap, desktop ? styles.desktop : styles.mobile, className ?? ""]
-        .filter(Boolean)
-        .join(" ")}
-      {...rest}
-    >
+  const head = (
+    <>
       <div className={[styles.label, named.length ? "" : styles.labelLevel].filter(Boolean).join(" ")}>
         {label}
       </div>
@@ -101,6 +110,24 @@ export function Bottleneck({
           ))}
         </div>
       ) : null}
+    </>
+  );
+
+  return (
+    <div
+      className={[styles.wrap, desktop ? styles.desktop : styles.mobile, lead ? styles.withLead : "", className ?? ""]
+        .filter(Boolean)
+        .join(" ")}
+      {...rest}
+    >
+      {lead ? (
+        <div className={styles.row}>
+          <div className={styles.lead}>{lead}</div>
+          <div className={styles.head}>{head}</div>
+        </div>
+      ) : (
+        head
+      )}
       <div className={styles.verdict} data-testid="score-verdict">
         {verdict}
       </div>

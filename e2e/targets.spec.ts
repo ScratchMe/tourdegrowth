@@ -144,6 +144,10 @@ test("every definition trigger on the result page takes a 44px tap, and no two t
   );
   const radii: number[] = [];
   for (const i of indices) {
+    // `elementFromPoint` only sees the viewport. Since the stage profile sits
+    // over the chips (design I + B, 2026-09-28) the lower ones start below the
+    // fold at 1280×720, and a trigger off screen measured a 0px target.
+    await page.locator(TRIGGER).nth(i).evaluate((el) => el.scrollIntoView({ block: "center" }));
     const drawn = await page.locator(TRIGGER).nth(i).boundingBox();
     expect(Math.round(drawn!.width)).toBe(16); // the drawn circle does not grow
     const across = await hitExtent(page, TRIGGER, i, "x");
