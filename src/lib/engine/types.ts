@@ -206,10 +206,18 @@ export interface EngineSetup {
  * The fixed slides, in `SLIDE_ORDER`, plus the what-if ones (2026-09-26):
  * one per lever the team moved (`whatif:<lever>`) and one that adds them all
  * up (`scenario`). Those have no fixed place in the list: `deck.ts` puts them
- * after `leak`, in lever order.
+ * after `leak`, in lever order. The appendix may run over more than one page
+ * (A2.1, 2026-09-29): its first page is `annex`, the next ones `annex:2`,
+ * `annex:3`… (lib/engine/annex-pages.ts).
  */
 export type FixedSlideId = "peloton" | "leak" | "visibility" | "unit-economics" | "mirror" | "ask" | "annex";
-export type SlideId = FixedSlideId | "scenario" | `whatif:${LeverId}`;
+export type AnnexPageId = `annex:${number}`;
+export type SlideId = FixedSlideId | "scenario" | `whatif:${LeverId}` | AnnexPageId;
+
+export const isAnnexPage = (id: SlideId): id is AnnexPageId => id.startsWith("annex:");
+
+/** The key a slide's « include » box reads and writes: the appendix's pages go in or out together, as `annex`. */
+export const includeKeyOf = (id: SlideId): SlideId => (isAnnexPage(id) ? "annex" : id);
 export const SLIDE_ORDER: readonly FixedSlideId[] = ["peloton", "leak", "visibility", "unit-economics", "mirror", "ask", "annex"];
 
 export interface EngineAsk {
@@ -512,6 +520,7 @@ export type SlideTitleKey =
   /** The team wrote what it asks for, but no success metric with a target: the ask alone, no half-empty goal. */
   | "askPlain"
   | "askMeasureFirst"
+  /** « Définitions et sources (1/2) »: the appendix always runs over two pages or more at 18px (A2.1). */
   | "annex"
   /** « Et si » (2026-09-26): one lever, priced on the MRR in 12 months — or plain when it can't be. */
   | "whatIfLever"

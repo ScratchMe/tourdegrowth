@@ -144,26 +144,6 @@ const PAIRS: Pair[] = [
   { fg: "viz-highlight-text", bg: P1, stated: 5.42, role: "text", why: "its label" },
   { fg: "viz-highlight-text", bg: P2, stated: 4.89, role: "text", why: "its label" },
   { fg: "viz-unknown", bg: P0, stated: 7.2, role: "text", why: "'not measured' dash" },
-  { fg: "viz-cat-1", bg: P0, stated: 6.5, role: "text", why: "direct label" },
-  { fg: "viz-cat-1", bg: P1, stated: 5.25, role: "text", why: "direct label" },
-  { fg: "viz-cat-1", bg: P2, stated: 4.73, role: "text", why: "direct label" },
-  { fg: "viz-cat-2", bg: P0, stated: 5.83, role: "text", why: "direct label" },
-  { fg: "viz-cat-2", bg: P1, stated: 4.71, role: "text", why: "direct label" },
-  { fg: "viz-cat-2", bg: P2, stated: 4.24, role: "mark-only", why: "no colored label on --paper-2" },
-  { fg: "viz-cat-3", bg: P0, stated: 6.05, role: "text", why: "direct label" },
-  { fg: "viz-cat-3", bg: P1, stated: 4.88, role: "text", why: "direct label" },
-  { fg: "viz-cat-3", bg: P2, stated: 4.4, role: "mark-only", why: "no colored label on --paper-2" },
-  { fg: "viz-cat-4", bg: P0, stated: 6.61, role: "text", why: "direct label" },
-  { fg: "viz-cat-4", bg: P1, stated: 5.34, role: "text", why: "direct label" },
-  { fg: "viz-cat-4", bg: P2, stated: 4.81, role: "text", why: "direct label" },
-  { fg: "viz-cat-5", bg: P0, stated: 16.06, role: "text", why: "direct label" },
-  { fg: "viz-cat-5", bg: P1, stated: 12.97, role: "text", why: "direct label" },
-  { fg: "viz-cat-5", bg: P2, stated: 11.68, role: "text", why: "direct label" },
-  { fg: "viz-seq-1-text", bg: "viz-seq-1", stated: 14.22, role: "text", why: "cell label" },
-  { fg: "viz-seq-2-text", bg: "viz-seq-2", stated: 10.62, role: "text", why: "cell label" },
-  { fg: "viz-seq-3-text", bg: "viz-seq-3", stated: 6.76, role: "text", why: "cell label" },
-  { fg: "viz-seq-4-text", bg: "viz-seq-4", stated: 4.56, role: "text", why: "cell label" },
-  { fg: "viz-seq-5-text", bg: "viz-seq-5", stated: 9.61, role: "text", why: "cell label" },
 ];
 
 describe("every stated paper-world contrast ratio holds", () => {
@@ -183,7 +163,8 @@ describe("every stated paper-world contrast ratio holds", () => {
     // no page renders yet. (Grid, unknown and highlight are covered above.)
     const measured = new Set(PAIRS.flatMap((p) => [p.fg, p.bg]));
     const viz = [...TOKENS.keys()].filter((n) => n.startsWith("viz-"));
-    expect(viz.length).toBeGreaterThan(20);
+    // Six since the chart scales went (A2.2, 2026-09-29): ink, axis, grid, highlight and its text, unknown.
+    expect(viz.length).toBeGreaterThanOrEqual(6);
     for (const n of viz) expect(measured.has(n), `--${n} has no stated ratio`).toBe(true);
   });
 });
@@ -273,20 +254,6 @@ describe("text on the page's bare ground still clears AA", () => {
 
   it("keeps the faint ink quieter than the muted one there too", () => {
     expect(contrast("text-faint", FLOOR)).toBeLessThan(contrast("text-muted", FLOOR));
-  });
-});
-
-describe("the sequential ramp", () => {
-  const steps = [1, 2, 3, 4, 5].map((i) => `viz-seq-${i}`);
-  const gaps = steps.slice(1).map((s, i) => contrast(steps[i] ?? "", s));
-
-  it("neighbouring steps sit 1.34 to 2.11 apart, as documented", () => {
-    expect(round2(Math.min(...gaps))).toBe(1.34);
-    expect(round2(Math.max(...gaps))).toBe(2.11);
-  });
-
-  it("is under 3:1 between neighbours — which is why cells need a paper rule between them", () => {
-    for (const g of gaps) expect(g).toBeLessThan(3);
   });
 });
 

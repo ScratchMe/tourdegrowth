@@ -1,7 +1,7 @@
 /*
- * The peloton — engine spec §8.1. Sizes are the ones the spec measured
- * legible at both widths: dots ~17px with a 4px gap (a grid ≤ 210px) on
- * desktop, a 118px mini-grid on the left of each row at 390px.
+ * The peloton — engine spec §8.1. The grids are viz/DotGrid's (design audit
+ * S-10, 2026-09-29): up to 200px with a 4px gap on desktop, a 118px
+ * mini-grid on the left of each row at 390px. This sheet only places them.
  */
 .peloton {
   display: flex;
@@ -106,76 +106,6 @@
 
 .grid {
   grid-area: grid;
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(10, minmax(0, 1fr));
-  gap: 4px;
-  width: 100%;
-  max-width: 210px;
-  aspect-ratio: 1;
-}
-
-.dot {
-  display: block;
-  border-radius: var(--radius-round);
-  aspect-ratio: 1;
-}
-
-.filled {
-  background: var(--viz-ink);
-}
-
-/* The bottleneck's column: its measured dots take the one red (the stamp
-   says it in words too, so the color is never alone). */
-.highlighted .filled {
-  background: var(--viz-highlight);
-}
-
-/* A referred sign-up: an ink ring around a paper core — distinct from a
-   plain measured dot, and not red, which belongs to the bottleneck. */
-.referred {
-  background: var(--surface-card);
-  box-shadow: inset 0 0 0 4px var(--viz-ink);
-}
-
-.referredRange {
-  background: var(--viz-unknown-fill), var(--surface-card);
-  box-shadow: inset 0 0 0 4px var(--viz-ink);
-}
-
-/* An estimated range: hatched, from lo to hi. */
-.range {
-  background: var(--viz-unknown-fill);
-  box-shadow: inset 0 0 0 1.5px var(--viz-axis);
-}
-
-.empty {
-  box-shadow: inset 0 0 0 1.5px var(--viz-axis);
-}
-
-/* Not measured: the whole grid is one hatched, dashed panel — a shape of its
-   own, never 100 empty dots (which would read as "nobody"). */
-.unknownGrid {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--viz-unknown-fill);
-  border: var(--border-dashed);
-  border-radius: var(--radius-panel);
-}
-
-/* The « ? » sits on its own paper disk so it never overlaps a mark. */
-.unknownMark {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 38%;
-  aspect-ratio: 1;
-  border-radius: var(--radius-round);
-  background: var(--surface-card);
-  border: var(--border-solid);
-  font: var(--chart-value-xl);
-  color: var(--text-body);
 }
 
 .source {
@@ -190,38 +120,6 @@
   color: var(--text-body);
   padding-top: var(--space-5);
   border-top: var(--border-rule);
-}
-
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3) var(--space-8);
-  list-style: none;
-  font: var(--meta-xs);
-  color: var(--text-muted);
-}
-
-.legend li {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.swatch {
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  border-radius: var(--radius-round);
-}
-
-.swatch.referred {
-  box-shadow: inset 0 0 0 3px var(--viz-ink);
-}
-
-.unknownSwatch {
-  background: var(--viz-unknown-fill);
-  outline: 1.5px dashed var(--viz-axis);
-  border-radius: 2px;
 }
 
 @media (max-width: 760px) {
@@ -252,8 +150,6 @@
   }
 
   .grid {
-    max-width: 118px;
-    gap: 2px;
     align-self: start;
   }
 
@@ -266,19 +162,5 @@
     text-transform: uppercase;
     letter-spacing: var(--meta-tracking);
     margin-bottom: 0;
-  }
-
-  .referred,
-  .referredRange {
-    box-shadow: inset 0 0 0 2.5px var(--viz-ink);
-  }
-
-  .range,
-  .empty {
-    box-shadow: inset 0 0 0 1px var(--viz-axis);
-  }
-
-  .unknownMark {
-    font: var(--display-section);
   }
 }

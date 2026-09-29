@@ -16,7 +16,8 @@ test.beforeEach(async ({ context }) => {
  * (lib/engine/__tests__/deck.test.ts); what only the rendered deck can say is
  * here — that a target moved on the board becomes a slide, that the slides
  * sit where the model puts them, that eight levers still fit a 1920 × 1080
- * page, and that they print in the three embedded families only.
+ * page with nothing under 18px (A2.1, 2026-09-29), and that they print in
+ * the three embedded families only.
  */
 
 const STORAGE_KEY = "tdg.engine.v1";
@@ -68,7 +69,9 @@ for (const locale of ["fr", "en"] as const) {
         "unit-economics",
         // No Tour linked, so no mirror slide to offer.
         "ask",
+        // The appendix on its two pages (A2.1).
         "annex",
+        "annex:2",
       ]);
       for (const id of ["whatif:act.rate", "whatif:ret.logo-churn", "scenario"]) {
         await expect(page.getByTestId(`deck-thumb-${id}`)).toHaveAttribute("data-included", "true");
@@ -104,12 +107,20 @@ for (const locale of ["fr", "en"] as const) {
           const footTop = (foot.getBoundingClientRect().top - box.top) / scale;
           const body = foot.previousElementSibling!;
           const deepest = Math.max(...[...body.querySelectorAll("*")].map(y));
-          return { id: slide.getAttribute("data-slide")!, deepest: Math.round(deepest), footTop: Math.round(footTop), text: (slide as HTMLElement).innerText };
+          // The smallest size set on any element with text of its own (A2.1: nothing under 18px on a slide).
+          const smallest = Math.min(
+            ...[...slide.querySelectorAll("*")]
+              .filter((el) => [...el.childNodes].some((n) => n.nodeType === Node.TEXT_NODE && n.textContent!.trim()))
+              .map((el) => parseFloat(getComputedStyle(el).fontSize)),
+          );
+          return { id: slide.getAttribute("data-slide")!, deepest: Math.round(deepest), footTop: Math.round(footTop), smallest, text: (slide as HTMLElement).innerText };
         }),
       );
       expect(measured).toHaveLength(9);
       const clashes = measured.filter((m) => m.deepest > m.footTop).map((m) => `${m.id}: body ends at ${m.deepest}, footer starts at ${m.footTop}`);
       expect(clashes).toEqual([]);
+      // The assumptions footer, the table heads and the levers' moves were 15, 14 and 16px before A2.1.
+      expect(measured.filter((m) => m.smallest < 18).map((m) => `${m.id}: ${m.smallest}px`)).toEqual([]);
 
       // Engine spec §10.4: printable Latin-1 plus – — ’ « » … € · × ÷ ±. A U+2212 minus or a typed « → » is outside it.
       const allowed = /^[\n\t -~ -ÿ–—’…€]*$/u;

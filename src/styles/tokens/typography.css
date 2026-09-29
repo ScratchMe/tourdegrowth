@@ -121,17 +121,45 @@
    * Inter for the prose, mono for the meta — only larger. The title is one
    * sentence that carries the number; `-long` is the step down for the few
    * that run past three lines at full size (the Ask with a long request).
+   *
+   * Nothing on a slide is under 18px (design audit S-8, 2026-09-29): the
+   * slides had 23 sizes written by hand, down to 14px on a page projected at
+   * 1920. Every size they set is a step below, and a table that does not
+   * hold at 18px is cut into two slides, never written smaller (Antoine,
+   * 2026-09-29) — the appendix is paged by the model (lib/engine/annex-pages.ts).
+   * `type-scale.test.ts` fails on a --slide-* step under 18px, and
+   * e2e/engine-deck.spec.ts measures the smallest size a slide renders.
    */
   --slide-kicker: 500 20px/1.4 var(--font-mono);
   --slide-title: 700 78px/1.04 var(--font-display);
   --slide-title-long: 700 62px/1.06 var(--font-display);
   --slide-title-xlong: 700 52px/1.08 var(--font-display);
-  --slide-numeral: 700 104px/0.9 var(--font-display);
+  /* The peloton's column figures. Was 104, a size no slide ever printed:
+     both readers wrote 92 and 64 over it. */
+  --slide-numeral: 700 92px/0.9 var(--font-display);
+  --slide-figure: 700 64px/0.9 var(--font-display); /* a unit-economics figure */
+  /* Stencil labels, by the room they have: a question or a count a slide
+     stands on (xl), a request or a timeline's question (lg), the ask's cost
+     (md), a stage (sm), the leak's aside (xs). */
+  --slide-label-xl: 700 44px/1.1 var(--font-display);
+  --slide-label-lg: 700 40px/1.1 var(--font-display);
+  --slide-label-md: 700 34px/1.1 var(--font-display);
   --slide-label: 700 30px/1.1 var(--font-display);
+  --slide-label-sm: 700 26px/1.1 var(--font-display);
+  --slide-label-xs: 700 24px/1.1 var(--font-display);
   --slide-heading: 600 22px/1.3 var(--font-mono);
   --slide-body: 500 30px/1.35 var(--font-ui);
   --slide-body-sm: 500 24px/1.4 var(--font-ui);
+  --slide-body-xs: 500 22px/1.35 var(--font-ui); /* the « together » sentence */
+  --slide-figures: 500 20px/1.3 var(--font-ui); /* the what-if tables and lever rows */
+  --slide-table: 500 18px/1.35 var(--font-ui); /* the appendix */
+  /* The model's assumptions under a what-if slide, up to seven sentences:
+     prose, so Inter, at the floor — mono at 18px ran them under the body. */
+  --slide-note: 500 18px/1.4 var(--font-ui);
+  /* A line of prose beside or under a label: the leak's aside, a stage's
+     metric, the Tour's answer on the mirror (that one was 21px). */
+  --slide-caption: 500 20px/1.45 var(--font-ui);
   --slide-meta: 500 18px/1.45 var(--font-mono);
-  --slide-table: 500 17px/1.35 var(--font-ui);
+  --size-slide-wordmark: 26px; /* the wordmark in a slide's footer */
   --slide-tracking: 0.12em;
 }

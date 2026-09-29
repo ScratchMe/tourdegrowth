@@ -5,14 +5,6 @@ import styles from "./deck.module.css";
 
 type AnnexRow = DeckRows["annex"];
 
-/**
- * Past this many rows the table takes its dense step (smaller type, tighter
- * cells): the appendix is one page, never two — a second page would print as
- * a slide with no title. Measured on the §6.0 example: its fifteen rows ran
- * into the footer at the normal step.
- */
-const DENSE_ABOVE = 12;
-
 /** The table's columns, in the order of `slide.annexCols` (§14.8); the row's `label` is the "Number" column. */
 const COLUMNS = ["label", "formula", "window", "period", "source", "status", "confidence"] as const satisfies readonly (keyof AnnexRow)[];
 
@@ -23,6 +15,11 @@ const COLUMNS = ["label", "formula", "window", "period", "source", "status", "co
  * status and how much to trust it. The user's own definition, when they
  * wrote one, sits under the formula; their private note never does (it is
  * "never on a slide", §4.1), and the model doesn't carry it.
+ *
+ * One page of it: the model cuts the appendix into as many pages as its
+ * rows need at 18px (lib/engine/annex-pages.ts, 2026-09-29), each a slide
+ * with its own title and number, and this draws the rows it was given.
+ * Until then a long appendix took a 15px step to stay on one page.
  *
  * A real `<table>`: this is tabular data, and a slide exported to PDF keeps
  * its structure for anyone reading it with assistive technology. A cell the
@@ -35,7 +32,7 @@ export function SlideAnnex({ slide, context }: SlideProps) {
 
   return (
     <SlideFrame slide={slide} context={context}>
-      <table className={[styles.annex, rows.length > DENSE_ABOVE ? styles.annexDense : ""].filter(Boolean).join(" ")}>
+      <table className={styles.annex}>
         <thead>
           <tr>
             {COLUMNS.map((col) => (

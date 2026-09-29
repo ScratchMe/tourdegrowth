@@ -40,11 +40,12 @@ import {
   unitInputsPhrase,
   worthOf,
 } from "./phrases";
+import { annexPages, type AnnexCells } from "./annex-pages";
 import { buildScenario, leverAlone } from "./scenario";
 import type { Scenario, ScenarioFunnel, ScenarioKpis } from "./scenario";
 import { BASIS_KEY, REPAIR_KEY, ROLE_KEY, STATUS_KEY } from "./strings";
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "./strings";
-import { SLIDE_ORDER } from "./types";
+import { includeKeyOf, SLIDE_ORDER } from "./types";
 import type {
   CandidateId,
   Comparator,
@@ -694,7 +695,7 @@ function mirrorLines(mirror: NonNullable<EngineDerived["mirror"]>, strings: Word
 
 // --- Annex -------------------------------------------------------------------
 
-function buildAnnex(state: EngineState, strings: Words, metrics: ResolvedMetric[], ctx: EngineCalcContext): Row[] {
+function buildAnnex(state: EngineState, strings: Words, metrics: ResolvedMetric[], ctx: EngineCalcContext): (Row & AnnexCells)[] {
   const snapshot = currentSnapshot(state);
   return METRIC_SHAPES.map((shape) => {
     const entry = entryOf(snapshot, shape.id);
@@ -930,6 +931,22 @@ function movedLevers(state: EngineState, strings: Words, ctx: EngineCalcContext)
 
 type BuiltSlide = Omit<DeckSlide, "id" | "included" | "index">;
 
+/**
+ * The appendix as the pages it prints on (A2.1, 2026-09-29): `annex`,
+ * `annex:2`…, « (1/2) » in each title, every page with its own rows in the
+ * catalogue's order. It is never one page: the catalogue's rows, each at its
+ * shortest, run past one page at 18px (annex-pages.test.ts holds that, so
+ * the title's page part never reads « (1/1) » without a test saying so).
+ */
+function annexSlides(annex: BuiltSlide, rows: (Row & AnnexCells)[]): { id: SlideId; slide: BuiltSlide; byDefault: boolean }[] {
+  const pages = annexPages(rows);
+  return pages.map((lines, i) => ({
+    id: i === 0 ? "annex" : `annex:${i + 1}`,
+    slide: { ...annex, title: { key: "annex", values: { i: String(i + 1), n: String(pages.length) } }, lines },
+    byDefault: DEFAULT_INCLUDE.annex,
+  }));
+}
+
 /** The what-if slides, in the order they print: each lever alone, then all of them together when there are two or more. */
 function buildWhatIfSlides(state: EngineState, strings: Words, ctx: EngineCalcContext): { id: SlideId; slide: BuiltSlide }[] {
   const levers = movedLevers(state, strings, ctx);
@@ -1021,6 +1038,7 @@ export function buildDeck(state: EngineState, derived: EngineDerived, strings: W
       }),
     );
 
+  const annexRows = buildAnnex(state, strings, metrics, ctx);
   const built: Record<FixedSlideId, Omit<DeckSlide, "id" | "included" | "index">> = {
     peloton: {
       present: true,
@@ -1046,19 +1064,21 @@ export function buildDeck(state: EngineState, derived: EngineDerived, strings: W
       notes: [],
     },
     ask: { present: ask.present, title: ask.title, lines: ask.lines, notes: [] },
-    annex: { present: true, title: { key: "annex", values: {} }, lines: buildAnnex(state, strings, metrics, ctx), notes: [] },
+    // Its title's page part is filled by annexSlides, page by page.
+    annex: { present: true, title: { key: "annex", values: { i: "1", n: "1" } }, lines: annexRows, notes: [] },
   };
 
   const order: FixedSlideId[] = blindEngine ? ["visibility", ...SLIDE_ORDER.filter((id) => id !== "visibility")] : [...SLIDE_ORDER];
   // The what-if slides have no fixed place: they follow the leak, in lever order, then the « together » one.
   const whatIfs = buildWhatIfSlides(state, strings, ctx);
-  const entries = order.flatMap((id): { id: SlideId; slide: BuiltSlide; byDefault: boolean }[] => [
-    { id, slide: built[id], byDefault: DEFAULT_INCLUDE[id] },
-    ...(id === "leak" ? whatIfs.map((w) => ({ ...w, byDefault: true })) : []),
-  ]);
+  const entries = order.flatMap((id): { id: SlideId; slide: BuiltSlide; byDefault: boolean }[] => {
+    if (id === "annex") return annexSlides(built.annex, annexRows);
+    return [{ id, slide: built[id], byDefault: DEFAULT_INCLUDE[id] }, ...(id === "leak" ? whatIfs.map((w) => ({ ...w, byDefault: true })) : [])];
+  });
   let index = 0;
   const slides: DeckSlide[] = entries.map(({ id, slide, byDefault }) => {
-    const included = slide.present && (state.deck.include[id] ?? byDefault);
+    // The appendix's pages share one « include » box (`annex`).
+    const included = slide.present && (state.deck.include[includeKeyOf(id)] ?? byDefault);
     return { id, ...slide, included, index: included ? ++index : null };
   });
 

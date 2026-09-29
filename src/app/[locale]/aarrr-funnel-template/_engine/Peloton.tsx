@@ -1,3 +1,4 @@
+import { DotGrid, DotLegend } from "@/components/viz/DotGrid";
 import type { Locale } from "@/lib/i18n/locale";
 import type { Diagnosis, Peloton as PelotonModel, PelotonColumn, YearMonth } from "@/lib/engine/types";
 import type { EngineStrings } from "@/lib/engine/strings";
@@ -166,26 +167,15 @@ export function Peloton({ peloton, strings, locale, cohortMonth, paidWindowDays,
           : fill(w.sameHundred, { cohort })}
       </p>
 
-      <ul className={styles.legend} aria-hidden="true">
-        {referredText ? (
-          <li>
-            <span className={`${styles.swatch} ${styles.referred}`} />
-            {fill(w.legendReferred, { n: referredText })}
-          </li>
-        ) : null}
-        <li>
-          <span className={`${styles.swatch} ${styles.filled}`} />
-          {w.legendMeasured}
-        </li>
-        <li>
-          <span className={`${styles.swatch} ${styles.range}`} />
-          {w.legendRange}
-        </li>
-        <li>
-          <span className={`${styles.swatch} ${styles.unknownSwatch}`} />
-          {w.legendUnknown}
-        </li>
-      </ul>
+      <DotLegend
+        aria-hidden
+        items={[
+          ...(referredText ? [{ mark: "referred" as const, label: fill(w.legendReferred, { n: referredText }) }] : []),
+          { mark: "filled", label: w.legendMeasured },
+          { mark: "range", label: w.legendRange },
+          { mark: "unknown", label: w.legendUnknown },
+        ]}
+      />
 
       {/* Hidden by a WRAPPER, not on the table itself: a table box sizes to
           its content and ignores `width: 1px` / `overflow: hidden`, so the
@@ -239,7 +229,7 @@ function Column({ numeral, label, grid, aria, source, stamp, metric }: ColumnPro
   const highlighted = Boolean(stamp);
   return (
     <div
-      className={[styles.column, highlighted ? styles.highlighted : ""].filter(Boolean).join(" ")}
+      className={styles.column}
       data-metric={metric}
       data-state={unknown ? "unknown" : "known"}
     >
@@ -254,22 +244,7 @@ function Column({ numeral, label, grid, aria, source, stamp, metric }: ColumnPro
           </span>
         ) : null}
       </div>
-      <div
-        role="img"
-        aria-label={aria}
-        className={[styles.grid, unknown ? styles.unknownGrid : ""].filter(Boolean).join(" ")}
-        data-testid={`peloton-grid-${metric}`}
-      >
-        {unknown ? (
-          <span className={styles.unknownMark} aria-hidden="true">
-            ?
-          </span>
-        ) : (
-          grid.dots.map((dot, i) => (
-            <span key={i} className={`${styles.dot} ${styles[dot]}`} data-dot={dot} aria-hidden="true" />
-          ))
-        )}
-      </div>
+      <DotGrid grid={grid} label={aria} highlighted={highlighted} className={styles.grid} data-testid={`peloton-grid-${metric}`} />
       <p className={styles.source}>{source}</p>
     </div>
   );

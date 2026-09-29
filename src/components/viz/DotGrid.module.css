@@ -1,0 +1,195 @@
+/*
+ * viz/DotGrid — the funnel as counts (design audit S-10, 2026-09-29).
+ *
+ * Three strokes, each a proportion of the system's edge (--border-width,
+ * tokens/shape.css), set once per size:
+ *   --dot-stroke     an outline: an empty dot, an estimate's hatched dot,
+ *                    the « unknown » swatch — ¾ of the edge;
+ *   --dot-ring       a referred sign-up's ring — twice the edge;
+ *   --dot-ring-thin  a gained or lost dot's ring — one edge.
+ * On a slide the outline is a whole edge; on a phone's 118px grid every
+ * stroke steps down by a quarter of an edge or more. The peloton drew
+ * 1.5 / 4 / —, « Et si » 1.5 / — / 2 and the slides 2 / 4 / —, each on its
+ * own, and the phone halved them by hand: the same values, now from here.
+ */
+.grid {
+  --dot-gap: 4px;
+  --dot-stroke: calc(0.75 * var(--border-width));
+  --dot-ring: calc(2 * var(--border-width));
+  --dot-ring-thin: var(--border-width);
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: var(--dot-gap);
+  box-sizing: border-box;
+}
+
+/* No aspect ratio on the grid: 100 square dots make a square, more grow it row by row. */
+.screen {
+  width: 100%;
+  max-width: 200px;
+}
+
+.slide {
+  --dot-gap: 6px;
+  --dot-stroke: var(--border-width);
+  width: 200px;
+}
+
+.dot {
+  display: block;
+  box-sizing: border-box;
+  border-radius: var(--radius-round);
+  aspect-ratio: 1;
+}
+
+.filled {
+  background: var(--viz-ink);
+}
+
+/* The bottleneck's grid: its counted dots take the one red. */
+.highlighted .filled {
+  background: var(--viz-highlight);
+}
+
+.range {
+  background: var(--viz-unknown-fill);
+  box-shadow: inset 0 0 0 var(--dot-stroke) var(--viz-axis);
+}
+
+.empty {
+  box-shadow: inset 0 0 0 var(--dot-stroke) var(--viz-axis);
+}
+
+.referred {
+  background: var(--surface-card);
+  box-shadow: inset 0 0 0 var(--dot-ring) var(--viz-ink);
+}
+
+.referredRange {
+  background: var(--viz-unknown-fill), var(--surface-card);
+  box-shadow: inset 0 0 0 var(--dot-ring) var(--viz-ink);
+}
+
+.gained {
+  background: radial-gradient(circle, var(--viz-ink) 0 30%, transparent 32%);
+  box-shadow: inset 0 0 0 var(--dot-ring-thin) var(--viz-ink);
+}
+
+.gainedRange {
+  background: radial-gradient(circle, var(--viz-ink) 0 30%, transparent 32%), var(--viz-unknown-fill);
+  box-shadow: inset 0 0 0 var(--dot-ring-thin) var(--viz-ink);
+}
+
+.lost {
+  background: linear-gradient(135deg, transparent 0 42%, var(--viz-ink) 42% 58%, transparent 58%);
+  box-shadow: inset 0 0 0 var(--dot-ring-thin) var(--viz-ink);
+}
+
+/*
+ * Not measured: one hatched, dashed panel with a « ? » on its own paper disc,
+ * so the mark never sits on a hatch line. Declared after .grid, so its
+ * display wins.
+ */
+.unknown {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  background: var(--viz-unknown-fill);
+  border: var(--border-dashed);
+  border-radius: var(--radius-panel);
+}
+
+.question {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38%;
+  aspect-ratio: 1;
+  box-sizing: border-box;
+  border: var(--border-solid);
+  border-radius: var(--radius-round);
+  background: var(--surface-card);
+  font: var(--chart-value-xl);
+  color: var(--text-body);
+}
+
+.slide .question {
+  font: var(--slide-label-xl);
+}
+
+/* --- The legend: each swatch drawn by the dot's own rules ----------------- */
+
+.legend {
+  --dot-stroke: calc(0.75 * var(--border-width));
+  /* Half an edge under the grid's ring: a 12px swatch keeps its paper core. */
+  --dot-ring: calc(1.5 * var(--border-width));
+  --dot-ring-thin: var(--border-width);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.swatch {
+  display: inline-block;
+  flex: none;
+  box-sizing: border-box;
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-round);
+}
+
+/* « Not measured »: the panel's hatch and dashed edge, at the dots' stroke, inside the swatch as a dot's ring is. */
+.unknownSwatch {
+  background: var(--viz-unknown-fill);
+  outline: var(--dot-stroke) dashed var(--viz-axis);
+  outline-offset: calc(-1 * var(--dot-stroke));
+  border-radius: 2px;
+}
+
+/* On a slide: 20px swatches, the slide's stroke and meta type. */
+.legendSlide {
+  --dot-stroke: var(--border-width);
+  --dot-ring: calc(2 * var(--border-width));
+  gap: 8px 32px;
+  font: var(--slide-meta);
+}
+
+.legendSlide li {
+  gap: 10px;
+}
+
+.legendSlide .swatch {
+  width: 20px;
+  height: 20px;
+}
+
+.legendSlide .unknownSwatch {
+  border-radius: 3px;
+}
+
+@media (max-width: 760px) {
+  /* A 118px mini-grid: the strokes step down with the dots. */
+  .screen {
+    --dot-gap: 2px;
+    --dot-stroke: calc(0.5 * var(--border-width));
+    --dot-ring: var(--border-width);
+    --dot-ring-thin: calc(0.75 * var(--border-width));
+    max-width: 118px;
+  }
+
+  .screen .question {
+    font: var(--display-section);
+  }
+}

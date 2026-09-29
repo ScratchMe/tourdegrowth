@@ -1476,7 +1476,9 @@ de flèche, de coche ou de puce ronde (§10.4).
 | `annex` | toujours | oui |
 
 Ordre normal : peloton → leak → visibility → unit-economics → mirror → ask →
-annex. **Si moins de 2 ★ sont connus**, `visibility` passe en premier (le
+annex. L'annexe court sur **deux pages ou plus** depuis le 2026-09-29 (A2.1 :
+rien sous 18 px sur une slide) : `annex`, `annex:2`…, une seule case
+« inclure » pour toutes (`lib/engine/annex-pages.ts`). **Si moins de 2 ★ sont connus**, `visibility` passe en premier (le
 message est alors « on ne voit pas encore le moteur ») et `leak` est omise.
 
 ### 9.3 Les slides, avec leurs gabarits exacts (FR / EN)
@@ -1590,7 +1592,9 @@ qui confronte à la réalité ; elle tient aussi lieu d'Evidence)
 **Annexe — `annex` · « définitions et sources »**
 - Tableau : chiffre · formule · fenêtre · cohorte/mois · source · statut ·
   confiance. C'est ce qui rend chaque nombre ré-explicable en dix secondes.
-  Titre : « Définitions et sources » / "Definitions and sources".
+  Titre : « Définitions et sources ({i}/{n}) » / "Definitions and sources
+  ({i}/{n})" — la page et leur nombre, depuis que l'annexe se découpe au lieu
+  de rétrécir (2026-09-29, à relire).
 
 ### 9.4 Export texte et notes d'orateur
 
@@ -2332,7 +2336,7 @@ src/`**, jamais depuis cette liste. Français avec U+00A0 avant `%`, `€`, `:`,
 | `slide.askKnow` | Comment nous saurons | How we'll know |
 | `slide.askMeasure` | Ce qu'il faut d'abord mesurer | What to measure first |
 | `slide.askCheckpoint` | relevé mensuel, premier point le {date} | monthly reading, first checkpoint on {date} |
-| `slide.annexTitle` | Définitions et sources | Definitions and sources |
+| `slide.annexTitle` | Définitions et sources ({i}/{n}) | Definitions and sources ({i}/{n}) |
 | `slide.annexCols` | Chiffre · Formule · Fenêtre · Période · Source · Statut · Confiance | Number · Formula · Window · Period · Source · Status · Confidence |
 | `slide.titles.*` | les gabarits de §9.3, un par cas et par accord | the §9.3 templates, one per case and plural form |
 | `notes.compared` | Comparé à quoi ? — {comparator}. | Compared with what? — {comparator}. |

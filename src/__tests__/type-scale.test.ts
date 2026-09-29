@@ -9,16 +9,20 @@ import { describe, expect, it } from "vitest";
  * Fifteen sizes were written in pixels in components, beside the tokens they
  * shadowed. They now read a step of the scale: an existing one where the
  * literal sat within half a pixel of it, a step added and named by its use
- * where the screen had a size of its own. The slides are the exception, with
- * their own scale to finish (S-8, CHANTIERS.md A2.1). The « built by » credit
- * became a named step on 2026-09-29 (C23, below).
+ * where the screen had a size of its own. The « built by » credit became a
+ * named step on 2026-09-29 (C23, below). The slides joined the same day
+ * (S-8, CHANTIERS.md A2.1): their 23 literal sizes are --slide-* steps, and
+ * none of those is under 18px (last describe).
  *
  * A1.4 — nothing under 11px. The HC flag of the stage profile and the head of
  * the kilometre marker were 10px, written over tokens of 11.
  *
  * Non-vacuity (2026-09-29): a `font-size: 10px` put back on the marker's head
  * fails both the second test (a literal) and the fourth (under the floor);
- * a token set to 10px fails the fourth alone.
+ * a token set to 10px fails the fourth alone. On the slides: the annex
+ * header's `font-size: 15px` put back fails « writes no size of its own » and
+ * « the slides read only slide steps », on that line; --slide-table back at
+ * 17px fails « every slide step is 18px or more » alone, on that token.
  */
 
 const SRC = join(process.cwd(), "src");
@@ -33,10 +37,7 @@ function walk(dir: string): string[] {
 
 const strip = (css: string) => css.replace(/\/\*[\s\S]*?\*\//g, "");
 
-/** The slides keep their own literal scale until A2.1 completes --slide-*. */
-const SLIDES = join("aarrr-funnel-template", "_engine", "deck");
-
-const SHEETS = walk(SRC).filter((f) => !f.includes(join("styles", "tokens")) && !f.includes(SLIDES));
+const SHEETS = walk(SRC).filter((f) => !f.includes(join("styles", "tokens")));
 const TYPOGRAPHY = strip(readFileSync(join(SRC, "styles", "tokens", "typography.css"), "utf8"));
 
 const NOT_ON_THE_SCALE: Record<string, string> = {
@@ -114,5 +115,34 @@ describe("nothing is set under 11px (design audit A1.4)", () => {
     }
     expect(sizes.length).toBeGreaterThan(30);
     expect(sizes.filter((s) => Number(s.split(" ").pop()) < 11)).toEqual([]);
+  });
+});
+
+describe("nothing on a slide is under 18px (design audit S-8, A2.1)", () => {
+  /*
+   * A slide is 1920px wide and projected on a wall: the slides had 23 sizes
+   * of their own, down to 14px. Every --slide-* step (and --size-slide-*) is
+   * 18px or more, and the deck's sheet reads only those, the one wordmark
+   * size included. e2e/engine-deck.spec.ts measures what a slide renders.
+   */
+  const DECK = readFileSync(join(SRC, "app", "[locale]", "aarrr-funnel-template", "_engine", "deck", "deck.module.css"), "utf8");
+
+  it("every slide step is 18px or more", () => {
+    const steps: [string, number][] = [];
+    for (const m of TYPOGRAPHY.matchAll(/(--(?:size-)?slide-[a-z0-9-]+)\s*:\s*([^;]+);/g)) {
+      const size = m[2]!.match(/(\d*\.?\d+)px/);
+      if (size) steps.push([m[1]!, Number(size[1])]);
+    }
+    // Non-vacuity: the scale has its twenty-odd steps, not a handful.
+    expect(steps.length).toBeGreaterThan(20);
+    expect(steps.filter(([, px]) => px < 18).map(([name]) => name)).toEqual([]);
+  });
+
+  it("the slides read only slide steps", () => {
+    // The slide rules end where the screen around them starts (deck.module.css says so in its header).
+    const slides = strip(DECK.slice(0, DECK.indexOf("The screen around the slides")));
+    const reads = [...slides.matchAll(/(?<![-\w])(?:font|font-size)\s*:\s*([^;}]+)/g)].map((m) => m[1]!.trim());
+    expect(reads.length).toBeGreaterThan(40);
+    expect(reads.filter((value) => !/^var\(--(?:size-)?slide-[a-z0-9-]+\)$/.test(value))).toEqual([]);
   });
 });

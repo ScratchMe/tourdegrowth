@@ -89,21 +89,6 @@ export const SEMANTIC = {
   "viz-highlight": "var(--paint-red)",
   "viz-highlight-text": "var(--paint-red-deep)",
   "viz-unknown": "var(--ink-1)",
-  "viz-cat-1": "#1f5f8b",
-  "viz-cat-2": "#1c6e57",
-  "viz-cat-3": "#855500",
-  "viz-cat-4": "#8a3f6e",
-  "viz-cat-5": "var(--ink-0)",
-  "viz-seq-1": "#f1ebdc",
-  "viz-seq-2": "#d8ccb0",
-  "viz-seq-3": "#b2a283",
-  "viz-seq-4": "#7f705a",
-  "viz-seq-5": "#4a4034",
-  "viz-seq-1-text": "var(--ink-0)",
-  "viz-seq-2-text": "var(--ink-0)",
-  "viz-seq-3-text": "var(--ink-0)",
-  "viz-seq-4-text": "var(--paper-0)",
-  "viz-seq-5-text": "var(--paper-0)",
 } as const satisfies Record<string, ColorValue>;
 
 export const DERIVED = {
@@ -186,21 +171,6 @@ export const NIGHT_WORLD = {
   "viz-highlight": "var(--night-bad)",
   "viz-highlight-text": "var(--night-bad)",
   "viz-unknown": "var(--night-muted)",
-  "viz-cat-1": "#6cb4e8",
-  "viz-cat-2": "#3fc59a",
-  "viz-cat-3": "var(--night-amber)",
-  "viz-cat-4": "#e08cc0",
-  "viz-cat-5": "var(--night-text)",
-  "viz-seq-1": "#3a3226",
-  "viz-seq-2": "#5a4a2c",
-  "viz-seq-3": "#7a5c26",
-  "viz-seq-4": "#c08c30",
-  "viz-seq-5": "var(--night-amber)",
-  "viz-seq-1-text": "var(--night-text)",
-  "viz-seq-2-text": "var(--night-text)",
-  "viz-seq-3-text": "var(--night-text)",
-  "viz-seq-4-text": "var(--night-0)",
-  "viz-seq-5-text": "var(--night-0)",
 } as const satisfies Record<keyof typeof SEMANTIC, ColorValue>;
 
 export type NightColorToken = keyof typeof NIGHT_PRIMITIVES | keyof typeof SEMANTIC | keyof typeof DERIVED;

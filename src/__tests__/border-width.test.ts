@@ -14,7 +14,9 @@ import { describe, expect, it } from "vitest";
  * Non-vacuity (2026-09-29): putting back the game's 4px boss edge fails the
  * second test on exactly that line; putting back one `2px solid` fails it on
  * that line too. The allowance below is checked both ways — a listed line
- * that disappears fails the third test, so the list cannot go stale.
+ * that disappears fails the third test, so the list cannot go stale. It is
+ * empty since A2.2 (2026-09-29): its last line, the peloton's « unknown »
+ * swatch at 1.5px, is drawn by viz/DotGrid at ¾ of --border-width.
  */
 
 const SRC = join(process.cwd(), "src");
@@ -34,10 +36,7 @@ const SHAPE = readFileSync(join(SRC, "styles", "tokens", "shape.css"), "utf8");
  * Widths still written by hand, each with the reason it is not a token yet.
  * Keyed `file: declaration` so a second occurrence is not covered by the first.
  */
-const NOT_YET_A_TOKEN: Record<string, string> = {
-  "src/app/[locale]/aarrr-funnel-template/_engine/Peloton.module.css: outline: 1.5px dashed var(--viz-axis)":
-    "the peloton's « unknown » swatch, drawn at the grid's own stroke — it takes the stroke of viz/DotGrid when A2.2 redraws the grid",
-};
+const NOT_YET_A_TOKEN: Record<string, string> = {};
 
 /** Border and outline declarations whose value can carry a width. */
 const WIDTH_PROPERTY =
