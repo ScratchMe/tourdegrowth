@@ -14,7 +14,9 @@
   background: var(--surface-card);
   color: var(--text-body);
   border: var(--border-solid);
-  border-radius: var(--radius-tag);
+  /* A box of paragraphs, never a pill: --radius-tag became 999px with design I
+     (#177) and turned the clipping into an ellipse that cut its own text. */
+  border-radius: var(--radius-panel);
   transform: rotate(-1deg);
 }
 
