@@ -217,13 +217,38 @@ viewport media query, not the cell) overlapped its own figure labels.
 
 ## Previews are all repo-owned
 
-All 77 live in `.design-sync/previews/` (244 story cells) — none are
-generated. Copy is the product's own, pulled from `dictionary.ts`,
-`copy-library.ts`, `how-it-works.ts` and, for the game, `content/game/*.ts`
-rather than invented, so the cards read as the real product. The game's
-numbers follow the real level (`lib/game/levels/retention.ts`: 100,000
-subscribers, 6.0% churn, targets 5.6/5.1/4.6/4.0%, each card's trust and
-radar effects) and are formatted the way `lib/game/format.ts` formats them.
+All 77 live in `.design-sync/previews/` — none are generated (cell count: see
+"Synced"). Copy is the product's own and numbers are the model's own — **and
+that was not true until the 2026-09-29 re-sync**: this paragraph already said
+so, while 64 of 245 cells carried retired copy, mockup copy, hand-typed game
+numbers the model cannot reach, or a prop passed at its default. Grading found
+them; reading the sources had not (see "Found in the 2026-09-29 re-sync").
+
+**How the props are produced now — the method, not the result, is what keeps
+this true.** Strings come from the product modules (`dictionary.ts`,
+`copy-library.ts`, `how-it-works.ts`, `glossary-terms.ts`, `next-moves.ts`,
+`free-context.ts`, `content/game/*.ts`), imported or copied verbatim. Numbers
+and whole prop objects come from **running the product's own functions** and
+pasting their output:
+- game: a reference year played through the reducer
+  (`lib/game/__tests__/paths.ts`: `PATH_A`, `PATH_C`, `PATH_M`, fired years…),
+  turned into props by the island's builders
+  (`app/[locale]/game/retention/island-view.ts`: `dashboardProps`, `handView`,
+  `journalEntries`, `newsContent`, `reportContent`, `decemberContent`,
+  `bossMessage`, `moodNow`);
+- result: `computeScore`, `resolveBottleneck`, `buildQuickVerdict`,
+  `resolveNextMove` on a board the quiz can produce (reachable pillar scores
+  are 0/2/5/7/9/11/13/16/20 — the `/r/sample` board 18·12·8·16·20 is fixed
+  display data and is NOT one; the result previews use 20·13·9·16·16 = 74);
+- engine: `kpiRows` and the scenario view.
+Run them with `node --experimental-strip-types --import ./register.mjs x.mts`,
+where `register.mjs` installs a resolve hook (`@/` → `src/`, add `.ts`, stub
+`.css`) — or bundle a scratch entry with `.ds-sync/node_modules/.bin/esbuild
+--bundle --platform=node`. Paste the JSON as inline JSX props (contextual
+typing keeps the unions) and name the path or board in the story's doc
+comment. Keep scratch scripts in a per-batch folder: parallel agents share the
+scratchpad.
+
 French strings carry U+00A0 before `: ; ! ? % »`, after `«`, in digit groups
 and before units. Check it in Python (`re` on each `"…"` literal, looking for
 `[0-9A-Za-zé] [:;!?%»]`, `« ` and `\d \d{3}`), not with `grep -P`: in byte
@@ -242,6 +267,23 @@ clicks pill, `ZoneNav`'s compact line, `RevealCells` stacking — all chosen by
 data table, `GameJournal`'s entries, `PatternCatalogue`'s turned-down and
 unseen groups), and **hover/press/animation** (`Button`'s `HoverAndPress`,
 `VideoCall`'s typing and clock, the December unblur and stamp).
+
+**What the per-story capture cannot see.** `package-capture.mjs` shoots each
+story alone at 900×700 (`fullPage: false`), and the review sheet caps a cell at
+520px. So:
+- `SpaceBand`'s wide form (the legs' names) needs about 950px — a container
+  query at 900px on `.inner` plus its 24px side padding. Its Tour, Engine, Game
+  and NotOpenYet cells are clipped in the per-story shots and whole in the
+  1200px render-check shot (`_screenshots/brand__SpaceBand.png`), which is
+  what they are graded on. Narrowing the wrapper would switch them to the
+  narrow form, which `Narrow` already shows. `SiteHeader` WithBand,
+  `ContentHeader` InTheEngine and `ProsePage` NightIntro show the band in its
+  narrow form at card width, and say so.
+- Tall cells lose their bottom (`ProsePage` Page and NightIntro, all three
+  `QuarterReport` cells, `PatternCatalogue` ThreeGroups, `PhoneMock` Dark):
+  graded from the render-check shots or a scratch full-page shot, never from
+  the cut sheet alone.
+- `Hand` shows 6 of its cards for the same reason; its doc says which.
 
 `ShareCard.tsx` imports `share-sample.png`, a real 1200×630 render of
 `/r/sample` captured from a production build; esbuild inlines it as a data URI
@@ -281,6 +323,12 @@ Playwright's browser is **not** in the repo either. `package-validate.mjs` and
 which wants chromium build **1194**. `npx playwright install chromium` from the
 repo root gets the matching one. Nothing was cached on this machine on the
 first run — do not assume a sandbox has it.
+
+**In a claude.ai/code cloud session** (2026-09-29) both are there: the
+`/design-sync` skill ships the converter in its own base directory (stage it
+into `.ds-sync/` as usual), and Chromium build 1194 is preinstalled under
+`/opt/pw-browsers` (`PLAYWRIGHT_BROWSERS_PATH`) — do not run `playwright
+install`.
 
 ## `relativize-dts.mjs` — without it, half the contracts are useless
 
@@ -382,7 +430,42 @@ contract mismatch — this is what caught an undefined month in `ChartFrame`.
   constants. Same for copy: a catalogue `tell` was paraphrased until checked
   against `retention.ts`.
 
+### Found in the 2026-09-29 re-sync, all by grading
+
+64 of 245 cells, in 43 components, rendered cleanly and said something false.
+Four agents graded them from the sheets, each finding was checked against the
+source before anything was changed, and every one was fixed in the preview —
+except the first, which was the product's:
+- **A component bug.** `EventClipping`, and the CEO quote boxes of
+  `QuarterNews` and `QuarterReport`, read `--radius-tag`, which design I (#177)
+  turned into a 999px pill: the clipping became an ellipse spilling its text
+  onto the night. Fixed in the components (PR #192), with an e2e guard that
+  measures multi-line pills on screen.
+- **A prop passed at its default** makes two identical cells: `total={20}` in
+  `InsightCard` and `StampedPillar` (`WithTotal` removed), the same trap as
+  `PillarChip` above.
+- **Copy from the mockups, or retired from `src/`**: Bottleneck's "Solid
+  engine, one flat tyre", ProseSection's "three per pillar", PriorityMove's
+  upgrade copy, the game's "your two actions", a "Leave the call" hint.
+- **A plausible number is not the model's number**: a radar at 81 (the
+  inspection fires at its threshold and resets it), a €450,000 fine (the range
+  is 97,500–110,000), a miss that beats its target, a June firing the model
+  cannot produce, moods the CEO never has on that call.
+- **Doc comments that promise more than the cell shows**: "the only place"
+  when there are four, "mid-sentence" for a last word, a ✕ that needs
+  `onClose`, "five pillars" over three chips.
+- **Cells identical to their neighbour** (EN/FR wordmark, a link that differs
+  only by `href`): removed rather than kept.
+- **French typography**: three plain spaces before `?` or `:`.
+
 ## Re-sync risks
+
+- **Previews drift from the product silently.** A change to the game model,
+  the copy library or a component's defaults does not touch
+  `.design-sync/previews/`, and nothing fails: the cell still renders. When
+  those sources change, regenerate the affected props with the method in
+  "Previews are all repo-owned" and re-grade — every preview's doc comment
+  names the path or board it was built from.
 
 - **`cfg.buildCmd` is two commands now**, and the second one is load-bearing.
   Simplifying it back to a bare `tsc` degrades a dozen contracts silently — no
