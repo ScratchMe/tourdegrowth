@@ -310,7 +310,8 @@
   padding: var(--space-8);
   background: var(--surface-card);
   border-left: var(--border-width-stamp) solid var(--border-hard);
-  border-radius: var(--radius-tag);
+  /* A quote that wraps: a text box's radius, never the tag's pill (#177). */
+  border-radius: var(--radius-panel);
 }
 
 .angry {
