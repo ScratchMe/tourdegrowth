@@ -52,9 +52,12 @@
 /*
  * The meter: a --viz-grid track, a --viz-ink fill (16.06 on the card), red
  * on the weak pillar (--viz-highlight on the wash, 3.47: a mark, ≥ 3).
- * Decorative by design — see PillarChip.tsx.
+ * Decorative by design — see PillarChip.tsx — so it lets taps through: it
+ * sits under the 44px tap area of the glossary « ? », and positioned over
+ * it, it took 4px off that target (e2e/targets.spec.ts measured 40).
  */
 .meter {
+  pointer-events: none;
   position: absolute;
   left: 12px;
   right: 12px;

@@ -4966,6 +4966,10 @@ La deuxième PR de la passe retenue par Antoine le 2026-09-28, lancée sur son �
 
 **Contrastes des paires nouvelles** (calculés sur la palette du dépôt, pas celle de la maquette) : blanc sur `--surface-accent` 4,65 (tête de la borne, « HC ») ; `--viz-highlight` sur le lavis 3,47 et sur la carte 4,42 (crête du col HC, marques) ; rouge profond sur la carte 6,72 (écart et abréviation du col HC) ; `--viz-axis` sur la carte 7,20 (les autres).
 
-**Spec remise à jour** : `targets.spec.ts` centre chaque « ? » dans la fenêtre avant de le mesurer, comme pour le sélecteur de ton dans la PR 1 : le profil pousse les puces sous la ligne de flottaison à 1 280 × 720.
+**La jauge mangeait la cible du « ? ».** `targets.spec.ts` mesure la zone de toucher de 44 px de chaque « ? » de glossaire en balayant `elementFromPoint`. Deux échecs l'un derrière l'autre :
+- d'abord 0 px : le profil pousse les puces sous la ligne de flottaison à 1 280 × 720, et `elementFromPoint` ne voit que la fenêtre. La spec centre maintenant chaque « ? » avant de le mesurer, comme pour le sélecteur de ton dans la PR 1 ;
+- puis 40 px en hauteur, soit 44 moins les 4 px de la jauge : positionnée, elle passait au-dessus de la zone de toucher. Elle est décorative, elle laisse passer les touchers (`pointer-events: none`).
+
+**Deux délais dépassés dans le moteur** au premier passage complet (`engine-collect.spec.ts:609`, l'analyse axe ; `engine-deck-whatif.spec.ts:58`, l'attente des polices). Ce changement ne touche pas le moteur. Relancés seuls, trois fois chacun : 9 sur 9. Ce sont des lenteurs sous la charge de la suite entière, pas une casse.
 
 **design-sync** : `StageProfile` entre dans l'inventaire (74 composants), avec un aperçu en quatre histoires ; `ScoreDisplay`, `Bottleneck` et `PillarChip` montrent leur nouvelle forme, `Bottleneck` en cartes pleine largeur (en grille, la rangée se repliait sous la borne). Bundle reconstruit et validé : 74/74 aperçus rendus, les trois avertissements permanents seulement.
