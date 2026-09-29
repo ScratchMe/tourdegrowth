@@ -61,33 +61,87 @@
 /*
  * Docked (mobile) placement: a light bottom-sheet fixed to the viewport
  * rather than positioned near the trigger, which always overflows on a
- * ~390px screen (DESIGN-BRIEF-ADDENDUM-01.md). The parent that renders this
- * with placement="docked" is responsible for the backdrop click target;
- * this class only handles the sheet's own fixed position.
+ * ~390px screen (DESIGN-BRIEF-ADDENDUM-01.md). `docked` draws that shape
+ * where it stands (a preview frames it); `auto` below is the one that opens.
  */
 .dockedWrap {
   position: fixed;
   left: 16px;
   right: 16px;
   bottom: 16px;
-  z-index: var(--z-popover);
 }
 
-/* Right under the sheet it closes (design audit L-7: the scale, not 39/40). */
-.backdrop {
+/*
+ * `auto` — the one panel GlossaryTerm opens, in the top layer
+ * (`popover="manual"`): no z-index anywhere, the top layer is above
+ * everything. The popover is a transparent layer and the card inside it is
+ * what is drawn; the UA's popover box (centred, bordered, its own colours) is
+ * replaced whole.
+ *
+ * By default — a phone, or any screen without anchor positioning — the layer
+ * is the whole screen and the card the docked sheet at its foot: a tap
+ * outside the sheet lands on the layer and closes it, never on the page.
+ */
+.auto {
   position: fixed;
   inset: 0;
-  z-index: calc(var(--z-popover) - 1);
-  background: transparent;
-  border: none;
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  margin: 0;
   padding: 0;
-  cursor: default;
+  border: none;
+  background: transparent;
+  color: var(--text-body);
+  overflow: visible;
+}
+
+.autoCard {
+  position: absolute;
+  inset: auto 16px 16px;
+  padding: 16px;
+}
+
+/*
+ * From 641px, where anchor positioning exists: the layer shrinks to its card
+ * under the trigger, 280px at most, turned to the other side when the
+ * screen's edge is near (`position-try-fallbacks`). The trigger carries
+ * `--glossary-definition` while it is open (GlossaryTerm), and only one is
+ * open at a time. Nothing covers the page: a click outside goes where it was
+ * aimed and closes the panel on its way (the pointerdown handler), as it
+ * always did on desktop. Without anchor positioning a desktop gets the
+ * sheet: right, if not as close.
+ */
+@media (min-width: 641px) {
+  @supports (anchor-name: --a) {
+    .auto {
+      position-anchor: --glossary-definition;
+      inset: auto;
+      top: anchor(bottom);
+      left: anchor(left);
+      margin-top: 6px;
+      width: max-content;
+      max-width: 280px;
+      position-try-fallbacks: flip-inline, flip-block;
+    }
+
+    .autoCard {
+      position: static;
+      padding: 14px 16px;
+    }
+
+    .auto .closeButton {
+      display: none;
+    }
+  }
 }
 
 /* Focused programmatically on open (REVIEW.md R-19) — the panel is not
    tabbable, so a ring here would mark something the user never tabbed to.
    Its own interactive children keep their focus styles. */
-.popover:focus {
+.popover:focus,
+.auto:focus {
   outline: none;
 }
 

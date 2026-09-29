@@ -21,13 +21,13 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
-| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | Maintenant. A4 et A5 l'un après l'autre (A1, A2, A3 et A6 livrés le 2026-09-29) ; A7 dans l'ordre de ses dépendances ; A8 à tout moment |
-| **B. Design sync** | Une session sur ta machine | Claude Code en local : l'autorisation Claude Design ne s'obtient que là | Maintenant (A1 et A2 sont livrés), puis de nouveau après A5 et A7.10 |
+| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | Maintenant. A5 (A1, A2, A3, A4 et A6 livrés le 2026-09-29) ; A7 dans l'ordre de ses dépendances ; A8 à tout moment |
+| **B. Design sync** | Une session sur ta machine | Claude Code en local : l'autorisation Claude Design ne s'obtient que là | Maintenant (A1, A2 et A4 sont livrés), puis de nouveau après A5 et A7.10 |
 | **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). Restent C23, pas urgente, C24 (née d'A3), et la validation de la spécification de A7.3 quand elle sera écrite |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, tout A7.3 |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
 
-**L'ordre conseillé** : A4 et A7 en parallèle (A7.1 et A7.3.a, la
+**L'ordre conseillé** : A5 et A7 en parallèle (A7.1 et A7.3.a, la
 spécification, d'abord : ce sont les plus longs). B dès que tu as un
 créneau sur ta machine (A1 et A2 sont livrés), puis D. La section C a été tranchée
 le 2026-09-29.
@@ -50,35 +50,6 @@ mêmes feuilles de style.
 
 Une question produit ou de design rencontrée en route ne se tranche pas en
 route : elle part en section C, avec une recommandation.
-
-### A4 — Ce que la plateforme offre déjà (audit du kit, §6)
-
-Ce sont les remplacements natifs pointés par les guides Modern Web de Chrome.
-Ces douze-là n'étaient pas encore dans `src/` le 2026-09-29 (vérifié par
-`grep`).
-
-| Où | Quoi |
-|---|---|
-| `QuarterNews` | Entrée en `@starting-style`, sortie en `allow-discrete` : une fermeture animée sans JS |
-| `QuarterNews` | « Passer au bilan » en `command="request-close"` : un seul chemin de sortie, avec Escape |
-| `GlossaryTerm`, `DefinitionPopover` | Un seul popover en couche supérieure, positionné par ancre, au lieu de deux variantes rendues et de trois `z-index` |
-| `Disclosure` | `::details-content` et `interpolate-size` : un accordéon animé sans JS |
-| `StageTabs` | `hidden="until-found"` : Ctrl+F trouve un chiffre replié et ouvre sa ligne |
-| Onglets du moteur | Un indice dur quand la bande d'onglets défile, au lieu d'un troisième onglet coupé |
-| `Segmented` | Le remplissage qui glisse, positionné par ancre, en CSS seul |
-| Tampons | Des propriétés de transformation individuelles (`rotate:`) : une seule keyframe partagée |
-| `motion.css` | Le dépassement du tampon en `linear()`, réglé par un seul jeton |
-| Monde nuit | `color-scheme: dark` sous `[data-world="night"]` : barres de défilement et contrôles natifs en sombre |
-| Deck | `content-visibility: auto` sur les vignettes, forcé à `visible` pendant l'export PNG |
-| Barres collantes | Une requête de conteneur `scroll-state` : le filet seulement quand la barre recouvre du contenu |
-
-**Tout s'ajoute en amélioration progressive** : la page doit rester juste
-sans. Pour chaque ajout :
-- vérifier le support (MDN, Baseline) avant de l'écrire ;
-- garder les gardes `prefers-reduced-motion`.
-
-`text-wrap: pretty` est déjà posé (18 usages) : il reste à vérifier que la
-modale en profite.
 
 ### A5 — Le nommage des variantes (S-16)
 
@@ -374,7 +345,7 @@ ne peut pas le pousser.
 |---|---|---|
 | B1 | **Pousser le bundle** vers le projet Claude Design existant (`23b9671c-a55b-452e-aa41-39906ee71ba8`, créé le 2026-09-11) | Au 2026-09-29 : 77 composants, 244 cellules, 77 aperçus sur 77 rendus. Lire `.design-sync/NOTES.md` avant toute commande : ce dépôt est une app, pas un paquet. Trois avertissements sont permanents et attendus : « Impact », et `GRID_OVERFLOW` sur `DefinitionPopover` et `QuarterNews`. **Ne pas appliquer** le `cardMode: "single"` suggéré, qui masquerait des histoires |
 | B2 | **Le brief S-15 : les primitives de formulaire.** Elles vivent hors du système, en deux copies. Côté moteur : `Field`, `NumberField`, `TextField`, `Select`, `Choices`, `CheckField`, `MonthField` et `SegmentedField`, sous `src/app/[locale]/aarrr-funnel-template/_engine/_ui/`. Côté audit : sous `src/app/(app)/admin/audit/` | Écrire `design/DS-EXTENSION-BRIEF-04.md`, sur la forme des briefs 01 et 03, puis l'envoyer à Claude Design. Le retour arrive par `design/ds-extension-04-return/` ou par « Send to Claude Code Web ». La promotion dans `core/` devient ensuite un lot A |
-| B3 | **Re-synchroniser** après A1, A2, A5 et A7.10 | Ces lots changent des composants et leurs aperçus. **Ni A1 ni A2 n'ont pu reconstruire le bundle** : le convertisseur (`.ds-sync/`) n'est pas dans une session cloud. A1 a changé l'aperçu `Button` (une histoire `Quiet` de plus), le contrat de `Button` et `conventions.md` (le bouton texte, les trois épaisseurs de trait). A2 ajoute deux composants, `DotGrid` et `DotLegend` (`viz/DotGrid.tsx`, trois histoires chacun, dans `componentSrcMap`), l'échelle `--slide-*` complétée et les quinze jetons `--viz-cat-*` / `--viz-seq-*` retirés, et deux passages de `conventions.md`. Attendu : 79 composants, 251 cellules (244 + 1 + 6). À reconstruire et valider avant de pousser. A7.10 changera le contrat de `ShareCard` (primaire chez le propriétaire) |
+| B3 | **Re-synchroniser** après A1, A2, A4, A5 et A7.10 | Ces lots changent des composants et leurs aperçus. **Ni A1, ni A2, ni A4 n'ont pu reconstruire le bundle** : le convertisseur (`.ds-sync/`) n'est pas dans une session cloud. A1 a changé l'aperçu `Button` (une histoire `Quiet` de plus), le contrat de `Button` et `conventions.md` (le bouton texte, les trois épaisseurs de trait). A2 ajoute deux composants, `DotGrid` et `DotLegend` (`viz/DotGrid.tsx`, trois histoires chacun, dans `componentSrcMap`), l'échelle `--slide-*` complétée et les quinze jetons `--viz-cat-*` / `--viz-seq-*` retirés, et deux passages de `conventions.md`. Attendu : 79 composants, 251 cellules (244 + 1 + 6). A4 n'ajoute aucune cellule mais change quatre contrats : `DefinitionPopover` (un placement `auto`, un seul panneau en couche supérieure, que monte `GlossaryTerm` ; le `docked` dessiné en place perd son bouton de fond et ses `z-index`), `GlossaryTerm` (ses histoires `Open` et `French` ouvrent maintenant un popover en couche supérieure : **regarder la capture de ces deux cartes**, le panneau peut sortir de sa cellule), `Segmented` (le remplissage est le `::before` de la piste, positionné par ancre) et `Disclosure` (l'ouverture glisse), plus un passage de `conventions.md`. À reconstruire et valider avant de pousser. A7.10 changera le contrat de `ShareCard` (primaire chez le propriétaire) |
 
 ---
 

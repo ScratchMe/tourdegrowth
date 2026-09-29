@@ -93,8 +93,10 @@ reason: 760 (the phone line), 640 (the glossary popover docks to the bottom
 of the window), 960 (a page breaks out of its reading column) and 1100 (the
 engine page's stopwatch).
 
-`DefinitionPopover` renders both placements at once and lets CSS choose. Anything
-that moves focus has to be guarded to the placement actually on screen.
+`GlossaryTerm` opens ONE `DefinitionPopover`, `placement="auto"`: a popover in
+the top layer (no z-index) that CSS shapes — anchored under its trigger from
+641px where anchor positioning exists, the docked sheet otherwise. The
+`anchored` and `docked` placements draw each shape in place, for a story.
 
 Target 390px. Nothing may scroll horizontally at 360px.
 

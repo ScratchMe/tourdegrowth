@@ -71,6 +71,14 @@
 
 /* SEMANTIC — the night world rebinds this layer, and only this layer. */
 [data-world="night"] {
+  /*
+   * Not a token: tells the browser the night is dark, so what it draws itself
+   * — scrollbars, a number field's spinner, a select's list, the text caret —
+   * is drawn dark too (audit du kit §6, CHANTIERS.md A4, 2026-09-29). Baseline
+   * since 2022; the paper block below says light again for a slide or a
+   * sheet printed on paper inside the night.
+   */
+  color-scheme: dark;
   --surface-page: var(--night-0);
   --surface-card: var(--night-1);
   --surface-sunken: var(--night-2);
@@ -166,5 +174,6 @@
 }
 
 [data-world="paper"] {
+  color-scheme: light;
   --ground-lift: var(--ground-lift-paper);
 }

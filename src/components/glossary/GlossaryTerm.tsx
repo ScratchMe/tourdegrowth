@@ -24,12 +24,13 @@ export interface GlossaryTermProps {
 
 /**
  * A glossary term's "?" trigger plus its definition popover, wired together.
- * Renders BOTH the anchored (desktop) and docked (mobile) popover variants
- * when open and lets CSS pick one per viewport — DefinitionTrigger.prompt.md:
- * "Below 640px always use docked, a 280px anchored panel overflows one side
- * of a 390px screen no matter how it is positioned." No JS viewport
- * detection, so no hydration mismatch risk (same pattern the app already
- * uses elsewhere for breakpoint-dependent rendering).
+ * ONE popover when open (`placement="auto"`, audit du kit §6, CHANTIERS.md A4,
+ * 2026-09-29), in the top layer, and CSS picks its shape per viewport —
+ * DefinitionTrigger.prompt.md: "Below 640px always use docked, a 280px
+ * anchored panel overflows one side of a 390px screen no matter how it is
+ * positioned." Above that it hangs under this trigger, which carries the
+ * anchor name while its popover is open. No JS viewport detection, so no
+ * hydration mismatch risk; and no longer two copies rendered at once.
  */
 export function GlossaryTerm({
   id,
@@ -55,30 +56,18 @@ export function GlossaryTerm({
         label={label}
         open={open}
         tone={tone}
+        className={open ? styles.anchorOpen : undefined}
         onClick={() => onOpenChange(open ? null : id)}
       />
       {open ? (
-        <>
-          <span className={styles.anchoredWrap}>
-            <DefinitionPopover
-              placement="anchored"
-              term={term}
-              definition={definition}
-              more={more}
-              onClose={() => onOpenChange(null)}
-            />
-          </span>
-          <span className={styles.dockedWrap}>
-            <DefinitionPopover
-              placement="docked"
-              term={term}
-              definition={definition}
-              more={more}
-              closeLabel={closeLabel}
-              onClose={() => onOpenChange(null)}
-            />
-          </span>
-        </>
+        <DefinitionPopover
+          placement="auto"
+          term={term}
+          definition={definition}
+          more={more}
+          closeLabel={closeLabel}
+          onClose={() => onOpenChange(null)}
+        />
       ) : null}
     </span>
   );

@@ -123,3 +123,79 @@
 .onAccent {
   background: var(--action-primary-bg);
 }
+
+/*
+ * The selected fill slides to the option chosen, in CSS alone (audit du kit
+ * §6, CHANTIERS.md A4, 2026-09-29): one fill for the track, drawn behind the
+ * options and positioned on whichever is `.on` (anchor positioning, with
+ * `anchor-scope` so two controls on one page each keep their own). The
+ * dividers are the options' borders, so they still draw over it. Where
+ * anchor positioning or its scope is missing, each option fills itself as
+ * before, and under reduced motion the fill moves without sliding.
+ *
+ * `md` clips the fill to its rounded track; `compact` cannot clip (its hit
+ * extension reaches past the track), so its fill rounds its outer end only,
+ * the curve the end option draws, and square where it meets a divider.
+ *
+ * The label on the fill is measured by e2e/platform-native.spec.ts, on the
+ * fill's real colour: axe cannot see a background drawn by a pseudo-element.
+ */
+@supports (anchor-name: --a) and (anchor-scope: all) {
+  .track {
+    position: relative;
+    anchor-scope: --segmented-on;
+  }
+
+  /* Positioned, the options paint after the track's ::before, which comes
+     first in the tree: over the fill with no z-index (z-index.test.ts). */
+  .option {
+    position: relative;
+  }
+
+  .on {
+    anchor-name: --segmented-on;
+  }
+
+  .on,
+  .onAccent {
+    background: transparent;
+  }
+
+  .track::before {
+    content: "";
+    position: absolute;
+    position-anchor: --segmented-on;
+    top: anchor(top);
+    right: anchor(right);
+    bottom: anchor(bottom);
+    left: anchor(left);
+    background: var(--state-selected-bg);
+    pointer-events: none;
+  }
+
+  .track:has(.onAccent)::before {
+    background: var(--action-primary-bg);
+  }
+
+  .compact .track:has(> .on:first-child)::before {
+    border-radius: calc(var(--radius-tag) - var(--border-width)) 0 0 calc(var(--radius-tag) - var(--border-width));
+  }
+
+  .compact .track:has(> .on:last-child)::before {
+    border-radius: 0 calc(var(--radius-tag) - var(--border-width)) calc(var(--radius-tag) - var(--border-width)) 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .track::before {
+      transition:
+        left var(--dur-state) var(--ease-out),
+        right var(--dur-state) var(--ease-out),
+        border-radius var(--dur-state) var(--ease-out),
+        background-color var(--dur-state) var(--ease-out);
+    }
+
+    .option {
+      transition: color var(--dur-state) var(--ease-out);
+    }
+  }
+}

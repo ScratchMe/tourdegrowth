@@ -1,10 +1,10 @@
 import { DefinitionPopover } from "tour-de-growth";
 
 /*
- * The definition itself. Both placements are RENDERED AT ONCE by GlossaryTerm
- * and CSS picks which one shows at the current width — there is no viewport
- * detection in JS anywhere in this product. Which is also why anything that
- * grabs focus has to be guarded to the placement actually on screen.
+ * The definition itself. GlossaryTerm opens ONE panel, `placement="auto"`, in
+ * the top layer, and CSS picks its shape at the current width — there is no
+ * viewport detection in JS anywhere in this product. The two placements
+ * below draw each of those shapes in place, so a story can show them.
  *
  * The definition here is the SHORT one. The long "In practice" text lives on
  * the term's own page and never in this box — a 200-word popover is broken.

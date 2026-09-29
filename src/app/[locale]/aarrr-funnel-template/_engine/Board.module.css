@@ -151,6 +151,63 @@
   }
 }
 
+/*
+ * Where the strip scrolls, an arrow at each edge that has more tabs past it
+ * (audit du kit §6, CHANTIERS.md A4, 2026-09-29): a tab cut at the edge was
+ * the only sign, and a cut tab reads as a layout bug as easily as a hint.
+ * A `scroll-state` query on the strip (Chromium 133+) draws the arrow only
+ * while that side can still scroll, so it leaves once the last tab is in
+ * view. Each arrow is one of the strip's own pseudo-elements, sticky to its
+ * edge; its negative margin gives back its width and the gap, so the strip
+ * scrolls exactly as far as before. Decorative: its alternative text is
+ * empty, and the arrow keys are what moves between tabs. Elsewhere the cut
+ * tab stays the sign, as before.
+ */
+@supports (container-type: scroll-state) {
+  .tabs {
+    --tabs-hint: calc(var(--space-9) + var(--space-3));
+    container-type: scroll-state;
+    /* A tab brought into view (focus, or StageTabs choosing one) stops clear
+       of the arrow, never under it. */
+    scroll-padding-inline: calc(var(--tabs-hint) + var(--tabs-room));
+  }
+
+  @container scroll-state(scrollable: inline-start) {
+    .tabs::before {
+      content: "←" / "";
+      position: sticky;
+      inset-inline-start: 0;
+      margin-inline-end: calc(-1 * (var(--tabs-hint) + var(--space-3)));
+      justify-content: flex-start;
+      background: linear-gradient(to left, transparent, var(--surface-page) 55%);
+    }
+  }
+
+  @container scroll-state(scrollable: inline-end) {
+    .tabs::after {
+      content: "→" / "";
+      position: sticky;
+      inset-inline-end: 0;
+      margin-inline-start: calc(-1 * (var(--tabs-hint) + var(--space-3)));
+      justify-content: flex-end;
+      background: linear-gradient(to right, transparent, var(--surface-page) 55%);
+    }
+  }
+
+  .tabs::before,
+  .tabs::after {
+    z-index: var(--z-raised);
+    flex: none;
+    display: flex;
+    align-items: center;
+    width: var(--tabs-hint);
+    font: var(--meta-md);
+    font-weight: 600;
+    color: var(--text-body);
+    pointer-events: none;
+  }
+}
+
 /* The marks' ink: one custom property, so a selected (ink) tab can turn its
    marks to paper without restating five rules. */
 .tab {
@@ -266,7 +323,7 @@
   background: var(--surface-accent);
   border-radius: var(--radius-tag);
   padding: var(--space-1) var(--space-3);
-  transform: rotate(-1.5deg);
+  rotate: -1.5deg;
   white-space: nowrap;
 }
 
@@ -500,6 +557,12 @@
 .metricBody {
   padding: var(--space-3) 0 var(--space-8);
   max-width: var(--width-reading);
+}
+
+/* Folded (StageTabs, `hidden="until-found"`): the browser skips the contents
+   but keeps the box, so its padding would open a gap under every row. */
+.metricBody[hidden] {
+  padding: 0;
 }
 
 /* --- Actions ----------------------------------------------------------- */

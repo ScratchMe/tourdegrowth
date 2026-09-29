@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 import type { EngineState, LeverId } from "../src/lib/engine/types";
 import { exampleState } from "../src/lib/engine/__tests__/fixtures";
-import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
+import { ADMIN_PASSWORD, expect, grantOwnerPreview, openFold, readEachOnScreen, SKIP_ADMIN_REASON, test } from "./helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -98,24 +98,23 @@ for (const locale of ["fr", "en"] as const) {
       expect(ids).toHaveLength(9);
       await expect(page.getByTestId("slide-scenario-levers").locator('[data-testid^="slide-lever-"]')).toHaveCount(8);
 
-      const measured = await page.locator('[data-slide^="whatif:"], [data-slide="scenario"]').evaluateAll((slides) =>
-        slides.map((slide) => {
-          const box = slide.getBoundingClientRect();
-          const scale = box.width / 1920;
-          const y = (el: Element) => (el.getBoundingClientRect().bottom - box.top) / scale;
-          const foot = slide.querySelector("footer")!;
-          const footTop = (foot.getBoundingClientRect().top - box.top) / scale;
-          const body = foot.previousElementSibling!;
-          const deepest = Math.max(...[...body.querySelectorAll("*")].map(y));
-          // The smallest size set on any element with text of its own (A2.1: nothing under 18px on a slide).
-          const smallest = Math.min(
-            ...[...slide.querySelectorAll("*")]
-              .filter((el) => [...el.childNodes].some((n) => n.nodeType === Node.TEXT_NODE && n.textContent!.trim()))
-              .map((el) => parseFloat(getComputedStyle(el).fontSize)),
-          );
-          return { id: slide.getAttribute("data-slide")!, deepest: Math.round(deepest), footTop: Math.round(footTop), smallest, text: (slide as HTMLElement).innerText };
-        }),
-      );
+      // Each slide read on screen (readEachOnScreen): off screen a thumbnail skips its text, and an empty text has no placeholder to find.
+      const measured = await readEachOnScreen(page, page.locator('[data-slide^="whatif:"], [data-slide="scenario"]'), (slide) => {
+        const box = slide.getBoundingClientRect();
+        const scale = box.width / 1920;
+        const y = (el: Element) => (el.getBoundingClientRect().bottom - box.top) / scale;
+        const foot = slide.querySelector("footer")!;
+        const footTop = (foot.getBoundingClientRect().top - box.top) / scale;
+        const body = foot.previousElementSibling!;
+        const deepest = Math.max(...[...body.querySelectorAll("*")].map(y));
+        // The smallest size set on any element with text of its own (A2.1: nothing under 18px on a slide).
+        const smallest = Math.min(
+          ...[...slide.querySelectorAll("*")]
+            .filter((el) => [...el.childNodes].some((n) => n.nodeType === Node.TEXT_NODE && n.textContent!.trim()))
+            .map((el) => parseFloat(getComputedStyle(el).fontSize)),
+        );
+        return { id: slide.getAttribute("data-slide")!, deepest: Math.round(deepest), footTop: Math.round(footTop), smallest, text: (slide as HTMLElement).innerText };
+      });
       expect(measured).toHaveLength(9);
       const clashes = measured.filter((m) => m.deepest > m.footTop).map((m) => `${m.id}: body ends at ${m.deepest}, footer starts at ${m.footTop}`);
       expect(clashes).toEqual([]);
@@ -125,6 +124,8 @@ for (const locale of ["fr", "en"] as const) {
       // Engine spec §10.4: printable Latin-1 plus – — ’ « » … € · × ÷ ±. A U+2212 minus or a typed « → » is outside it.
       const allowed = /^[\n\t -~ -ÿ–—’…€]*$/u;
       for (const { id, text } of measured) {
+        // Non-vacuity: a slide read empty would have nothing to find below.
+        expect(text.length, `${id} is empty`).toBeGreaterThan(80);
         expect(text, `${id} leaks a placeholder`).not.toMatch(/\{[a-zA-Z]+\}/);
         expect(text, `${id} prints accent marks`).not.toContain("**");
         expect(text, `${id} prints a missing value`).not.toMatch(/\bundefined\b|\bNaN\b|\bnull\b/);
@@ -145,7 +146,7 @@ test("a target moved on the board's slider becomes a slide", async ({ page }) =>
   );
   await page.goto("/fr/aarrr-funnel-template");
   await expect(page.getByTestId("engine-board")).toBeVisible();
-  await page.getByTestId("engine-board-whatif").locator(":scope > summary").click();
+  await openFold(page.getByTestId("engine-board-whatif"));
   await page.getByTestId("whatif-slider-act.rate").focus();
   for (let i = 0; i < 3; i += 1) await page.keyboard.press("ArrowRight");
   await expect(page.getByTestId("whatif-value-act.rate")).toHaveText(/^21\s?%$/);

@@ -81,7 +81,7 @@ test.describe("the stage menu", () => {
 
     // Folded on arrival — three rows, not one sheet open.
     expect(Object.values(await expandedStates(page))).toEqual(["false", "false", "false"]);
-    await expect(page.locator('[data-testid^="engine-sheet-"]')).toHaveCount(0);
+    await expect(page.locator('[data-testid^="engine-sheet-"]:visible')).toHaveCount(0);
 
     // The named stage says so in words, and only it (churn sits above its reference but isn't named).
     await expect(page.getByText(ENGINE_COPY.board.tabNamed.en, { exact: true })).toHaveCount(1);
@@ -110,14 +110,14 @@ test.describe("the stage menu", () => {
       "engine-metric-act-event": "true",
       "engine-metric-act-ttv": "false",
     });
-    await expect(page.locator('[data-testid^="engine-sheet-"]')).toHaveCount(1);
+    await expect(page.locator('[data-testid^="engine-sheet-"]:visible')).toHaveCount(1);
     await expect(page.getByTestId("engine-sheet-act-event")).toBeVisible();
     // aria-controls names the body that appeared.
     const body = await page.getByTestId("engine-metric-act-event").getAttribute("aria-controls");
     await expect(page.locator(`#${body}`).getByTestId("engine-sheet-act-event")).toBeVisible();
 
     await page.getByTestId("engine-metric-act-event").click();
-    await expect(page.locator('[data-testid^="engine-sheet-"]')).toHaveCount(0);
+    await expect(page.locator('[data-testid^="engine-sheet-"]:visible')).toHaveCount(0);
   });
 
   test("the arrow keys move between tabs — one Tab stop, wrapping, Home and End", async ({ page }) => {

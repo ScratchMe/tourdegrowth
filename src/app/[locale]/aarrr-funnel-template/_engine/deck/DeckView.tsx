@@ -113,7 +113,7 @@ const PRINT_CSS = `
   #engine-deck [data-print="thumb"] { display: block !important; margin: 0 !important; padding: 0 !important; border: 0 !important; box-shadow: none !important; background: none !important; break-inside: avoid; break-after: page; }
   #engine-deck [data-print="thumb"][data-last="true"] { break-after: auto; }
   #engine-deck [data-print="thumb"][data-included="false"] { display: none !important; }
-  #engine-deck [data-print="viewport"] { width: ${SLIDE_WIDTH}px !important; height: ${SLIDE_HEIGHT}px !important; aspect-ratio: auto !important; overflow: hidden !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
+  #engine-deck [data-print="viewport"] { width: ${SLIDE_WIDTH}px !important; height: ${SLIDE_HEIGHT}px !important; aspect-ratio: auto !important; overflow: hidden !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; content-visibility: visible !important; }
   #engine-deck [data-print="scaler"] { transform: none !important; }
   #engine-deck, #engine-deck * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }

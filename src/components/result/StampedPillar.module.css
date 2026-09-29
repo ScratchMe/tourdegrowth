@@ -9,5 +9,5 @@
   background: var(--surface-accent);
   border-radius: var(--radius-tag);
   padding: 8px 12px;
-  transform: rotate(-1deg);
+  rotate: -1deg;
 }

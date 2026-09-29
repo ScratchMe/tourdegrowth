@@ -2,7 +2,7 @@ import type { Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import type { EngineState } from "../src/lib/engine/types";
 import { exampleState } from "../src/lib/engine/__tests__/fixtures";
-import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
+import { ADMIN_PASSWORD, expect, grantOwnerPreview, openFold, SKIP_ADMIN_REASON, test } from "./helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -36,7 +36,7 @@ async function openWith(page: Page, state: EngineState, locale: "en" | "fr" = "e
   });
   await page.reload();
   await expect(page.getByTestId("engine-board")).toBeVisible();
-  await page.getByTestId("engine-board-whatif").locator(":scope > summary").click();
+  await openFold(page.getByTestId("engine-board-whatif"));
   await expect(page.getByTestId("engine-whatif-panel").or(page.getByTestId("engine-whatif-none"))).toBeVisible();
 }
 
@@ -102,7 +102,7 @@ test("the targets are kept in the state: a reload finds them where they were lef
 
   await page.reload();
   await expect(page.getByTestId("engine-board")).toBeVisible();
-  await page.getByTestId("engine-board-whatif").locator(":scope > summary").click();
+  await openFold(page.getByTestId("engine-board-whatif"));
   await expect(page.getByTestId("whatif-value-rev.arpa")).toHaveText(moved!);
   await expect(page.getByTestId("engine-whatif-funnel-title")).toHaveText(W.funnelIf.en);
 });
