@@ -12,7 +12,7 @@ export const Variants = () => (
   </div>
 );
 
-/** `lg` is the mobile scale; `fullWidth` is how the hero CTA ships on a phone. */
+/** `lg` is the large CTA (17px), at every width; `fullWidth` is how it ships on a phone. */
 export const Sizes = () => (
   <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 320 }}>
     <Button variant="primary" size="md">

@@ -24,7 +24,7 @@
   --pad-card: 26px 30px; /* desktop card */
   --pad-card-mobile: 20px; /* mobile card */
   --pad-button: 14px 24px; /* desktop button */
-  --pad-button-mobile: 16px; /* mobile button, full width */
+  --pad-button-mobile: 16px; /* a large button's sides on a phone, where it is full width */
   /* Large button (design I + B: 17px type). The mockup's 26px sides do not
      fit the landing's two CTAs side by side in French at 1280 (515px for a
      495px column); 20px does (491). Full width on a phone keeps 16px sides. */

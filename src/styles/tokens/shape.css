@@ -26,14 +26,15 @@
 
   /*
    * Roast-mode score card shadow — kept from the app's original
-   * --shadow-card-roast (same 7px offset, --paint-red instead of --ink-0).
+   * --shadow-card-roast: the card's offset (6px since design I, 7px before;
+   * it stayed at 7 until 2026-09-29), --paint-red instead of --ink-0.
    * Not part of the v2 bundle's shape.css (the addendum only touches the
    * glossary/how-it-works/deep-dive screens, never the roast score card),
    * so this is carried forward rather than invented: the roast result
    * screen still needs its red-bordered/red-shadowed card exactly as
    * shipped in iteration 1.
    */
-  --shadow-card-roast: 7px 7px 0 var(--paint-red);
+  --shadow-card-roast: 6px 6px 0 var(--paint-red);
 
   /* --- Focus --- */
   --focus-width: 3px;

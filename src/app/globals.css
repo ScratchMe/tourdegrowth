@@ -53,7 +53,8 @@ body {
   /*
    * `min-height`, NOT `height` — and `no-repeat` with it.
    *
-   * `--ground-lift` is two radial gradients painted on the body, and a
+   * `--ground-lift` was two radial gradients painted on the body (one white
+   * wash since 2026-09-29), and a
    * background's positioning area is the element's own box. With
    * `height: 100%` that box was exactly one viewport tall while the page
    * scrolled past it, so the gradients TILED (the default is
@@ -97,7 +98,7 @@ body {
    * §2.11.2), and `html` is `height: 100%`, one window tall. `no-repeat`
    * stopped the tiling above, but the gradients still ended at that box's
    * bottom edge — a ~7/255 step at y = window height, on the right half of
-   * every page, where the shadow lift at `88% 74%` is still visible.
+   * every page, where the shadow lift at `88% 74%` was visible.
    *
    * Attaching the lift to the viewport removes the edge rather than moving
    * it, and it is the right metaphor anyway: the ground is lit, and light

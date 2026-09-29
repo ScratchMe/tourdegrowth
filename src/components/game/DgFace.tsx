@@ -138,7 +138,7 @@ export function DgFace({ mood, size = "frame", speaking = false, className }: Dg
       <path id={frame ? "browR" : undefined} className={styles.brow} d={face.browR} />
       <rect className={styles.mouth} x="153" y="83" width="14" height="2.5" rx="1.2" />
       <path id={frame ? "mouthShape" : undefined} className={styles.mouthLine} d={face.mouth} />
-      {frame && <rect className={styles.vignette} width="320" height="180" fill="url(#dgVignette)" />}
+      {frame && <rect width="320" height="180" fill="url(#dgVignette)" />}
     </svg>
   );
 }

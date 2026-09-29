@@ -59,7 +59,8 @@
    the group an accessible name; they used to be direct children of `.main`,
    whose `gap: 20px` spaced them. A wrapper with no layout of its own made
    that gap apply to a single child, so the question card sat flush against
-   the first answer with its 7px hard shadow falling behind the button. The
+   the first answer with its hard shadow (7px then, 8px `--shadow-hero` now)
+   falling behind the button. The
    value below is `.main`'s, restored — not a new spacing decision. */
 .questionRegion {
   display: flex;
