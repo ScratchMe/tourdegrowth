@@ -5012,3 +5012,5 @@ Demandé par Antoine après #178 (« fais le correctif du cookie »). C'est la c
 Non-vacuité, écrite dans `proxy.test.ts` : sans la condition, exactement le test « un fetch de `next/link` n'écrit pas » tombe. Les deux compagnons (une navigation écrit, une requête sans métadonnées écrit) passent dans les deux états.
 
 **Durcissement ajouté sur l'avis de `relecteur-securite`** : un test épingle `config.matcher` à sa chaîne exacte. Coller l'exemple de la doc (`missing: [{ type: "header", key: "next-router-prefetch" }]`) sortirait les préchargements du proxy. Or `/admin/stats/json` n'a pas de garde à lui : un seul en-tête suffirait alors pour le lire sans mot de passe.
+
+**Suite complète sur ce correctif** : 568 passées, 5 ignorées par construction, **aucun échec**. C'est le premier passage entier sans le flake depuis qu'il est mesuré. Unitaires : 2 189.
