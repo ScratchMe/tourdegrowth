@@ -24,14 +24,24 @@
   --display-score-lg: 700 var(--size-score-lg) / 0.88 var(--font-display); /* mobile score numeral */
   --display-hero: 700 62px/1.02 var(--font-display);
   --display-hero-mobile: 700 40px/1.03 var(--font-display);
+  /* The landing's title alone — design I (2026-09-28) grows it to 80px and
+     tightens it; fluid between the two so a 1024px window does not get an
+     80px title in a half column. Its own tokens, not the hero's: the hero
+     also sets every prose page's title, where a long French title at 80px
+     (50 on a phone) runs one line per word. */
+  --display-landing: 700 clamp(44px, 6.1vw, 80px) / 0.92 var(--font-display);
+  --display-landing-mobile: 700 50px/0.92 var(--font-display);
   --display-section: 700 30px/1.1 var(--font-display);
   --display-title: 700 36px/1.05 var(--font-display); /* detour card title: 404, error 06c */
   --display-wordmark: 700 19px/1 var(--font-display);
   --display-letter-spacing: 0.02em;
 
   /* --- UI / body: Inter, never uppercase, never below 13.5px --- */
-  --title-question-lg: 600 28px/1.28 var(--font-ui);
-  --title-question-sm: 600 22px/1.3 var(--font-ui);
+  /* Design I (2026-09-28): the question is the screen's one job — larger,
+     bolder, tighter (was 600 28px/1.28 and 22px/1.3). */
+  --title-question-lg: 700 34px/1.18 var(--font-ui);
+  --title-question-sm: 700 25px/1.22 var(--font-ui);
+  --title-question-tracking: -0.02em;
   --title-card: 600 19px/1.35 var(--font-ui);
   --body-lg: 500 17px/1.55 var(--font-ui);
   --body-md: 500 15px/1.55 var(--font-ui);

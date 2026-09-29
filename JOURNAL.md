@@ -4847,3 +4847,91 @@ Le nº8 est reconstruit par un script qui repart des clés de chaque ancienne ca
 **Vérifié** : les deux pages rendues dans Chromium à 1 280 et 390 px, avec `scrollWidth === clientWidth`, aucune carte hors de l'écran et aucune erreur de page. Le payload publié, relu depuis le service, est identique au local (82 et 38 cartes). Ce qui a été regardé à l'écran : la main du nº7 (avant → après), l'écran plein à 390 px, une carte du catalogue et les titres des slides « Et si » du nº8.
 
 **Reste hors de tout bon à tirer** : les deux libellés SEO du 28/09 (`glossaryPage.relatedComparisonLabel`, `applyAarrrLabel`), déjà en ligne.
+
+### Six directions de design, posées sur le vrai site (2026-09-28)
+
+**La demande** : les cinq directions retenues après l'audit du kit (A, B, H, E, F), plus une sixième qu'Antoine a ajoutée : « l'existant, en mieux », moderne, avec un signe distinctif entre les trois espaces. La contrainte vient de sa décision du matin : « un Tour, trois étapes », et chaque direction doit distinguer le Tour, le moteur et le jeu.
+
+**La méthode** : pas de maquettes hors sol. Chaque direction est une surcouche CSS, plus un peu de DOM décoratif, posée sur le **build de production local**. Les pages, la copie et les chiffres sont donc ceux du produit. Un harnais capture sept écrans (accueil FR et EN, question du quiz, résultat FR et EN, moteur, hub du jeu) en 1280 et 390 px. Chaque direction a aussi son image de partage en HTML et sa fiche : contrastes mesurés, polices, risques, coût. I a été faite dans la session ; A, B, H, E et F par cinq sous-agents, sur un brief commun (`design/alternatives-2026-09/BRIEF.md`), relus un par un. La page de comparaison (artifact privé) montre la grille des trois espaces, chaque écran en entier, le mode « face à aujourd'hui » et les fiches.
+
+**Correction d'Antoine en cours de route** : le jeu ne se décrit jamais par son seul niveau jouable (l'appli de streaming), puisque quatre autres niveaux arrivent. Le brief a été corrigé, les sous-agents prévenus, la carte « № 3 » de I réécrite avec les mots du hub. L'encart du jeu sur le résultat garde sa copie : il ne s'affiche que quand la rétention freine et ouvre ce niveau-là, il est donc juste à sa place.
+
+**Pièges** :
+- Une capture pleine page peint un fond `fixed` sur une seule hauteur d'écran, d'où une couture qu'aucun lecteur ne voit. Le harnais passe le fond en `scroll` pour les captures.
+- Pixelify Sans ferme ses C : « CROISSANCE » se lit « OROISSANOE ». F ne l'emploie donc qu'en minuscules, au-dessus de 32 px.
+- Le « 4 » de pochoir a une barre détachée et se lit « 74· ». B pose les chiffres du score en Big Shoulders plein.
+- Aucune des polices Google en sous-ensemble latin n'a le №. Une vraie livraison doit l'embarquer : Plex Mono complet, comme aujourd'hui.
+
+**Archive** : `design/alternatives-2026-09/`. On y trouve les surcouches, leurs sources, les images de partage, les fiches, le brief, le harnais et la page. Les captures sont dans la page publiée, les polices se retéléchargent. Rien de tout ça n'est importé par l'application.
+
+## La synthèse I + B (2026-09-28)
+
+**La décision d'Antoine** : I pour la base, avec quatre signes de B, pour « une belle identité avec des points qui restent en tête sans avoir à tout refondre ». Ces signes sont le bandeau des étapes 1 · 2 · 3, le moteur en outremer (plutôt que le millimétré de I), la borne kilométrique et le profil d'étape.
+
+**Ce qui a été maquetté** (`design/alternatives-2026-09/`, ids `ib` et `ib-ink`) :
+- Le bandeau d'étape est accroché sous l'en-tête collant et remplace les dossards de I. Il est rouge pour le Tour, outremer pour le moteur, ocre pour le jeu.
+- La borne porte le score.
+- Le profil d'étape vient du calcul : la hauteur d'un col vaut les points manquants sur 20, et le col qui freine est marqué « HC ».
+- Le hub du jeu montre cinq cols sous la légende « cinq cols, cinq entreprises ».
+- L'image de partage porte la borne et le profil.
+
+`ib-ink` est la même maquette avec le bandeau du Tour à l'encre. Les deux ont été captées sur les sept écrans, aux deux largeurs. L'audit des captures ne trouve aucun texte sous AA en 1280 px et aucun défilement horizontal.
+
+**Deux questions ouvertes pour Antoine** :
+1. Le bandeau du Tour, rouge ou encre ? La recommandation est l'encre, parce que le rouge de I a trois sens et seulement trois : action, diagnostic, conseil.
+2. Le mot « étape », qui sert deux fois. Le bandeau dit « Étape 1/3 » au-dessus de « Étape 1 sur 5 — Acquisition » et d'« Une étape te freine ».
+
+**Piège** : le serveur local des captures meurt quand la session redémarre, et le sous-agent qui capte n'a pas le droit de le relancer. Il faut donc vérifier `curl localhost:3300/fr` avant de relancer une capture.
+
+**Coût d'une vraie mise en œuvre**, d'après la fiche `notes/ib.md` : deux à trois sessions. Il faut des jetons d'espace, deux composants neufs (`StageBand`, `StageProfile`, ce dernier en SVG pur et testable), la borne en CSS seul et le gabarit Satori. La garde de payload devra compter les cinq scores que le profil expose (convention 11).
+
+**Tranché par Antoine le même jour** : le bandeau du Tour est à l'encre, et le rouge ne reste que sur le pictogramme. Le bandeau dit « 1/3 · Plaine », sans le mot « étape », qui reste réservé aux cinq étapes AARRR. Même règle sur l'image de partage.
+
+**Et tant que le moteur et le jeu sont fermés** (Antoine, même jour) : le bandeau montre la course entière. Les espaces fermés sont grisés, marqués « bientôt » et sans lien. Ils deviennent des liens quand le build les voit ouverts.
+
+## Kit I + B, 1/3 : jetons, en-tête collant, bandeau d'espace (2026-09-29)
+
+**Ce qui est livré** :
+- **Le bandeau d'espace** (`brand/SpaceBand`). Il est accroché sous l'en-tête de chaque page qui appartient à un espace : le Tour (accueil, quiz, résultat, Deep dive), le moteur, le jeu (hub et niveau). Les pages de lecture (glossaire, comparaisons, À propos) n'en ont pas.
+- **Ses trois couleurs**, dans `tokens/spaces.css` : encre pour le Tour (le rouge ne reste que sur son pictogramme), outremer pour le moteur, ocre pour le jeu.
+- **« 1/3 · Plaine »**, jamais « étape ».
+- **La course complète à droite.** Un espace ouvert au build est un lien. Un espace fermé est grisé, en pointillé et marqué « bientôt », sans lien. Dans le quiz et le Deep dive, rien n'est un lien : pas de sortie au milieu d'un tunnel, la règle du pied de page.
+- **Le drapeau du moteur** est inliné au build pour le code client (`TDG_ENGINE_OPEN_AT_BUILD`), comme celui du jeu. `next-config.test.ts` le tient à la règle d'`access.ts`.
+- **Un seul en-tête** (`brand/SiteHeader`) pour les cinq qui recopiaient la même règle : accueil, pages de contenu, résultat, quiz, Deep dive. Il est collant, en verre dépoli, et porte le bandeau.
+  - `--sticky-offset` (globals.css) donne sa hauteur mesurée (118 px avec bandeau, 74 px sans). Ancres et focus s'arrêtent sous l'en-tête (`scroll-padding-top`, WCAG 2.4.11).
+  - La colonne du jeu et les chiffres « Et si », qui collaient déjà, collent maintenant sous lui.
+- **La base de I** :
+  - rayons 999 / 12 / 14 / 18 (étaient 4 / 6 / 8 / 10), ombres 6 / 4 / 3 (étaient 7 / 5 / 4) ;
+  - titre de l'accueil fluide jusqu'à 80 px, 50 px sur téléphone, par ses propres jetons (`--display-landing`) ;
+  - question du quiz en 700 34 px ; réponses en cartes avec une marque radio ;
+  - bouton principal posé sur son ombre dure, bord encre ;
+  - dossard « № 15 questions » plein ;
+  - grain du papier.
+- **Le titre héros des autres pages ne bouge pas** (62 / 40 px). Un premier essai l'avait passé à 80 / 50 px pour tout le monde, alors que I ne grandissait que celui de l'accueil. `open-door.spec.ts` l'a rattrapé : le titre français d'une page de lecture repassait au-dessus de 50 px sur téléphone, la taille qui lui faisait prendre six lignes. Les fins du jeu, des phrases entières en capitales, y échappent du même coup.
+
+**Choix de tech lead** :
+- **La palette ne bouge pas.** Celle de I est d'un cran plus claire pour le papier et plus sombre pour l'encre. L'écart est invisible à l'œil. L'adopter obligeait à re-mesurer et réécrire chaque ratio cité dans `colors.css` et `token-contrast.test.ts`.
+- **`--display-section` reste à 30 px.** Vingt-trois fichiers le lisent, dont le jeu, et la maquette ne montrait pas ces écrans.
+
+**Trois valeurs de la maquette qui ne passaient pas la mesure**. Les trois bornes sont maintenant des tests, dans `space-token-contrast.test.ts` et `e2e/page-ground.spec.ts` :
+- **Le grain.** À 9 % d'encre, le grain le plus sombre fait passer `--state-good-text` à 4,18 et `--text-faint` à 4,35. Il est à 4,5 %, soit 4,57 et 4,53 au pire pixel. Le test échoue si on remet 9 % (vérifié).
+- **Le verre de l'en-tête.** À 74 %, au-dessus d'un fond d'encre plein (le bureau de nuit du jeu, l'ombre dure d'une carte), le texte gris de la rangée tombe à 3,43 et le lien rouge à 3,20. Il est à 92 % : 4,98 et 4,65.
+- **Les calques du fond.** `--ground-lift` compte déjà deux dégradés. Avec deux valeurs pour trois calques, la liste bouclait et le second dégradé prenait la taille et le `repeat` du grain, d'où des taches de 160 px sur toute la page. Premier essai du test de longueur : **vacuité**. Une liste calculée a toujours une valeur par calque, puisque c'est justement le bouclage. Le test lit donc la valeur de chaque calque, et sur la page fautive il voit `repeat, no-repeat, repeat`.
+
+**Piège** : écrire `backdrop-filter` et `-webkit-backdrop-filter` côte à côte fait garder au compilateur CSS la forme préfixée seule, que Chrome ignore. L'en-tête a été construit sans flou et rien ne le montrait, sauf la valeur calculée (`none`). Il faut écrire la forme sans préfixe seule : Lightning CSS ajoute le préfixe pour Safari. `e2e/site-header.spec.ts` lit la valeur calculée.
+
+**Specs remises à jour** :
+- `selection-states` : le bouton principal repose sur son ombre, et l'appui le déplace de la longueur de l'ombre.
+- `question-rhythm` et `prose-pages` : l'ombre de carte est de 6 px.
+- `page-ground` : la couture se mesure sur une moyenne de 16 × 5 pixels, puisque le grain est un bruit au pixel.
+- `targets` : chaque segment est centré dans la fenêtre avant d'être mesuré. Avec l'en-tête plus haut, le sélecteur de ton de la carte d'aperçu passait sous la ligne de flottaison à 390 px, et `elementFromPoint` hors de l'écran renvoie `null`.
+
+**Suite complète, deux passages** :
+- **Premier** : 557 passées, 5 ignorées par construction, 3 échecs. `open-door` et `targets` sont corrigés ci-dessus.
+- **Second, après correction** : 559 passées, 5 ignorées, 1 échec (`locale-routing.spec.ts:76`).
+
+**Le flake de `locale-routing`, mesuré plutôt que supposé.** Deux de ses tests échouent par intermittence : `:76` (l'ancien `:75`, le flake connu) et `:320` (le lecteur qui revient sur `/` après avoir choisi l'anglais). Le fichier a été répété sur ce build et sur `main`, construit dans un worktree :
+- ce build : 1 échec sur 5 passages (`:320`) ;
+- `main` : 3 échecs sur 10 (`:320` deux fois, `:76` une fois).
+
+La course existe donc déjà sur `main`, à une fréquence égale ou supérieure. Ce changement ne la crée pas et ne touche ni le proxy, ni les cookies, ni les redirections. Elle n'est plus rare : un passage de fichier sur trois à cinq échoue. Les deux tests échouent sur le même geste, le cookie de langue qui ne reflète pas le dernier choix.

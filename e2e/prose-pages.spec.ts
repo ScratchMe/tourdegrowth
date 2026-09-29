@@ -34,7 +34,7 @@ test.describe("prose pages", () => {
       await page.goto(path);
       const raised = await page
         .locator("main *")
-        .evaluateAll((els) => els.filter((el) => getComputedStyle(el).boxShadow.startsWith("rgb") && /7px 7px 0px/.test(getComputedStyle(el).boxShadow)).length);
+        .evaluateAll((els) => els.filter((el) => getComputedStyle(el).boxShadow.startsWith("rgb") && /6px 6px 0px/.test(getComputedStyle(el).boxShadow)).length);
       expect(raised, path).toBeLessThanOrEqual(1);
     }
   });

@@ -11,6 +11,7 @@
 @import "../styles/tokens/motion.css";
 @import "../styles/tokens/world-night.css";
 @import "../styles/tokens/game.css";
+@import "../styles/tokens/spaces.css";
 
 *,
 *::before,
@@ -22,6 +23,30 @@
 
 html {
   height: 100%;
+  /*
+   * Anchors and keyboard focus land clear of the sticky header
+   * (brand/SiteHeader) instead of under it — WCAG 2.4.11, focus not obscured.
+   */
+  scroll-padding-top: calc(var(--sticky-offset) + var(--space-5));
+}
+
+/*
+ * The sticky header's height, for what must stay clear of it: anchors and
+ * focus (above), and the two things that stick under it (the game's side
+ * column, the engine's « Et si » figures). Measured on the build at each
+ * width, with and without the space band: the band is the header's bottom
+ * two-fifths, and on a phone it runs on two lines.
+ */
+:root {
+  --sticky-offset: 0px;
+}
+
+html:has(header[data-site-header="plain"]) {
+  --sticky-offset: 74px;
+}
+
+html:has(header[data-site-header="band"]) {
+  --sticky-offset: 118px;
 }
 
 body {
@@ -47,8 +72,21 @@ body {
    */
   min-height: 100%;
   background-color: var(--surface-page);
-  background-image: var(--ground-lift);
-  background-repeat: no-repeat;
+  /*
+   * Three layers: the paper's grain (design I, 2026-09-28), a seamless noise
+   * tile repeated over the whole canvas and scrolling with it, then the two
+   * radial gradients of --ground-lift described here. The grain repeats on
+   * purpose — a tile, not a gradient, so tiling is what it is for and it has
+   * no edge to leave a seam.
+   *
+   * THREE values in each list below, not two: --ground-lift is itself two
+   * layers, and a shorter list cycles — written with two values, the lift's
+   * second gradient took the grain's 160px size and `repeat`, and tiled the
+   * page in soft blotches (seen on the first build, 2026-09-29).
+   */
+  background-image: var(--ground-grain), var(--ground-lift);
+  background-size: var(--ground-grain-size), auto, auto;
+  background-repeat: repeat, no-repeat, no-repeat;
   /*
    * `fixed` — the second half of the same seam, found 2026-09-24.
    *
@@ -63,7 +101,7 @@ body {
    * it, and it is the right metaphor anyway: the ground is lit, and light
    * stays where the window is.
    */
-  background-attachment: fixed;
+  background-attachment: scroll, fixed, fixed;
   color: var(--text-body);
   font-family: var(--font-ui), system-ui, sans-serif;
   line-height: 1.5;

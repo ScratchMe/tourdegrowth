@@ -68,19 +68,29 @@ async function colourStepsAtTileBoundaries(page: Page, x: number): Promise<{ y: 
         image.src = `data:image/png;base64,${data}`;
         await image.decode();
 
+        // A 16-pixel-wide strip, averaged over five rows: the paper grain
+        // (design I, 2026-09-28) is per-pixel noise of up to ~9/255 a
+        // channel, so two single pixels differ by more than a seam's
+        // threshold. A seam is a step of the MEAN; the noise averages out.
+        const W = 16;
         const canvas = document.createElement("canvas");
-        canvas.width = 1;
+        canvas.width = W;
         canvas.height = image.naturalHeight;
         const ctx = canvas.getContext("2d")!;
-        ctx.drawImage(image, -column, 0);
+        ctx.drawImage(image, -(column - W / 2), 0);
 
         // Compare a few rows above the boundary with a few below, so an
         // antialiased seam edge can't hide between two sampled rows.
-        const px = (r: number) => ctx.getImageData(0, r, 1, 1).data;
-        const before = px(at - 3);
-        const after = px(at + 3);
-        return (
-          Math.abs(before[0]! - after[0]!) + Math.abs(before[1]! - after[1]!) + Math.abs(before[2]! - after[2]!)
+        const mean = (from: number) => {
+          const d = ctx.getImageData(0, from, W, 5).data;
+          const sum = [0, 0, 0];
+          for (let i = 0; i < d.length; i += 4) for (let c = 0; c < 3; c++) sum[c]! += d[i + c]!;
+          return sum.map((v) => v / (d.length / 4));
+        };
+        const before = mean(at - 7);
+        const after = mean(at + 3);
+        return Math.round(
+          Math.abs(before[0]! - after[0]!) + Math.abs(before[1]! - after[1]!) + Math.abs(before[2]! - after[2]!),
         );
       },
       [png, x, row] as [string, number, number],
@@ -135,16 +145,38 @@ test("the ground covers the whole page and never tiles", async ({ page }) => {
   // The properties that together make a seam impossible — asserted
   // directly, so a future edit that reinstates either one fails here with a
   // readable reason rather than only as a colour step.
-  const ground = await page.evaluate(() => ({
-    bodyHeight: Math.round(document.body.getBoundingClientRect().height),
-    documentHeight: document.documentElement.scrollHeight,
-    repeat: getComputedStyle(document.body).backgroundRepeat,
-    attachment: getComputedStyle(document.body).backgroundAttachment,
-  }));
+  const ground = await page.evaluate(() => {
+    const cs = getComputedStyle(document.body);
+    return {
+      bodyHeight: Math.round(document.body.getBoundingClientRect().height),
+      documentHeight: document.documentElement.scrollHeight,
+      // Counted by their openings, not split on commas: the grain's data URI
+      // holds commas and parentheses of its own.
+      firstIsUrl: cs.backgroundImage.startsWith("url("),
+      layers: (cs.backgroundImage.match(/url\("/g) ?? []).length + (cs.backgroundImage.match(/gradient\(/g) ?? []).length,
+      size: cs.backgroundSize.split(", "),
+      repeat: cs.backgroundRepeat.split(", "),
+      attachment: cs.backgroundAttachment.split(", "),
+    };
+  });
 
   expect(ground.bodyHeight).toBe(ground.documentHeight);
-  expect(ground.repeat).toMatch(/^no-repeat(, no-repeat)*$/);
-  // Without it the lift is positioned on the one-window-tall root box and
-  // ends at its bottom edge, tiled or not.
-  expect(ground.attachment).toMatch(/^fixed(, fixed)*$/);
+
+  // The first layer is the paper grain (design I, 2026-09-28): a noise TILE,
+  // which repeats and scrolls by design. Every layer after it is the lift,
+  // which must neither tile nor scroll.
+  expect(ground.firstIsUrl).toBe(true);
+  const lift = ground.layers - 1;
+  expect(lift).toBeGreaterThanOrEqual(2);
+  // The value of EACH layer, not the lists' lengths: a computed list always
+  // has one value per layer, because a shorter declared list CYCLES — which
+  // is the bug this pins. Written with two values for three layers, the
+  // lift's second gradient took the grain's 160px size and its `repeat`
+  // (computed: "repeat, no-repeat, repeat") and tiled the page in blotches
+  // (2026-09-29). A length check passed on that page; these do not.
+  expect(ground.repeat).toEqual(["repeat", ...Array(lift).fill("no-repeat")]);
+  // Without `fixed` the lift is positioned on the one-window-tall root box
+  // and ends at its bottom edge, tiled or not.
+  expect(ground.attachment).toEqual(["scroll", ...Array(lift).fill("fixed")]);
+  expect(ground.size.slice(1)).toEqual(Array(lift).fill("auto"));
 });

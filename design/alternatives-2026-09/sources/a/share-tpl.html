@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="__LANG__">
+<head>
+<meta charset="utf-8">
+<title>Tour de Growth — __TITLE__</title>
+<link rel="stylesheet" href="/fonts.css">
+<style>
+  :root {
+    --paper: #efebe1; --card: #fbf9f2; --ink: #151515; --grey: #5b5346;
+    --screen: #111111; --yellow: #ffd21a; --red: #b8321f;
+    --display: "Saira Extra Condensed", sans-serif;
+    --mono: "JetBrains Mono", monospace;
+    --ui: "Inter", sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; }
+  body { background: var(--paper); color: var(--ink); font-family: var(--ui); position: relative; }
+  .strip { position: absolute; left: 0; right: 0; top: 0; height: 10px; background: var(--yellow); border-bottom: 2px solid var(--ink); }
+
+  .top { position: absolute; left: 60px; right: 60px; top: 40px; height: 44px; display: flex; align-items: center; justify-content: space-between; }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .word { font: 800 44px/1 var(--display); letter-spacing: 0.01em; text-transform: uppercase; }
+  .word b { color: var(--red); font-weight: 800; }
+  .bug { width: 40px; height: 40px; background: var(--screen); display: grid; place-items: center; }
+  .bug i { width: 26px; height: 26px; background: var(--yellow);
+    clip-path: polygon(0 22%, 30% 0, 38% 0, 50% 12%, 62% 0, 70% 0, 100% 22%, 88% 46%, 79% 40%, 79% 100%, 21% 100%, 21% 40%, 12% 46%); }
+  .kicker { display: flex; align-items: stretch; height: 40px; background: var(--screen); color: #fff;
+    font: 700 16px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; }
+  .kicker::before { content: ""; width: 12px; background: var(--yellow); }
+  .kicker span { display: flex; align-items: center; padding: 0 16px 0 14px; }
+
+  .hook { position: absolute; left: 60px; top: 122px; width: 620px;
+    font: 800 76px/0.9 var(--display); text-transform: uppercase; letter-spacing: 0.002em; }
+  .hook em { font-style: normal; color: var(--red); display: block; margin-top: 10px; }
+
+  .tower { position: absolute; right: 60px; top: 116px; width: 400px; height: 272px;
+    background: var(--screen); color: #fff; border-bottom: 12px solid var(--yellow); padding: 24px 28px 0; }
+  .tower .label { font: 700 15px/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; }
+  .tower .score { display: flex; align-items: flex-end; gap: 12px; margin-top: 14px; }
+  .tower .n { font: 800 212px/0.8 var(--display); letter-spacing: -0.01em; }
+  .tower .of { font: 700 44px/1 var(--mono); color: var(--yellow); margin-bottom: 8px; letter-spacing: -0.02em; }
+
+  .lower { position: absolute; left: 60px; right: 60px; top: 432px; }
+  .tabs { display: flex; height: 42px; }
+  .tab { display: flex; align-items: center; gap: 12px; padding: 0 18px; font: 700 17px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; }
+  .tab.action { background: var(--red); color: #fff; }
+  .tab.stage { background: var(--yellow); color: var(--ink); }
+  .tab.stage::before { content: ""; width: 18px; height: 15px; background: var(--red); clip-path: polygon(0 0, 100% 0, 50% 100%); }
+  .bar { display: flex; align-items: stretch; background: var(--screen); color: #fff; min-height: 118px; }
+  .bar p { flex: 1; padding: 20px 28px 22px; font: 600 28px/1.36 var(--ui); letter-spacing: -0.005em; }
+  .bar .url { flex: none; display: flex; align-items: center; padding: 0 26px; border-left: 2px solid #3a3a3a;
+    font: 700 19px/1 var(--mono); color: var(--yellow); letter-spacing: 0.01em; }
+</style>
+</head>
+<body>
+  <div class="strip"></div>
+  <div class="top">
+    <div class="brand"><span class="bug"><i></i></span><span class="word">Tour de <b>Growth</b></span></div>
+    <div class="kicker"><span>__KICKER__</span></div>
+  </div>
+  <h1 class="hook">__HOOK__<em>__ASK__</em></h1>
+  <div class="tower">
+    <div class="label">__SCORE_LABEL__</div>
+    <div class="score"><span class="n">74</span><span class="of">/100</span></div>
+  </div>
+  <div class="lower">
+    <div class="tabs"><span class="tab action">__NEXT__</span><span class="tab stage">Retention · 8/20</span></div>
+    <div class="bar"><p>__MOVE__</p><span class="url">tourdegrowth.com</span></div>
+  </div>
+</body>
+</html>

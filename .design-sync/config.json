@@ -25,6 +25,8 @@
     "ProseSection": "src/components/brand/ProsePage.tsx",
     "ProseText": "src/components/brand/ProsePage.tsx",
     "SiteFooter": "src/components/brand/SiteFooter.tsx",
+    "SiteHeader": "src/components/brand/SiteHeader.tsx",
+    "SpaceBand": "src/components/brand/SpaceBand.tsx",
     "TrackedLink": "src/components/brand/TrackedLink.tsx",
     "Wordmark": "src/components/brand/Wordmark.tsx",
     "WordmarkLink": "src/components/brand/WordmarkLink.tsx",
@@ -153,6 +155,12 @@
       "cardMode": "column"
     },
     "VideoCall": {
+      "cardMode": "column"
+    },
+    "SiteHeader": {
+      "cardMode": "column"
+    },
+    "SpaceBand": {
       "cardMode": "column"
     }
   },

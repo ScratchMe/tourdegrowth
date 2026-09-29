@@ -1,0 +1,1708 @@
+/* ==========================================================================
+   Direction E « Le Journal du growth » — presse économique.
+   Le résultat se lit comme une page de quotidien économique : papier rosé,
+   serif de titrage, filets, cotes et tableaux.
+   Grammaire des couleurs :
+     - bordeaux  = diagnostic (ce qui cale chez le lecteur) + rubrique « Le Diagnostic » (le Tour)
+     - encre     = action (boutons pleins, « Notre conseil »)
+     - bleu nuit = rubrique « Les Chiffres » (le moteur)
+     - vert      = rubrique « Le Feuilleton » (le jeu)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Tokens
+   -------------------------------------------------------------------------- */
+html[data-alt="e"] {
+  /* E's own palette (contrasts in notes/e.md) */
+  --e-paper: #f6e9da;
+  --e-paper-hi: #fbf4ea;
+  --e-paper-lo: #eeddc8;
+  --e-ink: #1a1714;
+  --e-grey: #5e574f;
+  --e-rule: #cfc2b0; /* decorative hairlines only */
+  --e-rule-strong: #8c7f72; /* 3.26 on paper: meaningful non-text marks */
+  --e-bordeaux: #8e1b3a;
+  --e-bordeaux-wash: #f1d8d3;
+  --e-nuit: #1d3557;
+  --e-vert: #22583d;
+  --e-on-flag: #f6e9da;
+  --e-sec: var(--e-bordeaux); /* colour of the current section, set per space below */
+
+  --font-kicker: "Libre Franklin", "Inter", system-ui, sans-serif;
+
+  /* primitives, rebound */
+  --paper-0: var(--e-paper-hi);
+  --paper-1: var(--e-paper);
+  --paper-2: var(--e-paper-lo);
+  --paper-3: #e4cfb6;
+  --ink-0: var(--e-ink);
+  --ink-1: var(--e-grey);
+  --paint-red: var(--e-bordeaux);
+  --paint-red-action: var(--e-bordeaux);
+  --paint-red-deep: var(--e-bordeaux);
+  --paint-red-wash: var(--e-bordeaux-wash);
+  --ink-faint: var(--e-grey);
+
+  /* semantic */
+  --surface-page: var(--paper-1);
+  --surface-card: var(--paper-0);
+  --surface-sunken: var(--paper-2);
+  --surface-desk: var(--paper-3);
+  --surface-alert: var(--paint-red-wash);
+  --surface-inverse: var(--ink-0);
+  --surface-accent: var(--e-bordeaux);
+  --text-body: var(--ink-0);
+  --text-muted: var(--ink-1);
+  --text-inverse: var(--paper-0);
+  --text-on-inverse: var(--paper-0);
+  --text-alert: var(--e-bordeaux);
+  --text-link: var(--ink-0);
+  --text-link-hover: var(--e-bordeaux);
+  --text-faint: var(--ink-1);
+  --border-hard: var(--ink-0);
+  --border-soft: var(--ink-1);
+  --border-alert: var(--e-bordeaux);
+  --border-divider: var(--e-rule);
+  --accent-mark: var(--e-bordeaux);
+  --shadow-color: transparent;
+  --texture-ink: transparent;
+  --state-bad-text: var(--e-bordeaux);
+  --state-good-text: var(--e-vert);
+  --action-primary-bg: var(--ink-0);
+  --action-primary-text: var(--paper-0);
+  --action-secondary-text: var(--ink-0);
+  --focus-ring: var(--ink-0);
+  --focus-ring-invert: var(--e-bordeaux);
+  --field-border-alert: var(--e-bordeaux);
+  --state-selected-bg: var(--ink-0);
+  --state-selected-text: var(--paper-0);
+  --viz-ink: var(--ink-0);
+  --viz-highlight: var(--e-bordeaux);
+  --viz-highlight-text: var(--e-bordeaux);
+  --viz-cat-1: var(--e-nuit);
+  --viz-cat-2: var(--e-vert);
+  --ground-lift: none;
+  --ground-lift-paper: none;
+
+  /* shape: a newspaper has hairlines, square corners, no shadows */
+  --radius-tag: 0;
+  --radius-button: 0;
+  --radius-panel: 0;
+  --radius-card: 0;
+  --border-width: 1px;
+  --shadow-card-roast: none;
+
+  /* type */
+  --font-display: "Newsreader", Georgia, "Times New Roman", serif;
+  --font-ui: "Source Serif 4", Georgia, serif;
+  --display-hero: 600 74px/0.96 var(--font-display);
+  --display-hero-mobile: 600 44px/1 var(--font-display);
+  --display-section: 700 30px/1.08 var(--font-display);
+  --display-title: 700 40px/1 var(--font-display);
+  --display-wordmark: 800 19px/1 var(--font-display);
+  --display-letter-spacing: -0.01em;
+  --title-question-lg: 600 36px/1.12 var(--font-display);
+  --title-question-sm: 600 27px/1.16 var(--font-display);
+  --title-card: 700 22px/1.2 var(--font-display);
+  --body-lg: 400 18px/1.55 var(--font-ui);
+  --body-md: 400 16px/1.55 var(--font-ui);
+  --body-sm: 400 15px/1.5 var(--font-ui);
+  --body-read: 400 18px/1.62 var(--font-ui);
+  --body-read-mobile: 400 17px/1.58 var(--font-ui);
+  --label-button-sm: 700 13px/1 var(--font-kicker);
+  --label-button: 700 14.5px/1 var(--font-kicker);
+  --label-button-lg: 700 15.5px/1 var(--font-kicker);
+  --label-nav: 600 14px/1 var(--font-kicker);
+  --meta-md: 600 13px/1.45 var(--font-kicker);
+  --meta-sm: 600 12.5px/1.45 var(--font-kicker);
+  --meta-xs: 600 12px/1.5 var(--font-kicker);
+  --meta-2xs: 700 11.5px/1.2 var(--font-kicker);
+  --meta-tracking: 0.07em;
+  --meta-tracking-wide: 0.09em;
+  --chart-value-xl: 700 48px/1 var(--font-display);
+}
+html[data-alt="e"],
+html[data-alt="e"] [data-world] {
+  --border-solid: 1px solid var(--border-hard);
+  --border-dashed: 1px dashed var(--border-soft);
+  --border-rule: 1px solid var(--border-divider);
+  --shadow-card: none;
+  --shadow-panel: none;
+  --shadow-hover: none;
+  --state-hover-shadow: none;
+  --texture-spray: none;
+  --texture-spray-strong: none;
+}
+html[data-alt="e"] body {
+  --font-display: "Newsreader", Georgia, "Times New Roman", serif;
+  --font-ui: "Source Serif 4", Georgia, serif;
+  background: var(--e-paper);
+  font-feature-settings: "kern";
+  text-rendering: optimizeLegibility;
+}
+html[data-alt="e"][data-space="moteur"] { --e-sec: var(--e-nuit); }
+/* the night world (the game's level): bordeaux marks would drop to 2.1:1 on
+   the night ground, so they take a night bordeaux (5.2 to 6.4) */
+html[data-alt="e"] [data-world="night"] {
+  --border-alert: #e0768f;
+  --accent-mark: #e0768f;
+  --field-border-alert: #e0768f;
+  --focus-ring-invert: #e0768f;
+  --viz-highlight: #e0768f;
+}
+html[data-alt="e"][data-space="jeu"] { --e-sec: var(--e-vert); }
+
+/* --------------------------------------------------------------------------
+   2. Shared primitives: kickers (small caps), buttons, segmented, links
+   -------------------------------------------------------------------------- */
+html[data-alt="e"] :is(
+  .MetaLabel--label,
+  .ScoreDisplay--eyebrow,
+  .Bottleneck--label,
+  .PriorityMove--eyebrow,
+  .ShareCard--caption,
+  .Board--eyebrow,
+  .Diagnosis--eyebrow,
+  .GameEntry--meta
+) {
+  font-family: var(--font-kicker);
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.3;
+  text-transform: none;
+  font-variant-caps: small-caps;
+  letter-spacing: 0.05em;
+}
+
+html[data-alt="e"] .Button--button {
+  border-radius: 0;
+  letter-spacing: 0.01em;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+html[data-alt="e"] .Button--primary {
+  background: var(--e-ink);
+  border: 1px solid var(--e-ink);
+  color: var(--e-paper-hi);
+}
+html[data-alt="e"] .Button--primary:not(:disabled):hover {
+  transform: none;
+  background: #000;
+}
+html[data-alt="e"] .Button--secondary {
+  border: 1px solid var(--e-ink);
+  background: transparent;
+  box-shadow: inset 0 0 0 0 var(--e-ink);
+}
+html[data-alt="e"] .Button--secondary:not(:disabled):hover {
+  transform: none;
+  box-shadow: inset 0 -3px 0 0 var(--e-ink);
+}
+html[data-alt="e"] .Button--quiet {
+  font-family: var(--font-kicker);
+  font-weight: 600;
+  color: var(--e-ink);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+  text-decoration-color: var(--e-rule-strong);
+}
+
+html[data-alt="e"] .Segmented--track {
+  border: 1px solid var(--e-ink);
+  border-radius: 0;
+}
+html[data-alt="e"] .Segmented--option {
+  border-radius: 0 !important;
+  font-family: var(--font-kicker);
+  font-weight: 700;
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+}
+html[data-alt="e"] .Segmented--option + .Segmented--option {
+  border-left: 1px solid var(--e-ink);
+}
+html[data-alt="e"] .Segmented--option[aria-pressed="true"],
+html[data-alt="e"] .Segmented--option[aria-current="true"] {
+  background: var(--e-ink);
+  color: var(--e-paper-hi);
+}
+html[data-alt="e"] .Segmented--option[aria-pressed="false"] {
+  background: transparent;
+  color: var(--e-grey);
+}
+
+html[data-alt="e"] .DefinitionTrigger--trigger {
+  border-width: 1px;
+  border-style: solid;
+  font-family: var(--font-kicker);
+  font-size: 10px;
+  font-weight: 700;
+  width: 15px;
+  height: 15px;
+}
+
+/* --------------------------------------------------------------------------
+   3. The masthead: folio line, nameplate, section strip (JS adds .e-*)
+   -------------------------------------------------------------------------- */
+html[data-alt="e"] .e-header {
+  border-bottom: 0;
+  padding: 0;
+}
+html[data-alt="e"] .e-mast {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "folio folio"
+    "name  name"
+    "strip rest";
+  column-gap: 20px;
+  align-items: center;
+  width: calc(100% - 48px);
+  max-width: 992px;
+  margin: 0 auto;
+  padding: 0;
+  border-bottom: 1px solid var(--e-ink);
+}
+html[data-alt="e"] .e-folio {
+  grid-area: folio;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-height: 42px;
+  padding-right: 120px;
+  font: 600 13px/1.2 var(--font-kicker);
+  font-variant-caps: small-caps;
+  letter-spacing: 0.06em;
+  color: var(--e-grey);
+}
+html[data-alt="e"] .e-folio__ed {
+  color: var(--e-ink);
+}
+html[data-alt="e"] .e-folio__motto {
+  position: absolute;
+  left: 50%;
+  top: 21px;
+  transform: translate(-50%, -50%);
+  font: italic 400 16px/1 var(--font-display);
+  font-variant-caps: normal;
+  letter-spacing: 0;
+  color: var(--e-ink);
+  white-space: nowrap;
+}
+html[data-alt="e"] .e-mast .Segmented--group {
+  position: absolute;
+  top: 1px;
+  right: 0;
+}
+html[data-alt="e"] .e-mast > .WordmarkLink--link {
+  grid-area: name;
+  justify-self: stretch;
+  display: block;
+  text-align: center;
+  text-decoration: none;
+  padding: 16px 0 17px;
+  border-top: 1px solid var(--e-ink);
+  /* thick-thin rule under the nameplate */
+  background:
+    linear-gradient(var(--e-ink), var(--e-ink)) left bottom / 100% 1px no-repeat,
+    linear-gradient(var(--e-ink), var(--e-ink)) left calc(100% - 3px) / 100% 3px no-repeat;
+}
+html[data-alt="e"] .e-mast .Wordmark--wordmark {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 46px;
+  line-height: 1;
+  letter-spacing: 0.035em;
+  color: var(--e-ink);
+  font-variation-settings: "opsz" 72;
+}
+html[data-alt="e"] .e-mast .Wordmark--accent {
+  color: var(--e-ink);
+}
+html[data-alt="e"][data-e-page="landing"] .e-mast .Wordmark--wordmark {
+  font-size: 68px;
+  letter-spacing: 0.03em;
+}
+
+/* the section strip: the sign of the three spaces */
+html[data-alt="e"] .e-strip {
+  grid-area: strip;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  padding: 9px 0;
+  min-height: 50px;
+}
+html[data-alt="e"] .e-sec {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  font: 700 15px/1 var(--font-kicker);
+  font-variant-caps: small-caps;
+  letter-spacing: 0.04em;
+  color: var(--e-grey);
+  white-space: nowrap;
+}
+html[data-alt="e"] .e-sec__n {
+  font: 500 12px/1 var(--font-mono);
+  font-variant-caps: normal;
+  letter-spacing: 0;
+}
+html[data-alt="e"] .e-sec::before {
+  content: "";
+  align-self: center;
+  width: 9px;
+  height: 9px;
+  background: var(--e-c);
+}
+html[data-alt="e"] .e-sec[data-sec="tour"] { --e-c: var(--e-bordeaux); }
+html[data-alt="e"] .e-sec[data-sec="moteur"] { --e-c: var(--e-nuit); }
+html[data-alt="e"] .e-sec[data-sec="jeu"] { --e-c: var(--e-vert); }
+html[data-alt="e"] .e-sec--on {
+  background: var(--e-c);
+  color: var(--e-on-flag);
+  padding: 8px 13px 9px 11px;
+  font-size: 16.5px;
+}
+html[data-alt="e"] .e-sec--on::before {
+  display: none;
+}
+html[data-alt="e"] .e-sec--on .e-sec__n {
+  color: var(--e-on-flag);
+  opacity: 0.85;
+}
+
+/* whatever the page keeps on the right of the strip */
+html[data-alt="e"] .e-mast > :is(nav, .ResultView--headerRight, .page--headerRight) {
+  grid-area: rest;
+}
+html[data-alt="e"] .e-mast .page--nav {
+  gap: 22px;
+}
+html[data-alt="e"] .e-mast .page--navLink {
+  font: 600 14px/1 var(--font-kicker);
+  color: var(--e-ink);
+  padding: 6px 0;
+}
+html[data-alt="e"] .e-mast .page--headerCta {
+  font: 700 13px/1 var(--font-kicker);
+  padding: 11px 16px;
+}
+
+/* the quiz keeps a compact masthead */
+html[data-alt="e"][data-e-page="quiz"] .e-mast {
+  max-width: 672px;
+}
+html[data-alt="e"][data-e-page="quiz"] .e-mast .Wordmark--wordmark {
+  font-size: 34px;
+}
+html[data-alt="e"][data-e-page="quiz"] .e-mast > .WordmarkLink--link {
+  padding: 12px 0 13px;
+}
+html[data-alt="e"][data-e-page="quiz"] .e-mast {
+  grid-template-areas:
+    "folio rest"
+    "name  name"
+    "strip strip";
+}
+html[data-alt="e"][data-e-page="quiz"] .e-folio {
+  padding-right: 0;
+}
+html[data-alt="e"][data-e-page="quiz"] .e-folio__motto {
+  display: none;
+}
+html[data-alt="e"] .page--headerRight .MetaLabel--label {
+  font: 500 12.5px/1 var(--font-mono);
+  font-variant-caps: normal;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--e-ink);
+}
+html[data-alt="e"] .page--headerRight .page--minutesLeft {
+  color: var(--e-grey);
+}
+
+/* --------------------------------------------------------------------------
+   4. Signature blocks, shared by the landing preview and the result
+   -------------------------------------------------------------------------- */
+
+/* 4a. La cote : 74 in bold serif, /100 in mono */
+html[data-alt="e"] .ScoreDisplay--eyebrow {
+  color: var(--e-ink);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--e-ink);
+}
+html[data-alt="e"] .ScoreDisplay--numeralRow {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-variation-settings: "opsz" 72;
+  letter-spacing: -0.035em;
+  color: var(--e-ink);
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+html[data-alt="e"] .ScoreDisplay--desktop {
+  font-size: 168px;
+  line-height: 0.92;
+  margin-top: 30px;
+}
+html[data-alt="e"] .ScoreDisplay--mobile {
+  font-size: 118px;
+  line-height: 0.94;
+  margin-top: 22px;
+}
+html[data-alt="e"] .ScoreDisplay--suffix {
+  font: 500 24px/1 var(--font-mono);
+  letter-spacing: 0;
+  color: var(--e-grey);
+  vertical-align: baseline;
+  margin-left: 0;
+  padding: 5px 8px 4px;
+  border: 1px solid var(--e-rule-strong);
+}
+html[data-alt="e"] .ScoreDisplay--suffixMobile {
+  font-size: 19px;
+}
+html[data-alt="e"] .ScoreDisplay--spray {
+  display: none;
+}
+
+/* 4b. À la une : the stalled stage, boxed */
+html[data-alt="e"] .Bottleneck--wrap {
+  position: relative;
+  border: 1px solid var(--e-bordeaux);
+  border-top: 5px solid var(--e-bordeaux);
+  background: var(--e-paper-hi);
+  padding: 26px 20px 18px;
+  margin-top: 30px;
+  gap: 8px;
+}
+html[data-alt="e"] .e-une {
+  position: absolute;
+  top: -16px;
+  left: 16px;
+  background: var(--e-bordeaux);
+  color: var(--e-on-flag);
+  font: 700 14.5px/1 var(--font-kicker);
+  font-variant-caps: small-caps;
+  letter-spacing: 0.06em;
+  padding: 6px 10px 7px;
+}
+html[data-alt="e"] .Bottleneck--label {
+  color: var(--e-bordeaux);
+}
+html[data-alt="e"] .Bottleneck--name {
+  gap: 14px;
+  align-items: baseline;
+}
+html[data-alt="e"] .Bottleneck--pillar,
+html[data-alt="e"] .Bottleneck--mobile .Bottleneck--pillar {
+  font: 700 46px/0.98 var(--font-display);
+  font-variation-settings: "opsz" 72;
+  letter-spacing: -0.02em;
+  text-transform: none;
+  color: var(--e-ink);
+}
+html[data-alt="e"] .Bottleneck--mobile .Bottleneck--pillar {
+  font-size: 38px;
+}
+html[data-alt="e"] .Bottleneck--score {
+  font: 500 17px/1 var(--font-mono);
+  color: var(--e-grey);
+}
+html[data-alt="e"] .Bottleneck--score b {
+  color: var(--e-bordeaux);
+  font-weight: 600;
+}
+html[data-alt="e"] .Bottleneck--verdict,
+html[data-alt="e"] .Bottleneck--mobile .Bottleneck--verdict {
+  font: italic 400 17px/1.5 var(--font-ui);
+  color: var(--e-ink);
+}
+
+/* 4c. The five stages as a stock table (JS sets --e-v on each row) */
+html[data-alt="e"] .e-thead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 0 0 7px;
+  border-bottom: 2px solid var(--e-ink);
+  font: 700 14px/1.2 var(--font-kicker);
+  font-variant-caps: small-caps;
+  letter-spacing: 0.05em;
+  color: var(--e-ink);
+}
+html[data-alt="e"] .e-thead span:last-child {
+  color: var(--e-grey);
+}
+html[data-alt="e"] .PillarChip--chip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 2.4ch 3.2ch minmax(60px, 38%) 20px;
+  align-items: center;
+  column-gap: 8px;
+  width: 100%;
+  padding: 10px 0 9px;
+  border: 0;
+  border-bottom: 1px solid var(--e-rule);
+  border-radius: 0;
+  background: transparent;
+  font: 500 15px/1.2 var(--font-mono);
+  color: var(--e-grey);
+}
+html[data-alt="e"] .PillarChip--label {
+  order: -1;
+  margin: 0;
+  padding: 0;
+  font: 600 17px/1.2 var(--font-display);
+  color: var(--e-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+html[data-alt="e"] .PillarChip--score {
+  text-align: right;
+  font-weight: 600;
+  color: var(--e-ink);
+}
+html[data-alt="e"] .PillarChip--chip > span:not([class]) {
+  font-size: 12.5px;
+  color: var(--e-grey);
+}
+html[data-alt="e"] .PillarChip--chip::after {
+  content: "";
+  order: 4;
+  height: 10px;
+  /* bar (ink) over a track with a tick every 5 points */
+  background:
+    linear-gradient(var(--e-bar, var(--e-ink)), var(--e-bar, var(--e-ink))) left center / calc(var(--e-v, 0) * 5%) 100% no-repeat,
+    linear-gradient(var(--e-rule-strong), var(--e-rule-strong)) left bottom / 100% 1px no-repeat,
+    repeating-linear-gradient(90deg, var(--e-rule-strong) 0 1px, transparent 1px 25%) left bottom / 100% 4px no-repeat;
+}
+html[data-alt="e"] .PillarChip--chip > .GlossaryTerm--anchor {
+  order: 5;
+  justify-self: end;
+}
+html[data-alt="e"] .PillarChip--chip:not(:has(.GlossaryTerm--anchor)) {
+  grid-template-columns: minmax(0, 1fr) 2.4ch 3.2ch minmax(60px, 40%);
+}
+html[data-alt="e"] .PillarChip--weak {
+  --e-bar: var(--e-bordeaux);
+  background: linear-gradient(90deg, var(--e-bordeaux-wash), var(--e-bordeaux-wash));
+  box-shadow: inset 3px 0 0 var(--e-bordeaux);
+  padding-left: 10px;
+  color: var(--e-bordeaux);
+}
+html[data-alt="e"] .PillarChip--weak .PillarChip--label,
+html[data-alt="e"] .PillarChip--weak .PillarChip--score,
+html[data-alt="e"] .PillarChip--weak > span:not([class]) {
+  color: var(--e-bordeaux);
+}
+html[data-alt="e"] .PillarChip--weak .PillarChip--label {
+  font-weight: 700;
+}
+
+/* 4d. Notre conseil : the action, in ink */
+html[data-alt="e"] .PriorityMove--card {
+  position: relative;
+  background: transparent;
+  border: 0;
+  border-top: 5px solid var(--e-ink);
+  border-bottom: 1px solid var(--e-ink);
+  border-radius: 0;
+  padding: 0 0 18px;
+}
+html[data-alt="e"] .e-conseil {
+  display: inline-block;
+  background: var(--e-ink);
+  color: var(--e-paper-hi);
+  font: 700 14.5px/1 var(--font-kicker);
+  font-variant-caps: small-caps;
+  letter-spacing: 0.06em;
+  padding: 6px 10px 8px;
+  margin-bottom: 14px;
+}
+html[data-alt="e"] .PriorityMove--eyebrow {
+  color: var(--e-ink);
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--e-rule);
+}
+html[data-alt="e"] .PriorityMove--stage {
+  font: 500 13px/1.3 var(--font-mono);
+  font-variant-caps: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--e-grey);
+}
+html[data-alt="e"] .PriorityMove--body {
+  font: 500 22px/1.32 var(--font-display);
+  color: var(--e-ink);
+  letter-spacing: -0.005em;
+}
+html[data-alt="e"] .PriorityMove--body::first-letter {
+  float: left;
+  font: 700 64px/0.8 var(--font-display);
+  font-variation-settings: "opsz" 72;
+  margin: 3px 9px 0 -2px;
+  color: var(--e-ink);
+}
+
+/* --------------------------------------------------------------------------
+   5. Landing — the front page
+   -------------------------------------------------------------------------- */
+html[data-alt="e"] .page--main {
+  padding-top: 40px;
+}
+html[data-alt="e"][data-e-page="landing"] .page--main {
+  width: calc(100% - 48px);
+  max-width: 992px;
+  padding: 40px 0 40px;
+}
+html[data-alt="e"] .page--heroRight {
+  gap: 24px;
+}
+@media (min-width: 761px) {
+  html[data-alt="e"][data-e-page="landing"] .page--main {
+    display: grid;
+    grid-template-columns: minmax(0, 1.14fr) minmax(0, 0.86fr);
+    grid-template-areas:
+      "left  right"
+      "quote right";
+    grid-template-rows: auto 1fr;
+    align-items: start;
+  }
+  html[data-alt="e"] .page--hero {
+    display: contents;
+  }
+  html[data-alt="e"] .page--heroLeft {
+    grid-area: left;
+    padding-right: 44px;
+  }
+  html[data-alt="e"] .page--heroRight {
+    grid-area: right;
+    padding-left: 40px;
+    border-left: 1px solid var(--e-rule);
+  }
+  html[data-alt="e"] .page--founder {
+    grid-area: quote;
+    margin: 56px 44px 0 0 !important;
+  }
+}
+html[data-alt="e"] .page--bibTag {
+  transform: none;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--e-ink);
+  border-bottom: 1px solid var(--e-ink);
+  border-radius: 0;
+  padding: 7px 0 6px;
+  font: 500 12.5px/1.2 var(--font-mono);
+  letter-spacing: 0.06em;
+  color: var(--e-ink);
+  margin-bottom: 28px;
+}
+html[data-alt="e"] .page--h1 {
+  font: 600 70px/0.95 var(--font-display);
+  font-variation-settings: "opsz" 72;
+  letter-spacing: -0.028em;
+  margin-bottom: 26px;
+}
+html[data-alt="e"] .page--h1Accent {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--e-bordeaux);
+  letter-spacing: -0.02em;
+}
+html[data-alt="e"] .page--subtitle {
+  font: 400 20px/1.5 var(--font-ui);
+  color: var(--e-ink);
+  max-width: 470px;
+  margin-bottom: 30px;
+}
+html[data-alt="e"] .page--promise {
+  font: italic 400 16px/1.5 var(--font-ui);
+  letter-spacing: 0;
+  color: var(--e-grey);
+  border-left: 3px solid var(--e-ink);
+  padding-left: 12px;
+  margin: -10px 0 30px;
+}
+html[data-alt="e"] .page--ctaRow {
+  gap: 12px;
+  flex-wrap: wrap;
+}
+html[data-alt="e"] .page--problem {
+  font: italic 400 25px/1.28 var(--font-display);
+  color: var(--e-ink);
+  letter-spacing: -0.005em;
+}
+html[data-alt="e"] .page--previewCard {
+  background: var(--e-paper-hi);
+  border: 1px solid var(--e-ink);
+  border-top: 5px solid var(--e-ink);
+  padding: 20px 22px 22px;
+  gap: 16px;
+}
+html[data-alt="e"] .page--previewTopRow .MetaLabel--label {
+  color: var(--e-grey);
+}
+html[data-alt="e"] .page--previewTags {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 0;
+  margin-top: 8px;
+}
+html[data-alt="e"] .page--previewChipLink {
+  display: block;
+  text-decoration: none;
+}
+html[data-alt="e"] .page--previewMove {
+  margin-top: 12px;
+}
+html[data-alt="e"] .page--previewMove .PriorityMove--body {
+  font-size: 19px;
+}
+html[data-alt="e"] .page--previewMove .PriorityMove--body::first-letter {
+  font-size: 54px;
+  margin-top: 2px;
+}
+html[data-alt="e"] .page--founder {
+  max-width: none;
+  margin-top: 64px;
+  padding: 26px 0 8px;
+  border-top: 3px solid var(--e-ink);
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  column-gap: 14px;
+}
+html[data-alt="e"] .page--founder::before {
+  content: "\00AB";
+  grid-row: span 2;
+  font: 700 84px/0.72 var(--font-display);
+  color: var(--e-bordeaux);
+}
+html[data-alt="e"]:lang(en) .page--founder::before {
+  content: "\201C";
+}
+html[data-alt="e"] .page--founderQuote {
+  font: italic 400 29px/1.22 var(--font-display);
+  letter-spacing: -0.01em;
+  color: var(--e-ink);
+  max-width: 820px;
+  margin-bottom: 14px;
+}
+html[data-alt="e"] .page--founderMeta {
+  font: 600 14px/1.4 var(--font-kicker);
+  font-variant-caps: small-caps;
+  letter-spacing: 0.05em;
+  color: var(--e-grey);
+}
+html[data-alt="e"] .page--founderLink {
+  white-space: nowrap;
+  color: var(--e-ink);
+  font-variant-caps: normal;
+  letter-spacing: 0;
+  font-family: var(--font-ui);
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* --------------------------------------------------------------------------
+   6. Result — the page of the day
+   -------------------------------------------------------------------------- */
+html[data-alt="e"] .ResultView--main {
+  width: calc(100% - 48px);
+  max-width: 992px;
+  padding: 26px 0 40px;
+  gap: 26px;
+}
+html[data-alt="e"] .ResultView--sampleBadge {
+  background: transparent;
+  border: 1px solid var(--e-bordeaux);
+  color: var(--e-bordeaux);
+  padding: 6px 10px 7px;
+}
+html[data-alt="e"] .ResultView--slotScore {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  box-shadow: none;
+}
+html[data-alt="e"] .ResultView--builtByCredit {
+  font: italic 400 14px/1.4 var(--font-ui);
+  color: var(--e-grey);
+  margin-top: 12px;
+}
+html[data-alt="e"] .ResultView--pillarGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+html[data-alt="e"] .ResultView--pillarGrid > div {
+  grid-column: auto;
+}
+html[data-alt="e"] .ResultView--section {
+  gap: 14px;
+}
+html[data-alt="e"] .ResultView--section > .MetaLabel--label {
+  color: var(--e-ink);
+  font-size: 15px;
+  border-top: 2px solid var(--e-ink);
+  padding-top: 8px;
+}
+html[data-alt="e"] .ResultView--cardGrid {
+  gap: 0;
+}
+html[data-alt="e"] .InsightCard--card {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0 0 4px;
+}
+html[data-alt="e"] .InsightCard--eyebrow {
+  font: 700 14px/1.3 var(--font-kicker);
+  font-variant-caps: small-caps;
+  letter-spacing: 0.05em;
+  color: var(--e-ink);
+  margin-bottom: 6px;
+}
+html[data-alt="e"] .InsightCard--eyebrowWeakness {
+  color: var(--e-bordeaux);
+}
+html[data-alt="e"] .InsightCard--body {
+  font: 400 16px/1.5 var(--font-ui);
+  color: var(--e-ink);
+}
+html[data-alt="e"] .ShareCard--frame {
+  background: transparent;
+  border: 0;
+  border-top: 2px solid var(--e-ink);
+  border-radius: 0;
+  padding: 10px 0 0;
+}
+html[data-alt="e"] .ShareCard--caption {
+  color: var(--e-ink);
+}
+html[data-alt="e"] .ShareCard--image {
+  border: 1px solid var(--e-ink);
+  border-radius: 0;
+  box-shadow: 0 1px 0 var(--e-ink), 0 10px 22px -14px rgba(26, 23, 20, 0.35);
+}
+html[data-alt="e"] .ShareCard--save {
+  font: 600 14px/1 var(--font-kicker);
+  color: var(--e-ink);
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--e-rule-strong);
+}
+html[data-alt="e"] .ResultView--visitorPitch {
+  font: italic 400 17px/1.45 var(--font-ui);
+  color: var(--e-ink);
+}
+html[data-alt="e"] .ResultView--ctaRow .Button--primary {
+  min-height: 52px;
+  font-size: 16px;
+}
+html[data-alt="e"] .Disclaimer--disclaimer {
+  font: italic 400 14px/1.45 var(--font-ui);
+  color: var(--e-grey);
+}
+html[data-alt="e"] .Disclaimer--disclaimer a {
+  color: var(--e-ink);
+}
+
+/* Le Feuilleton teaser on the result (the game's entry) */
+html[data-alt="e"] .GameEntry--card {
+  background: var(--e-paper-hi);
+  border: 1px solid var(--e-ink);
+  border-top: 5px solid var(--e-vert);
+  border-radius: 0;
+}
+html[data-alt="e"] .GameEntry--band {
+  --surface-page: var(--e-vert);
+  --text-body: var(--e-on-flag);
+  --text-muted: #e5d6c3;
+  --border-hard: var(--e-on-flag);
+  background: var(--e-vert);
+  background-image: none;
+  color: var(--e-on-flag);
+  font: 500 12.5px/1.3 var(--font-mono);
+  letter-spacing: 0.06em;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+html[data-alt="e"] .e-bandflag {
+  flex-basis: 100%;
+  font: 700 16px/1 var(--font-kicker);
+  font-variant-caps: small-caps;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  padding-bottom: 7px;
+  margin-bottom: 1px;
+  border-bottom: 1px solid rgba(246, 233, 218, 0.45);
+}
+html[data-alt="e"] .GameEntry--title {
+  font: 700 26px/1.12 var(--font-display);
+  letter-spacing: 0;
+  word-spacing: 0.02em;
+}
+html[data-alt="e"] .GameEntry--text {
+  font: 400 16px/1.55 var(--font-ui);
+}
+
+/* desktop composition */
+@media (min-width: 761px) {
+  html[data-alt="e"] .ResultView--layout {
+    grid-template-columns: 404px minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    gap: 34px 0;
+  }
+  html[data-alt="e"] .ResultView--left,
+  html[data-alt="e"] .ResultView--slotShare {
+    margin-right: 40px;
+  }
+  html[data-alt="e"] .ResultView--right {
+    border-left: 1px solid var(--e-rule);
+    padding-left: 40px;
+    gap: 34px;
+    min-height: 100%;
+  }
+  html[data-alt="e"] .ResultView--left {
+    gap: 30px;
+  }
+  html[data-alt="e"] .ResultView--cardGrid > :nth-child(2) {
+    border-left: 1px solid var(--e-rule);
+    padding-left: 22px;
+    margin-left: 0;
+  }
+  html[data-alt="e"] .ResultView--cardGrid > :nth-child(1) {
+    padding-right: 22px;
+  }
+  html[data-alt="e"] .ResultView--slotMove .PriorityMove--body {
+    font-size: 27px;
+    line-height: 1.26;
+  }
+  html[data-alt="e"] .ResultView--slotMove .PriorityMove--body::first-letter {
+    font-size: 78px;
+    margin-top: 4px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   7. Quiz — the reader's survey
+   -------------------------------------------------------------------------- */
+html[data-alt="e"][data-e-page="quiz"] .page--main {
+  max-width: 720px;
+  padding-top: 30px;
+  gap: 18px;
+}
+html[data-alt="e"] .StageProgress--segments {
+  gap: 4px;
+  margin-bottom: 4px;
+}
+html[data-alt="e"] .StageProgress--segment {
+  height: 8px;
+  border-radius: 0;
+}
+html[data-alt="e"] .StageProgress--current,
+html[data-alt="e"] .StageProgress--done {
+  background: var(--e-ink);
+  border: 1px solid var(--e-ink);
+}
+html[data-alt="e"] .StageProgress--pending {
+  background: transparent;
+  border: 1px solid var(--e-rule-strong);
+}
+html[data-alt="e"][data-e-page="quiz"] .page--main > .MetaLabel--label {
+  color: var(--e-ink);
+}
+html[data-alt="e"] .QuestionCard--card {
+  background: transparent;
+  border: 0;
+  border-top: 5px solid var(--e-ink);
+  border-bottom: 1px solid var(--e-ink);
+  border-radius: 0;
+  padding: 22px 0 26px;
+}
+html[data-alt="e"] .QuestionCard--question {
+  font-variation-settings: "opsz" 72;
+  letter-spacing: -0.015em;
+}
+html[data-alt="e"] .page--answers {
+  counter-reset: e-opt;
+  gap: 10px;
+}
+html[data-alt="e"] .AnswerOption--option {
+  counter-increment: e-opt;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--e-paper-hi);
+  border: 1px solid var(--e-ink);
+  border-radius: 0;
+  padding: 14px 18px 14px 14px;
+  font: 400 19px/1.35 var(--font-ui);
+}
+html[data-alt="e"] .AnswerOption--option::before {
+  content: counter(e-opt, upper-alpha);
+  flex: 0 0 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--e-ink);
+  font: italic 600 19px/1 var(--font-display);
+  color: var(--e-ink);
+}
+html[data-alt="e"] .AnswerOption--option:hover {
+  background: var(--e-paper-lo);
+}
+html[data-alt="e"] .AnswerOption--option[aria-pressed="true"] {
+  background: var(--e-ink);
+  color: var(--e-paper-hi);
+}
+html[data-alt="e"] .AnswerOption--option[aria-pressed="true"]::before {
+  border-color: var(--e-paper-hi);
+  color: var(--e-paper-hi);
+}
+html[data-alt="e"] .page--footer .MetaLabel--label {
+  color: var(--e-grey);
+}
+
+/* --------------------------------------------------------------------------
+   8. The moteur — « Les Chiffres » (markets pages)
+   -------------------------------------------------------------------------- */
+html[data-alt="e"][data-e-page="engine"] .page--main {
+  width: calc(100% - 48px);
+  max-width: 992px;
+  padding: 40px 0 60px;
+  gap: 48px;
+}
+html[data-alt="e"] .page--intro > .MetaLabel--label,
+html[data-alt="e"] .ProsePage--intro > .MetaLabel--label {
+  color: var(--e-sec);
+  font-size: 15px;
+}
+html[data-alt="e"] .page--title,
+html[data-alt="e"] .ProsePage--title.ProsePage--page {
+  font: 600 72px/0.96 var(--font-display);
+  font-variation-settings: "opsz" 72;
+  letter-spacing: -0.028em;
+}
+html[data-alt="e"] :is(.page--lead, .ProsePage--lead) {
+  font: italic 400 24px/1.35 var(--font-display);
+  color: var(--e-ink);
+  max-width: 34em;
+}
+html[data-alt="e"] .page--text {
+  font: 400 18px/1.6 var(--font-ui);
+}
+@media (min-width: 761px) {
+  html[data-alt="e"][data-e-page="engine"] .page--intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    column-gap: 0;
+    row-gap: 16px;
+    max-width: none;
+    align-items: start;
+  }
+  html[data-alt="e"][data-e-page="engine"] .page--intro > * {
+    grid-column: 1;
+    margin-right: 44px;
+  }
+  html[data-alt="e"][data-e-page="engine"] .page--intro > .page--title {
+    grid-column: 1 / -1;
+    margin-right: 0;
+  }
+  html[data-alt="e"][data-e-page="engine"] .page--intro > .page--privacy {
+    grid-column: 2;
+    grid-row: 3 / span 3;
+    margin: 6px 0 0;
+  }
+}
+html[data-alt="e"] .Callout--caveat {
+  border: 1px solid var(--e-ink);
+  border-top: 5px solid var(--e-sec);
+  border-radius: 0;
+  background: var(--e-paper-hi);
+  padding: 22px 26px 24px;
+}
+html[data-alt="e"] .page--privacyTitle {
+  font: 700 22px/1.2 var(--font-display);
+}
+html[data-alt="e"] .Callout--body {
+  font: 400 17px/1.55 var(--font-ui);
+}
+html[data-alt="e"] .page--ctaNote {
+  font: italic 400 15px/1.4 var(--font-ui);
+  color: var(--e-grey);
+}
+html[data-alt="e"] .page--duration {
+  gap: 14px;
+  border-top: 2px solid var(--e-ink);
+  padding-top: 12px;
+}
+html[data-alt="e"] .page--durationTitle {
+  font: 700 30px/1.1 var(--font-display);
+  letter-spacing: -0.01em;
+}
+html[data-alt="e"] .page--duration > .page--text {
+  font-size: 17px;
+}
+/* the dl becomes a table: a header row of section-coloured kickers, ruled columns */
+html[data-alt="e"] .page--durationList {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  border-top: 1px solid var(--e-ink);
+  border-bottom: 1px solid var(--e-ink);
+  margin-top: 6px;
+}
+html[data-alt="e"] .page--durationItem {
+  border-top: 0;
+  padding: 12px 18px 16px;
+  gap: 8px;
+}
+html[data-alt="e"] .page--durationItem + .page--durationItem {
+  border-left: 1px solid var(--e-rule);
+}
+html[data-alt="e"] .page--durationItem:first-child {
+  padding-left: 0;
+}
+html[data-alt="e"] .page--durationItem dt {
+  font: 700 14px/1.25 var(--font-kicker);
+  font-variant-caps: small-caps;
+  text-transform: none;
+  letter-spacing: 0.05em;
+  color: var(--e-sec);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--e-rule);
+}
+html[data-alt="e"] .page--durationItem dd {
+  font: 400 15.5px/1.5 var(--font-ui);
+}
+html[data-alt="e"] .Board--board {
+  width: auto !important;
+  margin-inline: 0 !important;
+}
+html[data-alt="e"] .Board--head {
+  border-top: 2px solid var(--e-ink);
+  padding-top: 10px;
+}
+html[data-alt="e"] .Board--eyebrow {
+  color: var(--e-sec);
+}
+html[data-alt="e"] .Board--verdict {
+  font: 600 44px/1.06 var(--font-display);
+  font-variation-settings: "opsz" 72;
+  letter-spacing: -0.02em;
+  text-transform: none;
+}
+html[data-alt="e"] .Board--verdictAccent {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--e-bordeaux);
+}
+html[data-alt="e"] .Board--chip {
+  font: 500 13px/1.2 var(--font-mono);
+  background: transparent;
+  padding: 6px 10px;
+}
+html[data-alt="e"] .Board--chipFound {
+  background: var(--e-ink);
+  color: var(--e-paper-hi);
+  border: 1px solid var(--e-ink);
+}
+html[data-alt="e"] .Board--chipMissing {
+  border: 1px solid var(--e-bordeaux);
+  color: var(--e-bordeaux);
+}
+html[data-alt="e"] .Board--headActions .Button--quiet {
+  font-size: 14px;
+}
+html[data-alt="e"] .Screens--resume {
+  border-left: 3px solid var(--e-sec);
+  padding-left: 14px;
+}
+html[data-alt="e"] .Diagnosis--diagnosis {
+  border-top: 1px solid var(--e-ink);
+}
+html[data-alt="e"] .Diagnosis--stage {
+  font: 700 40px/1 var(--font-display);
+  text-transform: none;
+  color: var(--e-bordeaux);
+}
+html[data-alt="e"] .Board--pelotonCard {
+  background: var(--e-paper-hi);
+  border: 1px solid var(--e-ink);
+  border-top: 5px solid var(--e-sec);
+}
+
+/* --------------------------------------------------------------------------
+   9. The game hub — « Le Feuilleton »
+   -------------------------------------------------------------------------- */
+html[data-alt="e"] .ProsePage--main {
+  padding-top: 40px;
+  gap: 40px;
+}
+html[data-alt="e"] .ProsePage--heading {
+  font: 700 26px/1.15 var(--font-display);
+  border-top: 2px solid var(--e-ink);
+  padding-top: 10px;
+}
+html[data-alt="e"] .ProsePage--text {
+  font: 400 18px/1.6 var(--font-ui);
+}
+html[data-alt="e"][data-e-page="game"] .ProsePage--title.ProsePage--page {
+  font-weight: 500;
+  font-style: italic;
+  font-size: 84px;
+  letter-spacing: -0.03em;
+}
+html[data-alt="e"] .page--zones {
+  counter-reset: e-ep;
+  gap: 0;
+  border-bottom: 1px solid var(--e-ink);
+}
+html[data-alt="e"] .page--zone {
+  counter-increment: e-ep;
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  column-gap: 20px;
+  row-gap: 6px;
+  align-items: start;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--e-rule);
+  border-radius: 0;
+  padding: 18px 0 20px;
+  box-shadow: none;
+}
+html[data-alt="e"] .page--zone:first-child {
+  border-top: 0;
+}
+html[data-alt="e"] .page--zone::before {
+  content: counter(e-ep, upper-roman);
+  grid-column: 1;
+  grid-row: 1 / span 4;
+  font: 400 44px/0.9 var(--font-display);
+  font-style: italic;
+  font-variation-settings: "opsz" 72;
+  color: var(--e-rule-strong);
+  text-align: right;
+  padding-top: 2px;
+}
+html[data-alt="e"] .page--zone > * {
+  grid-column: 2;
+}
+html[data-alt="e"] .page--zoneName {
+  font: 700 23px/1.2 var(--font-display);
+  letter-spacing: -0.005em;
+}
+html[data-alt="e"] .page--zoneSoon .page--zoneName {
+  color: var(--e-grey);
+  font-weight: 600;
+}
+html[data-alt="e"] .page--company {
+  font: italic 400 16px/1.45 var(--font-ui);
+  color: var(--e-grey);
+}
+html[data-alt="e"] .page--zone .MetaLabel--label {
+  color: var(--e-grey);
+  font-size: 13.5px;
+}
+html[data-alt="e"] .page--zoneOpen {
+  background: var(--e-paper-hi);
+  border: 1px solid var(--e-ink);
+  border-top: 5px solid var(--e-vert);
+  padding: 20px 22px 24px 0;
+  margin: 6px 0;
+}
+html[data-alt="e"] .page--zoneOpen + .page--zone {
+  border-top: 0;
+}
+html[data-alt="e"] .page--zoneOpen::before {
+  color: var(--e-vert);
+}
+html[data-alt="e"] .page--zoneOpen .MetaLabel--label {
+  color: var(--e-vert);
+}
+html[data-alt="e"] .page--zoneOpen .page--zoneName {
+  font-size: 30px;
+}
+html[data-alt="e"] .page--zoneOpen .page--company {
+  color: var(--e-ink);
+}
+
+/* cross-reference chip (JS): another section named inside a page */
+html[data-alt="e"] .e-xref {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  align-self: flex-start;
+  font: 700 14px/1 var(--font-kicker);
+  font-variant-caps: small-caps;
+  letter-spacing: 0.05em;
+  color: var(--e-c);
+}
+html[data-alt="e"] .e-xref::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  background: var(--e-c);
+}
+html[data-alt="e"] .e-xref[data-sec="tour"] { --e-c: var(--e-bordeaux); }
+html[data-alt="e"] .e-xref[data-sec="moteur"] { --e-c: var(--e-nuit); }
+html[data-alt="e"] .e-xref[data-sec="jeu"] { --e-c: var(--e-vert); }
+
+/* --------------------------------------------------------------------------
+   10. Content header pages (moteur, jeu) share the masthead; footer = colophon
+   -------------------------------------------------------------------------- */
+html[data-alt="e"] .SiteFooter--footer {
+  border-top: 0;
+  margin-top: 64px;
+}
+html[data-alt="e"] .SiteFooter--inner {
+  width: calc(100% - 48px);
+  max-width: 992px;
+  padding: 20px 0 44px;
+  border-top: 1px solid var(--e-ink);
+  background: linear-gradient(var(--e-ink), var(--e-ink)) left 2px / 100% 3px no-repeat;
+}
+html[data-alt="e"] .SiteFooter--navLink {
+  font: 600 14px/1 var(--font-kicker);
+  color: var(--e-ink);
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--e-rule-strong);
+}
+html[data-alt="e"] .SiteFooter--credit {
+  font: italic 400 14px/1.45 var(--font-ui);
+  color: var(--e-grey);
+}
+html[data-alt="e"] .SiteFooter--creditLink {
+  color: var(--e-ink);
+}
+
+/* --------------------------------------------------------------------------
+   11. Roast = a signed opinion column (never a person's name)
+   -------------------------------------------------------------------------- */
+html[data-alt="e"] .Bottleneck--wrap:has([class*="__pillarRoast"]) .Bottleneck--verdict {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 19px;
+  border-left: 2px solid var(--e-bordeaux);
+  padding-left: 12px;
+}
+html[data-alt="e"] .Bottleneck--wrap:has([class*="__pillarRoast"]) .Bottleneck--verdict::after {
+  display: block;
+  margin-top: 8px;
+  font: 700 13.5px/1 var(--font-kicker);
+  font-style: normal;
+  font-variant-caps: small-caps;
+  letter-spacing: 0.06em;
+  color: var(--e-bordeaux);
+}
+html[data-alt="e"][lang="fr"] .Bottleneck--wrap:has([class*="__pillarRoast"]) .Bottleneck--verdict::after {
+  content: "\2014\00A0Le chroniqueur";
+}
+html[data-alt="e"][lang="en"] .Bottleneck--wrap:has([class*="__pillarRoast"]) .Bottleneck--verdict::after {
+  content: "\2014\00A0The columnist";
+}
+html[data-alt="e"] [class*="__pillarRoast"] {
+  font: 700 46px/0.98 var(--font-display);
+  font-variation-settings: "opsz" 72;
+  letter-spacing: -0.02em;
+  text-transform: none;
+  color: var(--e-bordeaux) !important;
+}
+html[data-alt="e"] .Bottleneck--mobile [class*="__pillarRoast"] {
+  font-size: 38px;
+}
+
+/* --------------------------------------------------------------------------
+   12. Phone (≤ 760 px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 760px) {
+  html[data-alt="e"] .e-mast {
+    width: calc(100% - 40px);
+    grid-template-areas:
+      "folio"
+      "name"
+      "strip"
+      "rest";
+    grid-template-columns: minmax(0, 1fr);
+  }
+  html[data-alt="e"] .e-folio {
+    min-height: 44px;
+    font-size: 12.5px;
+    padding-right: 96px;
+  }
+  html[data-alt="e"] .e-mast .Segmented--group {
+    top: 2px;
+  }
+  html[data-alt="e"] .e-mast .Wordmark--wordmark,
+  html[data-alt="e"][data-e-page="landing"] .e-mast .Wordmark--wordmark {
+    font-size: clamp(22px, 7.7vw, 31px);
+    letter-spacing: 0.02em;
+  }
+  html[data-alt="e"][data-e-page="landing"] .e-mast .Wordmark--wordmark {
+    font-size: clamp(24px, 8.1vw, 34px);
+  }
+  html[data-alt="e"] .e-mast > .WordmarkLink--link {
+    padding: 13px 0 14px;
+  }
+  html[data-alt="e"] .e-strip {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 0;
+    min-height: 0;
+  }
+  html[data-alt="e"] .e-sec {
+    font-size: 12.5px;
+    letter-spacing: 0.02em;
+    gap: 5px;
+  }
+  html[data-alt="e"] .e-sec::before {
+    width: 7px;
+    height: 7px;
+  }
+  html[data-alt="e"] .e-sec--on {
+    font-size: 13.5px;
+    padding: 7px 8px 8px;
+  }
+  html[data-alt="e"] .e-sec__n {
+    display: none;
+  }
+  html[data-alt="e"] .e-folio__motto {
+    display: none;
+  }
+  html[data-alt="e"][data-e-page="quiz"] .e-mast {
+    grid-template-areas:
+      "folio rest"
+      "name name"
+      "strip strip";
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  html[data-alt="e"][data-e-page="quiz"] .e-mast .Wordmark--wordmark {
+    font-size: 26px;
+  }
+
+  /* landing */
+  html[data-alt="e"][data-e-page="landing"] .page--main {
+    width: calc(100% - 40px);
+    padding-top: 26px;
+  }
+  html[data-alt="e"] .page--heroLeft {
+    padding-right: 0;
+  }
+  html[data-alt="e"] .page--heroRight {
+    padding-left: 0;
+    border-left: 0;
+    border-top: 1px solid var(--e-ink);
+    padding-top: 22px;
+  }
+  html[data-alt="e"] .page--h1 {
+    font-size: 50px;
+    line-height: 0.96;
+  }
+  html[data-alt="e"] .page--subtitle {
+    font-size: 18px;
+  }
+  html[data-alt="e"] .page--problem {
+    font-size: 22px;
+  }
+  html[data-alt="e"] .page--previewCard {
+    padding: 16px 16px 18px;
+  }
+  html[data-alt="e"] .page--founder {
+    grid-template-columns: 44px minmax(0, 1fr);
+    column-gap: 12px;
+    margin-top: 44px;
+  }
+  html[data-alt="e"] .page--founder::before {
+    font-size: 64px;
+  }
+  html[data-alt="e"] .page--founderQuote {
+    font-size: 25px;
+  }
+
+  /* result */
+  html[data-alt="e"] .ResultView--main {
+    width: calc(100% - 40px);
+    padding-top: 20px;
+    gap: 26px;
+  }
+  html[data-alt="e"] .ResultView--layout {
+    gap: 30px;
+  }
+  html[data-alt="e"] .ScoreDisplay--desktop {
+    font-size: 132px;
+    margin-top: 24px;
+  }
+  html[data-alt="e"] .ScoreDisplay--suffixDesktop {
+    font-size: 20px;
+  }
+  html[data-alt="e"] .Bottleneck--desktop .Bottleneck--pillar {
+    font-size: 40px;
+  }
+  html[data-alt="e"] .Bottleneck--wrap {
+    padding: 24px 16px 16px;
+  }
+  html[data-alt="e"] .ResultView--cardGrid {
+    gap: 16px;
+  }
+  html[data-alt="e"] .ResultView--cardGrid > :nth-child(2) {
+    border-top: 1px solid var(--e-rule);
+    padding-top: 14px;
+  }
+  html[data-alt="e"] .GameEntry--band {
+    padding: 10px 16px;
+  }
+  html[data-alt="e"] .e-bandflag {
+    border-right: 0;
+    padding-right: 0;
+  }
+
+  /* quiz */
+  html[data-alt="e"][data-e-page="quiz"] .page--main {
+    padding: 22px 20px 48px;
+  }
+  html[data-alt="e"] .AnswerOption--option {
+    font-size: 17px;
+    padding: 12px 14px 12px 12px;
+    gap: 13px;
+  }
+  html[data-alt="e"] .AnswerOption--option::before {
+    flex-basis: 30px;
+    height: 30px;
+    font-size: 17px;
+  }
+
+  /* engine */
+  html[data-alt="e"][data-e-page="engine"] .page--main {
+    width: calc(100% - 40px);
+    padding-top: 28px;
+    gap: 40px;
+  }
+  html[data-alt="e"] .page--title,
+  html[data-alt="e"] .ProsePage--title.ProsePage--page {
+    font-size: 46px;
+  }
+  html[data-alt="e"] :is(.page--lead, .ProsePage--lead) {
+    font-size: 21px;
+  }
+  html[data-alt="e"] .page--text {
+    font-size: 17px;
+  }
+  html[data-alt="e"] .Callout--caveat {
+    padding: 18px 18px 20px;
+  }
+  html[data-alt="e"] .page--durationList {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  html[data-alt="e"] .page--durationItem {
+    display: grid;
+    grid-template-columns: 104px minmax(0, 1fr);
+    column-gap: 14px;
+    padding: 12px 0 14px;
+  }
+  html[data-alt="e"] .page--durationItem + .page--durationItem {
+    border-left: 0;
+    border-top: 1px solid var(--e-rule);
+  }
+  html[data-alt="e"] .page--durationItem dt {
+    border-bottom: 0;
+    padding-bottom: 0;
+    padding-top: 2px;
+  }
+  html[data-alt="e"] .Board--verdict {
+    font-size: 32px;
+  }
+
+  /* game */
+  html[data-alt="e"] .ProsePage--main {
+    padding: 28px 20px 56px;
+  }
+  html[data-alt="e"][data-e-page="game"] .ProsePage--title.ProsePage--page {
+    font-size: 58px;
+  }
+  html[data-alt="e"] .page--zone {
+    grid-template-columns: 44px minmax(0, 1fr);
+    column-gap: 12px;
+  }
+  html[data-alt="e"] .page--zone::before {
+    font-size: 32px;
+  }
+  html[data-alt="e"] .page--zoneOpen {
+    padding: 18px 16px 20px 0;
+  }
+  html[data-alt="e"] .page--zoneOpen .page--zoneName {
+    font-size: 25px;
+  }
+
+  html[data-alt="e"] .SiteFooter--inner {
+    width: calc(100% - 40px);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   13. The front page's index « Dans ce numéro » (JS, landing only)
+   -------------------------------------------------------------------------- */
+html[data-alt="e"] .e-index {
+  border-top: 2px solid var(--e-ink);
+  border-bottom: 1px solid var(--e-ink);
+  margin-top: 44px;
+  padding: 10px 0 4px;
+}
+html[data-alt="e"] .e-index__head {
+  font: 700 15px/1.2 var(--font-kicker);
+  font-variant-caps: small-caps;
+  letter-spacing: 0.05em;
+  color: var(--e-ink);
+  padding-bottom: 8px;
+}
+html[data-alt="e"] .e-index__row {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  column-gap: 12px;
+  align-items: baseline;
+  padding: 11px 0 12px;
+  border-top: 1px solid var(--e-rule);
+}
+html[data-alt="e"] .e-index__row[data-sec="tour"] { --e-c: var(--e-bordeaux); }
+html[data-alt="e"] .e-index__row[data-sec="moteur"] { --e-c: var(--e-nuit); }
+html[data-alt="e"] .e-index__row[data-sec="jeu"] { --e-c: var(--e-vert); }
+html[data-alt="e"] .e-index__n {
+  grid-row: span 2;
+  align-self: start;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  background: var(--e-c);
+  color: var(--e-on-flag);
+  font: 500 14px/1 var(--font-mono);
+}
+html[data-alt="e"] .e-index__name {
+  font: 700 21px/1.15 var(--font-display);
+  color: var(--e-c);
+}
+html[data-alt="e"] .e-index__blurb {
+  font: italic 400 16px/1.4 var(--font-ui);
+  color: var(--e-ink);
+}
+@media (min-width: 761px) {
+  html[data-alt="e"][data-e-page="landing"] .page--main {
+    grid-template-areas:
+      "left  right"
+      "quote right"
+      "index right";
+    grid-template-rows: auto auto 1fr;
+  }
+  html[data-alt="e"] .e-index {
+    grid-area: index;
+    align-self: start;
+    margin-right: 44px;
+  }
+}

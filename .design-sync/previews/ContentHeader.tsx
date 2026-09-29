@@ -38,3 +38,10 @@ export const Narrow = () => (
     <ContentHeader locale="fr" path="/about" />
   </div>
 );
+
+/** On the engine's page: the header of a space wears its band (here, ultramarine). */
+export const InTheEngine = () => (
+  <div style={{ maxWidth: 1040 }}>
+    <ContentHeader locale="fr" path="/aarrr-funnel-template" width="wide" space="engine" />
+  </div>
+);

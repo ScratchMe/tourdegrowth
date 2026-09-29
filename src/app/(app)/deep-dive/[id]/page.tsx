@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { SiteHeader } from "@/components/brand/SiteHeader";
 import { WordmarkLink } from "@/components/brand/WordmarkLink";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import { ModeTag } from "@/components/brand/ModeTag";
@@ -186,11 +187,9 @@ export default function DeepDivePage() {
   if (!ownershipChecked) {
     return (
       <>
-        <header className={styles.header}>
-          <div className={styles.headerInner}>
-            <WordmarkLink locale={locale} />
-          </div>
-        </header>
+        <SiteHeader locale={locale} width="narrow" space="tour" bandLinked={false}>
+          <WordmarkLink locale={locale} />
+        </SiteHeader>
         <main id="main" className={styles.main}>
           <h1 className="tdg-visually-hidden">{tc(UI_STRINGS.meta.deepDiveHeading, locale)}</h1>
         </main>
@@ -204,14 +203,12 @@ export default function DeepDivePage() {
 
   return (
     <>
-      <header className={styles.header}>
-        <div className={styles.headerInner}>
-          <WordmarkLink locale={locale} />
-          <div className={styles.headerRight}>
-            <ModeTag mode="deep">{tc(dd.badge, locale)}</ModeTag>
-          </div>
+      <SiteHeader locale={locale} width="narrow" space="tour" bandLinked={false}>
+        <WordmarkLink locale={locale} />
+        <div className={styles.headerRight}>
+          <ModeTag mode="deep">{tc(dd.badge, locale)}</ModeTag>
         </div>
-      </header>
+      </SiteHeader>
 
       <main id="main" className={styles.main}>
         {/* Voir `/quiz` : le document porte un titre que l'écran ne peint pas. */}

@@ -2,6 +2,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import type { NextConfig } from "next";
 import { describe, expect, it } from "vitest";
+import { ENGINE_OPEN_AT_BUILD_ENV, engineOpenWith } from "@/lib/engine/access";
 import { GAME_OPEN_AT_BUILD_ENV, gameOpenWith } from "@/lib/game/build-flag";
 
 // A JS module in a `allowJs: false` project: the specifier is widened to
@@ -93,5 +94,35 @@ describe("next.config.mjs inlines the game's build flag with the same rule as bu
 
   it("never exposes GAME_ENABLED itself to the client bundles", () => {
     expect(Object.keys(nextConfig.env ?? {})).not.toContain("GAME_ENABLED");
+  });
+});
+
+/**
+ * The engine's build-time flag, inlined for the space band (design I + B,
+ * 2026-09-28): the same two-sided rule as the game's above, held the same way.
+ */
+describe("next.config.mjs inlines the engine's build flag with the same rule as access.ts", () => {
+  async function configWith(value: string | undefined): Promise<NextConfig> {
+    const previous = process.env.ENGINE_ENABLED;
+    if (value === undefined) delete process.env.ENGINE_ENABLED;
+    else process.env.ENGINE_ENABLED = value;
+    try {
+      const specifier = `../../next.config.mjs?engine=${encodeURIComponent(String(value))}` as string;
+      return (await import(specifier)).default as NextConfig;
+    } finally {
+      if (previous === undefined) delete process.env.ENGINE_ENABLED;
+      else process.env.ENGINE_ENABLED = previous;
+    }
+  }
+
+  for (const value of ["true", undefined, "", "TRUE", "1", "yes", "true "]) {
+    it(`ENGINE_ENABLED=${JSON.stringify(value)}`, async () => {
+      const config = await configWith(value);
+      expect(config.env?.[ENGINE_OPEN_AT_BUILD_ENV]).toBe(engineOpenWith(value) ? "1" : "0");
+    });
+  }
+
+  it("never exposes ENGINE_ENABLED itself to the client bundles", () => {
+    expect(Object.keys(nextConfig.env ?? {})).not.toContain("ENGINE_ENABLED");
   });
 });

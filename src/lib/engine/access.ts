@@ -53,6 +53,18 @@ export function engineEnvFlag(): string | undefined {
 }
 
 /**
+ * The name under which `next.config.mjs` inlines the flag as it stood at
+ * build — a derived "1"/"0" for client code (the space band), never
+ * `ENGINE_ENABLED` itself.
+ */
+export const ENGINE_OPEN_AT_BUILD_ENV = "TDG_ENGINE_OPEN_AT_BUILD";
+
+/** The rule, pure: open for exactly this value of `ENGINE_ENABLED`. See `gameOpenWith` for why it is not a default parameter. */
+export function engineOpenWith(env: string | undefined): boolean {
+  return resolveEngineAccess({ env, ownerPreview: false }) === "open";
+}
+
+/**
  * Whether the flag was open when THIS page was prerendered. The page is
  * static (●): its `robots` tag and, later, the sitemap are fixed at build
  * time, while the proxy reads the flag per request. So the page stays
@@ -62,5 +74,5 @@ export function engineEnvFlag(): string | undefined {
  * no browser, so it holds none.
  */
 export function isEngineOpenAtBuild(): boolean {
-  return resolveEngineAccess({ env: engineEnvFlag(), ownerPreview: false }) === "open";
+  return engineOpenWith(engineEnvFlag());
 }

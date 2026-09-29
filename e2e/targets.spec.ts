@@ -67,6 +67,12 @@ for (const [where, path] of [
     expect(indices.length).toBeGreaterThanOrEqual(2);
 
     for (const i of indices) {
+      // Centred in the window first: hit-testing only sees what is on screen.
+      // The preview card's toggle sat above a phone's fold until the header
+      // grew its space band (2026-09-29); from there `elementFromPoint`
+      // answered null and the tap strip measured 0. Centred rather than
+      // scrolled to the edge, so the sticky header covers none of the strip.
+      await page.locator(COMPACT_OPTIONS).nth(i).evaluate((el) => el.scrollIntoView({ block: "center" }));
       const drawn = await page.locator(COMPACT_OPTIONS).nth(i).boundingBox();
       expect(drawn!.height).toBeLessThanOrEqual(32); // still the compact look
       expect(await hitExtent(page, COMPACT_OPTIONS, i, "y")).toBeGreaterThanOrEqual(43.5);

@@ -29,11 +29,17 @@
   min-height: var(--hit-min);
 }
 
+/*
+ * Design I (2026-09-28): the primary action is a sticker already lifted off
+ * the page — an ink edge and a hard ink shadow at rest, like the cards. The
+ * edge is ink, not the fill's red: a lighter accent red would draw a faint
+ * rim, and ink is what every other hard edge in the system is drawn in.
+ */
 .primary {
   background: var(--action-primary-bg);
   color: var(--action-primary-text);
-  /* Same token as the fill: a border in the lighter accent red would draw a faint rim around it. */
-  border: 2px solid var(--action-primary-bg);
+  border: var(--border-solid);
+  box-shadow: var(--shadow-panel);
 }
 
 .secondary {
@@ -73,10 +79,21 @@
   box-shadow: var(--state-hover-shadow);
 }
 
+/* The primary already rests on its shadow: hover peels it further. */
+.primary:not(:disabled):hover {
+  box-shadow: var(--shadow-card);
+}
+
+/* Press flattens it onto the page — the primary travels the length of its
+   shadow, so the ink under it is covered rather than cut off. */
 .primary:not(:disabled):active,
 .secondary:not(:disabled):active {
   transform: none;
   box-shadow: none;
+}
+
+.primary:not(:disabled):active {
+  transform: translate(4px, 4px);
 }
 
 /* Where nothing hovers, a tap would leave the button peeled up until the next
@@ -86,6 +103,10 @@
   .secondary:not(:disabled):hover {
     transform: none;
     box-shadow: none;
+  }
+
+  .primary:not(:disabled):hover {
+    box-shadow: var(--shadow-panel);
   }
 }
 

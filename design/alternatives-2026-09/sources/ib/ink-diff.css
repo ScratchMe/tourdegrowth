@@ -1,0 +1,17 @@
+
+/* ═════════ ib-ink: the only rules that differ from ib ═════════
+   The Tour band is printed in ink; red keeps its three meanings (action,
+   diagnosis, advice) and appears in the band only as the pictogram, a
+   non-text mark (#D2402C on ink: 3.78, ≥ 3). Moteur and jeu are unchanged. */
+html[data-alt="ib-ink"][data-space="tour"] {
+  --ib-space: var(--ink-0);
+  --ib-space-ink: var(--paper-0);        /* 16.88 */
+  --ib-space-on: var(--ink-0);           /* the active stop: ink on paper-0, 16.88 */
+  --ib-picto: var(--paint-red);          /* mark only: 3.78 on ink */
+}
+html[data-alt="ib-ink"][data-space="tour"] .ib-band__stop.is-on .ib-band__mini { color: var(--paint-red); } /* 4.46 on paper-0 */
+html[data-alt="ib-ink"] .ib-stage[data-s="tour"] .ib-stage-chip { background: var(--ink-0); }
+html[data-alt="ib-ink"] .ib-stage[data-s="tour"] .ib-stage-chip svg { color: var(--paint-red); }
+html[data-alt="ib-ink"] .ib-stage[data-s="tour"]::before { background: var(--ink-0); }
+html[data-alt="ib-ink"] .ibP-stage { background: #1d1812; }
+html[data-alt="ib-ink"] .ibP-stage svg { color: #d2402c; }

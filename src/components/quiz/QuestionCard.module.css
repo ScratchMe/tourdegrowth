@@ -8,22 +8,23 @@
 /* "desktop" shrinks to the "mobile" figures below the app's breakpoint on
    its own — see ScoreDisplay.module.css for the rationale. */
 .desktop {
-  padding: 30px 32px;
+  padding: 40px 44px;
 }
 
 @media (max-width: 760px) {
   .desktop {
-    padding: 22px 20px;
+    padding: 24px 22px;
   }
 }
 
 .mobile {
-  padding: 22px 20px;
+  padding: 24px 22px;
 }
 
 .question {
   color: var(--text-body);
   margin: 0;
+  letter-spacing: var(--title-question-tracking);
   text-wrap: pretty;
 }
 

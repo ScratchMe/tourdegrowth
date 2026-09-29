@@ -1,0 +1,55 @@
+/*
+ * The three spaces of the Tour — design I + B, retained by Antoine on
+ * 2026-09-28 (design/alternatives-2026-09/, JOURNAL.md).
+ *
+ * « Un Tour, trois étapes » (the decision's words, never the band's, which
+ * does not say « étape »): the check-up, the growth engine and the game
+ * are three legs of one race, and each wears a colour on the band that hangs
+ * from the header (`brand/SpaceBand`):
+ *
+ *   1 · the Tour (flat stage)       ink, the red kept for its pictogram only
+ *   2 · the engine (time trial)     ultramarine
+ *   3 · the game (mountain stage)   ochre
+ *
+ * The Tour is ink and not red on purpose (Antoine, 2026-09-28): red already
+ * means three things — the action, the stage that stalls, the advice — and a
+ * red band would have given it a fourth, « this is the Tour ».
+ *
+ * Its own file, like game.css, rather than the semantic layer of colors.css:
+ * the band only ever renders in the paper world (it sits in the header, never
+ * inside a night section), so the night world has nothing to rebind here. For
+ * the same reason these tokens read primitives only — a var() resolves where
+ * it is declared, and one built on a semantic token would freeze at paper.
+ * Every ratio below is pinned by `src/__tests__/space-token-contrast.test.ts`.
+ */
+:root {
+  /* --- The two new colours; the Tour's are the palette's own --- */
+  --space-ultramarine: #1d3f8f;
+  --space-ochre: #d99a2b;
+
+  /* --- 1 · the Tour: ink band --- */
+  --space-tour-bg: var(--ink-0);
+  --space-tour-text: var(--paper-0); /* 16.06 */
+  --space-tour-muted: #a39a8a; /* a stage not open yet: 6.08 */
+  --space-tour-mark: var(--paint-red); /* the pictogram, a mark and never text: 3.63 */
+
+  /* --- 2 · the engine: ultramarine band --- */
+  --space-engine-bg: var(--space-ultramarine);
+  --space-engine-text: var(--paper-0); /* 9.23 */
+  --space-engine-muted: #b7c2de; /* 5.46 */
+  --space-engine-mark: var(--paper-0);
+
+  /* --- 3 · the game: ochre band, ink text --- */
+  --space-game-bg: var(--space-ochre);
+  --space-game-text: var(--ink-0); /* 6.93 */
+  --space-game-muted: #46351a; /* 4.82 */
+  --space-game-mark: var(--ink-0);
+
+  /*
+   * The space's colour used as an accent on paper — the engine's labels and
+   * rules. Ultramarine reads as text on both grounds (9.23 on a card, 7.45 on
+   * the page); ochre never does (1.87 on the page), so the game has no text
+   * accent: it is a ground under ink, or a mark with an ink edge.
+   */
+  --space-engine-accent: var(--space-ultramarine);
+}

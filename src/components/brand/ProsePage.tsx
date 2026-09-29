@@ -2,6 +2,7 @@ import type { HTMLAttributes, ReactNode } from "react";
 import type { Locale } from "@/lib/i18n/locale";
 import { ContentHeader } from "./ContentHeader";
 import { SiteFooter } from "./SiteFooter";
+import type { Space } from "./SpaceBand";
 import styles from "./ProsePage.module.css";
 
 export interface ProsePageProps {
@@ -35,6 +36,8 @@ export interface ProsePageProps {
    * §2.1). The footer widens to the desk's width with it.
    */
   band?: ReactNode;
+  /** The space this page belongs to — the game's hub and levels. Hangs the space band under the header (`SpaceBand`). */
+  space?: Space;
   children: ReactNode;
 }
 
@@ -66,6 +69,7 @@ export function ProsePage({
   className,
   switchQuery,
   band,
+  space,
   children,
 }: ProsePageProps) {
   const column = (
@@ -83,7 +87,7 @@ export function ProsePage({
 
   return (
     <>
-      <ContentHeader locale={locale} path={path} switchQuery={switchQuery} />
+      <ContentHeader locale={locale} path={path} switchQuery={switchQuery} space={space} />
 
       {band ? (
         // The column keeps its own box, so a page with a band reads exactly
