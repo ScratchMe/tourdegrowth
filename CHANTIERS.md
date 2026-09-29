@@ -70,10 +70,10 @@ C'est à faire avant la seconde passe de B.
 
 **Où on en est (2026-09-29)** : la table est écrite (« Variant names » dans
 `conventions.md`), avec la cible de chaque nom retiré. Les familles quiz et
-résultat (`desktop|mobile` → `md|sm`, #197) et core (`Segmented`, `ToneToggle`
-et `Button` en `size="sm"`, `Tag` en `tone="alert"`) sont migrées.
+résultat (`desktop|mobile` → `md|sm`, #197), core (`Segmented`, `ToneToggle`
+et `Button` en `size="sm"`, `Tag` en `tone="alert"`, #198) et viz sont migrées.
 `variant-names.test.ts` tient la liste de ce qui reste, famille par famille :
-- **viz** : `StatTile`, `BulletChart`, et `DotGrid` / `DotLegend` en `medium` ;
+- ~~**viz**~~ (fait) : `StatTile`, `BulletChart`, et `DotGrid` / `DotLegend` en `medium` ;
 - **jeu** : `DgFace` et `ClickPill`.
 
 ### A7 — Ce que les décisions du 2026-09-29 demandent

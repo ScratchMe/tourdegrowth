@@ -5595,3 +5595,17 @@ Les histoires `Compact` deviennent `Small`, et l'exemple de `Tag` dit ce qu'il m
 
 **Au pixel près** : les 36 captures (accueil, quiz, résultat, moteur, tableau de bord et rapport du jeu, slide peloton, admin d'audit ; FR et EN ; 1 280 et 390 px) sont identiques à celles de `main`. Elles ont été prises sur l'empilement des trois familles restantes, qui contient celle-ci.
 
+**En production** : PR [#198](https://github.com/ScratchMe/tourdegrowth/pull/198), mergée le 2026-09-29 (squash `beb7fc0`, 39 fichiers, identique à la tête de la PR), servie à 23 h 38 UTC. Relevé par HTTP : l'accueil FR et EN porte les classes `__sm` de `Segmented` et de `Button`, et plus aucun `__compact`.
+
+## A5, famille viz : `StatTile`, `BulletChart`, `DotGrid` et `DotLegend` (2026-09-29)
+
+**Ce qui bouge** :
+- `StatTile` : `hero|md|compact|responsive` → `lg|md|sm|auto`. `auto` est la tuile `md` au-dessus de 760 px, `sm` en dessous, basculée en CSS. Appelants : le tableau de bord du jeu et les chiffres du « Et si ».
+- `BulletChart` : `mini|md` → `sm|md`, `sm` par défaut.
+- `DotGrid` et `DotLegend` : `size="screen" | "slide"` devient `medium="screen" | "slide"`. Ce n'est pas une échelle : la grille d'une slide a le trait plus épais d'une projection. Appelant : la slide peloton.
+- Le contrat de `StatTile` écrit à la main dans `.design-sync/config.json` était déjà en retard d'une valeur (`responsive` n'y figurait pas) : il suit maintenant le composant.
+
+Les aperçus suivent, et la liste d'attente de `variant-names.test.ts` perd ses trois lignes viz.
+
+**Vérifié** : lint et `tsc` propres, 2 239 tests unitaires. `next build` propre et **620 specs Playwright** (615 passées, 5 ignorées par construction, aucun échec) sur cet arbre, avant le rebase sur #198 : le code sous `src/` et `e2e/` en est identique (vérifié par `git diff`). Les 36 captures au pixel près, prises sur l'empilement qui contient cette famille, restent identiques à `main` : le tableau de bord du jeu et la slide peloton en font partie.
+
