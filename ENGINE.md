@@ -47,7 +47,34 @@ chacune se renverse en une phrase :
    clic.
 3. La v1 couvre le SaaS libre-service (freemium ou essai) ; le B2B assisté en
    v1.1 ; l'appli B2C et la marketplace plus tard.
+   **Renversée par Antoine le 2026-09-29 (`CHANTIERS.md` C4) : le B2B assisté
+   entre dans la v1**, « il faut qu'on soit pertinent dès le début ». Le
+   réglage sépare deux axes que le sélecteur mélangeait :
+   - le **type** : SaaS B2B (ouvert) ; app grand public et place de marché
+     (plus tard) ;
+   - la **motion** : deux cases, libre-service (PLG) et assisté (SLG), au
+     moins une cochée.
+
+   Les deux cochées expriment un modèle **hybride**, rendu en « deux
+   moteurs, un total » et **jamais en face-à-face** : les deux motions jouent
+   sur des segments différents, et un « PLG vs SLG » pousserait un CODIR à
+   chercher un gagnant. Concrètement :
+   - deux funnels côte à côte, chacun avec ses cibles et sa fuite ;
+   - le MRR additionné ;
+   - une slide d'unit economics avec les deux motions en regard (CAC,
+     payback, panier, churn) ;
+   - un chiffre de liaison optionnel : les comptes qualifiés par le produit
+     passés aux commerciaux, parce que dans beaucoup d'hybrides le PLG
+     alimente le SLG.
+
+   Le SLG a son propre funnel (leads, opportunités, taux de closing, cycle de
+   vente, ACV, sources CRM), donc son propre catalogue. **L'ouverture du
+   moteur attend** la spécification, sa validation par Antoine, le code et
+   le bon à tirer de cette copie. À faire : `CHANTIERS.md` A7.3.
 4. La slide « déclaré au Tour × mesuré » existe mais n'est pas cochée par défaut.
+   **Confirmé par Antoine le 2026-09-29 (`CHANTIERS.md` C5)** : on la choisit
+   quand l'écart est l'argument, et personne ne la découvre par surprise dans
+   son export.
 5. Les deux repères approuvés du glossaire (activation 20-40 %, churn logo
    1-2 %/mois) peuvent désigner un goulot sur une slide, avec leur réserve
    imprimée sur la slide ; une cible d'équipe le peut toujours.
@@ -63,6 +90,13 @@ chacune se renverse en une phrase :
 6. Le moteur est public, gratuit et local : ce n'est pas la phase 3 de
    l'instrument d'audit (aucun connecteur, rien ne quitte le navigateur, pas un
    produit commercial). `lib/audit` n'est pas touché.
+   **Confirmé par Antoine le 2026-09-29 (`CHANTIERS.md` C6)**, avec une réserve
+   de sa part : l'instrument d'audit fait « carrément doublon » avec le
+   moteur, auquel il croit davantage parce qu'il est public, et un audit
+   privé n'a de sens que s'il va plus loin. Le sort de l'audit n'est pas
+   tranché à froid : la mission de la phase 1 bis le tranche (`AUDIT-PLAN.md`
+   §4). S'il s'avère un doublon, ses lignes utiles passent au moteur en copie
+   publique relue.
 7. `ENGINE_ENABLED` reste fermé jusqu'à la signature du bon à tirer nº6. Liens
    d'ouverture prévus : `/how-it-works`, les deux pages SEO d'entrée, une section
    de la landing sous la citation — pas de septième lien au pied de page.

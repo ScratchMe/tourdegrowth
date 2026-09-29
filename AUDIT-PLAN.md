@@ -626,6 +626,22 @@ T0, 4 en T1, 15 en T2, 3 en T3, 1 en T4), mandat `no-mandate`, `pending = 0`,
    catalogue qui ne veut rien dire pour ce profil), une ligne. **C'est
    l'entrée principale de la phase 2** : elle décide de l'ordre des
    correctifs, et de si le catalogue passe en version `2`.
+
+   **Depuis le 2026-09-29, le journal répond aussi à une autre question :
+   l'instrument fait-il doublon avec le moteur public ?** Antoine le pense
+   (`CHANTIERS.md` C6) : il croit davantage au moteur, parce qu'il est public,
+   et un audit privé n'a de sens que s'il va plus loin. D'où une colonne de
+   plus par ligne : **« le moteur le faisait déjà ? »** (oui, non, en partie).
+   La différence supposée : le moteur mesure les chiffres du funnel, l'audit
+   mesure la capacité de l'organisation à les produire et à s'y fier
+   (définitions, propriétaires, sources, décisions). La mission dit si elle
+   vaut un outil à part.
+   - **Si oui**, la phase 2 suit.
+   - **Si non**, l'instrument s'arrête à la maintenance. Ses lignes utiles
+     passent au moteur (le catalogue SLG, `CHANTIERS.md` A7.3), en copie
+     publique relue, sans importer `lib/audit`.
+
+   La décision s'écrit ici, à la fin de la phase 1 bis.
 5. **À la fin — exporter, et écrire les constats** (étape 1.5) avec le bloc
    de tête. Sans readout encore : le bloc de tête à 400 mots et les constats
    5C sont déjà, tels quels, la matière d'une présentation.
