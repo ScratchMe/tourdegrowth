@@ -5345,6 +5345,22 @@ Des seize opportunités de plateforme, douze sont absentes de `src/`, `text-wrap
 
 **Pas vérifiable d'ici, pour D7** : si le profil github.com/ScratchMe affiche un nom. L'API des profils est refusée à une session cloud, bornée aux routes du dépôt. Antoine le regardera avant la vague 4.
 
+## La coupure de journal et la citation du DG ne sont plus des pilules (2026-09-29)
+
+**Trouvé par la design sync, pas par un test.** En notant les aperçus avant l'envoi vers Claude Design (section B de `CHANTIERS.md`), la coupure de journal du jeu (`EventClipping`) est apparue en **ellipse** : ses paragraphes débordaient sur le fond de nuit, illisibles. Cause : le design I (#177) a passé `--radius-tag` de 4 à 999 px, et trois boîtes de plusieurs lignes le lisaient encore, la coupure et les deux encadrés de citation du DG (`.boss` de `QuarterNews` et de `QuarterReport`), devenus des pilules. Le jeu est fermé derrière son drapeau : personne ne l'a vu en public.
+
+**Le correctif** : les trois prennent `--radius-panel` (14 px), le rayon que l'échelle donne aux boîtes de texte (options de réponse, cartes d'analyse, popovers). Un choix de tech lead, la maquette I ne dessinant pas la coupure ; il se réverse en une ligne. Les autres usages de `--radius-tag` ont été relus un par un : étiquettes, segments, pistes de jauge, tampons (« Amende · 106 000 € », le verdict du trimestre), tous d'une ligne, la pilule y est voulue.
+
+**La garde** compte ce qui est à l'écran, pas des noms de classes (convention 11) : `multiLinePills` (`e2e/helpers.ts`) relève toute boîte peinte dont le plus petit rayon atteint la moitié de son petit côté et dont le texte tient sur plus d'une ligne (des fragments de texte regroupés par recouvrement vertical, pour qu'une ligne tournée de 1° reste une ligne). `game-news.spec.ts` la passe sur chaque carte du trimestre de l'inspection et sur son rapport, à 1 280 et 390 px, et exige qu'elle ait vu des pilules (les tampons), pour qu'elle ne passe pas à vide.
+
+**Non-vacuité**, écrite dans le spec : la pilule remise sur la coupure seule fait tomber ce seul test (7 autres passent), qui nomme la coupure sur les cartes 3 et 4 et dans le rapport, aux deux largeurs (jusqu'à 22 lignes dans une pilule) ; remise sur les deux encadrés seuls, il tombe seul aussi et nomme la carte 5 et le rapport.
+
+**À l'écran**, FR et EN, 1 280 et 390 px : la coupure de l'inspection, celle du fil viral, la citation du DG et le rapport du trimestre 3.
+
+**Piège** : un worktree dont `node_modules` est un lien symbolique vers le clone principal fait paniquer Turbopack (« Symlink [project]/node_modules is invalid, it points out of the filesystem root »). Une copie en liens physiques (`cp -al`) passe, instantanée et sans place disque.
+
+**Vérifié** : lint et `tsc` propres, **2 236 tests unitaires**, couverture au-dessus de ses seuils, `next build` propre avec `GAME_ENABLED=true`, **594 specs Playwright** (+1 : 589 passées, 5 ignorées par construction, aucun échec, sans reprise). Relecteurs non lancés : ni route, ni proxy, ni payload, ni workflow, ni copie.
+
 ## La séance des décisions : les vingt-deux questions de la section C (2026-09-29)
 
 **La demande d'Antoine** : faire trancher, une par une, les décisions de la section C de `CHANTIERS.md`, sans écrire de code. Chaque question est vérifiée ouverte avant d'être posée ; les questions de design sont posées avec une capture du vrai écran ; chaque réponse est consignée tout de suite, datée, là où vit la question ; le code devient un item A, un geste d'Antoine un item D.
