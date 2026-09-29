@@ -1,9 +1,10 @@
 import { createHash } from "node:crypto";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { LOCALES, type Locale } from "@/lib/i18n/locale";
+import { SPACE_STRINGS } from "@/lib/i18n/space-strings";
 import { primaryBottleneck, resolveBottleneck } from "@/lib/scoring/bottleneck";
 import { resolveNextMove } from "@/lib/scoring/next-move";
-import type { Pillar } from "@/lib/scoring/pillars";
+import { PILLARS, type Pillar } from "@/lib/scoring/pillars";
 import { SITE_DOMAIN_LABEL } from "@/lib/site";
 import { getSampleNextMove, SAMPLE_RESULT } from "@/lib/submissions/sample";
 import { stallSentence } from "@/lib/submissions/stall-sentence";
@@ -35,8 +36,13 @@ import { toPillarViews } from "@/lib/submissions/view-model";
  * `ResultView` as a prop (`src/__tests__/client-bundles.test.ts` guards it).
  */
 
-/** Bump when the frame itself changes — layout, fonts, colours — so every address already cached turns over. */
-export const SHARE_IMAGE_VERSION = 1;
+/**
+ * Bump when the frame itself changes — layout, fonts, colours — so every address already cached turns over.
+ *
+ * 2 — design I + B (2026-09-28): the score on a kilometre marker, the stage
+ * profile under the action, the space's pill beside the wordmark.
+ */
+export const SHARE_IMAGE_VERSION = 2;
 
 /**
  * The token the two legacy addresses rewrite to (`next.config.mjs`):
@@ -80,6 +86,15 @@ export interface ShareImageModel {
   roast: boolean;
   /** SPEC-ADDENDUM-01.md §2.6 — swaps the checkup badge's text, no other gabarit change. */
   deepDive: boolean;
+  /**
+   * The stage profile under the action (design I + B, 2026-09-28): the five
+   * scores in AARRR order, each flagged when the Bottleneck block names it —
+   * every tied stage on a shared bottleneck, none on a level board, as on the
+   * page. The image drew no score but the total since extension 03 took the
+   * five rows off it; these draw a shape, not a table. They are public on
+   * the page already, and like every field here they are hashed, never sent.
+   */
+  profile: { score: number; hot: boolean }[];
 }
 
 /** The copy the frame draws, resolved once — the token hashes it, so a copy change turns the address over without anyone bumping a version. */
@@ -93,6 +108,12 @@ export interface ShareImageStrings {
   stall: string;
   whereDoesYours: string;
   domain: string;
+  /** « 1/3 · LE DIAGNOSTIC » — the space's pill beside the wordmark, as the band says it. Never « étape » (`space-strings.ts`). */
+  space: string;
+  /** Under each climb of the profile, in AARRR order. */
+  profileLabels: string[];
+  /** Over a flagged climb. */
+  profileFlag: string;
 }
 
 export function shareImageStrings(model: ShareImageModel): ShareImageStrings {
@@ -109,6 +130,9 @@ export function shareImageStrings(model: ShareImageModel): ShareImageStrings {
     stall: stallSentence(locale, model.bottleneck?.pillar ?? null),
     whereDoesYours: tc(UI_STRINGS.og.whereDoesYours, locale),
     domain: SITE_DOMAIN_LABEL,
+    space: `1/3 · ${tc(SPACE_STRINGS.name.tour, locale)}`.toUpperCase(),
+    profileLabels: PILLARS.map((pillar) => tc(UI_STRINGS.profileAbbr[pillar], locale).toUpperCase()),
+    profileFlag: tc(UI_STRINGS.profile.flag, locale),
   };
 }
 
@@ -117,6 +141,15 @@ function bottleneckOf(pillars: readonly { pillar: Pillar; score: number }[]): Sh
   const view = resolveBottleneck(pillars);
   const pillar = primaryBottleneck(view);
   return pillar ? { pillar, score: view.pillars[0]!.score } : null;
+}
+
+/** The five climbs, in AARRR order, flagged by the same resolver the page's Bottleneck block reads. */
+function profileOf(pillars: readonly { pillar: Pillar; score: number }[]): ShareImageModel["profile"] {
+  const named = new Set(resolveBottleneck(pillars).pillars.map((p) => p.pillar));
+  return PILLARS.flatMap((pillar) => {
+    const entry = pillars.find((p) => p.pillar === pillar);
+    return entry ? [{ score: entry.score, hot: named.has(pillar) }] : [];
+  });
 }
 
 /** `locale` defaults to the author's: that is the picture a crawler gets. Pass the reader's for the one shown in the page. */
@@ -133,6 +166,7 @@ export function shareImageModel(submission: Submission, locale: Locale = submiss
     locale,
     roast: submission.tone === "roast",
     deepDive: submission.deepDive !== null,
+    profile: profileOf(pillars),
   };
 }
 
@@ -145,6 +179,7 @@ export function sampleShareImageModel(locale: Locale = "en"): ShareImageModel {
     locale,
     roast: false,
     deepDive: false,
+    profile: profileOf(SAMPLE_RESULT.pillars),
   };
 }
 

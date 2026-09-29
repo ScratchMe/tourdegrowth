@@ -6,6 +6,7 @@ import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { gameHubShareText } from "@/lib/og/game-hub-share-text";
 import { gameLevelShareText } from "@/lib/og/game-level-share-text";
 import { LOCALES, type Locale } from "@/lib/i18n/locale";
+import { sampleShareImageModel, shareImageStrings } from "@/lib/og/share-image";
 import { PILLARS } from "@/lib/scoring/pillars";
 import { SITE_DOMAIN_LABEL } from "@/lib/site";
 
@@ -39,6 +40,10 @@ function textsByFamily(locale: Locale) {
   const pillars = PILLARS.map((pillar) => tc(UI_STRINGS.pillars[pillar], locale));
   const hub = gameHubShareText(locale);
   const level = gameLevelShareText(locale);
+  // The result image's own strings, read through the function the frame is
+  // handed them by: the space's pill, the profile's labels and flag, and the
+  // stage beside the action label, in capitals as drawn.
+  const result = shareImageStrings(sampleShareImageModel(locale));
   return {
     stardos: [
       WORDMARK,
@@ -82,6 +87,12 @@ function textsByFamily(locale: Locale) {
       tc(UI_STRINGS.result.nextMoveLabel, locale),
       SITE_DOMAIN_LABEL,
       NUMERALS,
+      // Design I + B (SHARE_IMAGE_VERSION 2): « /100 » under the marker's
+      // rule is mono now, and so is everything around the profile.
+      result.space,
+      ...result.profileLabels,
+      result.profileFlag,
+      ...pillars.map((label) => `${label.toUpperCase()} · 20/20`),
       // « Le côté obscur » — kickers, zone names and states, tile labels.
       hub.kicker,
       hub.zonesLabel,

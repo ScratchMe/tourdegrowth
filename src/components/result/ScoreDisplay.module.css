@@ -81,3 +81,122 @@
   pointer-events: none;
 }
 
+
+/*
+ * --- The kilometre marker — design I + B, retained by Antoine on 2026-09-28 ---
+ *
+ * A French road's borne: a stone with a rounded head painted red, the figure
+ * under it. Here the head carries the label, the stone the score and, under
+ * a rule, its total; a plinth grounds it. Drawn in I's clean line (2.5px
+ * edge, hard shadow, rounded plinth), with no hatching.
+ *
+ * Its width is one custom property: the head is a half-disc of that width,
+ * so the whole marker scales from it. `markerDesktop` shrinks to the phone
+ * figures below the app's breakpoint on its own, like the numeral above.
+ */
+.marker {
+  --marker-w: 160px;
+  --marker-edge: 2.5px;
+  position: relative;
+  box-sizing: border-box;
+  width: var(--marker-w);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 14px;
+  /* The plinth hangs 19px below the stone and 22px past its shadow side. */
+  margin: 0 0 22px 2px;
+  background: var(--surface-card);
+  border: var(--marker-edge) solid var(--border-hard);
+  border-radius: calc(var(--marker-w) / 2) calc(var(--marker-w) / 2) var(--radius-button) var(--radius-button);
+  box-shadow: var(--shadow-card);
+  color: var(--text-body);
+}
+
+.marker::after {
+  content: "";
+  position: absolute;
+  left: -16px;
+  right: -22px;
+  bottom: -19px;
+  height: 7px;
+  border-radius: 7px;
+  background: var(--border-hard);
+}
+
+.markerDesktop {
+  --marker-numeral: 84px;
+}
+
+.markerMobile {
+  --marker-w: 140px;
+  --marker-numeral: 72px;
+}
+
+@media (max-width: 760px) {
+  .markerDesktop {
+    --marker-w: 132px;
+    --marker-numeral: 68px;
+  }
+}
+
+/*
+ * The red head. White on --surface-accent is 4.65 — the fill that exists for
+ * a small white label (colors.css, R-22); the road-paint red would be 4.42.
+ */
+.cap {
+  align-self: stretch;
+  box-sizing: border-box;
+  min-height: calc(var(--marker-w) / 2 - var(--marker-edge));
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 22px 10px;
+  border-radius: calc(var(--marker-w) / 2 - var(--marker-edge)) calc(var(--marker-w) / 2 - var(--marker-edge)) 0 0;
+  border-bottom: var(--marker-edge) solid var(--border-hard);
+  background: var(--surface-accent);
+  color: var(--text-inverse);
+  font: var(--meta-2xs);
+  line-height: 1.35;
+  letter-spacing: var(--meta-tracking-wide);
+  text-transform: uppercase;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.markerMobile .cap {
+  padding: 0 18px 9px;
+  font-size: 10px;
+}
+
+@media (max-width: 760px) {
+  .markerDesktop .cap {
+    padding: 0 16px 8px;
+    font-size: 10px;
+    letter-spacing: var(--meta-tracking);
+  }
+}
+
+.markerNumeral {
+  margin-top: 14px;
+  /* The stencil's digits carry their own left bearing; this recentres them. */
+  padding-left: 6px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--marker-numeral);
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  font-variant-numeric: var(--tabular);
+}
+
+.markerTotal {
+  margin-top: 8px;
+  padding: 7px 12px 0;
+  border-top: 2px solid var(--border-hard);
+  font: var(--meta-md);
+  font-size: 14px;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}

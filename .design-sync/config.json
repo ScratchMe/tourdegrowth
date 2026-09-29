@@ -85,6 +85,7 @@
     "BulletChart": "src/components/viz/BulletChart.tsx",
     "ChartFrame": "src/components/viz/ChartFrame.tsx",
     "Sparkline": "src/components/viz/Sparkline.tsx",
+    "StageProfile": "src/components/viz/StageProfile.tsx",
     "StatTile": "src/components/viz/StatTile.tsx"
   },
   "extraFonts": [
@@ -161,6 +162,12 @@
       "cardMode": "column"
     },
     "SpaceBand": {
+      "cardMode": "column"
+    },
+    "StageProfile": {
+      "cardMode": "column"
+    },
+    "Bottleneck": {
       "cardMode": "column"
     }
   },

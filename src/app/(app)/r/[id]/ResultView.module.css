@@ -251,7 +251,9 @@
 
   .layout {
     display: grid;
-    grid-template-columns: 400px 1fr;
+    /* 440, not 400, since design I + B (2026-09-28): the score card sets the
+       kilometre marker beside the stage's name, and the name needs the room. */
+    grid-template-columns: 440px 1fr;
     /* The share block is not in either column (see the note above), so the
        desktop shape is named rather than left to auto-placement: the right
        column spans both rows, the left column sizes row 1, and the share

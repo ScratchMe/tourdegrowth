@@ -88,6 +88,13 @@ Target 390px. Nothing may scroll horizontally at 360px.
 - A figure is `StatTile`; a series over time is `Sparkline`; a value against a
   target is `BulletChart`; any chart sits in a `ChartFrame`, whose data opens
   as a `DataTable`. Five tiles and a chart are still flat, on one surface.
+- The five pillar scores as a shape are `StageProfile` — one climb per stage,
+  as high as the points it is missing, the named stage flagged « HC ». It
+  sits over the five `PillarChip`s, which are its table: it is hidden from
+  assistive technology and never shown without them.
+- On a result, the score is a kilometre marker (`ScoreDisplay
+  variant="marker"`) standing beside the stage that stalls: it goes in
+  `Bottleneck`'s `lead`, never on its own.
 - A result screen shows **exactly two** calls to action. Sharing lives in
   `ShareCard`, whose button is never primary — the image sells the share.
   The offer to play the game (`GameEntry`) is not a third: a flat paper card

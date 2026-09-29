@@ -2,9 +2,12 @@ import { Card, ScoreDisplay } from "tour-de-growth";
 
 /*
  * The stencil numeral. This is the single loudest element in the product and
- * there is one per screen — it always sits at the top of a `raised` Card, and
- * on a result screen the Bottleneck block goes directly under it inside the
- * same card.
+ * there is one per screen — it always sits at the top of a `raised` Card.
+ *
+ * On a result screen (and the landing's preview of one) it is a kilometre
+ * marker since design I + B (2026-09-28): `variant="marker"`, standing in
+ * `Bottleneck`'s `lead`, beside the stage that stalls — see the Bottleneck
+ * previews for the composition.
  *
  * The little break after the "4" is not a rendering artefact: it is a real
  * stencil break in Stardos Stencil's glyph (verified against the font on its
@@ -41,5 +44,23 @@ export const Mobile = () => (
 export const NoAnimation = () => (
   <Card elevation="raised" style={{ maxWidth: 400 }}>
     <ScoreDisplay score={41} label="Overall growth score" animate={false} />
+  </Card>
+);
+
+/**
+ * `variant="marker"` — the kilometre marker: a red head carrying the label,
+ * the figure, the total under a rule, a plinth. Made to stand in
+ * `Bottleneck`'s `lead`; shown alone here only to see it.
+ */
+export const Marker = () => (
+  <Card elevation="raised" style={{ maxWidth: 260 }}>
+    <ScoreDisplay variant="marker" score={74} label="Overall growth score" />
+  </Card>
+);
+
+/** The marker at the landing preview's scale (140px wide). */
+export const MarkerMobile = () => (
+  <Card elevation="raised" style={{ maxWidth: 240 }}>
+    <ScoreDisplay variant="marker" score={74} label="Score growth global" size="mobile" />
   </Card>
 );

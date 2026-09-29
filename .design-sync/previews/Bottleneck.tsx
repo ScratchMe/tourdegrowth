@@ -2,22 +2,28 @@ import { Bottleneck, Card, ScoreDisplay } from "tour-de-growth";
 
 /*
  * Sharpness is the honesty mechanism (design system extension 03, §1): a
- * stage name set in 36px stencil is a claim, and `sharpness` says whether
- * the scores support it. All copy below is the product's own — the three
+ * stage name set in stencil is a claim, and `sharpness` says whether the
+ * scores support it. All copy below is the product's own — the three
  * labels from `UI_STRINGS.bottleneck`, the verdicts from the copy library.
  *
  * Never render this block outside the raised score card: it replaces the
  * verdict line that used to float under the numeral, so it reads as the
  * card's second half, not as a standalone banner.
+ *
+ * Since design I + B (2026-09-28) the score stands in its `lead`, as a
+ * kilometre marker: marker on the left, the label and the names beside it,
+ * the verdict under both. The name sizes to the room the marker leaves
+ * (« ACQUISITION » is the longest), and the row wraps when the names would get under 120px.
  */
 
-const card = { maxWidth: 400 } as const;
+const card = { maxWidth: 440 } as const;
+const marker = (score: number) => <ScoreDisplay variant="marker" score={score} label="Overall growth score" />;
 
 /** `clear` — one stage sits at least four points below the next. One name. */
 export const Clear = () => (
   <Card elevation="raised" style={card}>
-    <ScoreDisplay score={74} label="Overall growth score" />
     <Bottleneck
+      lead={marker(74)}
       sharpness="clear"
       label="One stage holding you back"
       pillars={[{ pillar: "Retention", score: 8 }]}
@@ -34,8 +40,8 @@ export const Clear = () => (
  */
 export const Shared = () => (
   <Card elevation="raised" style={card}>
-    <ScoreDisplay score={41} label="Overall growth score" />
     <Bottleneck
+      lead={marker(41)}
       sharpness="shared"
       label="3 stages holding you back"
       pillars={[
@@ -51,8 +57,8 @@ export const Shared = () => (
 /** `level` — every pillar is in the strong band, so no stage is named at all. */
 export const Level = () => (
   <Card elevation="raised" style={card}>
-    <ScoreDisplay score={88} label="Overall growth score" />
     <Bottleneck
+      lead={marker(88)}
       sharpness="level"
       label="Nothing is stalling you"
       verdict="Every stage is holding — it's the whole engine working, not one part carrying the rest."
@@ -63,8 +69,8 @@ export const Level = () => (
 /** `roast` paints the stage name red and changes nothing else. */
 export const Roast = () => (
   <Card elevation="raised" style={card}>
-    <ScoreDisplay score={74} label="Overall growth score" />
     <Bottleneck
+      lead={marker(74)}
       sharpness="clear"
       tone="roast"
       label="One stage holding you back"
@@ -74,12 +80,25 @@ export const Roast = () => (
   </Card>
 );
 
-/** `mobile` is the landing preview card's scale — 30px name instead of 36px. */
+/** `mobile` is the landing preview card's scale — a 140px marker. */
 export const Mobile = () => (
-  <Card elevation="raised" style={{ maxWidth: 320 }}>
-    <ScoreDisplay score={74} label="Overall growth score" size="mobile" />
+  <Card elevation="raised" style={{ maxWidth: 448 }}>
     <Bottleneck
+      lead={<ScoreDisplay variant="marker" score={74} label="Overall growth score" size="mobile" />}
       size="mobile"
+      sharpness="clear"
+      label="One stage holding you back"
+      pillars={[{ pillar: "Retention", score: 8 }]}
+      verdict="Solid engine, one flat tyre: retention."
+    />
+  </Card>
+);
+
+/** Without a `lead`, the block stacks under a numeral placed before it — how it read before the marker. */
+export const Stacked = () => (
+  <Card elevation="raised" style={{ maxWidth: 400 }}>
+    <ScoreDisplay score={74} label="Overall growth score" />
+    <Bottleneck
       sharpness="clear"
       label="One stage holding you back"
       pillars={[{ pillar: "Retention", score: 8 }]}
