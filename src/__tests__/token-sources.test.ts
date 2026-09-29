@@ -136,6 +136,7 @@ describe("lib/og/tokens.ts reads the typed source", () => {
     OG_STONE: "paper-1",
     OG_STONE_2: "paper-2",
     OG_RED: "paint-red",
+    OG_RED_ACTION: "paint-red-action",
     OG_RED_INK: "paint-red-deep",
     OG_RED_SOFT: "paint-red-wash",
     OG_PAINT_WHITE: "paper-0",

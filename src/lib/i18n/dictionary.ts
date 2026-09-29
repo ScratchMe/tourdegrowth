@@ -195,6 +195,32 @@ export const UI_STRINGS = {
     label: { en: "Overall Growth Score", fr: "Score growth global" },
   },
 
+  /**
+   * The stage profile over the pillar chips (`viz/StageProfile`) — design
+   * I + B, retained by Antoine on 2026-09-28. « Parcours » and never
+   * « étape »: the five climbs ARE the étapes, and « profil de l'étape »
+   * would ask which one. The abbreviations (`profileAbbr`, below) are the
+   * pillar names', which stay in English on French screens (see `pillars`).
+   */
+  profile: {
+    // TODO: à relire (convention 6).
+    title: { en: "Route profile", fr: "Profil du parcours" },
+    // TODO: à relire (convention 6).
+    legend: { en: "height = points missing out of 20", fr: "hauteur = points manquants sur 20" },
+    // TODO: à relire (convention 6). « Hors catégorie », the Tour's hardest climbs — the same two letters in both languages.
+    flag: { en: "HC", fr: "HC" },
+  },
+
+  /** Under each climb of the stage profile. Its own group: this dictionary is two levels deep by construction. */
+  // TODO: à relire (convention 6).
+  profileAbbr: {
+    acquisition: { en: "Acq.", fr: "Acq." },
+    activation: { en: "Act.", fr: "Act." },
+    retention: { en: "Ret.", fr: "Ret." },
+    referral: { en: "Ref.", fr: "Ref." },
+    revenue: { en: "Rev.", fr: "Rev." },
+  },
+
   /** Text specific to the fixed, hard-coded sample result (SPEC.md §12) —
    * shown on the landing preview now, and on the future `/r/sample` page. */
   sample: {

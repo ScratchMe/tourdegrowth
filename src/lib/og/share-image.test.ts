@@ -38,6 +38,8 @@ describe("shareImageToken", () => {
       { ...base, locale: "fr" },
       { ...base, roast: true },
       { ...base, deepDive: true },
+      { ...base, profile: base.profile.map((p, i) => (i === 0 ? { ...p, score: p.score - 2 } : p)) },
+      { ...base, profile: base.profile.map((p) => ({ ...p, hot: false })) },
     ];
     const tokens = new Set(variants.map(shareImageToken));
     expect(tokens.size).toBe(variants.length);
@@ -52,7 +54,53 @@ describe("shareImageToken", () => {
     expect(en.whereDoesYours).not.toBe(fr.whereDoesYours);
     expect(en.bottleneckLabel).toMatch(/^[A-Z]+ · \d+\/20$/);
     expect(shareImageStrings({ ...base, bottleneck: null }).bottleneckLabel).toBeNull();
-    expect(SHARE_IMAGE_VERSION).toBeGreaterThanOrEqual(1);
+    // 2 since design I + B: the marker, the profile, the space's pill.
+    expect(SHARE_IMAGE_VERSION).toBeGreaterThanOrEqual(2);
+  });
+
+  it("draws the space's pill and the profile's words in the model's language, never « étape »", () => {
+    const en = shareImageStrings(base);
+    const fr = shareImageStrings({ ...base, locale: "fr" });
+    // The band's kicker, as decided for the image too (Antoine, 2026-09-28).
+    expect(en.space).toBe("1/3 · FLAT");
+    expect(fr.space).toBe("1/3 · PLAINE");
+    expect(fr.space).not.toMatch(/étape/i);
+    expect(en.profileLabels).toEqual(["ACQ.", "ACT.", "RET.", "REF.", "REV."]);
+    expect(en.profileFlag).toBe("HC");
+  });
+});
+
+describe("the profile in the model", () => {
+  it("carries the five scores in AARRR order, flagging the stage the page names", () => {
+    // The sample: 18 · 12 · 8 · 16 · 20, retention clear of activation by 4.
+    expect(sampleShareImageModel().profile).toEqual([
+      { pillar: "acquisition", score: 18, hot: false },
+      { pillar: "activation", score: 12, hot: false },
+      { pillar: "retention", score: 8, hot: true },
+      { pillar: "referral", score: 16, hot: false },
+      { pillar: "revenue", score: 20, hot: false },
+    ]);
+  });
+
+  it("labels each climb by its own pillar, so a missing stage cannot shift the labels", () => {
+    // The server always scores five; the image must not depend on it.
+    // Security review, 2026-09-29: the labels were indexed by position.
+    const four = shareImageModel({
+      ...submissionBase,
+      pillars: PILLARS.filter((p) => p !== "activation").map((pillar) => ({ pillar, score: 10, rawPoints: 0 })),
+    } as unknown as Submission);
+    expect(four.profile.map((p) => p.pillar)).toEqual(["acquisition", "retention", "referral", "revenue"]);
+    expect(shareImageStrings(four).profileLabels).toEqual(["ACQ.", "RET.", "REF.", "REV."]);
+  });
+
+  it("flags every tied stage on a shared bottleneck, and none on a level board — the Bottleneck block's rule", () => {
+    const withScores = (scores: number[]) =>
+      shareImageModel({
+        ...submissionBase,
+        pillars: PILLARS.map((pillar, i) => ({ pillar, score: scores[i]!, rawPoints: 0 })),
+      } as unknown as Submission);
+    expect(withScores([7, 7, 9, 16, 20]).profile.map((p) => p.hot)).toEqual([true, true, true, false, false]);
+    expect(withScores([16, 20, 16, 20, 16]).profile.every((p) => !p.hot)).toBe(true);
   });
 });
 
@@ -72,6 +120,20 @@ describe("addresses", () => {
     expect(LEGACY_SHARE_TOKEN).not.toMatch(/^[a-f0-9]{12}$/);
   });
 });
+
+const submissionBase = {
+  id: "3f1c2a7e-9b4d-4e21-a8c6-000000000000",
+  createdAt: "2026-09-14T10:00:00.000Z",
+  locale: "en",
+  tone: "straight",
+  answers: {},
+  total: 50,
+  weakestPillar: "acquisition",
+  refId: null,
+  segment: null,
+  ownerTokenHash: null,
+  deepDive: null,
+};
 
 describe("shareImageModel", () => {
   const submission = {

@@ -90,10 +90,11 @@ export function PreviewCard({
         />
       </div>
 
-      <ScoreDisplay score={total} label={scoreLabel} size="mobile" />
-
+      {/* The score as a kilometre marker beside the stage that stalls,
+          exactly as on the result page (design I + B, 2026-09-28). */}
       <Bottleneck
         data-testid="preview-bottleneck"
+        lead={<ScoreDisplay variant="marker" score={total} label={scoreLabel} size="mobile" />}
         size="mobile"
         sharpness="clear"
         label={bottleneckLabel}
@@ -108,7 +109,7 @@ export function PreviewCard({
             nothing to any term page. */}
         {chips.map((chip) => (
           <Link key={chip.href} href={chip.href} className={styles.previewChipLink} aria-label={chip.label}>
-            <PillarChip pillar={chip.label} score={chip.score} size="mobile" weak={chip.weak} />
+            <PillarChip pillar={chip.label} score={chip.score} size="mobile" weak={chip.weak} stretch />
           </Link>
         ))}
       </div>

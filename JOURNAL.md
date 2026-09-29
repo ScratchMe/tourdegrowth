@@ -4936,7 +4936,47 @@ Le nº8 est reconstruit par un script qui repart des clés de chaque ancienne ca
 
 La course existe donc déjà sur `main`, à une fréquence égale ou supérieure. Ce changement ne la crée pas et ne touche ni le proxy, ni les cookies, ni les redirections. Elle n'est plus rare : un passage de fichier sur trois à cinq échoue. Les deux tests échouent sur le même geste, le cookie de langue qui ne reflète pas le dernier choix.
 
-### Bon à tirer nº6 clos, et les marqueurs que le nº5 avait laissés (2026-09-29)
+**Après le merge (#177), tranché par Antoine** : sur téléphone, un espace fermé reste un chiffre grisé en pointillé, sans le mot « bientôt » (le lecteur d'écran l'entend). Le bandeau garde ses deux lignes plutôt que d'en prendre une troisième, collante.
+
+## Kit I + B, 2/3 : la borne, le profil du parcours, les jauges, l'image de partage (2026-09-29, #178)
+
+La deuxième PR de la passe retenue par Antoine le 2026-09-28, lancée sur son « ok go pour la deuxième PR ». Elle touche le résultat, la carte d'aperçu de l'accueil et l'image de partage.
+
+**Ce qui change à l'écran** :
+- **La borne kilométrique porte le score** (`ScoreDisplay variant="marker"`) : tête rouge qui porte le libellé, chiffre, « /100 » sous un filet, socle. Elle se tient à gauche du bloc « l'étape qui freine », dans un nouvel emplacement `lead` de `Bottleneck` ; le verdict court dessous, pleine largeur. Même composition sur la carte d'aperçu de l'accueil.
+- **Le profil du parcours** (`viz/StageProfile`, nouveau) est posé en tête de la colonne des puces : un col par étape, aussi haut que les points qui lui **manquent** sur 20, l'écart écrit au sommet (« −8 »). Les étapes que le bloc `Bottleneck` nomme sont en rouge et portent « HC » : une seule sur un goulot net, toutes les ex æquo sur un goulot partagé, aucune sur un tableau de niveau. Jamais la deuxième puce rouge du roast, qui est de l'emphase et pas un diagnostic.
+- **Chaque puce porte une jauge**, bord plein au lieu de pointillé (le pointillé rouge reste le conseil, le trait plein rouge est le diagnostic).
+- **L'image de partage** (version 2) : la mise en page de I, la borne à la place du chiffre nu, le profil sous l'action, la pilule « 1/3 · PLAINE » à côté du mot-symbole. La première version écrivait « 1/3 · LE DIAGNOSTIC » ; `relecteur-copie` a rappelé la décision du 2026-09-28 (« même règle sur l'image de partage ») et la pilule reprend le compteur du bandeau.
+
+**Choix de tech lead** :
+- **Le profil s'appelle « Profil du parcours »**, pas « Profil de l'étape » comme dans la maquette : les cinq cols SONT les étapes, et la règle du 2026-09-28 réserve le mot aux étapes AARRR.
+- **Une géométrie, deux rendus.** `lib/viz/stage-profile.ts` est pure et déterministe (la maquette faisait onduler la crête avec un bruit ; ici des collines lisses). La page la tend dans un `viewBox` 0-100 avec des traits qui ne s'étirent pas et des mots en HTML placés en pourcentage, comme `Sparkline` ; Satori la dessine aux pixels de l'image.
+- **Le profil est `aria-hidden`.** Les puces dessous sont sa vue tableau, et le bloc au-dessus a déjà nommé l'étape. Un lecteur d'écran n'entend rien de nouveau, et rien de moins.
+- **Un emplacement plutôt que `display: contents`.** La maquette posait la borne et le bloc dans une grille en rendant le bloc transparent. Un élément en `display: contents` n'a plus de boîte : `result-composition.spec.ts`, qui vérifie que le bloc est DANS la carte, n'aurait plus rien mesuré.
+- **La colonne gauche du résultat passe de 400 à 420 px** sur desktop : le nom de l'étape a besoin de la place à côté de la borne. La maquette disait 440, mais la mise en page fait 992 px de large, pas 1 040 : à 440 px, la colonne droite tombait à 508 px, sous les 519 px dont la carte du jeu a besoin pour garder son bandeau sur une ligne. `game-entry.spec.ts` l'a vu.
+
+**Ce que la mesure a corrigé** :
+- **Des jauges qui ne se comparaient pas.** Une jauge a la largeur de sa puce. Sur téléphone et sur la carte d'aperçu, les puces avaient la largeur de leur texte : la barre d'un 16/20 était aussi longue que celle d'un 18/20, et Revenue, qui occupait toute la dernière ligne du résultat, aurait eu une piste deux fois plus longue. Les puces sont maintenant étirées dans des cellules égales partout (`stretch` vaut à toutes les largeurs), la carte d'aperçu passe en grille à deux colonnes, et Revenue n'occupe plus toute la ligne. `e2e/marker-profile.spec.ts` exige des pistes de même longueur.
+- **« ACQUISITION » débordait.** Le nom se dimensionne sur la place que laisse la borne (`min(30px, 14cqi)`, la tête est un conteneur). À 15cqi, il débordait de 2 à 4 px à 390 et 1 280 px (mesuré en injectant le nom le plus long et trois ex æquo dans la page).
+- **Des libellés lus par position.** L'image indexait les abréviations par rang, alors que le profil saute un pilier absent : un pilier manquant aurait décalé les libellés. Le serveur en calcule toujours cinq, mais chaque col porte maintenant son pilier (`relecteur-securite`), et un test couvre le cas.
+- **Un repli trop tôt.** Sous une certaine largeur la rangée passe à la ligne, la borne au-dessus des noms, pour ne pas écrire un nom en 11 px (320 px, hors contrat mais atteignable). Premier seuil à 150 px : un téléphone de 390 px en donne 146, et le repli cassait exactement la mise en page qu'il protégeait. C'est la nouvelle spec qui l'a vu. Il est à 120 px.
+- **Les drapeaux touchaient l'ombre de la carte d'action** sur l'image quand les cinq étapes sont à 0/20 : la marge au-dessus des cols passe de 36 à 50 px. La phrase d'action la plus longue de la bibliothèque tient en trois lignes dans les deux langues. Les six cas (échantillon, phrase la plus longue, roast, goulot partagé, niveau, tout à zéro) ont été rendus hors navigateur avant d'être gardés.
+
+**L'image de partage** : `SHARE_IMAGE_VERSION` passe à 2, donc toutes les adresses déjà en cache se renouvellent. Le modèle porte les cinq scores (haché, jamais envoyé ; ils sont déjà publics sur `/r/<id>`) et `profileOf` les signale avec le même résolveur que la page. `fonts.test.ts` lit les nouveaux textes (pilule, abréviations, « HC », « /100 » passé en Plex Mono) à travers `shareImageStrings`, pas recopiés. `OG_RED_ACTION` rejoint les jetons OG : blanc sur le rouge d'action, 4,65, pour la tête de la borne, les drapeaux et l'adresse.
+
+**Contrastes des paires nouvelles** (calculés sur la palette du dépôt, pas celle de la maquette) : blanc sur `--surface-accent` 4,65 (tête de la borne, « HC ») ; `--viz-highlight` sur le lavis 3,47 et sur la carte 4,42 (crête du col HC, marques) ; rouge profond sur la carte 6,72 (écart et abréviation du col HC) ; `--viz-axis` sur la carte 7,20 (les autres).
+
+**La jauge mangeait la cible du « ? ».** `targets.spec.ts` mesure la zone de toucher de 44 px de chaque « ? » de glossaire en balayant `elementFromPoint`. Deux échecs l'un derrière l'autre :
+- d'abord 0 px : le profil pousse les puces sous la ligne de flottaison à 1 280 × 720, et `elementFromPoint` ne voit que la fenêtre. La spec centre maintenant chaque « ? » avant de le mesurer, comme pour le sélecteur de ton dans la PR 1 ;
+- puis 40 px en hauteur, soit 44 moins les 4 px de la jauge : positionnée, elle passait au-dessus de la zone de toucher. Elle est décorative, elle laisse passer les touchers (`pointer-events: none`).
+
+**Deux délais dépassés dans le moteur** au premier passage complet (`engine-collect.spec.ts:609`, l'analyse axe ; `engine-deck-whatif.spec.ts:58`, l'attente des polices). Ce changement ne touche pas le moteur. Relancés seuls, trois fois chacun : 9 sur 9. Ce sont des lenteurs sous la charge de la suite entière, pas une casse.
+
+**design-sync** : `StageProfile` entre dans l'inventaire (74 composants), avec un aperçu en quatre histoires ; `ScoreDisplay`, `Bottleneck` et `PillarChip` montrent leur nouvelle forme, `Bottleneck` en cartes pleine largeur (en grille, la rangée se repliait sous la borne). Bundle reconstruit et validé : 74/74 aperçus rendus, les trois avertissements permanents seulement.
+
+**Vérifié avant la PR** : 2 185 tests unitaires, `tsc`, `eslint`, `next build` propres, couverture au-dessus de ses seuils, `npm audit --omit=dev` à zéro. Suite Playwright complète sur le dernier build : 567 passées, 5 ignorées par construction, 1 échec, `locale-routing.spec.ts:320`, le flake déjà mesuré sur `main`. Bundle design-sync revalidé : 74/74. Relectures : `relecteur-securite` sans constat bloquant (il signale, hors de ce changement, qu'une adresse d'image au jeton inventé force un rendu Satori non mis en cache : à ranger avec R-15 si un abus apparaît), `relecteur-copie` a trouvé la pilule et le vocabulaire, corrigés.
+
+## Bon à tirer nº6 clos, et les marqueurs que le nº5 avait laissés (2026-09-29)
 
 **La décision.** Antoine : « le bon à tirer nº6 est vu et tout est OK ». Dans la base de la page, 36 cartes sur 37 portaient « ça passe », sans aucune note. La 37ᵉ (`g-referral`) n'avait aucune décision en base : elle est enregistrée « ok » d'après son message, avec une réponse sous la carte qui le dit. Aucune chaîne ne change, donc aucun `updatedAt` ne bouge.
 

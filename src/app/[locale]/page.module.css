@@ -156,9 +156,14 @@
   margin-left: auto;
 }
 
+/*
+ * Two equal columns, each chip stretched to its cell: the chips carry a meter
+ * whose track is the chip's width, and chips of five widths drew a 16/20 bar
+ * as long as an 18/20 one (design I + B, 2026-09-28).
+ */
 .previewTags {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 9px;
   margin-top: 6px;
 }
@@ -233,7 +238,8 @@
 }
 
 /* REVIEW-02.md R2-13 — the preview card's chips link to their glossary pages,
-   without changing how the chip looks.
+   without changing how the chip looks. (Since 2026-09-28 the chip is
+   stretched to its grid cell, and the link is that cell's item.)
  *
  * NOT `display: contents`, which is what this was: an element with that
  * display generates no box, and Chromium leaves such an anchor out of

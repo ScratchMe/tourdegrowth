@@ -20,6 +20,7 @@ import { PriorityMove } from "@/components/result/PriorityMove";
 import { ScoreDisplay } from "@/components/result/ScoreDisplay";
 import { ShareCard } from "@/components/result/ShareCard";
 import { StampedPillar } from "@/components/result/StampedPillar";
+import { StageProfile } from "@/components/viz/StageProfile";
 import { ANTOINE_LINKS, cvUrl, DEEP_DIVE_CREDIT, QUICK_CREDIT } from "@/content/antoine-credit";
 import { HOW_IT_WORKS } from "@/content/how-it-works";
 import { PROFILE_CLICK_DETAILS, trackEvent } from "@/lib/analytics/goatcounter";
@@ -326,15 +327,19 @@ export function ResultView({
               elevation="raised"
               className={[styles.slotScore, roast ? styles.scoreCardRoast : ""].filter(Boolean).join(" ")}
             >
-              <ScoreDisplay score={total} label={tc(UI_STRINGS.scoreCard.label, locale)} />
               {/* Design system extension 03 §1. This REPLACES the verdict line
                   that used to float under the numeral — the verdict sentence
                   is now this block's last line, so the stage that is holding
                   the reader back gets the position it was already the
                   subject of. `sharpness` is what says whether naming one
-                  stage is a claim the scores support. */}
+                  stage is a claim the scores support.
+
+                  Design I + B (2026-09-28): the score stands beside it as a
+                  kilometre marker, so the card reads score → stage in one
+                  glance, and the verdict runs under both. */}
               <Bottleneck
                 data-testid="bottleneck"
+                lead={<ScoreDisplay variant="marker" score={total} label={tc(UI_STRINGS.scoreCard.label, locale)} />}
                 sharpness={bottleneck.sharpness}
                 label={bottleneckLabel}
                 pillars={bottleneck.pillars.map((p) => ({
@@ -386,10 +391,38 @@ export function ResultView({
             </Card>
 
             <div className={`${styles.pillarGrid} ${styles.slotPillars}`}>
+              {/* Design I + B (2026-09-28): the shape of the five scores over
+                  the chips that give them. Flagged: exactly the stages the
+                  Bottleneck block names — none on a level board, every tied
+                  one on a shared bottleneck — never the roast's second red
+                  chip, which is emphasis and not a diagnosis. */}
+              <StageProfile
+                className={styles.spanFull}
+                data-testid="stage-profile"
+                stages={PILLARS.flatMap((pillar) => {
+                  const entry = pillars.find((p) => p.pillar === pillar);
+                  return entry
+                    ? [
+                        {
+                          abbr: tc(UI_STRINGS.profileAbbr[pillar], locale),
+                          score: entry.score,
+                          hot: bottleneck.pillars.some((p) => p.pillar === pillar),
+                        },
+                      ]
+                    : [];
+                })}
+                title={tc(UI_STRINGS.profile.title, locale)}
+                legend={tc(UI_STRINGS.profile.legend, locale)}
+                flag={tc(UI_STRINGS.profile.flag, locale)}
+              />
               {PILLARS.map((pillar) => {
                 const entry = pillars.find((p) => p.pillar === pillar);
                 if (!entry) return null;
-                const spanFull = pillar === "revenue" || (roast && !level && pillar === weakestName);
+                // Only the roast's stamp takes the whole row. Revenue used to
+                // as well, to close the phone's two-up grid; with a meter on
+                // every chip it would have drawn its bar on a track twice as
+                // long as the other four (design I + B, 2026-09-28).
+                const spanFull = roast && !level && pillar === weakestName;
                 const label = tc(UI_STRINGS.pillars[pillar], locale);
 
                 if (roast && !level && pillar === weakestName) {

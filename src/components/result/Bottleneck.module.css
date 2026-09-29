@@ -103,3 +103,104 @@
     font: var(--body-sm);
   }
 }
+
+/*
+ * --- With a lead: the kilometre marker on the left — design I + B, 2026-09-28 ---
+ *
+ * The marker stands beside the label and the names, both set against its
+ * middle; the verdict runs under the two, full width, after a dashed rule.
+ * The block no longer hangs under a numeral, so it drops its own top rule.
+ */
+.withLead {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+  gap: 0;
+}
+
+/*
+ * Wraps when the head would get under 120px — below ~350px of viewport, a
+ * width outside the design's contract (375-430) but reachable: the names
+ * then run under the marker, full width, instead of shrinking to 11px. Not
+ * 150: a 390px phone gives the head 146, and 150 wrapped the very layout
+ * this row exists for (caught by e2e/marker-profile.spec.ts).
+ */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 22px;
+}
+
+.lead {
+  flex: none;
+}
+
+/*
+ * A container, so the stage's name can size to the room the marker leaves:
+ * « ACQUISITION » in stencil is the longest name, and beside a 132px marker
+ * on a 390px phone it has 146px — 14cqi sets it at 20px and it fits with its
+ * tracking (measured at 390 and 1280px; 15cqi overflowed by 2 to 4px).
+ */
+.head {
+  flex: 1 1 120px;
+  min-width: 0;
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.withLead .label {
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--accent-mark);
+  letter-spacing: var(--meta-tracking-wide);
+  line-height: 1.35;
+}
+
+.withLead .labelLevel {
+  border-bottom-color: var(--border-divider);
+}
+
+.withLead .name {
+  gap: 2px 10px;
+}
+
+.withLead .pillar,
+.withLead.mobile .pillar {
+  font: var(--display-section);
+  font-size: min(30px, 14cqi);
+  letter-spacing: var(--display-letter-spacing);
+}
+
+.withLead .verdict {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 2px dashed var(--border-divider);
+}
+
+.withLead.mobile .verdict {
+  margin-top: 14px;
+  padding-top: 12px;
+}
+
+@media (max-width: 760px) {
+  .withLead.desktop {
+    margin-top: 0;
+    padding-top: 0;
+  }
+
+  .withLead.desktop .pillar {
+    font: var(--display-section);
+    font-size: min(30px, 14cqi);
+  }
+
+  .withLead .row {
+    column-gap: 18px;
+  }
+
+  .withLead .verdict {
+    margin-top: 14px;
+    padding-top: 12px;
+  }
+}

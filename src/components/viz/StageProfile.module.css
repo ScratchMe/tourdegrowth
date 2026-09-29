@@ -1,0 +1,170 @@
+/*
+ * viz/StageProfile — see StageProfile.tsx. Every position inside `.plot` is
+ * a percentage of it, the same 0–100 space the SVG is drawn in.
+ */
+
+.card {
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 14px 16px 12px;
+  background: var(--surface-card);
+  border: var(--border-solid);
+  border-radius: var(--radius-panel);
+}
+
+.cap {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 2px 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--viz-grid);
+  font: var(--meta-2xs);
+  line-height: 1.35;
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.title {
+  color: var(--text-body);
+}
+
+/* 36px of air above the plot: room for a flag over a climb that reaches the top. */
+.plot {
+  position: relative;
+  height: 72px;
+  margin-top: 36px;
+}
+
+.svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* The ridge's stroke on a climb at the top edge, and the road's on the bottom one. */
+  overflow: visible;
+}
+
+.area {
+  fill: var(--surface-sunken);
+}
+
+/* The stage that stalls: the red wash of the weak chip, under a red ridge. */
+.hotArea {
+  fill: var(--surface-alert);
+}
+
+.ridge,
+.hotRidge,
+.road {
+  fill: none;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.ridge {
+  stroke: var(--viz-ink);
+  stroke-width: 2px;
+}
+
+.hotRidge {
+  stroke: var(--viz-highlight);
+  stroke-width: 3px;
+}
+
+.road {
+  stroke: var(--viz-ink);
+  stroke-width: 2px;
+}
+
+/* The kilometre ticks between two stages, under the road. */
+.tick {
+  position: absolute;
+  top: 100%;
+  width: 1.5px;
+  height: 5px;
+  translate: -50% 0;
+  background: var(--viz-axis);
+}
+
+/* Each summit's gap, over it. */
+.gap {
+  position: absolute;
+  translate: -50% calc(-100% - 6px);
+  font: var(--meta-2xs);
+  font-variant-numeric: var(--tabular);
+  color: var(--viz-axis);
+  white-space: nowrap;
+}
+
+/*
+ * The flag: a red pill on a stick, its gap beside it in the deep red. White
+ * on --surface-accent is 4.65, the fill made for a small white label.
+ */
+.flag {
+  position: absolute;
+  translate: -50% calc(-100% - 12px);
+  padding: 3px 7px;
+  border-radius: var(--radius-tag);
+  background: var(--surface-accent);
+  color: var(--text-inverse);
+  font: var(--meta-2xs);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: var(--meta-tracking);
+  white-space: nowrap;
+}
+
+.flag::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 1.5px;
+  height: 10px;
+  translate: -50% 0;
+  background: var(--viz-highlight);
+}
+
+.gapHot {
+  position: absolute;
+  left: calc(100% + 5px);
+  top: 50%;
+  translate: 0 -50%;
+  font: var(--meta-2xs);
+  font-variant-numeric: var(--tabular);
+  color: var(--viz-highlight-text);
+}
+
+.labels {
+  position: relative;
+  height: 1.4em;
+  margin-top: 9px;
+  font: var(--meta-2xs);
+}
+
+.label {
+  position: absolute;
+  top: 0;
+  translate: -50% 0;
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--viz-axis);
+  white-space: nowrap;
+}
+
+.labelHot {
+  font-weight: 700;
+  color: var(--viz-highlight-text);
+}
+
+@media (max-width: 760px) {
+  .card {
+    padding: 12px 12px 10px;
+  }
+
+  .plot {
+    height: 64px;
+  }
+}
