@@ -32,10 +32,12 @@ export interface DotGridProps {
   /** The bottleneck's grid: its counted dots take the one red. Say it in words too — a stamp, a label. */
   highlighted?: boolean;
   /**
-   * `screen`: fills its column up to 200px, a 118px mini-grid under 760px.
-   * `slide`: 200px on a 1920px slide, with the slide's heavier stroke.
+   * What the grid is drawn for — not a scale, so not `size` (the variant
+   * names, S-16). `screen`: fills its column up to 200px, a 118px mini-grid
+   * under 760px. `slide`: 200px on a 1920px slide, with the slide's heavier
+   * stroke.
    */
-  size?: "screen" | "slide";
+  medium?: "screen" | "slide";
   className?: string;
   "data-testid"?: string;
 }
@@ -51,9 +53,9 @@ export interface DotGridProps {
  * (--border-width on a slide, the hairline on a phone), a ring at twice the
  * edge. Every dot carries `data-dot`, so a test counts marks, not pixels.
  */
-export function DotGrid({ grid, label, highlighted = false, size = "screen", className, "data-testid": testId }: DotGridProps) {
+export function DotGrid({ grid, label, highlighted = false, medium = "screen", className, "data-testid": testId }: DotGridProps) {
   const unknown = grid.kind === "unknown";
-  const classes = [styles.grid, styles[size], unknown ? styles.unknown : "", highlighted && !unknown ? styles.highlighted : "", className ?? ""].filter(Boolean).join(" ");
+  const classes = [styles.grid, styles[medium], unknown ? styles.unknown : "", highlighted && !unknown ? styles.highlighted : "", className ?? ""].filter(Boolean).join(" ");
   return (
     <div role="img" aria-label={label} className={classes} data-testid={testId} data-state={unknown ? "unknown" : "known"}>
       {unknown ? (
@@ -72,17 +74,17 @@ export interface DotLegendProps {
   items: readonly { mark: DotMark | "unknown"; label: string }[];
   /** When a text equivalent already says it all (a visually hidden table), the legend is for the eye only. */
   "aria-hidden"?: boolean;
-  /** The size of the grids it names: `slide` draws 20px swatches in the slide's meta type. */
-  size?: "screen" | "slide";
+  /** What the grids it names are drawn for: `slide` draws 20px swatches in the slide's meta type. */
+  medium?: "screen" | "slide";
   className?: string;
   "data-testid"?: string;
 }
 
 /** The legend under a set of grids: each swatch drawn by the same rules as the dot it names, stroke included. */
-export function DotLegend({ items, "aria-hidden": ariaHidden, size = "screen", className, "data-testid": testId }: DotLegendProps) {
+export function DotLegend({ items, "aria-hidden": ariaHidden, medium = "screen", className, "data-testid": testId }: DotLegendProps) {
   return (
     <ul
-      className={[styles.legend, size === "slide" ? styles.legendSlide : "", className ?? ""].filter(Boolean).join(" ")}
+      className={[styles.legend, medium === "slide" ? styles.legendSlide : "", className ?? ""].filter(Boolean).join(" ")}
       aria-hidden={ariaHidden || undefined}
       data-testid={testId}
     >

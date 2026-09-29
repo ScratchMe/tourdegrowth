@@ -317,8 +317,8 @@ Retired names, and where each went, one family at a time
 | `size="desktop"` / `"mobile"` | `size="md"` / `"sm"` | quiz and result: `AnswerOption`, `QuestionCard`, `StageProgress`, `Bottleneck`, `PillarChip`, `ScoreDisplay`, `ShareCard` — done |
 | `size="compact"`, `Button compact` | `size="sm"` | core: `Segmented`, `ToneToggle`, `Button` — done |
 | `tone="red"` | `tone="alert"` | core: `Tag` — done |
-| `size="hero"` / `"compact"` / `"responsive"`, `size="mini"` | `size="lg"` / `"sm"` / `"auto"`, `size="sm"` | viz: `StatTile`, `BulletChart` |
-| `size="screen"` / `"slide"` | `medium="screen"` / `"slide"` | viz: `DotGrid`, `DotLegend` |
+| `size="hero"` / `"compact"` / `"responsive"`, `size="mini"` | `size="lg"` / `"sm"` / `"auto"`, `size="sm"` | viz: `StatTile`, `BulletChart` — done |
+| `size="screen"` / `"slide"` | `medium="screen"` / `"slide"` | viz: `DotGrid`, `DotLegend` — done |
 | `size="frame"` / `"avatar"`, `size="compact"` | `size="lg"` / `"sm"`, `size="sm"` | game: `DgFace`, `ClickPill` |
 
 ## Contracts: two things to know when reading a `.d.ts`

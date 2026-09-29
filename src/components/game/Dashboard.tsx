@@ -73,7 +73,7 @@ function SecretTile({ tile, testId }: { tile: DashboardSecretTile; testId: strin
     return (
       <StatTile
         hidden
-        size="responsive"
+        size="auto"
         label={tile.label}
         hiddenLabel={tile.hiddenLabel}
         hiddenNote={tile.hiddenNote}
@@ -84,7 +84,7 @@ function SecretTile({ tile, testId }: { tile: DashboardSecretTile; testId: strin
   }
   return (
     <StatTile
-      size="responsive"
+      size="auto"
       label={tile.label}
       value={tile.value}
       sub={tile.sub}
@@ -120,7 +120,7 @@ export function Dashboard({ label, churn, subs, mrr, patience, trust, radar }: D
       </h2>
       <div className={styles.grid}>
         <StatTile
-          size="hero"
+          size="lg"
           label={churn.label}
           value={churn.value}
           sub={churn.sub}
@@ -136,7 +136,7 @@ export function Dashboard({ label, churn, subs, mrr, patience, trust, radar }: D
           />
         </StatTile>
         <StatTile
-          size="responsive"
+          size="auto"
           label={subs.label}
           value={subs.value}
           sub={subs.sub}
@@ -145,7 +145,7 @@ export function Dashboard({ label, churn, subs, mrr, patience, trust, radar }: D
           data-testid="game-dash-subs"
         />
         <StatTile
-          size="responsive"
+          size="auto"
           label={mrr.label}
           value={mrr.value}
           sub={mrr.sub}
@@ -154,7 +154,7 @@ export function Dashboard({ label, churn, subs, mrr, patience, trust, radar }: D
           data-testid="game-dash-mrr"
         />
         <StatTile
-          size="responsive"
+          size="auto"
           label={patience.label}
           value={patience.value}
           sub={patience.sub}

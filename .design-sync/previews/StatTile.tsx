@@ -86,7 +86,7 @@ export const WithMeter = () => (
   </NightSurface>
 );
 
-/** A mini `BulletChart` as the tile's child — a value against its target, never a second number. */
+/** A `BulletChart` at `sm` as the tile's child — a value against its target, never a second number. */
 export const WithBullet = () => (
   <div style={{ maxWidth: 260 }}>
     <StatTile label="Résiliations" value="6,0 %" sub="objectif du trimestre : 5,6 %">
@@ -96,13 +96,13 @@ export const WithBullet = () => (
 );
 
 /**
- * `hero` is the stencil figure — one per dashboard, like the score numeral —
- * and shrinks below 760px on its own. `md` and `compact` are mono.
+ * `lg` is the stencil figure — one per dashboard, like the score numeral —
+ * and shrinks below 760px on its own. `md` and `sm` are mono.
  */
 export const Sizes = () => (
   <div style={{ display: "flex", gap: 16, alignItems: "flex-start", flexWrap: "wrap" }}>
-    <StatTile size="hero" label="Churn" value="4.1%" sub="board target: 4%" />
+    <StatTile size="lg" label="Churn" value="4.1%" sub="board target: 4%" />
     <StatTile size="md" label="Churn" value="4.1%" sub="board target: 4%" />
-    <StatTile size="compact" label="Churn" value="4.1%" sub="board target: 4%" />
+    <StatTile size="sm" label="Churn" value="4.1%" sub="board target: 4%" />
   </div>
 );

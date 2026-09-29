@@ -14,7 +14,7 @@
   color: var(--text-body);
 }
 
-.hero {
+.lg {
   padding: var(--space-7);
 }
 
@@ -22,14 +22,14 @@
   padding: var(--space-6);
 }
 
-.compact {
+.sm {
   gap: var(--space-2);
   padding: var(--space-4);
 }
 
-/* `responsive`: the `md` tile above 760px, the `compact` one below (see the
-   media block further down, which mirrors `.compact` exactly). */
-.responsive {
+/* `auto`: the `md` tile above 760px, the `sm` one below (see the
+   media block further down, which mirrors `.sm` exactly). */
+.auto {
   padding: var(--space-6);
 }
 
@@ -56,38 +56,38 @@
   overflow-wrap: anywhere;
 }
 
-.hero .value {
+.lg .value {
   font: var(--chart-value-xl);
   letter-spacing: var(--display-letter-spacing);
 }
 
 .md .value,
-.responsive .value {
+.auto .value {
   font: var(--chart-value);
 }
 
 /* 17px mono: the game plan's compact mobile tile (§2.4). */
-.compact .value {
+.sm .value {
   font: var(--chart-value-compact);
 }
 
 @media (max-width: 760px) {
   /* The race-bib figure steps down like the score numeral does. */
-  .hero .value {
+  .lg .value {
     font: var(--display-section);
   }
 
-  /* `responsive` becomes `compact`: same padding, gap, figure and delta row. */
-  .responsive {
+  /* `auto` becomes `sm`: same padding, gap, figure and delta row. */
+  .auto {
     gap: var(--space-2);
     padding: var(--space-4);
   }
 
-  .responsive .value {
+  .auto .value {
     font: var(--chart-value-compact);
   }
 
-  .responsive .delta {
+  .auto .delta {
     flex-basis: 100%;
   }
 }
@@ -107,7 +107,7 @@
   color: var(--text-muted);
 }
 
-.compact .delta {
+.sm .delta {
   flex-basis: 100%;
 }
 
