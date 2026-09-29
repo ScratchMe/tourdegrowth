@@ -5142,7 +5142,7 @@ Un test « `ui-timing.ts` ne recopie aucune durée CSS » a été écrit puis re
 - **Bundle design-sync** : 77/77 aperçus rendus, les trois avertissements permanents seulement.
 - **Relectures non lancées**, et pourquoi : la PR ne touche ni route, ni proxy, ni payload, ni prompt, ni workflow, et n'ajoute aucune copie visible (les seuls textes changés sont des commentaires).
 
-## Kit I + B, fidélité : ce que la maquette dessinait et que le rendu n'avait pas (2026-09-29)
+## Kit I + B, fidélité : ce que la maquette dessinait et que le rendu n'avait pas (2026-09-29, #183)
 
 Demandé par Antoine après le merge de #182 : « il me semble qu'il y a quelques écarts encore entre ce qui était prévu et ce qu'on obtient. Par exemple, la couleur du background où le titre "Tour de Growth" est présent était censé être plus clair que le background du body ».
 
