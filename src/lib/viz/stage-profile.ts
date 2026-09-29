@@ -1,7 +1,8 @@
 /**
- * The Tour's profile — design I + B, retained by Antoine on 2026-09-28.
+ * The route profile (« Profil du parcours ») — design I + B, retained by
+ * Antoine on 2026-09-28.
  *
- * The five AARRR stages drawn as the climbs of a road book's stage profile:
+ * The five AARRR stages drawn as the climbs of a road book's route profile:
  * one hill per stage, its height the points that stage is MISSING out of its
  * total. A stage at 20/20 is flat road; the stage that stalls is the highest
  * climb, and the one the page names is marked « HC » (hors catégorie, the

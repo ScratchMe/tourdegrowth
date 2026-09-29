@@ -17,7 +17,7 @@ import { Bottleneck, Card, ScoreDisplay } from "tour-de-growth";
  */
 
 const card = { maxWidth: 440 } as const;
-const marker = (score: number) => <ScoreDisplay variant="marker" score={score} label="Overall growth score" />;
+const marker = (score: number) => <ScoreDisplay variant="marker" score={score} label="Overall Growth Score" />;
 
 /** `clear` — one stage sits at least four points below the next. One name. */
 export const Clear = () => (
@@ -84,7 +84,7 @@ export const Roast = () => (
 export const Mobile = () => (
   <Card elevation="raised" style={{ maxWidth: 448 }}>
     <Bottleneck
-      lead={<ScoreDisplay variant="marker" score={74} label="Overall growth score" size="mobile" />}
+      lead={<ScoreDisplay variant="marker" score={74} label="Overall Growth Score" size="mobile" />}
       size="mobile"
       sharpness="clear"
       label="One stage holding you back"
@@ -97,7 +97,7 @@ export const Mobile = () => (
 /** Without a `lead`, the block stacks under a numeral placed before it — how it read before the marker. */
 export const Stacked = () => (
   <Card elevation="raised" style={{ maxWidth: 400 }}>
-    <ScoreDisplay score={74} label="Overall growth score" />
+    <ScoreDisplay score={74} label="Overall Growth Score" />
     <Bottleneck
       sharpness="clear"
       label="One stage holding you back"

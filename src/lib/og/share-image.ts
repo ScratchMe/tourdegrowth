@@ -94,7 +94,7 @@ export interface ShareImageModel {
    * five rows off it; these draw a shape, not a table. They are public on
    * the page already, and like every field here they are hashed, never sent.
    */
-  profile: { score: number; hot: boolean }[];
+  profile: { pillar: Pillar; score: number; hot: boolean }[];
 }
 
 /** The copy the frame draws, resolved once — the token hashes it, so a copy change turns the address over without anyone bumping a version. */
@@ -108,9 +108,13 @@ export interface ShareImageStrings {
   stall: string;
   whereDoesYours: string;
   domain: string;
-  /** « 1/3 · LE DIAGNOSTIC » — the space's pill beside the wordmark, as the band says it. Never « étape » (`space-strings.ts`). */
+  /**
+   * « 1/3 · PLAINE » — the space's pill beside the wordmark: the band's own
+   * kicker, as Antoine decided on 2026-09-28 (« même règle sur l'image de
+   * partage »). Never « étape » (`space-strings.ts`).
+   */
   space: string;
-  /** Under each climb of the profile, in AARRR order. */
+  /** Under each climb of the profile, one per `model.profile` entry — read off its pillar, never off a position. */
   profileLabels: string[];
   /** Over a flagged climb. */
   profileFlag: string;
@@ -130,8 +134,9 @@ export function shareImageStrings(model: ShareImageModel): ShareImageStrings {
     stall: stallSentence(locale, model.bottleneck?.pillar ?? null),
     whereDoesYours: tc(UI_STRINGS.og.whereDoesYours, locale),
     domain: SITE_DOMAIN_LABEL,
-    space: `1/3 · ${tc(SPACE_STRINGS.name.tour, locale)}`.toUpperCase(),
-    profileLabels: PILLARS.map((pillar) => tc(UI_STRINGS.profileAbbr[pillar], locale).toUpperCase()),
+    // TODO: à relire (convention 6).
+    space: `1/3 · ${tc(SPACE_STRINGS.kind.tour, locale)}`.toUpperCase(),
+    profileLabels: model.profile.map((p) => tc(UI_STRINGS.profileAbbr[p.pillar], locale).toUpperCase()),
     profileFlag: tc(UI_STRINGS.profile.flag, locale),
   };
 }
@@ -148,7 +153,7 @@ function profileOf(pillars: readonly { pillar: Pillar; score: number }[]): Share
   const named = new Set(resolveBottleneck(pillars).pillars.map((p) => p.pillar));
   return PILLARS.flatMap((pillar) => {
     const entry = pillars.find((p) => p.pillar === pillar);
-    return entry ? [{ score: entry.score, hot: named.has(pillar) }] : [];
+    return entry ? [{ pillar, score: entry.score, hot: named.has(pillar) }] : [];
   });
 }
 

@@ -2,7 +2,7 @@ import { Card, ScoreDisplay } from "tour-de-growth";
 
 /*
  * The stencil numeral. This is the single loudest element in the product and
- * there is one per screen — it always sits at the top of a `raised` Card.
+ * there is one per screen, inside a `raised` Card.
  *
  * On a result screen (and the landing's preview of one) it is a kilometre
  * marker since design I + B (2026-09-28): `variant="marker"`, standing in
@@ -17,7 +17,7 @@ import { Card, ScoreDisplay } from "tour-de-growth";
 /** The overall score — `total` defaults to 100, so it is usually left off. */
 export const Overall = () => (
   <Card elevation="raised" style={{ maxWidth: 400 }}>
-    <ScoreDisplay score={74} label="Overall growth score" />
+    <ScoreDisplay score={74} label="Overall Growth Score" />
   </Card>
 );
 
@@ -36,14 +36,14 @@ export const Pillar = () => (
  */
 export const Mobile = () => (
   <Card elevation="raised" style={{ maxWidth: 320 }}>
-    <ScoreDisplay score={74} label="Overall growth score" size="mobile" />
+    <ScoreDisplay score={74} label="Overall Growth Score" size="mobile" />
   </Card>
 );
 
 /** `animate={false}` kills the stamp-in — for print, and for anything captured as an image. */
 export const NoAnimation = () => (
   <Card elevation="raised" style={{ maxWidth: 400 }}>
-    <ScoreDisplay score={41} label="Overall growth score" animate={false} />
+    <ScoreDisplay score={41} label="Overall Growth Score" animate={false} />
   </Card>
 );
 
@@ -54,7 +54,7 @@ export const NoAnimation = () => (
  */
 export const Marker = () => (
   <Card elevation="raised" style={{ maxWidth: 260 }}>
-    <ScoreDisplay variant="marker" score={74} label="Overall growth score" />
+    <ScoreDisplay variant="marker" score={74} label="Overall Growth Score" />
   </Card>
 );
 

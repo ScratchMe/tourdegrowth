@@ -3,7 +3,7 @@ import { stageProfile } from "@/lib/viz/stage-profile";
 import styles from "./StageProfile.module.css";
 
 export interface StageProfileStage {
-  /** Printed under its column, e.g. « ACQ. ». */
+  /** Printed under its column, e.g. « Acq. » (set in capitals by the stylesheet). */
   abbr: string;
   score: number;
   /** A stage the page names as holding the product back: red, and flagged. */
@@ -33,10 +33,12 @@ const at = (x: number, y: number): CSSProperties => ({ left: `${x}%`, top: `${y}
 const gap = (missing: number) => (missing ? `−${missing}` : "0");
 
 /**
- * The stage profile — design I + B, retained by Antoine on 2026-09-28.
+ * The route profile (« Profil du parcours ») — design I + B, retained by
+ * Antoine on 2026-09-28. Never « profil de l'étape »: the climbs ARE the
+ * étapes.
  *
- * The five AARRR stages drawn as a road book draws a stage: one climb per
- * stage, as high as the points it is missing, the stage that stalls in red
+ * The five AARRR stages drawn as a road book draws the day's route: one
+ * climb per stage, as high as the points it is missing, the stage that stalls in red
  * and flagged « HC ». It shows the SHAPE of the five scores; the pillar chips
  * under it give the numbers and are its table view, which is why the whole
  * figure is hidden from assistive technology — a screen reader gets the

@@ -30,7 +30,7 @@ import { stageProfile } from "@/lib/viz/stage-profile";
 // I's layout — wordmark, big score on the left, the action in a dashed red
 // card, the hook and the address at the bottom — with B's signs: the score
 // stands on a kilometre marker, the stage profile runs under the action, and
-// the space's pill (« 1/3 · LE DIAGNOSTIC ») sits beside the wordmark.
+// the space's pill (« 1/3 · PLAINE », the band's kicker) sits beside the wordmark.
 
 /** The right column: 1200 − 2 × 56 of padding − the marker's 300 − 44 of gap. */
 const PROFILE_W = 744;

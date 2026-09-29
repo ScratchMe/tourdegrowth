@@ -1,8 +1,10 @@
 import { StageProfile } from "tour-de-growth";
 
 /*
- * The stage profile — design I + B, retained by Antoine on 2026-09-28. The
- * five AARRR stages as a road book draws a stage: one climb per stage, as
+ * The route profile (« Profil du parcours », never « profil de l'étape »:
+ * the climbs ARE the étapes) — design I + B, retained by Antoine on
+ * 2026-09-28. The five AARRR stages as a road book draws the day's route:
+ * one climb per stage, as
  * high as the points it is MISSING out of 20, so a stage at 20/20 is flat
  * road and the one that stalls is the highest climb. The stage the page
  * names is red and flagged « HC » (hors catégorie).
@@ -12,10 +14,12 @@ import { StageProfile } from "tour-de-growth";
  * without them. `hot` follows the `Bottleneck` block's rule: the stages it
  * names, all of the tied ones on a shared bottleneck, none on a level board.
  *
- * All copy is the product's own, from `UI_STRINGS.profile`.
+ * All copy is the product's own, from `UI_STRINGS.profile` and
+ * `UI_STRINGS.profileAbbr`; the abbreviations are set in capitals by the
+ * stylesheet.
  */
 
-const LABELS = ["ACQ.", "ACT.", "RET.", "REF.", "REV."];
+const LABELS = ["Acq.", "Act.", "Ret.", "Ref.", "Rev."];
 const stages = (scores: number[], hot: number[] = []) =>
   scores.map((score, i) => ({ abbr: LABELS[i]!, score, hot: hot.includes(i) }));
 

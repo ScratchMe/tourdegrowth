@@ -61,8 +61,9 @@ describe("shareImageToken", () => {
   it("draws the space's pill and the profile's words in the model's language, never « étape »", () => {
     const en = shareImageStrings(base);
     const fr = shareImageStrings({ ...base, locale: "fr" });
-    expect(en.space).toBe("1/3 · THE CHECK-UP");
-    expect(fr.space).toBe("1/3 · LE DIAGNOSTIC");
+    // The band's kicker, as decided for the image too (Antoine, 2026-09-28).
+    expect(en.space).toBe("1/3 · FLAT");
+    expect(fr.space).toBe("1/3 · PLAINE");
     expect(fr.space).not.toMatch(/étape/i);
     expect(en.profileLabels).toEqual(["ACQ.", "ACT.", "RET.", "REF.", "REV."]);
     expect(en.profileFlag).toBe("HC");
@@ -73,12 +74,23 @@ describe("the profile in the model", () => {
   it("carries the five scores in AARRR order, flagging the stage the page names", () => {
     // The sample: 18 · 12 · 8 · 16 · 20, retention clear of activation by 4.
     expect(sampleShareImageModel().profile).toEqual([
-      { score: 18, hot: false },
-      { score: 12, hot: false },
-      { score: 8, hot: true },
-      { score: 16, hot: false },
-      { score: 20, hot: false },
+      { pillar: "acquisition", score: 18, hot: false },
+      { pillar: "activation", score: 12, hot: false },
+      { pillar: "retention", score: 8, hot: true },
+      { pillar: "referral", score: 16, hot: false },
+      { pillar: "revenue", score: 20, hot: false },
     ]);
+  });
+
+  it("labels each climb by its own pillar, so a missing stage cannot shift the labels", () => {
+    // The server always scores five; the image must not depend on it.
+    // Security review, 2026-09-29: the labels were indexed by position.
+    const four = shareImageModel({
+      ...submissionBase,
+      pillars: PILLARS.filter((p) => p !== "activation").map((pillar) => ({ pillar, score: 10, rawPoints: 0 })),
+    } as unknown as Submission);
+    expect(four.profile.map((p) => p.pillar)).toEqual(["acquisition", "retention", "referral", "revenue"]);
+    expect(shareImageStrings(four).profileLabels).toEqual(["ACQ.", "RET.", "REF.", "REV."]);
   });
 
   it("flags every tied stage on a shared bottleneck, and none on a level board — the Bottleneck block's rule", () => {

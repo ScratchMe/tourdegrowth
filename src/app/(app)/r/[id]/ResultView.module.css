@@ -251,9 +251,12 @@
 
   .layout {
     display: grid;
-    /* 440, not 400, since design I + B (2026-09-28): the score card sets the
-       kilometre marker beside the stage's name, and the name needs the room. */
-    grid-template-columns: 440px 1fr;
+    /* 420, not 400, since design I + B (2026-09-28): the score card sets the
+       kilometre marker beside the stage's name, and the name needs the room.
+       Not the mockup's 440: the layout is 992px wide, so 440 left the right
+       column 508px, under the 519px the game card needs to keep its band on
+       one line (GameEntry.module.css; caught by e2e/game-entry.spec.ts). */
+    grid-template-columns: 420px 1fr;
     /* The share block is not in either column (see the note above), so the
        desktop shape is named rather than left to auto-placement: the right
        column spans both rows, the left column sizes row 1, and the share

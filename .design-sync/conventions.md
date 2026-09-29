@@ -60,6 +60,11 @@ they render whole screens (`NotFoundScreen`, `ErrorScreen`, `SiteFooter`,
 French runs roughly 15–20% longer than English. Anything with a fixed width
 should be checked in French before it is called done.
 
+« Étape » / "stage" names the five AARRR stages and nothing else (Antoine,
+2026-09-28). The three spaces are never « étapes »: the space band says
+« 1/3 · Plaine », and the profile of the five scores is « Profil du
+parcours », never « profil de l'étape ».
+
 ## Responsive
 
 Sizing is CSS-only. `ScoreDisplay`, `PillarChip`, `QuestionCard`,
@@ -88,7 +93,8 @@ Target 390px. Nothing may scroll horizontally at 360px.
 - A figure is `StatTile`; a series over time is `Sparkline`; a value against a
   target is `BulletChart`; any chart sits in a `ChartFrame`, whose data opens
   as a `DataTable`. Five tiles and a chart are still flat, on one surface.
-- The five pillar scores as a shape are `StageProfile` — one climb per stage,
+- The five pillar scores as a shape are `StageProfile` (« Profil du
+  parcours » / "Route profile") — one climb per stage,
   as high as the points it is missing, the named stage flagged « HC ». It
   sits over the five `PillarChip`s, which are its table: it is hidden from
   assistive technology and never shown without them.
