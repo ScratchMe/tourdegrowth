@@ -4926,6 +4926,12 @@ Le nº8 est reconstruit par un script qui repart des clés de chaque ancienne ca
 - `page-ground` : la couture se mesure sur une moyenne de 16 × 5 pixels, puisque le grain est un bruit au pixel.
 - `targets` : chaque segment est centré dans la fenêtre avant d'être mesuré. Avec l'en-tête plus haut, le sélecteur de ton de la carte d'aperçu passait sous la ligne de flottaison à 390 px, et `elementFromPoint` hors de l'écran renvoie `null`.
 
-**Suite complète** : 557 passées, 5 ignorées par construction, 3 échecs.
-- `open-door` et `targets` : corrigés ci-dessus.
-- `locale-routing.spec.ts:320` (le lecteur qui revient sur `/` après avoir choisi l'anglais) : il passe relancé seul. C'est un autre test que le flake connu de la ligne 75, noté ici comme première occurrence. Rien dans ce changement ne touche le proxy, les cookies ou les redirections.
+**Suite complète, deux passages** :
+- **Premier** : 557 passées, 5 ignorées par construction, 3 échecs. `open-door` et `targets` sont corrigés ci-dessus.
+- **Second, après correction** : 559 passées, 5 ignorées, 1 échec (`locale-routing.spec.ts:76`).
+
+**Le flake de `locale-routing`, mesuré plutôt que supposé.** Deux de ses tests échouent par intermittence : `:76` (l'ancien `:75`, le flake connu) et `:320` (le lecteur qui revient sur `/` après avoir choisi l'anglais). Le fichier a été répété sur ce build et sur `main`, construit dans un worktree :
+- ce build : 1 échec sur 5 passages (`:320`) ;
+- `main` : 3 échecs sur 10 (`:320` deux fois, `:76` une fois).
+
+La course existe donc déjà sur `main`, à une fréquence égale ou supérieure. Ce changement ne la crée pas et ne touche ni le proxy, ni les cookies, ni les redirections. Elle n'est plus rare : un passage de fichier sur trois à cinq échoue. Les deux tests échouent sur le même geste, le cookie de langue qui ne reflète pas le dernier choix.
