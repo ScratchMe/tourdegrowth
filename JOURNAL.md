@@ -5313,4 +5313,4 @@ Des seize opportunités de plateforme, douze sont absentes de `src/`, `text-wrap
 - **A2.1, les slides** : le plancher de 18 px est confirmé ; un tableau qui ne tient pas se coupe en deux slides. Écrit dans la ligne d'A2.1, rien à coder ici.
 - **Les choix faits en route par A1, validés** : trimestre en cours 5 → 3 px et bord du DG en colère 4 → 3 px dans le jeu, nom de l'espace à 19 px sur téléphone, actions texte du moteur sur le bouton `quiet`.
 
-**Vérifié** : lint et `tsc` propres, **2 236 tests unitaires** (+1), couverture au-dessus de ses seuils, `next build` propre avec `GAME_ENABLED=true`, PW_LOT2. À l'écran : le bandeau à 320, 360 et 390 px en français et en anglais ; le crédit mesuré à 360, 390 et 1 280 px (une ligne à 390, inchangé).
+**Vérifié** : lint et `tsc` propres, **2 236 tests unitaires** (+1), couverture au-dessus de ses seuils, `next build` propre avec `GAME_ENABLED=true`, **593 specs Playwright** (+1 : 588 passées, 5 ignorées par construction, aucun échec, sans reprise). À l'écran : le bandeau à 320, 360 et 390 px en français et en anglais ; le crédit mesuré à 360, 390 et 1 280 px (une ligne à 390, inchangé).
