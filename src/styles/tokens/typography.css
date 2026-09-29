@@ -50,7 +50,14 @@
   --display-loading: 700 96px/0.88 var(--font-display); /* the waiting numeral */
   --display-letter-spacing: 0.02em;
 
-  /* --- UI / body: Inter, never uppercase, never below 13.5px --- */
+  /*
+   * --- UI / body: Inter, never uppercase. Text meant to be READ never goes
+   * below 13.5px; two labels sit under it, by decision, and nothing else may
+   * (type-scale.test.ts holds the list): the compact button (13px) and the
+   * result's « built by » credit (12px, Antoine, 2026-09-29, C23 — kept
+   * discreet and on one line on a 390px phone, where 13.5px or mono would
+   * wrap it to two).
+   */
   /* Design I (2026-09-28): the question is the screen's one job — larger,
      bolder, tighter (was 600 28px/1.28 and 22px/1.3). */
   --title-question-lg: 700 34px/1.18 var(--font-ui);
@@ -67,6 +74,7 @@
   --body-md: 500 15px/1.55 var(--font-ui);
   --body-sm: 500 14.5px/1.5 var(--font-ui);
   --label-button-sm: 600 13px/1 var(--font-ui); /* compact button, until now written inline */
+  --body-credit: 500 12px/1.4 var(--font-ui); /* the result's « built by » line, and nothing else */
   --label-button: 600 15px/1 var(--font-ui);
   --label-button-lg: 600 17px/1 var(--font-ui); /* design I: was 16px */
   --label-nav: 500 13.5px/1 var(--font-ui);
