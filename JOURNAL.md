@@ -5227,3 +5227,39 @@ Demandée par Antoine une fois #183 en production : « fais une dernière passe 
 - les comptes de tests.
 
 **Laissé, et listé comme reste** : deux jetons morts d'avant la passe (`--width-mobile` et `--texture-spray-strong`), et le rayon de 6 px du message de chargement, hors de l'échelle.
+
+**En production** : mergée le 2026-09-29 (squash `b708d43`, 25 fichiers, identique à la tête de la PR), servie à 16 h 35 UTC. Relevé par `curl` sur les feuilles servies : `--shadow-card-roast:6px 6px 0` et `@container game-entry (max-width:349px)`.
+
+## La liste de travail rangée par agent (2026-09-29)
+
+**La demande d'Antoine** : tout ce qui reste à faire, hors bons à tirer, documenté clairement et regroupé par sujets qu'une session peut traiter seule, avec un prompt par agent (le travail autonome, la design sync, ses décisions une par une, ses gestes pas à pas), pour clore cette session et repartir sur des sessions plus fines.
+
+**Ce qui est livré** : `CHANTIERS.md`, et un renvoi depuis `CLAUDE.md`. Cinq sections :
+- A, le travail autonome, en six lots ;
+- B, la design sync, sur la machine d'Antoine ;
+- C, ses 22 décisions, chacune avec une recommandation ;
+- D, ses gestes ;
+- E, la veille sur déclencheur.
+
+Le document se termine par les quatre prompts. La règle d'usage est écrite en tête : une session retire ce qu'elle livre et ajoute ce qu'elle trouve.
+
+**Reconstruit depuis les sources, pas depuis l'inventaire de la veille** :
+- les constats restants de l'audit du kit (S-6, S-8, S-10, S-11, S-15 à S-17) et ses opportunités de plateforme (§6), relus dans l'artifact ;
+- les sept décisions du moteur, dans `ENGINE.md` ;
+- D1 à D4 des campagnes ;
+- les vagues 3 et 4 de `GROWTH-PLAN.md` ;
+- la phase 1 bis d'`AUDIT-PLAN.md` ;
+- `.design-sync/NOTES.md`.
+
+**Chaque compte est re-mesuré par `grep`, et trois ont bougé depuis l'audit** :
+- quinze `font-size` littéraux hors des slides (et non dix-sept) ;
+- une cinquantaine de `2px solid|dashed` en dur ;
+- quinze jetons `--viz-*` sans usage.
+
+Des seize opportunités de plateforme, douze sont absentes de `src/`, `text-wrap: pretty` est déjà posé, et trois étaient déjà traitées (S-4, S-18, S-19).
+
+**Deux choses qui n'existaient que hors du dépôt, maintenant dedans** : les sept décisions par défaut du jeu (2026-09-24), jusque-là seulement dans le répertoire de travail d'une session, et le numéro du projet Claude Design.
+
+**Une affirmation vérifiée avant d'être écrite** : « les liens d'ouverture du moteur ne sont pas construits ». `ENGINE_PATH` n'est lu que par `SpaceBand`, `sitemap.ts` et `/admin/preview`, donc la phrase dit aussi que le bandeau d'étape, lui, y mène.
+
+**Déplacé** : le relevé des événements `retake_started` et `landing_return` passe des gestes d'Antoine au travail de la session (A6.1). Le workflow chiffré lit `/admin/stats` sans lui depuis le 2026-09-14.

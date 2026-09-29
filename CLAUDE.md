@@ -49,7 +49,9 @@ Les autres documents de la racine sont des **plans et des revues**, pas des
 conventions : `SPEC.md` et ses addenda (le produit), `REVIEW*.md` (les trois
 revues, closes), `AUDIT.md` + `AUDIT-PLAN.md` (l'instrument d'audit),
 `GROWTH-PLAN.md` (la distribution), `GAME-BRIEF.md` (le jeu « Le côté obscur ») et
-`ENGINE.md` (le moteur de croissance).
+`ENGINE.md` (le moteur de croissance). **`CHANTIERS.md` est la liste de travail**,
+rangée par agent (autonome, design sync, décisions, gestes d'Antoine), avec le
+prompt de chaque session : on y retire ce qu'on livre, on y ajoute ce qu'on trouve.
 
 ## Les plug-ins s'installent à la main, dans le dépôt
 
@@ -166,7 +168,7 @@ Complète-le au fil du projet — mais il est chargé dans chaque session, donc 
 
 ## État du projet au 2026-09-29 — à lire en premier dans une nouvelle session
 
-Le journal (`JOURNAL.md`) raconte le projet dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée du journal la contredit, c'est celle-ci qui a raison.
+Le journal (`JOURNAL.md`) raconte le projet dans l'ordre où les choses se sont passées. Cette section-ci est l'**état courant** : quand une entrée du journal la contredit, c'est celle-ci qui a raison. Ce qui reste **à faire**, et par qui, est dans `CHANTIERS.md`.
 
 ### Où en est le produit
 
