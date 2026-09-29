@@ -5314,3 +5314,49 @@ Des seize opportunités de plateforme, douze sont absentes de `src/`, `text-wrap
 - **Les choix faits en route par A1, validés** : trimestre en cours 5 → 3 px et bord du DG en colère 4 → 3 px dans le jeu, nom de l'espace à 19 px sur téléphone, actions texte du moteur sur le bouton `quiet`.
 
 **Vérifié** : lint et `tsc` propres, **2 236 tests unitaires** (+1), couverture au-dessus de ses seuils, `next build` propre avec `GAME_ENABLED=true`, **593 specs Playwright** (+1 : 588 passées, 5 ignorées par construction, aucun échec, sans reprise). À l'écran : le bandeau à 320, 360 et 390 px en français et en anglais ; le crédit mesuré à 360, 390 et 1 280 px (une ligne à 390, inchangé).
+
+**En production** : PR [#188](https://github.com/ScratchMe/tourdegrowth/pull/188), mergée le 2026-09-29 (squash `f62469d`, 13 fichiers, identique à la tête de la PR), servie à 18 h 55 UTC. Relevé par HTTP sur les feuilles servies par `/en` et `/fr` : présents `--border-width-fine:1.5px`, `--body-credit:500 12px/1.4 var(--font-ui)` et la requête de conteneur `game-entry (max-width:319px)` qui ramène les marges du bandeau à `--space-5`.
+
+## A6 : le premier relevé chiffré (2026-09-29)
+
+**La demande** : le lot A6 de `CHANTIERS.md`, tout ce que la session peut lire seule par `stats.yml` (portées `admin` et `gsc`), sans qu'un chiffre entre dans le dépôt. Deux runs lus : `both`, puis `admin` seul pour relancer la fenêtre « All-time ». Clé `age` créée dans le scratchpad de la session, jamais commitée ; les rapports déchiffrés y sont restés.
+
+**A6.1, les événements d'A4 dans le vrai GoatCounter.** La section funnel porte bien les trois champs attendus, dans les deux fenêtres : `landingReturn` et `valueActionsPerResult` sont présents (des vrais retours sur l'accueil ont été comptés), `retakeStarted` est présent mais pas encore déclenché : personne n'a refait son Tour. Le point de la table « ce qui reste ouvert » de `CLAUDE.md` est retiré.
+
+**Au passage, `take_own_tour` absent depuis le début.** C'était le seul événement du funnel à zéro sur toutes les fenêtres, avec `retake_started`. Vérifié que ce n'est pas l'envoi : Firestore ne compte aucune soumission arrivée par un lien partagé (`referredSubmissions`, `kFactor` et `conversionPerShare` absents eux aussi), et `visitor-cta.spec.ts` exige l'événement au clic. Les deux sources concordent : c'est le volume, pas l'instrumentation.
+
+**A6.2, Search Console.** Les anciennes adresses `/glossary/*` (d'avant R-13) sont encore créditées sur 28 et 90 jours, les `/fr/glossary/*` le sont aussi, et aucune `/en/glossary/*`. Côté site, tout est en place, vérifié en production le même jour : la 308 de `/glossary/aarrr` vers `/en/glossary/aarrr`, la canonique, `hreflang` en, fr et `x-default` sur `/en/`, et un sitemap qui ne liste aucune adresse non préfixée. C'est donc Google qui garde l'ancienne adresse comme représentante, pour l'anglais seulement. Rien à coder ; le geste qui tranche est dans Search Console : geste **D8** de `CHANTIERS.md` (inspection de l'URL, lire la canonique choisie par Google, demander l'indexation).
+
+**A6.3, les déclencheurs de volume.** Ni les 50 soumissions, ni quelques centaines, ni aucun signe d'abus. Rien ne s'ouvre dans la section E.
+
+**La fenêtre « All-time » a renvoyé une 404 de GoatCounter** au premier run, comme le 2026-09-14. Relancée seule quelques minutes plus tard, elle répond. Deux occurrences, deux fois passée à la relance : c'est une réponse passagère de leur API sur la plus longue fenêtre, pas notre code. La règle « relancer avant d'enquêter » tient, et elle est maintenant dans la ligne « Lecture des stats » de `CLAUDE.md`, pas seulement ici.
+
+**Ce qui change dans les documents** : A6 sort de `CHANTIERS.md` (la section A passe à quatre lots), la section E dit qu'un relevé mensuel suffit et renvoie à la méthode, D8 s'ajoute. Dans `CLAUDE.md`, la ligne des événements d'A4 est retirée et celle de la lecture des stats mise à jour.
+
+## D1 : les réglages du dépôt, vérifiés et clos (2026-09-29)
+
+**La demande** : la section D de `CHANTIERS.md`, pas à pas avec Antoine (prompt D). Première action choisie : D1.
+
+**Ce que l'API disait avant le moindre clic** (`GET /repos/ScratchMe/tourdegrowth`) : `has_projects` et `has_discussions` déjà à `false`, la description et les neuf topics de `GROWTH-PLAN.md` 0.2 en place. `CHANTIERS.md` écrivait pourtant « Activés » à la ligne C18, le matin même : un document dit ce qui était vrai quand il a été écrit (convention 10). Antoine a confirmé à l'écran (Settings → General → Features).
+
+**Le seul geste** : la page d'accueil du dépôt pointait vers l'apex `https://tourdegrowth.com`, qui répond en 308 vers `www`. Antoine l'a passée à `https://www.tourdegrowth.com`, l'adresse que prévoyait 0.2. Relu par l'API après coup.
+
+**Retiré de `CHANTIERS.md`** : D1, et C18, sans objet puisque l'état recommandé était déjà en place et qu'Antoine l'a validé. La section C passe à 21 questions. La ligne « Hygiène de dépôt public » de `CLAUDE.md` n'a plus rien côté Antoine.
+
+**Pas vérifiable d'ici, pour D7** : si le profil github.com/ScratchMe affiche un nom. L'API des profils est refusée à une session cloud, bornée aux routes du dépôt. Antoine le regardera avant la vague 4.
+
+## La coupure de journal et la citation du DG ne sont plus des pilules (2026-09-29)
+
+**Trouvé par la design sync, pas par un test.** En notant les aperçus avant l'envoi vers Claude Design (section B de `CHANTIERS.md`), la coupure de journal du jeu (`EventClipping`) est apparue en **ellipse** : ses paragraphes débordaient sur le fond de nuit, illisibles. Cause : le design I (#177) a passé `--radius-tag` de 4 à 999 px, et trois boîtes de plusieurs lignes le lisaient encore, la coupure et les deux encadrés de citation du DG (`.boss` de `QuarterNews` et de `QuarterReport`), devenus des pilules. Le jeu est fermé derrière son drapeau : personne ne l'a vu en public.
+
+**Le correctif** : les trois prennent `--radius-panel` (14 px), le rayon que l'échelle donne aux boîtes de texte (options de réponse, cartes d'analyse, popovers). Un choix de tech lead, la maquette I ne dessinant pas la coupure ; il se réverse en une ligne. Les autres usages de `--radius-tag` ont été relus un par un : étiquettes, segments, pistes de jauge, tampons (« Amende · 106 000 € », le verdict du trimestre), tous d'une ligne, la pilule y est voulue.
+
+**La garde** compte ce qui est à l'écran, pas des noms de classes (convention 11) : `multiLinePills` (`e2e/helpers.ts`) relève toute boîte peinte dont le plus petit rayon atteint la moitié de son petit côté et dont le texte tient sur plus d'une ligne (des fragments de texte regroupés par recouvrement vertical, pour qu'une ligne tournée de 1° reste une ligne). `game-news.spec.ts` la passe sur chaque carte du trimestre de l'inspection et sur son rapport, à 1 280 et 390 px, et exige qu'elle ait vu des pilules (les tampons), pour qu'elle ne passe pas à vide.
+
+**Non-vacuité**, écrite dans le spec : la pilule remise sur la coupure seule fait tomber ce seul test (7 autres passent), qui nomme la coupure sur les cartes 3 et 4 et dans le rapport, aux deux largeurs (jusqu'à 22 lignes dans une pilule) ; remise sur les deux encadrés seuls, il tombe seul aussi et nomme la carte 5 et le rapport.
+
+**À l'écran**, FR et EN, 1 280 et 390 px : la coupure de l'inspection, celle du fil viral, la citation du DG et le rapport du trimestre 3.
+
+**Piège** : un worktree dont `node_modules` est un lien symbolique vers le clone principal fait paniquer Turbopack (« Symlink [project]/node_modules is invalid, it points out of the filesystem root »). Une copie en liens physiques (`cp -al`) passe, instantanée et sans place disque.
+
+**Vérifié** : lint et `tsc` propres, **2 236 tests unitaires**, couverture au-dessus de ses seuils, `next build` propre avec `GAME_ENABLED=true`, **594 specs Playwright** (+1 : 589 passées, 5 ignorées par construction, aucun échec, sans reprise). Relecteurs non lancés : ni route, ni proxy, ni payload, ni workflow, ni copie.

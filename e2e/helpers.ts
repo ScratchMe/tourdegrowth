@@ -1,4 +1,4 @@
-import { expect, test as base, type APIRequestContext, type Page, type Route } from "@playwright/test";
+import { expect, test as base, type APIRequestContext, type Locator, type Page, type Route } from "@playwright/test";
 
 /**
  * Every spec runs with GoatCounter's script replaced by a local stub that
@@ -203,4 +203,63 @@ export async function grantOwnerPreview(
     maxRedirects: 0,
   });
   expect(res.status(), "POST /admin/preview must answer 303 — is ADMIN_DASHBOARD_PASSWORD set on the server?").toBe(303);
+}
+
+/**
+ * The pills under `root` whose text runs over more than one line.
+ *
+ * A pill is any painted box (a background or a border) whose smallest corner
+ * radius reaches half its short side — what `--radius-tag` (999px since
+ * design I, #177) draws. It holds ONE line: past that its round ends cut
+ * into the text, which is how the game's newspaper clipping became an
+ * ellipse spilling its paragraphs onto the night (design sync, 2026-09-29).
+ *
+ * Counted from what is on screen, never from a list of class names, so a box
+ * that picks up the token tomorrow is measured like the ones today. Lines are
+ * clusters of text fragments (`Range.getClientRects`) that overlap vertically
+ * by at least half their height: a rotated line stays one line, two stacked
+ * lines never merge. `pills` is returned so a caller can prove the measure
+ * saw something (TESTING.md §2.1).
+ */
+export async function multiLinePills(root: Locator): Promise<{ pills: number; offenders: string[] }> {
+  return root.evaluate((rootEl) => {
+    const corners = ["borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius"] as const;
+    const sides = ["borderTopWidth", "borderRightWidth", "borderBottomWidth", "borderLeftWidth"] as const;
+    let pills = 0;
+    const offenders: string[] = [];
+    for (const el of [rootEl, ...rootEl.querySelectorAll("*")]) {
+      if (!(el instanceof HTMLElement) || el.offsetHeight === 0) continue;
+      const cs = getComputedStyle(el);
+      const painted = cs.backgroundColor !== "rgba(0, 0, 0, 0)" || sides.some((side) => parseFloat(cs[side]) > 0);
+      if (!painted) continue;
+      const radius = Math.min(...corners.map((corner) => parseFloat(cs[corner]) || 0));
+      if (radius < Math.min(el.offsetWidth, el.offsetHeight) / 2 - 0.5) continue;
+      pills += 1;
+
+      const rects: DOMRect[] = [];
+      const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        if (!node.textContent?.trim()) continue;
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        for (const rect of range.getClientRects()) if (rect.height > 0) rects.push(rect);
+      }
+      rects.sort((a, b) => a.top - b.top);
+      const lines: { top: number; bottom: number }[] = [];
+      for (const rect of rects) {
+        const line = lines.at(-1);
+        const overlap = line ? Math.min(line.bottom, rect.bottom) - Math.max(line.top, rect.top) : 0;
+        if (line && overlap >= Math.min(line.bottom - line.top, rect.height) / 2) {
+          line.top = Math.min(line.top, rect.top);
+          line.bottom = Math.max(line.bottom, rect.bottom);
+        } else {
+          lines.push({ top: rect.top, bottom: rect.bottom });
+        }
+      }
+      if (lines.length > 1) {
+        offenders.push(`${el.className || el.tagName.toLowerCase()} (${lines.length} lines): ${(el.textContent ?? "").trim().slice(0, 40)}`);
+      }
+    }
+    return { pills, offenders };
+  });
 }

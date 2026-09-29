@@ -21,9 +21,9 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
-| **A. Le travail autonome**, en cinq lots | Une session seule, une PR par lot | Session cloud | Maintenant. A2 à A5 l'un après l'autre ; A6 à tout moment (A1 livré le 2026-09-29) |
+| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot | Session cloud | Maintenant. A2 à A5 l'un après l'autre (A1 et A6 livrés le 2026-09-29) |
 | **B. Design sync** | Une session sur ta machine | Claude Code en local : l'autorisation Claude Design ne s'obtient que là | Maintenant (A1 est livré), puis de nouveau après A2 et A5 |
-| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | Maintenant : 22 questions, environ 45 minutes |
+| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | Maintenant : 21 questions, environ 45 minutes |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt (D2 attend les bons à tirer nº7 et nº8) |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
 
@@ -117,19 +117,6 @@ modale en profite.
 
 C'est à faire avant la seconde passe de B.
 
-### A6 — Les relevés chiffrés
-
-**Tout ce que la session peut lire seule.** La méthode est la ligne « Lecture
-des stats par la session » de `CLAUDE.md`, et l'entrée du 2026-09-14 de
-`JOURNAL.md` (`grep stats.yml`). **Aucun chiffre n'entre dans le dépôt**,
-qui est public : on n'y écrit que « vérifié, présent » ou « absent ».
-
-| # | Quoi |
-|---|---|
-| A6.1 | **Les événements `retake_started` et `landing_return`** n'ont jamais été vus dans le vrai GoatCounter. Lancer `stats.yml` avec la portée `admin`, déchiffrer, et vérifier deux choses : qu'ils figurent dans la section funnel, et que la ligne « Value actions per result » existe |
-| A6.2 | **Search Console** (portée `gsc`) : les URL `/en/glossary/*` ont-elles remplacé les anciennes URL non préfixées dans les pages créditées ? |
-| A6.3 | **Les déclencheurs de volume de la section E** : 50 soumissions, quelques centaines, signes d'abus. Dire si l'un d'eux est atteint, sans écrire le compte |
-
 ---
 
 ## B. Design sync — sur ta machine
@@ -193,7 +180,6 @@ désormais.*
 |---|---|---|---|
 | C16 | **Le bouton principal du propriétaire sur son résultat** | « Refaire le Tour ». Le partage est un bloc image juste en dessous, et `ShareCard.prompt.md` dit « never primary ». Un essai contraire a été fait puis annulé | Garder. À revoir après A3.2 (le partage avec l'image) et un mois de chiffres |
 | C17 | **Une porte de test pour les e2e de composition** : un identifiant de résultat de test derrière une variable d'environnement, fermée par défaut, pour que les e2e passent par le vrai chemin de `/r/<id>`. Aujourd'hui, seul `/r/sample` est testé, et il prend une branche à part | Pas de porte : la garde statique protège seule le payload | Oui, mais fermée par construction en production : refusée dès que `VERCEL` est posé, avec un test qui l'exige. C'est la route publique la plus sensible, et c'est aussi celle qui a fui deux fois (`rawPoints`) |
-| C18 | **Les réglages du dépôt : Projects et Discussions** | Activés | Les désactiver : ils ne servent pas, et la posture du README est « lecture bienvenue, PR non attendues ». Le geste est en D1 |
 
 ### Les campagnes
 
@@ -217,13 +203,13 @@ rien de privé dans le dépôt, qui est public. Cela vaut pour les chiffres de
 
 | # | Action | Prête ? | Détail |
 |---|---|---|---|
-| D1 | **Les réglages du dépôt GitHub** | Oui, après C18 | Projects et Discussions (Settings → General → Features). Vérifier au passage les topics de `GROWTH-PLAN.md` 0.2 (la description et la page d'accueil sont déjà posées) |
 | D2 | **Ouvrir le jeu et le moteur à tout le monde** | Non : il faut les bons à tirer nº7 et nº8 signés, C1 à C15 tranchés, et les liens d'ouverture (C7) construits | Poser `GAME_ENABLED` et/ou `ENGINE_ENABLED` à `true` dans Vercel (Production), puis **redéployer** (`VERCEL.md` §1.11). Ensuite, la session vérifie la production : pages en 200, sitemap, pied de page, bandeau. Toi, tu demandes l'indexation des nouvelles pages dans Search Console |
 | D3 | **Lancer la design sync** | Oui | C'est la section B, sur ta machine |
 | D4 | **L'instrument d'audit, phase 1 bis : la mission AB Tasty** | Oui | Voir `AUDIT-PLAN.md` §4. Créer la mission sous `/admin/audit` (profil `b2b-assiste`, sans mandat), et faire partir le jour 1 ce qui est lent (T3, T4). Les T1 se font en libre-service, la définition d'abord. Les T2 se font par système. **Tenir le journal des frictions** dans un fichier local jamais commité dès qu'une friction cite l'entreprise. Critère de sortie : `pending = 0`, exporté. La session corrige les frictions en petites PR, et rien de la phase 2 |
 | D5 | **À côté de l'outil** | Oui | Les cinq à dix entretiens (`AUDIT-PLAN.md` §2). La vérification de ton contrat de travail (non-concurrence, cession de propriété intellectuelle) : elle conditionne la phase 3, et c'est la seule question qui la ferme à elle seule |
 | D6 | **La distribution, vague 1** | Selon C19 à C22 | Textes dans `marketing/launch/` et `marketing/campaigns/`. Tu postes sous pseudo, la session fournit et met à jour les textes. Annuaires dans l'ordre de `GROWTH-PLAN.md` 1.6. **Jamais ton nom, jamais LinkedIn** |
 | D7 | **La distribution, vague 4** | Après deux semaines de lecture de la vague 1 | La session écrit les pitchs de newsletters et passe honnêtement le produit de chaque auteur au Tour ; tu envoies depuis `contact@`. Pour les listes « awesome », seulement si ton profil GitHub n'affiche pas ton nom (à vérifier d'abord sur github.com/ScratchMe) |
+| D8 | **Search Console : les pages du glossaire anglais** | Oui | Au relevé du 2026-09-29, Search Console crédite encore les anciennes adresses `/glossary/*` et aucune `/en/glossary/*` (les `/fr/glossary/*` sont créditées). Côté site, tout pointe vers `/en/` : la 308, la canonique, `hreflang`, `x-default` et le sitemap, vérifiés en production le même jour. Dans Search Console, **Inspection de l'URL** sur deux ou trois `/en/glossary/*` : lire la « canonique sélectionnée par Google », puis **Demander l'indexation**. Si Google a choisi l'ancienne adresse comme canonique, le dire à une session : c'est le seul cas qui demanderait d'agir côté code |
 
 ---
 
@@ -242,8 +228,11 @@ rien de privé dans le dépôt, qui est public. Cela vaut pour les chiffres de
 | Besoin de `guidelines/` du bundle d'extension 01 | Le demander à Claude Design (l'archive ne le contenait pas) | `CLAUDE.md` |
 | Un contrat de largeur qui descend à 320 px | À 320 px, le bandeau d'entrée au jeu passe sur trois lignes (la seconde, ≈ 270 px de texte, pour une colonne de 244). Laissé par décision d'Antoine (2026-09-29) : seule une copie plus courte le tiendrait. 360 px est réglé depuis le même jour | `game/GameEntry.module.css` |
 
-Une session de relevé (A6), une fois par mois, suffit à voir passer les trois
-premiers.
+Un relevé par `stats.yml`, une fois par mois, suffit à voir passer les trois
+premiers. La méthode est la ligne « Lecture des stats par la session » de
+`CLAUDE.md`. **Aucun chiffre n'entre dans le dépôt** : on n'y écrit que
+« atteint », « présent » ou « absent ». Le premier relevé date du 2026-09-29
+(`JOURNAL.md`) : aucun des trois n'était atteint.
 
 ---
 
