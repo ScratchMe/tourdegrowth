@@ -10,7 +10,8 @@
   transition:
     box-shadow var(--dur-fast) var(--ease-out),
     transform var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out);
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
 }
 
 .button:disabled {
@@ -57,7 +58,20 @@
   border: var(--border-solid);
 }
 
+/*
+ * The system's one text button (design audit S-11, 2026-09-29). There were
+ * three: this one at 31px with no hover, the engine's `linkButton` at 32px and
+ * the what-if reset at 44px. The engine's two now render `Button variant="quiet"`
+ * (`compact` where eight of them sit beside the sliders).
+ *
+ * It is drawn 31px tall on purpose — an underlined line of text, not a box —
+ * and TAPPED 44px tall: the `::before` below is a transparent strip centred on
+ * the label, at least --hit-min on each axis, that moves nothing around it.
+ * `targets.spec.ts` measures it with `elementFromPoint`, the way a finger meets
+ * it, and checks it steals no tap from a neighbour.
+ */
 .quiet {
+  position: relative;
   background: transparent;
   color: var(--text-muted);
   border: none;
@@ -68,6 +82,22 @@
   text-underline-offset: 3px;
 }
 
+.quiet::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: min(0px, calc((100% - var(--hit-min)) / 2));
+  right: min(0px, calc((100% - var(--hit-min)) / 2));
+  height: max(100%, var(--hit-min));
+  translate: 0 -50%;
+}
+
+/* Two classes, so it beats `.compact` whatever the order: the compact size
+   takes the smaller label and keeps quiet's flat line with no side padding. */
+.quiet.compact {
+  padding: 8px 0;
+}
+
 .fullWidth {
   width: 100%;
 }
@@ -76,8 +106,9 @@
  * States (ds-critique H-6). The transition above animated box-shadow and
  * transform since the bundle, and nothing ever changed either: the button had
  * no hover, no press. In the sticker grammar: hover peels it up and to the
- * left over a hard ink shadow, press flattens it back onto the page. Quiet is
- * an underlined link and keeps its underline as its only affordance.
+ * left over a hard ink shadow, press flattens it back onto the page. Quiet has
+ * no box to lift: hover inks it and thickens its underline to the system's
+ * line, press draws the underline up against the letters (below).
  *
  * `:not(:disabled)` so a disabled button does not lift under the cursor — the
  * one state that must look like it will not respond.
@@ -109,6 +140,18 @@
   transform: translate(4px, 4px);
 }
 
+/* Quiet: muted at rest, body ink under the pointer — the most contrast the
+   world has, in either world. */
+.quiet:not(:disabled):hover,
+.quiet:not(:disabled):active {
+  color: var(--text-body);
+  text-decoration-thickness: var(--border-width);
+}
+
+.quiet:not(:disabled):active {
+  text-underline-offset: 1px;
+}
+
 /* Where nothing hovers, a tap would leave the button peeled up until the next
    tap elsewhere. Press still flattens it; there is just nothing to undo. */
 @media (hover: none) {
@@ -120,6 +163,18 @@
 
   .primary:not(:disabled):hover {
     box-shadow: var(--shadow-panel);
+  }
+
+  .quiet:not(:disabled):hover {
+    color: var(--text-muted);
+    text-decoration-thickness: auto;
+  }
+
+  /* Listed again after the reset above, which would otherwise undo the press
+     too (same specificity, later rule). */
+  .quiet:not(:disabled):active {
+    color: var(--text-body);
+    text-decoration-thickness: var(--border-width);
   }
 }
 

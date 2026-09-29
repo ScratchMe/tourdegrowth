@@ -22,6 +22,25 @@
 
   /* --- Borders: exactly three, declared in the world block below --- */
   --border-width: 2px;
+  /*
+   * Three more weights, each one a use and never a taste (design audit S-17,
+   * 2026-09-29). The game had 1, 3, 4 and 5px written by hand; what was
+   * meant became stamp and hairline, the rest came back to --border-width.
+   *  - stamp: an inked mark over an edge, one step heavier than it — a rubber
+   *    stamp's rim, the angry CEO's edge, the quarter being played, a space's
+   *    accent band.
+   *  - hairline: a line UNDER the content, never an edge — a chart's grid, a
+   *    table's rows, and the screens of another company's app (the game's
+   *    phone), which is not drawn in our system.
+   *  - fine: the space band's strokes (its separator, its stop pills) — light
+   *    lines on the dark band, drawn at 1.5px in the retained I + B mockup;
+   *    at 2px they read heavier there than an edge on paper (Antoine,
+   *    2026-09-29). The band only.
+   * `border-width.test.ts` fails on any width written outside these tokens.
+   */
+  --border-width-stamp: 3px;
+  --border-width-hairline: 1px;
+  --border-width-fine: 1.5px;
   --shadow-none: none;
 
   /*
@@ -88,9 +107,9 @@
 :root,
 [data-world] {
   /* --- Borders: the system has exactly three --- */
-  --border-solid: 2px solid var(--border-hard);
-  --border-dashed: 2px dashed var(--border-soft);
-  --border-rule: 2px dashed var(--border-divider);
+  --border-solid: var(--border-width) solid var(--border-hard);
+  --border-dashed: var(--border-width) dashed var(--border-soft);
+  --border-rule: var(--border-width) dashed var(--border-divider);
 
   /* --- Hard offset shadows, no blur, always the world's --shadow-color ---
      Design I (2026-09-28): a pixel shorter each (was 7 / 5 / 4) — the larger
@@ -109,13 +128,11 @@
 
   /*
    * --- Stencil spray texture: overlay on large display numerals only ---
-   * Both variants read --texture-ink. `-strong` was transcribed at 0.05 —
-   * LIGHTER than the plain 0.055, despite its name — and nothing in the app
-   * uses it; it now shares the one ink rather than keeping a second literal
-   * that no world would rebind.
+   * Reads --texture-ink. The bundle's `-strong` variant was transcribed at
+   * 0.05 — LIGHTER than this one's 0.055, despite its name — and nothing ever
+   * used it: removed (design audit A1.6, 2026-09-29).
    */
   --texture-spray: repeating-linear-gradient(115deg, transparent 0 3px, var(--texture-ink) 3px 4px);
-  --texture-spray-strong: var(--texture-spray);
 
   /* "Not measured" in a chart (DS v3 §5.5): a hatch, never an empty bar —
      an empty bar reads as zero, and zero is a measurement. */

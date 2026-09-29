@@ -7,7 +7,7 @@
 }
 
 .sm {
-  font-size: 15px;
+  font: var(--display-wordmark-sm);
 }
 
 /*
@@ -18,17 +18,17 @@
  * a fixed size is wanted regardless of viewport (none currently).
  */
 .md {
-  font-size: 19px;
+  font: var(--display-wordmark);
 }
 
 @media (max-width: 760px) {
   .md {
-    font-size: 15px;
+    font: var(--display-wordmark-sm);
   }
 }
 
 .lg {
-  font-size: 34px;
+  font: var(--display-wordmark-lg);
 }
 
 .accent {

@@ -26,7 +26,7 @@
 
 .sampleBadge {
   background: var(--surface-alert);
-  border: 2px dashed var(--border-alert);
+  border: var(--border-width) dashed var(--border-alert);
   border-radius: var(--radius-tag);
   padding: 8px 12px;
   display: inline-block;
@@ -71,7 +71,7 @@
 }
 
 .builtByCredit {
-  font: 500 12px/1.4 var(--font-ui);
+  font: var(--body-credit);
   color: var(--text-faint);
   margin-top: 14px;
 }

@@ -26,7 +26,7 @@
 .table tbody td {
   text-align: left;
   vertical-align: baseline;
-  border-bottom: 1px dashed var(--border-divider);
+  border-bottom: var(--border-width-hairline) dashed var(--border-divider);
 }
 
 .table tbody tr:last-child th,

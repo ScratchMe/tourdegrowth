@@ -308,7 +308,9 @@ describe("L-10 — --surface-desk stays unused", () => {
     const offenders: string[] = [];
     let scanned = 0;
     for (const f of files(src)) {
-      if (f.startsWith(tokensDir) || f.endsWith("token-contrast.test.ts")) continue;
+      // A test that names the token is not a reader: this file and the night's
+      // measure it, dead-tokens.test.ts lists it as kept out of use on purpose.
+      if (f.startsWith(tokensDir) || f.startsWith(path.join(src, "__tests__"))) continue;
       scanned++;
       if (readFileSync(f, "utf8").includes("--surface-desk")) offenders.push(path.relative(src, f));
     }

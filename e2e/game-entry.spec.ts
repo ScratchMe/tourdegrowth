@@ -178,6 +178,20 @@ test.describe("P23 — the card on the sample's retention bottleneck", () => {
     }));
     expect(sw).toBe(cw);
   });
+
+  test("a 360px Android phone: the French band still holds on two lines", async ({ page }) => {
+    // Out of the 375-430 contract, but a common width. Before 2026-09-29 the
+    // band went to three lines here (74px), « pas sur ton / dashboard » cut
+    // in two — the non-vacuity of this test, measured on that build.
+    await page.setViewportSize({ width: 360, height: 800 });
+    await page.goto(`/r/sample?lang=fr`);
+    expect((await box(page, "game-entry-band")).height).toBeLessThanOrEqual(56);
+    const { sw, cw } = await page.evaluate(() => ({
+      sw: document.documentElement.scrollWidth,
+      cw: document.documentElement.clientWidth,
+    }));
+    expect(sw).toBe(cw);
+  });
 });
 
 test.describe("accessibility with the card on screen", () => {

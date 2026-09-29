@@ -150,9 +150,9 @@ export function WhatIfPanel({ view, onChange }: { view: EngineView; onChange: (t
                 <div className={styles.leverFoot}>
                   <span>{l.today}</span>
                   {l.moved ? (
-                    <button type="button" className={styles.reset} onClick={() => set(withTarget(targets, l.id, null))} data-testid={`whatif-reset-${l.id}`}>
+                    <Button variant="quiet" compact onClick={() => set(withTarget(targets, l.id, null))} data-testid={`whatif-reset-${l.id}`}>
                       {w.reset}
-                    </button>
+                    </Button>
                   ) : null}
                 </div>
               </li>

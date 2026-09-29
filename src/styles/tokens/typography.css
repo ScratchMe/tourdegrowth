@@ -20,6 +20,9 @@
   /* --- Display: stencil, always uppercase, tight --- */
   --size-score-xl: 144px; /* the numeral alone, for components that set size without the shorthand */
   --size-score-lg: 110px;
+  --size-score-suffix-xl: 38px; /* the "/100" beside the desktop numeral */
+  --size-score-suffix-lg: 30px; /* …and beside the phone's */
+  --size-score-total: 14px; /* the "/100" under the kilometre marker's rule */
   --display-score-xl: 700 var(--size-score-xl) / 0.86 var(--font-display); /* desktop score numeral */
   --display-score-lg: 700 var(--size-score-lg) / 0.88 var(--font-display); /* mobile score numeral */
   --display-hero: 700 62px/1.02 var(--font-display);
@@ -31,12 +34,30 @@
      (50 on a phone) runs one line per word. */
   --display-landing: 700 clamp(44px, 6.1vw, 80px) / 0.92 var(--font-display);
   --display-landing-mobile: 700 50px/0.92 var(--font-display);
-  --display-section: 700 30px/1.1 var(--font-display);
+  /* Its size alone, for the one title that shrinks with its container below it (Bottleneck). */
+  --size-display-section: 30px;
+  --display-section: 700 var(--size-display-section) / 1.1 var(--font-display);
   --display-title: 700 36px/1.05 var(--font-display); /* detour card title: 404, error 06c */
   --display-wordmark: 700 19px/1 var(--font-display);
+  /*
+   * Steps added with design audit A1.5 (2026-09-29): sizes that shipped as
+   * literals in a component, now named here by what they are for. Each is the
+   * size the screen already had — the scale grew, the screens did not move.
+   */
+  --display-wordmark-sm: 700 15px/1 var(--font-display); /* the small wordmark, and the header's on a phone */
+  --display-wordmark-lg: 700 34px/1 var(--font-display);
+  --display-section-lg: 700 34px/1.1 var(--font-display); /* the tone choice's title */
+  --display-loading: 700 96px/0.88 var(--font-display); /* the waiting numeral */
   --display-letter-spacing: 0.02em;
 
-  /* --- UI / body: Inter, never uppercase, never below 13.5px --- */
+  /*
+   * --- UI / body: Inter, never uppercase. Text meant to be READ never goes
+   * below 13.5px; two labels sit under it, by decision, and nothing else may
+   * (type-scale.test.ts holds the list): the compact button (13px) and the
+   * result's « built by » credit (12px, Antoine, 2026-09-29, C23 — kept
+   * discreet and on one line on a 390px phone, where 13.5px or mono would
+   * wrap it to two).
+   */
   /* Design I (2026-09-28): the question is the screen's one job — larger,
      bolder, tighter (was 600 28px/1.28 and 22px/1.3). */
   --title-question-lg: 700 34px/1.18 var(--font-ui);
@@ -49,9 +70,11 @@
   --title-quote: 600 24px/1.35 var(--font-ui);
   --title-move: 600 18px/1.45 var(--font-ui);
   --body-lg: 500 17px/1.55 var(--font-ui);
+  --body-lg-mobile: 500 16px/1.4 var(--font-ui); /* a quiz answer on a phone */
   --body-md: 500 15px/1.55 var(--font-ui);
   --body-sm: 500 14.5px/1.5 var(--font-ui);
   --label-button-sm: 600 13px/1 var(--font-ui); /* compact button, until now written inline */
+  --body-credit: 500 12px/1.4 var(--font-ui); /* the result's « built by » line, and nothing else */
   --label-button: 600 15px/1 var(--font-ui);
   --label-button-lg: 600 17px/1 var(--font-ui); /* design I: was 16px */
   --label-nav: 500 13.5px/1 var(--font-ui);

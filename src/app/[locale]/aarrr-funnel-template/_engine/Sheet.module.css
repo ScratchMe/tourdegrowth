@@ -277,7 +277,7 @@
 }
 
 .readingInvalid {
-  border-left: 2px solid var(--border-alert);
+  border-left: var(--border-width) solid var(--border-alert);
 }
 
 .readingBody {
@@ -322,7 +322,7 @@
   position: absolute;
   top: -3px;
   bottom: -3px;
-  border: 2px dashed var(--viz-unknown);
+  border: var(--border-width) dashed var(--viz-unknown);
   border-radius: var(--radius-tag);
   background: var(--texture-ink);
 }
@@ -341,7 +341,7 @@
   top: 0;
   bottom: 0;
   background: repeating-linear-gradient(45deg, var(--viz-ink) 0 2px, transparent 2px 5px);
-  border: 2px solid var(--viz-ink);
+  border: var(--border-width) solid var(--viz-ink);
 }
 
 .stripBelow {

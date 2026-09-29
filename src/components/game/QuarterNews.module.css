@@ -237,7 +237,7 @@
   font-weight: 700;
   letter-spacing: var(--meta-tracking-wide);
   text-transform: uppercase;
-  border: 3px solid currentColor;
+  border: var(--border-width-stamp) solid currentColor;
   border-radius: var(--radius-tag);
   rotate: -4deg;
   animation-duration: var(--dur-stamp);
@@ -309,7 +309,7 @@
   gap: var(--space-7);
   padding: var(--space-8);
   background: var(--surface-card);
-  border-left: 4px solid var(--border-hard);
+  border-left: var(--border-width-stamp) solid var(--border-hard);
   border-radius: var(--radius-tag);
 }
 

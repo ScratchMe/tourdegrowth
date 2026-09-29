@@ -115,7 +115,7 @@
   letter-spacing: var(--meta-tracking-wide);
   text-transform: uppercase;
   color: var(--text-alert);
-  border: 3px solid currentColor;
+  border: var(--border-width-stamp) solid currentColor;
   border-radius: var(--radius-tag);
   rotate: -6deg;
   animation-duration: var(--dur-stamp);

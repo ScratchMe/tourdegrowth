@@ -398,7 +398,7 @@ bannissement le plus courant).
   (`/en`, `/fr`, les deux pages « porte ouverte », les quatre « AARRR vs X »)
   et les annuaires restants de la vague 1 (Launching Next d'abord, campagne
   `relaunch_tour`, liens dans `kit.md`). Le fil de S1 est retiré du
-  calendrier. Geste : `CHANTIERS.md` D9.
+  calendrier. Geste : `CHANTIERS.md` D10.
 - **D3 — Capturer maintenant, refaire à l'ouverture.** Des captures de
   travail du moteur et du jeu sont prises dès maintenant, **marquées
   provisoires** (nom de fichier et `kit.md`), pour préparer les annuaires et

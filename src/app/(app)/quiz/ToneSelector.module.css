@@ -6,8 +6,7 @@
 }
 
 .title {
-  font: var(--display-section);
-  font-size: 34px;
+  font: var(--display-section-lg);
   color: var(--text-body);
 }
 
@@ -86,14 +85,14 @@
   width: 18px;
   height: 18px;
   border-radius: var(--radius-round);
-  border: 2px solid var(--text-muted);
+  border: var(--border-width) solid var(--text-muted);
   flex-shrink: 0;
 }
 
 /* On the inverse fill the dot inverts too: a paper ring around a paper dot,
    the ink showing through between them. */
 .radioSelected {
-  border: 2px solid var(--state-selected-text);
+  border: var(--border-width) solid var(--state-selected-text);
   background: var(--state-selected-text);
   box-shadow: inset 0 0 0 3px var(--state-selected-bg);
 }

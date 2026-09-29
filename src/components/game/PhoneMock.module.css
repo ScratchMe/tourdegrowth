@@ -28,7 +28,7 @@
   width: 100%;
   padding: var(--space-5);
   background: var(--phone-bezel);
-  border: 1px solid var(--phone-bezel-line);
+  border: var(--border-width) solid var(--phone-bezel-line);
   border-radius: var(--phone-radius);
 }
 
@@ -102,7 +102,7 @@
   flex-direction: column;
   gap: var(--space-1);
   padding: var(--space-5);
-  border: 1px solid var(--app-line);
+  border: var(--border-width-hairline) solid var(--app-line);
   border-radius: var(--radius-panel);
 }
 
@@ -136,7 +136,7 @@
   height: 18px;
   border-radius: var(--radius-round);
   background: var(--app-social-avatar);
-  border: 2px solid var(--app-bg);
+  border: var(--border-width) solid var(--app-bg);
 }
 
 .avatars > span + span {
@@ -166,7 +166,7 @@
 
 .callBox {
   padding: var(--space-4) var(--space-5);
-  border: 1px solid var(--app-warn-line);
+  border: var(--border-width-hairline) solid var(--app-warn-line);
   border-radius: var(--radius-panel);
   background: var(--app-warn-bg);
   color: var(--app-ink);
@@ -202,7 +202,7 @@
 .dangerButton {
   background: var(--app-danger-bg);
   color: var(--app-danger-text);
-  border: 1px solid var(--app-danger-line);
+  border: var(--border-width-hairline) solid var(--app-danger-line);
 }
 
 /*
@@ -231,7 +231,7 @@
   flex-direction: column;
   gap: var(--space-2);
   padding: var(--space-4) var(--space-5);
-  border: 1px solid var(--app-line);
+  border: var(--border-width-hairline) solid var(--app-line);
   border-radius: var(--radius-panel);
   background: var(--app-modal-bg);
 }
@@ -273,7 +273,7 @@
  * motion with every other animation.
  */
 .flash {
-  outline: 2px solid transparent;
+  outline: var(--border-width) solid transparent;
   outline-offset: 2px;
   animation: phone-flash var(--game-dur-flash) var(--ease-out);
 }

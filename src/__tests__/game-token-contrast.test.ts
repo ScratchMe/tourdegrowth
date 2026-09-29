@@ -150,7 +150,6 @@ const UNMEASURED: Record<string, string> = {
   "dg-shelf-1": "backdrop",
   "dg-shelf-2": "backdrop",
   "dg-shelf-3": "backdrop",
-  "visio-halo-angry": "an inner glow, decorative",
   "app-danger-line": "notice border, decorative (the notice is carried by its text)",
   "app-warn-line": "notice border, decorative",
   "app-social-avatar": "an avatar dot, decorative",

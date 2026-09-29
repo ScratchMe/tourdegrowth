@@ -80,7 +80,7 @@
   display: inline-block;
   width: 1.4em;
   height: 1em;
-  border: 1px solid var(--border-hard);
+  border: var(--border-solid);
   border-radius: 2px;
 }
 
@@ -143,6 +143,19 @@
 @container game-entry (max-width: 349px) {
   .bandPicto {
     display: none;
+  }
+}
+
+/*
+ * A 360px phone, a common Android width: the card is 308px, and the longer
+ * item needs 20 + 272 + 20 = 312. Narrower sides keep it on its line — «
+ * pas sur ton dashboard » was cut in two and the empty cell squeezed
+ * (Antoine, 2026-09-29). At 320px (a 268px card) only new copy would, and
+ * that is left: three lines there.
+ */
+@container game-entry (max-width: 319px) {
+  .band {
+    padding-inline: var(--space-5);
   }
 }
 

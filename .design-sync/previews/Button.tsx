@@ -40,6 +40,25 @@ export const Compact = () => (
 );
 
 /**
+ * `quiet` is the system's one text button. Drawn as a line of text — 31px,
+ * 27px with `compact`, which the growth engine uses for the small actions
+ * beside its sliders and fields — and TAPPED on a 44px strip centred on it,
+ * which moves nothing around it. Keep the room above and below: it is where
+ * the taps land.
+ */
+export const Quiet = () => (
+  <div style={{ display: "flex", gap: 24, alignItems: "center", flexWrap: "wrap" }}>
+    <Button variant="quiet">Switch to straight up</Button>
+    <Button variant="quiet" compact>
+      Back to today
+    </Button>
+    <Button variant="quiet" compact>
+      I only have the rate
+    </Button>
+  </div>
+);
+
+/**
  * The three states a still can show: resting, `loading` and disabled.
  * `loading` sets `aria-busy` and `disabled` together so the request cannot be
  * sent twice, keeps full opacity (busy is not broken) and adds an ellipsis to
@@ -69,7 +88,8 @@ export const States = () => (
  * Hover and press, live — a screenshot cannot show them. Hover peels the
  * button up and to the left over a hard ink shadow; press flattens it back
  * onto the page. Neither happens on a touch screen, where a stuck hover would
- * read as a state. `quiet` keeps its underline as its only affordance.
+ * read as a state. `quiet` has no box to lift: hover inks it and thickens its
+ * underline, press draws the underline in against the letters.
  */
 export const HoverAndPress = () => (
   <div style={{ display: "flex", gap: 16, alignItems: "center", padding: 8 }}>

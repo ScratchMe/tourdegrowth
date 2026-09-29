@@ -20,7 +20,7 @@
 }
 
 .zone.current {
-  border-bottom: 2px solid var(--accent-mark);
+  border-bottom: var(--border-width) solid var(--accent-mark);
 }
 
 .link,
@@ -105,6 +105,6 @@
   }
 
   .segment.segmentCurrent {
-    border-top: 2px solid var(--accent-mark);
+    border-top: var(--border-width) solid var(--accent-mark);
   }
 }

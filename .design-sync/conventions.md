@@ -140,8 +140,12 @@ Every interactive target is at least 44×44px. The compact controls draw
 smaller than that and extend their hit area on the element itself: a
 `Segmented size="compact"` track is 32px, each option reaches 44px into the
 room the group keeps above and below it; the 16px `DefinitionTrigger` glyph
-takes taps on a 44px disc around it. Never strip that surrounding room to
-tighten a header — it is where the taps land.
+takes taps on a 44px disc around it; `Button variant="quiet"` is drawn as a
+line of underlined text (31px, 27px `compact`) and takes taps on a 44px strip
+centred on it. Never strip that surrounding room to tighten a header — it is
+where the taps land. The system has one text button, `quiet`: an action in
+text is that, never a styled `<button>` of its own. A link inside a sentence
+is a link, set in the sentence's type.
 
 ## Tokens: three layers, and worlds rebind only the middle one
 
@@ -211,7 +215,9 @@ hard shadow, and it is off on touch screens, where a stuck hover would pass for
 a choice.
 
 `Button`: hover peels it up over a hard ink shadow, press flattens it back
-onto the page, disabled fades and never lifts. `loading` sets `aria-busy` and
+onto the page, disabled fades and never lifts. `quiet` has no box to lift:
+muted at rest, it turns body ink with a 2px underline on hover, and the
+underline draws in against the letters on press. `loading` sets `aria-busy` and
 `disabled` together — it cannot be sent twice — and adds an ellipsis to the
 label; there is no spinner, because there are no icons. A link is never
 "loading".
@@ -262,7 +268,14 @@ numbers support:
 ## What is not in here
 
 No icon set, no user-facing dark mode, no chart library, no blurred shadows
-(the night changes the shadow's colour, never its hardness). If a design
+(the night changes the shadow's colour, never its hardness; the game's call
+rings and angers in a hard ring, not a glow). Lines have four weights, each
+a token: `--border-width` (2px, every edge), `--border-width-stamp` (3px, an
+inked mark over an edge: a rubber stamp, an accent band, the angry edge),
+`--border-width-hairline` (1px, under the content: a chart's grid, a table's
+rows) and `--border-width-fine` (1.5px, the space band's strokes only). Type
+never goes under 11px, and Inter text never under 13.5px, with two named
+exceptions: the compact button's label and the result's « built by » credit. If a design
 needs one of those, that is a product decision to raise, not a component to
 invent.
 

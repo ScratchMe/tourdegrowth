@@ -359,7 +359,7 @@ export function MetricSheet({
                 {others.map((other, i) => (
                   <span key={other.id}>
                     {i > 0 ? (i === others.length - 1 ? strings.grammar.and : strings.grammar.listSeparator) : null}
-                    <button type="button" className={ui.linkButton} onClick={() => actions.openMetric(other.id)}>
+                    <button type="button" className={ui.inlineLink} onClick={() => actions.openMetric(other.id)}>
                       {midSentence(other.name, locale)}
                     </button>
                   </span>

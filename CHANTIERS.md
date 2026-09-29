@@ -21,15 +21,16 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
-| **A. Le travail autonome**, en huit lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | Maintenant. A1 à A5 l'un après l'autre ; A6 à tout moment ; A7 dans l'ordre de ses dépendances ; A8 à tout moment |
-| **B. Design sync** | Une session sur ta machine | Claude Code en local : l'autorisation Claude Design ne s'obtient que là | Après A1 de préférence, puis de nouveau après A2, A5 et A7.10 |
-| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Les 22 tranchées le 2026-09-29.** Reste C23, pas urgente, et la validation de la spécification de A7.3 quand elle sera écrite |
-| **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D9 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D8) et, pour le moteur, tout A7.3 |
+| **A. Le travail autonome**, en six lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | Maintenant. A2 à A5 l'un après l'autre (A1 et A6 livrés le 2026-09-29) ; A7 dans l'ordre de ses dépendances ; A8 à tout moment |
+| **B. Design sync** | Une session sur ta machine | Claude Code en local : l'autorisation Claude Design ne s'obtient que là | Maintenant (A1 est livré), puis de nouveau après A2, A5 et A7.10 |
+| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). Reste C23, pas urgente, et la validation de la spécification de A7.3 quand elle sera écrite |
+| **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, tout A7.3 |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
 
-**L'ordre conseillé** : A1 et A7 en parallèle (A7.1 et A7.3.a, la
-spécification, d'abord : ce sont les plus longs), puis B, puis D quand tu
-as un créneau. La section C a été tranchée le 2026-09-29.
+**L'ordre conseillé** : A2 et A7 en parallèle (A7.1 et A7.3.a, la
+spécification, d'abord : ce sont les plus longs). B dès que tu as un
+créneau sur ta machine (A1 est livré), puis D. La section C a été tranchée
+le 2026-09-29.
 
 **Deux sessions en parallèle** écrivent toutes deux à la fin de `JOURNAL.md`
 et dans ce fichier. La seconde à merger fusionne `main` dans sa branche avant
@@ -50,33 +51,12 @@ mêmes feuilles de style.
 Une question produit ou de design rencontrée en route ne se tranche pas en
 route : elle part en section C, avec une recommandation.
 
-### A1 — Accessibilité et cohérence du système *(à faire en premier)*
-
-La plupart des constats viennent de l'audit du kit du 2026-09-28 (`JOURNAL.md`,
-« Audit du design kit »). Les numéros S-n sont les siens.
-
-| # | Constat | Où | Correctif attendu |
-|---|---|---|---|
-| A1.1 | **S-11.** Le bouton `quiet` fait 31 px de haut, sous les 44 px d'une cible tactile. Il n'a ni survol ni pression. 33 usages, dont les sorties de secours. Trois recettes de « bouton texte » coexistent, de 31 à 44 px | `core/Button.module.css` et ses copies | Une seule recette dans `Button`. Zone de frappe étendue à 44 px sans changer la mise en page. Survol et pression. Un e2e mesure la zone de frappe |
-| A1.2 | **S-17.** Le jeu a des bordures de 1, 3, 4 et 5 px (une douzaine de déclarations), alors que le système n'a qu'une épaisseur, 2 px. Et `2px solid` ou `dashed` est écrit en dur une cinquantaine de fois au lieu de `--border-width` | `components/game`, `app/[locale]/game`, tout `src/` | Un jeton de tampon si l'épaisseur est voulue. Le reste ramené au jeton |
-| A1.3 | **S-6.** `VideoCall` : la transition de `filter` est morte, parce qu'elle vise le cadre alors que c'est le SVG qui change. Le halo est flou, alors que les conventions disent « no blurred shadows ». `--dur-stamp` est détourné | `components/game/VideoCall*` | La transition sur le bon élément. Le halo dans la matière de la marque (filet, anneau dur). Une durée de l'échelle de mouvement |
-| A1.4 | Deux libellés à 10 px, sous le plancher de 11 px : le drapeau « HC » et la tête de la borne | `result/ScoreDisplay.module.css`, `viz/StageProfile.module.css` | 11 px au moins. La borne est mesurée à 390 px par un e2e : le relancer |
-| A1.5 | Une quinzaine de `font-size` en pixels littéraux hors des slides | `grep -rnE 'font-size: *[0-9]+px' src` | Sur l'échelle typographique |
-| A1.6 | Jetons morts : `--width-mobile` et `--texture-spray-strong`. Les 15 `--viz-cat-*` et `--viz-seq-*` n'ont aucun usage | `src/styles/tokens/` | Retirer les deux premiers. Les `--viz-*` attendent A2, qui peut en avoir l'usage |
-| A1.7 | Le message de `LoadingScreen` a un rayon de 6 px, hors de l'échelle | `LoadingScreen.module.css:60` | Un jeton de rayon |
-| A1.8 | *Facultatif, hors contrat* : le bandeau d'entrée au jeu repasse sur trois lignes à 320 et 360 px en français. Le contrat, lui, va de 375 à 430 px | `game/GameEntry.module.css` | Seulement si c'est gratuit |
-
-**Vérifier en plus** :
-- `e2e/accessibility.spec.ts` ;
-- le bundle design-sync reconstruit, parce que `Button` change ses aperçus ;
-- le contraste des nouveaux états de survol (convention 7).
-
 ### A2 — Les slides et la grille de points du moteur
 
 | # | Constat | Correctif attendu |
 |---|---|---|
-| A2.1 | **S-8.** Les slides ont 23 tailles de police littérales, jusqu'à 14 px sur une slide projetée de 1 920 px | Compléter l'échelle `--slide-*`, avec rien sous 18 px. Un e2e mesure la plus petite taille rendue d'une slide. L'export PNG est vérifié aussi |
-| A2.2 | **S-10.** Le funnel en points est dessiné trois fois hors du système : le peloton, « Et si » et les slides, à trois tailles | Un `viz/DotGrid` que les trois vues composent, avec son aperçu design-sync. Décider là de l'usage des jetons `--viz-*` (voir A1.6) |
+| A2.1 | **S-8.** Les slides ont 23 tailles de police littérales, jusqu'à 14 px sur une slide projetée de 1 920 px | Compléter l'échelle `--slide-*`, avec rien sous 18 px. Un e2e mesure la plus petite taille rendue d'une slide. L'export PNG est vérifié aussi **Plancher de 18 px confirmé par Antoine le 2026-09-29** : un tableau qui ne tient pas à 18 px se coupe en deux slides, il ne s'écrit pas plus petit |
+| A2.2 | **S-10.** Le funnel en points est dessiné trois fois hors du système : le peloton, « Et si » et les slides, à trois tailles | Un `viz/DotGrid` que les trois vues composent, avec son aperçu design-sync. Décider là de l'usage des 15 jetons `--viz-cat-*` et `--viz-seq-*`, qui n'ont aucun lecteur : les employer ou les retirer (`dead-tokens.test.ts` les tient en attente) La case « inconnu » du peloton (`outline: 1.5px`, la dernière épaisseur hors jeton, listée dans `border-width.test.ts`) prend le trait de `DotGrid` ; retirer alors sa ligne de la garde |
 
 Le moteur est fermé derrière `ENGINE_ENABLED` : les e2e passent par
 l'aperçu propriétaire, comme le canari moteur.
@@ -138,19 +118,6 @@ modale en profite.
 
 C'est à faire avant la seconde passe de B.
 
-### A6 — Les relevés chiffrés
-
-**Tout ce que la session peut lire seule.** La méthode est la ligne « Lecture
-des stats par la session » de `CLAUDE.md`, et l'entrée du 2026-09-14 de
-`JOURNAL.md` (`grep stats.yml`). **Aucun chiffre n'entre dans le dépôt**,
-qui est public : on n'y écrit que « vérifié, présent » ou « absent ».
-
-| # | Quoi |
-|---|---|
-| A6.1 | **Les événements `retake_started` et `landing_return`** n'ont jamais été vus dans le vrai GoatCounter. Lancer `stats.yml` avec la portée `admin`, déchiffrer, et vérifier deux choses : qu'ils figurent dans la section funnel, et que la ligne « Value actions per result » existe |
-| A6.2 | **Search Console** (portée `gsc`) : les URL `/en/glossary/*` ont-elles remplacé les anciennes URL non préfixées dans les pages créditées ? |
-| A6.3 | **Les déclencheurs de volume de la section E** : 50 soumissions, quelques centaines, signes d'abus. Dire si l'un d'eux est atteint, sans écrire le compte |
-
 ### A7 — Ce que les décisions du 2026-09-29 demandent
 
 Les réponses d'Antoine à la section C, séance du 2026-09-29. Chaque item dit
@@ -164,7 +131,7 @@ rencontrée en le faisant repart en section C. Toute copie neuve porte
 - A7.11 avant A7.10, car la vue propriétaire ne se teste que sur
   l'émulateur ;
 - A7.3 avant A7.4, parce que les liens promettent ce que le moteur fait ;
-- A7.12.a avant les annuaires de D9.
+- A7.12.a avant les annuaires de D10.
 
 Le jeu (A7.7, A7.8, et A7.9 pour sa part) n'attend rien du moteur.
 **Commencer par A7.1 et A7.3.a** : ce sont les plus longs, et A7.3.a
@@ -274,7 +241,7 @@ l'omission est gardée.
 
 | Où | Quoi |
 |---|---|
-| `lib/engine/deck.ts#buildLeak` (l. 358-360) | Séparer les deux cas que la condition `!impact \|\| less-than-one` confond. Sans prix : un titre `leakClearUnpriced` (« {Étape} freine le moteur : {valeur}, pour {cible}. »), sans la carte « Le calcul » en quatre lignes (il n'y a pas de chaîne à montrer), avec la colonne « À côté » comme d'habitude, et un pied qui dit pourquoi il n'y a pas de montant. Titre et corps sortent de la même fonction (`ENGINE.md` §9.3, règle « titre = corps ») |
+| `lib/engine/deck.ts#buildLeak` (l. 355-356) | Séparer les deux cas que la condition `!impact \|\| less-than-one` confond. Sans prix : un titre `leakClearUnpriced` (« {Étape} freine le moteur : {valeur}, pour {cible}. »), sans la carte « Le calcul » en quatre lignes (il n'y a pas de chaîne à montrer), avec la colonne « À côté » comme d'habitude, et un pied qui dit pourquoi il n'y a pas de montant. Titre et corps sortent de la même fonction (`ENGINE.md` §9.3, règle « titre = corps ») |
 | `content/engine-copy.ts` | Le gabarit du titre et le pied, en FR et en EN, « à relire ». `{cible}` suit `targetPhrase`, qui après A7.1 ne dit plus que « notre cible » |
 | Export texte et notes | `deckMarkdown` et les notes d'orateur suivent la même slide |
 | Tests | Un état où la rétention à J30 est seule sous sa cible : la slide existe, son titre ne contient aucun montant, et aucune chaîne « Le calcul » n'est rendue. Un état où le gain vaut moins d'un client : pas de slide. **Non-vacuité** : remettre l'omission fait rougir le premier test |
@@ -371,7 +338,7 @@ maintenant, refaire à l'ouverture.
 
 | # | Quoi | Comment |
 |---|---|---|
-| A7.12.a | **Refaire les captures du Tour** (`marketing/assets/01` à `05`, `og-*`). Elles datent du 2026-09-14, d'avant la synthèse I + B | Mêmes noms, même format que `marketing/kit.md` « Les captures » (2×, PNG palette, deux langues, desktop et mobile). Contre un build de production local. **À faire avant D9**, puisque les annuaires s'en servent. Si A7.7 (l'encart) ou A7.10 (le partage) sont livrés entre-temps, les captures de résultat suivent |
+| A7.12.a | **Refaire les captures du Tour** (`marketing/assets/01` à `05`, `og-*`). Elles datent du 2026-09-14, d'avant la synthèse I + B | Mêmes noms, même format que `marketing/kit.md` « Les captures » (2×, PNG palette, deux langues, desktop et mobile). Contre un build de production local. **À faire avant D10**, puisque les annuaires s'en servent. Si A7.7 (l'encart) ou A7.10 (le partage) sont livrés entre-temps, les captures de résultat suivent |
 | A7.12.b | **Des captures provisoires du moteur et du jeu** | Dans `marketing/assets/`, préfixées `provisoire-` et listées dans `kit.md` comme telles. Le moteur par l'aperçu propriétaire ou un build local ouvert ; l'exemple rempli (§6.0) plutôt qu'un vrai jeu de chiffres. Le jeu : le hub, un trimestre, la page de décembre |
 | A7.12.c | **Les refaire à l'ouverture** de chaque produit (D2), contre la production, et supprimer les `provisoire-` | Fait partie de la vérification d'ouverture |
 
@@ -427,7 +394,7 @@ ne peut pas le pousser.
 |---|---|---|
 | B1 | **Pousser le bundle** vers le projet Claude Design existant (`23b9671c-a55b-452e-aa41-39906ee71ba8`, créé le 2026-09-11) | Au 2026-09-29 : 77 composants, 244 cellules, 77 aperçus sur 77 rendus. Lire `.design-sync/NOTES.md` avant toute commande : ce dépôt est une app, pas un paquet. Trois avertissements sont permanents et attendus : « Impact », et `GRID_OVERFLOW` sur `DefinitionPopover` et `QuarterNews`. **Ne pas appliquer** le `cardMode: "single"` suggéré, qui masquerait des histoires |
 | B2 | **Le brief S-15 : les primitives de formulaire.** Elles vivent hors du système, en deux copies. Côté moteur : `Field`, `NumberField`, `TextField`, `Select`, `Choices`, `CheckField`, `MonthField` et `SegmentedField`, sous `src/app/[locale]/aarrr-funnel-template/_engine/_ui/`. Côté audit : sous `src/app/(app)/admin/audit/` | Écrire `design/DS-EXTENSION-BRIEF-04.md`, sur la forme des briefs 01 et 03, puis l'envoyer à Claude Design. Le retour arrive par `design/ds-extension-04-return/` ou par « Send to Claude Code Web ». La promotion dans `core/` devient ensuite un lot A |
-| B3 | **Re-synchroniser** après A1, A2, A5 et A7.10 | Ces lots changent des composants et leurs aperçus. A7.10 change le contrat de `ShareCard` (primaire chez le propriétaire) |
+| B3 | **Re-synchroniser** après A1, A2, A5 et A7.10 | Ces lots changent des composants et leurs aperçus. **A1 n'a pas pu reconstruire le bundle** : le convertisseur (`.ds-sync/`) n'est pas dans une session cloud. Il a changé l'aperçu `Button` (une histoire `Quiet` de plus, donc 245 cellules attendues), le contrat de `Button` et `conventions.md` (le bouton texte, les trois épaisseurs de trait). À reconstruire et valider avant de pousser. A7.10 changera le contrat de `ShareCard` (primaire chez le propriétaire) |
 
 ---
 
@@ -463,14 +430,14 @@ ouverts, et, pour la vue propriétaire, un build jetable jamais commité.
 | C10 | Place de l'encart du jeu | **Sous le bouton principal sur desktop**, comme sur mobile. Mesuré : il faisait descendre le bouton du visiteur de 350 px | `GAME-BRIEF.md` §15.4 | A7.7 |
 | C11 | Quand montrer l'encart | Gardé : la rétention dans le groupe, partagé compris. Le cas de plusieurs niveaux se tranche à l'ouverture d'un deuxième niveau | `GAME-BRIEF.md` §15.4 | Section E |
 | C12 | Noms de zones bilingues | Gardés : « Retention — S'ils reviennent » | `GAME-BRIEF.md` §15.3 | — |
-| C13 | « Vingt minutes » | Chronométré à la recette : gardé si la médiane des testeurs tombe entre 15 et 25 minutes | `GAME-BRIEF.md` §7.3 | D8 |
+| C13 | « Vingt minutes » | Chronométré à la recette : gardé si la médiane des testeurs tombe entre 15 et 25 minutes | `GAME-BRIEF.md` §7.3 | D9 |
 | C14 | Amende du jeu | **Plafonnée à 75 000 €**, le maximum légal pour une entreprise | `GAME-BRIEF.md` §5, règle 5 | A7.8 |
 | C15 | Cartes de la bande de l'accueil | **Des liens mesurés** à l'ouverture (`home_strip`), et les pastilles du bandeau mesurées aussi (`space_band`) | `GAME-BRIEF.md` §13.3 E | A7.9 |
 | C16 | Primaire du propriétaire | **« Partager » devient le primaire** chez le propriétaire ; « Refaire le Tour » passe secondaire. Le visiteur ne change pas | Ici et en A7.10 | A7.10 |
 | C17 | Porte de test pour `/r/<id>` | Déléguée à la session : **pas de porte, l'émulateur Firestore en CI** | Ici et en A7.11 | A7.11 |
-| C18 | Projects et Discussions | **Déjà désactivés** (constaté par l'API GitHub). Question non posée, et D1 retiré | — | — |
+| C18 | Projects et Discussions | **Déjà désactivés** (constaté par l'API GitHub). Question non posée : la session D l'a close en parallèle avec D1, le même jour | `JOURNAL.md`, « D1 : les réglages du dépôt » | — |
 | C19 | Ce qui est parti de la vague 1 | **Rien.** Et rien ne part avant que le moteur et le jeu soient prêts | `marketing/campaigns/README.md` §10 | D6 |
-| C20 | Relancer le Tour sur les réseaux | **Le Tour au seul SEO**, sans fil. L'indexation et les annuaires partent maintenant | `marketing/campaigns/README.md` §10 | D9, A7.12.a |
+| C20 | Relancer le Tour sur les réseaux | **Le Tour au seul SEO**, sans fil. L'indexation et les annuaires partent maintenant | `marketing/campaigns/README.md` §10 | D10, A7.12.a |
 | C21 | Captures de B et C | **Capturer maintenant**, provisoires, puis refaire à l'ouverture. Celles du Tour datent d'avant I + B | `marketing/campaigns/README.md` §10 | A7.12 |
 | C22 | « Qui est derrière ? » | **La réponse nomme Antoine.** C'est une question de calendrier, pas d'anonymat : pas de LinkedIn ni de lancement en grande pompe pour l'instant | `GROWTH-PLAN.md` option A, `marketing/campaigns/README.md` §10 | A7.13 |
 
@@ -496,8 +463,9 @@ rien de privé dans le dépôt, qui est public. Cela vaut pour les chiffres de
 | D5 | **À côté de l'outil** | Oui | Les cinq à dix entretiens (`AUDIT-PLAN.md` §2). La vérification de ton contrat de travail : elle conditionne la phase 3, et c'est la seule question qui la ferme à elle seule. **Trois clauses à relire** (précisées le 2026-09-29) : la **non-concurrence** (couvre-t-elle un outil vendu à des équipes produit B2B, pendant et après le contrat ?), l'**exclusivité ou l'activité annexe** (une activité commerciale à côté demande-t-elle une autorisation ?) et la **propriété intellectuelle** (un logiciel créé « dans l'exercice de ses fonctions » appartient à l'employeur, CPI art. L113-9, et la clause peut aller plus loin). Si une clause est floue, une consultation d'avocat en droit du travail. Le moteur public et gratuit n'est pas concerné au même titre : rien n'y est vendu |
 | D6 | **La distribution, vague 1** | **Non : rien ne part avant que le moteur et le jeu soient prêts** (C19, 2026-09-29). Rien n'est encore parti. Le Tour n'aura ni Show HN ni r/SaaS | Textes dans `marketing/launch/` et `marketing/campaigns/`. Tu postes sous pseudo, la session fournit et met à jour les textes. Annuaires dans l'ordre de `GROWTH-PLAN.md` 1.6. **Pas de LinkedIn ni de lancement en grande pompe pour l'instant** (C22 : une question de calendrier, pas d'anonymat) |
 | D7 | **La distribution, vague 4** | Après deux semaines de lecture de la vague 1 | La session écrit les pitchs de newsletters et passe honnêtement le produit de chaque auteur au Tour ; tu envoies depuis `contact@`. Pour les listes « awesome », seulement si ton profil GitHub n'affiche pas ton nom (à vérifier d'abord sur github.com/ScratchMe) |
-| D8 | **La recette du jeu** (`GAME-BRIEF.md` §7.3), avant d'ouvrir le jeu (D2) | Oui, dès que le nº7 est signé | Cinq testeurs qui ne connaissent pas le sujet, et les critères de §7.3. **Chronomètre chaque partie complète** (C13, 2026-09-29) : « vingt minutes » reste si la médiane tombe entre 15 et 25 minutes. Sinon, donne-moi la médiane : une session réécrit l'encart (`content/game/entry.ts:65`) et les textes de lancement. La relecture juridique du catalogue des cas réels est aussi à toi (`marketing/campaigns/README.md` §9) |
-| D9 | **Le Tour au seul SEO, maintenant** (C20, 2026-09-29) | Oui pour l'indexation. **Les annuaires attendent A7.12.a** (les captures du Tour datent d'avant I + B) | Ce ne sont pas des posts, ils partent sans attendre le moteur et le jeu. 1) Search Console, « Demander l'indexation » pour `/en`, `/fr`, les deux pages « porte ouverte » et les quatre « AARRR vs X » (10 min). 2) Les annuaires restants de la vague 1, dans l'ordre de `GROWTH-PLAN.md` 1.6 (Launching Next d'abord), avec les liens `relaunch_tour` de `marketing/kit.md`. Pas de fil X/Bluesky pour le Tour |
+| D8 | **Search Console : les pages du glossaire anglais** | Oui | Au relevé du 2026-09-29, Search Console crédite encore les anciennes adresses `/glossary/*` et aucune `/en/glossary/*` (les `/fr/glossary/*` sont créditées). Côté site, tout pointe vers `/en/` : la 308, la canonique, `hreflang`, `x-default` et le sitemap, vérifiés en production le même jour. Dans Search Console, **Inspection de l'URL** sur deux ou trois `/en/glossary/*` : lire la « canonique sélectionnée par Google », puis **Demander l'indexation**. Si Google a choisi l'ancienne adresse comme canonique, le dire à une session : c'est le seul cas qui demanderait d'agir côté code |
+| D9 | **La recette du jeu** (`GAME-BRIEF.md` §7.3), avant d'ouvrir le jeu (D2) | Oui, dès que le nº7 est signé | Cinq testeurs qui ne connaissent pas le sujet, et les critères de §7.3. **Chronomètre chaque partie complète** (C13, 2026-09-29) : « vingt minutes » reste si la médiane tombe entre 15 et 25 minutes. Sinon, donne-moi la médiane : une session réécrit l'encart (`content/game/entry.ts:65`) et les textes de lancement. La relecture juridique du catalogue des cas réels est aussi à toi (`marketing/campaigns/README.md` §9) |
+| D10 | **Le Tour au seul SEO, maintenant** (C20, 2026-09-29) | Oui pour l'indexation. **Les annuaires attendent A7.12.a** (les captures du Tour datent d'avant I + B) | Ce ne sont pas des posts, ils partent sans attendre le moteur et le jeu. 1) Search Console, « Demander l'indexation » pour `/en`, `/fr`, les deux pages « porte ouverte » et les quatre « AARRR vs X » (10 min). 2) Les annuaires restants de la vague 1, dans l'ordre de `GROWTH-PLAN.md` 1.6 (Launching Next d'abord), avec les liens `relaunch_tour` de `marketing/kit.md`. Pas de fil X/Bluesky pour le Tour |
 
 ---
 
@@ -515,9 +483,13 @@ rien de privé dans le dépôt, qui est public. Cela vaut pour les chiffres de
 | **Juin 2027** | La fenêtre Tour de France (R2-30) : Grand Départ le 2 juillet 2027 à Édimbourg. À construire en juin, pour partir pendant le Tour | `GROWTH-PLAN.md` |
 | Une facture Vercel qui surprend | `VERCEL.md` §1.6 et §2.2 | `VERCEL.md` |
 | Besoin de `guidelines/` du bundle d'extension 01 | Le demander à Claude Design (l'archive ne le contenait pas) | `CLAUDE.md` |
+| Un contrat de largeur qui descend à 320 px | À 320 px, le bandeau d'entrée au jeu passe sur trois lignes (la seconde, ≈ 270 px de texte, pour une colonne de 244). Laissé par décision d'Antoine (2026-09-29) : seule une copie plus courte le tiendrait. 360 px est réglé depuis le même jour | `game/GameEntry.module.css` |
 
-Une session de relevé (A6), une fois par mois, suffit à voir passer les trois
-premiers.
+Un relevé par `stats.yml`, une fois par mois, suffit à voir passer les trois
+premiers. La méthode est la ligne « Lecture des stats par la session » de
+`CLAUDE.md`. **Aucun chiffre n'entre dans le dépôt** : on n'y écrit que
+« atteint », « présent » ou « absent ». Le premier relevé date du 2026-09-29
+(`JOURNAL.md`) : aucun des trois n'était atteint.
 
 ---
 
