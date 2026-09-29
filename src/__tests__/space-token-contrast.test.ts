@@ -30,9 +30,12 @@ const paper = parseBlocks("colors.css");
 const spaces = parseBlocks("spaces.css");
 const SPACE_ROOT = declsOf(spaces, ":root");
 
+const night = parseBlocks("world-night.css");
+
 const literal = makeResolver(
   new Map([
     ...declsOf(paper, ":root"),
+    ...declsOf(night, ":root"),
     ...declsOf(paper, ':root,[data-world="paper"]'),
     ...declsOf(paper, ":root,[data-world]"),
     ...SPACE_ROOT,
@@ -65,9 +68,24 @@ const PAIRS: Pair[] = [
   { fg: "space-game-bg", bg: "space-game-text", stated: 6.93, role: "text", why: "the filled pill: ochre on ink" },
   { fg: "space-game-mark", bg: "space-game-bg", stated: 6.93, role: "mark", why: "the mountain" },
   { fg: "space-ochre", bg: "paper-1", stated: 1.87, role: "under", why: "why the game has no text accent on paper" },
+
+  // --- 3 · the game in its own world: the hub's night intro, the landing's third card ---
+  { fg: "space-game-night-accent", bg: "night-0", stated: 10.13, role: "text", why: "the amber eyebrow on the night" },
+  { fg: "space-game-night-accent", bg: "paper-1", stated: 1.42, role: "under", why: "why it never leaves the night" },
 ];
 
-const isColor = (v: string) => /^(#[0-9a-f]{6}|rgba\(|var\(--(paper|ink|paint-red|space)[a-z0-9-]*\)$)/i.test(v);
+/*
+ * The glow over the hub's mountain lightens the night where the title and the
+ * lead sit: every text colour set there is measured on the glow composed on
+ * the night page, its brightest point.
+ */
+const GLOW_PAIRS: { fg: string; stated: number; why: string }[] = [
+  { fg: "space-game-night-accent", stated: 8.13, why: "the eyebrow under the glow" },
+  { fg: "night-text", stated: 13.15, why: "the title (--text-body at night)" },
+  { fg: "night-muted", stated: 6.65, why: "the lead (--text-muted at night)" },
+];
+
+const isColor = (v: string) => /^(#[0-9a-f]{6}|rgba\(|var\(--(paper|ink|paint-red|night|space)[a-z0-9-]*\)$)/i.test(v);
 
 describe("every stated space-token contrast ratio holds", () => {
   it.each(PAIRS)("--$fg on --$bg is $stated:1 ($why)", (pair) => {
@@ -76,8 +94,22 @@ describe("every stated space-token contrast ratio holds", () => {
     expect(assertRole(value, pair.role)).toBeNull();
   });
 
+  it.each(GLOW_PAIRS)("--$fg under the glow is $stated:1 ($why)", ({ fg, stated }) => {
+    const glow = compose(parseColor(literal("space-game-night-glow")), parseColor(literal("night-0")));
+    const value = ratio(parseColor(literal(fg)), glow);
+    expect(round2(value)).toBe(stated);
+    expect(assertRole(value, "text")).toBeNull();
+  });
+
+  it("makes the glow the accent itself, at 12%", () => {
+    const glow = parseColor(literal("space-game-night-glow"));
+    expect({ ...glow, a: 1 }).toEqual(parseColor(literal("space-game-night-accent")));
+    expect(glow.a).toBe(0.12);
+  });
+
   it("measures every colour token of spaces.css", () => {
-    const measured = new Set(PAIRS.flatMap((p) => [p.fg, p.bg]));
+    // The glow is measured as the ground it makes (GLOW_PAIRS).
+    const measured = new Set([...PAIRS.flatMap((p) => [p.fg, p.bg]), "space-game-night-glow"]);
     const colors = [...SPACE_ROOT].filter(([, v]) => isColor(v)).map(([k]) => k);
     expect(colors.length).toBeGreaterThanOrEqual(15);
     // The two raw colours are measured through the tokens built on them.

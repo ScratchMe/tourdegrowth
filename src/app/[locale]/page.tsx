@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { LocaleSwitcher } from "@/components/brand/LocaleSwitcher";
 import { SiteHeader } from "@/components/brand/SiteHeader";
+import { SpaceStrip } from "@/components/brand/SpaceStrip";
 import { WordmarkLink } from "@/components/brand/WordmarkLink";
 import { Button } from "@/components/core/Button";
 import { SiteFooter } from "@/components/brand/SiteFooter";
@@ -161,6 +162,10 @@ export default async function LandingPage({ params }: PageProps) {
             />
           </div>
         </div>
+
+        {/* Design I + B (2026-09-28): what the three legs of the race are,
+            for the visitor who scrolled past the hero. */}
+        <SpaceStrip locale={locale} className={styles.strip} />
 
         {/* REVIEW-03.md B3 — below the fold on purpose: a visitor who is going
             to start the Tour has already left above. This is for the one who

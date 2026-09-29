@@ -2,6 +2,12 @@
    is ProsePage's, the family of prose pages this one belongs to; only what
    the hub adds lives here. */
 
+/* The eyebrow in the night's amber (10.13, 8.13 under the glow). Two classes:
+   MetaLabel's own tone class sets the colour too (lesson nº2). */
+.hub .eyebrow {
+  color: var(--space-game-night-accent);
+}
+
 .zones {
   list-style: none;
   margin: 0;
@@ -24,9 +30,12 @@
   background: var(--surface-card);
 }
 
+/* The open zone lifts on the ochre of its col on the poster above, rimmed in ink. */
 .zoneOpen {
   border: var(--border-solid);
-  box-shadow: var(--shadow-card);
+  box-shadow:
+    6px 6px 0 var(--space-game-bg),
+    6px 6px 0 2px var(--shadow-color);
 }
 
 .zoneSoon {

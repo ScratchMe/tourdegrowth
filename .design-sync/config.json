@@ -27,6 +27,8 @@
     "SiteFooter": "src/components/brand/SiteFooter.tsx",
     "SiteHeader": "src/components/brand/SiteHeader.tsx",
     "SpaceBand": "src/components/brand/SpaceBand.tsx",
+    "SpaceStrip": "src/components/brand/SpaceStrip.tsx",
+    "Stopwatch": "src/components/brand/Stopwatch.tsx",
     "TrackedLink": "src/components/brand/TrackedLink.tsx",
     "Wordmark": "src/components/brand/Wordmark.tsx",
     "WordmarkLink": "src/components/brand/WordmarkLink.tsx",
@@ -50,6 +52,7 @@
     "EventClipping": "src/components/game/EventClipping.tsx",
     "GameEntry": "src/components/game/GameEntry.tsx",
     "GameJournal": "src/components/game/GameJournal.tsx",
+    "HubMountain": "src/components/game/HubMountain.tsx",
     "Hand": "src/components/game/Hand.tsx",
     "NextLevel": "src/components/game/NextLevel.tsx",
     "NightSurface": "src/components/game/NightSurface.tsx",
@@ -168,6 +171,12 @@
       "cardMode": "column"
     },
     "Bottleneck": {
+      "cardMode": "column"
+    },
+    "SpaceStrip": {
+      "cardMode": "column"
+    },
+    "HubMountain": {
       "cardMode": "column"
     }
   },

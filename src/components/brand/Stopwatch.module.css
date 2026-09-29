@@ -1,0 +1,59 @@
+/*
+ * brand/Stopwatch — see Stopwatch.tsx. Ink lines, a card face, and the
+ * engine's ultramarine where the band puts it: the bezel, the buttons, the
+ * time already run.
+ */
+
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.shadow,
+.stem {
+  fill: var(--shadow-color);
+}
+
+.button,
+.hub {
+  fill: var(--space-engine-accent);
+  stroke: var(--border-hard);
+  stroke-width: 2.5;
+}
+
+.face {
+  fill: var(--surface-card);
+  stroke: var(--border-hard);
+  stroke-width: 3;
+}
+
+.bezel {
+  fill: none;
+  stroke: var(--space-engine-accent);
+  stroke-width: 8;
+}
+
+.wedge {
+  fill: color-mix(in srgb, var(--space-engine-accent) 14%, transparent);
+}
+
+.minor,
+.major,
+.hand {
+  fill: none;
+  stroke: var(--border-hard);
+  stroke-linecap: round;
+}
+
+.minor {
+  stroke-width: 1.4;
+}
+
+.major {
+  stroke-width: 3.5;
+}
+
+.hand {
+  stroke-width: 5;
+}

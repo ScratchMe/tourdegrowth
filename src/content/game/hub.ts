@@ -35,6 +35,12 @@ export const GAME_HUB = {
     "Le Tour te dit où ta croissance cale et quoi faire. Ici, c'est l'inverse : cinq années dans cinq entreprises, avec un DG qui veut le chiffre et des astuces pour l'obtenir, nommées comme on les nomme en réunion. Tu y apprends à les reconnaître.",
     "The Tour tells you where your growth stalls and what to do about it. This is the other side: five years at five companies, with a CEO who wants the number and tricks to get it, named the way they are named in meetings. You learn to spot them.",
   ),
+  // TODO: à relire (convention 6).
+  /** Over the hub's night poster (`game/HubMountain`, design I + B): the five zones drawn as five cols. */
+  mountain: {
+    title: t("Profil de la montagne", "Mountain profile"),
+    legend: t("cinq cols, cinq entreprises", "five climbs, five companies"),
+  },
   zonesTitle: t("Les cinq zones du Tour", "The five zones of the Tour"),
   zoneCounter: t("Zone {n}/5", "Zone {n}/5"),
   // State is carried by the word, never by colour alone (plan §6.2).

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import { ProsePage, ProseSection, ProseText } from "@/components/brand/ProsePage";
 import { Button } from "@/components/core/Button";
+import { HubMountain } from "@/components/game/HubMountain";
 import { GAME_HUB } from "@/content/game/hub";
 import { GAME_META } from "@/content/game/meta";
 import { GAME_LEVELS_BY_PILLAR } from "@/lib/game/levels";
@@ -62,13 +63,30 @@ export default async function GameHubPage({ params }: PageProps) {
           })),
         })}
       />
+      {/* Design I + B (2026-09-28): the intro is a night poster, the five
+          zones drawn as the day's five cols. The list below says in words
+          what the drawing shows. */}
       <ProsePage
         locale={locale}
         path="/game"
         space="game"
+        introWorld="night"
+        className={own.hub}
         title={tc(GAME_HUB.title, locale)}
-        kicker={<MetaLabel size="xs">{tc(GAME_HUB.eyebrow, locale)}</MetaLabel>}
+        kicker={
+          <MetaLabel size="xs" className={own.eyebrow}>
+            {tc(GAME_HUB.eyebrow, locale)}
+          </MetaLabel>
+        }
         lead={tc(GAME_HUB.lead, locale)}
+        note={
+          <HubMountain
+            zones={PILLARS.map((pillar) => ({ open: GAME_LEVELS_BY_PILLAR[pillar]?.enabled === true }))}
+            title={tc(GAME_HUB.mountain.title, locale)}
+            legend={tc(GAME_HUB.mountain.legend, locale)}
+            data-testid="game-hub-mountain"
+          />
+        }
       >
         <ProseSection heading={tc(GAME_HUB.zonesTitle, locale)}>
           <ol className={own.zones} data-testid="game-hub-zones">

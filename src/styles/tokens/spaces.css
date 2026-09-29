@@ -52,4 +52,15 @@
    * accent: it is a ground under ink, or a mark with an ink edge.
    */
   --space-engine-accent: var(--space-ultramarine);
+
+  /*
+   * The game's accent in its own world: the amber of the night, where the
+   * game hub's intro and the landing's third card are set. Read inside a
+   * `[data-world="night"]` block only — on paper it would be 1.42. The glow
+   * is that amber at 12%, the light over the mountain; text sits on it, so
+   * the night's text colours are measured on it too: the amber 8.13, the
+   * title 13.15, the lead 6.65.
+   */
+  --space-game-night-accent: var(--night-amber); /* 10.13 on the night page */
+  --space-game-night-glow: rgba(240, 180, 60, 0.12);
 }

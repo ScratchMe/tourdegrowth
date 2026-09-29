@@ -24,14 +24,14 @@ const HOME: Record<Space, string> = { tour: "/", engine: "/aarrr-funnel-template
  * is undefined there — the same reason `SiteFooter` reads its game link this
  * way. Literal `process.env.X` accesses on purpose: the only form Next inlines.
  */
-const OPEN_AT_BUILD: Record<Space, boolean> = {
+export const SPACE_OPEN_AT_BUILD: Record<Space, boolean> = {
   tour: true,
   engine: process.env.TDG_ENGINE_OPEN_AT_BUILD === "1",
   game: process.env.TDG_GAME_OPEN_AT_BUILD === "1",
 };
 
 /** The road book's three pictograms: a flat stage, a stopwatch, a mountain. Drawn in `currentColor`. */
-const PICTO: Record<Space, ReactNode> = {
+export const SPACE_PICTO: Record<Space, ReactNode> = {
   tour: (
     <svg viewBox="0 0 34 22" aria-hidden="true" focusable="false">
       <path d="M1 20.5H33" stroke="currentColor" strokeWidth="2.2" fill="none" />
@@ -96,13 +96,13 @@ export interface SpaceBandProps {
  * state: it renders the same in a Server Component and in the quiz.
  */
 export function SpaceBand({ locale, space, linked = true, width = "wide", open }: SpaceBandProps) {
-  const isOpen = (s: Space) => s === space || (open?.[s] ?? OPEN_AT_BUILD[s]);
+  const isOpen = (s: Space) => s === space || (open?.[s] ?? SPACE_OPEN_AT_BUILD[s]);
   const n = SPACES.indexOf(space) + 1;
 
   return (
     <div className={styles.band} data-space={space} data-testid="space-band">
       <div className={`${styles.inner} ${styles[width]}`}>
-        <span className={styles.picto}>{PICTO[space]}</span>
+        <span className={styles.picto}>{SPACE_PICTO[space]}</span>
         <p className={styles.where}>
           <span className={styles.kicker}>
             {n}/{SPACES.length} · {tc(SPACE_STRINGS.kind[space], locale)}
@@ -115,7 +115,7 @@ export function SpaceBand({ locale, space, linked = true, width = "wide", open }
               const state = s === space ? "current" : isOpen(s) ? "open" : "soon";
               const body = (
                 <>
-                  <span className={styles.mini}>{PICTO[s]}</span>
+                  <span className={styles.mini}>{SPACE_PICTO[s]}</span>
                   <span className={styles.n}>{i + 1}</span>
                   <span className={styles.label}>{tc(SPACE_STRINGS.short[s], locale)}</span>
                   {state === "soon" && <span className={styles.soon}>{tc(SPACE_STRINGS.soon, locale)}</span>}

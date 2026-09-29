@@ -1,0 +1,133 @@
+/*
+ * game/HubMountain — see HubMountain.tsx. Night-world tokens throughout; every
+ * position inside `.plot` is a percentage of it, the 0–100 space the SVG is
+ * drawn in (the same scheme as viz/StageProfile).
+ */
+
+.mountain {
+  min-width: 0;
+  margin-top: var(--space-5);
+}
+
+.cap {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 2px 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--viz-grid);
+  font: var(--meta-2xs);
+  line-height: 1.35;
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.title {
+  color: var(--space-game-night-accent);
+}
+
+/* 48px of sky above the plot: the moon, and a flag over the highest col. */
+.plot {
+  position: relative;
+  height: 120px;
+  margin-top: 48px;
+}
+
+.svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.area {
+  fill: var(--surface-sunken);
+}
+
+/* The zone you can play, in the game's own colour. */
+.openArea {
+  fill: var(--space-game-bg);
+}
+
+.ridge,
+.road {
+  fill: none;
+  stroke: var(--viz-ink);
+  stroke-width: 2px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.tick {
+  position: absolute;
+  top: 100%;
+  width: 1.5px;
+  height: 5px;
+  translate: -50% 0;
+  background: var(--viz-ink);
+}
+
+/* A crescent: an amber disc with the night taken out of it. */
+.moon {
+  position: absolute;
+  left: 0;
+  top: -42px;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-round);
+  background:
+    radial-gradient(circle at 70% 30%, var(--surface-page) 0 11px, transparent 12px),
+    var(--space-game-night-accent);
+}
+
+.tag {
+  position: absolute;
+  translate: -50% calc(-100% - 6px);
+  font: var(--meta-2xs);
+  font-variant-numeric: var(--tabular);
+  color: var(--text-body);
+}
+
+/* The open zone's flag: amber on a stick, the night as its ink (10.13). */
+.flag {
+  position: absolute;
+  translate: -50% calc(-100% - 12px);
+  min-width: 24px;
+  padding: 3px 7px;
+  border-radius: var(--radius-tag);
+  background: var(--surface-inverse);
+  color: var(--text-on-inverse);
+  font: var(--meta-2xs);
+  font-weight: 700;
+  font-variant-numeric: var(--tabular);
+  text-align: center;
+}
+
+.flag::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 1.5px;
+  height: 10px;
+  translate: -50% 0;
+  background: var(--surface-inverse);
+}
+
+@media (max-width: 760px) {
+  .plot {
+    height: 96px;
+    margin-top: 40px;
+  }
+
+  .moon {
+    top: -34px;
+    width: 22px;
+    height: 22px;
+    background:
+      radial-gradient(circle at 70% 30%, var(--surface-page) 0 8px, transparent 9px),
+      var(--space-game-night-accent);
+  }
+}
