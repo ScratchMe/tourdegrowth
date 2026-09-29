@@ -8,6 +8,7 @@ import { PILLARS, type Pillar } from "@/lib/scoring/pillars";
 import { SITE_DOMAIN_LABEL } from "@/lib/site";
 import { getSampleNextMove, SAMPLE_RESULT } from "@/lib/submissions/sample";
 import { stallSentence } from "@/lib/submissions/stall-sentence";
+import type { Tone } from "@/lib/quiz/tone";
 import type { Submission } from "@/lib/submissions/types";
 import { toPillarViews } from "@/lib/submissions/view-model";
 
@@ -175,14 +176,19 @@ export function shareImageModel(submission: Submission, locale: Locale = submiss
   };
 }
 
-/** `/r/sample` — English by default for crawlers, never enriched (SPEC.md §12). */
-export function sampleShareImageModel(locale: Locale = "en"): ShareImageModel {
+/**
+ * `/r/sample` — English by default for crawlers, never enriched (SPEC.md §12).
+ * `/r/sample?tone=roast` is the canonical roast example (CHANTIERS.md A3.3,
+ * 2026-09-29): the same fixed result in the roast frame, so a post or a page
+ * can show a roast card without exposing anyone's real result.
+ */
+export function sampleShareImageModel(locale: Locale = "en", tone: Tone = "neutral"): ShareImageModel {
   return {
     total: SAMPLE_RESULT.total,
     bottleneck: bottleneckOf(SAMPLE_RESULT.pillars),
     nextMove: getSampleNextMove(locale),
     locale,
-    roast: false,
+    roast: tone === "roast",
     deepDive: false,
     profile: profileOf(SAMPLE_RESULT.pillars),
   };

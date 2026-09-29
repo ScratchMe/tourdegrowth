@@ -21,13 +21,13 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
-| **A. Le travail autonome**, en cinq lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | Maintenant. A3 à A5 l'un après l'autre (A1, A2 et A6 livrés le 2026-09-29) ; A7 dans l'ordre de ses dépendances ; A8 à tout moment |
+| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | Maintenant. A4 et A5 l'un après l'autre (A1, A2, A3 et A6 livrés le 2026-09-29) ; A7 dans l'ordre de ses dépendances ; A8 à tout moment |
 | **B. Design sync** | Une session sur ta machine | Claude Code en local : l'autorisation Claude Design ne s'obtient que là | Maintenant (A1 et A2 sont livrés), puis de nouveau après A5 et A7.10 |
-| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). Reste C23, pas urgente, et la validation de la spécification de A7.3 quand elle sera écrite |
+| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). Restent C23, pas urgente, C24 (née d'A3), et la validation de la spécification de A7.3 quand elle sera écrite |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, tout A7.3 |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
 
-**L'ordre conseillé** : A3 et A7 en parallèle (A7.1 et A7.3.a, la
+**L'ordre conseillé** : A4 et A7 en parallèle (A7.1 et A7.3.a, la
 spécification, d'abord : ce sont les plus longs). B dès que tu as un
 créneau sur ta machine (A1 et A2 sont livrés), puis D. La section C a été tranchée
 le 2026-09-29.
@@ -50,17 +50,6 @@ mêmes feuilles de style.
 
 Une question produit ou de design rencontrée en route ne se tranche pas en
 route : elle part en section C, avec une recommandation.
-
-### A3 — La boucle de croissance (`GROWTH-PLAN.md`, vague 3)
-
-| # | Quoi | Précautions |
-|---|---|---|
-| A3.1 | **Un badge embarquable** `/r/<id>/badge.svg` (« Tour de Growth · 74/100 », style shields), et un extrait Markdown « ajoute-le à ton README » sur le résultat du **propriétaire** | **Firestore** : c'est une lecture sur un chemin public, et un badge dans un README est lu à chaque vue. Il faut un cache CDN sous une adresse versionnée, comme l'image de partage (`FIRESTORE.md`, `VERCEL.md` §2.2). **Barrière §0** : aucun fichier de police dans le bundle serveur. **Relecture** : `relecteur-securite`, car le badge ne doit rien dire de plus que l'image de partage. **Analytics** : un événement pour la copie de l'extrait. La copie repart « à relire » |
-| A3.2 | **Le partage natif emporte l'image** : `navigator.share({ files })` là où `navigator.canShare({ files })` le permet, sinon le partage de lien actuel | Aujourd'hui, `ResultView.tsx:241` ne partage que l'URL. Un événement doit distinguer les deux chemins |
-| A3.3 | **Un exemple roast canonique** : `/r/sample?tone=roast`, ou un second échantillon, pour que la landing et les posts aient une carte roast à montrer sans exposer un vrai résultat. Son image de partage aussi | La copie roast est neuve : garde-fou anti-moquerie (le roast vise la stratégie, jamais la personne), et statut « à relire » |
-
-Le percentile (3.4 du plan) attend quelques centaines de soumissions : il est
-en section E.
 
 ### A4 — Ce que la plateforme offre déjà (audit du kit, §6)
 
@@ -436,6 +425,7 @@ ouverts, et, pour la vue propriétaire, un build jetable jamais commité.
 
 | # | Question | Aujourd'hui | Reco |
 |---|---|---|---|
+| C24 | **La landing mène-t-elle à l'exemple roast ?** Né d'A3.3 (2026-09-29) | `/r/sample?tone=roast` existe : l'échantillon ouvert sur son verdict roast, avec sa propre carte de partage, dans la page et en `og:image`. Mais l'aperçu de la landing a son propre sélecteur de ton, qui change une phrase, et « Voir un exemple » mène toujours à l'échantillon neutre | Que « Voir un exemple » suive le sélecteur : en roast, il mène à `/r/sample?tone=roast`. Le lien tient alors ce que l'aperçu vient de montrer. Pour un post, l'adresse est prête dès maintenant |
 | C23 | **L'ordre des lancements du moteur (B) et du jeu (C).** Née de C4 : le moteur attend désormais le lot A7.3, alors que le jeu peut être prêt bien avant. Mais rien ne part avant que les deux soient prêts (C19) | Le calendrier dit B puis C, avec trois semaines entre les deux Show HN | Trancher quand les deux sont prêts. Par défaut, l'ordre du calendrier. Si le jeu attend plus d'un mois après sa recette, C d'abord : un jeu prêt qui attend perd son sujet (le Digital Fairness Act est attendu au quatrième trimestre 2026) |
 
 ---
@@ -472,6 +462,8 @@ rien de privé dans le dépôt, qui est public. Cela vaut pour les chiffres de
 | Un mois après l'ouverture du jeu | La place de l'encart (C10) et le bouton principal (C16), sur les chiffres | Section C |
 | **Un deuxième niveau du jeu ouvre** | Trancher l'encart d'un goulot partagé entre deux étapes qui ont chacune un niveau. Aujourd'hui, l'ordre AARRR choisit. Reco du 2026-09-29 : une carte qui propose les deux niveaux | `GAME-BRIEF.md` §15.4, C11 |
 | **Juin 2027** | La fenêtre Tour de France (R2-30) : Grand Départ le 2 juillet 2027 à Édimbourg. À construire en juin, pour partir pendant le Tour | `GROWTH-PLAN.md` |
+| Une demande d'effacement (RGPD) | Supprimer le document **et** purger le cache CDN de `/r/<id>/*` : l'image de partage (depuis le 2026-09-14) et le badge (A3) y sont gardés un an sous une adresse immuable, et le badge l'est aussi chez GitHub (camo), hors de notre main. Vérifier d'abord comment Vercel purge par chemin. Relevé par la relecture de sécurité d'A3 | `legal.ts`, `VERCEL.md` §1.8 |
+| Des badges en 429 dans des README | Le proxy compte `/r/<id>/…` dans le budget de lectures (120 par 10 minutes et par IP) **avant** le cache CDN, et les images d'un README passent par les quelques IP de camo. Mesurer avant de conclure ; si c'est réel, sortir `/r/<id>/badge/…` du budget, puisque la route ne lit Firestore qu'au premier passage | `src/proxy.ts`, `isResultReadPath` |
 | Une facture Vercel qui surprend | `VERCEL.md` §1.6 et §2.2 | `VERCEL.md` |
 | Besoin de `guidelines/` du bundle d'extension 01 | Le demander à Claude Design (l'archive ne le contenait pas) | `CLAUDE.md` |
 | Un contrat de largeur qui descend à 320 px | À 320 px, le bandeau d'entrée au jeu passe sur trois lignes (la seconde, ≈ 270 px de texte, pour une colonne de 244). Laissé par décision d'Antoine (2026-09-29) : seule une copie plus courte le tiendrait. 360 px est réglé depuis le même jour | `game/GameEntry.module.css` |

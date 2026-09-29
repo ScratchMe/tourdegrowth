@@ -5414,3 +5414,44 @@ Des seize opportunités de plateforme, douze sont absentes de `src/`, `text-wrap
 **Piège** : un premier passage complet avait 4 échecs et 87 specs ignorées. Le serveur de test avait été lancé sans `GAME_ENABLED=true` : le build le portait, pas le `next start`, et le drapeau du jeu se lit à l'exécution. Relancé avec le drapeau, comme la CI : vert.
 
 **Pas fait ici** : le bundle design-sync n'est pas reconstruit (le convertisseur n'est pas dans une session cloud) ; B3 de `CHANTIERS.md` dit ce qu'il doit emporter. Relecteur de copie lancé sur le titre d'annexe ; relecteur de sécurité non lancé : ni route, ni proxy, ni payload, ni workflow.
+
+**En production** : PR [#194](https://github.com/ScratchMe/tourdegrowth/pull/194), mergée le 2026-09-29 (squash `2e2977c`, 39 fichiers, identique à la tête de la PR après deux fusions de `main`, #190/#192 puis #193, qui n'avaient touché que des documents et une feuille du jeu), servie à 21 h 11 UTC. Relevé par HTTP sur les feuilles servies par `/en` : présents `--slide-note:500 18px/1.4`, `--slide-caption:500 20px/1.45`, `--slide-table:500 18px/1.35`, `--slide-numeral:700 92px/.9` ; absents `--viz-cat-1` et `--viz-seq-1`. Le moteur reste en 404, fermé derrière son drapeau. **Piège** : la PR est restée sans CI tant qu'elle était en conflit avec `main`. GitHub ne lance pas un `pull_request` qu'il ne peut pas fusionner, et rien ne le signale sur la PR, sauf `mergeable_state: dirty`. Trois autres sessions mergeaient en même temps.
+
+## A3 : le badge README, le partage avec l'image, l'exemple roast (2026-09-29)
+
+**La demande** : le lot A3 de `CHANTIERS.md`, la vague 3 de `GROWTH-PLAN.md`, en autonomie, une PR.
+
+**A3.1, le badge.** `GET /r/<id>/badge/<jeton>.svg` : « Tour de Growth · 74/100 », dans le style shields, blanc sur encre et blanc sur le rouge fait pour le petit texte blanc (les jetons de l'image de partage). Il dit le total et rien d'autre, la règle de l'image de partage. Il ne porte ni étape, ni ton, ni identifiant, ni lien, ni script, ni police : le texte est en Verdana, ajusté par `textLength` à une largeur mesurée ici, pour qu'une police de substitution ne déborde pas.
+- **Une adresse versionnée**, comme l'image de partage (`VERCEL.md` §1.8) : un résultat ne change jamais de total, donc le jeton courant est servi `immutable` un an, et une vue répétée ne coûte rien à l'origine (`FIRESTORE.md` §1.3). Un jeton plus ancien répond avec le badge courant, gardé une heure ; un README ne se corrige jamais pour nous suivre. L'identifiant est validé avant toute lecture ; le budget de lecture du proxy couvre la route, comme la page et l'image.
+- **Pas de CSP propre à la route** : `next.config.mjs` pose `frame-ancestors 'none'` sur toute réponse, et cet en-tête remplace celui d'une route du même nom (mesuré en e2e). Y toucher franchirait la barrière §0 de `/livrer`. Le SVG n'est construit qu'à partir d'un nombre, et `nosniff` le garde image.
+- **Chez le propriétaire seulement**, sous la carte de partage : le badge, la ligne Markdown à sélectionner à la main, et « Copier le Markdown ». L'événement `badge_copied` compte la copie ; il a sa ligne dans `/admin/stats` et n'entre pas dans le ratio « actions de valeur par résultat », dont la définition (REVIEW-03 A4) ne change pas en silence. Copie neuve « à relire », le texte du badge compris.
+- **Le budget de contenu** (`content-fan-in.test.ts`) a arrêté la première version : la route importait `sample.ts` pour le total de l'échantillon, et tirait la bibliothèque de verdicts dans une fonction de plus. Les chiffres fixes de l'échantillon vivent maintenant seuls dans `sample-result.ts`.
+
+**A3.2, le partage avec l'image.** Là où `navigator.canShare({ files })` le permet, « Partager ce résultat » envoie l'image de partage elle-même, avec le lien dans le texte (une cible qui reçoit un fichier laisse souvent tomber `url`). Sinon, le partage du lien, comme avant. Le fichier se prépare quand le bloc approche de l'écran, au moment où sa propre `<img>` paresseuse charge la même adresse immuable : la requête touche le cache, et un lecteur qui ne descend pas jusque-là ne paie rien. Il est prêt avant le geste parce que Safari refuse la feuille de partage si un `await fetch` s'intercale entre le geste et `navigator.share`. Le funnel distingue `share/<ton>/image` de `native` et `copy`, et les compte tous trois comme des partages.
+
+**A3.3, l'exemple roast.** `/r/sample?tone=roast` : l'échantillon ouvert sur son verdict roast, avec sa propre carte de partage, dans la page et en `og:image`. La route d'image reconnaît les jetons des deux tons pour l'échantillon, et tout autre ton donne l'échantillon neutre. **Pas de copie neuve** : le verdict roast de l'échantillon vient de la bibliothèque existante, comme tout vrai résultat roast. **Parti en C24** : faut-il que « Voir un exemple » de la landing suive son sélecteur de ton ? La reco est oui.
+
+**Gardes.** En unitaires :
+- `badge.test.ts` : le badge ne dit que le total, ce n'est qu'une image, ses couleurs viennent des jetons, `textLength` est posé, et son jeton suit le dessin ;
+- `badge-snippet.test.ts` : le balisage du bloc, et son câblage (propriétaire seulement, jamais sur l'échantillon) ;
+- les partages `image` et le compte du badge dans le funnel ;
+- les jetons de l'échantillon roast.
+
+En e2e, `growth-loop.spec.ts` couvre :
+- la route du badge : SVG immuable, adresse ancienne gardée une heure, 404 ;
+- le partage qui emporte le fichier, et son repli par lien ;
+- l'exemple roast, dans la page, en `og:image` et au partage.
+
+Le test d'ordre de lecture du résultat se repère désormais sur l'enveloppe du bloc de partage, qui porte la carte et le badge.
+
+**Non-vacuité.** Unitaires, un sabotage par test, chacun tombant seul : `textLength` retiré, le jeton haché sur la seule version, un lien glissé dans le SVG, `isOwner &&` retiré de la condition, un `badge` passé dans la branche de l'échantillon. Navigateur, contre le build de `main` d'avant A3 : les quatre tests qui portent A3 tombent. Les deux qui passent gardent ce qui reste : le partage par lien quand aucun fichier n'est pris, et l'échantillon neutre sous un autre ton.
+
+**Barrière `/livrer` §0** : ni dépendance ni réglage de build, aucun fichier non-code sous `src/`. La route du badge tombe dans le même groupe de fonction que celle de l'image de partage (API, même arbre de layout, même configuration, `VERCEL.md` §1.3). Mesuré sur les `.nft.json` du build : elle n'ajoute que 16,4 Ko de fichiers que sa voisine ne tirait pas déjà, pour un seuil d'environ 1 Mo. La CLI Vercel n'est pas dans la session, d'où cette mesure plutôt que celle de §1.2.
+
+**Relectures.**
+- **Sécurité** : rien de bloquant. Un durcissement appliqué : le total arrive de Firestore sans validation, et c'est le premier champ stocké à devenir du balisage sur notre origine, gardé un an. `renderBadgeSvg` refuse donc tout ce qui n'est pas un entier de 0 à 100, et la route répond 404 (test et sabotage). Deux points partent en veille (section E) : une demande d'effacement doit aussi purger le cache CDN de `/r/<id>/*` (c'était déjà vrai pour l'image de partage depuis le 2026-09-14), et des badges en 429 derrière camo, à mesurer avant d'agir.
+- **Copie** : conforme, avec une correction : le texte du badge lui-même porte maintenant son marqueur « à relire », comme l'étiquette d'espace de l'image de partage.
+
+**Vérifié** : lint et `tsc` propres, **2 227 tests unitaires** (+16), couverture au-dessus de ses seuils, `next build` propre avec `GAME_ENABLED=true`, **606 specs Playwright** (+6 : 601 passées, 5 ignorées par construction, aucun échec, sans reprise ; la garde du total, ajoutée après ce passage, a été rejouée avec les specs du partage : 19 sur 19).
+
+**À l'écran.** L'exemple roast, en FR et en EN, à 1 280 et 390 px : la pastille « Roast mode », le verdict roast de la bibliothèque, la carte de partage dans son cadre roast, et aucun défilement horizontal. L'extrait du propriétaire ne peut pas se rendre en e2e, faute de Firestore (C17 : l'émulateur arrivera en A7.11). Il a donc été vu dans un build jetable, jamais commité, où l'échantillon reçoit un badge et où la condition « propriétaire » est levée : FR et EN, 1 280 et 390 px. Résultat : ni défilement horizontal, un badge lisible, et le bouton qui copie, dit « Markdown copié » et envoie `badge_copied`.
