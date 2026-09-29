@@ -2,8 +2,8 @@ import type { HTMLAttributes, ReactNode } from "react";
 import styles from "./Tag.module.css";
 
 export interface TagProps extends HTMLAttributes<HTMLSpanElement> {
-  /** neutral = sunken fill · outline = dashed on paper · ink = solid dark · red = roast/emphasis */
-  tone?: "neutral" | "outline" | "ink" | "red";
+  /** neutral = sunken fill · outline = dashed on paper · ink = solid dark · alert = the red of a diagnosis (the game catalogue's trick still running) */
+  tone?: "neutral" | "outline" | "ink" | "alert";
   children?: ReactNode;
 }
 

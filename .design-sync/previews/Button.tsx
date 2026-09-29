@@ -25,15 +25,15 @@ export const Sizes = () => (
 );
 
 /**
- * `compact` is the header CTA — smaller inline sizing, and the only place the
- * product uses it. Hidden below 760px (R-21), so it is a desktop-only shape.
+ * `sm` is the header CTA — smaller inline sizing (it was a `compact` flag
+ * beside the size until S-16). Hidden below 760px (R-21), so it is a desktop-only shape.
  */
-export const Compact = () => (
+export const Small = () => (
   <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-    <Button variant="primary" compact>
+    <Button variant="primary" size="sm">
       Start your Tour →
     </Button>
-    <Button variant="secondary" compact>
+    <Button variant="secondary" size="sm">
       How it works
     </Button>
   </div>
@@ -41,7 +41,7 @@ export const Compact = () => (
 
 /**
  * `quiet` is the system's one text button. Drawn as a line of text — 31px,
- * 27px with `compact`, which the growth engine uses for the small actions
+ * 27px at `sm`, which the growth engine uses for the small actions
  * beside its sliders and fields — and TAPPED on a 44px strip centred on it,
  * which moves nothing around it. Keep the room above and below: it is where
  * the taps land.
@@ -49,10 +49,10 @@ export const Compact = () => (
 export const Quiet = () => (
   <div style={{ display: "flex", gap: 24, alignItems: "center", flexWrap: "wrap" }}>
     <Button variant="quiet">Switch to straight up</Button>
-    <Button variant="quiet" compact>
+    <Button variant="quiet" size="sm">
       Back to today
     </Button>
-    <Button variant="quiet" compact>
+    <Button variant="quiet" size="sm">
       I only have the rate
     </Button>
   </div>

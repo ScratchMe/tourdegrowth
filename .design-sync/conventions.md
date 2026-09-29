@@ -145,10 +145,10 @@ glossary popover returns focus to the trigger that opened it.
 
 Every interactive target is at least 44×44px. The compact controls draw
 smaller than that and extend their hit area on the element itself: a
-`Segmented size="compact"` track is 32px, each option reaches 44px into the
+`Segmented size="sm"` track is 32px, each option reaches 44px into the
 room the group keeps above and below it; the 16px `DefinitionTrigger` glyph
 takes taps on a 44px disc around it; `Button variant="quiet"` is drawn as a
-line of underlined text (31px, 27px `compact`) and takes taps on a 44px strip
+line of underlined text (31px, 27px at `sm`) and takes taps on a 44px strip
 centred on it. Never strip that surrounding room to tighten a header — it is
 where the taps land. The system has one text button, `quiet`: an action in
 text is that, never a styled `<button>` of its own. A link inside a sentence
@@ -284,7 +284,7 @@ inked mark over an edge: a rubber stamp, an accent band, the angry edge),
 `--border-width-hairline` (1px, under the content: a chart's grid, a table's
 rows) and `--border-width-fine` (1.5px, the space band's strokes only). Type
 never goes under 11px, and Inter text never under 13.5px, with two named
-exceptions: the compact button's label and the result's « built by » credit. If a design
+exceptions: the small (`sm`) button's label and the result's « built by » credit. If a design
 needs one of those, that is a product decision to raise, not a component to
 invent.
 
@@ -315,8 +315,8 @@ Retired names, and where each went, one family at a time
 | Was | Now | Family |
 |---|---|---|
 | `size="desktop"` / `"mobile"` | `size="md"` / `"sm"` | quiz and result: `AnswerOption`, `QuestionCard`, `StageProgress`, `Bottleneck`, `PillarChip`, `ScoreDisplay`, `ShareCard` — done |
-| `size="compact"`, `Button compact` | `size="sm"` | core: `Segmented`, `ToneToggle`, `Button` |
-| `tone="red"` | `tone="alert"` | core: `Tag` |
+| `size="compact"`, `Button compact` | `size="sm"` | core: `Segmented`, `ToneToggle`, `Button` — done |
+| `tone="red"` | `tone="alert"` | core: `Tag` — done |
 | `size="hero"` / `"compact"` / `"responsive"`, `size="mini"` | `size="lg"` / `"sm"` / `"auto"`, `size="sm"` | viz: `StatTile`, `BulletChart` |
 | `size="screen"` / `"slide"` | `medium="screen"` / `"slide"` | viz: `DotGrid`, `DotLegend` |
 | `size="frame"` / `"avatar"`, `size="compact"` | `size="lg"` / `"sm"`, `size="sm"` | game: `DgFace`, `ClickPill` |

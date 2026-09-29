@@ -193,7 +193,7 @@
 
 /*
  * A text action under a field ("I only have the rate") is `Button
- * variant="quiet" compact` (design audit S-11): the system's one text button,
+ * variant="quiet" size="sm"` (design audit S-11): the system's one text button,
  * tapped 44px tall. In a column it would stretch to the column's width and
  * centre its label; this keeps it at the start, under the field it acts on.
  */

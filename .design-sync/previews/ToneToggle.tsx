@@ -15,10 +15,10 @@ import { ToneToggle } from "tour-de-growth";
  * would reopen a settled decision.
  */
 
-/** Live, at the `compact` scale the landing uses: a 32px track in a 44px hit area. */
-export const Compact = () => {
+/** Live, at the `sm` scale the landing uses: a 32px track in a 44px hit area. */
+export const Small = () => {
   const [tone, setTone] = React.useState<"straight" | "roast">("straight");
-  return <ToneToggle size="compact" value={tone} onChange={setTone} />;
+  return <ToneToggle size="sm" value={tone} onChange={setTone} />;
 };
 
 /** `md` is the full scale, for a placement with room around it. */
@@ -38,7 +38,7 @@ export const French = () => {
   const [tone, setTone] = React.useState<"straight" | "roast">("straight");
   return (
     <ToneToggle
-      size="compact"
+      size="sm"
       value={tone}
       onChange={setTone}
       straightLabel="Neutre"

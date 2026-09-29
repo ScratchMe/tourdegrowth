@@ -21,10 +21,6 @@ const COMPONENTS = join(process.cwd(), "src", "components");
 const SCALE = new Set(["xs", "sm", "md", "lg", "auto"]);
 
 const PENDING: Record<string, readonly string[]> = {
-  "core/Segmented.tsx": ["compact"],
-  "result/ToneToggle.tsx": ["compact"],
-  "core/Button.tsx": ["compact flag"],
-  "core/Tag.tsx": ["red"],
   "viz/StatTile.tsx": ["hero", "compact", "responsive"],
   "viz/BulletChart.tsx": ["mini"],
   "viz/DotGrid.tsx": ["screen", "slide"],

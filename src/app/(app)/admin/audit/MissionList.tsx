@@ -37,7 +37,7 @@ export function MissionList({
       <div className={styles.screenHead}>
         <h2 className={styles.h2}>Missions</h2>
         <div className={styles.screenActions}>
-          <Button compact onClick={onNew} data-testid="new-mission">
+          <Button size="sm" onClick={onNew} data-testid="new-mission">
             Nouvelle mission
           </Button>
           <label className={styles.importLabel}>
@@ -90,7 +90,7 @@ export function MissionList({
                       {last ? `exportée le ${last.slice(0, 10)}` : "jamais exportée"}
                     </p>
                   </div>
-                  <Button compact variant="secondary" onClick={() => onOpen(mission.id)} data-testid="open-mission">
+                  <Button size="sm" variant="secondary" onClick={() => onOpen(mission.id)} data-testid="open-mission">
                     Ouvrir
                   </Button>
                 </Card>

@@ -57,7 +57,7 @@ export function TourScreen({
     <section className={styles.screen}>
       <div className={styles.screenHead}>
         <h2 className={styles.h2}>Le Tour</h2>
-        <Button compact variant="secondary" onClick={onClose} data-testid="close-tour">
+        <Button size="sm" variant="secondary" onClick={onClose} data-testid="close-tour">
           Retour
         </Button>
       </div>

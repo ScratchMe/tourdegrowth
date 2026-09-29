@@ -72,7 +72,7 @@ export default async function LandingPage({ params }: PageProps) {
           <Button href={localePath(locale, "/how-it-works")} variant="quiet" className={styles.navLink}>
             {tc(UI_STRINGS.nav.howItWorks, locale)}
           </Button>
-          <Button href="/quiz" hard size="md" compact className={styles.headerCta}>
+          <Button href="/quiz" hard size="sm" className={styles.headerCta}>
             {tc(t.ctaPrimary, locale)}
           </Button>
         </nav>
