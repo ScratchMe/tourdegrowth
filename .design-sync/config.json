@@ -183,6 +183,9 @@
     },
     "HubMountain": {
       "cardMode": "column"
+    },
+    "ActionCard": {
+      "cardMode": "column"
     }
   },
   "dtsPropsFor": {

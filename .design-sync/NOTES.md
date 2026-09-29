@@ -208,8 +208,9 @@ All three are non-blocking and all are expected:
   on 2026-09-28: three stories, each inside its frame, none over another.
 
 Wide components get `cardMode: "column"` in `cfg.overrides` (one full-width
-card per story) — 28 of them now: most of `game`, the two charts, `Button`
-(its `States` grid) and `GlossaryTerm`. Add one when validate prints
+card per story) — 29 of them now: most of `game` (`ActionCard` joined on
+2026-09-29, once its cards took their real 294px width), the two charts,
+`Button` (its `States` grid) and `GlossaryTerm`. Add one when validate prints
 `[GRID_OVERFLOW] … stories render wider than their grid cells`; that warning
 is always a real crop. `QuarterReport` and `Hand` were not flagged but still
 need it: squeezed into a third-width cell, their desktop layout (chosen by a
@@ -300,17 +301,26 @@ doc comment says why the layout uses an auto margin rather than
 ## Synced
 
 Project `23b9671c-a55b-452e-aa41-39906ee71ba8` ("Tour de Growth"), pinned as
-`projectId` in `config.json`. Last upload (2026-09-11): 182 files, 34
-components, 116 story cells.
+`projectId` in `config.json`. **Last upload: 2026-09-29**, from a claude.ai/code
+cloud session — 77 components, **238 story cells**, all graded good; 398 files
+(308 component files, 77 compiled previews, `_vendor/`, `fonts/`, bundle, CSS,
+README), no delete. `report_validate`: 77 total, 0 bad, 0 thin, 0 identical.
+The anchor `_ds_sync.json` now covers all 77, so the next re-sync skips every
+component whose sources did not change. The previous upload (2026-09-11) held
+34 components and 116 cells.
 
-**Not uploaded yet:** the DS v3 inputs (77 components, 244 story cells,
-~360 files, the night world, `viz`, `game`, the prose family). The bundle
-builds and validates clean from this directory; the upload is Antoine's next
-`/design-sync` run — sessions do not upload.
+**Sessions do upload now.** The `DesignSync` tool answered from a cloud session
+with the claude.ai login — no `/design-login`, no local machine. The
+authorization that blocked the first attempt (2026-09-11) came from an
+interactive session on Antoine's machine; it is no longer a prerequisite. The
+upload asks its own approval once per run (`finalize_plan`).
 
-The authorization that blocked the first attempt is obtained by running
-`/design-login` once from an interactive Claude Code session on this machine;
-headless runs then reuse it.
+The upload path for a pinned project is the skill's **atomic** one: re-fetch
+`_ds_sync.json` right before `finalize_plan` (a moved `bundleSha12` means a
+concurrent sync), sentinel `_ds_needs_recompile` first, content in chunks
+(`components/` in two halves of 154, then `_preview/` + root files, then
+`_vendor/` alone — `react.js` is 1.1 MB —, then `fonts/`), `upload.deletePaths`
+verbatim, sentinel again, `_ds_sync.json` last, `list_files` to confirm.
 
 ## A fresh clone needs two installs before anything runs
 
