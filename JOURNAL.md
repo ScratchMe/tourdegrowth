@@ -4988,3 +4988,29 @@ La deuxième PR de la passe retenue par Antoine le 2026-09-28, lancée sur son �
 Chaque levée garde sa raison : « TODO: à relire — revue de copie v1… » devient « Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1… ». C'est la forme du nº3.
 
 **Vérifié** : lint et `tsc` propres, **2 169 tests unitaires** verts. Aucune chaîne affichée ne change, seulement des commentaires.
+
+## Le cookie de langue ne suit plus les préchargements (2026-09-29)
+
+Demandé par Antoine après #178 (« fais le correctif du cookie »). C'est la cause du flake `locale-routing.spec.ts` (`:76`, `:320`), qui échouait 3 fois sur 10 sur `main` et avait fait rougir la CI de #178 à l'essai comme à la reprise.
+
+**Le mécanisme, reproduit avant d'être corrigé.** Un script Playwright rejoue le scénario de `:320` : navigateur en français, `/fr`, clic sur « EN », puis retaper `/`. Il trace chaque requête après le clic, avec son cookie et son `Set-Cookie`. Il échouait 2 à 3 fois sur 20 à 25, puis 6 fois sur 40.
+- La réponse de `/en` pose bien `tdg_locale=en`.
+- La page `/fr` qu'on quitte continue de précharger ses liens (`next/link`), et certains de ces préchargements partent après le clic.
+- Le proxy traite toute requête vers `/fr/…` comme un choix explicite et renvoie `Set-Cookie: tdg_locale=fr`.
+- Le lecteur retape l'adresse et retombe sur `/fr`. Un vrai lecteur pouvait perdre son choix de langue de la même façon.
+
+**Premier correctif, faux, et pourquoi.** Il ignorait les requêtes portant `next-router-prefetch: 1`. Ses tests unitaires passaient, et le navigateur échouait toujours 6 fois sur 40. Next retire ses en-têtes de routeur (`rsc`, `next-router-prefetch`…) avant d'appeler le proxy ; la doc installée le dit (`proxy.md`, « RSC requests and rewrites »). Les tests construisaient des requêtes qui n'arrivent jamais telles quelles. C'est le piège de `NEXTJS.md` §1.1, « une logique parfaitement testée unitairement qui n'a strictement aucun effet », et il y est maintenant écrit.
+
+**Le correctif.** Le proxy n'écrit le cookie que sur une navigation : `Sec-Fetch-Mode: navigate`, ou pas d'en-tête du tout (vieux navigateur, script), ce qui reproduit le comportement d'avant. Tout `fetch` de `next/link` est en mode `cors` et n'écrit plus. Aucune navigation douce ne change de langue : le seul lien entre les deux langues est le sélecteur, fait de `<a>` simples exprès. Un prérendu du navigateur (`Sec-Purpose: prefetch;prerender`) est en mode `navigate` et peut devenir la navigation elle-même : il écrit. L'exclusion par le `matcher`, que la doc propose, a été écartée : le proxy ne tournerait plus sur ces requêtes, et un préchargement de `/admin` passerait la garde.
+
+**Vérifié** :
+- le rejeu : 0 échec sur 40, contre 6 sur 40 ;
+- `locale-routing.spec.ts` répété 10 fois : 240/240 ;
+- les specs d'attribution, d'en-têtes de sécurité, d'aperçus de partage et d'en-tête : 34/34 ;
+- une sonde directe : un `fetch` en mode `cors` avec le cookie `en` ne reçoit plus de `Set-Cookie`, une navigation vers la même page écrit toujours `fr`.
+
+Non-vacuité, écrite dans `proxy.test.ts` : sans la condition, exactement le test « un fetch de `next/link` n'écrit pas » tombe. Les deux compagnons (une navigation écrit, une requête sans métadonnées écrit) passent dans les deux états.
+
+**Durcissement ajouté sur l'avis de `relecteur-securite`** : un test épingle `config.matcher` à sa chaîne exacte. Coller l'exemple de la doc (`missing: [{ type: "header", key: "next-router-prefetch" }]`) sortirait les préchargements du proxy. Or `/admin/stats/json` n'a pas de garde à lui : un seul en-tête suffirait alors pour le lire sans mot de passe.
+
+**Suite complète sur ce correctif** : 568 passées, 5 ignorées par construction, **aucun échec**. C'est le premier passage entier sans le flake depuis qu'il est mesuré. Unitaires : 2 189.

@@ -63,6 +63,22 @@ chaque `next dev`. Désactivable par `agentRules: false` dans
 `next.config.mjs` — un fichier tenu à la main n'est pas un endroit où laisser
 un outil de build écrire.
 
+**Le proxy ne voit pas les en-têtes du routeur.** Avant de l'appeler, Next
+retire de la requête ses en-têtes « Flight » (`rsc`, `next-router-prefetch`,
+`next-router-segment-prefetch`, `next-router-state-tree`) et le paramètre
+`_rsc` (`proxy.md`, « RSC requests and rewrites » ; `server/web/adapter.js`).
+Un proxy qui teste `next-router-prefetch` ne le trouve donc jamais, et un test
+unitaire qui construit sa `NextRequest` AVEC ces en-têtes passe quand même :
+il teste une requête qui n'arrive pas. Mesuré le 2026-09-29 : le premier
+correctif du cookie de langue, écrit ainsi, passait ses tests et laissait
+6 échecs sur 40 dans le navigateur. Ce qui arrive intact, ce sont les
+`Sec-Fetch-*` : `Sec-Fetch-Mode: navigate` pour un chargement de document (ou
+un prérendu du navigateur qui peut en devenir un), `cors` pour tout `fetch` de
+`next/link`, préchargement comme navigation douce. La doc propose aussi
+d'exclure les préchargements par le `matcher` (`missing: [{ type: "header",
+key: "next-router-prefetch" }]`), mais le proxy ne tournerait plus du tout sur
+eux : ni garde d'accès, ni drapeau, ni limite de débit.
+
 ### 1.2 Layouts racine : la frontière la plus chère du framework
 
 **Traverser une frontière de layout racine force un chargement de document

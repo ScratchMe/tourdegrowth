@@ -235,13 +235,34 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   // persisted the same way — otherwise a reader who switched to French and
   // then pressed "Démarre ton Tour" would land on an English questionnaire,
   // since `/quiz` carries no prefix of its own.
+  //
+  // Only a NAVIGATION persists it (2026-09-29). The page a reader is leaving
+  // keeps prefetching its own links while the next document loads: a French
+  // reader who pressed « EN » got `tdg_locale=en` from `/en`, then the
+  // in-flight `next/link` prefetches of `/fr/…` from the page left behind
+  // wrote `fr` back, and typing the address again landed on `/fr`.
+  // Reproduced in Chromium (6 runs in 40); the `locale-routing.spec.ts:320`
+  // flake.
+  //
+  // Not by `next-router-prefetch`: Next strips its router headers (`rsc`,
+  // `next-router-prefetch`…) from the request before the proxy sees it
+  // (`proxy.md`, « RSC requests and rewrites ») — a first version keyed on
+  // it passed its unit tests and changed nothing at runtime. `Sec-Fetch-Mode`
+  // reaches the proxy: a document load, or a browser prerender that may be
+  // activated as one, is `navigate`; every `next/link` fetch, prefetch or
+  // soft navigation, is `cors`. Soft navigations never change the language
+  // — the only link across languages is the switcher, plain `<a>` elements
+  // on purpose (`LocaleSwitcher.tsx`). No header at all (an old browser, a
+  // script) is taken as a navigation, which is the behaviour before this.
   const currentCookie = request.cookies.get(LOCALE_COOKIE)?.value ?? null;
   const chosen = fromUrl?.locale ?? (isLocale(queryLang) ? queryLang : null);
+  const fetchMode = request.headers.get("sec-fetch-mode");
+  const navigation = fetchMode === null || fetchMode === "navigate";
   // Only write when it actually changes. Content pages are prerendered and
   // CDN-cacheable since R-24, and re-sending an identical `Set-Cookie` on
   // every one of their responses is both pointless and the kind of header
   // that makes caches nervous.
-  const explicitChoice = chosen && chosen !== currentCookie ? chosen : null;
+  const explicitChoice = chosen && chosen !== currentCookie && navigation ? chosen : null;
   if (explicitChoice) {
     request.cookies.set(LOCALE_COOKIE, explicitChoice);
   }

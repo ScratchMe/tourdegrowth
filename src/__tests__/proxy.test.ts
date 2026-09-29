@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { resetRateLimitsForTests } from "@/lib/rate-limit";
-import { constantTimeEqual, isAuthorizedForAdmin, proxy } from "../proxy";
+import { config, constantTimeEqual, isAuthorizedForAdmin, proxy } from "../proxy";
 import { ENGINE_PREVIEW_COOKIE } from "@/lib/engine/access";
 import { GAME_PREVIEW_COOKIE } from "@/lib/game/access";
 import { ownerPreviewToken } from "@/lib/owner-preview";
@@ -136,6 +136,57 @@ describe("proxy (locale cookie)", () => {
   it("never writes a cookie for a page that expresses no choice", async () => {
     expect((await proxy(request("/quiz", "fr"))).cookies.get("tdg_locale")).toBeUndefined();
     expect((await proxy(request("/r/abc"))).cookies.get("tdg_locale")).toBeUndefined();
+  });
+
+  /*
+   * 2026-09-29, the `locale-routing.spec.ts:320` flake: the page a reader
+   * leaves keeps prefetching its own-language links, and those prefetches
+   * wrote the old language back over the one just chosen.
+   *
+   * The requests below carry what reaches the proxy in production: Next
+   * strips `rsc` and `next-router-prefetch` before calling it, so they are
+   * deliberately absent — a first fix keyed on them passed tests written
+   * WITH them, and changed nothing in the browser.
+   *
+   * Non-vacuity: with `&& navigation` removed from the proxy, exactly the
+   * first of these three tests fails (a `fr` cookie comes back); the other
+   * two pass in both states, as companions should — they pin that a real
+   * navigation, and a request with no fetch metadata, still write, so the
+   * fix cannot be "never write".
+   */
+  function fetched(url: string, mode: string | null, extra: Record<string, string> = {}): NextRequest {
+    const headers: Record<string, string> = { cookie: "tdg_locale=en", ...extra };
+    if (mode) headers["sec-fetch-mode"] = mode;
+    return new NextRequest(`https://tourdegrowth.com${url}`, { headers });
+  }
+
+  it("never writes the cookie from a next/link fetch — a prefetch is not a choice", async () => {
+    const res = await proxy(fetched("/fr/glossary/cac", "cors", { "sec-fetch-dest": "empty" }));
+    expect(res.cookies.get("tdg_locale")).toBeUndefined();
+    // The page it fetches is still the French one: only the cookie is left alone.
+    expect(res.headers.get("x-middleware-request-x-tdg-locale")).toBe("fr");
+  });
+
+  it("writes it on a navigation, including a browser prerender that may become one", async () => {
+    expect((await proxy(fetched("/fr/glossary/cac", "navigate"))).cookies.get("tdg_locale")?.value).toBe("fr");
+    const prerender = fetched("/fr", "navigate", { "sec-purpose": "prefetch;prerender" });
+    expect((await proxy(prerender)).cookies.get("tdg_locale")?.value).toBe("fr");
+    expect((await proxy(fetched("/quiz?lang=fr", "navigate"))).cookies.get("tdg_locale")?.value).toBe("fr");
+  });
+
+  it("treats a request without fetch metadata as a navigation, as before", async () => {
+    expect((await proxy(fetched("/fr/glossary/cac", null))).cookies.get("tdg_locale")?.value).toBe("fr");
+  });
+
+  /*
+   * The proxy runs on EVERY request, prefetches included. Next's docs show a
+   * matcher that skips prefetches (`missing: [{ type: "header", key:
+   * "next-router-prefetch" }]`); pasted here, it would let anyone read
+   * `/admin/stats/json` — which has no check of its own — by sending that
+   * one header (security review, 2026-09-29). Pinned to the exact string.
+   */
+  it("keeps its matcher a plain path pattern, with no has/missing condition a header could satisfy", () => {
+    expect(config.matcher).toEqual(["/((?!_next/static|_next/image|favicon.ico).*)"]);
   });
 
   it("hands the resolved locale down to the root layout as a header", async () => {
