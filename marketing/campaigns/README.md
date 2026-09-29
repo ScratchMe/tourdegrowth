@@ -381,3 +381,21 @@ bannissement le plus courant).
 | **D2** | Relancer A sur les réseaux, ou laisser A au seul SEO ? | Un fil « nouvelle copie » intéresse peu ; les annuaires et le SEO font l'essentiel | Un seul fil X/Bluesky, court, centré sur la carte de résultat (l'action sur l'image), puis laisser composer |
 | **D3** | Les captures B et C : attendre le design final ou prendre la prévisualisation ? | Une capture de prévisualisation qui change avant le lancement est un visuel faux | Attendre la recette de chaque produit, et capturer le jour de l'ouverture |
 | **D4** | La réponse à « qui est derrière ? » | Sous l'option A, la seule réponse honnête dit que le site est signé | Garder celle de la vague 1 : « the site credits its author in the footer; I keep this account pseudonymous » |
+
+### Réponses d'Antoine (séance des décisions du 2026-09-29, `CHANTIERS.md` C19 à C22)
+
+- **D1 — Rien n'est parti** de la vague 1, nulle part (ni le Show HN du Tour,
+  ni Reddit, ni Indie Hackers). **Et rien ne part avant que le moteur et le
+  jeu soient prêts**, « pour avoir suffisamment de matière ». Le Tour
+  n'aura ni Show HN ni r/SaaS : les deux créneaux HN du pseudo restent au
+  moteur (B) et au jeu (C), et la fenêtre r/SaaS reste au moteur. Ses posts
+  r/SideProject, r/roastmystartup et Indie Hackers attendent, et se
+  recaleront sur le calendrier de B et C. Les commentaires sans lien (S2),
+  qui font exister le compte, ne sont pas concernés.
+- **D2 — A au seul SEO.** Pas de fil X/Bluesky pour le Tour : les fils du
+  moteur et du jeu mènent au Tour de toute façon. Ce qui n'est pas un post
+  part **maintenant** : « Demander l'indexation » dans la Search Console
+  (`/en`, `/fr`, les deux pages « porte ouverte », les quatre « AARRR vs X »)
+  et les annuaires restants de la vague 1 (Launching Next d'abord, campagne
+  `relaunch_tour`, liens dans `kit.md`). Le fil de S1 est retiré du
+  calendrier. Geste : `CHANTIERS.md` D9.
