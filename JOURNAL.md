@@ -4938,7 +4938,7 @@ La course existe donc déjà sur `main`, à une fréquence égale ou supérieure
 
 **Après le merge (#177), tranché par Antoine** : sur téléphone, un espace fermé reste un chiffre grisé en pointillé, sans le mot « bientôt » (le lecteur d'écran l'entend). Le bandeau garde ses deux lignes plutôt que d'en prendre une troisième, collante.
 
-## Kit I + B, 2/3 : la borne, le profil du parcours, les jauges, l'image de partage (2026-09-29)
+## Kit I + B, 2/3 : la borne, le profil du parcours, les jauges, l'image de partage (2026-09-29, #178)
 
 La deuxième PR de la passe retenue par Antoine le 2026-09-28, lancée sur son « ok go pour la deuxième PR ». Elle touche le résultat, la carte d'aperçu de l'accueil et l'image de partage.
 
