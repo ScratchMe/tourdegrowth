@@ -14,7 +14,11 @@ import { Dashboard, NightSurface } from "tour-de-growth";
  * a sign AND a word.
  */
 
-const box = { padding: 16, maxWidth: 880 } as const;
+// No side padding: the dashboard gets the full 880px, the widest a card may
+// take. Below ~870px of dashboard width (a window under ~920px) the tiles'
+// 20px figures run out of room and "100,000" breaks mid-number — in the
+// product too; that is the component's to fix, not the card's to hide.
+const box = { padding: "16px 0", maxWidth: 880 } as const;
 
 /** The first of January: churn 6.0% against Q1's 5.6%, 100,000 subscribers, patience at its starting 55, the two secrets hidden. */
 export const YearStart = () => (
