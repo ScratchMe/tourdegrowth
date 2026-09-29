@@ -53,15 +53,6 @@ export function engineEnvFlag(): string | undefined {
 }
 
 /**
- * Whether the flag was open when THIS page was prerendered. The page is
- * static (●): its `robots` tag and, later, the sitemap are fixed at build
- * time, while the proxy reads the flag per request. So the page stays
- * `noindex` until a build runs with the flag open — opening for good means
- * setting the variable AND redeploying, exactly as `.env.local.example` says
- * for the game. A preview cookie never makes a build indexable: a build has
- * no browser, so it holds none.
- */
-/**
  * The name under which `next.config.mjs` inlines the flag as it stood at
  * build — a derived "1"/"0" for client code (the space band), never
  * `ENGINE_ENABLED` itself.
@@ -73,6 +64,15 @@ export function engineOpenWith(env: string | undefined): boolean {
   return resolveEngineAccess({ env, ownerPreview: false }) === "open";
 }
 
+/**
+ * Whether the flag was open when THIS page was prerendered. The page is
+ * static (●): its `robots` tag and, later, the sitemap are fixed at build
+ * time, while the proxy reads the flag per request. So the page stays
+ * `noindex` until a build runs with the flag open — opening for good means
+ * setting the variable AND redeploying, exactly as `.env.local.example` says
+ * for the game. A preview cookie never makes a build indexable: a build has
+ * no browser, so it holds none.
+ */
 export function isEngineOpenAtBuild(): boolean {
-  return resolveEngineAccess({ env: engineEnvFlag(), ownerPreview: false }) === "open";
+  return engineOpenWith(engineEnvFlag());
 }
