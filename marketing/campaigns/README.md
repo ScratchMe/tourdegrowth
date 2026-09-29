@@ -399,3 +399,10 @@ bannissement le plus courant).
   et les annuaires restants de la vague 1 (Launching Next d'abord, campagne
   `relaunch_tour`, liens dans `kit.md`). Le fil de S1 est retiré du
   calendrier. Geste : `CHANTIERS.md` D9.
+- **D3 — Capturer maintenant, refaire à l'ouverture.** Des captures de
+  travail du moteur et du jeu sont prises dès maintenant, **marquées
+  provisoires** (nom de fichier et `kit.md`), pour préparer les annuaires et
+  les fiches ; elles sont refaites le jour de chaque ouverture, contre le
+  build de production. Au passage, les captures du Tour (`marketing/assets/`,
+  du 2026-09-14) sont antérieures à la synthèse I + B et doivent être
+  refaites **avant** les annuaires de D2. À faire : `CHANTIERS.md` A7.12.

@@ -351,6 +351,17 @@ sans ajouter une seule branche à la route publique la plus sensible.
 | Doc | `TESTING.md` : comment lancer l'émulateur en local, et pourquoi il n'y a pas de porte. `relecteur-securite` sur le diff du workflow (une clé jetable dans un log public ne doit rien ouvrir) |
 | Ordre | Avant A7.10, qui en a besoin pour tester la vue propriétaire |
 
+#### A7.12 — Les captures : le Tour à jour, le moteur et le jeu provisoires (C21)
+
+**Décidé** (`marketing/campaigns/README.md` §10, réponse D3) : capturer
+maintenant, refaire à l'ouverture.
+
+| # | Quoi | Comment |
+|---|---|---|
+| A7.12.a | **Refaire les captures du Tour** (`marketing/assets/01` à `05`, `og-*`). Elles datent du 2026-09-14, d'avant la synthèse I + B | Mêmes noms, même format que `marketing/kit.md` « Les captures » (2×, PNG palette, deux langues, desktop et mobile). Contre un build de production local. **À faire avant D9**, puisque les annuaires s'en servent. Si A7.7 (l'encart) ou A7.10 (le partage) sont livrés entre-temps, les captures de résultat suivent |
+| A7.12.b | **Des captures provisoires du moteur et du jeu** | Dans `marketing/assets/`, préfixées `provisoire-` et listées dans `kit.md` comme telles. Le moteur par l'aperçu propriétaire ou un build local ouvert ; l'exemple rempli (§6.0) plutôt qu'un vrai jeu de chiffres. Le jeu : le hub, un trimestre, la page de décembre |
+| A7.12.c | **Les refaire à l'ouverture** de chaque produit (D2), contre la production, et supprimer les `provisoire-` | Fait partie de la vérification d'ouverture |
+
 ### A8 — L'audit GEO, joué sans installer le plug-in
 
 **D'où ça vient** : le 2026-09-29, Antoine a proposé le plug-in
@@ -450,7 +461,7 @@ de ce tableau.
 |---|---|---|
 | C19 | **D1 : qu'est-ce qui est déjà parti de la vague 1 ?** (Show HN du Tour, posts r/SideProject, r/roastmystartup, r/SaaS, Indie Hackers.) Un second Show HN, ou un second r/SaaS dans les 60 jours, brûle le compte | *Un fait que toi seul connais.* Si le Show HN du Tour n'est pas parti, ne pas le faire : garder les deux créneaux HN pour B et C. **→ Répondu le 2026-09-29 : rien n'est parti. Et rien ne part avant que le moteur et le jeu soient prêts. Consigné dans `marketing/campaigns/README.md` §10** |
 | C20 | **D2 : relancer A sur les réseaux, ou le laisser au seul SEO ?** | Un seul fil X/Bluesky, court, centré sur la carte de résultat, puis laisser composer. **→ Tranché autrement le 2026-09-29 : A au seul SEO, sans fil (ceux de B et C mènent au Tour). L'indexation Search Console et les annuaires partent maintenant, puisque ce ne sont pas des posts. Geste : D9** |
-| C21 | **D3 : les captures de B et C**, attendre le design final ou prendre la prévisualisation ? | Attendre la recette de chaque produit, et capturer le jour de l'ouverture |
+| C21 | **D3 : les captures de B et C**, attendre le design final ou prendre la prévisualisation ? | Attendre la recette de chaque produit, et capturer le jour de l'ouverture. **→ Tranché autrement le 2026-09-29 : capturer maintenant, en captures provisoires, puis refaire à l'ouverture. Constat au passage : les captures du Tour datent du 14/09, d'avant I + B. À faire : A7.12, avant D9** |
 | C22 | **D4 : la réponse à « qui est derrière ? »** | Garder celle de la vague 1 : « the site credits its author in the footer; I keep this account pseudonymous » |
 
 ---
@@ -470,7 +481,7 @@ rien de privé dans le dépôt, qui est public. Cela vaut pour les chiffres de
 | D6 | **La distribution, vague 1** | **Non : rien ne part avant que le moteur et le jeu soient prêts** (C19, 2026-09-29). Rien n'est encore parti. Le Tour n'aura ni Show HN ni r/SaaS | Textes dans `marketing/launch/` et `marketing/campaigns/`. Tu postes sous pseudo, la session fournit et met à jour les textes. Annuaires dans l'ordre de `GROWTH-PLAN.md` 1.6. **Jamais ton nom, jamais LinkedIn** |
 | D7 | **La distribution, vague 4** | Après deux semaines de lecture de la vague 1 | La session écrit les pitchs de newsletters et passe honnêtement le produit de chaque auteur au Tour ; tu envoies depuis `contact@`. Pour les listes « awesome », seulement si ton profil GitHub n'affiche pas ton nom (à vérifier d'abord sur github.com/ScratchMe) |
 | D8 | **La recette du jeu** (`GAME-BRIEF.md` §7.3), avant d'ouvrir le jeu (D2) | Oui, dès que le nº7 est signé | Cinq testeurs qui ne connaissent pas le sujet, et les critères de §7.3. **Chronomètre chaque partie complète** (C13, 2026-09-29) : « vingt minutes » reste si la médiane tombe entre 15 et 25 minutes. Sinon, donne-moi la médiane : une session réécrit l'encart (`content/game/entry.ts:65`) et les textes de lancement. La relecture juridique du catalogue des cas réels est aussi à toi (`marketing/campaigns/README.md` §9) |
-| D9 | **Le Tour au seul SEO, maintenant** (C20, 2026-09-29) | Oui | Ce ne sont pas des posts, ils partent sans attendre le moteur et le jeu. 1) Search Console, « Demander l'indexation » pour `/en`, `/fr`, les deux pages « porte ouverte » et les quatre « AARRR vs X » (10 min). 2) Les annuaires restants de la vague 1, dans l'ordre de `GROWTH-PLAN.md` 1.6 (Launching Next d'abord), avec les liens `relaunch_tour` de `marketing/kit.md`. Jamais ton nom. Pas de fil X/Bluesky pour le Tour |
+| D9 | **Le Tour au seul SEO, maintenant** (C20, 2026-09-29) | Oui pour l'indexation. **Les annuaires attendent A7.12.a** (les captures du Tour datent d'avant I + B) | Ce ne sont pas des posts, ils partent sans attendre le moteur et le jeu. 1) Search Console, « Demander l'indexation » pour `/en`, `/fr`, les deux pages « porte ouverte » et les quatre « AARRR vs X » (10 min). 2) Les annuaires restants de la vague 1, dans l'ordre de `GROWTH-PLAN.md` 1.6 (Launching Next d'abord), avec les liens `relaunch_tour` de `marketing/kit.md`. Jamais ton nom. Pas de fil X/Bluesky pour le Tour |
 
 ---
 
