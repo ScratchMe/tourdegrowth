@@ -80,8 +80,9 @@ GAME_ENABLED=true NEXT_PUBLIC_GOATCOUNTER_CODE=e2e-stub ADMIN_DASHBOARD_PASSWORD
 
 - Liste des fichiers conforme à l'intention ; rien de vide, rien de trop.
 - Aucun identifiant de modèle, aucun secret, aucun chiffre de `/admin/stats` ni
-  de la Search Console (le dépôt est public), et jamais le nom d'Antoine dans
-  `marketing/`.
+  de la Search Console (le dépôt est public). Dans `marketing/`, le nom
+  d'Antoine seulement dans la réponse à « qui est derrière ? » (C22), et
+  jamais LinkedIn pour l'instant.
 - Toute copie neuve porte `TODO: à relire` (convention 6).
 - Pour un changement qui touche une route, le proxy, un payload vers le client
   ou un workflow : lancer le sous-agent `relecteur-securite`. Pour de la copie :

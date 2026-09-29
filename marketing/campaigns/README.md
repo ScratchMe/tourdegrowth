@@ -406,3 +406,10 @@ bannissement le plus courant).
   build de production. Au passage, les captures du Tour (`marketing/assets/`,
   du 2026-09-14) sont antérieures à la synthèse I + B et doivent être
   refaites **avant** les annuaires de D2. À faire : `CHANTIERS.md` A7.12.
+- **D4 — « Qui est derrière ? » : Antoine, nommé simplement.** C'est une
+  question de calendrier, pas d'anonymat (`GROWTH-PLAN.md`, option A précisée
+  le 2026-09-29) : son nom sera utilisé, sans lancement en grande pompe pour
+  l'instant et sans LinkedIn tant qu'il ne lève pas cette réserve. La
+  réponse des FAQ (« I keep this account pseudonymous ») est remplacée par
+  une réponse qui le nomme, sans insister (texte « à relire »). À faire :
+  `CHANTIERS.md` A7.13.

@@ -21,14 +21,15 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
-| **A. Le travail autonome**, en six lots | Une session seule, une PR par lot | Session cloud | Maintenant. A1 à A5 l'un après l'autre ; A6 à tout moment |
-| **B. Design sync** | Une session sur ta machine | Claude Code en local : l'autorisation Claude Design ne s'obtient que là | Après A1 de préférence, puis de nouveau après A2 et A5 |
-| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | Maintenant : 22 questions, environ 45 minutes |
-| **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt (D2 attend les bons à tirer nº7 et nº8) |
+| **A. Le travail autonome**, en huit lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | Maintenant. A1 à A5 l'un après l'autre ; A6 à tout moment ; A7 dans l'ordre de ses dépendances ; A8 à tout moment |
+| **B. Design sync** | Une session sur ta machine | Claude Code en local : l'autorisation Claude Design ne s'obtient que là | Après A1 de préférence, puis de nouveau après A2, A5 et A7.10 |
+| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Les 22 tranchées le 2026-09-29.** Reste C23, pas urgente, et la validation de la spécification de A7.3 quand elle sera écrite |
+| **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D9 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D8) et, pour le moteur, tout A7.3 |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
 
-**L'ordre conseillé** : C et A1 en parallèle dès maintenant, car ils ne
-touchent pas les mêmes fichiers. Ensuite B, puis D quand tu as un créneau.
+**L'ordre conseillé** : A1 et A7 en parallèle (A7.1 et A7.3.a, la
+spécification, d'abord : ce sont les plus longs), puis B, puis D quand tu
+as un créneau. La section C a été tranchée le 2026-09-29.
 
 **Deux sessions en parallèle** écrivent toutes deux à la fin de `JOURNAL.md`
 et dans ce fichier. La seconde à merger fusionne `main` dans sa branche avant
@@ -156,6 +157,18 @@ Les réponses d'Antoine à la section C, séance du 2026-09-29. Chaque item dit
 ce qui est décidé ; **il ne se rediscute pas en route**. Une question neuve
 rencontrée en le faisant repart en section C. Toute copie neuve porte
 « TODO: à relire » (convention 6).
+
+**Dans quel ordre.** Les items sont indépendants, sauf :
+- A7.1 avant A7.6, car la slide sans prix suppose que seule une cible
+  désigne ;
+- A7.11 avant A7.10, car la vue propriétaire ne se teste que sur
+  l'émulateur ;
+- A7.3 avant A7.4, parce que les liens promettent ce que le moteur fait ;
+- A7.12.a avant les annuaires de D9.
+
+Le jeu (A7.7, A7.8, et A7.9 pour sa part) n'attend rien du moteur.
+**Commencer par A7.1 et A7.3.a** : ce sont les plus longs, et A7.3.a
+revient à Antoine pour validation.
 
 #### A7.1 — Aucun repère ne désigne l'étape qui freine (C1)
 
@@ -362,6 +375,20 @@ maintenant, refaire à l'ouverture.
 | A7.12.b | **Des captures provisoires du moteur et du jeu** | Dans `marketing/assets/`, préfixées `provisoire-` et listées dans `kit.md` comme telles. Le moteur par l'aperçu propriétaire ou un build local ouvert ; l'exemple rempli (§6.0) plutôt qu'un vrai jeu de chiffres. Le jeu : le hub, un trimestre, la page de décembre |
 | A7.12.c | **Les refaire à l'ouverture** de chaque produit (D2), contre la production, et supprimer les `provisoire-` | Fait partie de la vérification d'ouverture |
 
+#### A7.13 — « Qui est derrière ? » : une réponse qui nomme Antoine (C22)
+
+**Décidé** (`GROWTH-PLAN.md`, option A précisée le 2026-09-29) : c'est une
+question de calendrier, pas d'anonymat. La réponse nomme Antoine,
+simplement. La promotion reste discrète pour l'instant : pas de LinkedIn, pas
+de lancement en grande pompe, et `linkedin` reste dans `EXCLUDED`
+(`scripts/utm-channels.mjs`) tant qu'Antoine ne lève pas la réserve.
+
+| Où | Quoi |
+|---|---|
+| `marketing/launch/show-hn.md:49`, `marketing/campaigns/engine/show-hn.md:77`, `marketing/campaigns/game/show-hn.md:90` | La ligne « Who's behind this? » : une réponse courte qui donne son nom et renvoie au pied de page et à `/about`, sans insister et sans lien vers LinkedIn. En FR là où le texte existe en FR. « À relire » |
+| `marketing/README.md:14`, `marketing/campaigns/brand-review.md:78` et le §8 de `marketing/campaigns/README.md` | La règle « pseudonyme » décrite comme « discrète pour l'instant » |
+| Ne change pas | Le compte qui poste reste celui du projet (`tourdegrowth`). `CLAUDE.md`, `GROWTH-PLAN.md`, `/livrer` §3 et `relecteur-copie` §5 sont déjà à jour. Reste le commentaire de `src/__tests__/utm-channels.test.ts:21-25` (« the author is never named ») : il devient « not for now », et le test, lui, garde `linkedin` exclu |
+
 ### A8 — L'audit GEO, joué sans installer le plug-in
 
 **D'où ça vient** : le 2026-09-29, Antoine a proposé le plug-in
@@ -400,7 +427,7 @@ ne peut pas le pousser.
 |---|---|---|
 | B1 | **Pousser le bundle** vers le projet Claude Design existant (`23b9671c-a55b-452e-aa41-39906ee71ba8`, créé le 2026-09-11) | Au 2026-09-29 : 77 composants, 244 cellules, 77 aperçus sur 77 rendus. Lire `.design-sync/NOTES.md` avant toute commande : ce dépôt est une app, pas un paquet. Trois avertissements sont permanents et attendus : « Impact », et `GRID_OVERFLOW` sur `DefinitionPopover` et `QuarterNews`. **Ne pas appliquer** le `cardMode: "single"` suggéré, qui masquerait des histoires |
 | B2 | **Le brief S-15 : les primitives de formulaire.** Elles vivent hors du système, en deux copies. Côté moteur : `Field`, `NumberField`, `TextField`, `Select`, `Choices`, `CheckField`, `MonthField` et `SegmentedField`, sous `src/app/[locale]/aarrr-funnel-template/_engine/_ui/`. Côté audit : sous `src/app/(app)/admin/audit/` | Écrire `design/DS-EXTENSION-BRIEF-04.md`, sur la forme des briefs 01 et 03, puis l'envoyer à Claude Design. Le retour arrive par `design/ds-extension-04-return/` ou par « Send to Claude Code Web ». La promotion dans `core/` devient ensuite un lot A |
-| B3 | **Re-synchroniser** après A1, A2 et A5 | Ces lots changent des composants et leurs aperçus |
+| B3 | **Re-synchroniser** après A1, A2, A5 et A7.10 | Ces lots changent des composants et leurs aperçus. A7.10 change le contrat de `ShareCard` (primaire chez le propriétaire) |
 
 ---
 
@@ -409,60 +436,49 @@ ne peut pas le pousser.
 Chaque question a :
 - **Aujourd'hui** : ce qui est en place ;
 - **Source** : où elle vit ;
-- **Reco** : ma recommandation.
+- **Reco** : la recommandation de la session.
 
 La session qui les pose recopie chaque réponse, avec sa date, à l'endroit où
 vit la question. Une réponse qui demande du code devient un item de la
-section A.
+section A, un geste d'Antoine un item de la section D.
 
-### Le moteur
+### Séance du 2026-09-29 : les vingt-deux questions sont tranchées
 
-| # | Question | Aujourd'hui | Source | Reco |
+Chaque réponse est écrite là où vit la question, avec son raisonnement.
+Ce tableau n'en est que l'index. Les questions de design ont été posées
+avec des captures du vrai écran : un build local avec le jeu et le moteur
+ouverts, et, pour la vue propriétaire, un build jetable jamais commité.
+
+| # | Sujet | Réponse | Écrit dans | Suite |
 |---|---|---|---|---|
-| C1 | **Le repère de churn logo de 1-2 %/mois peut-il désigner la fuite ?** La vérification des faits dit qu'il ne vaut que pour le SaaS B2B à panier élevé (ChartMogul : médiane de 6,1 % sous 25 $ d'ARPA, 2,2 % au-dessus de 500 $). Un produit à petit panier à 4 % serait signalé à tort. Le repère d'activation de 20-40 %, qui désigne aussi, n'a aucune source primaire. C'est aussi la première carte du bon à tirer nº8 : vérifier d'abord qu'elle n'y est pas déjà tranchée | Les deux repères désignent, avec une réserve imprimée (décision 5 d'`ENGINE.md`). La copie dit « les produits vendus aux petites entreprises » | `ENGINE.md` en tête, `engine-catalog.ts`, `glossary-deep.ts` | **Retirer le pouvoir de désigner aux deux repères** : ils restent affichés comme contexte, et une cible d'équipe désigne toujours. Et reformuler la population du churn (« SaaS B2B à panier élevé »). C'est honnête et simple, sans saisie de plus. Un repère faux pour la moitié du public ne doit pas nommer la fuite. **→ Tranché le 2026-09-29 : contexte seulement, comme recommandé. Non tranché dans le nº8 (sa carte n'avait aucune décision). Code : A7.1** |
-| C2 | Le nom et l'adresse du moteur : « Moteur de croissance » / "Growth engine", à `/{locale}/aarrr-funnel-template`. **Définitif dès l'ouverture** | Pris par défaut | `ENGINE.md`, décision 1 | Garder : c'est la requête sans concurrent de l'audit SEO. **→ Tranché le 2026-09-29 : « Moteur de growth » en français (Antoine garde l'anglicisme), "Growth engine" en anglais ; l'adresse `/aarrr-funnel-template` est gardée, choisie sur le seul critère SEO (raisonnement dans `ENGINE.md`, décision 1). Code : A7.2** |
-| C3 | Le crédit « tourdegrowth.com » sur les slides exportées | Présent par défaut, retirable | Décision 2 | Garder. **→ Confirmé le 2026-09-29. Rien à coder** |
-| C4 | Le périmètre de la v1 : le SaaS libre-service. Le B2B assisté en v1.1, le B2C et la marketplace plus tard | Pris par défaut | Décision 3 | Garder. **→ Tranché autrement le 2026-09-29 : le B2B assisté entre en v1. Le réglage devient un type (SaaS B2B), puis deux motions cochables, PLG et SLG, au moins une. L'hybride se rend en « deux moteurs, un total », jamais en face-à-face. Le détail est dans `ENGINE.md`, décision 3. L'ouverture attend. Spécification puis code : A7.3** |
-| C5 | La slide « déclaré au Tour × mesuré » | Non cochée par défaut | Décision 4 | Garder : elle cite les réponses du Tour mot pour mot, dans un deck qui part en CODIR. **→ Confirmé le 2026-09-29. Rien à coder** |
-| C6 | Le moteur est public, gratuit et local. Ce n'est pas la phase 3 de l'instrument d'audit | Pris par défaut | Décision 6 | Garder. **→ Confirmé le 2026-09-29. Antoine tient l'audit privé pour un doublon du moteur, auquel il croit davantage : c'est la mission D4 qui tranchera, avec une colonne « le moteur le faisait déjà ? » dans le journal des frictions (`AUDIT-PLAN.md` §4). Rien à coder** |
-| C7 | Les liens d'ouverture : `/how-it-works`, les deux pages SEO d'entrée, une section de la landing sous la citation. Pas de septième lien au pied de page | Prévus, pas encore construits. Aujourd'hui, seuls le bandeau d'étape et le sitemap y mènent, une fois le moteur ouvert (vérifié : `ENGINE_PATH` n'est lu que par `SpaceBand`, `sitemap.ts` et `/admin/preview`) | Décision 7 | Garder. Les construire devient un item A avant l'ouverture (D2). **→ Tranché le 2026-09-29, capture de l'accueil à l'appui : les trois pages gardent leur lien, mais pas de section à part sur l'accueil (la bande « trois parties » présente déjà le moteur ; sa carte devient le lien, selon C15), et pas de pied de page. Code : A7.4** |
-| C8 | Le miroir, quand un Tour est présent sur l'appareil mais non relié au moteur | Il n'affiche rien (sans Tour du tout, il invite à faire le Tour) | `ENGINE.md` §8.5, `CLAUDE.md` | Afficher une ligne et le bouton qui relie le Tour. Sinon, la comparaison ne se découvre jamais. **→ Tranché le 2026-09-29, captures à l'appui : une ligne et un bouton, et la case de liaison dans les Réglages. L'invitation « Fais le Tour » menait à une impasse, faute de pouvoir relier le Tour après la carte de départ. Code : A7.5** |
-| C9 | La slide « fuite » quand l'étape nommée n'a pas de prix (rétention à J30, part recommandée) ou qu'elle rapporte moins d'un client | La slide est omise | `lib/engine/deck.ts#buildLeak` | Garder l'omission : pas de slide plutôt qu'un titre faux. **→ Tranché autrement le 2026-09-29, sur une reco revue en séance. Pour une étape sans prix, la slide existe avec un titre sans argent, car un titre vrai existe. Sous un client, l'omission est gardée. Code : A7.6** |
+| C1 | Les repères qui désignent la fuite | **Aucun repère ne désigne** : seule une cible d'équipe nomme l'étape. Population du churn reformulée (« SaaS B2B à panier élevé »). Non tranchée auparavant dans le nº8, sa carte y est désormais remplie | `ENGINE.md` décision 5 | A7.1 |
+| C2 | Nom et adresse du moteur | **« Moteur de growth »** en français, "Growth engine" en anglais. **Adresse `/aarrr-funnel-template` gardée** : Antoine a délégué le choix sur le seul critère SEO, et la session l'a vérifié sur les résultats de recherche du jour | `ENGINE.md` décision 1 | A7.2 |
+| C3 | Crédit tourdegrowth.com sur les slides | Gardé : présent, retirable | `ENGINE.md` décision 2 | — |
+| C4 | Périmètre de la v1 | **Le B2B assisté entre en v1.** Un type (SaaS B2B), puis deux motions cochables, PLG et SLG. L'hybride en « deux moteurs, un total », jamais en face-à-face. L'ouverture du moteur attend | `ENGINE.md` décision 3 | A7.3 (spécification, validation, code, bon à tirer) |
+| C5 | Slide « déclaré × mesuré » | Gardée décochée | `ENGINE.md` décision 4 | — |
+| C6 | Moteur public, distinct de l'audit | Confirmé. Antoine tient l'audit privé pour un doublon : **la mission D4 tranche**, avec une colonne « le moteur le faisait déjà ? ». Les trois clauses du contrat sont précisées en D5 | `ENGINE.md` décision 6, `AUDIT-PLAN.md` §4 | D4, D5 |
+| C7 | Liens d'ouverture du moteur | Les trois pages gardent leur lien ; **pas de section à part sur l'accueil** (la carte de la bande devient le lien) ; pas de pied de page | `ENGINE.md` décision 7 | A7.4 |
+| C8 | Le miroir, Tour présent non relié | **Une ligne et un bouton « Relier ce Tour »**, et la liaison dans les Réglages. L'invitation « Fais le Tour » menait à une impasse | `ENGINE.md` §8.5 | A7.5 |
+| C9 | Slide fuite d'une étape sans prix | **La slide existe**, avec un titre sans argent. Sous un client, l'omission est gardée | `ENGINE.md` §9.3 | A7.6 |
+| C10 | Place de l'encart du jeu | **Sous le bouton principal sur desktop**, comme sur mobile. Mesuré : il faisait descendre le bouton du visiteur de 350 px | `GAME-BRIEF.md` §15.4 | A7.7 |
+| C11 | Quand montrer l'encart | Gardé : la rétention dans le groupe, partagé compris. Le cas de plusieurs niveaux se tranche à l'ouverture d'un deuxième niveau | `GAME-BRIEF.md` §15.4 | Section E |
+| C12 | Noms de zones bilingues | Gardés : « Retention — S'ils reviennent » | `GAME-BRIEF.md` §15.3 | — |
+| C13 | « Vingt minutes » | Chronométré à la recette : gardé si la médiane des testeurs tombe entre 15 et 25 minutes | `GAME-BRIEF.md` §7.3 | D8 |
+| C14 | Amende du jeu | **Plafonnée à 75 000 €**, le maximum légal pour une entreprise | `GAME-BRIEF.md` §5, règle 5 | A7.8 |
+| C15 | Cartes de la bande de l'accueil | **Des liens mesurés** à l'ouverture (`home_strip`), et les pastilles du bandeau mesurées aussi (`space_band`) | `GAME-BRIEF.md` §13.3 E | A7.9 |
+| C16 | Primaire du propriétaire | **« Partager » devient le primaire** chez le propriétaire ; « Refaire le Tour » passe secondaire. Le visiteur ne change pas | Ici et en A7.10 | A7.10 |
+| C17 | Porte de test pour `/r/<id>` | Déléguée à la session : **pas de porte, l'émulateur Firestore en CI** | Ici et en A7.11 | A7.11 |
+| C18 | Projects et Discussions | **Déjà désactivés** (constaté par l'API GitHub). Question non posée, et D1 retiré | — | — |
+| C19 | Ce qui est parti de la vague 1 | **Rien.** Et rien ne part avant que le moteur et le jeu soient prêts | `marketing/campaigns/README.md` §10 | D6 |
+| C20 | Relancer le Tour sur les réseaux | **Le Tour au seul SEO**, sans fil. L'indexation et les annuaires partent maintenant | `marketing/campaigns/README.md` §10 | D9, A7.12.a |
+| C21 | Captures de B et C | **Capturer maintenant**, provisoires, puis refaire à l'ouverture. Celles du Tour datent d'avant I + B | `marketing/campaigns/README.md` §10 | A7.12 |
+| C22 | « Qui est derrière ? » | **La réponse nomme Antoine.** C'est une question de calendrier, pas d'anonymat : pas de LinkedIn ni de lancement en grande pompe pour l'instant | `GROWTH-PLAN.md` option A, `marketing/campaigns/README.md` §10 | A7.13 |
 
-### Le jeu
-
-*Décisions prises par défaut le 2026-09-24, pour avancer. Elles n'étaient
-écrites que dans le répertoire de travail d'une session, et le sont ici
-désormais.*
-
-| # | Question | Aujourd'hui | Reco |
-|---|---|---|---|
-| C10 | **La place de l'encart du jeu sur le résultat.** Sur desktop, il pousse le bouton principal du visiteur environ 30 px sous le bouton de partage. **Question à poser avec une capture du vrai écran** | Desktop : entre « Là où tu perds du temps » et la rangée de CTA. Mobile : après la carte de partage | Garder jusqu'à un mois de chiffres après l'ouverture (section E), puis décider sur les chiffres. **→ Tranché autrement le 2026-09-29, captures à l'appui : sur desktop, l'encart passe sous le bouton principal, comme sur mobile. Mesuré : il faisait descendre le bouton du visiteur de 350 px, pas de ~30 px. Et un mois de chiffres ne dira rien sous 50 soumissions. Code : A7.7** |
-| C11 | Montrer l'encart quand la rétention est dans le **groupe** qui freine, netteté « partagée » comprise | Oui, et jamais sur un tableau « à niveau » | Garder. **→ Confirmé le 2026-09-29. Antoine a demandé ce qui se passera avec tous les niveaux : une carte unique, l'ordre AARRR qui départage deux étapes à égalité, et un encart sur presque tout résultat. C'est noté dans `GAME-BRIEF.md` §15.4, et un déclencheur est ajouté en section E. Rien à coder aujourd'hui** |
-| C12 | Les noms de zones bilingues : « Retention — S'ils reviennent » | Oui | Garder. **→ Confirmé le 2026-09-29, capture du hub à l'appui. Rien à coder** |
-| C13 | La mention « vingt minutes » | Gardée seulement si le temps mesuré la porte ; pas encore mesuré | Chronométrer une partie complète à la recette. Garder si on est entre 15 et 25 minutes, sinon écrire le vrai chiffre. **→ Tranché le 2026-09-29, comme recommandé. Ce sont les parties des testeurs qui sont chronométrées (ils découvrent le jeu), et la médiane tranche. Geste : D8** |
-| C14 | **La formule d'amende** donne au moins 97 500 € à radar 75, au-dessus du maximum légal de 75 000 € par manquement | Fiction inoffensive, qu'un juriste relèverait | **Plafonner à 75 000 € par manquement.** Le jeu tient sa crédibilité de faits vérifiés, et le changement tient en une ligne. **→ Tranché le 2026-09-29, comme recommandé. Code : A7.8** |
-| C15 | **Les cartes de la bande de l'accueil : des liens ou non**, et comment les mesurer. Ni le bandeau ni cette bande ne passent par `game_entry_clicked` | Pas des liens. À trancher à l'ouverture du jeu | En faire des liens à l'ouverture, avec une source `home_strip` dans le vocabulaire de `game_entry_clicked` pour que `/admin/stats` les compte. **→ Tranché le 2026-09-29, comme recommandé, et étendu aux pastilles du bandeau (`space_band`), qui sont déjà des liens mais ne sont pas mesurées. Code : A7.9** |
-
-### Le résultat, la croissance, le dépôt
+### Encore ouvert
 
 | # | Question | Aujourd'hui | Reco |
 |---|---|---|---|
-| C16 | **Le bouton principal du propriétaire sur son résultat** | « Refaire le Tour ». Le partage est un bloc image juste en dessous, et `ShareCard.prompt.md` dit « never primary ». Un essai contraire a été fait puis annulé | Garder. À revoir après A3.2 (le partage avec l'image) et un mois de chiffres. **→ Tranché autrement le 2026-09-29, captures de la vue propriétaire à l'appui : chez le propriétaire, « Partager » devient le primaire. Le « never primary » de `ShareCard.prompt.md` visait le primaire du visiteur ; le cas du propriétaire n'avait pas été couvert par le retour design. Code : A7.10** |
-| C17 | **Une porte de test pour les e2e de composition** : un identifiant de résultat de test derrière une variable d'environnement, fermée par défaut, pour que les e2e passent par le vrai chemin de `/r/<id>`. Aujourd'hui, seul `/r/sample` est testé, et il prend une branche à part | Pas de porte : la garde statique protège seule le payload | Oui, mais fermée par construction en production : refusée dès que `VERCEL` est posé, avec un test qui l'exige. C'est la route publique la plus sensible, et c'est aussi celle qui a fui deux fois (`rawPoints`). **→ Antoine a délégué la décision le 2026-09-29 (« c'est technique »). Décidé par la session : pas de porte dans le code, mais l'émulateur Firestore en CI. `firebase-admin` le respecte nativement, donc le vrai chemin se teste sans rien ajouter à la route publique. Code : A7.11** |
-| C18 | **Les réglages du dépôt : Projects et Discussions** | Activés | Les désactiver : ils ne servent pas, et la posture du README est « lecture bienvenue, PR non attendues ». Le geste est en D1. **→ Déjà fait : l'API GitHub donne `has_projects: false` et `has_discussions: false` le 2026-09-29, avec 9 topics, une description et une page d'accueil posés. La question n'a pas été posée, et D1 est retiré** |
-
-### Les campagnes
-
-Source : `marketing/campaigns/README.md`, §8. Les recommandations sont celles
-de ce tableau.
-
-| # | Question | Reco |
-|---|---|---|
-| C19 | **D1 : qu'est-ce qui est déjà parti de la vague 1 ?** (Show HN du Tour, posts r/SideProject, r/roastmystartup, r/SaaS, Indie Hackers.) Un second Show HN, ou un second r/SaaS dans les 60 jours, brûle le compte | *Un fait que toi seul connais.* Si le Show HN du Tour n'est pas parti, ne pas le faire : garder les deux créneaux HN pour B et C. **→ Répondu le 2026-09-29 : rien n'est parti. Et rien ne part avant que le moteur et le jeu soient prêts. Consigné dans `marketing/campaigns/README.md` §10** |
-| C20 | **D2 : relancer A sur les réseaux, ou le laisser au seul SEO ?** | Un seul fil X/Bluesky, court, centré sur la carte de résultat, puis laisser composer. **→ Tranché autrement le 2026-09-29 : A au seul SEO, sans fil (ceux de B et C mènent au Tour). L'indexation Search Console et les annuaires partent maintenant, puisque ce ne sont pas des posts. Geste : D9** |
-| C21 | **D3 : les captures de B et C**, attendre le design final ou prendre la prévisualisation ? | Attendre la recette de chaque produit, et capturer le jour de l'ouverture. **→ Tranché autrement le 2026-09-29 : capturer maintenant, en captures provisoires, puis refaire à l'ouverture. Constat au passage : les captures du Tour datent du 14/09, d'avant I + B. À faire : A7.12, avant D9** |
-| C22 | **D4 : la réponse à « qui est derrière ? »** | Garder celle de la vague 1 : « the site credits its author in the footer; I keep this account pseudonymous » |
+| C23 | **L'ordre des lancements du moteur (B) et du jeu (C).** Née de C4 : le moteur attend désormais le lot A7.3, alors que le jeu peut être prêt bien avant. Mais rien ne part avant que les deux soient prêts (C19) | Le calendrier dit B puis C, avec trois semaines entre les deux Show HN | Trancher quand les deux sont prêts. Par défaut, l'ordre du calendrier. Si le jeu attend plus d'un mois après sa recette, C d'abord : un jeu prêt qui attend perd son sujet (le Digital Fairness Act est attendu au quatrième trimestre 2026) |
 
 ---
 
@@ -478,10 +494,10 @@ rien de privé dans le dépôt, qui est public. Cela vaut pour les chiffres de
 | D3 | **Lancer la design sync** | Oui | C'est la section B, sur ta machine |
 | D4 | **L'instrument d'audit, phase 1 bis : la mission AB Tasty** | Oui | Voir `AUDIT-PLAN.md` §4. Créer la mission sous `/admin/audit` (profil `b2b-assiste`, sans mandat), et faire partir le jour 1 ce qui est lent (T3, T4). Les T1 se font en libre-service, la définition d'abord. Les T2 se font par système. **Tenir le journal des frictions** dans un fichier local jamais commité dès qu'une friction cite l'entreprise. **Depuis le 2026-09-29 (C6), une colonne de plus par friction : « le moteur le faisait déjà ? »** C'est elle qui dira si l'audit fait doublon avec le moteur public. Critère de sortie : `pending = 0`, exporté. La session corrige les frictions en petites PR, et rien de la phase 2 |
 | D5 | **À côté de l'outil** | Oui | Les cinq à dix entretiens (`AUDIT-PLAN.md` §2). La vérification de ton contrat de travail : elle conditionne la phase 3, et c'est la seule question qui la ferme à elle seule. **Trois clauses à relire** (précisées le 2026-09-29) : la **non-concurrence** (couvre-t-elle un outil vendu à des équipes produit B2B, pendant et après le contrat ?), l'**exclusivité ou l'activité annexe** (une activité commerciale à côté demande-t-elle une autorisation ?) et la **propriété intellectuelle** (un logiciel créé « dans l'exercice de ses fonctions » appartient à l'employeur, CPI art. L113-9, et la clause peut aller plus loin). Si une clause est floue, une consultation d'avocat en droit du travail. Le moteur public et gratuit n'est pas concerné au même titre : rien n'y est vendu |
-| D6 | **La distribution, vague 1** | **Non : rien ne part avant que le moteur et le jeu soient prêts** (C19, 2026-09-29). Rien n'est encore parti. Le Tour n'aura ni Show HN ni r/SaaS | Textes dans `marketing/launch/` et `marketing/campaigns/`. Tu postes sous pseudo, la session fournit et met à jour les textes. Annuaires dans l'ordre de `GROWTH-PLAN.md` 1.6. **Jamais ton nom, jamais LinkedIn** |
+| D6 | **La distribution, vague 1** | **Non : rien ne part avant que le moteur et le jeu soient prêts** (C19, 2026-09-29). Rien n'est encore parti. Le Tour n'aura ni Show HN ni r/SaaS | Textes dans `marketing/launch/` et `marketing/campaigns/`. Tu postes sous pseudo, la session fournit et met à jour les textes. Annuaires dans l'ordre de `GROWTH-PLAN.md` 1.6. **Pas de LinkedIn ni de lancement en grande pompe pour l'instant** (C22 : une question de calendrier, pas d'anonymat) |
 | D7 | **La distribution, vague 4** | Après deux semaines de lecture de la vague 1 | La session écrit les pitchs de newsletters et passe honnêtement le produit de chaque auteur au Tour ; tu envoies depuis `contact@`. Pour les listes « awesome », seulement si ton profil GitHub n'affiche pas ton nom (à vérifier d'abord sur github.com/ScratchMe) |
 | D8 | **La recette du jeu** (`GAME-BRIEF.md` §7.3), avant d'ouvrir le jeu (D2) | Oui, dès que le nº7 est signé | Cinq testeurs qui ne connaissent pas le sujet, et les critères de §7.3. **Chronomètre chaque partie complète** (C13, 2026-09-29) : « vingt minutes » reste si la médiane tombe entre 15 et 25 minutes. Sinon, donne-moi la médiane : une session réécrit l'encart (`content/game/entry.ts:65`) et les textes de lancement. La relecture juridique du catalogue des cas réels est aussi à toi (`marketing/campaigns/README.md` §9) |
-| D9 | **Le Tour au seul SEO, maintenant** (C20, 2026-09-29) | Oui pour l'indexation. **Les annuaires attendent A7.12.a** (les captures du Tour datent d'avant I + B) | Ce ne sont pas des posts, ils partent sans attendre le moteur et le jeu. 1) Search Console, « Demander l'indexation » pour `/en`, `/fr`, les deux pages « porte ouverte » et les quatre « AARRR vs X » (10 min). 2) Les annuaires restants de la vague 1, dans l'ordre de `GROWTH-PLAN.md` 1.6 (Launching Next d'abord), avec les liens `relaunch_tour` de `marketing/kit.md`. Jamais ton nom. Pas de fil X/Bluesky pour le Tour |
+| D9 | **Le Tour au seul SEO, maintenant** (C20, 2026-09-29) | Oui pour l'indexation. **Les annuaires attendent A7.12.a** (les captures du Tour datent d'avant I + B) | Ce ne sont pas des posts, ils partent sans attendre le moteur et le jeu. 1) Search Console, « Demander l'indexation » pour `/en`, `/fr`, les deux pages « porte ouverte » et les quatre « AARRR vs X » (10 min). 2) Les annuaires restants de la vague 1, dans l'ordre de `GROWTH-PLAN.md` 1.6 (Launching Next d'abord), avec les liens `relaunch_tour` de `marketing/kit.md`. Pas de fil X/Bluesky pour le Tour |
 
 ---
 
@@ -570,7 +586,7 @@ Tu m'accompagnes pas à pas dans les actions qui ne peuvent venir que de moi : l
 3. Une action à la fois, en étapes courtes : où aller, quoi cliquer ou taper, ce que je dois voir. Attends ma confirmation avant l'étape suivante.
 4. Vérifie toi-même tout ce qui se vérifie d'ici (la production par curl, GitHub par l'API, les stats par le workflow chiffré) et dis-moi ce que tu as constaté. Pour le reste, demande-moi ce que je vois.
 5. Ne me demande jamais un mot de passe, une clé ou un secret. Rien de privé ne va dans le dépôt : il est public (chiffres de /admin/stats, données d'une mission d'audit, noms de clients).
-6. Promotion : jamais mon nom, jamais LinkedIn. Tu fournis les textes, je poste sous pseudo.
+6. Promotion : pas de LinkedIn ni de lancement en grande pompe pour l'instant, c'est une question de calendrier, pas d'anonymat (C22, `GROWTH-PLAN.md` option A). Tu fournis les textes, je poste sous le compte du projet.
 7. Quand une action est faite : retire-la de CHANTIERS.md, mets à jour CLAUDE.md si l'état change, ajoute l'entrée de JOURNAL.md ; PR de doc seule, mergée quand elle est verte. Si une action révèle du code à écrire, ne l'écris pas ici : ajoute-le en section A.
 
 Réponds-moi en français.
