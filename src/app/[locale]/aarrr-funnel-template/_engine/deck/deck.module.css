@@ -254,7 +254,7 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  transform: rotate(-2deg);
+  rotate: -2deg;
   white-space: nowrap;
 }
 
@@ -1391,6 +1391,19 @@
   border: var(--border-solid);
   border-radius: var(--radius-panel);
   background: var(--surface-page);
+  /*
+   * A deck is up to twenty 1920 × 1080 slides stacked in one column: the ones
+   * off screen are not rendered until they come near (audit du kit §6,
+   * CHANTIERS.md A4, 2026-09-29; Baseline 2025). The box keeps its size —
+   * its width and ratio are its own, never its content's — so nothing jumps.
+   * An export lifts the skip while it runs (export-png.ts), and so does
+   * printing (DeckView.tsx, PRINT_CSS).
+   */
+  content-visibility: auto;
+}
+
+.viewport[data-rendering] {
+  content-visibility: visible;
 }
 
 /* An excluded slide is still editable, so it stays; its dashed frame says it won't be exported. Never dimmed: dimming text fails contrast. */

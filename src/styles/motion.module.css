@@ -39,14 +39,22 @@
  * (--ease-stamp), so it happens once: the three stops this used to have
  * overshot on their own, and an overshooting easing applied to each segment
  * made the numeral bounce twice (design audit L-6).
+ *
+ * The individual properties, like `slam` below (CHANTIERS.md A4,
+ * 2026-09-29): `transform` here would override any transform the element
+ * carries at rest, where `scale` and `rotate` compose with it. `rotate` ends
+ * at 0, the numeral's rest; `individual-transforms.test.ts` keeps every
+ * stamp's resting tilt on `rotate:` too.
  */
 @keyframes stamp {
   from {
-    transform: scale(1.18) rotate(-3deg);
+    scale: 1.18;
+    rotate: -3deg;
     opacity: 0;
   }
   to {
-    transform: none;
+    scale: 1;
+    rotate: 0deg;
     opacity: 1;
   }
 }

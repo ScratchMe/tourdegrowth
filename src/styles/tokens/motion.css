@@ -16,10 +16,36 @@
 :root {
   /* --- Easing --- */
   --ease-out: cubic-bezier(0.2, 0.7, 0.3, 1); /* every settle: hover, state, arrival */
-  /* The stamp overshoots once, then settles: DESIGN-BRIEF « Motion »,
-     .26s cubic-bezier(.2,1.4,.4,1). Entrances only; the keyframes it drives
-     have two stops, so the overshoot is the easing's and happens once. */
-  --ease-stamp: cubic-bezier(0.2, 1.4, 0.4, 1);
+  /*
+   * The stamp overshoots once, then settles: DESIGN-BRIEF « Motion »,
+   * .26s cubic-bezier(.2,1.4,.4,1). Entrances only; the keyframes it drives
+   * have two stops, so the overshoot is the easing's and happens once.
+   *
+   * Written as `linear()` since 2026-09-29 (audit du kit §6, CHANTIERS.md A4;
+   * Baseline 2023): the same curve, sampled from that cubic-bezier, with how
+   * far it goes past its mark in ONE token. The bezier's peak is 5.3 % past
+   * the mark, half-way through; every point after 30 % is a share of it, so
+   * turning --stamp-overshoot up or down reshapes the whole settle and nothing
+   * else. At 0 the stamp lands without a bounce.
+   */
+  --stamp-overshoot: 0.053;
+  --ease-stamp: linear(
+    0,
+    0.312 5%,
+    0.553 10%,
+    0.729 15%,
+    0.853 20%,
+    0.937 25%,
+    0.992 30%,
+    calc(1 + var(--stamp-overshoot) * 0.47) 35%,
+    calc(1 + var(--stamp-overshoot) * 0.81) 40%,
+    calc(1 + var(--stamp-overshoot)) 50%,
+    calc(1 + var(--stamp-overshoot) * 0.81) 60%,
+    calc(1 + var(--stamp-overshoot) * 0.53) 70%,
+    calc(1 + var(--stamp-overshoot) * 0.26) 80%,
+    calc(1 + var(--stamp-overshoot) * 0.08) 90%,
+    1
+  );
 
   /* --- Durations, by use --- */
   --dur-fast: 120ms; /* hover, press */

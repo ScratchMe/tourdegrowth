@@ -100,7 +100,7 @@
   background: var(--surface-accent);
   border-radius: var(--radius-tag);
   padding: var(--space-1) var(--space-3);
-  transform: rotate(-1.5deg);
+  rotate: -1.5deg;
   white-space: nowrap;
 }
 
