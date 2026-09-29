@@ -308,6 +308,30 @@ mesurées.
 | Tests | Un e2e par carte ouverte (lien et événement), la carte fermée sans lien (build sans drapeau), et la même chose pour les pastilles. Accessibilité : un seul nom accessible par carte, et le contraste des états de survol (convention 7) |
 | Quand | Le jeu peut en profiter dès son ouverture. La carte du moteur suit A7.4 |
 
+#### A7.10 — Chez le propriétaire, « Partager » est le primaire (C16)
+
+**Décidé** (2026-09-29, captures de la vue propriétaire à l'appui) : sur son
+propre résultat, le propriétaire a **« Partager ce résultat » comme seul
+bouton plein** (rouge, primaire). « Refaire le Tour » devient secondaire
+(contour). La vue du **visiteur ne change pas** : son primaire reste « Fais
+ton propre Tour → », et le bouton de la carte de partage reste secondaire
+chez lui.
+
+**Pourquoi il n'y a pas de brief design** : le « never primary » de
+`design/ds-extension-03-return/components/result/ShareCard.prompt.md` se
+justifie par le primaire du visiteur, et le retour design n'avait pas couvert
+le propriétaire (commentaire de `ResultView.tsx`, au-dessus de la rangée de
+boutons). La décision comble ce trou. Le contrat est précisé dans le dépôt, et
+part chez Claude Design à la prochaine synchro (B3).
+
+| Où | Quoi |
+|---|---|
+| `components/result/ShareCard` | Une variante « primaire » du bouton de partage, choisie par la page (`isOwner`), jamais par défaut |
+| `app/(app)/r/[id]/ResultView.tsx` et `.module.css` | Chez le propriétaire, « Refaire le Tour » passe en `secondary`. **Sur mobile, la carte de partage passe au-dessus de la rangée de boutons** chez le propriétaire, pour que le primaire ne tombe pas sous un secondaire (la raison de l'essai annulé). Réécrire le commentaire de la rangée de boutons. `isOwner` n'est connu qu'après le montage : le premier rendu reste celui du visiteur. Mesurer le décalage que la bascule produit (le texte du bouton change déjà aujourd'hui) et le garder sous le seuil CLS des e2e existants |
+| Contrat de design | `ShareCard.prompt.md` et son aperçu design-sync disent : « secondary for a visitor, primary for the owner ». Même chose dans `.design-sync/` si le contrat y est recopié |
+| Tests | `result-reading-order.test.ts` et `e2e/result-composition.spec.ts` : l'ordre propriétaire à 390 px (partage avant la rangée). Un e2e propriétaire, dans les deux langues, à 1 280 et 390 px, dit que le seul bouton `primary` visible est « Partager ». Le propriétaire se simule avec `seedOwnedResult`. Mais `/r/sample` ne passe pas d'identifiant à `ResultView` et ne rend donc **jamais** la vue propriétaire : il faut d'abord la porte de C17 (A7.11), ou une autre façon de rendre le propriétaire, à choisir par la session |
+| Mesure | L'événement de partage existe déjà. Noter dans le journal la date du changement, pour lire l'avant et l'après dans `/admin/stats` |
+
 ### A8 — L'audit GEO, joué sans installer le plug-in
 
 **D'où ça vient** : le 2026-09-29, Antoine a proposé le plug-in
@@ -394,7 +418,7 @@ désormais.*
 
 | # | Question | Aujourd'hui | Reco |
 |---|---|---|---|
-| C16 | **Le bouton principal du propriétaire sur son résultat** | « Refaire le Tour ». Le partage est un bloc image juste en dessous, et `ShareCard.prompt.md` dit « never primary ». Un essai contraire a été fait puis annulé | Garder. À revoir après A3.2 (le partage avec l'image) et un mois de chiffres |
+| C16 | **Le bouton principal du propriétaire sur son résultat** | « Refaire le Tour ». Le partage est un bloc image juste en dessous, et `ShareCard.prompt.md` dit « never primary ». Un essai contraire a été fait puis annulé | Garder. À revoir après A3.2 (le partage avec l'image) et un mois de chiffres. **→ Tranché autrement le 2026-09-29, captures de la vue propriétaire à l'appui : chez le propriétaire, « Partager » devient le primaire. Le « never primary » de `ShareCard.prompt.md` visait le primaire du visiteur ; le cas du propriétaire n'avait pas été couvert par le retour design. Code : A7.10** |
 | C17 | **Une porte de test pour les e2e de composition** : un identifiant de résultat de test derrière une variable d'environnement, fermée par défaut, pour que les e2e passent par le vrai chemin de `/r/<id>`. Aujourd'hui, seul `/r/sample` est testé, et il prend une branche à part | Pas de porte : la garde statique protège seule le payload | Oui, mais fermée par construction en production : refusée dès que `VERCEL` est posé, avec un test qui l'exige. C'est la route publique la plus sensible, et c'est aussi celle qui a fui deux fois (`rawPoints`) |
 | C18 | **Les réglages du dépôt : Projects et Discussions** | Activés | Les désactiver : ils ne servent pas, et la posture du README est « lecture bienvenue, PR non attendues ». Le geste est en D1 |
 
