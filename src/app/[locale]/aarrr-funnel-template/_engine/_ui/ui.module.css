@@ -78,9 +78,11 @@
   margin: 0;
 }
 
+/* The character counter: 11.5px and muted, never the faint ink at 11px
+   (design audit S-26 — a label that small has to be the legible grey). */
 .counter {
-  font: var(--meta-2xs);
-  color: var(--text-faint);
+  font: var(--meta-xs);
+  color: var(--text-muted);
   align-self: flex-end;
 }
 
@@ -116,21 +118,53 @@
   font: var(--body-md);
   color: var(--text-body);
   background: var(--surface-card);
-  border: var(--border-dashed);
+  border: var(--border-solid);
   border-radius: var(--radius-button);
   padding: var(--space-4) var(--space-5);
   min-height: var(--hit-min);
   cursor: pointer;
+  transition:
+    box-shadow var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
 }
 
-/* Selected is a solid edge on a sunken fill: the same "this one" the rest of
-   the system draws with a hard border, never with colour alone. */
+/*
+ * The system's one selection language (DS v3 §5.4, conventions.md), the
+ * questionnaire's own: hover lifts the shadow and never touches the fill, and
+ * is off where nothing can hover; selected is the inverse fill, and everything
+ * inside reads on it. The engine used to select with a solid edge on a sunken
+ * fill — a fourth dialect of "this one" (design audit S-3).
+ */
+.choice:not(.choiceDisabled):hover {
+  box-shadow: var(--state-hover-shadow);
+  border-color: var(--state-hover-border);
+}
+
+@media (hover: none) {
+  .choice:not(.choiceDisabled):hover {
+    box-shadow: none;
+    border-color: var(--border-hard);
+  }
+}
+
+.choice:has(.radio:checked),
+.choice:has(.radio:checked) * {
+  color: var(--state-selected-text);
+}
+
 .choice:has(.radio:checked) {
-  border: var(--border-solid);
-  background: var(--surface-sunken);
+  background: var(--state-selected-bg);
+  border-color: var(--state-selected-bg);
 }
 
+.choice:has(.radio:checked) .radio {
+  accent-color: var(--state-selected-text);
+}
+
+/* Not open yet: dashed, the system's « not yet », and dimmed. */
 .choiceDisabled {
+  border-style: dashed;
   cursor: not-allowed;
   opacity: var(--state-disabled-opacity);
 }
@@ -155,17 +189,6 @@
 .choiceNote {
   font: var(--meta-xs);
   color: var(--text-muted);
-}
-
-/* Read, not seen: clip-path rather than display:none, which would remove it
-   from the accessibility tree too (the /quiz h1 lesson, 2026-09-14). */
-.srOnly {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
 }
 
 /* A text-styled button: "I only have the rate", "Close". Underlined so it

@@ -102,6 +102,8 @@
   --border-soft: var(--night-line);
   --border-alert: var(--paint-red); /* a mark: 4.04 / 3.76 / 3.30 */
   --border-divider: var(--night-rule);
+  /* Hover at night cannot live in the shadow: the edge lightens instead. */
+  --state-hover-border: var(--night-muted); /* 8.28 / 7.70 / 6.76 */
 
   --accent-mark: var(--paint-red); /* 3.76 on night-1: a mark, FORBIDDEN as text */
 
@@ -109,7 +111,7 @@
    * Hard shadows stay hard at night (no blur, ever — critique §6); only their
    * color changes. Black on --night-1 is 1.20:1: decorative. A card's edge
    * (≥ 3:1) is carried by --border-hard, never by its shadow — which is also
-   * why hover cannot rely on the shadow in this world (see game.css).
+   * why hover cannot rely on the shadow in this world (--state-hover-border).
    */
   --shadow-color: #000000;
   --texture-ink: rgba(243, 239, 228, 0.05);

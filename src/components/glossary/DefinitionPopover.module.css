@@ -30,12 +30,24 @@
   color: var(--text-body);
 }
 
+/*
+ * A 44px target around a 13px glyph (design audit S-22: it was ~23px tall and
+ * one glyph wide). The negative margins give the extra room back to the
+ * sheet's padding, so the row keeps its height and the ✕ its place, top right.
+ */
 .closeButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: none;
+  min-width: var(--hit-min);
+  min-height: var(--hit-min);
+  margin: -12px -12px -12px 0;
+  padding: 0 12px 0 0;
   font: var(--meta-md);
   color: var(--text-muted);
   background: none;
   border: none;
-  padding: 2px 0;
   cursor: pointer;
 }
 
@@ -58,13 +70,14 @@
   left: 16px;
   right: 16px;
   bottom: 16px;
-  z-index: 40;
+  z-index: var(--z-popover);
 }
 
+/* Right under the sheet it closes (design audit L-7: the scale, not 39/40). */
 .backdrop {
   position: fixed;
   inset: 0;
-  z-index: 39;
+  z-index: calc(var(--z-popover) - 1);
   background: transparent;
   border: none;
   padding: 0;

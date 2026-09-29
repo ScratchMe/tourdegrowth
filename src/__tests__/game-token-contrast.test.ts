@@ -129,7 +129,6 @@ const PAIRS: Pair[] = [
     role: "decorative",
     why: "the hidden tile's dimmed decoy",
   },
-  { fg: "game-hover-border", bg: "surface-card", stated: 7.7, role: "mark", why: "night hover: the edge, not the shadow" },
 ];
 
 /** Color tokens of game.css with no ratio of their own, and why. */

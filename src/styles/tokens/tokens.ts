@@ -38,7 +38,7 @@ export const PRIMITIVES = {
   "paint-red-action": "#cc3e2b",
   "paint-red-deep": "#a32e1f",
   "paint-red-wash": "#f3d9d2",
-  "ink-faint": "rgba(33, 28, 21, 0.65)",
+  "ink-faint": "rgba(33, 28, 21, 0.67)",
 } as const satisfies Record<string, Hex | Rgba>;
 
 export const SEMANTIC = {
@@ -63,13 +63,14 @@ export const SEMANTIC = {
   "border-soft": "var(--ink-1)",
   "border-alert": "var(--paint-red)",
   "border-divider": "rgba(33, 28, 21, 0.22)",
+  "state-hover-border": "var(--ink-0)",
 
   "accent-mark": "var(--paint-red)",
   "shadow-color": "var(--ink-0)",
   "texture-ink": "rgba(33, 28, 21, 0.055)",
 
   "state-bad-text": "var(--paint-red-deep)",
-  "state-good-text": "#1f6b3f",
+  "state-good-text": "#1e693e",
   "state-warn-text": "#7a5200",
 
   "action-primary-bg": "var(--paint-red-action)",
@@ -159,6 +160,7 @@ export const NIGHT_WORLD = {
   "border-soft": "var(--night-line)",
   "border-alert": "var(--paint-red)",
   "border-divider": "var(--night-rule)",
+  "state-hover-border": "var(--night-muted)",
 
   "accent-mark": "var(--paint-red)",
   "shadow-color": "#000000",

@@ -207,11 +207,12 @@
  * `.line` and the canvas inset exist to keep (review R16).
  */
 .draw {
-  animation: tdg-viz-draw 800ms var(--ease-out) backwards;
+  animation: tdg-viz-draw var(--dur-draw) var(--ease-out) backwards;
 }
 
+/* The end label arrives as the line reaches it: a beat before the draw ends. */
 .late {
-  animation: tdg-viz-late 200ms var(--ease-out) 700ms both;
+  animation: tdg-viz-late var(--dur-open) var(--ease-out) calc(var(--dur-draw) - 100ms) both;
 }
 
 @keyframes tdg-viz-draw {

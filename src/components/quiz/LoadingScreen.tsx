@@ -32,12 +32,11 @@ interface LoadingScreenProps {
 // (2.6s each — the old 900ms was too fast to actually read), then the
 // screen settles into a persistent "still working" state: last message
 // held, plus two continuously-animating cues (the numeral placeholder
-// breathing, an ellipsis ticking) that are driven by their own CSS/interval
+// breathing, an ellipsis ticking) that are driven by their own CSS
 // loops, never by a fixed timeout — so motion never stops, no matter how
 // long the real call takes. The parent alone decides when to leave this
 // screen, on the real response.
 const MESSAGE_DURATION_MS = 2600;
-const DOT_TICK_MS = 450;
 
 /** Loading screen — DESIGN-BRIEF.md §06b, extended for real-world latency (see note above). Purely the animation; the real network call happens in the parent while this plays. */
 export function LoadingScreen({ locale, variant }: LoadingScreenProps) {
@@ -61,21 +60,12 @@ function QuickLoadingScreen({ locale }: { locale: Locale }) {
 
 function DeepDiveLoadingScreen({ locale }: { locale: Locale }) {
   const [step, setStep] = useState(0);
-  const [dots, setDots] = useState(0);
 
   useEffect(() => {
     if (step >= 2) return; // hold on the last message — the ellipsis below keeps it visibly alive
     const timer = window.setTimeout(() => setStep((s) => s + 1), MESSAGE_DURATION_MS);
     return () => window.clearTimeout(timer);
   }, [step]);
-
-  // Independent of `step` and of how long the real call takes — this just
-  // keeps ticking for as long as the screen is mounted, so there is always
-  // something moving even if Gemini takes a full minute.
-  useEffect(() => {
-    const timer = window.setInterval(() => setDots((d) => (d + 1) % 4), DOT_TICK_MS);
-    return () => window.clearInterval(timer);
-  }, []);
 
   const messages = [UI_STRINGS.loading.message1, UI_STRINGS.loading.message2, UI_STRINGS.loading.message3];
   const stillWorking = step >= 2;
@@ -100,8 +90,12 @@ function DeepDiveLoadingScreen({ locale }: { locale: Locale }) {
             <span key={i} className={`${styles.message} ${state}`}>
               {text}
               {active && stillWorking && (
+                // Three dots, uncovered one to three by a CSS loop (design
+                // audit S-19): independent of `step` and of how long the call
+                // takes, and switched off under reduced motion, where the
+                // three simply stay — a JS interval ran for the whole ~70 s.
                 <span className={styles.dots} aria-hidden="true">
-                  {".".repeat(dots || 1)}
+                  ...
                 </span>
               )}
             </span>

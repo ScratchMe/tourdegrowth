@@ -282,8 +282,10 @@ function StagePanel({
                       {value.text}
                     </span>
                   ) : null}
-                  {/* Ink for found, outline for the rest — never the red tag: its 11px label on the
-                      road-paint red is 4.42:1, under AA for text this small (R-22). */}
+                  {/* Ink for found, outline for the rest — never the red tag: red on this board
+                      is the stage the diagnosis names (the tab's stamp), and a number's status is
+                      not a diagnosis. Contrast is not the reason: the red Tag reads
+                      --surface-accent, 4.65:1 (design audit S-9). */}
                   <Tag tone={status === "measured" ? "ink" : "outline"} className={styles.metricStatus}>
                     {strings.status[STATUS_KEY[status]]}
                   </Tag>

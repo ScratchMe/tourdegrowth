@@ -115,6 +115,7 @@
 
 /* --- Collect (E4) ------------------------------------------------------ */
 .collect {
+  container: collect / inline-size;
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
@@ -134,8 +135,9 @@
   gap: var(--space-9);
 }
 
-/* Two columns from the board's own breakout width; "to ask for" stays first. */
-@media (min-width: 960px) {
+/* Two columns once the hub has the room (its own width, design audit S-18);
+   "to ask for" stays first. */
+@container collect (min-width: 860px) {
   .collectColumns {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

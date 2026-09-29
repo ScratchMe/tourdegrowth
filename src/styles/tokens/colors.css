@@ -64,12 +64,17 @@
    *
    * REVIEW.md R-22: 0.45 measured 2.80:1 on --surface-card — "quiet" had
    * become "unreadable", on the one line that points at Antoine's CV. 0.62
-   * is the minimum that clears AA (4.67:1); 0.65 gives 5.18:1 and still
-   * sits visibly lighter than --text-muted (#5b5346), so the hierarchy the
-   * addendum asks for (fainter than muted) survives. (4.72:1 on --paper-1:
-   * a translucent color is measured on the ground it actually lands on.)
+   * is the minimum that clears AA (4.67:1) on a card. 0.67 since design
+   * audit L-10: at 0.65 it measured 4.72 on flat --paper-1 but 4.50 at the
+   * darkest point of the page's own halo (--ground-lift, shape.css), which
+   * is where a credit line can sit. 0.67 gives 5.50 on a card, 5.02 on the
+   * page, 4.79 under the halo (4.57 with the grain's darkest pixel on top),
+   * and still sits visibly lighter than
+   * --text-muted (#5b5346), so the hierarchy the addendum asks for (fainter
+   * than muted) survives. A translucent color is measured on the ground it
+   * actually lands on (token-contrast.test.ts).
    */
-  --ink-faint: rgba(33, 28, 21, 0.65);
+  --ink-faint: rgba(33, 28, 21, 0.67);
 }
 
 /* SEMANTIC — the paper world, and the layer a world rebinds */
@@ -115,6 +120,10 @@
   --border-soft: var(--ink-1); /* 2px dashed — pending / secondary */
   --border-alert: var(--paint-red);
   --border-divider: rgba(33, 28, 21, 0.22); /* 1-2px dashed rules */
+  /* A control's edge under the pointer (design audit S-7). On paper it keeps
+     the edge it has — hover lives in the lifted shadow; at night, where the
+     shadow is black and 1.20:1, it lightens (world-night.css). */
+  --state-hover-border: var(--ink-0);
 
   /* Non-text red marks: borders, segments, the wordmark accent. 3.57:1 on
      --paper-1 — a mark (≥ 3:1), never body text. */
@@ -127,12 +136,15 @@
 
   /*
    * Status text. Bad is the deep red — "red means diagnosis" already.
-   * Good and warn are new (DS v3 §5.1), measured 6.17/4.98 and 6.57/5.31 on
-   * --paper-0/--paper-1. On --paper-2, --state-good-text is 4.49:1: large
-   * text only there (≥ 24px, or ≥ 18.66px bold — WCAG's 14pt), never body.
+   * Good and warn are new (DS v3 §5.1), measured 6.34/5.12 and 6.57/5.31 on
+   * --paper-0/--paper-1. Good was #1f6b3f until design audit S-20: 4.98 on
+   * the page, but 4.47 under the page's own halo (--ground-lift), where
+   * December's « won » line sits with no card under it; one step darker
+   * clears it at 4.60, and clears the sunken --paper-2 too (4.61), where
+   * the old green was large text only.
    */
   --state-bad-text: var(--paint-red-deep);
-  --state-good-text: #1f6b3f;
+  --state-good-text: #1e693e;
   --state-warn-text: #7a5200;
 
   --action-primary-bg: var(--paint-red-action);

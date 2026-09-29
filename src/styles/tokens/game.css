@@ -111,21 +111,15 @@
   --game-order-text: var(--paper-0);
   /* The same badge on a ticked (amber) card: red on amber would be 2.63. */
   --game-order-on-selected: var(--night-0); /* outline + text, 10.13 on amber */
-  /*
-   * Hover at night. The shadow is black (1.20:1): hover cannot live in it.
-   * A lighter edge and a 2px lift instead — the night variant of
-   * --state-hover-shadow the plan asks the design system to adopt.
-   */
-  --game-hover-border: var(--night-muted); /* 7.70 on --night-1 */
-  --game-hover-lift: -2px;
+  /* Hover at night lives in the design system now: --state-hover-border
+     (world-night.css, design audit S-7). */
 }
 
 /* --- 3. Type, motion, layout --- */
 :root {
-  /* The Churn tile's hero value on a phone; desktop uses --chart-value-xl. */
-  --game-value-hero-mobile: 700 30px/1 var(--font-display);
-  /* Other tile values on a compact phone row; desktop uses --chart-value. */
-  --game-value-compact: 600 17px/1.1 var(--font-mono);
+  /* Tile values read the chart scale (--chart-value-xl, --chart-value,
+     --chart-value-compact): the two game-only sizes here were read by
+     nothing (design audit S-27). */
   /* The CEO's subtitles: legibility first, neither italic nor mono. */
   --game-subtitle: var(--body-lg);
   /* The phone speaks the app's language (Inter), at its own sizes. */
@@ -134,21 +128,17 @@
   --app-text-link: 500 11.5px/1.3 var(--font-ui); /* never under 11px */
 
   /*
-   * Motion. All of it is switched off by the reduced-motion rule of
-   * motion.css; JS-driven motion (typewriter, the months rolling) lives in
-   * lib/game/ui-timing.ts, where the tests can read it.
+   * Motion: the game's own loops. Arrivals, stamps, reveals and curves read
+   * the site's scale in motion.css (design audit S-12). All of it is switched
+   * off by the reduced-motion rule there; JS-driven motion (typewriter, the
+   * months rolling) lives in lib/game/ui-timing.ts, where the tests read it.
    */
   --game-dur-speak: 220ms; /* mouth scaleY while talking, alternate */
   --game-dur-blink: 4.5s; /* calm blink */
   --game-dur-live: 1.6s; /* live dot */
   --game-dur-live-angry: 0.7s;
   --game-dur-ring: 1.2s; /* incoming call, frame pulse */
-  --game-dur-enter: 200ms; /* report: fade + rise */
-  --game-enter-rise: 8px;
   --game-dur-flash: 600ms; /* phone diff flash */
-  --game-dur-trace: 800ms; /* December curves, stroke-dashoffset */
-  /* December unblur. Proposed to motion.css (plan §2.5); here until it lands. */
-  --dur-reveal: 600ms;
 
   /* Layout (plan §2.8): the desktop split and the phone frame. */
   --game-col-main: 600px;

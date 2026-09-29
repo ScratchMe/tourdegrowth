@@ -8,7 +8,6 @@ import { RequestCopy } from "./RequestCopy";
 import { daysBetween, domId, fill, metricById } from "./text";
 import type { EngineActions, EngineView } from "./view";
 import styles from "./Screens.module.css";
-import ui from "./_ui/ui.module.css";
 
 /**
  * "To go and get" (spec §7 E4) — the collection, planned rather than
@@ -99,7 +98,7 @@ export function CollectHub({ plan, view, actions }: { plan: CollectPlan; view: E
                       <Button variant="quiet" onClick={() => actions.openMetric(id)} data-testid={`engine-fill-${domId(id)}`}>
                         {strings.collect.fill}
                         {/* Five "Fill in" buttons read alike in a screen reader's list of controls: each names its number. */}
-                        <span className={ui.srOnly}> — {name(id)}</span>
+                        <span className="tdg-visually-hidden"> — {name(id)}</span>
                       </Button>
                     </li>
                   ))}

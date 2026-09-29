@@ -13,7 +13,7 @@ import { expect, test } from "./helpers";
  * compiled result in the browser, which is where the bug lived.
  *
  * `document.getAnimations()` keeps an animation with `fill-mode: both` after
- * it ends, so the reading does not race the 380 ms stamp. Checked beforehand
+ * it ends, so the reading does not race the 260 ms stamp. Checked beforehand
  * in Chromium: an element whose `animation-name` has no matching @keyframes
  * returns zero animations, one whose name resolves returns one. So a return
  * of the bug empties the list, and these specs fail.

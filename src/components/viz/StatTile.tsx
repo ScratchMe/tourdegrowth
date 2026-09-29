@@ -56,7 +56,7 @@ interface StatTileKnown extends StatTileBase {
   sub?: string;
   delta?: StatTileDelta;
   bar?: StatTileBar;
-  /** Lifts the blur a `hidden` tile was showing, once (`--dur-reveal`, 600ms by default). Off under reduced motion. */
+  /** Lifts the blur a `hidden` tile was showing, once (`--dur-reveal`). Off under reduced motion. */
   revealing?: boolean;
   /** A small chart under the figure — a mini `BulletChart`, never a second number. */
   children?: ReactNode;

@@ -21,19 +21,19 @@
   transition:
     transform var(--dur-fast) var(--ease-out),
     border-color var(--dur-fast) var(--ease-out),
-    background var(--dur-fast) var(--ease-out);
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
 }
 
 /*
  * Hover at night cannot live in the shadow (black on --night-1 is 1.20:1),
- * so it is a lighter edge and a 2px lift — game.css. It never touches the
- * fill: a hover that sticks after a tap must not look like a choice (DS v3
- * §5.4). The fallbacks are the paper behaviour, should a card ever be drawn
- * outside the night.
+ * so it is the design system's lighter edge (--state-hover-border) and a 2px
+ * lift. It never touches the fill: a hover that sticks after a tap must not
+ * look like a choice (DS v3 §5.4).
  */
 .card:not(:disabled):hover {
-  border-color: var(--game-hover-border, var(--border-hard));
-  transform: translateY(var(--game-hover-lift, 0));
+  border-color: var(--state-hover-border);
+  transform: translateY(-2px);
 }
 
 @media (hover: none) {

@@ -154,7 +154,7 @@ body {
   position: fixed;
   top: var(--space-5);
   left: var(--space-5);
-  z-index: 100;
+  z-index: var(--z-overlay);
   padding: var(--space-4) var(--space-7);
   background: var(--surface-card);
   color: var(--text-body);
@@ -176,14 +176,8 @@ body {
   outline-offset: var(--focus-offset);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation: none !important;
-    transition: none !important;
-  }
-}
+/* The reduced-motion guard lives once, in tokens/motion.css (design audit
+   S-25): this file used to repeat it word for word. */
 
 /**
  * Un titre que le document porte sans le peindre.

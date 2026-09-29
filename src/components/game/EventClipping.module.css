@@ -101,9 +101,11 @@
 /*
  * The news screen's rubber stamp. Its resting place is its final one — tilted,
  * in the flow under the article — so with motion off (motion.css) it is simply
- * there. With motion on, it slams down a beat after the clipping arrives.
+ * there. With motion on, it slams down (motion.module.css, `slam`, the same
+ * keyframe as the verdict's) once the clipping has arrived.
  */
 .stamp {
+  composes: slam from "../../styles/motion.module.css";
   align-self: flex-end;
   display: inline-block;
   margin-top: var(--space-2);
@@ -115,21 +117,13 @@
   color: var(--text-alert);
   border: 3px solid currentColor;
   border-radius: var(--radius-tag);
-  transform: rotate(-6deg);
-  animation: tdg-game-stamp-slam 380ms var(--ease-stamp) 260ms both;
+  rotate: -6deg;
+  animation-duration: var(--dur-stamp);
+  animation-timing-function: var(--ease-stamp);
+  animation-delay: var(--dur-open);
+  animation-fill-mode: both;
 }
 
 .stamp[data-tone="good"] {
   color: var(--state-good-text);
-}
-
-@keyframes tdg-game-stamp-slam {
-  from {
-    opacity: 0;
-    transform: scale(2.4) rotate(-18deg);
-  }
-  to {
-    opacity: 1;
-    transform: rotate(-6deg);
-  }
 }

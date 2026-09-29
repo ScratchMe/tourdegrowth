@@ -9,14 +9,14 @@
   color: var(--text-body);
   border: var(--border-solid);
   border-radius: var(--radius-card);
-  animation: tdg-game-report-enter var(--game-dur-enter, 200ms) var(--ease-out) both;
+  animation: tdg-game-report-enter var(--dur-open) var(--ease-out) both;
 }
 
 /* Fades and rises into the call's place; off under reduced motion (motion.css). */
 @keyframes tdg-game-report-enter {
   from {
     opacity: 0;
-    transform: translateY(var(--game-enter-rise, 8px));
+    transform: translateY(var(--dist-step));
   }
   to {
     opacity: 1;

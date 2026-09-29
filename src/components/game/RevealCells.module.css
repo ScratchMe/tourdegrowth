@@ -1,6 +1,7 @@
 /* Game plan §2.6 — three equal tiles: a dashboard row, read on paper. */
 
 .wrap {
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
@@ -18,8 +19,9 @@
   color: var(--text-muted);
 }
 
-/* Three columns of a phone's width would wrap every label onto three lines. */
-@media (max-width: 560px) {
+/* Three columns of a phone's width would wrap every label onto three lines.
+   The row's own width (design audit S-18): 520px is what a 560px window left it. */
+@container (max-width: 520px) {
   .cells {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-4);
