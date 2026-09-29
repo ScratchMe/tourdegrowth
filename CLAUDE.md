@@ -194,7 +194,7 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 | Sujet | État | Ce qui le déclencherait |
 |---|---|---|
-| Hygiène de dépôt public | **Fait le 2026-09-24** : `SECURITY.md` (adresse `contact@`), posture « lecture bienvenue, PR non attendues » dans le README, actions de `ci.yml` épinglées par SHA et `workflows-pinned.test.ts` qui l'exige pour tous les workflows. Restent côté Antoine : les réglages du dépôt vus au passage (`has_projects`, `has_discussions`) | Rien côté code. |
+| Hygiène de dépôt public | **Fait le 2026-09-24** : `SECURITY.md` (adresse `contact@`), posture « lecture bienvenue, PR non attendues » dans le README, actions de `ci.yml` épinglées par SHA et `workflows-pinned.test.ts` qui l'exige pour tous les workflows. Réglages du dépôt faits le 2026-09-29 : Projects et Discussions désactivés, page d'accueil sur `https://www.tourdegrowth.com`, les neuf topics de `GROWTH-PLAN.md` 0.2 en place (lu par l'API) | Rien côté code. |
 | Limite de débit en mémoire (R-15) | Par instance serverless, arrête le cas naïf | Un abus réel. Passer alors sur un store partagé (Upstash) ou le pare-feu Vercel. |
 | Deep dive à ~70 s | Quatre générations en parallèle depuis le bilingue ; l'écran de chargement est conçu pour une attente longue | Si ça devient la norme, regarder le **nombre** de générations, pas le plafond de temps. |
 | `/r/<id>` déborde de 37 px à 320 px | Hors contrat (DESIGN-BRIEF fixe 390 et exige 375-430) ; c'est le `PillarChip` | Une décision de design, pas un correctif évident. Antoine a choisi de laisser. |

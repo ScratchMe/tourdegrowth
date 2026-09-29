@@ -23,7 +23,7 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 |---|---|---|---|
 | **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot | Session cloud | Maintenant. A2 à A5 l'un après l'autre (A1 et A6 livrés le 2026-09-29) |
 | **B. Design sync** | Une session sur ta machine | Claude Code en local : l'autorisation Claude Design ne s'obtient que là | Maintenant (A1 est livré), puis de nouveau après A2 et A5 |
-| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | Maintenant : 22 questions, environ 45 minutes |
+| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | Maintenant : 21 questions, environ 45 minutes |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt (D2 attend les bons à tirer nº7 et nº8) |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
 
@@ -180,7 +180,6 @@ désormais.*
 |---|---|---|---|
 | C16 | **Le bouton principal du propriétaire sur son résultat** | « Refaire le Tour ». Le partage est un bloc image juste en dessous, et `ShareCard.prompt.md` dit « never primary ». Un essai contraire a été fait puis annulé | Garder. À revoir après A3.2 (le partage avec l'image) et un mois de chiffres |
 | C17 | **Une porte de test pour les e2e de composition** : un identifiant de résultat de test derrière une variable d'environnement, fermée par défaut, pour que les e2e passent par le vrai chemin de `/r/<id>`. Aujourd'hui, seul `/r/sample` est testé, et il prend une branche à part | Pas de porte : la garde statique protège seule le payload | Oui, mais fermée par construction en production : refusée dès que `VERCEL` est posé, avec un test qui l'exige. C'est la route publique la plus sensible, et c'est aussi celle qui a fui deux fois (`rawPoints`) |
-| C18 | **Les réglages du dépôt : Projects et Discussions** | Activés | Les désactiver : ils ne servent pas, et la posture du README est « lecture bienvenue, PR non attendues ». Le geste est en D1 |
 
 ### Les campagnes
 
@@ -204,7 +203,6 @@ rien de privé dans le dépôt, qui est public. Cela vaut pour les chiffres de
 
 | # | Action | Prête ? | Détail |
 |---|---|---|---|
-| D1 | **Les réglages du dépôt GitHub** | Oui, après C18 | Projects et Discussions (Settings → General → Features). Vérifier au passage les topics de `GROWTH-PLAN.md` 0.2 (la description et la page d'accueil sont déjà posées) |
 | D2 | **Ouvrir le jeu et le moteur à tout le monde** | Non : il faut les bons à tirer nº7 et nº8 signés, C1 à C15 tranchés, et les liens d'ouverture (C7) construits | Poser `GAME_ENABLED` et/ou `ENGINE_ENABLED` à `true` dans Vercel (Production), puis **redéployer** (`VERCEL.md` §1.11). Ensuite, la session vérifie la production : pages en 200, sitemap, pied de page, bandeau. Toi, tu demandes l'indexation des nouvelles pages dans Search Console |
 | D3 | **Lancer la design sync** | Oui | C'est la section B, sur ta machine |
 | D4 | **L'instrument d'audit, phase 1 bis : la mission AB Tasty** | Oui | Voir `AUDIT-PLAN.md` §4. Créer la mission sous `/admin/audit` (profil `b2b-assiste`, sans mandat), et faire partir le jour 1 ce qui est lent (T3, T4). Les T1 se font en libre-service, la définition d'abord. Les T2 se font par système. **Tenir le journal des frictions** dans un fichier local jamais commité dès qu'une friction cite l'entreprise. Critère de sortie : `pending = 0`, exporté. La session corrige les frictions en petites PR, et rien de la phase 2 |
