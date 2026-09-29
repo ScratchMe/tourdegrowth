@@ -269,11 +269,13 @@ numbers support:
 
 No icon set, no user-facing dark mode, no chart library, no blurred shadows
 (the night changes the shadow's colour, never its hardness; the game's call
-rings and angers in a hard ring, not a glow). Lines have three weights, each
+rings and angers in a hard ring, not a glow). Lines have four weights, each
 a token: `--border-width` (2px, every edge), `--border-width-stamp` (3px, an
-inked mark over an edge: a rubber stamp, an accent band, the angry edge) and
+inked mark over an edge: a rubber stamp, an accent band, the angry edge),
 `--border-width-hairline` (1px, under the content: a chart's grid, a table's
-rows). Type never goes under 11px. If a design
+rows) and `--border-width-fine` (1.5px, the space band's strokes only). Type
+never goes under 11px, and Inter text never under 13.5px, with two named
+exceptions: the compact button's label and the result's « built by » credit. If a design
 needs one of those, that is a product decision to raise, not a component to
 invent.
 

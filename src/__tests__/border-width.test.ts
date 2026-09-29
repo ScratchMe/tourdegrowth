@@ -7,9 +7,9 @@ import { describe, expect, it } from "vitest";
  * game had 1, 3, 4 and 5px written by hand in a dozen places, beside some
  * fifty `2px solid` / `2px dashed` that did not read --border-width. Every
  * border and outline width now reads a token: --border-width (an edge),
- * --border-width-stamp (an inked mark over an edge) or
- * --border-width-hairline (a line under the content) — tokens/shape.css says
- * which is which. A new width is a new token, argued there, not a literal.
+ * --border-width-stamp (an inked mark over an edge),
+ * --border-width-hairline (a line under the content) or --border-width-fine
+ * (the space band's strokes) — tokens/shape.css says which is which. A new width is a new token, argued there, not a literal.
  *
  * Non-vacuity (2026-09-29): putting back the game's 4px boss edge fails the
  * second test on exactly that line; putting back one `2px solid` fails it on
@@ -35,12 +35,8 @@ const SHAPE = readFileSync(join(SRC, "styles", "tokens", "shape.css"), "utf8");
  * Keyed `file: declaration` so a second occurrence is not covered by the first.
  */
 const NOT_YET_A_TOKEN: Record<string, string> = {
-  "src/components/brand/SpaceBand.module.css: border-right: 1.5px solid currentColor":
-    "the space band's kicker rule, transcribed from the I + B mockup with its signs — a sign stroke, not an edge (CHANTIERS.md, A2.3)",
-  "src/components/brand/SpaceBand.module.css: border: 1.5px solid currentColor":
-    "the space band's stop pills, same stroke as the signs beside them (A2.3)",
   "src/app/[locale]/aarrr-funnel-template/_engine/Peloton.module.css: outline: 1.5px dashed var(--viz-axis)":
-    "the peloton's « unknown » swatch, drawn at the grid's own stroke — the dot grid is redrawn as viz/DotGrid (A2.2, A2.3)",
+    "the peloton's « unknown » swatch, drawn at the grid's own stroke — it takes the stroke of viz/DotGrid when A2.2 redraws the grid",
 };
 
 /** Border and outline declarations whose value can carry a width. */
@@ -73,6 +69,7 @@ describe("every border width reads a token (design audit S-17)", () => {
     expect(SHAPE).toMatch(/--border-width:\s*2px;/);
     expect(SHAPE).toMatch(/--border-width-stamp:\s*3px;/);
     expect(SHAPE).toMatch(/--border-width-hairline:\s*1px;/);
+    expect(SHAPE).toMatch(/--border-width-fine:\s*1\.5px;/);
     // And the three shorthands draw their edge at --border-width, not a copy of it.
     for (const name of ["border-solid", "border-dashed", "border-rule"]) {
       expect(SHAPE).toMatch(new RegExp(`--${name}:\\s*var\\(--border-width\\) (solid|dashed) `));

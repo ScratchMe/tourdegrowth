@@ -10,7 +10,8 @@ import { describe, expect, it } from "vitest";
  * shadowed. They now read a step of the scale: an existing one where the
  * literal sat within half a pixel of it, a step added and named by its use
  * where the screen had a size of its own. The slides are the exception, with
- * their own scale to finish (S-8, CHANTIERS.md A2.1).
+ * their own scale to finish (S-8, CHANTIERS.md A2.1). The « built by » credit
+ * became a named step on 2026-09-29 (C23, below).
  *
  * A1.4 — nothing under 11px. The HC flag of the stage profile and the head of
  * the kilometre marker were 10px, written over tokens of 11.
@@ -41,8 +42,6 @@ const TYPOGRAPHY = strip(readFileSync(join(SRC, "styles", "tokens", "typography.
 const NOT_ON_THE_SCALE: Record<string, string> = {
   "src/components/brand/SiteFooter.module.css: font: 700 100px var(--font-display)":
     "SVG text: 100 is in the viewBox's user units (SiteFooter.tsx lays the wordmark out in them), not a type size",
-  "src/app/(app)/r/[id]/ResultView.module.css: font: 500 12px/1.4 var(--font-ui)":
-    "the « built by » credit, Inter 12px under the scale's own 13.5px floor for Inter: a design question (CHANTIERS.md, C23)",
 };
 
 function declarations(): { where: string; value: string }[] {
@@ -73,6 +72,28 @@ describe("every font size reads the type scale (design audit A1.5)", () => {
   it("the allowance lists only sizes that are still there", () => {
     const present = new Set(declarations().map(({ where }) => where));
     expect(Object.keys(NOT_ON_THE_SCALE).filter((where) => !present.has(where))).toEqual([]);
+  });
+});
+
+describe("Inter's reading floor, 13.5px, has exactly its two named exceptions (C23)", () => {
+  /*
+   * Antoine, 2026-09-29: the result's « built by » credit stays Inter 12px —
+   * discreet, and on one line on a 390px phone, where 13.5px or mono would
+   * wrap it — as a named step of the scale. The compact button's 13px label
+   * was already under the floor. Anything else under it is a regression.
+   * Non-vacuity (2026-09-29): --body-sm set to 13px fails this on that token.
+   */
+  it("lists every Inter step under 13.5px, and only the two decided", () => {
+    const under: string[] = [];
+    let inter = 0;
+    for (const m of TYPOGRAPHY.matchAll(/(--[a-z0-9-]+)\s*:\s*([^;]+);/g)) {
+      if (!m[2]!.includes("var(--font-ui)")) continue;
+      inter++;
+      const size = m[2]!.match(/(\d*\.?\d+)px/);
+      if (size && Number(size[1]) < 13.5) under.push(m[1]!);
+    }
+    expect(inter).toBeGreaterThan(10);
+    expect(under.sort()).toEqual(["--body-credit", "--label-button-sm"]);
   });
 });
 

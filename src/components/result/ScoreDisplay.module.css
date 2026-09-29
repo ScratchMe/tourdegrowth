@@ -96,6 +96,8 @@
  */
 .marker {
   --marker-w: 160px;
+  /* A parameter of the marker's drawing, like its width — not an edge of the
+     system, so not a --border-width-* token (Antoine, 2026-09-29). */
   --marker-edge: 2.5px;
   position: relative;
   box-sizing: border-box;

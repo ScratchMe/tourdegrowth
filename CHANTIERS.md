@@ -23,7 +23,7 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 |---|---|---|---|
 | **A. Le travail autonome**, en cinq lots | Une session seule, une PR par lot | Session cloud | Maintenant. A2 à A5 l'un après l'autre ; A6 à tout moment (A1 livré le 2026-09-29) |
 | **B. Design sync** | Une session sur ta machine | Claude Code en local : l'autorisation Claude Design ne s'obtient que là | Maintenant (A1 est livré), puis de nouveau après A2 et A5 |
-| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | Maintenant : 23 questions, environ 45 minutes |
+| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | Maintenant : 22 questions, environ 45 minutes |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt (D2 attend les bons à tirer nº7 et nº8) |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
 
@@ -54,9 +54,8 @@ route : elle part en section C, avec une recommandation.
 
 | # | Constat | Correctif attendu |
 |---|---|---|
-| A2.1 | **S-8.** Les slides ont 23 tailles de police littérales, jusqu'à 14 px sur une slide projetée de 1 920 px | Compléter l'échelle `--slide-*`, avec rien sous 18 px. Un e2e mesure la plus petite taille rendue d'une slide. L'export PNG est vérifié aussi |
-| A2.2 | **S-10.** Le funnel en points est dessiné trois fois hors du système : le peloton, « Et si » et les slides, à trois tailles | Un `viz/DotGrid` que les trois vues composent, avec son aperçu design-sync. Décider là de l'usage des 15 jetons `--viz-cat-*` et `--viz-seq-*`, qui n'ont aucun lecteur : les employer ou les retirer (`dead-tokens.test.ts` les tient en attente) |
-| A2.3 | **Les trois derniers traits hors jeton** (trouvé par A1, 2026-09-29) : la case « inconnu » du peloton (`outline: 1.5px`) et les deux traits de 1,5 px du bandeau d'espace (`SpaceBand`, transcrits de la maquette I + B). `border-width.test.ts` les liste un par un. S'y ajoute `--marker-edge: 2.5px`, l'épaisseur de la borne du résultat, déclarée dans son module | Les ramener à un jeton (`--border-width` ou `--border-width-hairline`) ou en créer un seul pour le trait des pictos, argumenté dans `shape.css`. Retirer chaque ligne de la liste de la garde. Vérifier à l'écran : ce sont des traits de maquette |
+| A2.1 | **S-8.** Les slides ont 23 tailles de police littérales, jusqu'à 14 px sur une slide projetée de 1 920 px | Compléter l'échelle `--slide-*`, avec rien sous 18 px. Un e2e mesure la plus petite taille rendue d'une slide. L'export PNG est vérifié aussi **Plancher de 18 px confirmé par Antoine le 2026-09-29** : un tableau qui ne tient pas à 18 px se coupe en deux slides, il ne s'écrit pas plus petit |
+| A2.2 | **S-10.** Le funnel en points est dessiné trois fois hors du système : le peloton, « Et si » et les slides, à trois tailles | Un `viz/DotGrid` que les trois vues composent, avec son aperçu design-sync. Décider là de l'usage des 15 jetons `--viz-cat-*` et `--viz-seq-*`, qui n'ont aucun lecteur : les employer ou les retirer (`dead-tokens.test.ts` les tient en attente) La case « inconnu » du peloton (`outline: 1.5px`, la dernière épaisseur hors jeton, listée dans `border-width.test.ts`) prend le trait de `DotGrid` ; retirer alors sa ligne de la garde |
 
 Le moteur est fermé derrière `ENGINE_ENABLED` : les e2e passent par
 l'aperçu propriétaire, comme le canari moteur.
@@ -195,7 +194,6 @@ désormais.*
 | C16 | **Le bouton principal du propriétaire sur son résultat** | « Refaire le Tour ». Le partage est un bloc image juste en dessous, et `ShareCard.prompt.md` dit « never primary ». Un essai contraire a été fait puis annulé | Garder. À revoir après A3.2 (le partage avec l'image) et un mois de chiffres |
 | C17 | **Une porte de test pour les e2e de composition** : un identifiant de résultat de test derrière une variable d'environnement, fermée par défaut, pour que les e2e passent par le vrai chemin de `/r/<id>`. Aujourd'hui, seul `/r/sample` est testé, et il prend une branche à part | Pas de porte : la garde statique protège seule le payload | Oui, mais fermée par construction en production : refusée dès que `VERCEL` est posé, avec un test qui l'exige. C'est la route publique la plus sensible, et c'est aussi celle qui a fui deux fois (`rawPoints`) |
 | C18 | **Les réglages du dépôt : Projects et Discussions** | Activés | Les désactiver : ils ne servent pas, et la posture du README est « lecture bienvenue, PR non attendues ». Le geste est en D1 |
-| C23 | **Le crédit « Built by » sous le résultat** est en Inter 12 px, alors que l'échelle typographique se donne un plancher de 13,5 px pour Inter (trouvé par A1, 2026-09-29). C'est la seule taille de l'interface qui reste hors de l'échelle (`type-scale.test.ts` la tient à part). Source : `ResultView.module.css`, `.builtByCredit` | Inter 12 px, en `--text-faint` | **Le passer en `--meta-sm`** (IBM Plex Mono 12 px) : la même taille, dans la voix que le système donne déjà aux petites mentions (sources, dates). Le passer à 13,5 px en Inter le ferait grossir sous le résultat, pour un texte qui doit rester discret |
 
 ### Les campagnes
 
@@ -242,7 +240,7 @@ rien de privé dans le dépôt, qui est public. Cela vaut pour les chiffres de
 | **Juin 2027** | La fenêtre Tour de France (R2-30) : Grand Départ le 2 juillet 2027 à Édimbourg. À construire en juin, pour partir pendant le Tour | `GROWTH-PLAN.md` |
 | Une facture Vercel qui surprend | `VERCEL.md` §1.6 et §2.2 | `VERCEL.md` |
 | Besoin de `guidelines/` du bundle d'extension 01 | Le demander à Claude Design (l'archive ne le contenait pas) | `CLAUDE.md` |
-| Un contrat de largeur qui descend sous 375 px | Le bandeau d'entrée au jeu repasse sur trois lignes à 320 et 360 px en français (et à 320 en anglais) : la seconde ligne (≈ 270 px de texte) dépasse une colonne de 228 px. Non gratuit, donc laissé par A1 (ex-A1.8) | `game/GameEntry.module.css` |
+| Un contrat de largeur qui descend à 320 px | À 320 px, le bandeau d'entrée au jeu passe sur trois lignes (la seconde, ≈ 270 px de texte, pour une colonne de 244). Laissé par décision d'Antoine (2026-09-29) : seule une copie plus courte le tiendrait. 360 px est réglé depuis le même jour | `game/GameEntry.module.css` |
 
 Une session de relevé (A6), une fois par mois, suffit à voir passer les trois
 premiers.

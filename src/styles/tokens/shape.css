@@ -23,19 +23,24 @@
   /* --- Borders: exactly three, declared in the world block below --- */
   --border-width: 2px;
   /*
-   * Two more weights, each one a use and never a taste (design audit S-17,
+   * Three more weights, each one a use and never a taste (design audit S-17,
    * 2026-09-29). The game had 1, 3, 4 and 5px written by hand; what was
-   * meant became these two, the rest came back to --border-width.
+   * meant became stamp and hairline, the rest came back to --border-width.
    *  - stamp: an inked mark over an edge, one step heavier than it — a rubber
    *    stamp's rim, the angry CEO's edge, the quarter being played, a space's
    *    accent band.
    *  - hairline: a line UNDER the content, never an edge — a chart's grid, a
    *    table's rows, and the screens of another company's app (the game's
    *    phone), which is not drawn in our system.
-   * `border-width.test.ts` fails on any width written outside these three.
+   *  - fine: the space band's strokes (its separator, its stop pills) — light
+   *    lines on the dark band, drawn at 1.5px in the retained I + B mockup;
+   *    at 2px they read heavier there than an edge on paper (Antoine,
+   *    2026-09-29). The band only.
+   * `border-width.test.ts` fails on any width written outside these tokens.
    */
   --border-width-stamp: 3px;
   --border-width-hairline: 1px;
+  --border-width-fine: 1.5px;
   --shadow-none: none;
 
   /*
