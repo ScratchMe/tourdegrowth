@@ -1,0 +1,163 @@
+/*
+ * brand/SpaceStrip — see SpaceStrip.tsx. Each card takes its space's colours
+ * from `tokens/spaces.css`, renamed to three local roles like the band's, so
+ * the rules below are written once for the three legs.
+ */
+
+/* A container, like the band: the strip folds on its own width, not the
+   window's, so it holds in any column it is set in. */
+.strip {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+/* A label with the page's dashed rule running out after it. */
+.heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  font: var(--meta-xs);
+  font-weight: 600;
+  letter-spacing: var(--meta-tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-body);
+}
+
+.heading::after {
+  content: "";
+  flex: 1;
+  border-top: var(--border-rule);
+}
+
+/* The leg you start with is a little wider: it is the one on offer today. */
+.grid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1.25fr 1fr 1fr;
+  gap: var(--space-9);
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+  padding: var(--space-10) var(--space-9);
+  border: var(--border-solid);
+  border-radius: var(--radius-card);
+  background: var(--surface-card);
+  color: var(--text-body);
+  overflow: hidden;
+}
+
+.card[data-space="tour"] {
+  --strip-mark: var(--space-tour-bg);
+  --strip-chip-text: var(--space-tour-text);
+  --strip-picto: var(--space-tour-mark);
+  box-shadow: var(--shadow-card);
+}
+
+.card[data-space="engine"] {
+  --strip-mark: var(--space-engine-bg);
+  --strip-chip-text: var(--space-engine-text);
+  --strip-picto: var(--space-engine-mark);
+}
+
+.card[data-space="game"] {
+  --strip-mark: var(--space-game-bg);
+  --strip-chip-text: var(--space-game-text);
+  --strip-picto: var(--space-game-mark);
+  /* The night's own ground: [data-world="night"] rebinds --surface-page. */
+  background: var(--surface-page);
+}
+
+/* The space's colour along the top, as the band hangs under the header. */
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 7px;
+  background: var(--strip-mark);
+}
+
+/* Not open yet: dashed, as on the band — and « bientôt » says it in words. */
+.card[data-state="soon"] {
+  border-style: dashed;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 11px 5px 8px;
+  border-radius: var(--radius-tag);
+  background: var(--strip-mark);
+  color: var(--strip-chip-text);
+  font: var(--meta-2xs);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.picto {
+  display: flex;
+  color: var(--strip-picto);
+}
+
+.picto svg {
+  display: block;
+  width: 22px;
+  height: 14px;
+}
+
+/* The kind (« Plaine »): in one column only, where the card has the width for it. */
+.kind {
+  display: none;
+  font-weight: 600;
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+}
+
+.when {
+  font: var(--meta-2xs);
+  letter-spacing: var(--meta-tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.name {
+  margin-top: var(--space-3);
+  font: var(--display-section);
+  color: var(--text-body);
+}
+
+.pitch {
+  font: var(--body-md);
+  color: var(--text-body);
+}
+
+/* Three cards need 760px: under it, one column (a phone, a narrow frame). */
+@container (max-width: 759px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+
+  .card {
+    padding: var(--space-9) var(--space-8);
+  }
+
+  .kind {
+    display: inline;
+  }
+}

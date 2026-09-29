@@ -65,6 +65,14 @@ should be checked in French before it is called done.
 « 1/3 · Plaine », and the profile of the five scores is « Profil du
 parcours », never « profil de l'étape ».
 
+Each space wears its colour and its sign, and only where it is the subject:
+the Tour in ink (its pictogram red), the engine in ultramarine
+(`--space-engine-accent`, its labels and rules, and the `Stopwatch` beside its
+intro), the game in ochre on paper and amber at night (`HubMountain` on its
+hub's night poster, `ProsePage introWorld="night"`). `SpaceStrip` is the one
+place the three stand side by side, on the landing. Ochre is never text on
+paper (1.87); the night's amber never leaves the night.
+
 ## Responsive
 
 Sizing is CSS-only. `ScoreDisplay`, `PillarChip`, `QuestionCard`,

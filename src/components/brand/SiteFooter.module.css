@@ -79,6 +79,24 @@
   color: var(--text-link-hover);
 }
 
+/* The name signing off, as wide as the column — see SiteFooter.tsx. */
+.brand {
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.wordmark {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+}
+
+.wordmark text {
+  font: 700 100px var(--font-display);
+  fill: color-mix(in srgb, var(--text-body) 7%, transparent);
+}
+
 .footer a:focus-visible {
   outline: var(--focus-width) solid var(--focus-ring);
   outline-offset: var(--focus-offset);
@@ -93,5 +111,10 @@
 
   .nav {
     gap: 0 var(--space-6);
+  }
+
+  .brand {
+    padding-left: var(--gutter-mobile);
+    padding-right: var(--gutter-mobile);
   }
 }

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ContentHeader } from "@/components/brand/ContentHeader";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import { SiteFooter } from "@/components/brand/SiteFooter";
+import { Stopwatch } from "@/components/brand/Stopwatch";
 import { Button } from "@/components/core/Button";
 import { Callout } from "@/components/core/Callout";
 import { Disclosure } from "@/components/core/Disclosure";
@@ -121,8 +122,14 @@ export default async function EnginePage({ params }: PageProps) {
       <ContentHeader locale={locale} path={PATH} width="wide" space="engine" />
 
       <main id="main" className={styles.main}>
+        {/* A box of the page's own: the drawing fills whatever width it is given. */}
+        <div className={styles.stopwatch}>
+          <Stopwatch data-testid="engine-stopwatch" />
+        </div>
         <div className={styles.intro}>
-          <MetaLabel size="xs">{t.eyebrow}</MetaLabel>
+          <MetaLabel size="xs" className={styles.eyebrow}>
+            {t.eyebrow}
+          </MetaLabel>
           <h1 className={styles.title}>{t.title}</h1>
           <p className={styles.lead}>{t.positioning}</p>
           <p className={styles.text}>{t.promise}</p>
@@ -148,7 +155,7 @@ export default async function EnginePage({ params }: PageProps) {
 
         {/* How long it takes, said BEFORE the tool (retours d'Antoine
             2026-09-25): the counts come from the catalogue's own effort
-            tags, so the sentence cannot promise a split the fifteen
+            tags, so the sentence cannot promise a split the seventeen
             numbers do not have. */}
         <section className={styles.duration} aria-labelledby="engine-duration" data-testid="engine-duration">
           <h2 id="engine-duration" className={styles.durationTitle}>

@@ -5014,3 +5014,54 @@ Non-vacuité, écrite dans `proxy.test.ts` : sans la condition, exactement le te
 **Durcissement ajouté sur l'avis de `relecteur-securite`** : un test épingle `config.matcher` à sa chaîne exacte. Coller l'exemple de la doc (`missing: [{ type: "header", key: "next-router-prefetch" }]`) sortirait les préchargements du proxy. Or `/admin/stats/json` n'a pas de garde à lui : un seul en-tête suffirait alors pour le lire sans mot de passe.
 
 **Suite complète sur ce correctif** : 568 passées, 5 ignorées par construction, **aucun échec**. C'est le premier passage entier sans le flake depuis qu'il est mesuré. Unitaires : 2 189.
+
+## Kit I + B, 3/4 : les signes des trois espaces (2026-09-29, #181)
+
+Demandé par Antoine : « go PR 3 », puis « Deux PR » (les signes d'abord, le reste de l'audit ensuite). Cette PR pose les quatre signes de la synthèse I + B qui restaient hors du résultat ; le reste de l'audit du kit est la PR 4.
+
+**Ce qui change à l'écran** :
+- **L'accueil** : sous le héros, « Le Tour en trois parties » en trois cartes (`brand/SpaceStrip`). Chacune porte la couleur et le signe de son espace (pictogramme, numéro), dit quand il vient (« Maintenant », « Ensuite », « Pour finir ») et ce qu'il donne. Le titre est le nom accessible du bandeau : jamais « étape ». La carte du jeu est posée dans la nuit. Un espace fermé garde sa place, en pointillés, avec « bientôt » à la place de « Ensuite » : le mot et le trait, jamais la couleur seule.
+- **Le moteur** porte son outremer : sur-titre, promesse de confidentialité (bord plein et ombre outremer au lieu du pointillé du `Callout`), les quatre durées, le trait au-dessus de l'outil, la puce « trouvés » du tableau. À droite de l'intro, le chrono de la maquette (`brand/Stopwatch`), à partir de 1 100 px seulement : en dessous, il repousserait le titre dans une colonne étroite, et le pictogramme du bandeau dit déjà « contre-la-montre ».
+- **Le hub du jeu** : l'intro devient une affiche de nuit aussi large que l'écran (`ProsePage introWorld="night"`), avec deux champs d'étoiles, une lueur ambrée et la montagne (`game/HubMountain`) : cinq cols pour cinq zones, celle qu'on peut jouer en ocre avec son numéro sur un drapeau, une lune. La liste des zones reste sur papier ; la zone jouable y prend une ombre ocre cerclée d'encre.
+- **Le pied de page**, sur toutes les pages : « TOUR DE GROWTH » aussi large que la colonne, à 7 % de l'encre, le pied des lettres coupé par le bord de la page. La règle d'extension 01 (« pas de mot-symbole ») est levée par la décision I + B, et la JSDoc le dit.
+
+**Décisions prises par défaut, chacune réversible en une phrase** :
+- **Les cartes de l'accueil ne sont pas des liens.** Le bouton du héros est la porte de l'accueil, le bandeau la navigation de la course. Si Antoine veut des portes, il faudra aussi décider comment les mesurer : ni le bandeau ni cette bande ne passent par `game_entry_clicked`, dont le vocabulaire (`result/retention`, `deep_dive/retention`, `footer`, `hub`) alimente `/admin/stats`. À trancher à l'ouverture du jeu.
+- **La phrase du diagnostic répète « 15 questions, 3 minutes »**, déjà sur le dossard du héros. `dictionary.ts` déconseille de le dire deux fois à quelques lignes d'écart ; ici, un écran plus bas. Elle part au bon à tirer comme le reste.
+- **Les hauteurs de la montagne sont un dessin** (9, 12, 17, 11, 14 sur 20), pas une mesure. La légende ne dit pas ce que vaut une hauteur, rien n'est noté sur le hub, et la figure est cachée aux lecteurs d'écran.
+
+**Deux jetons de plus** (`spaces.css`) : `--space-game-night-accent`, l'ambre de la nuit (10,13 sur la nuit, 1,42 sur papier, d'où la règle : il ne quitte jamais la nuit), et `--space-game-night-glow`, cet ambre à 12 %. Le titre, le chapeau et le sur-titre sont posés sur la lueur, donc mesurés dessus, composée sur la nuit : 13,15, 6,65 et 8,13 (`space-token-contrast.test.ts`, qui vérifie aussi que la lueur est bien l'accent à 12 %). Le chrono lit `--space-engine-accent`, `--border-hard`, `--surface-card` et `--shadow-color` ; aucun composant ne lit de primitive.
+
+**Le chrono et la colonne de l'intro, calculés avant d'être posés.** L'intro fait 760 px et le cadre du moteur 960 : avec 280 px de chrono, les deux se seraient chevauchés de 80 px. Au-dessus de 1 100 px, l'intro laisse donc 320 px au chrono (`min(760px, 100% - 320px)`) ; le texte courant, plafonné à la mesure de lecture, n'y perd presque rien. La spec vérifie qu'aucun titre, paragraphe ni lien ne passe sous le dessin.
+
+**Le mot-symbole est mesuré, pas deviné.** À corps 100, « TOUR DE GROWTH » en Stardos Stencil fait 905 unités d'avance et 902 d'encre, pour des capitales de 71. Le dessin fait donc 902 × 66, avec la ligne de base à 72 : la page coupe le pied des lettres. `textLength` tient la largeur si la police de repli dessine à la place. En SVG et caché aux lecteurs d'écran : un `::after` aurait été lu par certains lecteurs, et un texte HTML à 7 % aurait été un faux échec de contraste pour axe.
+
+**Ce que la mesure a corrigé** :
+- **Une assertion vide dans la nouvelle spec.** Pour prouver que le pied des lettres est coupé, la première version comparait le bas de la boîte du texte au bas du dessin. La boîte d'un texte SVG inclut la descente de la police : elle dépasse toujours, même avec une ligne de base remontée de 40 unités. La spec vérifie maintenant la règle elle-même, une ligne de base sous le bord du dessin.
+
+**e2e** (`e2e/spaces-kit.spec.ts`, 8 tests, 1 280 px en anglais et 390 px en français) :
+- la bande nomme les trois espaces dans l'ordre et lit les mêmes drapeaux que le bandeau ;
+- un espace fermé est en pointillés et dit « bientôt », la carte du jeu est dans la nuit, aucune carte n'est un lien ;
+- trois colonnes sur grand écran, une sur téléphone ;
+- les couleurs calculées du moteur sont l'outremer, le chrono est caché aux lecteurs d'écran, visible à 1 280 px et absent à 390 px ;
+- l'intro du hub est dans la nuit, pleine largeur, et les drapeaux de la montagne sont exactement les zones jouables de la liste ;
+- le mot-symbole a la largeur de la colonne des liens, termine la page, et reste sous 10 % d'opacité.
+Aucune page ne défile de côté.
+
+**design-sync** : `SpaceStrip`, `Stopwatch` et `HubMountain` entrent dans l'inventaire (77 composants), avec leurs aperçus, plus une histoire `NightIntro` pour `ProsePage`. `conventions.md` dit où chaque espace porte sa couleur. Deux choses vues seulement dans le rendu du bundle :
+- **La bande se repliait sur la fenêtre, pas sur sa largeur.** Dans l'histoire « Phone » (350 px dans un volet large), les trois cartes restaient côte à côte, écrasées : la règle était une media query. C'est maintenant une requête de conteneur, comme le bandeau ; la bande tient dans n'importe quelle colonne, et passe à une colonne sous 760 px de large.
+- **`RENDER_THIN` sur le chrono** : le validateur lit un aperçu sans texte comme vide, alors que le dessin est bien là. Les deux histoires ont maintenant une légende, plutôt qu'un quatrième avertissement permanent.
+
+**Relectures.** `relecteur-securite` : aucun constat. La bande ne révèle rien que le bandeau ne dise déjà sur l'accueil (les mêmes drapeaux inlinés), aucun aperçu propriétaire ne peut la faire passer « ouverte », rien ne rend la page dynamique, et rien de nouveau ne part vers le client. `relecteur-copie` : rien de bloquant, et ceci corrigé :
+- les dates de contenu de `/` et `/game` (`updated-at.ts`) ;
+- deux écarts de vocabulaire en anglais : "the stage holding you back", comme partout ailleurs, et "leadership meeting", la traduction de « CODIR » fixée par le moteur ;
+- « stage » employé pour un espace dans deux JSDoc et deux aperçus, qui partent chez Claude Design à côté de la règle qui l'interdit ;
+- les espaces insécables et une copie périmée (« pillar ») dans les aperçus de `ProsePage`.
+Restent pour Antoine, au bon à tirer : « cinq cols » (la métaphore du dessin) là où le jeu dit « zones », et « 17 » en chiffres là où le moteur écrit « dix-sept ».
+
+**Vérifié avant la PR** :
+- **2 195 tests unitaires** (6 de plus : les contrastes de la nuit), `tsc`, `eslint`, `next build` propres ;
+- couverture au-dessus de ses seuils, `npm audit --omit=dev` à zéro ;
+- suite Playwright complète : **576 passées, 5 ignorées par construction, aucun échec** ;
+- après les corrections des relecteurs et le passage en requête de conteneur, 71 specs repassées sur le nouveau build : la nouvelle spec, l'accessibilité, l'accueil, les pages de prose, la typographie, les données structurées ;
+- bundle design-sync : 77/77 aperçus rendus, les trois avertissements permanents seulement.

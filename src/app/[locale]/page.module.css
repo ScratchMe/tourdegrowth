@@ -86,6 +86,11 @@
 
 /* REVIEW-03.md B3 — one sentence and a link, never a section: no card, no
    border box, just a rule above it and the reading measure. */
+/* The race in three cards, a section's gap under the hero. */
+.strip {
+  margin-top: var(--space-15);
+}
+
 .founder {
   margin-top: 72px;
   padding-top: 26px;
@@ -225,6 +230,10 @@
 
   .promise {
     max-width: none;
+  }
+
+  .strip {
+    margin-top: var(--space-14);
   }
 
   .founder {

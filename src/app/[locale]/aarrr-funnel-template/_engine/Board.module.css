@@ -81,8 +81,10 @@
   padding: var(--space-2) var(--space-4);
 }
 
+/* Found: the engine's ultramarine, the one chip that says « done » (I + B). */
 .chipFound {
-  border: var(--border-solid);
+  border: 2px solid var(--space-engine-accent);
+  color: var(--space-engine-accent);
 }
 
 .chipApprox,

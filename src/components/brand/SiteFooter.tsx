@@ -61,8 +61,14 @@ export interface SiteFooterProps {
  * Design system extension 01 brought it into the system as-is: text on stone
  * under the same dashed rule as the header, because that rule IS the footer's
  * signature — the page is a ticket with a top and a bottom edge. Never add a
- * card, a Tag, a second rule or a wordmark to give it "more presence"
- * (SiteFooter.prompt.md).
+ * card, a Tag or a second rule to give it "more presence".
+ *
+ * One addition since, and only one (design I + B, retained by Antoine on
+ * 2026-09-28): the name, set as wide as the column, faint (the text ink at
+ * 7%), its foot cropped by the page's bottom edge — the brand signing off, not
+ * a second logo. It is a drawing: hidden from assistive technology, never a
+ * link, never read; the header's wordmark is the one that works. That note
+ * in extension 01's prompt said "no wordmark" before this decision.
  */
 export function SiteFooter({ locale, width = "wide" }: SiteFooterProps) {
   return (
@@ -122,6 +128,18 @@ export function SiteFooter({ locale, width = "wide" }: SiteFooterProps) {
           </TrackedLink>
           {tc(SITE_FOOTER_CREDIT.suffix, locale)}
         </p>
+      </div>
+
+      {/* The drawing box is the name's ink, measured in Stardos Stencil at
+          100 units: 902 wide, 71 for the capitals. The baseline sits under
+          the box, so the letters' foot is cut by the page's edge; `textLength`
+          holds the width if the fallback face draws instead. */}
+      <div className={`${styles.brand} ${styles[width]}`}>
+        <svg className={styles.wordmark} viewBox="0 0 902 66" aria-hidden="true" focusable="false" data-testid="footer-wordmark">
+          <text x="0" y="72" textLength="905" lengthAdjust="spacingAndGlyphs">
+            TOUR DE GROWTH
+          </text>
+        </svg>
       </div>
     </footer>
   );

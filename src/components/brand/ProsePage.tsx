@@ -38,6 +38,12 @@ export interface ProsePageProps {
   band?: ReactNode;
   /** The space this page belongs to — the game's hub and levels. Hangs the space band under the header (`SpaceBand`). */
   space?: Space;
+  /**
+   * `night` sets the intro (kicker, title, lead, note) in the night world, as
+   * wide as the screen: the game hub's poster, stars and a glow over the
+   * mountain (design I + B, 2026-09-28). The column below stays on paper.
+   */
+  introWorld?: "night";
   children: ReactNode;
 }
 
@@ -70,17 +76,21 @@ export function ProsePage({
   switchQuery,
   band,
   space,
+  introWorld,
   children,
 }: ProsePageProps) {
+  const intro = (
+    <div className={styles.intro}>
+      {kicker}
+      <h1 className={`${styles.title} ${styles[titleSize]}`}>{title}</h1>
+      {lead && <p className={styles.lead}>{lead}</p>}
+      {note}
+    </div>
+  );
+  const night = introWorld === "night";
   const column = (
     <>
-      <div className={styles.intro}>
-        {kicker}
-        <h1 className={`${styles.title} ${styles[titleSize]}`}>{title}</h1>
-        {lead && <p className={styles.lead}>{lead}</p>}
-        {note}
-      </div>
-
+      {night ? null : intro}
       {children}
     </>
   );
@@ -89,10 +99,16 @@ export function ProsePage({
     <>
       <ContentHeader locale={locale} path={path} switchQuery={switchQuery} space={space} />
 
-      {band ? (
+      {band || night ? (
         // The column keeps its own box, so a page with a band reads exactly
-        // like one without until the band starts.
-        <main id="main" className={[styles.withBand, className ?? ""].filter(Boolean).join(" ")}>
+        // like one without until the band starts; a night intro is the same
+        // column's intro, set in a box as wide as the screen above it.
+        <main id="main" className={[styles.stacked, className ?? ""].filter(Boolean).join(" ")}>
+          {night && (
+            <div className={styles.night} data-world="night" data-testid="prose-night-intro">
+              <div className={styles.nightInner}>{intro}</div>
+            </div>
+          )}
           <div className={styles.main}>{column}</div>
           {band}
         </main>

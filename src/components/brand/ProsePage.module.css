@@ -15,15 +15,50 @@
 
 /* A page with a band (the game level): the column above, then a band as
    wide as the screen — the band sets its own inner width and gutters. The
-   column closes on the band's gap rather than on the page's 80px foot. */
-.withBand {
+   column closes on the band's gap rather than on the page's 80px foot.
+   A night intro (the game hub) stacks the same way, above the column. */
+.stacked {
   display: flex;
   flex-direction: column;
 }
 
-.withBand > .main {
+.stacked > .main {
   width: 100%;
+}
+
+.stacked > .main:not(:last-child) {
   padding-bottom: var(--space-12);
+}
+
+/*
+ * The night intro — design I + B, 2026-09-28: the game hub as a night
+ * poster. Two fields of stars (amber and the night's ink, a dot each on a
+ * tile no two of which line up), the amber glow over the mountain, on the
+ * night's own ground. `[data-world="night"]` on this box rebinds every
+ * semantic token under it; the ground and the text colour are painted here
+ * because both would otherwise be inherited, computed, from the paper body.
+ * The glow's brightest point is where every contrast of the night's text is
+ * measured (space-token-contrast.test.ts).
+ */
+.night {
+  background:
+    radial-gradient(circle, color-mix(in srgb, var(--space-game-night-accent) 42%, transparent) 0.9px, transparent 1.4px)
+      3px 5px / 47px 37px,
+    radial-gradient(circle, color-mix(in srgb, var(--text-body) 28%, transparent) 0.8px, transparent 1.3px) 21px 19px /
+      61px 43px,
+    radial-gradient(900px 400px at 70% 0%, var(--space-game-night-glow), transparent 70%),
+    var(--surface-page);
+  color: var(--text-body);
+}
+
+.nightInner {
+  max-width: var(--width-reading);
+  margin: 0 auto;
+  padding: var(--space-14) 24px var(--space-12);
+}
+
+.night + .main {
+  padding-top: var(--space-12);
 }
 
 .intro {
