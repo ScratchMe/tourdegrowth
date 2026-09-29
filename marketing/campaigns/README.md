@@ -211,7 +211,7 @@ l'**espacement** entre deux lancements ne se comprime jamais (règle 2 du §0).
 | **S1** · 28 sept-4 oct | **A** : intégration mergée (copie revue, DS v3). Relevé de la ligne de départ par `stats.yml` **le jour même**, avant tout post | `main`, workflow stats | Antoine (merge), session (relevé) | Portier A |
 | S1 | A : « Demander l'indexation » dans la Search Console pour `/en`, `/fr`, les deux pages « porte ouverte » et les quatre « AARRR vs X » | Search Console | Antoine, 10 min | Après le merge |
 | S1 | A : annuaires restants de la vague 1 (Launching Next d'abord), avec la campagne `relaunch_tour` | Annuaires | Antoine (formulaires), liens déjà dans `kit.md` | — |
-| S1 | A : un fil X / Bluesky « ce qui a changé », EN puis FR le lendemain | X, Bluesky | Antoine poste, textes dans `social.md` de la vague 1 à mettre à jour (§8, D2) | — |
+| S1 | ~~A : un fil X / Bluesky « ce qui a changé », EN puis FR le lendemain~~ **Retiré le 2026-09-29 (§10, réponse D2) : A au seul SEO** | X, Bluesky | — | Retiré |
 | **S2** · 5-11 oct | Lecture A à J+7 : Tours créés, partages, `take_own_tour` ; recalage des cibles | `/admin/stats` | Session (workflow), Antoine décide | — |
 | S2 | **Bon à tirer nº6** (copie du moteur) signé ; recette du moteur ; spec canari verte | Revue | Antoine ; **portier B** | — |
 | S2 | Comptes : commenter sur HN et dans r/SaaS, r/growthhacking **sans lien**, pour que le compte existe avant le post | HN, Reddit | Antoine, 15 min par jour | Continu |
@@ -381,3 +381,35 @@ bannissement le plus courant).
 | **D2** | Relancer A sur les réseaux, ou laisser A au seul SEO ? | Un fil « nouvelle copie » intéresse peu ; les annuaires et le SEO font l'essentiel | Un seul fil X/Bluesky, court, centré sur la carte de résultat (l'action sur l'image), puis laisser composer |
 | **D3** | Les captures B et C : attendre le design final ou prendre la prévisualisation ? | Une capture de prévisualisation qui change avant le lancement est un visuel faux | Attendre la recette de chaque produit, et capturer le jour de l'ouverture |
 | **D4** | La réponse à « qui est derrière ? » | Sous l'option A, la seule réponse honnête dit que le site est signé | Garder celle de la vague 1 : « the site credits its author in the footer; I keep this account pseudonymous » |
+
+### Réponses d'Antoine (séance des décisions du 2026-09-29, `CHANTIERS.md` C19 à C22)
+
+- **D1 — Rien n'est parti** de la vague 1, nulle part (ni le Show HN du Tour,
+  ni Reddit, ni Indie Hackers). **Et rien ne part avant que le moteur et le
+  jeu soient prêts**, « pour avoir suffisamment de matière ». Le Tour
+  n'aura ni Show HN ni r/SaaS : les deux créneaux HN du pseudo restent au
+  moteur (B) et au jeu (C), et la fenêtre r/SaaS reste au moteur. Ses posts
+  r/SideProject, r/roastmystartup et Indie Hackers attendent, et se
+  recaleront sur le calendrier de B et C. Les commentaires sans lien (S2),
+  qui font exister le compte, ne sont pas concernés.
+- **D2 — A au seul SEO.** Pas de fil X/Bluesky pour le Tour : les fils du
+  moteur et du jeu mènent au Tour de toute façon. Ce qui n'est pas un post
+  part **maintenant** : « Demander l'indexation » dans la Search Console
+  (`/en`, `/fr`, les deux pages « porte ouverte », les quatre « AARRR vs X »)
+  et les annuaires restants de la vague 1 (Launching Next d'abord, campagne
+  `relaunch_tour`, liens dans `kit.md`). Le fil de S1 est retiré du
+  calendrier. Geste : `CHANTIERS.md` D10.
+- **D3 — Capturer maintenant, refaire à l'ouverture.** Des captures de
+  travail du moteur et du jeu sont prises dès maintenant, **marquées
+  provisoires** (nom de fichier et `kit.md`), pour préparer les annuaires et
+  les fiches ; elles sont refaites le jour de chaque ouverture, contre le
+  build de production. Au passage, les captures du Tour (`marketing/assets/`,
+  du 2026-09-14) sont antérieures à la synthèse I + B et doivent être
+  refaites **avant** les annuaires de D2. À faire : `CHANTIERS.md` A7.12.
+- **D4 — « Qui est derrière ? » : Antoine, nommé simplement.** C'est une
+  question de calendrier, pas d'anonymat (`GROWTH-PLAN.md`, option A précisée
+  le 2026-09-29) : son nom sera utilisé, sans lancement en grande pompe pour
+  l'instant et sans LinkedIn tant qu'il ne lève pas cette réserve. La
+  réponse des FAQ (« I keep this account pseudonymous ») est remplacée par
+  une réponse qui le nomme, sans insister (texte « à relire »). À faire :
+  `CHANTIERS.md` A7.13.
