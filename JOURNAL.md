@@ -5314,3 +5314,21 @@ Des seize opportunités de plateforme, douze sont absentes de `src/`, `text-wrap
 - **Les choix faits en route par A1, validés** : trimestre en cours 5 → 3 px et bord du DG en colère 4 → 3 px dans le jeu, nom de l'espace à 19 px sur téléphone, actions texte du moteur sur le bouton `quiet`.
 
 **Vérifié** : lint et `tsc` propres, **2 236 tests unitaires** (+1), couverture au-dessus de ses seuils, `next build` propre avec `GAME_ENABLED=true`, **593 specs Playwright** (+1 : 588 passées, 5 ignorées par construction, aucun échec, sans reprise). À l'écran : le bandeau à 320, 360 et 390 px en français et en anglais ; le crédit mesuré à 360, 390 et 1 280 px (une ligne à 390, inchangé).
+
+**En production** : PR [#188](https://github.com/ScratchMe/tourdegrowth/pull/188), mergée le 2026-09-29 (squash `f62469d`, 13 fichiers, identique à la tête de la PR), servie à 18 h 55 UTC. Relevé par HTTP sur les feuilles servies par `/en` et `/fr` : présents `--border-width-fine:1.5px`, `--body-credit:500 12px/1.4 var(--font-ui)` et la requête de conteneur `game-entry (max-width:319px)` qui ramène les marges du bandeau à `--space-5`.
+
+## A6 : le premier relevé chiffré (2026-09-29)
+
+**La demande** : le lot A6 de `CHANTIERS.md`, tout ce que la session peut lire seule par `stats.yml` (portées `admin` et `gsc`), sans qu'un chiffre entre dans le dépôt. Deux runs lus : `both`, puis `admin` seul pour relancer la fenêtre « All-time ». Clé `age` créée dans le scratchpad de la session, jamais commitée ; les rapports déchiffrés y sont restés.
+
+**A6.1, les événements d'A4 dans le vrai GoatCounter.** La section funnel porte bien les trois champs attendus, dans les deux fenêtres : `landingReturn` et `valueActionsPerResult` sont présents (des vrais retours sur l'accueil ont été comptés), `retakeStarted` est présent mais pas encore déclenché : personne n'a refait son Tour. Le point de la table « ce qui reste ouvert » de `CLAUDE.md` est retiré.
+
+**Au passage, `take_own_tour` absent depuis le début.** C'était le seul événement du funnel à zéro sur toutes les fenêtres, avec `retake_started`. Vérifié que ce n'est pas l'envoi : Firestore ne compte aucune soumission arrivée par un lien partagé (`referredSubmissions`, `kFactor` et `conversionPerShare` absents eux aussi), et `visitor-cta.spec.ts` exige l'événement au clic. Les deux sources concordent : c'est le volume, pas l'instrumentation.
+
+**A6.2, Search Console.** Les anciennes adresses `/glossary/*` (d'avant R-13) sont encore créditées sur 28 et 90 jours, les `/fr/glossary/*` le sont aussi, et aucune `/en/glossary/*`. Côté site, tout est en place, vérifié en production le même jour : la 308 de `/glossary/aarrr` vers `/en/glossary/aarrr`, la canonique, `hreflang` en, fr et `x-default` sur `/en/`, et un sitemap qui ne liste aucune adresse non préfixée. C'est donc Google qui garde l'ancienne adresse comme représentante, pour l'anglais seulement. Rien à coder ; le geste qui tranche est dans Search Console : geste **D8** de `CHANTIERS.md` (inspection de l'URL, lire la canonique choisie par Google, demander l'indexation).
+
+**A6.3, les déclencheurs de volume.** Ni les 50 soumissions, ni quelques centaines, ni aucun signe d'abus. Rien ne s'ouvre dans la section E.
+
+**La fenêtre « All-time » a renvoyé une 404 de GoatCounter** au premier run, comme le 2026-09-14. Relancée seule quelques minutes plus tard, elle répond. Deux occurrences, deux fois passée à la relance : c'est une réponse passagère de leur API sur la plus longue fenêtre, pas notre code. La règle « relancer avant d'enquêter » tient, et elle est maintenant dans la ligne « Lecture des stats » de `CLAUDE.md`, pas seulement ici.
+
+**Ce qui change dans les documents** : A6 sort de `CHANTIERS.md` (la section A passe à quatre lots), la section E dit qu'un relevé mensuel suffit et renvoie à la méthode, D8 s'ajoute. Dans `CLAUDE.md`, la ligne des événements d'A4 est retirée et celle de la lecture des stats mise à jour.
