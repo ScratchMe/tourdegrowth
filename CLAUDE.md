@@ -129,7 +129,7 @@ règles :
 
 Retenu le 2026-09-27 en jouant le plug-in Claude Code Setup (sans l'installer), et validé par Antoine :
 
-- **`/livrer`** et **`/bon-a-tirer`** (`.claude/skills/`) : les deux séquences qu'on refaisait à la main, merger jusqu'à la production et construire puis appliquer un bon à tirer. Appelables par Antoine seulement (`disable-model-invocation`) : l'une merge, l'autre publie.
+- **`/livrer`** et **`/bon-a-tirer`** (`.claude/skills/`) : les deux séquences qu'on refaisait à la main, merger jusqu'à la production et construire puis appliquer un bon à tirer. Appelables par Antoine seulement (`disable-model-invocation`) : l'une merge, l'autre publie. **Depuis le 2026-09-29, la session merge d'elle-même une PR verte** en suivant `/livrer` (lu, pas appelé), sauf si le merge touche une dépendance, un réglage de build ou ajoute une route de fonction : alors question à Antoine (`/livrer` §0).
 - **`relecteur-securite`** et **`relecteur-copie`** (`.claude/agents/`) : deux sous-agents en lecture seule, à lancer sur un diff avant une PR.
 - **Un hook** (`.claude/settings.json`) refuse tout Edit ou Write dans ce dépôt tant que la branche courante est `main` (convention 2). Une écriture par Bash passe à travers.
 - **Pas de lint ni de type-check après chaque édition** : environ 7 s par édition, mesuré. La CI et `/livrer` s'en chargent.

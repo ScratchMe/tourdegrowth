@@ -1,6 +1,6 @@
 ---
 name: livrer
-description: Emmène la branche de travail jusqu'à la production — vérifications locales, PR, CI, merge en squash, contrôle du squash puis de la production. Appelé par Antoine quand il demande de merger, jamais de lui-même.
+description: Emmène la branche de travail jusqu'à la production — vérifications locales, PR, CI, merge en squash, contrôle du squash puis de la production. Appelé par Antoine ; la session suit aussi cette séquence d'elle-même pour une PR verte, dans la limite du §0.
 disable-model-invocation: true
 ---
 
@@ -8,8 +8,14 @@ disable-model-invocation: true
 
 La séquence de merge de ce dépôt, rassemblée depuis `GITHUB.md`, `VERCEL.md`,
 `TESTING.md` et les conventions de `CLAUDE.md`. Chaque étape existe parce qu'un
-merge est parti de travers sans elle. Appeler ce skill, c'est la demande de
-merger : sans lui, on s'arrête à une PR à CI verte.
+merge est parti de travers sans elle.
+
+**Qui décide du merge** (Antoine, 2026-09-29 : « quand les PR sont vertes, tu
+peux merge, n'attends pas forcément mon GO, tant que tu sais que tu ne vas pas
+provoquer soudainement une grosse hausse de functions storage côté Vercel ») :
+une PR verte se merge sans attendre son accord, en suivant cette séquence, lue
+et non appelée. Sauf si elle peut faire grimper Functions Storage : alors on
+s'arrête à la PR verte et on lui pose la question (§0).
 
 ## 0. Avant tout
 
@@ -17,6 +23,15 @@ merger : sans lui, on s'arrête à une PR à CI verte.
   déclencheur (table en tête de `CLAUDE.md`).
 - **Un état de dépôt s'énonce d'après GitHub**, jamais d'après un clone ou un
   document (convention 10) : `git fetch --prune origin` d'abord.
+- **La barrière Functions Storage**, pour un merge que la session décide
+  seule. Ce qui fait grimper le compteur, c'est le poids des fonctions
+  (`VERCEL.md` §1.6) : une dépendance, une route de fonction, un réglage de
+  build. Donc, avant de merger sans Antoine :
+  `git diff --stat origin/main..HEAD -- package.json package-lock.json next.config.mjs vercel.json`
+  doit être vide, et `git diff --name-status origin/main..HEAD -- src/app`
+  ne doit ajouter (`A`) aucun `route.ts` ni `page.tsx` dynamique. Sinon, PR
+  verte et question à Antoine, avec le poids mesuré (`VERCEL.md` §1.2). Un
+  merge qui ne touche que de la doc ne déploie rien et passe toujours.
 
 ## 1. La branche
 

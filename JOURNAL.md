@@ -5188,3 +5188,5 @@ Demandé par Antoine après le merge de #182 : « il me semble qu'il y a quelque
 - bundle design-sync : 77/77 aperçus, les trois avertissements permanents seulement. L'histoire `Elevations` de `Card` montre `hero`.
 
 **Relectures non lancées**, et pourquoi : aucune route, aucun proxy, aucun payload ni prompt n'est touché, et aucune copie visible n'est ajoutée (seuls des commentaires changent).
+
+**Après la PR, une règle de merge nouvelle** (Antoine) : « quand les PR sont vertes, tu peux merge, n'attends pas forcément mon GO, tant que tu sais que tu ne vas pas provoquer soudainement une grosse hausse de functions storage côté Vercel ». Écrite là où une session la lit avant d'agir : `CLAUDE.md` (l'outillage), `GITHUB.md` §2 et `/livrer` §0. Ce dernier donne la barrière vérifiable : aucun changement à `package.json`, au verrou, à `next.config.mjs` ni à `vercel.json`, et aucune route de fonction ajoutée. #183 la passe : du style, six composants retouchés, des tests et de la doc.
