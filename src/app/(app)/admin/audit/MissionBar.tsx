@@ -71,13 +71,13 @@ export function MissionBar({
         ) : null}
       </div>
       <div className={styles.missionBarActions}>
-        <Button compact variant="secondary" onClick={onExport} data-testid="export-mission">
+        <Button size="sm" variant="secondary" onClick={onExport} data-testid="export-mission">
           Exporter
         </Button>
-        <Button compact variant="secondary" onClick={onExportPurged} data-testid="export-purged">
+        <Button size="sm" variant="secondary" onClick={onExportPurged} data-testid="export-purged">
           Exporter une copie purgée
         </Button>
-        <Button compact variant="secondary" onClick={onClose} data-testid="close-mission">
+        <Button size="sm" variant="secondary" onClick={onClose} data-testid="close-mission">
           Fermer
         </Button>
       </div>

@@ -55,7 +55,7 @@ export function BadgeSnippet({ src, alt, markdown, caption, lead, copyLabel, cop
       <pre className={styles.code}>
         <code data-testid="badge-markdown">{markdown}</code>
       </pre>
-      <Button variant="secondary" compact onClick={copy} aria-live="polite" data-testid="badge-copy">
+      <Button variant="secondary" size="sm" onClick={copy} aria-live="polite" data-testid="badge-copy">
         {copied ? copiedLabel : copyLabel}
       </Button>
     </div>

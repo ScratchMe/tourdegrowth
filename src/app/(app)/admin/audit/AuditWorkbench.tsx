@@ -358,13 +358,13 @@ export function AuditWorkbench({
             onClose={() => goTo({ kind: "list" })}
           />
           <Card elevation="panel" className={styles.viewSwitch}>
-            <Button compact variant="secondary" onClick={() => goTo({ kind: "tour", id: current.id })} data-testid="open-tour">
+            <Button size="sm" variant="secondary" onClick={() => goTo({ kind: "tour", id: current.id })} data-testid="open-tour">
               Le Tour ({Object.keys(currentPass?.tourAnswers ?? {}).length} / {questions.length})
             </Button>
-            <Button compact variant="secondary" onClick={() => goTo({ kind: "restitution", id: current.id })} data-testid="open-restitution">
+            <Button size="sm" variant="secondary" onClick={() => goTo({ kind: "restitution", id: current.id })} data-testid="open-restitution">
               Restitution
             </Button>
-            <Button compact variant="secondary" onClick={() => goTo({ kind: "findings", id: current.id })} data-testid="open-findings">
+            <Button size="sm" variant="secondary" onClick={() => goTo({ kind: "findings", id: current.id })} data-testid="open-findings">
               Constats ({currentPass?.findings.length ?? 0})
             </Button>
           </Card>
@@ -372,7 +372,7 @@ export function AuditWorkbench({
             <RowList mission={current} pass={currentPass} today={today} onOpenRow={(metricId) => goTo({ kind: "row", id: current.id, metricId })} />
           ) : null}
           <Card elevation="panel" className={styles.placeholder}>
-            <Button compact variant="secondary" onClick={() => goTo({ kind: "purge", id: current.id })} data-testid="open-purge">
+            <Button size="sm" variant="secondary" onClick={() => goTo({ kind: "purge", id: current.id })} data-testid="open-purge">
               Purger et retirer de cet appareil
             </Button>
           </Card>
@@ -519,10 +519,10 @@ function PurgeConfirm({ mission, onCancel, onConfirm }: { mission: Mission; onCa
           <TextInput id="purge-confirm" value={typed} onChange={setTyped} autoFocus />
         </Field>
         <div className={styles.screenActions}>
-          <Button compact variant="secondary" onClick={onCancel}>
+          <Button size="sm" variant="secondary" onClick={onCancel}>
             Annuler
           </Button>
-          <Button compact onClick={onConfirm} data-testid="confirm-purge" {...(matches ? {} : { disabled: true })}>
+          <Button size="sm" onClick={onConfirm} data-testid="confirm-purge" {...(matches ? {} : { disabled: true })}>
             Purger
           </Button>
         </div>

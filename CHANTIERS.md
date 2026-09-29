@@ -69,10 +69,10 @@ route : elle part en section C, avec une recommandation.
 C'est à faire avant la seconde passe de B.
 
 **Où on en est (2026-09-29)** : la table est écrite (« Variant names » dans
-`conventions.md`), avec la cible de chaque nom retiré. La famille quiz et
-résultat est migrée (`desktop|mobile` → `md|sm`). `variant-names.test.ts`
-tient la liste de ce qui reste, famille par famille :
-- **core** : `Segmented`, `ToneToggle` et `Button` en `size="sm"`, `Tag` en `tone="alert"` ;
+`conventions.md`), avec la cible de chaque nom retiré. Les familles quiz et
+résultat (`desktop|mobile` → `md|sm`, #197) et core (`Segmented`, `ToneToggle`
+et `Button` en `size="sm"`, `Tag` en `tone="alert"`) sont migrées.
+`variant-names.test.ts` tient la liste de ce qui reste, famille par famille :
 - **viz** : `StatTile`, `BulletChart`, et `DotGrid` / `DotLegend` en `medium` ;
 - **jeu** : `DgFace` et `ClickPill`.
 

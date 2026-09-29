@@ -49,7 +49,7 @@ export function RestitutionView({
     <section className={styles.screen}>
       <div className={styles.screenHead}>
         <h2 className={styles.h2}>Restitution</h2>
-        <Button compact variant="secondary" onClick={onClose} data-testid="close-restitution">
+        <Button size="sm" variant="secondary" onClick={onClose} data-testid="close-restitution">
           Retour
         </Button>
       </div>
@@ -72,7 +72,7 @@ export function RestitutionView({
           <p className={styles.muted}>
             Aucun angle mort ne peut être établi tant que le Tour est vide : c&apos;est un croisement, il lui faut les deux axes.{" "}
           </p>
-          <Button compact variant="secondary" onClick={onOpenTour} data-testid="open-tour-from-restitution">
+          <Button size="sm" variant="secondary" onClick={onOpenTour} data-testid="open-tour-from-restitution">
             Remplir le Tour
           </Button>
         </Card>
@@ -88,7 +88,7 @@ export function RestitutionView({
           <ul className={styles.rowList}>
             {view.blindSpots.map((item) => (
               <li key={item.row.id}>
-                <Button compact variant="secondary" onClick={() => onOpenRow(item.row.id)} data-testid={`blind-spot-${item.row.id}`}>
+                <Button size="sm" variant="secondary" onClick={() => onOpenRow(item.row.id)} data-testid={`blind-spot-${item.row.id}`}>
                   {item.row.name}
                 </Button>
               </li>
@@ -130,7 +130,7 @@ function RestitutionItem({ item, onOpen }: { item: RestitutionRow; onOpen: () =>
             {QUADRANT_LABELS[item.quadrant]}
           </p>
         </div>
-        <Button compact variant="secondary" onClick={onOpen} data-testid={`open-restitution-${item.row.id}`}>
+        <Button size="sm" variant="secondary" onClick={onOpen} data-testid={`open-restitution-${item.row.id}`}>
           Ouvrir
         </Button>
       </Card>

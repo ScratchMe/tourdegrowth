@@ -257,7 +257,7 @@ function ReadingFields({
         {shortcut ? (
           <Button
             variant="quiet"
-            compact
+            size="sm"
             className={ui.textAction}
             onClick={() => set({ kind: reading.kind === "ratio" ? shortcut : "ratio" })}
           >

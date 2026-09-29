@@ -46,17 +46,17 @@ export const Links = () => (
 );
 
 /**
- * `compact` is the header scale: a 32px track, and each segment's touch
+ * `sm` is the header scale: a 32px track, and each segment's touch
  * target reaches 44px on the segment itself, into the 6px of room the group
  * keeps above and below — never strip that room to tighten a header.
  */
-export const Compact = () => {
+export const Small = () => {
   const [tone, setTone] = React.useState<"neutral" | "roast">("neutral");
   return (
     <div style={{ display: "flex", gap: 20, alignItems: "center", flexWrap: "wrap" }}>
       <Segmented
         as="button"
-        size="compact"
+        size="sm"
         label="Tone"
         value={tone}
         onChange={setTone}
@@ -68,7 +68,7 @@ export const Compact = () => {
       />
       <Segmented
         as="a"
-        size="compact"
+        size="sm"
         label="Language"
         value="fr"
         options={[

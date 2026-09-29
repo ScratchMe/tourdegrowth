@@ -3,16 +3,21 @@ import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode, Ref } from 
 import styles from "./Button.module.css";
 
 type Variant = "primary" | "secondary" | "quiet";
-type Size = "md" | "lg";
+type Size = "sm" | "md" | "lg";
 
 interface SharedProps {
   /** primary = filled road-paint red, max one per screen · secondary = ink outline · quiet = the one text button: underlined, drawn as a line of text, tapped on a 44px strip */
   variant?: Variant;
-  /** md = desktop (14px 24px) · lg = the large CTA: 17px label, 17px 20px padding (16px sides under 760px) */
+  /**
+   * sm = --label-button-sm, 11px 20px: the header CTA, the admin's small
+   * actions, and a `quiet` action beside sliders or fields (the growth
+   * engine) — not part of the DS bundle's own matrix, see Button.module.css ·
+   * md = the default (14px 24px) · lg = the large CTA: 17px label, 17px 20px
+   * padding (16px sides under 760px). `sm` was a `compact` flag beside the
+   * size until the variant names were made one word per axis (S-16).
+   */
   size?: Size;
   fullWidth?: boolean;
-  /** Smaller sizing, --label-button-sm: the header CTA, and a `quiet` action beside sliders or fields (the growth engine) — not part of the DS bundle's own variant matrix, see Button.module.css. */
-  compact?: boolean;
   className?: string;
   children: ReactNode;
 }
@@ -59,20 +64,19 @@ type ButtonProps = LinkButtonProps | PlainButtonProps;
  * either way.
  */
 export function Button(props: ButtonProps) {
-  const { variant = "primary", size = "md", fullWidth = false, compact = false } = props;
+  const { variant = "primary", size = "md", fullWidth = false } = props;
   const className = [
     styles.button,
     styles[size],
     styles[variant],
     fullWidth ? styles.fullWidth : "",
-    compact ? styles.compact : "",
     props.className ?? "",
   ]
     .filter(Boolean)
     .join(" ");
 
   if (props.href !== undefined) {
-    const { href, hard = false, variant: _v, size: _s, fullWidth: _fw, compact: _c, className: _cn, children, ...rest } =
+    const { href, hard = false, variant: _v, size: _s, fullWidth: _fw, className: _cn, children, ...rest } =
       props;
     if (hard) {
       return (
@@ -93,7 +97,6 @@ export function Button(props: ButtonProps) {
     variant: _v2,
     size: _s2,
     fullWidth: _fw2,
-    compact: _c2,
     className: _cn2,
     loading = false,
     disabled,

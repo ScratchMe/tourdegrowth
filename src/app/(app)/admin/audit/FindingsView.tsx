@@ -70,7 +70,7 @@ export function FindingsView({
     <section className={styles.screen} data-testid="findings-screen">
       <div className={styles.screenHead}>
         <h2 className={styles.h2}>Constats</h2>
-        <Button compact variant="secondary" onClick={onClose} data-testid="close-findings">
+        <Button size="sm" variant="secondary" onClick={onClose} data-testid="close-findings">
           Retour
         </Button>
       </div>
@@ -124,7 +124,7 @@ export function FindingsView({
                     </p>
                   </div>
                   <Button
-                    compact
+                    size="sm"
                     variant="secondary"
                     onClick={() => onNewFinding([entry.metricId])}
                     data-testid={`promote-${entry.metricId}`}
@@ -220,7 +220,7 @@ function FindingRow({
         </div>
         <div className={styles.viewSwitch}>
           <Button
-            compact
+            size="sm"
             variant="secondary"
             onClick={onToggleHeadline}
             data-testid={`headline-${finding.id}`}
@@ -231,7 +231,7 @@ function FindingRow({
             {finding.headline ? "Retirer de la une" : "À la une"}
           </Button>
           <Button
-            compact
+            size="sm"
             variant="secondary"
             onClick={onSetPriority}
             data-testid={`priority-${finding.id}`}
@@ -239,7 +239,7 @@ function FindingRow({
           >
             Action prioritaire
           </Button>
-          <Button compact variant="secondary" onClick={onOpen} data-testid={`open-finding-${finding.id}`}>
+          <Button size="sm" variant="secondary" onClick={onOpen} data-testid={`open-finding-${finding.id}`}>
             Ouvrir
           </Button>
         </div>

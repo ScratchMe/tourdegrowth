@@ -64,7 +64,7 @@ export function ContextEditor({
       </Field>
       {defaultDecision && !entry.decisionAtStake ? (
         <Button
-          compact
+          size="sm"
           variant="secondary"
           onClick={() => onChange({ decisionAtStake: defaultDecision })}
           data-testid="use-catalog-decision"
@@ -135,7 +135,7 @@ export function ContextEditor({
           </div>
         ))}
         <Button
-          compact
+          size="sm"
           variant="secondary"
           onClick={() => patchExposure({ inputs: [...inputs, { label: "", value: 0, source: "" }] })}
           data-testid="add-exposure-input"

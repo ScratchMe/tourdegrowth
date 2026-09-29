@@ -45,12 +45,12 @@ export interface PreviewCardProps {
  * **Why the landing gets a tone control and the result page does not.** The
  * result screen shows exactly two CTAs and a third was refused (R-23). This
  * card is a demo, and a demo you can poke is a stronger promise that a roast
- * exists than a line of copy saying so. `compact` keeps it visibly
+ * exists than a line of copy saying so. `sm` keeps it visibly
  * subordinate to "Start your Tour →", which stays the only filled red element
  * on the screen.
  *
  * The score's eyebrow sits on `ScoreDisplay` here, as it does on the result
- * page, rather than in the top row: this card is 448px wide and the compact
+ * page, rather than in the top row: this card is 448px wide and the small
  * toggle takes 219 of them, so a top row carrying both the eyebrow and the
  * sample caption wrapped to three lines. The row now holds only what the
  * toggle has to sit beside.
@@ -81,7 +81,7 @@ export function PreviewCard({
       <div className={styles.previewTopRow}>
         <MetaLabel size="xs">{caption}</MetaLabel>
         <ToneToggle
-          size="compact"
+          size="sm"
           value={tone}
           onChange={setTone}
           straightLabel={toneLabels.straight}

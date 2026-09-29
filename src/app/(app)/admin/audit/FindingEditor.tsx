@@ -61,7 +61,7 @@ export function FindingEditor({
     <section className={styles.screen}>
       <div className={styles.screenHead}>
         <h2 className={styles.h2}>Constat</h2>
-        <Button compact variant="secondary" onClick={onClose} data-testid="close-finding">
+        <Button size="sm" variant="secondary" onClick={onClose} data-testid="close-finding">
           Retour
         </Button>
       </div>
@@ -246,11 +246,11 @@ export function FindingEditor({
         ) : null}
 
         <div className={styles.screenActions}>
-          <Button compact variant="secondary" onClick={onClose}>
+          <Button size="sm" variant="secondary" onClick={onClose}>
             Annuler
           </Button>
           <Button
-            compact
+            size="sm"
             data-testid="save-finding"
             {...(ready ? {} : { disabled: true })}
             onClick={() => {

@@ -57,7 +57,7 @@ export function ImportPanel({
     <section className={styles.screen}>
       <div className={styles.screenHead}>
         <h2 className={styles.h2}>Importer une mission</h2>
-        <Button compact variant="secondary" onClick={onCancel}>
+        <Button size="sm" variant="secondary" onClick={onCancel}>
           Annuler
         </Button>
       </div>
@@ -116,10 +116,10 @@ export function ImportPanel({
                     ? " Ce fichier est une copie purgée : la remplacer échangerait tout le travail contre une copie sans nom ni valeurs."
                     : ""}
                 </p>
-                <Button compact variant={mode === "replace" ? "primary" : "secondary"} onClick={() => setMode("replace")}>
+                <Button size="sm" variant={mode === "replace" ? "primary" : "secondary"} onClick={() => setMode("replace")}>
                   Remplacer
                 </Button>
-                <Button compact variant={mode === "keep-both" ? "primary" : "secondary"} onClick={() => setMode("keep-both")}>
+                <Button size="sm" variant={mode === "keep-both" ? "primary" : "secondary"} onClick={() => setMode("keep-both")}>
                   Garder les deux
                 </Button>
               </div>

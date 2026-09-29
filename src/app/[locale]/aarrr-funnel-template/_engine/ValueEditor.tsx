@@ -240,7 +240,7 @@ export function ValueEditor({
       ) : null}
 
       {kindToggle ? (
-        <Button variant="quiet" compact className={ui.textAction} onClick={() => update({ kind: kindToggle.to })}>
+        <Button variant="quiet" size="sm" className={ui.textAction} onClick={() => update({ kind: kindToggle.to })}>
           {kindToggle.label}
         </Button>
       ) : null}

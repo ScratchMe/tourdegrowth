@@ -76,13 +76,13 @@ export function MatrixEditor({
               <TextInput id={`${id}-col-${index}`} value={column} onChange={(label) => setColumn(index, label)} placeholder={columnPlaceholder} />
             </Field>
             {value.columns.length > 1 ? (
-              <Button compact variant="secondary" onClick={() => removeColumn(index)} data-testid={`remove-column-${index}`}>
+              <Button size="sm" variant="secondary" onClick={() => removeColumn(index)} data-testid={`remove-column-${index}`}>
                 Retirer
               </Button>
             ) : null}
           </div>
         ))}
-        <Button compact variant="secondary" onClick={addColumn} data-testid={`add-column-${id}`}>
+        <Button size="sm" variant="secondary" onClick={addColumn} data-testid={`add-column-${id}`}>
           Ajouter une colonne
         </Button>
       </div>
@@ -123,7 +123,7 @@ export function MatrixEditor({
           </div>
           {!singleRow && value.rows.length > 1 ? (
             <Button
-              compact
+              size="sm"
               variant="secondary"
               onClick={() => onChange({ ...value, rows: value.rows.filter((_, i) => i !== rowIndex) })}
               data-testid={`remove-row-${rowIndex}`}
@@ -136,7 +136,7 @@ export function MatrixEditor({
 
       {singleRow ? null : (
         <Button
-          compact
+          size="sm"
           variant="secondary"
           onClick={() => onChange({ ...value, rows: [...value.rows, { label: "", n: 0, cells: value.columns.map(() => null) }] })}
           data-testid={`add-row-${id}`}

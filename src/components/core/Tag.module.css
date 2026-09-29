@@ -26,7 +26,7 @@
   border: var(--border-width) solid var(--surface-inverse);
 }
 
-.red {
+.alert {
   background: var(--surface-accent);
   color: var(--text-inverse);
   border: var(--border-width) solid var(--surface-accent);

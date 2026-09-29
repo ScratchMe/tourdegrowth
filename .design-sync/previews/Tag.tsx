@@ -6,13 +6,13 @@ import { Tag } from "tour-de-growth";
  * the system has no named chip for.
  */
 
-/** All four tones. `red` is roast emphasis, never an error state. */
+/** All four tones. `alert` is the red of a diagnosis — in the game's catalogue, a trick still running. Never an error state. */
 export const Tones = () => (
   <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
     <Tag tone="neutral">15 questions</Tag>
     <Tag tone="outline">3 min</Tag>
     <Tag tone="ink">Deep dive</Tag>
-    <Tag tone="red">Roast Mode</Tag>
+    <Tag tone="alert">Still running</Tag>
   </div>
 );
 

@@ -17,12 +17,12 @@ interface SegmentedBaseProps<Id extends string> {
   /** Accessible group name, localized by the caller. */
   label: string;
   /**
-   * `md` is the ToneToggle scale (44px tall). `compact` is header scale: a
+   * `md` is the ToneToggle scale (44px tall). `sm` is header scale: a
    * 32px track, with each option's touch target extended to 44px on the
    * option itself — into 6px of room the group keeps above and below, so
    * never collapse that room to tighten a header.
    */
-  size?: "md" | "compact";
+  size?: "md" | "sm";
   /** Returns true for an option whose selected fill is red rather than ink — the roast tone only. */
   accent?: (id: Id) => boolean;
   className?: string;
@@ -53,7 +53,7 @@ export type SegmentedProps<Id extends string> = SegmentedButtonProps<Id> | Segme
  */
 export function Segmented<Id extends string>(props: SegmentedProps<Id>) {
   const { options, value, label, size = "md", accent, className } = props;
-  const sizeClass = size === "compact" ? styles.compact : styles.md;
+  const sizeClass = size === "sm" ? styles.sm : styles.md;
 
   return (
     <div

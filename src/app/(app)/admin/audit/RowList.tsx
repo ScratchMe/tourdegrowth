@@ -150,7 +150,7 @@ function RowItem({ row, entry, today, onOpen }: { row: AuditCatalogRow; entry: E
             {state !== "not-requested" ? ` · ${CHASE_STATE_LABELS[state]}` : ""}
           </p>
         </div>
-        <Button compact variant="secondary" onClick={onOpen} data-testid={`open-row-${row.id}`}>
+        <Button size="sm" variant="secondary" onClick={onOpen} data-testid={`open-row-${row.id}`}>
           {entry ? "Modifier" : "Renseigner"}
         </Button>
       </Card>
