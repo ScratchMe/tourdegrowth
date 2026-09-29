@@ -5544,3 +5544,39 @@ Deux tests passent sur l'ancien code par construction, parce qu'ils gardent ce q
 - **Sans ancrage** (Firefox tant qu'il ne l'a pas), un desktop reçoit la feuille au lieu de la bulle : juste, moins proche. Il deviendra bulle seul.
 - **Relecteurs non lancés** : ni route, ni proxy, ni payload, ni workflow, et aucune copie neuve (les flèches sont décoratives, avec un texte alternatif vide).
 
+**En production** : PR [#196](https://github.com/ScratchMe/tourdegrowth/pull/196), mergée le 2026-09-29 (squash `74aacdf`, 40 fichiers, identique à la tête de la PR), servie à 23 h 00 UTC. Relevé par HTTP sur les feuilles servies par `/en`, `/fr/glossary/cac` et `/r/sample` : présents `--stamp-overshoot`, `scroll-state(stuck:top)`, `anchor-scope:--segmented-on`, `position-anchor:--glossary-definition`, `interpolate-size:allow-keywords` et `color-scheme:dark` ; absent `--z-popover`. **Pas de navigateur contre la production** : le Chromium de la session ne reconnaît pas l'autorité du proxy, même en build complet, et la vérification TLS ne se désactive pas. Le comportement est celui que l'e2e a vu sur le même build.
+
+## A5, première famille : la table de nommage, et `desktop|mobile` devient `md|sm` (2026-09-29)
+
+**La demande** : le lot A5 de `CHANTIERS.md` (constat S-16), une famille de composants par PR.
+
+**Re-mesuré d'abord**, sur `src/components` :
+- quatre vocabulaires pour `size` : `desktop|mobile` (sept composants du quiz et du résultat), `sm|md|lg`, `md|compact`, et des noms propres (`frame|avatar`, `screen|slide`, `mini`, `hero|responsive`) ;
+- un drapeau `compact` à côté de la taille de `Button`, qui est en fait une troisième taille ;
+- `Tag tone="red"`, dont le seul usage produit (le catalogue du jeu, une astuce encore en place) est un diagnostic, soit le rôle d'`alert`.
+
+`desktop|mobile` n'a jamais été un appareil : le quiz passe toujours `"desktop"`, la taille de base qui rétrécit seule sous 760 px, et `"mobile"` ne sert qu'à l'aperçu réduit de l'accueil et à l'écran d'audit. C'est une échelle.
+
+**La table** (« Variant names » dans `.design-sync/conventions.md`) : un mot par axe.
+- `size` ne dit que l'échelle : `xs`, `sm`, `md`, `lg`, et `auto` pour « selon la largeur ». `md` est le défaut, et c'est lui qui rétrécit seul sur un téléphone.
+- Ce qui change plus que l'échelle prend sa propre prop (la grille de points d'une slide sera `medium="slide"`).
+- Le rouge d'un diagnostic est `alert`, jamais `red`.
+- Chaque nom retiré a sa cible et sa famille.
+
+**Cette PR** : les sept composants du quiz et du résultat passent de `desktop|mobile` à `md|sm`, avec leurs classes, leurs appelants (accueil, quiz, écran d'audit) et leurs aperçus. Les histoires `Mobile` et `Desktop` deviennent `Small` et `Medium`. Aucun changement visible : c'est un renommage.
+
+**Garde** : `variant-names.test.ts`.
+- `size` ne prend que l'échelle, `red` n'est pas un ton, et une taille n'est pas un drapeau `compact`.
+- Ce qui n'a pas encore bougé est listé par fichier, et la liste ne peut que rétrécir : elle refuse un mot qu'un fichier n'a plus.
+- Non-vacuité : `desktop|mobile` remis sur `AnswerOption` fait tomber le premier test ; une ligne en trop dans la liste fait tomber le dernier.
+
+**Vérifié** :
+- lint et `tsc` propres ;
+- **2 239 tests unitaires** (+4), couverture au-dessus de ses seuils ;
+- `next build` propre avec `GAME_ENABLED=true` ;
+- **620 specs Playwright** : 615 passées, 5 ignorées par construction, aucun échec.
+
+**À l'écran, au pixel près** : l'accueil, le quiz, le résultat, et le « Et si » et un panneau du moteur, en FR et EN, à 1 280 et 390 px (20 captures pleine page) ont été comparés à l'octet avec le build de `main`. Dix-neuf sont identiques. La vingtième (le « Et si » FR à 1 280) variait déjà d'une capture à l'autre sur `main`, et trois recaptures sur la branche lui sont identiques.
+
+**Pas fait ici** : les familles core, viz et jeu, une PR chacune ; le bundle design-sync, qui suit en B3.
+
