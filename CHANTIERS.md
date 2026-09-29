@@ -72,9 +72,8 @@ C'est à faire avant la seconde passe de B.
 `conventions.md`), avec la cible de chaque nom retiré. Les familles quiz et
 résultat (`desktop|mobile` → `md|sm`, #197), core (`Segmented`, `ToneToggle`
 et `Button` en `size="sm"`, `Tag` en `tone="alert"`, #198) et viz sont migrées.
-`variant-names.test.ts` tient la liste de ce qui reste, famille par famille :
-- ~~**viz**~~ (fait) : `StatTile`, `BulletChart`, et `DotGrid` / `DotLegend` en `medium` ;
-- **jeu** : `DgFace` et `ClickPill`.
+Il reste la famille **jeu** (`DgFace` et `ClickPill`), que
+`variant-names.test.ts` tient dans sa liste d'attente.
 
 ### A7 — Ce que les décisions du 2026-09-29 demandent
 
