@@ -22,16 +22,15 @@
   --size-score-lg: 110px;
   --display-score-xl: 700 var(--size-score-xl) / 0.86 var(--font-display); /* desktop score numeral */
   --display-score-lg: 700 var(--size-score-lg) / 0.88 var(--font-display); /* mobile score numeral */
-  /* Design I (2026-09-28): the hero grows to 80px and tightens (was 62/1.02,
-     40/1.03 on a phone); fluid between the two so a 1024px window does not
-     get a 80px title in a half column. */
-  --display-hero: 700 clamp(44px, 6.1vw, 80px) / 0.92 var(--font-display);
-  --display-hero-mobile: 700 50px/0.92 var(--font-display);
-  /* A whole sentence stamped as a headline — the game's seven endings. Kept at
-     the old hero size: « LE LABYRINTHE TIENT. REGARDE CE QU'IL COÛTE. » in
-     capitals at 80px would run five lines. */
-  --display-stamp: 700 62px/1.02 var(--font-display);
-  --display-stamp-mobile: 700 40px/1.03 var(--font-display);
+  --display-hero: 700 62px/1.02 var(--font-display);
+  --display-hero-mobile: 700 40px/1.03 var(--font-display);
+  /* The landing's title alone — design I (2026-09-28) grows it to 80px and
+     tightens it; fluid between the two so a 1024px window does not get an
+     80px title in a half column. Its own tokens, not the hero's: the hero
+     also sets every prose page's title, where a long French title at 80px
+     (50 on a phone) runs one line per word. */
+  --display-landing: 700 clamp(44px, 6.1vw, 80px) / 0.92 var(--font-display);
+  --display-landing-mobile: 700 50px/0.92 var(--font-display);
   --display-section: 700 30px/1.1 var(--font-display);
   --display-title: 700 36px/1.05 var(--font-display); /* detour card title: 404, error 06c */
   --display-wordmark: 700 19px/1 var(--font-display);

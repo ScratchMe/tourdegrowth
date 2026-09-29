@@ -51,7 +51,7 @@
 }
 
 .h1 {
-  font: var(--display-hero);
+  font: var(--display-landing);
   margin-bottom: 22px;
   color: var(--text-body);
 }
@@ -211,7 +211,7 @@
   }
 
   .h1 {
-    font: var(--display-hero-mobile);
+    font: var(--display-landing-mobile);
   }
 
   .subtitle {

@@ -4902,12 +4902,12 @@ Le nº8 est reconstruit par un script qui repart des clés de chaque ancienne ca
   - La colonne du jeu et les chiffres « Et si », qui collaient déjà, collent maintenant sous lui.
 - **La base de I** :
   - rayons 999 / 12 / 14 / 18 (étaient 4 / 6 / 8 / 10), ombres 6 / 4 / 3 (étaient 7 / 5 / 4) ;
-  - titre héros fluide jusqu'à 80 px, 50 px sur téléphone ;
+  - titre de l'accueil fluide jusqu'à 80 px, 50 px sur téléphone, par ses propres jetons (`--display-landing`) ;
   - question du quiz en 700 34 px ; réponses en cartes avec une marque radio ;
   - bouton principal posé sur son ombre dure, bord encre ;
   - dossard « № 15 questions » plein ;
   - grain du papier.
-- **Les fins du jeu** gardent 62 / 40 px par un jeton à elles (`--display-stamp`) : une phrase entière en capitales à 80 px ferait cinq lignes.
+- **Le titre héros des autres pages ne bouge pas** (62 / 40 px). Un premier essai l'avait passé à 80 / 50 px pour tout le monde, alors que I ne grandissait que celui de l'accueil. `open-door.spec.ts` l'a rattrapé : le titre français d'une page de lecture repassait au-dessus de 50 px sur téléphone, la taille qui lui faisait prendre six lignes. Les fins du jeu, des phrases entières en capitales, y échappent du même coup.
 
 **Choix de tech lead** :
 - **La palette ne bouge pas.** Celle de I est d'un cran plus claire pour le papier et plus sombre pour l'encre. L'écart est invisible à l'œil. L'adopter obligeait à re-mesurer et réécrire chaque ratio cité dans `colors.css` et `token-contrast.test.ts`.
@@ -4924,3 +4924,8 @@ Le nº8 est reconstruit par un script qui repart des clés de chaque ancienne ca
 - `selection-states` : le bouton principal repose sur son ombre, et l'appui le déplace de la longueur de l'ombre.
 - `question-rhythm` et `prose-pages` : l'ombre de carte est de 6 px.
 - `page-ground` : la couture se mesure sur une moyenne de 16 × 5 pixels, puisque le grain est un bruit au pixel.
+- `targets` : chaque segment est centré dans la fenêtre avant d'être mesuré. Avec l'en-tête plus haut, le sélecteur de ton de la carte d'aperçu passait sous la ligne de flottaison à 390 px, et `elementFromPoint` hors de l'écran renvoie `null`.
+
+**Suite complète** : 557 passées, 5 ignorées par construction, 3 échecs.
+- `open-door` et `targets` : corrigés ci-dessus.
+- `locale-routing.spec.ts:320` (le lecteur qui revient sur `/` après avoir choisi l'anglais) : il passe relancé seul. C'est un autre test que le flake connu de la ligne 75, noté ici comme première occurrence. Rien dans ce changement ne touche le proxy, les cookies ou les redirections.
