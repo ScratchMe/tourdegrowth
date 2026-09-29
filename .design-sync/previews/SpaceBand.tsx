@@ -1,7 +1,8 @@
 import { SpaceBand } from "tour-de-growth";
 
 /*
- * The space band — « Un Tour, trois étapes ». It hangs under the header of
+ * The space band — « Un Tour, trois étapes » (the decision's words, never
+ * the band's: it does not say « étape »). It hangs under the header of
  * every page that belongs to one of the three legs of the race, and says
  * which: the leg's pictogram, « 1/3 · Plaine », its name, and on the right
  * the whole race with this leg filled. Each leg wears its colour: ink for the

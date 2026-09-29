@@ -80,7 +80,8 @@ export interface SpaceBandProps {
 /**
  * The space band — design I + B, retained by Antoine on 2026-09-28.
  *
- * « Un Tour, trois étapes » : the check-up, the growth engine and the game
+ * « Un Tour, trois étapes » (the decision's words, never the band's — see
+ * below): the check-up, the growth engine and the game
  * are three legs of one race. The band hangs from the header of every page
  * that belongs to one of them, and says which: the leg's pictogram, its place
  * in the race and its kind (« 1/3 · Plaine »), its name, and on the right the

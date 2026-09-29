@@ -166,13 +166,14 @@ a.pill:focus-visible {
 }
 
 /*
- * A narrower header: the race keeps its pictograms and numbers, and the words
- * leave the screen but not the page — a screen reader still hears
- * « 2 Moteur bientôt ».
+ * A narrower header (the quiz, the Deep dive, the game's reading column): the
+ * race keeps its pictograms and numbers, and the legs' names leave the screen
+ * but not the page — a screen reader still hears « 2 Moteur bientôt ». The
+ * word « bientôt » stays on screen: a closed leg is greyed AND marked
+ * (Antoine, 2026-09-28), at every width it fits in.
  */
 @container (max-width: 900px) {
-  .label,
-  .soon {
+  .label {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -193,8 +194,19 @@ a.pill:focus-visible {
 /*
  * A phone: the name on top, its place in the race under it, and the race as
  * three numbers — no pictograms, they would not fit next to « Contre-la-montre ».
+ * Nor would « bientôt »: a closed leg is its greyed, dashed number here, and
+ * the word goes to screen readers only.
  */
 @container (max-width: 560px) {
+  .soon {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
   .inner {
     padding-block: 7px;
   }
