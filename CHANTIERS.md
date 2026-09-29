@@ -150,6 +150,75 @@ qui est public : on n'y écrit que « vérifié, présent » ou « absent ».
 | A6.2 | **Search Console** (portée `gsc`) : les URL `/en/glossary/*` ont-elles remplacé les anciennes URL non préfixées dans les pages créditées ? |
 | A6.3 | **Les déclencheurs de volume de la section E** : 50 soumissions, quelques centaines, signes d'abus. Dire si l'un d'eux est atteint, sans écrire le compte |
 
+### A7 — Ce que les décisions du 2026-09-29 demandent
+
+Les réponses d'Antoine à la section C, séance du 2026-09-29. Chaque item dit
+ce qui est décidé ; **il ne se rediscute pas en route**. Une question neuve
+rencontrée en le faisant repart en section C. Toute copie neuve porte
+« TODO: à relire » (convention 6).
+
+#### A7.1 — Aucun repère ne désigne l'étape qui freine (C1)
+
+**Décidé** : les repères d'activation (20-40 %) et de churn logo (1-2 %/mois)
+restent affichés comme **contexte**, et ne désignent plus rien. Seule une
+**cible d'équipe** nomme l'étape qui freine. La population du churn est
+reformulée : 1-2 % vaut pour le « SaaS B2B à panier élevé », pas pour « les
+produits vendus aux petites entreprises ». Source : ChartMogul, médiane de
+6,1 %/mois sous 25 $ d'ARPA et de 2,2 % au-dessus de 500 $.
+
+| Où | Quoi |
+|---|---|
+| `lib/engine/catalog-shape.ts:174` et `:223` | `designates: false` pour `act.rate` et `ret.logo-churn`. Garder le champ (tous à `false`) ou le retirer : c'est un choix d'implémentation. Mettre à jour les commentaires de `diagnose.ts` (l. 15-35) et de `catalog-shape.ts` (l. 31-32) |
+| `lib/engine/example.ts:82` | L'exemple §6.0 n'a aucune cible (`targets: {}`) et ne nommerait plus de fuite. Lui donner des **cibles d'équipe** qui gardent un diagnostic `clear` sur l'activation et la slide « fuite ». Par exemple, activation 20 % et churn logo 2 % ; les valeurs restent libres. L'exemple doit dire que ce sont les cibles de l'équipe fictive |
+| `content/engine-catalog.ts:486-487` | La réserve du churn : « pour le SaaS B2B à panier élevé ; les petits paniers tournent bien plus haut… ». En FR comme en EN |
+| `content/glossary-deep.ts:758-759` (page churn) et `:886-887` (page rétention, « 97-99 % … pour des produits vendus aux petites entreprises ») | La même affirmation et la même correction. C'est de la copie validée qui change : elle repasse « à relire » |
+| `content/engine-copy.ts` | La promesse (l. 89-90, « sauf deux repères publiés que la page nomme ») ; l'encart de durée (l. 122-123, « le moteur compare alors aux deux repères publiés ») ; l'écran des cibles (l. 1408-1409) ; la FAQ 3 (l. 1544, « Deux seulement servent à désigner… ») ; `diagnosis.notEnough` (« Pas assez de repères pour conclure » : ce sont des cibles qui manquent) ; `levelBody` (« ni sur son repère »). Chercher aussi `referenceDesignates` et les phrases `belowReference`, `aboveReference` et `maybeBelow`, qui ne servent plus à désigner |
+| `deck/ask-defaults.ts:33` | La valeur par défaut de la demande à copier prend « la borne prudente d'un repère qui désigne » : il n'y en a plus |
+| Tests | `catalog-shape.test.ts:39-40` attend désormais zéro repère désignant. `diagnose.test.ts`, `phrases.test.ts:172`, les tests du deck et `e2e/engine-*.spec.ts` suivent. **Non-vacuité** : remettre `designates: true` sur le churn doit faire rougir au moins un test |
+| Hors code | La spec §6.6 d'`ENGINE.md` à relire contre la décision 5 renversée. Le bon à tirer nº8 cite l'exemple §6.0 et ces phrases : le signaler à l'agent des bons à tirer, qui remet la page d'accord avec le code |
+
+#### A7.2 — « Moteur de growth » en français (C2)
+
+**Décidé** : le moteur s'appelle « Moteur de growth » en français (« Ton
+moteur de growth », avec « growth » en minuscule dans le texte courant),
+toujours "Growth engine" en anglais. **L'adresse `/aarrr-funnel-template` ne
+change pas.**
+
+| Où | Quoi |
+|---|---|
+| `content/engine-copy.ts` | `breadcrumb` (l. 76), `title` (l. 81), l'en-tête du tableau (l. 189) et le pied de slide (l. 1017). Les deux demandes à copier (l. 523 et 533, « un point sur notre moteur de croissance ») parlent du moteur **de l'entreprise**, pas de l'outil : elles gardent « croissance » |
+| `content/legal.ts:239` et `:253` | La confidentialité nomme l'outil : elle suit, et `e2e/legal.spec.ts` avec elle |
+| `app/(app)/admin/preview/page.tsx:40` | Le nom affiché dans l'aperçu propriétaire |
+| Commentaires | `updated-at.ts:30` et `i18n/routes.ts:41` |
+| Ne change pas | `comparisons.ts:316` (« pas un moteur de croissance » : l'usage générique) et le titre `meta.title` (« Modèle de funnel AARRR… », qui porte la requête) |
+| Hors `src/` | Les textes de lancement qui nomment l'outil : `marketing/kit.md`, `marketing/README.md`, `marketing/campaigns/README.md`, `competitive-brief.md` et `marketing/campaigns/engine/*.md`. Une recherche `grep -rn "oteur de croissance"` fait l'inventaire ; garder chaque usage générique |
+| Copie | Chaque chaîne renommée repasse « à relire ». Le bon à tirer nº8 suit (agent des bons à tirer) |
+
+### A8 — L'audit GEO, joué sans installer le plug-in
+
+**D'où ça vient** : le 2026-09-29, Antoine a proposé le plug-in
+« claude-site-audit » (Rob Spence, MIT, 1.0.0). Il a été lu, **pas installé** :
+- l'archive ne contient pas ses 17 contrôles (`references/checks.md`), sa
+  notation (`scoring.md`) ni son générateur de PDF ;
+- il appelle des outils de claude.ai (`web_fetch`, `present_files`) ;
+- il est cadré pour le secteur public américain (ADA Title II, HUD) ;
+- il n'a pas de fichier de licence.
+
+**Décidé** : garder l'idée, pas l'outil. L'angle **GEO** (être lu et cité par
+les moteurs de réponse IA) n'a jamais été audité ici : le site n'a pas de
+`llms.txt`, `robots.ts` laisse tout passer (`userAgent: "*"`), et ni
+`JOURNAL.md` ni `GROWTH-PLAN.md` n'en parlent. L'audit SEO du 25/09 ne l'a pas
+couvert.
+
+| # | Quoi | Comment |
+|---|---|---|
+| A8.1 | **Relever l'état GEO de la production**, en lecture seule contre `www.tourdegrowth.com`, dans les deux langues | Ce que servent `/robots.txt` et `/llms.txt`. Le JSON-LD par type de page (accueil, glossaire, comparaisons, pages « porte ouverte », `/how-it-works`) et sa validité. Une réponse citable dans le HTML servi sans JavaScript : la définition en tête de page, une date visible, un auteur. Le `lang` et les `hreflang`. Ne pas refaire ce que la CI couvre déjà (accessibilité, contraste, métadonnées de base) |
+| A8.2 | **Corriger ce qui ne demande aucun choix** : un JSON-LD invalide, un `hreflang` manquant, une définition absente du HTML servi | Une PR, avec ses gardes. Toute copie neuve est « à relire » |
+| A8.3 | **Remonter en section C ce qui est une décision**, avec une recommandation | Au moins deux décisions : **laisser ou bloquer les robots d'IA** (GPTBot, ClaudeBot, PerplexityBot, Google-Extended, CCBot), qui entraînent des modèles autant qu'ils citent ; et **publier un `llms.txt`**, dont le contenu est de la copie et une vitrine publique |
+
+Le plug-in n'entre pas dans le dépôt, même en `--manuel`. Si l'amont publie
+les fichiers manquants, la question repart en section C.
+
 ---
 
 ## B. Design sync — sur ta machine
@@ -182,9 +251,9 @@ section A.
 
 | # | Question | Aujourd'hui | Source | Reco |
 |---|---|---|---|---|
-| C1 | **Le repère de churn logo de 1-2 %/mois peut-il désigner la fuite ?** La vérification des faits dit qu'il ne vaut que pour le SaaS B2B à panier élevé (ChartMogul : médiane de 6,1 % sous 25 $ d'ARPA, 2,2 % au-dessus de 500 $). Un produit à petit panier à 4 % serait signalé à tort. Le repère d'activation de 20-40 %, qui désigne aussi, n'a aucune source primaire. C'est aussi la première carte du bon à tirer nº8 : vérifier d'abord qu'elle n'y est pas déjà tranchée | Les deux repères désignent, avec une réserve imprimée (décision 5 d'`ENGINE.md`). La copie dit « les produits vendus aux petites entreprises » | `ENGINE.md` en tête, `engine-catalog.ts`, `glossary-deep.ts` | **Retirer le pouvoir de désigner aux deux repères** : ils restent affichés comme contexte, et une cible d'équipe désigne toujours. Et reformuler la population du churn (« SaaS B2B à panier élevé »). C'est honnête et simple, sans saisie de plus. Un repère faux pour la moitié du public ne doit pas nommer la fuite |
-| C2 | Le nom et l'adresse du moteur : « Moteur de croissance » / "Growth engine", à `/{locale}/aarrr-funnel-template`. **Définitif dès l'ouverture** | Pris par défaut | `ENGINE.md`, décision 1 | Garder : c'est la requête sans concurrent de l'audit SEO |
-| C3 | Le crédit « tourdegrowth.com » sur les slides exportées | Présent par défaut, retirable | Décision 2 | Garder |
+| C1 | **Le repère de churn logo de 1-2 %/mois peut-il désigner la fuite ?** La vérification des faits dit qu'il ne vaut que pour le SaaS B2B à panier élevé (ChartMogul : médiane de 6,1 % sous 25 $ d'ARPA, 2,2 % au-dessus de 500 $). Un produit à petit panier à 4 % serait signalé à tort. Le repère d'activation de 20-40 %, qui désigne aussi, n'a aucune source primaire. C'est aussi la première carte du bon à tirer nº8 : vérifier d'abord qu'elle n'y est pas déjà tranchée | Les deux repères désignent, avec une réserve imprimée (décision 5 d'`ENGINE.md`). La copie dit « les produits vendus aux petites entreprises » | `ENGINE.md` en tête, `engine-catalog.ts`, `glossary-deep.ts` | **Retirer le pouvoir de désigner aux deux repères** : ils restent affichés comme contexte, et une cible d'équipe désigne toujours. Et reformuler la population du churn (« SaaS B2B à panier élevé »). C'est honnête et simple, sans saisie de plus. Un repère faux pour la moitié du public ne doit pas nommer la fuite. **→ Tranché le 2026-09-29 : contexte seulement, comme recommandé. Non tranché dans le nº8 (sa carte n'avait aucune décision). Code : A7.1** |
+| C2 | Le nom et l'adresse du moteur : « Moteur de croissance » / "Growth engine", à `/{locale}/aarrr-funnel-template`. **Définitif dès l'ouverture** | Pris par défaut | `ENGINE.md`, décision 1 | Garder : c'est la requête sans concurrent de l'audit SEO. **→ Tranché le 2026-09-29 : « Moteur de growth » en français (Antoine garde l'anglicisme), "Growth engine" en anglais ; l'adresse `/aarrr-funnel-template` est gardée, choisie sur le seul critère SEO (raisonnement dans `ENGINE.md`, décision 1). Code : A7.2** |
+| C3 | Le crédit « tourdegrowth.com » sur les slides exportées | Présent par défaut, retirable | Décision 2 | Garder. **→ Confirmé le 2026-09-29. Rien à coder** |
 | C4 | Le périmètre de la v1 : le SaaS libre-service. Le B2B assisté en v1.1, le B2C et la marketplace plus tard | Pris par défaut | Décision 3 | Garder |
 | C5 | La slide « déclaré au Tour × mesuré » | Non cochée par défaut | Décision 4 | Garder : elle cite les réponses du Tour mot pour mot, dans un deck qui part en CODIR |
 | C6 | Le moteur est public, gratuit et local. Ce n'est pas la phase 3 de l'instrument d'audit | Pris par défaut | Décision 6 | Garder |

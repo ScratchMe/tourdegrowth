@@ -18,14 +18,48 @@ chacune se renverse en une phrase :
 1. Nom « Moteur de croissance » / "Growth engine" ; URL
    `/{locale}/aarrr-funnel-template` (la requête sans concurrent de l'audit SEO).
    Une URL publiée ne meurt jamais ici : c'est définitif dès l'ouverture.
+   **Tranché par Antoine le 2026-09-29 (`CHANTIERS.md` C2).** *Le nom* :
+   « growth » se garde en français, anglicisme courant. Le moteur s'appelle
+   donc « **Moteur de growth** » (« Ton moteur de growth », en minuscule dans
+   le texte courant comme « le travail de growth » d'`about.ts`), et reste
+   "Growth engine" en anglais. *L'adresse* : Antoine a délégué le choix sur le
+   seul critère SEO, et **`/aarrr-funnel-template` est gardée**. Les résultats
+   de recherche ont été relevés le jour même :
+   - « AARRR funnel template » et « AARRR template » sont occupés par des
+     diagrammes et des modèles de slides à remplir (Miro, Creately, Ayoa,
+     SlideModel), sans aucun outil qui calcule avec ses propres chiffres.
+     Le slug couvre les deux requêtes.
+   - « AARRR funnel calculator » ne renvoie ni outil ni intention (des
+     calculateurs d'ARR, des articles) : plus étroit, et sans demande visible.
+   - « pirate metrics template » est envahi de pages copiées.
+   - `/growth-engine` ne porte aucune requête.
+
+   Le slug reste anglais dans les deux langues (R2-16), et le titre français
+   « Modèle de funnel AARRR » porte la requête française. Correction de la
+   formule d'origine : « sans concurrent » voulait dire « sans **outil**
+   concurrent ». La page est bien en concurrence avec des domaines forts, et
+   c'est son utilité qui doit gagner, pas le slug. À coder : `CHANTIERS.md`
+   A7.2 (le nom seulement).
 2. Le crédit « tourdegrowth.com » sur les slides exportées : présent par défaut,
    retirable par l'utilisateur (le deck est le sien).
+   **Confirmé par Antoine le 2026-09-29 (`CHANTIERS.md` C3)** : c'est la
+   seule boucle de distribution du moteur, et l'utilisateur la retire en un
+   clic.
 3. La v1 couvre le SaaS libre-service (freemium ou essai) ; le B2B assisté en
    v1.1 ; l'appli B2C et la marketplace plus tard.
 4. La slide « déclaré au Tour × mesuré » existe mais n'est pas cochée par défaut.
 5. Les deux repères approuvés du glossaire (activation 20-40 %, churn logo
    1-2 %/mois) peuvent désigner un goulot sur une slide, avec leur réserve
    imprimée sur la slide ; une cible d'équipe le peut toujours.
+   **Renversée par Antoine le 2026-09-29 (`CHANTIERS.md` C1) : aucun repère ne
+   désigne.** Les deux restent affichés comme contexte ; seule une cible
+   d'équipe nomme l'étape qui freine. Pourquoi : 1-2 % vaut pour le SaaS B2B
+   à panier élevé (ChartMogul : médiane de 6,1 %/mois sous 25 $ d'ARPA, 2,2 %
+   au-dessus de 500 $), pas pour « les produits vendus aux petites
+   entreprises » ; l'exemple §6.0 (ARPA 120 €, churn 2,5 %) était signalé à
+   tort. Le 20-40 % d'activation n'a aucune source primaire. La population du
+   churn est reformulée partout où elle est écrite. À coder : `CHANTIERS.md`
+   A7.1.
 6. Le moteur est public, gratuit et local : ce n'est pas la phase 3 de
    l'instrument d'audit (aucun connecteur, rien ne quitte le navigateur, pas un
    produit commercial). `lib/audit` n'est pas touché.
