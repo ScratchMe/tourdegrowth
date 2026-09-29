@@ -354,7 +354,8 @@ de lancement en grande pompe, et `linkedin` reste dans `EXCLUDED`
 |---|---|
 | `marketing/launch/show-hn.md:49`, `marketing/campaigns/engine/show-hn.md:77`, `marketing/campaigns/game/show-hn.md:90` | La ligne « Who's behind this? » : une réponse courte qui donne son nom et renvoie au pied de page et à `/about`, sans insister et sans lien vers LinkedIn. En FR là où le texte existe en FR. « À relire » |
 | `marketing/README.md:14`, `marketing/campaigns/brand-review.md:78` et le §8 de `marketing/campaigns/README.md` | La règle « pseudonyme » décrite comme « discrète pour l'instant » |
-| Ne change pas | Le compte qui poste reste celui du projet (`tourdegrowth`). `CLAUDE.md`, `GROWTH-PLAN.md`, `/livrer` §3 et `relecteur-copie` §5 sont déjà à jour. Reste le commentaire de `src/__tests__/utm-channels.test.ts:21-25` (« the author is never named ») : il devient « not for now », et le test, lui, garde `linkedin` exclu |
+| **D'abord, l'outillage** | Deux consignes appliquent encore l'ancienne règle et arrêteraient cet item : `.claude/agents/relecteur-copie.md` §5 (« Jamais le nom d'Antoine ») et `.claude/skills/livrer/SKILL.md` §3 (« jamais le nom d'Antoine dans `marketing/` »). Les réécrire : le nom seulement dans la réponse à « qui est derrière ? » (C22), et jamais LinkedIn pour l'instant. Même chose pour le commentaire de `src/__tests__/utm-channels.test.ts:21-25` (« the author is never named » devient « not for now »), le test gardant `linkedin` exclu. Non fait dans la PR de la séance : `.claude/` n'est pas dans la liste « doc » de `scripts/vercel-ignore.sh`, et la PR devait rester de la doc seule |
+| Ne change pas | Le compte qui poste reste celui du projet (`tourdegrowth`). `CLAUDE.md` et `GROWTH-PLAN.md` sont déjà à jour |
 
 ### A8 — L'audit GEO, joué sans installer le plug-in
 
