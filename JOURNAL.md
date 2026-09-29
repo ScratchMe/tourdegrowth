@@ -5015,7 +5015,7 @@ Non-vacuité, écrite dans `proxy.test.ts` : sans la condition, exactement le te
 
 **Suite complète sur ce correctif** : 568 passées, 5 ignorées par construction, **aucun échec**. C'est le premier passage entier sans le flake depuis qu'il est mesuré. Unitaires : 2 189.
 
-## Kit I + B, 3/4 : les signes des trois espaces (2026-09-29)
+## Kit I + B, 3/4 : les signes des trois espaces (2026-09-29, #181)
 
 Demandé par Antoine : « go PR 3 », puis « Deux PR » (les signes d'abord, le reste de l'audit ensuite). Cette PR pose les quatre signes de la synthèse I + B qui restaient hors du résultat ; le reste de l'audit du kit est la PR 4.
 
