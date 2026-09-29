@@ -155,7 +155,7 @@ export default async function EnginePage({ params }: PageProps) {
 
         {/* How long it takes, said BEFORE the tool (retours d'Antoine
             2026-09-25): the counts come from the catalogue's own effort
-            tags, so the sentence cannot promise a split the fifteen
+            tags, so the sentence cannot promise a split the seventeen
             numbers do not have. */}
         <section className={styles.duration} aria-labelledby="engine-duration" data-testid="engine-duration">
           <h2 id="engine-duration" className={styles.durationTitle}>

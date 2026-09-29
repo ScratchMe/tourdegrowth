@@ -11,16 +11,20 @@ import { Stopwatch } from "tour-de-growth";
  * wide screen and drops it under 1100px. On paper only.
  */
 
-/** As the engine's intro sets it: 280px wide. */
+/** As the engine's intro sets it: 280px wide, beside the title, from 1100px. */
 export const Intro = () => (
-  <div style={{ width: 280 }}>
+  <figure style={{ width: 280, margin: 0 }}>
     <Stopwatch />
-  </div>
+    <figcaption style={{ font: "var(--meta-xs)", color: "var(--text-muted)", marginTop: 8 }}>
+      Beside the engine&apos;s intro, 280px, from 1100px
+    </figcaption>
+  </figure>
 );
 
 /** Smaller, the same drawing: nothing in it depends on the size. */
 export const Small = () => (
-  <div style={{ width: 120 }}>
+  <figure style={{ width: 120, margin: 0 }}>
     <Stopwatch />
-  </div>
+    <figcaption style={{ font: "var(--meta-xs)", color: "var(--text-muted)", marginTop: 8 }}>120px</figcaption>
+  </figure>
 );

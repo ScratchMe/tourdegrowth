@@ -2,7 +2,7 @@ import { HubMountain, NightSurface } from "tour-de-growth";
 
 /*
  * The game hub's mountain — design I + B, retained by Antoine on 2026-09-28.
- * « Le côté obscur » is the race's mountain stage, and the hub's intro is a
+ * « Le côté obscur » is the race's mountain leg, and the hub's intro is a
  * night poster: five cols for the five zones, the one you can play filled in
  * the game's ochre and flagged with its number, the others tagged with
  * theirs, an amber moon over the first.

@@ -41,6 +41,6 @@ export const SPACE_STRINGS = {
   /** On a pill whose space is not open yet (Antoine, 2026-09-28: the race stays whole, the closed ones greyed). */
   soon: { fr: "bientôt", en: "soon" },
   // TODO: à relire (convention 6).
-  /** The race's accessible name. */
+  /** The race's accessible name on the band, and the heading of the landing's strip (`brand/SpaceStrip`). */
   race: { fr: "Le Tour en trois parties", en: "The Tour in three parts" },
 } as const satisfies Record<string, Translatable | Record<string, Translatable>>;

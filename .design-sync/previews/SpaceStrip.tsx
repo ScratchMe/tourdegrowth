@@ -28,7 +28,7 @@ export const NotOpenYet = () => (
   </div>
 );
 
-/** A phone: one column, the kind of stage (« Contre-la-montre ») beside the number. */
+/** A phone: one column, the kind of leg (« Contre-la-montre ») beside the number. */
 export const Phone = () => (
   <div style={{ width: 350 }}>
     <SpaceStrip locale="fr" open={{ engine: false, game: true }} />

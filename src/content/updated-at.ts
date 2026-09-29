@@ -11,7 +11,7 @@
  * (`content/legal.ts`, `updatedAt`), and the sitemap reads that one.
  */
 export const CONTENT_UPDATED_AT: Record<string, string> = {
-  "/": "2026-09-24", // sous-titre, promesse et dossard (revue de copie v1)
+  "/": "2026-09-29", // bande « Le Tour en trois parties » (design I + B)
   "/how-it-works": "2026-09-24", // « étape », intro et CTA (revue de copie v1)
   "/about": "2026-09-24", // questions, calcul et CTA (revue de copie v1)
   "/glossary": "2026-09-24", // définition d'AARRR (revue de copie v1)
@@ -25,7 +25,7 @@ export const CONTENT_UPDATED_AT: Record<string, string> = {
   "/aarrr-vs-heart": "2026-09-25", // ce que les deux acronymes partagent (revue adversariale R11)
   // Le jeu (GAME-BRIEF 9.3). Listed in the sitemap only when the game is
   // open at build (lib/game/build-flag.ts); dated here like every other page.
-  "/game": "2026-09-24", // created (hub)
+  "/game": "2026-09-29", // légende de la montagne (design I + B)
   "/game/retention": "2026-09-24", // created (level page, intro only until the island lands)
   // Le moteur de croissance (engine spec §11.1). Same rule as the game: in the
   // sitemap only when ENGINE_ENABLED is open at build (app/sitemap.ts).

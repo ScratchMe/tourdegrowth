@@ -4,7 +4,10 @@
  * the rules below are written once for the three legs.
  */
 
+/* A container, like the band: the strip folds on its own width, not the
+   window's, so it holds in any column it is set in. */
 .strip {
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   gap: var(--space-8);
@@ -116,7 +119,7 @@
   height: 14px;
 }
 
-/* The kind (« Plaine »): on a phone only, where the card has the width for it. */
+/* The kind (« Plaine »): in one column only, where the card has the width for it. */
 .kind {
   display: none;
   font-weight: 600;
@@ -143,7 +146,8 @@
   color: var(--text-body);
 }
 
-@media (max-width: 760px) {
+/* Three cards need 760px: under it, one column (a phone, a narrow frame). */
+@container (max-width: 759px) {
   .grid {
     grid-template-columns: 1fr;
     gap: var(--space-8);

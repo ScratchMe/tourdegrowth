@@ -33,11 +33,11 @@ export const SPACE_STRIP = {
   pitch: {
     tour: t(
       "15 questions, 3 minutes. Ton score, l'étape qui freine, une action.",
-      "15 questions, 3 minutes. Your score, the stage that stalls, one action.",
+      "15 questions, 3 minutes. Your score, the stage holding you back, one action.",
     ),
     engine: t(
       "Tes 17 vrais chiffres, là où ton funnel perd du monde, et des slides pour ton CODIR.",
-      "Your 17 real numbers, where your funnel loses people, and slides for your leadership team.",
+      "Your 17 real numbers, where your funnel loses people, and slides for your leadership meeting.",
     ),
     game: t(
       "Cinq zones, cinq entreprises, un DG qui veut le chiffre. Apprends à reconnaître les astuces avant d'en livrer une.",
