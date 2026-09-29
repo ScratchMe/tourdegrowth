@@ -51,7 +51,9 @@ const corpus = walk(SRC)
   .filter((f) => !f.includes("__tests__"))
   .map((f) => readFileSync(f, "utf8"))
   .join("\n");
-const isRead = (name: string) => new RegExp(`var\\(\\s*${name.replace(/-/g, "\\-")}(?![\\w-])`).test(corpus);
+/** Every regex metacharacter escaped: a token name is data, never a pattern. */
+const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\-]/g, "\\$&");
+const isRead = (name: string) => new RegExp(`var\\(\\s*${escapeRegExp(name)}(?![\\w-])`).test(corpus);
 
 describe("every token has a reader (design audit A1.6)", () => {
   it("reads the real token sheets", () => {
