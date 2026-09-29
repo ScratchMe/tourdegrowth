@@ -1,5 +1,5 @@
 import type { Page } from "@playwright/test";
-import { expect, test } from "./helpers";
+import { expect, multiLinePills, test } from "./helpers";
 import {
   LEVEL_PATH,
   acceptResume,
@@ -100,6 +100,52 @@ test("the inspection says why, names every trick it took down, and is stamped wi
   const reportWhy = page.getByTestId("game-report-3").getByTestId("game-clipping-why");
   await expect(reportWhy).toContainText("Pourquoi ce contrôle");
   await expect(reportWhy).toContainText("Préavis contractuel");
+});
+
+/**
+ * The inspection's clipping and the CEO's quote are boxes of several lines.
+ * Design I (#177) set `--radius-tag` to 999px, and the three that read it
+ * became pills: the clipping an ellipse whose paragraphs spilled onto the
+ * night, unreadable — found by the design sync's grading, 2026-09-29, not by
+ * any spec. Measured here on every card of the inspection quarter and on its
+ * report, at both widths, by what is on screen (helpers.ts), not by name.
+ *
+ * Non-vacuity (2026-09-29): with `--radius-tag` put back on the clipping
+ * alone, this test fails on the clipping in the news and in the report; with
+ * it back on the two quote boxes alone, it fails on the news' last card and
+ * the report. No other spec of the file fails either way. `pills` is
+ * asserted non-zero so the measure is proven to see the stamps it must leave
+ * alone.
+ */
+test("no box of several lines is drawn as a pill — the inspection's clipping, the CEO's quote, and the report", async ({ page }) => {
+  await runTheInspectionQuarter(page, "fr");
+  const news = page.getByTestId("game-news");
+  const count = (await page.getByTestId("game-news-count").textContent()) ?? "";
+  const total = Number(count.match(/(\d+)\D*$/)?.[1]);
+  expect(total).toBeGreaterThan(1);
+
+  let pillsSeen = 0;
+  const offenders: string[] = [];
+  const measure = async (root: import("@playwright/test").Locator, where: string) => {
+    for (const width of [1280, 390]) {
+      await page.setViewportSize({ width, height: 900 });
+      const found = await multiLinePills(root);
+      pillsSeen += found.pills;
+      offenders.push(...found.offenders.map((o) => `${where} @${width}: ${o}`));
+    }
+  };
+
+  for (let i = 0; i < total; i++) {
+    const kind = (await page.getByTestId("game-news-item").getAttribute("data-kind")) ?? "?";
+    await measure(news, `news ${i + 1}/${total} (${kind})`);
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.getByTestId("game-news-next").click();
+  }
+  await expect(news).toHaveCount(0);
+  await measure(page.getByTestId("game-report-3"), "report 3");
+
+  expect(offenders).toEqual([]);
+  expect(pillsSeen).toBeGreaterThan(0);
 });
 
 test("Escape, or « Passer au bilan », goes straight to the report — and the live region says the quarter ended", async ({ page }) => {

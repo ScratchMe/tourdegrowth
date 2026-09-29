@@ -138,7 +138,8 @@
   padding: var(--space-6);
   background: var(--surface-card);
   border-left: var(--border-width-stamp) solid var(--border-hard);
-  border-radius: var(--radius-tag);
+  /* A quote that wraps: a text box's radius, never the tag's pill (#177). */
+  border-radius: var(--radius-panel);
 }
 
 /* An angry CEO: the same edge the call's subtitle band takes (plan §2.6). */
