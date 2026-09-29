@@ -71,8 +71,9 @@ export const States = () => (
  * The CEO's order, ticked, in French — reference year C's second quarter,
  * where he asks for the phone-only cancellation and gets it. On a ticked card
  * the red badge turns into an outline in the selection's ink. At the hand's
- * real card width the top row wraps: « Choisie » drops under the badge,
- * right-aligned — the row is `flex-wrap`, so it never overflows.
+ * real card width (294px) his badge and "Choisie" share the top row; the row
+ * is `flex-wrap`, so on a narrower card the word drops under the badge
+ * rather than overflowing.
  */
 export const OrderedFrench = () => (
   <NightSurface as="div" style={{ padding: 20, width: 334 }}>
