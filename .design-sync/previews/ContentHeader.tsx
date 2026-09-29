@@ -9,26 +9,24 @@ import { ContentHeader } from "tour-de-growth";
  * `path` is the page's address WITHOUT its language prefix: the switch needs
  * to send a reader to the same page in the other language, and only the
  * caller knows which page that is.
+ *
+ * The header spans the page; its row aligns to the page's own column —
+ * `width="reading"` (760px, the default: every prose page, How it works and
+ * the glossary alike, through `ProsePage`) or `wide` (the app shell's 1040px,
+ * the engine's page).
  */
 
-/** On a glossary term page. */
+/** On a glossary term page: the header runs the card's width, its row sits on the 760px reading column, so both ends are inset. */
 export const English = () => (
-  <div style={{ maxWidth: 680 }}>
+  <div style={{ maxWidth: 880 }}>
     <ContentHeader locale="en" path="/glossary/cac" />
   </div>
 );
 
 /** The same page in French — the switch now highlights FR and points back at EN. */
 export const French = () => (
-  <div style={{ maxWidth: 680 }}>
-    <ContentHeader locale="fr" path="/glossary/cac" />
-  </div>
-);
-
-/** On "How it works", which is the wider of the two content containers. */
-export const HowItWorks = () => (
   <div style={{ maxWidth: 880 }}>
-    <ContentHeader locale="en" path="/how-it-works" />
+    <ContentHeader locale="fr" path="/glossary/cac" />
   </div>
 );
 
@@ -39,7 +37,13 @@ export const Narrow = () => (
   </div>
 );
 
-/** On the engine's page: the header of a space wears its band (here, ultramarine). */
+/**
+ * On the engine's page: `width="wide"` puts the row on the app shell's column,
+ * and the header of a space wears its band (here, ultramarine). At this card's
+ * width the band is in its under-900px form — the legs' names go to screen
+ * readers, the pictograms, numbers and "bientôt" stay; a window wide enough
+ * for a band over ~950px shows the names too.
+ */
 export const InTheEngine = () => (
   <div style={{ maxWidth: 1040 }}>
     <ContentHeader locale="fr" path="/aarrr-funnel-template" width="wide" space="engine" />

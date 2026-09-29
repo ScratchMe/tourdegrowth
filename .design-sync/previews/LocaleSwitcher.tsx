@@ -10,19 +10,14 @@ import { LocaleSwitcher } from "tour-de-growth";
  * `path` is the current page WITHOUT its language prefix. Omit it on a page
  * whose URL carries no language — a result page, the quiz — and the switch
  * falls back to `?lang=`, which resolves against whatever address you are on.
+ * That form looks exactly like the one below (only the links differ), so it
+ * has no cell of its own.
  */
 
-/** On a content page, where the other language is a real URL. */
+/** On a content page, where the other language is a real URL: the English page, then the French one — the active language filled. */
 export const ContentPage = () => (
   <div style={{ display: "flex", gap: 24, alignItems: "center", flexWrap: "wrap" }}>
     <LocaleSwitcher locale="en" path="/glossary/cac" />
     <LocaleSwitcher locale="fr" path="/glossary/cac" />
   </div>
 );
-
-/**
- * With no `path` — a shared result has no language in its address, and must
- * not gain one: those links are already out in the world and a result renders
- * in the READER's language, not its author's.
- */
-export const AppPage = () => <LocaleSwitcher locale="en" />;

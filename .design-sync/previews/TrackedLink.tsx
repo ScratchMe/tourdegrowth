@@ -1,4 +1,4 @@
-import { TrackedLink } from "tour-de-growth";
+import { ProseText, TrackedLink } from "tour-de-growth";
 
 /*
  * A plain link that also fires one GoatCounter event. It exists so a Server
@@ -19,48 +19,70 @@ import { TrackedLink } from "tour-de-growth";
  * place one, style the surrounding block, not the link.
  */
 
-const LINK = {
-  color: "var(--text-link)",
-  textDecoration: "underline",
-  textUnderlineOffset: 3,
-} as const;
+/** The footer's credit: small mono, muted, the link in the link colour. */
+const credit = { font: "var(--meta-xs)", color: "var(--text-muted)", margin: 0 } as const;
+const creditLink = { color: "var(--text-link)", textDecoration: "underline", textUnderlineOffset: 3 } as const;
 
-const credit = { font: "13px/1.5 'IBM Plex Mono', monospace", margin: 0 } as const;
+/** The /about page's prose links. */
+const proseLink = { color: "var(--text-link)", textDecoration: "underline", textUnderlineOffset: "0.15em" } as const;
 
 /** The site footer's link to Antoine's CV — descriptive anchor text, on purpose: it is the only SEO lever this link has. */
 export const FooterCredit = () => (
   <p style={credit}>
     A side project by{" "}
     <TrackedLink
-      href="https://cv.antoine.berthaud.me"
+      href="https://cv.antoine.berthaud.me/en/"
+      target="_blank"
+      rel="noopener"
       event="profile_click"
       detail="sitefooter_cv"
-      style={LINK}
+      style={creditLink}
     >
       Antoine Berthaud — Senior Growth PM
     </TrackedLink>
+    .
   </p>
 );
 
-/** The same component on the result screen's score-card credit line. */
-export const ResultCredit = () => (
-  <p style={credit}>
-    Built by{" "}
-    <TrackedLink
-      href="https://cv.antoine.berthaud.me"
-      event="profile_click"
-      detail="footer_cv"
-      style={LINK}
-    >
-      Antoine Berthaud
-    </TrackedLink>
-  </p>
+/** Inside running text: the contact line of the About page, two TrackedLinks (`about_linkedin`, `about_cv`) set as the page's prose links. */
+export const AboutContact = () => (
+  <div style={{ maxWidth: 760 }}>
+    <ProseText>
+      A question about the method, a score you disagree with, or a growth problem you&apos;d like an outside eye on:{" "}
+      <TrackedLink
+        href="https://www.linkedin.com/in/antoine-berthaud-pm/"
+        target="_blank"
+        rel="noopener"
+        event="profile_click"
+        detail="about_linkedin"
+        style={proseLink}
+      >
+        message me on LinkedIn
+      </TrackedLink>
+      , or{" "}
+      <TrackedLink
+        href="https://cv.antoine.berthaud.me/en/"
+        target="_blank"
+        rel="noopener"
+        event="profile_click"
+        detail="about_cv"
+        style={proseLink}
+      >
+        read my background
+      </TrackedLink>
+      .
+    </ProseText>
+  </div>
 );
 
-/** `detail` is optional — without it the event is just its own name. */
+/**
+ * `detail` is optional — without it the event is just its own name. No
+ * TrackedLink in the product omits it today: `take_own_tour`, the one event
+ * this shows, is fired by the shared result's primary Button, not by a link.
+ */
 export const NoDetail = () => (
-  <p style={{ font: "15px/1.5 Inter, sans-serif", margin: 0 }}>
-    <TrackedLink href="/quiz" event="take_own_tour" style={LINK}>
+  <p style={{ font: "var(--body-md)", color: "var(--text-body)", margin: 0 }}>
+    <TrackedLink href="/quiz" event="take_own_tour" style={creditLink}>
       Take your own Tour →
     </TrackedLink>
   </p>

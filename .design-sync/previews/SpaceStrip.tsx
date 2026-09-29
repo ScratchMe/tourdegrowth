@@ -12,18 +12,21 @@ import { SpaceStrip } from "tour-de-growth";
  * the hero's button and the band are the doors. A leg not open yet is dashed
  * and says « bientôt », never a colour alone. The game's card is set in the
  * night. `open` is passed so the preview does not depend on the build.
+ *
+ * The strip folds on its own width (a container query), not the window's:
+ * three columns from 760px, so the two wide cards hold them at 880px.
  */
 
 /** Every leg open: the Tour lifted on its shadow, the engine in ultramarine, the game at night. */
 export const AllOpen = () => (
-  <div style={{ width: 992 }}>
+  <div style={{ width: 880 }}>
     <SpaceStrip locale="fr" open={{ engine: true, game: true }} />
   </div>
 );
 
 /** Today in production: the engine and the game still closed, dashed and « soon ». */
 export const NotOpenYet = () => (
-  <div style={{ width: 992 }}>
+  <div style={{ width: 880 }}>
     <SpaceStrip locale="en" open={{ engine: false, game: false }} />
   </div>
 );
