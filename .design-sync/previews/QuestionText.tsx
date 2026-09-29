@@ -9,6 +9,7 @@ import { QuestionCard, QuestionText } from "tour-de-growth";
  *
  * The open popover is the CALLER's state — one at a time per screen, which is
  * why `openGlossaryId` comes in as a prop rather than living in here.
+ * Questions: content/copy-library.ts; labels: dictionary.ts (`glossary`).
  */
 
 const glossary = {
@@ -45,25 +46,24 @@ const Screen = ({
   );
 };
 
-/** A question with a term: the trigger appears right after "aha" moment. */
-export const WithTerm = () => (
-  <Screen questionId="act-1" text={'Have you defined a specific "aha" moment for new users?'} />
-);
+/** A question with a term mid-sentence (act-1): the trigger appears right after "aha" moment. */
+export const WithTerm = () => <Screen questionId="act-1" text={"Have you defined a specific \"aha\" moment for new users?"} />;
 
-/** Another one — the anchor is mid-sentence here too. */
+/** The anchor ends the sentence here (ret-3): the trigger sits right before the question mark. */
 export const Churn = () => <Screen questionId="ret-3" text="Do you know your main cause of churn?" />;
 
-/** A question with no glossary term renders as plain text, no trigger. */
-export const NoTerm = () => (
-  <Screen questionId="ret-1" text="Do you track a retention rate (D7/D30 or similar)?" />
-);
+/** A question with no glossary term (ret-1) renders as plain text, no trigger. */
+export const NoTerm = () => <Screen questionId="ret-1" text="Do you track a retention rate (D7/D30 or similar)?" />;
 
-/** French, where the anchor substring is different copy for the same term. */
+/**
+ * French, where the anchor substring is different copy for the same term:
+ * act-1 splits on "moment « aha »", not on '"aha" moment'.
+ */
 export const French = () => (
   <Screen
-    questionId="ret-3"
+    questionId="act-1"
     locale="fr"
-    text="Connais-tu ta principale cause de churn ?"
+    text="As-tu défini un moment « aha » précis pour tes nouveaux utilisateurs ?"
     labels={{
       glossaryCloseLabel: "Fermer",
       glossaryLabelTemplate: "Définition : {term}",

@@ -20,7 +20,7 @@ const line = { font: "17px/1.5 Inter, sans-serif", margin: 0 } as const;
 export const Inline = () => (
   <p style={line}>
     {"Have you defined a specific \"aha\" moment"}
-    <DefinitionTrigger term={"\"Aha\"} moment" label={"Definition: \"Aha\"} moment" />
+    <DefinitionTrigger term={"\"Aha\" moment"} label={"Definition: \"Aha\" moment"} />
     {" for new users?"}
   </p>
 );

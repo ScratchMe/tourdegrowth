@@ -14,19 +14,19 @@ import { SpaceStrip } from "tour-de-growth";
  * night. `open` is passed so the preview does not depend on the build.
  *
  * The strip folds on its own width (a container query), not the window's:
- * three columns from 760px, so the two wide cards hold them at 880px.
+ * three columns from 760px, so the two wide cards (up to 880px) hold them.
  */
 
 /** Every leg open: the Tour lifted on its shadow, the engine in ultramarine, the game at night. */
 export const AllOpen = () => (
-  <div style={{ width: 880 }}>
+  <div style={{ maxWidth: 880 }}>
     <SpaceStrip locale="fr" open={{ engine: true, game: true }} />
   </div>
 );
 
 /** Today in production: the engine and the game still closed, dashed and « soon ». */
 export const NotOpenYet = () => (
-  <div style={{ width: 880 }}>
+  <div style={{ maxWidth: 880 }}>
     <SpaceStrip locale="en" open={{ engine: false, game: false }} />
   </div>
 );

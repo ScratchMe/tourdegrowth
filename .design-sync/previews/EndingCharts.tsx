@@ -7,86 +7,46 @@ import { EndingCharts } from "tour-de-growth";
  * data" (closed in these stills). The year is a slot per month-end: a year
  * cut short keeps its twelve slots and leaves the unlived months empty — a
  * gap, never a zero. Each curve ends on the same string as its December cell.
+ *
+ * Every prop is what the island builds (`decemberContent` in
+ * game/retention/island-view.ts) from a reference year played to its end.
  */
 
-const MONTHS = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
-const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const box = { padding: 24, maxWidth: 880 } as const;
 
-const CHURN_COPY = {
-  title: "Churn per month",
-  caption: "The dotted line is the December target.",
-  ariaLabel: "Monthly churn over the year",
-  reference: "target 4.0%",
-  ticks: ["3%", "5%", "7%", "9%"],
-};
-const TRUST_COPY = {
-  title: "Subscriber trust, the counter nobody displayed",
-  caption: "From 0 to 100. At 35 or below, people leave and tell everyone why.",
-  ariaLabel: "Subscriber trust over the year",
-  reference: "viral thread",
-  ticks: ["25", "50", "75", "100"],
-};
+/**
+ * Reference year C, the dark one, played to December: churn dips under 5%,
+ * then the Q3 inspection takes every trick down and it jumps past 10% before
+ * ending at 9.1%, far above the dotted 4.0% target; trust falls through the
+ * viral line at 35 and ends at 27. The churn scale grows to 11% to hold it.
+ */
+export const DarkYear = () => (
+  <div style={box}>
+    <EndingCharts
+      view={{"churn": {"values": [6, 4.98, 4.98, 5.286, 4.63116, 4.63116, 5.01276, 5.977, 5.477, 5.04, 10.066, 9.566, 9.066], "months": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], "scale": {"min": 2, "max": 11, "ticks": [3, 5, 7, 9, 11]}, "reference": 4, "end": 0.09066}, "trust": {"values": [60, 51, 51, 51, 38, 38, 38, 25, 25, 25, 27, 27, 27], "months": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], "scale": {"min": 0, "max": 100, "ticks": [25, 50, 75, 100]}, "reference": 35, "end": 27}}}
+      figures={{"churn": "9.1%", "trust": "27 / 100", "radar": "1 / 100"}}
+      churn={{"title": "Churn per month", "caption": "The dotted line is the December target.", "ariaLabel": "Monthly churn over the year: 6.0% on January 1st, 9.1% at the end of December; lowest 4.6%, highest 10.1%.", "reference": "target 4.0%", "ticks": ["3%", "5%", "7%", "9%", "11%"]}}
+      trust={{"title": "Subscriber trust, the counter nobody displayed", "caption": "From 0 to 100. At 35 or below, people leave and tell everyone why.", "ariaLabel": "Subscriber trust over the year: 60 on January 1st, 27 at the end of December; lowest 25, highest 60.", "reference": "viral thread", "ticks": ["25", "50", "75", "100"]}}
+      monthInitials={["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"]}
+      data={{"toggle": "See the data", "month": "Month", "churn": "Churn", "trust": "Trust", "rows": [{"id": "1", "month": "January", "churn": "5.0%", "trust": "51"}, {"id": "2", "month": "February", "churn": "5.0%", "trust": "51"}, {"id": "3", "month": "March", "churn": "5.3%", "trust": "51"}, {"id": "4", "month": "April", "churn": "4.6%", "trust": "38"}, {"id": "5", "month": "May", "churn": "4.6%", "trust": "38"}, {"id": "6", "month": "June", "churn": "5.0%", "trust": "38"}, {"id": "7", "month": "July", "churn": "6.0%", "trust": "25"}, {"id": "8", "month": "August", "churn": "5.5%", "trust": "25"}, {"id": "9", "month": "September", "churn": "5.0%", "trust": "25"}, {"id": "10", "month": "October", "churn": "10.1%", "trust": "27"}, {"id": "11", "month": "November", "churn": "9.6%", "trust": "27"}, {"id": "12", "month": "December", "churn": "9.1%", "trust": "27"}]}}
+    />
+  </div>
+);
 
-const DATA_LABELS = { toggle: "See the data", month: "Month", churn: "Churn", trust: "Trust" };
-
-const box = { padding: 24, maxWidth: 900 } as const;
-
-/** A dark year played to December: churn met the target, trust fell through the viral line. */
-export const DarkYear = () => {
-  const churn = [6.0, 5.8, 5.5, 5.2, 4.9, 4.6, 4.4, 4.3, 4.5, 5.2, 4.8, 4.4, 4.1];
-  const trust = [60, 58, 55, 50, 46, 42, 38, 34, 30, 26, 22, 20, 18];
-  const months = churn.map((_, i) => i);
-  return (
-    <div style={box}>
-      <EndingCharts
-        view={{
-          churn: { values: churn, months, scale: { min: 2, max: 9, ticks: [3, 5, 7, 9] }, reference: 4.0, end: 0.041 },
-          trust: { values: trust, months, scale: { min: 0, max: 100, ticks: [25, 50, 75, 100] }, reference: 35, end: 18 },
-        }}
-        figures={{ churn: "4.1%", trust: "18 / 100" }}
-        churn={CHURN_COPY}
-        trust={TRUST_COPY}
-        monthInitials={MONTHS}
-        data={{
-          ...DATA_LABELS,
-          rows: MONTH_NAMES.map((month, i) => ({
-            id: `m${i + 1}`,
-            month,
-            churn: `${churn[i + 1]?.toFixed(1)}%`,
-            trust: String(trust[i + 1]),
-          })),
-        }}
-      />
-    </div>
-  );
-};
-
-/** A year cut short in June (fired): both lines stop, the rest of the year stays empty. */
-export const CutShortInJune = () => {
-  const churn = [6.0, 5.9, 5.8, 5.7, 5.6, 5.5, 5.4];
-  const trust = [60, 62, 64, 66, 67, 68, 69];
-  const months = churn.map((_, i) => i);
-  return (
-    <div style={box}>
-      <EndingCharts
-        view={{
-          churn: { values: churn, months, scale: { min: 2, max: 9, ticks: [3, 5, 7, 9] }, reference: 4.0, end: 0.054 },
-          trust: { values: trust, months, scale: { min: 0, max: 100, ticks: [25, 50, 75, 100] }, reference: 35, end: 69 },
-        }}
-        figures={{ churn: "5.4%", trust: "69 / 100" }}
-        churn={CHURN_COPY}
-        trust={TRUST_COPY}
-        monthInitials={MONTHS}
-        data={{
-          ...DATA_LABELS,
-          rows: MONTH_NAMES.slice(0, 6).map((month, i) => ({
-            id: `m${i + 1}`,
-            month,
-            churn: `${churn[i + 1]?.toFixed(1)}%`,
-            trust: String(trust[i + 1]),
-          })),
-        }}
-      />
-    </div>
-  );
-};
+/**
+ * Reference year D, fired at the end of June: an honest player with nothing
+ * strong enough, churn 6.0% → 6.2% while trust climbs to 73. Both lines stop
+ * at June; July to December stay empty.
+ */
+export const CutShortInJune = () => (
+  <div style={box}>
+    <EndingCharts
+      view={{"churn": {"values": [6, 6.06, 6.06, 6.06, 6.158, 6.158, 6.158], "months": [0, 1, 2, 3, 4, 5, 6], "scale": {"min": 2, "max": 9, "ticks": [3, 5, 7, 9]}, "reference": 4, "end": 0.06158}, "trust": {"values": [60, 70, 70, 70, 73, 73, 73], "months": [0, 1, 2, 3, 4, 5, 6], "scale": {"min": 0, "max": 100, "ticks": [25, 50, 75, 100]}, "reference": 35, "end": 73}}}
+      figures={{"churn": "6.2%", "trust": "73 / 100", "radar": "0 / 100"}}
+      churn={{"title": "Churn per month", "caption": "The dotted line is the December target.", "ariaLabel": "Monthly churn over the year: 6.0% on January 1st, 6.2% at the end of June; lowest 6.0%, highest 6.2%.", "reference": "target 4.0%", "ticks": ["3%", "5%", "7%", "9%"]}}
+      trust={{"title": "Subscriber trust, the counter nobody displayed", "caption": "From 0 to 100. At 35 or below, people leave and tell everyone why.", "ariaLabel": "Subscriber trust over the year: 60 on January 1st, 73 at the end of June; lowest 60, highest 73.", "reference": "viral thread", "ticks": ["25", "50", "75", "100"]}}
+      monthInitials={["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"]}
+      data={{"toggle": "See the data", "month": "Month", "churn": "Churn", "trust": "Trust", "rows": [{"id": "1", "month": "January", "churn": "6.1%", "trust": "70"}, {"id": "2", "month": "February", "churn": "6.1%", "trust": "70"}, {"id": "3", "month": "March", "churn": "6.1%", "trust": "70"}, {"id": "4", "month": "April", "churn": "6.2%", "trust": "73"}, {"id": "5", "month": "May", "churn": "6.2%", "trust": "73"}, {"id": "6", "month": "June", "churn": "6.2%", "trust": "73"}]}}
+    />
+  </div>
+);

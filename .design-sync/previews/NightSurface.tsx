@@ -66,8 +66,8 @@ export const DashboardRow = () => (
 
 /**
  * Paper nested inside the night: the complaints clipping of a real second
- * quarter (paths.ts PATH_C) keeps its own ground and ink, its "What it
- * signals" note included.
+ * quarter (paths.ts PATH_C) keeps its own ground and ink, its « what it
+ * signals » included.
  */
 export const PaperInside = () => (
   <NightSurface as="div" style={pad}>
