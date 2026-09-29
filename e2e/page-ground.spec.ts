@@ -118,12 +118,13 @@ for (const path of ["/en", "/fr", "/en/glossary/viral-coefficient", "/r/sample"]
     //
     // The right one is not a duplicate. The body's background propagates to
     // the canvas and is positioned on the ROOT element's box, which is one
-    // window tall (`html { height: 100% }`): below it the second lift — the
-    // shadow at `88% 74%` — simply stops, ~7/255 per channel (21 summed, the
-    // way this spec measures) on the right half of every page (ds-critique
-    // H-1, 2026-09-24). At column 24 that lift has already faded to nothing,
-    // so the left gutter alone never saw it: this spec passed with the seam
-    // in production.
+    // window tall (`html { height: 100% }`): below it the second lift — a
+    // shadow at `88% 74%`, until 2026-09-29 — simply stopped, ~7/255 per
+    // channel (21 summed, the way this spec measures) on the right half of
+    // every page (ds-critique H-1, 2026-09-24). At column 24 that lift had
+    // already faded to nothing, so the left gutter alone never saw it: this
+    // spec passed with the seam in production. The right gutter stays
+    // sampled so that a seam there cannot come back unseen.
     const width = await page.evaluate(() => document.documentElement.clientWidth);
     for (const x of [24, width - 24]) {
       const steps = await colourStepsAtTileBoundaries(page, x);

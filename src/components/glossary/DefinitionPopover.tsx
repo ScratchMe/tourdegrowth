@@ -18,8 +18,8 @@ export interface DefinitionPopoverProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 /**
- * The definition itself, in a 5px-shadow panel — smaller than the main 7px
- * card shadow, to read as "secondary element, not a content block". Anchored
+ * The definition itself, in a 4px-shadow panel (`--shadow-panel`) — smaller
+ * than the 6px card shadow, to read as "secondary element, not a content block". Anchored
  * under the trigger on desktop; docked to the bottom of the viewport on
  * mobile, where an anchored popover always overflows a ~390px screen. Only
  * one popover is ever open at a time app-wide — the caller (glossary

@@ -133,6 +133,19 @@
  * a media query, because what decides is the CARD's width, and the right
  * column is narrow on small desktops too (761-1000px), not only on phones.
  */
+/*
+ * On a phone-width card the mountain gives its place back. Stacked, the
+ * longer item (« Confiance ▢ pas sur ton dashboard », 272px in French) needs
+ * a 344px container with the picto (20 + 22 + 10 + 272 + 20): at 375-393px
+ * the card is 327-345px, and the band went to three lines, the empty cell
+ * squeezed (seen in the verification pass, 2026-09-29).
+ */
+@container game-entry (max-width: 349px) {
+  .bandPicto {
+    display: none;
+  }
+}
+
 @container game-entry (max-width: 519px) {
   .bandItems {
     flex-direction: column;

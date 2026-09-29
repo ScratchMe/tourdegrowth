@@ -1,22 +1,22 @@
 import { AnswerOption, QuestionCard, StageProgress } from "tour-de-growth";
 
 /*
- * The question itself. It is the `raised` card of the quiz screen — the one
- * loud surface, the way ScoreDisplay is on a result — so there is never a
- * second raised card next to it.
+ * The question itself. It is the loud card of the quiz screen (the hero
+ * shadow, 8px) — the one loud surface, the way ScoreDisplay is on a result —
+ * so there is never a raised card next to it.
  *
  * Its children may contain an inline glossary trigger (see GlossaryTerm);
  * six of the fifteen questions carry one.
  */
 
-/** Desktop: 28px question in 30px 32px padding. */
+/** Desktop: 34px question in 40px 44px padding. */
 export const Desktop = () => (
   <div style={{ maxWidth: 560 }}>
     <QuestionCard>Do you track a retention rate (D7/D30 or similar)?</QuestionCard>
   </div>
 );
 
-/** Mobile: 22px in 22px 20px. Below 760px the desktop size shrinks to this on its own. */
+/** Mobile: 25px in 24px 22px. Below 760px the desktop size shrinks to this on its own. */
 export const Mobile = () => (
   <div style={{ maxWidth: 320 }}>
     <QuestionCard size="mobile">Do you track a retention rate (D7/D30 or similar)?</QuestionCard>

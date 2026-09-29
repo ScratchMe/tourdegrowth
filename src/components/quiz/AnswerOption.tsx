@@ -12,8 +12,9 @@ export interface AnswerOptionProps extends ButtonHTMLAttributes<HTMLButtonElemen
  * One answer in the questionnaire, 2 to 6 per question, stacked in a
  * 12px-gap column — never a radio list, never a grid. Selected is the
  * inverse fill (--state-selected-*), the tunnel's one selection language;
- * hover only adds the 4px shadow and is off on touch screens, so a stuck
- * hover never passes for a choice. Minimum height 64px on both viewports. Never label an option with its score, a letter, or a number —
+ * hover only adds the 3px shadow (`--state-hover-shadow`) and is off on touch
+ * screens, so a stuck hover never passes for a choice. Minimum height 72px
+ * (`--hit-answer`) on both viewports. Never label an option with its score, a letter, or a number —
  * scoring stays invisible to the user.
  */
 export function AnswerOption({ selected = false, size = "desktop", className, children, ...rest }: AnswerOptionProps) {

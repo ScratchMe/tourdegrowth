@@ -204,7 +204,31 @@ describe("every stated paper-world contrast ratio holds", () => {
 describe("text on the page's bare ground still clears AA", () => {
   const shape = readFileSync(path.join(process.cwd(), "src/styles/tokens/shape.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
   const lift = /--ground-lift\s*:([^;]+);/.exec(shape)?.[1] ?? "";
-  const stops = [...lift.matchAll(/rgba?\([^)]*\)|#[0-9a-f]{3,8}\b/gi)].map((m) => m[0]);
+  // Split on the commas that are not inside parentheses.
+  const topLevel = (list: string) => {
+    const parts: string[] = [];
+    let depth = 0;
+    let start = 0;
+    for (let i = 0; i < list.length; i++) {
+      if (list[i] === "(") depth++;
+      else if (list[i] === ")") depth--;
+      else if (list[i] === "," && depth === 0) {
+        parts.push(list.slice(start, i).trim());
+        start = i + 1;
+      }
+    }
+    return [...parts, list.slice(start).trim()];
+  };
+  // Every layer is a gradient; every argument of it that is not its geometry
+  // (shape, size, `at` position) is a colour stop, with its position removed.
+  const layers = topLevel(lift);
+  const stops = layers.flatMap((layer) => {
+    const args = /^[a-z-]*gradient\((.*)\)$/s.exec(layer)?.[1];
+    if (args === undefined) throw new Error(`--ground-lift has a layer that is not a gradient: ${layer}`);
+    return topLevel(args)
+      .filter((arg) => !/(^|\s)at\s|^(circle|ellipse|closest-|farthest-)|^-?[\d.]+(px|%)(\s+-?[\d.]+(px|%))?$/.test(arg))
+      .map((arg) => arg.replace(/(\s+-?[\d.]+(px|%))+$/, ""));
+  });
   const FLOOR = P1;
 
   const GROUND_PAIRS: { fg: string; stated: number }[] = [
@@ -225,11 +249,19 @@ describe("text on the page's bare ground still clears AA", () => {
     expect(stops.length).toBeGreaterThan(0);
   });
 
-  it("only lightens: every color stop is white or transparent", () => {
-    const darkening = stops.filter((c) => {
-      const { r, g, b, a } = parse(c);
-      return a > 0 && (r < 255 || g < 255 || b < 255);
+  it("only lightens: every colour stop, laid on the paper, is at least as light as it", () => {
+    // A stop this cannot read fails here by name rather than passing unseen
+    // (`black`, `hsl()`, `var(--ink-0)`…): measure it by hand, then teach the
+    // parser. `transparent` is the one keyword that cannot darken anything.
+    const paper = paint(P1);
+    const darkening = stops.filter((stop) => {
+      if (stop === "transparent") return false;
+      if (!/^(#[0-9a-f]{6}|rgba\(\d+,\s*\d+,\s*\d+,\s*[\d.]+\))$/i.test(stop)) {
+        throw new Error(`--ground-lift: a colour stop this test cannot read: ${stop}`);
+      }
+      return luminance(paint(stop, paper)) < luminance(paper);
     });
+    expect(stops.length).toBeGreaterThan(0);
     expect(darkening).toEqual([]);
   });
 

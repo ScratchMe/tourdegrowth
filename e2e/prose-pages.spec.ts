@@ -32,9 +32,11 @@ test.describe("prose pages", () => {
   test("carry at most one raised card each", async ({ page }) => {
     for (const path of PROSE_PAGES) {
       await page.goto(path);
+      // `raised` (6px) and `hero` (8px, since 2026-09-29) are both "the one
+      // loud thing": matching 6px alone went blind to a hero card.
       const raised = await page
         .locator("main *")
-        .evaluateAll((els) => els.filter((el) => getComputedStyle(el).boxShadow.startsWith("rgb") && /6px 6px 0px/.test(getComputedStyle(el).boxShadow)).length);
+        .evaluateAll((els) => els.filter((el) => getComputedStyle(el).boxShadow.startsWith("rgb") && /(?:6|8)px (?:6|8)px 0px/.test(getComputedStyle(el).boxShadow)).length);
       expect(raised, path).toBeLessThanOrEqual(1);
     }
   });

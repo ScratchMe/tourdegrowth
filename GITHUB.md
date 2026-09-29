@@ -178,8 +178,9 @@ Et un principe : **les types suivent le runtime, jamais ils ne le précèdent**
     fichier servi.
 - **Une PR verte se merge sans attendre Antoine** (sa décision du 2026-09-29),
   en suivant `.claude/skills/livrer/SKILL.md`, sauf si elle peut faire grimper
-  Functions Storage (dépendance, réglage de build, nouvelle route de fonction) :
-  la barrière et la commande qui la vérifie sont au §0 de ce skill.
+  Functions Storage (dépendance, réglage de build, binaire sous `src/`, code
+  serveur qui pèse — une route de plus, elle, ne coûte presque rien) : la
+  barrière et les commandes qui la vérifient sont au §0 de ce skill.
 - **La suppression automatique des branches de tête est activée** : les
   branches de PR mergées disparaissent seules. Ne pas s'en étonner au prochain
   `--force-with-lease`.
