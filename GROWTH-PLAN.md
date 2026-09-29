@@ -244,6 +244,11 @@ mois.*
 mieux repartager celle qui vient. Chacun est une PR avec ses specs, comme
 d'habitude.*
 
+**3.1 à 3.3 sont livrés le 2026-09-29** (lot A3 de `CHANTIERS.md`, `JOURNAL.md`).
+Le badge vit sous une adresse versionnée, `/r/<id>/badge/<jeton>.svg`, et non
+sous `/r/<id>/badge.svg` : c'est ce qui permet au CDN de le garder un an.
+Reste une question pour 3.3, C24 : faut-il que la landing mène à l'exemple roast ?
+
 | # | Action | Pourquoi |
 |---|---|---|
 | 3.1 | **Badge embarquable** `/r/<id>/badge.svg` (« Tour de Growth · 74/100 », style shields) + snippet Markdown « ajoute-le à ton README » sur la page de résultat du **propriétaire** | La cible d'HN et d'Indie Hackers vit sur GitHub ; un badge dans un README est un lien permanent, anonyme, et un `?ref=` qui travaille tout seul. Public par nature : le score l'est déjà via l'OG |

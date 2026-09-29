@@ -132,7 +132,8 @@ export function resetPendingEventsForTests(): void {
  *   segment_answered/<both|stage|model|neither>  the two context questions (REVIEW-02.md R2-26)
  *   tone_selected/<neutral|roast>       "Get my score" pressed
  *   submission_completed/<tone>         a result exists (SPEC.md §8)
- *   share/<tone>/<native|copy>          a share actually happened (SPEC.md §8)
+ *   share/<tone>/<native|image|copy>    a share actually happened (SPEC.md §8); `image` carried the picture (A3.2)
+ *   badge_copied                        the owner copied the README badge's Markdown (A3.1)
  *   take_own_tour                       a VISITOR of a shared result clicked into their own Tour (REVIEW-02.md R2-02)
  *   retake_started                      a Tour begun on a device that already holds a result (REVIEW-03.md A4)
  *   landing_return                      the landing loaded for someone who already has a result (REVIEW-03.md A4)
@@ -149,8 +150,13 @@ export function resetPendingEventsForTests(): void {
 /** Both tones, as they appear in event paths. Mirrors `lib/quiz/tone.ts`. */
 export const TONES = ["neutral", "roast"] as const;
 
-/** How a share actually happened — the native sheet, or the desktop clipboard fallback. */
-export const SHARE_METHODS = ["native", "copy"] as const;
+/**
+ * How a share actually happened: the native sheet with the link, the native
+ * sheet carrying the share image itself (`image`, CHANTIERS.md A3.2 — where
+ * `navigator.canShare({ files })` allows it), or the desktop clipboard
+ * fallback. `goatcounter-api.ts` sums all three into the funnel's shares.
+ */
+export const SHARE_METHODS = ["native", "image", "copy"] as const;
 
 /** The five AARRR stages, as stage-completion suffixes. */
 export const QUIZ_STAGES = ["1", "2", "3", "4", "5"] as const;
@@ -188,6 +194,14 @@ export const PROFILE_CLICK_DETAILS = ["footer_cv", "card_cv", "card_linkedin", "
  * CTA was the owner's share button and nothing measured the visitor at all.
  */
 export const OWN_TOUR_EVENT = "take_own_tour";
+
+/**
+ * The owner copied the README badge's Markdown (CHANTIERS.md A3.1). A copy,
+ * not a paste: what happens in the README is out of sight. Counted on its
+ * own line in the dashboard, not in the value-action ratio, whose definition
+ * (REVIEW-03.md A4) this does not change without saying so.
+ */
+export const BADGE_COPIED_EVENT = "badge_copied";
 
 /**
  * The two return signals — REVIEW-03.md A4.

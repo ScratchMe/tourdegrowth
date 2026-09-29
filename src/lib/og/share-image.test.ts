@@ -194,3 +194,17 @@ describe("matchShareToken", () => {
     expect(matchShareToken(shareImageToken({ ...build("fr"), deepDive: true }), build)).toBeNull();
   });
 });
+
+describe("the canonical roast example (CHANTIERS.md A3.3)", () => {
+  it("is the same fixed sample in the roast frame, on an address of its own", () => {
+    const roast = sampleShareImageModel("en", "roast");
+    expect(roast).toEqual({ ...sampleShareImageModel("en"), roast: true });
+    expect(shareImageToken(roast)).not.toBe(shareImageToken(sampleShareImageModel("en")));
+  });
+
+  it("each tone's token matches its own build and only its own", () => {
+    const roastToken = shareImageToken(sampleShareImageModel("fr", "roast"));
+    expect(matchShareToken(roastToken, (locale) => sampleShareImageModel(locale, "roast"))).toEqual(sampleShareImageModel("fr", "roast"));
+    expect(matchShareToken(roastToken, (locale) => sampleShareImageModel(locale, "neutral"))).toBeNull();
+  });
+});

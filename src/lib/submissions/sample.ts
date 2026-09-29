@@ -2,8 +2,8 @@ import { NEXT_MOVES } from "@/content/next-moves";
 import type { Locale } from "@/lib/i18n/locale";
 import { tc } from "@/lib/i18n/translatable";
 import type { Tone } from "@/lib/quiz/tone";
-import type { Pillar } from "@/lib/scoring/pillars";
 import { buildQuickVerdict, type QuickVerdict } from "@/lib/scoring/verdict";
+import { SAMPLE_RESULT } from "./sample-result";
 import { buildQuickVerdicts, type QuickVerdicts } from "./view-model";
 
 /**
@@ -26,21 +26,7 @@ import { buildQuickVerdicts, type QuickVerdicts } from "./view-model";
  * sample stays a faithful preview of the real thing rather than
  * independently-authored copy that could drift from it.
  */
-export const SAMPLE_RESULT: {
-  total: number;
-  pillars: { pillar: Pillar; score: number }[];
-  weakestPillar: Pillar;
-} = {
-  total: 74,
-  pillars: [
-    { pillar: "acquisition", score: 18 },
-    { pillar: "activation", score: 12 },
-    { pillar: "retention", score: 8 },
-    { pillar: "referral", score: 16 },
-    { pillar: "revenue", score: 20 },
-  ],
-  weakestPillar: "retention",
-};
+export { SAMPLE_RESULT };
 
 /** Resolves the sample's Quick verdict for one tone/locale, from the real copy library (see module comment above). `modelUsed` doesn't apply — this was never AI-generated. */
 export function getSampleVerdict(tone: Tone, locale: Locale): QuickVerdict {

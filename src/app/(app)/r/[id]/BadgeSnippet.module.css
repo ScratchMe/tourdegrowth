@@ -1,0 +1,56 @@
+/*
+ * The README badge block (CHANTIERS.md A3.1), under the share card, owner
+ * only. The share card's own grammar: a sunken frame, an uppercase mono
+ * caption, then the picture and its one action.
+ */
+.badge {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: var(--pad-share-frame);
+  background: var(--surface-sunken);
+  border: var(--border-solid);
+  border-radius: var(--radius-card);
+}
+
+.caption {
+  margin: 0;
+  font: var(--meta-2xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.lead {
+  margin: 0;
+  font: var(--body-sm);
+  color: var(--text-body);
+}
+
+/* The badge at its own size: a README shows it 20px tall. */
+.image {
+  display: block;
+  height: 20px;
+  width: auto;
+}
+
+.code {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: 10px 12px;
+  background: var(--surface-card);
+  border: var(--border-dashed);
+  border-radius: var(--radius-button);
+  font: var(--meta-xs);
+  color: var(--text-body);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 760px) {
+  .badge {
+    padding: 12px;
+  }
+}

@@ -5,6 +5,7 @@ import {
   SHARE_METHODS,
   TONES,
   OWN_TOUR_EVENT,
+  BADGE_COPIED_EVENT,
   SEGMENT_DETAILS,
   RETAKE_STARTED_EVENT,
   LANDING_RETURN_EVENT,
@@ -88,6 +89,7 @@ const ALL_PATHS = [
   ...SUBMISSION_PATHS,
   ...SHARE_PATHS,
   OWN_TOUR_EVENT,
+  BADGE_COPIED_EVENT,
   DEEP_DIVE_STARTED_PATH,
   ...DEEP_DIVE_COMPLETED_PATHS,
   ...PROFILE_CLICK_PATHS,
@@ -164,6 +166,8 @@ export interface FunnelStats {
   shares: number;
   /** Visitors of a shared result who clicked into their own Tour (REVIEW-02.md R2-02). */
   ownTourClicks: number;
+  /** Owners who copied the README badge's Markdown (CHANTIERS.md A3.1). Not in `valueActionsPerResult`. */
+  badgeCopied: number;
   deepDiveStarted: number;
   deepDiveCompleted: number;
   /** Sum of all profile_click/* events (SPEC-ADDENDUM-02.md §2 credit links) in the same window. */
@@ -302,6 +306,7 @@ export async function fetchFunnelWindow(startISO: string, label: string): Promis
       submissionsCompleted,
       shares,
       ownTourClicks,
+      badgeCopied: counts.get(BADGE_COPIED_EVENT) ?? 0,
       deepDiveStarted,
       deepDiveCompleted: sum(DEEP_DIVE_COMPLETED_PATHS),
       profileClicks,

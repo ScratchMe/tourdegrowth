@@ -39,18 +39,28 @@ import { isValidSubmissionId } from "@/lib/submissions/referral";
 const IMMUTABLE = "public, max-age=31536000, s-maxage=31536000, immutable";
 const BRIEF = "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400";
 
-/** The declared (author's) model, and how to build the same result in any language. */
+/**
+ * The declared (author's) model, and how to build the same result in any
+ * language — once per tone the address can carry. A real result has its own
+ * tone; the sample has both, its roast frame being the canonical roast
+ * example (`/r/sample?tone=roast`, CHANTIERS.md A3.3).
+ */
 interface ShareModels {
   declared: ShareImageModel;
-  build: (locale: Locale) => ShareImageModel;
+  builds: ((locale: Locale) => ShareImageModel)[];
 }
 
 async function loadModels(id: string): Promise<ShareModels | null> {
-  if (id === "sample") return { declared: sampleShareImageModel(), build: sampleShareImageModel };
+  if (id === "sample") {
+    return {
+      declared: sampleShareImageModel(),
+      builds: [(locale) => sampleShareImageModel(locale, "neutral"), (locale) => sampleShareImageModel(locale, "roast")],
+    };
+  }
   if (!isValidSubmissionId(id)) return null;
   const submission = await getCachedSubmissionById(id);
   return submission
-    ? { declared: shareImageModel(submission), build: (locale) => shareImageModel(submission, locale) }
+    ? { declared: shareImageModel(submission), builds: [(locale) => shareImageModel(submission, locale)] }
     : null;
 }
 
@@ -62,7 +72,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   const [models, fonts] = await Promise.all([loadModels(id), loadOgFonts()]);
   if (!models) return new Response(null, { status: 404 });
 
-  const current = matchShareToken(token, models.build);
+  const current = models.builds.map((build) => matchShareToken(token, build)).find((model) => model !== null) ?? null;
   const model = current ?? models.declared;
   return renderResultShareImage(model, shareImageStrings(model), fonts, {
     "Cache-Control": current ? IMMUTABLE : BRIEF,
