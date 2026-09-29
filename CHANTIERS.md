@@ -252,6 +252,21 @@ miroir sans Tour invite justement à en faire un.
 | Copie | La ligne et le bouton, en FR et en EN, « à relire » |
 | Tests | Un e2e du parcours complet : moteur commencé sans Tour → invitation → un Tour déposé sur l'appareil → retour au tableau → état `unlinked` → « Relier ce Tour » → miroir `linked`. Et relier puis délier par les Réglages. Dans les deux langues, à 1 280 et 390 px. Le canari « rien ne quitte le navigateur » tient toujours : relier ne fait que lire `tdg.results.v1` |
 
+#### A7.6 — La slide « fuite » d'une étape sans prix (C9)
+
+**Décidé** (`ENGINE.md` §9.3) : quand le diagnostic est `clear` sur une
+étape **sans prix** (rétention à J30, part recommandée), la slide `leak`
+existe au lieu d'être omise. Quand le gain est **inférieur à un client**,
+l'omission est gardée.
+
+| Où | Quoi |
+|---|---|
+| `lib/engine/deck.ts#buildLeak` (l. 358-360) | Séparer les deux cas que la condition `!impact \|\| less-than-one` confond. Sans prix : un titre `leakClearUnpriced` (« {Étape} freine le moteur : {valeur}, pour {cible}. »), sans la carte « Le calcul » en quatre lignes (il n'y a pas de chaîne à montrer), avec la colonne « À côté » comme d'habitude, et un pied qui dit pourquoi il n'y a pas de montant. Titre et corps sortent de la même fonction (`ENGINE.md` §9.3, règle « titre = corps ») |
+| `content/engine-copy.ts` | Le gabarit du titre et le pied, en FR et en EN, « à relire ». `{cible}` suit `targetPhrase`, qui après A7.1 ne dit plus que « notre cible » |
+| Export texte et notes | `deckMarkdown` et les notes d'orateur suivent la même slide |
+| Tests | Un état où la rétention à J30 est seule sous sa cible : la slide existe, son titre ne contient aucun montant, et aucune chaîne « Le calcul » n'est rendue. Un état où le gain vaut moins d'un client : pas de slide. **Non-vacuité** : remettre l'omission fait rougir le premier test |
+| Ordre | Après A7.1 : sans repère qui désigne, le cas `clear` ne vient plus que d'une cible |
+
 ### A8 — L'audit GEO, joué sans installer le plug-in
 
 **D'où ça vient** : le 2026-09-29, Antoine a proposé le plug-in
@@ -317,7 +332,7 @@ section A.
 | C6 | Le moteur est public, gratuit et local. Ce n'est pas la phase 3 de l'instrument d'audit | Pris par défaut | Décision 6 | Garder. **→ Confirmé le 2026-09-29. Antoine tient l'audit privé pour un doublon du moteur, auquel il croit davantage : c'est la mission D4 qui tranchera, avec une colonne « le moteur le faisait déjà ? » dans le journal des frictions (`AUDIT-PLAN.md` §4). Rien à coder** |
 | C7 | Les liens d'ouverture : `/how-it-works`, les deux pages SEO d'entrée, une section de la landing sous la citation. Pas de septième lien au pied de page | Prévus, pas encore construits. Aujourd'hui, seuls le bandeau d'étape et le sitemap y mènent, une fois le moteur ouvert (vérifié : `ENGINE_PATH` n'est lu que par `SpaceBand`, `sitemap.ts` et `/admin/preview`) | Décision 7 | Garder. Les construire devient un item A avant l'ouverture (D2). **→ Tranché le 2026-09-29, capture de l'accueil à l'appui : les trois pages gardent leur lien, mais pas de section à part sur l'accueil (la bande « trois parties » présente déjà le moteur ; sa carte devient le lien, selon C15), et pas de pied de page. Code : A7.4** |
 | C8 | Le miroir, quand un Tour est présent sur l'appareil mais non relié au moteur | Il n'affiche rien (sans Tour du tout, il invite à faire le Tour) | `ENGINE.md` §8.5, `CLAUDE.md` | Afficher une ligne et le bouton qui relie le Tour. Sinon, la comparaison ne se découvre jamais. **→ Tranché le 2026-09-29, captures à l'appui : une ligne et un bouton, et la case de liaison dans les Réglages. L'invitation « Fais le Tour » menait à une impasse, faute de pouvoir relier le Tour après la carte de départ. Code : A7.5** |
-| C9 | La slide « fuite » quand l'étape nommée n'a pas de prix (rétention à J30, part recommandée) ou qu'elle rapporte moins d'un client | La slide est omise | `lib/engine/deck.ts#buildLeak` | Garder l'omission : pas de slide plutôt qu'un titre faux |
+| C9 | La slide « fuite » quand l'étape nommée n'a pas de prix (rétention à J30, part recommandée) ou qu'elle rapporte moins d'un client | La slide est omise | `lib/engine/deck.ts#buildLeak` | Garder l'omission : pas de slide plutôt qu'un titre faux. **→ Tranché autrement le 2026-09-29, sur une reco revue en séance. Pour une étape sans prix, la slide existe avec un titre sans argent, car un titre vrai existe. Sous un client, l'omission est gardée. Code : A7.6** |
 
 ### Le jeu
 

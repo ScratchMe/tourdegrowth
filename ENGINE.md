@@ -1518,6 +1518,22 @@ Les accords (`one`/`other`) sont des gabarits distincts dans `ENGINE_COPY`
 | `not-enough` + below | « **{Étape} est sous son repère.** Sans cible sur les autres étapes, impossible de dire si c'est la plus grosse fuite. » | "**{Stage} sits below its reference.** Without targets on the other stages, we can't say whether it's the biggest leak." |
 | `level` | « Aucune étape n'est sous sa cible : **le levier est le volume ou le prix**. » | "No stage sits below its target: **the lever is volume or price**." |
 
+**`clear` sur une étape sans prix — tranché par Antoine le 2026-09-29
+(`CHANTIERS.md` C9).** Jusque-là, la slide était omise (`deck.ts#buildLeak`)
+dans deux cas : quand l'étape nommée n'a pas de prix (rétention à J30, part
+recommandée) et quand combler l'écart rapporterait moins d'un client.
+Désormais :
+- **Étape sans prix : la slide existe**, avec un titre sans argent
+  (« **{Étape} freine le moteur** : {valeur}, pour {cible}. ») et un pied qui
+  dit pourquoi il n'y a pas de montant (le modèle ne relie pas ce chiffre à
+  des euros). Sans elle, le deck perdait sans rien dire la conclusion que le
+  tableau affiche.
+- **Moins d'un client : l'omission est gardée.** Un tel écart n'est pas un
+  argument de comité.
+
+Le gabarit exact est de la copie neuve, « à relire ». À coder :
+`CHANTIERS.md` A7.6.
+
   `{cible}` : « 20 % (bas de l'ordre de grandeur couramment cité) » ou « 30 %
   (notre cible) » / "20% (low end of the commonly cited range)" or "30% (our
   target)". Exemple : « Ramener l'activation à 20 % vaudrait **~600 € de MRR
