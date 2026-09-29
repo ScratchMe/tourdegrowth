@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/core/Button";
 import { TEXT_LIMITS, type MetricShape } from "@/lib/engine/catalog-shape";
 import { CAUSE_KEY, REPAIR_KEY, ROLE_KEY, type ResolvedMetric } from "@/lib/engine/strings";
 import type { RepairScale, RoleId } from "@/lib/engine/types";
@@ -254,13 +255,14 @@ function ReadingFields({
           </Field>
         )}
         {shortcut ? (
-          <button
-            type="button"
-            className={ui.linkButton}
+          <Button
+            variant="quiet"
+            compact
+            className={ui.textAction}
             onClick={() => set({ kind: reading.kind === "ratio" ? shortcut : "ratio" })}
           >
             {reading.kind === "ratio" ? (shortcut === "rate" ? strings.sheet.rateOnly : strings.sheet.amountOnly) : w.countsBack}
-          </button>
+          </Button>
         ) : null}
         <Field label={strings.sheet.source} htmlFor={`${idPrefix}-source`}>
           <Select<Exclude<SourceChoice, "">>

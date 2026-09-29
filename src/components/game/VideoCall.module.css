@@ -27,21 +27,36 @@
   position: relative;
   aspect-ratio: 16 / 9;
   background: var(--dg-wall);
+}
+
+/*
+ * The picture is what changes (grey when cold or over, dark while it rings),
+ * so the picture is what transitions. The transition sat on `.frame` until
+ * design audit S-6 (2026-09-29): a `filter` that never changes there, so
+ * every change of mood cut instead of fading.
+ */
+.frame :where(svg) {
   transition: filter var(--dur-state) var(--ease-out);
 }
 
-/* A decorative layer over the picture: the angry halo, the ringing pulse. */
+/*
+ * A decorative layer over the picture: the angry rim, the ringing pulse. Both
+ * are a hard ring the stamp's weight, never a glow — the system has no
+ * blurred shadow (conventions.md), and the call was its one exception, a
+ * 90px red halo, until design audit S-6. Red for anger, the world's amber
+ * for a call waiting to be picked up.
+ */
 .frame::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-  box-shadow: inset 0 0 0 transparent;
+  box-shadow: inset 0 0 0 0 transparent;
   transition: box-shadow var(--dur-state) var(--ease-out);
 }
 
 .call[data-mood="angry"] .frame::after {
-  box-shadow: inset 0 0 90px var(--visio-halo-angry);
+  box-shadow: inset 0 0 0 var(--border-width-stamp) var(--state-bad-text);
 }
 
 /* Cold, or the year is over: the picture goes grey. The chip and timer on top of it stay legible — they are not part of the filtered layer. */
@@ -61,7 +76,7 @@
 }
 
 .call[data-state="ringing"] .frame::after {
-  box-shadow: inset 0 0 0 3px var(--state-selected-bg);
+  box-shadow: inset 0 0 0 var(--border-width-stamp) var(--state-selected-bg);
   animation: visio-ring var(--game-dur-ring) ease-in-out infinite;
 }
 
@@ -124,7 +139,7 @@
 
 /* Angry: a red rule down the band's edge, beside the words — the colour repeats what the CEO says, it never replaces it. */
 .call[data-mood="angry"] .band {
-  box-shadow: inset 3px 0 0 var(--state-bad-text);
+  box-shadow: inset var(--border-width-stamp) 0 0 var(--state-bad-text);
 }
 
 .caption {

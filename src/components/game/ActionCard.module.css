@@ -95,7 +95,7 @@
   border-radius: var(--radius-tag);
   background: var(--game-order-bg, var(--action-primary-bg));
   color: var(--game-order-text, var(--action-primary-text));
-  border: 2px solid var(--game-order-bg, var(--action-primary-bg));
+  border: var(--border-width) solid var(--game-order-bg, var(--action-primary-bg));
 }
 
 .card.pressed .order {
@@ -111,7 +111,7 @@
   text-transform: uppercase;
   padding: var(--pad-tag);
   border-radius: var(--radius-tag);
-  border: 2px solid currentColor;
+  border: var(--border-width) solid currentColor;
 }
 
 .chosen {

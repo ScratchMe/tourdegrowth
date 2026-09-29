@@ -363,7 +363,7 @@
 .swatchUnknown {
   border-radius: 3px;
   background: var(--viz-unknown-fill);
-  outline: 2px dashed var(--viz-axis);
+  outline: var(--border-width) dashed var(--viz-axis);
   outline-offset: -2px;
 }
 
@@ -758,16 +758,16 @@
 }
 
 .pipApprox {
-  border: 2px solid var(--viz-ink);
+  border: var(--border-width) solid var(--viz-ink);
   background: var(--viz-unknown-fill);
 }
 
 .pipMissing {
-  border: 2px dashed var(--viz-axis);
+  border: var(--border-width) dashed var(--viz-axis);
 }
 
 .pipPending {
-  border: 2px solid var(--viz-ink);
+  border: var(--border-width) solid var(--viz-ink);
 }
 
 .pipNa {
@@ -950,7 +950,7 @@
   top: -14px;
   bottom: -14px;
   width: 0;
-  border-left: 3px dashed var(--viz-axis);
+  border-left: var(--border-width-stamp) dashed var(--viz-axis);
 }
 
 .timelineScale {
@@ -1183,7 +1183,7 @@
   padding: 8px 12px;
   text-align: left;
   vertical-align: top;
-  border-bottom: 1px solid var(--border-divider);
+  border-bottom: var(--border-width-hairline) solid var(--border-divider);
   overflow-wrap: anywhere;
 }
 

@@ -23,11 +23,11 @@
 .ink {
   background: var(--surface-inverse);
   color: var(--text-on-inverse);
-  border: 2px solid var(--surface-inverse);
+  border: var(--border-width) solid var(--surface-inverse);
 }
 
 .red {
   background: var(--surface-accent);
   color: var(--text-inverse);
-  border: 2px solid var(--surface-accent);
+  border: var(--border-width) solid var(--surface-accent);
 }

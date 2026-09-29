@@ -45,8 +45,8 @@
   left: 3px;
   width: 5px;
   height: 5px;
-  border-left: 2px solid var(--viz-ink);
-  border-bottom: 2px solid var(--viz-ink);
+  border-left: var(--border-width) solid var(--viz-ink);
+  border-bottom: var(--border-width) solid var(--viz-ink);
   transform: translateY(-50%) rotate(45deg);
 }
 

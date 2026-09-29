@@ -10,7 +10,7 @@
 
 .weakness {
   background: var(--surface-alert);
-  border: 2px solid var(--border-alert);
+  border: var(--border-width) solid var(--border-alert);
 }
 
 .eyebrow {

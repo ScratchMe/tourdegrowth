@@ -7,7 +7,7 @@
   text-transform: uppercase;
   color: var(--text-muted);
   text-decoration: none;
-  border-bottom: 1px solid var(--border-divider);
+  border-bottom: var(--border-width-hairline) solid var(--border-divider);
   padding-bottom: 3px;
   align-self: flex-start;
   /* The hero column spaces its children with margins, not gap. */

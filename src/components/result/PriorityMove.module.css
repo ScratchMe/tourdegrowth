@@ -4,7 +4,7 @@
    of its own red, and its sentence is set as the one thing to do. */
 .card {
   background: var(--surface-card);
-  border: 2px dashed var(--border-alert);
+  border: var(--border-width) dashed var(--border-alert);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-advice);
   padding: 20px 22px;

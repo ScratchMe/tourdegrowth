@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/core/Button";
 import { TEXT_LIMITS, type MetricShape } from "@/lib/engine/catalog-shape";
 import { ROLE_KEY, type ResolvedMetric } from "@/lib/engine/strings";
 import type { RoleId } from "@/lib/engine/types";
@@ -239,9 +240,9 @@ export function ValueEditor({
       ) : null}
 
       {kindToggle ? (
-        <button type="button" className={ui.linkButton} onClick={() => update({ kind: kindToggle.to })}>
+        <Button variant="quiet" compact className={ui.textAction} onClick={() => update({ kind: kindToggle.to })}>
           {kindToggle.label}
-        </button>
+        </Button>
       ) : null}
 
       {needsSource ? (

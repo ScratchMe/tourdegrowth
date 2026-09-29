@@ -32,17 +32,17 @@
 }
 
 .muted {
-  border: 2px dashed var(--text-muted);
+  border: var(--border-width) dashed var(--text-muted);
   color: var(--text-muted);
 }
 
 .ink {
-  border: 2px dashed var(--text-body);
+  border: var(--border-width) dashed var(--text-body);
   color: var(--text-body);
 }
 
 .alert {
-  border: 2px dashed var(--text-alert);
+  border: var(--border-width) dashed var(--text-alert);
   color: var(--text-alert);
 }
 

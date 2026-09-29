@@ -115,6 +115,14 @@
 
 /* A lever under test says so twice: its value in bold ink over a solid rule
    (the slides' « moved » row), and a reset beside today's value. */
+/* A moved lever's row keeps the 44px its reset used to be drawn at: the reset
+   is now the system's quiet button, drawn smaller and tapped 44px tall, and a
+   shorter row would let that strip reach up over the slider (targets.spec.ts).
+   An unmoved lever has no reset, and keeps its one line. */
+.lever[data-moved="true"] .leverFoot {
+  min-height: var(--hit-min);
+}
+
 .lever[data-moved="true"] .leverValue {
   font-weight: 700;
   text-decoration: underline solid var(--text-body) 2px;
@@ -144,25 +152,6 @@
   gap: var(--space-2) var(--space-4);
   font: var(--meta-xs);
   color: var(--text-muted);
-}
-
-/* A text button, underlined: `Button variant="quiet"` is sized for a screen's
-   actions, and eight of those would out-shout the sliders. 44px tall all the same. */
-.reset {
-  font: var(--meta-xs);
-  color: var(--text-link);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  background: none;
-  border: 0;
-  padding: 0 var(--space-2);
-  min-height: var(--hit-min);
-  cursor: pointer;
-}
-
-.reset:focus-visible {
-  outline: var(--focus-width) solid var(--focus-ring);
-  outline-offset: var(--focus-offset-tight);
 }
 
 .note {

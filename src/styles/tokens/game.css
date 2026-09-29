@@ -62,7 +62,6 @@
    * (the plan quoted 4.13, measured on a 60% chip that no token declares).
    */
   --visio-scrim: rgba(0, 0, 0, 0.72);
-  --visio-halo-angry: rgba(210, 64, 44, 0.45); /* --paint-red at 45%, decorative */
   --visio-live: var(--paint-red); /* a shape, never text */
 
   /*

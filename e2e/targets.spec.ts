@@ -1,5 +1,6 @@
-import { expect, test } from "./helpers";
+import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
 import type { Page } from "@playwright/test";
+import { exampleState } from "../src/lib/engine/__tests__/fixtures";
 
 /**
  * DS v3 H-2 and H-3 — touch targets measured the way a finger meets them.
@@ -199,4 +200,202 @@ test("a trigger inside question copy takes a 44px tap without covering an answer
   }, TRIGGER);
   expect(checked).toBeGreaterThanOrEqual(3); // the three answers of acq-3
   expect(covered).toEqual([]);
+});
+
+/*
+ * Design audit S-11 (2026-09-29) — the system's one text button.
+ *
+ * `Button variant="quiet"` was drawn 31px tall and tapped 31px tall, with no
+ * hover and no press; the engine had two more recipes (32px and 44px). The
+ * engine's now render the Button, and the Button carries a transparent strip
+ * (`::before`) at least 44px on each axis, centred on the label, that moves
+ * nothing. Three claims, each measured the way a finger meets the page:
+ *   1. a tap anywhere in a 44px strip through the label reaches the button;
+ *   2. the strip covers no part of another target (a slider, a field, a
+ *      button next to it) — an extension that steals a neighbour's tap is
+ *      worse than none;
+ *   3. the drawn button did not grow: the page lays out as it did.
+ *
+ * Non-vacuity (2026-09-29): claim 2 failed for real on the first build — the
+ * what-if row had lost the 44px its old reset gave it, and the strip reached
+ * up over the slider (« Back to today » covers a neighbour: INPUT). Fixed in
+ * WhatIfPanel.module.css. A build without the `::before` fails exactly the
+ * three engine tests, on claim 1 (strips of 31.75, 31.75 and 29.75px); the
+ * six others pass. Against main's build (before this change) the hover test
+ * fails too — the quiet button had no hover.
+ */
+const QUIET = '[class*="Button-module__"][class*="__quiet"]';
+
+/** Indices of the quiet buttons a person can see (a hidden nav link has no box). */
+async function visibleQuiet(page: Page, sel: string): Promise<number[]> {
+  return page.evaluate((sel) => {
+    const out: number[] = [];
+    document.querySelectorAll(sel).forEach((el, i) => {
+      const r = el.getBoundingClientRect();
+      if (r.width > 0 && r.height > 0) out.push(i);
+    });
+    return out;
+  }, sel);
+}
+
+/** How close a neighbour has to be for claim 2 to be worth checking against it. */
+const NEAR = 16;
+
+/**
+ * Claim 2, for quiet button `index`: every other target whose drawn box meets
+ * the quiet button's 44px zone is still reached at every point of that
+ * overlap (sampled every 1px). Returns the labels of the targets that lost a
+ * point, and how many targets stand within NEAR px of the zone — so an empty
+ * list can be told apart from a check with nothing around it.
+ */
+async function stolenFrom(page: Page, sel: string, index: number): Promise<{ near: number; stolen: string[] }> {
+  return page.evaluate(
+    ({ sel, index, near_ }) => {
+      const quiet = document.querySelectorAll(sel)[index] as HTMLElement;
+      const q = quiet.getBoundingClientRect();
+      const zone = {
+        top: q.top + q.height / 2 - Math.max(q.height, 44) / 2,
+        bottom: q.top + q.height / 2 + Math.max(q.height, 44) / 2,
+        left: q.left + q.width / 2 - Math.max(q.width, 44) / 2,
+        right: q.left + q.width / 2 + Math.max(q.width, 44) / 2,
+      };
+      const targets = [...document.querySelectorAll("a, button, input, select, textarea, summary, label")].filter(
+        (el) => el !== quiet && !quiet.contains(el) && !el.contains(quiet),
+      );
+      let near = 0;
+      const stolen: string[] = [];
+      for (const el of targets) {
+        const r = el.getBoundingClientRect();
+        if (r.width === 0) continue;
+        const gap = Math.max(zone.top - r.bottom, r.top - zone.bottom, zone.left - r.right, r.left - zone.right);
+        if (gap <= near_) near += 1;
+        const top = Math.max(r.top, zone.top);
+        const bottom = Math.min(r.bottom, zone.bottom);
+        const left = Math.max(r.left, zone.left);
+        const right = Math.min(r.right, zone.right);
+        if (bottom <= top || right <= left) continue;
+        let lost = false;
+        for (let y = top + 0.5; y < bottom && !lost; y += 1) {
+          for (let x = left + 0.5; x < right && !lost; x += 1) {
+            const hit = document.elementFromPoint(x, y);
+            if (hit && (hit === quiet || quiet.contains(hit))) lost = true;
+          }
+        }
+        if (lost) stolen.push(`${el.tagName} "${(el.textContent ?? "").trim().slice(0, 40)}"`);
+      }
+      return { near, stolen };
+    },
+    { sel, index, near_: NEAR },
+  );
+}
+
+/**
+ * The three claims for every quiet button inside `scope` (a test id). Scoped
+ * because a sheet can hold the page still: the buttons behind it cannot be
+ * scrolled to, and a finger cannot reach them either.
+ */
+async function expectQuietTargets(page: Page, scope: string, minimum: number): Promise<number> {
+  const sel = `[data-testid="${scope}"] ${QUIET}`;
+  const indices = await visibleQuiet(page, sel);
+  expect(indices.length).toBeGreaterThanOrEqual(minimum);
+  let neighbours = 0;
+  for (const i of indices) {
+    const quiet = page.locator(sel).nth(i);
+    await quiet.evaluate((el) => el.scrollIntoView({ block: "center" }));
+    const drawn = (await quiet.boundingBox())!;
+    const label = (await quiet.textContent())?.trim();
+    // Claim 3: the look is unchanged — a line of text, not a 44px box.
+    // (A label that wraps is two lines tall, and taller than 44 on its own.)
+    if (drawn.height < 40) expect(drawn.height, `"${label}" is drawn as a line of text`).toBeLessThanOrEqual(32);
+    // Claim 1.
+    expect(await hitExtent(page, sel, i, "y"), `"${label}" tap strip, vertical`).toBeGreaterThanOrEqual(43.5);
+    expect(await hitExtent(page, sel, i, "x"), `"${label}" tap strip, horizontal`).toBeGreaterThanOrEqual(
+      Math.min(43.5, drawn.width),
+    );
+    // Claim 2.
+    const { near, stolen } = await stolenFrom(page, sel, i);
+    expect(stolen, `"${label}" covers a neighbour`).toEqual([]);
+    neighbours += near;
+  }
+  return neighbours;
+}
+
+test.describe("the quiet text button", () => {
+  test.skip(!ADMIN_PASSWORD, SKIP_ADMIN_REASON);
+
+  test("on the engine's first screen, each takes a 44px tap and covers nothing", async ({ page, context }) => {
+    await grantOwnerPreview(context.request, "engine");
+    await page.goto("/fr/aarrr-funnel-template");
+    await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
+    // « Voir un exemple rempli » and « Importer un fichier ».
+    await expectQuietTargets(page, "engine-workbench", 2);
+  });
+
+  test("the what-if resets sit under their sliders: 44px each, and no slider loses a tap", async ({ page, context }) => {
+    await grantOwnerPreview(context.request, "engine");
+    await page.clock.setFixedTime(new Date(2026, 8, 24, 12));
+    await page.goto("/en/aarrr-funnel-template");
+    await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
+    await page.evaluate((state) => localStorage.setItem("tdg.engine.v1", JSON.stringify({ schemaVersion: 1, state })), exampleState());
+    await page.reload();
+    await page.getByTestId("engine-board-whatif").locator(":scope > summary").click();
+    const panel = page.getByTestId("engine-whatif-panel");
+    await expect(panel).toBeVisible();
+    // Two levers moved: two resets under two sliders, and « reset all » above them.
+    for (const lever of ["act.rate", "rev.arpa"]) {
+      await page.getByTestId(`whatif-slider-${lever}`).focus();
+      await page.keyboard.press("ArrowRight");
+      await expect(page.getByTestId(`whatif-reset-${lever}`)).toBeVisible();
+    }
+    const neighbours = await expectQuietTargets(page, "engine-whatif-panel", 3);
+    // Non-vacuity of claim 2: each reset has its slider within NEAR px of its
+    // zone — the neighbour a strip that grew would cover first.
+    expect(neighbours).toBeGreaterThanOrEqual(2);
+  });
+
+  test("the text action under a metric's fields takes a 44px tap and covers no field", async ({ page, context }) => {
+    await grantOwnerPreview(context.request, "engine");
+    await page.goto("/en/aarrr-funnel-template");
+    await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
+    await page.getByTestId("engine-setup-board").click();
+    const tab = page.getByTestId("engine-tab-activation");
+    if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click();
+    const toggle = page.getByTestId("engine-metric-act-rate");
+    if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+    const sheet = page.getByTestId("engine-sheet-act-rate");
+    await sheet.getByRole("radio", { name: "I have it" }).check();
+    const rateOnly = sheet.getByRole("button", { name: "I only have the rate" });
+    await expect(rateOnly).toBeVisible();
+    // Its fields stand right above it: the neighbours a strip would cover.
+    expect(await expectQuietTargets(page, "engine-sheet-act-rate", 1)).toBeGreaterThanOrEqual(1);
+    // The same action, the other way: back to the two counts.
+    await rateOnly.click();
+    await expect(sheet.getByRole("button", { name: "I have both counts" })).toBeVisible();
+    expect(await expectQuietTargets(page, "engine-sheet-act-rate", 1)).toBeGreaterThanOrEqual(1);
+  });
+});
+
+test("a quiet link answers the pointer: ink and a heavier underline on hover, the underline drawn in on press", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto("/en");
+  const quiet = page.locator(QUIET).first();
+  await expect(quiet).toBeVisible();
+  const style = () =>
+    quiet.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return { color: cs.color, thickness: cs.textDecorationThickness, offset: cs.textUnderlineOffset };
+    });
+  await page.mouse.move(0, 0);
+  const rest = await style();
+  await quiet.hover();
+  await expect.poll(async () => (await style()).color).not.toBe(rest.color);
+  const hover = await style();
+  expect(hover.thickness).toBe("2px");
+
+  await page.mouse.down();
+  await expect.poll(async () => (await style()).offset).toBe("1px");
+  // Off the link before letting go: a press, not a click — the page stays.
+  await page.mouse.move(0, 0);
+  await page.mouse.up();
+  expect(rest.offset).toBe("3px");
 });

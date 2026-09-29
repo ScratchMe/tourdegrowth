@@ -18,16 +18,17 @@
 
 /*
  * The road marking: solid when played, thick amber now, dashed ahead. The box
- * is the same 5px for all three, the border inside it only changes weight, so
- * the labels under the current quarter do not sit 3px lower than their
- * neighbours.
+ * is the same height for all three — the stamp weight, the heaviest of them —
+ * and the border inside it only changes weight, so the labels under the
+ * current quarter do not sit lower than their neighbours. (It was 5px, a
+ * width of its own; design audit S-17 brought it to the system's stamp.)
  */
 .rule {
   display: block;
   box-sizing: border-box;
-  height: 5px;
+  height: var(--border-width-stamp);
   margin-bottom: var(--space-2);
-  border-top: 2px solid var(--border-hard);
+  border-top: var(--border-solid);
 }
 
 .done .rule {
@@ -35,7 +36,7 @@
 }
 
 .current .rule {
-  border-top: 5px solid var(--state-selected-bg);
+  border-top: var(--border-width-stamp) solid var(--state-selected-bg);
 }
 
 .upcoming .rule {

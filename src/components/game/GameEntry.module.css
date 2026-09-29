@@ -80,7 +80,7 @@
   display: inline-block;
   width: 1.4em;
   height: 1em;
-  border: 1px solid var(--border-hard);
+  border: var(--border-solid);
   border-radius: 2px;
 }
 

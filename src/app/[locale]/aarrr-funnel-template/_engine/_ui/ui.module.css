@@ -191,26 +191,39 @@
   color: var(--text-muted);
 }
 
-/* A text-styled button: "I only have the rate", "Close". Underlined so it
-   reads as an action without competing with the screen's one red button. */
-.linkButton {
-  font: var(--meta-sm);
+/*
+ * A text action under a field ("I only have the rate") is `Button
+ * variant="quiet" compact` (design audit S-11): the system's one text button,
+ * tapped 44px tall. In a column it would stretch to the column's width and
+ * centre its label; this keeps it at the start, under the field it acts on.
+ */
+.textAction {
+  align-self: flex-start;
+}
+
+/*
+ * A link inside a sentence ("also in Amplitude: activation rate and…"): it
+ * opens another sheet, so it is a button, but it reads as the sentence's own
+ * words — its font, the link colour, no box. Not a text button: WCAG 2.5.8
+ * exempts a target set in a line of text, and a 44px strip here would cover
+ * the lines above and below.
+ */
+.inlineLink {
+  font: inherit;
   color: var(--text-link);
   background: none;
   border: none;
-  padding: var(--space-2) 0;
+  padding: 0;
   text-decoration: underline;
   text-underline-offset: 3px;
   cursor: pointer;
-  align-self: flex-start;
-  min-height: var(--hit-compact);
 }
 
-.linkButton:hover {
+.inlineLink:hover {
   color: var(--text-link-hover);
 }
 
-.linkButton:focus-visible {
+.inlineLink:focus-visible {
   outline: var(--focus-width) solid var(--focus-ring);
   outline-offset: var(--focus-offset-tight);
 }
