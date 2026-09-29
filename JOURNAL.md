@@ -4975,3 +4975,16 @@ La deuxième PR de la passe retenue par Antoine le 2026-09-28, lancée sur son �
 **design-sync** : `StageProfile` entre dans l'inventaire (74 composants), avec un aperçu en quatre histoires ; `ScoreDisplay`, `Bottleneck` et `PillarChip` montrent leur nouvelle forme, `Bottleneck` en cartes pleine largeur (en grille, la rangée se repliait sous la borne). Bundle reconstruit et validé : 74/74 aperçus rendus, les trois avertissements permanents seulement.
 
 **Vérifié avant la PR** : 2 185 tests unitaires, `tsc`, `eslint`, `next build` propres, couverture au-dessus de ses seuils, `npm audit --omit=dev` à zéro. Suite Playwright complète sur le dernier build : 567 passées, 5 ignorées par construction, 1 échec, `locale-routing.spec.ts:320`, le flake déjà mesuré sur `main`. Bundle design-sync revalidé : 74/74. Relectures : `relecteur-securite` sans constat bloquant (il signale, hors de ce changement, qu'une adresse d'image au jeton inventé force un rendu Satori non mis en cache : à ranger avec R-15 si un abus apparaît), `relecteur-copie` a trouvé la pilule et le vocabulaire, corrigés.
+
+## Bon à tirer nº6 clos, et les marqueurs que le nº5 avait laissés (2026-09-29)
+
+**La décision.** Antoine : « le bon à tirer nº6 est vu et tout est OK ». Dans la base de la page, 36 cartes sur 37 portaient « ça passe », sans aucune note. La 37ᵉ (`g-referral`) n'avait aucune décision en base : elle est enregistrée « ok » d'après son message, avec une réponse sous la carte qui le dit. Aucune chaîne ne change, donc aucun `updatedAt` ne bouge.
+
+**Les marqueurs levés se décident à partir du texte, pas du commentaire du marqueur.** Pour chacun des 94 marqueurs hors jeu, moteur et audit, un script a relevé le français qu'il couvre et l'a cherché mot pour mot dans la page du nº6. Pour les en-têtes de fichier et de lot, il l'a cherché aussi dans le nº5. Les cas que le script ne savait pas lire ont été vérifiés un par un : les `t(en, fr)` du glossaire long, les `p()` de la confidentialité, les commentaires sur plusieurs lignes. Résultat :
+- **82 marqueurs du nº6** : leur texte est celui qu'Antoine a validé. Dans `antoine-credit.ts`, la seule différence est une espace finale, qui sert à coller le lien.
+- **9 restes du nº5**, dont le texte est identique à ce qui avait été tranché le 2026-09-22 (réécritures du 23 comprises) : les en-têtes « premier jet » d'`open-door.ts` et de `comparisons.ts`, les trois lots du glossaire, les libellés `openDoor`, `comparisonPage`, `quizHeading` et `nav-strings.checklist`. **La clôture du nº5 n'avait pas levé ses marqueurs** : chaque grep suivant les recomptait comme à relire, et le prochain bon à tirer les aurait resoumis.
+- **3 restent marqués**, faute d'être passés dans un bon à tirer : le verdict de la comparaison OKR réécrit le 25/09 (« des quatre » était devenu faux avec la page HEART) et les deux libellés SEO du 28/09.
+
+Chaque levée garde sa raison : « TODO: à relire — revue de copie v1… » devient « Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1… ». C'est la forme du nº3.
+
+**Vérifié** : lint et `tsc` propres, **2 169 tests unitaires** verts. Aucune chaîne affichée ne change, seulement des commentaires.

@@ -6,10 +6,11 @@ import { COMPARISON_TITLES, type ComparisonSlug } from "./comparison-index";
  * comparisons.ts — le cluster « frameworks comparés » du plan de
  * distribution (`GROWTH-PLAN.md` vague 2.3).
  *
- * **TODO: à relire.** Premier jet de la session de code, comme les pages
- * longues du glossaire et les deux pages « porte ouverte » avant leur
- * validation. Ce sont des pages de fond qui portent le nom d'Antoine ; à
- * passer au prochain bon à tirer.
+ * **Validé** au bon à tirer nº5 (2026-09-22), et ses retouches de la revue
+ * de copie et de l'audit SEO du 24/09 au nº6 (2026-09-29). Ce sont des pages
+ * de fond qui portent le nom d'Antoine : toute phrase neuve repart « à relire »
+ * (convention 6), comme le verdict de la comparaison OKR réécrit le 25/09,
+ * encore marqué plus bas.
  *
  * **Pourquoi ces cinq-là.** Le concurrent le mieux placé sur « AARRR » en
  * anglais se classe précisément avec des pages « X vs Y » : la requête
@@ -75,7 +76,7 @@ export interface Comparison {
 const NORTH_STAR: Comparison = {
   other: { en: "North Star metric", fr: "North Star metric" },
   title: COMPARISON_TITLES["aarrr-vs-north-star-metric"],
-  // TODO: à relire — audit SEO v1 (2026-09-24), §1.3 : 62 et 68 caractères, coupés dans un résultat de recherche.
+  // Validé au bon à tirer nº6 (2026-09-29) — audit SEO v1 (2026-09-24), §1.3 : 62 et 68 caractères, coupés dans un résultat de recherche.
   metaTitle: {
     en: "AARRR vs North Star metric — a map and a compass",
     fr: "AARRR ou North Star metric — une carte et une boussole",
@@ -258,7 +259,7 @@ const RARRA: Comparison = {
 const GROWTH_LOOPS: Comparison = {
   other: { en: "Growth loops", fr: "Growth loops" },
   title: COMPARISON_TITLES["aarrr-vs-growth-loops"],
-  // TODO: à relire — audit SEO v1 (2026-09-24), §1.3 : 69 et 77 caractères, coupés dans un résultat de recherche.
+  // Validé au bon à tirer nº6 (2026-09-29) — audit SEO v1 (2026-09-24), §1.3 : 69 et 77 caractères, coupés dans un résultat de recherche.
   metaTitle: {
     en: "AARRR vs growth loops — a funnel is a loop missing an edge",
     fr: "AARRR ou growth loops — un entonnoir est une boucle ouverte",
@@ -427,7 +428,7 @@ const OKR: Comparison = {
   glossary: ["north-star-metric", "activation", "aarrr", "retention"],
 };
 
-// TODO: à relire — audit SEO v1 (2026-09-24), §3.1 : cinquième page du cluster, premier jet de la session de code (titres, descriptions, tableau, sections et verdict).
+// Validé au bon à tirer nº6 (2026-09-29) — audit SEO v1 (2026-09-24), §3.1 : cinquième page du cluster, premier jet de la session de code (titres, descriptions, tableau, sections et verdict).
 const HEART: Comparison = {
   other: { en: "HEART", fr: "HEART" },
   title: COMPARISON_TITLES["aarrr-vs-heart"],

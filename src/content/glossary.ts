@@ -55,7 +55,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
     ...GLOSSARY_TERMS.aarrr,
     updatedAt: "2026-09-24", // revue de copie v1 (2026-09-24) — « étape » au lieu de « pilier », calques corrigés
     extended: {
-      // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
+      // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
       fr: "Dave McClure (500 Startups) a présenté ce cadre en 2007 pour répondre à un problème simple : les fondateurs suivaient trop de métriques sans savoir lesquelles comptaient vraiment à chaque étape. L'ordre n'est pas arbitraire — c'est un entonnoir. Un produit qui dépense en acquisition alors que son activation fuit remplit un seau percé : chaque euro dépensé en amont perd de la valeur en aval. La plupart des équipes découvrent qu'une seule étape tire toute la note vers le bas ; c'est exactement ce que ce test calcule, étape par étape, plutôt que de donner une impression générale.",
       en: "Dave McClure (500 Startups) introduced this framework in 2007 to solve a simple problem: founders were tracking too many metrics without knowing which ones mattered at which stage. The order isn't arbitrary — it's a funnel. A product spending on acquisition while activation leaks is filling a leaky bucket: every euro spent upstream loses value downstream. Most teams find that one single stage is dragging the whole score down; that's exactly what this test calculates, stage by stage, instead of giving one vague overall impression.",
     },
@@ -89,7 +89,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
     ...GLOSSARY_TERMS.retention,
     updatedAt: "2026-09-24", // revue de copie v1 (2026-09-24) — « étape » au lieu de « pilier », calques corrigés
     extended: {
-      // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
+      // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
       fr: "La retention se lit sur une courbe, pas sur un seul chiffre : le signe à chercher, c'est qu'elle finisse par s'aplatir plutôt que de continuer à descendre vers zéro (une courbe qui se stabilise dit que le produit a trouvé un usage régulier pour un noyau d'utilisateurs). C'est aussi l'étape la plus rentable à réparer avant de pousser l'acquisition : faire grandir un entonnoir qui fuit revient à courir plus vite sur un tapis roulant. L'inverse de la retention, c'est le churn — les deux se lisent toujours ensemble.",
       en: "Retention is read as a curve, not a single number: the sign to look for is that it eventually flattens rather than sliding toward zero (a curve that stabilizes means the product found regular use with a core of users). It's also the highest-leverage stage to fix before pushing acquisition harder — growing a leaking funnel is just running faster on a treadmill. The inverse of retention is churn — the two are always read together.",
     },
@@ -108,7 +108,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
     ...GLOSSARY_TERMS.revenue,
     updatedAt: "2026-09-24", // revue de copie v1 (2026-09-24) — « étape » au lieu de « pilier », calques corrigés
     extended: {
-      // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
+      // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
       fr: "Cette étape ne juge pas le montant encaissé, mais si le modèle de revenu a été réellement testé face à de vrais clients — beaucoup de produits ont un plan de monétisation « pour plus tard » qui n'a jamais rencontré une carte bancaire. Une référence souvent citée dans le SaaS est un ratio LTV:CAC autour de 3:1 comme seuil de viabilité (voir LTV et CAC) — à prendre comme repère directionnel, pas comme une règle absolue selon ton marché. L'upsell et le cross-sell sont les deux leviers les plus rapides une fois le modèle de base validé.",
       en: "This stage doesn't judge how much money comes in, but whether the revenue model has actually been tested against real customers — plenty of products have a monetization plan for \"later\" that has never met a credit card. A commonly cited SaaS rule of thumb is an LTV:CAC ratio around 3:1 as a viability threshold (see LTV and CAC) — treat it as a directional benchmark, not an absolute rule for every market. Upsell and cross-sell are the fastest levers once the base model is validated.",
     },
@@ -136,7 +136,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
     ...GLOSSARY_TERMS.ltv,
     updatedAt: "2026-09-24", // revue de copie v1 (2026-09-24) — « étape » au lieu de « pilier », calques corrigés
     extended: {
-      // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
+      // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
       fr: "Une estimation courante en SaaS : revenu mensuel moyen par client, divisé par le taux de churn mensuel. Un churn de 5 %/mois donne mécaniquement une durée de vie moyenne de 20 mois — ce qui montre à quel point la LTV dépend directement de la retention, pas seulement du prix. Augmenter son prix sans travailler la retention gonfle la LTV sur le papier sans rien changer à la réalité si les clients partent toujours aussi vite. C'est pour ça que cette étape et Retention se lisent toujours ensemble, jamais isolément.",
       en: "A common SaaS estimate: average monthly revenue per customer, divided by the monthly churn rate. A 5%/month churn rate mechanically implies an average 20-month lifetime — which shows how directly LTV depends on retention, not just price. Raising your price without working on retention inflates LTV on paper without changing anything in reality if customers still leave just as fast. That's why this stage and Retention are always read together, never in isolation.",
     },
@@ -195,7 +195,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   "north-star-metric": {
     ...GLOSSARY_TERMS["north-star-metric"],
-    // TODO: à relire — audit SEO v1 (2026-09-24), §1.3 : titre de recherche court.
+    // Validé au bon à tirer nº6 (2026-09-29) — audit SEO v1 (2026-09-24), §1.3 : titre de recherche court.
     metaTitle: { fr: "Métrique phare (North Star)" },
     updatedAt: "2026-09-09", // R2-11, lot 5 — the "doubling test" paragraph reworded after review
     extended: {
@@ -205,12 +205,10 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
     related: ["aarrr", "retention", "dau-mau", "cohort-analysis"],
   },
   // ——— GROWTH-PLAN.md wave 2.2, lot 1 (2026-09-14) ———
-  // Premier jet de la session de code, comme les `extended` de 2026-08-29
-  // avant leur validation : de la copie de fond qui porte le nom d'Antoine,
-  // à relire ligne à ligne. TODO: à relire.
+  // Validé au bon à tirer nº5 (2026-09-22), comme les lots 2 et 3.
   "cac-payback": {
     ...GLOSSARY_TERMS["cac-payback"],
-    // TODO: à relire — audit SEO v1 (2026-09-24), §1.3 : titre de recherche court.
+    // Validé au bon à tirer nº6 (2026-09-29) — audit SEO v1 (2026-09-24), §1.3 : titre de recherche court.
     metaTitle: { fr: "Délai de remboursement du CAC" },
     updatedAt: "2026-09-23", // bon à tirer nº5 — réécritures demandées par Antoine
     extended: {
@@ -221,7 +219,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   "nrr-grr": {
     ...GLOSSARY_TERMS["nrr-grr"],
-    // TODO: à relire — audit SEO v1 (2026-09-24), §1.3 : titre de recherche court.
+    // Validé au bon à tirer nº6 (2026-09-29) — audit SEO v1 (2026-09-24), §1.3 : titre de recherche court.
     metaTitle: { en: "NRR & GRR — net revenue retention", fr: "NRR et GRR — rétention du revenu" },
     updatedAt: "2026-09-23", // bon à tirer nº5 — réécritures demandées par Antoine
     extended: {
@@ -239,10 +237,10 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
     },
     related: ["retention", "churn", "activation", "dau-mau"],
   },
-  // ——— wave 2.2, lot 2 (2026-09-14) — premier jet, TODO: à relire ———
+  // ——— wave 2.2, lot 2 (2026-09-14) — validé au bon à tirer nº5 ———
   "dau-mau": {
     ...GLOSSARY_TERMS["dau-mau"],
-    // TODO: à relire — audit SEO v1 (2026-09-24), §1.3 : titre de recherche court.
+    // Validé au bon à tirer nº6 (2026-09-29) — audit SEO v1 (2026-09-24), §1.3 : titre de recherche court.
     metaTitle: { en: "DAU/MAU ratio", fr: "Ratio DAU/MAU" },
     updatedAt: "2026-09-14", // GROWTH-PLAN.md 2.2, lot 2 — created
     extended: {
@@ -253,7 +251,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   "time-to-value": {
     ...GLOSSARY_TERMS["time-to-value"],
-    // TODO: à relire — audit SEO v1 (2026-09-24), §1.3 : titre de recherche court.
+    // Validé au bon à tirer nº6 (2026-09-29) — audit SEO v1 (2026-09-24), §1.3 : titre de recherche court.
     metaTitle: { fr: "Time to value" },
     updatedAt: "2026-09-23", // bon à tirer nº5 — réécritures demandées par Antoine
     extended: {
@@ -271,10 +269,10 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
     },
     related: ["activation", "product-led-growth", "upsell-cross-sell", "revenue"],
   },
-  // ——— wave 2.2, lot 3 (2026-09-14) — clôt la vague. Premier jet, TODO: à relire ———
+  // ——— wave 2.2, lot 3 (2026-09-14) — clôt la vague. Validé au bon à tirer nº5 ———
   "product-led-growth": {
     ...GLOSSARY_TERMS["product-led-growth"],
-    // TODO: à relire — audit SEO v1 (2026-09-24), §1.3 : titre de recherche court.
+    // Validé au bon à tirer nº6 (2026-09-29) — audit SEO v1 (2026-09-24), §1.3 : titre de recherche court.
     metaTitle: { fr: "Product-led growth (PLG)" },
     updatedAt: "2026-09-23", // bon à tirer nº5 — réécritures demandées par Antoine
     extended: {

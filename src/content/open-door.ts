@@ -4,9 +4,10 @@ import type { Translatable } from "@/lib/i18n/translatable";
  * open-door.ts — les deux pages « porte ouverte » du plan de distribution
  * (`GROWTH-PLAN.md` vague 2.1).
  *
- * **TODO: à relire.** Premier jet de la session de code, comme les pages
- * longues du glossaire avant leur validation. Ce sont des pages de fond qui
- * portent le nom d'Antoine ; à passer au prochain bon à tirer.
+ * **Validé** au bon à tirer nº5 (2026-09-22), et ses retouches de la revue
+ * de copie et de l'audit SEO du 24/09 au nº6 (2026-09-29). Ce sont des pages
+ * de fond qui portent le nom d'Antoine : toute phrase neuve repart « à relire »
+ * (convention 6).
  *
  * **Deux pages, pas deux traductions l'une de l'autre.** Le plan les
  * désignait par deux requêtes vides trouvées dans les SERP — « growth audit
@@ -57,17 +58,17 @@ export const CHECKLIST: OpenDoorPage = {
     en: "Growth audit checklist: the 15 points",
   },
   metaTitle: {
-    // TODO: à relire — audit SEO v1 (2026-09-24), §1.3 : 64 caractères en français.
+    // Validé au bon à tirer nº6 (2026-09-29) — audit SEO v1 (2026-09-24), §1.3 : 64 caractères en français.
     fr: "Checklist d'audit growth — 15 points, gratuite, sans compte",
     en: "Growth audit checklist — 15 points, free, no signup",
   },
-  // TODO: à relire — audit SEO v1 (2026-09-24), §1.2 : 191 et 186 caractères, que Google réécrit.
+  // Validé au bon à tirer nº6 (2026-09-29) — audit SEO v1 (2026-09-24), §1.2 : 191 et 186 caractères, que Google réécrit.
   metaDescription: {
     fr: "Les quinze questions d'un audit growth AARRR, ce à quoi ressemble une bonne réponse et ce que coûte son absence. Sur papier, ou en trois minutes en ligne.",
     en: "The fifteen questions of an AARRR growth audit, what a good answer looks like, and what its absence costs. On paper, or interactive in three minutes.",
   },
   intro: {
-    // TODO: à relire — revue de copie v1 (2026-09-24), §3.1 : « une distinction qui décide de tout le reste », emphase abstraite.
+    // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), §3.1 : « une distinction qui décide de tout le reste », emphase abstraite.
     fr: "Quinze questions, trois par étape du cadre AARRR. Elles ne mesurent pas tes résultats — elles mesurent si tu peux les voir. Et ça change tout : une équipe qui ne fait pas et une équipe qui fait sans pouvoir le prouver ont le même tableau de bord vide, et deux plans d'action opposés.",
     en: "Fifteen questions, three per stage of the AARRR framework. They don't measure your results — they measure whether you can see them. And that changes everything: a team that isn't doing the work and a team doing it without being able to prove it have the same empty dashboard and two opposite action plans.",
   },
@@ -80,7 +81,7 @@ export const CHECKLIST: OpenDoorPage = {
           en: "Answer all fifteen in one sitting, without going to look anything up. What you know off the top of your head is exactly what counts: a metric that takes half a day to reconstruct is not a metric your team steers by.",
         },
         {
-          // TODO: à relire — revue de copie v1 (2026-09-24), §3.1 : « tout le sujet ».
+          // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), §3.1 : « tout le sujet ».
           fr: "Trois réponses possibles par question, et une seule règle : la réponse haute demande que ce soit à la fois en place ET suivi. « On a un canal principal » sans chiffre en face n'est pas la réponse haute — c'est celle du milieu, et c'est cet écart que la checklist mesure.",
           en: "Three possible answers per question, and one rule: the top answer requires the thing to be both in place AND measured. \"We have a main channel\" with no number behind it is not the top answer — it's the middle one, and that gap is what the checklist measures.",
         },
@@ -117,7 +118,7 @@ export const CHECKLIST: OpenDoorPage = {
     fr: "La même checklist, en trois minutes, avec le score calculé et l'étape qui te freine nommée :",
     en: "The same checklist, in three minutes, with the score worked out and the stage that's holding you back named:",
   },
-  // TODO: à relire — revue de copie v1 (2026-09-24), changement nº7 et critique DS L-3 : un seul libellé vers /quiz.
+  // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), changement nº7 et critique DS L-3 : un seul libellé vers /quiz.
   ctaLabel: { fr: "Démarre ton Tour →", en: "Start your Tour →" },
 };
 
@@ -130,13 +131,13 @@ export const DIAGNOSTIC: OpenDoorPage = {
     fr: "Diagnostic croissance startup — la méthode, gratuite",
     en: "Startup growth diagnostic — the method, free",
   },
-  // TODO: à relire — audit SEO v1 (2026-09-24), §1.2 : 187 et 165 caractères.
+  // Validé au bon à tirer nº6 (2026-09-29) — audit SEO v1 (2026-09-24), §1.2 : 187 et 165 caractères.
   metaDescription: {
     fr: "Mener un diagnostic de croissance en une semaine : par où commencer, dans quel ordre lire les cinq étapes et pourquoi des pratiques ne sont pas des résultats.",
     en: "How to run a growth diagnostic in a week: where to start, what order to look at the five stages in, and why measuring practices is not measuring results.",
   },
   intro: {
-    // TODO: à relire — revue de copie v1 (2026-09-24), §3.1 : le « mot » annoncé n'était pas un mot.
+    // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), §3.1 : le « mot » annoncé n'était pas un mot.
     fr: "Un diagnostic de croissance n'est pas un tableau de bord de plus. Un tableau de bord répond à « où en est-on ? » ; un diagnostic répond à « qu'est-ce qui nous empêche d'aller plus vite, et comment le sait-on ? ». Un diagnostic, lui, doit pouvoir se tromper.",
     en: "A growth diagnostic is not another dashboard. A dashboard answers \"where are we?\"; a diagnostic answers \"what is stopping us going faster, and how do we know?\". A diagnostic, unlike a dashboard, has to be able to be wrong.",
   },
@@ -198,6 +199,6 @@ export const DIAGNOSTIC: OpenDoorPage = {
     fr: "Les quinze questions de la méthode, en trois minutes, avec l'étape qui te freine nommée et une action à mener :",
     en: "The method's fifteen questions, in three minutes, with the stage that's holding you back named and one action to take:",
   },
-  // TODO: à relire — revue de copie v1 (2026-09-24), changement nº7 et critique DS L-3 : un seul libellé vers /quiz.
+  // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), changement nº7 et critique DS L-3 : un seul libellé vers /quiz.
   ctaLabel: { fr: "Démarre ton Tour →", en: "Start your Tour →" },
 };

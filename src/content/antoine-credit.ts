@@ -39,7 +39,7 @@ export const QUICK_CREDIT = {
 export const DEEP_DIVE_CREDIT = {
   eyebrow: { fr: "Qui a conçu cet outil", en: "Who built this" },
   bio: {
-    // TODO: à relire — revue de copie v1 (2026-09-24), §3.2 : calque de *than AI can*.
+    // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), §3.2 : calque de *than AI can*.
     fr: "Envie d'aller plus loin que ce qu'une IA peut faire ? Je suis Antoine, Senior Growth PM avec 10 ans d'expérience (AB Tasty, SNCF Connect & Tech…). ",
     en: "Want to go deeper than AI can? I'm Antoine, a Senior Growth PM with 10 years of experience (AB Tasty, SNCF Connect & Tech...). ",
   },

@@ -21,7 +21,7 @@ export const HOW_IT_WORKS = {
   // five stages of the framework and its meta description promises "the AARRR
   // framework explained", but the word never appeared in the page itself.
   intro: {
-    // TODO: à relire — revue de copie v1 (2026-09-24), §3.1 : « précisément », « la seule chose » — emphase de modèle.
+    // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), §3.1 : « précisément », « la seule chose » — emphase de modèle.
     fr: "Quinze questions, trois minutes, un score AARRR honnête. Voici ce qu'on mesure, pourquoi, et la limite à garder en tête avant de prendre ce chiffre trop au sérieux.",
     en: "Fifteen questions, three minutes, one honest AARRR score. Here's what we measure, why, and the limit to keep in mind before you take the number too seriously.",
   },
@@ -30,7 +30,7 @@ export const HOW_IT_WORKS = {
    * SEO audit v1 §1.2 — the search snippet, until now the `intro` above: a
    * paragraph written to be read on the page, which runs past 160 characters in
    * French — the length at which Google rewrites a snippet.
-   * TODO: à relire — audit SEO v1 (2026-09-24) — copie neuve.
+   * Validé au bon à tirer nº6 (2026-09-29) — audit SEO v1 (2026-09-24) — copie neuve.
    */
   metaDescription: {
     fr: "Comment marche le score de Tour de Growth : quinze questions sur les cinq étapes AARRR, une règle de calcul fixe sans IA et la limite à garder en tête.",
@@ -49,7 +49,7 @@ export const HOW_IT_WORKS = {
     {
       pillar: "activation",
       explanation: {
-        // TODO: à relire — revue de copie v1 (2026-09-24), §3.1 : « vraiment »/"actually" quatre fois en quatre phrases ; gardé une fois (Revenue).
+        // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), §3.1 : « vraiment »/"actually" quatre fois en quatre phrases ; gardé une fois (Revenue).
         fr: "L'écart entre s'inscrire et comprendre pour de bon — le moment où ton produit fait tilt pour quelqu'un de nouveau.",
         en: "The gap between signing up and getting it — the moment your product clicks for someone new.",
       },
@@ -58,7 +58,7 @@ export const HOW_IT_WORKS = {
     {
       pillar: "retention",
       explanation: {
-        // TODO: à relire — revue de copie v1 (2026-09-24), §3.1.
+        // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), §3.1.
         fr: "Est-ce que les gens restent, ou disparaissent discrètement après un premier essai.",
         en: "Whether people stick around, or quietly disappear after the first try.",
       },
@@ -67,7 +67,7 @@ export const HOW_IT_WORKS = {
     {
       pillar: "referral",
       explanation: {
-        // TODO: à relire — revue de copie v1 (2026-09-24), §3.1.
+        // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), §3.1.
         fr: "Est-ce que tes utilisateurs les plus satisfaits t'en amènent de nouveaux — ou sont juste satisfaits en silence.",
         en: "Whether your happiest users are bringing you new ones — or just being happy quietly.",
       },
@@ -86,7 +86,7 @@ export const HOW_IT_WORKS = {
   scoringSection: {
     title: { fr: "Comment le score est calculé", en: "How the score is calculated" },
     body: {
-      // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code. Aussi : « la même transparence, à chaque fois, pour tout le monde » était une triade creuse (§3.1).
+      // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code. Aussi : « la même transparence, à chaque fois, pour tout le monde » était une triade creuse (§3.1).
       fr: "Quinze questions, trois par étape. Chaque réponse vaut un nombre de points fixe — rien de subjectif, rien qu'une IA ne décide à la volée. Tes cinq scores d'étape (sur 20 chacun) s'additionnent pour ton total (sur 100). Le texte de ton résultat vient d'un ensemble de verdicts pré-écrits, choisis selon ton score — les mêmes textes pour tout le monde, à score égal.",
       en: "Fifteen questions, three per stage. Each answer is worth a fixed number of points — nothing subjective, nothing an AI decides on the fly. Your five stage scores (out of 20 each) add up to your total (out of 100). The wording of your results comes from a set of pre-written verdicts matched to your score — the same wording for everyone with the same score.",
     },
@@ -95,7 +95,7 @@ export const HOW_IT_WORKS = {
   tonesSection: {
     title: { fr: "Les deux tons", en: "The two tones" },
     straightUp: {
-      // TODO: à relire — revue de copie v1 (2026-09-24), changement nº6 : le
+      // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), changement nº6 : le
       // sélecteur de ton, la page de résultat et la carte d'aperçu disent
       // « Neutre » ; cette page était la seule à dire « Straight up » en
       // français, un nom que le lecteur ne retrouvait nulle part ensuite.
@@ -116,7 +116,7 @@ export const HOW_IT_WORKS = {
 
   limitationNotice: {
     long: {
-      // TODO: à relire — revue de copie v1 (2026-09-24), §3.2 : « point de départ de conversation », calque de *conversation starter*.
+      // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), §3.2 : « point de départ de conversation », calque de *conversation starter*.
       fr: "Tour de Growth donne une estimation rapide et directionnelle, pas un audit professionnel. Le score reflète tes propres réponses à 15 questions — utile pour ouvrir la discussion, pas comme verdict définitif.",
       en: "Tour de Growth gives a fast, directional estimate — not a professional audit. The score reflects your own answers to 15 questions, useful as a conversation starter, not a final verdict.",
     },
@@ -128,6 +128,6 @@ export const HOW_IT_WORKS = {
     },
   },
 
-  // TODO: à relire — revue de copie v1 (2026-09-24), changement nº7 et critique DS L-3 : un seul libellé vers /quiz, « Démarre ton Tour → » / "Start your Tour →", comme le CTA de la landing. Seul le visiteur d'un résultat partagé garde « Fais ton propre Tour → ».
+  // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), changement nº7 et critique DS L-3 : un seul libellé vers /quiz, « Démarre ton Tour → » / "Start your Tour →", comme le CTA de la landing. Seul le visiteur d'un résultat partagé garde « Fais ton propre Tour → ».
   cta: { fr: "Démarre ton Tour →", en: "Start your Tour →" },
 };

@@ -86,7 +86,7 @@ export const NEXT_MOVES: Record<string, Record<ActionablePoints, Translatable>> 
     },
     0: {
       en: "Test one second channel small and on purpose — a single channel is a single point of failure.",
-      // TODO: à relire — revue de copie v1 (2026-09-24), §3.2 : calque de *small and on purpose*.
+      // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), §3.2 : calque de *small and on purpose*.
       fr: "Teste un second canal, à petite échelle et exprès — un canal unique est un point de défaillance unique.",
     },
   },
@@ -147,7 +147,7 @@ export const NEXT_MOVES: Record<string, Record<ActionablePoints, Translatable>> 
   "ret-2": {
     7: {
       en: "Compare your re-engagement message against sending nothing at all — basic and untested is a guess with a schedule.",
-      // TODO: à relire — revue de copie v1 (2026-09-24), §3.2 : calque de *a guess with a schedule*.
+      // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), §3.2 : calque de *a guess with a schedule*.
       fr: "Compare ton message de réengagement au fait de ne rien envoyer du tout — basique et non testé, c'est une intuition qu'on envoie à heure fixe.",
     },
     0: {
@@ -226,7 +226,7 @@ export const NEXT_MOVES: Record<string, Record<ActionablePoints, Translatable>> 
     },
     0: {
       en: "Look at the customers who already outgrew their plan and offer them the next one on purpose.",
-      // TODO: à relire — revue de copie v1 (2026-09-24), §3.2 : calque de *on purpose*.
+      // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), §3.2 : calque de *on purpose*.
       fr: "Regarde les clients qui ont déjà dépassé leur offre, et propose-leur exprès l'offre au-dessus.",
     },
   },

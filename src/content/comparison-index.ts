@@ -35,7 +35,7 @@ export const COMPARISON_TITLES: Record<ComparisonSlug, Translatable> = {
   "aarrr-vs-rarra": { en: "AARRR vs RARRA", fr: "AARRR ou RARRA" },
   "aarrr-vs-growth-loops": { en: "AARRR vs growth loops", fr: "AARRR ou growth loops" },
   "aarrr-vs-okr": { en: "AARRR vs OKR", fr: "AARRR ou OKR" },
-  // TODO: à relire — audit SEO v1 (2026-09-24), §3.1 : titre de la cinquième page du cluster.
+  // Validé au bon à tirer nº6 (2026-09-29) — audit SEO v1 (2026-09-24), §3.1 : titre de la cinquième page du cluster.
   "aarrr-vs-heart": { en: "AARRR vs HEART", fr: "AARRR ou HEART" },
 };
 
