@@ -33,7 +33,9 @@ const frame = {
   overflow: "hidden",
   width: "100%",
   maxWidth: 760,
-  height: 720,
+  // The capture is 700px tall and the card sits under 24px of padding: the
+  // whole frame, its footer included, stays inside the still.
+  height: 652,
   border: "1px dashed #d6d3d1",
   borderRadius: 6,
 } as const;
@@ -87,7 +89,9 @@ export const TheVerdict = () => (
  * An inspection lands (paths.ts PATH_C, quarter 3): card 3 of 5, after the
  * mail and the verdict — the one card where the screen shakes, the clipping
  * stamped with the fine (€60,000 + €500 per radar point), and its "why" on
- * the clipping itself, naming every trick taken down.
+ * the clipping itself, naming every trick taken down. It is longer than
+ * this frame: as on a short screen, the dialog scrolls and the count and
+ * Next stay stuck to its bottom, so the still shows the card's top.
  */
 export const AnInspection = () => (
   <InFrame startAt={2}>

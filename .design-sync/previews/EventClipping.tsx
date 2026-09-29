@@ -37,7 +37,7 @@ export const Inspection = () => (
     <EventClipping
       kind="viral"
       handle="@endless_evening"
-      text="A viral thread: \"I tried to cancel Flixo, here are my three hours.\" Cancellations speed up."
+      text={"A viral thread: \"I tried to cancel Flixo, here are my three hours.\" Cancellations speed up."}
     />
   </NightSurface>
 );
@@ -59,7 +59,7 @@ export const Warnings = () => (
     <EventClipping
       kind="viral"
       handle="@endless_evening"
-      text="A viral thread: \"I tried to cancel Flixo, here are my three hours.\" Cancellations speed up."
+      text={"A viral thread: \"I tried to cancel Flixo, here are my three hours.\" Cancellations speed up."}
     />
     <EventClipping
       kind="competitor"
@@ -77,7 +77,7 @@ export const Press = () => (
       kind="press"
       masthead="The Screen Echo"
       headline="Flixo, the app that lets you leave"
-      text="An article: \"Flixo, the app that lets its subscribers leave, and sees them come back.\" Sign-ups climb."
+      text={"An article: \"Flixo, the app that lets its subscribers leave, and sees them come back.\" Sign-ups climb."}
     />
   </NightSurface>
 );
