@@ -5361,6 +5361,35 @@ Des seize opportunités de plateforme, douze sont absentes de `src/`, `text-wrap
 
 **Vérifié** : lint et `tsc` propres, **2 236 tests unitaires**, couverture au-dessus de ses seuils, `next build` propre avec `GAME_ENABLED=true`, **594 specs Playwright** (+1 : 589 passées, 5 ignorées par construction, aucun échec, sans reprise). Relecteurs non lancés : ni route, ni proxy, ni payload, ni workflow, ni copie.
 
+## La séance des décisions : les vingt-deux questions de la section C (2026-09-29)
+
+**La demande d'Antoine** : faire trancher, une par une, les décisions de la section C de `CHANTIERS.md`, sans écrire de code. Chaque question est vérifiée ouverte avant d'être posée ; les questions de design sont posées avec une capture du vrai écran ; chaque réponse est consignée tout de suite, datée, là où vit la question ; le code devient un item A, un geste d'Antoine un item D.
+
+**Ce qui est tranché** (l'index complet est dans `CHANTIERS.md` C, le raisonnement là où vit chaque question) :
+- **Le moteur change de périmètre** (C4) : le B2B assisté entre dans la v1. Le réglage sépare le type (SaaS B2B) de la motion (PLG, SLG, cochables, au moins une), et l'hybride se rend en « deux moteurs, un total », jamais en face-à-face. L'idée des deux motions cochables est d'Antoine ; la session a proposé le rendu. L'ouverture du moteur attend désormais la spécification, sa validation, le code et le bon à tirer (A7.3).
+- **Aucun repère ne désigne plus la fuite** (C1) : seule une cible d'équipe. La carte correspondante du bon à tirer nº8 n'avait aucune décision ; elle en porte une maintenant.
+- **« Moteur de growth »** (C2), à la même adresse. Antoine a délégué l'adresse sur le seul critère SEO. Les résultats de recherche du jour montrent que « AARRR funnel template » est occupé par des diagrammes et des modèles de slides (Miro, Creately, Ayoa), sans aucun outil qui calcule : la formule « sans concurrent » voulait dire « sans outil concurrent ».
+- **Quatre recommandations de `CHANTIERS.md` revues en séance** sur des faits neufs, et suivies par Antoine :
+  - la slide fuite d'une étape sans prix existe, car un titre vrai existe sans montant (C9) ;
+  - l'encart du jeu passe sous le bouton principal : mesuré, il le faisait descendre de 350 px, pas de ~30 (C10) ;
+  - « un mois de chiffres » ne dira rien sous 50 soumissions ;
+  - l'invitation « Fais le Tour » du miroir menait à une impasse, faute de pouvoir relier un Tour après la carte de départ (C8).
+- **Trois recommandations non suivies** : le partage devient le primaire du propriétaire (C16), le Tour reste au seul SEO (C20), et les captures sont prises dès maintenant (C21).
+- **Deux délégations** : l'adresse du moteur (C2), et la porte de test (C17), tranchée par la session. Pas de porte dans le code : l'émulateur Firestore, que `firebase-admin` lit nativement.
+- **C6 ouvre une question de fond** : Antoine tient l'instrument d'audit pour un doublon du moteur public, auquel il croit davantage. Le sort de l'audit se décide sur la mission de la phase 1 bis, avec une colonne « le moteur le faisait déjà ? » dans le journal des frictions (`AUDIT-PLAN.md` §4). Les trois clauses du contrat à relire sont précisées en D5.
+- **C22 précise l'option A du 13/09** : la réserve « jamais le nom, jamais LinkedIn » est une question de calendrier, pas d'anonymat. La réponse à « qui est derrière ? » nommera Antoine. Seule la décision est écrite dans le dépôt, pas ses raisons.
+- **C18 n'a pas été posée** : l'API GitHub donne déjà `has_projects: false` et `has_discussions: false`. La session D l'a constaté et clos en parallèle (entrée précédente), avec D1. Une question neuve est née de C4, l'ordre des lancements (C23), laissée ouverte.
+
+**Hors de la section C** : Antoine a proposé en cours de séance le plug-in « claude-site-audit » (Rob Spence, MIT). Il a été **lu, pas installé** : l'archive ne contient pas ses 17 contrôles, sa notation ni son générateur de PDF ; il appelle des outils de claude.ai ; il est cadré pour le secteur public américain ; et il n'a pas de fichier de licence. L'idée est gardée : l'angle GEO n'avait jamais été audité ici (pas de `llms.txt`, robots d'IA non traités). Cela devient A8.
+
+**Pièges de la séance** :
+- **Le conteneur a redémarré deux fois** en cours de séance. Les fichiers non commités ont survécu, mais pas le serveur local. D'où un commit poussé après chaque groupe de réponses, et une seule PR à la fin.
+- **`/r/sample` ne rend jamais la vue propriétaire**, parce que la branche échantillon ne passe pas d'identifiant à `ResultView`. Aucun e2e ne rend donc cette vue. Pour la capturer, il a fallu un build jetable dans un worktree hors du dépôt, avec `id="sample"` ajouté, jamais commité, puis supprimé. C'est l'argument concret de A7.11.
+- **Turbopack refuse un `node_modules` en lien symbolique hors de la racine** du projet (« Symlink [project]/node_modules is invalid, it points out of the filesystem root »). Pour un worktree jetable, il faut une copie en liens physiques : `cp -al node_modules <worktree>/`, sur le même système de fichiers.
+- **Les captures du Tour** (`marketing/assets/`) datent du 2026-09-14, d'avant la synthèse I + B. Les annuaires de D10 attendent qu'elles soient refaites (A7.12.a).
+
+**Vérifié, et comment** : l'état de chaque question dans le code avant de la poser (`catalog-shape.ts`, `example.ts`, `Setup.tsx`, `Board.tsx`, `deck.ts#buildLeak`, `levels.ts#gameEntryFor`, `retention.ts`, `SiteFooter.tsx`, `SpaceBand.tsx`). Les écrans, sur un build de production local avec `GAME_ENABLED` et `ENGINE_ENABLED` : l'accueil, le tableau du moteur (miroir relié et non relié), `/r/sample` en visiteur et en propriétaire, à 1 280 et 390 px, et le hub du jeu. Les positions sont mesurées par script, pas estimées. Les réglages du dépôt, par l'API GitHub. La base du bon à tirer nº8 a été lue avant d'y écrire.
+
 ## A2 : les slides à 18 px, et une seule grille de points (2026-09-29)
 
 **La demande** : le lot A2 de `CHANTIERS.md` (constats S-8 et S-10 de l'audit du kit), en autonomie, une PR.

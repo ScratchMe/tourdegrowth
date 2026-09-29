@@ -66,6 +66,15 @@ en trois secondes.** Deux lectures possibles :
 la promotion, elle, ne le porte jamais — aucun post, aucun compte, aucun
 pitch ne le nomme ni ne renvoie vers le CV.
 
+**Précisé par Antoine le 2026-09-29 (`CHANTIERS.md` C22) : c'est une question
+de calendrier, pas d'anonymat.** Son nom sera utilisé. Pour l'instant, la
+promotion reste discrète, sans LinkedIn et sans lancement en grande pompe,
+jusqu'à ce qu'il décide de lever cette réserve. **La règle « jamais le nom,
+jamais LinkedIn » se lit donc « pas maintenant ».** À « qui est derrière ? »,
+la réponse le nomme simplement. Le jour où il lève la réserve, LinkedIn sort
+d'`EXCLUDED` dans `scripts/utm-channels.mjs`, avec son test : c'est sa
+décision, pas celle d'une session.
+
 ---
 
 ## 1. La ligne de départ, mesurée là où c'était possible

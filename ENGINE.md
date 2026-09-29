@@ -18,20 +18,97 @@ chacune se renverse en une phrase :
 1. Nom « Moteur de croissance » / "Growth engine" ; URL
    `/{locale}/aarrr-funnel-template` (la requête sans concurrent de l'audit SEO).
    Une URL publiée ne meurt jamais ici : c'est définitif dès l'ouverture.
+   **Tranché par Antoine le 2026-09-29 (`CHANTIERS.md` C2).** *Le nom* :
+   « growth » se garde en français, anglicisme courant. Le moteur s'appelle
+   donc « **Moteur de growth** » (« Ton moteur de growth », en minuscule dans
+   le texte courant comme « le travail de growth » d'`about.ts`), et reste
+   "Growth engine" en anglais. *L'adresse* : Antoine a délégué le choix sur le
+   seul critère SEO, et **`/aarrr-funnel-template` est gardée**. Les résultats
+   de recherche ont été relevés le jour même :
+   - « AARRR funnel template » et « AARRR template » sont occupés par des
+     diagrammes et des modèles de slides à remplir (Miro, Creately, Ayoa,
+     SlideModel), sans aucun outil qui calcule avec ses propres chiffres.
+     Le slug couvre les deux requêtes.
+   - « AARRR funnel calculator » ne renvoie ni outil ni intention (des
+     calculateurs d'ARR, des articles) : plus étroit, et sans demande visible.
+   - « pirate metrics template » est envahi de pages copiées.
+   - `/growth-engine` ne porte aucune requête.
+
+   Le slug reste anglais dans les deux langues (R2-16), et le titre français
+   « Modèle de funnel AARRR » porte la requête française. Correction de la
+   formule d'origine : « sans concurrent » voulait dire « sans **outil**
+   concurrent ». La page est bien en concurrence avec des domaines forts, et
+   c'est son utilité qui doit gagner, pas le slug. À coder : `CHANTIERS.md`
+   A7.2 (le nom seulement).
 2. Le crédit « tourdegrowth.com » sur les slides exportées : présent par défaut,
    retirable par l'utilisateur (le deck est le sien).
+   **Confirmé par Antoine le 2026-09-29 (`CHANTIERS.md` C3)** : c'est la
+   seule boucle de distribution du moteur, et l'utilisateur la retire en un
+   clic.
 3. La v1 couvre le SaaS libre-service (freemium ou essai) ; le B2B assisté en
    v1.1 ; l'appli B2C et la marketplace plus tard.
+   **Renversée par Antoine le 2026-09-29 (`CHANTIERS.md` C4) : le B2B assisté
+   entre dans la v1**, « il faut qu'on soit pertinent dès le début ». Le
+   réglage sépare deux axes que le sélecteur mélangeait :
+   - le **type** : SaaS B2B (ouvert) ; app grand public et place de marché
+     (plus tard) ;
+   - la **motion** : deux cases, libre-service (PLG) et assisté (SLG), au
+     moins une cochée.
+
+   Les deux cochées expriment un modèle **hybride**, rendu en « deux
+   moteurs, un total » et **jamais en face-à-face** : les deux motions jouent
+   sur des segments différents, et un « PLG vs SLG » pousserait un CODIR à
+   chercher un gagnant. Concrètement :
+   - deux funnels côte à côte, chacun avec ses cibles et sa fuite ;
+   - le MRR additionné ;
+   - une slide d'unit economics avec les deux motions en regard (CAC,
+     payback, panier, churn) ;
+   - un chiffre de liaison optionnel : les comptes qualifiés par le produit
+     passés aux commerciaux, parce que dans beaucoup d'hybrides le PLG
+     alimente le SLG.
+
+   Le SLG a son propre funnel (leads, opportunités, taux de closing, cycle de
+   vente, ACV, sources CRM), donc son propre catalogue. **L'ouverture du
+   moteur attend** la spécification, sa validation par Antoine, le code et
+   le bon à tirer de cette copie. À faire : `CHANTIERS.md` A7.3.
 4. La slide « déclaré au Tour × mesuré » existe mais n'est pas cochée par défaut.
+   **Confirmé par Antoine le 2026-09-29 (`CHANTIERS.md` C5)** : on la choisit
+   quand l'écart est l'argument, et personne ne la découvre par surprise dans
+   son export.
 5. Les deux repères approuvés du glossaire (activation 20-40 %, churn logo
    1-2 %/mois) peuvent désigner un goulot sur une slide, avec leur réserve
    imprimée sur la slide ; une cible d'équipe le peut toujours.
+   **Renversée par Antoine le 2026-09-29 (`CHANTIERS.md` C1) : aucun repère ne
+   désigne.** Les deux restent affichés comme contexte ; seule une cible
+   d'équipe nomme l'étape qui freine. Pourquoi : 1-2 % vaut pour le SaaS B2B
+   à panier élevé (ChartMogul : médiane de 6,1 %/mois sous 25 $ d'ARPA, 2,2 %
+   au-dessus de 500 $), pas pour « les produits vendus aux petites
+   entreprises » ; l'exemple §6.0 (ARPA 120 €, churn 2,5 %) était signalé à
+   tort. Le 20-40 % d'activation n'a aucune source primaire. La population du
+   churn est reformulée partout où elle est écrite. À coder : `CHANTIERS.md`
+   A7.1.
 6. Le moteur est public, gratuit et local : ce n'est pas la phase 3 de
    l'instrument d'audit (aucun connecteur, rien ne quitte le navigateur, pas un
    produit commercial). `lib/audit` n'est pas touché.
+   **Confirmé par Antoine le 2026-09-29 (`CHANTIERS.md` C6)**, avec une réserve
+   de sa part : l'instrument d'audit fait « carrément doublon » avec le
+   moteur, auquel il croit davantage parce qu'il est public, et un audit
+   privé n'a de sens que s'il va plus loin. Le sort de l'audit n'est pas
+   tranché à froid : la mission de la phase 1 bis le tranche (`AUDIT-PLAN.md`
+   §4). S'il s'avère un doublon, ses lignes utiles passent au moteur en copie
+   publique relue.
 7. `ENGINE_ENABLED` reste fermé jusqu'à la signature du bon à tirer nº6. Liens
    d'ouverture prévus : `/how-it-works`, les deux pages SEO d'entrée, une section
    de la landing sous la citation — pas de septième lien au pied de page.
+   **Revu par Antoine le 2026-09-29 (`CHANTIERS.md` C7).** Les liens sont
+   gardés depuis `/how-it-works`, `/growth-audit-checklist` et
+   `/startup-growth-diagnostic`, toujours sans lien au pied de page. **La
+   section de la landing sous la citation est abandonnée** : la bande « Le
+   Tour en trois parties » de la synthèse I + B présente déjà le moteur,
+   au-dessus de la citation. C'est sa carte qui devient le lien, selon C15.
+   Et le bon à tirer nº6 n'est plus le verrou (il est clos le 2026-09-29) :
+   l'ouverture attend le nº8 et le lot A7.3 (décision 3). À coder :
+   `CHANTIERS.md` A7.4.
 
 **Refonte de la saisie (2026-09-26, sur les premiers retours d'Antoine).** Ce
 qui change par rapport aux §4, §7 et §8 plus bas — le reste tient :
@@ -1341,6 +1418,21 @@ le statut trouvé. Pont cohérent : un compteur, pas de carte. Sans Tour : une
 ligne « Fais le Tour pour comparer ce que ton équipe déclare à ce que tu
 trouves » (`Button hard` vers `/quiz`).
 
+**Tour présent mais non relié — tranché par Antoine le 2026-09-29
+(`CHANTIERS.md` C8).** Jusque-là, rien ne s'affichait : c'était « leur choix »
+(D13). Mais la case « Comparer avec ce Tour » n'existe que sur la carte de
+départ, et l'invitation « Fais le Tour » menait donc à une impasse : Tour
+fait, retour au tableau, miroir disparu, et aucun moyen de le relier.
+Désormais :
+- à la place du miroir, **une ligne et un bouton** : « Tu as fait le Tour le
+  {date} ({score}/100). Le relier compare ce que tu y as déclaré à ce que tu
+  retrouves ici. » et « Relier ce Tour », dans le style de l'invitation sans
+  Tour ;
+- la case de liaison entre aussi **dans les Réglages**, pour relier ou délier
+  après coup.
+
+À coder : `CHANTIERS.md` A7.5.
+
 ### 8.6 Ce qu'on ne dessine volontairement pas
 
 Pas de score global ni de note sur 100 (le seul /100 du produit est le Tour) ;
@@ -1427,6 +1519,22 @@ Les accords (`one`/`other`) sont des gabarits distincts dans `ENGINE_COPY`
 | `shared` | « **{n} étapes** sont sous leur cible sans que l'une pèse nettement plus : {liste}. » | "**{n} stages** sit below their target, none clearly heavier: {list}." |
 | `not-enough` + below | « **{Étape} est sous son repère.** Sans cible sur les autres étapes, impossible de dire si c'est la plus grosse fuite. » | "**{Stage} sits below its reference.** Without targets on the other stages, we can't say whether it's the biggest leak." |
 | `level` | « Aucune étape n'est sous sa cible : **le levier est le volume ou le prix**. » | "No stage sits below its target: **the lever is volume or price**." |
+
+**`clear` sur une étape sans prix — tranché par Antoine le 2026-09-29
+(`CHANTIERS.md` C9).** Jusque-là, la slide était omise (`deck.ts#buildLeak`)
+dans deux cas : quand l'étape nommée n'a pas de prix (rétention à J30, part
+recommandée) et quand combler l'écart rapporterait moins d'un client.
+Désormais :
+- **Étape sans prix : la slide existe**, avec un titre sans argent
+  (« **{Étape} freine le moteur** : {valeur}, pour {cible}. ») et un pied qui
+  dit pourquoi il n'y a pas de montant (le modèle ne relie pas ce chiffre à
+  des euros). Sans elle, le deck perdait sans rien dire la conclusion que le
+  tableau affiche.
+- **Moins d'un client : l'omission est gardée.** Un tel écart n'est pas un
+  argument de comité.
+
+Le gabarit exact est de la copie neuve, « à relire ». À coder :
+`CHANTIERS.md` A7.6.
 
   `{cible}` : « 20 % (bas de l'ordre de grandeur couramment cité) » ou « 30 %
   (notre cible) » / "20% (low end of the commonly cited range)" or "30% (our
