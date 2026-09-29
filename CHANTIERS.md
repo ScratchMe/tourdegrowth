@@ -267,6 +267,19 @@ l'omission est gardée.
 | Tests | Un état où la rétention à J30 est seule sous sa cible : la slide existe, son titre ne contient aucun montant, et aucune chaîne « Le calcul » n'est rendue. Un état où le gain vaut moins d'un client : pas de slide. **Non-vacuité** : remettre l'omission fait rougir le premier test |
 | Ordre | Après A7.1 : sans repère qui désigne, le cas `clear` ne vient plus que d'une cible |
 
+#### A7.7 — L'encart du jeu sous le bouton principal, sur desktop (C10)
+
+**Décidé** (`GAME-BRIEF.md` §15.4) : sur desktop, l'encart du jeu passe
+**sous** la rangée de boutons du résultat, dans la colonne de droite. Sur
+mobile, rien ne change : il est déjà après le bouton et la carte de partage.
+
+| Où | Quoi |
+|---|---|
+| `app/(app)/r/[id]/ResultView.module.css` (`.slotGame`, l. 176 et 297) et le commentaire de `ResultView.tsx:556-564` | L'ordre desktop : l'encart après `.slotCta`. Même ordre pour le visiteur et le propriétaire (le premier rendu est celui du visiteur, et un ordre qui dépend de `isOwner` décalerait la page après le montage) |
+| `src/__tests__/result-reading-order.test.ts` et `e2e/result-composition.spec.ts` | L'ordre de lecture épinglé suit, pour les quatre variantes |
+| Un e2e de mesure | Sur `/r/sample`, en vue visiteur, à 1 280 px : le haut du bouton « Fais ton propre Tour » est **au-dessus** du haut de l'encart. Même mesure à 390 px. **Non-vacuité** : l'ancien ordre fait rougir le test |
+| Hors code | `CLAUDE.md` citait « ~30 px » : c'était 350 px mesurés le 2026-09-29, et la ligne est corrigée dans la même séance |
+
 ### A8 — L'audit GEO, joué sans installer le plug-in
 
 **D'où ça vient** : le 2026-09-29, Antoine a proposé le plug-in
@@ -342,8 +355,8 @@ désormais.*
 
 | # | Question | Aujourd'hui | Reco |
 |---|---|---|---|
-| C10 | **La place de l'encart du jeu sur le résultat.** Sur desktop, il pousse le bouton principal du visiteur environ 30 px sous le bouton de partage. **Question à poser avec une capture du vrai écran** | Desktop : entre « Là où tu perds du temps » et la rangée de CTA. Mobile : après la carte de partage | Garder jusqu'à un mois de chiffres après l'ouverture (section E), puis décider sur les chiffres |
-| C11 | Montrer l'encart quand la rétention est dans le **groupe** qui freine, netteté « partagée » comprise | Oui, et jamais sur un tableau « à niveau » | Garder |
+| C10 | **La place de l'encart du jeu sur le résultat.** Sur desktop, il pousse le bouton principal du visiteur environ 30 px sous le bouton de partage. **Question à poser avec une capture du vrai écran** | Desktop : entre « Là où tu perds du temps » et la rangée de CTA. Mobile : après la carte de partage | Garder jusqu'à un mois de chiffres après l'ouverture (section E), puis décider sur les chiffres. **→ Tranché autrement le 2026-09-29, captures à l'appui : sur desktop, l'encart passe sous le bouton principal, comme sur mobile. Mesuré : il faisait descendre le bouton du visiteur de 350 px, pas de ~30 px. Et un mois de chiffres ne dira rien sous 50 soumissions. Code : A7.7** |
+| C11 | Montrer l'encart quand la rétention est dans le **groupe** qui freine, netteté « partagée » comprise | Oui, et jamais sur un tableau « à niveau » | Garder. **→ Confirmé le 2026-09-29. Antoine a demandé ce qui se passera avec tous les niveaux : une carte unique, l'ordre AARRR qui départage deux étapes à égalité, et un encart sur presque tout résultat. C'est noté dans `GAME-BRIEF.md` §15.4, et un déclencheur est ajouté en section E. Rien à coder aujourd'hui** |
 | C12 | Les noms de zones bilingues : « Retention — S'ils reviennent » | Oui | Garder |
 | C13 | La mention « vingt minutes » | Gardée seulement si le temps mesuré la porte ; pas encore mesuré | Chronométrer une partie complète à la recette. Garder si on est entre 15 et 25 minutes, sinon écrire le vrai chiffre |
 | C14 | **La formule d'amende** donne au moins 97 500 € à radar 75, au-dessus du maximum légal de 75 000 € par manquement | Fiction inoffensive, qu'un juriste relèverait | **Plafonner à 75 000 € par manquement.** Le jeu tient sa crédibilité de faits vérifiés, et le changement tient en une ligne |
@@ -399,6 +412,7 @@ rien de privé dans le dépôt, qui est public. Cela vaut pour les chiffres de
 | Le Deep dive à ~70 s devient la norme | Réduire le **nombre** de générations, pas le plafond de temps | `GEMINI.md` §2 |
 | `eslint-config-next` suit | TypeScript 7 et ESLint 10, testés en installant, pas en lisant les plages de peer | `CLAUDE.md` |
 | Un mois après l'ouverture du jeu | La place de l'encart (C10) et le bouton principal (C16), sur les chiffres | Section C |
+| **Un deuxième niveau du jeu ouvre** | Trancher l'encart d'un goulot partagé entre deux étapes qui ont chacune un niveau. Aujourd'hui, l'ordre AARRR choisit. Reco du 2026-09-29 : une carte qui propose les deux niveaux | `GAME-BRIEF.md` §15.4, C11 |
 | **Juin 2027** | La fenêtre Tour de France (R2-30) : Grand Départ le 2 juillet 2027 à Édimbourg. À construire en juin, pour partir pendant le Tour | `GROWTH-PLAN.md` |
 | Une facture Vercel qui surprend | `VERCEL.md` §1.6 et §2.2 | `VERCEL.md` |
 | Besoin de `guidelines/` du bundle d'extension 01 | Le demander à Claude Design (l'archive ne le contenait pas) | `CLAUDE.md` |
