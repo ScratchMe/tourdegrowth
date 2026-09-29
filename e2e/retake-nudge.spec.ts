@@ -58,13 +58,22 @@ test("clicking the nudge reaches the quiz and is counted", async ({ page }) => {
   // this link is a full document load and `window.__tdgEvents` is gone by
   // the time the quiz renders. Hold the first click so the event can be
   // read from the document that fired it, then let the second one navigate.
+  //
+  // The nudge only renders after its effect has read the device, so wait
+  // for the link before holding it. `querySelector` does not wait: under
+  // load it found nothing, `?.` held nothing, the first click navigated and
+  // the quiz's fresh event list read empty (seen 2026-09-29, 3 in 280 runs
+  // at four workers). Throw rather than hold nothing silently.
+  await expect(page.getByTestId("retake-nudge-link")).toBeVisible();
   await page.evaluate(() => {
-    document
-      .querySelector('[data-testid="retake-nudge-link"]')
-      ?.addEventListener("click", (e) => e.preventDefault(), { once: true });
+    const link = document.querySelector('[data-testid="retake-nudge-link"]');
+    if (!link) throw new Error("the nudge link is not in the page");
+    link.addEventListener("click", (e) => e.preventDefault(), { once: true });
   });
   await page.getByTestId("retake-nudge-link").click();
-  expect(await trackedEvents(page)).toContain("retake_nudge_clicked");
+  // Polled: the analytics script loads `afterInteractive`, and a click that
+  // beats it is queued, then flushed when it arrives.
+  await expect.poll(() => trackedEvents(page)).toContain("retake_nudge_clicked");
 
   await page.getByTestId("retake-nudge-link").click();
   await page.waitForURL(/\/quiz/);

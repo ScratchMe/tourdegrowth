@@ -5211,6 +5211,13 @@ Demandée par Antoine une fois #183 en production : « fais une dernière passe 
 - **Deux formulations du journal** : « exactement » (1 203 × 697) et « six composants ».
 - **Deux restes plus anciens** : `DgFace` nommait une classe inexistante (#175), et `.wrap` de `StageProgress` était mort depuis #14.
 
+**Un flake débusqué en route, et sa cause** : `retake-nudge.spec.ts:54` a échoué une fois dans la suite, puis réussi au second essai. Ce n'était pas le produit.
+- La spec retient le premier clic du lien de relance (un `preventDefault` posé par `page.evaluate`) pour lire l'événement dans le document qui l'a tiré. Mais la relance ne s'affiche qu'après l'effet qui lit l'appareil, et `querySelector` n'attend pas.
+- Sous charge, il ne trouvait rien, `?.` ne retenait rien, le clic naviguait, et la liste d'événements toute neuve du quiz était vide.
+- Deux essais qui soignaient le symptôme ont échoué au test de charge : lire par sondage, puis attendre le script d'analytics. La vraie cause se lisait dans la liste vide, sans même `landing_return`, l'événement de montage : on avait changé de document.
+- Correctif : attendre le lien avant de le retenir, et lever une erreur s'il manque.
+- Mesure : 280 passages à quatre workers sans reprise (spec et bandeau du jeu, 20 fois chacun). 1 à 2 échecs avant, aucun après.
+
 **Vérifié et juste** :
 - les rapports de contraste de la vitre, recalculés ;
 - les deux calques du sol ;
