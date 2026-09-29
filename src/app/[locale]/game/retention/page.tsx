@@ -108,6 +108,7 @@ export default async function RetentionLevelPage({ params }: PageProps) {
         locale={locale}
         path={PATH}
         switchQuery="resume=1"
+        space="game"
         title={tc(intro.title, locale)}
         kicker={<MetaLabel size="xs">{tc(intro.eyebrow, locale)}</MetaLabel>}
         lead={tc(intro.lead, locale)}

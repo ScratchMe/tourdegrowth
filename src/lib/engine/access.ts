@@ -61,6 +61,18 @@ export function engineEnvFlag(): string | undefined {
  * for the game. A preview cookie never makes a build indexable: a build has
  * no browser, so it holds none.
  */
+/**
+ * The name under which `next.config.mjs` inlines the flag as it stood at
+ * build — a derived "1"/"0" for client code (the space band), never
+ * `ENGINE_ENABLED` itself.
+ */
+export const ENGINE_OPEN_AT_BUILD_ENV = "TDG_ENGINE_OPEN_AT_BUILD";
+
+/** The rule, pure: open for exactly this value of `ENGINE_ENABLED`. See `gameOpenWith` for why it is not a default parameter. */
+export function engineOpenWith(env: string | undefined): boolean {
+  return resolveEngineAccess({ env, ownerPreview: false }) === "open";
+}
+
 export function isEngineOpenAtBuild(): boolean {
   return resolveEngineAccess({ env: engineEnvFlag(), ownerPreview: false }) === "open";
 }

@@ -25,7 +25,7 @@
 
 .title {
   margin: 0;
-  font: var(--display-hero);
+  font: var(--display-stamp);
   letter-spacing: var(--display-letter-spacing);
   text-transform: uppercase;
   text-wrap: balance;
@@ -57,7 +57,7 @@
 
 @media (max-width: 760px) {
   .title {
-    font: var(--display-hero-mobile);
+    font: var(--display-stamp-mobile);
     letter-spacing: var(--display-letter-spacing);
   }
 

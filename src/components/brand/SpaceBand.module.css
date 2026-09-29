@@ -1,0 +1,232 @@
+/*
+ * The space band — see SpaceBand.tsx. Its colours are the space's own
+ * (`tokens/spaces.css`), picked by `data-space` and renamed to four local
+ * roles so the rules below are written once for the three legs.
+ */
+.band {
+  background: var(--band-bg);
+  color: var(--band-text);
+  border-bottom: var(--border-solid);
+}
+
+.band[data-space="tour"] {
+  --band-bg: var(--space-tour-bg);
+  --band-text: var(--space-tour-text);
+  --band-muted: var(--space-tour-muted);
+  --band-mark: var(--space-tour-mark);
+}
+
+.band[data-space="engine"] {
+  --band-bg: var(--space-engine-bg);
+  --band-text: var(--space-engine-text);
+  --band-muted: var(--space-engine-muted);
+  --band-mark: var(--space-engine-mark);
+}
+
+.band[data-space="game"] {
+  --band-bg: var(--space-game-bg);
+  --band-text: var(--space-game-text);
+  --band-muted: var(--space-game-muted);
+  --band-mark: var(--space-game-mark);
+}
+
+.inner {
+  container-type: inline-size;
+  margin: 0 auto;
+  padding: 0 24px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+/* Two classes deep so the width never loses to `.inner` on emission order. */
+.inner.wide {
+  max-width: var(--content-max-width);
+}
+
+.inner.reading {
+  max-width: var(--width-reading);
+}
+
+.inner.narrow {
+  max-width: 720px;
+}
+
+.picto {
+  display: flex;
+  flex: none;
+  color: var(--band-mark);
+}
+
+.picto svg {
+  display: block;
+  width: 34px;
+  height: 22px;
+}
+
+.where {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.kicker {
+  font: var(--meta-2xs);
+  letter-spacing: var(--meta-tracking-wide);
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding-right: var(--space-5);
+  border-right: 1.5px solid currentColor;
+}
+
+.name {
+  font: var(--display-wordmark);
+  white-space: nowrap;
+}
+
+.race {
+  margin-left: auto;
+}
+
+.stops {
+  list-style: none;
+  display: flex;
+  gap: 6px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 3px 11px 3px 8px;
+  border: 1.5px solid currentColor;
+  border-radius: 999px;
+  font: var(--meta-2xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: inherit;
+  text-decoration: none;
+}
+
+.mini {
+  display: flex;
+}
+
+.mini svg {
+  display: block;
+  width: 21px;
+  height: 14px;
+}
+
+.n {
+  font-weight: 700;
+}
+
+.n::after {
+  content: "·";
+  margin-left: 6px;
+  font-weight: 500;
+}
+
+/* The leg you are on: filled with the band's text colour. */
+.stop[data-state="current"] .pill {
+  background: var(--band-text);
+  color: var(--band-bg);
+  border-color: var(--band-text);
+}
+
+/* On the Tour's filled pill the pictogram keeps its red: 4.42 on the pill, a mark. */
+.band[data-space="tour"] .stop[data-state="current"] .mini {
+  color: var(--band-mark);
+}
+
+/* A leg not open yet: greyed and dashed, never a link (Antoine, 2026-09-28). */
+.stop[data-state="soon"] .pill {
+  color: var(--band-muted);
+  border-style: dashed;
+}
+
+.soon::before {
+  content: "·";
+  margin-right: 6px;
+}
+
+a.pill:hover .label {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+a.pill:focus-visible {
+  outline: var(--focus-width) solid var(--band-text);
+  outline-offset: 2px;
+}
+
+/*
+ * A narrower header: the race keeps its pictograms and numbers, and the words
+ * leave the screen but not the page — a screen reader still hears
+ * « 2 Moteur bientôt ».
+ */
+@container (max-width: 900px) {
+  .label,
+  .soon {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .n::after {
+    content: none;
+  }
+
+  .pill {
+    padding: 3px 9px 3px 7px;
+  }
+}
+
+/*
+ * A phone: the name on top, its place in the race under it, and the race as
+ * three numbers — no pictograms, they would not fit next to « Contre-la-montre ».
+ */
+@container (max-width: 560px) {
+  .inner {
+    padding-block: 7px;
+  }
+
+  .where {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+  }
+
+  .name {
+    order: -1;
+    font-size: 18px;
+  }
+
+  .kicker {
+    padding-right: 0;
+    border-right: 0;
+    letter-spacing: var(--meta-tracking);
+  }
+
+  .mini {
+    display: none;
+  }
+
+  .stops {
+    gap: 4px;
+  }
+
+  .pill {
+    min-width: 28px;
+    justify-content: center;
+    padding: 3px 8px;
+  }
+}

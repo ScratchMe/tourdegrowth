@@ -118,7 +118,7 @@ export default async function EnginePage({ params }: PageProps) {
         })}
       />
       <JsonLd data={breadcrumbSchema(locale, [{ name: tc(ENGINE_COPY.meta.breadcrumb, locale), path: PATH }])} />
-      <ContentHeader locale={locale} path={PATH} width="wide" />
+      <ContentHeader locale={locale} path={PATH} width="wide" space="engine" />
 
       <main id="main" className={styles.main}>
         <div className={styles.intro}>

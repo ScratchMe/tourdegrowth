@@ -38,7 +38,8 @@
   /* Eight sliders run twice as tall as the figures they move: the figures stay in view while the last ones move. */
   .kpis {
     position: sticky;
-    top: var(--space-7);
+    /* Under the sticky site header, not beneath it (globals.css). */
+    top: calc(var(--sticky-offset) + var(--space-7));
   }
 }
 

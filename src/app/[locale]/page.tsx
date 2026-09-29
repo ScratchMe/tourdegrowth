@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { LocaleSwitcher } from "@/components/brand/LocaleSwitcher";
+import { SiteHeader } from "@/components/brand/SiteHeader";
 import { WordmarkLink } from "@/components/brand/WordmarkLink";
 import { Button } from "@/components/core/Button";
 import { SiteFooter } from "@/components/brand/SiteFooter";
@@ -60,23 +61,21 @@ export default async function LandingPage({ params }: PageProps) {
       </Suspense>
       {/* SPEC-ADDENDUM-02.md §3.2 — built per language, with the author node; see lib/seo/jsonld.tsx (REVIEW-02.md R2-15). */}
       <JsonLd data={webApplicationSchema(locale)} />
-      <header className={styles.header}>
-        <div className={styles.headerInner}>
-          <WordmarkLink locale={locale} />
-          <nav className={styles.nav}>
-            <LocaleSwitcher locale={locale} path="/" />
-            <Button href={localePath(locale, "/glossary")} variant="quiet" className={styles.navLink}>
-              {tc(UI_STRINGS.nav.glossary, locale)}
-            </Button>
-            <Button href={localePath(locale, "/how-it-works")} variant="quiet" className={styles.navLink}>
-              {tc(UI_STRINGS.nav.howItWorks, locale)}
-            </Button>
-            <Button href="/quiz" hard size="md" compact className={styles.headerCta}>
-              {tc(t.ctaPrimary, locale)}
-            </Button>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader locale={locale} space="tour">
+        <WordmarkLink locale={locale} />
+        <nav className={styles.nav}>
+          <LocaleSwitcher locale={locale} path="/" />
+          <Button href={localePath(locale, "/glossary")} variant="quiet" className={styles.navLink}>
+            {tc(UI_STRINGS.nav.glossary, locale)}
+          </Button>
+          <Button href={localePath(locale, "/how-it-works")} variant="quiet" className={styles.navLink}>
+            {tc(UI_STRINGS.nav.howItWorks, locale)}
+          </Button>
+          <Button href="/quiz" hard size="md" compact className={styles.headerCta}>
+            {tc(t.ctaPrimary, locale)}
+          </Button>
+        </nav>
+      </SiteHeader>
 
       <main id="main" className={styles.main}>
         <div className={styles.hero}>

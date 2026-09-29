@@ -4886,3 +4886,41 @@ Le nº8 est reconstruit par un script qui repart des clés de chaque ancienne ca
 **Coût d'une vraie mise en œuvre**, d'après la fiche `notes/ib.md` : deux à trois sessions. Il faut des jetons d'espace, deux composants neufs (`StageBand`, `StageProfile`, ce dernier en SVG pur et testable), la borne en CSS seul et le gabarit Satori. La garde de payload devra compter les cinq scores que le profil expose (convention 11).
 
 **Tranché par Antoine le même jour** : le bandeau du Tour est à l'encre, et le rouge ne reste que sur le pictogramme. Le bandeau dit « 1/3 · Plaine », sans le mot « étape », qui reste réservé aux cinq étapes AARRR. Même règle sur l'image de partage.
+
+**Et tant que le moteur et le jeu sont fermés** (Antoine, même jour) : le bandeau montre la course entière. Les espaces fermés sont grisés, marqués « bientôt » et sans lien. Ils deviennent des liens quand le build les voit ouverts.
+
+## Kit I + B, 1/3 : jetons, en-tête collant, bandeau d'espace (2026-09-29)
+
+**Ce qui est livré** :
+- **Le bandeau d'espace** (`brand/SpaceBand`). Il est accroché sous l'en-tête de chaque page qui appartient à un espace : le Tour (accueil, quiz, résultat, Deep dive), le moteur, le jeu (hub et niveau). Les pages de lecture (glossaire, comparaisons, À propos) n'en ont pas.
+- **Ses trois couleurs**, dans `tokens/spaces.css` : encre pour le Tour (le rouge ne reste que sur son pictogramme), outremer pour le moteur, ocre pour le jeu.
+- **« 1/3 · Plaine »**, jamais « étape ».
+- **La course complète à droite.** Un espace ouvert au build est un lien. Un espace fermé est grisé, en pointillé et marqué « bientôt », sans lien. Dans le quiz et le Deep dive, rien n'est un lien : pas de sortie au milieu d'un tunnel, la règle du pied de page.
+- **Le drapeau du moteur** est inliné au build pour le code client (`TDG_ENGINE_OPEN_AT_BUILD`), comme celui du jeu. `next-config.test.ts` le tient à la règle d'`access.ts`.
+- **Un seul en-tête** (`brand/SiteHeader`) pour les cinq qui recopiaient la même règle : accueil, pages de contenu, résultat, quiz, Deep dive. Il est collant, en verre dépoli, et porte le bandeau.
+  - `--sticky-offset` (globals.css) donne sa hauteur mesurée (118 px avec bandeau, 74 px sans). Ancres et focus s'arrêtent sous l'en-tête (`scroll-padding-top`, WCAG 2.4.11).
+  - La colonne du jeu et les chiffres « Et si », qui collaient déjà, collent maintenant sous lui.
+- **La base de I** :
+  - rayons 999 / 12 / 14 / 18 (étaient 4 / 6 / 8 / 10), ombres 6 / 4 / 3 (étaient 7 / 5 / 4) ;
+  - titre héros fluide jusqu'à 80 px, 50 px sur téléphone ;
+  - question du quiz en 700 34 px ; réponses en cartes avec une marque radio ;
+  - bouton principal posé sur son ombre dure, bord encre ;
+  - dossard « № 15 questions » plein ;
+  - grain du papier.
+- **Les fins du jeu** gardent 62 / 40 px par un jeton à elles (`--display-stamp`) : une phrase entière en capitales à 80 px ferait cinq lignes.
+
+**Choix de tech lead** :
+- **La palette ne bouge pas.** Celle de I est d'un cran plus claire pour le papier et plus sombre pour l'encre. L'écart est invisible à l'œil. L'adopter obligeait à re-mesurer et réécrire chaque ratio cité dans `colors.css` et `token-contrast.test.ts`.
+- **`--display-section` reste à 30 px.** Vingt-trois fichiers le lisent, dont le jeu, et la maquette ne montrait pas ces écrans.
+
+**Trois valeurs de la maquette qui ne passaient pas la mesure**. Les trois bornes sont maintenant des tests, dans `space-token-contrast.test.ts` et `e2e/page-ground.spec.ts` :
+- **Le grain.** À 9 % d'encre, le grain le plus sombre fait passer `--state-good-text` à 4,18 et `--text-faint` à 4,35. Il est à 4,5 %, soit 4,57 et 4,53 au pire pixel. Le test échoue si on remet 9 % (vérifié).
+- **Le verre de l'en-tête.** À 74 %, au-dessus d'un fond d'encre plein (le bureau de nuit du jeu, l'ombre dure d'une carte), le texte gris de la rangée tombe à 3,43 et le lien rouge à 3,20. Il est à 92 % : 4,98 et 4,65.
+- **Les calques du fond.** `--ground-lift` compte déjà deux dégradés. Avec deux valeurs pour trois calques, la liste bouclait et le second dégradé prenait la taille et le `repeat` du grain, d'où des taches de 160 px sur toute la page. Premier essai du test de longueur : **vacuité**. Une liste calculée a toujours une valeur par calque, puisque c'est justement le bouclage. Le test lit donc la valeur de chaque calque, et sur la page fautive il voit `repeat, no-repeat, repeat`.
+
+**Piège** : écrire `backdrop-filter` et `-webkit-backdrop-filter` côte à côte fait garder au compilateur CSS la forme préfixée seule, que Chrome ignore. L'en-tête a été construit sans flou et rien ne le montrait, sauf la valeur calculée (`none`). Il faut écrire la forme sans préfixe seule : Lightning CSS ajoute le préfixe pour Safari. `e2e/site-header.spec.ts` lit la valeur calculée.
+
+**Specs remises à jour** :
+- `selection-states` : le bouton principal repose sur son ombre, et l'appui le déplace de la longueur de l'ombre.
+- `question-rhythm` et `prose-pages` : l'ombre de carte est de 6 px.
+- `page-ground` : la couture se mesure sur une moyenne de 16 × 5 pixels, puisque le grain est un bruit au pixel.

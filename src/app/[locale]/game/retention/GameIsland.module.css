@@ -49,7 +49,8 @@
 .side {
   grid-area: side;
   position: sticky;
-  top: var(--space-9);
+  /* Under the sticky site header, not beneath it (globals.css). */
+  top: calc(var(--sticky-offset) + var(--space-9));
   display: flex;
   flex-direction: column;
   align-items: center;

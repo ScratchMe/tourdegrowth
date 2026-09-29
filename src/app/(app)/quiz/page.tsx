@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { SiteHeader } from "@/components/brand/SiteHeader";
 import { WordmarkLink } from "@/components/brand/WordmarkLink";
 import { Button } from "@/components/core/Button";
 import { DetourCard } from "@/components/core/DetourCard";
@@ -158,11 +159,9 @@ export default function QuizPage() {
   if (!mounted) {
     return (
       <>
-        <header className={styles.header}>
-          <div className={styles.headerInner}>
-            <WordmarkLink locale={locale} />
-          </div>
-        </header>
+        <SiteHeader locale={locale} width="narrow" space="tour" bandLinked={false}>
+          <WordmarkLink locale={locale} />
+        </SiteHeader>
         <main id="main" className={styles.main}>
           <h1 className="tdg-visually-hidden">{tc(UI_STRINGS.meta.quizHeading, locale)}</h1>
         </main>
@@ -304,27 +303,25 @@ export default function QuizPage() {
 
   return (
     <>
-      <header className={styles.header}>
-        <div className={styles.headerInner}>
-          <WordmarkLink locale={locale} />
-          <div className={styles.headerRight}>
-            {phase === "answering" ? (
-              <>
-                <MetaLabel size="sm">{questionCounter}</MetaLabel>
-                <MetaLabel size="sm" className={styles.minutesLeft}>
-                  {minutesLeftLabel}
-                </MetaLabel>
-              </>
-            ) : phase === "error" ? (
-              <MetaLabel size="sm" tone="alert">
-                {tc(t.errorHeaderLabel, locale)}
+      <SiteHeader locale={locale} width="narrow" space="tour" bandLinked={false}>
+        <WordmarkLink locale={locale} />
+        <div className={styles.headerRight}>
+          {phase === "answering" ? (
+            <>
+              <MetaLabel size="sm">{questionCounter}</MetaLabel>
+              <MetaLabel size="sm" className={styles.minutesLeft}>
+                {minutesLeftLabel}
               </MetaLabel>
-            ) : (
-              <MetaLabel size="sm">{tc(UI_STRINGS.toneSelector.headerLabel, locale)}</MetaLabel>
-            )}
-          </div>
+            </>
+          ) : phase === "error" ? (
+            <MetaLabel size="sm" tone="alert">
+              {tc(t.errorHeaderLabel, locale)}
+            </MetaLabel>
+          ) : (
+            <MetaLabel size="sm">{tc(UI_STRINGS.toneSelector.headerLabel, locale)}</MetaLabel>
+          )}
         </div>
-      </header>
+      </SiteHeader>
 
       <main id="main" className={styles.main}>
         {/*

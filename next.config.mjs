@@ -24,6 +24,14 @@ const nextConfig = {
    */
   env: {
     TDG_GAME_OPEN_AT_BUILD: process.env.GAME_ENABLED === "true" ? "1" : "0",
+    /*
+     * The engine's, for the same reason (design I + B, 2026-09-28): the space
+     * band under every header links to the engine once it is open, and the
+     * band renders in the quiz and the result, which are Client Components.
+     * Same derived "1"/"0"; `ENGINE_ENABLED` stays server-only. Held to
+     * `engineOpenWith` in `src/lib/engine/access.ts` by next-config.test.ts.
+     */
+    TDG_ENGINE_OPEN_AT_BUILD: process.env.ENGINE_ENABLED === "true" ? "1" : "0",
   },
 
   /**

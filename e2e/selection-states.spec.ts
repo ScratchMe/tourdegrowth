@@ -126,16 +126,21 @@ test.describe("selection states — pointer", () => {
     await answerQuestionsOnly(page);
     const cta = page.getByTestId("segment-continue");
 
+    // Design I (2026-09-28): the primary rests on a hard shadow already.
     await unhover(page);
-    expect((await look(cta)).transform).toBe("none");
+    const rest = await look(cta);
+    expect(rest.transform).toBe("none");
+    expect(rest.shadow).not.toBe("none");
+
     await cta.hover();
     const lifted = await look(cta);
     expect(lifted.transform).not.toBe("none");
-    expect(lifted.shadow).not.toBe("none");
+    expect(lifted.shadow).not.toBe(rest.shadow);
 
+    // Flattened onto the page: it travels the length of its shadow, which goes.
     await page.mouse.down();
     const pressed = await look(cta);
-    expect(pressed.transform).toBe("none");
+    expect(pressed.transform).toBe("matrix(1, 0, 0, 1, 4, 4)");
     expect(pressed.shadow).toBe("none");
   });
 });
@@ -189,12 +194,15 @@ test.describe("selection states — touch", () => {
     await other.hover();
     expect((await look(other)).shadow).toBe("none");
 
+    // A button under a resting finger looks exactly like one at rest — which,
+    // for the primary, is its resting shadow (design I), not a lift.
     const cta = page.getByTestId("segment-continue");
+    const rest = await look(cta);
     await cta.hover();
     expect(await cta.evaluate((el) => el.matches(":hover"))).toBe(true);
     const peeled = await look(cta);
     expect(peeled.transform).toBe("none");
-    expect(peeled.shadow).toBe("none");
+    expect(peeled.shadow).toBe(rest.shadow);
   });
 });
 

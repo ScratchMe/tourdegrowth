@@ -65,6 +65,7 @@ export default async function GameHubPage({ params }: PageProps) {
       <ProsePage
         locale={locale}
         path="/game"
+        space="game"
         title={tc(GAME_HUB.title, locale)}
         kicker={<MetaLabel size="xs">{tc(GAME_HUB.eyebrow, locale)}</MetaLabel>}
         lead={tc(GAME_HUB.lead, locale)}

@@ -22,16 +22,27 @@
   --size-score-lg: 110px;
   --display-score-xl: 700 var(--size-score-xl) / 0.86 var(--font-display); /* desktop score numeral */
   --display-score-lg: 700 var(--size-score-lg) / 0.88 var(--font-display); /* mobile score numeral */
-  --display-hero: 700 62px/1.02 var(--font-display);
-  --display-hero-mobile: 700 40px/1.03 var(--font-display);
+  /* Design I (2026-09-28): the hero grows to 80px and tightens (was 62/1.02,
+     40/1.03 on a phone); fluid between the two so a 1024px window does not
+     get a 80px title in a half column. */
+  --display-hero: 700 clamp(44px, 6.1vw, 80px) / 0.92 var(--font-display);
+  --display-hero-mobile: 700 50px/0.92 var(--font-display);
+  /* A whole sentence stamped as a headline — the game's seven endings. Kept at
+     the old hero size: « LE LABYRINTHE TIENT. REGARDE CE QU'IL COÛTE. » in
+     capitals at 80px would run five lines. */
+  --display-stamp: 700 62px/1.02 var(--font-display);
+  --display-stamp-mobile: 700 40px/1.03 var(--font-display);
   --display-section: 700 30px/1.1 var(--font-display);
   --display-title: 700 36px/1.05 var(--font-display); /* detour card title: 404, error 06c */
   --display-wordmark: 700 19px/1 var(--font-display);
   --display-letter-spacing: 0.02em;
 
   /* --- UI / body: Inter, never uppercase, never below 13.5px --- */
-  --title-question-lg: 600 28px/1.28 var(--font-ui);
-  --title-question-sm: 600 22px/1.3 var(--font-ui);
+  /* Design I (2026-09-28): the question is the screen's one job — larger,
+     bolder, tighter (was 600 28px/1.28 and 22px/1.3). */
+  --title-question-lg: 700 34px/1.18 var(--font-ui);
+  --title-question-sm: 700 25px/1.22 var(--font-ui);
+  --title-question-tracking: -0.02em;
   --title-card: 600 19px/1.35 var(--font-ui);
   --body-lg: 500 17px/1.55 var(--font-ui);
   --body-md: 500 15px/1.55 var(--font-ui);

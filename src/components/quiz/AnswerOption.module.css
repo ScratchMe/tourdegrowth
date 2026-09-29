@@ -1,4 +1,13 @@
+/*
+ * Design I (2026-09-28): the option is a card, not a sunken well, and it
+ * carries a radio mark — every use of this component (the quiz, the Deep
+ * dive, the audit Tour) is one answer out of several, and the round mark
+ * says so before the first tap.
+ */
 .option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-7);
   text-align: left;
   width: 100%;
   color: var(--text-body);
@@ -6,7 +15,7 @@
   min-height: var(--hit-option);
   border-radius: var(--radius-panel);
   border: var(--border-solid);
-  background: var(--surface-sunken);
+  background: var(--surface-card);
   cursor: pointer;
   transition:
     box-shadow var(--dur-fast) var(--ease-out),
@@ -47,6 +56,23 @@
   color: var(--state-selected-text);
 }
 
+/* The radio mark, drawn in the option's own text colour — ink at rest, paper
+   once chosen, where it fills around a dot of the fill. Decoration: the
+   choice itself is `aria-pressed` on the button. */
+.option::before {
+  content: "";
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-round);
+  border: var(--border-width) solid currentColor;
+}
+
+.option.selected::before {
+  background: currentColor;
+  box-shadow: inset 0 0 0 4px var(--state-selected-bg);
+}
+
 /* "desktop" shrinks to the "mobile" figure below the app's breakpoint on
    its own — see ScoreDisplay.module.css for the rationale. */
 .desktop {
@@ -63,9 +89,10 @@
   font: 500 16px/1.4 var(--font-ui);
 }
 
-/* Resting fill is already the sunken neutral, so the global ink focus ring
-   would barely register — red reads clearly against it instead. */
+/* The ring is drawn outside the option, on the page ground. It was red while
+   the option sat sunken (an ink ring barely registered against that fill);
+   the option is a card now, and the ink ring reads on the ground, 12.97:1. */
 .option:focus-visible {
-  outline: var(--focus-width) solid var(--focus-ring-invert);
+  outline: var(--focus-width) solid var(--focus-ring);
   outline-offset: var(--focus-offset);
 }

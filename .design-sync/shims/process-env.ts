@@ -15,7 +15,9 @@
  * by the component entry, and ES modules evaluate in import order — so this
  * module runs before any component module does. An empty `env` gives the
  * footer exactly what production gives it while the game is closed: no game
- * link. Nothing else in the component graph reads `process`.
+ * link. `SpaceBand` reads the same way (`TDG_ENGINE_OPEN_AT_BUILD` and the
+ * game's), and an empty `env` shows both legs « bientôt » — its previews pass
+ * `open` to show the other states. Nothing else in the graph reads `process`.
  */
 const g = globalThis as { process?: { env: Record<string, string | undefined> } };
 g.process ??= { env: {} };
