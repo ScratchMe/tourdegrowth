@@ -40,23 +40,13 @@ export async function renderSlidePng(node: HTMLElement, { hd }: PngOptions): Pro
     pixelRatio: hd ? 2 : 1,
     cacheBust: false,
   };
-  // An off-screen thumbnail skips its rendering (`content-visibility: auto`,
-  // deck.module.css): the export renders what nobody is looking at, so the
-  // skip is lifted for as long as it runs, and one frame is given to lay out.
-  const viewport = node.closest<HTMLElement>('[data-print="viewport"]');
-  viewport?.setAttribute("data-rendering", "");
-  try {
-    await new Promise((resolve) => requestAnimationFrame(resolve));
-    // The first render is thrown away: Safari's first pass can come out
-    // without the embedded fonts (a known html-to-image behaviour, spec R7);
-    // the second is the one that ships.
-    await toBlob(node, options);
-    const blob = await toBlob(node, options);
-    if (!blob) throw new Error("html-to-image returned no image");
-    return blob;
-  } finally {
-    viewport?.removeAttribute("data-rendering");
-  }
+  // The first render is thrown away: Safari's first pass can come out
+  // without the embedded fonts (a known html-to-image behaviour, spec R7);
+  // the second is the one that ships.
+  await toBlob(node, options);
+  const blob = await toBlob(node, options);
+  if (!blob) throw new Error("html-to-image returned no image");
+  return blob;
 }
 
 /**

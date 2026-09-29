@@ -19,19 +19,22 @@ import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } fr
  * page, no height) and for what the browser's `beforematch` does to them.
  *
  * Non-vacuity (2026-09-29), one sabotage each, each failing its own test:
- * the Disclosure's `@supports` block removed; `StageTabs` rendering the
+ * the Disclosure's `@supports` block removed; the glossary popover back to
+ * `placement` anchored; `StageTabs` rendering the
  * body only when open again; the header's `scroll-state` block removed; the
  * tabs' negative margin dropped; the news' `onClick` fallback emptied, and
  * `command` taken off the skip button; `Segmented`'s anchor block removed;
- * `color-scheme` removed from the night world; `data-rendering` no longer
- * set by the PNG export.
+ * `color-scheme` removed from the night world. Two tests hold what stays and
+ * pass on the old code too: a Disclosure under reduced motion, and a folded
+ * row dropping an unsaved edit. So does the PNG half of the deck's: a lift of
+ * the skip during the export was written, measured useless (the off-screen
+ * slide came out byte for byte the same without it) and taken out.
  */
 
 const STORAGE_KEY = "tdg.engine.v1";
 const EXAMPLE_CLOCK = new Date(2026, 8, 24, 12);
 const GAME_OPEN = process.env.GAME_ENABLED === "true";
 
-const px = (value: string) => Number.parseFloat(value);
 const frames = (page: Page, n = 2) =>
   page.evaluate((count) => new Promise<void>((resolve) => {
     const step = (left: number) => (left ? requestAnimationFrame(() => step(left - 1)) : resolve());
@@ -130,6 +133,64 @@ test.describe("Segmented: the fill slides to the choice", () => {
       // Non-vacuity: the two tones are two fills (ink, and the roast's red).
       expect(seen.size).toBe(2);
     });
+  });
+});
+
+test.describe("the glossary definition: one panel, in the top layer", () => {
+  const open = async (page: Page) => {
+    await page.goto("/r/sample?lang=en");
+    await page.locator("main").waitFor();
+    const trigger = page.getByRole("button", { name: /definition: retention/i });
+    await trigger.click();
+    await expect(page.getByRole("dialog", { name: /retention/i })).toBeVisible();
+    return trigger;
+  };
+  const panel = (page: Page) => page.getByRole("dialog", { name: /retention/i });
+
+  test("on a desktop it hangs under its own trigger, with no ✕, and covers nothing else", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    const trigger = await open(page);
+    // One panel, not two copies with CSS hiding one; open in the top layer.
+    await expect(page.locator("[role=dialog]")).toHaveCount(1);
+    expect(await panel(page).evaluate((el) => el.matches(":popover-open"))).toBe(true);
+    const t = (await trigger.boundingBox())!;
+    const p = (await panel(page).boundingBox())!;
+    expect(p.y).toBeGreaterThanOrEqual(t.y + t.height);
+    expect(p.y).toBeLessThan(t.y + t.height + 12);
+    expect(Math.abs(p.x - t.x)).toBeLessThan(2);
+    expect(p.width).toBeLessThanOrEqual(280);
+    await expect(panel(page).getByRole("button", { name: "Close" })).toBeHidden();
+    expect(await page.evaluate(() => document.elementFromPoint(5, 450)?.getAttribute("role"))).not.toBe("dialog");
+
+    // A click elsewhere still closes it, and goes where it was aimed.
+    await page.mouse.click(5, 450);
+    await expect(page.locator("[role=dialog]")).toHaveCount(0);
+  });
+
+  test("on a phone it is the sheet at the bottom; its ✕ and a tap outside close it, and that tap never reaches the page", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const trigger = await open(page);
+    await expect(page.locator("[role=dialog]")).toHaveCount(1);
+    const p = (await panel(page).locator(":scope > div").boundingBox())!;
+    expect(Math.round(p.x)).toBe(16);
+    expect(Math.round(p.width)).toBe(390 - 32);
+    expect(Math.round(p.y + p.height)).toBe(844 - 16);
+    // Focus goes into the sheet too, now there is one panel to give it to.
+    await expect(panel(page)).toBeFocused();
+
+    await panel(page).getByRole("button", { name: "Close" }).click();
+    await expect(page.locator("[role=dialog]")).toHaveCount(0);
+    await expect(trigger).toBeFocused();
+
+    // A tap outside lands on the popover's own layer, not on the page under it.
+    await trigger.click();
+    const landed = await page.evaluate(() => {
+      const el = document.elementFromPoint(195, 200);
+      return el?.getAttribute("role") ?? el?.tagName;
+    });
+    expect(landed).toBe("dialog");
+    await page.mouse.click(195, 200);
+    await expect(page.locator("[role=dialog]")).toHaveCount(0);
   });
 });
 

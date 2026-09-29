@@ -143,8 +143,13 @@
 @supports (anchor-name: --a) and (anchor-scope: all) {
   .track {
     position: relative;
-    isolation: isolate;
     anchor-scope: --segmented-on;
+  }
+
+  /* Positioned, the options paint after the track's ::before, which comes
+     first in the tree: over the fill with no z-index (z-index.test.ts). */
+  .option {
+    position: relative;
   }
 
   .on {
@@ -164,7 +169,6 @@
     right: anchor(right);
     bottom: anchor(bottom);
     left: anchor(left);
-    z-index: -1;
     background: var(--state-selected-bg);
     pointer-events: none;
   }

@@ -1396,14 +1396,13 @@
    * off screen are not rendered until they come near (audit du kit §6,
    * CHANTIERS.md A4, 2026-09-29; Baseline 2025). The box keeps its size —
    * its width and ratio are its own, never its content's — so nothing jumps.
-   * An export lifts the skip while it runs (export-png.ts), and so does
-   * printing (DeckView.tsx, PRINT_CSS).
+   * A PNG export needs nothing more: html-to-image draws a copy of the slide,
+   * and a slide exported from far off screen comes out byte for byte the one
+   * exported in view (e2e/platform-native.spec.ts). Printing lifts the skip
+   * anyway (DeckView.tsx, PRINT_CSS), so a PDF never depends on what was in
+   * view when it was asked for.
    */
   content-visibility: auto;
-}
-
-.viewport[data-rendering] {
-  content-visibility: visible;
 }
 
 /* An excluded slide is still editable, so it stays; its dashed frame says it won't be exported. Never dimmed: dimming text fails contrast. */

@@ -1,15 +1,22 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import type { HTMLAttributes, ReactNode } from "react";
 import styles from "./DefinitionPopover.module.css";
 
 export interface DefinitionPopoverProps extends HTMLAttributes<HTMLDivElement> {
   term: string;
   definition: ReactNode;
-  /** anchored = under the trigger, 280px max (desktop) · docked = full-width sheet at the bottom (mobile) */
-  placement?: "anchored" | "docked";
-  /** Accessible label for the close button, e.g. "Close" / "Fermer" (docked only). */
+  /**
+   * `auto` — what GlossaryTerm opens: ONE panel, in the top layer, that CSS
+   * places — under its trigger from 641px where anchor positioning exists
+   * (the trigger carries `--glossary-definition`), a sheet docked to the
+   * bottom of the screen everywhere else.
+   * `anchored` / `docked` — the two shapes drawn where they stand, for a
+   * page or a preview that shows one without opening anything.
+   */
+  placement?: "auto" | "anchored" | "docked";
+  /** Accessible label for the ✕, e.g. "Close" / "Fermer" — shown wherever the panel is a sheet. */
   closeLabel?: string;
   /** Called on outside click, Escape, or the docked ✕ — the trigger's own re-click toggle is handled by the caller. */
   onClose?: () => void;
@@ -24,6 +31,22 @@ export interface DefinitionPopoverProps extends HTMLAttributes<HTMLDivElement> {
  * mobile, where an anchored popover always overflows a ~390px screen. Only
  * one popover is ever open at a time app-wide — the caller (glossary
  * open-id state) is responsible for that, this component just closes itself.
+ *
+ * `auto` is one element for both (audit du kit §6, CHANTIERS.md A4,
+ * 2026-09-29). It used to be two, both rendered, CSS hiding one, each over
+ * the page by its own `z-index`, three in all. It is now a `popover="manual"`
+ * shown on mount: the top layer covers everything with no z-index, and the
+ * shape is the stylesheet's alone. Manual, not `auto`: this component
+ * already closes on Escape and on a press outside, and the trigger's own
+ * click toggles it; a native light dismiss would close it on that press and
+ * the click would open it again.
+ *
+ * On a phone the popover is the whole screen, transparent, and the sheet a
+ * card inside it: a tap outside the sheet lands on the popover, so it never
+ * reaches the page behind (a quiz answer, say) — the job of the old
+ * transparent full-screen button. A popover's `::backdrop` cannot do it: it
+ * takes no clicks (measured, Chromium 141). On a desktop the popover shrinks
+ * to its card, under the trigger.
  */
 export function DefinitionPopover({
   term,
@@ -38,6 +61,19 @@ export function DefinitionPopover({
 }: DefinitionPopoverProps) {
   const docked = placement === "docked";
   const ref = useRef<HTMLDivElement>(null);
+  // The drawn box: the card inside `auto`'s layer, the panel itself otherwise.
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Into the top layer before the first paint. A browser without the Popover
+  // API ignores the attribute and draws the panel where it stands, as a sheet.
+  useLayoutEffect(() => {
+    const panel = ref.current;
+    if (placement !== "auto" || !panel || typeof panel.showPopover !== "function") return;
+    panel.showPopover();
+    return () => {
+      if (panel.matches(":popover-open")) panel.hidePopover();
+    };
+  }, [placement]);
 
   /**
    * REVIEW.md R-19. The panel had `role="dialog"` but never took focus, so a
@@ -45,11 +81,10 @@ export function DefinitionPopover({
    * it, and Escape only worked because the handler is on `document`. Focus
    * moves in on open and returns to whatever opened it on close — otherwise
    * closing drops focus to <body> and the reader loses their place mid-
-   * question.
+   * question. Now on a phone too: there is one panel, so there is no longer
+   * a mobile copy that would steal the focus from the desktop one.
    *
-   * Guarded on `docked`: both placements render at once and CSS picks one
-   * per viewport (see GlossaryTerm), so focusing both would have the mobile
-   * copy win on desktop.
+   * Not on `docked`, which is only ever drawn in place, never opened.
    */
   useEffect(() => {
     if (docked) return;
@@ -62,9 +97,8 @@ export function DefinitionPopover({
     if (!onClose) return;
 
     function handlePointerDown(event: PointerEvent) {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
-        onClose?.();
-      }
+      const card = cardRef.current ?? ref.current;
+      if (card && !card.contains(event.target as Node)) onClose?.();
     }
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") onClose?.();
@@ -78,19 +112,11 @@ export function DefinitionPopover({
     };
   }, [onClose]);
 
-  const panel = (
-    <div
-      ref={ref}
-      role="dialog"
-      tabIndex={-1}
-      aria-label={term}
-      className={[styles.popover, docked ? styles.docked : styles.anchored, className ?? ""].filter(Boolean).join(" ")}
-      style={style}
-      {...rest}
-    >
+  const content = (
+    <>
       <div className={styles.topRow}>
         <div className={styles.term}>{term}</div>
-        {docked && onClose ? (
+        {placement !== "anchored" && onClose ? (
           <button type="button" aria-label={closeLabel} onClick={onClose} className={styles.closeButton}>
             ✕
           </button>
@@ -109,16 +135,41 @@ export function DefinitionPopover({
           {more.label}
         </a>
       ) : null}
+    </>
+  );
+
+  if (placement === "auto") {
+    return (
+      <div
+        ref={ref}
+        role="dialog"
+        tabIndex={-1}
+        aria-label={term}
+        popover="manual"
+        className={[styles.auto, className ?? ""].filter(Boolean).join(" ")}
+        style={style}
+        {...rest}
+      >
+        <div ref={cardRef} className={[styles.popover, styles.autoCard].join(" ")}>
+          {content}
+        </div>
+      </div>
+    );
+  }
+
+  const panel = (
+    <div
+      ref={ref}
+      role="dialog"
+      tabIndex={-1}
+      aria-label={term}
+      className={[styles.popover, styles[placement], className ?? ""].filter(Boolean).join(" ")}
+      style={style}
+      {...rest}
+    >
+      {content}
     </div>
   );
 
-  if (!docked) return panel;
-
-  return (
-    <>
-      {/* Dims/blocks the rest of the page without a visible scrim — matches the anchored variant's plain outside-click close. */}
-      <button type="button" aria-label={closeLabel} className={styles.backdrop} onClick={onClose} tabIndex={-1} />
-      <div className={styles.dockedWrap}>{panel}</div>
-    </>
-  );
+  return docked ? <div className={styles.dockedWrap}>{panel}</div> : panel;
 }
