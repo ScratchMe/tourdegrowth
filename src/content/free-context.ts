@@ -14,7 +14,7 @@ export const FREE_CONTEXT = {
     fr: "Un contexte particulier qu'on devrait connaître ? (optionnel)",
     en: "Any specific context we should know about? (optional)",
   },
-  // TODO: à relire — revue de copie v1 (2026-09-24), changement nº10. The one
+  // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), changement nº10. The one
   // screen that asks for writing, so the one where the copy weighs most on the
   // output. "Two or three sentences are enough" lowers the bar (the field takes
   // 500 characters) and replaces "not just another X", a model-writing tic.
@@ -34,7 +34,7 @@ export const FREE_CONTEXT = {
    */
   skip: { fr: "Skip", en: "Skip" },
   /**
-   * TODO: à relire — revue de copie v1 (2026-09-24), changement nº5. The
+   * Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), changement nº5. The
    * button used to promise a « diagnostic » in French and "results" in
    * English, while the line right above it says we are writing your
    * RECOMMENDATIONS — which is what the Deep dive returns. Imperative and

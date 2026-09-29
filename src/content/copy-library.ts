@@ -97,7 +97,7 @@ export const QUESTIONS: readonly CopyLibraryQuestion[] = [
     id: "act-1",
     pillar: "activation",
     question: {
-      // TODO: à relire — revue de copie v1 (2026-09-24), §3.2 : guillemets français en français, comme partout ailleurs.
+      // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), §3.2 : guillemets français en français, comme partout ailleurs.
       fr: "As-tu défini un moment « aha » précis pour tes nouveaux utilisateurs ?",
       en: 'Have you defined a specific "aha" moment for new users?',
     },
@@ -327,7 +327,7 @@ export const PILLAR_VERDICTS: Record<Pillar, Record<ScoreBand, Record<Tone, Tran
   activation: {
     weak: {
       neutral: {
-        // TODO: à relire — revue de copie v1 (2026-09-24), §3.2 : guillemets français.
+        // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), §3.2 : guillemets français.
         fr: "Pas de moment « aha » identifié — sans lui, difficile de savoir ce qu'il faut optimiser dans l'onboarding.",
         en: 'No identified "aha" moment — without one, it\'s hard to know what to optimize in onboarding.',
       },
@@ -338,7 +338,7 @@ export const PILLAR_VERDICTS: Record<Pillar, Record<ScoreBand, Record<Tone, Tran
     },
     developing: {
       neutral: {
-        // TODO: à relire — revue de copie v1 (2026-09-24), §3.2 : calque de *should aim to*.
+        // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), §3.2 : calque de *should aim to*.
         fr: "Le moment clé existe dans les grandes lignes, mais son taux d'atteinte n'est pas encore suivi — la prochaine version de l'onboarding doit le mesurer.",
         en: "The key moment exists in broad strokes, but its completion rate isn't tracked yet — the next onboarding iteration should aim to measure it.",
       },
@@ -349,7 +349,7 @@ export const PILLAR_VERDICTS: Record<Pillar, Record<ScoreBand, Record<Tone, Tran
     },
     strong: {
       neutral: {
-        // TODO: à relire — revue de copie v1 (2026-09-24), §3.2 : guillemets français.
+        // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), §3.2 : guillemets français.
         fr: "Moment « aha » clair, mesuré, et un onboarding déjà itéré sur cette base — un vrai socle pour la suite.",
         en: 'Clear "aha" moment, measured, and an onboarding already iterated on that basis — a real foundation to build on.',
       },
@@ -382,7 +382,7 @@ export const PILLAR_VERDICTS: Record<Pillar, Record<ScoreBand, Record<Tone, Tran
     },
     strong: {
       neutral: {
-        // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
+        // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
         fr: "Rétention suivie, cause de churn connue, mécanisme de réengagement actif — une étape solide de ta croissance.",
         en: "Retention tracked, churn cause known, re-engagement mechanism active — a solid pillar of your growth.",
       },
@@ -415,7 +415,7 @@ export const PILLAR_VERDICTS: Record<Pillar, Record<ScoreBand, Record<Tone, Tran
     },
     strong: {
       neutral: {
-        // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
+        // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
         fr: "Mécanisme de partage intégré et mesuré — l'étape la plus rare à ce niveau, probablement ton meilleur atout.",
         en: "Sharing mechanism built in and measured — the rarest stage at this level, probably your best asset.",
       },
@@ -448,7 +448,7 @@ export const PILLAR_VERDICTS: Record<Pillar, Record<ScoreBand, Record<Tone, Tran
     },
     strong: {
       neutral: {
-        // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
+        // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
         fr: "Pricing testé, LTV connue, playbook d'expansion actif — une étape Revenue qui tient déjà la comparaison avec des équipes bien plus établies.",
         en: "Pricing tested, LTV known, expansion playbook active — a Revenue stage that already holds up against much more established teams.",
       },

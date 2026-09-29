@@ -15,7 +15,7 @@ import type { Translatable } from "@/lib/i18n/translatable";
 export const ABOUT = {
   title: { fr: "À propos de Tour de Growth", en: "About Tour de Growth" },
   metaDescription: {
-    // TODO: à relire — audit SEO v1 (2026-09-24), §1.2 : 169 caractères ; « exactement » part, le reste ne bouge pas.
+    // Validé au bon à tirer nº6 (2026-09-29) — audit SEO v1 (2026-09-24), §1.2 : 169 caractères ; « exactement » part, le reste ne bouge pas.
     fr: "Qui a construit Tour de Growth et pourquoi, ce que mesurent les quinze questions AARRR, et comment le score est calculé — sans qu'aucune IA touche au chiffre.",
     en: "Who built Tour de Growth and why, what the fifteen AARRR questions measure, and exactly how the score is calculated — with no AI touching the number.",
   },
@@ -27,7 +27,7 @@ export const ABOUT = {
   questionsSection: {
     title: { fr: "Pourquoi ces quinze questions", en: "Why these fifteen questions" },
     body: {
-      // TODO: à relire — revue de copie v1 (2026-09-24) : nom d'étape « Retention » sans accent, comme partout ailleurs (R2-12) ; l'accent reste au nom commun.
+      // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24) : nom d'étape « Retention » sans accent, comme partout ailleurs (R2-12) ; l'accent reste au nom commun.
       fr: "Trois questions par étape du cadre AARRR — Acquisition, Activation, Retention, Referral, Revenue. Elles portent volontairement sur ce que tu fais et mesures, pas sur ce que tu crois : un canal est-il identifié et suivi, un moment « aha » est-il défini, la rétention est-elle mesurée, le parrainage est-il dans le produit, le pricing a-t-il été testé. Un fondateur peut répondre en trois minutes, et deux personnes de la même équipe devraient obtenir le même score.",
       en: "Three questions per stage of the AARRR framework — Acquisition, Activation, Retention, Referral, Revenue. They deliberately ask what you do and measure, not what you believe: is a channel identified and tracked, is an aha moment defined, is retention measured, is referral built into the product, has pricing been tested. A founder can answer in three minutes, and two people on the same team should land on the same score.",
     },
@@ -59,7 +59,7 @@ export const ABOUT = {
     ] satisfies Translatable[],
     exampleLabel: { fr: "Exemple", en: "Worked example" },
     example: {
-      // TODO: à relire — revue de copie v1 (2026-09-24) : nom d'étape « Retention » sans accent, comme partout ailleurs (R2-12) ; l'accent reste au nom commun.
+      // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24) : nom d'étape « Retention » sans accent, comme partout ailleurs (R2-12) ; l'accent reste au nom commun.
       fr: "Trois réponses à 20, 7 et 7 points font 34 sur 60. 34 divisé par 3 donne 11,33, arrondi à 11 : l'étape vaut 11/20. Cinq étapes à 18, 12, 8, 16 et 20 font un total de 74/100, et Retention, à 8, est l'étape la plus faible.",
       en: "Three answers worth 20, 7 and 7 points make 34 out of 60. 34 divided by 3 is 11.33, rounded to 11: the stage scores 11/20. Five stages at 18, 12, 8, 16 and 20 add up to 74/100, and Retention, at 8, is the weakest stage.",
     },
@@ -94,7 +94,7 @@ export const ABOUT = {
     after: { fr: ".", en: "." },
   },
 
-  // TODO: à relire — revue de copie v1 (2026-09-24), changement nº7 et critique DS L-3 : un seul libellé vers /quiz, « Démarre ton Tour → » / "Start your Tour →", comme le CTA de la landing. Seul le visiteur d'un résultat partagé garde « Fais ton propre Tour → ».
+  // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), changement nº7 et critique DS L-3 : un seul libellé vers /quiz, « Démarre ton Tour → » / "Start your Tour →", comme le CTA de la landing. Seul le visiteur d'un résultat partagé garde « Fais ton propre Tour → ».
   cta: { fr: "Démarre ton Tour →", en: "Start your Tour →" },
 } as const;
 

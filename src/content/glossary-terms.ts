@@ -59,7 +59,7 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
   aarrr: {
     term: same("AARRR"),
     definition: {
-      // TODO: à relire — revue de copie v1 (2026-09-24) : nom d'étape « Retention » sans accent, comme partout ailleurs (R2-12) ; l'accent reste au nom commun.
+      // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24) : nom d'étape « Retention » sans accent, comme partout ailleurs (R2-12) ; l'accent reste au nom commun.
       fr: "Le cadre en 5 étapes pour évaluer un produit : Acquisition, Activation, Retention, Referral (parrainage), Revenue (revenu). Popularisé par Dave McClure en 2007.",
       en: "The 5-stage framework used to evaluate a product: Acquisition, Activation, Retention, Referral, Revenue. Popularized by Dave McClure in 2007.",
     },

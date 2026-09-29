@@ -12,7 +12,7 @@ import type { Translatable } from "./translatable";
  */
 export const ERROR_SCREEN_STRINGS = {
   errorEyebrow: { en: "Detour", fr: "Détour" },
-  // TODO: à relire — revue de copie v1 (2026-09-24), changement nº8. The
+  // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), changement nº8. The
   // French was a calque of the brief's English (*took a wrong turn*,
   // *something broke*): « prendre un mauvais virage » is rare in the figurative
   // sense and « quelque chose a cassé » reads translated. Same road metaphor,

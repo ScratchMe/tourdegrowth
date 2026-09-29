@@ -56,7 +56,7 @@ export const SEGMENT_SCREEN = {
   submit: t("Continuer →", "Continue →"),
   /** Shown under the button: says plainly that skipping costs nothing. */
   optional: t(
-    // TODO: à relire — revue de copie v1 (2026-09-24), §3.3 : « tu seras comparé » supposait un lecteur masculin.
+    // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), §3.3 : « tu seras comparé » supposait un lecteur masculin.
     "Les deux sont facultatives : sans réponse, la comparaison se fait avec la moyenne générale.",
     "Both are optional: leave them and you'll be compared to the overall average.",
   ),

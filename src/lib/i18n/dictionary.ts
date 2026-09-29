@@ -38,7 +38,7 @@ export const UI_STRINGS = {
   landing: {
     bibTag: {
       en: "№ 15 questions — 3 min — free entry",
-      // TODO: à relire — revue de copie v1 (2026-09-24) : « entrée gratuite »
+      // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24) : « entrée gratuite »
       // passait sur deux lignes à 390 px, « GRATUITE » orpheline (critique DS
       // L-2). « gratuit » tient sur une ligne ; « entrée libre » coupait encore.
       fr: "№ 15 questions — 3 min — gratuit",
@@ -54,7 +54,7 @@ export const UI_STRINGS = {
     subtitle: {
       // R2-12 put "AARRR" in the visible copy (the framework's name appeared
       // only in the metadata); it stays, once, in brackets.
-      // TODO: à relire — revue de copie v1 (2026-09-24), changement nº1. The
+      // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), changement nº1. The
       // old line listed five English stage names behind French articles —
       // four lines on a phone that say nothing to someone who doesn't already
       // know AARRR, which is most of the launch audience. It now says what
@@ -98,7 +98,7 @@ export const UI_STRINGS = {
       * Relu et validé par Antoine (2026-09-11).
       */
     promise: {
-      // TODO: à relire — revue de copie v1 (2026-09-24), changement nº1: the
+      // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), changement nº1: the
       // score out of 100 joins the deliverable — it is the very object people
       // share, and the preview card beside this line shows it at 120 px. Still
       // says only what you leave WITH; the subtitle says what you do.
@@ -229,7 +229,7 @@ export const UI_STRINGS = {
    * du CHROME de page — les libellés de maillage, que le reste de l'app
    * pourrait réutiliser.
    *
-   * TODO: à relire (convention 6).
+   * Validé au bon à tirer nº5 (2026-09-22).
    */
   openDoor: {
     stagesHeading: { en: "The five stages, one page each", fr: "Les cinq étapes, une page chacune" },
@@ -242,7 +242,7 @@ export const UI_STRINGS = {
   /**
    * `/aarrr-vs-*` (GROWTH-PLAN.md vague 2.3) — le chrome des pages du
    * cluster. Le contenu lui-même vit dans `content/comparisons.ts`.
-   * TODO: à relire (convention 6).
+   * Validé au bon à tirer nº5 (2026-09-22).
    */
   comparisonPage: {
     atAGlance: { en: "At a glance", fr: "En un coup d'œil" },
@@ -278,7 +278,7 @@ export const UI_STRINGS = {
     inPracticeLabel: { en: "In practice", fr: "En pratique" },
     relatedLabel: { en: "Related terms", fr: "Termes liés" },
     // SEO audit v1 §1.7 — the block that links the AARRR term page to the
-    // "AARRR vs X" cluster. TODO: à relire — copie neuve (convention 6).
+    // "AARRR vs X" cluster. Validé au bon à tirer nº6 (2026-09-29).
     comparedWithLabel: { en: "AARRR compared with other frameworks", fr: "AARRR comparé à d'autres cadres" },
     // SEO lot 3 (2026-09-28) — the same block on a term that links ONE
     // comparison (North Star, growth loop, retention). Neutral on purpose:
@@ -347,11 +347,11 @@ export const UI_STRINGS = {
       en: "Same insights, sharper tongue. All in good fun.",
       fr: "Mêmes constats, un ton plus mordant. Toujours bienveillant.",
     },
-    // TODO: à relire — revue de copie v1 (2026-09-24), fiche terminologique :
+    // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), fiche terminologique :
     // an arrow CTA speaks to the reader in both languages, so "your", as the
     // French « Obtiens ton score » already did.
     cta: { en: "Get your score →", fr: "Obtiens ton score →" },
-    // TODO: à relire — revue de copie v1 (2026-09-24), changement nº3 et
+    // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), changement nº3 et
     // critique DS M-6. The old line promised a tone switch on the result
     // page, which only exists for an owner in roast ("Switch to straight
     // up"); someone who keeps the default neutral tone — the majority —
@@ -398,7 +398,7 @@ export const UI_STRINGS = {
    *
    * Relu et validé par Antoine (2026-09-11). */
   deepDive: {
-    // TODO: à relire — revue de copie v1 (2026-09-24), §3.2 et fiche
+    // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), §3.2 et fiche
     // terminologique : « spécifique à » est le calque de *specific to*, et
     // un CTA à flèche est à l'impératif, à la deuxième personne, dans les
     // deux langues (« Obtiens ton score », « Démarre ton Tour »).
@@ -410,7 +410,7 @@ export const UI_STRINGS = {
       en: "Make it specific to your business →",
       fr: "Adapte-la à ton entreprise →",
     },
-    // TODO: à relire — revue de copie v1 (2026-09-24), changement nº5 : le
+    // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), changement nº5 : le
     // mode avait trois noms en français (Deep dive sur le badge,
     // Approfondissement ici, Diagnostic approfondi dans le titre du
     // document). « Deep dive » est un nom propre, invariable, comme le badge.
@@ -433,7 +433,7 @@ export const UI_STRINGS = {
     // the text goes, that it is not kept, and that it can show through in
     // the recommendation on a page the person may share (a fact the first
     // live probe established — see CLAUDE.md, 2026-09-05).
-    // TODO: à relire — revue de copie v1 (2026-09-24), changement nº10 :
+    // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), changement nº10 :
     // « façonner » était le calque de *shape* ; « se retrouver dans » dit le
     // fait établi par la sonde du 2026-09-05 (Gemini reprend le contexte dans
     // ses recommandations), sans l'euphémiser. L'anglais ne change pas.
@@ -575,7 +575,7 @@ export const UI_STRINGS = {
     pointsTemplate: { en: "{n} pts", fr: "{n} pts" },
     ownerOnlyNote: {
       en: "Only visible to you — your answers are stored on this device, never on the shared page.",
-      // TODO: à relire — revue de copie v1 (2026-09-24), §3.3 : « toi seul » supposait un lecteur masculin.
+      // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), §3.3 : « toi seul » supposait un lecteur masculin.
       fr: "Visible sur cet appareil uniquement — tes réponses sont stockées ici, jamais sur la page partagée.",
     },
   },
@@ -598,7 +598,7 @@ export const UI_STRINGS = {
        reader sees are unchanged. */
     textTemplate: {
       en: "I scored {total}/100 on my AARRR growth check-up. {stall} Where does yours?",
-      // TODO: à relire — revue de copie v1 (2026-09-24), changement nº5 :
+      // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), changement nº5 :
       // « bilan » → « diagnostic », le nom du produit en français partout
       // ailleurs (landing, <title>). C'est la phrase que l'utilisateur publie
       // en son nom : elle ne doit pas donner au produit un quatrième nom.
@@ -639,7 +639,7 @@ export const UI_STRINGS = {
      * ci-dessus, qui portent le suffixe de marque : un `<h1>` nomme la page,
      * il ne répète pas le nom du site.
      *
-     * TODO: à relire — copie neuve (convention 6 de CLAUDE.md).
+     * Validé au bon à tirer nº5 (2026-09-22).
      */
     quizHeading: { en: "The Tour — 15 questions", fr: "Le Tour — 15 questions" },
     resultHeading: { en: "Tour result — {score}/100", fr: "Résultat du Tour — {score}/100" },
@@ -647,7 +647,7 @@ export const UI_STRINGS = {
     deepDiveHeading: { en: "Deep dive — 10 more questions", fr: "Deep dive — 10 questions de plus" },
     quizDescription: {
       en: "Answer 15 questions about how your product acquires, activates, retains, refers and monetises — and get an AARRR growth score out of 100 you can share.",
-      // TODO: à relire — audit SEO v1 (2026-09-24), §1.2 : 163 caractères depuis la revue de copie ; « growth » part, le reste ne bouge pas.
+      // Validé au bon à tirer nº6 (2026-09-29) — audit SEO v1 (2026-09-24), §1.2 : 163 caractères depuis la revue de copie ; « growth » part, le reste ne bouge pas.
       fr: "Réponds à 15 questions sur la façon dont ton produit acquiert, active, retient, fait recommander et monétise — et obtiens un score AARRR sur 100 à partager.",
     },
     // Alt text of the landing share image (opengraph-image.tsx): what it shows,
@@ -658,7 +658,7 @@ export const UI_STRINGS = {
     },
     // Alt text of the `/quiz` share image (`quiz/share/[locale]/route.ts`,
     // SEO audit v1 §1.1): the two lines it draws, said once.
-    // TODO: à relire — copie neuve (convention 6 de CLAUDE.md).
+    // Validé au bon à tirer nº6 (2026-09-29).
     quizShareImageAlt: {
       en: "Tour de Growth — the Tour, 15 questions. You leave with a score out of 100, the stage holding you back, and one action to take.",
       fr: "Tour de Growth — le Tour, 15 questions. Tu repars avec un score sur 100, l'étape qui te freine et une action à mener.",
@@ -666,7 +666,7 @@ export const UI_STRINGS = {
   },
 
   og: {
-    // TODO: à relire — revue de copie v1 (2026-09-24), changement nº5 :
+    // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), changement nº5 :
     // « Bilan » → « Diagnostic », le nom du produit en français partout
     // ailleurs. Mesuré dans l'image rendue avant d'être gardé : le badge tient
     // sur sa ligne à côté du wordmark.

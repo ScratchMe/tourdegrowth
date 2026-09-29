@@ -4935,3 +4935,16 @@ Le nº8 est reconstruit par un script qui repart des clés de chaque ancienne ca
 - `main` : 3 échecs sur 10 (`:320` deux fois, `:76` une fois).
 
 La course existe donc déjà sur `main`, à une fréquence égale ou supérieure. Ce changement ne la crée pas et ne touche ni le proxy, ni les cookies, ni les redirections. Elle n'est plus rare : un passage de fichier sur trois à cinq échoue. Les deux tests échouent sur le même geste, le cookie de langue qui ne reflète pas le dernier choix.
+
+### Bon à tirer nº6 clos, et les marqueurs que le nº5 avait laissés (2026-09-29)
+
+**La décision.** Antoine : « le bon à tirer nº6 est vu et tout est OK ». Dans la base de la page, 36 cartes sur 37 portaient « ça passe », sans aucune note. La 37ᵉ (`g-referral`) n'avait aucune décision en base : elle est enregistrée « ok » d'après son message, avec une réponse sous la carte qui le dit. Aucune chaîne ne change, donc aucun `updatedAt` ne bouge.
+
+**Les marqueurs levés se décident à partir du texte, pas du commentaire du marqueur.** Pour chacun des 94 marqueurs hors jeu, moteur et audit, un script a relevé le français qu'il couvre et l'a cherché mot pour mot dans la page du nº6. Pour les en-têtes de fichier et de lot, il l'a cherché aussi dans le nº5. Les cas que le script ne savait pas lire ont été vérifiés un par un : les `t(en, fr)` du glossaire long, les `p()` de la confidentialité, les commentaires sur plusieurs lignes. Résultat :
+- **82 marqueurs du nº6** : leur texte est celui qu'Antoine a validé. Dans `antoine-credit.ts`, la seule différence est une espace finale, qui sert à coller le lien.
+- **9 restes du nº5**, dont le texte est identique à ce qui avait été tranché le 2026-09-22 (réécritures du 23 comprises) : les en-têtes « premier jet » d'`open-door.ts` et de `comparisons.ts`, les trois lots du glossaire, les libellés `openDoor`, `comparisonPage`, `quizHeading` et `nav-strings.checklist`. **La clôture du nº5 n'avait pas levé ses marqueurs** : chaque grep suivant les recomptait comme à relire, et le prochain bon à tirer les aurait resoumis.
+- **3 restent marqués**, faute d'être passés dans un bon à tirer : le verdict de la comparaison OKR réécrit le 25/09 (« des quatre » était devenu faux avec la page HEART) et les deux libellés SEO du 28/09.
+
+Chaque levée garde sa raison : « TODO: à relire — revue de copie v1… » devient « Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1… ». C'est la forme du nº3.
+
+**Vérifié** : lint et `tsc` propres, **2 169 tests unitaires** verts. Aucune chaîne affichée ne change, seulement des commentaires.
