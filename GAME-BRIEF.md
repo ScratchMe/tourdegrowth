@@ -517,6 +517,7 @@ Chaque scénario part d'une page vierge, stockage local vidé, sauf mention cont
 - La révélation : sur les testeurs qui ont obéi, la page de décembre provoque une réaction.
 - Les applaudissements : un testeur qui a tenu se sent récompensé, pas puni par la difficulté.
 - Aucun texte ne sonne artificiel ; la relecture d'Antoine est un critère, pas une étape facultative.
+- **La durée** (ajouté le 2026-09-29, `CHANTIERS.md` C13) : chaque partie complète d'un testeur qui découvre le jeu est chronométrée. « Vingt minutes » reste si la médiane tombe entre 15 et 25 minutes ; sinon, le vrai chiffre arrondi remplace la mention dans l'encart (`content/game/entry.ts:65`) et dans les textes de lancement (`marketing/campaigns/game/`, `marketing/kit.md`).
 
 ---
 
@@ -853,6 +854,8 @@ Aucune transition de couleur au défilement. Le monde nuit rebinde chaque jeton 
 - **L'indication de ce qui suit** (« Trois mois vont passer… ») n'est dite qu'une fois, par l'en-tête de la main, à toutes les largeurs. La barre d'action n'a pas de phrase à elle.
 - **Aucune indication « Choisis deux actions. » seule** : le brief ne la prévoyait à aucun écran, la clé a été retirée. Les trois indications restantes sont « le DG parle », « choisis-en deux » et « trois mois vont passer ».
 
+- **Les noms de zones portent les deux noms**, « Retention — S'ils reviennent » (décision du 2026-09-24, `content/game/hub.ts`). Le nom d'étape vient du Tour, non traduit ; la question vient du prototype. **Confirmé par Antoine le 2026-09-29 (`CHANTIERS.md` C12)** : c'est le pont avec le Tour, plus la voix du jeu.
+
 ### 15.4 L'encart sur la page de résultat
 
 - **Condition** : l'accès est ouvert, le board n'est pas « level », et **l'un des piliers du goulot** a un niveau ouvert dans `GAME_LEVELS_BY_PILLAR`. Pour un goulot partagé, ce n'est donc pas seulement le premier du groupe dans l'ordre AARRR : si la rétention fait partie du lot qui freine, l'encart s'affiche. Lire `pillars[0]` seul aurait fait dépendre la décision de l'ordre de déclaration des piliers plutôt que des chiffres.
@@ -860,7 +863,7 @@ Aucune transition de couleur au défilement. Le monde nuit rebinde chaque jeton 
 - **Place** : sur desktop, dans la colonne de droite, entre « Là où tu perds du temps » et la rangée de boutons (la carte de partage est dans l'autre colonne, donc jamais sous l'encart) ; sur mobile, juste après la carte de partage. L'ordre de lecture des quatre variantes de la page est épinglé par un test.
   **Changée par Antoine le 2026-09-29 (`CHANTIERS.md` C10), captures à l'appui : sur desktop, l'encart passe sous la rangée de boutons**, dans la même colonne, comme sur mobile. Mesuré sur `/r/sample` en vue visiteur à 1 280 px : l'encart faisait descendre « Fais ton propre Tour » de 350 px (de 961 à 1 311), et posait « Jouer le niveau » juste au-dessus du bouton rouge. Le visiteur qui fait son propre Tour est le cœur de la boucle `?ref=`, et le jeu reste une entrée secondaire. L'attente d'« un mois de chiffres » (J6, 13.3) a été écartée : sous 50 soumissions, un mois ne dit rien. La règle de 13.3 (« l'encart descend sous Refaire le Tour ») est donc appliquée d'avance. À coder : `CHANTIERS.md` A7.7.
 - **Visiteur ou propriétaire** : même règle ; un visiteur arrivé par un lien partagé à goulot rétention voit l'encart.
-- La mention « vingt minutes, gratuit » est une promesse à mesurer en recette (7.3) avant ouverture.
+- La mention « vingt minutes, gratuit » est une promesse à mesurer en recette (7.3) avant ouverture. **Méthode tranchée par Antoine le 2026-09-29 (`CHANTIERS.md` C13)** : on chronomètre les parties des testeurs de la recette, et on garde la mention entre 15 et 25 minutes de médiane (voir 7.3).
 
 ### 15.5 Les images de partage
 
