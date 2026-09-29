@@ -244,6 +244,7 @@ Dans cet ordre, après les 3 mois :
 3. Message du DG à mi-trimestre (événement, style courriel) : si le churn du 2e mois > objectif, « Je vois les chiffres de la semaine. Ça ne bouge pas assez. » ; sinon « Ça bouge. Continue. »
 4. Si « Point données avec le DG » a été joué : événement positif « Ta présentation au DG a tenu… » si insight, sinon « sans données, il a hoché la tête poliment » (l'effet sur la patience, +15 ou +3, est appliqué au moment du choix).
 5. Radar ≥ 75 : **contrôle**. `sanction = true` ; amende = 60 000 + round(radar) × 500 ; événement « Contrôle de la DGCCRF, article dans la presse, amende de … Le DG te demande de tout retirer avant vendredi. N abonnés partent dans la foulée », N = 1,5 % des abonnés ; toutes les astuces sortent de production (archivées dans `removedDark`) ; radar = 20 ; confiance −10 ; patience −15 ; spike +0,015.
+   **Amende plafonnée par Antoine le 2026-09-29 (`CHANTIERS.md` C14) : 75 000 €**, le maximum légal pour une entreprise qui manque aux règles de résiliation (15 000 € pour une personne physique). La formule 60 000 + radar × 500 donnait de 97 500 € à 110 000 €, au-dessus de ce plafond, dans un jeu qui tient sa crédibilité de faits vérifiés. L'amende ne varie donc plus avec le radar. L'article est à vérifier sur Légifrance et à citer ici au moment du code (A7.8).
    Sinon radar ≥ 45 : **signalements**. Événement SignalConso ; patience −5 ; confiance −3.
 6. Confiance ≤ 35 : **fil viral**. spike +0,01 ; patience −5.
 7. Confiance ≥ 80 : **article positif**. press = 3 ; patience +8.
@@ -437,7 +438,7 @@ Tout test est bloquant pour la mise en production. Les tests unitaires portent s
 - Q1 Objectif atteint : patience +12. Raté de 0,5 point : −14. Raté de 2 points : −32.
 - Q2 Ordre obéi : +10 ; refusé : −8 ; pas d'ordre : 0. `orders`, `obeyed`, `refused` cohérents.
 - Q3 `present` avec insight : +15 ; sans : +3 ; appliqué avant la simulation.
-- Q4 Radar 75 : contrôle ; amende = 60 000 + radar × 500 ; astuces retirées et archivées ; radar 20 ; confiance −10 ; patience −15 ; spike +0,015 ; `sanction = true`. Radar 74 : signalements (patience −5, confiance −3). Radar 44 : rien.
+- Q4 Radar 75 : contrôle ; amende = 60 000 + radar × 500 (**75 000 € fixe depuis le 2026-09-29**, voir la règle 5) ; astuces retirées et archivées ; radar 20 ; confiance −10 ; patience −15 ; spike +0,015 ; `sanction = true`. Radar 74 : signalements (patience −5, confiance −3). Radar 44 : rien.
 - Q5 Confiance 35 : fil viral (spike +0,01, patience −5). Confiance 80 : article (press 3, patience +8). Les deux ne peuvent pas survenir le même trimestre.
 - Q6 L'événement concurrent n'apparaît qu'au trimestre d'index 1.
 - Q7 Confiance, radar et patience restent dans 0–100.
@@ -517,6 +518,7 @@ Chaque scénario part d'une page vierge, stockage local vidé, sauf mention cont
 - La révélation : sur les testeurs qui ont obéi, la page de décembre provoque une réaction.
 - Les applaudissements : un testeur qui a tenu se sent récompensé, pas puni par la difficulté.
 - Aucun texte ne sonne artificiel ; la relecture d'Antoine est un critère, pas une étape facultative.
+- **La durée** (ajouté le 2026-09-29, `CHANTIERS.md` C13) : chaque partie complète d'un testeur qui découvre le jeu est chronométrée. « Vingt minutes » reste si la médiane tombe entre 15 et 25 minutes ; sinon, le vrai chiffre arrondi remplace la mention dans l'encart (`content/game/entry.ts:65`) et dans les textes de lancement (`marketing/campaigns/game/`, `marketing/kit.md`).
 
 ---
 
@@ -780,6 +782,8 @@ Aucune donnée n'est jamais écrite : fermer la feature ne perd rien pour person
 
 **C · Le hub** `/{locale}/game` : les cinq zones, événement `game_entry_clicked/hub` sur le bouton du niveau.
 
+**E · L'accueil et le bandeau d'espace** (ajouté le 2026-09-29, `CHANTIERS.md` C15). La synthèse I + B a posé deux entrées que ce brief ne prévoyait pas : la bande « Le Tour en trois parties » de l'accueil (`SpaceStrip`) et les pastilles du bandeau d'espace en haut de chaque page (`SpaceBand`). **Tranché par Antoine** : à l'ouverture, chaque carte d'un espace ouvert devient un lien (la carte entière, sans bouton de plus), et chaque entrée est mesurée. Le jeu reçoit `game_entry_clicked/home_strip` depuis la bande et `game_entry_clicked/space_band` depuis le bandeau. Le moteur et le Tour ont la même source dans leur propre événement. À coder : `CHANTIERS.md` A7.9.
+
 **D · La boucle inverse**, déjà en 11.5 : en fin de niveau, « Où en est ta croissance ? » renvoie vers le Tour, pour ceux qui arrivent par le jeu. Le lien porte `?ref=` comme les autres entrées du Tour si un identifiant de résultat est connu, sinon rien.
 
 ### 13.4 La table pilier → niveau
@@ -853,12 +857,16 @@ Aucune transition de couleur au défilement. Le monde nuit rebinde chaque jeton 
 - **L'indication de ce qui suit** (« Trois mois vont passer… ») n'est dite qu'une fois, par l'en-tête de la main, à toutes les largeurs. La barre d'action n'a pas de phrase à elle.
 - **Aucune indication « Choisis deux actions. » seule** : le brief ne la prévoyait à aucun écran, la clé a été retirée. Les trois indications restantes sont « le DG parle », « choisis-en deux » et « trois mois vont passer ».
 
+- **Les noms de zones portent les deux noms**, « Retention — S'ils reviennent » (décision du 2026-09-24, `content/game/hub.ts`). Le nom d'étape vient du Tour, non traduit ; la question vient du prototype. **Confirmé par Antoine le 2026-09-29 (`CHANTIERS.md` C12)** : c'est le pont avec le Tour, plus la voix du jeu.
+
 ### 15.4 L'encart sur la page de résultat
 
 - **Condition** : l'accès est ouvert, le board n'est pas « level », et **l'un des piliers du goulot** a un niveau ouvert dans `GAME_LEVELS_BY_PILLAR`. Pour un goulot partagé, ce n'est donc pas seulement le premier du groupe dans l'ordre AARRR : si la rétention fait partie du lot qui freine, l'encart s'affiche. Lire `pillars[0]` seul aurait fait dépendre la décision de l'ordre de déclaration des piliers plutôt que des chiffres.
+  **Confirmée par Antoine le 2026-09-29 (`CHANTIERS.md` C11), avec une question pour plus tard.** Quand plusieurs niveaux existeront, `gameEntryFor` montre une seule carte : le niveau de la première étape du groupe, de la plus faible à la moins faible. Deux conséquences. D'abord, avec les cinq niveaux, l'encart paraît sur tout résultat qui n'est pas « à niveau » : il devient une rubrique fixe, « le côté obscur de ton étape ». Ensuite, à égalité entre deux étapes qui ont chacune un niveau, l'ordre AARRR choisit, soit précisément l'artefact que cette règle écartait. **Déclencheur : l'ouverture d'un deuxième niveau** (`CHANTIERS.md` section E). La reco, à confirmer ce jour-là : pour un goulot partagé, une seule carte qui propose le niveau de chaque étape du groupe.
 - **Place** : sur desktop, dans la colonne de droite, entre « Là où tu perds du temps » et la rangée de boutons (la carte de partage est dans l'autre colonne, donc jamais sous l'encart) ; sur mobile, juste après la carte de partage. L'ordre de lecture des quatre variantes de la page est épinglé par un test.
+  **Changée par Antoine le 2026-09-29 (`CHANTIERS.md` C10), captures à l'appui : sur desktop, l'encart passe sous la rangée de boutons**, dans la même colonne, comme sur mobile. Mesuré sur `/r/sample` en vue visiteur à 1 280 px : l'encart faisait descendre « Fais ton propre Tour » de 350 px (de 961 à 1 311), et posait « Jouer le niveau » juste au-dessus du bouton rouge. Le visiteur qui fait son propre Tour est le cœur de la boucle `?ref=`, et le jeu reste une entrée secondaire. L'attente d'« un mois de chiffres » (J6, 13.3) a été écartée : sous 50 soumissions, un mois ne dit rien. La règle de 13.3 (« l'encart descend sous Refaire le Tour ») est donc appliquée d'avance. À coder : `CHANTIERS.md` A7.7.
 - **Visiteur ou propriétaire** : même règle ; un visiteur arrivé par un lien partagé à goulot rétention voit l'encart.
-- La mention « vingt minutes, gratuit » est une promesse à mesurer en recette (7.3) avant ouverture.
+- La mention « vingt minutes, gratuit » est une promesse à mesurer en recette (7.3) avant ouverture. **Méthode tranchée par Antoine le 2026-09-29 (`CHANTIERS.md` C13)** : on chronomètre les parties des testeurs de la recette, et on garde la mention entre 15 et 25 minutes de médiane (voir 7.3).
 
 ### 15.5 Les images de partage
 

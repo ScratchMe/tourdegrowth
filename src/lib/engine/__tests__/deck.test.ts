@@ -38,7 +38,9 @@ describe("§9.2 — presence, default inclusion, order", () => {
       ["unit-economics", true, true, 4],
       ["mirror", false, false, null],
       ["ask", true, true, 5],
+      // The appendix runs over two pages at 18px (A2.1, 2026-09-29).
       ["annex", true, true, 6],
+      ["annex:2", true, true, 7],
     ]);
     expect(model.dataPill).toEqual({ measured: 11, approximate: 2, missing: 3 });
   });
@@ -70,6 +72,7 @@ describe("§9.2 — presence, default inclusion, order", () => {
       ["unit-economics", 3],
       ["ask", 4],
       ["annex", 5],
+      ["annex:2", 6],
     ]);
     // GRR and NRR (2026-09-26) are figures of that slide too: without the CAC AND without the churn, it has nothing to show.
     expect(slide(deck(withEntry(exampleState(), "acq.cac", undefined)), "unit-economics").present).toBe(true);
@@ -249,7 +252,7 @@ describe("deckMarkdown", () => {
   it("the kicker, the data pill, each included title in order, lines and notes", () => {
     const md = deckMarkdown(deck(exampleState()), FR.strings);
     const titles = md.split("\n").filter((l) => l.startsWith("## "));
-    expect(titles.map((t) => t.slice(0, 5))).toEqual(["## 1.", "## 2.", "## 3.", "## 4.", "## 5.", "## 6."]);
+    expect(titles.map((t) => t.slice(0, 5))).toEqual(["## 1.", "## 2.", "## 3.", "## 4.", "## 5.", "## 6.", "## 7."]);
     expect(titles[1]).toContain("**~600 € de MRR nouveau**");
     expect(md).toContain("Données\u00a0: mesurées 11 · approximatives 2 · introuvables 3");
     expect(md).toContain("> ");
@@ -396,7 +399,7 @@ describe("the what-if slides (2026-09-26)", () => {
 
   it("one slide per lever moved, after the leak, in lever order; « scenario » only from two", () => {
     expect(ids(deck(exampleState())).some((id) => id.startsWith("whatif:") || id === "scenario")).toBe(false);
-    expect(ids(deck(withWhatIf({ "act.rate": 24 })))).toEqual(["peloton", "leak", "whatif:act.rate", "visibility", "unit-economics", "mirror", "ask", "annex"]);
+    expect(ids(deck(withWhatIf({ "act.rate": 24 })))).toEqual(["peloton", "leak", "whatif:act.rate", "visibility", "unit-economics", "mirror", "ask", "annex", "annex:2"]);
     // Typed in the reverse order: the deck still follows the levers' order.
     const two = deck(withWhatIf({ "ret.logo-churn": 1.5, "act.rate": 24 }));
     expect(ids(two).slice(1, 5)).toEqual(["leak", "whatif:act.rate", "whatif:ret.logo-churn", "scenario"]);

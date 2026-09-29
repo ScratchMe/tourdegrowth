@@ -92,6 +92,10 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
       // mean the dashboard reads them as flat zero, with no error.
       "retake_started",
       "landing_return",
+      // CHANTIERS.md A3 — the share that carried the picture, and the badge.
+      "share/neutral/image",
+      "share/roast/image",
+      "badge_copied",
     ]) {
       expect(requestedPaths).toContain(path);
     }
@@ -133,6 +137,29 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
     expect(stats?.shares).toBe(8);
     expect(stats?.deepDiveStarted).toBe(9);
     expect(stats?.deepDiveCompleted).toBe(6);
+  });
+
+  it("counts a share that carried the picture as a share, and the badge on its own line (A3)", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({
+        total: 0,
+        more: false,
+        hits: [
+          { path: "submission_completed/neutral", count: 10, event: true },
+          { path: "share/neutral/native", count: 2, event: true },
+          { path: "share/neutral/image", count: 3, event: true },
+          { path: "share/roast/image", count: 1, event: true },
+          { path: "badge_copied", count: 4, event: true },
+        ],
+      }),
+    );
+
+    const { stats } = await fetchFunnelWindow("2024-01-01T00:00:00Z", "All-time");
+
+    expect(stats?.shares).toBe(6);
+    expect(stats?.badgeCopied).toBe(4);
+    // Not a value action: the ratio's definition (REVIEW-03.md A4) is unchanged — 6 shares over 10 results.
+    expect(stats?.valueActionsPerResult).toBeCloseTo(0.6, 10);
   });
 
   it("counts value actions per result across all four ways a result can produce one", async () => {

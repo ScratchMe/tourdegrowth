@@ -112,6 +112,11 @@ Target 390px. Nothing may scroll horizontally at 360px.
 - A figure is `StatTile`; a series over time is `Sparkline`; a value against a
   target is `BulletChart`; any chart sits in a `ChartFrame`, whose data opens
   as a `DataTable`. Five tiles and a chart are still flat, on one surface.
+- A count out of 100 (the funnel's « peloton ») is a `DotGrid`: ten dots to a
+  row, a solid dot counted, a hatched one estimated, an outline not counted,
+  and « not measured » a whole hatched panel with a « ? » — never 100 empty
+  dots, which read as nobody. Its legend is a `DotLegend`, drawn by the same
+  rules. `size="slide"` is the same grid on a 1920px slide.
 - The five pillar scores as a shape are `StageProfile` (« Profil du
   parcours » / "Route profile") — one climb per stage,
   as high as the points it is missing, the named stage flagged « HC ». It
@@ -241,9 +246,11 @@ things.
 tabular mono figures, opt-in sorting announced with `aria-sort`), and it is
 also the text equivalent of every chart. `ChartFrame` puts it behind "See the
 data" under the chart, with a title that states the insight ("Churn fell under
-target in October", not "Monthly churn"). `StatTile`, `Sparkline` and
-`BulletChart` are drawn by hand, in ink with one red highlight; there is no
-chart library.
+target in October", not "Monthly churn"). `StatTile`, `Sparkline`,
+`BulletChart` and `DotGrid` are drawn by hand, in ink with one red highlight;
+there is no chart library, and no categorical or sequential palette: a series
+is named, a count is a shape (the DS v3 scales went unused and were removed on
+2026-09-29).
 
 The honesty rules are the same as `Bottleneck`'s — never draw more than the
 numbers support:
@@ -261,9 +268,9 @@ numbers support:
   (a hollow end marker, a pointed bar end).
 - **A reference line is labelled.** The dashed red objective always carries
   its words; red alone never speaks.
-- The five AARRR pillars are ordered stages: they are named, not coloured. The
-  categorical `--viz-cat-*` palette is for nominal series only, and every
-  series also gets a dash pattern and a direct label.
+- The five AARRR pillars are ordered stages: they are named, not coloured.
+  There is no categorical or sequential palette: a series is told apart by a
+  dash pattern and a direct label, a count by a shape.
 
 ## What is not in here
 

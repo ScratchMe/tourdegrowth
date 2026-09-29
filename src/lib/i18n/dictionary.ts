@@ -558,6 +558,20 @@ export const UI_STRINGS = {
        Relu et validé par Antoine (2026-09-11). */
     shareCardCaption: { en: "What a shared link shows", fr: "Ce que montre un lien partagé" },
     shareCardSave: { en: "Save image", fr: "Enregistrer l'image" },
+    /* CHANTIERS.md A3.1 (2026-09-29): the README badge, offered to the owner
+       only, under the share card. The badge itself reads « Tour de Growth ·
+       74/100 » in both languages (lib/og/badge.ts): a name and a number. */
+    // TODO: à relire (convention 6).
+    badgeCaption: { en: "In a README", fr: "Dans un README" },
+    // TODO: à relire (convention 6).
+    badgeLead: {
+      en: "A badge that links back to this result. Paste this line into your project's README.",
+      fr: "Un badge qui renvoie vers ce résultat. Colle cette ligne dans le README de ton projet.",
+    },
+    // TODO: à relire (convention 6).
+    badgeCopy: { en: "Copy the Markdown", fr: "Copier le Markdown" },
+    // TODO: à relire (convention 6).
+    badgeCopied: { en: "Markdown copied", fr: "Markdown copié" },
     /* Alt text for that image. `{total}` and `{pillar}` are replaced in code —
        an alt that repeated the caption would tell a screen-reader user nothing
        about THIS result. Relu et validé par Antoine (2026-09-11). */

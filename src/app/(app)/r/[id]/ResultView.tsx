@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { SiteFooter } from "@/components/brand/SiteFooter";
 import { LocaleSwitcher } from "@/components/brand/LocaleSwitcher";
@@ -43,6 +43,7 @@ import type { DeepDiveView } from "@/lib/submissions/types";
 import { SEGMENT_MODELS, SEGMENT_STAGES } from "@/content/segments";
 import type { Benchmark } from "@/lib/submissions/benchmark";
 import type { SegmentAnswers } from "@/lib/submissions/segment";
+import { BadgeSnippet } from "./BadgeSnippet";
 import { ScoreBreakdown, type BreakdownData } from "./ScoreBreakdown";
 import styles from "./ResultView.module.css";
 
@@ -56,6 +57,12 @@ interface ResultViewProps {
   id?: string;
   /** The share image's versioned address, minted on the server (`lib/og/share-image.ts`) so the CDN can cache it as immutable. */
   shareImageSrc: string;
+  /**
+   * The README badge (CHANTIERS.md A3.1): its versioned address, its alt and
+   * the Markdown line, minted on the server (`lib/og/badge.ts`). Shown to the
+   * owner only. Absent on the sample, which has no one to own it.
+   */
+  badge?: { src: string; alt: string; markdown: string } | null;
   total: number;
   pillars: { pillar: Pillar; score: number }[];
   weakestPillar: Pillar;
@@ -120,6 +127,7 @@ function benchmarkLine(benchmark: Benchmark, segment: SegmentAnswers | null, loc
 export function ResultView({
   id,
   shareImageSrc,
+  badge = null,
   total,
   pillars,
   weakestPillar,
@@ -159,6 +167,46 @@ export function ResultView({
     setOwnAnswers(stored?.answers ?? null);
     setProgress(stored ? progressionFor(loadStoredResults(), id) : null);
   }, [id]);
+  /**
+   * The share image as a file, for `navigator.share({ files })` — CHANTIERS.md
+   * A3.2: on a phone, a picture shared into a chat opens where a bare link
+   * gets skimmed. Fetched when the share block comes near the screen, the
+   * moment its own lazy `<img>` loads the same immutable address, so the fetch
+   * is a cache hit and a reader who never scrolls there never pays for it.
+   * Held ready rather than fetched on the tap: the sheet must open inside the
+   * click, and an `await fetch` between the two loses the user activation
+   * on Safari, which then refuses the sheet.
+   */
+  const shareSlotRef = useRef<HTMLDivElement | null>(null);
+  const shareFileRef = useRef<File | null>(null);
+  useEffect(() => {
+    shareFileRef.current = null;
+    const slot = shareSlotRef.current;
+    if (!slot || typeof navigator.canShare !== "function" || typeof IntersectionObserver === "undefined") return;
+    let cancelled = false;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        observer.disconnect();
+        fetch(shareImageSrc)
+          .then((response) => (response.ok ? response.blob() : null))
+          .then((blob) => {
+            if (!blob || cancelled) return;
+            const file = new File([blob], `tour-de-growth-${total}.png`, { type: "image/png" });
+            if (navigator.canShare({ files: [file] })) shareFileRef.current = file;
+          })
+          .catch(() => {
+            // No file, no harm: the share falls back to the link.
+          });
+      },
+      { rootMargin: "400px" },
+    );
+    observer.observe(slot);
+    return () => {
+      cancelled = true;
+      observer.disconnect();
+    };
+  }, [shareImageSrc, total]);
   const roast = tone === "roast";
   const verdict = verdicts[tone];
   const deepVerdict = deepDive ? deepDive.verdicts[tone] : null;
@@ -238,6 +286,14 @@ export function ResultView({
     const text = shareText(locale, total, bottleneckPrimary?.pillar ?? null);
 
     try {
+      // The picture itself where the platform takes a file (A3.2). A target
+      // that receives files often drops `url`, so the link rides in the text.
+      const file = shareFileRef.current;
+      if (file && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: "Tour de Growth", text: `${text} ${url}` });
+        trackEvent("share", `${tone}/image`);
+        return;
+      }
       if (navigator.share) {
         await navigator.share({ url, title: "Tour de Growth", text });
         trackEvent("share", `${tone}/native`); // SPEC.md §8: one custom event per share
@@ -652,22 +708,34 @@ export function ResultView({
               surface of it, and the one raised card on this screen is
               already spent on the score. It absorbs "Share this result",
               which leaves the CTA row below. */}
-          <ShareCard
-            className={styles.slotShare}
-            data-testid="share-card"
-            src={shareImageSrc}
-            alt={shareImageAlt}
-            caption={tc(t.shareCardCaption, locale)}
-            /* Same control, same test id as when it lived in the CTA row —
-               the specs that cover cancelled shares and the desktop
-               clipboard fallback are about behaviour that did not change. */
-            shareTestId="share-button"
-            shareLabel={copied ? tc(t.ctaShareCopied, locale) : tc(t.ctaShareResult, locale)}
-            saveLabel={tc(t.shareCardSave, locale)}
-            onShare={handleShare}
-            saveHref={shareImageSrc}
-            saveFileName={`tour-de-growth-${total}.png`}
-          />
+          <div className={styles.slotShare} ref={shareSlotRef}>
+            <ShareCard
+              data-testid="share-card"
+              src={shareImageSrc}
+              alt={shareImageAlt}
+              caption={tc(t.shareCardCaption, locale)}
+              /* Same control, same test id as when it lived in the CTA row —
+                 the specs that cover cancelled shares and the desktop
+                 clipboard fallback are about behaviour that did not change. */
+              shareTestId="share-button"
+              shareLabel={copied ? tc(t.ctaShareCopied, locale) : tc(t.ctaShareResult, locale)}
+              saveLabel={tc(t.shareCardSave, locale)}
+              onShare={handleShare}
+              saveHref={shareImageSrc}
+              saveFileName={`tour-de-growth-${total}.png`}
+            />
+            {isOwner && badge ? (
+              <BadgeSnippet
+                src={badge.src}
+                alt={badge.alt}
+                markdown={badge.markdown}
+                caption={tc(t.badgeCaption, locale)}
+                lead={tc(t.badgeLead, locale)}
+                copyLabel={tc(t.badgeCopy, locale)}
+                copiedLabel={tc(t.badgeCopied, locale)}
+              />
+            ) : null}
+          </div>
         </div>
       </main>
 

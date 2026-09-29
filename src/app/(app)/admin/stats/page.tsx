@@ -90,6 +90,9 @@ function FunnelBreakdown({ window }: { window: FunnelWindow }) {
             shares)
           </li>
           <li>
+            README badge copied — {stats.badgeCopied} ({ratio(stats.badgeCopied, stats.submissionsCompleted)} of results)
+          </li>
+          <li>
             Deep dive started — {stats.deepDiveStarted} (
             {ratio(stats.deepDiveStarted, stats.submissionsCompleted)} of results)
           </li>

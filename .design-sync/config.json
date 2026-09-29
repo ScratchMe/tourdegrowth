@@ -87,6 +87,8 @@
     "ToneToggle": "src/components/result/ToneToggle.tsx",
     "BulletChart": "src/components/viz/BulletChart.tsx",
     "ChartFrame": "src/components/viz/ChartFrame.tsx",
+    "DotGrid": "src/components/viz/DotGrid.tsx",
+    "DotLegend": "src/components/viz/DotGrid.tsx",
     "Sparkline": "src/components/viz/Sparkline.tsx",
     "StageProfile": "src/components/viz/StageProfile.tsx",
     "StatTile": "src/components/viz/StatTile.tsx"
@@ -102,6 +104,9 @@
       "cardMode": "column"
     },
     "Sparkline": {
+      "cardMode": "column"
+    },
+    "DotGrid": {
       "cardMode": "column"
     },
     "GameEntry": {

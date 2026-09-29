@@ -251,73 +251,9 @@
   min-height: 2.4em;
 }
 
-/* No aspect ratio: 100 dots are a square, what the what-ifs add grows it row by row. */
+/* The grids are viz/DotGrid's (design audit S-10, 2026-09-29); this only places them. */
 .grid {
-  display: grid;
-  grid-template-columns: repeat(10, minmax(0, 1fr));
-  gap: 4px;
-  width: 100%;
-  max-width: 190px;
-}
-
-.dot {
-  display: block;
-  border-radius: var(--radius-round);
-  aspect-ratio: 1;
-}
-
-.filled {
-  background: var(--viz-ink);
-}
-
-.range {
-  background: var(--viz-unknown-fill);
-  box-shadow: inset 0 0 0 1.5px var(--viz-axis);
-}
-
-/* What the what-ifs add: an ink ring with an ink centre, told apart from the
-   solid dots already there by its shape. On the hatch when it is estimated. */
-.gained {
-  background: radial-gradient(circle, var(--viz-ink) 0 30%, transparent 32%);
-  box-shadow: inset 0 0 0 2px var(--viz-ink);
-}
-
-.gainedRange {
-  background: radial-gradient(circle, var(--viz-ink) 0 30%, transparent 32%), var(--viz-unknown-fill);
-  box-shadow: inset 0 0 0 2px var(--viz-ink);
-}
-
-/* What today had and the projection loses: an ink ring struck through, never a gap that reads as nobody. */
-.lost {
-  background: linear-gradient(135deg, transparent 0 42%, var(--viz-ink) 42% 58%, transparent 58%);
-  box-shadow: inset 0 0 0 2px var(--viz-ink);
-}
-
-.empty {
-  box-shadow: inset 0 0 0 1.5px var(--viz-axis);
-}
-
-.unknownGrid {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  aspect-ratio: 1;
-  background: var(--viz-unknown-fill);
-  border: var(--border-dashed);
-  border-radius: var(--radius-panel);
-}
-
-.unknownMark {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 38%;
-  aspect-ratio: 1;
-  border-radius: var(--radius-round);
-  background: var(--surface-card);
-  border: var(--border-solid);
-  font: var(--chart-value-xl);
-  color: var(--text-body);
+  align-self: start;
 }
 
 .detail {
@@ -339,30 +275,6 @@
   gap: var(--space-3);
   padding-top: var(--space-5);
   border-top: var(--border-rule);
-}
-
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3) var(--space-8);
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  font: var(--meta-xs);
-  color: var(--text-muted);
-}
-
-.legend li {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.swatch {
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  border-radius: var(--radius-round);
 }
 
 /* --- What each lever brings --------------------------------------------- */
@@ -420,9 +332,6 @@
 
   .column .grid {
     grid-area: grid;
-    max-width: 118px;
-    gap: 2px;
-    align-self: start;
   }
 
   .column .numeral {
@@ -454,16 +363,5 @@
     font: var(--label-button);
     text-transform: uppercase;
     letter-spacing: var(--meta-tracking);
-  }
-
-  .range,
-  .empty {
-    box-shadow: inset 0 0 0 1px var(--viz-axis);
-  }
-
-  .gained,
-  .lost,
-  .gainedRange {
-    box-shadow: inset 0 0 0 1.5px var(--viz-ink);
   }
 }

@@ -12,10 +12,12 @@ import { stallSentence } from "@/lib/submissions/stall-sentence";
 import { buildQuickVerdicts, toDeepDiveView, toPillarViews } from "@/lib/submissions/view-model";
 import { primaryBottleneck, resolveBottleneck } from "@/lib/scoring/bottleneck";
 import { resolveNextMove } from "@/lib/scoring/next-move";
+import { badgeAlt, badgeMarkdown, badgePath } from "@/lib/og/badge";
 import { sampleShareImageModel, SHARE_IMAGE_ALT, shareImageModel, shareImageSrc } from "@/lib/og/share-image";
 import { QUESTIONS } from "@/content/copy-library";
 import type { BreakdownData } from "./ScoreBreakdown";
 import type { Locale } from "@/lib/i18n/locale";
+import type { Tone } from "@/lib/quiz/tone";
 import type { Pillar } from "@/lib/scoring/pillars";
 import { GAME_PREVIEW_COOKIE, resolveGameAccess, type GameAccess } from "@/lib/game/access";
 import { hasOwnerPreview } from "@/lib/owner-preview";
@@ -24,6 +26,18 @@ import { ResultView } from "./ResultView";
 
 interface PageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ tone?: string | string[] }>;
+}
+
+/**
+ * `/r/sample?tone=roast` — the canonical roast example (CHANTIERS.md A3.3,
+ * 2026-09-29): the fixed sample, opened on its roast verdict, with the roast
+ * share card in the page and in `og:image`. Only the sample reads it: a real
+ * result shows the tone its author chose. Anything else than `roast` is the
+ * neutral sample, so a mangled link still lands on a page.
+ */
+async function sampleTone(searchParams: PageProps["searchParams"]): Promise<Tone> {
+  return (await searchParams).tone === "roast" ? "roast" : "neutral";
 }
 
 /**
@@ -94,19 +108,20 @@ function resultMetadata(total: number, stalling: Pillar | null, locale: Locale, 
   };
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const { id } = await params;
   rejectImplausibleId(id);
 
   if (id === "sample") {
     // The sample's share image is fixed to English (`sampleShareImageModel`),
     // so its preview text matches rather than contradicting the picture.
+    // `?tone=roast` declares the roast frame: the roast example's own card.
     return resultMetadata(
       SAMPLE_RESULT.total,
       primaryBottleneck(resolveBottleneck(SAMPLE_RESULT.pillars)),
       "en",
       true,
-      shareImageSrc("sample", sampleShareImageModel()),
+      shareImageSrc("sample", sampleShareImageModel("en", await sampleTone(searchParams))),
     );
   }
 
@@ -177,7 +192,7 @@ async function readGameAccess(): Promise<GameAccess> {
 
 // `/r/sample` is the fixed, hard-coded "See a sample result" screen
 // (SPEC.md §12) — never a real Firestore lookup, never recalculated.
-export default async function ResultPage({ params }: PageProps) {
+export default async function ResultPage({ params, searchParams }: PageProps) {
   const { id } = await params;
   rejectImplausibleId(id);
 
@@ -188,6 +203,7 @@ export default async function ResultPage({ params }: PageProps) {
     // paint, without needing a client fetch just for demo copy.
     const locale = await resolveRequestLocale();
     const sampleBottleneck = resolveBottleneck(SAMPLE_RESULT.pillars);
+    const tone = await sampleTone(searchParams);
 
     return (
       <ResultView
@@ -199,8 +215,8 @@ export default async function ResultPage({ params }: PageProps) {
         nextMove={getSampleNextMove(locale)}
         // The picture IN the page follows the reader (copy review v1, DS
         // critique L-5); the one declared to crawlers above stays English.
-        shareImageSrc={shareImageSrc("sample", sampleShareImageModel(locale))}
-        initialTone="neutral"
+        shareImageSrc={shareImageSrc("sample", sampleShareImageModel(locale, tone))}
+        initialTone={tone}
         isSample
         // The sample's own board has a clear retention bottleneck (8 against
         // 12 and up), so it is where the card is seen before any real result
@@ -271,6 +287,10 @@ export default async function ResultPage({ params }: PageProps) {
       // the READER's language, like the rest of this page (copy review v1,
       // DS critique L-5) — `og:image`, above, stays in the author's.
       shareImageSrc={shareImageSrc(submission.id, shareImageModel(submission, locale))}
+      // The README badge (CHANTIERS.md A3.1): its versioned address and the
+      // Markdown line, minted here for the same reason as the share image.
+      // Shown to the owner only; the view decides, once it knows.
+      badge={{ src: badgePath(submission.id, submission.total), alt: badgeAlt(submission.total), markdown: badgeMarkdown(submission.id, submission.total) }}
       initialTone={submission.tone}
       breakdown={buildBreakdownData(locale)}
       deepDive={deepDive}

@@ -66,6 +66,15 @@ en trois secondes.** Deux lectures possibles :
 la promotion, elle, ne le porte jamais — aucun post, aucun compte, aucun
 pitch ne le nomme ni ne renvoie vers le CV.
 
+**Précisé par Antoine le 2026-09-29 (`CHANTIERS.md` C22) : c'est une question
+de calendrier, pas d'anonymat.** Son nom sera utilisé. Pour l'instant, la
+promotion reste discrète, sans LinkedIn et sans lancement en grande pompe,
+jusqu'à ce qu'il décide de lever cette réserve. **La règle « jamais le nom,
+jamais LinkedIn » se lit donc « pas maintenant ».** À « qui est derrière ? »,
+la réponse le nomme simplement. Le jour où il lève la réserve, LinkedIn sort
+d'`EXCLUDED` dans `scripts/utm-channels.mjs`, avec son test : c'est sa
+décision, pas celle d'une session.
+
 ---
 
 ## 1. La ligne de départ, mesurée là où c'était possible
@@ -234,6 +243,11 @@ mois.*
 *Ces chantiers ne demandent pas d'audience : ils font mieux convertir et
 mieux repartager celle qui vient. Chacun est une PR avec ses specs, comme
 d'habitude.*
+
+**3.1 à 3.3 sont livrés le 2026-09-29** (lot A3 de `CHANTIERS.md`, `JOURNAL.md`).
+Le badge vit sous une adresse versionnée, `/r/<id>/badge/<jeton>.svg`, et non
+sous `/r/<id>/badge.svg` : c'est ce qui permet au CDN de le garder un an.
+Reste une question pour 3.3, C24 : faut-il que la landing mène à l'exemple roast ?
 
 | # | Action | Pourquoi |
 |---|---|---|

@@ -2,7 +2,8 @@ import { readFileSync } from "node:fs";
 import AxeBuilder from "@axe-core/playwright";
 import type { Page, Request } from "@playwright/test";
 import { QUESTIONS } from "../src/content/copy-library";
-import { exampleState, tourResult } from "../src/lib/engine/__tests__/fixtures";
+import { METRIC_SHAPES } from "../src/lib/engine/catalog-shape";
+import { exampleState, missing, tourResult } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
@@ -33,6 +34,12 @@ test.beforeEach(async ({ context }) => {
 
 const COMPANY_CANARY = "CANARY-CO-7Q3X";
 const ASK_CANARY = "CANARY-ASK-9K2W";
+
+/** A team's own definition at its 200-character limit (TEXT_LIMITS.definitionNote), in words a team would write. */
+const LONG_DEFINITION = {
+  fr: "Un compte est actif quand au moins deux personnes de l'équipe ont modifié un projet partagé dans les sept jours qui suivent l'inscription, hors comptes de test, démo et partenaires revendeurs.",
+  en: "An account counts as active once at least two people on the team have edited a shared project within seven days of signing up, test accounts, demos and reseller partners excluded, as agreed today.",
+};
 
 /** Every answer given, so `tdg.results.v1` accepts it and the mirror has a verdict per bridge. */
 const TOUR = tourResult(Object.fromEntries(QUESTIONS.map((q, i) => [q.id, (i % 3) as 0 | 1 | 2])));
@@ -110,14 +117,16 @@ for (const locale of ["fr", "en"] as const) {
       await expect(page.getByTestId("deck-show-credit")).toBeChecked();
       // §9.2: the slides in the model's order, the mirror offered among them.
       const order = await page.locator('[data-print="thumb"]').evaluateAll((els) => els.map((el) => el.getAttribute("data-testid")));
+      // The appendix runs over two pages at 18px (A2.1): `annex`, then `annex:2`.
       expect(order).toEqual(
-        ["peloton", "leak", "visibility", "unit-economics", "mirror", "ask", "annex"].map((id) => `deck-thumb-${id}`),
+        ["peloton", "leak", "visibility", "unit-economics", "mirror", "ask", "annex", "annex:2"].map((id) => `deck-thumb-${id}`),
       );
       // Every included slide is numbered i/N, N counting only what will print; the excluded mirror has no number.
       const n = await includedCount(page);
-      expect(n).toBe(6);
+      expect(n).toBe(7);
       await expect(page.getByTestId("slide-page-peloton")).toHaveText(`1/${n}`);
-      await expect(page.getByTestId("slide-page-annex")).toHaveText(`${n}/${n}`);
+      await expect(page.getByTestId("slide-page-annex")).toHaveText(`${n - 1}/${n}`);
+      await expect(page.getByTestId("slide-page-annex:2")).toHaveText(`${n}/${n}`);
       await expect(page.getByTestId("slide-page-mirror")).toHaveCount(0);
       // The title carries the number (§9.1): 18 of 100 reach first value, and the peloton says so in its column.
       await expect(page.getByTestId("slide-peloton").locator("h3")).toContainText("18");
@@ -164,8 +173,8 @@ for (const locale of ["fr", "en"] as const) {
           return { id: el.getAttribute("data-slide"), title, lines: lines.length };
         }),
       );
-      // Non-vacuity: the six slides §6.0 includes, not an empty list that passes by being empty.
-      expect(slides.map((s) => s.id)).toEqual(["peloton", "leak", "visibility", "unit-economics", "ask", "annex"]);
+      // Non-vacuity: the seven slides §6.0 includes, not an empty list that passes by being empty.
+      expect(slides.map((s) => s.id)).toEqual(["peloton", "leak", "visibility", "unit-economics", "ask", "annex", "annex:2"]);
       for (const s of slides) {
         expect(s.title, `${s.id} has no title`).not.toBe("");
         expect(s.lines, `${s.id} has an empty body`).toBeGreaterThan(0);
@@ -191,7 +200,7 @@ for (const locale of ["fr", "en"] as const) {
       const texts = await page.locator("[data-slide]").evaluateAll((els) =>
         els.map((el) => [el.getAttribute("data-slide"), (el as HTMLElement).innerText] as const),
       );
-      expect(texts.map(([id]) => id)).toEqual(["peloton", "leak", "visibility", "unit-economics", "mirror", "ask", "annex"]);
+      expect(texts.map(([id]) => id)).toEqual(["peloton", "leak", "visibility", "unit-economics", "mirror", "ask", "annex", "annex:2"]);
       const allowed = /^[\n\t -~ -ÿ–—’«»…€·×÷±]*$/u;
       for (const [id, text] of texts) {
         expect(text.length, `${id} is empty`).toBeGreaterThan(80);
@@ -209,7 +218,8 @@ for (const locale of ["fr", "en"] as const) {
      * PDF, without an error anywhere. Measured on the rendered slides — the
      * leak's list of other candidates, the visibility slide's last card and
      * the fifteen-row appendix all ran into the footer before their layouts
-     * were tightened — so this is the check that keeps them tight.
+     * were tightened — so this is the check that keeps them tight. The
+     * appendix is paged since A2.1: each of its pages is checked here too.
      */
     test("every slide's body ends above its footer", async ({ page }) => {
       await openDeck(page, locale);
@@ -227,6 +237,80 @@ for (const locale of ["fr", "en"] as const) {
         }),
       );
       expect(clashes).toEqual([]);
+    });
+
+    /**
+     * Design audit S-8 (A2.1, 2026-09-29): a slide is projected at 1920px, and
+     * nothing on it is set under 18px — the slides had 14px table heads and a
+     * 15px appendix. Measured on what renders, every element that carries text
+     * of its own, so a component a slide borrows can't bring a smaller size in.
+     * Non-vacuity: against the build of `main` before A2.1 this fails on the
+     * appendix (15px) in both languages.
+     */
+    test("nothing on a slide is set under 18px", async ({ page }) => {
+      await openDeck(page, locale);
+      await page.getByTestId("deck-include-mirror").check();
+      const sizes = await page.locator("[data-slide]").evaluateAll((slides) =>
+        slides.flatMap((slide) =>
+          [...slide.querySelectorAll("*")]
+            .filter((el) => [...el.childNodes].some((n) => n.nodeType === Node.TEXT_NODE && n.textContent!.trim()))
+            .map((el) => ({ where: `${slide.getAttribute("data-slide")}: ${el.textContent!.trim().slice(0, 30)}`, px: parseFloat(getComputedStyle(el).fontSize) })),
+        ),
+      );
+      // Non-vacuity: every slide's text, not a handful of elements.
+      expect(sizes.length).toBeGreaterThan(200);
+      expect(sizes.filter((s) => s.px < 18).map((s) => `${s.where} (${s.px}px)`)).toEqual([]);
+    });
+
+    /**
+     * The appendix is cut into pages by the model's estimate of each row
+     * (lib/engine/annex-pages.ts), never set smaller. The worst case a team
+     * can type — every definition at its 200-character limit — only adds
+     * pages, each titled « (i/n) », each ending above its footer, and a
+     * continuation page exports like any other slide.
+     */
+    test("the appendix: every definition at its limit adds pages that still fit, and each one exports", async ({ page }) => {
+      // Every number of the catalogue gets the definition, the ones nobody found included.
+      const store = exampleStore();
+      const metrics = store.state.snapshots[store.state.snapshots.length - 1]!.metrics;
+      for (const { id } of METRIC_SHAPES) metrics[id] = { ...(metrics[id] ?? missing("not-tracked", "sprint")), definitionNote: LONG_DEFINITION[locale] };
+      await page.addInitScript((seeded) => {
+        if (sessionStorage.getItem("e2e-engine-seeded")) return;
+        localStorage.setItem("tdg.engine.v1", JSON.stringify(seeded));
+        sessionStorage.setItem("e2e-engine-seeded", "1");
+      }, store);
+      await page.goto(`/${locale}/aarrr-funnel-template`);
+      await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
+      await page.getByTestId("engine-open-deck").click();
+      await expect(page.getByTestId("engine-deck")).toBeVisible();
+      await page.evaluate(() => document.fonts.ready.then(() => undefined));
+
+      const pages = await page.locator('[data-slide="annex"], [data-slide^="annex:"]').evaluateAll((slides) =>
+        slides.map((slide) => {
+          const box = slide.getBoundingClientRect();
+          const scale = box.width / 1920;
+          const foot = slide.querySelector("footer")!;
+          const footTop = (foot.getBoundingClientRect().top - box.top) / scale;
+          const rows = [...slide.querySelectorAll("tbody tr")];
+          const deepest = Math.max(...rows.map((r) => (r.getBoundingClientRect().bottom - box.top) / scale));
+          return { id: slide.getAttribute("data-slide")!, title: slide.querySelector("h3")!.textContent!.trim(), rows: rows.length, definitions: slide.querySelectorAll('[class*="annexDefinition"]').length, deepest: Math.round(deepest), footTop: Math.round(footTop) };
+        }),
+      );
+      // More pages than the example's two, every row still there, each with its definition.
+      expect(pages.length).toBeGreaterThan(2);
+      const rows = pages.reduce((sum, p) => sum + p.rows, 0);
+      expect(rows).toBe(METRIC_SHAPES.length);
+      expect(pages.reduce((sum, p) => sum + p.definitions, 0)).toBe(rows);
+      pages.forEach((p, i) => {
+        expect(p.id).toBe(i === 0 ? "annex" : `annex:${i + 1}`);
+        expect(p.title).toContain(`(${i + 1}/${pages.length})`);
+        expect(p.deepest, `${p.id} runs under its footer`).toBeLessThanOrEqual(p.footTop);
+      });
+
+      const last = pages[pages.length - 1]!.id;
+      const download = page.waitForEvent("download");
+      await page.getByTestId(`deck-png-${last}`).click();
+      expect(pngSize(readFileSync((await (await download).path())!))).toEqual([1920, 1080]);
     });
 
     /**
@@ -262,6 +346,9 @@ for (const locale of ["fr", "en"] as const) {
       await page.getByTestId("deck-include-mirror").check();
       await page.getByTestId("deck-include-annex").uncheck();
       await expect(page.getByTestId("deck-thumb-annex")).toHaveAttribute("data-included", "false");
+      // The appendix's pages go out together: one box, both pages (A2.1).
+      await expect(page.getByTestId("deck-thumb-annex:2")).toHaveAttribute("data-included", "false");
+      await expect(page.getByTestId("deck-include-annex:2")).not.toBeChecked();
       const expected = await includedCount(page);
 
       await page.getByTestId("deck-pdf").click();
@@ -384,7 +471,7 @@ for (const locale of ["fr", "en"] as const) {
       await expect(page.getByTestId("deck-thumb-visibility")).toHaveAttribute("data-included", "false");
       await expect(page.getByTestId("slide-visibility")).toBeVisible();
       expect(await includedCount(page)).toBe(before - 1);
-      await expect(page.getByTestId("slide-page-annex")).toHaveText(`${before - 1}/${before - 1}`);
+      await expect(page.getByTestId("slide-page-annex:2")).toHaveText(`${before - 1}/${before - 1}`);
       await expect(page.getByTestId("slide-page-visibility")).toHaveCount(0);
     });
 

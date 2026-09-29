@@ -46,7 +46,8 @@ function column(slot: string): "left" | "right" | "outside" {
   const at = VIEW.indexOf(`styles.${slot}`);
   const left = VIEW.indexOf("className={styles.left}");
   const right = VIEW.indexOf("className={styles.right}");
-  const share = VIEW.indexOf("<ShareCard");
+  // The share slot wraps the card and, for the owner, the README badge (A3.1, 2026-09-29): it starts at its own wrapper.
+  const share = VIEW.indexOf("className={styles.slotShare}");
   if (at > left && at < right) return "left";
   if (at > right && at < share) return "right";
   return "outside";

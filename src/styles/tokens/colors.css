@@ -161,11 +161,17 @@
 
   /*
    * --- Data-viz, paper world (DS v3 §5.5) ---
-   * Doctrine, in order of preference: every mark in --viz-ink with ONE red
-   * highlight on the step that stalls (labelled in text, never red alone);
-   * the sequential ramp for an intensity; the categorical set only for
-   * nominal series (cohorts, channels, periods) — never the five pillars,
-   * which are ordered stages: they are named, not colored.
+   * Doctrine: every mark in --viz-ink with ONE red highlight on the step
+   * that stalls (labelled in text, never red alone); a count is a shape
+   * (viz/DotGrid), an estimate a hatch, an unknown a panel of its own — never
+   * a second colour. The five pillars are ordered stages: they are named, not
+   * colored.
+   *
+   * The DS v3 bundle also carried a categorical set (five colours from
+   * Okabe-Ito) and a five-step sequential ramp, measured in both worlds.
+   * Nothing ever read them, so they went on 2026-09-29 (design audit A2.2,
+   * CHANTIERS.md): a chart that needs a nominal series or an intensity brings
+   * them back from git history, with their contrast rows.
    */
   --viz-ink: var(--ink-0); /* default series, strong axes — 16.06 / 12.97 / 11.68 */
   --viz-axis: var(--ink-1); /* axes, ticks, axis labels — 7.20 / 5.81 / 5.23 */
@@ -174,37 +180,6 @@
   --viz-highlight: var(--paint-red); /* diagnosis mark, non-text — 4.42 / 3.57 / 3.22 */
   --viz-highlight-text: var(--paint-red-deep); /* its label — 6.72 / 5.42 / 4.89 */
   --viz-unknown: var(--ink-1); /* "not measured": hatch + dash, 7.20 on --paper-0 */
-
-  /*
-   * Categorical, derived from Okabe-Ito with red excluded (it is reserved).
-   * Each passes 4.5:1 as TEXT on --paper-0 and --paper-1, so a series can be
-   * labelled directly in its own color; on --paper-2, cat-2 and cat-3 drop
-   * under 4.5 — no colored label on a sunken ground. Worst CIE76 distance
-   * under deuteranopia is 12.3: distinguishable, not comfortable, so every
-   * series ALSO carries a dash pattern and a direct label.
-   */
-  --viz-cat-1: #1f5f8b; /* blue */
-  --viz-cat-2: #1c6e57; /* green */
-  --viz-cat-3: #855500; /* ochre */
-  --viz-cat-4: #8a3f6e; /* plum */
-  --viz-cat-5: var(--ink-0);
-
-  /*
-   * Sequential, ink on paper, five steps. Neighbouring steps are only
-   * 1.34–2.11:1 apart — under 1.4.11 — so cells are always separated by a
-   * 2px paper rule (the brand's tile pattern), never butted together. Each
-   * step names the ink its label takes.
-   */
-  --viz-seq-1: #f1ebdc;
-  --viz-seq-2: #d8ccb0;
-  --viz-seq-3: #b2a283;
-  --viz-seq-4: #7f705a;
-  --viz-seq-5: #4a4034;
-  --viz-seq-1-text: var(--ink-0); /* 14.22 */
-  --viz-seq-2-text: var(--ink-0); /* 10.62 */
-  --viz-seq-3-text: var(--ink-0); /* 6.76 */
-  --viz-seq-4-text: var(--paper-0); /* 4.56 */
-  --viz-seq-5-text: var(--paper-0); /* 9.61 */
 }
 
 /* DERIVED — redeclared on every world container (see the header) */
