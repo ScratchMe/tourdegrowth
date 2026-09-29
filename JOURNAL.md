@@ -5609,3 +5609,19 @@ Les aperçus suivent, et la liste d'attente de `variant-names.test.ts` perd ses 
 
 **Vérifié** : lint et `tsc` propres, 2 239 tests unitaires. `next build` propre et **620 specs Playwright** (615 passées, 5 ignorées par construction, aucun échec) sur cet arbre, avant le rebase sur #198 : le code sous `src/` et `e2e/` en est identique (vérifié par `git diff`). Les 36 captures au pixel près, prises sur l'empilement qui contient cette famille, restent identiques à `main` : le tableau de bord du jeu et la slide peloton en font partie.
 
+**En production** : PR [#199](https://github.com/ScratchMe/tourdegrowth/pull/199), mergée le 2026-09-29 (squash `77f0fff`, 18 fichiers, identique à la tête de la PR), servie à 23 h 51 UTC. Le jeu et le moteur, seuls à rendre ces composants, restent en 404 derrière leurs drapeaux. La feuille globale servie par `/en` porte `StatTile …__auto` et `BulletChart …__sm`, et plus `__responsive` ni `__mini`.
+
+## A5, famille jeu, et le lot clos (2026-09-29)
+
+**Ce qui bouge** :
+- `DgFace` : `size="frame" | "avatar"` devient `framing="call" | "avatar"`. `call` dessine l'appel entier en 16:9 avec le bureau, `avatar` recadre la tête : ce qui est dans l'image, pas sa taille. C'est la règle de la table, et la cible écrite d'abord (`lg|sm`) la contredisait : corrigée avant cette PR. Appelants : le rapport du trimestre et les nouvelles.
+- `ClickPill` : `md|compact` → `md|sm`.
+- Les aperçus suivent (`Frame` → `Call`, `FrameMoods` → `CallMoods`, `Compact` → `Small`).
+- La liste d'attente de `variant-names.test.ts` est vide : un composant qui arrive avec un nom retiré se renomme, il ne s'y inscrit pas.
+
+**Le lot A5 est clos** : quatre PR (#197, #198, #199 et celle de cette entrée), une famille chacune, toutes selon la table « Variant names » de `conventions.md`. S-16 est livré. Aucune ne change quoi que ce soit à l'écran : 36 captures pleine page (accueil, quiz, résultat, moteur, tableau de bord et rapport du jeu, slide peloton, admin d'audit ; FR et EN ; 1 280 et 390 px) sont identiques à l'octet à celles de `main`, sur l'empilement des familles. Le bundle design-sync est à reconstruire (B3 dit ce qu'il doit emporter).
+
+**Vérifié** : lint et `tsc` propres ; 2 239 tests unitaires ; `next build` propre avec `GAME_ENABLED=true` ; **620 specs Playwright** (615 passées, 5 ignorées par construction, aucun échec), passées sur l'empilement des quatre familles, dont le code sous `src/`, `e2e/` et `.design-sync/` est identique à celui de cette branche (vérifié par `git diff`).
+
+**Piège** : un `git rebase --onto` qui part d'une base trop ancienne rejoue des commits déjà squashés dans `main` et s'arrête sur un conflit fantôme (convention 12). La base à donner est le dernier commit de la branche du dessous, pas son premier. Ici, `--skip` a suffi : le contenu était déjà là.
+
