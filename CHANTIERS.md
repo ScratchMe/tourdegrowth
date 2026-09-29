@@ -280,6 +280,34 @@ mobile, rien ne change : il est déjà après le bouton et la carte de partage.
 | Un e2e de mesure | Sur `/r/sample`, en vue visiteur, à 1 280 px : le haut du bouton « Fais ton propre Tour » est **au-dessus** du haut de l'encart. Même mesure à 390 px. **Non-vacuité** : l'ancien ordre fait rougir le test |
 | Hors code | `CLAUDE.md` citait « ~30 px » : c'était 350 px mesurés le 2026-09-29, et la ligne est corrigée dans la même séance |
 
+#### A7.8 — L'amende du jeu plafonnée à 75 000 € (C14)
+
+**Décidé** (`GAME-BRIEF.md` §5, règle 5) : le contrôle DGCCRF inflige
+**75 000 €**, le maximum légal pour une entreprise, au lieu de
+60 000 + radar × 500 (de 97 500 € à 110 000 €).
+
+| Où | Quoi |
+|---|---|
+| `lib/game/levels/retention.ts:84` | L'amende du contrôle vaut 75 000 €. La forme est libre (un plafond, ou une constante qui remplace `fineBase` et `finePerPoint`), mais l'amende ne doit jamais dépasser le plafond, à tout radar |
+| La source | Vérifier sur Légifrance l'article qui fixe le plafond de l'amende administrative pour un manquement aux règles de résiliation (15 000 € pour une personne physique, 75 000 € pour une personne morale), et le citer dans le commentaire du code et dans la règle 5 de `GAME-BRIEF.md`. **Si le texte dit autre chose, s'arrêter et remonter en section C** |
+| Tests | Les tests du moteur du jeu (série Q4 de `GAME-BRIEF.md`) : l'amende vaut 75 000 € à radar 75 et à radar 100. **Non-vacuité** : l'ancienne formule fait rougir le test |
+| Copie | L'événement dit « amende de {fine} » : le texte ne change pas, seul le nombre change. Les textes de lancement qui citeraient un montant sont à vérifier (`grep -rn "97 500\|110 000" marketing src`) |
+
+#### A7.9 — La bande de l'accueil en liens mesurés, et le bandeau mesuré (C15)
+
+**Décidé** (`GAME-BRIEF.md` §13.3 E) : chaque carte de la bande « Le Tour en
+trois parties » (`components/brand/SpaceStrip.tsx`) devient un lien vers son
+espace **quand cet espace est ouvert**. Un espace fermé reste une carte
+« bientôt », sans lien. Toutes les entrées de la bande et du bandeau sont
+mesurées.
+
+| Où | Quoi |
+|---|---|
+| `SpaceStrip.tsx` | La carte entière est cliquable (un seul lien par carte, pas de bouton en plus) : le Tour vers `/quiz`, le moteur vers `/{locale}/aarrr-funnel-template`, le jeu vers `/{locale}/game`. Elle reste visuellement secondaire sous « Démarre ton Tour » : un survol et un focus visibles, et pas de remplissage rouge. Le lien vers `/quiz` est `hard`, comme ailleurs (`cross-root-links.test.ts`) |
+| Mesure | Le jeu : `game_entry_clicked` avec `home_strip` depuis la bande et `space_band` depuis les pastilles de `SpaceBand.tsx`, les deux ajoutés au vocabulaire (`lib/game/events.ts`, `goatcounter-api.ts:112`). Le moteur : son événement d'entrée (A7.4) avec les mêmes sources. Le Tour : l'événement de démarrage existant, avec la source `home_strip`. `/admin/stats` affiche ces nouvelles sources |
+| Tests | Un e2e par carte ouverte (lien et événement), la carte fermée sans lien (build sans drapeau), et la même chose pour les pastilles. Accessibilité : un seul nom accessible par carte, et le contraste des états de survol (convention 7) |
+| Quand | Le jeu peut en profiter dès son ouverture. La carte du moteur suit A7.4 |
+
 ### A8 — L'audit GEO, joué sans installer le plug-in
 
 **D'où ça vient** : le 2026-09-29, Antoine a proposé le plug-in
@@ -359,8 +387,8 @@ désormais.*
 | C11 | Montrer l'encart quand la rétention est dans le **groupe** qui freine, netteté « partagée » comprise | Oui, et jamais sur un tableau « à niveau » | Garder. **→ Confirmé le 2026-09-29. Antoine a demandé ce qui se passera avec tous les niveaux : une carte unique, l'ordre AARRR qui départage deux étapes à égalité, et un encart sur presque tout résultat. C'est noté dans `GAME-BRIEF.md` §15.4, et un déclencheur est ajouté en section E. Rien à coder aujourd'hui** |
 | C12 | Les noms de zones bilingues : « Retention — S'ils reviennent » | Oui | Garder. **→ Confirmé le 2026-09-29, capture du hub à l'appui. Rien à coder** |
 | C13 | La mention « vingt minutes » | Gardée seulement si le temps mesuré la porte ; pas encore mesuré | Chronométrer une partie complète à la recette. Garder si on est entre 15 et 25 minutes, sinon écrire le vrai chiffre. **→ Tranché le 2026-09-29, comme recommandé. Ce sont les parties des testeurs qui sont chronométrées (ils découvrent le jeu), et la médiane tranche. Geste : D8** |
-| C14 | **La formule d'amende** donne au moins 97 500 € à radar 75, au-dessus du maximum légal de 75 000 € par manquement | Fiction inoffensive, qu'un juriste relèverait | **Plafonner à 75 000 € par manquement.** Le jeu tient sa crédibilité de faits vérifiés, et le changement tient en une ligne |
-| C15 | **Les cartes de la bande de l'accueil : des liens ou non**, et comment les mesurer. Ni le bandeau ni cette bande ne passent par `game_entry_clicked` | Pas des liens. À trancher à l'ouverture du jeu | En faire des liens à l'ouverture, avec une source `home_strip` dans le vocabulaire de `game_entry_clicked` pour que `/admin/stats` les compte |
+| C14 | **La formule d'amende** donne au moins 97 500 € à radar 75, au-dessus du maximum légal de 75 000 € par manquement | Fiction inoffensive, qu'un juriste relèverait | **Plafonner à 75 000 € par manquement.** Le jeu tient sa crédibilité de faits vérifiés, et le changement tient en une ligne. **→ Tranché le 2026-09-29, comme recommandé. Code : A7.8** |
+| C15 | **Les cartes de la bande de l'accueil : des liens ou non**, et comment les mesurer. Ni le bandeau ni cette bande ne passent par `game_entry_clicked` | Pas des liens. À trancher à l'ouverture du jeu | En faire des liens à l'ouverture, avec une source `home_strip` dans le vocabulaire de `game_entry_clicked` pour que `/admin/stats` les compte. **→ Tranché le 2026-09-29, comme recommandé, et étendu aux pastilles du bandeau (`space_band`), qui sont déjà des liens mais ne sont pas mesurées. Code : A7.9** |
 
 ### Le résultat, la croissance, le dépôt
 

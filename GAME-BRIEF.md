@@ -244,6 +244,7 @@ Dans cet ordre, après les 3 mois :
 3. Message du DG à mi-trimestre (événement, style courriel) : si le churn du 2e mois > objectif, « Je vois les chiffres de la semaine. Ça ne bouge pas assez. » ; sinon « Ça bouge. Continue. »
 4. Si « Point données avec le DG » a été joué : événement positif « Ta présentation au DG a tenu… » si insight, sinon « sans données, il a hoché la tête poliment » (l'effet sur la patience, +15 ou +3, est appliqué au moment du choix).
 5. Radar ≥ 75 : **contrôle**. `sanction = true` ; amende = 60 000 + round(radar) × 500 ; événement « Contrôle de la DGCCRF, article dans la presse, amende de … Le DG te demande de tout retirer avant vendredi. N abonnés partent dans la foulée », N = 1,5 % des abonnés ; toutes les astuces sortent de production (archivées dans `removedDark`) ; radar = 20 ; confiance −10 ; patience −15 ; spike +0,015.
+   **Amende plafonnée par Antoine le 2026-09-29 (`CHANTIERS.md` C14) : 75 000 €**, le maximum légal pour une entreprise qui manque aux règles de résiliation (15 000 € pour une personne physique). La formule 60 000 + radar × 500 donnait de 97 500 € à 110 000 €, au-dessus de ce plafond, dans un jeu qui tient sa crédibilité de faits vérifiés. L'amende ne varie donc plus avec le radar. L'article est à vérifier sur Légifrance et à citer ici au moment du code (A7.8).
    Sinon radar ≥ 45 : **signalements**. Événement SignalConso ; patience −5 ; confiance −3.
 6. Confiance ≤ 35 : **fil viral**. spike +0,01 ; patience −5.
 7. Confiance ≥ 80 : **article positif**. press = 3 ; patience +8.
@@ -437,7 +438,7 @@ Tout test est bloquant pour la mise en production. Les tests unitaires portent s
 - Q1 Objectif atteint : patience +12. Raté de 0,5 point : −14. Raté de 2 points : −32.
 - Q2 Ordre obéi : +10 ; refusé : −8 ; pas d'ordre : 0. `orders`, `obeyed`, `refused` cohérents.
 - Q3 `present` avec insight : +15 ; sans : +3 ; appliqué avant la simulation.
-- Q4 Radar 75 : contrôle ; amende = 60 000 + radar × 500 ; astuces retirées et archivées ; radar 20 ; confiance −10 ; patience −15 ; spike +0,015 ; `sanction = true`. Radar 74 : signalements (patience −5, confiance −3). Radar 44 : rien.
+- Q4 Radar 75 : contrôle ; amende = 60 000 + radar × 500 (**75 000 € fixe depuis le 2026-09-29**, voir la règle 5) ; astuces retirées et archivées ; radar 20 ; confiance −10 ; patience −15 ; spike +0,015 ; `sanction = true`. Radar 74 : signalements (patience −5, confiance −3). Radar 44 : rien.
 - Q5 Confiance 35 : fil viral (spike +0,01, patience −5). Confiance 80 : article (press 3, patience +8). Les deux ne peuvent pas survenir le même trimestre.
 - Q6 L'événement concurrent n'apparaît qu'au trimestre d'index 1.
 - Q7 Confiance, radar et patience restent dans 0–100.
@@ -780,6 +781,8 @@ Aucune donnée n'est jamais écrite : fermer la feature ne perd rien pour person
 **B · Le pied de page**, une fois le drapeau ouvert au build : un lien « Le jeu » vers `/{locale}/game`, à côté de « Comment ça marche » et « Glossaire », événement `game_entry_clicked/footer`. C'est l'entrée pour les lecteurs dont le goulot n'est pas la rétention.
 
 **C · Le hub** `/{locale}/game` : les cinq zones, événement `game_entry_clicked/hub` sur le bouton du niveau.
+
+**E · L'accueil et le bandeau d'espace** (ajouté le 2026-09-29, `CHANTIERS.md` C15). La synthèse I + B a posé deux entrées que ce brief ne prévoyait pas : la bande « Le Tour en trois parties » de l'accueil (`SpaceStrip`) et les pastilles du bandeau d'espace en haut de chaque page (`SpaceBand`). **Tranché par Antoine** : à l'ouverture, chaque carte d'un espace ouvert devient un lien (la carte entière, sans bouton de plus), et chaque entrée est mesurée. Le jeu reçoit `game_entry_clicked/home_strip` depuis la bande et `game_entry_clicked/space_band` depuis le bandeau. Le moteur et le Tour ont la même source dans leur propre événement. À coder : `CHANTIERS.md` A7.9.
 
 **D · La boucle inverse**, déjà en 11.5 : en fin de niveau, « Où en est ta croissance ? » renvoie vers le Tour, pour ceux qui arrivent par le jeu. Le lien porte `?ref=` comme les autres entrées du Tour si un identifiant de résultat est connu, sinon rien.
 
