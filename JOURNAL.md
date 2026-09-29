@@ -5314,3 +5314,15 @@ Des seize opportunités de plateforme, douze sont absentes de `src/`, `text-wrap
 - **Les choix faits en route par A1, validés** : trimestre en cours 5 → 3 px et bord du DG en colère 4 → 3 px dans le jeu, nom de l'espace à 19 px sur téléphone, actions texte du moteur sur le bouton `quiet`.
 
 **Vérifié** : lint et `tsc` propres, **2 236 tests unitaires** (+1), couverture au-dessus de ses seuils, `next build` propre avec `GAME_ENABLED=true`, **593 specs Playwright** (+1 : 588 passées, 5 ignorées par construction, aucun échec, sans reprise). À l'écran : le bandeau à 320, 360 et 390 px en français et en anglais ; le crédit mesuré à 360, 390 et 1 280 px (une ligne à 390, inchangé).
+
+## D1 : les réglages du dépôt, vérifiés et clos (2026-09-29)
+
+**La demande** : la section D de `CHANTIERS.md`, pas à pas avec Antoine (prompt D). Première action choisie : D1.
+
+**Ce que l'API disait avant le moindre clic** (`GET /repos/ScratchMe/tourdegrowth`) : `has_projects` et `has_discussions` déjà à `false`, la description et les neuf topics de `GROWTH-PLAN.md` 0.2 en place. `CHANTIERS.md` écrivait pourtant « Activés » à la ligne C18, le matin même : un document dit ce qui était vrai quand il a été écrit (convention 10). Antoine a confirmé à l'écran (Settings → General → Features).
+
+**Le seul geste** : la page d'accueil du dépôt pointait vers l'apex `https://tourdegrowth.com`, qui répond en 308 vers `www`. Antoine l'a passée à `https://www.tourdegrowth.com`, l'adresse que prévoyait 0.2. Relu par l'API après coup.
+
+**Retiré de `CHANTIERS.md`** : D1, et C18, sans objet puisque l'état recommandé était déjà en place et qu'Antoine l'a validé. La section C passe à 21 questions. La ligne « Hygiène de dépôt public » de `CLAUDE.md` n'a plus rien côté Antoine.
+
+**Pas vérifiable d'ici, pour D7** : si le profil github.com/ScratchMe affiche un nom. L'API des profils est refusée à une session cloud, bornée aux routes du dépôt. Antoine le regardera avant la vague 4.
