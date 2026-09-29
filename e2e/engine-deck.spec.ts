@@ -4,7 +4,7 @@ import type { Page, Request } from "@playwright/test";
 import { QUESTIONS } from "../src/content/copy-library";
 import { METRIC_SHAPES } from "../src/lib/engine/catalog-shape";
 import { exampleState, missing, tourResult } from "../src/lib/engine/__tests__/fixtures";
-import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
+import { ADMIN_PASSWORD, expect, grantOwnerPreview, readEachOnScreen, SKIP_ADMIN_REASON, test } from "./helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -164,15 +164,13 @@ for (const locale of ["fr", "en"] as const) {
       await expect(page.getByTestId("engine-deck")).toBeVisible();
       await expect(page.getByTestId("engine-board")).toHaveCount(0);
       await expect(page.locator("#engine-deck-title")).toBeFocused();
-
-      const slides = await page.locator('[data-print="thumb"][data-included="true"] [data-slide]').evaluateAll((els) =>
-        els.map((el) => {
-          const title = el.querySelector("h3")?.textContent?.trim() ?? "";
-          const body = el.querySelector("footer")?.previousElementSibling as HTMLElement | null;
-          const lines = (body?.innerText ?? "").split("\n").map((l) => l.trim()).filter(Boolean);
-          return { id: el.getAttribute("data-slide"), title, lines: lines.length };
-        }),
-      );
+      // Each slide read on screen (readEachOnScreen: the thumbnails skip their text off screen).
+      const slides = await readEachOnScreen(page, page.locator('[data-print="thumb"][data-included="true"] [data-slide]'), (el) => {
+        const title = el.querySelector("h3")?.textContent?.trim() ?? "";
+        const body = el.querySelector("footer")?.previousElementSibling as HTMLElement | null;
+        const lines = (body?.innerText ?? "").split("\n").map((l) => l.trim()).filter(Boolean);
+        return { id: el.getAttribute("data-slide"), title, lines: lines.length };
+      });
       // Non-vacuity: the seven slides §6.0 includes, not an empty list that passes by being empty.
       expect(slides.map((s) => s.id)).toEqual(["peloton", "leak", "visibility", "unit-economics", "ask", "annex", "annex:2"]);
       for (const s of slides) {
@@ -197,9 +195,7 @@ for (const locale of ["fr", "en"] as const) {
     test("every slide prints filled templates in the brand's glyphs only", async ({ page }) => {
       await openDeck(page, locale);
       await page.getByTestId("deck-include-mirror").check();
-      const texts = await page.locator("[data-slide]").evaluateAll((els) =>
-        els.map((el) => [el.getAttribute("data-slide"), (el as HTMLElement).innerText] as const),
-      );
+      const texts = await readEachOnScreen(page, page.locator("[data-slide]"), (el) => [el.getAttribute("data-slide"), (el as HTMLElement).innerText] as const);
       expect(texts.map(([id]) => id)).toEqual(["peloton", "leak", "visibility", "unit-economics", "mirror", "ask", "annex", "annex:2"]);
       const allowed = /^[\n\t -~ -ÿ–—’«»…€·×÷±]*$/u;
       for (const [id, text] of texts) {

@@ -203,6 +203,8 @@ test.describe("the news: one way out, faded by the platform", () => {
     for (const card of PATH_A[0]!) await page.getByTestId(`game-card-${card}`).click();
     await page.getByTestId("game-run").click();
     await expect(page.getByTestId("game-news")).toBeVisible();
+    // The fade in does not hold the focus back: the primary button has it (QuarterNews).
+    await expect(page.getByTestId("game-news-next")).toBeFocused();
     await expect(page.getByTestId("game-news")).toHaveCSS("opacity", "1");
   }
 
@@ -277,10 +279,12 @@ test.describe("the engine", () => {
       const frame = () => new Promise((resolve) => requestAnimationFrame(resolve));
       const closed = height();
       d.open = true;
+      // Drawn from the very first frame: only the height moves.
+      const drawn = getComputedStyle(d, "::details-content").contentVisibility;
       for (let i = 0; i < 5; i++) await frame();
       const early = height();
       await new Promise((resolve) => setTimeout(resolve, 600));
-      return { closed, early, open: height() };
+      return { closed, early, open: height(), drawn };
     });
   }
 
@@ -289,6 +293,8 @@ test.describe("the engine", () => {
     await openExample(page);
     const h = await openingHeights(page);
     expect(h.open).toBeGreaterThan(h.closed + 100);
+    // Its content is there at once — a control in it can take the focus the moment it opens.
+    expect(h.drawn).toBe("visible");
     // Five frames in (~80 ms of --dur-open's 250), part-way: neither closed nor open yet.
     expect(h.early).toBeGreaterThan(h.closed);
     expect(h.early).toBeLessThan(h.open);
@@ -356,6 +362,15 @@ test.describe("the engine", () => {
       await frames(page, 3);
       return read();
     };
+    // Arriving on the stage the diagnosis names (the second tab), the strip
+    // keeps that tab clear of the arrow drawn over its edge.
+    const clear = await strip.evaluate((t) => {
+      const tab = t.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]')!.getBoundingClientRect();
+      const box = t.getBoundingClientRect();
+      return { right: box.right - tab.right, left: tab.left - box.left, hint: parseFloat(getComputedStyle(t, "::after").width) || 0 };
+    });
+    expect(clear.hint).toBeGreaterThan(0);
+    expect(clear.right).toBeGreaterThanOrEqual(clear.hint);
     const start = await at(0);
     expect(start.before).toBe("none");
     expect(start.after).toContain("→");

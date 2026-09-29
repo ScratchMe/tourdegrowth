@@ -3,7 +3,7 @@ import AxeBuilder from "@axe-core/playwright";
 import type { Locator, Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { EXAMPLE_EXPECTED, exampleState } from "../src/lib/engine/__tests__/fixtures";
-import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test, trackedEvents } from "./helpers";
+import { ADMIN_PASSWORD, expect, grantOwnerPreview, openFold, SKIP_ADMIN_REASON, test, trackedEvents } from "./helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -628,7 +628,7 @@ test.describe("accessibility of each screen", () => {
   test("the example board — diagnosis, peloton, what-if, mirror — has no serious or critical issue", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await openExample(page);
-    await page.getByTestId("engine-board-whatif").locator(":scope > summary").click();
+    await openFold(page.getByTestId("engine-board-whatif"));
     await expect(page.getByTestId("engine-whatif-panel")).toBeVisible();
     // With a lever moved, so the red dots and the better/worse deltas are in the pass.
     await page.getByTestId("whatif-slider-acq.signup-rate").focus();

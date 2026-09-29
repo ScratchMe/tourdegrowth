@@ -83,7 +83,10 @@ export function StageTabs({
     if (!box || !tab) return;
     const b = box.getBoundingClientRect();
     const t = tab.getBoundingClientRect();
-    const room = parseFloat(getComputedStyle(box).paddingLeft) || 0;
+    // The room kept at each edge: the strip's scroll padding where its edge
+    // arrows draw over the tabs (Board.module.css), its padding elsewhere.
+    const style = getComputedStyle(box);
+    const room = parseFloat(style.scrollPaddingInlineStart) || parseFloat(style.paddingLeft) || 0;
     if (t.left < b.left + room) box.scrollLeft -= b.left + room - t.left;
     else if (t.right > b.right - room) box.scrollLeft += t.right - (b.right - room);
   }, [current]);

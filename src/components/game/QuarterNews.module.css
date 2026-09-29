@@ -54,10 +54,13 @@
     overlay var(--dur-close) allow-discrete;
 }
 
-/* The way in: from the starting style, over --dur-open. */
+/* The way in: from the starting style, over --dur-open. The opacity only:
+   `display` flips at once, so the primary button can take the focus the
+   moment the dialog opens (a discrete transition reads its old value on its
+   first frame). */
 .dialog[open] {
   opacity: 1;
-  transition-duration: var(--dur-open);
+  transition: opacity var(--dur-open) var(--ease-out);
 }
 
 @starting-style {

@@ -1,4 +1,4 @@
-import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
+import { ADMIN_PASSWORD, expect, grantOwnerPreview, openFold, SKIP_ADMIN_REASON, test } from "./helpers";
 import type { Page } from "@playwright/test";
 import { exampleState } from "../src/lib/engine/__tests__/fixtures";
 
@@ -343,7 +343,7 @@ test.describe("the quiet text button", () => {
     await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
     await page.evaluate((state) => localStorage.setItem("tdg.engine.v1", JSON.stringify({ schemaVersion: 1, state })), exampleState());
     await page.reload();
-    await page.getByTestId("engine-board-whatif").locator(":scope > summary").click();
+    await openFold(page.getByTestId("engine-board-whatif"));
     const panel = page.getByTestId("engine-whatif-panel");
     await expect(panel).toBeVisible();
     // Two levers moved: two resets under two sliders, and « reset all » above them.

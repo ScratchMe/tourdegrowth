@@ -167,6 +167,9 @@
   .tabs {
     --tabs-hint: calc(var(--space-9) + var(--space-3));
     container-type: scroll-state;
+    /* A tab brought into view (focus, or StageTabs choosing one) stops clear
+       of the arrow, never under it. */
+    scroll-padding-inline: calc(var(--tabs-hint) + var(--tabs-room));
   }
 
   @container scroll-state(scrollable: inline-start) {
