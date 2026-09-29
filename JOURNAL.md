@@ -4935,3 +4935,5 @@ Le nº8 est reconstruit par un script qui repart des clés de chaque ancienne ca
 - `main` : 3 échecs sur 10 (`:320` deux fois, `:76` une fois).
 
 La course existe donc déjà sur `main`, à une fréquence égale ou supérieure. Ce changement ne la crée pas et ne touche ni le proxy, ni les cookies, ni les redirections. Elle n'est plus rare : un passage de fichier sur trois à cinq échoue. Les deux tests échouent sur le même geste, le cookie de langue qui ne reflète pas le dernier choix.
+
+**Après le merge (#177), tranché par Antoine** : sur téléphone, un espace fermé reste un chiffre grisé en pointillé, sans le mot « bientôt » (le lecteur d'écran l'entend). Le bandeau garde ses deux lignes plutôt que d'en prendre une troisième, collante.
