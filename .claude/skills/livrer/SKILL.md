@@ -24,14 +24,23 @@ s'arrête à la PR verte et on lui pose la question (§0).
 - **Un état de dépôt s'énonce d'après GitHub**, jamais d'après un clone ou un
   document (convention 10) : `git fetch --prune origin` d'abord.
 - **La barrière Functions Storage**, pour un merge que la session décide
-  seule. Ce qui fait grimper le compteur, c'est le poids des fonctions
-  (`VERCEL.md` §1.6) : une dépendance, une route de fonction, un réglage de
-  build. Donc, avant de merger sans Antoine :
-  `git diff --stat origin/main..HEAD -- package.json package-lock.json next.config.mjs vercel.json`
-  doit être vide, et `git diff --name-status origin/main..HEAD -- src/app`
-  ne doit ajouter (`A`) aucun `route.ts` ni `page.tsx` dynamique. Sinon, PR
-  verte et question à Antoine, avec le poids mesuré (`VERCEL.md` §1.2). Un
-  merge qui ne touche que de la doc ne déploie rien et passe toujours.
+  seule. Le compteur, c'est le poids disque des bundles serveur multiplié
+  par chaque déploiement des 30 derniers jours (`VERCEL.md` §1.1). **Ajouter
+  une route ou une page ne coûte presque rien ; ce qui coûte, c'est du code,
+  une dépendance ou un fichier tiré dans un bundle serveur.** Avant de merger
+  sans Antoine :
+  - `git diff --stat origin/main...HEAD -- package.json package-lock.json next.config.mjs vercel.json`
+    est vide (trois points : ce que la branche change, pas ce que `main` a
+    reçu depuis) ;
+  - `git diff --name-only --diff-filter=A origin/main...HEAD -- src | grep -vE '\.(tsx?|css|md)$'`
+    est vide : aucune police, image, donnée ou autre binaire ajouté sous
+    `src/` ;
+  - si la branche ajoute du code côté serveur qui pèse (`src/lib/og/`, une
+    route d'image, un gros module de contenu importé par une route
+    dynamique), mesurer le poids disque avant et après (`VERCEL.md` §1.2).
+    Plus d'environ 1 Mo d'écart (2 % des ~47 Mo), c'est une question.
+  Sinon, PR verte et question à Antoine, avec le poids mesuré. Un merge qui
+  ne touche que de la doc ne déploie rien et passe toujours.
 
 ## 1. La branche
 

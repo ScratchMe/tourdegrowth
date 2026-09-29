@@ -168,6 +168,10 @@ test.describe("P23 — the card on the sample's retention bottleneck", () => {
     // The band stacks on a narrow card instead of wrapping, so the "·"
     // cannot be left dangling at the end of a line (seen in a capture).
     await expect(page.getByTestId("game-entry-band-sep")).toBeHidden();
+    // Two lines, never three: at this width the mountain gives its place
+    // back, or the longer item wraps and squeezes the empty cell (74px).
+    await expect(page.getByTestId("game-entry-band-picto")).toBeHidden();
+    expect((await box(page, "game-entry-band")).height).toBeLessThanOrEqual(56);
     const { sw, cw } = await page.evaluate(() => ({
       sw: document.documentElement.scrollWidth,
       cw: document.documentElement.clientWidth,

@@ -5150,7 +5150,7 @@ Demandé par Antoine après le merge de #182 : « il me semble qu'il y a quelque
 
 **Ce qui change à l'écran** :
 - **L'en-tête est en papier relevé** (`--surface-card`, `--paper-0`), un cran plus clair que la page (`--paper-1`). Le premier build l'avait vitré avec le papier de la page elle-même, donc l'en-tête se confondait avec le sol : 3 niveaux d'écart par canal, mesurés dans la gouttière droite ; 21 à 32 maintenant (vitre 249, 247, 239 sur un sol à 228, 222, 207). Les 92 % d'opacité, qui sont une borne de contraste, ne bougent pas. Au-dessus d'une encre pleine, le texte gris de la rangée monte de 4,98 à 6,14 et le lien rouge de 4,65 à 5,73.
-- **Le sol de la page n'a plus de halo gris.** La maquette l'éclaire d'un seul lavis blanc venu d'au-dessus du coin haut gauche, rien d'autre. Le halo noir à `88% 74%` grisait la moitié droite de chaque fenêtre. Le lavis est écrit en pourcentage de la boîte qu'il éclaire : sur 1 280 × 860, c'est exactement le `1200px 700px at 12% -10%` de la maquette, et une slide ou une carte de papier dans la nuit est éclairée pareil.
+- **Le sol de la page n'a plus de halo gris.** La maquette l'éclaire d'un seul lavis blanc venu d'au-dessus du coin haut gauche, rien d'autre. Le halo noir à `88% 74%` grisait la moitié droite de chaque fenêtre. Le lavis est écrit en pourcentage de la boîte qu'il éclaire : sur 1 280 × 860, c'est à trois pixels près le `1200px 700px at 12% -10%` de la maquette (1 203 × 697), et une slide ou une carte de papier dans la nuit est éclairée pareil.
 - **Le pied de page s'ouvre sur un trait plein d'encre**, et non plus sur le pointillé des séparations internes.
 - **La citation du fondateur** devient une citation en exergue : 600 24 px (`--title-quote`).
 - **L'action unique** se pose sur une ombre dure rouge (`--shadow-advice`), et sa phrase passe en 600 18 px (`--title-move`). Sur l'accueil comme sur le résultat.
@@ -5189,4 +5189,34 @@ Demandé par Antoine après le merge de #182 : « il me semble qu'il y a quelque
 
 **Relectures non lancées**, et pourquoi : aucune route, aucun proxy, aucun payload ni prompt n'est touché, et aucune copie visible n'est ajoutée (seuls des commentaires changent).
 
-**Après la PR, une règle de merge nouvelle** (Antoine) : « quand les PR sont vertes, tu peux merge, n'attends pas forcément mon GO, tant que tu sais que tu ne vas pas provoquer soudainement une grosse hausse de functions storage côté Vercel ». Écrite là où une session la lit avant d'agir : `CLAUDE.md` (l'outillage), `GITHUB.md` §2 et `/livrer` §0. Ce dernier donne la barrière vérifiable : aucun changement à `package.json`, au verrou, à `next.config.mjs` ni à `vercel.json`, et aucune route de fonction ajoutée. #183 la passe : du style, six composants retouchés, des tests et de la doc.
+**Après la PR, une règle de merge nouvelle** (Antoine) : « quand les PR sont vertes, tu peux merge, n'attends pas forcément mon GO, tant que tu sais que tu ne vas pas provoquer soudainement une grosse hausse de functions storage côté Vercel ». Écrite là où une session la lit avant d'agir : `CLAUDE.md` (l'outillage), `GITHUB.md` §2 et `/livrer` §0. Ce dernier donne la barrière vérifiable : aucun changement à `package.json`, au verrou, à `next.config.mjs` ni à `vercel.json`, et aucune route de fonction ajoutée. #183 la passe : du style (dix composants rendus autrement, six fichiers de composant retouchés), des tests et de la doc.
+
+## Kit I + B, passe de vérification après merge (2026-09-29)
+
+Demandée par Antoine une fois #183 en production : « fais une dernière passe de vérification de ton travail là-dessus ». Trois voies, dont deux indépendantes de l'auteur :
+- **La suite complète sur `main` (`cbe11da`)** : `tsc`, `eslint`, `npm audit` propres, build, 582 specs passées et 5 ignorées par construction, aucun échec.
+  - `vitest --coverage` a d'abord rendu deux échecs, deux dépassements de 5 s. Seuls, ces deux tests prennent 112 et 884 ms. Leurs fichiers n'ont pas bougé depuis #169, et la CI était verte sur le même code. La cause est la charge : 4 processeurs, 177 workers sous couverture, et deux relecteurs qui tournaient en même temps. Rejouée à machine calme, la suite fait 2 220/2 220, seuils compris.
+- **Une relecture adversariale du diff de #183**, par un agent qui a mesuré dans un Chromium les vraies feuilles construites.
+- **Un balayage du dépôt** pour les traces périmées de toute la passe.
+
+**Ce qu'elles ont trouvé, et qui est corrigé ici** :
+- **Une régression réelle : le bandeau du jeu passait sur trois lignes sur téléphone** (74 px au lieu de 56, en français de 375 à 393 px, en anglais à 360). La montagne ajoutée par #183 prenait 32 px à une colonne qui tenait tout juste. Mes captures à 390 px étaient en anglais, qui passe encore. Sous 350 px de carte, la montagne rend sa place (requête de conteneur), et la spec téléphone exige maintenant une hauteur de 56 px au plus et une montagne cachée. Elle ne vérifiait que le « · » et le défilement latéral.
+- **Une garde devenue aveugle** : `prose-pages` compte « une seule carte haute » avec les ombres de 6 px. Une carte `hero` (8 px) lui échappait.
+- **L'ombre du roast était restée à 7 px** quand l'échelle passait à 6. Le score roast et la carte de panne se tenaient un pixel plus haut que leurs jumeaux.
+- **La barrière Functions Storage de `/livrer`, écrite le jour même, vérifiait la mauvaise chose.** Elle citait `VERCEL.md` §1.6 au lieu de §1.1-1.2, et bloquait sur une route ajoutée, qui ne coûte presque rien. Elle laissait passer ce qui coûte : du code, une police ou un fichier tiré dans un bundle serveur. Réécrite, avec deux commandes (dépendances et réglages de build ; binaires ajoutés sous `src/`) et une mesure de poids au-delà d'~1 Mo. Elle compare maintenant avec `origin/main...HEAD`, ce que la branche change.
+- **La garde « le sol ne fait qu'éclaircir » se contournait.** Elle ne lisait que `rgba()` et `#hex`, donc un arrêt `black`, `hsl()` ou `var(--ink-0)` passait sans bruit. Chaque arrêt est maintenant posé sur le papier et doit l'éclaircir, et un arrêt illisible échoue par son nom. Sabotages : le halo, `black` et `var(--ink-0)` tombent ; un blanc chaud, qui éclaircit, passe (l'ancienne version l'aurait refusé à tort).
+- **Des commentaires et des aperçus design-sync** citaient les anciennes valeurs : ombres 7/5/4, question 28/22 px, bouton `lg` « mobile », halo.
+- **Les comptes de `.design-sync/NOTES.md`** : 77 composants, 244 cellules, 28 cartes en colonne.
+- **`CLAUDE.md`** : passe close, bundle 77/244, trois avertissements permanents, carte du dépôt.
+- **Deux formulations du journal** : « exactement » (1 203 × 697) et « six composants ».
+- **Deux restes plus anciens** : `DgFace` nommait une classe inexistante (#175), et `.wrap` de `StageProgress` était mort depuis #14.
+
+**Vérifié et juste** :
+- les rapports de contraste de la vitre, recalculés ;
+- les deux calques du sol ;
+- les seuils du bandeau sur desktop (515 px nécessaires, sans « · » pendant à partir de 520) ;
+- les deux appels de l'accueil de 761 à 1 280 px ;
+- les points d'échantillonnage de `kit-fidelity` ;
+- les comptes de tests.
+
+**Laissé, et listé comme reste** : deux jetons morts d'avant la passe (`--width-mobile` et `--texture-spray-strong`), et le rayon de 6 px du message de chargement, hors de l'échelle.
