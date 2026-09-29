@@ -5293,4 +5293,4 @@ Des seize opportunités de plateforme, douze sont absentes de `src/`, `text-wrap
 
 **Pièges** : un `pkill -f` dont le motif figurait dans sa propre ligne de commande a tué le shell (TESTING.md §4 le disait) : tuer par PID. Et `rsync` n'est pas installé dans le conteneur : copier la branche vers une copie de construction par `tar`.
 
-**Vérifié** : lint et `tsc` propres, **2 235 tests unitaires** (+15, les cinq gardes), couverture au-dessus de ses seuils, `next build` propre avec `GAME_ENABLED=true`, **PW_TOTAL specs Playwright** (PW_DETAIL).
+**Vérifié** : lint et `tsc` propres, **2 235 tests unitaires** (+15, les cinq gardes), couverture au-dessus de ses seuils, `next build` propre avec `GAME_ENABLED=true`, **592 specs Playwright** (+5 : 587 passées, 5 ignorées par construction, aucun échec, sans reprise). CodeQL a relevé dans la PR un échappement incomplet dans la regex de `dead-tokens.test.ts` (seul le tiret était échappé) : corrigé, tous les métacaractères le sont.
