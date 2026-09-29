@@ -46,10 +46,10 @@ export const PastTheScale = () => (
   </div>
 );
 
-/** `mini` (8px) is the size that lives inside a StatTile; `md` (12px) stands on its own row. */
+/** `sm` (8px) is the size that lives inside a StatTile; `md` (12px) stands on its own row. */
 export const Sizes = () => (
   <div style={col}>
-    <BulletChart size="mini" value={5.2} target={4} domain={[0, 8]} ariaLabel="Churn 5.2%, board target 4%: above" />
+    <BulletChart size="sm" value={5.2} target={4} domain={[0, 8]} ariaLabel="Churn 5.2%, board target 4%: above" />
     <BulletChart size="md" value={5.2} target={4} domain={[0, 8]} ariaLabel="Churn 5.2%, board target 4%: above" />
   </div>
 );

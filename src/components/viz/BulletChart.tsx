@@ -19,8 +19,8 @@ export interface BulletChartProps {
    * ("Résiliations 6,0 %, objectif 5,6 % : au-dessus"). Nothing drawn is read.
    */
   ariaLabel: string;
-  /** `mini` 8px track, inside a StatTile. `md` 12px, on its own row. */
-  size?: "mini" | "md";
+  /** `sm` 8px track, inside a StatTile. `md` 12px, on its own row. */
+  size?: "sm" | "md";
   className?: string;
   "data-testid"?: string;
 }
@@ -43,7 +43,7 @@ export function BulletChart({
   target,
   domain,
   ariaLabel,
-  size = "mini",
+  size = "sm",
   className,
   "data-testid": testId,
 }: BulletChartProps) {

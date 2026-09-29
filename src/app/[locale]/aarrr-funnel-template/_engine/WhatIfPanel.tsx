@@ -248,7 +248,7 @@ export function WhatIfPanel({ view, onChange }: { view: EngineView; onChange: (t
 }
 
 function Kpi({ kpi, better, worse, todayTemplate }: { kpi: KpiView; better: string; worse: string; todayTemplate: string }) {
-  const common = { label: kpi.label, size: "responsive" as const, "data-testid": `whatif-kpi-${kpi.id}` };
+  const common = { label: kpi.label, size: "auto" as const, "data-testid": `whatif-kpi-${kpi.id}` };
   if (kpi.projected === null) return <StatTile {...common} value={null} unknownLabel={kpi.unknown} />;
   // « aujourd'hui … » only once it differs: the same figure twice says nothing.
   const sub = kpi.today !== null && kpi.today !== kpi.projected ? fillTemplate(todayTemplate, { value: kpi.today }) : undefined;
