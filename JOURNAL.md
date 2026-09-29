@@ -5455,3 +5455,92 @@ Le test d'ordre de lecture du résultat se repère désormais sur l'enveloppe du
 **Vérifié** : lint et `tsc` propres, **2 227 tests unitaires** (+16), couverture au-dessus de ses seuils, `next build` propre avec `GAME_ENABLED=true`, **606 specs Playwright** (+6 : 601 passées, 5 ignorées par construction, aucun échec, sans reprise ; la garde du total, ajoutée après ce passage, a été rejouée avec les specs du partage : 19 sur 19).
 
 **À l'écran.** L'exemple roast, en FR et en EN, à 1 280 et 390 px : la pastille « Roast mode », le verdict roast de la bibliothèque, la carte de partage dans son cadre roast, et aucun défilement horizontal. L'extrait du propriétaire ne peut pas se rendre en e2e, faute de Firestore (C17 : l'émulateur arrivera en A7.11). Il a donc été vu dans un build jetable, jamais commité, où l'échantillon reçoit un badge et où la condition « propriétaire » est levée : FR et EN, 1 280 et 390 px. Résultat : ni défilement horizontal, un badge lisible, et le bouton qui copie, dit « Markdown copié » et envoie `badge_copied`.
+
+**En production** : PR [#195](https://github.com/ScratchMe/tourdegrowth/pull/195), mergée le 2026-09-29 (squash `93bf1f4`, 25 fichiers, identique à la tête de la PR), servie à 21 h 32 UTC. Relevé par HTTP : le badge de l'échantillon à son adresse courante répond en SVG, `immutable`, `nosniff`, et `HIT` au second appel ; `/r/sample?tone=roast` déclare en `og:image` une adresse distincte de celle du neutre, qui répond en PNG 1 200 × 630 dans le cadre roast.
+
+## A4 : ce que la plateforme fait à notre place (2026-09-29)
+
+**La demande** : le lot A4 de `CHANTIERS.md`, les remplacements natifs pointés par l'audit du kit (§6), en amélioration progressive, une PR.
+
+**Re-mesuré d'abord** : aucun des douze n'était dans `src/` (`grep`), et la modale des nouvelles n'avait pas `text-wrap: pretty` (aucune de ses règles de texte). Le support de chaque fonction a été lu sur webstatus.dev avant de l'écrire ; chacune a sa condition (`@supports`, ou un repli qui est l'ancien comportement), et chaque animation neuve est sous `prefers-reduced-motion: no-preference`.
+
+**Ce qui est livré**, item par item :
+- **Monde nuit** : `color-scheme: dark` sous `[data-world="night"]`, `light` sous le papier qui s'y niche. Barres de défilement et contrôles natifs suivent le monde.
+- **Deck** : `content-visibility: auto` sur les vignettes, forcé à `visible` à l'impression. Une levée pendant l'export PNG a été écrite, puis **mesurée inutile** : html-to-image dessine une copie, et une slide exportée de très loin hors écran sort identique à l'octet à la même exportée à l'écran. Retirée.
+- **Tampons** : les inclinaisons au repos passent à `rotate:`, et les keyframes `stamp` et `slam` n'animent plus que `scale` / `rotate` / `opacity`. Une keyframe partagée se compose avec l'inclinaison propre d'un tampon au lieu de l'écraser.
+- **`motion.css`** : `--ease-stamp` en `linear()`, le cubic-bezier du brief échantillonné, et son dépassement dans un seul jeton, `--stamp-overshoot` (5,3 %, à mi-course, comme la courbe d'origine).
+- **`Disclosure`** : l'accordéon glisse, sans script (`::details-content` et `interpolate-size`, Chromium). La fermeture garde le contenu dessiné pendant qu'il se replie.
+- **`StageTabs`** : la fiche d'une ligne repliée reste dans la page, `hidden="until-found"`. Ctrl+F trouve un mot dedans et `beforematch` ouvre la ligne. React écrit tout `hidden` en booléen, donc l'attribut est posé sur l'élément, dans un effet de mise en page. Une fiche porte un brouillon : repliée, elle est redessinée à chaque changement du moteur et à chaque repli. Ouvrir une ligne montre donc toujours ce qui est enregistré, comme quand la fiche était démontée.
+- **Barres collantes** : l'en-tête du site ne tire son filet qu'une fois la page défilée dessous, et la barre des nouvelles un filet en haut tant que la carte continue dessous (`scroll-state`, Chromium 133). Une requête `scroll-state` ne stylise pas l'élément qu'elle interroge, mais ses pseudo-éléments oui (mesuré) : la bordure garde sa place, transparente, et rien ne bouge d'un pixel. La barre d'action du jeu garde sa bordure : c'est le bord de son panneau, pas un filet.
+- **Onglets du moteur** : quand la bande défile, une flèche au bord qui a encore des onglets, sur un fondu. Ce sont deux pseudo-éléments collants de la bande, qui rendent leur place par une marge négative. Un `scroll-padding` garde l'onglet choisi hors d'elles.
+- **`QuarterNews`** : une seule sortie, la fermeture du dialogue. « Passer au bilan » est `command="request-close"`, la requête même d'Escape. Le dernier « Suivant » ferme avec la valeur `read`. Là où le bouton ne connaît pas `command`, son clic ferme le dialogue lui-même. Le fondu est une transition sur `open` (`@starting-style`, `display` et `overlay` en `allow-discrete`), plus de classe `closing`. La durée attendue avant de rendre la main se lit sur le dialogue, comme avant. Le texte des cartes est en `text-wrap: pretty`.
+- **`Segmented`** : un seul remplissage pour la piste, sous l'option choisie, qui glisse de l'une à l'autre (ancrage et `anchor-scope`, Chromium 131). Les options, positionnées, se peignent au-dessus sans `z-index`. En compact, la pilule arrondit seulement son bout extérieur.
+- **Glossaire** : `GlossaryTerm` ouvre un seul `DefinitionPopover`, placement `auto`, en couche supérieure (`popover="manual"`). Il était rendu deux fois, avec trois `z-index`. À partir de 641 px et là où l'ancrage existe, il pend sous son déclencheur. Sinon, c'est la feuille en bas d'écran, avec son ✕. Le focus y entre maintenant aussi sur téléphone.
+
+**Deux pièges mesurés, et les choix qu'ils ont dictés** :
+- **Le `::backdrop` d'un popover ne prend aucun clic** (Chromium 141 ; celui d'un dialogue modal, si). Un tap hors de la feuille serait passé à la page, par exemple à une réponse du quiz. Sur téléphone, le popover est donc l'écran entier, transparent, et la feuille une carte à l'intérieur : le tap tombe sur lui.
+- **Une transition discrète lit encore son ancienne valeur à sa première frame.** Avec `content-visibility` en transition à l'ouverture, le contenu d'un accordéon qui s'ouvre refusait le focus pendant une frame, et un e2e qui focalisait le curseur « Et si » l'a montré. `content-visibility`, `display` et `overlay` ne transitent donc qu'à la fermeture. À l'ouverture, le contenu est là tout de suite, et seules la hauteur ou l'opacité bougent.
+
+**Ce que l'e2e ne peut pas faire** : piloter Ctrl+F. En Chromium headless, ni `window.find()` ni un fragment de texte ne révèlent `hidden="until-found"`, même sur une page statique. Le test lit donc l'attribut, le texte présent, la hauteur nulle et ce que fait `beforematch`.
+
+**Gardes.**
+
+`e2e/platform-native.spec.ts`, quatorze tests :
+- l'accordéon, qui glisse et dont le contenu est là dès la première frame, et sous mouvement réduit ;
+- les lignes repliées trouvables ;
+- le brouillon abandonné au repli ;
+- les flèches des onglets, l'onglet gardé hors d'elles, la largeur de défilement inchangée ;
+- le deck, l'export compris ;
+- le filet de l'en-tête ;
+- le remplissage de `Segmented`, avec le contraste du libellé mesuré sur le vrai remplissage dans les deux tons, qu'axe ne voit pas sous un pseudo-élément ;
+- le popover en bulle et en feuille, tap extérieur compris ;
+- la sortie des nouvelles et son repli sans `command` ;
+- le monde nuit.
+
+En unitaires :
+- `individual-transforms.test.ts` : aucune inclinaison en `transform: rotate()`, les keyframes partagées, `linear()` et son jeton ;
+- `quarter-news.test.ts` : la lecture de la durée ;
+- `z-index.test.ts` : l'échelle ne garde aucune couche sans lecteur, `--z-popover` retiré ;
+- `motion-scale.test.ts` : un jeton qui règle un autre jeton lu est vivant.
+
+**Non-vacuité** : chaque sabotage fait tomber son test, sur un build :
+- le bloc `@supports` de l'accordéon retiré ;
+- la fiche rendue seulement ouverte ;
+- le bloc `scroll-state` de l'en-tête retiré ;
+- la marge négative des flèches retirée ;
+- `command` et le repli du bouton retirés ;
+- le bloc d'ancrage de `Segmented` retiré ;
+- `color-scheme` retiré ;
+- le popover remis en `anchored` ;
+- l'ancien CSS d'ouverture, qui fait lire `hidden` à la première frame ;
+- l'onglet gardé à 8 px, qui passait sous la flèche.
+
+Deux tests passent sur l'ancien code par construction, parce qu'ils gardent ce qui reste : l'accordéon sous mouvement réduit, et le brouillon abandonné au repli.
+
+**Specs existantes ajustées, chacune pour une raison mesurée** :
+- **Moteur** : les fiches repliées sont maintenant dans le DOM, cachées. « Aucune fiche » devient « aucune fiche visible ».
+- **Cibles tactiles** : un voisin compte s'il est touchable (`checkVisibility()`). Une fiche repliée rend encore une boîte à `getBoundingClientRect`.
+- **Diapos** : `innerText` d'une vignette hors écran est vide. Le deck commence à ~2 000 px, sous le panneau d'export. Les trois lectures de texte des slides passent donc par `readEachOnScreen`. L'une d'elles (le test des glyphes « Et si ») n'avait pas de plancher de longueur et aurait passé à vide : elle en a un.
+- **Accordéons** : ouvrir un accordéon puis focaliser tout de suite loin dedans tombe court pendant l'ouverture. Aucun humain ne le fait en 250 ms, un test si : `openFold` attend la fin de l'ouverture. La légende d'audit se lit une fois dessinée.
+
+**Vérifié** :
+- lint et `tsc` propres ;
+- **2 235 tests unitaires** (+8), couverture au-dessus de ses seuils ;
+- `next build` propre avec `GAME_ENABLED=true` ;
+- **620 specs Playwright** (+14) : 615 passées, 5 ignorées par construction, aucun échec, sans reprise ;
+- les specs « Et si » rejouées quatre fois en parallèle : 228 sur 228.
+
+**À l'écran**, FR et EN, 1 280 et 390 px :
+- le popover en bulle et en feuille ;
+- le contrôle de ton dans ses deux tons ;
+- l'en-tête en haut de page et défilé ;
+- la bande d'onglets et ses flèches ;
+- les nouvelles, carte de texte et courriel du DG.
+
+**Barrière `/livrer` §0** : ni dépendance ni réglage de build, aucun fichier non-code sous `src/`, aucune route touchée. Le changement est du CSS et des composants client.
+
+**Pas fait ici** :
+- **Le bundle design-sync** n'est pas reconstruit ; B3 dit ce qu'il doit emporter, dont deux histoires `GlossaryTerm` à regarder.
+- **Sans ancrage** (Firefox tant qu'il ne l'a pas), un desktop reçoit la feuille au lieu de la bulle : juste, moins proche. Il deviendra bulle seul.
+- **Relecteurs non lancés** : ni route, ni proxy, ni payload, ni workflow, et aucune copie neuve (les flèches sont décoratives, avec un texte alternatif vide).
+
