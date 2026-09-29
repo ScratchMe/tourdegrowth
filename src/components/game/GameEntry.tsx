@@ -3,6 +3,7 @@
 import { useId } from "react";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
+import { SPACE_PICTO } from "@/components/brand/SpaceBand";
 import { trackEvent } from "@/lib/analytics/goatcounter";
 import { NightSurface } from "./NightSurface";
 import styles from "./GameEntry.module.css";
@@ -66,14 +67,20 @@ export function GameEntry({ href, title, body, cta, meta, band, event, className
       data-testid="game-entry"
     >
       <NightSurface as="div" className={styles.band} data-testid="game-entry-band">
-        <span className={styles.bandItem}>{band.churn}</span>
-        <span className={styles.bandSep} aria-hidden="true" data-testid="game-entry-band-sep">
-          ·
+        {/* The game's sign, as on the band of its pages: a link to the game wears it (design I + B). */}
+        <span className={styles.bandPicto} data-testid="game-entry-band-picto">
+          {SPACE_PICTO.game}
         </span>
-        <span className={styles.bandItem}>
-          {band.trust}
-          <span className={styles.missing} aria-hidden="true" />
-          <span className={styles.bandMuted}>{band.notOnDashboard}</span>
+        <span className={styles.bandItems}>
+          <span className={styles.bandItem}>{band.churn}</span>
+          <span className={styles.bandSep} aria-hidden="true" data-testid="game-entry-band-sep">
+            ·
+          </span>
+          <span className={styles.bandItem}>
+            {band.trust}
+            <span className={styles.missing} aria-hidden="true" />
+            <span className={styles.bandMuted}>{band.notOnDashboard}</span>
+          </span>
         </span>
       </NightSurface>
       <div className={styles.body}>

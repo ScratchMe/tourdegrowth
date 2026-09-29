@@ -10,12 +10,17 @@ import { Card, MetaLabel } from "tour-de-growth";
 const body = { margin: "6px 0 0", font: "15px/1.45 Inter, sans-serif" } as const;
 
 /**
- * `raised` is the 7px drop shadow and there is AT MOST ONE per screen — the
- * score card on a result, the question card in the quiz. `panel` is the 5px
- * popover weight. `flat` carries no shadow at all.
+ * `hero` is the 8px drop shadow of a card that IS the screen — the landing's
+ * preview of a result (the quiz's question card stands as high). `raised` is
+ * the 6px one and there is AT MOST ONE per screen — the score card on a
+ * result. `panel` is the 4px popover weight. `flat` carries no shadow at all.
  */
 export const Elevations = () => (
   <div style={{ display: "flex", flexDirection: "column", gap: 18, maxWidth: 380 }}>
+    <Card elevation="hero">
+      <MetaLabel size="xs">hero</MetaLabel>
+      <p style={body}>The card the whole screen is for.</p>
+    </Card>
     <Card elevation="raised">
       <MetaLabel size="xs">raised</MetaLabel>
       <p style={body}>One per screen. The thing the page is about.</p>

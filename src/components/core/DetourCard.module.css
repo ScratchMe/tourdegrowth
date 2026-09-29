@@ -10,8 +10,10 @@
 }
 
 /*
- * `fault` is the only card in the system with a red shadow, and it is
- * reserved for OUR failures. A 404 is never fault: the reader is lost, not
+ * `fault` is the only card in the system with a SOLID red edge on a red
+ * shadow, and it is reserved for OUR failures. (The advice, PriorityMove,
+ * stands on a red shadow too since design I + B, but its edge is dashed: the
+ * dash is what says "advice".) A 404 is never fault: the reader is lost, not
  * broken, and red would blame them.
  */
 .fault {

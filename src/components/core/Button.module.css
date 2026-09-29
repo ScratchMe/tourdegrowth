@@ -26,8 +26,16 @@
 
 .lg {
   font: var(--label-button-lg);
-  padding: var(--pad-button-mobile);
+  padding: var(--pad-button-lg);
   min-height: var(--hit-min);
+}
+
+/* On a phone a large button is usually full width: its sides are not what
+   gives it room, and 26px would wrap a long label at 320px. */
+@media (max-width: 760px) {
+  .lg {
+    padding-inline: var(--space-7);
+  }
 }
 
 /*

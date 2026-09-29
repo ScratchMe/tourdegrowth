@@ -167,9 +167,11 @@
   /*
    * The page ground is not a color token (shape.css declares it once, on
    * :root), so rebinding the semantic layer cannot reach it — and its paper
-   * value is a 45% WHITE lift, a floodlight on asphalt. Overridden by name:
-   * a faint lamp of the night text, and a deeper shade where paper had its
-   * soft shadow. Same geometry, so the two worlds are lit the same way.
+   * value is a WHITE wash, a floodlight on asphalt. Overridden by name: a
+   * faint lamp of the night text, and a deep shade at the far corner. Since
+   * 2026-09-29 the paper wash comes from above the corner and has no shade
+   * (design I + B); the night keeps its own two layers, which the mockup
+   * did not redraw.
    */
   --ground-lift: radial-gradient(circle at 16% 12%, rgba(243, 239, 228, 0.06), transparent 42%),
     radial-gradient(circle at 88% 74%, rgba(0, 0, 0, 0.35), transparent 46%);

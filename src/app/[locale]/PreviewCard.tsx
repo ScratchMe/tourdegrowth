@@ -77,7 +77,7 @@ export function PreviewCard({
   const [tone, setTone] = useState<ToneToggleValue>("straight");
 
   return (
-    <Card elevation="raised" className={styles.previewCard} data-testid="preview-card">
+    <Card elevation="hero" className={styles.previewCard} data-testid="preview-card">
       <div className={styles.previewTopRow}>
         <MetaLabel size="xs">{caption}</MetaLabel>
         <ToneToggle

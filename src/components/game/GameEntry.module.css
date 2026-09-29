@@ -21,15 +21,40 @@
 .band {
   min-height: 44px;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  column-gap: var(--space-4);
-  row-gap: var(--space-1);
-  padding: var(--space-3) var(--space-10);
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-8);
   font: var(--meta-sm);
   letter-spacing: var(--meta-tracking);
   text-transform: uppercase;
   font-variant-numeric: var(--tabular);
+}
+
+/*
+ * The game's mountain, in the night's amber (10.13 on the night ground; a
+ * mark, aria-hidden inside the SVG). 22 × 14, the band's own mini size: at
+ * 30 × 20 as in the mockup, the French line (443px of text) no longer fit a
+ * 528px card on one line — with this one and 20px sides it needs 515px.
+ */
+.bandPicto {
+  flex: none;
+  display: flex;
+  color: var(--space-game-night-accent);
+}
+
+.bandPicto svg {
+  display: block;
+  width: 22px;
+  height: 14px;
+}
+
+.bandItems {
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--space-4);
+  row-gap: var(--space-1);
 }
 
 .bandItem {
@@ -101,14 +126,15 @@
 }
 
 /*
- * The band on one line needs ~500px (the French one, measured at 1280). Below
+ * The band on one line needs 515px (the French one, measured at 1280, with
+ * its mountain). Below
  * that the two items stack instead of wrapping: a wrap left the "·" dangling
  * at the end of the first line (seen at 390px). A container query rather than
  * a media query, because what decides is the CARD's width, and the right
  * column is narrow on small desktops too (761-1000px), not only on phones.
  */
 @container game-entry (max-width: 519px) {
-  .band {
+  .bandItems {
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
@@ -120,10 +146,6 @@
 }
 
 @media (max-width: 760px) {
-  .band {
-    padding: var(--space-3) var(--space-8);
-  }
-
   .body {
     padding: var(--pad-card-mobile);
   }

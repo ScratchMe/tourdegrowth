@@ -25,6 +25,10 @@
   --pad-card-mobile: 20px; /* mobile card */
   --pad-button: 14px 24px; /* desktop button */
   --pad-button-mobile: 16px; /* mobile button, full width */
+  /* Large button (design I + B: 17px type). The mockup's 26px sides do not
+     fit the landing's two CTAs side by side in French at 1280 (515px for a
+     495px column); 20px does (491). Full width on a phone keeps 16px sides. */
+  --pad-button-lg: 17px 20px;
   --pad-chip: 11px 14px; /* pillar chip, desktop */
   --pad-chip-sm: 10px 12px; /* pillar chip, mobile grid */
   --pad-tag: 5px 12px; /* mono uppercase tag */
@@ -39,7 +43,8 @@
   --gutter-desktop: 40px;
   --gutter-mobile: 20px;
   --hit-min: 44px; /* never smaller */
-  --hit-option: 64px; /* answer options */
+  --hit-option: 64px; /* an option to pick: the game's action cards */
+  --hit-answer: 72px; /* a quiz answer: a card of its own (design I + B, 2026-09-29) */
   /*
    * Visual height of header-scale controls. The bundle said "the 44px hit
    * comes from a transparent 6px outer pad" — measured, it does not: that

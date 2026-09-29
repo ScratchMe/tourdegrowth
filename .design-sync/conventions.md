@@ -9,20 +9,23 @@ paper stock, one brand red. It is deliberately not a SaaS dashboard.
 
 ## The rules that are not preferences
 
-**One loud thing per screen.** Exactly one `Card elevation="raised"` and at most
-one `ScoreDisplay`. On a result that is the score card; in the quiz it is the
-question. A second raised card does not read as "also important", it reads as a
+**One loud thing per screen.** Exactly one `Card elevation="raised"` (or
+`"hero"`, 8px instead of 6, for a card that IS the screen: the landing's preview
+of a result) and at most one `ScoreDisplay`. On a result that is the score card;
+in the quiz it is the question. A second raised card does not read as "also important", it reads as a
 mistake. Everything else is flat or panel: a `Callout` is never raised, and a
 dashboard is a row of flat `StatTile`s — a row of equals.
 
 **Red means one of three things, never a fourth.** Solid red fill = the primary
 action. Red wash or solid red edge (`Card tone="alert"`, `InsightCard
 kind="weakness"`) = a diagnosis about the reader's business. Dashed red on paper
-(`tone="outlineAlert"`, `PriorityMove`) = advice. In a chart, the one red mark
-(`--viz-highlight`) is the stage that stalls or the objective aimed at — a
-diagnosis, labelled in words. Our own failures get the one
-red-shadowed card in the system, `DetourCard tone="fault"` — and a 404 is never
-that: the reader is lost, not broken, and red would blame them.
+(`tone="outlineAlert"`, `PriorityMove`) = advice; `PriorityMove`, the one next
+action, also stands on a hard red shadow (`--shadow-advice`). In a chart, the one
+red mark (`--viz-highlight`) is the stage that stalls or the objective aimed at —
+a diagnosis, labelled in words. Our own failures get the one card with a SOLID
+red edge on a red shadow, `DetourCard tone="fault"` — the dash is what tells
+advice from fault — and a 404 is never that: the reader is lost, not broken, and
+red would blame them.
 
 **Scoring is invisible during the questionnaire.** Never label an `AnswerOption`
 with its point value; showing the arithmetic changes the answers. The score

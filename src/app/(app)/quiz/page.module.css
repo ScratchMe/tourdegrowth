@@ -8,10 +8,12 @@
   display: none;
 }
 
+/* 64px of air under the band on a desktop (design I + B); a phone keeps 32,
+   where the last answer has to stay in the first screen. */
 .main {
   max-width: 720px;
   margin: 0 auto;
-  padding: 32px 24px 56px;
+  padding: 64px 24px 56px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -33,6 +35,12 @@
   font: var(--meta-sm);
   color: var(--text-muted);
   word-break: break-word;
+}
+
+@media (max-width: 760px) {
+  .main {
+    padding-top: 32px;
+  }
 }
 
 @media (min-width: 761px) {

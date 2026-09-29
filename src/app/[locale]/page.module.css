@@ -15,7 +15,7 @@
 .main {
   max-width: var(--content-max-width);
   margin: 0 auto;
-  padding: 60px 24px 80px;
+  padding: 64px 24px 80px;
 }
 
 .hero {
@@ -50,9 +50,12 @@
   margin-bottom: 26px;
 }
 
+/* Design I + B: set a hair tighter than the stencil's default, and 26px
+   above the subtitle. */
 .h1 {
   font: var(--display-landing);
-  margin-bottom: 22px;
+  letter-spacing: -0.012em;
+  margin-bottom: 26px;
   color: var(--text-body);
 }
 
@@ -61,9 +64,9 @@
 }
 
 .subtitle {
-  font: var(--body-lg);
+  font: var(--body-lead);
   color: var(--text-muted);
-  max-width: 440px;
+  max-width: 480px;
   margin-bottom: 30px;
 }
 
@@ -75,13 +78,23 @@
   font: var(--meta-sm);
   letter-spacing: 0.04em;
   color: var(--text-body);
-  max-width: 440px;
+  max-width: 480px;
   margin: -18px 0 30px;
 }
 
+/* Side by side where they fit (French at 1280: 491 of 495px). Where they do
+   not, the second button goes under the first rather than both labels
+   breaking onto two lines inside their buttons. */
 .ctaRow {
   display: flex;
+  flex-wrap: wrap;
   gap: 14px;
+}
+
+@media (min-width: 761px) {
+  .ctaRow > * {
+    white-space: nowrap;
+  }
 }
 
 /* REVIEW-03.md B3 — one sentence and a link, never a section: no card, no
@@ -91,15 +104,17 @@
   margin-top: var(--space-15);
 }
 
+/* Design I + B: the founder's line is a pull quote, not a footnote. */
 .founder {
-  margin-top: 72px;
+  margin-top: var(--space-14);
   padding-top: 26px;
   border-top: var(--border-rule);
-  max-width: 620px;
+  max-width: 720px;
 }
 
 .founderQuote {
-  font: var(--body-lg);
+  font: var(--title-quote);
+  letter-spacing: -0.01em;
   color: var(--text-body);
   margin: 0 0 10px;
 }
@@ -237,7 +252,7 @@
   }
 
   .founder {
-    margin-top: 48px;
+    margin-top: var(--space-13);
   }
 
   .ctaRow {

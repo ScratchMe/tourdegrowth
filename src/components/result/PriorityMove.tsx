@@ -23,7 +23,9 @@ export interface PriorityMoveProps extends HTMLAttributes<HTMLDivElement> {
 
 /**
  * The single next action — dashed red on paper, because dashed red is advice
- * and solid red is diagnosis. Exactly one per result screen.
+ * and solid red is diagnosis, on a hard red shadow since design I + B (the
+ * dash, not the shadow, is what tells it from `DetourCard tone="fault"`).
+ * Exactly one per result screen.
  *
  * Since design system extension 03 it carries the free, deterministic action
  * from `content/next-moves.ts` for **everyone**, owner and visitor alike, and

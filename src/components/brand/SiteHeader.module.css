@@ -1,17 +1,23 @@
 /*
  * The site header — see SiteHeader.tsx. Sticky, on frosted paper.
  *
+ * The glass is the RAISED paper (--surface-card, --paper-0), a step lighter
+ * than the page ground (--surface-page, --paper-1): the design I + B mockup
+ * lifts the header off the page, and the first build glazed it with the
+ * page's own paper, so the two read as one surface (Antoine, 2026-09-29).
+ * space-token-contrast.test.ts holds the glass lighter than the page.
+ *
  * The paper is 92% opaque, and that number is a contrast bound: whatever
  * scrolls under the row shows through the rest, and the worst ground is a
  * solid ink one (the game's night desk, a card's hard shadow). Measured over
- * solid ink, 92% keeps the row's muted text at 4.98 and red link text at 4.65;
- * the design's mockup ran 74%, which puts them at 3.43 and 3.20.
+ * solid ink, 92% keeps the row's muted text at 6.14 and red link text at 5.73;
+ * the design's mockup ran 74%, which puts them at 4.16 and 3.89.
  */
 .header {
   position: sticky;
   top: 0;
   z-index: var(--z-header);
-  background: color-mix(in srgb, var(--surface-page) 92%, transparent);
+  background: color-mix(in srgb, var(--surface-card) 92%, transparent);
   /*
    * Unprefixed ONLY: the build (Lightning CSS) adds `-webkit-` for Safari.
    * Written with both, it kept the prefixed one alone — which Chrome ignores
@@ -24,7 +30,7 @@
 /* Without the blur, glass is just a pane in the way: paper, solid. */
 @supports not (backdrop-filter: blur(1px)) {
   .header {
-    background: var(--surface-page);
+    background: var(--surface-card);
   }
 }
 

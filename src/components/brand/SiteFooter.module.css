@@ -1,5 +1,8 @@
+/* A solid ink rule, as in the I + B mockup: the footer closes the page the
+   way the band opens it. (It was the dashed divider, the rule a section
+   uses inside a page.) */
 .footer {
-  border-top: var(--border-rule);
+  border-top: var(--border-solid);
   margin-top: var(--space-15);
 }
 

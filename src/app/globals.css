@@ -73,20 +73,22 @@ body {
   min-height: 100%;
   background-color: var(--surface-page);
   /*
-   * Three layers: the paper's grain (design I, 2026-09-28), a seamless noise
-   * tile repeated over the whole canvas and scrolling with it, then the two
-   * radial gradients of --ground-lift described here. The grain repeats on
-   * purpose — a tile, not a gradient, so tiling is what it is for and it has
-   * no edge to leave a seam.
+   * Two layers: the paper's grain (design I, 2026-09-28), a seamless noise
+   * tile repeated over the whole canvas and scrolling with it, then the
+   * white wash of --ground-lift. The grain repeats on purpose — a tile, not
+   * a gradient, so tiling is what it is for and it has no edge to leave a
+   * seam.
    *
-   * THREE values in each list below, not two: --ground-lift is itself two
-   * layers, and a shorter list cycles — written with two values, the lift's
-   * second gradient took the grain's 160px size and `repeat`, and tiled the
-   * page in soft blotches (seen on the first build, 2026-09-29).
+   * ONE value per layer in each list below, and a layer added to
+   * --ground-lift needs one more in each: a shorter list cycles. When the
+   * lift was two gradients and these lists had two values, its second
+   * gradient took the grain's 160px size and `repeat`, and tiled the page in
+   * soft blotches (seen on the first build, 2026-09-29).
+   * e2e/page-ground.spec.ts reads each layer's computed value.
    */
   background-image: var(--ground-grain), var(--ground-lift);
-  background-size: var(--ground-grain-size), auto, auto;
-  background-repeat: repeat, no-repeat, no-repeat;
+  background-size: var(--ground-grain-size), auto;
+  background-repeat: repeat, no-repeat;
   /*
    * `fixed` — the second half of the same seam, found 2026-09-24.
    *
@@ -99,9 +101,11 @@ body {
    *
    * Attaching the lift to the viewport removes the edge rather than moving
    * it, and it is the right metaphor anyway: the ground is lit, and light
-   * stays where the window is.
+   * stays where the window is. (The shadow lift is gone since 2026-09-29;
+   * `fixed` stays: the white wash is sized in percent of the window, as the
+   * mockup drew it on a 1280 × 860 one.)
    */
-  background-attachment: scroll, fixed, fixed;
+  background-attachment: scroll, fixed;
   color: var(--text-body);
   font-family: var(--font-ui), system-ui, sans-serif;
   line-height: 1.5;

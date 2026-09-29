@@ -5141,3 +5141,52 @@ Un test « `ui-timing.ts` ne recopie aucune durée CSS » a été écrit puis re
 - **Popover** mesuré dans l'application à 390 px : la croix fait 44 × 44 px, à sa place, et la ligne garde sa hauteur.
 - **Bundle design-sync** : 77/77 aperçus rendus, les trois avertissements permanents seulement.
 - **Relectures non lancées**, et pourquoi : la PR ne touche ni route, ni proxy, ni payload, ni prompt, ni workflow, et n'ajoute aucune copie visible (les seuls textes changés sont des commentaires).
+
+## Kit I + B, fidélité : ce que la maquette dessinait et que le rendu n'avait pas (2026-09-29, #183)
+
+Demandé par Antoine après le merge de #182 : « il me semble qu'il y a quelques écarts encore entre ce qui était prévu et ce qu'on obtient. Par exemple, la couleur du background où le titre "Tour de Growth" est présent était censé être plus clair que le background du body ».
+
+**La méthode : mesurer l'écart plutôt que le chercher à l'œil.** La feuille de la maquette (`design/alternatives-2026-09/designs/ib-ink.css`) est posée sur le build courant, et chaque style calculé qu'elle change est relevé : six écrans, 1 280 et 390 px. Les réglages déjà tranchés sont retirés d'abord (palette, grain, titre héros des autres pages, titre de section). Restent environ soixante écarts par écran. Chacun a été classé : choix consigné dans ce journal, bruit (la maquette dessine en pseudo-élément ce que le code rend en élément), ou oubli. L'en-tête n'est pas sorti du relevé : la maquette visait les trois anciens en-têtes, fondus depuis dans `SiteHeader`. Il a été traité à part.
+
+**Ce qui change à l'écran** :
+- **L'en-tête est en papier relevé** (`--surface-card`, `--paper-0`), un cran plus clair que la page (`--paper-1`). Le premier build l'avait vitré avec le papier de la page elle-même, donc l'en-tête se confondait avec le sol : 3 niveaux d'écart par canal, mesurés dans la gouttière droite ; 21 à 32 maintenant (vitre 249, 247, 239 sur un sol à 228, 222, 207). Les 92 % d'opacité, qui sont une borne de contraste, ne bougent pas. Au-dessus d'une encre pleine, le texte gris de la rangée monte de 4,98 à 6,14 et le lien rouge de 4,65 à 5,73.
+- **Le sol de la page n'a plus de halo gris.** La maquette l'éclaire d'un seul lavis blanc venu d'au-dessus du coin haut gauche, rien d'autre. Le halo noir à `88% 74%` grisait la moitié droite de chaque fenêtre. Le lavis est écrit en pourcentage de la boîte qu'il éclaire : sur 1 280 × 860, c'est exactement le `1200px 700px at 12% -10%` de la maquette, et une slide ou une carte de papier dans la nuit est éclairée pareil.
+- **Le pied de page s'ouvre sur un trait plein d'encre**, et non plus sur le pointillé des séparations internes.
+- **La citation du fondateur** devient une citation en exergue : 600 24 px (`--title-quote`).
+- **L'action unique** se pose sur une ombre dure rouge (`--shadow-advice`), et sa phrase passe en 600 18 px (`--title-move`). Sur l'accueil comme sur le résultat.
+- **Le bandeau du jeu, sur le résultat, porte la montagne** en ambre de nuit, empruntée à `SPACE_PICTO` et non redessinée.
+- **Le quiz** : segments de progression de 10 px (au lieu de 18/16), réponses de 72 px (`--hit-answer`, puisque les cartes d'action du jeu gardent `--hit-option`), 64 px d'air sous le bandeau sur desktop.
+- **L'accueil** : sous-titre en 19 px (`--body-lead`), titre resserré (−0,012 em), boutons larges en 17 px.
+- **Une ombre de 8 px** (`--shadow-hero`, `Card elevation="hero"`) pour les deux cartes qui SONT l'écran : l'aperçu de l'accueil et la question.
+- **La carte du jeu de la bande d'accueil, ouverte, perd son liseré gris.** Fermée, elle garde son pointillé, qui dit « bientôt » sans le mot.
+
+**Tranché par Antoine** : la colonne gauche de l'accueil reste **calée en haut**. La maquette la centre face à la carte d'aperçu. Le bouton principal descendrait alors d'environ 180 px et passerait sous la ligne de flottaison d'un portable 1 366 × 768.
+
+**Choix de tech lead** :
+- **Les boutons larges ont 20 px de côté, pas 26.** Avec 26, les deux appels de l'accueil font 515 px en français pour une colonne de 495 : le premier build a coupé chaque libellé en deux. Avec 20, c'est 491 px. La colonne de la maquette faisait 515 px, par un effet de sa grille sur la carte d'aperçu. Sur téléphone, où ils prennent toute la largeur, ils gardent 16 px. La rangée passe en `flex-wrap` : là où ils ne tiennent pas, le second bouton descend entier au lieu de couper les deux libellés.
+- **La montagne du bandeau fait 22 × 14 et non 30 × 20, avec 20 px de côté au lieu de 26.** La ligne française fait 443 px de texte dans une carte de 528. À la taille de la maquette, elle ne tenait plus sur une ligne. À celle-ci, il faut 515 px. La spec du bandeau sur une ligne à 1 280 px reste verte.
+- **L'ombre rouge de l'action ne se confond pas avec celle de `DetourCard tone="fault"`** (nos pannes) : le pointillé fait la différence. `conventions.md` et les deux JSDoc le disent.
+- **`--ink-faint` 0,67 et le vert `#1e693e` (#182) restent** : ils passent avec plus de marge sur un sol qui ne fait plus qu'éclaircir, et le vert sert encore sur `--paper-2`.
+
+**Écarts laissés, et pourquoi** :
+- Les rayons hors de l'échelle 999/12/14/18 : dossard 8, question 22, cartes d'analyse et action 16.
+- L'interlettrage mono de 0,12 em de la maquette (nous : 0,08). Il élargirait chaque étiquette de 4 % et renverrait le bandeau du jeu sur deux lignes.
+- Le chapeau du hub en `#d9d1c2` sur la nuit : il demanderait une primitive de plus.
+- Les autres encadrés du moteur en outremer : la maquette ne montrait que la promesse de confidentialité.
+- Les 8 px d'air du moteur.
+
+**Deux gardes nouvelles, prouvées par sabotage** :
+- `space-token-contrast.test.ts` exige que la vitre soit plus claire que la page qu'elle survole : luminance supérieure de 10 %. Remise sur `--surface-page`, la vitre fait tomber six tests.
+- `token-contrast.test.ts` exige que le sol ne fasse qu'éclaircir : aucun arrêt de couleur plus sombre que le blanc. Il mesure aussi les encres de texte sur `--paper-1`, devenu le plancher. Le halo remis fait tomber le test.
+- `e2e/kit-fidelity.spec.ts` le vérifie aux pixels, sur quatre pages : la vitre dépasse le sol de plus de 10 niveaux par canal. Il vérifie aussi que les deux appels de l'accueil tiennent côte à côte, un libellé par ligne, dans les deux langues.
+- Sabotage sur le build : vitre remise sur le papier de la page, 26 px de côté. Les quatre pages tombent (vitre 231, 225, 210 contre un sol à 228, 222, 207 : l'écart qu'avait vu Antoine), ainsi que le français. L'anglais passe, puisqu'il tient même à 26.
+
+**Vérifié avant la PR** :
+- `tsc`, `eslint`, **2 220 tests unitaires**, `next build` ;
+- **suite Playwright complète : 582 passées, 5 ignorées par construction, aucun échec** ;
+- captures 1 280 / 390, en français et en anglais, comparées à celles de la maquette, et relevé calculé relancé : il ne reste que les écarts listés ci-dessus et le bruit ;
+- bundle design-sync : 77/77 aperçus, les trois avertissements permanents seulement. L'histoire `Elevations` de `Card` montre `hero`.
+
+**Relectures non lancées**, et pourquoi : aucune route, aucun proxy, aucun payload ni prompt n'est touché, et aucune copie visible n'est ajoutée (seuls des commentaires changent).
+
+**Après la PR, une règle de merge nouvelle** (Antoine) : « quand les PR sont vertes, tu peux merge, n'attends pas forcément mon GO, tant que tu sais que tu ne vas pas provoquer soudainement une grosse hausse de functions storage côté Vercel ». Écrite là où une session la lit avant d'agir : `CLAUDE.md` (l'outillage), `GITHUB.md` §2 et `/livrer` §0. Ce dernier donne la barrière vérifiable : aucun changement à `package.json`, au verrou, à `next.config.mjs` ni à `vercel.json`, et aucune route de fonction ajoutée. #183 la passe : du style, six composants retouchés, des tests et de la doc.
