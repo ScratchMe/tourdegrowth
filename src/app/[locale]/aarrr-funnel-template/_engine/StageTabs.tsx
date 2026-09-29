@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { Tag } from "@/components/core/Tag";
 import { CANDIDATE_IDS, metricsOfStage, type MetricShape } from "@/lib/engine/catalog-shape";
 import { positionLabel } from "@/lib/engine/phrases";
@@ -191,6 +191,15 @@ function rowValue(shape: MetricShape, view: EngineView): { text: string; kind: "
  * number opened from elsewhere ("Fill in" in the collect list, "Continue"
  * in the resume band) lands open, and the island moves focus to its toggle.
  *
+ * A folded row's sheet is in the page, `hidden="until-found"` (audit du kit
+ * §6, CHANTIERS.md A4, 2026-09-29): Ctrl+F finds a word inside it and the
+ * browser opens that row, which `beforematch` makes the row's own state.
+ * Where the value is not understood (Safari) it is a plain `hidden`, the
+ * row folded as before. A sheet holds a draft, so a folded one is drawn
+ * again from the engine each time the engine changes, and each time the
+ * row folds: opening a row still shows what is saved, never an edit left
+ * behind or a count another number has since changed.
+ *
  * The head keeps what the old stage row said beyond the pills: where each
  * of the stage's candidate rates sits against its comparator, in words
  * (`phrases.ts#positionLabel`, the one wording the sheet and the peloton
@@ -213,14 +222,25 @@ function StagePanel({
   const diagnosis = view.derived.diagnosis;
   const snapshot = state.snapshots[state.snapshots.length - 1]!;
   const shapes = metricsOfStage(stage);
-  const [open, setOpen] = useState<ReadonlySet<MetricId>>(() => new Set(initiallyOpen ? [initiallyOpen] : []));
-  const toggle = (metricId: MetricId) =>
+  // A folded sheet's key: the engine it was drawn from, and how many times its row has folded.
+  // An open row keeps the key it opened with, so opening never redraws what Ctrl+F just found.
+  const revision = revisionOf(snapshot);
+  const [folds, setFolds] = useState<Partial<Record<MetricId, number>>>({});
+  const foldedKey = (metricId: MetricId) => `${revision}:${folds[metricId] ?? 0}`;
+  const [open, setOpen] = useState<ReadonlyMap<MetricId, string>>(
+    () => new Map(initiallyOpen ? [[initiallyOpen, foldedKey(initiallyOpen)]] : []),
+  );
+  const unfold = (metricId: MetricId) =>
+    setOpen((was) => (was.has(metricId) ? was : new Map(was).set(metricId, foldedKey(metricId))));
+  const toggle = (metricId: MetricId) => {
+    if (!open.has(metricId)) return unfold(metricId);
     setOpen((was) => {
-      const next = new Set(was);
-      if (next.has(metricId)) next.delete(metricId);
-      else next.add(metricId);
+      const next = new Map(was);
+      next.delete(metricId);
       return next;
     });
+    setFolds((was) => ({ ...was, [metricId]: (was[metricId] ?? 0) + 1 }));
+  };
 
   const namedIds = new Set<MetricId>(diagnosis.state === "clear" || diagnosis.state === "shared" ? diagnosis.named : []);
   const positions = shapes.flatMap((shape) => {
@@ -293,14 +313,48 @@ function StagePanel({
                 <span className={styles.metricMarker} aria-hidden="true" data-open={isOpen ? "true" : "false"} />
               </button>
             </h4>
-            {isOpen ? (
-              <div id={bodyId} className={styles.metricBody}>
-                <MetricSheet id={shape.id} view={view} actions={actions} />
-              </div>
-            ) : null}
+            <FoldedBody id={bodyId} open={isOpen} onFound={() => unfold(shape.id)}>
+              <MetricSheet key={open.get(shape.id) ?? foldedKey(shape.id)} id={shape.id} view={view} actions={actions} />
+            </FoldedBody>
           </div>
         );
       })}
+    </div>
+  );
+}
+
+/** One number per engine snapshot object: what a folded sheet was drawn from (StagePanel). */
+const revisions = new WeakMap<object, number>();
+let lastRevision = 0;
+function revisionOf(snapshot: object): number {
+  let revision = revisions.get(snapshot);
+  if (revision === undefined) {
+    revision = ++lastRevision;
+    revisions.set(snapshot, revision);
+  }
+  return revision;
+}
+
+/**
+ * A row's body, `hidden="until-found"` while folded. Set on the element
+ * rather than as a prop: React writes any `hidden` it is given as a bare
+ * boolean, which would drop the value that makes it findable. A layout
+ * effect, so a folded body is never painted open for a frame.
+ */
+function FoldedBody({ id, open, onFound, children }: { id: string; open: boolean; onFound: () => void; children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    if (open) ref.current?.removeAttribute("hidden");
+    else ref.current?.setAttribute("hidden", "until-found");
+  }, [open]);
+  useEffect(() => {
+    const body = ref.current;
+    body?.addEventListener("beforematch", onFound);
+    return () => body?.removeEventListener("beforematch", onFound);
+  }, [onFound]);
+  return (
+    <div ref={ref} id={id} className={styles.metricBody} data-testid="engine-metric-body">
+      {children}
     </div>
   );
 }

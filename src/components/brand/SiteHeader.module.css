@@ -39,6 +39,36 @@
   border-bottom: var(--border-rule);
 }
 
+/*
+ * The rule only once the header covers something (audit du kit §6,
+ * CHANTIERS.md A4, 2026-09-29): at the top of the page the raised glass on
+ * the page's ground is edge enough, and the rule comes back the moment the
+ * page scrolls under it. A `scroll-state` query (Chromium 133+) cannot style
+ * the element it queries, but it can style its pseudo-elements: the border
+ * keeps its place in the layout, transparent, so nothing moves by a pixel,
+ * and the rule is drawn over it. Elsewhere the rule stays, as it always did.
+ */
+@supports (container-type: scroll-state) {
+  .header {
+    container-type: scroll-state;
+  }
+
+  .header[data-site-header="plain"] {
+    border-bottom-color: transparent;
+  }
+
+  @container scroll-state(stuck: top) {
+    .header[data-site-header="plain"]::after {
+      content: "";
+      position: absolute;
+      inset-inline: 0;
+      bottom: -1px;
+      border-bottom: var(--border-rule);
+      pointer-events: none;
+    }
+  }
+}
+
 .row {
   margin: 0 auto;
   padding: var(--space-6) 24px;

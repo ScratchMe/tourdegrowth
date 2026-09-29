@@ -9,7 +9,9 @@
  * and the cards are simply there.
  *
  * The choreography, on the site's scale (design audit S-13): the screen
- * fades in (--dur-open) and out (--dur-close, faster); each card rises by
+ * fades in (--dur-open) and out (--dur-close, faster) — transitions on the
+ * dialog's own `open`, no class and no script (audit du kit §6, CHANTIERS.md
+ * A4, 2026-09-29); each card rises by
  * --dist-step over --dur-open; its verdict slams once the card has landed;
  * an inspection shakes the stage once the stamp is down. One emphasis per
  * card: the number no longer stamps as well as the verdict.
@@ -32,33 +34,41 @@
   overflow-y: auto;
   /* A wheel at the end of the dialog does not scroll the page behind it. */
   overscroll-behavior: contain;
-  animation: tdg-game-news-open var(--dur-open) var(--ease-out) both;
+  /* Only read out of the top layer: during the fade out where `overlay`
+     below is not supported, the screen still covers the sticky header. */
+  z-index: var(--z-overlay);
+  /*
+   * The way out: closing the dialog (the last « Suivant », « Passer au
+   * bilan », Escape — all three are the dialog's own close) fades it over
+   * --dur-close. `display` and `overlay` flip at the END of that time
+   * (`allow-discrete`, Baseline 2024), so the dialog stays drawn, and in the
+   * top layer, while it fades. QuarterNews reads this length off the dialog
+   * and calls onDone once it has run, so the island unmounts a faded screen;
+   * under reduced motion (motion.css) there is no transition, its length is
+   * 0s, and the screen leaves at once.
+   */
+  opacity: 0;
+  transition:
+    opacity var(--dur-close) var(--ease-out),
+    display var(--dur-close) allow-discrete,
+    overlay var(--dur-close) allow-discrete;
 }
 
-/* Leaving: QuarterNews reads this animation's length from the dialog and
-   calls onDone when it has run, so the island unmounts a faded screen. */
-.dialog.closing {
-  animation: tdg-game-news-close var(--dur-close) var(--ease-out) both;
+/* The way in: from the starting style, over --dur-open. */
+.dialog[open] {
+  opacity: 1;
+  transition-duration: var(--dur-open);
+}
+
+@starting-style {
+  .dialog[open] {
+    opacity: 0;
+  }
 }
 
 /* The dialog paints the whole screen itself; the backdrop has nothing to add. */
 .dialog::backdrop {
   background: transparent;
-}
-
-@keyframes tdg-game-news-open {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes tdg-game-news-close {
-  to {
-    opacity: 0;
-  }
 }
 
 .frame {
@@ -171,6 +181,10 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
+  /* The site's paragraphs wrap `pretty` (no orphaned last word); the news
+     is read one card at a time, larger, so it inherits the same from here —
+     the mail, the note, the clipping, the CEO's line. */
+  text-wrap: pretty;
   animation: tdg-game-news-card var(--dur-open) var(--ease-out) both;
 }
 
@@ -351,6 +365,30 @@
   gap: var(--space-6);
   padding-block: var(--space-5);
   background: var(--surface-page);
+}
+
+/*
+ * A rule on top of the bar only while the card runs on under it (audit du
+ * kit §6, CHANTIERS.md A4, 2026-09-29): that is when the bar hides
+ * something, and the rule says where. A `scroll-state` query (Chromium
+ * 133+) on the bar itself, read by its own pseudo-element; out of layout,
+ * so the bar keeps its height. Without the query there is no rule, as before.
+ */
+@supports (container-type: scroll-state) {
+  .bottom {
+    container-type: scroll-state;
+  }
+
+  @container scroll-state(stuck: bottom) {
+    .bottom::before {
+      content: "";
+      position: absolute;
+      inset-inline: 0;
+      top: 0;
+      border-top: var(--border-rule);
+      pointer-events: none;
+    }
+  }
 }
 
 .count {

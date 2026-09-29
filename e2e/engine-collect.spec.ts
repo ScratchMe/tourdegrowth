@@ -300,7 +300,7 @@ test.describe("asking and collecting", () => {
     await expect(band).toContainText("to follow up");
     await band.getByTestId("engine-resume-continue").click();
     // "Continue" opens the cheapest number still to fill: a five-minute one.
-    await expect(page.locator('[data-testid^="engine-sheet-"]')).toBeVisible();
+    await expect(page.locator('[data-testid^="engine-sheet-"]:visible')).toHaveCount(1);
   });
 });
 
@@ -360,7 +360,7 @@ test.describe("the §6.0 example on the board", () => {
       // The board opens on the stage the diagnosis names, every number folded.
       const stagePanel = page.getByTestId("engine-panel");
       await expect(stagePanel).toHaveAttribute("data-stage", "activation");
-      await expect(stagePanel.locator('[data-testid^="engine-sheet-"]')).toHaveCount(0);
+      await expect(stagePanel.locator('[data-testid^="engine-sheet-"]:visible')).toHaveCount(0);
       // « What if » is folded on the board, and no longer inside a number's sheet.
       await expect(stagePanel.getByTestId("engine-whatif-panel")).toHaveCount(0);
       const fold = page.getByTestId("engine-board-whatif");
