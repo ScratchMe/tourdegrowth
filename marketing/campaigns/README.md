@@ -211,7 +211,7 @@ l'**espacement** entre deux lancements ne se comprime jamais (règle 2 du §0).
 | **S1** · 28 sept-4 oct | **A** : intégration mergée (copie revue, DS v3). Relevé de la ligne de départ par `stats.yml` **le jour même**, avant tout post | `main`, workflow stats | Antoine (merge), session (relevé) | Portier A |
 | S1 | A : « Demander l'indexation » dans la Search Console pour `/en`, `/fr`, les deux pages « porte ouverte » et les quatre « AARRR vs X » | Search Console | Antoine, 10 min | Après le merge |
 | S1 | A : annuaires restants de la vague 1 (Launching Next d'abord), avec la campagne `relaunch_tour` | Annuaires | Antoine (formulaires), liens déjà dans `kit.md` | — |
-| S1 | A : un fil X / Bluesky « ce qui a changé », EN puis FR le lendemain | X, Bluesky | Antoine poste, textes dans `social.md` de la vague 1 à mettre à jour (§8, D2) | — |
+| S1 | ~~A : un fil X / Bluesky « ce qui a changé », EN puis FR le lendemain~~ **Retiré le 2026-09-29 (§10, réponse D2) : A au seul SEO** | X, Bluesky | — | Retiré |
 | **S2** · 5-11 oct | Lecture A à J+7 : Tours créés, partages, `take_own_tour` ; recalage des cibles | `/admin/stats` | Session (workflow), Antoine décide | — |
 | S2 | **Bon à tirer nº6** (copie du moteur) signé ; recette du moteur ; spec canari verte | Revue | Antoine ; **portier B** | — |
 | S2 | Comptes : commenter sur HN et dans r/SaaS, r/growthhacking **sans lien**, pour que le compte existe avant le post | HN, Reddit | Antoine, 15 min par jour | Continu |
