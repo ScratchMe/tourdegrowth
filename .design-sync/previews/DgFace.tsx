@@ -15,22 +15,22 @@ export const Avatars = () => (
   <NightSurface as="div" style={{ padding: 20, display: "flex", gap: 24 }}>
     {MOODS.map((mood) => (
       <div key={mood} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-        <DgFace mood={mood} size="avatar" />
+        <DgFace mood={mood} framing="avatar" />
         <span style={caption}>{mood}</span>
       </div>
     ))}
   </NightSurface>
 );
 
-/** `frame` — the whole call, 16:9, with the office behind him. One per page (its paths carry test ids). */
-export const Frame = () => (
+/** `framing="call"` — the whole call, 16:9, with the office behind him. One per page (its paths carry test ids). */
+export const Call = () => (
   <NightSurface as="div" style={{ padding: 20, maxWidth: 480 }}>
     <DgFace mood="firm" />
   </NightSurface>
 );
 
-/** The four frames side by side, only to compare the moods at the size they are read. */
-export const FrameMoods = () => (
+/** The four calls side by side, only to compare the moods at the size they are read. */
+export const CallMoods = () => (
   <NightSurface as="div" style={{ padding: 20, display: "grid", gridTemplateColumns: "repeat(2, 220px)", gap: 16 }}>
     {MOODS.map((mood) => (
       <div key={mood} style={{ display: "flex", flexDirection: "column", gap: 6 }}>

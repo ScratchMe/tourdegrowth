@@ -319,7 +319,7 @@ Retired names, and where each went, one family at a time
 | `tone="red"` | `tone="alert"` | core: `Tag` — done |
 | `size="hero"` / `"compact"` / `"responsive"`, `size="mini"` | `size="lg"` / `"sm"` / `"auto"`, `size="sm"` | viz: `StatTile`, `BulletChart` — done |
 | `size="screen"` / `"slide"` | `medium="screen"` / `"slide"` | viz: `DotGrid`, `DotLegend` — done |
-| `size="frame"` / `"avatar"`, `size="compact"` | `size="lg"` / `"sm"`, `size="sm"` | game: `DgFace`, `ClickPill` |
+| `size="frame"` / `"avatar"`, `size="compact"` | `framing="call"` / `"avatar"`, `size="sm"` | game: `DgFace` (what is in the picture, not a scale), `ClickPill` — done |
 
 ## Contracts: two things to know when reading a `.d.ts`
 

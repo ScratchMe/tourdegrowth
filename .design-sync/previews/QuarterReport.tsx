@@ -35,7 +35,7 @@ export const MissedByALittle = () => (
         "Exit survey: exit answers, and numbers to show the CEO",
       ]}
       mail={{ header: "From: CEO · Subject: this week's numbers", body: '"It\'s moving. Keep going."' }}
-      boss={{ line: 'The CEO: "That\'s not what we agreed."', mood: "firm", face: <DgFace mood="firm" size="avatar" /> }}
+      boss={{ line: 'The CEO: "That\'s not what we agreed."', mood: "firm", face: <DgFace mood="firm" framing="avatar" /> }}
       next={{ label: "The CEO is calling you →", onClick: noop }}
     />
   </NightSurface>
@@ -76,7 +76,7 @@ export const HitWithAClipping = () => (
           text: '"I tried to cancel Flixo, here are my three hours."',
         },
       ]}
-      boss={{ line: 'The CEO: "Well played."', mood: "calm", face: <DgFace mood="calm" size="avatar" /> }}
+      boss={{ line: 'The CEO: "Well played."', mood: "calm", face: <DgFace mood="calm" framing="avatar" /> }}
       next={{ label: "See the year's review →", onClick: noop }}
     />
   </NightSurface>
@@ -101,7 +101,7 @@ export const FrenchWithANote = () => (
       boss={{
         line: "Le DG : « Je ne sais pas combien de temps je peux te couvrir. »",
         mood: "cold",
-        face: <DgFace mood="cold" size="avatar" />,
+        face: <DgFace mood="cold" framing="avatar" />,
       }}
       next={{ label: "Le DG t'appelle →", onClick: noop }}
     />

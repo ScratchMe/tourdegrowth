@@ -20,10 +20,9 @@ import { describe, expect, it } from "vitest";
 const COMPONENTS = join(process.cwd(), "src", "components");
 const SCALE = new Set(["xs", "sm", "md", "lg", "auto"]);
 
-const PENDING: Record<string, readonly string[]> = {
-  "game/DgFace.tsx": ["frame", "avatar"],
-  "game/ClickPill.tsx": ["compact"],
-};
+// Empty since the four families moved (2026-09-29). A component that comes
+// in with a retired name is renamed, not listed.
+const PENDING: Record<string, readonly string[]> = {};
 
 const walk = (dir: string): string[] =>
   readdirSync(dir).flatMap((name) => {

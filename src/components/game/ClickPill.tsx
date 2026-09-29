@@ -7,8 +7,8 @@ export interface ClickPillProps {
   /** lib/game/view.ts `clicksOverLaw(clicks)` — decided by the view, not re-derived here. */
   overLaw: boolean;
   labels: LevelCopy["clicks"];
-  /** `compact` for the sticky action bar on a phone: same words, smaller type. */
-  size?: "md" | "compact";
+  /** `sm` for the sticky action bar on a phone: same words, smaller type. */
+  size?: "md" | "sm";
   /**
    * Whether the pill speaks for itself (`aria-live="polite"`). On by default:
    * alone on a page, it is the one change a screen-reader user needs to hear
