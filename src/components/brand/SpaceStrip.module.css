@@ -103,8 +103,8 @@
   border-radius: var(--radius-tag);
   background: var(--strip-mark);
   color: var(--strip-chip-text);
-  font: var(--meta-2xs);
-  font-size: 13px;
+  font: var(--meta-md);
+  line-height: 1;
   font-weight: 700;
 }
 

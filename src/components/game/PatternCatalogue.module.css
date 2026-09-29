@@ -4,6 +4,7 @@
  */
 
 .catalogue {
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
@@ -137,8 +138,9 @@
   }
 }
 
-/* One column: a label beside a legal paragraph leaves the paragraph ten words wide on a phone. */
-@media (max-width: 560px) {
+/* One column: a label beside a legal paragraph leaves the paragraph ten words
+   wide on a phone. The catalogue's own width (design audit S-18). */
+@container (max-width: 520px) {
   .fact {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-1);

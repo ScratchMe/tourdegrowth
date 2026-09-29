@@ -26,22 +26,45 @@
   animation-name: stamp;
 }
 
+.slam {
+  animation-name: slam;
+}
+
 .pulse {
   animation-name: pulse;
 }
 
-/* The score lands like a stamp: overshoot, settle, no bounce back up. */
+/*
+ * The score lands like a stamp. Two stops, and the overshoot is the easing's
+ * (--ease-stamp), so it happens once: the three stops this used to have
+ * overshot on their own, and an overshooting easing applied to each segment
+ * made the numeral bounce twice (design audit L-6).
+ */
 @keyframes stamp {
-  0% {
+  from {
     transform: scale(1.18) rotate(-3deg);
     opacity: 0;
   }
-  60% {
-    transform: scale(0.99) rotate(0.6deg);
+  to {
+    transform: none;
     opacity: 1;
   }
-  100% {
-    transform: scale(1) rotate(0);
+}
+
+/*
+ * A rubber stamp slams down on a verdict or a press clipping. It animates
+ * `scale` and `opacity` only, the individual properties: the stamp's resting
+ * tilt is its own `rotate`, which this never touches, so one keyframe serves
+ * a -4° verdict and a -6° clipping (design audit S-13; the two copies it
+ * replaces differed by a few degrees and 0.2 of scale).
+ */
+@keyframes slam {
+  from {
+    scale: 2.3;
+    opacity: 0;
+  }
+  to {
+    scale: 1;
     opacity: 1;
   }
 }

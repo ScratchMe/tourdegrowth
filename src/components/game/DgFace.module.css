@@ -111,7 +111,7 @@
 .flush {
   fill: var(--dg-flush);
   opacity: 0;
-  transition: opacity var(--dur-stamp) var(--ease-out);
+  transition: opacity var(--dur-state) var(--ease-out);
 }
 
 .crease {
@@ -119,7 +119,7 @@
   stroke: var(--dg-skin-shade);
   stroke-width: 1.2;
   opacity: 0;
-  transition: opacity var(--dur-stamp) var(--ease-out);
+  transition: opacity var(--dur-state) var(--ease-out);
 }
 
 .face[data-mood="angry"] .flush,
@@ -178,7 +178,7 @@
   stroke: var(--dg-hair);
   stroke-width: 3;
   stroke-linecap: round;
-  transition: d var(--dur-stamp) var(--ease-out);
+  transition: d var(--dur-state) var(--ease-out);
 }
 
 .mouthLine {
@@ -186,7 +186,7 @@
   stroke: var(--dg-mouth);
   stroke-width: 2.4;
   stroke-linecap: round;
-  transition: d var(--dur-stamp) var(--ease-out);
+  transition: d var(--dur-state) var(--ease-out);
 }
 
 .mouth {

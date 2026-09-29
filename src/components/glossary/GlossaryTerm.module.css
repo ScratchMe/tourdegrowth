@@ -7,7 +7,7 @@
   position: absolute;
   top: calc(100% + 6px);
   left: 0;
-  z-index: 30;
+  z-index: var(--z-popover);
 }
 
 @media (max-width: 640px) {

@@ -73,11 +73,17 @@ export interface QuarterNewsProps {
  * by the stage, a polite live region read whole.
  *
  * Every animation is CSS and every element rests in its final state, so
- * under `prefers-reduced-motion` (motion.css) the cards simply appear.
+ * under `prefers-reduced-motion` (motion.css) the cards simply appear. The
+ * way out fades too (`--dur-close`): `onDone`, which lets the island unmount
+ * the dialog, waits for the length the stylesheet gives that fade — read
+ * from the dialog itself, so there is no copy of the number here, and under
+ * reduced motion the fade is off, its length 0s, and the screen leaves at
+ * once.
  */
 export function QuarterNews({ q, eyebrow, period, items, progress, labels, primaryRef, onDone }: QuarterNewsProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [index, setIndex] = useState(0);
+  const [closing, setClosing] = useState<"read" | "skipped" | null>(null);
   const last = index >= items.length - 1;
   const item = items[Math.min(index, items.length - 1)];
 
@@ -98,8 +104,24 @@ export function QuarterNews({ q, eyebrow, period, items, progress, labels, prima
     };
   }, []);
 
+  // The fade out has started (the `closing` class is on): hand over when it
+  // ends. Its length is the stylesheet's, read here rather than copied.
+  useEffect(() => {
+    if (!closing) return;
+    const duration = dialogRef.current ? getComputedStyle(dialogRef.current).animationDuration : "0s";
+    const ms = duration.endsWith("ms") ? parseFloat(duration) : parseFloat(duration) * 1000;
+    const timer = window.setTimeout(() => onDone(closing), Number.isFinite(ms) ? ms : 0);
+    return () => window.clearTimeout(timer);
+  }, [closing, onDone]);
+
+  // Once, whichever way out is taken first (the last « Suivant », « Passer au
+  // bilan », Escape): a second press during the fade does nothing.
+  const finish = (how: "read" | "skipped") => {
+    if (!closing) setClosing(how);
+  };
+
   const next = () => {
-    if (last) return onDone("read");
+    if (last) return finish("read");
     setIndex((i) => i + 1);
     // A long card (an inspection, on a phone) may have been scrolled; the next
     // one starts at its top, where its label says what it is.
@@ -112,12 +134,12 @@ export function QuarterNews({ q, eyebrow, period, items, progress, labels, prima
   return (
     <dialog
       ref={dialogRef}
-      className={styles.dialog}
+      className={[styles.dialog, closing ? styles.closing : ""].filter(Boolean).join(" ")}
       aria-labelledby={`game-news-${q}-title`}
       aria-describedby={`game-news-${q}-stage`}
       onCancel={(event) => {
         event.preventDefault();
-        onDone("skipped");
+        finish("skipped");
       }}
       data-testid="game-news"
       data-q={q}
@@ -130,7 +152,7 @@ export function QuarterNews({ q, eyebrow, period, items, progress, labels, prima
               {period}
             </h2>
           </div>
-          <Button variant="quiet" onClick={() => onDone("skipped")} data-testid="game-news-skip">
+          <Button variant="quiet" onClick={() => finish("skipped")} data-testid="game-news-skip">
             {labels.skip}
           </Button>
         </header>

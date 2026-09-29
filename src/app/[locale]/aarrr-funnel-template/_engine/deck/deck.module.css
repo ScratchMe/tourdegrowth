@@ -300,16 +300,18 @@
 }
 
 /*
- * The diagnosis stamp on the named column, beside its numeral. The action
- * fill, as on the board: bold and large enough to be large text, and it
- * passes as body text too, so the same tag reads at a PNG thumbnail's size.
+ * The diagnosis stamp on the named column, beside its numeral. The red fill
+ * made for small white text (--surface-accent / --text-inverse, 4.65:1), as
+ * on the board — not the button's tokens (design audit S-9): bold and large
+ * enough to be large text, and it passes as body text too, so the same tag
+ * reads at a PNG thumbnail's size.
  */
 .stamp {
   flex: none;
   padding: 6px 16px;
   border-radius: var(--radius-tag);
-  background: var(--action-primary-bg);
-  color: var(--action-primary-text);
+  background: var(--surface-accent);
+  color: var(--text-inverse);
   font: var(--slide-heading);
   font-size: 22px;
   font-weight: 700;

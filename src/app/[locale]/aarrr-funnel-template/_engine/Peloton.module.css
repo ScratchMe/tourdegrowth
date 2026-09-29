@@ -88,16 +88,16 @@
   margin-bottom: var(--space-3);
 }
 
-/* StampedPillar's grammar (a painted, slightly rotated tag). The action red,
-   not the road-paint red: white 12px text on --paint-red is 4.42:1, under
-   AA; the action fill clears it at 4.65:1. */
+/* StampedPillar's grammar (a painted, slightly rotated tag), on the role made
+   for a red fill under small white text: --surface-accent / --text-inverse,
+   4.65:1 where the road-paint red is 4.42 (design audit S-9). */
 .stamp {
   display: inline-block;
   font: var(--meta-2xs);
   letter-spacing: var(--meta-tracking);
   text-transform: uppercase;
-  color: var(--action-primary-text);
-  background: var(--action-primary-bg);
+  color: var(--text-inverse);
+  background: var(--surface-accent);
   border-radius: var(--radius-tag);
   padding: var(--space-1) var(--space-3);
   transform: rotate(-1.5deg);

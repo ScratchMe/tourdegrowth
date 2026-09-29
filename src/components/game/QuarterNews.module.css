@@ -7,6 +7,12 @@
  * Every element's resting style is its final state, and each entrance is a
  * `from` keyframe: under reduced motion (motion.css) the animations are off
  * and the cards are simply there.
+ *
+ * The choreography, on the site's scale (design audit S-13): the screen
+ * fades in (--dur-open) and out (--dur-close, faster); each card rises by
+ * --dist-step over --dur-open; its verdict slams once the card has landed;
+ * an inspection shakes the stage once the stamp is down. One emphasis per
+ * card: the number no longer stamps as well as the verdict.
  */
 
 .dialog {
@@ -26,7 +32,13 @@
   overflow-y: auto;
   /* A wheel at the end of the dialog does not scroll the page behind it. */
   overscroll-behavior: contain;
-  animation: tdg-game-news-open 240ms var(--ease-out) both;
+  animation: tdg-game-news-open var(--dur-open) var(--ease-out) both;
+}
+
+/* Leaving: QuarterNews reads this animation's length from the dialog and
+   calls onDone when it has run, so the island unmounts a faded screen. */
+.dialog.closing {
+  animation: tdg-game-news-close var(--dur-close) var(--ease-out) both;
 }
 
 /* The dialog paints the whole screen itself; the backdrop has nothing to add. */
@@ -40,6 +52,12 @@
   }
   to {
     opacity: 1;
+  }
+}
+
+@keyframes tdg-game-news-close {
+  to {
+    opacity: 0;
   }
 }
 
@@ -123,27 +141,29 @@
   justify-content: center;
 }
 
-/* An inspection shakes the stage once, after its stamp has landed. */
+/*
+ * An inspection shakes the stage once, after its stamp has landed: four
+ * swings of 80, 80, 60 and 60 ms (--dur-shake), dying from one step to
+ * three-eighths of one. `ease-in-out` per swing: a shake has no rest to
+ * settle into until the last one.
+ */
 .shake {
-  animation: tdg-game-news-shake 420ms ease-in-out 620ms both;
+  animation: tdg-game-news-shake var(--dur-shake) ease-in-out calc(var(--dur-open) + var(--dur-stamp)) both;
 }
 
 @keyframes tdg-game-news-shake {
   0%,
   100% {
-    transform: none;
+    translate: 0;
   }
-  20% {
-    transform: translateX(-10px);
+  28.6% {
+    translate: calc(-1 * var(--dist-step));
   }
-  40% {
-    transform: translateX(9px);
+  57.1% {
+    translate: calc(0.75 * var(--dist-step));
   }
-  60% {
-    transform: translateX(-6px);
-  }
-  80% {
-    transform: translateX(3px);
+  78.6% {
+    translate: calc(-0.375 * var(--dist-step));
   }
 }
 
@@ -151,17 +171,17 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
-  animation: tdg-game-news-card 420ms var(--ease-out) both;
+  animation: tdg-game-news-card var(--dur-open) var(--ease-out) both;
 }
 
 @keyframes tdg-game-news-card {
   from {
     opacity: 0;
-    transform: translateY(28px) scale(0.97);
+    translate: 0 var(--dist-step);
   }
   to {
     opacity: 1;
-    transform: none;
+    translate: 0;
   }
 }
 
@@ -191,18 +211,14 @@
   color: var(--text-muted);
 }
 
-/* The number the quarter is judged on, as big as the page can carry it. */
+/* The number the quarter is judged on, as big as the page can carry it. It
+   arrives with its card; the verdict under it is the card's one stamp. */
 .value {
-  composes: stamp from "../../styles/motion.module.css";
   margin: 0;
   font: var(--display-score-xl);
   font-variant-numeric: var(--tabular);
   line-height: 1;
   color: var(--text-body);
-  animation-duration: var(--dur-stamp);
-  animation-timing-function: var(--ease-stamp);
-  animation-delay: 120ms;
-  animation-fill-mode: both;
 }
 
 .note {
@@ -211,8 +227,10 @@
   color: var(--text-muted);
 }
 
-/* Hit or missed, in words, stamped: the colour repeats what the words say. */
+/* Hit or missed, in words, stamped: the colour repeats what the words say.
+   It slams once the card has landed (motion.module.css, `slam`). */
 .verdict {
+  composes: slam from "../../styles/motion.module.css";
   margin: var(--space-3) 0 0;
   padding: var(--space-2) var(--space-5);
   font: var(--meta-md);
@@ -221,8 +239,11 @@
   text-transform: uppercase;
   border: 3px solid currentColor;
   border-radius: var(--radius-tag);
-  transform: rotate(-4deg);
-  animation: tdg-game-news-verdict 380ms var(--ease-stamp) 420ms both;
+  rotate: -4deg;
+  animation-duration: var(--dur-stamp);
+  animation-timing-function: var(--ease-stamp);
+  animation-delay: var(--dur-open);
+  animation-fill-mode: both;
 }
 
 .verdict[data-tone="good"] {
@@ -231,17 +252,6 @@
 
 .verdict[data-tone="bad"] {
   color: var(--state-bad-text);
-}
-
-@keyframes tdg-game-news-verdict {
-  from {
-    opacity: 0;
-    transform: scale(2.2) rotate(-14deg);
-  }
-  to {
-    opacity: 1;
-    transform: rotate(-4deg);
-  }
 }
 
 .figures {

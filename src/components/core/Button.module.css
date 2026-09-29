@@ -9,7 +9,8 @@
   text-decoration: none;
   transition:
     box-shadow var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out);
+    transform var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
 }
 
 .button:disabled {
@@ -73,10 +74,14 @@
  * `:not(:disabled)` so a disabled button does not lift under the cursor — the
  * one state that must look like it will not respond.
  */
+/* At night the shadow is black on black: the edge lightens with it
+   (--state-hover-border, design audit S-7), and on paper it is the edge the
+   button already has. */
 .primary:not(:disabled):hover,
 .secondary:not(:disabled):hover {
   transform: translate(-2px, -2px);
   box-shadow: var(--state-hover-shadow);
+  border-color: var(--state-hover-border);
 }
 
 /* The primary already rests on its shadow: hover peels it further. */

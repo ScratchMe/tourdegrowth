@@ -62,6 +62,7 @@ const PAIRS: Pair[] = [
   ...on3("text-muted", [8.28, 7.7, 6.76], "text", "labels, captions"),
   ...on3("border-hard", [3.99, 3.7, 3.25], "mark", "component edges, axes — ≥ 3 everywhere"),
   ...on3("border-divider", [1.51, 1.4, 1.23], "decorative", "dashed separators"),
+  ...on3("state-hover-border", [8.28, 7.7, 6.76], "mark", "night hover: the edge, not the shadow"),
   ...on3("surface-inverse", [10.13, 9.41, 8.26], "text", "amber: key figure, selection"),
   ...on3("state-good-text", [9.68, 9.0, 7.9], "text", "patience ≥ 35"),
   ...on3("state-bad-text", [6.66, 6.19, 5.44], "text", "red text AND patience < 35"),

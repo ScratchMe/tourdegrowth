@@ -77,6 +77,10 @@
   --tabular: tabular-nums;
   --chart-value-xl: 700 48px/1 var(--font-display); /* the hero figure of a tile: a race bib */
   --chart-value: 600 20px/1.1 var(--font-mono);
+  /* A tile's figure on a compact phone row (the game's dashboard): the game
+     declared it as --game-value-compact and wrote 17px by hand instead of
+     reading it (design audit S-27). */
+  --chart-value-compact: 600 17px/1.1 var(--font-mono);
   --chart-label: 500 12px/1.4 var(--font-mono);
   --chart-title: var(--title-card); /* a chart title is a sentence that says the insight */
   --chart-note: var(--meta-xs); /* source, date, granularity */

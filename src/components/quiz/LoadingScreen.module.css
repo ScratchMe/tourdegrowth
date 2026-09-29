@@ -32,7 +32,7 @@
      real call can take well over a minute (see LoadingScreen.tsx), so this
      is deliberately not tied to the message-step timer: it must keep moving
      regardless of how long the wait turns out to be. */
-  animation: breathe 2.4s ease-in-out infinite;
+  animation: breathe var(--dur-breathe) ease-in-out infinite;
 }
 
 @keyframes breathe {
@@ -80,8 +80,24 @@
 
 .dots {
   display: inline-block;
-  width: 1.5em;
+  width: 3ch;
   text-align: left;
+  animation: dots var(--dur-dots) step-end infinite;
+}
+
+/* One dot, one, two, three — each stop held until the next (step-end). The
+   clip, not the width, so the line never reflows as the dots come and go. */
+@keyframes dots {
+  0% {
+    clip-path: inset(0 66% 0 0);
+  }
+  50% {
+    clip-path: inset(0 33% 0 0);
+  }
+  75%,
+  100% {
+    clip-path: inset(0);
+  }
 }
 
 .segments {
@@ -108,7 +124,7 @@
    ellipsis and the breathing numeral: visible motion for as long as the
    real call takes, never a fixed timeout. */
 .pulsing {
-  animation: segmentPulse 1.6s ease-in-out infinite;
+  animation: segmentPulse var(--dur-wait) ease-in-out infinite;
 }
 
 @keyframes segmentPulse {

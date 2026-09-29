@@ -108,8 +108,8 @@ const PAIRS: Pair[] = [
   { fg: "text-link", bg: P1, stated: 5.42, role: "text", why: "links on the page ground (H-4)" },
   { fg: "text-link", bg: P0, stated: 6.72, role: "text", why: "links on a card" },
   { fg: "text-link", bg: P2, stated: 4.89, role: "text", why: "links on a sunken block" },
-  { fg: "text-faint", bg: "surface-card", stated: 5.18, role: "text", why: "credit line, ink at 0.65" },
-  { fg: "text-faint", bg: P1, stated: 4.72, role: "text", why: "same ink, composed on the page ground" },
+  { fg: "text-faint", bg: "surface-card", stated: 5.5, role: "text", why: "credit line, ink at 0.67" },
+  { fg: "text-faint", bg: P1, stated: 5.02, role: "text", why: "same ink, composed on the page ground" },
 
   // --- Critique §3/§4 ---
   { fg: "text-body", bg: P1, stated: 12.97, role: "text", why: "long-form body (M-3)" },
@@ -122,9 +122,9 @@ const PAIRS: Pair[] = [
   { fg: "text-on-inverse", bg: "surface-inverse", stated: 16.06, role: "text", why: "ink chip, active segment" },
   { fg: "text-inverse", bg: "surface-accent", stated: 4.65, role: "text", why: "small label on a red fill: Tag red, stamped pillar, roast badge" },
   { fg: "state-selected-text", bg: "state-selected-bg", stated: 16.06, role: "text", why: "one selection language (H-5)" },
-  { fg: "state-good-text", bg: P0, stated: 6.17, role: "text", why: "status good" },
-  { fg: "state-good-text", bg: P1, stated: 4.98, role: "text", why: "status good" },
-  { fg: "state-good-text", bg: P2, stated: 4.49, role: "large", why: "large text only on a sunken ground (≥ 24px, or ≥ 18.66px bold)" },
+  { fg: "state-good-text", bg: P0, stated: 6.34, role: "text", why: "status good" },
+  { fg: "state-good-text", bg: P1, stated: 5.12, role: "text", why: "status good" },
+  { fg: "state-good-text", bg: P2, stated: 4.61, role: "text", why: "status good, on a sunken ground too since S-20" },
   { fg: "state-warn-text", bg: P0, stated: 6.57, role: "text", why: "status warn" },
   { fg: "state-warn-text", bg: P1, stated: 5.31, role: "text", why: "status warn" },
   { fg: "state-warn-text", bg: P2, stated: 4.78, role: "text", why: "status warn" },
@@ -185,6 +185,62 @@ describe("every stated paper-world contrast ratio holds", () => {
     const viz = [...TOKENS.keys()].filter((n) => n.startsWith("viz-"));
     expect(viz.length).toBeGreaterThan(20);
     for (const n of viz) expect(measured.has(n), `--${n} has no stated ratio`).toBe(true);
+  });
+});
+
+/*
+ * Design audit L-10 / S-20 — the page ground is not flat --paper-1. Its
+ * `--ground-lift` (shape.css) darkens it under a black halo, and text sits
+ * on the bare ground there: a credit line, December's « won » line, a
+ * status on the page. Every text ink the paper world sets on the page is
+ * measured at the halo's darkest point too. (The grain's own darkest pixel
+ * is measured alone in space-token-contrast.test.ts; stacked on the halo it
+ * would ask the brand's primitive reds to change, and a glyph is never
+ * drawn on one noise pixel.)
+ *
+ * Two series colors fall under AA there: they are marks and in-chart labels
+ * (a ChartFrame is a card), never text on the bare page — pinned as such, so
+ * the day one is used that way this fails.
+ */
+describe("text on the page's darkest halo still clears AA", () => {
+  const shape = readFileSync(path.join(process.cwd(), "src/styles/tokens/shape.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  const lift = /--ground-lift\s*:([^;]+);/.exec(shape)?.[1] ?? "";
+  const darkest = /rgba\(0,\s*0,\s*0,\s*([\d.]+)\)/.exec(lift)?.[1];
+  const halo = paint(`rgba(0, 0, 0, ${darkest})`, paint(P1));
+  const HALO = `#${[halo.r, halo.g, halo.b].map((v) => v.toString(16).padStart(2, "0")).join("")}`;
+
+  const HALO_PAIRS: { fg: string; stated: number; role: Role }[] = [
+    { fg: "text-body", stated: 11.65, role: "text" },
+    { fg: "text-muted", stated: 5.22, role: "text" },
+    { fg: "text-faint", stated: 4.79, role: "text" },
+    { fg: "text-link", stated: 4.87, role: "text" },
+    { fg: "text-alert", stated: 4.87, role: "text" },
+    { fg: "state-good-text", stated: 4.6, role: "text" },
+    { fg: "state-bad-text", stated: 4.87, role: "text" },
+    { fg: "state-warn-text", stated: 4.77, role: "text" },
+    { fg: "viz-axis", stated: 5.22, role: "text" },
+    { fg: "viz-highlight-text", stated: 4.87, role: "text" },
+    { fg: "viz-cat-2", stated: 4.23, role: "mark-only" },
+    { fg: "viz-cat-3", stated: 4.39, role: "mark-only" },
+  ];
+
+  it("reads the halo from shape.css, not a copy of it", () => {
+    expect(darkest).toBe("0.05");
+    expect(HALO).not.toBe(literal(P1));
+  });
+
+  it.each(HALO_PAIRS)("--$fg under the halo is $stated:1", ({ fg, stated, role }) => {
+    const ratio = contrast(fg, HALO);
+    expect(round2(ratio)).toBe(stated);
+    if (role === "text") expect(ratio).toBeGreaterThanOrEqual(4.5);
+    if (role === "mark-only") {
+      expect(ratio).toBeGreaterThanOrEqual(3);
+      expect(ratio).toBeLessThan(4.5);
+    }
+  });
+
+  it("keeps the faint ink quieter than the muted one there too", () => {
+    expect(contrast("text-faint", HALO)).toBeLessThan(contrast("text-muted", HALO));
   });
 });
 

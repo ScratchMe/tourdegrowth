@@ -72,12 +72,14 @@
      the column and changes nothing, which is right. */
   --measure-read: 36em;
 
-  /* Stacking — one scale instead of 30/39/40 written inline. The popover
-     sits under any overlay; a toast sits over everything. */
+  /* Stacking — one scale, and every z-index reads it (design audit L-7;
+     z-index.test.ts). A bar raised over its own page, the sticky site
+     header, the glossary popover (anchored or docked, its backdrop one
+     under it), then the skip link over everything. */
+  --z-raised: 1;
   /* The sticky site header (brand/SiteHeader): over the page, under an
-     open glossary popover (its anchored wrap is 30) and every overlay. */
+     open glossary popover and every overlay. */
   --z-header: 25;
   --z-popover: 40;
   --z-overlay: 100;
-  --z-toast: 200;
 }

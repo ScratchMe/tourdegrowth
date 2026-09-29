@@ -23,21 +23,21 @@
  * always a secondary/smaller context than the real result screen).
  */
 .desktop {
-  font-size: 144px;
+  font-size: var(--size-score-xl);
   line-height: 0.86;
   margin-top: 10px;
 }
 
 @media (max-width: 760px) {
   .desktop {
-    font-size: 110px;
+    font-size: var(--size-score-lg);
     line-height: 0.88;
     margin-top: 6px;
   }
 }
 
 .mobile {
-  font-size: 110px;
+  font-size: var(--size-score-lg);
   line-height: 0.88;
   margin-top: 6px;
 }
@@ -47,7 +47,7 @@
      here, never the shorthand (it would reset the composed name). */
   composes: stamp from "../../styles/motion.module.css";
   animation-duration: var(--dur-stamp);
-  animation-timing-function: var(--ease-out);
+  animation-timing-function: var(--ease-stamp);
   animation-fill-mode: both;
 }
 

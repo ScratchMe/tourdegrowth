@@ -145,7 +145,8 @@ describe("spaces.css stays out of the worlds", () => {
  * alpha is capped by the feColorMatrix's last row. At the tile's darkest pixel
  * the page ground is the ink at that alpha over --paper-1; every text token of
  * the paper world must still clear AA there. The design's mockup ran 9%, which
- * this test would reject: --state-good-text falls to 4.18 on the darkest grain.
+ * this test would reject: --state-good-text falls to 4.30 on the darkest grain
+ * (4.18 with the green before design audit S-20).
  */
 describe("the paper grain never takes paper-world text under AA", () => {
   // Read raw: the data URI holds a `;` (svg+xml;utf8) that the token parser would cut the value at.
@@ -174,7 +175,7 @@ describe("the paper grain never takes paper-world text under AA", () => {
 
   it("the mockup's 9% would not have passed — the bound is a measurement, not a taste", () => {
     const darkest = compose({ ...ink, a: 0.09 }, parseColor(literal("paper-1")));
-    expect(round2(ratio(parseColor(literal("state-good-text")), darkest))).toBe(4.18);
+    expect(round2(ratio(parseColor(literal("state-good-text")), darkest))).toBe(4.3);
   });
 });
 

@@ -82,6 +82,14 @@ the explicit override for the rare case of forcing the small scale on a wide
 screen (the landing's preview card, which is intentionally smaller than the
 real result screen).
 
+A component that is set in different frames (a 1 040px board, a 760px column,
+a phone) lays out on its own width with a container query, never on the
+window's: `SpaceBand`, `SpaceStrip`, `GameEntry`, `RevealCells`,
+`PatternCatalogue`. Viewport queries are a short written list, each for a
+reason: 760 (the phone line), 640 (the glossary popover docks to the bottom
+of the window), 960 (a page breaks out of its reading column) and 1100 (the
+engine page's stopwatch).
+
 `DefinitionPopover` renders both placements at once and lets CSS choose. Anything
 that moves focus has to be guarded to the placement actually on screen.
 
@@ -172,6 +180,24 @@ Rules the night world adds:
   `--app-*` tokens, and it does not follow the world around it.
 - There is still no user-facing dark mode. The night is a place in the story,
   not a theme preference.
+
+## Motion: one scale, named by use
+
+Every duration is a token of `tokens/motion.css`, never a literal:
+`--dur-fast` (hover, press), `--dur-open` and `--dur-close` (arriving,
+leaving — leaving is faster), `--dur-state` (a change in place),
+`--dur-stamp` with `--ease-stamp` (the stamp overshoots once; only an
+entrance may overshoot), `--dur-shake`, `--dur-pulse`, `--dur-reveal`,
+`--dur-draw`, and three loops for waiting (`--dur-wait`, `--dur-breathe`,
+`--dur-dots`). An arrival rises by `--dist-step` (8px). The shared keyframes
+(the score's `stamp`, the verdict's `slam`, the progress `pulse`) reach a
+component through `composes` from `styles/motion.module.css`. Reduced motion
+switches all of it off; every element rests in its final state, so nothing
+is lost.
+
+Hover at night cannot live in the shadow (black on black): a control's edge
+lightens instead, through `--state-hover-border`, which on paper is simply
+the edge it already has.
 
 ## One selection language, and honest button states
 

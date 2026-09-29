@@ -27,7 +27,7 @@
   position: relative;
   aspect-ratio: 16 / 9;
   background: var(--dg-wall);
-  transition: filter var(--dur-stamp) var(--ease-out);
+  transition: filter var(--dur-state) var(--ease-out);
 }
 
 /* A decorative layer over the picture: the angry halo, the ringing pulse. */
@@ -37,7 +37,7 @@
   inset: 0;
   pointer-events: none;
   box-shadow: inset 0 0 0 transparent;
-  transition: box-shadow var(--dur-stamp) var(--ease-out);
+  transition: box-shadow var(--dur-state) var(--ease-out);
 }
 
 .call[data-mood="angry"] .frame::after {
@@ -94,7 +94,7 @@
   height: 7px;
   border-radius: var(--radius-round);
   background: var(--visio-live);
-  animation: visio-live var(--game-dur-live) infinite;
+  animation: visio-live var(--game-dur-live) ease-in-out infinite;
 }
 
 .call[data-mood="angry"] .live {

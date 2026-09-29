@@ -7,6 +7,7 @@
    the growth tiles' changes are bold ink (StatTile `sentiment="neutral"`),
    gains and losses alike, as the slides' « change » column. */
 .panel {
+  container: whatif / inline-size;
   display: flex;
   flex-direction: column;
   gap: var(--space-9);
@@ -20,8 +21,9 @@
   max-width: 62ch;
 }
 
-/* Levers | growth numbers, side by side once the board has the app width
-   (Board.module.css, 960px): moving a slider and watching the figures it moves
+/* Levers | growth numbers, side by side once the panel has the room (a
+   container query, design audit S-18: the panel sits in the board AND in the
+   steps, at two widths): moving a slider and watching the figures it moves
    happen on one screen. */
 .top {
   display: grid;
@@ -30,7 +32,7 @@
   align-items: start;
 }
 
-@media (min-width: 960px) {
+@container whatif (min-width: 860px) {
   .top {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }

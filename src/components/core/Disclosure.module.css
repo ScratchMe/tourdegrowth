@@ -70,6 +70,19 @@
   background: var(--surface-sunken);
   color: var(--text-body);
   border-radius: var(--radius-tag);
+  transition: box-shadow var(--dur-fast) var(--ease-out);
+}
+
+/* The chip is the affordance: it lifts under the pointer, and not where
+   nothing can hover. */
+.summary:hover .marker {
+  box-shadow: var(--state-hover-shadow);
+}
+
+@media (hover: none) {
+  .summary:hover .marker {
+    box-shadow: none;
+  }
 }
 
 .marker::before {

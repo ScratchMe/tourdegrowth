@@ -20,6 +20,7 @@
   transition:
     box-shadow var(--dur-fast) var(--ease-out),
     background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
     color var(--dur-fast) var(--ease-out);
 }
 
@@ -33,11 +34,13 @@
  */
 .option:hover {
   box-shadow: var(--state-hover-shadow);
+  border-color: var(--state-hover-border);
 }
 
 @media (hover: none) {
   .option:hover {
     box-shadow: none;
+    border-color: var(--border-hard);
   }
 }
 

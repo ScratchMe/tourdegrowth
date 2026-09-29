@@ -1,25 +1,53 @@
 /*
- * Easing and durations — transcribed from tokens/motion.css in the
- * Claude Design bundle.
+ * Easing, durations and distances — one scale, named by what the motion is
+ * FOR (design audit S-12, 2026-09-27). Started from tokens/motion.css in the
+ * Claude Design bundle; the usage names are ours (transitions.dev's own
+ * `_root.css` is not redistributable, so it is read, never imported).
+ *
+ * Rules the scale encodes:
+ *  - leaving is faster than arriving (--dur-close < --dur-open);
+ *  - only an entrance may overshoot (--ease-stamp), never an exit;
+ *  - a loop (waiting, attention) is the only motion that repeats.
+ *
+ * JavaScript that has to WAIT for one of these reads its mirror in
+ * lib/game/ui-timing.ts, and `motion-scale.test.ts` holds the two equal.
+ * Every value here has a consumer: the same test fails on a dead token.
  */
 :root {
-  --ease-out: cubic-bezier(0.2, 0.7, 0.3, 1);
-  /* DESIGN-BRIEF "Motion": the stamp overshoots — .26s cubic-bezier(.2,1.4,.4,1).
-     Not yet applied: ScoreDisplay still animates with --dur-stamp and
-     --ease-out, and changing the pair is a visible motion change that
-     belongs with the component that adopts it, not with the token layer. */
+  /* --- Easing --- */
+  --ease-out: cubic-bezier(0.2, 0.7, 0.3, 1); /* every settle: hover, state, arrival */
+  /* The stamp overshoots once, then settles: DESIGN-BRIEF « Motion »,
+     .26s cubic-bezier(.2,1.4,.4,1). Entrances only; the keyframes it drives
+     have two stops, so the overshoot is the easing's and happens once. */
   --ease-stamp: cubic-bezier(0.2, 1.4, 0.4, 1);
+
+  /* --- Durations, by use --- */
   --dur-fast: 120ms; /* hover, press */
-  --dur-exit: 80ms; /* leaving is faster than arriving (~65% of --dur-fast) */
-  --dur-stamp: 380ms; /* score stamp-in */
-  --dur-pulse: 400ms; /* progress segment fill */
-  --dur-message: 1300ms; /* loading message dwell (deep dive only) */
+  --dur-close: 150ms; /* something closes: faster than it opened */
+  --dur-open: 250ms; /* something arrives: a dialog, the next card */
+  --dur-state: 250ms; /* an element changes state in place: a mood, a halo, a filter */
+  --dur-stamp: 260ms; /* the stamp lands (score, verdict, press stamp) */
+  --dur-shake: 280ms; /* a bad news shakes the stage once: 80 + 80 + 60 + 60 */
+  --dur-pulse: 400ms; /* a progress segment fills */
+  --dur-reveal: 600ms; /* hidden values unblur (December) */
+  --dur-draw: 800ms; /* a curve draws itself */
+
+  /* --- Loops: waiting and attention --- */
+  --dur-wait: 1.6s; /* the waiting segment of the Deep dive */
+  --dur-breathe: 2.4s; /* the waiting numeral breathes */
+  --dur-dots: 1.8s; /* the three waiting dots, one step each 450ms */
+
+  /* --- Distances --- */
+  --dist-step: 8px; /* an arrival rises by this much; a shake swings by it */
 }
 
-/* The brand's keyframes (the stamp, the progress pulse) are NOT here: a
-   global @keyframes cannot be named from a CSS Module, whose scoping renames
-   the reference. They live in styles/motion.module.css — see its header. */
+/* The brand's keyframes (the stamp, the slam, the progress pulse) are NOT
+   here: a global @keyframes cannot be named from a CSS Module, whose scoping
+   renames the reference. They live in styles/motion.module.css — see its
+   header. */
 
+/* The one reduced-motion guard of the site (design audit S-25): globals.css
+   no longer repeats it. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

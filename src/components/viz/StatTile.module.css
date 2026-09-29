@@ -66,14 +66,9 @@
   font: var(--chart-value);
 }
 
-/*
- * 17px mono: the game plan's compact mobile tile (§2.4). There is no chart
- * token at this size yet; the value is written here, once, rather than as a
- * new token nobody else uses.
- */
+/* 17px mono: the game plan's compact mobile tile (§2.4). */
 .compact .value {
-  font: var(--chart-value);
-  font-size: 17px;
+  font: var(--chart-value-compact);
 }
 
 @media (max-width: 760px) {
@@ -89,8 +84,7 @@
   }
 
   .responsive .value {
-    font: var(--chart-value);
-    font-size: 17px;
+    font: var(--chart-value-compact);
   }
 
   .responsive .delta {
@@ -219,7 +213,7 @@
 /* --- Reveal: the blur lifts once, then the tile is an ordinary known tile --- */
 
 .revealing {
-  animation: tdg-viz-reveal var(--dur-reveal, 600ms) var(--ease-out) both;
+  animation: tdg-viz-reveal var(--dur-reveal) var(--ease-out) both;
 }
 
 @keyframes tdg-viz-reveal {

@@ -1,14 +1,21 @@
 /*
  * The board (spec §7 E2) — semantic tokens only (no-primitives.test.ts).
  *
- * From 960px the board BREAKS OUT of the page's 760px reading column to the
- * app width: the five stage tabs share one row there, and the « what if »
- * panel puts its funnel beside its slider (WhatIfPanel.module.css, same
- * 960px). The breakout is written to be a no-op once the page itself is that
+ * From a 960px window the board BREAKS OUT of the page's column to the app
+ * width. The breakout is written to be a no-op once the page itself is that
  * wide: margin = (container − board) / 2 is zero when they match, so a wider
- * page layout (P5) needs no change here.
+ * page layout (P5) needs no change here. What lays out INSIDE the board (the
+ * five tabs in one row, the « what if » panel's two columns) follows the
+ * board's and the panel's own widths, by container queries (design audit
+ * S-18), so the same panel lays out right in the steps as on the board.
+ */
+/*
+ * The board is a container: what lays out inside it (the tab strip) follows
+ * the board's own width, not the window's (design audit S-18). The breakout
+ * below stays a viewport rule — it is the page's layout, not the board's.
  */
 .board {
+  container: board / inline-size;
   display: flex;
   flex-direction: column;
   gap: var(--space-10);
@@ -112,11 +119,11 @@
 }
 
 /*
- * ONE row of tabs at every width. Under 960px the tabs keep their natural
- * width and the strip scrolls sideways INSIDE its own box — the page never
- * does (`overflow-x: auto` on the strip, `min-width: 0` up the chain, and the
- * e2e measures the document's scrollWidth). From 960px the five share the
- * board's width equally.
+ * ONE row of tabs at every width. On a board under 860px the tabs keep their
+ * natural width and the strip scrolls sideways INSIDE its own box — the page
+ * never does (`overflow-x: auto` on the strip, `min-width: 0` up the chain,
+ * and the e2e measures the document's scrollWidth). From 860px of board the
+ * five share its width equally.
  *
  * A scroll box clips BOTH axes, so the strip carries its own room for what
  * draws outside a tab: the focus ring (3px width + 3px offset) and the hover
@@ -135,7 +142,9 @@
   min-width: 0;
 }
 
-@media (min-width: 960px) {
+/* 860px of board: five tabs of ~165px, the widest stencil name included —
+   the width the board has from a 960px window, where this used to switch. */
+@container board (min-width: 860px) {
   .tabs {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -160,10 +169,23 @@
   border-radius: var(--radius-panel);
   padding: var(--space-5) var(--space-6);
   cursor: pointer;
+  transition:
+    box-shadow var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
 }
 
+/* The tunnel's hover (design audit S-14): the shadow only, never the fill,
+   and off where nothing can hover — a hover that sticks after a tap must not
+   look like the selected tab. */
 .tab:hover {
   box-shadow: var(--state-hover-shadow);
+}
+
+@media (hover: none) {
+  .tab:hover {
+    box-shadow: none;
+  }
 }
 
 .tab:focus-visible {
@@ -232,15 +254,16 @@
   white-space: nowrap;
 }
 
-/* StampedPillar's grammar, as the peloton's stamp: the action red, not the
-   road-paint red — white 11px text on --paint-red is 4.42:1, under AA; the
-   action fill clears it at 4.65:1. */
+/* StampedPillar's grammar, as the peloton's stamp, on the role made for a
+   red fill under small white text: --surface-accent / --text-inverse, 4.65:1
+   (design audit S-9). Not the button's tokens: a change to the primary
+   button would have repainted every stamp. */
 .tabStamp {
   font: var(--meta-2xs);
   letter-spacing: var(--meta-tracking);
   text-transform: uppercase;
-  color: var(--action-primary-text);
-  background: var(--action-primary-bg);
+  color: var(--text-inverse);
+  background: var(--surface-accent);
   border-radius: var(--radius-tag);
   padding: var(--space-1) var(--space-3);
   transform: rotate(-1.5deg);
@@ -377,6 +400,18 @@
   cursor: pointer;
 }
 
+/* The row's affordance is its marker chip: it lifts under the pointer, as a
+   Disclosure's does (design audit S-14). */
+.metricToggle:hover .metricMarker {
+  box-shadow: var(--state-hover-shadow);
+}
+
+@media (hover: none) {
+  .metricToggle:hover .metricMarker {
+    box-shadow: none;
+  }
+}
+
 @media (max-width: 760px) {
   .metricToggle {
     grid-template-columns: minmax(0, 1fr) auto;
@@ -443,19 +478,13 @@
   flex: none;
 }
 
-/* The disclosure's typographic marker, as in core/Disclosure: a sunken mono
-   chip carrying + / −, the chip the affordance, the glyph the state. */
+/* The disclosure's marker, core/Disclosure's own chip rather than a copy of
+   it (design audit S-23): a sunken mono chip carrying + / −, the chip the
+   affordance, the glyph the state. The glyph is silent here — the toggle
+   says its state with aria-expanded. */
 .metricMarker {
+  composes: marker from "../../../../components/core/Disclosure.module.css";
   grid-area: marker;
-  flex: none;
-  width: 24px;
-  height: 24px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font: var(--meta-md);
-  background: var(--surface-sunken);
-  border-radius: var(--radius-tag);
 }
 
 .metricMarker::before {

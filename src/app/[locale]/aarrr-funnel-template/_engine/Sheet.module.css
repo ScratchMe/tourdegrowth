@@ -293,11 +293,13 @@
   gap: var(--space-2);
 }
 
-/* The target's label lives ABOVE the track — nothing is ever written in it. */
+/* The target's label lives ABOVE the track — nothing is ever written in it.
+   Axis text is --chart-label (12px), the system's floor for a chart's words
+   (design audit S-26): the 11px meta label is for a tag, not an axis. */
 .stripMarks {
   position: relative;
   height: 1.4em;
-  font: var(--meta-2xs);
+  font: var(--chart-label);
   color: var(--text-body);
 }
 
@@ -363,6 +365,6 @@
 .stripBounds {
   display: flex;
   justify-content: space-between;
-  font: var(--meta-2xs);
+  font: var(--chart-label);
   color: var(--text-muted);
 }

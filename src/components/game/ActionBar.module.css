@@ -47,7 +47,7 @@
   .bar {
     position: sticky;
     bottom: 0;
-    z-index: 1;
+    z-index: var(--z-raised);
     gap: var(--space-4);
     padding: var(--space-5) var(--space-6) calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
     background: var(--surface-sunken);

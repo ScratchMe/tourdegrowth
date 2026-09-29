@@ -14,7 +14,11 @@
   text-transform: uppercase;
 }
 
-/* 6.17:1 on the page ground, 4.98 on a raised one — plan §2.6. */
+/* --state-good-text: 5.12:1 on the page ground (--paper-1), 6.34 on a card
+   (--paper-0), 4.60 at the darkest point of the page's halo — where this
+   line sits, with no card under it. The comment used to give 6.17 and 4.98
+   the other way round, and the old green was 4.47 under the halo (design
+   audit S-20; token-contrast.test.ts measures it there now). */
 .win {
   color: var(--state-good-text);
 }
