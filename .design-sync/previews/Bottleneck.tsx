@@ -80,12 +80,12 @@ export const Roast = () => (
   </Card>
 );
 
-/** `mobile` is the landing preview card's scale — a 140px marker. */
-export const Mobile = () => (
+/** `sm` is the landing preview card's scale — a 140px marker. */
+export const Small = () => (
   <Card elevation="raised" style={{ maxWidth: 448 }}>
     <Bottleneck
-      lead={<ScoreDisplay variant="marker" score={74} label="Overall Growth Score" size="mobile" />}
-      size="mobile"
+      lead={<ScoreDisplay variant="marker" score={74} label="Overall Growth Score" size="sm" />}
+      size="sm"
       sharpness="clear"
       label="One stage holding you back"
       pillars={[{ pillar: "Retention", score: 8 }]}

@@ -9,17 +9,17 @@ import { AnswerOption, QuestionCard, StageProgress } from "tour-de-growth";
  * six of the fifteen questions carry one.
  */
 
-/** Desktop: 34px question in 40px 44px padding. */
-export const Desktop = () => (
+/** `md`: 34px question in 40px 44px padding. */
+export const Medium = () => (
   <div style={{ maxWidth: 560 }}>
     <QuestionCard>Do you track a retention rate (D7/D30 or similar)?</QuestionCard>
   </div>
 );
 
-/** Mobile: 25px in 24px 22px. Below 760px the desktop size shrinks to this on its own. */
-export const Mobile = () => (
+/** `sm`: 25px in 24px 22px. Below 760px the `md` size shrinks to this on its own. */
+export const Small = () => (
   <div style={{ maxWidth: 320 }}>
-    <QuestionCard size="mobile">Do you track a retention rate (D7/D30 or similar)?</QuestionCard>
+    <QuestionCard size="sm">Do you track a retention rate (D7/D30 or similar)?</QuestionCard>
   </div>
 );
 

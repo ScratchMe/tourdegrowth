@@ -6,7 +6,7 @@ export interface StageProgressProps extends HTMLAttributes<HTMLDivElement> {
   current?: number;
   /** Segment count. Always 5 in production — one per AARRR pillar. */
   total?: number;
-  size?: "desktop" | "mobile";
+  size?: "md" | "sm";
   /** Mono caption below, e.g. "Deep dive · Question 3 of 10". */
   label?: ReactNode;
   /**
@@ -25,8 +25,8 @@ export interface StageProgressProps extends HTMLAttributes<HTMLDivElement> {
  * not the segments: the Deep dive reuses these same five segments across
  * its 10 questions (2 per pillar).
  */
-export function StageProgress({ current = 1, total = 5, size = "desktop", label, className, ...rest }: StageProgressProps) {
-  const desktop = size === "desktop";
+export function StageProgress({ current = 1, total = 5, size = "md", label, className, ...rest }: StageProgressProps) {
+  const md = size === "md";
   // The Deep dive's free-text screen passes `total + 1` to render every
   // segment as done (see that page). That is fine visually, but
   // `aria-valuenow` above `aria-valuemax` is invalid, so clamp it here —
@@ -42,7 +42,7 @@ export function StageProgress({ current = 1, total = 5, size = "desktop", label,
       aria-valuenow={value}
       {...rest}
     >
-      <div className={[styles.segments, desktop ? styles.desktop : styles.mobile].join(" ")}>
+      <div className={[styles.segments, md ? styles.md : styles.sm].join(" ")}>
         {Array.from({ length: total }, (_, i) => {
           const n = i + 1;
           const state = n < current ? styles.done : n === current ? styles.current : styles.pending;
@@ -52,7 +52,7 @@ export function StageProgress({ current = 1, total = 5, size = "desktop", label,
         })}
       </div>
       {label ? (
-        <div className={[styles.label, desktop ? styles.labelDesktop : styles.labelMobile].join(" ")}>{label}</div>
+        <div className={[styles.label, md ? styles.labelMd : styles.labelSm].join(" ")}>{label}</div>
       ) : null}
     </div>
   );

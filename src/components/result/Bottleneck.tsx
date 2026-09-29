@@ -36,7 +36,7 @@ export interface BottleneckProps extends HTMLAttributes<HTMLDivElement> {
   total?: number;
   /** The verdict sentence, already translated. Closes the block. */
   verdict: string;
-  size?: "desktop" | "mobile";
+  size?: "md" | "sm";
   /** `roast` paints the pillar name red and does nothing else. */
   tone?: "straight" | "roast";
   /**
@@ -78,13 +78,13 @@ export function Bottleneck({
   pillars = [],
   total = 20,
   verdict,
-  size = "desktop",
+  size = "md",
   tone = "straight",
   lead,
   className,
   ...rest
 }: BottleneckProps) {
-  const desktop = size === "desktop";
+  const md = size === "md";
   const named = sharpness === "level" ? [] : sharpness === "clear" ? pillars.slice(0, 1) : pillars;
 
   const head = (
@@ -115,7 +115,7 @@ export function Bottleneck({
 
   return (
     <div
-      className={[styles.wrap, desktop ? styles.desktop : styles.mobile, lead ? styles.withLead : "", className ?? ""]
+      className={[styles.wrap, md ? styles.md : styles.sm, lead ? styles.withLead : "", className ?? ""]
         .filter(Boolean)
         .join(" ")}
       {...rest}

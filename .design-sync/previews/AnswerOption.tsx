@@ -64,11 +64,11 @@ export const Interactive = () => {
   );
 };
 
-/** `mobile` is 16px instead of 17px — padding and hit height do not change. */
-export const Mobile = () => (
+/** `sm` is 16px instead of 17px — padding and hit height do not change. */
+export const Small = () => (
   <div style={{ ...stack, maxWidth: 320 }}>
     {OPTIONS.map((o, i) => (
-      <AnswerOption key={o} size="mobile" selected={i === 1}>
+      <AnswerOption key={o} size="sm" selected={i === 1}>
         {o}
       </AnswerOption>
     ))}
