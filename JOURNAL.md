@@ -5066,7 +5066,7 @@ Restent pour Antoine, au bon à tirer : « cinq cols » (la métaphore du dessin
 - après les corrections des relecteurs et le passage en requête de conteneur, 71 specs repassées sur le nouveau build : la nouvelle spec, l'accessibilité, l'accueil, les pages de prose, la typographie, les données structurées ;
 - bundle design-sync : 77/77 aperçus rendus, les trois avertissements permanents seulement.
 
-## Kit I + B, 4/4 : le reste de l'audit du kit (2026-09-29)
+## Kit I + B, 4/4 : le reste de l'audit du kit (2026-09-29, #182)
 
 La dernière des quatre PR de la passe I + B, décidée par Antoine (« Deux PR » : les signes, puis l'audit). Elle solde ce que l'audit statique du kit (2026-09-27) laissait ouvert en dehors des signes : le moteur ramené dans le système, une échelle de mouvement, et les constats faibles. Les constats de l'audit sont cités par leur numéro (S-, M-, L-).
 
