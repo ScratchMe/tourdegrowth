@@ -28,12 +28,12 @@
 }
 
 .done {
-  border: 2px solid var(--surface-inverse);
+  border: var(--border-width) solid var(--surface-inverse);
   background: var(--surface-inverse);
 }
 
 .current {
-  border: 2px solid var(--accent-mark);
+  border: var(--border-width) solid var(--accent-mark);
   background: var(--accent-mark);
   /* The pulse's keyframes live in styles/motion.module.css: longhands only
      here, never the shorthand (it would reset the composed name). */

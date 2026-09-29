@@ -36,8 +36,9 @@
   --pad-field: 16px; /* TextArea inner padding */
   --pad-footer: 26px 0 40px; /* SiteFooter, both widths */
 
-  /* Layout */
-  --width-mobile: 390px;
+  /* Layout. (The phone width, 390px, is a contract of DESIGN-BRIEF and of
+     the e2e viewports, never a length a rule reads: --width-mobile had no
+     consumer and was removed, design audit A1.6, 2026-09-29.) */
   --width-reading: 760px; /* How it works, prose pages */
   --width-desktop: 1040px; /* app shell max width */
   --gutter-desktop: 40px;

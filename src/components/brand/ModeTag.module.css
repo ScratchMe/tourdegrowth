@@ -17,5 +17,5 @@
 .deep {
   background: var(--surface-inverse);
   color: var(--text-on-inverse);
-  border: 2px solid var(--surface-inverse);
+  border: var(--border-width) solid var(--surface-inverse);
 }

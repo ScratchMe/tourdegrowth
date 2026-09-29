@@ -90,7 +90,7 @@
 
 /* Found: the engine's ultramarine, the one chip that says « done » (I + B). */
 .chipFound {
-  border: 2px solid var(--space-engine-accent);
+  border: var(--border-width) solid var(--space-engine-accent);
   color: var(--space-engine-accent);
 }
 
@@ -100,7 +100,7 @@
 }
 
 .chipMissing {
-  border: 2px solid var(--border-alert);
+  border: var(--border-width) solid var(--border-alert);
   color: var(--text-alert);
 }
 
@@ -288,16 +288,16 @@
 }
 
 .pillApprox {
-  border: 2px solid var(--tab-mark);
+  border: var(--border-width) solid var(--tab-mark);
   background: repeating-linear-gradient(45deg, var(--tab-mark) 0 2px, transparent 2px 4px);
 }
 
 .pillMissing {
-  border: 2px dashed var(--viz-highlight);
+  border: var(--border-width) dashed var(--viz-highlight);
 }
 
 .pillProgress {
-  border: 2px solid var(--tab-mark);
+  border: var(--border-width) solid var(--tab-mark);
 }
 
 .pillNa {

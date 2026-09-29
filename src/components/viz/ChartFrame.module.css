@@ -58,7 +58,7 @@
   justify-content: space-between;
   gap: var(--space-5);
   padding: var(--space-7);
-  border: 2px solid var(--border-alert);
+  border: var(--border-width) solid var(--border-alert);
   border-radius: var(--radius-panel);
 }
 
@@ -92,11 +92,11 @@
 }
 
 .line {
-  border-top: 2px solid var(--viz-ink);
+  border-top: var(--border-width) solid var(--viz-ink);
 }
 
 .reference {
-  border-top: 2px dashed var(--viz-highlight);
+  border-top: var(--border-width) dashed var(--viz-highlight);
 }
 
 .bar,

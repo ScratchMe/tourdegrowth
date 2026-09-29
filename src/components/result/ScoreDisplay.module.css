@@ -58,18 +58,18 @@
 }
 
 .suffixDesktop {
-  font-size: 38px;
+  font-size: var(--size-score-suffix-xl);
 }
 
 @media (max-width: 760px) {
   .suffixDesktop {
-    font-size: 30px;
+    font-size: var(--size-score-suffix-lg);
     margin-left: 6px;
   }
 }
 
 .suffixMobile {
-  font-size: 30px;
+  font-size: var(--size-score-suffix-lg);
   margin-left: 6px;
 }
 
@@ -120,7 +120,7 @@
   right: -22px;
   bottom: -19px;
   height: 7px;
-  border-radius: 7px;
+  border-radius: var(--radius-tag);
   background: var(--border-hard);
 }
 
@@ -166,13 +166,11 @@
 
 .markerMobile .cap {
   padding: 0 18px 9px;
-  font-size: 10px;
 }
 
 @media (max-width: 760px) {
   .markerDesktop .cap {
     padding: 0 16px 8px;
-    font-size: 10px;
     letter-spacing: var(--meta-tracking);
   }
 }
@@ -192,9 +190,9 @@
 .markerTotal {
   margin-top: 8px;
   padding: 7px 12px 0;
-  border-top: 2px solid var(--border-hard);
+  border-top: var(--border-solid);
   font: var(--meta-md);
-  font-size: 14px;
+  font-size: var(--size-score-total);
   line-height: 1;
   font-weight: 600;
   letter-spacing: 0.06em;

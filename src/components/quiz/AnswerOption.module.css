@@ -84,12 +84,12 @@
 
 @media (max-width: 760px) {
   .desktop {
-    font: 500 16px/1.4 var(--font-ui);
+    font: var(--body-lg-mobile);
   }
 }
 
 .mobile {
-  font: 500 16px/1.4 var(--font-ui);
+  font: var(--body-lg-mobile);
 }
 
 /* The ring is drawn outside the option, on the page ground. It was red while

@@ -81,7 +81,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  border-top: 1px solid var(--viz-grid);
+  border-top: var(--border-width-hairline) solid var(--viz-grid);
 }
 
 /* --- The series --- */
@@ -119,7 +119,7 @@
 /* Drawn on the edge because the value is past it: hollow, so it does not claim to be the value. */
 .endDot.overflow {
   background: var(--surface-card);
-  border: 2px solid var(--viz-ink);
+  border: var(--border-width) solid var(--viz-ink);
 }
 
 .endLabel {
@@ -160,7 +160,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  border-top: 2px dashed var(--viz-highlight);
+  border-top: var(--border-width) dashed var(--viz-highlight);
 }
 
 .referenceLabel {

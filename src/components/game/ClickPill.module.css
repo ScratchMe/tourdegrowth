@@ -9,7 +9,7 @@
   max-width: 100%;
   margin: 0;
   padding: var(--space-2) var(--space-5);
-  border: 1px solid var(--border-hard);
+  border: var(--border-solid);
   border-radius: var(--radius-tag);
   background: var(--surface-card);
   color: var(--text-body);

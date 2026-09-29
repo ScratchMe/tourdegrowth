@@ -137,7 +137,7 @@
   gap: var(--space-6);
   padding: var(--space-6);
   background: var(--surface-card);
-  border-left: 3px solid var(--border-hard);
+  border-left: var(--border-width-stamp) solid var(--border-hard);
   border-radius: var(--radius-tag);
 }
 

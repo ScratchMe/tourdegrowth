@@ -6,12 +6,12 @@ type Variant = "primary" | "secondary" | "quiet";
 type Size = "md" | "lg";
 
 interface SharedProps {
-  /** primary = filled road-paint red, max one per screen · secondary = ink outline · quiet = underlined mono-weight link */
+  /** primary = filled road-paint red, max one per screen · secondary = ink outline · quiet = the one text button: underlined, drawn as a line of text, tapped on a 44px strip */
   variant?: Variant;
   /** md = desktop (14px 24px) · lg = the large CTA: 17px label, 17px 20px padding (16px sides under 760px) */
   size?: Size;
   fullWidth?: boolean;
-  /** Smaller inline sizing for the header CTA — not part of the DS bundle's own variant matrix, see Button.module.css. Font is --label-button-sm. */
+  /** Smaller sizing, --label-button-sm: the header CTA, and a `quiet` action beside sliders or fields (the growth engine) — not part of the DS bundle's own variant matrix, see Button.module.css. */
   compact?: boolean;
   className?: string;
   children: ReactNode;

@@ -103,7 +103,7 @@
   min-height: 28px;
   padding: 3px 11px 3px 8px;
   border: 1.5px solid currentColor;
-  border-radius: 999px;
+  border-radius: var(--radius-tag);
   font: var(--meta-2xs);
   letter-spacing: var(--meta-tracking);
   text-transform: uppercase;
@@ -217,9 +217,11 @@ a.pill:focus-visible {
     gap: 3px;
   }
 
+  /* The desktop's size: at 18px it was the one literal of the band, and 19
+     fits every space's name down to 320px in both languages (measured
+     2026-09-29, design audit A1.5). */
   .name {
     order: -1;
-    font-size: 18px;
   }
 
   .kicker {
