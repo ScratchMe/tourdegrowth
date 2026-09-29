@@ -5580,3 +5580,18 @@ Deux tests passent sur l'ancien code par construction, parce qu'ils gardent ce q
 
 **Pas fait ici** : les familles core, viz et jeu, une PR chacune ; le bundle design-sync, qui suit en B3.
 
+**En production** : PR [#197](https://github.com/ScratchMe/tourdegrowth/pull/197), mergée le 2026-09-29 (squash `68c0ac4`, 30 fichiers, identique à la tête de la PR), servie à 23 h 21 UTC. Relevé par HTTP, en FR et EN : l'accueil porte les classes `__sm` de `PillarChip`, `ScoreDisplay` et `Bottleneck`, le résultat leurs classes `__md`, et aucune page ne porte plus de `__mobile` ni de `__desktop`.
+
+## A5, famille core : `Segmented`, `ToneToggle`, `Button` et `Tag` (2026-09-29)
+
+**Ce qui bouge** :
+- `Segmented` et `ToneToggle` passent de `md|compact` à `md|sm`. Appelants : le sélecteur de langue, l'aperçu de l'accueil, le formulaire de mission.
+- `Button` perd son drapeau `compact`, qui était une troisième taille posée par-dessus `md` (police `--label-button-sm`, padding réduit) : c'est maintenant `size="sm"`. Il y avait une quarantaine d'appelants, dans l'admin d'audit, le moteur, l'accueil, le graphe et l'extrait du badge ; `tsc` a donné la liste complète.
+- `Tag` passe de `tone="red"` à `"alert"`. Son seul usage produit, le catalogue du jeu, marque une astuce encore en place : un diagnostic, pas l'accent roast que l'aperçu annonçait.
+
+Les histoires `Compact` deviennent `Small`, et l'exemple de `Tag` dit ce qu'il marque vraiment. La liste d'attente de `variant-names.test.ts` perd ses quatre lignes core.
+
+**Vérifié** : lint et `tsc` propres ; 2 239 tests unitaires ; `next build` propre avec `GAME_ENABLED=true` ; **620 specs Playwright** (615 passées, 5 ignorées par construction, aucun échec).
+
+**Au pixel près** : les 36 captures (accueil, quiz, résultat, moteur, tableau de bord et rapport du jeu, slide peloton, admin d'audit ; FR et EN ; 1 280 et 390 px) sont identiques à celles de `main`. Elles ont été prises sur l'empilement des trois familles restantes, qui contient celle-ci.
+
