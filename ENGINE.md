@@ -100,6 +100,15 @@ chacune se renverse en une phrase :
 7. `ENGINE_ENABLED` reste fermé jusqu'à la signature du bon à tirer nº6. Liens
    d'ouverture prévus : `/how-it-works`, les deux pages SEO d'entrée, une section
    de la landing sous la citation — pas de septième lien au pied de page.
+   **Revu par Antoine le 2026-09-29 (`CHANTIERS.md` C7).** Les liens sont
+   gardés depuis `/how-it-works`, `/growth-audit-checklist` et
+   `/startup-growth-diagnostic`, toujours sans lien au pied de page. **La
+   section de la landing sous la citation est abandonnée** : la bande « Le
+   Tour en trois parties » de la synthèse I + B présente déjà le moteur,
+   au-dessus de la citation. C'est sa carte qui devient le lien, selon C15.
+   Et le bon à tirer nº6 n'est plus le verrou (il est clos le 2026-09-29) :
+   l'ouverture attend le nº8 et le lot A7.3 (décision 3). À coder :
+   `CHANTIERS.md` A7.4.
 
 **Refonte de la saisie (2026-09-26, sur les premiers retours d'Antoine).** Ce
 qui change par rapport aux §4, §7 et §8 plus bas — le reste tient :
@@ -1408,6 +1417,21 @@ puis une carte par pont non cohérent citant **la réponse du Tour mot pour mot*
 le statut trouvé. Pont cohérent : un compteur, pas de carte. Sans Tour : une
 ligne « Fais le Tour pour comparer ce que ton équipe déclare à ce que tu
 trouves » (`Button hard` vers `/quiz`).
+
+**Tour présent mais non relié — tranché par Antoine le 2026-09-29
+(`CHANTIERS.md` C8).** Jusque-là, rien ne s'affichait : c'était « leur choix »
+(D13). Mais la case « Comparer avec ce Tour » n'existe que sur la carte de
+départ, et l'invitation « Fais le Tour » menait donc à une impasse : Tour
+fait, retour au tableau, miroir disparu, et aucun moyen de le relier.
+Désormais :
+- à la place du miroir, **une ligne et un bouton** : « Tu as fait le Tour le
+  {date} ({score}/100). Le relier compare ce que tu y as déclaré à ce que tu
+  retrouves ici. » et « Relier ce Tour », dans le style de l'invitation sans
+  Tour ;
+- la case de liaison entre aussi **dans les Réglages**, pour relier ou délier
+  après coup.
+
+À coder : `CHANTIERS.md` A7.5.
 
 ### 8.6 Ce qu'on ne dessine volontairement pas
 

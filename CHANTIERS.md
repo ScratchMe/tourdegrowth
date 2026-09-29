@@ -220,6 +220,38 @@ change pas.**
 | A7.3.d | **Le bon à tirer** de la copie neuve | Par l'agent des bons à tirer, avec `/bon-a-tirer`, construit depuis le code |
 | Hors code | Les textes de lancement disent « v1 : SaaS en libre-service » | `marketing/kit.md:105` et la ligne de risque de `marketing/campaigns/README.md` §8 : ils sont à réécrire quand A7.3.c est livré, pas avant |
 
+#### A7.4 — Les liens d'ouverture du moteur (C7)
+
+**Décidé** : un lien vers le moteur depuis `/how-it-works`,
+`/growth-audit-checklist` et `/startup-growth-diagnostic`, là où le texte
+parle déjà de chiffres. **Pas de section à part sur l'accueil** : la carte
+« Le moteur » de la bande « trois parties » (`SpaceStrip`) devient le lien,
+avec la règle de C15. **Pas de lien au pied de page.**
+
+| Où | Quoi |
+|---|---|
+| Les trois pages | Un lien en contexte (une phrase, pas un bandeau), en FR et en EN. Il n'apparaît que si le moteur est ouvert au build : même garde que la bande, `SPACE_OPEN_AT_BUILD.engine` (`SpaceBand.tsx:27`), et même raison que le sitemap (R2-28). La copie neuve est « à relire » |
+| Mesure | Chaque lien porte un événement d'entrée avec sa source, sur le modèle de `game_entry_clicked` (`detail` = la page), déclaré dans le vocabulaire de `lib/analytics/`, pour que `/admin/stats` dise d'où viennent les ouvertures |
+| Tests | Un e2e par page : le lien existe moteur ouvert et mène à `/{locale}/aarrr-funnel-template`. Un test sur un build fermé : il n'existe pas (les specs « jeu fermé » montrent la façon de faire) |
+| Quand | Construit avant l'ouverture (D2), après A7.3 : les liens promettent ce que le moteur fait, hybride compris |
+
+#### A7.5 — Relier un Tour après coup (C8)
+
+**Le constat** : la case « Comparer avec ce Tour » n'existe que sur la carte
+de départ (`Setup.tsx:209`, `tour && !editing`). Un Tour fait après le début
+du moteur, ou une case décochée par mégarde, ne peut donc plus jamais être
+relié. Le tableau n'affiche alors rien (`Board.tsx:170-182`), alors que le
+miroir sans Tour invite justement à en faire un.
+
+**Décidé** (`ENGINE.md` §8.5) :
+
+| Où | Quoi |
+|---|---|
+| `_engine/Mirror.tsx` et `Board.tsx` | Un troisième état du miroir, `data-state="unlinked"`, quand un Tour est sur l'appareil et `state.tourLink` est nul : le titre du miroir, une ligne (« Tu as fait le Tour le {date} ({score}/100). Le relier compare ce que tu y as déclaré à ce que tu retrouves ici. »), et un bouton « Relier ce Tour » qui pose `tourLink` comme le fait la carte de départ. Même style que l'état `none`. Sans score, la variante sans score qui existe déjà (`mirrorTakenAtNoScore`) |
+| `_engine/Setup.tsx` | La case de liaison apparaît aussi dans les Réglages (`editing`), pour relier ou délier. Délier ne supprime pas le Tour de l'appareil |
+| Copie | La ligne et le bouton, en FR et en EN, « à relire » |
+| Tests | Un e2e du parcours complet : moteur commencé sans Tour → invitation → un Tour déposé sur l'appareil → retour au tableau → état `unlinked` → « Relier ce Tour » → miroir `linked`. Et relier puis délier par les Réglages. Dans les deux langues, à 1 280 et 390 px. Le canari « rien ne quitte le navigateur » tient toujours : relier ne fait que lire `tdg.results.v1` |
+
 ### A8 — L'audit GEO, joué sans installer le plug-in
 
 **D'où ça vient** : le 2026-09-29, Antoine a proposé le plug-in
@@ -283,8 +315,8 @@ section A.
 | C4 | Le périmètre de la v1 : le SaaS libre-service. Le B2B assisté en v1.1, le B2C et la marketplace plus tard | Pris par défaut | Décision 3 | Garder. **→ Tranché autrement le 2026-09-29 : le B2B assisté entre en v1. Le réglage devient un type (SaaS B2B), puis deux motions cochables, PLG et SLG, au moins une. L'hybride se rend en « deux moteurs, un total », jamais en face-à-face. Le détail est dans `ENGINE.md`, décision 3. L'ouverture attend. Spécification puis code : A7.3** |
 | C5 | La slide « déclaré au Tour × mesuré » | Non cochée par défaut | Décision 4 | Garder : elle cite les réponses du Tour mot pour mot, dans un deck qui part en CODIR. **→ Confirmé le 2026-09-29. Rien à coder** |
 | C6 | Le moteur est public, gratuit et local. Ce n'est pas la phase 3 de l'instrument d'audit | Pris par défaut | Décision 6 | Garder. **→ Confirmé le 2026-09-29. Antoine tient l'audit privé pour un doublon du moteur, auquel il croit davantage : c'est la mission D4 qui tranchera, avec une colonne « le moteur le faisait déjà ? » dans le journal des frictions (`AUDIT-PLAN.md` §4). Rien à coder** |
-| C7 | Les liens d'ouverture : `/how-it-works`, les deux pages SEO d'entrée, une section de la landing sous la citation. Pas de septième lien au pied de page | Prévus, pas encore construits. Aujourd'hui, seuls le bandeau d'étape et le sitemap y mènent, une fois le moteur ouvert (vérifié : `ENGINE_PATH` n'est lu que par `SpaceBand`, `sitemap.ts` et `/admin/preview`) | Décision 7 | Garder. Les construire devient un item A avant l'ouverture (D2) |
-| C8 | Le miroir, quand un Tour est présent sur l'appareil mais non relié au moteur | Il n'affiche rien (sans Tour du tout, il invite à faire le Tour) | `ENGINE.md` §8.5, `CLAUDE.md` | Afficher une ligne et le bouton qui relie le Tour. Sinon, la comparaison ne se découvre jamais |
+| C7 | Les liens d'ouverture : `/how-it-works`, les deux pages SEO d'entrée, une section de la landing sous la citation. Pas de septième lien au pied de page | Prévus, pas encore construits. Aujourd'hui, seuls le bandeau d'étape et le sitemap y mènent, une fois le moteur ouvert (vérifié : `ENGINE_PATH` n'est lu que par `SpaceBand`, `sitemap.ts` et `/admin/preview`) | Décision 7 | Garder. Les construire devient un item A avant l'ouverture (D2). **→ Tranché le 2026-09-29, capture de l'accueil à l'appui : les trois pages gardent leur lien, mais pas de section à part sur l'accueil (la bande « trois parties » présente déjà le moteur ; sa carte devient le lien, selon C15), et pas de pied de page. Code : A7.4** |
+| C8 | Le miroir, quand un Tour est présent sur l'appareil mais non relié au moteur | Il n'affiche rien (sans Tour du tout, il invite à faire le Tour) | `ENGINE.md` §8.5, `CLAUDE.md` | Afficher une ligne et le bouton qui relie le Tour. Sinon, la comparaison ne se découvre jamais. **→ Tranché le 2026-09-29, captures à l'appui : une ligne et un bouton, et la case de liaison dans les Réglages. L'invitation « Fais le Tour » menait à une impasse, faute de pouvoir relier le Tour après la carte de départ. Code : A7.5** |
 | C9 | La slide « fuite » quand l'étape nommée n'a pas de prix (rétention à J30, part recommandée) ou qu'elle rapporte moins d'un client | La slide est omise | `lib/engine/deck.ts#buildLeak` | Garder l'omission : pas de slide plutôt qu'un titre faux |
 
 ### Le jeu
