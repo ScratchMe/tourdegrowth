@@ -1,9 +1,12 @@
 /* Design system extension 03 — see design/ds-extension-03-return/components/result/PriorityMove.prompt.md */
 
+/* Design I + B (2026-09-29): the advice lifts off the page on a hard shadow
+   of its own red, and its sentence is set as the one thing to do. */
 .card {
   background: var(--surface-card);
   border: 2px dashed var(--border-alert);
   border-radius: var(--radius-card);
+  box-shadow: var(--shadow-advice);
   padding: 20px 22px;
 }
 
@@ -28,7 +31,8 @@
 }
 
 .body {
-  font: 600 15px/1.5 var(--font-ui);
+  font: var(--title-move);
+  letter-spacing: -0.005em;
   color: var(--text-body);
   text-wrap: pretty;
 }

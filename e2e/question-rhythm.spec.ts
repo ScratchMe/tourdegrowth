@@ -8,7 +8,7 @@ import { expect, seedOwnedResult, stubDeepDive, test } from "./helpers";
  * question. The three used to be direct children of `.main`, whose
  * `gap: 20px` spaced them; the new wrapper had no layout of its own, so the
  * gap applied to a single child and the question card sat flush against the
- * first answer — with its hard shadow (`--shadow-card`, 7px then, 6px since design I) falling behind
+ * first answer — with its hard shadow (7px then, 6px in design I, 8px `--shadow-hero` since the I + B pass) falling behind
  * the button rather than onto the page.
  *
  * Measured rather than asserted as a class: what a reader sees is the
@@ -59,8 +59,8 @@ test.describe("the question card never touches the answers", () => {
 
       // The gap has to clear the card's hard shadow, which is what made the
       // regression look like a rendering fault rather than a spacing one.
-      // 6px since design I (2026-09-28); it was 7.
-      expect(gaps.shadow).toContain("6px 6px 0px");
+      // 8px since the I + B fidelity pass (2026-09-29): 7, then 6 in design I.
+      expect(gaps.shadow).toContain("8px 8px 0px");
     });
   }
 

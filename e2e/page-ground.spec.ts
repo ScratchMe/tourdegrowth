@@ -4,7 +4,7 @@ import { expect, test } from "./helpers";
 /**
  * The page ground must be one continuous wash, not a tiled one.
  *
- * `--ground-lift` (tokens/shape.css) is two radial gradients painted on
+ * `--ground-lift` (tokens/shape.css) was two radial gradients painted on
  * `body`, and a background's positioning area is that element's own box.
  * `body { height: 100% }` made the box exactly one viewport tall while the
  * page scrolled well past it, so the gradients tiled — `background-repeat`
@@ -167,7 +167,8 @@ test("the ground covers the whole page and never tiles", async ({ page }) => {
   // which must neither tile nor scroll.
   expect(ground.firstIsUrl).toBe(true);
   const lift = ground.layers - 1;
-  expect(lift).toBeGreaterThanOrEqual(2);
+  // One white wash since 2026-09-29 (it was two gradients before).
+  expect(lift).toBeGreaterThanOrEqual(1);
   // The value of EACH layer, not the lists' lengths: a computed list always
   // has one value per layer, because a shorter declared list CYCLES — which
   // is the bug this pins. Written with two values for three layers, the

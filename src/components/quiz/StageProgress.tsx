@@ -47,10 +47,7 @@ export function StageProgress({ current = 1, total = 5, size = "desktop", label,
           const n = i + 1;
           const state = n < current ? styles.done : n === current ? styles.current : styles.pending;
           return (
-            <div
-              key={n}
-              className={[styles.segment, desktop ? styles.segmentDesktop : styles.segmentMobile, state].join(" ")}
-            />
+            <div key={n} className={[styles.segment, state].join(" ")} />
           );
         })}
       </div>

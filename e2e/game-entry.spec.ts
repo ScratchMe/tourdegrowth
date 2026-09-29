@@ -150,6 +150,8 @@ test.describe("P23 — the card on the sample's retention bottleneck", () => {
     // longer language.
     await page.goto(`/r/sample?lang=fr`);
     await expect(page.getByTestId("game-entry-band-sep")).toBeVisible();
+    // …with the game's mountain in front of it (design I + B, 2026-09-29).
+    await expect(page.getByTestId("game-entry-band-picto")).toBeVisible();
     expect((await box(page, "game-entry-band")).height).toBeLessThanOrEqual(44);
   });
 

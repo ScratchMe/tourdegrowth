@@ -189,58 +189,58 @@ describe("every stated paper-world contrast ratio holds", () => {
 });
 
 /*
- * Design audit L-10 / S-20 — the page ground is not flat --paper-1. Its
- * `--ground-lift` (shape.css) darkens it under a black halo, and text sits
- * on the bare ground there: a credit line, December's « won » line, a
- * status on the page. Every text ink the paper world sets on the page is
- * measured at the halo's darkest point too. (The grain's own darkest pixel
- * is measured alone in space-token-contrast.test.ts; stacked on the halo it
- * would ask the brand's primitive reds to change, and a glyph is never
- * drawn on one noise pixel.)
- *
- * Two series colors fall under AA there: they are marks and in-chart labels
- * (a ChartFrame is a card), never text on the bare page — pinned as such, so
- * the day one is used that way this fails.
+ * Design audit L-10 / S-20 — text sits on the bare page ground too: a
+ * credit line, December's « won » line, a status on the page. The ground is
+ * not flat --paper-1: `--ground-lift` (shape.css) washes it. Until
+ * 2026-09-29 it also darkened it, under a black halo at `88% 74%`, and every
+ * text ink was measured at that halo's darkest point. The I + B mockup has
+ * no halo, so the lift now only LIGHTENS — and this pins it: a darkening
+ * layer brought back fails here, and asks for the inks to be re-measured
+ * under it. On a ground that only lightens, flat --paper-1 is the floor.
+ * (The grain's own darkest pixel is measured alone in
+ * space-token-contrast.test.ts, and a glyph is never drawn on one noise
+ * pixel.)
  */
-describe("text on the page's darkest halo still clears AA", () => {
+describe("text on the page's bare ground still clears AA", () => {
   const shape = readFileSync(path.join(process.cwd(), "src/styles/tokens/shape.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
   const lift = /--ground-lift\s*:([^;]+);/.exec(shape)?.[1] ?? "";
-  const darkest = /rgba\(0,\s*0,\s*0,\s*([\d.]+)\)/.exec(lift)?.[1];
-  const halo = paint(`rgba(0, 0, 0, ${darkest})`, paint(P1));
-  const HALO = `#${[halo.r, halo.g, halo.b].map((v) => v.toString(16).padStart(2, "0")).join("")}`;
+  const stops = [...lift.matchAll(/rgba?\([^)]*\)|#[0-9a-f]{3,8}\b/gi)].map((m) => m[0]);
+  const FLOOR = P1;
 
-  const HALO_PAIRS: { fg: string; stated: number; role: Role }[] = [
-    { fg: "text-body", stated: 11.65, role: "text" },
-    { fg: "text-muted", stated: 5.22, role: "text" },
-    { fg: "text-faint", stated: 4.79, role: "text" },
-    { fg: "text-link", stated: 4.87, role: "text" },
-    { fg: "text-alert", stated: 4.87, role: "text" },
-    { fg: "state-good-text", stated: 4.6, role: "text" },
-    { fg: "state-bad-text", stated: 4.87, role: "text" },
-    { fg: "state-warn-text", stated: 4.77, role: "text" },
-    { fg: "viz-axis", stated: 5.22, role: "text" },
-    { fg: "viz-highlight-text", stated: 4.87, role: "text" },
-    { fg: "viz-cat-2", stated: 4.23, role: "mark-only" },
-    { fg: "viz-cat-3", stated: 4.39, role: "mark-only" },
+  const GROUND_PAIRS: { fg: string; stated: number }[] = [
+    { fg: "text-body", stated: 12.97 },
+    { fg: "text-muted", stated: 5.81 },
+    { fg: "text-faint", stated: 5.02 },
+    { fg: "text-link", stated: 5.42 },
+    { fg: "text-alert", stated: 5.42 },
+    { fg: "state-good-text", stated: 5.12 },
+    { fg: "state-bad-text", stated: 5.42 },
+    { fg: "state-warn-text", stated: 5.31 },
+    { fg: "viz-axis", stated: 5.81 },
+    { fg: "viz-highlight-text", stated: 5.42 },
   ];
 
-  it("reads the halo from shape.css, not a copy of it", () => {
-    expect(darkest).toBe("0.05");
-    expect(HALO).not.toBe(literal(P1));
+  it("reads the lift from shape.css, not a copy of it", () => {
+    expect(lift).toMatch(/^\s*radial-gradient\(/);
+    expect(stops.length).toBeGreaterThan(0);
   });
 
-  it.each(HALO_PAIRS)("--$fg under the halo is $stated:1", ({ fg, stated, role }) => {
-    const ratio = contrast(fg, HALO);
+  it("only lightens: every color stop is white or transparent", () => {
+    const darkening = stops.filter((c) => {
+      const { r, g, b, a } = parse(c);
+      return a > 0 && (r < 255 || g < 255 || b < 255);
+    });
+    expect(darkening).toEqual([]);
+  });
+
+  it.each(GROUND_PAIRS)("--$fg on the bare ground is $stated:1", ({ fg, stated }) => {
+    const ratio = contrast(fg, FLOOR);
     expect(round2(ratio)).toBe(stated);
-    if (role === "text") expect(ratio).toBeGreaterThanOrEqual(4.5);
-    if (role === "mark-only") {
-      expect(ratio).toBeGreaterThanOrEqual(3);
-      expect(ratio).toBeLessThan(4.5);
-    }
+    expect(ratio).toBeGreaterThanOrEqual(4.5);
   });
 
   it("keeps the faint ink quieter than the muted one there too", () => {
-    expect(contrast("text-faint", HALO)).toBeLessThan(contrast("text-muted", HALO));
+    expect(contrast("text-faint", FLOOR)).toBeLessThan(contrast("text-muted", FLOOR));
   });
 });
 

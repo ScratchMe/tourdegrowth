@@ -100,7 +100,7 @@ export default async function LandingPage({ params }: PageProps) {
               {tc(t.promise, locale)}
             </p>
 
-            <div className={styles.ctaRow}>
+            <div className={styles.ctaRow} data-testid="landing-cta-row">
               <Button size="lg" href="/quiz" hard data-testid="hero-cta">
                 {tc(t.ctaPrimary, locale)}
               </Button>

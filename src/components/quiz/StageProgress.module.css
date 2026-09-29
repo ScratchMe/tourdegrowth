@@ -24,23 +24,12 @@
   gap: 6px;
 }
 
+/* A thin pill (design I + B: 10px at every width; it was 18 / 16). The
+   progress is read from the count and the label, not from the bar's bulk. */
 .segment {
   flex: 1;
+  height: 10px;
   border-radius: var(--radius-tag);
-}
-
-.segmentDesktop {
-  height: 18px;
-}
-
-@media (max-width: 760px) {
-  .segmentDesktop {
-    height: 16px;
-  }
-}
-
-.segmentMobile {
-  height: 16px;
 }
 
 .done {

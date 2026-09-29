@@ -14,11 +14,12 @@
   text-transform: uppercase;
 }
 
-/* --state-good-text: 5.12:1 on the page ground (--paper-1), 6.34 on a card
-   (--paper-0), 4.60 at the darkest point of the page's halo — where this
-   line sits, with no card under it. The comment used to give 6.17 and 4.98
-   the other way round, and the old green was 4.47 under the halo (design
-   audit S-20; token-contrast.test.ts measures it there now). */
+/* --state-good-text: 5.12:1 on the page ground (--paper-1) — where this
+   line sits, with no card under it — and 6.34 on a card (--paper-0). The
+   ground only lightens since 2026-09-29, so 5.12 is its floor; under the
+   former halo it was 4.60, and the old green 4.47 (design audit S-20). The
+   comment used to give 6.17 and 4.98 the other way round.
+   token-contrast.test.ts measures it on the bare ground. */
 .win {
   color: var(--state-good-text);
 }

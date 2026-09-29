@@ -88,6 +88,14 @@
   border-style: dashed;
 }
 
+/* Open, the night card has no drawn edge (design I + B): the night's hard
+   border is a lighter line, which framed the dark card in a grey rim. Its
+   edge against the paper is its own ground. Closed, it keeps the dashed
+   line: that dash is what says « bientôt » without the word. */
+.card[data-space="game"]:not([data-state="soon"]) {
+  border-color: var(--surface-page);
+}
+
 .top {
   display: flex;
   align-items: center;

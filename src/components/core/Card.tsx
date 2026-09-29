@@ -2,8 +2,8 @@ import type { CSSProperties, HTMLAttributes } from "react";
 import styles from "./Card.module.css";
 
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
-  /** raised = 7px shadow, one per screen · panel = 5px, popovers · flat = no shadow */
-  elevation?: "raised" | "panel" | "flat";
+  /** hero = 8px shadow, the card a whole screen is for · raised = 6px, one per screen · panel = 4px, popovers · flat = no shadow */
+  elevation?: "hero" | "raised" | "panel" | "flat";
   /** paper = default · sunken = recessed example block · alert = red wash · outlineAlert = dashed red on paper */
   tone?: "paper" | "sunken" | "alert" | "outlineAlert";
   /** CSS padding override. Defaults to 26px 30px desktop / 20px mobile. */
@@ -11,11 +11,14 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 /**
- * The paper card. `elevation="raised"` carries the 7px hard shadow and is
- * reserved for the one thing a screen is about — the score, or the current
- * question. `tone="alert"` (solid red wash) marks a diagnosed weakness;
- * `tone="outlineAlert"` (dashed red on paper) marks advice. Shadows are
- * always ink, never blurred, never coloured.
+ * The paper card. `elevation="raised"` carries the 6px hard shadow and is
+ * reserved for the one thing a screen is about — the score, for instance.
+ * `elevation="hero"` (8px, design I + B) stands higher still, for a card that
+ * IS the screen: the landing's preview of a result (the quiz's question card
+ * reads the same token). `tone="alert"` (solid red wash) marks a diagnosed
+ * weakness; `tone="outlineAlert"` (dashed red on paper) marks advice. A
+ * card's shadow is ink, never blurred; the only red ones are the advice's
+ * (PriorityMove) and the roast's.
  */
 export function Card({
   elevation = "flat",

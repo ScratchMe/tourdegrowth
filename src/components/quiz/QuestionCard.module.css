@@ -2,7 +2,8 @@
   background: var(--surface-card);
   border: var(--border-solid);
   border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
+  /* The card the whole quiz screen is for (design I + B: 8px). */
+  box-shadow: var(--shadow-hero);
 }
 
 /* "desktop" shrinks to the "mobile" figures below the app's breakpoint on

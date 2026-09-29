@@ -6,6 +6,10 @@
   padding: var(--pad-card);
 }
 
+.hero {
+  box-shadow: var(--shadow-hero);
+}
+
 .raised {
   box-shadow: var(--shadow-card);
 }

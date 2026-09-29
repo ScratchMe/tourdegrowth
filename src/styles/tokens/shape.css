@@ -69,9 +69,18 @@
   --ground-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .12  0 0 0 0 .1  0 0 0 0 .07  0 0 0 .045 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   --ground-grain-size: 160px 160px;
 
-  /* --- Page ground: two soft radial lifts, never a linear gradient --- */
-  --ground-lift: radial-gradient(circle at 16% 12%, rgba(255, 255, 255, 0.45), transparent 42%),
-    radial-gradient(circle at 88% 74%, rgba(0, 0, 0, 0.05), transparent 46%);
+  /*
+   * --- Page ground: one soft white wash from above the top-left corner ---
+   * Design I + B (2026-09-29): the mockup's `1200px 700px at 12% -10%`,
+   * written in percent of the box it lights (a 1280 × 860 window) so a slide
+   * or a paper card inside the night is lit the same way. It only LIGHTENS:
+   * the black halo that sat at `88% 74%` greyed the right half of every
+   * window, which the mockup does not have, and it was the page's darkest
+   * point (design audit L-10). token-contrast.test.ts fails if a darkening
+   * layer comes back, so the text inks are measured on --paper-1 as the floor.
+   * Never a linear gradient.
+   */
+  --ground-lift: radial-gradient(94% 81% at 12% -10%, rgba(255, 255, 255, 0.7), transparent 60%);
 }
 
 /* Color-bearing shorthands — redeclared per world (see the header). */
@@ -88,6 +97,12 @@
   --shadow-card: 6px 6px 0 var(--shadow-color); /* primary card: score, question */
   --shadow-panel: 4px 4px 0 var(--shadow-color); /* popover, secondary card */
   --shadow-hover: 3px 3px 0 var(--shadow-color); /* option button on hover */
+  /* Design I + B (2026-09-29): the one card a screen is FOR stands higher —
+     the question, the landing's preview of a result. */
+  --shadow-hero: 8px 8px 0 var(--shadow-color);
+  /* The next action's hard shadow is the advice red, as its dashed edge is:
+     a mark (--border-alert), never text. */
+  --shadow-advice: 5px 5px 0 var(--border-alert);
   /* Hover lifts the shadow only; the fill never changes (DS v3 §5.4). */
   --state-hover-shadow: var(--shadow-hover);
 

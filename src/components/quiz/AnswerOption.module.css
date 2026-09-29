@@ -12,7 +12,7 @@
   width: 100%;
   color: var(--text-body);
   padding: var(--pad-option);
-  min-height: var(--hit-option);
+  min-height: var(--hit-answer);
   border-radius: var(--radius-panel);
   border: var(--border-solid);
   background: var(--surface-card);

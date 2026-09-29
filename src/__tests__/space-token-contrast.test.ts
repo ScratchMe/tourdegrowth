@@ -180,29 +180,49 @@ describe("the paper grain never takes paper-world text under AA", () => {
 });
 
 /*
- * The sticky header's frosted glass (brand/SiteHeader): the page ground at
+ * The sticky header's frosted glass (brand/SiteHeader): the raised paper at
  * some opacity, over whatever scrolls under it. The worst ground is solid ink
  * — the game's night desk, a card's hard shadow — and the row carries muted
  * text (the quiet nav links) and red link text. Both must stay AA over it.
+ *
+ * And the glass is LIGHTER than the page it floats over: the first build
+ * glazed it with the page's own paper, and the header read as part of the
+ * ground (Antoine, 2026-09-29). Measured on the ground it usually covers —
+ * the bare page — rather than asserted on token names.
  */
 describe("the sticky header's glass keeps its row AA over solid ink", () => {
   const css = readFileSync(path.join(process.cwd(), "src/components/brand/SiteHeader.module.css"), "utf8").replace(
     /\/\*[\s\S]*?\*\//g,
     "",
   );
-  const pct = Number(/background:\s*color-mix\(in srgb, var\(--surface-page\) (\d+)%, transparent\)/.exec(css)?.[1]);
+  const glassRule = /background:\s*color-mix\(in srgb, var\(--([a-z-]+)\) (\d+)%, transparent\)/.exec(css);
+  const surface = glassRule?.[1] ?? "";
+  const pct = Number(glassRule?.[2]);
+  const glassOver = (ground: string) => compose({ ...parseColor(literal(surface)), a: pct / 100 }, parseColor(literal(ground)));
 
-  it("reads the real opacity", () => {
+  it("reads the real surface and opacity", () => {
+    expect(surface).toBe("surface-card");
     expect(pct).toBe(92);
   });
 
-  it.each(["text-muted", "text-link", "text-body"])("--%s on the glass over ink", (token) => {
-    const glass = compose({ ...parseColor(literal("paper-1")), a: pct / 100 }, parseColor(literal("ink-0")));
-    expect(ratio(parseColor(literal(token)), glass)).toBeGreaterThanOrEqual(4.5);
+  it.each([
+    ["text-muted", 6.14],
+    ["text-link", 5.73],
+    ["text-body", 13.7],
+  ])("--%s on the glass over ink is %s:1", (token, stated) => {
+    const r = ratio(parseColor(literal(token)), glassOver("ink-0"));
+    expect(round2(r)).toBe(stated);
+    expect(r).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("is lighter than the page ground it floats over", () => {
+    const luminance = (c: ReturnType<typeof parseColor>) => ratio(c, { r: 0, g: 0, b: 0, a: 1 });
+    const page = parseColor(literal("surface-page"));
+    expect(luminance(glassOver("surface-page"))).toBeGreaterThan(luminance(page) * 1.1);
   });
 
   it("the mockup's 74% would not have passed", () => {
-    const glass = compose({ ...parseColor(literal("paper-1")), a: 0.74 }, parseColor(literal("ink-0")));
-    expect(round2(ratio(parseColor(literal("text-link")), glass))).toBe(3.2);
+    const glass = compose({ ...parseColor(literal(surface)), a: 0.74 }, parseColor(literal("ink-0")));
+    expect(round2(ratio(parseColor(literal("text-link")), glass))).toBe(3.89);
   });
 });

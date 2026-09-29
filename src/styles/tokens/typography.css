@@ -43,12 +43,17 @@
   --title-question-sm: 700 25px/1.22 var(--font-ui);
   --title-question-tracking: -0.02em;
   --title-card: 600 19px/1.35 var(--font-ui);
+  /* Design I + B (2026-09-29), named by use: the landing's subtitle, a pull
+     quote (the founder's line), and the one next action a result is for. */
+  --body-lead: 500 19px/1.55 var(--font-ui);
+  --title-quote: 600 24px/1.35 var(--font-ui);
+  --title-move: 600 18px/1.45 var(--font-ui);
   --body-lg: 500 17px/1.55 var(--font-ui);
   --body-md: 500 15px/1.55 var(--font-ui);
   --body-sm: 500 14.5px/1.5 var(--font-ui);
   --label-button-sm: 600 13px/1 var(--font-ui); /* compact button, until now written inline */
   --label-button: 600 15px/1 var(--font-ui);
-  --label-button-lg: 600 16px/1 var(--font-ui);
+  --label-button-lg: 600 17px/1 var(--font-ui); /* design I: was 16px */
   --label-nav: 500 13.5px/1 var(--font-ui);
 
   /* --- Mono: uppercase for labels, sentence case for read-aloud meta --- */
