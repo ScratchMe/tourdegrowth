@@ -5332,3 +5332,15 @@ Des seize opportunités de plateforme, douze sont absentes de `src/`, `text-wrap
 **La fenêtre « All-time » a renvoyé une 404 de GoatCounter** au premier run, comme le 2026-09-14. Relancée seule quelques minutes plus tard, elle répond. Deux occurrences, deux fois passée à la relance : c'est une réponse passagère de leur API sur la plus longue fenêtre, pas notre code. La règle « relancer avant d'enquêter » tient, et elle est maintenant dans la ligne « Lecture des stats » de `CLAUDE.md`, pas seulement ici.
 
 **Ce qui change dans les documents** : A6 sort de `CHANTIERS.md` (la section A passe à quatre lots), la section E dit qu'un relevé mensuel suffit et renvoie à la méthode, D8 s'ajoute. Dans `CLAUDE.md`, la ligne des événements d'A4 est retirée et celle de la lecture des stats mise à jour.
+
+## D1 : les réglages du dépôt, vérifiés et clos (2026-09-29)
+
+**La demande** : la section D de `CHANTIERS.md`, pas à pas avec Antoine (prompt D). Première action choisie : D1.
+
+**Ce que l'API disait avant le moindre clic** (`GET /repos/ScratchMe/tourdegrowth`) : `has_projects` et `has_discussions` déjà à `false`, la description et les neuf topics de `GROWTH-PLAN.md` 0.2 en place. `CHANTIERS.md` écrivait pourtant « Activés » à la ligne C18, le matin même : un document dit ce qui était vrai quand il a été écrit (convention 10). Antoine a confirmé à l'écran (Settings → General → Features).
+
+**Le seul geste** : la page d'accueil du dépôt pointait vers l'apex `https://tourdegrowth.com`, qui répond en 308 vers `www`. Antoine l'a passée à `https://www.tourdegrowth.com`, l'adresse que prévoyait 0.2. Relu par l'API après coup.
+
+**Retiré de `CHANTIERS.md`** : D1, et C18, sans objet puisque l'état recommandé était déjà en place et qu'Antoine l'a validé. La section C passe à 21 questions. La ligne « Hygiène de dépôt public » de `CLAUDE.md` n'a plus rien côté Antoine.
+
+**Pas vérifiable d'ici, pour D7** : si le profil github.com/ScratchMe affiche un nom. L'API des profils est refusée à une session cloud, bornée aux routes du dépôt. Antoine le regardera avant la vague 4.
