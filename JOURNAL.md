@@ -5191,7 +5191,7 @@ Demandé par Antoine après le merge de #182 : « il me semble qu'il y a quelque
 
 **Après la PR, une règle de merge nouvelle** (Antoine) : « quand les PR sont vertes, tu peux merge, n'attends pas forcément mon GO, tant que tu sais que tu ne vas pas provoquer soudainement une grosse hausse de functions storage côté Vercel ». Écrite là où une session la lit avant d'agir : `CLAUDE.md` (l'outillage), `GITHUB.md` §2 et `/livrer` §0. Ce dernier donne la barrière vérifiable : aucun changement à `package.json`, au verrou, à `next.config.mjs` ni à `vercel.json`, et aucune route de fonction ajoutée. #183 la passe : du style (dix composants rendus autrement, six fichiers de composant retouchés), des tests et de la doc.
 
-## Kit I + B, passe de vérification après merge (2026-09-29)
+## Kit I + B, passe de vérification après merge (2026-09-29, #184)
 
 Demandée par Antoine une fois #183 en production : « fais une dernière passe de vérification de ton travail là-dessus ». Trois voies, dont deux indépendantes de l'auteur :
 - **La suite complète sur `main` (`cbe11da`)** : `tsc`, `eslint`, `npm audit` propres, build, 582 specs passées et 5 ignorées par construction, aucun échec.
