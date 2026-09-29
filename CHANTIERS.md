@@ -21,15 +21,15 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
-| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot | Session cloud | Maintenant. A2 à A5 l'un après l'autre (A1 et A6 livrés le 2026-09-29) |
-| **B. Design sync** | Une session sur ta machine | Claude Code en local : l'autorisation Claude Design ne s'obtient que là | Maintenant (A1 est livré), puis de nouveau après A2 et A5 |
+| **A. Le travail autonome**, en trois lots | Une session seule, une PR par lot | Session cloud | Maintenant. A3 à A5 l'un après l'autre (A1, A2 et A6 livrés le 2026-09-29) |
+| **B. Design sync** | Une session sur ta machine | Claude Code en local : l'autorisation Claude Design ne s'obtient que là | Maintenant (A1 et A2 sont livrés), puis de nouveau après A5 |
 | **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | Maintenant : 22 questions, environ 45 minutes |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt (D2 attend les bons à tirer nº7 et nº8) |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
 
-**L'ordre conseillé** : C et A2 en parallèle dès maintenant, car ils ne
+**L'ordre conseillé** : C et A3 en parallèle dès maintenant, car ils ne
 touchent pas les mêmes fichiers. B dès que tu as un créneau sur ta machine
-(A1 est livré), puis D.
+(A1 et A2 sont livrés), puis D.
 
 **Deux sessions en parallèle** écrivent toutes deux à la fin de `JOURNAL.md`
 et dans ce fichier. La seconde à merger fusionne `main` dans sa branche avant
@@ -49,16 +49,6 @@ mêmes feuilles de style.
 
 Une question produit ou de design rencontrée en route ne se tranche pas en
 route : elle part en section C, avec une recommandation.
-
-### A2 — Les slides et la grille de points du moteur
-
-| # | Constat | Correctif attendu |
-|---|---|---|
-| A2.1 | **S-8.** Les slides ont 23 tailles de police littérales, jusqu'à 14 px sur une slide projetée de 1 920 px | Compléter l'échelle `--slide-*`, avec rien sous 18 px. Un e2e mesure la plus petite taille rendue d'une slide. L'export PNG est vérifié aussi **Plancher de 18 px confirmé par Antoine le 2026-09-29** : un tableau qui ne tient pas à 18 px se coupe en deux slides, il ne s'écrit pas plus petit |
-| A2.2 | **S-10.** Le funnel en points est dessiné trois fois hors du système : le peloton, « Et si » et les slides, à trois tailles | Un `viz/DotGrid` que les trois vues composent, avec son aperçu design-sync. Décider là de l'usage des 15 jetons `--viz-cat-*` et `--viz-seq-*`, qui n'ont aucun lecteur : les employer ou les retirer (`dead-tokens.test.ts` les tient en attente) La case « inconnu » du peloton (`outline: 1.5px`, la dernière épaisseur hors jeton, listée dans `border-width.test.ts`) prend le trait de `DotGrid` ; retirer alors sa ligne de la garde |
-
-Le moteur est fermé derrière `ENGINE_ENABLED` : les e2e passent par
-l'aperçu propriétaire, comme le canari moteur.
 
 ### A3 — La boucle de croissance (`GROWTH-PLAN.md`, vague 3)
 
@@ -130,7 +120,7 @@ ne peut pas le pousser.
 |---|---|---|
 | B1 | **Pousser le bundle** vers le projet Claude Design existant (`23b9671c-a55b-452e-aa41-39906ee71ba8`, créé le 2026-09-11) | Au 2026-09-29 : 77 composants, 244 cellules, 77 aperçus sur 77 rendus. Lire `.design-sync/NOTES.md` avant toute commande : ce dépôt est une app, pas un paquet. Trois avertissements sont permanents et attendus : « Impact », et `GRID_OVERFLOW` sur `DefinitionPopover` et `QuarterNews`. **Ne pas appliquer** le `cardMode: "single"` suggéré, qui masquerait des histoires |
 | B2 | **Le brief S-15 : les primitives de formulaire.** Elles vivent hors du système, en deux copies. Côté moteur : `Field`, `NumberField`, `TextField`, `Select`, `Choices`, `CheckField`, `MonthField` et `SegmentedField`, sous `src/app/[locale]/aarrr-funnel-template/_engine/_ui/`. Côté audit : sous `src/app/(app)/admin/audit/` | Écrire `design/DS-EXTENSION-BRIEF-04.md`, sur la forme des briefs 01 et 03, puis l'envoyer à Claude Design. Le retour arrive par `design/ds-extension-04-return/` ou par « Send to Claude Code Web ». La promotion dans `core/` devient ensuite un lot A |
-| B3 | **Re-synchroniser** après A1, A2 et A5 | Ces lots changent des composants et leurs aperçus. **A1 n'a pas pu reconstruire le bundle** : le convertisseur (`.ds-sync/`) n'est pas dans une session cloud. Il a changé l'aperçu `Button` (une histoire `Quiet` de plus, donc 245 cellules attendues), le contrat de `Button` et `conventions.md` (le bouton texte, les trois épaisseurs de trait). À reconstruire et valider avant de pousser |
+| B3 | **Re-synchroniser** après A1, A2 et A5 | Ces lots changent des composants et leurs aperçus. **Ni A1 ni A2 n'ont pu reconstruire le bundle** : le convertisseur (`.ds-sync/`) n'est pas dans une session cloud. A1 a changé l'aperçu `Button` (une histoire `Quiet` de plus), le contrat de `Button` et `conventions.md` (le bouton texte, les trois épaisseurs de trait). A2 ajoute deux composants, `DotGrid` et `DotLegend` (`viz/DotGrid.tsx`, trois histoires chacun, dans `componentSrcMap`), l'échelle `--slide-*` complétée et les quinze jetons `--viz-cat-*` / `--viz-seq-*` retirés, et deux passages de `conventions.md`. Attendu : 79 composants, 251 cellules (244 + 1 + 6). À reconstruire et valider avant de pousser |
 
 ---
 

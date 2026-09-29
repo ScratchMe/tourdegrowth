@@ -6,6 +6,7 @@ import { Callout } from "@/components/core/Callout";
 import { Card } from "@/components/core/Card";
 import { DataTable } from "@/components/core/DataTable";
 import { Disclosure } from "@/components/core/Disclosure";
+import { DotGrid, DotLegend } from "@/components/viz/DotGrid";
 import { StatTile } from "@/components/viz/StatTile";
 import { fillTemplate, joinList, lowerFirst } from "@/lib/engine/format";
 import type { LeverId } from "@/lib/engine/types";
@@ -286,15 +287,7 @@ function Column({ step, aria }: { step: FunnelStepView; aria: string }) {
     <div className={styles.column} data-step={step.id} data-testid={`whatif-step-${step.id}`}>
       <div className={styles.numeral}>{step.numeral}</div>
       <div className={styles.label}>{step.label}</div>
-      <div role="img" aria-label={aria} className={[styles.grid, unknown ? styles.unknownGrid : ""].filter(Boolean).join(" ")}>
-        {unknown ? (
-          <span className={styles.unknownMark} aria-hidden="true">
-            ?
-          </span>
-        ) : (
-          grid.dots.map((dot, i) => <span key={i} className={`${styles.dot} ${styles[dot]}`} data-dot={dot} aria-hidden="true" />)
-        )}
-      </div>
+      <DotGrid grid={unknown ? { kind: "unknown", dots: [] } : grid} label={aria} className={styles.grid} />
       {step.detail ? <p className={styles.detail}>{step.detail}</p> : null}
       {step.delta ? (
         <p className={styles.delta} data-sign={step.deltaSign}>
@@ -318,14 +311,7 @@ function Legend({ inUse, strings, range }: { inUse: Set<ScenarioDot>; strings: E
   const items = LEGEND.filter((item) => (item.dot === "range" ? hasRange : inUse.has(item.dot) || (item.dot === "gained" && inUse.has("gainedRange"))));
   return (
     <div className={styles.legendWrap}>
-      <ul className={styles.legend} data-testid="whatif-legend">
-        {items.map((item) => (
-          <li key={item.dot}>
-            <span className={`${styles.swatch} ${styles[item.dot]}`} aria-hidden="true" />
-            {item.key ? strings[item.key] : range}
-          </li>
-        ))}
-      </ul>
+      <DotLegend data-testid="whatif-legend" items={items.map((item) => ({ mark: item.dot, label: item.key ? strings[item.key] : range }))} />
       <p className={styles.note}>{strings.legendUnit}</p>
     </div>
   );

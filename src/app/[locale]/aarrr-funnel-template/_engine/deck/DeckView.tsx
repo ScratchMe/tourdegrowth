@@ -8,6 +8,7 @@ import { fillTemplate } from "@/lib/engine/format";
 import { sanityText } from "@/lib/engine/sentences";
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
 import type { DeckSlide, EngineAsk, EngineCalcContext, EngineDeck, EngineDerived, EngineState, FixedSlideId, LeverId, SanityCheck, SlideId } from "@/lib/engine/types";
+import { includeKeyOf, isAnnexPage } from "@/lib/engine/types";
 import { currentSnapshot } from "@/lib/engine/values";
 import type { Locale } from "@/lib/i18n/locale";
 import { AskForm } from "./AskForm";
@@ -76,6 +77,8 @@ const isWhatIfSlide = (id: SlideId): id is `whatif:${LeverId}` => id.startsWith(
 function slideComponent(id: SlideId): ComponentType<SlideProps> {
   if (id === "scenario") return SlideScenario;
   if (isWhatIfSlide(id)) return SlideWhatIf;
+  // The appendix's next pages (`annex:2`…): the same table, the rows the model put on that page.
+  if (isAnnexPage(id)) return SlideAnnex;
   return SLIDES[id];
 }
 
@@ -247,7 +250,8 @@ export function DeckView({
   const referenceMonth = currentSnapshot(state).referenceMonth;
 
   const change = (next: Partial<EngineDeck>) => onDeckChange({ ...state.deck, ...next });
-  const setInclude = (id: SlideId, value: boolean) => change({ include: { ...state.deck.include, [id]: value } });
+  // The appendix's pages go in or out together: each page's box writes `annex`.
+  const setInclude = (id: SlideId, value: boolean) => change({ include: { ...state.deck.include, [includeKeyOf(id)]: value } });
   const setAsk = (next: EngineAsk) => {
     setAskTouched(true);
     change({ ask: next });

@@ -117,10 +117,23 @@
   max-width: 1180px;
 }
 
-/* The what-if slides' footer carries the model's assumptions, up to seven sentences: smaller, and wider. */
+/*
+ * The what-if slides' footer carries the model's assumptions, up to seven
+ * sentences: prose at the floor, across all the width the sign leaves — the
+ * sign stacks to give it (below). With eight levers and seven assumptions
+ * the « together » slide keeps 28px between its body and this footer
+ * (e2e/engine-deck-whatif.spec.ts); in mono at 18px it ran 90px into the body.
+ */
 .slideSourcesDense {
-  max-width: 1320px;
-  font: 500 15px/1.4 var(--font-mono);
+  flex: 1;
+  max-width: none;
+  font: var(--slide-note);
+}
+
+.slideFootDense .slideSign {
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
 }
 
 .slideSign {
@@ -132,7 +145,7 @@
 
 /* Two classes: the Wordmark's own `.sm` lives in another module, and a tie on one class would be decided by stylesheet order. */
 .slideSign .slideWordmark {
-  font-size: 26px;
+  font-size: var(--size-slide-wordmark);
 }
 
 .slideDomain {
@@ -206,10 +219,9 @@
 
 .numeral {
   margin: 0;
+  /* Numeral, label, grid and source must fit the body under a three-line
+     title (measured on the §6.0 example): hence 92, not the 104 it once was. */
   font: var(--slide-numeral);
-  /* One step under the token: numeral, label, grid and source must fit the
-     body under a three-line title (measured on the §6.0 example). */
-  font-size: 92px;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -223,81 +235,7 @@
   font: var(--slide-label);
 }
 
-.grid {
-  box-sizing: border-box;
-  width: 200px;
-  aspect-ratio: 1;
-  display: grid;
-  grid-template-columns: repeat(10, minmax(0, 1fr));
-  gap: 6px;
-}
-
-.dot {
-  display: block;
-  box-sizing: border-box;
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: var(--radius-round);
-}
-
-.dotFilled {
-  background: var(--viz-ink);
-}
-
-/* The bottleneck's column: its measured dots take the one red; the stamp says it in words too. */
-.gridHighlighted .dotFilled {
-  background: var(--viz-highlight);
-}
-
-/* A referred sign-up: an ink ring around a paper core — not red, which belongs to the bottleneck (the board's grammar, Peloton.module.css). */
-.dotReferred {
-  background: var(--surface-card);
-  box-shadow: inset 0 0 0 4px var(--viz-ink);
-}
-
-.dotReferredRange {
-  background: var(--viz-unknown-fill), var(--surface-card);
-  box-shadow: inset 0 0 0 4px var(--viz-ink);
-}
-
-/* A range's upper part: hatched, "counted, not certain". */
-.dotRange {
-  background: var(--viz-unknown-fill);
-  box-shadow: inset 0 0 0 2px var(--viz-axis);
-}
-
-.dotEmpty {
-  box-shadow: inset 0 0 0 2px var(--viz-axis);
-}
-
-/*
- * Not measured: the whole grid is one hatched, dashed panel — a shape of its
- * own, never 100 empty dots, which would read as "nobody", and zero is a
- * measurement. Declared after .grid in the same module, so its display wins.
- */
-.gridUnknown {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--viz-unknown-fill);
-  border: var(--border-dashed);
-  border-radius: var(--radius-panel);
-}
-
-/* The « ? » sits on its own paper disc so it never overlaps a mark. */
-.gridQuestion {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 38%;
-  aspect-ratio: 1;
-  border: var(--border-solid);
-  border-radius: var(--radius-round);
-  background: var(--surface-card);
-  font: var(--slide-label);
-  font-size: 44px;
-  color: var(--text-body);
-}
+/* The grids and their legend are viz/DotGrid's, at its `slide` size (design audit S-10, 2026-09-29). */
 
 /*
  * The diagnosis stamp on the named column, beside its numeral. The red fill
@@ -313,7 +251,6 @@
   background: var(--surface-accent);
   color: var(--text-inverse);
   font: var(--slide-heading);
-  font-size: 22px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -334,37 +271,6 @@
   gap: 32px;
   font: var(--slide-meta);
   color: var(--text-muted);
-}
-
-.legendItems {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 32px;
-}
-
-.legendItems li {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.swatch {
-  display: inline-block;
-  flex: none;
-  box-sizing: border-box;
-  width: 20px;
-  height: 20px;
-  border-radius: var(--radius-round);
-}
-
-.swatchUnknown {
-  border-radius: 3px;
-  background: var(--viz-unknown-fill);
-  outline: var(--border-width) dashed var(--viz-axis);
-  outline-offset: -2px;
 }
 
 .legendNote {
@@ -479,8 +385,7 @@
 }
 
 .asideStage {
-  font: var(--slide-label);
-  font-size: 24px;
+  font: var(--slide-label-xs);
 }
 
 .asideRow[data-tone="below"] .asideStage {
@@ -488,9 +393,7 @@
 }
 
 .asideText {
-  font: var(--slide-meta);
-  font-family: var(--font-ui);
-  font-size: 20px;
+  font: var(--slide-caption);
 }
 
 .asideRow[data-tone="unknown"] .asideText {
@@ -537,7 +440,7 @@
 .changeTable {
   width: 100%;
   border-collapse: collapse;
-  font: 500 20px/1.3 var(--font-ui);
+  font: var(--slide-figures);
   font-variant-numeric: tabular-nums;
 }
 
@@ -551,8 +454,9 @@
 .changeTable thead th {
   padding-top: 0;
   vertical-align: bottom;
-  font: 500 14px/1.3 var(--font-mono);
-  letter-spacing: var(--slide-tracking);
+  font: var(--slide-meta);
+  /* Half the slide tracking: « Avec les « Et si » » holds on one line at 18px. */
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-muted);
 }
@@ -648,18 +552,20 @@
 }
 
 .leverName {
-  font: 600 20px/1.3 var(--font-ui);
+  font: var(--slide-figures);
+  font-weight: 600;
 }
 
 .leverMove {
-  font: 500 16px/1.3 var(--font-mono);
+  font: var(--slide-meta);
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
 .leverGain {
-  font: 700 20px/1.3 var(--font-ui);
+  font: var(--slide-figures);
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   text-align: right;
   white-space: nowrap;
@@ -676,7 +582,8 @@
 
 .together {
   margin: 0;
-  font: 600 22px/1.35 var(--font-ui);
+  font: var(--slide-body-xs);
+  font-weight: 600;
 }
 
 /* ── Slide 3 — visibility (§9.3) ────────────────────────────────────── */
@@ -716,8 +623,7 @@
 }
 
 .stageName {
-  font: var(--slide-label);
-  font-size: 26px;
+  font: var(--slide-label-sm);
   /* The pillar ids are lower-case; their names are the AARRR words, never translated. */
   text-transform: capitalize;
 }
@@ -738,9 +644,7 @@
 }
 
 .stageMetricName {
-  font: var(--slide-meta);
-  font-family: var(--font-ui);
-  font-size: 20px;
+  font: var(--slide-caption);
 }
 
 /* Pips: status by shape, never by colour alone (WCAG 1.4.1) — the board's vocabulary (§8.2). */
@@ -877,8 +781,7 @@
 }
 
 .figureValue {
-  font: var(--slide-numeral);
-  font-size: 64px;
+  font: var(--slide-figure);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -939,8 +842,7 @@
   border: var(--border-solid);
   border-radius: var(--radius-round);
   background: var(--surface-card);
-  font: var(--slide-label);
-  font-size: 40px;
+  font: var(--slide-label-lg);
   color: var(--text-body);
 }
 
@@ -1013,8 +915,7 @@
 }
 
 .mirrorCountValue {
-  font: var(--slide-label);
-  font-size: 44px;
+  font: var(--slide-label-xl);
 }
 
 .mirrorCountLabel {
@@ -1056,9 +957,7 @@
 }
 
 .mirrorAnswer {
-  font: var(--slide-meta);
-  font-family: var(--font-ui);
-  font-size: 21px;
+  font: var(--slide-caption);
 }
 
 /* ── Slide 6 — the ask (§9.3) ───────────────────────────────────────── */
@@ -1121,8 +1020,7 @@
 /* The cost line leads the funded block: the number a CODIR reads first. */
 .askCost {
   margin: 0;
-  font: var(--slide-label);
-  font-size: 34px;
+  font: var(--slide-label-md);
 }
 
 .askKnow {
@@ -1147,8 +1045,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  font: var(--slide-label);
-  font-size: 40px;
+  font: var(--slide-label-lg);
   font-variant-numeric: tabular-nums;
 }
 
@@ -1189,20 +1086,24 @@
 
 .annex thead th {
   font: var(--slide-meta);
-  font-size: 15px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-muted);
   border-bottom: var(--border-solid);
 }
 
-/* The formula is the long column: the others hold a month, a tool, a word. */
+/*
+ * The formula is the long column: the others hold a month, a tool, a word.
+ * lib/engine/annex-pages.ts estimates a row's height from these widths, and
+ * annex-pages.test.ts holds the two in step. « Confidence », in capitals at
+ * 18px, needs its 10%.
+ */
 .annex thead th:nth-child(1) {
   width: 17%;
 }
 
 .annex thead th:nth-child(2) {
-  width: 37%;
+  width: 35%;
 }
 
 .annex thead th:nth-child(3) {
@@ -1214,9 +1115,12 @@
   width: 11%;
 }
 
-.annex thead th:nth-child(6),
-.annex thead th:nth-child(7) {
+.annex thead th:nth-child(6) {
   width: 8%;
+}
+
+.annex thead th:nth-child(7) {
+  width: 10%;
 }
 
 .annex tbody th {
@@ -1229,12 +1133,6 @@
   color: var(--text-muted);
 }
 
-/* Past twelve rows the whole appendix still fits one page: a step down, never a second page. */
-.annexDense th,
-.annexDense td {
-  padding: 4px 10px;
-  font-size: 15px;
-}
 
 /* ── The screen around the slides (§7 E5) ───────────────────────────── */
 

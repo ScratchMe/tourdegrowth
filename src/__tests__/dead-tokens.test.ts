@@ -32,13 +32,7 @@ const WAITING: Record<string, string> = {
   "--state-warn-text":
     "the middle of the status triplet (good · warn · bad), measured in both worlds by the contrast tests; no screen says « warn » yet",
 };
-// The categorical and sequential chart scales: A2.2 (CHANTIERS.md) decides
-// whether the dot grid uses them, or whether they go.
-for (let i = 1; i <= 5; i++) {
-  WAITING[`--viz-cat-${i}`] = "chart scale, waiting on A2.2";
-  WAITING[`--viz-seq-${i}`] = "chart scale, waiting on A2.2";
-  WAITING[`--viz-seq-${i}-text`] = "chart scale, waiting on A2.2";
-}
+// The fifteen --viz-cat-* and --viz-seq-* waited here until A2.2 (2026-09-29), which removed them: nothing read them.
 
 const sheets = readdirSync(TOKENS).filter((f) => f.endsWith(".css"));
 const declared = new Map<string, string>();

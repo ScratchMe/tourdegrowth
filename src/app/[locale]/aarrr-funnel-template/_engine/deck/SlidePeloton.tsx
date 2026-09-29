@@ -1,49 +1,12 @@
+import { DotGrid, DotLegend } from "@/components/viz/DotGrid";
 import { fillTemplate } from "@/lib/engine/format";
 import { positionLabel } from "@/lib/engine/phrases";
 import type { CandidateId } from "@/lib/engine/types";
-import { columnGrid, signupsGrid, type GridModel } from "../visual-model";
+import { columnGrid, signupsGrid } from "../visual-model";
 import { rowOf, rowsOf } from "./deck-rows";
 import { SlideFrame, type SlideProps } from "./SlideFrame";
 import { Arrow, SlideText } from "./slide-text";
 import styles from "./deck.module.css";
-
-const DOT_CLASS = {
-  filled: styles.dotFilled,
-  referred: styles.dotReferred,
-  range: styles.dotRange,
-  referredRange: styles.dotReferredRange,
-  empty: styles.dotEmpty,
-} as const;
-
-/**
- * A 10 × 10 grid of the same 100 sign-ups — engine spec §8.1, D5 — drawn
- * from the board's own model (`visual-model.ts`), so the screen and the
- * slide can't draw one column two ways.
- *
- * Counts, not lengths: there is no scale to defend, and an unknown has a
- * shape of its own — the whole grid hatched, a dashed edge, a "?" on a paper
- * disc — instead of an empty grid that would read as zero. A range is solid
- * to its low bound and hatched to its high one, so "6 à 9" is six solid dots
- * and three striped ones, never "7.5".
- */
-function DotGrid({ grid, highlighted, label }: { grid: GridModel; highlighted: boolean; label: string }) {
-  if (grid.kind === "unknown") {
-    return (
-      <div className={`${styles.grid} ${styles.gridUnknown}`} role="img" aria-label={label}>
-        <span className={styles.gridQuestion} aria-hidden="true">
-          ?
-        </span>
-      </div>
-    );
-  }
-  return (
-    <div className={[styles.grid, highlighted ? styles.gridHighlighted : ""].filter(Boolean).join(" ")} role="img" aria-label={label}>
-      {grid.dots.map((dot, i) => (
-        <span key={i} className={`${styles.dot} ${DOT_CLASS[dot]}`} aria-hidden="true" />
-      ))}
-    </div>
-  );
-}
 
 /**
  * Slide 1 — "where the engine stands" (§9.3). Four columns counted on the
@@ -110,8 +73,8 @@ export function SlidePeloton({ slide, context }: SlideProps) {
           </div>
           <h4 className={styles.columnLabel}>{t.signups}</h4>
           <DotGrid
+            size="slide"
             grid={signupsGrid(derived.peloton.referredPerHundred)}
-            highlighted={false}
             label={referred ? `${referred.label} — 100, ${referred.text}` : `${t.signups} — 100`}
           />
           <p className={styles.columnSource}>{fillTemplate(strings.visual.cohortOf, { cohort: model.footer.cohort ?? "" })}</p>
@@ -130,7 +93,7 @@ export function SlidePeloton({ slide, context }: SlideProps) {
               ) : null}
             </div>
             <h4 className={styles.columnLabel}>{c.row.label}</h4>
-            <DotGrid grid={c.grid} highlighted={Boolean(c.stamp)} label={`${c.row.label} — ${c.row.text}`} />
+            <DotGrid size="slide" grid={c.grid} highlighted={Boolean(c.stamp)} label={`${c.row.label} — ${c.row.text}`} />
             <p className={styles.columnSource}>
               <SlideText text={c.caption} accent={false} />
             </p>
@@ -139,26 +102,16 @@ export function SlidePeloton({ slide, context }: SlideProps) {
       </div>
 
       <div className={styles.legend}>
-        <ul className={styles.legendItems} aria-hidden="true">
-          {referred ? (
-            <li>
-              <span className={`${styles.swatch} ${styles.dotReferred}`} />
-              {referred.text}
-            </li>
-          ) : null}
-          <li>
-            <span className={`${styles.swatch} ${styles.dotFilled}`} />
-            {t.legendMeasured}
-          </li>
-          <li>
-            <span className={`${styles.swatch} ${styles.dotRange}`} />
-            {t.legendRange}
-          </li>
-          <li>
-            <span className={`${styles.swatch} ${styles.swatchUnknown}`} />
-            {t.legendUnknown}
-          </li>
-        </ul>
+        <DotLegend
+          aria-hidden
+          size="slide"
+          items={[
+            ...(referred ? [{ mark: "referred" as const, label: referred.text }] : []),
+            { mark: "filled", label: t.legendMeasured },
+            { mark: "range", label: t.legendRange },
+            { mark: "unknown", label: t.legendUnknown },
+          ]}
+        />
         <p className={styles.legendNote}>{t.slideSameHundred}</p>
       </div>
     </SlideFrame>

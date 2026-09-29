@@ -115,7 +115,7 @@ export function SlideFrame({
 
       <div className={styles.slideBody}>{children}</div>
 
-      <footer className={styles.slideFoot}>
+      <footer className={[styles.slideFoot, footerDense ? styles.slideFootDense : ""].filter(Boolean).join(" ")}>
         <p className={[styles.slideSources, footerDense ? styles.slideSourcesDense : ""].filter(Boolean).join(" ")}>
           <SlideText text={sources} accent={false} />
         </p>

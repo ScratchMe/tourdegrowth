@@ -139,30 +139,6 @@
   --viz-highlight: var(--night-bad);
   --viz-highlight-text: var(--night-bad); /* bright enough to be its own label here */
   --viz-unknown: var(--night-muted);
-  /* ΔE min 46.1 normal, 17.7 deuteranopia, 12.9 protanopia, 10.9 tritanopia:
-     dash patterns and direct labels stay mandatory, as on paper. */
-  --viz-cat-1: #6cb4e8;
-  --viz-cat-2: #3fc59a;
-  --viz-cat-3: var(--night-amber);
-  --viz-cat-4: #e08cc0;
-  --viz-cat-5: var(--night-text);
-
-  /*
-   * Sequential, amber rising out of the night. Step 3 was #8a6a2c (4.37:1
-   * with the night text, 3.75:1 with the night ground — no label passed);
-   * darkened to #7a5c26. Neighbours are 1.38–2.08 apart: cells keep their
-   * separating rule, as on paper.
-   */
-  --viz-seq-1: #3a3226;
-  --viz-seq-2: #5a4a2c;
-  --viz-seq-3: #7a5c26;
-  --viz-seq-4: #c08c30;
-  --viz-seq-5: var(--night-amber);
-  --viz-seq-1-text: var(--night-text); /* 10.98 */
-  --viz-seq-2-text: var(--night-text); /* 7.46 */
-  --viz-seq-3-text: var(--night-text); /* 5.40 */
-  --viz-seq-4-text: var(--night-0); /* 6.31 */
-  --viz-seq-5-text: var(--night-0); /* 10.13 */
 
   /*
    * The page ground is not a color token (shape.css declares it once, on

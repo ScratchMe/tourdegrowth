@@ -206,3 +206,30 @@ test("the tiles' changes are bold ink, a loss as much as a gain", async ({ page 
     expect(d.weight, d.text ?? "").toBe("700");
   }
 });
+
+/**
+ * Design audit S-10 (A2.2, 2026-09-29): the peloton and « Et si » drew the
+ * same 100 sign-ups at 210px and 190px, each with its own dots. Both are
+ * viz/DotGrid now: the same grid, the same dot, at both widths.
+ * Non-vacuity: against the build of `main` before A2.2 this fails at 1280px
+ * (210 against 190).
+ */
+for (const width of [1280, 390]) {
+  test(`at ${width}px, the what-if grids are the peloton's: same size, same dot`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await openWith(page, exampleState());
+    const measure = (selector: string) =>
+      page.locator(selector).evaluateAll((grids) =>
+        grids.map((grid) => {
+          const dot = grid.querySelector("[data-dot]")!.getBoundingClientRect();
+          return [Math.round(grid.getBoundingClientRect().width), Math.round(dot.width * 10) / 10];
+        }),
+      );
+    const peloton = await measure('[data-testid="peloton-grid-act.rate"], [data-testid="peloton-grid-signups"]');
+    const whatIf = await measure('[data-testid="whatif-step-activated"] [role="img"], [data-testid="whatif-step-signups"] [role="img"]');
+    expect(peloton).toHaveLength(2);
+    expect(whatIf).toHaveLength(2);
+    for (const grid of [...peloton, ...whatIf]) expect(grid).toEqual(peloton[0]);
+    expect(peloton[0]![0]).toBe(width === 1280 ? 200 : 118);
+  });
+}

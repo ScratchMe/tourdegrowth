@@ -1236,7 +1236,8 @@ export const ENGINE_COPY = {
       fr: "Nous demandons **{cost}** pour mesurer d'abord ce qui manque ({metric}), avant de décider où investir.",
       en: "We're asking for **{cost}** to measure what's missing first ({metric}), before deciding where to invest.",
     },
-    annex: { fr: "Définitions et sources", en: "Definitions and sources" },
+    // TODO: à relire (convention 6). The page part is new (2026-09-29): the appendix now runs over two pages or more.
+    annex: { fr: "Définitions et sources ({i}/{n})", en: "Definitions and sources ({i}/{n})" },
     // TODO: à relire — nouveau (2026-09-26).
     whatIfLever: { fr: "Si {stage} passait à {to} (aujourd'hui : {from}), le MRR dans 12 mois gagnerait **{gain}**.", en: "If {stage} went from {from} to {to}, MRR in 12 months would gain **{gain}**." },
     // TODO: à relire — nouveau (2026-09-26).
