@@ -11,13 +11,13 @@
    convention as ScoreDisplay.module.css, which this block sits directly
    under inside the same card. `mobile` is a hard small at every width, for
    the landing's preview card. */
-.desktop {
+.md {
   margin-top: 20px;
   padding-top: 18px;
   gap: 10px;
 }
 
-.mobile {
+.sm {
   margin-top: 16px;
   padding-top: 14px;
   gap: 8px;
@@ -55,7 +55,7 @@
   color: var(--text-body);
 }
 
-.mobile .pillar {
+.sm .pillar {
   font: var(--display-section);
 }
 
@@ -84,22 +84,22 @@
   text-wrap: pretty;
 }
 
-.mobile .verdict {
+.sm .verdict {
   font: var(--body-sm);
 }
 
 @media (max-width: 760px) {
-  .desktop {
+  .md {
     margin-top: 16px;
     padding-top: 14px;
     gap: 8px;
   }
 
-  .desktop .pillar {
+  .md .pillar {
     font: var(--display-section);
   }
 
-  .desktop .verdict {
+  .md .verdict {
     font: var(--body-sm);
   }
 }
@@ -167,7 +167,7 @@
 }
 
 .withLead .pillar,
-.withLead.mobile .pillar {
+.withLead.sm .pillar {
   font: var(--display-section);
   font-size: min(var(--size-display-section), 14cqi);
   letter-spacing: var(--display-letter-spacing);
@@ -179,18 +179,18 @@
   border-top: var(--border-rule);
 }
 
-.withLead.mobile .verdict {
+.withLead.sm .verdict {
   margin-top: 14px;
   padding-top: 12px;
 }
 
 @media (max-width: 760px) {
-  .withLead.desktop {
+  .withLead.md {
     margin-top: 0;
     padding-top: 0;
   }
 
-  .withLead.desktop .pillar {
+  .withLead.md .pillar {
     font: var(--display-section);
     font-size: min(var(--size-display-section), 14cqi);
   }

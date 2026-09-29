@@ -8,12 +8,12 @@
   flex-direction: column;
 }
 
-.desktop {
+.md {
   padding: var(--pad-share-frame);
   gap: var(--pad-share-frame);
 }
 
-.mobile {
+.sm {
   padding: 12px;
   gap: 12px;
 }
@@ -67,7 +67,7 @@
 }
 
 @media (max-width: 760px) {
-  .desktop {
+  .md {
     padding: 12px;
     gap: 12px;
   }

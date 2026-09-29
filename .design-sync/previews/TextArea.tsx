@@ -18,7 +18,7 @@ const Field = ({ initial }: { initial: string }) => {
   const [value, setValue] = React.useState(initial);
   return (
     <div style={{ maxWidth: 560, display: "flex", flexDirection: "column", gap: 14 }}>
-      <QuestionCard size="desktop">{PROMPT}</QuestionCard>
+      <QuestionCard size="md">{PROMPT}</QuestionCard>
       <TextArea value={value} onChange={setValue} maxLength={500} label={PROMPT} />
     </div>
   );

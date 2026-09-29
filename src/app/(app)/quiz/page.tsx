@@ -59,10 +59,10 @@ export default function QuizPage() {
   const searchParams = useSearchParams();
   const { locale } = useLocale();
   const t = UI_STRINGS.quiz;
-  // Components below shrink to their own mobile figures via CSS below the
-  // app's breakpoint (see e.g. QuestionCard.module.css) — "desktop" here is
-  // just the base size, not a fixed desktop-only choice.
-  const size = "desktop";
+  // Components below shrink to their own phone figures via CSS below the
+  // app's breakpoint (see e.g. QuestionCard.module.css) — "md" is the base
+  // size, which does that; "sm" is the small one at every width.
+  const size = "md";
 
   /**
    * REVIEW.md R-19. Answering removes the button that had focus and replaces

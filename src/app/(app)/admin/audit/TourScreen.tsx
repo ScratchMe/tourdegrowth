@@ -107,12 +107,12 @@ export function TourScreen({
               <MetaLabel size="xs" wide>
                 {index + 1} / {questions.length} · {AUDIT_PILLAR_LABELS[question.pillar]}
               </MetaLabel>
-              <QuestionCard size="mobile">{question.question}</QuestionCard>
+              <QuestionCard size="sm">{question.question}</QuestionCard>
               <div className={styles.tourOptions}>
                 {question.options.map((option, optionIndex) => (
                   <AnswerOption
                     key={option.label}
-                    size="mobile"
+                    size="sm"
                     selected={chosen === optionIndex}
                     onClick={() => onAnswer(question.id, optionIndex as AnswerIndex)}
                     data-testid={`tour-answer-${question.id}-${optionIndex}`}

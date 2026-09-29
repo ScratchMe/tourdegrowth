@@ -40,7 +40,7 @@ export interface PreviewCardProps {
  * The landing's preview of a real result — design system extension 03 §4.
  *
  * It mirrors the result screen so the promise matches the delivery: score →
- * bottleneck → pillars → next move, in the same components at `size="mobile"`.
+ * bottleneck → pillars → next move, in the same components at `size="sm"`.
  *
  * **Why the landing gets a tone control and the result page does not.** The
  * result screen shows exactly two CTAs and a third was refused (R-23). This
@@ -94,8 +94,8 @@ export function PreviewCard({
           exactly as on the result page (design I + B, 2026-09-28). */}
       <Bottleneck
         data-testid="preview-bottleneck"
-        lead={<ScoreDisplay variant="marker" score={total} label={scoreLabel} size="mobile" />}
-        size="mobile"
+        lead={<ScoreDisplay variant="marker" score={total} label={scoreLabel} size="sm" />}
+        size="sm"
         sharpness="clear"
         label={bottleneckLabel}
         pillars={[{ pillar: bottleneckPillar, score: bottleneckScore }]}
@@ -109,7 +109,7 @@ export function PreviewCard({
             nothing to any term page. */}
         {chips.map((chip) => (
           <Link key={chip.href} href={chip.href} className={styles.previewChipLink} aria-label={chip.label}>
-            <PillarChip pillar={chip.label} score={chip.score} size="mobile" weak={chip.weak} stretch />
+            <PillarChip pillar={chip.label} score={chip.score} size="sm" weak={chip.weak} stretch />
           </Link>
         ))}
       </div>

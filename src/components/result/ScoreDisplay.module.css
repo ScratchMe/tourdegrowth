@@ -14,29 +14,29 @@
 }
 
 /*
- * "desktop" is the default and shrinks to the "mobile" figures below the
+ * "md" is the default and shrinks to the "sm" figures below the
  * app's breakpoint on its own (CSS-only — this component is used from
  * server-rendered pages like ResultView, which must stay responsive
  * without a JS viewport check; see Wordmark.module.css for the same
- * pattern). Pass size="mobile" explicitly only where a smaller size is
+ * pattern). Pass size="sm" explicitly only where a smaller size is
  * wanted regardless of viewport (the landing hero's preview card, which is
  * always a secondary/smaller context than the real result screen).
  */
-.desktop {
+.md {
   font-size: var(--size-score-xl);
   line-height: 0.86;
   margin-top: 10px;
 }
 
 @media (max-width: 760px) {
-  .desktop {
+  .md {
     font-size: var(--size-score-lg);
     line-height: 0.88;
     margin-top: 6px;
   }
 }
 
-.mobile {
+.sm {
   font-size: var(--size-score-lg);
   line-height: 0.88;
   margin-top: 6px;
@@ -57,18 +57,18 @@
   margin-left: 8px;
 }
 
-.suffixDesktop {
+.suffixMd {
   font-size: var(--size-score-suffix-xl);
 }
 
 @media (max-width: 760px) {
-  .suffixDesktop {
+  .suffixMd {
     font-size: var(--size-score-suffix-lg);
     margin-left: 6px;
   }
 }
 
-.suffixMobile {
+.suffixSm {
   font-size: var(--size-score-suffix-lg);
   margin-left: 6px;
 }
@@ -126,17 +126,17 @@
   background: var(--border-hard);
 }
 
-.markerDesktop {
+.markerMd {
   --marker-numeral: 84px;
 }
 
-.markerMobile {
+.markerSm {
   --marker-w: 140px;
   --marker-numeral: 72px;
 }
 
 @media (max-width: 760px) {
-  .markerDesktop {
+  .markerMd {
     --marker-w: 132px;
     --marker-numeral: 68px;
   }
@@ -166,12 +166,12 @@
   text-wrap: balance;
 }
 
-.markerMobile .cap {
+.markerSm .cap {
   padding: 0 18px 9px;
 }
 
 @media (max-width: 760px) {
-  .markerDesktop .cap {
+  .markerMd .cap {
     padding: 0 16px 8px;
     letter-spacing: var(--meta-tracking);
   }

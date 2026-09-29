@@ -7,7 +7,7 @@ export interface ScoreDisplayProps extends HTMLAttributes<HTMLDivElement> {
   total?: number;
   /** Mono eyebrow, e.g. "Overall Growth Score". */
   label?: ReactNode;
-  size?: "desktop" | "mobile";
+  size?: "md" | "sm";
   /**
    * `numeral` is the stencil figure on its own, under its eyebrow. `marker`
    * sets it on a kilometre marker — design I + B, retained by Antoine on
@@ -30,13 +30,13 @@ export function ScoreDisplay({
   score,
   total = 100,
   label,
-  size = "desktop",
+  size = "md",
   variant = "numeral",
   animate = true,
   className,
   ...rest
 }: ScoreDisplayProps) {
-  const desktop = size === "desktop";
+  const md = size === "md";
 
   if (variant === "marker") {
     // Divs only, the plinth a pseudo-element: the marker sits first inside
@@ -44,7 +44,7 @@ export function ScoreDisplay({
     // stage's name (`e2e/landing-preview.spec.ts`).
     return (
       <div
-        className={[styles.marker, desktop ? styles.markerDesktop : styles.markerMobile, className ?? ""]
+        className={[styles.marker, md ? styles.markerMd : styles.markerSm, className ?? ""]
           .filter(Boolean)
           .join(" ")}
         data-variant="marker"
@@ -60,9 +60,9 @@ export function ScoreDisplay({
   return (
     <div className={className} {...rest}>
       {label ? <div className={styles.eyebrow}>{label}</div> : null}
-      <div className={[styles.numeralRow, desktop ? styles.desktop : styles.mobile, animate ? styles.animate : ""].filter(Boolean).join(" ")}>
+      <div className={[styles.numeralRow, md ? styles.md : styles.sm, animate ? styles.animate : ""].filter(Boolean).join(" ")}>
         {score}
-        <span className={[styles.suffix, desktop ? styles.suffixDesktop : styles.suffixMobile].join(" ")}>/{total}</span>
+        <span className={[styles.suffix, md ? styles.suffixMd : styles.suffixSm].join(" ")}>/{total}</span>
         <span aria-hidden="true" className={styles.spray} />
       </div>
     </div>

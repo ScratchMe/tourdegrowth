@@ -80,7 +80,7 @@ paper (1.87); the night's amber never leaves the night.
 
 Sizing is CSS-only. `ScoreDisplay`, `PillarChip`, `QuestionCard`,
 `AnswerOption`, `StageProgress`, `Bottleneck` and a `hero` `StatTile` shrink
-themselves below 760px — you do not detect a viewport in JS. `size="mobile"` is
+themselves below 760px — you do not detect a viewport in JS. `size="sm"` is
 the explicit override for the rare case of forcing the small scale on a wide
 screen (the landing's preview card, which is intentionally smaller than the
 real result screen).
@@ -293,6 +293,33 @@ One modal, and only one: `QuarterNews`, the game's end-of-quarter news
 with `showModal()`, Escape means « skip to the report », and the report stays
 underneath for re-reading. A second modal is the same product decision as
 any item of the list above.
+
+## Variant names: one word per axis
+
+A prop that picks a variant says which axis it moves, and each axis has one
+vocabulary (design audit S-16, 2026-09-29). Four vocabularies had grown for
+the same thing — `desktop`/`mobile`, `sm`/`md`/`lg`, `md`/`compact`, and
+proper names — and `alert` and `red` named the same role.
+
+| Axis | Prop | Words | What it means |
+|---|---|---|---|
+| Scale | `size` | `xs` · `sm` · `md` · `lg`, and `auto` | How big it is drawn, and nothing else. `md` is the default wherever it exists, and the one that shrinks on a phone by itself; `sm` is small at every width; `auto` picks one per width where no size shrinks by itself. Never a device, never an adjective |
+| What it is drawn for | its own prop, never `size` | the medium's words | A variant that changes more than the scale: `DotGrid`'s slide grid has the thicker stroke of a projected slide, so it is `medium="slide"`, not a size |
+| Role colour | `tone` | `muted` · `ink` · `alert` · `good` · `bad` · `neutral`, and a surface's own (`paper`, `sunken`, `outlineAlert`; `caveat`, `cta`) | `alert` is the red of a diagnosis, everywhere. There is no `red` |
+| Hierarchy | `variant` | `primary` · `secondary` · `quiet` | How loud an action is, beside the others |
+| Column | `width` | `narrow` · `reading` · `wide` | The page column a frame sits in |
+
+Retired names, and where each went, one family at a time
+(`variant-names.test.ts` holds the list of what is still to move):
+
+| Was | Now | Family |
+|---|---|---|
+| `size="desktop"` / `"mobile"` | `size="md"` / `"sm"` | quiz and result: `AnswerOption`, `QuestionCard`, `StageProgress`, `Bottleneck`, `PillarChip`, `ScoreDisplay`, `ShareCard` — done |
+| `size="compact"`, `Button compact` | `size="sm"` | core: `Segmented`, `ToneToggle`, `Button` |
+| `tone="red"` | `tone="alert"` | core: `Tag` |
+| `size="hero"` / `"compact"` / `"responsive"`, `size="mini"` | `size="lg"` / `"sm"` / `"auto"`, `size="sm"` | viz: `StatTile`, `BulletChart` |
+| `size="screen"` / `"slide"` | `medium="screen"` / `"slide"` | viz: `DotGrid`, `DotLegend` |
+| `size="frame"` / `"avatar"`, `size="compact"` | `size="lg"` / `"sm"`, `size="sm"` | game: `DgFace`, `ClickPill` |
 
 ## Contracts: two things to know when reading a `.d.ts`
 

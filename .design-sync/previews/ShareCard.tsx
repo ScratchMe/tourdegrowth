@@ -13,8 +13,8 @@ import shareSample from "./share-sample.png";
  * The PNG below is the real 1200×630 render of /r/sample, inlined by esbuild.
  */
 
-/** As it ships on desktop, under the pillar chips. */
-export const Desktop = () => (
+/** As it ships on a wide screen, under the pillar chips (`md`). */
+export const Medium = () => (
   <div style={{ maxWidth: 420 }}>
     <ShareCard
       src={shareSample}
@@ -28,11 +28,11 @@ export const Desktop = () => (
   </div>
 );
 
-/** `mobile` tightens the frame from 14px to 12px. */
-export const Mobile = () => (
+/** `sm` tightens the frame from 14px to 12px. */
+export const Small = () => (
   <div style={{ maxWidth: 320 }}>
     <ShareCard
-      size="mobile"
+      size="sm"
       src={shareSample}
       alt="Tour de Growth — Where does your growth stall? A guided AARRR check-up, 15 questions, 3 minutes."
       caption="What a shared link shows"

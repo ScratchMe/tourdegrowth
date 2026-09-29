@@ -5,17 +5,17 @@
 
 /* "desktop" shrinks to the "mobile" figures below the app's breakpoint on
    its own — see ScoreDisplay.module.css for the rationale. */
-.desktop {
+.md {
   gap: 8px;
 }
 
 @media (max-width: 760px) {
-  .desktop {
+  .md {
     gap: 6px;
   }
 }
 
-.mobile {
+.sm {
   gap: 6px;
 }
 
@@ -54,16 +54,16 @@
   color: var(--text-muted);
 }
 
-.labelDesktop {
+.labelMd {
   font: var(--meta-md);
 }
 
 @media (max-width: 760px) {
-  .labelDesktop {
+  .labelMd {
     font: var(--meta-sm);
   }
 }
 
-.labelMobile {
+.labelSm {
   font: var(--meta-sm);
 }
