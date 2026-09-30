@@ -6174,3 +6174,29 @@ Le paragraphe d'ouverture du résumé reprend la phrase de l'ancien paragraphe r
 - **A10.a** ([#218](https://github.com/ScratchMe/tourdegrowth/pull/218), squash `675f4f3`) et **A10.b** ([#221](https://github.com/ScratchMe/tourdegrowth/pull/221), squash `ce0f91d`) sont déployées. Vérifié par le statut `Vercel` du commit (`success`) et par les jetons servis : `--radius-field`, `--field-value`, puis `--form-gap-sm/md`. Le moteur reste fermé (404).
 - **A10.c** ([#223](https://github.com/ScratchMe/tourdegrowth/pull/223), `cb13646`) et **A10.d** ([#224](https://github.com/ScratchMe/tourdegrowth/pull/224), `bd32dab`) sont sur `main`, squashs vérifiés (25 et 23 fichiers, arbres identiques aux têtes). Mais **leurs déploiements ont été refusés par Vercel** : « Deployment rate limited — retry in 24 hours », le quota quotidien du compte, un jour de merges en parallèle. Le site répond (200), `/admin/audit` reste fermé (401), et la production tourne sur A10.b. Le piège est dans `VERCEL.md` §1.12, le geste dans `CHANTIERS.md` D11.
 - **La re-synchro vers Claude Design** (B3 : 88 composants, 284 cellules attendus) n'est pas faite : cette session n'avait pas `/design-sync`.
+
+## Design sync B3 : les primitives de formulaire dans Claude Design (2026-09-30)
+
+**Envoyé** au projet Claude Design existant (`23b9671c…`), par le chemin atomique : 453 fichiers, aucune suppression, le dossier `design/` du projet laissé tel quel. **88 composants, 292 cellules, 88 aperçus sur 88 rendus**, toutes les cellules notées « bonnes ». Seuls les quatre avertissements connus sont sortis : « Impact », et `GRID_OVERFLOW` sur `DefinitionPopover`, `QuarterNews` et `GlossaryTerm`. L'en-tête de conventions a été relu contre le build : ses 41 jetons et ses noms de composants existent, il n'a pas changé. Ancre : `d1835d51cffd`.
+
+**Les aperçus des primitives ont été refaits**, et c'est le gros du travail. A10.a les avait écrits depuis la planche du brief 04, avant qu'A10.b et A10.c ne les branchent, et seul le compilateur les avait vus. Rendus et notés, huit composants sur onze disaient des choses fausses :
+- de la copie de la planche ou de mémoire (« Northwind », une liste de sources inventée, le message « à compléter » de l'audit avec deux-points au lieu du tiret) ;
+- un message qui contredisait sa cellule : « moins de 120 caractères » au-dessus d'un compteur à 104/120 ;
+- des états qu'aucun appel ne produit : champs désactivés avec une raison inventée, `Select` à compléter, case invalide, ligne invalide du résumé ;
+- un doublon : `Segmented.InAForm` refaisait `Field.AroundSegmented`.
+
+Trois agents les ont repris en parallèle, chacun sur des composants distincts, depuis les vrais appels du moteur et de l'audit : copie mot pour mot, valeurs tirées des fonctions du produit sur le moteur d'exemple (`sourceOptions`, `moneyUnit`, `missingByRepairCost`…). Les états jamais produits sont retirés plutôt que réécrits, parce qu'une carte enseigne un usage à l'agent de design. De 46 cellules, les onze composants passent à 54 : d'où 292 et non les 284 annoncés.
+
+**La recapture de contrôle a trouvé deux aperçus faux dans des notes reportées**, sans qu'aucun composant ne soit en cause :
+- l'amende du jeu, fixée à 75 000 € par A7.8 dans `levels/retention.ts` : `EventClipping` et `QuarterNews` disaient encore 106 000 € et l'ancien barème ;
+- `SpaceStrip`, dont la doc affirmait « the cards are not links » alors qu'A7.9 en a fait des portes.
+
+La méthode pour les trouver la prochaine fois est dans `.design-sync/NOTES.md` (« Re-sync risks ») : lister les commits du modèle et de la copie depuis le dernier envoi, puis chercher les anciennes valeurs dans les aperçus.
+
+**Un défaut du produit corrigé dans la même PR** : les rangées de `Checkbox` étaient arrondies, si bien que le trait tireté posé sur leur bord supérieur s'enroulait vers le bas à ses deux bouts, dans toutes les listes de cases du produit. L'arrondi ne dessinait rien d'autre. `form-controls.test.ts` garde qu'une rangée qui porte un trait n'est pas arrondie ; le test rougissait sur l'ancien CSS. Vérifié à l'écran, à 4×, avant et après.
+
+**Vu et laissé au produit**, sans rien « corriger » dans un aperçu :
+- `CHANTIERS.md` A11 : « 1 jours », pas de bord rouge sur un 31 février, le joint de `FieldRow` qui s'écarte de sa boîte, et une espace ordinaire entre un nombre et son mot dans trois chaînes du moteur ;
+- deux questions de design : C28, les 6 px entre une unité et son chiffre (c'est le dessin du retour lui-même, « € 500 ») ; C29, « facultatif » écrit dans les libellés alors que la prop `optional` n'est passée par aucun appel.
+
+**Vérifié** : le driver final a reporté les 15 notes sans en effacer aucune et n'a rien laissé en attente. `report_validate` : 88, 0 défaut. Après l'envoi, `list_files` montre les 88 dossiers de composants.

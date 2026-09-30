@@ -329,36 +329,23 @@ doc comment says why the layout uses an auto margin rather than
 ## Synced
 
 Project `23b9671c-a55b-452e-aa41-39906ee71ba8` ("Tour de Growth"), pinned as
-`projectId` in `config.json`. **Last upload: 2026-09-30**, from a claude.ai/code
-cloud session, after A1, A2, A4 and A5 — 79 components, **244 story cells**, all
-graded good; 408 files (316 component files, 79 compiled previews, `_vendor/`,
-`fonts/`, bundle, CSS, README, the sentinel and the anchor), no delete.
-`report_validate`: 79 total, 0 bad, 0 thin, 0 identical; anchor `bundleSha12`
-`f3b4bf9eb3c5`. The next re-sync skips every component whose sources did not
-change. Earlier uploads: 2026-09-29 (77 components, 238 cells, anchor
-`17cca5e0909b`), 2026-09-11 (34 components, 116 cells).
+`projectId` in `config.json`. **Last upload: 2026-09-30 (B3)**, from a
+claude.ai/code cloud session, after A7.10 and A10 — **88 components, 292 story
+cells**, all graded good; 453 files (352 component files, 88 compiled previews,
+`_vendor/`, `fonts/`, bundle, CSS, README, the sentinel and the anchor), no
+delete. `report_validate`: 88 total, 0 bad, 0 thin, 0 identical; anchor
+`bundleSha12` `d1835d51cffd`. The next re-sync skips every component whose
+sources did not change. Earlier uploads: 2026-09-30 before A10 (79 components,
+244 cells, anchor `f3b4bf9eb3c5`), 2026-09-29 (77, 238, `17cca5e0909b`),
+2026-09-11 (34, 116).
 
 The cell count is what the previews export, not a sum of what each session
-announced: A1 and A2 each counted from 244 (A1: 245, A2: 251), but the
-2026-09-29 grading had already removed cells that duplicated a neighbour or
-lied, bringing 245 down to 238. 238 + DotGrid's 3 + DotLegend's 3 = 244.
-
-**Not yet uploaded (A10.a, 2026-09-30)**: nine form primitives —
-`Field`, `TextField`, `NumberField`, `Select`, `DateField`, `Choices`,
-`Checkbox`, `FieldRow`, `FormSummary` — are in `componentSrcMap` with their
-previews, and `TextArea` and `Segmented` gained a story each (`InAField`,
-`InAForm`). `check-inventory.mjs` reads 88 pinned, none missing. The previews
-were type-checked against the real components (a throwaway `tour-de-growth`
-shim in the scratchpad: 11 files, no error), not rendered by the driver: the
-session that ported them had no `/design-sync` skill. `NumberField` takes a
-number (`number | null`), not the text the extension 04 bundle drew — its
-contract says so, and Claude Design will read the real one on upload.
-Since A10.b to A10.d (same day) the engine and the audit mount them and no
-other form control exists outside `src/components/core/`
-(`form-controls-source.test.ts`); `TextField` gained `autoFocus`, four
-controls a `data-testid` on the native element, and `FieldRow` works without
-a joiner — the contracts change with them. Expected at the next sync:
-88 components, 284 cells (`CHANTIERS.md` B3).
+announced. `CHANTIERS.md` B3 expected 284 (244, plus `ShareCard.Owner`, plus
+the 39 cells A10.a wrote from the board); the rebuild from the product's call
+sites ended at 292: the eleven form components went from 46 cells to 54
+(`DateField` 2 → 6, `FieldRow` 2 → 4, `TextArea` 4 → 5, `Select` 5 → 6,
+`Field` 3 → 4, `Choices` 4 → 5; `NumberField` 8 → 6; the others unchanged in
+number). The 2026-09-29 note on 245 → 238 → 244 is in the journal.
 
 **The project also holds `design/`, which is not part of the bundle.** On
 2026-09-30 brief 04 went in at the paths it has in this repo:
@@ -377,13 +364,13 @@ upload asks its own approval once per run (`finalize_plan`).
 
 The upload path for a pinned project is the skill's **atomic** one: re-fetch
 `_ds_sync.json` right before `finalize_plan` (a moved `bundleSha12` means a
-concurrent sync), sentinel `_ds_needs_recompile` first, content in chunks
-(`components/` in two halves of 154, then `_preview/` + root files, then
-`_vendor/` alone — `react.js` is 1.1 MB —, then `fonts/`), `upload.deletePaths`
-verbatim, sentinel again, `_ds_sync.json` last, `list_files` to confirm. On
-2026-09-30 two chunks of 200 (root files, `_preview/`, `_vendor/` and the first
-half of `components/`, then the rest), `styles.css`, then `fonts/` went through
-without a size error.
+concurrent sync), sentinel `_ds_needs_recompile` first, content in chunks,
+`upload.deletePaths` verbatim, sentinel again, `_ds_sync.json` last,
+`list_files` to confirm. No size error in either upload of 2026-09-30: first
+two chunks of 200 then `styles.css` then `fonts/`; at B3, `_preview/` +
+`_vendor/` + the root files in one call (94 files, 2.3 MB), `fonts/`, then
+`components/` in two halves of 176. Build the chunk lists from the live
+`ds-bundle/` into `.design-sync/.cache/`, never from memory.
 
 ## A fresh clone needs two installs before anything runs
 
