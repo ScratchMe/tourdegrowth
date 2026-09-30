@@ -304,8 +304,14 @@ n'apparaît jamais : on attend un déploiement qui n'aura pas lieu.
 **Y remédier** : rien ne se relance tout seul. Le prochain déploiement de
 production, une fois la fenêtre passée, emporte tout ce qui a été mergé entre
 temps ; si aucun merge n'arrive, il faut un « Redeploy » du dernier commit de
-`main` depuis le tableau de bord. Un merge de doc seule ne compte pas contre le
-quota : `ignoreCommand` l'annule avant le build (§1.6).
+`main` depuis le tableau de bord.
+
+**Ce qui le consomme** : le refus porte le code `api-deployments-free-per-day`
+(« more than 100 »), et il tombe à la **création** du déploiement, avant le
+build, donc avant `ignoreCommand` (§1.6). Chaque push de branche crée un
+aperçu, doc seule comprise : le même jour, la PR de doc #225 a reçu le même
+refus, en commentaire du robot Vercel. Plusieurs sessions qui poussent leurs
+branches en parallèle le vident donc sans rien merger.
 
 ---
 
