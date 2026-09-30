@@ -21,14 +21,15 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
-| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.c et A7.3.d après C25, A7.4 après A7.3, et A7.12.c à l'ouverture. A10 (S-15) et A11 livrés le 2026-09-30 |
+| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.c (le code) et A7.3.e (les quatre termes du glossaire), **prêts depuis C25** (2026-09-30), A7.3.d après A7.3.c, A7.4 après A7.3, et A7.12.c à l'ouverture. A10 (S-15) et A11 livrés le 2026-09-30 |
 | **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30, après A7.10, A10 et A11** (B3, puis la re-synchro d'A11 le soir même : 88 composants, 292 cellules, 88 aperçus sur 88 rendus). Rien à lancer tant qu'un composant, ou une copie qu'un aperçu reprend, ne change pas |
-| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23, C24 et C26 à C29 tranchées le 2026-09-30, C26 à C29 livrées le même jour. Reste **C25**, la validation de la spécification de A7.3 (`ENGINE.md` §18), avec son propre prompt |
+| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 à C29 tranchées le 2026-09-30, C26 à C29 livrées le même jour, **C25** (la spécification de A7.3, `ENGINE.md` §18) dans sa propre session. **Rien n'est ouvert** |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, tout A7.3 |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
 
-**L'ordre conseillé** : C25 d'abord (Q3, Q1 et Q2, puis les autres en bloc),
-qui débloque A7.3.c, puis D. Rien d'autre n'attend dans la section C.
+**L'ordre conseillé** : A7.3.c (prompt A sur « le lot A7.3.c », dans l'ordre
+du §18.11) et A7.3.e (son prompt) en parallèle, puis D. Rien n'attend dans la
+section C : C25 est tranchée le 2026-09-30.
 
 **Deux sessions en parallèle** écrivent toutes deux à la fin de `JOURNAL.md`
 et dans ce fichier. La seconde à merger fusionne `main` dans sa branche avant
@@ -60,7 +61,7 @@ rencontrée en le faisant repart en section C. Toute copie neuve porte
 - A7.3 avant A7.4, parce que les liens promettent ce que le moteur fait ;
 
 Le jeu n'attend rien du moteur.
-**A7.1, A7.2, A7.5 à A7.11, A7.12.a, A7.12.b et A7.13 sont livrés (2026-09-30).** **A7.3.a est écrit** (`ENGINE.md` §18) et attend Antoine (C25) : rien de A7.3 ne se code avant sa réponse.
+**A7.1, A7.2, A7.5 à A7.11, A7.12.a, A7.12.b et A7.13 sont livrés (2026-09-30).** **A7.3.a est écrit et A7.3.b est close** : Antoine a validé la spécification le 2026-09-30 (C25, `ENGINE.md` §18.12). **A7.3.c et A7.3.e peuvent partir**, en parallèle.
 
 #### A7.3 — Le B2B assisté et l'hybride dès la v1 (C4)
 
@@ -78,14 +79,32 @@ Le jeu n'attend rien du moteur.
   les deux motions.
 - **L'ouverture du moteur attend tout le lot**, spécification comprise.
 
-**Dans l'ordre, et chaque étape attend la précédente :**
+**Décidé en plus à la validation** (C25, 2026-09-30, `ENGINE.md` §18.12) :
+- **Un client compte dans la motion qui a signé son contrat en cours**, et un
+  passage du libre-service à l'assisté n'est pas un départ du libre-service
+  (Q3) ;
+- **l'activation assistée est la mise en production** (Q1), et **tout
+  l'assisté se lit sur trois mois glissants**, sans réglage (Q2) ;
+- **une marge brute par motion** (Q4) : l'assisté gagne
+  `slg.rev.gross-margin`, avec un repli « Reprendre la marge globale »,
+  compté approximatif ;
+- **la liaison est un levier « Et si » dès la v1** (Q7), en nombre
+  d'opportunités par trimestre, jamais candidate ni constat, et rien n'est
+  retiré au libre-service ;
+- **quatre termes de glossaire dès la v1** (Q8), écrits par une session à
+  part (A7.3.e) ;
+- les dix autres recos du §18.12 telles quelles.
+
+**Dans l'ordre, et chaque étape attend la précédente** (sauf A7.3.e, en
+parallèle de A7.3.c) :
 
 | # | Quoi | Précisions |
 |---|---|---|
-| A7.3.a | **La spécification** — **écrite le 2026-09-30 : `ENGINE.md` §18** | Le catalogue assisté (14 chiffres, trois relais sur leur propre base de 100), le modèle de données (`type` + `motions`, ids `slg.*`, `schemaVersion` 2 et sa migration testée au caractère près), l'hybride en « deux moteurs, un total » et ses garde-fous contre le face-à-face, le deck, l'exemple rempli calculé à la main, les tests et le découpage en PR. Seize questions produit en §18.12, reprises en C25 |
-| A7.3.b | **La validation par Antoine** | C25. Rien ne se code avant sa réponse |
-| A7.3.c | **Le code**, sur le modèle du moteur actuel | Moteur pur dans `lib/engine/`, catalogue et copie dans `content/engine-*.ts` (« à relire »), la vue sous `aarrr-funnel-template/_engine/`. Tests du moteur pur avec leur non-vacuité, e2e dans les deux langues, à 1 280 et 390 px, par l'aperçu propriétaire. Le canari « rien ne quitte le navigateur » couvre la nouvelle saisie |
-| A7.3.d | **Le bon à tirer** de la copie neuve | Par l'agent des bons à tirer, avec `/bon-a-tirer`, construit depuis le code |
+| A7.3.a | **La spécification** — **écrite le 2026-09-30 : `ENGINE.md` §18** | Le catalogue assisté (14 chiffres, 15 depuis Q4 ; trois relais sur leur propre base de 100), le modèle de données (`type` + `motions`, ids `slg.*`, `schemaVersion` 2 et sa migration testée au caractère près), l'hybride en « deux moteurs, un total » et ses garde-fous contre le face-à-face, le deck, l'exemple rempli calculé à la main, les tests et le découpage en PR. Seize questions produit en §18.12, reprises en C25 |
+| A7.3.b | **La validation par Antoine** — **close le 2026-09-30** | C25 : treize recos retenues, trois reprises (Q4, Q7, Q8) et Q3 précisée. Les réponses sont datées en `ENGINE.md` §18.12, et les sections qu'elles changent sont corrigées |
+| A7.3.c | **Le code**, sur le modèle du moteur actuel — **prêt à partir** | Dans l'ordre du **§18.11** : branche d'intégration `feat/engine-slg`, six PR (S0 contrats et migration → S1 moteur pur → S4 deck → S5 intégration, avec S2 contenu et S3 écrans en parallèle), **un seul merge sur `main`**, drapeau fermé. Se lance avec le prompt A sur « le lot A7.3.c ». S2 attend les slugs d'A7.3.e pour lier les fiches. Moteur pur dans `lib/engine/`, catalogue et copie dans `content/engine-*.ts` (« à relire »), la vue sous `aarrr-funnel-template/_engine/`. Tests du moteur pur avec leur non-vacuité, e2e dans les deux langues, à 1 280 et 390 px, par l'aperçu propriétaire. Le canari « rien ne quitte le navigateur » couvre la nouvelle saisie |
+| A7.3.d | **Le bon à tirer** de la copie neuve | Par l'agent des bons à tirer, avec `/bon-a-tirer`, construit depuis le code, **les quatre termes d'A7.3.e compris** |
+| A7.3.e | **Les quatre termes du glossaire de l'assisté** (Q8) — **prêt à partir**, en parallèle d'A7.3.c | « Taux de closing », « cycle de vente », « ACV » et « conversion lead → opportunité ». Pages FR et EN, sur le modèle de la vague 2.2 (`JOURNAL.md`, « Glossaire, lot 1 » à « lot 3 ») : FAQ sur la forme des requêtes que lit Search Console, exemples chiffrés repris de l'exemple §18.9 (18 signées sur 75 conclues, cycle médian de 64 jours, ACV 24 000 €, 72 opportunités sur 480 MQL), maillage vers `revenue`, `cac`, `arpu`, `acquisition` et `pql`. Un repère n'entre que s'il a une source primaire publique, et reste du contexte (C1). **Jamais** les ordres de grandeur de l'instrument d'audit (non relus au nº4, et la décision 6 l'interdit). Slugs proposés : `win-rate`, `sales-cycle`, `acv`, `lead-to-opportunity`, à confirmer. Une PR sur `main`, hors drapeau : sitemap, `hreflang`, JSON-LD, IndexNow, et `/llms.txt` et `/llms-full.txt`, qui les reprennent d'eux-mêmes (C27). Le glossaire passe de 24 à 28 termes (56 pages) : les comptes écrits dans les tests et dans `CLAUDE.md` suivent. Copie « à relire ». Prompt : « Prompt A7.3.e », en fin de fichier |
 | Hors code | Les textes de lancement disent « v1 : SaaS en libre-service » | `marketing/kit.md:105` et la ligne de risque de `marketing/campaigns/README.md` §8 : ils sont à réécrire quand A7.3.c est livré, pas avant |
 
 #### A7.4 — Les liens d'ouverture du moteur (C7)
@@ -252,13 +271,12 @@ ouverts, et, pour la vue propriétaire, un build jetable jamais commité.
 | C26 | Laisser ou bloquer les robots d'IA (née d'A8) | **Tout laisser, et l'écrire** (la reco, tranchée le 2026-09-30) : `robots.txt` nomme les onze robots d'IA, entraînement et réponses dans deux groupes, tous en `Allow: /`. Un test refuse tout `Disallow` : en ajouter un, c'est rouvrir C26 | `src/lib/seo/ai-agents.ts`, `src/app/robots.ts` | Livré le 2026-09-30 |
 | C27 | Publier un `llms.txt` (née d'A8) | **Court et généré, plus `llms-full.txt`** (tranchée le 2026-09-30 ; la reco était sans `llms-full.txt`). `/llms.txt` liste exactement les adresses du sitemap, drapeaux compris, en anglais avec l'adresse française à côté ; `/llms-full.txt` porte le texte anglais des articles et des 24 termes, construit depuis les champs que les pages impriment. Deux tests les tiennent au sitemap et aux pages. En-têtes « à relire » | `src/lib/seo/llms.ts`, `llms-full.ts`, `GROWTH-PLAN.md` 2.8 | Livré le 2026-09-30 ; sa copie ira au prochain bon à tirer |
 | C28 | L'espace entre une unité et son chiffre (tranchée le 2026-09-30) | **L'unité porte son espace** (la reco) : la boîte n'en ajoute plus. Collée en anglais (« €500 », « 20% »), insécable en français (« 21 000 € », « 20 % »), ce que `Intl` donne ; `moneyUnit` reprend l'espace qu'`Intl` met à côté du signe | `Field.module.css`, `NumberField.tsx`, `.design-sync/conventions.md` | Livré le 2026-09-30 avec A11 |
+| C25 | La spécification du B2B assisté et de l'hybride (tranchée le 2026-09-30, dans sa propre session) | **Validée.** Q3 : un client compte dans la motion qui a signé son contrat en cours, et un passage n'est pas un départ. Q1 : l'activation assistée est la mise en production. Q2 : trois mois glissants, fixes. **Reprises** : Q4, une marge brute par motion, avec repli sur la marge globale ; Q7, la liaison devient un levier « Et si » dès la v1, en nombre, jamais candidate ; Q8, quatre termes de glossaire dès la v1, par une session à part. Les dix autres recos retenues. Posée sur l'exemple §18.9, Q10 et Q12 sur l'écran actuel et un croquis | `ENGINE.md` §18.12, et les sections du §18 corrigées | A7.3.c, A7.3.e |
 | C29 | « Facultatif » : dans le libellé, ou par la prop `optional` (tranchée le 2026-09-30) | **Par la prop** (la reco) : le mot sort des quatre libellés du moteur et se dessine plus discret après eux, comme le retour 04 le dessine ; nouvelle clé `workbench.optional`. Les quatre libellés raccourcis et la clé sont « à relire » | `engine-copy.ts`, `.design-sync/conventions.md` | Livré le 2026-09-30 avec A11 |
 
 ### Encore ouvert
 
-| # | Question | Aujourd'hui | Reco |
-|---|---|---|---|
-| C25 | **Valider la spécification du B2B assisté et de l'hybride** (`ENGINE.md` §18, A7.3.a, écrite le 2026-09-30) | Rien n'est codé. La spécification tient la décision 3 à la lettre (type puis motions, « deux moteurs, un total », jamais de face-à-face) et C1 dans les deux motions. Elle pose **seize questions** (§18.12), chacune avec sa reco et ce qui casse si on se trompe. Les trois qui structurent tout : **Q3**, un client compte dans la motion qui a signé son contrat en cours (sinon le MRR total se compte deux fois), **Q1**, l'activation assistée est la mise en production, et **Q2**, l'assisté se lit sur trois mois glissants | **Trancher Q3, Q1 et Q2 d'abord**, une par une avec le prompt C25, puis valider les treize autres en bloc si leurs recos te vont. Ensuite A7.3.c (le code) peut partir, dans l'ordre du §18.11 |
+Rien. C25 est tranchée le 2026-09-30 (plus haut).
 
 ---
 
@@ -359,26 +377,26 @@ Tu es là pour me faire trancher, une par une, les décisions de la section C de
 Réponds-moi en français.
 ```
 
-### Prompt C25 — la spécification du B2B assisté et de l'hybride
+### Prompt A7.3.e — les quatre termes du glossaire de l'assisté
 
-Écrit le 2026-09-30, à la demande d'Antoine. C25 se tranche dans sa propre
-session, pas dans celle du prompt C : seize questions liées entre elles, dont
-trois qui structurent tout.
+Écrit le 2026-09-30 à la validation de C25 (Q8 : « on peut créer un prompt à
+part »). Il se lance en parallèle d'A7.3.c : les deux ne touchent pas les
+mêmes fichiers, et S2 attend seulement ses slugs. Le prompt C25 qui était ici
+a servi le même jour.
 
 ```text
-Tu es là pour me faire trancher C25 : la validation de la spécification du B2B assisté et de l'hybride (ENGINE.md §18, écrite le 2026-09-30 : CHANTIERS.md A7.3.a, PR #214). Tu n'écris pas de code.
+Tu reprends Tour de Growth en autonomie sur l'item A7.3.e de CHANTIERS.md : les quatre termes de glossaire de la vente assistée, « taux de closing », « cycle de vente », « ACV » et « conversion lead → opportunité ».
 
-1. Lis CLAUDE.md, CHANTIERS.md (C25 et A7.3), puis ENGINE.md : la décision 3, puis tout le §18, en commençant par §18.0 (en une page) et §18.12 (les seize questions).
-2. Avant de poser une question, vérifie qu'elle est encore ouverte : que §18 dit encore ce que fait le code de src/lib/engine/ (git log depuis 62e3618), et qu'aucune réponse n'est déjà dans JOURNAL.md ou dans le bon à tirer nº8.
-3. Pose d'abord Q3, puis Q1, puis Q2, une par une avec AskUserQuestion. Pour chacune : ce que c'est, un exemple chiffré tiré de §18.9, ce qui est en jeu, ta recommandation en premier avec « (Recommandé) », et ce qu'on casse si on se trompe. Pour Q3, montre-moi le double compte du MRR sur l'exemple.
-4. Puis propose Q4 à Q16 en bloc : un tableau (question, reco, ce qui casse) et une seule question « je valide ces recos / je veux en reprendre certaines ». Celles que je reprends, pose-les une par une comme au point 3. Pour Q10 et Q12, qui portent sur des écrans, montre un croquis ou l'écran actuel du moteur (build local avec ENGINE_ENABLED, via l'aperçu propriétaire), pas une description.
-5. Après chaque réponse, consigne-la tout de suite dans ENGINE.md §18.12, datée. Si elle change la spécification, corrige la section de §18 concernée dans la foulée. Une question neuve va en section C de CHANTIERS.md, avec sa reco.
-6. À la fin :
-   - C25 passe dans les « Tranchées » de CHANTIERS.md C, A7.3.b est close, et A7.3.c est prêt à partir dans l'ordre du §18.11 ;
-   - mets à jour la ligne « Décisions qui attendent Antoine » de CLAUDE.md, et ajoute l'entrée de JOURNAL.md ;
-   - ouvre une PR de doc seule, et merge-la quand elle est verte (/livrer lu, pas appelé). Si une autre session a touché les mêmes fichiers entre-temps, fusionne main d'abord et garde les deux côtés.
+1. Lis CLAUDE.md (chargé d'office), l'item A7.3.e de CHANTIERS.md, ENGINE.md §18.4 (les fiches qui renverront à ces termes) et §18.9 (l'exemple chiffré), puis les entrées « Glossaire, lot 1 » à « lot 3 » de JOURNAL.md : la vague 2.2 est le modèle à suivre. Ouvre TESTING.md avant d'annoncer quoi que ce soit comme vérifié, et VERCEL.md avant le merge.
+2. Crée ta branche depuis origin/main avant la première édition.
+3. Avant d'écrire : relève les requêtes réelles (le rapport Search Console par stats.yml, scope gsc, et les résultats de recherche du jour) pour confirmer les slugs proposés (win-rate, sales-cycle, acv, lead-to-opportunity) et la forme des FAQ. Aucun chiffre du rapport n'entre dans le dépôt.
+4. Chaque terme, en FR et en EN : définition, formule, exemple chiffré repris de l'exemple §18.9 (jamais un nouveau jeu de nombres), pièges, FAQ, maillage vers les termes voisins (revenue, cac, arpu, acquisition, pql). Un repère n'entre que s'il a une source primaire publique, citée ; il reste du contexte et ne désigne jamais (C1). Jamais les ordres de grandeur de l'instrument d'audit (audit-catalog.ts) : non relus, et la décision 6 d'ENGINE.md l'interdit. Toute copie neuve porte « // TODO: à relire (convention 6). ».
+5. Les pages suivent tout ce que le glossaire fait déjà : sitemap, hreflang, JSON-LD, date de mise à jour, IndexNow, et /llms.txt et /llms-full.txt (C27), qui les reprennent d'eux-mêmes. Les comptes écrits en dur (24 termes, 48 pages) suivent : tests, CLAUDE.md. Vérifie à l'écran, en français et en anglais, à 1280 et 390 px.
+6. Avant la PR : tsc, lint, vitest --coverage, build avec GAME_ENABLED=true NEXT_PUBLIC_GOATCOUNTER_CODE=e2e-stub ADMIN_DASHBOARD_PASSWORD=e2e-admin, Playwright complet, et le relecteur-copie. Une PR sur main, mergée quand elle est verte en suivant /livrer (lu, pas appelé). Vérifie en production.
+7. Si tu rencontres une question produit, ne la tranche pas : ajoute-la en section C de CHANTIERS.md avec ta recommandation.
+8. À la fin : retire A7.3.e de CHANTIERS.md, écris dans l'item A7.3.c les slugs retenus (S2 en a besoin), ajoute l'entrée de JOURNAL.md, mets à jour CLAUDE.md (le nombre de termes et de pages).
 
-Réponds-moi en français.
+Réponds-moi en français, court : ce qui est livré, ce qui est vérifié et comment, ce qui reste.
 ```
 
 ### Prompt D — tes actions, pas à pas

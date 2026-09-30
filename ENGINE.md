@@ -3898,7 +3898,8 @@ cause**.
     / "{n} of the {m} sales-assisted opportunities came from self-serve
     accounts ({period})." ;
   - l'onglet Acquisition de l'assisté, sous ses trois chiffres, en bloc
-    « Liaison avec le libre-service (facultatif) » ;
+    « Liaison avec le libre-service », que la prop `optional` marque
+    facultatif (C29, 2026-09-30 : le mot sort des libellés) ;
   - l'annexe ;
   - une flèche **SVG** dans la bande du total, du bloc libre-service vers le
     bloc assisté (jamais un glyphe, §8.6).
