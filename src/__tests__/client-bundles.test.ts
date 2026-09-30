@@ -86,9 +86,10 @@ describe("client bundles (REVIEW-02.md R2-14)", () => {
  * accepts a wider object outside an object literal, so passing the stored
  * `PillarScore[]` (which also carries `rawPoints`) compiled cleanly and RSC
  * serialised the extra field into every public result payload. The fix is
- * `toPillarViews`; this is what stops it coming back, since no e2e can see
- * it — `/r/sample` has no `rawPoints` by construction and a real submission
- * needs Firestore, which CI does not have.
+ * `toPillarViews`; this is what stops it coming back at the source. Since
+ * A7.11 (2026-09-30) an e2e sees it too: `/r/sample` has no `rawPoints` by
+ * construction, but `e2e/result-real.spec.ts` reads a real submission from
+ * the Firestore emulator and counts every stored key that crosses.
  */
 describe("the result payload keeps stored-only fields on the server", () => {
   const RESULT_PAGE = "app/(app)/r/[id]/page.tsx";

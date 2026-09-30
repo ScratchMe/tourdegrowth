@@ -112,7 +112,8 @@ test.describe("Deep dive progress survives a reload", () => {
 });
 
 /**
- * The benchmark itself needs Firestore, which CI has no credentials for, so
+ * The benchmark itself needs the running totals in Firestore, which the
+ * emulator CI has run since A7.11 does not hold (no spec writes them), so
  * what is pinned here is the rule that holds without it: the sample's numbers
  * are not real, and a real average printed beside them would blur the line
  * the "not your data" badge exists to draw.

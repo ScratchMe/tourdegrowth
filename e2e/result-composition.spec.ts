@@ -179,9 +179,10 @@ test.describe("the share block", () => {
  * IMPORTANT — what this can and cannot see. `/r/sample` carries no `id` and
  * no `breakdown` prop, so it is structurally always the VISITOR variant; the
  * owner's own page also renders the score breakdown, which puts the share
- * block 2 places out instead of 1. That variant needs Firestore and so
- * cannot be rendered here: it is computed from the source and the stylesheet,
- * for all four combinations, in `src/__tests__/result-reading-order.test.ts`.
+ * block 2 places out instead of 1. That variant needs a stored result: it is
+ * computed from the source and the stylesheet, for all four combinations, in
+ * `src/__tests__/result-reading-order.test.ts`, and rendered for real on the
+ * Firestore emulator by `result-real.spec.ts` (A7.11).
  * This spec's job is to prove the browser really lays out the way those two
  * files say it does — not to stand in for the variants it cannot render.
  */

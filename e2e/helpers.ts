@@ -37,8 +37,10 @@ export async function trackedEvents(page: Page): Promise<string[]> {
  * Shared helpers for the critical-path specs.
  *
  * Every spec stubs `/api/submissions` rather than hitting the real one: CI
- * has no Firebase or Gemini credentials, and a test that depends on a live
- * Firestore write would be testing someone else's uptime. What these specs
+ * has no Firebase or Gemini credentials — only the Firestore emulator since
+ * A7.11, which `result-real.spec.ts` reads through `global-setup.ts` — and a
+ * test that depends on a live Firestore write would be testing someone
+ * else's uptime. What these specs
  * exist to protect is the client flow — 15 answers in, a result page out,
  * answers never lost, attribution carried — all of which is entirely ours.
  */
@@ -123,18 +125,33 @@ export async function expectStoredRefId(page: Page, expected: string | null): Pr
  * Marks this browser as the owner of a result, the way completing a Tour
  * would (REVIEW.md R-01). Needed by anything that exercises the Deep dive,
  * which redirects a non-owner away before rendering a single question.
+ *
+ * `answers` are what the creating browser keeps too: the score breakdown
+ * reads them from this device, never from the page (REVIEW.md R-12), so the
+ * owner's full view needs them — a real `/r/<id>` does (`result-real.spec.ts`).
  */
-export async function seedOwnedResult(page: Page, id = CREATED_ID, total = CREATED_TOTAL): Promise<void> {
+export async function seedOwnedResult(
+  page: Page,
+  id = CREATED_ID,
+  total = CREATED_TOTAL,
+  answers?: Record<string, number>,
+): Promise<void> {
   await page.evaluate(
-    ([resultId, score]) => {
+    ([resultId, score, own]) => {
       window.localStorage.setItem(
         "tdg.results.v1",
         JSON.stringify([
-          { id: resultId, ownerToken: "e2e-owner-token", createdAt: "2026-09-05T10:00:00.000Z", total: score },
+          {
+            id: resultId,
+            ownerToken: "e2e-owner-token",
+            createdAt: "2026-09-05T10:00:00.000Z",
+            total: score,
+            ...(own ? { answers: own } : {}),
+          },
         ]),
       );
     },
-    [id, total] as [string, number],
+    [id, total, answers ?? null] as [string, number, Record<string, number> | null],
   );
 }
 

@@ -101,9 +101,9 @@ test.describe("locale in the URL", () => {
 /**
  * REVIEW.md R-14 — a dead link must not preview as a real, terrible score.
  *
- * The precise status can't be asserted here: reaching a missing submission
- * means reaching Firestore, which has no credentials in CI, so this run gets
- * a 500 where production gets the 404 the route now returns. What the check
+ * The precise status isn't asserted here: reaching a missing submission
+ * means reaching Firestore, so a run without it gets a 500 where production
+ * — and CI, on the emulator since A7.11 — gets the 404 the route returns. What the check
  * is actually for is the OLD behaviour — a 200 carrying a fabricated
  * "0/100" frame — and "never a real image" holds in both environments.
  */

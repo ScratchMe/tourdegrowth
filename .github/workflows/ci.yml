@@ -98,8 +98,44 @@ jobs:
           sudo rm -f /etc/apt/sources.list.d/google-chrome*
           npx playwright install --with-deps chromium
 
+      # CHANTIERS.md A7.11 (C17): a real `/r/<id>`, read from the Firestore
+      # EMULATOR, so the stored document, its narrowing and what crosses to
+      # the client are tested end to end with no test door in the production
+      # code (`e2e/real-results.ts`). The emulator is the jar the Firebase CLI
+      # would fetch, downloaded directly and checked against its SHA-256
+      # (GITHUB.md §1.5), run on the image's JDK 21: no npm dependency, no
+      # container. The credentials are made up for this job: a `demo-`
+      # project, which the emulator treats as offline, and an RSA key
+      # generated here — `cert()` wants a well-formed key, and the emulator
+      # never checks it. Nothing it could open exists, and still it is kept
+      # out of the public log: `$GITHUB_ENV` values are printed at the top of
+      # every later step, so only the three plain values go there, and the
+      # key waits in a file only the end-to-end step reads.
+      - name: Firestore emulator
+        env:
+          EMULATOR_VERSION: "1.22.0"
+          EMULATOR_SHA256: "9b6498b7f62714d67f48f59b3818883cd682dbcd46b9f59511de81c97bb5166c"
+        run: |
+          java="${JAVA_HOME_21_X64:-}/bin/java"
+          [ -x "$java" ] || { echo "::error::JDK 21 is missing from the runner image (JAVA_HOME_21_X64)"; exit 1; }
+          jar="$RUNNER_TEMP/cloud-firestore-emulator-v$EMULATOR_VERSION.jar"
+          curl -fsSL --retry 3 -o "$jar" "https://storage.googleapis.com/firebase-preview-drop/emulator/cloud-firestore-emulator-v$EMULATOR_VERSION.jar"
+          echo "$EMULATOR_SHA256  $jar" | sha256sum -c -
+          nohup "$java" -jar "$jar" --host=127.0.0.1 --port=8080 > "$RUNNER_TEMP/firestore-emulator.log" 2>&1 &
+          for _ in $(seq 1 60); do curl -sf http://127.0.0.1:8080/ > /dev/null && break; sleep 1; done
+          curl -sf http://127.0.0.1:8080/ > /dev/null || { cat "$RUNNER_TEMP/firestore-emulator.log"; exit 1; }
+          (umask 077 && openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out "$RUNNER_TEMP/throwaway-key.pem" 2> /dev/null)
+          {
+            echo "FIRESTORE_EMULATOR_HOST=127.0.0.1:8080"
+            echo "FIREBASE_PROJECT_ID=demo-tdg-e2e"
+            echo "FIREBASE_CLIENT_EMAIL=e2e@demo-tdg-e2e.iam.gserviceaccount.com"
+          } >> "$GITHUB_ENV"
+
       - name: End-to-end tests
-        run: npx playwright test
+        # The throwaway key from the emulator step, read here only (see there).
+        run: |
+          key="$(cat "$RUNNER_TEMP/throwaway-key.pem")"
+          FIREBASE_PRIVATE_KEY="$key" npx playwright test
 
       - name: Upload Playwright report
         if: failure()
