@@ -262,6 +262,18 @@ describe("FieldRow", () => {
   });
 });
 
+describe("NumberField's unit", () => {
+  it("is the box's last child, so it keeps its inset from the edge; the word for screen readers sits outside", () => {
+    // Measured on the engine's target (2026-09-30): with the hidden word as
+    // the box's last child, `.affix:last-child` lost its match and the « % »
+    // sat 3px from the edge instead of 14.
+    const out = html(
+      createElement(NumberField, { label: "Target", value: 20, onChange: noop, locale: "en", suffix: "%", unitName: "percent", parseError: "!" }),
+    );
+    expect(out).toMatch(/aria-hidden="true">%<\/span><\/div><span id="[^"]*-unit" class="tdg-visually-hidden">percent<\/span>/);
+  });
+});
+
 describe("test ids", () => {
   it("land on the native control, where a test clicks and reads", () => {
     const testId = { "data-testid": "x" };
