@@ -6071,6 +6071,8 @@ Ils sont pris par `scripts/kit-provisional.capture.ts`, un fichier Playwright av
 
 **Reste A7.12.c** : refaire à l'ouverture de chaque produit, puis retirer le préfixe.
 
+**En production** : PR [#220](https://github.com/ScratchMe/tourdegrowth/pull/220), mergée le 2026-09-30 à 13 h 00 UTC (squash `9a359c3`, 40 fichiers, identique à la tête de la PR, rebasée sur #218 d'une autre session). Les captures sont servies par le dépôt public à ce commit, au même poids que dans la branche (`01-landing-fr-desktop.png` : 266 313 octets ; `provisoire-07-game-hub-fr-desktop.png` : 156 163). Le déploiement de production Vercel de ce commit porte aussi le code de #218, arrivé juste avant : `READY`, lu par l'API. Rien de cette PR ne change le site.
+
 ## Extension 04 du design system, lot b : le moteur sur les primitives (2026-09-30)
 
 **Ce qui est porté** : tous les champs du moteur passent sur les primitives de `src/components/core/`. Cela couvre les réglages et la mise en route (`Setup`), les deux écrans d'étapes (la cible, la base), la fiche d'un chiffre (`MetricSheet`, `ValueEditor`), le triage « Je ne le trouve pas » et ses deux lectures, la confirmation d'effacement, l'import et la copie de secours d'une demande. Le constructeur de slides suit : `deck/AskForm.tsx` perd son `Field`, son `DraftInput` et son analyseur, et les cinq cases à cocher de l'écran du deck deviennent des `Checkbox`. `deck.module.css` perd `.field`, `.control`, `.check` et leurs voisines. Plus aucun fichier du moteur n'importe `_engine/_ui/`, que A10.d supprime avec les autres copies. Densités, comme le retour le fixe : `md` pour la mise en route et les étapes à une question, `sm` pour une fiche et pour le deck. `--form-gap-sm` et `--form-gap-md` arrivent avec leurs premiers lecteurs.
