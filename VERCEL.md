@@ -287,6 +287,32 @@ chaque bascule coûte un déploiement de Functions Storage (§1.6). Écrire « s
 redéploiement » à côté d'un tel drapeau est faux, même quand le code le lit
 bien par requête.
 
+### 1.12 Un merge vert peut ne rien déployer : le quota de déploiements par jour
+
+Vu le 2026-09-30, un jour où plusieurs sessions mergeaient en parallèle : la
+CI verte, le squash sur `main`, et pourtant le statut `Vercel` du commit en
+**`failure`**, avec « Deployment rate limited — retry in 24 hours ». Le compte
+avait épuisé son quota quotidien de déploiements. La production reste alors sur
+le build d'avant, sans rien casser : le site répond, il est seulement en
+retard.
+
+**Le voir** : le statut du commit, pas le site —
+`https://api.github.com/repos/<owner>/<repo>/commits/<sha>/status`. Un site
+qui répond 200 ne prouve rien, et un jeton guetté dans la feuille servie
+n'apparaît jamais : on attend un déploiement qui n'aura pas lieu.
+
+**Y remédier** : rien ne se relance tout seul. Le prochain déploiement de
+production, une fois la fenêtre passée, emporte tout ce qui a été mergé entre
+temps ; si aucun merge n'arrive, il faut un « Redeploy » du dernier commit de
+`main` depuis le tableau de bord.
+
+**Ce qui le consomme** : le refus porte le code `api-deployments-free-per-day`
+(« more than 100 »), et il tombe à la **création** du déploiement, avant le
+build, donc avant `ignoreCommand` (§1.6). Chaque push de branche crée un
+aperçu, doc seule comprise : le même jour, la PR de doc #225 a reçu le même
+refus, en commentaire du robot Vercel. Plusieurs sessions qui poussent leurs
+branches en parallèle le vident donc sans rien merger.
+
 ---
 
 ## 2. Propre à Tour de Growth
