@@ -1,4 +1,4 @@
-# Annuaires — le moteur de croissance (lancement B)
+# Annuaires — le moteur de growth (lancement B)
 
 *TODO: à relire. Mêmes annuaires que `../../kit.md` (table vérifiée le
 2026-09-13), mêmes règles : le soumetteur est « Tour de Growth » et
@@ -21,7 +21,7 @@ présenter comme un outil d'IA serait faux.
 ## Nom et accroche (≤ 60 caractères)
 
 - **EN** : `Growth engine — AARRR funnel template, kept local` (49)
-- **FR** : `Moteur de croissance — ton funnel AARRR, en local` (49)
+- **FR** : `Moteur de growth — ton funnel AARRR, en local` (45)
 
 ## Description — 140 caractères
 
@@ -35,8 +35,8 @@ présenter comme un outil d'IA serait faux.
 
 ## Description — 800 caractères
 
-- **EN** : `Growth numbers usually live in four tools and end up as a funnel drawn in PowerPoint. The growth engine is a free AARRR funnel template that runs entirely in your browser. You enter seventeen numbers from your own tools, stage by stage, as counts rather than percentages. It follows 100 sign-ups through your product, names a leak only against a target you set or a published range printed with its caveat, and turns every number you can't find into a finding with a repair cost. Then it exports a 4 to 7 slide deck for a leadership meeting: PDF, one PNG per slide, or text with speaker notes. No account, no server, no AI — nothing you type leaves the browser, and a test in the open-source repo checks it. Built for self-serve SaaS; free; in English and French.` (763)
-- **FR** : `Tes chiffres de croissance vivent dans quatre outils. Le moteur de croissance est un modèle de funnel AARRR gratuit qui tourne entièrement dans ton navigateur. Tu saisis dix-sept chiffres tirés de tes outils, étape par étape, en comptes plutôt qu'en pourcentages. Il suit 100 inscrits dans ton produit, ne désigne une fuite que contre une cible que tu fixes ou une fourchette publiée imprimée avec sa réserve, et fait de chaque chiffre introuvable un constat chiffré en coût de réparation. Puis il exporte 4 à 7 slides pour ton CODIR : PDF, une image par slide, ou le texte avec les notes d'orateur. Sans compte, sans serveur, sans IA : rien ne quitte ton navigateur, et un test du dépôt open source le vérifie. Pour le SaaS en libre-service ; gratuit ; en français et en anglais.` (780)
+- **EN** : `Growth numbers usually live in four tools and end up as a funnel drawn in PowerPoint. The growth engine is a free AARRR funnel template that runs entirely in your browser. You enter seventeen numbers from your own tools, stage by stage, as counts rather than percentages. It follows 100 sign-ups through your product, names a leak only against a target you set (published ranges are shown for context), and turns every number you can't find into a finding with a repair cost. Then it exports a 4 to 7 slide deck for a leadership meeting: PDF, one PNG per slide, or text with speaker notes. No account, no server, no AI — nothing you type leaves the browser, and a test in the open-source repo checks it. Built for self-serve SaaS; free; in English and French.` (759)
+- **FR** : `Tes chiffres de croissance vivent dans quatre outils. Le moteur de growth est un modèle de funnel AARRR gratuit qui tourne entièrement dans ton navigateur. Tu saisis dix-sept chiffres tirés de tes outils, étape par étape, en comptes plutôt qu'en pourcentages. Il suit 100 inscrits dans ton produit, ne désigne une fuite que contre une cible que tu fixes (les fourchettes publiées servent à situer), et fait de chaque chiffre introuvable un constat chiffré en coût de réparation. Puis il exporte 4 à 7 slides pour ton CODIR : PDF, une image par slide, ou le texte avec les notes d'orateur. Sans compte, sans serveur, sans IA : rien ne quitte ton navigateur, et un test du dépôt open source le vérifie. Pour le SaaS en libre-service ; gratuit ; en français et en anglais.` (769)
 
 *Les nombres entre parenthèses se vérifient par `node marketing/check-lengths.mjs` à chaque retouche (`--fix` les réécrit) ; ne jamais les recopier à la main.*
 

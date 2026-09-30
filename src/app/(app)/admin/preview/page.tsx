@@ -37,7 +37,7 @@ type State = "everyone" | "this-browser" | "closed";
 
 const FEATURES: Record<PreviewFeature, { name: string; path: string; env: () => string | undefined; envName: string }> = {
   game: { name: "Le jeu « Le côté obscur »", path: "/game", env: () => process.env.GAME_ENABLED, envName: "GAME_ENABLED" },
-  engine: { name: "Le moteur de croissance", path: ENGINE_PATH, env: engineEnvFlag, envName: "ENGINE_ENABLED" },
+  engine: { name: "Le moteur de growth", path: ENGINE_PATH, env: engineEnvFlag, envName: "ENGINE_ENABLED" },
 };
 
 const STATE_LABEL: Record<State, string> = {

@@ -74,12 +74,14 @@ export const ENGINE_COPY = {
       fr: "Entre les chiffres de tes cinq étapes AARRR, vois où tu perds le plus de monde et exporte des slides pour ton CODIR. Rien n'est envoyé.",
       en: "Enter the numbers for your five AARRR stages, see where you lose the most people and export slides for your leadership meeting. Nothing is sent.",
     },
-    breadcrumb: { fr: "Moteur de croissance", en: "Growth engine" },
+    // TODO: à relire (convention 6) — renommé le 2026-09-30 (A7.2, C2 : « Moteur de growth »).
+    breadcrumb: { fr: "Moteur de growth", en: "Growth engine" },
   },
 
   page: {
     eyebrow: { fr: "Le moteur", en: "The engine" },
-    title: { fr: "Ton moteur de croissance", en: "Your growth engine" },
+    // TODO: à relire (convention 6) — renommé le 2026-09-30 (A7.2, C2 : « Moteur de growth »).
+    title: { fr: "Ton moteur de growth", en: "Your growth engine" },
     positioning: {
       fr: "Ton Tour dit si tu mesures. Le moteur montre ce que disent tes chiffres.",
       en: "Your Tour tells you whether you measure. The engine shows what your numbers say.",
@@ -188,8 +190,9 @@ export const ENGINE_COPY = {
   },
 
   board: {
+    // TODO: à relire (convention 6) — renommé le 2026-09-30 (A7.2, C2 : « Moteur de growth »).
     eyebrow: {
-      fr: "Ton moteur de croissance · {model} · cohorte : {cohort} · flux : {month}",
+      fr: "Ton moteur de growth · {model} · cohorte : {cohort} · flux : {month}",
       en: "Your growth engine · {model} · {cohort} cohort · {month} flows",
     },
     smallCohort: {
@@ -991,8 +994,9 @@ export const ENGINE_COPY = {
     },
   },
   slide: {
+    // TODO: à relire (convention 6) — renommé le 2026-09-30 (A7.2, C2 : « Moteur de growth »).
     kicker: {
-      fr: "Moteur de croissance · {company}{month} · données internes",
+      fr: "Moteur de growth · {company}{month} · données internes",
       en: "Growth engine · {company}{month} · internal data",
     },
     dataPill: {

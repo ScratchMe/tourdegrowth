@@ -27,7 +27,7 @@ export const CONTENT_UPDATED_AT: Record<string, string> = {
   // open at build (lib/game/build-flag.ts); dated here like every other page.
   "/game": "2026-09-29", // légende de la montagne (design I + B)
   "/game/retention": "2026-09-24", // created (level page, intro only until the island lands)
-  // Le moteur de croissance (engine spec §11.1). Same rule as the game: in the
+  // Le moteur de growth (engine spec §11.1). Same rule as the game: in the
   // sitemap only when ENGINE_ENABLED is open at build (app/sitemap.ts).
   "/aarrr-funnel-template": "2026-09-30", // A7.1 (C1) : la promesse, la FAQ et les réserves des repères, qui ne désignent plus
 };

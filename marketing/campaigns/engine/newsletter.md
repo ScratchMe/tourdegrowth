@@ -1,4 +1,4 @@
-# Pitch newsletters — le moteur de croissance (lancement B)
+# Pitch newsletters — le moteur de growth (lancement B)
 
 *TODO: à relire. Envoyé par Antoine depuis `contact@tourdegrowth.com`, signé
 « L'équipe Tour de Growth » / « The Tour de Growth team » — jamais un prénom.
@@ -43,7 +43,7 @@ une adresse personnelle trouvée ailleurs.
 >
 > We built a free AARRR funnel template that runs entirely in the browser: a growth lead enters seventeen numbers from their own tools, sees where they lose the most people, and exports a 4 to 7 slide deck for their leadership meeting. No account, no server, no AI — there's a test in the public repo that fails if anything they type is sent.
 >
-> What might interest your readers is less the tool than two rules it holds: it only calls a stage "the leak" against a target the team sets (or a published range, printed with its caveat), and every number it can't find becomes a finding with a repair cost, on its own slide.
+> What might interest your readers is less the tool than two rules it holds: it only calls a stage "the leak" against a target the team sets (published ranges are shown for context, never to name one), and every number it can't find becomes a finding with a repair cost, on its own slide.
 >
 > I've attached one slide, generated from example data. The tool is here: [link]
 >
@@ -65,7 +65,7 @@ une adresse personnelle trouvée ailleurs.
 >
 > On a construit un modèle de funnel AARRR gratuit qui tourne entièrement dans le navigateur : un responsable growth y saisit dix-sept chiffres tirés de ses outils, voit où il perd le plus de monde, et repart avec 4 à 7 slides pour son CODIR. Sans compte, sans serveur, sans IA — un test du dépôt public échoue si quoi que ce soit de saisi est envoyé.
 >
-> Ce qui pourrait intéresser tes lecteurs, c'est moins l'outil que deux règles qu'il tient : il ne désigne une étape comme « la fuite » que contre une cible fixée par l'équipe (ou une fourchette publiée, imprimée avec sa réserve), et chaque chiffre introuvable devient un constat, chiffré en coût de réparation, sur sa propre slide.
+> Ce qui pourrait intéresser tes lecteurs, c'est moins l'outil que deux règles qu'il tient : il ne désigne une étape comme « la fuite » que contre une cible fixée par l'équipe (les fourchettes publiées sont affichées pour situer, jamais pour désigner), et chaque chiffre introuvable devient un constat, chiffré en coût de réparation, sur sa propre slide.
 >
 > Je joins une slide, faite avec des données d'exemple. L'outil est ici : [lien]
 >

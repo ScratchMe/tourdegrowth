@@ -10,7 +10,7 @@ describe("tc", () => {
 
 describe("resolveTree (engine spec §4.4)", () => {
   const tree = {
-    title: { en: "Your growth engine", fr: "Ton moteur de croissance" },
+    title: { en: "Your growth engine", fr: "Ton moteur de growth" },
     nested: {
       deep: { en: "Deep", fr: "Profond" },
       count: 15,
@@ -27,7 +27,7 @@ describe("resolveTree (engine spec §4.4)", () => {
 
   it("replaces every { en, fr } leaf by the chosen language, at any depth, arrays included", () => {
     expect(resolveTree(tree, "fr")).toEqual({
-      title: "Ton moteur de croissance",
+      title: "Ton moteur de growth",
       nested: { deep: "Profond", count: 15, open: false, nothing: null, raw: "untranslated id" },
       faq: [
         { q: "Envoyé ?", a: "Non." },

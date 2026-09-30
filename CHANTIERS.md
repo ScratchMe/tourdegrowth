@@ -67,23 +67,6 @@ Le jeu (A7.7, A7.8, et A7.9 pour sa part) n'attend rien du moteur.
 **A7.1 est livré (2026-09-30)** : A7.6 peut partir. **Commencer par A7.3.a**,
 le plus long, qui revient à Antoine pour validation.
 
-#### A7.2 — « Moteur de growth » en français (C2)
-
-**Décidé** : le moteur s'appelle « Moteur de growth » en français (« Ton
-moteur de growth », avec « growth » en minuscule dans le texte courant),
-toujours "Growth engine" en anglais. **L'adresse `/aarrr-funnel-template` ne
-change pas.**
-
-| Où | Quoi |
-|---|---|
-| `content/engine-copy.ts` | `breadcrumb` (l. 76), `title` (l. 81), l'en-tête du tableau (l. 189) et le pied de slide (l. 1017). Les deux demandes à copier (l. 523 et 533, « un point sur notre moteur de croissance ») parlent du moteur **de l'entreprise**, pas de l'outil : elles gardent « croissance » |
-| `content/legal.ts:239` et `:253` | La confidentialité nomme l'outil : elle suit, et `e2e/legal.spec.ts` avec elle |
-| `app/(app)/admin/preview/page.tsx:40` | Le nom affiché dans l'aperçu propriétaire |
-| Commentaires | `updated-at.ts:30` et `i18n/routes.ts:41` |
-| Ne change pas | `comparisons.ts:316` (« pas un moteur de croissance » : l'usage générique) et le titre `meta.title` (« Modèle de funnel AARRR… », qui porte la requête) |
-| Hors `src/` | Les textes de lancement qui nomment l'outil : `marketing/kit.md`, `marketing/README.md`, `marketing/campaigns/README.md`, `competitive-brief.md` et `marketing/campaigns/engine/*.md`. Une recherche `grep -rn "oteur de croissance"` fait l'inventaire ; garder chaque usage générique |
-| Copie | Chaque chaîne renommée repasse « à relire ». Le bon à tirer nº8 suit (agent des bons à tirer) |
-
 #### A7.3 — Le B2B assisté et l'hybride dès la v1 (C4)
 
 **Décidé** (`ENGINE.md`, décision 3) :
@@ -344,7 +327,7 @@ ouverts, et, pour la vue propriétaire, un build jetable jamais commité.
 | # | Sujet | Réponse | Écrit dans | Suite |
 |---|---|---|---|---|
 | C1 | Les repères qui désignent la fuite | **Aucun repère ne désigne** : seule une cible d'équipe nomme l'étape. Population du churn reformulée (« SaaS B2B à panier élevé »). Non tranchée auparavant dans le nº8, sa carte y est désormais remplie | `ENGINE.md` décision 5 | A7.1, livré le 2026-09-30 |
-| C2 | Nom et adresse du moteur | **« Moteur de growth »** en français, "Growth engine" en anglais. **Adresse `/aarrr-funnel-template` gardée** : Antoine a délégué le choix sur le seul critère SEO, et la session l'a vérifié sur les résultats de recherche du jour | `ENGINE.md` décision 1 | A7.2 |
+| C2 | Nom et adresse du moteur | **« Moteur de growth »** en français, "Growth engine" en anglais. **Adresse `/aarrr-funnel-template` gardée** : Antoine a délégué le choix sur le seul critère SEO, et la session l'a vérifié sur les résultats de recherche du jour | `ENGINE.md` décision 1 | A7.2, livré le 2026-09-30 |
 | C3 | Crédit tourdegrowth.com sur les slides | Gardé : présent, retirable | `ENGINE.md` décision 2 | — |
 | C4 | Périmètre de la v1 | **Le B2B assisté entre en v1.** Un type (SaaS B2B), puis deux motions cochables, PLG et SLG. L'hybride en « deux moteurs, un total », jamais en face-à-face. L'ouverture du moteur attend | `ENGINE.md` décision 3 | A7.3 (spécification, validation, code, bon à tirer) |
 | C5 | Slide « déclaré × mesuré » | Gardée décochée | `ENGINE.md` décision 4 | — |

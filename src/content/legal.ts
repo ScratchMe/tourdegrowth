@@ -133,8 +133,9 @@ export const PRIVACY: LegalDocument = {
     "Ce que Tour de Growth enregistre quand tu fais le Tour, où ça va, combien de temps ça reste, et ce que tu peux demander.",
     "What Tour de Growth records when you take the Tour, where it goes, how long it stays, and what you can ask for.",
   ),
-  // Moved for the growth engine (engine spec §11.5): two paragraphs added.
-  updatedAt: "2026-09-24",
+  // Moved for the growth engine (engine spec §11.5): two paragraphs added; then
+  // 2026-09-30, its French name (« moteur de growth », A7.2).
+  updatedAt: "2026-09-30",
   intro: t(
     "Tour de Growth enregistre le strict nécessaire pour calculer ton score, te le redonner par son lien, et mesurer si l'outil fonctionne. Cette page dit précisément quoi, pourquoi, pendant combien de temps, et ce que tu peux exiger.",
     "Tour de Growth records the bare minimum needed to compute your score, hand it back to you through its link, and measure whether the tool works. This page says exactly what, why, for how long, and what you can ask for.",
@@ -236,7 +237,8 @@ export const PRIVACY: LegalDocument = {
         // above (« Ton navigateur garde… ») stops being the whole list the day the
         // growth engine opens.
         p(
-          "Si tu utilises le moteur de croissance, ton navigateur garde aussi, au même endroit, les chiffres et les textes que tu y saisis. Rien de tout cela n'est envoyé, ni à nous ni à personne : les seules sorties sont les fichiers que tu télécharges et ce que tu copies toi-même. Effacer les données du site efface aussi ton moteur, sauf si tu l'as sauvegardé dans un fichier.",
+          // TODO: à relire (convention 6) — renommé le 2026-09-30 (A7.2, C2 : « moteur de growth »).
+          "Si tu utilises le moteur de growth, ton navigateur garde aussi, au même endroit, les chiffres et les textes que tu y saisis. Rien de tout cela n'est envoyé, ni à nous ni à personne : les seules sorties sont les fichiers que tu télécharges et ce que tu copies toi-même. Effacer les données du site efface aussi ton moteur, sauf si tu l'as sauvegardé dans un fichier.",
           "If you use the growth engine, your browser also keeps, in the same place, the numbers and text you enter there. None of it is sent, to us or to anyone: the only ways out are the files you download and what you copy yourself. Clearing the site's data also clears your engine, unless you saved it to a file.",
         ),
       ],
@@ -250,7 +252,8 @@ export const PRIVACY: LegalDocument = {
         ),
         // Validé au bon à tirer nº6 (2026-09-29) — copie neuve (engine spec §11.6: event paths only, never a value).
         p(
-          "Sur le moteur de croissance, seuls sont comptés l'ouverture de la page, le premier chiffre enregistré dans chaque étape, la copie d'une demande, le rapprochement avec ton Tour, et l'ouverture ou l'export des slides — jamais un chiffre, un statut ni un texte que tu y saisis.",
+          // TODO: à relire (convention 6) — renommé le 2026-09-30 (A7.2, C2 : « moteur de growth »).
+          "Sur le moteur de growth, seuls sont comptés l'ouverture de la page, le premier chiffre enregistré dans chaque étape, la copie d'une demande, le rapprochement avec ton Tour, et l'ouverture ou l'export des slides — jamais un chiffre, un statut ni un texte que tu y saisis.",
           "On the growth engine, the only things counted are the page being opened, the first number saved in each stage, a request being copied, the link with your Tour, and the slides being opened or exported — never a number, a status or any text you enter.",
         ),
       ],

@@ -54,7 +54,7 @@ qu'un seul champ de formulaire soit rempli.*
 
 ---
 
-## Le moteur de croissance (lancement B)
+## Le moteur de growth (lancement B)
 
 *TODO: à relire. Ajouté le 2026-09-24. Les descriptions 140/300/800 et les
 textes prêts à coller sont dans `campaigns/engine/` ; ce bloc ne garde que ce
@@ -62,7 +62,7 @@ qui sert à **vérifier** un texte avant de le poster.*
 
 | Champ | Valeur |
 |---|---|
-| Nom | **Moteur de croissance** / **Growth engine** |
+| Nom | **Moteur de growth** / **Growth engine** |
 | URL | `/fr/aarrr-funnel-template`, `/en/aarrr-funnel-template` — définitive une fois ouverte (une URL publiée ne meurt pas ici) |
 | Portier | Bon à tirer nº6 signé, puis `ENGINE_ENABLED` ; d'ici là, aperçu propriétaire seul (`/admin/preview`, derrière le mot de passe admin) |
 | Campagne UTM | `launch_engine` (`--campaign launch_engine`) |

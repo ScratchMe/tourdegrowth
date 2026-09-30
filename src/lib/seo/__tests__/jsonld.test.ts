@@ -35,9 +35,9 @@ describe("structured data", () => {
    * honest volume), at its own URL and tied back to the site.
    */
   it("describes another application of the site at its own URL, free, unrated, part of the site", () => {
-    const engine = webApplicationSchema("fr", { path: "/aarrr-funnel-template", name: "Moteur de croissance", description: "d" });
+    const engine = webApplicationSchema("fr", { path: "/aarrr-funnel-template", name: "Moteur de growth", description: "d" });
     expect(engine["@type"]).toBe("WebApplication");
-    expect(engine.name).toBe("Moteur de croissance");
+    expect(engine.name).toBe("Moteur de growth");
     expect(engine.url).toMatch(/\/fr\/aarrr-funnel-template$/);
     expect(engine.applicationCategory).toBe("BusinessApplication");
     expect(engine.isAccessibleForFree).toBe(true);

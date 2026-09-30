@@ -1,4 +1,4 @@
-# Show HN — le moteur de croissance (lancement B)
+# Show HN — le moteur de growth (lancement B)
 
 *TODO: à relire. Compte HN `tourdegrowth`, jamais un compte personnel. Règle
 de [Show HN](https://news.ycombinator.com/showhn.html) : ne demander à personne
@@ -51,7 +51,7 @@ sent » (82 caractères, trop long).
 > - **Nothing you type leaves the browser.** No account, no server, no AI. There's an end-to-end test that seeds unique strings into every field, plays the whole flow, records every request the browser makes and fails if any of them carries one of those strings. Open the Network tab and check. The page does count visits and a closed list of event names (cookie-less GoatCounter) — never a number or a word you entered.
 > - **You enter counts, not percentages.** Numerator and denominator, so the tool knows what the rate is a rate *of*. "12%" of what, over which month, is where most funnel debates die.
 > - **No multiplied chain.** The main view follows 100 sign-ups: how many reach first value, how many are still active at day 30, how many pay — all on the same base. Multiplying rates measured on different populations produces a precise-looking number that nobody can defend.
-> - **It won't name a leak without a reference.** A stage is only called "the leak" against a target you set, or against one of two published ranges it can cite, with the caveat printed on the slide. Otherwise it says it can't tell — and tells you what to measure first.
+> - **It won't name a leak without your target.** A stage is only called "the leak" against a target you set. Published ranges are shown for context, never to name a stage: 1-2% monthly churn is a high-ticket B2B number, and a product sold at $20 a month runs far higher. Otherwise it says it can't tell — and tells you what to measure first.
 > - **Export without a server.** PDF is the browser's print (zero JavaScript); PNG loads a small library only when you click. The deck credits the site in its footer by default; it's your deck, so you can turn that off.
 >
 > Known limits, so you don't have to find them: v1 assumes a self-serve SaaS (freemium or trial); sales-led B2B, consumer apps and marketplaces aren't modelled yet. There's no PowerPoint export yet — a deck generated in the browser can't carry the display font, and a deck in a substitute font is worse than a PDF.
