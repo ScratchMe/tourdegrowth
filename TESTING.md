@@ -324,6 +324,31 @@ serrée des deux côtés (un écart qui **grandit** est autant une régression q
   `/admin` est un 401. La CI le pose au niveau du workflow, et les specs
   concernées **sautent avec un message** s'il manque — jamais faussement
   vertes, jamais faussement rouges.
+- **L'émulateur Firestore** (A7.11, 2026-09-30) : `e2e/result-real.spec.ts`
+  rend un vrai `/r/<id>`, lu dans l'émulateur, et **aucune porte de test**
+  n'existe dans le code de production. `firebase-admin` lit
+  `FIRESTORE_EMULATOR_HOST` seul : la lecture et la sérialisation vers le
+  client, là où `rawPoints` a fui deux fois, tournent comme en production. Une
+  porte (« si test, lire une fixture ») aurait ajouté une branche à la route
+  publique la plus sensible, et le test aurait vérifié la porte, pas la route.
+  `e2e/global-setup.ts` y écrit trois résultats par `createSubmissionFlow` et le
+  vrai `saveSubmission`. Sans la variable, rien n'est écrit et ces specs
+  sautent avec leur raison. **En local** :
+  ```sh
+  curl -fsSLO https://storage.googleapis.com/firebase-preview-drop/emulator/cloud-firestore-emulator-v1.22.0.jar
+  echo "9b6498b7f62714d67f48f59b3818883cd682dbcd46b9f59511de81c97bb5166c  cloud-firestore-emulator-v1.22.0.jar" | sha256sum -c -
+  java -jar cloud-firestore-emulator-v1.22.0.jar --host=127.0.0.1 --port=8080 &
+  export FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 FIREBASE_PROJECT_ID=demo-tdg-e2e \
+    FIREBASE_CLIENT_EMAIL=e2e@demo-tdg-e2e.iam.gserviceaccount.com \
+    FIREBASE_PRIVATE_KEY="$(openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 2>/dev/null)"
+  npx playwright test e2e/result-real.spec.ts
+  ```
+  Java 21, un projet `demo-` (que l'émulateur traite hors ligne) et une clé
+  jetable : `cert()` exige une clé bien formée, l'émulateur ne la vérifie pas.
+  La version et le SHA-256 du jar sont épinglés dans `ci.yml`. Pour les
+  monter, lire `lib/emulator/downloadableEmulatorInfo.json` dans le paquet
+  `firebase-tools` du jour. `global-setup.ts` refuse une adresse qui n'est
+  pas locale.
 - Chiffres de référence au 2026-09-15 : **709 tests unitaires**, **286 specs
   Playwright**, seuils de couverture `src/lib/**` à 82 % de lignes.
 - **Flake connu** : `e2e/locale-routing.spec.ts:75`, quatre occurrences,

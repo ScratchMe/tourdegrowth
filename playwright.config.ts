@@ -21,6 +21,9 @@ const PORT = Number(process.env.E2E_PORT ?? 3210);
 
 export default defineConfig({
   testDir: "./e2e",
+  // Writes the real results into the Firestore emulator when one is set
+  // (CHANTIERS.md A7.11); a no-op otherwise, and those specs skip.
+  globalSetup: "./e2e/global-setup.ts",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

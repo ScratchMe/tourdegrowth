@@ -5958,3 +5958,37 @@ C22, tranché par Antoine le 2026-09-29 : c'est une question de calendrier, pas 
 **Ne change pas** : les mentions « pseudonyme » qui désignent le compte `tourdegrowth` (le kit, le calendrier des Show HN), `GROWTH-PLAN.md` (déjà précisé le 2026-09-29) et le relevé de référence de `brand-review.md` (ce qui a été appliqué le 2026-09-24).
 
 **Vérifié** : `grep` de `Antoine`, `Berthaud`, `LinkedIn` et `cv.` dans les lignes collables de `marketing/` : le nom n'apparaît que dans les trois réponses, et ni LinkedIn ni le CV nulle part. `check-lengths.mjs` : 71 longueurs, aucun écart. `utm-channels.test.ts` : 15 tests passent.
+
+**En production** : PR [#216](https://github.com/ScratchMe/tourdegrowth/pull/216), mergée le 2026-09-30 à 12 h 12 UTC (squash `e456679`, 11 fichiers, identique à la tête de la PR). Déploiement de production Vercel `READY` sur ce commit, lu par l'API : le commentaire d'un test sous `src/` déclenche un build, sans rien changer au site. Le texte vit dans `marketing/`, pas sur une page.
+
+## A7.11 : les e2e de `/r/<id>` par le vrai chemin, sur l'émulateur Firestore (2026-09-30)
+
+C17, délégué à la session le 2026-09-29 : **aucune porte de test dans le code de production**, un vrai `/r/<id>` lu dans l'émulateur Firestore. Jusqu'ici, toute spec de composition passait par `/r/sample`, une branche à part qui ne lit jamais Firestore et ne rend jamais la vue propriétaire. Le chemin des lecteurs (un document stocké, rétréci par le modèle de vue, sérialisé vers le client) n'avait aucun e2e.
+
+**Comment** :
+- **L'émulateur est le jar** que la CLI Firebase téléchargerait (v1.22.0, 136 Mo). La CI le télécharge directement, vérifie son SHA-256 et le lance sur le JDK 21 de l'image. C'était l'option la plus légère des trois chiffrées : `firebase-tools` en `devDependency` télécharge le même jar en plus du paquet, et l'image Docker gcloud dépasse le gigaoctet. **Pas de dépendance npm**, donc pas de barrière §0.
+- **Les identifiants sont inventés pour le job** : un projet `demo-` (que l'émulateur traite hors ligne) et une clé RSA générée à la volée, que `cert()` exige bien formée et que l'émulateur ne vérifie pas. **`admin.ts` ne change pas.** Vérifié en local avant d'écrire la CI : `firebase-admin` écrit et relit l'émulateur avec cette clé.
+- **Les données** : `e2e/global-setup.ts` écrit quatre résultats par `createSubmissionFlow` et le vrai `saveSubmission`, le chemin de `/api/submissions` : un goulot net (la rétention), un partagé, un « à niveau », et un résultat avec un Deep dive écrit par le vrai `saveDeepDive`. Il écrit aussi un document **volontairement mal formé**. Il refuse une adresse d'émulateur qui ne serait pas locale.
+- **La spec** `e2e/result-real.spec.ts` (12 tests) :
+  - **la garde de payload compte ce qui traverse** (convention 11). Elle lit le document stocké, en tire **toutes** ses clés, et exige qu'aucune ne traverse, hors une liste de clés publiques qui donne chacune sa raison. Une valeur sentinelle ne doit jamais apparaître non plus ;
+  - l'étape et l'action pour un visiteur ;
+  - l'image de partage, qui se charge ;
+  - l'encart du jeu ;
+  - la vue propriétaire (le détail du score et le Deep dive) ;
+  - les deux autres états du bloc goulot ;
+  - l'action du Deep dive.
+- **`seedOwnedResult` prend les réponses en option** : le détail du score les lit sur l'appareil, jamais sur la page (R-12).
+
+**Ce que la relecture de sécurité a trouvé, et corrigé avant la PR** :
+- **La clé jetable serait partie en clair dans le log public** : le runner imprime les variables de `$GITHUB_ENV` en tête de chaque étape suivante. Elle n'ouvrait rien, mais c'était une « clé privée dans un log » à trier pour chaque scanner. Elle attend maintenant dans un fichier de `$RUNNER_TEMP`, que seule l'étape e2e lit.
+- **`error-page.spec.ts` serait devenue vacante** : elle comptait sur l'absence de Firestore pour qu'un UUID inconnu fasse échouer la lecture. Avec l'émulateur, c'est une 404, que sa regex acceptait aussi. L'écran d'erreur (R2-23) se prouve maintenant sur le document mal formé, et la 404 a son propre test.
+- **La garde ne voyait pas les champs du Deep dive** tant que tous les résultats avaient `deepDive: null`. Le résultat `deep` porte `modelUsed` et les deux champs hérités d'avant R2-20 (`contextAnswers`, `freeContext`), marqués d'une sentinelle.
+- **La recette locale** vérifie aussi le SHA-256. Six commentaires qui disaient « la CI n'a pas Firestore » sont remis à jour.
+
+**Vérifié** :
+- **Non-vacuité, deux fois** :
+  - remettre `resolveBottleneck(submission.pillars)` (la fuite historique de `rawPoints`) fait rougir la garde sur les deux résultats qui nomment une étape, et sur `rawPoints` seul ;
+  - passer le Deep dive brut au lieu de `toDeepDiveView` la fait rougir sur le résultat `deep` seul, en nommant exactement les six clés stockées.
+- **Sans l'émulateur**, les 12 tests sautent avec leur raison, comme le nouveau test de 404, et `global-setup.ts` n'écrit rien.
+- **La suite complète avec l'émulateur** : 639 specs, 634 passées, 5 ignorées par construction, aucun échec. Aucune spec existante n'a changé de comportement.
+- `relecteur-securite` est passé sur le diff. Ses trois constats sont traités, et ses deux angles morts aussi (le SHA n'est pas recoupé contre Google, mais un faux hash échoue fermé ; les champs du Deep dive sont couverts ci-dessus).
