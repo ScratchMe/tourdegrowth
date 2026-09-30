@@ -53,10 +53,11 @@ export const CountOutOfACount = () => (
 );
 
 /**
- * An amount out of a count, in French: the CAC's spend, « 21 000 € », sur 42
+ * An amount out of a count, in French: the CAC's spend, « 21 000 € », sur 42
  * new paying customers. The amount takes `moneyUnit("EUR", "fr")` and may be
- * a decimal; the count is whole. The first column is as wide as its field,
- * label included, so « sur » sits after the longer label, not against the box.
+ * a decimal; the count is whole. The first field spans the joiner's column
+ * and its label does not size the columns, so « sur » sits against the box
+ * and the longer label runs over both (A11.3, 2026-09-30).
  */
 export const AmountOutOfACount = () => (
   <div style={{ maxWidth: 760 }}>
@@ -66,7 +67,7 @@ export const AmountOutOfACount = () => (
         size="sm"
         label="Dépense d'acquisition en août 2026"
         locale="fr"
-        suffix="€"
+        suffix={" €"}
         unitName="euros"
         parseError="Ce n'est pas un nombre lisible."
       />

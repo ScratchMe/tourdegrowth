@@ -173,7 +173,8 @@ export const ENGINE_COPY = {
     paidWindow: { fr: "Fenêtre de paiement", en: "Payment window" },
     windowDays: { fr: "{n} jours", en: "{n} days" },
     // TODO: à relire — réécrit le 2026-09-25 (retour d'Antoine) : dire quel nom.
-    companyLabel: { fr: "Nom de ton SaaS ou de ton entreprise (facultatif)", en: "Your SaaS or company name (optional)" },
+    // TODO: à relire (convention 6) — 2026-09-30 (C29) : « facultatif » sort du libellé, la prop `optional` le dessine (workbench.optional).
+    companyLabel: { fr: "Nom de ton SaaS ou de ton entreprise", en: "Your SaaS or company name" },
     companyHint: {
       fr: "Il n'apparaît que sur tes slides, et reste sur cet appareil comme le reste.",
       en: "It only appears on your slides, and stays on this device like everything else.",
@@ -460,7 +461,8 @@ export const ENGINE_COPY = {
     variant: { fr: "Ce qui est compté", en: "What's counted" },
     channelName: { fr: "Nom du canal", en: "Channel name" },
     evidence: { fr: "Comment le sais-tu ?", en: "How do you know?" },
-    definitionNote: { fr: "Ta définition (facultatif)", en: "Your definition (optional)" },
+    // TODO: à relire (convention 6) — 2026-09-30 (C29) : « facultatif » sort du libellé, la prop `optional` le dessine (workbench.optional).
+    definitionNote: { fr: "Ta définition", en: "Your definition" },
     definitionNoteHint: {
       fr: "Par exemple « actif = au moins un projet modifié ». Elle apparaît dans l'annexe des slides et dans les demandes que tu copies.",
       en: "For example \"active = at least one project edited\". It appears in the slides' appendix and in the requests you copy.",
@@ -482,7 +484,8 @@ export const ENGINE_COPY = {
       en: "{range} · for context, never to name a stage: {caveat}",
     },
     noReference: { fr: "Pas de repère publiable : {reason}.", en: "No reference worth publishing: {reason}." },
-    target: { fr: "Ta cible (facultatif)", en: "Your target (optional)" },
+    // TODO: à relire (convention 6) — 2026-09-30 (C29) : « facultatif » sort du libellé, la prop `optional` le dessine (workbench.optional).
+    target: { fr: "Ta cible", en: "Your target" },
     // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1 : aucun repère ne désigne).
     targetHint: {
       fr: "Seule une cible d'équipe permet de dire quelle étape freine.",
@@ -511,7 +514,8 @@ export const ENGINE_COPY = {
   triage: {
     question: { fr: "Pourquoi ?", en: "Why?" },
     repair: { fr: "Le réparer prendrait", en: "Fixing it would take" },
-    repairComment: { fr: "Précision (facultatif)", en: "Detail (optional)" },
+    // TODO: à relire (convention 6) — 2026-09-30 (C29) : « facultatif » sort du libellé, la prop `optional` le dessine (workbench.optional).
+    repairComment: { fr: "Précision", en: "Detail" },
     owner: { fr: "Qui l'a ?", en: "Who has it?" },
     readingA: { fr: "Premier chiffre", en: "First number" },
     readingB: { fr: "Second chiffre", en: "Second number" },
@@ -568,6 +572,10 @@ export const ENGINE_COPY = {
     durationUnit: { fr: "Unité", en: "Unit" },
     hours: { fr: "heures", en: "hours" },
     days: { fr: "jours", en: "days" },
+    // TODO: à relire (convention 6) — ajouté le 2026-09-30 (A11.1) : l'unité d'une durée au singulier, « 1 jour ».
+    day: { fr: "jour", en: "day" },
+    // TODO: à relire (convention 6) — ajouté le 2026-09-30 (C29) : le mot que la prop `optional` dessine après un libellé.
+    optional: { fr: "facultatif", en: "optional" },
     saved: { fr: "Enregistré", en: "Saved" },
     saveNeeds: { fr: "Pour enregistrer, il manque : {fields}", en: "To save, still missing: {fields}" },
     percentRange: { fr: "Un taux se situe entre 0 et 100 %.", en: "A rate sits between 0 and 100%." },

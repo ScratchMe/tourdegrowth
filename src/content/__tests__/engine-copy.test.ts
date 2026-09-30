@@ -308,3 +308,17 @@ describe("lengths", () => {
     expect(long).toEqual([]);
   });
 });
+
+describe("an optional field", () => {
+  /**
+   * C29 (Antoine, 2026-09-30): « facultatif » is drawn by Field's `optional`
+   * prop, quieter than the label, and never written inside a label at the
+   * label's weight. Non-vacuity: the copy before C29 carried it in four
+   * labels (companyLabel, definitionNote, target, repairComment).
+   */
+  it("says so with Field's `optional` word, never inside its label", () => {
+    const inLabel = ALL.filter(([, v]) => /\((facultatif|optional)\)/i.test(v.fr) || /\((facultatif|optional)\)/i.test(v.en)).map(([p]) => p);
+    expect(inLabel).toEqual([]);
+    expect(ENGINE_COPY.workbench.optional).toEqual({ fr: "facultatif", en: "optional" });
+  });
+});

@@ -6200,3 +6200,110 @@ La méthode pour les trouver la prochaine fois est dans `.design-sync/NOTES.md` 
 - deux questions de design : C28, les 6 px entre une unité et son chiffre (c'est le dessin du retour lui-même, « € 500 ») ; C29, « facultatif » écrit dans les libellés alors que la prop `optional` n'est passée par aucun appel.
 
 **Vérifié** : le driver final a reporté les 15 notes sans en effacer aucune et n'a rien laissé en attente. `report_validate` : 88, 0 défaut. Après l'envoi, `list_files` montre les 88 dossiers de composants.
+
+## A11, C28 et C29 : ce que B3 avait trouvé, livré le soir même, et Claude Design re-synchronisé (2026-09-30)
+
+**Les deux décisions d'Antoine**, prises le soir même dans une séance « point par point, plusieurs options et une reco » :
+- **C28** : l'unité porte son espace, la boîte n'en ajoute plus (la reco). `Field.module.css` retire les 6 px entre l'affixe et le chiffre ; `NumberField` réserve la même largeur. La chaîne donne « €500 » et « 20% » en anglais, « 21 000 € » et « 20 % » en français. `moneyUnit` reprend l'espace qu'`Intl` met à côté du signe, au lieu de la supposer : aucune dans « €500 », une insécable dans « 500 € » comme dans « CHF 500 ».
+- **C29** : « facultatif » passe par la prop `optional` (la reco). Le mot sort des quatre libellés du moteur (`companyLabel`, `definitionNote`, `target`, `repairComment`) et se dessine plus discret après eux, comme le dessine le retour 04. La nouvelle clé `workbench.optional` et les quatre libellés raccourcis sont « à relire » (convention 6).
+
+**A11, livré** ([#227](https://github.com/ScratchMe/tourdegrowth/pull/227)) :
+- **A11.1** : `wordUnit` choisit le mot par `Intl.PluralRules`, avec la nouvelle clé `workbench.day`, « à relire ». On lit « 1 jour », « 1,5 jour », « 2 jours », « 1 day », « 0 days ». Chaque borne de l'estimation prend l'unité de son propre chiffre.
+- **A11.2** : quand les trois parties d'une date sont choisies et que le jour n'existe pas, les trois passent en invalide. Une date incomplète ne marque que ses parties vides.
+- **A11.3** : le premier champ d'une `FieldRow` couvre aussi la colonne du joint, et son libellé ne dimensionne plus les colonnes (`contain: inline-size`). « sur » se pose contre la boîte.
+
+**A11.4 est clos sans changement, après mesure.** La copie validée n'a pas de convention unique entre un nombre et son mot. Sur les chaînes françaises évaluées, « {n} jours » prend une espace ordinaire dans 25 chaînes (glossaire, catalogue d'audit, jeu, moteur) et l'insécable dans 16 ; « mois » et « min » sont partagés de même, et un compte de choses prend partout l'espace ordinaire. Une garde limitée aux jours a été écrite, puis retirée : elle rougissait sur ces 25 chaînes validées. Harmoniser serait une passe de copie à faire relire par Antoine, pas un correctif.
+
+**Gardes, chacune rouge sur l'ancien code** :
+- `sources.test.ts` : l'espace de l'unité (« €500 », « 500 € », « CHF 500 », « 20 % ») et les pluriels. Quatre tests rougissent sur l'ancien `sources.ts`.
+- `form-controls.test.ts` : aucun `padding` entre l'affixe et le chiffre. Rouge sur l'ancien CSS.
+- `form-primitives.test.ts` : le 31 février donne trois `aria-invalid`, une date incomplète aucun. Rouge sur l'ancien `DateField`.
+- `engine-copy.test.ts` : aucun libellé ne contient « facultatif » ou « optional ». Rouge sur l'ancienne copie.
+- `engine-forms.spec.ts`, sur la fiche du CAC en français : le joint est à 9 px de la boîte, pour un écart de colonne de 12. Il était à 114 px avant.
+
+**Vérifié** :
+- `tsc` et `eslint` propres, **2 345 tests unitaires** ;
+- les e2e d'accessibilité (bureau et mobile), de l'audit, du moteur et des contrôles natifs : **221 passées** sur un build de production ;
+- à l'écran, en français et en anglais, à 390 et 1 280 px : « 21 000 € », « €21,000 », « 1 jour / 3 jours », « 1 day / 3 days », les mots « facultatif » et « optional » après leur libellé, le joint contre sa boîte, et le 31 février bordé de rouge sur ses trois listes.
+
+**Claude Design, re-synchronisé deux fois ce soir-là.** Le premier envoi porte l'ancre `f8933d513a1e` : cinq composants recapturés et renotés (26 cellules). Ensuite, le relecteur de copie (`relecteur-copie`, lancé sur le diff avant la PR) n'a rien trouvé dans le produit, mais trois choses dans ce qui part vers l'agent de design :
+- l'en-tête de l'aperçu `TextField` disait encore qu'aucun appel ne passe `optional` ;
+- celui de `FieldRow` décrivait encore le joint d'avant A11.3 ;
+- des numéros de ligne cités par les aperçus étaient décalés par le diff lui-même, et les exemples de l'insécable (`conventions.md`, `NumberField`) étaient tapés avec des espaces ordinaires.
+
+Corrigés, les numéros de ligne remplacés par les noms de clés, qui ne bougent pas. `conventions.md` dit aussi maintenant son exception : le contexte libre du quiz, écran à une question, écrit « (optionnel) » dans la question. Second envoi : rendus identiques, sources seules ; 88 composants, 292 cellules, 453 fichiers, ancre `8235f4e6de01`.
+
+**En production le soir même, et D11 n'a plus d'objet.** Le squash de #227 (`c8b869a`, 23 fichiers, arbre identique à la tête) a été déployé à 21 h 12 UTC : statut `Vercel` du commit à `success`, là où celui d'A10.d (`bd32dab`) dit encore « Deployment rate limited ». Le quota s'était libéré. Comme `main` porte tout, ce déploiement emporte aussi A10.c, A10.d et B3, que Vercel avait refusés. D11 est retiré de `CHANTIERS.md`, et le rappel du lendemain est supprimé.
+
+Vérifié en HTTP :
+- `/en`, `/fr` et `/en/glossary` en 200 ;
+- le moteur et le jeu fermés (404) ;
+- `/admin/audit` en 401.
+
+Les champs eux-mêmes sont derrière l'aperçu propriétaire et le mot de passe admin : ils ne se vérifient pas d'ici. Ce que la production sert est le build que la CI a fait passer sur la même tête.
+
+## C26 et C27 : les robots d'IA laissés et nommés, `/llms.txt` et `/llms-full.txt` générés (2026-09-30)
+
+**Les deux décisions**, prises par Antoine le 2026-09-30, une question à la fois, chacune avec sa reco :
+- **C26, « tout laisser, et l'écrire »** (la reco). `robots.txt` servait `User-Agent: *` / `Allow: /` sans rien dire des robots d'IA : c'était un défaut, c'est maintenant un choix écrit.
+- **C27, « court et généré, plus `llms-full.txt` »**. La reco était le fichier court seul : l'entrée A8 ci-dessus disait « sans `llms-full.txt` ». Antoine a choisi d'y ajouter le texte intégral.
+
+**C26.** `src/lib/seo/ai-agents.ts` tient deux listes, et `robots.ts` les sert en deux groupes, tous en `Allow: /`, avant le groupe `*` :
+- les robots d'**entraînement** : GPTBot, ClaudeBot, Google-Extended, Applebot-Extended, CCBot ;
+- les robots de **réponse**, qui lisent une page pour répondre à quelqu'un ou l'indexer pour une recherche par IA : OAI-SearchBot, ChatGPT-User, Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User.
+
+Google-Extended et Applebot-Extended sont des jetons, pas des robots : ils ne visitent rien, ils disent ce que Google et Apple peuvent faire de ce que leurs robots de recherche ont lu. Le commentaire le dit, pour qu'une session future ne les « corrige » pas. `robots.test.ts` refuse tout `Disallow` dans n'importe quel groupe : en ajouter un, c'est rouvrir C26, et le test est l'endroit qui le dit.
+
+**C27.** Deux routes statiques (`force-static`), `src/app/llms.txt/route.ts` et `llms-full.txt/route.ts`, qui ne font qu'appeler un constructeur de `src/lib/seo/` :
+- **`/llms.txt`** (~10 Ko) suit la forme de llmstxt.org : un H1, un résumé cité, un paragraphe, puis une section H2 de liens par famille de pages. Chaque titre est le H1 de la page, chaque description sa méta-description ou sa définition : rien n'y est écrit à la main, hors l'en-tête. **Sa portée est celle du sitemap, drapeaux compris** : le jeu et le moteur n'y figurent que s'ils sont ouverts au build. En anglais, chaque ligne porte l'adresse française à côté.
+- **`/llms-full.txt`** (~188 Ko) porte le texte anglais de `/how-it-works`, des deux pages « porte ouverte », des cinq comparaisons et des 24 termes, construit depuis les champs que les pages impriment et dans leur ordre. Chaque intertitre est un libellé que la page imprime déjà (`UI_STRINGS`), et chaque partie s'ouvre sur ses deux adresses et le jour de sa mise à jour, celui que la page affiche depuis A8. Il laisse de côté la landing et About, déjà listées, les pages légales, et le jeu et le moteur, qui sont des outils et non du texte.
+- **Les deux constructeurs ne s'importent pas l'un l'autre** : ce qu'ils partagent (le résumé, la forme d'une adresse) est dans `llms-shared.ts`, pour que la route du texte intégral n'embarque ni le moteur ni le jeu.
+
+**Ce qui les tient aux pages** (`llms.test.ts`) :
+- l'ensemble des liens de `/llms.txt` est exactement celui du sitemap, jeu et moteur fermés comme ouverts ;
+- `/llms-full.txt` couvre chaque clé de `CONTENT_PUBLISHED_AT` et chaque terme, une fois chacun ;
+- il contient chaque définition, chaque verdict, chaque question du Tour, la première réponse de chaque FAQ et le texte du barème ;
+- il n'a ni français ni gabarit non rendu (`{n}`, `[object`, `NaN`).
+
+La garde « undefined » a dû être resserrée : le glossaire dit lui-même « an undefined moment ».
+
+**Non-vacuité** :
+- un `disallow` ajouté à un groupe fait rougir `robots.test.ts` ;
+- retirer une comparaison ou un terme de `/llms-full.txt` fait rougir quatre tests.
+
+**Le poids, mesuré plutôt que supposé.** Les plafonds de `content-fan-in.test.ts` ont rougi sur sept modules de contenu, puisque deux points d'entrée de plus les atteignent. Un `vercel build --prod` hors ligne a montré que :
+- les deux routes sont préconstruites, mais leur fonction est un lien vers le bundle partagé de `quiz/share/[locale]`, avec `robots.txt` et `sitemap.xml` ;
+- elles l'alourdissent de 386 Ko, dont 284 Ko pour le morceau du glossaire, soit 6,35 Mo au total ;
+- c'est sous le seuil d'~1 Mo de `/livrer` §0, donc pas de question à Antoine.
+
+Les plafonds sont relevés, chacun avec sa raison, et le paragraphe du test cite la mesure.
+
+**La relecture de la copie** (`relecteur-copie`) a trouvé deux chaînes neuves sans marqueur : le libellé de la version française dans `/llms.txt` (en minuscule, alors que l'autre fichier écrivait `French`) et les deux libellés de langue de chaque adresse de `/llms-full.txt`. Les deux sont maintenant sous un marqueur. Elle a aussi relevé quatre inexactitudes, toutes corrigées :
+- « Full text of these pages » alors que le fichier ne les couvre pas toutes ;
+- « The Tour » comme titre d'une section qui n'est pas le Tour ;
+- « each link » alors que le lien du texte intégral n'a pas de version française ;
+- un résumé qui promettait toujours une étape, alors que l'état « level » n'en nomme aucune.
+
+Tout l'en-tête est « à relire » et hors de tout bon à tirer, comme `CLAUDE.md` le liste.
+
+**La relecture de sécurité** (`relecteur-securite`) n'a rien trouvé de bloquant. Elle a vérifié quatre points :
+- rien de non public dans les deux fichiers, ni nom, ni LinkedIn, ni variable d'environnement autre que `SITE_URL` ;
+- aucune lecture par requête ;
+- l'aperçu propriétaire ne peut pas fuir dans un fichier construit, puisque les deux drapeaux sont lus avec `ownerPreview: false` ;
+- le proxy n'est pas touché.
+
+Elle a relevé un trou : seules les lignes d'adresse de `/llms-full.txt` étaient comparées au sitemap, pas ses autres liens (termes liés, étapes du diagnostic). Un test le comble : toute adresse du texte intégral doit être dans le sitemap le plus petit, jeu et moteur fermés. Il rougit sur un lien vers `/r/sample` ajouté pour l'essai.
+
+**CodeQL** a levé une alerte haute sur la PR : « Incomplete string escaping ». Les cellules du tableau des comparaisons échappaient `|` sans échapper d'abord `\`, si bien qu'une barre oblique déjà dans le texte aurait rendu la barre verticale à la colonne. Aucune copie n'en contient aujourd'hui, et la sortie est identique. `tableCell` échappe maintenant les deux, dans le bon ordre. Son test rougit sans l'échappement de la barre oblique.
+
+**Un piège de mesure, pas un bug** : un build avec `GAME_ENABLED=true` servi par un `next start` sans la variable liste `/en/game` dans `/llms.txt`, et le proxy y répond 404. C'est le « construit ouvert, fermé à l'exécution » que décrit `build-flag.ts`, qui n'existe qu'en local : la CI pose la variable au niveau du workflow, pour le build comme pour le serveur.
+
+**Vérifié** : `tsc` et `eslint` propres, **2 352 tests unitaires** (onze de plus), `vitest --coverage` au-dessus de ses seuils, `next build` propre, avec les trois routes en statique. La suite Playwright complète, avec les variables de la CI : **666 specs, 643 passées, aucun échec**, 23 ignorées par construction. `llms-robots.spec.ts` (trois specs, dont une qui demande chaque adresse listée et exige un 200) a été rejouée après les corrections de la relecture, sur un build refait.
+
+**`main` a bougé deux fois pendant la PR** : A11, C28 et C29 (#227), puis la ligne de production d'A11 (#229), touchaient les mêmes lignes de `CHANTIERS.md`, de `CLAUDE.md` et de la fin du journal. `main` a été fusionné deux fois dans la branche en gardant les deux côtés, et la ligne des décisions de `CLAUDE.md` a été resserrée pour rester sous le budget de 40 000 caractères : seule C25 y reste ouverte. Re-mesuré sur l'arbre fusionné : **2 356 tests unitaires**, **667 specs, 644 passées, aucun échec**, 23 ignorées par construction.
+
+**En production (2026-09-30)** : [#228](https://github.com/ScratchMe/tourdegrowth/pull/228), squash `4f804ea`, 15 fichiers, arbre identique à la tête. Déployé : le statut `Vercel` du commit est à `success`. Vérifié en HTTP sur `www.tourdegrowth.com` :
+- `/robots.txt`, `/llms.txt` et `/llms-full.txt` répondent 200 en `text/plain; charset=utf-8`, pour 369 o, 10 403 o et 188 394 o ;
+- `robots.txt` sert les deux groupes nommés et le groupe `*`, tous en `Allow: /`, sans aucun `Disallow` ;
+- les adresses de `/llms.txt` sont exactement les 74 du sitemap de production, plus le lien du texte intégral. Chacune répond 200. Ni le jeu ni le moteur n'y figurent, puisqu'ils sont fermés ;
+- `/llms-full.txt` a ses 32 parties et ne cite ni `/r/`, ni `/admin`, ni le moteur.

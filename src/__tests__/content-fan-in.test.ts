@@ -45,27 +45,32 @@ function reachersOf(module: string): string[] {
  * 2026-09-15 ; ce sont des plafonds, pas des objectifs — les dépasser est
  * une décision (une page de plus rend vraiment ce contenu), jamais un
  * accident de refactor.
+ *
+ * **`/llms.txt` et `/llms-full.txt` (C27, 2026-09-30) sont prérendus en statique, mais
+ * leur code rejoint quand même le bundle de fonction de `robots.txt` et du sitemap** :
+ * mesuré par `vercel build` hors ligne (VERCEL.md §1.2), +386 Ko sur ce bundle,
+ * dont 284 Ko pour le chunk du glossaire long. Sous le seuil de /livrer §0 (~1 Mo).
  */
 const BUDGETS: { module: string; max: number; why: string }[] = [
   {
     module: "content/glossary-deep.ts",
-    max: 1,
-    why: "300 Ko de prose longue : seule la page de terme la rend. Elle a été dans six chunks.",
+    max: 2,
+    why: "300 Ko de prose longue : la page de terme la rend, et le texte intégral de /llms-full.txt (C27, 2026-09-30). Elle a été dans six chunks.",
   },
   {
     module: "content/glossary.ts",
-    max: 2,
-    why: "La copie `extended` : la page de terme la rend, le sitemap lit `updatedAt`. Tout le reste passe par content/glossary-terms.ts.",
+    max: 3,
+    why: "La copie `extended` : la page de terme la rend, le sitemap lit `updatedAt`, /llms-full.txt la recopie (C27). Tout le reste passe par content/glossary-terms.ts.",
   },
   {
     module: "content/legal.ts",
-    max: 3,
-    why: "Les deux pages légales et le sitemap (qui lit leur `updatedAt`).",
+    max: 4,
+    why: "Les deux pages légales, le sitemap (qui lit leur `updatedAt`) et /llms.txt (leur titre et leur description, C27).",
   },
   {
     module: "content/comparisons.ts",
-    max: 5,
-    why: "Les cinq pages du cluster (HEART ajoutée par l'audit SEO v1 §3.1), et elles seules. Qui ne fait que LISTER le cluster (/how-it-works, le terme AARRR, le sitemap) lit content/comparison-index.ts — ~40 Ko de prose en moins sur chacune, 48 routes pour le seul glossaire.",
+    max: 7,
+    why: "Les cinq pages du cluster (HEART ajoutée par l'audit SEO v1 §3.1), et /llms.txt et /llms-full.txt (C27 : la description et le texte de chaque comparaison). Qui ne fait que LISTER le cluster (/how-it-works, le terme AARRR, le sitemap) lit content/comparison-index.ts — ~40 Ko de prose en moins sur chacune, 48 routes pour le seul glossaire.",
   },
   // Le moteur de growth (spec du moteur §10.3) : sa prose ne sert qu'à sa
   // propre page, qui la résout au build et la passe à l'îlot en props.
@@ -78,14 +83,14 @@ const BUDGETS: { module: string; max: number; why: string }[] = [
   },
   {
     module: "content/engine-copy.ts",
-    max: 1,
-    why: "Toute la copie d'interface du moteur : seule sa page la résout.",
+    max: 2,
+    why: "Toute la copie d'interface du moteur : sa page la résout, et /llms.txt lit son titre et sa description quand le moteur est ouvert au build (C27).",
   },
   {
     module: "content/copy-library.ts",
-    max: 12,
+    max: 13,
     why:
-      "Les quinze questions du Tour : onze routes les citaient au 2026-09-15 ; la page du moteur est la douzième (spec du moteur §10.3), pour les huit questions du pont Tour × moteur — une décision, pas un contournement.",
+      "Les quinze questions du Tour : onze routes les citaient au 2026-09-15 ; la page du moteur est la douzième (spec du moteur §10.3), pour les huit questions du pont Tour × moteur — une décision, pas un contournement. /llms-full.txt est la treizième (C27) : la checklist et les termes y impriment les quinze questions.",
   },
   // Le jeu (plan §3.4). Chaque module de texte du jeu a sa ligne dès qu'une
   // route l'atteint : l'encart du résultat depuis G5b, le texte du niveau
@@ -97,8 +102,8 @@ const BUDGETS: { module: string; max: number; why: string }[] = [
   },
   {
     module: "content/game/meta.ts",
-    max: 4,
-    why: "Titres, descriptions, intro du niveau : le hub, la page du niveau, et leurs deux images OG (chantier G4b). Pas le sitemap, qui ne lit que des chemins et des dates.",
+    max: 5,
+    why: "Titres, descriptions, intro du niveau : le hub, la page du niveau, leurs deux images OG (chantier G4b), et /llms.txt quand le jeu est ouvert (C27). Pas le sitemap, qui ne lit que des chemins et des dates.",
   },
   {
     module: "content/game/hub.ts",
