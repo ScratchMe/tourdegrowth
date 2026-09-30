@@ -175,12 +175,12 @@ become the WHOLE list. The first DS v3 pass pinned four components to fix
 their contracts and the bundle silently shrank from 70 components to 4 —
 with 36 previews left pointing at components that no longer existed.
 
-So `componentSrcMap` now pins all 77 exported components to their file
+So `componentSrcMap` now pins all 88 exported components to their file
 (`"LegalPage": null` stays), and `.design-sync/check-inventory.mjs`, chained
 last in `cfg.buildCmd`, fails the build if a component exported from
 `src/components/**` is missing from the map, pinned to the wrong file, or
 pinned but no longer exported. Its success line is
-`[inventory] 77 components pinned, 1 excluded on purpose, none missing`.
+`[inventory] 88 components pinned, 1 excluded on purpose, none missing`.
 `QuarterNews` (the game's news screen, 2026-09-26) shipped without its entry
 and broke this build for two days — caught by the design audit of
 2026-09-27, not by anything that runs on a PR, since CI does not build the
@@ -243,7 +243,7 @@ viewport media query, not the cell) overlapped its own figure labels.
 
 ## Previews are all repo-owned
 
-All 77 live in `.design-sync/previews/` — none are generated (cell count: see
+All 88 live in `.design-sync/previews/` — none are generated (cell count: see
 "Synced"). Copy is the product's own and numbers are the model's own — **and
 that was not true until the 2026-09-29 re-sync**: this paragraph already said
 so, while 64 of 245 cells carried retired copy, mockup copy, hand-typed game
@@ -270,7 +270,10 @@ pasting their output:
 Run them with `node --experimental-strip-types --import ./register.mjs x.mts`,
 where `register.mjs` installs a resolve hook (`@/` → `src/`, add `.ts`, stub
 `.css`) — or bundle a scratch entry with `.ds-sync/node_modules/.bin/esbuild
---bundle --platform=node`. Paste the JSON as inline JSX props (contextual
+--bundle --platform=node` (for the engine, no hook is needed: `--format=esm
+--tsconfig=./tsconfig.json --alias:@=./src --loader:.css=empty`, then
+`resolveTree(ENGINE_COPY, locale)` for the copy and `exampleEngine` from
+`lib/engine/example.ts` for real chosen values — sources, repairs, targets). Paste the JSON as inline JSX props (contextual
 typing keeps the unions) and name the path or board in the story's doc
 comment. Keep scratch scripts in a per-batch folder: parallel agents share the
 scratchpad.
@@ -528,6 +531,53 @@ except the first, which was the product's:
   only by `href`): removed rather than kept.
 - **French typography**: three plain spaces before `?` or `:`.
 
+### Found in the 2026-09-30 re-sync (B3), by grading and by the check capture
+
+The nine form primitives, `TextArea.InAField` and `Segmented.InAForm` had
+been written from brief 04's board (`design/ds-extension-04-return/board/`)
+BEFORE A10.b and A10.c wired them, and type-checked but never rendered. Three
+agents rebuilt them from the product's call sites (engine and audit), with
+the copy verbatim and the values from the product's functions. Same root
+cause in eight components:
+- **Copy from the board, or from memory**: « Northwind », "Spend that month",
+  « Début de la mission », a source list with "Everything else", and the
+  audit's missing message typed with a colon where `FORM_COPY.missing` has
+  an em dash.
+- **A message that contradicted its own cell**: `Field`'s error said "Keep it
+  under 120 characters" over a counter reading 104/120.
+- **States no call site produces**, dropped rather than rewritten, because a
+  card teaches the design agent a usage: `disabled`/`disabledReason` on
+  `TextField`, `Select`, `Checkbox`; `Select missing`; `Choices
+  disabledLead`; `Checkbox invalid`; `FormSummary`'s `invalid` line. The
+  `optional` prop is in the same case — no call passes it, the engine writes
+  « (optional) » inside its labels — and no preview passes it. If one of
+  these gets wired, add its cell then, from that call site.
+- **Duplicates across components**: `Segmented.InAForm` repeated
+  `Field.AroundSegmented`; it is now the audit's mandate.
+
+The check capture of components whose code had changed while their preview
+had not (Re-sync risks, second bullet) found two more, both in carried grades:
+- **The game's fine**: A7.8 (C14) set it to €75,000, the legal maximum, in
+  `levels/retention.ts`; `EventClipping` and `QuarterNews` still said
+  €106,000 and the old « 60,000 + 500 per radar point ». No component changed.
+- **`SpaceStrip`'s doc** still said « the cards are not links » after A7.9
+  made every open card a door. The cells rendered identically; the words
+  going to the design agent were false.
+
+And one component defect, fixed in the same PR with a guard
+(`form-controls.test.ts`): `Checkbox`'s rows were rounded, so the dashed rule
+drawn on their top edge curled down at both ends, in every list of boxes.
+
+Seen, reported in `CHANTIERS.md` and left to the product (the previews show
+them as they are, never « fixed » in a preview): the 6px between a unit and
+its figure (« € 500 »; the return's own CSS, a design question), `FieldRow`'s
+joiner sitting after the longer of label and box, no red edge on an
+impossible day, and « 1 days » in the engine's duration estimate.
+
+A native `<select>` is closed in a still: its groups and order are never on
+the card, so the `Select` stories say in their doc comments what the list
+holds.
+
 ## Re-sync risks
 
 - **Merging `main` in the middle of a re-sync.** A5 renamed variant props and
@@ -553,7 +603,11 @@ except the first, which was the product's:
   `.design-sync/previews/`, and nothing fails: the cell still renders. When
   those sources change, regenerate the affected props with the method in
   "Previews are all repo-owned" and re-grade — every preview's doc comment
-  names the path or board it was built from.
+  names the path or board it was built from. How to find them (it found the
+  €106,000 fine on 2026-09-30): from the commit that recorded the last upload
+  (`git log -S"<its cell count> story cells" -- .design-sync/NOTES.md`), run
+  `git log <that>..HEAD -- src/lib/game src/content src/lib/i18n src/lib/engine`,
+  read what each commit changed, and grep the previews for the old values.
 
 - **`cfg.buildCmd` is two commands now**, and the second one is load-bearing.
   Simplifying it back to a bare `tsc` degrades a dozen contracts silently — no
