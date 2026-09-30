@@ -610,16 +610,6 @@ export function ResultView({
               </Card>
             ) : null}
 
-            {/* The game card (game plan §3.10, orchestrator decision 1): in
-                the right column on desktop, after the evidence and before the
-                CTA row — so it never sits above the share block (left column)
-                nor above the Deep dive offer (inside the action card at the
-                top of this column). On a phone it goes right after the share
-                card instead; `.slotGame` in the stylesheet says why the two
-                layouts need two orders. Secondary by construction: flat
-                paper, outline button, never the page's primary. */}
-            {gameEntry ? <GameEntry {...gameEntry} className={styles.slotGame} /> : null}
-
             {/* Whose CTAs these are still depends on who is looking
                 (REVIEW-02.md R2-02): a visitor's primary is their own Tour,
                 the owner's is taking it again. `isOwner` is only known after
@@ -683,6 +673,17 @@ export function ResultView({
                 </div>
               </div>
             )}
+
+            {/* The game card (game plan §3.10), secondary by construction:
+                flat paper, outline button, never the page's primary. UNDER
+                the CTA row, on desktop as on a phone (C10, GAME-BRIEF §15.4,
+                2026-09-29): placed above it, it pushed a visitor's « Fais ton
+                propre Tour » 350px down on desktop. The same place for the
+                visitor and the owner, since the first paint is the visitor's
+                and an order that depended on `isOwner` would move the page
+                after mount. On a phone it comes after the share block too:
+                `order` does that, and the source order is the same. */}
+            {gameEntry ? <GameEntry {...gameEntry} className={styles.slotGame} /> : null}
 
             <Disclaimer align="left" className={`${styles.disclaimer} ${styles.slotDisclaimer}`}>
               {disclaimerSplit[0]}

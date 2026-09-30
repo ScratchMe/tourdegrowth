@@ -5835,3 +5835,17 @@ L'article cité par CHANTIERS était présumé « L. 242-… » : c'est L. 241-3
 - **Non-vacuité** : l'ancienne formule fait rougir le test du contrôle et le nouveau test « 75 000 € à radar 75 et à radar 100 ».
 - L'e2e des nouvelles (le trimestre de l'inspection, chemin C) attend maintenant « 75 000 » sur le tampon, au lieu de « 106 ».
 - **La suite complète**, lancée une fois sur le haut de la pile A7.8 → A7.13 (2026-09-30) : 642 specs Playwright, 637 passées, 5 ignorées par construction, aucun échec ; 2 245 tests unitaires avec la couverture, `tsc` et lint propres.
+
+## A7.7 : l'encart du jeu sous le bouton principal, sur desktop (2026-09-30)
+
+C10, tranché par Antoine le 2026-09-29, codé. Sur desktop, l'encart du jeu passe **sous** la rangée de boutons du résultat, dans la colonne de droite. Placé au-dessus, il faisait descendre de 350 px le « Fais ton propre Tour » du visiteur, qui est le cœur de la boucle `?ref=`. Sur mobile, rien ne change : l'encart vient déjà après le bouton et la carte de partage.
+
+**Comment** :
+- **Dans le JSX**, `GameEntry` suit maintenant la rangée de boutons, juste avant l'avertissement. C'est la même place pour le visiteur et le propriétaire : le premier rendu est celui du visiteur, et un ordre qui dépendrait d'`isOwner` décalerait la page après le montage.
+- **Dans la feuille de style**, la réinitialisation desktop `.slotGame { order: 6 }` disparaît. La valeur mobile (9) est aussi la bonne dans la colonne de droite (CTA 7, jeu 9, avertissement 10). L'ordre de chaque colonne desktop est donc à nouveau son ordre source, sans exception.
+
+**Vérifié** :
+- `result-reading-order.test.ts` : les huit variantes gardent leurs coûts sur mobile (1 et 2 sans l'encart, 2 et 3 avec ; `slotShare` reste le bloc le plus déplacé, recalculé). Le test desktop exige « sous le CTA, au-dessus de l'avertissement », et aucune réinitialisation.
+- `game-entry.spec.ts`, à 1 280 px : le bas du bouton principal est au-dessus du haut de l'encart. À 390 px : le bouton, puis le partage, puis l'encart.
+- **Non-vacuité** : l'ancien ordre source fait rougir le test desktop, dans l'unitaire comme dans l'e2e.
+- **La suite complète** sur le haut de la pile A7.8 → A7.13 : 642 specs Playwright, 637 passées, 5 ignorées par construction, aucun échec. Plus tard, 49 specs du résultat et du jeu sur l'émulateur Firestore (A7.11), vue propriétaire comprise.
