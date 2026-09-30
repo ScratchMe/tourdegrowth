@@ -118,14 +118,14 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
 
   dashboard: {
     label: t("Ton dashboard", "Your dashboard"),
-    churn: t("Résiliations", "Churn"),
-    churnUnit: t("par mois", "per month"),
+    metric: t("Résiliations", "Churn"),
+    metricUnit: t("par mois", "per month"),
     quarterTarget: t("objectif du trimestre : {target}", "quarter target: {target}"),
     boardTarget: t("objectif du board : {target}", "board target: {target}"),
-    subs: t("Abonnés", "Subscribers"),
+    customers: t("Abonnés", "Subscribers"),
     monthEnd: t("{month}, fin de mois", "{month}, end of month"),
-    mrr: t("Revenu mensuel", "Monthly revenue"),
-    mrrDelta: t("{delta} vs janvier", "{delta} vs January"),
+    revenue: t("Revenu mensuel", "Monthly revenue"),
+    revenueDelta: t("{delta} vs janvier", "{delta} vs January"),
     patience: t("Patience du DG", "CEO's patience"),
     // TODO: à relire — nouveau (plan §2.6 : sous 35, dit en mots et pas seulement en couleur).
     patienceLow: t("à bout", "at breaking point"),
@@ -164,12 +164,12 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
       "Morning. I'll be direct: the board wants churn at 4% by December, and I promised them. By the end of March I want to see 5.6%. Not 5.7. You have two projects this quarter. I don't want to know how. I want the number.",
     ),
     t2Hit: t(
-      "{churn}, c'est bien. Mars, c'était l'échauffement. Fin juin, {target}.",
-      "{churn}, that's good. March was the warm-up. End of June, {target}.",
+      "{metric}, c'est bien. Mars, c'était l'échauffement. Fin juin, {target}.",
+      "{metric}, that's good. March was the warm-up. End of June, {target}.",
     ),
     t2Miss: t(
-      "Tu m'as fait mentir en comité. {churn} au lieu de 5,6. Ça n'arrivera pas deux fois. Fin juin, {target}.",
-      "You made me look like a liar in front of the committee. {churn} instead of 5.6. It won't happen twice. End of June, {target}.",
+      "Tu m'as fait mentir en comité. {metric} au lieu de 5,6. Ça n'arrivera pas deux fois. Fin juin, {target}.",
+      "You made me look like a liar in front of the committee. {metric} instead of 5.6. It won't happen twice. End of June, {target}.",
     ),
     t3Hit: t(
       "On tient. La marche est plus haute maintenant : {target} fin septembre.",
@@ -560,10 +560,10 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
   },
 
   report: {
-    churn: t("Résiliations", "Churn"),
+    metric: t("Résiliations", "Churn"),
     target: t("objectif {target}", "target {target}"),
-    subs: t("Abonnés", "Subscribers"),
-    mrr: t("Revenu", "Revenue"),
+    customers: t("Abonnés", "Subscribers"),
+    revenue: t("Revenu", "Revenue"),
     patience: t("Patience du DG", "CEO's patience"),
     // TODO: à relire — nouveau (plan §2.6, QuarterReport : le statut dit en mots).
     statusHit: t("objectif atteint", "target hit"),
@@ -603,12 +603,12 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
     present: t("le DG t'a donné du temps", "the CEO gave you time"),
     clean: t("astuces retirées, les résiliations remontent un peu", "tricks removed, churn creeps back up a little"),
     extra: t("un mois de plus facturé à chaque partant", "one more month billed to everyone who leaves"),
-    down: t("−{pct} % de résiliations ce trimestre", "−{pct}% churn this quarter"),
-    downRising: t(
+    gain: t("−{pct} % de résiliations ce trimestre", "−{pct}% churn this quarter"),
+    gainRising: t(
       "−{pct} % de résiliations ce trimestre, l'effet monte encore",
       "−{pct}% churn this quarter, and the effect is still growing",
     ),
-    up: t("+{pct} % de résiliations ce trimestre, moins de litiges", "+{pct}% churn this quarter, fewer disputes"),
+    loss: t("+{pct} % de résiliations ce trimestre, moins de litiges", "+{pct}% churn this quarter, fewer disputes"),
     none: t("rien de visible ce trimestre", "nothing visible this quarter"),
   },
 
@@ -734,8 +734,8 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
       eyebrow: t("Décembre · applaudissements", "December · applause"),
       title: t("Tu as tenu. Et ça a marché.", "You held out. And it worked."),
       text: t(
-        "Résiliations à {churn}, {subs} abonnés, une confiance à {trust} que personne ne mesurait, et pas un seul abonné n'a eu à appeler un numéro le lundi matin. Le DG t'a pressé trois fois. Tu as répondu avec des chiffres. C'est exactement le métier.",
-        "Churn at {churn}, {subs} subscribers, trust at {trust} that nobody was measuring, and not one subscriber had to call a number on a Monday morning. The CEO pushed you three times. You answered with numbers. That is exactly the job.",
+        "Résiliations à {metric}, {customers} abonnés, une confiance à {trust} que personne ne mesurait, et pas un seul abonné n'a eu à appeler un numéro le lundi matin. Le DG t'a pressé trois fois. Tu as répondu avec des chiffres. C'est exactement le métier.",
+        "Churn at {metric}, {customers} subscribers, trust at {trust} that nobody was measuring, and not one subscriber had to call a number on a Monday morning. The CEO pushed you three times. You answered with numbers. That is exactly the job.",
       ),
     },
     cleanMiss: {
@@ -743,8 +743,8 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
       eyebrow: t("Décembre · droit dans tes bottes", "December · standing your ground"),
       title: t("Pas encore 4 %. Mais tout est propre.", "Not 4% yet. But everything is clean."),
       text: t(
-        "Résiliations à {churn}, confiance à {trust}. La courbe descend encore, parce que les effets lents ne s'arrêtent pas en décembre. Le board voulait un chiffre, tu as construit une pente. Regarde la confiance : c'est elle qui fera le 4 % au printemps.",
-        "Churn at {churn}, trust at {trust}. The curve is still going down, because slow effects don't stop in December. The board wanted a number; you built a slope. Look at trust: that's what will deliver the 4% in the spring.",
+        "Résiliations à {metric}, confiance à {trust}. La courbe descend encore, parce que les effets lents ne s'arrêtent pas en décembre. Le board voulait un chiffre, tu as construit une pente. Regarde la confiance : c'est elle qui fera le 4 % au printemps.",
+        "Churn at {metric}, trust at {trust}. The curve is still going down, because slow effects don't stop in December. The board wanted a number; you built a slope. Look at trust: that's what will deliver the 4% in the spring.",
       ),
     },
     firedClean: {
@@ -770,8 +770,8 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
       eyebrow: t("Décembre · la révélation", "December · the reveal"),
       title: t("Voici ce que tu as fait.", "Here is what you did."),
       text: t(
-        "Le radar est monté jusqu'au contrôle, l'amende est tombée, la presse a écrit. Résiliations à {churn}, confiance à {trust}. Les abonnés retenus de force au printemps sont partis à l'automne, en le racontant. Ce que tu as mis en production a des noms. Ils sont en dessous.",
-        "The radar climbed all the way to an inspection, the fine landed, the press wrote about it. Churn at {churn}, trust at {trust}. The subscribers held back by force in the spring left in the autumn, and told everyone why. What you put into production has names. They are below.",
+        "Le radar est monté jusqu'au contrôle, l'amende est tombée, la presse a écrit. Résiliations à {metric}, confiance à {trust}. Les abonnés retenus de force au printemps sont partis à l'automne, en le racontant. Ce que tu as mis en production a des noms. Ils sont en dessous.",
+        "The radar climbed all the way to an inspection, the fine landed, the press wrote about it. Churn at {metric}, trust at {trust}. The subscribers held back by force in the spring left in the autumn, and told everyone why. What you put into production has names. They are below.",
       ),
     },
     labyrinth: {
@@ -779,8 +779,8 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
       eyebrow: t("Décembre · la révélation", "December · the reveal"),
       title: t("Le labyrinthe tient. Regarde ce qu'il coûte.", "The maze holds. Look at what it costs."),
       text: t(
-        "Pas de contrôle cette année. Résiliations à {churn}, et une confiance à {trust} que ton dashboard ne t'a jamais montrée. Les gens que tu retiens ne reviennent pas, ne recommandent pas, et attendent le jour où ils sauront à qui écrire. Le radar est à {radar}. Il ne redescend pas tout seul.",
-        "No inspection this year. Churn at {churn}, and trust at {trust} that your dashboard never showed you. The people you hold back don't come back, don't recommend you, and wait for the day they find out who to write to. The radar is at {radar}. It doesn't come down on its own.",
+        "Pas de contrôle cette année. Résiliations à {metric}, et une confiance à {trust} que ton dashboard ne t'a jamais montrée. Les gens que tu retiens ne reviennent pas, ne recommandent pas, et attendent le jour où ils sauront à qui écrire. Le radar est à {radar}. Il ne redescend pas tout seul.",
+        "No inspection this year. Churn at {metric}, and trust at {trust} that your dashboard never showed you. The people you hold back don't come back, don't recommend you, and wait for the day they find out who to write to. The radar is at {radar}. It doesn't come down on its own.",
       ),
     },
     repentant: {
@@ -788,8 +788,8 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
       eyebrow: t("Décembre · le repenti", "December · the repentant"),
       title: t("Tu as essayé, puis tu as nettoyé.", "You tried, then you cleaned up."),
       text: t(
-        "Tu as mis des astuces en production, puis tu les as retirées. Résiliations à {churn}, confiance à {trust}, radar à {radar}. La confiance remonte plus lentement qu'elle ne tombe. C'est la seule règle du jeu qui est aussi celle de la vraie vie.",
-        "You put tricks into production, then took them out. Churn at {churn}, trust at {trust}, radar at {radar}. Trust climbs back more slowly than it falls. It's the one rule of the game that is also a rule of real life.",
+        "Tu as mis des astuces en production, puis tu les as retirées. Résiliations à {metric}, confiance à {trust}, radar à {radar}. La confiance remonte plus lentement qu'elle ne tombe. C'est la seule règle du jeu qui est aussi celle de la vraie vie.",
+        "You put tricks into production, then took them out. Churn at {metric}, trust at {trust}, radar at {radar}. Trust climbs back more slowly than it falls. It's the one rule of the game that is also a rule of real life.",
       ),
     },
   },
@@ -798,7 +798,7 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
     cells: {
       // TODO: à relire — le prototype disait « en décembre » ; {month} est le mois où l'année
       // s'est close, pour qu'une année coupée en juin ne dise pas « décembre ».
-      churn: t("Résiliations en {month}", "Churn in {month}"),
+      metric: t("Résiliations en {month}", "Churn in {month}"),
       trust: t("Confiance des abonnés", "Subscriber trust"),
       radar: t("Radar DGCCRF", "Regulator radar"),
       outOf: t("{value} / 100", "{value} / 100"),
@@ -808,7 +808,7 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
       "Chiffres du jeu : un modèle simple écrit dans le code, pas une étude.",
       "Game numbers: a simple model written in code, not a study.",
     ),
-    churnChart: {
+    metricChart: {
       title: t("Résiliations par mois", "Churn per month"),
       caption: t("La ligne pointillée est l'objectif de décembre.", "The dotted line is the December target."),
       label: t("Résiliations mensuelles sur l'année", "Monthly churn over the year"),
@@ -838,7 +838,7 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
     dataToggle: t("Voir les données", "See the data"),
     table: {
       month: t("Mois", "Month"),
-      churn: t("Résiliations", "Churn"),
+      metric: t("Résiliations", "Churn"),
       trust: t("Confiance", "Trust"),
     },
   },
@@ -884,8 +884,8 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
     copy: t("Copier un lien avec ton résultat", "Copy a link with your result"),
     copied: t("Copié.", "Copied."),
     text: t(
-      "Une année chez Flixo : {title} Résiliations à {churn}, confiance à {trust}. Et toi, tu tiendrais ? {url}",
-      "A year at Flixo: {title} Churn at {churn}, trust at {trust}. Would you hold out? {url}",
+      "Une année chez Flixo : {title} Résiliations à {metric}, confiance à {trust}. Et toi, tu tiendrais ? {url}",
+      "A year at Flixo: {title} Churn at {metric}, trust at {trust}. Would you hold out? {url}",
     ),
   },
 
@@ -911,7 +911,7 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
     resume: t("Reprendre", "Resume"),
     restart: t("Recommencer", "Start over"),
     previously: t("Précédemment chez Flixo", "Previously at Flixo"),
-    quarterLine: t("Trimestre {q} : {cards}. Résiliations à {churn}.", "Quarter {q}: {cards}. Churn at {churn}."),
+    quarterLine: t("Trimestre {q} : {cards}. Résiliations à {metric}.", "Quarter {q}: {cards}. Churn at {metric}."),
     finished: t(
       "Ta dernière année chez Flixo s'est terminée ainsi : « {title} »",
       'Your last year at Flixo ended like this: "{title}"',
@@ -932,8 +932,8 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
   a11y: {
     handLabel: t("Tes actions du trimestre", "Your actions this quarter"),
     quarterEnd: t(
-      "Fin du trimestre {q} : résiliations {churn}, objectif {target} {status}, patience {patience}.",
-      "End of quarter {q}: churn {churn}, target {target} {status}, patience {patience}.",
+      "Fin du trimestre {q} : résiliations {metric}, objectif {target} {status}, patience {patience}.",
+      "End of quarter {q}: churn {metric}, target {target} {status}, patience {patience}.",
     ),
     resumed: t("Année reprise au trimestre {q}.", "Year resumed at quarter {q}."),
   },

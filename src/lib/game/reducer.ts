@@ -11,9 +11,9 @@
  * Relative imports only — see model.ts.
  */
 import { fresh, handIds, picksInHand, runQuarter } from "./model";
-import type { GameAction, GameState, LevelDefinition } from "./types";
+import type { GameAction, GameState, LevelDefinition, ModelSlug } from "./types";
 
-export function gameReducer<Id extends string>(level: LevelDefinition<Id>) {
+export function gameReducer<Id extends string>(level: LevelDefinition<Id, ModelSlug>) {
   return function reduce(state: GameState<Id>, action: GameAction<Id>): GameState<Id> {
     switch (action.type) {
       case "hangup":
@@ -46,7 +46,7 @@ export function gameReducer<Id extends string>(level: LevelDefinition<Id>) {
       case "restore":
         // Shape is the storage layer's job (isGameState); this only refuses a
         // save that belongs to another level or another state version.
-        if (action.state.level !== level.slug || action.state.v !== 1) return state;
+        if (action.state.level !== level.slug || action.state.v !== 2) return state;
         // The hand is not part of the shape check (it takes the level's
         // rules to deal it). A pick outside it could be neither run nor
         // unpicked — `toggle` refuses it — so it is dropped, not the year.

@@ -7,7 +7,6 @@ import type { GameState } from "../types";
 import { typingDurationMs, TYPE_TICK_MS } from "../ui-timing";
 import {
   chartScale,
-  CHURN_SCALE,
   clicksFor,
   clicksOverLaw,
   dashboardView,
@@ -28,6 +27,8 @@ import { endingState, ENDING_PATHS, finalState, PATH_A, PATH_C, playPath } from 
 // Plan §4.2, G1v: E4, P5-unit, X9-X12.
 type Id = RetentionCardId;
 const L = RETENTION_LEVEL;
+/** Level 1's December frame, in percent — what the view used to export as CHURN_SCALE. */
+const { factor: _factor, ...CHURN_FRAME } = L.display.chart;
 const kinds = (items: PhoneItem[]) => items.map((i) => i.kind);
 const item = <K extends PhoneItem["kind"]>(items: PhoneItem[], kind: K) =>
   items.find((i): i is Extract<PhoneItem, { kind: K }> => i.kind === kind);
@@ -142,8 +143,8 @@ describe("the dashboard", () => {
   it("on the first of January: the quarter's target, January, no comparison yet", () => {
     const view = dashboardView(L, fresh(L));
     expect(view).toMatchObject({
-      churn: 0.06, target: 0.056, targetScope: "quarter", subs: 100_000,
-      monthIndex: 0, monthEnd: false, mrrVsJanuary: null, patience: 55, patienceBar: 55, patienceLow: false,
+      metric: 0.06, target: 0.056, targetScope: "quarter", customers: 100_000,
+      monthIndex: 0, monthEnd: false, revenueVsJanuary: null, patience: 55, patienceBar: 55, patienceLow: false,
       deltas: null,
     });
   });
@@ -155,7 +156,7 @@ describe("the dashboard", () => {
     expect(view.monthIndex).toBe(2);
     expect(view.monthEnd).toBe(true);
     expect(view.target).toBe(0.051);
-    expect(view.mrrVsJanuary).toBeCloseTo(q1.mrr - 1_299_000, 6);
+    expect(view.revenueVsJanuary).toBeCloseTo(q1.revenue - 1_299_000, 6);
     expect(dashboardView(L, finalState(PATH_A)).monthIndex).toBe(11);
   });
 
@@ -173,10 +174,10 @@ describe("the dashboard", () => {
     const [start, q1] = playPath(PATH_A);
     if (!start || !q1) throw new Error("path A");
     const { deltas } = dashboardView(L, q1, start);
-    expect(deltas?.churn.sentiment).toBe("good"); // 6,0 → 5,8
+    expect(deltas?.metric.sentiment).toBe("good"); // 6,0 → 5,8
     expect(deltas?.patience.sentiment).toBe("bad"); // 55 → 51
     expect(deltas?.patience.value).toBe(-4);
-    expect(dashboardView(L, start, start).deltas?.subs.sentiment).toBe("flat");
+    expect(dashboardView(L, start, start).deltas?.customers.sentiment).toBe("flat");
   });
 
   it("the months that scroll after « Lancer » are the quarter's three", () => {
@@ -212,19 +213,19 @@ describe("the quarter report", () => {
 
 describe("X9 — the December frame holds its data", () => {
   it("2-9 % when the year stays inside it", () => {
-    expect(chartScale([6, 5.7, 4.2, 4.0], CHURN_SCALE)).toEqual({ min: 2, max: 9, ticks: [3, 5, 7, 9] });
+    expect(chartScale([6, 5.7, 4.2, 4.0], CHURN_FRAME)).toEqual({ min: 2, max: 9, ticks: [3, 5, 7, 9] });
   });
 
   it("stretches to 12 for an 11 % spike, and every value stays in the frame", () => {
     const values = [6, 7.8, 9.4, 11];
-    const scale = chartScale(values, CHURN_SCALE);
+    const scale = chartScale(values, CHURN_FRAME);
     expect(scale.max).toBe(12);
     expect(scale.ticks).toEqual([3, 5, 7, 9, 11]);
     for (const v of values) expect(v >= scale.min && v <= scale.max).toBe(true);
   });
 
   it("drops its floor for a churn at the model's 1,2 % minimum", () => {
-    const scale = chartScale([1.2, 3], CHURN_SCALE);
+    const scale = chartScale([1.2, 3], CHURN_FRAME);
     expect(scale.min).toBeLessThanOrEqual(1.2);
     expect(scale.min).toBeGreaterThanOrEqual(0);
   });
@@ -236,7 +237,7 @@ describe("X9 — the December frame holds its data", () => {
   it("on every year the tests play, the curves stay inside their frames", () => {
     for (const ending of Object.keys(ENDING_PATHS) as (keyof typeof ENDING_PATHS)[]) {
       const d = decemberView(L, endingState(ending));
-      for (const curve of [d.churn, d.trust]) {
+      for (const curve of [d.metric, d.trust]) {
         for (const v of curve.values) expect(v >= curve.scale.min && v <= curve.scale.max).toBe(true);
       }
     }
@@ -248,25 +249,25 @@ describe("X12 — one number, one form: the end of a curve is written like its c
     for (const ending of Object.keys(ENDING_PATHS) as (keyof typeof ENDING_PATHS)[]) {
       const s = endingState(ending);
       const d = decemberView(L, s);
-      expect(d.churn.end).toBe(d.cells.churn);
+      expect(d.metric.end).toBe(d.cells.metric);
       expect(d.trust.end).toBe(d.cells.trust);
-      expect(d.churn.values.at(-1)).toBeCloseTo(d.churn.end * 100, 12);
+      expect(d.metric.values.at(-1)).toBeCloseTo(d.metric.end * 100, 12);
       for (const locale of ["fr", "en"] as const) {
-        expect(formatPct(locale, d.churn.end)).toBe(formatPct(locale, d.cells.churn));
+        expect(formatPct(locale, d.metric.end)).toBe(formatPct(locale, d.cells.metric));
       }
     }
   });
 
   it("path A ends at 3,99 %: the cell and the curve both read « 4,0 % »", () => {
     const d = decemberView(L, finalState(PATH_A));
-    expect(formatPct("fr", d.churn.end)).toBe("4,0\u00A0%");
+    expect(formatPct("fr", d.metric.end)).toBe("4,0\u00A0%");
   });
 
   it("the reference lines are the board's target and the viral threshold", () => {
     const d = decemberView(L, finalState(PATH_A));
-    expect(d.churn.reference).toBeCloseTo(4, 12);
+    expect(d.metric.reference).toBeCloseTo(4, 12);
     expect(d.trust.reference).toBe(35);
-    expect(d.churn.months).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+    expect(d.metric.months).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
   });
 });
 

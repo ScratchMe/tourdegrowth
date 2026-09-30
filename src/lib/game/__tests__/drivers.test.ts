@@ -12,12 +12,12 @@ import { ENDING_PATHS, finalState, PATH_A, PATH_C, PATH_M } from "./paths";
 
 const years = Object.entries(ENDING_PATHS).map(([name, path]) => ({ name, log: finalState(path).log }));
 
-describe("churnDrivers — the quarter's move, split", () => {
+describe("metricDrivers — the quarter's move, split", () => {
   it("adds up EXACTLY to the quarter's move, on every quarter of every year the tests play", () => {
     for (const { name, log } of years) {
       for (const entry of log) {
         const sum = DRIVER_ORDER.reduce((acc, key) => acc + entry.drivers[key], 0);
-        expect(sum, `${name} Q${entry.q + 1}`).toBeCloseTo(entry.churnEnd - entry.churnStart, 12);
+        expect(sum, `${name} Q${entry.q + 1}`).toBeCloseTo(entry.metricEnd - entry.metricStart, 12);
       }
     }
   });
@@ -60,8 +60,8 @@ describe("driverRows — the lines as printed", () => {
   it("each a whole tenth of a point, adding up to the move the TILES show, zeros dropped", () => {
     for (const { name, log } of years) {
       for (const entry of log) {
-        const { total, rows } = driverRows(entry);
-        const shown = Math.round(entry.churnEnd * 1000) - Math.round(entry.churnStart * 1000);
+        const { total, rows } = driverRows(entry, L.display.step);
+        const shown = Math.round(entry.metricEnd * 1000) - Math.round(entry.metricStart * 1000);
         expect(Math.round(total * 1000), `${name} Q${entry.q + 1} total`).toBe(shown);
         const tenths = rows.map((r) => r.value * 1000);
         for (const t of tenths) {
@@ -79,11 +79,11 @@ describe("driverRows — the lines as printed", () => {
   it("hands a rounding's missing tenth to the line that lost the most", () => {
     // 0,34 + 0,34 + 0,32 = 1,0 point; rounded 0,3 + 0,3 + 0,3 = 0,9.
     const log = {
-      churnStart: 0.05,
-      churnEnd: 0.06,
+      metricStart: 0.05,
+      metricEnd: 0.06,
       drivers: { picks: 0.0034, production: 0.0034, inspection: 0, word: 0.0032, market: 0 },
     };
-    const { total, rows } = driverRows(log);
+    const { total, rows } = driverRows(log, 0.001);
     expect(total).toBeCloseTo(0.01, 12);
     expect(rows.map((r) => [r.key, Math.round(r.value * 1000)])).toEqual([
       ["picks", 4],
@@ -93,11 +93,14 @@ describe("driverRows — the lines as printed", () => {
   });
 
   it("a quarter that moved nothing on the tiles prints a zero total and no line", () => {
-    const { total, rows } = driverRows({
-      churnStart: 0.05,
-      churnEnd: 0.0502,
-      drivers: { picks: -0.0003, production: 0.0005, inspection: 0, word: 0, market: 0 },
-    });
+    const { total, rows } = driverRows(
+      {
+        metricStart: 0.05,
+        metricEnd: 0.0502,
+        drivers: { picks: -0.0003, production: 0.0005, inspection: 0, word: 0, market: 0 },
+      },
+      0.001,
+    );
     expect(total).toBe(0);
     expect(rows).toEqual([]);
   });

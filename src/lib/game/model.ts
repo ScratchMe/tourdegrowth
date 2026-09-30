@@ -27,12 +27,13 @@
 import type {
   BossMessageSpec,
   CardDef,
-  ChurnDrivers,
   EndingId,
   GameEvent,
   GameState,
   LevelDefinition,
+  MetricDrivers,
   ModelConstants,
+  ModelSlug,
   Mood,
   QuarterLog,
   VisibleEffect,
@@ -40,7 +41,8 @@ import type {
 
 // Rules of the model that are not per-level tunables (brief §5.7): the shape
 // of the trust multiplier, the ages at which a card ramps up or wears off,
-// and the decay rates. Named so the arithmetic below reads like the brief.
+// and the radar's decay. Named so the arithmetic below reads like the brief.
+// The spike's decay is in the level's unit, so it is a level constant.
 const TRUST_PIVOT = 60;
 const TRUST_LOW_DIVISOR = 150;
 const TRUST_HIGH_DIVISOR = 300;
@@ -50,11 +52,11 @@ const TEMP_AGE = 3;
 const INSIGHT_BOOST = 1.2;
 const DARK_WEAR_AGE = 3;
 const DARK_WEAR = 0.7;
-const SPIKE_DECAY = 0.005;
 const RADAR_DECAY = 3;
 const MONTHS_PER_QUARTER = 3;
 
-type Level<Id extends string> = LevelDefinition<Id>;
+// Any level the engine can run, a draft included (types.ts `DraftLevelSlug`).
+type Level<Id extends string> = LevelDefinition<Id, ModelSlug>;
 type State<Id extends string> = GameState<Id>;
 
 /** A deep copy the private helpers may mutate. States are plain JSON. */
@@ -74,27 +76,52 @@ function clamp(x: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, x));
 }
 
-/** The churn target of quarter `q` — the board's, past the end of the year. */
+/** The target of quarter `q` — the board's, past the end of the year. */
 export function targetFor(c: ModelConstants, q: number): number {
   const target = c.targets[Math.min(q, c.targets.length - 1)];
   if (target === undefined) throw new Error("model: a level needs four quarter targets");
   return target;
 }
 
+/**
+ * How far `value` falls short of `target`, in the level's unit: positive is a
+ * miss, zero or negative a hit — for churn that has to go down as for
+ * customers that have to go up. Every verdict of the year reads this sign.
+ */
+export function shortfall(c: ModelConstants, value: number, target: number): number {
+  return c.direction === "down" ? value - target : target - value;
+}
+
+/** Whether the number, as it stands, is the board's (December's win). */
+export function reachesBoard(c: ModelConstants, value: number): boolean {
+  return c.direction === "down" ? value <= c.win : value >= c.win;
+}
+
 // ---------------------------------------------------------------- state ---
+
+/**
+ * Revenue on January 1st, before any month has run: a subscriber pays the
+ * price; a shop's month is its new customers plus the past ones ordering
+ * again, at the average basket.
+ */
+function openingRevenue(c: ModelConstants): number {
+  const e = c.economy;
+  if (e.kind === "subscription") return e.customers0 * e.price;
+  return (c.metric0 + e.customers0 * e.repeatRate) * e.basket;
+}
 
 /** The first of January: the CEO's first call is open, nothing is in production. */
 export function fresh<Id extends string>(level: Level<Id>): State<Id> {
   const c = level.constants;
-  const mrr = c.subs0 * c.price;
+  const revenue = openingRevenue(c);
   const state: State<Id> = {
-    v: 1,
+    v: 2,
     level: level.slug,
     q: 0,
     month: 0,
-    subs: c.subs0,
-    churn: c.churn0,
-    mrr,
+    metric: c.metric0,
+    customers: c.economy.customers0,
+    revenue,
     trust: c.trust0,
     radar: c.radar0,
     patience: c.patience0,
@@ -112,7 +139,7 @@ export function fresh<Id extends string>(level: Level<Id>): State<Id> {
     insight: false,
     presented: 0,
     picks: [],
-    history: [{ m: 0, churn: c.churn0, trust: c.trust0, subs: c.subs0, mrr }],
+    history: [{ m: 0, metric: c.metric0, trust: c.trust0, customers: c.economy.customers0, revenue }],
     log: [],
     sanction: false,
     fired: false,
@@ -192,15 +219,16 @@ export function picksInHand<Id extends string>(level: Level<Id>, state: State<Id
   return new Set(state.picks).size === state.picks.length && state.picks.every((id) => hand.includes(id));
 }
 
-// ----------------------------------------------------------- reductions ---
+// ---------------------------------------------------------------- gains ---
 
 /**
- * How much one card cuts churn at a given month (§5.7.2). `ramp` takes over
- * at age 4, `temp` wears off at age 3, the exit survey's insight lifts every
- * honest cut by a fifth, and a pattern loses 30 % of its bite after three
- * months — the people it held back leave anyway.
+ * How much one card moves the level's number at a given month (§5.7.2) — a
+ * churn cut on level 1. `ramp` takes over at age 4, `temp` wears off at
+ * age 3, the survey's insight lifts every honest gain by a fifth, and a
+ * pattern loses 30 % of its bite after three months — the people it held
+ * back leave anyway, the people it rushed stop falling for it.
  */
-export function cardReduction<Id extends string>(
+export function cardGain<Id extends string>(
   level: Level<Id>,
   state: State<Id>,
   id: Id,
@@ -208,7 +236,7 @@ export function cardReduction<Id extends string>(
 ): number {
   const c = card(level, id);
   const age = month - (state.since[id] ?? month);
-  let r = c.red ?? 0;
+  let r = c.gain ?? 0;
   if (c.ramp && age >= RAMP_AGE) r = c.ramp;
   if (c.temp && age >= TEMP_AGE) r = 0;
   if (state.insight && c.kind === "h" && r > 0) r *= INSIGHT_BOOST;
@@ -216,33 +244,33 @@ export function cardReduction<Id extends string>(
   return r;
 }
 
-export interface MonthlyReduction {
-  /** Honest cuts, summed then capped at `honestCap`. */
+export interface MonthlyGains {
+  /** Honest gains, summed then capped at `honestCap`. */
   hr: number;
-  /** Pattern cuts, summed then capped at `darkCap`. */
+  /** Pattern gains, summed then capped at `darkCap`. */
   dr: number;
-  mrrMult: number;
+  revenueMult: number;
   /** One more month billed to every leaver (the notice period). */
   extra: boolean;
 }
 
-export function monthlyReduction<Id extends string>(level: Level<Id>, state: State<Id>): MonthlyReduction {
+export function monthlyGains<Id extends string>(level: Level<Id>, state: State<Id>): MonthlyGains {
   let hr = 0;
   let dr = 0;
-  let mrrMult = 1;
+  let revenueMult = 1;
   let extra = false;
   for (const id of state.active) {
     const c = card(level, id);
-    const r = cardReduction(level, state, id);
+    const r = cardGain(level, state, id);
     if (c.kind === "h") hr += r;
     else dr += r;
-    if (c.mrr) mrrMult *= c.mrr;
+    if (c.revenueMult) revenueMult *= c.revenueMult;
     if (c.extra) extra = true;
   }
   return {
     hr: Math.min(level.constants.honestCap, hr),
     dr: Math.min(level.constants.darkCap, dr),
-    mrrMult,
+    revenueMult,
     extra,
   };
 }
@@ -258,16 +286,42 @@ export function trustMult(lagTrust: number): number {
     : 1 - (lagTrust - TRUST_PIVOT) / TRUST_HIGH_DIVISOR;
 }
 
+/**
+ * The same trust, read the other way for a number the board wants UP: what
+ * multiplies churn by 1,2 at trust 30 multiplies new customers by 0,8. One
+ * curve for both, so trust weighs the same on every level.
+ */
+export function trustFactor(direction: "down" | "up", lagTrust: number): number {
+  return direction === "down" ? trustMult(lagTrust) : 2 - trustMult(lagTrust);
+}
+
+/**
+ * The level's number from the gains in production and the trust the quarter
+ * runs on, before the additive terms (spike, season) and the floor. Level 1
+ * keeps the brief's exact expression, factor for factor and in its order, so
+ * the fixtures and every saved number stay bit for bit what they were.
+ */
+function core(c: ModelConstants, hr: number, dr: number, lagTrust: number): number {
+  return c.direction === "down"
+    ? c.metric0 * (1 - hr) * (1 - dr) * trustMult(lagTrust)
+    : c.metric0 * (1 + hr) * (1 + dr) * trustFactor("up", lagTrust);
+}
+
+/** A spike (a viral thread, an inspection's rush) pushes the number the wrong way, whichever that is. */
+function against(c: ModelConstants, x: number): number {
+  return c.direction === "down" ? x : -x;
+}
+
 // -------------------------------------------------------------- drivers ---
 
 /**
- * The churn formula of `mutStepMonth`, for any set of cards in production and
- * any trust, WITHOUT the spike and the season — the two additive terms the
- * drivers account for separately. Used only to explain a quarter: the month
- * itself is always stepped by `mutStepMonth`, so this can never decide a
- * number the dashboard shows.
+ * The formula of `mutStepMonth`, for any set of cards in production and any
+ * trust, WITHOUT the spike, the season and the press — the terms the drivers
+ * account for separately. Used only to explain a quarter: the month itself
+ * is always stepped by `mutStepMonth`, so this can never decide a number the
+ * dashboard shows.
  */
-function baseChurn<Id extends string>(
+function baseMetric<Id extends string>(
   level: Level<Id>,
   state: State<Id>,
   active: readonly Id[],
@@ -279,20 +333,21 @@ function baseChurn<Id extends string>(
   let hr = 0;
   let dr = 0;
   for (const id of active) {
-    const r = cardReduction(level, at, id, month);
+    const r = cardGain(level, at, id, month);
     if (card(level, id).kind === "h") hr += r;
     else dr += r;
   }
-  return c.churn0 * (1 - Math.min(c.honestCap, hr)) * (1 - Math.min(c.darkCap, dr)) * trustMult(lagTrust);
+  return core(c, Math.min(c.honestCap, hr), Math.min(c.darkCap, dr), lagTrust);
 }
 
+/** What the calendar does to the number this month, signed in its unit (against the board). */
 function seasonAt(c: ModelConstants, month: number): number {
-  return c.season.months.includes(month) ? c.season.add : 0;
+  return c.season.months.includes(month) ? against(c, c.season.add) : 0;
 }
 
 /**
- * Why churn moved over the quarter just stepped — the report's « Pourquoi le
- * churn a bougé ». `before` is the state as the quarter opened (before the
+ * Why the number moved over the quarter just stepped — the report's
+ * « Pourquoi le churn a bougé ». `before` is the state as the quarter opened (before the
  * picks), `after` the state once its three months ran, before the end-of-
  * quarter reckoning. Sequential attribution on the formula at the quarter's
  * last month: first what was already running ages (ramps, wear), then the
@@ -303,28 +358,28 @@ function seasonAt(c: ModelConstants, month: number): number {
  * two quarters get their own line: they are neither the player's pick nor
  * something people said, and they are the year's largest single jump.
  */
-export function churnDrivers<Id extends string>(
+export function metricDrivers<Id extends string>(
   level: Level<Id>,
   before: State<Id>,
   after: State<Id>,
-): ChurnDrivers {
+): MetricDrivers {
   const c = level.constants;
   const start = before.month;
   const end = after.month;
   // An inspection at the end of the quarter before took patterns down AFTER
-  // that quarter's last month ran: the churn this quarter starts from was
+  // that quarter's last month ran: the number this quarter starts from was
   // still computed with them. They are put back to read where it started.
   const control = before.log.at(-1)?.events.find((e) => e.kind === "control");
   const forcedDown = (control?.kind === "control" ? control.removed : []).filter(
     (id): id is Id => id in level.cards && !before.active.includes(id as Id),
   );
-  const startBase = baseChurn(level, before, [...before.active, ...forcedDown], before.lagTrust, start);
-  const inspection = baseChurn(level, before, before.active, before.lagTrust, start) - startBase;
-  const aged = baseChurn(level, after, before.active, before.lagTrust, end) - baseChurn(level, before, before.active, before.lagTrust, start);
-  const withPicks = baseChurn(level, after, after.active, before.lagTrust, end);
-  const picks = withPicks - baseChurn(level, after, before.active, before.lagTrust, end);
+  const startBase = baseMetric(level, before, [...before.active, ...forcedDown], before.lagTrust, start);
+  const inspection = baseMetric(level, before, before.active, before.lagTrust, start) - startBase;
+  const aged = baseMetric(level, after, before.active, before.lagTrust, end) - baseMetric(level, before, before.active, before.lagTrust, start);
+  const withPicks = baseMetric(level, after, after.active, before.lagTrust, end);
+  const picks = withPicks - baseMetric(level, after, before.active, before.lagTrust, end);
   const market = seasonAt(c, end) - seasonAt(c, start);
-  const total = after.churn - before.churn;
+  const total = after.metric - before.metric;
   return { picks, production: aged, inspection, market, word: total - picks - aged - inspection - market };
 }
 
@@ -332,20 +387,33 @@ export function churnDrivers<Id extends string>(
 
 function mutStepMonth<Id extends string>(level: Level<Id>, s: State<Id>): void {
   const c = level.constants;
+  const e = c.economy;
   s.month += 1;
-  const { hr, dr, mrrMult, extra } = monthlyReduction(level, s);
-  let churn = c.churn0 * (1 - hr) * (1 - dr) * trustMult(s.lagTrust) + s.spike;
-  if (c.season.months.includes(s.month)) churn += c.season.add;
-  s.spike = Math.max(0, s.spike - SPIKE_DECAY);
-  churn = Math.max(c.churnFloor, churn);
-  const cancels = s.subs * churn;
-  const acq = c.acq0 * (1 + (s.trust - TRUST_PIVOT) / ACQ_TRUST_DIVISOR) * (s.press > 0 ? c.press.acqBoost : 1);
+  const { hr, dr, revenueMult, extra } = monthlyGains(level, s);
+  let metric = core(c, hr, dr, s.lagTrust);
+  // A shop's good press brings customers — the level's number itself; a
+  // subscription's brings subscribers, below, and leaves churn alone.
+  if (e.kind === "shop" && s.press > 0) metric *= c.press.boost;
+  metric += against(c, s.spike);
+  metric += seasonAt(c, s.month);
+  s.spike = Math.max(0, s.spike - c.spikeDecay);
+  metric = Math.max(c.floor, metric);
+  if (e.kind === "subscription") {
+    const cancels = s.customers * metric;
+    const acq = e.acq0 * (1 + (s.trust - TRUST_PIVOT) / ACQ_TRUST_DIVISOR) * (s.press > 0 ? c.press.boost : 1);
+    s.customers = s.customers - cancels + acq;
+    s.revenue = s.customers * e.price * revenueMult + (extra ? cancels * e.price : 0);
+  } else {
+    // Past customers order again at a rate the trust of the quarter bends,
+    // like churn on level 1: a shop that pushed them buys less from them later.
+    const repeat = s.customers * e.repeatRate * trustFactor("up", s.lagTrust);
+    s.customers = s.customers + metric;
+    s.revenue = (metric + repeat) * e.basket * revenueMult;
+  }
   s.press = Math.max(0, s.press - 1);
-  s.subs = s.subs - cancels + acq;
-  s.churn = churn;
-  s.mrr = s.subs * c.price * mrrMult + (extra ? cancels * c.price : 0);
+  s.metric = metric;
   if (activeDarkIds(level, s).length === 0) s.radar = Math.max(0, s.radar - RADAR_DECAY);
-  s.history.push({ m: s.month, churn, trust: s.trust, subs: s.subs, mrr: s.mrr });
+  s.history.push({ m: s.month, metric, trust: s.trust, customers: s.customers, revenue: s.revenue });
 }
 
 /** One simulated month (§5.7). */
@@ -407,9 +475,9 @@ export function visibleEffect<Id extends string>(level: Level<Id>, state: State<
   if (c.present) return { kind: "present" };
   if (c.clean) return { kind: "clean" };
   if (c.extra) return { kind: "extra" };
-  const r = cardReduction(level, state, id);
-  if (r > 0) return { kind: "down", pct: Math.round(r * 100), rising: !!c.ramp && r < c.ramp };
-  if (r < 0) return { kind: "up", pct: Math.round(-r * 100) };
+  const r = cardGain(level, state, id);
+  if (r > 0) return { kind: "gain", pct: Math.round(r * 100), rising: !!c.ramp && r < c.ramp };
+  if (r < 0) return { kind: "loss", pct: Math.round(-r * 100) };
   return { kind: "none" };
 }
 
@@ -447,7 +515,7 @@ export function bossMessageSpec<Id extends string>(level: Level<Id>, state: Stat
     kind: "quarter",
     q: state.q as 1 | 2 | 3,
     hit: last.gap <= 0,
-    churnPrev: last.churnEnd,
+    metricPrev: last.metricEnd,
     target: targetFor(level.constants, state.q),
     order: state.order,
   };
@@ -457,7 +525,7 @@ export function bossMessageSpec<Id extends string>(level: Level<Id>, state: Stat
 export function computeEnding<Id extends string>(level: Level<Id>, state: State<Id>): EndingId {
   const usedDark = state.everDark.length > 0;
   const stillDark = activeDarkIds(level, state).length > 0;
-  const win = state.churn <= level.constants.winChurn;
+  const win = reachesBoard(level.constants, state.metric);
   if (state.fired) return usedDark ? "firedDark" : "firedClean";
   if (!usedDark) return win ? "applause" : "cleanMiss";
   if (state.sanction) return "fine";
@@ -482,7 +550,7 @@ export function runQuarter<Id extends string>(level: Level<Id>, state: State<Id>
   if (state.over || state.picks.length !== c.picksPerQuarter) return state;
   const s = draft(state);
   const picked = [...s.picks];
-  const churnStart = s.churn;
+  const metricStart = s.metric;
   s.lagTrust = s.trust;
   const orderId = s.order;
   const obeyed = orderId !== null && picked.includes(orderId);
@@ -496,21 +564,21 @@ export function runQuarter<Id extends string>(level: Level<Id>, state: State<Id>
   const presentedNow = picked.some((id) => card(level, id).present);
   const surveyedNow = picked.some((id) => card(level, id).insight);
   for (let i = 0; i < MONTHS_PER_QUARTER; i++) mutStepMonth(level, s);
-  const drivers = churnDrivers(level, opening, s);
+  const drivers = metricDrivers(level, opening, s);
   // What each card visibly did, read BEFORE the survey's answers land below:
   // their boost did not act during these months, so it must not show in them.
   const fx = picked.map((id) => ({ card: id, effect: visibleEffect(level, s, id) }));
   // The CEO's mid-quarter mail reads the quarter's second month.
-  const midChurn = s.history.at(-2)?.churn ?? s.churn;
+  const midMetric = s.history.at(-2)?.metric ?? s.metric;
 
   const target = targetFor(c, s.q);
-  const gap = s.churn - target;
+  const gap = shortfall(c, s.metric, target);
   const p = c.patience;
   const events: GameEvent[] = [];
   if (gap <= 0) s.patience += p.hit;
   else s.patience -= Math.min(p.missCap, Math.round(p.missPerPoint * gap));
   if (orderId !== null) s.patience += obeyed ? p.obeyed : p.refused;
-  events.push({ kind: "midMail", moving: !(midChurn > target) });
+  events.push({ kind: "midMail", moving: !(shortfall(c, midMetric, target) > 0) });
   if (presentedNow) events.push({ kind: "present" });
   // Three months of answers are in: from next quarter the honest cuts aim
   // better (INSIGHT_BOOST) and the data review is dealt.
@@ -522,7 +590,7 @@ export function runQuarter<Id extends string>(level: Level<Id>, state: State<Id>
     s.sanction = true;
     const fine = c.control.fine; // the legal maximum, never more (C14, levels/retention.ts)
     const removed = activeDarkIds(level, s);
-    events.push({ kind: "control", fine, leavers: Math.round(s.subs * c.control.leaversRate), removed });
+    events.push({ kind: "control", fine, leavers: Math.round(s.customers * c.control.leaversRate), removed });
     for (const d of removed) if (!s.removedDark.includes(d)) s.removedDark.push(d);
     s.active = s.active.filter((x) => card(level, x).kind !== "d");
     s.radar = c.control.radarAfter;
@@ -554,12 +622,12 @@ export function runQuarter<Id extends string>(level: Level<Id>, state: State<Id>
     picked,
     order: orderId,
     fx,
-    churnStart,
-    churnEnd: s.churn,
+    metricStart,
+    metricEnd: s.metric,
     target,
     gap,
-    subs: s.subs,
-    mrr: s.mrr,
+    customers: s.customers,
+    revenue: s.revenue,
     patience: s.patience,
     events,
     boss: {

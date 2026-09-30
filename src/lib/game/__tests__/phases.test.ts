@@ -273,16 +273,16 @@ describe("the deltas and the scrolling months read only what the engine wrote", 
   it("the start of the last quarter is its first month in the history, and its patience the one the previous quarter ended on", () => {
     const afterQ1 = deepFreeze(states[1]!);
     const start1 = lastQuarterStart(L, afterQ1)!;
-    expect(start1.churn).toBe(afterQ1.log[0]!.churnStart);
-    expect(start1.subs).toBe(L.constants.subs0);
+    expect(start1.metric).toBe(afterQ1.log[0]!.metricStart);
+    expect(start1.customers).toBe(L.constants.economy.customers0);
     expect(start1.patience).toBe(L.constants.patience0);
 
     const afterQ3 = deepFreeze(states[3]!);
     const start3 = lastQuarterStart(L, afterQ3)!;
     const endOfJune = afterQ3.history.find((h) => h.m === 6)!;
-    expect(start3.churn).toBe(afterQ3.log[2]!.churnStart);
-    expect(start3.subs).toBe(endOfJune.subs);
-    expect(start3.mrr).toBe(endOfJune.mrr);
+    expect(start3.metric).toBe(afterQ3.log[2]!.metricStart);
+    expect(start3.customers).toBe(endOfJune.customers);
+    expect(start3.revenue).toBe(endOfJune.revenue);
     expect(start3.patience).toBe(afterQ3.log[1]!.patience);
   });
 
@@ -290,7 +290,7 @@ describe("the deltas and the scrolling months read only what the engine wrote", 
     const after = states[2]!;
     const deltas = dashboardView(L, after, lastQuarterStart(L, after)).deltas!;
     const log = after.log[1]!;
-    expect(deltas.churn.value).toBeCloseTo(log.churnEnd - log.churnStart, 12);
+    expect(deltas.metric.value).toBeCloseTo(log.metricEnd - log.metricStart, 12);
     expect(deltas.patience.value).toBe(log.patience - after.log[0]!.patience);
     // A JSON round-trip is what a reload does to the state.
     const reloaded = JSON.parse(JSON.stringify(after)) as GameState<Id>;
@@ -316,7 +316,7 @@ describe("the deltas and the scrolling months read only what the engine wrote", 
       expect(s.over).toBe(false);
     }
     const last = shown.at(-1)!;
-    expect([last.churn, last.subs, last.mrr]).toEqual([next.churn, next.subs, next.mrr]);
+    expect([last.metric, last.customers, last.revenue]).toEqual([next.metric, next.customers, next.revenue]);
     expect(dashboardView(L, last).trust).toEqual({ hidden: true });
   });
 });

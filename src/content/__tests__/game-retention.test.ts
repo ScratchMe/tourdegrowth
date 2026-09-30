@@ -441,7 +441,9 @@ const PROTO_ENDINGS = literal<Record<string, { win: boolean; eyebrow: string; ti
     fmtPct: (v: string) => `{${v}}`,
     fmtInt: (v: string) => `{${v}}`,
     Math: { round: (v: string) => `{${v}}` },
-    S: { churn: "churn", subs: "subs", trust: "trust", radar: "radar", patience: "patience" },
+    // The prototype's state names, printed as the engine's placeholders
+    // since the engine serves more than one level (2026-09-30).
+    S: { churn: "metric", subs: "customers", trust: "trust", radar: "radar", patience: "patience" },
   },
 );
 const PROTO_MONTHS = (SCRIPT.match(/const MONTHS = (\[[^\]]*\]);/)?.[1] ?? "[]").match(/'([^']+)'/g)!.map((s) => s.slice(1, -1));
@@ -480,7 +482,7 @@ const NOT_FROM_PROTOTYPE: Record<string, string> = {
   "journal.*": "new — plan §2.6 (GameJournal had no title key)",
   "clippings.*": "new — plan §2.6",
   "december.gameNumbers": "new — plan §2.7",
-  "december.churnChart.reference": "new — plan §2.6",
+  "december.metricChart.reference": "new — plan §2.6",
   "december.trustChart.reference": "new — plan §2.6",
   "december.trustChart.caption": "R6",
   "december.trend": "new — plan §2.6 (a curve states its trend)",
