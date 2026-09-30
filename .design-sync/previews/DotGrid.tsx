@@ -35,7 +35,7 @@ export const Peloton = () => (
     <DotLegend
       aria-hidden
       items={[
-        { mark: "referred", label: "12 referred" },
+        { mark: "referred", label: "came through a referral (12)" },
         { mark: "filled", label: "measured" },
         { mark: "range", label: "estimated range" },
         { mark: "unknown", label: "not measured" },
@@ -55,8 +55,8 @@ export const WhatIf = () => (
     <DotLegend
       items={[
         { mark: "filled", label: "there today" },
-        { mark: "gained", label: "added by the what-ifs" },
-        { mark: "lost", label: "lost by the what-ifs" },
+        { mark: "gained", label: "added by your what-ifs" },
+        { mark: "lost", label: "lost to your what-ifs" },
         { mark: "range", label: "estimated range" },
       ]}
     />
