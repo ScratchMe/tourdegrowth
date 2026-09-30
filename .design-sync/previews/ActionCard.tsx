@@ -8,15 +8,23 @@ import { ActionCard, NightSurface } from "tour-de-growth";
  * mechanical sentence, never a figure, a sign or an arrow.
  *
  * Why a card cannot be ticked is two different things, drawn differently:
- * `locked` (the CEO is still talking: disabled, full contrast, because the
- * hand is read WHILE he talks) and `unavailable` (two are already ticked:
- * muted, out of the round). Copy: content/game/retention.ts.
+ * `unavailable` (two are already ticked: muted, out of the round) and
+ * `locked` (disabled at full contrast). `locked` was the hand while the CEO
+ * talked; since 2026-09-25 the hand only appears once the call is hung up
+ * (lib/game/phases.ts `handVisible`), so the level no longer draws it — it
+ * stays in the contract, and is shown here so it is recognised, not copied.
+ * Copy: content/game/retention.ts. Cards are 294px wide, the width of one
+ * column of the hand in the desk's 600px column.
  */
 
-const grid = { padding: 20, display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 260px))", gap: 12 } as const;
+const grid = { padding: 20, display: "grid", gridTemplateColumns: "repeat(2, 294px)", gap: 12 } as const;
 const noop = () => {};
 
-/** The four states side by side. The word "Chosen" says a card is ticked — never the colour alone. */
+/**
+ * The four states side by side: available, ticked (the word "Chosen" says it
+ * — never the colour alone), `locked` with the CEO's badge (contract only, see
+ * above), and `unavailable`.
+ */
 export const States = () => (
   <NightSurface as="div" style={grid}>
     <ActionCard
@@ -59,9 +67,16 @@ export const States = () => (
   </NightSurface>
 );
 
-/** The CEO's order, ticked: his badge and the "Chosen" word share the top row. In French. */
+/**
+ * The CEO's order, ticked, in French — reference year C's second quarter,
+ * where he asks for the phone-only cancellation and gets it. On a ticked card
+ * the red badge turns into an outline in the selection's ink. At the hand's
+ * real card width (294px) his badge and "Choisie" share the top row; the row
+ * is `flex-wrap`, so on a narrower card the word drops under the badge
+ * rather than overflowing.
+ */
 export const OrderedFrench = () => (
-  <NightSurface as="div" style={{ padding: 20, maxWidth: 300 }}>
+  <NightSurface as="div" style={{ padding: 20, width: 334 }}>
     <ActionCard
       id="call"
       name="Résiliation accompagnée"

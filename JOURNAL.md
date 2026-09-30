@@ -5679,3 +5679,34 @@ La décision 5 renversée par Antoine le 2026-09-29 (C1), codée. **Seule une ci
 Il signale aussi, pour le bon à tirer, un écart qui existait déjà et devient visible : la page rétention donne 97-99 % de rétention mensuelle (1 à 3 % de churn), la page churn 1-2 %, pour la même population désormais nommée à l'identique. Les chiffres validés ne sont pas touchés ici.
 
 **Hors code** : `ENGINE.md` suit (D8 et décision 5 marquées, §5.1, §5.3, §6.0, §6.6, §9.3, §13.1, §14). Le bon à tirer nº8 cite l'exemple et ces phrases : sa page est à remettre d'accord avec le code par l'agent des bons à tirer, comme A7.2 et A7.3 le demanderont aussi.
+
+## La design sync depuis une session cloud : B1, B2, et B3 jusqu'à A5 (2026-09-29 → 2026-09-30)
+
+**La demande d'Antoine** : la section B de `CHANTIERS.md`, par son prompt B — pousser le bundle vers le projet Claude Design existant (`23b9671c-a55b-452e-aa41-39906ee71ba8`), écrire le brief S-15, tenir les documents à jour ; tout avertissement autre que les trois connus, s'arrêter et lui expliquer.
+
+**Ce que le prompt supposait, et qui était faux** : « sur ta machine ». La session tournait dans le cloud, et c'est là qu'elle a tout fait. `DesignSync` y répond avec la connexion claude.ai ; le convertisseur vient avec le skill `/design-sync` ; Chromium est préinstallé. L'autorisation locale qui manquait le 2026-09-11 n'est plus un prérequis.
+
+**Deux envois, par le chemin atomique** (ancre relue juste avant, sentinelle, contenu par paquets, sentinelle, `_ds_sync.json` en dernier, `list_files` relu) :
+- **2026-09-29** : 77 composants, 238 cellules, 398 fichiers, ancre `17cca5e0909b` ;
+- **2026-09-30**, après la fusion d'A2, A4 et A5 : **79 composants, 244 cellules, 79/79 rendus**, 408 fichiers, aucune suppression, `report_validate` 79/0/0/0, ancre `f3b4bf9eb3c5`. Un premier bundle d'après A2 n'est pas parti : main avait pris A4 et A5 entre-temps, il aurait été périmé en arrivant.
+
+**La notation a trouvé ce que le rendu ne montrait pas** : 64 cellules sur 245, dans 43 composants, rendaient proprement et disaient faux (copie des maquettes, chiffres plausibles que le modèle ne produit pas, commentaires qui promettent plus que la cellule). Antoine a choisi « corriger puis pousser » ; chaque aperçu a été refait depuis les sources du produit, le détail est dans `.design-sync/NOTES.md`. Une seule était un défaut du produit : la coupure de journal en pilule, livrée à part (#192, son entrée du 2026-09-29).
+
+**Les avertissements** : `ActionCard` en a levé un quatrième (`GRID_OVERFLOW`, ses cartes à leur vraie largeur de 294 px) ; Antoine a choisi la carte en colonne. `GlossaryTerm` en a levé un autre après A4, que B3 annonçait : un seul popover ouvert par page, dans la couche supérieure, donc l'histoire `French` s'affichait fermée et le panneau d'`Open` pendait sous sa cellule. Antoine a choisi le 2026-09-30 de l'accepter et de rendre la carte honnête (`French` fermée exprès, de la place sous `Open`). Il y a donc **quatre** avertissements permanents.
+
+**Le compte annoncé n'était pas le bon** : A1 puis A2 comptaient à partir de 244 (245, puis 251). La notation du 2026-09-29 avait retiré sept cellules, doublons ou fausses (245 → 238) ; 238 + 3 + 3 = 244. Le compte vient de ce que les aperçus exportent, pas des annonces.
+
+**B2** : `design/DS-EXTENSION-BRIEF-04.md`, sur la forme des briefs 01 et 03, avec neuf captures du moteur et de l'audit dans `design/ds-extension-04/`. Il attend la relecture d'Antoine et son envoi (D3). Rien n'est parti vers Claude Design.
+
+**Pièges** :
+- **Le driver ne lance pas `cfg.buildCmd`.** Après A5, le rendu était à jour (il se construit depuis `src/`) mais les contrats disaient encore `Button compact` et `Segmented size="compact"` : `dist/types/` datait de la fusion précédente. Vu en relisant les `.prompt.md` avant l'envoi, pas par un avertissement.
+- **Une note suit l'aperçu, pas le composant.** A4 et A5 ont changé neuf composants dont l'aperçu n'a pas bougé ; leurs notes auraient été reportées sans capture. Recapturés en contrôle, c'est comme ça que `GlossaryTerm` s'est vu.
+- **Fusionner main au milieu d'une synchro** : onze aperçus en conflit avec les renommages d'A5, et deux valeurs retirées restées sur des lignes que seule la branche avait ajoutées (`StatTile size="responsive"`, `DgFace size="avatar"`). Une valeur inconnue retombe sur le défaut sans rien casser à l'œil ; seul un `grep` des valeurs retirées les trouve.
+- **Le conteneur a redémarré deux fois.** `ds-bundle/` et les notes (`.design-sync/.cache/`, non commités) ont survécu ; l'ancre relue avant chaque envoi dit si quelqu'un a poussé entre-temps.
+- **La capture par histoire fait 900 × 700** : les cellules hautes (le jeu) sont coupées, et `SpaceBand`, qui n'a sa mise en page large qu'à partir de 950 px, a été noté sur un rendu à 1 200.
+
+**Trouvé dans le produit, laissé en A9 de `CHANTIERS.md`** après re-mesure sur main d'après A5 : les guillemets de l'audit à espaces ordinaires (17 lignes de copie, hors de la garde de typographie), « 100,000 » coupé en deux entre 761 et 850 px dans le tableau de bord du jeu, la courbe de churn qui touche l'étiquette d'objectif dans `EndingCharts`, et une règle morte dans `SpaceBand.module.css`. **Deux constats de la notation se sont révélés faux à la re-mesure** et n'y sont pas : l'état `locked` d'`ActionCard` n'est pas mort (`island-view.ts` le pose), et le premier compte de l'audit (69 lignes) comptait les commentaires.
+
+**Consigné** : `.design-sync/NOTES.md` (« Synced », les quatre avertissements, le piège de `dist/types`, les risques de re-synchro), `.design-sync/conventions.md` (le `medium="slide"` qu'A5 avait laissé en `size`), `CHANTIERS.md` (B réécrite : B1 retiré, B2 en attente, B3 après A7.10 ; D3 ; le prompt B ; A9), `CLAUDE.md` (le paragraphe de synchro, la ligne des avertissements, la ligne « Design system → Claude Design »).
+
+**Vérifié, et comment** : 79 aperçus sur 79 rendus sans erreur (aucun vide, fin ou identique) ; les 244 cellules notées « good » une à une sur leur capture, plus dix composants recapturés en contrôle ; les contrats relus après régénération (`grep` des props retirées : zéro) ; `conventions.md` confronté au build (noms de composants, jetons retirés) ; l'envoi relu par `list_files`. Aucun code de `src/` dans cette PR : que de la doc, des aperçus et des captures sous `design/`, que `vercel-ignore.sh` ne déploie pas.

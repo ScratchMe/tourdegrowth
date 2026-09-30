@@ -12,27 +12,32 @@ import { QuestionCard, TextArea } from "tour-de-growth";
  * independent places (SPEC-ADDENDUM-02 §1.4).
  */
 
-const PROMPT = "Anything else about your business we should know?";
+// The Deep dive's last screen, `content/free-context.ts`: its label (which is
+// also the field's accessible name), its placeholder and its 500-character cap.
+const PROMPT = "Any specific context we should know about? (optional)";
+const PLACEHOLDER = "E.g.: we sell to accounting firms, long sales cycle, trust is a bigger blocker than price...";
 
 const Field = ({ initial }: { initial: string }) => {
   const [value, setValue] = React.useState(initial);
   return (
     <div style={{ maxWidth: 560, display: "flex", flexDirection: "column", gap: 14 }}>
-      <QuestionCard size="md">{PROMPT}</QuestionCard>
-      <TextArea value={value} onChange={setValue} maxLength={500} label={PROMPT} />
+      <QuestionCard>{PROMPT}</QuestionCard>
+      <TextArea value={value} onChange={setValue} maxLength={500} placeholder={PLACEHOLDER} label={PROMPT} />
     </div>
   );
 };
 
-/** Empty — and submitting it empty IS how you skip this screen; there is no Skip button. */
+/**
+ * Empty: the placeholder shows an example, the counter reads 0/500. Submitting
+ * it empty IS how you skip this screen — the label says "(optional)" and there
+ * is no Skip button.
+ */
 export const Empty = () => <Field initial="" />;
 
-/** Filled, well under the cap. */
-export const Filled = () => (
-  <Field initial="We sell scheduling software to independent physiotherapists. Most churn happens in the first month, and we have never worked out why." />
-);
+/** Filled, well under the cap (what a founder might type — the e2e suite types this one). */
+export const Filled = () => <Field initial="We sell to accounting firms and trust is the blocker." />;
 
-/** Over the cap: red border, red counter, and the text still types. */
+/** Over the cap (567/500): red border, red counter, and the text still types. */
 export const OverLimit = () => (
   <Field
     initial={

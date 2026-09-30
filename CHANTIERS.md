@@ -22,15 +22,14 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
 | **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | Maintenant. A7 dans l'ordre de ses dépendances ; A8 à tout moment (A1 à A6 livrés le 2026-09-29) |
-| **B. Design sync** | Une session sur ta machine | Claude Code en local : l'autorisation Claude Design ne s'obtient que là | Maintenant (A1, A2, A4 et A5 sont livrés), puis de nouveau après A7.10 |
+| **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30** (79 composants, après A1, A2, A4 et A5). Reste le brief 04 à relire et envoyer (D3), puis une re-synchro après A7.10 |
 | **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 tranchée le 2026-09-30. Restent C24 (née d'A3) et la validation de la spécification de A7.3 quand elle sera écrite |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, tout A7.3 |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
 
 **L'ordre conseillé** : A7 (A7.3.a, la spécification, d'abord : c'est le
-plus long ; A7.1 est livré le 2026-09-30). B dès que tu as un créneau sur ta machine (A1, A2,
-A4 et A5 sont livrés), puis D. La section C a été tranchée
-le 2026-09-29.
+plus long ; A7.1 est livré le 2026-09-30). B3 après A7.10, dans la même
+session si possible, puis D. La section C a été tranchée le 2026-09-29.
 
 **Deux sessions en parallèle** écrivent toutes deux à la fin de `JOURNAL.md`
 et dans ce fichier. La seconde à merger fusionne `main` dans sa branche avant
@@ -293,20 +292,34 @@ couvert.
 Le plug-in n'entre pas dans le dépôt, même en `--manuel`. Si l'amont publie
 les fichiers manquants, la question repart en section C.
 
+### A9 — Ce que la design sync du 2026-09-30 a trouvé dans le produit
+
+Vus en notant les 244 cellules, puis **re-mesurés le 2026-09-30 sur `main`
+d'après A5** avant d'être écrits ici. Chacun est petit ; ils peuvent partir
+dans une seule PR, ou avec le lot qui touche le même fichier.
+
+| # | Quoi | Où, et comment le voir |
+|---|---|---|
+| A9.1 | **Les guillemets de l'audit portent des espaces ordinaires** : `« mot »` au lieu de U+00A0, sur 17 lignes de copie (les commentaires non comptés) | Sous `src/app/(app)/admin/audit/` : les `hint` de `DefinitionEditor` (4), `RowEditor` (3), `NewMissionForm` (3), `CriterionEditor` (2), `ContextEditor` (2), `ObservationList`, le libellé de purge d'`AuditWorkbench` et `labels.ts`. La garde `copy-typography.test.ts` ne lit que `src/content` et `src/lib/i18n` : l'étendre à ce dossier, pour que la correction tienne |
+| A9.2 | **Le tableau de bord du jeu coupe « 100,000 » sur deux lignes** entre 761 et 850 px de large (une ligne à 920) | La tuile « Subscribers » de `Dashboard`, dans la rangée de six : `StatTile` laisse le chiffre se couper au milieu. Mesuré dans l'aperçu `YearStart` par les rectangles du texte. Un chiffre ne se coupe jamais (`white-space: nowrap` sur la valeur, et une tuile qui s'élargit ou passe à la ligne) |
+| A9.3 | **La courbe de churn touche l'étiquette « target 4.0% »** dans la fin `DarkYear` | `EndingCharts` : l'étiquette de la ligne d'objectif est posée au-dessus de la ligne, là où passe une courbe proche de 5 %. Placer l'étiquette du côté sans données, ou lui donner un fond |
+| A9.4 | **Une règle morte dans `SpaceBand.module.css`** : `.inner { padding-block: 7px }` sous `@container (max-width: 560px)` | `.inner` est lui-même le conteneur, et une requête de conteneur ne s'applique jamais au conteneur qu'elle interroge. Soit la retirer, soit la poser sur un enfant (et vérifier à 360 px que la bande ne change pas) |
+
 ---
 
-## B. Design sync — sur ta machine
+## B. Design sync
 
-**Pourquoi en local** : l'outil `DesignSync` demande une autorisation qui ne
-s'obtient que depuis une session interactive sur ta machine (`JOURNAL.md`,
-brief d'extension 03). Une session cloud construit et valide le bundle, mais
-ne peut pas le pousser.
+**Une session cloud suffit** depuis le 2026-09-29 : l'outil `DesignSync` y
+répond avec la connexion claude.ai, et le convertisseur vient avec le skill
+`/design-sync`. L'autorisation locale qui manquait le 2026-09-11 n'est plus un
+prérequis. **B1 est fait** : le projet Claude Design est à jour du 2026-09-30,
+avec 79 composants, 244 cellules et 79 aperçus sur 79 rendus, après A1, A2, A4
+et A5 (`JOURNAL.md`, 2026-09-30, et `.design-sync/NOTES.md`, « Synced »).
 
 | # | Quoi | Détail |
 |---|---|---|
-| B1 | **Pousser le bundle** vers le projet Claude Design existant (`23b9671c-a55b-452e-aa41-39906ee71ba8`, créé le 2026-09-11) | Au 2026-09-29 : 77 composants, 244 cellules, 77 aperçus sur 77 rendus. Lire `.design-sync/NOTES.md` avant toute commande : ce dépôt est une app, pas un paquet. Trois avertissements sont permanents et attendus : « Impact », et `GRID_OVERFLOW` sur `DefinitionPopover` et `QuarterNews`. **Ne pas appliquer** le `cardMode: "single"` suggéré, qui masquerait des histoires |
-| B2 | **Le brief S-15 : les primitives de formulaire.** Elles vivent hors du système, en deux copies. Côté moteur : `Field`, `NumberField`, `TextField`, `Select`, `Choices`, `CheckField`, `MonthField` et `SegmentedField`, sous `src/app/[locale]/aarrr-funnel-template/_engine/_ui/`. Côté audit : sous `src/app/(app)/admin/audit/` | Écrire `design/DS-EXTENSION-BRIEF-04.md`, sur la forme des briefs 01 et 03, puis l'envoyer à Claude Design. Le retour arrive par `design/ds-extension-04-return/` ou par « Send to Claude Code Web ». La promotion dans `core/` devient ensuite un lot A |
-| B3 | **Re-synchroniser** après A1, A2, A4, A5 et A7.10 | Ces lots changent des composants et leurs aperçus. **Ni A1, ni A2, ni A4, ni A5 n'ont pu reconstruire le bundle** : le convertisseur (`.ds-sync/`) n'est pas dans une session cloud. A1 a changé l'aperçu `Button` (une histoire `Quiet` de plus), le contrat de `Button` et `conventions.md` (le bouton texte, les trois épaisseurs de trait). A2 ajoute deux composants, `DotGrid` et `DotLegend` (`viz/DotGrid.tsx`, trois histoires chacun, dans `componentSrcMap`), l'échelle `--slide-*` complétée et les quinze jetons `--viz-cat-*` / `--viz-seq-*` retirés, et deux passages de `conventions.md`. Attendu : 79 composants, 251 cellules (244 + 1 + 6). A4 n'ajoute aucune cellule mais change quatre contrats : `DefinitionPopover` (un placement `auto`, un seul panneau en couche supérieure, que monte `GlossaryTerm` ; le `docked` dessiné en place perd son bouton de fond et ses `z-index`), `GlossaryTerm` (ses histoires `Open` et `French` ouvrent maintenant un popover en couche supérieure : **regarder la capture de ces deux cartes**, le panneau peut sortir de sa cellule), `Segmented` (le remplissage est le `::before` de la piste, positionné par ancre) et `Disclosure` (l'ouverture glisse), plus un passage de `conventions.md`. A5 renomme des props et des histoires sans ajouter de cellule, et ajoute la section « Variant names » de `conventions.md`. Les histoires : `Mobile` → `Small` et `Desktop` → `Medium` (quiz et résultat), `Compact` → `Small` (`Button`, `Segmented`, `ToneToggle`, `ClickPill`), `Frame` → `Call` et `FrameMoods` → `CallMoods` (`DgFace`). Les props : `size` en `xs`/`sm`/`md`/`lg`/`auto` partout, `DotGrid`/`DotLegend` en `medium`, `DgFace` en `framing`, `Tag` en `tone="alert"`. Le contrat écrit de `StatTile` dans `config.json` suit. À reconstruire et valider avant de pousser. A7.10 changera le contrat de `ShareCard` (primaire chez le propriétaire) |
+| B2 | **Le brief S-15 : les primitives de formulaire.** Écrit le 2026-09-29 : `design/DS-EXTENSION-BRIEF-04.md`, avec ses neuf captures dans `design/ds-extension-04/` | Il attend ta relecture, puis ton envoi à Claude Design (D3). Le retour arrive par `design/ds-extension-04-return/` ou par « Send to Claude Code Web ». La promotion dans `core/` devient ensuite un lot A |
+| B3 | **Re-synchroniser après A7.10** (le primaire de `ShareCard` chez le propriétaire) | Avec le prompt B. Attendu avant A7.10 : 79 composants, 244 cellules, 79/79. **Quatre** avertissements sont permanents : « Impact », et `GRID_OVERFLOW` sur `DefinitionPopover`, `QuarterNews` et `GlossaryTerm` (le quatrième depuis A4, accepté par Antoine le 2026-09-30). Deux pièges : le driver ne régénère pas `dist/types/` (lancer `cfg.buildCmd` d'abord, sinon les contrats restent ceux d'avant), et une note est reportée quand l'aperçu n'a pas changé même si le composant a changé (recapturer ceux-là en contrôle). Les deux sont dans `.design-sync/NOTES.md` |
 
 ---
 
@@ -371,7 +384,7 @@ rien de privé dans le dépôt, qui est public. Cela vaut pour les chiffres de
 | # | Action | Prête ? | Détail |
 |---|---|---|---|
 | D2 | **Ouvrir le jeu et le moteur à tout le monde** | Non : il faut les bons à tirer nº7 et nº8 signés, C1 à C15 tranchés, et les liens d'ouverture (C7) construits. **Pour le moteur, en plus : tout le lot A7.3** (le B2B assisté et l'hybride, décidés le 2026-09-29), bon à tirer compris. **Le jeu n'ouvre pas avant le moteur** (C23, 2026-09-30), et sa phrase sur le Digital Fairness Act est remise à jour avant d'ouvrir (section E) | Poser `GAME_ENABLED` et/ou `ENGINE_ENABLED` à `true` dans Vercel (Production), puis **redéployer** (`VERCEL.md` §1.11). Ensuite, la session vérifie la production : pages en 200, sitemap, pied de page, bandeau. Toi, tu demandes l'indexation des nouvelles pages dans Search Console |
-| D3 | **Lancer la design sync** | Oui | C'est la section B, sur ta machine |
+| D3 | **Relire le brief 04 et l'envoyer à Claude Design** | Oui | `design/DS-EXTENSION-BRIEF-04.md` (B2) : les primitives de formulaire, dix-huit questions pour le design. Le relire, puis le déposer dans le projet Claude Design avec les captures de `design/ds-extension-04/`. Le retour se dépose dans `design/ds-extension-04-return/` |
 | D4 | **L'instrument d'audit, phase 1 bis : la mission AB Tasty** | Oui | Voir `AUDIT-PLAN.md` §4. Créer la mission sous `/admin/audit` (profil `b2b-assiste`, sans mandat), et faire partir le jour 1 ce qui est lent (T3, T4). Les T1 se font en libre-service, la définition d'abord. Les T2 se font par système. **Tenir le journal des frictions** dans un fichier local jamais commité dès qu'une friction cite l'entreprise. **Depuis le 2026-09-29 (C6), une colonne de plus par friction : « le moteur le faisait déjà ? »** C'est elle qui dira si l'audit fait doublon avec le moteur public. Critère de sortie : `pending = 0`, exporté. La session corrige les frictions en petites PR, et rien de la phase 2 |
 | D5 | **À côté de l'outil** | Oui | Les cinq à dix entretiens (`AUDIT-PLAN.md` §2). La vérification de ton contrat de travail : elle conditionne la phase 3, et c'est la seule question qui la ferme à elle seule. **Trois clauses à relire** (précisées le 2026-09-29) : la **non-concurrence** (couvre-t-elle un outil vendu à des équipes produit B2B, pendant et après le contrat ?), l'**exclusivité ou l'activité annexe** (une activité commerciale à côté demande-t-elle une autorisation ?) et la **propriété intellectuelle** (un logiciel créé « dans l'exercice de ses fonctions » appartient à l'employeur, CPI art. L113-9, et la clause peut aller plus loin). Si une clause est floue, une consultation d'avocat en droit du travail. Le moteur public et gratuit n'est pas concerné au même titre : rien n'y est vendu |
 | D6 | **La distribution, vague 1** | **Non : rien ne part avant que le moteur et le jeu soient prêts** (C19, 2026-09-29). Rien n'est encore parti. Le Tour n'aura ni Show HN ni r/SaaS | Textes dans `marketing/launch/` et `marketing/campaigns/`. Tu postes sous pseudo, la session fournit et met à jour les textes. Annuaires dans l'ordre de `GROWTH-PLAN.md` 1.6. **Pas de LinkedIn ni de lancement en grande pompe pour l'instant** (C22 : une question de calendrier, pas d'anonymat) |
@@ -434,17 +447,15 @@ Tu reprends Tour de Growth en autonomie sur le lot A1 de CHANTIERS.md.
 Réponds-moi en français, court : ce qui est livré, ce qui est vérifié et comment, ce qui reste.
 ```
 
-### Prompt B — la design sync (Claude Code sur ta machine)
+### Prompt B — la design sync (session cloud ou locale)
 
 ```text
-Tu tournes sur ma machine, dans mon clone de tourdegrowth. Mission : la section B de CHANTIERS.md.
+Mission : la section B de CHANTIERS.md, sur une branche (jamais main).
 
-1. git switch main, git pull, npm ci.
-2. Lis .design-sync/NOTES.md en entier avant toute commande : ce dépôt est une app, pas un paquet de composants, et trois réglages non évidents en découlent.
-3. B1 — Lance /design-sync pour mettre à jour le projet Claude Design existant (23b9671c-a55b-452e-aa41-39906ee71ba8), sans en créer un nouveau. Recompte les composants, les cellules et les aperçus rendus : au 2026-09-29, c'était 77, 244 et 77/77. Trois avertissements sont attendus (« Impact », GRID_OVERFLOW sur DefinitionPopover et QuarterNews) ; n'applique pas le cardMode "single" suggéré. Tout autre avertissement ou erreur : arrête-toi et explique-moi avant de corriger.
-4. Si le bundle ne se construit pas, corrige sur une branche (jamais sur main) et documente la cause dans .design-sync/NOTES.md.
-5. B2 — Écris design/DS-EXTENSION-BRIEF-04.md sur les primitives de formulaire (S-15), sur la forme des briefs 01 et 03 : ce qui existe en deux copies (moteur et audit), ce qu'on attend (des primitives dans core/, leurs états, les deux langues, la version nuit), les contraintes (tokens, contraste AA, cibles de 44 px). Montre-le-moi avant de l'envoyer à Claude Design.
-6. À la fin, sur une branche : mets à jour la section B de CHANTIERS.md, la ligne « Design system → Claude Design » de CLAUDE.md, et une entrée de JOURNAL.md. Ouvre la PR ; merge-la quand elle est verte.
+1. Lis .design-sync/NOTES.md en entier avant toute commande : ce dépôt est une app, pas un paquet de composants. Les sections « The emitted contracts come from dist/types », « The four standing validate warnings », « Synced » et « Re-sync risks » disent ce qui a coûté du temps.
+2. B3 — Lance /design-sync pour mettre à jour le projet Claude Design existant (23b9671c-a55b-452e-aa41-39906ee71ba8), sans en créer un nouveau. Lance cfg.buildCmd avant le driver. Recompte les composants, les cellules et les aperçus rendus : au 2026-09-30, c'était 79, 244 et 79/79. Quatre avertissements sont attendus (« Impact », GRID_OVERFLOW sur DefinitionPopover, QuarterNews et GlossaryTerm) ; n'applique pas le cardMode "single" suggéré. Tout autre avertissement ou erreur : arrête-toi et explique-moi avant de corriger.
+3. Note chaque cellule que le driver met en attente, et recapture en contrôle les composants dont le code a changé sans que leur aperçu change. Une cellule qui rend proprement mais dit quelque chose de faux est un défaut : corrige l'aperçu depuis les sources du produit, jamais de mémoire.
+4. À la fin : mets à jour la section B de CHANTIERS.md, la ligne « Design system → Claude Design » de CLAUDE.md, « Synced » dans NOTES.md, et une entrée de JOURNAL.md. Ouvre la PR ; merge-la quand elle est verte.
 
 Réponds-moi en français.
 ```

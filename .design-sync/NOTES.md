@@ -132,6 +132,21 @@ still carrying `verdict` (removed in extension 03), `PriorityMove` missing
 Check the build log for `[DTS] parsed N .d.ts files from .../dist/types` — if
 that path is not `dist/types`, the contracts are wrong.
 
+**The driver does not run `cfg.buildCmd`.** `resync.mjs` reads whatever
+`dist/types/` holds; only `package-build.mjs` runs the build command. Measured
+on 2026-09-30: after merging A5, the render was current (it is built from
+`src/`) while the contracts still said `Button compact`, `Segmented size="md" |
+"compact"` and `ClickPill size="compact"`, because `dist/types/` dated from the
+previous merge. So before any driver run that follows a source change, run the
+build command by hand:
+
+```sh
+npx tsc -p .design-sync/tsconfig.dts.json && node .design-sync/relativize-dts.mjs && node .design-sync/check-inventory.mjs
+```
+
+and check it: `grep -rl 'compact?: boolean' ds-bundle/components/` (or any
+prop the change retired) must return nothing after the rebuild.
+
 `tsconfig.dts.json`'s `include` is narrowed to `../src/components/**/*` on
 purpose. Widening it reaches `src/proxy.ts` and `lib/i18n/meta.ts`, which
 import Next, which pulls in `@vercel/og`'s `declare module 'react'` — and a
@@ -184,9 +199,9 @@ in a browser: a `ReferenceError` while the bundle evaluates, before
 listed FIRST in `cfg.extraEntries` (ES modules evaluate in import order). The
 file's header says the same; do not reorder the list.
 
-## The three standing validate warnings
+## The four standing validate warnings
 
-All three are non-blocking and all are expected:
+All four are non-blocking and all are expected:
 
 - `[FONT_MISSING] "Impact"` — the system-font fallback above.
 - `[GRID_OVERFLOW] DefinitionPopover (Docked)` — the check is a **property**
@@ -206,10 +221,21 @@ All three are non-blocking and all are expected:
   component takes its documented fallback (`open`, a fixed layer), and a
   transformed, clipped 760×720 frame contains it. Checked in the screenshot
   on 2026-09-28: three stories, each inside its frame, none over another.
+- `[GRID_OVERFLOW] GlossaryTerm (Open)` — since A4 (2026-09-29) the term
+  opens ONE `DefinitionPopover`, `placement="auto"`, in the top layer, and a
+  page shows one panel at a time: opening a second closes the first. In the
+  column card that meant `French` showed closed although its code opened it,
+  and `Open`'s panel hung under its cell. Decided by Antoine on 2026-09-30
+  (accept, and make the card honest): `French` now renders its trigger closed
+  on purpose (the French definition is `DefinitionPopover`'s `French`), and
+  `Open` keeps 200px of room under its paragraph so the panel lands inside
+  its own cell. Checked in the screenshot. The property test still flags it,
+  and `cardMode: "single"` stays refused for the same reason as the others.
 
 Wide components get `cardMode: "column"` in `cfg.overrides` (one full-width
-card per story) — 28 of them now: most of `game`, the two charts, `Button`
-(its `States` grid) and `GlossaryTerm`. Add one when validate prints
+card per story) — 29 of them now: most of `game` (`ActionCard` joined on
+2026-09-29, once its cards took their real 294px width), the two charts,
+`Button` (its `States` grid) and `GlossaryTerm`. Add one when validate prints
 `[GRID_OVERFLOW] … stories render wider than their grid cells`; that warning
 is always a real crop. `QuarterReport` and `Hand` were not flagged but still
 need it: squeezed into a third-width cell, their desktop layout (chosen by a
@@ -217,13 +243,38 @@ viewport media query, not the cell) overlapped its own figure labels.
 
 ## Previews are all repo-owned
 
-All 77 live in `.design-sync/previews/` (244 story cells) — none are
-generated. Copy is the product's own, pulled from `dictionary.ts`,
-`copy-library.ts`, `how-it-works.ts` and, for the game, `content/game/*.ts`
-rather than invented, so the cards read as the real product. The game's
-numbers follow the real level (`lib/game/levels/retention.ts`: 100,000
-subscribers, 6.0% churn, targets 5.6/5.1/4.6/4.0%, each card's trust and
-radar effects) and are formatted the way `lib/game/format.ts` formats them.
+All 77 live in `.design-sync/previews/` — none are generated (cell count: see
+"Synced"). Copy is the product's own and numbers are the model's own — **and
+that was not true until the 2026-09-29 re-sync**: this paragraph already said
+so, while 64 of 245 cells carried retired copy, mockup copy, hand-typed game
+numbers the model cannot reach, or a prop passed at its default. Grading found
+them; reading the sources had not (see "Found in the 2026-09-29 re-sync").
+
+**How the props are produced now — the method, not the result, is what keeps
+this true.** Strings come from the product modules (`dictionary.ts`,
+`copy-library.ts`, `how-it-works.ts`, `glossary-terms.ts`, `next-moves.ts`,
+`free-context.ts`, `content/game/*.ts`), imported or copied verbatim. Numbers
+and whole prop objects come from **running the product's own functions** and
+pasting their output:
+- game: a reference year played through the reducer
+  (`lib/game/__tests__/paths.ts`: `PATH_A`, `PATH_C`, `PATH_M`, fired years…),
+  turned into props by the island's builders
+  (`app/[locale]/game/retention/island-view.ts`: `dashboardProps`, `handView`,
+  `journalEntries`, `newsContent`, `reportContent`, `decemberContent`,
+  `bossMessage`, `moodNow`);
+- result: `computeScore`, `resolveBottleneck`, `buildQuickVerdict`,
+  `resolveNextMove` on a board the quiz can produce (reachable pillar scores
+  are 0/2/5/7/9/11/13/16/20 — the `/r/sample` board 18·12·8·16·20 is fixed
+  display data and is NOT one; the result previews use 20·13·9·16·16 = 74);
+- engine: `kpiRows` and the scenario view.
+Run them with `node --experimental-strip-types --import ./register.mjs x.mts`,
+where `register.mjs` installs a resolve hook (`@/` → `src/`, add `.ts`, stub
+`.css`) — or bundle a scratch entry with `.ds-sync/node_modules/.bin/esbuild
+--bundle --platform=node`. Paste the JSON as inline JSX props (contextual
+typing keeps the unions) and name the path or board in the story's doc
+comment. Keep scratch scripts in a per-batch folder: parallel agents share the
+scratchpad.
+
 French strings carry U+00A0 before `: ; ! ? % »`, after `«`, in digit groups
 and before units. Check it in Python (`re` on each `"…"` literal, looking for
 `[0-9A-Za-zé] [:;!?%»]`, `« ` and `\d \d{3}`), not with `grep -P`: in byte
@@ -243,6 +294,23 @@ data table, `GameJournal`'s entries, `PatternCatalogue`'s turned-down and
 unseen groups), and **hover/press/animation** (`Button`'s `HoverAndPress`,
 `VideoCall`'s typing and clock, the December unblur and stamp).
 
+**What the per-story capture cannot see.** `package-capture.mjs` shoots each
+story alone at 900×700 (`fullPage: false`), and the review sheet caps a cell at
+520px. So:
+- `SpaceBand`'s wide form (the legs' names) needs about 950px — a container
+  query at 900px on `.inner` plus its 24px side padding. Its Tour, Engine, Game
+  and NotOpenYet cells are clipped in the per-story shots and whole in the
+  1200px render-check shot (`_screenshots/brand__SpaceBand.png`), which is
+  what they are graded on. Narrowing the wrapper would switch them to the
+  narrow form, which `Narrow` already shows. `SiteHeader` WithBand,
+  `ContentHeader` InTheEngine and `ProsePage` NightIntro show the band in its
+  narrow form at card width, and say so.
+- Tall cells lose their bottom (`ProsePage` Page and NightIntro, all three
+  `QuarterReport` cells, `PatternCatalogue` ThreeGroups, `PhoneMock` Dark):
+  graded from the render-check shots or a scratch full-page shot, never from
+  the cut sheet alone.
+- `Hand` shows 6 of its cards for the same reason; its doc says which.
+
 `ShareCard.tsx` imports `share-sample.png`, a real 1200×630 render of
 `/r/sample` captured from a production build; esbuild inlines it as a data URI
 via the same `.png` loader the bundler uses. **Do not** reuse the OG captures
@@ -258,17 +326,35 @@ doc comment says why the layout uses an auto margin rather than
 ## Synced
 
 Project `23b9671c-a55b-452e-aa41-39906ee71ba8` ("Tour de Growth"), pinned as
-`projectId` in `config.json`. Last upload (2026-09-11): 182 files, 34
-components, 116 story cells.
+`projectId` in `config.json`. **Last upload: 2026-09-30**, from a claude.ai/code
+cloud session, after A1, A2, A4 and A5 — 79 components, **244 story cells**, all
+graded good; 408 files (316 component files, 79 compiled previews, `_vendor/`,
+`fonts/`, bundle, CSS, README, the sentinel and the anchor), no delete.
+`report_validate`: 79 total, 0 bad, 0 thin, 0 identical; anchor `bundleSha12`
+`f3b4bf9eb3c5`. The next re-sync skips every component whose sources did not
+change. Earlier uploads: 2026-09-29 (77 components, 238 cells, anchor
+`17cca5e0909b`), 2026-09-11 (34 components, 116 cells).
 
-**Not uploaded yet:** the DS v3 inputs (77 components, 244 story cells,
-~360 files, the night world, `viz`, `game`, the prose family). The bundle
-builds and validates clean from this directory; the upload is Antoine's next
-`/design-sync` run — sessions do not upload.
+The cell count is what the previews export, not a sum of what each session
+announced: A1 and A2 each counted from 244 (A1: 245, A2: 251), but the
+2026-09-29 grading had already removed cells that duplicated a neighbour or
+lied, bringing 245 down to 238. 238 + DotGrid's 3 + DotLegend's 3 = 244.
 
-The authorization that blocked the first attempt is obtained by running
-`/design-login` once from an interactive Claude Code session on this machine;
-headless runs then reuse it.
+**Sessions do upload now.** The `DesignSync` tool answered from a cloud session
+with the claude.ai login — no `/design-login`, no local machine. The
+authorization that blocked the first attempt (2026-09-11) came from an
+interactive session on Antoine's machine; it is no longer a prerequisite. The
+upload asks its own approval once per run (`finalize_plan`).
+
+The upload path for a pinned project is the skill's **atomic** one: re-fetch
+`_ds_sync.json` right before `finalize_plan` (a moved `bundleSha12` means a
+concurrent sync), sentinel `_ds_needs_recompile` first, content in chunks
+(`components/` in two halves of 154, then `_preview/` + root files, then
+`_vendor/` alone — `react.js` is 1.1 MB —, then `fonts/`), `upload.deletePaths`
+verbatim, sentinel again, `_ds_sync.json` last, `list_files` to confirm. On
+2026-09-30 two chunks of 200 (root files, `_preview/`, `_vendor/` and the first
+half of `components/`, then the rest), `styles.css`, then `fonts/` went through
+without a size error.
 
 ## A fresh clone needs two installs before anything runs
 
@@ -281,6 +367,12 @@ Playwright's browser is **not** in the repo either. `package-validate.mjs` and
 which wants chromium build **1194**. `npx playwright install chromium` from the
 repo root gets the matching one. Nothing was cached on this machine on the
 first run — do not assume a sandbox has it.
+
+**In a claude.ai/code cloud session** (2026-09-29) both are there: the
+`/design-sync` skill ships the converter in its own base directory (stage it
+into `.ds-sync/` as usual), and Chromium build 1194 is preinstalled under
+`/opt/pw-browsers` (`PLAYWRIGHT_BROWSERS_PATH`) — do not run `playwright
+install`.
 
 ## `relativize-dts.mjs` — without it, half the contracts are useless
 
@@ -382,7 +474,60 @@ contract mismatch — this is what caught an undefined month in `ChartFrame`.
   constants. Same for copy: a catalogue `tell` was paraphrased until checked
   against `retention.ts`.
 
+### Found in the 2026-09-29 re-sync, all by grading
+
+64 of 245 cells, in 43 components, rendered cleanly and said something false.
+Four agents graded them from the sheets, each finding was checked against the
+source before anything was changed, and every one was fixed in the preview —
+except the first, which was the product's:
+- **A component bug.** `EventClipping`, and the CEO quote boxes of
+  `QuarterNews` and `QuarterReport`, read `--radius-tag`, which design I (#177)
+  turned into a 999px pill: the clipping became an ellipse spilling its text
+  onto the night. Fixed in the components (PR #192), with an e2e guard that
+  measures multi-line pills on screen.
+- **A prop passed at its default** makes two identical cells: `total={20}` in
+  `InsightCard` and `StampedPillar` (`WithTotal` removed), the same trap as
+  `PillarChip` above.
+- **Copy from the mockups, or retired from `src/`**: Bottleneck's "Solid
+  engine, one flat tyre", ProseSection's "three per pillar", PriorityMove's
+  upgrade copy, the game's "your two actions", a "Leave the call" hint.
+- **A plausible number is not the model's number**: a radar at 81 (the
+  inspection fires at its threshold and resets it), a €450,000 fine (the range
+  is 97,500–110,000), a miss that beats its target, a June firing the model
+  cannot produce, moods the CEO never has on that call.
+- **Doc comments that promise more than the cell shows**: "the only place"
+  when there are four, "mid-sentence" for a last word, a ✕ that needs
+  `onClose`, "five pillars" over three chips.
+- **Cells identical to their neighbour** (EN/FR wordmark, a link that differs
+  only by `href`): removed rather than kept.
+- **French typography**: three plain spaces before `?` or `:`.
+
 ## Re-sync risks
+
+- **Merging `main` in the middle of a re-sync.** A5 renamed variant props and
+  stories (`mobile`/`desktop`/`compact` → `sm`/`md`, `Frame` → `Call`,
+  `tone="red"` → `alert`, `DotGrid size` → `medium`, `DgFace size` →
+  `framing`) in the same previews this sync had corrected: eleven conflicted.
+  Keep the product-true content and apply the renames — and then grep **every**
+  preview for the retired values, because a cleanly auto-merged file can still
+  carry an old value on a line only this branch added (it happened in
+  `StatTile`, `size="responsive"`, and `QuarterNews`, `DgFace size="avatar"`).
+  The table of retired names is in `conventions.md`, "Variant names". An old
+  value renders nothing wrong-looking: an unknown `size` falls back to the
+  default, silently.
+- **A component changed, its preview did not: the grade is carried.** Grades
+  follow the preview sources, not the component's. After a merge, list the
+  components whose `src/components/` files changed (`git diff --name-only`)
+  and spot-check the ones the driver did not queue:
+  `package-capture.mjs --components A,B --spot-check-components A,B`. On
+  2026-09-30 that is how `GlossaryTerm`'s one-panel-at-a-time card was seen.
+
+- **Previews drift from the product silently.** A change to the game model,
+  the copy library or a component's defaults does not touch
+  `.design-sync/previews/`, and nothing fails: the cell still renders. When
+  those sources change, regenerate the affected props with the method in
+  "Previews are all repo-owned" and re-grade — every preview's doc comment
+  names the path or board it was built from.
 
 - **`cfg.buildCmd` is two commands now**, and the second one is load-bearing.
   Simplifying it back to a bare `tsc` degrades a dozen contracts silently — no
@@ -400,7 +545,7 @@ contract mismatch — this is what caught an undefined month in `ChartFrame`.
   Executable doesn't exist`); re-run `npx playwright install chromium`.
 - **The grades in `.design-sync/.cache/` are not committed.** What makes
   verification durable is the uploaded `_ds_sync.json`. If that anchor is ever
-  lost or the project is recreated, all 77 components re-verify from scratch —
+  lost or the project is recreated, all 79 components re-verify from scratch —
   which is a few hours of reading sheets, not minutes.
 - **The `--entry ./dist/index.js` trick breaks the day the repo gains a real
   `dist/`.** If a build is ever added, drop the flag and set `cfg.buildCmd`.
