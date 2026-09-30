@@ -5992,3 +5992,28 @@ C17, délégué à la session le 2026-09-29 : **aucune porte de test dans le cod
 - **Sans l'émulateur**, les 12 tests sautent avec leur raison, comme le nouveau test de 404, et `global-setup.ts` n'écrit rien.
 - **La suite complète avec l'émulateur** : 639 specs, 634 passées, 5 ignorées par construction, aucun échec. Aucune spec existante n'a changé de comportement.
 - `relecteur-securite` est passé sur le diff. Ses trois constats sont traités, et ses deux angles morts aussi (le SHA n'est pas recoupé contre Google, mais un faux hash échoue fermé ; les champs du Deep dive sont couverts ci-dessus).
+
+**En production** : PR [#217](https://github.com/ScratchMe/tourdegrowth/pull/217), mergée le 2026-09-30 à 12 h 22 UTC (squash `47f8e75`, 18 fichiers, identique à la tête de la PR). **Le premier passage de la CI avec l'émulateur**, lu dans le log du job : 650 specs passées et 5 ignorées, les cinq « jeu fermé » par construction, donc les 12 de `result-real.spec.ts` et le test de 404 ont tourné, et le processus `java` de l'émulateur est arrêté au nettoyage. Déploiement de production Vercel `READY` sur ce commit, lu par l'API : rien ne change sur le site, seuls la CI, les e2e et un commentaire de test bougent.
+
+## A7.10 : chez le propriétaire, « Partager » est le primaire (2026-09-30)
+
+C16, tranché par Antoine le 2026-09-29, captures de la vue propriétaire à l'appui. Sur son propre résultat, le propriétaire a **« Partager ce résultat » comme seul bouton plein**. « Refaire le Tour » passe secondaire. Le visiteur ne change pas : son primaire reste « Fais ton propre Tour → », et le bouton de la carte de partage reste secondaire chez lui.
+
+**Ce qui change** :
+- **`ShareCard`** prend `shareVariant` (`secondary` par défaut). C'est la page qui le choisit, d'après `isOwner`, jamais le défaut. Aucune copie neuve : les libellés existaient.
+- **`ResultView`** : « Refaire le Tour » passe en `secondary`, et la racine porte `data-owner` chez le propriétaire.
+- **Sur mobile, chez le propriétaire, la carte de partage passe au-dessus de la rangée de boutons** (`.layout[data-owner]`). C'est ce qui avait fait annuler le premier essai : un primaire sous un secondaire. Sur desktop, rien ne bouge, puisque les deux sont dans des colonnes différentes.
+- **Le coût, mesuré et épinglé** : le lecteur d'écran du propriétaire entend la carte de partage en dernier, mais la voit avant les boutons. Son pire écart d'ordre de lecture passe de 2 à 3, et de 3 à 4 avec l'encart du jeu. `slotShare` est le pire dans les quatre cas. `result-reading-order.test.ts` lit maintenant l'ordre propriétaire dans la feuille, et vérifie aussi que, sur desktop, chaque colonne reste dans l'ordre de la source. Remonter la carte dans la source ferait payer chaque visiteur, le lecteur de la boucle de croissance. Les chiffres du visiteur ne bougent pas.
+- **Le contrat de design** : `ShareCard.prompt.md` (retour 03), `.design-sync/conventions.md` et l'aperçu disent « secondaire pour un visiteur, primaire pour le propriétaire ». L'aperçu gagne une histoire `Owner`, d'où 245 cellules attendues à la prochaine synchro (B3).
+- **Le commentaire de la rangée de boutons** raconte la décision au lieu de l'essai annulé.
+
+**La mesure** : l'événement de partage existe déjà. **Le changement date du merge de cette PR, le 2026-09-30** : c'est la date à partir de laquelle lire l'avant et l'après dans `/admin/stats`.
+
+**Vérifié** : un vrai `/r/<id>` sur l'émulateur (A7.11), dans `result-real.spec.ts`.
+- **Le propriétaire, en FR et en EN, à 1 280 et 390 px** :
+  - le seul bouton plein visible est « Partager », et « Refaire le Tour » est en contour ;
+  - à 390 px, la carte de partage est au-dessus de la rangée ;
+  - le décalage de mise en page qui suit le montage reste sous 0,1, le seuil « bon » des Web Vitals. La bascule se fait sous le premier écran d'un téléphone.
+- **Le visiteur** : son Tour reste le seul primaire, et le partage vient après, à 390 px.
+- **Non-vacuité** : remettre l'ancien primaire et retirer l'ordre propriétaire fait rougir les quatre tests propriétaire, et eux seuls, ainsi que trois variantes du test d'ordre de lecture.
+- **À l'écran**, en FR et en EN, à 1 280 et 390 px.

@@ -7,8 +7,10 @@ import shareSample from "./share-sample.png";
  * is the product's most-seen surface, so seeing it on the page is the point
  * of the component.
  *
- * Its button is NEVER primary: the image sells the share, and the primary
- * button on that screen belongs to the CTA row above.
+ * Its button is secondary for a visitor: the primary on their screen
+ * belongs to the CTA row above ("Take your own Tour →"). On the owner's own
+ * result it is the primary (`shareVariant="primary"`, C16, 2026-09-29), and
+ * the card moves above the CTA row on a phone.
  *
  * The PNG below is the real 1200×630 render of /r/sample (74/100, retention
  * named), inlined by esbuild. Every string is `ResultView`'s own: the alt is
@@ -21,6 +23,22 @@ import shareSample from "./share-sample.png";
 export const Medium = () => (
   <div style={{ maxWidth: 420 }}>
     <ShareCard
+      src={shareSample}
+      alt="Share image: 74/100, with Retention named as the stage holding this growth back."
+      caption="What a shared link shows"
+      shareLabel="Share this result"
+      saveLabel="Save image"
+      saveHref={shareSample}
+      saveFileName="tour-de-growth-74.png"
+    />
+  </div>
+);
+
+/** On the owner's own result: Share is the screen's one primary (C16). */
+export const Owner = () => (
+  <div style={{ maxWidth: 420 }}>
+    <ShareCard
+      shareVariant="primary"
       src={shareSample}
       alt="Share image: 74/100, with Retention named as the stage holding this growth back."
       caption="What a shared link shows"

@@ -1,3 +1,5 @@
+import type { Page } from "@playwright/test";
+import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { getSubmissionById } from "@/lib/submissions/repository";
 import { expect, seedOwnedResult, test } from "./helpers";
 import { EMULATOR_HOST, REAL_DEEP_DIVE, REAL_RESULTS, SENTINEL, SKIP_EMULATOR_REASON } from "./real-results";
@@ -167,5 +169,78 @@ test.describe("the other two states of the bottleneck block", () => {
       await expect(block).not.toContainText(stage);
     }
     await expect(page.getByTestId("game-entry")).toHaveCount(0);
+  });
+});
+
+/** Every visible filled button — the Button recipe's `primary` class, whatever the element. */
+function visiblePrimaries(page: Page) {
+  return page.locator('a[class*="__primary"]:visible, button[class*="__primary"]:visible');
+}
+
+/** Cumulative layout shift since navigation, as the browser counts it (`layout-shift` entries, no input). */
+async function trackShifts(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    const w = window as unknown as { __cls: number };
+    w.__cls = 0;
+    new PerformanceObserver((list) => {
+      for (const entry of list.getEntries() as unknown as { value: number; hadRecentInput: boolean }[]) {
+        if (!entry.hadRecentInput) w.__cls += entry.value;
+      }
+    }).observe({ type: "layout-shift", buffered: true });
+  });
+}
+
+/**
+ * C16, decided 2026-09-29 (CHANTIERS.md A7.10): on the owner's own result,
+ * « Partager ce résultat » is the one primary and « Refaire le Tour » steps
+ * down to secondary. On a phone the share block comes before the CTA row, so
+ * the primary is never under a secondary. The visitor does not change.
+ *
+ * `isOwner` is only known after mount, so the owner's page first paints as
+ * the visitor's: the shift that follows is measured, and must stay under
+ * 0.1, the "good" CLS threshold — it happens ~1700px down on a phone, below
+ * the first screen, where the browser does not count it.
+ */
+test.describe("the owner's primary is sharing (C16)", () => {
+  for (const locale of ["en", "fr"] as const) {
+    for (const width of [1280, 390]) {
+      test(`${locale} at ${width}px: sharing is the one visible primary, retaking is secondary`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 844 });
+        await page.goto(`/r/${clear.id}?lang=${locale}`);
+        await seedOwnedResult(page, clear.id, clear.total, clear.answers);
+        await trackShifts(page);
+        await page.reload();
+        const retake = page.getByTestId("take-again-cta");
+        await expect(retake).toBeVisible();
+        await expect(retake).toHaveClass(/__secondary/);
+        await expect(retake).toHaveText(tc(UI_STRINGS.result.ctaAgain, locale));
+
+        const primaries = visiblePrimaries(page);
+        await expect(primaries).toHaveCount(1);
+        await expect(primaries.first()).toHaveAttribute("data-testid", "share-button");
+        await expect(primaries.first()).toHaveText(tc(UI_STRINGS.result.ctaShareResult, locale));
+
+        const share = (await page.getByTestId("share-card").boundingBox())!;
+        const cta = (await retake.boundingBox())!;
+        if (width === 390) expect(share.y, "on a phone the share block comes first").toBeLessThan(cta.y);
+
+        const cls = await page.evaluate(() => (window as unknown as { __cls: number }).__cls);
+        expect(cls, "layout shift when the owner's view replaces the visitor's").toBeLessThan(0.1);
+      });
+    }
+  }
+
+  test("a visitor keeps their own Tour as the primary, with sharing secondary and after it on a phone", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`/r/${clear.id}?lang=en`);
+    const own = page.getByTestId("own-tour-cta");
+    await expect(own).toBeVisible();
+    const primaries = visiblePrimaries(page);
+    await expect(primaries).toHaveCount(1);
+    await expect(primaries.first()).toHaveAttribute("data-testid", "own-tour-cta");
+    await expect(page.getByTestId("share-button")).toHaveClass(/__secondary/);
+    const share = (await page.getByTestId("share-card").boundingBox())!;
+    const cta = (await own.boundingBox())!;
+    expect(share.y).toBeGreaterThan(cta.y);
   });
 });

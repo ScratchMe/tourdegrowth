@@ -11,6 +11,12 @@ export interface ShareCardProps extends HTMLAttributes<HTMLDivElement> {
   caption?: string;
   /** Already-translated button label. */
   shareLabel: string;
+  /**
+   * `secondary` for a visitor, whose primary is "Take your own Tour →";
+   * `primary` on the owner's own result, where sharing is the one thing left
+   * to do (C16, 2026-09-29). The page chooses — never the default.
+   */
+  shareVariant?: "secondary" | "primary";
   /** Test id for the share control itself — the card's own `data-testid` lands on the frame. */
   shareTestId?: string;
   /** Already-translated link label. */
@@ -36,9 +42,11 @@ export interface ShareCardProps extends HTMLAttributes<HTMLDivElement> {
  *
  * Sunken paper, because this is an artefact *of* the result rather than a
  * surface of it — the one raised card on this screen is already spent on the
- * score. Share is a secondary Button and never a primary: the primary here
- * is "Take your own Tour →". No platform icons (the brand ships no icon
- * files) and no copy-link field.
+ * score. Share is a secondary Button for a visitor, whose primary is "Take
+ * your own Tour →", and the primary on the owner's own result, where "Take
+ * the Tour again" steps down to secondary (C16, 2026-09-29): one primary per
+ * screen either way. No platform icons (the brand ships no icon files) and
+ * no copy-link field.
  *
  * The image is rendered server-side by Satori in the author's language and
  * tone. This component never re-renders it and never localises it for the
@@ -49,6 +57,7 @@ export function ShareCard({
   alt,
   caption,
   shareLabel,
+  shareVariant = "secondary",
   shareTestId,
   saveLabel,
   onShare,
@@ -85,7 +94,7 @@ export function ShareCard({
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img className={styles.image} src={src} alt={alt} width={1200} height={630} loading="lazy" />
       <div className={styles.actions}>
-        <Button variant="secondary" onClick={onShare} aria-live="polite" data-testid={shareTestId}>
+        <Button variant={shareVariant} onClick={onShare} aria-live="polite" data-testid={shareTestId}>
           {shareLabel}
         </Button>
         <a className={styles.save} href={saveHref} download={saveFileName ?? ""}>
