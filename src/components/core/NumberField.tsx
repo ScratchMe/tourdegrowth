@@ -16,9 +16,17 @@ export interface NumberFieldProps {
   locale: "en" | "fr";
   /** A count of people or things: a decimal is not a readable value then. */
   integer?: boolean;
-  /** A sign that comes first, inside the box: "€", "£", "$" in English. The figure starts against it. */
+  /**
+   * A sign that comes first, inside the box: "€", "£" in English. The figure
+   * starts against it. The string carries its own space when the language
+   * writes one ("CHF\u00a0"): the box adds none (C28, 2026-09-30).
+   */
   prefix?: string;
-  /** A unit that follows, inside the box: "€" in French, "%" (" %" with its no-break space in French). */
+  /**
+   * A unit that follows, inside the box, with its own space: "\u00a0€" and
+   * "\u00a0%" in French, "%" in English, "\u00a0days". The box adds none, so
+   * "€500", "140%" and « 26 000 € » read as the rest of the product writes them.
+   */
   suffix?: string;
   /** The unit as a word for screen readers ("euros", "percent"); the visible sign is hidden from them. */
   unitName?: string;

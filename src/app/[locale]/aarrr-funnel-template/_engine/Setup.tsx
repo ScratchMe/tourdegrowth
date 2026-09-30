@@ -207,6 +207,7 @@ export function Setup({
       <TextField
         id={`${id}-company`}
         label={s.companyLabel}
+        optional={strings.workbench.optional}
         hint={s.companyHint}
         value={company}
         onChange={setCompany}

@@ -21,14 +21,14 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
-| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.c et A7.3.d après C25, A7.4 après A7.3, et A7.12.c à l'ouverture ; A10 (S-15) dans l'ordre a → d |
-| **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30, après A7.10 et A10** (B3 : 88 composants, 292 cellules, 88 aperçus sur 88 rendus). Rien à lancer tant qu'un composant, ou une copie qu'un aperçu reprend, ne change pas |
-| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23, C24, C26 et C27 tranchées le 2026-09-30 (C26 et C27 livrées le même jour). Restent **C25**, la validation de la spécification de A7.3 (`ENGINE.md` §18), et C28 et C29, nées de la design sync B3 (l'espace d'une unité, le mot « facultatif ») |
-| **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, tout A7.3 |
+| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.c et A7.3.d après C25, A7.4 après A7.3, et A7.12.c à l'ouverture. A10 (S-15) et A11 livrés le 2026-09-30 |
+| **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30, après A7.10, A10 et A11** (B3, puis la re-synchro d'A11 le soir même : 88 composants, 292 cellules, 88 aperçus sur 88 rendus). Rien à lancer tant qu'un composant, ou une copie qu'un aperçu reprend, ne change pas |
+| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23, C24 et C26 à C29 tranchées le 2026-09-30, C26 à C29 livrées le même jour. Reste **C25**, la validation de la spécification de A7.3 (`ENGINE.md` §18), avec son propre prompt |
+| **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite, D11 (le redéploiement) le 2026-10-01 après 14 h UTC. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, tout A7.3 |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
 
 **L'ordre conseillé** : C25 d'abord (Q3, Q1 et Q2, puis les autres en bloc),
-qui débloque A7.3.c, puis D. C28 et C29 quand tu veux : rien ne les attend.
+qui débloque A7.3.c, puis D. Rien d'autre n'attend dans la section C.
 
 **Deux sessions en parallèle** écrivent toutes deux à la fin de `JOURNAL.md`
 et dans ce fichier. La seconde à merger fusionne `main` dans sa branche avant
@@ -172,16 +172,17 @@ portage.
 ### A11 — Ce que la design sync B3 du 2026-09-30 a trouvé dans le produit
 
 Vus en reprenant les aperçus des primitives sur leurs vrais appels. Le
-défaut du trait de `Checkbox` est corrigé dans la PR de la synchro, avec sa
-garde ; les quatre suivants sont petits et peuvent partir ensemble. Les deux
-qui demandent un avis de design sont en C28 et C29.
+défaut du trait de `Checkbox` est corrigé dans la PR de la synchro (#226), avec
+sa garde. **Les quatre suivants sont traités le soir même** ([#227](https://github.com/ScratchMe/tourdegrowth/pull/227)), avec C28
+et C29 qu'Antoine a tranchées entre-temps, et la re-synchro de Claude Design
+qui les suit.
 
-| # | Quoi | Où, et comment le voir |
+| # | Quoi | État |
 |---|---|---|
-| A11.1 | **« 1 days » / « 1 jours »** : l'estimation d'une durée prend un pluriel fixe | `MetricSheet.tsx:41` : `wordUnit(view.strings.workbench.days)` pour tout chiffre `duration` (`act.ttv`). Le moteur d'exemple l'estime de 1 à 3 : la borne basse lit « 1 jours ». L'unité suit le nombre (`Intl.PluralRules`), et un test sur 1 et 2 dans les deux langues |
-| A11.2 | **Un jour qui n'existe pas n'a pas de bord rouge** | `DateField` en précision jour : « Ce jour n'existe pas. » s'affiche, mais `DayField` ne donne le bord d'état qu'aux parties vides ; le 31 février, les trois boîtes sont choisies et aucune ne rougit. Avec `error`, les trois passent en invalide (le bord de 3 px que `Field` promet) |
-| A11.3 | **Le joint d'une `FieldRow` s'écarte de sa boîte** | `.rowGrid` dimensionne la première colonne sur le champ entier, libellé et indice compris : quand l'un est plus large que la boîte, « sur » se pose contre le texte, loin du chiffre (le CAC : « 21 000 € ……… sur 42 »). Le commentaire du composant promet le joint contre la boîte. Voir l'aperçu `FieldRow` `AmountOutOfACount` |
-| A11.4 | **Une espace ordinaire entre un nombre et son mot** dans la copie du moteur | `engine-copy.ts` : `tooLong` (« {n} caractères au plus. »), `lastVisit` (« il y a {n} jours ») et `deckUi.what` (« Quoi (120 caractères) ») ; `windowDays` a déjà l'insécable. `copy-typography.test.ts` ne le voit pas : elle cherche la ponctuation haute et les groupes de chiffres. Corriger, et étendre la garde à « chiffre ou `{n}`, espace, mot » |
+| A11.1 | **« 1 days » / « 1 jours »** : l'estimation d'une durée prenait un pluriel fixe | **Livré le 2026-09-30.** `wordUnit` choisit le mot par `Intl.PluralRules` (nouvelle clé `workbench.day`, « à relire ») : « 1 jour », « 1,5 jour », « 2 jours » ; « 1 day », « 0 days ». Chaque borne de l'estimation prend l'unité de son propre chiffre. Test sur 0, 1, 1,5 et 2 dans les deux langues (`sources.test.ts`) |
+| A11.2 | **Un jour qui n'existe pas n'avait pas de bord rouge** | **Livré le 2026-09-30.** `DayField` : quand les trois parties sont choisies et que la date est refusée, les trois boîtes passent en invalide (bord de 3 px, `aria-invalid`) ; une date incomplète ne marque que ses parties vides. Test : le 31 février donne trois `aria-invalid` (`form-primitives.test.ts`) |
+| A11.3 | **Le joint d'une `FieldRow` s'écartait de sa boîte** | **Livré le 2026-09-30.** Le premier champ couvre aussi la colonne du joint, et son libellé et son indice ne dimensionnent plus les colonnes (`contain: inline-size`) : « sur » se pose contre la boîte, un libellé long passe au-dessus des deux. Garde e2e sur la fiche du CAC en français : 9 px entre la boîte et « sur » (l'écart de colonne est de 12), contre 114 px avant (`engine-forms.spec.ts`) |
+| A11.4 | **Une espace ordinaire entre un nombre et son mot** dans la copie du moteur | **Clos sans changement : ce n'est pas un défaut isolé.** La copie validée n'a pas de convention unique, mesuré le 2026-09-30 sur les chaînes françaises évaluées : « {n} jours » s'écrit avec une espace ordinaire dans 25 chaînes (glossaire, catalogue d'audit, jeu, moteur) et avec l'insécable dans 16 ; « mois » et « min » sont partagés de même, et un compte de choses (« 15 questions », « 42 inscrits ») prend partout l'espace ordinaire. La garde proposée rougirait sur de la copie validée par Antoine. Harmoniser serait une passe de copie à lui faire relire, pas un correctif |
 
 ---
 
@@ -191,15 +192,16 @@ qui demandent un avis de design sont en C28 et C29.
 répond avec la connexion claude.ai, et le convertisseur vient avec le skill
 `/design-sync`. L'autorisation locale qui manquait le 2026-09-11 n'est plus un
 prérequis. **B1 et B3 sont faits** : le projet Claude Design est à jour du
-2026-09-30 après A7.10 et A10, avec **88 composants, 292 cellules et 88 aperçus
-sur 88 rendus** (`JOURNAL.md`, « Design sync B3 », et `.design-sync/NOTES.md`,
+2026-09-30 après A7.10 et A10, puis re-synchronisé le soir même après A11, C28
+et C29 (cinq composants recapturés, ancre `8235f4e6de01`), avec **88
+composants, 292 cellules et 88 aperçus sur 88 rendus** (`JOURNAL.md`, « Design sync B3 », et `.design-sync/NOTES.md`,
 « Synced »). B2, le brief S-15, est clos avec A10.
 
 **Rien d'ouvert.** La prochaine synchro se lance quand un composant change, ou
 quand change une copie, un chiffre du modèle ou un comportement qu'un aperçu
 reprend : c'est ainsi que B3 a trouvé l'amende du jeu et les cartes de
 `SpaceStrip` restées d'avant A7.8 et A7.9, dans des notes reportées. Ce qu'elle
-a trouvé dans le produit est en A11, C28 et C29.
+a trouvé dans le produit (A11, C28 et C29) est livré le soir même.
 
 ---
 
@@ -249,14 +251,14 @@ ouverts, et, pour la vue propriétaire, un build jetable jamais commité.
 | C24 | « Voir un exemple » en roast | **Oui, tranchée le 2026-09-30** (la reco) : le bouton suit le sélecteur de ton de l'aperçu, et en roast il mène à `/r/sample?tone=roast` | Ici | Livré le 2026-09-30 avec A7.9 |
 | C26 | Laisser ou bloquer les robots d'IA (née d'A8) | **Tout laisser, et l'écrire** (la reco, tranchée le 2026-09-30) : `robots.txt` nomme les onze robots d'IA, entraînement et réponses dans deux groupes, tous en `Allow: /`. Un test refuse tout `Disallow` : en ajouter un, c'est rouvrir C26 | `src/lib/seo/ai-agents.ts`, `src/app/robots.ts` | Livré le 2026-09-30 |
 | C27 | Publier un `llms.txt` (née d'A8) | **Court et généré, plus `llms-full.txt`** (tranchée le 2026-09-30 ; la reco était sans `llms-full.txt`). `/llms.txt` liste exactement les adresses du sitemap, drapeaux compris, en anglais avec l'adresse française à côté ; `/llms-full.txt` porte le texte anglais des articles et des 24 termes, construit depuis les champs que les pages impriment. Deux tests les tiennent au sitemap et aux pages. En-têtes « à relire » | `src/lib/seo/llms.ts`, `llms-full.ts`, `GROWTH-PLAN.md` 2.8 | Livré le 2026-09-30 ; sa copie ira au prochain bon à tirer |
+| C28 | L'espace entre une unité et son chiffre (tranchée le 2026-09-30) | **L'unité porte son espace** (la reco) : la boîte n'en ajoute plus. Collée en anglais (« €500 », « 20% »), insécable en français (« 21 000 € », « 20 % »), ce que `Intl` donne ; `moneyUnit` reprend l'espace qu'`Intl` met à côté du signe | `Field.module.css`, `NumberField.tsx`, `.design-sync/conventions.md` | Livré le 2026-09-30 avec A11 |
+| C29 | « Facultatif » : dans le libellé, ou par la prop `optional` (tranchée le 2026-09-30) | **Par la prop** (la reco) : le mot sort des quatre libellés du moteur et se dessine plus discret après eux, comme le retour 04 le dessine ; nouvelle clé `workbench.optional`. Les quatre libellés raccourcis et la clé sont « à relire » | `engine-copy.ts`, `.design-sync/conventions.md` | Livré le 2026-09-30 avec A11 |
 
 ### Encore ouvert
 
 | # | Question | Aujourd'hui | Reco |
 |---|---|---|---|
 | C25 | **Valider la spécification du B2B assisté et de l'hybride** (`ENGINE.md` §18, A7.3.a, écrite le 2026-09-30) | Rien n'est codé. La spécification tient la décision 3 à la lettre (type puis motions, « deux moteurs, un total », jamais de face-à-face) et C1 dans les deux motions. Elle pose **seize questions** (§18.12), chacune avec sa reco et ce qui casse si on se trompe. Les trois qui structurent tout : **Q3**, un client compte dans la motion qui a signé son contrat en cours (sinon le MRR total se compte deux fois), **Q1**, l'activation assistée est la mise en production, et **Q2**, l'assisté se lit sur trois mois glissants | **Trancher Q3, Q1 et Q2 d'abord**, une par une avec le prompt C25, puis valider les treize autres en bloc si leurs recos te vont. Ensuite A7.3.c (le code) peut partir, dans l'ordre du §18.11 |
-| C28 | **L'espace entre une unité et son chiffre** dans un champ. Née de la design sync B3 (2026-09-30) | Le retour 04 pose 6 px entre le signe et le chiffre (`Field.module.css`, `.affix + .control`, repris tel quel), alors que sa propre table écrit « €26,000 ». En anglais on lit « € 500 », « 140 % » ; en français, les 6 px s'ajoutent à l'insécable que `percentUnit` met déjà dans « % » | Supprimer les 6 px et laisser la chaîne de l'unité porter son espace, comme partout ailleurs dans le produit : collée en anglais (« €500 », « 20% »), insécable en français (« 26 000 € », « 20 % », ce que `Intl` donne). Deux fichiers, `Field.module.css` et `moneyUnit`. Ce qu'on casse si on se trompe : rien d'irréversible, c'est une espace |
-| C29 | **« Facultatif » : dans le libellé, ou par la prop `optional` ?** Née de la design sync B3 | Six primitives prennent `optional`, qui dessine le mot plus discret après le libellé (le dessin du retour 04). Aucun appel ne la passe : le moteur écrit « (facultatif) » dans quatre libellés (`engine-copy.ts` : `companyLabel`, `definitionNote`, `target`, `repairComment`), au poids du libellé | Passer le mot par la prop : c'est le dessin retenu, et Claude Design le voit dans les contrats. Quatre chaînes à couper (copie « à relire »). Sinon, retirer la prop des contrats, pour ne pas enseigner un usage que le produit n'a pas |
 
 ---
 
@@ -268,7 +270,7 @@ rien de privé dans le dépôt, qui est public. Cela vaut pour les chiffres de
 
 | # | Action | Prête ? | Détail |
 |---|---|---|---|
-| D11 | **Redéployer la production si aucun merge ne l'a fait** (2026-09-30) | **Oui, à partir du 2026-10-01 vers 14 h UTC.** A10.c (#223) et A10.d (#224) sont sur `main`, mais Vercel a refusé leurs deux déploiements (« Deployment rate limited — retry in 24 hours », `VERCEL.md` §1.12). La production tourne sur A10.b (#221) : rien de cassé, l'audit y garde ses anciens champs | Si un merge de code est passé sur `main` après la fenêtre, rien à faire : il emporte tout. Sinon, dans Vercel, « Redeploy » du dernier commit de `main`. La session vérifie ensuite le statut du commit et `/admin/audit` |
+| D11 | **Redéployer la production si aucun merge ne l'a fait** (2026-09-30) | **Oui, à partir du 2026-10-01 vers 14 h UTC.** A10.c (#223), A10.d (#224), la synchro B3 (#226), A11 ([#227](https://github.com/ScratchMe/tourdegrowth/pull/227)) et C26/C27 ([#228](https://github.com/ScratchMe/tourdegrowth/pull/228)) sont sur `main`, mais Vercel a refusé leurs déploiements (« Deployment rate limited — retry in 24 hours », `VERCEL.md` §1.12). La production tourne sur A10.b (#221) : rien de cassé, l'audit y garde ses anciens champs et le moteur ses anciens libellés. Un rappel est programmé dans la session du 2026-09-30 pour le 2026-10-01 à 14 h 30 UTC | Si un merge de code est passé sur `main` après la fenêtre, rien à faire : il emporte tout. Sinon, dans Vercel, « Redeploy » du dernier commit de `main` (la session n'a pas les droits : l'API Vercel lui répond 403). La session vérifie ensuite le statut du commit, `/robots.txt`, `/llms.txt` et `/llms-full.txt` (C26/C27), `/admin/audit` et une fiche du moteur en aperçu propriétaire |
 | D2 | **Ouvrir le jeu et le moteur à tout le monde** | Non : il faut les bons à tirer nº7 et nº8 signés, C1 à C15 tranchés, et les liens d'ouverture (C7) construits. **Pour le moteur, en plus : tout le lot A7.3** (le B2B assisté et l'hybride, décidés le 2026-09-29), bon à tirer compris. **Le jeu n'ouvre pas avant le moteur** (C23, 2026-09-30), et sa phrase sur le Digital Fairness Act est remise à jour avant d'ouvrir (section E) | Poser `GAME_ENABLED` et/ou `ENGINE_ENABLED` à `true` dans Vercel (Production), puis **redéployer** (`VERCEL.md` §1.11). Ensuite, la session vérifie la production : pages en 200, sitemap, pied de page, bandeau. Toi, tu demandes l'indexation des nouvelles pages dans Search Console |
 | D5 | **Les entretiens, réorientés vers le moteur** (2026-09-30) | **Reportés par Antoine le 2026-09-30, sans date.** La trame attend en annexe d'`ENGINE.md` (validée le même jour). Une session ne les relance pas : c'est lui qui les rouvrira | Cinq à dix PM growth ou Heads of Growth, dans des boîtes où « on score sous 50 ». La question de fond : « quelqu'un taperait-il ses chiffres à la main, et pour obtenir quoi ? ». Ils servaient le Go / No-Go de l'audit ; l'audit étant entre parenthèses (`AUDIT-PLAN.md`, en tête), ils nourrissent le moteur (A7.3, les textes de lancement). **Les notes d'entretien restent hors du dépôt** : noms, entreprises, chiffres ; seule une synthèse anonyme y entre |
 | D6 | **La distribution, vague 1** | **Non : rien ne part avant que le moteur et le jeu soient prêts** (C19, 2026-09-29). Rien n'est encore parti. Le Tour n'aura ni Show HN ni r/SaaS | Textes dans `marketing/launch/` et `marketing/campaigns/`. Tu postes sous pseudo, la session fournit et met à jour les textes. Annuaires dans l'ordre de `GROWTH-PLAN.md` 1.6. **Pas de LinkedIn ni de lancement en grande pompe pour l'instant** (C22 : une question de calendrier, pas d'anonymat) |

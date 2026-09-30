@@ -102,6 +102,7 @@ export function MissingTriage({
             size="sm"
             id={`${idPrefix}-repair-comment`}
             label={t.repairComment}
+            optional={strings.workbench.optional}
             error={rule("comment-too-long")}
             value={draft.repairComment}
             onChange={(repairComment) => update({ repairComment })}
