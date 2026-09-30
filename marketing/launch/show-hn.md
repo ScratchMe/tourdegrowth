@@ -46,7 +46,7 @@ Jour : mardi à jeudi, 14h-16h heure de Paris (matin côte Est).*
 | **"Why AGPL?"** | The only scenario that would cost anything is someone deploying a copy as a service; AGPL covers exactly that and bothers nobody who just wants to read the code. |
 | **"Why Gemini?"** | Price/latency for short generations, and a documented fallback alias. The client is provider-agnostic in shape; swapping is a small PR. |
 | **"Can't people game the score?"** | Sure — it's their own score. Nothing is ranked publicly. The only thing that would be gamed is the benchmark, which is why it's gated behind a minimum volume. |
-| **"Who's behind this?"** | The site credits its author in the footer; I keep this account pseudonymous. *(Antoine : c'est la seule réponse honnête sous l'option A. Si tu préfères ne pas la donner du tout, remplacer par « a growth PM working on it as a side project ».)* |
+| **"Who's behind this?"** | I'm Antoine Berthaud, a growth PM; this is a side project, posted from its own account. My name is in the site's footer, and the About page says how it's made. *(TODO : à relire. C22 : la réponse te nomme, sans insister et sans lien vers LinkedIn.)* |
 
 ## Après le post
 

@@ -74,7 +74,7 @@ sent » (82 caractères, trop long).
 | **"Only self-serve SaaS?"** | For now. The seventeen numbers and where to find them differ for sales-led B2B and marketplaces; I'd rather ship one profile that's right than four that are vague. |
 | **"Is there AI in it?"** | No. Every sentence in the tool and on the slides is written in advance and chosen by rules; nothing is generated. |
 | **"Business model?"** | It's free and there's no account system to sell you anything through. The deck credits the site by default, and you can remove that. |
-| **"Who's behind this?"** | The site credits its author in the footer; I keep this account pseudonymous. |
+| **"Who's behind this?"** | I'm Antoine Berthaud, a growth PM; this is a side project, posted from its own account. My name is in the site's footer, and the About page says how it's made. *(TODO : à relire. C22 : la réponse te nomme, sans insister et sans lien vers LinkedIn.)* |
 
 ## Après le post
 

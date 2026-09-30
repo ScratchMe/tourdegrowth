@@ -75,14 +75,17 @@ Aucun ne bloque l'écriture ; tous bloquent la publication du texte concerné.
 - **Aucune marque réelle dans aucun post** — vérifié par recherche dans toutes les lignes collables (`>` et `**EN**`/`**FR**`) : aucune occurrence des marques citées dans le brief du jeu ni des concurrents du brief concurrentiel.
 - **Article L215-1-1 du Code de la consommation**, résiliation « en trois clics » depuis le 1ᵉʳ juin 2023, et **DSA article 25** : repris de `GAME-BRIEF.md` §1.3. À confirmer par la relecture juridique du catalogue, qui est de toute façon un portier du lancement C.
 - **Digital Fairness Act** : jamais une date, seulement « attendu fin 2026 » ; le créneau réactif s'écrit d'après la publication elle-même.
-- **Le crédit de l'auteur** : sous l'option A, la seule réponse à « qui est derrière ? » est « the site credits its author in the footer; I keep this account pseudonymous ». Elle est vraie et elle renvoie au site signé ; ce n'est pas un anonymat au sens juridique, et le site garde ses mentions légales (LCEN).
+- **Le crédit de l'auteur** : sous l'option A précisée le 2026-09-29 (C22), la promotion est **discrète pour l'instant**, pas anonyme. La réponse à « qui est derrière ? » nomme Antoine simplement et renvoie au site signé, sans lien vers LinkedIn. Le site garde ses mentions légales (LCEN). *(Mis à jour par A7.13 : la réponse d'origine, « I keep this account pseudonymous », est retirée des trois Show HN.)*
 
 ## Anonymat — vérifié
 
 Recherche de `Antoine`, `Berthaud`, `LinkedIn`, `cv.` dans toutes les lignes
-collables de `engine/` et `game/` : **aucune occurrence**. Les seules mentions
-d'Antoine sont dans les notes internes (en italique, hors blocs collables) qui
-disent qui envoie et qui relit.
+collables de `engine/` et `game/` : **aucune occurrence** au 2026-09-24.
+Les seules mentions d'Antoine étaient dans les notes internes (en italique,
+hors blocs collables) qui disent qui envoie et qui relit. **Depuis A7.13
+(C22)**, son nom figure aussi dans une ligne collable par Show HN, la réponse
+à « Who's behind this? », et nulle part ailleurs ; `LinkedIn` et `cv.`
+restent absents.
 
 ## Longueurs
 

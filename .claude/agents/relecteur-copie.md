@@ -54,8 +54,10 @@ bon à tirer. Liste chaque chaîne du diff qui n'a pas son marqueur.
 
 ## 5. La promotion (`marketing/`)
 
-- **Jamais le nom d'Antoine**, jamais LinkedIn : la promotion est anonyme, le
-  site seul est signé.
+- **Le nom d'Antoine seulement dans la réponse à « qui est derrière ? »**
+  (C22, 2026-09-29), et **jamais LinkedIn pour l'instant** : la promotion est
+  discrète, pas anonyme, et le site est signé. Le jour où Antoine lève la
+  réserve, cette ligne change avec `EXCLUDED` (`scripts/utm-channels.mjs`).
 - Aucun chiffre privé (`/admin/stats`, Search Console) : le dépôt est public.
 - Les comptes de caractères annoncés se vérifient avec
   `node marketing/check-lengths.mjs`.

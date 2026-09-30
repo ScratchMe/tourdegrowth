@@ -5942,3 +5942,19 @@ L'angle **GEO** (être lu et cité par les moteurs de réponse IA) n'avait jamai
 - **À l'écran**, en FR et en EN, à 1 280 et 390 px (`/how-it-works`, `/aarrr-vs-okr`, `/glossary/churn`, `/privacy`) : la ligne est à sa place, sans défilement horizontal.
 
 **Au passage, `CLAUDE.md`** frôlait son budget de 40 000 caractères. La ligne « Hygiène de dépôt public », close depuis le 2026-09-29, en sort. Sa seule règle encore utile, l'épinglage par SHA de tous les workflows et le test qui l'exige, passe dans `GITHUB.md` §2 : c'est le fichier qu'on ouvre avant de toucher un workflow.
+
+**En production** : PR [#215](https://github.com/ScratchMe/tourdegrowth/pull/215), mergée le 2026-09-30 à 12 h 00 UTC (squash `382eb99`, 20 fichiers, identique à la tête de la PR). Déploiement de production Vercel `READY` sur ce commit, lu par l'API. Relevé par HTTP : `/fr/how-it-works` et `/en/how-it-works` portent un `Article` en JSON-LD, `og:type` à `article` et la ligne « 24 septembre 2026 » / "September 24, 2026" ; `/fr/glossary/churn` et `/en/glossary/churn` portent le 30 septembre, et le sitemap dit `2026-09-24` et `2026-09-30` pour les mêmes adresses. `/en/aarrr-vs-okr` et `/fr/privacy` portent aussi leur ligne.
+
+## A7.13 : « Qui est derrière ? », une réponse qui nomme Antoine (2026-09-30)
+
+C22, tranché par Antoine le 2026-09-29 : c'est une question de calendrier, pas d'anonymat. La réponse le nomme, simplement. La promotion reste discrète pour l'instant : pas de LinkedIn, pas de lancement en grande pompe, et `linkedin` reste dans `EXCLUDED` (`scripts/utm-channels.mjs`).
+
+**Ce qui change** :
+- **La FAQ des trois Show HN** (le Tour, le moteur, le jeu) répond à "Who's behind this?" : « I'm Antoine Berthaud, a growth PM; this is a side project, posted from its own account. My name is in the site's footer, and the About page says how it's made. » Pas de lien, donc aucun lien nu, et aucun LinkedIn. « À relire ». Show HN est en anglais seulement : il n'y a pas de texte français à suivre.
+- **La règle de `marketing/README.md`** passe de « Jamais le nom » à « Discret pour l'instant : le nom seulement si on le demande, jamais LinkedIn ». Le compte qui poste reste celui du projet, `tourdegrowth`.
+- **`brand-review.md`** : le crédit de l'auteur et le relevé d'anonymat sont redatés. Le nom figure désormais dans une ligne collable par Show HN, et nulle part ailleurs ; `LinkedIn` et `cv.` restent absents. Le §8 des campagnes parle d'un « compte de projet », discret pour l'instant.
+- **L'outillage d'abord**, puisqu'il aurait arrêté cet item : `relecteur-copie` §5 et `/livrer` §3 ne disent plus « jamais le nom d'Antoine », mais « seulement dans la réponse à « qui est derrière ? », jamais LinkedIn ». Le commentaire de `utm-channels.test.ts` dit « pas maintenant », et le test garde `linkedin` exclu.
+
+**Ne change pas** : les mentions « pseudonyme » qui désignent le compte `tourdegrowth` (le kit, le calendrier des Show HN), `GROWTH-PLAN.md` (déjà précisé le 2026-09-29) et le relevé de référence de `brand-review.md` (ce qui a été appliqué le 2026-09-24).
+
+**Vérifié** : `grep` de `Antoine`, `Berthaud`, `LinkedIn` et `cv.` dans les lignes collables de `marketing/` : le nom n'apparaît que dans les trois réponses, et ni LinkedIn ni le CV nulle part. `check-lengths.mjs` : 71 longueurs, aucun écart. `utm-channels.test.ts` : 15 tests passent.
