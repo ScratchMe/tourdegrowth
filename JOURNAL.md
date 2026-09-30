@@ -6308,6 +6308,30 @@ Elle a relevé un trou : seules les lignes d'adresse de `/llms-full.txt` étaien
 - les adresses de `/llms.txt` sont exactement les 74 du sitemap de production, plus le lien du texte intégral. Chacune répond 200. Ni le jeu ni le moteur n'y figurent, puisqu'ils sont fermés ;
 - `/llms-full.txt` a ses 32 parties et ne cite ni `/r/`, ni `/admin`, ni le moteur.
 
+## C25 : la spécification du B2B assisté et de l'hybride, validée (2026-09-30)
+
+Antoine a tranché C25 dans sa propre session, avec le prompt C25 : les seize questions du §18.12 d'`ENGINE.md` (A7.3.a, [#214](https://github.com/ScratchMe/tourdegrowth/pull/214)). **A7.3.b est close**, et le code (A7.3.c) peut partir dans l'ordre du §18.11. Chaque réponse est datée dans une colonne « Tranché » du §18.12, et **les sections qu'elle change sont corrigées le même jour**. Aucune ligne de code.
+
+**Avant de poser** : `src/lib/engine/` n'a pas bougé depuis `62e3618`. A10 n'a changé que les écrans, que le §18 écrivait déjà avec `Choices` et `Segmented`. Ni le journal ni le nº8 (une seule carte tranchée, C1) ne contenaient de réponse. Un écart mineur est corrigé en passant : le §18.10.3 « étendait » `engine-mobile.spec.ts`, qui n'a jamais existé.
+
+**Q3, Q1 et Q2, une par une, sur l'exemple §18.9** :
+- **Q3, oui : un client compte dans la motion qui a signé son contrat en cours.** Le double compte a été montré sur l'exemple : 5 comptes à 2 000 € par mois comptés par Stripe et par HubSpot donnent 228 000 € affichés pour 218 000 € réels. Rien à l'écran ne le montre. **Un ajout de la séance** : un passage du libre-service à l'assisté n'est pas un départ du libre-service. Compté comme tel, il ajoute ~0,4 point à un churn de 2,5 % dont la cible est 2 %. S8 et §18.4.6 (une ligne de piège sur cinq fiches du libre-service, en hybride seulement) sont corrigés.
+- **Q1, oui : l'activation assistée est la mise en production.**
+- **Q2, oui : trois mois glissants, fixes.** Montré : au mois (~6 signées sur 25), une seule signature de plus fait passer l'étape nommée du taux de closing au passage lead → opportunité. Sur trois mois, elle ne la change pas.
+
+**Q4 à Q16 en bloc** : dix recos retenues. Q10 et Q12 ont été posées sur l'écran actuel du moteur (build local, aperçu propriétaire, l'exemple rempli à 1 280 et 390 px) et sur un croquis de l'écran hybride fait avec les chiffres de §18.9. Les images sont restées dans le scratchpad. **Constat en posant Q12** : le bloc de diagnostic du tableau ne montre aucun montant (`Diagnosis.tsx`). Les deux montants (~600 € et ~4 000 €) ne vivent que sur deux slides, à deux slides d'écart. La reco « oui » tient donc à plus forte raison.
+
+**Trois reprises, posées une par une** :
+- **Q4 : une marge brute par motion.** Antoine : « ça change tout, il faut qu'on ait la différence ». L'assisté gagne `slg.rev.gross-margin` : 15 chiffres propres, une union de 32, plus de chiffre « commun ». **Aucune migration**, puisque `rev.gross-margin` reste au libre-service. Un repli « Reprendre la marge globale » existe en hybride seulement : la valeur s'enregistre en estimation (base `company-wide`), comptée approximative, jamais trouvée. Par symétrie, la fiche du libre-service offre le même repli. Montré : payback assisté de 13 mois à 75 % de marge, de 16 à 60 %. Quatorze sections sont corrigées, dont l'exemple (« 24 chiffres sur 32 ») et un gabarit neuf pour « les deux marges manquent ».
+- **Q7 : la liaison devient un levier « Et si » dès la v1.** Antoine : « c'est justement un point important dans ces organisations hybrides ». Le levier se chiffre **en nombre** d'opportunités venues du libre-service par trimestre, et non en part, qui monte aussi quand les autres baissent. Il est **jamais candidat** : une cible sur la liaison ferait dire au diagnostic de l'assisté « le libre-service ne passe pas assez ». Son gain s'écrit dans l'assisté et le total, et rien n'est retiré au libre-service. Exemple : 31 → 40 donne +1,25 signature par trimestre, soit ~830 € de MRR nouveau par mois.
+- **Q8 : quatre termes de glossaire dès la v1, par une session à part.** Ce sont « taux de closing », « cycle de vente », « ACV » et « conversion lead → opportunité » ; le §18.4.2 annonçait ce quatrième, que Q8 oubliait. Ils deviennent l'item **A7.3.e**, avec son prompt dans `CHANTIERS.md`, en parallèle d'A7.3.c. S2 attend leurs slugs. Le glossaire passera à 28 termes et 56 pages.
+
+**Mis d'accord en passant** : C29, tranchée entre-temps par une autre session, fait passer « facultatif » par la prop `optional`. Le bloc de liaison du §18.6.3 le suit.
+
+**Aucune question neuve** pour la section C. Chiffrage revu : ≈ 12 jours-agent avec A7.3.e, et le même chemin critique de ~6 jours.
+
+**`main` a bougé pendant la séance** : A11, C28, C29 (#227, #229), puis C26 et C27 (#228, #230). Ces PR touchaient `CHANTIERS.md`, `CLAUDE.md` et la fin de ce journal. `main` a été fusionné avant d'y écrire, en gardant les deux côtés. `CLAUDE.md` reste sous 40 000 caractères.
+
 ## Le niveau 2 du jeu : la spécification, le moteur généralisé, le modèle en brouillon (2026-09-30)
 
 **La demande.** Antoine veut un deuxième niveau du jeu avant le lancement, et demande lequel. La comparaison des quatre esquisses du §11 avec le vrai catalogue du niveau 1 a désigné l'acquisition : six astuces sur huit absentes du niveau 1 (contre trois pour l'activation et le referral), la DGCCRF comme autorité, des cas publics récents, et aucun terrain déjà occupé, alors que le bandeau cookies de l'activation l'est par le quiz de la CNIL et Cookie Consent Speed.Run. Antoine a répondu « OK go ». Tout est dans `GAME-BRIEF.md` §17 ; la construction attend C30.
@@ -6331,7 +6355,7 @@ Les composants de `components/game` gardent leurs noms d'emplacement (`churn`, `
 - « DSA article 27 » ne s'applique pas à une boutique qui vend son propre stock : c'est le L121-4 25° ;
 - les faux avis relèvent du L121-4 28° et 27°, pas du seul L121-2 ;
 - « prix total obligatoire » allait trop loin : la livraison peut s'afficher à part si elle est annoncée (L121-3 3°, arrêté du 3 décembre 1987) ;
-- le faux prix barré est un délit, réglé par transaction pénale, pas une amende administrative.
+- le faux prix barré n'a pas d'amende administrative à lui : l'article L131-5 ne vise que l'article L112-1 et ses arrêtés, et l'arrêté de 2015 sur les annonces de réduction est abrogé. C'est une pratique commerciale trompeuse, un délit, que la DGCCRF règle par transaction pénale.
 
 D'où le contrôle du niveau 2 : une transaction de 150 000 €, à trancher (C30 Q3). Deux pièges pour la copie à venir : la mention « Publicité » ou « Collaboration commerciale » n'est plus une obligation littérale depuis l'ordonnance du 8 novembre 2024, et les fiches de la DGCCRF citent encore des peines d'avant l'aggravation en ligne de 2024.
 
@@ -6340,3 +6364,10 @@ D'où le contrôle du niveau 2 : une transaction de 150 000 €, à trancher (C3
 **`CLAUDE.md` dépassait son budget avant cette entrée** (40 529 caractères pour 40 000). Il repasse dessous en resserrant deux lignes que le journal raconte déjà (le nº5, le flake de `locale-routing`) et la convention 13, qui n'est plus une contrainte et dont le détail chiffré est dans `VERCEL.md` §2.3.
 
 **Vérifié** : `tsc` et `eslint` propres, **2 382 tests unitaires** (vingt-six de plus, ceux du niveau 2 et du sens « vers le haut »), `vitest --coverage` au-dessus de ses seuils, `next build` propre avec les variables de la CI. La suite Playwright complète, avec l'émulateur Firestore et le mot de passe d'administration posés : **667 specs, 662 passées, aucun échec**, 5 ignorées par construction (les specs « jeu fermé »). À l'écran, sur un second serveur du même build : la première vue du niveau 1 en français à 1 280 px et en anglais à 390 px, et décembre des années A (anglais, 1 280 px) et C (français, 390 px), chiffres, fins et courbes compris, les placeholders renommés remplis.
+
+**La relecture de la copie** (`relecteur-copie`) a confirmé qu'aucun texte lu par un joueur n'a changé dans `content/game/retention.ts`, en français comme en anglais : seules les clés et les noms de placeholders bougent, des deux côtés de chaque paire. Dans les premiers jets du §17, elle a relevé :
+- un `{titre}` là où le contrat attend `{title}` ;
+- un cas Temu qui présentait comme établi ce qu'une notification énonce ;
+- surtout, des textes d'événements et de fins qui nommaient des cartes (« les guides », « les prix barrés », « avis vérifiés »), alors que ces événements se déclenchent sur des seuils de radar et de confiance, pas sur ce qui a été joué. L'année D, virée, n'a écrit aucun guide.
+
+Tout est corrigé, et le §17.8 pose la règle. Elle a aussi mis en doute, de mémoire, que le faux prix barré échappe à l'amende administrative. La vérification sur Légifrance le confirme, et le texte le dit maintenant avec sa source plutôt qu'en une phrase absolue.
