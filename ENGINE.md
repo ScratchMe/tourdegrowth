@@ -2736,7 +2736,7 @@ cochées font l'**hybride** : « deux moteurs, un total ». Concrètement :
 - une slide d'unit economics avec les deux motions **en regard** : CAC,
   payback, panier, clients perdus sur un an ;
 - un chiffre de **liaison** facultatif, la part des opportunités assistées
-  venues de comptes du libre-service.
+  venues de comptes du libre-service, qui est aussi un levier « Et si » (Q7).
 
 **Ce qui ne change pas.**
 - Le drapeau `ENGINE_ENABLED` reste fermé jusqu'à la fin du lot A7.3 (bon à
@@ -2763,8 +2763,9 @@ cochées font l'**hybride** : « deux moteurs, un total ». Concrètement :
   liaison (Q7, 2026-09-30) : son gain s'écrit dans l'assisté et dans le
   total, et rien n'est jamais retiré au libre-service.
 
-**Chiffrage.** Six PR sur une branche d'intégration, ~10 jours-agent, un seul
-merge sur `main`, drapeau fermé (§18.11).
+**Chiffrage.** Six PR sur une branche d'intégration, un seul merge sur
+`main`, drapeau fermé, plus les quatre termes du glossaire (A7.3.e, Q8) dans
+une PR à part : ~12 jours-agent en tout (§18.11).
 
 ---
 
