@@ -23,12 +23,12 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 |---|---|---|---|
 | **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | Maintenant. A7 dans l'ordre de ses dépendances ; A8 à tout moment (A1 à A6 livrés le 2026-09-29) |
 | **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30** (79 composants, après A1, A2, A4 et A5). Le brief 04 est déposé dans le projet le 2026-09-30 ; reste à le lancer depuis Claude Design (D3), puis une re-synchro après A7.10 |
-| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 et C24 tranchées le 2026-09-30. Reste la validation de la spécification de A7.3 quand elle sera écrite |
+| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 et C24 tranchées le 2026-09-30. Reste **C25**, la validation de la spécification de A7.3 (`ENGINE.md` §18) |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, tout A7.3 |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
 
-**L'ordre conseillé** : A7 (A7.3.a, la spécification, d'abord : c'est le
-plus long ; A7.1 est livré le 2026-09-30). B3 après A7.10, dans la même
+**L'ordre conseillé** : A7 (la spécification A7.3.a est écrite le
+2026-09-30 et attend C25 ; A7.1 est livré le même jour). B3 après A7.10, dans la même
 session si possible, puis D. La section C a été tranchée le 2026-09-29.
 
 **Deux sessions en parallèle** écrivent toutes deux à la fin de `JOURNAL.md`
@@ -64,8 +64,7 @@ rencontrée en le faisant repart en section C. Toute copie neuve porte
 - A7.12.a avant les annuaires de D10.
 
 Le jeu n'attend rien du moteur.
-**A7.1, A7.2 et A7.5 à A7.9 sont livrés (2026-09-30).** **Commencer par A7.3.a**,
-le plus long, qui revient à Antoine pour validation.
+**A7.1, A7.2 et A7.5 à A7.9 sont livrés (2026-09-30).** **A7.3.a est écrit** (`ENGINE.md` §18) et attend Antoine (C25) : rien de A7.3 ne se code avant sa réponse.
 
 #### A7.3 — Le B2B assisté et l'hybride dès la v1 (C4)
 
@@ -87,8 +86,8 @@ le plus long, qui revient à Antoine pour validation.
 
 | # | Quoi | Précisions |
 |---|---|---|
-| A7.3.a | **La spécification**, écrite par une session dans `ENGINE.md` (une section neuve, sur la forme du §4 au §9) | Le catalogue SLG : ses étapes, ses chiffres (même règle qu'aujourd'hui : des comptes, pas des pourcentages ; trois par étape), leurs formules, leurs sources par outil (CRM) et leurs pièges. La vue hybride, la liaison PLG → ventes, le deck (quelles slides se dédoublent, lesquelles s'additionnent), le fichier de sauvegarde et sa migration (`EngineProfile` est déjà une union), et l'exemple rempli d'un hybride. Le catalogue de l'instrument d'audit (`audit-catalog.ts`, profil `b2b-assiste`) peut inspirer les chiffres, mais la décision 6 interdit d'importer `lib/audit`. **Toute question produit rencontrée part en section C, avec une recommandation** |
-| A7.3.b | **La validation par Antoine** | La spécification revient en section C, comme une question. Rien ne se code avant sa réponse |
+| A7.3.a | **La spécification** — **écrite le 2026-09-30 : `ENGINE.md` §18** | Le catalogue assisté (14 chiffres, trois relais sur leur propre base de 100), le modèle de données (`type` + `motions`, ids `slg.*`, `schemaVersion` 2 et sa migration testée au caractère près), l'hybride en « deux moteurs, un total » et ses garde-fous contre le face-à-face, le deck, l'exemple rempli calculé à la main, les tests et le découpage en PR. Seize questions produit en §18.12, reprises en C25 |
+| A7.3.b | **La validation par Antoine** | C25. Rien ne se code avant sa réponse |
 | A7.3.c | **Le code**, sur le modèle du moteur actuel | Moteur pur dans `lib/engine/`, catalogue et copie dans `content/engine-*.ts` (« à relire »), la vue sous `aarrr-funnel-template/_engine/`. Tests du moteur pur avec leur non-vacuité, e2e dans les deux langues, à 1 280 et 390 px, par l'aperçu propriétaire. Le canari « rien ne quitte le navigateur » couvre la nouvelle saisie |
 | A7.3.d | **Le bon à tirer** de la copie neuve | Par l'agent des bons à tirer, avec `/bon-a-tirer`, construit depuis le code |
 | Hors code | Les textes de lancement disent « v1 : SaaS en libre-service » | `marketing/kit.md:105` et la ligne de risque de `marketing/campaigns/README.md` §8 : ils sont à réécrire quand A7.3.c est livré, pas avant |
@@ -282,6 +281,7 @@ ouverts, et, pour la vue propriétaire, un build jetable jamais commité.
 
 | # | Question | Aujourd'hui | Reco |
 |---|---|---|---|
+| C25 | **Valider la spécification du B2B assisté et de l'hybride** (`ENGINE.md` §18, A7.3.a, écrite le 2026-09-30) | Rien n'est codé. La spécification tient la décision 3 à la lettre (type puis motions, « deux moteurs, un total », jamais de face-à-face) et C1 dans les deux motions. Elle pose **seize questions** (§18.12), chacune avec sa reco et ce qui casse si on se trompe. Les trois qui structurent tout : **Q3**, un client compte dans la motion qui a signé son contrat en cours (sinon le MRR total se compte deux fois), **Q1**, l'activation assistée est la mise en production, et **Q2**, l'assisté se lit sur trois mois glissants | **Trancher Q3, Q1 et Q2 d'abord**, une par une avec le prompt C, puis valider les treize autres en bloc si leurs recos te vont. Ensuite A7.3.c (le code) peut partir, dans l'ordre du §18.11 |
 
 ---
 

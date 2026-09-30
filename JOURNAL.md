@@ -5881,3 +5881,28 @@ C15, tranché par Antoine le 2026-09-29, et C24, tranchée le 2026-09-30 (« OK 
 - `accessibility.spec.ts` passe (axe sur l'accueil, FR et EN).
 - **Non-vacuité**, sur un build saboté (le bouton figé sur l'exemple direct, un détail `home` au lieu de `home_strip`) : 8 tests rougissent (les quatre du Tour, les deux du jeu, les deux de C24). Les 3 qui restent verts (la carte fermée, le survol) ne portent pas sur ce qui a été cassé.
 - **Piège** : dans le test, la carte est sous le pli à toutes les largeurs. Un `page.mouse.click` sur les coordonnées de sa boîte, sans la faire défiler d'abord, ne touche rien et ne dit rien.
+
+**En production** : PR [#213](https://github.com/ScratchMe/tourdegrowth/pull/213), mergée le 2026-09-30 à 11 h 40 UTC (squash `ab25349`, 21 fichiers, identique à la tête de la PR). Déploiement de production Vercel `READY` sur ce commit, lu par l'API. Relevé par HTTP, en FR et en EN : la carte du Tour porte `space-strip-link-tour`, et celles du moteur et du jeu, fermés en production, n'ont pas de lien. Le bouton d'exemple mène à `/r/sample` avec `data-tone="straight"`, et `/r/sample?tone=roast` répond 200.
+
+## A7.3.a : la spécification du B2B assisté et de l'hybride (2026-09-30)
+
+La décision 3 renversée par Antoine le 2026-09-29 (C4) : le B2B assisté (SLG) entre dans la v1 du moteur, et l'hybride se lit en « deux moteurs, un total ». Sa spécification est écrite dans **`ENGINE.md` §18**, sur la forme des §4 à §9. Elle attend la validation d'Antoine (**C25**), et rien ne se code avant.
+
+**Comment elle a été écrite** :
+- **Le premier jet** vient d'un sous-agent, écrit contre le code de `main` après A7.1 (types, catalogue, validation, stockage, diagnostic, deck, exemple, réglage) et non contre les documents. Son arithmétique d'exemple a été refaite au script.
+- **La relecture** d'intégration a vérifié les points qui ne se discutent pas :
+  - C1 vaut dans les deux motions ;
+  - aucun chiffre de marché n'est inventé : le seul repère gardé, NRR 110-130 %, est lu mot pour mot dans `glossary-deep.ts` ;
+  - les ordres de grandeur de l'instrument d'audit restent dehors (non relus au nº4, et la décision 6 interdit l'import) ;
+  - aucun gabarit ne met les deux motions en face-à-face, et un test est prévu pour le garder.
+- **La numérotation** : la section devient §18, et non §15, déjà pris par « Reporté ». Les §15 à §17 ne bougent pas.
+
+**Ce qu'elle tranche, sous réserve de C25** :
+- **Le réglage** porte deux axes, `type` et `motions: {plg, slg}`. L'hybride se dérive, il n'est jamais stocké. Décocher une motion ne perd rien.
+- **Les chiffres assistés** vivent dans le même `Snapshot.metrics`, sous des ids `slg.*` ; les ids du libre-service ne changent pas. La marge brute est commune aux deux motions.
+- **Le catalogue assisté** compte 14 chiffres (trois au plus par étape), plus la liaison `link.pql-handoff`, facultative et hors couverture.
+- **Le funnel assisté** se dessine en **trois relais**, chacun sur sa propre base de 100, jamais en chaîne multipliée. Tout l'assisté se lit sur trois mois glissants.
+- **Le fichier** passe en `schemaVersion` 2, avec une migration pure. Un test « golden » exige qu'un moteur v1 donne, après migration, le même tableau et les mêmes slides au caractère près.
+- **Un correctif de validation** est nécessaire : le refus au-dessus de 100 % ne doit plus valoir que pour les chiffres bornés, sinon une NRR réelle ne s'enregistre pas.
+
+**Les seize questions** sont en §18.12, chacune avec sa reco et ce qui casse si on se trompe. C25 recommande de trancher d'abord Q3 (un client compte dans la motion qui a signé son contrat en cours : c'est ce qui évite de compter deux fois le MRR total), Q1 (l'activation assistée est la mise en production) et Q2 (trois mois glissants), puis les autres en bloc.

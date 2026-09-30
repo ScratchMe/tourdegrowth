@@ -71,6 +71,9 @@ chacune se renverse en une phrase :
    vente, ACV, sources CRM), donc son propre catalogue. **L'ouverture du
    moteur attend** la spécification, sa validation par Antoine, le code et
    le bon à tirer de cette copie. À faire : `CHANTIERS.md` A7.3.
+   **La spécification est écrite le 2026-09-30 : §18 de ce document**
+   (A7.3.a). Elle attend la validation d'Antoine (`CHANTIERS.md` C25, avec
+   ses seize questions en §18.12) ; rien ne se code avant.
 4. La slide « déclaré au Tour × mesuré » existe mais n'est pas cochée par défaut.
    **Confirmé par Antoine le 2026-09-29 (`CHANTIERS.md` C5)** : on la choisit
    quand l'écart est l'argument, et personne ne la découvre par surprise dans
@@ -2676,6 +2679,1762 @@ La phrase de §11.5, dans `content/legal.ts`.
    tirer nº6 et une vérification manuelle Safari/Firefox — et l'annoncer depuis
    `/how-it-works`, les pages porte ouverte et une section de landing sous la
    citation, sans 7ᵉ lien de pied de page ?
+
+---
+
+## 18. Le B2B assisté et l'hybride — spécification A7.3.a, à valider
+
+*Premier jet du 2026-09-30, écrit contre le code de `main` (`c8ec215`, A7.1
+livré) et non contre les documents. Rien ici n'est codé ni validé. Il revient
+à Antoine comme une question (`CHANTIERS.md` A7.3.b) et rien ne se code avant
+sa réponse. Toute la copie citée est de la copie neuve, **`TODO: à relire`**
+(convention 6), et la typographie finale (U+00A0 avant `:` `;` `%` `€` `?` et
+après `«`) est posée dans `content/engine-*.ts`, pas dans ce document.*
+
+*Vérifié pour ce jet : `types.ts`, `catalog-shape.ts`, `validate.ts`, `io.ts`,
+`storage.ts`, `values.ts`, `cohort.ts`, `diagnose.ts`, `impact.ts`,
+`peloton.ts`, `unit-economics.ts`, `sanity.ts`, `findings.ts`,
+`shared-counts.ts`, `scenario.ts` (en-tête et KPI), `deck.ts` (`buildDeck`,
+`buildVisibility`), `example.ts`, `Setup.tsx`, `steps-model.ts`,
+`stage-tabs.ts`, `engine-copy.ts` (§ `setup`), `audit-catalog.ts` (socle et
+variantes `b2b-assiste`), `glossary-terms.ts` (24 termes) et les blocs
+`benchmark` de `glossary-deep.ts` (`cac`, `cac-payback`, `ltv`, `churn`,
+`nrr-grr`, `retention`, `referral`, `revenue`, `arpu`, `acquisition`, `pql`).
+L'arithmétique de §18.9 est refaite à la main ligne par ligne.*
+
+---
+
+### 18.0 En une page
+
+**Ce qui change.** Le réglage sépare le **type** (« SaaS B2B », seul ouvert)
+de la **motion** : deux cases, libre-service (PLG) et assisté (SLG), au moins
+une cochée. L'assisté a **son propre catalogue** : 14 chiffres propres, trois
+au plus par étape (deux en Referral), un ★ par étape, plus la marge brute,
+**commune** aux deux motions. Il a aussi son propre funnel, dessiné en
+**trois relais** et non en peloton : chaque relais a sa base de 100. Il a son
+diagnostic, contre **ses** cibles, ses « Et si » et ses slides. Les deux
+cochées font l'**hybride** : « deux moteurs, un total ». Concrètement :
+
+- deux funnels côte à côte, chacun avec sa fuite, dans un ordre fixe
+  (libre-service à gauche ou au-dessus, assisté ensuite), jamais trié par
+  valeur ;
+- un bandeau et une slide « un total » : MRR additionné, nouveau MRR du mois
+  additionné ;
+- une slide d'unit economics avec les deux motions **en regard** : CAC,
+  payback, panier, clients perdus sur un an ;
+- un chiffre de **liaison** facultatif, la part des opportunités assistées
+  venues de comptes du libre-service.
+
+**Ce qui ne change pas.**
+- Le drapeau `ENGINE_ENABLED` reste fermé jusqu'à la fin du lot A7.3 (bon à
+  tirer compris).
+- Tout reste local : aucun chiffre ni texte saisi ne quitte le navigateur, et
+  le canari couvre la nouvelle saisie.
+- Tout est bilingue, et la copie neuve est « à relire ».
+- La saisie se fait **en comptes**. Le diagnostic est déterministe.
+- **C1 vaut pour les deux motions** : seule une cible d'équipe désigne une
+  fuite ; un repère du glossaire n'est jamais que du contexte.
+- **Jamais de face-à-face**, ni en titre, ni en graphique, ni en classement.
+  Aucune fonction ne compare une fuite PLG à une fuite SLG. Aucun gabarit
+  hybride ne contient de comparatif (`vs`, « plus rentable », « mieux que »…),
+  et un test le garde.
+- Un fichier v1 (100 % libre-service) s'ouvre sans perte et donne, au
+  caractère près, le même tableau et les mêmes slides.
+
+**Ce que l'hybride ne fait pas.**
+- Il ne dit jamais quelle motion « marche le mieux ».
+- Il ne transfère aucun crédit d'une motion à l'autre : la liaison n'est pas
+  une attribution.
+- Il n'additionne jamais deux fuites.
+- Il ne propose aucun « Et si » qui traverse les motions en v1.
+
+**Chiffrage.** Six PR sur une branche d'intégration, ~10 jours-agent, un seul
+merge sur `main`, drapeau fermé (§18.11).
+
+---
+
+### 18.1 Le réglage (E1)
+
+#### 18.1.1 Ce que la carte montre, dans l'ordre
+
+1. **Ton type d'entreprise** (`Choices`, une seule option active) :
+   - « SaaS B2B » / "B2B SaaS" (active, cochée) ;
+   - « App grand public » / "Consumer app" — note « Plus tard : leur funnel n'a
+     pas la même forme. » / "Later: their funnel has a different shape."
+     (désactivée) ;
+   - « Place de marché » / "Marketplace" — même note (désactivée).
+2. **Comment tu vends** / "How you sell" — deux cases à cocher, dont au moins
+   une cochée :
+   - ☐ « Libre-service (PLG) : les clients s'inscrivent et paient seuls » /
+     "Self-serve (PLG): customers sign up and pay on their own"
+   - ☐ « Assisté (SLG) : une équipe commerciale signe les contrats » /
+     "Sales-assisted (SLG): a sales team signs the contracts"
+   - Aide sous le groupe : « Les deux ? Coche les deux : tu auras deux moteurs
+     et leur total, jamais l'un contre l'autre. » / "Both? Tick both: you get
+     two engines and their total, never one against the other."
+   - Erreur si aucune n'est cochée, sous le groupe et focalisée à l'envoi
+     (R-19) : « Coche au moins une façon de vendre. » / "Tick at least one way
+     you sell."
+   - Défaut à la première visite : libre-service coché, assisté décoché. C'est
+     le comportement v1, et c'est une question (Q16).
+3. **Réglages de chaque motion cochée**, dépliés sous sa case :
+   - libre-service : fenêtre d'activation (7/14/30 j) et fenêtre de paiement
+     (30/60/90 j), inchangées ;
+   - assisté : **fenêtre de qualification** (30/60/90 j, défaut 30), qui entre
+     dans la définition de `slg.acq.lead-to-opp`, et **fenêtre de mise en
+     production** (30/60/90 j, défaut 90), qui entre dans celle de
+     `slg.act.go-live`.
+4. **Mois des flux** : commun, défaut = dernier mois clos. **Cohorte suivie**
+   : affichée seulement si le libre-service est coché, inchangée (D7). Si
+   l'assisté est coché, une ligne en lecture seule dit ses périodes, calculées
+   (§18.2, S4) : « Assisté : les flux de juin à août ; les leads de mai à
+   juillet (ils ont eu 30 jours) ; les nouveaux clients de mars à mai (ils ont
+   eu 90 jours). » / "Sales-assisted: flows from June to August; leads from
+   May to July (they've had 30 days); new customers from March to May
+   (they've had 90 days)."
+5. Devise, nom sur les slides, liaison du Tour : communs et inchangés.
+
+La carte garde ≤ 560 px aux deux largeurs. Les réglages d'une motion
+décochée sont masqués, pas remis à zéro.
+
+#### 18.1.2 Cocher ou décocher après coup (« Réglages » sur le tableau) : rien ne se perd
+
+| Geste | Ce qui se passe | Ce que l'écran dit **avant** d'enregistrer (FR / EN) |
+|---|---|---|
+| Décocher l'assisté (le libre-service reste coché) | Les entrées `slg.*`, `link.*`, leurs cibles, leurs « Et si » et leurs cases de slides **restent dans l'état, dans le stockage et dans le fichier**. Le tableau, la couverture, le diagnostic et le deck les ignorent | « Décocher l'assisté le retire du tableau et des slides. Ses {n} chiffres, ses cibles et ses « Et si » restent sur cet appareil et dans ton fichier : recoche pour les retrouver. » / "Unticking sales-assisted removes it from the board and the slides. Its {n} numbers, targets and what-ifs stay on this device and in your file: tick it again to get them back." |
+| Décocher le libre-service | Symétrique (les 17 chiffres PLG sont gardés, cachés) | même gabarit, motion « le libre-service » / "self-serve" |
+| Décocher les deux | Impossible : la case restante est désactivée, avec « Il faut au moins une façon de vendre. » / "You need at least one way you sell." | — |
+| Cocher l'assisté sur un moteur PLG | Le catalogue SLG apparaît vide (`todo`) ; le PLG ne bouge pas | « L'assisté commence vide : {n} chiffres à aller chercher. Ton libre-service ne change pas. » / "Sales-assisted starts empty: {n} numbers to go and get. Your self-serve side doesn't change." |
+| Recocher une motion décochée | Tout revient tel quel | « On retrouve les {n} chiffres que tu avais saisis. » / "Your {n} numbers are back." |
+| Changer une fenêtre SLG | Même règle que le PLG (§ en tête d'ENGINE.md) : le chiffre qu'elle définit repasse « à faire » | gabarits `settings.*Reset` existants, avec la fenêtre nommée |
+
+« Tout effacer » efface les deux motions (une seule clé). L'aperçu d'import
+(E7) compte les chiffres cachés à part : « Mon produit · août 2026 ·
+libre-service 11 sur 17 · assisté 10 sur 15 (masqué) ».
+
+---
+
+### 18.2 Modèle de données
+
+#### 18.2.1 Types (`src/lib/engine/types.ts`)
+
+```ts
+export const ENGINE_STORAGE_KEY = "tdg.engine.v2";
+/** Lue une fois, migrée, gardée jusqu'au premier export réussi (§18.3). */
+export const LEGACY_STORAGE_KEY_V1 = "tdg.engine.v1";
+export const ENGINE_SCHEMA_VERSION = 2 as const;
+
+/** Décision 3 (2026-09-29) : le type, puis la motion. v1 du moteur : un seul type ouvert. */
+export type BusinessType = "b2b-saas"; // plus tard : | "consumer-app" | "marketplace"
+export type Motion = "plg" | "slg";
+/** L'ordre canonique, le seul : écrans, slides, listes. Jamais trié par une valeur. */
+export const MOTIONS: readonly Motion[] = ["plg", "slg"];
+
+export interface EngineSetup {
+  type: BusinessType;
+  /** Au moins une à true (validate.ts). Les deux = hybride : dérivé, jamais stocké. */
+  motions: Record<Motion, boolean>;
+  currency: Currency;
+  activationWindowDays: 7 | 14 | 30;     // PLG — inchangé
+  paidWindowDays: 30 | 60 | 90;          // PLG — inchangé
+  qualificationWindowDays: 30 | 60 | 90; // SLG, défaut 30 — entre dans slg.acq.lead-to-opp
+  goLiveWindowDays: 30 | 60 | 90;        // SLG, défaut 90 — entre dans slg.act.go-live
+  companyLabel?: string;
+}
+
+export type PlgMetricId = /* les 17 ids actuels, inchangés */;
+export type SlgMetricId =
+  | "slg.acq.lead-to-opp" | "slg.acq.cac" | "slg.acq.cycle"
+  | "slg.act.live-event" | "slg.act.go-live" | "slg.act.time-to-live"
+  | "slg.ret.renewal" | "slg.ret.nrr" | "slg.ret.loss-cause"
+  | "slg.ref.referred-share" | "slg.ref.referenceable"
+  | "slg.rev.win-rate" | "slg.rev.acv" | "slg.rev.arpa";
+export type LinkMetricId = "link.pql-handoff";
+export type MetricId = PlgMetricId | SlgMetricId | LinkMetricId;
+
+export type DerivedId =
+  | "rev.ltv" | "rev.cac-payback" | "rev.ltv-cac" | "rev.nrr" | "rev.grr"
+  | "slg.rev.ltv" | "slg.rev.cac-payback" | "slg.rev.ltv-cac";
+
+export type ToolId = /* existants */ | "pipedrive" | "cs-platform"; // « Outil de Customer Success (Gainsight, Vitally, Planhat…) »
+export type RoleId = /* existants */ | "sales" | "customer-success";
+
+/** SLG : trois comptes partagés de plus (S6). */
+export type SharedCount =
+  | "cohortSignups" | "monthSignups" | "mrrEnd" | "mrrStart"
+  | "slgOppsCreated" | "slgDealsWon" | "slgCustomers";
+
+export type LeverId =
+  | /* les 8 leviers PLG */
+  | "slg.acq.lead-to-opp" | "slg.rev.win-rate" | "slg.rev.acv" | "slg.ret.renewal";
+
+export type FixedSlideId = "peloton" | "leak" | "visibility" | "unit-economics" | "mirror" | "ask" | "annex";
+/** `total` : hybride seulement. Les slides SLG portent le préfixe `slg:` ; celles du PLG gardent leur id v1. */
+export type SlideId =
+  | FixedSlideId | "total" | "slg:peloton" | "slg:leak" | "slg:scenario"
+  | "scenario" | `whatif:${LeverId}` | AnnexPageId;
+
+// Snapshot, MetricEntry, MetricValue, EngineDeck, EngineAsk, EngineState : forme INCHANGÉE.
+// `Snapshot.metrics`, `targets`, `base` et `EngineState.whatIf` s'élargissent par les unions ci-dessus.
+export interface EngineStore { schemaVersion: 2; state: EngineState }
+```
+
+**Forme du catalogue** (`catalog-shape.ts`) :
+
+```ts
+export interface MetricShape {
+  // … champs existants …
+  /** Où le chiffre vit : "shared" = une seule entrée, montrée dès qu'une motion est cochée ; "link" = hybride seulement. */
+  scope: "plg" | "slg" | "shared" | "link";
+  /** Mois couverts : 1 (PLG), 3 (tout l'assisté, S4). */
+  span: 1 | 3;
+  window?: "activation" | "paid" | "qualification" | "go-live" | 30;
+  /** Hors couverture, jamais un constat, jamais candidat (la liaison). */
+  optional?: true;
+}
+```
+
+`rev.gross-margin` passe à `scope: "shared"`. Les 16 autres chiffres PLG
+passent à `scope: "plg"`, les 14 SLG à `"slg"`, `link.pql-handoff` à
+`"link"`. Aide : `shapesOf(motions): MetricShape[]`, dans l'ordre du
+catalogue. Elle rend les `plg` si le PLG est coché, les `slg` si le SLG l'est,
+`shared` si l'une des deux l'est, `link` si les deux le sont.
+
+**Types dérivés** (jamais stockés) :
+
+```ts
+export type PlgCandidateId = /* les 6 actuels */;
+export type SlgCandidateId =
+  | "slg.acq.lead-to-opp" | "slg.act.go-live" | "slg.ret.renewal" | "slg.ref.referred-share" | "slg.rev.win-rate";
+export type CandidateId = PlgCandidateId | SlgCandidateId;
+
+/** Diagnosis garde sa forme ; il gagne sa motion, et ses positions ne portent que ses candidats. */
+export interface Diagnosis { motion: Motion; /* … champs existants … */ }
+
+/** Le funnel assisté : trois relais, chacun sur SA base de 100 (§18.5.1). */
+export interface RelayColumn {
+  metric: "slg.acq.lead-to-opp" | "slg.rev.win-rate" | "slg.act.go-live";
+  base: "leads" | "closed-opps" | "new-customers";
+  perHundred: Interval | null;          // null = inconnu, jamais 0
+  confidence: Confidence;
+  source: SourceRef | null;
+  period: { from: YearMonth; to: YearMonth } | null;
+  sampleSize: number | null;            // le dénominateur saisi, pour « petits effectifs »
+}
+export interface Relays {
+  leadNoun: "leads" | "mql";            // la variante de slg.acq.lead-to-opp
+  leadsPerMonth: Interval | null;       // dénominateur ÷ 3
+  columns: RelayColumn[];               // toujours 3 : lead→opp, conclue→signée, signé→en production
+  chain: Peloton["chain"];
+}
+
+export interface SlgUnitEconomics {
+  cacVariant: string | null;
+  renewalTerm: "annual" | "monthly" | null;
+  lifetimeMonths: DerivedValue;         // min(durée tirée du renouvellement, 36)
+  ltv: DerivedValue; payback: DerivedValue; ltvCac: DerivedValue;
+}
+export type MotionDerived =
+  | { motion: "plg"; coverage: Coverage; peloton: Peloton; diagnosis: Diagnosis; unit: UnitEconomics }
+  | { motion: "slg"; coverage: Coverage; relays: Relays; diagnosis: Diagnosis; unit: SlgUnitEconomics };
+
+/** « Un total » (hybride seulement). Une somme n'existe que si ses deux parties existent (S9). */
+export interface TotalView {
+  mrr: Record<Motion | "total", DerivedValue>;
+  newMrrPerMonth: Record<Motion | "total", DerivedValue>;
+  mrrIn12Months: Record<Motion | "total", DerivedValue>;
+  link: { known: Known; fromSelfServe: number | null; oppsCreated: number | null };
+}
+
+export interface EngineDerived {
+  motions: MotionDerived[];   // cochées, ordre MOTIONS — jamais trié par valeur
+  coverage: Coverage;         // l'union : la marge comptée une fois, la liaison exclue
+  total: TotalView | null;    // null hors hybride
+  sanity: SanityCheck[];      // SanityCheck gagne `motion?: Motion` (absent = commun)
+  findings: Finding[];        // Finding gagne `motion?: Motion`
+  mirror: Mirror | null;      // BridgeRow gagne `motion: Motion`
+}
+```
+
+#### 18.2.2 Décisions (décision · raison · alternative rejetée)
+
+**S1 — Le réglage porte deux axes, `type` et `motions`, et l'hybride n'est
+jamais stocké.** *Raison* : c'est la décision 3 mot pour mot (« le réglage
+sépare deux axes que le sélecteur mélangeait »). L'hybride se dérive de
+`motions` : aucun état ne peut dire « hybride » quand une seule case est
+cochée. *Rejeté* : élargir `EngineProfile` en
+`"selfserve" | "sales-led" | "hybrid"`. C'est une valeur de plus par
+combinaison, le type et la motion y seraient de nouveau mêlés, et le jour où
+l'app grand public ouvre, il faudrait `"consumer-selfserve"`.
+
+**S2 — `motions: Record<Motion, boolean>`, pas un tableau.** *Raison* : pas
+de doublon ni d'ordre à valider. Le fichier reste stable (clés triées), et
+« cocher / décocher » est littéralement le champ. *Rejeté* : `Motion[]`, qui
+autorise `["slg","plg","slg"]` et ferait dépendre l'ordre d'affichage d'un
+ordre de saisie.
+
+**S3 — Les réglages des deux motions sont toujours présents, à plat.**
+*Raison* : décocher ne perd rien (§18.1.2), et `windowDaysOf` reste un
+`switch` sur `shape.window`. *Rejeté* : `setup.plg{…}` / `setup.slg{…}`
+imbriqués, qui renommeraient les deux champs PLG dans tout le code et dans
+chaque fichier v1, pour aucun gain de lecture.
+
+**S4 — Tout l'assisté se lit sur trois mois glissants.** Les flux SLG
+couvrent les trois mois qui finissent au mois des flux (juin-août pour
+août). Les cohortes SLG couvrent les trois mois qui finissent au mois mûr de
+leur fenêtre (`matureCohortMonth(window, today)`, déjà écrit). L'entrée garde
+le mois de fin (`MetricEntry.cohortMonth` existe déjà) ; `span: 3` dit
+d'afficher « juin à août 2026 ». *Raison* : un mois d'assisté compte trop peu
+d'affaires. Avec 6 signatures, une de plus bouge le taux de closing de
+plusieurs points. Trois mois lissent la saisonnalité sans mélanger deux
+grilles tarifaires, et c'est la maille à laquelle un CODIR B2B lit son
+pipeline. *Rejeté* : le mois (bruit), les douze mois de l'instrument d'audit
+(lents à refléter un changement), une durée réglable (un réglage de plus pour
+un gain que personne n'a demandé). *Question Q2.*
+
+**S5 — Un seul `Snapshot.metrics`, les ids SLG préfixés `slg.`, les ids PLG
+inchangés.** *Raison* : couverture, validation, constats, annexe et demande
+copiée bouclent déjà sur le catalogue ; `scope` suffit à filtrer. La marge
+commune a une seule entrée, donc une seule saisie. Et un fichier v1 ne
+renomme aucune clé. *Rejeté* : un second jeu `Snapshot.slg.metrics`, qui
+doublerait chaque boucle et forcerait la marge à choisir un camp ; préfixer
+aussi le PLG en `plg.*`, qui renommerait les 17 clés de chaque fichier v1 et
+chaque test.
+
+**S6 — Trois comptes partagés SLG, saisis une fois (`shared-counts.ts`).**
+- `slgOppsCreated` (opportunités créées sur les trois mois) : dénominateur de
+  `slg.ref.referred-share` et de `link.pql-handoff`.
+- `slgDealsWon` (affaires « nouveau client » gagnées sur les trois mois) :
+  numérateur de `slg.rev.win-rate`, dénominateur de `slg.rev.acv` et de
+  `slg.acq.cac`.
+- `slgCustomers` (clients assistés, fin du mois des flux) : dénominateur de
+  `slg.rev.arpa` et de `slg.ref.referenceable`.
+
+*Raison* : la demande d'Antoine du 2026-09-25, « si on l'a déjà saisi une
+fois… ». Chaque entrée reste complète seule, comme en PLG.
+
+**S7 — Les cibles restent dans `Snapshot.targets`, par motion par
+construction.** Les ids SLG sont distincts : `targets["slg.rev.win-rate"]`
+est la cible de l'assisté, et aucune cible n'a deux sens. `comparatorOf`
+reste une lecture de cible (C1).
+
+**S8 — Une règle d'appartenance, imprimée partout où un montant est
+additionné : un client compte dans la motion qui a signé son contrat en
+cours.** Un compte du libre-service qu'un commercial fait passer à un
+contrat annuel compte en assisté : dans le MRR assisté, dans les affaires
+gagnées, et plus dans la conversion payante ni l'ARPA du libre-service.
+*Raison* : sans règle, le même client est compté deux fois dans le MRR total
+et dans les deux « nouveaux clients ». C'est la seule fuite silencieuse du
+modèle hybride. *Rejeté* : la motion d'origine du compte (un PQL signé par un
+commercial resterait PLG, et le taux de closing assisté ne le verrait jamais
+gagné). *Question Q3*, la plus lourde.
+
+**S9 — Un total n'existe que si ses deux parties existent.** Il n'y a jamais
+de « MRR total » qui serait le seul MRR connu. Avec une partie inconnue, le
+total est `uncomputable` et dit laquelle manque. *Raison* : un total partiel
+présenté comme un total est exactement la fausse précision que §16 R1
+combat.
+
+**S10 — La liaison est une entrée comme les autres (statuts, source,
+estimation, demande), mais `optional`.** Elle est hors couverture, jamais un
+constat, jamais candidate, jamais un levier. *Raison* : la décision 3 la dit
+« optionnelle ». La compter comme un trou pénaliserait l'hybride qui n'a pas
+de PQL.
+
+---
+
+### 18.3 Le fichier de sauvegarde et sa migration
+
+#### 18.3.1 `migrate.ts` (nouveau, pur)
+
+`migrateToV2(state: unknown): { state: EngineState; from: 1 | 2 } | null`
+ne lève jamais. Il rend `null` pour tout ce qui n'est pas un moteur v1 ou v2
+reconnaissable. Pour un v1 :
+
+| Champ v1 | Devient en v2 |
+|---|---|
+| `schemaVersion: 1` | `2` |
+| `setup.profile: "selfserve"` | `setup.type: "b2b-saas"`, `setup.motions: { plg: true, slg: false }` |
+| *(absent)* | `setup.qualificationWindowDays: 30`, `setup.goLiveWindowDays: 90` |
+| tout le reste (`metrics`, `targets`, `base`, `whatIf`, `deck`, `tourLink`, `id`, dates) | **copié tel quel** : aucun id ne change (S5) |
+
+`setup.profile` ≠ `"selfserve"` dans un v1 : `null` (aucun build v1 n'a pu
+l'écrire).
+
+#### 18.3.2 Lecture d'un fichier (`io.ts#parseEngineFile`)
+
+| Fichier | Résultat |
+|---|---|
+| pas du JSON | `unreadable` (inchangé) |
+| `schemaVersion` > 2 | `unknown-version` (inchangé : refus, pas d'ouverture avec erreurs) |
+| `schemaVersion: 1`, forme de moteur | migré, puis validé : `{ state, errors, migratedFrom: 1 }`. L'écran d'import dit « Fichier d'une version précédente : il a été mis à jour, rien n'a changé dans tes chiffres. » / "File from an earlier version: it's been updated, nothing changed in your numbers." |
+| `schemaVersion: 2` | validé : `{ state, errors }` |
+| v2 avec `setup.type` inconnu, ou `motions` sans aucune case vraie | **refus** `unsupported-setup` (nouveau) : le tableau n'aurait rien à montrer. Message : « Ce fichier ne dit pas comment l'entreprise vend : il ne peut pas s'ouvrir. » / "This file doesn't say how the company sells: it can't be opened." |
+
+Un fichier v2 ouvert par un build v1 est déjà refusé en `unknown-version`
+(`io.ts` compare `schemaVersion > 1`) : pas de régression à la descente.
+
+#### 18.3.3 Règles de validation neuves (`validate.ts`)
+
+- `setup.type` ∈ `{"b2b-saas"}` ; `setup.motions` est un objet à deux booléens
+  dont au moins un est vrai ; `qualificationWindowDays` et `goLiveWindowDays`
+  ∈ {30, 60, 90}.
+- Les ids `slg.*` et `link.*` sont acceptés quelles que soient les motions
+  cochées (§18.1.2 : on garde les chiffres cachés).
+- **Deux règles à corriger, car elles refuseraient une NRR réelle.**
+  Aujourd'hui, `rate.percent > 100` et `estimate.high > 100` sont refusés
+  pour **tout** chiffre en pourcentage. Ils ne doivent plus l'être que pour
+  un chiffre **borné** (`shape.bounded`). Sans ce correctif, une NRR estimée
+  à 104-108 % ne s'enregistre pas. Le `whatIf` le fait déjà
+  (`validate.ts:367`).
+- `deck.include` accepte `total`, `slg:peloton`, `slg:leak`, `slg:scenario`
+  et `whatif:slg.*` ; `ask.successMetric` et `ask.measureFirst` acceptent les
+  ids SLG ; `whatIf` accepte les leviers SLG ; `base` accepte les trois
+  comptes SLG (entiers > 0).
+- Les impossibles qui **bloquent l'enregistrement** (D11) : numérateur >
+  dénominateur sur tout ratio SLG borné (`lead-to-opp`, `go-live`,
+  `renewal`, `referred-share`, `referenceable`, `win-rate`,
+  `link.pql-handoff`) ; dénominateur nul. Ne sont **pas** bornés :
+  `slg.ret.nrr`, qui peut dépasser 100 %, et les montants.
+
+#### 18.3.4 Stockage (`storage.ts`)
+
+- `loadEngine()` lit `tdg.engine.v2`. S'il est absent et que `tdg.engine.v1`
+  est lisible, il migre en mémoire et rend
+  `{ kind: "ok", state, migratedFrom: 1 }`. S'il est absent et que v1 est
+  illisible, c'est le chemin `unreadable` existant.
+- Le premier `saveEngine` écrit **v2** et **laisse v1 en place** (§4.3 : « on
+  ne détruit jamais la seule copie »). `.v1` n'est retiré qu'au **premier
+  export `.json` réussi** qui suit la migration (`lastExportedAt` postérieur à
+  la migration). `clearEngine()` efface les deux clés.
+- Portée réelle : le moteur est fermé, donc seul Antoine a un `.v1` sur un
+  appareil. La migration protège surtout ses fichiers exportés. Un onglet
+  resté sur un ancien build écrirait encore dans `.v1` après la migration,
+  et ces écritures-là ne remonteraient pas en v2. C'est accepté et dit dans
+  le journal ; aucun visiteur n'est concerné.
+
+#### 18.3.5 Tests de non-régression (bloquants)
+
+1. **Golden v1** : pour chaque fixture v1 (`storage-fixtures.ts`, l'exemple
+   §6.0, plus trois états tirés des e2e : vide, à moitié, conflit), on compare
+   `deriveEngine` et `buildDeck` (FR et EN) avant et après migration, sous la
+   même horloge. Peloton, diagnostic, couverture (« 11 sur 17 »), unit
+   economics, constats, titres et lignes de chaque slide doivent être
+   **identiques au caractère près**. Le build v1 fournit les sorties de
+   référence, figées une fois dans `__tests__/golden-v1.json`, avant la
+   première ligne de code de la migration.
+2. **Aller-retour** : `serialize(migrate(v1))`, puis `parse`, doit rendre un
+   état égal, sans erreur.
+3. **Idempotence** : `migrate(v2)` rend `v2` inchangé, octet pour octet.
+4. **Refus** : `motions` tout faux, `type` inconnu, `schemaVersion: 3`,
+   `profile: "sales-led"` dans un v1.
+5. **Stockage** : v1 seul ⇒ v2 écrit au premier enregistrement, v1 intact ;
+   export ⇒ v1 retiré ; export en échec ⇒ v1 gardé ; v2 illisible ⇒ aucune
+   écriture (règle existante).
+6. **Non-vacuité** : une migration qui oublie `activationWindowDays` fait
+   tomber le golden (le taux d'activation change de fenêtre) ; une qui met
+   `slg: true` fait tomber le golden (la couverture passe de 17 à 32).
+
+---
+
+### 18.4 Le catalogue assisté
+
+#### 18.4.1 Comment l'AARRR se lit en vente assistée
+
+Honnêtement, **l'ordre chronologique n'est pas celui des lettres**. Un
+client assisté est acquis (lead → opportunité), puis **signé** (Revenue),
+puis **mis en production** (Activation), puis **renouvelé** (Retention),
+puis il **recommande** (Referral). Le tableau garde l'ordre AARRR des
+onglets, commun aux deux motions et au Tour. Le funnel dessiné (§18.5.1) et
+le titre de la slide suivent, eux, l'ordre chronologique.
+
+| Étape | Ce qu'elle veut dire en assisté | ★ |
+|---|---|---|
+| Acquisition | créer du pipeline qualifié, et ce que ça coûte en argent et en temps | passage lead → opportunité |
+| Activation | le client **obtient la valeur achetée** : la mise en production, pas le premier rendez-vous (Q1) | mise en production |
+| Retention | le contrat **se renouvelle** à l'échéance | renouvellement (logos) |
+| Referral | les clients (et partenaires) **amènent des opportunités**, et acceptent d'être cités | part des opportunités recommandées |
+| Revenue | le pipeline **se signe**, et à quel prix | taux de closing |
+
+**Pourquoi l'activation est après la signature.** Le passage lead →
+opportunité couvre déjà la qualification. Mettre « premier rendez-vous
+qualifié » en Activation ferait deux chiffres d'un seul entonnoir de
+qualification, et laisserait l'après-vente dans le noir. Or c'est là que
+l'assisté meurt en silence : un compte jamais mis en production ne renouvelle
+pas, sans laisser de trace dans le CRM. Et « Activation » garde le même sens
+dans les deux motions (la valeur obtenue dans le produit), ce qui rend
+l'hybride lisible. *Question Q1.*
+
+**Trois au plus par étape.** Acquisition 3, Activation 3, Retention 3,
+Referral 2, Revenue 3 : **14 chiffres propres**. La marge brute s'y ajoute,
+commune aux deux motions et montrée dans l'onglet Revenue avec l'étiquette
+« commun aux deux motions » / "shared by both motions". Le cycle de vente est
+rangé en Acquisition (le temps d'acquérir un client, à côté de son coût), ce
+qui laisse en Revenue la place de l'ARPA assisté, sans lequel le MRR ne
+s'additionne pas (Q15). Referral n'a que deux chiffres : le troisième candidat,
+le taux de closing des opportunités recommandées, porterait sur une dizaine
+d'affaires par trimestre et ne dirait rien.
+
+**Effort** (paliers existants) : « Seul, 5 min » · « Seul, ~1 h » · « À
+demander » · « À construire ».
+
+**Chemins de menu** : ceux qui suivent sont des repères de rédaction, **à
+revérifier en écrivant `engine-catalog.ts`** (§14.13). Les interfaces
+bougent, et plusieurs champs cités (source, type d'affaire, raison de perte)
+sont souvent personnalisés d'un compte à l'autre. La page affiche déjà
+« Recettes relues en {mois} ».
+
+**Politique de repères** : inchangée (§5.1). Un repère n'existe que s'il est
+écrit et approuvé dans `glossary-deep.ts`, et il ne désigne jamais (C1). Les
+ordres de grandeur de l'instrument d'audit sont **exclus** : win rate
+25-35 % en PME, 12-18 % en entreprise ; couverture de pipeline de 3× à 6× ;
+remise. Ils vivent dans `audit-catalog.ts`, dont le bon à tirer nº4 n'a
+tranché qu'une carte sur 39, et la décision 6 interdit de toute façon d'en
+importer quoi que ce soit.
+
+#### 18.4.2 Acquisition
+
+**★ `slg.acq.lead-to-opp`** — Passage lead → opportunité / Lead-to-opportunity rate
+- *Formule* : leads créés sur la cohorte de trois mois, devenus une
+  opportunité qualifiée sous {n} jours ÷ leads créés sur ces trois mois. EN :
+  leads created over the three-month cohort that became a qualified
+  opportunity within {n} days ÷ leads created over those three months.
+- *Période* : cohorte de trois mois qui finit au mois mûr pour la fenêtre de
+  qualification. Au 24/09/2026, avec 30 j : **mai à juillet**. Cohorte, borné.
+- *Variante* (fermée, imprimée) : `all-leads` (tout contact entrant) · `mql`
+  (seuls les leads qualifiés par le marketing). Elle donne le nom de la base
+  du relais : « pour 100 leads » ou « pour 100 MQL ».
+- *Où le trouver* :
+  - **HubSpot** : contacts créés sur la période, avec la date d'entrée dans
+    l'étape « Opportunité » du cycle de vie. Le délai (entrée − création) doit
+    être ≤ {n} j. Un export, puis on compte.
+  - **Salesforce** : rapport de leads avec les informations de conversion.
+    Leads créés sur la période, convertis, et « Converted Date » −
+    « Created Date » ≤ {n} j.
+  - **Pipedrive** : boîte de réception des leads, ceux de la période convertis
+    en affaire. Sinon, un export.
+- *Effort* : Seul, ~1 h · rôle `revops` · réparation par défaut : une
+  après-midi.
+- *Piège* : « lead » n'a pas de définition commune. Des contacts importés ou
+  des inscrits à un webinar font chuter le taux sans que rien n'ait changé.
+  Écris ce qui compte comme lead, et ce qui compte comme opportunité :
+  acceptée par un commercial, pas seulement créée.
+- *Glossaire* : `acquisition` (terme à créer : « conversion lead →
+  opportunité », Q8).
+- *Repère* : pas de repère publiable. Le glossaire n'en écrit aucun, et le
+  taux dépend entièrement de ce que l'entreprise appelle un lead.
+
+**`slg.acq.cac`** — CAC assisté / Sales-assisted CAC
+- *Formule* : dépense ventes et marketing des trois derniers mois (variante)
+  ÷ nouveaux clients assistés signés sur ces trois mois. Montant, non borné.
+- *Période* : flux, juin à août. Le dénominateur est `slgDealsWon`.
+- *Variante* : `media-only` · `plus-team` · `fully-loaded`, la liste
+  existante. La fiche pré-sélectionne `fully-loaded` et dit pourquoi : « en
+  vente assistée, le coût est d'abord celui des commerciaux ».
+- *Où le trouver* :
+  - **Finance** : la dépense ventes et marketing du trimestre, salaires
+    chargés compris pour la variante « tout chargé ».
+  - **HubSpot / Salesforce / Pipedrive** : les affaires « nouveau client »
+    gagnées sur la période (le dénominateur).
+  - **Régies** : le coût média, pour la variante « média seul ».
+- *Effort* : À demander (finance) · réparation : une réunion.
+- *Piège* : si le cycle médian dépasse trois mois, les clients signés ce
+  trimestre viennent des dépenses d'avant. Le CAC du trimestre est alors un
+  ordre de grandeur, pas une mesure (contrôle `slg-cycle-long`, §18.5.7). En
+  hybride, la dépense commune (site, marque, contenu) se répartit entre les
+  deux motions selon une clé écrite dans la définition. Sans clé, les deux
+  CAC sont faux, et dans le même sens.
+- *Glossaire* : `cac` · *Tour* : `acq-3`.
+- *Repère* : aucun dans l'absolu. Il se juge contre ce qu'un client rapporte
+  (payback, LTV:CAC).
+
+**`slg.acq.cycle`** — Cycle de vente médian / Median sales cycle
+- *Formule* : médiane des jours entre la création de l'opportunité et sa
+  signature, sur les affaires « nouveau client » gagnées des trois derniers
+  mois. `duration`, en jours ; statistique déclarée (`median` | `mean`).
+- *Où le trouver* :
+  - **Salesforce** : rapport des opportunités gagnées sur la période, champ
+    d'ancienneté de l'opportunité (jours entre création et clôture). Export,
+    puis médiane.
+  - **HubSpot** : transactions gagnées, délai entre la date de création et la
+    date de fermeture. Export, puis médiane : les rapports natifs donnent des
+    moyennes.
+  - **Pipedrive** : Insights, durée des affaires (une moyenne ; la médiane se
+    calcule sur un export).
+- *Effort* : Seul, ~1 h · rôle `revops` · réparation : une après-midi.
+- *Piège* : une affaire à 400 jours déplace la moyenne de plusieurs semaines,
+  donc prends la médiane. Et une opportunité créée tard, après la démo,
+  raccourcit le cycle sur le papier.
+- *Glossaire* : `cac`, dont la page explique le décalage qu'impose un cycle
+  long (terme à créer : « cycle de vente », Q8).
+- *Repère* : pas de repère publiable.
+
+#### 18.4.3 Activation
+
+**`slg.act.live-event`** — Ce que « en production » veut dire / What "live" means
+- *Formule* : le résultat concret qui prouve qu'un client a obtenu ce qu'il a
+  acheté (120 car.), et non la fin du déploiement technique.
+- *Où le trouver* : une décision du produit et du Customer Success, pas un
+  chiffre d'outil.
+- *Effort* : Seul, 5 min (ou « À construire ») · rôle `customer-success` ·
+  réparation : une réunion.
+- *Piège* : « déployé » n'est pas « en production ». Un compte livré que
+  personne n'utilise ne renouvelle pas.
+- *Glossaire* : `aha-moment` · *Tour* : `act-1` · *Dépendance* :
+  `slg.act.go-live` dépend de ce chiffre (même règle que `act.rate` →
+  `act.event`).
+
+**★ `slg.act.go-live`** — Mise en production / Go-live rate
+- *Formule* : nouveaux clients signés sur la cohorte de trois mois, « en
+  production » sous {n} jours après la signature ÷ nouveaux clients signés
+  sur ces trois mois.
+- *Période* : cohorte de trois mois qui finit au mois mûr pour la fenêtre de
+  mise en production. Au 24/09/2026, avec 90 j : **mars à mai** (31/05 + 90 j
+  = 29/08 ≤ 24/09 ; 30/06 + 90 j = 28/09 > 24/09). Cohorte, borné.
+- *Où le trouver* :
+  - **Outil de Customer Success** (Gainsight, Vitally, Planhat…) : l'étape
+    d'onboarding du compte et sa date.
+  - **HubSpot** : un pipeline d'onboarding (tickets ou transactions) avec la
+    date de passage « en production ».
+  - **Salesforce** : un champ date sur le compte ou sur l'objet d'onboarding,
+    s'il existe.
+  - **Pipedrive** : les projets d'onboarding, si l'équipe s'en sert.
+  - Souvent, un tableur du Customer Success.
+- *Effort* : À demander (customer success). « À construire » si aucune date
+  n'est gardée. Réparation : un sprint.
+- *Piège* : compter les comptes « déployés » plutôt qu'en production double
+  le taux. Et le taux se lit sur la cohorte mûre : un client signé en août
+  n'a pas eu ses 90 jours.
+- *Glossaire* : `activation` · *Tour* : `act-2`.
+- *Repère* : pas de repère publiable.
+
+**`slg.act.time-to-live`** — Délai de mise en production / Time to go-live
+- *Formule* : médiane des jours entre la signature et la mise en production,
+  sur les clients de la cohorte qui y sont arrivés. `duration`, en jours.
+- *Où le trouver* : les mêmes sources que la mise en production.
+- *Effort* : Seul, ~1 h si la date existe, sinon À demander · réparation :
+  une après-midi.
+- *Piège* : médiane, et seulement sur ceux qui y sont arrivés : les autres
+  sont dans le taux.
+- *Glossaire* : `time-to-value` · *Repère* : aucun.
+
+#### 18.4.4 Retention
+
+**★ `slg.ret.renewal`** — Renouvellement des contrats / Contract renewal rate
+- *Formule* : contrats renouvelés ÷ contrats arrivés à échéance sur les trois
+  derniers mois. En **logos**, jamais en euros.
+- *Période* : flux, juin à août. Borné.
+- *Variante* (fermée, imprimée, entre dans la durée de vie §18.5.6) :
+  `annual` (contrats annuels, défaut) · `monthly` (contrats mensuels : chaque
+  mois compte comme une échéance).
+- *Sans objet* : `no-renewal-yet` (« aucun contrat n'est encore arrivé à
+  échéance »).
+- *Où le trouver* :
+  - **Salesforce** : opportunités de renouvellement closes sur la période
+    (type d'affaire « client existant », ou un type dédié), gagnées ÷ closes.
+  - **HubSpot** : un pipeline « Renouvellements », gagnées ÷ closes sur la
+    période.
+  - **Pipedrive** : un pipeline dédié, même lecture.
+  - **Chargebee / Stripe** : les abonnements dont l'échéance tombait sur la
+    période, et leur statut aujourd'hui.
+- *Effort* : Seul, ~1 h s'il existe un pipeline de renouvellement, sinon À
+  demander (finance) · rôle `customer-success` · réparation : une
+  après-midi.
+- *Piège* :
+  - La tacite reconduction ne se « gagne » pas : compte les résiliations
+    reçues avant l'échéance.
+  - Un contrat pluriannuel qui n'arrive pas à échéance sort du dénominateur.
+  - Un renouvellement à la baisse reste un renouvellement en logos : la perte
+    se lit dans la NRR.
+- *Glossaire* : `retention` · *Tour* : `ret-1`.
+- *Repère* : pas de repère publiable. Le glossaire cite un churn logo
+  **mensuel** (1-2 % pour le SaaS B2B à panier élevé, texte repassé « à
+  relire » par A7.1), pas un taux de renouvellement. Le convertir supposerait
+  des contrats mensuels.
+
+**`slg.ret.nrr`** — NRR sur douze mois / 12-month NRR
+- *Formule* : ARR aujourd'hui des clients assistés qui l'étaient déjà il y a
+  douze mois ÷ leur ARR il y a douze mois. Deux montants, en pourcentage,
+  **non borné** (peut dépasser 100 %).
+- *Période* : les douze mois qui finissent au mois des flux.
+- *Où le trouver* :
+  - **ChartMogul** : la rétention nette de revenu par cohorte (selon
+    l'offre).
+  - **Finance** : le board pack.
+  - **Salesforce** : la somme des contrats actifs par compte à deux dates, si
+    les contrats y vivent.
+- *Effort* : À demander (finance) · réparation : une après-midi.
+- *Piège* : publiée seule, elle cache la perte. Une NRR à 110 % peut tenir
+  sur une base qui perd un client sur cinq : lis-la avec le renouvellement.
+  Les nouveaux clients de l'année n'entrent ni au numérateur ni au
+  dénominateur.
+- *Glossaire* : `nrr-grr`.
+- *Repère* : **contexte**. 110-130 % est « considérée comme solide » en SaaS
+  B2B (`nrr-grr`, bloc `benchmark`, approuvé au bon à tirer nº5). Il ne
+  désigne jamais (C1), et la NRR n'est pas candidate. Test anti-dérive :
+  « 110 » et « 130 » dans le texte du terme, FR et EN.
+
+**`slg.ret.loss-cause`** — Cause principale de non-renouvellement / Main reason for non-renewal
+- *Formule* : la cause (120 car.) et comment on la sait : données ·
+  entretiens · intuition (`evidence`, comme `ret.churn-cause`).
+- *Où le trouver* :
+  - **HubSpot** : la raison de perte sur les renouvellements perdus.
+  - **Salesforce** : le champ de raison de perte, souvent personnalisé.
+  - **Pipedrive** : la raison de perte des affaires perdues.
+  - Relire les derniers départs avec le Customer Success.
+- *Effort* : À demander (customer success) · réparation : une réunion.
+- *Piège* : « le prix » est la case la plus rapide à cocher. Croise la raison
+  déclarée avec l'usage des 90 jours d'avant.
+- *Glossaire* : `churn` · *Tour* : `ret-3`.
+
+#### 18.4.5 Referral
+
+**★ `slg.ref.referred-share`** — Opportunités recommandées / Referred opportunities
+- *Formule* : opportunités créées sur les trois derniers mois dont la source
+  est une recommandation client (ou un partenaire, selon la variante) ÷
+  opportunités créées sur ces trois mois (`slgOppsCreated`).
+- *Variante* : `customers` · `customers-and-partners`.
+- *Où le trouver* :
+  - **Salesforce** : la source du lead ou de l'opportunité (valeurs de
+    recommandation et de partenaire, selon la configuration).
+  - **HubSpot** : une propriété de source de la transaction, le plus souvent
+    personnalisée ; la « source d'origine » ne sait pas ce qu'est une
+    recommandation.
+  - **Pipedrive** : le champ de source de l'affaire.
+  - En assisté, demander aux commerciaux l'origine de leurs dix dernières
+    opportunités va souvent plus vite et plus juste.
+- *Effort* : Seul, ~1 h · rôle `sales` · réparation : une après-midi.
+- *Piège* : un zéro veut presque toujours dire « personne ne l'a compté », pas
+  « ça n'arrive pas ». Et la source « referral » d'un outil web compte des
+  sites, pas des personnes.
+- *Glossaire* : `referral`.
+- *Repère* : pas de repère publiable. Le glossaire dit « de presque zéro à la
+  majorité selon le produit » : compare-toi à toi-même.
+
+**`slg.ref.referenceable`** — Clients références / Reference customers
+- *Formule* : clients assistés qui ont donné un accord écrit, daté de moins de
+  douze mois, pour être cités ou prendre un appel de prospect ÷ clients
+  assistés à la fin du mois des flux (`slgCustomers`).
+- *Où le trouver* : un tableur du marketing ou du Customer Success ; une
+  propriété « client référence » sur la société (HubSpot, Salesforce,
+  Pipedrive), si l'équipe l'a créée.
+- *Effort* : À demander (marketing) · réparation : une après-midi.
+- *Piège* : les logos du site comptent des clients partis et des accords
+  jamais renouvelés.
+- *Glossaire* : `referral` · *Repère* : aucun.
+
+#### 18.4.6 Revenue
+
+**★ `slg.rev.win-rate`** — Taux de closing / Win rate
+- *Formule* : opportunités « nouveau client » gagnées ÷ opportunités
+  « nouveau client » conclues (gagnées + perdues) sur les trois derniers
+  mois. Le numérateur est `slgDealsWon`.
+- *Où le trouver* :
+  - **Salesforce** : rapport d'opportunités « nouveau client » closes sur la
+    période, gagnées ÷ closes.
+  - **HubSpot** : transactions « nouvelle affaire » fermées sur la période,
+    gagnées ÷ (gagnées + perdues).
+  - **Pipedrive** : Insights, conversion des affaires sur la période.
+- *Effort* : Seul, 5 min · rôle `revops` · réparation : une réunion.
+- *Piège* : les affaires mortes jamais passées « perdues » gonflent le taux,
+  et un « sans décision » est une perte. Les upsells sur des clients
+  existants n'ont rien à faire ici.
+- *Glossaire* : `revenue` (terme à créer : « taux de closing », Q8).
+- *Repère* : pas de repère publiable (voir §18.4.1 pour les chiffres de
+  l'audit, exclus).
+
+**`slg.rev.acv`** — ACV des nouveaux contrats / New-contract ACV
+- *Formule* : valeur annuelle totale des contrats « nouveau client » signés
+  sur les trois derniers mois (hors frais de mise en service, un contrat
+  pluriannuel ramené à l'année) ÷ nombre de ces contrats (`slgDealsWon`).
+- *Où le trouver* :
+  - **HubSpot** : la propriété d'ACV des transactions (calculée depuis les
+    lignes de produit), sinon le montant.
+  - **Salesforce** : le montant des opportunités gagnées (vérifie qu'il porte
+    une année et non toute la durée).
+  - **Pipedrive** : la valeur des affaires gagnées.
+  - **Finance** : les contrats signés.
+- *Effort* : Seul, 5 min · rôle `finance` · réparation : une réunion.
+- *Piège* : un montant qui porte trois ans de contrat triple l'ACV, et les
+  frais de mise en service ne sont pas récurrents. Une moyenne se laisse
+  tirer par un gros contrat : regarde aussi la médiane.
+- *Glossaire* : `arpu` (terme à créer : « ACV », Q8).
+- *Repère* : aucun (« trois ordres de grandeur entre catégories », `arpu`).
+
+**`slg.rev.arpa`** — ARPA assisté / Sales-assisted ARPA
+- *Formule* : MRR des clients assistés à la fin du mois des flux ÷ clients
+  assistés (`slgCustomers`). Le numérateur est le MRR assisté, qui entre dans
+  le total.
+- *Où le trouver* : **Stripe / Chargebee / ChartMogul**, le MRR et les
+  clients filtrés sur les clients assistés (un segment, un plan, une
+  propriété) ; **Finance**, l'ARR assisté ÷ 12.
+- *Effort* : Seul, 5 min si les clients assistés sont marqués, sinon À
+  demander (finance) · réparation : une réunion.
+- *Piège* : en hybride, un client compte dans la seule motion qui a signé son
+  contrat en cours (S8). Un client du libre-service passé par un commercial
+  compte ici, et plus dans l'ARPA libre-service.
+- *Glossaire* : `arpu` · *Repère* : aucun.
+
+**Commun : `rev.gross-margin`** — le chiffre existant, inchangé, `scope:
+"shared"`. Un piège de plus, affiché seulement si l'assisté est coché : « Si
+l'offre assistée comprend de la mise en service, sa marge est plus basse
+qu'une marge moyenne : une seule marge flatte l'assisté. » / "If the
+sales-assisted offer includes onboarding services, its margin is lower than
+an average one: a single margin flatters sales-assisted." *Question Q4.*
+
+#### 18.4.7 Les trois calculés assistés (jamais saisis)
+
+| id | Formule | Existe si | Repère (contexte) | Glossaire · Tour |
+|---|---|---|---|---|
+| `slg.rev.ltv` | ACV ÷ 12 × marge brute × durée de vie, en mois (§18.5.6) | ACV, marge, renouvellement connus ou estimés | durée plafonnée à 36 mois, comme en PLG (Q6) | `ltv` · `rev-2` |
+| `slg.rev.cac-payback` | CAC assisté ÷ (ACV ÷ 12 × marge brute), en mois | CAC, ACV, marge | le même que le PLG : < 12 mois pour un SaaS vendu aux petites entreprises, 18-24 mois en vente entreprise (`cac-payback`) | `cac-payback` · — |
+| `slg.rev.ltv-cac` | LTV ÷ CAC | les deux | autour de 3:1, « un repère, pas une loi » (`ltv`) | `ltv` · — |
+
+Ces chiffres partent de l'**ACV des nouveaux contrats**, et non de l'ARPA
+assisté, parce que le CAC porte sur eux. Mêmes règles qu'en PLG : jamais 0,
+« incalculable — manque : {entrée} », et jamais de repli sur le revenu quand
+la marge manque.
+
+#### 18.4.8 La liaison
+
+**`link.pql-handoff`** — Opportunités venues du libre-service / Opportunities from self-serve
+- *Formule* : opportunités assistées créées sur les trois derniers mois à
+  partir d'un compte du libre-service (un PQL passé aux commerciaux) ÷
+  opportunités assistées créées sur ces trois mois (`slgOppsCreated`). Borné.
+- *Définition recommandée* (`definitionNote`, déjà prévue) : le seuil PQL,
+  par exemple « espace avec 3 membres actifs ».
+- *Où le trouver* :
+  - **HubSpot** : la source de la transaction, ou une propriété « PQL »
+    posée par l'intégration produit.
+  - **Salesforce** : la source du lead, ou une campagne dédiée aux PQL.
+  - **Pipedrive** : le champ de source ou un libellé.
+  - **Data** : la jointure base produit × CRM sur le domaine de l'entreprise.
+- *Effort* : Seul, ~1 h si la source est posée, sinon « À construire ».
+- *Piège* : une opportunité issue d'un compte du libre-service n'est pas
+  forcément « amenée par le produit » : le compte avait peut-être déjà parlé à
+  un commercial. C'est une part du pipeline, pas une attribution. Et elle ne
+  s'additionne pas à la part recommandée : une opportunité peut être les
+  deux.
+- *Glossaire* : `pql`.
+- *Repère* : aucun. Le glossaire le dit : « la seule référence qui vaille est
+  ton propre taux de base ».
+- `scope: "link"`, `optional` (S10). *Question Q7.*
+
+#### 18.4.9 Le pont avec le Tour (assisté)
+
+Même règle qu'en §6.11 : un pont seulement là où la question porte
+**littéralement** sur le fait de mesurer ce chiffre. Six ponts :
+
+| Question | Chiffre |
+|---|---|
+| `acq-3` | `slg.acq.cac` |
+| `act-1` | `slg.act.live-event` |
+| `act-2` | `slg.act.go-live` |
+| `ret-1` | `slg.ret.renewal` (« un taux de rétention, ou équivalent ») |
+| `ret-3` | `slg.ret.loss-cause` |
+| `rev-2` | `slg.rev.ltv` (calculé) |
+
+`acq-1` n'a pas de pont en assisté (pas de chiffre « canal principal »), et
+`ref-3` non plus (le coefficient viral n'a pas d'équivalent). En hybride,
+une question pontée dans les deux motions donne **une ligne par motion**
+(`BridgeRow.motion`), et la carte cite la réponse du Tour une fois : « Au
+Tour : « Oui, et on le mesure » (20 pts). Libre-service : trouvé. Assisté :
+introuvable. » Les compteurs du miroir comptent les lignes.
+
+---
+
+### 18.5 Les calculs assistés — purs, déterministes, dans `lib/engine/`
+
+Les modules existants gagnent un paramètre `motion`. Les nouveaux sont
+`relays.ts`, `total.ts`, `slg-impact.ts` et `slg-scenario.ts`. Aucun ne lit
+un chiffre de l'autre motion, sauf `total.ts`, qui additionne, et `sanity.ts`
+pour `cac-variants-differ`. Un test d'indépendance le garde (§18.10).
+
+#### 18.5.1 Les trois relais (`relays.ts`)
+
+Le peloton PLG compte chaque colonne sur **les mêmes** 100 inscrits (D5).
+L'assisté ne le peut pas : le taux de closing porte sur les opportunités
+conclues du trimestre, pas sur les leads d'une cohorte (il faudrait remonter
+un cycle entier en arrière). Le funnel assisté est donc dessiné en **trois
+relais**, chacun sur **sa** base de 100, dans l'ordre chronologique :
+
+| Relais | Base (100) | Chiffre | Période |
+|---|---|---|---|
+| 1 | leads (ou MQL) de la cohorte | `slg.acq.lead-to-opp` → « deviennent une opportunité » | cohorte, ex. mai-juillet |
+| 2 | opportunités conclues | `slg.rev.win-rate` → « sont signées » | flux, ex. juin-août |
+| 3 | nouveaux clients de la cohorte | `slg.act.go-live` → « sont en production à {n} jours » | cohorte, ex. mars-mai |
+
+- `perHundred = round(100 × taux)`, borne par borne ; un inconnu vaut `null`,
+  jamais 0.
+- **Pas de chaîne multiplicative** : on n'imprime jamais « {x} clients pour
+  100 leads ». La légende le dit : « Chaque grille a sa propre base de 100 :
+  ce ne sont pas les mêmes personnes. » / "Each grid has its own base of 100:
+  they aren't the same people."
+- `chain` reprend `peloton.ts#chainOf` sur les trois relais (`complete`,
+  `gap`, `tail-break`, `empty`) : « on ne voit pas ce relais », même si les
+  bases diffèrent.
+- `leadsPerMonth = dénominateur ÷ 3`, la ligne amont : « ~160 MQL par mois ·
+  HubSpot · mai à juillet ».
+- **Petits effectifs, version assistée** : tout ratio SLG borné dont le
+  dénominateur est < 100 perd ses décimales (règle §6.2), et sa fiche dit
+  « Sur {d} {base}, un de plus ou de moins bouge le taux de {p} point(s) : lis
+  la direction. » / "Out of {d} {base}, one more or less moves the rate by
+  {p} point(s): read the direction.", avec `p = 100 ÷ d` formaté comme un
+  taux. Le tableau affiche la phrase du ★ au plus petit dénominateur.
+
+#### 18.5.2 Le diagnostic assisté (`diagnose.ts`, `motion: "slg"`)
+
+**Candidats** : `slg.acq.lead-to-opp`, `slg.rev.win-rate`, `slg.act.go-live`,
+`slg.ret.renewal`, `slg.ref.referred-share`. Tous se lisent « plus haut =
+mieux » : le renouvellement est un taux de ce qu'on garde, pas de ce qu'on
+perd.
+
+**Comparateur** : la cible d'équipe, sinon aucun (C1). Les positions, les
+états (`not-enough`, `level`, `clear`, `shared`), `CLEAR_MARGIN` = 1,25 et la
+tolérance de `clearlyAbove` sont **inchangés**, appliqués aux seuls candidats
+SLG.
+
+**Non chiffrés en €** : `slg.act.go-live` (il faudrait un modèle qui relie la
+mise en production au renouvellement) et `slg.ref.referred-share` (la
+boucle). Ils vont en `belowUnpriced`, comme `ret.d30` et `ref.referred-share`
+en PLG.
+
+**`blind`** : tout ★ assisté dont la valeur est inconnue. Les cinq ★ sont
+aussi les cinq candidats, donc il n'y a pas d'équivalent du churn à ajouter
+comme en PLG. Même phrase qu'en PLG.
+
+Une phrase fixe, affichée une fois sous le diagnostic assisté : « Le cycle ne
+bouge pas l'argent dans ce calcul : le raccourcir avance les signatures sans
+en créer. » / "The cycle doesn't move the money in this calculation:
+shortening it brings signatures forward without creating any."
+
+#### 18.5.3 L'impact en € (`slg-impact.ts`), en trimestre puis par mois
+
+- *W* = nouveaux clients assistés sur les trois mois : `slgDealsWon` mesuré
+  (numérateur du taux de closing ou dénominateur du CAC). Sinon, les
+  opportunités conclues × le taux de closing (approximatif). Sinon, inconnu.
+- *ACV mensuel* = ACV ÷ 12. *ARPA assisté* = `slg.rev.arpa`. *D* = contrats
+  arrivés à échéance sur les trois mois (dénominateur du renouvellement).
+- **Flux** (`lead-to-opp`, `win-rate`) : clients en plus sur trois mois =
+  `W × (t ÷ r − 1)` ; MRR nouveau par mois = `W × (t ÷ r − 1) × ACV ÷ 12 ÷ 3`.
+  C'est le même *W* et le même ACV pour les deux : **classer en € revient à
+  classer par écart relatif**, la même identité qu'en PLG (D9), épinglée par
+  un test.
+  - Hypothèse imprimée pour `lead-to-opp` : « les opportunités en plus se
+    signent au même taux que les autres ».
+  - Pour `win-rate` : « le même nombre d'opportunités conclues ».
+- **Renouvellement** : contrats gardés en plus sur trois mois =
+  `D × (t − r) ÷ 100` ; MRR préservé par mois = `D × (t − r) ÷ 100 × ARPA
+  assisté ÷ 3`. Hypothèse imprimée : « les contrats sauvés valent l'ARPA
+  assisté ».
+- Sans ACV ni ARPA : impact en clients (`customers`). Sans *W* : « pour 100 »
+  sur la base du relais, jamais une chaîne. Exemples : « +{x} opportunités
+  pour 100 leads », « +{x} signatures pour 100 opportunités conclues ».
+- **La chaîne affichée** (lignes recalculables à la calculette, comme §6.7) :
+
+| Clé | FR | EN |
+|---|---|---|
+| `today` (flux) | « Aujourd'hui · {rate} {phrase} → {n} nouveaux clients sur 3 mois » | "Today · {rate} {phrase} → {n} new customers over 3 months" |
+| `today` (renouvellement) | « Aujourd'hui · {rate} des contrats échus renouvelés, sur {d} contrats échus en 3 mois » | "Today · {rate} of contracts up for renewal renewed, out of {d} in 3 months" |
+| `if` | « Si · {stage} atteint {target} (cible de l'équipe) » | "If · {stage} reaches {target} (team target)" |
+| `then` (flux) | « Alors · {n} × {t}/{r} = {m} (+{delta}) sur 3 mois » | "Then · {n} × {t}/{r} = {m} (+{delta}) over 3 months" |
+| `then` (renouvellement) | « Alors · {d} × ({target} − {rate}) = {kept} contrat(s) gardé(s) en plus sur 3 mois » | "Then · {d} × ({target} − {rate}) = {kept} more contract(s) kept over 3 months" |
+| `times` (flux) | « × ACV ÷ 12 · {delta} × {acvMonthly} = {quarter} de MRR nouveau par trimestre » | "× ACV ÷ 12 · {delta} × {acvMonthly} = {quarter} of new MRR per quarter" |
+| `times` (renouvellement) | « × ARPA assisté · {kept} × {arpa} = {quarter} de MRR préservé par trimestre » | "× sales-assisted ARPA · {kept} × {arpa} = {quarter} of retained MRR per quarter" |
+| `per-month` | « soit {amount} par mois » | "that is {amount} a month" |
+| `annual` | « Soit {amount} de MRR de plus au bout d'un an (contrats annuels : aucun ne se renouvelle dans l'année). » | "That's {amount} more MRR after a year (annual contracts: none comes up for renewal within the year)." |
+
+  `{quarter}` est un entier × un montant affiché, donc exact. `{amount}` vaut
+  `{quarter} ÷ 3`, arrondi à deux chiffres significatifs avec « ~ ». La ligne
+  `annual` vaut `{amount} × 12`, seulement si le renouvellement est connu en
+  variante `annual`. En variante `monthly`, elle reprend la décroissance
+  PLG, `Σ (r/100)^k`. Un écart de moins d'un client (ou d'un contrat) donne
+  `less-than-one`, sans montant, comme en PLG.
+- **Titre = corps** : le titre de `slg:leak` cite `{amount}`, lu sur la
+  ligne `per-month` du même objet (`impactHeadline`, étendu). C'est le
+  gabarit PLG existant (`leakClearMrrNew` / `leakClearMrrRetained`) : « chaque
+  mois » dit la même chose que « par mois ».
+
+#### 18.5.4 Ce qui n'est jamais chiffré
+
+- La mise en production et la part recommandée (§18.5.2).
+- Le cycle, qui avance l'argent sans en créer.
+- Les clients références.
+- La NRR, qui est du contexte et non une candidate.
+- La liaison, qui ne vaut jamais « X € du libre-service ».
+- **Aucune fuite d'une motion n'est jamais rapportée en € à l'autre**, ni
+  additionnée à l'autre.
+
+#### 18.5.5 « Et si » assisté (`slg-scenario.ts`)
+
+- **Leviers**, dans cet ordre : `slg.acq.lead-to-opp`, `slg.rev.win-rate`,
+  `slg.ret.renewal`, `slg.rev.acv`. Même panneau, mêmes curseurs (pas de
+  `scenario.ts#stepOf`), mêmes slides `whatif:<lever>`, et une slide
+  `slg:scenario` « ensemble » à partir de deux leviers.
+- **Modèle, à régime établi** (chaque règle est imprimée avec le résultat) :
+  - `W' = W × (t_lead ÷ r_lead) × (t_win ÷ r_win)` : les deux leviers se
+    composent, comme activation et conversion en PLG.
+  - Nouveau MRR par mois = `W' ÷ 3 × ACV' ÷ 12` : le nouvel ACV porte sur les
+    nouveaux contrats seulement.
+  - Base dans 12 mois = MRR assisté × NRR' (ou × renouvellement', en
+    approximation « logos pour revenu », si la NRR manque). Avec
+    `NRR' = NRR + (t_ren − r_ren)` points : « un point de renouvellement
+    compte comme un point de NRR ; les contrats sauvés valent la moyenne ».
+  - MRR dans 12 mois = base dans 12 mois + 12 × nouveau MRR par mois
+    (contrats annuels : aucun nouveau ne se renouvelle dans l'année).
+  - CAC' = même dépense ÷ W'. LTV' et payback' par §18.5.6.
+- **Pas de levier sur le cycle** (il avance, il ne crée pas), ni sur la
+  mise en production (non chiffrée), ni sur la liaison (Q7).
+- **En hybride** : deux panneaux, un par motion, chacun sur ses leviers. Une
+  seule ligne les relie, le **MRR total dans 12 mois**, aujourd'hui → avec
+  les « Et si » des deux panneaux. C'est une somme, pas une comparaison ;
+  elle suit la règle d'affichage de §18.6.2.
+
+#### 18.5.6 Unit economics assistées (`unit-economics.ts`, branche SLG)
+
+- Durée de vie, en mois :
+  - `annual` : `min(12 ÷ (1 − r/100), 36)` ;
+  - `monthly` : `min(1 ÷ (1 − r/100), 36)` ;
+  - `r = 100` donne 36. Les bornes s'inversent (un renouvellement plus haut
+    donne une vie plus longue).
+- LTV = ACV ÷ 12 × marge ÷ 100 × durée ; payback = CAC ÷ (ACV ÷ 12 × marge
+  ÷ 100) ; LTV:CAC = LTV ÷ CAC. Tout en intervalles. Marge inconnue : les
+  trois sont incalculables, et **jamais de repli sur le revenu**.
+- « Clients perdus sur un an », pour la slide en regard (Q5) :
+  - assisté `annual` : `100 − r` (« des contrats échus ») ;
+  - assisté `monthly` : `100 × (1 − (r/100)^12)` ;
+  - libre-service : `100 × (1 − (1 − churn/100)^12)`, composé, affiché
+    « ~26 % (2,5 % par mois, composé) ».
+
+#### 18.5.7 Contrôles de cohérence assistés (`sanity.ts`), « à vérifier », jamais bloquants
+
+| Id | Condition | Message (FR / EN) |
+|---|---|---|
+| `num-gt-den` | ratio SLG borné, numérateur > dénominateur | bloque, message existant |
+| `slg-cycle-long` | cycle médian > 90 jours (tout l'intervalle) | « Ton cycle médian dépasse les trois mois de la fenêtre : le CAC du trimestre divise sa dépense par des clients venus des dépenses d'avant. Lis-le comme un ordre de grandeur. » / "Your median cycle is longer than the three-month window: this quarter's CAC divides its spend by customers from earlier spend. Read it as an order of magnitude." |
+| `slg-cycle-mean`, `slg-ttl-mean` | statistique `mean` | le message de `ttv-mean`, repris |
+| `slg-acv-vs-arpa` | (ACV ÷ 12) ÷ ARPA assisté entièrement hors de [0,5 ; 2] | « Un nouveau contrat vaut {x} fois le panier moyen du portefeuille : hausse de prix, nouveau segment, ou deux définitions du revenu ? » / "A new contract is worth {x} times the book's average: price rise, new segment, or two definitions of revenue?" |
+| `cac-variants-differ` | hybride, les deux CAC connus avec des variantes différentes | « Les deux CAC ne comptent pas les mêmes dépenses : {v1} en libre-service, {v2} en assisté. » / "The two CACs don't count the same spend: {v1} self-serve, {v2} sales-assisted." Imprimé aussi au pied de la slide en regard |
+
+Les seuils (90 j, [0,5 ; 2]) sont des déclencheurs de relecture, jamais des
+repères. Ils n'apparaissent sur aucune slide comme une norme.
+
+#### 18.5.8 Constats assistés (`findings.ts`)
+
+Mêmes kinds et mêmes rangs, avec `motion` posé :
+- `chain-break` : un relais inconnu et introuvable ; `go-live` avec sa
+  définition introuvable fait un seul constat, sur la définition.
+- `no-definition`, `blind-spot` (ponts §18.4.9), `below-comparator`,
+  `conflict`.
+- `unit-econ-uncomputable` : payback assisté.
+- `small-cohort` : il devient `small-sample` en assisté, avec le chiffre et
+  `p`.
+- `hidden-knowledge`.
+
+Pas de constat de liaison. Règle inchangée : **aucune phrase n'affirme une
+cause**.
+
+---
+
+### 18.6 L'hybride : deux moteurs, un total
+
+#### 18.6.1 Ce qui se dédouble, ce qui reste unique, ce qui s'additionne
+
+| Objet | Hybride |
+|---|---|
+| Couverture | une par motion, dans sa colonne. L'union (marge une fois, liaison exclue) sert au pied des slides communes et à la slide `visibility` |
+| Funnel | deux : le peloton PLG et les relais SLG, **côte à côte**, sans axe ni échelle commune |
+| Diagnostic | deux, chacun contre **ses** cibles. Chaque motion peut nommer sa fuite. **Aucune fonction ne classe les deux ensemble** : il n'existe pas de « plus grosse fuite des deux moteurs » |
+| « Et si » | deux panneaux ; une ligne commune, le MRR total dans 12 mois |
+| MRR, nouveau MRR du mois, MRR dans 12 mois | **additionnés** (`total.ts`) |
+| Unit economics | une slide, deux colonnes **en regard** |
+| Miroir du Tour | un seul, une ligne par (question, motion) |
+| Demande copiée, « À aller chercher » | un seul, groupé par rôle, les chiffres de chaque motion sous son intertitre |
+| Ask | une seule slide (§18.8) |
+
+#### 18.6.2 Le total (`total.ts`)
+
+- **MRR** = MRR libre-service (numérateur de `rev.arpa`, compte `mrrEnd`) +
+  MRR assisté (numérateur de `slg.rev.arpa`). Deux montants saisis en
+  comptes donnent une somme **exacte**, sans « ~ ». Une partie estimée ou
+  approximative donne une somme en intervalle, avec « ~ ». Une partie
+  inconnue donne `uncomputable`, qui nomme la partie manquante (S9).
+- **Nouveau MRR du mois** = N × ARPA (PLG, comme `scenario.ts`) + W ÷ 3 × ACV
+  ÷ 12 (SLG).
+- **MRR dans 12 mois, au rythme actuel** = `mrr12` PLG (`scenario.ts`, sans
+  « Et si ») + la projection SLG (§18.5.5, sans « Et si »). Seulement si les
+  deux existent (Q11).
+- **Règle d'affichage d'une somme** : les parties sont arrondies à une unité
+  commune, celle des deux chiffres significatifs de la plus petite partie, et
+  **le total affiché est la somme des parties affichées**. Le lecteur refait
+  l'addition à la calculette : même règle que la chaîne de §6.7, même test.
+
+#### 18.6.3 La liaison libre-service → ventes
+
+- **Définition** : §18.4.8. En hybride seulement, facultative.
+- **Où elle apparaît** :
+  - la bande du total (tableau) et la slide `total` : « {n} des {m}
+    opportunités assistées viennent de comptes du libre-service ({période}). »
+    / "{n} of the {m} sales-assisted opportunities came from self-serve
+    accounts ({period})." ;
+  - l'onglet Acquisition de l'assisté, sous ses trois chiffres, en bloc
+    « Liaison avec le libre-service (facultatif) » ;
+  - l'annexe ;
+  - une flèche **SVG** dans la bande du total, du bloc libre-service vers le
+    bloc assisté (jamais un glyphe, §8.6).
+- **Ce qu'on n'en conclut pas**, en note de la bande et de la slide : « Une
+  part du pipeline, pas une attribution : on ne sait pas combien de ces
+  comptes auraient signé sans le libre-service. » / "A share of the pipeline,
+  not an attribution: we don't know how many of these accounts would have
+  signed without self-serve." La liaison ne déplace aucun client ni aucun
+  euro d'une motion à l'autre. S8 décide qui compte où.
+- **Jamais** : ni candidate, ni levier, ni constat, ni valeur « en € ».
+
+#### 18.6.4 Garde-fous du « jamais face-à-face »
+
+1. **Ordre fixe** : libre-service puis assisté, partout (colonnes, lignes,
+   titres, listes), quelles que soient les valeurs. Un test échange les
+   valeurs des deux motions et vérifie que l'ordre ne bouge pas.
+2. **Aucun comparatif** dans les gabarits hybrides. Un test balaie la copie
+   `hybrid.*`, `total.*` et `slide.unitEconomicsBoth*` à la recherche de
+   `vs`, `versus`, « contre », « face à », « plus rentable », « mieux »,
+   « meilleur », « moins bien », « fois plus », "better", "worse", "than",
+   "against".
+3. **Aucun graphique commun** : pas de barres, d'empilement ni de jauge qui
+   mette les deux motions sur un même axe. Le total est du texte.
+4. **Une phrase fixe**, sous les deux diagnostics et au pied de la slide en
+   regard : « Deux motions, deux segments : chacune se lit contre ses cibles,
+   pas contre l'autre. » / "Two motions, two segments: each is read against
+   its own targets, not against the other."
+
+---
+
+### 18.7 Les écrans (E1-E5 revus)
+
+**E0 (la page statique)** : la section « Les dix-sept chiffres » devient deux
+sous-sections :
+- « Libre-service : 17 chiffres » ;
+- « Assisté : 14 chiffres, et la marge brute commune », avec formule, « où le
+  trouver » et glossaire, pliées comme aujourd'hui.
+
+Une question de FAQ s'ajoute : « Et si on vend avec une équipe
+commerciale ? » / "What if we sell through a sales team?". Réponse : les deux
+motions, l'hybride, jamais l'un contre l'autre. `meta.title` ne change pas.
+
+**E1** : §18.1.
+
+**E2, une seule motion** : l'écran actuel. En assisté seul, les relais
+remplacent le peloton, et l'eyebrow dit « Ton moteur de growth · assisté ·
+flux : juin à août 2026 ».
+
+**E2, hybride, à 1 280 px**, de haut en bas :
+1. Eyebrow : « Ton moteur de growth · libre-service et assisté · flux :
+   août 2026 ».
+2. **Bande « Deux moteurs, un total »** (`Card`, pleine largeur) :
+   - le titre-verdict en stencil, c'est-à-dire le titre de la slide `total` ;
+   - deux blocs texte côte à côte (MRR, nouveau MRR du mois), avec la flèche
+     de liaison et sa phrase entre eux ;
+   - la phrase fixe de §18.6.4.
+3. **Grille `minmax(0,1fr) minmax(0,1fr)`**, libre-service à gauche, assisté
+   à droite. Chaque colonne a son eyebrow de motion, ses puces de couverture,
+   son diagnostic (grammaire `Diagnosis`, eyebrow « Libre-service — une
+   étape freine le moteur »), puis son funnel **en format compact** :
+   - peloton en quatre lignes, mini-grilles de 118 px à gauche (le rendu
+     mobile actuel) ;
+   - relais en trois lignes, même format, séparés par un filet et
+     l'étiquette « nouvelle base ».
+
+   Les deux colonnes ont la même hauteur de bloc (`subgrid`) : aucune
+   longueur ne se compare d'une colonne à l'autre.
+4. **Sélecteur de motion** (`Segmented`, « Libre-service · Assisté ») : il
+   choisit quels onglets d'étape (`StageTabs`) et quel panneau « Et si »
+   s'affichent en dessous. Par défaut, la motion dont un chiffre a été ouvert
+   en dernier, sinon le libre-service. La ligne « MRR total dans 12 mois »
+   reste sous le panneau, quelle que soit la motion.
+5. Déclaré × mesuré, barre d'actions, bandeau de sauvegarde : uniques,
+   inchangés.
+
+**E2, hybride, à 390 px** : même ordre, **empilé**. Bande du total (les deux
+blocs l'un sous l'autre, la flèche de liaison verticale), carte libre-service,
+carte assisté, puis le sélecteur de motion pleine largeur, les onglets (bande
+qui défile, comme aujourd'hui) et le panneau. « Côte à côte » devient « l'un
+après l'autre, dans l'ordre fixe » : c'est dit ici pour que personne ne
+l'invente autrement.
+
+**E3, la fiche** : même structure. Trois ajouts :
+- la ligne de période, en assisté (« Prends les affaires conclues de juin à
+  août : trois mois, parce qu'un mois compte trop peu d'affaires. » / "Take
+  the deals closed from June to August: three months, because one month has
+  too few deals.") ;
+- la phrase « petits effectifs » assistée (§18.5.1) ;
+- l'étiquette « commun aux deux motions » sur la marge.
+
+**Le pas à pas** (`steps-model.ts`) garde ses quatre grandes étapes :
+1. **Cibles** : un écran, deux groupes (libre-service, assisté).
+2. **Base** : celle du libre-service, puis celle de l'assisté (les trois
+   comptes S6).
+3. **Chiffres** : ceux du libre-service, puis ceux de l'assisté, puis la
+   liaison (facultative, sautable). La numérotation est **par motion** :
+   « Assisté · point 4 sur 15 », jamais « point 21 sur 32 ». Chaque motion a
+   « Passer à l'assisté → » pour sauter.
+4. **« Et si »** : les deux panneaux, puis les slides.
+
+`resumePosition` reprend au premier chiffre `todo` le moins cher des motions
+cochées, dans l'ordre canonique.
+
+**E4, « À aller chercher »** : groupé par rôle, avec deux rôles neufs,
+« Commercial » / "Sales" et « Customer Success » / "Customer success" (Q9).
+Une demande par rôle couvre les deux motions, les chiffres étant listés sous
+« Libre-service » et « Assisté ». Aucune valeur saisie dans le message,
+inchangé.
+
+**E5, les slides** : les vignettes se rangent sous quatre intertitres, « Les
+deux moteurs » (`total`), « Libre-service », « Assisté », « Pour conclure ».
+Au-dessus, « {n} points à vérifier avant de projeter » compte les deux
+motions.
+
+**E6 et E7** : la bande de reprise compte par motion (« Libre-service 11 sur
+17 · assisté 10 sur 15 »). L'import est §18.3.
+
+**Vérification visuelle** (leçon nº 1) : E1 avec les deux cases, E2 hybride
+(bande, deux colonnes, sélecteur), relais seuls, fiche assistée, E4 et E5
+hybride, en FR et EN, à 390 et 1 280 px. On mesure l'égalité de hauteur des
+deux colonnes et l'absence de débordement.
+
+---
+
+### 18.8 Le deck
+
+#### 18.8.1 Sélection et ordre (`deck.ts`)
+
+| Slide | Présente si | Défaut « inclure » | Nature |
+|---|---|---|---|
+| `total` | hybride | oui | **s'additionne** |
+| `peloton` | PLG coché | oui | par motion |
+| `leak` | PLG, même règle qu'en §9.2 et C9 | oui | par motion |
+| `whatif:<lever PLG>`, `scenario` | PLG, leviers bougés | oui | par motion |
+| `slg:peloton` (les relais) | SLG coché | oui | par motion |
+| `slg:leak` | SLG, même règle | oui | par motion |
+| `whatif:slg.*`, `slg:scenario` | SLG, leviers bougés | oui | par motion |
+| `visibility` | toujours | oui | une slide, deux colonnes ; titre sur l'union |
+| `unit-economics` | un CAC connu ou un calculé calculable, dans une motion | oui | une slide, **en regard** en hybride |
+| `mirror` | Tour relié | **non** (D13) | une slide, lignes par motion |
+| `ask` | toujours | oui | une slide |
+| `annex` | toujours | oui | une case, pages groupées par motion |
+
+**Ordre en hybride** : `total` → `peloton` → `leak` → leviers PLG → `scenario`
+→ `slg:peloton` → `slg:leak` → leviers SLG → `slg:scenario` → `visibility`
+→ `unit-economics` → `mirror` → `ask` → `annex`.
+
+En **assisté seul**, c'est le même ordre sans `total` ni les slides PLG. En
+**libre-service seul**, rien ne change par rapport à la v1 (golden,
+§18.3.5).
+
+**Moins de 2 ★ connus dans une motion** : sa `leak` est omise, son funnel
+reste. Si les deux motions sont aveugles, `visibility` monte juste après
+`total`.
+
+**Kicker** : inchangé, plus un marqueur de motion sur les slides d'une
+motion (« · libre-service » / « · assisté »). La **pastille de données**
+compte la motion de la slide, ou l'union sur les slides communes. Le
+**pied** d'une slide assistée : « Flux assistés de {juin à août 2026} ·
+leads de {mai à juillet} · sources : {outils} ».
+
+#### 18.8.2 Gabarits exacts (FR / EN), copie neuve « à relire »
+
+**`total` : « deux moteurs, un total »**
+
+| Cas | FR | EN |
+|---|---|---|
+| les deux MRR connus | « Le MRR atteint **{total}** : {plg} en libre-service, {slg} en assisté. » | "MRR stands at **{total}**: {plg} self-serve, {slg} sales-assisted." |
+| un MRR inconnu | « **On ne peut pas encore additionner les deux moteurs** : le MRR {du libre-service\|de l'assisté} n'est pas mesuré. » | "**We can't add the two engines up yet**: {self-serve\|sales-assisted} MRR isn't measured." |
+
+- *Corps* : deux blocs, libre-service puis assisté (MRR, nouveau MRR du
+  mois, étape nommée par son diagnostic suivie de « (slide {i}) », ou « rien
+  ne freine » ou « pas assez de cibles »), la ligne de liaison entre les
+  deux, puis les totaux :
+  - « Nouveau MRR du mois : {a} + {b} = {c} » ;
+  - « Dans 12 mois, au rythme actuel : {a} + {b} = {c} », si calculable.
+- *Pied* : « MRR à fin {mois} · un client compte dans la motion qui a signé
+  son contrat en cours · sources : {outils} ». La règle S8 est imprimée.
+- **Titre = corps** : `{total}`, `{plg}` et `{slg}` sont les mêmes chaînes
+  que la première ligne du corps (test).
+
+**`slg:peloton` : les relais.** Clauses :
+- r1 « sur 100 {leads}, {q} deviennent une opportunité » / "out of 100
+  {leads}, {q} become an opportunity" ;
+- r2 « sur 100 opportunités conclues, {w} sont signées » / "out of 100
+  closed opportunities, {w} are signed" ;
+- r3 « sur 100 nouveaux clients, {g} sont en production à {n} jours » / "out
+  of 100 new customers, {g} are live within {n} days".
+
+Première majuscule, clauses jointes par « ; ».
+
+| Cas | FR | EN |
+|---|---|---|
+| `complete` | « {r1} ; {r2} ; **{r3}**. » | "{r1}; {r2}; **{r3}**." |
+| `gap` | « {clauses connues}. **Entre les deux, on ne voit rien : {étapes} n'{est\|sont} pas mesurée(s).** » | "{known clauses}. **In between, we see nothing: {stages} {isn't\|aren't} measured.**" |
+| `tail-break` | « {clauses connues}. **Au-delà, on ne sait pas les suivre : {étapes} n'{est\|sont} pas mesurée(s).** » | "{known clauses}. **Beyond that, we can't follow them: {stages} {isn't\|aren't} measured.**" |
+| `empty` | « **On ne sait pas encore suivre 100 leads jusqu'à la mise en production.** » | "**We can't yet follow 100 leads all the way to go-live.**" |
+
+Ce sont les accords `…One` existants, et `{leads}` suit la variante (« leads
+» / « MQL »). *Pied* : « Chaque grille a sa propre base de 100 · {sources
+par relais} ».
+
+**`slg:leak`** : les gabarits `leak*` existants, avec les noms d'étape
+assistés (`phrases.ts`) :
+- « le passage des {leads} en opportunités » / "{leads}-to-opportunity
+  conversion" ;
+- « le taux de closing » / "the win rate" ;
+- « le renouvellement » / "renewals" ;
+- « la mise en production » / "go-live" ;
+- « la part des opportunités recommandées » / "the referred opportunity
+  share".
+
+Les lignes suivent §18.5.3, et le pied les hypothèses de §18.5.3.
+
+**`unit-economics` en hybride : « deux motions en regard »**
+
+| Cas | FR | EN |
+|---|---|---|
+| les deux paybacks calculables | « Un client libre-service rembourse son coût d'acquisition en **{m1} mois**, un client assisté en **{m2} mois**. » | "A self-serve customer pays back their acquisition cost in **{m1} months**, a sales-assisted one in **{m2} months**." |
+| un seul calculable | « Un client {libre-service\|assisté} rembourse son coût d'acquisition en **{m} mois**. Côté {assisté\|libre-service}, **on ne peut pas encore le dire** : {entrée} n'est pas mesurée. » | "A {self-serve\|sales-assisted} customer pays back their acquisition cost in **{m} months**. On the {sales-assisted\|self-serve} side, **we can't say yet**: {input} isn't measured." |
+| aucun, même entrée manquante | le gabarit existant `unitEconomicsUnknown` : « **On ne peut pas encore dire ce que rapporte un client** : {entrée} n'est pas mesurée. » | existing |
+| aucun, entrées différentes | « **On ne peut pas encore dire ce que rapporte un client** : il manque {entrée 1} en libre-service et {entrée 2} en assisté. » | "**We can't yet say what a customer is worth**: {input 1} is missing self-serve and {input 2} sales-assisted." |
+
+Dans les gabarits, l'ordre est toujours libre-service puis assisté, et aucun
+comparatif (§18.6.4).
+
+- *Corps* : un tableau de cinq lignes et deux colonnes (« Libre-service » |
+  « Assisté »).
+
+  | Ligne | Libre-service | Assisté |
+  |---|---|---|
+  | CAC (variante écrite) | CAC PLG | CAC assisté |
+  | Payback | en mois | en mois |
+  | Panier | « ARPA {x} par mois » | « ACV {y} par an ({y÷12} par mois) » |
+  | Clients perdus sur un an (§18.5.6) | annualisé, composé | des contrats échus |
+  | LTV:CAC | | |
+
+  Un calculé incalculable s'écrit « incalculable — manque : {entrée} ».
+- *Pied* : la phrase fixe de §18.6.4 · « durée de vie plafonnée à 36 mois ·
+  marge brute commune aux deux motions » · `cac-variants-differ` si levé ·
+  le repère de payback en **contexte**, tel qu'imprimé aujourd'hui.
+
+**`visibility` en hybride** : le titre existant, calculé sur l'**union**
+(« On documente **{n} chiffres sur {N}**… »). Corps : deux colonnes d'étapes
+× pastilles, puis les introuvables triés par coût de réparation, chacun avec
+sa motion (« assisté · mise en production · pas suivie · Customer Success ·
+un sprint »).
+
+**`ask`** : une slide. En hybride, **pas de pré-remplissage** de la métrique
+de succès quand les deux motions nomment une étape. Le formulaire propose
+les deux, sans ordre de valeur, pour ne pas choisir à la place de l'équipe
+(Q13). « Ce qu'il faut d'abord mesurer » est pré-coché avec les introuvables
+les moins chers des deux motions, départagés par l'ordre canonique.
+
+**`annex`** : les pages se groupent en « Libre-service », « Assisté »,
+« Commun » (la marge) et « Liaison ». Mêmes colonnes, et la période s'écrit
+en trois mois pour l'assisté.
+
+#### 18.8.3 Notes d'orateur neuves (§9.4)
+
+- « Pourquoi ne pas comparer les deux ? » → « Les deux motions vendent à des
+  segments différents : chacune se lit contre ses cibles (slides {i} et
+  {j}). »
+- « Le libre-service alimente-t-il les ventes ? » → la phrase de liaison, et
+  « ce n'est pas une attribution ».
+- « Pourquoi trois mois ? » → « Un mois compte trop peu d'affaires ; trois
+  mois lissent sans mélanger deux grilles tarifaires. »
+- « Et le cycle ? » → « Cycle médian de {c} jours. » Si `slg-cycle-long` est
+  levé, on ajoute la réserve sur le CAC.
+- « Qui compte où ? » → la règle S8.
+
+---
+
+### 18.9 L'exemple rempli d'un hybride
+
+**Entreprise fictive**, et **toutes les valeurs sont fictives**, cibles
+comprises. Le libre-service est **exactement le jeu §6.0** (inchangé, donc
+tous ses tests tiennent). L'assisté et la liaison sont neufs.
+
+- `referenceMonth = 2026-08` ; aujourd'hui = 24/09/2026 ; EUR.
+- Fenêtres PLG : 7 j et 30 j. Fenêtres SLG : qualification 30 j, mise en
+  production 90 j.
+- Périodes assistées :
+  - flux de **juin à août** ;
+  - leads de **mai à juillet** (juillet est le mois mûr à 30 j) ;
+  - nouveaux clients de **mars à mai** (mai est le mois mûr à 90 j).
+- CRM : HubSpot. Facturation : Stripe.
+- `lib/engine/example.ts` gagne `exampleSlgMetrics(words)` et
+  `EXAMPLE_SLG_TARGETS`. La vue « exemple » montre l'exemple **dans les
+  motions cochées** au réglage : libre-service seul (§6.0), assisté seul, ou
+  les deux.
+
+#### 18.9.1 Valeurs saisies
+
+| id | Statut | Valeur saisie |
+|---|---|---|
+| `slg.acq.lead-to-opp` | measured · HubSpot · variante `mql` | 72 ÷ 480 MQL (mai à juillet) = 15 % |
+| `slg.acq.cac` | measured · finance (une personne) · `fully-loaded` | 342 000 € ÷ 18 nouveaux clients (juin à août) = 19 000 € |
+| `slg.acq.cycle` | measured · HubSpot | 64 jours, médiane |
+| `slg.act.live-event` | measured | « premier rapport partagé avec l'équipe du client » |
+| `slg.act.go-live` | **missing** · not-tracked · un sprint · customer-success | — |
+| `slg.act.time-to-live` | **todo** | — |
+| `slg.ret.renewal` | measured · HubSpot · `annual` | 22 ÷ 25 contrats échus (juin à août) = 88 % |
+| `slg.ret.nrr` | estimated · ancien chiffre | 104 à 108 % |
+| `slg.ret.loss-cause` | measured · intuition | « départ du sponsor chez le client » |
+| `slg.ref.referred-share` | measured · HubSpot · `customers-and-partners` | 26 ÷ 130 opportunités créées (juin à août) = 20 % |
+| `slg.ref.referenceable` | **requested** · marketing · il y a 3 j | — |
+| `slg.rev.win-rate` | measured · HubSpot | 18 ÷ 75 opportunités conclues (juin à août) = 24 % |
+| `slg.rev.acv` | measured · HubSpot | 432 000 € ÷ 18 contrats = 24 000 € |
+| `slg.rev.arpa` | measured · Stripe | 180 000 € de MRR ÷ 100 clients assistés (fin août) = 1 800 € |
+| `rev.gross-margin` (commun) | **missing** · no-access (déjà dans §6.0) | — |
+| `link.pql-handoff` | measured · HubSpot · « espace avec 3 membres actifs » | 31 ÷ 130 opportunités créées = 24 % (23,8) |
+
+- Base assistée : `slgOppsCreated` = 130, `slgDealsWon` = 18,
+  `slgCustomers` = 100.
+- **Cibles de l'équipe fictive** : passage lead → opportunité 18 %, taux de
+  closing 32 %, renouvellement 92 %. Le libre-service garde §6.0 :
+  activation 20 %, churn 2 %.
+
+#### 18.9.2 Couverture
+
+| Périmètre | Trouvés | Approximatifs | Demandés / à faire | Introuvables | Total |
+|---|---|---|---|---|---|
+| Libre-service (17) | 11 | 2 | 1 | 3 | 17 |
+| Assisté (15, marge comprise) | 10 | 1 | 2 (1 demandé, 1 à faire) | 2 (mise en production, marge) | 15 |
+| Union (31 : marge une fois, liaison exclue) | 21 | 3 | 3 | 4 | 31 |
+
+La slide `visibility` compte « documentés » = trouvés + approximatifs : « On
+documente **24 chiffres sur 31**. Les 7 qui manquent se réparent entre une
+réunion et un sprint. »
+
+#### 18.9.3 Les relais assistés
+
+- Relais 1 : 72 ÷ 480 = 15 % ⇒ **15 sur 100 MQL**. Mesuré, HubSpot, mai à
+  juillet. Ligne amont : 480 ÷ 3 = 160 ⇒ « ~160 MQL par mois ».
+- Relais 2 : 18 ÷ 75 = 24 % ⇒ **24 sur 100 opportunités conclues**. Petits
+  effectifs : 75 < 100, donc « un de plus ou de moins bouge le taux de ~1,3
+  point » (100 ÷ 75 = 1,33).
+- Relais 3 : inconnu (introuvable) ⇒ `chain = tail-break`.
+- Titre : « Sur 100 MQL, 15 deviennent une opportunité ; sur 100 opportunités
+  conclues, 24 sont signées. **Au-delà, on ne sait pas les suivre : la mise
+  en production n'est pas mesurée.** »
+- Le renouvellement porte sur 25 contrats, donc « un contrat de plus ou de
+  moins bouge le taux de 4 points » (100 ÷ 25). La cible (92 %) est
+  exactement un contrat au-dessus de la valeur (88 %), et la fiche le dit.
+
+#### 18.9.4 Le diagnostic assisté, calculé à la main
+
+*W* = 18 (mesuré), ACV ÷ 12 = 2 000 €, ARPA assisté = 1 800 €, *D* = 25.
+
+| Candidat | Valeur | Cible | Position | Impact exact (classement) |
+|---|---|---|---|---|
+| passage lead → opp. | 15 % | 18 % | below | 18 × (18/15 − 1) = 3,6 clients / 3 mois × 2 000 € ÷ 3 = **2 400 €/mois** |
+| taux de closing | 24 % | 32 % | below | 18 × (32/24 − 1) = 6 clients / 3 mois × 2 000 € ÷ 3 = **4 000 €/mois** |
+| renouvellement | 88 % | 92 % | below | 25 × 4 % = 1 contrat / 3 mois × 1 800 € ÷ 3 = **600 €/mois** |
+| mise en production | inconnu | — | unknown | — |
+| part recommandée | 20 % | — | no-comparator | — |
+
+- Trois candidats comparables, donc pas `not-enough`, et trois `below`. La
+  base est `mrr`.
+- Classement : 4 000 > 2 400 > 600. **`clear`**, parce que 4 000 > 2 400 ×
+  1,25 = 3 000. Nommé : **Revenue (taux de closing)**. `belowUnpriced = []`,
+  `blind = ["slg.act.go-live"]`.
+- **Borne du test** : avec une cible de closing à 30 %, on a 18 × 0,25 × 2 000
+  ÷ 3 = 3 000, et 3 000 > 2 400 × 1,25 = 3 000 est **faux**. L'état est
+  `shared` : le taux de closing et le passage lead → opportunité (2 400 ≥
+  3 000 ÷ 1,25). Le renouvellement (600) sort du groupe. La tolérance de
+  `clearlyAbove` absorbe le résidu flottant de 18/15 − 1.
+- **Chaîne affichée** (slide `slg:leak`) :
+  - « Aujourd'hui · 24 % de closing → 18 nouveaux clients sur 3 mois »
+  - « Si · le taux de closing atteint 32 % (cible de l'équipe) »
+  - « Alors · 18 × 32/24 = 24 (+6) sur 3 mois »
+  - « × ACV ÷ 12 · 6 × 2 000 € = 12 000 € de MRR nouveau par trimestre »
+  - « soit ~4 000 € par mois »
+  - « Soit ~48 000 € de MRR de plus au bout d'un an (contrats annuels :
+    aucun ne se renouvelle dans l'année). » (4 000 × 12)
+- **Titre** : « Ramener le taux de closing à 32 % vaudrait **~4 000 € de MRR
+  nouveau** chaque mois. »
+- **À côté** (les autres candidats), chaque montant venant de sa propre chaîne
+  affichée :
+  - passage : 18 × 18/15 = 21,6 ⇒ 22 (+4), puis 4 × 2 000 € = 8 000 € par
+    trimestre, soit ~2 700 € par mois ;
+  - renouvellement : 25 × (92 % − 88 %) = 1 contrat, puis 1 × 1 800 € =
+    1 800 € par trimestre, soit ~600 € par mois.
+
+  Comme en PLG (560 € exact contre ~600 € affiché), l'écart entre la chaîne
+  arrondie et l'impact exact est normal : le classement lit l'exact.
+- **Sous le diagnostic** : « La mise en production n'est pas mesurée : le vrai
+  frein peut s'y cacher. »
+
+**Le libre-service**, inchangé (§6.6) : **Activation**, ~600 € de MRR
+nouveau par mois, `clear` contre les ~240 € du churn, et le J30 en `blind`.
+Les deux fuites sont affichées chacune dans sa colonne. **Rien ne dit
+qu'« ~4 000 € » pèse plus que « ~600 € »** : ce sont deux moteurs, et chacun
+se lit contre ses cibles.
+
+#### 18.9.5 Le total
+
+- MRR : 48 000 € + 180 000 € = **228 000 €**, exact (deux montants saisis).
+  Titre : « Le MRR atteint **228 000 €** : 48 000 € en libre-service,
+  180 000 € en assisté. »
+- Nouveau MRR du mois :
+  - libre-service : 42 × 120 € = 5 040 €, soit « ~5 000 € » ;
+  - assisté : 18 ÷ 3 × 2 000 € = 12 000 €, soit « ~12 000 € » ;
+  - total affiché : « ~5 000 € + ~12 000 € = ~17 000 € » (le réel, 17 040 €,
+    s'arrondit aussi à 17 000 €).
+- MRR dans 12 mois, au rythme actuel :
+  - libre-service, par `scenario.ts` : q = 1 − 2,5 % − 1,0256 % + 3,0769 % =
+    99,5513 % par mois, puis 48 000 × q¹² + 5 040 × (1 − q¹²) ÷ (1 − q) =
+    45 478 + 59 009 = 104 487 € ;
+  - assisté : 180 000 × [1,04 ; 1,08] + 12 × 12 000 = [331 200 ; 338 400] € ;
+  - unité commune (deux chiffres significatifs de la plus petite partie) :
+    10 000 €, d'où « ~100 000 € + ~330 000 € à ~340 000 € = ~430 000 € à
+    ~440 000 € ».
+- Liaison : « 31 des 130 opportunités assistées viennent de comptes du
+  libre-service (juin à août). »
+
+#### 18.9.6 Unit economics en regard
+
+| Ligne | Libre-service | Assisté |
+|---|---|---|
+| CAC | 500 € (média seul) | 19 000 € (tout chargé) |
+| Payback | incalculable — manque : marge brute | incalculable — manque : marge brute |
+| Panier | ARPA 120 € par mois | ACV 24 000 € par an (2 000 € par mois) |
+| Clients perdus sur un an | ~26 % (2,5 % par mois, composé : 1 − 0,975¹² = 0,262) | 12 % des contrats échus (contrats annuels) |
+| LTV:CAC | incalculable — manque : marge brute | incalculable — manque : marge brute |
+
+- Titre : même entrée manquante des deux côtés ⇒ « **On ne peut pas encore
+  dire ce que rapporte un client** : la marge brute n'est pas mesurée. » Une
+  seule marge manque aux deux motions, et c'est ce que montre le « commun ».
+- Pied : `cac-variants-differ` (« Les deux CAC ne comptent pas les mêmes
+  dépenses : média seul en libre-service, tout chargé en assisté. »).
+- **Cas de test**, pas de l'exemple affiché : avec une marge de 75 % (et une
+  durée de vie de 12 ÷ 0,12 = 100 mois, plafonnée à 36) :
+  - PLG : payback = 500 ÷ 90 = 5,6 mois ;
+  - SLG : payback = 19 000 ÷ 1 500 = 12,7 ⇒ « 13 mois » ; LTV = 1 500 × 36 =
+    54 000 € ; LTV:CAC = 2,8.
+  - Titre : « Un client libre-service rembourse son coût d'acquisition en
+    **5,6 mois**, un client assisté en **13 mois**. »
+
+#### 18.9.7 Deck par défaut de l'exemple
+
+`total` → `peloton` → `leak` (Activation) → `slg:peloton` → `slg:leak` (taux
+de closing) → `visibility` → `unit-economics` → `ask` → `annex` (sur
+plusieurs pages). `mirror` est absent (pas de Tour relié), et il n'y a
+aucune slide « Et si » : aucun levier n'a bougé.
+
+---
+
+### 18.10 Plan de tests
+
+Chaque test porte son commentaire de non-vacuité (convention 5).
+
+#### 18.10.1 Unitaires (`src/lib/engine/__tests__/`, `src/content/__tests__/`)
+
+- **`catalog-shape`**
+  - 14 ids `slg.*` ; au plus 3 `scope: "slg"` par étape (2 en Referral) ; un
+    ★ par étape.
+  - `rev.gross-margin` est le seul `shared`, `link.pql-handoff` le seul
+    `link`.
+  - Chaque `glossary` existe (24 termes).
+  - Les ids de `engine-catalog.ts` sont les ids de la forme.
+  - Six ponts SLG épinglés.
+- **`shapesOf`** : les quatre combinaisons de motions, avec leurs effectifs
+  (17 / 15 / 32 avec la liaison / refus sans motion).
+- **`migrate`, `io`, `storage`** : §18.3.5 en entier, golden v1 compris.
+- **`validate`** :
+  - motions et type ;
+  - fenêtres SLG ;
+  - **NRR à 106 % acceptée** en `rate`, en estimation et en comptes, et un
+    renouvellement à 106 % refusé (borné) ;
+  - ids SLG et liaison acceptés avec une motion décochée.
+- **`shared-counts`** : les trois comptes SLG se propagent dans leurs
+  entrées, et un compte qui rendrait une entrée impossible la laisse telle
+  quelle (règle existante).
+- **`cohort`** : périodes de trois mois ; mois mûrs 30 j ⇒ juillet et 90 j
+  ⇒ mai au 24/09/2026 ; affichage « mars à mai 2026 » / "March to May 2026".
+- **`relays`**
+  - l'exemple (15, 24, `null`, `tail-break`, ~160 MQL par mois) ;
+  - les quatre `chain` ;
+  - jamais 0 pour un inconnu ;
+  - `leadNoun` suit la variante ;
+  - la phrase des petits effectifs (p = 1,3 pour 75, 4 pour 25).
+- **`diagnose` (SLG)**
+  - l'exemple : `clear`, taux de closing, 4 000 contre 2 400 et 600 ;
+  - la borne : 30 % donne `shared` (closing et passage), sans le
+    renouvellement ;
+  - `go-live` et `referred-share` jamais chiffrés ;
+  - aucun repère ne désigne ;
+  - l'équivalence € ↔ écart relatif sur une grille pour les deux flux.
+- **Indépendance des motions**
+  - Tirer au hasard (graine fixe) 1 000 états SLG, puis vérifier que
+    `diagnose(state, "plg")`, le peloton et les unit economics PLG sont
+    **identiques** à ceux de l'état sans SLG. La réciproque vaut pour le
+    PLG.
+  - Non-vacuité : un `diagnose` qui lirait `slg.rev.win-rate` dans les
+    candidats PLG fait tomber le test.
+- **`slg-impact`**
+  - La chaîne de l'exemple, au caractère près, FR et EN.
+  - **Invariant d'affichage** : chaque ligne se recalcule depuis les nombres
+    affichés de la précédente, `{amount}` = `{quarter}` ÷ 3 arrondi, et
+    `annual` = `{amount}` × 12.
+  - Moins d'un client ⇒ pas de montant.
+  - Titre et corps de `slg:leak` contiennent la même chaîne formatée.
+- **`total`**
+  - 228 000 € exact ;
+  - une partie inconnue ⇒ `uncomputable`, qui nomme la partie, **jamais**
+    la partie connue présentée comme total ;
+  - somme affichée = somme des parties affichées, sur une grille de
+    montants (dont l'exemple : 100 000 + [330 000 ; 340 000]).
+- **`unit-economics` (SLG)**
+  - durée de vie `annual` / `monthly`, plafond 36, r = 100 ;
+  - marge inconnue ⇒ trois incalculables, **pas de repli sur le revenu** ;
+  - le cas « marge 75 % » de §18.9.6 ;
+  - clients perdus sur un an : ~26 % (PLG) et 12 % (SLG).
+- **`sanity`** : chaque contrôle SLG a un cas qui déclenche et un qui ne
+  déclenche pas ; `cac-variants-differ` seulement en hybride.
+- **`findings`** : `motion` posé ; `small-sample` ; pas de constat de
+  liaison ; `go-live` avec sa définition introuvable donne un seul
+  `chain-break`.
+- **`bridge`** : une ligne par (question, motion) en hybride ; les
+  compteurs.
+- **`deck`**
+  - Les règles de §18.8.1 : présence, ordre des trois configurations,
+    `visibility` qui monte si les deux motions sont aveugles.
+  - Les ids PLG inchangés en libre-service seul.
+  - Chaque gabarit neuf a un cas qui le déclenche et un qui ne le déclenche
+    pas.
+  - Titre = corps pour `total` et `slg:leak`.
+  - **Ordre fixe** : échanger les valeurs des deux motions ne change ni
+    l'ordre des slides ni celui des colonnes.
+- **Contenu**
+  - Garde « aucun comparatif » (§18.6.4) sur la copie hybride.
+  - Repère anti-dérive : « 110 » et « 130 » (NRR) dans `nrr-grr`, FR et EN.
+  - Placeholders présents dans les deux langues.
+  - Glyphes (§10.4) sur tous les gabarits neufs.
+  - U+00A0 en français (`copy-typography.test.ts`).
+  - Chaque rôle et chaque outil neuf a son libellé FR et EN (`satisfies
+    Record<…>`).
+
+#### 18.10.2 Gardes statiques
+
+`engine-boundary.test.ts` couvre les nouveaux modules sans changement de
+règle : aucun import de `lib/audit` ni de `content/audit-catalog` (décision
+6). Une recherche de source vérifie que « b2b-assiste » n'apparaît nulle
+part sous `lib/engine`.
+
+#### 18.10.3 E2E (Playwright, build de production, par l'aperçu propriétaire)
+
+- **`engine-hybrid-journey.spec.ts`**, paramétré **FR/EN × 1 280/390** :
+  1. réglage avec les deux motions ;
+  2. saisie de l'exemple §18.9 (PLG par l'exemple §6.0, SLG par les fiches) ;
+  3. titre du total exact ;
+  4. deux diagnostics exacts (Activation, taux de closing) ;
+  5. couverture par motion ;
+  6. **rechargement** : tout est là ;
+  7. décocher l'assisté (le tableau n'a plus que le PLG, et le texte
+     d'avertissement s'affiche), puis recocher (les 10 trouvés reviennent) ;
+  8. export, `localStorage` vidé, import : fractions identiques.
+- **`engine-canary.spec.ts`**, étendu : les canaris sont semés **aussi** dans
+  la définition de mise en production, la cause de non-renouvellement, la
+  `definitionNote` de la liaison, un compte à 9 chiffres dans
+  `slg.rev.win-rate` et une note SLG. On vérifie qu'ils sont dans le `.json`
+  et le texte copié, qu'aucune requête ne porte un canari, et qu'il n'y a
+  aucune requête non-`GET` de la session, **réglage des motions compris**.
+- **`engine-migration.spec.ts`**
+  - Semer `tdg.engine.v1` (l'exemple §6.0), ouvrir : même titre, même
+    couverture « 11 sur 17 », mêmes slides. `tdg.engine.v2` est écrit au
+    premier enregistrement, et `tdg.engine.v1` est présent jusqu'à l'export
+    puis absent.
+  - Importer un fichier v1 affiche le message de mise à jour.
+- **`engine-setup.spec.ts`** : impossible de décocher les deux cases
+  (clavier compris) ; les réglages SLG n'apparaissent que cochés ; « App
+  grand public » et « Place de marché » sont désactivées, avec leur note.
+- **`engine-deck.spec.ts`**, étendu :
+  - hybride : pages du PDF = slides incluses ; la slide `total` est
+    présente ;
+  - `unit-economics` a deux colonnes, dans l'ordre libre-service puis
+    assisté ;
+  - polices embarquées : les trois familles seulement ;
+  - assisté seul : ni `total` ni slides PLG.
+- **`engine-mobile.spec.ts`**, étendu : `scrollWidth === clientWidth` sur E1
+  (deux motions dépliées), E2 hybride, les relais, la fiche SLG, E4 et E5
+  hybrides, à 320 (mesure seulement), 360, 390 et 430, FR et EN. Aucun
+  libellé de relais hors de sa carte ; les deux colonnes ont la même hauteur
+  à 1 280.
+- **Ajouts** :
+  - `accessibility.spec.ts` : axe sur E2 hybride, avec un diagnostic
+    assisté visible (surface rouge) ;
+  - `keyboard.spec.ts` : cocher l'assisté, puis renseigner
+    `slg.rev.win-rate` sans souris ;
+  - `analytics.spec.ts` : le vocabulaire neuf, si Q14 est tranchée oui.
+
+#### 18.10.4 Non-vacuité à mesurer à la livraison
+
+| Sabotage | Doit faire tomber | Ne doit pas faire tomber |
+|---|---|---|
+| la migration met `slg: true` | golden v1, migration e2e | diagnose SLG |
+| `validate` garde « > 100 refusé » pour tout pourcentage | validate (NRR 106 %) | golden |
+| `total` rend la partie connue quand l'autre manque | total (unitaire), hybrid-journey | diagnose |
+| `diagnose(plg)` lit un candidat SLG | indépendance | relays |
+| le deck trie les colonnes par payback | ordre fixe (deck) | unit-economics |
+| décocher supprime les entrées SLG | hybrid-journey (recocher) | migration |
+| un `fetch` de l'état au changement de motion | canary (non-GET) | hybrid-journey |
+
+---
+
+### 18.11 Découpage en PR
+
+Le lot A7.3.c. Branche d'intégration `feat/engine-slg` : chaque PR vise
+cette branche (la CI tourne quelle que soit la base), et **un seul merge sur
+`main`**, drapeau fermé, puis la vérification `git show --stat`
+(convention 1). A7 dit « une PR par item » : c'est cette PR d'intégration.
+
+| PR | Contenu | Fichiers possédés | Dépend de | Jours-agent |
+|---|---|---|---|---|
+| **S0 — Contrats et migration** | `types.ts`, `catalog-shape.ts` (formes SLG, `scope`, `span`, `shapesOf`), `migrate.ts`, `validate.ts` (règles §18.3.3, dont le correctif > 100), `io.ts`, `storage.ts`, **golden v1 figé avant toute ligne**, `shared-counts.ts`, `cohort.ts` (trois mois), clés de copie vides | `lib/engine/{types,catalog-shape,migrate,validate,io,storage,shared-counts,cohort}.ts` + tests | — | 1,5 |
+| **S1 — Moteur pur SLG** | `relays`, `diagnose` (motion), `slg-impact`, `unit-economics` (SLG), `total`, `sanity`, `findings`, `bridge`, `slg-scenario`, `request` (rôles), `derive`, `phrases`, `example.ts` (hybride) | `lib/engine/*.ts` hors S0 et `deck.ts` | S0 | 2,5 |
+| **S2 — Contenu** | prose des 14 chiffres et de la liaison, copie `setup.*` / `hybrid.*` / `total.*` / `relays.*` / slides / notes / FAQ, FR et EN, « à relire » ; les tests de contenu | `content/engine-*.ts`, `content/__tests__/engine-*` | S0 | 1,5 |
+| **S3 — Écrans** | `Setup.tsx` (type, motions), `Board.tsx` (bande du total, deux colonnes, sélecteur), `Relays.tsx`, `TotalBand.tsx`, `StageTabs`/`steps-model` (par motion), `MetricSheet` (période, petits effectifs, « commun »), `CollectHub` (rôles), `ExampleView` | `aarrr-funnel-template/_engine/**` hors `deck/` | S0 ; S1 par interfaces | 2,5 |
+| **S4 — Deck** | `deck.ts` (sélection, ordre, gabarits), `SlideTotal.tsx`, `SlideRelays.tsx`, `SlideUnitEconomics.tsx` (en regard), `SlideAnnex` (groupes), `copy-text.ts` | `lib/engine/deck.ts`, `_engine/deck/**` | S1 | 1,5 |
+| **S5 — Intégration** | e2e §18.10.3, captures relues FR/EN × 390/1 280, analytics (Q14), `legal.ts` si Q14, entrée de `JOURNAL.md`, mise à jour d'ENGINE.md (état) | `e2e/engine-*`, `e2e/helpers.ts`, `lib/analytics/*` | S1-S4 | 1 |
+
+Total ≈ **10,5 jours-agent**. Chemin critique S0 → S1 → S4 → S5 ≈ **6
+jours**, avec S2 et S3 en parallèle. Ensuite viennent **A7.3.d** (le bon à
+tirer de la copie neuve, construit depuis `grep -rn "TODO: à relire" src/`)
+et, hors code, la réécriture de `marketing/kit.md:105` et de la ligne de
+risque de `marketing/campaigns/README.md` §8. **Toute évolution des types
+passe par S0.**
+
+---
+
+### 18.12 Questions produit ouvertes (prêtes pour la section C)
+
+Au format de `CHANTIERS.md` C, « Encore ouvert ». La numérotation C25 et
+suivantes est à confirmer au collage. « Aujourd'hui » est ce que ce jet
+suppose ; « Si on se trompe » dit ce qui casse.
+
+| # | Question | Aujourd'hui | Reco |
+|---|---|---|---|
+| Q1 | **L'activation assistée est-elle la mise en production ?** (§18.4.1) | Activation = le client obtient ce qu'il a acheté, après la signature, et non le premier rendez-vous qualifié. Le funnel dessiné suit la chronologie (acquis → signé → en production → renouvelé), les onglets gardent l'ordre AARRR | **Oui** : le passage lead → opportunité couvre déjà la qualification, et l'après-vente est l'angle mort qui explique les non-renouvellements. *Si on se trompe* : les équipes qui appellent « activation » le premier rendez-vous ne trouvent pas leur chiffre. Corriger après coup change un ★, un candidat, un relais et les fichiers remplis |
+| Q2 | **Tout l'assisté se lit-il sur trois mois glissants, fixes ?** (S4) | Flux de juin à août pour août ; cohortes de trois mois qui finissent au mois mûr de leur fenêtre ; pas de réglage | **Oui en v1**. *Si on se trompe* : 40 affaires par mois voudraient le mois, 3 par mois voudraient six mois. Rendre la durée réglable plus tard ne migre rien (`span` est dans la forme, pas dans le fichier) |
+| Q3 | **Un client compte-t-il dans la motion qui a signé son contrat en cours ?** (S8, la plus lourde) | Oui, et la règle est imprimée au pied de la slide `total`. Un compte du libre-service signé par un commercial compte en assisté, et sort de la conversion payante et de l'ARPA du libre-service | **Oui** : c'est la seule règle qui empêche de compter deux fois le MRR et les nouveaux clients. *Si on se trompe* : avec « la motion d'origine », un PQL signé par un commercial ne serait jamais gagné pour l'assisté ; sans règle, le MRR total est faux sans que rien ne le montre |
+| Q4 | **Une seule marge brute, commune aux deux motions ?** | `rev.gross-margin` est `shared`, avec un piège : une marge unique flatte l'assisté s'il comprend de la mise en service | **Oui en v1**, la finance la donne rarement par motion. *Si on se trompe* : le payback assisté paraît trop court. Deux marges plus tard = un id de plus, sans migration |
+| Q5 | **La rétention assistée se lit-elle en renouvellement des contrats échus, et la slide en regard en « clients perdus sur un an » ?** | ★ = renouvellement (logos), avec une variante contrats annuels / mensuels. Sur la slide : libre-service annualisé (~26 %, composé), assisté en contrats échus (12 %) | **Oui** : c'est le chiffre honnête en contrats annuels, et une seule unité par ligne. *Si on se trompe* : garder le natif des deux côtés met un taux mensuel en regard d'un taux annuel, exactement la comparaison piégée que la décision 3 écarte |
+| Q6 | **Durée de vie plafonnée à 36 mois aussi en assisté ?** | 36 mois ; le plafond mord dès 67 % de renouvellement annuel | **Oui** : le bas de « trois à cinq ans », et un seul plafond pour les deux motions. *Si on se trompe* : le glossaire dit « cinq ans ou plus » en entreprise ; 60 mois donneraient une LTV assistée 1,7 fois plus haute, imprimée dans le deck |
+| Q7 | **La liaison = la part des opportunités assistées venues du libre-service ; facultative ; jamais levier, candidate ni constat ?** (S10) | Un ratio en comptes (31 ÷ 130) sur le dénominateur partagé des opportunités créées ; la phrase « une part du pipeline, pas une attribution » | **Oui**, et un « Et si » croisé en v2 seulement s'il est demandé. *Si on se trompe* : s'il fallait le nombre de PQL passés et leur taux d'acceptation, c'est une entrée de plus ; un « Et si » croisé dès la v1 rouvrirait le « mets l'argent dans le PLG », donc le face-à-face |
+| Q8 | **Aucun repère pour le closing, le cycle, le passage lead → opportunité et l'ACV ; trois termes de glossaire à créer ?** | Liens vers des termes voisins (`revenue`, `cac`, `acquisition`, `arpu`). Les ordres de grandeur de l'instrument d'audit (win rate 25-35 % / 12-18 %, couverture de pipeline 3×-6×) restent dehors : non relus (nº4) et interdits d'import (décision 6) | **Oui** ; créer « taux de closing », « cycle de vente » et « ACV » dans une vague SEO hors v1 (même chemin que 2.2), repères éventuels compris. *Si on se trompe* : reprendre les chiffres de l'audit les imprimerait, non relus, sous le nom du site, dans le deck d'un CODIR |
+| Q9 | **Deux rôles neufs : « Commercial » et « Customer Success » ?** | Les demandes copiées vont à eux pour la mise en production, le renouvellement, les références et l'origine des opportunités | **Oui** : sinon ces demandes partent au Support ou au RevOps, qui n'ont pas ces chiffres. *Si on se trompe* : deux libellés à relire, rien d'autre |
+| Q10 | **L'écran hybride : résumés côte à côte, collecte par motion ?** (§18.7) | À 1 280 px : bande du total, deux colonnes (couverture, diagnostic, funnel compact), puis un sélecteur de motion pour les onglets. À 390 px : empilé, ordre fixe | **Oui** : deux tableaux complets ne tiennent pas côte à côte à 1 280 px. *Si on se trompe* : deux tableaux entiers imposent un défilement horizontal ou des fiches en modale, ce que le moteur a évité jusqu'ici |
+| Q11 | **La slide « Deux moteurs, un total » ouvre-t-elle le deck hybride, avec le MRR dans 12 mois ?** | Présente et cochée. Le « dans 12 mois au rythme actuel » n'apparaît que si les deux projections existent ; total = somme des parties affichées | **Oui**, les deux : c'est ce que « un total » veut dire pour un COMEX. *Si on se trompe* : la ligne à 12 mois empile les hypothèses des deux modèles ; la retirer coûte une ligne |
+| Q12 | **Les montants des deux fuites peuvent-ils être visibles côte à côte ?** | Chaque diagnostic dans sa colonne, ordre fixe, phrase fixe « chacune se lit contre ses cibles » ; ni somme ni classement des fuites | **Oui, c'est suffisant**. *Si on se trompe* : un CODIR lira quand même « ~4 000 € » contre « ~600 € » (§18.9.4) ; masquer les montants en hybride retirerait au deck son argument dans les deux motions |
+| Q13 | **Pas de pré-remplissage de la slide `ask` quand les deux motions nomment une étape ?** | Le formulaire propose les deux, sans ordre de valeur | **Oui** : pré-remplir, c'est choisir une motion à la place de l'équipe. *Si on se trompe* : un clic de plus |
+| Q14 | **Compter la motion choisie dans GoatCounter ?** | Non spécifié. Proposition : `engine_setup/<plg\|slg\|hybrid>` et des étapes préfixées (`engine_stage_saved/slg-revenue`), liste fermée | **Oui** : seule façon de savoir si l'assisté trouve son public. C'est une case cochée, pas un chiffre ni un texte ; relire la phrase de confidentialité (D16) pour qu'elle reste exacte. *Si on se trompe* : on pilote le catalogue à l'aveugle, ou la promesse se discute pour une case cochée |
+| Q15 | **Le cycle de vente en Acquisition, et la couverture de pipeline hors v1 ?** | Acquisition = passage, CAC, cycle ; Revenue = closing, ACV, ARPA assisté. C'est ce qui tient « trois par étape » tout en gardant le MRR assisté, sans lequel rien ne s'additionne | **Oui**. La couverture de pipeline, seul indicateur avancé, suppose un objectif de revenu et un seuil qui dépend du ticket, donc un repère qu'on n'a pas. *Si on se trompe* : on cherchera le cycle en Revenue ; le déplacer ne change que `stage` |
+| Q16 | **Libellés et défauts du réglage** | « Plus tard » (pas « Bientôt ») pour l'app grand public et la place de marché ; « taux de closing » ; « assisté » / "sales-assisted" ; libre-service coché et assisté décoché par défaut | **Garder**, et laisser le bon à tirer trancher les mots. *Si on se trompe* : de la copie à reprendre. Pour le défaut, un visiteur en vente assistée doit décocher avant de cocher ; aucune case cochée serait plus neutre, mais la carte ne démarrerait plus valide |
 
 ---
 
