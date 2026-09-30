@@ -9,7 +9,8 @@
 .setup {
   display: flex;
   flex-direction: column;
-  gap: var(--space-8);
+  /* One question after another: extension 04's md rhythm between fields. */
+  gap: var(--form-gap-md);
   min-width: 0;
 }
 
@@ -54,7 +55,7 @@
 .setupGrid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-7);
+  gap: var(--form-gap-md);
 }
 
 @media (min-width: 761px) {
@@ -78,8 +79,23 @@
 }
 
 /* --- Import ------------------------------------------------------------ */
+/* The browser's own file button, in a field's edge until it becomes a
+   Button over a hidden input (extension 04, outside A10). */
 .file {
+  width: 100%;
+  min-height: var(--hit-min);
   padding: var(--space-3);
+  font: var(--body-md);
+  color: var(--field-text);
+  background: var(--field-bg);
+  border: var(--border-width) solid var(--field-border);
+  border-radius: var(--radius-field);
+}
+
+.error {
+  font: var(--meta-xs);
+  color: var(--text-alert);
+  margin: 0;
 }
 
 .preview {

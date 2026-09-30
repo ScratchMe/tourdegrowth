@@ -45,6 +45,8 @@ export interface NumberFieldProps {
   id?: string;
   name?: string;
   onBlur?: FocusEventHandler<HTMLInputElement>;
+  /** Set on the native control, for tests. */
+  "data-testid"?: string;
 }
 
 /**
@@ -84,6 +86,7 @@ export function NumberField({
   id,
   name,
   onBlur,
+  "data-testid": testId,
 }: NumberFieldProps) {
   // The typed text is kept alongside the value it produced: while they agree,
   // the person's own spelling stays on screen; when `value` changes from
@@ -135,6 +138,7 @@ export function NumberField({
               ref={input}
               id={controlId}
               name={name}
+              data-testid={testId}
               type="text"
               inputMode={integer ? "numeric" : "decimal"}
               autoComplete="off"

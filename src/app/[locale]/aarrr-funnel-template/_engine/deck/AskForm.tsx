@@ -1,6 +1,13 @@
 "use client";
 
-import { useId, useState, type InputHTMLAttributes, type ReactNode } from "react";
+import { useId, useState } from "react";
+import { Checkbox } from "@/components/core/Checkbox";
+import { Choices } from "@/components/core/Choices";
+import { Field } from "@/components/core/Field";
+import { FieldRow } from "@/components/core/FieldRow";
+import { NumberField, type NumberFieldProps } from "@/components/core/NumberField";
+import { Select } from "@/components/core/Select";
+import { TextField, type TextFieldProps } from "@/components/core/TextField";
 import { TEXT_LIMITS, shapeOf } from "@/lib/engine/catalog-shape";
 import { fillTemplate } from "@/lib/engine/format";
 import { REPAIR_KEY } from "@/lib/engine/strings";
@@ -8,6 +15,7 @@ import type { EngineStrings, ResolvedMetric } from "@/lib/engine/strings";
 import type { EngineAsk, EngineState, MetricId } from "@/lib/engine/types";
 import { currentSnapshot } from "@/lib/engine/values";
 import type { Locale } from "@/lib/i18n/locale";
+import { percentUnit } from "../sources";
 import { SUCCESS_METRICS, horizonOptions, missingByRepairCost } from "./ask-defaults";
 import { SlideText } from "./slide-text";
 import styles from "./deck.module.css";
@@ -33,24 +41,6 @@ export interface AskFormProps {
 }
 
 /**
- * A labelled field. The label is a real `<label for>`: `core/TextArea`'s
- * accessible-only name has left three fields of the audit instrument
- * nameless on screen (CLAUDE.md, audit 1.3a/1.4/1.6), and a field in a form
- * is read by sighted users too.
- */
-function Field({ id, label, hint, children }: { id: string; label: string; hint?: string; children: ReactNode }) {
-  return (
-    <div className={styles.field}>
-      <label className={styles.fieldLabel} htmlFor={id}>
-        {label}
-      </label>
-      {children}
-      {hint ? <p className={styles.fieldHint}>{hint}</p> : null}
-    </div>
-  );
-}
-
-/**
  * A text field that keeps its draft while it has focus and hands it up on
  * blur (§4.3: writes happen when a field is validated, not per keystroke).
  *
@@ -59,31 +49,58 @@ function Field({ id, label, hint, children }: { id: string; label: string; hint?
  * ask (§7 E5) — resets the draft instead of being hidden behind a stale one.
  * (Found on screen: the success target arrived while the target field still
  * showed the empty draft it was mounted with.)
+ *
+ * The limit is soft (design system extension 04): what is typed past it
+ * stays on screen with its count and message, and is not handed up — the
+ * engine's own check would refuse the whole state over one long bullet. It
+ * used to be a hard `maxlength`, which cut a pasted sentence mid-word.
  */
-function DraftInput({
+function DraftText({
   initial,
   onCommit,
+  maxLength,
+  tooLong,
   ...rest
-}: { initial: string; onCommit: (value: string) => void } & Omit<
-  InputHTMLAttributes<HTMLInputElement>,
-  "value" | "defaultValue" | "onChange" | "onBlur"
+}: { initial: string; onCommit: (value: string) => void; maxLength: number; tooLong: string } & Omit<
+  TextFieldProps,
+  "value" | "onChange" | "onBlur" | "maxLength" | "error"
 >) {
   const [draft, setDraft] = useState(initial);
+  const over = draft.length > maxLength;
   return (
-    <input
+    <TextField
       {...rest}
       value={draft}
-      onChange={(e) => setDraft(e.target.value)}
-      onBlur={() => draft !== initial && onCommit(draft)}
+      onChange={setDraft}
+      maxLength={maxLength}
+      error={over ? tooLong : undefined}
+      onBlur={() => !over && draft !== initial && onCommit(draft)}
     />
   );
 }
 
-/** Parses a typed number; empty is "no value", which is not zero. */
-function parseNumber(raw: string): number | undefined {
-  if (raw.trim() === "") return undefined;
-  const n = Number(raw.replace(",", ".").replace(/\s/g, ""));
-  return Number.isFinite(n) && n >= 0 ? n : undefined;
+/**
+ * The same for a number, read the way the reader writes it (« 26 000 »,
+ * "26,000") by NumberField — the deck's own parser read "26,000" as 26.
+ * `null` is "no value", which is not zero; a negative one is not handed up.
+ */
+function DraftNumber({
+  initial,
+  onCommit,
+  ...rest
+}: { initial: number | null; onCommit: (value: number | undefined) => void } & Omit<
+  NumberFieldProps,
+  "value" | "onChange" | "onBlur"
+>) {
+  const [value, setValue] = useState(initial);
+  return (
+    <NumberField
+      {...rest}
+      value={value}
+      onChange={setValue}
+      onBlur={() => value !== initial && onCommit(value !== null && value >= 0 ? value : undefined)}
+    />
+  );
 }
 
 /**
@@ -102,21 +119,23 @@ export function AskForm({ locale, strings, metrics, state, ask, titlePreview, on
   const u = strings.deckUi;
   const nameOf = (id: MetricId) => metrics.find((m) => m.id === id)?.name ?? id;
 
-  const [amount, setAmount] = useState(ask.cost?.kind === "money" ? String(ask.cost.amount) : "");
-  const [weeks, setWeeks] = useState(ask.cost?.kind === "team" ? String(ask.cost.weeks) : "");
-  const [people, setPeople] = useState(ask.cost?.kind === "team" ? String(ask.cost.people) : "");
+  const [amount, setAmount] = useState<number | null>(ask.cost?.kind === "money" ? ask.cost.amount : null);
+  const [weeks, setWeeks] = useState<number | null>(ask.cost?.kind === "team" ? ask.cost.weeks : null);
+  const [people, setPeople] = useState<number | null>(ask.cost?.kind === "team" ? ask.cost.people : null);
   const [costKind, setCostKind] = useState<CostKind>(ask.cost?.kind ?? "none");
 
   const update = (patch: Partial<EngineAsk>) => onAskChange({ ...ask, ...patch });
 
-  const commitCost = (kind: CostKind, next: { amount?: string; weeks?: string; people?: string } = {}) => {
+  // Empty is "no value", which is not zero; a negative cost is not one either.
+  const usable = (n: number | null) => (n !== null && n >= 0 ? n : undefined);
+  const commitCost = (kind: CostKind) => {
     if (kind === "none") return update({ cost: undefined });
     if (kind === "money") {
-      const value = parseNumber(next.amount ?? amount);
+      const value = usable(amount);
       return update({ cost: value === undefined ? undefined : { kind: "money", amount: value } });
     }
-    const w = parseNumber(next.weeks ?? weeks);
-    const p = parseNumber(next.people ?? people);
+    const w = usable(weeks);
+    const p = usable(people);
     update({ cost: w === undefined || p === undefined ? undefined : { kind: "team", weeks: w, people: p } });
   };
 
@@ -132,6 +151,7 @@ export function AskForm({ locale, strings, metrics, state, ask, titlePreview, on
   const missing = missingByRepairCost(state);
   const entries = snapshot.metrics;
   const full = ask.measureFirst.length >= TEXT_LIMITS.askMeasureFirst;
+  const tooLong = (n: number) => fillTemplate(strings.sheet.tooLong, { n });
 
   return (
     <section className={styles.askForm} aria-labelledby={`${uid}-title`} data-testid="deck-ask-form">
@@ -146,155 +166,135 @@ export function AskForm({ locale, strings, metrics, state, ask, titlePreview, on
         </p>
       ) : null}
 
-      <Field id={`${uid}-what`} label={t.what}>
-        <DraftInput
-          key={ask.what}
-          id={`${uid}-what`}
-          className={styles.control}
-          type="text"
-          maxLength={TEXT_LIMITS.askWhat}
-          initial={ask.what}
-          onCommit={(value) => update({ what: value.trim() })}
-          data-testid="deck-ask-what"
-        />
-      </Field>
+      <DraftText
+        key={ask.what}
+        size="sm"
+        id={`${uid}-what`}
+        label={t.what}
+        maxLength={TEXT_LIMITS.askWhat}
+        tooLong={tooLong(TEXT_LIMITS.askWhat)}
+        initial={ask.what}
+        onCommit={(value) => update({ what: value.trim() })}
+        data-testid="deck-ask-what"
+      />
 
       {/*
-        Radios, not the DS Segmented control: three French options in one
+        Choices, not the DS Segmented control: three French options in one
         compact track measured 367px inside a 342px card at 390px (the deck
-        screen scrolled sideways). A wrapping group of real radios stays in
-        its column at every width and needs no new component.
+        screen scrolled sideways). Rows of real radios stay in their column at
+        every width.
       */}
-      <fieldset className={styles.checkGroup}>
-        <legend className={styles.fieldLabel}>{t.cost}</legend>
-        <div className={styles.radioRow}>
-          {(
-            [
-              ["none", u.askCostNone],
-              ["money", t.costMoney],
-              ["team", u.askCostTeamOption],
-            ] as const
-          ).map(([kind, label]) => (
-            <label key={kind} className={styles.check}>
-              <input
-                type="radio"
-                name={`${uid}-cost`}
-                value={kind}
-                checked={costKind === kind}
-                onChange={() => {
-                  setCostKind(kind);
-                  commitCost(kind);
-                }}
-                data-testid={`deck-ask-cost-${kind}`}
-              />
-              <span>{label}</span>
-            </label>
-          ))}
-        </div>
-        {costKind === "money" ? (
-          <Field id={`${uid}-amount`} label={fillTemplate(u.askAmount, { currency: currencySymbol })}>
-            <input
-              id={`${uid}-amount`}
-              className={styles.control}
-              inputMode="decimal"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              onBlur={() => commitCost("money")}
-            />
-          </Field>
-        ) : null}
-        {costKind === "team" ? (
-          <div className={styles.inlineFields}>
-            <Field id={`${uid}-weeks`} label={u.askWeeks}>
-              <input
-                id={`${uid}-weeks`}
-                className={styles.control}
-                inputMode="numeric"
-                value={weeks}
-                onChange={(e) => setWeeks(e.target.value)}
-                onBlur={() => commitCost("team")}
-              />
-            </Field>
-            <Field id={`${uid}-people`} label={u.askPeople}>
-              <input
-                id={`${uid}-people`}
-                className={styles.control}
-                inputMode="numeric"
-                value={people}
-                onChange={(e) => setPeople(e.target.value)}
-                onBlur={() => commitCost("team")}
-              />
-            </Field>
-          </div>
-        ) : null}
-      </fieldset>
+      <Choices<CostKind>
+        size="sm"
+        id={`${uid}-cost`}
+        legend={t.cost}
+        value={costKind}
+        options={[
+          { value: "none", label: u.askCostNone },
+          { value: "money", label: t.costMoney },
+          { value: "team", label: u.askCostTeamOption },
+        ]}
+        onChange={(kind) => {
+          setCostKind(kind);
+          commitCost(kind);
+        }}
+      />
+      {costKind === "money" ? (
+        // The currency is in the label already: no sign inside the box as well.
+        <NumberField
+          size="sm"
+          id={`${uid}-amount`}
+          label={fillTemplate(u.askAmount, { currency: currencySymbol })}
+          value={amount}
+          onChange={setAmount}
+          onBlur={() => commitCost("money")}
+          locale={locale}
+          parseError={strings.workbench.notANumber}
+          data-testid="deck-ask-amount"
+        />
+      ) : null}
+      {costKind === "team" ? (
+        // « Weeks » and « People » name themselves: a pair with no joiner.
+        <FieldRow>
+          <NumberField
+            size="sm"
+            id={`${uid}-weeks`}
+            label={u.askWeeks}
+            value={weeks}
+            onChange={setWeeks}
+            onBlur={() => commitCost("team")}
+            locale={locale}
+            digits={4}
+            parseError={strings.workbench.notANumber}
+          />
+          <NumberField
+            size="sm"
+            id={`${uid}-people`}
+            label={u.askPeople}
+            value={people}
+            onChange={setPeople}
+            onBlur={() => commitCost("team")}
+            locale={locale}
+            digits={4}
+            parseError={strings.workbench.notANumber}
+          />
+        </FieldRow>
+      ) : null}
 
-      <Field id={`${uid}-horizon`} label={t.horizon}>
-        <select
-          id={`${uid}-horizon`}
-          className={styles.control}
-          value={horizonValue}
-          onChange={(e) => {
-            if (!e.target.value) return update({ horizon: undefined });
-            const [year, quarter] = e.target.value.split("-").map(Number);
-            update({ horizon: { year: year!, quarter: quarter as 1 | 2 | 3 | 4 } });
-          }}
-        >
-          <option value="">{u.askHorizonNone}</option>
-          {quarters.map((q) => (
-            <option key={`${q.year}-${q.quarter}`} value={`${q.year}-${q.quarter}`}>
-              {fillTemplate(strings.units.quarter, { q: q.quarter, year: q.year })}
-            </option>
-          ))}
-        </select>
-      </Field>
+      <Select
+        size="sm"
+        id={`${uid}-horizon`}
+        label={t.horizon}
+        value={horizonValue}
+        placeholder={u.askHorizonNone}
+        options={quarters.map((q) => ({
+          value: `${q.year}-${q.quarter}`,
+          label: fillTemplate(strings.units.quarter, { q: q.quarter, year: q.year }),
+        }))}
+        onChange={(value) => {
+          if (!value) return update({ horizon: undefined });
+          const [year, quarter] = value.split("-").map(Number);
+          update({ horizon: { year: year!, quarter: quarter as 1 | 2 | 3 | 4 } });
+        }}
+      />
 
-      <div className={styles.inlineFields}>
-        <Field id={`${uid}-metric`} label={t.successMetric}>
-          <select
-            id={`${uid}-metric`}
-            className={styles.control}
-            value={ask.successMetric ?? ""}
-            onChange={(e) =>
-              update({ successMetric: (e.target.value || undefined) as MetricId | undefined })
-            }
-          >
-            <option value="">{u.askSuccessNone}</option>
-            {SUCCESS_METRICS.map((id) => (
-              <option key={id} value={id}>
-                {nameOf(id)}
-              </option>
-            ))}
-          </select>
-        </Field>
-        {/* The unit in the label: every metric offered here is a rate, typed "20" for 20 % — never "0.2". */}
-        {ask.successMetric ? (
-          <Field id={`${uid}-target`} label={shapeOf(ask.successMetric).unit === "percent" ? `${u.askTarget} (%)` : u.askTarget}>
-            <DraftInput
-              key={String(ask.successTarget ?? "")}
-              id={`${uid}-target`}
-              className={styles.control}
-              inputMode="decimal"
-              initial={ask.successTarget === undefined ? "" : String(ask.successTarget)}
-              onCommit={(value) => update({ successTarget: parseNumber(value) })}
-              data-testid="deck-ask-target"
-            />
-          </Field>
-        ) : null}
-      </div>
+      <Select<MetricId>
+        size="sm"
+        id={`${uid}-metric`}
+        label={t.successMetric}
+        value={ask.successMetric ?? ""}
+        placeholder={u.askSuccessNone}
+        options={SUCCESS_METRICS.map((id) => ({ value: id, label: nameOf(id) }))}
+        onChange={(value) => update({ successMetric: value || undefined })}
+      />
+      {/* Every metric offered here is a rate, typed "20" for 20 % — never "0.2": the % is in the box. */}
+      {ask.successMetric ? (
+        <DraftNumber
+          key={String(ask.successTarget ?? "")}
+          size="sm"
+          id={`${uid}-target`}
+          label={u.askTarget}
+          initial={ask.successTarget ?? null}
+          onCommit={(successTarget) => update({ successTarget })}
+          locale={locale}
+          digits={5}
+          {...(shapeOf(ask.successMetric).unit === "percent" ? percentUnit(locale) : {})}
+          parseError={strings.workbench.notANumber}
+          data-testid="deck-ask-target"
+        />
+      ) : null}
 
-      <div className={styles.field} role="group" aria-labelledby={`${uid}-bullets`}>
-        <span className={styles.fieldLabel} id={`${uid}-bullets`}>
-          {t.bullets}
-        </span>
+      <Field group size="sm" id={`${uid}-bullets`} label={t.bullets}>
+        <div className={styles.bullets}>
         {[0, 1, 2].map((i) => (
-          <DraftInput
+          <DraftText
             // Position and committed text: an emptied bullet compacts the list, and the fields follow it.
             key={`${i}:${ask.bullets[i] ?? ""}`}
-            className={styles.control}
-            type="text"
+            size="sm"
+            id={`${uid}-bullet-${i + 1}`}
+            label={fillTemplate(u.askBullet, { n: i + 1 })}
             maxLength={TEXT_LIMITS.askBullet}
-            aria-label={fillTemplate(u.askBullet, { n: i + 1 })}
+            tooLong={tooLong(TEXT_LIMITS.askBullet)}
             initial={ask.bullets[i] ?? ""}
             onCommit={(value) =>
               update({
@@ -306,40 +306,37 @@ export function AskForm({ locale, strings, metrics, state, ask, titlePreview, on
             data-testid={`deck-ask-bullet-${i + 1}`}
           />
         ))}
-      </div>
+        </div>
+      </Field>
 
-      <fieldset className={styles.checkGroup}>
-        <legend className={styles.fieldLabel}>{t.measureFirst}</legend>
-        {missing.length > 0 ? (
-          <>
-            <p className={styles.fieldHint}>{u.askMeasureFirstHint}</p>
-            {missing.map((id) => {
-              const checked = ask.measureFirst.includes(id);
-              const repair = entries[id]?.missing?.repair;
-              return (
-                <label key={id} className={styles.check}>
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    disabled={!checked && full}
-                    onChange={() =>
-                      update({
-                        measureFirst: checked ? ask.measureFirst.filter((m) => m !== id) : [...ask.measureFirst, id],
-                      })
-                    }
-                  />
-                  <span>
-                    <SlideText text={nameOf(id)} accent={false} />
-                    {repair ? <span className={styles.checkMeta}> · {strings.repair[REPAIR_KEY[repair]]}</span> : null}
-                  </span>
-                </label>
-              );
-            })}
-          </>
-        ) : (
-          <p className={styles.fieldHint}>{u.askMeasureFirstEmpty}</p>
-        )}
-      </fieldset>
+      <Field
+        group
+        size="sm"
+        id={`${uid}-measure`}
+        label={t.measureFirst}
+        hint={missing.length > 0 ? u.askMeasureFirstHint : u.askMeasureFirstEmpty}
+      >
+        {missing.map((id) => {
+          const checked = ask.measureFirst.includes(id);
+          const repair = entries[id]?.missing?.repair;
+          return (
+            <Checkbox
+              key={id}
+              id={`${uid}-measure-${id.replace(/\./g, "-")}`}
+              label={<SlideText text={nameOf(id)} accent={false} />}
+              hint={repair ? strings.repair[REPAIR_KEY[repair]] : undefined}
+              checked={checked}
+              // Three at most: the group's hint says so, the fourth box waits.
+              disabled={!checked && full}
+              onChange={() =>
+                update({
+                  measureFirst: checked ? ask.measureFirst.filter((m) => m !== id) : [...ask.measureFirst, id],
+                })
+              }
+            />
+          );
+        })}
+      </Field>
     </section>
   );
 }

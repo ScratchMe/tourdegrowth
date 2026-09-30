@@ -94,7 +94,7 @@
 .targets {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-7);
+  gap: var(--form-gap-md);
 }
 
 @media (min-width: 761px) {

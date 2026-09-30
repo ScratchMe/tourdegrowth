@@ -3,17 +3,17 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
+import { NumberField } from "@/components/core/NumberField";
 import { CANDIDATE_IDS, METRIC_SHAPES } from "@/lib/engine/catalog-shape";
 import { isAnswerMetric } from "@/lib/engine/phrases";
 import { knownSharedCount } from "@/lib/engine/shared-counts";
 import type { MetricId, SharedCount } from "@/lib/engine/types";
 import { MetricSheet } from "./MetricSheet";
 import { STEP_PHASES, NUMBER_COUNT, nextPosition, phaseOf, previousPosition, type StepPhase, type StepPosition } from "./steps-model";
+import { percentUnit } from "./sources";
 import { catalogFill, fill, metricById } from "./text";
 import type { EngineActions, EngineView } from "./view";
 import { WhatIfPanel } from "./WhatIfPanel";
-import { describedBy, Field } from "./_ui/Field";
-import { NumberField } from "./_ui/NumberField";
 import styles from "./Steps.module.css";
 
 /**
@@ -160,25 +160,21 @@ function TargetInput({ id, view, actions }: { id: MetricId; view: EngineView; ac
   const target = snapshot.targets[id];
   const [value, setValue] = useState<number | null>(target ?? null);
   const metric = metricById(view.metrics, id);
-  const fieldId = `engine-step-target-${id.replace(/\./g, "-")}`;
   return (
-    <div
+    <NumberField
+      id={`engine-step-target-${id.replace(/\./g, "-")}`}
+      label={fill(view.strings.steps.targetFor, { metric: metric.name })}
+      hint={metric.oneLiner}
+      value={value}
+      onChange={setValue}
       onBlur={() => {
         if ((value ?? undefined) !== target) actions.setTarget(id, value);
       }}
-    >
-      <Field label={fill(view.strings.steps.targetFor, { metric: metric.name })} hint={metric.oneLiner} htmlFor={fieldId}>
-        <NumberField
-          id={fieldId}
-          value={value}
-          onChange={setValue}
-          locale={view.ctx.locale}
-          unit="%"
-          describedBy={describedBy(fieldId, { hint: metric.oneLiner })}
-          invalidMessage={view.strings.workbench.notANumber}
-        />
-      </Field>
-    </div>
+      locale={view.ctx.locale}
+      digits={5}
+      {...percentUnit(view.ctx.locale)}
+      parseError={view.strings.workbench.notANumber}
+    />
   );
 }
 
@@ -227,28 +223,26 @@ function BaseStep({
       </h2>
       <p className={styles.lead}>{s.baseIntro}</p>
       <div className={styles.targets}>
-        <Field label={cohortLabel} hint={cohortHint} htmlFor="engine-base-cohort">
-          <NumberField
-            id="engine-base-cohort"
-            value={cohort}
-            onChange={setCohort}
-            locale={view.ctx.locale}
-            integer
-            describedBy={describedBy("engine-base-cohort", { hint: cohortHint })}
-            invalidMessage={view.strings.workbench.notAWholeNumber}
-          />
-        </Field>
-        <Field label={monthLabel} hint={monthHint} htmlFor="engine-base-month">
-          <NumberField
-            id="engine-base-month"
-            value={month}
-            onChange={setMonth}
-            locale={view.ctx.locale}
-            integer
-            describedBy={describedBy("engine-base-month", { hint: monthHint })}
-            invalidMessage={view.strings.workbench.notAWholeNumber}
-          />
-        </Field>
+        <NumberField
+          id="engine-base-cohort"
+          label={cohortLabel}
+          hint={cohortHint}
+          value={cohort}
+          onChange={setCohort}
+          locale={view.ctx.locale}
+          integer
+          parseError={view.strings.workbench.notAWholeNumber}
+        />
+        <NumberField
+          id="engine-base-month"
+          label={monthLabel}
+          hint={monthHint}
+          value={month}
+          onChange={setMonth}
+          locale={view.ctx.locale}
+          integer
+          parseError={view.strings.workbench.notAWholeNumber}
+        />
       </div>
       <div className={styles.nav}>
         <Button variant="quiet" onClick={onBack}>

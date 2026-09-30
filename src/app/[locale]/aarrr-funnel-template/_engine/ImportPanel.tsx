@@ -8,9 +8,8 @@ import type { EngineState } from "@/lib/engine/types";
 import { coverage } from "@/lib/engine/coverage";
 import { parseEngineFile } from "@/lib/engine/io";
 import { fill, formatMonth } from "./text";
-import { Field } from "./_ui/Field";
+import { Field } from "@/components/core/Field";
 import styles from "./Screens.module.css";
-import ui from "./_ui/ui.module.css";
 
 type Parsed = ReturnType<typeof parseEngineFile>;
 
@@ -63,19 +62,24 @@ export function ImportPanel({
       <h2 id="engine-import-title" className={styles.panelTitle} tabIndex={-1}>
         {strings.io.importTitle}
       </h2>
-      <Field label={strings.actions.import} htmlFor={inputId}>
-        <input
-          id={inputId}
-          className={[ui.control, styles.file].join(" ")}
-          type="file"
-          accept="application/json,.json"
-          onChange={(event) => void read(event.target.files?.[0])}
-          data-testid="engine-import-file"
-        />
+      {/* The file button stays the browser's for now: extension 04 wants it a
+          secondary Button over a hidden input, a later port (CHANTIERS.md A10). */}
+      <Field id={inputId} label={strings.actions.import}>
+        {({ id: fileId, describedBy }) => (
+          <input
+            id={fileId}
+            className={styles.file}
+            type="file"
+            accept="application/json,.json"
+            aria-describedby={describedBy}
+            onChange={(event) => void read(event.target.files?.[0])}
+            data-testid="engine-import-file"
+          />
+        )}
       </Field>
 
       {parsed?.refusal ? (
-        <p className={ui.error} role="alert" data-testid="engine-import-refused">
+        <p className={styles.error} role="alert" data-testid="engine-import-refused">
           {parsed.refusal === "unknown-version" ? strings.io.unknownVersion : strings.io.notEngine}
         </p>
       ) : null}

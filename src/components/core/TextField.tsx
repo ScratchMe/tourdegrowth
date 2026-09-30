@@ -37,6 +37,8 @@ export interface TextFieldProps {
   autoComplete?: string;
   spellCheck?: boolean;
   onBlur?: FocusEventHandler<HTMLInputElement>;
+  /** Set on the native control, for tests. */
+  "data-testid"?: string;
 }
 
 /**
@@ -68,6 +70,7 @@ export function TextField({
   autoComplete = "off",
   spellCheck,
   onBlur,
+  "data-testid": testId,
 }: TextFieldProps) {
   const count = value.length;
   const over = maxLength !== undefined && count > maxLength;
@@ -93,6 +96,7 @@ export function TextField({
           <input
             id={controlId}
             name={name}
+            data-testid={testId}
             type={type}
             className={fieldBox.control}
             value={value}

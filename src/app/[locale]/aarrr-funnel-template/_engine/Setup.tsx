@@ -9,13 +9,14 @@ import type { Currency, EngineSetup, YearMonth } from "@/lib/engine/types";
 import type { StoredResult } from "@/lib/quiz/storage";
 import { defaultReferenceMonth, matureCohortMonth, nextMonth } from "@/lib/engine/cohort";
 import { fill, formatDate, formatMonth } from "./text";
-import { CheckField } from "./_ui/CheckField";
-import { Choices } from "./_ui/Choices";
-import { describedBy, Field } from "./_ui/Field";
-import { MonthField } from "./_ui/MonthField";
-import { SegmentedField } from "./_ui/SegmentedField";
-import { Select } from "./_ui/Select";
-import { TextField } from "./_ui/TextField";
+import { Checkbox } from "@/components/core/Checkbox";
+import { Choices } from "@/components/core/Choices";
+import { DateField } from "@/components/core/DateField";
+import { Field } from "@/components/core/Field";
+import { Segmented } from "@/components/core/Segmented";
+import { Select } from "@/components/core/Select";
+import { TextField } from "@/components/core/TextField";
+import { monthsEndingAt } from "@/lib/forms/date";
 import styles from "./Screens.module.css";
 
 const CURRENCIES: readonly Currency[] = ["EUR", "USD", "GBP", "CHF"];
@@ -136,87 +137,88 @@ export function Setup({
       </h2>
 
       <Choices
-        name={`${id}-model`}
+        id={`${id}-model`}
         legend={s.model}
         value="selfserve"
         onChange={() => undefined}
         options={[
-          { id: "selfserve", label: s.models.selfserve },
+          { value: "selfserve", label: s.models.selfserve },
           // Shown, not hidden: saying which funnels are coming tells a sales-led
-          // team why the seventeen numbers below won't fit them yet.
-          { id: "sales-led", label: s.models.salesLed, note: s.modelSoon, disabled: true },
-          { id: "consumer-app", label: s.models.consumerApp, note: s.modelSoon, disabled: true },
-          { id: "marketplace", label: s.models.marketplace, note: s.modelSoon, disabled: true },
+          // team why the seventeen numbers below won't fit them yet. Dashed and
+          // at full contrast, never faded (design system extension 04, Q18).
+          { value: "sales-led", label: s.models.salesLed, disabledNote: s.modelSoon, disabled: true },
+          { value: "consumer-app", label: s.models.consumerApp, disabledNote: s.modelSoon, disabled: true },
+          { value: "marketplace", label: s.models.marketplace, disabledNote: s.modelSoon, disabled: true },
         ]}
       />
 
       <div className={styles.setupGrid}>
-        <Field label={s.referenceMonth} hint={s.referenceMonthHint} htmlFor={`${id}-reference`}>
-          <MonthField
-            id={`${id}-reference`}
-            value={referenceMonth}
-            latest={lastClosed}
-            format={(m) => formatMonth(m, locale)}
-            onChange={setReferenceMonth}
-            describedBy={describedBy(`${id}-reference`, { hint: s.referenceMonthHint })}
-          />
-        </Field>
-        <Field label={s.cohortMonth} hint={cohortHint} htmlFor={`${id}-cohort`}>
-          <MonthField
-            id={`${id}-cohort`}
-            value={cohortMonth}
-            latest={lastClosed}
-            format={(m) => formatMonth(m, locale)}
-            onChange={setChosenCohort}
-            describedBy={describedBy(`${id}-cohort`, { hint: cohortHint })}
-          />
-        </Field>
+        <DateField
+          precision="month"
+          id={`${id}-reference`}
+          label={s.referenceMonth}
+          hint={s.referenceMonthHint}
+          value={referenceMonth}
+          months={monthOptions(lastClosed, referenceMonth, locale)}
+          onChange={(m) => m && setReferenceMonth(m)}
+        />
+        <DateField
+          precision="month"
+          id={`${id}-cohort`}
+          label={s.cohortMonth}
+          hint={cohortHint}
+          value={cohortMonth}
+          months={monthOptions(lastClosed, cohortMonth, locale)}
+          onChange={(m) => m && setChosenCohort(m)}
+        />
       </div>
 
-      <Field label={s.currency} htmlFor={`${id}-currency`}>
-        <Select<Currency>
-          id={`${id}-currency`}
-          value={currency}
-          options={CURRENCIES.map((c) => ({ id: c, label: c }))}
-          onChange={(c) => c && setCurrency(c)}
-        />
+      {/* A three-letter code, so a box its size, not the column's (extension 04, Q18.11). */}
+      <Select<Currency>
+        id={`${id}-currency`}
+        label={s.currency}
+        fit="content"
+        value={currency}
+        options={CURRENCIES.map((c) => ({ value: c, label: c }))}
+        onChange={(c) => c && setCurrency(c)}
+      />
+
+      <Field group label={s.activationWindow}>
+        {({ labelId }) => (
+          <Segmented
+            labelledBy={labelId}
+            value={String(activation) as "7" | "14" | "30"}
+            options={([7, 14, 30] as const).map((n) => ({ id: String(n) as "7" | "14" | "30", label: fill(s.windowDays, { n }) }))}
+            onChange={(v) => setActivation(Number(v) as EngineSetup["activationWindowDays"])}
+          />
+        )}
+      </Field>
+      <Field group label={s.paidWindow}>
+        {({ labelId }) => (
+          <Segmented
+            labelledBy={labelId}
+            value={String(paid) as "30" | "60" | "90"}
+            options={([30, 60, 90] as const).map((n) => ({ id: String(n) as "30" | "60" | "90", label: fill(s.windowDays, { n }) }))}
+            onChange={(v) => setPaid(Number(v) as EngineSetup["paidWindowDays"])}
+          />
+        )}
       </Field>
 
-      <SegmentedField
-        label={s.activationWindow}
-        value={String(activation) as "7" | "14" | "30"}
-        options={([7, 14, 30] as const).map((n) => ({ id: String(n) as "7" | "14" | "30", label: fill(s.windowDays, { n }) }))}
-        onChange={(v) => setActivation(Number(v) as EngineSetup["activationWindowDays"])}
-      />
-      <SegmentedField
-        label={s.paidWindow}
-        value={String(paid) as "30" | "60" | "90"}
-        options={([30, 60, 90] as const).map((n) => ({ id: String(n) as "30" | "60" | "90", label: fill(s.windowDays, { n }) }))}
-        onChange={(v) => setPaid(Number(v) as EngineSetup["paidWindowDays"])}
-      />
-
-      <Field
+      <TextField
+        id={`${id}-company`}
         label={s.companyLabel}
         hint={s.companyHint}
-        htmlFor={`${id}-company`}
+        value={company}
+        onChange={setCompany}
+        maxLength={TEXT_LIMITS.companyLabel}
         error={tried && companyTooLong ? fill(strings.sheet.tooLong, { n: TEXT_LIMITS.companyLabel }) : null}
-      >
-        <TextField
-          id={`${id}-company`}
-          value={company}
-          onChange={setCompany}
-          limit={TEXT_LIMITS.companyLabel}
-          describedBy={describedBy(`${id}-company`, { hint: s.companyHint })}
-        />
-      </Field>
+      />
 
       {/* Also in the settings since C8 (2026-09-29): a Tour taken after the engine was started, or
           a box unticked by mistake, could never be linked again. */}
       {tour ? (
         <div className={styles.tour} data-testid="engine-setup-tour">
-          <CheckField id={`${id}-tour`} checked={linkTour} onChange={setLinkTour}>
-            {s.tourLink}
-          </CheckField>
+          <Checkbox id={`${id}-tour`} label={s.tourLink} checked={linkTour} onChange={setLinkTour} />
           <p className={styles.tourText}>
             {fill(s.tourFound, { date: formatDate(tour.createdAt, locale), score: tour.total ?? "—" })}
           </p>
@@ -273,4 +275,14 @@ export function Setup({
       )}
     </Card>
   );
+}
+
+/**
+ * The months offered: the eighteen closed ones up to `latest` — a cohort from
+ * next year, or five years back, is a typo the list makes impossible — plus
+ * `current` when an imported file holds an older one, so it is never
+ * silently swapped for another.
+ */
+function monthOptions(latest: YearMonth, current: YearMonth, locale: "en" | "fr") {
+  return monthsEndingAt(latest, 18, current).map((m) => ({ value: m, label: formatMonth(m, locale) }));
 }
