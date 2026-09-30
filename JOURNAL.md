@@ -5619,9 +5619,11 @@ Les aperçus suivent, et la liste d'attente de `variant-names.test.ts` perd ses 
 - Les aperçus suivent (`Frame` → `Call`, `FrameMoods` → `CallMoods`, `Compact` → `Small`).
 - La liste d'attente de `variant-names.test.ts` est vide : un composant qui arrive avec un nom retiré se renomme, il ne s'y inscrit pas.
 
-**Le lot A5 est clos** : quatre PR (#197, #198, #199 et celle de cette entrée), une famille chacune, toutes selon la table « Variant names » de `conventions.md`. S-16 est livré. Aucune ne change quoi que ce soit à l'écran : 36 captures pleine page (accueil, quiz, résultat, moteur, tableau de bord et rapport du jeu, slide peloton, admin d'audit ; FR et EN ; 1 280 et 390 px) sont identiques à l'octet à celles de `main`, sur l'empilement des familles. Le bundle design-sync est à reconstruire (B3 dit ce qu'il doit emporter).
+**Le lot A5 est clos** : quatre PR (#197, #198, #199 et #200), une famille chacune, toutes selon la table « Variant names » de `conventions.md`. S-16 est livré. Aucune ne change quoi que ce soit à l'écran : 36 captures pleine page (accueil, quiz, résultat, moteur, tableau de bord et rapport du jeu, slide peloton, admin d'audit ; FR et EN ; 1 280 et 390 px) sont identiques à l'octet à celles de `main`, sur l'empilement des familles. Le bundle design-sync est à reconstruire (B3 dit ce qu'il doit emporter).
 
 **Vérifié** : lint et `tsc` propres ; 2 239 tests unitaires ; `next build` propre avec `GAME_ENABLED=true` ; **620 specs Playwright** (615 passées, 5 ignorées par construction, aucun échec), passées sur l'empilement des quatre familles, dont le code sous `src/`, `e2e/` et `.design-sync/` est identique à celui de cette branche (vérifié par `git diff`).
+
+**En production** : PR [#200](https://github.com/ScratchMe/tourdegrowth/pull/200), mergée le 2026-09-30 à 0 h 01 UTC (squash `bd8b24c`, 12 fichiers, identique à la tête de la PR), servie à 0 h 03 UTC. Le jeu et le moteur restent en 404 derrière leurs drapeaux. La feuille globale servie par `/en` porte `ClickPill …__sm`, et plus `__compact`. `DgFace` garde ses classes `__frame` et `__avatar` : seul le nom de la prop a changé (`framing`), pas la feuille.
 
 **Piège** : un `git rebase --onto` qui part d'une base trop ancienne rejoue des commits déjà squashés dans `main` et s'arrête sur un conflit fantôme (convention 12). La base à donner est le dernier commit de la branche du dessous, pas son premier. Ici, `--skip` a suffi : le contenu était déjà là.
 
