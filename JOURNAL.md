@@ -6301,3 +6301,9 @@ Elle a relevé un trou : seules les lignes d'adresse de `/llms-full.txt` étaien
 **Vérifié** : `tsc` et `eslint` propres, **2 352 tests unitaires** (onze de plus), `vitest --coverage` au-dessus de ses seuils, `next build` propre, avec les trois routes en statique. La suite Playwright complète, avec les variables de la CI : **666 specs, 643 passées, aucun échec**, 23 ignorées par construction. `llms-robots.spec.ts` (trois specs, dont une qui demande chaque adresse listée et exige un 200) a été rejouée après les corrections de la relecture, sur un build refait.
 
 **`main` a bougé deux fois pendant la PR** : A11, C28 et C29 (#227), puis la ligne de production d'A11 (#229), touchaient les mêmes lignes de `CHANTIERS.md`, de `CLAUDE.md` et de la fin du journal. `main` a été fusionné deux fois dans la branche en gardant les deux côtés, et la ligne des décisions de `CLAUDE.md` a été resserrée pour rester sous le budget de 40 000 caractères : seule C25 y reste ouverte. Re-mesuré sur l'arbre fusionné : **2 356 tests unitaires**, **667 specs, 644 passées, aucun échec**, 23 ignorées par construction.
+
+**En production (2026-09-30)** : [#228](https://github.com/ScratchMe/tourdegrowth/pull/228), squash `4f804ea`, 15 fichiers, arbre identique à la tête. Déployé : le statut `Vercel` du commit est à `success`. Vérifié en HTTP sur `www.tourdegrowth.com` :
+- `/robots.txt`, `/llms.txt` et `/llms-full.txt` répondent 200 en `text/plain; charset=utf-8`, pour 369 o, 10 403 o et 188 394 o ;
+- `robots.txt` sert les deux groupes nommés et le groupe `*`, tous en `Allow: /`, sans aucun `Disallow` ;
+- les adresses de `/llms.txt` sont exactement les 74 du sitemap de production, plus le lien du texte intégral. Chacune répond 200. Ni le jeu ni le moteur n'y figurent, puisqu'ils sont fermés ;
+- `/llms-full.txt` a ses 32 parties et ne cite ni `/r/`, ni `/admin`, ni le moteur.
