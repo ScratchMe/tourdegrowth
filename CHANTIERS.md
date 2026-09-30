@@ -22,14 +22,13 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
 | **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.c et A7.3.d après C25, A7.4 après A7.3, et A7.12.c à l'ouverture ; A10 (S-15) dans l'ordre a → d |
-| **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30** (79 composants, après A1, A2, A4 et A5). A7.10 et A10 (les primitives de formulaire) sont livrés le 2026-09-30 : **une re-synchro les envoie ensemble** (B3), 88 composants attendus |
-| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 et C24 tranchées le 2026-09-30. Restent **C25**, la validation de la spécification de A7.3 (`ENGINE.md` §18), et C26 et C27, nées d'A8 (robots d'IA, `llms.txt`) |
+| **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30, après A7.10 et A10** (B3 : 88 composants, 292 cellules, 88 aperçus sur 88 rendus). Rien à lancer tant qu'un composant, ou une copie qu'un aperçu reprend, ne change pas |
+| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 et C24 tranchées le 2026-09-30. Restent **C25**, la validation de la spécification de A7.3 (`ENGINE.md` §18), C26 et C27, nées d'A8 (robots d'IA, `llms.txt`), et C28 et C29, nées de la design sync B3 (l'espace d'une unité, le mot « facultatif ») |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, tout A7.3 |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
 
 **L'ordre conseillé** : C25 d'abord (Q3, Q1 et Q2, puis les autres en bloc),
-qui débloque A7.3.c. B3 maintenant qu'A7.10 est livré, puis D. C26 et C27
-quand tu veux : rien ne les attend.
+qui débloque A7.3.c, puis D. C26 à C29 quand tu veux : rien ne les attend.
 
 **Deux sessions en parallèle** écrivent toutes deux à la fin de `JOURNAL.md`
 et dans ce fichier. La seconde à merger fusionne `main` dans sa branche avant
@@ -170,6 +169,20 @@ contre toute opacité sur du texte. La ligne « Pour enregistrer, il manque :
 lui faut un titre qui compte, donc de la copie neuve : une décision, pas un
 portage.
 
+### A11 — Ce que la design sync B3 du 2026-09-30 a trouvé dans le produit
+
+Vus en reprenant les aperçus des primitives sur leurs vrais appels. Le
+défaut du trait de `Checkbox` est corrigé dans la PR de la synchro, avec sa
+garde ; les quatre suivants sont petits et peuvent partir ensemble. Les deux
+qui demandent un avis de design sont en C28 et C29.
+
+| # | Quoi | Où, et comment le voir |
+|---|---|---|
+| A11.1 | **« 1 days » / « 1 jours »** : l'estimation d'une durée prend un pluriel fixe | `MetricSheet.tsx:41` : `wordUnit(view.strings.workbench.days)` pour tout chiffre `duration` (`act.ttv`). Le moteur d'exemple l'estime de 1 à 3 : la borne basse lit « 1 jours ». L'unité suit le nombre (`Intl.PluralRules`), et un test sur 1 et 2 dans les deux langues |
+| A11.2 | **Un jour qui n'existe pas n'a pas de bord rouge** | `DateField` en précision jour : « Ce jour n'existe pas. » s'affiche, mais `DayField` ne donne le bord d'état qu'aux parties vides ; le 31 février, les trois boîtes sont choisies et aucune ne rougit. Avec `error`, les trois passent en invalide (le bord de 3 px que `Field` promet) |
+| A11.3 | **Le joint d'une `FieldRow` s'écarte de sa boîte** | `.rowGrid` dimensionne la première colonne sur le champ entier, libellé et indice compris : quand l'un est plus large que la boîte, « sur » se pose contre le texte, loin du chiffre (le CAC : « 21 000 € ……… sur 42 »). Le commentaire du composant promet le joint contre la boîte. Voir l'aperçu `FieldRow` `AmountOutOfACount` |
+| A11.4 | **Une espace ordinaire entre un nombre et son mot** dans la copie du moteur | `engine-copy.ts` : `tooLong` (« {n} caractères au plus. »), `lastVisit` (« il y a {n} jours ») et `deckUi.what` (« Quoi (120 caractères) ») ; `windowDays` a déjà l'insécable. `copy-typography.test.ts` ne le voit pas : elle cherche la ponctuation haute et les groupes de chiffres. Corriger, et étendre la garde à « chiffre ou `{n}`, espace, mot » |
+
 ---
 
 ## B. Design sync
@@ -177,13 +190,16 @@ portage.
 **Une session cloud suffit** depuis le 2026-09-29 : l'outil `DesignSync` y
 répond avec la connexion claude.ai, et le convertisseur vient avec le skill
 `/design-sync`. L'autorisation locale qui manquait le 2026-09-11 n'est plus un
-prérequis. **B1 est fait** : le projet Claude Design est à jour du 2026-09-30,
-avec 79 composants, 244 cellules et 79 aperçus sur 79 rendus, après A1, A2, A4
-et A5 (`JOURNAL.md`, 2026-09-30, et `.design-sync/NOTES.md`, « Synced »).
+prérequis. **B1 et B3 sont faits** : le projet Claude Design est à jour du
+2026-09-30 après A7.10 et A10, avec **88 composants, 292 cellules et 88 aperçus
+sur 88 rendus** (`JOURNAL.md`, « Design sync B3 », et `.design-sync/NOTES.md`,
+« Synced »). B2, le brief S-15, est clos avec A10.
 
-| # | Quoi | Détail |
-|---|---|---|
-| B3 | **Re-synchroniser : A7.10 et A10 sont livrés** (le primaire de `ShareCard` chez le propriétaire ; les neuf primitives de formulaire, 2026-09-30 — B2, le brief S-15, est clos avec A10) | Avec le prompt B. Attendu : **88 composants, 284 cellules** (245 après A7.10, plus 39 : les aperçus des neuf primitives, `InAField` de `TextArea` et `InAForm` de `Segmented`), 88/88. Les aperçus des primitives n'ont été vérifiés que par le compilateur, jamais rendus par le pilote : les regarder un par un contre `design/ds-extension-04-return/board/`. **Quatre** avertissements sont permanents : « Impact », et `GRID_OVERFLOW` sur `DefinitionPopover`, `QuarterNews` et `GlossaryTerm` (le quatrième depuis A4, accepté par Antoine le 2026-09-30). Deux pièges : le driver ne régénère pas `dist/types/` (lancer `cfg.buildCmd` d'abord, sinon les contrats restent ceux d'avant), et une note est reportée quand l'aperçu n'a pas changé même si le composant a changé (recapturer ceux-là en contrôle). Les deux sont dans `.design-sync/NOTES.md` |
+**Rien d'ouvert.** La prochaine synchro se lance quand un composant change, ou
+quand change une copie, un chiffre du modèle ou un comportement qu'un aperçu
+reprend : c'est ainsi que B3 a trouvé l'amende du jeu et les cartes de
+`SpaceStrip` restées d'avant A7.8 et A7.9, dans des notes reportées. Ce qu'elle
+a trouvé dans le produit est en A11, C28 et C29.
 
 ---
 
@@ -239,6 +255,8 @@ ouverts, et, pour la vue propriétaire, un build jetable jamais commité.
 | C25 | **Valider la spécification du B2B assisté et de l'hybride** (`ENGINE.md` §18, A7.3.a, écrite le 2026-09-30) | Rien n'est codé. La spécification tient la décision 3 à la lettre (type puis motions, « deux moteurs, un total », jamais de face-à-face) et C1 dans les deux motions. Elle pose **seize questions** (§18.12), chacune avec sa reco et ce qui casse si on se trompe. Les trois qui structurent tout : **Q3**, un client compte dans la motion qui a signé son contrat en cours (sinon le MRR total se compte deux fois), **Q1**, l'activation assistée est la mise en production, et **Q2**, l'assisté se lit sur trois mois glissants | **Trancher Q3, Q1 et Q2 d'abord**, une par une avec le prompt C, puis valider les treize autres en bloc si leurs recos te vont. Ensuite A7.3.c (le code) peut partir, dans l'ordre du §18.11 |
 | C26 | **Laisser ou bloquer les robots d'IA ?** Né d'A8 (2026-09-30) | `robots.ts` sert `User-Agent: *` / `Allow: /`, sans rien dire d'autre. Mesuré le 2026-09-30 : neuf robots d'IA ou de recherche (GPTBot, OAI-SearchBot, ClaudeBot, PerplexityBot, CCBot…) reçoivent la même page que Googlebot, au même octet. Les éditeurs séparent maintenant leurs robots d'**entraînement** (GPTBot, ClaudeBot, CCBot, Google-Extended) de leurs robots de **recherche** (OAI-SearchBot, Claude-SearchBot, PerplexityBot) : on peut refuser l'un sans perdre l'autre | **Tout laisser, et l'écrire** dans `robots.ts`, pour que ce soit un choix et plus un défaut. Le Tour vit du seul SEO (C20), le glossaire et les comparaisons sont écrits pour être cités, et ce qui a de la valeur (le Tour, le moteur, le jeu) tourne dans le navigateur : un modèle entraîné sur les pages ne l'emporte pas. Bloquer l'entraînement seul coûterait la présence du site dans ce qu'un modèle sait sans chercher. **Si on se trompe** : laisser ne se rattrape pas pour ce qui est déjà lu ; bloquer coûte des citations, et se défait au passage suivant |
 | C27 | **Publier un `llms.txt` ?** Né d'A8 (2026-09-30) | `/llms.txt` répond par la page 404 du site. C'est une proposition, pas un standard. Google a dit en juillet 2025 ne pas le lire, et selon une mesure publiée par [PPC Land](https://ppc.land/llms-txt-adoption-rises-8-8x-but-97-of-files-get-zero-ai-requests/), 97 % des fichiers n'ont reçu aucune requête d'IA en mai 2026. Perplexity est seule à dire qu'elle le lit (même source) | **Oui, court et généré** : une route qui le construit depuis ce qui existe déjà (titre et description de chaque page, les 24 termes, les comparaisons, les deux pages « porte ouverte », `/how-it-works`), en anglais avec les adresses des deux langues, **sans `llms-full.txt`**. Seul le paragraphe d'en-tête est de la copie neuve, « à relire », et un test l'empêche de dériver des pages. Gain faible, coût faible. **Si on se trompe** : rien ne casse dans un sens ni dans l'autre tant que Google et OpenAI ne le lisent pas |
+| C28 | **L'espace entre une unité et son chiffre** dans un champ. Née de la design sync B3 (2026-09-30) | Le retour 04 pose 6 px entre le signe et le chiffre (`Field.module.css`, `.affix + .control`, repris tel quel), alors que sa propre table écrit « €26,000 ». En anglais on lit « € 500 », « 140 % » ; en français, les 6 px s'ajoutent à l'insécable que `percentUnit` met déjà dans « % » | Supprimer les 6 px et laisser la chaîne de l'unité porter son espace, comme partout ailleurs dans le produit : collée en anglais (« €500 », « 20% »), insécable en français (« 26 000 € », « 20 % », ce que `Intl` donne). Deux fichiers, `Field.module.css` et `moneyUnit`. Ce qu'on casse si on se trompe : rien d'irréversible, c'est une espace |
+| C29 | **« Facultatif » : dans le libellé, ou par la prop `optional` ?** Née de la design sync B3 | Six primitives prennent `optional`, qui dessine le mot plus discret après le libellé (le dessin du retour 04). Aucun appel ne la passe : le moteur écrit « (facultatif) » dans quatre libellés (`engine-copy.ts` : `companyLabel`, `definitionNote`, `target`, `repairComment`), au poids du libellé | Passer le mot par la prop : c'est le dessin retenu, et Claude Design le voit dans les contrats. Quatre chaînes à couper (copie « à relire »). Sinon, retirer la prop des contrats, pour ne pas enseigner un usage que le produit n'a pas |
 
 ---
 
@@ -318,8 +336,8 @@ Réponds-moi en français, court : ce qui est livré, ce qui est vérifié et co
 Mission : la section B de CHANTIERS.md, sur une branche (jamais main).
 
 1. Lis .design-sync/NOTES.md en entier avant toute commande : ce dépôt est une app, pas un paquet de composants. Les sections « The emitted contracts come from dist/types », « The four standing validate warnings », « Synced » et « Re-sync risks » disent ce qui a coûté du temps.
-2. B3 — Lance /design-sync pour mettre à jour le projet Claude Design existant (23b9671c-a55b-452e-aa41-39906ee71ba8), sans en créer un nouveau. Lance cfg.buildCmd avant le driver. Recompte les composants, les cellules et les aperçus rendus : au 2026-09-30, c'était 79, 244 et 79/79. Quatre avertissements sont attendus (« Impact », GRID_OVERFLOW sur DefinitionPopover, QuarterNews et GlossaryTerm) ; n'applique pas le cardMode "single" suggéré. Tout autre avertissement ou erreur : arrête-toi et explique-moi avant de corriger.
-3. Note chaque cellule que le driver met en attente, et recapture en contrôle les composants dont le code a changé sans que leur aperçu change. Une cellule qui rend proprement mais dit quelque chose de faux est un défaut : corrige l'aperçu depuis les sources du produit, jamais de mémoire.
+2. Lance /design-sync pour mettre à jour le projet Claude Design existant (23b9671c-a55b-452e-aa41-39906ee71ba8), sans en créer un nouveau. Lance cfg.buildCmd avant le driver. Recompte les composants, les cellules et les aperçus rendus : au 2026-09-30 (B3), c'était 88, 292 et 88/88. Quatre avertissements sont attendus (« Impact », GRID_OVERFLOW sur DefinitionPopover, QuarterNews et GlossaryTerm) ; n'applique pas le cardMode "single" suggéré. Tout autre avertissement ou erreur : arrête-toi et explique-moi avant de corriger.
+3. Note chaque cellule que le driver met en attente, et recapture en contrôle les composants dont le code a changé sans que leur aperçu change. Cherche aussi ce qui a changé dans le modèle et la copie depuis le dernier envoi (la méthode est dans NOTES.md, « Re-sync risks ») : une note reportée ne voit pas une amende qui change dans levels/retention.ts. Une cellule qui rend proprement mais dit quelque chose de faux est un défaut : corrige l'aperçu depuis les sources du produit, jamais de mémoire.
 4. À la fin : mets à jour la section B de CHANTIERS.md, la ligne « Design system → Claude Design » de CLAUDE.md, « Synced » dans NOTES.md, et une entrée de JOURNAL.md. Ouvre la PR ; merge-la quand elle est verte.
 
 Réponds-moi en français.

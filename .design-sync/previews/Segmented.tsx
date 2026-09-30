@@ -97,25 +97,30 @@ export const Three = () => {
 /**
  * In a form (extension 04): the Field shows the label and the group takes its
  * name from it (`labelledBy`), so what is seen and what is announced cannot
- * drift. `md` at every density of form. The engine's activation window.
+ * drift. The Segmented stays `md` whatever the form's density — here the
+ * audit's new mission (`app/(app)/admin/audit/NewMissionForm.tsx`, French
+ * only), a sheet of `sm` fields, with the hint that says what the choice
+ * changes. « Sans mandat » is the default, and a product decision: without a
+ * mandate the deliverable never says « audit ».
  */
 export const InAForm = () => {
-  const [days, setDays] = React.useState<"7" | "14" | "30">("7");
+  const [mandate, setMandate] = React.useState<"mandated" | "no-mandate">("no-mandate");
   return (
-    <Field group label="Activation window" hint="Counted from the day they sign up.">
-      {({ labelId }) => (
-        <Segmented
-          as="button"
-          labelledBy={labelId}
-          value={days}
-          onChange={setDays}
-          options={[
-            { id: "7", label: "7 days" },
-            { id: "14", label: "14 days" },
-            { id: "30", label: "30 days" },
-          ]}
-        />
-      )}
-    </Field>
+    <div style={{ maxWidth: 480 }}>
+      <Field group size="sm" label="Mandat" hint={"Sans mandat, le livrable dit « diagnostic » et jamais « audit »."}>
+        {({ labelId }) => (
+          <Segmented
+            as="button"
+            labelledBy={labelId}
+            value={mandate}
+            onChange={setMandate}
+            options={[
+              { id: "mandated", label: "Avec mandat" },
+              { id: "no-mandate", label: "Sans mandat" },
+            ]}
+          />
+        )}
+      </Field>
+    </div>
   );
 };

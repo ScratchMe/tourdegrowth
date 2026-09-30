@@ -88,7 +88,7 @@ export const TheVerdict = () => (
 /**
  * An inspection lands (paths.ts PATH_C, quarter 3): card 3 of 5, after the
  * mail and the verdict — the one card where the screen shakes, the clipping
- * stamped with the fine (€60,000 + €500 per radar point), and its "why" on
+ * stamped with the fine (€75,000, the legal maximum whatever the radar — C14, A7.8), and its "why" on
  * the clipping itself, naming every trick taken down. It is longer than
  * this frame: as on a short screen, the dialog scrolls and the count and
  * Next stay stuck to its bottom, so the still shows the card's top.
@@ -102,7 +102,7 @@ export const AnInspection = () => (
       items={[
         { kind: "mail", label: "Mid-quarter", mail: { header: "From: CEO · Subject: this week's numbers", body: "Message from the CEO, mid-quarter: \"I can see this week's numbers. It isn't moving enough.\"" } },
         { kind: "result", label: "The verdict", metric: "Churn", value: "5.0%", note: "target 4.6%", status: { text: "missed by 0.4 pts", tone: "bad" }, figures: [{ key: "subs", label: "Subscribers", value: "93,304" }, { key: "mrr", label: "Revenue", value: "€1.27M" }, { key: "patience", label: "CEO's patience", value: "57" }] },
-        { kind: "clipping", label: "Meanwhile, outside", clipping: { kind: "control", masthead: "The Business Courier", headline: "Flixo caught out by the French consumer watchdog", text: "An inspection by the DGCCRF, France's consumer protection authority, an article in the press, a fine of €106,000. The CEO asks you to take everything down by Friday. 1,400 subscribers leave on the spot, and tell everyone why.", why: { heading: "Why this inspection", lines: ["Every trick you put into production pushed up the regulator radar, the hidden tile on your dashboard. This quarter it crossed the inspection threshold.", "In production when the inspectors came: \"Pause up front\", \"Declutter the subscription page\", \"Assisted cancellation\", \"Retention offers\", \"Social proof at exit\" and \"Contractual notice\". All of it is taken down on the spot, and its effect stops."] }, stamp: { text: "Fined · €106,000", tone: "bad" } } },
+        { kind: "clipping", label: "Meanwhile, outside", clipping: { kind: "control", masthead: "The Business Courier", headline: "Flixo caught out by the French consumer watchdog", text: "An inspection by the DGCCRF, France's consumer protection authority, an article in the press, a fine of €75,000. The CEO asks you to take everything down by Friday. 1,400 subscribers leave on the spot, and tell everyone why.", why: { heading: "Why this inspection", lines: ["Every trick you put into production pushed up the regulator radar, the hidden tile on your dashboard. This quarter it crossed the inspection threshold.", "In production when the inspectors came: \"Pause up front\", \"Declutter the subscription page\", \"Assisted cancellation\", \"Retention offers\", \"Social proof at exit\" and \"Contractual notice\". All of it is taken down on the spot, and its effect stops."] }, stamp: { text: "Fined · €75,000", tone: "bad" } } },
         { kind: "clipping", label: "Meanwhile, outside", clipping: { kind: "viral", handle: "@endless_evening", text: "A viral thread: \"I tried to cancel Flixo, here are my three hours.\" Cancellations speed up.", stamp: { text: "Viral", tone: "bad" } } },
         { kind: "boss", label: "The CEO's word", line: "The CEO: \"That's not what we agreed.\" \"Thanks for doing what I asked.\"", mood: "angry", face: <DgFace mood="angry" framing="avatar" /> },
       ]}

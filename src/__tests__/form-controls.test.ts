@@ -25,7 +25,9 @@ import { DERIVED } from "@/styles/tokens/tokens";
  * Non-vacuity (2026-09-30): Select's ring put back on `--focus-ring-invert`
  * fails the first test on that line; the `.control:focus-visible` rule taken
  * out of Field's sheet fails the second; `opacity: 0.45` put back on a
- * disabled choice fails the last.
+ * disabled choice fails the last. `border-radius: var(--radius-field)` put
+ * back on Checkbox's `.row` fails the rule test (checked when it was written,
+ * on the design sync of 2026-09-30).
  */
 
 const SRC = join(process.cwd(), "src");
@@ -72,6 +74,25 @@ describe("one focus ring on every form control", () => {
 
   it("--field-focus-ring is the system's ring, not a second one", () => {
     expect(DERIVED["field-focus-ring"]).toBe("var(--focus-ring)");
+  });
+});
+
+describe("a list split by a rule keeps its rule straight", () => {
+  it("never rounds a row that draws the rule between rows", () => {
+    // Seen on the design sync of 2026-09-30: Checkbox's rows carried
+    // `--radius-field`, and the dashed rule `.row + .row` draws on their top
+    // edge curled down at both ends, in every list of boxes in the product.
+    // The radius drew nothing else (no fill, no outline on the row).
+    const offending: string[] = [];
+    for (const { file, css } of sheets) {
+      for (const m of css.matchAll(/\.([\w-]+)\s*\+\s*\.\1\s*\{[^}]*border-top\s*:/g)) {
+        const own = new RegExp(`(^|[},\\s])\\.${m[1]}\\s*\\{([^}]*)\\}`, "g");
+        for (const block of css.matchAll(own)) {
+          if (/border-radius\s*:/.test(block[2]!)) offending.push(`${file}: .${m[1]} is rounded and draws a rule`);
+        }
+      }
+    }
+    expect(offending).toEqual([]);
   });
 });
 

@@ -175,12 +175,12 @@ become the WHOLE list. The first DS v3 pass pinned four components to fix
 their contracts and the bundle silently shrank from 70 components to 4 —
 with 36 previews left pointing at components that no longer existed.
 
-So `componentSrcMap` now pins all 77 exported components to their file
+So `componentSrcMap` now pins all 88 exported components to their file
 (`"LegalPage": null` stays), and `.design-sync/check-inventory.mjs`, chained
 last in `cfg.buildCmd`, fails the build if a component exported from
 `src/components/**` is missing from the map, pinned to the wrong file, or
 pinned but no longer exported. Its success line is
-`[inventory] 77 components pinned, 1 excluded on purpose, none missing`.
+`[inventory] 88 components pinned, 1 excluded on purpose, none missing`.
 `QuarterNews` (the game's news screen, 2026-09-26) shipped without its entry
 and broke this build for two days — caught by the design audit of
 2026-09-27, not by anything that runs on a PR, since CI does not build the
@@ -243,7 +243,7 @@ viewport media query, not the cell) overlapped its own figure labels.
 
 ## Previews are all repo-owned
 
-All 77 live in `.design-sync/previews/` — none are generated (cell count: see
+All 88 live in `.design-sync/previews/` — none are generated (cell count: see
 "Synced"). Copy is the product's own and numbers are the model's own — **and
 that was not true until the 2026-09-29 re-sync**: this paragraph already said
 so, while 64 of 245 cells carried retired copy, mockup copy, hand-typed game
@@ -270,7 +270,10 @@ pasting their output:
 Run them with `node --experimental-strip-types --import ./register.mjs x.mts`,
 where `register.mjs` installs a resolve hook (`@/` → `src/`, add `.ts`, stub
 `.css`) — or bundle a scratch entry with `.ds-sync/node_modules/.bin/esbuild
---bundle --platform=node`. Paste the JSON as inline JSX props (contextual
+--bundle --platform=node` (for the engine, no hook is needed: `--format=esm
+--tsconfig=./tsconfig.json --alias:@=./src --loader:.css=empty`, then
+`resolveTree(ENGINE_COPY, locale)` for the copy and `exampleEngine` from
+`lib/engine/example.ts` for real chosen values — sources, repairs, targets). Paste the JSON as inline JSX props (contextual
 typing keeps the unions) and name the path or board in the story's doc
 comment. Keep scratch scripts in a per-batch folder: parallel agents share the
 scratchpad.
@@ -326,36 +329,23 @@ doc comment says why the layout uses an auto margin rather than
 ## Synced
 
 Project `23b9671c-a55b-452e-aa41-39906ee71ba8` ("Tour de Growth"), pinned as
-`projectId` in `config.json`. **Last upload: 2026-09-30**, from a claude.ai/code
-cloud session, after A1, A2, A4 and A5 — 79 components, **244 story cells**, all
-graded good; 408 files (316 component files, 79 compiled previews, `_vendor/`,
-`fonts/`, bundle, CSS, README, the sentinel and the anchor), no delete.
-`report_validate`: 79 total, 0 bad, 0 thin, 0 identical; anchor `bundleSha12`
-`f3b4bf9eb3c5`. The next re-sync skips every component whose sources did not
-change. Earlier uploads: 2026-09-29 (77 components, 238 cells, anchor
-`17cca5e0909b`), 2026-09-11 (34 components, 116 cells).
+`projectId` in `config.json`. **Last upload: 2026-09-30 (B3)**, from a
+claude.ai/code cloud session, after A7.10 and A10 — **88 components, 292 story
+cells**, all graded good; 453 files (352 component files, 88 compiled previews,
+`_vendor/`, `fonts/`, bundle, CSS, README, the sentinel and the anchor), no
+delete. `report_validate`: 88 total, 0 bad, 0 thin, 0 identical; anchor
+`bundleSha12` `d1835d51cffd`. The next re-sync skips every component whose
+sources did not change. Earlier uploads: 2026-09-30 before A10 (79 components,
+244 cells, anchor `f3b4bf9eb3c5`), 2026-09-29 (77, 238, `17cca5e0909b`),
+2026-09-11 (34, 116).
 
 The cell count is what the previews export, not a sum of what each session
-announced: A1 and A2 each counted from 244 (A1: 245, A2: 251), but the
-2026-09-29 grading had already removed cells that duplicated a neighbour or
-lied, bringing 245 down to 238. 238 + DotGrid's 3 + DotLegend's 3 = 244.
-
-**Not yet uploaded (A10.a, 2026-09-30)**: nine form primitives —
-`Field`, `TextField`, `NumberField`, `Select`, `DateField`, `Choices`,
-`Checkbox`, `FieldRow`, `FormSummary` — are in `componentSrcMap` with their
-previews, and `TextArea` and `Segmented` gained a story each (`InAField`,
-`InAForm`). `check-inventory.mjs` reads 88 pinned, none missing. The previews
-were type-checked against the real components (a throwaway `tour-de-growth`
-shim in the scratchpad: 11 files, no error), not rendered by the driver: the
-session that ported them had no `/design-sync` skill. `NumberField` takes a
-number (`number | null`), not the text the extension 04 bundle drew — its
-contract says so, and Claude Design will read the real one on upload.
-Since A10.b to A10.d (same day) the engine and the audit mount them and no
-other form control exists outside `src/components/core/`
-(`form-controls-source.test.ts`); `TextField` gained `autoFocus`, four
-controls a `data-testid` on the native element, and `FieldRow` works without
-a joiner — the contracts change with them. Expected at the next sync:
-88 components, 284 cells (`CHANTIERS.md` B3).
+announced. `CHANTIERS.md` B3 expected 284 (244, plus `ShareCard.Owner`, plus
+the 39 cells A10.a wrote from the board); the rebuild from the product's call
+sites ended at 292: the eleven form components went from 46 cells to 54
+(`DateField` 2 → 6, `FieldRow` 2 → 4, `TextArea` 4 → 5, `Select` 5 → 6,
+`Field` 3 → 4, `Choices` 4 → 5; `NumberField` 8 → 6; the others unchanged in
+number). The 2026-09-29 note on 245 → 238 → 244 is in the journal.
 
 **The project also holds `design/`, which is not part of the bundle.** On
 2026-09-30 brief 04 went in at the paths it has in this repo:
@@ -374,13 +364,13 @@ upload asks its own approval once per run (`finalize_plan`).
 
 The upload path for a pinned project is the skill's **atomic** one: re-fetch
 `_ds_sync.json` right before `finalize_plan` (a moved `bundleSha12` means a
-concurrent sync), sentinel `_ds_needs_recompile` first, content in chunks
-(`components/` in two halves of 154, then `_preview/` + root files, then
-`_vendor/` alone — `react.js` is 1.1 MB —, then `fonts/`), `upload.deletePaths`
-verbatim, sentinel again, `_ds_sync.json` last, `list_files` to confirm. On
-2026-09-30 two chunks of 200 (root files, `_preview/`, `_vendor/` and the first
-half of `components/`, then the rest), `styles.css`, then `fonts/` went through
-without a size error.
+concurrent sync), sentinel `_ds_needs_recompile` first, content in chunks,
+`upload.deletePaths` verbatim, sentinel again, `_ds_sync.json` last,
+`list_files` to confirm. No size error in either upload of 2026-09-30: first
+two chunks of 200 then `styles.css` then `fonts/`; at B3, `_preview/` +
+`_vendor/` + the root files in one call (94 files, 2.3 MB), `fonts/`, then
+`components/` in two halves of 176. Build the chunk lists from the live
+`ds-bundle/` into `.design-sync/.cache/`, never from memory.
 
 ## A fresh clone needs two installs before anything runs
 
@@ -528,6 +518,53 @@ except the first, which was the product's:
   only by `href`): removed rather than kept.
 - **French typography**: three plain spaces before `?` or `:`.
 
+### Found in the 2026-09-30 re-sync (B3), by grading and by the check capture
+
+The nine form primitives, `TextArea.InAField` and `Segmented.InAForm` had
+been written from brief 04's board (`design/ds-extension-04-return/board/`)
+BEFORE A10.b and A10.c wired them, and type-checked but never rendered. Three
+agents rebuilt them from the product's call sites (engine and audit), with
+the copy verbatim and the values from the product's functions. Same root
+cause in eight components:
+- **Copy from the board, or from memory**: « Northwind », "Spend that month",
+  « Début de la mission », a source list with "Everything else", and the
+  audit's missing message typed with a colon where `FORM_COPY.missing` has
+  an em dash.
+- **A message that contradicted its own cell**: `Field`'s error said "Keep it
+  under 120 characters" over a counter reading 104/120.
+- **States no call site produces**, dropped rather than rewritten, because a
+  card teaches the design agent a usage: `disabled`/`disabledReason` on
+  `TextField`, `Select`, `Checkbox`; `Select missing`; `Choices
+  disabledLead`; `Checkbox invalid`; `FormSummary`'s `invalid` line. The
+  `optional` prop is in the same case — no call passes it, the engine writes
+  « (optional) » inside its labels — and no preview passes it. If one of
+  these gets wired, add its cell then, from that call site.
+- **Duplicates across components**: `Segmented.InAForm` repeated
+  `Field.AroundSegmented`; it is now the audit's mandate.
+
+The check capture of components whose code had changed while their preview
+had not (Re-sync risks, second bullet) found two more, both in carried grades:
+- **The game's fine**: A7.8 (C14) set it to €75,000, the legal maximum, in
+  `levels/retention.ts`; `EventClipping` and `QuarterNews` still said
+  €106,000 and the old « 60,000 + 500 per radar point ». No component changed.
+- **`SpaceStrip`'s doc** still said « the cards are not links » after A7.9
+  made every open card a door. The cells rendered identically; the words
+  going to the design agent were false.
+
+And one component defect, fixed in the same PR with a guard
+(`form-controls.test.ts`): `Checkbox`'s rows were rounded, so the dashed rule
+drawn on their top edge curled down at both ends, in every list of boxes.
+
+Seen, reported in `CHANTIERS.md` and left to the product (the previews show
+them as they are, never « fixed » in a preview): the 6px between a unit and
+its figure (« € 500 »; the return's own CSS, a design question), `FieldRow`'s
+joiner sitting after the longer of label and box, no red edge on an
+impossible day, and « 1 days » in the engine's duration estimate.
+
+A native `<select>` is closed in a still: its groups and order are never on
+the card, so the `Select` stories say in their doc comments what the list
+holds.
+
 ## Re-sync risks
 
 - **Merging `main` in the middle of a re-sync.** A5 renamed variant props and
@@ -553,7 +590,11 @@ except the first, which was the product's:
   `.design-sync/previews/`, and nothing fails: the cell still renders. When
   those sources change, regenerate the affected props with the method in
   "Previews are all repo-owned" and re-grade — every preview's doc comment
-  names the path or board it was built from.
+  names the path or board it was built from. How to find them (it found the
+  €106,000 fine on 2026-09-30): from the commit that recorded the last upload
+  (`git log -S"<its cell count> story cells" -- .design-sync/NOTES.md`), run
+  `git log <that>..HEAD -- src/lib/game src/content src/lib/i18n src/lib/engine`,
+  read what each commit changed, and grep the previews for the old values.
 
 - **`cfg.buildCmd` is two commands now**, and the second one is load-bearing.
   Simplifying it back to a bare `tsc` degrades a dozen contracts silently — no

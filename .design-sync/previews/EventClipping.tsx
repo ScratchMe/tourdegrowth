@@ -21,7 +21,7 @@ const col = { padding: 24, maxWidth: 648, display: "flex", flexDirection: "colum
 
 /**
  * Reference year C, third quarter: the inspection. The fine is the model's
- * (60,000 + 500 per radar point: €106,000 at radar 92), the leavers too, and
+ * (€75,000, the legal maximum whatever the radar — C14, A7.8), the leavers too, and
  * the `why` names every trick in production when it fell. A viral thread
  * lands the same quarter.
  */
@@ -31,7 +31,7 @@ export const Inspection = () => (
       kind="control"
       masthead="The Business Courier"
       headline="Flixo caught out by the French consumer watchdog"
-      text="An inspection by the DGCCRF, France's consumer protection authority, an article in the press, a fine of €106,000. The CEO asks you to take everything down by Friday. 1,400 subscribers leave on the spot, and tell everyone why."
+      text="An inspection by the DGCCRF, France's consumer protection authority, an article in the press, a fine of €75,000. The CEO asks you to take everything down by Friday. 1,400 subscribers leave on the spot, and tell everyone why."
       why={{"heading": "Why this inspection", "lines": ["Every trick you put into production pushed up the regulator radar, the hidden tile on your dashboard. This quarter it crossed the inspection threshold.", "In production when the inspectors came: \"Pause up front\", \"Declutter the subscription page\", \"Assisted cancellation\", \"Retention offers\", \"Social proof at exit\" and \"Contractual notice\". All of it is taken down on the spot, and its effect stops."]}}
     />
     <EventClipping
@@ -89,7 +89,7 @@ export const French = () => (
       kind="control"
       masthead="Le Courrier de l'éco"
       headline="Flixo épinglé par la répression des fraudes"
-      text="Contrôle de la DGCCRF, article dans la presse, amende de 106 000 €. Le DG te demande de tout retirer avant vendredi. 1 400 abonnés partent dans la foulée, en le racontant."
+      text="Contrôle de la DGCCRF, article dans la presse, amende de 75 000 €. Le DG te demande de tout retirer avant vendredi. 1 400 abonnés partent dans la foulée, en le racontant."
       why={{"heading": "Pourquoi ce contrôle", "lines": ["Chaque astuce mise en production a fait monter le radar DGCCRF, la tuile masquée de ton tableau de bord. Ce trimestre, il a franchi le seuil du contrôle.", "En production au moment du contrôle : « Pause mise en avant », « Alléger la page abonnement », « Résiliation accompagnée », « Offres de rétention », « Preuve sociale en sortie » et « Préavis contractuel ». Tout est retiré d'office, et leur effet s'arrête."]}}
     />
   </NightSurface>
