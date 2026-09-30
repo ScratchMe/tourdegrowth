@@ -17,11 +17,12 @@ export const FACE_PATHS: Readonly<Record<Mood, { browL: string; browR: string; m
 export interface DgFaceProps {
   mood: Mood;
   /**
-   * `frame` = the whole call, 16:9, with the office behind him. `avatar` =
+   * `call` = the whole call, 16:9, with the office behind him. `avatar` =
    * the head alone, cropped by the viewBox, for the CEO's line in the quarter
-   * report and the journal (40px).
+   * report and the journal (40px). What is in the picture, not how big it
+   * is: so `framing`, not `size` (the variant names, S-16).
    */
-  size?: "frame" | "avatar";
+  framing?: "call" | "avatar";
   /** The mouth moves while the caption types or the voice speaks. */
   speaking?: boolean;
   className?: string;
@@ -45,13 +46,13 @@ export interface DgFaceProps {
  * in JSX (game-no-hex.test.ts), and a mood is a `data-mood` switch in CSS,
  * not a second drawing.
  *
- * ONE `frame` per page: the ids (the P10 strokes, and the frame's blur and
+ * ONE `call` per page: the ids (the P10 strokes, and the frame's blur and
  * vignette) are unique only once. The `avatar` carries classes only and no
  * `<defs>`, so any number can sit beside the one frame.
  */
-export function DgFace({ mood, size = "frame", speaking = false, className }: DgFaceProps) {
+export function DgFace({ mood, framing = "call", speaking = false, className }: DgFaceProps) {
   const face = FACE_PATHS[mood];
-  const frame = size === "frame";
+  const frame = framing === "call";
   return (
     <svg
       className={[styles.face, frame ? styles.frame : styles.avatar, className ?? ""].filter(Boolean).join(" ")}

@@ -22,7 +22,7 @@
   font: var(--meta-md);
 }
 
-.compact {
+.sm {
   padding: var(--space-1) var(--space-4);
   font: var(--meta-sm);
 }

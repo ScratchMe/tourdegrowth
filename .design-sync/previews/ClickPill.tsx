@@ -43,10 +43,10 @@ export const French = () => (
   </NightSurface>
 );
 
-/** `compact` — the same words, smaller type, for the sticky action bar on a phone. */
-export const Compact = () => (
+/** `sm` — the same words, smaller type, for the sticky action bar on a phone. */
+export const Small = () => (
   <NightSurface as="div" style={col}>
-    <ClickPill size="compact" clicks={2} overLaw={false} labels={EN} />
-    <ClickPill size="compact" clicks={6} overLaw labels={EN} />
+    <ClickPill size="sm" clicks={2} overLaw={false} labels={EN} />
+    <ClickPill size="sm" clicks={6} overLaw labels={EN} />
   </NightSurface>
 );

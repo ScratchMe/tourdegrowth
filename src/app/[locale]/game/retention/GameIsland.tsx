@@ -127,7 +127,7 @@ export function GameIsland({ copy, locale }: GameIslandProps) {
         drivers={report.drivers}
         mail={report.mail}
         clippings={report.clippings}
-        boss={{ line: report.bossLine, mood: report.mood, face: <DgFace mood={report.mood} size="avatar" /> }}
+        boss={{ line: report.bossLine, mood: report.mood, face: <DgFace mood={report.mood} framing="avatar" /> }}
         next={{ label: report.nextLabel, onClick: g.next }}
       />
     );
@@ -240,7 +240,7 @@ export function GameIsland({ copy, locale }: GameIslandProps) {
             eyebrow={news.eyebrow}
             period={news.period}
             items={news.items.map((item) =>
-              item.kind === "boss" ? { ...item, face: <DgFace mood={item.mood} size="avatar" /> } : item,
+              item.kind === "boss" ? { ...item, face: <DgFace mood={item.mood} framing="avatar" /> } : item,
             )}
             progress={news.progress}
             labels={{ next: copy.news.next, finish: copy.news.finish, skip: copy.news.skip }}
