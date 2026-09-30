@@ -9,10 +9,11 @@ import { ADMIN_PASSWORD, SKIP_ADMIN_REASON, expect, grantOwnerPreview, test, tra
  * each layout, the event, and an accessibility pass with the card on screen.
  *
  * P24 and P25 — a real result whose bottleneck is acquisition, and one with a
- * Deep dive — need a Firestore document, which CI does not have. They are
- * pinned on the pure resolver (`r/[id]/__tests__/game-entry.test.ts`) and the
+ * Deep dive — are pinned on the pure resolver (`r/[id]/__tests__/game-entry.test.ts`) and the
  * page is held to that resolver by `src/__tests__/game-entry-wiring.test.ts`
  * (orchestrator decision 3, 2026-09-24: no fixture route on the public page).
+ * Since A7.11 a real result renders on the Firestore emulator too, and
+ * `result-real.spec.ts` checks the card on a stored retention bottleneck.
  *
  * The flag has two states and a run sees one of them. CI builds and serves
  * the game OPEN (`GAME_ENABLED: "true"` at workflow level, like

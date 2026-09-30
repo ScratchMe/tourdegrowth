@@ -127,8 +127,10 @@ Target 390px. Nothing may scroll horizontally at 360px.
 - On a result, the score is a kilometre marker (`ScoreDisplay
   variant="marker"`) standing beside the stage that stalls: it goes in
   `Bottleneck`'s `lead`, never on its own.
-- A result screen shows **exactly two** calls to action. Sharing lives in
-  `ShareCard`, whose button is never primary — the image sells the share.
+- A result screen shows **exactly two** calls to action, and one primary.
+  Sharing lives in `ShareCard`: its button is secondary for a visitor, whose
+  primary is their own Tour, and primary on the owner's own result
+  (`shareVariant`, C16), where "Take the Tour again" becomes secondary.
   The offer to play the game (`GameEntry`) is not a third: a flat paper card
   with a secondary button, and a thin band of night across its top.
 - The `game` group is presentation only. Every string arrives resolved, and

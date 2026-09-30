@@ -377,7 +377,9 @@ export function ResultView({
           </MetaLabel>
         )}
 
-        <div className={styles.layout}>
+        {/* `data-owner` reorders the share block above the CTA row on a
+            phone, for the owner only (C16) — see the CTA row's comment. */}
+        <div className={styles.layout} data-owner={isOwner ? "" : undefined}>
           <div className={styles.left}>
             <Card
               elevation="raised"
@@ -622,18 +624,19 @@ export function ResultView({
                 image makes it a block rather than a button, and the row holds
                 the primary alone.
 
-                Two things the design return did not cover, decided here and
-                deliberately not silent:
+                Two things the design return did not cover:
 
-                - Which button is the owner's primary. Sharing was theirs
-                  before; with it gone from the row, "Take the Tour again"
-                  is promoted. Making the ShareCard's button primary instead
-                  was tried and reverted: `ShareCard.prompt.md` says "never
-                  primary", and the design's own mobile order puts the CTA row
-                  ABOVE the share block, so a primary in the card would sit
-                  below a secondary. The image is what sells the share here,
-                  not a filled button. Worth Antoine's eye all the same — it
-                  makes "retake" the loudest thing on an owner's result.
+                - Which button is the owner's primary. Decided by Antoine on
+                  2026-09-29 (C16, captures of the owner's view in hand):
+                  **"Share this result" is the owner's one primary**, in the
+                  share card, and "Take the Tour again" steps down to
+                  secondary. The earlier attempt had been reverted because the
+                  design's mobile order put the CTA row ABOVE the share block,
+                  so a primary in the card sat under a secondary: on the
+                  owner's page the share block now comes first on a phone
+                  (`.layout[data-owner]` in the stylesheet). `isOwner` is only
+                  known after mount, so a phone owner sees the visitor's order
+                  for a frame; `result-real.spec.ts` bounds the shift.
                 - A roast owner keeps "Switch to straight up". Removing it
                   would take away the only way back from a tone, and that
                   reassurance is precisely what step 7 promised when it
@@ -642,6 +645,7 @@ export function ResultView({
             {isOwner ? (
               <div className={`${styles.ctaRow} ${styles.slotCta}`}>
                 <Button
+                  variant="secondary"
                   href="/quiz"
                   data-testid="take-again-cta"
                   onClick={() => clearStoredAnswers()}
@@ -719,6 +723,7 @@ export function ResultView({
                  the specs that cover cancelled shares and the desktop
                  clipboard fallback are about behaviour that did not change. */
               shareTestId="share-button"
+              shareVariant={isOwner ? "primary" : "secondary"}
               shareLabel={copied ? tc(t.ctaShareCopied, locale) : tc(t.ctaShareResult, locale)}
               saveLabel={tc(t.shareCardSave, locale)}
               onShare={handleShare}

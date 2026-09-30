@@ -6,9 +6,9 @@ import { expect, test, trackedEvents } from "./helpers";
 /**
  * The growth loop, wave 3 of GROWTH-PLAN.md (CHANTIERS.md A3, 2026-09-29):
  * the README badge's address, the native share that carries the picture,
- * and the canonical roast example. All on `/r/sample`, the one result page
- * the suite can render (a real one needs Firestore); the owner's badge block
- * is held by `r/[id]/__tests__/badge-snippet.test.ts`.
+ * and the canonical roast example. All on `/r/sample`, which renders in every
+ * run (a real result needs the Firestore emulator, `result-real.spec.ts`);
+ * the owner's badge block is held by `r/[id]/__tests__/badge-snippet.test.ts`.
  *
  * Non-vacuity (2026-09-29): against the build of `main` before A3, the four
  * tests that carry it fail (the badge's two, the share with the file, the

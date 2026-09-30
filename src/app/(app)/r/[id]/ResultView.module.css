@@ -177,6 +177,15 @@
 .slotDisclaimer { order: 10; }
 .slotBreakdown { order: 11; }
 
+/* The owner's own result (C16, 2026-09-29): "Share this result" is their one
+   primary, so on a phone the share block comes BEFORE the CTA row, where
+   "Take the Tour again" is now secondary — a primary under a secondary is
+   what had this reverted once. On desktop the two are in different columns
+   and these values stay ascending inside each, so nothing moves there. The
+   reading-order test reads these two lines too. */
+.layout[data-owner] .slotShare { order: 7; }
+.layout[data-owner] .slotCta { order: 8; }
+
 /* The share card, and under it the owner's README badge (CHANTIERS.md A3.1),
    at the left column's own 22px rhythm. */
 .slotShare {

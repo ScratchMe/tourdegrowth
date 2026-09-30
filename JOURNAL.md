@@ -5959,6 +5959,64 @@ C22, tranché par Antoine le 2026-09-29 : c'est une question de calendrier, pas 
 
 **Vérifié** : `grep` de `Antoine`, `Berthaud`, `LinkedIn` et `cv.` dans les lignes collables de `marketing/` : le nom n'apparaît que dans les trois réponses, et ni LinkedIn ni le CV nulle part. `check-lengths.mjs` : 71 longueurs, aucun écart. `utm-channels.test.ts` : 15 tests passent.
 
+**En production** : PR [#216](https://github.com/ScratchMe/tourdegrowth/pull/216), mergée le 2026-09-30 à 12 h 12 UTC (squash `e456679`, 11 fichiers, identique à la tête de la PR). Déploiement de production Vercel `READY` sur ce commit, lu par l'API : le commentaire d'un test sous `src/` déclenche un build, sans rien changer au site. Le texte vit dans `marketing/`, pas sur une page.
+
+## A7.11 : les e2e de `/r/<id>` par le vrai chemin, sur l'émulateur Firestore (2026-09-30)
+
+C17, délégué à la session le 2026-09-29 : **aucune porte de test dans le code de production**, un vrai `/r/<id>` lu dans l'émulateur Firestore. Jusqu'ici, toute spec de composition passait par `/r/sample`, une branche à part qui ne lit jamais Firestore et ne rend jamais la vue propriétaire. Le chemin des lecteurs (un document stocké, rétréci par le modèle de vue, sérialisé vers le client) n'avait aucun e2e.
+
+**Comment** :
+- **L'émulateur est le jar** que la CLI Firebase téléchargerait (v1.22.0, 136 Mo). La CI le télécharge directement, vérifie son SHA-256 et le lance sur le JDK 21 de l'image. C'était l'option la plus légère des trois chiffrées : `firebase-tools` en `devDependency` télécharge le même jar en plus du paquet, et l'image Docker gcloud dépasse le gigaoctet. **Pas de dépendance npm**, donc pas de barrière §0.
+- **Les identifiants sont inventés pour le job** : un projet `demo-` (que l'émulateur traite hors ligne) et une clé RSA générée à la volée, que `cert()` exige bien formée et que l'émulateur ne vérifie pas. **`admin.ts` ne change pas.** Vérifié en local avant d'écrire la CI : `firebase-admin` écrit et relit l'émulateur avec cette clé.
+- **Les données** : `e2e/global-setup.ts` écrit quatre résultats par `createSubmissionFlow` et le vrai `saveSubmission`, le chemin de `/api/submissions` : un goulot net (la rétention), un partagé, un « à niveau », et un résultat avec un Deep dive écrit par le vrai `saveDeepDive`. Il écrit aussi un document **volontairement mal formé**. Il refuse une adresse d'émulateur qui ne serait pas locale.
+- **La spec** `e2e/result-real.spec.ts` (12 tests) :
+  - **la garde de payload compte ce qui traverse** (convention 11). Elle lit le document stocké, en tire **toutes** ses clés, et exige qu'aucune ne traverse, hors une liste de clés publiques qui donne chacune sa raison. Une valeur sentinelle ne doit jamais apparaître non plus ;
+  - l'étape et l'action pour un visiteur ;
+  - l'image de partage, qui se charge ;
+  - l'encart du jeu ;
+  - la vue propriétaire (le détail du score et le Deep dive) ;
+  - les deux autres états du bloc goulot ;
+  - l'action du Deep dive.
+- **`seedOwnedResult` prend les réponses en option** : le détail du score les lit sur l'appareil, jamais sur la page (R-12).
+
+**Ce que la relecture de sécurité a trouvé, et corrigé avant la PR** :
+- **La clé jetable serait partie en clair dans le log public** : le runner imprime les variables de `$GITHUB_ENV` en tête de chaque étape suivante. Elle n'ouvrait rien, mais c'était une « clé privée dans un log » à trier pour chaque scanner. Elle attend maintenant dans un fichier de `$RUNNER_TEMP`, que seule l'étape e2e lit.
+- **`error-page.spec.ts` serait devenue vacante** : elle comptait sur l'absence de Firestore pour qu'un UUID inconnu fasse échouer la lecture. Avec l'émulateur, c'est une 404, que sa regex acceptait aussi. L'écran d'erreur (R2-23) se prouve maintenant sur le document mal formé, et la 404 a son propre test.
+- **La garde ne voyait pas les champs du Deep dive** tant que tous les résultats avaient `deepDive: null`. Le résultat `deep` porte `modelUsed` et les deux champs hérités d'avant R2-20 (`contextAnswers`, `freeContext`), marqués d'une sentinelle.
+- **La recette locale** vérifie aussi le SHA-256. Six commentaires qui disaient « la CI n'a pas Firestore » sont remis à jour.
+
+**Vérifié** :
+- **Non-vacuité, deux fois** :
+  - remettre `resolveBottleneck(submission.pillars)` (la fuite historique de `rawPoints`) fait rougir la garde sur les deux résultats qui nomment une étape, et sur `rawPoints` seul ;
+  - passer le Deep dive brut au lieu de `toDeepDiveView` la fait rougir sur le résultat `deep` seul, en nommant exactement les six clés stockées.
+- **Sans l'émulateur**, les 12 tests sautent avec leur raison, comme le nouveau test de 404, et `global-setup.ts` n'écrit rien.
+- **La suite complète avec l'émulateur** : 639 specs, 634 passées, 5 ignorées par construction, aucun échec. Aucune spec existante n'a changé de comportement.
+- `relecteur-securite` est passé sur le diff. Ses trois constats sont traités, et ses deux angles morts aussi (le SHA n'est pas recoupé contre Google, mais un faux hash échoue fermé ; les champs du Deep dive sont couverts ci-dessus).
+
+**En production** : PR [#217](https://github.com/ScratchMe/tourdegrowth/pull/217), mergée le 2026-09-30 à 12 h 22 UTC (squash `47f8e75`, 18 fichiers, identique à la tête de la PR). **Le premier passage de la CI avec l'émulateur**, lu dans le log du job : 650 specs passées et 5 ignorées, les cinq « jeu fermé » par construction, donc les 12 de `result-real.spec.ts` et le test de 404 ont tourné, et le processus `java` de l'émulateur est arrêté au nettoyage. Déploiement de production Vercel `READY` sur ce commit, lu par l'API : rien ne change sur le site, seuls la CI, les e2e et un commentaire de test bougent.
+
+## A7.10 : chez le propriétaire, « Partager » est le primaire (2026-09-30)
+
+C16, tranché par Antoine le 2026-09-29, captures de la vue propriétaire à l'appui. Sur son propre résultat, le propriétaire a **« Partager ce résultat » comme seul bouton plein**. « Refaire le Tour » passe secondaire. Le visiteur ne change pas : son primaire reste « Fais ton propre Tour → », et le bouton de la carte de partage reste secondaire chez lui.
+
+**Ce qui change** :
+- **`ShareCard`** prend `shareVariant` (`secondary` par défaut). C'est la page qui le choisit, d'après `isOwner`, jamais le défaut. Aucune copie neuve : les libellés existaient.
+- **`ResultView`** : « Refaire le Tour » passe en `secondary`, et la racine porte `data-owner` chez le propriétaire.
+- **Sur mobile, chez le propriétaire, la carte de partage passe au-dessus de la rangée de boutons** (`.layout[data-owner]`). C'est ce qui avait fait annuler le premier essai : un primaire sous un secondaire. Sur desktop, rien ne bouge, puisque les deux sont dans des colonnes différentes.
+- **Le coût, mesuré et épinglé** : le lecteur d'écran du propriétaire entend la carte de partage en dernier, mais la voit avant les boutons. Son pire écart d'ordre de lecture passe de 2 à 3, et de 3 à 4 avec l'encart du jeu. `slotShare` est le pire dans les quatre cas. `result-reading-order.test.ts` lit maintenant l'ordre propriétaire dans la feuille, et vérifie aussi que, sur desktop, chaque colonne reste dans l'ordre de la source. Remonter la carte dans la source ferait payer chaque visiteur, le lecteur de la boucle de croissance. Les chiffres du visiteur ne bougent pas.
+- **Le contrat de design** : `ShareCard.prompt.md` (retour 03), `.design-sync/conventions.md` et l'aperçu disent « secondaire pour un visiteur, primaire pour le propriétaire ». L'aperçu gagne une histoire `Owner`, d'où 245 cellules attendues à la prochaine synchro (B3).
+- **Le commentaire de la rangée de boutons** raconte la décision au lieu de l'essai annulé.
+
+**La mesure** : l'événement de partage existe déjà. **Le changement date du merge de cette PR, le 2026-09-30** : c'est la date à partir de laquelle lire l'avant et l'après dans `/admin/stats`.
+
+**Vérifié** : un vrai `/r/<id>` sur l'émulateur (A7.11), dans `result-real.spec.ts`.
+- **Le propriétaire, en FR et en EN, à 1 280 et 390 px** :
+  - le seul bouton plein visible est « Partager », et « Refaire le Tour » est en contour ;
+  - à 390 px, la carte de partage est au-dessus de la rangée ;
+  - le décalage de mise en page qui suit le montage reste sous 0,1, le seuil « bon » des Web Vitals. La bascule se fait sous le premier écran d'un téléphone.
+- **Le visiteur** : son Tour reste le seul primaire, et le partage vient après, à 390 px.
+- **Non-vacuité** : remettre l'ancien primaire et retirer l'ordre propriétaire fait rougir les quatre tests propriétaire, et eux seuls, ainsi que trois variantes du test d'ordre de lecture.
+- **À l'écran**, en FR et en EN, à 1 280 et 390 px.
 
 ## Extension 04 du design system, lot a : les primitives de formulaire, rien de câblé (2026-09-30)
 
@@ -5988,6 +6046,6 @@ C22, tranché par Antoine le 2026-09-29 : c'est une question de calendrier, pas 
 
 **Design sync** : les neuf primitives sont dans `componentSrcMap` avec leurs aperçus, les conventions ont une section « Forms » et l'axe `fit` ; rien n'est envoyé (la session n'avait pas le skill `/design-sync`). Les aperçus ont été vérifiés par le compilateur contre les vrais composants, pas rendus par le pilote.
 
-**Vérifié** : `tsc` et `eslint` propres, `next build` propre, **2 327 tests unitaires** (194 fichiers) après la fusion de `main`, couverture au-dessus des seuils, et la suite Playwright complète sur un build de production (`GAME_ENABLED=true`, comme la CI) : **636 passées, aucun échec, 5 ignorées par construction** sur 641, dont le moteur, l'audit, l'accessibilité et le contraste.
+**Vérifié** : `tsc` et `eslint` propres, `next build` propre, **2 328 tests unitaires** (194 fichiers) après la fusion de `main`, couverture au-dessus des seuils, et la suite Playwright complète sur un build de production (`GAME_ENABLED=true`, comme la CI) : **636 passées, aucun échec, 5 ignorées par construction** sur 641, dont le moteur, l'audit, l'accessibilité et le contraste.
 
 **Reste** : A10.b, c et d ; `--select-inset` dans WebKit et Gecko ; la re-synchro.

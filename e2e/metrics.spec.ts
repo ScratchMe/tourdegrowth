@@ -8,7 +8,8 @@ import { expect, test } from "./helpers";
  * What this can check without credentials is the gate, which is the part that
  * matters while the page is closed: shut by default, and shut for anything
  * other than an exact "true". The rendered figures are covered by unit tests
- * on `toPublicMetrics`, since reaching them needs a real Firestore.
+ * on `toPublicMetrics`, since reaching them needs the running totals, which
+ * no spec writes into the emulator.
  */
 test("the metrics page is closed while the flag is unset", async ({ request }) => {
   for (const path of ["/en/metrics", "/fr/metrics"]) {

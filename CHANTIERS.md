@@ -22,14 +22,14 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
 | **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | Maintenant. A7 dans l'ordre de ses dépendances (A1 à A6 livrés le 2026-09-29, A8 le 2026-09-30) ; A10 (S-15) dans l'ordre a → d |
-| **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30** (79 composants, après A1, A2, A4 et A5). Le retour du brief 04 est arrivé le 2026-09-30 et se porte en A10 ; re-synchroniser à la fin d'A10 (neuf primitives de plus) et après A7.10 |
+| **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30** (79 composants, après A1, A2, A4 et A5). Le retour du brief 04 est arrivé le 2026-09-30 et se porte en A10 ; re-synchroniser pour A7.10, qui a changé le contrat de `ShareCard` (2026-09-30), puis à la fin d'A10 (neuf primitives de plus) |
 | **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 et C24 tranchées le 2026-09-30. Restent **C25**, la validation de la spécification de A7.3 (`ENGINE.md` §18), et C26 et C27, nées d'A8 (robots d'IA, `llms.txt`) |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, tout A7.3 |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
 
 **L'ordre conseillé** : A7 (la spécification A7.3.a est écrite le
-2026-09-30 et attend C25 ; A7.1 est livré le même jour). B3 après A7.10, dans la même
-session si possible, puis D. La section C a été tranchée le 2026-09-29.
+2026-09-30 et attend C25 ; A7.1 est livré le même jour). B3 maintenant qu'A7.10 est livré,
+puis D. La section C a été tranchée le 2026-09-29.
 
 **Deux sessions en parallèle** écrivent toutes deux à la fin de `JOURNAL.md`
 et dans ce fichier. La seconde à merger fusionne `main` dans sa branche avant
@@ -58,13 +58,11 @@ rencontrée en le faisant repart en section C. Toute copie neuve porte
 « TODO: à relire » (convention 6).
 
 **Dans quel ordre.** Les items sont indépendants, sauf :
-- A7.11 avant A7.10, car la vue propriétaire ne se teste que sur
-  l'émulateur ;
 - A7.3 avant A7.4, parce que les liens promettent ce que le moteur fait ;
 - A7.12.a avant les annuaires de D10.
 
 Le jeu n'attend rien du moteur.
-**A7.1, A7.2, A7.5 à A7.9 et A7.13 sont livrés (2026-09-30).** **A7.3.a est écrit** (`ENGINE.md` §18) et attend Antoine (C25) : rien de A7.3 ne se code avant sa réponse.
+**A7.1, A7.2, A7.5 à A7.11 et A7.13 sont livrés (2026-09-30).** **A7.3.a est écrit** (`ENGINE.md` §18) et attend Antoine (C25) : rien de A7.3 ne se code avant sa réponse.
 
 #### A7.3 — Le B2B assisté et l'hybride dès la v1 (C4)
 
@@ -106,49 +104,6 @@ avec la règle de C15. **Pas de lien au pied de page.**
 | Mesure | **L'événement existe depuis A7.9 (2026-09-30)** : `engine_entry_clicked/<source>` (`ENGINE_ENTRY_DETAILS` dans `lib/analytics/goatcounter.ts`, déjà lu par `/admin/stats`), avec `home_strip` et `space_band`. Ajouter à la liste une source par page (`how_it_works`, `growth_audit_checklist`, `startup_growth_diagnostic`), et poser les liens avec `TrackedLink` comme la bande de l'accueil |
 | Tests | Un e2e par page : le lien existe moteur ouvert et mène à `/{locale}/aarrr-funnel-template`. Un test sur un build fermé : il n'existe pas (les specs « jeu fermé » montrent la façon de faire) |
 | Quand | Construit avant l'ouverture (D2), après A7.3 : les liens promettent ce que le moteur fait, hybride compris |
-
-#### A7.10 — Chez le propriétaire, « Partager » est le primaire (C16)
-
-**Décidé** (2026-09-29, captures de la vue propriétaire à l'appui) : sur son
-propre résultat, le propriétaire a **« Partager ce résultat » comme seul
-bouton plein** (rouge, primaire). « Refaire le Tour » devient secondaire
-(contour). La vue du **visiteur ne change pas** : son primaire reste « Fais
-ton propre Tour → », et le bouton de la carte de partage reste secondaire
-chez lui.
-
-**Pourquoi il n'y a pas de brief design** : le « never primary » de
-`design/ds-extension-03-return/components/result/ShareCard.prompt.md` se
-justifie par le primaire du visiteur, et le retour design n'avait pas couvert
-le propriétaire (commentaire de `ResultView.tsx`, au-dessus de la rangée de
-boutons). La décision comble ce trou. Le contrat est précisé dans le dépôt, et
-part chez Claude Design à la prochaine synchro (B3).
-
-| Où | Quoi |
-|---|---|
-| `components/result/ShareCard` | Une variante « primaire » du bouton de partage, choisie par la page (`isOwner`), jamais par défaut |
-| `app/(app)/r/[id]/ResultView.tsx` et `.module.css` | Chez le propriétaire, « Refaire le Tour » passe en `secondary`. **Sur mobile, la carte de partage passe au-dessus de la rangée de boutons** chez le propriétaire, pour que le primaire ne tombe pas sous un secondaire (la raison de l'essai annulé). Réécrire le commentaire de la rangée de boutons. `isOwner` n'est connu qu'après le montage : le premier rendu reste celui du visiteur. Mesurer le décalage que la bascule produit (le texte du bouton change déjà aujourd'hui) et le garder sous le seuil CLS des e2e existants |
-| Contrat de design | `ShareCard.prompt.md` et son aperçu design-sync disent : « secondary for a visitor, primary for the owner ». Même chose dans `.design-sync/` si le contrat y est recopié |
-| Tests | `result-reading-order.test.ts` et `e2e/result-composition.spec.ts` : l'ordre propriétaire à 390 px (partage avant la rangée). Un e2e propriétaire, dans les deux langues, à 1 280 et 390 px, dit que le seul bouton `primary` visible est « Partager ». Le propriétaire se simule avec `seedOwnedResult`. Mais `/r/sample` ne passe pas d'identifiant à `ResultView` et ne rend donc **jamais** la vue propriétaire : ces e2e passent par un vrai `/r/<id>` sur l'émulateur Firestore (A7.11, à faire avant) |
-| Mesure | L'événement de partage existe déjà. Noter dans le journal la date du changement, pour lire l'avant et l'après dans `/admin/stats` |
-
-#### A7.11 — Les e2e de `/r/<id>` par le vrai chemin, sur l'émulateur Firestore (C17)
-
-**Décidé** (Antoine a délégué, la session a tranché le 2026-09-29) : **aucune
-porte de test dans le code de production.** Les e2e rendent un vrai
-`/r/<id>` lu dans l'**émulateur Firestore**, en CI. Pourquoi : `firebase-admin`
-lit `FIRESTORE_EMULATOR_HOST` nativement, donc la lecture Firestore et la
-sérialisation vers le client (là où `rawPoints` a fui deux fois) se testent
-sans ajouter une seule branche à la route publique la plus sensible.
-
-| Où | Quoi |
-|---|---|
-| `.github/workflows/ci.yml` | Démarrer l'émulateur Firestore avant Playwright. Deux façons possibles : `firebase-tools` épinglé, ou l'image officielle de l'émulateur épinglée par digest. La session chiffre les deux (temps de job, poids) et prend la plus légère. `workflows-pinned.test.ts` doit rester vert : tout est épinglé. Un nouveau `devDependency` déclenche la barrière §0 de `/livrer`, et donc la question à Antoine au merge |
-| Identifiants | `lib/firebase/admin.ts` exige trois variables. En CI : un projet `demo-…` (le préfixe que les émulateurs traitent comme hors ligne) et une clé RSA jetable générée au début du job, jamais commitée. Vérifier que `cert()` l'accepte. **Aucun changement à `admin.ts`** ; s'il en fallait un, s'arrêter et remonter en C |
-| Les données | Un global setup Playwright écrit dans l'émulateur deux ou trois résultats (un goulot net, un partagé, un « à niveau »), par `lib/submissions/repository.ts` lui-même plutôt que par un doublon |
-| Les specs | Les e2e de composition de `/r/sample` sont doublés sur un vrai `/r/<id>` : payload compté (convention 11, `NEXTJS.md` §1.8), action déterministe, image de partage, encart du jeu. La vue propriétaire (`seedOwnedResult` avec l'identifiant écrit) sert à A7.10. **Sans `FIRESTORE_EMULATOR_HOST`, ces specs sautent** avec leur raison, comme celles de l'admin sans mot de passe |
-| Non-vacuité | Remettre un prop brut (`rawPoints`) dans le payload du vrai chemin doit faire rougir la spec de payload |
-| Doc | `TESTING.md` : comment lancer l'émulateur en local, et pourquoi il n'y a pas de porte. `relecteur-securite` sur le diff du workflow (une clé jetable dans un log public ne doit rien ouvrir) |
-| Ordre | Avant A7.10, qui en a besoin pour tester la vue propriétaire |
 
 #### A7.12 — Les captures : le Tour à jour, le moteur et le jeu provisoires (C21)
 
@@ -227,7 +182,7 @@ et A5 (`JOURNAL.md`, 2026-09-30, et `.design-sync/NOTES.md`, « Synced »).
 | # | Quoi | Détail |
 |---|---|---|
 | B2 | **Le brief S-15 : les primitives de formulaire.** `design/DS-EXTENSION-BRIEF-04.md` | **Le retour est arrivé le 2026-09-30** (`design/ds-extension-04-return/`) : les dix-huit questions ont leur réponse, aucune ne contredit une contrainte. Le port est le lot A10 ; B2 se ferme avec lui, et la re-synchro qui suit y envoie les neuf primitives (`componentSrcMap` et aperçus prêts depuis A10.a) |
-| B3 | **Re-synchroniser après A7.10** (le primaire de `ShareCard` chez le propriétaire) | Avec le prompt B. Attendu avant A7.10 : 79 composants, 244 cellules, 79/79. **Quatre** avertissements sont permanents : « Impact », et `GRID_OVERFLOW` sur `DefinitionPopover`, `QuarterNews` et `GlossaryTerm` (le quatrième depuis A4, accepté par Antoine le 2026-09-30). Deux pièges : le driver ne régénère pas `dist/types/` (lancer `cfg.buildCmd` d'abord, sinon les contrats restent ceux d'avant), et une note est reportée quand l'aperçu n'a pas changé même si le composant a changé (recapturer ceux-là en contrôle). Les deux sont dans `.design-sync/NOTES.md` |
+| B3 | **Re-synchroniser : A7.10 est livré** (le primaire de `ShareCard` chez le propriétaire, 2026-09-30) | Avec le prompt B. Attendu : 79 composants, 245 cellules (l'aperçu `Owner` de `ShareCard` s'ajoute), 79/79. **Quatre** avertissements sont permanents : « Impact », et `GRID_OVERFLOW` sur `DefinitionPopover`, `QuarterNews` et `GlossaryTerm` (le quatrième depuis A4, accepté par Antoine le 2026-09-30). Deux pièges : le driver ne régénère pas `dist/types/` (lancer `cfg.buildCmd` d'abord, sinon les contrats restent ceux d'avant), et une note est reportée quand l'aperçu n'a pas changé même si le composant a changé (recapturer ceux-là en contrôle). Les deux sont dans `.design-sync/NOTES.md` |
 
 ---
 
@@ -266,8 +221,8 @@ ouverts, et, pour la vue propriétaire, un build jetable jamais commité.
 | C13 | « Vingt minutes » | Chronométré à la recette : gardé si la médiane des testeurs tombe entre 15 et 25 minutes | `GAME-BRIEF.md` §7.3 | D9 |
 | C14 | Amende du jeu | **Plafonnée à 75 000 €**, le maximum légal pour une entreprise | `GAME-BRIEF.md` §5, règle 5 | A7.8, livré le 2026-09-30 |
 | C15 | Cartes de la bande de l'accueil | **Des liens mesurés** à l'ouverture (`home_strip`), et les pastilles du bandeau mesurées aussi (`space_band`) | `GAME-BRIEF.md` §13.3 E | A7.9, livré le 2026-09-30 |
-| C16 | Primaire du propriétaire | **« Partager » devient le primaire** chez le propriétaire ; « Refaire le Tour » passe secondaire. Le visiteur ne change pas | Ici et en A7.10 | A7.10 |
-| C17 | Porte de test pour `/r/<id>` | Déléguée à la session : **pas de porte, l'émulateur Firestore en CI** | Ici et en A7.11 | A7.11 |
+| C16 | Primaire du propriétaire | **« Partager » devient le primaire** chez le propriétaire ; « Refaire le Tour » passe secondaire. Le visiteur ne change pas | Ici et en A7.10 | A7.10, livré le 2026-09-30 |
+| C17 | Porte de test pour `/r/<id>` | Déléguée à la session : **pas de porte, l'émulateur Firestore en CI** | Ici et en A7.11 | A7.11, livré le 2026-09-30 |
 | C18 | Projects et Discussions | **Déjà désactivés** (constaté par l'API GitHub). Question non posée : la session D l'a close en parallèle avec D1, le même jour | `JOURNAL.md`, « D1 : les réglages du dépôt » | — |
 | C19 | Ce qui est parti de la vague 1 | **Rien.** Et rien ne part avant que le moteur et le jeu soient prêts | `marketing/campaigns/README.md` §10 | D6 |
 | C20 | Relancer le Tour sur les réseaux | **Le Tour au seul SEO**, sans fil. L'indexation et les annuaires partent maintenant | `marketing/campaigns/README.md` §10 | D10, A7.12.a |
