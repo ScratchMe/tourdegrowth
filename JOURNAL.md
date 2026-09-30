@@ -5746,3 +5746,21 @@ C9, tranché par Antoine le 2026-09-29, codé. Quand le diagnostic nomme **seule
 - **Non-vacuité** : remettre l'omission fait rougir le test de la slide, et le garde-fou des phrases, qui exige qu'un scénario déclenche chaque titre.
 - **Tests unitaires** : une rétention à J30 seule sous sa cible donne une slide avec un titre sans « € » ni « MRR », sans ligne de calcul, et « ## 2. » dans l'export, en FR et en EN. Un gain d'un tiers de client ne donne pas de slide.
 - **Un e2e**, en FR et en EN, à 1 280 et 390 px : la slide rendue, sans « Le calcul », avec « À côté » et le pied, sans défilement horizontal.
+
+## D10 : le Tour au seul SEO, l'indexation anglaise et Launching Next (2026-09-29 → 30)
+
+**La demande** : la suite de la section D, pas à pas avec Antoine (prompt D). L'action a commencé sous le nom de D6, semaine S1 du calendrier des campagnes. La séance des décisions ([#193](https://github.com/ScratchMe/tourdegrowth/pull/193)), mergée en parallèle, l'a renommée D10 (C20 : le Tour au seul SEO, sans post). Rien de ce qui a été fait ne la contredit.
+
+**Le relevé de départ d'abord** : `stats.yml` (portée `both`), déclenché avant toute soumission, déchiffré dans le scratchpad de la session. Les chiffres sont restés dans la conversation.
+
+**Search Console, le 2026-09-29** :
+- **Anglais** : `/en` était déjà sur Google. Les deux pages « porte ouverte » et les cinq « AARRR vs X » ne l'étaient pas, deux semaines après leur mise en ligne. Indexation demandée pour les huit. Le rapport chiffré le disait déjà : aucune impression sur ces pages.
+- **Le sitemap** : lu par Google le jour même, avec ses 74 pages. Google connaît donc les adresses et ne les a pas encore explorées. Ce n'est pas un problème de découverte.
+- **D8, clos** : pour `/en/glossary/viral-coefficient`, `activation` et `aha-moment`, les deux canoniques (« déclarée » et « sélectionnée par Google ») s'affichent « Sans objet ». Cela veut dire que Google ne les a jamais explorées : s'il les avait lues, il afficherait au moins la canonique déclarée, qui est la bonne (revérifié en production, avec `hreflang` en, fr et `x-default`). Google n'a donc pas choisi l'ancienne adresse contre la nouvelle. Rien à coder. Indexation demandée.
+- **Français** : le 2026-09-30 au matin, le quota était encore dépassé. Il se compte sur une fenêtre glissante de 24 heures, pas par jour calendaire. `/fr` est déjà sur Google. Les sept autres adresses sont listées dans D10.
+
+**Launching Next, soumis le 2026-09-30** : formulaire revérifié la veille depuis la session, identique à la table de `marketing/kit.md`. Lien `directory_launchingnext` en campagne `relaunch_tour`, soumetteur « Tour de Growth » et `contact@`, option payante refusée. Les 15 questions, les 10 du Deep dive, les 24 termes du glossaire et la licence AGPL de la description ont été revérifiés contre le code avant de coller. Le titre de 5 à 8 mots (« A 3-minute AARRR growth check-up, with roast mode ») est neuf : il est tiré de la tagline du kit et relu par Antoine en le collant.
+
+**Les annuaires suivants attendent A7.12.a** : les captures du Tour sont antérieures à I + B, et la décision C20 les fait refaire avant. Launching Next ne prend aucune image, donc rien de périmé n'est parti.
+
+**Au passage** : cette session a été lancée avec le prompt D d'avant C22 (« jamais mon nom »), que la séance des décisions a réécrit depuis dans `CHANTIERS.md`. C22 fait nommer Antoine en réponse à « qui est derrière ? ». Sans effet ici : aucun post ne part, et le champ soumetteur d'un annuaire reçoit « Tour de Growth ».

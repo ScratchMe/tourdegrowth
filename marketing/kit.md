@@ -214,7 +214,7 @@ laissait ouvrir) ; le reste est à confirmer au moment de remplir.
 
 | Annuaire | Page | Compte ? | Gratuit ? | Ce qu'il demande | Verdict |
 |---|---|---|---|---|---|
-| **Launching Next** | `launchingnext.com/submit/` | Non (un e-mail) | Oui ; 99 $ pour passer en 1 jour | Nom, URL, titre 5-8 mots, description ≤ 2 500 car., 5-10 tags, type « side project », budget marketing 90 j, **nom + e-mail du soumetteur** | **Premier à faire.** Soumetteur : « Tour de Growth », `contact@` |
+| **Launching Next** | `launchingnext.com/submit/` | Non (un e-mail) | Oui ; 99 $ pour passer en 1 jour | Nom, URL, titre 5-8 mots, description ≤ 2 500 car., 5-10 tags, type « side project », budget marketing 90 j, **nom + e-mail du soumetteur** | **Soumis le 2026-09-30** (formulaire revérifié la veille, identique ; option à 99 $ refusée ; lien `relaunch_tour`). Soumetteur : « Tour de Growth », `contact@` |
 | **Uneed** | `uneed.best/submit-a-tool` | Pas pour commencer ; inscription pour enregistrer | Oui (file d'attente) ; « fast-track » payant | Nom + URL, le reste est aspiré de la page | À faire ; l'inscription se fait avec `contact@` |
 | **Fazier** | `fazier.com/submit` | Probable | Oui (« reviewed & listed within 30 days ») ; 29 / 49 / 139 $ | Le formulaire n'était pas visible ; le plan gratuit **exige un backlink** vers Fazier, sur la page d'accueil ou dans le pied de page | À faire seulement si ce lien retour est acceptable — `/about` ne suffit pas ; sinon refuser |
 | **BetaList** | `betalist.com/submit` | **Oui** (X ou lien magique) | Oui + option payante | Non vu (page de connexion) | À faire avec le compte de marque X |
