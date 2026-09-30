@@ -8,7 +8,7 @@ import { HOW_IT_WORKS } from "@/content/how-it-works";
 import { CONTENT_PUBLISHED_AT } from "@/content/updated-at";
 import { SITE_URL } from "@/lib/site";
 import { buildLlmsTxt } from "../llms";
-import { buildLlmsFullTxt, llmsFullPaths } from "../llms-full";
+import { buildLlmsFullTxt, llmsFullPaths, tableCell } from "../llms-full";
 
 /** Every Markdown link target in a text. */
 const linkTargets = (text: string): string[] => [...text.matchAll(/\]\((https?:\/\/[^)\s]+)\)/g)].map((m) => m[1]!);
@@ -109,5 +109,14 @@ describe("/llms-full.txt carries the full text of the articles and the terms (C2
     // Not a bare /undefined/: the glossary itself says "an undefined moment".
     expect(text).not.toMatch(/\[object |\{n\}|: undefined\b|^undefined$|\bNaN\b/m);
     expect(text.startsWith("# Tour de Growth — full text\n\n> ")).toBe(true);
+  });
+});
+
+describe("tableCell keeps a comparison row in its columns", () => {
+  it("escapes a pipe, and a backslash before it, so neither breaks the row", () => {
+    expect(tableCell("MRR | ARR")).toBe("MRR \\| ARR");
+    // A backslash already in the text must not swallow the escape and free the pipe.
+    expect(tableCell("a\\|b")).toBe("a\\\\\\|b");
+    expect(tableCell("no pipe")).toBe("no pipe");
   });
 });

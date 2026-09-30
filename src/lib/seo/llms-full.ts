@@ -43,8 +43,13 @@ function addressLine(path: string, isoDay: string): string {
 const stageEyebrow = (index: number) => en(ui.howItWorksPage.stageEyebrowTemplate).replace("{n}", String(index + 1));
 const questionsOf = (pillar: (typeof PILLARS)[number]) => QUESTIONS.filter((q) => q.pillar === pillar);
 const points = (n: number) => en(ui.breakdown.pointsTemplate).replace("{n}", String(n));
-/** A table cell cannot hold a pipe or a line break. */
-const cell = (text: Translatable) => en(text).replace(/\|/g, "\\|");
+/**
+ * A Markdown table cell cannot hold a bare pipe (`en` already folds line
+ * breaks). Backslashes are escaped first, so one already in the text cannot
+ * turn our `\|` back into a column break (CodeQL, js/incomplete-sanitization).
+ */
+export const tableCell = (text: string): string => text.replace(/\\/g, "\\\\").replace(/\|/g, "\\|");
+const cell = (text: Translatable) => tableCell(en(text));
 
 function howItWorks(): string[] {
   const out = [`## ${en(HOW_IT_WORKS.title)}`, "", addressLine("/how-it-works", CONTENT_UPDATED_AT["/how-it-works"]!), "", en(HOW_IT_WORKS.intro), ""];
