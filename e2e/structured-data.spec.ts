@@ -2,6 +2,19 @@ import { expect, test } from "./helpers";
 import { COMPARISON_ORDER } from "@/content/comparisons";
 import { GLOSSARY } from "@/content/glossary";
 import { CONTENT_PUBLISHED_AT, CONTENT_UPDATED_AT } from "@/content/updated-at";
+import { formatLongDate } from "@/lib/i18n/format-date";
+
+/**
+ * The pages that declare an `Article`, from their own sources (a sixth
+ * comparison is covered the day it lands). `/how-it-works` joined them with
+ * the GEO audit (A8.2, 2026-09-30).
+ */
+const ARTICLE_PATHS = [
+  "/how-it-works",
+  "/growth-audit-checklist",
+  "/startup-growth-diagnostic",
+  ...COMPARISON_ORDER.map((slug) => `/${slug}`),
+];
 
 /**
  * REVIEW-02.md R2-15 — the JSON-LD the content pages actually emit. Read
@@ -53,9 +66,8 @@ test("a term page is a DefinedTerm tied to the set, with a three-step breadcrumb
  * the served HTML of each Article page, in both languages.
  */
 test("every Article page declares its dates and the author as publisher", async ({ page }) => {
-  const paths = ["/growth-audit-checklist", "/startup-growth-diagnostic", ...COMPARISON_ORDER.map((slug) => `/${slug}`)];
   for (const locale of ["en", "fr"]) {
-    for (const path of paths) {
+    for (const path of ARTICLE_PATHS) {
       const blocks = await jsonLdBlocks(page, `/${locale}${path}`);
       const article = blocks.find((b) => b["@type"] === "Article") as Record<string, unknown>;
       expect(article, `${locale}${path}`).toBeDefined();
@@ -107,7 +119,7 @@ test("og:type is article on exactly the Article pages, with the sitemap's dates"
     lastmod: /<lastmod>([^<]+)<\/lastmod>/.exec(m[1]!)?.[1] ?? "(none)",
   }));
   expect(entries.length).toBeGreaterThan(60);
-  const articles = new Set(["/growth-audit-checklist", "/startup-growth-diagnostic", ...COMPARISON_ORDER.map((slug) => `/${slug}`)]);
+  const articles = new Set(ARTICLE_PATHS);
   const meta = (html: string, property: string) =>
     [...html.matchAll(new RegExp(`<meta property="${property}" content="([^"]*)"`, "g"))].map((m) => m[1]!);
 
@@ -138,5 +150,47 @@ test("og:type is article on exactly the Article pages, with the sitemap's dates"
   }
   // Two languages of every Article page: a sitemap that lost them would pass the loop by skipping it.
   expect(articlePages).toBe(articles.size * 2);
+  expect(off).toEqual([]);
+});
+
+/**
+ * GEO audit (A8.2, 2026-09-30) — the date a reader sees is the date the
+ * machines read. Every article, every glossary term and both legal pages
+ * print « Dernière mise à jour : … » / "Last updated: …" in the served HTML,
+ * with the sitemap's `<lastmod>` for that URL in the `<time datetime>` and the
+ * same day, written out in the page's language, as its text. Walked from the
+ * sitemap, so a page added there is checked the day it lands.
+ */
+test("every dated prose page prints the sitemap's date, in its language", async ({ page }) => {
+  test.setTimeout(120_000);
+  const xml = await (await page.request.get("/sitemap.xml")).text();
+  const entries = [...xml.matchAll(/<url>([\s\S]*?)<\/url>/g)].map((m) => ({
+    path: new URL(/<loc>([^<]+)<\/loc>/.exec(m[1]!)![1]!).pathname,
+    lastmod: /<lastmod>([^<]+)<\/lastmod>/.exec(m[1]!)?.[1] ?? "(none)",
+  }));
+  const articles = new Set(ARTICLE_PATHS);
+  const dated = (path: string) =>
+    articles.has(path) || /^\/glossary\/[^/]+$/.test(path) || path === "/privacy" || path === "/terms";
+
+  const off: string[] = [];
+  let checked = 0;
+  for (const { path, lastmod } of entries) {
+    const [, locale, rest] = /^\/(en|fr)(\/.*)?$/.exec(path) ?? [];
+    if (!locale || !dated(rest ?? "/")) continue;
+    checked++;
+    const html = await (await page.request.get(path)).text();
+    const line = /data-testid="updated-line"[^>]*>([\s\S]*?)<\/div>/.exec(html)?.[1];
+    if (!line) {
+      off.push(`${path}: no date line`);
+      continue;
+    }
+    const time = /<time dateTime="([^"]+)"[^>]*>([^<]*)<\/time>/i.exec(line);
+    if (time?.[1] !== lastmod) off.push(`${path}: <time> ${time?.[1] ?? "(none)"} ≠ lastmod ${lastmod}`);
+    const shown = formatLongDate(lastmod, locale as "en" | "fr");
+    if (time?.[2] !== shown) off.push(`${path}: shows "${time?.[2] ?? ""}", expected "${shown}"`);
+  }
+  // Both languages of 8 articles, 24 terms and 2 legal pages: a sitemap that
+  // lost a family would pass the loop by skipping it.
+  expect(checked).toBe((articles.size + Object.keys(GLOSSARY).length + 2) * 2);
   expect(off).toEqual([]);
 });

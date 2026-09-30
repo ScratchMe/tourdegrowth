@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { COMPARISON_ORDER } from "@/content/comparison-index";
 import { GLOSSARY } from "@/content/glossary";
 import { PRIVACY, TERMS } from "@/content/legal";
-import { CONTENT_UPDATED_AT, GLOSSARY_UPDATED_AT } from "@/content/updated-at";
+import { CONTENT_UPDATED_AT, termUpdatedAt } from "@/content/updated-at";
 import { ENGINE_PATH, isEngineOpenAtBuild } from "@/lib/engine/access";
 import { gameSitemapPaths, isGameOpenAtBuild } from "@/lib/game/build-flag";
 import { DEFAULT_LOCALE, LOCALES } from "@/lib/i18n/locale";
@@ -55,7 +55,7 @@ const CONTENT_PATHS: { path: string; changeFrequency: "monthly" | "yearly"; prio
     path: `/glossary/${term}`,
     changeFrequency: "yearly" as const,
     priority: 0.5,
-    lastModified: entry.updatedAt ?? GLOSSARY_UPDATED_AT,
+    lastModified: termUpdatedAt(entry),
   })),
 ];
 

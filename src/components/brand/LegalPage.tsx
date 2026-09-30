@@ -1,6 +1,8 @@
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import { ProseList, ProsePage, ProseSection, ProseText } from "@/components/brand/ProsePage";
-import { CONTACT_EMAIL, EMAIL_PLACEHOLDER, LEGAL_UI, splitOnEmail, type LegalBlock, type LegalDocument } from "@/content/legal";
+import { CONTACT_EMAIL, EMAIL_PLACEHOLDER, splitOnEmail, type LegalBlock, type LegalDocument } from "@/content/legal";
+import { UI_STRINGS } from "@/lib/i18n/dictionary";
+import { formatLongDate } from "@/lib/i18n/format-date";
 import type { Locale } from "@/lib/i18n/locale";
 import { tc } from "@/lib/i18n/translatable";
 import styles from "./LegalPage.module.css";
@@ -28,8 +30,9 @@ export function LegalPage({ document, path, locale }: { document: LegalDocument;
       title={tc(document.title, locale)}
       lead={tc(document.intro, locale)}
       kicker={
-        <MetaLabel size="xs" uppercase={false}>
-          {tc(LEGAL_UI.updatedAt, locale)} {formatDate(document.updatedAt, locale)}
+        <MetaLabel size="xs" uppercase={false} data-testid="updated-line">
+          {tc(UI_STRINGS.prosePage.updatedAt, locale)}{" "}
+          <time dateTime={document.updatedAt}>{formatLongDate(document.updatedAt, locale)}</time>
         </MetaLabel>
       }
     >
@@ -96,12 +99,5 @@ function withEmail(text: string) {
     ) : (
       part
     ),
-  );
-}
-
-/** "6 septembre 2026" / "September 6, 2026" — the date is stored as an ISO day, shown in the reader's language. */
-function formatDate(isoDay: string, locale: Locale): string {
-  return new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", { dateStyle: "long", timeZone: "UTC" }).format(
-    new Date(`${isoDay}T00:00:00Z`),
   );
 }

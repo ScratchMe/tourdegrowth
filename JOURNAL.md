@@ -5906,3 +5906,39 @@ La décision 3 renversée par Antoine le 2026-09-29 (C4) : le B2B assisté (SLG)
 - **Un correctif de validation** est nécessaire : le refus au-dessus de 100 % ne doit plus valoir que pour les chiffres bornés, sinon une NRR réelle ne s'enregistre pas.
 
 **Les seize questions** sont en §18.12, chacune avec sa reco et ce qui casse si on se trompe. C25 recommande de trancher d'abord Q3 (un client compte dans la motion qui a signé son contrat en cours : c'est ce qui évite de compter deux fois le MRR total), Q1 (l'activation assistée est la mise en production) et Q2 (trois mois glissants), puis les autres en bloc.
+
+**En production** : PR [#214](https://github.com/ScratchMe/tourdegrowth/pull/214), mergée le 2026-09-30 à 11 h 49 UTC (squash `62e3618`, 4 fichiers, identique à la tête de la PR). Doc seule : Vercel ignore le build, et rien ne change sur le site.
+
+## A8 : l'audit GEO, et la date sur la page (2026-09-30)
+
+L'angle **GEO** (être lu et cité par les moteurs de réponse IA) n'avait jamais été audité. Le plug-in « claude-site-audit », proposé par Antoine le 2026-09-29, a été lu mais **pas installé** : ses contrôles, sa notation et son générateur ne sont pas dans l'archive, et il n'a pas de licence. L'audit a donc été joué à la main. **Si l'amont publie les fichiers manquants, la question repart en section C.**
+
+**A8.1, le relevé**, en lecture seule contre `www.tourdegrowth.com`, sur 74 pages dans les deux langues :
+- **Ce qui tenait déjà** : tout le JSON-LD se parse ; chaque page porte son `lang` et ses trois `hreflang` ; la définition d'un terme est en tête du HTML servi sans JavaScript ; l'auteur est nommé au pied de chaque page. Neuf robots d'IA ou de recherche (GPTBot, OAI-SearchBot, ChatGPT-User, ClaudeBot, Claude-User, PerplexityBot, CCBot, Bytespider, Applebot) reçoivent la même page que Googlebot, au même octet.
+- **`/robots.txt`** laisse tout passer (`User-Agent: *`, `Allow: /`). **`/llms.txt`** répond par la page 404 du site.
+- **Deux trous** : `/how-it-works`, la page qui explique le score, était la seule page de prose sans `Article` ni date. Et **aucune page n'affichait sa date**, alors que le JSON-LD et le sitemap la portaient : ni un lecteur, ni un moteur qui cite la page, ne pouvait distinguer une définition revue la semaine dernière d'une définition vieille d'un an.
+
+**A8.2, ce qui ne demandait aucun choix** :
+- **`/how-it-works` devient un `Article`**, publié le 2026-08-28 (#14, lu dans l'historique) et mis à jour le 2026-09-24. Son `og:type` passe à `article`, avec les mêmes dates.
+- **La ligne de date** « Dernière mise à jour : … » / "Last updated: …" s'imprime sur :
+  - les huit articles, au-dessus du titre, comme sur les pages légales ;
+  - les 24 termes, sous le titre, puisque le lien de retour tient la place au-dessus.
+- **Le jour affiché est toujours celui du `<lastmod>`**, dans un `<time dateTime>`. `termUpdatedAt()` devient la source unique du sitemap et de la page de terme. `formatLongDate()` est partagée avec les pages légales.
+- **Le libellé** était celui des pages légales (`LEGAL_UI`, validé avec elles). Il passe dans le dictionnaire (`UI_STRINGS.prosePage.updatedAt`) et repart « à relire », pour son usage neuf.
+- **Pas de nouveau composant** dans `src/components/` : `UpdatedLine` vit sous `src/app/[locale]/_prose/`. C'est de l'assemblage de page, et un composant du système demanderait un aperçu de design sync qu'une session cloud ne peut pas reconstruire.
+- **Pas de date en JSON-LD sur les termes** : `DefinedTerm` n'est pas une `CreativeWork`, et `dateModified` n'y est pas défini. Le sitemap et la page portent la date.
+
+**A8.3, ce qui est une décision**, en section C avec une reco :
+- **C26, les robots d'IA** : tout laisser, et l'écrire.
+- **C27, `llms.txt`** : oui, court et généré, sans `llms-full.txt`. Le fichier n'est encore lu par presque personne : 97 % des fichiers sans aucune requête d'IA en mai 2026 selon [PPC Land](https://ppc.land/llms-txt-adoption-rises-8-8x-but-97-of-files-get-zero-ai-requests/), et Google a dit en juillet 2025 ne pas le lire. D'où « court » : le gain est faible, le coût aussi.
+- **`FAQPage` n'est pas rouvert** : le refus de septembre tient.
+
+**Vérifié** :
+- **Gardes** :
+  - `e2e/structured-data.spec.ts` inclut `/how-it-works` dans ses deux tests d'`Article`, sur une liste unique.
+  - Un test neuf parcourt le sitemap et exige, sur chaque article, terme et page légale dans les deux langues, la ligne de date. Son `<time>` doit valoir le `<lastmod>` et son texte le jour écrit dans la langue de la page. Il compte 68 pages, pour qu'une famille perdue par le sitemap ne passe pas en silence.
+  - Tests unitaires : `formatLongDate` en FR et en EN, sans glisser au jour d'avant ; `termUpdatedAt` ; la liste des pages `Article`.
+- **Non-vacuité**, dans un seul build, en retirant l'`Article` et la ligne de `/how-it-works` et en affichant la date de repli sur les termes : les trois tests rougissent. Ils nomment exactement `/en` et `/fr/how-it-works`, puis chacun des 24 termes dans les deux langues, et rien d'autre.
+- **À l'écran**, en FR et en EN, à 1 280 et 390 px (`/how-it-works`, `/aarrr-vs-okr`, `/glossary/churn`, `/privacy`) : la ligne est à sa place, sans défilement horizontal.
+
+**Au passage, `CLAUDE.md`** frôlait son budget de 40 000 caractères. La ligne « Hygiène de dépôt public », close depuis le 2026-09-29, en sort. Sa seule règle encore utile, l'épinglage par SHA de tous les workflows et le test qui l'exige, passe dans `GITHUB.md` §2 : c'est le fichier qu'on ouvre avant de toucher un workflow.

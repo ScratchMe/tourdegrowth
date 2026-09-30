@@ -11,6 +11,7 @@ import { localePath } from "@/lib/i18n/routes";
 import { contentMetadata } from "@/lib/i18n/meta";
 import { articleSchema, breadcrumbSchema, JsonLd } from "@/lib/seo/jsonld";
 import { articleDates } from "@/content/updated-at";
+import { UpdatedLine } from "../_prose/UpdatedLine";
 import own from "./page.module.css";
 
 interface PageProps {
@@ -60,6 +61,7 @@ export default async function DiagnosticPage({ params }: PageProps) {
         path="/startup-growth-diagnostic"
         title={tc(DIAGNOSTIC.title, locale)}
         lead={tc(DIAGNOSTIC.intro, locale)}
+        kicker={<UpdatedLine locale={locale} isoDay={articleDates("/startup-growth-diagnostic").modified} />}
       >
         {DIAGNOSTIC.sections.map((section) => (
           <ProseSection key={section.heading.en} heading={tc(section.heading, locale)}>
