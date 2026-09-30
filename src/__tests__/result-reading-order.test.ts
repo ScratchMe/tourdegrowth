@@ -35,6 +35,16 @@ const VISUAL_ORDER = Object.fromEntries(
 );
 
 /** The desktop block — where `.slotGame` takes a different value (see the stylesheet). */
+/**
+ * The owner's own order (C16, 2026-09-29): on their result the share block
+ * comes before the CTA row. Read from the stylesheet like the rest, never
+ * restated here.
+ */
+const OWNER_OVERRIDES = Object.fromEntries(
+  [...CSS.matchAll(/^\.layout\[data-owner\] \.(slot[A-Za-z]+) \{ order: (\d+); \}/gm)].map((m) => [m[1]!, Number(m[2])]),
+);
+const OWNER_ORDER: Record<string, number> = { ...VISUAL_ORDER, ...OWNER_OVERRIDES };
+
 const DESKTOP_CSS = CSS.slice(CSS.indexOf("@media (min-width: 761px)"));
 const DESKTOP_OVERRIDES = Object.fromEntries(
   [...DESKTOP_CSS.matchAll(/\.(slot[A-Za-z]+)\s*\{\s*order:\s*(\d+);\s*\}/g)].map((m) => [m[1]!, Number(m[2])]),
@@ -53,9 +63,9 @@ function column(slot: string): "left" | "right" | "outside" {
   return "outside";
 }
 
-function worstDisplacement(present: string[]): { worst: number; where: string } {
+function worstDisplacement(present: string[], order: Record<string, number> = VISUAL_ORDER): { worst: number; where: string } {
   const source = SOURCE_ORDER.filter((s) => present.includes(s));
-  const visual = [...source].sort((a, b) => VISUAL_ORDER[a]! - VISUAL_ORDER[b]!);
+  const visual = [...source].sort((a, b) => order[a]! - order[b]!);
   let worst = 0;
   let where = "";
   visual.forEach((slot, visualIndex) => {
@@ -75,6 +85,12 @@ describe("the mobile reading order, for every variant", () => {
     expect(SOURCE_ORDER.length, "no slot classes found in ResultView.tsx").toBe(11);
     expect(Object.keys(VISUAL_ORDER).length, "no order values found in the stylesheet").toBe(11);
     expect(SOURCE_ORDER.every((s) => s in VISUAL_ORDER)).toBe(true);
+  });
+
+  it("reads the owner's own order, and it puts sharing before the CTA row (C16)", () => {
+    expect(OWNER_OVERRIDES, "the owner's reordering is missing from the stylesheet").toEqual({ slotShare: 7, slotCta: 8 });
+    expect(OWNER_ORDER.slotShare!).toBeLessThan(OWNER_ORDER.slotCta!);
+    expect(VISUAL_ORDER.slotShare!).toBeGreaterThan(VISUAL_ORDER.slotCta!);
   });
 
   /**
@@ -103,21 +119,33 @@ describe("the mobile reading order, for every variant", () => {
    *
    * A visitor without the card — every shared link whose bottleneck has no
    * level yet — stays at 1.
+   *
+   * The owner pays one place more since C16 (2026-09-29): "Share this
+   * result" is their primary, so on a phone the share block is shown BEFORE
+   * the CTA row while still announced last. 2 → 3 without the card, 3 → 4
+   * with it, and `slotShare` is the worst slot in all four. Moving the share
+   * block up the source would cost every visitor instead — the growth loop's
+   * reader — and it has to stay outside the columns for its desktop grid
+   * area. The visitor's numbers do not move.
    */
   const VARIANTS = [
-    { name: "visitor", without: ["slotCredit", "slotBreakdown", "slotGame"], displacement: 1 },
-    { name: "visitor with a Deep dive", without: ["slotBreakdown", "slotGame"], displacement: 1 },
-    { name: "owner", without: ["slotCredit", "slotGame"], displacement: 2 },
-    { name: "owner with a Deep dive", without: ["slotGame"], displacement: 2 },
-    { name: "visitor with the game card", without: ["slotCredit", "slotBreakdown"], displacement: 2 },
-    { name: "visitor with a Deep dive and the game card", without: ["slotBreakdown"], displacement: 2 },
-    { name: "owner with the game card", without: ["slotCredit"], displacement: 3 },
-    { name: "owner with a Deep dive and the game card", without: [], displacement: 3 },
+    { name: "visitor", owner: false, without: ["slotCredit", "slotBreakdown", "slotGame"], displacement: 1 },
+    { name: "visitor with a Deep dive", owner: false, without: ["slotBreakdown", "slotGame"], displacement: 1 },
+    { name: "owner", owner: true, without: ["slotCredit", "slotGame"], displacement: 3 },
+    { name: "owner with a Deep dive", owner: true, without: ["slotGame"], displacement: 3 },
+    { name: "visitor with the game card", owner: false, without: ["slotCredit", "slotBreakdown"], displacement: 2 },
+    { name: "visitor with a Deep dive and the game card", owner: false, without: ["slotBreakdown"], displacement: 2 },
+    { name: "owner with the game card", owner: true, without: ["slotCredit"], displacement: 4 },
+    { name: "owner with a Deep dive and the game card", owner: true, without: [], displacement: 4 },
   ];
 
-  it.each(VARIANTS)("$name: worst displacement is $displacement", ({ without, displacement }) => {
-    const { worst } = worstDisplacement(SOURCE_ORDER.filter((s) => !without.includes(s)));
+  it.each(VARIANTS)("$name: worst displacement is $displacement", ({ owner, without, displacement }) => {
+    const { worst, where } = worstDisplacement(
+      SOURCE_ORDER.filter((s) => !without.includes(s)),
+      owner ? OWNER_ORDER : VISUAL_ORDER,
+    );
     expect(worst).toBe(displacement);
+    if (owner) expect(where).toBe("slotShare");
   });
 
   it("the game card costs exactly one place, never more, on every variant", () => {
@@ -126,8 +154,9 @@ describe("the mobile reading order, for every variant", () => {
     // would change and could be re-pinned without anyone noticing the card
     // had become the expensive thing on the page.
     for (const v of VARIANTS.filter((x) => x.without.includes("slotGame"))) {
-      const withCard = worstDisplacement(SOURCE_ORDER.filter((s) => !v.without.includes(s) || s === "slotGame"));
-      const without = worstDisplacement(SOURCE_ORDER.filter((s) => !v.without.includes(s)));
+      const order = v.owner ? OWNER_ORDER : VISUAL_ORDER;
+      const withCard = worstDisplacement(SOURCE_ORDER.filter((s) => !v.without.includes(s) || s === "slotGame"), order);
+      const without = worstDisplacement(SOURCE_ORDER.filter((s) => !v.without.includes(s)), order);
       expect(withCard.worst - without.worst, v.name).toBe(1);
     }
   });
@@ -151,8 +180,13 @@ describe("the desktop reading order", () => {
   it.each(["left", "right"] as const)("the %s column reads in its source order", (col) => {
     const source = SOURCE_ORDER.filter((s) => column(s) === col);
     expect(source.length, `no slots found in the ${col} column`).toBeGreaterThan(1);
-    const visual = [...source].sort((a, b) => DESKTOP_ORDER[a]! - DESKTOP_ORDER[b]! || source.indexOf(a) - source.indexOf(b));
-    expect(visual).toEqual(source);
+    // The owner's reordering (C16) is not scoped to phones: on desktop it must
+    // leave every column in source order too, since the share block has its
+    // own grid area there.
+    for (const order of [DESKTOP_ORDER, { ...OWNER_ORDER, ...DESKTOP_OVERRIDES }]) {
+      const visual = [...source].sort((a, b) => order[a]! - order[b]! || source.indexOf(a) - source.indexOf(b));
+      expect(visual).toEqual(source);
+    }
   });
 
   /** C10 (GAME-BRIEF §15.4, 2026-09-29). Non-vacuity, measured 2026-09-30: the old place (before the CTA row) fails it. */
