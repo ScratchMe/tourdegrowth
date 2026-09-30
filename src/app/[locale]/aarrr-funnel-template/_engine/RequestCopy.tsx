@@ -6,9 +6,8 @@ import type { MetricId, RoleId } from "@/lib/engine/types";
 import { buildRequest } from "@/lib/engine/request";
 import { trackEngine } from "./engine-events";
 import type { EngineView } from "./view";
-import { Field } from "./_ui/Field";
+import { Field } from "@/components/core/Field";
 import styles from "./Sheet.module.css";
-import ui from "./_ui/ui.module.css";
 
 /**
  * "Copy the request" (§6.13): the message to send to Finance, Data or
@@ -73,17 +72,21 @@ export function RequestCopy({
         {outcome?.ok ? view.strings.request.copied : ""}
       </p>
       {outcome && !outcome.ok ? (
-        <Field label={view.strings.request.copy} hint={view.strings.workbench.copyFailed} htmlFor={fallbackId}>
-          <textarea
-            id={fallbackId}
-            className={[ui.control, styles.requestFallback].join(" ")}
-            readOnly
-            rows={7}
-            value={outcome.text}
-            aria-describedby={`${fallbackId}-hint`}
-            onFocus={(event) => event.currentTarget.select()}
-            data-testid="engine-request-fallback"
-          />
+        // Not a TextArea: nothing is typed here, so no limit and no count —
+        // only the text to select and copy by hand.
+        <Field size="sm" id={fallbackId} label={view.strings.request.copy} hint={view.strings.workbench.copyFailed}>
+          {({ id: textId, describedBy }) => (
+            <textarea
+              id={textId}
+              className={styles.requestFallback}
+              readOnly
+              rows={7}
+              value={outcome.text}
+              aria-describedby={describedBy}
+              onFocus={(event) => event.currentTarget.select()}
+              data-testid="engine-request-fallback"
+            />
+          )}
         </Field>
       ) : null}
     </div>

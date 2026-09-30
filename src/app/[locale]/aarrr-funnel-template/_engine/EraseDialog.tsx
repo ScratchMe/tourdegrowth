@@ -5,8 +5,7 @@ import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import type { EngineStrings } from "@/lib/engine/strings";
 import { fill } from "./text";
-import { Field } from "./_ui/Field";
-import { TextField } from "./_ui/TextField";
+import { TextField } from "@/components/core/TextField";
 import styles from "./Screens.module.css";
 
 /**
@@ -49,9 +48,7 @@ export function EraseDialog({
       <p className={styles.lead} data-testid="engine-erase-prompt">
         {fill(strings.erase.confirmPrompt, { word })}
       </p>
-      <Field label={strings.erase.confirmLabel} htmlFor={inputId}>
-        <TextField id={inputId} value={typed} onChange={setTyped} />
-      </Field>
+      <TextField id={inputId} label={strings.erase.confirmLabel} value={typed} onChange={setTyped} />
       <div className={styles.panelActions}>
         <Button variant="secondary" onClick={onErase} disabled={!matches} data-testid="engine-erase-confirm">
           {strings.erase.confirm}

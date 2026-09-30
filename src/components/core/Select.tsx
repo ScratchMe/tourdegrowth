@@ -42,6 +42,8 @@ export interface SelectProps<V extends string = string> {
   id?: string;
   name?: string;
   onBlur?: FocusEventHandler<HTMLSelectElement>;
+  /** Set on the native control, for tests. */
+  "data-testid"?: string;
 }
 
 const isGroup = <V extends string>(item: SelectOption<V> | SelectOptionGroup<V>): item is SelectOptionGroup<V> =>
@@ -71,6 +73,7 @@ export function Select<V extends string = string>({
   id,
   name,
   onBlur,
+  "data-testid": testId,
 }: SelectProps<V>) {
   return (
     <Field
@@ -87,6 +90,7 @@ export function Select<V extends string = string>({
         <select
           id={controlId}
           name={name}
+          data-testid={testId}
           className={selectClasses({ status, empty: value === "", size, fit })}
           value={value}
           disabled={disabled}

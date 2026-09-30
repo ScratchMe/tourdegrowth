@@ -72,6 +72,8 @@
   --pad-choice-sm: var(--space-4) var(--space-6);
   --pad-choice-md: var(--space-7) var(--space-8);
   --choice-gap: var(--space-3); /* between two option rows */
+  --form-gap-sm: var(--space-8); /* field → field in a sheet, 20px */
+  --form-gap-md: var(--space-10); /* field → field on a one-question screen, 26px */
   /* A number field is as wide as the magnitude it expects; the caller gives
      the digits, this is the fallback (Q6). */
   --field-digits-default: 9;

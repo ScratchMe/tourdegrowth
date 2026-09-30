@@ -30,7 +30,8 @@ export function FieldRow({ joiner, error, children }: FieldRowProps) {
     <div className={fieldRow.row} role="group" aria-describedby={error ? `${id}-message` : undefined}>
       <div className={fieldRow.grid}>
         {first}
-        {joiner ? <span className={fieldRow.joiner}>{joiner}</span> : null}
+        {/* Always in place, empty without a joiner, so the second field keeps its column. */}
+        <span className={fieldRow.joiner}>{joiner}</span>
         {second}
       </div>
       {error ? (

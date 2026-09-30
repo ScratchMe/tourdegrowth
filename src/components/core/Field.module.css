@@ -281,6 +281,11 @@
   color: var(--field-hint-text);
 }
 
+/* A pair without a joiner ("At least" / "At most" name themselves). */
+.joiner:empty {
+  display: none;
+}
+
 .rowMessage {
   margin-top: var(--space-3);
 }

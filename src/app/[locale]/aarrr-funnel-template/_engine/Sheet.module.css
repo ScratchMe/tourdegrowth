@@ -7,7 +7,8 @@
 .sheet {
   display: flex;
   flex-direction: column;
-  gap: var(--space-7);
+  /* A sheet of many fields: extension 04's sm rhythm between them. */
+  gap: var(--form-gap-sm);
   min-width: 0;
 }
 
@@ -69,36 +70,8 @@
 .editor {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--form-gap-sm);
   min-width: 0;
-}
-
-/* The two counts with "out of" between them — one line from a phone up;
-   each box keeps half the width, the word takes what it needs. */
-.counts {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  align-items: end;
-  gap: var(--space-4);
-}
-
-.sharedNotes {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.sharedNote {
-  font: var(--meta-xs);
-  color: var(--text-muted);
-  margin: 0;
-}
-
-.over {
-  font: var(--meta-sm);
-  color: var(--text-muted);
-  /* Aligned with the boxes, not with their labels. */
-  padding-bottom: var(--space-5);
 }
 
 .live {
@@ -258,8 +231,15 @@
   min-height: 1em;
 }
 
+/* Read-only text to copy by hand: drawn as a field, in the caption voice. */
 .requestFallback {
+  width: 100%;
+  padding: var(--space-4) var(--pad-field-inline);
   font: var(--meta-sm);
+  color: var(--field-text);
+  background: var(--field-bg);
+  border: var(--border-width) solid var(--field-border);
+  border-radius: var(--radius-field);
   white-space: pre-wrap;
   resize: vertical;
 }
@@ -274,10 +254,6 @@
 .reading {
   border-left: var(--border-rule);
   padding-left: var(--space-5);
-}
-
-.readingInvalid {
-  border-left: var(--border-width) solid var(--border-alert);
 }
 
 .readingBody {
@@ -367,4 +343,62 @@
   justify-content: space-between;
   font: var(--chart-label);
   color: var(--text-muted);
+}
+
+/* --- Outside the fields ------------------------------------------------- */
+
+/* A caption over a block of the sheet ("Formula", "Trap", "Reference"): the
+   system's mono meta label, never a field's label. */
+.metaLabel {
+  /* The typography tokens are `font` SHORTHANDS, not sizes — `font-size:
+     var(--meta-xs)` would be silently invalid (CLAUDE.md, audit 1.2). */
+  font: var(--meta-xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* The sheet's refusals under the save button (what it still needs, a rule, a
+   write that failed). Each field also says its own under itself. */
+.error {
+  font: var(--meta-xs);
+  color: var(--text-alert);
+  margin: 0;
+}
+
+/*
+ * A text action under a field ("I only have the rate") is `Button
+ * variant="quiet" size="sm"` (design audit S-11): the system's one text button,
+ * tapped 44px tall. In a column it would stretch to the column's width and
+ * centre its label; this keeps it at the start, under the field it acts on.
+ */
+.textAction {
+  align-self: flex-start;
+}
+
+/*
+ * A link inside a sentence ("also in Amplitude: activation rate and…"): it
+ * opens another sheet, so it is a button, but it reads as the sentence's own
+ * words — its font, the link colour, no box. Not a text button: WCAG 2.5.8
+ * exempts a target set in a line of text, and a 44px strip here would cover
+ * the lines above and below.
+ */
+.inlineLink {
+  font: inherit;
+  color: var(--text-link);
+  background: none;
+  border: none;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.inlineLink:hover {
+  color: var(--text-link-hover);
+}
+
+.inlineLink:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset-tight);
 }

@@ -1200,7 +1200,15 @@
 }
 
 .askForm {
-  gap: var(--space-8);
+  /* A sheet of fields: extension 04's sm rhythm between them. */
+  gap: var(--form-gap-sm);
+}
+
+/* The three bullets, each a field, under their group's legend. */
+.bullets {
+  display: flex;
+  flex-direction: column;
+  gap: var(--form-gap-sm);
 }
 
 .panelTitle {
@@ -1211,36 +1219,10 @@
   color: var(--text-muted);
 }
 
-.check {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  min-height: var(--hit-min);
-  font: var(--body-md);
-  cursor: pointer;
-}
 
-.check input {
-  flex: none;
-  width: 20px;
-  height: 20px;
-  margin: 0;
-  accent-color: var(--text-body);
-}
 
-.check input:disabled + span {
-  color: var(--text-muted);
-}
 
-.checkHint {
-  display: block;
-  font: var(--body-sm);
-  color: var(--text-muted);
-}
 
-.checkMeta {
-  color: var(--text-muted);
-}
 
 .exportActions {
   display: flex;
@@ -1306,59 +1288,12 @@
   color: var(--text-muted);
 }
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  min-width: 0;
-}
 
-.fieldLabel {
-  padding: 0;
-  font: var(--meta-xs);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
 
-.control {
-  box-sizing: border-box;
-  width: 100%;
-  min-height: var(--hit-min);
-  padding: var(--space-4) var(--space-5);
-  font: var(--body-md);
-  color: var(--text-body);
-  background: var(--field-bg);
-  border: var(--border-solid);
-  border-radius: var(--radius-button);
-}
 
-.control:focus-visible {
-  outline: var(--focus-width) solid var(--focus-ring-invert);
-  outline-offset: var(--focus-offset-tight);
-}
 
-.inlineFields {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-5);
-}
 
-.checkGroup {
-  min-width: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
 
-.radioRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 var(--space-8);
-}
 
 .thumbs {
   margin: 0;

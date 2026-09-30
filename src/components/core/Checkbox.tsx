@@ -21,6 +21,8 @@ export interface CheckboxProps {
   name?: string;
   /** More ids to describe it by, such as its group's message. */
   describedBy?: string;
+  /** Set on the native control, for tests. */
+  "data-testid"?: string;
 }
 
 /**
@@ -43,6 +45,7 @@ export function Checkbox({
   id: idProp,
   name,
   describedBy,
+  "data-testid": testId,
 }: CheckboxProps) {
   const auto = useId().replace(/:/g, "");
   const id = idProp ?? `check-${auto}`;
@@ -58,6 +61,7 @@ export function Checkbox({
       <input
         id={id}
         name={name}
+        data-testid={testId}
         type="checkbox"
         className={styles.input}
         checked={checked}

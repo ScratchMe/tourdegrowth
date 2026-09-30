@@ -45,6 +45,8 @@ export interface NumberFieldProps {
   id?: string;
   name?: string;
   onBlur?: FocusEventHandler<HTMLInputElement>;
+  /** Set on the native control, for tests. */
+  "data-testid"?: string;
 }
 
 /**
@@ -84,6 +86,7 @@ export function NumberField({
   id,
   name,
   onBlur,
+  "data-testid": testId,
 }: NumberFieldProps) {
   // The typed text is kept alongside the value it produced: while they agree,
   // the person's own spelling stays on screen; when `value` changes from
@@ -125,61 +128,67 @@ export function NumberField({
         const sized = fit === "content" ? (prefix || suffix ? styles.sizedAffixed : styles.sized) : "";
         const style = digits ? ({ "--field-digits": digits } as CSSProperties) : undefined;
         return (
-          <div className={[fieldBox.box, boxStatusClasses(status, disabled)].filter(Boolean).join(" ")} style={style}>
-            {prefix ? (
-              <span className={fieldBox.affix} aria-hidden="true">
-                {prefix}
-              </span>
-            ) : null}
-            <input
-              ref={input}
-              id={controlId}
-              name={name}
-              type="text"
-              inputMode={integer ? "numeric" : "decimal"}
-              autoComplete="off"
-              className={[fieldBox.control, styles.control, styles.figure, prefix ? styles.afterPrefix : "", sized]
-                .filter(Boolean)
-                .join(" ")}
-              value={raw}
-              placeholder={placeholder}
-              disabled={disabled}
-              aria-invalid={status === "invalid" || undefined}
-              aria-describedby={[unitId, describedBy].filter(Boolean).join(" ") || undefined}
-              onChange={(event) => {
-                const el = event.target;
-                const inputType = (event.nativeEvent as InputEvent).inputType;
-                const { text, caret } = regroupTypedNumber(
-                  el.value,
-                  el.selectionStart,
-                  locale,
-                  inputType === "deleteContentForward" ? "forward" : "backward",
-                );
-                if (text !== el.value) pendingCaret.current = caret;
-                const next = parseTypedNumber(text, locale);
-                const usable = next !== null && (!integer || Number.isInteger(next)) ? next : null;
-                // Once the text reads again, the message goes; it only comes
-                // back when the person leaves a box that still cannot be read.
-                if (!isUnreadable(text, locale, integer)) setParseShown(false);
-                setDraft({ raw: text, value: usable });
-                onChange(usable);
-              }}
-              onBlur={(event) => {
-                setParseShown(isUnreadable(event.target.value, locale, integer));
-                onBlur?.(event);
-              }}
-            />
-            {suffix ? (
-              <span className={fieldBox.affix} aria-hidden="true">
-                {suffix}
-              </span>
-            ) : null}
+          <>
+            <div className={[fieldBox.box, boxStatusClasses(status, disabled)].filter(Boolean).join(" ")} style={style}>
+              {prefix ? (
+                <span className={fieldBox.affix} aria-hidden="true">
+                  {prefix}
+                </span>
+              ) : null}
+              <input
+                ref={input}
+                id={controlId}
+                name={name}
+                data-testid={testId}
+                type="text"
+                inputMode={integer ? "numeric" : "decimal"}
+                autoComplete="off"
+                className={[fieldBox.control, styles.control, styles.figure, prefix ? styles.afterPrefix : "", sized]
+                  .filter(Boolean)
+                  .join(" ")}
+                value={raw}
+                placeholder={placeholder}
+                disabled={disabled}
+                aria-invalid={status === "invalid" || undefined}
+                aria-describedby={[unitId, describedBy].filter(Boolean).join(" ") || undefined}
+                onChange={(event) => {
+                  const el = event.target;
+                  const inputType = (event.nativeEvent as InputEvent).inputType;
+                  const { text, caret } = regroupTypedNumber(
+                    el.value,
+                    el.selectionStart,
+                    locale,
+                    inputType === "deleteContentForward" ? "forward" : "backward",
+                  );
+                  if (text !== el.value) pendingCaret.current = caret;
+                  const next = parseTypedNumber(text, locale);
+                  const usable = next !== null && (!integer || Number.isInteger(next)) ? next : null;
+                  // Once the text reads again, the message goes; it only comes
+                  // back when the person leaves a box that still cannot be read.
+                  if (!isUnreadable(text, locale, integer)) setParseShown(false);
+                  setDraft({ raw: text, value: usable });
+                  onChange(usable);
+                }}
+                onBlur={(event) => {
+                  setParseShown(isUnreadable(event.target.value, locale, integer));
+                  onBlur?.(event);
+                }}
+              />
+              {suffix ? (
+                <span className={fieldBox.affix} aria-hidden="true">
+                  {suffix}
+                </span>
+              ) : null}
+            </div>
+            {/* Outside the box: inside, it was the box's last child, and the sign
+                that follows the figure lost the inset `.affix:last-child` gives
+                it — measured 3px from the edge instead of 14 (2026-09-30). */}
             {unitName ? (
               <span id={unitId} className="tdg-visually-hidden">
                 {unitName}
               </span>
             ) : null}
-          </div>
+          </>
         );
       }}
     </Field>

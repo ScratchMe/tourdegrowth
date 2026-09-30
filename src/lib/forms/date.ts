@@ -6,8 +6,8 @@
  * desktop draws as a bare text box.
  */
 
-/** "2026-08": a year and a month, the value a month list holds. */
-export type YearMonth = `${number}-${string}`;
+/** "2026-08": a year and a month, the value a month list holds — the engine's own type. */
+export type YearMonth = string;
 
 /**
  * The `count` months that end at `latest`, newest first — the growth

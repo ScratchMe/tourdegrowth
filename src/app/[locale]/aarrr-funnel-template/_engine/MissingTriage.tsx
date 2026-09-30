@@ -1,6 +1,12 @@
 "use client";
 
 import { Button } from "@/components/core/Button";
+import { Choices, type ChoiceOption } from "@/components/core/Choices";
+import { Field } from "@/components/core/Field";
+import { FieldRow } from "@/components/core/FieldRow";
+import { NumberField } from "@/components/core/NumberField";
+import { Select } from "@/components/core/Select";
+import { TextField } from "@/components/core/TextField";
 import { TEXT_LIMITS, type MetricShape } from "@/lib/engine/catalog-shape";
 import { CAUSE_KEY, REPAIR_KEY, ROLE_KEY, type ResolvedMetric } from "@/lib/engine/strings";
 import type { RepairScale, RoleId } from "@/lib/engine/types";
@@ -13,17 +19,12 @@ import {
   type SourceChoice,
   type TriageAnswer,
 } from "./sheet-draft";
-import { isRule, ruleMessage } from "./sheet-problems";
-import { currencySymbol, sourceOptions } from "./sources";
+import { isRule, missingLabel, ruleMessage } from "./sheet-problems";
+import { moneyUnit, percentUnit, sourceOptions } from "./sources";
 import { RequestCopy } from "./RequestCopy";
+import { fill } from "./text";
 import type { EngineView } from "./view";
-import { Choices, type Choice } from "./_ui/Choices";
-import { Field } from "./_ui/Field";
-import { NumberField } from "./_ui/NumberField";
-import { Select } from "./_ui/Select";
-import { TextField } from "./_ui/TextField";
 import styles from "./Sheet.module.css";
-import ui from "./_ui/ui.module.css";
 
 const REPAIRS = Object.keys(REPAIR_KEY) as RepairScale[];
 const ROLES = Object.keys(ROLE_KEY) as RoleId[];
@@ -62,10 +63,12 @@ export function MissingTriage({
   const t = strings.triage;
   const locale = view.ctx.locale;
   const rule = (p: DraftProblem) => (problems.includes(p) && isRule(p) ? ruleMessage(p, metric, strings, locale) : null);
+  const need = (p: DraftProblem) =>
+    problems.includes(p) ? fill(strings.workbench.saveNeeds, { fields: missingLabel(p, metric, strings) }) : null;
 
   // Which answers a metric offers is decided in sheet-draft.ts (no « deux chiffres » for an answer).
-  const answers: Choice<TriageAnswer>[] = triageAnswersFor(shape, Boolean(metric.naReasons?.length)).map((id) => ({
-    id,
+  const answers: ChoiceOption<TriageAnswer>[] = triageAnswersFor(shape, Boolean(metric.naReasons?.length)).map((id) => ({
+    value: id,
     label: id === "conflicting" ? strings.cause.conflicting : id === "not-applicable" ? strings.cause.notApplicable : strings.cause[CAUSE_KEY[id]],
   }));
 
@@ -75,8 +78,10 @@ export function MissingTriage({
   return (
     <div className={styles.editor} data-testid="engine-triage">
       <Choices
-        name={`${idPrefix}-triage`}
+        size="sm"
+        id={`${idPrefix}-triage`}
         legend={t.question}
+        error={need("triage")}
         value={draft.triage}
         options={answers}
         onChange={(triage) => update({ triage, repair: proposedRepair(triage, shape) })}
@@ -85,34 +90,36 @@ export function MissingTriage({
       {isMissing ? (
         <>
           <Choices
-            name={`${idPrefix}-repair`}
+            size="sm"
+            id={`${idPrefix}-repair`}
             legend={t.repair}
             value={draft.repair}
-            options={REPAIRS.map((r) => ({ id: r, label: strings.repair[REPAIR_KEY[r]] }))}
+            options={REPAIRS.map((r) => ({ value: r, label: strings.repair[REPAIR_KEY[r]] }))}
             onChange={(repair) => update({ repair })}
             columns={2}
           />
-          <Field label={t.repairComment} htmlFor={`${idPrefix}-repair-comment`} error={rule("comment-too-long")}>
-            <TextField
-              id={`${idPrefix}-repair-comment`}
-              value={draft.repairComment}
-              onChange={(repairComment) => update({ repairComment })}
-              limit={TEXT_LIMITS.repairComment}
-            />
-          </Field>
+          <TextField
+            size="sm"
+            id={`${idPrefix}-repair-comment`}
+            label={t.repairComment}
+            error={rule("comment-too-long")}
+            value={draft.repairComment}
+            onChange={(repairComment) => update({ repairComment })}
+            maxLength={TEXT_LIMITS.repairComment}
+          />
         </>
       ) : null}
 
       {draft.triage === "no-access" ? (
         <>
-          <Field label={t.owner} htmlFor={`${idPrefix}-owner`}>
-            <Select<RoleId>
-              id={`${idPrefix}-owner`}
-              value={ownerRole}
-              options={ROLES.map((role) => ({ id: role, label: strings.role[ROLE_KEY[role]] }))}
-              onChange={(role) => role && update({ ownerRole: role })}
-            />
-          </Field>
+          <Select<RoleId>
+            size="sm"
+            id={`${idPrefix}-owner`}
+            label={t.owner}
+            value={ownerRole}
+            options={ROLES.map((role) => ({ value: role, label: strings.role[ROLE_KEY[role]] }))}
+            onChange={(role) => role && update({ ownerRole: role })}
+          />
           <RequestCopy
             role={ownerRole}
             ids={[shape.id]}
@@ -137,7 +144,7 @@ export function MissingTriage({
             legend={t.readingA}
             reading={draft.readingA}
             onChange={(readingA) => update({ readingA })}
-            invalid={problems.includes("reading-a")}
+            error={need("reading-a")}
             shape={shape}
             metric={metric}
             view={view}
@@ -147,7 +154,7 @@ export function MissingTriage({
             legend={t.readingB}
             reading={draft.readingB}
             onChange={(readingB) => update({ readingB })}
-            invalid={problems.includes("reading-b")}
+            error={need("reading-b")}
             shape={shape}
             metric={metric}
             view={view}
@@ -157,10 +164,12 @@ export function MissingTriage({
 
       {draft.triage === "not-applicable" && metric.naReasons?.length ? (
         <Choices
-          name={`${idPrefix}-na`}
+          size="sm"
+          id={`${idPrefix}-na`}
           legend={t.naReason}
+          error={need("na-reason")}
           value={draft.naReason || null}
-          options={metric.naReasons.map((r) => ({ id: r.id, label: r.label }))}
+          options={metric.naReasons.map((r) => ({ value: r.id, label: r.label }))}
           onChange={(naReason) => update({ naReason })}
         />
       ) : null}
@@ -178,7 +187,7 @@ function ReadingFields({
   legend,
   reading,
   onChange,
-  invalid,
+  error,
   shape,
   metric,
   view,
@@ -187,7 +196,8 @@ function ReadingFields({
   legend: string;
   reading: ReadingDraft;
   onChange: (reading: ReadingDraft) => void;
-  invalid: boolean;
+  /** What this reading still lacks, once a save was tried. */
+  error: string | null;
   shape: MetricShape;
   metric: ResolvedMetric;
   view: EngineView;
@@ -201,90 +211,86 @@ function ReadingFields({
   const money = shape.unit === "money";
 
   return (
-    <fieldset className={[ui.fieldset, styles.reading, invalid ? styles.readingInvalid : ""].filter(Boolean).join(" ")}>
-      <legend className={ui.legend}>{legend}</legend>
+    <Field group size="sm" label={legend} error={error} className={styles.reading}>
       <div className={styles.readingBody}>
         {reading.kind === "ratio" ? (
-          <div className={styles.counts}>
-            <Field label={metric.inputs?.numerator ?? metric.name} htmlFor={`${idPrefix}-num`}>
-              <NumberField
-                id={`${idPrefix}-num`}
-                value={reading.numerator}
-                onChange={(numerator) => set({ numerator })}
-                locale={locale}
-                integer={!money}
-                unit={money ? currencySymbol(view.state.setup.currency, locale) : undefined}
-                invalidMessage={money ? w.notANumber : w.notAWholeNumber}
-              />
-            </Field>
-            <span className={styles.over} aria-hidden="true">
-              {strings.sheet.over}
-            </span>
-            <Field label={metric.inputs?.denominator ?? metric.name} htmlFor={`${idPrefix}-den`}>
-              <NumberField
-                id={`${idPrefix}-den`}
-                value={reading.denominator}
-                onChange={(denominator) => set({ denominator })}
-                locale={locale}
-                integer
-                invalidMessage={w.notAWholeNumber}
-              />
-            </Field>
-          </div>
+          <FieldRow joiner={strings.sheet.over}>
+            <NumberField
+              size="sm"
+              id={`${idPrefix}-num`}
+              label={metric.inputs?.numerator ?? metric.name}
+              value={reading.numerator}
+              onChange={(numerator) => set({ numerator })}
+              locale={locale}
+              integer={!money}
+              {...(money ? moneyUnit(view.state.setup.currency, locale) : {})}
+              parseError={money ? w.notANumber : w.notAWholeNumber}
+            />
+            <NumberField
+              size="sm"
+              id={`${idPrefix}-den`}
+              label={metric.inputs?.denominator ?? metric.name}
+              value={reading.denominator}
+              onChange={(denominator) => set({ denominator })}
+              locale={locale}
+              integer
+              parseError={w.notAWholeNumber}
+            />
+          </FieldRow>
         ) : reading.kind === "rate" ? (
-          <Field label={metric.name} htmlFor={`${idPrefix}-rate`}>
-            <NumberField
-              id={`${idPrefix}-rate`}
-              value={reading.percent}
-              onChange={(percent) => set({ percent })}
-              locale={locale}
-              unit="%"
-              invalidMessage={w.notANumber}
-            />
-          </Field>
+          <NumberField
+            size="sm"
+            id={`${idPrefix}-rate`}
+            label={metric.name}
+            value={reading.percent}
+            onChange={(percent) => set({ percent })}
+            locale={locale}
+            digits={5}
+            {...percentUnit(locale)}
+            parseError={w.notANumber}
+          />
         ) : (
-          <Field label={metric.name} htmlFor={`${idPrefix}-amount`}>
-            <NumberField
-              id={`${idPrefix}-amount`}
-              value={reading.amount}
-              onChange={(amount) => set({ amount })}
-              locale={locale}
-              unit={currencySymbol(view.state.setup.currency, locale)}
-              invalidMessage={w.notANumber}
-            />
-          </Field>
+          <NumberField
+            size="sm"
+            id={`${idPrefix}-amount`}
+            label={metric.name}
+            value={reading.amount}
+            onChange={(amount) => set({ amount })}
+            locale={locale}
+            {...moneyUnit(view.state.setup.currency, locale)}
+            parseError={w.notANumber}
+          />
         )}
         {shortcut ? (
           <Button
             variant="quiet"
             size="sm"
-            className={ui.textAction}
+            className={styles.textAction}
             onClick={() => set({ kind: reading.kind === "ratio" ? shortcut : "ratio" })}
           >
             {reading.kind === "ratio" ? (shortcut === "rate" ? strings.sheet.rateOnly : strings.sheet.amountOnly) : w.countsBack}
           </Button>
         ) : null}
-        <Field label={strings.sheet.source} htmlFor={`${idPrefix}-source`}>
-          <Select<Exclude<SourceChoice, "">>
-            id={`${idPrefix}-source`}
-            value={reading.source}
-            placeholder={w.choose}
-            options={src.options}
-            groups={src.groups}
-            onChange={(source) => set({ source })}
-          />
-        </Field>
+        <Select<Exclude<SourceChoice, "">>
+          size="sm"
+          id={`${idPrefix}-source`}
+          label={strings.sheet.source}
+          value={reading.source}
+          placeholder={w.choose}
+          options={src}
+          onChange={(source) => set({ source })}
+        />
         {reading.source === "person" ? (
-          <Field label={w.sourceRole} htmlFor={`${idPrefix}-source-role`}>
-            <Select<RoleId>
-              id={`${idPrefix}-source-role`}
-              value={reading.sourceRole}
-              options={ROLES.map((role) => ({ id: role, label: strings.role[ROLE_KEY[role]] }))}
-              onChange={(role) => role && set({ sourceRole: role })}
-            />
-          </Field>
+          <Select<RoleId>
+            size="sm"
+            id={`${idPrefix}-source-role`}
+            label={w.sourceRole}
+            value={reading.sourceRole}
+            options={ROLES.map((role) => ({ value: role, label: strings.role[ROLE_KEY[role]] }))}
+            onChange={(role) => role && set({ sourceRole: role })}
+          />
         ) : null}
       </div>
-    </fieldset>
+    </Field>
   );
 }

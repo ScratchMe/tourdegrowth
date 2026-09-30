@@ -2,6 +2,11 @@
 
 import { useState } from "react";
 import { Button } from "@/components/core/Button";
+import { Choices } from "@/components/core/Choices";
+import { Field } from "@/components/core/Field";
+import { FieldRow } from "@/components/core/FieldRow";
+import { NumberField } from "@/components/core/NumberField";
+import { Select } from "@/components/core/Select";
 import { Tag } from "@/components/core/Tag";
 import { TextArea } from "@/components/core/TextArea";
 import { CANDIDATE_IDS, TEXT_LIMITS, shapeOf, type MetricShape } from "@/lib/engine/catalog-shape";
@@ -20,25 +25,21 @@ import { MissingTriage } from "./MissingTriage";
 import { RequestCopy } from "./RequestCopy";
 import { draftFromEntry, entryFromDraft, isWideRange, type DraftProblem, type SheetDraft, type SheetMode } from "./sheet-draft";
 import { isRule, missingLabel, ruleMessage } from "./sheet-problems";
-import { currencySymbol } from "./sources";
+import { moneyUnit, percentUnit, wordUnit, type NumberUnit } from "./sources";
 import { catalogFill, daysBetween, domId, fill, formatMonth, joinList, metricById, midSentence, sourceLabel } from "./text";
 import { ValueEditor } from "./ValueEditor";
 import type { EngineActions, EngineView } from "./view";
-import { Choices } from "./_ui/Choices";
-import { describedBy, Field } from "./_ui/Field";
-import { NumberField } from "./_ui/NumberField";
-import { Select } from "./_ui/Select";
 import styles from "./Sheet.module.css";
-import ui from "./_ui/ui.module.css";
 
 const ROLES = Object.keys(ROLE_KEY) as RoleId[];
 const BASES = Object.keys(BASIS_KEY) as EstimateBasis[];
 
-function unitMark(shape: MetricShape, view: EngineView): string | undefined {
-  if (shape.unit === "percent") return "%";
-  if (shape.unit === "money") return currencySymbol(view.state.setup.currency, view.ctx.locale);
-  if (shape.unit === "duration") return view.strings.workbench.days;
-  return undefined;
+/** The unit inside a bound's or a target's box, placed by the page's language. */
+function unitOf(shape: MetricShape, view: EngineView): NumberUnit {
+  if (shape.unit === "percent") return percentUnit(view.ctx.locale);
+  if (shape.unit === "money") return moneyUnit(view.state.setup.currency, view.ctx.locale);
+  if (shape.unit === "duration") return wordUnit(view.strings.workbench.days);
+  return {};
 }
 
 /**
@@ -136,13 +137,16 @@ export function MetricSheet({
     ? { ...metric, inputs: { numerator: fillCatalog(metric.inputs.numerator), denominator: fillCatalog(metric.inputs.denominator) } }
     : metric;
   const missing = [...new Set(problems.filter((p) => !isRule(p)).map((p) => missingLabel(p, filledMetric, strings)))];
+  // What the save still needs, said under the field itself too; the line under the button stays the index.
+  const need = (p: DraftProblem) =>
+    problems.includes(p) ? fill(strings.workbench.saveNeeds, { fields: missingLabel(p, filledMetric, strings) }) : null;
 
-  const modes: { id: SheetMode; label: string }[] = [
-    { id: "have", label: strings.sheet.haveIt },
+  const modes: { value: SheetMode; label: string }[] = [
+    { value: "have", label: strings.sheet.haveIt },
     // A name or a mechanism cannot be "somewhere between": no estimate for words.
-    ...(shape.unit === "text" || shape.unit === "choice" ? [] : [{ id: "estimate" as const, label: strings.sheet.canEstimate }]),
-    { id: "ask", label: strings.sheet.willAsk },
-    { id: "cantFind", label: strings.sheet.cantFind },
+    ...(shape.unit === "text" || shape.unit === "choice" ? [] : [{ value: "estimate" as const, label: strings.sheet.canEstimate }]),
+    { value: "ask", label: strings.sheet.willAsk },
+    { value: "cantFind", label: strings.sheet.cantFind },
   ];
 
   const eventMeasured = snapshot.metrics["act.event"]?.status === "measured";
@@ -188,7 +192,7 @@ export function MetricSheet({
       <p className={styles.oneLiner}>{fillCatalog(metric.oneLiner)}</p>
 
       <div className={styles.formulaBlock}>
-        <span className={ui.label}>{strings.sheet.formula}</span>
+        <span className={styles.metaLabel}>{strings.sheet.formula}</span>
         <p className={styles.formula}>{fillCatalog(metric.formula)}</p>
       </div>
 
@@ -206,7 +210,8 @@ export function MetricSheet({
       {shape.dependsOn === "act.event" && !eventMeasured ? <p className={styles.caveat}>{strings.sheet.dependsOnEvent}</p> : null}
 
       <Choices
-        name={`${prefix}-mode`}
+        size="sm"
+        id={`${prefix}-mode`}
         legend={statusQuestionOf(id, strings)}
         value={draft.mode}
         options={modes}
@@ -235,43 +240,44 @@ export function MetricSheet({
 
       {draft.mode === "estimate" ? (
         <div className={styles.editor} data-testid="engine-estimate">
-          <div className={styles.counts}>
-            <Field label={strings.sheet.low} htmlFor={`${prefix}-low`}>
-              <NumberField
-                id={`${prefix}-low`}
-                value={draft.low}
-                onChange={(low) => update({ low })}
-                locale={locale}
-                unit={unitMark(shape, view)}
-                invalidMessage={strings.workbench.notANumber}
-              />
-            </Field>
-            <span className={styles.over} aria-hidden="true" />
-            <Field label={strings.sheet.high} htmlFor={`${prefix}-high`}>
-              <NumberField
-                id={`${prefix}-high`}
-                value={draft.high}
-                onChange={(high) => update({ high })}
-                locale={locale}
-                unit={unitMark(shape, view)}
-                invalidMessage={strings.workbench.notANumber}
-              />
-            </Field>
-          </div>
-          {draft.low !== null && draft.high !== null && draft.low > draft.high ? (
-            <p className={ui.error} role="alert">
-              {strings.sheet.lowAboveHigh}
-            </p>
-          ) : isWideRange(draft.low, draft.high) ? (
+          {/* « At least » / « At most » name themselves: a pair with no joiner,
+              and the rule about the two belongs to the row. */}
+          <FieldRow error={draft.low !== null && draft.high !== null && draft.low > draft.high ? strings.sheet.lowAboveHigh : undefined}>
+            <NumberField
+              size="sm"
+              id={`${prefix}-low`}
+              label={strings.sheet.low}
+              error={need("low")}
+              value={draft.low}
+              onChange={(low) => update({ low })}
+              locale={locale}
+              {...unitOf(shape, view)}
+              parseError={strings.workbench.notANumber}
+            />
+            <NumberField
+              size="sm"
+              id={`${prefix}-high`}
+              label={strings.sheet.high}
+              error={need("high")}
+              value={draft.high}
+              onChange={(high) => update({ high })}
+              locale={locale}
+              {...unitOf(shape, view)}
+              parseError={strings.workbench.notANumber}
+            />
+          </FieldRow>
+          {draft.low !== null && draft.high !== null && draft.low > draft.high ? null : isWideRange(draft.low, draft.high) ? (
             <p className={styles.caveat} data-testid="engine-wide-range">
               {strings.sheet.wideRange}
             </p>
           ) : null}
           <Choices
-            name={`${prefix}-basis`}
+            size="sm"
+            id={`${prefix}-basis`}
             legend={strings.sheet.basis}
+            error={need("basis")}
             value={draft.basis || null}
-            options={BASES.map((b) => ({ id: b, label: strings.basis[BASIS_KEY[b]] }))}
+            options={BASES.map((b) => ({ value: b, label: strings.basis[BASIS_KEY[b]] }))}
             onChange={(basis) => update({ basis })}
             columns={2}
           />
@@ -280,17 +286,17 @@ export function MetricSheet({
 
       {draft.mode === "ask" ? (
         <div className={styles.editor} data-testid="engine-ask">
-          <Field label={strings.request.role} htmlFor={`${prefix}-role`}>
-            <Select<RoleId>
-              id={`${prefix}-role`}
-              value={draft.requestRole}
-              options={ROLES.map((role) => ({ id: role, label: strings.role[ROLE_KEY[role]] }))}
-              onChange={(role) => role && update({ requestRole: role })}
-            />
-          </Field>
+          <Select<RoleId>
+            size="sm"
+            id={`${prefix}-role`}
+            label={strings.request.role}
+            value={draft.requestRole}
+            options={ROLES.map((role) => ({ value: role, label: strings.role[ROLE_KEY[role]] }))}
+            onChange={(role) => role && update({ requestRole: role })}
+          />
           <DefinitionNote prefix={prefix} draft={draft} update={update} view={view} error={problems.includes("definition-too-long")} />
           {entry?.status === "requested" && requestedAt ? (
-            <p className={stale ? ui.error : styles.caveat}>
+            <p className={stale ? styles.error : styles.caveat}>
               {stale
                 ? fill(strings.request.stale, { n: daysBetween(requestedAt, ctx.today) })
                 : `${strings.status.requested} · ${strings.role[ROLE_KEY[entry.request?.role ?? draft.requestRole]]}`}
@@ -351,7 +357,7 @@ export function MetricSheet({
               ))}
             </ul>
             <p className={styles.trap}>
-              <span className={ui.label}>{strings.sheet.trapTitle}</span> {fillCatalog(metric.trap)}
+              <span className={styles.metaLabel}>{strings.sheet.trapTitle}</span> {fillCatalog(metric.trap)}
             </p>
             {alsoIn.map(({ tool, others }) => (
               <p key={tool} className={styles.alsoIn}>
@@ -359,7 +365,7 @@ export function MetricSheet({
                 {others.map((other, i) => (
                   <span key={other.id}>
                     {i > 0 ? (i === others.length - 1 ? strings.grammar.and : strings.grammar.listSeparator) : null}
-                    <button type="button" className={ui.inlineLink} onClick={() => actions.openMetric(other.id)}>
+                    <button type="button" className={styles.inlineLink} onClick={() => actions.openMetric(other.id)}>
                       {midSentence(other.name, locale)}
                     </button>
                   </span>
@@ -372,7 +378,7 @@ export function MetricSheet({
 
       {bench || isCandidate ? (
         <div className={styles.reference} data-testid="engine-reference">
-          <span className={ui.label}>{strings.sheet.reference}</span>
+          <span className={styles.metaLabel}>{strings.sheet.reference}</span>
           {shape.unit === "percent" ? (
             <ComparisonStrip
               value={known.kind === "known" ? known.value : null}
@@ -392,7 +398,7 @@ export function MetricSheet({
               : fill(strings.sheet.noReference, { reason: metric.noReferenceReason ?? "" })}
           </p>
           {isCandidate && variant === "board" ? (
-            <TargetField id={id} prefix={prefix} target={target} unit={unitMark(shape, view)} view={view} actions={actions} />
+            <TargetField id={id} prefix={prefix} target={target} unit={unitOf(shape, view)} view={view} actions={actions} />
           ) : null}
           {positionText ? (
             <p className={[styles.position, position === "below" ? styles.positionBelow : ""].filter(Boolean).join(" ")} data-testid="engine-position">
@@ -412,15 +418,24 @@ export function MetricSheet({
         </p>
       ) : null}
 
-      <Field label={strings.sheet.note} hint={strings.sheet.noteHint} htmlFor={`${prefix}-note`} error={problems.includes("note-too-long") ? ruleMessage("note-too-long", filledMetric, strings, locale) : null}>
-        <TextArea
-          id={`${prefix}-note`}
-          value={draft.note}
-          onChange={(note) => update({ note })}
-          maxLength={TEXT_LIMITS.note}
-          label={strings.sheet.note}
-          rows={3}
-        />
+      <Field
+        size="sm"
+        id={`${prefix}-note`}
+        label={strings.sheet.note}
+        hint={strings.sheet.noteHint}
+        error={problems.includes("note-too-long") ? ruleMessage("note-too-long", filledMetric, strings, locale) : null}
+      >
+        {({ id: noteId, describedBy, invalid }) => (
+          <TextArea
+            id={noteId}
+            value={draft.note}
+            onChange={(note) => update({ note })}
+            maxLength={TEXT_LIMITS.note}
+            invalid={invalid}
+            aria-describedby={describedBy}
+            rows={3}
+          />
+        )}
       </Field>
 
       {/* The copy button of "I'll ask for it" is that mode's save: the request is what gets recorded. */}
@@ -447,19 +462,19 @@ export function MetricSheet({
         </div>
       ) : null}
       {missing.length ? (
-        <p className={ui.error} data-testid="engine-save-needs">
+        <p className={styles.error} data-testid="engine-save-needs">
           {fill(strings.workbench.saveNeeds, { fields: joinList(missing, strings.grammar) })}
         </p>
       ) : null}
       {rules
         .filter((p) => p !== "num-gt-den" && p !== "denominator-zero")
         .map((p) => (
-          <p key={p} className={ui.error}>
+          <p key={p} className={styles.error}>
             {ruleMessage(p, filledMetric, strings, locale)}
           </p>
         ))}
       {outcome === "failed" ? (
-        <p className={ui.error} role="alert">
+        <p className={styles.error} role="alert">
           {strings.storage.writeFailed}
         </p>
       ) : null}
@@ -484,19 +499,23 @@ function DefinitionNote({
   const { strings } = view;
   return (
     <Field
+      size="sm"
+      id={`${prefix}-definition`}
       label={strings.sheet.definitionNote}
       hint={strings.sheet.definitionNoteHint}
-      htmlFor={`${prefix}-definition`}
       error={error ? fill(strings.sheet.tooLong, { n: TEXT_LIMITS.definitionNote }) : null}
     >
-      <TextArea
-        id={`${prefix}-definition`}
-        value={draft.definitionNote}
-        onChange={(definitionNote) => update({ definitionNote })}
-        maxLength={TEXT_LIMITS.definitionNote}
-        label={strings.sheet.definitionNote}
-        rows={2}
-      />
+      {({ id: definitionId, describedBy, invalid }) => (
+        <TextArea
+          id={definitionId}
+          value={draft.definitionNote}
+          onChange={(definitionNote) => update({ definitionNote })}
+          maxLength={TEXT_LIMITS.definitionNote}
+          invalid={invalid}
+          aria-describedby={describedBy}
+          rows={2}
+        />
+      )}
     </Field>
   );
 }
@@ -517,30 +536,27 @@ function TargetField({
   id: MetricId;
   prefix: string;
   target: number | undefined;
-  unit: string | undefined;
+  unit: NumberUnit;
   view: EngineView;
   actions: EngineActions;
 }) {
   const [value, setValue] = useState<number | null>(target ?? null);
-  const fieldId = `${prefix}-target`;
   return (
-    <div
+    <NumberField
+      size="sm"
+      id={`${prefix}-target`}
+      label={view.strings.sheet.target}
+      hint={view.strings.sheet.targetHint}
+      value={value}
+      onChange={setValue}
       onBlur={() => {
         if ((value ?? undefined) !== target) actions.setTarget(id, value);
       }}
-    >
-      <Field label={view.strings.sheet.target} hint={view.strings.sheet.targetHint} htmlFor={fieldId}>
-        <NumberField
-          id={fieldId}
-          value={value}
-          onChange={setValue}
-          locale={view.ctx.locale}
-          unit={unit}
-          describedBy={describedBy(fieldId, { hint: view.strings.sheet.targetHint })}
-          invalidMessage={view.strings.workbench.notANumber}
-        />
-      </Field>
-    </div>
+      locale={view.ctx.locale}
+      digits={5}
+      {...unit}
+      parseError={view.strings.workbench.notANumber}
+    />
   );
 }
 

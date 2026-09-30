@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ComponentType, type ReactNode } from "react";
 import { Button } from "@/components/core/Button";
 import { Callout } from "@/components/core/Callout";
+import { Checkbox } from "@/components/core/Checkbox";
 import { buildDeck, deckMarkdown } from "@/lib/engine/deck";
 import { fillTemplate } from "@/lib/engine/format";
 import { sanityText } from "@/lib/engine/sentences";
@@ -343,40 +344,31 @@ export function DeckView({
           <h3 id="engine-deck-settings" className={styles.panelTitle}>
             {u.settingsTitle}
           </h3>
-          {state.setup.companyLabel ? (
-            <label className={styles.check}>
-              <input
-                type="checkbox"
+          <div>
+            {state.setup.companyLabel ? (
+              <Checkbox
+                label={t.showCompany}
                 checked={state.deck.showCompany}
-                onChange={(e) => change({ showCompany: e.target.checked })}
+                onChange={(showCompany) => change({ showCompany })}
                 data-testid="deck-show-company"
               />
-              <span>{t.showCompany}</span>
-            </label>
-          ) : null}
-          <label className={styles.check}>
-            <input
-              type="checkbox"
+            ) : null}
+            <Checkbox
+              label={t.showCredit}
               checked={state.deck.showSiteCredit}
-              onChange={(e) => change({ showSiteCredit: e.target.checked })}
+              onChange={(showSiteCredit) => change({ showSiteCredit })}
               data-testid="deck-show-credit"
             />
-            <span>{t.showCredit}</span>
-          </label>
-          {mirrorSlide ? (
-            <label className={styles.check}>
-              <input
-                type="checkbox"
+            {mirrorSlide ? (
+              <Checkbox
+                label={t.showMirror}
+                hint={t.showMirrorHint}
                 checked={mirrorSlide.included}
-                onChange={(e) => setInclude("mirror", e.target.checked)}
+                onChange={(included) => setInclude("mirror", included)}
                 data-testid="deck-show-mirror"
               />
-              <span>
-                {t.showMirror}
-                <span className={styles.checkHint}>{t.showMirrorHint}</span>
-              </span>
-            </label>
-          ) : null}
+            ) : null}
+          </div>
         </section>
 
         <section className={styles.panel} aria-labelledby="engine-deck-exports">
@@ -408,10 +400,7 @@ export function DeckView({
               </Button>
             ) : null}
           </div>
-          <label className={styles.check}>
-            <input type="checkbox" checked={hd} onChange={(e) => setHd(e.target.checked)} data-testid="deck-hd" />
-            <span>{t.pngHd}</span>
-          </label>
+          <Checkbox label={t.pngHd} checked={hd} onChange={setHd} data-testid="deck-hd" />
           <p className={styles.fieldHint}>{t.otherLanguageHint}</p>
           <p className={styles.status} role="status" aria-live="polite" data-tone={status?.tone} data-testid="deck-status">
             {status?.text ?? ""}
@@ -443,15 +432,12 @@ export function DeckView({
               data-testid={`deck-thumb-${slide.id}`}
             >
               <div className={styles.thumbHead} data-print="off">
-                <label className={styles.check}>
-                  <input
-                    type="checkbox"
-                    checked={slide.included}
-                    onChange={(e) => setInclude(slide.id, e.target.checked)}
-                    data-testid={`deck-include-${slide.id}`}
-                  />
-                  <span>{t.include}</span>
-                </label>
+                <Checkbox
+                  label={t.include}
+                  checked={slide.included}
+                  onChange={(included) => setInclude(slide.id, included)}
+                  data-testid={`deck-include-${slide.id}`}
+                />
                 <span className={styles.thumbPosition}>
                   {slide.index !== null ? fillTemplate(u.slidePosition, { i: slide.index, n: included.length }) : u.excluded}
                 </span>
