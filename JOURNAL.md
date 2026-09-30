@@ -6233,7 +6233,14 @@ La méthode pour les trouver la prochaine fois est dans `.design-sync/NOTES.md` 
 
 Corrigés, les numéros de ligne remplacés par les noms de clés, qui ne bougent pas. `conventions.md` dit aussi maintenant son exception : le contexte libre du quiz, écran à une question, écrit « (optionnel) » dans la question. Second envoi : rendus identiques, sources seules ; 88 composants, 292 cellules, 453 fichiers, ancre `8235f4e6de01`.
 
-**En production** : rien de ce lot n'y est encore. Vercel refuse les déploiements depuis A10.c (quota quotidien, `VERCEL.md` §1.12), et la production tourne sur A10.b. Le geste est `CHANTIERS.md` D11, le 2026-10-01 après 14 h UTC. Un rappel est programmé dans cette session.
+**En production le soir même, et D11 n'a plus d'objet.** Le squash de #227 (`c8b869a`, 23 fichiers, arbre identique à la tête) a été déployé à 21 h 12 UTC : statut `Vercel` du commit à `success`, là où celui d'A10.d (`bd32dab`) dit encore « Deployment rate limited ». Le quota s'était libéré. Comme `main` porte tout, ce déploiement emporte aussi A10.c, A10.d et B3, que Vercel avait refusés. D11 est retiré de `CHANTIERS.md`, et le rappel du lendemain est supprimé.
+
+Vérifié en HTTP :
+- `/en`, `/fr` et `/en/glossary` en 200 ;
+- le moteur et le jeu fermés (404) ;
+- `/admin/audit` en 401.
+
+Les champs eux-mêmes sont derrière l'aperçu propriétaire et le mot de passe admin : ils ne se vérifient pas d'ici. Ce que la production sert est le build que la CI a fait passer sur la même tête.
 
 ## C26 et C27 : les robots d'IA laissés et nommés, `/llms.txt` et `/llms-full.txt` générés (2026-09-30)
 
@@ -6293,4 +6300,4 @@ Elle a relevé un trou : seules les lignes d'adresse de `/llms-full.txt` étaien
 
 **Vérifié** : `tsc` et `eslint` propres, **2 352 tests unitaires** (onze de plus), `vitest --coverage` au-dessus de ses seuils, `next build` propre, avec les trois routes en statique. La suite Playwright complète, avec les variables de la CI : **666 specs, 643 passées, aucun échec**, 23 ignorées par construction. `llms-robots.spec.ts` (trois specs, dont une qui demande chaque adresse listée et exige un 200) a été rejouée après les corrections de la relecture, sur un build refait.
 
-**Pas encore en production le soir du merge.** Le quota quotidien de déploiements de Vercel était déjà épuisé (`VERCEL.md` §1.12, `CHANTIERS.md` D11) : le merge arrive sur `main`, mais la production reste sur A10.b jusqu'au redéploiement du 2026-10-01. `/robots.txt`, `/llms.txt` et `/llms-full.txt` sont ajoutés à la liste de ce que D11 vérifie ensuite. **`main` avait bougé pendant la PR** : A11, C28 et C29 (#227) touchaient les mêmes lignes de `CHANTIERS.md`, de `CLAUDE.md` et de la fin du journal. `main` a été fusionné dans la branche en gardant les deux côtés, et la ligne des décisions de `CLAUDE.md` a été resserrée pour rester sous le budget de 40 000 caractères : seule C25 y reste ouverte. Re-mesuré sur l'arbre fusionné : **2 356 tests unitaires**, **667 specs, 644 passées, aucun échec**, 23 ignorées par construction.
+**`main` a bougé deux fois pendant la PR** : A11, C28 et C29 (#227), puis la ligne de production d'A11 (#229), touchaient les mêmes lignes de `CHANTIERS.md`, de `CLAUDE.md` et de la fin du journal. `main` a été fusionné deux fois dans la branche en gardant les deux côtés, et la ligne des décisions de `CLAUDE.md` a été resserrée pour rester sous le budget de 40 000 caractères : seule C25 y reste ouverte. Re-mesuré sur l'arbre fusionné : **2 356 tests unitaires**, **667 specs, 644 passées, aucun échec**, 23 ignorées par construction.
