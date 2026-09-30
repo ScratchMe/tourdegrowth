@@ -6307,3 +6307,34 @@ Elle a relevé un trou : seules les lignes d'adresse de `/llms-full.txt` étaien
 - `robots.txt` sert les deux groupes nommés et le groupe `*`, tous en `Allow: /`, sans aucun `Disallow` ;
 - les adresses de `/llms.txt` sont exactement les 74 du sitemap de production, plus le lien du texte intégral. Chacune répond 200. Ni le jeu ni le moteur n'y figurent, puisqu'ils sont fermés ;
 - `/llms-full.txt` a ses 32 parties et ne cite ni `/r/`, ni `/admin`, ni le moteur.
+
+## Le niveau 2 du jeu : la spécification, le moteur généralisé, le modèle en brouillon (2026-09-30)
+
+**La demande.** Antoine veut un deuxième niveau du jeu avant le lancement, et demande lequel. La comparaison des quatre esquisses du §11 avec le vrai catalogue du niveau 1 a désigné l'acquisition : six astuces sur huit absentes du niveau 1 (contre trois pour l'activation et le referral), la DGCCRF comme autorité, des cas publics récents, et aucun terrain déjà occupé, alors que le bandeau cookies de l'activation l'est par le quiz de la CNIL et Cookie Consent Speed.Run. Antoine a répondu « OK go ». Tout est dans `GAME-BRIEF.md` §17 ; la construction attend C30.
+
+**Le brief se trompait sur le moteur.** Le §11 promettait « le même modèle, avec deux constantes renommées ». Le code disait autre chose : 35 mentions du churn dans `model.ts`, 25 dans `view.ts`, 11 composants, une formule qui ne sait que faire baisser un chiffre, une économie d'abonnement. Le moteur est donc généralisé, sans rien changer au niveau 1 :
+- `direction` : le chiffre du board baisse (le churn) ou monte (les nouveaux clients). `shortfall` et `reachesBoard` lisent le signe à un seul endroit ;
+- `economy` : abonnement ou boutique, une union plutôt que des champs facultatifs ;
+- le `red` du brief devient `gain`, le `mrr` d'une carte `revenueMult`, `ChurnDrivers` devient `MetricDrivers` ;
+- l'état passe en `v: 2` (`metric`, `customers`, `revenue`) sous une clé de sauvegarde `v2`. Le jeu est fermé : seules les parties de l'aperçu sont perdues ;
+- `DraftLevelSlug` : un niveau peut exister comme modèle testé avant d'avoir une page. Mettre `"acquisition"` dans `LevelSlug` aurait exigé une clé de sauvegarde, un encart et un vocabulaire analytique pour un niveau que personne ne peut jouer.
+
+Les composants de `components/game` gardent leurs noms d'emplacement (`churn`, `subs`, `mrr`) : ce sont des contrats synchronisés avec Claude Design, et les renommer demande une re-synchro. L'îlot du niveau 1 traduit. Ce sera A12.d.
+
+**Vérifié au bit près.** Avant de toucher au code, 3 000 années ont été jouées au hasard et enregistrées en entier : états, tableaux de bord, rapports, lignes du « pourquoi », décembres, téléphones. Rejouées après la refonte, une fois les noms rendus, elles sont identiques au JSON près, et les fixtures F1 à F5 restent vertes sans une tolérance touchée. La formule du niveau 1 garde son ordre de facteurs exact, pour cette raison.
+
+**Le modèle du niveau 2, en brouillon.** Chaque carte tient le rôle d'une carte du niveau 1. Le premier réglage, avec les mêmes chiffres, ratait les quatre années de référence : un gain de x fait moins qu'une baisse de x (A virée en septembre, C sans atteindre le T2). Les gains ×1,3 et les plafonds 0,43 et 0,82 (≈ 1/0,70 et 1/0,55) rendent le profil : l'année A a exactement la patience du niveau 1 (51, 42, 46, 73), C subit le contrôle au T3, D est virée en juin. Joué au hasard, le niveau 2 pardonne un peu plus au joueur honnête (43 % d'applaudissements contre 35 %) : noté en §17.6, la recette tranchera.
+
+**Trouvé en route** : `driverRows` divisait par zéro pour un pas d'une dizaine de clients, puisque `Math.round(1 / 10)` vaut 0. C'est le test du niveau 2 qui l'a vu. Un pas inférieur à un se compte en multipliant par son inverse, exactement le produit de toujours (`x * 1000`, jamais `x / 0.001`), un pas d'un ou plus en divisant.
+
+**Le droit, vérifié sur les sources primaires** (Légifrance, DGCCRF, Commission, FTC, CMA), par un agent de recherche, relancé une fois pour le cas de la publicité déguisée. Le §11.1 avait quatre erreurs, corrigées en place :
+- « DSA article 27 » ne s'applique pas à une boutique qui vend son propre stock : c'est le L121-4 25° ;
+- les faux avis relèvent du L121-4 28° et 27°, pas du seul L121-2 ;
+- « prix total obligatoire » allait trop loin : la livraison peut s'afficher à part si elle est annoncée (L121-3 3°, arrêté du 3 décembre 1987) ;
+- le faux prix barré est un délit, réglé par transaction pénale, pas une amende administrative.
+
+D'où le contrôle du niveau 2 : une transaction de 150 000 €, à trancher (C30 Q3). Deux pièges pour la copie à venir : la mention « Publicité » ou « Collaboration commerciale » n'est plus une obligation littérale depuis l'ordonnance du 8 novembre 2024, et les fiches de la DGCCRF citent encore des peines d'avant l'aggravation en ligne de 2024.
+
+**Le nom.** « Braquet », premier candidat, est porté par deux magasins de vélos. « Pédalix » ne sort nulle part ; l'INPI reste à consulter (C30 Q2).
+
+**`CLAUDE.md` dépassait son budget avant cette entrée** (40 529 caractères pour 40 000). Il repasse dessous en resserrant deux lignes que le journal raconte déjà (le nº5, le flake de `locale-routing`) et la convention 13, qui n'est plus une contrainte et dont le détail chiffré est dans `VERCEL.md` §2.3.

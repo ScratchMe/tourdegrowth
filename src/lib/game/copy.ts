@@ -61,7 +61,7 @@ export interface EndingCopy {
   eyebrow: string;
   /** Stamped headline of December. */
   title: string;
-  /** Template: any of {churn} {subs} {trust} {radar} {patience}. */
+  /** Template: any of {metric} {customers} {trust} {radar} {patience}. */
   text: string;
   /** Green eyebrow (a win) or alert eyebrow. Kept with the copy because it decides which words fit. */
   win: boolean;
@@ -93,15 +93,16 @@ export interface LevelCopy<CardId extends string = string, DarkId extends CardId
   };
   dashboard: {
     label: string;
-    churn: string;
-    churnUnit: string;
+    /** The level's number: « Résiliations » on level 1. */
+    metric: string;
+    metricUnit: string;
     quarterTarget: string;
     boardTarget: string;
-    subs: string;
+    customers: string;
     /** "{month}, fin de mois" — from the first simulated month on; month 0 shows the month name alone. */
     monthEnd: string;
-    mrr: string;
-    mrrDelta: string;
+    revenue: string;
+    revenueDelta: string;
     patience: string;
     /** Said in words under 35, never by colour alone. */
     patienceLow: string;
@@ -204,10 +205,10 @@ export interface LevelCopy<CardId extends string = string, DarkId extends CardId
     phoneSuffix: string;
   };
   report: {
-    churn: string;
+    metric: string;
     target: string;
-    subs: string;
-    mrr: string;
+    customers: string;
+    revenue: string;
     patience: string;
     statusHit: string;
     /**
@@ -224,7 +225,7 @@ export interface LevelCopy<CardId extends string = string, DarkId extends CardId
      * quarter's whole move, signed, with its unit (`formatDelta`).
      */
     driversHeading: string;
-    /** One label per `ChurnDrivers` key, in the order the report lists them. */
+    /** One label per `MetricDrivers` key, in the order the report lists them. */
     drivers: { picks: string; production: string; inspection: string; word: string; market: string };
     /** The line template: « {label} : {delta} ». */
     driverLine: string;
@@ -235,15 +236,15 @@ export interface LevelCopy<CardId extends string = string, DarkId extends CardId
   };
   /** The year so far, under the desk — one disclosure per quarter played (plan §2.6). */
   journal: { title: string };
-  /** One per `VisibleEffect` kind — `down` splits on `rising`. */
+  /** One per `VisibleEffect` kind — `gain` splits on `rising`. */
   effects: {
     insight: string;
     present: string;
     clean: string;
     extra: string;
-    down: string;
-    downRising: string;
-    up: string;
+    gain: string;
+    gainRising: string;
+    loss: string;
     none: string;
   };
   /** One per `GameEvent` kind; `midMail` splits on its flag. */
@@ -310,10 +311,10 @@ export interface LevelCopy<CardId extends string = string, DarkId extends CardId
   };
   endings: Readonly<Record<EndingId, EndingCopy>>;
   december: {
-    cells: { churn: string; trust: string; radar: string; outOf: string };
+    cells: { metric: string; trust: string; radar: string; outOf: string };
     /** Under the cells, and in the level's footer note too (plan §2.7, P19). */
     gameNumbers: string;
-    churnChart: { title: string; caption: string; label: string; reference: string };
+    metricChart: { title: string; caption: string; label: string; reference: string };
     trustChart: { title: string; caption: string; label: string; reference: string };
     /**
      * A curve's text equivalent — where it starts, where it ends, and its
@@ -324,7 +325,7 @@ export interface LevelCopy<CardId extends string = string, DarkId extends CardId
      */
     trend: string;
     dataToggle: string;
-    table: { month: string; churn: string; trust: string };
+    table: { month: string; metric: string; trust: string };
   };
   playbook: {
     eyebrow: string;
@@ -396,10 +397,10 @@ export const LEVEL_COPY_TEMPLATES: Readonly<Record<string, readonly string[]>> =
   "dashboard.boardTarget": ["target"],
   "dashboard.monthEnd": ["month"],
   "dashboard.revealed": ["month"],
-  "dashboard.mrrDelta": ["delta"],
+  "dashboard.revenueDelta": ["delta"],
   "dashboard.delta": ["delta"],
-  "boss.t2Hit": ["churn", "target"],
-  "boss.t2Miss": ["churn", "target"],
+  "boss.t2Hit": ["metric", "target"],
+  "boss.t2Miss": ["metric", "target"],
   "boss.t3Hit": ["target"],
   "boss.t3Miss": ["target"],
   "boss.orderWrap": ["order"],
@@ -417,23 +418,23 @@ export const LEVEL_COPY_TEMPLATES: Readonly<Record<string, readonly string[]>> =
   "clippings.why.controlRemoved": ["list"],
   "news.progress": ["n", "total"],
   "news.stamps.fine": ["fine"],
-  "effects.down": ["pct"],
-  "effects.downRising": ["pct"],
-  "effects.up": ["pct"],
+  "effects.gain": ["pct"],
+  "effects.gainRising": ["pct"],
+  "effects.loss": ["pct"],
   "events.control": ["fine", "leavers"],
-  "endings.*.text": ["churn", "subs", "trust", "radar", "patience"],
-  "december.cells.churn": ["month"],
+  "endings.*.text": ["metric", "customers", "trust", "radar", "patience"],
+  "december.cells.metric": ["month"],
   "december.cells.outOf": ["value"],
-  "december.churnChart.reference": ["target"],
+  "december.metricChart.reference": ["target"],
   "december.trend": ["label", "from", "to", "month", "min", "max"],
   "playbook.refused": ["refused", "total"],
   "playbook.trust": ["trust"],
   "playbook.radar": ["radar"],
   "catalogue.hiddenEffect": ["trust", "radar"],
-  "share.text": ["title", "churn", "trust", "url"],
-  "resume.quarterLine": ["q", "cards", "churn"],
+  "share.text": ["title", "metric", "trust", "url"],
+  "resume.quarterLine": ["q", "cards", "metric"],
   "resume.finished": ["title"],
-  "a11y.quarterEnd": ["q", "churn", "target", "status", "patience"],
+  "a11y.quarterEnd": ["q", "metric", "target", "status", "patience"],
   "a11y.resumed": ["q"],
 };
 

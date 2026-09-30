@@ -35,7 +35,7 @@ describe("série H — what the first quarter deals", () => {
     const shuffled = Object.fromEntries(
       Object.values(L.cards).map((c, i): [Id, CardDef<Id>] => [
         c.id,
-        { ...c, red: ((i * 7) % 5) / 10, ramp: ((i * 3) % 4) / 10, trust: 20 - i, radar: i * 3 },
+        { ...c, gain: ((i * 7) % 5) / 10, ramp: ((i * 3) % 4) / 10, trust: 20 - i, radar: i * 3 },
       ]),
     ) as Record<Id, CardDef<Id>>;
     const scrambled: LevelDefinition<Id> = { ...L, cards: shuffled };

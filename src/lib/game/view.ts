@@ -16,7 +16,20 @@ import type { Locale } from "@/lib/i18n/locale";
 import { deltaSign, type DeltaKind } from "./format";
 import type { RetentionCardId } from "./levels/retention";
 import { targetFor } from "./model";
-import type { ChurnDrivers, GameEvent, GameState, LevelDefinition, Mood, MonthPoint, QuarterLog } from "./types";
+import type {
+  GameEvent,
+  GameState,
+  LevelDefinition,
+  MetricDisplay,
+  MetricDrivers,
+  ModelSlug,
+  Mood,
+  MonthPoint,
+  QuarterLog,
+  ScaleSpec,
+} from "./types";
+
+export type { ScaleSpec } from "./types";
 
 // ------------------------------------------------------------ dashboard ---
 
@@ -39,18 +52,19 @@ export interface RevealedValue {
 }
 
 export interface DashboardView {
-  churn: number;
+  /** The level's number: churn on level 1, new customers of the month on level 2. */
+  metric: number;
   /** The target the tile compares against: the quarter's, or the board's once the year is over. */
   target: number;
   targetScope: "quarter" | "board";
-  subs: number;
+  customers: number;
   /** Index into the months copy: the month the numbers describe. */
   monthIndex: number;
   /** True once a month has been simulated — the figure is an end-of-month one. */
   monthEnd: boolean;
-  mrr: number;
+  revenue: number;
   /** Revenue against January's, once a month has run; null on the first of January. */
-  mrrVsJanuary: number | null;
+  revenueVsJanuary: number | null;
   patience: number;
   /** Width of the patience bar, 0 to 100. */
   patienceBar: number;
@@ -58,7 +72,12 @@ export interface DashboardView {
   trust: HiddenValue | RevealedValue;
   radar: HiddenValue | RevealedValue;
   /** Changes since `prev` — only when a previous reading is given (after a quarter). */
-  deltas: { churn: Delta; subs: Delta; mrr: Delta; patience: Delta } | null;
+  deltas: { metric: Delta; customers: Delta; revenue: Delta; patience: Delta } | null;
+}
+
+/** The formatter a level's number takes in a delta: points of a rate, or a whole count. */
+export function metricDeltaKind(display: Pick<MetricDisplay, "kind">): DeltaKind {
+  return display.kind === "rate" ? "rate" : "int";
 }
 
 function delta(kind: DeltaKind, a: number, b: number, upIsGood: boolean): Delta {
@@ -71,24 +90,25 @@ function reveal(over: boolean, value: number): HiddenValue | RevealedValue {
 }
 
 export function dashboardView<Id extends string>(
-  level: LevelDefinition<Id>,
+  level: LevelDefinition<Id, ModelSlug>,
   state: GameState<Id>,
   prev?: GameState<Id>,
 ): DashboardView {
   const c = level.constants;
   const board = state.over;
   return {
-    churn: state.churn,
+    metric: state.metric,
     target: targetFor(c, board ? c.targets.length - 1 : state.q),
     targetScope: board ? "board" : "quarter",
-    subs: state.subs,
+    customers: state.customers,
     // Month m (1-12) has just ENDED: its figures are end-of-month m, index
     // m − 1. The prototype read index m and so labelled the end of March
     // « avril, fin de mois ».
     monthIndex: state.month === 0 ? 0 : state.month - 1,
     monthEnd: state.month > 0,
-    mrr: state.mrr,
-    mrrVsJanuary: state.month > 0 ? state.mrr - c.subs0 * c.price : null,
+    revenue: state.revenue,
+    // January's revenue is the first point of the history, whatever the economy.
+    revenueVsJanuary: state.month > 0 ? state.revenue - (state.history[0]?.revenue ?? state.revenue) : null,
     patience: state.patience,
     patienceBar: Math.max(0, Math.min(100, state.patience)),
     patienceLow: state.patience < c.patience.lowLine,
@@ -96,9 +116,9 @@ export function dashboardView<Id extends string>(
     radar: reveal(state.over, state.radar),
     deltas: prev
       ? {
-          churn: delta("churn", prev.churn, state.churn, false),
-          subs: delta("int", prev.subs, state.subs, true),
-          mrr: delta("millions", prev.mrr, state.mrr, true),
+          metric: delta(metricDeltaKind(level.display), prev.metric, state.metric, c.direction === "up"),
+          customers: delta("int", prev.customers, state.customers, true),
+          revenue: delta("millions", prev.revenue, state.revenue, true),
           patience: delta("int", prev.patience, state.patience, true),
         }
       : null,
@@ -189,9 +209,6 @@ export function clicksOverLaw(clicks: number | "phone"): boolean {
 
 // --------------------------------------------------------------- report ---
 
-/** Missed by more than one point reads as a bad miss (red), less as a near one. */
-export const SEVERE_MISS = 0.01;
-
 export type ReportStatus = { kind: "hit" } | { kind: "missed"; by: number; severe: boolean };
 
 export interface ReportView<Id extends string> {
@@ -202,11 +219,11 @@ export interface ReportView<Id extends string> {
   picked: Id[];
   order: Id | null;
   status: ReportStatus;
-  churnStart: number;
-  churnEnd: number;
+  metricStart: number;
+  metricEnd: number;
   target: number;
-  subs: number;
-  mrr: number;
+  customers: number;
+  revenue: number;
   patience: number;
   fx: QuarterLog<Id>["fx"];
   events: GameEvent[];
@@ -214,25 +231,35 @@ export interface ReportView<Id extends string> {
   moodAfter: Mood;
 }
 
-export type DriverKey = keyof ChurnDrivers;
+export type DriverKey = keyof MetricDrivers;
 /** The order the report reads them: what you did, what was already there, what people say, the market. */
 export const DRIVER_ORDER: readonly DriverKey[] = ["picks", "production", "inspection", "word", "market"];
 
 /**
- * The quarter's drivers as the report prints them: each rounded to the tenth
- * of a point the tiles use, and adding up to the move the TILES show
- * (churn at the quarter's end minus churn at its start, each rounded as
- * displayed) — largest remainder, so a line and the total never disagree by
- * a rounding. A driver that rounds to nothing is dropped; the total is kept
- * even when it is zero. Values stay fractions (0.004 = 0,4 point).
+ * The quarter's drivers as the report prints them: each rounded to the step
+ * the tiles use (a tenth of a point, one customer), and adding up to the move
+ * the TILES show (the number at the quarter's end minus the number at its
+ * start, each rounded as displayed) — largest remainder, so a line and the
+ * total never disagree by a rounding. A driver that rounds to nothing is
+ * dropped; the total is kept even when it is zero. Values stay in the
+ * model's unit (0.004 = 0,4 point of churn).
  */
-export function driverRows(log: Pick<QuarterLog, "churnStart" | "churnEnd" | "drivers">): {
+export function driverRows(
+  log: Pick<QuarterLog, "metricStart" | "metricEnd" | "drivers">,
+  step: number,
+): {
   total: number;
   rows: { key: DriverKey; value: number }[];
 } {
-  const tenths = (x: number) => x * 1000;
-  const total = Math.round(tenths(log.churnEnd)) - Math.round(tenths(log.churnStart));
-  const raw = DRIVER_ORDER.map((key) => ({ key, exact: tenths(log.drivers[key]) }));
+  // Whole steps. A step under one (a tenth of a point, 0.001) is counted by
+  // multiplying by its inverse, exactly the product the report always used
+  // (x * 1000, never x / 0.001, which rounds differently); a step of one or
+  // more (ten customers) by dividing by it.
+  const perUnit = step < 1 ? Math.round(1 / step) : 0;
+  const steps = (x: number) => (perUnit ? x * perUnit : x / step);
+  const back = (n: number) => (perUnit ? n / perUnit : n * step);
+  const total = Math.round(steps(log.metricEnd)) - Math.round(steps(log.metricStart));
+  const raw = DRIVER_ORDER.map((key) => ({ key, exact: steps(log.drivers[key]) }));
   const rounded = raw.map((r) => ({ ...r, value: Math.round(r.exact) }));
   let gap = total - rounded.reduce((sum, r) => sum + r.value, 0);
   // Hand the missing tenths to the lines whose rounding lost the most in that direction.
@@ -245,13 +272,14 @@ export function driverRows(log: Pick<QuarterLog, "churnStart" | "churnEnd" | "dr
     gap -= step;
   }
   return {
-    total: total / 1000,
-    rows: rounded.filter((r) => r.value !== 0).map((r) => ({ key: r.key, value: r.value / 1000 })),
+    total: back(total),
+    rows: rounded.filter((r) => r.value !== 0).map((r) => ({ key: r.key, value: back(r.value) })),
   };
 }
 
-export function reportView<Id extends string>(level: LevelDefinition<Id>, log: QuarterLog<Id>): ReportView<Id> {
-  const status: ReportStatus = log.gap <= 0 ? { kind: "hit" } : { kind: "missed", by: log.gap, severe: log.gap > SEVERE_MISS };
+export function reportView<Id extends string>(level: LevelDefinition<Id, ModelSlug>, log: QuarterLog<Id>): ReportView<Id> {
+  const status: ReportStatus =
+    log.gap <= 0 ? { kind: "hit" } : { kind: "missed", by: log.gap, severe: log.gap > level.display.severeMiss };
   return {
     q: log.q,
     monthFrom: log.q * 3,
@@ -259,11 +287,11 @@ export function reportView<Id extends string>(level: LevelDefinition<Id>, log: Q
     picked: [...log.picked],
     order: log.order,
     status,
-    churnStart: log.churnStart,
-    churnEnd: log.churnEnd,
+    metricStart: log.metricStart,
+    metricEnd: log.metricEnd,
     target: log.target,
-    subs: log.subs,
-    mrr: log.mrr,
+    customers: log.customers,
+    revenue: log.revenue,
     patience: log.patience,
     fx: log.fx,
     events: log.events,
@@ -274,32 +302,20 @@ export function reportView<Id extends string>(level: LevelDefinition<Id>, log: Q
 
 // ------------------------------------------------------------- December ---
 
-export interface ScaleSpec {
-  /** The frame shows at least this range… */
-  min: number;
-  max: number;
-  /** …and stretches to keep every value this far inside it. */
-  headroom: number;
-  /** Gridlines at tickFrom, tickFrom + tickStep, … up to the top. */
-  tickFrom: number;
-  tickStep: number;
-}
-
 export interface ChartScale {
   min: number;
   max: number;
   ticks: number[];
 }
 
-/** Churn, in percent: 2 to 9 % unless a spike goes higher (it can reach ~11 %, R16). */
-export const CHURN_SCALE: ScaleSpec = { min: 2, max: 9, headroom: 0.5, tickFrom: 3, tickStep: 2 };
 /** Trust, 0 to 100. Clamped by the model, so it never needs to stretch. */
 export const TRUST_SCALE: ScaleSpec = { min: 0, max: 100, headroom: 0, tickFrom: 25, tickStep: 25 };
 
 /**
  * The frame of a December curve. The prototype fixed churn at 2-9 %, and a
  * control plus a viral thread take it past 9: the line left its own chart.
- * The frame now grows to hold the data, never the other way round.
+ * The frame now grows to hold the data, never the other way round. The
+ * level's own frame is `display.chart`.
  */
 export function chartScale(values: readonly number[], spec: ScaleSpec): ChartScale {
   const top = values.length ? Math.max(...values) : spec.max;
@@ -329,24 +345,25 @@ export interface CurveView {
 }
 
 export interface DecemberView {
-  cells: { churn: number; trust: number; radar: number };
-  churn: CurveView;
+  cells: { metric: number; trust: number; radar: number };
+  metric: CurveView;
   trust: CurveView;
 }
 
-export function decemberView<Id extends string>(level: LevelDefinition<Id>, state: GameState<Id>): DecemberView {
+export function decemberView<Id extends string>(level: LevelDefinition<Id, ModelSlug>, state: GameState<Id>): DecemberView {
   const c = level.constants;
-  const churnValues = state.history.map((h) => h.churn * 100);
+  const { factor, ...frame } = level.display.chart;
+  const metricValues = state.history.map((h) => h.metric * factor);
   const trustValues = state.history.map((h) => h.trust);
   const months = state.history.map((h) => h.m);
   return {
-    cells: { churn: state.churn, trust: state.trust, radar: state.radar },
-    churn: {
-      values: churnValues,
+    cells: { metric: state.metric, trust: state.trust, radar: state.radar },
+    metric: {
+      values: metricValues,
       months,
-      scale: chartScale(churnValues, CHURN_SCALE),
-      reference: targetFor(c, c.targets.length - 1) * 100,
-      end: state.churn,
+      scale: chartScale(metricValues, frame),
+      reference: targetFor(c, c.targets.length - 1) * factor,
+      end: state.metric,
     },
     trust: {
       values: trustValues,
@@ -362,7 +379,7 @@ export function decemberView<Id extends string>(level: LevelDefinition<Id>, stat
  * The honest cards played this year, once each, in the order first played —
  * the « what you did that was clean » list, with their hidden effects.
  */
-export function playbookCards<Id extends string>(level: LevelDefinition<Id>, state: GameState<Id>): Id[] {
+export function playbookCards<Id extends string>(level: LevelDefinition<Id, ModelSlug>, state: GameState<Id>): Id[] {
   const seen: Id[] = [];
   for (const entry of state.log) for (const id of entry.picked) if (level.cards[id].kind === "h" && !seen.includes(id)) seen.push(id);
   return seen;
@@ -375,7 +392,7 @@ export type PatternGroup = "used" | "refused" | "unseen";
  * — used, refused (dealt but never played), never dealt — with its status.
  */
 export function patternCatalogue<Id extends string>(
-  level: LevelDefinition<Id>,
+  level: LevelDefinition<Id, ModelSlug>,
   state: GameState<Id>,
 ): { id: Id; group: PatternGroup; status: "live" | "removed" | null }[] {
   return level.darkOrder.map((id) => {

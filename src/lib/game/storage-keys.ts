@@ -16,9 +16,14 @@
  */
 import type { EndingId, LevelSlug } from "./types";
 
-/** One save per level: the year in progress (`{modelVersion, savedAt, state}`). */
+/**
+ * One save per level: the year in progress (`{modelVersion, savedAt, state}`).
+ * `v2` since 2026-09-30: the state's churn, subs and mrr became metric,
+ * customers and revenue when the engine learned a second level. The game was
+ * still closed, so the only saves this leaves behind are previews.
+ */
 export const GAME_SAVE_KEYS = {
-  retention: "tdg.game.retention.v1",
+  retention: "tdg.game.retention.v2",
 } as const satisfies Record<LevelSlug, string>;
 
 /**

@@ -48,9 +48,9 @@ export function gameLevelShareText(locale: Locale): GameLevelShareText {
     title: upper(tc(RETENTION_INTRO.title, locale)),
     tiles: [
       {
-        label: upper(tc(dashboard.churn, locale)),
-        value: formatPct(locale, RETENTION_LEVEL.constants.churn0),
-        unit: tc(dashboard.churnUnit, locale),
+        label: upper(tc(dashboard.metric, locale)),
+        value: formatPct(locale, RETENTION_LEVEL.constants.metric0),
+        unit: tc(dashboard.metricUnit, locale),
       },
       { label: upper(tc(dashboard.trust, locale)) },
       { label: upper(tc(dashboard.radar, locale)) },

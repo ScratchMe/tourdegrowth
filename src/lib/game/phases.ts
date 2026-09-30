@@ -265,19 +265,19 @@ export function lastQuarterStart<Id extends string>(
   const start = state.history.find((h) => h.m === startMonth);
   if (!start) return undefined;
   const patience = quarters >= 2 ? state.log[quarters - 2]!.patience : level.constants.patience0;
-  return { ...state, churn: start.churn, subs: start.subs, mrr: start.mrr, patience };
+  return { ...state, metric: start.metric, customers: start.customers, revenue: start.revenue, patience };
 }
 
 /**
  * The months the dashboard scrolls through, as readings of the state the
- * quarter STARTED from: the churn, subscribers and revenue of each simulated
+ * quarter STARTED from: the number, customers and revenue of each simulated
  * month, everything else as it was when « Lancer » was pressed. The engine has
  * already computed the quarter; this only picks what to show, frame by frame,
  * so the animation can never decide a number (plan §2.5).
  */
 export function runFrame<Id extends string>(
   from: GameState<Id>,
-  point: { m: number; churn: number; subs: number; mrr: number },
+  point: { m: number; metric: number; customers: number; revenue: number },
 ): GameState<Id> {
-  return { ...from, month: point.m, churn: point.churn, subs: point.subs, mrr: point.mrr };
+  return { ...from, month: point.m, metric: point.metric, customers: point.customers, revenue: point.revenue };
 }

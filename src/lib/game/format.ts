@@ -117,22 +117,23 @@ export function formatSigned(locale: Locale, n: number): string {
   return `${sign(d, true)}${d.body}`;
 }
 
-export type DeltaKind = "churn" | "int" | "millions";
+/** `rate`: a share in percentage points (churn) ; `int`: a count ; `millions`: euros in M€. */
+export type DeltaKind = "rate" | "int" | "millions";
 
 // The power of ten each delta is rounded at — shared by `formatDelta` and
 // `deltaSign`, so the two cannot round differently.
-const DELTA_SCALE: Record<DeltaKind, number> = { churn: 3, int: 0, millions: -4 };
+const DELTA_SCALE: Record<DeltaKind, number> = { rate: 3, int: 0, millions: -4 };
 
 /**
- * The change between two readings of a tile, with its sign: churn in points,
+ * The change between two readings of a tile, with its sign: a rate in points,
  * subscribers and patience as integers, revenue in millions. A change that
  * rounds to nothing prints without a sign, and `deltaSign` agrees with it —
  * the arrow and the number can never disagree.
  */
 export function formatDelta(locale: Locale, kind: DeltaKind, a: number, b: number): string {
   const diff = b - a;
-  if (kind === "churn") {
-    const d = digits(locale, diff, DELTA_SCALE.churn, 1);
+  if (kind === "rate") {
+    const d = digits(locale, diff, DELTA_SCALE.rate, 1);
     return `${sign(d, true)}${d.body}${NBSP}${UNITS[locale].points}`;
   }
   if (kind === "millions") {

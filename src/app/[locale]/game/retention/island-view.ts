@@ -15,7 +15,7 @@
 import type { DashboardProps, DashboardSecretTile } from "@/components/game/Dashboard";
 import type { CatalogueEntry } from "@/components/game/PatternCatalogue";
 import type { PlaybookItem } from "@/components/game/Playbook";
-import type { EndingChartCopy, EndingChartRow } from "@/components/game/EndingCharts";
+import type { EndingChartCopy, EndingChartRow, EndingChartsProps } from "@/components/game/EndingCharts";
 import type { DecemberFigures } from "@/components/game/RevealCells";
 import type { EventClippingProps } from "@/components/game/EventClipping";
 import type { HandCard } from "@/components/game/Hand";
@@ -42,7 +42,6 @@ import { bossMessageSpec, handIds } from "@/lib/game/model";
 import type { HandHint } from "@/lib/game/phases";
 import type { EndingId, GameEvent, GameState, QuarterLog, VisibleEffect } from "@/lib/game/types";
 import {
-  CHURN_SCALE,
   clicksOverLaw,
   dashboardView,
   decemberView,
@@ -51,7 +50,6 @@ import {
   driverRows,
   reportView,
   type Delta,
-  type DecemberView,
 } from "@/lib/game/view";
 import type { Locale } from "@/lib/i18n/locale";
 
@@ -107,7 +105,7 @@ export function bossMessage(ctx: IslandContext, state: State): string {
     case "fired":
       return copy.boss.fired;
     case "quarter": {
-      const vars = { churn: formatPct(locale, spec.churnPrev), target: formatPct(locale, spec.target) };
+      const vars = { metric: formatPct(locale, spec.metricPrev), target: formatPct(locale, spec.target) };
       const byQuarter = {
         1: spec.hit ? copy.boss.t2Hit : copy.boss.t2Miss,
         2: spec.hit ? copy.boss.t3Hit : copy.boss.t3Miss,
@@ -132,10 +130,10 @@ export function effectText({ copy, locale }: IslandContext, effect: VisibleEffec
       return copy.effects.clean;
     case "extra":
       return copy.effects.extra;
-    case "down":
-      return fill(effect.rising ? copy.effects.downRising : copy.effects.down, { pct: formatInt(locale, effect.pct) });
-    case "up":
-      return fill(copy.effects.up, { pct: formatInt(locale, effect.pct) });
+    case "gain":
+      return fill(effect.rising ? copy.effects.gainRising : copy.effects.gain, { pct: formatInt(locale, effect.pct) });
+    case "loss":
+      return fill(copy.effects.loss, { pct: formatInt(locale, effect.pct) });
     case "none":
       return copy.effects.none;
   }
@@ -231,11 +229,11 @@ export type DashboardReveal = "hidden" | "revealing" | "shown";
 export function dashboardProps(ctx: IslandContext, state: State, prev: State | undefined, reveal: DashboardReveal): DashboardProps {
   const { copy, locale } = ctx;
   const v = dashboardView(L, state, prev);
-  const churnValue = formatPct(locale, v.churn);
+  const churnValue = formatPct(locale, v.metric);
   const target = fill(v.targetScope === "quarter" ? copy.dashboard.quarterTarget : copy.dashboard.boardTarget, {
     target: formatPct(locale, v.target),
   });
-  const churnLabel = `${copy.dashboard.churn} · ${copy.dashboard.churnUnit}`;
+  const churnLabel = `${copy.dashboard.metric} · ${copy.dashboard.metricUnit}`;
   const month = copy.months[v.monthIndex] ?? "";
   return {
     label: copy.dashboard.label,
@@ -243,29 +241,29 @@ export function dashboardProps(ctx: IslandContext, state: State, prev: State | u
       label: churnLabel,
       value: churnValue,
       sub: target,
-      delta: v.deltas ? tileDelta(ctx, "churn", v.deltas.churn) : undefined,
+      delta: v.deltas ? tileDelta(ctx, "rate", v.deltas.metric) : undefined,
       bullet: {
-        value: v.churn,
+        value: v.metric,
         target: v.target,
-        domain: [CHURN_SCALE.min / 100, CHURN_SCALE.max / 100],
+        domain: [L.display.chart.min / L.display.chart.factor, L.display.chart.max / L.display.chart.factor],
         // The value and the target, in words: nothing drawn is read.
-        ariaLabel: `${copy.dashboard.churn} ${churnValue}, ${target}`,
+        ariaLabel: `${copy.dashboard.metric} ${churnValue}, ${target}`,
       },
     },
     subs: {
-      label: copy.dashboard.subs,
-      value: formatInt(locale, v.subs),
+      label: copy.dashboard.customers,
+      value: formatInt(locale, v.customers),
       sub: v.monthEnd ? fill(copy.dashboard.monthEnd, { month }) : month,
-      delta: v.deltas ? tileDelta(ctx, "int", v.deltas.subs) : undefined,
+      delta: v.deltas ? tileDelta(ctx, "int", v.deltas.customers) : undefined,
     },
     mrr: {
-      label: copy.dashboard.mrr,
-      value: formatMillions(locale, v.mrr),
+      label: copy.dashboard.revenue,
+      value: formatMillions(locale, v.revenue),
       sub:
-        v.mrrVsJanuary === null
+        v.revenueVsJanuary === null
           ? undefined
-          : fill(copy.dashboard.mrrDelta, { delta: formatDelta(locale, "millions", 0, v.mrrVsJanuary) }),
-      delta: v.deltas ? tileDelta(ctx, "millions", v.deltas.mrr) : undefined,
+          : fill(copy.dashboard.revenueDelta, { delta: formatDelta(locale, "millions", 0, v.revenueVsJanuary) }),
+      delta: v.deltas ? tileDelta(ctx, "millions", v.deltas.revenue) : undefined,
     },
     patience: {
       label: copy.dashboard.patience,
@@ -294,7 +292,7 @@ export function timelineSegments(ctx: IslandContext, state: State): TimelineSegm
       status,
       result:
         log && verdict
-          ? { value: formatPct(locale, log.churnEnd), word: verdict.hit ? copy.timeline.hit : copy.timeline.missed, hit: verdict.hit }
+          ? { value: formatPct(locale, log.metricEnd), word: verdict.hit ? copy.timeline.hit : copy.timeline.missed, hit: verdict.hit }
           : undefined,
     };
   });
@@ -428,11 +426,11 @@ function clipping(ctx: IslandContext, event: GameEvent): EventClippingProps | nu
 function driversContent(ctx: IslandContext, log: QuarterLog<Id>): { heading: string; lines: string[] } {
   const { copy, locale } = ctx;
   if (!log.drivers) return { heading: "", lines: [] };
-  const { total, rows } = driverRows(log);
+  const { total, rows } = driverRows(log, L.display.step);
   return {
-    heading: fill(copy.report.driversHeading, { delta: formatDelta(locale, "churn", 0, total) }),
+    heading: fill(copy.report.driversHeading, { delta: formatDelta(locale, "rate", 0, total) }),
     lines: rows.map(({ key, value }) =>
-      fill(copy.report.driverLine, { label: copy.report.drivers[key], delta: formatDelta(locale, "churn", 0, value) }),
+      fill(copy.report.driverLine, { label: copy.report.drivers[key], delta: formatDelta(locale, "rate", 0, value) }),
     ),
   };
 }
@@ -452,13 +450,13 @@ export function reportContent(ctx: IslandContext, state: State, q: number): Repo
     figures: [
       {
         key: "churn",
-        label: copy.report.churn,
-        value: formatPct(locale, r.churnEnd),
+        label: copy.report.metric,
+        value: formatPct(locale, r.metricEnd),
         note: fill(copy.report.target, { target: formatPct(locale, r.target) }),
         status: { text: verdict.text, tone: verdict.hit ? "good" : "bad" },
       },
-      { key: "subs", label: copy.report.subs, value: formatInt(locale, r.subs) },
-      { key: "mrr", label: copy.report.mrr, value: formatMillions(locale, r.mrr) },
+      { key: "subs", label: copy.report.customers, value: formatInt(locale, r.customers) },
+      { key: "mrr", label: copy.report.revenue, value: formatMillions(locale, r.revenue) },
       { key: "patience", label: copy.report.patience, value: formatInt(locale, r.patience) },
     ],
     effectsHeading: copy.report.effectsHeading,
@@ -582,7 +580,7 @@ export function journalEntries(ctx: IslandContext, state: State): JournalEntry[]
     return {
       q: i + 1,
       period: quarterPeriod(ctx, i),
-      result: { text: `${formatPct(locale, log.churnEnd)} · ${target} · ${verdict.text}`, tone: verdict.hit ? "good" : "bad" },
+      result: { text: `${formatPct(locale, log.metricEnd)} · ${target} · ${verdict.text}`, tone: verdict.hit ? "good" : "bad" },
       picked: log.picked.map((id) => cardName(ctx, id)),
       lines: [
         ...log.fx.map(({ card, effect }) =>
@@ -601,7 +599,7 @@ export function quarterEndAnnouncement(ctx: IslandContext, state: State, q: numb
   const log = state.log[q]!;
   return fill(copy.a11y.quarterEnd, {
     q: formatInt(locale, q + 1),
-    churn: formatPct(locale, log.churnEnd),
+    metric: formatPct(locale, log.metricEnd),
     target: formatPct(locale, log.target),
     status: statusText(ctx, log).text,
     patience: formatInt(locale, log.patience),
@@ -635,7 +633,7 @@ export function resumeContent(ctx: IslandContext, saved: State): ResumeContent {
         fill(copy.resume.quarterLine, {
           q: formatInt(locale, log.q + 1),
           cards: log.picked.map((id) => cardName(ctx, id)).join(", "),
-          churn: formatPct(locale, log.churnEnd),
+          metric: formatPct(locale, log.metricEnd),
         }),
       ),
     },
@@ -653,7 +651,8 @@ export interface DecemberContent {
   figures: DecemberFigures;
   cellLabels: { churn: string; trust: string; radar: string };
   note: string;
-  view: DecemberView;
+  /** The curves in EndingCharts' slots: level 1's number goes in `churn`. */
+  view: EndingChartsProps["view"];
   churnChart: EndingChartCopy;
   trustChart: EndingChartCopy;
   rows: EndingChartRow[];
@@ -684,13 +683,14 @@ export function decemberContent(ctx: IslandContext, state: State): DecemberConte
   const { copy, locale } = ctx;
   const ending = state.ending!;
   const endingCopy = copy.endings[ending];
-  const view = decemberView(L, state);
+  const dv = decemberView(L, state);
+  const view = { churn: dv.metric, trust: dv.trust };
   const figures: DecemberFigures = {
-    churn: formatPct(locale, state.churn),
+    churn: formatPct(locale, state.metric),
     trust: fill(copy.december.cells.outOf, { value: formatInt(locale, state.trust) }),
     radar: fill(copy.december.cells.outOf, { value: formatInt(locale, state.radar) }),
   };
-  const churnPoints = state.history.map((h) => ({ m: h.m, value: h.churn }));
+  const churnPoints = state.history.map((h) => ({ m: h.m, value: h.metric }));
   const trustPoints = state.history.map((h) => ({ m: h.m, value: h.trust }));
   const pct = (v: number) => formatPct(locale, v);
   const int = (v: number) => formatInt(locale, v);
@@ -702,8 +702,8 @@ export function decemberContent(ctx: IslandContext, state: State): DecemberConte
       eyebrow: endingCopy.eyebrow,
       title: endingCopy.title,
       text: fill(endingCopy.text, {
-        churn: figures.churn,
-        subs: formatInt(locale, state.subs),
+        metric: figures.churn,
+        customers: formatInt(locale, state.customers),
         trust: formatInt(locale, state.trust),
         radar: formatInt(locale, state.radar),
         patience: formatInt(locale, state.patience),
@@ -714,17 +714,17 @@ export function decemberContent(ctx: IslandContext, state: State): DecemberConte
     // The three labels, not the whole `cells` block: its `outOf` is a template
     // the figures above already went through, never something to print.
     cellLabels: {
-      churn: fill(copy.december.cells.churn, { month: closingMonth(ctx, state) }),
+      churn: fill(copy.december.cells.metric, { month: closingMonth(ctx, state) }),
       trust: copy.december.cells.trust,
       radar: copy.december.cells.radar,
     },
     note: copy.december.gameNumbers,
     view,
     churnChart: {
-      title: copy.december.churnChart.title,
-      caption: copy.december.churnChart.caption,
-      ariaLabel: trend(ctx, copy.december.churnChart.label, churnPoints, pct),
-      reference: fill(copy.december.churnChart.reference, { target: formatPct(locale, view.churn.reference / 100) }),
+      title: copy.december.metricChart.title,
+      caption: copy.december.metricChart.caption,
+      ariaLabel: trend(ctx, copy.december.metricChart.label, churnPoints, pct),
+      reference: fill(copy.december.metricChart.reference, { target: formatPct(locale, view.churn.reference / 100) }),
       ticks: view.churn.scale.ticks.map((t) => formatPct(locale, t / 100, 0)),
     },
     trustChart: {
@@ -736,7 +736,7 @@ export function decemberContent(ctx: IslandContext, state: State): DecemberConte
     },
     rows: state.history
       .filter((h) => h.m >= 1)
-      .map((h) => ({ id: String(h.m), month: copy.months[h.m - 1] ?? "", churn: pct(h.churn), trust: int(h.trust) })),
+      .map((h) => ({ id: String(h.m), month: copy.months[h.m - 1] ?? "", churn: pct(h.metric), trust: int(h.trust) })),
     playbook: {
       eyebrow: copy.playbook.eyebrow,
       title: endingCopy.win ? copy.playbook.titleWin : copy.playbook.titleLose,
@@ -781,7 +781,7 @@ export function shareText(ctx: IslandContext, state: State, url: string): string
   const { copy, locale } = ctx;
   return fill(copy.share.text, {
     title: copy.endings[state.ending!].title,
-    churn: formatPct(locale, state.churn),
+    metric: formatPct(locale, state.metric),
     trust: fill(copy.december.cells.outOf, { value: formatInt(locale, state.trust) }),
     url,
   });

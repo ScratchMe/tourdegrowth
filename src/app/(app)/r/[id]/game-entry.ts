@@ -30,7 +30,7 @@ import { tc } from "@/lib/i18n/translatable";
  * `Record<LevelSlug, …>` so a new level does not compile without one.
  */
 const STARTING_CHURN: Record<LevelSlug, number> = {
-  retention: RETENTION_LEVEL.constants.churn0,
+  retention: RETENTION_LEVEL.constants.metric0,
 };
 
 export function resultGameEntry({

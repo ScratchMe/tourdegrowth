@@ -145,9 +145,9 @@ export function isGameState<Id extends string>(level: LevelDefinition<Id>, value
   const isId = (x: unknown): x is Id => typeof x === "string" && known.has(x);
   const isIdList = (x: unknown): x is Id[] => Array.isArray(x) && x.every(isId);
 
-  if (value.v !== 1 || value.level !== level.slug) return false;
+  if (value.v !== 2 || value.level !== level.slug) return false;
   if (!isIntIn(value.q, 0, QUARTERS_PER_YEAR) || !isIntIn(value.month, 0, MONTHS_PER_YEAR)) return false;
-  if (!["subs", "churn", "mrr", "spike", "press"].every((k) => isFiniteNumber(value[k]))) return false;
+  if (!["customers", "metric", "revenue", "spike", "press"].every((k) => isFiniteNumber(value[k]))) return false;
   if (!["trust", "radar", "patience", "lagTrust"].every((k) => isGauge(value[k]))) return false;
   if (!isIntIn(value.presented, 0, QUARTERS_PER_YEAR)) return false;
   if (!["callOpen", "insight", "sanction", "fired", "over"].every((k) => typeof value[k] === "boolean")) return false;
@@ -171,7 +171,7 @@ export function isGameState<Id extends string>(level: LevelDefinition<Id>, value
 
   if (!Array.isArray(value.history) || value.history.length < 1) return false;
   for (const point of value.history) {
-    if (!isRecord(point) || !["m", "churn", "trust", "subs", "mrr"].every((k) => isFiniteNumber(point[k]))) {
+    if (!isRecord(point) || !["m", "metric", "trust", "customers", "revenue"].every((k) => isFiniteNumber(point[k]))) {
       return false;
     }
   }
@@ -181,11 +181,11 @@ export function isGameState<Id extends string>(level: LevelDefinition<Id>, value
     if (!isRecord(entry) || !isIntIn(entry.q, 0, QUARTERS_PER_YEAR - 1)) return false;
     if (!isIdList(entry.picked) || !Array.isArray(entry.fx) || !Array.isArray(entry.events)) return false;
     if (entry.order !== null && !isId(entry.order)) return false;
-    if (!["churnStart", "churnEnd", "target", "gap", "subs", "mrr", "patience"].every((k) => isFiniteNumber(entry[k]))) {
+    if (!["metricStart", "metricEnd", "target", "gap", "customers", "revenue", "patience"].every((k) => isFiniteNumber(entry[k]))) {
       return false;
     }
     if (!isRecord(entry.boss) || typeof entry.moodAfter !== "string") return false;
-    // Model v2: the report reads the drivers, four numbers.
+    // Model v2: the report reads the drivers, five numbers.
     const drivers = entry.drivers;
     if (!isRecord(drivers) || !["picks", "production", "inspection", "word", "market"].every((k) => isFiniteNumber(drivers[k]))) {
       return false;
