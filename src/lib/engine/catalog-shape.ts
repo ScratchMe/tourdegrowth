@@ -28,9 +28,13 @@ import type {
  * `benchmark` restates an order of magnitude already written, reviewed and
  * signed off in `content/glossary-deep.ts` (bons à tirer nº1-5); the content
  * tests check that `lo` and `hi`, formatted in each language, appear in the
- * text of the linked term. Only two of them `designates` (decision D8,
- * confirmed 2026-09-24): activation 20-40 % and SMB logo churn 1-2 %/month.
- * Every other one is context — shown, never used to name a bottleneck.
+ * text of the linked term. **None of them names a bottleneck** (decision 5,
+ * reversed by Antoine on 2026-09-29, `CHANTIERS.md` C1): a reference is
+ * context — shown with its caveat, never compared against to name a stage.
+ * Only the team's own target does that (`diagnose.ts#comparatorOf`). The two
+ * that used to (activation 20-40 %, logo churn 1-2 %/month) lost the right
+ * because neither holds for every company: 1-2 % is high-ticket B2B SaaS,
+ * and the 20-40 % has no primary source.
  */
 
 /**
@@ -47,8 +51,6 @@ export interface Benchmark {
   lo: number;
   hi: number;
   direction: "higher" | "lower";
-  /** May name a bottleneck on a slide. Two in v1 — adding one is a product decision. */
-  designates: boolean;
 }
 
 export interface MetricShape {
@@ -106,7 +108,7 @@ export const METRIC_SHAPES: readonly MetricShape[] = [
     sources: ["ga4", "mixpanel", "amplitude", "product-db"],
     glossary: "acquisition",
     // Context only: 2-5 % is for cold paid traffic, and real traffic is a mix.
-    benchmark: { term: "acquisition", lo: 2, hi: 5, direction: "higher", designates: false },
+    benchmark: { term: "acquisition", lo: 2, hi: 5, direction: "higher" },
     defaultRepair: "afternoon",
   },
   {
@@ -171,7 +173,7 @@ export const METRIC_SHAPES: readonly MetricShape[] = [
     sources: ["amplitude", "mixpanel", "ga4", "posthog"],
     glossary: "activation",
     tourQuestionId: "act-2",
-    benchmark: { term: "activation", lo: 20, hi: 40, direction: "higher", designates: true },
+    benchmark: { term: "activation", lo: 20, hi: 40, direction: "higher" },
     defaultRepair: "sprint",
     dependsOn: "act.event",
   },
@@ -220,7 +222,7 @@ export const METRIC_SHAPES: readonly MetricShape[] = [
     defaultRole: "finance",
     sources: ["stripe", "chargebee", "chartmogul"],
     glossary: "churn",
-    benchmark: { term: "churn", lo: 1, hi: 2, direction: "lower", designates: true },
+    benchmark: { term: "churn", lo: 1, hi: 2, direction: "lower" },
     defaultRepair: "afternoon",
     naReasons: ["not-subscription"],
   },
@@ -285,7 +287,7 @@ export const METRIC_SHAPES: readonly MetricShape[] = [
     sources: ["mixpanel", "amplitude", "product-db"],
     glossary: "viral-coefficient",
     tourQuestionId: "ref-3",
-    benchmark: { term: "viral-coefficient", lo: 0.15, hi: 0.5, direction: "higher", designates: false },
+    benchmark: { term: "viral-coefficient", lo: 0.15, hi: 0.5, direction: "higher" },
     defaultRepair: "sprint",
     naReasons: ["no-invite-mechanism"],
   },
@@ -333,7 +335,7 @@ export const METRIC_SHAPES: readonly MetricShape[] = [
     sources: ["spreadsheet"],
     glossary: "cac-payback",
     // 70-85 % lives in the terms of cac-payback's formula, not in its benchmark block.
-    benchmark: { term: "cac-payback", lo: 70, hi: 85, direction: "higher", designates: false },
+    benchmark: { term: "cac-payback", lo: 70, hi: 85, direction: "higher" },
     defaultRepair: "meeting",
   },
   // --- MRR movements (2026-09-26) -------------------------------------------
@@ -390,7 +392,7 @@ export const DERIVED_SHAPES: readonly DerivedShape[] = [
     inputs: ["acq.cac", "rev.arpa", "rev.gross-margin"],
     glossary: "cac-payback",
     // Under 12 months for SMB SaaS, 18-24 in enterprise sales: context, never a verdict.
-    benchmark: { term: "cac-payback", lo: 12, hi: 24, direction: "lower", designates: false },
+    benchmark: { term: "cac-payback", lo: 12, hi: 24, direction: "lower" },
   },
   {
     id: "rev.ltv-cac",
@@ -398,7 +400,7 @@ export const DERIVED_SHAPES: readonly DerivedShape[] = [
     inputs: ["acq.cac", "rev.arpa", "rev.gross-margin", "ret.logo-churn"],
     glossary: "ltv",
     // "About 3:1 — a rule of thumb, not a law."
-    benchmark: { term: "ltv", lo: 3, hi: 3, direction: "higher", designates: false },
+    benchmark: { term: "ltv", lo: 3, hi: 3, direction: "higher" },
   },
   // Monthly, in percent. No reference: the glossary quotes NRR and GRR over a
   // year, and comparing a monthly figure with an annual range would mislead.

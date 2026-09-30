@@ -58,6 +58,16 @@ export function exampleMetrics(words: ExampleWords): Partial<Record<MetricId, Me
   };
 }
 
+/**
+ * The fictional team's own targets. Only a team target names the stage that
+ * holds the engine back (decision 5, reversed 2026-09-29, `CHANTIERS.md` C1):
+ * without them the example would name nothing. They are the values the two
+ * published references used to lend it, so its diagnosis — activation, ~600 €
+ * a month, `clear` against churn's ~240 € — is the one ENGINE.md §6.6 works
+ * through. The example's banner says whose targets they are.
+ */
+export const EXAMPLE_TARGETS: Partial<Record<MetricId, number>> = { "act.rate": 20, "ret.logo-churn": 2 };
+
 /** A fresh copy each call: callers may change it (the example's own slide choices live in memory only). */
 export function exampleEngine(words: ExampleWords): EngineState {
   return structuredClone({
@@ -79,7 +89,7 @@ export function exampleEngine(words: ExampleWords): EngineState {
         cohortMonth: "2026-07",
         createdAt: "2026-09-24T08:00:00.000Z",
         metrics: exampleMetrics(words),
-        targets: {},
+        targets: EXAMPLE_TARGETS,
       },
     ],
     tourLink: null,

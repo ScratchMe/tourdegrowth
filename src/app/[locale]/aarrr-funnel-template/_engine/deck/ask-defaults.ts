@@ -29,13 +29,13 @@ export function missingByRepairCost(state: EngineState): MetricId[] {
 
 /**
  * The success metric and target the diagnosis already points at: the named
- * stage and the value its comparator sets — the team's target when there is
- * one, otherwise the cautious bound of a designating reference — the same
- * bound the "what if" starts from, read from `impactTarget` rather than
- * re-derived here so the form and the slide can't suggest two targets
- * (§6.6-§6.7). Nothing when
- * the diagnosis names nothing: a suggested target without a named leak would
- * be the tool deciding for the user.
+ * stage and the team's target that named it — the value the "what if"
+ * starts from, read from `impactTarget` rather than re-derived here so the
+ * form and the slide can't suggest two targets (§6.6-§6.7). Only a team
+ * target names a stage (C1), so the suggestion is always the team's own
+ * number, never a published reference. Nothing when the diagnosis names
+ * nothing: a suggested target without a named leak would be the tool
+ * deciding for the user.
  */
 export function suggestedSuccess(derived: EngineDerived): Pick<EngineAsk, "successMetric" | "successTarget"> {
   const { state, named, positions } = derived.diagnosis;

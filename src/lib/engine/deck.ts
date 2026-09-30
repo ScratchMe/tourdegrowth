@@ -305,15 +305,10 @@ function pelotonLines(state: EngineState, peloton: Peloton, strings: Words, ctx:
 
 // --- Slide 2: the leak -------------------------------------------------------
 
-/**
- * "20 % (low end of the commonly cited range)" or "30 % (team target)" — the
- * target's own words (§9.3). Churn is measured to its reference's cautious
- * bound, which for a lower-is-better metric is the HIGH end, and says so.
- */
+/** "30 % (team target)" — the target's own words (§9.3). Only a team target names a stage (C1). */
 export function targetPhrase(comparator: Comparator, id: CandidateId, state: EngineState, strings: Words, ctx: EngineCalcContext): string {
   const value = formatInterval(point(impactTarget(comparator)), shapeOf(id).unit, ctx, strings.units, { currency: state.setup.currency });
-  if (comparator.kind === "target") return fillTemplate(strings.whatIf.targetTeam, { value });
-  return fillTemplate(comparator.direction === "higher" ? strings.whatIf.targetReference : strings.whatIf.targetReferenceHigh, { value });
+  return fillTemplate(strings.whatIf.targetTeam, { value });
 }
 
 /** One chain line as the sentence the slide prints; `label` is the line's lead-in ("Aujourd'hui", "Si"…). */
@@ -367,14 +362,10 @@ function buildLeak(state: EngineState, derived: Omit<EngineDerived, "findings">,
       return absent;
     }
     for (const line of impact.lines) lines.push(chainLine(line, impact, stage, target, strings, locale));
-    const caveat = comparator.kind === "reference" ? (metricOf(metrics, id).benchmarkCaveat ?? "") : "";
     lines.push({
       row: "footer",
       // The assumption is said here, once (spec §9.3): the calculation multiplies activation into payers.
-      text: fillSegments(strings.slide.leakFooter, {
-        assumption: id === "act.rate" ? strings.slide.leakAssumption : "",
-        caveat: caveat ? fillTemplate(strings.slide.leakCaveat, { range: formatComparator(comparator, id, state, ctx, strings.units), caveat }) : "",
-      }),
+      text: fillSegments(strings.slide.leakFooter, { assumption: id === "act.rate" ? strings.slide.leakAssumption : "" }),
     });
     notes.push(fillTemplate(strings.notes.compared, { comparator: target }));
     top = worthOf(impact, strings, locale);
@@ -1152,7 +1143,7 @@ export function deckMarkdown(model: DeckModel, strings: Words): string {
   return out.join("\n");
 }
 
-/** Present for reuse by the board: the comparator of a candidate, formatted — "20 à 40 %" or "30 %". */
+/** Present for reuse by the board: the team's target on a candidate, formatted — "30 %" — or "" without one. */
 export function comparatorText(state: EngineState, id: CandidateId, strings: Words, ctx: EngineCalcContext): string {
   const comparator = comparatorOf(state, id);
   return comparator ? formatComparator(comparator, id, state, ctx, strings.units) : "";

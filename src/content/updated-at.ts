@@ -29,7 +29,7 @@ export const CONTENT_UPDATED_AT: Record<string, string> = {
   "/game/retention": "2026-09-24", // created (level page, intro only until the island lands)
   // Le moteur de croissance (engine spec §11.1). Same rule as the game: in the
   // sitemap only when ENGINE_ENABLED is open at build (app/sitemap.ts).
-  "/aarrr-funnel-template": "2026-09-28", // dix-sept chiffres dans la promesse, l'intro du catalogue et les chiffres calculés
+  "/aarrr-funnel-template": "2026-09-30", // A7.1 (C1) : la promesse, la FAQ et les réserves des repères, qui ne désignent plus
 };
 
 /** The day the long-form `extended` copy of every term was approved. */

@@ -1,4 +1,3 @@
-import type { GlossaryTermId } from "@/content/glossary-terms"; // type only: erased at compile time, never a bundle edge
 
 /**
  * The growth engine's data contract — engine spec §4.1-§4.2.
@@ -157,7 +156,7 @@ export interface Snapshot {
   createdAt: string;
   /** Absent = "todo". */
   metrics: Partial<Record<MetricId, MetricEntry>>;
-  /** Team targets, display unit (%, currency). They always designate (D8). */
+  /** Team targets, display unit (%, currency). The only comparator that names a stage (decision 5, C1). */
   targets: Partial<Record<MetricId, number>>;
   /**
    * The counts several numbers share, typed ONCE (Antoine, 2026-09-25: « si
@@ -288,12 +287,16 @@ export type CandidateId =
   | "rev.paid-conversion"
   | "ref.referred-share"
   | "ret.logo-churn";
+/**
+ * What may name a stage: the team's own target, and nothing else (decision 5,
+ * reversed 2026-09-29, `CHANTIERS.md` C1 — a published reference is context,
+ * never a comparator). A point, `lo === hi`, kept as an interval so
+ * `diagnose.ts#positionOf` reads it like any value.
+ */
 export interface Comparator {
-  kind: "target" | "reference";
   lo: number;
   hi: number;
   direction: "higher" | "lower";
-  term?: GlossaryTermId;
 }
 export type Position = "below" | "maybe-below" | "within" | "above" | "no-comparator" | "unknown";
 

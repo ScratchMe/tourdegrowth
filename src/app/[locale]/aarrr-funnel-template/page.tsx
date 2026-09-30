@@ -68,8 +68,7 @@ function referenceLine(
 ): string | null {
   if (shape.benchmark) {
     const range = referenceRange(shape.benchmark, shape.unit === "percent" ? "percent" : "ratio", strings, locale);
-    const template = shape.benchmark.designates ? strings.sheet.referenceDesignates : strings.sheet.referenceContext;
-    return fill(template, { range, caveat: caveat ?? "" });
+    return fill(strings.sheet.referenceContext, { range, caveat: caveat ?? "" });
   }
   if (noReferenceReason) return fill(strings.sheet.noReference, { reason: noReferenceReason });
   return null;

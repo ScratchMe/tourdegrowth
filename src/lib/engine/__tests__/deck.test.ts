@@ -187,12 +187,14 @@ describe("the §6.0 example, in words", () => {
     // The stage mid-sentence, with its article, never capitalised: « pour la rétention », not « pour La rétention ».
     expect(leak.lines.find((l) => l.row === "blind")!.text).toBe("Sans chiffre pour la rétention à J30, l'étape qui freine vraiment peut s'y cacher.");
     expect(leak.lines.filter((l) => l.row === "aside")).toHaveLength(5);
-    // Churn behind its reference is ABOVE it — and priced from the same chain the title of its own slide would quote.
-    expect(leak.lines.find((l) => l.row === "aside" && l.id === "ret.logo-churn")!.text).toBe("au-dessus du repère · ~240\u00a0€ de MRR préservé par mois");
-    expect(leak.notes).toContain("Pourquoi pas le churn logo\u00a0? — Au-dessus du repère aussi, mais l'écart vaut ~240\u00a0€ de MRR préservé par mois, contre ~600\u00a0€ de MRR nouveau par mois.");
+    // Churn behind its target is ABOVE it — and priced from the same chain the title of its own slide would quote.
+    expect(leak.lines.find((l) => l.row === "aside" && l.id === "ret.logo-churn")!.text).toBe("au-dessus de la cible · ~240\u00a0€ de MRR préservé par mois");
+    expect(leak.notes).toContain("Pourquoi pas le churn logo\u00a0? — Au-dessus de la cible aussi, mais l'écart vaut ~240\u00a0€ de MRR préservé par mois, contre ~600\u00a0€ de MRR nouveau par mois.");
+    // The team's target, in its own words — never a published range (C1).
     expect(renderTitle(leak.title, FR.strings)).toBe(
-      "Ramener l'activation à 20 % (bas de l'ordre de grandeur couramment cité) vaudrait **~600 € de MRR nouveau** chaque mois.",
+      "Ramener l'activation à 20 % (cible de l'équipe) vaudrait **~600 € de MRR nouveau** chaque mois.",
     );
+    expect(leak.lines.find((l) => l.row === "footer")!.text).not.toMatch(/repère/);
   });
 
   it("visibility: 13 of 17 documented, the missing ones sorted from a meeting to a sprint", () => {

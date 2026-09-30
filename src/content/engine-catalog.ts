@@ -130,9 +130,10 @@ export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
       fr: "le nombre de visiteurs uniques et le nombre d'inscriptions en {month}",
       en: "the number of unique visitors and the number of sign-ups in {month}",
     },
+    // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1) : plus aucun repère ne désigne, le « jamais » isolait celui-ci.
     benchmarkCaveat: {
-      fr: "pour du trafic payant froid, bien plus pour du trafic chaud ; ton trafic est un mélange, donc ce repère ne désigne jamais une étape qui freine",
-      en: "for cold paid traffic, far higher for warm traffic; your traffic is a mix, so this reference never names the stage holding you back",
+      fr: "pour du trafic payant froid, bien plus pour du trafic chaud ; ton trafic est un mélange",
+      en: "for cold paid traffic, far higher for warm traffic; your traffic is a mix",
     },
   },
   "acq.top-channel-share": {
@@ -482,9 +483,10 @@ export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
       fr: "le nombre de clients payants au 1er {month} et le nombre de ceux perdus pendant le mois",
       en: "the number of paying customers at the start of {month} and the number lost during the month",
     },
+    // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1) : 1-2 % vaut pour le SaaS B2B à panier élevé.
     benchmarkCaveat: {
-      fr: "pour des produits vendus aux petites entreprises ; les produits entreprise visent bien plus bas, les abonnements grand public tournent bien plus haut",
-      en: "for products sold to small businesses; enterprise products aim much lower, consumer subscriptions run much higher",
+      fr: "pour le SaaS B2B à panier élevé ; les petits paniers tournent bien plus haut, les contrats entreprise bien plus bas",
+      en: "for high-ticket B2B SaaS; low-ticket products run much higher, enterprise contracts much lower",
     },
     naReasons: [{ id: "not-subscription", label: { fr: "Pas d'abonnement", en: "No subscription" } }],
   },
