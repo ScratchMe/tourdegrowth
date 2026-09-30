@@ -12,6 +12,8 @@ import { NotFoundScreen } from "tour-de-growth";
  * broken, and red would blame them for it.
  */
 
+/* Both copied exactly from `dictionary.ts`: `notFound` (the site-wide 404) and
+   `result.notFound*` (a result id that names nothing). */
 const UNKNOWN_PAGE = {
   eyebrow: { en: "Detour", fr: "Détour" },
   title: { en: "This page doesn't exist.", fr: "Cette page n'existe pas." },
@@ -26,8 +28,8 @@ const LOST_RESULT = {
   eyebrow: { en: "Lost result", fr: "Résultat introuvable" },
   title: { en: "No result at this address.", fr: "Aucun résultat à cette adresse." },
   body: {
-    en: "This link may have been mistyped, or the result it pointed to is gone. Your own Tour takes three minutes.",
-    fr: "Ce lien a peut-être été mal recopié, ou le résultat qu'il désignait n'existe plus. Ton propre Tour prend trois minutes.",
+    en: "This link may be wrong, or the result may no longer exist.",
+    fr: "Ce lien est peut-être incorrect, ou le résultat n'existe plus.",
   },
   cta: { en: "Start your Tour →", fr: "Démarre ton Tour →" },
 };

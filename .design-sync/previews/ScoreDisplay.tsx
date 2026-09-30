@@ -12,6 +12,10 @@ import { Card, ScoreDisplay } from "tour-de-growth";
  * The little break after the "4" is not a rendering artefact: it is a real
  * stencil break in Stardos Stencil's glyph (verified against the font on its
  * own, outside the app).
+ *
+ * `animate` (on by default) plays a stamp-in; `animate={false}` kills it, for
+ * print and for anything captured as an image. A still shows the settled
+ * numeral either way, so there is no separate cell for it.
  */
 
 /** The overall score — `total` defaults to 100, so it is usually left off. */
@@ -21,10 +25,10 @@ export const Overall = () => (
   </Card>
 );
 
-/** A single pillar reads out of 20. */
+/** A single pillar reads out of 20: pass `total={20}`. */
 export const Pillar = () => (
   <Card elevation="raised" style={{ maxWidth: 400 }}>
-    <ScoreDisplay score={8} total={20} label="Retention" />
+    <ScoreDisplay score={9} total={20} label="Retention" />
   </Card>
 );
 
@@ -40,13 +44,6 @@ export const Small = () => (
   </Card>
 );
 
-/** `animate={false}` kills the stamp-in — for print, and for anything captured as an image. */
-export const NoAnimation = () => (
-  <Card elevation="raised" style={{ maxWidth: 400 }}>
-    <ScoreDisplay score={41} label="Overall Growth Score" animate={false} />
-  </Card>
-);
-
 /**
  * `variant="marker"` — the kilometre marker: a red head carrying the label,
  * the figure, the total under a rule, a plinth. Made to stand in
@@ -58,7 +55,11 @@ export const Marker = () => (
   </Card>
 );
 
-/** The marker at the landing preview's scale (140px wide). */
+/**
+ * The marker at the landing preview's scale (140px wide), in French: the
+ * label is « Score growth global », `UI_STRINGS.scoreCard.label` as the
+ * French landing's preview card prints it.
+ */
 export const MarkerSmall = () => (
   <Card elevation="raised" style={{ maxWidth: 240 }}>
     <ScoreDisplay variant="marker" score={74} label="Score growth global" size="sm" />

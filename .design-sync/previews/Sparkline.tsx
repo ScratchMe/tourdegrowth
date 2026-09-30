@@ -5,84 +5,93 @@ import { Sparkline } from "tour-de-growth";
  * marker, the last value written next to it. The scale is the caller's and is
  * never fitted to the data, so a small change cannot pass for a cliff.
  *
- * The year is the retention level's (content/game/retention.ts): monthly
- * churn from 6.0% in January, a board target of 4% by December.
+ * The years are the game's own: reference paths of
+ * `lib/game/__tests__/paths.ts` played through the reducer, drawn the way
+ * December's `EndingCharts` draws them — a slot for 1 January, then one per
+ * month under its initial, the 2–9 % churn scale, the board's 4 % target —
+ * with the tick labels, end label and text equivalent `decemberContent`
+ * writes for that year.
  */
 
-const MONTHS = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
-const YEAR = [6.0, 5.9, 5.7, 5.5, 5.3, 5.2, 4.9, 4.7, 4.5, 4.2, 4.1, 4.1];
-const pct = (v: number) => `${v.toFixed(1)}%`;
+const MONTHS = ["", "J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
+/** Path « clean miss »: churn from 6.0 % on 1 January to 4.2 % in December, just above the target. */
+const CLEAN_MISS = [6, 6, 6, 6, 5.74, 5.74, 5.622, 4.997, 4.997, 4.997, 4.154, 4.154, 4.154];
 const box = { maxWidth: 520 } as const;
 
-/** The full year, with the objective as a labelled dashed red line — the red dash never speaks alone. */
+/** The full year, with the board's target as a labelled dashed red line — the red dash never speaks alone. */
 export const WithReference = () => (
   <div style={box}>
     <Sparkline
-      values={YEAR}
-      min={3}
-      max={7}
-      ticks={[3, 4, 5, 6, 7]}
+      values={CLEAN_MISS}
+      min={2}
+      max={9}
+      ticks={[3, 5, 7, 9]}
       formatTick={(v) => `${v}%`}
-      reference={{ value: 4, label: "target 4%" }}
+      reference={{ value: 4, label: "target 4.0%" }}
       xLabels={MONTHS}
-      endLabel="4.1%"
-      ariaLabel="Churn: from 6.0% in January to 4.1% in December, just above the 4% target"
+      endLabel="4.2%"
+      ariaLabel="Monthly churn over the year: 6.0% on January 1st, 4.2% at the end of December; lowest 4.2%, highest 6.0%."
     />
   </div>
 );
 
 /**
- * `null` is a month not played yet: a gap in the line, never a zero. Mid-year,
- * the line stops at June and the end label states June's value.
+ * `null` is a month never played: a gap in the line, never a zero. Path D,
+ * in French: fired at the end of June, so the year stops there and the end
+ * label states June's value.
  */
 export const NotYetPlayed = () => (
   <div style={box}>
     <Sparkline
-      values={[...YEAR.slice(0, 6), null, null, null, null, null, null]}
-      min={3}
-      max={7}
-      ticks={[3, 4, 5, 6, 7]}
+      values={[6, 6.06, 6.06, 6.06, 6.158, 6.158, 6.158, null, null, null, null, null, null]}
+      min={2}
+      max={9}
+      ticks={[3, 5, 7, 9]}
       formatTick={(v) => `${v} %`}
-      reference={{ value: 4, label: "objectif 4 %" }}
+      reference={{ value: 4, label: "objectif 4,0 %" }}
       xLabels={MONTHS}
-      endLabel="5,2 %"
-      ariaLabel="Résiliations : de 6,0 % en janvier à 5,2 % en juin, l'objectif de décembre est 4 %"
+      endLabel="6,2 %"
+      ariaLabel="Résiliations mensuelles sur l'année : 6,0 % le 1er janvier, 6,2 % fin juin ; au plus bas 6,0 %, au plus haut 6,2 %."
     />
   </div>
 );
 
 /**
  * A value past the scale sits on the edge and the end marker turns hollow;
- * the end label still states the real value. Here trust collapses below the
- * floor of a scale that was chosen before anyone knew it would.
+ * the end label still states the real value. Path C — every order obeyed,
+ * an inspection, then a viral thread — takes churn to 10.1 % in October and
+ * ends at 9.1 %, drawn here on the prototype's fixed 2–9 % scale. That is
+ * the case that made the game stretch its own scale (`chartScale` in
+ * lib/game/view.ts now takes this year to 11 %).
  */
 export const OutOfRange = () => (
   <div style={box}>
     <Sparkline
-      values={[70, 66, 61, 55, 49, 44, 38, 33, 28, 24, 21, 18]}
-      min={20}
-      max={80}
-      ticks={[20, 35, 50, 65, 80]}
-      reference={{ value: 35, label: "viral thread" }}
+      values={[6, 4.98, 4.98, 5.286, 4.631, 4.631, 5.013, 5.977, 5.477, 5.04, 10.066, 9.566, 9.066]}
+      min={2}
+      max={9}
+      ticks={[3, 5, 7, 9]}
+      formatTick={(v) => `${v}%`}
+      reference={{ value: 4, label: "target 4.0%" }}
       xLabels={MONTHS}
-      endLabel="18"
-      ariaLabel="Subscriber trust: from 70 in January to 18 in December, under the viral-thread threshold of 35 since August"
+      endLabel="9.1%"
+      ariaLabel="Monthly churn over the year: 6.0% on January 1st, 9.1% at the end of December; lowest 4.6%, highest 10.1%."
     />
   </div>
 );
 
-/** `sm` is 64px tall, inline next to a figure — no ticks, no month initials, just the shape and the last value. */
+/** `sm` is 64px tall, inline next to a figure — no ticks, no month initials, just the shape and the last value. The clean-miss year again. */
 export const Small = () => (
   <div style={{ display: "flex", alignItems: "center", gap: 16, maxWidth: 360 }}>
     <span style={{ font: "var(--meta-sm)", textTransform: "uppercase" }}>Churn</span>
     <div style={{ flex: 1 }}>
       <Sparkline
         size="sm"
-        values={YEAR}
-        min={3}
-        max={7}
-        endLabel={pct(4.1)}
-        ariaLabel="Churn: from 6.0% in January to 4.1% in December"
+        values={CLEAN_MISS}
+        min={2}
+        max={9}
+        endLabel="4.2%"
+        ariaLabel="Monthly churn over the year: 6.0% on January 1st, 4.2% at the end of December; lowest 4.2%, highest 6.0%."
       />
     </div>
   </div>

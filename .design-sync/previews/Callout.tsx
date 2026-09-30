@@ -13,7 +13,10 @@ import { Button, Callout } from "tour-de-growth";
 
 const wrap = { maxWidth: 560 } as const;
 
-/** `caveat` — dashed ink on the page ground. What to know before trusting the score. */
+/**
+ * `caveat` — dashed ink on the page ground. What to know before trusting the
+ * score: How it works's `limitationNotice.long`, the one place it is used.
+ */
 export const Caveat = () => (
   <div style={wrap}>
     <Callout tone="caveat">
@@ -26,14 +29,18 @@ export const Caveat = () => (
   </div>
 );
 
-/** `cta` — paper and an ink edge, leading into its one button. The button is the only red. */
+/**
+ * `cta` — paper and an ink edge, leading into its one button. The button is
+ * the only red. Copy: `content/open-door.ts` (`ctaLead`, `ctaLabel`), as the
+ * growth-audit checklist page sets it.
+ */
 export const Cta = () => (
   <div style={wrap}>
     <Callout
       tone="cta"
       action={
-        <Button size="lg" href="/quiz">
-          Take the Tour →
+        <Button size="lg" href="/quiz" hard>
+          Start your Tour →
         </Button>
       }
     >
@@ -51,14 +58,14 @@ export const CtaFrench = () => (
     <Callout
       tone="cta"
       action={
-        <Button size="lg" href="/quiz">
-          Faire le Tour →
+        <Button size="lg" href="/quiz" hard>
+          Démarre ton Tour →
         </Button>
       }
     >
       <p>
         La même checklist, en trois minutes, avec le score calculé et l&apos;étape qui te freine
-        nommée :
+        nommée :
       </p>
     </Callout>
   </div>

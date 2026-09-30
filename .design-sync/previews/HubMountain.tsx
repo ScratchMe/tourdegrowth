@@ -13,6 +13,10 @@ import { HubMountain, NightSurface } from "tour-de-growth";
  * reads the night world's tokens, so it lives inside `data-world="night"`
  * (here a `NightSurface`; on the hub, `ProsePage introWorld="night"`).
  * Copy: `GAME_HUB.mountain`.
+ *
+ * On a phone the plot drops from 120px to 96px and the moon shrinks: both
+ * come from a viewport `@media (max-width: 760px)`, which these desktop-width
+ * stills cannot draw, so no card pretends to show it.
  */
 
 const pad = { padding: "8px 24px 24px" } as const;
@@ -29,12 +33,5 @@ export const OneOpen = () => (
 export const TwoOpen = () => (
   <NightSurface as="div" style={{ ...pad, width: 760 }}>
     <HubMountain zones={zones([0, 2])} title="Mountain profile" legend="five climbs, five companies" />
-  </NightSurface>
-);
-
-/** A phone: the plot lower, the moon smaller. */
-export const Phone = () => (
-  <NightSurface as="div" style={{ ...pad, width: 390 }}>
-    <HubMountain zones={zones([2])} title="Profil de la montagne" legend="cinq cols, cinq entreprises" />
   </NightSurface>
 );

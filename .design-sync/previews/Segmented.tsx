@@ -7,21 +7,50 @@ import { Segmented } from "tour-de-growth";
  *
  * Two forms, kept apart by a discriminated union rather than a loose `as`:
  * the link form has no `onChange`, and the type refuses one. Two options, at
- * most three: past that it is a list, not a control.
+ * most three: past that it is a list, not a control. `label` is the group's
+ * accessible name and must name what the options choose between.
  */
 
-/** The button form — local state, no navigation. This is ToneToggle's shape. */
+/**
+ * The button form at its `md` size — local state, no navigation. As the
+ * growth engine's value editor sets it for a duration's unit (where the
+ * page prints the same label, "Unit", above the control).
+ */
 export const Buttons = () => {
-  const [tone, setTone] = React.useState<"neutral" | "roast">("neutral");
+  const [unit, setUnit] = React.useState<"hours" | "days">("days");
   return (
     <Segmented
       as="button"
+      label="Unit"
+      value={unit}
+      onChange={setUnit}
+      options={[
+        { id: "hours", label: "hours" },
+        { id: "days", label: "days" },
+      ]}
+    />
+  );
+};
+
+/**
+ * `sm` is the header scale: a 32px track, and each segment's touch
+ * target reaches 44px on the segment itself, into the 6px of room the group
+ * keeps above and below — never strip that room to tighten a header. This is
+ * ToneToggle as the landing's preview card sets it, with "Roast me" chosen:
+ * `accent` makes the roast tone the one option whose selected fill is red.
+ */
+export const Small = () => {
+  const [tone, setTone] = React.useState<"straight" | "roast">("roast");
+  return (
+    <Segmented
+      as="button"
+      size="sm"
       label="Tone"
       value={tone}
       onChange={setTone}
       accent={(id) => id === "roast"}
       options={[
-        { id: "neutral", label: "Straight up" },
+        { id: "straight", label: "Straight up" },
         { id: "roast", label: "Roast me 🔥" },
       ]}
     />
@@ -30,69 +59,36 @@ export const Buttons = () => {
 
 /**
  * The link form — real anchors, because switching language must reload the
- * document so `<html lang>` follows (REVIEW.md R-13). This is LocaleSwitcher's
- * shape.
+ * document so `<html lang>` follows (REVIEW.md R-13). This is LocaleSwitcher:
+ * always `sm`, each link carrying `lang` (so `hreflang` too) for the
+ * language it names.
  */
 export const Links = () => (
   <Segmented
     as="a"
+    size="sm"
     label="Language"
     value="en"
     options={[
-      { id: "en", label: "EN", href: "/en/glossary/cac" },
-      { id: "fr", label: "FR", href: "/fr/glossary/cac" },
+      { id: "en", label: "EN", lang: "en", href: "/en/glossary/cac" },
+      { id: "fr", label: "FR", lang: "fr", href: "/fr/glossary/cac" },
     ]}
   />
 );
 
-/**
- * `sm` is the header scale: a 32px track, and each segment's touch
- * target reaches 44px on the segment itself, into the 6px of room the group
- * keeps above and below — never strip that room to tighten a header.
- */
-export const Small = () => {
-  const [tone, setTone] = React.useState<"neutral" | "roast">("neutral");
-  return (
-    <div style={{ display: "flex", gap: 20, alignItems: "center", flexWrap: "wrap" }}>
-      <Segmented
-        as="button"
-        size="sm"
-        label="Tone"
-        value={tone}
-        onChange={setTone}
-        accent={(id) => id === "roast"}
-        options={[
-          { id: "neutral", label: "Straight up" },
-          { id: "roast", label: "Roast me 🔥" },
-        ]}
-      />
-      <Segmented
-        as="a"
-        size="sm"
-        label="Language"
-        value="fr"
-        options={[
-          { id: "en", label: "EN", href: "/en" },
-          { id: "fr", label: "FR", href: "/fr" },
-        ]}
-      />
-    </div>
-  );
-};
-
-/** Three is the ceiling, and it already reads as a lot. */
+/** Three is the ceiling, and it already reads as a lot: the growth engine's activation window. */
 export const Three = () => {
-  const [v, setV] = React.useState("all");
+  const [days, setDays] = React.useState<"7" | "14" | "30">("7");
   return (
     <Segmented
       as="button"
-      label="Score band"
-      value={v}
-      onChange={setV}
+      label="Activation window"
+      value={days}
+      onChange={setDays}
       options={[
-        { id: "all", label: "All" },
-        { id: "quick", label: "Quick" },
-        { id: "deep", label: "Deep dive" },
+        { id: "7", label: "7 days" },
+        { id: "14", label: "14 days" },
+        { id: "30", label: "30 days" },
       ]}
     />
   );

@@ -10,9 +10,14 @@ import { LocaleSwitcher, SiteHeader, WordmarkLink } from "tour-de-growth";
  * rule it always had.
  */
 
-/** On the result: the Tour's band. */
+/**
+ * On the result: the Tour's band, the row on the app shell's width. At this
+ * card's width the band is in its under-900px form (a container query on the
+ * band, not the window): the legs' names go to screen readers, pictograms,
+ * numbers and "bientôt" stay. Over ~950px of band they show — see SpaceBand.
+ */
 export const WithBand = () => (
-  <div style={{ width: 1040 }}>
+  <div style={{ maxWidth: 1040 }}>
     <SiteHeader locale="fr" space="tour">
       <WordmarkLink locale="fr" />
       <LocaleSwitcher locale="fr" />

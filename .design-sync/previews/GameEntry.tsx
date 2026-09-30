@@ -49,14 +49,15 @@ export const French = () => (
  * Under 520px of CARD width (a container query, not the viewport: the right
  * column is narrow on small desktops too) the band's two items stack instead
  * of wrapping — a wrap left the "·" dangling at the end of the first line —
- * and the mention drops under the button.
+ * and the mention drops under the button. Under 350px the game's sign leaves
+ * the band too, so the two figures keep their room.
  */
 export const Narrow = () => (
   <div style={{ maxWidth: 342 }}>
     <GameEntry
       href="/fr/game/retention?from=result"
       title="Le côté obscur de la rétention"
-      body="Tu sais maintenant quoi faire. Voici ce qu'il ne faut pas faire : joue une année comme PM growth d'une appli de streaming."
+      body="Tu sais maintenant quoi faire. Voici ce qu'il ne faut pas faire : joue une année comme PM growth d'une appli de streaming, un DG qui veut du chiffre, et huit astuces que tu reconnaîtras ensuite partout."
       cta="Jouer le niveau « S'ils reviennent »"
       meta="vingt minutes, gratuit"
       band={{ churn: "Résiliations 6,0 %", trust: "Confiance", notOnDashboard: "pas sur ton dashboard" }}

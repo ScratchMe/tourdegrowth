@@ -10,7 +10,11 @@ import { DgFace, NightSurface } from "tour-de-growth";
 const MOODS = ["calm", "firm", "angry", "cold"] as const;
 const caption = { font: "var(--meta-xs)", textTransform: "uppercase", letterSpacing: "var(--meta-tracking)" } as const;
 
-/** `avatar` — the head alone, 40px, for his line in the quarter report and the journal. Any number can sit on a page. */
+/**
+ * `avatar` — the head alone, 40px, for his line in the quarter report and the
+ * journal. It carries classes only and no ids, so any number can sit on a
+ * page: this is where the four moods are compared side by side.
+ */
 export const Avatars = () => (
   <NightSurface as="div" style={{ padding: 20, display: "flex", gap: 24 }}>
     {MOODS.map((mood) => (
@@ -22,21 +26,13 @@ export const Avatars = () => (
   </NightSurface>
 );
 
-/** `framing="call"` — the whole call, 16:9, with the office behind him. One per page (its paths carry test ids). */
+/**
+ * `framing="call"` (the default) — the whole call, 16:9, with the office behind him. ONE per page:
+ * its strokes and filters carry ids that are unique only once, which is why
+ * the moods are compared on the avatars and not on four calls.
+ */
 export const Call = () => (
   <NightSurface as="div" style={{ padding: 20, maxWidth: 480 }}>
     <DgFace mood="firm" />
-  </NightSurface>
-);
-
-/** The four calls side by side, only to compare the moods at the size they are read. */
-export const CallMoods = () => (
-  <NightSurface as="div" style={{ padding: 20, display: "grid", gridTemplateColumns: "repeat(2, 220px)", gap: 16 }}>
-    {MOODS.map((mood) => (
-      <div key={mood} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-        <DgFace mood={mood} />
-        <span style={caption}>{mood}</span>
-      </div>
-    ))}
   </NightSurface>
 );

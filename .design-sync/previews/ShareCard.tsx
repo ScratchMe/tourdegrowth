@@ -10,7 +10,11 @@ import shareSample from "./share-sample.png";
  * Its button is NEVER primary: the image sells the share, and the primary
  * button on that screen belongs to the CTA row above.
  *
- * The PNG below is the real 1200×630 render of /r/sample, inlined by esbuild.
+ * The PNG below is the real 1200×630 render of /r/sample (74/100, retention
+ * named), inlined by esbuild. Every string is `ResultView`'s own: the alt is
+ * `UI_STRINGS.result.shareCardAltTemplate` filled with that total and stage —
+ * it describes THIS result, never the caption again — and the file name is
+ * `tour-de-growth-{total}.png`.
  */
 
 /** As it ships on a wide screen, under the pillar chips (`md`). */
@@ -18,56 +22,66 @@ export const Medium = () => (
   <div style={{ maxWidth: 420 }}>
     <ShareCard
       src={shareSample}
-      alt="Tour de Growth — Where does your growth stall? A guided AARRR check-up, 15 questions, 3 minutes."
+      alt="Share image: 74/100, with Retention named as the stage holding this growth back."
       caption="What a shared link shows"
       shareLabel="Share this result"
       saveLabel="Save image"
       saveHref={shareSample}
-      saveFileName="tour-de-growth.png"
+      saveFileName="tour-de-growth-74.png"
     />
   </div>
 );
 
-/** `sm` tightens the frame from 14px to 12px. */
+/**
+ * `sm` tightens the frame from 14px to 12px. The result page does not
+ * pass it today; this is the prop's small form, for a tighter placement.
+ */
 export const Small = () => (
   <div style={{ maxWidth: 320 }}>
     <ShareCard
       size="sm"
       src={shareSample}
-      alt="Tour de Growth — Where does your growth stall? A guided AARRR check-up, 15 questions, 3 minutes."
+      alt="Share image: 74/100, with Retention named as the stage holding this growth back."
       caption="What a shared link shows"
       shareLabel="Share this result"
       saveLabel="Save image"
       saveHref={shareSample}
-      saveFileName="tour-de-growth.png"
+      saveFileName="tour-de-growth-74.png"
     />
   </div>
 );
 
-/** In French — the caption and both labels are already translated by the caller. */
+/**
+ * In French — the caption, both labels and the alt are translated by the
+ * caller. The picture is NOT: it is rendered once, in the author's language
+ * and tone, and never localised for the reader (a crawler fetching it has no
+ * reader). So this is what a French visitor sees on an English author's
+ * result: French around the image, English inside it.
+ */
 export const French = () => (
   <div style={{ maxWidth: 420 }}>
     <ShareCard
       src={shareSample}
-      alt="Tour de Growth — Où ta croissance cale-t-elle ? Un diagnostic AARRR guidé, 15 questions, 3 minutes."
+      alt="Image de partage : 74/100, avec Retention désignée comme l'étape qui freine cette croissance."
       caption="Ce que montre un lien partagé"
       shareLabel="Partager ce résultat"
       saveLabel="Enregistrer l'image"
       saveHref={shareSample}
-      saveFileName="tour-de-growth.png"
+      saveFileName="tour-de-growth-74.png"
     />
   </div>
 );
 
-/** Without a caption, for a placement that already has a heading above it. */
+/** `caption` is optional: without it, for a placement that already has a heading above it. The result page always passes one. */
 export const NoCaption = () => (
   <div style={{ maxWidth: 420 }}>
     <ShareCard
       src={shareSample}
-      alt="Tour de Growth — Where does your growth stall?"
+      alt="Share image: 74/100, with Retention named as the stage holding this growth back."
       shareLabel="Share this result"
       saveLabel="Save image"
       saveHref={shareSample}
+      saveFileName="tour-de-growth-74.png"
     />
   </div>
 );
