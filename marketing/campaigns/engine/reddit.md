@@ -1,4 +1,4 @@
-# Reddit — le moteur de croissance (lancement B)
+# Reddit — le moteur de growth (lancement B)
 
 *TODO: à relire. Compte `tourdegrowth`, **vieilli** : il a commenté sans lien
 dans chacun de ces subs pendant au moins une semaine (brief §5, S2). Un seul
@@ -38,7 +38,7 @@ titre.
 >
 > 1. **You can't hide sloppy math behind a backend.** Everything has to be computable, and explainable, on the page. So you enter counts (numerator and denominator), not percentages, and every title on every slide is recomputable from the numbers shown right under it.
 > 2. **No multiplied chain.** The main view follows 100 sign-ups — how many reach first value, stay to day 30, pay — all on the same base. Chaining rates measured on different populations gives you a precise number you can't defend in the room.
-> 3. **"Where's the leak?" needs a reference.** Without a server there's no pool of other companies to compare against, and honestly that pool would be comparing definitions anyway. So a stage is only called the leak against a target you set, or one of two published ranges printed with its caveat. Otherwise the tool says it can't tell, and the deck's "ask" slide becomes "fund measuring X first" — often the most honest ask a growth lead can bring.
+> 3. **"Where's the leak?" needs your target.** Without a server there's no pool of other companies to compare against, and honestly that pool would be comparing definitions anyway. Published ranges don't travel either: 1-2% monthly churn is a high-ticket B2B number, and a product sold at $20 a month runs far higher. So a stage is only called the leak against a target you set; published ranges are shown for context. Otherwise the tool says it can't tell, and the deck's "ask" slide becomes "fund measuring X first" — often the most honest ask a growth lead can bring.
 > 4. **Missing numbers are findings, not blanks.** Each one you can't find gets a repair cost, from a meeting to a quarter, and they're ranked on their own slide.
 >
 > Export is the browser's print for PDF and a small library loaded on click for PNG, so there's still no server involved.
@@ -94,7 +94,7 @@ cliquer) :
 
 **Corps** :
 
-> **What it is**: you enter seventeen numbers from your own tools, stage by stage. It shows how 100 sign-ups move through your product, where you lose the most people (only against a target you set or a published range it can cite), and what each missing number would cost to measure. Then it exports 4 to 7 slides: PDF, PNG per slide, or text with speaker notes.
+> **What it is**: you enter seventeen numbers from your own tools, stage by stage. It shows how 100 sign-ups move through your product, where you lose the most people (only against a target you set; published ranges are shown for context), and what each missing number would cost to measure. Then it exports 4 to 7 slides: PDF, PNG per slide, or text with speaker notes.
 >
 > **Why local-only**: these are your employer's numbers. No account, no server, no AI; there's a test in the repo that fails if any request carries something you typed.
 >

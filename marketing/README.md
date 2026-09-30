@@ -32,7 +32,7 @@ dans l'app ; rien ici n'est importé par `src/`.*
 | `launch/reddit.md` | Un post par subreddit, dans son ton et sous ses règles (vérifiées, sources dans le fichier) |
 | `launch/indiehackers.md` | La page produit et le post « build log » |
 | `launch/social.md` | Le fil de lancement X / Bluesky et la cadence de cartes |
-| `campaigns/README.md` | *(2026-09-24, à relire)* Le brief de campagne des trois lancements suivants — A : le Tour relancé ; B : le moteur de croissance ; C : le jeu « Le côté obscur » — objectifs mesurables, publics, messages et preuves, canaux, calendrier semaine par semaine, risques, partage main / session, décisions à prendre |
+| `campaigns/README.md` | *(2026-09-24, à relire)* Le brief de campagne des trois lancements suivants — A : le Tour relancé ; B : le moteur de growth ; C : le jeu « Le côté obscur » — objectifs mesurables, publics, messages et preuves, canaux, calendrier semaine par semaine, risques, partage main / session, décisions à prendre |
 | `campaigns/competitive-brief.md` | *(2026-09-24, à relire)* Le paysage : outils de score growth, gabarits AARRR, éducation aux dark patterns, et les trous de positionnement |
 | `campaigns/engine/`, `campaigns/game/` | *(2026-09-24, à relire)* Les textes prêts à coller de B et C : Show HN (titres, premier commentaire, FAQ), Reddit, Indie Hackers, X / Bluesky, pitch newsletter, descriptions d'annuaire 140/300/800 — chacun avec la liste des portiers à cocher avant de poster |
 | `campaigns/brand-review.md` | *(2026-09-24)* La relecture de marque de ces textes par la session : constats, corrections faites, points juridiques, longueurs vérifiées par script |

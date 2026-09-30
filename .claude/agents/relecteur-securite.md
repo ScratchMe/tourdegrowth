@@ -51,7 +51,7 @@ dépôt. Commence par elles, dans cet ordre.
 
 ## 4. Ce qui ne doit jamais quitter le navigateur
 
-L'instrument d'audit (`/admin/audit`) et le moteur de croissance ne touchent
+L'instrument d'audit (`/admin/audit`) et le moteur de growth ne touchent
 jamais Firestore. Les gardes sont `src/__tests__/audit-boundary.test.ts` et
 `src/__tests__/engine-boundary.test.ts`, les canaris `e2e/audit-canary.spec.ts`
 et `e2e/engine-canary.spec.ts`. Un `fetch`, un `<img>` à l'URL construite ou un

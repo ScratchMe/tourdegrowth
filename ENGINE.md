@@ -1,4 +1,4 @@
-# ENGINE.md — le moteur de croissance
+# ENGINE.md — le moteur de growth
 
 *Versionné le 2026-09-25. Jusque-là, cette spécification ne vivait que dans le
 répertoire de travail d'une session, qui disparaît avec son conteneur ; c'est la
@@ -216,7 +216,7 @@ rapport au bloc précédent et aux §5, §6.7, §8.2 et §9 :
 
 ---
 
-# Le moteur de croissance — spécification d'implémentation (v1)
+# Le moteur de growth — spécification d'implémentation (v1)
 
 *Phase 1, lecture seule. Synthèse des trois conceptions (`engine-codir.md`,
 `engine-collect.md`, `engine-funnel.md`), jugées puis greffées. Ce document est
@@ -241,7 +241,7 @@ Chromium (`spec-probe/glyphs.cjs`) ; les repères du glossaire relus dans
 ## 0. En une page
 
 **Ce que c'est.** Une page publique, gratuite, bilingue,
-`/{locale}/aarrr-funnel-template`, nommée « Moteur de croissance » / « Growth
+`/{locale}/aarrr-funnel-template`, nommée « Moteur de growth » / « Growth
 engine ». Un Growth PM ou un Head of Growth y va **chercher quinze chiffres**
 (trois par étape AARRR, comme le Tour a trois questions par étape), les saisit
 **en comptes** (numérateur ÷ dénominateur), voit son moteur sous forme d'un
@@ -337,6 +337,8 @@ client comme `/quiz`).
 dans les deux langues (R2-16). *Rejeté* : `/growth-engine` (ne porte aucune
 requête), `/aarrr-metrics` (intention informationnelle déjà saturée de guides).
 **À confirmer par Antoine (Q1)** — une URL publiée ne meurt jamais ici.
+*Tranché le 2026-09-29 (C2), codé le 2026-09-30 (A7.2)* : le nom affiché devient
+« Moteur de growth », l'adresse reste (décision 1 en tête de fichier).
 
 **D3 — Derrière un drapeau `ENGINE_ENABLED`, fermé par défaut, avec cookie de
 prévisualisation `?engine=preview`.** Copie conforme de `lib/game/access.ts` +
@@ -1152,7 +1154,7 @@ l'état vide, identique au premier rendu client.
 ### E0 — La page (prérendue, visible sans JavaScript, indexée)
 
 - `ContentHeader` (wordmark + `LocaleSwitcher`), `SiteFooter` en bas.
-- Eyebrow « Le moteur », H1 « Ton moteur de croissance », ligne de
+- Eyebrow « Le moteur », H1 « Ton moteur de growth », ligne de
   positionnement « Ton Tour dit si tu mesures. Le moteur montre ce que disent tes
   chiffres. » (copie de `copy-review.md` §4.3, à relire).
 - **La promesse de confidentialité**, dans une `Card` bord plein, avant le CTA,
@@ -1193,7 +1195,7 @@ l'état vide, identique au premier rendu client.
 Maquette : `spec-probe/board-1280.png`, `spec-probe/board-390.png`.
 
 De haut en bas :
-1. Eyebrow « Ton moteur de croissance · libre-service · cohorte de juillet 2026 ·
+1. Eyebrow « Ton moteur de growth · libre-service · cohorte de juillet 2026 ·
    flux d'août 2026 ».
 2. **Titre-verdict** en stencil (`--display-hero-mobile` sur les deux largeurs —
    le hero plein est réservé à la landing) : la phrase du peloton (§9.3, slide 1),
@@ -1460,7 +1462,7 @@ de flèche, de coche ou de puce ronde (§10.4).
 - 1920 × 1080 px CSS (16:9) ; marges 120 × 96 ; fond `--paper-1` avec le
   dégradé `--ground-lift` (comme `peloton.png`) ; tokens CSS de l'app (on est dans
   le DOM, pas dans Satori : aucune copie hex).
-- **Kicker** mono 20 px, tracking 0,12em : « Moteur de croissance · {entreprise ·}
+- **Kicker** mono 20 px, tracking 0,12em : « Moteur de growth · {entreprise ·}
   {mois} · données internes » ; numéro « {i}/{N} » à droite.
 - **Pastille de données**, bord pointillé `--ink-1`, sur chaque slide : « Données :
   {m} mesurées · {a} approximatives · {x} introuvables ».
@@ -1808,7 +1810,7 @@ route) ⇒ 404, pages toujours prérendues. Seul `access.ts` lit
 
 `content/legal.ts` énumère les clés `localStorage` (« Ton navigateur garde… »,
 ligne ~231) : la phrase **devient fausse** sans ajout. Ajouter (TODO: à relire) :
-FR « … et, si tu utilises le moteur de croissance, les chiffres et les textes que
+FR « … et, si tu utilises le moteur de growth, les chiffres et les textes que
 tu y saisis. Rien de tout cela n'est envoyé : les seules sorties sont des fichiers
 que tu télécharges ou ce que tu copies toi-même. » / EN "… and, if you use the
 growth engine, the numbers and text you enter there. None of it is sent: the only
@@ -2058,9 +2060,9 @@ src/`**, jamais depuis cette liste. Français avec U+00A0 avant `%`, `€`, `:`,
 |---|---|---|
 | `meta.title` | Modèle de funnel AARRR — tes chiffres, en local | AARRR funnel template — your numbers, kept local |
 | `meta.description` | Entre les chiffres de tes cinq étapes AARRR, vois où tu perds le plus de monde et exporte des slides pour ton CODIR. Rien n'est envoyé. | Enter the numbers for your five AARRR stages, see where you lose the most people and export slides for your leadership meeting. Nothing is sent. |
-| `meta.breadcrumb` | Moteur de croissance | Growth engine |
+| `meta.breadcrumb` | Moteur de growth | Growth engine |
 | `page.eyebrow` | Le moteur | The engine |
-| `page.title` | Ton moteur de croissance | Your growth engine |
+| `page.title` | Ton moteur de growth | Your growth engine |
 | `page.positioning` | Ton Tour dit si tu mesures. Le moteur montre ce que disent tes chiffres. | Your Tour tells you whether you measure. The engine shows what your numbers say. |
 | `page.promise` | Quinze chiffres, trois par étape : trouve-les, vois où ton moteur perd du monde, et repars avec des slides prêtes pour ton CODIR. | Fifteen numbers, three per stage: find them, see where your engine loses people, and leave with slides ready for your leadership meeting. |
 | `page.privacyTitle` | Rien de ce que tu saisis ne sort d'ici | Nothing you enter leaves this page |
@@ -2101,7 +2103,7 @@ src/`**, jamais depuis cette liste. Français avec U+00A0 avant `%`, `€`, `:`,
 
 | Clé | FR | EN |
 |---|---|---|
-| `board.eyebrow` | Ton moteur de croissance · {model} · cohorte de {cohort} · flux de {month} | Your growth engine · {model} · {cohort} cohort · {month} flows |
+| `board.eyebrow` | Ton moteur de growth · {model} · cohorte de {cohort} · flux de {month} | Your growth engine · {model} · {cohort} cohort · {month} flows |
 | `board.tabEngine` | Le moteur | The engine |
 | `board.tabCollect` | À aller chercher ({n}) | To go and get ({n}) |
 | `coverage.found` | {n} chiffres sur {N} trouvés | {n} of {N} numbers found |
@@ -2325,7 +2327,7 @@ src/`**, jamais depuis cette liste. Français avec U+00A0 avant `%`, `€`, `:`,
 | `ask.successMetric` | Comment nous saurons | How we'll know |
 | `ask.bullets` | Ce que ça finance (3 puces au plus) | What it funds (3 bullets at most) |
 | `ask.measureFirst` | Ce qu'il faut d'abord mesurer | What to measure first |
-| `slide.kicker` | Moteur de croissance · {company}{month} · données internes | Growth engine · {company}{month} · internal data |
+| `slide.kicker` | Moteur de growth · {company}{month} · données internes | Growth engine · {company}{month} · internal data |
 | `slide.dataPill` | Données : {m} mesurées · {a} approximatives · {x} introuvables | Data: {m} measured · {a} approximate · {x} missing |
 | `slide.footer` | Cohorte d'inscrits de {cohort} · flux de {month} · sources : {tools} | {cohort} sign-up cohort · {month} flows · sources: {tools} |
 | `slide.leakFooter` | Toutes choses égales par ailleurs · {assumption} | All else being equal · {assumption} |

@@ -1,4 +1,4 @@
-# Indie Hackers — build log du moteur de croissance (lancement B)
+# Indie Hackers — build log du moteur de growth (lancement B)
 
 *TODO: à relire. Compte `tourdegrowth`. IH lit des récits de construction, pas
 des pitchs. Vendredi de la semaine B, après le Show HN : on peut y raconter ce
@@ -21,7 +21,7 @@ même site.
 >
 > **1. The first prototype drew a funnel with bars proportional to counts.** 12,400 visitors down to 49 customers doesn't fit on any linear scale, so the bars were decoration pretending to be data. It went. The main visual now follows **100 sign-ups** — how many reach first value, how many are still there at day 30, how many pay — all on the same base, drawn as dots. No chained percentages, because rates measured on different populations don't multiply into anything honest.
 >
-> **2. "Where's the leak?" turned out to be the hard question.** An early mock called 24% activation a leak — while 24% sits *inside* the commonly cited 20-40% range it was comparing against. Rule now: a value inside its reference is never a leak against that reference, and a stage is only named against a target you set or one of two published ranges, printed with its caveat. Otherwise the tool says so.
+> **2. "Where's the leak?" turned out to be the hard question.** An early mock called 24% activation a leak — while 24% sits *inside* the commonly cited 20-40% range it was comparing against. Then we let two published ranges name a leak, until we saw that the 1-2% monthly churn range belongs to high-ticket B2B SaaS: it flagged our own example, a product at €120 a month per customer, for nothing. Rule now: a stage is only named against a target you set; published ranges are context. Otherwise the tool says so.
 >
 > **3. The best slide is often "we can't see this yet".** If day-30 retention isn't measured, the honest deck says "in between, we see nothing" and asks for the budget to measure it before deciding where to invest. Missing numbers get a repair cost and a slide of their own.
 >

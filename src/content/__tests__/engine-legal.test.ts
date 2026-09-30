@@ -10,7 +10,7 @@ import { LOCALES } from "@/lib/i18n/locale";
  * on the whole page, so a mention in the wrong place (say, the Gemini
  * section) cannot satisfy it.
  */
-const ENGINE = { fr: /moteur de croissance/, en: /growth engine/ } as const;
+const ENGINE = { fr: /moteur de growth/, en: /growth engine/ } as const;
 
 function paragraphs(heading: RegExp, locale: "en" | "fr"): string[] {
   const section = PRIVACY.sections.find((s) => heading.test(tc(s.heading, locale)));

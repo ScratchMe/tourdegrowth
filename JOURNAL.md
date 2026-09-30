@@ -5679,3 +5679,21 @@ La décision 5 renversée par Antoine le 2026-09-29 (C1), codée. **Seule une ci
 Il signale aussi, pour le bon à tirer, un écart qui existait déjà et devient visible : la page rétention donne 97-99 % de rétention mensuelle (1 à 3 % de churn), la page churn 1-2 %, pour la même population désormais nommée à l'identique. Les chiffres validés ne sont pas touchés ici.
 
 **Hors code** : `ENGINE.md` suit (D8 et décision 5 marquées, §5.1, §5.3, §6.0, §6.6, §9.3, §13.1, §14). Le bon à tirer nº8 cite l'exemple et ces phrases : sa page est à remettre d'accord avec le code par l'agent des bons à tirer, comme A7.2 et A7.3 le demanderont aussi.
+
+**En production** : PR [#203](https://github.com/ScratchMe/tourdegrowth/pull/203), mergée le 2026-09-30 à 9 h 42 UTC (squash `c8ec215`, 36 fichiers, identique à la tête de la PR), servie à 9 h 43 UTC. Relevé par HTTP, entités décodées : `/fr/glossary/churn` porte « panier élevé » et « ChartMogul », et plus « petites entreprises » ; `/en/glossary/retention` porte « high-ticket ». Le moteur reste en 404 derrière son drapeau.
+
+## A7.2 : « Moteur de growth » (2026-09-30)
+
+Le nom tranché par Antoine le 2026-09-29 (C2), codé. En français, le moteur s'appelle « Moteur de growth » (« Ton moteur de growth », minuscule dans le texte courant). En anglais, il reste "Growth engine". **L'adresse `/aarrr-funnel-template` ne change pas.**
+
+**Ce qui change** :
+- **La copie**, « à relire » : le fil d'Ariane (donc aussi le nom du `WebApplication` et du fil en JSON-LD, qui le lisent), le titre de la page, l'en-tête du tableau et le kicker des slides.
+- **La confidentialité** : ses deux paragraphes sur le moteur, et sa date, qui passe au 2026-09-30.
+- **L'aperçu propriétaire**, et les commentaires qui nommaient l'outil.
+- **Hors `src/`** : `ENGINE.md`, `CLAUDE.md`, les textes de lancement (`marketing/kit.md`, `README.md`, `campaigns/README.md`, `competitive-brief.md`, `campaigns/engine/*.md`) et le relecteur de sécurité.
+
+**Ce qui ne change pas**, par décision : les deux demandes à copier (« un point sur notre moteur de croissance ») parlent du moteur **de l'entreprise**, pas de l'outil. La comparaison OKR (« pas un moteur de croissance ») est l'usage générique. Le titre `meta.title` (« Modèle de funnel AARRR… ») porte la requête. Le nom court « Le moteur » du bandeau et de la bande de l'accueil reste aussi.
+
+**Et ce qu'A7.1 rendait faux dans les textes de lancement** : cinq textes du lancement B disaient encore qu'une fuite peut être nommée « contre une fourchette publiée » (Show HN, Reddit, Indie Hackers, newsletters, fil X/Bluesky, annuaires, brief concurrentiel). Ils disent maintenant « contre une cible que tu fixes ; les fourchettes publiées servent à situer ». Le récit d'Indie Hackers gagne l'histoire du churn 1-2 % qui signalait l'exemple à tort. Les longueurs déclarées des annuaires sont recalculées par `check-lengths.mjs --fix`.
+
+**Vérifié** : `grep -rn "oteur de croissance"` ne trouve plus dans `src/`, `e2e/` et `marketing/` que les trois usages génériques gardés.

@@ -21,7 +21,7 @@ déjà. La ligne de départ de chaque lancement se relève par le workflow
 
 ## 0. Ce qu'on lance, et pourquoi trois fois plutôt qu'une
 
-| | A · Le Tour, relancé | B · Le moteur de croissance | C · Le côté obscur |
+| | A · Le Tour, relancé | B · Le moteur de growth | C · Le côté obscur |
 |---|---|---|---|
 | Ce que c'est | Le diagnostic AARRR de 3 minutes, avec la copie revue (revue de copie v1) et les correctifs SEO | Un modèle de funnel AARRR **local** : tes dix-sept chiffres, où tu perds du monde, des slides pour ton CODIR | Un jeu de vingt minutes : une année comme PM growth d'une appli de streaming, un DG qui veut du chiffre, huit dark patterns |
 | URL | `/{en,fr}` → `/quiz` | `/{en,fr}/aarrr-funnel-template` | `/{en,fr}/game`, `/{en,fr}/game/retention` |
@@ -124,7 +124,7 @@ trois minutes, trouve l'étape qui te freine — et une action à mener. »*
 | Le roast vise la stratégie, jamais la personne | Résultat rapide : une bibliothèque de phrases pré-écrites et relues, aucun modèle ; Deep dive : règle codée en dur dans le prompt | `src/content/copy-library.ts`, `src/lib/gemini/prompt.ts` |
 | Aucun compte, aucun e-mail | Aucun champ d'identité dans le parcours ; analytics GoatCounter sans cookie | `src/app/root-shell.tsx`, pages légales |
 
-### B · Le moteur de croissance
+### B · Le moteur de growth
 
 **Message central** : *« Ton Tour dit si tu mesures. Le moteur montre ce que
 disent tes chiffres — et aucun ne quitte ton navigateur. »* (Ligne de

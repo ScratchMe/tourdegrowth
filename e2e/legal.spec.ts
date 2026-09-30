@@ -91,7 +91,7 @@ test("the free-text field of the Deep dive says where the text goes and links to
  * renderer would pass a unit test and fail the reader.
  */
 for (const [locale, engine, kept, ways] of [
-  ["fr", /moteur de croissance/i, /les chiffres et les textes que tu y saisis/i, /fichiers que tu télécharges et ce que tu copies/i],
+  ["fr", /moteur de growth/i, /les chiffres et les textes que tu y saisis/i, /fichiers que tu télécharges et ce que tu copies/i],
   ["en", /growth engine/i, /the numbers and text you enter there/i, /files you download and what you copy/i],
 ] as const) {
   test(`/${locale}/privacy says what the growth engine keeps on the device, and that none of it is sent`, async ({ page }) => {

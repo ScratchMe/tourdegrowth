@@ -67,7 +67,7 @@ const BUDGETS: { module: string; max: number; why: string }[] = [
     max: 5,
     why: "Les cinq pages du cluster (HEART ajoutée par l'audit SEO v1 §3.1), et elles seules. Qui ne fait que LISTER le cluster (/how-it-works, le terme AARRR, le sitemap) lit content/comparison-index.ts — ~40 Ko de prose en moins sur chacune, 48 routes pour le seul glossaire.",
   },
-  // Le moteur de croissance (spec du moteur §10.3) : sa prose ne sert qu'à sa
+  // Le moteur de growth (spec du moteur §10.3) : sa prose ne sert qu'à sa
   // propre page, qui la résout au build et la passe à l'îlot en props.
   // Atteinte par une deuxième route, elle partirait dans une fonction de plus
   // — et comptée par route (VERCEL.md §2.2).
