@@ -33,18 +33,18 @@ export const Buttons = () => {
 };
 
 /**
- * `compact` is the header scale: a 32px track, and each segment's touch
+ * `sm` is the header scale: a 32px track, and each segment's touch
  * target reaches 44px on the segment itself, into the 6px of room the group
  * keeps above and below — never strip that room to tighten a header. This is
  * ToneToggle as the landing's preview card sets it, with "Roast me" chosen:
  * `accent` makes the roast tone the one option whose selected fill is red.
  */
-export const Compact = () => {
+export const Small = () => {
   const [tone, setTone] = React.useState<"straight" | "roast">("roast");
   return (
     <Segmented
       as="button"
-      size="compact"
+      size="sm"
       label="Tone"
       value={tone}
       onChange={setTone}
@@ -60,13 +60,13 @@ export const Compact = () => {
 /**
  * The link form — real anchors, because switching language must reload the
  * document so `<html lang>` follows (REVIEW.md R-13). This is LocaleSwitcher:
- * always `compact`, each link carrying `lang` (so `hreflang` too) for the
+ * always `sm`, each link carrying `lang` (so `hreflang` too) for the
  * language it names.
  */
 export const Links = () => (
   <Segmented
     as="a"
-    size="compact"
+    size="sm"
     label="Language"
     value="en"
     options={[

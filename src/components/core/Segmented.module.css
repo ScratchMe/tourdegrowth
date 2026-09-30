@@ -5,16 +5,16 @@
 }
 
 /*
- * `compact` is header scale: 32px visual height (a 28px option inside the
+ * `sm` is header scale: 32px visual height (a 28px option inside the
  * track's 2px border). The bundle said the 6px outer pad "is what makes the
  * 44px hit" — measured, it did not: the pad belongs to this div, and
  * elementFromPoint in it returned the div, never the option. The hit is now
- * extended on the option itself (`.compact .option::before` below); this pad
+ * extended on the option itself (`.sm .option::before` below); this pad
  * only reserves the room that extension reaches into, so it lands on nothing
  * else. Pad + track border = --hit-extend-compact, which is why it is written
  * as that difference. Do not strip it to "tighten" a header.
  */
-.compact.group {
+.sm.group {
   padding: calc(var(--hit-extend-compact) - var(--border-width)) 0;
 }
 
@@ -30,20 +30,20 @@
 
 /*
  * `overflow: hidden` clipped the selected fill into the rounded border — and
- * would clip the hit extension too, so the compact track lets it out and
+ * would clip the hit extension too, so the `sm` track lets it out and
  * rounds its two end options instead: outer radius minus the border, which
  * is exactly the curve the clip used to draw.
  */
-.compact .track {
+.sm .track {
   border-radius: var(--radius-tag);
   overflow: visible;
 }
 
-.compact .option:first-child {
+.sm .option:first-child {
   border-radius: calc(var(--radius-tag) - var(--border-width)) 0 0 calc(var(--radius-tag) - var(--border-width));
 }
 
-.compact .option:last-child {
+.sm .option:last-child {
   border-radius: 0 calc(var(--radius-tag) - var(--border-width)) calc(var(--radius-tag) - var(--border-width)) 0;
 }
 
@@ -70,7 +70,7 @@
   min-height: var(--hit-min);
 }
 
-.compact .option {
+.sm .option {
   font: var(--meta-2xs);
   letter-spacing: var(--meta-tracking);
   text-transform: uppercase;
@@ -85,14 +85,14 @@
    border to its left — the track's own edge for the first option, the divider
    for the others — and the last one takes the track's right edge, so a tap
    anywhere in the group's box lands on an option, never on a dead column. */
-.compact .option::before {
+.sm .option::before {
   content: "";
   position: absolute;
   inset: calc(-1 * var(--hit-extend-compact)) 0 calc(-1 * var(--hit-extend-compact))
     calc(-1 * var(--border-width));
 }
 
-.compact .option:last-child::before {
+.sm .option:last-child::before {
   right: calc(-1 * var(--border-width));
 }
 
@@ -122,4 +122,80 @@
  */
 .onAccent {
   background: var(--action-primary-bg);
+}
+
+/*
+ * The selected fill slides to the option chosen, in CSS alone (audit du kit
+ * §6, CHANTIERS.md A4, 2026-09-29): one fill for the track, drawn behind the
+ * options and positioned on whichever is `.on` (anchor positioning, with
+ * `anchor-scope` so two controls on one page each keep their own). The
+ * dividers are the options' borders, so they still draw over it. Where
+ * anchor positioning or its scope is missing, each option fills itself as
+ * before, and under reduced motion the fill moves without sliding.
+ *
+ * `md` clips the fill to its rounded track; `sm` cannot clip (its hit
+ * extension reaches past the track), so its fill rounds its outer end only,
+ * the curve the end option draws, and square where it meets a divider.
+ *
+ * The label on the fill is measured by e2e/platform-native.spec.ts, on the
+ * fill's real colour: axe cannot see a background drawn by a pseudo-element.
+ */
+@supports (anchor-name: --a) and (anchor-scope: all) {
+  .track {
+    position: relative;
+    anchor-scope: --segmented-on;
+  }
+
+  /* Positioned, the options paint after the track's ::before, which comes
+     first in the tree: over the fill with no z-index (z-index.test.ts). */
+  .option {
+    position: relative;
+  }
+
+  .on {
+    anchor-name: --segmented-on;
+  }
+
+  .on,
+  .onAccent {
+    background: transparent;
+  }
+
+  .track::before {
+    content: "";
+    position: absolute;
+    position-anchor: --segmented-on;
+    top: anchor(top);
+    right: anchor(right);
+    bottom: anchor(bottom);
+    left: anchor(left);
+    background: var(--state-selected-bg);
+    pointer-events: none;
+  }
+
+  .track:has(.onAccent)::before {
+    background: var(--action-primary-bg);
+  }
+
+  .sm .track:has(> .on:first-child)::before {
+    border-radius: calc(var(--radius-tag) - var(--border-width)) 0 0 calc(var(--radius-tag) - var(--border-width));
+  }
+
+  .sm .track:has(> .on:last-child)::before {
+    border-radius: 0 calc(var(--radius-tag) - var(--border-width)) calc(var(--radius-tag) - var(--border-width)) 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .track::before {
+      transition:
+        left var(--dur-state) var(--ease-out),
+        right var(--dur-state) var(--ease-out),
+        border-radius var(--dur-state) var(--ease-out),
+        background-color var(--dur-state) var(--ease-out);
+    }
+
+    .option {
+      transition: color var(--dur-state) var(--ease-out);
+    }
+  }
 }

@@ -76,7 +76,7 @@ export const TheVerdict = () => (
       items={[
         { kind: "mail", label: "Mid-quarter", mail: { header: "From: CEO · Subject: this week's numbers", body: "Message from the CEO, mid-quarter: \"It's moving. Keep going.\"" } },
         { kind: "result", label: "The verdict", metric: "Churn", value: "5.7%", note: "target 5.6%", status: { text: "missed by 0.1 pts", tone: "bad" }, figures: [{ key: "subs", label: "Subscribers", value: "98,756" }, { key: "mrr", label: "Revenue", value: "€1.28M" }, { key: "patience", label: "CEO's patience", value: "53" }] },
-        { kind: "boss", label: "The CEO's word", line: "The CEO: \"That's not what we agreed.\"", mood: "angry", face: <DgFace mood="angry" size="avatar" /> },
+        { kind: "boss", label: "The CEO's word", line: "The CEO: \"That's not what we agreed.\"", mood: "angry", face: <DgFace mood="angry" framing="avatar" /> },
       ]}
       progress={["1 of 3", "2 of 3", "3 of 3"]}
       labels={{ next: "Next →", finish: "See the quarter's report →", skip: "Skip to the report" }}
@@ -104,7 +104,7 @@ export const AnInspection = () => (
         { kind: "result", label: "The verdict", metric: "Churn", value: "5.0%", note: "target 4.6%", status: { text: "missed by 0.4 pts", tone: "bad" }, figures: [{ key: "subs", label: "Subscribers", value: "93,304" }, { key: "mrr", label: "Revenue", value: "€1.27M" }, { key: "patience", label: "CEO's patience", value: "57" }] },
         { kind: "clipping", label: "Meanwhile, outside", clipping: { kind: "control", masthead: "The Business Courier", headline: "Flixo caught out by the French consumer watchdog", text: "An inspection by the DGCCRF, France's consumer protection authority, an article in the press, a fine of €106,000. The CEO asks you to take everything down by Friday. 1,400 subscribers leave on the spot, and tell everyone why.", why: { heading: "Why this inspection", lines: ["Every trick you put into production pushed up the regulator radar, the hidden tile on your dashboard. This quarter it crossed the inspection threshold.", "In production when the inspectors came: \"Pause up front\", \"Declutter the subscription page\", \"Assisted cancellation\", \"Retention offers\", \"Social proof at exit\" and \"Contractual notice\". All of it is taken down on the spot, and its effect stops."] }, stamp: { text: "Fined · €106,000", tone: "bad" } } },
         { kind: "clipping", label: "Meanwhile, outside", clipping: { kind: "viral", handle: "@endless_evening", text: "A viral thread: \"I tried to cancel Flixo, here are my three hours.\" Cancellations speed up.", stamp: { text: "Viral", tone: "bad" } } },
-        { kind: "boss", label: "The CEO's word", line: "The CEO: \"That's not what we agreed.\" \"Thanks for doing what I asked.\"", mood: "angry", face: <DgFace mood="angry" size="avatar" /> },
+        { kind: "boss", label: "The CEO's word", line: "The CEO: \"That's not what we agreed.\" \"Thanks for doing what I asked.\"", mood: "angry", face: <DgFace mood="angry" framing="avatar" /> },
       ]}
       progress={["1 of 5", "2 of 5", "3 of 5", "4 of 5", "5 of 5"]}
       labels={{ next: "Next →", finish: "See the quarter's report →", skip: "Skip to the report" }}
@@ -125,7 +125,7 @@ export const French = () => (
         { kind: "result", label: "Le verdict", metric: "Résiliations", value: "4,0 %", note: "objectif 4,0 %", status: { text: "objectif atteint", tone: "good" }, figures: [{ key: "subs", label: "Abonnés", value: "105 632" }, { key: "mrr", label: "Revenu", value: "1,33 M€" }, { key: "patience", label: "Patience du DG", value: "73" }] },
         { kind: "note", label: "Dans ton équipe", text: "Ta présentation au DG a tenu : des données, une courbe, une demande de temps. Il t'en donne." },
         { kind: "clipping", label: "Pendant ce temps, dehors", clipping: { kind: "press", masthead: "L'Écho des écrans", headline: "Flixo, l'appli qui laisse partir", text: "Un article : « Flixo, l'appli qui laisse partir ses abonnés, et qui les voit revenir. » Les inscriptions montent.", stamp: { text: "À la une", tone: "good" } } },
-        { kind: "boss", label: "Le mot du DG", line: "Le DG : « Bien joué. » « Tu n'as pas fait ce que j'ai demandé. Je l'ai noté. »", mood: "firm", face: <DgFace mood="firm" size="avatar" /> },
+        { kind: "boss", label: "Le mot du DG", line: "Le DG : « Bien joué. » « Tu n'as pas fait ce que j'ai demandé. Je l'ai noté. »", mood: "firm", face: <DgFace mood="firm" framing="avatar" /> },
       ]}
       progress={["1 sur 5", "2 sur 5", "3 sur 5", "4 sur 5", "5 sur 5"]}
       labels={{ next: "Suivant →", finish: "Voir le bilan du trimestre →", skip: "Passer au bilan" }}

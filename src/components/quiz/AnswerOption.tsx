@@ -3,8 +3,8 @@ import styles from "./AnswerOption.module.css";
 
 export interface AnswerOptionProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   selected?: boolean;
-  /** desktop = 17px · mobile = 16px. Padding and hit height are identical. */
-  size?: "desktop" | "mobile";
+  /** md = 17px · sm = 16px. Padding and hit height are identical. */
+  size?: "md" | "sm";
   children?: ReactNode;
 }
 
@@ -17,7 +17,7 @@ export interface AnswerOptionProps extends ButtonHTMLAttributes<HTMLButtonElemen
  * (`--hit-answer`) on both viewports. Never label an option with its score, a letter, or a number —
  * scoring stays invisible to the user.
  */
-export function AnswerOption({ selected = false, size = "desktop", className, children, ...rest }: AnswerOptionProps) {
+export function AnswerOption({ selected = false, size = "md", className, children, ...rest }: AnswerOptionProps) {
   const classes = [styles.option, styles[size], selected ? styles.selected : "", className ?? ""]
     .filter(Boolean)
     .join(" ");

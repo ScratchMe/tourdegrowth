@@ -62,7 +62,7 @@
  * The system's one text button (design audit S-11, 2026-09-29). There were
  * three: this one at 31px with no hover, the engine's `linkButton` at 32px and
  * the what-if reset at 44px. The engine's two now render `Button variant="quiet"`
- * (`compact` where eight of them sit beside the sliders).
+ * (`size="sm"` where eight of them sit beside the sliders).
  *
  * It is drawn 31px tall on purpose — an underlined line of text, not a box —
  * and TAPPED 44px tall: the `::before` below is a transparent strip centred on
@@ -92,9 +92,9 @@
   translate: 0 -50%;
 }
 
-/* Two classes, so it beats `.compact` whatever the order: the compact size
+/* Two classes, so it beats `.sm` whatever the order: the small size
    takes the smaller label and keeps quiet's flat line with no side padding. */
-.quiet.compact {
+.quiet.sm {
   padding: 8px 0;
 }
 
@@ -201,12 +201,12 @@
 
 /*
  * Not part of the DS bundle's Button (which only defines md/lg) — kept from
- * the app's original "compact" size for the one place that still needs it:
+ * the app's original "compact" size, `sm` since S-16, first made for this:
  * the landing/quiz header's inline CTA, which sits next to the wordmark in
  * a 24px-padding header and was always visually smaller than a normal
  * inline button. A real, already-shipped need, not a new design decision.
  */
-.compact {
+.sm {
   font: var(--label-button-sm);
   padding: 11px 20px;
   min-height: auto;

@@ -96,3 +96,38 @@
 .content {
   padding-bottom: var(--space-8);
 }
+
+/*
+ * The row opens and closes by sliding, with no script (audit du kit §6,
+ * CHANTIERS.md A4, 2026-09-29). `::details-content` is the content's own box
+ * (Baseline 2025) and `interpolate-size` lets its height reach `auto`
+ * (Chromium only): where either is missing the row opens at once, as it
+ * always did. `content-visibility` flips last on the way out, so the content
+ * stays drawn while it closes; the UA's own rule is what hides it after. On
+ * the way in it does not transition at all: a discrete transition still
+ * reads `hidden` on its first frame, and a control focused the moment its
+ * row opens (the « what if » slider, in e2e) would refuse the focus.
+ *
+ * Clipped on the block axis only: a focus ring inside still shows on its
+ * sides, and `clip` (unlike `hidden`) leaves the inline axis visible.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (interpolate-size: allow-keywords) and selector(::details-content) {
+    .wrap {
+      interpolate-size: allow-keywords;
+    }
+
+    .wrap::details-content {
+      block-size: 0;
+      overflow-y: clip;
+      transition:
+        block-size var(--dur-close) var(--ease-out),
+        content-visibility var(--dur-close) allow-discrete;
+    }
+
+    .wrap[open]::details-content {
+      block-size: auto;
+      transition: block-size var(--dur-open) var(--ease-out);
+    }
+  }
+}

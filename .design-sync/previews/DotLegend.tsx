@@ -34,7 +34,7 @@ export const WhatIf = () => (
 export const Slide = () => (
   <DotLegend
     aria-hidden
-    size="slide"
+    medium="slide"
     items={[
       { mark: "filled", label: "measured" },
       { mark: "range", label: "estimated range" },

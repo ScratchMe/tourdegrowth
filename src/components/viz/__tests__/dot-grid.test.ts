@@ -52,7 +52,7 @@ describe("DotGrid markup", () => {
   });
 
   it("a slide grid takes the slide size", () => {
-    expect(render({ grid: { kind: "known", dots: ["filled"] }, label: "x", size: "slide" })).toMatch(/class="[^"]*slide/);
+    expect(render({ grid: { kind: "known", dots: ["filled"] }, label: "x", medium: "slide" })).toMatch(/class="[^"]*slide/);
     expect(render({ grid: { kind: "known", dots: ["filled"] }, label: "x" })).toMatch(/class="[^"]*screen/);
   });
 });

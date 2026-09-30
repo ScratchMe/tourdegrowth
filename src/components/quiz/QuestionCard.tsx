@@ -2,8 +2,8 @@ import type { HTMLAttributes, ReactNode } from "react";
 import styles from "./QuestionCard.module.css";
 
 export interface QuestionCardProps extends HTMLAttributes<HTMLDivElement> {
-  /** desktop = 34px question in 40px 44px padding · mobile = 25px in 24px 22px */
-  size?: "desktop" | "mobile";
+  /** md = 34px question in 40px 44px padding · sm = 25px in 24px 22px */
+  size?: "md" | "sm";
   /** Question text. May contain an inline DefinitionTrigger. */
   children?: ReactNode;
 }
@@ -15,11 +15,11 @@ export interface QuestionCardProps extends HTMLAttributes<HTMLDivElement> {
  * `--shadow-hero`), so nothing else on a question screen may use
  * `elevation="raised"` or `"hero"`.
  */
-export function QuestionCard({ size = "desktop", className, children, ...rest }: QuestionCardProps) {
-  const desktop = size === "desktop";
+export function QuestionCard({ size = "md", className, children, ...rest }: QuestionCardProps) {
+  const md = size === "md";
   return (
-    <div className={[styles.card, desktop ? styles.desktop : styles.mobile, className ?? ""].filter(Boolean).join(" ")} {...rest}>
-      <h2 className={[styles.question, desktop ? styles.questionDesktop : styles.questionMobile].join(" ")}>
+    <div className={[styles.card, md ? styles.md : styles.sm, className ?? ""].filter(Boolean).join(" ")} {...rest}>
+      <h2 className={[styles.question, md ? styles.questionMd : styles.questionSm].join(" ")}>
         {children}
       </h2>
     </div>

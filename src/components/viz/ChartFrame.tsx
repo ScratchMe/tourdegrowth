@@ -125,7 +125,7 @@ export function ChartFrame({
         <div className={styles.error} role="alert">
           <p className={styles.errorMessage}>{state.message}</p>
           {state.retry ? (
-            <Button variant="secondary" compact onClick={state.retry.onRetry}>
+            <Button variant="secondary" size="sm" onClick={state.retry.onRetry}>
               {state.retry.label}
             </Button>
           ) : null}

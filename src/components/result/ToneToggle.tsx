@@ -14,13 +14,13 @@ export interface ToneToggleProps {
   /** Accessible group label, localized by the caller. */
   groupLabel?: string;
   /**
-   * `compact` is the header scale — 32px visual, 44px hit — and the only one
+   * `sm` is the header scale — 32px visual, 44px hit — and the only one
    * anything asks for today: the landing preview card, where the toggle
    * demonstrates the roast without adding a CTA (extension 03, §4). `md` is
    * `Segmented`'s own 44px default, carried through so this wrapper doesn't
    * narrow the primitive; it has no call site.
    */
-  size?: "md" | "compact";
+  size?: "md" | "sm";
   className?: string;
 }
 
@@ -34,9 +34,9 @@ export interface ToneToggleProps {
  * grammar a primitive; this wrapper stays so call sites do not carry the
  * option list.
  *
- * ONE place today: the landing preview card, at `compact` (extension 03) —
+ * ONE place today: the landing preview card, at `sm` (extension 03) —
  * a demo you can poke is a stronger promise that a roast exists than a line
- * of copy saying so, and `compact` keeps it visibly subordinate to "Start
+ * of copy saying so, and `sm` keeps it visibly subordinate to "Start
  * your Tour →".
  *
  * This used to claim two, naming the post-question-15 tone selector as the

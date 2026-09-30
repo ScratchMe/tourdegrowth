@@ -21,7 +21,7 @@ export interface ShareCardProps extends HTMLAttributes<HTMLDivElement> {
   saveHref: string;
   /** Filename the download is offered under; omit to let the browser choose. */
   saveFileName?: string;
-  size?: "desktop" | "mobile";
+  size?: "md" | "sm";
 }
 
 /**
@@ -54,15 +54,15 @@ export function ShareCard({
   onShare,
   saveHref,
   saveFileName,
-  size = "desktop",
+  size = "md",
   className,
   ...rest
 }: ShareCardProps) {
-  const desktop = size === "desktop";
+  const md = size === "md";
 
   return (
     <div
-      className={[styles.frame, desktop ? styles.desktop : styles.mobile, className ?? ""]
+      className={[styles.frame, md ? styles.md : styles.sm, className ?? ""]
         .filter(Boolean)
         .join(" ")}
       {...rest}

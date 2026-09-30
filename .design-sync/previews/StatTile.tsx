@@ -30,28 +30,28 @@ const row = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180
 export const Known = () => (
   <div style={row}>
     <StatTile
-      size="responsive"
+      size="auto"
       label="Churn · per month"
       value="5.4%"
       delta={{ text: "−0.6 pts this quarter", direction: "down", sentiment: "good" }}
       sub="quarter target: 5.1%"
     />
     <StatTile
-      size="responsive"
+      size="auto"
       label="Subscribers"
       value="99,158"
       delta={{ text: "−842 this quarter", direction: "down", sentiment: "bad" }}
       sub="March, end of month"
     />
     <StatTile
-      size="responsive"
+      size="auto"
       label="Monthly revenue"
       value="€1.29M"
       delta={{ text: "−€0.01M this quarter", direction: "down", sentiment: "bad" }}
       sub="−€0.01M vs January"
     />
     <StatTile
-      size="responsive"
+      size="auto"
       label="MRR in 12 months"
       value="~€107,000"
       delta={{ text: "+€3,000 · better", direction: "up", sentiment: "neutral" }}
@@ -69,9 +69,9 @@ export const Known = () => (
  */
 export const Unknown = () => (
   <div style={row}>
-    <StatTile size="responsive" label="LTV" value={null} unknownLabel="missing: gross margin" />
+    <StatTile size="auto" label="LTV" value={null} unknownLabel="missing: gross margin" />
     <StatTile
-      size="responsive"
+      size="auto"
       label="CAC payback"
       value={null}
       unknownLabel="il manque la marge brute"
@@ -89,14 +89,14 @@ export const Hidden = () => (
   <NightSurface as="div" style={{ padding: 20 }}>
     <div style={row}>
       <StatTile
-        size="responsive"
+        size="auto"
         label="Confiance des abonnés"
         hidden
         hiddenLabel="pas sur ton dashboard"
         hiddenNote="Masquée jusqu'en décembre"
       />
       <StatTile
-        size="responsive"
+        size="auto"
         label="Radar DGCCRF"
         hidden
         hiddenLabel="pas sur ton dashboard"
@@ -117,14 +117,14 @@ export const WithMeter = () => (
   <NightSurface as="div" style={{ padding: 20 }}>
     <div style={row}>
       <StatTile
-        size="responsive"
+        size="auto"
         label="CEO's patience"
         value="67"
         delta={{ text: "+12 this quarter", direction: "up", sentiment: "good" }}
         bar={{ value: 67, tone: "good" }}
       />
       <StatTile
-        size="responsive"
+        size="auto"
         label="CEO's patience"
         value="31"
         delta={{ text: "−20 this quarter", direction: "down", sentiment: "bad" }}
@@ -132,7 +132,7 @@ export const WithMeter = () => (
         sub="at breaking point"
       />
       <StatTile
-        size="responsive"
+        size="auto"
         label="Subscriber trust"
         value="83"
         bar={{ value: 83, tone: "neutral" }}
@@ -143,13 +143,13 @@ export const WithMeter = () => (
 );
 
 /**
- * A mini `BulletChart` as the tile's child — a value against its target,
+ * A `BulletChart` at `sm` as the tile's child — a value against its target,
  * never a second number. The game's churn tile on 1 January, in French:
  * 6,0 % against the first quarter's 5,6 %, on the dashboard's 2–9 % track.
  */
 export const WithBullet = () => (
   <div style={{ maxWidth: 300 }}>
-    <StatTile size="hero" label="Résiliations · par mois" value="6,0 %" sub="objectif du trimestre : 5,6 %">
+    <StatTile size="lg" label="Résiliations · par mois" value="6,0 %" sub="objectif du trimestre : 5,6 %">
       <BulletChart
         value={0.06}
         target={0.056}
@@ -162,13 +162,13 @@ export const WithBullet = () => (
 
 /**
  * `hero` is the stencil figure — one per dashboard, like the score numeral —
- * and shrinks below 760px on its own. `md` and `compact` are mono. The
+ * and shrinks below 760px on its own. `md` and `sm` are mono. The
  * game's churn tile in December on path A.
  */
 export const Sizes = () => (
   <div style={{ display: "flex", gap: 16, alignItems: "flex-start", flexWrap: "wrap" }}>
-    <StatTile size="hero" label="Churn · per month" value="4.0%" sub="board target: 4.0%" />
+    <StatTile size="lg" label="Churn · per month" value="4.0%" sub="board target: 4.0%" />
     <StatTile size="md" label="Churn · per month" value="4.0%" sub="board target: 4.0%" />
-    <StatTile size="compact" label="Churn · per month" value="4.0%" sub="board target: 4.0%" />
+    <StatTile size="sm" label="Churn · per month" value="4.0%" sub="board target: 4.0%" />
   </div>
 );

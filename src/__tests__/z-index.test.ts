@@ -7,8 +7,13 @@ import { describe, expect, it } from "vitest";
  * nothing read it — the glossary popover wrote 30, its sheet 40 and its
  * backdrop 39, the skip link 100, the game's action bar 1, each by hand, and
  * a new layer had to guess where it fitted. Every z-index now reads the
- * scale (a `calc()` from it is allowed: the backdrop is « one under the
- * popover »), so the order of the layers is written in one place.
+ * scale (a `calc()` from it is allowed), so the order of the layers is
+ * written in one place.
+ *
+ * 2026-09-29 (CHANTIERS.md A4): the glossary popover moved to the top layer
+ * and its three z-index went with it, `--z-popover` too. The scale keeps no
+ * layer nothing reads. Non-vacuity: `--z-popover: 40` put back fails the
+ * last test.
  */
 
 const SRC = join(process.cwd(), "src");
@@ -41,7 +46,17 @@ describe("every z-index reads the stacking scale (L-7)", () => {
         }
       }
     }
-    expect(checked).toBeGreaterThanOrEqual(6);
+    // Five on 2026-09-29: the header, the skip link, the game's action bar,
+    // the engine tabs' edge arrows, the news screen out of the top layer.
+    expect(checked).toBeGreaterThanOrEqual(5);
     expect(offending).toEqual([]);
+  });
+
+  it("keeps no layer nothing reads", () => {
+    const scale = readFileSync(join(SRC, "styles", "tokens", "spacing.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    const layers = [...scale.matchAll(/(--z-[a-z]+)\s*:/g)].map((m) => m[1]!);
+    expect(layers.length).toBeGreaterThanOrEqual(3);
+    const read = SHEETS.map((f) => readFileSync(f, "utf8")).join("\n");
+    expect(layers.filter((layer) => !read.includes(`var(${layer})`))).toEqual([]);
   });
 });

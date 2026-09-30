@@ -33,14 +33,14 @@ export const Pillar = () => (
 );
 
 /**
- * `size="mobile"` is the explicit small scale — used once, for the landing's
+ * `size="sm"` is the explicit small scale — used once, for the landing's
  * preview card, which is deliberately smaller than the real result screen.
- * The desktop size already shrinks itself below 760px in pure CSS, so you
+ * The `md` size already shrinks itself below 760px in pure CSS, so you
  * only pass this to force the small scale on a wide viewport.
  */
-export const Mobile = () => (
+export const Small = () => (
   <Card elevation="raised" style={{ maxWidth: 320 }}>
-    <ScoreDisplay score={74} label="Overall Growth Score" size="mobile" />
+    <ScoreDisplay score={74} label="Overall Growth Score" size="sm" />
   </Card>
 );
 
@@ -60,8 +60,8 @@ export const Marker = () => (
  * label is « Score growth global », `UI_STRINGS.scoreCard.label` as the
  * French landing's preview card prints it.
  */
-export const MarkerMobile = () => (
+export const MarkerSmall = () => (
   <Card elevation="raised" style={{ maxWidth: 240 }}>
-    <ScoreDisplay variant="marker" score={74} label="Score growth global" size="mobile" />
+    <ScoreDisplay variant="marker" score={74} label="Score growth global" size="sm" />
   </Card>
 );

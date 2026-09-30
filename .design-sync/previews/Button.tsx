@@ -30,12 +30,12 @@ export const Sizes = () => (
 );
 
 /**
- * `compact` — the smaller label (13px) and padding: the landing header's CTA,
+ * `sm` — the smaller label (13px) and padding: the landing header's CTA,
  * set here as in that header, after its two quiet links. The page hides the
  * CTA and the links below 760px (R-21), an @media rule a still cannot show.
- * The engine's quiet actions beside its sliders are `compact` too (see Quiet).
+ * The engine's quiet actions beside its sliders are `sm` too (see Quiet).
  */
-export const Compact = () => (
+export const Small = () => (
   <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
     <Button variant="quiet" href="/en/glossary">
       Glossary
@@ -43,7 +43,7 @@ export const Compact = () => (
     <Button variant="quiet" href="/en/how-it-works">
       How it works
     </Button>
-    <Button variant="primary" compact href="/quiz">
+    <Button variant="primary" size="sm" href="/quiz">
       Start your Tour →
     </Button>
   </div>
@@ -51,7 +51,7 @@ export const Compact = () => (
 
 /**
  * `quiet` is the system's one text button. Drawn as a line of text — 31px,
- * 29px with `compact`, which the growth engine uses for the small actions
+ * 29px at `sm`, which the growth engine uses for the small actions
  * beside its sliders and fields — and TAPPED on a 44px strip centred on it,
  * which moves nothing around it. Keep the room above and below: it is where
  * the taps land.
@@ -59,10 +59,10 @@ export const Compact = () => (
 export const Quiet = () => (
   <div style={{ display: "flex", gap: 24, alignItems: "center", flexWrap: "wrap" }}>
     <Button variant="quiet">How it works</Button>
-    <Button variant="quiet" compact>
+    <Button variant="quiet" size="sm">
       Back to today
     </Button>
-    <Button variant="quiet" compact>
+    <Button variant="quiet" size="sm">
       I only have the rate
     </Button>
   </div>

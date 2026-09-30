@@ -19,7 +19,7 @@ export const Avatars = () => (
   <NightSurface as="div" style={{ padding: 20, display: "flex", gap: 24 }}>
     {MOODS.map((mood) => (
       <div key={mood} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-        <DgFace mood={mood} size="avatar" />
+        <DgFace mood={mood} framing="avatar" />
         <span style={caption}>{mood}</span>
       </div>
     ))}
@@ -27,11 +27,11 @@ export const Avatars = () => (
 );
 
 /**
- * `frame` — the whole call, 16:9, with the office behind him. ONE per page:
+ * `framing="call"` (the default) — the whole call, 16:9, with the office behind him. ONE per page:
  * its strokes and filters carry ids that are unique only once, which is why
- * the moods are compared on the avatars and not on four frames.
+ * the moods are compared on the avatars and not on four calls.
  */
-export const Frame = () => (
+export const Call = () => (
   <NightSurface as="div" style={{ padding: 20, maxWidth: 480 }}>
     <DgFace mood="firm" />
   </NightSurface>

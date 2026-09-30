@@ -57,7 +57,7 @@ export function TourScreen({
     <section className={styles.screen}>
       <div className={styles.screenHead}>
         <h2 className={styles.h2}>Le Tour</h2>
-        <Button compact variant="secondary" onClick={onClose} data-testid="close-tour">
+        <Button size="sm" variant="secondary" onClick={onClose} data-testid="close-tour">
           Retour
         </Button>
       </div>
@@ -107,12 +107,12 @@ export function TourScreen({
               <MetaLabel size="xs" wide>
                 {index + 1} / {questions.length} · {AUDIT_PILLAR_LABELS[question.pillar]}
               </MetaLabel>
-              <QuestionCard size="mobile">{question.question}</QuestionCard>
+              <QuestionCard size="sm">{question.question}</QuestionCard>
               <div className={styles.tourOptions}>
                 {question.options.map((option, optionIndex) => (
                   <AnswerOption
                     key={option.label}
-                    size="mobile"
+                    size="sm"
                     selected={chosen === optionIndex}
                     onClick={() => onAnswer(question.id, optionIndex as AnswerIndex)}
                     data-testid={`tour-answer-${question.id}-${optionIndex}`}

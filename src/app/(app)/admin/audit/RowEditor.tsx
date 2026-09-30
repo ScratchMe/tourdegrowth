@@ -129,7 +129,7 @@ export function RowEditor({
             constats et les définitions référencent. Il ne change pas, même si le nom de la ligne est réécrit.
           </p>
         </div>
-        <Button compact variant="secondary" onClick={onClose} data-testid="close-row">
+        <Button size="sm" variant="secondary" onClick={onClose} data-testid="close-row">
           Retour à la collecte
         </Button>
       </div>

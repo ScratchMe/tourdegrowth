@@ -263,3 +263,41 @@ export async function multiLinePills(root: Locator): Promise<{ pills: number; of
     return { pills, offenders };
   });
 }
+
+/**
+ * Runs `read` on each element of `items` once it is on screen. The deck's
+ * thumbnails are `content-visibility: auto` (CHANTIERS.md A4, 2026-09-29):
+ * off screen their text is not laid out and `innerText` reads it as empty,
+ * so a check on a slide's words would pass on nothing. A reader only reads a
+ * slide on screen; so does this. `read` is serialised into the page: it may
+ * not close over anything.
+ */
+export async function readEachOnScreen<T>(page: Page, items: Locator, read: (el: Element) => T): Promise<T[]> {
+  const out: T[] = [];
+  const count = await items.count();
+  for (let i = 0; i < count; i++) {
+    await items.nth(i).scrollIntoViewIfNeeded();
+    await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    out.push(await items.nth(i).evaluate(read));
+  }
+  return out;
+}
+
+/**
+ * Opens a `core/Disclosure` and waits until it has finished opening. Its
+ * content slides open (CHANTIERS.md A4, 2026-09-29): until then the part
+ * still clipped cannot be scrolled to, so a control far down it, focused at
+ * once, lands off screen. A person cannot get there within those 250 ms; a
+ * test can, and did (the what-if's last slider, e2e/engine-whatif.spec.ts).
+ */
+export async function openFold(fold: Locator): Promise<void> {
+  await fold.locator(":scope > summary").click();
+  await fold.evaluate((details) =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((a) => (a.effect as KeyframeEffect | null)?.target === details)
+        .map((a) => a.finished.catch(() => undefined)),
+    ).then(() => undefined),
+  );
+}

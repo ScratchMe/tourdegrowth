@@ -39,7 +39,7 @@ export const MissedByALittle = () => (
       effects={["Pause up front: −6% churn this quarter", "Pre-billing reminder: +1% churn this quarter, fewer disputes"]}
       drivers={{ heading: "Why churn moved: −0.3 pts", lines: ["Your two projects this quarter: −0.3 pts"] }}
       mail={{ header: "From: CEO · Subject: this week's numbers", body: "Message from the CEO, mid-quarter: \"It's moving. Keep going.\"" }}
-      boss={{ line: "The CEO: \"That's not what we agreed.\"", mood: "angry", face: <DgFace mood="angry" size="avatar" /> }}
+      boss={{ line: "The CEO: \"That's not what we agreed.\"", mood: "angry", face: <DgFace mood="angry" framing="avatar" /> }}
       next={{ label: "The CEO is calling you →", onClick: noop }}
     />
   </NightSurface>
@@ -71,7 +71,7 @@ export const HitWithAClipping = () => (
         { kind: "viral", handle: "@endless_evening", text: "A viral thread: \"I tried to cancel Flixo, here are my three hours.\" Cancellations speed up." },
         { kind: "competitor", masthead: "The Streaming Letter", headline: "A price offensive in the spring", text: "A competitor launched an aggressive offer in the spring. Everyone lost subscribers this quarter, you included." },
       ]}
-      boss={{ line: "The CEO: \"Well played.\" \"Thanks for doing what I asked.\"", mood: "firm", face: <DgFace mood="firm" size="avatar" /> }}
+      boss={{ line: "The CEO: \"Well played.\" \"Thanks for doing what I asked.\"", mood: "firm", face: <DgFace mood="firm" framing="avatar" /> }}
       next={{ label: "The CEO is calling you →", onClick: noop }}
     />
   </NightSurface>
@@ -98,7 +98,7 @@ export const FrenchWithANote = () => (
       clippings={[
         { kind: "competitor", masthead: "La Lettre du streaming", headline: "Offensive tarifaire au printemps", text: "Un concurrent a lancé une offre agressive au printemps. Tout le monde a perdu des abonnés ce trimestre, toi compris." },
       ]}
-      boss={{ line: "Le DG : « Ce n'est pas ce qu'on avait dit. » « Tu n'as pas fait ce que j'ai demandé. Je l'ai noté. »", mood: "angry", face: <DgFace mood="angry" size="avatar" /> }}
+      boss={{ line: "Le DG : « Ce n'est pas ce qu'on avait dit. » « Tu n'as pas fait ce que j'ai demandé. Je l'ai noté. »", mood: "angry", face: <DgFace mood="angry" framing="avatar" /> }}
       next={{ label: "Le DG t'appelle →", onClick: noop }}
     />
   </NightSurface>

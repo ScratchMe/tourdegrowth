@@ -17,12 +17,12 @@
   /* A box of paragraphs, never a pill: --radius-tag became 999px with design I
      (#177) and turned the clipping into an ellipse that cut its own text. */
   border-radius: var(--radius-panel);
-  transform: rotate(-1deg);
+  rotate: -1deg;
 }
 
 /* A second clipping leans the other way: two cut-outs on a desk, not a stack of cards. */
 .clipping + .clipping {
-  transform: rotate(0.6deg);
+  rotate: 0.6deg;
 }
 
 .masthead,

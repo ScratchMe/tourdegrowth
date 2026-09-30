@@ -56,7 +56,7 @@ export function LocaleSwitcher({ locale, path, switchQuery }: LocaleSwitcherProp
   return (
     <Segmented
       as="a"
-      size="compact"
+      size="sm"
       label={GROUP_LABEL[locale]}
       value={locale}
       options={LOCALES.map((candidate) => ({

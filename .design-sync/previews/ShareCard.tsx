@@ -17,8 +17,8 @@ import shareSample from "./share-sample.png";
  * `tour-de-growth-{total}.png`.
  */
 
-/** As it ships on desktop, under the pillar chips. */
-export const Desktop = () => (
+/** As it ships on a wide screen, under the pillar chips (`md`). */
+export const Medium = () => (
   <div style={{ maxWidth: 420 }}>
     <ShareCard
       src={shareSample}
@@ -33,13 +33,13 @@ export const Desktop = () => (
 );
 
 /**
- * `mobile` tightens the frame from 14px to 12px. The result page does not
+ * `sm` tightens the frame from 14px to 12px. The result page does not
  * pass it today; this is the prop's small form, for a tighter placement.
  */
-export const Mobile = () => (
+export const Small = () => (
   <div style={{ maxWidth: 320 }}>
     <ShareCard
-      size="mobile"
+      size="sm"
       src={shareSample}
       alt="Share image: 74/100, with Retention named as the stage holding this growth back."
       caption="What a shared link shows"

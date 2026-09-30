@@ -80,12 +80,11 @@
 
   /* Stacking — one scale, and every z-index reads it (design audit L-7;
      z-index.test.ts). A bar raised over its own page, the sticky site
-     header, the glossary popover (anchored or docked, its backdrop one
-     under it), then the skip link over everything. */
+     header, then the skip link over everything. The glossary popover and
+     the quarter's news need none: they open in the top layer, above all of
+     it (audit du kit §6, CHANTIERS.md A4, 2026-09-29). */
   --z-raised: 1;
-  /* The sticky site header (brand/SiteHeader): over the page, under an
-     open glossary popover and every overlay. */
+  /* The sticky site header (brand/SiteHeader): over the page, under every overlay. */
   --z-header: 25;
-  --z-popover: 40;
   --z-overlay: 100;
 }

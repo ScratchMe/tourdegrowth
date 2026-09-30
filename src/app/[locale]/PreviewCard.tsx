@@ -40,17 +40,17 @@ export interface PreviewCardProps {
  * The landing's preview of a real result — design system extension 03 §4.
  *
  * It mirrors the result screen so the promise matches the delivery: score →
- * bottleneck → pillars → next move, in the same components at `size="mobile"`.
+ * bottleneck → pillars → next move, in the same components at `size="sm"`.
  *
  * **Why the landing gets a tone control and the result page does not.** The
  * result screen shows exactly two CTAs and a third was refused (R-23). This
  * card is a demo, and a demo you can poke is a stronger promise that a roast
- * exists than a line of copy saying so. `compact` keeps it visibly
+ * exists than a line of copy saying so. `sm` keeps it visibly
  * subordinate to "Start your Tour →", which stays the only filled red element
  * on the screen.
  *
  * The score's eyebrow sits on `ScoreDisplay` here, as it does on the result
- * page, rather than in the top row: this card is 448px wide and the compact
+ * page, rather than in the top row: this card is 448px wide and the small
  * toggle takes 219 of them, so a top row carrying both the eyebrow and the
  * sample caption wrapped to three lines. The row now holds only what the
  * toggle has to sit beside.
@@ -81,7 +81,7 @@ export function PreviewCard({
       <div className={styles.previewTopRow}>
         <MetaLabel size="xs">{caption}</MetaLabel>
         <ToneToggle
-          size="compact"
+          size="sm"
           value={tone}
           onChange={setTone}
           straightLabel={toneLabels.straight}
@@ -94,8 +94,8 @@ export function PreviewCard({
           exactly as on the result page (design I + B, 2026-09-28). */}
       <Bottleneck
         data-testid="preview-bottleneck"
-        lead={<ScoreDisplay variant="marker" score={total} label={scoreLabel} size="mobile" />}
-        size="mobile"
+        lead={<ScoreDisplay variant="marker" score={total} label={scoreLabel} size="sm" />}
+        size="sm"
         sharpness="clear"
         label={bottleneckLabel}
         pillars={[{ pillar: bottleneckPillar, score: bottleneckScore }]}
@@ -109,7 +109,7 @@ export function PreviewCard({
             nothing to any term page. */}
         {chips.map((chip) => (
           <Link key={chip.href} href={chip.href} className={styles.previewChipLink} aria-label={chip.label}>
-            <PillarChip pillar={chip.label} score={chip.score} size="mobile" weak={chip.weak} stretch />
+            <PillarChip pillar={chip.label} score={chip.score} size="sm" weak={chip.weak} stretch />
           </Link>
         ))}
       </div>

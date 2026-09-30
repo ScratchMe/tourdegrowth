@@ -80,7 +80,7 @@ paper (1.87); the night's amber never leaves the night.
 
 Sizing is CSS-only. `ScoreDisplay`, `PillarChip`, `QuestionCard`,
 `AnswerOption`, `StageProgress`, `Bottleneck` and a `hero` `StatTile` shrink
-themselves below 760px — you do not detect a viewport in JS. `size="mobile"` is
+themselves below 760px — you do not detect a viewport in JS. `size="sm"` is
 the explicit override for the rare case of forcing the small scale on a wide
 screen (the landing's preview card, which is intentionally smaller than the
 real result screen).
@@ -93,8 +93,10 @@ reason: 760 (the phone line), 640 (the glossary popover docks to the bottom
 of the window), 960 (a page breaks out of its reading column) and 1100 (the
 engine page's stopwatch).
 
-`DefinitionPopover` renders both placements at once and lets CSS choose. Anything
-that moves focus has to be guarded to the placement actually on screen.
+`GlossaryTerm` opens ONE `DefinitionPopover`, `placement="auto"`: a popover in
+the top layer (no z-index) that CSS shapes — anchored under its trigger from
+641px where anchor positioning exists, the docked sheet otherwise. The
+`anchored` and `docked` placements draw each shape in place, for a story.
 
 Target 390px. Nothing may scroll horizontally at 360px.
 
@@ -143,10 +145,10 @@ glossary popover returns focus to the trigger that opened it.
 
 Every interactive target is at least 44×44px. The compact controls draw
 smaller than that and extend their hit area on the element itself: a
-`Segmented size="compact"` track is 32px, each option reaches 44px into the
+`Segmented size="sm"` track is 32px, each option reaches 44px into the
 room the group keeps above and below it; the 16px `DefinitionTrigger` glyph
 takes taps on a 44px disc around it; `Button variant="quiet"` is drawn as a
-line of underlined text (31px, 27px `compact`) and takes taps on a 44px strip
+line of underlined text (31px, 27px at `sm`) and takes taps on a 44px strip
 centred on it. Never strip that surrounding room to tighten a header — it is
 where the taps land. The system has one text button, `quiet`: an action in
 text is that, never a styled `<button>` of its own. A link inside a sentence
@@ -282,7 +284,7 @@ inked mark over an edge: a rubber stamp, an accent band, the angry edge),
 `--border-width-hairline` (1px, under the content: a chart's grid, a table's
 rows) and `--border-width-fine` (1.5px, the space band's strokes only). Type
 never goes under 11px, and Inter text never under 13.5px, with two named
-exceptions: the compact button's label and the result's « built by » credit. If a design
+exceptions: the small (`sm`) button's label and the result's « built by » credit. If a design
 needs one of those, that is a product decision to raise, not a component to
 invent.
 
@@ -291,6 +293,33 @@ One modal, and only one: `QuarterNews`, the game's end-of-quarter news
 with `showModal()`, Escape means « skip to the report », and the report stays
 underneath for re-reading. A second modal is the same product decision as
 any item of the list above.
+
+## Variant names: one word per axis
+
+A prop that picks a variant says which axis it moves, and each axis has one
+vocabulary (design audit S-16, 2026-09-29). Four vocabularies had grown for
+the same thing — `desktop`/`mobile`, `sm`/`md`/`lg`, `md`/`compact`, and
+proper names — and `alert` and `red` named the same role.
+
+| Axis | Prop | Words | What it means |
+|---|---|---|---|
+| Scale | `size` | `xs` · `sm` · `md` · `lg`, and `auto` | How big it is drawn, and nothing else. `md` is the default wherever it exists, and the one that shrinks on a phone by itself; `sm` is small at every width; `auto` picks one per width where no size shrinks by itself. Never a device, never an adjective |
+| What it is drawn for | its own prop, never `size` | the medium's words | A variant that changes more than the scale: `DotGrid`'s slide grid has the thicker stroke of a projected slide, so it is `medium="slide"`, not a size |
+| Role colour | `tone` | `muted` · `ink` · `alert` · `good` · `bad` · `neutral`, and a surface's own (`paper`, `sunken`, `outlineAlert`; `caveat`, `cta`) | `alert` is the red of a diagnosis, everywhere. There is no `red` |
+| Hierarchy | `variant` | `primary` · `secondary` · `quiet` | How loud an action is, beside the others |
+| Column | `width` | `narrow` · `reading` · `wide` | The page column a frame sits in |
+
+Retired names, and where each went, one family at a time
+(`variant-names.test.ts` holds the list of what is still to move):
+
+| Was | Now | Family |
+|---|---|---|
+| `size="desktop"` / `"mobile"` | `size="md"` / `"sm"` | quiz and result: `AnswerOption`, `QuestionCard`, `StageProgress`, `Bottleneck`, `PillarChip`, `ScoreDisplay`, `ShareCard` — done |
+| `size="compact"`, `Button compact` | `size="sm"` | core: `Segmented`, `ToneToggle`, `Button` — done |
+| `tone="red"` | `tone="alert"` | core: `Tag` — done |
+| `size="hero"` / `"compact"` / `"responsive"`, `size="mini"` | `size="lg"` / `"sm"` / `"auto"`, `size="sm"` | viz: `StatTile`, `BulletChart` — done |
+| `size="screen"` / `"slide"` | `medium="screen"` / `"slide"` | viz: `DotGrid`, `DotLegend` — done |
+| `size="frame"` / `"avatar"`, `size="compact"` | `framing="call"` / `"avatar"`, `size="sm"` | game: `DgFace` (what is in the picture, not a scale), `ClickPill` — done |
 
 ## Contracts: two things to know when reading a `.d.ts`
 

@@ -54,7 +54,7 @@ export function NewMissionForm({
     <section className={styles.screen}>
       <div className={styles.screenHead}>
         <h2 className={styles.h2}>Nouvelle mission</h2>
-        <Button compact variant="secondary" onClick={onCancel}>
+        <Button size="sm" variant="secondary" onClick={onCancel}>
           Annuler
         </Button>
       </div>
@@ -70,7 +70,7 @@ export function NewMissionForm({
             value={mandate}
             options={MANDATES.map((id) => ({ id, label: MANDATE_LABELS[id] }))}
             onChange={setMandate}
-            size="compact"
+            size="sm"
           />
         </Field>
 

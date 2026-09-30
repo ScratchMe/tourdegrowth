@@ -86,6 +86,8 @@ test.describe("the audit instrument's rows", () => {
     // Fermée par défaut — la légende ne doit pas pousser la première ligne
     // hors de l'écran — mais son contenu est là dès qu'on l'ouvre.
     await legend.locator("summary").click();
+    // The content slides open (core/Disclosure, CHANTIERS.md A4): read once it is drawn.
+    await expect.poll(() => legend.innerText()).toContain("l'autre sens");
     const text = await legend.innerText();
     for (const tier of ["T0", "T1", "T2", "T3", "T4"]) expect(text, tier).toContain(tier);
     expect(text).toContain("file d'analyste");

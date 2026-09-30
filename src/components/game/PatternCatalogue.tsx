@@ -51,7 +51,7 @@ function Summary({ entry }: { entry: CatalogueEntry }) {
       <span className={styles.official}>{entry.official}</span>
       <span className={styles.meeting}>{entry.meeting}</span>
       {entry.status ? (
-        <Tag tone={entry.status.removed ? "outline" : "red"} className={styles.status}>
+        <Tag tone={entry.status.removed ? "outline" : "alert"} className={styles.status}>
           {entry.status.label}
         </Tag>
       ) : null}

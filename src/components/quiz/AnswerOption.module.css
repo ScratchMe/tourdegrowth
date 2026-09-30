@@ -78,17 +78,17 @@
 
 /* "desktop" shrinks to the "mobile" figure below the app's breakpoint on
    its own — see ScoreDisplay.module.css for the rationale. */
-.desktop {
+.md {
   font: var(--body-lg);
 }
 
 @media (max-width: 760px) {
-  .desktop {
+  .md {
     font: var(--body-lg-mobile);
   }
 }
 
-.mobile {
+.sm {
   font: var(--body-lg-mobile);
 }
 

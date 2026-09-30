@@ -8,7 +8,7 @@ export interface PillarChipProps extends HTMLAttributes<HTMLSpanElement> {
   total?: number;
   /** Marks the lowest-scoring pillar: red wash, red dashed edge. At most one. */
   weak?: boolean;
-  size?: "desktop" | "mobile";
+  size?: "md" | "sm";
   /** Stretch to the full width of its cell, score pinned left / name right — so every meter's track is the same length; see PillarChip.module.css. */
   stretch?: boolean;
   /** Slot for an inline DefinitionTrigger. */
@@ -31,18 +31,18 @@ export function PillarChip({
   score,
   total = 20,
   weak = false,
-  size = "desktop",
+  size = "md",
   stretch = false,
   className,
   children,
   ...rest
 }: PillarChipProps) {
-  const desktop = size === "desktop";
+  const md = size === "md";
   const value = typeof score === "number" ? score : Number(score);
   const share = Number.isFinite(value) && total > 0 ? Math.min(1, Math.max(0, value / total)) : null;
   const classes = [
     styles.chip,
-    desktop ? styles.desktop : styles.mobile,
+    md ? styles.md : styles.sm,
     weak ? styles.weak : styles.normal,
     stretch ? styles.stretch : "",
     className ?? "",

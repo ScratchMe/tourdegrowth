@@ -189,7 +189,7 @@ export function ObservationList({
           ) : null}
 
           <Button
-            compact
+            size="sm"
             variant="secondary"
             onClick={() => onChange(observations.filter((_, i) => i !== index))}
             data-testid={`remove-observation-${index}`}
@@ -199,7 +199,7 @@ export function ObservationList({
         </Card>
       ))}
 
-      <Button compact variant="secondary" onClick={() => onChange([...observations, blankObservation()])} data-testid="add-observation">
+      <Button size="sm" variant="secondary" onClick={() => onChange([...observations, blankObservation()])} data-testid="add-observation">
         Ajouter une observation
       </Button>
     </div>

@@ -35,15 +35,15 @@ interface StatTileBase {
   /** Already-translated label. Rendered uppercase mono. */
   label: string;
   /**
-   * `hero` = the stencil figure (48px, 30px under 760px): the one tile a
-   * dashboard is about, like the score numeral. `md` = mono 20px. `compact` =
-   * mono 17px, for a dense mobile grid. `responsive` = `md` above 760px and
-   * `compact` below, switched in CSS: a row of tiles that has room on a
+   * `lg` = the stencil figure (48px, 30px under 760px): the one tile a
+   * dashboard is about, like the score numeral. `md` = mono 20px. `sm` =
+   * mono 17px, for a dense mobile grid. `auto` = `md` above 760px and
+   * `sm` below, switched in CSS: a row of tiles that has room on a
    * desktop and a third of a phone's width on a phone needs both, and this
    * system never picks a prop from a width read in JavaScript (the step-4
    * hydration lesson — the server has no width to read).
    */
-  size?: "hero" | "md" | "compact" | "responsive";
+  size?: "lg" | "md" | "sm" | "auto";
   className?: string;
   "data-testid"?: string;
 }
@@ -58,7 +58,7 @@ interface StatTileKnown extends StatTileBase {
   bar?: StatTileBar;
   /** Lifts the blur a `hidden` tile was showing, once (`--dur-reveal`). Off under reduced motion. */
   revealing?: boolean;
-  /** A small chart under the figure — a mini `BulletChart`, never a second number. */
+  /** A small chart under the figure — a `BulletChart` at `sm`, never a second number. */
   children?: ReactNode;
 }
 

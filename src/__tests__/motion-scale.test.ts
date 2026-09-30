@@ -57,7 +57,14 @@ describe("the motion scale", () => {
 
   it("has no dead token: every one of them is read somewhere", () => {
     const sources = CONSUMERS.map((f) => readFileSync(f, "utf8")).join("\n");
-    const dead = [...MOTION.keys()].filter((name) => !new RegExp(`var\\(--${name}[,)]`).test(sources));
+    const reads = (name: string, text: string) => new RegExp(`var\\(--${name}[,)]`).test(text);
+    // A token may be a setting of another (--stamp-overshoot shapes
+    // --ease-stamp, CHANTIERS.md A4): alive when a token that reads it is read.
+    const dead = [...MOTION.keys()].filter(
+      (name) =>
+        !reads(name, sources) &&
+        ![...MOTION].some(([other, value]) => other !== name && reads(name, value) && reads(other, sources)),
+    );
     expect(dead).toEqual([]);
   });
 

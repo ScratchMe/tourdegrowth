@@ -42,9 +42,9 @@ export const DeepDive = () => (
   </div>
 );
 
-/** `mobile` is the narrow scale. */
-export const Mobile = () => (
+/** `sm` is the narrow scale. */
+export const Small = () => (
   <div style={{ maxWidth: 320 }}>
-    <StageProgress current={2} total={5} size="mobile" label="Stage 2 of 5" aria-label="Stage 2 of 5" />
+    <StageProgress current={2} total={5} size="sm" label="Stage 2 of 5" aria-label="Stage 2 of 5" />
   </div>
 );

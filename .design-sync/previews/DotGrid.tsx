@@ -67,12 +67,12 @@ export const WhatIf = () => (
 export const Slide = () => (
   <div style={{ display: "grid", gap: 24 }}>
     <div style={{ ...row, gridTemplateColumns: "repeat(2, 200px)" }}>
-      <DotGrid size="slide" highlighted grid={{ kind: "known", dots: run(["filled", 18], ["empty", 82]) }} label="18 of the 100 sign-ups reach first value" />
-      <DotGrid size="slide" grid={{ kind: "unknown", dots: [] }} label="Active at day 30 — not measured" />
+      <DotGrid medium="slide" highlighted grid={{ kind: "known", dots: run(["filled", 18], ["empty", 82]) }} label="18 of the 100 sign-ups reach first value" />
+      <DotGrid medium="slide" grid={{ kind: "unknown", dots: [] }} label="Active at day 30 — not measured" />
     </div>
     <DotLegend
       aria-hidden
-      size="slide"
+      medium="slide"
       items={[
         { mark: "filled", label: "measured" },
         { mark: "unknown", label: "not measured" },

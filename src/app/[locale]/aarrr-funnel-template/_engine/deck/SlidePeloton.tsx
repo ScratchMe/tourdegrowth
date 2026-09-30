@@ -73,7 +73,7 @@ export function SlidePeloton({ slide, context }: SlideProps) {
           </div>
           <h4 className={styles.columnLabel}>{t.signups}</h4>
           <DotGrid
-            size="slide"
+            medium="slide"
             grid={signupsGrid(derived.peloton.referredPerHundred)}
             label={referred ? `${referred.label} — 100, ${referred.text}` : `${t.signups} — 100`}
           />
@@ -93,7 +93,7 @@ export function SlidePeloton({ slide, context }: SlideProps) {
               ) : null}
             </div>
             <h4 className={styles.columnLabel}>{c.row.label}</h4>
-            <DotGrid size="slide" grid={c.grid} highlighted={Boolean(c.stamp)} label={`${c.row.label} — ${c.row.text}`} />
+            <DotGrid medium="slide" grid={c.grid} highlighted={Boolean(c.stamp)} label={`${c.row.label} — ${c.row.text}`} />
             <p className={styles.columnSource}>
               <SlideText text={c.caption} accent={false} />
             </p>
@@ -104,7 +104,7 @@ export function SlidePeloton({ slide, context }: SlideProps) {
       <div className={styles.legend}>
         <DotLegend
           aria-hidden
-          size="slide"
+          medium="slide"
           items={[
             ...(referred ? [{ mark: "referred" as const, label: referred.text }] : []),
             { mark: "filled", label: t.legendMeasured },

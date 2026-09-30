@@ -5455,3 +5455,175 @@ Le test d'ordre de lecture du résultat se repère désormais sur l'enveloppe du
 **Vérifié** : lint et `tsc` propres, **2 227 tests unitaires** (+16), couverture au-dessus de ses seuils, `next build` propre avec `GAME_ENABLED=true`, **606 specs Playwright** (+6 : 601 passées, 5 ignorées par construction, aucun échec, sans reprise ; la garde du total, ajoutée après ce passage, a été rejouée avec les specs du partage : 19 sur 19).
 
 **À l'écran.** L'exemple roast, en FR et en EN, à 1 280 et 390 px : la pastille « Roast mode », le verdict roast de la bibliothèque, la carte de partage dans son cadre roast, et aucun défilement horizontal. L'extrait du propriétaire ne peut pas se rendre en e2e, faute de Firestore (C17 : l'émulateur arrivera en A7.11). Il a donc été vu dans un build jetable, jamais commité, où l'échantillon reçoit un badge et où la condition « propriétaire » est levée : FR et EN, 1 280 et 390 px. Résultat : ni défilement horizontal, un badge lisible, et le bouton qui copie, dit « Markdown copié » et envoie `badge_copied`.
+
+**En production** : PR [#195](https://github.com/ScratchMe/tourdegrowth/pull/195), mergée le 2026-09-29 (squash `93bf1f4`, 25 fichiers, identique à la tête de la PR), servie à 21 h 32 UTC. Relevé par HTTP : le badge de l'échantillon à son adresse courante répond en SVG, `immutable`, `nosniff`, et `HIT` au second appel ; `/r/sample?tone=roast` déclare en `og:image` une adresse distincte de celle du neutre, qui répond en PNG 1 200 × 630 dans le cadre roast.
+
+## A4 : ce que la plateforme fait à notre place (2026-09-29)
+
+**La demande** : le lot A4 de `CHANTIERS.md`, les remplacements natifs pointés par l'audit du kit (§6), en amélioration progressive, une PR.
+
+**Re-mesuré d'abord** : aucun des douze n'était dans `src/` (`grep`), et la modale des nouvelles n'avait pas `text-wrap: pretty` (aucune de ses règles de texte). Le support de chaque fonction a été lu sur webstatus.dev avant de l'écrire ; chacune a sa condition (`@supports`, ou un repli qui est l'ancien comportement), et chaque animation neuve est sous `prefers-reduced-motion: no-preference`.
+
+**Ce qui est livré**, item par item :
+- **Monde nuit** : `color-scheme: dark` sous `[data-world="night"]`, `light` sous le papier qui s'y niche. Barres de défilement et contrôles natifs suivent le monde.
+- **Deck** : `content-visibility: auto` sur les vignettes, forcé à `visible` à l'impression. Une levée pendant l'export PNG a été écrite, puis **mesurée inutile** : html-to-image dessine une copie, et une slide exportée de très loin hors écran sort identique à l'octet à la même exportée à l'écran. Retirée.
+- **Tampons** : les inclinaisons au repos passent à `rotate:`, et les keyframes `stamp` et `slam` n'animent plus que `scale` / `rotate` / `opacity`. Une keyframe partagée se compose avec l'inclinaison propre d'un tampon au lieu de l'écraser.
+- **`motion.css`** : `--ease-stamp` en `linear()`, le cubic-bezier du brief échantillonné, et son dépassement dans un seul jeton, `--stamp-overshoot` (5,3 %, à mi-course, comme la courbe d'origine).
+- **`Disclosure`** : l'accordéon glisse, sans script (`::details-content` et `interpolate-size`, Chromium). La fermeture garde le contenu dessiné pendant qu'il se replie.
+- **`StageTabs`** : la fiche d'une ligne repliée reste dans la page, `hidden="until-found"`. Ctrl+F trouve un mot dedans et `beforematch` ouvre la ligne. React écrit tout `hidden` en booléen, donc l'attribut est posé sur l'élément, dans un effet de mise en page. Une fiche porte un brouillon : repliée, elle est redessinée à chaque changement du moteur et à chaque repli. Ouvrir une ligne montre donc toujours ce qui est enregistré, comme quand la fiche était démontée.
+- **Barres collantes** : l'en-tête du site ne tire son filet qu'une fois la page défilée dessous, et la barre des nouvelles un filet en haut tant que la carte continue dessous (`scroll-state`, Chromium 133). Une requête `scroll-state` ne stylise pas l'élément qu'elle interroge, mais ses pseudo-éléments oui (mesuré) : la bordure garde sa place, transparente, et rien ne bouge d'un pixel. La barre d'action du jeu garde sa bordure : c'est le bord de son panneau, pas un filet.
+- **Onglets du moteur** : quand la bande défile, une flèche au bord qui a encore des onglets, sur un fondu. Ce sont deux pseudo-éléments collants de la bande, qui rendent leur place par une marge négative. Un `scroll-padding` garde l'onglet choisi hors d'elles.
+- **`QuarterNews`** : une seule sortie, la fermeture du dialogue. « Passer au bilan » est `command="request-close"`, la requête même d'Escape. Le dernier « Suivant » ferme avec la valeur `read`. Là où le bouton ne connaît pas `command`, son clic ferme le dialogue lui-même. Le fondu est une transition sur `open` (`@starting-style`, `display` et `overlay` en `allow-discrete`), plus de classe `closing`. La durée attendue avant de rendre la main se lit sur le dialogue, comme avant. Le texte des cartes est en `text-wrap: pretty`.
+- **`Segmented`** : un seul remplissage pour la piste, sous l'option choisie, qui glisse de l'une à l'autre (ancrage et `anchor-scope`, Chromium 131). Les options, positionnées, se peignent au-dessus sans `z-index`. En compact, la pilule arrondit seulement son bout extérieur.
+- **Glossaire** : `GlossaryTerm` ouvre un seul `DefinitionPopover`, placement `auto`, en couche supérieure (`popover="manual"`). Il était rendu deux fois, avec trois `z-index`. À partir de 641 px et là où l'ancrage existe, il pend sous son déclencheur. Sinon, c'est la feuille en bas d'écran, avec son ✕. Le focus y entre maintenant aussi sur téléphone.
+
+**Deux pièges mesurés, et les choix qu'ils ont dictés** :
+- **Le `::backdrop` d'un popover ne prend aucun clic** (Chromium 141 ; celui d'un dialogue modal, si). Un tap hors de la feuille serait passé à la page, par exemple à une réponse du quiz. Sur téléphone, le popover est donc l'écran entier, transparent, et la feuille une carte à l'intérieur : le tap tombe sur lui.
+- **Une transition discrète lit encore son ancienne valeur à sa première frame.** Avec `content-visibility` en transition à l'ouverture, le contenu d'un accordéon qui s'ouvre refusait le focus pendant une frame, et un e2e qui focalisait le curseur « Et si » l'a montré. `content-visibility`, `display` et `overlay` ne transitent donc qu'à la fermeture. À l'ouverture, le contenu est là tout de suite, et seules la hauteur ou l'opacité bougent.
+
+**Ce que l'e2e ne peut pas faire** : piloter Ctrl+F. En Chromium headless, ni `window.find()` ni un fragment de texte ne révèlent `hidden="until-found"`, même sur une page statique. Le test lit donc l'attribut, le texte présent, la hauteur nulle et ce que fait `beforematch`.
+
+**Gardes.**
+
+`e2e/platform-native.spec.ts`, quatorze tests :
+- l'accordéon, qui glisse et dont le contenu est là dès la première frame, et sous mouvement réduit ;
+- les lignes repliées trouvables ;
+- le brouillon abandonné au repli ;
+- les flèches des onglets, l'onglet gardé hors d'elles, la largeur de défilement inchangée ;
+- le deck, l'export compris ;
+- le filet de l'en-tête ;
+- le remplissage de `Segmented`, avec le contraste du libellé mesuré sur le vrai remplissage dans les deux tons, qu'axe ne voit pas sous un pseudo-élément ;
+- le popover en bulle et en feuille, tap extérieur compris ;
+- la sortie des nouvelles et son repli sans `command` ;
+- le monde nuit.
+
+En unitaires :
+- `individual-transforms.test.ts` : aucune inclinaison en `transform: rotate()`, les keyframes partagées, `linear()` et son jeton ;
+- `quarter-news.test.ts` : la lecture de la durée ;
+- `z-index.test.ts` : l'échelle ne garde aucune couche sans lecteur, `--z-popover` retiré ;
+- `motion-scale.test.ts` : un jeton qui règle un autre jeton lu est vivant.
+
+**Non-vacuité** : chaque sabotage fait tomber son test, sur un build :
+- le bloc `@supports` de l'accordéon retiré ;
+- la fiche rendue seulement ouverte ;
+- le bloc `scroll-state` de l'en-tête retiré ;
+- la marge négative des flèches retirée ;
+- `command` et le repli du bouton retirés ;
+- le bloc d'ancrage de `Segmented` retiré ;
+- `color-scheme` retiré ;
+- le popover remis en `anchored` ;
+- l'ancien CSS d'ouverture, qui fait lire `hidden` à la première frame ;
+- l'onglet gardé à 8 px, qui passait sous la flèche.
+
+Deux tests passent sur l'ancien code par construction, parce qu'ils gardent ce qui reste : l'accordéon sous mouvement réduit, et le brouillon abandonné au repli.
+
+**Specs existantes ajustées, chacune pour une raison mesurée** :
+- **Moteur** : les fiches repliées sont maintenant dans le DOM, cachées. « Aucune fiche » devient « aucune fiche visible ».
+- **Cibles tactiles** : un voisin compte s'il est touchable (`checkVisibility()`). Une fiche repliée rend encore une boîte à `getBoundingClientRect`.
+- **Diapos** : `innerText` d'une vignette hors écran est vide. Le deck commence à ~2 000 px, sous le panneau d'export. Les trois lectures de texte des slides passent donc par `readEachOnScreen`. L'une d'elles (le test des glyphes « Et si ») n'avait pas de plancher de longueur et aurait passé à vide : elle en a un.
+- **Accordéons** : ouvrir un accordéon puis focaliser tout de suite loin dedans tombe court pendant l'ouverture. Aucun humain ne le fait en 250 ms, un test si : `openFold` attend la fin de l'ouverture. La légende d'audit se lit une fois dessinée.
+
+**Vérifié** :
+- lint et `tsc` propres ;
+- **2 235 tests unitaires** (+8), couverture au-dessus de ses seuils ;
+- `next build` propre avec `GAME_ENABLED=true` ;
+- **620 specs Playwright** (+14) : 615 passées, 5 ignorées par construction, aucun échec, sans reprise ;
+- les specs « Et si » rejouées quatre fois en parallèle : 228 sur 228.
+
+**À l'écran**, FR et EN, 1 280 et 390 px :
+- le popover en bulle et en feuille ;
+- le contrôle de ton dans ses deux tons ;
+- l'en-tête en haut de page et défilé ;
+- la bande d'onglets et ses flèches ;
+- les nouvelles, carte de texte et courriel du DG.
+
+**Barrière `/livrer` §0** : ni dépendance ni réglage de build, aucun fichier non-code sous `src/`, aucune route touchée. Le changement est du CSS et des composants client.
+
+**Pas fait ici** :
+- **Le bundle design-sync** n'est pas reconstruit ; B3 dit ce qu'il doit emporter, dont deux histoires `GlossaryTerm` à regarder.
+- **Sans ancrage** (Firefox tant qu'il ne l'a pas), un desktop reçoit la feuille au lieu de la bulle : juste, moins proche. Il deviendra bulle seul.
+- **Relecteurs non lancés** : ni route, ni proxy, ni payload, ni workflow, et aucune copie neuve (les flèches sont décoratives, avec un texte alternatif vide).
+
+**En production** : PR [#196](https://github.com/ScratchMe/tourdegrowth/pull/196), mergée le 2026-09-29 (squash `74aacdf`, 40 fichiers, identique à la tête de la PR), servie à 23 h 00 UTC. Relevé par HTTP sur les feuilles servies par `/en`, `/fr/glossary/cac` et `/r/sample` : présents `--stamp-overshoot`, `scroll-state(stuck:top)`, `anchor-scope:--segmented-on`, `position-anchor:--glossary-definition`, `interpolate-size:allow-keywords` et `color-scheme:dark` ; absent `--z-popover`. **Pas de navigateur contre la production** : le Chromium de la session ne reconnaît pas l'autorité du proxy, même en build complet, et la vérification TLS ne se désactive pas. Le comportement est celui que l'e2e a vu sur le même build.
+
+## A5, première famille : la table de nommage, et `desktop|mobile` devient `md|sm` (2026-09-29)
+
+**La demande** : le lot A5 de `CHANTIERS.md` (constat S-16), une famille de composants par PR.
+
+**Re-mesuré d'abord**, sur `src/components` :
+- quatre vocabulaires pour `size` : `desktop|mobile` (sept composants du quiz et du résultat), `sm|md|lg`, `md|compact`, et des noms propres (`frame|avatar`, `screen|slide`, `mini`, `hero|responsive`) ;
+- un drapeau `compact` à côté de la taille de `Button`, qui est en fait une troisième taille ;
+- `Tag tone="red"`, dont le seul usage produit (le catalogue du jeu, une astuce encore en place) est un diagnostic, soit le rôle d'`alert`.
+
+`desktop|mobile` n'a jamais été un appareil : le quiz passe toujours `"desktop"`, la taille de base qui rétrécit seule sous 760 px, et `"mobile"` ne sert qu'à l'aperçu réduit de l'accueil et à l'écran d'audit. C'est une échelle.
+
+**La table** (« Variant names » dans `.design-sync/conventions.md`) : un mot par axe.
+- `size` ne dit que l'échelle : `xs`, `sm`, `md`, `lg`, et `auto` pour « selon la largeur ». `md` est le défaut, et c'est lui qui rétrécit seul sur un téléphone.
+- Ce qui change plus que l'échelle prend sa propre prop (la grille de points d'une slide sera `medium="slide"`).
+- Le rouge d'un diagnostic est `alert`, jamais `red`.
+- Chaque nom retiré a sa cible et sa famille.
+
+**Cette PR** : les sept composants du quiz et du résultat passent de `desktop|mobile` à `md|sm`, avec leurs classes, leurs appelants (accueil, quiz, écran d'audit) et leurs aperçus. Les histoires `Mobile` et `Desktop` deviennent `Small` et `Medium`. Aucun changement visible : c'est un renommage.
+
+**Garde** : `variant-names.test.ts`.
+- `size` ne prend que l'échelle, `red` n'est pas un ton, et une taille n'est pas un drapeau `compact`.
+- Ce qui n'a pas encore bougé est listé par fichier, et la liste ne peut que rétrécir : elle refuse un mot qu'un fichier n'a plus.
+- Non-vacuité : `desktop|mobile` remis sur `AnswerOption` fait tomber le premier test ; une ligne en trop dans la liste fait tomber le dernier.
+
+**Vérifié** :
+- lint et `tsc` propres ;
+- **2 239 tests unitaires** (+4), couverture au-dessus de ses seuils ;
+- `next build` propre avec `GAME_ENABLED=true` ;
+- **620 specs Playwright** : 615 passées, 5 ignorées par construction, aucun échec.
+
+**À l'écran, au pixel près** : l'accueil, le quiz, le résultat, et le « Et si » et un panneau du moteur, en FR et EN, à 1 280 et 390 px (20 captures pleine page) ont été comparés à l'octet avec le build de `main`. Dix-neuf sont identiques. La vingtième (le « Et si » FR à 1 280) variait déjà d'une capture à l'autre sur `main`, et trois recaptures sur la branche lui sont identiques.
+
+**Pas fait ici** : les familles core, viz et jeu, une PR chacune ; le bundle design-sync, qui suit en B3.
+
+**En production** : PR [#197](https://github.com/ScratchMe/tourdegrowth/pull/197), mergée le 2026-09-29 (squash `68c0ac4`, 30 fichiers, identique à la tête de la PR), servie à 23 h 21 UTC. Relevé par HTTP, en FR et EN : l'accueil porte les classes `__sm` de `PillarChip`, `ScoreDisplay` et `Bottleneck`, le résultat leurs classes `__md`, et aucune page ne porte plus de `__mobile` ni de `__desktop`.
+
+## A5, famille core : `Segmented`, `ToneToggle`, `Button` et `Tag` (2026-09-29)
+
+**Ce qui bouge** :
+- `Segmented` et `ToneToggle` passent de `md|compact` à `md|sm`. Appelants : le sélecteur de langue, l'aperçu de l'accueil, le formulaire de mission.
+- `Button` perd son drapeau `compact`, qui était une troisième taille posée par-dessus `md` (police `--label-button-sm`, padding réduit) : c'est maintenant `size="sm"`. Il y avait une quarantaine d'appelants, dans l'admin d'audit, le moteur, l'accueil, le graphe et l'extrait du badge ; `tsc` a donné la liste complète.
+- `Tag` passe de `tone="red"` à `"alert"`. Son seul usage produit, le catalogue du jeu, marque une astuce encore en place : un diagnostic, pas l'accent roast que l'aperçu annonçait.
+
+Les histoires `Compact` deviennent `Small`, et l'exemple de `Tag` dit ce qu'il marque vraiment. La liste d'attente de `variant-names.test.ts` perd ses quatre lignes core.
+
+**Vérifié** : lint et `tsc` propres ; 2 239 tests unitaires ; `next build` propre avec `GAME_ENABLED=true` ; **620 specs Playwright** (615 passées, 5 ignorées par construction, aucun échec).
+
+**Au pixel près** : les 36 captures (accueil, quiz, résultat, moteur, tableau de bord et rapport du jeu, slide peloton, admin d'audit ; FR et EN ; 1 280 et 390 px) sont identiques à celles de `main`. Elles ont été prises sur l'empilement des trois familles restantes, qui contient celle-ci.
+
+**En production** : PR [#198](https://github.com/ScratchMe/tourdegrowth/pull/198), mergée le 2026-09-29 (squash `beb7fc0`, 39 fichiers, identique à la tête de la PR), servie à 23 h 38 UTC. Relevé par HTTP : l'accueil FR et EN porte les classes `__sm` de `Segmented` et de `Button`, et plus aucun `__compact`.
+
+## A5, famille viz : `StatTile`, `BulletChart`, `DotGrid` et `DotLegend` (2026-09-29)
+
+**Ce qui bouge** :
+- `StatTile` : `hero|md|compact|responsive` → `lg|md|sm|auto`. `auto` est la tuile `md` au-dessus de 760 px, `sm` en dessous, basculée en CSS. Appelants : le tableau de bord du jeu et les chiffres du « Et si ».
+- `BulletChart` : `mini|md` → `sm|md`, `sm` par défaut.
+- `DotGrid` et `DotLegend` : `size="screen" | "slide"` devient `medium="screen" | "slide"`. Ce n'est pas une échelle : la grille d'une slide a le trait plus épais d'une projection. Appelant : la slide peloton.
+- Le contrat de `StatTile` écrit à la main dans `.design-sync/config.json` était déjà en retard d'une valeur (`responsive` n'y figurait pas) : il suit maintenant le composant.
+
+Les aperçus suivent, et la liste d'attente de `variant-names.test.ts` perd ses trois lignes viz.
+
+**Vérifié** : lint et `tsc` propres, 2 239 tests unitaires. `next build` propre et **620 specs Playwright** (615 passées, 5 ignorées par construction, aucun échec) sur cet arbre, avant le rebase sur #198 : le code sous `src/` et `e2e/` en est identique (vérifié par `git diff`). Les 36 captures au pixel près, prises sur l'empilement qui contient cette famille, restent identiques à `main` : le tableau de bord du jeu et la slide peloton en font partie.
+
+**En production** : PR [#199](https://github.com/ScratchMe/tourdegrowth/pull/199), mergée le 2026-09-29 (squash `77f0fff`, 18 fichiers, identique à la tête de la PR), servie à 23 h 51 UTC. Le jeu et le moteur, seuls à rendre ces composants, restent en 404 derrière leurs drapeaux. La feuille globale servie par `/en` porte `StatTile …__auto` et `BulletChart …__sm`, et plus `__responsive` ni `__mini`.
+
+## A5, famille jeu, et le lot clos (2026-09-29)
+
+**Ce qui bouge** :
+- `DgFace` : `size="frame" | "avatar"` devient `framing="call" | "avatar"`. `call` dessine l'appel entier en 16:9 avec le bureau, `avatar` recadre la tête : ce qui est dans l'image, pas sa taille. C'est la règle de la table, et la cible écrite d'abord (`lg|sm`) la contredisait : corrigée avant cette PR. Appelants : le rapport du trimestre et les nouvelles.
+- `ClickPill` : `md|compact` → `md|sm`.
+- Les aperçus suivent (`Frame` → `Call`, `FrameMoods` → `CallMoods`, `Compact` → `Small`).
+- La liste d'attente de `variant-names.test.ts` est vide : un composant qui arrive avec un nom retiré se renomme, il ne s'y inscrit pas.
+
+**Le lot A5 est clos** : quatre PR (#197, #198, #199 et #200), une famille chacune, toutes selon la table « Variant names » de `conventions.md`. S-16 est livré. Aucune ne change quoi que ce soit à l'écran : 36 captures pleine page (accueil, quiz, résultat, moteur, tableau de bord et rapport du jeu, slide peloton, admin d'audit ; FR et EN ; 1 280 et 390 px) sont identiques à l'octet à celles de `main`, sur l'empilement des familles. Le bundle design-sync est à reconstruire (B3 dit ce qu'il doit emporter).
+
+**Vérifié** : lint et `tsc` propres ; 2 239 tests unitaires ; `next build` propre avec `GAME_ENABLED=true` ; **620 specs Playwright** (615 passées, 5 ignorées par construction, aucun échec), passées sur l'empilement des quatre familles, dont le code sous `src/`, `e2e/` et `.design-sync/` est identique à celui de cette branche (vérifié par `git diff`).
+
+**En production** : PR [#200](https://github.com/ScratchMe/tourdegrowth/pull/200), mergée le 2026-09-30 à 0 h 01 UTC (squash `bd8b24c`, 12 fichiers, identique à la tête de la PR), servie à 0 h 03 UTC. Le jeu et le moteur restent en 404 derrière leurs drapeaux. La feuille globale servie par `/en` porte `ClickPill …__sm`, et plus `__compact`. `DgFace` garde ses classes `__frame` et `__avatar` : seul le nom de la prop a changé (`framing`), pas la feuille.
+
+**Piège** : un `git rebase --onto` qui part d'une base trop ancienne rejoue des commits déjà squashés dans `main` et s'arrête sur un conflit fantôme (convention 12). La base à donner est le dernier commit de la branche du dessous, pas son premier. Ici, `--skip` a suffi : le contenu était déjà là.
+

@@ -66,10 +66,10 @@ export const Stretch = () => (
 );
 
 /** The phone's two-up grid: equal cells, stretched chips. `children` is the slot for an inline glossary trigger. */
-export const Mobile = () => (
+export const Small = () => (
   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, maxWidth: 342 }}>
     {PILLARS.map((p) => (
-      <PillarChip key={p.pillar} pillar={p.pillar} score={p.score} size="mobile" weak={p.pillar === "Retention"} stretch />
+      <PillarChip key={p.pillar} pillar={p.pillar} score={p.score} size="sm" weak={p.pillar === "Retention"} stretch />
     ))}
   </div>
 );

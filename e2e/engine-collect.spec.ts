@@ -3,7 +3,7 @@ import AxeBuilder from "@axe-core/playwright";
 import type { Locator, Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { EXAMPLE_EXPECTED, exampleState } from "../src/lib/engine/__tests__/fixtures";
-import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test, trackedEvents } from "./helpers";
+import { ADMIN_PASSWORD, expect, grantOwnerPreview, openFold, SKIP_ADMIN_REASON, test, trackedEvents } from "./helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -300,7 +300,7 @@ test.describe("asking and collecting", () => {
     await expect(band).toContainText("to follow up");
     await band.getByTestId("engine-resume-continue").click();
     // "Continue" opens the cheapest number still to fill: a five-minute one.
-    await expect(page.locator('[data-testid^="engine-sheet-"]')).toBeVisible();
+    await expect(page.locator('[data-testid^="engine-sheet-"]:visible')).toHaveCount(1);
   });
 });
 
@@ -360,7 +360,7 @@ test.describe("the §6.0 example on the board", () => {
       // The board opens on the stage the diagnosis names, every number folded.
       const stagePanel = page.getByTestId("engine-panel");
       await expect(stagePanel).toHaveAttribute("data-stage", "activation");
-      await expect(stagePanel.locator('[data-testid^="engine-sheet-"]')).toHaveCount(0);
+      await expect(stagePanel.locator('[data-testid^="engine-sheet-"]:visible')).toHaveCount(0);
       // « What if » is folded on the board, and no longer inside a number's sheet.
       await expect(stagePanel.getByTestId("engine-whatif-panel")).toHaveCount(0);
       const fold = page.getByTestId("engine-board-whatif");
@@ -628,7 +628,7 @@ test.describe("accessibility of each screen", () => {
   test("the example board — diagnosis, peloton, what-if, mirror — has no serious or critical issue", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await openExample(page);
-    await page.getByTestId("engine-board-whatif").locator(":scope > summary").click();
+    await openFold(page.getByTestId("engine-board-whatif"));
     await expect(page.getByTestId("engine-whatif-panel")).toBeVisible();
     // With a lever moved, so the red dots and the better/worse deltas are in the pass.
     await page.getByTestId("whatif-slider-acq.signup-rate").focus();

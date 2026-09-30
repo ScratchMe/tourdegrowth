@@ -1,4 +1,4 @@
-import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
+import { ADMIN_PASSWORD, expect, grantOwnerPreview, openFold, SKIP_ADMIN_REASON, test } from "./helpers";
 import type { Page } from "@playwright/test";
 import { exampleState } from "../src/lib/engine/__tests__/fixtures";
 
@@ -232,7 +232,10 @@ async function visibleQuiet(page: Page, sel: string): Promise<number[]> {
     const out: number[] = [];
     document.querySelectorAll(sel).forEach((el, i) => {
       const r = el.getBoundingClientRect();
-      if (r.width > 0 && r.height > 0) out.push(i);
+      // checkVisibility: a folded engine row keeps its sheet in the page,
+      // `hidden="until-found"` (StageTabs), and a skipped subtree still
+      // answers getBoundingClientRect with a box nobody can see or tap.
+      if (r.width > 0 && r.height > 0 && el.checkVisibility()) out.push(i);
     });
     return out;
   }, sel);
@@ -259,8 +262,10 @@ async function stolenFrom(page: Page, sel: string, index: number): Promise<{ nea
         left: q.left + q.width / 2 - Math.max(q.width, 44) / 2,
         right: q.left + q.width / 2 + Math.max(q.width, 44) / 2,
       };
+      // Only a neighbour someone can tap: not one inside a folded row's
+      // `hidden="until-found"` sheet, which still reports a box (visibleQuiet).
       const targets = [...document.querySelectorAll("a, button, input, select, textarea, summary, label")].filter(
-        (el) => el !== quiet && !quiet.contains(el) && !el.contains(quiet),
+        (el) => el !== quiet && !quiet.contains(el) && !el.contains(quiet) && el.checkVisibility(),
       );
       let near = 0;
       const stolen: string[] = [];
@@ -338,7 +343,7 @@ test.describe("the quiet text button", () => {
     await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
     await page.evaluate((state) => localStorage.setItem("tdg.engine.v1", JSON.stringify({ schemaVersion: 1, state })), exampleState());
     await page.reload();
-    await page.getByTestId("engine-board-whatif").locator(":scope > summary").click();
+    await openFold(page.getByTestId("engine-board-whatif"));
     const panel = page.getByTestId("engine-whatif-panel");
     await expect(panel).toBeVisible();
     // Two levers moved: two resets under two sliders, and « reset all » above them.
