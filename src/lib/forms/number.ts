@@ -1,3 +1,10 @@
+/*
+ * Numbers typed by a person: the growth engine's rules (spec D6, 2026-09-26),
+ * shared since design system extension 04 by `core/NumberField` and every
+ * form that reads it. Pure, so it is tested on its own
+ * (`__tests__/number.test.ts`) and the component only puts the caret back.
+ */
+
 /**
  * Reads what a person types as a number, the way they write it in their
  * language: "26 000" and "26 000" (NBSP, U+202F) and "26’000" in French,
@@ -112,4 +119,17 @@ export function regroupTypedNumber(
   if (caret === null) return { text, caret: null };
   if (text === raw) return { text, caret };
   return { text, caret: caretAfterSignificant(text, significantBefore(raw, caret, locale), locale, direction === "forward") };
+}
+
+/**
+ * A stored value as the field shows it on load: grouped the way the reader
+ * writes it, U+00A0 in French rather than Intl's U+202F — the same rule as
+ * the regrouping above and as the engine's formatter (§6.2), so a number
+ * reads the same typed or reloaded. `null` is an empty box, never "0".
+ */
+export function displayNumber(value: number | null, locale: "en" | "fr"): string {
+  if (value === null) return "";
+  return new Intl.NumberFormat(locale === "fr" ? "fr-FR" : "en-GB", { maximumFractionDigits: 6 })
+    .format(value)
+    .replace(/\u202F/g, "\u00A0");
 }

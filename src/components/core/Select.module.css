@@ -1,0 +1,80 @@
+/* Design system extension 04 — see design/ds-extension-04-return/components/core/Select/Select.prompt.md
+ *
+ * The native <select>, drawn as a field (Q9). The platform draws its own
+ * chevron and opens its own list: that pair is the operating system's, and the
+ * one glyph we do not draw, since the system has none that points down
+ * (brief 04, constraint 6). Everything else — edge, fill, radius, value type
+ * and inset — is ours, so a select lines up with a text field above it. */
+
+.control {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-height: var(--field-height-md);
+  margin: 0;
+  /* The platform indents a select's value by --select-inset on its own; taking
+     it back puts the value on the same line as a text field's. */
+  padding-block: 0;
+  padding-inline: calc(var(--pad-field-inline) + 1px - var(--select-inset)) var(--space-3);
+  font: var(--field-value);
+  color: var(--field-text);
+  background-color: var(--field-bg);
+  border: var(--border-width) solid var(--field-border);
+  border-radius: var(--radius-field);
+  cursor: pointer;
+  text-overflow: ellipsis;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.control.sm {
+  min-height: var(--field-height-sm);
+}
+
+.control.content {
+  width: auto;
+  align-self: flex-start;
+  min-width: 8ch;
+}
+
+/* "Choose…", not chosen yet, reads as a placeholder does. */
+.control.empty {
+  color: var(--field-placeholder);
+}
+
+.control option {
+  color: var(--field-text);
+  background-color: var(--field-bg);
+}
+
+@media (hover: hover) {
+  .control:hover {
+    border-color: var(--field-border-hover);
+  }
+}
+
+.control:focus-visible {
+  outline: var(--focus-width) solid var(--field-focus-ring);
+  outline-offset: var(--focus-offset-tight);
+}
+
+.control.invalid,
+.control.invalid:hover {
+  border-width: var(--field-edge-invalid);
+  border-color: var(--field-border-alert);
+  padding-inline-start: calc(var(--pad-field-inline) - var(--select-inset));
+}
+
+.control.missing,
+.control.missing:hover {
+  border-style: dashed;
+  border-color: var(--field-border-missing);
+}
+
+.control:disabled {
+  background-color: var(--field-disabled-bg);
+  border-color: var(--field-disabled-border);
+  color: var(--field-disabled-text);
+  cursor: not-allowed;
+  /* Browsers fade a disabled select on their own, past the tokens that pass. */
+  opacity: 1;
+}

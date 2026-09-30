@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { caretAfterSignificant, groupTypedNumber, parseTypedNumber, regroupTypedNumber, significantBefore } from "../_ui/number";
+import {
+  caretAfterSignificant,
+  displayNumber,
+  groupTypedNumber,
+  parseTypedNumber,
+  regroupTypedNumber,
+  significantBefore,
+} from "../number";
 
 /**
  * Counts are typed the way the reader writes them (spec D6). A number box
@@ -121,5 +128,26 @@ describe("regroupTypedNumber — the caret stays where the person is typing", ()
     expect(caretAfterSignificant("-1 234,5", 2, "fr")).toBe(2);
     expect(caretAfterSignificant("-1 234,5", 2, "fr", true)).toBe(3);
     expect(caretAfterSignificant("12", 9, "en")).toBe(2);
+  });
+});
+
+describe("displayNumber (a stored value as the box shows it on load)", () => {
+  it("groups the way the reader writes, with U+00A0 in French — not Intl's U+202F", () => {
+    expect(displayNumber(26000, "fr")).toBe("26 000");
+    expect(displayNumber(26000, "fr")).not.toContain(" ");
+    expect(displayNumber(26000, "en")).toBe("26,000");
+    expect(displayNumber(1.5, "fr")).toBe("1,5");
+  });
+
+  it("shows an empty box for null, never 0", () => {
+    expect(displayNumber(null, "fr")).toBe("");
+    expect(displayNumber(0, "en")).toBe("0");
+  });
+
+  it("reads back to the same number it shows", () => {
+    for (const n of [0, 7, 26000, 2000000, 12.25]) {
+      expect(parseTypedNumber(displayNumber(n, "fr"), "fr")).toBe(n);
+      expect(parseTypedNumber(displayNumber(n, "en"), "en")).toBe(n);
+    }
   });
 });

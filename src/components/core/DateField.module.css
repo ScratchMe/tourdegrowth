@@ -1,0 +1,22 @@
+/* Design system extension 04 — see design/ds-extension-04-return/components/core/DateField/DateField.prompt.md
+ *
+ * A day as three native selects, each with its own visible label, in
+ * day–month–year order in both languages (Q10). */
+
+.parts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-5);
+}
+
+.part {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.partLabel {
+  font: var(--field-hint);
+  color: var(--field-hint-text);
+}

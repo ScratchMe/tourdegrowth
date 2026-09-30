@@ -1,0 +1,228 @@
+/* Field — the label, the hint, the message, around any control.
+ * Also the shared box every one-line control is drawn in (Field_box),
+ * so TextField, NumberField and Select cannot drift apart again. */
+
+/* ── The frame ──────────────────────────────────────────────────────── */
+.Field_field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--field-gap-md);
+  min-width: 0;
+}
+.Field_sm {
+  gap: var(--field-gap-sm);
+}
+/* A group (radios, checkboxes, a date in parts) is a real fieldset. */
+.Field_fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.Field_fieldset > .Field_legend {
+  float: left; /* lets the legend take part in the column's layout */
+  width: 100%;
+  padding: 0;
+  margin-bottom: var(--field-gap-md);
+}
+.Field_sm.Field_fieldset > .Field_legend {
+  margin-bottom: var(--field-gap-sm);
+}
+.Field_fieldset > .Field_legend + * {
+  clear: both;
+}
+.Field_fieldset > .Field_groupBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--field-gap-md);
+}
+.Field_sm.Field_fieldset > .Field_groupBody {
+  gap: var(--field-gap-sm);
+}
+
+/* ── Label row: the label, the "optional" word, the soft-limit count ── */
+.Field_labelRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-5);
+}
+.Field_label {
+  font: var(--field-label);
+  color: var(--field-label-text);
+  text-wrap: pretty;
+}
+.Field_sm .Field_label {
+  font: var(--field-label-sm);
+}
+/* The legend of a group on a one-question screen is the question. */
+.Field_md.Field_fieldset .Field_label {
+  font: var(--field-legend);
+}
+.Field_sm.Field_fieldset .Field_label {
+  font: var(--field-legend-sm);
+}
+.Field_optional {
+  font: var(--field-optional);
+  color: var(--field-optional-text);
+  white-space: nowrap;
+}
+.Field_optional::before {
+  content: " ";
+}
+.Field_counter {
+  flex: none;
+  font: var(--field-counter);
+  font-variant-numeric: tabular-nums;
+  color: var(--field-counter-text);
+  white-space: nowrap;
+}
+.Field_counterOver {
+  color: var(--field-message-invalid);
+}
+
+/* ── Under the control: the message first, then the hint ─────────────── */
+.Field_after {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.Field_after:empty {
+  display: none;
+}
+.Field_hint {
+  font: var(--field-hint);
+  color: var(--field-hint-text);
+  text-wrap: pretty;
+  max-width: var(--measure-read);
+}
+/* The message is told apart from the hint by weight and by a rule on its
+   left, so it survives greyscale; the colour only repeats it. */
+.Field_message {
+  font: var(--field-message);
+  text-wrap: pretty;
+  max-width: var(--measure-read);
+  padding-inline-start: var(--space-3);
+  border-inline-start: var(--field-message-rule) solid;
+}
+.Field_messageInvalid {
+  color: var(--field-message-invalid);
+  border-color: var(--field-border-alert);
+}
+.Field_messageMissing {
+  color: var(--field-message-missing);
+  border-inline-start: var(--border-width) dashed var(--field-border-missing);
+  padding-inline-start: calc(var(--space-3) + var(--field-message-rule) - var(--border-width));
+}
+
+/* ── The box: every one-line control is drawn in it ───────────────────── */
+.Field_box {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  max-width: 100%;
+  min-height: var(--field-height-md);
+  /* 2px edge + 1px padding = the 3px an invalid edge takes, so the text
+     never moves when the edge turns. */
+  padding: 1px;
+  background: var(--field-bg);
+  color: var(--field-text);
+  border: var(--border-width) solid var(--field-border);
+  border-radius: var(--radius-field);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.Field_sm .Field_box {
+  min-height: var(--field-height-sm);
+}
+.Field_content .Field_box {
+  display: inline-flex;
+  width: auto;
+  align-self: flex-start;
+  justify-self: start; /* inside a FieldRow's subgrid */
+}
+@media (hover: hover) {
+  .Field_box:hover {
+    border-color: var(--field-border-hover);
+  }
+}
+.Field_box:focus-within {
+  outline: var(--focus-width) solid var(--field-focus-ring);
+  outline-offset: var(--focus-offset-tight);
+}
+.Field_boxInvalid,
+.Field_boxInvalid:hover {
+  border-width: var(--field-edge-invalid);
+  border-color: var(--field-border-alert);
+  padding: 0;
+}
+.Field_boxMissing,
+.Field_boxMissing:hover {
+  border-style: dashed;
+  border-color: var(--field-border-missing);
+}
+.Field_boxDisabled,
+.Field_boxDisabled:hover {
+  background: var(--field-disabled-bg);
+  border-color: var(--field-disabled-border);
+  color: var(--field-disabled-text);
+  cursor: not-allowed;
+}
+
+/* The native element inside the box: no edge, no ring of its own. */
+.Field_control {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0 var(--pad-field-inline);
+  font: var(--field-value);
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: calc(var(--radius-field) - var(--border-width));
+  outline: none;
+}
+.Field_control::placeholder {
+  color: var(--field-placeholder);
+  opacity: 1;
+}
+.Field_control:disabled {
+  cursor: not-allowed;
+  -webkit-text-fill-color: currentColor; /* Safari greys disabled text on its own */
+}
+
+/* A unit or currency sign: inside the box, never typed, never separable
+   from its number when the line wraps. */
+.Field_affix {
+  flex: none;
+  display: flex;
+  align-items: center;
+  font: var(--field-value);
+  color: var(--field-affix-text);
+  white-space: nowrap;
+  user-select: none;
+}
+.Field_affix:first-child {
+  padding-inline-start: var(--pad-field-inline);
+}
+.Field_affix:last-child {
+  padding-inline-end: var(--pad-field-inline);
+}
+.Field_affix + .Field_control {
+  padding-inline-start: var(--space-2);
+}
+.Field_control:has(+ .Field_affix) {
+  padding-inline-end: var(--space-2);
+}
+
+.tdg-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  border: 0;
+  clip-path: inset(50%);
+}

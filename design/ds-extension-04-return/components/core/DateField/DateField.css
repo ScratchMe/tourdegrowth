@@ -1,0 +1,16 @@
+/* DateField — a month, or a day, as native selects in the page's language (Q10). */
+.DateField_parts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-5);
+}
+.DateField_part {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.DateField_partLabel {
+  font: var(--field-hint);
+  color: var(--field-hint-text);
+}

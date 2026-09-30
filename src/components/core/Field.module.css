@@ -1,0 +1,332 @@
+/* Design system extension 04 — see design/ds-extension-04-return/components/core/Field/Field.prompt.md
+ *
+ * Field: the label, the hint and the message around a control. This sheet also
+ * draws the one box every one-line control sits in (TextField, NumberField),
+ * so the fields cannot drift apart again the way the engine's, the audit's and
+ * the slide builder's did — and FieldRow's layout, which places a Field's own
+ * parts on a shared grid and so has to name them. */
+
+/* --- The frame --- */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--field-gap-md);
+  min-width: 0;
+}
+
+.sm {
+  gap: var(--field-gap-sm);
+}
+
+/* A group (radios, checkboxes, a date in parts) is a real fieldset. */
+.fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.fieldset > .legend {
+  /* Floated so the legend takes part in the column instead of sitting on the edge. */
+  float: left;
+  width: 100%;
+  padding: 0;
+  margin-bottom: var(--field-gap-md);
+}
+
+.sm.fieldset > .legend {
+  margin-bottom: var(--field-gap-sm);
+}
+
+.fieldset > .legend + * {
+  clear: both;
+}
+
+.groupBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--field-gap-md);
+}
+
+.sm .groupBody {
+  gap: var(--field-gap-sm);
+}
+
+/* --- The label row: the label, the "optional" word, the soft-limit count --- */
+.labelRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-5);
+}
+
+.label {
+  font: var(--field-label);
+  color: var(--field-label-text);
+  text-wrap: pretty;
+}
+
+.sm .label {
+  font: var(--field-label-sm);
+}
+
+/* The legend of a group on a one-question screen is the question itself. */
+.md.fieldset .label {
+  font: var(--field-legend);
+}
+
+.sm.fieldset .label {
+  font: var(--field-legend-sm);
+}
+
+.optional {
+  font: var(--field-optional);
+  color: var(--field-optional-text);
+  white-space: nowrap;
+}
+
+.optional::before {
+  content: " ";
+}
+
+.counter {
+  flex: none;
+  font: var(--field-counter);
+  font-variant-numeric: tabular-nums;
+  color: var(--field-counter-text);
+  white-space: nowrap;
+}
+
+.counterOver {
+  color: var(--field-message-invalid);
+}
+
+/* --- Under the control: the message first, then the hint --- */
+.after {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.after:empty {
+  display: none;
+}
+
+.hint {
+  font: var(--field-hint);
+  color: var(--field-hint-text);
+  text-wrap: pretty;
+  max-width: var(--measure-read);
+}
+
+/* The message is told from the hint by its weight and by a rule on its left,
+   so it survives greyscale; the colour only repeats them. */
+.message {
+  font: var(--field-message);
+  text-wrap: pretty;
+  max-width: var(--measure-read);
+  padding-inline-start: var(--space-3);
+  border-inline-start: var(--field-message-rule) solid;
+}
+
+.messageInvalid {
+  color: var(--field-message-invalid);
+  border-color: var(--field-border-alert);
+}
+
+/* Missing is "not yet", not "wrong": a dashed rule in body ink, never red. */
+.messageMissing {
+  color: var(--field-message-missing);
+  border-inline-start: var(--border-width) dashed var(--field-border-missing);
+  padding-inline-start: calc(var(--space-3) + var(--field-message-rule) - var(--border-width));
+}
+
+/* --- The box every one-line control is drawn in --- */
+.box {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  max-width: 100%;
+  min-height: var(--field-height-md);
+  /* The 2px edge plus 1px of padding is the 3px an invalid edge takes, so
+     the text never moves when the edge turns. */
+  padding: 1px;
+  background: var(--field-bg);
+  color: var(--field-text);
+  border: var(--border-width) solid var(--field-border);
+  border-radius: var(--radius-field);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.sm .box {
+  min-height: var(--field-height-sm);
+}
+
+.content .box {
+  display: inline-flex;
+  width: auto;
+  align-self: flex-start;
+  justify-self: start;
+}
+
+@media (hover: hover) {
+  .box:hover {
+    border-color: var(--field-border-hover);
+  }
+}
+
+.box:focus-within {
+  outline: var(--focus-width) solid var(--field-focus-ring);
+  outline-offset: var(--focus-offset-tight);
+}
+
+.boxInvalid,
+.boxInvalid:hover {
+  border-width: var(--field-edge-invalid);
+  border-color: var(--field-border-alert);
+  padding: 0;
+}
+
+.boxMissing,
+.boxMissing:hover {
+  border-style: dashed;
+  border-color: var(--field-border-missing);
+}
+
+.boxDisabled,
+.boxDisabled:hover {
+  background: var(--field-disabled-bg);
+  border-color: var(--field-disabled-border);
+  color: var(--field-disabled-text);
+  cursor: not-allowed;
+}
+
+/* The native element inside the box: no edge and no ring of its own. */
+.control {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0 var(--pad-field-inline);
+  font: var(--field-value);
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: calc(var(--radius-field) - var(--border-width));
+  outline: none;
+}
+
+/* The box carries the ring (:focus-within above). Without this the global
+   :focus-visible rule — same weight as .control, and later — draws a second
+   ring around the input itself, under the box's edge. */
+.control:focus-visible {
+  outline: none;
+}
+
+.control::placeholder {
+  color: var(--field-placeholder);
+  opacity: 1;
+}
+
+.control:disabled {
+  cursor: not-allowed;
+  /* Safari greys disabled text on its own, past the token that passes. */
+  -webkit-text-fill-color: currentColor;
+}
+
+/* A unit or a currency sign: inside the box, never typed, never parted from
+   its number when a line wraps (Q7). */
+.affix {
+  flex: none;
+  display: flex;
+  align-items: center;
+  font: var(--field-value);
+  color: var(--field-affix-text);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.affix:first-child {
+  padding-inline-start: var(--pad-field-inline);
+}
+
+.affix:last-child {
+  padding-inline-end: var(--pad-field-inline);
+}
+
+.affix + .control {
+  padding-inline-start: var(--space-2);
+}
+
+.control:has(+ .affix) {
+  padding-inline-end: var(--space-2);
+}
+
+/* --- FieldRow: two fields that are one statement ("26 000 out of 120 000") ---
+ * Side by side from a 480px container, their boxes on one line however their
+ * labels wrap (subgrid); stacked below it, the joiner between them, so a
+ * French label or a long message never squeezes into half a phone. */
+.row {
+  container-type: inline-size;
+}
+
+.rowGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: var(--space-3);
+}
+
+.joiner {
+  font: var(--field-label-sm);
+  color: var(--field-hint-text);
+}
+
+.rowMessage {
+  margin-top: var(--space-3);
+}
+
+/* 480px: the width from which two fields and their joiner sit on one line. */
+@container (min-width: 480px) {
+  .rowGrid {
+    /* The first column as wide as its field, so the joiner sits against it. */
+    grid-template-columns: fit-content(50%) auto minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    column-gap: var(--space-5);
+    row-gap: 0;
+  }
+
+  .rowGrid > .field {
+    grid-row: span 3;
+    display: grid;
+    grid-template-rows: subgrid;
+    align-items: end;
+  }
+
+  .rowGrid > .field > .labelRow {
+    margin-bottom: var(--field-gap-sm);
+    align-self: end;
+  }
+
+  .rowGrid > .field > .after {
+    align-self: start;
+    margin-top: var(--field-gap-sm);
+  }
+
+  /* Placed by hand: the joiner's fixed row would otherwise let it take the
+     first column before the fields are placed. */
+  .rowGrid > :nth-child(1) {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+  }
+
+  .rowGrid > :nth-child(3) {
+    grid-column: 3;
+    grid-row: 1 / span 3;
+  }
+
+  .joiner {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: center;
+  }
+}

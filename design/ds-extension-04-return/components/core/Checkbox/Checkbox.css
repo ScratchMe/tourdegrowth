@@ -1,0 +1,69 @@
+/* Checkbox — yes / no with its sentence. A drawn 20px square on a native
+ * checkbox: the radio's family, square where the radio is round (Q13). */
+.Checkbox_row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-5);
+  min-height: var(--hit-min);
+  padding-block: var(--space-4);
+  font: var(--body-md);
+  color: var(--text-body);
+  cursor: pointer;
+  border-radius: var(--radius-field);
+  text-wrap: pretty;
+}
+.Checkbox_md {
+  font: var(--body-lg);
+}
+.Checkbox_row + .Checkbox_row {
+  border-top: var(--border-rule);
+}
+.Checkbox_input {
+  appearance: none;
+  flex: none;
+  width: var(--size-mark);
+  height: var(--size-mark);
+  margin: calc((1lh - var(--size-mark)) / 2) 0 0;
+  border: var(--border-width) solid var(--mark-color);
+  border-radius: var(--radius-mark);
+  background: var(--field-bg);
+  color: inherit;
+  cursor: inherit;
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+@media (hover: hover) {
+  .Checkbox_row:hover .Checkbox_input:not(:checked):not(:disabled) {
+    background: var(--mark-hover-bg);
+  }
+}
+.Checkbox_input:checked {
+  background: var(--mark-color);
+  box-shadow: inset 0 0 0 var(--mark-inset) var(--field-bg);
+}
+.Checkbox_input:focus-visible {
+  outline: var(--focus-width) solid var(--field-focus-ring);
+  outline-offset: var(--focus-offset-tight);
+}
+.Checkbox_text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.Checkbox_hint {
+  font: var(--field-hint);
+  color: var(--field-hint-text);
+}
+.Checkbox_invalid .Checkbox_input {
+  border-width: var(--field-edge-invalid);
+  border-color: var(--field-border-alert);
+}
+.Checkbox_disabled {
+  color: var(--field-disabled-text);
+  cursor: not-allowed;
+}
+.Checkbox_disabled .Checkbox_input {
+  border-style: dashed;
+  border-color: var(--field-disabled-border);
+  background: var(--field-disabled-bg);
+}

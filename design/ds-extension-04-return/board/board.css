@@ -1,0 +1,36 @@
+/* Board chrome only — not part of the delivery. */
+body { width: var(--board-width); margin: 0; overflow-x: hidden; }
+.B_main { padding: var(--space-12) var(--gutter-desktop) var(--space-15); display: flex; flex-direction: column; gap: var(--space-12); }
+.B_phone .B_main { padding: var(--space-10) var(--gutter-mobile) var(--space-14); gap: var(--space-11); }
+.B_kicker { font: var(--meta-sm); letter-spacing: var(--meta-tracking); text-transform: uppercase; color: var(--text-muted); }
+.B_h1 { font: var(--display-title); letter-spacing: var(--display-letter-spacing); margin-top: var(--space-3); }
+.B_section { background: var(--surface-card); border: var(--border-solid); border-radius: var(--radius-card); padding: var(--pad-card); }
+.B_phone .B_section { padding: var(--pad-card-mobile); }
+.B_head { display: flex; flex-direction: column; gap: var(--space-2); padding-bottom: var(--space-8); margin-bottom: var(--space-8); border-bottom: var(--border-rule); }
+.B_title { font: var(--display-section); letter-spacing: var(--display-letter-spacing); }
+.B_note { font: var(--body-sm); color: var(--text-muted); max-width: 60ch; }
+.B_grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-11) var(--space-12); }
+.B_phone .B_grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-10); }
+.B_wide { grid-column: 1 / -1; }
+.B_state { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
+.B_stateName { font: var(--meta-xs); letter-spacing: var(--meta-tracking); text-transform: uppercase; color: var(--text-muted); padding-bottom: var(--space-2); border-bottom: var(--border-width-hairline) solid var(--border-divider); }
+.B_stack { display: flex; flex-direction: column; gap: var(--form-gap-md); }
+.B_sheet { gap: var(--form-gap-sm); max-width: var(--width-reading); }
+/* At night, the last section sits on a raised panel (--surface-sunken): the
+   brief's "where to look first". */
+[data-world=night] .B_section:last-of-type { background: var(--surface-sunken); }
+
+/* Forced states, so hover and focus can be seen on a still board. Each
+   mirrors the component rule it stands for. */
+.force-hover .Field_box:not(.Field_boxInvalid):not(.Field_boxMissing):not(.Field_boxDisabled),
+.force-hover .Select_control { border-color: var(--field-border-hover); }
+.force-hover .Field_box, .force-hover .Select_control { box-shadow: none; }
+.force-focus .Field_box,
+.force-focus .Select_control,
+.force-focus .TextArea_field,
+.force-focus .Checkbox_input { outline: var(--focus-width) solid var(--field-focus-ring); outline-offset: var(--focus-offset-tight); }
+.force-hover-focus .Choices_option:nth-child(2) { box-shadow: var(--state-hover-shadow); border-color: var(--state-hover-border); }
+.force-hover-focus .Choices_option:nth-child(1) { outline: var(--focus-width) solid var(--field-focus-ring); outline-offset: var(--focus-offset-tight); }
+.force-hover .Checkbox_input:not(:checked) { background: var(--mark-hover-bg); }
+/* Hover marker, so a still hover reads as one (a cursor is not drawn). */
+.force-hover, .force-hover-focus { position: relative; }

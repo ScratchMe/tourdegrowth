@@ -1,17 +1,10 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState } from "react";
-import { parseTypedNumber, regroupTypedNumber } from "./number";
+import { displayNumber, parseTypedNumber, regroupTypedNumber } from "@/lib/forms/number";
 import styles from "./ui.module.css";
 
-function show(value: number | null, locale: "en" | "fr"): string {
-  if (value === null) return "";
-  // Grouped as the reader writes it; U+00A0 rather than Intl's U+202F, the
-  // same rule as the engine's formatter (§6.2).
-  return new Intl.NumberFormat(locale === "fr" ? "fr-FR" : "en-GB", { maximumFractionDigits: 6 })
-    .format(value)
-    .replace(/\u202F/g, "\u00A0");
-}
+const show = displayNumber;
 
 /**
  * A number field for COUNTS and amounts (spec D6: every rate is entered as

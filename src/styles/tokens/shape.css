@@ -19,6 +19,16 @@
   --radius-panel: 14px; /* answer options, insight cards, popovers */
   --radius-card: 18px; /* main cards, device frames */
   --radius-round: 50%; /* definition trigger */
+  /*
+   * Form fields (design system extension 04, design/ds-extension-04-return/).
+   * A field is not a button nor a panel: at the button's 12px a field and a
+   * button of the same height read as two buttons (Q4). The drawn marks —
+   * the radio ring and the checkbox square — are one size, AnswerOption's.
+   */
+  --radius-field: 6px;
+  --radius-mark: 4px; /* the checkbox square; the radio ring is --radius-round */
+  --size-mark: 20px;
+  --mark-inset: 4px; /* a checked mark: its edge, a gap of its ground, the fill */
 
   /* --- Borders: exactly three, declared in the world block below --- */
   --border-width: 2px;
@@ -41,6 +51,10 @@
   --border-width-stamp: 3px;
   --border-width-hairline: 1px;
   --border-width-fine: 1.5px;
+  /* An invalid field takes the stamp's weight: its edge and its message's
+     rule survive greyscale, the colour only repeats them (extension 04, Q2). */
+  --field-edge-invalid: var(--border-width-stamp);
+  --field-message-rule: var(--border-width-stamp);
   --shadow-none: none;
 
   /*

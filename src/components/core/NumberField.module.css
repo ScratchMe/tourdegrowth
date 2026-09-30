@@ -1,0 +1,27 @@
+/* Design system extension 04 — see design/ds-extension-04-return/components/core/NumberField/NumberField.prompt.md
+ *
+ * A number field looks like one before anything is typed (Q6): figures set
+ * against their unit and tabular, in a box as wide as the magnitude it
+ * expects. Written on `.control.x` so they win over the shared box's control
+ * rules whatever order the two sheets load in. */
+
+.control.figure {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+/* After a sign that comes first ("€26,000") the figure starts against it. */
+.control.afterPrefix {
+  text-align: start;
+}
+
+/* Sized to the magnitude, when the field does not fill its column. */
+.control.sized {
+  flex: 0 1 auto;
+  width: calc(var(--field-digits, var(--field-digits-default)) * 1ch + 2 * var(--pad-field-inline));
+}
+
+.control.sizedAffixed {
+  flex: 0 1 auto;
+  width: calc(var(--field-digits, var(--field-digits-default)) * 1ch + var(--pad-field-inline) + var(--space-2));
+}

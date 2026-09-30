@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Segmented } from "tour-de-growth";
+import { Field, Segmented } from "tour-de-growth";
 
 /*
  * The system's one segmented control. ToneToggle and LocaleSwitcher are both
@@ -91,5 +91,31 @@ export const Three = () => {
         { id: "30", label: "30 days" },
       ]}
     />
+  );
+};
+
+/**
+ * In a form (extension 04): the Field shows the label and the group takes its
+ * name from it (`labelledBy`), so what is seen and what is announced cannot
+ * drift. `md` at every density of form. The engine's activation window.
+ */
+export const InAForm = () => {
+  const [days, setDays] = React.useState<"7" | "14" | "30">("7");
+  return (
+    <Field group label="Activation window" hint="Counted from the day they sign up.">
+      {({ labelId }) => (
+        <Segmented
+          as="button"
+          labelledBy={labelId}
+          value={days}
+          onChange={setDays}
+          options={[
+            { id: "7", label: "7 days" },
+            { id: "14", label: "14 days" },
+            { id: "30", label: "30 days" },
+          ]}
+        />
+      )}
+    </Field>
   );
 };

@@ -110,6 +110,17 @@ const PAIRS: Pair[] = [
   ...on3("viz-axis", [8.28, 7.7, 6.76], "text", "axis labels"),
   { fg: "viz-unknown", bg: N0, stated: 8.28, role: "text", why: "'not measured' dash" },
   { fg: "viz-highlight-text", bg: N1, stated: 6.19, role: "text", why: "the diagnosis label" },
+  // --- Design system extension 04: the form primitives, as the night re-resolves them ---
+  ...on3("field-label-text", [16.38, 15.22, 13.37], "text", "a field's label"),
+  ...on3("field-hint-text", [8.28, 7.7, 6.76], "text", "hint, optional word, unit"),
+  ...on3("field-message-invalid", [6.66, 6.19, 5.44], "text", "an invalid field's message: --night-bad, never the brand red"),
+  ...on3("field-border", [3.99, 3.7, 3.25], "mark", "a field's edge — thin on night-2, as the return warns"),
+  ...on3("field-border-missing", [3.99, 3.7, 3.25], "mark", "dashed edge: missing, disabled"),
+  ...on3("field-border-alert", [4.04, 3.76, 3.3], "mark", "an invalid field's 3px edge"),
+  { fg: "field-text", bg: "field-bg", stated: 15.22, role: "text", why: "what the person typed" },
+  { fg: "field-placeholder", bg: "field-bg", stated: 7.7, role: "text", why: "a placeholder example" },
+  { fg: "field-disabled-text", bg: "field-disabled-bg", stated: 6.76, role: "text", why: "a disabled field's value" },
+  { fg: "field-focus-ring", bg: N1, stated: 15.22, role: "mark", why: "the one focus ring on every control" },
 ];
 
 describe("every stated night-world contrast ratio holds", () => {

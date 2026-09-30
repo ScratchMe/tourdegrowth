@@ -188,6 +188,30 @@
   /* --- Fields (design system extension 01): the one place a person types --- */
   --field-bg: var(--surface-card);
   --field-placeholder: var(--text-muted);
+  /*
+   * Design system extension 04: the form primitives. Aliases, so a field
+   * reads what it is (its edge, its hint) and a world re-resolves them on
+   * its own. Disabled is drawn with tokens that pass, never with opacity:
+   * `--state-disabled-opacity` on a row put its reason at 1.91:1 (Q18).
+   * One focus ring on every control, in every feature: the red
+   * `--focus-ring-invert` stays for ink- or red-filled surfaces.
+   */
+  --field-border: var(--border-hard);
+  --field-border-hover: var(--state-hover-border);
+  --field-border-missing: var(--border-soft); /* dashed: the system's « not yet » */
+  --field-text: var(--text-body);
+  --field-label-text: var(--text-body);
+  --field-hint-text: var(--text-muted);
+  --field-optional-text: var(--text-muted);
+  --field-affix-text: var(--text-muted);
+  --field-counter-text: var(--text-muted);
+  --field-message-invalid: var(--text-alert);
+  --field-message-missing: var(--text-body); /* not red: nothing is wrong yet */
+  --field-disabled-bg: var(--surface-sunken);
+  --field-disabled-text: var(--text-muted);
+  --field-disabled-border: var(--border-soft);
+  --field-focus-ring: var(--focus-ring);
+  --mark-hover-bg: var(--surface-sunken); /* an unticked box under the pointer: grey, never ticked */
 
   /*
    * --- Interaction states (DS v3 §5.4) --- one selection language for the

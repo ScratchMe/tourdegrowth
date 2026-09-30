@@ -144,6 +144,24 @@ const PAIRS: Pair[] = [
   { fg: "viz-highlight-text", bg: P1, stated: 5.42, role: "text", why: "its label" },
   { fg: "viz-highlight-text", bg: P2, stated: 4.89, role: "text", why: "its label" },
   { fg: "viz-unknown", bg: P0, stated: 7.2, role: "text", why: "'not measured' dash" },
+
+  // --- Design system extension 04: the form primitives (their README's table) ---
+  { fg: "field-label-text", bg: P0, stated: 16.06, role: "text", why: "a field's label, on a card" },
+  { fg: "field-label-text", bg: P1, stated: 12.97, role: "text", why: "a field's label, on the page" },
+  { fg: "field-hint-text", bg: P0, stated: 7.2, role: "text", why: "hint, optional word, unit" },
+  { fg: "field-hint-text", bg: P1, stated: 5.81, role: "text", why: "hint, optional word, unit" },
+  { fg: "field-message-invalid", bg: P0, stated: 6.72, role: "text", why: "an invalid field's message" },
+  { fg: "field-message-invalid", bg: P1, stated: 5.42, role: "text", why: "an invalid field's message" },
+  { fg: "field-text", bg: "field-bg", stated: 16.06, role: "text", why: "what the person typed" },
+  { fg: "field-placeholder", bg: "field-bg", stated: 7.2, role: "text", why: "a placeholder example" },
+  { fg: "field-disabled-text", bg: "field-disabled-bg", stated: 5.23, role: "text", why: "a disabled field's value — drawn, never faded" },
+  { fg: "field-border", bg: P0, stated: 16.06, role: "mark", why: "a field's edge" },
+  { fg: "field-border", bg: P1, stated: 12.97, role: "mark", why: "a field's edge" },
+  { fg: "field-border-missing", bg: P0, stated: 7.2, role: "mark", why: "dashed edge: missing, disabled" },
+  { fg: "field-border-missing", bg: P1, stated: 5.81, role: "mark", why: "dashed edge: missing, disabled" },
+  { fg: "field-border-alert", bg: P0, stated: 4.42, role: "mark", why: "an invalid field's 3px edge" },
+  { fg: "field-border-alert", bg: P1, stated: 3.57, role: "mark", why: "an invalid field's 3px edge" },
+  { fg: "field-focus-ring", bg: P1, stated: 12.97, role: "mark", why: "the one focus ring on every control" },
 ];
 
 describe("every stated paper-world contrast ratio holds", () => {

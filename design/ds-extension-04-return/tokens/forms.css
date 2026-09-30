@@ -1,0 +1,105 @@
+/* tokens/forms.css — design system extension 04, the form primitives.
+ *
+ * Every value a form control needs that the system did not already have.
+ * Three layers, as everywhere else:
+ *   - raw sizes and type on :root (no colour here);
+ *   - derived colours on `:root, [data-world]`, built only from semantic
+ *     tokens, so they re-resolve inside the night world on their own.
+ * No component reads a --night-* or --paper-* primitive.
+ *
+ * Typography tokens are `font` shorthands: write `font: var(--field-label)`,
+ * never `font-size: var(--field-label)` (silently invalid).
+ */
+
+:root {
+  /* ── Type ─────────────────────────────────────────────────────────── */
+  /* The label is a sentence, in Inter — not the mono meta-label (Q1). */
+  --field-label: 600 14.5px/1.35 var(--font-ui);
+  --field-label-sm: 600 13.5px/1.35 var(--font-ui);
+  /* A group's legend on a one-question screen is the question itself. */
+  --field-legend: var(--title-card);
+  --field-legend-sm: var(--field-label-sm);
+  /* What the person types. 16px, not --body-md (15px): under 16px, iOS
+     Safari zooms the page on focus (Q18). */
+  --field-value: 500 16px/1.4 var(--font-ui);
+  /* Hint and message share a size; the message is told apart by weight,
+     a red rule and the field's edge — never by colour alone (Q2). */
+  --field-hint: 500 13.5px/1.5 var(--font-ui);
+  --field-message: 600 13.5px/1.5 var(--font-ui);
+  /* The soft-limit count and the "optional" word keep the system's mono. */
+  --field-counter: var(--meta-xs);
+  --field-optional: 500 13.5px/1.35 var(--font-ui);
+
+  /* ── Shape ────────────────────────────────────────────────────────── */
+  /* Smaller than --radius-button (12px): a field and a button side by
+     side no longer read as two buttons (Q4). */
+  --radius-field: 6px;
+  /* The drawn marks: one 20px size for the radio ring and the checkbox. */
+  --size-mark: 20px;
+  --radius-mark: 4px;
+  --mark-inset: 4px;
+  /* An invalid field's edge is the system's inked 3px mark over an edge. */
+  --field-edge-invalid: var(--border-width-stamp);
+  /* The message's rule: same inked width, on its left. */
+  --field-message-rule: var(--border-width-stamp);
+
+  /* ── Size and room ───────────────────────────────────────────────── */
+  /* Two densities, one axis (`size`), Q17. Both keep the 44px target. */
+  --field-height-sm: var(--hit-min);        /* 44px, a sheet of fields */
+  --field-height-md: var(--space-13);       /* 48px, one question      */
+  --pad-field-inline: var(--space-6);       /* 14px, every control     */
+  --field-gap-sm: var(--space-2);           /* label → control, 6px    */
+  --field-gap-md: var(--space-3);           /* 8px                     */
+  --form-gap-sm: var(--space-8);            /* field → field, 20px     */
+  --form-gap-md: var(--space-10);           /* 26px                    */
+  --choice-height-sm: var(--hit-min);       /* 44px option rows        */
+  --choice-height-md: var(--hit-option);    /* 64px option rows        */
+  --pad-choice-sm: var(--space-4) var(--space-6);  /* 10px 14px */
+  --pad-choice-md: var(--space-7) var(--space-8);  /* 16px 20px */
+  --choice-gap: var(--space-3);             /* 8px between option rows */
+  /* A number field is as wide as the magnitude it expects (Q6). The
+     caller gives the digits; this is the fallback. */
+  --field-digits-default: 9;
+  /* The width at which a FieldRow sets its fields side by side, and at
+     which Choices may take two columns. Container widths, not viewport. */
+  --form-row-min: 480px;
+  --choices-columns-min: 560px;
+  /* The soft-limit count on a one-line field appears from this share of
+     the limit. Documented here; read by the component, not by CSS. */
+  --field-count-reveal: 0.8;
+  /* The platform indents a <select>'s value by this much inside its own
+     box; Select takes it back so its value lines up with a text field's.
+     Measured in Chromium 2026-09 (see README, "Measured"); re-measure in
+     WebKit and Gecko during the port and adjust here, never in a component. */
+  --select-inset: 4px;
+}
+
+:root,
+[data-world] {
+  /* ── Derived colours (re-resolve per world) ──────────────────────── */
+  --field-border: var(--border-hard);
+  --field-border-hover: var(--state-hover-border);
+  /* A field still to fill in: dashed, the system's "not yet" (Q18). */
+  --field-border-missing: var(--border-soft);
+  --field-text: var(--text-body);
+  --field-label-text: var(--text-body);
+  --field-hint-text: var(--text-muted);
+  --field-optional-text: var(--text-muted);
+  --field-affix-text: var(--text-muted);
+  --field-message-invalid: var(--text-alert);
+  --field-message-missing: var(--text-body);
+  --field-counter-text: var(--text-muted);
+  /* Disabled draws with tokens that pass, never with opacity (Q18):
+     `--state-disabled-opacity` on a row put its reason at 1.91:1. */
+  --field-disabled-bg: var(--surface-sunken);
+  --field-disabled-text: var(--text-muted);
+  --field-disabled-border: var(--border-soft);
+  /* The marks follow the text they sit beside. */
+  --mark-color: currentColor;
+  /* Hover on an unchecked checkbox greys its inside; it never looks ticked. */
+  --mark-hover-bg: var(--surface-sunken);
+  /* One focus ring for every control, in every feature. The red
+     `--focus-ring-invert` stays for ink- or red-filled surfaces only;
+     on a field it gave red a fourth meaning. */
+  --field-focus-ring: var(--focus-ring);
+}
