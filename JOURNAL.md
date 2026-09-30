@@ -6070,3 +6070,5 @@ Ils sont pris par `scripts/kit-provisional.capture.ts`, un fichier Playwright av
 - les pages du jeu, prérendues, affichaient le moteur « bientôt » : le bandeau lit le drapeau du moteur au build. Le build des captures pose donc les deux drapeaux, et la configuration le dit.
 
 **Reste A7.12.c** : refaire à l'ouverture de chaque produit, puis retirer le préfixe.
+
+**En production** : PR [#220](https://github.com/ScratchMe/tourdegrowth/pull/220), mergée le 2026-09-30 à 13 h 00 UTC (squash `9a359c3`, 40 fichiers, identique à la tête de la PR, rebasée sur #218 d'une autre session). Les captures sont servies par le dépôt public à ce commit, au même poids que dans la branche (`01-landing-fr-desktop.png` : 266 313 octets ; `provisoire-07-game-hub-fr-desktop.png` : 156 163). Le déploiement de production Vercel de ce commit porte aussi le code de #218, arrivé juste avant : `READY`, lu par l'API. Rien de cette PR ne change le site.
