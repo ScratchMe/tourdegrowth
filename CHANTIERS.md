@@ -23,12 +23,12 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 |---|---|---|---|
 | **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.c et A7.3.d après C25, A7.4 après A7.3, et A7.12.c à l'ouverture. A10 (S-15) et A11 livrés le 2026-09-30 |
 | **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30, après A7.10, A10 et A11** (B3, puis la re-synchro d'A11 le soir même : 88 composants, 292 cellules, 88 aperçus sur 88 rendus). Rien à lancer tant qu'un composant, ou une copie qu'un aperçu reprend, ne change pas |
-| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23, C24, C28 et C29 tranchées le 2026-09-30. Restent **C25**, la validation de la spécification de A7.3 (`ENGINE.md` §18), et C26 et C27, nées d'A8 (robots d'IA, `llms.txt`) |
+| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23, C24 et C26 à C29 tranchées le 2026-09-30, C26 à C29 livrées le même jour. Reste **C25**, la validation de la spécification de A7.3 (`ENGINE.md` §18), avec son propre prompt |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, tout A7.3 |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
 
 **L'ordre conseillé** : C25 d'abord (Q3, Q1 et Q2, puis les autres en bloc),
-qui débloque A7.3.c, puis D. C26 et C27 quand tu veux : rien ne les attend.
+qui débloque A7.3.c, puis D. Rien d'autre n'attend dans la section C.
 
 **Deux sessions en parallèle** écrivent toutes deux à la fin de `JOURNAL.md`
 et dans ce fichier. La seconde à merger fusionne `main` dans sa branche avant
@@ -249,6 +249,8 @@ ouverts, et, pour la vue propriétaire, un build jetable jamais commité.
 | C22 | « Qui est derrière ? » | **La réponse nomme Antoine.** C'est une question de calendrier, pas d'anonymat : pas de LinkedIn ni de lancement en grande pompe pour l'instant | `GROWTH-PLAN.md` option A, `marketing/campaigns/README.md` §10 | A7.13, livré le 2026-09-30 |
 | C23 | L'ordre des lancements (tranchée le 2026-09-30) | **On attend les deux, le moteur d'abord** : C19 tient, le calendrier garde B puis C. Le jeu, prêt plus tôt, reste fermé jusqu'à l'ouverture du moteur. **Le créneau réactif du Digital Fairness Act est abandonné**, alors que la proposition est visée pour novembre 2026 (MLex, 23/09) | `marketing/campaigns/README.md` §10, `GAME-BRIEF.md` | D2, section E (le fait DFA du jeu) |
 | C24 | « Voir un exemple » en roast | **Oui, tranchée le 2026-09-30** (la reco) : le bouton suit le sélecteur de ton de l'aperçu, et en roast il mène à `/r/sample?tone=roast` | Ici | Livré le 2026-09-30 avec A7.9 |
+| C26 | Laisser ou bloquer les robots d'IA (née d'A8) | **Tout laisser, et l'écrire** (la reco, tranchée le 2026-09-30) : `robots.txt` nomme les onze robots d'IA, entraînement et réponses dans deux groupes, tous en `Allow: /`. Un test refuse tout `Disallow` : en ajouter un, c'est rouvrir C26 | `src/lib/seo/ai-agents.ts`, `src/app/robots.ts` | Livré le 2026-09-30 |
+| C27 | Publier un `llms.txt` (née d'A8) | **Court et généré, plus `llms-full.txt`** (tranchée le 2026-09-30 ; la reco était sans `llms-full.txt`). `/llms.txt` liste exactement les adresses du sitemap, drapeaux compris, en anglais avec l'adresse française à côté ; `/llms-full.txt` porte le texte anglais des articles et des 24 termes, construit depuis les champs que les pages impriment. Deux tests les tiennent au sitemap et aux pages. En-têtes « à relire » | `src/lib/seo/llms.ts`, `llms-full.ts`, `GROWTH-PLAN.md` 2.8 | Livré le 2026-09-30 ; sa copie ira au prochain bon à tirer |
 | C28 | L'espace entre une unité et son chiffre (tranchée le 2026-09-30) | **L'unité porte son espace** (la reco) : la boîte n'en ajoute plus. Collée en anglais (« €500 », « 20% »), insécable en français (« 21 000 € », « 20 % »), ce que `Intl` donne ; `moneyUnit` reprend l'espace qu'`Intl` met à côté du signe | `Field.module.css`, `NumberField.tsx`, `.design-sync/conventions.md` | Livré le 2026-09-30 avec A11 |
 | C29 | « Facultatif » : dans le libellé, ou par la prop `optional` (tranchée le 2026-09-30) | **Par la prop** (la reco) : le mot sort des quatre libellés du moteur et se dessine plus discret après eux, comme le retour 04 le dessine ; nouvelle clé `workbench.optional`. Les quatre libellés raccourcis et la clé sont « à relire » | `engine-copy.ts`, `.design-sync/conventions.md` | Livré le 2026-09-30 avec A11 |
 
@@ -256,9 +258,7 @@ ouverts, et, pour la vue propriétaire, un build jetable jamais commité.
 
 | # | Question | Aujourd'hui | Reco |
 |---|---|---|---|
-| C25 | **Valider la spécification du B2B assisté et de l'hybride** (`ENGINE.md` §18, A7.3.a, écrite le 2026-09-30) | Rien n'est codé. La spécification tient la décision 3 à la lettre (type puis motions, « deux moteurs, un total », jamais de face-à-face) et C1 dans les deux motions. Elle pose **seize questions** (§18.12), chacune avec sa reco et ce qui casse si on se trompe. Les trois qui structurent tout : **Q3**, un client compte dans la motion qui a signé son contrat en cours (sinon le MRR total se compte deux fois), **Q1**, l'activation assistée est la mise en production, et **Q2**, l'assisté se lit sur trois mois glissants | **Trancher Q3, Q1 et Q2 d'abord**, une par une avec le prompt C, puis valider les treize autres en bloc si leurs recos te vont. Ensuite A7.3.c (le code) peut partir, dans l'ordre du §18.11 |
-| C26 | **Laisser ou bloquer les robots d'IA ?** Né d'A8 (2026-09-30) | `robots.ts` sert `User-Agent: *` / `Allow: /`, sans rien dire d'autre. Mesuré le 2026-09-30 : neuf robots d'IA ou de recherche (GPTBot, OAI-SearchBot, ClaudeBot, PerplexityBot, CCBot…) reçoivent la même page que Googlebot, au même octet. Les éditeurs séparent maintenant leurs robots d'**entraînement** (GPTBot, ClaudeBot, CCBot, Google-Extended) de leurs robots de **recherche** (OAI-SearchBot, Claude-SearchBot, PerplexityBot) : on peut refuser l'un sans perdre l'autre | **Tout laisser, et l'écrire** dans `robots.ts`, pour que ce soit un choix et plus un défaut. Le Tour vit du seul SEO (C20), le glossaire et les comparaisons sont écrits pour être cités, et ce qui a de la valeur (le Tour, le moteur, le jeu) tourne dans le navigateur : un modèle entraîné sur les pages ne l'emporte pas. Bloquer l'entraînement seul coûterait la présence du site dans ce qu'un modèle sait sans chercher. **Si on se trompe** : laisser ne se rattrape pas pour ce qui est déjà lu ; bloquer coûte des citations, et se défait au passage suivant |
-| C27 | **Publier un `llms.txt` ?** Né d'A8 (2026-09-30) | `/llms.txt` répond par la page 404 du site. C'est une proposition, pas un standard. Google a dit en juillet 2025 ne pas le lire, et selon une mesure publiée par [PPC Land](https://ppc.land/llms-txt-adoption-rises-8-8x-but-97-of-files-get-zero-ai-requests/), 97 % des fichiers n'ont reçu aucune requête d'IA en mai 2026. Perplexity est seule à dire qu'elle le lit (même source) | **Oui, court et généré** : une route qui le construit depuis ce qui existe déjà (titre et description de chaque page, les 24 termes, les comparaisons, les deux pages « porte ouverte », `/how-it-works`), en anglais avec les adresses des deux langues, **sans `llms-full.txt`**. Seul le paragraphe d'en-tête est de la copie neuve, « à relire », et un test l'empêche de dériver des pages. Gain faible, coût faible. **Si on se trompe** : rien ne casse dans un sens ni dans l'autre tant que Google et OpenAI ne le lisent pas |
+| C25 | **Valider la spécification du B2B assisté et de l'hybride** (`ENGINE.md` §18, A7.3.a, écrite le 2026-09-30) | Rien n'est codé. La spécification tient la décision 3 à la lettre (type puis motions, « deux moteurs, un total », jamais de face-à-face) et C1 dans les deux motions. Elle pose **seize questions** (§18.12), chacune avec sa reco et ce qui casse si on se trompe. Les trois qui structurent tout : **Q3**, un client compte dans la motion qui a signé son contrat en cours (sinon le MRR total se compte deux fois), **Q1**, l'activation assistée est la mise en production, et **Q2**, l'assisté se lit sur trois mois glissants | **Trancher Q3, Q1 et Q2 d'abord**, une par une avec le prompt C25, puis valider les treize autres en bloc si leurs recos te vont. Ensuite A7.3.c (le code) peut partir, dans l'ordre du §18.11 |
 
 ---
 
@@ -355,6 +355,28 @@ Tu es là pour me faire trancher, une par une, les décisions de la section C de
 4. Après chaque réponse, consigne-la tout de suite, datée, là où vit la question (ENGINE.md, marketing/campaigns/README.md, CHANTIERS.md), puis passe à la suivante. « On verra » se note aussi.
 5. Toute réponse qui demande du code devient un item de la section A de CHANTIERS.md, assez précis pour qu'une session autonome le fasse sans me reposer la question. Toute réponse qui demande un geste de ma part devient un item de la section D.
 6. À la fin : mets à jour la ligne « Décisions qui attendent Antoine » de CLAUDE.md, ajoute l'entrée de JOURNAL.md, ouvre une PR de doc seule et merge-la quand elle est verte (/livrer lu, pas appelé).
+
+Réponds-moi en français.
+```
+
+### Prompt C25 — la spécification du B2B assisté et de l'hybride
+
+Écrit le 2026-09-30, à la demande d'Antoine. C25 se tranche dans sa propre
+session, pas dans celle du prompt C : seize questions liées entre elles, dont
+trois qui structurent tout.
+
+```text
+Tu es là pour me faire trancher C25 : la validation de la spécification du B2B assisté et de l'hybride (ENGINE.md §18, écrite le 2026-09-30 : CHANTIERS.md A7.3.a, PR #214). Tu n'écris pas de code.
+
+1. Lis CLAUDE.md, CHANTIERS.md (C25 et A7.3), puis ENGINE.md : la décision 3, puis tout le §18, en commençant par §18.0 (en une page) et §18.12 (les seize questions).
+2. Avant de poser une question, vérifie qu'elle est encore ouverte : que §18 dit encore ce que fait le code de src/lib/engine/ (git log depuis 62e3618), et qu'aucune réponse n'est déjà dans JOURNAL.md ou dans le bon à tirer nº8.
+3. Pose d'abord Q3, puis Q1, puis Q2, une par une avec AskUserQuestion. Pour chacune : ce que c'est, un exemple chiffré tiré de §18.9, ce qui est en jeu, ta recommandation en premier avec « (Recommandé) », et ce qu'on casse si on se trompe. Pour Q3, montre-moi le double compte du MRR sur l'exemple.
+4. Puis propose Q4 à Q16 en bloc : un tableau (question, reco, ce qui casse) et une seule question « je valide ces recos / je veux en reprendre certaines ». Celles que je reprends, pose-les une par une comme au point 3. Pour Q10 et Q12, qui portent sur des écrans, montre un croquis ou l'écran actuel du moteur (build local avec ENGINE_ENABLED, via l'aperçu propriétaire), pas une description.
+5. Après chaque réponse, consigne-la tout de suite dans ENGINE.md §18.12, datée. Si elle change la spécification, corrige la section de §18 concernée dans la foulée. Une question neuve va en section C de CHANTIERS.md, avec sa reco.
+6. À la fin :
+   - C25 passe dans les « Tranchées » de CHANTIERS.md C, A7.3.b est close, et A7.3.c est prêt à partir dans l'ordre du §18.11 ;
+   - mets à jour la ligne « Décisions qui attendent Antoine » de CLAUDE.md, et ajoute l'entrée de JOURNAL.md ;
+   - ouvre une PR de doc seule, et merge-la quand elle est verte (/livrer lu, pas appelé). Si une autre session a touché les mêmes fichiers entre-temps, fusionne main d'abord et garde les deux côtés.
 
 Réponds-moi en français.
 ```
