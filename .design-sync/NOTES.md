@@ -350,6 +350,12 @@ shim in the scratchpad: 11 files, no error), not rendered by the driver: the
 session that ported them had no `/design-sync` skill. `NumberField` takes a
 number (`number | null`), not the text the extension 04 bundle drew — its
 contract says so, and Claude Design will read the real one on upload.
+Since A10.b to A10.d (same day) the engine and the audit mount them and no
+other form control exists outside `src/components/core/`
+(`form-controls-source.test.ts`); `TextField` gained `autoFocus`, four
+controls a `data-testid` on the native element, and `FieldRow` works without
+a joiner — the contracts change with them. Expected at the next sync:
+88 components, 284 cells (`CHANTIERS.md` B3).
 
 **The project also holds `design/`, which is not part of the bundle.** On
 2026-09-30 brief 04 went in at the paths it has in this repo:
