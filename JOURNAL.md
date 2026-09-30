@@ -6113,3 +6113,49 @@ Ils sont pris par `scripts/kit-provisional.capture.ts`, un fichier Playwright av
 Aucun débordement horizontal sur les seize vues mesurées. Le « % » de la cible a été re-mesuré après correctif : à 14 px du bord intérieur. Le monde nuit ne concerne pas le moteur, qui est sur papier.
 
 **Hors d'A10, noté** : la ligne « Pour enregistrer, il manque : … » deviendrait naturellement un `FormSummary`. Il faudrait pour cela un titre qui compte, donc de la copie neuve, et c'est une décision qui ne relève pas du portage.
+
+## Extension 04 du design system, lot c : l'audit sur les primitives, avec A9.1 (2026-09-30)
+
+**Porté, bien que l'audit soit entre parenthèses** (#210) : Antoine l'a tranché avant le lot a. C'est un portage qui retire une copie, pas une fonctionnalité. Tous les écrans de `/admin/audit` qui saisissent quelque chose passent sur `src/components/core/` : la nouvelle mission, la ligne et sa définition, les observations, le repère, le contexte, la matrice, le constat et la purge. Tous en densité `sm`, une fiche de champs. Plus rien n'importe `admin/audit/_ui/`, que A10.d supprime.
+
+**Le gros du portage est mécanique** : chaque `Field` + `TextInput`, `NumberInput`, `DateInput` ou `TextArea` devient le champ du système, 82 des 85 champs réécrits par un script jamais commité. Il ne touchait que la forme exacte « un `Field`, un seul contrôle dedans » et laissait le reste à la main : les listes à option vide, devenues des `placeholder`, le mandat en `Segmented` et les deux cases à cocher. En le relisant, une chose avait disparu : la `key` d'un `Field` dans une boucle de la matrice. Le lint l'a vue.
+
+**Ce qui change à l'écran** :
+- **Un nombre se lit comme on l'écrit** : « 1 200 000 » ou « 26 000 » sont lus, là où l'ancien `type="number"` les lisait comme rien du tout.
+- **Une date se choisit en trois listes, en français** : jour, mois (« janvier »…), année. Plus de `<input type="date">` à la langue du navigateur. Le format du fichier ne change pas (`aaaa-mm-jj`) : `IsoDateField`, une composition de `DateField` et non une copie, fait la traduction. Une date à moitié choisie reste à l'écran sans s'enregistrer, et le 31 février le dit.
+- **Le paragraphe rouge des champs manquants disparaît** : c'était la chose la plus bruyante de l'écran, pour un état qui enregistre quand même. Chaque champ requis de la définition porte maintenant l'état `missing`, en tirets, avec « À compléter — l'export signalera cette ligne comme incomplète. » L'argument d'un seuil argumenté porte sa phrase d'origine. Un `FormSummary` au-dessus du bouton les liste, un lien par champ, qui y porte le focus.
+- **L'anneau de focus est à l'encre partout**, bouton d'import compris : le rouge donnait au rouge un quatrième sens.
+
+**A9.1 dans la même PR** : 46 guillemets et 26 chaînes à ponctuation haute passent à l'espace insécable. `copy-typography.test.ts` lit désormais le dossier de l'audit, commentaires retirés. Les guillemets sont vérifiés partout, la ponctuation haute seulement dans les chaînes entre guillemets droits : `a ? b : c` est du code. Le texte entre balises JSX n'est pas lu pour la ponctuation haute, aucun motif ne le distingue du code.
+
+**Copie neuve, « à relire »** (`FORM_COPY` dans `labels.ts`) :
+- la phrase de lecture, reprise du moteur ;
+- la phrase « à compléter » et les trois libellés de la date, repris de la planche du retour ;
+- le titre compté du résumé ;
+- deux phrases pour une date à moitié choisie et pour un jour qui n'existe pas.
+
+Le paragraphe d'ouverture du résumé reprend la phrase de l'ancien paragraphe rouge.
+
+**Relu par le sous-agent `relecteur-copie`, qui a trouvé trois choses justes** :
+- **Un marqueur manquait** sur la phrase de l'argument, devenue une constante reprise dans le résumé.
+- **Il restait 18 espaces ordinaires** avant « : » ou « ; » dans du texte JSX que la garde ne lit pas, un dans un gabarit, et un avant « % ». Corrigés.
+- **Cette phrase promettait « l'export refusera cette ligne »**, ce qui est faux : l'export écrit le fichier, c'est le validateur qui signale. La même correction avait déjà été faite une fois sur la définition, en phase 1.3b. Elle dit maintenant « le validateur signalera cette ligne », marquée « à relire ».
+
+**Gardes, avec leur non-vacuité** :
+- **« 1 200 000 » tapé dans la valeur d'une observation est exporté 1200000** (`audit-rows.spec.ts`). Sur un build où `NumberField` lit avec `Number(text)`, la spec rougit : la valeur manque.
+- **La typographie du dossier** (`copy-typography.test.ts`) : remettre des espaces ordinaires dans un seul indice de `DefinitionEditor.tsx` fait rougir les deux vérifications.
+
+**Les e2e de l'audit suivent l'écran** :
+- les dates se choisissent par `pickDay` (trois listes) ;
+- le résumé remplace les deux paragraphes : `row-missing` contient « Unité », puis disparaît ;
+- son lien porte le focus dans le champ ;
+- le champ lui-même annonce « À compléter ».
+
+**Vérifié** :
+- `tsc`, `eslint` et `next build` propres ; **2 338 tests unitaires**.
+- La suite Playwright complète : **663 specs, 640 passées, aucun échec**. Les 23 ignorées le sont par construction : 5 « jeu fermé », et celles d'A7.11 sans l'émulateur.
+- **À l'écran**, à 390 et 1 280 px :
+  - la nouvelle mission ;
+  - une ligne mesurée : définition en `missing`, « 26 000 » dans sa boîte, un 31 février refusé, une date à moitié choisie, et le résumé au-dessus du bouton.
+
+  Aucun débordement horizontal.
