@@ -1447,7 +1447,11 @@ Désormais :
 - la case de liaison entre aussi **dans les Réglages**, pour relier ou délier
   après coup.
 
-À coder : `CHANTIERS.md` A7.5.
+**Codé le 2026-09-30 (A7.5)** : `Mirror` a un troisième état,
+`data-state="unlinked"` (date et score du Tour, bouton « Relier ce Tour »,
+qui pose `tourLink` et compte `engine_tour_linked`). Les Réglages portent la
+case : cochée, elle garde le lien existant ou relie ce Tour ; décochée, elle
+délie, et une ligne dit que le Tour reste sur l'appareil.
 
 ### 8.6 Ce qu'on ne dessine volontairement pas
 

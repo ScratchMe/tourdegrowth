@@ -108,23 +108,6 @@ avec la règle de C15. **Pas de lien au pied de page.**
 | Tests | Un e2e par page : le lien existe moteur ouvert et mène à `/{locale}/aarrr-funnel-template`. Un test sur un build fermé : il n'existe pas (les specs « jeu fermé » montrent la façon de faire) |
 | Quand | Construit avant l'ouverture (D2), après A7.3 : les liens promettent ce que le moteur fait, hybride compris |
 
-#### A7.5 — Relier un Tour après coup (C8)
-
-**Le constat** : la case « Comparer avec ce Tour » n'existe que sur la carte
-de départ (`Setup.tsx:209`, `tour && !editing`). Un Tour fait après le début
-du moteur, ou une case décochée par mégarde, ne peut donc plus jamais être
-relié. Le tableau n'affiche alors rien (`Board.tsx:170-182`), alors que le
-miroir sans Tour invite justement à en faire un.
-
-**Décidé** (`ENGINE.md` §8.5) :
-
-| Où | Quoi |
-|---|---|
-| `_engine/Mirror.tsx` et `Board.tsx` | Un troisième état du miroir, `data-state="unlinked"`, quand un Tour est sur l'appareil et `state.tourLink` est nul : le titre du miroir, une ligne (« Tu as fait le Tour le {date} ({score}/100). Le relier compare ce que tu y as déclaré à ce que tu retrouves ici. »), et un bouton « Relier ce Tour » qui pose `tourLink` comme le fait la carte de départ. Même style que l'état `none`. Sans score, la variante sans score qui existe déjà (`mirrorTakenAtNoScore`) |
-| `_engine/Setup.tsx` | La case de liaison apparaît aussi dans les Réglages (`editing`), pour relier ou délier. Délier ne supprime pas le Tour de l'appareil |
-| Copie | La ligne et le bouton, en FR et en EN, « à relire » |
-| Tests | Un e2e du parcours complet : moteur commencé sans Tour → invitation → un Tour déposé sur l'appareil → retour au tableau → état `unlinked` → « Relier ce Tour » → miroir `linked`. Et relier puis délier par les Réglages. Dans les deux langues, à 1 280 et 390 px. Le canari « rien ne quitte le navigateur » tient toujours : relier ne fait que lire `tdg.results.v1` |
-
 #### A7.7 — L'encart du jeu sous le bouton principal, sur desktop (C10)
 
 **Décidé** (`GAME-BRIEF.md` §15.4) : sur desktop, l'encart du jeu passe
@@ -318,7 +301,7 @@ ouverts, et, pour la vue propriétaire, un build jetable jamais commité.
 | C5 | Slide « déclaré × mesuré » | Gardée décochée | `ENGINE.md` décision 4 | — |
 | C6 | Moteur public, distinct de l'audit | Confirmé. Antoine tient l'audit privé pour un doublon ; la mission D4 devait trancher. **Tranché autrement le 2026-09-30 : l'audit est mis entre parenthèses, priorité au moteur** | `ENGINE.md` décision 6, `AUDIT-PLAN.md` en tête | D5 (les entretiens, réorientés vers le moteur) |
 | C7 | Liens d'ouverture du moteur | Les trois pages gardent leur lien ; **pas de section à part sur l'accueil** (la carte de la bande devient le lien) ; pas de pied de page | `ENGINE.md` décision 7 | A7.4 |
-| C8 | Le miroir, Tour présent non relié | **Une ligne et un bouton « Relier ce Tour »**, et la liaison dans les Réglages. L'invitation « Fais le Tour » menait à une impasse | `ENGINE.md` §8.5 | A7.5 |
+| C8 | Le miroir, Tour présent non relié | **Une ligne et un bouton « Relier ce Tour »**, et la liaison dans les Réglages. L'invitation « Fais le Tour » menait à une impasse | `ENGINE.md` §8.5 | A7.5, livré le 2026-09-30 |
 | C9 | Slide fuite d'une étape sans prix | **La slide existe**, avec un titre sans argent. Sous un client, l'omission est gardée | `ENGINE.md` §9.3 | A7.6, livré le 2026-09-30 |
 | C10 | Place de l'encart du jeu | **Sous le bouton principal sur desktop**, comme sur mobile. Mesuré : il faisait descendre le bouton du visiteur de 350 px | `GAME-BRIEF.md` §15.4 | A7.7 |
 | C11 | Quand montrer l'encart | Gardé : la rétention dans le groupe, partagé compris. Le cas de plusieurs niveaux se tranche à l'ouverture d'un deuxième niveau | `GAME-BRIEF.md` §15.4 | Section E |

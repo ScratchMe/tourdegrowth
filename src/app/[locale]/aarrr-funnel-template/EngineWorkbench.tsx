@@ -137,8 +137,9 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     // the screen and the slide cannot word one engine two ways.
     const verdict = pelotonTitle(state, derived.peloton, strings, metrics, ctx);
     const plan = collectPlan(lastSnapshot(state), ctx.today);
-    const tourOnDevice = latestTourWithAnswers(tourResults ?? []) !== null;
-    const view: EngineView = { state, derived, strings, metrics, derivedCopy, bridges, ctx, tourResult, tourOnDevice };
+    const deviceTour = latestTourWithAnswers(tourResults ?? []);
+    const tourOnDevice = deviceTour !== null;
+    const view: EngineView = { state, derived, strings, metrics, derivedCopy, bridges, ctx, tourResult, tourOnDevice, deviceTour };
     return { view, verdict, plan };
   }, [state, openedAt, tourResults, locale, bridges, strings, metrics, derivedCopy]);
 
@@ -329,6 +330,12 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
       setPanelSeq((n) => n + 1);
       focus(`engine-metric-${domId(id)}`);
     },
+    linkTour(resultId: string | null) {
+      // Only the id is stored (D13): the Tour is read from `tdg.results.v1`, never copied, and
+      // unlinking leaves it on the device (C8).
+      const result = persist({ ...current, tourLink: resultId ? { resultId, linkedAt: new Date().toISOString() } : null });
+      if (result.ok && resultId) trackEngine({ name: "engine_tour_linked" });
+    },
   };
 
   function exportJson() {
@@ -378,7 +385,8 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
         strings={strings}
         locale={locale}
         today={view.ctx.today}
-        tour={null}
+        tour={view.deviceTour}
+        linked={current.tourLink !== null}
         initial={{ setup: current.setup, referenceMonth: snapshot.referenceMonth, cohortMonth: snapshot.cohortMonth }}
         existing={{
           activation: snapshot.metrics["act.rate"] !== undefined,
@@ -387,7 +395,13 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
         }}
         onCancel={openBoard}
         onStart={(choice) => {
-          persist(withSettings(current, choice.setup, choice.referenceMonth, choice.cohortMonth));
+          // The Tour box (C8): ticked keeps the link there is, or links this Tour; unticked unlinks —
+          // and the Tour stays on the device either way.
+          const settled = withSettings(current, choice.setup, choice.referenceMonth, choice.cohortMonth);
+          const linking = choice.tourResultId !== null && current.tourLink === null;
+          const tourLink = choice.tourResultId === null ? null : (current.tourLink ?? { resultId: choice.tourResultId, linkedAt: new Date().toISOString() });
+          const result = persist({ ...settled, tourLink });
+          if (result.ok && linking) trackEngine({ name: "engine_tour_linked" });
           openBoard();
         }}
       />,

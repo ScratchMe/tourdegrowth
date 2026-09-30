@@ -165,8 +165,9 @@ export function Board({
           </Disclosure>
 
           {/* Declared × measured (§8.5): the linked Tour's mirror, or "that Tour is gone" when its
-              result left the device, or — with no Tour here at all — the invitation to take one.
-              A Tour on the device the person chose not to link: nothing (their choice, D13). */}
+              result left the device; a Tour here and no link — taken after the engine started, or
+              unticked by mistake — offers to link it (C8, 2026-09-29); with no Tour at all, the
+              invitation to take one. */}
           {state.tourLink ? (
             <Mirror
               mirror={derived.mirror}
@@ -177,9 +178,23 @@ export function Board({
               metrics={view.metrics}
               derived={view.derivedCopy}
             />
-          ) : !view.tourOnDevice ? (
+          ) : view.deviceTour ? (
+            <Mirror
+              mirror={null}
+              unlinked={{
+                takenAt: view.deviceTour.createdAt,
+                total: view.deviceTour.total ?? null,
+                onLink: () => actions.linkTour(view.deviceTour!.id),
+              }}
+              strings={strings}
+              locale={ctx.locale}
+              bridges={view.bridges}
+              metrics={view.metrics}
+              derived={view.derivedCopy}
+            />
+          ) : (
             <Mirror mirror={null} strings={strings} locale={ctx.locale} bridges={view.bridges} metrics={view.metrics} derived={view.derivedCopy} />
-          ) : null}
+          )}
       </>
 
       {plan.count > 0 ? (

@@ -5,6 +5,7 @@ import type { BridgeRow, DerivedId, MetricId, Mirror as MirrorModel, MirrorVerdi
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
 import { point } from "@/lib/engine/interval";
 import { numbered } from "@/lib/engine/phrases";
+import { formatDate } from "./text";
 import { fill } from "./visual-model";
 import styles from "./Mirror.module.css";
 
@@ -13,6 +14,11 @@ export interface MirrorProps {
   mirror: MirrorModel | null;
   /** A Tour was linked (`state.tourLink`) but its result is gone from the device (§6.11). */
   gone?: boolean;
+  /**
+   * A Tour is on this device and the engine is not linked to it (C8, §8.5): which one, and
+   * the link to make. Without it, a Tour taken after the engine started could never be compared.
+   */
+  unlinked?: { takenAt: string; total: number | null; onLink: () => void };
   strings: EngineStrings;
   locale: Locale;
   bridges: ResolvedBridge[];
@@ -58,8 +64,30 @@ const FOUND_STATUS: Record<TrackingLevel, keyof EngineStrings["status"]> = {
  * another root layout and a prefetch there would be wasted
  * (`cross-root-links.test.ts`).
  */
-export function Mirror({ mirror, gone = false, strings, locale, bridges, metrics, derived }: MirrorProps) {
+export function Mirror({ mirror, gone = false, unlinked, strings, locale, bridges, metrics, derived }: MirrorProps) {
   const m = strings.mirror;
+  // The Tour's day through the engine's own formatter, like the Settings card
+  // that names the same Tour (`Setup.tsx`): « 1er septembre 2026 », "September
+  // 1, 2026", and the raw string rather than a throw on a date it cannot read.
+  const dateOf = (iso: string) => formatDate(iso, locale);
+
+  if (!mirror && unlinked) {
+    return (
+      <section className={styles.mirror} data-testid="engine-mirror" data-state="unlinked">
+        <h3 className={styles.title}>{m.title}</h3>
+        <p className={styles.lead}>
+          {unlinked.total === null
+            ? fill(m.unlinkedNoScore, { date: dateOf(unlinked.takenAt) })
+            : fill(m.unlinked, { date: dateOf(unlinked.takenAt), score: String(unlinked.total) })}
+        </p>
+        <div>
+          <Button variant="secondary" onClick={unlinked.onLink} data-testid="mirror-link-tour">
+            {m.link}
+          </Button>
+        </div>
+      </section>
+    );
+  }
 
   if (!mirror) {
     return (
@@ -80,12 +108,7 @@ export function Mirror({ mirror, gone = false, strings, locale, bridges, metrics
   const nameOf = (id: MetricId | DerivedId) =>
     metrics.find((x) => x.id === id)?.name ?? derived.find((x) => x.id === id)?.name ?? id;
 
-  const date = new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(mirror.takenAt));
+  const date = dateOf(mirror.takenAt);
   const takenAt =
     mirror.total === null
       ? fill(strings.visual.mirrorTakenAtNoScore, { date })

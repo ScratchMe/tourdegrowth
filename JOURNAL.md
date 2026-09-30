@@ -5747,6 +5747,8 @@ C9, tranché par Antoine le 2026-09-29, codé. Quand le diagnostic nomme **seule
 - **Tests unitaires** : une rétention à J30 seule sous sa cible donne une slide avec un titre sans « € » ni « MRR », sans ligne de calcul, et « ## 2. » dans l'export, en FR et en EN. Un gain d'un tiers de client ne donne pas de slide.
 - **Un e2e**, en FR et en EN, à 1 280 et 390 px : la slide rendue, sans « Le calcul », avec « À côté » et le pied, sans défilement horizontal.
 
+**En production** : PR [#206](https://github.com/ScratchMe/tourdegrowth/pull/206), mergée le 2026-09-30 à 10 h 20 UTC (squash `2bded69`, 12 fichiers, identique au diff de la PR ; #205, d'une autre session, s'était glissée entre les deux). Déploiement de production Vercel `READY` sur ce commit, lu par l'API. La slide n'est pas observable en production : le moteur reste en 404 derrière son drapeau.
+
 ## D10 : le Tour au seul SEO, l'indexation anglaise et Launching Next (2026-09-29 → 30)
 
 **La demande** : la suite de la section D, pas à pas avec Antoine (prompt D). L'action a commencé sous le nom de D6, semaine S1 du calendrier des campagnes. La séance des décisions ([#193](https://github.com/ScratchMe/tourdegrowth/pull/193)), mergée en parallèle, l'a renommée D10 (C20 : le Tour au seul SEO, sans post). Rien de ce qui a été fait ne la contredit.
@@ -5764,6 +5766,22 @@ C9, tranché par Antoine le 2026-09-29, codé. Quand le diagnostic nomme **seule
 **Les annuaires suivants attendent A7.12.a** : les captures du Tour sont antérieures à I + B, et la décision C20 les fait refaire avant. Launching Next ne prend aucune image, donc rien de périmé n'est parti.
 
 **Au passage** : cette session a été lancée avec le prompt D d'avant C22 (« jamais mon nom »), que la séance des décisions a réécrit depuis dans `CHANTIERS.md`. C22 fait nommer Antoine en réponse à « qui est derrière ? ». Sans effet ici : aucun post ne part, et le champ soumetteur d'un annuaire reçoit « Tour de Growth ».
+
+## A7.5 : relier un Tour après coup (2026-09-30)
+
+C8, tranché par Antoine le 2026-09-29, codé. La case « Comparer avec ce Tour » n'existait que sur la carte de départ. Un Tour fait après le début du moteur, ou une case décochée par mégarde, ne pouvait donc plus jamais être relié. Le tableau n'affichait alors rien, alors que le miroir sans Tour invite justement à en faire un : une impasse.
+
+**Ce qui change** :
+- **Le miroir a un troisième état**, `data-state="unlinked"`, quand un Tour avec réponses est sur l'appareil et que le moteur n'y est pas relié. Il affiche le titre du miroir, une ligne avec la date et le score du Tour (ou sans score, `unlinkedNoScore`), et un bouton « Relier ce Tour ». Le bouton pose `tourLink`, comme la carte de départ, et compte `engine_tour_linked`.
+- **Les Réglages portent la case**. Elle s'ouvre sur l'état actuel. Cochée, elle garde le lien existant ou relie ce Tour. Décochée, elle délie, et une ligne dit que le Tour reste sur l'appareil.
+- **Seul l'identifiant du Tour est stocké** (D13) : relier ne fait que lire `tdg.results.v1`.
+- **La copie neuve** (la ligne, sa variante sans score, le bouton, la ligne des Réglages) est « à relire ».
+- **La date du Tour passe par le formateur du moteur** (`formatDate`), dans le miroir relié comme non relié : « 1er septembre 2026 », "September 1, 2026", comme la carte des Réglages qui nomme le même Tour. Le miroir la formatait à la main, en `en-GB` en anglais et sans « 1er » en français. Trouvé par `relecteur-copie`. Le Tour de l'e2e est daté du 1er septembre : remettre l'ancien format fait rougir les quatre parcours « relier depuis le tableau », en FR et en EN, et eux seuls.
+
+**Vérifié** : `e2e/engine-tour-link.spec.ts`, en FR et en EN.
+- **Le parcours complet, à 1 280 et 390 px** : moteur commencé sans Tour, invitation (`none`), un Tour déposé sur l'appareil, retour au tableau, état `unlinked` avec le score, « Relier ce Tour », état `linked`, qui tient au rechargement. L'événement est compté, le Tour reste intact dans `tdg.results.v1`, aucune requête autre qu'un GET ne part (hors compteur), et la page ne défile pas de côté.
+- **Relier puis délier par les Réglages** : la ligne « Délier garde ton Tour… » s'affiche, et le Tour reste sur l'appareil.
+- **La suite Playwright complète** sur la branche rebasée : 630 specs, 625 passées, 5 ignorées par construction, aucun échec. Puis les 120 specs du moteur après le correctif de date.
 
 ## L'instrument d'audit entre parenthèses, les entretiens réorientés vers le moteur (2026-09-30)
 
