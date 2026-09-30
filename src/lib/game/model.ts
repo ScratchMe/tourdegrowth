@@ -520,7 +520,7 @@ export function runQuarter<Id extends string>(level: Level<Id>, state: State<Id>
   }
   if (s.radar >= c.control.radar) {
     s.sanction = true;
-    const fine = c.control.fineBase + Math.round(s.radar) * c.control.finePerPoint;
+    const fine = c.control.fine; // the legal maximum, never more (C14, levels/retention.ts)
     const removed = activeDarkIds(level, s);
     events.push({ kind: "control", fine, leavers: Math.round(s.subs * c.control.leaversRate), removed });
     for (const d of removed) if (!s.removedDark.includes(d)) s.removedDark.push(d);

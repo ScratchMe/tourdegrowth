@@ -63,8 +63,8 @@ rencontrée en le faisant repart en section C. Toute copie neuve porte
 - A7.3 avant A7.4, parce que les liens promettent ce que le moteur fait ;
 - A7.12.a avant les annuaires de D10.
 
-Le jeu (A7.7, A7.8, et A7.9 pour sa part) n'attend rien du moteur.
-**A7.1, A7.2 et A7.6 sont livrés (2026-09-30).** **Commencer par A7.3.a**,
+Le jeu (A7.7, et A7.9 pour sa part) n'attend rien du moteur.
+**A7.1, A7.2, A7.5, A7.6 et A7.8 sont livrés (2026-09-30).** **Commencer par A7.3.a**,
 le plus long, qui revient à Antoine pour validation.
 
 #### A7.3 — Le B2B assisté et l'hybride dès la v1 (C4)
@@ -120,19 +120,6 @@ mobile, rien ne change : il est déjà après le bouton et la carte de partage.
 | `src/__tests__/result-reading-order.test.ts` et `e2e/result-composition.spec.ts` | L'ordre de lecture épinglé suit, pour les quatre variantes |
 | Un e2e de mesure | Sur `/r/sample`, en vue visiteur, à 1 280 px : le haut du bouton « Fais ton propre Tour » est **au-dessus** du haut de l'encart. Même mesure à 390 px. **Non-vacuité** : l'ancien ordre fait rougir le test |
 | Hors code | `CLAUDE.md` citait « ~30 px » : c'était 350 px mesurés le 2026-09-29, et la ligne est corrigée dans la même séance |
-
-#### A7.8 — L'amende du jeu plafonnée à 75 000 € (C14)
-
-**Décidé** (`GAME-BRIEF.md` §5, règle 5) : le contrôle DGCCRF inflige
-**75 000 €**, le maximum légal pour une entreprise, au lieu de
-60 000 + radar × 500 (de 97 500 € à 110 000 €).
-
-| Où | Quoi |
-|---|---|
-| `lib/game/levels/retention.ts:84` | L'amende du contrôle vaut 75 000 €. La forme est libre (un plafond, ou une constante qui remplace `fineBase` et `finePerPoint`), mais l'amende ne doit jamais dépasser le plafond, à tout radar |
-| La source | Vérifier sur Légifrance l'article qui fixe le plafond de l'amende administrative pour un manquement aux règles de résiliation (15 000 € pour une personne physique, 75 000 € pour une personne morale), et le citer dans le commentaire du code et dans la règle 5 de `GAME-BRIEF.md`. **Si le texte dit autre chose, s'arrêter et remonter en section C** |
-| Tests | Les tests du moteur du jeu (série Q4 de `GAME-BRIEF.md`) : l'amende vaut 75 000 € à radar 75 et à radar 100. **Non-vacuité** : l'ancienne formule fait rougir le test |
-| Copie | L'événement dit « amende de {fine} » : le texte ne change pas, seul le nombre change. Les textes de lancement qui citeraient un montant sont à vérifier (`grep -rn "97 500\|110 000" marketing src`) |
 
 #### A7.9 — La bande de l'accueil en liens mesurés, et le bandeau mesuré (C15)
 
@@ -307,7 +294,7 @@ ouverts, et, pour la vue propriétaire, un build jetable jamais commité.
 | C11 | Quand montrer l'encart | Gardé : la rétention dans le groupe, partagé compris. Le cas de plusieurs niveaux se tranche à l'ouverture d'un deuxième niveau | `GAME-BRIEF.md` §15.4 | Section E |
 | C12 | Noms de zones bilingues | Gardés : « Retention — S'ils reviennent » | `GAME-BRIEF.md` §15.3 | — |
 | C13 | « Vingt minutes » | Chronométré à la recette : gardé si la médiane des testeurs tombe entre 15 et 25 minutes | `GAME-BRIEF.md` §7.3 | D9 |
-| C14 | Amende du jeu | **Plafonnée à 75 000 €**, le maximum légal pour une entreprise | `GAME-BRIEF.md` §5, règle 5 | A7.8 |
+| C14 | Amende du jeu | **Plafonnée à 75 000 €**, le maximum légal pour une entreprise | `GAME-BRIEF.md` §5, règle 5 | A7.8, livré le 2026-09-30 |
 | C15 | Cartes de la bande de l'accueil | **Des liens mesurés** à l'ouverture (`home_strip`), et les pastilles du bandeau mesurées aussi (`space_band`) | `GAME-BRIEF.md` §13.3 E | A7.9 |
 | C16 | Primaire du propriétaire | **« Partager » devient le primaire** chez le propriétaire ; « Refaire le Tour » passe secondaire. Le visiteur ne change pas | Ici et en A7.10 | A7.10 |
 | C17 | Porte de test pour `/r/<id>` | Déléguée à la session : **pas de porte, l'émulateur Firestore en CI** | Ici et en A7.11 | A7.11 |

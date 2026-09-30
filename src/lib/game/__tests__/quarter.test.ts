@@ -129,7 +129,7 @@ describe("Q4 — the DGCCRF", () => {
     const control = s.log[0]?.events.find((e) => e.kind === "control");
     expect(control).toEqual({
       kind: "control",
-      fine: 60_000 + 75 * 500,
+      fine: 75_000,
       leavers: Math.round(s.subs * 0.015),
       removed: ["bury", "shame"],
     });
@@ -140,6 +140,20 @@ describe("Q4 — the DGCCRF", () => {
     expect(s.trust).toBe(60 - 5 - 2 - 10);
     expect(s.patience).toBe(55 + 12 - 15);
     expect(s.spike).toBeCloseTo(0.015, 12);
+  });
+
+  /**
+   * C14 (2026-09-29): the fine is the legal maximum for a company, 75 000 €
+   * (C. consom., art. L. 241-3-1), at any radar. Non-vacuity, measured
+   * 2026-09-30: the old 60 000 + radar × 500 fails both values.
+   */
+  it("the fine is 75 000 € at radar 75 and at radar 100 — never above the legal maximum", () => {
+    for (const radar of [57, 82]) {
+      // The quarter's patterns add 18: radar 75, then 100 at the check.
+      const s = runQuarter(level, picked({ ...fresh(level), radar }, ["bury", "shame"]));
+      const control = s.log[0]?.events.find((e) => e.kind === "control");
+      expect(control, `radar ${radar + 18}`).toMatchObject({ kind: "control", fine: 75_000 });
+    }
   });
 
   it("radar 74: reports — patience −5, trust −3, no sanction", () => {
