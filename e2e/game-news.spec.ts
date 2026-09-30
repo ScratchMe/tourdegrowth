@@ -22,7 +22,7 @@ import { PATH_A, PATH_C, playPath } from "../src/lib/game/__tests__/paths";
  * the DGCCRF took his tricks down and could not tell why. Path C lands one in
  * the third quarter; what it took down (pdef, bury, call, cascade, social,
  * notice — read from the engine's log, then pinned here) and its fine
- * (106 000 €) are the words the card has to say.
+ * (75 000 €, the legal maximum since C14) are the words the card has to say.
  */
 const GAME_OPEN = process.env.GAME_ENABLED === "true";
 test.skip(!GAME_OPEN, "GAME_ENABLED is not \"true\" for this run — the level page is closed.");
@@ -91,7 +91,7 @@ test("the inspection says why, names every trick it took down, and is stamped wi
   await expect(why).toContainText("tuile masquée");
   for (const name of ["Préavis contractuel", "Preuve sociale en sortie"]) await expect(why).toContainText(name);
   await expect(item.getByTestId("game-clipping-stamp")).toContainText("Amende");
-  await expect(item.getByTestId("game-clipping-stamp")).toContainText("106");
+  await expect(item.getByTestId("game-clipping-stamp")).toContainText(/75\s000/);
   await expect(item.getByTestId("game-clipping-stamp")).toHaveAttribute("data-tone", "bad");
 
   // The report underneath says the same why, for re-reading.

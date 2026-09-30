@@ -40,7 +40,7 @@ export interface ModelConstants {
   picksPerQuarter: 2; honestCap: number; darkCap: number; churnFloor: number;
   winChurn: number;                 // 0,041 (computeEnding)
   season: { months: readonly number[]; add: number };       // mois 4-6, +0,003
-  control: { radar: number; fineBase: number; finePerPoint: number; leaversRate: number;
+  control: { radar: number; fine: number; leaversRate: number;
              radarAfter: number; trustHit: number; patienceHit: number; spike: number };
   reports: { radar: number; patienceHit: number; trustHit: number };
   viral: { trust: number; spike: number; patienceHit: number };

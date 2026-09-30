@@ -5783,6 +5783,8 @@ C8, tranché par Antoine le 2026-09-29, codé. La case « Comparer avec ce Tour 
 - **Relier puis délier par les Réglages** : la ligne « Délier garde ton Tour… » s'affiche, et le Tour reste sur l'appareil.
 - **La suite Playwright complète** sur la branche rebasée : 630 specs, 625 passées, 5 ignorées par construction, aucun échec. Puis les 120 specs du moteur après le correctif de date.
 
+**En production** : PR [#209](https://github.com/ScratchMe/tourdegrowth/pull/209), mergée le 2026-09-30 à 10 h 47 UTC (squash `8fcdb4a`, 11 fichiers, identique à la tête de la PR ; #207, d'une autre session, était passée avant, d'où un rebase). Déploiement de production Vercel `READY` sur ce commit, lu par l'API. Le moteur reste en 404 derrière son drapeau : le miroir n'est pas observable en production.
+
 ## Le brief 04 déposé dans le projet Claude Design (D3, 2026-09-30)
 
 **La demande d'Antoine** : lancée pour porter S-15, la session s'est arrêtée à l'étape 0, parce que le retour de Claude Design n'existait pas : ni `design/ds-extension-04-return/` (cherché sur `main` et sur les trois branches du dépôt), ni « Send to Claude Code Web ». Antoine a répondu : « Envoie-le à Claude Design ».
@@ -5812,3 +5814,24 @@ C8, tranché par Antoine le 2026-09-29, codé. La case « Comparer avec ce Tour 
 **Les entretiens sont ensuite reportés par Antoine, sans date** : la trame attend, et aucune session ne les relance d'elle-même.
 
 **Ce qui ne change pas pour le moteur** : la décision 6 d'`ENGINE.md` dit déjà « public, gratuit et local », aucun connecteur, rien ne quitte le navigateur, pas un produit commercial. La changer passe par Antoine.
+
+## A7.8 : l'amende du jeu plafonnée à 75 000 € (2026-09-30)
+
+C14, tranché par Antoine le 2026-09-29, codé. Le contrôle de la DGCCRF inflige **75 000 €**, quel que soit le radar. La formule d'avant (60 000 + radar × 500) donnait de 97 500 € à 110 000 €, au-dessus de ce que la loi permet, dans un jeu qui tient sa crédibilité de faits vérifiés.
+
+**La source, lue sur Légifrance le 2026-09-30** (par un sous-agent, WebFetch, quatre lectures concordantes ; `curl` direct reçoit un 403) :
+- Code de la consommation, **art. L. 241-3-1**, créé par la loi nº 2022-1158 du 16 août 2022 (art. 15). Il est en vigueur depuis le 18 août 2022, et aucune autre version n'est listée.
+- Le texte : « Tout manquement aux dispositions de l'article L. 215-1-1 relatives aux modalités de résiliation par voie électronique des contrats est passible d'une amende administrative dont le montant ne peut excéder 15 000 € pour une personne physique et 75 000 € pour une personne morale. »
+- L'amende est prononcée par la DGCCRF (L. 522-1, R. 522-1), sur décision motivée après procédure contradictoire (L. 522-5).
+- Il n'y a pas de doublement en cas de réitération. Plusieurs manquements se cumulent (L. 522-7), mais le jeu n'en compte qu'un.
+
+L'article cité par CHANTIERS était présumé « L. 242-… » : c'est L. 241-3-1, et le montant est bien celui attendu. Il n'y avait donc pas lieu de remonter en section C.
+
+**Ce qui change** :
+- `control.fineBase` et `control.finePerPoint` deviennent `control.fine: 75_000`, avec la citation en commentaire dans `levels/retention.ts`. `GAME-BRIEF.md`, règle 5, cite l'article.
+- Le texte de l'événement (« amende de {fine} ») ne change pas : seul le nombre change. Aucun texte de lancement ne citait de montant (`grep` sur 97 500, 110 000, 106 000).
+
+**Vérifié** :
+- **Non-vacuité** : l'ancienne formule fait rougir le test du contrôle et le nouveau test « 75 000 € à radar 75 et à radar 100 ».
+- L'e2e des nouvelles (le trimestre de l'inspection, chemin C) attend maintenant « 75 000 » sur le tampon, au lieu de « 106 ».
+- **La suite complète**, lancée une fois sur le haut de la pile A7.8 → A7.13 (2026-09-30) : 642 specs Playwright, 637 passées, 5 ignorées par construction, aucun échec ; 2 245 tests unitaires avec la couverture, `tsc` et lint propres.

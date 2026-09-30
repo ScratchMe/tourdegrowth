@@ -80,8 +80,15 @@ export const RETENTION_LEVEL: LevelDefinition<RetentionCardId> = {
     season: { months: [4, 5, 6], add: 0.003 },
     // Every "hit" below is a signed delta, added as is: the sign is the rule,
     // so no call site has to remember which ones to subtract.
+    // The fine is the legal maximum for a company, whatever the radar (C14, 2026-09-29): C. consom.,
+    // art. L. 241-3-1 (loi nº 2022-1158 du 16 août 2022, art. 15) — a breach of the online-cancellation
+    // rules of art. L. 215-1-1 « est passible d'une amende administrative dont le montant ne peut excéder
+    // 15 000 € pour une personne physique et 75 000 € pour une personne morale », pronounced by the
+    // DGCCRF (art. L. 522-1, R. 522-1). Read on Légifrance on 2026-09-30, version in force since
+    // 18 August 2022; no doubling for a repeat offence. The old 60 000 + radar × 500 gave 97 500 to
+    // 110 000 €, above what the law allows.
     control: {
-      radar: 75, fineBase: 60_000, finePerPoint: 500, leaversRate: 0.015,
+      radar: 75, fine: 75_000, leaversRate: 0.015,
       radarAfter: 20, trustHit: -10, patienceHit: -15, spike: 0.015,
     },
     reports: { radar: 45, patienceHit: -5, trustHit: -3 },

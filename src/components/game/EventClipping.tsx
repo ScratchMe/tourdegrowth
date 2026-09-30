@@ -9,7 +9,7 @@ export interface ClippingWhy {
 }
 
 /**
- * The news screen's rubber stamp across the clipping (« Amende · 97 500 € »).
+ * The news screen's rubber stamp across the clipping (« Amende · 75 000 € »).
  * Decorative: it repeats what the clipping says, so it is hidden from
  * assistive technology. `good` for the one kind article.
  */
