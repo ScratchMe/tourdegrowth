@@ -87,7 +87,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   retention: {
     ...GLOSSARY_TERMS.retention,
-    updatedAt: "2026-09-24", // revue de copie v1 (2026-09-24) — « étape » au lieu de « pilier », calques corrigés
+    updatedAt: "2026-09-30", // A7.1 (C1) : la population de 97-99 % devient « SaaS B2B à panier élevé » (glossary-deep)
     extended: {
       // Validé au bon à tirer nº6 (2026-09-29) — revue de copie v1 (2026-09-24), fiche terminologique : « étape »/"stage" pour le lecteur, « pilier »/"pillar" réservé au code.
       fr: "La retention se lit sur une courbe, pas sur un seul chiffre : le signe à chercher, c'est qu'elle finisse par s'aplatir plutôt que de continuer à descendre vers zéro (une courbe qui se stabilise dit que le produit a trouvé un usage régulier pour un noyau d'utilisateurs). C'est aussi l'étape la plus rentable à réparer avant de pousser l'acquisition : faire grandir un entonnoir qui fuit revient à courir plus vite sur un tapis roulant. L'inverse de la retention, c'est le churn — les deux se lisent toujours ensemble.",
@@ -144,7 +144,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
   },
   churn: {
     ...GLOSSARY_TERMS.churn,
-    updatedAt: "2026-09-06", // R2-11, lot 1
+    updatedAt: "2026-09-30", // A7.1 (C1) : 1-2 % vaut pour le SaaS B2B à panier élevé, avec ChartMogul (glossary-deep)
     extended: {
       fr: "Deux churns à distinguer : le churn logo (nombre de clients perdus) et le churn revenu (montant perdu) — un client qui downgrade sans partir compte dans le second, pas dans le premier. Une autre distinction utile : le churn volontaire (le client décide de partir) contre le churn involontaire (un paiement qui échoue), ce dernier se corrige souvent avec de la simple mécanique de facturation. Le meilleur signe de santé qu'une équipe SaaS puisse viser est un « churn négatif » : l'expansion revenue des clients existants (upsell) dépasse ce que le churn fait perdre.",
       en: "Two churns worth telling apart: logo churn (number of customers lost) and revenue churn (amount lost) — a customer who downgrades without leaving counts in the second, not the first. Another useful split: voluntary churn (the customer decides to leave) vs. involuntary churn (a failed payment) — the latter is often fixed with plain billing mechanics. The strongest health signal a SaaS team can aim for is \"negative churn\": expansion revenue from existing customers (upsell) outpacing what churn takes away.",

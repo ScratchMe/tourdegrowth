@@ -83,7 +83,7 @@ test.describe("the stage menu", () => {
     expect(Object.values(await expandedStates(page))).toEqual(["false", "false", "false"]);
     await expect(page.locator('[data-testid^="engine-sheet-"]:visible')).toHaveCount(0);
 
-    // The named stage says so in words, and only it (churn sits above its reference but isn't named).
+    // The named stage says so in words, and only it (churn sits above its target but isn't named).
     await expect(page.getByText(ENGINE_COPY.board.tabNamed.en, { exact: true })).toHaveCount(1);
     await expect(activation).toContainText(ENGINE_COPY.board.tabNamed.en);
     await expect(page.locator('[role="tab"][data-named="true"]')).toHaveCount(1);
@@ -92,7 +92,7 @@ test.describe("the stage menu", () => {
     await expect(activation).toContainText(found(2));
     await expect(page.getByTestId("engine-tab-acquisition")).toContainText(found(3));
     // The old row's comparator, in the panel head, in the alert red for the named rate.
-    await expect(page.getByTestId("engine-panel-positions")).toContainText(ENGINE_COPY.side.underReference.en.replace(/^./, (c) => c.toUpperCase()));
+    await expect(page.getByTestId("engine-panel-positions")).toContainText(ENGINE_COPY.side.underTarget.en.replace(/^./, (c) => c.toUpperCase()));
   });
 
   test("a folded row says its value and status; a click unfolds exactly that number, and folds it back", async ({ page }) => {

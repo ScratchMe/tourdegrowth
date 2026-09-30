@@ -85,8 +85,10 @@ chacune se renverse en une phrase :
    au-dessus de 500 $), pas pour « les produits vendus aux petites
    entreprises » ; l'exemple §6.0 (ARPA 120 €, churn 2,5 %) était signalé à
    tort. Le 20-40 % d'activation n'a aucune source primaire. La population du
-   churn est reformulée partout où elle est écrite. À coder : `CHANTIERS.md`
-   A7.1.
+   churn est reformulée partout où elle est écrite. **Codé le 2026-09-30
+   (A7.1)** : le comparateur « repère » a disparu du moteur, l'exemple §6.0
+   porte les cibles de son équipe fictive (activation 20 %, churn 2 %), et la
+   copie (moteur, catalogue, glossaire churn et rétention) repasse « à relire ».
 6. Le moteur est public, gratuit et local : ce n'est pas la phase 3 de
    l'instrument d'audit (aucun connecteur, rien ne quitte le navigateur, pas un
    produit commercial). `lib/audit` n'est pas touché.
@@ -383,11 +385,13 @@ une cohorte d'août n'a pas eu 30 jours pour tous ses inscrits ; c'est le faux
 chiffre le plus courant. *Rejeté* : un seul mois de flux avec l'approximation
 « flux ≈ cohorte » (CODIR) — juste à la marge, faux dès que l'essai dure.
 
-**D8 — Le frein n'est nommé que contre une référence qui désigne.** Deux repères
-du glossaire désignent en v1 : activation 20-40 % des inscrits et churn logo
-1-2 %/mois (PME). Tous les autres repères sont du **contexte** (affichés, jamais
-utilisés pour nommer). **La cible de l'équipe désigne toujours**, et c'est le
-moyen normal de débloquer le diagnostic. Il faut au moins 2 étapes comparables
+**D8 — Le frein n'est nommé que contre une cible d'équipe.** *Renversée en
+partie le 2026-09-29 (décision 5, `CHANTIERS.md` C1), codée le 2026-09-30
+(A7.1).* La v1 laissait deux repères du glossaire désigner (activation 20-40 %
+des inscrits, churn logo 1-2 %/mois) ; **aucun ne désigne plus**. Tous les
+repères sont du **contexte** (affichés avec leur réserve, jamais utilisés pour
+nommer). **La cible de l'équipe désigne toujours**, et c'est le seul moyen de
+débloquer le diagnostic. Il faut au moins 2 étapes comparables
 pour classer. *Raison* : un COMEX lira « référence » comme « norme » ; la
 plupart des taux n'ont aucun repère transférable (le glossaire le dit lui-même
 pour ARPU, rétention SaaS, conversion payante, recommandation). *Rejeté* :
@@ -730,7 +734,7 @@ export interface MetricShape {
   window?: "activation" | "paid" | 30;  // fenêtre qui entre dans la définition
   effort: Effort; defaultRole: RoleId; sources: readonly ToolId[];
   glossary: GlossaryTermId; tourQuestionId?: string;
-  benchmark?: { term: GlossaryTermId; lo: number; hi: number; direction: "higher" | "lower"; designates: boolean };
+  benchmark?: { term: GlossaryTermId; lo: number; hi: number; direction: "higher" | "lower" }; // contexte, ne désigne jamais (C1)
   defaultRepair: RepairScale;
   dependsOn?: MetricId;                 // act.rate dépend d'act.event
 }
@@ -745,8 +749,9 @@ construire » (n'existe nulle part tant que rien n'est instrumenté).
 **Politique de repères** : un repère n'existe que s'il est déjà **écrit et
 approuvé** dans `glossary-deep.ts` (bons à tirer nº1-5) ; un test vérifie que
 ses bornes figurent dans le texte du terme lié, dans les deux langues (§13.1).
-`designates: true` pour deux repères seulement (D8). Sinon l'écran dit « Pas de
-repère publiable » + la raison, et propose « Fixe une cible ».
+Un repère ne désigne jamais (D8, C1) : il est affiché « pour situer, sans
+désigner d'étape ». Sans repère, l'écran dit « Pas de repère publiable » + la
+raison. Dans les deux cas, seule une cible d'équipe nomme une étape.
 
 ### 5.2 Acquisition
 
@@ -761,7 +766,7 @@ repère publiable » + la raison, et propose « Fixe une cible ».
 | id | Chiffre | Formule | Où le trouver | Effort | Repère | Glossaire · Tour |
 |---|---|---|---|---|---|---|
 | `act.event` | Événement d'activation | le nom de l'action qui marque la première valeur (120 car.) + sa fenêtre (7/14/30 j) | une décision produit : l'équipe produit, pas un outil | Seul, 5 min (ou « À construire ») | — | `aha-moment` · `act-1` |
-| ★ `act.rate` | Taux d'activation | inscrits de la cohorte ayant fait l'événement sous *n* jours ÷ inscrits de la cohorte | **Amplitude** Funnel Analysis, Inscription → événement, fenêtre *n* jours · **Mixpanel** Funnels, *conversion window* · **GA4** Explorer › Exploration de l'entonnoir (si l'événement est envoyé) | Seul, ~1 h | **désigne** : 20-40 % des inscrits, ordres de grandeur couramment cités pour l'onboarding SaaS, plus bas en essai gratuit (`activation`) | `activation` · `act-2` |
+| ★ `act.rate` | Taux d'activation | inscrits de la cohorte ayant fait l'événement sous *n* jours ÷ inscrits de la cohorte | **Amplitude** Funnel Analysis, Inscription → événement, fenêtre *n* jours · **Mixpanel** Funnels, *conversion window* · **GA4** Explorer › Exploration de l'entonnoir (si l'événement est envoyé) | Seul, ~1 h | **contexte** (ne désigne plus depuis C1) : 20-40 % des inscrits, ordres de grandeur couramment cités pour l'onboarding SaaS, plus bas en essai gratuit (`activation`) | `activation` · `act-2` |
 | `act.ttv` | Time-to-value médian | médiane du délai inscription → événement (médiane/moyenne déclarée) | **Amplitude/Mixpanel** vue *time to convert* de l'entonnoir · **GA4** pas de médiane native → à demander à la data | Seul, ~1 h | aucun (le glossaire le dit : une ambition, pas une norme) | `time-to-value` · — |
 
 `act.rate` dépend d'`act.event` : si l'événement est `missing`, la fiche du taux
@@ -773,7 +778,7 @@ qu'une fois, sur l'événement.
 | id | Chiffre | Formule | Où le trouver | Effort | Repère | Glossaire · Tour |
 |---|---|---|---|---|---|---|
 | ★ `ret.d30` | Rétention à J30 | inscrits de la cohorte encore actifs 30 jours après l'inscription ÷ inscrits de la cohorte (« actif » écrit dans `definitionNote`) | **Amplitude** Retention Analysis, événement de départ Inscription · **Mixpanel** Retention · **GA4** Explorer › Exploration de cohortes | Seul, ~1 h | aucun en libre-service (le 20-30 % à J30 du glossaire porte sur les applis grand public) → cible | `retention` · `ret-1` |
-| `ret.logo-churn` | Churn logo mensuel | clients payants perdus dans le mois ÷ clients payants au 1er du mois | **Stripe** Billing, vue d'ensemble, churn des abonnés (selon l'offre) · **Chargebee** RevenueStory (selon l'édition) · **ChartMogul / Baremetrics** churn clients | Seul, 5 min | **désigne** (plus bas = mieux) : ~1-2 % par mois, jugé sain pour des produits vendus aux petites entreprises (`churn`) | `churn` · — |
+| `ret.logo-churn` | Churn logo mensuel | clients payants perdus dans le mois ÷ clients payants au 1er du mois | **Stripe** Billing, vue d'ensemble, churn des abonnés (selon l'offre) · **Chargebee** RevenueStory (selon l'édition) · **ChartMogul / Baremetrics** churn clients | Seul, 5 min | **contexte** (plus bas = mieux ; ne désigne plus depuis C1) : ~1-2 % par mois, jugé sain pour le SaaS B2B à panier élevé ; les petits paniers tournent bien plus haut (ChartMogul : médiane 6,1 %/mois sous 25 $ d'ARPA, 2,2 % au-dessus de 500 $) (`churn`) | `churn` · — |
 | `ret.churn-cause` | Cause principale de churn | la cause (120 car.) + comment on la sait : données · entretiens · intuition | **HubSpot/Salesforce** champ raison de perte · relecture des derniers départs avec le support | À demander (support) | — | `churn` · `ret-3` |
 
 ### 5.5 Referral
@@ -848,6 +853,12 @@ activation sous 7 j, paiement sous 30 j.
 
 Couverture : **9 sur 15 trouvés · 2 approximatifs · 1 demandé · 3 introuvables**
 (9 + 2 + 1 + 3 = 15).
+
+**Cibles de l'équipe fictive** (depuis le 2026-09-30, A7.1) : activation 20 %,
+churn logo 2 % par mois (`EXAMPLE_TARGETS`, `lib/engine/example.ts`). Seule une
+cible nomme une étape (C1) : sans elles, l'exemple ne nommerait rien. Ce sont
+les bornes que les deux repères lui prêtaient, donc son diagnostic (§6.6) ne
+change pas, et son bandeau dit à qui sont ces cibles.
 
 ### 6.1 Intervalles (`interval.ts`)
 
@@ -945,29 +956,28 @@ export interface Peloton {
 **Candidats** : `acq.signup-rate`, `act.rate`, `ret.d30`, `rev.paid-conversion`,
 `ref.referred-share` (plus haut = mieux) ; `ret.logo-churn` (plus bas = mieux).
 
-**Comparateur**, dans cet ordre : cible d'équipe (désigne toujours) → repère du
-catalogue avec `designates: true` → aucun (`no-comparator`, exclu du classement,
-listé avec « fixe une cible »).
+**Comparateur** : la cible d'équipe, sinon aucun (`no-comparator`, exclu du
+classement, listé avec « fixes-en une »). Aucun repère du catalogue ne désigne
+(décision 5 renversée, C1, 2026-09-29 ; codé le 2026-09-30).
 
 **Position** (valeur `[lo, hi]`, comparateur `[cLo, cHi]` — une cible est
 `cLo = cHi`) :
 - plus haut = mieux : `below` si `hi < cLo` ; `maybe-below` si `lo < cLo ≤ hi`
   (texte seulement, pas de tampon) ; `within` si `cLo ≤ lo ≤ cHi` ; `above` sinon.
 - churn : `below` si `lo > cHi` ; symétrique pour le reste.
-- **Une valeur dans sa référence n'est jamais une fuite contre elle.** Seule une
-  cible peut la rendre candidate, et la phrase dit alors « sous ta cible »,
-  jamais « bas de la référence ».
+- **Une valeur hors de son repère n'est jamais une fuite pour autant** : le
+  repère ne compare rien (C1). Seule une cible la rend candidate, et la phrase
+  dit « sous ta cible », jamais « sous le repère ».
 
 **Impact en €** (`impact.ts`, énoncé « toutes choses égales par ailleurs ») :
 - *N* = nouveaux payants par mois : le dénominateur mesuré d'`acq.cac` s'il
   existe, sinon `inscrits du mois × rev.paid-conversion` (approximatif), sinon
   inconnu.
 - Flux (`acq.signup-rate`, `act.rate`, `rev.paid-conversion`) :
-  `payants en plus = N × (t ÷ taux − 1)` avec `t` = cible, ou borne **basse** du
-  repère (la plus prudente). Pour `act.rate`, l'hypothèse « les payants sont
-  parmi les activés » est **imprimée** sous le calcul.
-- Churn : `clients préservés = base au 1er × (churn − t)` avec `t` = cible ou
-  borne **haute** du repère.
+  `payants en plus = N × (t ÷ taux − 1)` avec `t` = la cible d'équipe. Pour
+  `act.rate`, l'hypothèse « les payants sont parmi les activés » est
+  **imprimée** sous le calcul.
+- Churn : `clients préservés = base au 1er × (churn − t)` avec `t` = la cible.
 - `× ARPA` ⇒ MRR/mois (`new-mrr` ou `retained-mrr`). ARPA inconnu ⇒ impact en
   clients/mois (`customers`). *N* inconnu ⇒ impact pour 100 inscrits
   (`per-hundred`).
@@ -986,9 +996,9 @@ grille de valeurs.
 
 **États**, décidés dans cet ordre :
 1. `not-enough` — moins de 2 candidats ont une valeur connue **et** un
-   comparateur. Si l'un d'eux est `below`, il est rapporté (« {étape} est sous
-   son repère ; sans cible sur les autres étapes, impossible de dire si c'est la
-   plus grosse fuite »).
+   comparateur, c'est-à-dire une cible. Si l'un d'eux est `below`, il est
+   rapporté (« {étape} est sous la cible. Sans cible sur les autres étapes,
+   impossible de dire si c'est la plus grosse fuite »).
 2. `level` — aucun candidat `below`.
 3. `clear` — un seul `below` chiffrable, ou le premier chiffrable a
    `lo > second.hi × CLEAR_MARGIN` (1,25). Si les seuls `below` sont non
@@ -1007,7 +1017,7 @@ Et une phrase fixe, affichée une fois, qui répond à la première objection d'
 CODIR : « La plus grosse perte en nombre est toujours en haut du tunnel ; ce
 n'est pas ce qui désigne un frein. »
 
-**Exemple (§6.0)** : `act.rate` 18 % < 20 % (repère) ⇒ `below` ; churn 2,5 % >
+**Exemple (§6.0)** : `act.rate` 18 % < 20 % (cible de l'équipe fictive) ⇒ `below` ; churn 2,5 % >
 2 % ⇒ `below`. *N* = 42 (mesuré). Activation : 42 × 20/18 = 46,7 ⇒ affiché
 « 47 (+5) », × 120 € = 600 € ⇒ « ~600 € ». Churn : 400 × (2,5 % − 2 %) = 2
 clients ⇒ 2 × 120 = 240 € ⇒ « ~240 € ». 600 > 240 × 1,25 = 300 ⇒ `clear`,
@@ -1536,12 +1546,12 @@ Désormais :
 Le gabarit exact est de la copie neuve, « à relire ». À coder :
 `CHANTIERS.md` A7.6.
 
-  `{cible}` : « 20 % (bas de l'ordre de grandeur couramment cité) » ou « 30 %
-  (notre cible) » / "20% (low end of the commonly cited range)" or "30% (our
-  target)". Exemple : « Ramener l'activation à 20 % vaudrait **~600 € de MRR
+  `{cible}` : « 20 % (cible de l'équipe) » / "20% (team target)" — seule une
+  cible nomme une étape (C1) ; le gabarit « bas de l'ordre de grandeur
+  couramment cité » est retiré le 2026-09-30 (A7.1). Exemple : « Ramener l'activation à 20 % vaudrait **~600 € de MRR
   nouveau** chaque mois. »
 - Les 4 lignes : « Aujourd'hui · 18 sur 100 activés → 42 nouveaux payants par mois »
-  · « Si · l'activation atteint 20 % (bas de l'ordre de grandeur couramment cité) »
+  · « Si · l'activation atteint 20 % (cible de l'équipe) »
   · « Alors · 42 × 20/18 = 47 (+5) » · « × ARPA · 120 € → ~600 € de MRR ajouté
   chaque mois ». Ligne annuelle si churn connu : « Soit ~6 300 € de MRR de plus au
   bout d'un an, churn compris. »
@@ -1889,7 +1899,8 @@ et lesquels ne tombent pas (convention 5).
   - **équivalence** : sur une grille de taux et de cibles, l'ordre des flux par
     € == l'ordre par écart relatif (`basis` différent, même `named`) ;
   - `ret.d30` et `ref.referred-share` jamais chiffrés en € ;
-  - un repère `designates: false` ne désigne jamais ; la cible désigne toujours.
+  - aucun repère ne désigne, pas même les deux qui le faisaient (C1) ; la cible
+    désigne toujours.
 - **`impact`** : exemple §6.6 (« 42 × 20/18 = 47 (+5) », « ~600 € », annuel
   « ~6 300 € ») ; **invariant d'affichage** : pour une grille d'entrées, chaque
   ligne se recalcule à partir des nombres *affichés* de la ligne précédente ;
@@ -1992,7 +2003,7 @@ Helper `openEngine(page, locale)` : visite
   E5 ; aucun libellé de ligne ou de colonne ne sort de sa carte (mesure des
   boîtes — le défaut de `mock-1280.png`).
 - **Ajouts aux specs existantes** :
-  - `accessibility.spec.ts` : axe sur E0, E2 (avec une ligne « sous le repère »
+  - `accessibility.spec.ts` : axe sur E0, E2 (avec une ligne « sous la cible »
     **visible** — la seule surface rouge, là où une régression de contraste se
     cacherait), tiroir ouvert avec fiche, E3bis, E4, E5 ;
   - `keyboard.spec.ts` : renseigner `act.rate` et l'enregistrer **sans souris** ;
@@ -2025,7 +2036,7 @@ titre qui dit les mêmes nombres que la grille.
 |---|---|---|
 | `saveEngine` n'écrit plus | journey (rechargement), canary (import) | diagnosis, deck |
 | un `fetch` POST de l'état dans `saveEngine` | canary (non-GET) | journey |
-| `diagnose` forcé à `clear` | diagnosis (« pas assez de repères », « dans le repère ») | journey |
+| `diagnose` forcé à `clear` | diagnosis (« pas assez de cibles », « à la cible ») | journey |
 | U+202F laissé par `format` | format (unitaire), glyphes | e2e hors FR |
 | `import` statique de `html-to-image` | engine-boundary règle 4 | e2e |
 | titre de `leak` formaté par une autre fonction | deck (titre = corps) | diagnosis |
@@ -2189,7 +2200,6 @@ src/`**, jamais depuis cette liste. Français avec U+00A0 avant `%`, `€`, `:`,
 | `sheet.trapTitle` | Le piège | The trap |
 | `sheet.alsoIn` | Aussi dans {tool} : {metrics} | Also in {tool}: {metrics} |
 | `sheet.reference` | Repère | Reference |
-| `sheet.referenceDesignates` | {range} · ordre de grandeur couramment cité, {caveat} | {range} · commonly cited order of magnitude, {caveat} |
 | `sheet.referenceContext` | {range} · contexte seulement, {caveat} | {range} · context only, {caveat} |
 | `sheet.noReference` | Pas de repère publiable : {reason} | No reference worth publishing: {reason} |
 | `sheet.target` | Ta cible (facultatif) | Your target (optional) |
@@ -2226,23 +2236,18 @@ src/`**, jamais depuis cette liste. Français avec U+00A0 avant `%`, `€`, `:`,
 | `diagnosis.clear` | Une étape freine le moteur | One stage holds the engine back |
 | `diagnosis.shared` | {n} étapes freinent autant l'une que l'autre | {n} stages hold it back about equally |
 | `diagnosis.level` | Rien ne freine le moteur | Nothing holds the engine back |
-| `diagnosis.notEnough` | Pas assez de repères pour conclure | Not enough references to conclude |
-| `diagnosis.belowReference` | {value}, sous l'ordre de grandeur couramment cité ({range}) | {value}, below the commonly cited range ({range}) |
+| `diagnosis.notEnough` | Pas assez de cibles pour conclure | Not enough targets to conclude |
 | `diagnosis.belowTarget` | {value}, sous ta cible ({target}) | {value}, below your target ({target}) |
-| `diagnosis.maybeBelow` | {value} : peut-être sous le repère ({range}) | {value}: possibly below the reference ({range}) |
 | `diagnosis.notEnoughBody` | Fixe une cible sur au moins deux étapes : c'est ce qui permet de dire laquelle freine. | Set a target on at least two stages: that's what lets us say which one holds you back. |
-| `diagnosis.notEnoughBelow` | {stage} est sous son repère ; sans cible sur les autres étapes, impossible de dire si c'est la plus grosse fuite. | {stage} is below its reference; without targets on the other stages, we can't say whether it's the biggest leak. |
+| `diagnosis.notEnoughBelow` | {stage} est {side}. Sans cible sur les autres étapes, impossible de dire si c'est la plus grosse fuite. | {stage} sits {side}. Without targets on the other stages, we can't say whether it's the biggest leak. |
 | `diagnosis.levelBody` | Aucune étape n'est sous sa cible : le levier est le volume ou le prix. | No stage is below its target: the lever is volume or price. |
 | `diagnosis.blind` | {stages} n'est pas mesurée : le vrai frein peut s'y cacher. | {stages} isn't measured: the real bottleneck may be hiding there. |
 | `diagnosis.blind.other` | {stages} ne sont pas mesurées : le vrai frein peut s'y cacher. | {stages} aren't measured: the real bottleneck may be hiding there. |
 | `diagnosis.unpriced` | Aussi sous ta cible, non chiffré en € : {stages} | Also below your target, not priced in €: {stages} |
 | `diagnosis.noArpa` | Le churn n'est pas comparable aux autres étapes sans ARPA. | Churn can't be compared with the other stages without ARPA. |
 | `diagnosis.topOfFunnel` | La plus grosse perte en nombre est toujours en haut du tunnel ; ce n'est pas ce qui désigne un frein. | The biggest loss in numbers is always at the top of the funnel; that's not what names a bottleneck. |
-| `diagnosis.stampReference` | Sous le repère | Below reference |
-| `diagnosis.stampTarget` | Sous ta cible | Below target |
-| `diagnosis.within` | dans le repère | within the reference |
-| `diagnosis.above` | au-dessus du repère | above the reference |
-| `diagnosis.noComparator` | sans repère · fixe une cible | no reference · set a target |
+| `side.*` (depuis P7a et C1) | sous la cible · au-dessus de la cible · à la cible · peut-être sous / au-dessus de la cible — choisis par la direction du chiffre (`phrases.ts#sideKey`) ; les mots « repère » sont retirés le 2026-09-30 (A7.1) | below / above / at the target · possibly below / above the target |
+| `diagnosis.noComparator` | sans cible · fixes-en une | no target · set one |
 | `whatIf.title` | Et si · toutes choses égales par ailleurs | What if · all else being equal |
 | `whatIf.today` | Aujourd'hui | Today |
 | `whatIf.if` | Si | If |
@@ -2260,7 +2265,6 @@ src/`**, jamais depuis cette liste. Français avec U+00A0 avant `%`, `€`, `:`,
 | `whatIf.assumptionActivation` | Hypothèse : les payants sont parmi les activés. | Assumption: paying customers are among the activated. |
 | `whatIf.multiplication` | Dans un funnel, les taux se multiplient : +20 % sur n'importe quelle étape donne +20 % de clients. Ce qui distingue les étapes, c'est l'écart à leur cible. | In a funnel, rates multiply: +20% at any stage gives +20% customers. What sets stages apart is the gap to their target. |
 | `whatIf.notForecast` | Un calcul, pas une prévision. | A calculation, not a forecast. |
-| `whatIf.targetReference` | {value} (bas de l'ordre de grandeur couramment cité) | {value} (low end of the commonly cited range) |
 | `whatIf.targetTeam` | {value} (ta cible) | {value} (your target) |
 
 ### 14.7 Peloton et miroir — `peloton.*`, `mirror.*`
@@ -2324,9 +2328,8 @@ src/`**, jamais depuis cette liste. Français avec U+00A0 avant `%`, `€`, `:`,
 | `slide.kicker` | Moteur de croissance · {company}{month} · données internes | Growth engine · {company}{month} · internal data |
 | `slide.dataPill` | Données : {m} mesurées · {a} approximatives · {x} introuvables | Data: {m} measured · {a} approximate · {x} missing |
 | `slide.footer` | Cohorte d'inscrits de {cohort} · flux de {month} · sources : {tools} | {cohort} sign-up cohort · {month} flows · sources: {tools} |
-| `slide.leakFooter` | Toutes choses égales par ailleurs · {assumption} · {caveat} | All else being equal · {assumption} · {caveat} |
+| `slide.leakFooter` | Toutes choses égales par ailleurs · {assumption} | All else being equal · {assumption} |
 | `slide.leakAside` | À côté | Alongside |
-| `slide.withinReference` | dans le repère | within the reference |
 | `slide.cannotExclude` | non mesuré — ne peut pas être exclu | not measured — can't be ruled out |
 | `slide.calcTitle` | Le calcul | The calculation |
 | `slide.visibilityLeft` | Ce qu'on voit | What we can see |

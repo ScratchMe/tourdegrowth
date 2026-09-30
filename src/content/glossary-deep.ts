@@ -754,9 +754,10 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       ),
     },
     benchmark: [
+      // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1) : 1-2 % vaut pour le SaaS B2B à panier élevé, pas « les produits vendus aux petites entreprises » (ChartMogul : médiane 6,1 %/mois sous 25 $ d'ARPA mensuel, 2,2 % au-dessus de 500 $).
       t(
-        "Commonly cited ranges for B2B SaaS: around 1-2% monthly logo churn is considered healthy for products sold to small businesses; enterprise products aim for single-digit annual churn, because their customers are fewer and each loss is large. B2C subscriptions routinely run far higher and live off re-acquisition.",
-        "Fourchettes couramment citées en SaaS B2B : autour de 1-2 % de churn logo mensuel est considéré comme sain pour des produits vendus aux petites entreprises ; les produits entreprise visent un churn annuel à un chiffre, parce que leurs clients sont moins nombreux et que chaque perte pèse lourd. Les abonnements B2C tournent couramment bien plus haut et vivent de réacquisition.",
+        "Commonly cited ranges for B2B SaaS: around 1-2% monthly logo churn is considered healthy for high-ticket B2B SaaS. Low tickets run much higher: ChartMogul puts the median at about 6% a month under $25 of monthly revenue per account, against about 2% above $500. Enterprise products aim for single-digit annual churn, because their customers are fewer and each loss is large. B2C subscriptions routinely run far higher and live off re-acquisition.",
+        "Fourchettes couramment citées en SaaS B2B : autour de 1-2 % de churn logo mensuel est considéré comme sain pour un SaaS B2B à panier élevé. Les petits paniers tournent bien plus haut : ChartMogul situe la médiane vers 6 % par mois sous 25 $ de revenu mensuel par compte, contre environ 2 % au-dessus de 500 $. Les produits entreprise visent un churn annuel à un chiffre, parce que leurs clients sont moins nombreux et que chaque perte pèse lourd. Les abonnements B2C tournent couramment bien plus haut et vivent de réacquisition.",
       ),
       t(
         "Small monthly numbers compound: 3% a month is not 36% a year but 1 − 0.97¹² ≈ 31% — a third of the customer base gone every year. Read monthly churn in years before deciding it's fine.",
@@ -882,9 +883,10 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       ),
     },
     benchmark: [
+      // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1) : même population que la page churn.
       t(
-        "Ranges vary enormously by category, so compare within yours. Widely cited orders of magnitude: consumer mobile apps often keep 20-30% of a cohort at D30 and single digits by D90; SaaS is read in months, and 97-99% monthly customer retention is the range usually called healthy for small-business products, higher again in enterprise.",
-        "Les fourchettes varient énormément selon la catégorie, donc compare dans la tienne. Ordres de grandeur couramment cités : les applis mobiles grand public gardent souvent 20-30 % d'une cohorte à J30 et moins de 10 % à J90 ; le SaaS se lit en mois, et 97-99 % de rétention client mensuelle est la fourchette habituellement qualifiée de saine pour des produits vendus aux petites entreprises, plus haut encore en entreprise.",
+        "Ranges vary enormously by category, so compare within yours. Widely cited orders of magnitude: consumer mobile apps often keep 20-30% of a cohort at D30 and single digits by D90; SaaS is read in months, and 97-99% monthly customer retention is the range usually called healthy for high-ticket B2B SaaS, lower for low-ticket products and higher again in enterprise.",
+        "Les fourchettes varient énormément selon la catégorie, donc compare dans la tienne. Ordres de grandeur couramment cités : les applis mobiles grand public gardent souvent 20-30 % d'une cohorte à J30 et moins de 10 % à J90 ; le SaaS se lit en mois, et 97-99 % de rétention client mensuelle est la fourchette habituellement qualifiée de saine pour un SaaS B2B à panier élevé, plus bas pour les petits paniers et plus haut encore en entreprise.",
       ),
       t(
         "The shape matters more than the level: a curve that flattens at 10% describes a real product with a small core; a curve at 40% still heading down at month three describes a novelty. Investors read the flattening before they read the number.",

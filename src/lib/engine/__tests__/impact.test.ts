@@ -136,11 +136,9 @@ describe("whatIf — edges", () => {
     expect(ranged.gap).toEqual({ lo: 0, hi: 0.25 });
   });
 
-  it("the slider starts at the target, else the reference's cautious bound when under it, else the value", () => {
-    expect(sliderStart({ lo: 18, hi: 18 }, { kind: "target", lo: 30, hi: 30, direction: "higher" })).toBe(30);
-    expect(sliderStart({ lo: 18, hi: 18 }, { kind: "reference", lo: 20, hi: 40, direction: "higher" })).toBe(20);
-    expect(sliderStart({ lo: 25, hi: 25 }, { kind: "reference", lo: 20, hi: 40, direction: "higher" })).toBe(25);
-    expect(sliderStart({ lo: 2.5, hi: 2.5 }, { kind: "reference", lo: 1, hi: 2, direction: "lower" })).toBe(2);
+  it("the slider starts at the team's target, else at the value — never at a published reference (C1)", () => {
+    expect(sliderStart({ lo: 18, hi: 18 }, { lo: 30, hi: 30, direction: "higher" })).toBe(30);
+    expect(sliderStart({ lo: 2.5, hi: 2.5 }, { lo: 2, hi: 2, direction: "lower" })).toBe(2);
     expect(sliderStart({ lo: 7, hi: 7 }, undefined)).toBe(7);
     expect(sliderStep(18)).toBe(1);
     expect(sliderStep(3.2)).toBe(0.1);

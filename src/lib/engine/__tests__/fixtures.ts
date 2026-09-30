@@ -63,10 +63,18 @@ export function withTarget(state: EngineState, id: CandidateId, target: number):
   return next;
 }
 
-/** An empty state (every number "todo"), same setup and months as the example. */
+/** The state with no team target at all: what a reader who skipped « Tes cibles » has. */
+export function withoutTargets(state: EngineState): EngineState {
+  const next = structuredClone(state);
+  next.snapshots[next.snapshots.length - 1]!.targets = {};
+  return next;
+}
+
+/** An empty state (every number "todo", no target yet), same setup and months as the example. */
 export function emptyState(): EngineState {
   const state = exampleState();
   state.snapshots[0]!.metrics = {};
+  state.snapshots[0]!.targets = {};
   return state;
 }
 

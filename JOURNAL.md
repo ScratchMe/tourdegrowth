@@ -5627,3 +5627,40 @@ Les aperçus suivent, et la liste d'attente de `variant-names.test.ts` perd ses 
 
 **Piège** : un `git rebase --onto` qui part d'une base trop ancienne rejoue des commits déjà squashés dans `main` et s'arrête sur un conflit fantôme (convention 12). La base à donner est le dernier commit de la branche du dessous, pas son premier. Ici, `--skip` a suffi : le contenu était déjà là.
 
+
+## A7.1 : aucun repère ne désigne l'étape qui freine (2026-09-30)
+
+La décision 5 renversée par Antoine le 2026-09-29 (C1), codée. **Seule une cible d'équipe nomme l'étape qui freine.** Les repères publiés (activation 20-40 %, churn logo 1-2 %/mois, et tous les autres) restent affichés, avec leur réserve, « pour situer, sans désigner d'étape ».
+
+**Le choix d'implémentation** : le comparateur « repère » est retiré du moteur, pas seulement éteint. Un drapeau `designates` laissé à `false` partout aurait gardé vivants une branche de `comparatorOf`, cinq mots `side`, deux phrases du tableau, deux gabarits du « Et si » et la réserve du pied de la slide « fuite ». Tout cela était du code sans chemin, qu'un `true` suffisait à rallumer. Ce qui disparaît :
+- `Benchmark.designates` ;
+- `Comparator.kind` et `Comparator.term` : un comparateur est la cible, un point `lo === hi` ;
+- les mots `side.*Reference`, `diagnosis.belowReference` / `aboveReference` / `maybeBelow` (ce dernier était déjà mort) ;
+- `whatIf.targetReference` / `targetReferenceHigh`, `sheet.referenceDesignates`, `slide.leakCaveat`, et le segment `{caveat}` du pied de la slide.
+
+**L'exemple §6.0** porte les cibles de son équipe fictive (`EXAMPLE_TARGETS` : activation 20 %, churn 2 %). Ce sont les bornes que les deux repères lui prêtaient : son diagnostic ne bouge pas (activation nommée, ~600 € contre ~240 €, `clear`), mais la slide dit maintenant « 20 % (cible de l'équipe) ». Son bandeau le dit aussi, avec des valeurs lues dans les données plutôt que recopiées : « l'équipe fictive vise 20 % d'activation et 2 % de churn logo par mois ».
+
+**La copie**, toute « à relire » :
+- **Moteur** : la promesse, l'encart de durée, l'écran des cibles, la FAQ « D'où viennent les repères ? », « Pas assez de cibles pour conclure », les titres `leakShared` / `leakLevel`, et les trois « sans cible » (ligne du tableau, slide, note d'orateur).
+- **Catalogue** : la réserve du churn devient « pour le SaaS B2B à panier élevé ; les petits paniers tournent bien plus haut, les contrats entreprise bien plus bas ».
+- **Glossaire** : la page churn cite ChartMogul (médiane de 6,1 %/mois sous 25 $ d'ARPA mensuel, 2,2 % au-dessus de 500 $, vérifié sur leur page le jour même), et la page rétention reprend la même population. C'est de la copie validée qui change : elle repasse « à relire ».
+
+**Vérifié** :
+- **Non-vacuité** : remettre un repère désignant dans `comparatorOf` (le churn, sans cible) fait rougir exactement « no reference ever names ». Un test du catalogue refuse aussi tout champ de plus sur un repère.
+- lint et `tsc` propres, 2 237 tests unitaires. Deux tests fusionnés : les mots de position n'ont plus qu'une famille.
+- Les 110 e2e du moteur passent sur un build de production.
+- À l'écran, en FR et en EN, à 1 280 et 390 px : le bandeau de l'exemple, « 18 %, sous ta cible (20 %) », le tampon « Sous la cible », et la slide « fuite » « Ramener l'activation à 20 % (cible de l'équipe)… », sans réserve de repère au pied.
+
+**Pièges** :
+- La copie française porte des espaces insécables U+00A0 avant `:` `;` `?` `%` `»` et après `«`. Un remplacement scripté écrit avec des espaces ordinaires ne trouve pas son texte, et une chaîne neuve tapée ainsi échouerait au test de typographie. Le remplacement cherche donc « espace ou insécable », et pose l'insécable dans les chaînes `fr`.
+- `emptyState()` (fixtures) partait de l'exemple, et héritait donc de ses nouvelles cibles : le pas à pas reprenait à « base » au lieu de « cibles ». Un état vide n'a pas de cible : c'est corrigé dans la fixture, pas dans le test.
+
+**Le relecteur de copie** a trouvé ce que la première passe avait laissé, tout corrigé avant la PR :
+- un marqueur manquant sur le pied de la slide ;
+- « fixe-en une », qui s'écrit « fixes-en une » (l'impératif reprend son *s* devant *en*) ;
+- deux phrases qui contredisaient encore C1 : l'aide du champ cible (« une cible d'équipe sert de repère ») et la réserve du taux d'inscription (« donc ce repère ne désigne jamais », qui isolait ce repère comme si les autres désignaient) ;
+- les dates de contenu : `updatedAt` des pages churn et rétention, et celle du moteur dans `updated-at.ts`.
+
+Il signale aussi, pour le bon à tirer, un écart qui existait déjà et devient visible : la page rétention donne 97-99 % de rétention mensuelle (1 à 3 % de churn), la page churn 1-2 %, pour la même population désormais nommée à l'identique. Les chiffres validés ne sont pas touchés ici.
+
+**Hors code** : `ENGINE.md` suit (D8 et décision 5 marquées, §5.1, §5.3, §6.0, §6.6, §9.3, §13.1, §14). Le bon à tirer nº8 cite l'exemple et ces phrases : sa page est à remettre d'accord avec le code par l'agent des bons à tirer, comme A7.2 et A7.3 le demanderont aussi.

@@ -12,7 +12,7 @@ import { SLIDE_ORDER } from "../types";
 import type { EngineState, FindingKind, MetricEntry, SanityId, SlideTitleKey, SourceRef, ToolId } from "../types";
 import { knownIn } from "../values";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
-import { emptyState, estimated, exampleState, measured, missing, ratio, tourResult, withEntry, withTarget } from "./fixtures";
+import { emptyState, estimated, exampleState, measured, missing, ratio, tourResult, withEntry, withTarget, withoutTargets } from "./fixtures";
 
 /**
  * The guard: every sentence the engine can produce, read as a reader would.
@@ -131,10 +131,11 @@ const SCENARIOS: { name: string; build: () => { state: EngineState; result?: Ret
   { name: "churn behind a team target", build: () => ({ state: withTarget(within(), "ret.logo-churn", 2) }) },
   { name: "two stages behind together", build: () => ({ state: withEntry(exampleState(), "ret.logo-churn", measured(ratio(12, 400), tool("stripe"))) }) },
   { name: "nothing behind", build: () => ({ state: withEntry(within(), "ret.logo-churn", measured(ratio(6, 400), tool("stripe"))) }) },
-  { name: "activation above its reference", build: () => ({ state: withEntry(exampleState(), "act.rate", measured(ratio(400, 800), tool("amplitude"))) }) },
+  { name: "activation above its target", build: () => ({ state: withEntry(exampleState(), "act.rate", measured(ratio(400, 800), tool("amplitude"))) }) },
   { name: "activation maybe below (estimate straddles)", build: () => ({ state: withEntry(exampleState(), "act.rate", estimated(15, 25)) }) },
-  { name: "not enough references", build: () => ({ state: withEntry(exampleState(), "ret.logo-churn", undefined) }) },
-  { name: "not enough references, behind a target", build: () => ({ state: withTarget(withEntry(exampleState(), "ret.logo-churn", undefined), "act.rate", 25) }) },
+  { name: "not enough targets", build: () => ({ state: withEntry(exampleState(), "ret.logo-churn", undefined) }) },
+  { name: "no target at all (C1: the references name nothing)", build: () => ({ state: withoutTargets(exampleState()) }) },
+  { name: "not enough targets, behind a raised one", build: () => ({ state: withTarget(withEntry(exampleState(), "ret.logo-churn", undefined), "act.rate", 25) }) },
   { name: "referred share behind a target (unpriced)", build: () => ({ state: withTarget(within(), "ref.referred-share", 10) }) },
   { name: "event unnamed", build: () => ({ state: withEntry(exampleState(), "act.event", undefined) }) },
   {
@@ -466,7 +467,7 @@ describe("the sweep reaches every sentence it claims to", () => {
   it("and reaches the forms the rules are about", () => {
     const all = SWEEP.samples.map((s) => s.text).join("\n");
     // Churn behind, in both directions of words; a singular count; the event quoted; a dropped segment.
-    for (const needle of ["au-dessus du repère", "above the reference", `1 nouveau payant`, "1 client gardé", `l'événement «${NB}Invited a teammate${NB}»`, "l'événement d'activation", "Il manque la marge brute"])
+    for (const needle of ["au-dessus de la cible", "above the target", `1 nouveau payant`, "1 client gardé", `l'événement «${NB}Invited a teammate${NB}»`, "l'événement d'activation", "Il manque la marge brute"])
       expect(all, needle).toContain(needle);
   });
 });

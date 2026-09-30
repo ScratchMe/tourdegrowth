@@ -182,35 +182,34 @@ export function sourceInSentence(source: SourceRef | null | undefined, strings: 
 export type SideKey = keyof Words["side"];
 
 /**
- * A position (good-or-bad) and its comparator, as a physical `side` key. The
- * one place the metric's direction crosses the words: churn `below` (behind)
- * is `overReference`, churn `above` (ahead) is `underReference`.
+ * A position (good-or-bad) against the team's target, as a physical `side`
+ * key. The one place the metric's direction crosses the words: churn `below`
+ * (behind) is `overTarget`, churn `above` (ahead) is `underTarget`.
  */
 export function sideKey(position: Position, comparator: Comparator | undefined): SideKey | null {
   if (!comparator) return null;
   const up = comparator.direction === "higher";
-  const target = comparator.kind === "target";
   switch (position) {
     case "below":
-      return target ? (up ? "underTarget" : "overTarget") : up ? "underReference" : "overReference";
+      return up ? "underTarget" : "overTarget";
     case "maybe-below":
-      return target ? (up ? "maybeUnderTarget" : "maybeOverTarget") : up ? "maybeUnderReference" : "maybeOverReference";
+      return up ? "maybeUnderTarget" : "maybeOverTarget";
     case "within":
-      return target ? "atTarget" : "withinReference";
+      return "atTarget";
     case "above":
-      return target ? (up ? "overTarget" : "underTarget") : up ? "overReference" : "underReference";
+      return up ? "overTarget" : "underTarget";
     default:
       return null;
   }
 }
 
-/** « sous le repère », « au-dessus de la cible »… — null when there is nothing to compare with. */
+/** « sous la cible », « au-dessus de la cible »… — null when there is nothing to compare with. */
 export function sideText(position: Position, comparator: Comparator | undefined, strings: Words): string | null {
   const key = sideKey(position, comparator);
   return key ? strings.side[key] : null;
 }
 
-/** The same, as a stamp or a line of its own: « Au-dessus du repère ». */
+/** The same, as a stamp or a line of its own: « Au-dessus de la cible ». */
 export function stampText(position: Position, comparator: Comparator | undefined, strings: Words): string | null {
   const text = sideText(position, comparator, strings);
   return text ? capitalise(text) : null;
@@ -218,12 +217,12 @@ export function stampText(position: Position, comparator: Comparator | undefined
 
 /**
  * A position as a label of its own — the board row's comparator, the metric
- * sheet's position line, the peloton's stamp: « Au-dessus du repère »,
- * « Dans le repère », « Sans repère · fixe une cible ». Null when the value is
+ * sheet's position line, the peloton's stamp: « Au-dessus de la cible »,
+ * « À la cible », « Sans cible · fixes-en une ». Null when the value is
  * unknown. The screens used to pick from four direction-blind strings
- * (`diagnosis.stampReference` & co.), so the §6.0 example's churn — 2,5 %
- * against 1 to 2 % — was labelled « Sous le repère » while it sat above it.
- * One function, so the board cannot word a position two ways.
+ * (`diagnosis.stampReference` & co.), so a churn above its comparator was
+ * once labelled « Sous le repère ». One function, so the board cannot word a
+ * position two ways.
  */
 export function positionLabel(position: Position, comparator: Comparator | undefined, strings: Words): string | null {
   if (position === "no-comparator") return strings.diagnosis.noComparator;
@@ -231,15 +230,13 @@ export function positionLabel(position: Position, comparator: Comparator | undef
 }
 
 /**
- * The board's sentence under a NAMED stage: « 18 %, sous l'ordre de grandeur
- * couramment cité (20 à 40 %) » — or, for churn, « au-dessus de … ».
- * `value` and `comparatorText` arrive formatted.
+ * The board's sentence under a NAMED stage: « 18 %, sous ta cible (20 %) » —
+ * or, for churn, « au-dessus de ta cible ». `value` and `comparatorText`
+ * arrive formatted.
  */
 export function behindSentence(comparator: Comparator, value: string, comparatorText: string, strings: Words): string {
   const d = strings.diagnosis;
-  const up = comparator.direction === "higher";
-  if (comparator.kind === "target") return fillTemplate(up ? d.belowTarget : d.aboveTarget, { value, target: comparatorText });
-  return fillTemplate(up ? d.belowReference : d.aboveReference, { value, range: comparatorText });
+  return fillTemplate(comparator.direction === "higher" ? d.belowTarget : d.aboveTarget, { value, target: comparatorText });
 }
 
 // --- Diagnosis sentences ------------------------------------------------------------
