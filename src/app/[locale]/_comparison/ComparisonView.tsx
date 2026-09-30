@@ -11,6 +11,7 @@ import type { Locale } from "@/lib/i18n/locale";
 import { localePath } from "@/lib/i18n/routes";
 import { articleSchema, breadcrumbSchema, JsonLd } from "@/lib/seo/jsonld";
 import { articleDates } from "@/content/updated-at";
+import { UpdatedLine } from "../_prose/UpdatedLine";
 import own from "./comparison.module.css";
 
 /**
@@ -49,7 +50,13 @@ export function ComparisonView({ slug, locale }: { slug: ComparisonSlug; locale:
       <JsonLd
         data={articleSchema(locale, `/${slug}`, tc(entry.title, locale), tc(entry.metaDescription, locale), articleDates(`/${slug}`))}
       />
-      <ProsePage locale={locale} path={`/${slug}`} title={tc(entry.title, locale)} lead={tc(entry.intro, locale)}>
+      <ProsePage
+        locale={locale}
+        path={`/${slug}`}
+        title={tc(entry.title, locale)}
+        lead={tc(entry.intro, locale)}
+        kicker={<UpdatedLine locale={locale} isoDay={articleDates(`/${slug}`).modified} />}
+      >
         <ProseSection heading={tc(t.atAGlance, locale)} data-testid="comparison-table">
           <div className={own.rows}>
             {entry.rows.map((row) => (

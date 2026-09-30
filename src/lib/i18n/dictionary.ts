@@ -286,6 +286,18 @@ export const UI_STRINGS = {
     },
   },
 
+  /**
+   * The chrome every prose page may print — audit GEO (A8.2, 2026-09-30).
+   * The date line was the legal pages' own (`LEGAL_UI` in `content/legal.ts`,
+   * approved with them); the articles and the glossary terms print it too
+   * now, so it lives with the shared chrome. The date itself is always the
+   * one the sitemap and the JSON-LD carry (`content/updated-at.ts`).
+   */
+  prosePage: {
+    // TODO: à relire (convention 6). — le libellé des pages légales, nouveau sur les articles et les termes du glossaire.
+    updatedAt: { en: "Last updated:", fr: "Dernière mise à jour :" },
+  },
+
   howItWorksPage: {
     exampleQuestionLabel: { en: "Example question:", fr: "Exemple de question :" },
     // Relu et validé par Antoine (2026-09-09) — R2-17. Eyebrow of each pillar card: the

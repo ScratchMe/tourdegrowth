@@ -21,9 +21,9 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
-| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | Maintenant. A7 dans l'ordre de ses dépendances ; A8 à tout moment (A1 à A6 livrés le 2026-09-29) |
+| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | Maintenant. A7 dans l'ordre de ses dépendances (A1 à A6 livrés le 2026-09-29, A8 le 2026-09-30) |
 | **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30** (79 composants, après A1, A2, A4 et A5). Le brief 04 est déposé dans le projet le 2026-09-30 ; reste à le lancer depuis Claude Design (D3), puis une re-synchro après A7.10 |
-| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 et C24 tranchées le 2026-09-30. Reste **C25**, la validation de la spécification de A7.3 (`ENGINE.md` §18) |
+| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 et C24 tranchées le 2026-09-30. Restent **C25**, la validation de la spécification de A7.3 (`ENGINE.md` §18), et C26 et C27, nées d'A8 (robots d'IA, `llms.txt`) |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, tout A7.3 |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
 
@@ -176,31 +176,6 @@ de lancement en grande pompe, et `linkedin` reste dans `EXCLUDED`
 | **D'abord, l'outillage** | Deux consignes appliquent encore l'ancienne règle et arrêteraient cet item : `.claude/agents/relecteur-copie.md` §5 (« Jamais le nom d'Antoine ») et `.claude/skills/livrer/SKILL.md` §3 (« jamais le nom d'Antoine dans `marketing/` »). Les réécrire : le nom seulement dans la réponse à « qui est derrière ? » (C22), et jamais LinkedIn pour l'instant. Même chose pour le commentaire de `src/__tests__/utm-channels.test.ts:21-25` (« the author is never named » devient « not for now »), le test gardant `linkedin` exclu. Non fait dans la PR de la séance : `.claude/` n'est pas dans la liste « doc » de `scripts/vercel-ignore.sh`, et la PR devait rester de la doc seule |
 | Ne change pas | Le compte qui poste reste celui du projet (`tourdegrowth`). `CLAUDE.md` et `GROWTH-PLAN.md` sont déjà à jour |
 
-### A8 — L'audit GEO, joué sans installer le plug-in
-
-**D'où ça vient** : le 2026-09-29, Antoine a proposé le plug-in
-« claude-site-audit » (Rob Spence, MIT, 1.0.0). Il a été lu, **pas installé** :
-- l'archive ne contient pas ses 17 contrôles (`references/checks.md`), sa
-  notation (`scoring.md`) ni son générateur de PDF ;
-- il appelle des outils de claude.ai (`web_fetch`, `present_files`) ;
-- il est cadré pour le secteur public américain (ADA Title II, HUD) ;
-- il n'a pas de fichier de licence.
-
-**Décidé** : garder l'idée, pas l'outil. L'angle **GEO** (être lu et cité par
-les moteurs de réponse IA) n'a jamais été audité ici : le site n'a pas de
-`llms.txt`, `robots.ts` laisse tout passer (`userAgent: "*"`), et ni
-`JOURNAL.md` ni `GROWTH-PLAN.md` n'en parlent. L'audit SEO du 25/09 ne l'a pas
-couvert.
-
-| # | Quoi | Comment |
-|---|---|---|
-| A8.1 | **Relever l'état GEO de la production**, en lecture seule contre `www.tourdegrowth.com`, dans les deux langues | Ce que servent `/robots.txt` et `/llms.txt`. Le JSON-LD par type de page (accueil, glossaire, comparaisons, pages « porte ouverte », `/how-it-works`) et sa validité. Une réponse citable dans le HTML servi sans JavaScript : la définition en tête de page, une date visible, un auteur. Le `lang` et les `hreflang`. Ne pas refaire ce que la CI couvre déjà (accessibilité, contraste, métadonnées de base) |
-| A8.2 | **Corriger ce qui ne demande aucun choix** : un JSON-LD invalide, un `hreflang` manquant, une définition absente du HTML servi | Une PR, avec ses gardes. Toute copie neuve est « à relire » |
-| A8.3 | **Remonter en section C ce qui est une décision**, avec une recommandation | Au moins deux décisions : **laisser ou bloquer les robots d'IA** (GPTBot, ClaudeBot, PerplexityBot, Google-Extended, CCBot), qui entraînent des modèles autant qu'ils citent ; et **publier un `llms.txt`**, dont le contenu est de la copie et une vitrine publique |
-
-Le plug-in n'entre pas dans le dépôt, même en `--manuel`. Si l'amont publie
-les fichiers manquants, la question repart en section C.
-
 ### A9 — Ce que la design sync du 2026-09-30 a trouvé dans le produit
 
 Vus en notant les 244 cellules, puis **re-mesurés le 2026-09-30 sur `main`
@@ -282,6 +257,8 @@ ouverts, et, pour la vue propriétaire, un build jetable jamais commité.
 | # | Question | Aujourd'hui | Reco |
 |---|---|---|---|
 | C25 | **Valider la spécification du B2B assisté et de l'hybride** (`ENGINE.md` §18, A7.3.a, écrite le 2026-09-30) | Rien n'est codé. La spécification tient la décision 3 à la lettre (type puis motions, « deux moteurs, un total », jamais de face-à-face) et C1 dans les deux motions. Elle pose **seize questions** (§18.12), chacune avec sa reco et ce qui casse si on se trompe. Les trois qui structurent tout : **Q3**, un client compte dans la motion qui a signé son contrat en cours (sinon le MRR total se compte deux fois), **Q1**, l'activation assistée est la mise en production, et **Q2**, l'assisté se lit sur trois mois glissants | **Trancher Q3, Q1 et Q2 d'abord**, une par une avec le prompt C, puis valider les treize autres en bloc si leurs recos te vont. Ensuite A7.3.c (le code) peut partir, dans l'ordre du §18.11 |
+| C26 | **Laisser ou bloquer les robots d'IA ?** Né d'A8 (2026-09-30) | `robots.ts` sert `User-Agent: *` / `Allow: /`, sans rien dire d'autre. Mesuré le 2026-09-30 : neuf robots d'IA ou de recherche (GPTBot, OAI-SearchBot, ClaudeBot, PerplexityBot, CCBot…) reçoivent la même page que Googlebot, au même octet. Les éditeurs séparent maintenant leurs robots d'**entraînement** (GPTBot, ClaudeBot, CCBot, Google-Extended) de leurs robots de **recherche** (OAI-SearchBot, Claude-SearchBot, PerplexityBot) : on peut refuser l'un sans perdre l'autre | **Tout laisser, et l'écrire** dans `robots.ts`, pour que ce soit un choix et plus un défaut. Le Tour vit du seul SEO (C20), le glossaire et les comparaisons sont écrits pour être cités, et ce qui a de la valeur (le Tour, le moteur, le jeu) tourne dans le navigateur : un modèle entraîné sur les pages ne l'emporte pas. Bloquer l'entraînement seul coûterait la présence du site dans ce qu'un modèle sait sans chercher. **Si on se trompe** : laisser ne se rattrape pas pour ce qui est déjà lu ; bloquer coûte des citations, et se défait au passage suivant |
+| C27 | **Publier un `llms.txt` ?** Né d'A8 (2026-09-30) | `/llms.txt` répond par la page 404 du site. C'est une proposition, pas un standard. Google a dit en juillet 2025 ne pas le lire, et selon une mesure publiée par [PPC Land](https://ppc.land/llms-txt-adoption-rises-8-8x-but-97-of-files-get-zero-ai-requests/), 97 % des fichiers n'ont reçu aucune requête d'IA en mai 2026. Perplexity est seule à dire qu'elle le lit (même source) | **Oui, court et généré** : une route qui le construit depuis ce qui existe déjà (titre et description de chaque page, les 24 termes, les comparaisons, les deux pages « porte ouverte », `/how-it-works`), en anglais avec les adresses des deux langues, **sans `llms-full.txt`**. Seul le paragraphe d'en-tête est de la copie neuve, « à relire », et un test l'empêche de dériver des pages. Gain faible, coût faible. **Si on se trompe** : rien ne casse dans un sens ni dans l'autre tant que Google et OpenAI ne le lisent pas |
 
 ---
 

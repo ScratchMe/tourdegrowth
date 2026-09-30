@@ -10,8 +10,10 @@ import { HOW_IT_WORKS } from "@/content/how-it-works";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { localePath } from "@/lib/i18n/routes";
-import { breadcrumbSchema, JsonLd } from "@/lib/seo/jsonld";
+import { articleSchema, breadcrumbSchema, JsonLd } from "@/lib/seo/jsonld";
+import { articleDates } from "@/content/updated-at";
 import { contentMetadata } from "@/lib/i18n/meta";
+import { UpdatedLine } from "../_prose/UpdatedLine";
 import styles from "./page.module.css";
 
 interface PageProps {
@@ -29,7 +31,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     "/how-it-works",
     tc(UI_STRINGS.meta.howItWorksTitle, resolved),
     tc(HOW_IT_WORKS.metaDescription, resolved),
-    { ownShareImage: true },
+    { ownShareImage: true, article: articleDates("/how-it-works") },
   );
 }
 
@@ -46,11 +48,24 @@ export default async function HowItWorksPage({ params }: PageProps) {
   return (
     <>
       <JsonLd data={breadcrumbSchema(locale, [{ name: tc(HOW_IT_WORKS.title, locale), path: "/how-it-works" }])} />
+      {/* GEO audit (A8.2): the page that explains the score was the one prose
+          page with neither an `Article` nor a date — the page an answer
+          engine quotes when asked how Tour de Growth computes anything. */}
+      <JsonLd
+        data={articleSchema(
+          locale,
+          "/how-it-works",
+          tc(HOW_IT_WORKS.title, locale),
+          tc(HOW_IT_WORKS.metaDescription, locale),
+          articleDates("/how-it-works"),
+        )}
+      />
       <ProsePage
         locale={locale}
         path="/how-it-works"
         title={tc(HOW_IT_WORKS.title, locale)}
         lead={tc(HOW_IT_WORKS.intro, locale)}
+        kicker={<UpdatedLine locale={locale} isoDay={articleDates("/how-it-works").modified} />}
       >
         {/* ds-critique M-1: these were five raised cards — "one loud thing per
             screen" broken five times, on the page that explains the system.

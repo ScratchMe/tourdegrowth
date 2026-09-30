@@ -176,6 +176,11 @@ Et un principe : **les types suivent le runtime, jamais ils ne le précèdent**
   - `indexnow.yml` — soumission quotidienne du sitemap. Aucun secret : une clé
     IndexNow est publique par construction, la preuve de propriété est le
     fichier servi.
+- **Toute action de tout workflow est épinglée par SHA de commit** (§1.5), et
+  `src/__tests__/workflows-pinned.test.ts` l'exige : un workflow neuf ou une
+  étape ajoutée rougit la CI sinon. Posé avec l'hygiène de dépôt public du
+  2026-09-24 (`SECURITY.md`, posture « lecture bienvenue, PR non attendues »
+  dans le README).
 - **Une PR verte se merge sans attendre Antoine** (sa décision du 2026-09-29),
   en suivant `.claude/skills/livrer/SKILL.md`, sauf si elle peut faire grimper
   Functions Storage (dépendance, réglage de build, binaire sous `src/`, code
