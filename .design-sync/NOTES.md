@@ -340,6 +340,14 @@ announced: A1 and A2 each counted from 244 (A1: 245, A2: 251), but the
 2026-09-29 grading had already removed cells that duplicated a neighbour or
 lied, bringing 245 down to 238. 238 + DotGrid's 3 + DotLegend's 3 = 244.
 
+**The project also holds `design/`, which is not part of the bundle.** On
+2026-09-30 brief 04 went in at the paths it has in this repo:
+`design/DS-EXTENSION-BRIEF-04.md` and the nine PNGs under
+`design/ds-extension-04/` (ten files, written alone under their own plan,
+anchor untouched). A re-sync must leave them: before applying
+`upload.deletePaths`, check it names nothing under `design/`. Remove them on
+purpose once the return is ported, not as a side effect of a sync.
+
 **Sessions do upload now.** The `DesignSync` tool answered from a cloud session
 with the claude.ai login — no `/design-login`, no local machine. The
 authorization that blocked the first attempt (2026-09-11) came from an
