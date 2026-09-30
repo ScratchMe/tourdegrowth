@@ -1,4 +1,7 @@
-/* Design system extension 01 — see design/ds-extension-01-return/components/core/TextArea.prompt.md */
+/* Design system extension 01 — see design/ds-extension-01-return/components/core/TextArea.prompt.md
+ * Brought into the field family by extension 04 (design/ds-extension-04-return/
+ * components/core/TextArea/TextArea.delta.md): the field's radius, the 16px
+ * value, the tight focus offset, and the 3px red edge an invalid field takes. */
 
 .wrap {
   display: flex;
@@ -11,39 +14,54 @@
   display: block;
   width: 100%;
   min-height: var(--field-min-height);
-  padding: var(--pad-field);
-  font: var(--body-md);
-  color: var(--text-body);
+  /* The 2px edge plus this padding is the room a 3px edge takes, so the text
+     never moves when the edge turns. */
+  padding: calc(var(--pad-field) - 1px);
+  /* 16px, not --body-md: under it, iOS Safari zooms the page on focus. */
+  font: var(--field-value);
+  color: var(--field-text);
   background: var(--field-bg);
-  border: var(--border-solid);
-  border-radius: var(--radius-panel);
+  border: var(--border-width) solid var(--field-border);
+  border-radius: var(--radius-field);
   resize: none;
   /* Removed so the system focus ring below is uniform. */
   outline: none;
 }
 
 .field::placeholder {
-  font: var(--body-md);
+  font: var(--field-value);
   color: var(--field-placeholder);
 }
 
-.field:focus-visible {
-  outline: var(--focus-width) solid var(--focus-ring);
-  outline-offset: var(--focus-offset);
+@media (hover: hover) {
+  .field:hover {
+    border-color: var(--field-border-hover);
+  }
 }
 
-/* Past the limit only: solid red is diagnosis. No amber, no "50 left" warning. */
-.fieldOverLimit {
+.field:focus-visible {
+  outline: var(--focus-width) solid var(--field-focus-ring);
+  outline-offset: var(--focus-offset-tight);
+}
+
+/* Past the limit, or invalid in its Field: solid red is diagnosis, 3px like
+   every field's. No amber, no "50 left" warning. */
+.fieldOverLimit,
+.fieldInvalid,
+.fieldOverLimit:hover,
+.fieldInvalid:hover {
+  border-width: var(--field-edge-invalid);
   border-color: var(--field-border-alert);
+  padding: calc(var(--pad-field) - 2px);
 }
 
 .counter {
   align-self: flex-end;
-  font: var(--meta-xs);
+  font: var(--field-counter);
   font-variant-numeric: tabular-nums;
-  color: var(--text-muted);
+  color: var(--field-counter-text);
 }
 
 .counterOverLimit {
-  color: var(--text-alert);
+  color: var(--field-message-invalid);
 }

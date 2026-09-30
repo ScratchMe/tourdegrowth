@@ -22,7 +22,7 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
 | **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | Maintenant. A7 dans l'ordre de ses dépendances ; A8 à tout moment (A1 à A6 livrés le 2026-09-29) |
-| **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30** (79 composants, après A1, A2, A4 et A5). Le brief 04 est déposé dans le projet le 2026-09-30 ; reste à le lancer depuis Claude Design (D3), puis une re-synchro après A7.10 |
+| **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30** (79 composants, après A1, A2, A4 et A5). Le retour du brief 04 est arrivé le 2026-09-30 et se porte en A10 ; re-synchroniser à la fin d'A10 (neuf primitives de plus) et après A7.10 |
 | **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 et C24 tranchées le 2026-09-30. Reste **C25**, la validation de la spécification de A7.3 (`ENGINE.md` §18) |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, tout A7.3 |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
@@ -214,6 +214,45 @@ dans une seule PR, ou avec le lot qui touche le même fichier.
 | A9.3 | **La courbe de churn touche l'étiquette « target 4.0% »** dans la fin `DarkYear` | `EndingCharts` : l'étiquette de la ligne d'objectif est posée au-dessus de la ligne, là où passe une courbe proche de 5 %. Placer l'étiquette du côté sans données, ou lui donner un fond |
 | A9.4 | **Une règle morte dans `SpaceBand.module.css`** : `.inner { padding-block: 7px }` sous `@container (max-width: 560px)` | `.inner` est lui-même le conteneur, et une requête de conteneur ne s'applique jamais au conteneur qu'elle interroge. Soit la retirer, soit la poser sur un enfant (et vérifier à 360 px que la bande ne change pas) |
 
+
+### A10 — S-15 : les primitives de formulaire (extension 04 du design system)
+
+Le retour de Claude Design sur `design/DS-EXTENSION-BRIEF-04.md` est arrivé le
+2026-09-30 : `design/ds-extension-04-return/`, qui fait autorité comme les
+retours 01 et 03. Il répond aux dix-huit questions sans contredire aucune des
+dix contraintes. **Antoine a tranché le 2026-09-30 que l'audit est porté lui
+aussi**, bien qu'il soit entre parenthèses (#210) : c'est un portage qui retire
+une copie, pas une fonctionnalité. Une PR par sous-lot, dans cet ordre :
+
+| # | Quoi | Détail |
+|---|---|---|
+| A10.a | **Les primitives dans `src/components/core/`, sans rien câbler** | `Field` (et `FieldRow`), `TextField`, `NumberField`, `Select`, `DateField`, `Choices`, `Checkbox`, `FormSummary` ; `TextArea` et `Segmented` selon leurs deltas ; `AnswerOption` lit `--size-mark` et `--mark-inset`. Jetons répartis dans les couches existantes (`colors.css` et `tokens.ts` pour les couleurs, `typography.css`, `shape.css`, `spacing.css`), pas dans un fichier à part. Tests unitaires (la logique pure dans `src/lib/forms/`, le balisage par rendu statique), aperçus dans `.design-sync/previews/`, contrats dans `componentSrcMap`. Gardes : un seul anneau de focus sur toutes les primitives, aucune opacité pour dessiner un état. Vérification à l'écran sur une page d'échafaudage jamais commitée, papier et nuit, FR et EN, 390 et 1 280 |
+| A10.b | **Le moteur sur les primitives** | `_engine/_ui/` puis ses usages, constructeur de slides compris (`deck/AskForm.tsx` et son `Field` local, les cinq cases à cocher de l'écran du deck). Gardes : « 26 000 » lu comme 26000, l'anneau de focus le même partout. Les e2e du moteur, de l'accessibilité et du contraste restent verts |
+| A10.c | **L'audit sur les primitives, avec A9.1** | `admin/audit/_ui/` (ses cinq fichiers), le paragraphe rouge des champs manquants remplacé par l'état `missing` et un `FormSummary`, la date en trois listes en français, l'anneau d'encre à la place du rouge. A9.1 (les guillemets) dans la même PR, puisqu'il touche les mêmes fichiers, et `copy-typography.test.ts` étendu à ce dossier. Garde : « 26 000 » lu dans l'audit aussi |
+| A10.d | **Les trois copies supprimées, et une garde contre une quatrième** | Les dossiers `_ui/` du moteur et de l'audit, le `Field` et le `.control` de `deck/`. La garde refuse tout `<input>`, `<select>` ou case à cocher écrit à la main hors de `src/components/core/` |
+
+**Écarts assumés contre le retour, signalés plutôt qu'absorbés** (le détail
+dans l'entrée de `JOURNAL.md` du lot a) :
+- `NumberField` prend et rend un nombre (`number | null`) et garde le texte
+  tapé en interne, comme le moteur aujourd'hui. Le retour le voulait en texte,
+  analysé par l'appelant, mais cela aurait redonné à chaque appelant du moteur
+  et de l'audit une copie de la logique de brouillon. L'analyse et le
+  regroupement sont ceux du moteur (`number.ts`, plus complet que
+  `groupAsTyped`), déplacés dans `src/lib/forms/`.
+- `--mark-color: currentColor` n'est pas un jeton de couleur (les gardes
+  exigent une couleur littérale) : les marques écrivent `currentColor`.
+- `--field-count-reveal`, `--form-row-min` et `--choices-columns-min` ne
+  deviennent pas des jetons, puisqu'aucune feuille ne peut les lire (un seuil
+  lu par du JS, deux largeurs de requête de conteneur) : ce sont des
+  constantes commentées. `--form-gap-sm` et `--form-gap-md` arrivent en b,
+  avec leur premier lecteur (`dead-tokens.test.ts`).
+
+**Reste hors d'A10** : mesurer `--select-inset` dans WebKit et Gecko (cette
+session n'a que Chromium), porter le curseur du « et si » et les deux boutons
+d'import de fichier (le retour pose ses conditions : un `Field`, et un
+`NumberField` à côté du curseur), et la garde générale que le retour suggère
+contre toute opacité sur du texte.
+
 ---
 
 ## B. Design sync
@@ -227,7 +266,7 @@ et A5 (`JOURNAL.md`, 2026-09-30, et `.design-sync/NOTES.md`, « Synced »).
 
 | # | Quoi | Détail |
 |---|---|---|
-| B2 | **Le brief S-15 : les primitives de formulaire.** Écrit le 2026-09-29 : `design/DS-EXTENSION-BRIEF-04.md`, avec ses neuf captures dans `design/ds-extension-04/` | **Déposé dans le projet Claude Design le 2026-09-30** par une session, à ta demande : le brief et ses neuf captures sous `design/`, aux mêmes chemins que dans le dépôt. Rien ne tourne encore de son côté : il faut le lancer (D3). Le retour arrive par `design/ds-extension-04-return/` ou par « Send to Claude Code Web ». La promotion dans `core/` devient ensuite un lot A |
+| B2 | **Le brief S-15 : les primitives de formulaire.** `design/DS-EXTENSION-BRIEF-04.md` | **Le retour est arrivé le 2026-09-30** (`design/ds-extension-04-return/`) : les dix-huit questions ont leur réponse, aucune ne contredit une contrainte. Le port est le lot A10 ; B2 se ferme avec lui, et la re-synchro qui suit y envoie les neuf primitives (`componentSrcMap` et aperçus prêts depuis A10.a) |
 | B3 | **Re-synchroniser après A7.10** (le primaire de `ShareCard` chez le propriétaire) | Avec le prompt B. Attendu avant A7.10 : 79 composants, 244 cellules, 79/79. **Quatre** avertissements sont permanents : « Impact », et `GRID_OVERFLOW` sur `DefinitionPopover`, `QuarterNews` et `GlossaryTerm` (le quatrième depuis A4, accepté par Antoine le 2026-09-30). Deux pièges : le driver ne régénère pas `dist/types/` (lancer `cfg.buildCmd` d'abord, sinon les contrats restent ceux d'avant), et une note est reportée quand l'aperçu n'a pas changé même si le composant a changé (recapturer ceux-là en contrôle). Les deux sont dans `.design-sync/NOTES.md` |
 
 ---
@@ -294,7 +333,6 @@ rien de privé dans le dépôt, qui est public. Cela vaut pour les chiffres de
 | # | Action | Prête ? | Détail |
 |---|---|---|---|
 | D2 | **Ouvrir le jeu et le moteur à tout le monde** | Non : il faut les bons à tirer nº7 et nº8 signés, C1 à C15 tranchés, et les liens d'ouverture (C7) construits. **Pour le moteur, en plus : tout le lot A7.3** (le B2B assisté et l'hybride, décidés le 2026-09-29), bon à tirer compris. **Le jeu n'ouvre pas avant le moteur** (C23, 2026-09-30), et sa phrase sur le Digital Fairness Act est remise à jour avant d'ouvrir (section E) | Poser `GAME_ENABLED` et/ou `ENGINE_ENABLED` à `true` dans Vercel (Production), puis **redéployer** (`VERCEL.md` §1.11). Ensuite, la session vérifie la production : pages en 200, sitemap, pied de page, bandeau. Toi, tu demandes l'indexation des nouvelles pages dans Search Console |
-| D3 | **Lancer le brief 04 dans Claude Design** | Oui | Le brief (B2) et ses neuf captures sont **déjà dans le projet** « Tour de Growth » depuis le 2026-09-30, sous `design/`. Ouvre le projet dans Claude Design et colle : *Read design/DS-EXTENSION-BRIEF-04.md and its nine screenshots in design/ds-extension-04/. Answer its eighteen open questions, keep its ten constraints, and deliver what "What we need back" asks for. Send the result back with "Send to Claude Code Web".* Le retour arrive par « Send to Claude Code Web » ou se dépose dans `design/ds-extension-04-return/` ; la session qui le reçoit lance la mission S-15 |
 | D5 | **Les entretiens, réorientés vers le moteur** (2026-09-30) | **Reportés par Antoine le 2026-09-30, sans date.** La trame attend en annexe d'`ENGINE.md` (validée le même jour). Une session ne les relance pas : c'est lui qui les rouvrira | Cinq à dix PM growth ou Heads of Growth, dans des boîtes où « on score sous 50 ». La question de fond : « quelqu'un taperait-il ses chiffres à la main, et pour obtenir quoi ? ». Ils servaient le Go / No-Go de l'audit ; l'audit étant entre parenthèses (`AUDIT-PLAN.md`, en tête), ils nourrissent le moteur (A7.3, les textes de lancement). **Les notes d'entretien restent hors du dépôt** : noms, entreprises, chiffres ; seule une synthèse anonyme y entre |
 | D6 | **La distribution, vague 1** | **Non : rien ne part avant que le moteur et le jeu soient prêts** (C19, 2026-09-29). Rien n'est encore parti. Le Tour n'aura ni Show HN ni r/SaaS | Textes dans `marketing/launch/` et `marketing/campaigns/`. Tu postes sous pseudo, la session fournit et met à jour les textes. Annuaires dans l'ordre de `GROWTH-PLAN.md` 1.6. **Pas de LinkedIn ni de lancement en grande pompe pour l'instant** (C22 : une question de calendrier, pas d'anonymat) |
 | D7 | **La distribution, vague 4** | Après deux semaines de lecture de la vague 1 | La session écrit les pitchs de newsletters et passe honnêtement le produit de chaque auteur au Tour ; tu envoies depuis `contact@`. Pour les listes « awesome », seulement si ton profil GitHub n'affiche pas ton nom (à vérifier d'abord sur github.com/ScratchMe) |

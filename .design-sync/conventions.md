@@ -138,9 +138,11 @@ Target 390px. Nothing may scroll horizontally at 360px.
 
 ## Accessibility, where it is load-bearing
 
-`TextArea` requires `label` and `StageProgress` needs `aria-label`: in both the
-visible prompt sits in a sibling component, so without them the control has no
-accessible name at all. Focus moves deliberately between quiz questions, and the
+`StageProgress` needs `aria-label`, and a `TextArea` that stands alone under a
+`QuestionCard` needs `label`: the visible prompt sits in a sibling component,
+so without them the control has no accessible name at all. In a form, every
+control gets its **visible** label from a `Field` instead (below), and a
+`TextArea` or a `Segmented` inside one takes its name from it. Focus moves deliberately between quiz questions, and the
 glossary popover returns focus to the trigger that opened it.
 
 Every interactive target is at least 44×44px. The compact controls draw
@@ -274,6 +276,37 @@ numbers support:
   There is no categorical or sequential palette: a series is told apart by a
   dash pattern and a direct label, a count by a shape.
 
+## Forms: one set of primitives (extension 04)
+
+Every control in a form gets its **visible** label from a `Field` — an
+accessible name alone is anonymous to half the people using it. `TextField`,
+`NumberField`, `Select`, `DateField` and `Choices` render their own; wrap a
+`TextArea`, a `Segmented` (`labelledBy`) or a list of `Checkbox`es in one.
+The label is a sentence in Inter, never the mono meta-label; an optional
+field says so with a word, a required one carries no mark.
+
+- **Native underneath, always**: `<input>`, `<select>`, radios, checkboxes.
+  No custom dropdown or listbox; the select keeps the platform's chevron,
+  the one glyph the system does not draw.
+- **Two messages, never colour alone**: `error` (cannot be saved as it is: a
+  3px red edge, a 600 message behind a red rule) and `missing` (still to fill
+  in, saves anyway: dashed, « not yet », in body ink — not red). Show a parse
+  error on blur and a missing field on save, never on each keystroke. What
+  stands between the person and saving is a `FormSummary` just above the
+  button, one link per field.
+- **Nothing typed is thrown away**: soft limits never block, « 12o » stays on
+  screen, an empty number is `null` and never 0, and nothing is pre-selected
+  for the person.
+- **Two densities on one axis**: `size="md"` for a one-question screen (48px
+  controls), `sm` for a sheet of fields (44px). Never both in one form.
+- **Numbers look like numbers**: tabular Inter, a box as wide as the
+  magnitude (`fit="content"`, `digits`), the unit inside it where the caller's
+  locale puts it (€26,000 / 26 000 €). A count out of a count is a `FieldRow`.
+- **One focus ring and one selection language**: `--field-focus-ring` is the
+  system's ink ring on every control (the red `--focus-ring-invert` is for
+  ink- or red-filled surfaces only); a chosen option is the inverse fill.
+  Disabled is dashed in muted ink that passes, never faded by opacity.
+
 ## What is not in here
 
 No icon set, no user-facing dark mode, no chart library, no blurred shadows
@@ -308,6 +341,7 @@ proper names — and `alert` and `red` named the same role.
 | Role colour | `tone` | `muted` · `ink` · `alert` · `good` · `bad` · `neutral`, and a surface's own (`paper`, `sunken`, `outlineAlert`; `caveat`, `cta`) | `alert` is the red of a diagnosis, everywhere. There is no `red` |
 | Hierarchy | `variant` | `primary` · `secondary` · `quiet` | How loud an action is, beside the others |
 | Column | `width` | `narrow` · `reading` · `wide` | The page column a frame sits in |
+| Field width | `fit` | `fill` · `content` | How wide a form field sits in its column: all of it, or as wide as what it holds (a number, a currency). Not `width`, which names the page column |
 
 Retired names, and where each went, one family at a time
 (`variant-names.test.ts` holds the list of what is still to move):

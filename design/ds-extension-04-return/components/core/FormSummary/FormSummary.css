@@ -1,0 +1,49 @@
+/* FormSummary — what still stands between the person and "Save", above the
+ * button, each line a link to its field. Replaces the audit's red paragraph. */
+.FormSummary_root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-inline-start: var(--space-7);
+  border-inline-start: var(--field-message-rule) solid var(--field-border-alert);
+}
+.FormSummary_missingOnly {
+  border-inline-start: var(--border-width) dashed var(--field-border-missing);
+}
+.FormSummary_root:focus-visible {
+  outline: var(--focus-width) solid var(--field-focus-ring);
+  outline-offset: var(--focus-offset);
+}
+.FormSummary_title {
+  font: var(--field-label);
+  color: var(--text-body);
+}
+.FormSummary_lead {
+  font: var(--field-hint);
+  color: var(--field-hint-text);
+  max-width: var(--measure-read);
+}
+.FormSummary_list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.FormSummary_item {
+  display: flex;
+  align-items: center;
+  min-height: var(--hit-min);
+  font: var(--field-hint);
+}
+.FormSummary_link {
+  color: var(--text-link);
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
+.FormSummary_link:hover {
+  color: var(--text-link-hover);
+}
+.FormSummary_kind {
+  color: var(--field-hint-text);
+}

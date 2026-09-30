@@ -1,0 +1,46 @@
+/* TextArea — extension 01, brought into the field family (see TextArea.delta.md).
+ * Changed lines are marked ◆. */
+.TextArea_wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.TextArea_field {
+  display: block;
+  width: 100%;
+  min-height: var(--field-min-height);
+  padding: calc(var(--pad-field) - 1px);     /* ◆ room for the 3px edge */
+  font: var(--field-value);                  /* ◆ 16px: no iOS zoom */
+  color: var(--field-text);
+  background: var(--field-bg);
+  border: var(--border-width) solid var(--field-border);
+  border-radius: var(--radius-field);        /* ◆ was --radius-panel */
+  resize: none;
+  outline: none;
+}
+.TextArea_field::placeholder {
+  font: var(--field-value);
+  color: var(--field-placeholder);
+}
+@media (hover: hover) {
+  .TextArea_field:hover { border-color: var(--field-border-hover); }  /* ◆ night edge */
+}
+.TextArea_field:focus-visible {
+  outline: var(--focus-width) solid var(--field-focus-ring);
+  outline-offset: var(--focus-offset-tight); /* ◆ was --focus-offset */
+}
+.TextArea_fieldOverLimit,
+.TextArea_fieldInvalid {                     /* ◆ invalid, from its Field */
+  border-width: var(--field-edge-invalid);   /* ◆ 3px, like every field */
+  border-color: var(--field-border-alert);
+  padding: calc(var(--pad-field) - 2px);
+}
+.TextArea_counter {
+  align-self: flex-end;
+  font: var(--field-counter);
+  font-variant-numeric: tabular-nums;
+  color: var(--field-counter-text);
+}
+.TextArea_counterOverLimit {
+  color: var(--field-message-invalid);
+}

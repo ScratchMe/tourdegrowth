@@ -1,0 +1,65 @@
+/* Design system extension 04 — see design/ds-extension-04-return/components/core/FormSummary/FormSummary.prompt.md
+ *
+ * What still stands between the person and « Save », just above the button,
+ * each line a link to its field. Replaces the audit's paragraph of red body
+ * text above the group — the loudest thing on the screen (Q18). */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-inline-start: var(--space-7);
+  border-inline-start: var(--field-message-rule) solid var(--field-border-alert);
+}
+
+/* Only fields still to fill in, none invalid: « not yet », dashed, not red. */
+.missingOnly {
+  border-inline-start: var(--border-width) dashed var(--field-border-missing);
+}
+
+.root:focus-visible {
+  outline: var(--focus-width) solid var(--field-focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.title {
+  font: var(--field-label);
+  color: var(--text-body);
+}
+
+.lead {
+  font: var(--field-hint);
+  color: var(--field-hint-text);
+  max-width: var(--measure-read);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  min-height: var(--hit-min);
+  font: var(--field-hint);
+}
+
+.link {
+  color: var(--text-link);
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
+
+@media (hover: hover) {
+  .link:hover {
+    color: var(--text-link-hover);
+  }
+}
+
+.kind {
+  color: var(--field-hint-text);
+}

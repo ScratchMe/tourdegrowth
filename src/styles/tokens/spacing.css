@@ -57,6 +57,29 @@
   --hit-compact: 32px;
   --hit-extend-compact: 8px;
   --field-min-height: 120px; /* TextArea */
+  /*
+   * Form fields (design system extension 04): two densities on one axis,
+   * `size` — `md` for a one-question screen, `sm` for a sheet of fields
+   * (Q17). Both keep every target at --hit-min.
+   */
+  --field-height-sm: var(--hit-min);
+  --field-height-md: var(--space-13); /* 48px */
+  --pad-field-inline: var(--space-6); /* 14px, inside every one-line control */
+  --field-gap-sm: var(--space-2); /* label → control */
+  --field-gap-md: var(--space-3);
+  --choice-height-sm: var(--hit-min);
+  --choice-height-md: var(--hit-option);
+  --pad-choice-sm: var(--space-4) var(--space-6);
+  --pad-choice-md: var(--space-7) var(--space-8);
+  --choice-gap: var(--space-3); /* between two option rows */
+  /* A number field is as wide as the magnitude it expects; the caller gives
+     the digits, this is the fallback (Q6). */
+  --field-digits-default: 9;
+  /* The platform indents a <select>'s value by this much inside its box;
+     Select takes it back so its value lines up with a text field's.
+     Measured in Chromium (extension 04, « Measured »); not yet in WebKit or
+     Gecko — adjust it here, never in a component. */
+  --select-inset: 4px;
 
   /* Design system extension 03 — the share image and the frame that shows it
      on the result page. `--ratio-share` is an `aspect-ratio` value, not a

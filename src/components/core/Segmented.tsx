@@ -14,8 +14,17 @@ interface SegmentedBaseProps<Id extends string> {
   options: readonly SegmentedOption<Id>[];
   /** The selected id. */
   value: Id;
-  /** Accessible group name, localized by the caller. */
-  label: string;
+  /**
+   * Accessible group name, localized by the caller — right in a header (the
+   * tone toggle, the language switch). In a form, pass `labelledBy` instead.
+   */
+  label?: string;
+  /**
+   * The id of a VISIBLE label that names the group — a Field's `labelId`
+   * (design system extension 04, Q15). It replaces `label` as the accessible
+   * name: in a form, the name must be the words on screen.
+   */
+  labelledBy?: string;
   /**
    * `md` is the ToneToggle scale (44px tall). `sm` is header scale: a
    * 32px track, with each option's touch target extended to 44px on the
@@ -49,16 +58,18 @@ export type SegmentedProps<Id extends string> = SegmentedButtonProps<Id> | Segme
  * a third such control appears.
  *
  * Never for navigation between pages of different content (that is tabs), and
- * never for on/off (that is a checkbox, which this system does not have).
+ * never for on/off (that is a Checkbox). In a form it sits in a Field `group`
+ * that shows its label, at `md` whatever the form's density.
  */
 export function Segmented<Id extends string>(props: SegmentedProps<Id>) {
-  const { options, value, label, size = "md", accent, className } = props;
+  const { options, value, label, labelledBy, size = "md", accent, className } = props;
   const sizeClass = size === "sm" ? styles.sm : styles.md;
 
   return (
     <div
       role="group"
-      aria-label={label}
+      aria-labelledby={labelledBy}
+      aria-label={labelledBy ? undefined : label}
       className={[styles.group, sizeClass, className ?? ""].filter(Boolean).join(" ")}
     >
       <div className={styles.track}>

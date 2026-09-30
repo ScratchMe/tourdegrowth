@@ -1,0 +1,109 @@
+/* Choices — pick one, as cards. Native radios in a fieldset; the round mark
+ * is AnswerOption's ring, drawn on the native input (Q11). */
+.Choices_root {
+  container-type: inline-size;
+}
+.Choices_list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--choice-gap);
+}
+/* 560px = --choices-columns-min (a container query cannot read a token). */
+@container (min-width: 560px) {
+  .Choices_cols2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.Choices_option {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-5);
+  min-height: var(--choice-height-md);
+  padding: var(--pad-choice-md);
+  font: var(--body-lg);
+  color: var(--text-body);
+  background: var(--surface-card);
+  border: var(--border-solid);
+  border-radius: var(--radius-panel);
+  cursor: pointer;
+  transition:
+    box-shadow var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+.Choices_sm .Choices_option {
+  min-height: var(--choice-height-sm);
+  padding: var(--pad-choice-sm);
+  font: var(--body-md);
+}
+.Choices_option:not(.Choices_disabled) {
+  align-items: center;
+}
+.Choices_option:has(.Choices_note) {
+  align-items: flex-start;
+}
+/* Hover lifts the hard shadow and lightens the edge (night), never the fill.
+   Off on touch screens, where a stuck hover would pass for a choice. */
+@media (hover: hover) {
+  .Choices_option:not(.Choices_disabled):hover {
+    box-shadow: var(--state-hover-shadow);
+    border-color: var(--state-hover-border);
+  }
+}
+.Choices_option:has(.Choices_input:checked) {
+  background: var(--state-selected-bg);
+  color: var(--state-selected-text);
+}
+.Choices_option:has(.Choices_input:focus-visible) {
+  outline: var(--focus-width) solid var(--field-focus-ring);
+  outline-offset: var(--focus-offset-tight);
+}
+/* The one radio mark of the system: a 20px ring in the text's colour,
+   filled around a dot once chosen. Native input underneath. */
+.Choices_input {
+  appearance: none;
+  flex: none;
+  width: var(--size-mark);
+  height: var(--size-mark);
+  margin: calc((1lh - var(--size-mark)) / 2) 0 0;
+  border: var(--border-width) solid var(--mark-color);
+  border-radius: var(--radius-round);
+  background: transparent;
+  color: inherit;
+  cursor: inherit;
+}
+.Choices_option:not(:has(.Choices_note)) .Choices_input {
+  margin-top: 0;
+}
+.Choices_input:focus-visible {
+  outline: none; /* the row carries the ring */
+}
+.Choices_input:checked {
+  background: var(--mark-color);
+  box-shadow: inset 0 0 0 var(--mark-inset) var(--state-selected-bg);
+}
+.Choices_text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  text-wrap: pretty;
+}
+.Choices_note {
+  font: var(--field-hint);
+  color: var(--field-hint-text);
+}
+.Choices_option:has(.Choices_input:checked) .Choices_note {
+  color: inherit;
+}
+.Choices_noteLead {
+  font-weight: 600;
+}
+/* Not yet: dashed, in muted ink that passes — never faded by opacity,
+   which put the reason, the one thing to read here, at 1.91:1. */
+.Choices_disabled {
+  border-style: dashed;
+  border-color: var(--field-disabled-border);
+  background: transparent;
+  color: var(--field-disabled-text);
+  cursor: not-allowed;
+}

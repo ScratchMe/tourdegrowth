@@ -340,11 +340,23 @@ announced: A1 and A2 each counted from 244 (A1: 245, A2: 251), but the
 2026-09-29 grading had already removed cells that duplicated a neighbour or
 lied, bringing 245 down to 238. 238 + DotGrid's 3 + DotLegend's 3 = 244.
 
+**Not yet uploaded (A10.a, 2026-09-30)**: nine form primitives —
+`Field`, `TextField`, `NumberField`, `Select`, `DateField`, `Choices`,
+`Checkbox`, `FieldRow`, `FormSummary` — are in `componentSrcMap` with their
+previews, and `TextArea` and `Segmented` gained a story each (`InAField`,
+`InAForm`). `check-inventory.mjs` reads 88 pinned, none missing. The previews
+were type-checked against the real components (a throwaway `tour-de-growth`
+shim in the scratchpad: 11 files, no error), not rendered by the driver: the
+session that ported them had no `/design-sync` skill. `NumberField` takes a
+number (`number | null`), not the text the extension 04 bundle drew — its
+contract says so, and Claude Design will read the real one on upload.
+
 **The project also holds `design/`, which is not part of the bundle.** On
 2026-09-30 brief 04 went in at the paths it has in this repo:
 `design/DS-EXTENSION-BRIEF-04.md` and the nine PNGs under
 `design/ds-extension-04/` (ten files, written alone under their own plan,
-anchor untouched). A re-sync must leave them: before applying
+anchor untouched), and Claude Design wrote its return next to them,
+`design/ds-extension-04-return/` (56 files). A re-sync must leave them: before applying
 `upload.deletePaths`, check it names nothing under `design/`. Remove them on
 purpose once the return is ported, not as a side effect of a sync.
 

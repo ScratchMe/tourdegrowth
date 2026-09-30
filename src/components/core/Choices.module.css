@@ -1,0 +1,131 @@
+/* Design system extension 04 — see design/ds-extension-04-return/components/core/Choices/Choices.prompt.md
+ *
+ * Pick one, as cards: native radios in a fieldset, each drawn with the
+ * system's one radio mark, AnswerOption's ring (Q11). */
+
+.root {
+  container-type: inline-size;
+}
+
+.list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--choice-gap);
+}
+
+/* 560px of the group's own width: short, parallel options go two by two. */
+@container (min-width: 560px) {
+  .columns2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  min-height: var(--choice-height-md);
+  padding: var(--pad-choice-md);
+  font: var(--body-lg);
+  color: var(--text-body);
+  background: var(--surface-card);
+  border: var(--border-solid);
+  border-radius: var(--radius-panel);
+  cursor: pointer;
+  transition:
+    box-shadow var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.sm .option {
+  min-height: var(--choice-height-sm);
+  padding: var(--pad-choice-sm);
+  font: var(--body-md);
+}
+
+/* With a second line, the mark sits on the first. */
+.option:has(.note) {
+  align-items: flex-start;
+}
+
+/* Hover lifts the hard shadow and, at night, lightens the edge — never the
+   fill. Pointer only: a stuck touch hover would pass for a choice. */
+@media (hover: hover) {
+  .option:not(.disabled):hover {
+    box-shadow: var(--state-hover-shadow);
+    border-color: var(--state-hover-border);
+  }
+}
+
+/* The one selection language (DS v3 §5.4): the inverse fill. */
+.option:has(.input:checked) {
+  background: var(--state-selected-bg);
+  color: var(--state-selected-text);
+}
+
+/* Focus rings the whole row. */
+.option:has(.input:focus-visible) {
+  outline: var(--focus-width) solid var(--field-focus-ring);
+  outline-offset: var(--focus-offset-tight);
+}
+
+/* The radio mark: a ring in the text's colour, filled around a dot of the
+   row's own fill once chosen — AnswerOption's drawing, on a native input. */
+.input {
+  appearance: none;
+  flex: none;
+  width: var(--size-mark);
+  height: var(--size-mark);
+  margin: 0;
+  border: var(--border-width) solid currentColor;
+  border-radius: var(--radius-round);
+  background: transparent;
+  color: inherit;
+  cursor: inherit;
+}
+
+.option:has(.note) .input {
+  /* Centred on the first line of a two-line label. */
+  margin-top: calc((1lh - var(--size-mark)) / 2);
+}
+
+.input:focus-visible {
+  /* The row carries the ring. */
+  outline: none;
+}
+
+.input:checked {
+  background: currentColor;
+  box-shadow: inset 0 0 0 var(--mark-inset) var(--state-selected-bg);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  text-wrap: pretty;
+}
+
+.note {
+  font: var(--field-hint);
+  color: var(--field-hint-text);
+}
+
+.option:has(.input:checked) .note {
+  color: inherit;
+}
+
+.noteLead {
+  font-weight: 600;
+}
+
+/* Not yet: dashed, in muted ink that passes — never faded by opacity, which
+   put the reason, the one thing to read here, at 1.91:1 (Q18). */
+.option.disabled {
+  border-style: dashed;
+  border-color: var(--field-disabled-border);
+  background: transparent;
+  color: var(--field-disabled-text);
+  cursor: not-allowed;
+}

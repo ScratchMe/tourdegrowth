@@ -1,0 +1,56 @@
+/* FieldRow — two fields that belong together ("26 000 out of 120 000").
+ * Side by side from a 480px container (--form-row-min), with their boxes on
+ * one line however their labels wrap; stacked below it. */
+.FieldRow_root {
+  container-type: inline-size;
+}
+.FieldRow_grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: var(--space-3);
+}
+.FieldRow_joiner {
+  font: var(--field-label-sm);
+  color: var(--field-hint-text);
+}
+.FieldRow_message {
+  margin-top: var(--space-3);
+}
+@container (min-width: 480px) {
+  .FieldRow_grid {
+    /* The first column as wide as its field, so the joiner sits against it. */
+    grid-template-columns: fit-content(50%) auto minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    column-gap: var(--space-5);
+    row-gap: 0;
+  }
+  .FieldRow_grid > .Field_field {
+    grid-row: span 3;
+    display: grid;
+    grid-template-rows: subgrid;
+    align-items: end;
+  }
+  .FieldRow_grid > .Field_field > .Field_after {
+    align-self: start;
+    margin-top: var(--field-gap-sm);
+  }
+  .FieldRow_grid > .Field_field > .Field_labelRow {
+    margin-bottom: var(--field-gap-sm);
+    align-self: end;
+  }
+  /* Placed explicitly: the joiner's fixed row would otherwise let it take
+     the first column before the fields are placed. */
+  .FieldRow_grid > :nth-child(1) {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+  }
+  .FieldRow_grid > :nth-child(3) {
+    grid-column: 3;
+    grid-row: 1 / span 3;
+  }
+  .FieldRow_joiner {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: center;
+  }
+}

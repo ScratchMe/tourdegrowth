@@ -91,7 +91,16 @@
     "DotLegend": "src/components/viz/DotGrid.tsx",
     "Sparkline": "src/components/viz/Sparkline.tsx",
     "StageProfile": "src/components/viz/StageProfile.tsx",
-    "StatTile": "src/components/viz/StatTile.tsx"
+    "StatTile": "src/components/viz/StatTile.tsx",
+    "Field": "src/components/core/Field.tsx",
+    "TextField": "src/components/core/TextField.tsx",
+    "NumberField": "src/components/core/NumberField.tsx",
+    "Select": "src/components/core/Select.tsx",
+    "DateField": "src/components/core/DateField.tsx",
+    "Choices": "src/components/core/Choices.tsx",
+    "Checkbox": "src/components/core/Checkbox.tsx",
+    "FieldRow": "src/components/core/FieldRow.tsx",
+    "FormSummary": "src/components/core/FormSummary.tsx"
   },
   "extraFonts": [
     "./.design-sync/fonts/brand-fonts.css"

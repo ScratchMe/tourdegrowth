@@ -1,14 +1,15 @@
 import * as React from "react";
-import { QuestionCard, TextArea } from "tour-de-growth";
+import { Field, QuestionCard, TextArea } from "tour-de-growth";
 
 /*
- * The only text input in the system, so it is also the shape any future field
- * should follow. `label` is REQUIRED in the type on purpose: the visible
- * prompt sits in the QuestionCard above rather than in a <label>, so without
- * it the field would have no accessible name at all (REVIEW.md R-19).
+ * The multi-line input. Standing alone under a QuestionCard (the Deep dive's
+ * last screen), `label` is REQUIRED: the visible prompt sits in the card
+ * above rather than in a <label>, so without it the field would have no
+ * accessible name at all (REVIEW.md R-19). Inside a form it sits in a Field
+ * (extension 04), which gives it its visible label, and `label` is left out.
  *
- * `maxLength` is a soft cap — the counter turns over and the border goes red,
- * but typing is never blocked. Real enforcement is server-side, in two
+ * `maxLength` is a soft cap — the counter turns over and the edge goes 3px
+ * red, but typing is never blocked. Real enforcement is server-side, in two
  * independent places (SPEC-ADDENDUM-02 §1.4).
  */
 
@@ -17,7 +18,7 @@ import { QuestionCard, TextArea } from "tour-de-growth";
 const PROMPT = "Any specific context we should know about? (optional)";
 const PLACEHOLDER = "E.g.: we sell to accounting firms, long sales cycle, trust is a bigger blocker than price...";
 
-const Field = ({ initial }: { initial: string }) => {
+const Standalone = ({ initial }: { initial: string }) => {
   const [value, setValue] = React.useState(initial);
   return (
     <div style={{ maxWidth: 560, display: "flex", flexDirection: "column", gap: 14 }}>
@@ -32,14 +33,14 @@ const Field = ({ initial }: { initial: string }) => {
  * it empty IS how you skip this screen — the label says "(optional)" and there
  * is no Skip button.
  */
-export const Empty = () => <Field initial="" />;
+export const Empty = () => <Standalone initial="" />;
 
 /** Filled, well under the cap (what a founder might type — the e2e suite types this one). */
-export const Filled = () => <Field initial="We sell to accounting firms and trust is the blocker." />;
+export const Filled = () => <Standalone initial="We sell to accounting firms and trust is the blocker." />;
 
 /** Over the cap (567/500): red border, red counter, and the text still types. */
 export const OverLimit = () => (
-  <Field
+  <Standalone
     initial={
       "We sell scheduling software to independent physiotherapists. Most churn happens in the first month, and we have never worked out why. " +
       "Acquisition is mostly word of mouth from two physio schools, which we cannot scale, and we have never measured what a customer costs us. " +
@@ -49,3 +50,20 @@ export const OverLimit = () => (
     }
   />
 );
+
+/**
+ * Inside a Field (extension 04): the Field's label names it, its hint and
+ * message are read before the count. The engine's definition of a metric.
+ */
+export const InAField = () => {
+  const [value, setValue] = React.useState("Active = at least one project edited.");
+  return (
+    <div style={{ maxWidth: 560 }}>
+      <Field label="Your definition" optional="optional" hint="It appears in the slides' appendix and in the requests you copy.">
+        {({ id, describedBy, invalid }) => (
+          <TextArea id={id} aria-describedby={describedBy} invalid={invalid} value={value} onChange={setValue} maxLength={200} rows={3} />
+        )}
+      </Field>
+    </div>
+  );
+};

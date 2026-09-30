@@ -1,0 +1,20 @@
+/* NumberField — looks like a number before anything is typed (Q6):
+ * figures set right, tabular, in a box as wide as the magnitude it expects. */
+.NumberField_control {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+/* Sized to the magnitude only when the field does not fill its column. */
+.Field_content .NumberField_control {
+  flex: 0 1 auto;
+  width: calc(var(--field-digits, var(--field-digits-default)) * 1ch + 2 * var(--pad-field-inline));
+}
+.Field_content .Field_affix + .NumberField_control,
+.Field_content .NumberField_control:has(+ .Field_affix) {
+  width: calc(var(--field-digits, var(--field-digits-default)) * 1ch + var(--pad-field-inline) + var(--space-2));
+}
+/* The figure sits against its unit: set right, except after a sign that
+   comes first ("€26,000"), where it starts against the sign. */
+.Field_affix + .NumberField_control {
+  text-align: start;
+}

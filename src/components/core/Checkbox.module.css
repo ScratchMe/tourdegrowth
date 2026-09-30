@@ -1,0 +1,87 @@
+/* Design system extension 04 — see design/ds-extension-04-return/components/core/Checkbox/Checkbox.prompt.md
+ *
+ * Yes / no with its sentence: a drawn 20px square on a native checkbox, the
+ * radio mark's family, square where the radio is round (Q13). No tick glyph —
+ * the system has none — and never the platform's box. */
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-5);
+  min-height: var(--hit-min);
+  padding-block: var(--space-4);
+  font: var(--body-md);
+  color: var(--text-body);
+  cursor: pointer;
+  border-radius: var(--radius-field);
+  text-wrap: pretty;
+}
+
+.md {
+  font: var(--body-lg);
+}
+
+/* A list is plain rows split by the dashed rule, never cards (Q14). */
+.row + .row {
+  border-top: var(--border-rule);
+}
+
+.input {
+  appearance: none;
+  flex: none;
+  width: var(--size-mark);
+  height: var(--size-mark);
+  /* On the first line of a sentence that wraps. */
+  margin: calc((1lh - var(--size-mark)) / 2) 0 0;
+  border: var(--border-width) solid currentColor;
+  border-radius: var(--radius-mark);
+  background: var(--field-bg);
+  color: inherit;
+  cursor: inherit;
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+
+/* An unticked box under the pointer greys; it never looks ticked. */
+@media (hover: hover) {
+  .row:hover .input:not(:checked):not(:disabled) {
+    background: var(--mark-hover-bg);
+  }
+}
+
+.input:checked {
+  background: currentColor;
+  box-shadow: inset 0 0 0 var(--mark-inset) var(--field-bg);
+}
+
+.input:focus-visible {
+  outline: var(--focus-width) solid var(--field-focus-ring);
+  outline-offset: var(--focus-offset-tight);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.hint {
+  font: var(--field-hint);
+  color: var(--field-hint-text);
+}
+
+.invalid .input {
+  border-width: var(--field-edge-invalid);
+  border-color: var(--field-border-alert);
+}
+
+.disabled {
+  color: var(--field-disabled-text);
+  cursor: not-allowed;
+}
+
+.disabled .input {
+  border-style: dashed;
+  border-color: var(--field-disabled-border);
+  background: var(--field-disabled-bg);
+}

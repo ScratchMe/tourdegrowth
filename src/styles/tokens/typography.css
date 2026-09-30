@@ -75,6 +75,22 @@
   --body-sm: 500 14.5px/1.5 var(--font-ui);
   --label-button-sm: 600 13px/1 var(--font-ui); /* compact button, until now written inline */
   --body-credit: 500 12px/1.4 var(--font-ui); /* the result's « built by » line, and nothing else */
+  /*
+   * Form fields (design system extension 04). The label is a sentence in
+   * Inter, not the mono meta-label: a form of uppercase captions reads as
+   * shouting, and in French they ran to three lines (Q1). What the person
+   * types is 16px: under it, iOS Safari zooms the page on focus (Q18). The
+   * message is told from the hint by its weight and its rule (Q2).
+   */
+  --field-label: 600 14.5px/1.35 var(--font-ui);
+  --field-label-sm: 600 13.5px/1.35 var(--font-ui);
+  --field-legend: var(--title-card); /* a group's legend on a one-question screen is the question */
+  --field-legend-sm: var(--field-label-sm);
+  --field-value: 500 16px/1.4 var(--font-ui);
+  --field-hint: 500 13.5px/1.5 var(--font-ui);
+  --field-message: 600 13.5px/1.5 var(--font-ui);
+  --field-counter: var(--meta-xs);
+  --field-optional: 500 13.5px/1.35 var(--font-ui);
   --label-button: 600 15px/1 var(--font-ui);
   --label-button-lg: 600 17px/1 var(--font-ui); /* design I: was 16px */
   --label-nav: 500 13.5px/1 var(--font-ui);
