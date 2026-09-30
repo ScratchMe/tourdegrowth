@@ -3,7 +3,7 @@ import { deriveEngine } from "../derive";
 import { findingText, sanityText } from "../sentences";
 import type { EngineState, Finding, FindingKind, MetricEntry, SanityCheck, SanityId } from "../types";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
-import { exampleState, measured, ratio, tourResult, withEntry, withTarget } from "./fixtures";
+import { exampleState, measured, ratio, tourResult, withEntry } from "./fixtures";
 
 // lib/engine/sentences.ts — the finished sentence of a finding and of a
 // sanity check. One case per kind and per id, read through the real copy,
@@ -46,11 +46,12 @@ describe("findingText — one sentence per kind", () => {
   });
 
   it("below-comparator: a flow is « sous », churn — lower is better — is « au-dessus de »", () => {
-    expect(sentence(exampleState(), "below-comparator")).toBe(`Taux d'activation${NB}: 18${NB}%, sous 20 à 40${NB}%.`);
-    // Churn alone behind its reference: activation within, so churn is the one named.
+    // The comparator is the fictional team's target (C1), never the published 20-40 %.
+    expect(sentence(exampleState(), "below-comparator")).toBe(`Taux d'activation${NB}: 18${NB}%, sous 20${NB}%.`);
+    // Churn alone behind its target: activation past its own, so churn is the one named.
     const churnNamed = withEntry(exampleState(), "act.rate", measured(ratio(200, 800), { kind: "tool", tool: "amplitude" }));
-    expect(sentence(churnNamed, "below-comparator")).toBe(`Churn logo mensuel${NB}: 2,5${NB}%, au-dessus de 1 à 2${NB}%.`);
-    expect(sentence(withTarget(churnNamed, "ret.logo-churn", 2), "below-comparator", "en")).toBe("Monthly logo churn: 2.5%, above 2%.");
+    expect(sentence(churnNamed, "below-comparator")).toBe(`Churn logo mensuel${NB}: 2,5${NB}%, au-dessus de 2${NB}%.`);
+    expect(sentence(churnNamed, "below-comparator", "en")).toBe("Monthly logo churn: 2.5%, above 2%.");
   });
 
   it("conflict: each source named mid-sentence — « une autre source », never the label « Autre »", () => {

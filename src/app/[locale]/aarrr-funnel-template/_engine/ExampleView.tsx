@@ -6,7 +6,8 @@ import { Callout } from "@/components/core/Callout";
 import { Card } from "@/components/core/Card";
 import { pelotonTitle } from "@/lib/engine/deck";
 import { deriveEngine } from "@/lib/engine/derive";
-import { EXAMPLE_TODAY_ISO, exampleEngine } from "@/lib/engine/example";
+import { EXAMPLE_TARGETS, EXAMPLE_TODAY_ISO, exampleEngine } from "@/lib/engine/example";
+import { fillTemplate, formatPercent } from "@/lib/engine/format";
 import { knownSharedCount } from "@/lib/engine/shared-counts";
 import { CANDIDATE_IDS } from "@/lib/engine/catalog-shape";
 import { knownIn } from "@/lib/engine/values";
@@ -65,13 +66,18 @@ export function ExampleView({
   }, [showDeck]);
 
   const withDeck = deck ? { ...state, deck } : state;
+  // Whose targets they are, read from the data so the banner cannot drift from what the diagnosis used.
+  const bannerBody = fillTemplate(e.bannerBody, {
+    activation: formatPercent(EXAMPLE_TARGETS["act.rate"]!, locale),
+    churn: formatPercent(EXAMPLE_TARGETS["ret.logo-churn"]!, locale),
+  });
 
   if (showDeck) {
     return (
       <div className={styles.panel} data-testid="engine-example-deck">
         <Callout tone="caveat">
           <p>
-            <strong>{e.bannerTitle}</strong> — {e.bannerBody}
+            <strong>{e.bannerTitle}</strong> — {bannerBody}
           </p>
         </Callout>
         <DeckView
@@ -103,7 +109,7 @@ export function ExampleView({
         <h2 id="engine-example-title" ref={heading} tabIndex={-1} className={styles.exampleTitle}>
           {e.bannerTitle}
         </h2>
-        <p>{e.bannerBody}</p>
+        <p>{bannerBody}</p>
       </Callout>
       <Verdict title={verdict} strings={strings} />
       <Coverage coverage={derived.coverage} strings={strings} />

@@ -385,7 +385,7 @@ export function MetricSheet({
           ) : null}
           <p className={styles.referenceText}>
             {bench
-              ? fill(bench.designates ? strings.sheet.referenceDesignates : strings.sheet.referenceContext, {
+              ? fill(strings.sheet.referenceContext, {
                   range: formatInterval({ lo: bench.lo, hi: bench.hi }, shape.unit === "percent" ? "percent" : "ratio", ctx, strings.units),
                   caveat: metric.benchmarkCaveat ?? "",
                 })

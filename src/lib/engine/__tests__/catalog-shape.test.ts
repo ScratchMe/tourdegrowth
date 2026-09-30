@@ -35,10 +35,12 @@ describe("METRIC_SHAPES", () => {
     }
   });
 
-  it("lets exactly two references name a bottleneck (decision D8) — adding one is a product decision", () => {
-    const designating = METRIC_SHAPES.filter((s) => s.benchmark?.designates).map((s) => s.id);
-    expect(designating.sort()).toEqual(["act.rate", "ret.logo-churn"]);
-    expect(DERIVED_SHAPES.some((s) => s.benchmark?.designates)).toBe(false);
+  it("keeps a reference to what it is — a range and a direction, nothing that could name a bottleneck (C1)", () => {
+    // Decision 5, reversed 2026-09-29: no published reference names a stage. A flag that let one
+    // do it again would be a product decision taken in a data file; the shape has no room for it.
+    for (const s of [...METRIC_SHAPES, ...DERIVED_SHAPES]) {
+      if (s.benchmark) expect(Object.keys(s.benchmark).sort(), s.id).toEqual(["direction", "hi", "lo", "term"]);
+    }
   });
 
   it("writes every reference as an ordered range", () => {

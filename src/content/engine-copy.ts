@@ -45,9 +45,10 @@ import type { ScenarioAssumption } from "@/lib/engine/scenario";
  *   peloton `unmeasured` phrase, `unitInput` (« la marge brute ») or
  *   `event` (« l'événement « a créé un projet » »). `lib/engine/phrases.ts`
  *   picks them, so a consumer never has to;
- * - where a value sits against its comparator is `side`, chosen from the
- *   DIRECTION of the metric: churn, where lower is better, is « au-dessus du
- *   repère » when it is behind it, never « sous »;
+ * - where a value sits against its comparator — the team's target, the only
+ *   one that names a stage (C1) — is `side`, chosen from the DIRECTION of the
+ *   metric: churn, where lower is better, is « au-dessus de la cible » when
+ *   it is behind it, never « sous »;
  * - a count that a noun agrees with has a `xOne` sibling, picked from the
  *   PRINTED number by the language's own rule — French takes the singular
  *   under 2 (« 1,5 payant »), English only for exactly 1;
@@ -85,9 +86,10 @@ export const ENGINE_COPY = {
     },
     // TODO: à relire — réécrit le 2026-09-28 (audit du design kit) : le moteur collecte dix-sept
     // chiffres depuis le 2026-09-26 (expansion et rétrogradation), la page disait encore quinze.
+    // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1 : aucun repère ne désigne).
     promise: {
-      fr: "Dix-sept chiffres, trois par étape et cinq pour Revenue : va les chercher, vois où ton moteur perd du monde et repars avec des slides prêtes pour ton CODIR. Tes chiffres ne sont comparés qu'à toi-même et à ta propre cible, sauf deux repères publiés que la page nomme.",
-      en: "Seventeen numbers, three per stage and five for Revenue: go and get them, see where your engine loses people, and leave with slides ready for your leadership meeting. Your numbers are only compared with yourself and your own target, apart from two published references the page names.",
+      fr: "Dix-sept chiffres, trois par étape et cinq pour Revenue : va les chercher, vois où ton moteur perd du monde et repars avec des slides prêtes pour ton CODIR. Tes chiffres ne sont comparés qu'à toi-même et à ta propre cible : les repères publiés sont là pour situer, jamais pour désigner une étape.",
+      en: "Seventeen numbers, three per stage and five for Revenue: go and get them, see where your engine loses people, and leave with slides ready for your leadership meeting. Your numbers are only compared with yourself and your own target: published references are there for context, never to name a stage.",
     },
     privacyTitle: { fr: "Rien de ce que tu saisis ne sort d'ici", en: "Nothing you enter leaves this page" },
     privacyBody: {
@@ -118,9 +120,10 @@ export const ENGINE_COPY = {
       en: "Some of it sits with finance or data: allow one to two weeks of back and forth, for about an hour of your own time. The requests come ready to copy.",
     },
     durationTargetsLabel: { fr: "Pas encore de cible", en: "No target yet" },
+    // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1 : aucun repère ne désigne).
     durationTargets: {
-      fr: "Ajoute une réunion d'équipe pour en poser, ou avance sans : le moteur compare alors aux deux repères publiés qu'il connaît.",
-      en: "Add a team meeting to set some, or go ahead without: the engine then compares with the two published references it knows.",
+      fr: "Ajoute une réunion d'équipe pour en poser, ou avance sans : tu verras tes chiffres, avec leur repère quand il en existe un, mais pas quelle étape freine.",
+      en: "Add a team meeting to set some, or go ahead without: you'll see your numbers, with their reference where there is one, but not which stage holds you back.",
     },
     durationDeckLabel: { fr: "Les slides", en: "The slides" },
     durationDeck: { fr: "Un quart d'heure, une fois les chiffres là.", en: "A quarter of an hour, once the numbers are in." },
@@ -280,19 +283,15 @@ export const ENGINE_COPY = {
     "rev.contraction": { fr: "la rétrogradation", en: "contraction" },
   } satisfies Record<UnitInputId, Translatable>,
   /**
-   * Where a value sits against its comparator, in the words of the page — a
-   * reference (« le repère ») or the team's target (« la cible », never « ta
-   * cible »: these reach a slide). Physical, not good-or-bad: the code maps a
-   * position to one of them through the metric's direction, so churn behind
-   * its reference is « au-dessus du repère ». Gender-free on purpose, so they
-   * follow any stage phrase: « le churn logo est au-dessus du repère ».
+   * Where a value sits against its comparator — the team's target (« la
+   * cible », never « ta cible »: these reach a slide), the only one that
+   * names a stage (C1, 2026-09-29). Physical, not good-or-bad: the code maps
+   * a position to one of them through the metric's direction, so churn
+   * behind its target is « au-dessus de la cible ». Gender-free on purpose,
+   * so they follow any stage phrase: « le churn logo est au-dessus de la
+   * cible ».
    */
   side: {
-    underReference: { fr: "sous le repère", en: "below the reference" },
-    overReference: { fr: "au-dessus du repère", en: "above the reference" },
-    withinReference: { fr: "dans le repère", en: "within the reference" },
-    maybeUnderReference: { fr: "peut-être sous le repère", en: "possibly below the reference" },
-    maybeOverReference: { fr: "peut-être au-dessus du repère", en: "possibly above the reference" },
     underTarget: { fr: "sous la cible", en: "below the target" },
     overTarget: { fr: "au-dessus de la cible", en: "above the target" },
     atTarget: { fr: "à la cible", en: "at the target" },
@@ -469,19 +468,16 @@ export const ENGINE_COPY = {
     trapTitle: { fr: "Le piège", en: "The trap" },
     alsoIn: { fr: "Aussi dans {tool} : {metrics}", en: "Also in {tool}: {metrics}" },
     reference: { fr: "Repère", en: "Reference" },
-    referenceDesignates: {
-      fr: "{range} · ordre de grandeur couramment cité, {caveat}",
-      en: "{range} · commonly cited order of magnitude, {caveat}",
-    },
     referenceContext: {
       fr: "{range} · pour situer, sans désigner d'étape : {caveat}",
       en: "{range} · for context, never to name a stage: {caveat}",
     },
     noReference: { fr: "Pas de repère publiable : {reason}.", en: "No reference worth publishing: {reason}." },
     target: { fr: "Ta cible (facultatif)", en: "Your target (optional)" },
+    // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1 : aucun repère ne désigne).
     targetHint: {
-      fr: "Une cible d'équipe sert de repère : c'est elle qui permet de dire quelle étape freine.",
-      en: "A team target acts as the reference: it is what lets us say which stage holds you back.",
+      fr: "Seule une cible d'équipe permet de dire quelle étape freine.",
+      en: "Only a team target lets us say which stage holds you back.",
     },
     dependsOnEvent: {
       fr: "Il faut d'abord nommer l'événement d'activation : sans lui, ce taux ne veut rien dire.",
@@ -590,22 +586,11 @@ export const ENGINE_COPY = {
     clear: { fr: "Une étape freine le moteur", en: "One stage holds the engine back" },
     shared: { fr: "{n} étapes freinent autant l'une que l'autre", en: "{n} stages hold it back about equally" },
     level: { fr: "Rien ne freine le moteur", en: "Nothing holds the engine back" },
-    notEnough: { fr: "Pas assez de repères pour conclure", en: "Not enough references to conclude" },
-    belowReference: {
-      fr: "{value}, sous l'ordre de grandeur couramment cité ({range})",
-      en: "{value}, below the commonly cited range ({range})",
-    },
+    // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1 : aucun repère ne désigne).
+    notEnough: { fr: "Pas assez de cibles pour conclure", en: "Not enough targets to conclude" },
     belowTarget: { fr: "{value}, sous ta cible ({target})", en: "{value}, below your target ({target})" },
-    /** Churn behind its comparator: lower is better, so behind is ABOVE. Picked by `phrases.ts#behindSentence`. */
-    aboveReference: {
-      fr: "{value}, au-dessus de l'ordre de grandeur couramment cité ({range})",
-      en: "{value}, above the commonly cited range ({range})",
-    },
+    /** Churn behind its target: lower is better, so behind is ABOVE. Picked by `phrases.ts#behindSentence`. */
     aboveTarget: { fr: "{value}, au-dessus de ta cible ({target})", en: "{value}, above your target ({target})" },
-    maybeBelow: {
-      fr: "{value} : peut-être sous le repère ({range})",
-      en: "{value}: possibly below the reference ({range})",
-    },
     notEnoughBody: {
       fr: "Fixe une cible sur au moins deux étapes : c'est ce qui permet de dire laquelle freine.",
       en: "Set a target on at least two stages: that's what lets us say which one holds you back.",
@@ -615,9 +600,10 @@ export const ENGINE_COPY = {
       fr: "{stage} est {side}. Sans cible sur les autres étapes, impossible de dire si c'est la plus grosse fuite.",
       en: "{stage} sits {side}. Without targets on the other stages, we can't say whether it's the biggest leak.",
     },
+    // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1 : aucun repère ne désigne).
     levelBody: {
-      fr: "Aucune étape n'est en retard sur sa cible ni sur son repère : le levier est le volume ou le prix.",
-      en: "No stage trails its target or its reference: the lever is volume or price.",
+      fr: "Aucune étape n'est en retard sur sa cible : le levier est le volume ou le prix.",
+      en: "No stage trails its target: the lever is volume or price.",
     },
     blindOne: {
       fr: "Sans chiffre pour {stages}, l'étape qui freine vraiment peut s'y cacher.",
@@ -631,7 +617,7 @@ export const ENGINE_COPY = {
       fr: "Sans chiffre pour {stages}, l'étape qui freine vraiment peut s'y cacher.",
       en: "With no number for {stages}, the stage really holding the engine back may be hiding in one of them.",
     },
-    /** `{stages}`: catalogue names after the colon. Neither « sous » nor « la cible »: churn can be one of them, and a reference can be what it trails. */
+    /** `{stages}`: catalogue names after the colon. No « sous »: churn can be one of them, and it trails its target by being ABOVE it. */
     unpriced: {
       fr: "Aussi en retard, sans montant calculable : {stages}",
       en: "Also behind, with no amount that can be computed: {stages}",
@@ -653,9 +639,10 @@ export const ENGINE_COPY = {
      * No stamp keys here: a position is worded by `phrases.ts#positionLabel`,
      * which picks from `side` by the metric's direction — on the board, the
      * sheet and the peloton slide alike. The direction-blind « Sous le repère »
-     * keys went with that change; churn behind its reference sits ABOVE it.
+     * keys went with that change; churn behind its target sits ABOVE it.
      */
-    noComparator: { fr: "sans repère · fixe une cible", en: "no reference · set a target" },
+    // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1 : aucun repère ne désigne).
+    noComparator: { fr: "sans cible · fixes-en une", en: "no target · set one" },
   },
   whatIf: {
     today: { fr: "Aujourd'hui", en: "Today" },
@@ -691,15 +678,6 @@ export const ENGINE_COPY = {
       en: "That's {amount} more MRR after a year, churn included.",
     },
     lessThanOne: { fr: "Moins d'un client de plus par mois.", en: "Less than one more customer a month." },
-    targetReference: {
-      fr: "{value} (bas de l'ordre de grandeur couramment cité)",
-      en: "{value} (low end of the commonly cited range)",
-    },
-    /** Churn is measured to the reference's cautious bound, which for a lower-is-better metric is its HIGH end. */
-    targetReferenceHigh: {
-      fr: "{value} (haut de l'ordre de grandeur couramment cité)",
-      en: "{value} (high end of the commonly cited range)",
-    },
     targetTeam: { fr: "{value} (cible de l'équipe)", en: "{value} (team target)" },
   },
 
@@ -1027,20 +1005,20 @@ export const ENGINE_COPY = {
     },
     credit: { fr: "tourdegrowth.com", en: "tourdegrowth.com" },
     /** Segments whose value is empty are dropped whole, separator included (`phrases.ts#fillSegments`). */
+    // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1) : le segment {caveat} est parti avec slide.leakCaveat.
     leakFooter: {
-      fr: "Toutes choses égales par ailleurs · {assumption} · {caveat}",
-      en: "All else being equal · {assumption} · {caveat}",
+      fr: "Toutes choses égales par ailleurs · {assumption}",
+      en: "All else being equal · {assumption}",
     },
     /** The footer's `{assumption}` when activation is named: a clause, lower-case, no full stop. */
     leakAssumption: { fr: "les payants sont supposés parmi les activés", en: "paying customers are assumed to be among the activated" },
-    /** The footer's `{caveat}`: the designating reference's range, then its caveat from the catalogue. */
-    leakCaveat: { fr: "repère {range} {caveat}", en: "reference {range} {caveat}" },
     leakAside: { fr: "À côté", en: "Alongside" },
     /** A peloton column or a candidate nobody measured. Gender-free: it follows a label of either gender. */
     noNumber: { fr: "pas de chiffre", en: "no number" },
     cannotExclude: { fr: "pas de chiffre — impossible à exclure", en: "no number — can't be ruled out" },
-    /** A candidate with no designating reference and no team target. No « fixe une cible »: a slide never gives the reader orders. */
-    noComparator: { fr: "sans repère ni cible", en: "no reference, no target" },
+    /** A candidate with no team target. No « fixes-en une »: a slide never gives the reader orders. */
+    // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1 : aucun repère ne désigne).
+    noComparator: { fr: "sans cible d'équipe", en: "no team target" },
     unpricedShort: { fr: "sans montant calculable", en: "no amount can be computed" },
     /**
      * Why a number is missing, as a slide says it. The screen's `cause`
@@ -1186,19 +1164,21 @@ export const ENGINE_COPY = {
       fr: "Ramener {stage} à {target} ajouterait **{n} payant pour 100 inscrits**.",
       en: "Bringing {stage} to {target} would add **{n} paying customer per 100 sign-ups**.",
     },
-    /** « En retard sur », not « sous »: the group can hold churn, which trails its reference by being ABOVE it. */
+    /** « En retard sur », not « sous »: the group can hold churn, which trails its target by being ABOVE it. */
+    // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1 : aucun repère ne désigne).
     leakShared: {
-      fr: "**{n} étapes** sont en retard sur leur repère ou leur cible, sans que l'une pèse nettement plus : {list}.",
-      en: "**{n} stages** trail their reference or target, none clearly heavier: {list}.",
+      fr: "**{n} étapes** sont en retard sur leur cible, sans que l'une pèse nettement plus : {list}.",
+      en: "**{n} stages** trail their target, none clearly heavier: {list}.",
     },
     /** `{stage}`: a subject phrase, capitalised by the code; `{side}`: a `side` phrase, which knows churn's direction. */
     leakNotEnoughBelow: {
       fr: "**{stage} est {side}.** Sans cible sur les autres étapes, impossible de dire si c'est la plus grosse fuite.",
       en: "**{stage} sits {side}.** Without targets on the other stages, we can't say whether it's the biggest leak.",
     },
+    // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1 : aucun repère ne désigne).
     leakLevel: {
-      fr: "Aucune étape n'est en retard sur sa cible ni sur son repère : **le levier est le volume ou le prix**.",
-      en: "No stage trails its target or its reference: **the lever is volume or price**.",
+      fr: "Aucune étape n'est en retard sur sa cible : **le levier est le volume ou le prix**.",
+      en: "No stage trails its target: **the lever is volume or price**.",
     },
     /** `{documented}` is `slide.documented` filled: « 0 chiffre sur 15 » agrees where « {n} chiffres » could not. */
     visibility: {
@@ -1264,9 +1244,10 @@ export const ENGINE_COPY = {
     /** Why a stage is not the one the slide names — each a clause `whyNot` closes with a full stop. */
     ranking: {
       unknown: { fr: "pas de chiffre : impossible de l'exclure", en: "no number: it can't be ruled out" },
+      // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1 : aucun repère ne désigne).
       noComparator: {
-        fr: "sans repère publiable ni cible d'équipe, aucun classement possible",
-        en: "no reference worth publishing and no team target, so it can't be ranked",
+        fr: "sans cible d'équipe, aucun classement possible",
+        en: "no team target, so it can't be ranked",
       },
       maybe: { fr: "{side} : sa fourchette chevauche le seuil", en: "{side}: its range straddles the line" },
       belowWorth: {
@@ -1405,9 +1386,10 @@ export const ENGINE_COPY = {
     back: { fr: "← Retour", en: "← Back" },
     toBoard: { fr: "Voir le tableau complet", en: "See the full board" },
     targetsTitle: { fr: "Tes cibles actuelles", en: "Your current targets" },
+    // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1 : aucun repère ne désigne).
     targetsIntro: {
-      fr: "Si ton équipe s'est fixé une cible sur ces chiffres, entre-la. C'est une cible qui permet de dire, chiffres à l'appui, quelle étape freine. Pas de cible ? Continue : le moteur comparera aux repères publiés quand il en connaît un.",
-      en: "If your team has set a target on these numbers, enter it. A target is what lets the engine say, with numbers, which stage is holding you back. No target? Continue: the engine will compare with published references where it knows one.",
+      fr: "Si ton équipe s'est fixé une cible sur ces chiffres, entre-la. Seule une cible permet de dire, chiffres à l'appui, quelle étape freine. Pas de cible ? Continue : tu verras tes chiffres, et le repère publié quand il en existe un, mais pas quelle étape freine.",
+      en: "If your team has set a target on these numbers, enter it. Only a target lets the engine say, with numbers, which stage is holding you back. No target? Continue: you'll see your numbers, and the published reference where there is one, but not which stage holds you back.",
     },
     targetFor: { fr: "Cible pour {metric}", en: "Target for {metric}" },
     baseTitle: { fr: "Ta base : les inscrits", en: "Your base: sign-ups" },
@@ -1439,9 +1421,11 @@ export const ENGINE_COPY = {
   // TODO: à relire — nouveau (2026-09-25, retours d'Antoine) : l'exemple rempli.
   example: {
     bannerTitle: { fr: "Exemple : une appli SaaS fictive", en: "Example: a fictional SaaS app" },
+    /** `{activation}` and `{churn}`: the fictional team's targets, formatted from `lib/engine/example.ts`. */
+    // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1 : aucun repère ne désigne).
     bannerBody: {
-      fr: "Chiffres inventés, pour montrer le funnel et les slides une fois remplis. Rien n'est enregistré, et ça ne touche pas à ton moteur.",
-      en: "Made-up numbers, to show the funnel and the slides once filled in. Nothing is saved, and it doesn't touch your engine.",
+      fr: "Chiffres et cibles inventés, pour montrer le funnel et les slides une fois remplis : l'équipe fictive vise {activation} d'activation et {churn} de churn logo par mois. Rien n'est enregistré, et ça ne touche pas à ton moteur.",
+      en: "Made-up numbers and targets, to show the funnel and the slides once filled in: the fictional team aims for {activation} activation and {churn} monthly logo churn. Nothing is saved, and it doesn't touch your engine.",
     },
     back: { fr: "← Revenir", en: "← Back" },
     deck: { fr: "Voir les slides de l'exemple →", en: "See the example's slides →" },
@@ -1541,9 +1525,10 @@ export const ENGINE_COPY = {
     },
     {
       q: { fr: "D'où viennent les repères ?", en: "Where do the references come from?" },
+      // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1 : aucun repère ne désigne).
       a: {
-        fr: "Seulement d'ordres de grandeur déjà publiés et relus dans le glossaire du site, toujours affichés avec leur réserve. Deux seulement servent à désigner l'étape qui freine : l'activation et le churn logo. Les autres étapes n'ont pas de repère fiable ; ta propre cible sert alors de référence.",
-        en: "Only from orders of magnitude already published and reviewed in the site's glossary, always shown with their caveat. Only two are used to name the stage holding you back: activation and logo churn. The other stages have no reliable reference; your own target then serves as one.",
+        fr: "Seulement d'ordres de grandeur déjà publiés et relus dans le glossaire du site, toujours affichés avec leur réserve. Aucun ne sert à désigner l'étape qui freine : un ordre de grandeur ne vaut pas pour toutes les entreprises. Seule ta propre cible le peut.",
+        en: "Only from orders of magnitude already published and reviewed in the site's glossary, always shown with their caveat. None is used to name the stage holding you back: an order of magnitude doesn't hold for every company. Only your own target can do that.",
       },
     },
     {

@@ -4,7 +4,7 @@ import { comparatorOf, diagnose, positionOf } from "../diagnose";
 import { rankingImpact } from "../impact";
 import type { EngineState } from "../types";
 import { CTX_FR } from "./props";
-import { EXAMPLE_EXPECTED, estimated, exampleState, measured, ratio, withEntry, withTarget } from "./fixtures";
+import { EXAMPLE_EXPECTED, estimated, exampleState, measured, ratio, withEntry, withTarget, withoutTargets } from "./fixtures";
 
 // Engine spec §13.1 "diagnose". Non-vacuity, each measured on its own:
 // - letting a reference name a value INSIDE it (positionOf's `v.hi < c.lo`
@@ -15,8 +15,8 @@ import { EXAMPLE_EXPECTED, estimated, exampleState, measured, ratio, withEntry, 
 // - removing the float tolerance of `clearlyAbove` fails the 600-vs-480
 //   boundary only (600.0000000000003 > 600);
 // - capping `named` at two fails "shared names the whole group" only;
-// - letting `designates: false` designate fails 4: the example's positions,
-//   not-enough, "non-designating", and the deck's `leakNotEnoughBelow`.
+// - letting a published reference designate again (C1: a `benchmark`
+//   branch put back in `comparatorOf`) fails "no reference ever names".
 
 const tool = { kind: "tool", tool: "stripe" } as const;
 
@@ -32,12 +32,12 @@ describe("diagnose — the §6.0 example", () => {
   });
 
   it("every candidate's position, and the exact money the ranking used (560 € vs 240 €)", () => {
-    expect(d.positions["acq.signup-rate"].position).toBe("no-comparator"); // its reference doesn't designate
-    expect(d.positions["act.rate"]).toMatchObject({ position: "below", comparator: { kind: "reference", lo: 20, hi: 40 } });
+    expect(d.positions["acq.signup-rate"].position).toBe("no-comparator"); // no team target; its reference is context
+    expect(d.positions["act.rate"]).toMatchObject({ position: "below", comparator: { lo: 20, hi: 20 } }); // the fictional team's target
     expect(d.positions["ret.d30"].position).toBe("unknown");
     expect(d.positions["rev.paid-conversion"].position).toBe("no-comparator");
     expect(d.positions["ref.referred-share"].position).toBe("no-comparator");
-    expect(d.positions["ret.logo-churn"]).toMatchObject({ position: "below", comparator: { kind: "reference", lo: 1, hi: 2 } });
+    expect(d.positions["ret.logo-churn"]).toMatchObject({ position: "below", comparator: { lo: 2, hi: 2, direction: "lower" } });
     expect(d.positions["act.rate"].impact!.mrrPerMonth!.lo).toBeCloseTo(560, 9);
     expect(d.positions["ret.logo-churn"].impact!.mrrPerMonth!.lo).toBeCloseTo(240, 9);
     expect(d.positions["ret.logo-churn"].impact!.kind).toBe("retained-mrr");
@@ -45,12 +45,14 @@ describe("diagnose — the §6.0 example", () => {
 });
 
 describe("diagnose — the rules", () => {
-  it("a value inside its reference is never below it; only a target makes it a candidate", () => {
-    const within = withEntry(exampleState(), "act.rate", measured(ratio(200, 800)));
-    expect(diagnose(within, CTX_FR).positions["act.rate"].position).toBe("within");
-    expect(diagnose(within, CTX_FR).named).not.toContain("act.rate");
-    const targeted = withTarget(within, "act.rate", 30);
-    expect(diagnose(targeted, CTX_FR).positions["act.rate"]).toMatchObject({ position: "below", comparator: { kind: "target", lo: 30, hi: 30 } });
+  it("a value at or past its target is never a leak; raising the target makes it one", () => {
+    const at = withEntry(exampleState(), "act.rate", measured(ratio(160, 800)));
+    expect(diagnose(at, CTX_FR).positions["act.rate"].position).toBe("within");
+    expect(diagnose(at, CTX_FR).named).not.toContain("act.rate");
+    const past = withEntry(exampleState(), "act.rate", measured(ratio(200, 800)));
+    expect(diagnose(past, CTX_FR).positions["act.rate"].position).toBe("above");
+    const raised = withTarget(past, "act.rate", 30);
+    expect(diagnose(raised, CTX_FR).positions["act.rate"]).toMatchObject({ position: "below", comparator: { lo: 30, hi: 30 } });
   });
 
   it("maybe-below straddles the comparator: said, never stamped", () => {
@@ -58,8 +60,8 @@ describe("diagnose — the rules", () => {
     const d = diagnose(straddle, CTX_FR);
     expect(d.positions["act.rate"].position).toBe("maybe-below");
     expect(d.named).toEqual(["ret.logo-churn"]);
-    expect(positionOf({ lo: 1.5, hi: 3 }, { kind: "reference", lo: 1, hi: 2, direction: "lower" })).toBe("maybe-below");
-    expect(positionOf({ lo: 0.5, hi: 0.8 }, { kind: "reference", lo: 1, hi: 2, direction: "lower" })).toBe("above");
+    expect(positionOf({ lo: 1.5, hi: 3 }, { lo: 2, hi: 2, direction: "lower" })).toBe("maybe-below");
+    expect(positionOf({ lo: 0.5, hi: 0.8 }, { lo: 2, hi: 2, direction: "lower" })).toBe("above");
   });
 
   it("the clearness margin, both sides: 600 € vs 240 € is clear, 600 € vs 480 € is shared (600 > 600 is false)", () => {
@@ -134,10 +136,17 @@ describe("diagnose — the rules", () => {
     expect(onlyUnpriced).toMatchObject({ state: "clear", named: ["ret.d30"], basis: "none" });
   });
 
-  it("a reference that doesn't designate never names; a team target always does", () => {
-    // 1 % sign-up rate: under the 2-5 % context reference, which doesn't designate.
-    const low = withEntry(exampleState(), "acq.signup-rate", measured(ratio(260, 26_000)));
-    expect(comparatorOf(low, "acq.signup-rate")).toBeUndefined();
+  it("no reference ever names, not even the two that used to (C1); a team target always does", () => {
+    // Without targets, the example's activation (18 %, under 20-40 %) and churn (2,5 %, over 1-2 %) sit
+    // outside their published references — and nothing is named: the references are context.
+    const bare = withoutTargets(exampleState());
+    for (const id of CANDIDATE_IDS) expect(comparatorOf(bare, id), id).toBeUndefined();
+    const d = diagnose(bare, CTX_FR);
+    expect(d.positions["act.rate"].position).toBe("no-comparator");
+    expect(d.positions["ret.logo-churn"].position).toBe("no-comparator");
+    expect(d).toMatchObject({ state: "not-enough", named: [] });
+    // 1 % sign-up rate: under the 2-5 % context reference — still nothing without a target.
+    const low = withEntry(bare, "acq.signup-rate", measured(ratio(260, 26_000)));
     expect(diagnose(low, CTX_FR).positions["acq.signup-rate"].position).toBe("no-comparator");
     expect(diagnose(withTarget(low, "acq.signup-rate", 2), CTX_FR).positions["acq.signup-rate"].position).toBe("below");
   });

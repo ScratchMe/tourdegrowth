@@ -10,7 +10,7 @@ import {
 } from "./format";
 import { interval, mapBounds, mul, point } from "./interval";
 import { cohortIsSmall } from "./peloton";
-import type { CandidateId, EngineCalcContext, EngineState, Impact, ImpactLine, Interval } from "./types";
+import type { CandidateId, Comparator, EngineCalcContext, EngineState, Impact, ImpactLine, Interval } from "./types";
 import { countsOf, currentSnapshot, entryOf, knownIn } from "./values";
 
 /**
@@ -118,8 +118,8 @@ function twelveMonthFactor(churnPercent: number): number {
  * consumer from `line.key` and `impact.metric` (flows: `whatIf.todayFlow`,
  * `ifFlow`, `thenFlow`, `timesFlow`; churn: `todayChurn`, `ifFlow`,
  * `thenChurn`, `timesChurn`; then `annual` and `lessThanOne`). The `if` line
- * carries `{target}` only: the stage's name and the target's wording (team
- * target or low end of the reference) are copy the consumer adds.
+ * carries `{target}` only: the stage's name and the target's wording
+ * (« cible de l'équipe ») are copy the consumer adds.
  */
 export function whatIf(
   state: EngineState,
@@ -258,12 +258,9 @@ export function impactHeadline(impact: Impact): { amount?: string; n?: string; c
   return { n: then?.values.delta, count: then?.count };
 }
 
-/** Where the "what if" slider starts (§6.7): the target; else the reference's cautious bound when the value is under it; else the value — no gain until the user moves. */
-export function sliderStart(value: Interval, comparator: { kind: "target" | "reference"; lo: number; hi: number; direction: "higher" | "lower" } | undefined): number {
-  if (!comparator) return value.hi;
-  if (comparator.kind === "target") return comparator.lo;
-  if (comparator.direction === "higher") return value.hi < comparator.lo ? comparator.lo : value.hi;
-  return value.lo > comparator.hi ? comparator.hi : value.lo;
+/** Where the "what if" slider starts (§6.7): the team's target; without one, the value — no gain until the user moves. */
+export function sliderStart(value: Interval, comparator: Comparator | undefined): number {
+  return comparator ? comparator.lo : value.hi;
 }
 
 /** The slider's step (§6.7): one point above 10 %, a tenth below. */

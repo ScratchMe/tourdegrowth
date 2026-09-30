@@ -27,9 +27,9 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, tout A7.3 |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
 
-**L'ordre conseillé** : A7 (A7.1 et A7.3.a, la spécification, d'abord :
-ce sont les plus longs). B3 après A7.10, dans la même session si possible,
-puis D. La section C a été tranchée le 2026-09-29.
+**L'ordre conseillé** : A7 (A7.3.a, la spécification, d'abord : c'est le
+plus long ; A7.1 est livré le 2026-09-30). B3 après A7.10, dans la même
+session si possible, puis D. La section C a été tranchée le 2026-09-29.
 
 **Deux sessions en parallèle** écrivent toutes deux à la fin de `JOURNAL.md`
 et dans ce fichier. La seconde à merger fusionne `main` dans sa branche avant
@@ -58,36 +58,14 @@ rencontrée en le faisant repart en section C. Toute copie neuve porte
 « TODO: à relire » (convention 6).
 
 **Dans quel ordre.** Les items sont indépendants, sauf :
-- A7.1 avant A7.6, car la slide sans prix suppose que seule une cible
-  désigne ;
 - A7.11 avant A7.10, car la vue propriétaire ne se teste que sur
   l'émulateur ;
 - A7.3 avant A7.4, parce que les liens promettent ce que le moteur fait ;
 - A7.12.a avant les annuaires de D10.
 
 Le jeu (A7.7, A7.8, et A7.9 pour sa part) n'attend rien du moteur.
-**Commencer par A7.1 et A7.3.a** : ce sont les plus longs, et A7.3.a
-revient à Antoine pour validation.
-
-#### A7.1 — Aucun repère ne désigne l'étape qui freine (C1)
-
-**Décidé** : les repères d'activation (20-40 %) et de churn logo (1-2 %/mois)
-restent affichés comme **contexte**, et ne désignent plus rien. Seule une
-**cible d'équipe** nomme l'étape qui freine. La population du churn est
-reformulée : 1-2 % vaut pour le « SaaS B2B à panier élevé », pas pour « les
-produits vendus aux petites entreprises ». Source : ChartMogul, médiane de
-6,1 %/mois sous 25 $ d'ARPA et de 2,2 % au-dessus de 500 $.
-
-| Où | Quoi |
-|---|---|
-| `lib/engine/catalog-shape.ts:174` et `:223` | `designates: false` pour `act.rate` et `ret.logo-churn`. Garder le champ (tous à `false`) ou le retirer : c'est un choix d'implémentation. Mettre à jour les commentaires de `diagnose.ts` (l. 15-35) et de `catalog-shape.ts` (l. 31-32) |
-| `lib/engine/example.ts:82` | L'exemple §6.0 n'a aucune cible (`targets: {}`) et ne nommerait plus de fuite. Lui donner des **cibles d'équipe** qui gardent un diagnostic `clear` sur l'activation et la slide « fuite ». Par exemple, activation 20 % et churn logo 2 % ; les valeurs restent libres. L'exemple doit dire que ce sont les cibles de l'équipe fictive |
-| `content/engine-catalog.ts:486-487` | La réserve du churn : « pour le SaaS B2B à panier élevé ; les petits paniers tournent bien plus haut… ». En FR comme en EN |
-| `content/glossary-deep.ts:758-759` (page churn) et `:886-887` (page rétention, « 97-99 % … pour des produits vendus aux petites entreprises ») | La même affirmation et la même correction. C'est de la copie validée qui change : elle repasse « à relire » |
-| `content/engine-copy.ts` | La promesse (l. 89-90, « sauf deux repères publiés que la page nomme ») ; l'encart de durée (l. 122-123, « le moteur compare alors aux deux repères publiés ») ; l'écran des cibles (l. 1408-1409) ; la FAQ 3 (l. 1544, « Deux seulement servent à désigner… ») ; `diagnosis.notEnough` (« Pas assez de repères pour conclure » : ce sont des cibles qui manquent) ; `levelBody` (« ni sur son repère »). Chercher aussi `referenceDesignates` et les phrases `belowReference`, `aboveReference` et `maybeBelow`, qui ne servent plus à désigner |
-| `deck/ask-defaults.ts:33` | La valeur par défaut de la demande à copier prend « la borne prudente d'un repère qui désigne » : il n'y en a plus |
-| Tests | `catalog-shape.test.ts:39-40` attend désormais zéro repère désignant. `diagnose.test.ts`, `phrases.test.ts:172`, les tests du deck et `e2e/engine-*.spec.ts` suivent. **Non-vacuité** : remettre `designates: true` sur le churn doit faire rougir au moins un test |
-| Hors code | La spec §6.6 d'`ENGINE.md` à relire contre la décision 5 renversée. Le bon à tirer nº8 cite l'exemple §6.0 et ces phrases : le signaler à l'agent des bons à tirer, qui remet la page d'accord avec le code |
+**A7.1 est livré (2026-09-30)** : A7.6 peut partir. **Commencer par A7.3.a**,
+le plus long, qui revient à Antoine pour validation.
 
 #### A7.2 — « Moteur de growth » en français (C2)
 
@@ -174,7 +152,7 @@ l'omission est gardée.
 | Où | Quoi |
 |---|---|
 | `lib/engine/deck.ts#buildLeak` (l. 355-356) | Séparer les deux cas que la condition `!impact \|\| less-than-one` confond. Sans prix : un titre `leakClearUnpriced` (« {Étape} freine le moteur : {valeur}, pour {cible}. »), sans la carte « Le calcul » en quatre lignes (il n'y a pas de chaîne à montrer), avec la colonne « À côté » comme d'habitude, et un pied qui dit pourquoi il n'y a pas de montant. Titre et corps sortent de la même fonction (`ENGINE.md` §9.3, règle « titre = corps ») |
-| `content/engine-copy.ts` | Le gabarit du titre et le pied, en FR et en EN, « à relire ». `{cible}` suit `targetPhrase`, qui après A7.1 ne dit plus que « notre cible » |
+| `content/engine-copy.ts` | Le gabarit du titre et le pied, en FR et en EN, « à relire ». `{cible}` suit `targetPhrase`, qui depuis A7.1 ne dit plus que « {valeur} (cible de l'équipe) » |
 | Export texte et notes | `deckMarkdown` et les notes d'orateur suivent la même slide |
 | Tests | Un état où la rétention à J30 est seule sous sa cible : la slide existe, son titre ne contient aucun montant, et aucune chaîne « Le calcul » n'est rendue. Un état où le gain vaut moins d'un client : pas de slide. **Non-vacuité** : remettre l'omission fait rougir le premier test |
 | Ordre | Après A7.1 : sans repère qui désigne, le cas `clear` ne vient plus que d'une cible |
@@ -365,7 +343,7 @@ ouverts, et, pour la vue propriétaire, un build jetable jamais commité.
 
 | # | Sujet | Réponse | Écrit dans | Suite |
 |---|---|---|---|---|
-| C1 | Les repères qui désignent la fuite | **Aucun repère ne désigne** : seule une cible d'équipe nomme l'étape. Population du churn reformulée (« SaaS B2B à panier élevé »). Non tranchée auparavant dans le nº8, sa carte y est désormais remplie | `ENGINE.md` décision 5 | A7.1 |
+| C1 | Les repères qui désignent la fuite | **Aucun repère ne désigne** : seule une cible d'équipe nomme l'étape. Population du churn reformulée (« SaaS B2B à panier élevé »). Non tranchée auparavant dans le nº8, sa carte y est désormais remplie | `ENGINE.md` décision 5 | A7.1, livré le 2026-09-30 |
 | C2 | Nom et adresse du moteur | **« Moteur de growth »** en français, "Growth engine" en anglais. **Adresse `/aarrr-funnel-template` gardée** : Antoine a délégué le choix sur le seul critère SEO, et la session l'a vérifié sur les résultats de recherche du jour | `ENGINE.md` décision 1 | A7.2 |
 | C3 | Crédit tourdegrowth.com sur les slides | Gardé : présent, retirable | `ENGINE.md` décision 2 | — |
 | C4 | Périmètre de la v1 | **Le B2B assisté entre en v1.** Un type (SaaS B2B), puis deux motions cochables, PLG et SLG. L'hybride en « deux moteurs, un total », jamais en face-à-face. L'ouverture du moteur attend | `ENGINE.md` décision 3 | A7.3 (spécification, validation, code, bon à tirer) |

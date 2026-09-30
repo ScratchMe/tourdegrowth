@@ -20,11 +20,11 @@ const kinds = (fs: Finding[]): FindingKind[] => fs.map((f) => f.kind);
 describe("findings — the §6.0 example", () => {
   const { findings } = derive(exampleState());
 
-  it("in rank order: the break, the missing definition, the stage below its reference, the uncomputable payback", () => {
+  it("in rank order: the break, the missing definition, the stage below its target, the uncomputable payback", () => {
     expect(findings).toEqual([
       { kind: "chain-break", rank: 1, metrics: ["ret.d30"], values: {} },
       { kind: "no-definition", rank: 2, metrics: ["ret.churn-cause"], values: {} },
-      { kind: "below-comparator", rank: 2, metrics: ["act.rate"], values: { value: "18 %", comparator: "20 à 40 %" } },
+      { kind: "below-comparator", rank: 2, metrics: ["act.rate"], values: { value: "18 %", comparator: "20 %" } },
       { kind: "unit-econ-uncomputable", rank: 3, metrics: ["rev.cac-payback", "rev.gross-margin"], values: {} },
     ]);
   });

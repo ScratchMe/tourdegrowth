@@ -67,9 +67,7 @@ export function Diagnosis({ diagnosis, strings, locale, metrics, values, classNa
     const c = position.comparator;
     const formatted = formatInterval(value, "percent", ctx, strings.units);
     // The sentence picks « sous » or « au-dessus » from the metric's direction: churn behind its comparator sits ABOVE it.
-    const comparatorText =
-      c.kind === "target" ? formatPercent(c.lo, locale) : formatInterval({ lo: c.lo, hi: c.hi }, "percent", ctx, strings.units);
-    return behindSentence(c, formatted, comparatorText, strings);
+    return behindSentence(c, formatted, formatPercent(c.lo, locale), strings);
   };
 
   const named = diagnosis.state === "clear" || diagnosis.state === "shared" ? diagnosis.named : [];

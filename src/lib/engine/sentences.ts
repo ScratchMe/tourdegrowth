@@ -17,8 +17,8 @@ import { currentSnapshot, entryOf } from "./values";
  * the slide screen's "to check" list and in any export — and the choices
  * that are easy to get wrong in one place out of three are made once:
  *
- * - churn behind its comparator is ABOVE it (`aboveComparator`, never
- *   « 3 %, sous 1 à 2 % »);
+ * - churn behind its target is ABOVE it (`aboveComparator`, never
+ *   « 3 %, sous 2 % »);
  * - a missing input is an article-ful phrase after « Il manque »
  *   (`unitInput`), never a bare catalogue name;
  * - a conflicting source is named mid-sentence (« selon une autre source »,

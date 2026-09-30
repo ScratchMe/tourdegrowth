@@ -7,7 +7,7 @@ import { askDefaults, horizonOptions, isPristineAsk, missingByRepairCost, sugges
  * The ask form's defaults (engine spec §7 E5), on the §6.0 example: three
  * numbers are missing — day-30 retention (a sprint), churn cause (a meeting)
  * and gross margin (a meeting) — and the diagnosis, when it names a stage,
- * names activation against the 20-40 % reference.
+ * names activation against the team's 20 % target (only a target names, C1).
  */
 const AT = "2026-09-01T09:00:00.000Z";
 const entry = (e: Omit<MetricEntry, "updatedAt">): MetricEntry => ({ ...e, updatedAt: AT });
@@ -76,22 +76,12 @@ describe("isPristineAsk", () => {
 });
 
 describe("suggestedSuccess", () => {
-  it("takes the low end of a 'higher is better' reference — the prudent bound the what-if starts from", () => {
-    expect(suggestedSuccess(clearOn("act.rate", { kind: "reference", lo: 20, hi: 40, direction: "higher" }))).toEqual({
-      successMetric: "act.rate",
-      successTarget: 20,
-    });
-  });
-
-  it("takes the high end of a 'lower is better' reference (churn): still the least ambitious bound", () => {
-    expect(suggestedSuccess(clearOn("ret.logo-churn", { kind: "reference", lo: 1, hi: 2, direction: "lower" }))).toEqual({
+  it("takes the team's own target as it is — for a flow and for churn alike", () => {
+    expect(suggestedSuccess(clearOn("ret.logo-churn", { lo: 2, hi: 2, direction: "lower" }))).toEqual({
       successMetric: "ret.logo-churn",
       successTarget: 2,
     });
-  });
-
-  it("takes the team's own target as it is", () => {
-    expect(suggestedSuccess(clearOn("rev.paid-conversion", { kind: "target", lo: 12, hi: 12, direction: "higher" }))).toEqual({
+    expect(suggestedSuccess(clearOn("rev.paid-conversion", { lo: 12, hi: 12, direction: "higher" }))).toEqual({
       successMetric: "rev.paid-conversion",
       successTarget: 12,
     });
@@ -107,7 +97,7 @@ describe("askDefaults", () => {
   it("fills only what the engine can justify: the metric, its target, and the three cheapest missing numbers", () => {
     const defaults = askDefaults(
       exampleState(),
-      clearOn("act.rate", { kind: "reference", lo: 20, hi: 40, direction: "higher" }),
+      clearOn("act.rate", { lo: 20, hi: 20, direction: "higher" }),
     );
     expect(defaults.successMetric).toBe("act.rate");
     expect(defaults.successTarget).toBe(20);

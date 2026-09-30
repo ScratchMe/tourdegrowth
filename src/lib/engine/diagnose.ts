@@ -1,4 +1,4 @@
-import { CANDIDATE_IDS, CLEAR_MARGIN, METRIC_SHAPES, UNPRICED_CANDIDATES, shapeOf } from "./catalog-shape";
+import { CANDIDATE_IDS, CLEAR_MARGIN, METRIC_SHAPES, UNPRICED_CANDIDATES } from "./catalog-shape";
 import { isFlow, rankingImpact } from "./impact";
 import type {
   CandidateId,
@@ -19,13 +19,13 @@ import { currentSnapshot, knownIn, statusOf } from "./values";
  *
  * The rules that make a named bottleneck defensible in front of a CODIR:
  *
- * - A stage is named only against a comparator that DESIGNATES: the team's
- *   own target (always), or one of the two references the product has
- *   approved for that job (activation 20-40 %, SMB logo churn 1-2 %/month).
- *   Every other reference is context — shown, never used to name anything.
- * - A value INSIDE its reference is never a leak against it. Only a target
- *   can make such a value a candidate, and the sentence then says "below
- *   your target", never "low end of the reference".
+ * - A stage is named only against the team's own TARGET. No published
+ *   reference names anything — they are context, shown with their caveat
+ *   (decision 5, reversed by Antoine on 2026-09-29, `CHANTIERS.md` C1: 1-2 %
+ *   logo churn is high-ticket B2B SaaS, and 20-40 % activation has no
+ *   primary source; the §6.0 example's churn was flagged against a range
+ *   that was never its own). Without targets, the diagnosis says so
+ *   (`not-enough`) rather than borrow somebody else's.
  * - Ranking needs at least two comparable stages. With one, it is reported
  *   and not ranked ("we can't say whether it's the biggest leak").
  * - Ranking is in money per month when N and ARPA are known — the only unit
@@ -40,14 +40,11 @@ export function directionOf(id: CandidateId): Comparator["direction"] {
   return id === "ret.logo-churn" ? "lower" : "higher";
 }
 
-/** The comparator that may name this stage: the team target, else a designating reference, else none (§6.6). */
+/** The comparator that may name this stage: the team's target, or none (§6.6, C1). */
 export function comparatorOf(state: EngineState, id: CandidateId): Comparator | undefined {
   const target = currentSnapshot(state).targets[id];
-  const direction = directionOf(id);
-  if (target !== undefined && Number.isFinite(target)) return { kind: "target", lo: target, hi: target, direction };
-  const benchmark = shapeOf(id).benchmark;
-  if (benchmark?.designates) return { kind: "reference", lo: benchmark.lo, hi: benchmark.hi, direction, term: benchmark.term };
-  return undefined;
+  if (target === undefined || !Number.isFinite(target)) return undefined;
+  return { lo: target, hi: target, direction: directionOf(id) };
 }
 
 /**
@@ -67,9 +64,9 @@ export function positionOf(value: Interval, comparator: Comparator): Exclude<Pos
   return "above";
 }
 
-/** The target a `below` stage is measured to: the target itself, or the reference's CAUTIOUS bound (§6.6). */
+/** The value a `below` stage is measured to: the team's target (§6.6). */
 export function impactTarget(comparator: Comparator): number {
-  return comparator.direction === "higher" ? comparator.lo : comparator.hi;
+  return comparator.lo;
 }
 
 /**

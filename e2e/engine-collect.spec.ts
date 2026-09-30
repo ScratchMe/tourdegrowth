@@ -394,20 +394,20 @@ test.describe("the §6.0 example on the board", () => {
   }
 
   /**
-   * P7a/P7c: the example's churn (10/400 = 2.5% against a 1-2% reference) is
-   * BEHIND, and for a lower-is-better metric behind is above. The sheet used
-   * to print a direction-blind « Sous le repère » here. Read from the copy,
-   * not retyped, and in both languages.
+   * P7a/P7c: the example's churn (10/400 = 2.5% against the fictional team's
+   * 2% target) is BEHIND, and for a lower-is-better metric behind is above.
+   * The sheet used to print a direction-blind « Sous le repère » here. Read
+   * from the copy, not retyped, and in both languages.
    */
   for (const locale of ["en", "fr"] as const) {
-    test(`${locale}: churn behind its reference is labelled above it on its sheet`, async ({ page }) => {
+    test(`${locale}: churn behind its target is labelled above it on its sheet`, async ({ page }) => {
       await page.setViewportSize({ width: 1280, height: 900 });
       await openExample(page, locale);
       const sheet = await openSheet(page, "retention", "ret-logo-churn");
-      const above = ENGINE_COPY.side.overReference[locale];
+      const above = ENGINE_COPY.side.overTarget[locale];
       const label = above.charAt(0).toUpperCase() + above.slice(1);
       await expect(sheet.getByTestId("engine-position")).toHaveText(label);
-      await expect(sheet.getByTestId("engine-position")).not.toContainText(locale === "fr" ? "Sous le repère" : "Below");
+      await expect(sheet.getByTestId("engine-position")).not.toContainText(locale === "fr" ? "Sous" : "Below");
     });
   }
 

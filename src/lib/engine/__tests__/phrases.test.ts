@@ -130,75 +130,69 @@ describe("the catalogue's five placeholders", () => {
 });
 
 describe("where a value sits is said physically, from the metric's direction", () => {
-  const up = (kind: Comparator["kind"]): Comparator => ({ kind, lo: 20, hi: 40, direction: "higher" });
-  const down = (kind: Comparator["kind"]): Comparator => ({ kind, lo: 1, hi: 2, direction: "lower" });
+  // Only a team target is a comparator (C1): a point, lo === hi.
+  const up: Comparator = { lo: 20, hi: 20, direction: "higher" };
+  const down: Comparator = { lo: 2, hi: 2, direction: "lower" };
 
   it("higher-is-better: behind is under, ahead is over", () => {
-    expect(sideKey("below", up("reference"))).toBe("underReference");
-    expect(sideKey("maybe-below", up("reference"))).toBe("maybeUnderReference");
-    expect(sideKey("above", up("reference"))).toBe("overReference");
-    expect(sideKey("below", up("target"))).toBe("underTarget");
-    expect(sideKey("maybe-below", up("target"))).toBe("maybeUnderTarget");
-    expect(sideKey("above", up("target"))).toBe("overTarget");
+    expect(sideKey("below", up)).toBe("underTarget");
+    expect(sideKey("maybe-below", up)).toBe("maybeUnderTarget");
+    expect(sideKey("above", up)).toBe("overTarget");
   });
 
-  it("churn — lower is better: behind is OVER its comparator, ahead is under", () => {
-    expect(sideKey("below", down("reference"))).toBe("overReference");
-    expect(sideKey("maybe-below", down("reference"))).toBe("maybeOverReference");
-    expect(sideKey("above", down("reference"))).toBe("underReference");
-    expect(sideKey("below", down("target"))).toBe("overTarget");
-    expect(sideKey("maybe-below", down("target"))).toBe("maybeOverTarget");
-    expect(sideKey("above", down("target"))).toBe("underTarget");
+  it("churn — lower is better: behind is OVER its target, ahead is under", () => {
+    expect(sideKey("below", down)).toBe("overTarget");
+    expect(sideKey("maybe-below", down)).toBe("maybeOverTarget");
+    expect(sideKey("above", down)).toBe("underTarget");
   });
 
-  it("within, and nothing to compare with", () => {
-    expect(sideKey("within", down("reference"))).toBe("withinReference");
-    expect(sideKey("within", up("target"))).toBe("atTarget");
+  it("at the target, and nothing to compare with", () => {
+    expect(sideKey("within", down)).toBe("atTarget");
+    expect(sideKey("within", up)).toBe("atTarget");
     expect(sideKey("below", undefined)).toBeNull();
-    expect(sideKey("unknown", up("reference"))).toBeNull();
+    expect(sideKey("unknown", up)).toBeNull();
     expect(sideText("below", undefined, FR.strings)).toBeNull();
   });
 
-  it("the words, mid-sentence and as a stamp", () => {
-    expect(sideText("below", down("reference"), FR.strings)).toBe("au-dessus du repère");
-    expect(stampText("below", down("reference"), FR.strings)).toBe("Au-dessus du repère");
-    expect(stampText("below", up("target"), EN.strings)).toBe("Below the target");
-    expect(stampText("unknown", up("target"), EN.strings)).toBeNull();
+  it("the words, mid-sentence and as a stamp — never « repère », which names nothing (C1)", () => {
+    expect(sideText("below", down, FR.strings)).toBe("au-dessus de la cible");
+    expect(stampText("below", down, FR.strings)).toBe("Au-dessus de la cible");
+    expect(stampText("below", up, EN.strings)).toBe("Below the target");
+    expect(stampText("unknown", up, EN.strings)).toBeNull();
+    for (const text of Object.values(FR.strings.side)) expect(text).not.toMatch(/repère/);
+    for (const text of Object.values(EN.strings.side)) expect(text).not.toMatch(/reference/);
   });
 
   /**
    * P7a open issue: the board's labels outside the diagnosis picked from
-   * direction-blind strings, so churn behind its reference read « Sous le
-   * repère ». On the §6.0 example itself (churn 10/400 = 2,5 % against 1-2 %),
-   * read through the real diagnosis rather than a hand-built comparator.
-   * Non-vacuity, measured 2026-09-25: make positionLabel return the old
-   * direction-blind « Sous le repère » for "below" (the board's behaviour then;
-   * the key is gone since) and this test fails on its first churn assertion.
+   * direction-blind strings, so churn behind its comparator read « Sous le
+   * repère ». On the §6.0 example itself (churn 10/400 = 2,5 % against the
+   * fictional team's 2 %), read through the real diagnosis rather than a
+   * hand-built comparator. Non-vacuity, measured 2026-09-25: make
+   * positionLabel return a direction-blind « Sous … » for "below" and this
+   * test fails on its first churn assertion.
    */
-  it("a position as a label: churn behind its reference is ABOVE it, in both languages", () => {
+  it("a position as a label: churn behind its target is ABOVE it, in both languages", () => {
     const derivedFr = deriveEngine(exampleState(), CTX_FR, null, FR.bridges, FR.strings.units);
     const churn = derivedFr.diagnosis.positions["ret.logo-churn"];
     expect(churn.position).toBe("below");
-    expect(positionLabel(churn.position, churn.comparator, FR.strings)).toBe("Au-dessus du repère");
+    expect(positionLabel(churn.position, churn.comparator, FR.strings)).toBe("Au-dessus de la cible");
     const derivedEn = deriveEngine(exampleState(), CTX_EN, null, EN.bridges, EN.strings.units);
     const churnEn = derivedEn.diagnosis.positions["ret.logo-churn"];
-    expect(positionLabel(churnEn.position, churnEn.comparator, EN.strings)).toBe("Above the reference");
+    expect(positionLabel(churnEn.position, churnEn.comparator, EN.strings)).toBe("Above the target");
     // A flow behind is still under, and the other positions take their own words.
     const act = derivedEn.diagnosis.positions["act.rate"];
-    expect(positionLabel(act.position, act.comparator, EN.strings)).toBe("Below the reference");
-    expect(positionLabel("within", down("reference"), FR.strings)).toBe("Dans le repère");
-    expect(positionLabel("above", down("reference"), FR.strings)).toBe("Sous le repère");
+    expect(positionLabel(act.position, act.comparator, EN.strings)).toBe("Below the target");
+    expect(positionLabel("within", down, FR.strings)).toBe("À la cible");
+    expect(positionLabel("above", down, FR.strings)).toBe("Sous la cible");
     expect(positionLabel("no-comparator", undefined, FR.strings)).toBe(FR.strings.diagnosis.noComparator);
-    expect(positionLabel("unknown", down("reference"), FR.strings)).toBeNull();
+    expect(positionLabel("unknown", down, FR.strings)).toBeNull();
   });
 
   it("the board's sentence under a named stage: churn « au-dessus de », a flow « sous »", () => {
-    expect(behindSentence(down("reference"), `3${NB}%`, `1 à 2${NB}%`, FR.strings)).toBe(
-      `3${NB}%, au-dessus de l'ordre de grandeur couramment cité (1 à 2${NB}%)`,
-    );
-    expect(behindSentence(up("reference"), "18%", "20–40%", EN.strings)).toBe("18%, below the commonly cited range (20–40%)");
-    expect(behindSentence(down("target"), "3%", "2%", EN.strings)).toBe("3%, above your target (2%)");
-    expect(behindSentence(up("target"), `18${NB}%`, `25${NB}%`, FR.strings)).toBe(`18${NB}%, sous ta cible (25${NB}%)`);
+    expect(behindSentence(down, `3${NB}%`, `2${NB}%`, FR.strings)).toBe(`3${NB}%, au-dessus de ta cible (2${NB}%)`);
+    expect(behindSentence(down, "3%", "2%", EN.strings)).toBe("3%, above your target (2%)");
+    expect(behindSentence(up, `18${NB}%`, `25${NB}%`, FR.strings)).toBe(`18${NB}%, sous ta cible (25${NB}%)`);
   });
 });
 
@@ -215,9 +209,9 @@ describe("the diagnosis sentences", () => {
     expect(blindSentence([], FR.strings, FR.metrics)).toBeNull();
   });
 
-  it("not enough references: which stage, and WHERE it sits — a target makes it « sous la cible »", () => {
+  it("not enough targets: which stage, and WHERE it sits — « sous la cible »", () => {
     const noChurn = withEntry(exampleState(), "ret.logo-churn", undefined);
-    expect(notEnoughBelowValues(diagnosisOf(noChurn), FR.strings, FR.metrics)).toEqual({ stage: "L'activation", side: "sous le repère" });
+    expect(notEnoughBelowValues(diagnosisOf(noChurn), FR.strings, FR.metrics)).toEqual({ stage: "L'activation", side: "sous la cible" });
     expect(notEnoughBelowSentence(diagnosisOf(withTarget(noChurn, "act.rate", 25)), FR.strings, FR.metrics)).toBe(
       "L'activation est sous la cible. Sans cible sur les autres étapes, impossible de dire si c'est la plus grosse fuite.",
     );
@@ -240,7 +234,7 @@ describe("the diagnosis sentences", () => {
 
 describe("what a gap is worth — read from the same chain the calculation prints", () => {
   const impactOf = (state: EngineState, id: "act.rate" | "ret.logo-churn", ctx = CTX_FR) =>
-    whatIf(state, id, comparatorOf(state, id)!.kind === "target" ? comparatorOf(state, id)!.lo : id === "act.rate" ? 20 : 2, ctx, (ctx.locale === "fr" ? FR : EN).strings.units)!;
+    whatIf(state, id, comparatorOf(state, id)!.lo, ctx, (ctx.locale === "fr" ? FR : EN).strings.units)!;
 
   it("an amount: new or retained MRR", () => {
     expect(worthOf(impactOf(exampleState(), "act.rate"), FR.strings, "fr")).toBe(`~600${NB}€ de MRR nouveau par mois`);
