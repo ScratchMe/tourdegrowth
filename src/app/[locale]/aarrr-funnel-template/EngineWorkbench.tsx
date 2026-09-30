@@ -506,8 +506,15 @@ function withSettings(state: EngineState, setup: EngineSetup, referenceMonth: Ye
   const hadCompany = Boolean(state.setup.companyLabel);
   return {
     ...state,
-    // The model is not editable (one profile in v1), nor is anything the card doesn't show.
-    setup: { ...setup, profile: state.setup.profile },
+    // Nothing the card doesn't show changes here: the type, the motions and the sales-assisted
+    // windows stay the state's own until the card edits them (A7.3.c S3, §18.1.2).
+    setup: {
+      ...setup,
+      type: state.setup.type,
+      motions: state.setup.motions,
+      qualificationWindowDays: state.setup.qualificationWindowDays,
+      goLiveWindowDays: state.setup.goLiveWindowDays,
+    },
     // A name given for the first time goes on the slides, as it does at creation.
     deck: !hadCompany && setup.companyLabel ? { ...state.deck, showCompany: true } : state.deck,
     snapshots: [...state.snapshots.slice(0, -1), { ...snapshot, referenceMonth, cohortMonth, metrics }],

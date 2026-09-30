@@ -362,12 +362,17 @@ export const ENGINE_COPY = {
     marketing: { fr: "Marketing", en: "Marketing" },
     revops: { fr: "RevOps", en: "RevOps" },
     support: { fr: "Support", en: "Support" },
+    // TODO: à relire (convention 6) — neuf le 2026-09-30 (A7.3.c S0, C25 Q9) : les rôles de la vente assistée.
+    sales: { fr: "Commercial", en: "Sales" },
+    "customer-success": { fr: "Customer Success", en: "Customer success" },
   },
   basis: {
     teamHunch: { fr: "Intuition d'équipe", en: "Team hunch" },
     oldNumber: { fr: "Un ancien chiffre", en: "An old number" },
     sample: { fr: "Un échantillon", en: "A sample" },
     other: { fr: "Autre", en: "Other" },
+    // TODO: à relire (convention 6) — neuf le 2026-09-30 (A7.3.c S0, C25 Q4) : le repli d'une marge par motion.
+    companyWide: { fr: "La marge globale de l'entreprise", en: "The company-wide margin" },
   },
   source: {
     someoneTold: { fr: "Quelqu'un me l'a donné", en: "Someone gave it to me" },
@@ -393,6 +398,9 @@ export const ENGINE_COPY = {
     "play-console": { fr: "Google Play Console", en: "Google Play Console" },
     "product-db": { fr: "Base produit", en: "Product database" },
     spreadsheet: { fr: "Tableur", en: "Spreadsheet" },
+    // TODO: à relire (convention 6) — neuf le 2026-09-30 (A7.3.c S0) : les outils de la vente assistée (§18.2).
+    pipedrive: { fr: "Pipedrive", en: "Pipedrive" },
+    "cs-platform": { fr: "Outil de Customer Success (Gainsight, Vitally, Planhat…)", en: "Customer success platform (Gainsight, Vitally, Planhat…)" },
   } satisfies Record<ToolId, Translatable>,
 
   /**
@@ -714,6 +722,12 @@ export const ENGINE_COPY = {
     "rev.contraction": { fr: "la rétrogradation", en: "contraction" },
     "rev.expansion": { fr: "l'expansion", en: "expansion" },
     "rev.arpa": { fr: "l'ARPA des nouveaux clients", en: "new customers' ARPA" },
+    // TODO: à relire (convention 6) — neuf le 2026-09-30 (A7.3.c S0, §18.5.5 et C25 Q7) : les leviers de l'assisté, puis la liaison.
+    "slg.acq.lead-to-opp": { fr: "le passage des leads en opportunités", en: "lead-to-opportunity conversion" },
+    "slg.rev.win-rate": { fr: "le taux de closing", en: "the win rate" },
+    "slg.ret.renewal": { fr: "le renouvellement", en: "renewals" },
+    "slg.rev.acv": { fr: "l'ACV des nouveaux contrats", en: "new contracts' ACV" },
+    "link.pql-handoff": { fr: "le nombre d'opportunités venues du libre-service", en: "the number of opportunities from self-serve" },
   } satisfies Record<LeverId, Translatable>,
   /**
    * TODO: à relire — nouveau (2026-09-26). « Et si » cumulés : the panel
@@ -1513,6 +1527,15 @@ export const ENGINE_COPY = {
       en: "This file comes from a newer version of the engine: it can't be read here.",
     },
     notEngine: { fr: "Ce fichier n'est pas un moteur Tour de Growth.", en: "This file isn't a Tour de Growth engine." },
+    // TODO: à relire (convention 6) — neuf le 2026-09-30 (A7.3.c S0, §18.3.2) : le fichier v2 et la migration d'un v1.
+    unsupportedSetup: {
+      fr: "Ce fichier ne dit pas comment l'entreprise vend : il ne peut pas s'ouvrir.",
+      en: "This file doesn't say how the company sells: it can't be opened.",
+    },
+    migrated: {
+      fr: "Fichier d'une version précédente : il a été mis à jour, rien n'a changé dans tes chiffres.",
+      en: "File from an earlier version: it's been updated, nothing changed in your numbers.",
+    },
     fileName: { fr: "tdg-moteur-{month}.json", en: "tdg-engine-{month}.json" },
   },
   resume: {

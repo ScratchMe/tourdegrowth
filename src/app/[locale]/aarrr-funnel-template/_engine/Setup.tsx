@@ -6,6 +6,7 @@ import { Card } from "@/components/core/Card";
 import { TEXT_LIMITS } from "@/lib/engine/catalog-shape";
 import type { EngineStrings } from "@/lib/engine/strings";
 import type { Currency, EngineSetup, YearMonth } from "@/lib/engine/types";
+import { SETUP_V2_DEFAULTS } from "@/lib/engine/types";
 import type { StoredResult } from "@/lib/quiz/storage";
 import { defaultReferenceMonth, matureCohortMonth, nextMonth } from "@/lib/engine/cohort";
 import { fill, formatDate, formatMonth } from "./text";
@@ -104,7 +105,10 @@ export function Setup({
     onStart({
       start: how,
       setup: {
-        profile: "selfserve",
+        // Self-serve alone until the card asks how the company sells (A7.3.c S3, §18.1).
+        ...SETUP_V2_DEFAULTS,
+        // A copy: the defaults' object must never be the one a state carries (and may one day edit).
+        motions: { ...SETUP_V2_DEFAULTS.motions },
         currency,
         activationWindowDays: activation,
         paidWindowDays: paid,

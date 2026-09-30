@@ -111,6 +111,7 @@ export const BASIS_KEY: Record<EstimateBasis, keyof EngineStrings["basis"]> = {
   "old-number": "oldNumber",
   sample: "sample",
   other: "other",
+  "company-wide": "companyWide",
 };
 
 /** Role and repair ids are already valid keys; spelled out so a renamed id breaks the build. */
@@ -121,6 +122,8 @@ export const ROLE_KEY: Record<RoleId, keyof EngineStrings["role"]> = {
   marketing: "marketing",
   revops: "revops",
   support: "support",
+  sales: "sales",
+  "customer-success": "customer-success",
 };
 
 export const REPAIR_KEY: Record<RepairScale, keyof EngineStrings["repair"]> = {

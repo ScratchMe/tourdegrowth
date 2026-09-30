@@ -1,6 +1,6 @@
 // TODO: à relire — copie neuve (convention 6), rédigée par la session de code
 import type { Translatable } from "@/lib/i18n/translatable";
-import type { DerivedId, MetricId, SourceRef } from "@/lib/engine/types";
+import type { PlgDerivedId, PlgMetricId, SourceRef } from "@/lib/engine/types";
 
 /**
  * engine-catalog.ts — the PROSE of the growth engine's seventeen numbers and
@@ -78,7 +78,11 @@ export interface EngineDerivedEntry {
 const tool = (t: Extract<SourceRef, { kind: "tool" }>["tool"]): SourceRef => ({ kind: "tool", tool: t });
 const role = (r: Extract<SourceRef, { kind: "person" }>["role"]): SourceRef => ({ kind: "person", role: r });
 
-export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
+/**
+ * The self-serve catalogue's prose. The sales-assisted numbers get theirs with
+ * the content lot (A7.3.c S2), and this record widens to every `MetricId` then.
+ */
+export const ENGINE_CATALOG: Record<PlgMetricId, EngineCatalogEntry> = {
   // --- Acquisition -----------------------------------------------------------
   "acq.signup-rate": {
     name: { fr: "Taux d'inscription", en: "Sign-up rate" },
@@ -911,7 +915,7 @@ export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
   },
 };
 
-export const ENGINE_DERIVED_CATALOG: Record<DerivedId, EngineDerivedEntry> = {
+export const ENGINE_DERIVED_CATALOG: Record<PlgDerivedId, EngineDerivedEntry> = {
   "rev.ltv": {
     name: { fr: "LTV", en: "LTV" },
     formula: {

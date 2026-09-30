@@ -94,7 +94,8 @@ export function Board({
   const current = selected ?? initialStage;
 
   const eyebrow = fill(strings.board.eyebrow, {
-    model: strings.workbench.modelShort[state.setup.profile],
+    // The board shows self-serve only until it learns the motions (A7.3.c S3, §18.7).
+    model: strings.workbench.modelShort.selfserve,
     cohort: formatMonth(snapshot.cohortMonth, ctx.locale),
     month: formatMonth(snapshot.referenceMonth, ctx.locale),
   });

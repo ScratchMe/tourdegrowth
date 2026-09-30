@@ -80,7 +80,9 @@ function slideComponent(id: SlideId): ComponentType<SlideProps> {
   if (isWhatIfSlide(id)) return SlideWhatIf;
   // The appendix's next pages (`annex:2`…): the same table, the rows the model put on that page.
   if (isAnnexPage(id)) return SlideAnnex;
-  return SLIDES[id];
+  // The hybrid's `total` and the sales-assisted slides get their components with the deck (A7.3.c S4).
+  if (id === "total" || id.startsWith("slg:")) throw new Error(`No slide component yet for ${id}`);
+  return SLIDES[id as FixedSlideId];
 }
 
 /**

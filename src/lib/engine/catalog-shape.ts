@@ -5,10 +5,19 @@ import type {
   DerivedId,
   Effort,
   LeverId,
+  LinkMetricId,
   MetricId,
   MetricValue,
+  Motion,
+  PlgDerivedId,
+  PlgLeverId,
+  PlgMetricId,
   RepairScale,
   RoleId,
+  SlgCandidateId,
+  SlgDerivedId,
+  SlgLeverId,
+  SlgMetricId,
   ToolId,
 } from "./types";
 
@@ -53,8 +62,8 @@ export interface Benchmark {
   direction: "higher" | "lower";
 }
 
-export interface MetricShape {
-  id: MetricId;
+export interface MetricShape<Id extends MetricId = MetricId> {
+  id: Id;
   stage: Pillar;
   /** The ★ of its stage: the number that carries the peloton column or the stage row. One per stage. */
   primary: boolean;
@@ -65,8 +74,25 @@ export interface MetricShape {
   bounded: boolean;
   /** Which month the number belongs to: the flows' reference month, the followed cohort, or neither. */
   flow: "month" | "cohort" | "none";
-  /** The window that is part of the definition (setup's activation or payment window, or a fixed 30 days). */
-  window?: "activation" | "paid" | 30;
+  /**
+   * The window that is part of the definition: the setup's activation or
+   * payment window (self-serve), its qualification or go-live window
+   * (sales-assisted, §18.1.1), or a fixed 30 days.
+   */
+  window?: "activation" | "paid" | "qualification" | "go-live" | 30;
+  /**
+   * Where the number lives (§18.2.1): a motion's own catalogue, or the
+   * hybrid's link. No number is shared by both motions since C25 Q4 (one
+   * gross margin per motion).
+   */
+  scope: "plg" | "slg" | "link";
+  /**
+   * Months the number covers: 1 for self-serve, 3 for all of sales-assisted
+   * (C25 Q2: a month counts too few deals), 12 for the 12-month NRR.
+   */
+  span: 1 | 3 | 12;
+  /** Out of coverage, never a finding, never a candidate: the link (§18.2.2, S10). */
+  optional?: true;
   effort: Effort;
   defaultRole: RoleId;
   sources: readonly ToolId[];
@@ -84,8 +110,8 @@ export interface MetricShape {
 }
 
 /** The five computed figures (§5.7; NRR and GRR since 2026-09-26). Never entered; an unknown input makes them uncomputable, never 0. */
-export interface DerivedShape {
-  id: DerivedId;
+export interface DerivedShape<Id extends DerivedId = DerivedId> {
+  id: Id;
   stage: Pillar;
   inputs: readonly MetricId[];
   glossary: GlossaryTermId;
@@ -93,7 +119,13 @@ export interface DerivedShape {
   benchmark?: Benchmark;
 }
 
-export const METRIC_SHAPES: readonly MetricShape[] = [
+/**
+ * The self-serve catalogue — the seventeen v1 numbers, in their v1 order.
+ * Every v1 module reads this list; a module that learns the motions reads
+ * `shapesOf(motions)` instead (§18.2.1), and the sales-assisted numbers
+ * never leak into a self-serve board through it.
+ */
+export const METRIC_SHAPES: readonly MetricShape<PlgMetricId>[] = ([
   // --- Acquisition -----------------------------------------------------------
   {
     id: "acq.signup-rate",
@@ -373,12 +405,314 @@ export const METRIC_SHAPES: readonly MetricShape[] = [
     defaultRepair: "afternoon",
     naReasons: ["not-subscription"],
   },
+] satisfies readonly Omit<MetricShape<PlgMetricId>, "scope" | "span">[]).map((shape) => ({ ...shape, scope: "plg" as const, span: 1 as const }));
+
+/**
+ * The sales-assisted catalogue — engine spec §18.4, validated by Antoine on
+ * 2026-09-30 (`CHANTIERS.md` C25). Stages keep the AARRR order of the tabs;
+ * the funnel drawn in relays follows the calendar instead (signed, then live).
+ *
+ * - **Activation is the go-live** (Q1): the customer gets what they bought,
+ *   after the signature — the after-sale is where sales-assisted dies quietly.
+ * - **Everything reads over three months** (Q2), fixed: one month holds too
+ *   few deals for a rate to mean anything.
+ * - **Its own gross margin** (Q4): a single margin flatters the motion that
+ *   sells onboarding.
+ * - **No reference names a stage** (C1), and none is borrowed from the audit
+ *   instrument (decision 6): the NRR's 110-130 % is the one reference, read
+ *   word for word in the approved `nrr-grr` term, and it is context.
+ *
+ * Glossary links point at the nearest existing term until the four terms of
+ * `CHANTIERS.md` A7.3.e exist (Q8); S2 links each number to its own.
+ */
+export const SLG_METRIC_SHAPES: readonly MetricShape<SlgMetricId>[] = ([
+  // --- Acquisition -----------------------------------------------------------
+  {
+    id: "slg.acq.lead-to-opp",
+    stage: "acquisition",
+    primary: true,
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    bounded: true,
+    flow: "cohort",
+    window: "qualification",
+    effort: "self-1h",
+    defaultRole: "revops",
+    sources: ["hubspot", "salesforce", "pipedrive"],
+    glossary: "acquisition",
+    defaultRepair: "afternoon",
+    // The relay's base is named after it: « pour 100 leads » or « pour 100 MQL ».
+    variants: ["all-leads", "mql"],
+  },
+  {
+    id: "slg.acq.cac",
+    stage: "acquisition",
+    primary: false,
+    valueKinds: ["ratio", "amount"],
+    unit: "money",
+    bounded: false,
+    flow: "month",
+    effort: "ask",
+    defaultRole: "finance",
+    sources: ["hubspot", "salesforce", "pipedrive", "google-ads", "meta-ads", "linkedin-ads"],
+    glossary: "cac",
+    tourQuestionId: "acq-3",
+    defaultRepair: "meeting",
+    variants: ["media-only", "plus-team", "fully-loaded"],
+  },
+  {
+    id: "slg.acq.cycle",
+    stage: "acquisition",
+    primary: false,
+    valueKinds: ["duration"],
+    unit: "duration",
+    bounded: false,
+    flow: "month",
+    effort: "self-1h",
+    defaultRole: "revops",
+    sources: ["salesforce", "hubspot", "pipedrive"],
+    glossary: "cac",
+    defaultRepair: "afternoon",
+    variants: ["median", "mean"],
+  },
+  // --- Activation: the go-live (Q1) -----------------------------------------
+  {
+    id: "slg.act.live-event",
+    stage: "activation",
+    primary: false,
+    valueKinds: ["text"],
+    unit: "text",
+    bounded: false,
+    flow: "none",
+    window: "go-live",
+    effort: "self-5min",
+    defaultRole: "customer-success",
+    sources: [],
+    glossary: "aha-moment",
+    tourQuestionId: "act-1",
+    defaultRepair: "meeting",
+  },
+  {
+    id: "slg.act.go-live",
+    stage: "activation",
+    primary: true,
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    bounded: true,
+    flow: "cohort",
+    window: "go-live",
+    effort: "ask",
+    defaultRole: "customer-success",
+    sources: ["cs-platform", "hubspot", "salesforce", "pipedrive", "spreadsheet"],
+    glossary: "activation",
+    tourQuestionId: "act-2",
+    defaultRepair: "sprint",
+    dependsOn: "slg.act.live-event",
+  },
+  {
+    id: "slg.act.time-to-live",
+    stage: "activation",
+    primary: false,
+    valueKinds: ["duration"],
+    unit: "duration",
+    bounded: false,
+    flow: "cohort",
+    window: "go-live",
+    effort: "self-1h",
+    defaultRole: "customer-success",
+    sources: ["cs-platform", "hubspot", "salesforce", "pipedrive", "spreadsheet"],
+    glossary: "time-to-value",
+    defaultRepair: "afternoon",
+    variants: ["median", "mean"],
+  },
+  // --- Retention: renewals ---------------------------------------------------
+  {
+    id: "slg.ret.renewal",
+    stage: "retention",
+    primary: true,
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    bounded: true,
+    flow: "month",
+    effort: "self-1h",
+    defaultRole: "customer-success",
+    sources: ["salesforce", "hubspot", "pipedrive", "chargebee", "stripe"],
+    glossary: "retention",
+    tourQuestionId: "ret-1",
+    defaultRepair: "afternoon",
+    // Enters the lifetime (§18.5.6): an annual contract renews once a year.
+    variants: ["annual", "monthly"],
+    naReasons: ["no-renewal-yet"],
+  },
+  {
+    id: "slg.ret.nrr",
+    stage: "retention",
+    primary: false,
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    // Two amounts, and expansion can carry it past 100 %: not bounded (§18.3.3).
+    bounded: false,
+    flow: "month",
+    effort: "ask",
+    defaultRole: "finance",
+    sources: ["chartmogul", "spreadsheet", "salesforce"],
+    glossary: "nrr-grr",
+    // « Considérée comme solide » in B2B SaaS — context only, and the NRR is never a candidate.
+    benchmark: { term: "nrr-grr", lo: 110, hi: 130, direction: "higher" },
+    defaultRepair: "afternoon",
+  },
+  {
+    id: "slg.ret.loss-cause",
+    stage: "retention",
+    primary: false,
+    valueKinds: ["text"],
+    unit: "text",
+    bounded: false,
+    flow: "none",
+    effort: "ask",
+    defaultRole: "customer-success",
+    sources: ["hubspot", "salesforce", "pipedrive"],
+    glossary: "churn",
+    tourQuestionId: "ret-3",
+    defaultRepair: "meeting",
+    choices: ["data", "interviews", "hunch"],
+  },
+  // --- Referral --------------------------------------------------------------
+  {
+    id: "slg.ref.referred-share",
+    stage: "referral",
+    primary: true,
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    bounded: true,
+    flow: "month",
+    effort: "self-1h",
+    defaultRole: "sales",
+    sources: ["salesforce", "hubspot", "pipedrive"],
+    glossary: "referral",
+    defaultRepair: "afternoon",
+    variants: ["customers", "customers-and-partners"],
+  },
+  {
+    id: "slg.ref.referenceable",
+    stage: "referral",
+    primary: false,
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    bounded: true,
+    flow: "month",
+    effort: "ask",
+    defaultRole: "marketing",
+    sources: ["spreadsheet", "hubspot", "salesforce", "pipedrive"],
+    glossary: "referral",
+    defaultRepair: "afternoon",
+  },
+  // --- Revenue ---------------------------------------------------------------
+  {
+    id: "slg.rev.win-rate",
+    stage: "revenue",
+    primary: true,
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    bounded: true,
+    flow: "month",
+    effort: "self-5min",
+    defaultRole: "revops",
+    sources: ["salesforce", "hubspot", "pipedrive"],
+    glossary: "revenue",
+    defaultRepair: "meeting",
+  },
+  {
+    id: "slg.rev.acv",
+    stage: "revenue",
+    primary: false,
+    valueKinds: ["ratio", "amount"],
+    unit: "money",
+    bounded: false,
+    flow: "month",
+    effort: "self-5min",
+    defaultRole: "finance",
+    sources: ["hubspot", "salesforce", "pipedrive", "spreadsheet"],
+    glossary: "arpu",
+    defaultRepair: "meeting",
+  },
+  {
+    id: "slg.rev.arpa",
+    stage: "revenue",
+    primary: false,
+    valueKinds: ["ratio", "amount"],
+    unit: "money",
+    bounded: false,
+    flow: "month",
+    effort: "self-5min",
+    defaultRole: "finance",
+    sources: ["stripe", "chargebee", "chartmogul"],
+    glossary: "arpu",
+    defaultRepair: "meeting",
+  },
+  {
+    // C25 Q4: one margin per motion. `rev.gross-margin` stays self-serve's, unchanged.
+    id: "slg.rev.gross-margin",
+    stage: "revenue",
+    primary: false,
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    bounded: true,
+    flow: "month",
+    effort: "ask",
+    defaultRole: "finance",
+    sources: ["spreadsheet"],
+    glossary: "cac-payback",
+    defaultRepair: "meeting",
+  },
+] satisfies readonly Omit<MetricShape<SlgMetricId>, "scope" | "span">[]).map((shape) => ({
+  ...shape,
+  scope: "slg" as const,
+  // The 12-month NRR is the one number that is not read over the three months.
+  span: shape.id === "slg.ret.nrr" ? (12 as const) : (3 as const),
+}));
+
+/**
+ * The hybrid's link (§18.4.8, C25 Q7): optional, out of coverage, never a
+ * finding nor a candidate — and a lever, counted in opportunities.
+ */
+export const LINK_METRIC_SHAPES: readonly MetricShape<LinkMetricId>[] = [
+  {
+    id: "link.pql-handoff",
+    stage: "acquisition",
+    primary: false,
+    valueKinds: ["ratio", "rate"],
+    unit: "percent",
+    bounded: true,
+    flow: "month",
+    effort: "self-1h",
+    defaultRole: "revops",
+    sources: ["hubspot", "salesforce", "pipedrive", "product-db"],
+    glossary: "pql",
+    defaultRepair: "sprint",
+    scope: "link",
+    span: 3,
+    optional: true,
+  },
 ];
+
+/** Every number the engine knows, in catalogue order: self-serve, sales-assisted, the link. */
+export const ALL_METRIC_SHAPES: readonly MetricShape[] = [...METRIC_SHAPES, ...SLG_METRIC_SHAPES, ...LINK_METRIC_SHAPES];
+
+/**
+ * The numbers a setup shows, in catalogue order (§18.2.1): self-serve's if
+ * ticked, sales-assisted's if ticked, the link only in the hybrid. Throws on
+ * no motion — `validate.ts` refuses such a setup before anything asks.
+ */
+export function shapesOf(motions: Readonly<Record<Motion, boolean>>): MetricShape[] {
+  if (!motions.plg && !motions.slg) throw new Error("A setup sells at least one way (motions all false)");
+  return ALL_METRIC_SHAPES.filter((s) => (s.scope === "link" ? motions.plg && motions.slg : motions[s.scope]));
+}
 
 /** LTV counts at most this many months of margin: "most practitioners cap at three to five years; we take the low end". */
 export const LTV_CAP_MONTHS = 36;
 
-export const DERIVED_SHAPES: readonly DerivedShape[] = [
+export const DERIVED_SHAPES: readonly DerivedShape<PlgDerivedId>[] = [
   {
     id: "rev.ltv",
     stage: "revenue",
@@ -418,6 +752,37 @@ export const DERIVED_SHAPES: readonly DerivedShape[] = [
   },
 ];
 
+/**
+ * The three sales-assisted computed figures (§18.4.7): from the NEW contracts'
+ * ACV — the CAC is spent on them — and the motion's own margin (Q4). Lifetime
+ * capped at LTV_CAP_MONTHS like self-serve (Q6).
+ */
+export const SLG_DERIVED_SHAPES: readonly DerivedShape<SlgDerivedId>[] = [
+  {
+    id: "slg.rev.ltv",
+    stage: "revenue",
+    inputs: ["slg.rev.acv", "slg.rev.gross-margin", "slg.ret.renewal"],
+    glossary: "ltv",
+    tourQuestionId: "rev-2",
+  },
+  {
+    id: "slg.rev.cac-payback",
+    stage: "revenue",
+    inputs: ["slg.acq.cac", "slg.rev.acv", "slg.rev.gross-margin"],
+    glossary: "cac-payback",
+    benchmark: { term: "cac-payback", lo: 12, hi: 24, direction: "lower" },
+  },
+  {
+    id: "slg.rev.ltv-cac",
+    stage: "revenue",
+    inputs: ["slg.acq.cac", "slg.rev.acv", "slg.rev.gross-margin", "slg.ret.renewal"],
+    glossary: "ltv",
+    benchmark: { term: "ltv", lo: 3, hi: 3, direction: "higher" },
+  },
+];
+
+export const ALL_DERIVED_SHAPES: readonly DerivedShape[] = [...DERIVED_SHAPES, ...SLG_DERIVED_SHAPES];
+
 /** The rates that can be named as the bottleneck (§6.6), churn the only lower-is-better one. */
 export const CANDIDATE_IDS: readonly CandidateId[] = [
   "acq.signup-rate",
@@ -434,7 +799,7 @@ export const CANDIDATE_IDS: readonly CandidateId[] = [
  * number the engine already collects; see `lib/engine/scenario.ts` for how
  * each one moves the others.
  */
-export const LEVER_IDS: readonly LeverId[] = [
+export const LEVER_IDS: readonly PlgLeverId[] = [
   "acq.signup-rate",
   "ref.referred-share",
   "act.rate",
@@ -443,6 +808,24 @@ export const LEVER_IDS: readonly LeverId[] = [
   "rev.contraction",
   "rev.expansion",
   "rev.arpa",
+];
+
+/**
+ * The sales-assisted levers (§18.5.5), then the link (C25 Q7) — its target is
+ * a whole number of opportunities per quarter, never a percent.
+ */
+export const SLG_LEVER_IDS: readonly SlgLeverId[] = ["slg.acq.lead-to-opp", "slg.rev.win-rate", "slg.ret.renewal", "slg.rev.acv", "link.pql-handoff"];
+
+/** Every lever a file may carry a what-if target for. */
+export const ALL_LEVER_IDS: readonly LeverId[] = [...LEVER_IDS, ...SLG_LEVER_IDS];
+
+/** The five sales-assisted ★ (§18.5.2). The link is none of them, even with a team target (C25 Q7). */
+export const SLG_CANDIDATE_IDS: readonly SlgCandidateId[] = [
+  "slg.acq.lead-to-opp",
+  "slg.act.go-live",
+  "slg.ret.renewal",
+  "slg.ref.referred-share",
+  "slg.rev.win-rate",
 ];
 
 /** Never priced in money in v1: pricing them would need a retention and a loop model (§6.6). */
@@ -456,12 +839,20 @@ export const PELOTON_METRICS = ["act.rate", "ret.d30", "rev.paid-conversion"] as
  * whether THIS number is measured. Eight, derived from the shapes so the
  * list cannot drift from them; adding one is a decision (a test pins it).
  */
-export const ENGINE_BRIDGES: readonly { questionId: string; metric: MetricId | DerivedId }[] = [
-  ...METRIC_SHAPES,
-  ...DERIVED_SHAPES,
-]
-  .filter((s): s is (MetricShape | DerivedShape) & { tourQuestionId: string } => s.tourQuestionId !== undefined)
-  .map((s) => ({ questionId: s.tourQuestionId, metric: s.id }));
+export type EngineBridge = { questionId: string; metric: MetricId | DerivedId };
+
+function bridgesOf(shapes: readonly (MetricShape | DerivedShape)[]): EngineBridge[] {
+  return shapes.flatMap((s) => (s.tourQuestionId === undefined ? [] : [{ questionId: s.tourQuestionId, metric: s.id }]));
+}
+
+export const ENGINE_BRIDGES: readonly EngineBridge[] = bridgesOf([...METRIC_SHAPES, ...DERIVED_SHAPES]);
+
+/**
+ * The sales-assisted bridges (§18.4.9): six, by the same literal rule. No
+ * `acq-1` (no « main channel » number) nor `ref-3` (no viral coefficient).
+ * In the hybrid, a question bridged in both motions gives one line per motion.
+ */
+export const SLG_ENGINE_BRIDGES: readonly EngineBridge[] = bridgesOf([...SLG_METRIC_SHAPES, ...SLG_DERIVED_SHAPES]);
 
 // --- Rules shared by several modules, fixed here so no two can disagree ------
 
@@ -493,19 +884,20 @@ export const TEXT_LIMITS = {
   repairComment: 200,
 } as const;
 
+/** Any number's shape, whichever catalogue it belongs to. */
 export function shapeOf(id: MetricId): MetricShape {
-  const shape = METRIC_SHAPES.find((s) => s.id === id);
+  const shape = ALL_METRIC_SHAPES.find((s) => s.id === id);
   if (!shape) throw new Error(`Unknown engine metric: ${id}`);
   return shape;
 }
 
 export function derivedShapeOf(id: DerivedId): DerivedShape {
-  const shape = DERIVED_SHAPES.find((s) => s.id === id);
+  const shape = ALL_DERIVED_SHAPES.find((s) => s.id === id);
   if (!shape) throw new Error(`Unknown engine derived metric: ${id}`);
   return shape;
 }
 
-/** The metrics of a stage, ★ first — the order of a stage drawer (§7 E3). Three per stage, five for Revenue since 2026-09-26. */
-export function metricsOfStage(stage: Pillar): MetricShape[] {
+/** The self-serve metrics of a stage, ★ first — the order of a stage drawer (§7 E3). Three per stage, five for Revenue since 2026-09-26. */
+export function metricsOfStage(stage: Pillar): MetricShape<PlgMetricId>[] {
   return METRIC_SHAPES.filter((s) => s.stage === stage).sort((a, b) => Number(b.primary) - Number(a.primary));
 }

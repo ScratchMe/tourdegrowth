@@ -80,7 +80,11 @@ export function ImportPanel({
 
       {parsed?.refusal ? (
         <p className={styles.error} role="alert" data-testid="engine-import-refused">
-          {parsed.refusal === "unknown-version" ? strings.io.unknownVersion : strings.io.notEngine}
+          {parsed.refusal === "unknown-version"
+            ? strings.io.unknownVersion
+            : parsed.refusal === "unsupported-setup"
+              ? strings.io.unsupportedSetup
+              : strings.io.notEngine}
         </p>
       ) : null}
 
@@ -94,6 +98,12 @@ export function ImportPanel({
               N: cov.denominator,
             })}
           </p>
+          {/* A v1 file was migrated on the way in (§18.3.2): said once, so nobody wonders what « updated » did to their numbers. */}
+          {parsed?.migratedFrom === 1 ? (
+            <p className={styles.previewLine} data-testid="engine-import-migrated">
+              {strings.io.migrated}
+            </p>
+          ) : null}
           {parsed?.errors.length ? (
             <div className={styles.warnings}>
               <p>{fill(strings.io.warnings, { n: parsed.errors.length })}</p>

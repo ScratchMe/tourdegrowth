@@ -27,7 +27,7 @@ test.beforeEach(async ({ context }) => {
  * third on the first list it reaches, the month.
  */
 
-const STORAGE_KEY = "tdg.engine.v1";
+const STORAGE_KEY = "tdg.engine.v2";
 
 async function openEngine(page: Page, locale: "en" | "fr"): Promise<void> {
   await page.goto(`/${locale}/aarrr-funnel-template`);
@@ -98,7 +98,7 @@ test("« 26,000 » typed in English in the slide builder is stored as 26 000, no
   await page.clock.setFixedTime(new Date(2026, 8, 24, 12));
   await openEngine(page, "en");
   await page.evaluate(
-    ({ key, state }) => window.localStorage.setItem(key, JSON.stringify({ schemaVersion: 1, state })),
+    ({ key, state }) => window.localStorage.setItem(key, JSON.stringify({ schemaVersion: 2, state })),
     { key: STORAGE_KEY, state: exampleState() },
   );
   await page.reload();
@@ -135,7 +135,7 @@ test("one focus ring, the system's, on every kind of control the engine draws", 
 
   // The slide builder: a checkbox, and its own text box.
   await page.evaluate(
-    ({ key, state }) => window.localStorage.setItem(key, JSON.stringify({ schemaVersion: 1, state })),
+    ({ key, state }) => window.localStorage.setItem(key, JSON.stringify({ schemaVersion: 2, state })),
     { key: STORAGE_KEY, state: exampleState() },
   );
   await page.reload();

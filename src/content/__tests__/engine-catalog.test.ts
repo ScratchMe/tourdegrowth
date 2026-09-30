@@ -5,6 +5,8 @@ import { GLOSSARY } from "../glossary";
 import { GLOSSARY_DEEP } from "../glossary-deep";
 import { GLOSSARY_TERMS, type GlossaryTermId } from "../glossary-terms";
 import {
+  ALL_DERIVED_SHAPES,
+  ALL_METRIC_SHAPES,
   DERIVED_SHAPES,
   LTV_CAP_MONTHS,
   METRIC_SHAPES,
@@ -84,9 +86,10 @@ function restates(text: string, benchmark: Benchmark, locale: Locale): boolean {
 }
 
 describe("references never drift from the approved glossary", () => {
+  // Every catalogue, sales-assisted included (A7.3.c S0): the NRR's 110-130 % must be the approved `nrr-grr`'s own words.
   const withBenchmark = [
-    ...METRIC_SHAPES.filter((s) => s.benchmark).map((s) => [s.id, s.benchmark!] as const),
-    ...DERIVED_SHAPES.filter((s) => s.benchmark).map((s) => [s.id, s.benchmark!] as const),
+    ...ALL_METRIC_SHAPES.filter((s) => s.benchmark).map((s) => [s.id, s.benchmark!] as const),
+    ...ALL_DERIVED_SHAPES.filter((s) => s.benchmark).map((s) => [s.id, s.benchmark!] as const),
   ];
 
   it("has references to check — otherwise the next test proves nothing", () => {

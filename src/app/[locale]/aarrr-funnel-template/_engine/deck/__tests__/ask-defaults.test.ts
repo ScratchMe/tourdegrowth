@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CANDIDATE_IDS } from "@/lib/engine/catalog-shape";
 import type { CandidateId, Diagnosis, EngineAsk, EngineDerived, EngineState, MetricEntry, MetricId } from "@/lib/engine/types";
+import { SETUP_V2_DEFAULTS } from "@/lib/engine/types";
 import { askDefaults, horizonOptions, isPristineAsk, missingByRepairCost, suggestedSuccess } from "../ask-defaults";
 
 /**
@@ -23,11 +24,11 @@ function exampleState(ask: EngineAsk = EMPTY_ASK): EngineState {
     "rev.gross-margin": entry({ status: "missing", missing: { cause: "no-access", repair: "meeting", ownerRole: "finance" } }),
   };
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     id: "fixture",
     createdAt: AT,
     updatedAt: AT,
-    setup: { profile: "selfserve", currency: "EUR", activationWindowDays: 7, paidWindowDays: 30 },
+    setup: { ...SETUP_V2_DEFAULTS, currency: "EUR", activationWindowDays: 7, paidWindowDays: 30 },
     snapshots: [{ id: "s1", referenceMonth: "2026-08", cohortMonth: "2026-07", createdAt: AT, metrics, targets: {} }],
     tourLink: null,
     deck: { include: {}, showCompany: false, showSiteCredit: true, ask },

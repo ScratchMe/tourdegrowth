@@ -7,9 +7,12 @@ import {
   defaultReferenceMonth,
   isImmature,
   isYearMonth,
+  defaultSpanEnd,
   matureCohortMonth,
+  monthsBefore,
   nextMonth,
   periodOf,
+  periodRangeOf,
   previousMonth,
   windowDaysOf,
 } from "../cohort";
@@ -101,5 +104,54 @@ describe("defaults", () => {
     expect(periodOf(shapeOf("act.rate"), { ...snapshot.metrics["act.rate"]!, cohortMonth: "2026-06" }, snapshot)).toBe("2026-06");
     expect(periodOf(shapeOf("rev.arpa"), undefined, snapshot)).toBe("2026-08");
     expect(periodOf(shapeOf("act.event"), undefined, snapshot)).toBeNull();
+  });
+});
+
+describe("three rolling months for sales-assisted (engine spec §18.2 S4, C25 Q2 — A7.3.c S0)", () => {
+  // Non-vacuity, measured on 2026-09-30: every range read as one month fails the three range tests;
+  // ending a cohort at the snapshot's cohort month instead of its window's mature one fails « the
+  // ranges of §18.9 »; reading the qualification window as the go-live one fails « the windows »,
+  // « a cohort ends » and « the ranges ».
+  const today = new Date(2026, 8, 24);
+  const state = exampleState();
+  const snapshot = state.snapshots[0]!;
+  const setup = state.setup;
+  const at = "2026-09-30T10:00:00.000Z";
+
+  it("the windows are the setup's: qualification for lead → opportunity, go-live for the go-live", () => {
+    expect(windowDaysOf(shapeOf("slg.acq.lead-to-opp"), setup)).toBe(30);
+    expect(windowDaysOf(shapeOf("slg.act.go-live"), setup)).toBe(90);
+    expect(windowDaysOf(shapeOf("slg.acq.lead-to-opp"), { ...setup, qualificationWindowDays: 60 })).toBe(60);
+  });
+
+  it("a cohort ends at the month mature for its window: 30 days → July, 90 days → May, on 24/09/2026", () => {
+    expect(defaultSpanEnd(shapeOf("slg.acq.lead-to-opp"), setup, today)).toBe("2026-07");
+    expect(defaultSpanEnd(shapeOf("slg.act.go-live"), setup, today)).toBe("2026-05");
+    expect(defaultSpanEnd(shapeOf("slg.acq.lead-to-opp"), { ...setup, qualificationWindowDays: 60 }, today)).toBe("2026-06");
+  });
+
+  it("the ranges of §18.9: flows June to August, leads May to July, new customers March to May", () => {
+    expect(periodRangeOf(shapeOf("slg.rev.win-rate"), undefined, snapshot, setup, today)).toEqual({ from: "2026-06", to: "2026-08" });
+    expect(periodRangeOf(shapeOf("slg.acq.lead-to-opp"), undefined, snapshot, setup, today)).toEqual({ from: "2026-05", to: "2026-07" });
+    expect(periodRangeOf(shapeOf("slg.act.go-live"), undefined, snapshot, setup, today)).toEqual({ from: "2026-03", to: "2026-05" });
+    // The link reads over the same three months as the opportunities it divides.
+    expect(periodRangeOf(shapeOf("link.pql-handoff"), undefined, snapshot, setup, today)).toEqual({ from: "2026-06", to: "2026-08" });
+  });
+
+  it("an entry keeps the month it was measured on: the range ends there", () => {
+    const entry = { status: "todo" as const, updatedAt: at, cohortMonth: "2026-06" };
+    expect(periodRangeOf(shapeOf("slg.acq.lead-to-opp"), entry, snapshot, setup, today)).toEqual({ from: "2026-04", to: "2026-06" });
+  });
+
+  it("the NRR spans twelve months to the flows' month; a definition has no period; self-serve is one month", () => {
+    expect(periodRangeOf(shapeOf("slg.ret.nrr"), undefined, snapshot, setup, today)).toEqual({ from: "2025-09", to: "2026-08" });
+    expect(periodRangeOf(shapeOf("slg.act.live-event"), undefined, snapshot, setup, today)).toBeNull();
+    expect(periodRangeOf(shapeOf("act.rate"), undefined, snapshot, setup, today)).toEqual({ from: "2026-07", to: "2026-07" });
+    expect(periodRangeOf(shapeOf("rev.arpa"), undefined, snapshot, setup, today)).toEqual({ from: "2026-08", to: "2026-08" });
+  });
+
+  it("monthsBefore crosses the year", () => {
+    expect(monthsBefore("2026-02", 2)).toBe("2025-12");
+    expect(monthsBefore("2026-02", 0)).toBe("2026-02");
   });
 });

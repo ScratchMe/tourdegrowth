@@ -71,15 +71,18 @@ export const EXAMPLE_TARGETS: Partial<Record<MetricId, number>> = { "act.rate": 
 /** A fresh copy each call: callers may change it (the example's own slide choices live in memory only). */
 export function exampleEngine(words: ExampleWords): EngineState {
   return structuredClone({
-    schemaVersion: 1,
+    schemaVersion: 2,
     id: "00000000-0000-4000-8000-000000000060",
     createdAt: "2026-09-24T08:00:00.000Z",
     updatedAt: "2026-09-24T09:00:00.000Z",
     setup: {
-      profile: "selfserve",
+      type: "b2b-saas",
+      motions: { plg: true, slg: false },
       currency: "EUR",
       activationWindowDays: 7,
       paidWindowDays: 30,
+      qualificationWindowDays: 30,
+      goLiveWindowDays: 90,
       ...(words.company ? { companyLabel: words.company } : {}),
     },
     snapshots: [

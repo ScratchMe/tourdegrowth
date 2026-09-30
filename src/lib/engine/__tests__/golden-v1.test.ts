@@ -7,6 +7,7 @@ import { resumePosition } from "@/app/[locale]/aarrr-funnel-template/_engine/ste
 import type { StoredResult } from "@/lib/quiz/storage";
 import { buildDeck, deckMarkdown } from "../deck";
 import { deriveEngine } from "../derive";
+import { migrateToV2 } from "../migrate";
 import { buildScenario } from "../scenario";
 import type { DeckModel, EngineDerived, EngineState, MetricEntry } from "../types";
 import { currentSnapshot } from "../values";
@@ -128,12 +129,14 @@ function outputsOf(state: EngineState, tour: StoredResult | null) {
 }
 
 /**
- * The state a v1 file gives today. Identity until the migration exists; from
- * S0 on, the v1 state goes through `migrateToV2`, as a v1 file or a v1 store
- * does when a v2 build opens it.
+ * The state a v1 file gives today: the v1 state goes through `migrateToV2`,
+ * as a v1 file (`io.ts`) or a v1 store (`storage.ts`) does when a v2 build
+ * opens it. Identity until S0 — when the golden was written.
  */
 function openV1(v1: EngineState): EngineState {
-  return structuredClone(v1);
+  const migrated = migrateToV2(v1);
+  if (!migrated || migrated.from !== 1) throw new Error("A golden input is not a v1 engine");
+  return migrated.state;
 }
 
 describe("golden v1 — a self-serve engine reads the same after the change", () => {

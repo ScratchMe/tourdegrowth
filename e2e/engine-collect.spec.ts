@@ -33,7 +33,7 @@ test.beforeEach(async ({ context }) => {
  * (`lib/engine/__tests__/fixtures.ts`), so a number checked here is the
  * number checked everywhere. The clock is pinned to the example's "today".
  */
-const STORAGE_KEY = "tdg.engine.v1";
+const STORAGE_KEY = "tdg.engine.v2";
 
 /** The example's "today" (24 September 2026), at noon so no time zone moves the day. */
 const EXAMPLE_CLOCK = new Date(2026, 8, 24, 12);
@@ -47,7 +47,7 @@ async function openExample(page: Page, locale: "en" | "fr" = "en", at: Date = EX
   await page.clock.setFixedTime(at);
   await openEngine(page, locale);
   await page.evaluate(
-    ({ key, state }) => window.localStorage.setItem(key, JSON.stringify({ schemaVersion: 1, state })),
+    ({ key, state }) => window.localStorage.setItem(key, JSON.stringify({ schemaVersion: 2, state })),
     { key: STORAGE_KEY, state: exampleState() },
   );
   await page.reload();

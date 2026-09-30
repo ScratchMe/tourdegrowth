@@ -61,7 +61,7 @@ export function collectPlan(snapshot: Snapshot, now: Date): CollectPlan {
     .filter((effort) => self.has(effort))
     .map((effort) => ({ effort, ids: self.get(effort)! }));
   // Stale first, then by how much is waiting; the role order breaks ties so the list never reshuffles between renders.
-  const roles = Object.freeze(["finance", "data", "product", "marketing", "revops", "support"] satisfies RoleId[]);
+  const roles = Object.freeze(["finance", "data", "product", "marketing", "revops", "support", "sales", "customer-success"] satisfies RoleId[]);
   const askGroups = [...ask.values()].sort(
     (a, b) =>
       Number(b.stale.length > 0) - Number(a.stale.length > 0) ||

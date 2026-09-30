@@ -6331,3 +6331,51 @@ Antoine a tranché C25 dans sa propre session, avec le prompt C25 : les seize qu
 **Aucune question neuve** pour la section C. Chiffrage revu : ≈ 12 jours-agent avec A7.3.e, et le même chemin critique de ~6 jours.
 
 **`main` a bougé pendant la séance** : A11, C28, C29 (#227, #229), puis C26 et C27 (#228, #230). Ces PR touchaient `CHANTIERS.md`, `CLAUDE.md` et la fin de ce journal. `main` a été fusionné avant d'y écrire, en gardant les deux côtés. `CLAUDE.md` reste sous 40 000 caractères.
+
+## A7.3.c, S0 : le contrat v2, la migration et le golden v1 (2026-09-30)
+
+Première étape du code du B2B assisté et de l'hybride (`ENGINE.md` §18.11), juste après la validation de C25. Elle est construite dans la session d'Antoine, sur sa branche de travail, qui tient lieu de branche d'intégration. Chaque étape y est un commit, et une seule PR brouillon vers `main` porte le tout. Le drapeau reste fermé.
+
+**Le golden v1, avant toute ligne** (`37e9dfe`). Sept états v1 (l'exemple §6.0 avec et sans cibles, avec « Et si » et un Tour relié, l'état de stockage complet, vide, à moitié, en conflit) et ce que le code v1 en tirait, en français et en anglais :
+- le tableau dérivé : couverture, peloton, diagnostic, unit economics, contrôles, constats, miroir ;
+- le deck : titres, lignes et notes de chaque slide, contrôles, pastille ;
+- le texte exporté, le scénario « Et si », les onglets, la reprise et la collecte.
+
+Écrits une fois par `ENGINE_GOLDEN_V1_WRITE=1`, jamais régénérés : seule la projection du test peut suivre un champ qui bouge. Depuis S0, chaque état passe par `migrateToV2` avant d'être comparé.
+
+**Le contrat v2** :
+- `setup.type` + `setup.motions`, et les deux fenêtres de l'assisté ;
+- les ids `slg.*` (15, marge comprise depuis Q4) et `link.pql-handoff` ;
+- `schemaVersion` 2 et la clé `tdg.engine.v2` ;
+- la base d'estimation `company-wide` (Q4) ;
+- deux rôles et deux outils neufs, les trois comptes partagés de l'assisté, les leviers de l'assisté puis la liaison (Q7), et les slides `total` et `slg:*`.
+
+`METRIC_SHAPES` reste le catalogue du libre-service, que chaque module lit comme avant. L'assisté et la liaison vivent dans des listes à part, réunies par `shapesOf(motions)` et `shapeOf`. C'est ce qui garde le libre-service identique au caractère près, sans toucher un seul module de calcul.
+
+**Le fichier, le stockage, la validation** :
+- un fichier v1 est migré puis validé, et l'écran d'import le dit ;
+- un réglage sans motion ni type connu est refusé (`unsupported-setup`) ;
+- le stockage lit v2, sinon migre v1 à la lecture, écrit v2 à la première sauvegarde et garde v1 jusqu'à un export postérieur à tout ce que v1 contient ;
+- « au-dessus de 100 » n'est plus refusé que pour un chiffre borné : une NRR à 106 % s'enregistre ;
+- `company-wide` n'est accepté que sur les deux marges, et le levier de la liaison est un entier.
+
+**Deux écarts à la spécification, écrits dans `ENGINE.md`** :
+- la NRR de l'assisté porte `span: 12`, puisqu'elle se lit sur douze mois ;
+- la règle de retrait du v1 se passe de champ ajouté au stockage : un build v1 ne peut plus exporter, donc « un export postérieur à tout ce que v1 contient » est bien « le premier export qui suit la migration », y compris quand l'export est le tout premier geste après l'ouverture.
+
+**Ce que S0 laisse aux étapes suivantes**, pour que le golden reste vert, est listé en `ENGINE.md` §18.11 : les candidats et les types dérivés en S1, la prose du catalogue en S2, le réglage et le tableau en S3, les slides en S4.
+
+**Non-vacuité, mesurée par sabotage**, le détail en tête de chaque test :
+- une migration qui oublie la fenêtre d'activation fait tomber les sept états du golden ;
+- une migration qui coche l'assisté ne fait encore tomber que les tests de la migration et du fichier : aucun module ne lit les motions avant S1 ;
+- stockage : retirer v1 à chaque sauvegarde, ne jamais le retirer, lire v1 comme vide, chaque sabotage fait tomber les tests qui le visent ;
+- validation : garder « > 100 » partout, lever la règle de `company-wide`, lever l'entier de la liaison, chaque sabotage fait tomber exactement un test ;
+- catalogue et trois mois : même méthode, chaque sabotage fait tomber les tests qui le visent.
+
+**Les e2e passent au stockage v2** : neuf specs semaient encore `tdg.engine.v1`. `engine-migration.spec.ts`, prévue en S5, est écrite dès S0 avec le chemin qu'elle vérifie :
+- un appareil v1 rouvre le même tableau ;
+- v2 est écrit à la première sauvegarde, v1 part au premier export ;
+- un fichier v1 importé affiche le message, dans les deux langues ;
+- un fichier sans motion est refusé.
+
+Un piège en l'écrivant : un fichier passé à `setInputFiles` par un chemin sous `testInfo.outputPath` n'arrivait jamais à la page, sans erreur. Le même fichier passé en mémoire (`buffer`) fonctionne. La cause n'est pas établie ; le nom du dossier de sortie contenait un tiret long.

@@ -109,6 +109,70 @@ describe("validateEngine — the what-if levers and the MRR base (2026-09-26)", 
   });
 });
 
+describe("validateEngine — the v2 setup and the sales-assisted numbers (engine spec §18.3.3, A7.3.c S0)", () => {
+  // Non-vacuity, measured on 2026-09-30: keeping « > 100 refused » for every percent fails « a 106 % NRR »
+  // (three readings) and nothing else; dropping the company-wide rule fails « the company-wide margin »
+  // only; dropping the whole-number rule of the link's lever fails « the link's lever » only.
+  const slgEntry = (value: MetricEntry["value"]): MetricEntry => ({ status: "measured", value, source: { kind: "tool", tool: "hubspot" }, updatedAt: at });
+
+  it("the setup: a known type, two booleans with at least one ticked, the two sales-assisted windows", () => {
+    const s = fullState();
+    expect(validateEngine({ ...s, setup: { ...s.setup, motions: { plg: false, slg: false } } })).toEqual(["setup.motions: none ticked"]);
+    expect(validateEngine({ ...s, setup: { ...s.setup, motions: { plg: true } as never } })).toEqual(["setup.motions: not two booleans (plg, slg)"]);
+    expect(validateEngine({ ...s, setup: { ...s.setup, type: "marketplace" as never } })).toEqual(["setup.type: unknown type"]);
+    expect(validateEngine({ ...s, setup: { ...s.setup, qualificationWindowDays: 45 as never, goLiveWindowDays: 7 as never } })).toEqual([
+      "setup.qualificationWindowDays: not 30, 60 or 90",
+      "setup.goLiveWindowDays: not 30, 60 or 90",
+    ]);
+    // Sales-assisted alone, and the hybrid, are both valid setups.
+    for (const motions of [{ plg: false, slg: true }, { plg: true, slg: true }]) expect(validateEngine({ ...s, setup: { ...s.setup, motions } })).toEqual([]);
+  });
+
+  it("the sales-assisted numbers and the link are accepted whatever is ticked — unticking keeps them (§18.1.2)", () => {
+    const s = fullState();
+    s.snapshots[0]!.metrics["slg.rev.win-rate"] = slgEntry({ kind: "ratio", numerator: 18, denominator: 75 });
+    s.snapshots[0]!.metrics["link.pql-handoff"] = slgEntry({ kind: "ratio", numerator: 31, denominator: 130 });
+    s.snapshots[0]!.targets["slg.rev.win-rate"] = 32;
+    s.deck.ask.measureFirst = ["slg.act.go-live"];
+    expect(s.setup.motions).toEqual({ plg: true, slg: false });
+    expect(validateEngine(s)).toEqual([]);
+  });
+
+  it("a 106 % NRR is accepted as a rate, an estimate and counts; a 106 % renewal rate is refused (bounded)", () => {
+    const nrr = shapeOf("slg.ret.nrr");
+    expect(validateEntry(slgEntry({ kind: "rate", percent: 106 }), nrr)).toEqual([]);
+    expect(validateEntry(entry({ status: "estimated", estimate: { low: 104, high: 108, basis: "old-number" } }), nrr)).toEqual([]);
+    expect(validateEntry(slgEntry({ kind: "ratio", numerator: 212_000, denominator: 200_000 }), nrr)).toEqual([]);
+    const renewal = shapeOf("slg.ret.renewal");
+    expect(validateEntry(slgEntry({ kind: "rate", percent: 106 }), renewal)).toEqual(["slg.ret.renewal.value.percent: not within 0-100"]);
+    expect(validateEntry(entry({ status: "estimated", estimate: { low: 90, high: 106, basis: "old-number" } }), renewal)).toEqual(["slg.ret.renewal.estimate: above 100"]);
+    expect(validateEntry(slgEntry({ kind: "ratio", numerator: 26, denominator: 25 }), renewal)).toEqual(["slg.ret.renewal.value: numerator > denominator"]);
+  });
+
+  it("the company-wide margin stands in for a gross margin, of either motion, and for nothing else (C25 Q4)", () => {
+    const companyWide = entry({ status: "estimated", estimate: { low: 75, high: 75, basis: "company-wide" } });
+    expect(validateEntry(companyWide, shapeOf("slg.rev.gross-margin"))).toEqual([]);
+    expect(validateEntry(companyWide, shapeOf("rev.gross-margin"))).toEqual([]);
+    expect(validateEntry(companyWide, shapeOf("slg.rev.win-rate"))).toEqual(["slg.rev.win-rate.estimate.basis: company-wide is for a gross margin only"]);
+  });
+
+  it("the link's lever is a whole number of opportunities per quarter, and may pass 100 (C25 Q7)", () => {
+    const s = fullState();
+    s.whatIf = { "link.pql-handoff": 140, "slg.rev.win-rate": 32, "slg.rev.acv": 26_000 };
+    expect(validateEngine(s)).toEqual([]);
+    s.whatIf = { "link.pql-handoff": 40.5 };
+    expect(validateEngine(s)).toEqual(["whatIf.link.pql-handoff: not a whole number"]);
+  });
+
+  it("the deck accepts the hybrid's « total », the sales-assisted slides and their what-ifs", () => {
+    const s = fullState();
+    s.deck.include = { ...s.deck.include, total: true, "slg:peloton": true, "slg:leak": false, "slg:scenario": true, "whatif:slg.rev.win-rate": true, "whatif:link.pql-handoff": true };
+    expect(validateEngine(s)).toEqual([]);
+    s.deck.include = { ...s.deck.include, ["slg:unknown" as never]: true };
+    expect(validateEngine(s)).toEqual(["deck.include.slg:unknown: unknown slide"]);
+  });
+});
+
 describe("validateEntry — a status without the fields that make it true is refused", () => {
   it("a bounded ratio can't have more on top than below (the one blocking check, D11)", () => {
     const e = entry({ status: "measured", value: { kind: "ratio", numerator: 120, denominator: 100 }, source: { kind: "tool", tool: "ga4" } });

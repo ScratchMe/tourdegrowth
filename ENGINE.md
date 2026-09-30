@@ -2906,8 +2906,8 @@ export interface MetricShape {
   // … champs existants …
   /** Où le chiffre vit : "link" = hybride seulement. Aucun chiffre commun depuis Q4 (une marge par motion). */
   scope: "plg" | "slg" | "link";
-  /** Mois couverts : 1 (PLG), 3 (tout l'assisté, S4). */
-  span: 1 | 3;
+  /** Mois couverts : 1 (PLG), 3 (tout l'assisté, S4), 12 (la NRR sur douze mois, seule exception, codée en S0). */
+  span: 1 | 3 | 12;
   window?: "activation" | "paid" | "qualification" | "go-live" | 30;
   /** Hors couverture, jamais un constat, jamais candidat (la liaison). */
   optional?: true;
@@ -3146,6 +3146,13 @@ Un fichier v2 ouvert par un build v1 est déjà refusé en `unknown-version`
   ne détruit jamais la seule copie »). `.v1` n'est retiré qu'au **premier
   export `.json` réussi** qui suit la migration (`lastExportedAt` postérieur à
   la migration). `clearEngine()` efface les deux clés.
+  *Codé en S0 (2026-09-30), sans champ ajouté au stockage* : `.v1` part à la
+  première sauvegarde dont `lastExportedAt` est postérieur **à la dernière
+  écriture et au dernier export de la copie v1**. Un build v1 ne pouvant plus
+  exporter, c'est le même moment que « le premier export qui suit la
+  migration », y compris quand l'export est le tout premier geste après
+  l'ouverture. Un v1 illisible sans v2 est `unreadable`, et rien ne s'écrit
+  avant « Tout effacer ».
 - Portée réelle : le moteur est fermé, donc seul Antoine a un `.v1` sur un
   appareil. La migration protège surtout ses fichiers exportés. Un onglet
   resté sur un ancien build écrirait encore dans `.v1` après la migration,
@@ -4495,7 +4502,8 @@ part sous `lib/engine`.
   `slg.rev.win-rate` et une note SLG. On vérifie qu'ils sont dans le `.json`
   et le texte copié, qu'aucune requête ne porte un canari, et qu'il n'y a
   aucune requête non-`GET` de la session, **réglage des motions compris**.
-- **`engine-migration.spec.ts`**
+- **`engine-migration.spec.ts`** — *écrite dès S0 (2026-09-30), avec le
+  chemin qu'elle vérifie*
   - Semer `tdg.engine.v1` (l'exemple §6.0), ouvrir : même titre, même
     couverture « 11 sur 17 », mêmes slides. `tdg.engine.v2` est écrit au
     premier enregistrement, et `tdg.engine.v1` est présent jusqu'à l'export
@@ -4548,6 +4556,28 @@ Le lot A7.3.c. Branche d'intégration `feat/engine-slg` : chaque PR vise
 cette branche (la CI tourne quelle que soit la base), et **un seul merge sur
 `main`**, drapeau fermé, puis la vérification `git show --stat`
 (convention 1). A7 dit « une PR par item » : c'est cette PR d'intégration.
+*En pratique (2026-09-30)* : le lot se construit dans la session d'Antoine,
+sur sa branche de travail, qui tient lieu de branche d'intégration. Chaque
+étape y est un commit (S0, S1…), et **une seule PR brouillon** vers `main`
+porte le tout jusqu'au merge.
+
+**S0 est livré le 2026-09-30** (le golden v1 d'abord, `37e9dfe`, puis le
+contrat). Ce que S0 a laissé aux étapes suivantes, pour que le libre-service
+ne bouge pas d'un caractère en attendant (golden vert) :
+- **S1** : `CandidateId` reste celui du libre-service (`SlgCandidateId` est
+  déclaré à côté) ; les types dérivés neufs (`RelayColumn`, `Relays`,
+  `SlgUnitEconomics`, `MotionDerived`, `TotalView`) et les ids de contrôles
+  et de constats neufs arrivent avec leur calcul ; `UnitInputId` aussi.
+- **S2** : `ENGINE_CATALOG` et `ENGINE_DERIVED_CATALOG` restent typés sur le
+  libre-service jusqu'à la prose de l'assisté ; le test des libellés partagés
+  ne couvre les trois comptes neufs qu'à ce moment-là.
+- **S3** : l'écran de réglage crée un moteur libre-service
+  (`SETUP_V2_DEFAULTS`), et le tableau dit « libre-service » quoi qu'il arrive.
+- **S4** : `DeckView` refuse `total` et `slg:*`, que `deck.ts` ne produit pas
+  encore.
+- `METRIC_SHAPES` reste le catalogue du libre-service, et chaque module le
+  lit comme avant ; un module qui apprend les motions lit
+  `shapesOf(motions)`.
 
 | PR | Contenu | Fichiers possédés | Dépend de | Jours-agent |
 |---|---|---|---|---|

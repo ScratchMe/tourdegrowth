@@ -22,7 +22,7 @@ test.beforeEach(async ({ context }) => {
  * is here — that a slider moves the screen, that the screen keeps what was
  * moved, and that it holds on a phone.
  */
-const STORAGE_KEY = "tdg.engine.v1";
+const STORAGE_KEY = "tdg.engine.v2";
 const EXAMPLE_CLOCK = new Date(2026, 8, 24, 12);
 const W = ENGINE_COPY.scenario;
 
@@ -30,7 +30,7 @@ async function openWith(page: Page, state: EngineState, locale: "en" | "fr" = "e
   await page.clock.setFixedTime(EXAMPLE_CLOCK);
   await page.goto(`/${locale}/aarrr-funnel-template`);
   await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
-  await page.evaluate(({ key, value }) => window.localStorage.setItem(key, JSON.stringify({ schemaVersion: 1, state: value })), {
+  await page.evaluate(({ key, value }) => window.localStorage.setItem(key, JSON.stringify({ schemaVersion: 2, state: value })), {
     key: STORAGE_KEY,
     value: state,
   });

@@ -1,6 +1,6 @@
 import { CANDIDATE_IDS, METRIC_SHAPES, TEXT_LIMITS } from "@/lib/engine/catalog-shape";
 import { impactTarget } from "@/lib/engine/diagnose";
-import type { EngineAsk, EngineDerived, EngineState, MetricId, RepairScale, YearMonth } from "@/lib/engine/types";
+import type { EngineAsk, EngineDerived, EngineState, MetricId, PlgMetricId, RepairScale, YearMonth } from "@/lib/engine/types";
 import { currentSnapshot } from "@/lib/engine/values";
 
 /**
@@ -20,7 +20,7 @@ const REPAIR_ORDER: readonly RepairScale[] = ["meeting", "afternoon", "sprint", 
 export function missingByRepairCost(state: EngineState): MetricId[] {
   const entries = currentSnapshot(state).metrics;
   return METRIC_SHAPES.map((shape, index) => ({ id: shape.id, index, repair: entries[shape.id]?.missing?.repair }))
-    .filter((m): m is { id: MetricId; index: number; repair: RepairScale } =>
+    .filter((m): m is { id: PlgMetricId; index: number; repair: RepairScale } =>
       entries[m.id]?.status === "missing" && m.repair !== undefined,
     )
     .sort((a, b) => REPAIR_ORDER.indexOf(a.repair) - REPAIR_ORDER.indexOf(b.repair) || a.index - b.index)

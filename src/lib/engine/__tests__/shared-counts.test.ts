@@ -15,7 +15,9 @@ describe("SHARED_COUNTS — which numbers share a count", () => {
     // labels read the same, they are one population and belong together.
     const label = (id: string, side: "numerator" | "denominator") =>
       ENGINE_CATALOG[id as keyof typeof ENGINE_CATALOG].inputs?.[side]?.fr ?? null;
-    for (const slots of Object.values(SHARED_COUNTS)) {
+    // The sales-assisted counts' labels arrive with their prose (A7.3.c S2), and this loop covers them then.
+    const written = (slots: readonly { metric: string }[]) => slots.every((s) => s.metric in ENGINE_CATALOG);
+    for (const slots of Object.values(SHARED_COUNTS).filter(written)) {
       const labels = new Set(slots.map((s) => label(s.metric, s.side)));
       expect(labels.size, JSON.stringify(slots)).toBe(1);
     }
@@ -77,6 +79,39 @@ describe("withSharedCount / propagateFrom", () => {
     expect(validateEngine(state)).toEqual([]);
     (state.snapshots[0]!.base as Record<string, number>).cohortSignups = 0;
     expect(validateEngine(state).join()).toContain("base.cohortSignups");
+  });
+});
+
+describe("the sales-assisted counts (engine spec §18.2, S6)", () => {
+  it("opportunities, deals won and customers are each typed once, and reach every entry that carries them", () => {
+    const at = "2026-09-30T10:00:00.000Z";
+    const tool = { kind: "tool" as const, tool: "hubspot" as const };
+    const snap = {
+      ...emptyState().snapshots[0]!,
+      metrics: {
+        "slg.rev.win-rate": { status: "measured" as const, value: ratio(18, 75), source: tool, updatedAt: at },
+        "slg.rev.acv": { status: "measured" as const, value: ratio(432_000, 17), source: tool, updatedAt: at },
+        "slg.ref.referred-share": { status: "measured" as const, value: ratio(26, 130), source: tool, updatedAt: at },
+      },
+    };
+    // The win rate's 18 deals won is the ACV's count of contracts: saving one writes the other.
+    const next = propagateFrom(snap, "slg.rev.win-rate");
+    expect(next.base?.slgDealsWon).toBe(18);
+    expect(next.metrics["slg.rev.acv"]?.value).toEqual(ratio(432_000, 18));
+    expect(sharedCountAt("link.pql-handoff", "denominator")).toBe("slgOppsCreated");
+    expect(sharedCountAt("slg.ref.referenceable", "denominator")).toBe("slgCustomers");
+    expect(sharedCountAt("slg.acq.cac", "denominator")).toBe("slgDealsWon");
+    // The self-serve counts never reach a sales-assisted number, and the reverse.
+    for (const count of ["cohortSignups", "monthSignups", "mrrEnd", "mrrStart"] as const)
+      expect(SHARED_COUNTS[count].every((s) => !s.metric.startsWith("slg.") && !s.metric.startsWith("link."))).toBe(true);
+  });
+
+  it("a sales-assisted count is a whole number: 12.5 deals is refused", () => {
+    const state = exampleState();
+    state.snapshots[0]!.base = { slgOppsCreated: 130, slgDealsWon: 18, slgCustomers: 100 };
+    expect(validateEngine(state)).toEqual([]);
+    state.snapshots[0]!.base.slgDealsWon = 12.5;
+    expect(validateEngine(state)).toEqual(["snapshots[0].base.slgDealsWon: not a whole number > 0"]);
   });
 });
 

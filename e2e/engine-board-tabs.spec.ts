@@ -21,7 +21,7 @@ test.beforeEach(async ({ context }) => {
  * "Fill in" and "Continue" land on, and that the strip never pushes the page
  * sideways on a phone.
  */
-const STORAGE_KEY = "tdg.engine.v1";
+const STORAGE_KEY = "tdg.engine.v2";
 const EXAMPLE_CLOCK = new Date(2026, 8, 24, 12);
 const STAGES = ["acquisition", "activation", "retention", "referral", "revenue"] as const;
 
@@ -35,7 +35,7 @@ async function openExample(page: Page, locale: "en" | "fr" = "en"): Promise<void
   await page.clock.setFixedTime(EXAMPLE_CLOCK);
   await openEngine(page, locale);
   await page.evaluate(
-    ({ key, state }) => window.localStorage.setItem(key, JSON.stringify({ schemaVersion: 1, state })),
+    ({ key, state }) => window.localStorage.setItem(key, JSON.stringify({ schemaVersion: 2, state })),
     { key: STORAGE_KEY, state: exampleState() },
   );
   await page.reload();

@@ -22,17 +22,32 @@
  * in the engine's currency, never converted. Durations keep their own unit.
  */
 
-export const ENGINE_STORAGE_KEY = "tdg.engine.v1";
-export const ENGINE_SCHEMA_VERSION = 1 as const;
+export const ENGINE_STORAGE_KEY = "tdg.engine.v2";
+/**
+ * Read once, migrated, and kept until the first successful `.json` export
+ * that follows the migration (engine spec §18.3.4): a v1 store is never the
+ * copy we destroy first.
+ */
+export const LEGACY_STORAGE_KEY_V1 = "tdg.engine.v1";
+export const ENGINE_SCHEMA_VERSION = 2 as const;
 
-/** v1: a single profile. The union exists so v1.1 migrates nothing. */
-export type EngineProfile = "selfserve"; // v1.1: | "sales-led" | "consumer-app"   v2: | "marketplace"
+/**
+ * Decision 3 (2026-09-29, `CHANTIERS.md` C4): the setup separates the TYPE of
+ * business from how it SELLS, two axes the v1 profile mixed. One type is
+ * open; the consumer app and the marketplace come later (shown, disabled).
+ */
+export type BusinessType = "b2b-saas"; // later: | "consumer-app" | "marketplace"
+/** Self-serve (PLG) and sales-assisted (SLG). Both ticked is the hybrid: derived, never stored (§18.2, S1). */
+export type Motion = "plg" | "slg";
+/** The canonical order, the only one: screens, slides, lists. Never sorted by a value (§18.6.4). */
+export const MOTIONS: readonly Motion[] = ["plg", "slg"];
 export type Currency = "EUR" | "USD" | "GBP" | "CHF";
 /** "YYYY-MM", validated by `YEAR_MONTH_PATTERN`. */
 export type YearMonth = string;
 export const YEAR_MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/;
 
-export type MetricId =
+/** The self-serve catalogue: the seventeen v1 ids, unchanged, so a v1 file renames no key (§18.2, S5). */
+export type PlgMetricId =
   | "acq.signup-rate"
   | "acq.top-channel-share"
   | "acq.cac"
@@ -52,11 +67,38 @@ export type MetricId =
   | "rev.expansion"
   | "rev.contraction";
 /**
+ * The sales-assisted catalogue (§18.4): fourteen numbers, three at most per
+ * stage (two in Referral), plus its own gross margin since C25 Q4 — one
+ * margin per motion, « il faut qu'on ait la différence ».
+ */
+export type SlgMetricId =
+  | "slg.acq.lead-to-opp"
+  | "slg.acq.cac"
+  | "slg.acq.cycle"
+  | "slg.act.live-event"
+  | "slg.act.go-live"
+  | "slg.act.time-to-live"
+  | "slg.ret.renewal"
+  | "slg.ret.nrr"
+  | "slg.ret.loss-cause"
+  | "slg.ref.referred-share"
+  | "slg.ref.referenceable"
+  | "slg.rev.win-rate"
+  | "slg.rev.acv"
+  | "slg.rev.arpa"
+  | "slg.rev.gross-margin";
+/** The hybrid's link (§18.4.8): the share of sales-assisted opportunities that came from self-serve accounts. Optional. */
+export type LinkMetricId = "link.pql-handoff";
+export type MetricId = PlgMetricId | SlgMetricId | LinkMetricId;
+/**
  * The computed figures (§5.7): never entered, always derived. NRR and GRR
  * joined the three unit-economics figures on 2026-09-26, with the two MRR
  * movements they are computed from.
  */
-export type DerivedId = "rev.ltv" | "rev.cac-payback" | "rev.ltv-cac" | "rev.nrr" | "rev.grr";
+export type PlgDerivedId = "rev.ltv" | "rev.cac-payback" | "rev.ltv-cac" | "rev.nrr" | "rev.grr";
+/** Computed from the NEW contracts' ACV, not the book's ARPA: the CAC is spent on them (§18.4.7). */
+export type SlgDerivedId = "slg.rev.ltv" | "slg.rev.cac-payback" | "slg.rev.ltv-cac";
+export type DerivedId = PlgDerivedId | SlgDerivedId;
 
 export type ToolId =
   | "ga4"
@@ -74,8 +116,12 @@ export type ToolId =
   | "app-store-connect"
   | "play-console"
   | "product-db"
-  | "spreadsheet";
-export type RoleId = "finance" | "data" | "product" | "marketing" | "revops" | "support";
+  | "spreadsheet"
+  /** Sales-assisted (§18.2): a third CRM, and the customer-success platforms (Gainsight, Vitally, Planhat…). */
+  | "pipedrive"
+  | "cs-platform";
+/** `sales` and `customer-success` since C25 Q9: go-live, renewals and references are theirs, not Support's. */
+export type RoleId = "finance" | "data" | "product" | "marketing" | "revops" | "support" | "sales" | "customer-success";
 /** Who or what a number came from. A role, never a person's name. */
 export type SourceRef = { kind: "tool"; tool: ToolId } | { kind: "person"; role: RoleId } | { kind: "other" };
 
@@ -96,7 +142,13 @@ export type MetricStatus =
 export type MissingCause = "not-tracked" | "not-computed" | "no-access" | "no-definition";
 /** The audit's T1-T4 cost scale, in words (a meeting … a quarter), never in codes. */
 export type RepairScale = "meeting" | "afternoon" | "sprint" | "quarter";
-export type EstimateBasis = "team-hunch" | "old-number" | "sample" | "other";
+/**
+ * `company-wide` (C25 Q4, 2026-09-30): the company's single gross margin,
+ * taken as an ESTIMATE of one motion's margin when finance has no split.
+ * Accepted on the two gross margins only (validate.ts), and only ever
+ * « approximate ».
+ */
+export type EstimateBasis = "team-hunch" | "old-number" | "sample" | "other" | "company-wide";
 export type Effort = "self-5min" | "self-1h" | "ask" | "build";
 
 /** The unit is carried by the catalogue shape; a rate is stored as counts or as a 0-100 percent. */
@@ -174,7 +226,15 @@ export interface Snapshot {
  * gross margin's revenue); `mrrStart` the MRR on its 1st (the base the two
  * MRR movements are measured on).
  */
-export type SharedCount = "cohortSignups" | "monthSignups" | "mrrEnd" | "mrrStart";
+export type SharedCount =
+  | "cohortSignups"
+  | "monthSignups"
+  | "mrrEnd"
+  | "mrrStart"
+  /** Sales-assisted (§18.2, S6): opportunities created, new-customer deals won, both over the three months; customers at the flows' month end. */
+  | "slgOppsCreated"
+  | "slgDealsWon"
+  | "slgCustomers";
 
 /**
  * The levers « Et si ? » can move, together (Antoine, 2026-09-26: the
@@ -182,7 +242,7 @@ export type SharedCount = "cohortSignups" | "monthSignups" | "mrrEnd" | "mrrStar
  * collects; its target is kept in the number's display unit (percent for a
  * rate, the engine's currency for ARPA).
  */
-export type LeverId =
+export type PlgLeverId =
   | "acq.signup-rate"
   | "ref.referred-share"
   | "act.rate"
@@ -191,13 +251,47 @@ export type LeverId =
   | "rev.expansion"
   | "rev.contraction"
   | "rev.arpa";
+/**
+ * The sales-assisted levers (§18.5.5), then the link (C25 Q7, 2026-09-30):
+ * its target is a NUMBER of opportunities from self-serve per quarter, a
+ * whole count, never a percent — and the link is never a candidate.
+ */
+export type SlgLeverId = "slg.acq.lead-to-opp" | "slg.rev.win-rate" | "slg.ret.renewal" | "slg.rev.acv" | "link.pql-handoff";
+export type LeverId = PlgLeverId | SlgLeverId;
 
 export interface EngineSetup {
-  profile: EngineProfile;
+  type: BusinessType;
+  /** At least one true (validate.ts). Both true is the hybrid — derived, never stored. */
+  motions: Record<Motion, boolean>;
   currency: Currency;
-  activationWindowDays: 7 | 14 | 30; // default 7 — part of act.rate's definition
-  paidWindowDays: 30 | 60 | 90; // default 30 — part of rev.paid-conversion's definition
+  activationWindowDays: 7 | 14 | 30; // PLG, default 7 — part of act.rate's definition
+  paidWindowDays: 30 | 60 | 90; // PLG, default 30 — part of rev.paid-conversion's definition
+  /** SLG, default 30 — part of slg.acq.lead-to-opp's definition. Kept while the motion is unticked (§18.2, S3). */
+  qualificationWindowDays: 30 | 60 | 90;
+  /** SLG, default 90 — part of slg.act.go-live's definition. */
+  goLiveWindowDays: 30 | 60 | 90;
   /** ≤ 60 chars — only ever on the slides, and only if `deck.showCompany`. */
+  companyLabel?: string;
+}
+
+/**
+ * What a v1 engine becomes, and what a new engine starts with (§18.1.1,
+ * §18.3.1): self-serve ticked, sales-assisted not — the v1 behaviour — and
+ * the two sales-assisted windows at their defaults, kept even unticked.
+ */
+export const SETUP_V2_DEFAULTS = {
+  type: "b2b-saas",
+  motions: { plg: true, slg: false },
+  qualificationWindowDays: 30,
+  goLiveWindowDays: 90,
+} as const satisfies Pick<EngineSetup, "type" | "motions" | "qualificationWindowDays" | "goLiveWindowDays">;
+
+/** A setup as a v1 build wrote it: read by the migration only (`migrate.ts`). */
+export interface EngineSetupV1 {
+  profile: "selfserve";
+  currency: Currency;
+  activationWindowDays: 7 | 14 | 30;
+  paidWindowDays: 30 | 60 | 90;
   companyLabel?: string;
 }
 
@@ -211,7 +305,13 @@ export interface EngineSetup {
  */
 export type FixedSlideId = "peloton" | "leak" | "visibility" | "unit-economics" | "mirror" | "ask" | "annex";
 export type AnnexPageId = `annex:${number}`;
-export type SlideId = FixedSlideId | "scenario" | `whatif:${LeverId}` | AnnexPageId;
+/**
+ * `total` is the hybrid's alone (« deux moteurs, un total »). The
+ * sales-assisted slides carry the `slg:` prefix; the self-serve ones keep
+ * their v1 ids, so a v1 file's `deck.include` still means what it meant.
+ */
+export type SlgSlideId = "slg:peloton" | "slg:leak" | "slg:scenario";
+export type SlideId = FixedSlideId | "total" | SlgSlideId | "scenario" | `whatif:${LeverId}` | AnnexPageId;
 
 export const isAnnexPage = (id: SlideId): id is AnnexPageId => id.startsWith("annex:");
 
@@ -261,7 +361,7 @@ export interface EngineState {
 
 /** The value stored under ENGINE_STORAGE_KEY. */
 export interface EngineStore {
-  schemaVersion: 1;
+  schemaVersion: 2;
   state: EngineState;
 }
 
@@ -280,13 +380,24 @@ export type Known =
   | { kind: "unknown"; why: "todo" | "requested" | MissingCause | "not-applicable" };
 
 /** The six rates that can be named as the bottleneck (§6.6). */
-export type CandidateId =
+export type PlgCandidateId =
   | "acq.signup-rate"
   | "act.rate"
   | "ret.d30"
   | "rev.paid-conversion"
   | "ref.referred-share"
   | "ret.logo-churn";
+/**
+ * The five sales-assisted ★, all read « higher is better » (§18.5.2). Never
+ * the link (C25 Q7): a target on it names no stage.
+ */
+export type SlgCandidateId = "slg.acq.lead-to-opp" | "slg.act.go-live" | "slg.ret.renewal" | "slg.ref.referred-share" | "slg.rev.win-rate";
+/**
+ * Still the self-serve six: the diagnosis learns its motion in S1 (§18.11),
+ * and widens this to `PlgCandidateId | SlgCandidateId` then, with the copy
+ * keyed by it.
+ */
+export type CandidateId = PlgCandidateId;
 /**
  * What may name a stage: the team's own target, and nothing else (decision 5,
  * reversed 2026-09-29, `CHANTIERS.md` C1 — a published reference is context,

@@ -1,3 +1,4 @@
+import { migrateToV2 } from "./migrate";
 import type { EngineStrings } from "./strings";
 import { ENGINE_SCHEMA_VERSION, YEAR_MONTH_PATTERN, type EngineState } from "./types";
 import { validateEngine } from "./validate";
@@ -37,7 +38,9 @@ function sortedKeys(_key: string, value: unknown): unknown {
 export interface ParsedEngineFile {
   state: EngineState | null;
   errors: string[];
-  refusal?: "unknown-version" | "not-engine" | "unreadable";
+  refusal?: "unknown-version" | "not-engine" | "unreadable" | "unsupported-setup";
+  /** 1 when the file was a v1 engine, migrated on the way in (§18.3.2): the import screen says so. */
+  migratedFrom?: 1;
 }
 
 /**
@@ -71,11 +74,28 @@ export function parseEngineFile(text: string): ParsedEngineFile {
   if (typeof o.schemaVersion === "number" && o.schemaVersion > ENGINE_SCHEMA_VERSION && looksLikeAnyEngine(o)) {
     return { state: null, errors: [`schemaVersion: ${o.schemaVersion}`], refusal: "unknown-version" };
   }
-  if (o.schemaVersion !== ENGINE_SCHEMA_VERSION || !looksLikeEngine(o)) {
+  if ((o.schemaVersion !== 1 && o.schemaVersion !== ENGINE_SCHEMA_VERSION) || !looksLikeEngine(o)) {
     return { state: null, errors: ["file: not a growth engine"], refusal: "not-engine" };
   }
-  const state = o as unknown as EngineState;
-  return { state, errors: validateEngine(state) };
+  // A v1 engine is migrated, then validated like any v2 one (§18.3.2): nothing in its numbers changes.
+  const migrated = migrateToV2(o);
+  if (!migrated || !sellsSomehow(migrated.state)) {
+    return { state: null, errors: ["setup: no known type or no way of selling"], refusal: "unsupported-setup" };
+  }
+  const { state, from } = migrated;
+  return { state, errors: validateEngine(state), ...(from === 1 ? { migratedFrom: 1 as const } : {}) };
+}
+
+/**
+ * A setup the board can show at all (§18.3.2): a known type, and at least one
+ * way of selling ticked. Refused rather than opened with errors — there
+ * would be nothing to draw, and « Remplacer » would replace an engine with
+ * an empty one.
+ */
+function sellsSomehow(state: EngineState): boolean {
+  const setup = state.setup as unknown as Record<string, unknown>;
+  const motions = setup.motions as Record<string, unknown> | undefined;
+  return setup.type === "b2b-saas" && typeof motions === "object" && motions !== null && (motions.plg === true || motions.slg === true);
 }
 
 /**
