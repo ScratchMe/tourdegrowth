@@ -5796,3 +5796,19 @@ C8, tranché par Antoine le 2026-09-29, codé. La case « Comparer avec ce Tour 
 **Vérifié** : les neuf captures sont distinctes (sommes de contrôle ; le brief 03 avait envoyé deux fois la même image, `JOURNAL.md` 2026-09-09) ; `list_files` relu après l'envoi, et les dix chemins y sont ; l'ancre relue après l'envoi. Le contenu n'a pas été relu octet par octet côté projet.
 
 **Consigné** : `CHANTIERS.md` (vue d'ensemble, B2, D3 avec son prompt), `CLAUDE.md` (la ligne « Design system → Claude Design »), `.design-sync/NOTES.md` (« Synced »). Que de la doc : `vercel-ignore.sh` ne déploie pas.
+
+## L'instrument d'audit entre parenthèses, les entretiens réorientés vers le moteur (2026-09-30)
+
+**La décision d'Antoine**, prise pendant la session D (prompt D, action D5) : « mettre le projet d'audit entre parenthèses et se concentrer sur le moteur à la place ». Elle devance ce que la mission de la phase 1 bis devait trancher (C6 : l'instrument fait-il doublon avec le moteur ?). Trois précisions ont été demandées avant d'écrire, et Antoine y a répondu :
+
+- **Le périmètre** : tout est suspendu, sauf l'usage personnel. La mission de la phase 1 bis (D4), le bon à tirer nº4 et les phases 2 et 3 s'arrêtent. Antoine peut se servir de l'outil en mission quand ça l'arrange, mais ce n'est plus un chantier : une friction ne devient une PR que s'il la demande. **Le code reste** : `/admin/audit`, `lib/audit`, le catalogue et leurs tests. Rouvrir ne coûte rien.
+- **Les entretiens** (D5) sont gardés et réorientés vers le moteur. Leur question de fond était déjà la sienne : « quelqu'un taperait-il ses chiffres à la main, et pour obtenir quoi ? ». D5 perd ce qui ne servait que la phase 3 de l'audit.
+- **Ce que le dépôt en dit** : la décision seulement.
+
+**Écrit** : un en-tête daté dans `AUDIT-PLAN.md` (le plan reste tel quel, pour le jour où il rouvre), une ligne en tête d'`AUDIT.md`, la suite de la décision 6 d'`ENGINE.md`, la ligne C6 et D5 de `CHANTIERS.md`, D4 retiré. Dans `CLAUDE.md` : le paragraphe de l'instrument, sa ligne dans « ce qui reste ouvert », et le nº4 marqué suspendu. A9.1 (les guillemets de l'audit) reste en section A : c'est une correction typographique et une garde, pas un chantier de l'audit.
+
+**La trame d'entretien**, écrite avec Antoine et validée le jour même, est rangée en annexe d'`ENGINE.md` (« Les entretiens ») : qui interroger (dont au moins deux profils en vente assistée ou hybrides), huit questions sur ce que la personne a fait, une démo en fin d'entretien, ce qu'on note, et la règle du dépôt (notes hors du dépôt, synthèse anonyme à partir de cinq).
+
+**Les entretiens sont ensuite reportés par Antoine, sans date** : la trame attend, et aucune session ne les relance d'elle-même.
+
+**Ce qui ne change pas pour le moteur** : la décision 6 d'`ENGINE.md` dit déjà « public, gratuit et local », aucun connecteur, rien ne quitte le navigateur, pas un produit commercial. La changer passe par Antoine.

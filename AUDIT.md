@@ -7,6 +7,9 @@ session a tranché seule, ce que le code applique, et ce qui reste à
 construire. Il est au code ce que `SPEC.md` est au produit : quand ils
 divergent, le code a tort et c'est le code qu'on corrige.*
 
+> **Mis entre parenthèses le 2026-09-30** (priorité au moteur) : voir
+> l'en-tête d'`AUDIT-PLAN.md`.
+
 ---
 
 ## 0. Ce que c'est, et ce que ce n'est pas

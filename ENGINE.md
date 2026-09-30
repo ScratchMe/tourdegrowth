@@ -99,6 +99,10 @@ chacune se renverse en une phrase :
    tranché à froid : la mission de la phase 1 bis le tranche (`AUDIT-PLAN.md`
    §4). S'il s'avère un doublon, ses lignes utiles passent au moteur en copie
    publique relue.
+   **Tranché le 2026-09-30** : sans attendre la mission, Antoine met
+   l'instrument d'audit entre parenthèses et se concentre sur le moteur
+   (`AUDIT-PLAN.md`, en tête). Le catalogue du profil `b2b-assiste` peut
+   toujours inspirer A7.3, en copie publique relue, sans importer `lib/audit`.
 7. `ENGINE_ENABLED` reste fermé jusqu'à la signature du bon à tirer nº6. Liens
    d'ouverture prévus : `/how-it-works`, les deux pages SEO d'entrée, une section
    de la landing sous la citation — pas de septième lien au pied de page.
@@ -2710,3 +2714,56 @@ La phrase de §11.5, dans `content/legal.ts`.
   `--ink-1` 5,23:1 sur `--paper-2`.
 - **Arithmétique de l'exemple** recalculée : 100 ÷ (820/26 000) = 3 171 ;
   42 × 20/18 = 46,7 ; 0,975¹² = 0,738 ; 600 × 10,48 = 6 288.
+
+## Annexe — Les entretiens (`CHANTIERS.md` D5)
+
+*Trame validée par Antoine le 2026-09-30, quand l'instrument d'audit a été mis
+entre parenthèses (`AUDIT-PLAN.md`, en tête). Les entretiens y servaient le
+Go / No-Go de l'audit ; ils servent désormais le moteur. Leur question de fond
+était déjà la sienne : **« quelqu'un taperait-il ses chiffres à la main, et
+pour obtenir quoi ? »***
+
+**Ce qu'ils éprouvent** : les paris du moteur. On tape ses chiffres à la main ;
+ils ne quittent pas le navigateur ; seule une cible d'équipe désigne la fuite
+(décision 5) ; le deck part en CODIR (§9) ; le libre-service et l'assisté se
+lisent en « deux moteurs, un total » (décision 3, `CHANTIERS.md` A7.3).
+
+**Qui** : cinq à dix PM growth, Heads of Growth ou fondateurs de SaaS B2B de
+10 à 100 personnes, dont **au moins deux en vente assistée ou hybrides**,
+puisque le B2B assisté entre en v1. Ce sont des conversations une à une, pas
+de la promotion.
+
+**Format** : 30 minutes en visio. Le moteur n'apparaît que dans les dix
+dernières minutes, pour ne pas orienter les réponses. Les questions portent
+sur ce que la personne a fait, pas sur ce qu'elle ferait.
+
+1. **Contexte** (2 min) : le rôle, la taille de l'équipe, le modèle
+   (libre-service, vente assistée, les deux).
+2. **La dernière fois** qu'elle a présenté son funnel à un CODIR ou à un board :
+   quels chiffres, d'où ils venaient, combien de temps pour les réunir, dans
+   quel support.
+3. **En arrivant dans sa boîte actuelle** : combien de temps avant d'avoir une
+   vue des chiffres, et qui les lui a donnés.
+4. **La dernière fois** qu'elle a choisi l'étape du funnel à travailler :
+   comment, et par rapport à quoi (une cible d'équipe, un benchmark,
+   l'intuition).
+5. **A-t-elle déjà recopié ses chiffres à la main** dans un outil ou un tableur
+   pour obtenir quelque chose ? Quoi ? Qu'est-ce qui l'aurait retenue (le
+   temps, la confidentialité, autre chose) ?
+6. *Si les deux motions coexistent* : comment les présente-t-elle ? Séparées,
+   additionnées, comparées ?
+7. **Démo** (10 min, en partage d'écran depuis l'aperçu propriétaire) : elle
+   saisit ses chiffres. Noter ceux qu'elle n'a pas, le temps que ça prend, et
+   ce qu'elle attendait en sortie.
+8. **Clôture** : s'en servirait-elle sur ses vrais chiffres la semaine
+   prochaine ? L'enverrait-elle à quelqu'un ? Et surtout : **l'a-t-elle demandé
+   sans qu'on le propose ?**
+
+**À noter pour chaque entretien** : le profil, anonymisé ; les chiffres
+manquants ; le temps de collecte ; la référence de décision ; la réaction à
+l'hybride ; la phrase exacte sur la saisie à la main.
+
+**Ce qui entre dans le dépôt** : rien des notes. Ni nom, ni entreprise, ni
+chiffre ; elles restent sur la machine d'Antoine. À partir de cinq entretiens,
+une session écrit ici une **synthèse anonyme**, et ce qu'elle change au moteur
+part en section C de `CHANTIERS.md`, comme une question.
