@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { LocaleSwitcher } from "@/components/brand/LocaleSwitcher";
 import { SiteHeader } from "@/components/brand/SiteHeader";
 import { SpaceStrip } from "@/components/brand/SpaceStrip";
+import { SampleCta } from "./SampleCta";
 import { WordmarkLink } from "@/components/brand/WordmarkLink";
 import { Button } from "@/components/core/Button";
 import { SiteFooter } from "@/components/brand/SiteFooter";
@@ -104,9 +105,8 @@ export default async function LandingPage({ params }: PageProps) {
               <Button size="lg" href="/quiz" hard data-testid="hero-cta">
                 {tc(t.ctaPrimary, locale)}
               </Button>
-              <Button size="lg" href="/r/sample" hard variant="secondary">
-                {tc(t.ctaSecondary, locale)}
-              </Button>
+              {/* C24 (2026-09-30): follows the preview's tone — the roast sample in roast. */}
+              <SampleCta label={tc(t.ctaSecondary, locale)} />
             </div>
 
             {/* Renders nothing unless this device already took a Tour. */}

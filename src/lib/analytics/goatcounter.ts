@@ -140,6 +140,7 @@ export function resetPendingEventsForTests(): void {
  *   deep_dive_started                   the owner opened the Deep dive
  *   deep_dive_completed/<with_context|no_context>
  *   profile_click/<placement>           a credit link to Antoine's CV
+ *   tour_entry_clicked/<where>          the landing strip's Tour card (A7.9)
  *
  * These names are also what `goatcounter-api.ts` asks GoatCounter for, by
  * exact path — a name typed differently in the two places is a click the
@@ -234,6 +235,17 @@ export const LANDING_RETURN_EVENT = "landing_return";
 export const RETAKE_NUDGE_EVENT = "retake_nudge_clicked";
 
 /**
+ * The Tour's card on the landing's strip was clicked (CHANTIERS.md A7.9,
+ * C15, 2026-09-29) — `tour_entry_clicked/<where>`. A click, not a start:
+ * `quiz_started` is the funnel's own denominator and takes no detail (the
+ * `retake_started` note above says why), so where a Tour came from is a
+ * companion event, read next to it.
+ */
+export const TOUR_ENTRY_EVENT = "tour_entry_clicked";
+export const TOUR_ENTRY_DETAILS = ["home_strip"] as const;
+export type TourEntryDetail = (typeof TOUR_ENTRY_DETAILS)[number];
+
+/**
  * ---------------------------------------------------------------------------
  * The growth engine's vocabulary — engine spec §11.6.
  * ---------------------------------------------------------------------------
@@ -244,6 +256,7 @@ export const RETAKE_NUDGE_EVENT = "retake_nudge_clicked";
  *   engine_deck_opened                          the slide screen was opened
  *   engine_exported/<png|pdf|text|json>         a file downloaded, or the deck's text copied
  *   engine_tour_linked                          the engine was tied to a Tour result on the device
+ *   engine_entry_clicked/<where>                a door into the engine was clicked (A7.9, A7.4)
  *
  * PATHS ONLY, and every segment comes from the lists below. The page
  * promises in writing that nothing typed leaves the browser (D16), and an
@@ -261,6 +274,17 @@ export const ENGINE_REQUEST_COPIED_EVENT = "engine_request_copied";
 export const ENGINE_DECK_OPENED_EVENT = "engine_deck_opened";
 export const ENGINE_EXPORTED_EVENT = "engine_exported";
 export const ENGINE_TOUR_LINKED_EVENT = "engine_tour_linked";
+
+/**
+ * `engine_entry_clicked/<where>` — a door into the engine was clicked
+ * (CHANTIERS.md A7.9 and A7.4, C7 and C15): the landing's strip, the space
+ * band's pill. A7.4 adds the three pages that link to it. Fired on the
+ * click, before the page it opens, so `/admin/stats` can say where the
+ * openings come from.
+ */
+export const ENGINE_ENTRY_EVENT = "engine_entry_clicked";
+export const ENGINE_ENTRY_DETAILS = ["home_strip", "space_band"] as const;
+export type EngineEntryDetail = (typeof ENGINE_ENTRY_DETAILS)[number];
 
 /** `engine_stage_saved/<stage>` — the five AARRR stages, in the product's canonical order. */
 export const ENGINE_STAGES = ["acquisition", "activation", "retention", "referral", "revenue"] as const;
@@ -282,5 +306,6 @@ export function engineEventPaths(): string[] {
     ...ENGINE_SIMPLE_EVENTS,
     ...ENGINE_STAGES.map((stage) => `${ENGINE_STAGE_SAVED_EVENT}/${stage}`),
     ...ENGINE_EXPORT_FORMATS.map((format) => `${ENGINE_EXPORTED_EVENT}/${format}`),
+    ...ENGINE_ENTRY_DETAILS.map((where) => `${ENGINE_ENTRY_EVENT}/${where}`),
   ];
 }

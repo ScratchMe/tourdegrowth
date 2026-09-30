@@ -20,9 +20,13 @@ import type { EndingId, LevelSlug, Mood } from "./types";
 /** The levels the vocabulary covers. Adding a level adds its paths here, and the dashboard follows. */
 export const GAME_LEVEL_SLUGS = ["retention"] as const satisfies readonly LevelSlug[];
 
-/** `game_entry_clicked/<detail>` — the four doors into the game (§13.3). */
+/**
+ * `game_entry_clicked/<detail>` — the doors into the game (§13.3): the four
+ * of the brief, then the landing's strip and the space band's pill
+ * (CHANTIERS.md A7.9, C15, 2026-09-29).
+ */
 export const GAME_ENTRY_EVENT = "game_entry_clicked";
-export const GAME_ENTRY_DETAILS = ["result/retention", "deep_dive/retention", "footer", "hub"] as const;
+export const GAME_ENTRY_DETAILS = ["result/retention", "deep_dive/retention", "footer", "hub", "home_strip", "space_band"] as const;
 export type GameEntryDetail = (typeof GAME_ENTRY_DETAILS)[number];
 
 /** `game_started/<level>/<from>` — once, when a fresh year mounts; never on a resume. */

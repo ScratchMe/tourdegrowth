@@ -86,8 +86,11 @@ test.describe("the landing's strip: the race in three cards", () => {
       const gameGround = await strip.locator('[data-space="game"]').evaluate((el) => getComputedStyle(el).backgroundColor);
       expect(gameGround).toBe(NIGHT);
 
-      // Not doors: the hero's button is the landing's way in, the band the race's navigation.
-      await expect(strip.locator("a")).toHaveCount(0);
+      // Since C15 (2026-09-29) an open card is a door — one link each, its name; a closed one has none.
+      await expect(strip.locator("a")).toHaveCount(cards.filter((c) => c.state === "open").length);
+      for (const card of cards) {
+        await expect(strip.locator(`[data-space="${card.space}"] a`)).toHaveCount(card.state === "open" ? 1 : 0);
+      }
 
       // Three in a row on a wide screen, one column on a phone.
       if (width >= 1000) {

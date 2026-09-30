@@ -63,6 +63,8 @@ function FunnelBreakdown({ window }: { window: FunnelWindow }) {
           <li>Homepage views — {stats.homeViews}</li>
           <li>
             Quiz started — {stats.quizStarted} ({ratio(stats.quizStarted, stats.homeViews)} of views)
+            {/* A7.9 — a click on the landing strip's Tour card, read next to the starts (not one of them). */}
+            {" "}· clicks on the Tour card of the landing strip — <span data-testid="admin-tour-entries">{stats.tourEntries.home_strip}</span>
           </li>
           {stats.stagesCompleted.map((count, i) => (
             <li key={i}>

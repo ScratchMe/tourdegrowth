@@ -35,6 +35,9 @@ function EngineCard({ window }: { window: FunnelWindow }) {
       <MetaLabel size="xs" wide>{window.label} — the engine</MetaLabel>
       <ul className={styles.list} data-testid="admin-engine-stages">
         <li>Opened — {engine.opened}</li>
+        <li data-testid="admin-engine-entries">
+          Entries — landing strip {engine.entries.home_strip}, space band {engine.entries.space_band}
+        </li>
         {ENGINE_STAGES.map((stage) => (
           <li key={stage}>
             First number saved in {stage} — {engine.stagesSaved[stage]} ({share(engine.stagesSaved[stage], engine.opened)} of

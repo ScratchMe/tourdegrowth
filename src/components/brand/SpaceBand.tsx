@@ -1,9 +1,19 @@
 import type { ReactNode } from "react";
+import { ENGINE_ENTRY_EVENT } from "@/lib/analytics/goatcounter";
+import { GAME_ENTRY_EVENT } from "@/lib/game/events";
 import type { Locale } from "@/lib/i18n/locale";
 import { localePath } from "@/lib/i18n/routes";
 import { SPACE_STRINGS } from "@/lib/i18n/space-strings";
 import { tc } from "@/lib/i18n/translatable";
+import { TrackedLink } from "./TrackedLink";
 import styles from "./SpaceBand.module.css";
+
+/**
+ * The click a pill counts, as `space_band` (CHANTIERS.md A7.9, C15): the
+ * engine's and the game's doors. The Tour's pill leads back to the landing,
+ * which is not a start of anything: it stays a plain link.
+ */
+const PILL_EVENT: Partial<Record<Space, string>> = { engine: ENGINE_ENTRY_EVENT, game: GAME_ENTRY_EVENT };
 
 /** The three spaces of the Tour, in the order the race runs them. */
 export const SPACES = ["tour", "engine", "game"] as const;
@@ -128,9 +138,15 @@ export function SpaceBand({ locale, space, linked = true, width = "wide", open }
                       {body}
                     </span>
                   ) : state === "open" && linked ? (
-                    <a className={styles.pill} href={localePath(locale, HOME[s])}>
-                      {body}
-                    </a>
+                    PILL_EVENT[s] ? (
+                      <TrackedLink className={styles.pill} href={localePath(locale, HOME[s])} event={PILL_EVENT[s]} detail="space_band">
+                        {body}
+                      </TrackedLink>
+                    ) : (
+                      <a className={styles.pill} href={localePath(locale, HOME[s])}>
+                        {body}
+                      </a>
+                    )
                   ) : (
                     <span className={styles.pill}>{body}</span>
                   )}

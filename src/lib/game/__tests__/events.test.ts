@@ -24,12 +24,14 @@ describe("game analytics vocabulary (plan §3.8)", () => {
     }
   });
 
-  it("has the four entry doors the brief names (G7's source list)", () => {
+  it("has the four entry doors the brief names (G7's source list), then the landing strip's and the band's (A7.9)", () => {
     expect(GAME_ENTRY_DETAILS.map((d) => `${GAME_ENTRY_EVENT}/${d}`)).toEqual([
       "game_entry_clicked/result/retention",
       "game_entry_clicked/deep_dive/retention",
       "game_entry_clicked/footer",
       "game_entry_clicked/hub",
+      "game_entry_clicked/home_strip",
+      "game_entry_clicked/space_band",
     ]);
   });
 
