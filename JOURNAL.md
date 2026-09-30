@@ -6018,6 +6018,8 @@ C16, tranché par Antoine le 2026-09-29, captures de la vue propriétaire à l'a
 - **Non-vacuité** : remettre l'ancien primaire et retirer l'ordre propriétaire fait rougir les quatre tests propriétaire, et eux seuls, ainsi que trois variantes du test d'ordre de lecture.
 - **À l'écran**, en FR et en EN, à 1 280 et 390 px.
 
+**En production** : PR [#219](https://github.com/ScratchMe/tourdegrowth/pull/219), mergée le 2026-09-30 à 12 h 33 UTC (squash `6d6f2bc`, 11 fichiers, identique à la tête de la PR ; #218, d'une autre session, a pris le numéro d'avant). Le log de sa CI : 655 specs passées, 5 ignorées par construction. Déploiement de production Vercel `READY` sur ce commit, lu par l'API. Relevé par HTTP : la feuille servie par `/r/sample` porte la règle `data-owner`, et la page du visiteur n'a ni `data-owner` ni d'autre bouton plein que « Take your own Tour → » ; le partage y reste en contour. La vue propriétaire n'est pas observable en production sans le cookie de l'appareil : elle est prouvée par `result-real.spec.ts` sur l'émulateur.
+
 ## Extension 04 du design system, lot a : les primitives de formulaire, rien de câblé (2026-09-30)
 
 **Le retour.** Déposé dans le projet Claude Design par la session (#208), lancé par Antoine, écrit par Claude Design dans le projet même, sous `design/ds-extension-04-return/`. Recopié ici par la session, fichier par fichier : **les sous-agents n'ont pas `DesignSync`** (« disabled for this session, in subagents as well »), quatre l'ont confirmé. 46 fichiers texte ; les huit planches PNG, le build de la planche et son instantané de feuilles sont restés dans le projet (`design/ds-extension-04-return/COPIE.md` dit pourquoi, et que les espaces insécables de la prose ont pu devenir des espaces). Le retour fait autorité, comme 01 et 03.
@@ -6049,3 +6051,22 @@ C16, tranché par Antoine le 2026-09-29, captures de la vue propriétaire à l'a
 **Vérifié** : `tsc` et `eslint` propres, `next build` propre, **2 328 tests unitaires** (194 fichiers) après la fusion de `main`, couverture au-dessus des seuils, et la suite Playwright complète sur un build de production (`GAME_ENABLED=true`, comme la CI) : **636 passées, aucun échec, 5 ignorées par construction** sur 641, dont le moteur, l'audit, l'accessibilité et le contraste.
 
 **Reste** : A10.b, c et d ; `--select-inset` dans WebKit et Gecko ; la re-synchro.
+
+## A7.12.a et A7.12.b : les captures du Tour refaites, celles du moteur et du jeu provisoires (2026-09-30)
+
+C21, tranché par Antoine le 2026-09-29 : capturer maintenant, refaire à l'ouverture.
+
+**A7.12.a, le Tour** : les 22 fichiers de `marketing/assets/` (`01` à `05`, `og-*`) sont refaits par `scripts/kit-screenshots.mjs`. Ils sont pris contre un build de production local **aux produits fermés**, comme la production : le bandeau dit « bientôt » pour le moteur et le jeu. Le code est celui du haut de la pile, donc après I + B, l'encart du jeu sous le bouton (A7.7) et la carte de partage du propriétaire (A7.10). Les 13,8 Mo passent à 3,05 Mo en palette. Les annuaires de D10 peuvent partir.
+
+**A7.12.b, le moteur et le jeu** : douze fichiers `provisoire-*`, listés comme tels dans `kit.md`, avec la consigne de ne jamais les publier tels quels. On y trouve :
+- le tableau du moteur sur l'exemple rempli (§6.0), en FR et en EN, desktop et mobile ;
+- le hub du jeu, aux mêmes quatre formats ;
+- un trimestre et décembre (le chemin A), en desktop.
+
+Ils sont pris par `scripts/kit-provisional.capture.ts`, un fichier Playwright avec sa propre configuration (`scripts/kit-capture.config.ts`), hors de `e2e/`, donc jamais lancé par la CI. Il reprend les aides du jeu et les fixtures du moteur des specs : les mêmes données que les tests. Refaire ces captures à l'ouverture (A7.12.c) se fait donc en une commande.
+
+**Relues avant d'être nommées**, et deux corrections en route :
+- la première capture « tableau du moteur » montrait l'intro, le tableau étant sous la ligne de flottaison. Elle défile maintenant jusqu'au tableau ;
+- les pages du jeu, prérendues, affichaient le moteur « bientôt » : le bandeau lit le drapeau du moteur au build. Le build des captures pose donc les deux drapeaux, et la configuration le dit.
+
+**Reste A7.12.c** : refaire à l'ouverture de chaque produit, puis retirer le préfixe.
