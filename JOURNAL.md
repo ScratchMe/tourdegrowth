@@ -6233,4 +6233,11 @@ La méthode pour les trouver la prochaine fois est dans `.design-sync/NOTES.md` 
 
 Corrigés, les numéros de ligne remplacés par les noms de clés, qui ne bougent pas. `conventions.md` dit aussi maintenant son exception : le contexte libre du quiz, écran à une question, écrit « (optionnel) » dans la question. Second envoi : rendus identiques, sources seules ; 88 composants, 292 cellules, 453 fichiers, ancre `8235f4e6de01`.
 
-**En production** : rien de ce lot n'y est encore. Vercel refuse les déploiements depuis A10.c (quota quotidien, `VERCEL.md` §1.12), et la production tourne sur A10.b. Le geste est `CHANTIERS.md` D11, le 2026-10-01 après 14 h UTC. Un rappel est programmé dans cette session.
+**En production le soir même, et D11 n'a plus d'objet.** Le squash de #227 (`c8b869a`, 23 fichiers, arbre identique à la tête) a été déployé à 21 h 12 UTC : statut `Vercel` du commit à `success`, là où celui d'A10.d (`bd32dab`) dit encore « Deployment rate limited ». Le quota s'était libéré. Comme `main` porte tout, ce déploiement emporte aussi A10.c, A10.d et B3, que Vercel avait refusés. D11 est retiré de `CHANTIERS.md`, et le rappel du lendemain est supprimé.
+
+Vérifié en HTTP :
+- `/en`, `/fr` et `/en/glossary` en 200 ;
+- le moteur et le jeu fermés (404) ;
+- `/admin/audit` en 401.
+
+Les champs eux-mêmes sont derrière l'aperçu propriétaire et le mot de passe admin : ils ne se vérifient pas d'ici. Ce que la production sert est le build que la CI a fait passer sur la même tête.
