@@ -6159,3 +6159,13 @@ Le paragraphe d'ouverture du résumé reprend la phrase de l'ancien paragraphe r
   - une ligne mesurée : définition en `missing`, « 26 000 » dans sa boîte, un 31 février refusé, une date à moitié choisie, et le résumé au-dessus du bouton.
 
   Aucun débordement horizontal.
+
+## Extension 04 du design system, lot d : les trois copies supprimées, et une garde contre une quatrième (2026-09-30)
+
+**Supprimé** : `_engine/_ui/` (neuf fichiers) et `admin/audit/_ui/` (six fichiers). Le `Field` local et le `.control` du constructeur de slides étaient partis avec A10.b, dont c'étaient les seuls lecteurs. Plus rien ne dessine un contrôle de formulaire hors de `src/components/core/`.
+
+**La garde** (`form-controls-source.test.ts`) lit tous les `.tsx` de `src/` hors de `core/`, commentaires retirés. Elle refuse tout `<select>`, et tout `<input>` dont le `type` n'est pas `file` ou `range`. Restent donc, par leur type, le bouton de fichier de l'import (moteur et audit) et le curseur du « et si ». Le retour pose ses conditions pour les porter : un `Button` secondaire sur un `input` caché, et un curseur toujours à côté d'un `NumberField` qui tient la même valeur. Ce portage est hors A10. **Non-vacuité** : lancée avant la suppression, elle rougissait sur les neuf contrôles des deux copies, un par un.
+
+**Décisions remplacées, et dites** : D17 d'`ENGINE.md` (« composants de saisie locaux à la route ») et la décision 1 de la phase 1 d'`AUDIT-PLAN.md` (« `_ui/` sous la route, jamais ajouté à `src/components/` ») portent une note datée. Le commentaire de `form-controls.test.ts` suit : seul `core/` dessine un contrôle.
+
+**Vérifié** : `tsc`, `eslint` et `next build` propres, **2 340 tests unitaires**. La suite Playwright complète tourne sur la pile c + d : **663 specs, 640 passées, aucun échec**, 23 ignorées par construction. Ni le moteur ni l'audit n'importaient plus rien des dossiers supprimés : `tsc` le confirme, et aucune spec ne bouge.
