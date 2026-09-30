@@ -232,7 +232,7 @@ export function FindingEditor({
           Action convenue
         </MetaLabel>
         <p className={styles.muted} data-testid="agreed-hint">
-          À remplir en entretien, pas à la rédaction : un plan d&apos;action écrit seul n&apos;engage personne.
+          À remplir en entretien, pas à la rédaction : un plan d&apos;action écrit seul n&apos;engage personne.
         </p>
         <Field size="sm" id="agreed-action" label="Ce qui a été convenu">
           {({ id: controlId, describedBy }) => (
@@ -263,7 +263,7 @@ export function FindingEditor({
 
         {missing.length > 0 ? (
           <p className={styles.muted} data-testid="finding-missing">
-            Il manque : {missing.map((field) => MISSING_LABELS[field]).join(", ")}.
+            Il manque : {missing.map((field) => MISSING_LABELS[field]).join(", ")}.
           </p>
         ) : null}
 

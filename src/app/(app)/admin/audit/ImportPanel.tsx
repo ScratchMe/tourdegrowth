@@ -89,7 +89,7 @@ export function ImportPanel({
                 {mission.catalog.version === currentCatalogVersion ? null : (
                   <>
                     {" "}
-                    — version courante <code>{currentCatalogVersion}</code>. L&apos;outil ne migre jamais seul : la mission garde le sien.
+                    — version courante <code>{currentCatalogVersion}</code>. L&apos;outil ne migre jamais seul : la mission garde le sien.
                   </>
                 )}
               </p>

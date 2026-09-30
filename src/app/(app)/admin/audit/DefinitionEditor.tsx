@@ -48,12 +48,12 @@ export function DefinitionEditor({
       <p className={styles.muted}>
         {currentRef ? (
           <>
-            Définition en vigueur : <strong>{currentRef}</strong>. La modifier frappe une nouvelle version — l&apos;ancienne reste, et les
+            Définition en vigueur : <strong>{currentRef}</strong>. La modifier frappe une nouvelle version — l&apos;ancienne reste, et les
             observations qui la référencent gardent leur sens.
           </>
         ) : (
           <>
-            Aucune définition posée pour cette ligne. Les quatre premiers champs sont ceux que le validateur exige ; sans eux, le fichier
+            Aucune définition posée pour cette ligne. Les quatre premiers champs sont ceux que le validateur exige ; sans eux, le fichier
             s&apos;écrit quand même et signale la ligne comme incomplète.
           </>
         )}
@@ -118,7 +118,7 @@ export function DefinitionEditor({
       <Disclosure summary="Les axes qui font qu'un chiffre veut dire deux choses">
         <div className={styles.fieldGroup}>
           <p className={styles.muted}>
-            Facultatifs, et c&apos;est là que se joue la plupart des écarts. Renseigner ceux que le piège de la fiche nomme ; laisser vides
+            Facultatifs, et c&apos;est là que se joue la plupart des écarts. Renseigner ceux que le piège de la fiche nomme ; laisser vides
             les autres — un axe vide n&apos;entre pas dans la définition et ne frappe pas de version.
           </p>
 

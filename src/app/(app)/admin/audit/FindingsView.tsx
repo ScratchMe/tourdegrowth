@@ -187,7 +187,7 @@ export function FindingsView({
         {budget.over ? (
           <div data-testid="brief-overflow">
             <p className={styles.muted}>
-              Ce qui dépasse basculera en annexe — rien n&apos;est coupé, c&apos;est à toi de raccourcir :
+              Ce qui dépasse basculera en annexe — rien n&apos;est coupé, c&apos;est à toi de raccourcir :
             </p>
             <p className={styles.rowStatus}>{budget.overflow}</p>
           </div>

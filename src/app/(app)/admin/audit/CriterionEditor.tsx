@@ -10,16 +10,22 @@ import { TextField } from "@/components/core/TextField";
 import { CRITERION_KIND_LABELS, optionsFrom, FORM_COPY } from "./labels";
 import styles from "./page.module.css";
 
-/** Sous l'argument d'un seuil argumenté tant qu'il est vide ; repris dans le résumé au-dessus du bouton. */
-export const CRITERION_ARGUMENT_MISSING = "Un seuil argumenté porte son argument (q5) : sans lui, l'export refusera cette ligne.";
+/**
+ * Sous l'argument d'un seuil argumenté tant qu'il est vide ; repris dans le
+ * résumé au-dessus du bouton. TODO: à relire (convention 6) — l'ancien
+ * paragraphe disait « l'export refusera cette ligne », ce qui est faux :
+ * l'export écrit le fichier, c'est le validateur qui signale (même correction
+ * que celle de la définition, JOURNAL.md, phase 1.3b).
+ */
+export const CRITERION_ARGUMENT_MISSING = "Un seuil argumenté porte son argument (q5) : sans lui, le validateur signalera cette ligne.";
 
 /**
  * Le repère auquel la valeur se compare.
  *
  * Deux niveaux d'exigence, volontairement distincts et affichés
  * différemment : l'**argument** d'un seuil argumenté est ce que le validateur
- * refusera (q5), en rouge ; la **provenance** d'un repère public est du
- * conseil, en gris. Confondre les deux ferait bloquer sur ce qui n'est pas
+ * refusera (q5), dit sous le champ et dans le résumé au-dessus du bouton ; la
+ * **provenance** d'un repère public est du conseil, en gris. Confondre les deux ferait bloquer sur ce qui n'est pas
  * bloquant, ou passer sous silence ce qui l'est.
  */
 export function CriterionEditor({ criterion, onChange }: { criterion: Criterion | undefined; onChange: (criterion: Criterion | undefined) => void }) {
@@ -70,7 +76,7 @@ export function CriterionEditor({ criterion, onChange }: { criterion: Criterion 
                 size="sm"
                 id="criterionSource"
                 label="Source"
-                hint="Le rapport nommé et son année — « le marché dit 3 % » n'est pas opposable."
+                hint="Le rapport nommé et son année — « le marché dit 3 % » n'est pas opposable."
                 value={criterion.source ?? ""}
                 onChange={(source) => patch({ source: source || undefined })}
               />

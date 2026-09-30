@@ -141,7 +141,7 @@ export function RowEditor({
               peut pas le masquer — il fallait le dire. Signalé par Antoine le
               2026-09-14. */}
           <p className={styles.muted} data-testid="row-id-note">
-            <strong>{row.id}</strong> est l&apos;identifiant de cette ligne dans le catalogue : c&apos;est lui que le fichier de mission, les
+            <strong>{row.id}</strong> est l&apos;identifiant de cette ligne dans le catalogue : c&apos;est lui que le fichier de mission, les
             constats et les définitions référencent. Il ne change pas, même si le nom de la ligne est réécrit.
           </p>
         </div>
@@ -161,7 +161,7 @@ export function RowEditor({
           {row.decision ? <FicheBlock label="La décision en jeu" text={row.decision} /> : null}
           {row.absence ? <FicheBlock label="Ce que son absence dit" text={row.absence} /> : null}
           {row.why ? <FicheBlock label="Pourquoi cette ligne pour ce profil" text={row.why} /> : null}
-          <p className={styles.muted}>Coût de collecte : {row.cost}</p>
+          <p className={styles.muted}>Coût de collecte : {row.cost}</p>
         </Card>
 
         <Card elevation="panel" className={styles.form} data-testid="entry-form">

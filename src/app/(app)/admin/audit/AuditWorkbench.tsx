@@ -182,7 +182,7 @@ export function AuditWorkbench({
     const { mission: next, ref, bumped } = upsertDefinition(mission, definition);
     setNotice(
       bumped
-        ? `Définition ${ref} frappée. La version précédente reste dans la mission : les observations qui la référencent gardent leur sens.`
+        ? `Définition ${ref} frappée. La version précédente reste dans la mission : les observations qui la référencent gardent leur sens.`
         : null,
     );
     return saveEntry(next, { ...entry, definitionRef: ref });

@@ -64,7 +64,7 @@ export function RowList({
     <section className={styles.screen}>
       <h2 className={styles.h2}>Collecte</h2>
       <p className={styles.muted}>
-        {rows.length} lignes applicables au profil, du palier le plus coûteux au moins coûteux : ce sont celles qui doivent partir en
+        {rows.length} lignes applicables au profil, du palier le plus coûteux au moins coûteux : ce sont celles qui doivent partir en
         premier.
       </p>
 
@@ -84,7 +84,7 @@ export function RowList({
           ))}
         </dl>
         <p className={styles.muted}>
-          La légende va du moins cher au plus cher ; la liste ci-dessous trie dans l&apos;autre sens, parce qu&apos;une ligne T4 ou T3 met
+          La légende va du moins cher au plus cher ; la liste ci-dessous trie dans l&apos;autre sens, parce qu&apos;une ligne T4 ou T3 met
           des jours à revenir et doit être demandée le premier jour.
         </p>
       </Disclosure>
@@ -117,7 +117,7 @@ export function RowList({
 
       {groups.length ? (
         <p className={styles.muted} data-testid="collect-groups">
-          Par interlocuteur : {groups.map((group) => `${group.key} (${group.entries.length})`).join(" · ")}.
+          Par interlocuteur : {groups.map((group) => `${group.key} (${group.entries.length})`).join(" · ")}.
         </p>
       ) : null}
 
