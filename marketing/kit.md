@@ -248,3 +248,19 @@ la famille `directory:<slug>`, et le logo est `favicon-512.png`. Aucun champ
 | `og-r-sample.png` | L'image de partage d'un résultat | Montrer ce qu'un partage produit |
 
 Toutes en 2× (2560 px de large en desktop, 780 en mobile), PNG palette.
+Refaites le 2026-09-30 (A7.12.a), après la synthèse I + B, l'encart du jeu
+sous le bouton (A7.7) et la carte de partage (A7.10), contre un build de
+production local aux produits fermés : `node scripts/kit-screenshots.mjs`.
+
+**Provisoires** (A7.12.b, 2026-09-30) : le moteur et le jeu ne sont pas
+ouverts. Ces captures servent à préparer les fiches, **jamais à publier
+telles quelles** ; elles seront refaites à l'ouverture de chaque produit et
+perdront leur préfixe (A7.12.c). Contre un build local aux deux produits
+ouverts : `npx playwright test --config scripts/kit-capture.config.ts`.
+
+| Fichier | Quoi |
+|---|---|
+| `provisoire-06-engine-board-{en,fr}-{desktop,mobile}.png` | Le tableau du moteur sur l'exemple rempli (§6.0) : l'étape qui freine, le peloton |
+| `provisoire-07-game-hub-{en,fr}-{desktop,mobile}.png` | Le hub du jeu : la montagne et ses cinq cols |
+| `provisoire-08-game-quarter-{en,fr}-desktop.png` | Un trimestre : l'appel du DG raccroché, les chantiers en main, l'écran de résiliation |
+| `provisoire-09-game-december-{en,fr}-desktop.png` | Décembre : le journal de l'année et la fin (chemin A) |
