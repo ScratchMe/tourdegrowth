@@ -24,6 +24,9 @@ const PAGES = [
   "/fr/glossary/arpu", // the page the defect was seen on
   "/fr/glossary/nrr-grr", // the densest numeric example in the glossary
   "/fr/glossary/cac-payback",
+  // A7.3.e (2026-09-30): the two densest of the four sales-assisted terms.
+  "/fr/glossary/acv",
+  "/fr/glossary/win-rate",
 ];
 
 for (const path of PAGES) {

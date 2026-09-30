@@ -68,7 +68,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "L'acquisition couvre tous les canaux par lesquels quelqu'un arrive chez toi pour la première fois : SEO, publicité payante, bouche-à-oreille, contenu, communautés, partenariats. Le piège classique : juger un canal uniquement sur le volume qu'il apporte, sans se demander s'il est reproductible et si son coût est connu (voir CAC). Un canal qui a bien marché une fois par chance n'est pas une stratégie d'acquisition, c'est un coup de chance. Et l'acquisition seule ne dit rien de la santé du produit — un pic de nouveaux visiteurs qui n'activent jamais n'est qu'un chiffre de vanité.",
       en: "Acquisition covers every channel through which someone finds you for the first time: SEO, paid ads, word of mouth, content, communities, partnerships. The classic trap: judging a channel purely on volume, without asking whether it's repeatable and whether its cost is even known (see CAC). A channel that worked once by luck isn't an acquisition strategy, it's a lucky break. And acquisition alone says nothing about product health — a spike of new visitors who never activate is just a vanity number.",
     },
-    related: ["cac", "growth-loop", "activation", "aarrr"],
+    related: ["cac", "growth-loop", "lead-to-opportunity", "aarrr"],
     // Relu et validé par Antoine (2026-09-09) — R2-08. The English definition is 55
     // characters, too short for a search snippet; the French one is fine.
     metaDescription: {
@@ -112,7 +112,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "Cette étape ne juge pas le montant encaissé, mais si le modèle de revenu a été réellement testé face à de vrais clients — beaucoup de produits ont un plan de monétisation « pour plus tard » qui n'a jamais rencontré une carte bancaire. Une référence souvent citée dans le SaaS est un ratio LTV:CAC autour de 3:1 comme seuil de viabilité (voir LTV et CAC) — à prendre comme repère directionnel, pas comme une règle absolue selon ton marché. L'upsell et le cross-sell sont les deux leviers les plus rapides une fois le modèle de base validé.",
       en: "This stage doesn't judge how much money comes in, but whether the revenue model has actually been tested against real customers — plenty of products have a monetization plan for \"later\" that has never met a credit card. A commonly cited SaaS rule of thumb is an LTV:CAC ratio around 3:1 as a viability threshold (see LTV and CAC) — treat it as a directional benchmark, not an absolute rule for every market. Upsell and cross-sell are the fastest levers once the base model is validated.",
     },
-    related: ["arpu", "ltv", "upsell-cross-sell", "aarrr"],
+    related: ["arpu", "win-rate", "upsell-cross-sell", "aarrr"],
   },
   "aha-moment": {
     ...GLOSSARY_TERMS["aha-moment"],
@@ -130,7 +130,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "Le calcul de base : dépenses totales de vente et marketing sur une période, divisées par le nombre de nouveaux clients obtenus sur cette même période. Le piège le plus fréquent est d'oublier d'y inclure les salaires de l'équipe commerciale/marketing et le coût des outils — un CAC qui ne compte que la pub payante est presque toujours sous-estimé. Le CAC n'a de sens qu'à côté de la LTV : un CAC bas sur un produit à faible valeur peut coûter plus cher qu'un CAC élevé sur un produit à forte rétention.",
       en: "The basic calculation: total sales and marketing spend over a period, divided by the number of new customers acquired in that same period. The most common trap is forgetting to include sales/marketing salaries and tool costs — a CAC that only counts paid ad spend is almost always underestimated. CAC only means something next to LTV: a low CAC on a low-value product can end up costing more than a high CAC on a highly retentive one.",
     },
-    related: ["ltv", "revenue", "acquisition", "cac-payback"],
+    related: ["ltv", "win-rate", "acquisition", "cac-payback"],
   },
   ltv: {
     ...GLOSSARY_TERMS.ltv,
@@ -140,7 +140,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "Une estimation courante en SaaS : revenu mensuel moyen par client, divisé par le taux de churn mensuel. Un churn de 5 %/mois donne mécaniquement une durée de vie moyenne de 20 mois — ce qui montre à quel point la LTV dépend directement de la retention, pas seulement du prix. Augmenter son prix sans travailler la retention gonfle la LTV sur le papier sans rien changer à la réalité si les clients partent toujours aussi vite. C'est pour ça que cette étape et Retention se lisent toujours ensemble, jamais isolément.",
       en: "A common SaaS estimate: average monthly revenue per customer, divided by the monthly churn rate. A 5%/month churn rate mechanically implies an average 20-month lifetime — which shows how directly LTV depends on retention, not just price. Raising your price without working on retention inflates LTV on paper without changing anything in reality if customers still leave just as fast. That's why this stage and Retention are always read together, never in isolation.",
     },
-    related: ["cac", "arpu", "revenue", "cac-payback"],
+    related: ["cac", "arpu", "acv", "cac-payback"],
   },
   churn: {
     ...GLOSSARY_TERMS.churn,
@@ -215,7 +215,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "Le ratio LTV:CAC est la métrique d'acquisition la plus citée ; le CAC payback est celle qui contraint réellement une entreprise qui n'a pas trois ans de trésorerie devant elle. La différence tient en un mot : le LTV:CAC est une prévision, construite sur un taux de churn projeté des années en avant — le chiffre le moins fiable que possède une jeune entreprise —, alors que le payback est une date, calculée uniquement à partir de chiffres déjà connus. Les deux se calculent depuis les mêmes trois données et peuvent parfaitement se contredire : une économie unitaire excellente sur cinq ans ne dit rien sur la capacité à financer le mois prochain. Quand ils divergent, c'est la date que le compte en banque respecte.",
       en: "The LTV:CAC ratio is the most-quoted acquisition metric; CAC payback is the one that actually binds a company without three years of cash in the bank. The difference comes down to one word: LTV:CAC is a forecast, built on a churn rate projected years out — the least reliable number a young company owns — while payback is a date, computed only from figures you already have. Both come from the same three inputs and can flatly contradict each other: excellent unit economics over five years say nothing about your ability to fund next month. When they disagree, the date is the one your bank account respects.",
     },
-    related: ["cac", "ltv", "revenue", "nrr-grr"],
+    related: ["cac", "ltv", "sales-cycle", "nrr-grr"],
   },
   "nrr-grr": {
     ...GLOSSARY_TERMS["nrr-grr"],
@@ -258,7 +258,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "Cette métrique a un piège qu'il faut connaître avant d'en faire un indicateur de pilotage : calculée sur les seuls utilisateurs qui finissent par activer, elle s'améliore quand les plus lents abandonnent. Le chiffre progresse précisément parce que le produit a régressé, et rien à l'intérieur ne le montre. D'où deux règles qui ne coûtent rien — utiliser la médiane plutôt que la moyenne, qu'une poignée de traînards suffit à tripler, et publier systématiquement le taux d'activation juste à côté. L'autre confusion fréquente est avec la durée de l'onboarding : ce sont deux choses différentes, et l'écart entre elles est souvent la trouvaille. Un parcours bouclé en deux minutes peut très bien avoir un time to value de six jours si la valeur n'arrive qu'une fois qu'un collègue a validé une intégration — auquel cas polir l'interface ne changera rien.",
       en: "This metric has a dangerous edge worth knowing before you steer by it: computed on the users who eventually activate, it improves when the slowest ones give up. The figure gets better precisely because the product got worse, and nothing inside it shows that. Hence two rules that cost nothing — use the median rather than the mean, which a handful of stragglers is enough to triple, and always publish the activation rate right beside it. The other common confusion is with onboarding length: they are different things, and the gap between them is often the finding. A flow finished in two minutes can still have a six-day time to value if value only arrives once a colleague approves an integration — in which case polishing the interface changes nothing.",
     },
-    related: ["onboarding", "aha-moment", "activation"],
+    related: ["onboarding", "aha-moment", "activation", "sales-cycle"],
   },
   pql: {
     ...GLOSSARY_TERMS.pql,
@@ -267,7 +267,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "Un PQL qualifie sur un comportement dans le produit plutôt que sur une taille d'entreprise ou un intitulé de poste — c'est toute la différence avec un MQL, un lead qualifié par le marketing, et la raison pour laquelle il prédit mieux : la personne a déjà fait ce qu'une démo aurait essayé de la convaincre de faire. La partie que la plupart des définitions ratent est qu'un bon seuil doit tenir sur deux axes, pas un. Le lift — à quel point le groupe qualifié convertit mieux — est celui qu'on mesure toujours ; la taille de la liste est celui qu'on oublie, et deux seuils au lift identique peuvent produire l'un une dizaine de contacts par jour à forte densité, l'autre une liste de diffusion déguisée. Enfin, un seuil se périme : quand le produit change, le comportement qui était un signal fort devient banal, et le recalculer chaque trimestre est de l'entretien normal.",
       en: "A PQL qualifies on a behaviour inside the product rather than on a company size or a job title — that's the whole difference from an MQL, a marketing-qualified lead, and the reason it predicts better: the person has already done what a demo would have tried to convince them to do. The part most definitions miss is that a good threshold has to hold on two axes, not one. Lift — how much better the qualified group converts — is the one everybody measures; list size is the one everybody forgets, and two thresholds with identical lift can produce, respectively, about ten high-density contacts a day and a mailing list in disguise. Finally, a threshold expires: when the product changes, the behaviour that used to be a strong signal becomes routine, and re-deriving it quarterly is ordinary maintenance.",
     },
-    related: ["activation", "product-led-growth", "upsell-cross-sell", "revenue"],
+    related: ["lead-to-opportunity", "product-led-growth", "upsell-cross-sell", "revenue"],
   },
   // ——— wave 2.2, lot 3 (2026-09-14) — clôt la vague. Validé au bon à tirer nº5 ———
   "product-led-growth": {
@@ -288,7 +288,7 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       fr: "La confusion à évacuer avant tout le reste est celle avec l'ARPPU, le revenu moyen par utilisateur **payant**. Sur un produit freemium, les deux peuvent être vingt-cinq fois différents — 0,80 € et 20 € le même mois — et les deux se font appeler « ARPU » dans des documents différents la même semaine. Le bon choix dépend de la décision : l'ARPU pour juger une dépense d'acquisition, puisqu'on paie pour des inscriptions dont une partie seulement convertit ; l'ARPPU pour juger un changement de prix, qui ne touche pas les utilisateurs gratuits. La seconde chose à savoir est qu'un ARPU en hausse n'est pas une victoire en soi : perds tes plus petits utilisateurs et la moyenne de ceux qui restent monte sans qu'un euro ait été ajouté. C'est le même piège mécanique que le ratio DAU/MAU, et le même remède — publier le dénominateur à côté.",
       en: "The confusion to clear before anything else is with ARPPU, average revenue per **paying** user. On a freemium product the two can differ twenty-five fold — €0.80 and €20 in the same month — and both get called \"ARPU\", in different decks, in the same week. Which one is right depends on the decision: ARPU for judging acquisition spend, since you pay for sign-ups and only some convert; ARPPU for judging a price change, which free users are unaffected by. The second thing to know is that a rising ARPU is not a win in itself: lose your smallest users and the average of those remaining climbs without a euro being added. It is the same mechanical trap as the DAU/MAU ratio, and it has the same cure — publish the denominator beside it.",
     },
-    related: ["ltv", "revenue", "cac-payback", "dau-mau"],
+    related: ["ltv", "acv", "cac-payback", "dau-mau"],
   },
   nps: {
     ...GLOSSARY_TERMS.nps,
@@ -298,5 +298,52 @@ export const GLOSSARY: Record<GlossaryTermId, GlossaryEntry> = {
       en: "NPS measures stated intent, never a referral actually made — the distinction that matters most here, because it is the one most often lost. Someone can answer 10 and never recommend anyone: the act needs an occasion, a mechanism and a reason, and a product can score well while providing none of the three. Two further limits are worth knowing before steering by it. The score crushes eleven answers into three buckets, so two opposite distributions can produce the same figure — 45/35/20 and 30/65/5 both give +25, and call for contrary decisions. And it is computed on those who answer, while disengaged users answer least: a score on 10% of the base describes the 10% still paying attention. Hence the rule, which costs nothing: publish the response rate and the three percentages next to the number.",
     },
     related: ["referral", "viral-coefficient", "churn", "retention"],
+  },
+  // ——— A7.3.e (2026-09-30) — les quatre termes de la vente assistée (ENGINE.md §18.4.1, C25 Q8) ———
+  // Maillage (GROWTH-PLAN.md 2.4) : chaque terme reçoit deux liens de pages
+  // existantes, toutes au plafond de quatre, donc chacun est un ÉCHANGE contre
+  // un lien plus lâche vers une page qui en reçoit beaucoup (revenue 7,
+  // activation 8) : cac et revenue → win-rate, cac-payback et time-to-value
+  // (dernier créneau libre utile) → sales-cycle, arpu et ltv → acv,
+  // acquisition et pql → lead-to-opportunity. Aucune cible ne descend sous 4.
+  "win-rate": {
+    ...GLOSSARY_TERMS["win-rate"],
+    updatedAt: "2026-09-30", // A7.3.e — created
+    extended: {
+      // TODO: à relire (convention 6) — terme neuf, A7.3.e (2026-09-30).
+      fr: "Le taux de closing est le chiffre le plus simple de la vente assistée, et le plus facile à gonfler sans le vouloir. Sa formule tient en une ligne, mais chacun de ses termes cache une décision : ce qui compte comme opportunité, ce qui compte comme perdu, et la période sur laquelle on compte. Une affaire morte depuis trois mois que personne n'a passée en « perdue » n'entre pas au dénominateur, et le taux monte. Un « sans décision » rangé à part fait la même chose. Et un upsell sur un client existant n'a rien à faire dans un taux qui mesure la conquête. Le taux de closing ne se lit donc jamais seul : avec le nombre d'affaires conclues à côté, pour savoir ce que pèse un point, et avec la conversion lead → opportunité en amont, parce qu'un tri plus sévère à l'entrée remonte mécaniquement le taux à la sortie.",
+      en: "Win rate is the simplest number in sales-assisted selling, and the easiest to inflate without meaning to. The formula fits on one line, but each of its terms hides a decision: what counts as an opportunity, what counts as lost, and the period you count over. A deal that died three months ago and was never marked lost stays out of the denominator, and the rate goes up. A \"no decision\" filed separately does the same. And an upsell to an existing customer has no place in a rate that measures winning new business. So win rate is never read alone: with the number of closed deals beside it, to know what one point weighs, and with the lead-to-opportunity rate upstream, because stricter qualification at the entrance mechanically lifts the rate at the exit.",
+    },
+    related: ["revenue", "lead-to-opportunity", "sales-cycle", "cac"],
+  },
+  "sales-cycle": {
+    ...GLOSSARY_TERMS["sales-cycle"],
+    updatedAt: "2026-09-30", // A7.3.e — created
+    extended: {
+      // TODO: à relire (convention 6) — terme neuf, A7.3.e (2026-09-30).
+      fr: "Le cycle de vente dit combien de temps l'argent dépensé attend avant de devenir un client. C'est pour ça qu'il compte bien au-delà de l'équipe commerciale : tant qu'il dure, la dépense est engagée et le revenu n'a pas commencé, et un cycle qui s'allonge pèse sur la trésorerie avant de peser sur le chiffre d'affaires. Il fixe aussi le décalage des autres chiffres : un client signé ce trimestre est né d'une opportunité ouverte des semaines plus tôt, donc d'une dépense faite plus tôt encore. Deux décisions font le chiffre, et elles s'écrivent : où il commence — à la création de l'opportunité, pas au premier contact — et quelle statistique on publie. La médiane, presque toujours : une seule affaire interminable déplace la moyenne de plusieurs semaines sans que rien d'autre n'ait changé.",
+      en: "Sales cycle length says how long money spent waits before it becomes a customer. That is why it matters well beyond the sales team: while it runs, the spend is committed and the revenue has not started, and a lengthening cycle weighs on cash before it weighs on revenue. It also sets the lag of the other numbers: a customer signed this quarter was born from an opportunity opened weeks earlier, and from spend made earlier still. Two decisions make the figure, and both should be written down: where it starts — at the opportunity's creation, not at first contact — and which statistic you publish. The median, almost always: a single endless deal moves the average by weeks while nothing else has changed.",
+    },
+    related: ["cac", "cac-payback", "win-rate", "acv"],
+  },
+  acv: {
+    ...GLOSSARY_TERMS.acv,
+    updatedAt: "2026-09-30", // A7.3.e — created
+    extended: {
+      // TODO: à relire (convention 6) — terme neuf, A7.3.e (2026-09-30).
+      fr: "L'ACV est le chiffre qui décide de ce qu'on peut se permettre pour vendre. Un contrat à quelques centaines d'euros par an ne paie pas un commercial ; un contrat à plusieurs dizaines de milliers en paie un, parfois une équipe. C'est pour ça qu'il se lit à côté du coût d'acquisition plus que de tout autre chiffre : c'est lui qui dit en combien de mois un client rembourse ce qu'il a coûté. Deux pièges le faussent, dans le même sens. Un montant saisi pour toute la durée d'un contrat de trois ans triple l'ACV, et des frais de mise en service facturés une fois s'y glissent comme s'ils revenaient chaque année. Et comme toute moyenne, il se laisse tirer par un gros contrat : regarde la médiane à côté. Ne le confonds pas non plus avec l'ARR, qui additionne tous les contrats actifs, ni avec le revenu moyen de toute la base, qui mélange les nouveaux clients et les anciens.",
+      en: "ACV is the number that decides what you can afford to spend on selling. A contract worth a few hundred euros a year does not pay for a salesperson; one worth tens of thousands pays for one, sometimes for a team. That is why it is read next to the acquisition cost more than next to anything else: it is what says in how many months a customer pays back what it cost. Two traps distort it, in the same direction. An amount entered for the full length of a three-year contract triples the ACV, and set-up fees billed once slip in as if they came back every year. And like any average, it can be dragged by one large contract: look at the median beside it. Do not confuse it with ARR either, which adds up every active contract, or with the average revenue of the whole base, which mixes new customers with old ones.",
+    },
+    related: ["arpu", "ltv", "cac-payback", "sales-cycle"],
+  },
+  "lead-to-opportunity": {
+    ...GLOSSARY_TERMS["lead-to-opportunity"],
+    updatedAt: "2026-09-30", // A7.3.e — created
+    extended: {
+      // TODO: à relire (convention 6) — terme neuf, A7.3.e (2026-09-30).
+      fr: "La conversion lead → opportunité mesure le passage de relais entre le marketing et les ventes : sur les contacts que l'entreprise a attirés, combien un commercial juge assez sérieux pour ouvrir une affaire. C'est le chiffre le plus fragile de l'entonnoir, parce que ses deux termes sont des conventions internes. « Lead » peut vouloir dire tout contact entrant, ou seulement ceux que le marketing a qualifiés — les MQL. « Opportunité » peut vouloir dire une affaire créée par n'importe qui, ou une affaire qu'un commercial a acceptée. Un webinar qui remplit la base de contacts peu intéressés fait chuter le taux sans que rien n'ait changé dans les ventes ; un commercial qui ouvre une opportunité à chaque appel le fait monter sans que rien n'ait changé chez les clients. Écrire les deux définitions, et le délai dans lequel un lead a le droit de devenir une opportunité, c'est donc la moitié du travail.",
+      en: "Lead-to-opportunity rate measures the handover between marketing and sales: of the contacts the company attracted, how many a salesperson judges serious enough to open a deal. It is the most fragile number in the funnel, because both of its terms are internal conventions. \"Lead\" can mean any inbound contact, or only those marketing has qualified — MQLs. \"Opportunity\" can mean a deal anyone created, or one a salesperson accepted. A webinar that fills the database with lukewarm contacts makes the rate fall while nothing changed in sales; a salesperson who opens an opportunity on every call makes it rise while nothing changed among customers. Writing down both definitions, and the window in which a lead is allowed to become an opportunity, is therefore half the job.",
+    },
+    related: ["acquisition", "pql", "win-rate", "cac"],
   },
 };

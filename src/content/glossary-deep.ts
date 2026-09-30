@@ -3148,4 +3148,537 @@ export const GLOSSARY_DEEP: Record<GlossaryTermId, DeepGlossaryContent> = {
       },
     ],
   },
+  // ——— A7.3.e (2026-09-30) — les quatre termes de la vente assistée ———
+  // ENGINE.md §18.4.1 (C25, Q8). Every worked example reuses the filled-in
+  // hybrid of ENGINE.md §18.9 — 480 MQLs and 72 opportunities (May to July),
+  // 18 won out of 75 closed and 130 created (June to August), a 64-day median
+  // cycle, €432,000 of annual value over 18 contracts, a €19,000 acquisition
+  // cost, 180,000 € of sales-assisted MRR over 100 customers, and the team's
+  // targets of 18% and 32% — never a new set of numbers. The 75% and 60%
+  // margins are the spec's own test cases (§18.9.6), stated as hypotheses.
+  // No benchmark figure from the audit instrument (`audit-catalog.ts`, not
+  // reviewed, and ENGINE.md decision 6 forbids importing from it): the
+  // "Orders of magnitude" of these pages are either internal (what one deal
+  // weighs on the rate) or cited to a public primary source, as context that
+  // never designates (C1). `glossary.test.ts` holds the exclusion.
+  // TODO: à relire (convention 6) — les quatre entrées, copie neuve du 2026-09-30.
+  "win-rate": {
+    formula: {
+      expression: t(
+        "Win rate = new-customer opportunities won ÷ new-customer opportunities closed (won + lost), over the same period",
+        "Taux de closing = opportunités « nouveau client » gagnées ÷ opportunités « nouveau client » conclues (gagnées + perdues), sur la même période",
+      ),
+      terms: [
+        {
+          symbol: t("Won", "Gagnées"),
+          meaning: t(
+            "Contracts signed with a new customer during the period. Renewals and upsells are counted elsewhere: they measure keeping and growing a customer, not winning one, and mixing them in flatters the number.",
+            "Les contrats signés avec un nouveau client pendant la période. Les renouvellements et les upsells se comptent ailleurs : ils mesurent la façon de garder et de faire grandir un client, pas celle d'en gagner un, et les mélanger flatte le chiffre.",
+          ),
+        },
+        {
+          symbol: t("Closed", "Conclues"),
+          meaning: t(
+            "Won plus lost, and only those. An opportunity still open is neither a loss nor a win yet: it waits for the period in which it closes. Dividing by every opportunity created instead is the most common error, and it mixes a flow with an outcome.",
+            "Les gagnées plus les perdues, et seulement elles. Une opportunité encore ouverte n'est encore ni une perte ni un gain : elle attend la période où elle se conclut. Diviser par toutes les opportunités créées est l'erreur la plus courante, et elle mélange un flux avec un résultat.",
+          ),
+        },
+        {
+          symbol: t("Lost", "Perdues"),
+          meaning: t(
+            "Every closed deal that did not sign, \"no decision\" and silences included. A deal that stopped moving months ago and was never closed out is a loss nobody recorded, and each one of them lifts the rate.",
+            "Toute affaire conclue qui ne s'est pas signée, « sans décision » et silences compris. Une affaire qui ne bouge plus depuis des mois et qu'on n'a jamais clôturée est une perte que personne n'a notée, et chacune remonte le taux.",
+          ),
+        },
+      ],
+      note: t(
+        "Also called close rate. Some tools call it a \"conversion rate\" and divide by every opportunity created: the same words then describe another number, lower and slower to move. Check the denominator before comparing two figures.",
+        "On dit aussi « win rate », ou « taux de transformation ». Certains outils l'appellent « taux de conversion » et divisent par toutes les opportunités créées : les mêmes mots décrivent alors un autre chiffre, plus bas et plus lent à bouger. Vérifie le dénominateur avant de comparer deux chiffres.",
+      ),
+    },
+    example: {
+      title: t("18 signatures, and the denominator that decides what they mean", "18 signatures, et le dénominateur qui décide de ce qu'elles valent"),
+      steps: [
+        t(
+          "A B2B software company, June to August: 130 new-customer opportunities created, 75 closed — 18 won, 57 lost. The two counts do not cover the same deals: some of the 75 were opened before June, and many of the 130 are still open.",
+          "Un éditeur de logiciel B2B, de juin à août : 130 opportunités « nouveau client » créées, 75 conclues — 18 gagnées, 57 perdues. Les deux comptes ne portent pas sur les mêmes affaires : une partie des 75 avait été ouverte avant juin, et beaucoup des 130 sont encore ouvertes.",
+        ),
+        t(
+          "Win rate = 18 ÷ 75 = 24%. Divided by the 130 created instead, it would read 14% — a number that mixes this quarter's new pipeline with the deals that happened to finish in it.",
+          "Taux de closing = 18 ÷ 75 = 24 %. Divisé par les 130 créées, il afficherait 14 % — un chiffre qui mélange le pipeline neuf du trimestre avec les affaires qui s'y sont terminées.",
+        ),
+        t(
+          "On 75 closed deals, one deal more or less moves the rate by about 1.3 points (100 ÷ 75). Going from 24% to 25% is one signature, not a trend.",
+          "Sur 75 affaires conclues, une affaire de plus ou de moins bouge le taux d'environ 1,3 point (100 ÷ 75). Passer de 24 % à 25 %, c'est une signature, pas une tendance.",
+        ),
+        t(
+          "The team's target is 32%. On the same 75 deals, 32% would have signed 24 (75 × 0.32), six more a quarter. At an annual contract value of €24,000, that is 6 × €2,000 = €12,000 of new monthly recurring revenue per quarter, about €4,000 a month.",
+          "La cible de l'équipe est 32 %. Sur les mêmes 75 affaires, 32 % en auraient signé 24 (75 × 0,32), six de plus par trimestre. Avec une valeur annuelle de contrat de 24 000 €, c'est 6 × 2 000 € = 12 000 € de revenu mensuel récurrent nouveau par trimestre, soit environ 4 000 € par mois.",
+        ),
+      ],
+      takeaway: t(
+        "A win rate is only as honest as its denominator. Write down what counts as closed, count the silent deals as lost, and publish the number of closed deals next to the rate: at 75 deals a quarter, a point weighs less than one customer.",
+        "Un taux de closing ne vaut que ce que vaut son dénominateur. Écris ce qui compte comme conclu, compte les affaires silencieuses comme perdues, et publie le nombre d'affaires conclues à côté du taux : à 75 affaires par trimestre, un point pèse moins d'un client.",
+      ),
+    },
+    benchmark: [
+      t(
+        "Published win-rate tables are plentiful and hard to use: most come from vendor surveys, on populations, deal sizes and definitions of \"closed\" that are rarely stated. A figure divided by opportunities created and one divided by opportunities closed can be ten points apart on the same pipeline, as the example shows.",
+        "Les tableaux de taux de closing publiés sont nombreux et difficiles à utiliser : la plupart viennent d'enquêtes d'éditeurs, sur des populations, des tailles d'affaires et des définitions de « conclu » rarement précisées. Un chiffre divisé par les opportunités créées et un autre divisé par les conclues peuvent être à dix points l'un de l'autre sur le même pipeline, comme le montre l'exemple.",
+      ),
+      t(
+        "The rate moves with deal size and with how strictly opportunities are qualified. A team that opens an opportunity at the first call and a team that waits for a confirmed budget are not measuring the same thing, and neither of them is wrong.",
+        "Le taux bouge avec la taille des affaires et avec la sévérité de la qualification. Une équipe qui ouvre une opportunité au premier appel et une équipe qui attend un budget confirmé ne mesurent pas la même chose, et aucune des deux n'a tort.",
+      ),
+      t(
+        "The comparison worth making is your own rate, quarter after quarter, with the same definition and the number of closed deals beside it. At 75 deals a quarter, one deal is 1.3 points: a change of one or two points is one or two signatures, not a trend.",
+        "La comparaison qui vaut la peine est ton propre taux, trimestre après trimestre, à définition constante et avec le nombre d'affaires conclues à côté. À 75 affaires par trimestre, une affaire vaut 1,3 point : un écart d'un ou deux points, ce sont une ou deux signatures, pas une tendance.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Close out the dead deals. Set a rule — no activity for a fixed number of days means lost — and apply it before every count. The rate will drop the first time, and it will finally be true.",
+        "Clôture les affaires mortes. Pose une règle — sans activité depuis un nombre de jours fixé, l'affaire est perdue — et applique-la avant chaque comptage. Le taux baissera la première fois, et il sera enfin juste.",
+      ),
+      t(
+        "Record a reason for every loss, from a short closed list, and read them each quarter. Price, timing, a competitor and \"no decision\" call for four different fixes, and a win rate without reasons cannot say which one applies.",
+        "Note une raison pour chaque perte, dans une liste courte et fermée, et relis-les chaque trimestre. Le prix, le calendrier, un concurrent et « sans décision » appellent quatre corrections différentes, et un taux sans raisons ne dit pas laquelle.",
+      ),
+      t(
+        "Qualify earlier rather than push harder at the end. A deal that was weak when it was opened costs less sales time to drop at qualification than to lose after the proposal.",
+        "Qualifie plus tôt plutôt que de pousser plus fort à la fin. Une affaire faible dès son ouverture coûte moins de temps commercial à écarter à la qualification qu'à perdre après la proposition.",
+      ),
+      t(
+        "Split it by segment and by source. A blended rate over small and large deals, or over inbound and referred opportunities, describes none of them — and the segments are where a decision can act.",
+        "Découpe-le par segment et par source. Un taux global sur les petites et les grosses affaires, ou sur les opportunités entrantes et recommandées, n'en décrit aucune — et c'est sur les segments qu'une décision peut agir.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "rev-1",
+      body: t(
+        "The Tour asks whether your pricing has been tested rather than just chosen — 20 points for tested against alternatives, 7 for chosen with some reasoning, 0 for picked arbitrarily. It does not ask for a win rate, but in a sales-assisted business this is where the answer lives: every proposal is a price put in front of a buyer, and every loss with a written reason says whether that price held. A team that tracks its win rate and its loss reasons quarter after quarter is running a pricing test, whether it planned one or not; a team with neither has only the price it picked.",
+        "Le Tour demande si ton pricing a été testé plutôt que simplement choisi — 20 points s'il a été testé face à des alternatives, 7 s'il a été choisi avec une logique, 0 s'il l'a été un peu arbitrairement. Il ne demande pas de taux de closing, mais en vente assistée c'est là que vit la réponse : chaque proposition est un prix posé devant un acheteur, et chaque perte dont la raison est écrite dit si ce prix a tenu. Une équipe qui suit son taux de closing et ses raisons de perte, trimestre après trimestre, fait tourner un test de pricing, qu'elle l'ait prévu ou non ; une équipe qui n'a ni l'un ni les autres n'a que le prix qu'elle a choisi.",
+      ),
+    },
+    faq: [
+      {
+        question: t("How do you calculate win rate?", "Comment calculer le taux de closing ?"),
+        answer: t(
+          "Take the new-customer opportunities that closed in the period, won or lost, and divide the won ones by all of them. 18 won out of 75 closed is 24%. Open deals stay out until they close, and dead ones go in as lost.",
+          "Prends les opportunités « nouveau client » conclues sur la période, gagnées ou perdues, et divise les gagnées par l'ensemble. 18 gagnées sur 75 conclues, c'est 24 %. Les affaires ouvertes restent dehors jusqu'à leur conclusion, et les affaires mortes entrent comme perdues.",
+        ),
+      },
+      {
+        question: t("What is a good win rate?", "C'est quoi un bon taux de closing ?"),
+        answer: t(
+          "No figure travels between companies, because the rate depends on deal size and on how strictly an opportunity is qualified before it is opened. The useful question is whether yours moves from one quarter to the next with the definition held constant, and what the loss reasons say when it does.",
+          "Aucun chiffre ne voyage d'une entreprise à l'autre, parce que le taux dépend de la taille des affaires et de la sévérité avec laquelle on qualifie une opportunité avant de l'ouvrir. La question utile est de savoir si le tien bouge d'un trimestre à l'autre à définition constante, et ce que disent les raisons de perte quand il bouge.",
+        ),
+      },
+      {
+        question: t("Win rate or close rate: is there a difference?", "Win rate, taux de closing, taux de transformation : quelle différence ?"),
+        answer: t(
+          "Usually none in the words, often one in the denominator. Most teams divide by closed deals, some by every opportunity created, a few by every lead. Say which, because on the same pipeline the first two can be ten points apart.",
+          "En général aucune dans les mots, souvent une dans le dénominateur. La plupart des équipes divisent par les affaires conclues, certaines par toutes les opportunités créées, quelques-unes par tous les leads. Dis lequel, parce que sur le même pipeline les deux premiers peuvent être à dix points l'un de l'autre.",
+        ),
+      },
+      {
+        question: t("Should renewals and upsells count?", "Faut-il compter les renouvellements et les upsells ?"),
+        answer: t(
+          "Not in this rate. They measure keeping and growing a customer, not winning one, and the renewal rate and net revenue retention already follow them. Mixed in, they lift the win rate in quarters heavy in renewals and hide how new business is really doing.",
+          "Pas dans ce taux. Ils mesurent la façon de garder et de faire grandir un client, pas celle d'en gagner un, et le taux de renouvellement et la rétention nette du revenu (NRR) les suivent déjà. Mélangés, ils remontent le taux de closing les trimestres riches en renouvellements et cachent l'état réel de la conquête.",
+        ),
+      },
+    ],
+  },
+
+  "sales-cycle": {
+    formula: {
+      expression: t(
+        "Sales cycle = median of (signature date − opportunity creation date), in days, over the new-customer deals won in the period",
+        "Cycle de vente = médiane de (date de signature − date de création de l'opportunité), en jours, sur les affaires « nouveau client » gagnées de la période",
+      ),
+      terms: [
+        {
+          symbol: t("The start", "Le départ"),
+          meaning: t(
+            "The day the opportunity was created in the CRM. Not the first website visit, not the first email: those belong upstream. What matters is that the starting point stays the same every quarter — a team that starts opening opportunities only after the demo shortens its cycle on paper, and nowhere else.",
+            "Le jour où l'opportunité a été créée dans le CRM. Pas la première visite du site, pas le premier e-mail : ceux-là relèvent de l'amont. Ce qui compte, c'est que le point de départ reste le même chaque trimestre — une équipe qui se met à n'ouvrir l'opportunité qu'après la démo raccourcit son cycle sur le papier, et nulle part ailleurs.",
+          ),
+        },
+        {
+          symbol: t("The finish", "L'arrivée"),
+          meaning: t(
+            "The signature of a new-customer contract. Lost deals stay out of the median: they would mix how long it takes to win with how long it takes to give up. Their duration is worth reading separately.",
+            "La signature d'un contrat « nouveau client ». Les affaires perdues restent hors de la médiane : elles mélangeraient le temps qu'il faut pour gagner et celui qu'il faut pour abandonner. Leur durée se lit à part, et elle vaut la peine.",
+          ),
+        },
+        {
+          symbol: t("The median", "La médiane"),
+          meaning: t(
+            "The middle deal once they are sorted by duration — with an even count, the average of the two middle ones. It ignores how far the extremes go, which is exactly the property wanted here: sales cycles have a long tail, and the tail is not the typical deal.",
+            "L'affaire du milieu, une fois les affaires triées par durée — avec un nombre pair, la moyenne des deux du milieu. Elle ignore jusqu'où vont les extrêmes, ce qui est exactement la propriété voulue ici : les cycles de vente ont une longue traîne, et la traîne n'est pas l'affaire typique.",
+          ),
+        },
+      ],
+      note: t(
+        "Most CRM reports give an average by default. The median usually takes an export, and is worth the export.",
+        "La plupart des rapports de CRM donnent une moyenne par défaut. La médiane demande en général un export, et elle le vaut.",
+      ),
+    },
+    example: {
+      title: t("64 days, and why the median", "64 jours, et pourquoi la médiane"),
+      steps: [
+        t(
+          "A B2B software company signs 18 new customers from June to August. Sorted by duration, the median is the average of the 9th and 10th deals: 64 days.",
+          "Un éditeur de logiciel B2B signe 18 nouveaux clients de juin à août. Une fois les affaires triées par durée, la médiane est la moyenne des 9ᵉ et 10ᵉ : 64 jours.",
+        ),
+        t(
+          "Stretch the longest of the 18 deals by a full year. The average rises by 365 ÷ 18 ≈ 20 days. The median does not move by a single day: the longest deal was above it, and still is.",
+          "Allonge d'une année entière la plus longue des 18 affaires. La moyenne monte de 365 ÷ 18 ≈ 20 jours. La médiane ne bouge pas d'un jour : la plus longue affaire était au-dessus, elle y reste.",
+        ),
+        t(
+          "What the 64 days do to the other numbers: a contract signed on 1 June after 64 days was opened at the end of March, before the June-to-August window over which the €19,000 customer acquisition cost (CAC) is computed. As long as spend is steady, that lag cancels out; the quarter spend doubles or halves, the CAC describes the previous quarter as much as this one.",
+          "Ce que les 64 jours font aux autres chiffres : un contrat signé le 1ᵉʳ juin après 64 jours a été ouvert fin mars, avant la fenêtre de juin à août sur laquelle se calcule le coût d'acquisition client (CAC) de 19 000 €. Tant que la dépense est stable, ce décalage s'annule ; le trimestre où elle double ou diminue de moitié, le CAC décrit le trimestre précédent autant que celui-ci.",
+        ),
+        t(
+          "And after the signature, the clock the customer cares about keeps running: here, the time to go live is not measured at all. The buyer waits 64 days to sign, then an unknown time to get what they bought.",
+          "Et après la signature, l'horloge qui compte pour le client continue de tourner : ici, le délai de mise en production n'est pas mesuré du tout. L'acheteur attend 64 jours pour signer, puis un temps inconnu pour obtenir ce qu'il a acheté.",
+        ),
+      ],
+      takeaway: t(
+        "Publish the median, say where the clock starts, and read the acquisition cost with the cycle beside it: the longer the cycle, the more this quarter's CAC is a statement about the last one.",
+        "Publie la médiane, dis où l'horloge démarre, et lis le coût d'acquisition avec le cycle à côté : plus le cycle est long, plus le CAC de ce trimestre parle du précédent.",
+      ),
+    },
+    benchmark: [
+      t(
+        "Cycle lengths published by vendors vary with deal size, with the number of people who have to sign, and with where each company starts its clock — and the surveys rarely say which. Two teams quoting the same number of days may not be measuring the same span.",
+        "Les durées de cycle publiées par des éditeurs varient avec la taille des affaires, le nombre de personnes qui doivent signer et l'endroit où chaque entreprise démarre son horloge — et les enquêtes le précisent rarement. Deux équipes qui citent le même nombre de jours ne mesurent peut-être pas la même durée.",
+      ),
+      t(
+        "The order of magnitude that matters is internal: compare the cycle with the window over which you compute your acquisition cost. Under three months, a quarterly CAC is a measure; beyond it, the customers signed this quarter come from spend made in earlier ones, and the CAC is an order of magnitude.",
+        "L'ordre de grandeur qui compte est interne : compare le cycle à la fenêtre sur laquelle tu calcules ton coût d'acquisition. Sous trois mois, un CAC trimestriel est une mesure ; au-delà, les clients signés ce trimestre viennent de dépenses faites les trimestres d'avant, et le CAC devient un ordre de grandeur.",
+      ),
+      t(
+        "Your own trend, with the same starting point and the median, is the comparison that holds. When it lengthens, ask three questions before changing the process: did the deals grow, did the buyers change, or did the clock move?",
+        "Ta propre tendance, au même point de départ et en médiane, est la comparaison qui tient. Quand elle s'allonge, pose trois questions avant de changer le processus : les affaires ont-elles grossi, les acheteurs ont-ils changé, ou l'horloge a-t-elle bougé ?",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Find where the days go. Split the cycle by stage — first meeting, proposal, security review, legal — and work on the longest stage, not the one people complain about most.",
+        "Trouve où partent les jours. Découpe le cycle par étape — premier rendez-vous, proposition, revue de sécurité, juridique — et travaille l'étape la plus longue, pas celle dont on se plaint le plus.",
+      ),
+      t(
+        "Prepare what every buyer asks for: the security questionnaire, the standard contract, the price list. A document sent the same day instead of drafted over two weeks takes two weeks off every deal that needs it.",
+        "Prépare ce que tous les acheteurs demandent : le questionnaire de sécurité, le contrat type, la grille tarifaire. Un document envoyé le jour même au lieu d'être rédigé en deux semaines retire deux semaines à chaque affaire qui en a besoin.",
+      ),
+      t(
+        "Close out the deals that no longer move. They do not lengthen the median of won deals, but they eat the time that would shorten it.",
+        "Clôture les affaires qui ne bougent plus. Elles n'allongent pas la médiane des affaires gagnées, mais elles mangent le temps qui la raccourcirait.",
+      ),
+      t(
+        "Do not shorten it by opening opportunities later. Moving the starting line improves the number without changing the business — and breaks the comparison with every previous quarter.",
+        "Ne le raccourcis pas en ouvrant les opportunités plus tard. Déplacer la ligne de départ améliore le chiffre sans rien changer à l'entreprise — et casse la comparaison avec tous les trimestres d'avant.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "acq-3",
+      body: t(
+        "The Tour asks whether you know your customer acquisition cost, even roughly — 20 points for a solid number, 7 for a rough estimate, 0 for no idea. In a sales-assisted business, the sales cycle decides which of the first two answers is honest. A CAC computed over one quarter assumes the customers it counts were won by that quarter's spend; with a cycle longer than the quarter, they were won by the previous one's. A team that knows its median cycle can say whether its \"solid number\" is a measure or an order of magnitude — which is exactly the gap between 20 points and 7.",
+        "Le Tour demande si tu connais ton coût d'acquisition, même approximatif — 20 points pour un chiffre solide, 7 pour une estimation grossière, 0 pour aucune idée. En vente assistée, c'est le cycle de vente qui décide laquelle des deux premières réponses est honnête. Un CAC calculé sur un trimestre suppose que les clients qu'il compte ont été gagnés par la dépense de ce trimestre ; avec un cycle plus long que le trimestre, ils l'ont été par celle du précédent. Une équipe qui connaît son cycle médian peut dire si son « chiffre solide » est une mesure ou un ordre de grandeur — ce qui est exactement l'écart entre 20 points et 7.",
+      ),
+    },
+    faq: [
+      {
+        question: t("How do you calculate sales cycle length?", "Comment calculer la durée du cycle de vente ?"),
+        answer: t(
+          "For each new-customer deal won in the period, count the days between the opportunity's creation and the signature, then take the median. With 18 deals, the median is the average of the 9th and 10th once they are sorted. Most CRMs export both dates; few compute the median for you.",
+          "Pour chaque affaire « nouveau client » gagnée sur la période, compte les jours entre la création de l'opportunité et la signature, puis prends la médiane. Avec 18 affaires, la médiane est la moyenne des 9ᵉ et 10ᵉ une fois triées. La plupart des CRM exportent les deux dates ; peu calculent la médiane pour toi.",
+        ),
+      },
+      {
+        question: t("Median or average?", "Médiane ou moyenne ?"),
+        answer: t(
+          "The median. Cycle durations have a long tail — a handful of deals that take a year — and the average follows the tail: stretching one deal out of 18 by a year adds about 20 days to the average and nothing to the median. Publish the average too if you like, but steer by the median.",
+          "La médiane. Les durées de cycle ont une longue traîne — une poignée d'affaires qui prennent un an — et la moyenne suit la traîne : allonger d'un an une affaire sur 18 ajoute environ 20 jours à la moyenne, et rien à la médiane. Publie aussi la moyenne si tu veux, mais pilote avec la médiane.",
+        ),
+      },
+      {
+        question: t("What is a normal sales cycle in B2B?", "C'est quoi un cycle de vente normal en B2B ?"),
+        answer: t(
+          "No normal holds across companies: the length follows the size of the deal, the number of people who have to agree, and where the clock starts. The numbers to compare against are your own last quarter, and the window of your acquisition cost — which the cycle should not exceed if that cost is to be read as a measure.",
+          "Aucune normale ne tient d'une entreprise à l'autre : la durée suit la taille de l'affaire, le nombre de personnes qui doivent être d'accord et l'endroit où l'horloge démarre. Les chiffres auxquels te comparer sont ton propre trimestre précédent, et la fenêtre de ton coût d'acquisition — que le cycle ne devrait pas dépasser si ce coût doit se lire comme une mesure.",
+        ),
+      },
+      {
+        question: t("Where does the sales cycle start?", "Où commence le cycle de vente ?"),
+        answer: t(
+          "Wherever you decide, as long as it is written down and never moves. The common choice is the opportunity's creation, because every CRM keeps that date. Starting at first contact gives a longer, more complete number that is harder to measure; both are fine, and switching between them is not.",
+          "Là où tu le décides, pourvu que ce soit écrit et que ça ne bouge plus. Le choix courant est la création de l'opportunité, parce que tout CRM garde cette date. Partir du premier contact donne un chiffre plus long et plus complet, mais plus difficile à mesurer ; les deux conviennent, passer de l'un à l'autre non.",
+        ),
+      },
+    ],
+  },
+
+  acv: {
+    formula: {
+      expression: t(
+        "ACV = total annual value of the new-customer contracts signed in the period ÷ number of those contracts",
+        "ACV = valeur annuelle totale des contrats « nouveau client » signés sur la période ÷ nombre de ces contrats",
+      ),
+      terms: [
+        {
+          symbol: t("Annual value", "Valeur annuelle"),
+          meaning: t(
+            "The recurring amount per year. A three-year contract at €72,000 counts for €24,000; a monthly contract at €2,000 counts for €24,000 too. Anything billed once — set-up, training, a migration — stays out.",
+            "Le montant récurrent par an. Un contrat de trois ans à 72 000 € compte pour 24 000 € ; un contrat mensuel à 2 000 € compte aussi pour 24 000 €. Tout ce qui se facture une fois — mise en service, formation, migration — reste dehors.",
+          ),
+        },
+        {
+          symbol: t("New-customer contracts", "Contrats « nouveau client »"),
+          meaning: t(
+            "The deals that won a customer in the period. Renewals and expansions have their own metrics; mixed in, they describe the installed base rather than what the sales team is winning today.",
+            "Les affaires qui ont gagné un client sur la période. Les renouvellements et les extensions ont leurs propres chiffres ; mélangés ici, ils décrivent la base installée plutôt que ce que l'équipe commerciale gagne aujourd'hui.",
+          ),
+        },
+        {
+          symbol: t("The average", "La moyenne"),
+          meaning: t(
+            "The right statistic for the total — ACV × contracts gives back the value signed — and the wrong one for the typical deal. Publish the median beside it: when the two drift apart, one or two large contracts are carrying the quarter.",
+            "La bonne statistique pour le total — ACV × contrats redonne la valeur signée — et la mauvaise pour l'affaire typique. Publie la médiane à côté : quand les deux s'écartent, un ou deux gros contrats portent le trimestre.",
+          ),
+        },
+      ],
+      note: t(
+        "ACV is a per-contract value. ARR — annual recurring revenue — is the sum over every active contract, and TCV — total contract value — is one contract over its whole length. Three acronyms that look alike and answer three different questions.",
+        "L'ACV est une valeur par contrat. L'ARR — annual recurring revenue, le revenu récurrent annuel — est la somme sur tous les contrats actifs, et la TCV — total contract value, la valeur totale du contrat — est un contrat sur toute sa durée. Trois sigles qui se ressemblent et répondent à trois questions différentes.",
+      ),
+    },
+    example: {
+      title: t("€24,000, and what it pays for", "24 000 €, et ce qu'ils paient"),
+      steps: [
+        t(
+          "From June to August, a B2B software company signs 18 new contracts worth €432,000 a year in total. ACV = 432,000 ÷ 18 = €24,000, or €2,000 a month per contract.",
+          "De juin à août, un éditeur de logiciel B2B signe 18 nouveaux contrats pour 432 000 € par an au total. ACV = 432 000 ÷ 18 = 24 000 €, soit 2 000 € par mois et par contrat.",
+        ),
+        t(
+          "At the end of August, its 100 sales-assisted customers bring in €180,000 of monthly recurring revenue: €1,800 each on average — the average revenue per account, or ARPA. ACV ÷ 12 and ARPA differ because they do not count the same customers: the 18 signed this quarter for one, all 100 for the other. Neither is wrong; using one for the other is.",
+          "Fin août, ses 100 clients en vente assistée rapportent 180 000 € de revenu mensuel récurrent : 1 800 € chacun en moyenne — le revenu moyen par compte, ou ARPA (average revenue per account). L'ACV ÷ 12 et l'ARPA diffèrent parce qu'ils ne comptent pas les mêmes clients : les 18 signés ce trimestre pour l'un, les 100 pour l'autre. Aucun des deux n'a tort ; prendre l'un pour l'autre, si.",
+        ),
+        t(
+          "The acquisition cost is €19,000 per new customer. Suppose a gross margin of 75%: a contract earns 2,000 × 0.75 = €1,500 of margin a month and pays back its cost in 19,000 ÷ 1,500 ≈ 12.7, so 13 months. At 60%, once onboarding is counted in the cost of serving, it is 19,000 ÷ 1,200 ≈ 15.8, so 16 months.",
+          "Le coût d'acquisition est de 19 000 € par nouveau client. Suppose une marge brute de 75 % : un contrat rapporte 2 000 × 0,75 = 1 500 € de marge par mois et rembourse son coût en 19 000 ÷ 1 500 ≈ 12,7, donc 13 mois. À 60 %, une fois la mise en service comptée dans le coût de service, c'est 19 000 ÷ 1 200 ≈ 15,8, donc 16 mois.",
+        ),
+        t(
+          "Now suppose one of the 18, worth €24,000 a year, runs for three years and is entered at its full value, €72,000. The total becomes €480,000 and the ACV €26,667 — an 11% rise produced by a data-entry choice, and a payback that looks more than a month shorter than it is.",
+          "Suppose maintenant que l'un des 18, à 24 000 € par an, court sur trois ans et soit saisi pour sa valeur totale, 72 000 €. Le total passe à 480 000 € et l'ACV à 26 667 € — une hausse de 11 % produite par un choix de saisie, et un délai de remboursement qui paraît plus court de plus d'un mois.",
+        ),
+      ],
+      takeaway: t(
+        "ACV is where the sales model gets its price: it decides how many months of margin a customer needs to repay its acquisition. Annualise every contract, keep one-off fees out, and read it with the median — a quarter carried by one large deal is not a new price level.",
+        "C'est dans l'ACV que le modèle de vente se chiffre : il décide combien de mois de marge un client met à rembourser son acquisition. Ramène chaque contrat à l'année, laisse les frais ponctuels dehors, et lis-le avec la médiane — un trimestre porté par une grosse affaire n'est pas un nouveau niveau de prix.",
+      ),
+    },
+    benchmark: [
+      t(
+        "ACV has no good or bad value: it spans several orders of magnitude from one category to another, and it describes a business model rather than a performance. The question it answers is which way of selling the contract can pay for.",
+        "L'ACV n'a pas de bonne ou de mauvaise valeur : il couvre plusieurs ordres de grandeur d'une catégorie à l'autre, et il décrit un modèle économique plutôt qu'une performance. La question à laquelle il répond est : quelle façon de vendre le contrat peut-il payer ?",
+      ),
+      t(
+        "One framing that has lasted, as context and not as a target: Christoph Janz (Point Nine Capital), \"Five ways to build a $100 million business\", 5 October 2014. To reach $100 million a year, you need about 1,000 large companies paying $100k+ a year, 10,000 mid-sized ones paying $10k+, or 100,000 small businesses paying $1k+. He speaks of revenue per account rather than ACV, but on annual contracts the arithmetic is the same — and he ties the $10k tier to an inside sales team, the $100k tier to enterprise selling and its long cycle.",
+        "Un cadrage qui a duré, comme contexte et non comme cible : Christoph Janz (Point Nine Capital), « Five ways to build a $100 million business », 5 octobre 2014. Pour atteindre 100 millions de dollars par an, il faut environ 1 000 grandes entreprises qui paient plus de 100 000 $ par an, 10 000 entreprises moyennes à plus de 10 000 $, ou 100 000 petites entreprises à plus de 1 000 $. Il parle de revenu par compte plutôt que d'ACV, mais sur des contrats annuels l'arithmétique est la même — et il associe le palier à 10 000 $ à une équipe de vente à distance, celui à 100 000 $ à la vente aux grandes entreprises et à son cycle long.",
+      ),
+      t(
+        "The comparison worth tracking is your own ACV over time, split by segment, with the median beside the average. An average that rises while the median stays flat means the rise came from a few large deals, not from the typical one.",
+        "La comparaison qui vaut d'être suivie est ton propre ACV dans le temps, par segment, avec la médiane à côté de la moyenne. Une moyenne qui monte pendant que la médiane reste stable veut dire que la hausse vient de quelques grosses affaires, pas de l'affaire typique.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Annualise every contract the same way before averaging: total recurring value ÷ years, one-off fees out. Many ACV surprises are data-entry choices, not pricing.",
+        "Ramène chaque contrat à l'année de la même façon avant de faire la moyenne : valeur récurrente totale ÷ nombre d'années, frais ponctuels dehors. Beaucoup de surprises sur l'ACV sont des choix de saisie, pas de prix.",
+      ),
+      t(
+        "Price by segment and read ACV by segment. A single average over small and large accounts describes neither, and it is the segment figure that says which way of selling each one can afford.",
+        "Tarife par segment et lis l'ACV par segment. Une moyenne unique sur les petits et les grands comptes ne décrit ni les uns ni les autres, et c'est le chiffre par segment qui dit quelle façon de vendre chacun peut se payer.",
+      ),
+      t(
+        "Raise it through what the customer uses, not through the length of the contract. A three-year commitment lowers risk and changes nothing to the annual value; more seats, a higher plan or a second product do.",
+        "Fais-le monter par ce que le client utilise, pas par la durée du contrat. Un engagement sur trois ans réduit le risque et ne change rien à la valeur annuelle ; plus de licences, une offre supérieure ou un second produit, si.",
+      ),
+      t(
+        "Check it against the cost of selling. If the months of margin needed to repay an acquisition keep growing, the fix may be in the ACV — or in selling that segment another way.",
+        "Confronte-le au coût de la vente. Si le nombre de mois de marge nécessaires pour rembourser une acquisition ne cesse de monter, la correction est peut-être dans l'ACV — ou dans une autre façon de vendre à ce segment.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "rev-2",
+      body: t(
+        "The Tour asks whether you know your LTV, even roughly — 20 points for a solid estimate, 7 for a very rough guess, 0 for no idea. In a sales-assisted business, ACV is the first input of that estimate and the easiest to get right: the contracts are signed, and the amounts are in the CRM. LTV — lifetime value — is then ACV ÷ 12 × gross margin × the months a customer stays, and what tends to be missing is the margin or the renewal rate, not the ACV. A team that can state its ACV this afternoon is closer to the 20-point answer than it thinks.",
+        "Le Tour demande si tu connais ta LTV, même grossièrement — 20 points pour une estimation solide, 7 pour une estimation très approximative, 0 pour aucune idée. En vente assistée, l'ACV est la première entrée de cette estimation, et la plus facile à obtenir juste : les contrats sont signés, les montants sont dans le CRM. La LTV — lifetime value, la valeur d'un client sur toute sa durée — vaut ensuite ACV ÷ 12 × marge brute × le nombre de mois pendant lesquels un client reste, et ce qui manque en général, c'est la marge ou le taux de renouvellement, pas l'ACV. Une équipe qui peut donner son ACV cet après-midi est plus près des 20 points qu'elle ne le croit.",
+      ),
+    },
+    faq: [
+      {
+        question: t("What does ACV stand for?", "ACV, ça veut dire quoi ?"),
+        answer: t(
+          "Annual contract value: what one customer contract is worth per year, recurring part only. The acronym is the one sales teams use, in French as in English. Outside software the same three letters mean other things — in insurance, for instance — so spell it out once in any document that leaves the team.",
+          "Annual Contract Value, la valeur annuelle d'un contrat : ce qu'un contrat client vaut par an, part récurrente seulement. Le sigle anglais est celui qu'emploient les équipes commerciales, en français aussi. Hors logiciel, les mêmes trois lettres désignent autre chose — en assurance, par exemple —, donc développe-le une fois dans tout document qui sort de l'équipe.",
+        ),
+      },
+      {
+        question: t("ACV vs ARR: what is the difference?", "Quelle différence entre ACV et ARR ?"),
+        answer: t(
+          "ACV is per contract, ARR is a total. ARR — annual recurring revenue — adds up the annual value of every active contract; ACV averages the annual value of the contracts signed in a period. 18 new contracts at €24,000 of ACV add €432,000 to ARR, minus whatever the base lost in the meantime.",
+          "L'ACV est par contrat, l'ARR est un total. L'ARR — le revenu récurrent annuel — additionne la valeur annuelle de tous les contrats actifs ; l'ACV fait la moyenne de la valeur annuelle des contrats signés sur une période. 18 nouveaux contrats à 24 000 € d'ACV ajoutent 432 000 € à l'ARR, moins ce que la base a perdu entre-temps.",
+        ),
+      },
+      {
+        question: t("How do you calculate ACV on a multi-year contract?", "Comment calculer l'ACV d'un contrat pluriannuel ?"),
+        answer: t(
+          "Divide the recurring value by the number of years: a three-year contract at €72,000 has an ACV of €24,000. If the price rises each year, the average over the term is a common convention; write down the one you use, because the first-year value is lower and both circulate.",
+          "Divise la valeur récurrente par le nombre d'années : un contrat de trois ans à 72 000 € a un ACV de 24 000 €. Si le prix monte chaque année, la moyenne sur la durée est une convention courante ; écris celle que tu utilises, parce que la valeur de la première année est plus basse et que les deux circulent.",
+        ),
+      },
+      {
+        question: t("Do set-up fees count?", "Les frais de mise en service comptent-ils ?"),
+        answer: t(
+          "Not in ACV. They are billed once, and ACV is used to project what comes back every year. Report them separately, in a first-year total if you need one; blended in, they flatter every quarter heavy in new customers and none of the years that follow.",
+          "Pas dans l'ACV. Ils se facturent une fois, et l'ACV sert à projeter ce qui revient chaque année. Rapporte-les à part, dans un total de première année si tu en as besoin ; mélangés, ils flattent chaque trimestre riche en nouveaux clients, et aucune des années qui suivent.",
+        ),
+      },
+    ],
+  },
+
+  "lead-to-opportunity": {
+    formula: {
+      expression: t(
+        "Lead-to-opportunity rate = leads created over a three-month cohort that became a qualified opportunity within n days ÷ leads created over those three months",
+        "Conversion lead → opportunité = leads créés sur une cohorte de trois mois devenus une opportunité qualifiée sous n jours ÷ leads créés sur ces trois mois",
+      ),
+      terms: [
+        {
+          symbol: t("The leads", "Les leads"),
+          meaning: t(
+            "Either every inbound contact, or only marketing-qualified leads (MQLs), the ones marketing judged worth passing on. The second gives a higher, steadier rate; both are fine, and the rate is only comparable with itself if the choice never changes. The choice also names the base: \"per 100 leads\" or \"per 100 MQLs\".",
+            "Soit tous les contacts entrants, soit les seuls MQL — marketing-qualified leads, les leads qualifiés par le marketing —, ceux que le marketing a jugés dignes d'être transmis. Le second donne un taux plus haut et plus stable ; les deux conviennent, et le taux n'est comparable qu'à lui-même si le choix ne change jamais. Ce choix nomme aussi la base : « pour 100 leads » ou « pour 100 MQL ».",
+          ),
+        },
+        {
+          symbol: t("The opportunity", "L'opportunité"),
+          meaning: t(
+            "A deal a salesperson has accepted, not merely one that was created. If opportunities open automatically, or are opened by marketing, the rate measures the tooling rather than the handover.",
+            "Une affaire qu'un commercial a acceptée, pas seulement une affaire créée. Si les opportunités s'ouvrent automatiquement, ou si c'est le marketing qui les ouvre, le taux mesure l'outillage plutôt que le passage de relais.",
+          ),
+        },
+        {
+          symbol: t("The window", "Le délai"),
+          meaning: t(
+            "The number of days a lead has to become an opportunity — 30, for instance. Without it, last month's leads look worse than last year's simply because they have had less time. With it, a cohort is read only once its window has closed.",
+            "Le nombre de jours qu'un lead a pour devenir une opportunité — 30, par exemple. Sans lui, les leads du mois dernier paraissent moins bons que ceux de l'an dernier simplement parce qu'ils ont eu moins de temps. Avec lui, une cohorte ne se lit qu'une fois son délai écoulé.",
+          ),
+        },
+      ],
+      note: t(
+        "In some CRMs the step is called MQL to SQL — a sales-qualified lead. The name changes, the question does not: of what marketing passes on, how much does sales take?",
+        "Dans certains CRM, l'étape s'appelle MQL → SQL — sales-qualified lead, le lead qualifié par les ventes. Le nom change, la question non : de ce que le marketing transmet, combien les ventes en prennent-elles ?",
+      ),
+    },
+    example: {
+      title: t("15 out of 100, and a number that looks better", "15 sur 100, et un chiffre qui a l'air meilleur"),
+      steps: [
+        t(
+          "A B2B software company counts only MQLs, with a 30-day window. From May to July it creates 480 of them, about 160 a month; 72 become a qualified opportunity within 30 days. Rate: 72 ÷ 480 = 15%, or 15 opportunities per 100 MQLs.",
+          "Un éditeur de logiciel B2B ne compte que les MQL, avec un délai de 30 jours. De mai à juillet, il en crée 480, environ 160 par mois ; 72 deviennent une opportunité qualifiée sous 30 jours. Taux : 72 ÷ 480 = 15 %, soit 15 opportunités pour 100 MQL.",
+        ),
+        t(
+          "Why May to July, in late September: the window has to have closed. A lead created on 31 July had until 30 August; the last leads of August have not had their 30 days yet, so August waits.",
+          "Pourquoi mai à juillet, fin septembre : le délai doit être écoulé. Un lead créé le 31 juillet avait jusqu'au 30 août ; les derniers leads d'août n'ont pas encore eu leurs 30 jours, donc août attend.",
+        ),
+        t(
+          "From June to August, the sales team created 130 opportunities. Dividing 130 by the 480 MQLs would give 27% — a better-looking number that divides a flow by a cohort from another period, and counts opportunities that never came from an MQL: some came from a customer's referral, some from accounts already using the product.",
+          "De juin à août, l'équipe commerciale a créé 130 opportunités. Diviser 130 par les 480 MQL donnerait 27 % — un chiffre plus flatteur, qui divise un flux par une cohorte d'une autre période et compte des opportunités qui ne sont jamais passées par un MQL : certaines viennent d'une recommandation client, d'autres de comptes qui utilisent déjà le produit.",
+        ),
+        t(
+          "The team's target is 18%. At the same win rate, 18% instead of 15% would bring 18 × 18/15 = 21.6 new customers a quarter instead of 18 — about four more. That is what one step at the top of the funnel is worth at the bottom.",
+          "La cible de l'équipe est 18 %. À taux de closing constant, 18 % au lieu de 15 % donneraient 18 × 18/15 = 21,6 nouveaux clients par trimestre au lieu de 18, soit environ quatre de plus. C'est ce que vaut, en bas de l'entonnoir, un cran gagné en haut.",
+        ),
+      ],
+      takeaway: t(
+        "Write down what a lead is, what an opportunity is and how many days one has to become the other, then read each cohort once its window has closed. Without those three, a lead-to-opportunity rate is a number any team can make go up.",
+        "Écris ce qu'est un lead, ce qu'est une opportunité et combien de jours l'un a pour devenir l'autre, puis lis chaque cohorte une fois son délai écoulé. Sans ces trois-là, une conversion lead → opportunité est un chiffre que n'importe quelle équipe sait faire monter.",
+      ),
+    },
+    benchmark: [
+      t(
+        "Published lead-to-opportunity rates are hard to compare, because the rate depends almost entirely on what each company calls a lead. A base that counts every newsletter sign-up and one that counts only MQLs can be far apart with the very same sales team.",
+        "Les taux de conversion lead → opportunité publiés se comparent mal, parce que le taux dépend presque entièrement de ce que chaque entreprise appelle un lead. Une base qui compte chaque inscription à la newsletter et une base qui ne compte que les MQL peuvent être très éloignées avec exactement la même équipe commerciale.",
+      ),
+      t(
+        "The internal order of magnitude that matters is the size of the base: on 480 MQLs a quarter, one opportunity more or less moves the rate by about 0.2 point. The rate is steady enough to read from one quarter to the next; one point is five opportunities.",
+        "L'ordre de grandeur interne qui compte est la taille de la base : sur 480 MQL par trimestre, une opportunité de plus ou de moins bouge le taux d'environ 0,2 point. Le taux est assez stable pour se lire d'un trimestre à l'autre ; un point, ce sont cinq opportunités.",
+      ),
+      t(
+        "Compare with yourself, definitions frozen. When the definition of a lead changes — a new form, a new event, a new scoring rule — start a new series rather than drawing one line through both.",
+        "Compare-toi à toi-même, définitions figées. Quand la définition d'un lead change — un nouveau formulaire, un nouvel événement, une nouvelle règle de scoring —, commence une nouvelle série plutôt que de tracer une seule courbe à travers les deux.",
+      ),
+    ],
+    howToImprove: [
+      t(
+        "Agree on the definitions with sales before touching anything else: what a lead is, what an accepted opportunity is, how many days the handover may take. It is the cheapest lever on this list, and it makes every other one measurable.",
+        "Mets-toi d'accord avec les ventes sur les définitions avant de toucher à quoi que ce soit : ce qu'est un lead, ce qu'est une opportunité acceptée, combien de jours peut prendre le passage de relais. C'est le levier le moins cher de cette liste, et il rend tous les autres mesurables.",
+      ),
+      t(
+        "Read it by source. A channel that brings many leads and few opportunities costs sales time twice: once to call, once to disqualify. The rate per channel says which sources to fund, and it is the figure behind \"which channel works\".",
+        "Lis-le par source. Un canal qui amène beaucoup de leads et peu d'opportunités coûte deux fois du temps commercial : une fois pour appeler, une fois pour disqualifier. Le taux par canal dit quelles sources financer, et c'est lui qui se cache derrière « quel canal marche ».",
+      ),
+      t(
+        "Speed up the first contact. A lead that waits a week for a call has cooled by the time it gets one, and a rule on response time costs little to set.",
+        "Accélère le premier contact. Un lead qui attend son appel une semaine a refroidi quand il le reçoit, et une règle sur le délai de réponse coûte peu à poser.",
+      ),
+      t(
+        "Qualify on behaviour where the product allows it. A product-qualified lead (PQL) — someone whose usage already predicts buying — arrives with the evidence a salesperson would have spent a call looking for.",
+        "Qualifie sur le comportement quand le produit le permet. Un PQL — product-qualified lead, un lead qualifié par le produit, dont l'usage prédit déjà l'achat — arrive avec la preuve qu'un commercial aurait passé un appel à chercher.",
+      ),
+    ],
+    inTheTour: {
+      questionId: "acq-1",
+      body: t(
+        "The Tour asks whether you have a primary acquisition channel that is identified and measured — 20 points for yes and tracked, 7 for one you do not track closely, 0 for scattered. In sales-assisted selling, \"measured\" means more than lead volume: a channel is measured when you know how many of its leads became opportunities. A team that can say \"our main channel brings 160 MQLs a month, and 15 in 100 become opportunities\" answers 20 points with a straight face; a team that can quote only the leads is closer to 7, because volume alone does not say whether the channel feeds sales or just the database.",
+        "Le Tour demande si tu as un canal d'acquisition principal identifié et mesuré — 20 points s'il est clairement identifié et suivi, 7 si vous en avez un sans le suivre de près, 0 si c'est dispersé. En vente assistée, « mesuré » veut dire plus que le volume de leads : un canal est mesuré quand on sait combien de ses leads sont devenus des opportunités. Une équipe qui peut dire « notre canal principal amène 160 MQL par mois, et 15 sur 100 deviennent des opportunités » répond 20 points sans rougir ; une équipe qui ne cite que les leads est plus près des 7, parce que le volume seul ne dit pas si le canal nourrit les ventes ou seulement la base de contacts.",
+      ),
+    },
+    faq: [
+      {
+        question: t("How do you calculate the lead-to-opportunity conversion rate?", "Comment calculer le taux de conversion lead → opportunité ?"),
+        answer: t(
+          "Take the leads created over a period, count those that became a qualified opportunity within a fixed window — 30 days, say — and divide. 72 opportunities out of 480 MQLs is 15%. Count by cohort: the opportunities that came from those leads, not the opportunities created in the same months.",
+          "Prends les leads créés sur une période, compte ceux qui sont devenus une opportunité qualifiée dans un délai fixé — 30 jours, par exemple — et divise. 72 opportunités sur 480 MQL, c'est 15 %. Compte par cohorte : les opportunités issues de ces leads, pas les opportunités créées les mêmes mois.",
+        ),
+      },
+      {
+        question: t("What is the difference between a lead and an opportunity?", "Quelle différence entre un lead et une opportunité ?"),
+        answer: t(
+          "A lead is a contact who showed interest; an opportunity is a deal a salesperson believes can close, with a need, a buyer and usually an amount. Qualification sits between the two, and this rate is its measure.",
+          "Un lead est un contact qui a montré un intérêt ; une opportunité est une affaire qu'un commercial croit pouvoir conclure, avec un besoin, un acheteur et en général un montant. Entre les deux, il y a la qualification, et ce taux en est la mesure.",
+        ),
+      },
+      {
+        question: t("MQL, SQL, opportunity: in what order?", "MQL, SQL, opportunité : dans quel ordre ?"),
+        answer: t(
+          "The lead, then the MQL when marketing judges it worth passing on, then the SQL — sales-qualified lead — when a salesperson accepts it, and the opportunity once a deal is opened. Many teams merge the last two steps, and it does not matter as long as the rate names both its ends: \"MQL to opportunity\" is not the same number as \"lead to opportunity\".",
+          "Le lead, puis le MQL quand le marketing le juge digne d'être transmis, puis le SQL — le lead qualifié par les ventes — quand un commercial l'accepte, et l'opportunité une fois l'affaire ouverte. Beaucoup d'équipes fusionnent les deux dernières étapes, et peu importe tant que le taux nomme ses deux bouts : « MQL → opportunité » n'est pas le même chiffre que « lead → opportunité ».",
+        ),
+      },
+      {
+        question: t("What is a good lead-to-opportunity rate?", "C'est quoi un bon taux de conversion lead → opportunité ?"),
+        answer: t(
+          "One you can compare with last quarter's, because nothing in the definitions moved. Published figures vary with what counts as a lead far more than with how good a team is, so a table from elsewhere mostly compares definitions.",
+          "Un taux que tu peux comparer à celui du trimestre dernier, parce que rien n'a bougé dans les définitions. Les chiffres publiés varient bien plus avec ce qui compte comme lead qu'avec la qualité d'une équipe, donc un tableau venu d'ailleurs compare surtout des définitions.",
+        ),
+      },
+    ],
+  },
 };

@@ -49,7 +49,14 @@ export type GlossaryTermId =
   // funnel" (which belongs to the 2.3 comparison cluster).
   | "product-led-growth"
   | "arpu"
-  | "nps";
+  | "nps"
+  // A7.3.e (ENGINE.md §18.4.1, C25 Q8) — the four terms of sales-assisted
+  // selling, written before the engine's sales-assisted cards so that each
+  // card can link to one. Slugs in English in both languages (R2-16).
+  | "win-rate"
+  | "sales-cycle"
+  | "acv"
+  | "lead-to-opportunity";
 
 function same(value: string): Translatable {
   return { fr: value, en: value };
@@ -228,6 +235,43 @@ export const GLOSSARY_TERMS: Record<GlossaryTermId, { term: Translatable; defini
     definition: {
       fr: "Le pourcentage de promoteurs moins celui de détracteurs, sur une question en 0-10. Mesure une intention déclarée, jamais un parrainage réellement fait.",
       en: "The percentage of promoters minus the percentage of detractors, on a 0-10 question. It measures stated intent, never a referral actually made.",
+    },
+  },
+  // ——— A7.3.e (2026-09-30) — les quatre termes de la vente assistée ———
+  "win-rate": {
+    // TODO: à relire (convention 6) — terme neuf, A7.3.e (2026-09-30). « Taux de closing » en tête : c'est la requête française, et le nom des fiches du moteur.
+    term: { fr: "Taux de closing — win rate", en: "Win rate" },
+    definition: {
+      // TODO: à relire (convention 6).
+      fr: "La part des opportunités conclues qui se signent : gagnées ÷ (gagnées + perdues), sur une même période. Les affaires encore ouvertes n'y entrent pas.",
+      en: "The share of closed opportunities that are won: won ÷ (won + lost), over the same period. Deals still open stay out of it.",
+    },
+  },
+  "sales-cycle": {
+    // TODO: à relire (convention 6) — terme neuf, A7.3.e. « Sales cycle length » : la forme des requêtes anglaises du jour.
+    term: { fr: "Cycle de vente", en: "Sales cycle length" },
+    definition: {
+      // TODO: à relire (convention 6).
+      fr: "Le temps entre la création d'une opportunité et sa signature, en jours. Il se lit en médiane, parce que quelques affaires très longues tirent la moyenne.",
+      en: "The time from an opportunity's creation to its signature, in days. Read as a median, because a few very long deals drag the average.",
+    },
+  },
+  acv: {
+    // TODO: à relire (convention 6) — terme neuf, A7.3.e. Le sigle développé dans le titre, comme ARPU et NPS (acronyms.test.ts).
+    term: same("ACV — Annual Contract Value"),
+    definition: {
+      // TODO: à relire (convention 6).
+      fr: "Ce qu'un contrat client vaut par an : la part récurrente, hors frais ponctuels, un contrat de plusieurs années ramené à une seule.",
+      en: "What one customer contract is worth per year: the recurring part only, one-off fees excluded, a multi-year deal brought back to one year.",
+    },
+  },
+  "lead-to-opportunity": {
+    // TODO: à relire (convention 6) — terme neuf, A7.3.e. L'anglais reprend le nom de la fiche du moteur (§18.4.2) ; « conversion rate » est dans la définition.
+    term: { fr: "Conversion lead → opportunité", en: "Lead-to-opportunity rate" },
+    definition: {
+      // TODO: à relire (convention 6).
+      fr: "La part des leads d'une période qui deviennent une opportunité qualifiée dans un délai fixé. Le chiffre de la vente assistée qui dépend le plus des définitions.",
+      en: "The conversion rate from lead to sales opportunity: the share of a period's leads that a salesperson turns into a qualified deal within a set window.",
     },
   },
 };
