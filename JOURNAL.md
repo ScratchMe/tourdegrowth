@@ -5728,3 +5728,21 @@ Le nom tranché par Antoine le 2026-09-29 (C2), codé. En français, le moteur s
 **Et ce qu'A7.1 rendait faux dans les textes de lancement** : cinq textes du lancement B disaient encore qu'une fuite peut être nommée « contre une fourchette publiée » (Show HN, Reddit, Indie Hackers, newsletters, fil X/Bluesky, annuaires, brief concurrentiel). Ils disent maintenant « contre une cible que tu fixes ; les fourchettes publiées servent à situer ». Le récit d'Indie Hackers gagne l'histoire du churn 1-2 % qui signalait l'exemple à tort. Les longueurs déclarées des annuaires sont recalculées par `check-lengths.mjs --fix`.
 
 **Vérifié** : `grep -rn "oteur de croissance"` ne trouve plus dans `src/`, `e2e/` et `marketing/` que les trois usages génériques gardés.
+
+**En production** : PR [#204](https://github.com/ScratchMe/tourdegrowth/pull/204), mergée le 2026-09-30 à 10 h 07 UTC (squash `9417d70`, 25 fichiers, identique à la tête de la PR), servie à 10 h 08 UTC. Relevé par HTTP, entités décodées : `/fr/privacy` porte « moteur de growth » dans ses deux paragraphes et la date du 30 septembre 2026. Le moteur reste en 404 derrière son drapeau.
+
+## A7.6 : la slide « fuite » d'une étape sans prix (2026-09-30)
+
+C9, tranché par Antoine le 2026-09-29, codé. Quand le diagnostic nomme **seule** une étape que le modèle ne sait pas chiffrer en argent (la rétention à J30, la part d'inscrits recommandés), la slide « fuite » **existe**. Jusque-là, `buildLeak` l'omettait sans rien dire, et le deck perdait la conclusion que le tableau affiche. Quand combler l'écart rapporterait **moins d'un client** par mois, l'omission est gardée : ce n'est pas un argument de comité.
+
+**Ce qui la compose** :
+- **Le titre** `leakClearUnpriced`, qui nomme la valeur et la cible sans montant : « **La rétention à J30 freine le moteur** : 5 %, pour 20 % (cible de l'équipe). »
+- **Le pied** `leakFooterUnpriced`, qui dit pourquoi il n'y a pas de montant : « Sans montant : le moteur ne relie pas ce chiffre au MRR ».
+- **Pas de carte « Le calcul »**, puisqu'il n'y a pas de chaîne à montrer. La colonne « À côté » prend alors toute la largeur (`.leak[data-calc="false"]`), plutôt que de laisser une colonne vide.
+- **L'export texte et les notes** suivent sans code à part, puisqu'ils lisent le même modèle de slide.
+- Les deux gabarits neufs sont « à relire ». Les deux conditions que `!impact || less-than-one` confondait sont maintenant deux branches.
+
+**Vérifié** :
+- **Non-vacuité** : remettre l'omission fait rougir le test de la slide, et le garde-fou des phrases, qui exige qu'un scénario déclenche chaque titre.
+- **Tests unitaires** : une rétention à J30 seule sous sa cible donne une slide avec un titre sans « € » ni « MRR », sans ligne de calcul, et « ## 2. » dans l'export, en FR et en EN. Un gain d'un tiers de client ne donne pas de slide.
+- **Un e2e**, en FR et en EN, à 1 280 et 390 px : la slide rendue, sans « Le calcul », avec « À côté » et le pied, sans défilement horizontal.

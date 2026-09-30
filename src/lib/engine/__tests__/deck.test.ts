@@ -63,6 +63,46 @@ describe("§9.2 — presence, default inclusion, order", () => {
     expect(slide(model, "leak").present).toBe(false);
   });
 
+  /**
+   * C9 (2026-09-29, ENGINE.md §9.3): a stage the model can't price keeps its
+   * slide; a gain under one customer a month doesn't get one. Non-vacuity,
+   * measured 2026-09-30: putting back the old omission (an unpriced stage
+   * returns `absent`) fails the first test on `present`.
+   */
+  it("C9: day-30 retention named alone gets its leak slide — its value and target, no amount, no calculation", () => {
+    // Activation past its target, churn under its own, day 30 at 5 % against the team's 20 %: the only stage behind.
+    let s = withEntry(exampleState(), "act.rate", measured(ratio(200, 800), tool));
+    s = withEntry(s, "ret.logo-churn", measured(ratio(6, 400), tool));
+    s = withTarget(withEntry(s, "ret.d30", measured(ratio(40, 800), tool)), "ret.d30", 20);
+    for (const locale of ["fr", "en"] as const) {
+      const leak = slide(deck(s, locale), "leak");
+      const strings = props[locale].strings;
+      expect(leak.present, locale).toBe(true);
+      expect(leak.title.key).toBe("leakClearUnpriced");
+      const title = renderTitle(leak.title, strings);
+      expect(title).toBe(
+        locale === "fr"
+          ? "**La rétention à J30 freine le moteur**\u00a0: 5\u00a0%, pour 20\u00a0% (cible de l'équipe)."
+          : "**Day-30 retention is holding the engine back**: 5%, against 20% (team target).",
+      );
+      // No money anywhere on it, and no chain: the calculation card has nothing to show.
+      expect(title).not.toMatch(/€|MRR/);
+      expect(leak.lines.filter((l) => l.row === "calc")).toEqual([]);
+      expect(leak.lines.find((l) => l.row === "footer")!.text).toBe(strings.slide.leakFooterUnpriced);
+      // The others still stand alongside, and the text export carries the same slide.
+      expect(leak.lines.filter((l) => l.row === "aside")).toHaveLength(5);
+      expect(deckMarkdown(deck(s, locale), strings)).toContain(`## 2. ${title}`);
+    }
+  });
+
+  it("C9: a gain under one customer a month keeps the leak slide out", () => {
+    // Three new payers a month: closing activation's gap to 20 % is worth a third of a customer.
+    const s = withEntry(withEntry(exampleState(), "rev.arpa", undefined), "acq.cac", measured(ratio(1_500, 3), tool));
+    const model = deck(s);
+    expect(deriveEngine(s, CTX_FR, null, FR.bridges, FR.strings.units).diagnosis).toMatchObject({ state: "clear", named: ["act.rate"] });
+    expect(slide(model, "leak").present).toBe(false);
+  });
+
   it("an excluded slide gives up its number; unit economics needs a CAC or a computable figure", () => {
     const s = exampleState();
     s.deck.include.leak = false;

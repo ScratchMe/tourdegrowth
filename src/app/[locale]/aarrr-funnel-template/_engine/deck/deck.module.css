@@ -294,6 +294,11 @@
   align-items: start;
 }
 
+/* No calculation to show — a stage the model can't price (C9): the one card left spans the slide. */
+.leak[data-calc="false"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 /* Dashed red: this card is advice, the same grammar as PriorityMove on the result page. */
 .calcCard {
   display: flex;
