@@ -53,21 +53,34 @@ export const InPillarChips = () => {
   );
 };
 
-/** One term, open, so the whole thing can be read without a click: acq-3, with the trigger right after "customer acquisition cost". */
+/**
+ * One term, open, so the whole thing can be read without a click: acq-3, with
+ * the trigger right after "customer acquisition cost". The panel opens in the
+ * top layer (`placement="auto"`), out of the paragraph's flow: the room kept
+ * under the paragraph is only there so it lands inside this story's cell.
+ * It is the ONLY story here that opens one — a page shows one panel at a
+ * time, and a second story opening its own would close this one.
+ */
 export const Open = () => {
   const [open, setOpen] = React.useState("cac");
   return (
-    <p style={{ font: "17px/1.6 Inter, sans-serif", margin: 0, maxWidth: 420 }}>
-      {"Do you know your customer acquisition cost"}
-      <GlossaryTerm id="cac" locale="en" openId={open} onOpenChange={(id) => setOpen(id ?? "")} {...LABELS} />
-      {", even roughly?"}
-    </p>
+    <div style={{ paddingBottom: 200 }}>
+      <p style={{ font: "17px/1.6 Inter, sans-serif", margin: 0, maxWidth: 420 }}>
+        {"Do you know your customer acquisition cost"}
+        <GlossaryTerm id="cac" locale="en" openId={open} onOpenChange={(id) => setOpen(id ?? "")} {...LABELS} />
+        {", even roughly?"}
+      </p>
+    </div>
   );
 };
 
-/** French: same id, the French definition and link labels — ret-3, whose "?" keeps its non-breaking space after the trigger. */
+/**
+ * French: ret-3, whose "?" keeps its non-breaking space after the trigger,
+ * with the French labels. Closed on purpose: only one panel is open on a page
+ * (see Open), and the French definition itself is DefinitionPopover's French.
+ */
 export const French = () => {
-  const [open, setOpen] = React.useState("churn");
+  const [open, setOpen] = React.useState("");
   return (
     <p style={{ font: "17px/1.6 Inter, sans-serif", margin: 0, maxWidth: 420 }}>
       {"Connais-tu ta principale cause de churn"}

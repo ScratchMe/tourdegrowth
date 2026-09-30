@@ -118,7 +118,7 @@ Target 390px. Nothing may scroll horizontally at 360px.
   row, a solid dot counted, a hatched one estimated, an outline not counted,
   and « not measured » a whole hatched panel with a « ? » — never 100 empty
   dots, which read as nobody. Its legend is a `DotLegend`, drawn by the same
-  rules. `size="slide"` is the same grid on a 1920px slide.
+  rules. `medium="slide"` is the same grid on a 1920px slide.
 - The five pillar scores as a shape are `StageProfile` (« Profil du
   parcours » / "Route profile") — one climb per stage,
   as high as the points it is missing, the named stage flagged « HC ». It

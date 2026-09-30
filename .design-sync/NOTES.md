@@ -132,6 +132,21 @@ still carrying `verdict` (removed in extension 03), `PriorityMove` missing
 Check the build log for `[DTS] parsed N .d.ts files from .../dist/types` — if
 that path is not `dist/types`, the contracts are wrong.
 
+**The driver does not run `cfg.buildCmd`.** `resync.mjs` reads whatever
+`dist/types/` holds; only `package-build.mjs` runs the build command. Measured
+on 2026-09-30: after merging A5, the render was current (it is built from
+`src/`) while the contracts still said `Button compact`, `Segmented size="md" |
+"compact"` and `ClickPill size="compact"`, because `dist/types/` dated from the
+previous merge. So before any driver run that follows a source change, run the
+build command by hand:
+
+```sh
+npx tsc -p .design-sync/tsconfig.dts.json && node .design-sync/relativize-dts.mjs && node .design-sync/check-inventory.mjs
+```
+
+and check it: `grep -rl 'compact?: boolean' ds-bundle/components/` (or any
+prop the change retired) must return nothing after the rebuild.
+
 `tsconfig.dts.json`'s `include` is narrowed to `../src/components/**/*` on
 purpose. Widening it reaches `src/proxy.ts` and `lib/i18n/meta.ts`, which
 import Next, which pulls in `@vercel/og`'s `declare module 'react'` — and a
@@ -184,9 +199,9 @@ in a browser: a `ReferenceError` while the bundle evaluates, before
 listed FIRST in `cfg.extraEntries` (ES modules evaluate in import order). The
 file's header says the same; do not reorder the list.
 
-## The three standing validate warnings
+## The four standing validate warnings
 
-All three are non-blocking and all are expected:
+All four are non-blocking and all are expected:
 
 - `[FONT_MISSING] "Impact"` — the system-font fallback above.
 - `[GRID_OVERFLOW] DefinitionPopover (Docked)` — the check is a **property**
@@ -206,6 +221,16 @@ All three are non-blocking and all are expected:
   component takes its documented fallback (`open`, a fixed layer), and a
   transformed, clipped 760×720 frame contains it. Checked in the screenshot
   on 2026-09-28: three stories, each inside its frame, none over another.
+- `[GRID_OVERFLOW] GlossaryTerm (Open)` — since A4 (2026-09-29) the term
+  opens ONE `DefinitionPopover`, `placement="auto"`, in the top layer, and a
+  page shows one panel at a time: opening a second closes the first. In the
+  column card that meant `French` showed closed although its code opened it,
+  and `Open`'s panel hung under its cell. Decided by Antoine on 2026-09-30
+  (accept, and make the card honest): `French` now renders its trigger closed
+  on purpose (the French definition is `DefinitionPopover`'s `French`), and
+  `Open` keeps 200px of room under its paragraph so the panel lands inside
+  its own cell. Checked in the screenshot. The property test still flags it,
+  and `cardMode: "single"` stays refused for the same reason as the others.
 
 Wide components get `cardMode: "column"` in `cfg.overrides` (one full-width
 card per story) — 29 of them now: most of `game` (`ActionCard` joined on
@@ -301,13 +326,19 @@ doc comment says why the layout uses an auto margin rather than
 ## Synced
 
 Project `23b9671c-a55b-452e-aa41-39906ee71ba8` ("Tour de Growth"), pinned as
-`projectId` in `config.json`. **Last upload: 2026-09-29**, from a claude.ai/code
-cloud session — 77 components, **238 story cells**, all graded good; 398 files
-(308 component files, 77 compiled previews, `_vendor/`, `fonts/`, bundle, CSS,
-README), no delete. `report_validate`: 77 total, 0 bad, 0 thin, 0 identical.
-The anchor `_ds_sync.json` now covers all 77, so the next re-sync skips every
-component whose sources did not change. The previous upload (2026-09-11) held
-34 components and 116 cells.
+`projectId` in `config.json`. **Last upload: 2026-09-30**, from a claude.ai/code
+cloud session, after A1, A2, A4 and A5 — 79 components, **244 story cells**, all
+graded good; 408 files (316 component files, 79 compiled previews, `_vendor/`,
+`fonts/`, bundle, CSS, README, the sentinel and the anchor), no delete.
+`report_validate`: 79 total, 0 bad, 0 thin, 0 identical; anchor `bundleSha12`
+`f3b4bf9eb3c5`. The next re-sync skips every component whose sources did not
+change. Earlier uploads: 2026-09-29 (77 components, 238 cells, anchor
+`17cca5e0909b`), 2026-09-11 (34 components, 116 cells).
+
+The cell count is what the previews export, not a sum of what each session
+announced: A1 and A2 each counted from 244 (A1: 245, A2: 251), but the
+2026-09-29 grading had already removed cells that duplicated a neighbour or
+lied, bringing 245 down to 238. 238 + DotGrid's 3 + DotLegend's 3 = 244.
 
 **Sessions do upload now.** The `DesignSync` tool answered from a cloud session
 with the claude.ai login — no `/design-login`, no local machine. The
@@ -320,7 +351,10 @@ The upload path for a pinned project is the skill's **atomic** one: re-fetch
 concurrent sync), sentinel `_ds_needs_recompile` first, content in chunks
 (`components/` in two halves of 154, then `_preview/` + root files, then
 `_vendor/` alone — `react.js` is 1.1 MB —, then `fonts/`), `upload.deletePaths`
-verbatim, sentinel again, `_ds_sync.json` last, `list_files` to confirm.
+verbatim, sentinel again, `_ds_sync.json` last, `list_files` to confirm. On
+2026-09-30 two chunks of 200 (root files, `_preview/`, `_vendor/` and the first
+half of `components/`, then the rest), `styles.css`, then `fonts/` went through
+without a size error.
 
 ## A fresh clone needs two installs before anything runs
 
@@ -470,6 +504,24 @@ except the first, which was the product's:
 
 ## Re-sync risks
 
+- **Merging `main` in the middle of a re-sync.** A5 renamed variant props and
+  stories (`mobile`/`desktop`/`compact` → `sm`/`md`, `Frame` → `Call`,
+  `tone="red"` → `alert`, `DotGrid size` → `medium`, `DgFace size` →
+  `framing`) in the same previews this sync had corrected: eleven conflicted.
+  Keep the product-true content and apply the renames — and then grep **every**
+  preview for the retired values, because a cleanly auto-merged file can still
+  carry an old value on a line only this branch added (it happened in
+  `StatTile`, `size="responsive"`, and `QuarterNews`, `DgFace size="avatar"`).
+  The table of retired names is in `conventions.md`, "Variant names". An old
+  value renders nothing wrong-looking: an unknown `size` falls back to the
+  default, silently.
+- **A component changed, its preview did not: the grade is carried.** Grades
+  follow the preview sources, not the component's. After a merge, list the
+  components whose `src/components/` files changed (`git diff --name-only`)
+  and spot-check the ones the driver did not queue:
+  `package-capture.mjs --components A,B --spot-check-components A,B`. On
+  2026-09-30 that is how `GlossaryTerm`'s one-panel-at-a-time card was seen.
+
 - **Previews drift from the product silently.** A change to the game model,
   the copy library or a component's defaults does not touch
   `.design-sync/previews/`, and nothing fails: the cell still renders. When
@@ -493,7 +545,7 @@ except the first, which was the product's:
   Executable doesn't exist`); re-run `npx playwright install chromium`.
 - **The grades in `.design-sync/.cache/` are not committed.** What makes
   verification durable is the uploaded `_ds_sync.json`. If that anchor is ever
-  lost or the project is recreated, all 77 components re-verify from scratch —
+  lost or the project is recreated, all 79 components re-verify from scratch —
   which is a few hours of reading sheets, not minutes.
 - **The `--entry ./dist/index.js` trick breaks the day the repo gains a real
   `dist/`.** If a build is ever added, drop the flag and set `cfg.buildCmd`.
