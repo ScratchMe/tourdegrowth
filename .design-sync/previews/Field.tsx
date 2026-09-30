@@ -11,24 +11,26 @@ import { Field, Segmented, TextArea } from "tour-de-growth";
  * Every story mirrors a real call. Strings are the product's, copied
  * verbatim: the growth engine's from `src/content/engine-copy.ts` (EN and FR,
  * `{n}` filled the way `fillTemplate` fills it), the audit's from
- * `src/app/(app)/admin/audit/` (French only — the tool is). The engine marks
- * an optional field inside its label, « (optional) » / « (facultatif) »; no
- * product call passes the `optional` prop, so no story does either.
+ * `src/app/(app)/admin/audit/` (French only — the tool is). An optional field
+ * says so with Field's `optional` word, drawn quieter after the label (C29,
+ * 2026-09-30): the engine passes `workbench.optional`, "optional" /
+ * « facultatif », and no label carries the word itself.
  */
 
 const NB = " ";
 
-// engine-copy.ts:463-467 (sheet.definitionNote, sheet.definitionNoteHint)
+// engine-copy.ts (sheet.definitionNote, sheet.definitionNoteHint, workbench.optional)
 const DEFINITION = {
-  en: { label: "Your definition (optional)", hint: 'For example "active = at least one project edited". It appears in the slides\' appendix and in the requests you copy.' },
+  en: { label: "Your definition", optional: "optional", hint: 'For example "active = at least one project edited". It appears in the slides\' appendix and in the requests you copy.' },
   fr: {
-    label: "Ta définition (facultatif)",
+    label: "Ta définition",
+    optional: "facultatif",
     hint: `Par exemple «${NB}actif = au moins un projet modifié${NB}». Elle apparaît dans l'annexe des slides et dans les demandes que tu copies.`,
   },
 };
 
 /**
- * The engine's metric sheet, `_engine/MetricSheet.tsx:501-518` (`DefinitionNote`):
+ * The engine's metric sheet, `_engine/MetricSheet.tsx` (`DefinitionNote`):
  * `size="sm"`, a two-row TextArea capped (softly) at `TEXT_LIMITS.definitionNote`
  * = 200. The error prop is only set after a refused save (see `Invalid`).
  */
@@ -36,7 +38,7 @@ const DefinitionNote = ({ locale, initial, error }: { locale: "en" | "fr"; initi
   const [value, setValue] = React.useState(initial);
   const t = DEFINITION[locale];
   return (
-    <Field size="sm" label={t.label} hint={t.hint} error={error}>
+    <Field size="sm" label={t.label} optional={t.optional} hint={t.hint} error={error}>
       {({ id, describedBy, invalid }) => (
         <TextArea id={id} value={value} onChange={setValue} maxLength={200} invalid={invalid} aria-describedby={describedBy} rows={2} />
       )}
@@ -60,9 +62,10 @@ export const AroundTextArea = () => (
 
 /**
  * A Segmented named by its Field (`group`, `labelledBy`): the legend is the
- * words on screen. The engine's setup, `_engine/Setup.tsx:186-195` — no hint,
+ * words on screen. The engine's setup, `_engine/Setup.tsx` (the activation window) — no hint,
  * default size, 7 days pre-set as in the setup (`activationWindowDays` 7).
- * Labels: engine-copy.ts:172 and 174 (`{n} jours` in French).
+ * Labels: engine-copy.ts, `setup.activationWindow` and `setup.windowDays`
+ * (`{n} jours` in French).
  */
 export const AroundSegmented = () => {
   const [en, setEn] = React.useState<"7" | "14" | "30">("7");
@@ -104,7 +107,7 @@ export const AroundSegmented = () => {
 /**
  * Invalid — cannot be saved as it is: after a refused save, the same
  * definition field over its 200-character limit. The message is
- * `fillTemplate(sheet.tooLong, { n: 200 })` (engine-copy.ts:502,
+ * `fillTemplate(sheet.tooLong, { n: 200 })` (engine-copy.ts,
  * sheet-problems.ts:51-52): a red rule and 600 weight, read before the hint;
  * the TextArea takes the 3px red edge and its count turns red (226/200,
  * 230/200). The typed definitions are a person's words, lengthened from the

@@ -285,7 +285,11 @@ accessible name alone is anonymous to half the people using it. `TextField`,
 `NumberField`, `Select`, `DateField` and `Choices` render their own; wrap a
 `TextArea`, a `Segmented` (`labelledBy`) or a list of `Checkbox`es in one.
 The label is a sentence in Inter, never the mono meta-label; an optional
-field says so with a word, a required one carries no mark.
+field says so with Field's `optional` word ("optional" / « facultatif »),
+drawn quieter after the label and never written inside it; a required one
+carries no mark. The one exception is a one-question screen whose question
+is the label: the quiz's free context writes « (optionnel) » in the question
+itself (`TextArea`, `Empty`).
 
 - **Native underneath, always**: `<input>`, `<select>`, radios, checkboxes.
   No custom dropdown or listbox; the select keeps the platform's chevron,
@@ -303,7 +307,10 @@ field says so with a word, a required one carries no mark.
   controls), `sm` for a sheet of fields (44px). Never both in one form.
 - **Numbers look like numbers**: tabular Inter, a box as wide as the
   magnitude (`fit="content"`, `digits`), the unit inside it where the caller's
-  locale puts it (€26,000 / 26 000 €). A count out of a count is a `FieldRow`.
+  locale puts it (€26,000 / 26 000 €). The `prefix`/`suffix` string carries
+  the space its language writes — none in "€500" or "140%", a no-break space
+  in « 500 € », « 20 % », « 3 jours » — and the box adds none. A count out of
+  a count is a `FieldRow`; its joiner sits against the first box.
 - **One focus ring and one selection language**: `--field-focus-ring` is the
   system's ink ring on every control (the red `--focus-ring-invert` is for
   ink- or red-filled surfaces only); a chosen option is the inverse fill.

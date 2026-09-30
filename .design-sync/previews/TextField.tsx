@@ -11,9 +11,10 @@ import { TextField } from "tour-de-growth";
  * verbatim: the growth engine's from `src/content/engine-copy.ts` (EN and FR,
  * `{n}` filled the way `fillTemplate` fills it), the audit's from
  * `src/app/(app)/admin/audit/` (French only). Limits are `TEXT_LIMITS`
- * (`src/lib/engine/catalog-shape.ts:483`). No product call passes `optional`
- * (the engine writes « (optional) » into the label), `countLabel`,
- * `placeholder` on these fields, or `disabled`, so no story does.
+ * (`src/lib/engine/catalog-shape.ts:483`). `optional` is passed where the
+ * engine passes it, with `workbench.optional` (C29, 2026-09-30: the word left
+ * the labels). No product call passes `countLabel`, `placeholder` on these
+ * fields, or `disabled`, so no story does.
  */
 
 const NB = " ";
@@ -25,30 +26,30 @@ const Live = ({ initial, ...rest }: { initial: string } & Omit<React.ComponentPr
 
 const Pair = ({ children }: { children: React.ReactNode }) => <div style={{ display: "grid", gap: 26, maxWidth: 560 }}>{children}</div>;
 
-// The engine's setup, `_engine/Setup.tsx:207-215`: default size, limit TEXT_LIMITS.companyLabel = 60.
-// engine-copy.ts:176-180 (setup.companyLabel, setup.companyHint).
+// The engine's setup, `_engine/Setup.tsx` (the company name): default size, limit TEXT_LIMITS.companyLabel = 60.
+// engine-copy.ts (setup.companyLabel, setup.companyHint, workbench.optional — C29: the word is Field's, not the label's).
 const COMPANY = {
-  en: { label: "Your SaaS or company name (optional)", hint: "It only appears on your slides, and stays on this device like everything else." },
-  fr: { label: "Nom de ton SaaS ou de ton entreprise (facultatif)", hint: "Il n'apparaît que sur tes slides, et reste sur cet appareil comme le reste." },
+  en: { label: "Your SaaS or company name", optional: "optional", hint: "It only appears on your slides, and stays on this device like everything else." },
+  fr: { label: "Nom de ton SaaS ou de ton entreprise", optional: "facultatif", hint: "Il n'apparaît que sur tes slides, et reste sur cet appareil comme le reste." },
 };
 
 /** Empty: the setup's name field as it first appears. No placeholder, no count yet. English, then French. */
 export const Empty = () => (
   <Pair>
-    <Live initial="" label={COMPANY.en.label} hint={COMPANY.en.hint} maxLength={60} />
-    <Live initial="" label={COMPANY.fr.label} hint={COMPANY.fr.hint} maxLength={60} />
+    <Live initial="" label={COMPANY.en.label} optional={COMPANY.en.optional} hint={COMPANY.en.hint} maxLength={60} />
+    <Live initial="" label={COMPANY.fr.label} optional={COMPANY.fr.optional} hint={COMPANY.fr.hint} maxLength={60} />
   </Pair>
 );
 
 /**
  * Filled, well under the limit: still no count — it costs no line until it
- * matters. The name is the product's own example company (engine-copy.ts:1478,
+ * matters. The name is the product's own example company (engine-copy.ts,
  * `example.company`).
  */
 export const Filled = () => (
   <Pair>
-    <Live initial="Example SaaS" label={COMPANY.en.label} hint={COMPANY.en.hint} maxLength={60} />
-    <Live initial="Exemple SaaS" label={COMPANY.fr.label} hint={COMPANY.fr.hint} maxLength={60} />
+    <Live initial="Example SaaS" label={COMPANY.en.label} optional={COMPANY.en.optional} hint={COMPANY.en.hint} maxLength={60} />
+    <Live initial="Exemple SaaS" label={COMPANY.fr.label} optional={COMPANY.fr.optional} hint={COMPANY.fr.hint} maxLength={60} />
   </Pair>
 );
 
@@ -56,8 +57,8 @@ export const Filled = () => (
  * The ask on the slides, `_engine/deck/AskForm.tsx:169-179` (through
  * `DraftText`, :58-80): `size="sm"`, limit TEXT_LIMITS.askWhat = 120, and the
  * error set the moment the text runs past it, with
- * `fillTemplate(sheet.tooLong, { n: 120 })` (engine-copy.ts:502). Label:
- * engine-copy.ts:972 (`ask.what`). The typed asks start from the engine's own
+ * `fillTemplate(sheet.tooLong, { n: 120 })` (engine-copy.ts). Label:
+ * engine-copy.ts (`ask.what`). The typed asks start from the engine's own
  * sample (`what` in content/__tests__/engine-copy.test.ts) and add the deck
  * tests' bullets (« refaire l'onboarding », « instrumenter J30 »).
  */
@@ -104,7 +105,7 @@ export const OverTheLimit = () => (
  * Invalid, empty, after a refused save: the engine's activation event
  * (`_engine/ValueEditor.tsx:217-225`, a text value, limit TEXT_LIMITS.value =
  * 120). Label: the metric's name (`src/content/engine-catalog.ts:256`); message:
- * `fillTemplate(workbench.saveNeeds, { fields: name })` (engine-copy.ts:572).
+ * `fillTemplate(workbench.saveNeeds, { fields: name })` (engine-copy.ts).
  */
 export const Invalid = () => (
   <Pair>

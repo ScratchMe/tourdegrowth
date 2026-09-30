@@ -190,6 +190,35 @@ describe("DateField", () => {
     expect(out).toMatch(/<option value="09" selected="">septembre<\/option>/);
   });
 
+  /**
+   * A11.2 (2026-09-30): the 31st of February had its message and no red
+   * edge — only an empty part took the status. When all three are chosen and
+   * the field is invalid, the three together are what is wrong. Non-vacuity:
+   * on the earlier DayField this finds no `aria-invalid` at all.
+   */
+  it("marks all three parts invalid for a day the calendar lacks, and only the empty ones otherwise", () => {
+    const day = (value: { day: string; month: string; year: string }, extra: { error?: string; missing?: string }) =>
+      html(
+        createElement(DateField, {
+          precision: "day",
+          label: "Reçu le",
+          id: "r",
+          value,
+          onChange: noop,
+          monthNames: ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"],
+          years: [2025, 2026, 2027],
+          partLabels: { day: "Jour", month: "Mois", year: "Année" },
+          ...extra,
+        }),
+      );
+    const impossible = day({ day: "31", month: "02", year: "2026" }, { error: "Ce jour n'existe pas." });
+    expect(impossible.match(/aria-invalid="true"/g)).toHaveLength(3);
+    const partial = day({ day: "31", month: "02", year: "" }, { missing: "Il manque une partie de la date." });
+    expect(partial).not.toMatch(/aria-invalid/);
+    const partialInvalid = day({ day: "31", month: "", year: "" }, { error: "Ce jour n'existe pas." });
+    expect(partialInvalid.match(/aria-invalid="true"/g)).toHaveLength(2);
+  });
+
   it("draws a month as one select of the months the caller offers", () => {
     const out = html(
       createElement(DateField, {

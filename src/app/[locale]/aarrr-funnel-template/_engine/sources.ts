@@ -69,25 +69,39 @@ export interface NumberUnit {
 
 const intlLocale = (locale: "en" | "fr") => (locale === "fr" ? "fr-FR" : "en-GB");
 
-/** "%" in English, "30 %" with its no-break space in French. */
+/** "%" in English, "30 %" with its no-break space in French: the unit carries its own space, the box adds none (C28). */
 export function percentUnit(locale: "en" | "fr"): NumberUnit {
   return { suffix: locale === "fr" ? "\u00a0%" : "%", unitName: unitWord("percent", locale) };
 }
 
-/** A word that follows the number ("days" / « jours »): shown, and read as it is shown. */
-export function wordUnit(word: string): NumberUnit {
-  return { suffix: word, unitName: word };
+/**
+ * A word that follows the number, after a no-break space, in the number's
+ * grammatical number: « 1 jour », « 3 jours », "1 day", "0 days" (A11.1: the
+ * engine's own example read « 1 jours »). `Intl.PluralRules` decides, so
+ * French's singular below 2 comes with it. Shown, and read as it is shown.
+ */
+export function wordUnit(words: { one: string; other: string }, locale: "en" | "fr", value: number | null): NumberUnit {
+  const word = value !== null && new Intl.PluralRules(intlLocale(locale)).select(value) === "one" ? words.one : words.other;
+  return { suffix: `\u00a0${word}`, unitName: word };
 }
 
-/** "€26,000" in English, « 26 000 € » in French: the sign where the reader's language writes it. */
+/**
+ * "€26,000" in English, « 26 000 € » in French: the sign where the reader's
+ * language writes it, with the space it writes between them — `Intl`'s own
+ * literal, a no-break space in French, none before "€" in English. The box
+ * adds none (C28, 2026-09-30).
+ */
 export function moneyUnit(currency: Currency, locale: "en" | "fr"): NumberUnit {
   const parts = new Intl.NumberFormat(intlLocale(locale), { style: "currency", currency }).formatToParts(2);
-  const first = parts.findIndex((p) => p.type === "currency") < parts.findIndex((p) => p.type === "integer");
+  const at = parts.findIndex((p) => p.type === "currency");
+  const first = at < parts.findIndex((p) => p.type === "integer");
+  const beside = parts[first ? at + 1 : at - 1];
+  const space = beside?.type === "literal" ? beside.value : "";
   const symbol = currencySymbol(currency, locale);
   const name = new Intl.NumberFormat(intlLocale(locale), { style: "currency", currency, currencyDisplay: "name" })
     .formatToParts(2)
     .find((p) => p.type === "currency")?.value;
-  return { ...(first ? { prefix: symbol } : { suffix: symbol }), unitName: name ?? currency };
+  return { ...(first ? { prefix: symbol + space } : { suffix: space + symbol }), unitName: name ?? currency };
 }
 
 function unitWord(unit: "percent", locale: "en" | "fr"): string | undefined {

@@ -34,11 +34,14 @@ import styles from "./Sheet.module.css";
 const ROLES = Object.keys(ROLE_KEY) as RoleId[];
 const BASES = Object.keys(BASIS_KEY) as EstimateBasis[];
 
-/** The unit inside a bound's or a target's box, placed by the page's language. */
-function unitOf(shape: MetricShape, view: EngineView): NumberUnit {
+/** The unit inside a bound's or a target's box, placed by the page's language — a duration's word in the number's grammatical number (A11.1). */
+function unitOf(shape: MetricShape, view: EngineView, value: number | null): NumberUnit {
   if (shape.unit === "percent") return percentUnit(view.ctx.locale);
   if (shape.unit === "money") return moneyUnit(view.state.setup.currency, view.ctx.locale);
-  if (shape.unit === "duration") return wordUnit(view.strings.workbench.days);
+  if (shape.unit === "duration") {
+    const w = view.strings.workbench;
+    return wordUnit({ one: w.day, other: w.days }, view.ctx.locale, value);
+  }
   return {};
 }
 
@@ -251,7 +254,7 @@ export function MetricSheet({
               value={draft.low}
               onChange={(low) => update({ low })}
               locale={locale}
-              {...unitOf(shape, view)}
+              {...unitOf(shape, view, draft.low)}
               parseError={strings.workbench.notANumber}
             />
             <NumberField
@@ -262,7 +265,7 @@ export function MetricSheet({
               value={draft.high}
               onChange={(high) => update({ high })}
               locale={locale}
-              {...unitOf(shape, view)}
+              {...unitOf(shape, view, draft.high)}
               parseError={strings.workbench.notANumber}
             />
           </FieldRow>
@@ -398,7 +401,7 @@ export function MetricSheet({
               : fill(strings.sheet.noReference, { reason: metric.noReferenceReason ?? "" })}
           </p>
           {isCandidate && variant === "board" ? (
-            <TargetField id={id} prefix={prefix} target={target} unit={unitOf(shape, view)} view={view} actions={actions} />
+            <TargetField id={id} prefix={prefix} target={target} unitFor={(value) => unitOf(shape, view, value)} view={view} actions={actions} />
           ) : null}
           {positionText ? (
             <p className={[styles.position, position === "below" ? styles.positionBelow : ""].filter(Boolean).join(" ")} data-testid="engine-position">
@@ -502,6 +505,7 @@ function DefinitionNote({
       size="sm"
       id={`${prefix}-definition`}
       label={strings.sheet.definitionNote}
+      optional={strings.workbench.optional}
       hint={strings.sheet.definitionNoteHint}
       error={error ? fill(strings.sheet.tooLong, { n: TEXT_LIMITS.definitionNote }) : null}
     >
@@ -529,14 +533,14 @@ function TargetField({
   id,
   prefix,
   target,
-  unit,
+  unitFor,
   view,
   actions,
 }: {
   id: MetricId;
   prefix: string;
   target: number | undefined;
-  unit: NumberUnit;
+  unitFor: (value: number | null) => NumberUnit;
   view: EngineView;
   actions: EngineActions;
 }) {
@@ -546,6 +550,7 @@ function TargetField({
       size="sm"
       id={`${prefix}-target`}
       label={view.strings.sheet.target}
+      optional={view.strings.workbench.optional}
       hint={view.strings.sheet.targetHint}
       value={value}
       onChange={setValue}
@@ -554,7 +559,7 @@ function TargetField({
       }}
       locale={view.ctx.locale}
       digits={5}
-      {...unit}
+      {...unitFor(value)}
       parseError={view.strings.workbench.notANumber}
     />
   );
