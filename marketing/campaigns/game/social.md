@@ -55,6 +55,8 @@ deceptive.design, sans le citer.
 
 ## Le créneau réactif — le Digital Fairness Act
 
+**Abandonné le 2026-09-30** (`marketing/campaigns/README.md` §10, C23) : le jeu attend le moteur et ne sera pas ouvert quand la Commission publiera sa proposition, visée pour novembre 2026. Le texte ci-dessous est gardé pour mémoire.
+
 Le jour où la Commission publie sa proposition, et **seulement si le jeu est
 ouvert** : un post FR et un EN dans les 48 h, qui dit ce que le texte vise
 (la résiliation aussi simple que la souscription, les mécanismes addictifs)

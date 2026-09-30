@@ -91,6 +91,7 @@ Le jeu est purement client, sans serveur, bilingue dès la conception, et chaque
 - Une mécanique validée en quatre itérations avec Antoine : tension réelle, victoire possible, révélation qui cogne.
 - Tout est donnée : les quatre autres niveaux se déclinent sans nouveau moteur.
 - Un déclencheur réglementaire daté (Digital Fairness Act fin 2026) qui donnera de l'écho.
+  **Renoncé par Antoine le 2026-09-30 (`CHANTIERS.md` C23)** : le jeu attend l'ouverture du moteur (sans doute début 2027) et ne sera pas ouvert à la proposition, visée pour novembre 2026 (MLex, 23/09/2026). La phrase du jeu qui dit la proposition « attendue fin 2026 » (`content/game/retention.ts:487-488`) est à remettre à jour avant l'ouverture.
 - Cohérent avec la boucle de croissance de Tour de Growth : le résultat d'un niveau est partageable, le hub renvoie vers le Tour, le Tour renvoie vers le jeu.
 
 ### 3.2 Contre, sans enjoliver

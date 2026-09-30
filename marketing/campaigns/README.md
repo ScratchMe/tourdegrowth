@@ -232,7 +232,7 @@ l'**espacement** entre deux lancements ne se comprime jamais (règle 2 du §0).
 | S7 | Lecture C à J+7 : fins, catalogue ouvert, rejeu | GoatCounter, `/admin/stats` | Session | — |
 | **S8** · 16-22 nov | Lectures J+28 de A, J+28 de B ; lecture C à J+14 ; règle de coupe (§7) | — | Session, Antoine décide | — |
 | **S10** · ~7 déc | Lecture C à J+30, décision sur la place de l'encart de résultat (GAME-BRIEF §13.5) | `/admin/stats` | Antoine | Un mois de données |
-| **Réactif** | Le jour où la Commission publie le Digital Fairness Act : un post X / Bluesky FR et EN dans les 48 h, **seulement si C est ouvert** | X, Bluesky | Session (texte le jour même), Antoine | Aucune date promise |
+| **Réactif** | ~~Le jour où la Commission publie le Digital Fairness Act : un post X / Bluesky FR et EN dans les 48 h, seulement si C est ouvert~~ **Abandonné le 2026-09-30 (§10, C23) : le jeu attend le moteur et ne sera pas ouvert à la proposition, visée pour novembre 2026** | X, Bluesky | — | Retiré |
 
 **Coût d'infrastructure des merges** (convention 13) : les ouvertures B et C
 sont deux merges de code, chacun ~43 Mo de Functions Storage pendant 30 jours ;
@@ -331,7 +331,7 @@ visite.**
 | **Un pseudonyme qui ne poste que ses propres liens** est enterré sur HN et supprimé sur Reddit | Commenter sans lien entre les lancements (S2, S5) ; deux Show HN au plus, à trois semaines d'écart ; jamais le même texte deux fois |
 | **Glorification** : le jeu peut se lire comme un manuel de manipulation | Les textes de lancement ne décrivent jamais une astuce comme efficace ; ils parlent du coût différé et de la fin propre possible. La recette (GAME-BRIEF §7.3) le surveille en test |
 | **Diffamation** : citer une marque réelle dans un post | Aucune marque réelle dans un post, jamais. Les cas réels restent dans le catalogue du jeu, relus juridiquement |
-| **Le Digital Fairness Act glisse** | Aucune date promise ; créneau réactif seulement, et seulement si C est ouvert |
+| **Le Digital Fairness Act glisse** | Aucune date promise ; créneau réactif seulement, et seulement si C est ouvert. **Depuis le 2026-09-30 (C23), le créneau est abandonné : le jeu ouvrira après la proposition. Le risque devient l'inverse, un fait du jeu périmé à l'ouverture (`content/game/retention.ts:487`), à remettre à jour avant (`CHANTIERS.md` E)** |
 | **Un pic de trafic sur le Tour pendant une panne Gemini** | Le Tour et le moteur n'appellent aucun modèle ; seul le Deep dive tombe, et son écran d'erreur rejoue la requête (`GROWTH-PLAN.md` §8). La limite de débit en mémoire (R-15) est le point faible connu |
 | **Le moteur est lu comme un outil pour tous les modèles** | Le kit et les textes disent « v1 : SaaS en libre-service (freemium ou essai) » ; les autres profils sont annoncés comme à venir, sans date |
 | **Les cibles d'ouverture sont fausses d'un ordre de grandeur** | Recalage à J+7, écrit (§1) ; la règle de coupe porte sur des ratios, pas sur les cibles |
@@ -413,3 +413,21 @@ bannissement le plus courant).
   réponse des FAQ (« I keep this account pseudonymous ») est remplacée par
   une réponse qui le nomme, sans insister (texte « à relire »). À faire :
   `CHANTIERS.md` A7.13.
+
+### Réponse d'Antoine du 2026-09-30 (`CHANTIERS.md` C23)
+
+- **L'ordre des lancements : on attend les deux, le moteur d'abord.** C19
+  tient tel quel : rien ne part avant que le moteur et le jeu soient prêts,
+  et le calendrier garde l'ordre B puis C, avec trois semaines entre les deux
+  Show HN. Le moteur attend tout le lot A7.3 (le B2B assisté) ; le jeu, prêt
+  plus tôt, reste fermé jusqu'à l'ouverture du moteur, sans doute début 2027.
+- **Le créneau réactif du Digital Fairness Act est abandonné.** La Commission
+  vise novembre 2026 pour sa proposition, le 18 étant une date envisagée
+  (MLex, 23/09/2026). Le jeu ne sera pas ouvert à ce moment-là, et la règle
+  du §5 (« seulement si C est ouvert ») le ferme. Ce n'était pas une
+  hypothèse d'école : c'était l'actualité du jeu, et la question a été posée
+  à Antoine avec ce coût.
+- **Conséquence pour le jeu** : sa copie dit que la proposition est
+  « attendue fin 2026 » (`content/game/retention.ts:487-488`). Une fois la
+  proposition publiée, la phrase devient fausse, et le jeu ouvrira après.
+  Elle se remet à jour avant l'ouverture (`CHANTIERS.md` section E et D2).

@@ -5627,3 +5627,18 @@ Les aperçus suivent, et la liste d'attente de `variant-names.test.ts` perd ses 
 
 **Piège** : un `git rebase --onto` qui part d'une base trop ancienne rejoue des commits déjà squashés dans `main` et s'arrête sur un conflit fantôme (convention 12). La base à donner est le dernier commit de la branche du dessous, pas son premier. Ici, `--skip` a suffi : le contenu était déjà là.
 
+
+## C23 : le jeu attend le moteur (2026-09-30)
+
+**La question**, née de C4 la veille : puisque le moteur attend le lot A7.3 (le B2B assisté), le jeu, prêt bien plus tôt, doit-il l'attendre ? C19 disait « rien ne part avant que les deux soient prêts ».
+
+**Vérifié avant de la poser** :
+- **L'avancement des deux produits** : aucun item A7 livré. Le bon à tirer nº7 (le jeu) n'a aucune carte tranchée sur 38. Le nº8 (le moteur) en a 5 sur 82, et sera à refaire après A7.
+- **La date du Digital Fairness Act**, sur laquelle reposait la reco écrite la veille : la Commission vise novembre 2026, le 18 étant une date envisagée (MLex, 23/09/2026). Le programme de travail 2026 disait « quatrième trimestre ».
+- **Le créneau réactif** du calendrier des campagnes, qui ne joue « que si C est ouvert ».
+
+**La réponse d'Antoine : on attend les deux, le moteur d'abord.** La recommandation était de lancer le jeu seul pour profiter du DFA, sans jamais sauter la recette ni la relecture juridique. Elle n'a pas été suivie, en connaissance de ce coût. C19 tient, le calendrier garde B puis C, et le créneau du DFA est abandonné.
+
+**Ce qui en découle** : la copie du jeu dit la proposition du DFA « attendue fin 2026 » (`content/game/retention.ts:487-488`). Le jeu ouvrira après la proposition, et la phrase serait alors fausse. Un déclencheur en section E de `CHANTIERS.md`, et D2, imposent de la réécrire d'après le texte publié avant l'ouverture. Le créneau réactif est barré dans `marketing/campaigns/README.md` §5 et §8, et dans `game/social.md`, gardé pour mémoire.
+
+**Consigné** : `marketing/campaigns/README.md` §10 (réponse du 2026-09-30), `GAME-BRIEF.md` §3, `CHANTIERS.md` (C, D2, E), `CLAUDE.md` (la ligne des décisions, où C24 prend la place de C23).
