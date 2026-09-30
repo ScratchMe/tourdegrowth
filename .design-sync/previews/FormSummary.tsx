@@ -2,44 +2,71 @@ import * as React from "react";
 import { Button, FormSummary } from "tour-de-growth";
 
 /*
- * What stands between the person and « Save », just above the button: a title
- * that counts, a sentence on saving anyway, one link per field. Invalid lines
- * block the save, missing lines do not — with only missing lines the frame is
- * dashed, not red. It replaces the audit's paragraph of red body text, the
- * loudest thing on its screen. The primary button stays the loudest here.
+ * What stands between the person and saving, just above the button: a title
+ * that counts, a sentence on saving anyway, one link per field — each moves
+ * focus into its field, which also says it under itself. It replaced the
+ * audit's paragraph of red body text, the loudest thing on its screen; the
+ * primary button stays the loudest here.
+ *
+ * Its one product call is the audit's row editor (French only),
+ * `app/(app)/admin/audit/RowEditor.tsx:117-129` and `:286-304`: the title is
+ * `FORM_COPY.summaryTitle(n)`, the lead `FORM_COPY.summaryLead`
+ * (labels.ts:125-127), the labels `DEFINITION_FIELD_LABELS` (labels.ts:186-190),
+ * the link targets the fields' ids (`DEFINITION_FIELD_IDS`, RowEditor.tsx:334),
+ * and the button « Enregistrer cette ligne » follows it. Every line it passes is
+ * `kind: "missing"` — a row saves anyway — so the frame is always dashed,
+ * « not yet ». The component also takes `invalid` lines (they block the save
+ * and turn the frame red), but no product call produces one, so no story shows it.
  */
 
-/** A refused save, in French: one line blocks, two do not. */
-export const RefusedSave = () => (
+const LEAD = "La ligne s'enregistre quand même — l'export la signalera comme incomplète plutôt que de faire croire qu'elle est finie.";
+
+const AboveTheButton = ({ children }: { children: React.ReactNode }) => (
   <div style={{ display: "grid", gap: 26, maxWidth: 560 }}>
-    <FormSummary
-      title="3 choses avant d'enregistrer"
-      lead={"La première bloque l'enregistrement. Les deux autres non : la ligne s'enregistre et l'export la signale."}
-      items={[
-        { targetId: "signups", label: "Inscrits en juillet 2026", message: "Ce n'est pas un nombre lisible.", kind: "invalid" },
-        { targetId: "unit", label: "Unité", kind: "missing" },
-        { targetId: "source", label: "D'où vient ce chiffre ?", kind: "missing" },
-      ]}
-    />
+    {children}
     <div>
-      <Button variant="primary">Enregistrer ce chiffre</Button>
+      <Button>Enregistrer cette ligne</Button>
     </div>
   </div>
 );
 
-/** Only missing fields: nothing blocks, so the frame is dashed — « not yet ». */
-export const MissingOnly = () => (
-  <div style={{ display: "grid", gap: 26, maxWidth: 560 }}>
+/**
+ * A row with a value and a new definition: `seedDefinition` fills only the
+ * scope (the mission's, never empty), so `missingDefinitionFields` returns the
+ * other three required fields. `summaryTitle(3)`; no message after a label.
+ */
+export const ThreeFields = () => (
+  <AboveTheButton>
     <FormSummary
-      title="2 things still to fill in"
-      lead="The line saves anyway, and the export flags it as incomplete."
+      title="3 champs à compléter"
+      lead={LEAD}
       items={[
-        { targetId: "unit", label: "Unit", kind: "missing" },
-        { targetId: "source", label: "Where does it come from?", kind: "missing" },
+        { targetId: "def-unit", label: "Unité", kind: "missing" },
+        { targetId: "def-numerator", label: "Population au numérateur", kind: "missing" },
+        { targetId: "def-denominator", label: "Population au dénominateur", kind: "missing" },
       ]}
     />
-    <div>
-      <Button variant="primary">Save this number</Button>
-    </div>
-  </div>
+  </AboveTheButton>
+);
+
+/**
+ * The definition complete, an argued threshold chosen without its argument:
+ * one line, the singular title `summaryTitle(1)`, and the field's own message
+ * after a dash (`CRITERION_ARGUMENT_MISSING`, CriterionEditor.tsx:20).
+ */
+export const OneFieldWithItsMessage = () => (
+  <AboveTheButton>
+    <FormSummary
+      title="Un champ à compléter"
+      lead={LEAD}
+      items={[
+        {
+          targetId: "criterionJustification",
+          label: "Argument",
+          message: "Un seuil argumenté porte son argument (q5) : sans lui, le validateur signalera cette ligne.",
+          kind: "missing",
+        },
+      ]}
+    />
+  </AboveTheButton>
 );
