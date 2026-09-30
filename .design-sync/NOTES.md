@@ -329,15 +329,22 @@ doc comment says why the layout uses an auto margin rather than
 ## Synced
 
 Project `23b9671c-a55b-452e-aa41-39906ee71ba8` ("Tour de Growth"), pinned as
-`projectId` in `config.json`. **Last upload: 2026-09-30 (B3)**, from a
-claude.ai/code cloud session, after A7.10 and A10 — **88 components, 292 story
-cells**, all graded good; 453 files (352 component files, 88 compiled previews,
-`_vendor/`, `fonts/`, bundle, CSS, README, the sentinel and the anchor), no
-delete. `report_validate`: 88 total, 0 bad, 0 thin, 0 identical; anchor
-`bundleSha12` `d1835d51cffd`. The next re-sync skips every component whose
-sources did not change. Earlier uploads: 2026-09-30 before A10 (79 components,
-244 cells, anchor `f3b4bf9eb3c5`), 2026-09-29 (77, 238, `17cca5e0909b`),
-2026-09-11 (34, 116).
+`projectId` in `config.json`. **Last upload: 2026-09-30, after A11, C28 and
+C29**, from a claude.ai/code cloud session, the same evening as B3 — **88
+components, 292 story cells**, all graded good; the driver re-captured the
+five components those changes touch (`DateField`, `Field`, `FieldRow`,
+`NumberField`, `TextField`, 26 cells regraded) and carried the others forward.
+453 files (352 component files, 88 compiled previews, `_vendor/`, `fonts/`,
+bundle, CSS, README, the sentinel and the anchor), no delete. Pushed twice
+that evening: first with anchor `f8933d513a1e`, then again once the copy
+reviewer (`relecteur-copie`) found four preview docs and `conventions.md`
+still saying what A11 and C29 had just changed (the TextField header, the
+FieldRow joiner, line numbers shifted by the diff, plain spaces in the
+no-break examples) — renders identical, sources only. `report_validate`: 88
+total, 0 bad, 0 thin, 0 identical; anchor `bundleSha12` `8235f4e6de01`. The next re-sync skips every component whose sources did not
+change. Earlier uploads: 2026-09-30 B3 (88, 292, `d1835d51cffd`), 2026-09-30
+before A10 (79 components, 244 cells, anchor `f3b4bf9eb3c5`), 2026-09-29 (77,
+238, `17cca5e0909b`), 2026-09-11 (34, 116).
 
 The cell count is what the previews export, not a sum of what each session
 announced. `CHANTIERS.md` B3 expected 284 (244, plus `ShareCard.Owner`, plus
@@ -535,10 +542,10 @@ cause in eight components:
 - **States no call site produces**, dropped rather than rewritten, because a
   card teaches the design agent a usage: `disabled`/`disabledReason` on
   `TextField`, `Select`, `Checkbox`; `Select missing`; `Choices
-  disabledLead`; `Checkbox invalid`; `FormSummary`'s `invalid` line. The
-  `optional` prop is in the same case — no call passes it, the engine writes
-  « (optional) » inside its labels — and no preview passes it. If one of
-  these gets wired, add its cell then, from that call site.
+  disabledLead`; `Checkbox invalid`; `FormSummary`'s `invalid` line. If one
+  of these gets wired, add its cell then, from that call site. (`optional`
+  was in the same case until C29, the same evening: the engine now passes
+  it, and so do the previews that mirror those four fields.)
 - **Duplicates across components**: `Segmented.InAForm` repeated
   `Field.AroundSegmented`; it is now the audit's mandate.
 
@@ -555,11 +562,13 @@ And one component defect, fixed in the same PR with a guard
 (`form-controls.test.ts`): `Checkbox`'s rows were rounded, so the dashed rule
 drawn on their top edge curled down at both ends, in every list of boxes.
 
-Seen, reported in `CHANTIERS.md` and left to the product (the previews show
-them as they are, never « fixed » in a preview): the 6px between a unit and
-its figure (« € 500 »; the return's own CSS, a design question), `FieldRow`'s
-joiner sitting after the longer of label and box, no red edge on an
-impossible day, and « 1 days » in the engine's duration estimate.
+Seen and reported, never « fixed » in a preview (the previews show the
+product as it is): the 6px between a unit and its figure (« € 500 »; the
+return's own CSS), `FieldRow`'s joiner sitting after the longer of label and
+box, no red edge on an impossible day, « 1 days » in the engine's duration
+estimate, and « facultatif » written inside four labels. Antoine decided C28
+and C29 the same evening and all of it was fixed in the product (A11), then
+re-synced: the previews moved with the product, not ahead of it.
 
 A native `<select>` is closed in a still: its groups and order are never on
 the card, so the `Select` stories say in their doc comments what the list

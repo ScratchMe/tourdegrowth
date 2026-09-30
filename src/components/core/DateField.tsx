@@ -56,7 +56,9 @@ export type DateFieldProps = MonthFieldProps | DayFieldProps;
  * selects — day, month, year — each with its own visible label. Nothing is
  * pre-filled with today; the caller validates a day the calendar lacks
  * (`isRealDay`) and the field shows the message. A part left empty takes the
- * status edge, the chosen ones do not.
+ * status edge, the chosen ones do not — except when all three are chosen and
+ * the field is invalid (the 31st of February): then the three together are
+ * what is wrong, and all three take the red edge (A11.2, 2026-09-30).
  */
 export function DateField(props: DateFieldProps) {
   if (props.precision === "month") {
@@ -89,8 +91,10 @@ function DayField({
   return (
     <Field group label={label} hint={hint} error={error} missing={missing} optional={optional} size={size} fit="content" id={id}>
       {({ id: groupId, status }) => {
+        const allChosen = value.day !== "" && value.month !== "" && value.year !== "";
         const part = (key: keyof DayParts, options: readonly SelectOption[], chars: number) => {
           const empty = value[key] === "";
+          const marked = empty || (status === "invalid" && allChosen);
           return (
             <div className={styles.part}>
               <label className={styles.partLabel} htmlFor={`${groupId}-${key}`}>
@@ -98,12 +102,12 @@ function DayField({
               </label>
               <select
                 id={`${groupId}-${key}`}
-                className={selectClasses({ status: empty ? status : undefined, empty, size, fit: "content" })}
+                className={selectClasses({ status: marked ? status : undefined, empty, size, fit: "content" })}
                 // As wide as its longest value plus the platform's chevron.
                 style={{ width: `calc(${chars}ch + 3.5em)` }}
                 value={value[key]}
                 disabled={disabled}
-                aria-invalid={(status === "invalid" && empty) || undefined}
+                aria-invalid={(status === "invalid" && marked) || undefined}
                 onChange={(event) => set(key)(event.target.value)}
               >
                 <option value="">{partPlaceholder}</option>

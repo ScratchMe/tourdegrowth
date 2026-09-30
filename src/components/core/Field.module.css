@@ -254,12 +254,16 @@
   padding-inline-end: var(--pad-field-inline);
 }
 
+/* The unit carries its own space (C28, 2026-09-30): "€500", "140%" and
+   « 26 000 € » are the strings the caller passes, so the box adds nothing
+   between the figure and its sign. 6px here read « € 500 » in English and
+   doubled French's no-break space before « % ». */
 .affix + .control {
-  padding-inline-start: var(--space-2);
+  padding-inline-start: 0;
 }
 
 .control:has(+ .affix) {
-  padding-inline-end: var(--space-2);
+  padding-inline-end: 0;
 }
 
 /* --- FieldRow: two fields that are one statement ("26 000 out of 120 000") ---
@@ -318,10 +322,25 @@
   }
 
   /* Placed by hand: the joiner's fixed row would otherwise let it take the
-     first column before the fields are placed. */
+     first column before the fields are placed. The first field spans the
+     joiner's column too, and its label and hint do not size the columns
+     (`contain: inline-size`): the first column is as wide as the box, so the
+     joiner sits against it, and a long label wraps over the box and the
+     joiner (A11.3, 2026-09-30: « 21 000 € ……… sur 42 »). */
   .rowGrid > :nth-child(1) {
-    grid-column: 1;
+    grid-column: 1 / 3;
     grid-row: 1 / span 3;
+    grid-template-columns: subgrid;
+  }
+
+  .rowGrid > :nth-child(1) > .labelRow,
+  .rowGrid > :nth-child(1) > .after {
+    grid-column: 1 / -1;
+    contain: inline-size;
+  }
+
+  .rowGrid > :nth-child(1) > :not(.labelRow):not(.after) {
+    grid-column: 1;
   }
 
   .rowGrid > :nth-child(3) {

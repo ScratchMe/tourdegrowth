@@ -96,6 +96,19 @@ describe("a list split by a rule keeps its rule straight", () => {
   });
 });
 
+describe("a figure and its unit", () => {
+  it("are set side by side: the unit string carries its space, the box adds none", () => {
+    // C28 (Antoine, 2026-09-30): the box's 6px between a sign and its figure
+    // read « € 500 » in English and doubled French's no-break space before
+    // « % ». Non-vacuity: `var(--space-2)` put back on either side fails.
+    const field = sheets.find(({ file }) => file.endsWith("/Field.module.css"))!.css;
+    expect(field).toMatch(/\.affix \+ \.control\s*\{\s*padding-inline-start:\s*0;\s*\}/);
+    expect(field).toMatch(/\.control:has\(\+ \.affix\)\s*\{\s*padding-inline-end:\s*0;\s*\}/);
+    const number = sheets.find(({ file }) => file.endsWith("/NumberField.module.css"))!.css;
+    expect(number).not.toMatch(/--space-2/);
+  });
+});
+
 describe("no opacity to draw a state on a form control", () => {
   it("draws disabled and « not yet » with tokens that pass, never by fading", () => {
     const offending: string[] = [];

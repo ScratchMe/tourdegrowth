@@ -23,5 +23,5 @@
 
 .control.sizedAffixed {
   flex: 0 1 auto;
-  width: calc(var(--field-digits, var(--field-digits-default)) * 1ch + var(--pad-field-inline) + var(--space-2));
+  width: calc(var(--field-digits, var(--field-digits-default)) * 1ch + var(--pad-field-inline));
 }

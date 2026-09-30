@@ -144,3 +144,36 @@ test("one focus ring, the system's, on every kind of control the engine draws", 
   await expectOneSystemRing(page, page.getByTestId("deck-show-credit"), "a checkbox");
   await expectOneSystemRing(page, page.getByTestId("deck-ask-what"), "the ask");
 });
+
+/**
+ * A11.3 (2026-09-30): the first column of a pair was as wide as the longer
+ * of its label and its box, so with « Dépense d'acquisition en … » the
+ * joiner stood far from the figure it joins (« 21 000 € ……… sur 42 »). It
+ * now sits against the box, one column gap away, however long the label.
+ * Non-vacuity: on a build with the first field back in column 1 alone, the
+ * gap measured here is 114px, against 9 with the fix (column gap 12).
+ */
+test("the joiner of a pair sits against the first box, however long its label", async ({ page }) => {
+  await openEngine(page, "fr");
+  await page.getByTestId("engine-setup-board").click();
+  await page.getByTestId("engine-tab-acquisition").click();
+  await page.getByTestId("engine-metric-acq-cac").click();
+  const sheet = page.getByTestId("engine-sheet-acq-cac");
+  await sheet.getByRole("radio", { name: "Je l'ai" }).check();
+  const measure = await sheet.locator("#engine-acq-cac-num").evaluate((input) => {
+    const box = input.parentElement!;
+    const row = box.closest('[class*="rowGrid"]')!;
+    const joiner = row.querySelector(':scope > [class*="joiner"]')!;
+    const label = row.querySelector(":scope > :first-child label")!;
+    return {
+      gap: joiner.getBoundingClientRect().left - box.getBoundingClientRect().right,
+      columnGap: parseFloat(getComputedStyle(row).columnGap),
+      labelWider: label.getBoundingClientRect().width > box.getBoundingClientRect().width,
+      joiner: joiner.textContent,
+    };
+  });
+  expect(measure.joiner).toBe("sur");
+  // The case under test: a label wider than its box (it wraps now, over the box and the joiner).
+  expect(measure.labelWider).toBe(true);
+  expect(measure.gap).toBeLessThanOrEqual(measure.columnGap + 1);
+});

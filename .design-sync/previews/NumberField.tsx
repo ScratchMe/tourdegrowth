@@ -8,7 +8,9 @@ import { NumberField } from "tour-de-growth";
  * (`digits`, 9 characters when the caller gives none). The unit sits inside
  * the box where the caller's locale puts it — the engine asks
  * `_engine/sources.ts` (`moneyUnit`, `percentUnit`), the component does not
- * decide. `value` is a number, or `null` for an empty box — never 0. What
+ * decide. The unit string carries the space its language writes — none in
+ * "€500" or "140%", a no-break space in « 500 € » and « 20 % » — and the box
+ * adds none (C28, 2026-09-30). `value` is a number, or `null` for an empty box — never 0. What
  * cannot be read stays on screen as typed, and the parse error comes when the
  * person leaves the box: a still cannot show it (it needs typed text), and it
  * looks exactly like `Invalid`.
@@ -46,7 +48,7 @@ export const AmountEnglish = () => (
   />
 );
 
-/** The same field in French: `moneyUnit("EUR", "fr")` puts the sign after the figure, which sits against it. */
+/** The same field in French: `moneyUnit("EUR", "fr")` puts the sign after the figure, after the no-break space French writes. */
 export const AmountFrench = () => (
   <Live
     initial={500}
@@ -54,7 +56,7 @@ export const AmountFrench = () => (
     label="CAC"
     hint={"Sans les deux comptes, le chiffre sera marqué approximatif : on ne peut pas le recompter."}
     locale="fr"
-    suffix="€"
+    suffix={" €"}
     unitName="euros"
     parseError="Ce n'est pas un nombre lisible."
   />
@@ -73,14 +75,15 @@ export const CurrencyInTheLabel = () => (
 /**
  * A rate in French, « % » after its no-break space (`percentUnit("fr")`):
  * the team target on a metric sheet (`MetricSheet.tsx`, `TargetField`), in a
- * five-character box. The engine writes « (facultatif) » into the label
- * itself; it never passes `optional`. 20 % is the example's activation target.
+ * five-character box. « facultatif » is Field's `optional` word, drawn after
+ * the label (C29). 20 % is the example's activation target.
  */
 export const PercentTarget = () => (
   <Live
     initial={20}
     size="sm"
-    label="Ta cible (facultatif)"
+    label="Ta cible"
+    optional="facultatif"
     hint={"Seule une cible d'équipe permet de dire quelle étape freine."}
     locale="fr"
     digits={5}
