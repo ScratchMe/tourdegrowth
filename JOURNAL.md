@@ -6200,3 +6200,51 @@ La méthode pour les trouver la prochaine fois est dans `.design-sync/NOTES.md` 
 - deux questions de design : C28, les 6 px entre une unité et son chiffre (c'est le dessin du retour lui-même, « € 500 ») ; C29, « facultatif » écrit dans les libellés alors que la prop `optional` n'est passée par aucun appel.
 
 **Vérifié** : le driver final a reporté les 15 notes sans en effacer aucune et n'a rien laissé en attente. `report_validate` : 88, 0 défaut. Après l'envoi, `list_files` montre les 88 dossiers de composants.
+
+## C26 et C27 : les robots d'IA laissés et nommés, `/llms.txt` et `/llms-full.txt` générés (2026-09-30)
+
+**Les deux décisions**, prises par Antoine le 2026-09-30, une question à la fois, chacune avec sa reco :
+- **C26, « tout laisser, et l'écrire »** (la reco). `robots.txt` servait `User-Agent: *` / `Allow: /` sans rien dire des robots d'IA : c'était un défaut, c'est maintenant un choix écrit.
+- **C27, « court et généré, plus `llms-full.txt` »**. La reco était le fichier court seul : l'entrée A8 ci-dessus disait « sans `llms-full.txt` ». Antoine a choisi d'y ajouter le texte intégral.
+
+**C26.** `src/lib/seo/ai-agents.ts` tient deux listes, et `robots.ts` les sert en deux groupes, tous en `Allow: /`, avant le groupe `*` :
+- les robots d'**entraînement** : GPTBot, ClaudeBot, Google-Extended, Applebot-Extended, CCBot ;
+- les robots de **réponse**, qui lisent une page pour répondre à quelqu'un ou l'indexer pour une recherche par IA : OAI-SearchBot, ChatGPT-User, Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User.
+
+Google-Extended et Applebot-Extended sont des jetons, pas des robots : ils ne visitent rien, ils disent ce que Google et Apple peuvent faire de ce que leurs robots de recherche ont lu. Le commentaire le dit, pour qu'une session future ne les « corrige » pas. `robots.test.ts` refuse tout `Disallow` dans n'importe quel groupe : en ajouter un, c'est rouvrir C26, et le test est l'endroit qui le dit.
+
+**C27.** Deux routes statiques (`force-static`), `src/app/llms.txt/route.ts` et `llms-full.txt/route.ts`, qui ne font qu'appeler un constructeur de `src/lib/seo/` :
+- **`/llms.txt`** (~10 Ko) suit la forme de llmstxt.org : un H1, un résumé cité, un paragraphe, puis une section H2 de liens par famille de pages. Chaque titre est le H1 de la page, chaque description sa méta-description ou sa définition : rien n'y est écrit à la main, hors l'en-tête. **Sa portée est celle du sitemap, drapeaux compris** : le jeu et le moteur n'y figurent que s'ils sont ouverts au build. En anglais, chaque ligne porte l'adresse française à côté.
+- **`/llms-full.txt`** (~188 Ko) porte le texte anglais de `/how-it-works`, des deux pages « porte ouverte », des cinq comparaisons et des 24 termes, construit depuis les champs que les pages impriment et dans leur ordre. Chaque intertitre est un libellé que la page imprime déjà (`UI_STRINGS`), et chaque partie s'ouvre sur ses deux adresses et le jour de sa mise à jour, celui que la page affiche depuis A8. Il laisse de côté la landing et About, déjà listées, les pages légales, et le jeu et le moteur, qui sont des outils et non du texte.
+- **Les deux constructeurs ne s'importent pas l'un l'autre** : ce qu'ils partagent (le résumé, la forme d'une adresse) est dans `llms-shared.ts`, pour que la route du texte intégral n'embarque ni le moteur ni le jeu.
+
+**Ce qui les tient aux pages** (`llms.test.ts`) :
+- l'ensemble des liens de `/llms.txt` est exactement celui du sitemap, jeu et moteur fermés comme ouverts ;
+- `/llms-full.txt` couvre chaque clé de `CONTENT_PUBLISHED_AT` et chaque terme, une fois chacun ;
+- il contient chaque définition, chaque verdict, chaque question du Tour, la première réponse de chaque FAQ et le texte du barème ;
+- il n'a ni français ni gabarit non rendu (`{n}`, `[object`, `NaN`).
+
+La garde « undefined » a dû être resserrée : le glossaire dit lui-même « an undefined moment ».
+
+**Non-vacuité** :
+- un `disallow` ajouté à un groupe fait rougir `robots.test.ts` ;
+- retirer une comparaison ou un terme de `/llms-full.txt` fait rougir quatre tests.
+
+**Le poids, mesuré plutôt que supposé.** Les plafonds de `content-fan-in.test.ts` ont rougi sur sept modules de contenu, puisque deux points d'entrée de plus les atteignent. Un `vercel build --prod` hors ligne a montré que :
+- les deux routes sont préconstruites, mais leur fonction est un lien vers le bundle partagé de `quiz/share/[locale]`, avec `robots.txt` et `sitemap.xml` ;
+- elles l'alourdissent de 386 Ko, dont 284 Ko pour le morceau du glossaire, soit 6,35 Mo au total ;
+- c'est sous le seuil d'~1 Mo de `/livrer` §0, donc pas de question à Antoine.
+
+Les plafonds sont relevés, chacun avec sa raison, et le paragraphe du test cite la mesure.
+
+**La relecture de la copie** (`relecteur-copie`) a trouvé deux chaînes neuves sans marqueur : le libellé de la version française dans `/llms.txt` (en minuscule, alors que l'autre fichier écrivait `French`) et les deux libellés de langue de chaque adresse de `/llms-full.txt`. Les deux sont maintenant sous un marqueur. Elle a aussi relevé quatre inexactitudes, toutes corrigées :
+- « Full text of these pages » alors que le fichier ne les couvre pas toutes ;
+- « The Tour » comme titre d'une section qui n'est pas le Tour ;
+- « each link » alors que le lien du texte intégral n'a pas de version française ;
+- un résumé qui promettait toujours une étape, alors que l'état « level » n'en nomme aucune.
+
+Tout l'en-tête est « à relire » et hors de tout bon à tirer, comme `CLAUDE.md` le liste.
+
+**Un piège de mesure, pas un bug** : un build avec `GAME_ENABLED=true` servi par un `next start` sans la variable liste `/en/game` dans `/llms.txt`, et le proxy y répond 404. C'est le « construit ouvert, fermé à l'exécution » que décrit `build-flag.ts`, qui n'existe qu'en local : la CI pose la variable au niveau du workflow, pour le build comme pour le serveur.
+
+**Vérifié** : `tsc` et `eslint` propres, **2 350 tests unitaires** (neuf de plus), `vitest --coverage` au-dessus de ses seuils, `next build` propre, avec les trois routes en statique. La suite Playwright complète, avec les variables de la CI : **666 specs, 643 passées, aucun échec**, 23 ignorées par construction. `llms-robots.spec.ts` (trois specs, dont une qui demande chaque adresse listée et exige un 200) a été rejouée après les corrections de la relecture, sur un build refait.
