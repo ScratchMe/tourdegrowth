@@ -5782,3 +5782,17 @@ C8, tranché par Antoine le 2026-09-29, codé. La case « Comparer avec ce Tour 
 - **Le parcours complet, à 1 280 et 390 px** : moteur commencé sans Tour, invitation (`none`), un Tour déposé sur l'appareil, retour au tableau, état `unlinked` avec le score, « Relier ce Tour », état `linked`, qui tient au rechargement. L'événement est compté, le Tour reste intact dans `tdg.results.v1`, aucune requête autre qu'un GET ne part (hors compteur), et la page ne défile pas de côté.
 - **Relier puis délier par les Réglages** : la ligne « Délier garde ton Tour… » s'affiche, et le Tour reste sur l'appareil.
 - **La suite Playwright complète** sur la branche rebasée : 630 specs, 625 passées, 5 ignorées par construction, aucun échec. Puis les 120 specs du moteur après le correctif de date.
+
+## Le brief 04 déposé dans le projet Claude Design (D3, 2026-09-30)
+
+**La demande d'Antoine** : lancée pour porter S-15, la session s'est arrêtée à l'étape 0, parce que le retour de Claude Design n'existait pas : ni `design/ds-extension-04-return/` (cherché sur `main` et sur les trois branches du dépôt), ni « Send to Claude Code Web ». Antoine a répondu : « Envoie-le à Claude Design ».
+
+**Ce qui est parti** : `design/DS-EXTENSION-BRIEF-04.md` (la version de #205) et ses neuf captures, **aux mêmes chemins que dans le dépôt**, pour que les renvois du brief (`design/ds-extension-04/…png`) se lisent tels quels dans le projet. Dix fichiers, écrits par `DesignSync` sous un plan qui ne nommait qu'eux (`design/DS-EXTENSION-BRIEF-04.md`, `design/ds-extension-04/*.png`, aucune suppression). Aucun fichier du design system n'a été touché : ni le bundle, ni la sentinelle, ni `_ds_sync.json`, dont l'ancre `bundleSha12` est toujours `f3b4bf9eb3c5`.
+
+**Ce que « envoyer » veut dire ici, et ce que ça ne veut pas dire** : les briefs 01 à 03 avaient été déposés par Antoine lui-même dans une conversation Claude Design. La session, elle, n'écrit que des fichiers dans le projet : **rien ne tourne côté Claude Design tant que personne ne le lui demande**. D3 devient donc « lancer le brief », avec le prompt à coller dans `CHANTIERS.md`.
+
+**Un piège évité d'avance** : le projet porte maintenant un dossier `design/` que le bundle ne connaît pas. `.design-sync/NOTES.md` dit de vérifier qu'`upload.deletePaths` n'y touche pas lors de la prochaine re-synchro (B3), et de le retirer exprès une fois le retour porté.
+
+**Vérifié** : les neuf captures sont distinctes (sommes de contrôle ; le brief 03 avait envoyé deux fois la même image, `JOURNAL.md` 2026-09-09) ; `list_files` relu après l'envoi, et les dix chemins y sont ; l'ancre relue après l'envoi. Le contenu n'a pas été relu octet par octet côté projet.
+
+**Consigné** : `CHANTIERS.md` (vue d'ensemble, B2, D3 avec son prompt), `CLAUDE.md` (la ligne « Design system → Claude Design »), `.design-sync/NOTES.md` (« Synced »). Que de la doc : `vercel-ignore.sh` ne déploie pas.
