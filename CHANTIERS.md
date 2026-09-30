@@ -63,8 +63,8 @@ rencontrée en le faisant repart en section C. Toute copie neuve porte
 - A7.3 avant A7.4, parce que les liens promettent ce que le moteur fait ;
 - A7.12.a avant les annuaires de D10.
 
-Le jeu (A7.7, et A7.9 pour sa part) n'attend rien du moteur.
-**A7.1, A7.2, A7.5, A7.6 et A7.8 sont livrés (2026-09-30).** **Commencer par A7.3.a**,
+Le jeu (A7.9 pour sa part) n'attend rien du moteur.
+**A7.1, A7.2, A7.5, A7.6, A7.7 et A7.8 sont livrés (2026-09-30).** **Commencer par A7.3.a**,
 le plus long, qui revient à Antoine pour validation.
 
 #### A7.3 — Le B2B assisté et l'hybride dès la v1 (C4)
@@ -107,19 +107,6 @@ avec la règle de C15. **Pas de lien au pied de page.**
 | Mesure | Chaque lien porte un événement d'entrée avec sa source, sur le modèle de `game_entry_clicked` (`detail` = la page), déclaré dans le vocabulaire de `lib/analytics/`, pour que `/admin/stats` dise d'où viennent les ouvertures |
 | Tests | Un e2e par page : le lien existe moteur ouvert et mène à `/{locale}/aarrr-funnel-template`. Un test sur un build fermé : il n'existe pas (les specs « jeu fermé » montrent la façon de faire) |
 | Quand | Construit avant l'ouverture (D2), après A7.3 : les liens promettent ce que le moteur fait, hybride compris |
-
-#### A7.7 — L'encart du jeu sous le bouton principal, sur desktop (C10)
-
-**Décidé** (`GAME-BRIEF.md` §15.4) : sur desktop, l'encart du jeu passe
-**sous** la rangée de boutons du résultat, dans la colonne de droite. Sur
-mobile, rien ne change : il est déjà après le bouton et la carte de partage.
-
-| Où | Quoi |
-|---|---|
-| `app/(app)/r/[id]/ResultView.module.css` (`.slotGame`, l. 176 et 297) et le commentaire de `ResultView.tsx:556-564` | L'ordre desktop : l'encart après `.slotCta`. Même ordre pour le visiteur et le propriétaire (le premier rendu est celui du visiteur, et un ordre qui dépend de `isOwner` décalerait la page après le montage) |
-| `src/__tests__/result-reading-order.test.ts` et `e2e/result-composition.spec.ts` | L'ordre de lecture épinglé suit, pour les quatre variantes |
-| Un e2e de mesure | Sur `/r/sample`, en vue visiteur, à 1 280 px : le haut du bouton « Fais ton propre Tour » est **au-dessus** du haut de l'encart. Même mesure à 390 px. **Non-vacuité** : l'ancien ordre fait rougir le test |
-| Hors code | `CLAUDE.md` citait « ~30 px » : c'était 350 px mesurés le 2026-09-29, et la ligne est corrigée dans la même séance |
 
 #### A7.9 — La bande de l'accueil en liens mesurés, et le bandeau mesuré (C15)
 
@@ -290,7 +277,7 @@ ouverts, et, pour la vue propriétaire, un build jetable jamais commité.
 | C7 | Liens d'ouverture du moteur | Les trois pages gardent leur lien ; **pas de section à part sur l'accueil** (la carte de la bande devient le lien) ; pas de pied de page | `ENGINE.md` décision 7 | A7.4 |
 | C8 | Le miroir, Tour présent non relié | **Une ligne et un bouton « Relier ce Tour »**, et la liaison dans les Réglages. L'invitation « Fais le Tour » menait à une impasse | `ENGINE.md` §8.5 | A7.5, livré le 2026-09-30 |
 | C9 | Slide fuite d'une étape sans prix | **La slide existe**, avec un titre sans argent. Sous un client, l'omission est gardée | `ENGINE.md` §9.3 | A7.6, livré le 2026-09-30 |
-| C10 | Place de l'encart du jeu | **Sous le bouton principal sur desktop**, comme sur mobile. Mesuré : il faisait descendre le bouton du visiteur de 350 px | `GAME-BRIEF.md` §15.4 | A7.7 |
+| C10 | Place de l'encart du jeu | **Sous le bouton principal sur desktop**, comme sur mobile. Mesuré : il faisait descendre le bouton du visiteur de 350 px | `GAME-BRIEF.md` §15.4 | A7.7, livré le 2026-09-30 |
 | C11 | Quand montrer l'encart | Gardé : la rétention dans le groupe, partagé compris. Le cas de plusieurs niveaux se tranche à l'ouverture d'un deuxième niveau | `GAME-BRIEF.md` §15.4 | Section E |
 | C12 | Noms de zones bilingues | Gardés : « Retention — S'ils reviennent » | `GAME-BRIEF.md` §15.3 | — |
 | C13 | « Vingt minutes » | Chronométré à la recette : gardé si la médiane des testeurs tombe entre 15 et 25 minutes | `GAME-BRIEF.md` §7.3 | D9 |

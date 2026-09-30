@@ -91,15 +91,15 @@ describe("the mobile reading order, for every variant", () => {
    * column under the disclaimer. A visible hole on every owner's desktop is a
    * worse trade than one block announced early on a phone.
    *
-   * The game card adds one more, on every variant that shows it. Its two
-   * places are a decision (orchestrator decision 1, 2026-09-24): on desktop in
-   * the right column before the CTA row, on a phone right after the share
-   * card. The first fixes where it sits in the SOURCE — the right column,
-   * before the CTA — and the second puts it on screen after the share block,
+   * The game card adds one more, on every variant that shows it. Its place
+   * is a decision: under the CTA row on desktop (C10, 2026-09-29 — above it,
+   * it pushed a visitor's primary 350px down), right after the share card on
+   * a phone. The first fixes where it sits in the SOURCE — the right column,
+   * after the CTA — and the second puts it on screen after the share block,
    * which is itself last in the source; so on a phone the card is announced
-   * before the CTA row and seen after the share card, and the share card moves
-   * one place further from where it is read. Measured, not guessed: the worst
-   * slot is `slotShare` in all four "with the card" variants.
+   * before the share block and seen after it, and the share block moves one
+   * place further from where it is read. Measured, not guessed, again after
+   * C10: the worst slot is `slotShare` in all four "with the card" variants.
    *
    * A visitor without the card — every shared link whose bottleneck has no
    * level yet — stays at 1.
@@ -134,19 +134,19 @@ describe("the mobile reading order, for every variant", () => {
 });
 
 describe("the desktop reading order", () => {
-  it("finds the columns and the game card's override — otherwise the check below is vacuous", () => {
+  it("finds the columns, and no desktop override is left — otherwise the check below is vacuous", () => {
     expect(column("slotScore")).toBe("left");
     expect(column("slotGame")).toBe("right");
     expect(column("slotShare")).toBe("outside");
-    expect(DESKTOP_OVERRIDES).toHaveProperty("slotGame");
+    // Since C10 the game card's mobile `order` is also its desktop one: the reset it needed is gone.
+    expect(DESKTOP_OVERRIDES).toEqual({});
   });
 
   /**
    * On desktop the columns are boxes again and `order` applies inside each.
    * The rule is that no column reorders its own content: each one reads in
-   * source order. Equal `order` values keep source order (CSS Flexbox §5.4),
-   * which is how `.slotGame` shares the credit's value and still lands
-   * between it and the CTA row.
+   * source order. Equal `order` values would keep source order (CSS Flexbox
+   * §5.4); since C10 none is needed.
    */
   it.each(["left", "right"] as const)("the %s column reads in its source order", (col) => {
     const source = SOURCE_ORDER.filter((s) => column(s) === col);
@@ -155,10 +155,12 @@ describe("the desktop reading order", () => {
     expect(visual).toEqual(source);
   });
 
-  it("puts the game card between the evidence and the CTA row, never above the Deep dive offer", () => {
+  /** C10 (GAME-BRIEF §15.4, 2026-09-29). Non-vacuity, measured 2026-09-30: the old place (before the CTA row) fails it. */
+  it("puts the game card under the CTA row and above the disclaimer — never above the primary", () => {
     const right = SOURCE_ORDER.filter((s) => column(s) === "right");
-    expect(right.indexOf("slotGame")).toBeGreaterThan(right.indexOf("slotWeaknesses"));
-    expect(right.indexOf("slotGame")).toBeLessThan(right.indexOf("slotCta"));
+    expect(right.indexOf("slotGame")).toBeGreaterThan(right.indexOf("slotCta"));
+    expect(right.indexOf("slotGame")).toBeLessThan(right.indexOf("slotDisclaimer"));
+    expect(DESKTOP_ORDER.slotGame!).toBeGreaterThan(DESKTOP_ORDER.slotCta!);
     // The Deep dive offer lives inside the action card at the top of this column.
     expect(right.indexOf("slotGame")).toBeGreaterThan(right.indexOf("slotMove"));
   });

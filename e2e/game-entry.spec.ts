@@ -134,7 +134,13 @@ test.describe("P23 — the card on the sample's retention bottleneck", () => {
     await expect.poll(() => trackedEvents(page)).toContain("game_entry_clicked/result/retention");
   });
 
-  test("desktop: in the right column, after the evidence and before the CTA row", async ({ page }) => {
+  /**
+   * C10 (GAME-BRIEF §15.4, 2026-09-29): under the primary, on desktop as on
+   * a phone. Above it, the card pushed a visitor's « Fais ton propre Tour »
+   * 350px down. Non-vacuity, measured 2026-09-30: the old source order (the
+   * card before the CTA row) fails the `cta.y` line.
+   */
+  test("desktop: in the right column, under the CTA row — the primary comes first", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto(`/r/sample?lang=en`);
     const move = await box(page, "priority-move");
@@ -145,7 +151,7 @@ test.describe("P23 — the card on the sample's retention bottleneck", () => {
     expect(Math.abs(entry.x - move.x)).toBeLessThan(2);
     expect(entry.x).toBeGreaterThan(share.x + share.width);
     expect(entry.y).toBeGreaterThan(move.y + move.height);
-    expect(entry.y + entry.height).toBeLessThan(cta.y);
+    expect(cta.y + cta.height).toBeLessThan(entry.y);
     // Wide enough for the band on one line, separator included — in the
     // longer language.
     await page.goto(`/r/sample?lang=fr`);
@@ -161,7 +167,9 @@ test.describe("P23 — the card on the sample's retention bottleneck", () => {
     const share = await box(page, "share-card");
     const entry = await box(page, "game-entry");
     const cta = await box(page, "own-tour-cta");
+    // The primary first, then the share block, then the card (C10).
     expect(cta.y).toBeLessThan(share.y);
+    expect(cta.y).toBeLessThan(entry.y);
     expect(entry.y).toBeGreaterThan(share.y + share.height);
     // Directly after it: the layout's 22px rhythm, nothing in between.
     expect(entry.y - (share.y + share.height)).toBeLessThan(30);
