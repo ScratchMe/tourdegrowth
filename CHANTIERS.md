@@ -64,7 +64,7 @@ rencontrée en le faisant repart en section C. Toute copie neuve porte
 - A7.12.a avant les annuaires de D10.
 
 Le jeu (A7.7, A7.8, et A7.9 pour sa part) n'attend rien du moteur.
-**A7.1 est livré (2026-09-30)** : A7.6 peut partir. **Commencer par A7.3.a**,
+**A7.1, A7.2 et A7.6 sont livrés (2026-09-30).** **Commencer par A7.3.a**,
 le plus long, qui revient à Antoine pour validation.
 
 #### A7.3 — Le B2B assisté et l'hybride dès la v1 (C4)
@@ -124,21 +124,6 @@ miroir sans Tour invite justement à en faire un.
 | `_engine/Setup.tsx` | La case de liaison apparaît aussi dans les Réglages (`editing`), pour relier ou délier. Délier ne supprime pas le Tour de l'appareil |
 | Copie | La ligne et le bouton, en FR et en EN, « à relire » |
 | Tests | Un e2e du parcours complet : moteur commencé sans Tour → invitation → un Tour déposé sur l'appareil → retour au tableau → état `unlinked` → « Relier ce Tour » → miroir `linked`. Et relier puis délier par les Réglages. Dans les deux langues, à 1 280 et 390 px. Le canari « rien ne quitte le navigateur » tient toujours : relier ne fait que lire `tdg.results.v1` |
-
-#### A7.6 — La slide « fuite » d'une étape sans prix (C9)
-
-**Décidé** (`ENGINE.md` §9.3) : quand le diagnostic est `clear` sur une
-étape **sans prix** (rétention à J30, part recommandée), la slide `leak`
-existe au lieu d'être omise. Quand le gain est **inférieur à un client**,
-l'omission est gardée.
-
-| Où | Quoi |
-|---|---|
-| `lib/engine/deck.ts#buildLeak` (l. 355-356) | Séparer les deux cas que la condition `!impact \|\| less-than-one` confond. Sans prix : un titre `leakClearUnpriced` (« {Étape} freine le moteur : {valeur}, pour {cible}. »), sans la carte « Le calcul » en quatre lignes (il n'y a pas de chaîne à montrer), avec la colonne « À côté » comme d'habitude, et un pied qui dit pourquoi il n'y a pas de montant. Titre et corps sortent de la même fonction (`ENGINE.md` §9.3, règle « titre = corps ») |
-| `content/engine-copy.ts` | Le gabarit du titre et le pied, en FR et en EN, « à relire ». `{cible}` suit `targetPhrase`, qui depuis A7.1 ne dit plus que « {valeur} (cible de l'équipe) » |
-| Export texte et notes | `deckMarkdown` et les notes d'orateur suivent la même slide |
-| Tests | Un état où la rétention à J30 est seule sous sa cible : la slide existe, son titre ne contient aucun montant, et aucune chaîne « Le calcul » n'est rendue. Un état où le gain vaut moins d'un client : pas de slide. **Non-vacuité** : remettre l'omission fait rougir le premier test |
-| Ordre | Après A7.1 : sans repère qui désigne, le cas `clear` ne vient plus que d'une cible |
 
 #### A7.7 — L'encart du jeu sous le bouton principal, sur desktop (C10)
 
@@ -334,7 +319,7 @@ ouverts, et, pour la vue propriétaire, un build jetable jamais commité.
 | C6 | Moteur public, distinct de l'audit | Confirmé. Antoine tient l'audit privé pour un doublon : **la mission D4 tranche**, avec une colonne « le moteur le faisait déjà ? ». Les trois clauses du contrat sont précisées en D5 | `ENGINE.md` décision 6, `AUDIT-PLAN.md` §4 | D4, D5 |
 | C7 | Liens d'ouverture du moteur | Les trois pages gardent leur lien ; **pas de section à part sur l'accueil** (la carte de la bande devient le lien) ; pas de pied de page | `ENGINE.md` décision 7 | A7.4 |
 | C8 | Le miroir, Tour présent non relié | **Une ligne et un bouton « Relier ce Tour »**, et la liaison dans les Réglages. L'invitation « Fais le Tour » menait à une impasse | `ENGINE.md` §8.5 | A7.5 |
-| C9 | Slide fuite d'une étape sans prix | **La slide existe**, avec un titre sans argent. Sous un client, l'omission est gardée | `ENGINE.md` §9.3 | A7.6 |
+| C9 | Slide fuite d'une étape sans prix | **La slide existe**, avec un titre sans argent. Sous un client, l'omission est gardée | `ENGINE.md` §9.3 | A7.6, livré le 2026-09-30 |
 | C10 | Place de l'encart du jeu | **Sous le bouton principal sur desktop**, comme sur mobile. Mesuré : il faisait descendre le bouton du visiteur de 350 px | `GAME-BRIEF.md` §15.4 | A7.7 |
 | C11 | Quand montrer l'encart | Gardé : la rétention dans le groupe, partagé compris. Le cas de plusieurs niveaux se tranche à l'ouverture d'un deuxième niveau | `GAME-BRIEF.md` §15.4 | Section E |
 | C12 | Noms de zones bilingues | Gardés : « Retention — S'ils reviennent » | `GAME-BRIEF.md` §15.3 | — |

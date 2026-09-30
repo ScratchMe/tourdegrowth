@@ -42,7 +42,8 @@ export function SlideLeak({ slide, context }: SlideProps) {
         </p>
       ) : null}
 
-      <div className={styles.leak}>
+      {/* A stage with no price has no chain (C9): « À côté » then takes the whole width, not an orphan column. */}
+      <div className={styles.leak} data-calc={chain.length > 0 ? "true" : "false"}>
         {chain.length > 0 ? (
           <section className={styles.calcCard}>
             <h4 className={styles.cardEyebrow}>{strings.slide.calcTitle}</h4>

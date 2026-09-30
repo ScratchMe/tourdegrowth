@@ -137,6 +137,17 @@ const SCENARIOS: { name: string; build: () => { state: EngineState; result?: Ret
   { name: "no target at all (C1: the references name nothing)", build: () => ({ state: withoutTargets(exampleState()) }) },
   { name: "not enough targets, behind a raised one", build: () => ({ state: withTarget(withEntry(exampleState(), "ret.logo-churn", undefined), "act.rate", 25) }) },
   { name: "referred share behind a target (unpriced)", build: () => ({ state: withTarget(within(), "ref.referred-share", 10) }) },
+  {
+    // C9: the one stage behind is one the model can't price — its slide exists, with no amount.
+    name: "day 30 named alone (unpriced slide)",
+    build: () => ({
+      state: withTarget(
+        withEntry(withEntry(within(), "ret.logo-churn", measured(ratio(6, 400), tool("stripe"))), "ret.d30", measured(ratio(40, 800), tool("amplitude"))),
+        "ret.d30",
+        20,
+      ),
+    }),
+  },
   { name: "event unnamed", build: () => ({ state: withEntry(exampleState(), "act.event", undefined) }) },
   {
     name: "event missing, rate unknown",

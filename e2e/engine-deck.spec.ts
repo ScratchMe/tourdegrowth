@@ -3,7 +3,8 @@ import AxeBuilder from "@axe-core/playwright";
 import type { Page, Request } from "@playwright/test";
 import { QUESTIONS } from "../src/content/copy-library";
 import { METRIC_SHAPES } from "../src/lib/engine/catalog-shape";
-import { exampleState, missing, tourResult } from "../src/lib/engine/__tests__/fixtures";
+import { exampleState, measured, missing, ratio, tourResult, withEntry, withTarget } from "../src/lib/engine/__tests__/fixtures";
+import { ENGINE_COPY } from "../src/content/engine-copy";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, readEachOnScreen, SKIP_ADMIN_REASON, test } from "./helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
@@ -499,5 +500,35 @@ for (const locale of ["fr", "en"] as const) {
       await page.setViewportSize({ width: 1280, height: 800 });
       await expect(page.getByTestId("deck-pdf-hint")).toBeHidden();
     });
+
+    /**
+     * C9 (ENGINE.md §9.3): day-30 retention, which the model can't price, is
+     * the only stage behind its target. The leak slide exists — it used to be
+     * dropped without a word — names the stage, and draws no calculation
+     * card, and no amount, at both widths.
+     */
+    for (const width of [1280, 390]) {
+      test(`an unpriced stage named alone has its leak slide, without an amount or a calculation, at ${width}px`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 });
+        let state = withEntry(exampleState(), "act.rate", measured(ratio(200, 800)));
+        state = withEntry(state, "ret.logo-churn", measured(ratio(6, 400)));
+        state = withTarget(withEntry(state, "ret.d30", measured(ratio(40, 800))), "ret.d30", 20);
+        await page.addInitScript((store) => localStorage.setItem("tdg.engine.v1", JSON.stringify(store)), { schemaVersion: 1, state });
+        await page.goto(`/${locale}/aarrr-funnel-template`);
+        await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
+        const opener = page.getByTestId("engine-open-deck");
+        if (await opener.isVisible()) await opener.click();
+        const leak = page.locator('[data-slide="leak"]');
+        await expect(leak).toHaveCount(1);
+        const title = leak.locator("h3");
+        await expect(title).toContainText(locale === "fr" ? "La rétention à J30" : "Day-30 retention");
+        await expect(title).not.toContainText(/€|MRR/);
+        await expect(leak.getByText(ENGINE_COPY.slide.calcTitle[locale], { exact: true })).toHaveCount(0);
+        await expect(leak.getByText(ENGINE_COPY.slide.leakAside[locale], { exact: true })).toHaveCount(1);
+        await expect(leak).toContainText(ENGINE_COPY.slide.leakFooterUnpriced[locale]);
+        const [scroll, client] = await page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth]);
+        expect(scroll).toBe(client);
+      });
+    }
   });
 }

@@ -1016,6 +1016,12 @@ export const ENGINE_COPY = {
     },
     /** The footer's `{assumption}` when activation is named: a clause, lower-case, no full stop. */
     leakAssumption: { fr: "les payants sont supposés parmi les activés", en: "paying customers are assumed to be among the activated" },
+    /** The footer of a leak slide with no amount (C9): why there is none, in place of « toutes choses égales par ailleurs ». */
+    // TODO: à relire (convention 6) — nouveau (2026-09-30, A7.6, C9).
+    leakFooterUnpriced: {
+      fr: "Sans montant : le moteur ne relie pas ce chiffre au MRR",
+      en: "No amount: the engine doesn't link this number to MRR",
+    },
     leakAside: { fr: "À côté", en: "Alongside" },
     /** A peloton column or a candidate nobody measured. Gender-free: it follows a label of either gender. */
     noNumber: { fr: "pas de chiffre", en: "no number" },
@@ -1167,6 +1173,17 @@ export const ENGINE_COPY = {
     leakClearPerHundredOne: {
       fr: "Ramener {stage} à {target} ajouterait **{n} payant pour 100 inscrits**.",
       en: "Bringing {stage} to {target} would add **{n} paying customer per 100 sign-ups**.",
+    },
+    /**
+     * A stage the model can't price — day-30 retention, the referred share (C9,
+     * 2026-09-29, ENGINE.md §9.3). `{stage}` is a subject phrase capitalised by
+     * the code; `{value}` the measured value; `{target}` `targetPhrase`'s words.
+     * No amount: the footer (`slide.leakFooterUnpriced`) says why.
+     */
+    // TODO: à relire (convention 6) — nouveau (2026-09-30, A7.6, C9).
+    leakClearUnpriced: {
+      fr: "**{stage} freine le moteur** : {value}, pour {target}.",
+      en: "**{stage} is holding the engine back**: {value}, against {target}.",
     },
     /** « En retard sur », not « sous »: the group can hold churn, which trails its target by being ABOVE it. */
     // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1 : aucun repère ne désigne).

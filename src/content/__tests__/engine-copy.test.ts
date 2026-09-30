@@ -118,6 +118,7 @@ describe("placeholders", () => {
     leakClearKeptOne: ["n", "stage", "target"],
     leakClearPerHundred: ["n", "stage", "target"],
     leakClearPerHundredOne: ["n", "stage", "target"],
+    leakClearUnpriced: ["stage", "target", "value"],
     leakShared: ["list", "n"],
     leakNotEnoughBelow: ["side", "stage"],
     leakLevel: [],
@@ -158,7 +159,7 @@ describe("placeholders", () => {
       N: "15", k: "4", repair: "entre une réunion et un trimestre", m: "14 à 19 mois", x: "2,5 à 3,1 fois",
       input: "la marge brute", what: "80 000 € et deux personnes pendant un trimestre",
       metric: "Taux d'activation", current: "18 %", horizon: "T2 2027", cost: "un sprint",
-      from: "6 à 9 %", to: "12 %", gain: "~12 000 à 18 000 €", i: "1",
+      from: "6 à 9 %", to: "12 %", gain: "~12 000 à 18 000 €", i: "1", value: "4,5 à 6,5 %",
     },
     en: {
       activated: "18 reach first value", d30: "9–12 are still active at day 30", paid: "6–9 pay",
@@ -172,7 +173,7 @@ describe("placeholders", () => {
       N: "15", k: "4", repair: "between a meeting and a quarter", m: "14–19 months", x: "2.5–3.1×",
       input: "gross margin", what: "€80,000 and two people for a quarter",
       metric: "Activation rate", current: "18%", horizon: "Q2 2027", cost: "a sprint",
-      from: "6–9%", to: "12%", gain: "~€12,000–18,000", i: "1",
+      from: "6–9%", to: "12%", gain: "~€12,000–18,000", i: "1", value: "4.5–6.5%",
     },
   };
 
