@@ -87,7 +87,7 @@ l'agitation, et le jeu n'est pas un tribunal.
 | **"Does it track me?"** | Cookie-less GoatCounter: page views plus a fixed list of event labels — level started, quarter played, whether you followed or refused the CEO's order, which ending you reached, catalogue opened. Fixed labels only: no free text, no number you produced, no account, no identifier. The full list is in the source (`src/lib/game/events.ts`). |
 | **"Can I use it in a class?"** | Please do. A classroom mode (group codes, teacher guide) isn't built yet; if you'd use one, say so — it decides what gets built next. |
 | **"Why twenty minutes?"** | A single quarter was too easy to game. The cost only shows over a year, so the year stays. |
-| **"Who's behind this?"** | The site credits its author in the footer; I keep this account pseudonymous. |
+| **"Who's behind this?"** | I'm Antoine Berthaud, a growth PM; this is a side project, posted from its own account. My name is in the site's footer, and the About page says how it's made. *(TODO : à relire. C22 : la réponse te nomme, sans insister et sans lien vers LinkedIn.)* |
 
 *Note pour la relecture* : la réponse « This already exists » reconnaît le
 précédent **sans le nommer** (règle de `GROWTH-PLAN.md` §2 : ne jamais se

@@ -7,12 +7,15 @@ dans l'app ; rien ici n'est importé par `src/`.*
 
 ## Les trois règles, avant de copier quoi que ce soit
 
-1. **Jamais le nom.** Aucun texte de ce dossier ne nomme l'auteur, ne
-   renvoie vers son CV, ni n'est posté depuis un compte personnel. Le
-   pseudonyme est `tourdegrowth`, l'adresse est `contact@tourdegrowth.com`.
-   Si quelqu'un demande qui est derrière : « the site credits its author in
-   the footer; I keep this account pseudonymous » — le site est signé
-   (option A, `GROWTH-PLAN.md` §0), la promotion ne l'est pas.
+1. **Discret pour l'instant : le nom seulement si on le demande, jamais
+   LinkedIn.** C'est une question de calendrier, pas d'anonymat (C22,
+   `GROWTH-PLAN.md` §0, précisé le 2026-09-29). Les textes de ce dossier ne
+   mettent pas l'auteur en avant, ne renvoient ni vers son CV ni vers
+   LinkedIn, et partent du compte du projet, `tourdegrowth` (adresse
+   `contact@tourdegrowth.com`). Si quelqu'un demande qui est derrière, la
+   réponse le nomme simplement et renvoie au pied de page et à la page À
+   propos (la FAQ de chaque Show HN). La réserve se lève quand Antoine le
+   décide, pas avant.
 2. **Jamais un lien nu.** Chaque lien sortant passe par
    `node scripts/utm-link.mjs <canal> [chemin]` — sinon GoatCounter ne saura
    pas d'où vient le Tour, et la règle de coupe du plan ne pourra pas

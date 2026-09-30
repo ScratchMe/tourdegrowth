@@ -64,7 +64,7 @@ rencontrée en le faisant repart en section C. Toute copie neuve porte
 - A7.12.a avant les annuaires de D10.
 
 Le jeu n'attend rien du moteur.
-**A7.1, A7.2 et A7.5 à A7.9 sont livrés (2026-09-30).** **A7.3.a est écrit** (`ENGINE.md` §18) et attend Antoine (C25) : rien de A7.3 ne se code avant sa réponse.
+**A7.1, A7.2, A7.5 à A7.9 et A7.13 sont livrés (2026-09-30).** **A7.3.a est écrit** (`ENGINE.md` §18) et attend Antoine (C25) : rien de A7.3 ne se code avant sa réponse.
 
 #### A7.3 — Le B2B assisté et l'hybride dès la v1 (C4)
 
@@ -161,21 +161,6 @@ maintenant, refaire à l'ouverture.
 | A7.12.b | **Des captures provisoires du moteur et du jeu** | Dans `marketing/assets/`, préfixées `provisoire-` et listées dans `kit.md` comme telles. Le moteur par l'aperçu propriétaire ou un build local ouvert ; l'exemple rempli (§6.0) plutôt qu'un vrai jeu de chiffres. Le jeu : le hub, un trimestre, la page de décembre |
 | A7.12.c | **Les refaire à l'ouverture** de chaque produit (D2), contre la production, et supprimer les `provisoire-` | Fait partie de la vérification d'ouverture |
 
-#### A7.13 — « Qui est derrière ? » : une réponse qui nomme Antoine (C22)
-
-**Décidé** (`GROWTH-PLAN.md`, option A précisée le 2026-09-29) : c'est une
-question de calendrier, pas d'anonymat. La réponse nomme Antoine,
-simplement. La promotion reste discrète pour l'instant : pas de LinkedIn, pas
-de lancement en grande pompe, et `linkedin` reste dans `EXCLUDED`
-(`scripts/utm-channels.mjs`) tant qu'Antoine ne lève pas la réserve.
-
-| Où | Quoi |
-|---|---|
-| `marketing/launch/show-hn.md:49`, `marketing/campaigns/engine/show-hn.md:77`, `marketing/campaigns/game/show-hn.md:90` | La ligne « Who's behind this? » : une réponse courte qui donne son nom et renvoie au pied de page et à `/about`, sans insister et sans lien vers LinkedIn. En FR là où le texte existe en FR. « À relire » |
-| `marketing/README.md:14`, `marketing/campaigns/brand-review.md:78` et le §8 de `marketing/campaigns/README.md` | La règle « pseudonyme » décrite comme « discrète pour l'instant » |
-| **D'abord, l'outillage** | Deux consignes appliquent encore l'ancienne règle et arrêteraient cet item : `.claude/agents/relecteur-copie.md` §5 (« Jamais le nom d'Antoine ») et `.claude/skills/livrer/SKILL.md` §3 (« jamais le nom d'Antoine dans `marketing/` »). Les réécrire : le nom seulement dans la réponse à « qui est derrière ? » (C22), et jamais LinkedIn pour l'instant. Même chose pour le commentaire de `src/__tests__/utm-channels.test.ts:21-25` (« the author is never named » devient « not for now »), le test gardant `linkedin` exclu. Non fait dans la PR de la séance : `.claude/` n'est pas dans la liste « doc » de `scripts/vercel-ignore.sh`, et la PR devait rester de la doc seule |
-| Ne change pas | Le compte qui poste reste celui du projet (`tourdegrowth`). `CLAUDE.md` et `GROWTH-PLAN.md` sont déjà à jour |
-
 ### A9 — Ce que la design sync du 2026-09-30 a trouvé dans le produit
 
 Vus en notant les 244 cellules, puis **re-mesurés le 2026-09-30 sur `main`
@@ -248,7 +233,7 @@ ouverts, et, pour la vue propriétaire, un build jetable jamais commité.
 | C19 | Ce qui est parti de la vague 1 | **Rien.** Et rien ne part avant que le moteur et le jeu soient prêts | `marketing/campaigns/README.md` §10 | D6 |
 | C20 | Relancer le Tour sur les réseaux | **Le Tour au seul SEO**, sans fil. L'indexation et les annuaires partent maintenant | `marketing/campaigns/README.md` §10 | D10, A7.12.a |
 | C21 | Captures de B et C | **Capturer maintenant**, provisoires, puis refaire à l'ouverture. Celles du Tour datent d'avant I + B | `marketing/campaigns/README.md` §10 | A7.12 |
-| C22 | « Qui est derrière ? » | **La réponse nomme Antoine.** C'est une question de calendrier, pas d'anonymat : pas de LinkedIn ni de lancement en grande pompe pour l'instant | `GROWTH-PLAN.md` option A, `marketing/campaigns/README.md` §10 | A7.13 |
+| C22 | « Qui est derrière ? » | **La réponse nomme Antoine.** C'est une question de calendrier, pas d'anonymat : pas de LinkedIn ni de lancement en grande pompe pour l'instant | `GROWTH-PLAN.md` option A, `marketing/campaigns/README.md` §10 | A7.13, livré le 2026-09-30 |
 | C23 | L'ordre des lancements (tranchée le 2026-09-30) | **On attend les deux, le moteur d'abord** : C19 tient, le calendrier garde B puis C. Le jeu, prêt plus tôt, reste fermé jusqu'à l'ouverture du moteur. **Le créneau réactif du Digital Fairness Act est abandonné**, alors que la proposition est visée pour novembre 2026 (MLex, 23/09) | `marketing/campaigns/README.md` §10, `GAME-BRIEF.md` | D2, section E (le fait DFA du jeu) |
 | C24 | « Voir un exemple » en roast | **Oui, tranchée le 2026-09-30** (la reco) : le bouton suit le sélecteur de ton de l'aperçu, et en roast il mène à `/r/sample?tone=roast` | Ici | Livré le 2026-09-30 avec A7.9 |
 
