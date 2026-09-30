@@ -141,10 +141,10 @@ une copie, pas une fonctionnalité. Une PR par sous-lot, dans cet ordre :
 
 | # | Quoi | Détail |
 |---|---|---|
-| A10.a | **Les primitives dans `src/components/core/`, sans rien câbler** | `Field` (et `FieldRow`), `TextField`, `NumberField`, `Select`, `DateField`, `Choices`, `Checkbox`, `FormSummary` ; `TextArea` et `Segmented` selon leurs deltas ; `AnswerOption` lit `--size-mark` et `--mark-inset`. Jetons répartis dans les couches existantes (`colors.css` et `tokens.ts` pour les couleurs, `typography.css`, `shape.css`, `spacing.css`), pas dans un fichier à part. Tests unitaires (la logique pure dans `src/lib/forms/`, le balisage par rendu statique), aperçus dans `.design-sync/previews/`, contrats dans `componentSrcMap`. Gardes : un seul anneau de focus sur toutes les primitives, aucune opacité pour dessiner un état. Vérification à l'écran sur une page d'échafaudage jamais commitée, papier et nuit, FR et EN, 390 et 1 280 |
-| A10.b | **Le moteur sur les primitives** | `_engine/_ui/` puis ses usages, constructeur de slides compris (`deck/AskForm.tsx` et son `Field` local, les cinq cases à cocher de l'écran du deck). Gardes : « 26 000 » lu comme 26000, l'anneau de focus le même partout. Les e2e du moteur, de l'accessibilité et du contraste restent verts |
+| A10.a | **Les primitives dans `src/components/core/`, sans rien câbler** | **Livré le 2026-09-30** ([#218](https://github.com/ScratchMe/tourdegrowth/pull/218), squash `675f4f3`). `Field` (et `FieldRow`), `TextField`, `NumberField`, `Select`, `DateField`, `Choices`, `Checkbox`, `FormSummary` ; `TextArea` et `Segmented` selon leurs deltas ; `AnswerOption` lit `--size-mark` et `--mark-inset`. Jetons répartis dans les couches existantes (`colors.css` et `tokens.ts` pour les couleurs, `typography.css`, `shape.css`, `spacing.css`), pas dans un fichier à part. Tests unitaires (la logique pure dans `src/lib/forms/`, le balisage par rendu statique), aperçus dans `.design-sync/previews/`, contrats dans `componentSrcMap`. Gardes : un seul anneau de focus sur toutes les primitives, aucune opacité pour dessiner un état. Vérification à l'écran sur une page d'échafaudage jamais commitée, papier et nuit, FR et EN, 390 et 1 280 |
+| A10.b | **Le moteur sur les primitives** | **Fait le 2026-09-30.** Tous les champs du moteur, constructeur de slides compris (`deck/AskForm.tsx` perd son `Field`, son `DraftInput` et son analyseur ; les cinq cases à cocher du deck deviennent des `Checkbox`). Plus rien n'importe `_engine/_ui/`. Unités dans la boîte, placées par la langue et nommées par `Intl` pour les lecteurs d'écran ; `--form-gap-*` avec leurs lecteurs. Corrigé en passant : le deck lisait « 26,000 » comme 26, et le signe d'un `NumberField` collait au bord quand l'unité avait un nom. Gardes (`e2e/engine-forms.spec.ts`) : « 26 000 » lu dans la fiche et dans le deck, un seul anneau de focus sur huit sortes de contrôles |
 | A10.c | **L'audit sur les primitives, avec A9.1** | `admin/audit/_ui/` (ses cinq fichiers), le paragraphe rouge des champs manquants remplacé par l'état `missing` et un `FormSummary`, la date en trois listes en français, l'anneau d'encre à la place du rouge. A9.1 (les guillemets) dans la même PR, puisqu'il touche les mêmes fichiers, et `copy-typography.test.ts` étendu à ce dossier. Garde : « 26 000 » lu dans l'audit aussi |
-| A10.d | **Les trois copies supprimées, et une garde contre une quatrième** | Les dossiers `_ui/` du moteur et de l'audit, le `Field` et le `.control` de `deck/`. La garde refuse tout `<input>`, `<select>` ou case à cocher écrit à la main hors de `src/components/core/` |
+| A10.d | **Les trois copies supprimées, et une garde contre une quatrième** | Les dossiers `_ui/` du moteur et de l'audit (le `Field` et le `.control` de `deck/` sont partis avec A10.b, dont c'étaient les seuls lecteurs). La garde refuse tout `<input>`, `<select>` ou case à cocher écrit à la main hors de `src/components/core/` |
 
 **Écarts assumés contre le retour, signalés plutôt qu'absorbés** (le détail
 dans l'entrée de `JOURNAL.md` du lot a) :
@@ -166,7 +166,10 @@ dans l'entrée de `JOURNAL.md` du lot a) :
 session n'a que Chromium), porter le curseur du « et si » et les deux boutons
 d'import de fichier (le retour pose ses conditions : un `Field`, et un
 `NumberField` à côté du curseur), et la garde générale que le retour suggère
-contre toute opacité sur du texte.
+contre toute opacité sur du texte. La ligne « Pour enregistrer, il manque :
+… » de la fiche du moteur deviendrait naturellement un `FormSummary`, mais il
+lui faut un titre qui compte, donc de la copie neuve : une décision, pas un
+portage.
 
 ---
 

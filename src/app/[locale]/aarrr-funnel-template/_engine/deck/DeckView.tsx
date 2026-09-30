@@ -2,8 +2,8 @@
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ComponentType, type ReactNode } from "react";
 import { Button } from "@/components/core/Button";
-import { Checkbox } from "@/components/core/Checkbox";
 import { Callout } from "@/components/core/Callout";
+import { Checkbox } from "@/components/core/Checkbox";
 import { buildDeck, deckMarkdown } from "@/lib/engine/deck";
 import { fillTemplate } from "@/lib/engine/format";
 import { sanityText } from "@/lib/engine/sentences";

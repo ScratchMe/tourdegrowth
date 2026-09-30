@@ -6049,3 +6049,44 @@ C16, tranché par Antoine le 2026-09-29, captures de la vue propriétaire à l'a
 **Vérifié** : `tsc` et `eslint` propres, `next build` propre, **2 328 tests unitaires** (194 fichiers) après la fusion de `main`, couverture au-dessus des seuils, et la suite Playwright complète sur un build de production (`GAME_ENABLED=true`, comme la CI) : **636 passées, aucun échec, 5 ignorées par construction** sur 641, dont le moteur, l'audit, l'accessibilité et le contraste.
 
 **Reste** : A10.b, c et d ; `--select-inset` dans WebKit et Gecko ; la re-synchro.
+
+## Extension 04 du design system, lot b : le moteur sur les primitives (2026-09-30)
+
+**Ce qui est porté** : tous les champs du moteur passent sur les primitives de `src/components/core/`. Cela couvre les réglages et la mise en route (`Setup`), les deux écrans d'étapes (la cible, la base), la fiche d'un chiffre (`MetricSheet`, `ValueEditor`), le triage « Je ne le trouve pas » et ses deux lectures, la confirmation d'effacement, l'import et la copie de secours d'une demande. Le constructeur de slides suit : `deck/AskForm.tsx` perd son `Field`, son `DraftInput` et son analyseur, et les cinq cases à cocher de l'écran du deck deviennent des `Checkbox`. `deck.module.css` perd `.field`, `.control`, `.check` et leurs voisines. Plus aucun fichier du moteur n'importe `_engine/_ui/`, que A10.d supprime avec les autres copies. Densités, comme le retour le fixe : `md` pour la mise en route et les étapes à une question, `sm` pour une fiche et pour le deck. `--form-gap-sm` et `--form-gap-md` arrivent avec leurs premiers lecteurs.
+
+**Ce qui change à l'écran** :
+- Les libellés sont des phrases en Inter, et non plus du méta en capitales.
+- L'unité est dans la boîte : « % » (« 30 % » avec son espace insécable en français), et la devise placée par la langue (« €26,000 », « 26 000 € »). Elle est cachée des lecteurs d'écran, qui entendent à la place un mot pris dans `Intl` (« per cent », « euros »). **Aucun mot de copie neuve.**
+- Deux comptes forment une `FieldRow` avec « sur » : les boîtes restent sur une ligne quelle que soit la hauteur des libellés et des indices partagés, et le bloc qui plaçait ces indices sous la paire disparaît.
+- « Au moins » et « Au plus » forment une paire sans joint (`FieldRow` le permet désormais : le joint vide reste en place, caché). « Le minimum dépasse le maximum » appartient à la paire.
+- Le mois est un `DateField`, la devise un `Select` à sa taille, et les deux fenêtres un `Field group` avec `Segmented labelledBy`.
+- Les modèles « bientôt » sont en tirets, à pleine lisibilité : l'opacité à 0,45 mettait leur raison à 1,91:1.
+- Une pièce qui manque à l'enregistrement se dit aussi sous son propre champ. La ligne sous le bouton reste l'index de toutes. Aucune copie neuve : c'est `saveNeeds`, rempli avec le seul nom du champ.
+
+**Deux défauts corrigés** :
+- **Le constructeur de slides lisait « 26,000 » (anglais) comme 26.** Son montant passe maintenant par `NumberField`, qui lit comme le lecteur écrit.
+- **Un défaut d'A10.a, vu à l'écran ici.** Quand une unité a son nom pour les lecteurs d'écran, le `span` caché était le dernier enfant de la boîte ; `.affix:last-child` ne trouvait plus le signe, qui collait à 3 px du bord au lieu de 14. Le `span` sort de la boîte. La page d'échafaudage d'A10.a ne l'avait pas montré : elle ne donnait pas de nom à une unité qui suit. Un test de balisage le garde : il rougit sur l'ancien code.
+
+**Deux choix, signalés** :
+- La limite des textes du deck devient souple, comme partout. Au-delà, le texte reste à l'écran avec son compte et son message, mais n'est pas transmis : `validate.ts` refuserait tout l'état pour une puce trop longue. Avant, un `maxlength` dur coupait un collage au milieu d'un mot.
+- Le montant du deck garde sa devise dans le libellé (« Montant (€) ») : pas de signe dans la boîte en plus, pour ne pas toucher à la copie.
+
+**Gardes, avec leur non-vacuité** :
+- `e2e/engine-forms.spec.ts` vérifie trois choses (non-vacuité : sur un build où `NumberField` lit avec `Number(text)` et où `Select` reprend l'anneau rouge, les trois rougissent) :
+  - « 26 000 » tapé en français est lu 26 000 : le taux vivant suit, et la boîte se regroupe avec l'espace insécable ;
+  - « 26,000 » tapé en anglais dans le deck est stocké 26 000 ;
+  - un seul anneau de focus, celui du système, sur chaque sorte de contrôle du moteur : une rangée de choix, un mois, la devise, un texte, un compte, la source, une case, le texte du deck.
+- Côté unitaire, quatre ajouts :
+  - `sources.test.ts` : la place de l'unité par langue, son nom, et l'ordre de la liste des sources ;
+  - le signe d'une unité reste le dernier enfant de la boîte ;
+  - la `FieldRow` sans joint ;
+  - les `data-testid` posés sur le contrôle natif.
+
+**Vérifié** : `tsc`, `eslint` et `next build` propres ; **2 335 tests unitaires** (195 fichiers), avec la couverture au-dessus de ses seuils. La suite Playwright complète tourne sur un build de production (`GAME_ENABLED=true`) : **663 specs, 640 passées, aucun échec**. Les 23 ignorées le sont par construction : 5 « jeu fermé », et les specs d'A7.11 sans l'émulateur Firestore local. Cela inclut les e2e du moteur, de l'accessibilité et du contraste. **À l'écran**, en FR et EN, à 390 et 1 280 px :
+- la mise en route ;
+- une fiche, sous quatre états : deux comptes, un enregistrement refusé, une estimation inversée, deux lectures en conflit ;
+- le constructeur de slides et ses réglages.
+
+Aucun débordement horizontal sur les seize vues mesurées. Le « % » de la cible a été re-mesuré après correctif : à 14 px du bord intérieur. Le monde nuit ne concerne pas le moteur, qui est sur papier.
+
+**Hors d'A10, noté** : la ligne « Pour enregistrer, il manque : … » deviendrait naturellement un `FormSummary`. Il faudrait pour cela un titre qui compte, donc de la copie neuve, et c'est une décision qui ne relève pas du portage.

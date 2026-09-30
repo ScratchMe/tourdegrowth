@@ -20,11 +20,11 @@ test.beforeEach(async ({ context }) => {
  * 2. One focus ring, the system's, on every kind of control the engine
  *    draws, and never two at once (the box AND the input inside it).
  *
- * Non-vacuity (2026-09-30), one build with three faults put back: NumberField
- * reading with `Number(text)` fails the first test (the live rate never
- * shows); the deck's amount read with its old parser fails the second
- * (26 stored); Select's ring back on `--focus-ring-invert` fails the third
- * on « Currency ».
+ * Non-vacuity (2026-09-30), one build with two faults put back: NumberField
+ * reading with `Number(text)` — the naive reading the deck's own parser was a
+ * variant of — fails the first two tests (no live rate; nothing stored for
+ * « 26,000 »), and Select's ring back on `--focus-ring-invert` fails the
+ * third on the first list it reaches, the month.
  */
 
 const STORAGE_KEY = "tdg.engine.v1";
