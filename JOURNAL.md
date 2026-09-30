@@ -6307,3 +6307,27 @@ Elle a relevé un trou : seules les lignes d'adresse de `/llms-full.txt` étaien
 - `robots.txt` sert les deux groupes nommés et le groupe `*`, tous en `Allow: /`, sans aucun `Disallow` ;
 - les adresses de `/llms.txt` sont exactement les 74 du sitemap de production, plus le lien du texte intégral. Chacune répond 200. Ni le jeu ni le moteur n'y figurent, puisqu'ils sont fermés ;
 - `/llms-full.txt` a ses 32 parties et ne cite ni `/r/`, ni `/admin`, ni le moteur.
+
+## C25 : la spécification du B2B assisté et de l'hybride, validée (2026-09-30)
+
+Antoine a tranché C25 dans sa propre session, avec le prompt C25 : les seize questions du §18.12 d'`ENGINE.md` (A7.3.a, [#214](https://github.com/ScratchMe/tourdegrowth/pull/214)). **A7.3.b est close**, et le code (A7.3.c) peut partir dans l'ordre du §18.11. Chaque réponse est datée dans une colonne « Tranché » du §18.12, et **les sections qu'elle change sont corrigées le même jour**. Aucune ligne de code.
+
+**Avant de poser** : `src/lib/engine/` n'a pas bougé depuis `62e3618`. A10 n'a changé que les écrans, que le §18 écrivait déjà avec `Choices` et `Segmented`. Ni le journal ni le nº8 (une seule carte tranchée, C1) ne contenaient de réponse. Un écart mineur est corrigé en passant : le §18.10.3 « étendait » `engine-mobile.spec.ts`, qui n'a jamais existé.
+
+**Q3, Q1 et Q2, une par une, sur l'exemple §18.9** :
+- **Q3, oui : un client compte dans la motion qui a signé son contrat en cours.** Le double compte a été montré sur l'exemple : 5 comptes à 2 000 € par mois comptés par Stripe et par HubSpot donnent 228 000 € affichés pour 218 000 € réels. Rien à l'écran ne le montre. **Un ajout de la séance** : un passage du libre-service à l'assisté n'est pas un départ du libre-service. Compté comme tel, il ajoute ~0,4 point à un churn de 2,5 % dont la cible est 2 %. S8 et §18.4.6 (une ligne de piège sur cinq fiches du libre-service, en hybride seulement) sont corrigés.
+- **Q1, oui : l'activation assistée est la mise en production.**
+- **Q2, oui : trois mois glissants, fixes.** Montré : au mois (~6 signées sur 25), une seule signature de plus fait passer l'étape nommée du taux de closing au passage lead → opportunité. Sur trois mois, elle ne la change pas.
+
+**Q4 à Q16 en bloc** : dix recos retenues. Q10 et Q12 ont été posées sur l'écran actuel du moteur (build local, aperçu propriétaire, l'exemple rempli à 1 280 et 390 px) et sur un croquis de l'écran hybride fait avec les chiffres de §18.9. Les images sont restées dans le scratchpad. **Constat en posant Q12** : le bloc de diagnostic du tableau ne montre aucun montant (`Diagnosis.tsx`). Les deux montants (~600 € et ~4 000 €) ne vivent que sur deux slides, à deux slides d'écart. La reco « oui » tient donc à plus forte raison.
+
+**Trois reprises, posées une par une** :
+- **Q4 : une marge brute par motion.** Antoine : « ça change tout, il faut qu'on ait la différence ». L'assisté gagne `slg.rev.gross-margin` : 15 chiffres propres, une union de 32, plus de chiffre « commun ». **Aucune migration**, puisque `rev.gross-margin` reste au libre-service. Un repli « Reprendre la marge globale » existe en hybride seulement : la valeur s'enregistre en estimation (base `company-wide`), comptée approximative, jamais trouvée. Par symétrie, la fiche du libre-service offre le même repli. Montré : payback assisté de 13 mois à 75 % de marge, de 16 à 60 %. Quatorze sections sont corrigées, dont l'exemple (« 24 chiffres sur 32 ») et un gabarit neuf pour « les deux marges manquent ».
+- **Q7 : la liaison devient un levier « Et si » dès la v1.** Antoine : « c'est justement un point important dans ces organisations hybrides ». Le levier se chiffre **en nombre** d'opportunités venues du libre-service par trimestre, et non en part, qui monte aussi quand les autres baissent. Il est **jamais candidat** : une cible sur la liaison ferait dire au diagnostic de l'assisté « le libre-service ne passe pas assez ». Son gain s'écrit dans l'assisté et le total, et rien n'est retiré au libre-service. Exemple : 31 → 40 donne +1,25 signature par trimestre, soit ~830 € de MRR nouveau par mois.
+- **Q8 : quatre termes de glossaire dès la v1, par une session à part.** Ce sont « taux de closing », « cycle de vente », « ACV » et « conversion lead → opportunité » ; le §18.4.2 annonçait ce quatrième, que Q8 oubliait. Ils deviennent l'item **A7.3.e**, avec son prompt dans `CHANTIERS.md`, en parallèle d'A7.3.c. S2 attend leurs slugs. Le glossaire passera à 28 termes et 56 pages.
+
+**Mis d'accord en passant** : C29, tranchée entre-temps par une autre session, fait passer « facultatif » par la prop `optional`. Le bloc de liaison du §18.6.3 le suit.
+
+**Aucune question neuve** pour la section C. Chiffrage revu : ≈ 12 jours-agent avec A7.3.e, et le même chemin critique de ~6 jours.
+
+**`main` a bougé pendant la séance** : A11, C28, C29 (#227, #229), puis C26 et C27 (#228, #230). Ces PR touchaient `CHANTIERS.md`, `CLAUDE.md` et la fin de ce journal. `main` a été fusionné avant d'y écrire, en gardant les deux côtés. `CLAUDE.md` reste sous 40 000 caractères.
