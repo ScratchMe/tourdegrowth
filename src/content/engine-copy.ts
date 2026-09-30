@@ -183,6 +183,12 @@ export const ENGINE_COPY = {
       en: "You took the Tour on {date} ({score}/100). We'll compare what you declared there with what you find here — we read it, we don't copy it.",
     },
     tourLink: { fr: "Comparer avec ce Tour", en: "Compare with that Tour" },
+    /** In the settings, under the Tour box once it is unticked: unlinking never erases the Tour (C8). */
+    // TODO: à relire (convention 6) — nouveau (2026-09-30, A7.5, C8 : relier un Tour après coup).
+    tourUnlinkHint: {
+      fr: "Délier garde ton Tour sur cet appareil : tu pourras le relier de nouveau.",
+      en: "Unlinking keeps your Tour on this device: you can link it again.",
+    },
     // TODO: à relire — nouveau (2026-09-25, retours d'Antoine sur le moteur).
     exampleLink: { fr: "Voir un exemple rempli, funnel et slides →", en: "See a filled-in example, funnel and slides →" },
     startSteps: { fr: "Commencer pas à pas →", en: "Start step by step →" },
@@ -874,6 +880,23 @@ export const ENGINE_COPY = {
       fr: "Le résultat du Tour relié n'est plus sur cet appareil : la comparaison est retirée.",
       en: "The linked Tour result is no longer on this device: the comparison is removed.",
     },
+    /**
+     * A Tour is on this device and the engine is not linked to it (C8, ENGINE.md
+     * §8.5): taken after the engine was started, or unticked by mistake. The
+     * button links it, as the setup card's box does.
+     */
+    // TODO: à relire (convention 6) — nouveau (2026-09-30, A7.5, C8 : relier un Tour après coup).
+    unlinked: {
+      fr: "Tu as fait le Tour le {date} ({score}/100). Le relier compare ce que tu y as déclaré à ce que tu retrouves ici.",
+      en: "You took the Tour on {date} ({score}/100). Linking it compares what you declared there with what you find here.",
+    },
+    // TODO: à relire (convention 6) — nouveau (2026-09-30, A7.5, C8 : relier un Tour après coup).
+    unlinkedNoScore: {
+      fr: "Tu as fait le Tour le {date}. Le relier compare ce que tu y as déclaré à ce que tu retrouves ici.",
+      en: "You took the Tour on {date}. Linking it compares what you declared there with what you find here.",
+    },
+    // TODO: à relire (convention 6) — nouveau (2026-09-30, A7.5, C8 : relier un Tour après coup).
+    link: { fr: "Relier ce Tour", en: "Link this Tour" },
   },
 
   /**

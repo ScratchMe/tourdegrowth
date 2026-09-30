@@ -56,6 +56,7 @@ export function Setup({
   onExample,
   initial,
   existing,
+  linked,
   onCancel,
 }: {
   strings: EngineStrings;
@@ -74,6 +75,8 @@ export function Setup({
   initial?: { setup: EngineSetup; referenceMonth: YearMonth; cohortMonth: YearMonth };
   /** Which numbers a change of window would send back to "to fill in". */
   existing?: { activation: boolean; paid: boolean; any: boolean };
+  /** In the settings: whether the engine is linked to a Tour now — the box opens on it (C8). */
+  linked?: boolean;
   onCancel?: () => void;
 }) {
   const s = strings.setup;
@@ -86,7 +89,8 @@ export function Setup({
   const [referenceMonth, setReferenceMonth] = useState<YearMonth>(initial?.referenceMonth ?? lastClosed);
   const [chosenCohort, setChosenCohort] = useState<YearMonth | null>(initial?.cohortMonth ?? null);
   const [company, setCompany] = useState(initial?.setup.companyLabel ?? "");
-  const [linkTour, setLinkTour] = useState(true);
+  // A new engine offers the link ticked; the settings open on what is (C8).
+  const [linkTour, setLinkTour] = useState(editing ? Boolean(linked) : true);
   const [tried, setTried] = useState(false);
 
   const cohortWindow = Math.max(30, paid);
@@ -206,7 +210,9 @@ export function Setup({
         />
       </Field>
 
-      {tour && !editing ? (
+      {/* Also in the settings since C8 (2026-09-29): a Tour taken after the engine was started, or
+          a box unticked by mistake, could never be linked again. */}
+      {tour ? (
         <div className={styles.tour} data-testid="engine-setup-tour">
           <CheckField id={`${id}-tour`} checked={linkTour} onChange={setLinkTour}>
             {s.tourLink}
@@ -214,6 +220,11 @@ export function Setup({
           <p className={styles.tourText}>
             {fill(s.tourFound, { date: formatDate(tour.createdAt, locale), score: tour.total ?? "—" })}
           </p>
+          {editing && !linkTour ? (
+            <p className={styles.tourText} data-testid="engine-settings-unlink-hint">
+              {s.tourUnlinkHint}
+            </p>
+          ) : null}
         </div>
       ) : null}
 

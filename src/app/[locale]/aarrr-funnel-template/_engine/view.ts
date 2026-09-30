@@ -26,6 +26,8 @@ export interface EngineView {
    * the Tour (§8.5); with one the person chose not to link, the board says nothing about it.
    */
   tourOnDevice: boolean;
+  /** That Tour — the latest with answers on this device — so the board can offer to link it (C8, §8.5). */
+  deviceTour: StoredResult | null;
 }
 
 /** Every write a screen can ask for. Each one stamps `updatedAt` and goes through the store's `commit`. */
@@ -45,4 +47,6 @@ export interface EngineActions {
   markReminded: (ids: MetricId[]) => void;
   /** Opens a number's sheet from anywhere — "also in Stripe", the collect list, the resume band. */
   openMetric: (id: MetricId) => void;
+  /** Links the engine to a Tour result on this device, or unlinks it (`null`) — the Tour itself is never touched (C8, D13). */
+  linkTour: (resultId: string | null) => void;
 }
