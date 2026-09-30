@@ -251,6 +251,29 @@ describe("FieldRow", () => {
     expect(out).toContain("Le minimum dépasse le maximum.");
     expect(out).toMatch(/>à<\/span>/);
   });
+
+  it("keeps the second field in its column without a joiner (« At least » / « At most »)", () => {
+    // The layout places the pair by position (1st and 3rd child): an absent
+    // joiner would move the second field into the joiner's narrow column.
+    const field = (label: string) => createElement(TextField, { key: label, label, value: "", onChange: noop });
+    const out = html(createElement(FieldRow, { children: [field("Au moins"), field("Au plus")] }));
+    const grid = /<div class="[^"]*"><div[^>]*>.*?<\/div><span class="([^"]*)"><\/span><div/.exec(out);
+    expect(grid?.[1]).toBeTruthy();
+  });
+});
+
+describe("test ids", () => {
+  it("land on the native control, where a test clicks and reads", () => {
+    const testId = { "data-testid": "x" };
+    expect(html(createElement(TextField, { label: "L", value: "", onChange: noop, ...testId }))).toMatch(/<input[^>]*data-testid="x"/);
+    expect(html(createElement(NumberField, { label: "L", value: null, onChange: noop, locale: "en", parseError: "!", ...testId }))).toMatch(
+      /<input[^>]*data-testid="x"/,
+    );
+    expect(html(createElement(Select, { label: "L", value: "", onChange: noop, options: [], placeholder: "…", ...testId }))).toMatch(
+      /<select[^>]*data-testid="x"/,
+    );
+    expect(html(createElement(Checkbox, { label: "L", checked: false, onChange: noop, ...testId }))).toMatch(/<input[^>]*data-testid="x"/);
+  });
 });
 
 describe("FormSummary", () => {
