@@ -6245,6 +6245,14 @@ Les plafonds sont relevés, chacun avec sa raison, et le paragraphe du test cite
 
 Tout l'en-tête est « à relire » et hors de tout bon à tirer, comme `CLAUDE.md` le liste.
 
+**La relecture de sécurité** (`relecteur-securite`) n'a rien trouvé de bloquant. Elle a vérifié quatre points :
+- rien de non public dans les deux fichiers, ni nom, ni LinkedIn, ni variable d'environnement autre que `SITE_URL` ;
+- aucune lecture par requête ;
+- l'aperçu propriétaire ne peut pas fuir dans un fichier construit, puisque les deux drapeaux sont lus avec `ownerPreview: false` ;
+- le proxy n'est pas touché.
+
+Elle a relevé un trou : seules les lignes d'adresse de `/llms-full.txt` étaient comparées au sitemap, pas ses autres liens (termes liés, étapes du diagnostic). Un test le comble : toute adresse du texte intégral doit être dans le sitemap le plus petit, jeu et moteur fermés. Il rougit sur un lien vers `/r/sample` ajouté pour l'essai.
+
 **Un piège de mesure, pas un bug** : un build avec `GAME_ENABLED=true` servi par un `next start` sans la variable liste `/en/game` dans `/llms.txt`, et le proxy y répond 404. C'est le « construit ouvert, fermé à l'exécution » que décrit `build-flag.ts`, qui n'existe qu'en local : la CI pose la variable au niveau du workflow, pour le build comme pour le serveur.
 
-**Vérifié** : `tsc` et `eslint` propres, **2 350 tests unitaires** (neuf de plus), `vitest --coverage` au-dessus de ses seuils, `next build` propre, avec les trois routes en statique. La suite Playwright complète, avec les variables de la CI : **666 specs, 643 passées, aucun échec**, 23 ignorées par construction. `llms-robots.spec.ts` (trois specs, dont une qui demande chaque adresse listée et exige un 200) a été rejouée après les corrections de la relecture, sur un build refait.
+**Vérifié** : `tsc` et `eslint` propres, **2 351 tests unitaires** (dix de plus), `vitest --coverage` au-dessus de ses seuils, `next build` propre, avec les trois routes en statique. La suite Playwright complète, avec les variables de la CI : **666 specs, 643 passées, aucun échec**, 23 ignorées par construction. `llms-robots.spec.ts` (trois specs, dont une qui demande chaque adresse listée et exige un 200) a été rejouée après les corrections de la relecture, sur un build refait.

@@ -65,6 +65,18 @@ describe("/llms.txt covers the sitemap, and only it (C27)", () => {
     expect(text).toContain(FULL_TEXT_URL);
     expect(text).not.toMatch(/\[object |: undefined\b|^undefined$/m);
   });
+
+  // The full text's other links (a term's related terms, the diagnostic's
+  // stages) must not reach past the sitemap either — checked against the
+  // smallest sitemap, game and engine closed (relecteur-securite, 2026-09-30).
+  it("/llms-full.txt links only to sitemap pages, even with the game and the engine closed", () => {
+    delete process.env.GAME_ENABLED;
+    delete process.env.ENGINE_ENABLED;
+    const urls = [...buildLlmsFullTxt().matchAll(/https?:\/\/[^\s)|]+/g)].map((m) => m[0]);
+    expect(urls.length).toBeGreaterThan(llmsFullPaths().length * 2);
+    const allowed = sitemapUrls();
+    for (const url of urls) expect(allowed.has(url), url).toBe(true);
+  });
 });
 
 describe("/llms-full.txt carries the full text of the articles and the terms (C27)", () => {
