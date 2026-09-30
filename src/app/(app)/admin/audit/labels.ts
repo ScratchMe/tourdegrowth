@@ -57,8 +57,8 @@ export const TIER_GLOSS: Record<AuditTier, string> = {
 export const TIER_EXPLANATION: Record<AuditTier, string> = {
   T0: "Produit par l'audit lui-même — entretiens, relecture de dossiers, Tour de l'auditeur. Rien à demander à l'entreprise.",
   T1: "La donnée est dans un outil auquel tu as déjà accès. Des minutes, pas des heures, et aucune demande à poser.",
-  T2: "Une à trois heures : soit une session avec la personne qui tient le système (facturation, CRM, produit), soit une lecture de document quand il existe déjà.",
-  T3: "Une file d'analyste : deux à cinq jours ouvrés. À demander le PREMIER jour, définition déjà écrite, pour éviter un aller-retour.",
+  T2: "Une à trois heures : soit une session avec la personne qui tient le système (facturation, CRM, produit), soit une lecture de document quand il existe déjà.",
+  T3: "Une file d'analyste : deux à cinq jours ouvrés. À demander le PREMIER jour, définition déjà écrite, pour éviter un aller-retour.",
   T4: "Ne se demande pas sans sponsor — une ventilation de masse salariale par fonction, par exemple. Sans mandat, la ligne restera absente.",
 };
 
@@ -100,9 +100,32 @@ export const CONTRACT_TERM_LABELS: Record<ContractTerm, string> = {
 };
 
 /** `["a","b"]` + une table → les options d'un `Select`, dans l'ordre du schéma. */
+/** A closed vocabulary as the options of a design-system `Select`. */
 export function optionsFrom<Id extends string>(ids: readonly Id[], labels: Record<Id, string>) {
-  return ids.map((id) => ({ id, label: labels[id] }));
+  return ids.map((id) => ({ value: id, label: labels[id] }));
 }
+
+/**
+ * Ce que disent les champs eux-mêmes (extension 04 du design system, A10.c).
+ * TODO: à relire — copie neuve (convention 6) : la phrase de lecture reprend
+ * celle du moteur, le reste celle de la planche du retour 04.
+ */
+export const FORM_COPY = {
+  /** Sous une case où ce qui est tapé ne se lit pas comme un nombre — dit en quittant la case. */
+  notANumber: "Ce n'est pas un nombre lisible.",
+  /** Sous un champ que le validateur demande, tant qu'il est vide : la ligne s'enregistre quand même. */
+  missing: "À compléter — l'export signalera cette ligne comme incomplète.",
+  /** Les trois listes d'une date. */
+  dayParts: { day: "Jour", month: "Mois", year: "Année" },
+  /** Une date commencée mais pas finie : rien ne s'enregistre tant qu'il manque une partie. */
+  partialDay: "Il manque une partie de la date : rien ne s'enregistre avant les trois.",
+  /** Le 31 février. */
+  notADay: "Ce jour n'existe pas.",
+  /** Le titre du résumé au-dessus du bouton, compté. */
+  summaryTitle: (n: number) => (n === 1 ? "Un champ à compléter" : `${n} champs à compléter`),
+  /** Ce qui se passe si on enregistre quand même. */
+  summaryLead: "La ligne s'enregistre quand même — l'export la signalera comme incomplète plutôt que de faire croire qu'elle est finie.",
+} as const;
 
 /**
  * Les sept statuts. Les libellés disent ce que le statut AFFIRME, pas un
@@ -219,8 +242,8 @@ export const CONFIDENCE_LABELS: Record<Confidence, string> = {
  * n'invente pas de manque.
  */
 export const OBSERVATION_GAP_TEXT: Record<ObservationGap, string> = {
-  "needs-value": "Il manque au moins une observation qui porte une valeur — une observation en attente ne suffit pas à dire « mesuré ».",
-  "needs-second": "Contesté garde les deux chiffres côte à côte : il en faut une seconde. Un seul chiffre n'est pas un désaccord.",
+  "needs-value": "Il manque au moins une observation qui porte une valeur — une observation en attente ne suffit pas à dire « mesuré ».",
+  "needs-second": "Contesté garde les deux chiffres côte à côte : il en faut une seconde. Un seul chiffre n'est pas un désaccord.",
 };
 
 /**

@@ -36,6 +36,8 @@ export interface TextFieldProps {
   inputMode?: HTMLAttributes<HTMLInputElement>["inputMode"];
   autoComplete?: string;
   spellCheck?: boolean;
+  /** Only on a screen that exists to fill this one field in (a confirmation, a new mission). */
+  autoFocus?: boolean;
   onBlur?: FocusEventHandler<HTMLInputElement>;
   /** Set on the native control, for tests. */
   "data-testid"?: string;
@@ -69,6 +71,7 @@ export function TextField({
   inputMode,
   autoComplete = "off",
   spellCheck,
+  autoFocus,
   onBlur,
   "data-testid": testId,
 }: TextFieldProps) {
@@ -105,6 +108,7 @@ export function TextField({
             inputMode={inputMode}
             autoComplete={autoComplete}
             spellCheck={spellCheck}
+            autoFocus={autoFocus}
             aria-invalid={status === "invalid" || over || undefined}
             aria-describedby={describedBy}
             onChange={(event) => onChange(event.target.value)}

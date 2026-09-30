@@ -54,7 +54,7 @@ export function RestitutionView({
         </Button>
       </div>
       <p className={styles.muted}>
-        Les mêmes lignes, regroupées par étape et croisées avec le Tour : ce que l&apos;équipe déclare mesurer contre ce qu&apos;elle peut
+        Les mêmes lignes, regroupées par étape et croisées avec le Tour : ce que l&apos;équipe déclare mesurer contre ce qu&apos;elle peut
         montrer.
       </p>
 
@@ -62,7 +62,7 @@ export function RestitutionView({
         {QUADRANTS.filter((quadrant) => view.counts[quadrant] > 0).map((quadrant, index) => (
           <span key={quadrant}>
             {index > 0 ? " · " : ""}
-            {QUADRANT_LABELS[quadrant]} : {view.counts[quadrant]}
+            {QUADRANT_LABELS[quadrant]} : {view.counts[quadrant]}
           </span>
         ))}
       </p>
@@ -70,7 +70,7 @@ export function RestitutionView({
       {tourAnswered === 0 ? (
         <Card elevation="panel" className={styles.placeholder} data-testid="blind-spots-need-tour">
           <p className={styles.muted}>
-            Aucun angle mort ne peut être établi tant que le Tour est vide : c&apos;est un croisement, il lui faut les deux axes.{" "}
+            Aucun angle mort ne peut être établi tant que le Tour est vide : c&apos;est un croisement, il lui faut les deux axes.{" "}
           </p>
           <Button size="sm" variant="secondary" onClick={onOpenTour} data-testid="open-tour-from-restitution">
             Remplir le Tour
@@ -83,7 +83,7 @@ export function RestitutionView({
           </MetaLabel>
           <p className={styles.muted}>
             L&apos;équipe déclare mesurer ces lignes, et rien ne les documente. C&apos;est l&apos;écart le plus rentable de
-            l&apos;exercice : la maturité déclarée est haute, le système réel ne suit pas.
+            l&apos;exercice : la maturité déclarée est haute, le système réel ne suit pas.
           </p>
           <ul className={styles.rowList}>
             {view.blindSpots.map((item) => (

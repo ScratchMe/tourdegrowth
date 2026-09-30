@@ -89,7 +89,7 @@ export function ImportPanel({
                 {mission.catalog.version === currentCatalogVersion ? null : (
                   <>
                     {" "}
-                    — version courante <code>{currentCatalogVersion}</code>. L&apos;outil ne migre jamais seul : la mission garde le sien.
+                    — version courante <code>{currentCatalogVersion}</code>. L&apos;outil ne migre jamais seul : la mission garde le sien.
                   </>
                 )}
               </p>
@@ -113,7 +113,7 @@ export function ImportPanel({
                 <p className={styles.alert}>
                   Une mission de même identifiant est déjà sur cet appareil.
                   {pending.purgedOverFull
-                    ? " Ce fichier est une copie purgée : la remplacer échangerait tout le travail contre une copie sans nom ni valeurs."
+                    ? " Ce fichier est une copie purgée : la remplacer échangerait tout le travail contre une copie sans nom ni valeurs."
                     : ""}
                 </p>
                 <Button size="sm" variant={mode === "replace" ? "primary" : "secondary"} onClick={() => setMode("replace")}>

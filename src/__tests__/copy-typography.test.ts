@@ -136,3 +136,51 @@ describe("French typography", () => {
     expect(offenders, `use … in French copy:\n${offenders.join("\n")}`).toEqual([]);
   });
 });
+
+/**
+ * The audit instrument writes its copy inline, in its screens (hints, labels,
+ * a confirmation) — none of it in `src/content`, so the scans above never
+ * read it, and its guillemets carried plain spaces: « euro » wrapped as
+ * "« euro" / "»," at 390px (design sync, 2026-09-30, CHANTIERS.md A9.1). The
+ * audit is French only, so every string in it is French.
+ *
+ * Read from the source with the comments taken out: a guillemet never appears
+ * in code, so it is checked everywhere; high punctuation only inside
+ * double-quoted literals, since `a ? b : c` is code. Text between JSX tags is
+ * not read for high punctuation — no regex tells it from code.
+ *
+ * Non-vacuity (2026-09-30): the plain spaces put back in one hint of
+ * `DefinitionEditor.tsx` fail both checks.
+ */
+const AUDIT_ROOT = "src/app/(app)/admin/audit";
+const COMMENTS = /\{\/\*[\s\S]*?\*\/\}|\/\*[\s\S]*?\*\/|(?<!:)\/\/[^\n]*/g;
+const DOUBLE_QUOTED = /"((?:[^"\\\n]|\\.)*)"/g;
+
+function auditSources(): { file: string; code: string }[] {
+  return globSync(`${join(process.cwd(), AUDIT_ROOT)}/**/*.{ts,tsx}`)
+    .filter((f) => !f.includes("__tests__"))
+    .map((f) => ({ file: f.replace(process.cwd() + "/", ""), code: readFileSync(f, "utf8").replace(COMMENTS, "") }));
+}
+
+describe("the audit instrument's French", () => {
+  it("reads a corpus that actually exists", () => {
+    const sources = auditSources();
+    expect(sources.length).toBeGreaterThan(10);
+    const quoted = sources.reduce((n, { code }) => n + (code.match(/«/g)?.length ?? 0), 0);
+    expect(quoted).toBeGreaterThan(20);
+  });
+
+  it("has a no-break space inside « », never a plain one", () => {
+    const offenders = auditSources().flatMap(({ file, code }) =>
+      [...code.matchAll(/« | »/g)].map((m) => `${file}: …${code.slice(Math.max(0, m.index! - 30), m.index! + 10)}…`),
+    );
+    expect(offenders, `use U+00A0 in the audit's copy:\n${offenders.join("\n")}`).toEqual([]);
+  });
+
+  it("has a no-break space before ; : ! ? in its strings", () => {
+    const offenders = auditSources().flatMap(({ file, code }) =>
+      [...code.matchAll(DOUBLE_QUOTED)].filter((m) => / [;:!?]/.test(m[1]!)).map((m) => `${file}: ${m[1]!.slice(0, 80)}`),
+    );
+    expect(offenders, `use U+00A0 in the audit's copy:\n${offenders.join("\n")}`).toEqual([]);
+  });
+});

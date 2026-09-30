@@ -65,7 +65,7 @@ export function TourScreen({
       <Card elevation="panel" className={styles.placeholder}>
         <p className={styles.muted} data-testid="tour-warning">
           Tes réponses d&apos;auditeur, d&apos;après ce que les entretiens ont appris — jamais une auto-évaluation envoyée à
-          l&apos;équipe. Remplis au fil de l&apos;eau : rien n&apos;oblige à finir d&apos;un coup.
+          l&apos;équipe. Remplis au fil de l&apos;eau : rien n&apos;oblige à finir d&apos;un coup.
         </p>
       </Card>
 
@@ -90,7 +90,7 @@ export function TourScreen({
             ))}
           </ul>
           <p className={styles.muted}>
-            Des pratiques déclarées, pas une performance. Il ne se moyenne jamais avec les compteurs de couverture : ce sont deux axes.
+            Des pratiques déclarées, pas une performance. Il ne se moyenne jamais avec les compteurs de couverture : ce sont deux axes.
           </p>
         </Card>
       ) : (

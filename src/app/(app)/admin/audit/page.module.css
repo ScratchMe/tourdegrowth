@@ -93,8 +93,11 @@
   cursor: pointer;
 }
 
+/* The system's one ring (design system extension 04): red here gave red a
+   fourth meaning, « you are here », beside the primary action, a diagnosis
+   and advice. */
 .importLabel:focus-within {
-  outline: var(--focus-width) solid var(--focus-ring-invert);
+  outline: var(--focus-width) solid var(--focus-ring);
   outline-offset: var(--focus-offset);
 }
 

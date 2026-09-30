@@ -2,9 +2,9 @@
 
 import { Button } from "@/components/core/Button";
 import type { Matrix } from "@/lib/audit/schema";
-import { Field } from "./_ui/Field";
-import { NumberInput } from "./_ui/NumberInput";
-import { TextInput } from "./_ui/TextInput";
+import { NumberField } from "@/components/core/NumberField";
+import { TextField } from "@/components/core/TextField";
+import { FORM_COPY } from "./labels";
 import styles from "./page.module.css";
 
 /**
@@ -72,9 +72,14 @@ export function MatrixEditor({
       <div className={styles.matrixColumns}>
         {value.columns.map((column, index) => (
           <div key={index} className={styles.matrixColumn}>
-            <Field label={`Colonne ${index + 1}`} htmlFor={`${id}-col-${index}`}>
-              <TextInput id={`${id}-col-${index}`} value={column} onChange={(label) => setColumn(index, label)} placeholder={columnPlaceholder} />
-            </Field>
+            <TextField
+              size="sm"
+              id={`${id}-col-${index}`}
+              label={`Colonne ${index + 1}`}
+              value={column}
+              onChange={(label) => setColumn(index, label)}
+              placeholder={columnPlaceholder}
+            />
             {value.columns.length > 1 ? (
               <Button size="sm" variant="secondary" onClick={() => removeColumn(index)} data-testid={`remove-column-${index}`}>
                 Retirer
@@ -90,14 +95,14 @@ export function MatrixEditor({
       {value.rows.map((row, rowIndex) => (
         <div key={rowIndex} className={styles.matrixRowBlock}>
           {singleRow ? null : (
-            <Field label="Ligne" htmlFor={`${id}-row-${rowIndex}`}>
-              <TextInput
-                id={`${id}-row-${rowIndex}`}
-                value={row.label}
-                onChange={(label) => patchRow(rowIndex, { label })}
-                placeholder="Cohorte de janvier"
-              />
-            </Field>
+            <TextField
+              size="sm"
+              id={`${id}-row-${rowIndex}`}
+              label="Ligne"
+              value={row.label}
+              onChange={(label) => patchRow(rowIndex, { label })}
+              placeholder="Cohorte de janvier"
+            />
           )}
           {/*
             Le N est sur sa propre ligne, PAS dans la grille des cellules. Il
@@ -107,18 +112,28 @@ export function MatrixEditor({
             côte à côte, ce qui est précisément ce que « toujours en couple »
             demande. Vu en capture, pas à la relecture.
           */}
-          <Field label="Population (N)" htmlFor={`${id}-n-${rowIndex}`} hint="Combien de clients, de comptes ou d'utilisateurs derrière ces chiffres.">
-            <NumberInput id={`${id}-n-${rowIndex}`} value={row.n} onChange={(n) => patchRow(rowIndex, { n: n ?? 0 })} />
-          </Field>
+          <NumberField
+            size="sm"
+            id={`${id}-n-${rowIndex}`}
+            label="Population (N)"
+            hint="Combien de clients, de comptes ou d'utilisateurs derrière ces chiffres."
+            value={row.n}
+            onChange={(n) => patchRow(rowIndex, { n: n ?? 0 })}
+            locale="fr"
+            parseError={FORM_COPY.notANumber}
+          />
           <div className={styles.matrixCells}>
             {row.cells.map((cell, cellIndex) => (
-              <Field
+              <NumberField
                 key={cellIndex}
+                size="sm"
+                id={`${id}-cell-${rowIndex}-${cellIndex}`}
                 label={value.columns[cellIndex]?.trim() || `Colonne ${cellIndex + 1}`}
-                htmlFor={`${id}-cell-${rowIndex}-${cellIndex}`}
-              >
-                <NumberInput id={`${id}-cell-${rowIndex}-${cellIndex}`} value={cell} onChange={(next) => setCell(rowIndex, cellIndex, next)} />
-              </Field>
+                value={cell}
+                onChange={(next) => setCell(rowIndex, cellIndex, next)}
+                locale="fr"
+                parseError={FORM_COPY.notANumber}
+              />
             ))}
           </div>
           {!singleRow && value.rows.length > 1 ? (

@@ -13,17 +13,14 @@ import {
   confidenceOf,
   type Matrix,
   type Observation,
-  type ObtainedHow,
-  type PeriodType,
-  type SourceKind,
   type ValueStatus,
 } from "@/lib/audit/schema";
+import { Field } from "@/components/core/Field";
+import { NumberField } from "@/components/core/NumberField";
+import { Select } from "@/components/core/Select";
+import { TextField } from "@/components/core/TextField";
+import { IsoDateField } from "./IsoDateField";
 import { MatrixEditor, blankMatrix } from "./MatrixEditor";
-import { DateInput } from "./_ui/DateInput";
-import { Field } from "./_ui/Field";
-import { NumberInput } from "./_ui/NumberInput";
-import { Select } from "./_ui/Select";
-import { TextInput } from "./_ui/TextInput";
 import {
   CONFIDENCE_LABELS,
   OBSERVATION_GAP_TEXT,
@@ -31,6 +28,7 @@ import {
   PERIOD_TYPE_LABELS,
   SOURCE_KIND_LABELS,
   optionsFrom,
+  FORM_COPY,
 } from "./labels";
 import styles from "./page.module.css";
 
@@ -95,97 +93,100 @@ export function ObservationList({
           </div>
 
           <div className={styles.observationRow}>
-            <Field label="Début de période" htmlFor={`obs-${index}-start`}>
-              <DateInput id={`obs-${index}-start`} value={observation.periodStart} onChange={(periodStart) => patch(index, { periodStart })} />
-            </Field>
-            <Field label="Fin de période" htmlFor={`obs-${index}-end`}>
-              <DateInput id={`obs-${index}-end`} value={observation.periodEnd} onChange={(periodEnd) => patch(index, { periodEnd })} />
-            </Field>
-            <Field label="Type de période" htmlFor={`obs-${index}-type`}>
-              <Select
-                id={`obs-${index}-type`}
-                value={observation.periodType}
-                options={optionsFrom(PERIOD_TYPES, PERIOD_TYPE_LABELS)}
-                onChange={(periodType: PeriodType) => patch(index, { periodType })}
-              />
-            </Field>
+            <IsoDateField
+              id={`obs-${index}-start`}
+              label="Début de période"
+              value={observation.periodStart}
+              onChange={(periodStart) => patch(index, { periodStart })}
+            />
+            <IsoDateField
+              id={`obs-${index}-end`}
+              label="Fin de période"
+              value={observation.periodEnd}
+              onChange={(periodEnd) => patch(index, { periodEnd })}
+            />
+            <Select
+              size="sm"
+              id={`obs-${index}-type`}
+              label="Type de période"
+              value={observation.periodType}
+              options={optionsFrom(PERIOD_TYPES, PERIOD_TYPE_LABELS)}
+              onChange={(periodType) => periodType && patch(index, { periodType })}
+            />
           </div>
 
           <ValueField editor={editor} index={index} value={observation.value} onChange={(value) => patch(index, { value })} />
 
           <div className={styles.observationRow}>
-            <Field label="Système source" htmlFor={`obs-${index}-system`} hint="Le système NOMMÉ : Stripe, Salesforce, le tableur de la finance.">
-              <TextInput
-                id={`obs-${index}-system`}
-                value={observation.sourceSystem ?? ""}
-                onChange={(sourceSystem) => patch(index, { sourceSystem: sourceSystem || undefined })}
-              />
-            </Field>
-            <Field label="Sorte de source" htmlFor={`obs-${index}-kind`} hint="Du plus fiable au moins fiable. C'est cette valeur que la confiance lit.">
-              <Select
-                id={`obs-${index}-kind`}
-                value={observation.sourceKind}
-                options={optionsFrom(SOURCE_KINDS, SOURCE_KIND_LABELS)}
-                onChange={(sourceKind: SourceKind) => patch(index, { sourceKind })}
-              />
-            </Field>
-            <Field label="Comment obtenu" htmlFor={`obs-${index}-how`}>
-              <Select
-                id={`obs-${index}-how`}
-                value={observation.obtainedHow}
-                options={optionsFrom(OBTAINED_HOW, OBTAINED_HOW_LABELS)}
-                onChange={(obtainedHow: ObtainedHow) => patch(index, { obtainedHow })}
-              />
-            </Field>
+            <TextField
+              size="sm"
+              id={`obs-${index}-system`}
+              label="Système source"
+              hint="Le système NOMMÉ : Stripe, Salesforce, le tableur de la finance."
+              value={observation.sourceSystem ?? ""}
+              onChange={(sourceSystem) => patch(index, { sourceSystem: sourceSystem || undefined })}
+            />
+            <Select
+              size="sm"
+              id={`obs-${index}-kind`}
+              label="Sorte de source"
+              hint="Du plus fiable au moins fiable. C'est cette valeur que la confiance lit."
+              value={observation.sourceKind}
+              options={optionsFrom(SOURCE_KINDS, SOURCE_KIND_LABELS)}
+              onChange={(sourceKind) => sourceKind && patch(index, { sourceKind })}
+            />
+            <Select
+              size="sm"
+              id={`obs-${index}-how`}
+              label="Comment obtenu"
+              value={observation.obtainedHow}
+              options={optionsFrom(OBTAINED_HOW, OBTAINED_HOW_LABELS)}
+              onChange={(obtainedHow) => obtainedHow && patch(index, { obtainedHow })}
+            />
           </div>
 
           <div className={styles.observationRow}>
-            <Field label="Rôle du fournisseur" htmlFor={`obs-${index}-role`} hint="Un RÔLE, jamais un nom : « le DAF », pas « Sophie ». Un livrable ne désigne personne.">
-              <TextInput
-                id={`obs-${index}-role`}
-                value={observation.providedByRole ?? ""}
-                onChange={(providedByRole) => patch(index, { providedByRole: providedByRole || undefined })}
-              />
-            </Field>
-            <Field
+            <TextField
+              size="sm"
+              id={`obs-${index}-role`}
+              label="Rôle du fournisseur"
+              hint="Un RÔLE, jamais un nom : « le DAF », pas « Sophie ». Un livrable ne désigne personne."
+              value={observation.providedByRole ?? ""}
+              onChange={(providedByRole) => patch(index, { providedByRole: providedByRole || undefined })}
+            />
+            <IsoDateField
+              id={`obs-${index}-asof`}
               label="Tiré le"
-              htmlFor={`obs-${index}-asof`}
-              hint="La date à laquelle le chiffre a été sorti, DISTINCTE de la fin de période : un mois d'août tiré le 2 septembre n'a pas fini de bouger."
-            >
-              <DateInput id={`obs-${index}-asof`} value={observation.asOf} onChange={(asOf) => patch(index, { asOf })} />
-            </Field>
-            <Field
+              hint="La date à laquelle le chiffre a été sorti, DISTINCTE de la fin de période : un mois d'août tiré le 2 septembre n'a pas fini de bouger."
+              value={observation.asOf}
+              onChange={(asOf) => patch(index, { asOf })}
+            />
+            <NumberField
+              size="sm"
+              id={`obs-${index}-lag`}
               label="Délai de stabilisation (jours)"
-              htmlFor={`obs-${index}-lag`}
               hint="Facultatif. Combien de jours après la clôture le chiffre ne bouge plus."
-            >
-              <NumberInput
-                id={`obs-${index}-lag`}
-                value={observation.freshnessLagDays ?? null}
-                onChange={(freshnessLagDays) => patch(index, { freshnessLagDays: freshnessLagDays ?? undefined })}
-              />
-            </Field>
+              value={observation.freshnessLagDays ?? null}
+              onChange={(freshnessLagDays) => patch(index, { freshnessLagDays: freshnessLagDays ?? undefined })}
+              locale="fr"
+              parseError={FORM_COPY.notANumber}
+            />
           </div>
 
           {observations.length > 1 ? (
-            <Field
+            <Select
+              size="sm"
+              id={`obs-${index}-contradicts`}
               label="Contredit"
-              htmlFor={`obs-${index}-contradicts`}
-              hint="Deux chiffres du même créneau qui ne disent pas la même chose : le lien entre eux EST le constat."
-            >
-              <Select
-                id={`obs-${index}-contradicts`}
-                value={observation.contradicts ?? ""}
-                options={[
-                  { id: "", label: "— aucune —" },
-                  ...observations
-                    .map((other, i) => ({ other, i }))
-                    .filter(({ i }) => i !== index)
-                    .map(({ other, i }) => ({ id: other.id, label: `Observation ${i + 1}${other.sourceSystem ? ` — ${other.sourceSystem}` : ""}` })),
-                ]}
-                onChange={(contradicts) => patch(index, { contradicts: contradicts || undefined })}
-              />
-            </Field>
+              hint="Deux chiffres du même créneau qui ne disent pas la même chose : le lien entre eux EST le constat."
+              value={observation.contradicts ?? ""}
+              placeholder="— aucune —"
+              options={observations
+                .map((other, i) => ({ other, i }))
+                .filter(({ i }) => i !== index)
+                .map(({ other, i }) => ({ value: other.id, label: `Observation ${i + 1}${other.sourceSystem ? ` — ${other.sourceSystem}` : ""}` }))}
+              onChange={(contradicts) => patch(index, { contradicts: contradicts || undefined })}
+            />
           ) : null}
 
           <Button
@@ -217,25 +218,39 @@ function ValueField({
   value: Observation["value"];
   onChange: (value: Observation["value"]) => void;
 }) {
-  const hint = "Laisser vide tant que le chiffre n'est pas reçu : une observation sans valeur est une demande en cours, pas une absence.";
+  const hint = "Laisser vide tant que le chiffre n'est pas reçu : une observation sans valeur est une demande en cours, pas une absence.";
 
   if (editor === "number") {
     return (
-      <Field label="Valeur" htmlFor={`obs-${index}-value`} hint={hint}>
-        <NumberInput id={`obs-${index}-value`} value={typeof value === "number" ? value : null} onChange={onChange} />
-      </Field>
+      <NumberField
+        size="sm"
+        id={`obs-${index}-value`}
+        label="Valeur"
+        hint={hint}
+        value={typeof value === "number" ? value : null}
+        onChange={onChange}
+        locale="fr"
+        parseError={FORM_COPY.notANumber}
+      />
     );
   }
   if (editor === "text") {
     return (
-      <Field label="Valeur" htmlFor={`obs-${index}-value`} hint="Ce que l'entreprise dit, dans ses mots. Cette ligne se répond en une phrase, pas en un nombre.">
-        <TextArea
-          id={`obs-${index}-value`}
-          label="Valeur"
-          value={typeof value === "string" ? value : ""}
-          onChange={(next) => onChange(next || null)}
-          maxLength={400}
-        />
+      <Field
+        size="sm"
+        id={`obs-${index}-value`}
+        label="Valeur"
+        hint="Ce que l'entreprise dit, dans ses mots. Cette ligne se répond en une phrase, pas en un nombre."
+      >
+        {({ id: controlId, describedBy }) => (
+          <TextArea
+            id={controlId}
+            aria-describedby={describedBy}
+            value={typeof value === "string" ? value : ""}
+            onChange={(next) => onChange(next || null)}
+            maxLength={400}
+          />
+        )}
       </Field>
     );
   }

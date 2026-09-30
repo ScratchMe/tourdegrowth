@@ -1,4 +1,4 @@
-import { ADMIN_PASSWORD, SKIP_ADMIN_REASON, adminCredentials, expect, test } from "./helpers";
+import { ADMIN_PASSWORD, SKIP_ADMIN_REASON, adminCredentials, expect, test, pickDay } from "./helpers";
 
 /**
  * AUDIT-PLAN.md §3.4/1.3a — the collect view and the row editor.
@@ -213,11 +213,16 @@ test.describe("the audit instrument's rows", () => {
     // Nothing filled: the screen names the required fields rather than
     // blocking the save. A row still being nailed down is saved as such, and
     // the export is what says it is incomplete.
-    await expect(page.getByTestId("definition-missing")).toContainText("unité");
+    // Each required field says it under itself, dashed — « not yet », never
+    // red — and the summary above the button links to it (extension 04).
+    await expect(page.getByTestId("row-missing")).toContainText("Unité");
+    await expect(page.locator("#def-unit")).toHaveAccessibleDescription(/À compléter/);
     await expect(page.getByTestId("save-row")).toBeEnabled();
+    await page.getByTestId("row-missing").getByRole("link", { name: /Unité/ }).click();
+    await expect(page.locator("#def-unit")).toBeFocused();
 
     await fillDefinition(page);
-    await expect(page.getByTestId("definition-missing")).toHaveCount(0);
+    await expect(page.getByTestId("row-missing")).toHaveCount(0);
   });
 
   test("saving strikes v1, and the file carries both the definition and the entry that points at it", async ({ page }) => {
@@ -367,10 +372,12 @@ test.describe("the audit instrument's rows", () => {
     await page.locator("#status").selectOption("measured");
     await fillDefinition(page);
     await page.getByTestId("add-observation").click();
-    await page.locator("#obs-0-value").fill("1200000");
-    await page.locator("#obs-0-start").fill("2026-08-01");
-    await page.locator("#obs-0-end").fill("2026-08-31");
-    await page.locator("#obs-0-asof").fill("2026-09-05");
+    // Typed as a French reader writes it (design system extension 04): the
+    // old `type="number"` box read « 1 200 000 » as nothing at all.
+    await page.locator("#obs-0-value").fill("1 200 000");
+    await pickDay(page, "obs-0-start", "2026-08-01");
+    await pickDay(page, "obs-0-end", "2026-08-31");
+    await pickDay(page, "obs-0-asof", "2026-09-05");
     await page.locator("#obs-0-system").fill("Stripe");
     await page.getByTestId("save-row").click();
 
@@ -447,13 +454,13 @@ test.describe("the audit instrument's rows", () => {
     await page.getByTestId("open-row-m01").click();
     await page.locator("#status").selectOption("measured");
     await page.locator("#criterionKind").selectOption("argued-threshold");
-    await expect(page.getByTestId("criterion-missing")).toBeVisible();
+    await expect(page.getByTestId("row-missing")).toContainText("Argument");
     await page.locator("#criterionJustification").fill("Sous 85 %, la moitié de chaque euro d'acquisition est perdue d'avance.");
-    await expect(page.getByTestId("criterion-missing")).toHaveCount(0);
+    await expect(page.getByTestId("row-missing")).not.toContainText("Argument");
 
     await page.locator("#criterionKind").selectOption("public-benchmark");
     // Never blocking — but the missing provenance is named.
-    await expect(page.getByTestId("criterion-missing")).toHaveCount(0);
+    await expect(page.getByTestId("row-missing")).not.toContainText("Argument");
     await expect(page.getByTestId("criterion-weak")).toContainText("source");
     await page.locator("#criterionSource").fill("OpenView 2026");
     await expect(page.getByTestId("criterion-weak")).not.toContainText("source");
@@ -490,7 +497,7 @@ test.describe("the audit instrument's rows", () => {
     await page.locator("#status").selectOption("not-accessible");
     await page.getByTestId("context-disclosure").click();
     const old = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-    await page.locator("#requestedOn").fill(old);
+    await pickDay(page, "requestedOn", old);
     await page.locator("#routedTo").fill("DAF");
     await expect(page.getByTestId("chase-state")).toHaveText("À relancer");
     await page.getByTestId("save-row").click();
@@ -500,7 +507,7 @@ test.describe("the audit instrument's rows", () => {
 
     await page.getByTestId("open-row-m01").click();
     await page.getByTestId("context-disclosure").click();
-    await page.locator("#chasedOn").fill(new Date().toISOString().slice(0, 10));
+    await pickDay(page, "chasedOn", new Date().toISOString().slice(0, 10));
     await expect(page.getByTestId("chase-state")).toHaveText("En attente");
     await page.getByTestId("save-row").click();
     await expect(page.getByTestId("chase-list")).toHaveCount(0);
