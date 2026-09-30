@@ -99,6 +99,10 @@ chacune se renverse en une phrase :
    tranché à froid : la mission de la phase 1 bis le tranche (`AUDIT-PLAN.md`
    §4). S'il s'avère un doublon, ses lignes utiles passent au moteur en copie
    publique relue.
+   **Tranché le 2026-09-30** : sans attendre la mission, Antoine met
+   l'instrument d'audit entre parenthèses et se concentre sur le moteur
+   (`AUDIT-PLAN.md`, en tête). Le catalogue du profil `b2b-assiste` peut
+   toujours inspirer A7.3, en copie publique relue, sans importer `lib/audit`.
 7. `ENGINE_ENABLED` reste fermé jusqu'à la signature du bon à tirer nº6. Liens
    d'ouverture prévus : `/how-it-works`, les deux pages SEO d'entrée, une section
    de la landing sous la citation — pas de septième lien au pied de page.

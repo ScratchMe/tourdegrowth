@@ -5764,3 +5764,15 @@ C9, tranché par Antoine le 2026-09-29, codé. Quand le diagnostic nomme **seule
 **Les annuaires suivants attendent A7.12.a** : les captures du Tour sont antérieures à I + B, et la décision C20 les fait refaire avant. Launching Next ne prend aucune image, donc rien de périmé n'est parti.
 
 **Au passage** : cette session a été lancée avec le prompt D d'avant C22 (« jamais mon nom »), que la séance des décisions a réécrit depuis dans `CHANTIERS.md`. C22 fait nommer Antoine en réponse à « qui est derrière ? ». Sans effet ici : aucun post ne part, et le champ soumetteur d'un annuaire reçoit « Tour de Growth ».
+
+## L'instrument d'audit entre parenthèses, les entretiens réorientés vers le moteur (2026-09-30)
+
+**La décision d'Antoine**, prise pendant la session D (prompt D, action D5) : « mettre le projet d'audit entre parenthèses et se concentrer sur le moteur à la place ». Elle devance ce que la mission de la phase 1 bis devait trancher (C6 : l'instrument fait-il doublon avec le moteur ?). Trois précisions ont été demandées avant d'écrire, et Antoine y a répondu :
+
+- **Le périmètre** : tout est suspendu, sauf l'usage personnel. La mission de la phase 1 bis (D4), le bon à tirer nº4 et les phases 2 et 3 s'arrêtent. Antoine peut se servir de l'outil en mission quand ça l'arrange, mais ce n'est plus un chantier : une friction ne devient une PR que s'il la demande. **Le code reste** : `/admin/audit`, `lib/audit`, le catalogue et leurs tests. Rouvrir ne coûte rien.
+- **Les entretiens** (D5) sont gardés et réorientés vers le moteur. Leur question de fond était déjà la sienne : « quelqu'un taperait-il ses chiffres à la main, et pour obtenir quoi ? ». D5 perd ce qui ne servait que la phase 3 de l'audit.
+- **Ce que le dépôt en dit** : la décision seulement.
+
+**Écrit** : un en-tête daté dans `AUDIT-PLAN.md` (le plan reste tel quel, pour le jour où il rouvre), une ligne en tête d'`AUDIT.md`, la suite de la décision 6 d'`ENGINE.md`, la ligne C6 et D5 de `CHANTIERS.md`, D4 retiré. Dans `CLAUDE.md` : le paragraphe de l'instrument, sa ligne dans « ce qui reste ouvert », et le nº4 marqué suspendu. A9.1 (les guillemets de l'audit) reste en section A : c'est une correction typographique et une garde, pas un chantier de l'audit.
+
+**Ce qui ne change pas pour le moteur** : la décision 6 d'`ENGINE.md` dit déjà « public, gratuit et local », aucun connecteur, rien ne quitte le navigateur, pas un produit commercial. La changer passe par Antoine.

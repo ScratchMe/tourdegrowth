@@ -13,6 +13,15 @@ c'est ce fichier qui a raison, et c'est lui qu'on corrige si le plan change.*
 
 *Dernière mise à jour : 2026-09-13 (phase 0 livrée, phase 1 non commencée).*
 
+> **Mis entre parenthèses par Antoine le 2026-09-30 : priorité au moteur de
+> growth.** Le code reste en place (`/admin/audit`, `lib/audit`, le
+> catalogue) et ses tests continuent de tourner. Antoine peut s'en servir en
+> mission quand ça l'arrange, mais ce n'est plus un chantier : ni la mission
+> de la phase 1 bis, ni le bon à tirer nº4, ni les phases 2 et 3. Une
+> friction rencontrée à l'usage ne devient une PR que s'il la demande.
+> Les entretiens du §2 sont réorientés vers le moteur (`CHANTIERS.md` D5).
+> Ce plan reste tel quel, pour le jour où il rouvre.
+
 ---
 
 ## 0. Le plan en une page
@@ -642,6 +651,9 @@ T0, 4 en T1, 15 en T2, 3 en T3, 1 en T4), mandat `no-mandate`, `pending = 0`,
      publique relue, sans importer `lib/audit`.
 
    La décision s'écrit ici, à la fin de la phase 1 bis.
+   **Prise autrement le 2026-09-30** : sans attendre la mission, Antoine met
+   l'instrument entre parenthèses et se concentre sur le moteur (voir
+   l'en-tête).
 5. **À la fin — exporter, et écrire les constats** (étape 1.5) avec le bloc
    de tête. Sans readout encore : le bloc de tête à 400 mots et les constats
    5C sont déjà, tels quels, la matière d'une présentation.
