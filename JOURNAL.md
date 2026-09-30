@@ -5783,6 +5783,20 @@ C8, tranché par Antoine le 2026-09-29, codé. La case « Comparer avec ce Tour 
 - **Relier puis délier par les Réglages** : la ligne « Délier garde ton Tour… » s'affiche, et le Tour reste sur l'appareil.
 - **La suite Playwright complète** sur la branche rebasée : 630 specs, 625 passées, 5 ignorées par construction, aucun échec. Puis les 120 specs du moteur après le correctif de date.
 
+## Le brief 04 déposé dans le projet Claude Design (D3, 2026-09-30)
+
+**La demande d'Antoine** : lancée pour porter S-15, la session s'est arrêtée à l'étape 0, parce que le retour de Claude Design n'existait pas : ni `design/ds-extension-04-return/` (cherché sur `main` et sur les trois branches du dépôt), ni « Send to Claude Code Web ». Antoine a répondu : « Envoie-le à Claude Design ».
+
+**Ce qui est parti** : `design/DS-EXTENSION-BRIEF-04.md` (la version de #205) et ses neuf captures, **aux mêmes chemins que dans le dépôt**, pour que les renvois du brief (`design/ds-extension-04/…png`) se lisent tels quels dans le projet. Dix fichiers, écrits par `DesignSync` sous un plan qui ne nommait qu'eux (`design/DS-EXTENSION-BRIEF-04.md`, `design/ds-extension-04/*.png`, aucune suppression). Aucun fichier du design system n'a été touché : ni le bundle, ni la sentinelle, ni `_ds_sync.json`, dont l'ancre `bundleSha12` est toujours `f3b4bf9eb3c5`.
+
+**Ce que « envoyer » veut dire ici, et ce que ça ne veut pas dire** : les briefs 01 à 03 avaient été déposés par Antoine lui-même dans une conversation Claude Design. La session, elle, n'écrit que des fichiers dans le projet : **rien ne tourne côté Claude Design tant que personne ne le lui demande**. D3 devient donc « lancer le brief », avec le prompt à coller dans `CHANTIERS.md`.
+
+**Un piège évité d'avance** : le projet porte maintenant un dossier `design/` que le bundle ne connaît pas. `.design-sync/NOTES.md` dit de vérifier qu'`upload.deletePaths` n'y touche pas lors de la prochaine re-synchro (B3), et de le retirer exprès une fois le retour porté.
+
+**Vérifié** : les neuf captures sont distinctes (sommes de contrôle ; le brief 03 avait envoyé deux fois la même image, `JOURNAL.md` 2026-09-09) ; `list_files` relu après l'envoi, et les dix chemins y sont ; l'ancre relue après l'envoi. Le contenu n'a pas été relu octet par octet côté projet.
+
+**Consigné** : `CHANTIERS.md` (vue d'ensemble, B2, D3 avec son prompt), `CLAUDE.md` (la ligne « Design system → Claude Design »), `.design-sync/NOTES.md` (« Synced »). Que de la doc : `vercel-ignore.sh` ne déploie pas.
+
 ## L'instrument d'audit entre parenthèses, les entretiens réorientés vers le moteur (2026-09-30)
 
 **La décision d'Antoine**, prise pendant la session D (prompt D, action D5) : « mettre le projet d'audit entre parenthèses et se concentrer sur le moteur à la place ». Elle devance ce que la mission de la phase 1 bis devait trancher (C6 : l'instrument fait-il doublon avec le moteur ?). Trois précisions ont été demandées avant d'écrire, et Antoine y a répondu :
@@ -5794,5 +5808,7 @@ C8, tranché par Antoine le 2026-09-29, codé. La case « Comparer avec ce Tour 
 **Écrit** : un en-tête daté dans `AUDIT-PLAN.md` (le plan reste tel quel, pour le jour où il rouvre), une ligne en tête d'`AUDIT.md`, la suite de la décision 6 d'`ENGINE.md`, la ligne C6 et D5 de `CHANTIERS.md`, D4 retiré. Dans `CLAUDE.md` : le paragraphe de l'instrument, sa ligne dans « ce qui reste ouvert », et le nº4 marqué suspendu. A9.1 (les guillemets de l'audit) reste en section A : c'est une correction typographique et une garde, pas un chantier de l'audit.
 
 **La trame d'entretien**, écrite avec Antoine et validée le jour même, est rangée en annexe d'`ENGINE.md` (« Les entretiens ») : qui interroger (dont au moins deux profils en vente assistée ou hybrides), huit questions sur ce que la personne a fait, une démo en fin d'entretien, ce qu'on note, et la règle du dépôt (notes hors du dépôt, synthèse anonyme à partir de cinq).
+
+**Les entretiens sont ensuite reportés par Antoine, sans date** : la trame attend, et aucune session ne les relance d'elle-même.
 
 **Ce qui ne change pas pour le moteur** : la décision 6 d'`ENGINE.md` dit déjà « public, gratuit et local », aucun connecteur, rien ne quitte le navigateur, pas un produit commercial. La changer passe par Antoine.
