@@ -6200,3 +6200,37 @@ La méthode pour les trouver la prochaine fois est dans `.design-sync/NOTES.md` 
 - deux questions de design : C28, les 6 px entre une unité et son chiffre (c'est le dessin du retour lui-même, « € 500 ») ; C29, « facultatif » écrit dans les libellés alors que la prop `optional` n'est passée par aucun appel.
 
 **Vérifié** : le driver final a reporté les 15 notes sans en effacer aucune et n'a rien laissé en attente. `report_validate` : 88, 0 défaut. Après l'envoi, `list_files` montre les 88 dossiers de composants.
+
+## A11, C28 et C29 : ce que B3 avait trouvé, livré le soir même, et Claude Design re-synchronisé (2026-09-30)
+
+**Les deux décisions d'Antoine**, prises le soir même dans une séance « point par point, plusieurs options et une reco » :
+- **C28** : l'unité porte son espace, la boîte n'en ajoute plus (la reco). `Field.module.css` retire les 6 px entre l'affixe et le chiffre ; `NumberField` réserve la même largeur. La chaîne donne « €500 » et « 20% » en anglais, « 21 000 € » et « 20 % » en français. `moneyUnit` reprend l'espace qu'`Intl` met à côté du signe, au lieu de la supposer : aucune dans « €500 », une insécable dans « 500 € » comme dans « CHF 500 ».
+- **C29** : « facultatif » passe par la prop `optional` (la reco). Le mot sort des quatre libellés du moteur (`companyLabel`, `definitionNote`, `target`, `repairComment`) et se dessine plus discret après eux, comme le dessine le retour 04. La nouvelle clé `workbench.optional` et les quatre libellés raccourcis sont « à relire » (convention 6).
+
+**A11, livré** ([#227](https://github.com/ScratchMe/tourdegrowth/pull/227)) :
+- **A11.1** : `wordUnit` choisit le mot par `Intl.PluralRules`, avec la nouvelle clé `workbench.day`, « à relire ». On lit « 1 jour », « 1,5 jour », « 2 jours », « 1 day », « 0 days ». Chaque borne de l'estimation prend l'unité de son propre chiffre.
+- **A11.2** : quand les trois parties d'une date sont choisies et que le jour n'existe pas, les trois passent en invalide. Une date incomplète ne marque que ses parties vides.
+- **A11.3** : le premier champ d'une `FieldRow` couvre aussi la colonne du joint, et son libellé ne dimensionne plus les colonnes (`contain: inline-size`). « sur » se pose contre la boîte.
+
+**A11.4 est clos sans changement, après mesure.** La copie validée n'a pas de convention unique entre un nombre et son mot. Sur les chaînes françaises évaluées, « {n} jours » prend une espace ordinaire dans 25 chaînes (glossaire, catalogue d'audit, jeu, moteur) et l'insécable dans 16 ; « mois » et « min » sont partagés de même, et un compte de choses prend partout l'espace ordinaire. Une garde limitée aux jours a été écrite, puis retirée : elle rougissait sur ces 25 chaînes validées. Harmoniser serait une passe de copie à faire relire par Antoine, pas un correctif.
+
+**Gardes, chacune rouge sur l'ancien code** :
+- `sources.test.ts` : l'espace de l'unité (« €500 », « 500 € », « CHF 500 », « 20 % ») et les pluriels. Quatre tests rougissent sur l'ancien `sources.ts`.
+- `form-controls.test.ts` : aucun `padding` entre l'affixe et le chiffre. Rouge sur l'ancien CSS.
+- `form-primitives.test.ts` : le 31 février donne trois `aria-invalid`, une date incomplète aucun. Rouge sur l'ancien `DateField`.
+- `engine-copy.test.ts` : aucun libellé ne contient « facultatif » ou « optional ». Rouge sur l'ancienne copie.
+- `engine-forms.spec.ts`, sur la fiche du CAC en français : le joint est à 9 px de la boîte, pour un écart de colonne de 12. Il était à 114 px avant.
+
+**Vérifié** :
+- `tsc` et `eslint` propres, **2 345 tests unitaires** ;
+- les e2e d'accessibilité (bureau et mobile), de l'audit, du moteur et des contrôles natifs : **221 passées** sur un build de production ;
+- à l'écran, en français et en anglais, à 390 et 1 280 px : « 21 000 € », « €21,000 », « 1 jour / 3 jours », « 1 day / 3 days », les mots « facultatif » et « optional » après leur libellé, le joint contre sa boîte, et le 31 février bordé de rouge sur ses trois listes.
+
+**Claude Design, re-synchronisé deux fois ce soir-là.** Le premier envoi porte l'ancre `f8933d513a1e` : cinq composants recapturés et renotés (26 cellules). Ensuite, le relecteur de copie (`relecteur-copie`, lancé sur le diff avant la PR) n'a rien trouvé dans le produit, mais trois choses dans ce qui part vers l'agent de design :
+- l'en-tête de l'aperçu `TextField` disait encore qu'aucun appel ne passe `optional` ;
+- celui de `FieldRow` décrivait encore le joint d'avant A11.3 ;
+- des numéros de ligne cités par les aperçus étaient décalés par le diff lui-même, et les exemples de l'insécable (`conventions.md`, `NumberField`) étaient tapés avec des espaces ordinaires.
+
+Corrigés, les numéros de ligne remplacés par les noms de clés, qui ne bougent pas. `conventions.md` dit aussi maintenant son exception : le contexte libre du quiz, écran à une question, écrit « (optionnel) » dans la question. Second envoi : rendus identiques, sources seules ; 88 composants, 292 cellules, 453 fichiers, ancre `8235f4e6de01`.
+
+**En production** : rien de ce lot n'y est encore. Vercel refuse les déploiements depuis A10.c (quota quotidien, `VERCEL.md` §1.12), et la production tourne sur A10.b. Le geste est `CHANTIERS.md` D11, le 2026-10-01 après 14 h UTC. Un rappel est programmé dans cette session.
