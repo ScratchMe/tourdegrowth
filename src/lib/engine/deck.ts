@@ -1,4 +1,4 @@
-import { CANDIDATE_IDS, DERIVED_SHAPES, LEVER_IDS, METRIC_SHAPES, PELOTON_METRICS, shapeOf } from "./catalog-shape";
+import { CANDIDATE_IDS, DERIVED_SHAPES, LEVER_IDS, METRIC_SHAPES, PELOTON_METRICS, UNPRICED_CANDIDATES, shapeOf } from "./catalog-shape";
 import { nextMonth, currentMonth, periodOf, windowDaysOf } from "./cohort";
 import { comparatorOf, impactTarget } from "./diagnose";
 import { formatComparator } from "./findings";
@@ -344,11 +344,24 @@ function buildLeak(state: EngineState, derived: Omit<EngineDerived, "findings">,
   /** What closing the named gap is worth, for the notes that compare the others with it. */
   let top: string | null = null;
 
-  if (diagnosis.state === "clear") {
+  if (diagnosis.state === "clear" && UNPRICED_CANDIDATES.includes(diagnosis.named[0]!)) {
+    // A stage the model can't price — day-30 retention, the referred share (§6.6) — still gets its slide: without
+    // it the deck dropped, without a word, the conclusion the board shows (C9, 2026-09-29). Its title names the
+    // value and the target, never an amount; the footer says why there is none; no chain to show, so no card.
+    const id = diagnosis.named[0]!;
+    const comparator = diagnosis.positions[id].comparator;
+    const known = knownIn(state, id, ctx);
+    if (!comparator || known.kind !== "known") return absent;
+    const target = targetPhrase(comparator, id, state, strings, ctx);
+    const value = formatInterval(known.value, shapeOf(id).unit, ctx, strings.units);
+    title = { key: "leakClearUnpriced", values: { stage: capitalise(subject(id)), value, target } };
+    lines.push({ row: "footer", text: strings.slide.leakFooterUnpriced });
+    notes.push(fillTemplate(strings.notes.compared, { comparator: target }));
+  } else if (diagnosis.state === "clear") {
     const id = diagnosis.named[0]!;
     const comparator = diagnosis.positions[id].comparator;
     const impact = impactOf(id);
-    // An unpriced stage (day-30 retention, referred share) or a gain under one customer has no title the copy can say truthfully.
+    // A gain under one customer a month is not an argument for a committee: that slide stays out (C9).
     if (!comparator || !impact || impact.lines.some((l) => l.key === "less-than-one")) return absent;
     const stage = subject(id);
     const target = targetPhrase(comparator, id, state, strings, ctx);

@@ -1545,8 +1545,13 @@ Désormais :
 - **Moins d'un client : l'omission est gardée.** Un tel écart n'est pas un
   argument de comité.
 
-Le gabarit exact est de la copie neuve, « à relire ». À coder :
-`CHANTIERS.md` A7.6.
+Le gabarit exact est de la copie neuve, « à relire ». **Codé le 2026-09-30
+(A7.6)** : titre `leakClearUnpriced` — « **{Étape} freine le moteur** :
+{valeur}, pour {cible}. » / "**{Stage} is holding the engine back**: {value},
+against {target}." —, pied `slide.leakFooterUnpriced` — « Sans montant : le
+moteur ne relie pas ce chiffre au MRR » / "No amount: the engine doesn't link
+this number to MRR" —, pas de carte « Le calcul » (la colonne « À côté » prend
+alors toute la largeur), et le même contenu dans l'export texte et les notes.
 
   `{cible}` : « 20 % (cible de l'équipe) » / "20% (team target)" — seule une
   cible nomme une étape (C1) ; le gabarit « bas de l'ordre de grandeur

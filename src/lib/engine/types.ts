@@ -510,6 +510,8 @@ export type SlideTitleKey =
   | "leakClearKeptOne"
   | "leakClearPerHundred"
   | "leakClearPerHundredOne"
+  /** A stage the model can't price (day-30 retention, referred share): named, with no amount (C9). */
+  | "leakClearUnpriced"
   | "leakShared"
   | "leakNotEnoughBelow"
   | "leakLevel"
