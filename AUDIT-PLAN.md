@@ -187,7 +187,9 @@ tout moment il puisse emporter ce travail dans un fichier qu'il possède.
    produit, il repasse par un brief. `Segmented` sert pour les vocabulaires à
    deux ou trois valeurs (mandat, cohorte/instantané), `TextArea` pour toute
    prose, `Disclosure` pour les fiches, `Card`/`Button`/`MetaLabel` pour le
-   reste.
+   reste. **Remplacée le 2026-09-30** (`CHANTIERS.md` A10.c et A10.d,
+   extension 04 du design system) : le brief a eu lieu, l'audit saisit
+   maintenant par `src/components/core/`, et `admin/audit/_ui/` n'existe plus.
 2. **L'import est tolérant, le readout est strict.** Une mission en cours est
    *souvent* invalide au sens de `validateMission` (une ligne passée en
    « mesuré » dont l'observation n'est pas encore saisie). Refuser de rouvrir

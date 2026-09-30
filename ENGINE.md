@@ -474,6 +474,13 @@ design system n'a aucun `<input>` hormis `TextArea` ; un brief Claude Design
 retarderait de plusieurs jours ; importer depuis le dossier privé d'une autre
 route couple deux fonctionnalités. Promotion au design system en v1.1 si le
 moteur trouve son public. *Rejeté* : importer `admin/audit/_ui`.
+**Remplacée le 2026-09-30** (`CHANTIERS.md` A10, extension 04 du design
+system) : les trois copies avaient dérivé — trois anneaux de focus, une
+raison « bientôt » à 1,91:1, une case qui lisait « 26 000 » comme rien. Le
+moteur saisit maintenant par `src/components/core/` (`Field`, `TextField`,
+`NumberField`, `Select`, `DateField`, `Choices`, `Checkbox`), et
+`_engine/_ui/` n'existe plus ; `form-controls-source.test.ts` empêche une
+quatrième copie.
 
 **D18 — Le diagnostic garde la grammaire visuelle de `Bottleneck` sans le
 réutiliser.** `result/Bottleneck` impose `pillars: {pillar, score}[]` et un

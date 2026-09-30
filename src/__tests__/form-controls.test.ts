@@ -18,8 +18,9 @@ import { DERIVED } from "@/styles/tokens/tokens";
  *    drawn with tokens that pass; `opacity: 1` (undoing a browser's own
  *    fading) is the one value allowed.
  *
- * The list grows with the port: A10.b and A10.c add the sheets of the engine
- * and the audit that still draw a control, A10.d removes the copies.
+ * Only core draws a control since A10.d (2026-09-30): the engine's and the
+ * audit's copies are deleted, and `form-controls-source.test.ts` keeps a
+ * hand-written `<input>` or `<select>` from growing back anywhere else.
  *
  * Non-vacuity (2026-09-30): Select's ring put back on `--focus-ring-invert`
  * fails the first test on that line; the `.control:focus-visible` rule taken
