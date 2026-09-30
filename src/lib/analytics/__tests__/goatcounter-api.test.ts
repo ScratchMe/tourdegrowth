@@ -283,7 +283,7 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
 
     const game = (await fetchFunnelWindow("2024-01-01T00:00:00Z", "All-time")).stats!.game;
 
-    expect(game.entries).toEqual({ "result/retention": 7, "deep_dive/retention": 0, footer: 2, hub: 0 });
+    expect(game.entries).toEqual({ "result/retention": 7, "deep_dive/retention": 0, footer: 2, hub: 0, home_strip: 0, space_band: 0 });
     expect(game.started).toEqual({ direct: 4, result: 6, deep_dive: 0, hub: 0 });
     expect(game.quartersRun).toEqual([9, 0, 0, 3]);
     expect(game.hangups).toEqual([0, 5, 0, 0]);
@@ -315,6 +315,9 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
       "engine_tour_linked",
       ...["acquisition", "activation", "retention", "referral", "revenue"].map((s) => `engine_stage_saved/${s}`),
       ...["png", "pdf", "text", "json"].map((f) => `engine_exported/${f}`),
+      // The doors into it (A7.9): the landing strip and the space band.
+      "engine_entry_clicked/home_strip",
+      "engine_entry_clicked/space_band",
     ];
     expect([...engineEventPaths()].sort()).toEqual([...expected].sort());
     for (const path of expected) expect(paths).toContain(path);
@@ -337,6 +340,7 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
           { path: "engine_exported/pdf", count: 2, event: true },
           { path: "engine_exported/json", count: 5, event: true },
           { path: "engine_tour_linked", count: 1, event: true },
+          { path: "engine_entry_clicked/space_band", count: 6, event: true },
         ],
       }),
     );
@@ -348,7 +352,28 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
       deckOpened: 2,
       exported: { png: 0, pdf: 2, text: 0, json: 5 },
       tourLinked: 1,
+      entries: { home_strip: 0, space_band: 6 },
     });
+  });
+
+  /** A7.9: the landing strip's Tour card is a click next to the starts, never a detail on `quiz_started`. */
+  it("reads the Tour card's clicks apart from the starts", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({
+        total: 0,
+        more: false,
+        hits: [
+          { path: "quiz_started", count: 40, event: true },
+          { path: "tour_entry_clicked/home_strip", count: 3, event: true },
+        ],
+      }),
+    );
+    const stats = (await fetchFunnelWindow("2024-01-01T00:00:00Z", "All-time")).stats!;
+    expect(stats.quizStarted).toBe(40);
+    expect(stats.tourEntries).toEqual({ home_strip: 3 });
+    const paths = new URL(fetchMock.mock.calls[0]![0] as string).searchParams.get("include_paths")!.split(",");
+    expect(paths).toContain("tour_entry_clicked/home_strip");
+    expect(paths.filter((p) => p.startsWith("quiz_started"))).toEqual(["quiz_started"]);
   });
 
   it("fetchFunnelStats resolves both an all-time and a last-30-days window", async () => {

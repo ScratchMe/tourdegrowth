@@ -50,6 +50,8 @@ function GameCard({ window, growth }: { window: FunnelWindow; growth: Pick<Growt
         <li>Entries — from a result with a Deep dive: {game.entries["deep_dive/retention"]}</li>
         <li>Entries — footer: {game.entries.footer}</li>
         <li>Entries — hub: {game.entries.hub}</li>
+        <li>Entries — landing strip: {game.entries.home_strip}</li>
+        <li>Entries — space band: {game.entries.space_band}</li>
       </ul>
 
       <ul className={styles.list}>

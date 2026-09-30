@@ -10,7 +10,13 @@ import {
   RETAKE_STARTED_EVENT,
   LANDING_RETURN_EVENT,
   RETAKE_NUDGE_EVENT,
+  TOUR_ENTRY_DETAILS,
+  TOUR_ENTRY_EVENT,
+  type TourEntryDetail,
   ENGINE_DECK_OPENED_EVENT,
+  ENGINE_ENTRY_DETAILS,
+  ENGINE_ENTRY_EVENT,
+  type EngineEntryDetail,
   ENGINE_EXPORT_FORMATS,
   ENGINE_EXPORTED_EVENT,
   ENGINE_OPENED_EVENT,
@@ -79,6 +85,7 @@ const SHARE_PATHS = TONES.flatMap((tone) => SHARE_METHODS.map((method) => `share
 const DEEP_DIVE_COMPLETED_PATHS = DEEP_DIVE_CONTEXT_DETAILS.map((d) => `deep_dive_completed/${d}`);
 const PROFILE_CLICK_PATHS = PROFILE_CLICK_DETAILS.map((detail) => `profile_click/${detail}`);
 const SEGMENT_PATHS = SEGMENT_DETAILS.map((d) => `segment_answered/${d}`);
+const TOUR_ENTRY_PATHS = TOUR_ENTRY_DETAILS.map((d) => `${TOUR_ENTRY_EVENT}/${d}`);
 
 const ALL_PATHS = [
   ...HOME_PATHS,
@@ -96,6 +103,7 @@ const ALL_PATHS = [
   RETAKE_STARTED_EVENT,
   LANDING_RETURN_EVENT,
   RETAKE_NUDGE_EVENT,
+  ...TOUR_ENTRY_PATHS,
   // The game (GAME-BRIEF.md §9.6) — built from the same lists the island
   // fires from, so a path cannot exist on one side only.
   ...gameEventPaths(),
@@ -146,6 +154,8 @@ export interface EngineFunnelStats {
   /** `engine_exported/<format>` — files downloaded, or the deck's text copied. */
   exported: Record<(typeof ENGINE_EXPORT_FORMATS)[number], number>;
   tourLinked: number;
+  /** `engine_entry_clicked/<where>` — where the openings come from (A7.9, A7.4). */
+  entries: Record<EngineEntryDetail, number>;
 }
 
 export interface FunnelStats {
@@ -180,6 +190,8 @@ export interface FunnelStats {
   landingReturn: number;
   /** REVIEW-03.md C1 — the 30-day nudge was clicked. Against `landingReturn`, this is whether the nudge works at all. */
   retakeNudgeClicked: number;
+  /** `tour_entry_clicked/<where>` — the landing strip's Tour card (A7.9): a click, read next to `quizStarted`. */
+  tourEntries: Record<TourEntryDetail, number>;
   /**
    * Value actions per result — REVIEW-03.md A4, the closest thing this
    * product has to the North Star the external review asked for: did the
@@ -314,6 +326,7 @@ export async function fetchFunnelWindow(startISO: string, label: string): Promis
       retakeStarted,
       landingReturn: counts.get(LANDING_RETURN_EVENT) ?? 0,
       retakeNudgeClicked: counts.get(RETAKE_NUDGE_EVENT) ?? 0,
+      tourEntries: tally(TOUR_ENTRY_DETAILS, (d) => counts.get(`${TOUR_ENTRY_EVENT}/${d}`) ?? 0),
       valueActionsPerResult: submissionsCompleted > 0 ? valueActions / submissionsCompleted : null,
       game: gameStats((path) => counts.get(path) ?? 0),
       engine: engineStats((path) => counts.get(path) ?? 0),
@@ -352,6 +365,7 @@ function engineStats(count: (path: string) => number): EngineFunnelStats {
     deckOpened: count(ENGINE_DECK_OPENED_EVENT),
     exported: tally(ENGINE_EXPORT_FORMATS, (format) => count(`${ENGINE_EXPORTED_EVENT}/${format}`)),
     tourLinked: count(ENGINE_TOUR_LINKED_EVENT),
+    entries: tally(ENGINE_ENTRY_DETAILS, (where) => count(`${ENGINE_ENTRY_EVENT}/${where}`)),
   };
 }
 

@@ -5836,6 +5836,8 @@ L'article cité par CHANTIERS était présumé « L. 242-… » : c'est L. 241-3
 - L'e2e des nouvelles (le trimestre de l'inspection, chemin C) attend maintenant « 75 000 » sur le tampon, au lieu de « 106 ».
 - **La suite complète**, lancée une fois sur le haut de la pile A7.8 → A7.13 (2026-09-30) : 642 specs Playwright, 637 passées, 5 ignorées par construction, aucun échec ; 2 245 tests unitaires avec la couverture, `tsc` et lint propres.
 
+**En production** : PR [#211](https://github.com/ScratchMe/tourdegrowth/pull/211), mergée le 2026-09-30 à 11 h 20 UTC (squash `11688b6`, 9 fichiers, identique au commit de la PR). Déploiement de production Vercel `READY` sur ce commit, lu par l'API. Le jeu reste en 404 derrière son drapeau (`/fr/jeu`, `/en/game`) : l'amende n'est pas observable en production.
+
 ## A7.7 : l'encart du jeu sous le bouton principal, sur desktop (2026-09-30)
 
 C10, tranché par Antoine le 2026-09-29, codé. Sur desktop, l'encart du jeu passe **sous** la rangée de boutons du résultat, dans la colonne de droite. Placé au-dessus, il faisait descendre de 350 px le « Fais ton propre Tour » du visiteur, qui est le cœur de la boucle `?ref=`. Sur mobile, rien ne change : l'encart vient déjà après le bouton et la carte de partage.
@@ -5849,3 +5851,33 @@ C10, tranché par Antoine le 2026-09-29, codé. Sur desktop, l'encart du jeu pas
 - `game-entry.spec.ts`, à 1 280 px : le bas du bouton principal est au-dessus du haut de l'encart. À 390 px : le bouton, puis le partage, puis l'encart.
 - **Non-vacuité** : l'ancien ordre source fait rougir le test desktop, dans l'unitaire comme dans l'e2e.
 - **La suite complète** sur le haut de la pile A7.8 → A7.13 : 642 specs Playwright, 637 passées, 5 ignorées par construction, aucun échec. Plus tard, 49 specs du résultat et du jeu sur l'émulateur Firestore (A7.11), vue propriétaire comprise.
+
+**En production** : PR [#212](https://github.com/ScratchMe/tourdegrowth/pull/212), mergée le 2026-09-30 à 11 h 28 UTC (squash `5cf4bca`, 7 fichiers, identique à la tête de la PR). Déploiement de production Vercel `READY` sur ce commit, lu par l'API. Le jeu reste en 404 derrière son drapeau : l'encart ne s'affiche pas en production.
+
+## A7.9 et C24 : la bande de l'accueil en portes mesurées, et l'exemple qui suit le ton (2026-09-30)
+
+C15, tranché par Antoine le 2026-09-29, et C24, tranchée le 2026-09-30 (« OK pour C24 »), codés.
+
+**La bande « Le Tour en trois parties »** (`SpaceStrip`) : chaque carte d'un espace **ouvert** devient une porte.
+- **Un seul lien par carte** : son nom (le `h3`), étiré sur toute la carte par un `::after`. Un clic n'importe où sur la carte y mène, et un lecteur d'écran entend un nom, pas toute la carte. Le pitch sert de description (`aria-describedby`).
+- **Les destinations** : le Tour mène à `/quiz` par un `<a>` simple (un chargement de document, comme toutes les entrées du quiz), le moteur à `/{locale}/aarrr-funnel-template`, le jeu à `/{locale}/game`.
+- **Une carte fermée n'a pas de lien.** C'est le cas du moteur sur le build de la CI.
+- **Visuellement secondaire** : pas de remplissage rouge. Le survol souligne le nom et soulève la carte (`--shadow-hover`, sauf le Tour qui a déjà la sienne), et le focus clavier entoure toute la carte. Aucune couleur de texte ne change, donc le contraste ne bouge pas (convention 7).
+
+**La mesure** :
+- **Le jeu** : `game_entry_clicked/home_strip` depuis la bande, `game_entry_clicked/space_band` depuis la pastille du bandeau.
+- **Le moteur** : un événement d'entrée neuf, `engine_entry_clicked/<source>`, avec les mêmes deux sources. A7.4 y ajoutera ses trois pages.
+- **Le Tour** : un **clic à part**, `tour_entry_clicked/home_strip`, et non une source sur `quiz_started`. CHANTIERS disait « l'événement de démarrage existant, avec la source home_strip ». Mais `quiz_started` est le dénominateur du funnel depuis R-11, et lui ajouter un détail l'aurait coupé en deux chemins (la raison de `retake_started`, écrite dans `goatcounter.ts`). Le clic se lit donc à côté des démarrages, sur la même ligne de `/admin/stats`.
+- **Pas la pastille du Tour** : elle ramène à l'accueil, ce n'est l'entrée de rien.
+- **`/admin/stats`** affiche les nouvelles sources : entrées du jeu et du moteur, clics de la carte du Tour.
+
+**C24** : « Voir un résultat d'exemple » suit le sélecteur de ton de l'aperçu. En roast, il mène à `/r/sample?tone=roast`, l'exemple roast d'A3.3 avec sa propre carte de partage.
+- L'aperçu et le bouton sont deux îlots dans deux colonnes. Ils partagent le ton par une petite valeur de module lue avec `useSyncExternalStore` (`sample-tone.ts`), sans fournisseur de contexte.
+- L'instantané serveur est « Direct », donc le premier rendu et la page hydratée disent la même chose.
+
+**Vérifié** :
+- `e2e/home-strip-doors.spec.ts`, en FR et en EN, à 1 280 et 390 px : un clic dans le coin de la carte du Tour mène à `/quiz`, compte `tour_entry_clicked/home_strip`, et ne déclenche pas `quiz_started`. La carte du moteur, fermée, n'a pas de lien. La carte et la pastille du jeu comptent chacune leur source. Le bouton d'exemple suit le ton, aller et retour. Le survol souligne, et le focus entoure la carte.
+- `spaces-kit.spec.ts` ne dit plus « pas de portes » : un lien par carte ouverte, aucun sur une fermée.
+- `accessibility.spec.ts` passe (axe sur l'accueil, FR et EN).
+- **Non-vacuité**, sur un build saboté (le bouton figé sur l'exemple direct, un détail `home` au lieu de `home_strip`) : 8 tests rougissent (les quatre du Tour, les deux du jeu, les deux de C24). Les 3 qui restent verts (la carte fermée, le survol) ne portent pas sur ce qui a été cassé.
+- **Piège** : dans le test, la carte est sous le pli à toutes les largeurs. Un `page.mouse.click` sur les coordonnées de sa boîte, sans la faire défiler d'abord, ne touche rien et ne dit rien.

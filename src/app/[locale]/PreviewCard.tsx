@@ -9,6 +9,7 @@ import { PillarChip } from "@/components/result/PillarChip";
 import { PriorityMove } from "@/components/result/PriorityMove";
 import { ScoreDisplay } from "@/components/result/ScoreDisplay";
 import { ToneToggle, type ToneToggleValue } from "@/components/result/ToneToggle";
+import { setSampleTone } from "./sample-tone";
 import styles from "./page.module.css";
 
 export interface PreviewChip {
@@ -83,7 +84,11 @@ export function PreviewCard({
         <ToneToggle
           size="sm"
           value={tone}
-          onChange={setTone}
+          onChange={(next) => {
+            setTone(next);
+            // C24: the hero's « Voir un résultat d'exemple » follows what this card shows.
+            setSampleTone(next);
+          }}
           straightLabel={toneLabels.straight}
           roastLabel={toneLabels.roast}
           groupLabel={toneLabels.group}

@@ -154,6 +154,50 @@
   color: var(--text-body);
 }
 
+/*
+ * An open card is one link, its name, stretched over the whole card
+ * (C15, CHANTIERS.md A7.9): the `::after` covers the card, so a click
+ * anywhere on it follows the link. Secondary to the hero's button — the
+ * name keeps its ink, no red fill; a hover underlines it and lifts the card,
+ * and the focus ring goes round the whole card, where the click lands.
+ */
+.link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.link:focus-visible {
+  outline: none;
+}
+
+.card:has(.link:hover) .link {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.card:has(.link:hover):not([data-space="tour"]) {
+  box-shadow: var(--shadow-hover);
+}
+
+.card:has(.link:focus-visible) {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .card {
+    transition: box-shadow var(--dur-fast) var(--ease-out);
+  }
+}
+
 /* Three cards need 760px: under it, one column (a phone, a narrow frame). */
 @container (max-width: 759px) {
   .grid {

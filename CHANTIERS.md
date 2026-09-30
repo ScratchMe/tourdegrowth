@@ -23,7 +23,7 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 |---|---|---|---|
 | **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | Maintenant. A7 dans l'ordre de ses dépendances ; A8 à tout moment (A1 à A6 livrés le 2026-09-29) |
 | **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30** (79 composants, après A1, A2, A4 et A5). Le brief 04 est déposé dans le projet le 2026-09-30 ; reste à le lancer depuis Claude Design (D3), puis une re-synchro après A7.10 |
-| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 tranchée le 2026-09-30. Restent C24 (née d'A3) et la validation de la spécification de A7.3 quand elle sera écrite |
+| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 et C24 tranchées le 2026-09-30. Reste la validation de la spécification de A7.3 quand elle sera écrite |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, tout A7.3 |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
 
@@ -63,8 +63,8 @@ rencontrée en le faisant repart en section C. Toute copie neuve porte
 - A7.3 avant A7.4, parce que les liens promettent ce que le moteur fait ;
 - A7.12.a avant les annuaires de D10.
 
-Le jeu (A7.9 pour sa part) n'attend rien du moteur.
-**A7.1, A7.2, A7.5, A7.6, A7.7 et A7.8 sont livrés (2026-09-30).** **Commencer par A7.3.a**,
+Le jeu n'attend rien du moteur.
+**A7.1, A7.2 et A7.5 à A7.9 sont livrés (2026-09-30).** **Commencer par A7.3.a**,
 le plus long, qui revient à Antoine pour validation.
 
 #### A7.3 — Le B2B assisté et l'hybride dès la v1 (C4)
@@ -104,24 +104,9 @@ avec la règle de C15. **Pas de lien au pied de page.**
 | Où | Quoi |
 |---|---|
 | Les trois pages | Un lien en contexte (une phrase, pas un bandeau), en FR et en EN. Il n'apparaît que si le moteur est ouvert au build : même garde que la bande, `SPACE_OPEN_AT_BUILD.engine` (`SpaceBand.tsx:27`), et même raison que le sitemap (R2-28). La copie neuve est « à relire » |
-| Mesure | Chaque lien porte un événement d'entrée avec sa source, sur le modèle de `game_entry_clicked` (`detail` = la page), déclaré dans le vocabulaire de `lib/analytics/`, pour que `/admin/stats` dise d'où viennent les ouvertures |
+| Mesure | **L'événement existe depuis A7.9 (2026-09-30)** : `engine_entry_clicked/<source>` (`ENGINE_ENTRY_DETAILS` dans `lib/analytics/goatcounter.ts`, déjà lu par `/admin/stats`), avec `home_strip` et `space_band`. Ajouter à la liste une source par page (`how_it_works`, `growth_audit_checklist`, `startup_growth_diagnostic`), et poser les liens avec `TrackedLink` comme la bande de l'accueil |
 | Tests | Un e2e par page : le lien existe moteur ouvert et mène à `/{locale}/aarrr-funnel-template`. Un test sur un build fermé : il n'existe pas (les specs « jeu fermé » montrent la façon de faire) |
 | Quand | Construit avant l'ouverture (D2), après A7.3 : les liens promettent ce que le moteur fait, hybride compris |
-
-#### A7.9 — La bande de l'accueil en liens mesurés, et le bandeau mesuré (C15)
-
-**Décidé** (`GAME-BRIEF.md` §13.3 E) : chaque carte de la bande « Le Tour en
-trois parties » (`components/brand/SpaceStrip.tsx`) devient un lien vers son
-espace **quand cet espace est ouvert**. Un espace fermé reste une carte
-« bientôt », sans lien. Toutes les entrées de la bande et du bandeau sont
-mesurées.
-
-| Où | Quoi |
-|---|---|
-| `SpaceStrip.tsx` | La carte entière est cliquable (un seul lien par carte, pas de bouton en plus) : le Tour vers `/quiz`, le moteur vers `/{locale}/aarrr-funnel-template`, le jeu vers `/{locale}/game`. Elle reste visuellement secondaire sous « Démarre ton Tour » : un survol et un focus visibles, et pas de remplissage rouge. Le lien vers `/quiz` est `hard`, comme ailleurs (`cross-root-links.test.ts`) |
-| Mesure | Le jeu : `game_entry_clicked` avec `home_strip` depuis la bande et `space_band` depuis les pastilles de `SpaceBand.tsx`, les deux ajoutés au vocabulaire (`lib/game/events.ts`, `goatcounter-api.ts:112`). Le moteur : son événement d'entrée (A7.4) avec les mêmes sources. Le Tour : l'événement de démarrage existant, avec la source `home_strip`. `/admin/stats` affiche ces nouvelles sources |
-| Tests | Un e2e par carte ouverte (lien et événement), la carte fermée sans lien (build sans drapeau), et la même chose pour les pastilles. Accessibilité : un seul nom accessible par carte, et le contraste des états de survol (convention 7) |
-| Quand | Le jeu peut en profiter dès son ouverture. La carte du moteur suit A7.4 |
 
 #### A7.10 — Chez le propriétaire, « Partager » est le primaire (C16)
 
@@ -282,7 +267,7 @@ ouverts, et, pour la vue propriétaire, un build jetable jamais commité.
 | C12 | Noms de zones bilingues | Gardés : « Retention — S'ils reviennent » | `GAME-BRIEF.md` §15.3 | — |
 | C13 | « Vingt minutes » | Chronométré à la recette : gardé si la médiane des testeurs tombe entre 15 et 25 minutes | `GAME-BRIEF.md` §7.3 | D9 |
 | C14 | Amende du jeu | **Plafonnée à 75 000 €**, le maximum légal pour une entreprise | `GAME-BRIEF.md` §5, règle 5 | A7.8, livré le 2026-09-30 |
-| C15 | Cartes de la bande de l'accueil | **Des liens mesurés** à l'ouverture (`home_strip`), et les pastilles du bandeau mesurées aussi (`space_band`) | `GAME-BRIEF.md` §13.3 E | A7.9 |
+| C15 | Cartes de la bande de l'accueil | **Des liens mesurés** à l'ouverture (`home_strip`), et les pastilles du bandeau mesurées aussi (`space_band`) | `GAME-BRIEF.md` §13.3 E | A7.9, livré le 2026-09-30 |
 | C16 | Primaire du propriétaire | **« Partager » devient le primaire** chez le propriétaire ; « Refaire le Tour » passe secondaire. Le visiteur ne change pas | Ici et en A7.10 | A7.10 |
 | C17 | Porte de test pour `/r/<id>` | Déléguée à la session : **pas de porte, l'émulateur Firestore en CI** | Ici et en A7.11 | A7.11 |
 | C18 | Projects et Discussions | **Déjà désactivés** (constaté par l'API GitHub). Question non posée : la session D l'a close en parallèle avec D1, le même jour | `JOURNAL.md`, « D1 : les réglages du dépôt » | — |
@@ -291,12 +276,12 @@ ouverts, et, pour la vue propriétaire, un build jetable jamais commité.
 | C21 | Captures de B et C | **Capturer maintenant**, provisoires, puis refaire à l'ouverture. Celles du Tour datent d'avant I + B | `marketing/campaigns/README.md` §10 | A7.12 |
 | C22 | « Qui est derrière ? » | **La réponse nomme Antoine.** C'est une question de calendrier, pas d'anonymat : pas de LinkedIn ni de lancement en grande pompe pour l'instant | `GROWTH-PLAN.md` option A, `marketing/campaigns/README.md` §10 | A7.13 |
 | C23 | L'ordre des lancements (tranchée le 2026-09-30) | **On attend les deux, le moteur d'abord** : C19 tient, le calendrier garde B puis C. Le jeu, prêt plus tôt, reste fermé jusqu'à l'ouverture du moteur. **Le créneau réactif du Digital Fairness Act est abandonné**, alors que la proposition est visée pour novembre 2026 (MLex, 23/09) | `marketing/campaigns/README.md` §10, `GAME-BRIEF.md` | D2, section E (le fait DFA du jeu) |
+| C24 | « Voir un exemple » en roast | **Oui, tranchée le 2026-09-30** (la reco) : le bouton suit le sélecteur de ton de l'aperçu, et en roast il mène à `/r/sample?tone=roast` | Ici | Livré le 2026-09-30 avec A7.9 |
 
 ### Encore ouvert
 
 | # | Question | Aujourd'hui | Reco |
 |---|---|---|---|
-| C24 | **La landing mène-t-elle à l'exemple roast ?** Né d'A3.3 (2026-09-29) | `/r/sample?tone=roast` existe : l'échantillon ouvert sur son verdict roast, avec sa propre carte de partage, dans la page et en `og:image`. Mais l'aperçu de la landing a son propre sélecteur de ton, qui change une phrase, et « Voir un exemple » mène toujours à l'échantillon neutre | Que « Voir un exemple » suive le sélecteur : en roast, il mène à `/r/sample?tone=roast`. Le lien tient alors ce que l'aperçu vient de montrer. Pour un post, l'adresse est prête dès maintenant |
 
 ---
 
