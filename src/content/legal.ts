@@ -72,11 +72,6 @@ export function splitOnEmail(text: string): string[] {
   return text.split(/(\{email\})/).filter((part) => part !== "");
 }
 
-/** The one line of chrome the legal pages need beyond their own copy. */
-export const LEGAL_UI: { updatedAt: Translatable } = {
-  updatedAt: { fr: "Dernière mise à jour :", en: "Last updated:" },
-};
-
 export type LegalBlock =
   | { kind: "paragraph"; text: Translatable }
   | { kind: "bullets"; items: Translatable[] }

@@ -19,7 +19,9 @@ const mod = (await import("../../scripts/utm-channels.mjs" as string)) as {
 
 /**
  * GROWTH-PLAN.md (2026-09-13) was written under two constraints: no
- * LinkedIn, and the author is never named. The UTM vocabulary is the one
+ * LinkedIn, and the author never named. Both read "not for now" since
+ * 2026-09-29 (C22): the answer to "who's behind this?" names the author,
+ * and LinkedIn stays out until that reserve is lifted. The UTM vocabulary is the one
  * place a channel gets a name before a link goes out, so it is where the
  * first constraint is enforced rather than remembered — a `linkedin` source
  * added back by habit fails here, not in GoatCounter three weeks later.

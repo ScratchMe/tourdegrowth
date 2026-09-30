@@ -5906,3 +5906,88 @@ La décision 3 renversée par Antoine le 2026-09-29 (C4) : le B2B assisté (SLG)
 - **Un correctif de validation** est nécessaire : le refus au-dessus de 100 % ne doit plus valoir que pour les chiffres bornés, sinon une NRR réelle ne s'enregistre pas.
 
 **Les seize questions** sont en §18.12, chacune avec sa reco et ce qui casse si on se trompe. C25 recommande de trancher d'abord Q3 (un client compte dans la motion qui a signé son contrat en cours : c'est ce qui évite de compter deux fois le MRR total), Q1 (l'activation assistée est la mise en production) et Q2 (trois mois glissants), puis les autres en bloc.
+
+**En production** : PR [#214](https://github.com/ScratchMe/tourdegrowth/pull/214), mergée le 2026-09-30 à 11 h 49 UTC (squash `62e3618`, 4 fichiers, identique à la tête de la PR). Doc seule : Vercel ignore le build, et rien ne change sur le site.
+
+## A8 : l'audit GEO, et la date sur la page (2026-09-30)
+
+L'angle **GEO** (être lu et cité par les moteurs de réponse IA) n'avait jamais été audité. Le plug-in « claude-site-audit », proposé par Antoine le 2026-09-29, a été lu mais **pas installé** : ses contrôles, sa notation et son générateur ne sont pas dans l'archive, et il n'a pas de licence. L'audit a donc été joué à la main. **Si l'amont publie les fichiers manquants, la question repart en section C.**
+
+**A8.1, le relevé**, en lecture seule contre `www.tourdegrowth.com`, sur 74 pages dans les deux langues :
+- **Ce qui tenait déjà** : tout le JSON-LD se parse ; chaque page porte son `lang` et ses trois `hreflang` ; la définition d'un terme est en tête du HTML servi sans JavaScript ; l'auteur est nommé au pied de chaque page. Neuf robots d'IA ou de recherche (GPTBot, OAI-SearchBot, ChatGPT-User, ClaudeBot, Claude-User, PerplexityBot, CCBot, Bytespider, Applebot) reçoivent la même page que Googlebot, au même octet.
+- **`/robots.txt`** laisse tout passer (`User-Agent: *`, `Allow: /`). **`/llms.txt`** répond par la page 404 du site.
+- **Deux trous** : `/how-it-works`, la page qui explique le score, était la seule page de prose sans `Article` ni date. Et **aucune page n'affichait sa date**, alors que le JSON-LD et le sitemap la portaient : ni un lecteur, ni un moteur qui cite la page, ne pouvait distinguer une définition revue la semaine dernière d'une définition vieille d'un an.
+
+**A8.2, ce qui ne demandait aucun choix** :
+- **`/how-it-works` devient un `Article`**, publié le 2026-08-28 (#14, lu dans l'historique) et mis à jour le 2026-09-24. Son `og:type` passe à `article`, avec les mêmes dates.
+- **La ligne de date** « Dernière mise à jour : … » / "Last updated: …" s'imprime sur :
+  - les huit articles, au-dessus du titre, comme sur les pages légales ;
+  - les 24 termes, sous le titre, puisque le lien de retour tient la place au-dessus.
+- **Le jour affiché est toujours celui du `<lastmod>`**, dans un `<time dateTime>`. `termUpdatedAt()` devient la source unique du sitemap et de la page de terme. `formatLongDate()` est partagée avec les pages légales.
+- **Le libellé** était celui des pages légales (`LEGAL_UI`, validé avec elles). Il passe dans le dictionnaire (`UI_STRINGS.prosePage.updatedAt`) et repart « à relire », pour son usage neuf.
+- **Pas de nouveau composant** dans `src/components/` : `UpdatedLine` vit sous `src/app/[locale]/_prose/`. C'est de l'assemblage de page, et un composant du système demanderait un aperçu de design sync qu'une session cloud ne peut pas reconstruire.
+- **Pas de date en JSON-LD sur les termes** : `DefinedTerm` n'est pas une `CreativeWork`, et `dateModified` n'y est pas défini. Le sitemap et la page portent la date.
+
+**A8.3, ce qui est une décision**, en section C avec une reco :
+- **C26, les robots d'IA** : tout laisser, et l'écrire.
+- **C27, `llms.txt`** : oui, court et généré, sans `llms-full.txt`. Le fichier n'est encore lu par presque personne : 97 % des fichiers sans aucune requête d'IA en mai 2026 selon [PPC Land](https://ppc.land/llms-txt-adoption-rises-8-8x-but-97-of-files-get-zero-ai-requests/), et Google a dit en juillet 2025 ne pas le lire. D'où « court » : le gain est faible, le coût aussi.
+- **`FAQPage` n'est pas rouvert** : le refus de septembre tient.
+
+**Vérifié** :
+- **Gardes** :
+  - `e2e/structured-data.spec.ts` inclut `/how-it-works` dans ses deux tests d'`Article`, sur une liste unique.
+  - Un test neuf parcourt le sitemap et exige, sur chaque article, terme et page légale dans les deux langues, la ligne de date. Son `<time>` doit valoir le `<lastmod>` et son texte le jour écrit dans la langue de la page. Il compte 68 pages, pour qu'une famille perdue par le sitemap ne passe pas en silence.
+  - Tests unitaires : `formatLongDate` en FR et en EN, sans glisser au jour d'avant ; `termUpdatedAt` ; la liste des pages `Article`.
+- **Non-vacuité**, dans un seul build, en retirant l'`Article` et la ligne de `/how-it-works` et en affichant la date de repli sur les termes : les trois tests rougissent. Ils nomment exactement `/en` et `/fr/how-it-works`, puis chacun des 24 termes dans les deux langues, et rien d'autre.
+- **À l'écran**, en FR et en EN, à 1 280 et 390 px (`/how-it-works`, `/aarrr-vs-okr`, `/glossary/churn`, `/privacy`) : la ligne est à sa place, sans défilement horizontal.
+
+**Au passage, `CLAUDE.md`** frôlait son budget de 40 000 caractères. La ligne « Hygiène de dépôt public », close depuis le 2026-09-29, en sort. Sa seule règle encore utile, l'épinglage par SHA de tous les workflows et le test qui l'exige, passe dans `GITHUB.md` §2 : c'est le fichier qu'on ouvre avant de toucher un workflow.
+
+**En production** : PR [#215](https://github.com/ScratchMe/tourdegrowth/pull/215), mergée le 2026-09-30 à 12 h 00 UTC (squash `382eb99`, 20 fichiers, identique à la tête de la PR). Déploiement de production Vercel `READY` sur ce commit, lu par l'API. Relevé par HTTP : `/fr/how-it-works` et `/en/how-it-works` portent un `Article` en JSON-LD, `og:type` à `article` et la ligne « 24 septembre 2026 » / "September 24, 2026" ; `/fr/glossary/churn` et `/en/glossary/churn` portent le 30 septembre, et le sitemap dit `2026-09-24` et `2026-09-30` pour les mêmes adresses. `/en/aarrr-vs-okr` et `/fr/privacy` portent aussi leur ligne.
+
+## A7.13 : « Qui est derrière ? », une réponse qui nomme Antoine (2026-09-30)
+
+C22, tranché par Antoine le 2026-09-29 : c'est une question de calendrier, pas d'anonymat. La réponse le nomme, simplement. La promotion reste discrète pour l'instant : pas de LinkedIn, pas de lancement en grande pompe, et `linkedin` reste dans `EXCLUDED` (`scripts/utm-channels.mjs`).
+
+**Ce qui change** :
+- **La FAQ des trois Show HN** (le Tour, le moteur, le jeu) répond à "Who's behind this?" : « I'm Antoine Berthaud, a growth PM; this is a side project, posted from its own account. My name is in the site's footer, and the About page says how it's made. » Pas de lien, donc aucun lien nu, et aucun LinkedIn. « À relire ». Show HN est en anglais seulement : il n'y a pas de texte français à suivre.
+- **La règle de `marketing/README.md`** passe de « Jamais le nom » à « Discret pour l'instant : le nom seulement si on le demande, jamais LinkedIn ». Le compte qui poste reste celui du projet, `tourdegrowth`.
+- **`brand-review.md`** : le crédit de l'auteur et le relevé d'anonymat sont redatés. Le nom figure désormais dans une ligne collable par Show HN, et nulle part ailleurs ; `LinkedIn` et `cv.` restent absents. Le §8 des campagnes parle d'un « compte de projet », discret pour l'instant.
+- **L'outillage d'abord**, puisqu'il aurait arrêté cet item : `relecteur-copie` §5 et `/livrer` §3 ne disent plus « jamais le nom d'Antoine », mais « seulement dans la réponse à « qui est derrière ? », jamais LinkedIn ». Le commentaire de `utm-channels.test.ts` dit « pas maintenant », et le test garde `linkedin` exclu.
+
+**Ne change pas** : les mentions « pseudonyme » qui désignent le compte `tourdegrowth` (le kit, le calendrier des Show HN), `GROWTH-PLAN.md` (déjà précisé le 2026-09-29) et le relevé de référence de `brand-review.md` (ce qui a été appliqué le 2026-09-24).
+
+**Vérifié** : `grep` de `Antoine`, `Berthaud`, `LinkedIn` et `cv.` dans les lignes collables de `marketing/` : le nom n'apparaît que dans les trois réponses, et ni LinkedIn ni le CV nulle part. `check-lengths.mjs` : 71 longueurs, aucun écart. `utm-channels.test.ts` : 15 tests passent.
+
+
+## Extension 04 du design system, lot a : les primitives de formulaire, rien de câblé (2026-09-30)
+
+**Le retour.** Déposé dans le projet Claude Design par la session (#208), lancé par Antoine, écrit par Claude Design dans le projet même, sous `design/ds-extension-04-return/`. Recopié ici par la session, fichier par fichier : **les sous-agents n'ont pas `DesignSync`** (« disabled for this session, in subagents as well »), quatre l'ont confirmé. 46 fichiers texte ; les huit planches PNG, le build de la planche et son instantané de feuilles sont restés dans le projet (`design/ds-extension-04-return/COPIE.md` dit pourquoi, et que les espaces insécables de la prose ont pu devenir des espaces). Le retour fait autorité, comme 01 et 03.
+
+**Les dix-huit réponses, pour ne pas rouvrir le document** : le libellé est une phrase en Inter (`--field-label`), jamais le méta-libellé mono ; une erreur se lit sans couleur (bord à 3 px, message en 600 derrière un filet de 3 px) ; seul un champ facultatif porte un mot ; un rayon de champ à 6 px pour qu'un champ et un bouton ne se ressemblent plus ; le compteur d'une ligne va dans la rangée du libellé, à partir de 80 % ; un nombre ressemble à un nombre (chiffres tabulaires en Inter, boîte à la taille de la grandeur, unité dans la boîte, placée par la langue) ; une erreur de lecture et une règle ont le même traitement, une règle sur deux champs appartient à la paire ; le chevron de la plateforme reste (le système n'a pas de glyphe vers le bas) ; un mois est une liste, un jour trois listes natives ; un seul rond de radio, celui d'`AnswerOption` ; `Choices` n'est pas `AnswerOption` généralisé ; une case à cocher dessinée ; une liste de cases est un fieldset de lignes, pas des cartes ; `Segmented` reçoit `labelledBy` et `SegmentedField` disparaît ; les noms suivent le système, plus un axe `fit` ; deux densités sur `size` ; et onze choses que les copies faisaient mal, dont la raison d'une option « bientôt » à **1,91:1** (l'opacité, que la CI ne mesure pas), les champs à 15 px qui font zoomer iOS et l'anneau rouge de l'audit. **Aucune ne contredit une contrainte du brief** : vérifié sur les fichiers eux-mêmes (aucune couleur en dur, aucun primitif, aucune opacité, 44 px partout, natif dessous, aucune icône).
+
+**Une question, tranchée par Antoine le même jour** : l'audit venait d'être mis entre parenthèses (#210, après la mission S-15). Le porter quand même ? Oui : c'est un portage qui retire une copie, pas une fonctionnalité.
+
+**Ce qui est porté** : `Field` (et `FieldRow`, dont la mise en page nomme les parties de `Field` et vit donc dans sa feuille), `TextField`, `NumberField`, `Select`, `DateField`, `Choices`, `Checkbox`, `FormSummary` dans `src/components/core/` ; `TextArea` selon son delta ; `Segmented` avec `labelledBy` ; `AnswerOption` lit `--size-mark` et `--mark-inset`. Les jetons sont **répartis dans leurs couches** plutôt que dans un `forms.css` à part : `colors.css` et `tokens.ts` (seize dérivés), `typography.css`, `shape.css`, `spacing.css`. La logique pure va dans `src/lib/forms/` : `number.ts` **déplacé du moteur** (plus complet que le `groupAsTyped` du retour : suppression vers l'avant, apostrophes, décimale en cours de frappe), `field.ts`, `date.ts`. Aucun écran ne monte les primitives : le moteur et l'audit les prennent en b et c.
+
+**Écarts assumés, signalés plutôt qu'absorbés** :
+- **`NumberField` prend un nombre** (`number | null`) et garde le texte tapé, comme le moteur ; le retour le voulait en texte analysé par l'appelant, ce qui aurait redonné une copie de la logique de brouillon au moteur et à l'audit. Son erreur de lecture (`parseError`) paraît quand on quitte la case, comme le retour le demande.
+- **`--mark-color: currentColor` n'est pas un jeton** : `token-sources.test.ts` exige une couleur littérale. Les marques écrivent `currentColor`.
+- **Trois seuils ne sont pas des jetons** (80 %, 480 px, 560 px) : aucune feuille ne pourrait les lire. `--form-gap-*` arrive en b avec son premier lecteur (`dead-tokens.test.ts`).
+
+**Ce qui change en production** : seul le `TextArea` du Deep dive, selon son delta. Mesuré dans le navigateur : rayon de 14 à **6 px**, corps de 15 à **16 px**, anneau décalé de **2 px**, bord à 3 px au-delà de la limite. Vu en EN à 1 280 et en FR à 390.
+
+**Trouvé en vérifiant, et corrigé** : au clavier, l'`<input>` d'un `TextField` traçait son propre anneau sous le bord de la boîte, en plus de celui de la boîte. La règle globale `:focus-visible` pèse ce que pèse `.control` et vient après ; `.control:focus-visible { outline: none }` la reprend.
+
+**Gardes, chacune avec sa non-vacuité** :
+- `form-controls.test.ts` : un seul anneau (`--field-focus-ring`, qui est `--focus-ring`) sur toutes les feuilles de contrôle, aucune ne lit `--focus-ring-invert` ; l'input dans la boîte ne trace pas le sien ; aucune opacité autre que `1` pour dessiner un état. Rouge sur les trois erreurs remises une à une (l'anneau rouge sur `Select`, la règle de l'input retirée, `opacity: 0.45` sur une option désactivée), vert sur le code porté.
+- Les paires de contraste des nouveaux jetons, papier (16) et nuit (22) : **toutes les valeurs du tableau du retour sont exactes**, au centième.
+- 23 tests de balisage par rendu statique (libellé relié, message lu avant l'indice puis le compteur, jamais `type="number"`, « 26 000 » affiché avec U+00A0, rien de pré-sélectionné, trois listes natives pour un jour, raison d'une option désactivée lue avec elle, `labelledBy`), et les tests de `lib/forms` (mois à cheval sur une année, 31 février, aller-retour `aaaa-mm-jj`, seuil du compteur).
+
+**Vérifié à l'écran** sur une page d'échafaudage jamais commitée qui rejoue la planche du retour avec les vrais composants : papier et nuit, FR et EN, 390 et 1 280, **aucun débordement horizontal dans les huit** ; sections relues en papier/EN/1 280 et nuit/FR/390, anneau au clavier de nuit sur les quatre familles, et `--select-inset` mesuré au pixel : la valeur d'un `Select` commence sur la même colonne que celle d'un `TextField` (18 px du bord, écart nul, Chromium seulement). La ligne choisie en ambre est grande dans une feuille compacte de nuit, comme Claude Design le signalait : c'est le langage de sélection du système, à revoir sur le vrai écran du moteur en b.
+
+**Design sync** : les neuf primitives sont dans `componentSrcMap` avec leurs aperçus, les conventions ont une section « Forms » et l'axe `fit` ; rien n'est envoyé (la session n'avait pas le skill `/design-sync`). Les aperçus ont été vérifiés par le compilateur contre les vrais composants, pas rendus par le pilote.
+
+**Vérifié** : `tsc` et `eslint` propres, `next build` propre, **2 327 tests unitaires** (194 fichiers) après la fusion de `main`, couverture au-dessus des seuils, et la suite Playwright complète sur un build de production (`GAME_ENABLED=true`, comme la CI) : **636 passées, aucun échec, 5 ignorées par construction** sur 641, dont le moteur, l'audit, l'accessibilité et le contraste.
+
+**Reste** : A10.b, c et d ; `--select-inset` dans WebKit et Gecko ; la re-synchro.

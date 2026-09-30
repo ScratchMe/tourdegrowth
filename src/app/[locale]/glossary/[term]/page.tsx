@@ -14,6 +14,8 @@ import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { isLocale, LOCALES, type Locale } from "@/lib/i18n/locale";
 import { contentMetadata, glossaryTermTitle } from "@/lib/i18n/meta";
 import { localePath } from "@/lib/i18n/routes";
+import { termUpdatedAt } from "@/content/updated-at";
+import { UpdatedLine } from "../../_prose/UpdatedLine";
 import styles from "./page.module.css";
 
 interface PageProps {
@@ -78,6 +80,9 @@ export default async function GlossaryTermPage({ params }: PageProps) {
             {tc(t.backToIndex, locale)}
           </Link>
         }
+        // GEO audit (A8.2): under the title, since the back link holds the
+        // kicker — the same day as the sitemap's <lastmod> for this term.
+        note={<UpdatedLine locale={locale} isoDay={termUpdatedAt(entry)} />}
       >
         {/* The one raised card on the page: the definition is what the reader
             came for. The worked example below used to be raised too — two

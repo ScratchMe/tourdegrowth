@@ -13,6 +13,7 @@ import { localePath } from "@/lib/i18n/routes";
 import { contentMetadata } from "@/lib/i18n/meta";
 import { articleSchema, breadcrumbSchema, JsonLd } from "@/lib/seo/jsonld";
 import { articleDates } from "@/content/updated-at";
+import { UpdatedLine } from "../_prose/UpdatedLine";
 import own from "./page.module.css";
 
 interface PageProps {
@@ -69,6 +70,7 @@ export default async function ChecklistPage({ params }: PageProps) {
         path="/growth-audit-checklist"
         title={tc(CHECKLIST.title, locale)}
         lead={tc(CHECKLIST.intro, locale)}
+        kicker={<UpdatedLine locale={locale} isoDay={articleDates("/growth-audit-checklist").modified} />}
       >
         <ol className={own.stages}>
           {byPillar.map(({ pillar, questions }, index) => (

@@ -38,10 +38,14 @@ export const GLOSSARY_UPDATED_AT = "2026-08-29";
 /**
  * When each `Article` page was first published — the `datePublished` of its
  * JSON-LD (SEO audit v1 §1.5). Only the pages that declare an `Article` are
- * listed: the two open-door pages and the comparison cluster. A publication
- * date never moves; `CONTENT_UPDATED_AT` above is the one that does.
+ * listed: `/how-it-works`, the two open-door pages and the comparison
+ * cluster. A publication date never moves; `CONTENT_UPDATED_AT` above is the
+ * one that does.
  */
 export const CONTENT_PUBLISHED_AT: Record<string, string> = {
+  // The explainer of the score, public since #14; an `Article` since the GEO
+  // audit (A8.2, 2026-09-30), which found it the one prose page without a date.
+  "/how-it-works": "2026-08-28",
   "/growth-audit-checklist": "2026-09-14",
   "/startup-growth-diagnostic": "2026-09-14",
   "/aarrr-vs-north-star-metric": "2026-09-14",
@@ -64,4 +68,14 @@ export function articleDates(path: string): { published: string; modified: strin
   const modified = CONTENT_UPDATED_AT[path];
   if (!published || !modified) throw new Error(`articleDates: no publication or update date for "${path}" in content/updated-at.ts`);
   return { published, modified };
+}
+
+/**
+ * When a glossary term's words last changed: its own `updatedAt` when it has
+ * one, else the day the long-form copy was approved. One function for the
+ * sitemap's `<lastmod>` and the date printed on the term's page (GEO audit,
+ * A8.2), so the two can never disagree.
+ */
+export function termUpdatedAt(entry: { updatedAt?: string }): string {
+  return entry.updatedAt ?? GLOSSARY_UPDATED_AT;
 }

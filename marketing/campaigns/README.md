@@ -328,7 +328,7 @@ visite.**
 |---|---|
 | **La promesse « rien ne quitte ton navigateur » est fausse le jour du post** (un script, une requête ajoutée plus tard) | Portier B : la spec canari et le balayage statique doivent être sur `main` et verts ; la canari est relancée contre le build de production le jour de l'ouverture. Le premier commentaire HN invite à vérifier dans l'onglet Réseau : on ne l'écrit que si c'est vrai |
 | **« Ça existe déjà »** pour le jeu : un Show HN de janvier 2025 (179 points) apprenait déjà à repérer les dark patterns | Le dire avant qu'on le dise : la FAQ de `game/show-hn.md` reconnaît le précédent et dit la différence (on fabrique le piège, sous un DG, et le coût arrive en décembre). Ne jamais le citer en premier ni nommément : répondre si on le cite |
-| **Un pseudonyme qui ne poste que ses propres liens** est enterré sur HN et supprimé sur Reddit | Commenter sans lien entre les lancements (S2, S5) ; deux Show HN au plus, à trois semaines d'écart ; jamais le même texte deux fois |
+| **Un compte de projet qui ne poste que ses propres liens** est enterré sur HN et supprimé sur Reddit. La promotion reste discrète pour l'instant (C22) : le compte ne s'appuie sur aucun nom connu | Commenter sans lien entre les lancements (S2, S5) ; deux Show HN au plus, à trois semaines d'écart ; jamais le même texte deux fois |
 | **Glorification** : le jeu peut se lire comme un manuel de manipulation | Les textes de lancement ne décrivent jamais une astuce comme efficace ; ils parlent du coût différé et de la fin propre possible. La recette (GAME-BRIEF §7.3) le surveille en test |
 | **Diffamation** : citer une marque réelle dans un post | Aucune marque réelle dans un post, jamais. Les cas réels restent dans le catalogue du jeu, relus juridiquement |
 | **Le Digital Fairness Act glisse** | Aucune date promise ; créneau réactif seulement, et seulement si C est ouvert. **Depuis le 2026-09-30 (C23), le créneau est abandonné : le jeu ouvrira après la proposition. Le risque devient l'inverse, un fait du jeu périmé à l'ouverture (`content/game/retention.ts:487`), à remettre à jour avant (`CHANTIERS.md` E)** |
@@ -411,8 +411,8 @@ bannissement le plus courant).
   le 2026-09-29) : son nom sera utilisé, sans lancement en grande pompe pour
   l'instant et sans LinkedIn tant qu'il ne lève pas cette réserve. La
   réponse des FAQ (« I keep this account pseudonymous ») est remplacée par
-  une réponse qui le nomme, sans insister (texte « à relire »). À faire :
-  `CHANTIERS.md` A7.13.
+  une réponse qui le nomme, sans insister (texte « à relire »). **Fait le
+  2026-09-30** (`CHANTIERS.md` A7.13) : les trois Show HN.
 
 ### Réponse d'Antoine du 2026-09-30 (`CHANTIERS.md` C23)
 
