@@ -412,9 +412,9 @@ edge (`--state-hover-border`) rather than lifting.
 
 `core/TextArea` (the soft-limit counter, the red edge past it; both features
 already give it a visible label through their `Field`), `core/Segmented`
-(two or three options, `md` in the engine, `compact` in the audit's mission
+(two or three options, `md` in the engine, `sm` in the audit's mission
 form), `core/Button` (including
-`variant="quiet" compact`, the system's one text button, tapped 44px tall —
+`variant="quiet" size="sm"`, the system's one text button, tapped 44px tall —
 the engine's "I only have the rate" under a field), `core/Card`,
 `core/Callout`, `quiz/AnswerOption` (the selection language), `brand/MetaLabel`,
 and the night world's `NightSurface`. Prefer a composition where one works,
