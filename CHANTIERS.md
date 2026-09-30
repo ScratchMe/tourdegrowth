@@ -21,15 +21,15 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
-| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | Maintenant. A7 dans l'ordre de ses dépendances (A1 à A6 livrés le 2026-09-29, A8 le 2026-09-30) ; A10 (S-15) dans l'ordre a → d |
+| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.c et A7.3.d après C25, A7.4 après A7.3, et A7.12.c à l'ouverture ; A10 (S-15) dans l'ordre a → d |
 | **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30** (79 composants, après A1, A2, A4 et A5). Le retour du brief 04 est arrivé le 2026-09-30 et se porte en A10 ; re-synchroniser pour A7.10, qui a changé le contrat de `ShareCard` (2026-09-30), puis à la fin d'A10 (neuf primitives de plus) |
 | **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 et C24 tranchées le 2026-09-30. Restent **C25**, la validation de la spécification de A7.3 (`ENGINE.md` §18), et C26 et C27, nées d'A8 (robots d'IA, `llms.txt`) |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, tout A7.3 |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
 
-**L'ordre conseillé** : A7 (la spécification A7.3.a est écrite le
-2026-09-30 et attend C25 ; A7.1 est livré le même jour). B3 maintenant qu'A7.10 est livré,
-puis D. La section C a été tranchée le 2026-09-29.
+**L'ordre conseillé** : C25 d'abord (Q3, Q1 et Q2, puis les autres en bloc),
+qui débloque A7.3.c. B3 maintenant qu'A7.10 est livré, puis D. C26 et C27
+quand tu veux : rien ne les attend.
 
 **Deux sessions en parallèle** écrivent toutes deux à la fin de `JOURNAL.md`
 et dans ce fichier. La seconde à merger fusionne `main` dans sa branche avant
@@ -59,10 +59,9 @@ rencontrée en le faisant repart en section C. Toute copie neuve porte
 
 **Dans quel ordre.** Les items sont indépendants, sauf :
 - A7.3 avant A7.4, parce que les liens promettent ce que le moteur fait ;
-- A7.12.a avant les annuaires de D10.
 
 Le jeu n'attend rien du moteur.
-**A7.1, A7.2, A7.5 à A7.11 et A7.13 sont livrés (2026-09-30).** **A7.3.a est écrit** (`ENGINE.md` §18) et attend Antoine (C25) : rien de A7.3 ne se code avant sa réponse.
+**A7.1, A7.2, A7.5 à A7.11, A7.12.a, A7.12.b et A7.13 sont livrés (2026-09-30).** **A7.3.a est écrit** (`ENGINE.md` §18) et attend Antoine (C25) : rien de A7.3 ne se code avant sa réponse.
 
 #### A7.3 — Le B2B assisté et l'hybride dès la v1 (C4)
 
@@ -105,16 +104,16 @@ avec la règle de C15. **Pas de lien au pied de page.**
 | Tests | Un e2e par page : le lien existe moteur ouvert et mène à `/{locale}/aarrr-funnel-template`. Un test sur un build fermé : il n'existe pas (les specs « jeu fermé » montrent la façon de faire) |
 | Quand | Construit avant l'ouverture (D2), après A7.3 : les liens promettent ce que le moteur fait, hybride compris |
 
-#### A7.12 — Les captures : le Tour à jour, le moteur et le jeu provisoires (C21)
+#### A7.12.c — Refaire les captures du moteur et du jeu à l'ouverture (C21)
 
-**Décidé** (`marketing/campaigns/README.md` §10, réponse D3) : capturer
-maintenant, refaire à l'ouverture.
+**A7.12.a et A7.12.b sont livrés le 2026-09-30** : les captures du Tour sont
+refaites (après I + B, A7.7 et A7.10), et celles du moteur et du jeu sont là,
+préfixées `provisoire-` et listées comme telles dans `marketing/kit.md`.
 
-| # | Quoi | Comment |
-|---|---|---|
-| A7.12.a | **Refaire les captures du Tour** (`marketing/assets/01` à `05`, `og-*`). Elles datent du 2026-09-14, d'avant la synthèse I + B | Mêmes noms, même format que `marketing/kit.md` « Les captures » (2×, PNG palette, deux langues, desktop et mobile). Contre un build de production local. **À faire avant D10**, puisque les annuaires s'en servent. Si A7.7 (l'encart) ou A7.10 (le partage) sont livrés entre-temps, les captures de résultat suivent |
-| A7.12.b | **Des captures provisoires du moteur et du jeu** | Dans `marketing/assets/`, préfixées `provisoire-` et listées dans `kit.md` comme telles. Le moteur par l'aperçu propriétaire ou un build local ouvert ; l'exemple rempli (§6.0) plutôt qu'un vrai jeu de chiffres. Le jeu : le hub, un trimestre, la page de décembre |
-| A7.12.c | **Les refaire à l'ouverture** de chaque produit (D2), contre la production, et supprimer les `provisoire-` | Fait partie de la vérification d'ouverture |
+**Reste**, à l'ouverture de chaque produit (D2) : les refaire contre le
+produit ouvert (`scripts/kit-capture.config.ts`, qui dit comment), puis
+retirer le préfixe `provisoire-` et la mention dans `kit.md`. Fait partie de
+la vérification d'ouverture.
 
 ### A9 — Ce que la design sync du 2026-09-30 a trouvé dans le produit
 
@@ -185,7 +184,7 @@ et A5 (`JOURNAL.md`, 2026-09-30, et `.design-sync/NOTES.md`, « Synced »).
 | # | Quoi | Détail |
 |---|---|---|
 | B2 | **Le brief S-15 : les primitives de formulaire.** `design/DS-EXTENSION-BRIEF-04.md` | **Le retour est arrivé le 2026-09-30** (`design/ds-extension-04-return/`) : les dix-huit questions ont leur réponse, aucune ne contredit une contrainte. Le port est le lot A10 ; B2 se ferme avec lui, et la re-synchro qui suit y envoie les neuf primitives (`componentSrcMap` et aperçus prêts depuis A10.a) |
-| B3 | **Re-synchroniser : A7.10 est livré** (le primaire de `ShareCard` chez le propriétaire, 2026-09-30) | Avec le prompt B. Attendu : 79 composants, 245 cellules (l'aperçu `Owner` de `ShareCard` s'ajoute), 79/79. **Quatre** avertissements sont permanents : « Impact », et `GRID_OVERFLOW` sur `DefinitionPopover`, `QuarterNews` et `GlossaryTerm` (le quatrième depuis A4, accepté par Antoine le 2026-09-30). Deux pièges : le driver ne régénère pas `dist/types/` (lancer `cfg.buildCmd` d'abord, sinon les contrats restent ceux d'avant), et une note est reportée quand l'aperçu n'a pas changé même si le composant a changé (recapturer ceux-là en contrôle). Les deux sont dans `.design-sync/NOTES.md` |
+| B3 | **Re-synchroniser : A7.10 est livré** (le primaire de `ShareCard` chez le propriétaire, 2026-09-30) | Avec le prompt B. Attendu après A7.10 : 79 composants, 245 cellules (l'aperçu `Owner` de `ShareCard` s'ajoute), 79/79. **Depuis A10.a (#218)**, les neuf primitives de formulaire ont aussi leurs aperçus et leur entrée dans `componentSrcMap` : une synchro faite maintenant les envoie, donc recompter au lieu de comparer à 79. **Quatre** avertissements sont permanents : « Impact », et `GRID_OVERFLOW` sur `DefinitionPopover`, `QuarterNews` et `GlossaryTerm` (le quatrième depuis A4, accepté par Antoine le 2026-09-30). Deux pièges : le driver ne régénère pas `dist/types/` (lancer `cfg.buildCmd` d'abord, sinon les contrats restent ceux d'avant), et une note est reportée quand l'aperçu n'a pas changé même si le composant a changé (recapturer ceux-là en contrôle). Les deux sont dans `.design-sync/NOTES.md` |
 
 ---
 
@@ -229,7 +228,7 @@ ouverts, et, pour la vue propriétaire, un build jetable jamais commité.
 | C18 | Projects et Discussions | **Déjà désactivés** (constaté par l'API GitHub). Question non posée : la session D l'a close en parallèle avec D1, le même jour | `JOURNAL.md`, « D1 : les réglages du dépôt » | — |
 | C19 | Ce qui est parti de la vague 1 | **Rien.** Et rien ne part avant que le moteur et le jeu soient prêts | `marketing/campaigns/README.md` §10 | D6 |
 | C20 | Relancer le Tour sur les réseaux | **Le Tour au seul SEO**, sans fil. L'indexation et les annuaires partent maintenant | `marketing/campaigns/README.md` §10 | D10, A7.12.a |
-| C21 | Captures de B et C | **Capturer maintenant**, provisoires, puis refaire à l'ouverture. Celles du Tour datent d'avant I + B | `marketing/campaigns/README.md` §10 | A7.12 |
+| C21 | Captures de B et C | **Capturer maintenant**, provisoires, puis refaire à l'ouverture. Celles du Tour datent d'avant I + B | `marketing/campaigns/README.md` §10 | A7.12.a et A7.12.b livrés le 2026-09-30 ; A7.12.c à l'ouverture |
 | C22 | « Qui est derrière ? » | **La réponse nomme Antoine.** C'est une question de calendrier, pas d'anonymat : pas de LinkedIn ni de lancement en grande pompe pour l'instant | `GROWTH-PLAN.md` option A, `marketing/campaigns/README.md` §10 | A7.13, livré le 2026-09-30 |
 | C23 | L'ordre des lancements (tranchée le 2026-09-30) | **On attend les deux, le moteur d'abord** : C19 tient, le calendrier garde B puis C. Le jeu, prêt plus tôt, reste fermé jusqu'à l'ouverture du moteur. **Le créneau réactif du Digital Fairness Act est abandonné**, alors que la proposition est visée pour novembre 2026 (MLex, 23/09) | `marketing/campaigns/README.md` §10, `GAME-BRIEF.md` | D2, section E (le fait DFA du jeu) |
 | C24 | « Voir un exemple » en roast | **Oui, tranchée le 2026-09-30** (la reco) : le bouton suit le sélecteur de ton de l'aperçu, et en roast il mène à `/r/sample?tone=roast` | Ici | Livré le 2026-09-30 avec A7.9 |
@@ -257,7 +256,7 @@ rien de privé dans le dépôt, qui est public. Cela vaut pour les chiffres de
 | D6 | **La distribution, vague 1** | **Non : rien ne part avant que le moteur et le jeu soient prêts** (C19, 2026-09-29). Rien n'est encore parti. Le Tour n'aura ni Show HN ni r/SaaS | Textes dans `marketing/launch/` et `marketing/campaigns/`. Tu postes sous pseudo, la session fournit et met à jour les textes. Annuaires dans l'ordre de `GROWTH-PLAN.md` 1.6. **Pas de LinkedIn ni de lancement en grande pompe pour l'instant** (C22 : une question de calendrier, pas d'anonymat) |
 | D7 | **La distribution, vague 4** | Après deux semaines de lecture de la vague 1 | La session écrit les pitchs de newsletters et passe honnêtement le produit de chaque auteur au Tour ; tu envoies depuis `contact@`. Pour les listes « awesome », seulement si ton profil GitHub n'affiche pas ton nom (à vérifier d'abord sur github.com/ScratchMe) |
 | D9 | **La recette du jeu** (`GAME-BRIEF.md` §7.3), avant d'ouvrir le jeu (D2) | Oui, dès que le nº7 est signé | Cinq testeurs qui ne connaissent pas le sujet, et les critères de §7.3. **Chronomètre chaque partie complète** (C13, 2026-09-29) : « vingt minutes » reste si la médiane tombe entre 15 et 25 minutes. Sinon, donne-moi la médiane : une session réécrit l'encart (`content/game/entry.ts:65`) et les textes de lancement. La relecture juridique du catalogue des cas réels est aussi à toi (`marketing/campaigns/README.md` §9) |
-| D10 | **Le Tour au seul SEO, maintenant** (C20, 2026-09-29) | **Indexation : il reste le français**, dès que le quota de Search Console le permet. **Annuaires : Launching Next soumis le 2026-09-30 ; les suivants attendent A7.12.a** (les captures du Tour datent d'avant I + B) | Ce ne sont pas des posts, ils partent sans attendre le moteur et le jeu. 1) Search Console, « Demander l'indexation ». **Fait le 2026-09-29** : `/en` (déjà sur Google), les deux pages « porte ouverte » et les cinq « AARRR vs X » en anglais (aucune n'était sur Google), plus trois `/en/glossary/*` (ex-D8). Le sitemap est lu (74 pages, 2026-09-29). **Reste**, le quota étant dépassé le 2026-09-30 au matin (une dizaine de demandes par 24 h glissantes) : `/fr` (déjà sur Google), `/fr/growth-audit-checklist`, `/fr/startup-growth-diagnostic`, `/fr/aarrr-vs-north-star-metric`, `/fr/aarrr-vs-rarra`, `/fr/aarrr-vs-growth-loops`, `/fr/aarrr-vs-okr`, `/fr/aarrr-vs-heart`. 2) Les annuaires restants de la vague 1, dans l'ordre de `GROWTH-PLAN.md` 1.6, avec les liens `relaunch_tour` de `marketing/kit.md` (`node scripts/utm-link.mjs directory:<slug> /en --campaign relaunch_tour`). Launching Next est fait. Pas de fil X/Bluesky pour le Tour |
+| D10 | **Le Tour au seul SEO, maintenant** (C20, 2026-09-29) | **Indexation : il reste le français**, dès que le quota de Search Console le permet. **Annuaires : Launching Next soumis le 2026-09-30 ; les suivants peuvent partir**, les captures du Tour sont refaites (A7.12.a, 2026-09-30) | Ce ne sont pas des posts, ils partent sans attendre le moteur et le jeu. 1) Search Console, « Demander l'indexation ». **Fait le 2026-09-29** : `/en` (déjà sur Google), les deux pages « porte ouverte » et les cinq « AARRR vs X » en anglais (aucune n'était sur Google), plus trois `/en/glossary/*` (ex-D8). Le sitemap est lu (74 pages, 2026-09-29). **Reste**, le quota étant dépassé le 2026-09-30 au matin (une dizaine de demandes par 24 h glissantes) : `/fr` (déjà sur Google), `/fr/growth-audit-checklist`, `/fr/startup-growth-diagnostic`, `/fr/aarrr-vs-north-star-metric`, `/fr/aarrr-vs-rarra`, `/fr/aarrr-vs-growth-loops`, `/fr/aarrr-vs-okr`, `/fr/aarrr-vs-heart`. 2) Les annuaires restants de la vague 1, dans l'ordre de `GROWTH-PLAN.md` 1.6, avec les liens `relaunch_tour` de `marketing/kit.md` (`node scripts/utm-link.mjs directory:<slug> /en --campaign relaunch_tour`). Launching Next est fait. Pas de fil X/Bluesky pour le Tour |
 
 ---
 
