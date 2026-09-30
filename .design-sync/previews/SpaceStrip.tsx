@@ -8,23 +8,27 @@ import { SpaceStrip } from "tour-de-growth";
  * (« Maintenant », « Ensuite », « Pour finir ») and what it gives.
  *
  * The heading is the band's « Le Tour en trois parties »: the three spaces
- * are never « étapes », the AARRR stage's word. The cards are not links —
- * the hero's button and the band are the doors. A leg not open yet is dashed
- * and says « bientôt », never a colour alone. The game's card is set in the
- * night. `open` is passed so the preview does not depend on the build.
+ * are never « étapes », the AARRR stage's word. An open card is a door
+ * (C15, A7.9): ONE link, its name, stretched over the whole card — the
+ * Tour's leads to the quiz, the others to their space. It stays secondary to
+ * the hero's button: no red fill; a hover underlines the name and lifts the
+ * card, and the focus ring goes round the whole card (neither shows in a
+ * still). A leg not open yet has no link: dashed, and « bientôt », never a
+ * colour alone. The game's card is set in the night. `open` is passed so the
+ * preview does not depend on the build.
  *
  * The strip folds on its own width (a container query), not the window's:
  * three columns from 760px, so the two wide cards (up to 880px) hold them.
  */
 
-/** Every leg open: the Tour lifted on its shadow, the engine in ultramarine, the game at night. */
+/** Every leg open, three doors: the Tour lifted on its shadow, the engine in ultramarine, the game at night. */
 export const AllOpen = () => (
   <div style={{ maxWidth: 880 }}>
     <SpaceStrip locale="fr" open={{ engine: true, game: true }} />
   </div>
 );
 
-/** Today in production: the engine and the game still closed, dashed and « soon ». */
+/** Today in production: the engine and the game still closed, dashed and « soon », with no link; the Tour's card is the one door. */
 export const NotOpenYet = () => (
   <div style={{ maxWidth: 880 }}>
     <SpaceStrip locale="en" open={{ engine: false, game: false }} />
