@@ -3,10 +3,11 @@
 import { Disclosure } from "@/components/core/Disclosure";
 import { TextArea } from "@/components/core/TextArea";
 import { missingDefinitionFields, type DefinitionDraft } from "@/lib/audit/definitions";
-import { Field } from "./_ui/Field";
-import { Select } from "./_ui/Select";
-import { TextInput } from "./_ui/TextInput";
-import { DEFINITION_FIELD_LABELS } from "./labels";
+import { Checkbox } from "@/components/core/Checkbox";
+import { Field } from "@/components/core/Field";
+import { Select } from "@/components/core/Select";
+import { TextField } from "@/components/core/TextField";
+import { DEFINITION_FIELD_LABELS, FORM_COPY } from "./labels";
 import styles from "./page.module.css";
 
 /**
@@ -58,41 +59,61 @@ export function DefinitionEditor({
         )}
       </p>
 
-      <Field label={DEFINITION_FIELD_LABELS.unit} htmlFor="def-unit" hint="Jamais déduite du nom de la métrique. « euro », « pourcentage », « jours », « clients ».">
-        <TextInput id="def-unit" value={draft.unit ?? ""} onChange={(unit) => patch({ unit })} />
-      </Field>
+      <TextField
+        size="sm"
+        id="def-unit"
+        label={DEFINITION_FIELD_LABELS.unit}
+        missing={missing.includes("unit") ? FORM_COPY.missing : undefined}
+        hint="Jamais déduite du nom de la métrique. « euro », « pourcentage », « jours », « clients »."
+        value={draft.unit ?? ""}
+        onChange={(unit) => patch({ unit })}
+      />
 
       <Field
+        size="sm"
+        id="def-numerator"
         label={DEFINITION_FIELD_LABELS.numeratorPopulation}
-        htmlFor="def-numerator"
+        missing={missing.includes("numeratorPopulation") ? FORM_COPY.missing : undefined}
         hint="Qui est compté au-dessus de la barre, et à quel instant."
       >
-        <TextArea
-          id="def-numerator"
-          label={DEFINITION_FIELD_LABELS.numeratorPopulation}
-          value={draft.numeratorPopulation ?? ""}
-          onChange={(numeratorPopulation) => patch({ numeratorPopulation })}
-          maxLength={400}
-        />
+        {({ id: controlId, describedBy }) => (
+          <TextArea
+            id={controlId}
+            aria-describedby={describedBy}
+            value={draft.numeratorPopulation ?? ""}
+            onChange={(numeratorPopulation) => patch({ numeratorPopulation })}
+            maxLength={400}
+          />
+        )}
       </Field>
 
       <Field
+        size="sm"
+        id="def-denominator"
         label={DEFINITION_FIELD_LABELS.denominatorPopulation}
-        htmlFor="def-denominator"
-        hint="L'axe qui a produit le bug K-factor de ce dépôt (R2-01) : un dénominateur qui ne compte que ceux qui ont déjà converti donne un ratio qui ne peut pas descendre sous 1. Écrire « sans objet » pour une valeur absolue."
+        missing={missing.includes("denominatorPopulation") ? FORM_COPY.missing : undefined}
+        hint="L'axe qui a produit le bug K-factor de ce dépôt (R2-01) : un dénominateur qui ne compte que ceux qui ont déjà converti donne un ratio qui ne peut pas descendre sous 1. Écrire « sans objet » pour une valeur absolue."
       >
-        <TextArea
-          id="def-denominator"
-          label={DEFINITION_FIELD_LABELS.denominatorPopulation}
-          value={draft.denominatorPopulation ?? ""}
-          onChange={(denominatorPopulation) => patch({ denominatorPopulation })}
-          maxLength={400}
-        />
+        {({ id: controlId, describedBy }) => (
+          <TextArea
+            id={controlId}
+            aria-describedby={describedBy}
+            value={draft.denominatorPopulation ?? ""}
+            onChange={(denominatorPopulation) => patch({ denominatorPopulation })}
+            maxLength={400}
+          />
+        )}
       </Field>
 
-      <Field label={DEFINITION_FIELD_LABELS.scope} htmlFor="def-scope" hint="Entité, ligne de produit, région. Écrire « tout » plutôt que laisser vide.">
-        <TextInput id="def-scope" value={draft.scope ?? ""} onChange={(scope) => patch({ scope })} />
-      </Field>
+      <TextField
+        size="sm"
+        id="def-scope"
+        label={DEFINITION_FIELD_LABELS.scope}
+        missing={missing.includes("scope") ? FORM_COPY.missing : undefined}
+        hint="Entité, ligne de produit, région. Écrire « tout » plutôt que laisser vide."
+        value={draft.scope ?? ""}
+        onChange={(scope) => patch({ scope })}
+      />
 
       <Disclosure summary="Les axes qui font qu'un chiffre veut dire deux choses">
         <div className={styles.fieldGroup}>
@@ -101,93 +122,109 @@ export function DefinitionEditor({
             les autres — un axe vide n&apos;entre pas dans la définition et ne frappe pas de version.
           </p>
 
-          <Field label={DEFINITION_FIELD_LABELS.grossOrNet} htmlFor="def-gross" hint="Brut ou net de quoi : remises, retours, réactivations, remboursements.">
-            <TextInput id="def-gross" value={draft.grossOrNet ?? ""} onChange={(grossOrNet) => patch({ grossOrNet })} />
-          </Field>
+          <TextField
+            size="sm"
+            id="def-gross"
+            label={DEFINITION_FIELD_LABELS.grossOrNet}
+            hint="Brut ou net de quoi : remises, retours, réactivations, remboursements."
+            value={draft.grossOrNet ?? ""}
+            onChange={(grossOrNet) => patch({ grossOrNet })}
+          />
 
-          <Field
+          <Select
+            size="sm"
+            id="def-cohort"
             label={DEFINITION_FIELD_LABELS.cohortOrSnapshot}
-            htmlFor="def-cohort"
             hint="Une rétention en cohorte et une rétention en photo ne racontent pas la même histoire, et la seconde masque toujours la première."
-          >
-            <Select
-              id="def-cohort"
-              value={draft.cohortOrSnapshot ?? ""}
-              options={[
-                { id: "" as const, label: "— non précisé —" },
-                { id: "cohort" as const, label: "Cohorte" },
-                { id: "snapshot" as const, label: "Photo (snapshot)" },
-              ]}
-              onChange={(value) => patch({ cohortOrSnapshot: value === "" ? undefined : value })}
-            />
-          </Field>
+            value={draft.cohortOrSnapshot ?? ""}
+            placeholder="— non précisé —"
+            options={[
+              { value: "cohort" as const, label: "Cohorte" },
+              { value: "snapshot" as const, label: "Photo (snapshot)" },
+            ]}
+            onChange={(value) => patch({ cohortOrSnapshot: value === "" ? undefined : value })}
+          />
 
-          <Field
+          <TextField
+            size="sm"
+            id="def-counting"
             label={DEFINITION_FIELD_LABELS.countingRule}
-            htmlFor="def-counting"
-            hint="Pour toute rétention : exactement au jour N, au jour N ou après, ou par plage. Trois règles, trois courbes."
+            hint="Pour toute rétention : exactement au jour N, au jour N ou après, ou par plage. Trois règles, trois courbes."
+            value={draft.countingRule ?? ""}
+            onChange={(countingRule) => patch({ countingRule })}
+          />
+
+          <TextField
+            size="sm"
+            id="def-attr-model"
+            label={DEFINITION_FIELD_LABELS.attributionModel}
+            hint="Premier contact, dernier contact, linéaire, data-driven."
+            value={draft.attributionModel ?? ""}
+            onChange={(attributionModel) => patch({ attributionModel })}
+          />
+
+          <TextField
+            size="sm"
+            id="def-attr-window"
+            label={DEFINITION_FIELD_LABELS.attributionWindow}
+            hint="La fenêtre retenue, et si elle est celle de l'outil ou un choix."
+            value={draft.attributionWindow ?? ""}
+            onChange={(attributionWindow) => patch({ attributionWindow })}
+          />
+
+          <Field
+            size="sm"
+            id="def-costs-in"
+            label={DEFINITION_FIELD_LABELS.costsIncluded}
+            hint="Un poste par ligne. Ce qui est DANS le calcul."
           >
-            <TextInput id="def-counting" value={draft.countingRule ?? ""} onChange={(countingRule) => patch({ countingRule })} />
-          </Field>
-
-          <Field label={DEFINITION_FIELD_LABELS.attributionModel} htmlFor="def-attr-model" hint="Premier contact, dernier contact, linéaire, data-driven.">
-            <TextInput id="def-attr-model" value={draft.attributionModel ?? ""} onChange={(attributionModel) => patch({ attributionModel })} />
-          </Field>
-
-          <Field label={DEFINITION_FIELD_LABELS.attributionWindow} htmlFor="def-attr-window" hint="La fenêtre retenue, et si elle est celle de l'outil ou un choix.">
-            <TextInput id="def-attr-window" value={draft.attributionWindow ?? ""} onChange={(attributionWindow) => patch({ attributionWindow })} />
-          </Field>
-
-          <Field label={DEFINITION_FIELD_LABELS.costsIncluded} htmlFor="def-costs-in" hint="Un poste par ligne. Ce qui est DANS le calcul.">
-            <TextArea
-              id="def-costs-in"
-              label={DEFINITION_FIELD_LABELS.costsIncluded}
-              value={(draft.costsIncluded ?? []).join("\n")}
-              onChange={(value) => patch({ costsIncluded: toLines(value) })}
-              maxLength={600}
-            />
+            {({ id: controlId, describedBy }) => (
+              <TextArea
+                id={controlId}
+                aria-describedby={describedBy}
+                value={(draft.costsIncluded ?? []).join("\n")}
+                onChange={(value) => patch({ costsIncluded: toLines(value) })}
+                maxLength={600}
+              />
+            )}
           </Field>
 
           <Field
+            size="sm"
+            id="def-costs-out"
             label={DEFINITION_FIELD_LABELS.costsExcluded}
-            htmlFor="def-costs-out"
-            hint="Un poste par ligne. Souvent plus parlant que la liste du dessus : un CAC sans salaires ni outils n'est pas un CAC."
+            hint="Un poste par ligne. Souvent plus parlant que la liste du dessus : un CAC sans salaires ni outils n'est pas un CAC."
           >
-            <TextArea
-              id="def-costs-out"
-              label={DEFINITION_FIELD_LABELS.costsExcluded}
-              value={(draft.costsExcluded ?? []).join("\n")}
-              onChange={(value) => patch({ costsExcluded: toLines(value) })}
-              maxLength={600}
-            />
+            {({ id: controlId, describedBy }) => (
+              <TextArea
+                id={controlId}
+                aria-describedby={describedBy}
+                value={(draft.costsExcluded ?? []).join("\n")}
+                onChange={(value) => patch({ costsExcluded: toLines(value) })}
+                maxLength={600}
+              />
+            )}
           </Field>
 
-          <Field label={DEFINITION_FIELD_LABELS.horizon} htmlFor="def-horizon" hint="Pour toute valeur projetée : le plafond de durée de vie retenu. « À l'infini » est un choix, et il se dit.">
-            <TextInput id="def-horizon" value={draft.horizon ?? ""} onChange={(horizon) => patch({ horizon })} />
-          </Field>
+          <TextField
+            size="sm"
+            id="def-horizon"
+            label={DEFINITION_FIELD_LABELS.horizon}
+            hint="Pour toute valeur projetée : le plafond de durée de vie retenu. « À l'infini » est un choix, et il se dit."
+            value={draft.horizon ?? ""}
+            onChange={(horizon) => patch({ horizon })}
+          />
 
-          <div className={styles.checkboxRow}>
-            <input
-              id="def-tool-default"
-              type="checkbox"
-              checked={draft.toolDefault === true}
-              onChange={(event) => patch({ toolDefault: event.target.checked ? true : undefined })}
-            />
-            <label htmlFor="def-tool-default">{DEFINITION_FIELD_LABELS.toolDefault}</label>
-          </div>
-          <p className={styles.muted}>
-            À cocher quand la règle ci-dessus est le réglage par défaut de l&apos;outil et que personne ne l&apos;a choisie. C&apos;est
-            souvent le vrai constat de la ligne.
-          </p>
+          <Checkbox
+            id="def-tool-default"
+            label={DEFINITION_FIELD_LABELS.toolDefault}
+            hint="À cocher quand la règle ci-dessus est le réglage par défaut de l'outil et que personne ne l'a choisie. C'est souvent le vrai constat de la ligne."
+            checked={draft.toolDefault === true}
+            onChange={(checked) => patch({ toolDefault: checked ? true : undefined })}
+          />
         </div>
       </Disclosure>
 
-      {missing.length ? (
-        <p className={styles.alert} data-testid="definition-missing">
-          Il manque : {missing.map((field) => DEFINITION_FIELD_LABELS[field].toLowerCase()).join(", ")}. La ligne s&apos;enregistre quand
-          même — l&apos;export la signalera comme incomplète plutôt que de faire croire qu&apos;elle est finie.
-        </p>
-      ) : null}
     </div>
   );
 }

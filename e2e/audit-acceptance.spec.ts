@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { ADMIN_PASSWORD, SKIP_ADMIN_REASON, adminCredentials, expect, test } from "./helpers";
+import { ADMIN_PASSWORD, SKIP_ADMIN_REASON, adminCredentials, expect, test, pickDay } from "./helpers";
 
 /**
  * AUDIT-PLAN.md §3.1 — le critère de sortie de la phase 1, vérifié.
@@ -50,9 +50,9 @@ test.describe("phase 1 acceptance", () => {
     // Les dates sont vides sur une observation neuve, et le validateur les
     // exige — c'est voulu (une observation sans période ne se compare à
     // rien). L'auditeur les remplit ; la recette fait comme lui.
-    await page.locator("#obs-0-start").fill("2026-08-01");
-    await page.locator("#obs-0-end").fill("2026-08-31");
-    await page.locator("#obs-0-asof").fill("2026-09-05");
+    await pickDay(page, "obs-0-start", "2026-08-01");
+    await pickDay(page, "obs-0-end", "2026-08-31");
+    await pickDay(page, "obs-0-asof", "2026-09-05");
     await page.locator("#criterionKind").selectOption("internal-trend");
     await page.locator("#criterionValue").fill("1100000");
     await page.getByTestId("context-disclosure").click();

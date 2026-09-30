@@ -7,7 +7,7 @@ import { TextArea } from "@/components/core/TextArea";
 import { briefBudget } from "@/lib/audit/finding-draft";
 import { canMarkHeadline, headlineCount, isPromotable } from "@/lib/audit/findings";
 import { applicableRows, HEADLINE_CAP, type Brief, type Finding, type Mission, type Pass } from "@/lib/audit/schema";
-import { Field } from "./_ui/Field";
+import { Field } from "@/components/core/Field";
 import { GAP_LABELS } from "./labels";
 import styles from "./page.module.css";
 
@@ -144,35 +144,41 @@ export function FindingsView({
         </MetaLabel>
         <p className={styles.muted}>Le constat principal, UNE action, la preuve. Jamais la méthode.</p>
 
-        <Field label="Constat principal" htmlFor="brief-main">
-          <TextArea
-            id="brief-main"
-            label="Constat principal"
-            value={pass.brief.mainFinding}
-            onChange={(mainFinding) => onBriefChange({ ...pass.brief, mainFinding })}
-            maxLength={1200}
-            data-testid="brief-main"
-          />
+        <Field size="sm" id="brief-main" label="Constat principal">
+          {({ id: controlId, describedBy }) => (
+            <TextArea
+              id={controlId}
+              aria-describedby={describedBy}
+              value={pass.brief.mainFinding}
+              onChange={(mainFinding) => onBriefChange({ ...pass.brief, mainFinding })}
+              maxLength={1200}
+              data-testid="brief-main"
+            />
+          )}
         </Field>
-        <Field label="Action prioritaire" htmlFor="brief-action">
-          <TextArea
-            id="brief-action"
-            label="Action prioritaire"
-            value={pass.brief.priorityAction}
-            onChange={(priorityAction) => onBriefChange({ ...pass.brief, priorityAction })}
-            maxLength={600}
-            data-testid="brief-action"
-          />
+        <Field size="sm" id="brief-action" label="Action prioritaire">
+          {({ id: controlId, describedBy }) => (
+            <TextArea
+              id={controlId}
+              aria-describedby={describedBy}
+              value={pass.brief.priorityAction}
+              onChange={(priorityAction) => onBriefChange({ ...pass.brief, priorityAction })}
+              maxLength={600}
+              data-testid="brief-action"
+            />
+          )}
         </Field>
-        <Field label="La preuve" htmlFor="brief-proof">
-          <TextArea
-            id="brief-proof"
-            label="La preuve"
-            value={pass.brief.proof}
-            onChange={(proof) => onBriefChange({ ...pass.brief, proof })}
-            maxLength={600}
-            data-testid="brief-proof"
-          />
+        <Field size="sm" id="brief-proof" label="La preuve">
+          {({ id: controlId, describedBy }) => (
+            <TextArea
+              id={controlId}
+              aria-describedby={describedBy}
+              value={pass.brief.proof}
+              onChange={(proof) => onBriefChange({ ...pass.brief, proof })}
+              maxLength={600}
+              data-testid="brief-proof"
+            />
+          )}
         </Field>
 
         <p className={budget.over ? styles.quadrantAlert : styles.counters} data-testid="brief-budget">

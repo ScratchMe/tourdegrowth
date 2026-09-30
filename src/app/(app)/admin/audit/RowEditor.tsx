@@ -6,7 +6,9 @@ import { Card } from "@/components/core/Card";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import { TextArea } from "@/components/core/TextArea";
 import type { AuditCatalogRow } from "@/content/audit-catalog";
-import type { DefinitionDraft } from "@/lib/audit/definitions";
+import { FormSummary } from "@/components/core/FormSummary";
+import { missingCriterionFields } from "@/lib/audit/criterion-fields";
+import { missingDefinitionFields, type DefinitionDraft } from "@/lib/audit/definitions";
 import { entryFieldGroups, selectableStatuses } from "@/lib/audit/entry-fields";
 import { valueEditorFor } from "@/lib/audit/observation-fields";
 import { Disclosure } from "@/components/core/Disclosure";
@@ -17,22 +19,21 @@ import {
   SYSTEM_CAUSES,
   VALUE_STATUSES,
   normalizeEntry,
-  type AbsentCause,
   type Entry,
   type MetricDefinition,
-  type RepairScale,
-  type SystemCause,
   type ValueStatus,
 } from "@/lib/audit/schema";
+import { Field } from "@/components/core/Field";
+import { Select } from "@/components/core/Select";
 import { ContextEditor } from "./ContextEditor";
-import { CriterionEditor } from "./CriterionEditor";
+import { CRITERION_ARGUMENT_MISSING, CriterionEditor } from "./CriterionEditor";
 import { DefinitionEditor } from "./DefinitionEditor";
 import { ObservationList } from "./ObservationList";
-import { Field } from "./_ui/Field";
-import { Select } from "./_ui/Select";
 import {
   ABSENT_CAUSE_LABELS,
   AUDIT_PILLAR_LABELS,
+  DEFINITION_FIELD_LABELS,
+  FORM_COPY,
   REPAIR_SCALE_LABELS,
   TIER_GLOSS,
   SYSTEM_CAUSE_LABELS,
@@ -112,6 +113,21 @@ export function RowEditor({
     setDraft({ ...draft, ...next });
   }
 
+  // Only for a row with a value: an absent one has no definition to strike.
+  const missingItems =
+    draft && groups.includes("value")
+      ? [
+          ...missingDefinitionFields(definitionDraft).map((field) => ({
+            targetId: DEFINITION_FIELD_IDS[field],
+            label: DEFINITION_FIELD_LABELS[field],
+            kind: "missing" as const,
+          })),
+          ...(draft.criterion && missingCriterionFields(draft.criterion).length
+            ? [{ targetId: "criterionJustification", label: "Argument", message: CRITERION_ARGUMENT_MISSING, kind: "missing" as const }]
+            : []),
+        ]
+      : [];
+
   return (
     <section className={styles.screen}>
       <div className={styles.screenHead}>
@@ -149,47 +165,43 @@ export function RowEditor({
         </Card>
 
         <Card elevation="panel" className={styles.form} data-testid="entry-form">
-          <Field
+          <Select
+            size="sm"
+            id="status"
             label="Statut"
-            htmlFor="status"
-            hint={draft ? VALUE_STATUS_HINTS[draft.status] : "Rien n'est présélectionné : une ligne pas encore examinée est « en attente », jamais absente."}
-          >
-            <Select
-              id="status"
-              value={draft?.status ?? ("" as ValueStatus)}
-              options={[
-                ...(draft ? [] : [{ id: "" as ValueStatus, label: "— pas encore examinée —" }]),
-                ...optionsFrom(selectableStatuses(VALUE_STATUSES), VALUE_STATUS_LABELS),
-              ]}
-              onChange={(status) => {
-                if (status) setStatus(status);
-              }}
-            />
-          </Field>
+            hint={draft ? VALUE_STATUS_HINTS[draft.status] : "Rien n'est présélectionné : une ligne pas encore examinée est « en attente », jamais absente."}
+            value={draft?.status ?? ""}
+            // Rien n'est présélectionné : tant que la ligne n'a pas de statut,
+            // « pas encore examinée » est une valeur de la liste — qui s'en va
+            // dès qu'un statut est choisi (un statut ne redevient jamais vide).
+            {...(draft ? {} : { placeholder: "— pas encore examinée —" })}
+            options={optionsFrom(selectableStatuses(VALUE_STATUSES), VALUE_STATUS_LABELS)}
+            onChange={(status) => {
+              if (status) setStatus(status);
+            }}
+          />
 
           {groups.includes("absence") ? (
             <div className={styles.fieldGroup} data-testid="absence-fields">
-              <Field label="Cause de l'absence" htmlFor="absentCause" hint="Le défaut est « pas encore établi » — on ne devine jamais un type d'absence qu'on n'a pas vérifié.">
-                <Select
-                  id="absentCause"
-                  value={draft?.absentCause ?? DEFAULT_ABSENT_CAUSE}
-                  options={optionsFrom(ABSENT_CAUSES, ABSENT_CAUSE_LABELS)}
-                  onChange={(absentCause: AbsentCause) => patch({ absentCause })}
-                />
-              </Field>
+              <Select
+                size="sm"
+                id="absentCause"
+                label="Cause de l'absence"
+                hint="Le défaut est « pas encore établi » — on ne devine jamais un type d'absence qu'on n'a pas vérifié."
+                value={draft?.absentCause ?? DEFAULT_ABSENT_CAUSE}
+                options={optionsFrom(ABSENT_CAUSES, ABSENT_CAUSE_LABELS)}
+                onChange={(absentCause) => absentCause && patch({ absentCause })}
+              />
 
-              <Field
+              <Select
+                size="sm"
+                id="repairScale"
                 label="Coût de réparation"
-                htmlFor="repairScale"
-                hint="Requis. Une échelle fermée, jamais un nombre d'heures : le catalogue porte un palier, pas une estimation."
-              >
-                <Select
-                  id="repairScale"
-                  value={draft?.repairCost?.scale ?? "sprint"}
-                  options={optionsFrom(REPAIR_SCALES, REPAIR_SCALE_LABELS)}
-                  onChange={(scale: RepairScale) => patch({ repairCost: { ...draft?.repairCost, scale } })}
-                />
-              </Field>
+                hint="Requis. Une échelle fermée, jamais un nombre d'heures : le catalogue porte un palier, pas une estimation."
+                value={draft?.repairCost?.scale ?? "sprint"}
+                options={optionsFrom(REPAIR_SCALES, REPAIR_SCALE_LABELS)}
+                onChange={(scale) => scale && patch({ repairCost: { ...draft?.repairCost, scale } })}
+              />
 
               {/*
                 `TextArea`'s `label` is an ACCESSIBLE NAME only — it renders
@@ -198,26 +210,34 @@ export function RowEditor({
                 heading, so without a `Field` wrapper the operator gets an
                 unexplained box. Found on a screenshot, not in review.
               */}
-              <Field label="Ce que réparer veut dire concrètement" htmlFor="repairComment" hint="Facultatif, et la partie la plus utile en entretien : « quoi », pas « combien de temps ».">
-                <TextArea
-                  id="repairComment"
-                  label="Ce que réparer veut dire concrètement"
-                  value={draft?.repairCost?.comment ?? ""}
-                  onChange={(comment) =>
+              <Field
+                size="sm"
+                id="repairComment"
+                label="Ce que réparer veut dire concrètement"
+                hint="Facultatif, et la partie la plus utile en entretien : « quoi », pas « combien de temps »."
+              >
+                {({ id: controlId, describedBy }) => (
+                  <TextArea
+                    id={controlId}
+                    aria-describedby={describedBy}
+                    value={draft?.repairCost?.comment ?? ""}
+                    onChange={(comment) =>
                     patch({ repairCost: { scale: draft?.repairCost?.scale ?? "sprint", ...(comment ? { comment } : {}) } })
                   }
-                  maxLength={400}
-                />
+                    maxLength={400}
+                  />
+                )}
               </Field>
 
-              <Field label="Cause système" htmlFor="systemCause" hint="Liste fermée, aucun champ libre : un livrable ne nomme jamais une personne.">
-                <Select
-                  id="systemCause"
-                  value={draft?.systemCause ?? "no-owner"}
-                  options={optionsFrom(SYSTEM_CAUSES, SYSTEM_CAUSE_LABELS)}
-                  onChange={(systemCause: SystemCause) => patch({ systemCause })}
-                />
-              </Field>
+              <Select
+                size="sm"
+                id="systemCause"
+                label="Cause système"
+                hint="Liste fermée, aucun champ libre : un livrable ne nomme jamais une personne."
+                value={draft?.systemCause ?? "no-owner"}
+                options={optionsFrom(SYSTEM_CAUSES, SYSTEM_CAUSE_LABELS)}
+                onChange={(systemCause) => systemCause && patch({ systemCause })}
+              />
             </div>
           ) : null}
 
@@ -254,6 +274,19 @@ export function RowEditor({
               Le niveau de mandat qui débloquerait cette ligne se saisit à l&apos;étape 1.3b. Une ligne non accessible est un fait sur mon
               accès, jamais sur eux.
             </p>
+          ) : null}
+
+          {/*
+            What stands between this row and a complete one, just above the
+            button (design system extension 04, FormSummary). It replaces the
+            red paragraph that was the loudest thing on the screen, for a state
+            that saves anyway: dashed, never red, one link per field — and each
+            field says it under itself too.
+          */}
+          {missingItems.length ? (
+            <div data-testid="row-missing">
+              <FormSummary title={FORM_COPY.summaryTitle(missingItems.length)} lead={FORM_COPY.summaryLead} items={missingItems} />
+            </div>
           ) : null}
 
           <Button
@@ -296,3 +329,11 @@ function FicheBlock({ label, text }: { label: string; text: string }) {
     </div>
   );
 }
+
+/** Where each required field of the definition lives, for the summary's links. */
+const DEFINITION_FIELD_IDS = {
+  unit: "def-unit",
+  numeratorPopulation: "def-numerator",
+  denominatorPopulation: "def-denominator",
+  scope: "def-scope",
+} as const;

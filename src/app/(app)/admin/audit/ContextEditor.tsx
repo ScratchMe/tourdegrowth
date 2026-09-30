@@ -2,14 +2,14 @@
 
 import { Button } from "@/components/core/Button";
 import { TextArea } from "@/components/core/TextArea";
-import { MANDATE_LEVELS, type Entry, type Exposure, type MandateLevel, type Tracking } from "@/lib/audit/schema";
+import { MANDATE_LEVELS, type Entry, type Exposure, type Tracking } from "@/lib/audit/schema";
 import { chaseState } from "@/lib/audit/tracking";
-import { DateInput } from "./_ui/DateInput";
-import { Field } from "./_ui/Field";
-import { NumberInput } from "./_ui/NumberInput";
-import { Select } from "./_ui/Select";
-import { TextInput } from "./_ui/TextInput";
-import { CHASE_STATE_LABELS, MANDATE_LEVEL_LABELS, optionsFrom } from "./labels";
+import { Field } from "@/components/core/Field";
+import { NumberField } from "@/components/core/NumberField";
+import { Select } from "@/components/core/Select";
+import { TextField } from "@/components/core/TextField";
+import { IsoDateField } from "./IsoDateField";
+import { CHASE_STATE_LABELS, MANDATE_LEVEL_LABELS, optionsFrom, FORM_COPY } from "./labels";
 import styles from "./page.module.css";
 
 /**
@@ -50,17 +50,20 @@ export function ContextEditor({
   return (
     <div className={styles.fieldGroup} data-testid="context-fields">
       <Field
+        size="sm"
+        id="decisionAtStake"
         label="La décision en jeu"
-        htmlFor="decisionAtStake"
         hint="Vide, la ligne n'entre pas dans la grille des constats. C'est ce qui sépare un chiffre intéressant d'un chiffre qui fait bouger quelque chose."
       >
-        <TextArea
-          id="decisionAtStake"
-          label="La décision en jeu"
-          value={entry.decisionAtStake ?? ""}
-          onChange={(decisionAtStake) => onChange({ decisionAtStake: decisionAtStake || undefined })}
-          maxLength={400}
-        />
+        {({ id: controlId, describedBy }) => (
+          <TextArea
+            id={controlId}
+            aria-describedby={describedBy}
+            value={entry.decisionAtStake ?? ""}
+            onChange={(decisionAtStake) => onChange({ decisionAtStake: decisionAtStake || undefined })}
+            maxLength={400}
+          />
+        )}
       </Field>
       {defaultDecision && !entry.decisionAtStake ? (
         <Button
@@ -74,34 +77,39 @@ export function ContextEditor({
       ) : null}
 
       <Field
+        size="sm"
+        id="canonicalDeviation"
         label="Écart à la convention canonique"
-        htmlFor="canonicalDeviation"
         hint="Ce que le glossaire appelle cette métrique, moins ce que l'entreprise en fait. Souvent un constat à lui seul."
       >
-        <TextArea
-          id="canonicalDeviation"
-          label="Écart à la convention canonique"
-          value={entry.canonicalDeviation ?? ""}
-          onChange={(canonicalDeviation) => onChange({ canonicalDeviation: canonicalDeviation || undefined })}
-          maxLength={400}
-        />
+        {({ id: controlId, describedBy }) => (
+          <TextArea
+            id={controlId}
+            aria-describedby={describedBy}
+            value={entry.canonicalDeviation ?? ""}
+            onChange={(canonicalDeviation) => onChange({ canonicalDeviation: canonicalDeviation || undefined })}
+            maxLength={400}
+          />
+        )}
       </Field>
 
       <div className={styles.observationRow}>
-        <Field label="Propriétaire (rôle)" htmlFor="ownerRole" hint="Un RÔLE, jamais un nom. « Personne » est une réponse, et souvent la bonne.">
-          <TextInput id="ownerRole" value={entry.ownerRole ?? ""} onChange={(ownerRole) => onChange({ ownerRole: ownerRole || undefined })} />
-        </Field>
-        <Field
+        <TextField
+          size="sm"
+          id="ownerRole"
+          label="Propriétaire (rôle)"
+          hint="Un RÔLE, jamais un nom. « Personne » est une réponse, et souvent la bonne."
+          value={entry.ownerRole ?? ""}
+          onChange={(ownerRole) => onChange({ ownerRole: ownerRole || undefined })}
+        />
+        <TextField
+          size="sm"
+          id="lastReviewedInADecision"
           label="Dernière fois qu'elle a servi dans une décision"
-          htmlFor="lastReviewedInADecision"
-          hint="« Jamais » compte, et se dit. Un chiffre produit tous les mois que personne ne regarde est une dépense, pas une mesure."
-        >
-          <TextInput
-            id="lastReviewedInADecision"
-            value={entry.lastReviewedInADecision ?? ""}
-            onChange={(value) => onChange({ lastReviewedInADecision: value || undefined })}
-          />
-        </Field>
+          hint="« Jamais » compte, et se dit. Un chiffre produit tous les mois que personne ne regarde est une dépense, pas une mesure."
+          value={entry.lastReviewedInADecision ?? ""}
+          onChange={(value) => onChange({ lastReviewedInADecision: value || undefined })}
+        />
       </div>
 
       <div className={styles.fieldGroup} data-testid="exposure-fields">
@@ -111,27 +119,30 @@ export function ContextEditor({
         </p>
         {inputs.map((input, index) => (
           <div key={index} className={styles.observationRow}>
-            <Field label="Libellé" htmlFor={`exposure-${index}-label`}>
-              <TextInput
-                id={`exposure-${index}-label`}
-                value={input.label}
-                onChange={(label) => patchExposure({ inputs: inputs.map((it, i) => (i === index ? { ...it, label } : it)) })}
-              />
-            </Field>
-            <Field label="Valeur" htmlFor={`exposure-${index}-value`}>
-              <NumberInput
-                id={`exposure-${index}-value`}
-                value={input.value}
-                onChange={(value) => patchExposure({ inputs: inputs.map((it, i) => (i === index ? { ...it, value: value ?? 0 } : it)) })}
-              />
-            </Field>
-            <Field label="Fourni par" htmlFor={`exposure-${index}-source`} hint="Qui a donné ce chiffre, et d'où il sort.">
-              <TextInput
-                id={`exposure-${index}-source`}
-                value={input.source}
-                onChange={(source) => patchExposure({ inputs: inputs.map((it, i) => (i === index ? { ...it, source } : it)) })}
-              />
-            </Field>
+            <TextField
+              size="sm"
+              id={`exposure-${index}-label`}
+              label="Libellé"
+              value={input.label}
+              onChange={(label) => patchExposure({ inputs: inputs.map((it, i) => (i === index ? { ...it, label } : it)) })}
+            />
+            <NumberField
+              size="sm"
+              id={`exposure-${index}-value`}
+              label="Valeur"
+              value={input.value}
+              onChange={(value) => patchExposure({ inputs: inputs.map((it, i) => (i === index ? { ...it, value: value ?? 0 } : it)) })}
+              locale="fr"
+              parseError={FORM_COPY.notANumber}
+            />
+            <TextField
+              size="sm"
+              id={`exposure-${index}-source`}
+              label="Fourni par"
+              hint="Qui a donné ce chiffre, et d'où il sort."
+              value={input.source}
+              onChange={(source) => patchExposure({ inputs: inputs.map((it, i) => (i === index ? { ...it, source } : it)) })}
+            />
           </div>
         ))}
         <Button
@@ -142,18 +153,25 @@ export function ContextEditor({
         >
           Ajouter un chiffre fourni
         </Button>
-        <Field label="Calcul" htmlFor="exposureCalculation" hint="Écrit en toutes lettres, pour qu'il se refasse en séance.">
-          <TextArea
-            id="exposureCalculation"
-            label="Calcul"
-            value={entry.exposure?.calculation ?? ""}
-            onChange={(calculation) => patchExposure({ calculation })}
-            maxLength={400}
-          />
+        <Field size="sm" id="exposureCalculation" label="Calcul" hint="Écrit en toutes lettres, pour qu'il se refasse en séance.">
+          {({ id: controlId, describedBy }) => (
+            <TextArea
+              id={controlId}
+              aria-describedby={describedBy}
+              value={entry.exposure?.calculation ?? ""}
+              onChange={(calculation) => patchExposure({ calculation })}
+              maxLength={400}
+            />
+          )}
         </Field>
-        <Field label="Fourchette" htmlFor="exposureRange" hint="Une fourchette, jamais un chiffre unique : c'est une estimation et elle doit le dire.">
-          <TextInput id="exposureRange" value={entry.exposure?.range ?? ""} onChange={(range) => patchExposure({ range })} />
-        </Field>
+        <TextField
+          size="sm"
+          id="exposureRange"
+          label="Fourchette"
+          hint="Une fourchette, jamais un chiffre unique : c'est une estimation et elle doit le dire."
+          value={entry.exposure?.range ?? ""}
+          onChange={(range) => patchExposure({ range })}
+        />
       </div>
 
       <div className={styles.fieldGroup} data-testid="tracking-fields">
@@ -166,32 +184,44 @@ export function ContextEditor({
           </span>
         </div>
         <div className={styles.observationRow}>
-          <Field label="Demandé le" htmlFor="requestedOn">
-            <DateInput id="requestedOn" value={tracking.requestedOn ?? ""} onChange={(requestedOn) => patchTracking({ requestedOn: requestedOn || undefined })} />
-          </Field>
-          <Field label="Relancé le" htmlFor="chasedOn" hint="Remet le compteur à zéro : une ligne relancée hier n'est pas à relancer aujourd'hui.">
-            <DateInput id="chasedOn" value={tracking.chasedOn ?? ""} onChange={(chasedOn) => patchTracking({ chasedOn: chasedOn || undefined })} />
-          </Field>
-          <Field label="Reçu le" htmlFor="receivedOn">
-            <DateInput id="receivedOn" value={tracking.receivedOn ?? ""} onChange={(receivedOn) => patchTracking({ receivedOn: receivedOn || undefined })} />
-          </Field>
+          <IsoDateField
+            id="requestedOn"
+            label="Demandé le"
+            value={tracking.requestedOn ?? ""}
+            onChange={(requestedOn) => patchTracking({ requestedOn: requestedOn || undefined })}
+          />
+          <IsoDateField
+            id="chasedOn"
+            label="Relancé le"
+            hint="Remet le compteur à zéro : une ligne relancée hier n'est pas à relancer aujourd'hui."
+            value={tracking.chasedOn ?? ""}
+            onChange={(chasedOn) => patchTracking({ chasedOn: chasedOn || undefined })}
+          />
+          <IsoDateField
+            id="receivedOn"
+            label="Reçu le"
+            value={tracking.receivedOn ?? ""}
+            onChange={(receivedOn) => patchTracking({ receivedOn: receivedOn || undefined })}
+          />
         </div>
         <div className={styles.observationRow}>
-          <Field label="Adressée à (rôle)" htmlFor="routedTo" hint="Groupe la vue collecte : préparer une réunion plutôt que parcourir 25 lignes.">
-            <TextInput id="routedTo" value={tracking.routedTo ?? ""} onChange={(routedTo) => patchTracking({ routedTo: routedTo || undefined })} />
-          </Field>
-          <Field
+          <TextField
+            size="sm"
+            id="routedTo"
+            label="Adressée à (rôle)"
+            hint="Groupe la vue collecte : préparer une réunion plutôt que parcourir 25 lignes."
+            value={tracking.routedTo ?? ""}
+            onChange={(routedTo) => patchTracking({ routedTo: routedTo || undefined })}
+          />
+          <Select
+            size="sm"
+            id="mandateLevel"
             label="Ce qui débloquerait"
-            htmlFor="mandateLevel"
-            hint="Politique, jamais technique : le CAC chargé est trivial à calculer et demande souvent un directeur."
-          >
-            <Select
-              id="mandateLevel"
-              value={tracking.mandateLevel ?? "none"}
-              options={optionsFrom(MANDATE_LEVELS, MANDATE_LEVEL_LABELS)}
-              onChange={(mandateLevel: MandateLevel) => patchTracking({ mandateLevel })}
-            />
-          </Field>
+            hint="Politique, jamais technique : le CAC chargé est trivial à calculer et demande souvent un directeur."
+            value={tracking.mandateLevel ?? "none"}
+            options={optionsFrom(MANDATE_LEVELS, MANDATE_LEVEL_LABELS)}
+            onChange={(mandateLevel) => mandateLevel && patchTracking({ mandateLevel })}
+          />
         </div>
       </div>
     </div>

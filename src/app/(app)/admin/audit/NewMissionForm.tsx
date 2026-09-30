@@ -7,10 +7,11 @@ import { Segmented } from "@/components/core/Segmented";
 import { AUDIT_PROFILE_MODELS, type AuditProfileModel } from "@/lib/audit/profiles";
 import { ACV_BANDS, CONTRACT_TERMS, MANDATES, type AcvBand, type ContractTerm, type Mandate, type MissionHeader } from "@/lib/audit/schema";
 import { LOCALES, type Locale } from "@/lib/i18n/locale";
-import { DateInput } from "./_ui/DateInput";
-import { Field } from "./_ui/Field";
-import { Select } from "./_ui/Select";
-import { TextInput } from "./_ui/TextInput";
+import { Checkbox } from "@/components/core/Checkbox";
+import { Field } from "@/components/core/Field";
+import { Select } from "@/components/core/Select";
+import { TextField } from "@/components/core/TextField";
+import { IsoDateField } from "./IsoDateField";
 import { ACV_BAND_LABELS, CONTRACT_TERM_LABELS, MANDATE_LABELS, PROFILE_MODEL_LABELS, optionsFrom } from "./labels";
 import styles from "./page.module.css";
 
@@ -60,61 +61,82 @@ export function NewMissionForm({
       </div>
 
       <Card elevation="panel" className={styles.form}>
-        <Field label="Entreprise" htmlFor="company" hint="Le seul champ que la purge efface. Il ne quitte jamais cet appareil.">
-          <TextInput id="company" value={company} onChange={setCompany} autoFocus placeholder="Nom de l'entreprise" />
+        <TextField
+          size="sm"
+          id="company"
+          label="Entreprise"
+          hint="Le seul champ que la purge efface. Il ne quitte jamais cet appareil."
+          value={company}
+          onChange={setCompany}
+          autoFocus
+          placeholder="Nom de l'entreprise"
+        />
+
+        {/* A Segmented in a form: its label shown by the Field, and its name that label (extension 04, Q15). */}
+        <Field group size="sm" id="mandate" label="Mandat" hint="Sans mandat, le livrable dit « diagnostic » et jamais « audit ».">
+          {({ labelId }) => (
+            <Segmented<Mandate>
+              labelledBy={labelId}
+              value={mandate}
+              options={MANDATES.map((id) => ({ id, label: MANDATE_LABELS[id] }))}
+              onChange={setMandate}
+            />
+          )}
         </Field>
 
-        <Field label="Mandat" htmlFor="mandate" hint="Sans mandat, le livrable dit « diagnostic » et jamais « audit ».">
-          <Segmented<Mandate>
-            label="Mandat"
-            value={mandate}
-            options={MANDATES.map((id) => ({ id, label: MANDATE_LABELS[id] }))}
-            onChange={setMandate}
-            size="sm"
-          />
-        </Field>
+        <Select
+          size="sm"
+          id="model"
+          label="Modèle"
+          hint="Il décide des lignes applicables du catalogue."
+          value={model}
+          options={optionsFrom(AUDIT_PROFILE_MODELS, PROFILE_MODEL_LABELS)}
+          onChange={(value) => value && setModel(value)}
+        />
 
-        <Field label="Modèle" htmlFor="model" hint="Il décide des lignes applicables du catalogue.">
-          <Select id="model" value={model} options={optionsFrom(AUDIT_PROFILE_MODELS, PROFILE_MODEL_LABELS)} onChange={setModel} />
-        </Field>
-
-        <Field
+        <Select
+          size="sm"
+          id="acv"
           label="Tranche d'ACV"
-          htmlFor="acv"
-          hint="Annual Contract Value : le montant annuel d'un contrat client type, dans la devise déclarée plus bas. Sert de repère à la couverture de pipeline. « Sans objet » pour un modèle sans contrat annuel."
-        >
-          <Select id="acv" value={acvBand} options={optionsFrom(ACV_BANDS, ACV_BAND_LABELS)} onChange={setAcvBand} />
-        </Field>
+          hint="Annual Contract Value : le montant annuel d'un contrat client type, dans la devise déclarée plus bas. Sert de repère à la couverture de pipeline. « Sans objet » pour un modèle sans contrat annuel."
+          value={acvBand}
+          options={optionsFrom(ACV_BANDS, ACV_BAND_LABELS)}
+          onChange={(value) => value && setAcvBand(value)}
+        />
 
-        <Field label="Durée d'engagement" htmlFor="term">
-          <Select id="term" value={contractTerm} options={optionsFrom(CONTRACT_TERMS, CONTRACT_TERM_LABELS)} onChange={setContractTerm} />
-        </Field>
+        <Select
+          size="sm"
+          id="term"
+          label="Durée d'engagement"
+          value={contractTerm}
+          options={optionsFrom(CONTRACT_TERMS, CONTRACT_TERM_LABELS)}
+          onChange={(value) => value && setContractTerm(value)}
+        />
 
-        <Field label="Périmètre" htmlFor="scope" hint="Entité, ligne de produit, région. Écrire « tout » plutôt que laisser vide.">
-          <TextInput id="scope" value={scope} onChange={setScope} />
-        </Field>
+        <TextField
+          size="sm"
+          id="scope"
+          label="Périmètre"
+          hint="Entité, ligne de produit, région. Écrire « tout » plutôt que laisser vide."
+          value={scope}
+          onChange={setScope}
+        />
 
-        <Field label="Devise" htmlFor="currency">
-          <TextInput id="currency" value={currency} onChange={setCurrency} />
-        </Field>
+        <TextField size="sm" id="currency" label="Devise" value={currency} onChange={setCurrency} />
 
-        <Field label="Langue du livrable" htmlFor="locale" hint="L'outil reste en français quelle que soit cette valeur.">
-          <Select id="locale" value={deliverableLocale} options={optionsFrom(LOCALES, LOCALE_LABELS)} onChange={setDeliverableLocale} />
-        </Field>
+        <Select
+          size="sm"
+          id="locale"
+          label="Langue du livrable"
+          hint="L'outil reste en français quelle que soit cette valeur."
+          value={deliverableLocale}
+          options={optionsFrom(LOCALES, LOCALE_LABELS)}
+          onChange={(value) => value && setDeliverableLocale(value)}
+        />
 
-        <Field label="Date d'arrêté de la passe 1" htmlFor="passDate">
-          <DateInput id="passDate" value={passDate} onChange={setPassDate} />
-        </Field>
+        <IsoDateField id="passDate" label="Date d'arrêté de la passe 1" value={passDate} onChange={setPassDate} />
 
-        <div className={styles.checkboxRow}>
-          <input
-            id="showTourScore"
-            type="checkbox"
-            checked={showTourScore}
-            onChange={(event) => setShowTourScore(event.target.checked)}
-          />
-          <label htmlFor="showTourScore">Montrer le score du Tour dans le livrable</label>
-        </div>
+        <Checkbox id="showTourScore" label="Montrer le score du Tour dans le livrable" checked={showTourScore} onChange={setShowTourScore} />
 
         <Button
           onClick={() =>

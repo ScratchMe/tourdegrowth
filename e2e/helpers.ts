@@ -318,3 +318,15 @@ export async function openFold(fold: Locator): Promise<void> {
     ).then(() => undefined),
   );
 }
+
+/**
+ * A day picked the way the audit asks for it since design system extension
+ * 04 (CHANTIERS.md A10.c): three lists — day, month, year — in French, never
+ * `<input type="date">`. `iso` is the file's `yyyy-mm-dd`.
+ */
+export async function pickDay(page: Page, id: string, iso: string): Promise<void> {
+  const [year, month, day] = iso.split("-") as [string, string, string];
+  await page.locator(`#${id}-day`).selectOption(String(Number(day)));
+  await page.locator(`#${id}-month`).selectOption(month);
+  await page.locator(`#${id}-year`).selectOption(year);
+}

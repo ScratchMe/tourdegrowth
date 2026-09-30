@@ -24,6 +24,7 @@ import type { TourQuestionView } from "@/lib/audit/server";
 import { buildTourEntry, TOUR_METRIC_ID } from "@/lib/audit/tour-entry";
 import type { AnswerIndex } from "@/lib/scoring/compute";
 import { deleteMission, loadDraftMeta, loadMissions, markExported, saveMission, type DraftMeta, type SaveResult } from "@/lib/audit/storage";
+import { TextField } from "@/components/core/TextField";
 import { ImportPanel, type PendingImport } from "./ImportPanel";
 import { AUDIT_PILLAR_LABELS } from "./labels";
 import { MissionBar } from "./MissionBar";
@@ -36,8 +37,6 @@ import { RowList } from "./RowList";
 import { TourScreen } from "./TourScreen";
 import { NewMissionForm } from "./NewMissionForm";
 import styles from "./page.module.css";
-import { Field } from "./_ui/Field";
-import { TextInput } from "./_ui/TextInput";
 
 /**
  * AuditWorkbench — l'îlot client de `/admin/audit`.
@@ -515,9 +514,14 @@ function PurgeConfirm({ mission, onCancel, onConfirm }: { mission: Mission; onCa
             accessible — la phrase au-dessus est un `<p>`, pas un `<label>`.
             Trouvé par la passe axe une fois étendue à cet écran (1.6), qui
             n'était traversé par aucune spec jusque-là. */}
-        <Field label={`Retape « ${expected} » pour confirmer`} htmlFor="purge-confirm">
-          <TextInput id="purge-confirm" value={typed} onChange={setTyped} autoFocus />
-        </Field>
+        <TextField
+          size="sm"
+          id="purge-confirm"
+          label={`Retape « ${expected} » pour confirmer`}
+          value={typed}
+          onChange={setTyped}
+          autoFocus
+        />
         <div className={styles.screenActions}>
           <Button size="sm" variant="secondary" onClick={onCancel}>
             Annuler
