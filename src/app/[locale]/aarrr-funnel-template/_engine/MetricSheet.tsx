@@ -11,7 +11,7 @@ import { Tag } from "@/components/core/Tag";
 import { TextArea } from "@/components/core/TextArea";
 import { CANDIDATE_IDS, TEXT_LIMITS, shapeOf, type MetricShape } from "@/lib/engine/catalog-shape";
 import { BASIS_KEY, EFFORT_KEY, ROLE_KEY, SHEET_BASES, STATUS_KEY, type ResolvedMetric } from "@/lib/engine/strings";
-import type { CandidateId, MetricId, RoleId } from "@/lib/engine/types";
+import type { MetricId, PlgCandidateId, RoleId } from "@/lib/engine/types";
 import { isImmature, nextMonth, windowDaysOf } from "@/lib/engine/cohort";
 import { comparatorOf } from "@/lib/engine/diagnose";
 import { formatInterval } from "@/lib/engine/format";
@@ -156,8 +156,8 @@ export function MetricSheet({
   // knownIn grades a cohort number entered on an immature month as approximate (§6.3),
   // exactly as the board row and the peloton read it — one number, one reading.
   const known = knownIn(state, id, ctx);
-  const comparator = isCandidate ? comparatorOf(state, id as CandidateId) : undefined;
-  const position = isCandidate ? view.derived.diagnosis.positions[id as CandidateId]?.position : undefined;
+  const comparator = isCandidate ? comparatorOf(state, id as PlgCandidateId) : undefined;
+  const position = isCandidate ? view.derived.diagnosis.positions[id as PlgCandidateId]?.position : undefined;
   const target = snapshot.targets[id];
   const bench = shape.benchmark;
   // The strip is decorative; this sentence is what it says, in words — said

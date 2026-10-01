@@ -11,17 +11,19 @@ import {
   ENGINE_BRIDGES,
   LINK_METRIC_SHAPES,
   METRIC_SHAPES,
+  PELOTON_METRICS,
   SLG_CANDIDATE_IDS,
   SLG_DERIVED_SHAPES,
   SLG_ENGINE_BRIDGES,
   SLG_LEVER_IDS,
   SLG_METRIC_SHAPES,
-  shapesOf,
-  PELOTON_METRICS,
   UNPRICED_CANDIDATES,
+  candidatesOf,
   derivedShapeOf,
   metricsOfStage,
+  motionOfMetric,
   shapeOf,
+  shapesOf,
 } from "../catalog-shape";
 
 // Engine spec §5 — the shape half of the catalogue. The prose half is
@@ -81,8 +83,8 @@ describe("candidates and the peloton", () => {
     expect(lower).toEqual(["ret.logo-churn"]);
   });
 
-  it("never prices D30 retention or the referred share in money (§6.6)", () => {
-    expect([...UNPRICED_CANDIDATES].sort()).toEqual(["ref.referred-share", "ret.d30"]);
+  it("never prices D30 retention or the referred share in money (§6.6) — nor go-live and the referred share in sales-assisted (§18.5.2)", () => {
+    expect([...UNPRICED_CANDIDATES].sort()).toEqual(["ref.referred-share", "ret.d30", "slg.act.go-live", "slg.ref.referred-share"]);
   });
 
   it("builds the peloton from the three cohort ★s that follow the same 100 sign-ups", () => {
@@ -247,5 +249,15 @@ describe("lookups", () => {
     expect(metricsOfStage("activation").map((s) => s.id)).toEqual(["act.rate", "act.event", "act.ttv"]);
     expect(() => shapeOf("nope" as never)).toThrow(/Unknown engine metric/);
     expect(() => derivedShapeOf("nope" as never)).toThrow(/Unknown engine derived/);
+  });
+});
+
+describe("motions of the catalogue (A7.3.c S1)", () => {
+  it("each motion's candidates, in canonical order; every number belongs to one motion, the link with sales-assisted", () => {
+    expect(candidatesOf("plg")).toEqual(CANDIDATE_IDS);
+    expect(candidatesOf("slg")).toEqual(SLG_CANDIDATE_IDS);
+    for (const s of ALL_METRIC_SHAPES) expect(motionOfMetric(s.id), s.id).toBe(s.scope === "plg" ? "plg" : "slg");
+    expect(motionOfMetric("rev.ltv")).toBe("plg");
+    expect(motionOfMetric("slg.rev.ltv")).toBe("slg");
   });
 });

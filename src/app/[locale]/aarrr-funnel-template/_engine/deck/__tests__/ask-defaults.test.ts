@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CANDIDATE_IDS } from "@/lib/engine/catalog-shape";
-import type { CandidateId, Diagnosis, EngineAsk, EngineDerived, EngineState, MetricEntry, MetricId } from "@/lib/engine/types";
+import type { Diagnosis, EngineAsk, EngineDerived, EngineState, MetricEntry, MetricId, PlgCandidateId } from "@/lib/engine/types";
 import { SETUP_V2_DEFAULTS } from "@/lib/engine/types";
 import { askDefaults, horizonOptions, isPristineAsk, missingByRepairCost, suggestedSuccess } from "../ask-defaults";
 
@@ -46,7 +46,7 @@ function derivedWith(diagnosis: Partial<Diagnosis>): EngineDerived {
   } as EngineDerived;
 }
 
-const clearOn = (metric: CandidateId, comparator: Diagnosis["positions"][CandidateId]["comparator"]) =>
+const clearOn = (metric: PlgCandidateId, comparator: Diagnosis["positions"][PlgCandidateId]["comparator"]) =>
   derivedWith({ state: "clear", named: [metric], basis: "mrr", positions: positions({ [metric]: { position: "below", comparator } }) });
 
 describe("missingByRepairCost", () => {

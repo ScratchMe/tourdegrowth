@@ -5,7 +5,7 @@ import { Tag } from "@/components/core/Tag";
 import { CANDIDATE_IDS, metricsOfStage, type MetricShape } from "@/lib/engine/catalog-shape";
 import { positionLabel } from "@/lib/engine/phrases";
 import { STATUS_KEY } from "@/lib/engine/strings";
-import type { CandidateId, MetricId } from "@/lib/engine/types";
+import type { MetricId, PlgCandidateId } from "@/lib/engine/types";
 import { knownIn } from "@/lib/engine/values";
 import { PILLARS, type Pillar } from "@/lib/scoring/pillars";
 import { displayInterval, unknownReason } from "./display";
@@ -248,7 +248,7 @@ function StagePanel({
   const namedIds = new Set<MetricId>(diagnosis.state === "clear" || diagnosis.state === "shared" ? diagnosis.named : []);
   const positions = shapes.flatMap((shape) => {
     if (!(CANDIDATE_IDS as readonly MetricId[]).includes(shape.id)) return [];
-    const at = diagnosis.positions[shape.id as CandidateId];
+    const at = diagnosis.positions[shape.id as PlgCandidateId];
     // A position is only worded for a value someone has: an unknown sits nowhere.
     if (!at || knownIn(state, shape.id, ctx).kind !== "known") return [];
     const label = positionLabel(at.position, at.comparator, strings);

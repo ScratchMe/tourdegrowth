@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ENGINE_COPY } from "../engine-copy";
-import { CANDIDATE_IDS, DERIVED_SHAPES } from "@/lib/engine/catalog-shape";
+import { ALL_DERIVED_SHAPES, CANDIDATE_IDS, SLG_CANDIDATE_IDS } from "@/lib/engine/catalog-shape";
 import type { SlideTitleKey } from "@/lib/engine/types";
 import { PILLARS } from "@/lib/scoring/pillars";
 import type { Translatable } from "@/lib/i18n/translatable";
@@ -41,7 +41,7 @@ describe("keys the code reads by id", () => {
   });
 
   it("gives every candidate a subject phrase, lower-case, since no template starts a sentence with it", () => {
-    expect(Object.keys(ENGINE_COPY.subject).sort()).toEqual([...CANDIDATE_IDS].sort());
+    expect(Object.keys(ENGINE_COPY.subject).sort()).toEqual([...CANDIDATE_IDS, ...SLG_CANDIDATE_IDS].sort());
     for (const phrase of Object.values(ENGINE_COPY.subject))
       for (const l of LOCALES) expect(phrase[l], phrase[l]).toMatch(/^[a-zà-ÿ]/);
   });
@@ -62,7 +62,7 @@ describe("keys the code reads by id", () => {
   });
 
   it("gives every input a derived number can lack an article-ful phrase (« Il manque la marge brute »)", () => {
-    const inputs = [...new Set(DERIVED_SHAPES.flatMap((d) => d.inputs))].sort();
+    const inputs = [...new Set(ALL_DERIVED_SHAPES.flatMap((d) => d.inputs))].sort();
     expect(Object.keys(ENGINE_COPY.unitInput).sort()).toEqual(inputs);
     for (const phrase of Object.values(ENGINE_COPY.unitInput)) expect(phrase.fr).toMatch(/^(le |la |les |l['’])/);
   });
@@ -212,7 +212,7 @@ describe("the slides", () => {
   const SLIDE_REACHABLE = [
     "slideTitles", "slide", "notes", "findings", "peloton", "whatIf", "diagnosis", "mirror", "subject", "stages",
     "units", "grammar", "tools", "role", "repair", "cause", "status", "basis", "ask",
-    "side", "worth", "event", "unitInput", "source",
+    "side", "worth", "event", "unitInput", "source", "slgChain",
   ];
 
   it("stays inside the three fonts: no arrow, no ≈, no U+2212, no superscript (§10.4)", () => {

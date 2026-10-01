@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { METRIC_SHAPES } from "../catalog-shape";
-import { coverage } from "../coverage";
+import { coverage, motionCoverage, setupCoverage } from "../coverage";
 import type { MetricEntry, MetricStatus, Snapshot } from "../types";
-import { exampleState } from "./fixtures";
+import { exampleState, hybridState, salesAssistedState, withEntry } from "./fixtures";
 
 // Engine spec §13.1 "coverage". The invariant that lost half a point in the
 // audit instrument: found + approximate + missing + inProgress ===
@@ -89,5 +89,34 @@ describe("coverage", () => {
       const statuses = Array<MetricStatus>(N).fill(status);
       expect(coverage(snapshotWith(statuses)).denominator).toBe(status === "not-applicable" ? 0 : N);
     }
+  });
+});
+
+// --- Per motion and their union (§18.6.1, §18.9.2; A7.3.c S1). Non-vacuity,
+// measured on 2026-10-01: counting the link fails the union (33, not 32) and
+// « optional »; reading the union off METRIC_SHAPES fails the hybrid.
+
+describe("coverage per motion, and the union", () => {
+  it("the §18.9 example: self-serve 11 of 17, sales-assisted 10 of 15, the union 21 of 32 — the link left out", () => {
+    const snapshot = hybridState().snapshots[0]!;
+    expect(motionCoverage(snapshot, "plg")).toEqual({ denominator: 17, found: 11, approximate: 2, missing: 3, inProgress: 1, requested: 1, todo: 0 });
+    expect(motionCoverage(snapshot, "slg")).toEqual({ denominator: 15, found: 10, approximate: 1, missing: 2, inProgress: 2, requested: 1, todo: 1 });
+    expect(setupCoverage(snapshot, hybridState().setup)).toEqual({ denominator: 32, found: 21, approximate: 3, missing: 5, inProgress: 3, requested: 2, todo: 1 });
+    // « On documente 24 chiffres sur 32 » (§18.9.2): found + approximate.
+    const union = setupCoverage(snapshot, hybridState().setup);
+    expect(union.found + union.approximate).toBe(24);
+  });
+
+  it("the link is optional: its status never moves the coverage", () => {
+    const state = hybridState();
+    const without = withEntry(state, "link.pql-handoff", undefined);
+    expect(setupCoverage(without.snapshots[0]!, without.setup)).toEqual(setupCoverage(state.snapshots[0]!, state.setup));
+  });
+
+  it("one motion ticked: its own numbers only — self-serve alone is the v1 coverage", () => {
+    const state = exampleState();
+    expect(setupCoverage(state.snapshots[0]!, state.setup)).toEqual(coverage(state.snapshots[0]!));
+    const slg = salesAssistedState();
+    expect(setupCoverage(slg.snapshots[0]!, slg.setup)).toEqual(motionCoverage(slg.snapshots[0]!, "slg"));
   });
 });

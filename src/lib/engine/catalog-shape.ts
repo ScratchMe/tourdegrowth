@@ -9,6 +9,7 @@ import type {
   MetricId,
   MetricValue,
   Motion,
+  PlgCandidateId,
   PlgDerivedId,
   PlgLeverId,
   PlgMetricId,
@@ -783,8 +784,8 @@ export const SLG_DERIVED_SHAPES: readonly DerivedShape<SlgDerivedId>[] = [
 
 export const ALL_DERIVED_SHAPES: readonly DerivedShape[] = [...DERIVED_SHAPES, ...SLG_DERIVED_SHAPES];
 
-/** The rates that can be named as the bottleneck (§6.6), churn the only lower-is-better one. */
-export const CANDIDATE_IDS: readonly CandidateId[] = [
+/** The self-serve rates that can be named as the bottleneck (§6.6), churn the only lower-is-better one. */
+export const CANDIDATE_IDS: readonly PlgCandidateId[] = [
   "acq.signup-rate",
   "act.rate",
   "ret.d30",
@@ -828,8 +829,22 @@ export const SLG_CANDIDATE_IDS: readonly SlgCandidateId[] = [
   "slg.rev.win-rate",
 ];
 
-/** Never priced in money in v1: pricing them would need a retention and a loop model (§6.6). */
-export const UNPRICED_CANDIDATES: readonly CandidateId[] = ["ret.d30", "ref.referred-share"];
+/**
+ * Never priced in money in v1: pricing them would need a retention and a loop
+ * model (§6.6) — and, in sales-assisted, a model tying go-live to renewal
+ * (§18.5.2).
+ */
+export const UNPRICED_CANDIDATES: readonly CandidateId[] = ["ret.d30", "ref.referred-share", "slg.act.go-live", "slg.ref.referred-share"];
+
+/** A motion's own candidates, in canonical order — the only ones its diagnosis positions. */
+export function candidatesOf(motion: Motion): readonly CandidateId[] {
+  return motion === "plg" ? CANDIDATE_IDS : SLG_CANDIDATE_IDS;
+}
+
+/** The motion a number belongs to; the link counts with sales-assisted, whose opportunities it counts. */
+export function motionOfMetric(id: MetricId | DerivedId): Motion {
+  return id.startsWith("slg.") || id.startsWith("link.") ? "slg" : "plg";
+}
 
 /** The three peloton columns, in reading order — every one counted on the same 100 sign-ups. */
 export const PELOTON_METRICS = ["act.rate", "ret.d30", "rev.paid-conversion"] as const;
@@ -868,6 +883,10 @@ export const RECONCILE_BAND = { lo: 0.67, hi: 1.5 } as const;
 export const CHURN_HIGH_PERCENT = 30;
 /** A gross margin outside this is probably counting the wrong costs (§6.9). */
 export const MARGIN_ODD = { lo: 0, hi: 95 } as const;
+/** A median sales cycle past the three-month window: the quarter's CAC divides by customers of earlier spend (§18.5.7). */
+export const SLG_CYCLE_LONG_DAYS = 90;
+/** (ACV ÷ 12) ÷ sales-assisted ARPA outside this: a price rise, a new segment, or two definitions of revenue (§18.5.7). */
+export const SLG_ACV_ARPA_BAND = { lo: 0.5, hi: 2 } as const;
 /** high ÷ low above this: "a range this wide says almost nothing" (§7 E3). */
 export const WIDE_RANGE_FACTOR = 3;
 /** Character limits, checked on save — the copy says them, the validator enforces them. */

@@ -10,7 +10,7 @@ import {
 } from "./format";
 import { interval, mapBounds, mul, point } from "./interval";
 import { cohortIsSmall } from "./peloton";
-import type { CandidateId, Comparator, EngineCalcContext, EngineState, Impact, ImpactLine, Interval } from "./types";
+import type { Comparator, EngineCalcContext, EngineState, Impact, ImpactLine, Interval, PlgCandidateId } from "./types";
 import { countsOf, currentSnapshot, entryOf, knownIn } from "./values";
 
 /**
@@ -37,9 +37,9 @@ import { countsOf, currentSnapshot, entryOf, knownIn } from "./values";
  * doesn't have. `whatIf` returns null for them.
  */
 
-const FLOWS: readonly CandidateId[] = ["acq.signup-rate", "act.rate", "rev.paid-conversion"];
+const FLOWS: readonly PlgCandidateId[] = ["acq.signup-rate", "act.rate", "rev.paid-conversion"];
 
-export function isFlow(candidate: CandidateId): boolean {
+export function isFlow(candidate: PlgCandidateId): boolean {
   return FLOWS.includes(candidate);
 }
 
@@ -80,7 +80,7 @@ const floorAtZero = (i: Interval): Interval => mapBounds(i, (v) => Math.max(0, v
  */
 export function rankingImpact(
   state: EngineState,
-  candidate: CandidateId,
+  candidate: PlgCandidateId,
   target: number,
   ctx: EngineCalcContext,
 ): { gap?: Interval; mrr?: Interval } {
@@ -123,7 +123,7 @@ function twelveMonthFactor(churnPercent: number): number {
  */
 export function whatIf(
   state: EngineState,
-  candidate: CandidateId,
+  candidate: PlgCandidateId,
   target: number,
   ctx: EngineCalcContext,
   words: UnitWords,
@@ -251,10 +251,14 @@ export function whatIf(
  * figure as printed, for the noun that agrees with it ("1 client payant").
  */
 export function impactHeadline(impact: Impact): { amount?: string; n?: string; count?: Interval } {
+  // Sales-assisted: the title says « chaque mois », read on the chain's own `per-month` line (§18.5.3).
+  const perMonth = impact.lines.find((l) => l.key === "per-month");
   const times = impact.lines.find((l) => l.key === "times");
   const then = impact.lines.find((l) => l.key === "then");
+  if (perMonth?.values.amount) return { amount: perMonth.values.amount };
   if (times?.values.amount) return { amount: times.values.amount };
   if (impact.metric === "ret.logo-churn") return { n: then?.values.n, count: then?.count };
+  if (impact.metric === "slg.ret.renewal") return { n: then?.values.kept, count: then?.count };
   return { n: then?.values.delta, count: then?.count };
 }
 

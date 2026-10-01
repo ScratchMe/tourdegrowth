@@ -85,23 +85,31 @@ function buildInputs(): Record<string, GoldenInput> {
  * `EngineDerived` or `DeckModel` is left out on purpose; a v1 field that
  * moves (the peloton into a motion's column, say) is read from its new place
  * HERE, and nowhere else.
+ *
+ * Added in S1 and left out: `motions` and `total` on the derived object, and
+ * the `motion` each diagnosis, check, finding and mirror row now carries
+ * (§18.2.1) — a v1 engine's are all "plg", and the v1 build printed none.
  */
+function withoutMotion<T extends { motion?: unknown }>({ motion: _motion, ...rest }: T): Omit<T, "motion"> {
+  return rest;
+}
+
 function projectDerived(d: EngineDerived) {
   return {
     coverage: d.coverage,
     peloton: d.peloton,
-    diagnosis: d.diagnosis,
+    diagnosis: withoutMotion(d.diagnosis),
     unit: d.unit,
-    sanity: d.sanity,
-    findings: d.findings,
-    mirror: d.mirror,
+    sanity: d.sanity.map(withoutMotion),
+    findings: d.findings.map(withoutMotion),
+    mirror: d.mirror && { ...d.mirror, rows: d.mirror.rows.map(withoutMotion) },
   };
 }
 
 function projectDeck(m: DeckModel) {
   return {
     slides: m.slides.map((s) => ({ id: s.id, present: s.present, included: s.included, index: s.index, title: s.title, lines: s.lines, notes: s.notes })),
-    checks: m.checks,
+    checks: m.checks.map(withoutMotion),
     dataPill: m.dataPill,
     kicker: m.kicker,
     footer: m.footer,

@@ -392,12 +392,8 @@ export type PlgCandidateId =
  * the link (C25 Q7): a target on it names no stage.
  */
 export type SlgCandidateId = "slg.acq.lead-to-opp" | "slg.act.go-live" | "slg.ret.renewal" | "slg.ref.referred-share" | "slg.rev.win-rate";
-/**
- * Still the self-serve six: the diagnosis learns its motion in S1 (§18.11),
- * and widens this to `PlgCandidateId | SlgCandidateId` then, with the copy
- * keyed by it.
- */
-export type CandidateId = PlgCandidateId;
+/** Any stage a diagnosis may name — each diagnosis only ever positions its own motion's (§18.5.2). */
+export type CandidateId = PlgCandidateId | SlgCandidateId;
 /**
  * What may name a stage: the team's own target, and nothing else (decision 5,
  * reversed 2026-09-29, `CHANTIERS.md` C1 — a published reference is context,
@@ -418,7 +414,8 @@ export type Position = "below" | "maybe-below" | "within" | "above" | "no-compar
  * displayed numbers of the one before (tested).
  */
 export interface ImpactLine {
-  key: "today" | "if" | "then" | "times" | "annual" | "less-than-one";
+  /** `per-month`: sales-assisted only — its chain counts a quarter, then says what that is a month (§18.5.3). */
+  key: "today" | "if" | "then" | "times" | "per-month" | "annual" | "less-than-one";
   values: Record<string, string>;
   /**
    * The count this line's noun agrees with, AS PRINTED (rounded like its
@@ -436,21 +433,43 @@ export interface Impact {
   customersPerMonth?: Interval; // extra paying customers (flows) or kept ones (churn)
   mrrPerMonth?: Interval;
   mrrAfter12Months?: Interval; // only when churn is known
+  /**
+   * Sales-assisted (§18.5.3): its chains count over the three months — new
+   * customers signed, contracts kept — and the money of that quarter, as
+   * printed. `mrrPerMonth` is then that quarter ÷ 3.
+   */
+  customersPerQuarter?: Interval;
+  mrrPerQuarter?: Interval;
+  /**
+   * Sales-assisted, read « pour 100 » on the relay's own base (no count of new
+   * customers or of contracts up for renewal): which base, as a key of the
+   * copy's `findings.base` — never a word.
+   */
+  perHundredBase?: "leads" | "mql" | "closedOpps" | "renewals";
   lines: ImpactLine[];
 }
 
 export type DiagnosisState = "clear" | "shared" | "level" | "not-enough";
-export interface Diagnosis {
+/**
+ * One motion's diagnosis (§6.6, §18.5.2). Its positions carry ONLY that
+ * motion's candidates, so no function can rank a self-serve stage against a
+ * sales-assisted one (§18.6.4). The default, `PlgCandidateId`, is the v1
+ * reading the screens were written against; the hybrid's screens (S3) read
+ * either.
+ */
+export interface Diagnosis<C extends CandidateId = PlgCandidateId> {
+  motion: Motion;
   state: DiagnosisState;
   /** clear: 1; shared: the WHOLE group, never capped at two; otherwise []. */
-  named: CandidateId[];
+  named: C[];
   basis: "mrr" | "relative-gap" | "none";
-  /** Below target, not priceable in money in v1 (D30 retention, referral). */
-  belowUnpriced: CandidateId[];
-  /** ★ or churn unknown: "the real bottleneck may hide there". */
+  /** Below target, not priceable in money in v1 (D30 retention, referral; go-live and referred share in sales-assisted). */
+  belowUnpriced: C[];
+  /** ★ (or churn) unknown: "the real bottleneck may hide there". */
   blind: MetricId[];
-  positions: Record<CandidateId, { position: Position; comparator?: Comparator; impact?: Impact }>;
+  positions: Record<C, { position: Position; comparator?: Comparator; impact?: Impact }>;
 }
+export type SlgDiagnosis = Diagnosis<SlgCandidateId>;
 
 // ---------------------------------------------------------------------------
 // Derived shapes the spec leaves to the modules (§6.4-§6.13), fixed here so
@@ -506,11 +525,50 @@ export interface Peloton {
 }
 
 /**
+ * §18.5.1. The sales-assisted funnel: three relays, each on ITS OWN base of
+ * 100 — the win rate is read on the quarter's closed opportunities, not on a
+ * cohort of leads, so there is no common base and never a chain multiplied
+ * through. In chronological order: lead → opportunity, closed → signed,
+ * signed → live.
+ */
+export interface RelayColumn {
+  metric: "slg.acq.lead-to-opp" | "slg.rev.win-rate" | "slg.act.go-live";
+  base: "leads" | "closed-opps" | "new-customers";
+  /** null = unknown, never 0. Rounded per bound. */
+  perHundred: Interval | null;
+  confidence: Confidence;
+  source: SourceRef | null;
+  /** The three months the number covers (C25 Q2). */
+  period: { from: YearMonth; to: YearMonth } | null;
+  /** The denominator entered as counts, for « small samples » (§18.5.1). */
+  sampleSize: number | null;
+}
+export interface Relays {
+  /** The lead-to-opportunity variant names the first base: « pour 100 leads » or « pour 100 MQL ». */
+  leadNoun: "leads" | "mql";
+  /** The cohort's leads ÷ 3: the upstream line, « ~160 MQL par mois ». */
+  leadsPerMonth: Interval | null;
+  columns: RelayColumn[]; // always 3, in chronological order
+  chain: Peloton["chain"];
+}
+
+/**
  * The inputs of the five computed figures (`DERIVED_SHAPES[].inputs`), the
  * only numbers a sentence names after « il manque » / "missing:". The copy
  * carries one phrase per id (`unitInput`); a test pins the two sets equal.
  */
-export type UnitInputId = "acq.cac" | "rev.arpa" | "rev.gross-margin" | "ret.logo-churn" | "rev.expansion" | "rev.contraction";
+export type UnitInputId =
+  | "acq.cac"
+  | "rev.arpa"
+  | "rev.gross-margin"
+  | "ret.logo-churn"
+  | "rev.expansion"
+  | "rev.contraction"
+  // Sales-assisted (§18.4.7): the CAC, the new contracts' ACV, its own margin (Q4), the renewal.
+  | "slg.acq.cac"
+  | "slg.rev.acv"
+  | "slg.rev.gross-margin"
+  | "slg.ret.renewal";
 
 /** §5.7, §6.8. A computed figure with a missing input is "uncomputable — missing: …", never 0. */
 export type DerivedValue =
@@ -532,6 +590,22 @@ export interface UnitEconomics {
   nrr: DerivedValue;
 }
 
+/**
+ * §18.5.6. The sales-assisted computed figures, from the NEW contracts' ACV
+ * (the CAC is spent on them) and the motion's own margin (C25 Q4). Never a
+ * fallback on revenue, nor on self-serve's margin.
+ */
+export interface SlgUnitEconomics {
+  cacVariant: string | null;
+  /** The renewal's variant: an annual contract renews once a year. null when the renewal isn't known. */
+  renewalTerm: "annual" | "monthly" | null;
+  /** min(the life the renewal implies, 36), in months. */
+  lifetimeMonths: DerivedValue;
+  ltv: DerivedValue;
+  payback: DerivedValue; // months
+  ltvCac: DerivedValue;
+}
+
 /** §6.9. `num-gt-den` blocks the save; every other check is shown "to check", never blocking (D11). */
 export type SanityId =
   | "num-gt-den"
@@ -541,9 +615,18 @@ export type SanityId =
   | "margin-odd"
   | "ttv-mean"
   | "cohort-mismatch"
-  | "reconcile-gap";
+  | "reconcile-gap"
+  // Sales-assisted (§18.5.7): triggers to re-read, never references.
+  | "slg-cycle-long"
+  | "slg-cycle-mean"
+  | "slg-ttl-mean"
+  | "slg-acv-vs-arpa"
+  // The hybrid's one check across motions: the two CACs count different spend.
+  | "cac-variants-differ";
 export interface SanityCheck {
   id: SanityId;
+  /** The motion the check reads; absent for one that reads both (`cac-variants-differ`). */
+  motion?: Motion;
   blocking: boolean;
   metrics: MetricId[];
   /** Placeholders of the message template, already formatted. */
@@ -562,9 +645,13 @@ export type FindingKind =
   | "unit-econ-uncomputable"
   | "reconcile-gap"
   | "small-cohort"
+  /** Sales-assisted: a bounded number on fewer than 100 — one more or less moves it by p points (§18.5.1). */
+  | "small-sample"
   | "hidden-knowledge";
 export interface Finding {
   kind: FindingKind;
+  /** The motion the finding is about (§18.5.8). Never the link: it makes no finding. */
+  motion?: Motion;
   rank: 1 | 2 | 3 | 4;
   metrics: (MetricId | DerivedId)[];
   /** Placeholders of `findings.*`, already formatted. The sentence never asserts a cause. */
@@ -578,6 +665,8 @@ export type TrackingLevel = "tracked" | "approximate" | "unknown";
 export type MirrorVerdict = "coherent" | "blind-spot" | "blind-spot-light" | "better" | "known-gap";
 export interface BridgeRow {
   questionId: string;
+  /** In the hybrid, a question bridged in both motions gives one row per motion (§18.4.9). */
+  motion: Motion;
   metric: MetricId | DerivedId;
   declaredPoints: number;
   declared: TrackingLevel;
@@ -672,12 +761,44 @@ export interface DeckModel {
   footer: Record<string, string>;
 }
 
-/** Everything the board renders, computed in one pass from the state (P1 composes it). */
+/** One ticked motion, read on its own (§18.6.1): its coverage, its funnel, its diagnosis, its unit economics. */
+export type MotionDerived =
+  | { motion: "plg"; coverage: Coverage; peloton: Peloton; diagnosis: Diagnosis<PlgCandidateId>; unit: UnitEconomics }
+  | { motion: "slg"; coverage: Coverage; relays: Relays; diagnosis: SlgDiagnosis; unit: SlgUnitEconomics };
+
+/**
+ * « Un total » (§18.6.2), the hybrid only. A sum exists only when both of its
+ * parts do (S9): with one unknown, the total is `uncomputable` and names it —
+ * never the known part passed off as the total.
+ */
+export interface TotalView {
+  mrr: Record<Motion | "total", DerivedValue>;
+  newMrrPerMonth: Record<Motion | "total", DerivedValue>;
+  /** At the current pace, without any what-if (C25 Q11). */
+  mrrIn12Months: Record<Motion | "total", DerivedValue>;
+  /** « {n} des {m} opportunités assistées viennent de comptes du libre-service ». A share of the pipeline, not an attribution. */
+  link: { known: Known; fromSelfServe: number | null; oppsCreated: number | null };
+}
+
+/**
+ * Everything the board renders, computed in one pass from the state.
+ *
+ * `motions` holds the ticked motions, in `MOTIONS` order — never sorted by a
+ * value (§18.6.4). `coverage` is their union, the link left out. `peloton`,
+ * `diagnosis` and `unit` are SELF-SERVE's, where every v1 screen and the
+ * deck read them; they are the very objects of the `plg` entry of `motions`
+ * when self-serve is ticked, and describe an empty self-serve otherwise.
+ * The hybrid's screens (S3) and deck (S4) read `motions`, and these three go
+ * when the last v1 reader does.
+ */
 export interface EngineDerived {
   coverage: Coverage;
   peloton: Peloton;
-  diagnosis: Diagnosis;
+  diagnosis: Diagnosis<PlgCandidateId>;
   unit: UnitEconomics;
+  motions: MotionDerived[];
+  /** null outside the hybrid. */
+  total: TotalView | null;
   sanity: SanityCheck[];
   findings: Finding[];
   mirror: Mirror | null;

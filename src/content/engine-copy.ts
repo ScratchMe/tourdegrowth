@@ -266,6 +266,12 @@ export const ENGINE_COPY = {
     "rev.paid-conversion": { fr: "la conversion en payant", en: "paid conversion" },
     "ref.referred-share": { fr: "la part des inscrits recommandés", en: "the referred share of sign-ups" },
     "ret.logo-churn": { fr: "le churn logo", en: "logo churn" },
+    // TODO: à relire (convention 6) — neuf le 2026-09-30 (A7.3.c S1, ENGINE.md §18.5).
+    "slg.acq.lead-to-opp": { fr: "le passage des leads en opportunités", en: "lead-to-opportunity conversion" },
+    "slg.act.go-live": { fr: "la mise en production", en: "go-live" },
+    "slg.ret.renewal": { fr: "le renouvellement des contrats", en: "contract renewal" },
+    "slg.ref.referred-share": { fr: "la part des opportunités recommandées", en: "the referred share of opportunities" },
+    "slg.rev.win-rate": { fr: "le taux de closing", en: "the win rate" },
   } satisfies Record<CandidateId, Translatable>,
   /**
    * The activation event inside a sentence — what the catalogue's `{event}`
@@ -291,6 +297,11 @@ export const ENGINE_COPY = {
     // TODO: à relire — nouveau (2026-09-26, expansion et rétrogradation).
     "rev.expansion": { fr: "l'expansion", en: "expansion" },
     "rev.contraction": { fr: "la rétrogradation", en: "contraction" },
+    // TODO: à relire (convention 6) — neuf le 2026-09-30 (A7.3.c S1, ENGINE.md §18.5).
+    "slg.acq.cac": { fr: "le CAC assisté", en: "sales-assisted CAC" },
+    "slg.rev.acv": { fr: "l'ACV des nouveaux contrats", en: "new contracts' ACV" },
+    "slg.rev.gross-margin": { fr: "la marge brute de l'assisté", en: "sales-assisted gross margin" },
+    "slg.ret.renewal": { fr: "le renouvellement des contrats", en: "contract renewal" },
   } satisfies Record<UnitInputId, Translatable>,
   /**
    * Where a value sits against its comparator — the team's target (« la
@@ -323,6 +334,21 @@ export const ENGINE_COPY = {
     perHundred: { fr: "{n} payants de plus pour 100 inscrits", en: "{n} more paying customers per 100 sign-ups" },
     perHundredOne: { fr: "{n} payant de plus pour 100 inscrits", en: "{n} more paying customer per 100 sign-ups" },
     lessThanOne: { fr: "moins d'un client de plus par mois", en: "less than one more customer a month" },
+    /** Sales-assisted: its chains count a quarter (§18.5.3). The money keys above serve both: they say « par mois ». */
+    // TODO: à relire (convention 6) — neuf le 2026-09-30 (A7.3.c S1, ENGINE.md §18.5) : customersQuarter(One), keptQuarter(One), perHundredLead/Win/Renewal(One), lessThanOneQuarter, lessThanOneKept.
+    customersQuarter: { fr: "{n} nouveaux clients de plus par trimestre", en: "{n} more new customers a quarter" },
+    customersQuarterOne: { fr: "{n} nouveau client de plus par trimestre", en: "{n} more new customer a quarter" },
+    keptQuarter: { fr: "{n} contrats gardés de plus par trimestre", en: "{n} more contracts kept a quarter" },
+    keptQuarterOne: { fr: "{n} contrat gardé de plus par trimestre", en: "{n} more contract kept a quarter" },
+    /** Read on the relay's own 100, never a chain (§18.5.3); `{base}` is « leads » or « MQL ». */
+    perHundredLead: { fr: "{n} opportunités de plus pour 100 {base}", en: "{n} more opportunities per 100 {base}" },
+    perHundredLeadOne: { fr: "{n} opportunité de plus pour 100 {base}", en: "{n} more opportunity per 100 {base}" },
+    perHundredWin: { fr: "{n} signatures de plus pour 100 opportunités conclues", en: "{n} more deals signed per 100 closed opportunities" },
+    perHundredWinOne: { fr: "{n} signature de plus pour 100 opportunités conclues", en: "{n} more deal signed per 100 closed opportunities" },
+    perHundredRenewal: { fr: "{n} contrats gardés de plus pour 100 contrats échus", en: "{n} more contracts kept per 100 up for renewal" },
+    perHundredRenewalOne: { fr: "{n} contrat gardé de plus pour 100 contrats échus", en: "{n} more contract kept per 100 up for renewal" },
+    lessThanOneQuarter: { fr: "moins d'un client de plus par trimestre", en: "less than one more customer a quarter" },
+    lessThanOneKept: { fr: "moins d'un contrat gardé de plus par trimestre", en: "less than one more contract kept a quarter" },
   },
 
   // --- Closed vocabularies (§14.4) -----------------------------------------
@@ -552,6 +578,10 @@ export const ENGINE_COPY = {
     },
     item: { fr: "– {what} ({definition})", en: "– {what} ({definition})" },
     itemNoDefinition: { fr: "– {what}", en: "– {what}" },
+    /** The hybrid: one request per role covers both motions, each motion's numbers under its heading (§18.7, E4). */
+    // TODO: à relire (convention 6) — neuf le 2026-09-30 (A7.3.c S1, ENGINE.md §18.5).
+    groupPlg: { fr: "Libre-service :", en: "Self-serve:" },
+    groupSlg: { fr: "Assisté :", en: "Sales-assisted:" },
   },
   collect: {
     title: { fr: "À aller chercher", en: "To go and get" },
@@ -704,6 +734,55 @@ export const ENGINE_COPY = {
     },
     lessThanOne: { fr: "Moins d'un client de plus par mois.", en: "Less than one more customer a month." },
     targetTeam: { fr: "{value} (cible de l'équipe)", en: "{value} (team target)" },
+  },
+  /**
+   * TODO: à relire (convention 6) — neuf le 2026-09-30 (A7.3.c S1, ENGINE.md §18.5.3).
+   * The sales-assisted chain: a quarter counted, then a month. The labels
+   * « Aujourd'hui », « Si », « Alors » and the `if` line are `whatIf`'s;
+   * `{phrase}` names the rate after its value (« 24 % de closing »).
+   */
+  slgChain: {
+    timesAcv: { fr: "× ACV ÷ 12", en: "× ACV ÷ 12" },
+    timesArpa: { fr: "× ARPA assisté", en: "× sales-assisted ARPA" },
+    phrase: {
+      "slg.acq.lead-to-opp": { fr: "de passage en opportunité", en: "lead-to-opportunity" },
+      "slg.rev.win-rate": { fr: "de closing", en: "win rate" },
+    },
+    todayFlow: { fr: "{rate} {phrase}, soit {n} nouveaux clients sur 3 mois", en: "{rate} {phrase}, i.e. {n} new customers over 3 months" },
+    todayFlowOne: { fr: "{rate} {phrase}, soit {n} nouveau client sur 3 mois", en: "{rate} {phrase}, i.e. {n} new customer over 3 months" },
+    todayRenewal: {
+      fr: "{rate} des contrats échus renouvelés, sur {d} contrats échus en 3 mois",
+      en: "{rate} of contracts up for renewal renewed, out of {d} in 3 months",
+    },
+    todayRenewalOne: {
+      fr: "{rate} des contrats échus renouvelés, sur {d} contrat échu en 3 mois",
+      en: "{rate} of contracts up for renewal renewed, out of {d} in 3 months",
+    },
+    /** No count of new customers (or of contracts up for renewal): read on the relay's own 100, never a chain. */
+    todayPerHundred: { fr: "{rate}, soit {n} sur 100 {base}", en: "{rate}, i.e. {n} in 100 {base}" },
+    thenFlow: { fr: "{n} × {target}/{rate} = {m} (+{delta}) sur 3 mois", en: "{n} × {target}/{rate} = {m} (+{delta}) over 3 months" },
+    thenPerHundred: { fr: "{n} × {target}/{rate} = {m} (+{delta}) sur 100 {base}", en: "{n} × {target}/{rate} = {m} (+{delta}) in 100 {base}" },
+    thenRenewal: {
+      fr: "{d} × ({target} – {rate}) = {kept} contrats gardés en plus sur 3 mois",
+      en: "{d} × ({target} – {rate}) = {kept} more contracts kept over 3 months",
+    },
+    thenRenewalOne: {
+      fr: "{d} × ({target} – {rate}) = {kept} contrat gardé en plus sur 3 mois",
+      en: "{d} × ({target} – {rate}) = {kept} more contract kept over 3 months",
+    },
+    timesFlow: { fr: "{delta} × {acvMonthly} = {quarter} de MRR nouveau par trimestre", en: "{delta} × {acvMonthly} = {quarter} of new MRR per quarter" },
+    timesRenewal: { fr: "{kept} × {arpa} = {quarter} de MRR préservé par trimestre", en: "{kept} × {arpa} = {quarter} of retained MRR per quarter" },
+    perMonth: { fr: "soit {amount} par mois", en: "that is {amount} a month" },
+    annual: {
+      fr: "Soit {amount} de MRR de plus au bout d'un an (contrats annuels : aucun ne se renouvelle dans l'année).",
+      en: "That's {amount} more MRR after a year (annual contracts: none comes up for renewal within the year).",
+    },
+    annualMonthly: {
+      fr: "Soit {amount} de MRR de plus au bout d'un an, renouvellements mensuels compris.",
+      en: "That's {amount} more MRR after a year, monthly renewals included.",
+    },
+    lessThanOne: { fr: "Moins d'un client de plus sur 3 mois.", en: "Less than one more customer over 3 months." },
+    lessThanOneKept: { fr: "Moins d'un contrat gardé de plus sur 3 mois.", en: "Less than one more contract kept over 3 months." },
   },
 
   // --- Peloton and mirror (§14.7) ------------------------------------------
@@ -1381,6 +1460,32 @@ export const ENGINE_COPY = {
       fr: "Moins de 100 inscrits dans la cohorte : chaque inscrit pèse plus d'un point de pourcentage.",
       en: "Fewer than 100 sign-ups in the cohort: each one weighs more than a percentage point.",
     },
+    // TODO: à relire (convention 6) — neuf le 2026-09-30 (A7.3.c S1, ENGINE.md §18.5) : chainBreakRelay, relayVerb, base, smallSample(One).
+    /** A sales-assisted relay nobody could pull: each relay has its own base of 100 (§18.5.1). */
+    chainBreakRelay: { fr: "Sur 100 {base}, on ne sait pas dire combien {verb}.", en: "Out of 100 {base}, we can't say how many {verb}." },
+    relayVerb: {
+      leadToOpp: { fr: "deviennent une opportunité", en: "become an opportunity" },
+      winRate: { fr: "sont signées", en: "are signed" },
+      goLive: { fr: "sont en production à {n} jours", en: "are live within {n} days" },
+    },
+    /** What a sales-assisted rate is counted on, as a plural noun after a number. */
+    base: {
+      leads: { fr: "leads", en: "leads" },
+      mql: { fr: "MQL", en: "MQLs" },
+      closedOpps: { fr: "opportunités conclues", en: "closed opportunities" },
+      newCustomers: { fr: "nouveaux clients", en: "new customers" },
+      renewals: { fr: "contrats échus", en: "contracts up for renewal" },
+      oppsCreated: { fr: "opportunités créées", en: "opportunities created" },
+      customers: { fr: "clients assistés", en: "sales-assisted customers" },
+    },
+    smallSample: {
+      fr: "Sur {d} {base}, un de plus ou de moins bouge le taux de {p} points : lis la direction.",
+      en: "Out of {d} {base}, one more or less moves the rate by {p} points: read the direction.",
+    },
+    smallSampleOne: {
+      fr: "Sur {d} {base}, un de plus ou de moins bouge le taux de {p} point : lis la direction.",
+      en: "Out of {d} {base}, one more or less moves the rate by {p} point: read the direction.",
+    },
     hiddenKnowledge: {
       fr: "{metric} : ton Tour disait que ce chiffre n'était pas suivi, et tu l'as pourtant trouvé.",
       en: "{metric}: your Tour said this number wasn't tracked, and yet you found it.",
@@ -1416,6 +1521,20 @@ export const ENGINE_COPY = {
     reconcileGapOne: {
       fr: "Ta chaîne prédit ~{p} nouveau payant en {month} ; ta facturation en compte {n}. Au moins une définition ne porte pas sur la même population.",
       en: "Your chain predicts ~{p} new paying customer in {month}; your billing counts {n}. At least one definition doesn't cover the same population.",
+    },
+    // TODO: à relire (convention 6) — neuf le 2026-09-30 (A7.3.c S1, ENGINE.md §18.5) : slgCycleLong, slgAcvVsArpa, cacVariantsDiffer.
+    slgCycleLong: {
+      fr: "Ton cycle médian dépasse les trois mois de la fenêtre : le CAC du trimestre divise sa dépense par des clients venus des dépenses d'avant. Lis-le comme un ordre de grandeur.",
+      en: "Your median cycle is longer than the three-month window: this quarter's CAC divides its spend by customers from earlier spend. Read it as an order of magnitude.",
+    },
+    slgAcvVsArpa: {
+      fr: "Un nouveau contrat vaut {x} fois le panier moyen du portefeuille : hausse de prix, nouveau segment, ou deux définitions du revenu ?",
+      en: "A new contract is worth {x} times the book's average: price rise, new segment, or two definitions of revenue?",
+    },
+    /** `{plg}` and `{slg}`: the two CACs' variants, lower-cased labels. */
+    cacVariantsDiffer: {
+      fr: "Les deux CAC ne comptent pas les mêmes dépenses : {plg} en libre-service, {slg} en assisté.",
+      en: "The two CACs don't count the same spend: {plg} self-serve, {slg} sales-assisted.",
     },
     toCheck: { fr: "à vérifier", en: "to check" },
   },
@@ -1498,6 +1617,11 @@ export const ENGINE_COPY = {
     event: { fr: "a créé un premier projet", en: "created a first project" },
     channel: { fr: "Recherche naturelle", en: "Organic search" },
     company: { fr: "Exemple SaaS", en: "Example SaaS" },
+    /** The hybrid example's words (§18.9.1): what « live » means, the main reason for non-renewal, the PQL threshold. */
+    // TODO: à relire (convention 6) — neuf le 2026-09-30 (A7.3.c S1, ENGINE.md §18.5).
+    liveEvent: { fr: "premier rapport partagé avec l'équipe du client", en: "first report shared with the customer's team" },
+    lossCause: { fr: "départ du sponsor chez le client", en: "departure of the customer's sponsor" },
+    pqlThreshold: { fr: "espace avec 3 membres actifs", en: "workspace with 3 active members" },
   },
 
   storage: {

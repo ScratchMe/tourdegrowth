@@ -31,7 +31,7 @@ import {
 } from "../phrases";
 import type { Comparator, EngineState, ImpactLine, Interval } from "../types";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
-import { exampleState, measured, ratio, withEntry, withTarget } from "./fixtures";
+import { exampleState, hybridState, measured, ratio, withEntry, withTarget, withoutTargets } from "./fixtures";
 
 // lib/engine/phrases.ts — the words that go INTO the templates. Each rule is
 // here once, by itself; sentences-guard.test.ts sweeps them together over
@@ -387,5 +387,34 @@ describe("chainTemplate — which sentence a line of the chain is printed with",
       label: null,
       template: "lessThanOne",
     });
+  });
+});
+
+// --- Sales-assisted (§18.5.2; A7.3.c S1). Non-vacuity, measured on
+// 2026-10-01: a `notEnoughBelowValues` still walking self-serve's candidates
+// fails « the stage behind, sales-assisted »; a `churnWithoutCommonAmount`
+// still reading `ret.logo-churn` fails « the renewal stands apart ».
+
+describe("the diagnosis sentences, sales-assisted", () => {
+  const slg = (state: EngineState) => deriveEngine(state, CTX_FR, null, FR.bridges, FR.strings.units).motions.find((m) => m.motion === "slg")!.diagnosis;
+
+  it("the stage behind, when there isn't enough to rank: the sales-assisted subject", () => {
+    let s = withoutTargets(hybridState());
+    s = withTarget(s, "slg.rev.win-rate", 32);
+    expect(notEnoughBelowValues(slg(s), FR.strings, FR.metrics)).toEqual({ stage: "Le taux de closing", side: "sous la cible" });
+  });
+
+  it("the blind spot: « la mise en production », in a sentence", () => {
+    expect(blindSentence(slg(hybridState()).blind, FR.strings, FR.metrics)).toContain("la mise en production");
+  });
+
+  it("the renewal stands apart when the flows have no amount: the same sentence as churn", () => {
+    const noAcv = withEntry(hybridState(), "slg.rev.acv", undefined);
+    expect(churnWithoutCommonAmount(slg(noAcv))).toBe(true);
+    expect(churnWithoutCommonAmount(slg(hybridState()))).toBe(false);
+  });
+
+  it("the chain's per-month line has no self-serve template: asking for one is a bug", () => {
+    expect(() => chainTemplate({ key: "per-month", values: {} }, { metric: "act.rate", kind: "new-mrr" }, FR.strings.whatIf, "fr")).toThrow();
   });
 });

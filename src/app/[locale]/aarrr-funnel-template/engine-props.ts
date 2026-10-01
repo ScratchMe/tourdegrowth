@@ -1,7 +1,7 @@
 import { QUESTIONS } from "@/content/copy-library";
 import { ENGINE_CATALOG, ENGINE_DERIVED_CATALOG } from "@/content/engine-catalog";
 import { ENGINE_COPY } from "@/content/engine-copy";
-import { DERIVED_SHAPES, ENGINE_BRIDGES, METRIC_SHAPES } from "@/lib/engine/catalog-shape";
+import { DERIVED_SHAPES, ENGINE_BRIDGES, METRIC_SHAPES, SLG_ENGINE_BRIDGES } from "@/lib/engine/catalog-shape";
 import type { ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
 import type { Locale } from "@/lib/i18n/locale";
 import { localePath } from "@/lib/i18n/routes";
@@ -31,9 +31,11 @@ export function resolveEngineProps(locale: Locale): EngineWorkbenchProps {
     glossaryHref: localePath(locale, `/glossary/${shape.glossary}`),
   }));
 
-  // Only the eight bridged questions travel, not the fifteen: the island has
-  // no use for the others, and the copy library stays on the server.
-  const bridges: ResolvedBridge[] = ENGINE_BRIDGES.map(({ questionId, metric }) => {
+  // Only the bridged questions travel, not the fifteen: the island has no use
+  // for the others, and the copy library stays on the server. Self-serve's
+  // eight, then sales-assisted's six (§18.4.9): the mirror keeps the ticked
+  // motions' rows, one per (question, motion), in this order.
+  const bridges: ResolvedBridge[] = [...ENGINE_BRIDGES, ...SLG_ENGINE_BRIDGES].map(({ questionId, metric }) => {
     const question = QUESTIONS.find((q) => q.id === questionId);
     if (!question) throw new Error(`Engine bridge names an unknown Tour question: ${questionId}`);
     return {

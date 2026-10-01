@@ -1,5 +1,5 @@
 import type { Locale } from "@/lib/i18n/locale";
-import type { CandidateId, Diagnosis as DiagnosisModel, Interval, MetricId } from "@/lib/engine/types";
+import type { Diagnosis as DiagnosisModel, Interval, MetricId, PlgCandidateId } from "@/lib/engine/types";
 import type { EngineStrings, ResolvedMetric } from "@/lib/engine/strings";
 import { shapeOf } from "@/lib/engine/catalog-shape";
 import {
@@ -24,7 +24,7 @@ export interface DiagnosisProps {
    * and a comparator but not the value itself; the board has it (`knownOf`),
    * and the comparator sentence has to print it.
    */
-  values: Partial<Record<CandidateId, Interval>>;
+  values: Partial<Record<PlgCandidateId, Interval>>;
   className?: string;
 }
 
@@ -60,7 +60,7 @@ export function Diagnosis({ diagnosis, strings, locale, metrics, values, classNa
           ? d.level
           : d.notEnough;
 
-  const comparatorSentence = (id: CandidateId): string | null => {
+  const comparatorSentence = (id: PlgCandidateId): string | null => {
     const position = diagnosis.positions[id];
     const value = values[id];
     if (!position?.comparator || !value) return null;

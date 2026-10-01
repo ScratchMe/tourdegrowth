@@ -48,6 +48,7 @@ import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } f
 import { includeKeyOf, SLIDE_ORDER } from "./types";
 import type {
   CandidateId,
+  PlgCandidateId,
   Comparator,
   DeckModel,
   DeckSlide,
@@ -333,7 +334,7 @@ function buildLeak(state: EngineState, derived: Omit<EngineDerived, "findings">,
   const locale = ctx.locale;
   const absent: LeakBuild = { present: false, title: { key: "leakLevel", values: {} }, lines: [], notes: [] };
   const subject = (id: MetricId) => subjectOf(id, strings, metrics);
-  const impactOf = (id: CandidateId): Impact | null => {
+  const impactOf = (id: PlgCandidateId): Impact | null => {
     const comparator = diagnosis.positions[id].comparator;
     return comparator ? whatIf(state, id, impactTarget(comparator), ctx, strings.units) : null;
   };
@@ -926,7 +927,8 @@ function movedLevers(state: EngineState, strings: Words, ctx: EngineCalcContext)
     const alone = leverAlone(state, id, ctx);
     const lever = alone?.levers.find((l) => l.id === id);
     if (!alone || !lever?.today || lever.target === null) return [];
-    const print: Print = (i) => formatInterval(i, lever.unit, ctx, strings.units, { currency: state.setup.currency });
+    // Self-serve's levers are percents and money; the link's count is sales-assisted's, for its slides (S4).
+    const print: Print = (i) => formatInterval(i, lever.unit === "count" ? "ratio" : lever.unit, ctx, strings.units, { currency: state.setup.currency });
     const from = print(lever.today);
     const to = print(point(lever.target));
     return from === to ? [] : [{ id, from, to, alone }];
