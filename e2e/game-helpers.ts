@@ -2,9 +2,10 @@ import AxeBuilder from "@axe-core/playwright";
 import type { Page } from "@playwright/test";
 import { expect } from "./helpers";
 import { playPath, type Path } from "../src/lib/game/__tests__/paths";
-import { RETENTION_LEVEL, type RetentionCardId } from "../src/lib/game/levels/retention";
+import { ACQUISITION_LEVEL } from "../src/lib/game/levels/acquisition";
+import { RETENTION_LEVEL } from "../src/lib/game/levels/retention";
 import { GAME_SAVE_KEYS } from "../src/lib/game/storage-keys";
-import type { GameState } from "../src/lib/game/types";
+import type { GameState, LevelSlug } from "../src/lib/game/types";
 
 /**
  * Driving a year of « Le côté obscur » from a spec (game plan §4.2 G8b).
@@ -17,6 +18,14 @@ import type { GameState } from "../src/lib/game/types";
  */
 
 export const LEVEL_PATH = { en: "/en/game/retention", fr: "/fr/game/retention" } as const;
+/** Level 2, « Comment les gens vous trouvent » (A12.f, 2026-10-01). */
+export const LEVEL2_PATH = { en: "/en/game/acquisition", fr: "/fr/game/acquisition" } as const;
+
+/** Each level's model version, for a seeded save the island accepts. */
+const MODEL_VERSIONS: Record<LevelSlug, number> = {
+  acquisition: ACQUISITION_LEVEL.modelVersion,
+  retention: RETENTION_LEVEL.modelVersion,
+};
 
 /**
  * Puts a year on the device the way the island saves one — the same key and
@@ -24,13 +33,13 @@ export const LEVEL_PATH = { en: "/en/game/retention", fr: "/fr/game/retention" }
  * reads it after mount. A year with a quarter played opens on « Reprendre
  * l'année en cours ? »; one with nothing played resumes silently.
  */
-export async function seedGame(page: Page, state: GameState, path: string = LEVEL_PATH.fr): Promise<void> {
+export async function seedGame(page: Page, state: GameState, path: string = LEVEL_PATH.fr, level: LevelSlug = "retention"): Promise<void> {
   await page.goto(path);
   await page.evaluate(
     ([key, value]) => window.localStorage.setItem(key, value),
     [
-      GAME_SAVE_KEYS.retention,
-      JSON.stringify({ modelVersion: RETENTION_LEVEL.modelVersion, savedAt: new Date().toISOString(), state }),
+      GAME_SAVE_KEYS[level],
+      JSON.stringify({ modelVersion: MODEL_VERSIONS[level], savedAt: new Date().toISOString(), state }),
     ] as const,
   );
   await page.reload();
@@ -55,13 +64,13 @@ export async function pickUpCall(page: Page): Promise<void> {
  * wait for the quarter's report — through the three months when motion is
  * on, at once under reduced motion.
  */
-export async function playQuarter(page: Page, picks: readonly [RetentionCardId, RetentionCardId]): Promise<void> {
+export async function playQuarter(page: Page, picks: readonly [string, string]): Promise<void> {
   await hangUp(page);
   await pickAndRun(page, picks);
 }
 
 /** From the open hand: tick the two cards, « Lancer », and wait for the quarter's report. */
-export async function pickAndRun(page: Page, picks: readonly [RetentionCardId, RetentionCardId]): Promise<void> {
+export async function pickAndRun(page: Page, picks: readonly [string, string]): Promise<void> {
   for (const card of picks) {
     const button = page.getByTestId(`game-card-${card}`);
     await button.click();

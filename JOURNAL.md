@@ -1325,3 +1325,21 @@ Commit `70bdec2`. **Q14** (C25, tranchée oui) : `engine_setup/<plg|slg|hybrid>`
 - Une fixture e2e neuve : un vrai résultat lu dans l'émulateur, avec l'acquisition et la rétention à 0/20. Sa spec voit une carte, deux boutons dans l'ordre, les deux chiffres.
 - Les specs du jeu, des résultats et d'accessibilité : 160 passées, 6 ignorées par construction.
 - À l'écran, en français et en anglais, à 1 280, 390 et 360 px : la carte à deux niveaux et celle à un niveau, sans défilement horizontal.
+
+**Mergée, pas encore en production (2026-10-01)** : [#248](https://github.com/ScratchMe/tourdegrowth/pull/248), squash `976e3e9`, 17 fichiers, arbre identique à la tête. Le déploiement de production a été refusé par le quota du jour (`VERCEL.md` §1.12), comme celui d'A12.e le matin. Le jeu étant fermé, rien n'est en retard pour le public, et le prochain déploiement l'emportera.
+
+## A12.g : les specs Playwright du niveau 2 (2026-10-01)
+
+**Ce qui est livré** : `e2e/game-level2.spec.ts`, huit specs sur le modèle de celles du niveau 1. Les années de référence y sont écrites telles que le §17.6 les tabule, jamais recalculées : les tests unitaires tiennent le moteur à ces tables, ces specs tiennent l'écran. Les nouveaux clients s'affichent à la dizaine, sans « % » ni « pt ».
+- **P1, P2** : le premier écran, en nouveaux clients, avec le téléphone de Pédalix et « +29 € au panier » ; aucune carte ne dit ce qu'elle rapporte.
+- **P5** : un badge de pression apparaît sur la fiche sans changer le panier, et une livraison annoncée vide la pastille.
+- **A, en français** : les ordres refusés, chaque trimestre au chiffre près, des applaudissements en décembre et le lien vers le niveau 1 (C31).
+- **C, en anglais** : les frais de service du panier signalés en toutes lettres au T3, le contrôle au T3 et jamais avant, une transaction et jamais une amende, six astuces retirées.
+- **D** : l'année renvoyée en juin, « Année interrompue » là où était la main.
+- **La sauvegarde** sous `tdg.game.acquisition.v1`, sans toucher à celle du niveau 1.
+- **P17** : 390 px à chaque phase. **P21** : axe sur décembre.
+- **P20** : `game_started/acquisition/…` et `game_ending/acquisition/…`.
+
+**Les assistants** (`game-helpers.ts`) prennent maintenant le niveau en paramètre : `seedGame` reçoit la clé et la version du modèle de chaque niveau, et `pickAndRun` accepte les cartes de l'un ou de l'autre.
+
+**Vérifié** : la non-vacuité, d'abord. Avec les frais de service désactivés exprès dans `basketFor` puis reconstruit, l'année C rougit exactement sur `data-fees` et sur rien d'autre ; le code a été remis en place avant de reconstruire. Ensuite, sur le build final, les specs du jeu et d'accessibilité : 137 passées, 6 ignorées par construction. `tsc` et `eslint` sont propres.
