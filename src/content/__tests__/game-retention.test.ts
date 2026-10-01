@@ -1,12 +1,24 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { LEVEL_COPY_TEMPLATES, resolveLevelCopy, type RetentionCopy } from "@/lib/game/copy";
+import { RETENTION_COPY_TEMPLATES, resolveLevelCopy, type RetentionCopy } from "@/lib/game/copy";
 import * as retentionLevel from "@/lib/game/levels/retention";
 import { RETENTION_DARK_IDS, RETENTION_HONEST_IDS } from "@/lib/game/levels/retention";
-import type { Translatable } from "@/lib/i18n/translatable";
 import { RETENTION_INTRO } from "../game/meta";
 import { RETENTION_CONTENT } from "../game/retention";
+import {
+  CAPITALISED,
+  DOMAIN,
+  EN_COMMA,
+  escapeRegExp,
+  FR_POINT,
+  judgementIn,
+  placeholders,
+  sorted,
+  templatePatternFor,
+  templateProblems,
+  walk,
+} from "./game-copy-checks";
 
 /**
  * GAME-BRIEF.md §7.1, série C — the content of level 1 « S'ils reviennent ».
@@ -19,36 +31,12 @@ import { RETENTION_CONTENT } from "../game/retention";
  * wherever it is not explicitly marked as corrected or new.
  */
 
-type Leaf = { path: string; value: Translatable };
-
-/** Every translatable of the tree, with its dotted path. A bare string anywhere is a failure of its own (C2). */
-function walk(node: unknown, path = "", leaves: Leaf[] = [], bare: string[] = []): { leaves: Leaf[]; bare: string[] } {
-  if (typeof node === "string") {
-    bare.push(path);
-  } else if (Array.isArray(node)) {
-    node.forEach((child, i) => walk(child, path ? `${path}.${i}` : String(i), leaves, bare));
-  } else if (node !== null && typeof node === "object") {
-    const record = node as Record<string, unknown>;
-    const keys = Object.keys(record);
-    if (keys.length === 2 && typeof record.fr === "string" && typeof record.en === "string") {
-      leaves.push({ path, value: record as Translatable });
-    } else {
-      for (const key of keys) walk(record[key], path ? `${path}.${key}` : key, leaves, bare);
-    }
-  }
-  return { leaves, bare };
-}
-
 const { leaves: LEAVES, bare: BARE } = walk(RETENTION_CONTENT);
 const HONEST = [...RETENTION_HONEST_IDS] as string[];
 const DARK = [...RETENTION_DARK_IDS] as string[];
 
 /** The CEO asks for these five and no other (GAME-BRIEF §5.10). */
 const ORDER_POOL = ["pdef", "call", "bury", "cascade", "notice"];
-
-function sorted(values: Iterable<string>): string[] {
-  return [...values].sort();
-}
 
 // ---------------------------------------------------------------------------
 // C1, C2 — both languages, everywhere, and nothing forgotten.
@@ -124,24 +112,6 @@ describe("C1 · every trick has its four catalogue fields", () => {
 // ---------------------------------------------------------------------------
 // C3, C9 — the cards describe, they never judge (brief §5.5).
 // ---------------------------------------------------------------------------
-
-/** Word boundaries that understand accents: JavaScript's \b does not, even with the u flag. */
-const word = (alternatives: string) => new RegExp(`(?<![\\p{L}])(?:${alternatives})(?![\\p{L}])`, "iu");
-
-const FORBIDDEN = {
-  fr: word("lente?s?|rapides?|efficaces?|honnêtes?|astuces?|faux|fausses?|pièges?|certains partiront|ils n'existent pas"),
-  en: word("slow(?:ly)?|fast|quick(?:ly)?|effective|efficient|honest|tricks?|fake|traps?|some will leave|(?:don't|do not) exist"),
-};
-const PERCENT = /%/;
-/** A signed number: + − or - right before a digit, not inside a word like « e-mail » or « L215-1-1 ». */
-const SIGNED = /(?<![\p{L}\d])[+\-−]\s?\d/u;
-
-function judgementIn(text: string, locale: "fr" | "en"): string | null {
-  if (PERCENT.test(text)) return "a percentage";
-  if (SIGNED.test(text)) return "a signed number";
-  const hit = text.match(FORBIDDEN[locale]);
-  return hit ? `the word « ${hit[0]} »` : null;
-}
 
 describe("C3 · no card shows an effect", () => {
   it("names and pitches carry no percentage, no signed number, no forbidden word, in either language", () => {
@@ -273,9 +243,6 @@ const NOT_BRANDS = new Set([
   "Prime", "Iliad", "Nord",
 ]);
 
-const CAPITALISED = /(?<![\p{L}'-])\p{Lu}[\p{L}'’-]*/gu;
-const DOMAIN = /\b[a-z]+\.[a-z]{2,}\b/g;
-
 describe("C6 · brands", () => {
   it("names in a case only whitelisted brands, public bodies and ordinary words", () => {
     const unknown: string[] = [];
@@ -311,31 +278,6 @@ describe("C6 · brands", () => {
 // C8 — the placeholders are a contract with the island.
 // ---------------------------------------------------------------------------
 
-const PLACEHOLDER = /\{([a-zA-Z]+)\}/g;
-
-function placeholders(text: string): string[] {
-  return sorted(new Set([...text.matchAll(PLACEHOLDER)].map((m) => m[1]!)));
-}
-
-/** Every regex metacharacter escaped, so a path pattern matches literally except its `*`. */
-function escapeRegExp(text: string): string {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function patternFor(path: string): string | undefined {
-  return Object.keys(LEVEL_COPY_TEMPLATES).find((pattern) =>
-    new RegExp(`^${escapeRegExp(pattern).replace(/\\\*/g, "[^.]+")}$`).test(path),
-  );
-}
-
-/** The same contract `format.ts#fill` enforces: every placeholder must be supplied. */
-function fillStrict(template: string, vars: Record<string, string>): string {
-  return template.replace(PLACEHOLDER, (_, name: string) => {
-    if (!(name in vars)) throw new Error(`no value for {${name}}`);
-    return vars[name]!;
-  });
-}
-
 describe("C8 · templates", () => {
   const templated = LEAVES.filter(({ value }) => value.fr.includes("{") || value.en.includes("{"));
 
@@ -351,29 +293,12 @@ describe("C8 · templates", () => {
   });
 
   it("puts a placeholder only where the contract declares one, and fills with exactly the declared names", () => {
-    const problems: string[] = [];
-    for (const { path, value } of templated) {
-      const pattern = patternFor(path);
-      if (!pattern) {
-        problems.push(`${path}: not a declared template`);
-        continue;
-      }
-      const vars = Object.fromEntries(LEVEL_COPY_TEMPLATES[pattern]!.map((name) => [name, "X"]));
-      for (const locale of ["fr", "en"] as const) {
-        try {
-          const filled = fillStrict(value[locale], vars);
-          if (/[{}]/.test(filled)) problems.push(`${path} ${locale}: a brace survives filling`);
-        } catch (err) {
-          problems.push(`${path} ${locale}: ${(err as Error).message}`);
-        }
-      }
-    }
-    expect(problems).toEqual([]);
+    expect(templateProblems(LEAVES, RETENTION_COPY_TEMPLATES)).toEqual([]);
   });
 
   it("declares no template that the content does not have", () => {
     const paths = templated.map(({ path }) => path);
-    const stale = Object.keys(LEVEL_COPY_TEMPLATES).filter((pattern) => !paths.some((path) => patternFor(path) === pattern));
+    const stale = Object.keys(RETENTION_COPY_TEMPLATES).filter((pattern) => !paths.some((path) => templatePatternFor(RETENTION_COPY_TEMPLATES, path) === pattern));
     expect(stale).toEqual([]);
   });
 });
@@ -383,10 +308,6 @@ describe("C8 · templates", () => {
 // ---------------------------------------------------------------------------
 
 describe("C10 · decimal separators", () => {
-  const FR_POINT = /\d\.\d/;
-  /** A comma between digits that is not a thousands separator (followed by exactly three digits). */
-  const EN_COMMA = /\d,(?!\d{3}(?!\d))\d/;
-
   it("has no decimal point in French and no decimal comma in English", () => {
     const offenders = LEAVES.flatMap(({ path, value }) => [
       ...(FR_POINT.test(value.fr) ? [`${path} fr: ${value.fr.slice(0, 60)}`] : []),

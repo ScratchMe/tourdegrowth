@@ -1095,9 +1095,9 @@ Le niveau 2 pardonne un peu plus au joueur honnête qui joue au hasard. Ce n'est
 Au niveau 1, le téléphone montrait l'écran de résiliation. Ici, il montre le chemin d'un visiteur sur l'appli de Pédalix, de la recherche au panier, et reflète comme au niveau 1 l'union des cartes en production et des cartes cochées. Une figure de texte, sans faux boutons (E9). De haut en bas :
 
 - Barre d'appli « Pédalix · 21:04 ».
-- `native` : une vignette vidéo « Mon vélo de tous les jours », signée d'un créateur fictif, sans mention.
-- Résultats pour « vélo de ville » : le premier est le modèle le mieux noté ; avec `sponsored`, c'est celui d'une marque partenaire, sans mention ; avec `compare`, une ligne « Comparé à 3 sites, prix livrés ».
-- La fiche du « Urbain 7 », vélo de ville électrique : photo ; avec `specs`, « 12 photos · taille, poids, compatibilités ».
+- `native` : une vignette vidéo « Mon vélo de tous les jours », signée d'un créateur fictif (@deux_roues_et_moi), sans mention.
+- Résultats pour « vélo de ville » : le premier est le modèle le mieux noté ; avec `sponsored`, c'est celui d'une marque partenaire (Ferlune, une marque inventée), sans mention ; avec `compare`, une ligne « Comparé à 3 sites, prix livrés ».
+- La fiche du « Pédalix Ville 7 », vélo de ville électrique de la maison : photo ; avec `specs`, « 12 photos · taille, poids, compatibilités ». *(« Urbain 7 » jusqu'au 2026-10-01 : trop proche d'un « Urban 7 » réel, vu en écrivant la copie, A12.c.)*
 - Le prix : « 1 290 € » ; avec `anchor`, « ~~1 590 €~~ 1 290 € · −19 % » ; avec `allin`, « 1 319 € livré ».
 - La note : « 4,1 ★ · 38 avis » ; avec `reviews`, « 4,9 ★ · 1 204 avis » ; avec `verified`, « dont 31 vérifiés (achat prouvé) » à la suite.
 - La pression, une ligne par carte : `countdown` « Offre valable encore 02:59:41 » ; `stock` « Plus que 3 en stock » ; `watchers` « 12 personnes regardent ce vélo ».
@@ -1140,7 +1140,7 @@ Les coupures de presse gardent des titres de journaux fictifs (§8.3). Aucun tex
 
 Chaque texte dit ce que fait le modèle (E11) : la recommande pliée par la confiance, les rampes qui continuent, le radar qui ne baisse que sans astuce en production. Aucun ne nomme une carte que l'année n'aurait pas jouée : l'année D, virée, n'a par exemple écrit aucun guide.
 
-**Décembre** : les trois cellules (nouveaux clients, confiance, radar), la courbe des nouveaux clients de 1 000 à 4 000 avec le 3 000 du board en pointillé, celle de la confiance, le playbook, le catalogue, le partage (« Une année chez Pédalix : {title} {metric} nouveaux clients, confiance à {trust}. Et toi, tu tiendrais ? {url} »), le niveau suivant et la boucle vers le Tour.
+**Décembre** : les trois cellules (nouveaux clients, confiance, radar), la courbe des nouveaux clients de 1 000 à 4 000 avec le 3 000 du board en pointillé, celle de la confiance, le playbook, le catalogue, le partage (« Une année chez Pédalix : {title} {metric} nouveaux clients, confiance à {trust}. Et toi, tu tiendrais ? {url} »), **l'autre niveau** et la boucle vers le Tour. Le bloc « Niveau suivant » du niveau 1 annonce le niveau 2 ; celui du niveau 2 annonce le niveau 1, « jouable », et non un troisième niveau qui n'existe pas : **tranché par Antoine le 2026-10-01** (C31), les deux niveaux se renvoient l'un à l'autre.
 
 ### 17.9 Le catalogue : les huit astuces, vérifiées
 
@@ -1184,7 +1184,7 @@ Au format de `CHANTIERS.md` C. « Aujourd'hui » est ce que le brouillon suppose
 
 Dans l'ordre, une PR chacun :
 
-1. **La copie** : `content/game/acquisition.ts`, français et anglais, tout « à relire », avec la série C du §7.1 (parité, mots interdits, marques de la liste blanche) et ses propres tests de contenu.
+1. **La copie** : `content/game/acquisition.ts`, français et anglais, tout « à relire », avec la série C du §7.1 (parité, mots interdits, marques de la liste blanche) et ses propres tests de contenu. **Faite le 2026-10-01** (A12.c) : ce que le niveau 1 dit déjà de toute année (les mois, la visio, les nouvelles du trimestre, le playbook…) est repris par référence, et trois tests s'ajoutent à la série C : les espaces insécables des nombres (C12), l'arithmétique du téléphone (C13), et jamais « amende » pour une transaction pénale (C14).
 2. **L'îlot partagé** : l'îlot du niveau 1 vit sous `app/[locale]/game/retention/` et parle de churn ; il devient celui de tout niveau, chaque niveau n'apportant que sa copie, son téléphone et ses formats. Les composants de `components/game` gardent aujourd'hui des noms d'emplacement du niveau 1 (`churn`, `subs`, `mrr`) : les renommer change leur contrat, donc une re-synchronisation avec Claude Design (`.design-sync/NOTES.md`).
 3. **Le téléphone de Pédalix** et sa pastille (§17.7), un composant neuf, avec son aperçu pour Claude Design.
 4. **Le branchement** : le slug passe de `DraftLevelSlug` à `LevelSlug`, et le compilateur liste ce qu'il exige (clé de sauvegarde, encart du résultat, vocabulaire analytique) ; la page, son image de partage, le sitemap, le hub qui l'affiche « Jouable », et la réponse à Q5.

@@ -8,8 +8,8 @@ question tranchée plus tard y gagne sa ligne, dans le même format.*
 C1 à C22 ont été tranchées dans la séance du 2026-09-29. Les questions de
 design y ont été posées avec des captures du vrai écran : un build local avec
 le jeu et le moteur ouverts, et, pour la vue propriétaire, un build jetable
-jamais commité. C23 à C29 l'ont été le 2026-09-30, C30 le 2026-10-01. Les
-questions encore ouvertes sont dans `CHANTIERS.md`, section C.
+jamais commité. C23 à C29 l'ont été le 2026-09-30, C30 et C31 le 2026-10-01.
+Les questions encore ouvertes sont dans `CHANTIERS.md`, section C.
 
 | # | Sujet | Réponse | Écrit dans | Suite |
 |---|---|---|---|---|
@@ -43,3 +43,4 @@ questions encore ouvertes sont dans `CHANTIERS.md`, section C.
 | C28 | L'espace entre une unité et son chiffre (tranchée le 2026-09-30) | **L'unité porte son espace** (la reco) : la boîte n'en ajoute plus. Collée en anglais (« €500 », « 20% »), insécable en français (« 21 000 € », « 20 % »), ce que `Intl` donne ; `moneyUnit` reprend l'espace qu'`Intl` met à côté du signe | `Field.module.css`, `NumberField.tsx`, `.design-sync/conventions.md` | Livré le 2026-09-30 avec A11 |
 | C29 | « Facultatif » : dans le libellé, ou par la prop `optional` (tranchée le 2026-09-30) | **Par la prop** (la reco) : le mot sort des quatre libellés du moteur et se dessine plus discret après eux, comme le retour 04 le dessine ; nouvelle clé `workbench.optional`. Les quatre libellés raccourcis et la clé sont « à relire » | `engine-copy.ts`, `.design-sync/conventions.md` | Livré le 2026-09-30 avec A11 |
 | C30 | La spécification du niveau 2 du jeu (tranchée le 2026-10-01, dans la session qui l'avait écrite) | **Validée, les cinq recos.** Q1 : le DG réclame les **nouveaux clients par mois** (2 000 → 3 000), pas le taux de conversion du §11.1. Q2 : **Pédalix**, INPI à consulter avec la relecture juridique. Q3 : le contrôle finit en **transaction pénale de 150 000 €**, fixe. Q4 : **les huit cas tels quels**, Temu présenté comme une notification en cours. Q5 : quand l'acquisition et la rétention freinent ensemble, **une carte qui propose les deux niveaux** (C11) | `GAME-BRIEF.md` §17.10 et §15.4 | A12.c à A12.h |
+| C31 | Ce qu'annonce le bloc « Niveau suivant » à la fin du niveau 2 (née d'A12.c, tranchée le 2026-10-01, dans la session qui écrivait la copie) | **L'autre niveau**, la reco : les deux niveaux se renvoient l'un à l'autre, chacun « jouable », avec un lien. Écartés : un niveau 3 « bientôt » (ni spécifié ni décidé) et pas de bloc du tout | `GAME-BRIEF.md` §17.8, `content/game/acquisition.ts` | A12.f (le lien, et le bloc du niveau 1 qui passe à « jouable ») |

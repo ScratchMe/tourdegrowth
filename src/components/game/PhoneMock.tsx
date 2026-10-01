@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import type { LevelCopy } from "@/lib/game/copy";
+import type { RetentionPhoneCopy } from "@/lib/game/copy";
 import type { PhoneItem } from "@/lib/game/view";
 import styles from "./PhoneMock.module.css";
 
@@ -48,7 +48,7 @@ function withSlot(template: string, name: string, render: ReactNode): ReactNode 
 export interface PhoneMockProps {
   /** lib/game/view.ts `phoneView(level, phoneIds(state))` — the active cards AND the ticked ones. */
   items: readonly PhoneItem[];
-  labels: LevelCopy["phone"];
+  labels: RetentionPhoneCopy;
   className?: string;
 }
 
@@ -99,7 +99,7 @@ export function PhoneMock({ items, labels, className }: PhoneMockProps) {
   );
 }
 
-function PhoneElement({ item, labels, className }: { item: PhoneItem; labels: LevelCopy["phone"]; className: string }) {
+function PhoneElement({ item, labels, className }: { item: PhoneItem; labels: RetentionPhoneCopy; className: string }) {
   const cx = (...names: (string | undefined)[]) => [...names, className].filter(Boolean).join(" ");
   switch (item.kind) {
     case "appBar":
@@ -194,7 +194,7 @@ function CancelElement({
   className,
 }: {
   item: Extract<PhoneItem, { kind: "cancel" }>;
-  labels: LevelCopy["phone"];
+  labels: RetentionPhoneCopy;
   className: string;
 }) {
   const cx = (...names: (string | undefined)[]) => [...names, className].filter(Boolean).join(" ");
