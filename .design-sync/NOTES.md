@@ -341,7 +341,12 @@ with them: its emitted `.d.ts` and `.prompt.md` differed from the anchor's
 while its sources and render hash did not (not chased further). 14
 components uploaded, 76 carried forward. 463 files, no delete, `design/` untouched. Three driver
 runs; `report_validate`: 90 total, 0 bad, 0 thin, 0 identical; anchor
-`bundleSha12` `edc539adcbbf`. Earlier uploads: 2026-10-01 B4, the game's
+`bundleSha12` `edc539adcbbf`. **A second pass the same evening** carried the
+two tokens A14 T6 (#264) added while B6 was in review, `--paper-white` and
+`--surface-white`: no component changed (0 changed, sources and render hashes
+identical), so only the shared files went up (`_preview/`, `_vendor/`,
+`fonts/`, bundle, CSS, README: 101 files), between the two sentinels, then
+`_ds_sync.json`. Render check 90/0/0/0; anchor `6da5e42a15ef`. Earlier uploads: 2026-10-01 B4, the game's
 level 2 and A7.3.c's engine (90, 303, 19 components uploaded, eight driver
 runs, `fee6cc7084fe`), 2026-09-30 after A11 (88, 292, `8235f4e6de01`),
 2026-09-30 B3 (88, 292, `d1835d51cffd`), 2026-09-30 before A10 (79
