@@ -1029,5 +1029,5 @@ la fusion à trois de #233 avec le nouvel `ENGINE.md` est propre (simulée par
 
 **Vérifié** :
 - `npm audit` à 0, en production comme en développement, après un `npm ci` depuis le lockfile neuf.
-- `eslint` et `tsc` propres, **2 403 tests unitaires**, `vitest --coverage` au-dessus de ses seuils, et `next build` propre sous « Next.js 16.3.6 ».
+- `eslint` et `tsc` propres, **2 403 tests unitaires** (2 405 après la fusion de #240, qui ajoute la garde des liens des documents), `vitest --coverage` au-dessus de ses seuils, et `next build` propre sous « Next.js 16.3.6 ».
 - La suite Playwright complète, avec les variables de la CI et l'émulateur Firestore : **688 specs, 683 passées, 5 ignorées par construction, aucun échec ni rejeu**. Elle comprend les specs des images de partage (`share-previews`, `game-share-images`, `result-real`), qui exercent `ImageResponse`.
