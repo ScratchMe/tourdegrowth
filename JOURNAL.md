@@ -582,3 +582,4 @@ La première PR du moteur complet (`docs/engine/moteur-complet.md` §19.1 et §1
 - `vitest --coverage` : 2 727 tests passés (215 fichiers), au-dessus des seuils ;
 - `tsc`, `eslint` et `next build` (avec `GAME_ENABLED=true`, comme la CI) propres ;
 - Playwright sur ce build : 757 specs, 730 passées et 27 ignorées (les 20 de `result-real.spec.ts` et une d'`error-page.spec.ts`, faute d'émulateur ; 6 « jeu fermé », par construction), aucune au second essai. Les cinq specs de migration, dont les deux appareils v1 et v2, passent du premier coup.
+- la barrière de `/livrer` §0 relève deux fichiers non TypeScript ajoutés sous `src/` : `golden-v2-inputs.json` et `golden-v2.json` (1 Mo à eux deux). Ce sont des données de test lues par `readFileSync` dans Vitest seulement, comme celles du golden v1 ; aucun `.nft.json` du build ne les trace, donc aucun bundle serveur ne les porte.
