@@ -18,7 +18,7 @@ export interface ErrorScreenProps {
    * Next's `retry`: fetches the segment that threw again, then re-renders it.
    * Not `reset`, which re-renders without fetching — after a server failure
    * (Firestore on `/r/<id>`), the very case this screen exists for, `reset`
-   * could only show the same failure again (Next 16.3, `error.md`; A14.5).
+   * could only show the same failure again (Next 16.3, `error.md`; A15.5).
    */
   retry: () => void;
 }

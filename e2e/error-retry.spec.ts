@@ -29,7 +29,7 @@ test("a failed calculation keeps the answers and retries without restarting", as
 });
 
 /*
- * A14.4 (2026-10-01): the sentence says which failure it is, and the code
+ * A15.4 (2026-10-01): the sentence says which failure it is, and the code
  * under it is a stable one (R-04), never what `fetch` or a route wrote.
  * Read from the dictionary, in both languages. The Deep dive's screen runs
  * the same module (`lib/quiz/request-failure.ts`), unit-tested on its own.

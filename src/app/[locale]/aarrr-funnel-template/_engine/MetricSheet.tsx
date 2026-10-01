@@ -103,7 +103,7 @@ export function MetricSheet({
     };
   });
   const [attempted, setAttempted] = useState(false);
-  // A refused save moves the focus to the first field it names (A14.3): its
+  // A refused save moves the focus to the first field it names (A15.3): its
   // label and its message are read out with it, where a line under the
   // button, outside any live region, said nothing to a screen reader. Counted,
   // so a second refusal moves it again.
@@ -652,7 +652,7 @@ function TargetField({
       onChange={setValue}
       onBlur={(event) => {
         // An unreadable box stays on screen with its message and writes
-        // nothing: the stored target is not erased by a typo (A14.2).
+        // nothing: the stored target is not erased by a typo (A15.2).
         if (isUnreadableNumber(event.target.value, view.ctx.locale)) return;
         if ((value ?? undefined) !== target) actions.setTarget(id, value);
       }}

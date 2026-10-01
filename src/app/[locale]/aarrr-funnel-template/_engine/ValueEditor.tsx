@@ -68,7 +68,7 @@ export function ValueEditor({
 
   // A rule a single value breaks — a rate outside 0–100, a negative amount
   // or duration — is said when the box is left, not only at the save
-  // (A14.3): the person is still looking at it. A piece still missing waits
+  // (A15.3): the person is still looking at it. A piece still missing waits
   // for the save, as before.
   const [left, setLeft] = useState<Partial<Record<"rate" | "amount" | "duration", true>>>({});
   const leave = (field: "rate" | "amount" | "duration") => () => setLeft((was) => (was[field] ? was : { ...was, [field]: true }));

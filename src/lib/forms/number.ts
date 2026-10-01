@@ -28,7 +28,7 @@ export function parseTypedNumber(raw: string, locale: "en" | "fr"): number | nul
  * whole where it must be. An empty box is not unreadable — it is empty. A
  * field that writes on blur reads this first: `NumberField` hands it `null`
  * for an unreadable box as for an empty one, and only the empty one means
- * "remove" (CHANTIERS.md A14.2).
+ * "remove" (CHANTIERS.md A15.2).
  */
 export function isUnreadableNumber(raw: string, locale: "en" | "fr", integer = false): boolean {
   if (raw.trim() === "") return false;

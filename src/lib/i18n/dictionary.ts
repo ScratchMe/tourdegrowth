@@ -363,7 +363,7 @@ export const UI_STRINGS = {
       en: "Your 15 answers are still saved on this device — retrying doesn't restart the questionnaire.",
       fr: "Tes 15 réponses sont toujours enregistrées sur cet appareil — réessayer ne relance pas le questionnaire.",
     },
-    // TODO: à relire (convention 6). A14.4 (2026-10-01): `errorBody` says « in a moment »,
+    // TODO: à relire (convention 6). A15.4 (2026-10-01): `errorBody` says « in a moment »,
     // which a dropped connection and the hourly limit both make false. `{m}` is in minutes.
     errorOffline: {
       en: "The connection dropped before our answer reached you — check your network, then try again.",
@@ -415,7 +415,7 @@ export const UI_STRINGS = {
 
   /** Loading — DESIGN-BRIEF.md §06b had 3 rotating messages. Quick mode
    * only ever shows message1, briefly (SPEC-ADDENDUM-01.md §0: no real wait
-   * left to narrate). Since A14.6 (2026-10-01) the Deep dive shows message3
+   * left to narrate). Since A15.6 (2026-10-01) the Deep dive shows message3
    * alone, the one true for its whole wait, over a bar told by the clock;
    * « Calcul de tes temps par étape » went with the steps it promised. */
   loading: {

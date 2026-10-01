@@ -1,5 +1,5 @@
 /*
- * The tap strip (CHANTIERS.md A14.1, 2026-10-01): for a target drawn smaller
+ * The tap strip (CHANTIERS.md A15.1, 2026-10-01): for a target drawn smaller
  * than --hit-min — a 28px pill, a wordmark, a link standing on its own — a
  * transparent `::before`, at least --hit-min on each axis and centred on the
  * element, that takes the tap and moves nothing around it. The same strip

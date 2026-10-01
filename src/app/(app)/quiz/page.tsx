@@ -283,7 +283,7 @@ export default function QuizPage() {
       trackEvent("submission_completed", tone); // SPEC.md §8: one custom event per completed analysis
       router.push(`/r/${created.id}`);
     } catch (err) {
-      // The full error for the console; the reader gets a sentence and a stable code (A14.4, R-04).
+      // The full error for the console; the reader gets a sentence and a stable code (A15.4, R-04).
       console.error(err);
       setSubmitError(failureOf(err));
       setPhase("error");

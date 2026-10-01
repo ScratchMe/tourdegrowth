@@ -570,7 +570,7 @@ export const ENGINE_COPY = {
     low: { fr: "Au moins", en: "At least" },
     high: { fr: "Au plus", en: "At most" },
     basis: { fr: "Sur quoi repose l'estimation ?", en: "What is the estimate based on?" },
-    // TODO: à relire (convention 6) — réécrit le 2026-10-01 (A14.3) : il disait l'erreur, il dit le geste.
+    // TODO: à relire (convention 6) — réécrit le 2026-10-01 (A15.3) : il disait l'erreur, il dit le geste.
     lowAboveHigh: { fr: "Échange les deux : le minimum dépasse le maximum.", en: "Swap the two: the minimum is above the maximum." },
     wideRange: {
       fr: "Une fourchette aussi large ne dit presque rien — et c'est déjà une information.",
@@ -708,7 +708,7 @@ export const ENGINE_COPY = {
    */
   workbench: {
     choose: { fr: "Choisir…", en: "Choose…" },
-    // TODO: à relire (convention 6) — réécrit le 2026-10-01 (A14.3) : un exemple de ce qu'il faut écrire, plutôt que « pas lisible ».
+    // TODO: à relire (convention 6) — réécrit le 2026-10-01 (A15.3) : un exemple de ce qu'il faut écrire, plutôt que « pas lisible ».
     notANumber: { fr: "Écris un nombre, par exemple 1 250 ou 18,5.", en: "Type a number, such as 1,250 or 18.5." },
     notAWholeNumber: { fr: "Un nombre entier : on compte des personnes.", en: "A whole number: these are people." },
     sourceRole: { fr: "Qui te l'a donné ?", en: "Who gave it to you?" },
@@ -723,7 +723,7 @@ export const ENGINE_COPY = {
     saved: { fr: "Enregistré", en: "Saved" },
     saveNeeds: { fr: "Pour enregistrer, il manque : {fields}", en: "To save, still missing: {fields}" },
     percentRange: { fr: "Un taux se situe entre 0 et 100 %.", en: "A rate sits between 0 and 100%." },
-    // TODO: à relire (convention 6) — A14.3 (2026-10-01) : un montant ou une durée négatifs étaient dits « manquants ».
+    // TODO: à relire (convention 6) — A15.3 (2026-10-01) : un montant ou une durée négatifs étaient dits « manquants ».
     amountNegative: { fr: "Un montant ne peut pas être négatif.", en: "An amount can't be negative." },
     // TODO: à relire (convention 6).
     durationNegative: { fr: "Une durée ne peut pas être négative.", en: "A duration can't be negative." },

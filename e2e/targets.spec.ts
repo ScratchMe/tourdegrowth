@@ -490,7 +490,7 @@ test.describe("the small button on the owner's result", () => {
 });
 
 /*
- * A14.1 (2026-10-01): what is not a Button and was drawn, and tapped, under
+ * A15.1 (2026-10-01): what is not a Button and was drawn, and tapped, under
  * 44px — measured that day on ten pages at 390px with `elementFromPoint` —
  * now composes the same strip (`styles/hit.module.css`). Same three claims
  * per target; the related terms of a glossary page stand in rows, so their

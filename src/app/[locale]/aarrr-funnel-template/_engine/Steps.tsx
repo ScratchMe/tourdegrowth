@@ -205,7 +205,7 @@ function TargetInput({ id, view, actions }: { id: MetricId; view: EngineView; ac
       onChange={setValue}
       onBlur={(event) => {
         // An unreadable box stays on screen with its message and writes
-        // nothing: the stored target is not erased by a typo (A14.2).
+        // nothing: the stored target is not erased by a typo (A15.2).
         if (isUnreadableNumber(event.target.value, view.ctx.locale)) return;
         if ((value ?? undefined) !== target) actions.setTarget(id, value);
       }}

@@ -7,7 +7,7 @@ import { expect, seedOwnedResult, test } from "./helpers";
  * a line under the last screen's primary button, before the wait starts,
  * and a line under the wait's bar once its first seconds have passed and the
  * call is still going (5.2 s, the moment the three messages of the old
- * screen used to run out; A14.6 kept it).
+ * screen used to run out; A15.6 kept it).
  */
 async function reachTheLastScreen(page: import("@playwright/test").Page) {
   // localStorage belongs to an origin: load a page first, then seed.
@@ -50,7 +50,7 @@ test("once the first seconds of the wait have passed, the screen says this is ex
 });
 
 /*
- * A14.6 (2026-10-01, approved by Antoine): the wait is told by the clock.
+ * A15.6 (2026-10-01, approved by Antoine): the wait is told by the clock.
  * The bar used to follow three messages on a 2.6 s timer — full at 5.2 s for
  * a wait of up to 70 s. Now it follows the time spent against the usual
  * minute, slows as it goes and never fills; only the answer ends the wait.

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { formatElapsed, TYPICAL_WAIT_MS, waitProgress } from "../wait-progress";
 
-/** A14.6: the bar follows the clock, slows as it goes, and only the answer fills it. */
+/** A15.6: the bar follows the clock, slows as it goes, and only the answer fills it. */
 describe("waitProgress", () => {
   it("starts empty", () => {
     expect(waitProgress(0)).toBe(0);

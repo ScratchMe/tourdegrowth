@@ -1,5 +1,5 @@
 /*
- * The Deep dive's wait, told by the clock (CHANTIERS.md A14.6, approved by
+ * The Deep dive's wait, told by the clock (CHANTIERS.md A15.6, approved by
  * Antoine on 2026-10-01). The bar used to follow three messages on a fixed
  * 2.6 s timer: full at 5.2 s for a wait measured between 9 and 70 s
  * (GEMINI.md §2), and three steps no real step followed.

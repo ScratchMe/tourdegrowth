@@ -242,6 +242,7 @@ retiré depuis le même jour : la copie vit dans le code.*
 |---|---|---|
 | §0 à §17, et l'annexe des vérifications | [`docs/engine/v1.md`](docs/engine/v1.md) | La spécification d'implémentation de la v1 libre-service, construite du 2026-09-24 au 2026-09-30. Le code fait foi depuis |
 | §18 | [`docs/engine/assiste-et-hybride.md`](docs/engine/assiste-et-hybride.md) | Le B2B assisté et l'hybride (A7.3), validé par C25 et construit par A7.3.c (#233, 2026-10-01). Le code fait foi depuis |
+| §19 | [`docs/engine/moteur-complet.md`](docs/engine/moteur-complet.md) | Le moteur complet pour le SaaS B2B (A14) : la série mensuelle, la rétention J30 et la part recommandée en €, la couverture du pipeline, les outils, le tableau collé, plusieurs moteurs, la fusion, le fond blanc, les rappels, les portes d'entrée. Écrit et validé le 2026-10-01 (C32), à coder (A14.c) ; l'ouverture du moteur l'attend |
 | Annexe — Les entretiens | ci-dessous | La trame des entretiens (`CHANTIERS.md` D5) |
 
 ---

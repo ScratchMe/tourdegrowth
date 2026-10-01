@@ -181,7 +181,7 @@ test("the joiner of a pair sits against the first box, however long its label", 
 });
 
 /*
- * A14.3 (2026-10-01): a sheet's refused save said nothing to a screen reader
+ * A15.3 (2026-10-01): a sheet's refused save said nothing to a screen reader
  * — its lines under the button sit in no live region, and the focus stayed on
  * the button. It now moves to the first field it names, whose label and
  * message are read out with it. And a rule one value breaks (a rate over

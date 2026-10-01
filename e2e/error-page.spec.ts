@@ -62,7 +62,7 @@ test("an unknown but well-formed id is our 404 when Firestore answers", async ({
 });
 
 /*
- * A14.5 (2026-10-01): « Try again » on our error screen called Next's
+ * A15.5 (2026-10-01): « Try again » on our error screen called Next's
  * `reset`, which re-renders the segment WITHOUT fetching it — after a server
  * failure, it could only show the same failure. `retry` (stable since Next
  * 16.3) fetches it again. Behaviour, not the prop: the click must send a

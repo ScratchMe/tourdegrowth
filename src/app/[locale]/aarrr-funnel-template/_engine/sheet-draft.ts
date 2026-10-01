@@ -325,7 +325,7 @@ export function entryFromDraft(
           else if (draft.percent < 0 || draft.percent > 100) problems.push("percent-range");
           else value = { kind: "rate", percent: draft.percent };
           break;
-        // A negative number was typed, not left out: it gets its own rule (A14.3).
+        // A negative number was typed, not left out: it gets its own rule (A15.3).
         case "amount":
           if (draft.amount === null) problems.push("amount");
           else if (draft.amount < 0) problems.push("amount-negative");
@@ -373,7 +373,7 @@ export function entryFromDraft(
       if (draft.low === null) problems.push("low");
       if (draft.high === null) problems.push("high");
       if (draft.low !== null && draft.high !== null && draft.low > draft.high) problems.push("low-above-high");
-      // A rate's bounds are rates (A14.3): the same 0–100 the value itself is held to.
+      // A rate's bounds are rates (A15.3): the same 0–100 the value itself is held to.
       if (shape.unit === "percent" && [draft.low, draft.high].some((v) => v !== null && (v < 0 || v > 100))) problems.push("percent-range");
       if (!draft.basis) problems.push("basis");
       if (problems.length === 0)

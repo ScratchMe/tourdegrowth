@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { failureFromResponse, failureOf, failureSentence, RequestFailedError, requestOrFail } from "../request-failure";
 
 /**
- * A14.4 (2026-10-01): the error screens of the quiz and the Deep dive say
+ * A15.4 (2026-10-01): the error screens of the quiz and the Deep dive say
  * which failure it is — the reader's connection, the hourly limit and its
  * real wait, or ours — and keep a short stable code for support (REVIEW.md
  * R-04), never a sentence a route or `fetch` produced.

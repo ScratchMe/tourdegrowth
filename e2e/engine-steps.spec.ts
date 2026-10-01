@@ -253,7 +253,7 @@ async function boardSheet(page: Page, stage: string, metricDomId: string) {
 }
 
 /*
- * A14.2 (2026-10-01): a target is written when its box is left, and a box
+ * A15.2 (2026-10-01): a target is written when its box is left, and a box
  * holding text it cannot read used to write `null` — erasing the stored
  * target while the box still showed the typo and its message. Both target
  * fields: the step screen's and the board sheet's. Emptying the box is still

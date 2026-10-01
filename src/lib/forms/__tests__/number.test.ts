@@ -154,7 +154,7 @@ describe("displayNumber (a stored value as the box shows it on load)", () => {
 });
 
 /**
- * A14.2: a field that writes on blur must tell an empty box (remove the
+ * A15.2: a field that writes on blur must tell an empty box (remove the
  * value) from an unreadable one (keep it). Both reach it as `null`.
  */
 describe("isUnreadableNumber", () => {

@@ -25,7 +25,7 @@ export default function GlobalError({ error, retry }: { error: Error & { digest?
             {tc(t.errorBody, "en")}
             {error.digest ? ` (${error.digest})` : null}
           </DetourCard>
-          {/* `retry`, not `reset`: it fetches again (see ErrorScreen, A14.5). */}
+          {/* `retry`, not `reset`: it fetches again (see ErrorScreen, A15.5). */}
           <Button onClick={retry}>{tc(t.errorRetry, "en")}</Button>
         </main>
       </body>

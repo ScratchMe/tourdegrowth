@@ -19,7 +19,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-4);
-  /* Each link takes taps on a 44px strip over a 20px line (A14.1): rows at
+  /* Each link takes taps on a 44px strip over a 20px line (A15.1): rows at
      least 24px apart keep one row's strip off the next row's — at 12px, the
      two strips met, and the upper link kept 31px of its 44. */
   row-gap: var(--space-10);

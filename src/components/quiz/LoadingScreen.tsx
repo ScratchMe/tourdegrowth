@@ -15,7 +15,7 @@ interface LoadingScreenProps {
    * than the full 3-message sequence, per the addendum: "garde un état de
    * transition bref (200-400ms, une seule des trois phrases suffit)".
    * "deep" = Deep dive: a real Gemini call still happens (9 to 70 s
-   * measured), so the screen tells that wait by the clock (A14.6).
+   * measured), so the screen tells that wait by the clock (A15.6).
    */
   variant: "quick" | "deep";
 }
@@ -26,7 +26,7 @@ interface LoadingScreenProps {
 // (GEMINI.md §2), and nothing reports progress before its answer. Until
 // 2026-10-01 the bar still followed the messages on a fixed 2.6 s timer: full
 // at 5.2 s, then a minute at "complete", under three steps that no real step
-// followed. Since A14.6 (approved by Antoine the same day), the screen tells
+// followed. Since A15.6 (approved by Antoine the same day), the screen tells
 // the wait by the clock:
 // - one message, the one that is true for the whole wait (drafting the
 //   report), with its ticking dots;

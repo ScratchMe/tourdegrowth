@@ -1,6 +1,6 @@
 /*
  * What a failed request of the quiz or the Deep dive tells its reader
- * (CHANTIERS.md A14.4, 2026-10-01). Pure, and safe in the browser and on the
+ * (CHANTIERS.md A15.4, 2026-10-01). Pure, and safe in the browser and on the
  * server alike: nothing here reads `window`.
  *
  * Two things the error screens got wrong, and one they got right:
