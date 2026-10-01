@@ -64,7 +64,7 @@ qui sert à **vérifier** un texte avant de le poster.*
 |---|---|
 | Nom | **Moteur de growth** / **Growth engine** |
 | URL | `/fr/aarrr-funnel-template`, `/en/aarrr-funnel-template` — définitive une fois ouverte (une URL publiée ne meurt pas ici) |
-| Portier | Bon à tirer nº8 signé et tout le lot A7.3 livré (`CHANTIERS.md` D2), puis `ENGINE_ENABLED` et redéploiement ; d'ici là, aperçu propriétaire seul (`/admin/preview`, derrière le mot de passe admin) |
+| Portier | Bon à tirer nº8 signé et tout le lot A7.3 livré (`CHANTIERS.md` D2 ; le code, A7.3.c, l'est depuis le 2026-10-01, reste le bon à tirer de sa copie, A7.3.d), puis `ENGINE_ENABLED` et redéploiement ; d'ici là, aperçu propriétaire seul (`/admin/preview`, derrière le mot de passe admin) |
 | Campagne UTM | `launch_engine` (`--campaign launch_engine`) |
 | Catégories | Analytics · Productivity · SaaS tools · Startup tools · Marketing — **jamais** un annuaire d'IA |
 
@@ -72,26 +72,38 @@ qui sert à **vérifier** un texte avant de le poster.*
 dire « spécifié, pas encore sur `main` au 2026-09-24 », et le texte qui
 l'utilise attend que la case soit cochée dans `campaigns/engine/show-hn.md`.
 
-- Quinze chiffres, trois par étape AARRR, saisis **en comptes** (numérateur et
-  dénominateur), pas en pourcentages. **[portier]** spec du moteur.
+- **Deux motions, à cocher** : le SaaS B2B en libre-service (dix-sept
+  chiffres : trois par étape, cinq au revenu), en vente assistée (quinze :
+  trois, trois, trois, deux et quatre, lus sur trois mois), ou les deux, avec
+  un chiffre de liaison. Tous saisis **en comptes** (numérateur et
+  dénominateur), pas en pourcentages. **[portier]** `src/content/engine-catalog.ts`.
+- **L'hybride se lit en « deux moteurs, un total »**, jamais en face-à-face :
+  les deux motions vendent à des segments différents (décision C4 du
+  2026-09-29). **[portier]** `ENGINE.md` §18.
 - La vue principale suit **100 inscrits sur une même base** ; aucune chaîne de
   taux multipliés. **[portier]**
 - Une étape n'est appelée « la fuite » que contre une cible fixée par
-  l'utilisateur, ou contre l'une des **deux** fourchettes du glossaire relues
-  (activation 20-40 %, churn de clients 1-2 % par mois), réserve imprimée sur
-  la slide. **[portier]** — décision 5 du 2026-09-24.
+  l'utilisateur. Les **deux** fourchettes du glossaire relues (activation
+  20-40 %, churn de clients 1-2 % par mois) ne font que situer, réserve
+  imprimée, et ne désignent jamais une étape (C1, 2026-09-29, qui remplace la
+  décision 5 du 2026-09-24). **[portier]**
 - Chaque chiffre introuvable devient un constat, avec un coût de réparation.
   **[portier]**
-- Export de 4 à 7 slides : PDF (impression du navigateur), une image PNG par
+- Export d'un deck 16:9 : PDF (impression du navigateur), une image PNG par
   slide (`html-to-image`, chargé au clic — déjà dans `package.json`), ou texte
-  avec notes d'orateur. **Pas de PowerPoint.** **[portier]**
+  avec notes d'orateur. **Pas de PowerPoint.** **[portier]** Le nombre de
+  slides dépend des chiffres : 5 en libre-service sans aucun chiffre, 7 sur
+  l'exemple, 7 sur l'exemple assisté, 13 sur l'exemple hybride, et une de
+  plus par levier « Et si » déplacé (mesuré le 2026-10-01 sur les jeux
+  d'exemple des tests). **Ne jamais annoncer un nombre de slides.**
 - Aucune IA : aucun import de `lib/gemini` dans l'outil. **[portier]**
   `src/__tests__/engine-boundary.test.ts`.
 - **Rien de ce qui est saisi ne quitte le navigateur** : spec canari et
   balayage statique. **[portier]** `e2e/engine-canary.spec.ts` — le même
   mécanisme passe déjà pour `/admin/audit` (`e2e/audit-canary.spec.ts`).
   Seuls partent des pages vues et des noms d'événements d'une liste fermée
-  (`engine_opened`, `engine_stage_saved/<étape>`, `engine_deck_opened`,
+  (`engine_opened`, `engine_setup/<plg|slg|hybrid>`,
+  `engine_stage_saved/<étape>`, `engine_deck_opened`,
   `engine_exported/<format>`…), jamais une valeur.
 - Aucune fonction serveur nouvelle : une page prérendue et un îlot client.
   **[portier]**
@@ -101,9 +113,12 @@ l'utilise attend que la case soit cochée dans `campaigns/engine/show-hn.md`.
   **décochée par défaut** (décision 4).
 
 **À ne pas avancer** :
-- que le moteur couvre le B2B piloté par les ventes, les applis grand public
-  ou les places de marché — la v1 ne couvre que le **SaaS en libre-service**
-  (freemium ou essai) ;
+- que le moteur couvre les applis grand public ou les places de marché — la
+  v1 couvre le **SaaS B2B**, en libre-service (freemium ou essai), en vente
+  assistée, ou les deux ;
+- un « PLG contre SLG » : l'hybride montre deux moteurs et un total, jamais
+  l'un contre l'autre ;
+- un nombre fixe de slides : il dépend des chiffres saisis ;
 - un « benchmark » : il n'y en a pas, seulement deux fourchettes publiées et
   la cible de l'équipe ;
 - une taille de bibliothèque (« ~7 Ko ») tant qu'elle n'est pas remesurée sur

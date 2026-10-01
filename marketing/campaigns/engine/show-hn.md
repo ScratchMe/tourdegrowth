@@ -25,8 +25,10 @@ spécification. Une seule case vide et le post attend.
       **et** Safari. Si Safari rate le PNG, le premier commentaire le dit.
 - [ ] Les événements `engine_*` apparaissent dans `/admin/stats` (sinon le
       lancement n'est pas lisible — brief §7).
-- [ ] Le profil est bien « SaaS en libre-service » seulement ; si un autre
-      profil a été livré entre-temps, corriger la section « Known limits ».
+- [ ] Les profils livrés sont bien le SaaS B2B en libre-service, en vente
+      assistée ou les deux (A7.3.c, 2026-10-01) ; si l'appli grand public ou
+      la place de marché a été livrée entre-temps, corriger « Known limits »
+      et la FAQ « What about sales-led B2B? ».
 - [ ] Le crédit « tourdegrowth.com » en pied de slide est bien **activé par
       défaut et retirable** (décision 2 du 2026-09-24) — la FAQ l'affirme.
 
@@ -44,7 +46,7 @@ sent » (82 caractères, trop long).
 
 > Every growth review I've sat through had the same problem: the numbers live in four tools, nobody agrees what "activation" means, and the slide ends up as a funnel drawn in PowerPoint with bars that don't mean anything.
 >
-> This is an AARRR funnel template that you fill with your own numbers and that runs entirely in your browser. Fifteen numbers, three per stage (acquisition, activation, retention, referral, revenue). It tells you where you lose the most people, turns every number you can't find into a finding with a repair cost, and exports a 4 to 7 slide deck for a leadership meeting — PDF, one PNG per slide, or plain text with speaker notes.
+> This is an AARRR funnel template that you fill with your own numbers and that runs entirely in your browser. Seventeen numbers for a self-serve SaaS, fifteen for a sales-assisted one, or both — then it shows two engines and one total, never one against the other. It tells you where you lose the most people, turns every number you can't find into a finding with a repair cost, and exports a deck for a leadership meeting — PDF, one PNG per slide, or plain text with speaker notes.
 >
 > A few decisions that might interest this crowd:
 >
@@ -54,11 +56,11 @@ sent » (82 caractères, trop long).
 > - **It won't name a leak without your target.** A stage is only called "the leak" against a target you set. Published ranges are shown for context, never to name a stage: 1-2% monthly churn is a high-ticket B2B number, and a product sold at $20 a month runs far higher. Otherwise it says it can't tell — and tells you what to measure first.
 > - **Export without a server.** PDF is the browser's print (zero JavaScript); PNG loads a small library only when you click. The deck credits the site in its footer by default; it's your deck, so you can turn that off.
 >
-> Known limits, so you don't have to find them: v1 assumes a self-serve SaaS (freemium or trial); sales-led B2B, consumer apps and marketplaces aren't modelled yet. There's no PowerPoint export yet — a deck generated in the browser can't carry the display font, and a deck in a substitute font is worse than a PDF.
+> Known limits, so you don't have to find them: v1 covers B2B SaaS, self-serve (freemium or trial), sales-assisted, or both; consumer apps and marketplaces aren't modelled yet. There's no PowerPoint export yet — a deck generated in the browser can't carry the display font, and a deck in a substitute font is worse than a PDF.
 >
 > It sits next to a 3-minute check-up that asks whether you *measure* each stage; this one asks what the numbers *say*. Code is open (AGPL): github.com/ScratchMe/tourdegrowth
 >
-> What I'd love feedback on: which of the seventeen numbers you couldn't find, and whether the deck would survive your own leadership meeting.
+> What I'd love feedback on: which number you couldn't find, and whether the deck would survive your own leadership meeting.
 
 ## FAQ — les objections probables, réponse prête
 
@@ -66,12 +68,12 @@ sent » (82 caractères, trop long).
 |---|---|
 | **"Why not just a spreadsheet?"** | A spreadsheet holds numbers; it doesn't know that your activation rate and your retention rate were measured on different populations, and it'll happily multiply them. This refuses to, tells you which number is missing, and turns the result into slides. If you'd rather keep a spreadsheet, the plain-text export is there for exactly that. |
 | **"How do I know nothing is sent?"** | Network tab, first. Then the code: there's a test that plants unique strings in every field, plays the flow and fails if any request carries one; another forbids `fetch` and friends in the tool's folder. Both are in the repo. |
-| **"But the page loads analytics."** | Yes: cookie-less GoatCounter, page views plus event names from a fixed list (opened, stage saved, deck opened, exported). No values, no labels you typed, no identifiers. The list is in the source. |
+| **"But the page loads analytics."** | Yes: cookie-less GoatCounter, page views plus event names from a fixed list (opened, how you sell: self-serve, sales-assisted or both; stage saved, deck opened, exported). No values, no labels you typed, no identifiers. The list is in the source. |
 | **"Benchmarks are meaningless across companies."** | Agreed, which is why there are only two, each printed with its caveat, and the default comparison is a target *you* set. Most stages say "no publishable reference — set a target". |
 | **"Why counts instead of rates?"** | Because a rate without its denominator can't be checked, and half of funnel arguments are two people using two denominators. |
 | **"Your funnel math is naive."** | Tell me where. The one deliberate simplification is written on the slide itself: "all else equal, paying customers are assumed to come from activated users." The arithmetic behind every title is shown line by line. |
 | **"No PowerPoint?"** | Not in v1. A PPTX generated in the browser can't carry the display font, and every hatch and dotted line would need redrawing as shapes. PNG per slide pastes into your own deck template, which is what most people do with a leadership deck anyway. |
-| **"Only self-serve SaaS?"** | For now. The seventeen numbers and where to find them differ for sales-led B2B and marketplaces; I'd rather ship one profile that's right than four that are vague. |
+| **"What about sales-led B2B?"** | It's in. Tick sales-assisted and you get fifteen numbers of its own — lead-to-opportunity, win rate, new-contract ACV, contract renewal… — read over three months, because a sales team closes a handful of deals a month. Tick both and you get two engines and one total, never one against the other: the two motions sell to different segments, and a "PLG vs SLG" slide would push a leadership meeting to pick a winner. Consumer apps and marketplaces aren't modelled yet; I'd rather ship profiles that are right than ones that are vague. |
 | **"Is there AI in it?"** | No. Every sentence in the tool and on the slides is written in advance and chosen by rules; nothing is generated. |
 | **"Business model?"** | It's free and there's no account system to sell you anything through. The deck credits the site by default, and you can remove that. |
 | **"Who's behind this?"** | I'm Antoine Berthaud, a growth PM; this is a side project, posted from its own account. My name is in the site's footer, and the About page says how it's made. *(TODO : à relire. C22 : la réponse te nomme, sans insister et sans lien vers LinkedIn.)* |

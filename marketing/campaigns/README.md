@@ -23,7 +23,7 @@ déjà. La ligne de départ de chaque lancement se relève par le workflow
 
 | | A · Le Tour, relancé | B · Le moteur de growth | C · Le côté obscur |
 |---|---|---|---|
-| Ce que c'est | Le diagnostic AARRR de 3 minutes, avec la copie revue (revue de copie v1) et les correctifs SEO | Un modèle de funnel AARRR **local** : tes dix-sept chiffres, où tu perds du monde, des slides pour ton CODIR | Un jeu de vingt minutes : une année comme PM growth d'une appli de streaming, un DG qui veut du chiffre, huit dark patterns |
+| Ce que c'est | Le diagnostic AARRR de 3 minutes, avec la copie revue (revue de copie v1) et les correctifs SEO | Un modèle de funnel AARRR **local** : tes chiffres (libre-service, vente assistée ou les deux), où tu perds du monde, des slides pour ton CODIR | Un jeu de vingt minutes : une année comme PM growth d'une appli de streaming, un DG qui veut du chiffre, huit dark patterns |
 | URL | `/{en,fr}` → `/quiz` | `/{en,fr}/aarrr-funnel-template` | `/{en,fr}/game`, `/{en,fr}/game/retention` |
 | Portier | L'intégration mergée sur `main` | Bon à tirer nº8 signé + lot A7.3 livré + `ENGINE_ENABLED` | Bon à tirer nº7 signé + recette du jeu signée (GAME-BRIEF §7.3) + relecture juridique du catalogue + moteur ouvert d'abord (C23) + `GAME_ENABLED` |
 | Campagne UTM | `relaunch_tour` | `launch_engine` | `launch_game` |
@@ -133,8 +133,8 @@ positionnement de la revue de copie §4.3 et de la spec §14.1.)
 | Message | Preuve | Où la vérifier |
 |---|---|---|
 | Rien de ce que tu saisis ne quitte le navigateur | Une spec canari sème des chaînes uniques, joue tout le parcours, enregistre toutes les requêtes et exige qu'aucune ne les porte ; un balayage statique interdit `fetch`, `sendBeacon`, `WebSocket` dans l'outil | **[portier]** `e2e/engine-canary.spec.ts`, `src/__tests__/engine-boundary.test.ts` (spec §11.4, §13.3). Le même mécanisme existe déjà et passe pour `/admin/audit` : `e2e/audit-canary.spec.ts` |
-| Tu repars avec un deck, pas avec un tableau | 4 à 7 slides 16:9, en PDF, en PNG par slide et en texte copiable avec notes d'orateur | **[portier]** spec §9-10 ; `html-to-image` est déjà dans `package.json` |
-| Il ne nomme une fuite que contre une référence nommée | Une cible que tu fixes, ou l'une des deux fourchettes du glossaire relues (activation 20-40 %, churn de clients 1-2 %/mois), réserve imprimée | **[portier]** spec §5.1, §6.6 ; décision 5 du 2026-09-24 |
+| Tu repars avec un deck, pas avec un tableau | Un deck 16:9, en PDF, en PNG par slide et en texte copiable avec notes d'orateur ; son nombre de slides dépend des chiffres saisis, et ne s'annonce pas (`kit.md`) | **[portier]** spec §9-10 ; `html-to-image` est déjà dans `package.json` |
+| Il ne nomme une fuite que contre ta cible | Une cible que tu fixes ; les deux fourchettes du glossaire relues (activation 20-40 %, churn de clients 1-2 %/mois) ne font que situer, réserve imprimée | **[portier]** spec §5.1, §6.6 ; C1 du 2026-09-29, qui remplace la décision 5 du 2026-09-24 |
 | Aucune IA dans le moteur | Aucun import de `lib/gemini` autorisé dans l'outil | **[portier]** `engine-boundary.test.ts` règle 1 |
 | C'est gratuit, sans compte | Aucune fonction serveur nouvelle, aucun Route Handler : une page prérendue et un îlot client | **[portier]** spec §10.3 |
 
@@ -333,7 +333,8 @@ visite.**
 | **Diffamation** : citer une marque réelle dans un post | Aucune marque réelle dans un post, jamais. Les cas réels restent dans le catalogue du jeu, relus juridiquement |
 | **Le Digital Fairness Act glisse** | Aucune date promise ; créneau réactif seulement, et seulement si C est ouvert. **Depuis le 2026-09-30 (C23), le créneau est abandonné : le jeu ouvrira après la proposition. Le risque devient l'inverse, un fait du jeu périmé à l'ouverture (`content/game/retention.ts:487`), à remettre à jour avant (`CHANTIERS.md` E)** |
 | **Un pic de trafic sur le Tour pendant une panne Gemini** | Le Tour et le moteur n'appellent aucun modèle ; seul le Deep dive tombe, et son écran d'erreur rejoue la requête (`GROWTH-PLAN.md` §8). La limite de débit en mémoire (R-15) est le point faible connu |
-| **Le moteur est lu comme un outil pour tous les modèles** | Le kit et les textes disent « v1 : SaaS en libre-service (freemium ou essai) » ; les autres profils sont annoncés comme à venir, sans date |
+| **Le moteur est lu comme un outil pour tous les modèles** | Le kit et les textes disent « v1 : SaaS B2B, en libre-service, en vente assistée ou les deux » (A7.3.c, 2026-10-01) ; l'appli grand public et la place de marché sont annoncées comme à venir, sans date |
+| **L'hybride est lu comme un match « PLG contre SLG »** | Les textes disent « deux moteurs, un total », jamais « contre » ni « vs » : les deux motions vendent à des segments différents (C4), et le produit ne les classe jamais l'une contre l'autre |
 | **Les cibles d'ouverture sont fausses d'un ordre de grandeur** | Recalage à J+7, écrit (§1) ; la règle de coupe porte sur des ratios, pas sur les cibles |
 
 ---

@@ -29,13 +29,13 @@ même site.
 >
 > **5. Proving "nothing leaves the browser" is a test, not a sentence.** An end-to-end test plants unique strings in every field, plays the whole flow, records every network request and fails if any carries one. A static check forbids `fetch` and friends in the tool's folder.
 >
-> Export is the browser's print for PDF (no JS at all) and a ~7 KB library loaded on click for PNG. No PPTX yet: a deck generated in the browser can't carry the display font, and a deck in a substitute font looks worse than a PDF.
+> Export is the browser's print for PDF (no JS at all) and a small library loaded on click for PNG. No PPTX yet: a deck generated in the browser can't carry the display font, and a deck in a substitute font looks worse than a PDF.
 >
 > Revenue: $0, no account system. The deck credits the site in its footer by default; you can switch it off.
 >
 > Code: github.com/ScratchMe/tourdegrowth · Try it: [link]
 >
-> What I'd like to hear: which of the seventeen numbers you couldn't find in your own tools.
+> What I'd like to hear: which number you couldn't find in your own tools.
 
 *Notes pour la relecture* : les points 1, 2 et 4 sont des défauts réellement
 vus dans les maquettes des trois conceptions du moteur (spec, §1, tableau
