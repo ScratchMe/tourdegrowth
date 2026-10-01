@@ -59,7 +59,6 @@
   --dur-draw: 800ms; /* a curve draws itself */
 
   /* --- Loops: waiting and attention --- */
-  --dur-wait: 1.6s; /* the waiting segment of the Deep dive */
   --dur-breathe: 2.4s; /* the waiting numeral breathes */
   --dur-dots: 1.8s; /* the three waiting dots, one step each 450ms */
 

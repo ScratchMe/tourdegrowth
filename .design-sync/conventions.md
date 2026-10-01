@@ -207,8 +207,7 @@ Every duration is a token of `tokens/motion.css`, never a literal:
 leaving — leaving is faster), `--dur-state` (a change in place),
 `--dur-stamp` with `--ease-stamp` (the stamp overshoots once; only an
 entrance may overshoot), `--dur-shake`, `--dur-pulse`, `--dur-reveal`,
-`--dur-draw`, and three loops for waiting (`--dur-wait`, `--dur-breathe`,
-`--dur-dots`). An arrival rises by `--dist-step` (8px). The shared keyframes
+`--dur-draw`, and two loops for waiting (`--dur-breathe`, `--dur-dots`). An arrival rises by `--dist-step` (8px). The shared keyframes
 (the score's `stamp`, the verdict's `slam`, the progress `pulse`) reach a
 component through `composes` from `styles/motion.module.css`. Reduced motion
 switches all of it off; every element rests in its final state, so nothing
