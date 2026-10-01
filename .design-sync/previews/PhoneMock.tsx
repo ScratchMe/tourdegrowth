@@ -24,7 +24,7 @@ const EN = {
   priceAnnual: "€129.90 a year · can be cancelled online",
   social: "Léa, Karim and 2 friends are staying without you.",
   reminder: "Reminder sent three days before each charge.",
-  number: "09 70 00 00 00",
+  number: "09 70 00 00 00",
   call: "To cancel, call {number} Monday to Friday, 9 am to noon. Average wait: 23 min.",
   pauseButton: "Pause for 3 months",
   cancelLink: "or cancel",

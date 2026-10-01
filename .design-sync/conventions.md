@@ -71,8 +71,9 @@ parcours », never « profil de l'étape ».
 Each space wears its colour and its sign, and only where it is the subject:
 the Tour in ink (its pictogram red), the engine in ultramarine
 (`--space-engine-accent`, its labels and rules, and the `Stopwatch` beside its
-intro), the game in ochre on paper and amber at night (`HubMountain` on its
-hub's night poster, `ProsePage introWorld="night"`). `SpaceStrip` is the one
+intro), the game in ochre (on paper, and the open cols of `HubMountain` on its hub's
+night poster, `ProsePage introWorld="night"`, where amber marks only the
+moon, the flags and the titles). `SpaceStrip` is the one
 place the three stand side by side, on the landing. Ochre is never text on
 paper (1.87); the night's amber never leaves the night.
 
@@ -132,7 +133,8 @@ Target 390px. Nothing may scroll horizontally at 360px.
   primary is their own Tour, and primary on the owner's own result
   (`shareVariant`, C16), where "Take the Tour again" becomes secondary.
   The offer to play the game (`GameEntry`) is not a third: a flat paper card
-  with a secondary button, and a thin band of night across its top.
+  with one secondary button per level it offers, each under its stage's name
+  when there are several, and a thin band of night across its top.
 - The `game` group is presentation only. Every string arrives resolved, and
   every number arrives formatted — a game component never computes a score,
   a date or a sentence. They are drawn inside a `NightSurface` except the
@@ -195,8 +197,10 @@ Rules the night world adds:
 - `--paint-red` is never text at night (3.76:1). Red text is the night's
   `--text-alert`; the primary button keeps its red fill because its label sits
   on its own fill.
-- The phone mock (`PhoneMock`) is someone else's product: white, with its own
-  `--app-*` tokens, and it does not follow the world around it.
+- The two phones (`PhoneMock`, Flixo's streaming app in level 1, and
+  `ShopPhone`, Pédalix's bike shop in level 2) are someone else's product:
+  white, with their own `--app-*` tokens (the shop adds its green,
+  `--shop-brand`), and they do not follow the world around them.
 - There is still no user-facing dark mode. The night is a place in the story,
   not a theme preference.
 
@@ -372,5 +376,5 @@ Retired names, and where each went, one family at a time
 - Named object types (`DataTableColumn`, `HandCard`, `ReportFigure`, …) print
   as their name. The previews show every one of them with its real shape — copy
   from those. The few whose contract would otherwise be wrong (`StatTile`,
-  `Sparkline`, `EventClipping`, `PhoneMock`, `NotFoundScreen`) are written out
-  in full.
+  `Sparkline`, `EventClipping`, `PhoneMock`, `ShopPhone`, `NotFoundScreen`,
+  `ProseText`, `ProseActions`) are written out in full.
