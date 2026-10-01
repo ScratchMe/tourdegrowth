@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/core/Button";
 import { TEXT_LIMITS, type MetricShape } from "@/lib/engine/catalog-shape";
 import { ROLE_KEY, type ResolvedMetric } from "@/lib/engine/strings";
@@ -64,6 +65,19 @@ export function ValueEditor({
   const currency = state.setup.currency;
 
   const numberInvalid = w.notANumber;
+
+  // A rule a single value breaks — a rate outside 0–100, a negative amount
+  // or duration — is said when the box is left, not only at the save
+  // (A14.3): the person is still looking at it. A piece still missing waits
+  // for the save, as before.
+  const [left, setLeft] = useState<Partial<Record<"rate" | "amount" | "duration", true>>>({});
+  const leave = (field: "rate" | "amount" | "duration") => () => setLeft((was) => (was[field] ? was : { ...was, [field]: true }));
+  const outOfRange = draft.percent !== null && (draft.percent < 0 || draft.percent > 100);
+  const early = {
+    rate: left.rate && outOfRange ? w.percentRange : null,
+    amount: left.amount && draft.amount !== null && draft.amount < 0 ? w.amountNegative : null,
+    duration: left.duration && draft.durationValue !== null && draft.durationValue < 0 ? w.durationNegative : null,
+  };
 
   const kindToggle = (() => {
     if (shape.unit === "percent" && shape.valueKinds.includes("rate")) {
@@ -147,9 +161,10 @@ export function ValueEditor({
           id={`${idPrefix}-rate`}
           label={metric.name}
           hint={strings.sheet.rateOnlyHint}
-          error={rule("percent-range") ?? need("percent")}
+          error={rule("percent-range") ?? early.rate ?? need("percent")}
           value={draft.percent}
           onChange={(percent) => update({ percent })}
+          onBlur={leave("rate")}
           locale={locale}
           digits={5}
           {...percentUnit(locale)}
@@ -163,9 +178,10 @@ export function ValueEditor({
           id={`${idPrefix}-amount`}
           label={metric.name}
           hint={strings.sheet.rateOnlyHint}
-          error={need("amount")}
+          error={rule("amount-negative") ?? early.amount ?? need("amount")}
           value={draft.amount}
           onChange={(amount) => update({ amount })}
+          onBlur={leave("amount")}
           locale={locale}
           {...moneyUnit(currency, locale)}
           parseError={numberInvalid}
@@ -178,9 +194,10 @@ export function ValueEditor({
             size="sm"
             id={`${idPrefix}-duration`}
             label={metric.name}
-            error={need("duration")}
+            error={rule("duration-negative") ?? early.duration ?? need("duration")}
             value={draft.durationValue}
             onChange={(durationValue) => update({ durationValue })}
+            onBlur={leave("duration")}
             locale={locale}
             digits={5}
             parseError={numberInvalid}

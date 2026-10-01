@@ -105,6 +105,26 @@ describe("entryFromDraft — what refuses a save", () => {
     expect(save("act.rate", { mode: "ask", note: "z".repeat(TEXT_LIMITS.note + 1) }).problems).toEqual(["note-too-long"]);
   });
 
+  // A14.3 (2026-10-01): a negative number was typed, not left out — it was
+  // said « still missing », which sent the person looking for an empty box.
+  it("calls a negative amount or duration what it is, not missing", () => {
+    expect(save("act.ttv", { mode: "have", kind: "duration", durationValue: -3, source: "other" }).problems).toEqual(["duration-negative"]);
+    expect(save("act.ttv", { mode: "have", kind: "duration", durationValue: null, source: "other" }).problems).toEqual(["duration"]);
+    const cac = (amount: number | null) =>
+      save("acq.cac", { mode: "have", kind: "amount", amount, source: "other", variant: "media-only" }, { hasVariants: true }).problems;
+    expect(cac(-5)).toEqual(["amount-negative"]);
+    expect(cac(null)).toEqual(["amount"]);
+    expect(cac(0)).toEqual([]);
+  });
+
+  // A14.3: a rate's bounds are rates, held to the 0–100 its value is held to.
+  it("holds an estimated rate's bounds to 0–100, and only a rate's", () => {
+    expect(save("act.rate", { mode: "estimate", low: 10, high: 140, basis: "sample" }).problems).toEqual(["percent-range"]);
+    expect(save("act.rate", { mode: "estimate", low: -2, high: 20, basis: "sample" }).problems).toEqual(["percent-range"]);
+    expect(save("act.rate", { mode: "estimate", low: 0, high: 100, basis: "sample" }).problems).toEqual([]);
+    expect(save("acq.cac", { mode: "estimate", low: 200, high: 900, basis: "sample" }).problems).toEqual([]);
+  });
+
   it("an estimate needs both bounds the right way round and a basis", () => {
     expect(save("act.rate", { mode: "estimate", low: 30, high: 20, basis: "sample" }).problems).toEqual(["low-above-high"]);
     expect(save("act.rate", { mode: "estimate", low: 10 }).problems).toEqual(["high", "basis"]);

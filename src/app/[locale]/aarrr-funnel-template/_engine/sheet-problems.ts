@@ -18,6 +18,8 @@ const RULES: readonly DraftProblem[] = [
   "denominator-zero",
   "num-gt-den",
   "percent-range",
+  "amount-negative",
+  "duration-negative",
   "low-above-high",
   "text-too-long",
   "label-too-long",
@@ -42,6 +44,10 @@ export function ruleMessage(problem: DraftProblem, metric: ResolvedMetric, strin
       });
     case "percent-range":
       return strings.workbench.percentRange;
+    case "amount-negative":
+      return strings.workbench.amountNegative;
+    case "duration-negative":
+      return strings.workbench.durationNegative;
     case "low-above-high":
       return strings.sheet.lowAboveHigh;
     case "text-too-long":
