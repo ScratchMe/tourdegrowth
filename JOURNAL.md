@@ -1207,6 +1207,11 @@ Antoine a demandé le brief de B5 le soir de la fin d'A14.c : l'image de partag
 
 **Ce qui n'est pas touché** : l'agent de Claude Design lit les fichiers du jour. Le retour du brief 05 contient sa copie du `_ds_bundle.css` en ligne (`design/ds-extension-05-return/board/system-snapshot.css`, datée du 2026-10-02), avec `--radius-tag: 999px`, `--paper-white` et le monde nuit. Les maquettes sont construites sur le design system actuel ; seul le catalogue du volet est figé.
 
-**Reste ouvert** : ce qui fait recompiler la copie du volet. La doc de Claude Design parle de « publier » un design system ; c'est la première piste, à chercher avec Antoine dans l'interface, que la session ne voit pas.
+**Le diagnostic, avec Antoine** :
+- la piste de la publication est écartée : il n'y a ni bouton « Publier » ni état « brouillon » dans le projet ;
+- le bouton « Actualiser » ne change rien ;
+- une fenêtre privée montre la même chose, ce n'est donc pas un cache du navigateur.
+
+Le texte du skill `/design-sync` (trouvé en ligne) dit que l'application « clears the sentinel whenever the user opens the project » et que les nouvelles cartes « appear next time the user opens or refreshes the project ». Chez nous, la sentinelle survit à chaque ouverture : **le rafraîchissement de Claude Design échoue sur ce projet**, au moins depuis le premier envoi après le 11 septembre, donc avant que `design/` ne contienne quoi que ce soit. Aucun fichier envoyé par la synchro ne le relance. C'est à signaler à Anthropic : D13, avec le texte prêt à coller. Le script et l'index restent : l'index est juste, et le script le tiendra juste quand le rafraîchissement remarchera.
 
 **Consigné** : `.design-sync/NOTES.md` (« `_ds_manifest.json` », le chemin d'envoi, « Synced », « Re-sync risks », les 30 cartes en colonne), `CHANTIERS.md` (B8, la vue d'ensemble, le prompt B), `CLAUDE.md` (la correction de « les 90 composants y sont »). Que de la doc et un script hors de `src/` : `vercel-ignore.sh` ne déploie pas.

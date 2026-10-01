@@ -754,9 +754,20 @@ afterwards. **The design agent is not affected**: brief 05's return carries
 `design/ds-extension-05-return/board/system-snapshot.css`, its own copy of the
 live `_ds_bundle.css` dated 2026-10-02, with `--radius-tag: 999px`,
 `--paper-white` and the night world. Designs are built on the current
-system; only the pane's catalogue is stale. What makes Claude Design rebuild
-that copy (a publish step in its UI, or something else) is still open:
-`CHANTIERS.md`, B8.
+system; only the pane's catalogue is stale.
+
+**Where it breaks: Claude Design's refresh on open.** The skill's own text
+says the sentinel "fences the app's manifest/copy machinery against a
+half-uploaded state", that "the app clears the sentinel whenever the user
+opens the project", and that new cards "appear next time the user opens or
+refreshes the project". On this project none of that happens. Antoine opened
+it in the project itself, clicked its « Actualiser » button, and tried a
+private window: no publish button or draft state exists, the pane is
+unchanged, and the sentinel written by B6 is still there. Since the pane
+also shows content removed on 2026-09-29, the refresh has failed since at
+least the first upload after 2026-09-11, before `design/` held anything. No
+file the sync can write restarts it. It is a Claude Design defect to report
+(`CHANTIERS.md`, B8 and D13), not a step this repo is missing.
 
 ## Re-sync risks
 
