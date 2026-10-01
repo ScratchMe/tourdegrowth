@@ -1328,7 +1328,7 @@ Commit `70bdec2`. **Q14** (C25, tranchée oui) : `engine_setup/<plg|slg|hybrid>`
 
 **Mergée, pas encore en production (2026-10-01)** : [#248](https://github.com/ScratchMe/tourdegrowth/pull/248), squash `976e3e9`, 17 fichiers, arbre identique à la tête. Le déploiement de production a été refusé par le quota du jour (`VERCEL.md` §1.12), comme celui d'A12.e le matin. Le jeu étant fermé, rien n'est en retard pour le public, et le prochain déploiement l'emportera.
 
-## A12.g : les specs Playwright du niveau 2 (2026-10-01)
+## A12.g : les specs Playwright du niveau 2 (2026-10-01, #250)
 
 **Ce qui est livré** : `e2e/game-level2.spec.ts`, huit specs sur le modèle de celles du niveau 1. Les années de référence y sont écrites telles que le §17.6 les tabule, jamais recalculées : les tests unitaires tiennent le moteur à ces tables, ces specs tiennent l'écran. Les nouveaux clients s'affichent à la dizaine, sans « % » ni « pt ».
 - **P1, P2** : le premier écran, en nouveaux clients, avec le téléphone de Pédalix et « +29 € au panier » ; aucune carte ne dit ce qu'elle rapporte.
