@@ -96,7 +96,7 @@ for (const locale of ["fr", "en"] as const) {
       }
       const texts = await readEachOnScreen(page, slides, (el) => [el.getAttribute("data-slide"), (el as HTMLElement).innerText] as const);
       expect(texts.map(([id]) => id)).toContain("slg:scenario");
-      const allowed = /^[\n\t -~ -ÿ–—’«»…€·×÷±]*$/u;
+      const allowed = /^[\n\t\u0020-\u007e\u00a0-\u00ff–—’«»…€·×÷±]*$/u;
       for (const [id, text] of texts) {
         expect(text.length, `${id} is empty`).toBeGreaterThan(80);
         expect(text, `${id} leaks a placeholder`).not.toMatch(/\{[a-zA-Z]+\}/);
