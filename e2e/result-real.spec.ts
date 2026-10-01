@@ -139,6 +139,15 @@ test.describe("a visitor's view of a clear bottleneck", () => {
     await expect(entry).toBeVisible();
     await expect(page.getByTestId("game-entry-cta")).toHaveAttribute("href", /^\/en\/game\/retention(\?|$)/);
   });
+
+  test("offers level 2 on an acquisition bottleneck, as the Deep dive door (A12.f)", async ({ page }) => {
+    test.skip(!GAME_OPEN, "GAME_ENABLED is not \"true\" for this build: the card only exists with the game open.");
+    await page.goto(`/r/${deep.id}?lang=en`);
+    await expect(page.getByTestId("game-entry")).toBeVisible();
+    await expect(page.getByTestId("game-entry-cta")).toHaveAttribute("href", "/en/game/acquisition?from=deep_dive");
+    // Level 2's number in level 2's format: new customers, never a percentage.
+    await expect(page.getByTestId("game-entry-band")).toContainText("New customers 2,000");
+  });
 });
 
 test.describe("the owner's view", () => {

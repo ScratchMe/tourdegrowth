@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  GAME_ENDINGS,
   GAME_ENTRY_DETAILS,
   GAME_ENTRY_EVENT,
   GAME_START_FROM,
+  gameEndingDetail,
   gameEventPaths,
   gameStartedDetail,
   parseGameStartFrom,
@@ -24,8 +26,10 @@ describe("game analytics vocabulary (plan §3.8)", () => {
     }
   });
 
-  it("has the four entry doors the brief names (G7's source list), then the landing strip's and the band's (A7.9)", () => {
+  it("has the four entry doors the brief names (G7's source list), level 2's result doors, then the landing strip's and the band's (A7.9)", () => {
     expect(GAME_ENTRY_DETAILS.map((d) => `${GAME_ENTRY_EVENT}/${d}`)).toEqual([
+      "game_entry_clicked/result/acquisition",
+      "game_entry_clicked/deep_dive/acquisition",
       "game_entry_clicked/result/retention",
       "game_entry_clicked/deep_dive/retention",
       "game_entry_clicked/footer",
@@ -38,7 +42,21 @@ describe("game analytics vocabulary (plan §3.8)", () => {
   it("includes the resume answer (orchestrator decision 5) and every start origin", () => {
     const paths = gameEventPaths();
     expect(paths).toEqual(expect.arrayContaining(["game_resume/resume", "game_resume/restart"]));
-    for (const from of GAME_START_FROM) expect(paths).toContain(`game_started/retention/${from}`);
+    for (const slug of ["acquisition", "retention"]) {
+      for (const from of GAME_START_FROM) expect(paths).toContain(`game_started/${slug}/${from}`);
+    }
+    // The link one level's page makes to the other (C31, A12.f).
+    expect(GAME_START_FROM).toContain("other_level");
+  });
+
+  it("counts each level's endings apart (A12.f) — a fine at Flixo is not a settlement at Pédalix", () => {
+    const paths = gameEventPaths();
+    for (const ending of GAME_ENDINGS) {
+      expect(paths).toContain(`game_ending/acquisition/${ending}`);
+      expect(paths).toContain(`game_ending/retention/${ending}`);
+      expect(paths).not.toContain(`game_ending/${ending}`);
+    }
+    expect(gameEndingDetail("acquisition", "fine")).toBe("acquisition/fine");
   });
 
   it("counts the way back to the Tour, not only the ways in", () => {

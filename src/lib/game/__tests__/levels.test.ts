@@ -10,12 +10,19 @@ function board(scores: Record<Pillar, number>) {
 // A clear retention bottleneck: /r/sample's own board (8 against 12 and up).
 const RETENTION_CLEAR = board({ acquisition: 18, activation: 12, retention: 8, referral: 16, revenue: 20 });
 const ACQUISITION_CLEAR = board({ acquisition: 2, activation: 13, retention: 13, referral: 16, revenue: 13 });
+const ACTIVATION_CLEAR = board({ acquisition: 13, activation: 2, retention: 13, referral: 16, revenue: 13 });
+/** The table as it stood before level 2 (A12.f): the shared-bottleneck rules below are about retention. */
+const RETENTION_ONLY: GameLevelTable = { retention: { slug: "retention", enabled: true } };
 const LEVEL = board({ acquisition: 16, activation: 16, retention: 20, referral: 16, revenue: 20 });
 
 describe("GAME_LEVELS_BY_PILLAR (GAME-BRIEF.md 13.4)", () => {
-  it("ships with exactly one level, retention, enabled", () => {
-    expect(GAME_LEVELS_BY_PILLAR).toEqual({ retention: { slug: "retention", enabled: true } });
-    expect(enabledLevelSlugs()).toEqual(["retention"]);
+  it("ships with two levels, acquisition and retention, enabled, in AARRR order", () => {
+    expect(GAME_LEVELS_BY_PILLAR).toEqual({
+      acquisition: { slug: "acquisition", enabled: true },
+      retention: { slug: "retention", enabled: true },
+    });
+    // The sitemap, /llms.txt and the hub's image list the levels in this order.
+    expect(enabledLevelSlugs()).toEqual(["acquisition", "retention"]);
   });
 
   it("an enabled: false level is not playable", () => {
@@ -37,9 +44,17 @@ describe("gameEntryFor", () => {
     expect(gameEntryFor({ bottleneck: RETENTION_CLEAR, access: "closed" })).toBeNull();
   });
 
-  it("offers nothing for a pillar with no level", () => {
+  it("offers the acquisition level when acquisition is the clear bottleneck (level 2, A12.f)", () => {
     expect(ACQUISITION_CLEAR.sharpness).toBe("clear");
-    expect(gameEntryFor({ bottleneck: ACQUISITION_CLEAR, access: "open" })).toBeNull();
+    expect(gameEntryFor({ bottleneck: ACQUISITION_CLEAR, access: "open" })).toEqual({
+      pillar: "acquisition",
+      slug: "acquisition",
+    });
+  });
+
+  it("offers nothing for a pillar with no level", () => {
+    expect(ACTIVATION_CLEAR.sharpness).toBe("clear");
+    expect(gameEntryFor({ bottleneck: ACTIVATION_CLEAR, access: "open" })).toBeNull();
   });
 
   it("offers nothing on a level board — no stage is named, so no stage is sold", () => {
@@ -66,13 +81,16 @@ describe("gameEntryFor, shared bottleneck (X16)", () => {
     const shared = board({ acquisition: 7, activation: 16, retention: 7, referral: 16, revenue: 20 });
     expect(shared.sharpness).toBe("shared");
     expect(shared.pillars[0]?.pillar).toBe("acquisition");
-    expect(gameEntryFor({ bottleneck: shared, access: "open" })).toEqual({ pillar: "retention", slug: "retention" });
+    expect(gameEntryFor({ bottleneck: shared, access: "open", levels: RETENTION_ONLY })).toEqual({
+      pillar: "retention",
+      slug: "retention",
+    });
   });
 
-  it("offers nothing for a shared bottleneck that leaves retention out", () => {
-    const shared = board({ acquisition: 5, activation: 7, retention: 16, referral: 16, revenue: 20 });
+  it("offers nothing for a shared bottleneck whose stages have no level", () => {
+    const shared = board({ acquisition: 16, activation: 5, retention: 16, referral: 7, revenue: 20 });
     expect(shared.sharpness).toBe("shared");
-    expect(shared.pillars.map((p) => p.pillar)).not.toContain("retention");
+    expect(shared.pillars.map((p) => p.pillar)).toEqual(["activation", "referral"]);
     expect(gameEntryFor({ bottleneck: shared, access: "open" })).toBeNull();
   });
 

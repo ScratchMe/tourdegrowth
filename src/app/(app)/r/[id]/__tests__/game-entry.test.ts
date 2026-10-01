@@ -25,6 +25,8 @@ const LEVEL = board({ acquisition: 16, activation: 16, retention: 20, referral: 
 const SHARED_WITH_RETENTION = board({ acquisition: 7, activation: 16, retention: 7, referral: 16, revenue: 20 });
 
 const open = { access: "open" as const, hasDeepDive: false };
+/** The table as it stood before level 2 (A12.f): the shared-bottleneck rule below is about retention. */
+const RETENTION_ONLY = { retention: { slug: "retention" as const, enabled: true } };
 
 describe("resultGameEntry — P23, the sample's own board", () => {
   it("offers the retention level on the sample's clear retention bottleneck", () => {
@@ -68,9 +70,10 @@ describe("resultGameEntry — when there is no card", () => {
     expect(resultGameEntry({ bottleneck: RETENTION_CLEAR, locale: "fr", access: "closed", hasDeepDive: true })).toBeNull();
   });
 
-  it("P24 — offers nothing when the bottleneck is acquisition", () => {
-    expect(ACQUISITION_CLEAR.pillars.map((p) => p.pillar)).toEqual(["acquisition"]);
-    expect(resultGameEntry({ bottleneck: ACQUISITION_CLEAR, locale: "en", ...open })).toBeNull();
+  it("P24 — offers nothing when the bottleneck's stage has no level", () => {
+    const activation = board({ acquisition: 13, activation: 2, retention: 13, referral: 16, revenue: 13 });
+    expect(activation.pillars.map((p) => p.pillar)).toEqual(["activation"]);
+    expect(resultGameEntry({ bottleneck: activation, locale: "en", ...open })).toBeNull();
   });
 
   it("P24 — offers nothing on a level board, even though retention is lowest-but-strong", () => {
@@ -88,8 +91,28 @@ describe("resultGameEntry — orchestrator decision 2, a shared bottleneck", () 
   it("offers the card when retention is IN the group, even behind a tie-break", () => {
     expect(SHARED_WITH_RETENTION.sharpness).toBe("shared");
     expect(SHARED_WITH_RETENTION.pillars[0]?.pillar).toBe("acquisition");
-    const entry = resultGameEntry({ bottleneck: SHARED_WITH_RETENTION, locale: "en", ...open });
+    const entry = resultGameEntry({ bottleneck: SHARED_WITH_RETENTION, locale: "en", ...open, levels: RETENTION_ONLY });
     expect(entry?.event.detail).toBe("result/retention");
+  });
+});
+
+describe("resultGameEntry — level 2 (A12.f, 2026-10-01)", () => {
+  it("offers the acquisition level on a clear acquisition bottleneck", () => {
+    expect(ACQUISITION_CLEAR.pillars.map((p) => p.pillar)).toEqual(["acquisition"]);
+    const entry = resultGameEntry({ bottleneck: ACQUISITION_CLEAR, locale: "en", ...open })!;
+    expect(entry.href).toBe("/en/game/acquisition?from=result");
+    expect(entry.event).toEqual({ name: GAME_ENTRY_EVENT, detail: "result/acquisition" });
+    expect(entry.title).toBe("The dark side of acquisition");
+    expect(entry.cta).toBe('Play the level "How people find you"');
+  });
+
+  it("quotes level 2's starting number in its own format — new customers to the ten, never a percentage", () => {
+    expect(resultGameEntry({ bottleneck: ACQUISITION_CLEAR, locale: "en", ...open })!.band.metric).toBe("New customers 2,000");
+    const fr = resultGameEntry({ bottleneck: ACQUISITION_CLEAR, locale: "fr", ...open, hasDeepDive: true })!;
+    expect(fr.band.metric).toBe("Nouveaux clients 2 000");
+    expect(fr.band.metric).not.toMatch(/%|pt/);
+    expect(fr.event.detail).toBe("deep_dive/acquisition");
+    expect(JSON.stringify(GAME_ENTRY_COPY)).not.toMatch(/2[\s\u00a0,.]?000/);
   });
 });
 

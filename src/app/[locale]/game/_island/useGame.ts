@@ -32,6 +32,7 @@ import {
   GAME_STARTED_EVENT,
   GAME_TOUR_LOOP_EVENT,
   GAME_VOICE_EVENT,
+  gameEndingDetail,
   gameStartedDetail,
   parseGameStartFrom,
 } from "@/lib/game/events";
@@ -350,7 +351,7 @@ export function useGame(ctx: IslandContext, played: PlayedLevel, refs: GameRefs)
     const p = go({ type: "next", year: yearFacts(game) });
     if (p.kind === "december" && game.ending) {
       setEnteredDecember(true);
-      trackEvent(GAME_ENDING_EVENT, game.ending);
+      trackEvent(GAME_ENDING_EVENT, gameEndingDetail(L.slug, game.ending));
       recordYearEnd(L, { seen: game.seenDark, used: game.everDark, ending: game.ending });
       focus("december");
     } else if (p.kind === "ringing") {

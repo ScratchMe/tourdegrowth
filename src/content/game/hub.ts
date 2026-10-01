@@ -1,4 +1,4 @@
-import type { EndingId } from "@/lib/game/types";
+import type { EndingId, LevelSlug } from "@/lib/game/types";
 import type { Pillar } from "@/lib/scoring/pillars";
 import type { Translatable } from "@/lib/i18n/translatable";
 
@@ -28,6 +28,16 @@ export interface HubZone {
   company: Translatable;
 }
 
+/**
+ * Where a level names an ending differently: at Pédalix the inspection ends
+ * in a criminal settlement with the prosecutor's agreement, never a fine
+ * (GAME-BRIEF §17.9, test C14). The hub merges these over `GAME_HUB.endings`.
+ * TODO: à relire — nouveau (2026-10-01, CHANTIERS.md A12.f).
+ */
+const ENDINGS_BY_LEVEL: Partial<Record<LevelSlug, Partial<Record<EndingId, Translatable>>>> = {
+  acquisition: { fine: t("le contrôle et la transaction", "the inspection and the settlement") },
+};
+
 export const GAME_HUB = {
   eyebrow: t("Tour de Growth · le jeu", "Tour de Growth · the game"),
   title: t("Le côté obscur", "The dark side"),
@@ -50,7 +60,8 @@ export const GAME_HUB = {
   zones: {
     acquisition: {
       question: t("Comment les gens vous trouvent", "How people find you"),
-      company: t("Une boutique en ligne de vélos et d'équipement", "An online shop for bikes and gear"),
+      // TODO: à relire — 2026-10-01 (A12.f) : la boutique a un nom depuis que le niveau existe, comme Flixo.
+      company: t("Pédalix, une boutique de vélos en ligne", "Pédalix, an online bike shop"),
     },
     activation: {
       question: t("Comment ils comprennent ce que vous apportez", "How they understand what you bring"),
@@ -81,6 +92,7 @@ export const GAME_HUB = {
     labyrinth: t("le labyrinthe", "the maze"),
     repentant: t("le repenti", "the repentant"),
   } satisfies Record<EndingId, Translatable>,
+  endingsByLevel: ENDINGS_BY_LEVEL,
 
   // GAME-BRIEF 11.5 and 13.3 D: the loop back to the Tour.
   tourLoopTitle: t("Où en est ta croissance ?", "Where does your own growth stand?"),

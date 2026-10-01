@@ -37,6 +37,7 @@ export interface IslandSide<C> {
 
 /** The copy each playable level hands its island: its whole copy but the footer, which the page renders. */
 export interface IslandCopies {
+  acquisition: Omit<AcquisitionCopy, "footer">;
   retention: Omit<RetentionCopy, "footer">;
 }
 
@@ -98,11 +99,7 @@ export function basketSentence(copy: AcquisitionSideCopy, locale: Locale, basket
   return basket.fees ? `${figure} · ${copy.basket.feesSuffix}` : figure;
 }
 
-/**
- * Pédalix's phone and its basket pill (GAME-BRIEF §17.7). Not in
- * `ISLAND_SIDES` yet: level 2 is still a `DraftLevelSlug`, with no page and no
- * save key, until A12.f wires it.
- */
+/** Pédalix's phone and its basket pill (GAME-BRIEF §17.7). */
 export const ACQUISITION_SIDE: IslandSide<AcquisitionSideCopy> = {
   render: ({ ids, copy, locale }) => {
     const basket = basketFor(ids);
@@ -135,5 +132,6 @@ export const ACQUISITION_SIDE: IslandSide<AcquisitionSideCopy> = {
 
 /** Each playable level's side, keyed by its slug: a level added to `LevelSlug` does not compile without one. */
 export const ISLAND_SIDES: { [S in LevelSlug]: IslandSide<IslandCopies[S]> } = {
+  acquisition: ACQUISITION_SIDE,
   retention: RETENTION_SIDE,
 };

@@ -625,6 +625,7 @@ Le moteur est pur : des fonctions `(state, action) → state` sans DOM ni React.
 ### 9.6 Analytique
 
 Événements GoatCounter, déclarés dans `src/lib/game/events.ts` et ajoutés à `ALL_PATHS` de `goatcounter-api.ts` : `game_entry_clicked/{result|deep_dive}/{pillar}`, `game_entry_clicked/{footer|hub}`, `game_started/{level}/{from}` (`from` vaut `direct`, `result`, `deep_dive` ou `hub`, émis au montage d'une année neuve, jamais d'une année reprise — E13), `game_hangup/{q}`, `game_voice/{mood}`, `game_quarter/{q}`, `game_order/{obeyed|refused}`, `game_ending/{endingId}`, `game_resume/{resume|restart}` (réponse à « Reprendre ? », ajout 1.2), `game_catalogue_open`, `game_replay`, `game_share`, `game_tour_loop` (clic sur « Où en est ta croissance ? », ajout 1.2). Les indicateurs de 2.3 se lisent dans GoatCounter et dans le dashboard admin existant, qui gagne une ligne « entrées dans le jeu » par origine.
+**Depuis le 2026-10-01 (`CHANTIERS.md` A12.f, le niveau 2 branché, le jeu encore fermé)** : les fins se comptent par niveau, `game_ending/{level}/{endingId}`, parce qu'une amende chez Flixo n'est pas une transaction chez Pédalix ; `from` gagne `other_level`, le lien qu'une page de niveau fait vers l'autre (sa navigation des zones, le bloc qui clôt décembre, C31) ; et l'encart du résultat a ses deux portes par niveau (`result/acquisition`, `deep_dive/acquisition`). Le reste (trimestres, ordres, voix) additionne les deux niveaux.
 
 ### 9.7 Accessibilité
 
@@ -795,7 +796,7 @@ Aucune donnée n'est jamais écrite : fermer la feature ne perd rien pour person
 
 ### 13.4 La table pilier → niveau
 
-`GAME_LEVELS_BY_PILLAR: Partial<Record<Pillar, { slug: string; enabled: boolean }>>` dans `src/lib/game/levels.ts`. Au lancement : `{ retention: { slug: "retention", enabled: true } }`. Ajouter un niveau, c'est ajouter une entrée ; l'encart de résultat, le hub et le sitemap la lisent tous les trois. Un niveau `enabled: false` apparaît sur le hub comme « bientôt » et ne déclenche jamais l'encart.
+`GAME_LEVELS_BY_PILLAR: Partial<Record<Pillar, { slug: string; enabled: boolean }>>` dans `src/lib/game/levels.ts`. Au lancement : `{ retention: { slug: "retention", enabled: true } }`. **Depuis le 2026-10-01 (A12.f)**, l'acquisition aussi, déclarée en premier : le sitemap, `/llms.txt` et l'image du hub listent les niveaux dans l'ordre AARRR. Ajouter un niveau, c'est ajouter une entrée ; l'encart de résultat, le hub et le sitemap la lisent tous les trois. Un niveau `enabled: false` apparaît sur le hub comme « bientôt » et ne déclenche jamais l'encart.
 
 ### 13.5 Mesure et règle de décision
 

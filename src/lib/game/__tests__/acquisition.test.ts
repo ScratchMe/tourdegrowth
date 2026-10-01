@@ -33,7 +33,7 @@ import {
   type Path,
 } from "./paths-acquisition";
 
-// GAME-BRIEF.md §17: level 2, « Comment les gens vous trouvent », a DRAFT
+// GAME-BRIEF.md §17: level 2, « Comment les gens vous trouvent », the model
 // the spec quotes number for number. Its four reference years are the
 // mirror of level 1's (§6): same picks by role, same shape of year. A
 // rebalancing that moves one regenerates the table and §17.6, it does not

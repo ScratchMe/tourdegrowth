@@ -30,9 +30,10 @@ export const GAME_META = {
       "Five stages of the Tour, five companies, one CEO who wants the number. A free game to spot dark patterns before you ever ship one.",
     ),
     breadcrumb: t("Le jeu", "The game"),
+    // TODO: à relire — retouché (2026-10-01, A12.f) : « dont deux sont ouvertes ».
     shareImageAlt: t(
-      "Le côté obscur de Tour de Growth : les cinq étapes du Tour, dont une seule est ouverte.",
-      "The dark side of Tour de Growth: the five stages of the Tour, one of them open.",
+      "Le côté obscur de Tour de Growth : les cinq étapes du Tour, dont deux sont ouvertes.",
+      "The dark side of Tour de Growth: the five stages of the Tour, two of them open.",
     ),
   },
   retention: {

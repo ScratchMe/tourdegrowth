@@ -895,8 +895,9 @@ export const RETENTION_CONTENT: DeepTranslatable<RetentionCopy> = {
       "« Comment les gens vous trouvent » : le compte à rebours, le prix qui gonfle, le faux stock",
       '"How people find you": the countdown timer, the creeping price, the fake stock',
     ),
-    // TODO: à relire — R15 : « verrouillé · prototype » devient un simple « bientôt ».
-    status: t("bientôt", "coming soon"),
+    // TODO: à relire — R15 : « verrouillé · prototype » devient un simple « bientôt », puis
+    // « jouable » le 2026-10-01 quand le niveau 2 s'ouvre (C31) : le bloc devient un lien.
+    status: t("jouable", "playable"),
   },
 
   // TODO: à relire — nouveau (brief §13.3 D, la boucle vers le Tour) ; le bouton reprend le CTA de la landing.

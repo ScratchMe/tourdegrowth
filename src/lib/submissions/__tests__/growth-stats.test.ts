@@ -165,7 +165,7 @@ describe("summarizeSubmissions — results the game card is shown to (GAME-BRIEF
     return Object.entries(scores).map(([pillar, score]) => ({ pillar, score, rawPoints: 0 })) as Submission["pillars"];
   }
 
-  it("counts a clear or shared retention bottleneck, never a level board or another pillar's", () => {
+  it("counts a clear or shared bottleneck on a stage with a level, never a level board or a stage without one", () => {
     const stats = summarizeSubmissions(
       [
         submission({ id: "clear", pillars: board(16, 16, 5, 16, 16) }),
@@ -173,13 +173,16 @@ describe("summarizeSubmissions — results the game card is shown to (GAME-BRIEF
         submission({ id: "shared", pillars: board(5, 16, 5, 16, 16) }),
         // Old enough to fall out of the 30-day window.
         submission({ id: "old", createdAt: daysAgo(45), pillars: board(16, 16, 2, 16, 16) }),
+        // Level 2 (acquisition) has its card since 2026-10-01 (A12.f).
         submission({ id: "acq", pillars: board(2, 16, 16, 16, 16) }),
+        // Activation has no level: no card, so not in the population.
+        submission({ id: "act", pillars: board(16, 3, 16, 16, 16) }),
         submission({ id: "level", pillars: board(16, 16, 16, 16, 16) }),
         // A malformed document costs its own count, never the dashboard.
         submission({ id: "odd", pillars: { retention: 0 } as unknown as Submission["pillars"] }),
       ],
       NOW,
     );
-    expect(stats.retentionBottleneckResults).toEqual({ allTime: 3, last30Days: 2 });
+    expect(stats.gameBottleneckResults).toEqual({ allTime: 4, last30Days: 3 });
   });
 });

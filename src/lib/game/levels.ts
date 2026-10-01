@@ -23,7 +23,9 @@ export interface GameLevelEntry {
 
 export type GameLevelTable = Partial<Record<Pillar, GameLevelEntry>>;
 
+/** In AARRR order: the sitemap, /llms.txt and the hub's image list the levels in the order declared here. */
 export const GAME_LEVELS_BY_PILLAR: GameLevelTable = {
+  acquisition: { slug: "acquisition", enabled: true },
   retention: { slug: "retention", enabled: true },
 };
 
