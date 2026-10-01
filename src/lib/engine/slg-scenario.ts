@@ -17,6 +17,9 @@ import { countsOf, currentSnapshot, entryOf, knownIn } from "./values";
  *   compound, as activation and conversion do in self-serve. The extra
  *   opportunities are signed at today's win rate; a new win rate applies to
  *   the same closed opportunities.
+ * - The referred share of opportunities (§19.3.2, A14 T3): the referred come
+ *   on top of the others, who stay what they are — O' × (1 − r) ÷ (1 − t),
+ *   the leak slide's own rule (`slg-impact.ts`), signed at today's rate.
  * - New MRR a month = W' ÷ 3 × ACV' ÷ 12: the new ACV is the NEW contracts'.
  * - The base in twelve months = MRR × NRR', with NRR' = NRR + (t_ren − r_ren)
  *   points — « a point of renewal counts as a point of NRR; the contracts
@@ -40,7 +43,13 @@ import { countsOf, currentSnapshot, entryOf, knownIn } from "./values";
  */
 
 /** The sales-assisted levers with a slider of the self-serve kind: three rates, then the ACV. */
-const RATE_AND_MONEY_LEVERS = ["slg.acq.lead-to-opp", "slg.rev.win-rate", "slg.ret.renewal", "slg.rev.acv"] as const satisfies readonly Exclude<SlgLeverId, "link.pql-handoff">[];
+const RATE_AND_MONEY_LEVERS = [
+  "slg.acq.lead-to-opp",
+  "slg.ref.referred-share",
+  "slg.rev.win-rate",
+  "slg.ret.renewal",
+  "slg.rev.acv",
+] as const satisfies readonly Exclude<SlgLeverId, "link.pql-handoff">[];
 
 export interface SlgScenarioKpis {
   /** The sales-assisted MRR at the end of the flows' month. */
@@ -56,10 +65,13 @@ export interface SlgScenarioKpis {
   payback: Interval | null;
   /** New customers over the three months. */
   won: Interval | null;
+  /** Opportunities created over the three months: moved by the link and by the referred share. */
+  opps: Interval | null;
 }
 
 export type SlgScenarioAssumption =
   | "slg-lead-same-win-rate"
+  | "slg-referral-on-top"
   | "slg-win-same-closed"
   | "slg-acv-new-contracts"
   | "slg-renewal-as-nrr"
@@ -80,6 +92,7 @@ export interface SlgScenario {
 
 const ORDER: readonly SlgScenarioAssumption[] = [
   "slg-lead-same-win-rate",
+  "slg-referral-on-top",
   "slg-win-same-closed",
   "link-others-unchanged",
   "link-same-win-rate",
@@ -202,10 +215,18 @@ export function buildSlgScenario(state: EngineState, targets: Partial<Record<Lev
     assumptions.add("link-same-win-rate");
     assumptions.add("link-nothing-taken");
   }
-  const fWon = mapBounds(mul(mul(fLead, fWin), fLink), (v) => Math.max(0, v));
+  // O' × (1 − r) ÷ (1 − t): the non-referred stay, the referred make up the new share (§19.3.2).
+  const rRef = today("slg.ref.referred-share");
+  const tRef = target("slg.ref.referred-share");
+  const fRef =
+    rRef && tRef !== null ? mapBounds(correlatedRatio(mapBounds(rRef, (r) => 1 - r / 100), () => 1 - Math.min(tRef, 99) / 100), (f) => 1 / f) : one;
+  if (rRef && tRef !== null) assumptions.add("slg-referral-on-top");
+  const fOpps = mul(fLink, fRef);
+  const fWon = mapBounds(mul(mul(fLead, fWin), fOpps), (v) => Math.max(0, v));
 
   function kpis(projected: boolean): SlgScenarioKpis {
     const won = w ? (projected ? mul(w, fWon) : w) : null;
+    const opps = o !== null ? (projected ? mapBounds(scale(fOpps, o), (v) => Math.max(0, v)) : point(o)) : null;
     const acv = projected && target("slg.rev.acv") !== null ? point(target("slg.rev.acv")!) : today("slg.rev.acv");
     if (projected && target("slg.rev.acv") !== null) assumptions.add("slg-acv-new-contracts");
     const newMrr = won && acv ? scale(mul(won, acv), 1 / 36) : null;
@@ -231,7 +252,7 @@ export function buildSlgScenario(state: EngineState, targets: Partial<Record<Lev
     const lifetime = renewal && term ? slgLifetimeMonths(renewal, term) : null;
     const ltv = monthlyMargin && lifetime ? mul(monthlyMargin, lifetime) : null;
     const payback = cac && monthlyMargin ? div(cac, monthlyMargin) : null;
-    return { mrr, newMrr, mrr12, nrr, cac, ltv, payback: payback && mapBounds(payback, (v) => Math.max(0, v)), won };
+    return { mrr, newMrr, mrr12, nrr, cac, ltv, payback: payback && mapBounds(payback, (v) => Math.max(0, v)), won, opps };
   }
 
   const result = { levers, moved, today: kpis(false), projected: kpis(true) };

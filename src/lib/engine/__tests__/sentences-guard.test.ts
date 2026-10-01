@@ -138,15 +138,35 @@ const SCENARIOS: { name: string; build: () => { state: EngineState; result?: Ret
   { name: "not enough targets", build: () => ({ state: withEntry(exampleState(), "ret.logo-churn", undefined) }) },
   { name: "no target at all (C1: the references name nothing)", build: () => ({ state: withoutTargets(exampleState()) }) },
   { name: "not enough targets, behind a raised one", build: () => ({ state: withTarget(withEntry(exampleState(), "ret.logo-churn", undefined), "act.rate", 25) }) },
-  { name: "referred share behind a target (unpriced)", build: () => ({ state: withTarget(within(), "ref.referred-share", 10) }) },
+  { name: "referred share behind a target (priced, §19.3.2)", build: () => ({ state: withTarget(within(), "ref.referred-share", 10) }) },
+  { name: "referred share behind a target past 50 % (unpriced)", build: () => ({ state: withTarget(within(), "ref.referred-share", 60) }) },
   {
-    // C9: the one stage behind is one the model can't price — its slide exists, with no amount.
-    name: "day 30 named alone (unpriced slide)",
+    // §19.3.1: day 30 named alone is priced, with its own assumption.
+    name: "day 30 named alone (priced)",
     build: () => ({
       state: withTarget(
         withEntry(withEntry(within(), "ret.logo-churn", measured(ratio(6, 400), tool("stripe"))), "ret.d30", measured(ratio(40, 800), tool("amplitude"))),
         "ret.d30",
         20,
+      ),
+    }),
+  },
+  {
+    // C9: the one stage behind is one the model can't price — its slide exists, with no amount.
+    name: "referred share named alone past 50 % (unpriced slide)",
+    build: () => ({ state: withTarget(withEntry(within(), "ret.logo-churn", measured(ratio(6, 400), tool("stripe"))), "ref.referred-share", 60) }),
+  },
+  {
+    name: "referred share named alone, no N (per 100 sign-ups)",
+    build: () => ({
+      state: withTarget(
+        withEntry(
+          withEntry(withEntry(within(), "ret.logo-churn", measured(ratio(6, 400), tool("stripe"))), "acq.cac", measured({ kind: "amount", amount: 500 }, tool("stripe"))),
+          "acq.signup-rate",
+          measured({ kind: "rate", percent: 3.2 }, tool("ga4")),
+        ),
+        "ref.referred-share",
+        10,
       ),
     }),
   },
@@ -225,6 +245,26 @@ const SCENARIOS: { name: string; build: () => { state: EngineState; result?: Ret
   { name: "hybrid, relays broken twice at the tail", build: () => ({ state: withEntry(hybridState(), "slg.rev.win-rate", missing("not-tracked", "sprint")) }) },
   { name: "hybrid, relays empty", build: () => ({ state: withEntry(withEntry(hybridState(), "slg.rev.win-rate", undefined), "slg.acq.lead-to-opp", undefined) }) },
   { name: "hybrid, no sales-assisted ACV", build: () => ({ state: withEntry(hybridState(), "slg.rev.acv", undefined) }) },
+  {
+    // §19.3.2: the referred share of opportunities named, priced on W; then past its 50 % ceiling; then without W.
+    name: "hybrid, referred share named (priced)",
+    build: () => ({ state: withTarget(withTarget(withTarget(hybridState(), "slg.rev.win-rate", 20), "slg.acq.lead-to-opp", 12), "slg.ref.referred-share", 30) }),
+  },
+  {
+    name: "hybrid, referred share named past 50 % (unpriced)",
+    build: () => ({
+      state: withTarget(withTarget(withTarget(withTarget(hybridState(), "slg.rev.win-rate", 20), "slg.acq.lead-to-opp", 12), "slg.ret.renewal", 85), "slg.ref.referred-share", 60),
+    }),
+  },
+  {
+    name: "sales-assisted, referred share named, no W (per 100 opportunities created)",
+    build: () => {
+      let s = withEntry(salesAssistedState(), "slg.rev.win-rate", measured({ kind: "rate", percent: 24 }, tool("hubspot")));
+      s = withEntry(withEntry(s, "slg.rev.acv", measured({ kind: "amount", amount: 24_000 }, tool("hubspot"))), "slg.acq.cac", measured({ kind: "amount", amount: 19_000 }, tool("hubspot")));
+      s = withTarget(withTarget(withTarget(withTarget(s, "slg.rev.win-rate", 20), "slg.acq.lead-to-opp", 12), "slg.ret.renewal", 85), "slg.ref.referred-share", 30);
+      return { state: { ...s, snapshots: [{ ...s.snapshots[0]!, base: { slgOppsCreated: 130, slgCustomers: 100 } }] } };
+    },
+  },
   {
     name: "hybrid, renewal named, no sales-assisted ARPA, one contract kept",
     build: () => ({ state: withEntry(withEntry(withEntry(hybridState(), "slg.rev.win-rate", measured(ratio(25, 75))), "slg.acq.lead-to-opp", measured(ratio(90, 480))), "slg.rev.arpa", undefined) }),

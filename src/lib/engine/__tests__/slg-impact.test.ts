@@ -60,6 +60,28 @@ describe("the §18.9.4 example, in both languages, to the character", () => {
     expect(fr).toMatchObject({ kind: "new-mrr", customersPerQuarter: { lo: 6, hi: 6 }, mrrPerQuarter: { lo: 12_000, hi: 12_000 }, mrrPerMonth: { lo: 4_000, hi: 4_000 } });
   });
 
+  it("the referred share to 30 % (§19.3.2): 18 × (100 – 20)/(100 – 30) = 21 (+3), 6 000 € a quarter, ~2 000 € a month", () => {
+    const s = hybridState();
+    const fr = slgWhatIf(s, "slg.ref.referred-share", 30, CTX_FR, FR.strings.units)!;
+    expect(printed(fr, s, FR, "fr", FR.strings.subject["slg.ref.referred-share"], nb("30^% (cible de l'équipe)"))).toEqual(
+      [
+        "Aujourd'hui · 20^% d'opportunités recommandées, soit 18 nouveaux clients sur 3^mois",
+        "Si · la part des opportunités recommandées atteint 30^% (cible de l'équipe)",
+        "Alors · 18 × (100 – 20)/(100 – 30) = 21 (+3) sur 3^mois",
+        "× ACV ÷ 12 · 3 × 2^000^€ = 6^000^€ de MRR nouveau par trimestre",
+        "soit ~2^000^€ par mois",
+        "Soit ~24^000^€ de MRR de plus au bout d'un an (contrats annuels^: aucun ne se renouvelle dans l'année).",
+      ].map(nb),
+    );
+    const en = slgWhatIf(s, "slg.ref.referred-share", 30, CTX_EN, EN.strings.units)!;
+    expect(printed(en, s, EN, "en", EN.strings.subject["slg.ref.referred-share"], "30% (team target)").slice(0, 3)).toEqual([
+      "Today · 20% of opportunities referred, i.e. 18 new customers over 3 months",
+      "If · the referred share of opportunities reaches 30% (team target)",
+      "Then · 18 × (100 – 20)/(100 – 30) = 21 (+3) over 3 months",
+    ]);
+    expect(fr).toMatchObject({ kind: "new-mrr", customersPerQuarter: { lo: 3, hi: 3 }, mrrPerQuarter: { lo: 6_000, hi: 6_000 } });
+  });
+
   it("lead → opportunity to 18 %: 18 × 18/15 = 22 (+4), 8 000 € a quarter, ~2 700 € a month", () => {
     const s = hybridState();
     const fr = slgWhatIf(s, "slg.acq.lead-to-opp", 18, CTX_FR, FR.strings.units)!;
@@ -123,11 +145,14 @@ describe("the ranking value: exact, per month, the identity of D9", () => {
     expect(checked).toBe(27);
   });
 
-  it("never prices go-live nor the referred share, and a target already met is worth nothing", () => {
+  it("never prices go-live, nor a referred share past 50 %, and a target already met is worth nothing", () => {
     const s = withEntry(hybridState(), "slg.act.go-live", measured(ratio(10, 15), hubspot));
     expect(slgRankingImpact(s, "slg.act.go-live", 90, CTX_FR)).toEqual({});
     expect(slgWhatIf(s, "slg.act.go-live", 90, CTX_FR, FR.strings.units)).toBeNull();
-    expect(slgRankingImpact(s, "slg.ref.referred-share", 40, CTX_FR)).toEqual({});
+    expect(slgRankingImpact(s, "slg.ref.referred-share", 51, CTX_FR)).toEqual({});
+    expect(slgWhatIf(s, "slg.ref.referred-share", 51, CTX_FR, FR.strings.units)).toBeNull();
+    // W × (t − r)/(100 − t) × ACV ÷ 36: 18 × 10/70 × 24 000 € ÷ 36 = ~1 714 € a month.
+    expect(slgRankingImpact(s, "slg.ref.referred-share", 30, CTX_FR).mrr!.lo).toBeCloseTo((18 * 10 * 24_000) / 70 / 36);
     expect(slgRankingImpact(s, "slg.rev.win-rate", 20, CTX_FR).mrr).toEqual({ lo: 0, hi: 0 });
     expect(slgWhatIf(s, "slg.rev.win-rate", 24, CTX_FR, FR.strings.units)).toBeNull();
   });
@@ -205,6 +230,19 @@ describe("edges", () => {
     const lead = slgWhatIf(s, "slg.acq.lead-to-opp", 18, CTX_EN, EN.strings.units)!;
     expect(lead.perHundredBase).toBe("mql");
     expect(worthOf(lead, EN.strings, "en")).toBe("3 more opportunities per 100 MQLs");
+  });
+
+  it("the referred share without W: on 100 opportunities created, the referred on top (§19.3.2)", () => {
+    // No count of deals won anywhere: the win rate, the ACV and the CAC typed as values (as the test above).
+    let s = withEntry(salesAssistedState(), "slg.rev.win-rate", measured({ kind: "rate", percent: 24 }, hubspot));
+    s = withEntry(withEntry(s, "slg.rev.acv", measured({ kind: "amount", amount: 24_000 }, hubspot)), "slg.acq.cac", measured({ kind: "amount", amount: 19_000 }, hubspot));
+    s = withEntry(s, "slg.ref.referred-share", measured(ratio(26, 130), hubspot));
+    s = { ...s, snapshots: [{ ...s.snapshots[0]!, base: { slgOppsCreated: 130, slgCustomers: 100 } }] };
+    const impact = slgWhatIf(s, "slg.ref.referred-share", 30, CTX_FR, FR.strings.units)!;
+    expect(impact).toMatchObject({ kind: "per-hundred", perHundredBase: "oppsCreated" });
+    // 100 × 80/70 = 114,3, displayed as a whole number past 10: 14 more opportunities on every 100 created.
+    expect(printed(impact, s, FR, "fr", "", "").slice(2, 3)).toEqual([nb("Alors · 100 × (100 – 20)/(100 – 30) = 114 (+14) pour 100 opportunités créées aujourd'hui")]);
+    expect(worthOf(impact, FR.strings, "fr")).toBe("14 opportunités de plus pour 100 opportunités créées");
   });
 
   it("the renewal's « less than one » counts contracts kept, not customers", () => {

@@ -1,4 +1,5 @@
-import { UNPRICED_CANDIDATES } from "./catalog-shape";
+import { isPricedAt } from "./catalog-shape";
+import { referralGain } from "./impact";
 import { formatApproxMoneyInterval, formatCountInterval, formatInterval, roundDisplay, roundMoney, roundSignificant, type UnitWords } from "./format";
 import { mapBounds, mul, point, scale } from "./interval";
 import { slgNoDecimals } from "./relays";
@@ -26,13 +27,19 @@ import { countsOf, currentSnapshot, entryOf, knownIn } from "./values";
  * (C25 Q2) — W is the quarter's new customers, D the quarter's contracts up
  * for renewal. A month is a third of what the chain counted, and says so.
  *
- * Never priced: go-live and the referred share (§18.5.2), the cycle (it
- * brings signatures forward without creating any), the NRR, the reference
- * customers, and the link — whose « Et si » is in `slg-scenario.ts`.
+ * The referred share of opportunities (§19.3.2, A14 T3) is a third flow, on
+ * the same W and the same ACV: the referred opportunities come on top of
+ * the others and are signed at today's rate, so W grows by
+ * `(1 − r) ÷ (1 − t) − 1` — the « Et si »'s own rule (`slg-scenario.ts`),
+ * up to a target of 50 %.
+ *
+ * Never priced: go-live (§18.5.2), the cycle (it brings signatures forward
+ * without creating any), the NRR, the reference customers, and the link —
+ * whose « Et si » is in `slg-scenario.ts`.
  */
 
-/** The two flows: lead → opportunity, and closed → signed. The renewal is priced on the contracts up for renewal. */
-const SLG_FLOWS: readonly SlgCandidateId[] = ["slg.acq.lead-to-opp", "slg.rev.win-rate"];
+/** The three flows: lead → opportunity, the referred share, and closed → signed. The renewal is priced on the contracts up for renewal. */
+const SLG_FLOWS: readonly SlgCandidateId[] = ["slg.acq.lead-to-opp", "slg.ref.referred-share", "slg.rev.win-rate"];
 
 export function isSlgFlow(candidate: SlgCandidateId): boolean {
   return SLG_FLOWS.includes(candidate);
@@ -76,7 +83,7 @@ export function slgRankingImpact(
   ctx: EngineCalcContext,
 ): { gap?: Interval; mrr?: Interval } {
   const r = knownValue(state, candidate, ctx);
-  if (!r || UNPRICED_CANDIDATES.includes(candidate)) return {};
+  if (!r || !isPricedAt(candidate, target)) return {};
 
   if (candidate === "slg.ret.renewal") {
     const d = contractsUpForRenewal(state);
@@ -86,8 +93,9 @@ export function slgRankingImpact(
     return { mrr: scale(mul(kept, arpa), 1 / 3) };
   }
 
-  if (r.lo <= 0) return {};
-  const gap = floorAtZero({ lo: target / r.hi - 1, hi: target / r.lo - 1 });
+  const referral = candidate === "slg.ref.referred-share";
+  if (!referral && r.lo <= 0) return {};
+  const gap = referral ? referralGain(r, target) : floorAtZero({ lo: target / r.hi - 1, hi: target / r.lo - 1 });
   const w = wonPerQuarter(state);
   const acv = knownValue(state, "slg.rev.acv", ctx);
   return w && acv ? { gap, mrr: scale(mul(mul(w, gap), acv), 1 / 36) } : { gap };
@@ -124,7 +132,7 @@ export function slgWhatIf(
   ctx: EngineCalcContext,
   words: UnitWords,
 ): Impact | null {
-  if (UNPRICED_CANDIDATES.includes(candidate)) return null;
+  if (!isPricedAt(candidate, target)) return null;
   const r = knownValue(state, candidate, ctx);
   if (!r) return null;
 
@@ -198,15 +206,22 @@ export function slgWhatIf(
     };
   }
 
-  // A flow at 0 has no « × t/r »: nothing to scale from.
-  if (!(rD.lo > 0)) return null;
+  // A flow at 0 has no « × t/r »: nothing to scale from. A share at 0 has: the referred all come on top.
+  const referral = candidate === "slg.ref.referred-share";
+  if (!(rD.lo > 0) && !referral) return null;
+  /** What a count becomes at the target, per bound from the displayed numbers: the fewest with the highest value today. */
+  const grown = (v: Interval, round: (x: number) => number): Interval =>
+    referral
+      ? { lo: round((v.lo * (100 - rD.hi)) / (100 - tD)), hi: round((v.hi * (100 - rD.lo)) / (100 - tD)) }
+      : { lo: round((v.lo * tD) / rD.hi), hi: round((v.hi * tD) / rD.lo) };
   const w = wonPerQuarter(state);
   if (!w) {
+    if (referral) return referralPerHundred(candidate, r, target, rD, tD, grown, pct, bare, lines);
     const lead = entryOf(snapshot, "slg.acq.lead-to-opp")?.variant === "mql" ? "mql" : "leads";
     return perHundred(candidate, r, target, rD, tD, pct, bare, lines, candidate === "slg.acq.lead-to-opp" ? lead : "closedOpps");
   }
   const nD = mapBounds(w, Math.round);
-  const mD = { lo: Math.round((nD.lo * tD) / rD.hi), hi: Math.round((nD.hi * tD) / rD.lo) };
+  const mD = grown(nD, Math.round);
   const delta = floorAtZero({ lo: mD.lo - nD.lo, hi: mD.hi - nD.hi });
   lines.push(
     { key: "today", values: { rate: pct(rD), n: count(nD) }, count: nD },
@@ -227,6 +242,32 @@ export function slgWhatIf(
     ...amounts,
     lines,
   };
+}
+
+/**
+ * The referred share without W: on 100 opportunities created, the referred
+ * on top — « 100 × (100 – 20)/(100 – 30) = 114,3 (+14,3) sur 100
+ * opportunités créées ». No money: it needs W to become customers.
+ */
+function referralPerHundred(
+  candidate: SlgCandidateId,
+  r: Interval,
+  target: number,
+  rD: Interval,
+  tD: number,
+  grown: (v: Interval, round: (x: number) => number) => Interval,
+  pct: (i: Interval) => string,
+  bare: (i: Interval) => string,
+  lines: ImpactLine[],
+): Impact {
+  const mD = grown(point(100), (v) => roundDisplay(v));
+  const deltaD = mapBounds(floorAtZero({ lo: mD.lo - 100, hi: mD.hi - 100 }), (v) => roundDisplay(v));
+  lines.push(
+    { key: "today", values: { rate: pct(rD), n: bare(rD) }, count: rD },
+    { key: "if", values: { target: pct(point(tD)) } },
+    { key: "then", values: { n: bare(point(100)), target: bare(point(tD)), rate: bare(rD), m: bare(mD), delta: bare(deltaD) }, count: deltaD },
+  );
+  return { metric: candidate, kind: "per-hundred", from: r, to: target, perHundredBase: "oppsCreated", lines };
 }
 
 /**

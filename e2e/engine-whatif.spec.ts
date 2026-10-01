@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import type { EngineState } from "../src/lib/engine/types";
-import { exampleState } from "../src/lib/engine/__tests__/fixtures";
+import { exampleState, measured, ratio, withEntry } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, openFold, SKIP_ADMIN_REASON, test } from "./helpers";
 import { storedEngineEntry, writeEngineSeed } from "./engine-helpers";
 
@@ -102,6 +102,17 @@ test("the targets are kept in the state: a reload finds them where they were lef
   await openFold(page.getByTestId("engine-board-whatif"));
   await expect(page.getByTestId("whatif-value-rev.arpa")).toHaveText(moved!);
   await expect(page.getByTestId("engine-whatif-funnel-title")).toHaveText(W.funnelIf.en);
+});
+
+test("day 30, once entered, is a lever: the paying follow it, and the assumption says so (§19.3.1)", async ({ page }) => {
+  await openWith(page, withEntry(exampleState(), "ret.d30", measured(ratio(120, 800))));
+  const panel = page.getByTestId("engine-whatif-panel");
+  await expect(panel.getByTestId("whatif-value-ret.d30")).toHaveText(/^15\s?%$/);
+  await nudge(page, "ret.d30", "ArrowRight", 3);
+  await expect(panel.getByTestId("whatif-value-ret.d30")).toHaveText(/^18\s?%$/);
+  await expect(panel.getByTestId("whatif-step-paying")).toContainText("+");
+  await expect(panel.getByTestId("whatif-assumptions")).toContainText(W.assumption["d30-drives-paying"].en);
+  expect(await storedWhatIf(page)).toEqual({ "ret.d30": 18 });
 });
 
 test("a lever not entered gets no slider, and says which ones; with nothing entered there is nothing to move", async ({ page }) => {

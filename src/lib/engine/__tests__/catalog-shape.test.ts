@@ -13,6 +13,7 @@ import {
   LINK_METRIC_SHAPES,
   METRIC_SHAPES,
   PELOTON_METRICS,
+  REFERRAL_PRICING_CEILING,
   SLG_CANDIDATE_IDS,
   SLG_DERIVED_SHAPES,
   SLG_ENGINE_BRIDGES,
@@ -21,6 +22,7 @@ import {
   UNPRICED_CANDIDATES,
   candidatesOf,
   derivedShapeOf,
+  isPricedAt,
   metricsOfStage,
   motionOfMetric,
   shapeOf,
@@ -84,8 +86,15 @@ describe("candidates and the peloton", () => {
     expect(lower).toEqual(["ret.logo-churn"]);
   });
 
-  it("never prices D30 retention or the referred share in money (§6.6) — nor go-live and the referred share in sales-assisted (§18.5.2)", () => {
-    expect([...UNPRICED_CANDIDATES].sort()).toEqual(["ref.referred-share", "ret.d30", "slg.act.go-live", "slg.ref.referred-share"]);
+  it("never prices go-live (§18.5.2); prices D30 retention, and the referred shares up to a 50 % target (§19.3)", () => {
+    expect([...UNPRICED_CANDIDATES]).toEqual(["slg.act.go-live"]);
+    expect(isPricedAt("slg.act.go-live", 10)).toBe(false);
+    expect(isPricedAt("ret.d30", 99)).toBe(true);
+    for (const id of ["ref.referred-share", "slg.ref.referred-share"] as const) {
+      expect(isPricedAt(id, 50), id).toBe(true);
+      expect(isPricedAt(id, 50.5), id).toBe(false);
+    }
+    expect(REFERRAL_PRICING_CEILING).toBe(50);
   });
 
   it("builds the peloton from the three cohort ★s that follow the same 100 sign-ups", () => {

@@ -42,15 +42,19 @@ describe("the §18.9.4 example", () => {
 });
 
 describe("the rules, sales-assisted", () => {
-  it("never prices go-live nor the referred share: below their target, they stand apart, named but unpriced", () => {
+  it("never prices go-live: below its target, it stands apart, named but unpriced; the referred share ranks with the flows (§19.3.2)", () => {
     let s = withEntry(hybridState(), "slg.act.go-live", measured(ratio(9, 15), hubspot));
     s = withTarget(withTarget(s, "slg.act.go-live", 80), "slg.ref.referred-share", 30);
     const d = diagnose(s, CTX_FR, "slg");
     expect(d.positions["slg.act.go-live"]).toMatchObject({ position: "below" });
     expect(d.positions["slg.act.go-live"].impact).toBeUndefined();
-    expect(d.positions["slg.ref.referred-share"].impact).toBeUndefined();
-    expect(d.belowUnpriced).toEqual(["slg.act.go-live", "slg.ref.referred-share"]);
+    // 18 × (30 − 20)/(100 − 30) × 24 000 € ÷ 36 = ~1 714 € a month, under the win rate's 4 000 €.
+    expect(d.positions["slg.ref.referred-share"].impact?.mrrPerMonth?.lo).toBeCloseTo((18 * 10 * 24_000) / 70 / 36);
+    expect(d.belowUnpriced).toEqual(["slg.act.go-live"]);
     expect(d.named).toEqual(["slg.rev.win-rate"]);
+    // Past a 50 % target, the referred share stands apart too, and the others still rank in money.
+    const past = diagnose(withTarget(s, "slg.ref.referred-share", 60), CTX_FR, "slg");
+    expect(past).toMatchObject({ named: ["slg.rev.win-rate"], basis: "mrr", belowUnpriced: ["slg.act.go-live", "slg.ref.referred-share"] });
   });
 
   it("no published reference names anything: without the team's targets, not enough to say (C1)", () => {

@@ -815,6 +815,7 @@ export const LEVER_IDS: readonly PlgLeverId[] = [
   "acq.signup-rate",
   "ref.referred-share",
   "act.rate",
+  "ret.d30",
   "rev.paid-conversion",
   "ret.logo-churn",
   "rev.contraction",
@@ -826,7 +827,14 @@ export const LEVER_IDS: readonly PlgLeverId[] = [
  * The sales-assisted levers (§18.5.5), then the link (C25 Q7) — its target is
  * a whole number of opportunities per quarter, never a percent.
  */
-export const SLG_LEVER_IDS: readonly SlgLeverId[] = ["slg.acq.lead-to-opp", "slg.rev.win-rate", "slg.ret.renewal", "slg.rev.acv", "link.pql-handoff"];
+export const SLG_LEVER_IDS: readonly SlgLeverId[] = [
+  "slg.acq.lead-to-opp",
+  "slg.ref.referred-share",
+  "slg.rev.win-rate",
+  "slg.ret.renewal",
+  "slg.rev.acv",
+  "link.pql-handoff",
+];
 
 /** Every lever a file may carry a what-if target for. */
 export const ALL_LEVER_IDS: readonly LeverId[] = [...LEVER_IDS, ...SLG_LEVER_IDS];
@@ -841,11 +849,28 @@ export const SLG_CANDIDATE_IDS: readonly SlgCandidateId[] = [
 ];
 
 /**
- * Never priced in money in v1: pricing them would need a retention and a loop
- * model (§6.6) — and, in sales-assisted, a model tying go-live to renewal
- * (§18.5.2).
+ * Never priced in money: go-live, which would need a model tying it to
+ * renewal (§18.5.2). Day-30 retention and the referred shares were unpriced
+ * in v1 too (§6.6); the complete engine prices them (§19.3, A14 T3), the
+ * referred shares up to `REFERRAL_PRICING_CEILING`.
  */
-export const UNPRICED_CANDIDATES: readonly CandidateId[] = ["ret.d30", "ref.referred-share", "slg.act.go-live", "slg.ref.referred-share"];
+export const UNPRICED_CANDIDATES: readonly CandidateId[] = ["slg.act.go-live"];
+
+/** The two referred shares, priced as « the referred come on top of the others » (§19.3.2). */
+export const REFERRAL_CANDIDATES: readonly CandidateId[] = ["ref.referred-share", "slg.ref.referred-share"];
+
+/**
+ * Past a target of 50 %, a referred share is not priced (§19.3.2): the
+ * multiplier (1 − r) ÷ (1 − t) explodes as t nears 100 %, and the slide says
+ * the engine stops there.
+ */
+export const REFERRAL_PRICING_CEILING = 50;
+
+/** Whether closing a candidate's gap to `target` is priced at all — the ONE test the ranking, the chains and the slides read. */
+export function isPricedAt(id: CandidateId, target: number): boolean {
+  if (UNPRICED_CANDIDATES.includes(id)) return false;
+  return !REFERRAL_CANDIDATES.includes(id) || target <= REFERRAL_PRICING_CEILING;
+}
 
 /** A motion's own candidates, in canonical order — the only ones its diagnosis positions. */
 export function candidatesOf(motion: Motion): readonly CandidateId[] {

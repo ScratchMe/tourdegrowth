@@ -962,6 +962,11 @@ export const ENGINE_COPY = {
     todayPerHundredOne: { fr: "{rate}, soit {n} payant pour 100 inscrits", en: "{rate}, i.e. {n} paying customer per 100 sign-ups" },
     ifFlow: { fr: "{stage} atteint {target}", en: "{stage} reaches {target}" },
     thenFlow: { fr: "{n} × {target}/{rate} = {m} (+{delta})", en: "{n} × {target}/{rate} = {m} (+{delta})" },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T3, §19.3.2) : the referred share's `then`, its
+     * placeholders those of `thenFlow`. The others stay, the referred make up the new share: (1 − r) ÷ (1 − t).
+     */
+    thenReferral: { fr: "{n} × (100 – {rate})/(100 – {target}) = {m} (+{delta})", en: "{n} × (100 – {rate})/(100 – {target}) = {m} (+{delta})" },
     timesFlow: {
       fr: "{arpa} par client, soit {amount} de MRR ajouté chaque mois",
       en: "{arpa} per customer, i.e. {amount} of MRR added every month",
@@ -998,6 +1003,8 @@ export const ENGINE_COPY = {
     phrase: {
       "slg.acq.lead-to-opp": { fr: "de passage en opportunité", en: "lead-to-opportunity" },
       "slg.rev.win-rate": { fr: "de closing", en: "win rate" },
+      // TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T3, §19.3.2) : « 20 % d'opportunités recommandées ».
+      "slg.ref.referred-share": { fr: "d'opportunités recommandées", en: "of opportunities referred" },
     },
     todayFlow: { fr: "{rate} {phrase}, soit {n} nouveaux clients sur 3 mois", en: "{rate} {phrase}, i.e. {n} new customers over 3 months" },
     todayFlowOne: { fr: "{rate} {phrase}, soit {n} nouveau client sur 3 mois", en: "{rate} {phrase}, i.e. {n} new customer over 3 months" },
@@ -1013,6 +1020,16 @@ export const ENGINE_COPY = {
     todayPerHundred: { fr: "{rate}, soit {n} sur 100 {base}", en: "{rate}, i.e. {n} in 100 {base}" },
     thenFlow: { fr: "{n} × {target}/{rate} = {m} (+{delta}) sur 3 mois", en: "{n} × {target}/{rate} = {m} (+{delta}) over 3 months" },
     thenPerHundred: { fr: "{n} × {target}/{rate} = {m} (+{delta}) sur 100 {base}", en: "{n} × {target}/{rate} = {m} (+{delta}) in 100 {base}" },
+    /** TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T3, §19.3.2) : thenReferral and thenReferralPerHundred, the referred share's `then`, as `whatIf.thenReferral`. */
+    thenReferral: {
+      fr: "{n} × (100 – {rate})/(100 – {target}) = {m} (+{delta}) sur 3 mois",
+      en: "{n} × (100 – {rate})/(100 – {target}) = {m} (+{delta}) over 3 months",
+    },
+    /** On 100 of today's {base}: `{m}` passes 100, so « pour 100 … aujourd'hui », never « sur 100 ». */
+    thenReferralPerHundred: {
+      fr: "{n} × (100 – {rate})/(100 – {target}) = {m} (+{delta}) pour 100 {base} aujourd'hui",
+      en: "{n} × (100 – {rate})/(100 – {target}) = {m} (+{delta}) for every 100 {base} today",
+    },
     thenRenewal: {
       fr: "{d} × ({target} – {rate}) = {kept} contrats gardés en plus sur 3 mois",
       en: "{d} × ({target} – {rate}) = {kept} more contracts kept over 3 months",
@@ -1047,6 +1064,8 @@ export const ENGINE_COPY = {
     "acq.signup-rate": { fr: "le taux d'inscription", en: "the sign-up rate" },
     "ref.referred-share": { fr: "la part des inscrits recommandés", en: "the referred share of sign-ups" },
     "act.rate": { fr: "l'activation", en: "activation" },
+    // TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T3, §19.3.1) : the day-30 lever.
+    "ret.d30": { fr: "la rétention à J30", en: "day-30 retention" },
     "rev.paid-conversion": { fr: "la conversion en payant", en: "paid conversion" },
     "ret.logo-churn": { fr: "le churn logo", en: "logo churn" },
     "rev.contraction": { fr: "la rétrogradation", en: "contraction" },
@@ -1054,6 +1073,8 @@ export const ENGINE_COPY = {
     "rev.arpa": { fr: "l'ARPA des nouveaux clients", en: "new customers' ARPA" },
     // TODO: à relire (convention 6) — neuf le 2026-09-30 (A7.3.c S0, §18.5.5 et C25 Q7) : les leviers de l'assisté, puis la liaison.
     "slg.acq.lead-to-opp": { fr: "le passage des leads en opportunités", en: "lead-to-opportunity conversion" },
+    // TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T3, §19.3.2) : the referred-share lever.
+    "slg.ref.referred-share": { fr: "la part des opportunités recommandées", en: "the referred share of opportunities" },
     "slg.rev.win-rate": { fr: "le taux de closing", en: "the win rate" },
     "slg.ret.renewal": { fr: "le renouvellement", en: "renewals" },
     "slg.rev.acv": { fr: "l'ACV des nouveaux contrats", en: "new contracts' ACV" },
@@ -1133,6 +1154,11 @@ export const ENGINE_COPY = {
       "signup-same-visitors": { fr: "Le taux d'inscription s'applique aux mêmes visiteurs qu'aujourd'hui.", en: "The sign-up rate applies to the same visitors as today." },
       "referral-on-top": { fr: "Les inscrits recommandés s'ajoutent aux autres, qui restent les mêmes ; ils arrivent par des visiteurs qui s'inscrivent au taux d'aujourd'hui.", en: "Referred sign-ups come on top of the others, who stay the same; they arrive through visitors who sign up at today's rate." },
       "activation-drives-downstream": { fr: "Les actifs à J30 et les payants font partie des activés : ils suivent l'activation dans la même proportion, sans jamais la dépasser.", en: "Those active at day 30 and those paying are among the activated: they follow activation in the same proportion, never above it." },
+      // TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T3, §19.3.1).
+      "d30-drives-paying": {
+        fr: "Quand la rétention à J30 bouge, ce sont les actifs à J30 que les payants suivent : ils en font partie, sans jamais dépasser leur nombre.",
+        en: "When day-30 retention moves, paying customers follow those active at day 30: they are among them, never more than them.",
+      },
       "arpa-new-customers": { fr: "Le nouvel ARPA s'applique aux nouveaux clients ; le MRR déjà là garde son prix.", en: "The new ARPA applies to new customers; the MRR already there keeps its price." },
       "same-spend": { fr: "À dépense égale : plus de payants font baisser le CAC dans la même proportion.", en: "Same spend: more paying customers lower the CAC in the same proportion." },
       "churn-as-revenue": { fr: "Le churn logo tient lieu de churn en revenu, comme si les clients partis payaient l'ARPA moyen.", en: "Logo churn stands in for revenue churn, as if the customers who left paid the average ARPA." },
@@ -1172,6 +1198,11 @@ export const ENGINE_COPY = {
     /** One sentence per rule of `lib/engine/slg-scenario.ts`, printed only when it applied. */
     slgAssumption: {
       "slg-lead-same-win-rate": { fr: "Les opportunités en plus se signent au même taux que les autres.", en: "The extra opportunities are signed at the same rate as the others." },
+      // TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T3, §19.3.2).
+      "slg-referral-on-top": {
+        fr: "Les opportunités recommandées s'ajoutent aux autres, qui restent les mêmes, et se signent au même taux.",
+        en: "Referred opportunities come on top of the others, which stay the same, and are signed at the same rate.",
+      },
       "slg-win-same-closed": { fr: "Le nouveau taux de closing s'applique au même nombre d'opportunités conclues.", en: "The new win rate applies to the same number of closed opportunities." },
       "slg-acv-new-contracts": { fr: "Le nouvel ACV s'applique aux nouveaux contrats ; les contrats en cours gardent leur prix.", en: "The new ACV applies to new contracts; current contracts keep their price." },
       "slg-renewal-as-nrr": { fr: "Un point de renouvellement compte comme un point de NRR : les contrats sauvés valent la moyenne.", en: "A point of renewal counts as a point of NRR: the contracts saved are worth the average." },
@@ -1451,12 +1482,33 @@ export const ENGINE_COPY = {
       "slg.acq.lead-to-opp": { fr: "les opportunités en plus se signent au même taux que les autres", en: "the extra opportunities are signed at the same rate as the others" },
       "slg.rev.win-rate": { fr: "le même nombre d'opportunités conclues", en: "the same number of closed opportunities" },
       "slg.ret.renewal": { fr: "les contrats sauvés valent l'ARPA assisté", en: "the contracts saved are worth the sales-assisted ARPA" },
+      // TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T3, §19.3.2).
+      "slg.ref.referred-share": {
+        fr: "les opportunités recommandées s'ajoutent aux autres et se signent au même taux",
+        en: "the referred opportunities come on top of the others and are signed at the same rate",
+      },
+    },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T3, §19.3) : the `leak` footer's `{assumption}` for the two
+     * self-serve stages priced since the complete engine — a clause, lower-case, no full stop, as `leakAssumption`.
+     */
+    plgLeakAssumption: {
+      "ret.d30": { fr: "les payants sont supposés parmi les inscrits encore actifs à J30", en: "paying customers are assumed to be among the sign-ups still active at day 30" },
+      "ref.referred-share": {
+        fr: "les inscrits recommandés s'ajoutent aux autres et convertissent comme eux",
+        en: "referred sign-ups come on top of the others and convert like them",
+      },
     },
     /** The footer of a leak slide with no amount (C9): why there is none, in place of « toutes choses égales par ailleurs ». */
     // TODO: à relire (convention 6) — nouveau (2026-09-30, A7.6, C9).
     leakFooterUnpriced: {
       fr: "Sans montant : le moteur ne relie pas ce chiffre au MRR",
       en: "No amount: the engine doesn't link this number to MRR",
+    },
+    /** TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T3, §19.3.2) : a referred share's target past the ceiling. `{max}`: « 50 % ». */
+    leakFooterCeiling: {
+      fr: "Sans montant : au-delà d'une cible de {max}, le moteur ne chiffre plus la part des recommandations",
+      en: "No amount: past a target of {max}, the engine no longer prices a referred share",
     },
     leakAside: { fr: "À côté", en: "Alongside" },
     /** A peloton column or a candidate nobody measured. Gender-free: it follows a label of either gender. */
@@ -1671,10 +1723,12 @@ export const ENGINE_COPY = {
       en: "Bringing {stage} to {target} would add **{n} paying customer per 100 sign-ups**.",
     },
     /**
-     * A stage the model can't price — day-30 retention, the referred share (C9,
-     * 2026-09-29, ENGINE.md §9.3). `{stage}` is a subject phrase capitalised by
-     * the code; `{value}` the measured value; `{target}` `targetPhrase`'s words.
-     * No amount: the footer (`slide.leakFooterUnpriced`) says why.
+     * A stage the model can't price — go-live, a referred share past a 50 %
+     * target (C9, 2026-09-29, ENGINE.md §9.3; since §19.3, day-30 retention
+     * and a referred share up to 50 % are priced). `{stage}` is a subject
+     * phrase capitalised by the code; `{value}` the measured value; `{target}`
+     * `targetPhrase`'s words. No amount: the footer (`slide.leakFooterUnpriced`,
+     * or `leakFooterCeiling` for a referred share) says why.
      */
     // TODO: à relire (convention 6) — nouveau (2026-09-30, A7.6, C9).
     leakClearUnpriced: {

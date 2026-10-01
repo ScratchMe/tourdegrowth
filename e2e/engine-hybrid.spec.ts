@@ -165,6 +165,21 @@ test.describe("the hybrid board (§18.7 E2)", () => {
     expect(whatIf).toEqual({ "act.rate": 24 });
   });
 
+  test("the referred share of opportunities is a lever: it moves the opportunities created (§19.3.2)", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await seed(page, hybridState());
+    await page.getByTestId("engine-motion-selector").getByRole("button", { name: ENGINE_COPY.hybrid.motionName.slg.en }).click();
+    await page.getByTestId("engine-board-whatif").locator("summary").first().click();
+    await expect(page.getByTestId("whatif-value-slg.ref.referred-share")).toHaveText("20%");
+    await page.getByTestId("whatif-slider-slg.ref.referred-share").focus();
+    for (let i = 0; i < 10; i++) await page.keyboard.press("ArrowRight");
+    await expect(page.getByTestId("whatif-value-slg.ref.referred-share")).toHaveText("30%");
+    // 130 × 80/70 = 149 opportunities created: the referred come on top of the others.
+    await expect(page.getByTestId("whatif-slg-quarter")).toContainText("149");
+    await expect(page.getByTestId("whatif-slg-assumptions")).toContainText(ENGINE_COPY.scenario.slgAssumption["slg-referral-on-top"].en);
+    expect((await storedEngineEntry(page))?.state.whatIf).toEqual({ "slg.ref.referred-share": 30 });
+  });
+
   test("390: the columns stack and nothing pushes the page sideways — French too", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     for (const locale of ["en", "fr"] as const) {

@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test";
 import type { EngineState, PlgLeverId } from "../src/lib/engine/types";
-import { exampleState } from "../src/lib/engine/__tests__/fixtures";
+import { exampleState, measured as entry, ratio, withEntry } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, openFold, readEachOnScreen, SKIP_ADMIN_REASON, test } from "./helpers";
 import { engineSeed } from "./engine-helpers";
 
@@ -16,17 +16,18 @@ test.beforeEach(async ({ context }) => {
  * one for all of them together from two. The numbers are the pure model's
  * (lib/engine/__tests__/deck.test.ts); what only the rendered deck can say is
  * here — that a target moved on the board becomes a slide, that the slides
- * sit where the model puts them, that eight levers still fit a 1920 × 1080
+ * sit where the model puts them, that nine levers still fit a 1920 × 1080
  * page with nothing under 18px (A2.1, 2026-09-29), and that they print in
  * the three embedded families only.
  */
 
 
-/** Every lever the example knows, moved: the densest « together » slide the deck can print. */
+/** Every lever, moved — day 30 given a value, as the example has none (§19.3.1): the densest « together » slide the deck can print. */
 const ALL_LEVERS: Record<PlgLeverId, number> = {
   "acq.signup-rate": 4,
   "ref.referred-share": 10,
   "act.rate": 24,
+  "ret.d30": 18,
   "rev.paid-conversion": 10,
   "ret.logo-churn": 1.5,
   "rev.contraction": 0.5,
@@ -34,8 +35,8 @@ const ALL_LEVERS: Record<PlgLeverId, number> = {
   "rev.arpa": 150,
 };
 
-async function openDeckWith(page: Page, locale: "fr" | "en", whatIf: EngineState["whatIf"]): Promise<void> {
-  const state = { ...exampleState(), whatIf };
+async function openDeckWith(page: Page, locale: "fr" | "en", whatIf: EngineState["whatIf"], base: EngineState = exampleState()): Promise<void> {
+  const state = { ...base, whatIf };
   await page.addInitScript(
     (items) => {
       if (sessionStorage.getItem("e2e-engine-seeded")) return;
@@ -92,11 +93,11 @@ for (const locale of ["fr", "en"] as const) {
     });
 
     test("every lever moved: each body ends above its footer, and prints the brand's glyphs only", async ({ page }) => {
-      await openDeckWith(page, locale, ALL_LEVERS);
+      await openDeckWith(page, locale, ALL_LEVERS, withEntry(exampleState(), "ret.d30", entry(ratio(120, 800))));
       const ids = (await thumbOrder(page)).filter((id) => id.startsWith("whatif:") || id === "scenario");
-      // Non-vacuity: the eight levers and « together », not an empty list that passes by being empty.
-      expect(ids).toHaveLength(9);
-      await expect(page.getByTestId("slide-scenario-levers").locator('[data-testid^="slide-lever-"]')).toHaveCount(8);
+      // Non-vacuity: the nine levers and « together », not an empty list that passes by being empty.
+      expect(ids).toHaveLength(10);
+      await expect(page.getByTestId("slide-scenario-levers").locator('[data-testid^="slide-lever-"]')).toHaveCount(9);
 
       // Each slide read on screen (readEachOnScreen): off screen a thumbnail skips its text, and an empty text has no placeholder to find.
       const measured = await readEachOnScreen(page, page.locator('[data-slide^="whatif:"], [data-slide="scenario"]'), (slide) => {
@@ -115,7 +116,7 @@ for (const locale of ["fr", "en"] as const) {
         );
         return { id: slide.getAttribute("data-slide")!, deepest: Math.round(deepest), footTop: Math.round(footTop), smallest, text: (slide as HTMLElement).innerText };
       });
-      expect(measured).toHaveLength(9);
+      expect(measured).toHaveLength(10);
       const clashes = measured.filter((m) => m.deepest > m.footTop).map((m) => `${m.id}: body ends at ${m.deepest}, footer starts at ${m.footTop}`);
       expect(clashes).toEqual([]);
       // The assumptions footer, the table heads and the levers' moves were 15, 14 and 16px before A2.1.

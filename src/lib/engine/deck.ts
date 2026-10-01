@@ -7,7 +7,9 @@ import {
   PELOTON_METRICS,
   SLG_CANDIDATE_IDS,
   SLG_METRIC_SHAPES,
-  UNPRICED_CANDIDATES,
+  REFERRAL_CANDIDATES,
+  REFERRAL_PRICING_CEILING,
+  isPricedAt,
   motionOfMetric,
   motionShapes,
   shapeOf,
@@ -393,10 +395,14 @@ export function buildLeak(
   /** What closing the named gap is worth, for the notes that compare the others with it. */
   let top: string | null = null;
 
-  if (diagnosis.state === "clear" && UNPRICED_CANDIDATES.includes(named[0]!)) {
-    // A stage the model can't price — day-30 retention, the referred share (§6.6) — still gets its slide: without
-    // it the deck dropped, without a word, the conclusion the board shows (C9, 2026-09-29). Its title names the
-    // value and the target, never an amount; the footer says why there is none; no chain to show, so no card.
+  const unpriced = (id: CandidateId) => {
+    const comparator = positions[id].comparator;
+    return comparator !== undefined && !isPricedAt(id, impactTarget(comparator));
+  };
+  if (diagnosis.state === "clear" && unpriced(named[0]!)) {
+    // A stage the model can't price — go-live, a referred share past a 50 % target (§19.3) — still gets its slide:
+    // without it the deck dropped, without a word, the conclusion the board shows (C9, 2026-09-29). Its title names
+    // the value and the target, never an amount; the footer says why there is none; no chain to show, so no card.
     const id = named[0]!;
     const comparator = positions[id].comparator;
     const known = knownIn(state, id, ctx);
@@ -404,7 +410,11 @@ export function buildLeak(
     const target = targetPhrase(comparator, id, state, strings, ctx);
     const value = formatInterval(known.value, shapeOf(id).unit, ctx, strings.units);
     title = { key: "leakClearUnpriced", values: { stage: capitalise(subject(id)), value, target } };
-    lines.push({ row: "footer", text: strings.slide.leakFooterUnpriced });
+    const ceiling = formatInterval(point(REFERRAL_PRICING_CEILING), "percent", ctx, strings.units);
+    lines.push({
+      row: "footer",
+      text: REFERRAL_CANDIDATES.includes(id) ? fillTemplate(strings.slide.leakFooterCeiling, { max: ceiling }) : strings.slide.leakFooterUnpriced,
+    });
     notes.push(fillTemplate(strings.notes.compared, { comparator: target }));
   } else if (diagnosis.state === "clear") {
     const id = named[0]!;
@@ -438,7 +448,11 @@ export function buildLeak(
     }
     for (const line of impact.lines) lines.push(calcLine(line, impact, stage, target));
     // The assumption is said here, once (spec §9.3, §18.5.3): what the calculation takes for granted.
-    const assumption = slg ? (strings.slide.slgLeakAssumption[id as keyof Words["slide"]["slgLeakAssumption"]] ?? "") : id === "act.rate" ? strings.slide.leakAssumption : "";
+    const assumption = slg
+      ? (strings.slide.slgLeakAssumption[id as keyof Words["slide"]["slgLeakAssumption"]] ?? "")
+      : id === "act.rate"
+        ? strings.slide.leakAssumption
+        : (strings.slide.plgLeakAssumption[id as keyof Words["slide"]["plgLeakAssumption"]] ?? "");
     lines.push({ row: "footer", text: fillSegments(strings.slide.leakFooter, { assumption }) });
     notes.push(fillTemplate(strings.notes.compared, { comparator: target }));
     top = worthOf(impact, strings, locale);

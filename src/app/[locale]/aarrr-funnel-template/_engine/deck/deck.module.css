@@ -771,6 +771,15 @@
   padding-top: 0;
 }
 
+/* Nine levers since day 30 became one (§19.3.1): a step denser again. */
+.leverDenser .leverRow {
+  padding: 3px 0;
+}
+
+.leverDenser .leverRow:first-child {
+  padding-top: 0;
+}
+
 .together {
   margin: 0;
   font: var(--slide-body-xs);

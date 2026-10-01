@@ -192,7 +192,7 @@ function slgMrrGain(s: SlgScenario): Interval | null {
 
 /**
  * Sales-assisted's two tables for one scenario: the growth figures, then its
- * quarter — the opportunities created (only the link moves them), in the
+ * quarter — the opportunities created (the link and the referred share move them), in the
  * hybrid how many came from self-serve, and the new customers. The
  * assumptions that applied are the footer, as on every what-if slide.
  */
@@ -206,8 +206,7 @@ function slgScenarioLines(state: EngineState, s: SlgScenario, rowTemplate: strin
   const link = s.levers.find((x) => x.id === "link.pql-handoff");
   const linkTarget = link?.target ?? null;
   if (o !== null) {
-    const projected = linkTarget !== null && l ? { lo: o + linkTarget - l.hi, hi: o + linkTarget - l.lo } : point(o);
-    lines.push(changeRow("funnelStep", "opps", w.opps, point(o), projected, people, rowTemplate, strings));
+    lines.push(changeRow("funnelStep", "opps", w.opps, s.today.opps ?? point(o), s.projected.opps ?? point(o), people, rowTemplate, strings));
     if (link && l) lines.push(changeRow("funnelStep", "fromSelfServe", w.oppsFromSelfServe, l, linkTarget !== null ? point(linkTarget) : l, people, rowTemplate, strings));
   }
   lines.push(changeRow("funnelStep", "won", w.won, s.today.won, s.projected.won, people, rowTemplate, strings));

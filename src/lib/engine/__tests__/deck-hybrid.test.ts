@@ -4,7 +4,7 @@ import { deriveEngine } from "../derive";
 import type { DeckModel, EngineState } from "../types";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
 import { QUESTIONS } from "../../../content/copy-library";
-import { estimated, exampleState, hybridState, measured, missing, ratio, salesAssistedState, tourResult, withEntry } from "./fixtures";
+import { estimated, exampleState, hybridState, measured, missing, ratio, salesAssistedState, tourResult, withEntry, withTarget } from "./fixtures";
 
 /**
  * The deck with sales-assisted ticked (engine spec §18.8, A7.3.c S4): which
@@ -161,6 +161,21 @@ describe("sales-assisted's slides", () => {
     expect(leak.title.values.amount).toBe(nb("~4^000^€"));
     expect(leak.lines.some((l) => l.row === "calc" && (l.text ?? "").includes(leak.title.values.amount!))).toBe(true);
     expect(leak.lines.find((l) => l.row === "footer")!.text).toBe("Toutes choses égales par ailleurs · le même nombre d'opportunités conclues");
+  });
+
+  it("slg:leak: the referred share of opportunities named — its chain, its assumption; past 50 %, the ceiling said (§19.3.2)", () => {
+    // The win rate and lead → opportunity past lowered targets: the referred share (20 % → 30 %) is the leak, at ~2 000 € a month.
+    const named = withTarget(withTarget(withTarget(hybridState(), "slg.rev.win-rate", 20), "slg.acq.lead-to-opp", 12), "slg.ref.referred-share", 30);
+    const leak = slide(deckOf(named), "slg:leak");
+    expect(leak.title.key).toBe("leakClearMrrNew");
+    expect(leak.title.values.amount).toBe(nb("~2^000^€"));
+    expect(leak.lines.find((l) => l.row === "calc" && l.key === "then")!.text).toBe(nb("18 × (100 – 20)/(100 – 30) = 21 (+3) sur 3^mois"));
+    expect(leak.lines.find((l) => l.row === "footer")!.text).toBe(
+      "Toutes choses égales par ailleurs · les opportunités recommandées s'ajoutent aux autres et se signent au même taux",
+    );
+    const past = slide(deckOf(withTarget(withTarget(named, "slg.ret.renewal", 85), "slg.ref.referred-share", 60)), "slg:leak");
+    expect(past.title.key).toBe("leakClearUnpriced");
+    expect(past.lines.find((l) => l.row === "footer")!.text).toBe(nb("Sans montant^: au-delà d'une cible de 50^%, le moteur ne chiffre plus la part des recommandations"));
   });
 
   it("without an ACV, the sales-assisted leak counts customers a quarter", () => {

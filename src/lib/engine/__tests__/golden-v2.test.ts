@@ -15,6 +15,7 @@ import { buildSlgScenario } from "../slg-scenario";
 import type { EngineState, MetricId } from "../types";
 import { currentSnapshot } from "../values";
 import { EXAMPLE_TODAY, exampleState, hybridState, salesAssistedState, tourResult } from "./fixtures";
+import { asBeforeT3 } from "./golden-projection";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
 
 /**
@@ -94,7 +95,13 @@ function outputsOf(state: EngineState, tour: StoredResult | null) {
     };
   }
   // A round trip through JSON: `undefined` fields drop out exactly as they do in the file.
-  return JSON.parse(JSON.stringify(out)) as unknown;
+  const json = JSON.parse(JSON.stringify(out)) as Record<string, Record<string, unknown>>;
+  // The levers A14 T3 adds to « Et si », and only them (golden-projection.ts): a field added, not a change.
+  for (const o of Object.values(json)) {
+    asBeforeT3(o.scenario, false);
+    asBeforeT3(o.slgScenario, true);
+  }
+  return json as unknown;
 }
 
 /**
@@ -121,6 +128,16 @@ describe("golden v2 — a v2 engine reads the same after the change", () => {
 
   const inputs = JSON.parse(readFileSync(INPUTS, "utf8")) as Record<string, GoldenInput>;
   const outputs = JSON.parse(readFileSync(OUTPUTS, "utf8")) as Record<string, unknown>;
+
+  it("the projection drops what A14 T3 adds to « Et si », and nothing else: the two levers are there to drop", () => {
+    const state = openV2(inputs.hybrid!.state);
+    const scenario = JSON.parse(JSON.stringify(buildScenario(state, {}, CTX_FR))) as unknown;
+    const slg = JSON.parse(JSON.stringify(buildSlgScenario(state, {}, CTX_FR))) as { today: { opps?: unknown } };
+    expect(slg.today.opps).toBeDefined();
+    // Day 30 (no value in the hybrid: a lever without a slider), then the referred share of opportunities.
+    expect(asBeforeT3(scenario, false) + asBeforeT3(slg, true)).toBe(2);
+    expect(slg.today.opps).toBeUndefined();
+  });
 
   it("covers the six v2 states, each with a French and an English reading", () => {
     expect(existsSync(INPUTS) && existsSync(OUTPUTS)).toBe(true);

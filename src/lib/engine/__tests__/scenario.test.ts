@@ -76,6 +76,30 @@ describe("buildScenario — one lever at a time", () => {
     expect(high.d30!.hi).toBeLessThanOrEqual(high.activated!.hi);
   });
 
+  it("day 30, a lever since §19.3.1: 15 → 18 %, the paying follow it — × 6/5 — and activation caps it", () => {
+    const withD30 = withEntry(exampleState(), "ret.d30", { status: "measured", value: { kind: "ratio", numerator: 120, denominator: 800 }, source: { kind: "other" }, updatedAt: "2026-09-26T10:00:00.000Z" });
+    const s = buildScenario(withD30, { "ret.d30": 18 }, CTX_FR);
+    expect(s.moved).toEqual(["ret.d30"]);
+    expect(s.projected.funnel.d30?.lo).toBeCloseTo(820 * 0.18, 9);
+    // The estimated 6-9 % paid conversion, each bound × 18/15: 7,2-10,8 %.
+    expect(s.projected.funnel.paying?.lo).toBeCloseTo(820 * 0.072, 9);
+    expect(s.projected.funnel.paying?.hi).toBeCloseTo(820 * 0.108, 9);
+    // The leak slide's own rule: 42 new payers × 18/15, at 120 €.
+    expect(s.projected.kpis.newMrr?.lo).toBeCloseTo(5_040 * 1.2, 6);
+    expect(s.projected.kpis.cac?.lo).toBeCloseTo(500 / 1.2, 6);
+    // Activation doesn't move: day 30 is downstream of it.
+    expect(s.projected.funnel.activated).toEqual(s.today.funnel.activated);
+    expect(s.assumptions).toEqual(expect.arrayContaining(["d30-drives-paying", "same-spend"]));
+    // A target past the activated is capped at it: 25 % with 18 % activated reads 18 %.
+    expect(buildScenario(withD30, { "ret.d30": 25 }, CTX_FR).projected.funnel.d30?.lo).toBeCloseTo(820 * 0.18, 9);
+    // With activation moved too, day 30's own target carries the paying, under the new activated: 24/15.
+    expect(buildScenario(withD30, { "ret.d30": 25, "act.rate": 24 }, CTX_FR).projected.kpis.newMrr?.lo).toBeCloseTo(5_040 * (24 / 15), 6);
+    // Without day 30, no slider and no move: a target on it is ignored.
+    const none = buildScenario(exampleState(), { "ret.d30": 18 }, CTX_FR);
+    expect(none.moved).toEqual([]);
+    expect(none.projected.kpis).toEqual(none.today.kpis);
+  });
+
   it("sign-up rate 3.15 → 4 %: the same 26 000 visitors bring more sign-ups, and everything below follows", () => {
     const s = buildScenario(exampleState(), { "acq.signup-rate": 4 }, CTX_FR);
     expect(s.projected.funnel.visitors?.lo).toBeCloseTo(26_000, 6);
