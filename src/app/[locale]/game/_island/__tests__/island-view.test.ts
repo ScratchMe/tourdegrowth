@@ -10,14 +10,12 @@ import { handIds } from "@/lib/game/model";
 import { lastQuarterStart, runFrame } from "@/lib/game/phases";
 import { gameReducer } from "@/lib/game/reducer";
 import type { GameState } from "@/lib/game/types";
-import { clicksFor, clicksOverLaw, monthFrames, phoneIds } from "@/lib/game/view";
+import { clicksOverLaw, monthFrames, phoneIds } from "@/lib/game/view";
 import { formatEur } from "@/lib/game/format";
 import { LOCALES, type Locale } from "@/lib/i18n/locale";
 import {
   bossMessage,
-  clicksLabel,
   closingMonth,
-  clicksSentence,
   dashboardProps,
   decemberContent,
   handView,
@@ -29,8 +27,10 @@ import {
   shareText,
   timelineSegments,
   yearClosedView,
+  islandContext,
   type IslandContext,
 } from "../island-view";
+import { clicksSentence, RETENTION_SIDE } from "../sides";
 
 /**
  * X27's companion for the words: every screen of the island, built from every
@@ -39,7 +39,7 @@ import {
  * `fill` throws on a placeholder it was not given, but a template can also
  * leave one behind if the copy names it and the island passes a DIFFERENT
  * set — or a builder can interpolate `undefined` straight into a sentence.
- * Both reach a player as « {churn} » or « undefined ». This walks the output
+ * Both reach a player as « {metric} » or « undefined ». This walks the output
  * of each builder and fails on either, so the check covers what the screen
  * shows rather than what the templates declare.
  */
@@ -49,10 +49,10 @@ type State = GameState<Id>;
 const L = RETENTION_LEVEL;
 const reduce = gameReducer(L);
 
-const contexts: IslandContext[] = LOCALES.map((locale: Locale) => ({
-  copy: resolveLevelCopy<RetentionCopy>(RETENTION_CONTENT, locale),
-  locale,
-}));
+/** Level 1's whole copy in one language — the island's context reads most of it, its side the phone and the pill. */
+const copyOf = (locale: Locale) => resolveLevelCopy<RetentionCopy>(RETENTION_CONTENT, locale);
+
+const contexts: IslandContext[] = LOCALES.map((locale: Locale) => islandContext(L, copyOf(locale), locale));
 
 /** Every string anywhere under a value, with its path for the failure message. */
 function strings(value: unknown, path = "$"): { path: string; text: string }[] {
@@ -102,8 +102,9 @@ describe("island-view — every screen of every reference year, in both language
           check(`${label} dashboard`, dashboardProps(ctx, state, prev, "hidden"));
           check(`${label} timeline`, timelineSegments(ctx, state));
           for (const hint of ["pick", "ready"] as const) check(`${label} hand`, handView(ctx, state, hint));
-          check(`${label} clicks`, clicksLabel(ctx, clicksFor(L, phoneIds(state))));
-          check(`${label} clicks said`, clicksSentence(ctx, clicksFor(L, phoneIds(state))));
+          const side = { ids: phoneIds(state), copy: copyOf(ctx.locale), locale: ctx.locale };
+          check(`${label} clicks`, RETENTION_SIDE.pill(side));
+          check(`${label} clicks said`, RETENTION_SIDE.announce({ copy: side.copy, locale: side.locale, before: [], after: side.ids }) ?? "");
           check(`${label} journal`, journalEntries(ctx, state));
           check(`${label} resume`, resumeContent(ctx, state));
           state.log.forEach((_, q) => {
@@ -224,9 +225,9 @@ describe("island-view — what the words must say", () => {
     expect(reportContent(fr, playPath(PATH_A)[1]!, 0).drivers.lines).toHaveLength(1);
   });
 
-  it("the churn cell and the end of the churn curve are the same string (R5, X34)", () => {
+  it("the number's cell and the end of its curve are the same string (R5, X34)", () => {
     const d = decemberContent(fr, years.at(-1)!);
-    expect(d.churnChart.ariaLabel).toContain(d.figures.churn);
+    expect(d.metricChart.ariaLabel).toContain(d.figures.metric);
   });
 
   it("the share text carries the page's URL, the ending's title and the two figures", () => {
@@ -236,7 +237,7 @@ describe("island-view — what the words must say", () => {
     const d = decemberContent(en, last);
     expect(text).toContain(url);
     expect(text).toContain(d.hero.title);
-    expect(text).toContain(d.figures.churn);
+    expect(text).toContain(d.figures.metric);
     expect(text).toContain(d.figures.trust);
   });
 
@@ -256,24 +257,24 @@ describe("island-view — what the words must say", () => {
     expect(yearClosedView(en, years.at(-1)!).title).toBe("Year over");
   });
 
-  it("a year cut short never says December: the reveal and the churn cell name the month it closed in", () => {
+  it("a year cut short never says December: the reveal and the number's cell name the month it closed in", () => {
     const cutShort = playPath(PATH_D).at(-1)!;
     expect(cutShort.fired).toBe(true);
     expect(closingMonth(fr, cutShort)).toBe("juin");
     const d = decemberContent(fr, cutShort);
-    expect(d.cellLabels.churn).toBe("Résiliations en juin");
+    expect(d.cellLabels.metric).toBe("Résiliations en juin");
     const tiles = dashboardProps(fr, cutShort, lastQuarterStart(L, cutShort), "revealing");
     for (const tile of [tiles.trust, tiles.radar]) {
       expect(tile.hidden).toBe(false);
       if (!tile.hidden) expect(tile.sub).toBe("révélée en juin");
     }
-    expect(decemberContent(en, cutShort).cellLabels.churn).toBe("Churn in June");
+    expect(decemberContent(en, cutShort).cellLabels.metric).toBe("Churn in June");
     // Nothing on the cut-short year's December names the month it never reached.
     expect(strings({ d, tiles }).map((s) => s.text).filter((t) => /décembre/.test(t) && !/objectif de décembre/.test(t))).toEqual([]);
 
     // A year that ran its course still says December.
     const full = years.at(-1)!;
-    expect(decemberContent(fr, full).cellLabels.churn).toBe("Résiliations en décembre");
+    expect(decemberContent(fr, full).cellLabels.metric).toBe("Résiliations en décembre");
     const fullTiles = dashboardProps(en, full, lastQuarterStart(L, full), "revealing");
     if (!fullTiles.trust.hidden) expect(fullTiles.trust.sub).toBe("revealed in December");
   });
@@ -301,14 +302,14 @@ describe("island-view — what the words must say", () => {
         if (report.mail) expect(entry.lines, label).toContain(report.mail.body);
         for (const clip of report.clippings) expect(entry.lines, `${label}: ${clip.text}`).toContain(clip.text);
 
-        const [churn, subs, mrr, patience] = report.figures;
-        // The churn figure, its target and the verdict — the target is what a « target hit » alone loses.
-        expect(entry.result.text, label).toContain(churn!.value);
-        expect(entry.result.text, label).toContain(churn!.note!);
-        expect(entry.result.text, label).toContain(churn!.status!.text);
+        const [metric, customers, revenue, patience] = report.figures;
+        // The number, its target and the verdict — the target is what a « target hit » alone loses.
+        expect(entry.result.text, label).toContain(metric!.value);
+        expect(entry.result.text, label).toContain(metric!.note!);
+        expect(entry.result.text, label).toContain(metric!.status!.text);
         // The three others are the year's closing figures, on December's dashboard.
-        expect(tiles.subs.value, label).toBe(subs!.value);
-        expect(tiles.mrr.value, label).toBe(mrr!.value);
+        expect(tiles.customers.value, label).toBe(customers!.value);
+        expect(tiles.revenue.value, label).toBe(revenue!.value);
         expect(tiles.patience.value, label).toBe(patience!.value);
       }
     }
@@ -383,7 +384,7 @@ describe("the quarter's news (Antoine, 2026-09-26)", () => {
       const why = item.clipping.why!;
       expect(why.heading).toBe("Pourquoi ce contrôle");
       expect(why.lines[0]).toContain("radar DGCCRF");
-      for (const id of control.removed) expect(why.lines[1]).toContain(fr.copy.cards[id as Id].name);
+      for (const id of control.removed) expect(why.lines[1]).toContain(fr.copy.cards[id]!.name);
       expect(item.clipping.stamp).toEqual({ text: `Amende · ${formatEur("fr", control.fine)}`, tone: "bad" });
       const reported = reportContent(fr, state, q).clippings.find((c) => c.kind === "control");
       expect(reported?.why).toEqual(why);
@@ -414,7 +415,7 @@ describe("the quarter's news (Antoine, 2026-09-26)", () => {
 describe("the clicks pill and the one live region", () => {
   const pill = (ctx: IslandContext, clicks: number | "phone", announce?: boolean) =>
     renderToStaticMarkup(
-      createElement(ClickPill, { clicks, overLaw: clicksOverLaw(clicks), labels: ctx.copy.clicks, announce }),
+      createElement(ClickPill, { clicks, overLaw: clicksOverLaw(clicks), labels: copyOf(ctx.locale).clicks, announce }),
     );
   // Stripped until nothing changes, so a tag split by another ("<<b>i>")
   // cannot survive a single pass.
@@ -434,14 +435,15 @@ describe("the clicks pill and the one live region", () => {
   });
 
   for (const ctx of contexts) {
+    const copy = copyOf(ctx.locale);
     it(`${ctx.locale}: the island says exactly the sentence the pill shows`, () => {
       for (const clicks of [2, 3, 4, 5, "phone"] as const) {
-        expect(clicksSentence(ctx, clicks), String(clicks)).toBe(text(pill(ctx, clicks, false)));
+        expect(clicksSentence(copy, ctx.locale, clicks), String(clicks)).toBe(text(pill(ctx, clicks, false)));
       }
       // Past the legal path the sentence says why, not just how many.
-      expect(clicksSentence(ctx, 5)).toContain(ctx.copy.clicks.lawSuffix);
-      expect(clicksSentence(ctx, "phone")).toContain(ctx.copy.clicks.phoneSuffix);
-      expect(clicksSentence(ctx, 2)).not.toContain(ctx.copy.clicks.lawSuffix);
+      expect(clicksSentence(copy, ctx.locale, 5)).toContain(copy.clicks.lawSuffix);
+      expect(clicksSentence(copy, ctx.locale, "phone")).toContain(copy.clicks.phoneSuffix);
+      expect(clicksSentence(copy, ctx.locale, 2)).not.toContain(copy.clicks.lawSuffix);
     });
   }
 });

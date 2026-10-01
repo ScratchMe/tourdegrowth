@@ -51,8 +51,8 @@ describe("C7 — the game's client bundles", () => {
     const paths = GAME_CLIENT.map((f) => f.path);
     expect(paths).toContain("app/[locale]/game/HubProgress.tsx");
     // The island and its hook: the two files that import the engine by value.
-    expect(paths).toContain("app/[locale]/game/retention/GameIsland.tsx");
-    expect(paths).toContain("app/[locale]/game/retention/useGame.ts");
+    expect(paths).toContain("app/[locale]/game/_island/GameIsland.tsx");
+    expect(paths).toContain("app/[locale]/game/_island/useGame.ts");
   });
 
   it("1. no client component outside the game's tree imports lib/game or content/game by value", () => {

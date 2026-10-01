@@ -1,14 +1,20 @@
 /**
- * The island's words and numbers, built from the engine's state — pure.
+ * The island's words and numbers, built from the engine's state — pure, and
+ * the same for every level (CHANTIERS.md A12.d, 2026-10-01).
  *
  * Every string the level shows arrives in ONE language from the server (the
- * page resolves `RETENTION_CONTENT` for its URL, plan §3.4); every number goes
- * through `lib/game/format.ts`. This module is where the two meet: it picks
- * the template for each structured event the engine journalled and fills it
- * with already-formatted values. Nothing here is React, so the whole mapping
- * is exercised by a unit test on every state of every reference year, in both
- * languages — a template left with a raw « {churn} » would be a bug a player
- * reads, and `fill` throws where that test sees it.
+ * page resolves its level's content for its URL, plan §3.4); every number goes
+ * through `lib/game/format.ts`, and the level's own number through the
+ * format its display asks for (`metricFormat`: churn to the tenth of a
+ * point, new customers to the ten). This module is where the two meet: it
+ * picks the template for each structured event the engine journalled and
+ * fills it with already-formatted values. Nothing here is React, so the whole
+ * mapping is exercised by a unit test on every state of every reference year,
+ * of both levels, in both languages — a template left with a raw « {metric} »
+ * would be a bug a player reads, and `fill` throws where that test sees it.
+ *
+ * What only one level has — its phone and the pill under it — is not here:
+ * each level brings its own (`sides.tsx`).
  *
  * It never imports `content/**` (C7): the copy is a parameter.
  */
@@ -24,7 +30,7 @@ import type { QuarterNewsItem } from "@/components/game/QuarterNews";
 import type { ReportFigure } from "@/components/game/QuarterReport";
 import type { TimelineSegment } from "@/components/game/QuarterTimeline";
 import type { StatTileDelta } from "@/components/viz/StatTile";
-import type { RetentionCopy, RetentionOrderId } from "@/lib/game/copy";
+import type { LevelCopy } from "@/lib/game/copy";
 import {
   fill,
   formatDelta,
@@ -32,17 +38,15 @@ import {
   formatInt,
   formatList,
   formatMillions,
-  formatPct,
-  formatPoints,
   formatSigned,
+  metricFormat,
   type DeltaKind,
+  type MetricFormat,
 } from "@/lib/game/format";
-import { RETENTION_LEVEL, type RetentionCardId, type RetentionDarkId } from "@/lib/game/levels/retention";
 import { bossMessageSpec, handIds } from "@/lib/game/model";
 import type { HandHint } from "@/lib/game/phases";
-import type { EndingId, GameEvent, GameState, QuarterLog, VisibleEffect } from "@/lib/game/types";
+import type { EndingId, GameEvent, GameState, LevelDefinition, ModelSlug, QuarterLog, VisibleEffect } from "@/lib/game/types";
 import {
-  clicksOverLaw,
   dashboardView,
   decemberView,
   patternCatalogue,
@@ -54,19 +58,31 @@ import {
 import type { Locale } from "@/lib/i18n/locale";
 
 /**
- * What the island receives: the level's copy minus the footer note, which the
- * page renders itself on the server with the intro and the zones — the
- * indexable part of the page, which never needs the browser.
+ * What the island reads of any level's copy: everything but the footer note,
+ * which the page renders itself on the server with the intro and the zones —
+ * the indexable part of the page, which never needs the browser. `extra` (a
+ * month billed to every leaver) exists only on a level whose cards can bill
+ * one, level 1's notice period.
  */
-export type IslandCopy = Omit<RetentionCopy, "footer">;
+export type IslandCopy = Omit<LevelCopy, "footer"> & { effects: LevelCopy["effects"] & { extra?: string } };
 
-type Id = RetentionCardId;
+/** A level the island can show — a playable one, or a modelled one in a unit test. */
+export type IslandLevel = LevelDefinition<string, ModelSlug>;
+
+type Id = string;
 type State = GameState<Id>;
-const L = RETENTION_LEVEL;
 
 export interface IslandContext {
   copy: IslandCopy;
   locale: Locale;
+  level: IslandLevel;
+  /** How this level prints its own number — derived from `level.display`, once. */
+  format: MetricFormat;
+}
+
+/** The context for a level, its copy and a language: the one place `format` is derived. */
+export function islandContext(level: IslandLevel, copy: IslandCopy, locale: Locale): IslandContext {
+  return { copy, locale, level, format: metricFormat(level.display) };
 }
 
 // ---------------------------------------------------------------- pieces ---
@@ -80,14 +96,21 @@ export function quarterPeriod({ copy, locale }: IslandContext, q: number): strin
   });
 }
 
-function cardName({ copy }: IslandContext, id: Id): string {
-  return copy.cards[id].name;
+/** A card's name and pitch. A card with no copy is a level shipped half-written: it throws where the tests see it. */
+function cardCopy({ copy }: IslandContext, id: Id): { name: string; pitch: string } {
+  const card = copy.cards[id];
+  if (!card) throw new Error(`island: no copy for card "${id}"`);
+  return card;
+}
+
+function cardName(ctx: IslandContext, id: Id): string {
+  return cardCopy(ctx, id).name;
 }
 
 /** « objectif atteint » / « manqué de 0,1 pt » — the verdict in words, never by colour alone. */
-function statusText({ copy, locale }: IslandContext, log: Pick<QuarterLog, "gap">): { text: string; hit: boolean } {
+function statusText({ copy, locale, format }: IslandContext, log: Pick<QuarterLog, "gap">): { text: string; hit: boolean } {
   if (log.gap <= 0) return { text: copy.report.statusHit, hit: true };
-  return { text: fill(copy.report.statusMissed, { gap: formatPoints(locale, log.gap) }), hit: false };
+  return { text: fill(copy.report.statusMissed, { gap: format.gap(locale, log.gap) }), hit: false };
 }
 
 /**
@@ -95,8 +118,8 @@ function statusText({ copy, locale }: IslandContext, log: Pick<QuarterLog, "gap"
  * engine computed. The order, when there is one, is appended in his words.
  */
 export function bossMessage(ctx: IslandContext, state: State): string {
-  const { copy, locale } = ctx;
-  const spec = bossMessageSpec(L, state);
+  const { copy, locale, format } = ctx;
+  const spec = bossMessageSpec(ctx.level, state);
   switch (spec.kind) {
     case "t1":
       return copy.boss.t1;
@@ -105,7 +128,7 @@ export function bossMessage(ctx: IslandContext, state: State): string {
     case "fired":
       return copy.boss.fired;
     case "quarter": {
-      const vars = { metric: formatPct(locale, spec.metricPrev), target: formatPct(locale, spec.target) };
+      const vars = { metric: format.value(locale, spec.metricPrev), target: format.value(locale, spec.target) };
       const byQuarter = {
         1: spec.hit ? copy.boss.t2Hit : copy.boss.t2Miss,
         2: spec.hit ? copy.boss.t3Hit : copy.boss.t3Miss,
@@ -113,7 +136,8 @@ export function bossMessage(ctx: IslandContext, state: State): string {
       } as const;
       const line = fill(byQuarter[spec.q], vars);
       if (spec.order === null) return line;
-      const order = copy.orders[spec.order as RetentionOrderId];
+      const order = copy.orders[spec.order];
+      if (order === undefined) throw new Error(`bossMessage: no order text for "${spec.order}"`);
       return `${line} ${fill(copy.boss.orderWrap, { order })}`;
     }
   }
@@ -129,7 +153,9 @@ export function effectText({ copy, locale }: IslandContext, effect: VisibleEffec
     case "clean":
       return copy.effects.clean;
     case "extra":
-      return copy.effects.extra;
+      // Only a level with a card that bills an extra month emits it, and that
+      // level's copy has the line (`RetentionCopy`).
+      return copy.effects.extra ?? copy.effects.none;
     case "gain":
       return fill(effect.rising ? copy.effects.gainRising : copy.effects.gain, { pct: formatInt(locale, effect.pct) });
     case "loss":
@@ -227,36 +253,37 @@ export type DashboardReveal = "hidden" | "revealing" | "shown";
  * and before the first quarter.
  */
 export function dashboardProps(ctx: IslandContext, state: State, prev: State | undefined, reveal: DashboardReveal): DashboardProps {
-  const { copy, locale } = ctx;
-  const v = dashboardView(L, state, prev);
-  const churnValue = formatPct(locale, v.metric);
+  const { copy, locale, level, format } = ctx;
+  const v = dashboardView(level, state, prev);
+  const metricValue = format.value(locale, v.metric);
   const target = fill(v.targetScope === "quarter" ? copy.dashboard.quarterTarget : copy.dashboard.boardTarget, {
-    target: formatPct(locale, v.target),
+    target: format.value(locale, v.target),
   });
-  const churnLabel = `${copy.dashboard.metric} · ${copy.dashboard.metricUnit}`;
+  const metricLabel = `${copy.dashboard.metric} · ${copy.dashboard.metricUnit}`;
   const month = copy.months[v.monthIndex] ?? "";
+  const { chart } = level.display;
   return {
     label: copy.dashboard.label,
-    churn: {
-      label: churnLabel,
-      value: churnValue,
+    metric: {
+      label: metricLabel,
+      value: metricValue,
       sub: target,
-      delta: v.deltas ? tileDelta(ctx, "rate", v.deltas.metric) : undefined,
+      delta: v.deltas ? tileDelta(ctx, format.delta, v.deltas.metric) : undefined,
       bullet: {
         value: v.metric,
         target: v.target,
-        domain: [L.display.chart.min / L.display.chart.factor, L.display.chart.max / L.display.chart.factor],
+        domain: [chart.min / chart.factor, chart.max / chart.factor],
         // The value and the target, in words: nothing drawn is read.
-        ariaLabel: `${copy.dashboard.metric} ${churnValue}, ${target}`,
+        ariaLabel: `${copy.dashboard.metric} ${metricValue}, ${target}`,
       },
     },
-    subs: {
+    customers: {
       label: copy.dashboard.customers,
       value: formatInt(locale, v.customers),
       sub: v.monthEnd ? fill(copy.dashboard.monthEnd, { month }) : month,
       delta: v.deltas ? tileDelta(ctx, "int", v.deltas.customers) : undefined,
     },
-    mrr: {
+    revenue: {
       label: copy.dashboard.revenue,
       value: formatMillions(locale, v.revenue),
       sub:
@@ -278,9 +305,9 @@ export function dashboardProps(ctx: IslandContext, state: State, prev: State | u
   };
 }
 
-/** Four quarters and December: done with the churn it ended on, current, or to come. */
+/** Four quarters and December: done with the number it ended on, current, or to come. */
 export function timelineSegments(ctx: IslandContext, state: State): TimelineSegment[] {
-  const { copy, locale } = ctx;
+  const { copy, locale, format } = ctx;
   const quarters = [0, 1, 2, 3].map((i): TimelineSegment => {
     const log = state.log[i];
     const status = log ? "done" : i === state.q && !state.over ? "current" : "upcoming";
@@ -292,7 +319,7 @@ export function timelineSegments(ctx: IslandContext, state: State): TimelineSegm
       status,
       result:
         log && verdict
-          ? { value: formatPct(locale, log.metricEnd), word: verdict.hit ? copy.timeline.hit : copy.timeline.missed, hit: verdict.hit }
+          ? { value: format.value(locale, log.metricEnd), word: verdict.hit ? copy.timeline.hit : copy.timeline.missed, hit: verdict.hit }
           : undefined,
     };
   });
@@ -310,21 +337,22 @@ export interface HandView {
 }
 
 export function handView(ctx: IslandContext, state: State, hint: HandHint): HandView {
-  const { copy, locale } = ctx;
-  const max = L.constants.picksPerQuarter;
+  const { copy, locale, level } = ctx;
+  const max = level.constants.picksPerQuarter;
   const full = state.picks.length >= max;
   // The quarter the exit survey's answers came in, the data review is new in the hand.
   const unlockedNow = state.log.at(-1)?.events.some((e) => e.kind === "surveyAnswers") ?? false;
-  const cards = handIds(L, state).map((id): HandCard => {
+  const cards = handIds(level, state).map((id): HandCard => {
     const pressed = state.picks.includes(id);
+    const { name, pitch } = cardCopy(ctx, id);
     return {
       id,
-      name: copy.cards[id].name,
-      pitch: copy.cards[id].pitch,
+      name,
+      pitch,
       pressed,
       state: state.callOpen || state.over ? "locked" : full && !pressed ? "unavailable" : "available",
       ordered: id === state.order,
-      unlocked: unlockedNow && L.cards[id].present === true,
+      unlocked: unlockedNow && level.cards[id]!.present === true,
     };
   });
   const active = state.active.map((id) => cardName(ctx, id));
@@ -339,26 +367,6 @@ export function handView(ctx: IslandContext, state: State, hint: HandHint): Hand
     cards,
     production: active.length ? fill(copy.hand.production, { cards: active.join(", ") }) : copy.hand.productionEmpty,
     canRun: !state.callOpen && !state.over && state.picks.length === max,
-  };
-}
-
-/**
- * The pill's whole sentence, as the one live region says it when a ticked or
- * unticked card changes the count (plan E5): the figure AND, past the legal
- * path, why it is a problem — the same words the pill shows, never a
- * paraphrase of them.
- */
-export function clicksSentence({ copy, locale }: IslandContext, clicks: number | "phone"): string {
-  if (clicks === "phone") return `${copy.clicks.infinite} · ${copy.clicks.phoneSuffix}`;
-  const count = fill(copy.clicks.count, { n: formatInt(locale, clicks) });
-  return clicksOverLaw(clicks) ? `${count} · ${copy.clicks.lawSuffix}` : count;
-}
-
-/** The pill's abbreviated form for the action bar: the same words, and whether they read as a legal problem. */
-export function clicksLabel({ copy, locale }: IslandContext, clicks: number | "phone"): { text: string; alert: boolean } {
-  return {
-    text: clicks === "phone" ? copy.clicks.infinite : fill(copy.clicks.count, { n: formatInt(locale, clicks) }),
-    alert: clicksOverLaw(clicks),
   };
 }
 
@@ -391,7 +399,7 @@ function clippingWhy(ctx: IslandContext, event: GameEvent): EventClippingProps["
   const why = copy.clippings.why;
   if (event.kind === "reports") return { heading: why.reportsHeading, lines: [why.reports] };
   if (event.kind !== "control") return undefined;
-  const names = event.removed.map((id) => cardName(ctx, id as Id));
+  const names = event.removed.map((id) => cardName(ctx, id));
   return {
     heading: why.controlHeading,
     lines: [why.controlRadar, names.length > 0 ? fill(why.controlRemoved, { list: formatList(locale, names) }) : why.controlNone],
@@ -418,28 +426,29 @@ function clipping(ctx: IslandContext, event: GameEvent): EventClippingProps | nu
 }
 
 /**
- * « Pourquoi le churn a bougé » — the quarter's move split four ways, each
- * line in the tiles' tenth of a point, and the lines adding up to the total
- * in the heading (`driverRows`). A save from before model v2 has no drivers:
- * its report says nothing rather than something made up.
+ * « Pourquoi le churn a bougé » — the quarter's move split five ways, each
+ * line in the tile's own step (a tenth of a point, ten customers), and the
+ * lines adding up to the total in the heading (`driverRows`). A save from
+ * before model v2 has no drivers: its report says nothing rather than
+ * something made up.
  */
 function driversContent(ctx: IslandContext, log: QuarterLog<Id>): { heading: string; lines: string[] } {
-  const { copy, locale } = ctx;
+  const { copy, locale, level, format } = ctx;
   if (!log.drivers) return { heading: "", lines: [] };
-  const { total, rows } = driverRows(log, L.display.step);
+  const { total, rows } = driverRows(log, level.display.step);
   return {
-    heading: fill(copy.report.driversHeading, { delta: formatDelta(locale, "rate", 0, total) }),
+    heading: fill(copy.report.driversHeading, { delta: formatDelta(locale, format.delta, 0, total) }),
     lines: rows.map(({ key, value }) =>
-      fill(copy.report.driverLine, { label: copy.report.drivers[key], delta: formatDelta(locale, "rate", 0, value) }),
+      fill(copy.report.driverLine, { label: copy.report.drivers[key], delta: formatDelta(locale, format.delta, 0, value) }),
     ),
   };
 }
 
 /** The report of quarter `q` (0-based index into the journal). */
 export function reportContent(ctx: IslandContext, state: State, q: number): ReportContent {
-  const { copy, locale } = ctx;
+  const { copy, locale, level, format } = ctx;
   const log = state.log[q]!;
-  const r = reportView(L, log);
+  const r = reportView(level, log);
   const verdict = statusText(ctx, log);
   const mail = r.events.find((e) => e.kind === "midMail");
   const isLast = state.over && q === state.log.length - 1;
@@ -449,14 +458,14 @@ export function reportContent(ctx: IslandContext, state: State, q: number): Repo
     picked: r.picked.map((id) => cardName(ctx, id)),
     figures: [
       {
-        key: "churn",
+        key: "metric",
         label: copy.report.metric,
-        value: formatPct(locale, r.metricEnd),
-        note: fill(copy.report.target, { target: formatPct(locale, r.target) }),
+        value: format.value(locale, r.metricEnd),
+        note: fill(copy.report.target, { target: format.value(locale, r.target) }),
         status: { text: verdict.text, tone: verdict.hit ? "good" : "bad" },
       },
-      { key: "subs", label: copy.report.customers, value: formatInt(locale, r.customers) },
-      { key: "mrr", label: copy.report.revenue, value: formatMillions(locale, r.revenue) },
+      { key: "customers", label: copy.report.customers, value: formatInt(locale, r.customers) },
+      { key: "revenue", label: copy.report.revenue, value: formatMillions(locale, r.revenue) },
       { key: "patience", label: copy.report.patience, value: formatInt(locale, r.patience) },
     ],
     effectsHeading: copy.report.effectsHeading,
@@ -503,7 +512,7 @@ function newsStamp({ copy, locale }: IslandContext, event: GameEvent): EventClip
 /**
  * The quarter's news, in the order it happened (Antoine, 2026-09-26): the
  * CEO's mail from the middle of the quarter, then the verdict at its end,
- * what came back inside Flixo, what the outside world printed, and the CEO's
+ * what came back inside the company, what the outside world printed, and the CEO's
  * last word. Built from the SAME pieces as the report (`reportContent`), so
  * the two can never tell the quarter two different ways — the news screen
  * stages it, the report keeps it.
@@ -513,17 +522,17 @@ export function newsContent(ctx: IslandContext, state: State, q: number): NewsCo
   const report = reportContent(ctx, state, q);
   const log = state.log[q]!;
   const labels = copy.news.labels;
-  const [churn, ...others] = report.figures;
+  const [metric, ...others] = report.figures;
   const items: QuarterNewsItem[] = [];
   if (report.mail) items.push({ kind: "mail", label: labels.mail, mail: report.mail });
-  if (churn) {
+  if (metric) {
     items.push({
       kind: "result",
       label: labels.result,
-      metric: churn.label,
-      value: churn.value,
-      note: churn.note ?? "",
-      status: churn.status ?? { text: "", tone: "good" },
+      metric: metric.label,
+      value: metric.value,
+      note: metric.note ?? "",
+      status: metric.status ?? { text: "", tone: "good" },
       figures: others.map(({ key, label, value }) => ({ key, label, value })),
     });
   }
@@ -573,14 +582,14 @@ export function yearClosedView({ copy }: IslandContext, state: State): { title: 
  * last entry, field by field.
  */
 export function journalEntries(ctx: IslandContext, state: State): JournalEntry[] {
-  const { copy, locale } = ctx;
+  const { copy, locale, format } = ctx;
   return state.log.map((log, i) => {
     const verdict = statusText(ctx, log);
-    const target = fill(copy.report.target, { target: formatPct(locale, log.target) });
+    const target = fill(copy.report.target, { target: format.value(locale, log.target) });
     return {
       q: i + 1,
       period: quarterPeriod(ctx, i),
-      result: { text: `${formatPct(locale, log.metricEnd)} · ${target} · ${verdict.text}`, tone: verdict.hit ? "good" : "bad" },
+      result: { text: `${format.value(locale, log.metricEnd)} · ${target} · ${verdict.text}`, tone: verdict.hit ? "good" : "bad" },
       picked: log.picked.map((id) => cardName(ctx, id)),
       lines: [
         ...log.fx.map(({ card, effect }) =>
@@ -595,12 +604,12 @@ export function journalEntries(ctx: IslandContext, state: State): JournalEntry[]
 
 /** What the single live region says when a report opens (plan §3.5): one sentence, not six tiles. */
 export function quarterEndAnnouncement(ctx: IslandContext, state: State, q: number): string {
-  const { copy, locale } = ctx;
+  const { copy, locale, format } = ctx;
   const log = state.log[q]!;
   return fill(copy.a11y.quarterEnd, {
     q: formatInt(locale, q + 1),
-    metric: formatPct(locale, log.metricEnd),
-    target: formatPct(locale, log.target),
+    metric: format.value(locale, log.metricEnd),
+    target: format.value(locale, log.target),
     status: statusText(ctx, log).text,
     patience: formatInt(locale, log.patience),
   });
@@ -617,7 +626,7 @@ export interface ResumeContent {
 
 /** « Reprendre l'année en cours ? » — or, for a finished year, the sentence that closed it. */
 export function resumeContent(ctx: IslandContext, saved: State): ResumeContent {
-  const { copy, locale } = ctx;
+  const { copy, locale, format } = ctx;
   if (saved.over && saved.ending) {
     return {
       title: fill(copy.resume.finished, { title: copy.endings[saved.ending].title }),
@@ -633,7 +642,7 @@ export function resumeContent(ctx: IslandContext, saved: State): ResumeContent {
         fill(copy.resume.quarterLine, {
           q: formatInt(locale, log.q + 1),
           cards: log.picked.map((id) => cardName(ctx, id)).join(", "),
-          metric: formatPct(locale, log.metricEnd),
+          metric: format.value(locale, log.metricEnd),
         }),
       ),
     },
@@ -649,11 +658,11 @@ export interface DecemberContent {
   hero: { eyebrow: string; title: string; text: string; win: boolean };
   /** ONE object for the cells and the ends of the curves — the cell's string is the curve's label (R5, X34). */
   figures: DecemberFigures;
-  cellLabels: { churn: string; trust: string; radar: string };
+  cellLabels: { metric: string; trust: string; radar: string };
   note: string;
-  /** The curves in EndingCharts' slots: level 1's number goes in `churn`. */
+  /** The two curves, in EndingCharts' slots. */
   view: EndingChartsProps["view"];
-  churnChart: EndingChartCopy;
+  metricChart: EndingChartCopy;
   trustChart: EndingChartCopy;
   rows: EndingChartRow[];
   playbook: { eyebrow: string; title: string; refused: string; items: PlaybookItem[]; closing: string };
@@ -680,21 +689,22 @@ function trend(
 }
 
 export function decemberContent(ctx: IslandContext, state: State): DecemberContent {
-  const { copy, locale } = ctx;
+  const { copy, locale, level, format } = ctx;
   const ending = state.ending!;
   const endingCopy = copy.endings[ending];
-  const dv = decemberView(L, state);
-  const view = { churn: dv.metric, trust: dv.trust };
+  const dv = decemberView(level, state);
+  const view = { metric: dv.metric, trust: dv.trust };
   const figures: DecemberFigures = {
-    churn: formatPct(locale, state.metric),
+    metric: format.value(locale, state.metric),
     trust: fill(copy.december.cells.outOf, { value: formatInt(locale, state.trust) }),
     radar: fill(copy.december.cells.outOf, { value: formatInt(locale, state.radar) }),
   };
-  const churnPoints = state.history.map((h) => ({ m: h.m, value: h.metric }));
+  const metricPoints = state.history.map((h) => ({ m: h.m, value: h.metric }));
   const trustPoints = state.history.map((h) => ({ m: h.m, value: h.trust }));
-  const pct = (v: number) => formatPct(locale, v);
+  const value = (v: number) => format.value(locale, v);
   const int = (v: number) => formatInt(locale, v);
-  const card = (id: Id) => L.cards[id];
+  const card = (id: Id) => level.cards[id]!;
+  const { factor } = level.display.chart;
 
   return {
     ending,
@@ -702,7 +712,7 @@ export function decemberContent(ctx: IslandContext, state: State): DecemberConte
       eyebrow: endingCopy.eyebrow,
       title: endingCopy.title,
       text: fill(endingCopy.text, {
-        metric: figures.churn,
+        metric: figures.metric,
         customers: formatInt(locale, state.customers),
         trust: formatInt(locale, state.trust),
         radar: formatInt(locale, state.radar),
@@ -714,18 +724,18 @@ export function decemberContent(ctx: IslandContext, state: State): DecemberConte
     // The three labels, not the whole `cells` block: its `outOf` is a template
     // the figures above already went through, never something to print.
     cellLabels: {
-      churn: fill(copy.december.cells.metric, { month: closingMonth(ctx, state) }),
+      metric: fill(copy.december.cells.metric, { month: closingMonth(ctx, state) }),
       trust: copy.december.cells.trust,
       radar: copy.december.cells.radar,
     },
     note: copy.december.gameNumbers,
     view,
-    churnChart: {
+    metricChart: {
       title: copy.december.metricChart.title,
       caption: copy.december.metricChart.caption,
-      ariaLabel: trend(ctx, copy.december.metricChart.label, churnPoints, pct),
-      reference: fill(copy.december.metricChart.reference, { target: formatPct(locale, view.churn.reference / 100) }),
-      ticks: view.churn.scale.ticks.map((t) => formatPct(locale, t / 100, 0)),
+      ariaLabel: trend(ctx, copy.december.metricChart.label, metricPoints, value),
+      reference: fill(copy.december.metricChart.reference, { target: format.value(locale, view.metric.reference / factor) }),
+      ticks: view.metric.scale.ticks.map((t) => format.tick(locale, t)),
     },
     trustChart: {
       title: copy.december.trustChart.title,
@@ -736,7 +746,7 @@ export function decemberContent(ctx: IslandContext, state: State): DecemberConte
     },
     rows: state.history
       .filter((h) => h.m >= 1)
-      .map((h) => ({ id: String(h.m), month: copy.months[h.m - 1] ?? "", churn: pct(h.metric), trust: int(h.trust) })),
+      .map((h) => ({ id: String(h.m), month: copy.months[h.m - 1] ?? "", metric: value(h.metric), trust: int(h.trust) })),
     playbook: {
       eyebrow: copy.playbook.eyebrow,
       title: endingCopy.win ? copy.playbook.titleWin : copy.playbook.titleLose,
@@ -744,7 +754,7 @@ export function decemberContent(ctx: IslandContext, state: State): DecemberConte
         refused: formatInt(locale, state.refused.length),
         total: formatInt(locale, state.orders.length),
       }),
-      items: playbookCards(L, state).map((id) => ({
+      items: playbookCards(level, state).map((id) => ({
         id,
         name: cardName(ctx, id),
         effects: [
@@ -754,12 +764,13 @@ export function decemberContent(ctx: IslandContext, state: State): DecemberConte
       })),
       closing: copy.playbook.closing,
     },
-    catalogue: patternCatalogue(L, state).map(({ id, group, status }) => {
-      const dark = id as RetentionDarkId;
+    catalogue: patternCatalogue(level, state).map(({ id, group, status }) => {
+      const pattern = copy.patterns[id];
+      if (!pattern) throw new Error(`decemberContent: no catalogue entry for "${id}"`);
       return {
         id,
         group,
-        official: copy.patterns[dark].official,
+        official: pattern.official,
         meeting: cardName(ctx, id),
         status: status
           ? { label: status === "removed" ? copy.catalogue.statusRemoved : copy.catalogue.statusActive, removed: status === "removed" }
@@ -768,9 +779,9 @@ export function decemberContent(ctx: IslandContext, state: State): DecemberConte
           trust: formatSigned(locale, card(id).trust ?? 0),
           radar: formatSigned(locale, card(id).radar ?? 0),
         }),
-        law: copy.patterns[dark].law,
-        cas: copy.patterns[dark].cas,
-        tell: copy.patterns[dark].tell,
+        law: pattern.law,
+        cas: pattern.cas,
+        tell: pattern.tell,
       };
     }),
   };
@@ -778,10 +789,10 @@ export function decemberContent(ctx: IslandContext, state: State): DecemberConte
 
 /** The copied sentence: the ending's title, the two figures, and the page in the reader's language (P18). */
 export function shareText(ctx: IslandContext, state: State, url: string): string {
-  const { copy, locale } = ctx;
+  const { copy, locale, format } = ctx;
   return fill(copy.share.text, {
     title: copy.endings[state.ending!].title,
-    metric: formatPct(locale, state.metric),
+    metric: format.value(locale, state.metric),
     trust: fill(copy.december.cells.outOf, { value: formatInt(locale, state.trust) }),
     url,
   });

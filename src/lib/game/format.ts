@@ -16,6 +16,7 @@
  * Relative imports only, types from `@/` — see model.ts.
  */
 import type { Locale } from "@/lib/i18n/locale";
+import type { MetricDisplay } from "./types";
 
 export const NBSP = "\u00A0";
 export const MINUS = "\u2212";
@@ -23,8 +24,8 @@ export const MINUS = "\u2212";
 // TODO: à relire — units the formatter prints. French abbreviations are
 // invariable; English percentage points read « pts » on a dashboard.
 const UNITS = {
-  fr: { points: "pt", millions: "M€", euro: "€" },
-  en: { points: "pts", millions: "M", euro: "€" },
+  fr: { points: "pt", millions: "M€", euro: "€", customers: "clients" },
+  en: { points: "pts", millions: "M", euro: "€", customers: "customers" },
 } as const satisfies Record<Locale, Record<string, string>>;
 
 interface Digits {
@@ -117,12 +118,15 @@ export function formatSigned(locale: Locale, n: number): string {
   return `${sign(d, true)}${d.body}`;
 }
 
-/** `rate`: a share in percentage points (churn) ; `int`: a count ; `millions`: euros in M€. */
-export type DeltaKind = "rate" | "int" | "millions";
+/**
+ * `rate`: a share in percentage points (churn) ; `int`: a count ; `tens`: a
+ * count shown to the ten (level 2's new customers) ; `millions`: euros in M€.
+ */
+export type DeltaKind = "rate" | "int" | "tens" | "millions";
 
 // The power of ten each delta is rounded at — shared by `formatDelta` and
 // `deltaSign`, so the two cannot round differently.
-const DELTA_SCALE: Record<DeltaKind, number> = { rate: 3, int: 0, millions: -4 };
+const DELTA_SCALE: Record<DeltaKind, number> = { rate: 3, int: 0, tens: -1, millions: -4 };
 
 /**
  * The change between two readings of a tile, with its sign: a rate in points,
@@ -141,6 +145,12 @@ export function formatDelta(locale: Locale, kind: DeltaKind, a: number, b: numbe
     const u = UNITS[locale];
     return locale === "fr" ? `${sign(d, true)}${d.body}${NBSP}${u.millions}` : `${sign(d, true)}${u.euro}${d.body}${u.millions}`;
   }
+  if (kind === "tens") {
+    // Rounded to the ten, then printed as the whole number it stands for.
+    const tens = magnitude(diff, DELTA_SCALE.tens) * 10;
+    const d = digits(locale, diff < 0 ? -tens : tens, 0, 0);
+    return `${sign(d, true)}${d.body}`;
+  }
   const d = digits(locale, diff, DELTA_SCALE.int, 0);
   return `${sign(d, true)}${d.body}`;
 }
@@ -150,6 +160,59 @@ export function deltaSign(kind: DeltaKind, a: number, b: number): -1 | 0 | 1 {
   const diff = b - a;
   if (magnitude(diff, DELTA_SCALE[kind]) === 0) return 0;
   return diff > 0 ? 1 : -1;
+}
+
+/** A count of customers with its unit: 50 → « 50 clients » / « 50 customers ». */
+export function formatCustomers(locale: Locale, n: number): string {
+  return `${formatInt(locale, n)}${NBSP}${UNITS[locale].customers}`;
+}
+
+/**
+ * How a level prints its own number — the one thing the island cannot know
+ * without asking the level: churn is a rate read to the tenth of a point,
+ * new customers a count read to the ten (`MetricDisplay`). Every place the
+ * number appears goes through these, so the tile, the report, the timeline,
+ * December's cell and the end of its curve print the same figure.
+ */
+export interface MetricFormat {
+  /** The number as the tile shows it: « 5,6 % », « 2 150 ». */
+  value(locale: Locale, x: number): string;
+  /**
+   * A missed target, with its unit: « 0,1 pt », « 10 clients ». Never less
+   * than one step: the model compares raw values, so a quarter can miss by
+   * less than the tile can show (2 146 against 2 150 reads « 2 150 »), and
+   * « manqué de 0 client » would contradict the verdict it explains.
+   */
+  gap(locale: Locale, x: number): string;
+  /** The kind a change of the number is printed as, on a tile and in the report's « why ». */
+  delta: DeltaKind;
+  /** A December axis tick, in the chart's own unit (the model's value × `chart.factor`). */
+  tick(locale: Locale, v: number): string;
+}
+
+/** The kind a change of a level's number is printed as: points of a rate, a count to its step. */
+export function metricDeltaKind(display: Pick<MetricDisplay, "kind" | "step">): DeltaKind {
+  if (display.kind === "rate") return "rate";
+  return display.step === 10 ? "tens" : "int";
+}
+
+export function metricFormat(display: MetricDisplay): MetricFormat {
+  const { step } = display;
+  if (display.kind === "rate") {
+    return {
+      value: (locale, x) => formatPct(locale, x),
+      gap: (locale, x) => formatPoints(locale, Math.max(step, x)),
+      delta: metricDeltaKind(display),
+      tick: (locale, v) => formatPct(locale, v / display.chart.factor, 0),
+    };
+  }
+  const toStep = (x: number) => Math.round(x / step) * step;
+  return {
+    value: (locale, x) => formatInt(locale, toStep(x)),
+    gap: (locale, x) => formatCustomers(locale, Math.max(step, toStep(x))),
+    delta: metricDeltaKind(display),
+    tick: (locale, v) => formatInt(locale, v / display.chart.factor),
+  };
 }
 
 const PLACEHOLDER = /\{([A-Za-z0-9_]+)\}/g;

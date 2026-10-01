@@ -30,9 +30,9 @@ export const MissedByALittle = () => (
       period="Quarter 1 · January to March"
       picked={["Pause up front", "Pre-billing reminder"]}
       figures={[
-        { key: "churn", label: "Churn", value: "5.7%", note: "target 5.6%", status: { text: "missed by 0.1 pts", tone: "bad" } },
-        { key: "subs", label: "Subscribers", value: "98,756" },
-        { key: "mrr", label: "Revenue", value: "€1.28M" },
+        { key: "metric", label: "Churn", value: "5.7%", note: "target 5.6%", status: { text: "missed by 0.1 pts", tone: "bad" } },
+        { key: "customers", label: "Subscribers", value: "98,756" },
+        { key: "revenue", label: "Revenue", value: "€1.28M" },
         { key: "patience", label: "CEO's patience", value: "53" },
       ]}
       effectsHeading="What your actions did"
@@ -57,9 +57,9 @@ export const HitWithAClipping = () => (
       period="Quarter 2 · April to June"
       picked={["Assisted cancellation", "Retention offers"]}
       figures={[
-        { key: "churn", label: "Churn", value: "5.0%", note: "target 5.1%", status: { text: "target hit", tone: "good" } },
-        { key: "subs", label: "Subscribers", value: "97,624" },
-        { key: "mrr", label: "Revenue", value: "€1.27M" },
+        { key: "metric", label: "Churn", value: "5.0%", note: "target 5.1%", status: { text: "target hit", tone: "good" } },
+        { key: "customers", label: "Subscribers", value: "97,624" },
+        { key: "revenue", label: "Revenue", value: "€1.27M" },
         { key: "patience", label: "CEO's patience", value: "79" },
       ]}
       effectsHeading="What your actions did"
@@ -85,9 +85,9 @@ export const FrenchWithANote = () => (
       period="Trimestre 2 · avril à juin"
       picked={["Chantier onboarding", "Point données avec le DG"]}
       figures={[
-        { key: "churn", label: "Résiliations", value: "5,7 %", note: "objectif 5,1 %", status: { text: "manqué de 0,6 pt", tone: "bad" } },
-        { key: "subs", label: "Abonnés", value: "97 577" },
-        { key: "mrr", label: "Revenu", value: "1,27 M€" },
+        { key: "metric", label: "Résiliations", value: "5,7 %", note: "objectif 5,1 %", status: { text: "manqué de 0,6 pt", tone: "bad" } },
+        { key: "customers", label: "Abonnés", value: "97 577" },
+        { key: "revenue", label: "Revenu", value: "1,27 M€" },
         { key: "patience", label: "Patience du DG", value: "42" },
       ]}
       effectsHeading="Ce que tes actions ont fait"

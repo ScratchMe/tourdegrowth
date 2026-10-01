@@ -1,11 +1,14 @@
 "use client";
 
 /**
- * « S'ils reviennent » — the year, played (game plan §2.8, §3.5, chantier G8a).
+ * A level's year, played (game plan §2.8, §3.5, chantier G8a) — the same
+ * island for every level since CHANTIERS.md A12.d (2026-10-01): a level
+ * brings its model, its copy, the format of its number and its phone
+ * (`sides.tsx`), and nothing else.
  *
  * The night band of the level page: the quarter timeline, the dashboard, then
  * the desk — one slot that holds the video call, the quarter's report or the
- * resume prompt, the phone with its clicks pill beside it, and the hand with
+ * resume prompt, the level's phone with its pill beside it, and the hand with
  * its action bar under the slot — and the year's journal. December follows on
  * paper once the year is over.
  *
@@ -17,7 +20,6 @@
  */
 import { useMemo, useRef, type ReactNode } from "react";
 import { ActionBar } from "@/components/game/ActionBar";
-import { ClickPill } from "@/components/game/ClickPill";
 import { Dashboard } from "@/components/game/Dashboard";
 import { DgFace } from "@/components/game/DgFace";
 import { EndingCharts } from "@/components/game/EndingCharts";
@@ -27,7 +29,6 @@ import { Hand } from "@/components/game/Hand";
 import { NextLevel } from "@/components/game/NextLevel";
 import { NightSurface } from "@/components/game/NightSurface";
 import { PatternCatalogue } from "@/components/game/PatternCatalogue";
-import { PhoneMock } from "@/components/game/PhoneMock";
 import { Playbook } from "@/components/game/Playbook";
 import { QuarterNews } from "@/components/game/QuarterNews";
 import { QuarterReport } from "@/components/game/QuarterReport";
@@ -41,11 +42,11 @@ import { RETENTION_LEVEL } from "@/lib/game/levels/retention";
 import { moodNow } from "@/lib/game/model";
 import { actionBarVisible, callViewFor, handHint, handVisible } from "@/lib/game/phases";
 import { TYPE_CHARS_PER_TICK, TYPE_TICK_MS, VOICES_WAIT_MS } from "@/lib/game/ui-timing";
-import { clicksFor, clicksOverLaw, phoneIds, phoneView, voiceLang, voiceParams } from "@/lib/game/view";
+import type { LevelDefinition, LevelSlug } from "@/lib/game/types";
+import { phoneIds, voiceLang, voiceParams } from "@/lib/game/view";
 import type { Locale } from "@/lib/i18n/locale";
 import {
   bossMessage,
-  clicksLabel,
   dashboardProps,
   decemberContent,
   handView,
@@ -57,22 +58,31 @@ import {
   shareText,
   timelineSegments,
   yearClosedView,
-  type IslandContext,
-  type IslandCopy,
+  islandContext,
 } from "./island-view";
+import { ISLAND_SIDES, type IslandCopies } from "./sides";
 import { useGame } from "./useGame";
 import styles from "./GameIsland.module.css";
 
-const L = RETENTION_LEVEL;
+/** The model of each playable level. Data only, a few kilobytes: every level ships in the island's bundle. */
+const LEVELS: { [S in LevelSlug]: LevelDefinition<string> } = {
+  retention: RETENTION_LEVEL,
+};
 
-export interface GameIslandProps {
-  /** The level's copy in the page's language — everything but the intro, which the page renders itself. */
-  copy: IslandCopy;
-  locale: Locale;
-}
+export type GameIslandProps = {
+  [S in LevelSlug]: {
+    /** Which level this island plays. */
+    slug: S;
+    /** The level's copy in the page's language — everything but the intro and the footer, which the page renders itself. */
+    copy: IslandCopies[S];
+    locale: Locale;
+  };
+}[LevelSlug];
 
-export function GameIsland({ copy, locale }: GameIslandProps) {
-  const ctx: IslandContext = useMemo(() => ({ copy, locale }), [copy, locale]);
+export function GameIsland({ slug, copy, locale }: GameIslandProps) {
+  const L = LEVELS[slug];
+  const side = ISLAND_SIDES[slug];
+  const ctx = useMemo(() => islandContext(L, copy, locale), [L, copy, locale]);
   const callRef = useRef<HTMLElement>(null);
   const handRef = useRef<HTMLHeadingElement>(null);
   const dashboardRef = useRef<HTMLDivElement>(null);
@@ -80,7 +90,11 @@ export function GameIsland({ copy, locale }: GameIslandProps) {
   const reportRef = useRef<HTMLHeadingElement>(null);
   const decemberRef = useRef<HTMLHeadingElement>(null);
   const resumeRef = useRef<HTMLHeadingElement>(null);
-  const g = useGame(ctx, {
+  const played = useMemo(
+    () => ({ level: L, announceTick: (before: readonly string[], after: readonly string[]) => side.announce({ before, after, copy, locale }) }),
+    [L, side, copy, locale],
+  );
+  const g = useGame(ctx, played, {
     call: callRef,
     hand: handRef,
     dashboard: dashboardRef,
@@ -94,7 +108,6 @@ export function GameIsland({ copy, locale }: GameIslandProps) {
   const mood = moodNow(L, desk);
   const callView = callViewFor(phase);
   const ids = phoneIds(desk);
-  const clicks = clicksFor(L, ids);
   const hand = handView(ctx, desk, handHint(desk.picks.length, L.constants.picksPerQuarter));
 
   let slot: ReactNode = null;
@@ -176,9 +189,8 @@ export function GameIsland({ copy, locale }: GameIslandProps) {
             <div className={styles.slot}>{slot}</div>
 
             <div className={styles.side}>
-              <PhoneMock items={phoneView(L, ids)} labels={copy.phone} />
-              {/* Silent here: the island says a new count in its own region (plan E5). */}
-              <ClickPill clicks={clicks} overLaw={clicksOverLaw(clicks)} labels={copy.clicks} announce={false} />
+              {/* The level's phone and pill; the pill is silent here: the island says a change in its own region (plan E5). */}
+              {side.render({ ids, copy, locale })}
             </div>
 
             {handVisible(phase) ? (
@@ -202,7 +214,7 @@ export function GameIsland({ copy, locale }: GameIslandProps) {
                 {actionBarVisible(phase) ? (
                   <ActionBar
                     count={hand.count}
-                    clicks={clicksLabel(ctx, clicks)}
+                    pill={side.pill({ ids, copy, locale })}
                     runLabel={copy.hand.run}
                     canRun={hand.canRun}
                     onRun={g.run}
@@ -277,13 +289,13 @@ export function GameIsland({ copy, locale }: GameIslandProps) {
             <EndingCharts
               view={december.view}
               figures={december.figures}
-              churn={december.churnChart}
+              metric={december.metricChart}
               trust={december.trustChart}
               monthInitials={copy.monthInitials}
               data={{
                 toggle: copy.december.dataToggle,
                 month: copy.december.table.month,
-                churn: copy.december.table.metric,
+                metric: copy.december.table.metric,
                 trust: copy.december.table.trust,
                 rows: december.rows,
               }}

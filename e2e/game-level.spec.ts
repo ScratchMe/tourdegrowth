@@ -159,9 +159,9 @@ test.describe("P1 — the first screen", () => {
   test("the call is open, no card on the desk yet, the dashboard at January's figures", async ({ page }) => {
     await page.goto(LEVEL_PATH.fr);
     await expect(page.getByTestId("game-desk")).toHaveAttribute("data-phase", "call");
-    await expect(tileValue(page, "game-dash-churn")).toHaveText("6,0 %");
-    await expect(tileValue(page, "game-dash-subs")).toHaveText("100 000");
-    await expect(tileValue(page, "game-dash-mrr")).toHaveText("1,30 M€");
+    await expect(tileValue(page, "game-dash-metric")).toHaveText("6,0 %");
+    await expect(tileValue(page, "game-dash-customers")).toHaveText("100 000");
+    await expect(tileValue(page, "game-dash-revenue")).toHaveText("1,30 M€");
     await expect(tileValue(page, "game-dash-patience")).toHaveText("55");
     for (const id of ["game-dash-trust", "game-dash-radar"]) {
       await expect(page.getByTestId(id)).toContainText("pas sur ton dashboard");
@@ -194,7 +194,7 @@ test.describe("a whole year through the interface", () => {
       await hangUp(page);
       await expectOrder(page, A.orders[q - 1]!, "Demandé par le DG");
       await pickAndRun(page, A.path[q - 1]!);
-      await expect(tileValue(page, "game-dash-churn")).toHaveText(A.churn[q - 1]!);
+      await expect(tileValue(page, "game-dash-metric")).toHaveText(A.churn[q - 1]!);
       await expect(tileValue(page, "game-dash-patience")).toHaveText(A.patience[q - 1]!);
       await expectSecretsAbsent(page);
       if (q === 1) {
@@ -227,7 +227,7 @@ test.describe("a whole year through the interface", () => {
     await expect(playbook).toContainText("Offre de pause · confiance +4, radar −2");
     await expect(playbook).toContainText("Ordres du DG refusés : 3 sur 3.");
     // Two curves, each an image with its own name (a sentence, not a picture).
-    for (const id of ["game-chart-churn", "game-chart-trust"]) {
+    for (const id of ["game-chart-metric", "game-chart-trust"]) {
       const curve = page.getByTestId(id).getByRole("img");
       await expect(curve).toHaveCount(1);
       await expect(curve).toHaveAttribute("aria-label", /\S/);
@@ -248,7 +248,7 @@ test.describe("a whole year through the interface", () => {
       await hangUp(page);
       await expectOrder(page, C.orders[q - 1]!, "Requested by the CEO");
       await pickAndRun(page, C.path[q - 1]!);
-      await expect(tileValue(page, "game-dash-churn")).toHaveText(C.churn[q - 1]!);
+      await expect(tileValue(page, "game-dash-metric")).toHaveText(C.churn[q - 1]!);
       await expect(tileValue(page, "game-dash-patience")).toHaveText(C.patience[q - 1]!);
       await expectSecretsAbsent(page);
       if (q === 3) {
@@ -321,9 +321,9 @@ test.describe("coming back mid-quarter", () => {
     // numbers behind a resume question are the ones it offers to resume
     // (C.churn[1], the second report of path C, written the French way).
     await expect(page.getByTestId("game-resume")).toBeVisible();
-    await expect(tileValue(page, "game-dash-churn")).toHaveText("5,0 %");
+    await expect(tileValue(page, "game-dash-metric")).toHaveText("5,0 %");
     await page.getByTestId("game-resume-restart").click();
-    await expect(tileValue(page, "game-dash-churn")).toHaveText("6,0 %");
+    await expect(tileValue(page, "game-dash-metric")).toHaveText("6,0 %");
     await expect(page.getByTestId("game-call")).toHaveAttribute("data-state", "open");
     await expect(page.getByTestId("game-call")).toBeFocused();
     await expect.poll(() => page.evaluate((k) => window.localStorage.getItem(k), GAME_SAVE_KEYS.retention)).toBeNull();
@@ -346,7 +346,7 @@ test.describe("P18/X30 — a language switch mid-year", () => {
     await expect(page.getByTestId("game-desk")).toHaveAttribute("data-phase", "report");
     await expect(page.getByTestId("game-report-2")).toContainText("Quarter 2");
     await expect(page.getByTestId("game-journal-1")).toContainText("Quarter 1");
-    await expect(tileValue(page, "game-dash-churn")).toHaveText("5.7%");
+    await expect(tileValue(page, "game-dash-metric")).toHaveText("5.7%");
     await expect.poll(() => page.url()).not.toContain("resume=");
     // The new document counted nothing: a switch is not a new year, nor a resume.
     const events = await trackedEvents(page);
@@ -366,7 +366,7 @@ test.describe("P13 — replay", () => {
     await expect(page.getByTestId("game-december")).toHaveCount(0);
     await expect(page.getByTestId("game-call")).toHaveAttribute("data-state", "open");
     await expect(page.getByTestId("game-journal")).toHaveCount(0);
-    await expect(tileValue(page, "game-dash-churn")).toHaveText("6.0%");
+    await expect(tileValue(page, "game-dash-metric")).toHaveText("6.0%");
     await expectSecretsAbsent(page);
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
     await expect(page.getByTestId("game-call")).toBeFocused();

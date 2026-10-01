@@ -6,7 +6,7 @@ export interface JournalEntry {
   q: number;
   /** « Trimestre 1 · janvier à mars ». */
   period: string;
-  /** The quarter's churn and its verdict, in words: « 5,7 % · manqué de 0,1 pt ». */
+  /** The quarter's number and its verdict, in words: « 5,7 % · manqué de 0,1 pt ». */
   result: { text: string; tone: "good" | "bad" };
   /** The two cards played, by name. */
   picked: readonly string[];

@@ -6,7 +6,7 @@ import { BulletChart, NightSurface, StatTile } from "tour-de-growth";
  * not even accept a `value`.
  *
  * Every tile is one the product draws, with its strings as it prints them.
- * The game's come from `dashboardProps` (game/retention/island-view.ts) on
+ * The game's come from `dashboardProps` (game/_island/island-view.ts) on
  * the reference paths of `lib/game/__tests__/paths.ts`, played through the
  * reducer and formatted by `lib/game/format.ts`. The engine's come from
  * `kpiRows` on the « Et si » example of its scenario-view test (sign-up rate

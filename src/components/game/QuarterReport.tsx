@@ -8,19 +8,19 @@ import { EventClipping, type EventClippingProps } from "./EventClipping";
 import styles from "./QuarterReport.module.css";
 
 export interface ReportFigure {
-  /** Stable key, also the table column: "churn", "target", "subs", "mrr", "patience". */
+  /** Stable key, also the table column: "metric", "customers", "revenue", "patience". */
   key: string;
   label: string;
   /** Formatted by `lib/game/format.ts`, the same string the dashboard printed. */
   value: string;
   /**
-   * A line under the value — churn's target (« objectif 5,6 % »). The target
+   * A line under the value — the number's target (« objectif 5,6 % »). The target
    * is a number of the report, but the copy states it as a sentence about
-   * churn, so it sits with churn rather than as a sixth figure with no label.
+   * number, so it sits with the number rather than as a sixth figure with no label.
    */
   note?: string;
   /**
-   * Only on churn: « objectif atteint » / « manqué de 0,1 pt », in WORDS — the
+   * Only on the number: « objectif atteint » / « manqué de 0,1 pt », in WORDS — the
    * colour repeats it. `bad` for any miss: the prototype's coral and crimson
    * are one token at night (world-night.css rule 2), the size of the miss is
    * in the number.
@@ -36,7 +36,7 @@ export interface QuarterReportProps {
   headingRef?: Ref<HTMLHeadingElement>;
   /** The two cards played, by name. */
   picked: readonly string[];
-  /** Churn (with its target as `note` and its status), subscribers, revenue, patience — in that order. */
+  /** The level's number (with its target as `note` and its status), customers, revenue, patience — in that order. */
   figures: readonly ReportFigure[];
   /** « Ce que tes actions ont fait ». */
   effectsHeading: string;
@@ -45,7 +45,7 @@ export interface QuarterReportProps {
   /** Private events of the quarter, one sentence each (the data presentation, the survey's answers). */
   notes?: readonly string[];
   /**
-   * « Pourquoi le churn a bougé : +0,4 pt » and its lines, each already filled
+   * « Pourquoi le churn a bougé : +0,4 pt » (or the new customers) and its lines, each already filled
    * and adding up to the heading. Empty lines: no block.
    */
   drivers?: { heading: string; lines: readonly string[] };

@@ -1,4 +1,4 @@
-import type { LevelCopy } from "@/lib/game/copy";
+import type { ClicksCopy } from "@/lib/game/copy";
 import styles from "./ClickPill.module.css";
 
 export interface ClickPillProps {
@@ -6,7 +6,7 @@ export interface ClickPillProps {
   clicks: number | "phone";
   /** lib/game/view.ts `clicksOverLaw(clicks)` — decided by the view, not re-derived here. */
   overLaw: boolean;
-  labels: LevelCopy["clicks"];
+  labels: ClicksCopy;
   /** `sm` for the sticky action bar on a phone: same words, smaller type. */
   size?: "md" | "sm";
   /**

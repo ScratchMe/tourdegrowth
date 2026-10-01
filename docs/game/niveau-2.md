@@ -11,7 +11,7 @@ niveau spécifié au-delà du premier a son fichier dans `docs/game/`.*
 
 ## 17. Le niveau 2 « Comment les gens vous trouvent » — spécification, validée (C30, 2026-10-01)
 
-Écrite le 2026-09-30, le jour où Antoine a retenu ce niveau pour le deuxième du jeu, avant le lancement. **Ce qui existe déjà** : le moteur du jeu sert désormais les deux sens (un chiffre qui doit baisser, un chiffre qui doit monter), et le modèle du niveau 2 est codé en brouillon, sans page ni texte (`src/lib/game/levels/acquisition.ts`, testé par `src/lib/game/__tests__/acquisition.test.ts`). Tous les chiffres de cette section sont ceux que ce code produit. **Rien d'autre n'est construit** : ni page, ni copie, ni téléphone, ni entrée depuis le Tour. **Antoine l'a validée le 2026-10-01** (C30, §17.10), les cinq recos retenues : la construction peut partir (§17.11).
+Écrite le 2026-09-30, le jour où Antoine a retenu ce niveau pour le deuxième du jeu, avant le lancement. **Ce qui existe déjà** : le moteur du jeu sert désormais les deux sens (un chiffre qui doit baisser, un chiffre qui doit monter), et le modèle du niveau 2 est codé en brouillon, sans page ni texte (`src/lib/game/levels/acquisition.ts`, testé par `src/lib/game/__tests__/acquisition.test.ts`). Tous les chiffres de cette section sont ceux que ce code produit. **Rien d'autre n'est construit** : ni page, ni téléphone, ni entrée depuis le Tour ; la copie est écrite depuis le 2026-10-01 (A12.c, `content/game/acquisition.ts`). **Antoine l'a validée le 2026-10-01** (C30, §17.10), les cinq recos retenues : la construction peut partir (§17.11).
 
 Les textes en français de cette section sont des **premiers jets** : ils passent au statut « à relire » en entrant dans le code (convention 6), l'anglais s'écrit à ce moment-là, et le tout part dans un bon à tirer. Ce document n'a pas d'espaces insécables : elles se posent à l'entrée dans le code, devant `%` et `€` et dans les groupes de chiffres compris, que la garde de typographie ne voit pas.
 
@@ -194,11 +194,11 @@ Le niveau 2 pardonne un peu plus au joueur honnête qui joue au hasard. Ce n'est
 Au niveau 1, le téléphone montrait l'écran de résiliation. Ici, il montre le chemin d'un visiteur sur l'appli de Pédalix, de la recherche au panier, et reflète comme au niveau 1 l'union des cartes en production et des cartes cochées. Une figure de texte, sans faux boutons (E9). De haut en bas :
 
 - Barre d'appli « Pédalix · 21:04 ».
-- `native` : une vignette vidéo « Mon vélo de tous les jours », signée d'un créateur fictif, sans mention.
-- Résultats pour « vélo de ville » : le premier est le modèle le mieux noté ; avec `sponsored`, c'est celui d'une marque partenaire, sans mention ; avec `compare`, une ligne « Comparé à 3 sites, prix livrés ».
-- La fiche du « Urbain 7 », vélo de ville électrique : photo ; avec `specs`, « 12 photos · taille, poids, compatibilités ».
+- `native` : une vignette vidéo « Mon vélo de tous les jours », signée d'un créateur fictif (@deux_roues_et_moi), sans mention.
+- Résultats pour « vélo de ville » : le premier est le modèle le mieux noté ; avec `sponsored`, c'est celui d'une marque partenaire (Ferlune, une marque inventée), sans mention ; avec `compare`, une ligne « Comparé à 3 sites, prix livrés ».
+- La fiche du « Pédalix Ville 7 », vélo de ville électrique de la maison : photo ; avec `specs`, « 12 photos · taille, poids, compatibilités ». *(« Urbain 7 » jusqu'au 2026-10-01 : trop proche d'un « Urban 7 » réel, vu en écrivant la copie, A12.c.)*
 - Le prix : « 1 290 € » ; avec `anchor`, « ~~1 590 €~~ 1 290 € · −19 % » ; avec `allin`, « 1 319 € livré ».
-- La note : « 4,1 ★ · 38 avis » ; avec `reviews`, « 4,9 ★ · 1 204 avis » ; avec `verified`, « dont 31 vérifiés (achat prouvé) » à la suite.
+- La note : « 4,1 ★ · 38 avis » ; avec `reviews`, « 4,6 ★ · 29 avis », puisque les avis sous quatre étoiles attendent une modération qui ne vient pas ; avec `verified`, « dont 24 vérifiés (achat prouvé) » à la suite. *(« 4,9 ★ · 1 204 avis » et « 31 vérifiés » jusqu'au 2026-10-01 : trier ne fait pas apparaître d'avis, et 31 vérifiés ne tiennent pas dans 29 avis — relecture de copie d'A12.c.)*
 - La pression, une ligne par carte : `countdown` « Offre valable encore 02:59:41 » ; `stock` « Plus que 3 en stock » ; `watchers` « 12 personnes regardent ce vélo ».
 - `delivery` : « Livré le mardi 14 · 29 € ».
 - `guides` : un lien « Quelle taille de cadre pour vous ? ».
@@ -239,7 +239,7 @@ Les coupures de presse gardent des titres de journaux fictifs (§8.3). Aucun tex
 
 Chaque texte dit ce que fait le modèle (E11) : la recommande pliée par la confiance, les rampes qui continuent, le radar qui ne baisse que sans astuce en production. Aucun ne nomme une carte que l'année n'aurait pas jouée : l'année D, virée, n'a par exemple écrit aucun guide.
 
-**Décembre** : les trois cellules (nouveaux clients, confiance, radar), la courbe des nouveaux clients de 1 000 à 4 000 avec le 3 000 du board en pointillé, celle de la confiance, le playbook, le catalogue, le partage (« Une année chez Pédalix : {title} {metric} nouveaux clients, confiance à {trust}. Et toi, tu tiendrais ? {url} »), le niveau suivant et la boucle vers le Tour.
+**Décembre** : les trois cellules (nouveaux clients, confiance, radar), la courbe des nouveaux clients de 1 000 à 4 000 avec le 3 000 du board en pointillé, celle de la confiance, le playbook, le catalogue, le partage (« Une année chez Pédalix : {title} {metric} nouveaux clients, confiance à {trust}. Et toi, tu tiendrais ? {url} »), **l'autre niveau** et la boucle vers le Tour. Le bloc « Niveau suivant » du niveau 1 annonce le niveau 2 ; celui du niveau 2 annonce le niveau 1, « jouable », et non un troisième niveau qui n'existe pas : **tranché par Antoine le 2026-10-01** (C31), les deux niveaux se renvoient l'un à l'autre.
 
 ### 17.9 Le catalogue : les huit astuces, vérifiées
 
@@ -259,6 +259,17 @@ Vérifié le 2026-09-30 sur les sources primaires : Légifrance, les communiqué
 **Les marques citées**, liste blanche du niveau (série C6) : Booking.com, Expedia, Temu, Shein, Fashion Nova. Les autres noms de la recherche (PrettyLittleThing, Boohoo, Disinfluence) n'entrent que dans ce document.
 
 **Corrigé dans le §11.1 par cette vérification** : « Classement payé non signalé, DSA article 27 » était faux (l'article 27 porte sur les paramètres des systèmes de recommandation des plateformes, et une boutique qui vend son propre stock n'est pas une plateforme) ; « Faux avis, article L121-2 » était imprécis (L121-4 28° et 27°) ; « prix total obligatoire » allait trop loin (la livraison peut être indiquée à part si elle est annoncée) ; le faux prix barré n'a pas d'amende administrative à lui (l'article L131-5 ne vise que l'article L112-1 et ses arrêtés, lu sur Légifrance le 2026-09-30) : c'est une pratique commerciale trompeuse ; et les engagements de Booking.com datent du 20 décembre 2019, sans être une sanction.
+
+**Corrigé dans la copie par la vérification du 2026-10-01** (A12.c, le texte d'`content/game/acquisition.ts` relu sur les sources primaires) :
+- **28°** dit « modifier des avis », pas « déformer » : « déformer » est le mot de la directive Omnibus, pas celui du Code. Le 27° vise l'affirmation faite « sans avoir pris les mesures nécessaires pour le vérifier ».
+- **Article 5-2 de la loi du 9 juin 2023** (rédaction de l'ordonnance 2024-978, en vigueur depuis le 8 novembre 2024) : « publicité » ou « collaboration commerciale » **ou une mention équivalente**. Seul l'article 5 d'origine imposait les deux mentions.
+- **Frais cachés** : de tous les frais imposés, seule la livraison peut être indiquée à part, **avec son montant** (arrêté du 3 décembre 1987, art. 2) ; « si elle est annoncée » ne suffisait pas.
+- **Temu** : la notification de novembre 2024 suit une enquête coordonnée, et l'action du réseau CPC est **toujours en cours** au 2026-10-01 (page de la Commission). L'amende de 200 M€ infligée à Temu le 28 mai 2026 l'a été au titre du DSA, pour les produits illicites, pas pour les fausses échéances : le texte n'en parle pas. Une veille est posée (`CHANTIERS.md` E).
+- **CMA** : des engagements pris **auprès de** l'autorité britannique, qui ne valent pas aveu (« devant » évoquait un tribunal) ; « les six sites visés par l'enquête » plutôt que « contrôlés », lisible comme « détenus ».
+- **Shein** : les 40 M€ couvraient aussi des allégations environnementales, d'où « notamment pour de fausses réductions ». **Influenceurs** : la DGCCRF dit que **la totalité** des influenceurs en anomalie manquaient à la transparence commerciale (« tous », comme ce tableau ; la copie avait dérivé vers « notamment »). **Fashion Nova** : « a accepté de payer », pendant « près de » quatre ans (fin 2015 à novembre 2019).
+- **Faux prix barré** : la DGCCRF « peut régler » ce délit par une transaction pénale ; « souvent » n'était étayé que par des chiffres tous délits confondus.
+
+Lus sur Légifrance par un outil de lecture : le 28° et l'article 5-2 sont à relire à l'œil avant l'ouverture (D9).
 
 **Sources primaires** :
 - Code de la consommation, articles L112-1-1, L111-7-2, L121-2, L121-3, L121-4, L132-2, L523-1, sur Légifrance ; arrêté du 3 décembre 1987 relatif à l'information du consommateur sur les prix ; loi n° 2023-451 du 9 juin 2023, art. 5-2.
@@ -283,8 +294,8 @@ Au format de `CHANTIERS.md` C. « Aujourd'hui » est ce que le brouillon suppose
 
 Dans l'ordre, une PR chacun :
 
-1. **La copie** : `content/game/acquisition.ts`, français et anglais, tout « à relire », avec la série C du §7.1 (parité, mots interdits, marques de la liste blanche) et ses propres tests de contenu.
-2. **L'îlot partagé** : l'îlot du niveau 1 vit sous `app/[locale]/game/retention/` et parle de churn ; il devient celui de tout niveau, chaque niveau n'apportant que sa copie, son téléphone et ses formats. Les composants de `components/game` gardent aujourd'hui des noms d'emplacement du niveau 1 (`churn`, `subs`, `mrr`) : les renommer change leur contrat, donc une re-synchronisation avec Claude Design (`.design-sync/NOTES.md`).
+1. **La copie** : `content/game/acquisition.ts`, français et anglais, tout « à relire », avec la série C du §7.1 (parité, mots interdits, marques de la liste blanche) et ses propres tests de contenu. **Faite le 2026-10-01** (A12.c) : ce que le niveau 1 dit déjà de toute année (les mois, la visio, les nouvelles du trimestre, le playbook…) est repris par référence, et trois tests s'ajoutent à la série C : les espaces insécables des nombres (C12), l'arithmétique du téléphone (C13), et jamais « amende » pour une transaction pénale (C14).
+2. **L'îlot partagé** — **fait le 2026-10-01** (A12.d) : l'îlot vit sous `app/[locale]/game/_island/`, chaque niveau y apporte son modèle, sa copie, le format de son chiffre et son téléphone (`sides.tsx`). Le constat d'origine : l'îlot du niveau 1 vivait sous `app/[locale]/game/retention/` et parlait de churn ; il devient celui de tout niveau, chaque niveau n'apportant que sa copie, son téléphone et ses formats. Les composants de `components/game` gardent aujourd'hui des noms d'emplacement du niveau 1 (`churn`, `subs`, `mrr`) : les renommer change leur contrat, donc une re-synchronisation avec Claude Design (`.design-sync/NOTES.md`).
 3. **Le téléphone de Pédalix** et sa pastille (§17.7), un composant neuf, avec son aperçu pour Claude Design.
 4. **Le branchement** : le slug passe de `DraftLevelSlug` à `LevelSlug`, et le compilateur liste ce qu'il exige (clé de sauvegarde, encart du résultat, vocabulaire analytique) ; la page, son image de partage, le sitemap, le hub qui l'affiche « Jouable », et la réponse à Q5.
 5. **Les specs Playwright** du niveau, sur le modèle de P1 à P27.

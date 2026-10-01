@@ -16,8 +16,8 @@ import { localePath } from "@/lib/i18n/routes";
 import { PILLARS } from "@/lib/scoring/pillars";
 import { breadcrumbSchema, gameSchema, JsonLd } from "@/lib/seo/jsonld";
 import { gameMetadata } from "../game-metadata";
-import { GameIsland } from "./GameIsland";
-import type { IslandCopy } from "./island-view";
+import { GameIsland } from "../_island/GameIsland";
+import type { IslandCopies } from "../_island/sides";
 import own from "./page.module.css";
 
 const PATH = "/game/retention";
@@ -30,7 +30,7 @@ const MODEL_SOURCE_URL = `${REPO_URL}/blob/main/src/lib/game/model.ts`;
  * here, on the server, with the intro and the zones (which never were level
  * copy). The rest crosses as one prop, in one language (plan E3).
  */
-function islandCopy(copy: RetentionCopy): IslandCopy {
+function islandCopy(copy: RetentionCopy): IslandCopies["retention"] {
   const { footer: _footer, ...rest } = copy;
   return rest;
 }
@@ -114,7 +114,7 @@ export default async function RetentionLevelPage({ params }: PageProps) {
         lead={tc(intro.lead, locale)}
         band={
           <>
-            <GameIsland copy={islandCopy(copy)} locale={locale} />
+            <GameIsland slug="retention" copy={islandCopy(copy)} locale={locale} />
             <p className={own.footnote} data-testid="game-footnote">
               {copy.footer.note}{" "}
               <a href={MODEL_SOURCE_URL} target="_blank" rel="noopener">
