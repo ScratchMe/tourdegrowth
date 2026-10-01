@@ -92,7 +92,7 @@ export const ENGINE_COPY = {
     // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1 : aucun repère ne désigne).
     // TODO: à relire (convention 6) — réécrit le 2026-10-01 (A7.3.c S3) : les chiffres de l'assisté.
     promise: {
-      fr: "Dix-sept chiffres en libre-service, quinze en vente assistée : va les chercher, vois où ton moteur perd du monde et repars avec des slides prêtes pour ton CODIR. Tes chiffres ne sont comparés qu'à toi-même et à ta propre cible : les repères publiés sont là pour situer, jamais pour désigner une étape.",
+      fr: "Dix-sept chiffres en libre-service, quinze en assisté : va les chercher, vois où ton moteur perd du monde et repars avec des slides prêtes pour ton CODIR. Tes chiffres ne sont comparés qu'à toi-même et à ta propre cible : les repères publiés sont là pour situer, jamais pour désigner une étape.",
       en: "Seventeen numbers for self-serve, fifteen for sales-assisted: go and get them, see where your engine loses people, and leave with slides ready for your leadership meeting. Your numbers are only compared with yourself and your own target: published references are there for context, never to name a stage.",
     },
     privacyTitle: { fr: "Rien de ce que tu saisis ne sort d'ici", en: "Nothing you enter leaves this page" },
@@ -110,11 +110,12 @@ export const ENGINE_COPY = {
     },
     // TODO: à relire — nouveau (2026-09-25, retours d'Antoine sur le moteur).
     durationTitle: { fr: "Combien de temps ça prend", en: "How long it takes" },
-    // TODO: à relire (convention 6) — réécrit le 2026-10-01 (A7.3.c S3) : une phrase par motion, comptées sur le catalogue.
+    // TODO: à relire (convention 6) — 2026-10-01 (A7.3.c S3) : durationIntro réécrit, durationIntroSlg neuf (une phrase par motion, comptées sur le catalogue).
     durationIntro: {
       fr: "Surtout, là où sont tes chiffres. Sur les dix-sept du libre-service, {quick} se lisent en cinq minutes, {hour} demandent environ une heure chacun et {ask} sont à demander à quelqu'un.",
       en: "Mostly, where your numbers are. Of the seventeen self-serve ones, {quick} take five minutes to read, {hour} take about an hour each and {ask} have to be asked of someone.",
     },
+    // TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S3).
     durationIntroSlg: {
       fr: "Sur les quinze de l'assisté, {quick} se lisent en cinq minutes, {hour} demandent environ une heure chacun et {ask} sont à demander à quelqu'un.",
       en: "Of the fifteen sales-assisted ones, {quick} take five minutes to read, {hour} take about an hour each and {ask} have to be asked of someone.",
@@ -155,8 +156,8 @@ export const ENGINE_COPY = {
     faqTitle: { fr: "Questions fréquentes", en: "Frequently asked questions" },
     /**
      * TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.7 E0) : the catalogue
-     * splits into one subsection per motion, and the link. S3 lays them on
-     * the page; until then the page lists self-serve's alone.
+     * splits into one subsection per motion, and the link, laid on the page
+     * by S3 (`page.tsx`).
      */
     catalogueTitlePlg: { fr: "Libre-service : {n} chiffres", en: "Self-serve: {n} numbers" },
     catalogueTitleSlg: { fr: "Assisté : {n} chiffres", en: "Sales-assisted: {n} numbers" },
@@ -1151,6 +1152,15 @@ export const ENGINE_COPY = {
     opps: { fr: "Opportunités créées", en: "Opportunities created" },
     oppsFromSelfServe: { fr: "dont venues du libre-service", en: "of which from self-serve" },
     won: { fr: "Nouveaux clients", en: "New customers" },
+    // TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S3, relu sur les captures) : quarterColumn, introSlg, noneMovedSlg.
+    /** The quarter table's first column: what each row counts — not a lever, the link alone moves one of them. */
+    quarterColumn: { fr: "Ce trimestre", en: "This quarter" },
+    /** The panel's intro and its « nothing moved » line: sales-assisted has a quarter, not a month's funnel. */
+    introSlg: {
+      fr: "Bouge un ou plusieurs leviers : le trimestre et tes chiffres de croissance se recalculent ensemble, les effets se cumulent.",
+      en: "Move one lever or several: the quarter and your growth numbers recompute together, and the effects add up.",
+    },
+    noneMovedSlg: { fr: "Aucun levier bougé : le trimestre et les chiffres sont ceux d'aujourd'hui.", en: "No lever moved: the quarter and the numbers are today's." },
     /** One sentence per rule of `lib/engine/slg-scenario.ts`, printed only when it applied. */
     slgAssumption: {
       "slg-lead-same-win-rate": { fr: "Les opportunités en plus se signent au même taux que les autres.", en: "The extra opportunities are signed at the same rate as the others." },

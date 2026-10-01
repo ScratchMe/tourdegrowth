@@ -304,7 +304,7 @@ export function Setup({
         ) : null}
       </div>
       {motions.slg ? (
-        <p className={styles.caveatLine} data-testid="engine-setup-slg-periods">
+        <p className={styles.periodsLine} data-testid="engine-setup-slg-periods">
           {slgPeriods}
         </p>
       ) : null}

@@ -127,7 +127,10 @@ test.describe("setup and first save", () => {
   test("first visit shows the setup; « See it all at once » opens the board with nothing found yet", async ({ page }) => {
     await openEngine(page);
     await expect(page.getByTestId("engine-setup")).toBeVisible();
-    await expect(page.getByRole("radio", { name: /self-serve/ })).toBeChecked();
+    // B2B SaaS, sold self-serve: the v1 engine unless someone ticks sales-assisted (A7.3.c).
+    await expect(page.getByRole("radio", { name: /B2B SaaS/ })).toBeChecked();
+    await expect(page.getByTestId("engine-motion-plg")).toBeChecked();
+    await expect(page.getByTestId("engine-motion-slg")).not.toBeChecked();
     await page.getByTestId("engine-setup-board").click();
     await expect(page.getByTestId("engine-coverage")).toContainText("0 of 17 numbers found");
     // Focus follows the screen change to the verdict, never left on <body>.

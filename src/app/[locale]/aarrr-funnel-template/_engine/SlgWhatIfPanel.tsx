@@ -61,7 +61,7 @@ export function SlgWhatIfPanel({ view, onChange }: { view: EngineView; onChange:
 
   return (
     <div className={styles.panel} data-testid="engine-whatif-slg-panel">
-      <p className={styles.intro}>{w.intro}</p>
+      <p className={styles.intro}>{w.introSlg}</p>
 
       <div className={styles.top}>
         <section className={styles.levers} aria-labelledby={`${idBase}-levers`}>
@@ -130,7 +130,7 @@ export function SlgWhatIfPanel({ view, onChange }: { view: EngineView; onChange:
               <Kpi key={k.id} kpi={k} better={w.better} worse={w.worse} todayTemplate={w.leverToday} testIdPrefix="whatif-slg-kpi" />
             ))}
           </div>
-          {!moved ? <p className={styles.note}>{w.noneMoved}</p> : null}
+          {!moved ? <p className={styles.note}>{w.noneMovedSlg}</p> : null}
         </section>
       </div>
 
@@ -140,7 +140,7 @@ export function SlgWhatIfPanel({ view, onChange }: { view: EngineView; onChange:
             caption={moved ? w.quarterIf : w.quarterToday}
             size="sm"
             columns={[
-              { key: "label", header: w.aloneLever },
+              { key: "label", header: w.quarterColumn },
               { key: "value", header: moved ? w.kpiIf : w.kpiToday, numeric: true },
             ]}
             rows={quarter.map((row) => ({

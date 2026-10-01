@@ -117,9 +117,10 @@ test("one focus ring, the system's, on every kind of control the engine draws", 
   await page.clock.setFixedTime(new Date(2026, 8, 24, 12));
   await openEngine(page, "en");
 
-  // The setup: a radio row, a month list, a short select, a text box.
+  // The setup: a radio row, a motion's box, a month list, a short select, a text box.
   const setup = page.getByTestId("engine-setup");
-  await expectOneSystemRing(page, setup.getByRole("radio", { name: /self-serve/i }), "a choice row");
+  await expectOneSystemRing(page, setup.getByRole("radio", { name: /B2B SaaS/ }), "a choice row");
+  await expectOneSystemRing(page, setup.getByTestId("engine-motion-slg"), "a motion's box");
   await expectOneSystemRing(page, setup.getByRole("combobox").first(), "a month");
   await expectOneSystemRing(page, setup.getByLabel("Currency"), "Currency");
   await expectOneSystemRing(page, setup.getByRole("textbox").first(), "the company name");

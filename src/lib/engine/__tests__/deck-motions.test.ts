@@ -4,7 +4,7 @@ import { linkSentence, relaysTitle, totalBlocks, totalIn12, totalSums, totalTitl
 import { fillTemplate } from "../format";
 import type { EngineState, MotionDerived } from "../types";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
-import { hybridState, measured, ratio, salesAssistedState, withEntry } from "./fixtures";
+import { estimated, hybridState, measured, ratio, salesAssistedState, withEntry } from "./fixtures";
 
 /**
  * The words the sales-assisted motion and the hybrid add to the board and the
@@ -14,8 +14,9 @@ import { hybridState, measured, ratio, salesAssistedState, withEntry } from "./f
  *
  * Non-vacuity, measured on 2026-10-01: dropping `capitalise` from the relays'
  * first clause fails « Sur 100 MQL » ; printing each block's part on its own
- * rounding instead of the sum's fails « title = body » ; returning the known
- * MRR as the total when the other is missing fails the S9 test.
+ * rounding instead of the sum's fails « an approximate sum » only (the
+ * §18.9 example's exact parts print the same either way) ; returning the
+ * known MRR as the total when the other is missing fails the S9 test.
  */
 
 type Slg = Extract<MotionDerived, { motion: "slg" }>;
@@ -78,6 +79,15 @@ describe("« deux moteurs, un total » (§18.6.2, §18.8.2)", () => {
       nb("Nouveau MRR du mois^: ~5^000^€ + ~12^000^€ = ~17^000^€"),
       nb("Dans 12^mois, au rythme actuel^: ~100^000^€ + ~330^000^€ à 340^000^€ = ~430^000^€ à 440^000^€"),
     ]);
+  });
+
+  it("an approximate sum: each block prints its part in the sum's one unit, not on its own two digits", () => {
+    // Self-serve estimated (~47 000 € à 49 000 €) sets the unit at a thousand: sales-assisted's 183 400 € prints ~183 000 €, not ~180 000 €.
+    const state = withEntry(withEntry(hybridState(), "rev.arpa", estimated(118, 122)), "slg.rev.arpa", measured(ratio(183_400, 100)));
+    const { derived } = slgOf(state);
+    const t = totalTitle(derived.total!, state, FR.strings, CTX_FR);
+    expect(t.values).toEqual({ total: nb("~230^000^€ à 232^000^€"), plg: nb("~47^000^€ à 49^000^€"), slg: nb("~183^000^€") });
+    expect(totalBlocks(derived.total!, state, FR.strings, CTX_FR).map((b) => b.mrr)).toEqual([t.values.plg, t.values.slg]);
   });
 
   it("a total exists only when both parts do (S9): the missing part is named, never the known one passed off as the total", () => {

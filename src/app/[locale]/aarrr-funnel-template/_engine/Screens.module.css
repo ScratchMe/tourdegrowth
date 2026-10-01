@@ -285,6 +285,13 @@
   margin: 0;
 }
 
+/* Sales-assisted's months (§18.1.2): information, not a warning — the field hints' ink, not the alert's. */
+.periodsLine {
+  font: var(--body-sm);
+  color: var(--text-muted);
+  margin: 0;
+}
+
 /* --- The example's banner title (2026-09-25) ---------------------------- */
 .exampleTitle {
   font: var(--title-card);
