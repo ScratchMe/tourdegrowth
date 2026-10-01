@@ -1,4 +1,5 @@
 .link {
+  composes: strip from "../../styles/hit.module.css";
   display: inline-flex;
   text-decoration: none;
 }

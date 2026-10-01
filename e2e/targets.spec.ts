@@ -488,3 +488,33 @@ test.describe("the small button on the owner's result", () => {
     await expectTapTargets(page, `[data-testid="badge-snippet"] ${SMALL}`, 1, SMALL_LOOK);
   });
 });
+
+/*
+ * A14.1 (2026-10-01): what is not a Button and was drawn, and tapped, under
+ * 44px — measured that day on ten pages at 390px with `elementFromPoint` —
+ * now composes the same strip (`styles/hit.module.css`). Same three claims
+ * per target; the related terms of a glossary page stand in rows, so their
+ * claim 2 is the one that counts: at 12px between rows the two rows' strips
+ * met and the upper link kept 31px of its 44, hence rows 26px apart.
+ *
+ * Non-vacuity (2026-10-01): without the shared `::before`, all seven fall on
+ * claim 1; with the related terms' rows back at 10px apart, only that test
+ * falls (« LTV — Lifetime Value », vertical strip), the six others pass.
+ */
+const STRIPPED: { where: string; path: string; sel: string; look: Look; minimum: number }[] = [
+  { where: "the space band's pills", path: "/en", sel: 'a[class*="SpaceBand-module__"][class*="__pill"]', look: { what: "a 28px pill", max: 30, oneLine: 44 }, minimum: 1 },
+  { where: "the wordmark", path: "/en", sel: 'a[class*="WordmarkLink-module__"][class*="__link"]', look: { what: "the wordmark", max: 24, oneLine: 44 }, minimum: 1 },
+  { where: "a glossary term's way back", path: "/en/glossary/cac", sel: 'a[class*="__backLink"]', look: { what: "a line of text", max: 24, oneLine: 40 }, minimum: 1 },
+  { where: "a glossary term's related terms", path: "/en/glossary/cac", sel: 'a[class*="__relatedLink"]', look: { what: "a line of text", max: 24, oneLine: 40 }, minimum: 3 },
+  { where: "the stages of « how it works »", path: "/fr/how-it-works", sel: 'a[class*="__pillarLink"]', look: { what: "a heading", max: 26, oneLine: 40 }, minimum: 5 },
+  { where: "the comparisons of « how it works »", path: "/fr/how-it-works", sel: 'a[class*="__comparisonLink"]', look: { what: "a 38px chip", max: 40, oneLine: 44 }, minimum: 4 },
+  { where: "the stages of the checklist", path: "/fr/growth-audit-checklist", sel: 'a[class*="__pillarLink"]', look: { what: "a 41px heading", max: 42, oneLine: 50 }, minimum: 5 },
+];
+
+for (const { where, path, sel, look, minimum } of STRIPPED) {
+  test(`${where} take a 44px tap and cover no neighbour`, async ({ page }) => {
+    await page.goto(path);
+    await page.locator("main").waitFor();
+    await expectTapTargets(page, sel, minimum, look);
+  });
+}
