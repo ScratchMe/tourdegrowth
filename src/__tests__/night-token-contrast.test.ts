@@ -106,6 +106,8 @@ const PAIRS: Pair[] = [
   { fg: "state-warn-text", bg: N1, stated: 9.41, role: "text", why: "status warn" },
   { fg: "text-muted", bg: "surface-desk", stated: 8.28, role: "text", why: "the desk is the page at night" },
   { fg: "texture-ink", bg: N0, stated: 1.11, role: "decorative", why: "stencil spray" },
+  // Never read at night: a slide declares data-world="paper" and binds it to pure white again (A14 T6). Pinned for completeness.
+  { fg: "text-on-inverse", bg: "surface-white", stated: 16.38, role: "decorative", why: "the slides' white, rebound by the slide itself" },
   { fg: "viz-grid", bg: N0, stated: 1.43, role: "decorative", why: "gridlines, subtle on purpose" },
   ...on3("viz-axis", [8.28, 7.7, 6.76], "text", "axis labels"),
   { fg: "viz-unknown", bg: N0, stated: 8.28, role: "text", why: "'not measured' dash" },

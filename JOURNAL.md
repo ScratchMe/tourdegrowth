@@ -979,3 +979,55 @@ Points pour le bon à tirer A14.d : ce que « Remplacer » change exactement 
 - `e2e/engine-engines.spec.ts`, nouveau, dix specs : deux moteurs créés, basculés et supprimés ; la limite de dix ; une sauvegarde rouverte ajoutée sous un id neuf ; la fusion avec son aperçu, refusée pour une autre devise ; le tableau en français (modèle, aperçu, application, `engine_stage_saved`) ; les tabulations d'un tableur en anglais et « Annuler » ; un tableau qui ne suit pas le changement de moteur ; l'import sur un moteur illisible qui garde l'autre ; « Tout effacer » qui compte les moteurs ; 390 px sans défilement de côté ;
 - le canari passe maintenant aussi par le modèle, un tableau collé et une fusion ;
 - captures relues : le sélecteur, le tableau collé avec son aperçu, l'import à trois choix avec l'aperçu de la fusion, et la suppression, en français à 1 280 px et en anglais à 390 px.
+
+## A14.c, T6 : le fond blanc, les rappels d'agenda, les deux portes (2026-10-01, #264)
+
+La huitième PR du moteur complet (`docs/engine/moteur-complet.md` §19.8 à §19.10, C32 Q14 à Q16), drapeau fermé. L'image de partage du moteur (§19.11) n'en fait pas partie : elle attend la passe de Claude Design (B5).
+
+**Ce que fait T6** :
+- **« Fond blanc »** au deck : une case, décochée par défaut, qui peint chaque slide en blanc pur (`--paper-white`, `--surface-white`), sans le relief du papier, à l'écran, au PNG et au PDF. Le choix est rangé avec le moteur (`deck.theme`).
+- **Deux rappels d'agenda**, `lib/engine/ics.ts`, pur. « Me le rappeler » paraît une fois une demande copiée : le rappel tombe cinq jours plus tard, le jour où le tableau dit « à relancer ». « Me rappeler de démarrer {mois} » remplace le bandeau du mois suivant tant que ses flux ne sont pas clos : le rappel tombe le premier jour ouvré du mois qui suit. Chaque rappel est un fichier `.ics` téléchargé, à 9 h à l'heure de l'agenda : rien n'est envoyé, rien n'est programmé par le site. Il ne porte jamais une valeur ni le nom de l'entreprise, parce qu'un agenda se partage et s'affiche sur un écran verrouillé.
+- **Deux portes vers le moteur**, ouvertes seulement sur un build où le moteur l'est :
+  - sous le coup prioritaire d'un résultat, pour son propriétaire, quand une étape est nommée : « Tu mesures déjà cette étape ? Mets tes vrais chiffres dans le moteur → » ;
+  - sur l'accueil, quand l'appareil porte un moteur : « Ton moteur : août 2026, 11 sur 17 chiffres — le reprendre → ». La ligne est lue par `lib/engine/resume.ts`.
+
+**La relecture de sécurité** (`relecteur-securite`) a relevé cinq constats, tous traités :
+- **Le canari ne passait pas par les rappels.** Il télécharge maintenant les deux `.ics` et vérifie qu'aucune valeur saisie ni le nom de l'entreprise n'y figure.
+- **L'accueil lisait le stockage du moteur hors de sa route, sans règle.** La lecture vit dans son propre composant, `app/[locale]/EngineResume.tsx`. Une règle 8 de `engine-boundary.test.ts` en fait le seul lecteur hors de la route, sans primitive réseau ni appel d'analytics : un compte affiché là ne peut pas devenir le détail d'un événement.
+- **Une entrée de forme lisible mais de contenu incomptable faisait planter l'accueil** (un brouillon sans façon de vendre, un mois mal écrit). `engineResume` rend maintenant `null` plutôt que de jeter, et l'`import()` a son `.catch`.
+- **Le texte d'un rappel pouvait ouvrir une propriété**, parce qu'un retour chariot seul et les autres caractères de contrôle passaient. Désormais :
+  - tout saut de ligne est échappé et les autres caractères de contrôle sont retirés ;
+  - une adresse qui n'est pas un `http(s)` sans espace laisse le champ URL de côté.
+
+  Tous les textes viennent aujourd'hui de la copie ou du catalogue ; l'échappement tient pour un appelant futur.
+- **Un accueil construit moteur fermé portait-il le code du moteur ?** Deux verrous l'en empêchent :
+  - `page.tsx` ne passe la ligne qu'à un build ouvert ;
+  - `EngineResume` lit le drapeau du build par l'accès littéral à `process.env` que Next remplace, avant l'`import()`.
+
+  Sur le build fermé, aucun morceau ne porte plus `engineResume` : l'import est retiré à la construction, pas seulement jamais appelé. L'e2e des portes lit tous les scripts que la page charge vraiment et y cherche la clé de stockage du moteur. Il n'en trouve aucun sur un build fermé, et au moins un sur un build ouvert. Une première vérification, statique, sur les balises `<script>` de l'accueil ne voyait rien non plus sur le build ouvert, parce que le morceau s'atteint par un chargeur rangé dans un autre fichier : elle a été jetée.
+
+**La relecture de copie** (`relecteur-copie`) a relevé neuf constats, dont trois défauts, tous traités :
+- « 1 chiffres sur 17 » : la ligne de l'accueil s'accorde avec le total, « 11 sur 17 chiffres » ;
+- « Demandés à Finance : » pour un seul chiffre : la description a sa variante au singulier ;
+- « septembre 2026 est clos » commençait par une minuscule : « Mois clos : septembre 2026. » ;
+- « Reprendre → » après un tiret : « le reprendre → », comme « le revoir → » du même bloc, et « pick it up → » en anglais ;
+- « template » avait trois sens en anglais : « company slide template » ;
+- l'adresse de la page entre aussi dans la description, que tous les agendas affichent, alors que le champ URL ne s'affiche pas partout ;
+- les deux boutons de rappel entrent dans la garde de longueur, mois rempli.
+
+Points pour le bon à tirer A14.d : le rôle placé dans la phrase (« Relancer Commercial : … ») ou en étiquette ; « cette étape » plutôt que le nom de l'étape, que la carte du dessus porte déjà ; « le reprendre → » à l'infinitif ou « reprends-le → ».
+
+**Un piège de test** : la suite unitaire tourne en UTC, où l'heure locale et l'heure UTC se confondent. Un `DTSTAMP` écrit en heure locale passait (le sabotage « stamp local »). Un test sous `Pacific/Kiritimati`, quatorze heures d'avance, les sépare, et le sabotage tombe maintenant.
+
+**Sabotages** :
+- quinze sur les modules purs, dont quatorze font tomber au moins un test ;
+- le quinzième (`resume.ts` qui ne refuse plus que le cas « vide ») est devenu équivalent avec la relecture de sécurité : un moteur illisible jette, et le `try` rend `null` quand même ;
+- un de plus sur un build fermé, pour l'e2e des portes : la ligne toujours montée et le drapeau lu après l'`import()`. La ligne reste absente, mais le code du moteur se charge, et l'e2e tombe sur « a closed build loaded the engine's code on the landing ». Un premier essai, qui ne retirait que le second verrou, passait : sans le premier, la ligne n'est jamais montée.
+
+**Vérifié** :
+- `vitest --coverage` : 2 896 tests, au-dessus des seuils ;
+- `tsc`, `eslint` et `next build` propres, moteur fermé comme la CI et moteur ouvert ;
+- Playwright complet sur le build fermé, avec l'émulateur Firestore et `CI=1` : 845 specs, 839 passées, aucune au second essai, 6 ignorées par construction ;
+- sur un build `ENGINE_ENABLED=true`, avec l'émulateur : les specs des portes, de la porte du résultat (`result-real.spec.ts`), des rappels, du fond blanc, du canari et du retour à l'accueil, 42, toutes passées ;
+- neuf specs neuves : `e2e/engine-deck-theme.spec.ts` (la couleur peinte d'une slide à l'écran et un pixel du PNG, dans les deux thèmes, en français et en anglais), `e2e/engine-reminders.spec.ts` (les deux `.ics` téléchargés, leur jour, leur nom, sans valeur ni nom d'entreprise), `e2e/engine-entries.spec.ts` (la ligne de l'accueil et le code qu'elle charge, selon le build) et une de plus dans `result-real.spec.ts` ;
+- captures relues : l'accueil en français à 1 280 px (le moteur seul) et en anglais à 390 px (sous le dernier score), la demande copiée avec « Me le rappeler », le rappel du mois sous les comptes, et la slide en blanc à 1 280 et 390 px.

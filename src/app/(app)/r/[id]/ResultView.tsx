@@ -29,6 +29,7 @@ import type { Locale } from "@/lib/i18n/locale";
 import { useLocale } from "@/lib/i18n/locale-context";
 import { NAV_STRINGS } from "@/lib/i18n/nav-strings";
 import { localePath } from "@/lib/i18n/routes";
+import { SPACE_OPEN_AT_BUILD } from "@/components/brand/SpaceBand";
 import { progressionFor, type Progression } from "@/lib/quiz/progression";
 import { progressionSentence } from "@/lib/quiz/progression-copy";
 import { clearStoredAnswers, findStoredResult, loadStoredResults } from "@/lib/quiz/storage";
@@ -227,6 +228,22 @@ export function ResultView({
 
   /** The one stage the action belongs to. Null when nothing is behind. */
   const bottleneckPrimary = bottleneck.pillars[0] ?? null;
+  /*
+   * Engine spec §19.10 (C32 Q16, A14 T6): the owner, whose result just named
+   * the stage that holds them back, may already measure it — the engine takes
+   * their real numbers. Owner only (a visitor's numbers are not theirs to
+   * enter), only with a named stage, and only when the build opened the
+   * engine: the line points at a page a closed build would answer with a 404.
+   */
+  const engineEntry =
+    SPACE_OPEN_AT_BUILD.engine && isOwner && !isSample && bottleneckPrimary ? (
+      <p className={styles.engineEntry}>
+        {/* A bare anchor: the engine lives under another root layout, the navigation is a full load anyway (R-24). */}
+        <a href={localePath(locale, "/aarrr-funnel-template")} data-testid="result-engine-entry">
+          {tc(t.engineEntry, locale)}
+        </a>
+      </p>
+    ) : null;
 
   /**
    * No stage is behind — so nothing on this page may present one as a
@@ -548,12 +565,17 @@ export function ResultView({
                    SHARER's result with the clicker's own context —
                    irreversibly. It also disappears once the Deep dive has
                    been done, because there is nothing left to offer. */
-                !deepVerdict && !isSample && id && isOwner ? (
+                (!deepVerdict && !isSample && id && isOwner) || engineEntry ? (
                   <>
-                    <p className={styles.upgradeText}>{tc(dd.upgradeText, locale)}</p>
-                    <Button variant="secondary" href={`/deep-dive/${id}`} data-testid="deep-dive-cta">
-                      {tc(dd.upgradeCta, locale)}
-                    </Button>
+                    {!deepVerdict && !isSample && id && isOwner ? (
+                      <>
+                        <p className={styles.upgradeText}>{tc(dd.upgradeText, locale)}</p>
+                        <Button variant="secondary" href={`/deep-dive/${id}`} data-testid="deep-dive-cta">
+                          {tc(dd.upgradeCta, locale)}
+                        </Button>
+                      </>
+                    ) : null}
+                    {engineEntry}
                   </>
                 ) : undefined
               }

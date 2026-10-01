@@ -168,6 +168,10 @@ export const UI_STRINGS = {
       fr: "Ton dernier score : {score}/100 — le revoir →",
     },
     withoutScore: { en: "See your last result →", fr: "Revoir ton dernier résultat →" },
+    // TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T6, engine spec §19.10) : la reprise du moteur sur l'accueil,
+    // quand un moteur existe sur l'appareil et que le moteur est ouvert au build. Un mois et deux comptes, jamais une valeur.
+    engine: { en: "Your engine: {month}, {n} of {N} numbers", fr: "Ton moteur : {month}, {n} sur {N} chiffres" },
+    engineCta: { en: "pick it up →", fr: "le reprendre →" },
     /**
      * REVIEW-03.md C1 — the 30-day nudge on the landing.
      *
@@ -591,6 +595,9 @@ export const UI_STRINGS = {
        which the SAME card switches to once a Deep dive has made it specific.
        Relu et validé par Antoine (2026-09-11). */
     nextMoveLabel: { en: "Next move", fr: "Prochaine action" },
+    // TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T6, engine spec §19.10) : sous l'action prioritaire, pour son
+    // propriétaire seulement, quand le moteur est ouvert au build. « Cette étape » : celle que la carte vient de nommer.
+    engineEntry: { en: "Already measuring this stage? Put your real numbers in the engine →", fr: "Tu mesures déjà cette étape ? Mets tes vrais chiffres dans le moteur →" },
     /* Design system extension 03 §3 — the share block. The caption says what
        the picture IS, since a reader is otherwise looking at their own result
        twice without being told why.

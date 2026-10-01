@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { LocaleSwitcher } from "@/components/brand/LocaleSwitcher";
 import { SiteHeader } from "@/components/brand/SiteHeader";
 import { SpaceStrip } from "@/components/brand/SpaceStrip";
+import { SPACE_OPEN_AT_BUILD } from "@/components/brand/SpaceBand";
 import { SampleCta } from "./SampleCta";
 import { QUESTION_COUNT } from "@/lib/quiz/navigation";
 import { TourCta } from "./TourCta";
@@ -129,6 +130,16 @@ export default async function LandingPage({ params }: PageProps) {
                 months: tc(UI_STRINGS.lastResult.retakeNudgeMonths, locale),
                 cta: tc(UI_STRINGS.lastResult.retakeNudgeCta, locale),
               }}
+              {...(SPACE_OPEN_AT_BUILD.engine
+                ? {
+                    engine: {
+                      line: tc(UI_STRINGS.lastResult.engine, locale),
+                      cta: tc(UI_STRINGS.lastResult.engineCta, locale),
+                      href: localePath(locale, "/aarrr-funnel-template"),
+                      locale,
+                    },
+                  }
+                : {})}
             />
           </div>
 

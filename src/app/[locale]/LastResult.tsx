@@ -5,6 +5,7 @@ import { LANDING_RETURN_EVENT, RETAKE_NUDGE_EVENT, trackEvent } from "@/lib/anal
 import { latestProgression, type Progression, retakeNudge, type RetakeNudge } from "@/lib/quiz/progression";
 import { progressionSentence, type ProgressionTemplates } from "@/lib/quiz/progression-copy";
 import { loadStoredResults, type StoredResult } from "@/lib/quiz/storage";
+import { EngineResume } from "./EngineResume";
 import styles from "./LastResult.module.css";
 
 /**
@@ -20,6 +21,12 @@ export interface LastResultProps {
   progression: ProgressionTemplates;
   /** REVIEW-03.md C1 — the 30-day nudge: the two `{n}` templates and its link text, already translated. */
   nudge: { weeks: string; months: string; cta: string };
+  /**
+   * Engine spec §19.10 (A14 T6): « Ton moteur : {month}, {n} sur {N}
+   * chiffres — le reprendre → », when the device holds an engine. Passed
+   * only by a build that opened the engine.
+   */
+  engine?: { line: string; cta: string; href: string; locale: "en" | "fr" };
 }
 
 /**
@@ -38,7 +45,7 @@ export interface LastResultProps {
  * newcomer, who is most of this page's traffic, sees nothing appear and
  * disappear.
  */
-export function LastResult({ withScore, withoutScore, progression, nudge }: LastResultProps) {
+export function LastResult({ withScore, withoutScore, progression, nudge, engine }: LastResultProps) {
   const [last, setLast] = useState<StoredResult | null>(null);
   const [progress, setProgress] = useState<Progression | null>(null);
   const [stale, setStale] = useState<RetakeNudge | null>(null);
@@ -62,7 +69,10 @@ export function LastResult({ withScore, withoutScore, progression, nudge }: Last
     }
   }, []);
 
-  if (!last) return null;
+  // The engine's way back (§19.10): its own component, which reads the device and sends nothing (rule 8).
+  const engineRow = engine ? <EngineResume {...engine} alone={!last} /> : null;
+
+  if (!last) return engineRow;
 
   // Entries written before R-20 carry no score — an unnumbered link is still
   // the way back, so those fall back rather than being hidden.
@@ -104,6 +114,7 @@ export function LastResult({ withScore, withoutScore, progression, nudge }: Last
           </a>
         </span>
       ) : null}
+      {engineRow}
     </span>
   );
 }

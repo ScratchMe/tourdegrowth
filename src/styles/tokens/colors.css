@@ -32,6 +32,12 @@
   --paper-1: #e7e1d2; /* page / artboard ground */
   --paper-2: #ded6c2; /* recessed fill: option buttons, meta chips */
   --paper-3: #cfc7b4; /* desk, the darkest neutral ground */
+  /*
+   * A slide on a company template's white (engine spec §19.8, C32 Q14, A14
+   * T6): the one ground the system had no tone for — --paper-0 leans cream.
+   * Only the slide's ground changes; inks, the leak's red and the accents stay.
+   */
+  --paper-white: #ffffff;
 
   --ink-0: #211c15; /* text, every 2px hard border, every hard shadow */
   --ink-1: #5b5346; /* secondary text, dashed borders, meta labels */
@@ -84,6 +90,8 @@
   --surface-page: var(--paper-1);
   --surface-card: var(--paper-0);
   --surface-sunken: var(--paper-2);
+  /* The slides' white theme (§19.8): a deck set on « Fond blanc ». */
+  --surface-white: var(--paper-white);
   /*
    * L-10: --text-muted on this ground measures 4.505:1 — AA by 0.005. Nothing
    * uses it today, and token-contrast.test.ts keeps it that way rather than

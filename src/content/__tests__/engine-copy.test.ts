@@ -341,10 +341,11 @@ describe("lengths", () => {
       ...under("steps.skipToSlg", "steps.skipToWhatIf", "sheet.companyWide"),
       ...under("engines.open", "engines.new", "engines.delete", "engines.deleteConfirm", "io.addApply", "io.mergeApply"),
       ...under("table.download", "table.read", "table.apply", "table.applyOne", "table.cancel"),
+      ...under("reminders.request", "reminders.month"),
     ];
     expect(buttons.length).toBeGreaterThan(20);
     const long = buttons.flatMap(([p, t]) =>
-      LOCALES.filter((l) => fillTemplate(t[l], { n: "12" }).length > 40).map((l) => `${p}.${l}: ${t[l]}`),
+      LOCALES.filter((l) => fillTemplate(t[l], { n: "12", month: l === "fr" ? "septembre 2026" : "September 2026" }).length > 40).map((l) => `${p}.${l}: ${t[l]}`),
     );
     expect(long).toEqual([]);
   });

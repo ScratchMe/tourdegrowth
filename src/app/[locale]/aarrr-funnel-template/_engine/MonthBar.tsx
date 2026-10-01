@@ -15,12 +15,17 @@ export interface SeriesControls {
   shown: number;
   /** A past month being corrected: the board takes entries again, written back into that month. */
   correcting: boolean;
-  /** The next month (§19.2.1): ready to start, or the engine full; absent before the flows' month is over. */
-  next: { kind: "ready"; label: string } | { kind: "full" } | null;
+  /**
+   * The next month (§19.2.1): ready to start, or the engine full; before the
+   * flows' month is over, `later` — a reminder to start it (§19.9, A14 T6).
+   */
+  next: { kind: "ready"; label: string } | { kind: "full" } | { kind: "later"; label: string } | null;
   onPick: (index: number) => void;
   onCorrect: () => void;
   onDoneCorrecting: () => void;
   onStart: () => void;
+  /** « Me rappeler de démarrer {mois} »: the calendar file for the day it can start. */
+  onRemind?: () => void;
 }
 
 /**
@@ -71,9 +76,29 @@ export function MonthBar({ series, strings }: { series: SeriesControls; strings:
 }
 
 /** « Mois clos : septembre 2026. Ses chiffres peuvent commencer… » and its button (§19.2.1), or the engine's `MAX_MONTHS` reached. */
-export function NextMonthBand({ next, onStart, strings }: { next: SeriesControls["next"]; onStart: () => void; strings: EngineStrings }) {
+export function NextMonthBand({
+  next,
+  onStart,
+  onRemind,
+  strings,
+}: {
+  next: SeriesControls["next"];
+  onStart: () => void;
+  onRemind?: () => void;
+  strings: EngineStrings;
+}) {
   if (!next) return null;
   const s = strings.series;
+  // Its flows are not over yet: no band, only the way to be reminded — a quiet line on every board would be noise.
+  if (next.kind === "later") {
+    return onRemind ? (
+      <div className={styles.remind}>
+        <Button variant="quiet" size="sm" onClick={onRemind} data-testid="engine-month-remind">
+          {fill(strings.reminders.month, { month: next.label })}
+        </Button>
+      </div>
+    ) : null;
+  }
   if (next.kind === "full") {
     return (
       <div className={styles.resume} data-testid="engine-month-full">
