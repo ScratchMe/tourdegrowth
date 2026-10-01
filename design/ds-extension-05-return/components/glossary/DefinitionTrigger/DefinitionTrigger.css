@@ -1,0 +1,55 @@
+/* DefinitionTrigger — extension 05 changes. Changed lines are marked ◆.
+ * The "?" is now the one thing to touch on a stage row: it draws as a real
+ * edge (solid), takes the inverse fill once its definition is open, and
+ * still takes taps on a 44px disc. */
+.DefinitionTrigger_trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--trigger-size);                         /* ◆ token, still 16px */
+  height: var(--trigger-size);
+  padding: 0;
+  margin-left: 4px;
+  vertical-align: middle;
+  border: var(--border-width) solid currentColor;     /* ◆ was dashed */
+  border-radius: var(--radius-round);
+  background: none;
+  font: var(--meta-2xs);
+  font-weight: 700;                                   /* ◆ the glyph holds in a 12px hole */
+  line-height: 1;
+  cursor: pointer;
+  position: relative;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+.DefinitionTrigger_trigger::before {
+  content: "";
+  position: absolute;
+  inset: calc((var(--hit-min) - var(--trigger-size)) / -2 - var(--border-width));
+  border-radius: var(--radius-round);
+}
+.DefinitionTrigger_muted {
+  color: var(--text-muted);
+}
+.DefinitionTrigger_ink {
+  color: var(--text-body);
+}
+.DefinitionTrigger_alert {
+  color: var(--text-alert);
+}
+@media (hover: hover) {                               /* ◆ a hover, pointer only */
+  .DefinitionTrigger_trigger:hover:not(.DefinitionTrigger_open) {
+    color: var(--trigger-hover);
+  }
+}
+.DefinitionTrigger_open {                             /* ◆ was: ink border only */
+  color: var(--trigger-open-text);
+  background: var(--trigger-open-bg);
+  border-color: var(--trigger-open-bg);
+}
+.DefinitionTrigger_trigger:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset-tight);
+}

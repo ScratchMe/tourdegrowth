@@ -1181,3 +1181,29 @@ Antoine a demandé le brief de B5 le soir de la fin d'A14.c : l'image de partag
 `.design-sync/NOTES.md` (« Synced ») dit maintenant ce que le projet garde sous `design/`, brief 06 compris.
 
 **Ce qui reste** : D12 (le lancer). Le retour va dans `design/ds-extension-06-return/`, une session le recopie dans le dépôt et le porte en T6.2 ; sa copie rejoint le bon à tirer du moteur.
+
+
+## B7 : le retour 05 de Claude Design recopié, C34 et C35 tranchées (2026-10-02)
+
+**Ce qui est revenu** : Claude Design a répondu au brief 05 dans le projet, sous `design/ds-extension-05-return/`, et rien hors de ce dossier n'a changé. La liste des fichiers est celle d'avant, le dossier `ds-extension-06` étant celui de B5. `DefinitionTrigger.jsx` garde l'empreinte de `_ds_sync.json` (`sha256`, 12 caractères : la méthode est trouvée ici, elle servira), et les deux contrats qu'un agent de design aurait pu retoucher ne parlent pas de l'extension 05. La consigne ajoutée au prompt de lancement (« ne change aucun fichier hors de ce dossier ») a tenu.
+
+**La réponse** : la puce devient **une ligne d'une feuille de score**, sous le profil du parcours dont elle est la table. La ligne porte la note, une jauge, le nom de l'étape, puis le `?`. Sans cadre, sans rayon de bouton, réglée comme `DataTable` (un filet plein en tête, des tirets fins entre les lignes). Les huit réponses :
+- l'étape qui freine prend un lavis et un filet rouge plein de 3 px ;
+- la jauge rouge passe au rouge du texte, l'autre mesurait 2,65:1 contre sa piste ;
+- une seule colonne à toutes les largeurs : fini Revenue seul sur sa ligne au téléphone ;
+- le `?` devient plein, avec un survol, et prend le remplissage inverse une fois ouvert ;
+- à l'accueil, le lien passe sur le nom de l'étape ;
+- le tampon du roast perd le rouge plein de l'action principale et devient un tampon encré ;
+- les noms `StageScore`, `StageScores`, et `StageStamp` proposé ;
+- six trouvailles hors du brief.
+
+**Recopié** : les 22 fichiers, par `get_file`, aux mêmes chemins. Pour la première fois, rien ne reste dans le projet, puisque la planche est toute en source comme le brief le demandait. Le sous-agent lancé pour la planche n'avait pas l'outil `DesignSync` et n'a rien fait : tout est passé par la session. Une insécable déclarée par `board.js` est remise ; ailleurs, `COPIE.md` dit où une insécable a pu devenir une espace.
+
+**La planche rejouée** dans Chromium, servie en http avec les polices de `.design-sync/fonts/` (elle les cherche à la racine du projet Claude Design, que le dépôt n'a pas), aux huit cadres : aucune erreur de script, aucun défilement horizontal, des lignes de 44 px au moins, les cinq jauges d'une feuille de même longueur (220 et 166 px ; le retour annonce 223 et 163 avec ses polices).
+
+**Tranché par Antoine**, planche sous les yeux, dans la session (la règle d'A : poser tout de suite quand il est là) :
+- **C34** : sur un frein partagé, **toutes les étapes ex aequo en rouge**, comme le profil, qui les signale déjà. Aujourd'hui une seule puce l'est, et l'écran se contredit ;
+- **C35** : le nouveau `?` **partout, quiz compris** ;
+- le portage dans la même session : **A16**.
+
+**Consigné** : `design/ds-extension-05-return/COPIE.md`, `docs/decisions.md` (C34, C35), `CHANTIERS.md` (B7 fait, A15.19, A16 ouvert, D11 retiré), `design/README.md`, `design/LOIS-UX.md`, `.design-sync/NOTES.md` (« Synced »). Que de la doc sous `design/`, `docs/` et à la racine : rien ne se déploie.

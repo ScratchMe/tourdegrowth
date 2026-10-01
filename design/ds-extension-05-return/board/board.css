@@ -1,0 +1,42 @@
+/* Board chrome only — not part of the port. */
+body { width: var(--board-width); margin: 0; overflow-x: hidden; }
+.B_main { padding: var(--space-12) var(--gutter-desktop) var(--space-15); display: flex; flex-direction: column; gap: var(--space-12); }
+.B_phone .B_main { padding: var(--space-10) var(--gutter-mobile) var(--space-14); gap: var(--space-11); }
+.B_kicker { font: var(--meta-sm); letter-spacing: var(--meta-tracking); text-transform: uppercase; color: var(--text-muted); }
+.B_h1 { font: var(--display-title); letter-spacing: var(--display-letter-spacing); margin-top: var(--space-3); }
+/* Sections sit on the page itself: the result's sheet lives on the page, not in a card. */
+.B_section { padding-top: var(--space-8); border-top: var(--border-rule); }
+.B_head { display: flex; flex-direction: column; gap: var(--space-2); margin-bottom: var(--space-8); }
+.B_title { font: var(--display-section); letter-spacing: var(--display-letter-spacing); }
+.B_note { font: var(--body-sm); color: var(--text-muted); max-width: 64ch; }
+.B_grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-11) var(--space-12); align-items: start; }
+.B_phone .B_grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-10); }
+.B_wide { grid-column: 1 / -1; }
+.B_state { display: flex; flex-direction: column; gap: var(--space-5); min-width: 0; }
+.B_stateName { font: var(--meta-xs); letter-spacing: var(--meta-tracking); text-transform: uppercase; color: var(--text-muted); padding-bottom: var(--space-2); border-bottom: var(--border-width-hairline) solid var(--border-divider); }
+/* The result's column: 420px wide on a desktop, as in production. */
+.B_column { display: flex; flex-direction: column; gap: var(--space-5); width: 100%; max-width: 420px; }
+.B_card { padding: var(--space-7); max-width: 420px; }
+.B_phone .B_card { padding: var(--space-6); }
+.B_compare { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-8) var(--space-11); }
+.B_compare > .B_column, .B_compare > .B_card, .B_oldStack { flex: 1 1 300px; max-width: 420px; }
+.B_oldStack { display: flex; flex-direction: column; gap: var(--space-3); }
+.B_buttons { display: flex; flex-wrap: wrap; gap: var(--space-5); }
+
+/* Today's dashed "?" inside the old chip (the before). */
+.B_oldTrigger { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; margin-left: 4px; border: var(--border-width) dashed currentColor; border-radius: var(--radius-round); font: var(--meta-2xs); line-height: 1; color: var(--text-muted); }
+.B_oldTriggerAlert { color: var(--text-alert); }
+
+/* The open panel. On a desktop it hangs under its "?" (the product does it in
+   the top layer, with the same anchor); on a phone it is drawn docked, under
+   the sheet, where the real one would sit at the bottom of the screen. */
+.B_anchorWrap { position: relative; display: flex; flex-direction: column; gap: var(--space-5); }
+.B_anchorWrap [data-open] { anchor-name: --b-open; }
+.B_desk .B_popover { position: absolute; position-anchor: --b-open; top: anchor(bottom); right: anchor(right); margin-top: 6px; z-index: 1; }
+
+/* Forced states, so hover and focus can be seen on a still board. Each
+   mirrors the component rule it stands for. */
+.DefinitionTrigger_trigger.force-hover { color: var(--trigger-hover); }
+.DefinitionTrigger_trigger.force-focus { outline: var(--focus-width) solid var(--focus-ring); outline-offset: var(--focus-offset-tight); }
+.force-link-hover-1 .StageScore_row:nth-child(1) .StageScore_link { color: var(--text-body); text-decoration-thickness: var(--border-width); }
+.force-link-focus-2 .StageScore_row:nth-child(2) .StageScore_link { outline: var(--focus-width) solid var(--focus-ring); outline-offset: var(--focus-offset-tight); }

@@ -23,10 +23,10 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
-| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.d (le bon à tirer de la copie neuve), A7.4 après A7.3, et A7.12.c à l'ouverture. **A7.3.c est livré le 2026-10-01**, les textes de lancement de la ligne « Hors code » d'A7.3 le même jour (S0 à S5, PR d'intégration [#233](https://github.com/ScratchMe/tourdegrowth/pull/233), drapeau fermé). A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)**, sa copie, l'îlot partagé, le téléphone de Pédalix et le branchement faits le même jour (A12.c à A12.f.2)  et ses specs (A12.g) : reste A12.h (le bon à tirer, puis la recette) et A12.i (le `?ref=` de la boucle inverse, trouvé par B6). **A14, le moteur complet** : spécifié et validé le 2026-10-01 (C32) ; **A14.c est livré le même jour**, T0 à T7 (neuf PR de #255 à #266, drapeau fermé), sauf T6.2 (l'image de partage, après B5) ; reste A14.d, son bon à tirer. **A13** (trois alertes de dépendances, dont une critique sur `next`) livré le 2026-10-01. **A15**, la finition UI et UX d'après les reels et les lois de l'UX, ouvert le 2026-10-01 : tout livré le même jour : deux PR, puis A15.18 une fois C33 tranchée ; reste A15.19, pour Claude Design : son brief (B7) est déposé le 2026-10-01, retour attendu |
-| **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30, après A7.10, A10 et A11** (B3, puis la re-synchro d'A11 le soir même : 88 composants, 292 cellules, 88 aperçus sur 88 rendus). Ouverts le 2026-10-01 : **B4** (la re-synchro du niveau 2 du jeu, faite le même jour), **B5** (l'image de partage du moteur, C32 Q17 : brief 06 écrit et déposé le même jour, à lancer), **B6** (la re-synchro d'A15 et de C33, faite le même jour : 90 composants, 303 cellules, les douze aperçus du jeu laissés par B4 régénérés) et **B7** (les puces d'étape, A15.19 : le brief 05 est déposé dans le projet le 2026-10-01, retour attendu ; à toi de le lancer, D11). Hors d'eux, rien à lancer tant qu'un composant, ou une copie qu'un aperçu reprend, ne change pas |
-| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 à C29 tranchées le 2026-09-30, C26 à C29 livrées le même jour, **C25** (la spécification de A7.3, `ENGINE.md` §18) dans sa propre session. **C30** (le niveau 2 du jeu, `GAME-BRIEF.md` §17) le 2026-10-01. **C31** (le bloc « Niveau suivant » du jeu) et **C32** (le moteur complet, `docs/engine/moteur-complet.md` §19.15) le 2026-10-01. **C33** (la carte du jeu sous les chiffres du lecteur, A15.18) ouverte et tranchée le 2026-10-01. **Rien n'est ouvert** |
-| **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) et D11 (lancer le brief 05 dans Claude Design) sont prêts tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, la fin d'A7.3 (le code et les textes de lancement sont livrés le 2026-10-01 ; reste le bon à tirer A7.3.d) et celle d'A14 (T6.2 et le bon à tirer A14.d) |
+| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.d (le bon à tirer de la copie neuve), A7.4 après A7.3, et A7.12.c à l'ouverture. **A7.3.c est livré le 2026-10-01**, les textes de lancement de la ligne « Hors code » d'A7.3 le même jour (S0 à S5, PR d'intégration [#233](https://github.com/ScratchMe/tourdegrowth/pull/233), drapeau fermé). A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)**, sa copie, l'îlot partagé, le téléphone de Pédalix et le branchement faits le même jour (A12.c à A12.f.2)  et ses specs (A12.g) : reste A12.h (le bon à tirer, puis la recette) et A12.i (le `?ref=` de la boucle inverse, trouvé par B6). **A14, le moteur complet** : spécifié et validé le 2026-10-01 (C32) ; **A14.c est livré le même jour**, T0 à T7 (neuf PR de #255 à #266, drapeau fermé), sauf T6.2 (l'image de partage, après B5) ; reste A14.d, son bon à tirer. **A13** (trois alertes de dépendances, dont une critique sur `next`) livré le 2026-10-01. **A15**, la finition UI et UX d'après les reels et les lois de l'UX, ouvert le 2026-10-01 : tout livré le même jour : deux PR, puis A15.18 une fois C33 tranchée ; reste A15.19 : le retour de Claude Design (B7) est reçu le 2026-10-02, et son portage est **A16** |
+| **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30, après A7.10, A10 et A11** (B3, puis la re-synchro d'A11 le soir même : 88 composants, 292 cellules, 88 aperçus sur 88 rendus). Ouverts le 2026-10-01 : **B4** (la re-synchro du niveau 2 du jeu, faite le même jour), **B5** (l'image de partage du moteur, C32 Q17 : brief 06 écrit et déposé le même jour, à lancer), **B6** (la re-synchro d'A15 et de C33, faite le même jour : 90 composants, 303 cellules, les douze aperçus du jeu laissés par B4 régénérés) et **B7** (les puces d'étape, A15.19 : le retour 05 est reçu et recopié le 2026-10-02 ; son portage est A16). Hors d'eux, rien à lancer tant qu'un composant, ou une copie qu'un aperçu reprend, ne change pas |
+| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 à C29 tranchées le 2026-09-30, C26 à C29 livrées le même jour, **C25** (la spécification de A7.3, `ENGINE.md` §18) dans sa propre session. **C30** (le niveau 2 du jeu, `GAME-BRIEF.md` §17) le 2026-10-01. **C31** (le bloc « Niveau suivant » du jeu) et **C32** (le moteur complet, `docs/engine/moteur-complet.md` §19.15) le 2026-10-01. **C33** (la carte du jeu sous les chiffres du lecteur, A15.18) ouverte et tranchée le 2026-10-01. **C34** et **C35** (le rouge des ex aequo, le nouveau « ? », nées du retour 05) tranchées le 2026-10-02. **Rien n'est ouvert** |
+| **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, la fin d'A7.3 (le code et les textes de lancement sont livrés le 2026-10-01 ; reste le bon à tirer A7.3.d) et celle d'A14 (T6.2 et le bon à tirer A14.d) |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
 
 **L'ordre conseillé** : A7.3.d (le bon à tirer de la copie neuve du moteur,
@@ -37,7 +37,7 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 parallèle : il ne touche pas les mêmes fichiers. Le moteur ouvre avant le jeu (C23). A14.c
 (le moteur complet) est livré le 2026-10-01, sauf T6.2, qui attend B5 : reste son bon
 à tirer A14.d, et le moteur n'ouvre qu'après eux (C32 Q1).
-Rien n'attend dans la section C : C30 à C33 sont tranchées le 2026-10-01.
+Rien n'attend dans la section C : C30 à C33 sont tranchées le 2026-10-01, C34 et C35 le 2026-10-02.
 
 **Deux sessions en parallèle** écrivent toutes deux à la fin de `JOURNAL.md`
 et dans ce fichier. La seconde à merger fusionne `main` dans sa branche avant
@@ -245,7 +245,27 @@ journal, à « A15.7 à A15.20 »). **A15.18 suit le même jour** ([#262](https:
 
 | # | Quoi | Où |
 |---|---|---|
-| A15.19 | **Les puces d'étape ont l'allure d'un bouton secondaire** sans en être un (similarité) | Pour Claude Design : **B7**, brief déposé le 2026-10-01, retour attendu. Le portage sera un lot A à son retour |
+| A15.19 | **Les puces d'étape ont l'allure d'un bouton secondaire** sans en être un (similarité) | Le retour de Claude Design (**B7**) est reçu le 2026-10-02 ; son portage est **A16** |
+
+### A16 — La feuille de score : le portage de l'extension 05 (ouvert le 2026-10-02)
+
+Le retour de Claude Design au brief 05 est dans
+[`design/ds-extension-05-return/`](design/ds-extension-05-return/README.md),
+recopié le 2026-10-02 (`COPIE.md`). La puce devient **une ligne d'une feuille
+de score**, sous le profil du parcours : la note, une jauge, le nom de
+l'étape, puis le `?`. Pas de cadre, pas de rayon de bouton. Antoine a tranché
+le même jour **C34** (toutes les étapes ex aequo en rouge, comme le profil) et
+**C35** (le nouveau `?` partout, quiz compris), et demandé le portage dans la
+même session. **Une PR.**
+
+| # | Quoi |
+|---|---|
+| A16.a | Les jetons de `tokens/scores.css` dans `src/styles/tokens/` |
+| A16.b | `StageScore` et `StageScores` remplacent `PillarChip`. Le rouge suit la netteté du frein (C34) |
+| A16.c | Le résultat : la feuille sous le profil, une colonne à toutes les largeurs |
+| A16.d | L'accueil : le nom de l'étape devient le lien, avec un nom accessible qui dit où il mène (copie neuve, « à relire ») |
+| A16.e | `StampedPillar` redessiné en tampon encré, ligne de la feuille ; `DefinitionTrigger` plein, survolé, rempli une fois ouvert (C35) |
+| A16.f | Les aperçus de `.design-sync/`, les specs (`targets`, contraste, résultat, accueil), les captures avant/après ; la re-synchro avec Claude Design suit (B) |
 
 ---
 
@@ -281,23 +301,17 @@ tu ne le lances pas : c'est D12.** Le retour se dépose dans
 
 **B6 est fait le 2026-10-01** ([#265](https://github.com/ScratchMe/tourdegrowth/pull/265)) : le projet Claude Design est à jour d'A15 et de C33, avec **90 composants et 303 cellules**, toutes notées « bon » (14 composants téléversés, aucune suppression, `design/` intact). Une seconde passe, le même soir, a emporté les deux jetons qu'A14 T6 a ajoutés pendant la relecture, `--paper-white` et `--surface-white` (ancre `6da5e42a15ef`). Ce que B6 attendait est parti : `ErrorScreen` (`retry`), `LoadingScreen` (la variante `deep` racontée par l'horloge), `Button` (la bande de 44 px de `sm`), `MetaLabel` (`as`) et `GameEntry` (`eyebrow`). La recherche de dérive a trouvé `NumberField` et `FieldRow`, qui citaient encore les deux messages du moteur réécrits par A15 ; le contrôle ponctuel a trouvé la doc de `MetaLabel` (« ce n'est pas un titre », faux depuis A15.13). **Les douze aperçus du jeu que B4 avait laissés sont régénérés** depuis le modèle : sept étaient justes, cinq ne l'étaient pas (`ShareRow`, `ResumePrompt`, `PatternCatalogue`, `EventClipping`, `VideoCall`). La re-synchro a aussi trouvé A12.i (la boucle inverse du jeu ne porte jamais `?ref=`) et une phrase fausse dans la JSDoc de `DgFace`, corrigée. Le détail est dans `.design-sync/NOTES.md`, « Found in the 2026-10-01 re-sync (B6) ».
 
-**B7 : les puces d'étape, brief déposé, retour attendu** (A15.19, la loi de
-similarité, `design/LOIS-UX.md`). `PillarChip`, les cinq notes sur 20 du
-résultat et de l'aperçu de l'accueil, porte le cadre et le rayon d'un bouton
-secondaire sans en être un : seul son `?` se touche. **Le brief 05 est écrit et
-déposé le 2026-10-01** ([#268](https://github.com/ScratchMe/tourdegrowth/pull/268)) : [`design/DS-EXTENSION-BRIEF-05.md`](design/DS-EXTENSION-BRIEF-05.md)
-et ses dix captures (`design/ds-extension-05/`, un vrai build, l'accueil et
-`/r/sample` aux deux langues et aux deux largeurs, plus un gros plan d'une puce
-à côté d'un vrai `Button` secondaire), aux mêmes chemins dans le projet Claude
-Design, sous un plan à eux (onze fichiers, aucune suppression, ni le bundle ni
-`_ds_sync.json` touchés, ancre `6da5e42a15ef`). Il demande une puce qui se lit
-comme une valeur, en papier comme en nuit, en gardant la note sur 20, le rouge
-de l'étape qui freine, le `?` et ses 44 px, et le contraste AA de la CI ; huit
-questions, dont la puce-lien de l'accueil. **Rien ne tourne côté Claude Design
-tant que tu ne le lances pas : c'est D11.** Le retour se dépose dans
-`design/ds-extension-05-return/` ; la session qui le reçoit le recopie dans le
-dépôt (comme `design/ds-extension-04-return/COPIE.md`), et le portage devient un
-lot A.
+**B7 est fait : les puces d'étape** (A15.19, la loi de similarité,
+`design/LOIS-UX.md`). Le brief 05 est déposé le 2026-10-01
+([#268](https://github.com/ScratchMe/tourdegrowth/pull/268),
+[`design/DS-EXTENSION-BRIEF-05.md`](design/DS-EXTENSION-BRIEF-05.md) et ses
+dix captures), Antoine l'a lancé dans Claude Design, et **le retour est
+recopié le 2026-10-02** dans
+[`design/ds-extension-05-return/`](design/ds-extension-05-return/README.md) :
+22 fichiers, la planche toute en source, rejouée dans Chromium aux huit
+cadres (`COPIE.md`). Claude Design n'a rien touché hors de son dossier. Le
+portage est **A16** ; la re-synchro qui l'emportera vers le projet viendra
+après lui.
 
 **Hors de B5 et B7, rien d'ouvert.** La prochaine synchro se lance quand un composant change, ou
 quand change une copie, un chiffre du modèle ou un comportement qu'un aperçu
@@ -318,16 +332,16 @@ La session qui les pose recopie chaque réponse, avec sa date, à l'endroit où
 vit la question. Une réponse qui demande du code devient un item de la
 section A, un geste d'Antoine un item de la section D.
 
-### Tranchées : C1 à C33
+### Tranchées : C1 à C35
 
 Les vingt-deux questions de la séance du 2026-09-29, puis C23 à C29 le
-2026-09-30, et C30 à C33 le 2026-10-01. Chaque réponse est écrite là où vit la
+2026-09-30, C30 à C33 le 2026-10-01, et C34 et C35 (du retour 05) le 2026-10-02. Chaque réponse est écrite là où vit la
 question, et leur index (sujet, réponse, où c'est écrit, suite) est dans
 `docs/decisions.md`, où une question tranchée gagne sa ligne.
 
 ### Encore ouvert
 
-Rien. C25 est tranchée le 2026-09-30, C30 à C33 le 2026-10-01 (`docs/decisions.md`).
+Rien. C25 est tranchée le 2026-09-30, C30 à C33 le 2026-10-01, C34 et C35 le 2026-10-02 (`docs/decisions.md`).
 
 ---
 
@@ -345,7 +359,6 @@ rien de privé dans le dépôt, qui est public. Cela vaut pour les chiffres de
 | D7 | **La distribution, vague 4** | Après deux semaines de lecture de la vague 1 | La session écrit les pitchs de newsletters et passe honnêtement le produit de chaque auteur au Tour ; tu envoies depuis `contact@`. Pour les listes « awesome », seulement si ton profil GitHub n'affiche pas ton nom (à vérifier d'abord sur github.com/ScratchMe) |
 | D9 | **La recette du jeu** (`GAME-BRIEF.md` §7.3), avant d'ouvrir le jeu (D2) | Oui, dès que le nº7 est signé | Cinq testeurs qui ne connaissent pas le sujet, et les critères de §7.3. **Chronomètre chaque partie complète** (C13, 2026-09-29) : « vingt minutes » reste si la médiane tombe entre 15 et 25 minutes. Sinon, donne-moi la médiane : une session réécrit l'encart (`content/game/entry.ts:65`) et les textes de lancement. La relecture juridique du catalogue des cas réels est aussi à toi (`marketing/campaigns/README.md` §9) |
 | D10 | **Le Tour au seul SEO, maintenant** (C20, 2026-09-29) | **Indexation : il reste le français**, dès que le quota de Search Console le permet. **Annuaires : Launching Next soumis le 2026-09-30 ; les suivants peuvent partir**, les captures du Tour sont refaites (A7.12.a, 2026-09-30) | Ce ne sont pas des posts, ils partent sans attendre le moteur et le jeu. 1) Search Console, « Demander l'indexation ». **Fait le 2026-09-29** : `/en` (déjà sur Google), les deux pages « porte ouverte » et les cinq « AARRR vs X » en anglais (aucune n'était sur Google), plus trois `/en/glossary/*` (ex-D8). Le sitemap est lu (74 pages, 2026-09-29). **Reste**, le quota étant dépassé le 2026-09-30 au matin (une dizaine de demandes par 24 h glissantes) : `/fr` (déjà sur Google), `/fr/growth-audit-checklist`, `/fr/startup-growth-diagnostic`, `/fr/aarrr-vs-north-star-metric`, `/fr/aarrr-vs-rarra`, `/fr/aarrr-vs-growth-loops`, `/fr/aarrr-vs-okr`, `/fr/aarrr-vs-heart`, et depuis A7.3.e (2026-09-30) les quatre termes de la vente assistée : `/en/glossary/win-rate`, `/en/glossary/sales-cycle`, `/en/glossary/acv`, `/en/glossary/lead-to-opportunity`, puis leurs adresses `/fr`. 2) Les annuaires restants de la vague 1, dans l'ordre de `GROWTH-PLAN.md` 1.6, avec les liens `relaunch_tour` de `marketing/kit.md` (`node scripts/utm-link.mjs directory:<slug> /en --campaign relaunch_tour`). Launching Next est fait. Pas de fil X/Bluesky pour le Tour |
-| D11 | **Lancer le brief 05 dans Claude Design** (B7, les puces d'étape) | Oui | Le brief et ses dix captures sont **déjà dans le projet** « Tour de Growth » depuis le 2026-10-01, sous `design/`. Ouvre le projet dans Claude Design et colle : *Read design/DS-EXTENSION-BRIEF-05.md and its ten screenshots in design/ds-extension-05/. Answer its eight questions, keep its ten constraints, and deliver what "What we need back" asks for, under design/ds-extension-05-return/ in this project.* Dis-moi ensuite qu'il a répondu : une session recopie le retour dans le dépôt et ouvre le portage |
 | D12 | **Lancer le brief 06 dans Claude Design** (B5, l'image de partage du moteur) | Oui | Le brief et ses dix captures sont **déjà dans le projet** « Tour de Growth » depuis le 2026-10-01, sous `design/`. Ouvre le projet dans Claude Design et colle : *Read design/DS-EXTENSION-BRIEF-06.md and its ten screenshots in design/ds-extension-06/. Answer its four questions, keep its constraints, and deliver what "What we ask back" asks for, under design/ds-extension-06-return/ in this project.* Dis-moi ensuite qu'il a répondu : une session recopie le retour dans le dépôt et le porte en T6.2 |
 
 ---
