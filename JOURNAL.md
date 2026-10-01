@@ -1182,7 +1182,7 @@ Antoine a demandé le brief de B5 le soir de la fin d'A14.c : l'image de partag
 
 **Ce qui reste** : D12 (le lancer). Le retour va dans `design/ds-extension-06-return/`, une session le recopie dans le dépôt et le porte en T6.2 ; sa copie rejoint le bon à tirer du moteur.
 
-## B8 : l'index du volet Design System, resté au 11 septembre (2026-10-01)
+## B8 : l'index du volet Design System, resté au 11 septembre (2026-10-01, #269)
 
 **Ce qu'Antoine a vu** : pas de borne kilométrique dans le projet Claude Design. Ses deux captures montraient un `Bottleneck` qui ouvrait sur le chiffre au pochoir et sur « Solid engine, one flat tyre », une copie de maquette retirée le 2026-09-29, et un `LoadingScreen` à trois messages et trois barres, d'avant A15.
 
