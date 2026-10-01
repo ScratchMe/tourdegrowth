@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { TEXT_LIMITS, shapeOf } from "../catalog-shape";
+import { ALL_METRIC_SHAPES, TEXT_LIMITS, shapeOf } from "../catalog-shape";
+import { SHEET_BASES } from "../strings";
 import type { EngineState, MetricEntry } from "../types";
 import { defaultDeck, newEngineState, validateEngine, validateEntry } from "../validate";
 import { SETUP, fullState } from "./storage-fixtures";
@@ -154,6 +155,15 @@ describe("validateEngine — the v2 setup and the sales-assisted numbers (engine
     expect(validateEntry(companyWide, shapeOf("slg.rev.gross-margin"))).toEqual([]);
     expect(validateEntry(companyWide, shapeOf("rev.gross-margin"))).toEqual([]);
     expect(validateEntry(companyWide, shapeOf("slg.rev.win-rate"))).toEqual(["slg.rev.win-rate.estimate.basis: company-wide is for a gross margin only"]);
+  });
+
+  it("a sheet never offers the company-wide margin as a basis, and every basis it offers passes on every number", () => {
+    // Found by the copy review of S0 (2026-09-30): the sheet listed every key of BASIS_KEY, so « la marge
+    // globale » was offered on all 33 sheets, and saved an estimate the importer then refused.
+    expect(SHEET_BASES).toEqual(["team-hunch", "old-number", "sample", "other"]);
+    for (const shape of ALL_METRIC_SHAPES.filter((sh) => sh.unit === "percent" || sh.unit === "money"))
+      for (const basis of SHEET_BASES)
+        expect(validateEntry(entry({ status: "estimated", estimate: { low: 1, high: 2, basis } }), shape), `${shape.id} ${basis}`).toEqual([]);
   });
 
   it("the link's lever is a whole number of opportunities per quarter, and may pass 100 (C25 Q7)", () => {

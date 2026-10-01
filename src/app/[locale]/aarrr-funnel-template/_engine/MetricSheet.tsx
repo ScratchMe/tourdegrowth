@@ -10,8 +10,8 @@ import { Select } from "@/components/core/Select";
 import { Tag } from "@/components/core/Tag";
 import { TextArea } from "@/components/core/TextArea";
 import { CANDIDATE_IDS, TEXT_LIMITS, shapeOf, type MetricShape } from "@/lib/engine/catalog-shape";
-import { BASIS_KEY, EFFORT_KEY, ROLE_KEY, STATUS_KEY, type ResolvedMetric } from "@/lib/engine/strings";
-import type { CandidateId, EstimateBasis, MetricId, RoleId } from "@/lib/engine/types";
+import { BASIS_KEY, EFFORT_KEY, ROLE_KEY, SHEET_BASES, STATUS_KEY, type ResolvedMetric } from "@/lib/engine/strings";
+import type { CandidateId, MetricId, RoleId } from "@/lib/engine/types";
 import { isImmature, nextMonth, windowDaysOf } from "@/lib/engine/cohort";
 import { comparatorOf } from "@/lib/engine/diagnose";
 import { formatInterval } from "@/lib/engine/format";
@@ -32,7 +32,6 @@ import type { EngineActions, EngineView } from "./view";
 import styles from "./Sheet.module.css";
 
 const ROLES = Object.keys(ROLE_KEY) as RoleId[];
-const BASES = Object.keys(BASIS_KEY) as EstimateBasis[];
 
 /** The unit inside a bound's or a target's box, placed by the page's language — a duration's word in the number's grammatical number (A11.1). */
 function unitOf(shape: MetricShape, view: EngineView, value: number | null): NumberUnit {
@@ -280,7 +279,7 @@ export function MetricSheet({
             legend={strings.sheet.basis}
             error={need("basis")}
             value={draft.basis || null}
-            options={BASES.map((b) => ({ value: b, label: strings.basis[BASIS_KEY[b]] }))}
+            options={SHEET_BASES.map((b) => ({ value: b, label: strings.basis[BASIS_KEY[b]] }))}
             onChange={(basis) => update({ basis })}
             columns={2}
           />

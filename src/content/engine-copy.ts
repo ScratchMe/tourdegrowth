@@ -380,7 +380,7 @@ export const ENGINE_COPY = {
     /** « Autre » is a label; after « selon » / "according to", a source reads as a phrase. */
     otherInSentence: { fr: "une autre source", en: "another source" },
   },
-  /** Display names of the tools a source can name. Proper nouns, except the two generic ones. */
+  /** Display names of the tools a source can name. Proper nouns, except the three generic ones. */
   tools: {
     ga4: { fr: "GA4", en: "GA4" },
     mixpanel: { fr: "Mixpanel", en: "Mixpanel" },

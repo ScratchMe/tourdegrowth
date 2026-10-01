@@ -6379,3 +6379,7 @@ Première étape du code du B2B assisté et de l'hybride (`ENGINE.md` §18.11), 
 - un fichier sans motion est refusé.
 
 Un piège en l'écrivant : un fichier passé à `setInputFiles` par un chemin sous `testInfo.outputPath` n'arrivait jamais à la page, sans erreur. Le même fichier passé en mémoire (`buffer`) fonctionne. La cause n'est pas établie ; le nom du dossier de sortie contenait un tiret long.
+
+**La relecture de la copie** (`relecteur-copie`) n'a trouvé aucune règle enfreinte dans les chaînes neuves. Elle a relevé, hors copie, **un vrai défaut** : la fiche d'un chiffre construisait sa liste de bases d'estimation depuis toutes les clés de `BASIS_KEY`. « La marge globale de l'entreprise » était donc proposée sur toutes les fiches, libre-service compris, et donnait une estimation que l'import refusait ensuite. Les fiches lisent maintenant `SHEET_BASES`, sans `company-wide`, et un test le garde. Le vrai repli, le bouton « Reprendre la marge globale » sur les deux marges en hybride, arrive avec S3.
+
+**Vérifié** : `eslint` et `tsc` propres, **2 404 tests unitaires**, `vitest --coverage` au-dessus de ses seuils (lignes 97 %). Build de production avec les variables de la CI, puis la suite Playwright complète : **670 specs, 647 passées, aucun échec**, 23 ignorées par construction. Ce passage précède le correctif de la fiche, qui ne change que sa liste d'options.
