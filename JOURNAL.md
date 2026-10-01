@@ -987,3 +987,8 @@ unitaire changent, aucun fichier que le build lit ; la CI les passe quand même.
 - **Un piège d'outillage** : `npm audit fix --omit=dev` élague aussi les dépendances de développement de `node_modules`, sans toucher au lockfile. Le `npm audit fix` complet qui suivait les a remises (« added 337 packages »). Un `npm ci` a ensuite reconstruit l'arbre exact du lockfile avant toute vérification.
 
 **Poids des bundles serveur** (`VERCEL.md` §1.2, `vercel build` hors ligne, `filePathMap` des six bundles physiques) : **46,66 Mo avant, 46,70 Mo après**, soit +0,04 Mo, très loin du seuil d'environ 1 Mo.
+
+**Vérifié** :
+- `npm audit` à 0, en production comme en développement, après un `npm ci` depuis le lockfile neuf.
+- `eslint` et `tsc` propres, **2 403 tests unitaires**, `vitest --coverage` au-dessus de ses seuils, et `next build` propre sous « Next.js 16.3.6 ».
+- La suite Playwright complète, avec les variables de la CI et l'émulateur Firestore : **688 specs, 683 passées, 5 ignorées par construction, aucun échec ni rejeu**. Elle comprend les specs des images de partage (`share-previews`, `game-share-images`, `result-real`), qui exercent `ImageResponse`.
