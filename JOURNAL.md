@@ -736,6 +736,7 @@ Le balayage des phrases a gagné six scénarios à deux mois, et le contrat des 
 - `tsc`, `eslint` et `next build` (avec `GAME_ENABLED=true`) propres ;
 - `e2e/engine-series.spec.ts`, nouveau : deux mois offrent la slide décochée, et cochée elle imprime ses trois lignes en FR et en EN, sans déborder ; un moteur à un mois n'en a pas ; l'hybride en a une par motion. Captures relues dans les deux langues ;
 - Playwright complet (`CI=1`) : 782 specs, 754 passées dont une au second essai, et 28 ignorées (22 faute d'émulateur, 6 par construction).
+- après la fusion d'A15.7-A15.20 (#257), mergée pendant que la CI de T1 tournait : 2 785 tests unitaires, et Playwright complet sur l'arbre fusionné, 802 specs, 771 passées et 31 ignorées (25 faute d'émulateur, 6 par construction), aucune au second essai.
 
 **Le test passé au second essai** : « every slide prints filled templates… » de `engine-deck-hybrid.spec.ts`, en anglais, avec « total is empty ». Il est antérieur à T1, qui ne touche pas au deck d'un moteur à un mois. Le test connaissait déjà le piège de `content-visibility: auto` (une vignette lue hors écran rend un texte vide) et attendait que chaque vignette soit rendue. Mais il relisait ensuite toutes les vignettes une seconde fois, en remontant à la première, et cette seconde lecture est tombée trop tôt une fois sous charge. Il lit maintenant chaque vignette une seule fois, au moment où le sondage voit son texte : 10 passages sur 10 sans nouvel essai, en français et en anglais.
 
