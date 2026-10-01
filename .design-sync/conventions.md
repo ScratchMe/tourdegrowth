@@ -153,7 +153,8 @@ smaller than that and extend their hit area on the element itself: a
 room the group keeps above and below it; the 16px `DefinitionTrigger` glyph
 takes taps on a 44px disc around it; `Button variant="quiet"` is drawn as a
 line of underlined text (31px, 27px at `sm`) and takes taps on a 44px strip
-centred on it. Never strip that surrounding room to tighten a header — it is
+centred on it; a boxed `Button size="sm"` is drawn 39px tall and takes taps
+on the same strip. Never strip that surrounding room to tighten a header — it is
 where the taps land. The system has one text button, `quiet`: an action in
 text is that, never a styled `<button>` of its own. A link inside a sentence
 is a link, set in the sentence's type.
