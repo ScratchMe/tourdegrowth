@@ -1364,7 +1364,17 @@ Parti d'un reel envoyé par Antoine, lu par sa légende : six règles pour un bo
 - `targets.spec.ts` : les aides de `quiet` deviennent `expectTapTargets`, pour tout bouton, et trois tests neufs (l'en-tête à 820 px, la marge de l'hybride à 390 px, le badge d'un vrai résultat lu dans l'émulateur) tiennent les trois mêmes affirmations. Non-vacuité : sans `.sm::before`, exactement ces trois tombent, sur la bande (39,5, 40 et 39,75 px), les neuf autres passent.
 - Le doigt volé à un voisin, balayé : la bande dépasse de 2,5 px, et le voisin le plus proche d'un petit bouton est à 12 px (l'audit), 20 px (l'en-tête), 36 px (le résultat) et 50 px (le moteur, dont les deux fiches de marge sont les seules, sur 130 ouvertes en trois états à 390 et 1 280 px, à en porter un). La spec le dit, plutôt que d'exiger un voisin qui n'existe pas.
 - À l'écran, en français et en anglais : l'en-tête, le badge et la fiche du moteur inchangés.
-- `tsc`, `eslint`, `next build` propres ; `vitest --coverage` : 2 699 tests, seuils tenus. La suite Playwright complète, avec l'émulateur, tournait encore au premier push : son compte suit.
+- `tsc`, `eslint`, `next build` propres ; `vitest --coverage` : 2 699 tests, seuils tenus. La suite Playwright complète, avec l'émulateur : 750 specs, 743 passées, 6 ignorées par construction (« jeu fermé »), une tombée : la miniature « total » du deck hybride lue vide (`engine-deck-hybrid.spec.ts:87`, en anglais), pendant que `vitest` tournait à côté. C'est la lecture que le commentaire de la spec décrit déjà ; rejouée seule six fois dans les deux langues, 12 sur 12.
 - Pas de re-synchro Claude Design : rien de visible. Le contrat de `Button.tsx` dit la bande ; la prochaine re-synchro l'emportera.
 
 **Trouvé en route** : `sm` n'était pas la seule cible sous 44 px. Les pastilles de la bande d'espace, le lien du logo et plusieurs liens posés seuls le sont aussi, mesurés par `elementFromPoint` sur dix pages à 390 px. C'est A14.1 dans `CHANTIERS.md`, pour une PR à part.
+
+**Trois autres reels, le même jour** (chargement, validation de formulaire, cartes), confrontés au code par trois agents en lecture seule, chaque constat retenu revérifié à la source. Retenus : A14.2 à A14.6 dans `CHANTIERS.md`. Écartés, avec la raison :
+- les squelettes : aucune page n'attend de données mises en page ;
+- la coche verte sur un champ juste : « Enregistré » existe déjà ;
+- « pas de récapitulatif en tête » : contraire au GOV.UK Design System, qui met le message sous le champ *et* un récapitulatif à liens ;
+- la grille de 8 stricte : l'échelle est hors grille à dessein (`spacing.css`) ;
+- le rouge réservé à l'action : c'est la marque ;
+- l'ombre venue du haut : la direction I ;
+- 150 à 300 ms : notre 120 ms au survol est plus rapide, et le reel du bouton du même compte demandait un retour en moins de 100 ms ;
+- les rayons concentriques d'un bouton dans une carte : 2 px au lieu de 12 casseraient le bouton.
