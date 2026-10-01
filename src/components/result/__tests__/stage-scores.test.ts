@@ -19,7 +19,20 @@ import styles from "../StageScores.module.css";
  */
 
 const html = (element: ReactElement) => renderToStaticMarkup(element);
-const text = (markup: string) => markup.replace(/<span[^>]*aria-hidden="true"[^>]*>.*?<\/span>/g, "").replace(/<[^>]+>/g, "");
+/**
+ * What a screen reader reads: the `aria-hidden` spans dropped, then the tags,
+ * each stripped until nothing changes (as game-shop-phone.test.ts does: a
+ * single pass is an incomplete sanitization, CodeQL
+ * js/incomplete-multi-character-sanitization).
+ */
+function text(markup: string): string {
+  let out = markup;
+  for (let prev = ""; prev !== out; ) {
+    prev = out;
+    out = out.replace(/<span[^>]*aria-hidden="true"[^>]*>[^<]*<\/span>/g, "").replace(/<[^>]*>/g, "");
+  }
+  return out;
+}
 
 describe("StageScores", () => {
   it("is an ordered list carrying its accessible name and its size", () => {

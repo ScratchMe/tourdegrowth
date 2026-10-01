@@ -1266,6 +1266,8 @@ Le texte du skill `/design-sync` (trouvé en ligne) dit que l'application « cle
 
 **Les suites, sur la branche** : 2 908 tests unitaires verts ; 859 specs Playwright, 853 passées en local avec l'émulateur et `CI=1`, 6 ignorées par construction (les specs « jeu fermé ») ; `tsc` et `eslint` propres.
 
+**CodeQL a rougi sur la PR** (une alerte « high », *incomplete multi-character sanitization*) : l'assistant de `stage-scores.test.ts` qui lit le texte d'un rendu retirait les balises en une seule passe. Sans conséquence dans un test, mais l'alerte est juste : il retire maintenant jusqu'à ce que rien ne change, comme celui de `game-shop-phone.test.ts`, déjà corrigé pour la même famille d'alerte. Un assistant de ce genre se copie depuis un test existant, pas de mémoire.
+
 **À 320 px** (hors contrat, remesuré parce que `CHANTIERS.md` E citait la puce) : la feuille tient, tampon compris, et `/r/sample` ne déborde plus (il débordait de 37 px). Un résultat en roast déborde encore de 14 px, par le badge de l'en-tête, hors d'A16 : noté en E.
 
 **Le tampon garde son suffixe** (`stampedSuffix`, « bon dernier ») mais sa composition change : « RETENTION · 8/20 · BON DERNIER » au lieu de « 8/20 RETENTION — bon dernier », capitales comprises. La chaîne n'a pas bougé, donc le grep du bon à tirer ne la verrait pas : elle reprend un « TODO: à relire » pour que le prochain bon à tirer la montre.
