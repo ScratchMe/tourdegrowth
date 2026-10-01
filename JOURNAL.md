@@ -551,6 +551,22 @@ Le reste suit la reco : le mois suivant reprend les cibles et les définitions,
 
 **Un numéro rattrapé** : la décision s'appelait C31 dans le premier jet. `docs/decisions.md` montrait C31 déjà prise le matin même par le jeu (le bloc « Niveau suivant »), que la liste de `CHANTIERS.md` ne reportait pas encore. Renumérotée C32 avant le merge. Comme pour un numéro de PR (convention 8), un numéro de décision se lit dans l'index, pas dans une liste qui peut être en retard.
 
+## Design sync B4 : le niveau 2 et A7.3.c dans Claude Design, et ce que la régénération a trouvé (2026-10-01, #253)
+
+Antoine a lancé `/design-sync`. B4 devait recapturer les neuf composants changés par A12 et les deux nouveaux (`ShopPhone`, `BasketPill`) ; le projet est à jour avec **90 composants, 303 cellules** (ancre `fee6cc7084fe`, 463 fichiers, aucune suppression, `design/` laissé tel quel).
+
+**Deux méthodes ont trouvé plus que la liste de B4**, et aucune n'était de regarder une planche :
+- **La recherche de dérive** de `.design-sync/NOTES.md`, passée en script (chaque chaîne retirée du produit depuis le dernier envoi, cherchée dans les aperçus) : `ZoneNav` montrait encore la zone acquisition « bientôt », `Choices` citait le choix de modèle d'avant A7.3.c, `Tag` un « coming soon » qui n'existe plus. Lire les nouveaux appels a ajouté `Checkbox.LastMotion` : A7.3.c a branché l'état désactivé avec sa raison.
+- **Régénérer chaque aperçu du jeu** avec les fonctions de l'îlot (`dashboardProps`, `decemberContent`, `reportContent`, `newsContent`, `timelineSegments`, `journalEntries`, `phoneView`, `shopPhoneView`, `basketFor`, `clicksFor`) et comparer octet par octet : `RevealCells` (4,1 % / 18 / 81) et `QuarterTimeline` montraient des chiffres qu'aucune année n'atteint, notés « bon » depuis le 2026-09-29. Ils viennent maintenant d'années jouées ; une marche aléatoire sur le reducer trouve en secondes une année de la forme voulue (le labyrinthe : 4,0 % pile, confiance 31, radar 74).
+
+**Un défaut du produit, trouvé en mesurant `LastMotion` dans un navigateur** : `.disabled .input`, de même poids que `.input:checked` et plus loin dans la feuille, repeignait le fond d'une case cochée et désactivée. Dans les réglages du moteur, la dernière façon de vendre avait l'air décochée juste au-dessus de « Il faut au moins une façon de vendre ». Corrigé dans `Checkbox.module.css` (le remplissage, coupé à l'intérieur du bord en tirets) avec une mesure du fond calculé dans `engine-hybrid.spec.ts` ; non-vacuité : sans la règle, 1 test sur 11 tombe, sur cette ligne.
+
+**Ce qui ne part pas** : le motif par défaut des guides incluait `docs/*.md`, et le build copiait `docs/decisions.md` comme guide de design ; `guidelinesGlob: []`. `relecteur-copie` a confirmé chaque chaîne affichée et corrigé six affirmations des commentaires et de `conventions.md`.
+
+**Vérifié** : 2 699 tests unitaires, `tsc`, `eslint` ; les specs du moteur et d'accessibilité (28) sur un build de production ; le rendu des 90 composants (0 « bad ») ; chaque fichier envoyé relu dans la liste du projet.
+
+**Pour la prochaine synchro** : une note reportée dit que la planche avait l'air juste, pas que ses chiffres sont ceux du modèle. Les aperçus du jeu que B4 n'a pas régénérés sont listés dans `NOTES.md`, avec la recette.
+
 
 ## A14.c, T0 : le socle v3, plusieurs moteurs par appareil (2026-10-01, #255)
 

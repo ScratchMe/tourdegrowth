@@ -86,3 +86,14 @@
   border-color: var(--field-disabled-border);
   background: var(--field-disabled-bg);
 }
+
+/* Ticked AND disabled — the last motion left in the engine's settings (A7.3.c)
+   — stays ticked: filled with the row's muted ink, its edge dashed. Without
+   this rule the one above, of equal weight and later, repaints the fill and
+   a ticked box reads as unticked (found on the design sync of 2026-10-01).
+   The fill stops inside the border, or it shows through the dashes and the
+   edge reads solid. */
+.disabled .input:checked {
+  background: currentColor;
+  background-clip: padding-box;
+}

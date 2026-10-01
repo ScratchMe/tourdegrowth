@@ -46,7 +46,7 @@
   fill: var(--surface-sunken);
 }
 
-/* The zone you can play, in the game's own colour. */
+/* A zone you can play, in the game's own colour. */
 .openArea {
   fill: var(--space-game-bg);
 }
@@ -90,7 +90,7 @@
   color: var(--text-body);
 }
 
-/* The open zone's flag: amber on a stick, the night as its ink (10.13). */
+/* An open zone's flag: amber on a stick, the night as its ink (10.13). */
 .flag {
   position: absolute;
   translate: -50% calc(-100% - 12px);

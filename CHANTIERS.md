@@ -235,18 +235,7 @@ et C29 (cinq composants recapturés, ancre `8235f4e6de01`), avec **88
 composants, 292 cellules et 88 aperçus sur 88 rendus** (`JOURNAL.md`, « Design sync B3 », et `.design-sync/NOTES.md`,
 « Synced »). B2, le brief S-15, est clos avec A10.
 
-**B4, ouvert le 2026-10-01 : la re-synchro du niveau 2**, prête à lancer depuis A12.f.2.
-A12.d a renommé des emplacements dans le contrat de six composants du jeu
-(`Dashboard` : `metric`, `customers`, `revenue` ; `EndingCharts` et
-`RevealCells` : `metric` ; `QuarterReport` : les clés de ses chiffres ;
-`ActionBar` : `pill` ; `GameEntry` : `band.metric`). Les aperçus de
-`.design-sync/previews/` sont à jour et vérifiés au type près, mais **Claude
-Design montre encore les anciens noms**. A12.e ajoute deux composants neufs,
-`ShopPhone` (le téléphone de Pédalix) et `BasketPill` (sa pastille), et retouche
-`PhoneMock` (son cadre est maintenant partagé) ; A12.f.1 donne à `NextLevel` un
-`href` (le bloc de décembre devient un lien vers l'autre niveau, deux aperçus
-neufs) ; A12.f.2 fait proposer plusieurs niveaux à `GameEntry` (`levels`, deux aperçus neufs). Une seule
-synchro pour tout, avec la recapture des composants touchés (`.design-sync/NOTES.md`, « Synced »).
+**B4 est fait le 2026-10-01** ([#253](https://github.com/ScratchMe/tourdegrowth/pull/253)) : le projet Claude Design est à jour du niveau 2 et d'A7.3.c, avec **90 composants et 303 cellules**, toutes notées « bon » (ancre `fee6cc7084fe`). Ce que B4 attendait est fait : les six contrats renommés par A12.d, `ShopPhone` et `BasketPill`, `PhoneMock`, `NextLevel`, `GameEntry`. La recherche de dérive et la régénération des aperçus par les fonctions de l'îlot ont trouvé huit aperçus faux de plus : `ZoneNav`, `Choices`, `Checkbox`, `HubMountain`, `Tag`, puis `RevealCells` et `QuarterTimeline`, dont les chiffres ne sont la fin d'aucune année, et `PhoneMock`. Elles ont trouvé aussi **un défaut du produit**, corrigé avec une garde e2e : une case cochée et désactivée perdait son remplissage, et la dernière façon de vendre des réglages du moteur avait l'air décochée. Le détail est dans `.design-sync/NOTES.md`, « Found in the 2026-10-01 re-sync (B4) », avec la liste des aperçus du jeu à régénérer à la prochaine synchro.
 
 **B5, ouvert le 2026-10-01 : l'image de partage du moteur** (C32 Q17). Un
 brief à Claude Design pour l'image de la page `/aarrr-funnel-template`, en
@@ -255,7 +244,7 @@ chiffres (un peloton du jeu d'exemple, si l'image en dessine un). Ce qui
 revient se porte dans `lib/og/` avec T6 (`docs/engine/moteur-complet.md`
 §19.11). Les images du jeu sont le modèle.
 
-**Hors de B4 et B5, rien d'ouvert.** La prochaine synchro se lance quand un composant change, ou
+**Hors de B5, rien d'ouvert.** La prochaine synchro se lance quand un composant change, ou
 quand change une copie, un chiffre du modèle ou un comportement qu'un aperçu
 reprend : c'est ainsi que B3 a trouvé l'amende du jeu et les cartes de
 `SpaceStrip` restées d'avant A7.8 et A7.9, dans des notes reportées. Ce qu'elle

@@ -226,7 +226,15 @@ test.describe("the settings: a motion unticked is hidden, never erased (§18.1.3
 
     await page.getByTestId("engine-open-settings").click();
     // Self-serve is the only box left: it can't be unticked.
-    await expect(page.getByTestId("engine-settings").getByTestId("engine-motion-plg")).toBeDisabled();
+    const last = page.getByTestId("engine-settings").getByTestId("engine-motion-plg");
+    await expect(last).toBeDisabled();
+    await expect(last).toBeChecked();
+    // …and it still LOOKS ticked: filled with its own ink, as a ticked box is. Found on the design
+    // sync of 2026-10-01: the disabled rule repainted the fill and the box read as unticked.
+    // Non-vacuity (2026-10-01): with that rule emptied in Checkbox.module.css and the app rebuilt, this
+    // line alone fails, 1 test of the file's 11 (the fill is rgb(222, 214, 194), the disabled beige);
+    // `toBeChecked` above passes in both states — the box IS ticked, it only stopped looking it.
+    expect(await last.evaluate((el) => getComputedStyle(el).backgroundColor === getComputedStyle(el).color)).toBe(true);
     await expect(page.getByText(ENGINE_COPY.settings.motionLast.en)).toBeVisible();
     await page.getByTestId("engine-settings").getByTestId("engine-motion-slg").check();
     await expect(page.getByTestId("engine-settings-resets")).toContainText(/numbers are back/);
