@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { RETENTION_LEVEL, type RetentionCardId } from "../levels/retention";
-import { cardReduction, fresh, monthlyReduction } from "../model";
+import { cardGain, fresh, monthlyGains } from "../model";
 import type { GameState } from "../types";
 import { deepFreeze } from "./paths";
 
@@ -20,7 +20,7 @@ function running(ids: Id[], since: number, month: number, insight = false): Game
   };
 }
 
-const at = (id: Id, age: number, insight = false) => cardReduction(L, running([id], 0, age, insight), id);
+const at = (id: Id, age: number, insight = false) => cardGain(L, running([id], 0, age, insight), id);
 
 describe("série R — one card's cut", () => {
   it("R1 · a ramping card gives its immediate cut until age 3 and its full cut from age 4", () => {
@@ -50,9 +50,9 @@ describe("série R — one card's cut", () => {
 
   it("reads a card's age from when it went live, or zero if it has not yet", () => {
     const s = running(["pause"], 2, 6);
-    expect(cardReduction(L, s, "pause")).toBeCloseTo(0.07, 12); // age 4
-    expect(cardReduction(L, s, "pause", 5)).toBeCloseTo(0.04, 12); // age 3, asked for another month
-    expect(cardReduction(L, { ...s, since: {} }, "pause")).toBeCloseTo(0.04, 12);
+    expect(cardGain(L, s, "pause")).toBeCloseTo(0.07, 12); // age 4
+    expect(cardGain(L, s, "pause", 5)).toBeCloseTo(0.04, 12); // age 3, asked for another month
+    expect(cardGain(L, { ...s, since: {} }, "pause")).toBeCloseTo(0.04, 12);
   });
 });
 
@@ -68,7 +68,7 @@ describe("R5 — the month's total cuts are capped, whatever the combination", (
       const ids = perm.filter((_, i) => mask & (1 << i));
       for (const [month, insight] of [[1, false], [9, true]] as const) {
         const s = running(ids, 0, month, insight);
-        const { hr, dr } = monthlyReduction(L, s);
+        const { hr, dr } = monthlyGains(L, s);
         expect(hr).toBeLessThanOrEqual(L.constants.honestCap);
         expect(dr).toBeLessThanOrEqual(L.constants.darkCap);
         if (hr === L.constants.honestCap) honestCapped = true;
@@ -80,18 +80,18 @@ describe("R5 — the month's total cuts are capped, whatever the combination", (
 
   it("below the caps, the total is the plain sum of the cards' cuts", () => {
     const s = running(["pause", "bury"], 0, 1);
-    const { hr, dr } = monthlyReduction(L, s);
+    const { hr, dr } = monthlyGains(L, s);
     expect(hr).toBeCloseTo(0.04, 12);
     expect(dr).toBeCloseTo(0.08, 12);
   });
 
   it("carries the annual offer's price and the notice period's extra month", () => {
-    expect(monthlyReduction(L, running([], 0, 1))).toMatchObject({ mrrMult: 1, extra: false });
-    expect(monthlyReduction(L, running(["annual", "notice"], 0, 1))).toMatchObject({ mrrMult: 0.97, extra: true });
+    expect(monthlyGains(L, running([], 0, 1))).toMatchObject({ revenueMult: 1, extra: false });
+    expect(monthlyGains(L, running(["annual", "notice"], 0, 1))).toMatchObject({ revenueMult: 0.97, extra: true });
   });
 
   it("reads its input without touching it", () => {
     const s = deepFreeze(running(["pause", "bury", "annual"], 0, 7, true));
-    expect(() => monthlyReduction(L, s)).not.toThrow();
+    expect(() => monthlyGains(L, s)).not.toThrow();
   });
 });

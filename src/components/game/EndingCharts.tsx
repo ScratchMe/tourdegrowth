@@ -1,12 +1,12 @@
 import { ChartFrame } from "@/components/viz/ChartFrame";
 import { Sparkline } from "@/components/viz/Sparkline";
-import type { CurveView, DecemberView } from "@/lib/game/view";
+import type { CurveView } from "@/lib/game/view";
 import type { DecemberFigures } from "./RevealCells";
 import styles from "./EndingCharts.module.css";
 
 /** One curve's words, resolved and filled by the island. */
 export interface EndingChartCopy {
-  /** `december.churnChart.title` — the frame's heading. */
+  /** `december.metricChart.title` — the frame's heading. */
   title: string;
   /** `december.*Chart.caption`: what the dashed line is. It must say the model's threshold, not a rounder one (plan R6). */
   caption: string;
@@ -28,7 +28,11 @@ export interface EndingChartRow {
 }
 
 export interface EndingChartsProps {
-  view: Pick<DecemberView, "churn" | "trust">;
+  /**
+   * The two curves. `churn` is level 1's slot name, kept while it is the only
+   * level on screen: the island hands it `DecemberView.metric`.
+   */
+  view: { churn: CurveView; trust: CurveView };
   /**
    * The SAME object RevealCells prints. Its `churn` and `trust` become the
    * end-of-curve labels verbatim: the only way the curve can end on the cell's
