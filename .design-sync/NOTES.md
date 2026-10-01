@@ -348,9 +348,10 @@ two tokens A14 T6 (#264) added while B6 was in review, `--paper-white` and
 identical), so only the shared files went up (`_preview/`, `_vendor/`,
 `fonts/`, bundle, CSS, README: 101 files), between the two sentinels, then
 `_ds_sync.json`. Render check 90/0/0/0; anchor `6da5e42a15ef`. **None of these
-uploads reached the pane** until `_ds_manifest.json` was written by hand later
-that evening (90 cards; see "`_ds_manifest.json`" below): the project's index
-had stayed at the 2026-09-11 upload. Earlier uploads: 2026-10-01 B4, the game's
+uploads reached the Design System pane**, which still shows what was compiled on
+2026-09-11. Writing `_ds_manifest.json` by hand later that evening (90 cards)
+did not change it either; the design agent, though, reads the live files (see
+"`_ds_manifest.json`" below). Earlier uploads: 2026-10-01 B4, the game's
 level 2 and A7.3.c's engine (90, 303, 19 components uploaded, eight driver
 runs, `fee6cc7084fe`), 2026-09-30 after A11 (88, 292, `8235f4e6de01`),
 2026-09-30 B3 (88, 292, `d1835d51cffd`), 2026-09-30 before A10 (79
@@ -696,7 +697,7 @@ What the three methods found beyond that:
   known; and « 83 / 100 » keeps plain spaces around the slash in French
   (`december.cells.outOf`), outside the NBSP list above.
 
-## `_ds_manifest.json` — Claude Design never rebuilt it, so the sync writes it
+## `_ds_manifest.json` — Claude Design never rebuilt it, and writing it was not enough
 
 **What Antoine saw on 2026-10-01**: no kilometre marker anywhere in the
 project. The `Bottleneck` card opened on a stencil numeral with « Solid engine,
@@ -745,15 +746,23 @@ cards on 2026-10-01). Put `_ds_manifest.json` in the plan's writes, then
 count. If the converter ever ships its own `_ds_manifest.json` again, diff
 the two before choosing one.
 
-**Not yet known** (2026-10-01): whether the pane renders the current files
-once a card is indexed, or a copy compiled with the index. Antoine's check
-after the manifest write decides it; record the answer here.
+**What the manifest did not fix** (checked by Antoine the same evening): after
+the write and a reload, the pane was unchanged. It neither reads the
+project's `_ds_manifest.json` live nor renders the project's card files: it
+shows a copy compiled on 2026-09-11, and the sentinel was still there
+afterwards. **The design agent is not affected**: brief 05's return carries
+`design/ds-extension-05-return/board/system-snapshot.css`, its own copy of the
+live `_ds_bundle.css` dated 2026-10-02, with `--radius-tag: 999px`,
+`--paper-white` and the night world. Designs are built on the current
+system; only the pane's catalogue is stale. What makes Claude Design rebuild
+that copy (a publish step in its UI, or something else) is still open:
+`CHANTIERS.md`, B8.
 
 ## Re-sync risks
 
-- **`list_files` and the anchor do not prove what the pane shows.** Only
-  `_ds_manifest.json` does (section above). Six uploads passed every check while
-  the pane stayed on 2026-09-11.
+- **`list_files` and the anchor do not prove what the pane shows**, and neither
+  does `_ds_manifest.json` (section above). Six uploads passed every check while
+  the pane stayed on 2026-09-11. Only someone looking at the pane can say.
 - **Merging `main` in the middle of a re-sync.** A5 renamed variant props and
   stories (`mobile`/`desktop`/`compact` → `sm`/`md`, `Frame` → `Call`,
   `tone="red"` → `alert`, `DotGrid size` → `medium`, `DgFace size` →

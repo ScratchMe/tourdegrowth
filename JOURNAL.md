@@ -1203,6 +1203,10 @@ Antoine a demandé le brief de B5 le soir de la fin d'A14.c : l'image de partag
 - `.design-sync/build-manifest.mjs` produit le même fichier, octet pour octet, par ses deux chemins : depuis `config.json`, et depuis un bundle dont chaque carte porte le marqueur relu en ligne ;
 - non-vacuité : un `viewport` faussé dans une carte change la sortie, et une carte sans marqueur fait échouer le script.
 
-**Pas encore su** : si le volet affiche maintenant les rendus du jour ou une copie compilée avec l'index. Les captures d'Antoine montraient l'ancien rendu de cartes qui étaient pourtant déjà indexées. C'est sa vérification du volet qui tranche.
+**Ce que l'index n'a pas réparé** : Antoine a rechargé le volet après l'envoi, et rien n'a changé. Le volet ne lit donc ni l'index du projet en direct, ni les fichiers de ses cartes : il montre une copie compilée le 2026-09-11. Les captures le laissaient prévoir, puisque `Bottleneck` et `LoadingScreen` étaient déjà indexés et montraient pourtant leur rendu de septembre. La sentinelle est toujours là après le rechargement.
+
+**Ce qui n'est pas touché** : l'agent de Claude Design lit les fichiers du jour. Le retour du brief 05 contient sa copie du `_ds_bundle.css` en ligne (`design/ds-extension-05-return/board/system-snapshot.css`, datée du 2026-10-02), avec `--radius-tag: 999px`, `--paper-white` et le monde nuit. Les maquettes sont construites sur le design system actuel ; seul le catalogue du volet est figé.
+
+**Reste ouvert** : ce qui fait recompiler la copie du volet. La doc de Claude Design parle de « publier » un design system ; c'est la première piste, à chercher avec Antoine dans l'interface, que la session ne voit pas.
 
 **Consigné** : `.design-sync/NOTES.md` (« `_ds_manifest.json` », le chemin d'envoi, « Synced », « Re-sync risks », les 30 cartes en colonne), `CHANTIERS.md` (B8, la vue d'ensemble, le prompt B), `CLAUDE.md` (la correction de « les 90 composants y sont »). Que de la doc et un script hors de `src/` : `vercel-ignore.sh` ne déploie pas.
