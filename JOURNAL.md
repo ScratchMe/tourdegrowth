@@ -1077,7 +1077,7 @@ la fusion à trois de #233 avec le nouvel `ENGINE.md` est propre (simulée par
 
 **En production (2026-10-01)** : [#245](https://github.com/ScratchMe/tourdegrowth/pull/245), squash `3bb1b1e`, 41 fichiers, arbre identique à la tête. Le statut `Vercel` du commit est `success` et `/fr` répond 200. Rien de visible : le jeu est fermé, et le niveau 1 ne change pas à l'écran.
 
-## A12.e : le téléphone de Pédalix et sa pastille (2026-10-01)
+## A12.e : le téléphone de Pédalix et sa pastille (2026-10-01, #246)
 
 **Ce qui est livré** : le téléphone du niveau 2 et la pastille qui le suit (§17.7), sans rien brancher. Aucune page ne joue encore le niveau 2 : c'est A12.f qui l'inscrit dans `ISLAND_SIDES`.
 
