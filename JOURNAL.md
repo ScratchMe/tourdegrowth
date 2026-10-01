@@ -880,7 +880,7 @@ La cinquième PR du moteur complet (`docs/engine/moteur-complet.md` §19.4, C32 
 - `e2e/engine-pipeline.spec.ts`, nouveau : l'objectif saisi dans les Réglages, la couverture qui apparaît, le mois d'avant, un mois passé sans case, la slide mesurée en FR et en EN, 390 px sans défilement de côté ;
 - captures relues : le tableau, les Réglages, la slide, la colonne de l'hybride à 390 px.
 
-## A14.c, T4 : les outils de l'équipe (2026-10-01, #PR)
+## A14.c, T4 : les outils de l'équipe (2026-10-01, #261)
 
 La sixième PR du moteur complet (`docs/engine/moteur-complet.md` §19.5, C32 Q9 et Q10), drapeau fermé.
 
