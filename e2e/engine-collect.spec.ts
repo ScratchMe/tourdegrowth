@@ -121,7 +121,7 @@ async function expectNoSeriousA11y(page: Page, label: string): Promise<void> {
 }
 
 // The closed vocabulary of engine spec §11.6: never a number, never a label typed by someone.
-const ENGINE_EVENT = /^engine_(opened|request_copied|deck_opened|tour_linked|stage_saved\/(acquisition|activation|retention|referral|revenue)|exported\/json)$/;
+const ENGINE_EVENT = /^engine_(opened|request_copied|deck_opened|tour_linked|setup\/(plg|slg|hybrid)|stage_saved\/(slg-)?(acquisition|activation|retention|referral|revenue)|exported\/json)$/;
 
 test.describe("setup and first save", () => {
   test("first visit shows the setup; « See it all at once » opens the board with nothing found yet", async ({ page }) => {

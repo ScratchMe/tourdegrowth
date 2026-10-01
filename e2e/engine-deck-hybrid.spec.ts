@@ -87,7 +87,14 @@ for (const locale of ["fr", "en"] as const) {
     test("every slide prints filled templates in the brand's glyphs only", async ({ page }) => {
       await openDeck(page, locale, hybridStore());
       await page.getByTestId("deck-include-mirror").check();
-      const texts = await readEachOnScreen(page, page.locator("[data-slide]"), (el) => [el.getAttribute("data-slide"), (el as HTMLElement).innerText] as const);
+      // Each slide laid out before it is read: a thumbnail is `content-visibility: auto`, and the first one,
+      // read in the same frame it scrolled in, came back empty once in eight runs (2026-10-01).
+      const slides = page.locator("[data-slide]");
+      for (let i = 0; i < (await slides.count()); i++) {
+        await slides.nth(i).scrollIntoViewIfNeeded();
+        await expect.poll(() => slides.nth(i).evaluate((el) => (el as HTMLElement).innerText.length)).toBeGreaterThan(80);
+      }
+      const texts = await readEachOnScreen(page, slides, (el) => [el.getAttribute("data-slide"), (el as HTMLElement).innerText] as const);
       expect(texts.map(([id]) => id)).toContain("slg:scenario");
       const allowed = /^[\n\t -~ -ÿ–—’«»…€·×÷±]*$/u;
       for (const [id, text] of texts) {

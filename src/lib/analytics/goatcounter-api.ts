@@ -21,9 +21,13 @@ import {
   ENGINE_EXPORTED_EVENT,
   ENGINE_OPENED_EVENT,
   ENGINE_REQUEST_COPIED_EVENT,
+  ENGINE_SALES_STAGES,
+  ENGINE_SETUP_DETAILS,
+  ENGINE_SETUP_EVENT,
   ENGINE_STAGE_SAVED_EVENT,
   ENGINE_STAGES,
   ENGINE_TOUR_LINKED_EVENT,
+  type EngineSetupDetail,
   engineEventPaths,
 } from "./goatcounter";
 import {
@@ -147,8 +151,12 @@ export interface GameFunnelStats {
 export interface EngineFunnelStats {
   /** `engine_opened` — the island's first view in a session. */
   opened: number;
+  /** `engine_setup/<motions>` — the motions an engine was set up with, or changed to (C25 Q14). */
+  setup: Record<EngineSetupDetail, number>;
   /** `engine_stage_saved/<stage>` — first number saved in that stage, once a session. */
   stagesSaved: Record<(typeof ENGINE_STAGES)[number], number>;
+  /** `engine_stage_saved/slg-<stage>` — the same, in sales-assisted (Q14). */
+  stagesSavedSlg: Record<(typeof ENGINE_STAGES)[number], number>;
   requestsCopied: number;
   deckOpened: number;
   /** `engine_exported/<format>` — files downloaded, or the deck's text copied. */
@@ -360,7 +368,9 @@ function gameStats(count: (path: string) => number): GameFunnelStats {
 function engineStats(count: (path: string) => number): EngineFunnelStats {
   return {
     opened: count(ENGINE_OPENED_EVENT),
+    setup: tally(ENGINE_SETUP_DETAILS, (motions) => count(`${ENGINE_SETUP_EVENT}/${motions}`)),
     stagesSaved: tally(ENGINE_STAGES, (stage) => count(`${ENGINE_STAGE_SAVED_EVENT}/${stage}`)),
+    stagesSavedSlg: tally(ENGINE_STAGES, (stage) => count(`${ENGINE_STAGE_SAVED_EVENT}/${ENGINE_SALES_STAGES[ENGINE_STAGES.indexOf(stage)]}`)),
     requestsCopied: count(ENGINE_REQUEST_COPIED_EVENT),
     deckOpened: count(ENGINE_DECK_OPENED_EVENT),
     exported: tally(ENGINE_EXPORT_FORMATS, (format) => count(`${ENGINE_EXPORTED_EVENT}/${format}`)),

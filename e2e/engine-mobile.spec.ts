@@ -1,0 +1,174 @@
+import AxeBuilder from "@axe-core/playwright";
+import type { Locator, Page } from "@playwright/test";
+import { ENGINE_COPY } from "@/content/engine-copy";
+import { hybridState } from "../src/lib/engine/__tests__/fixtures";
+import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
+
+// The page ships closed (engine-flag.spec.ts): every test opens it with the
+// owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
+test.skip(!ADMIN_PASSWORD, SKIP_ADMIN_REASON);
+test.beforeEach(async ({ context }) => {
+  await grantOwnerPreview(context.request, "engine");
+});
+
+/**
+ * The engine on a phone, and its two motions read by every reader (engine
+ * spec §13.3, §18.10.3). The width checks of v1 are spread across
+ * engine-board-tabs, engine-collect, engine-deck and engine-whatif; this
+ * spec holds the screens the two motions add — the setup with both boxes
+ * unfolded, the hybrid board, the relays, a sales-assisted sheet, the
+ * collect list and the slide screen — at 360, 390 and 430, in both
+ * languages, with 320 measured and reported but not held (§18.10.3: « à 320,
+ * mesure seulement »). Then: the two columns as tall as each other at 1280,
+ * axe on the hybrid board with sales-assisted's red diagnosis showing, and
+ * the keyboard alone ticking sales-assisted and filling its win rate.
+ *
+ * Non-vacuity, measured on 2026-10-01: the total band forced to 600px makes
+ * the board run 190 to 260px past the viewport, and the six width tests
+ * fail on it. (A `min-width` written above the rule's own `min-width: 0`
+ * first passed — the sabotage, not the guard, was empty.) At 320, every
+ * screen measured 0 in both languages.
+ */
+const STORAGE_KEY = "tdg.engine.v2";
+
+async function overflow(page: Page): Promise<number> {
+  return page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+}
+
+async function seedHybrid(page: Page, locale: "fr" | "en") {
+  await page.clock.setFixedTime(new Date(2026, 8, 24, 12));
+  await page.addInitScript(
+    ([key, state]) => {
+      if (sessionStorage.getItem("e2e-engine-seeded")) return;
+      localStorage.setItem(key, JSON.stringify({ schemaVersion: 2, state }));
+      sessionStorage.setItem("e2e-engine-seeded", "1");
+    },
+    [STORAGE_KEY, hybridState()] as const,
+  );
+  await page.goto(`/${locale}/aarrr-funnel-template`);
+  await expect(page.getByTestId("engine-board")).toHaveAttribute("data-motions", "hybrid");
+}
+
+/** Every screen the two motions add, each measured: how many pixels the page runs past the viewport. */
+async function measureScreens(page: Page, locale: "fr" | "en"): Promise<Record<string, number>> {
+  const out: Record<string, number> = {};
+  // E1 — the setup, both motions unfolded.
+  await page.goto(`/${locale}/aarrr-funnel-template`);
+  await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
+  await page.getByTestId("engine-motion-slg").check();
+  out.setup = await overflow(page);
+
+  // E2 — the hybrid board, then sales-assisted's stages and a sheet.
+  await seedHybrid(page, locale);
+  out.board = await overflow(page);
+  await page.getByTestId("engine-motion-selector").getByRole("button", { name: ENGINE_COPY.hybrid.motionName.slg[locale] }).click();
+  await page.getByTestId("engine-metric-slg-rev-win-rate").click();
+  await expect(page.getByTestId("engine-sheet-slg-rev-win-rate")).toBeVisible();
+  out.sheet = await overflow(page);
+
+  // E4 — the collect list, both motions' numbers owed.
+  await page.getByTestId("engine-collect-disclosure").locator("summary").first().click();
+  out.collect = await overflow(page);
+
+  // E5 — the slide screen of the hybrid.
+  await page.getByTestId("engine-open-deck").click();
+  await expect(page.getByTestId("engine-deck")).toBeVisible();
+  out.deck = await overflow(page);
+  return out;
+}
+
+for (const locale of ["fr", "en"] as const) {
+  for (const width of [360, 390, 430] as const) {
+    test(`${locale} at ${width}: nothing the two motions add pushes the page sideways`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 800 });
+      expect(await measureScreens(page, locale)).toEqual({ setup: 0, board: 0, sheet: 0, collect: 0, deck: 0 });
+    });
+  }
+
+  test(`${locale} at 320: measured and reported, not held (§18.10.3)`, async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 640 });
+    const measured = await measureScreens(page, locale);
+    test.info().annotations.push({ type: "overflow at 320", description: JSON.stringify(measured) });
+    expect(Object.keys(measured)).toHaveLength(5);
+  });
+
+  test(`${locale}: each relay's words stay inside its card, at 390 and 1280`, async ({ page }) => {
+    for (const width of [390, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      await seedHybrid(page, locale);
+      const card = await page.getByTestId("engine-column-slg").getByTestId("engine-board-relays").boundingBox();
+      const words = page.getByTestId("engine-column-slg").getByTestId("engine-relays").locator("p, h3, h4, span, dt, dd");
+      const boxes = await words.evaluateAll((els) => els.map((e) => e.getBoundingClientRect()).filter((r) => r.width > 0).map((r) => [r.left, r.right]));
+      expect(boxes.length).toBeGreaterThan(5);
+      for (const [left, right] of boxes) {
+        expect(left!).toBeGreaterThanOrEqual(card!.x - 1);
+        expect(right!).toBeLessThanOrEqual(card!.x + card!.width + 1);
+      }
+    }
+  });
+}
+
+test("at 1280 the two columns are as tall as each other", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await seedHybrid(page, "fr");
+  const plg = await page.getByTestId("engine-column-plg").boundingBox();
+  const slg = await page.getByTestId("engine-column-slg").boundingBox();
+  expect(Math.abs(plg!.height - slg!.height)).toBeLessThanOrEqual(2);
+});
+
+test("the hybrid board has no serious or critical accessibility violation, sales-assisted's red diagnosis showing", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await seedHybrid(page, "fr");
+  // The §18.9 diagnosis names the win rate: the red surface is on screen.
+  await expect(page.getByTestId("engine-column-slg").getByTestId("relays-stamp")).toBeVisible();
+  const results = await new AxeBuilder({ page }).include('[data-testid="engine-board"]').analyze();
+  const serious = results.violations.filter((v) => v.impact === "serious" || v.impact === "critical");
+  expect(serious.flatMap((v) => v.nodes.map((n) => `${v.id} on ${n.target.join(" ")}`))).toEqual([]);
+});
+
+/** Presses Tab until `target` has focus — the keyboard's own way there. */
+async function tabTo(page: Page, target: Locator, max = 200): Promise<void> {
+  for (let i = 0; i < max; i += 1) {
+    if (await target.evaluate((el) => el === document.activeElement)) return;
+    await page.keyboard.press("Tab");
+  }
+  throw new Error(`Never reached ${target} with ${max} Tab presses`);
+}
+
+test("the keyboard alone: tick sales-assisted, open the board, fill its win rate", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.clock.setFixedTime(new Date(2026, 8, 24, 12));
+  await page.goto("/en/aarrr-funnel-template");
+  await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
+  await tabTo(page, page.getByTestId("engine-motion-slg"));
+  await page.keyboard.press("Space");
+  await expect(page.getByTestId("engine-motion-slg")).toBeChecked();
+  await tabTo(page, page.getByTestId("engine-setup-board"));
+  await page.keyboard.press("Enter");
+  await expect(page.getByTestId("engine-board")).toHaveAttribute("data-motions", "hybrid");
+
+  const selector = page.getByTestId("engine-motion-selector").getByRole("button", { name: ENGINE_COPY.hybrid.motionName.slg.en });
+  await tabTo(page, selector);
+  await page.keyboard.press("Enter");
+  await tabTo(page, page.getByTestId("engine-tab-revenue").or(page.getByRole("tab", { selected: true })).first());
+  // The tabs' own keys (WAI-ARIA): End goes to revenue.
+  await page.keyboard.press("End");
+  await expect(page.getByTestId("engine-tab-revenue")).toHaveAttribute("aria-selected", "true");
+  await tabTo(page, page.getByTestId("engine-metric-slg-rev-win-rate"));
+  await page.keyboard.press("Enter");
+  const sheet = page.getByTestId("engine-sheet-slg-rev-win-rate");
+  await expect(sheet).toBeVisible();
+  await tabTo(page, sheet.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en }));
+  await page.keyboard.press("Space");
+  await tabTo(page, sheet.locator("#engine-slg-rev-win-rate-num"));
+  await page.keyboard.type("18");
+  await tabTo(page, sheet.locator("#engine-slg-rev-win-rate-den"));
+  await page.keyboard.type("75");
+  await tabTo(page, sheet.locator("#engine-slg-rev-win-rate-source"));
+  await page.keyboard.press("ArrowDown");
+  await tabTo(page, sheet.getByTestId("engine-save-slg-rev-win-rate"));
+  await page.keyboard.press("Enter");
+  await expect(sheet.getByTestId("engine-saved-slg-rev-win-rate")).not.toBeEmpty();
+  const stored = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)!).state.snapshots[0].metrics["slg.rev.win-rate"], STORAGE_KEY);
+  expect(stored.value).toEqual({ kind: "ratio", numerator: 18, denominator: 75 });
+});

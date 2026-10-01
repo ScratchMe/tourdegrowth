@@ -129,8 +129,9 @@ export const PRIVACY: LegalDocument = {
     "What Tour de Growth records when you take the Tour, where it goes, how long it stays, and what you can ask for.",
   ),
   // Moved for the growth engine (engine spec §11.5): two paragraphs added; then
-  // 2026-09-30, its French name (« moteur de growth », A7.2).
-  updatedAt: "2026-09-30",
+  // 2026-09-30, its French name (« moteur de growth », A7.2); then 2026-10-01,
+  // what it counts once sales-assisted is in (A7.3.c, C25 Q14).
+  updatedAt: "2026-10-01",
   intro: t(
     "Tour de Growth enregistre le strict nécessaire pour calculer ton score, te le redonner par son lien, et mesurer si l'outil fonctionne. Cette page dit précisément quoi, pourquoi, pendant combien de temps, et ce que tu peux exiger.",
     "Tour de Growth records the bare minimum needed to compute your score, hand it back to you through its link, and measure whether the tool works. This page says exactly what, why, for how long, and what you can ask for.",
@@ -247,9 +248,10 @@ export const PRIVACY: LegalDocument = {
         ),
         // Validé au bon à tirer nº6 (2026-09-29) — copie neuve (engine spec §11.6: event paths only, never a value).
         p(
-          // TODO: à relire (convention 6) — renommé le 2026-09-30 (A7.2, C2 : « moteur de growth »).
-          "Sur le moteur de growth, seuls sont comptés l'ouverture de la page, le premier chiffre enregistré dans chaque étape, la copie d'une demande, le rapprochement avec ton Tour, et l'ouverture ou l'export des slides — jamais un chiffre, un statut ni un texte que tu y saisis.",
-          "On the growth engine, the only things counted are the page being opened, the first number saved in each stage, a request being copied, the link with your Tour, and the slides being opened or exported — never a number, a status or any text you enter.",
+          // TODO: à relire (convention 6) — renommé le 2026-09-30 (A7.2, C2 : « moteur de growth ») ;
+          // complété le 2026-10-01 (A7.3.c S5, C25 Q14) : la façon de vendre cochée, les étapes de chaque motion.
+          "Sur le moteur de growth, seuls sont comptés l'ouverture de la page, la façon de vendre cochée (libre-service, assisté ou les deux), le premier chiffre enregistré dans chaque étape de chaque motion, la copie d'une demande, le rapprochement avec ton Tour, et l'ouverture ou l'export des slides — jamais un chiffre, un statut ni un texte que tu y saisis.",
+          "On the growth engine, the only things counted are the page being opened, how you sell as ticked (self-serve, sales-assisted or both), the first number saved in each stage of each motion, a request being copied, the link with your Tour, and the slides being opened or exported — never a number, a status or any text you enter.",
         ),
       ],
     },
