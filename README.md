@@ -62,7 +62,7 @@ one browser only from the owner's preview at `/admin/preview`.
   the growth PM of a fictional app, under a CEO who wants the number, and
   learn to recognise manipulative interface patterns by being tempted to ship
   them. Level 1, on subscription cancellation, is playable; level 2, on
-  acquisition, is specified and modelled ([`GAME-BRIEF.md`](GAME-BRIEF.md)).
+  acquisition, is specified and modelled ([`docs/game/niveau-2.md`](docs/game/niveau-2.md)).
   Entirely client-side.
 
 A public `/metrics` page is built too, behind `METRICS_PAGE_ENABLED`, and stays
@@ -130,7 +130,7 @@ e2e/                Playwright specs
 scripts/            Vercel's ignore step, UTM links, the stats report, the plug-in installer
 design/             the design briefs and what came back from Claude Design
 marketing/          launch texts, the submission kit, the campaigns
-docs/journal/       the archived volumes of the project journal
+docs/              the journal's archived volumes, the decisions index, and the parts of the engine and game specs that are not current work
 ```
 
 ## The documentation is the point
@@ -146,8 +146,8 @@ these files are written first.
 | --- | --- |
 | [`SPEC.md`](SPEC.md) | The original product specification — scoring rules, tone, sharing mechanics |
 | [`design/DESIGN-BRIEF.md`](design/DESIGN-BRIEF.md) | The visual system, screen by screen; the extension briefs `DS-EXTENSION-BRIEF-01` to `04` sit next to it, each with what came back in `ds-extension-0N-return/` |
-| [`ENGINE.md`](ENGINE.md) | The growth engine: its decisions, its implementation spec, and the sales-assisted extension (§18) |
-| [`GAME-BRIEF.md`](GAME-BRIEF.md) | The game: level 1 in full, the four other levels sketched, level 2 specified (§17) |
+| [`ENGINE.md`](ENGINE.md) | The growth engine: its decisions and the sales-assisted extension being built (§18); the v1 implementation spec is in [`docs/engine/v1.md`](docs/engine/v1.md) |
+| [`GAME-BRIEF.md`](GAME-BRIEF.md) | The game: level 1 in full and the four other levels sketched; level 2's spec is in [`docs/game/niveau-2.md`](docs/game/niveau-2.md) |
 | [`GROWTH-PLAN.md`](GROWTH-PLAN.md) | The distribution plan, wave by wave; [`marketing/`](marketing/) holds its texts |
 | [`AUDIT.md`](AUDIT.md), [`AUDIT-PLAN.md`](AUDIT-PLAN.md) | A private growth-audit instrument, browser-only, paused since 2026-09-30 |
 

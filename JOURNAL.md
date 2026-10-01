@@ -969,6 +969,45 @@ unitaire changent, aucun fichier que le build lit ; la CI les passe quand même.
 
 **Fusionné avec la documentation en volumes** (#237, mergée pendant cette PR) : C30 gagne sa ligne dans `docs/decisions.md`, où C11 renvoie désormais à A12.f, et le découpage de `GAME-BRIEF.md` (section E) n'attend plus qu'A7.3.c.
 
+## ENGINE.md et GAME-BRIEF.md découpés à leur tour (2026-10-01, demandé par Antoine)
+
+Le matin, ce découpage avait été reporté : #233 (A7.3.c) écrivait dans le §18
+d'`ENGINE.md`, une session C30 allait écrire dans le §17 de `GAME-BRIEF.md`, et
+git ne suit pas un texte déplacé d'un fichier à l'autre. Antoine a demandé
+s'il était possible désormais. Relevé sur GitHub avant d'agir : C30 est mergée
+(#234), aucune branche ouverte ne touche `GAME-BRIEF.md`, et #233, toujours
+ouverte, ne modifie `ENGINE.md` qu'à partir du §18 (ses sept blocs commencent à
+la ligne 2380 ; le §18 commence à la 2167).
+
+**Ce qui est fait** :
+- `GAME-BRIEF.md` (147 000 caractères) : le §17, la spécification du niveau 2,
+  part tel quel dans `docs/game/niveau-2.md` (39 000). Le brief garde ce qui
+  vaut pour tous les niveaux, une entrée « Organisation » dans son journal des
+  versions et un §17 qui renvoie au fichier. Chaque niveau suivant aura le sien
+  à côté : le brief ne grossira plus d'un niveau à l'autre.
+- `ENGINE.md` (268 000) : la spécification de la v1 (§0 à §17) et son annexe
+  des vérifications partent telles quelles dans `docs/engine/v1.md` (129 000).
+  `ENGINE.md` (141 000) garde les décisions, un tableau « Où vit la
+  spécification », le §18 en cours et la trame des entretiens. **Le §18 reste
+  là jusqu'au merge d'A7.3.c** : c'est la ligne de la section E de
+  `CHANTIERS.md`, mise à jour.
+- Les numéros de section ne changent pas : un renvoi « `ENGINE.md` §9.3 » ou
+  « `GAME-BRIEF.md` §17.10 », dans le code comme dans les documents, se lit
+  dans le fichier que donne l'index en tête de l'original. Les documents
+  vivants (`CHANTIERS.md`, `CLAUDE.md`, `README.md`, `docs/decisions.md`)
+  nomment directement le nouveau fichier.
+
+**La garde** : `src/__tests__/doc-links.test.ts` exige que chaque lien relatif
+des documents (la racine, `docs/`, les README de `design/` et de `marketing/`,
+34 fichiers) mène à un fichier qui existe. Aucun lien mort le jour du
+découpage. Non-vacuité : renommer `docs/engine/v1.md` fait rougir le test, qui
+nomme les deux index qui y renvoient (`ENGINE.md`, `README.md`).
+
+**Vérifié** : les lignes non vides de chaque partie déplacée sont identiques,
+dans le même ordre, et la tête, le §18 et la trame d'`ENGINE.md` sont intacts ;
+la fusion à trois de #233 avec le nouvel `ENGINE.md` est propre (simulée par
+`git merge-file`).
+
 ## A13 : la faille critique de `next/og` corrigée, et `npm audit` revenu à zéro (2026-10-01)
 
 **La demande** : Antoine, sur le compte rendu d'A7.3.e : « Go pour fixer la faille critique ». Ce « go » valait l'accord que `/livrer` §0 exige pour un merge qui touche une dépendance, sous réserve d'un poids de bundle sans surprise.

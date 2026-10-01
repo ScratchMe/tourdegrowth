@@ -175,7 +175,7 @@ hors du périmètre qu'A10 s'était donné :
 Antoine a retenu le 2026-09-30 un deuxième niveau avant le lancement, et
 l'acquisition pour ce niveau (six astuces sur huit absentes du niveau 1, une
 autorité déjà connue du jeu, des cas publics récents : `GAME-BRIEF.md`
-§17.1). **Fait le même jour** : la spécification (`GAME-BRIEF.md` §17), le
+§17.1). **Fait le même jour** : la spécification (`GAME-BRIEF.md` §17, dans `docs/game/niveau-2.md` depuis le 2026-10-01), le
 moteur généralisé (un chiffre qui monte comme un chiffre qui baisse, une
 boutique comme un abonnement, le niveau 1 identique au bit près) et le modèle
 du niveau 2 codé en brouillon, sans page ni texte, avec ses quatre années de
@@ -186,7 +186,7 @@ spécification validée telle quelle. A12.c peut partir. Toute copie neuve porte
 
 | # | Quoi | Détail |
 |---|---|---|
-| A12.a | **La spécification et le modèle** | **Faits le 2026-09-30.** `GAME-BRIEF.md` §17 : univers (Pédalix), chiffre du board (nouveaux clients par mois), constantes, les dix-sept cartes et leur rôle au niveau 1, le DG, les quatre années de référence, le téléphone, les événements, les fins, et le catalogue vérifié sur les sources primaires. Cinq questions en §17.10, reprises en C30 |
+| A12.a | **La spécification et le modèle** | **Faits le 2026-09-30.** `GAME-BRIEF.md` §17 (`docs/game/niveau-2.md`) : univers (Pédalix), chiffre du board (nouveaux clients par mois), constantes, les dix-sept cartes et leur rôle au niveau 1, le DG, les quatre années de référence, le téléphone, les événements, les fins, et le catalogue vérifié sur les sources primaires. Cinq questions en §17.10, reprises en C30 |
 | A12.b | **La validation par Antoine** — **close le 2026-10-01** | C30 : nouveaux clients par mois, Pédalix, transaction de 150 000 €, les huit cas tels quels, une carte qui propose les deux niveaux. Réponses datées en `GAME-BRIEF.md` §17.10 |
 | A12.c | **La copie** | `content/game/acquisition.ts`, FR et EN, « à relire », avec la série C du §7.1 (parité, mots interdits, liste blanche des marques) |
 | A12.d | **L'îlot partagé** | L'îlot du niveau 1 (`app/[locale]/game/retention/`) devient celui de tout niveau ; les composants de `components/game` perdent leurs noms d'emplacement du niveau 1 (`churn`, `subs`, `mrr`), ce qui change leur contrat : re-synchro Claude Design (section B) dans la même série |
@@ -274,7 +274,7 @@ rien de privé dans le dépôt, qui est public. Cela vaut pour les chiffres de
 | Une facture Vercel qui surprend | `VERCEL.md` §1.6 et §2.2 | `VERCEL.md` |
 | Besoin de `guidelines/` du bundle d'extension 01 | Le demander à Claude Design (son README l'annonce, l'archive ne le contenait pas) | `design/ds-extension-01-return/README.md` |
 | Un contrat de largeur qui descend à 320 px | À 320 px, le bandeau d'entrée au jeu passe sur trois lignes (la seconde, ≈ 270 px de texte, pour une colonne de 244). Laissé par décision d'Antoine (2026-09-29) : seule une copie plus courte le tiendrait. 360 px est réglé depuis le même jour. De même, `/r/<id>` déborde de 37 px à 320 px (le `PillarChip`) : hors contrat (`DESIGN-BRIEF.md` fixe 390 et exige 375-430), laissé par Antoine | `game/GameEntry.module.css`, `result/PillarChip.module.css` |
-| **A7.3.c est mergé** (C30 est tranchée depuis le 2026-10-01) | Découper `ENGINE.md` (le §18 dans `docs/engine/`) et `GAME-BRIEF.md` (le §17 dans `docs/game/`), comme le journal le 2026-10-01 : texte déplacé tel quel, et en tête de l'original un index qui garde valides les renvois « `ENGINE.md` §18.12 ». Pas avant : #233 écrit dans le §18, et un déplacement de texte entre fichiers leur ferait un conflit que git ne sait pas suivre | `JOURNAL.md`, entrée du 2026-10-01 |
+| **A7.3.c est mergé** | Sortir le §18 d'`ENGINE.md` dans `docs/engine/`, à côté de `v1.md`, texte déplacé tel quel, et mettre à jour le tableau « Où vit la spécification » en tête d'`ENGINE.md`, qui garde valides les renvois « `ENGINE.md` §18.12 ». Pas avant : #233 écrit dans le §18, et git ne suit pas un texte déplacé d'un fichier à l'autre. **Fait le 2026-10-01** : la v1 (§0 à §17) dans `docs/engine/v1.md`, et le niveau 2 du jeu (§17 de `GAME-BRIEF.md`) dans `docs/game/niveau-2.md` | `JOURNAL.md`, entrées du 2026-10-01 |
 
 Un relevé par `stats.yml`, une fois par mois, suffit à voir passer les trois
 premiers. La méthode est la ligne « Lecture des stats par la session » de
