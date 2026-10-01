@@ -1,0 +1,689 @@
+# Journal de Tour de Growth — 2. La première revue
+
+*Volume archivé : les entrées du 2026-09-05 au 2026-09-06. On y trouve la revue technique et fonctionnelle (`REVIEW.md`, R-01 à R-26), la CI, Playwright, les premières sondes contre les services réels, le pied de page, le brief et l'extension 01 du design system.*
+
+*Le texte est celui du journal, déplacé tel quel le 2026-10-01 : rien n'y a été réécrit. Un « plus haut » ou un « voir l'entrée du… » peut donc désigner une entrée d'un autre volume. Le volume courant et la table des volumes sont dans [`JOURNAL.md`](../../JOURNAL.md), et `grep -rn "<motif>" JOURNAL.md docs/journal/` cherche partout.*
+
+---
+
+### Revue technique & fonctionnelle complète (2026-09-05)
+
+Revue à froid de tout le repo à la demande d'Antoine — code, `next build`, `vitest`, `tsc`, `npm audit`, tout exécuté réellement plutôt que déduit de la lecture. Les 20 constats, leur détail (preuve `fichier:ligne`, impact, correctif proposé, critères de vérification) et surtout **l'ordre de traitement par lots** sont dans **`REVIEW.md`** à la racine. Antoine a validé l'ensemble des constats et l'ordre le jour même.
+
+Convention pour les prochaines sessions : traiter les items de `REVIEW.md` dans l'ordre des lots (A → F), un PR par item sauf regroupement explicitement indiqué dans le détail de l'item, mettre à jour la colonne « Statut » de `REVIEW.md` à chaque livraison, et ajouter ici l'entrée habituelle (décision, pièges, ce qui a été vérifié en réel). `REVIEW.md` liste aussi ce qui a été audité et jugé sain, pour ne pas le ré-auditer.
+
+Deux corrections factuelles à des notes plus haut dans ce fichier, découvertes pendant la revue :
+- **L'étape 13 parle de « 24 pages statiques »** : c'est le compteur de `generateStaticParams` affiché pendant le build, pas des pages statiques. Le root layout lit `cookies()`/`headers()`, donc **toutes** les routes sont rendues dynamiquement (`ƒ` dans le résumé de `next build`), landing et glossaire compris — aucune n'est servie depuis le CDN, et une même URL sert deux langues, ce qui rend le contenu FR invisible pour les moteurs. Voir `REVIEW.md` R-13.
+- **`npm run lint` ne fonctionne plus** : Next.js 16 a retiré la commande `next lint`, et le repo n'a jamais eu de configuration ESLint — les commentaires `eslint-disable` présents dans le code n'ont donc jamais eu d'effet. Voir `REVIEW.md` R-06.
+
+### R-01 + R-02 : propriété du Deep dive et fuite du contexte libre (2026-09-05)
+
+Premier lot de la revue (`REVIEW.md`, lot A). Les deux items sont livrés ensemble parce qu'ils touchent les mêmes fichiers et le même trajet de données.
+
+**Le problème réel, pas théorique.** Un id de résultat *est* le lien partagé : tout destinataire le connaît. La route Deep dive et la page `/deep-dive/[id]` n'avaient aucune notion de propriétaire, et la carte « Action prioritaire — verrouillée » s'affichait pour tout le monde. Un destinataire curieux qui cliquait remplissait le résultat **du partageur** avec **son** contexte métier — et définitivement, à cause de la branche idempotente de la route (« si `deepDive` existe déjà, renvoyer tel quel »), qui interdisait au vrai auteur de faire le sien ensuite. En parallèle, `page.tsx` passait l'objet `deepDive` entier au Client Component : `freeContext` (le texte où un fondateur décrit son business et ses freins) et les 10 réponses contextuelles étaient sérialisés dans le payload RSC de chaque lien partagé, jamais affichés mais lisibles dans la source par n'importe qui.
+
+**Jeton de propriétaire (`src/lib/submissions/owner-token.ts`).** Un secret par soumission, généré à la création, dont seul le **hash SHA-256** est persisté (`Submission.ownerTokenHash`) — même raisonnement qu'un hash de mot de passe : un export Firestore, une ligne de log ou un futur chemin de lecture ne peut pas être retransformé en jeton utilisable. Le jeton en clair est renvoyé **une seule fois**, dans la réponse 201 de `POST /api/submissions`, et stocké par le navigateur créateur dans `tdg.results.v1` (`quiz/storage.ts`). Pas de sel : c'est un UUID v4 aléatoire, il n'y a rien à brute-forcer. Comparaison en temps constant (`timingSafeEqual`), avec vérification de longueur préalable puisque `timingSafeEqual` lève sur des tampons de tailles différentes.
+
+- **Échec fermé sur les soumissions antérieures** (pas de `ownerTokenHash`) : leur Deep dive devient impossible. Choix assumé plutôt qu'une exception « pas de hash = tout le monde passe », qui serait un contournement utilisable par n'importe qui. Volume concerné faible.
+- **Limite assumée et documentée** : vider les données du site ou changer d'appareil fait perdre la possibilité de faire le Deep dive d'un résultat déjà créé. C'est le coût réel de « pas de comptes utilisateurs » (SPEC.md §5) ; l'alternative serait précisément le trou qu'on vient de fermer.
+- Le module est **server-only** (`node:crypto`) : le navigateur ne hashe jamais rien, il ne fait que stocker et renvoyer une chaîne opaque.
+
+**Côté client.** `ResultView` calcule `isOwner` dans un `useEffect` **après montage**, jamais dans l'état initial — le serveur ne peut pas savoir qui regarde, donc un rendu serveur garantirait un mismatch d'hydratation (leçon de l'étape 4). L'état de départ `false` est aussi le plus sûr : ce qu'un visiteur voit brièvement, c'est l'absence d'offre, pas l'inverse. `/deep-dive/[id]` vérifie la possession au montage et redirige vers `/r/[id]` sans rien afficher plutôt que de faire parcourir 11 écrans avant un refus de l'API.
+
+**Ce que voit un visiteur non propriétaire :** le créneau de la carte reste simplement vide. `REVIEW.md` autorisait une carte « Fais ton propre Tour » à la place ; pas faite ici, ça demanderait de la copie nouvelle. **Point à traiter en R-10** : le CTA du bas affiche « Refaire le Tour » à un visiteur qui n'a jamais fait le Tour — le lien est bon (c'est le lien de parrainage), c'est le libellé qui est faux pour lui.
+
+**View-model (`src/lib/submissions/view-model.ts`).** `toDeepDiveView()` ne laisse passer que les verdicts générés. `modelUsed` reste côté serveur (déjà marqué « jamais montré à l'utilisateur » dans `types.ts`). Les deux routes renvoient maintenant le strict nécessaire : `{ id, ownerToken }` à la création, `{ id }` au Deep dive — la soumission complète (réponses incluses) revenait jusqu'ici sans que personne ne s'en serve. R-09 étendra ce module avec le view-model complet du résultat.
+
+**Vérifié en réel, pas seulement en unitaire.** 156 tests verts (+28), `tsc` et `next build` OK. Tests de la route Deep dive ajoutés avec `getSubmissionById`/`saveDeepDive`/`callGeminiWithFallback` mockés — c'est la frontière de sécurité, elle méritait ses propres tests : 403 sans jeton, 403 mauvais jeton, 403 jeton non-string, 403 sur une soumission sans hash, 200 pour le vrai propriétaire, idempotence sans second appel Gemini, 404 id inconnu, 400 avant toute lecture Firestore. Et surtout **vérification navigateur réelle** (`next start` + Chromium, sans `.env.local` — ces chemins ne touchent pas Firestore) : un visiteur sur `/deep-dive/<id>` est bien redirigé vers `/r/<id>` sans voir une seule question ; un propriétaire (jeton semé dans `localStorage`) atteint bien le questionnaire ; et la requête réellement émise par son navigateur, interceptée, porte bien `ownerToken` en plus des 10 réponses et du contexte libre. `/r/sample` répond toujours 200 et ne contient aucun `freeContext`.
+
+**Non vérifiable depuis cette session** (pas de `.env.local` dans ce conteneur, cf. étape 6) : le trajet complet création → jeton stocké → Deep dive réel avec Firestore et Gemini. À confirmer après déploiement en faisant un vrai Tour puis un vrai Deep dive.
+
+### R-03 : intégrité de l'attribution `?ref=` (2026-09-05)
+
+Le K-factor est la métrique que SPEC.md §1 désigne comme le critère de succès du projet — le chiffre à citer en entretien. Un K-factor flatteur mais indéfendable est donc un passif, pas un acquis. Deux choses le gonflaient.
+
+**1. L'auto-parrainage.** Le bouton « Refaire le Tour » d'une page de résultat portait `?ref=<ce résultat>` **y compris pour la personne qui venait de le créer**. Chaque re-test comptait comme une analyse parrainée, avec soi-même comme partageur unique : un utilisateur seul qui refait trois fois le Tour produisait un K de 3,00. Corrigé à deux endroits indépendants, volontairement : le lien lui-même n'emporte le ref que pour un non-propriétaire (`takeAgainHref` dans `ResultView`, s'appuie sur le `isOwner` de R-01), **et** `attributableRefId()` refuse au moment de la soumission tout ref pointant vers un résultat présent dans `tdg.results.v1`. La deuxième garde n'est pas redondante : `isOwner` n'est connu qu'après montage, donc le lien est brièvement « visiteur » pour le propriétaire ; la garde de soumission, elle, ne dépend d'aucun timing.
+
+**2. Les refs bidons.** Le serveur acceptait n'importe quelle chaîne. `?ref=hello` atterrissait tel quel dans Firestore et comptait comme un « partageur unique » dans `growth-stats.ts`. `lib/submissions/referral.ts` impose maintenant deux conditions : la forme d'un UUID v4 (ce que `crypto.randomUUID()` produit — vérifié **avant** toute lecture, pour qu'un ref bidon coûte zéro lecture Firestore), puis l'existence réelle de la soumission (`repository.ts#submissionExists`). Un ref invalide est **abandonné**, jamais une raison de refuser la soumission : perdre une attribution est une erreur d'arrondi, refuser de scorer quelqu'un parce qu'un paramètre d'URL est mal formé serait un vrai échec. Idem si la lecture d'existence échoue.
+
+**Politique tranchée : first-touch.** `saveRefId` n'écrase plus un ref déjà stocké — c'est le partage qui a *amené* la personne qui est crédité, la lecture la plus fidèle du « issu du parrainage de `<id>` » de SPEC.md §7. Le ref est effacé après une soumission réussie, pour qu'un second Tour depuis le même navigateur reparte propre au lieu d'hériter du crédit du premier. La politique tient en une ligne dans `storage.ts` plutôt que d'être éparpillée sur les points d'appel : basculer en last-touch un jour serait un changement d'une ligne.
+
+**Limite connue, assumée.** La garde anti-auto-parrainage est côté client : quelqu'un de déterminé peut toujours forger un ref vers son propre résultat précédent (le serveur ne peut pas distinguer « mon ancien résultat » de « le résultat de quelqu'un d'autre »). Le modèle de menace ici est l'inflation **accidentelle** par le parcours normal du produit, pas un adversaire motivé qui truquerait ses propres chiffres d'entretien.
+
+**Vérifié en réel** (`next start` + Chromium, sans Firestore — tous ces chemins sont client) : deux `?ref=` successifs, seul le premier est conservé ; le ref d'un vrai visiteur arrive bien dans le POST puis est effacé après succès ; le nouveau résultat et son jeton sont bien mémorisés ; et un parcours complet avec un ref pointant vers un de mes propres résultats part avec `refId: null`. 166 tests verts (+10), `tsc` et `next build` OK.
+
+### R-04 : validation stricte des payloads et surface d'erreur (2026-09-05) — clôt le lot A
+
+**Validation.** `isAnswers` ne regardait que les *valeurs* (0, 1 ou 2), jamais les clés. Deux conséquences réelles : des clés arbitraires étaient écrites telles quelles dans Firestore à côté des vraies réponses (n'importe quoi qu'un appelant décidait d'envoyer, stocké pour toujours sur un document qu'on relit ensuite avec un `as Submission`), et un jeu de réponses **incomplet** passait la validation pour aller faire lever `computeScore` plus bas — transformant une simple erreur client en 502 porteuse d'un message interne. Les clés doivent maintenant être **exactement** les 15 ids de questions : comparer le nombre d'entrées puis vérifier que chaque clé appartient à l'ensemble suffit à prouver l'égalité des deux ensembles (ni id manquant, ni id en trop).
+
+**Surface d'erreur.** Les deux routes renvoyaient `err.message` au navigateur, que le front affiche dans `errorDetail`. Selon ce qui échouait, ça pouvait être une erreur Firestore, la réponse brute de Gemini (`extractGeminiText` et `parseDeepDiveVerdict` font tous deux un `JSON.stringify` de ce qu'ils ont reçu dans leur message d'erreur) ou la sortie d'erreur de l'API Gemini. Désormais : détail complet dans `console.error` (logs Vercel), **code court et stable** au navigateur (`SCORING_FAILED`, `DEEP_DIVE_FAILED`). Le code reste affiché en petit mono sous la phrase rassurante du brief — utile au support, sans décrire nos entrailles. Les erreurs de validation, elles, gardent leur message explicite : elles décrivent le contrat de l'API, pas l'intérieur.
+
+**Aussi corrigé au passage**, dans le même esprit : `getSubmissionById` de la route Deep dive était en dehors de tout `try`, donc une panne Firestore remontait en throw non géré (un 500 nu du framework) au lieu du contrat d'erreur de l'app.
+
+**La preuve la plus parlante, obtenue en réel** (`next start` sans `.env.local`, donc Firestore sans identifiants) : une soumission par ailleurs parfaitement valide renvoie maintenant `{"error":"SCORING_FAILED"}` en 502. **Avant ce changement, cette même requête renvoyait au navigateur le message d'erreur de `firebase/admin.ts`, qui nomme `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL` et `FIREBASE_PRIVATE_KEY`.** La fuite n'était pas théorique. Vérifié aussi en direct : 15 réponses valides + 1 clé injectée → 400 ; réponses incomplètes → 400 (et non plus 502) ; Deep dive sans identifiants → `DEEP_DIVE_FAILED` en 502 (et non plus un 500 nu).
+
+178 tests verts (+12), dont un nouveau fichier de tests pour `POST /api/submissions` (repository mocké) couvrant le contrat de payload, l'attribution des refs de R-03 et l'absence de fuite en cas d'échec interne.
+
+**Lot A terminé** (R-01 à R-04) : plus rien dans `REVIEW.md` ne peut abîmer des données réelles ni fausser le K-factor. La suite est le lot B (CI, lint, E2E), qui doit venir avant les gros chantiers.
+
+### Pied de page site + lien CV (2026-09-05, demande d'Antoine sur recommandation SEO)
+
+**Il n'y avait aucun pied de page dans l'app.** Le lien vers le CV d'Antoine n'existait que dans les deux placements de crédit de la page de résultat (SPEC-ADDENDUM-02.md §2) — donc sur **aucune** des pages effectivement destinées à être indexées : ni la landing, ni `/how-it-works`, ni les 15 pages du glossaire. La recommandation SEO visait précisément ce trou.
+
+`components/brand/SiteFooter` (nouveau, aucun équivalent dans les 17 composants du bundle design à cette date — **entré dans le système à l'extension 01** ; construit ici uniquement à partir des tokens existants, filet dashed `--border-rule` comme le header, texte mono `--meta-xs` en `--text-muted`). Prop `width` (`wide` / `reading`) pour s'aligner sur les deux largeurs de conteneur déjà pratiquées par les pages.
+
+**Décisions prises et pourquoi :**
+- **Lien suivable, jamais `nofollow`** — c'est tout l'intérêt de la demande. Le `noindex` de `/r/[id]` est en `follow: true`, donc même les pages de résultat transmettent le signal.
+- **`rel="noopener"` seul, sans `noreferrer`.** `noreferrer` supprime l'en-tête `Referer`, donc l'analytics du site CV ne pourrait jamais attribuer ce trafic à Tour de Growth — exactement ce que ce lien existe pour produire. `noopener` seul ferme déjà la faille de tabnabbing. **Les 3 liens de crédit existants de `ResultView` ont été corrigés au passage** pour la même raison : ils étaient en `noopener noreferrer` et masquaient donc leur propre trafic.
+- **Texte d'ancre descriptif** (« Antoine Berthaud — Senior Growth PM ») plutôt que « mon CV » ou « ici » : c'est le texte que les moteurs lisent, et le seul levier SEO réel de ce lien.
+- **Phrase distincte de `QUICK_CREDIT`.** Les deux coexistent sur une page de résultat ; répéter deux fois « Conçu par Antoine Berthaud, Senior Growth PM » dans un même écran se lit comme de l'insistance. Le pied de page dit ce que *le site est* (« Un side project d'… »), ce qui est le rôle d'un pied de page.
+- **Liens internes (`/how-it-works`, `/glossary`) dans le pied de page**, pas du remplissage : un pied de page présent partout donne aux crawlers un chemin constant vers ces pages depuis n'importe où, et évite un pied de page réduit à un unique lien externe.
+- **Volontairement absent de `/quiz` et `/deep-dive/[id]`** : ce sont les deux parcours que le produit existe pour faire terminer, et un pied de page plein de sorties au milieu d'un tunnel de 15 questions joue contre ça. Aucune des deux n'est dans le sitemap, donc rien de perdu côté SEO. Présent en revanche sur la 404 de résultat : un lien mort partagé est un vrai point d'entrée.
+- **`profile_click/sitefooter_cv`** ajouté à `PROFILE_CLICK_DETAILS` — obligatoire, sinon `goatcounter-api.ts` (qui demande une liste de chemins exacte) sous-compterait silencieusement ces clics dans le funnel de `/admin/stats`. Nommé à part de `footer_cv`, qui malgré son nom désigne le pied de la *carte de score*, pas le pied de page.
+
+**Vérifié en réel** (Playwright, `next start`) : **64 assertions vertes** sur 5 pages × 2 langues — un seul lien CV par pied de page, `rel=noopener`, ancre exacte, phrase de crédit bien localisée, liens internes présents, aucun débordement horizontal causé par le pied de page ; absence confirmée sur `/quiz` et `/deep-dive`. Le tracking a d'abord été « vérifié » à vide (sans `NEXT_PUBLIC_GOATCOUNTER_CODE`, le script n'est pas injecté, donc l'assertion passait sans rien prouver) — rebuild avec un code de test et stub du script : `profile_click/sitefooter_cv` bien émis au clic. Captures relues en FR et EN, desktop et mobile 390px.
+
+**Bug préexistant trouvé pendant cette recette, non corrigé ici :** la landing **en français** défile horizontalement à 390px (`scrollWidth` 418 pour un viewport de 390), à cause du lien de nav « Comment ça marche » dans un header en `flex-wrap: nowrap`. Mesuré identique avec et sans le pied de page, donc antérieur. En anglais, aucun débordement. Consigné en **`REVIEW.md` R-21** plutôt que corrigé au passage : le correctif est un choix visuel (wrapper la nav, la masquer sous 760px comme le CTA d'en-tête l'est déjà, ou réduire la typo), pas une évidence technique.
+
+### R-05 : CI GitHub Actions (2026-09-05) — début du lot B
+
+`.github/workflows/ci.yml`, déclenché sur `pull_request` et sur `push` vers `main`. Le repo n'avait aucune CI : 19 PR mergées sans le moindre check automatique, alors que Vitest et `tsc` ne tournaient que quand on y pensait. Vercel construit bien chaque push, mais un build qui passe ne dit rien des tests.
+
+**Un seul job, pas plusieurs** : un side project paie `npm ci` une fois plutôt que trois, et les étapes sont ordonnées du moins cher au plus cher (`tsc` → `vitest` → `next build`) pour qu'une erreur de type ou un test cassé remonte en quelques secondes au lieu d'attendre un build Next complet. `tsc --noEmit` fait doublon avec la passe TypeScript de `next build`, c'est volontaire : il échoue plus vite et son message est plus direct.
+
+- **Node 22**, le major que Vercel exécute sur ce projet (le repo n'a pas de champ `engines` — voir R-18).
+- **Aucun secret nécessaire** : toutes les routes qui touchent Firestore ou Gemini sont rendues à la demande, rien ne les appelle au moment du build. Vérifié en construisant sans `.env.local` depuis le début de cette revue.
+- `concurrency` avec `cancel-in-progress` : un nouveau push annule le run en cours sur la même ref.
+- `permissions: contents: read` — le workflow ne fait que lire.
+
+Le lint (R-06) et les E2E (R-07) s'ajouteront à ce workflow avec leurs propres PR, comme prévu dans `REVIEW.md`.
+
+**Action manuelle restante côté Antoine** : rendre ce check **obligatoire** sur `main` (GitHub → Settings → Branches → Branch protection rules). Tant que ce n'est pas fait, la CI signale sans bloquer. Ça ne peut pas se configurer depuis le repo.
+
+Vérifié en rejouant localement la séquence exacte du job (tsc 0 erreur, 178 tests verts, build compilé) avant de la committer, puis en réel sur le PR lui-même.
+
+### R-06 + R-08 : un vrai lint, et le code mort qu'il a révélé (2026-09-05)
+
+**Le lint n'a jamais existé sur ce projet.** `package.json` portait `"lint": "next lint"`, commande retirée par Next.js 16 — le script n'imprimait plus que « Invalid project directory provided, no such directory: .../lint ». Et comme aucune configuration ESLint n'avait jamais été committée, même avant cette rupture, les commentaires `// eslint-disable-next-line` présents dans le code n'avaient **jamais** rien désactivé : il n'y avait rien à désactiver.
+
+`eslint.config.mjs` en flat config (ESLint 9). `eslint-config-next` expose déjà `core-web-vitals` et `typescript` comme tableaux flat — vérifié en inspectant le paquet installé plutôt qu'en supposant, donc pas de pont `FlatCompat` à construire. `design/` est ignoré : c'est le bundle de handoff Claude Design recopié verbatim, du code que l'app n'importe pas et que personne ici ne maintient ; le linter y trouvait 5 problèmes sur lesquels on ne peut rien.
+
+**Ce que le lint a trouvé le jour de son installation**, au-delà du style :
+
+1. **Une animation du brief déjà perdue, et son état orphelin.** `quiz/page.tsx` tenait un state `pulseStage` écrit à chaque fin d'étape (avec son `setTimeout` de nettoyage) et **jamais lu par quoi que ce soit**. Reliquat de la migration design system v2 : depuis, le pulse de segment (DESIGN-BRIEF.md « Motion ») est porté entièrement par le CSS de `StageProgress` (`.current` + `tdg-pulse`). Retiré, ainsi que l'import `QUESTIONS_PER_STAGE` devenu inutile. Vérifié en navigateur que le pulse est bien toujours là (`animationName` relevé sur le segment courant : `tdg-pulse`), donc rien de visible n'est perdu.
+2. **Deux imports morts** : `rankPillarsAscending` dans `opengraph-image.tsx`, `beforeEach` dans `goatcounter.test.ts`.
+3. **Un `eslint-disable` inutile** (`react/no-danger` sur la landing) — la règle n'est pas activée par la config Next. Retiré ; le commentaire qui explique pourquoi ce `dangerouslySetInnerHTML` est sûr, lui, reste : il sert au lecteur.
+
+**Trois suppressions volontaires, documentées sur place** : la règle `react-hooks/set-state-in-effect` (nouvelle, React 19) signale les trois endroits où on lit `localStorage` après montage pour poser le state — quiz, page de résultat, Deep dive. C'est précisément la décision d'hydratation de l'étape 4 : SSR ne voit pas `localStorage`, donc semer l'état initial garantirait un mismatch. La bonne réponse React moderne serait `useSyncExternalStore` avec un snapshot serveur ; c'est un refactor à part entière, pas le sujet de cet item — noté ici pour la prochaine fois qu'on touche ces trois écrans.
+
+**R-08, le code mort qu'ESLint ne peut pas voir** : `countSubmissionsReferredBy` (`repository.ts`) et `ctaSwitchToRoast` (`dictionary.ts`) sont **exportés**, donc un linter par fichier les croit utilisés — seule une recherche projet montre que rien ne les importe. Supprimés. `clearRefId` en revanche est **conservé** : R-03 l'utilise désormais pour la politique first-touch, exactement comme le constat R-08 l'avait anticipé.
+
+**Le lint est ajouté à la CI** (`.github/workflows/ci.yml`), en première étape puisque c'est la plus rapide.
+
+**Vérifié en réel** : `npm run lint` sort en 0, `tsc` propre, 178 tests verts, build OK. Et surtout en navigateur, parce que du code a été retiré de `handleAnswer` : le pulse du segment courant est bien présent, les 15 questions défilent dans l'ordre, le sélecteur de ton apparaît après la 15e, un rechargement avec 15 réponses en mémoire reprend directement au sélecteur de ton, et un parcours partiel reprend à la première question sans réponse (Q3 pour 2 réponses stockées) avec le bouton Retour disponible.
+
+### R-07 : Playwright committé (2026-09-05) — clôt le lot B
+
+Chaque étape de ce projet a été vérifiée avec Playwright (voir tout ce qui précède), mais toujours par des scripts jetables jamais committés. Les `data-testid` étaient déjà posés partout dans l'app : il ne manquait que les specs, donc rien ne protégeait le parcours critique d'une régression.
+
+`playwright.config.ts` + `e2e/` : **17 specs**, Chromium seul (un moteur qui attrape les vraies régressions de parcours vaut mieux que trois que personne ne maintient), exécutées contre un **build de production** (`next start`) et non `next dev` — les bugs qui valent la peine d'être attrapés ici (hydratation, payload RSC, redirections) ne se comportent pas pareil entre les deux.
+
+- `critical-path.spec.ts` : CTA de la landing → questionnaire ; les 15 questions → sélecteur de ton → page de résultat, avec vérification que les 15 réponses sont bien persistées avant la soumission ; le ton roast est opt-in et voyage jusqu'à l'API ; Retour resurligne la réponse précédente ; un parcours partiel reprend à la première question sans réponse.
+- `error-retry.spec.ts` : la promesse écrite noir sur blanc sur l'écran d'erreur (SPEC.md §4) — API en 500, code `SCORING_FAILED` affiché (R-04), les 15 réponses toujours en mémoire, puis « Réessayer » repart directement vers le résultat sans jamais repasser par la question 1.
+- `attribution-and-locale.spec.ts` : le ref survit landing → quiz et atteint l'API ; first-touch (un second ref n'écrase pas le premier) ; un ref pointant vers un de mes propres résultats n'est pas attribué (R-03) ; `?lang=` bascule l'interface **et** persiste d'une page à l'autre ; le questionnaire lui-même est traduit, pas seulement la landing (leçon n°5 de ce fichier) ; un visiteur sur une URL de Deep dive est redirigé (R-01).
+- `accessibility.spec.ts` : passe axe sur 5 écrans, limitée aux impacts serious/critical.
+
+**Toutes les specs bouchonnent `/api/submissions`** plutôt que d'appeler la vraie : la CI n'a ni identifiants Firebase ni clé Gemini, et un test qui dépend d'une écriture Firestore réelle testerait la disponibilité de quelqu'un d'autre. Ce que ces specs protègent, c'est le parcours client — 15 réponses entrent, une page de résultat sort, les réponses ne sont jamais perdues, l'attribution suit — et tout ça nous appartient entièrement.
+
+**Piège rencontré (vrai flake, corrigé à la racine plutôt que masqué)** : la landing capture `?ref=` dans un `useEffect`, donc l'écriture dans `localStorage` arrive **après** l'hydratation, pas au `load`. Lire la clé juste après `page.goto()` passait en solo et échouait en parallèle. Corrigé avec `expect.poll` (helper `expectStoredRefId`), jamais avec un `waitForTimeout`. Suite rejouée deux fois de suite pour confirmer la stabilité.
+
+**Piège d'outillage** : `@axe-core/playwright` déclare `playwright-core` en peer avec une plage `>= 1.0.0`, ce qui a fait installer un 1.63 à côté du 1.56.1 de `@playwright/test` — deux jeux de types `Page` incompatibles, `tsc` en erreur. Résolu en épinglant `playwright-core@1.56.1` en devDependency plutôt qu'en castant le type.
+
+**La CI gagne deux étapes** (`npx playwright install --with-deps chromium`, puis `npx playwright test`), plus l'upload du rapport HTML en artefact **uniquement en cas d'échec** — pour qu'une CI rouge soit débogable sans rejouer en local.
+
+**Ce que la passe axe a trouvé dès son premier passage** : trois paires de couleurs sous le seuil AA de contraste, toutes des **tokens du design system** (bouton principal 4,41:1, ligne de crédit `--text-faint` 2,80:1, lien du disclaimer 3,56:1) — donc présentes partout où le token sert. Consignées en `REVIEW.md` **R-22** plutôt que corrigées ici : ce sont des couleurs de marque livrées par Claude Design, deux des trois demandent un arbitrage d'Antoine. La spec ne désactive pas la règle pour autant : elle liste ces trois paires **par couleur** (stable) et non par sélecteur (un hash de build), donc toute **nouvelle** violation de contraste fait rougir la CI pendant que les connues restent visibles dans le code.
+
+**Lot B terminé** (R-05 à R-08) : CI, lint, E2E, code mort. La suite est le lot C (boucle de partage).
+
+### R-09 : le verdict suit le lecteur, plus l'auteur (2026-09-05) — début du lot C
+
+**Le bug.** `createSubmissionFlow` résolvait les deux verdicts Quick avec `input.locale` — la langue de l'auteur — et les **persistait** sur le document. Tout le reste de la page de résultat suit `useLocale()`, c'est-à-dire la langue du visiteur. Un fondateur français partageant son résultat à un collègue anglophone lui affichait donc une page en anglais avec un headline et cinq phrases de piliers en français. Et inversement. C'était la première impression du produit pour chaque personne arrivant par un lien partagé — sur l'écran dont dépend toute la boucle de croissance.
+
+**Le correctif.** `view-model.ts#buildQuickVerdicts(locale, pillars, weakestPillar)` résout les deux tons à la demande. C'est un pur lookup dans `content/copy-library.ts` indexé par bande de score, donc le résoudre à chaque requête ne coûte rien.
+
+- **Résolu côté serveur, pas dans le composant client** : le payload reste les mêmes douze courtes chaînes au lieu d'embarquer toute la bibliothèque de copie (483 lignes, 60 verdicts + 20 headlines × 2 langues) dans le bundle du navigateur.
+- **Le champ `verdicts` disparaît de `Submission`** : c'est une donnée dérivée et reproductible à volonté, et la stocker était précisément le piège — quelqu'un finirait par relire la version figée. Les documents antérieurs le portent encore, plus rien ne le lit. Un test vérifie maintenant qu'une soumission créée par un auteur français ne contient **aucun caractère accentué** : la langue appartient au rendu, pas à l'enregistrement.
+- **`/r/sample` passe par le même helper** (`getSampleVerdicts`), donc l'échantillon ne peut plus diverger du vrai chemin.
+
+**Asymétrie volontaire, à ne pas « corriger » plus tard** : l'image OG continue d'utiliser `submission.locale`, la langue de l'auteur (étape 8). Un crawler social n'envoie pas les cookies du visiteur qui partage — il n'y a donc pas de langue de lecteur à respecter à cet endroit.
+
+**Piège d'outillage rencontré** : `playwright.config.ts` a `reuseExistingServer: !process.env.CI`, donc en local un `next start` laissé tourner d'une vérification précédente sert **l'ancien build** en silence — 4 specs ont échoué de façon incompréhensible avant que je réalise que le serveur en mémoire datait. Tuer les `next-server` restants avant de relancer la suite ; `pkill -f "next start"` ne suffit pas, le processus s'appelle `next-server`.
+
+**Vérifié en réel** : 182 tests verts (+4), lint/tsc/build propres, 18 specs Playwright (+1 : `/r/sample` rend un verdict différent en FR et en EN, avec accents côté FR). Et par requête HTTP directe, **sans `?lang=` ni cookie**, uniquement sur `Accept-Language` — la même URL renvoie « Bon moteur global, un pneu à plat : la rétention. » en FR et « Solid engine, one flat tyre: retention. » en EN.
+
+**Non vérifiable ici** (pas de `.env.local`) : le rendu d'un **vrai** résultat Firestore dans les deux langues. Le chemin réel et celui de l'échantillon appellent désormais littéralement le même helper avec la même résolution de locale, donc le risque résiduel est faible — à confirmer après déploiement en ouvrant un vrai résultat avec `?lang=` dans les deux sens.
+
+### R-10 : le partage dit enfin quelque chose (2026-09-05)
+
+Le partage est le mécanisme que SPEC.md §7 désigne comme « le cœur du produit ». Quatre choses le desservaient, plus un cinquième problème découvert en ouvrant la fonction.
+
+**1. Chaque résultat avait le même aperçu de lien.** `generateMetadata` renvoyait un titre et une description génériques identiques pour tous. Sur LinkedIn ou X, seule l'image OG portait le score : le texte à côté ne disait rien. Désormais titre `74/100 — Tour de Growth` et description construite à partir du gabarit « où ça cale » déjà livré (`UI_STRINGS.og`), plus `og:locale` et les balises `twitter:*`. Le titre est volontairement **neutre en langue** (un chiffre et le nom du produit) pour rester correct comme titre d'onglet dans les deux langues, tandis que la description suit la locale de **la soumission** — même règle que l'image OG, pour la même raison : un crawler social n'envoie pas de cookies, il n'y a pas de langue de lecteur à respecter ici. C'est la contrepartie assumée de R-09, qui fait l'inverse pour le contenu de la page.
+
+**2. La lecture Firestore aurait doublé.** `generateMetadata` et le composant de page tournent dans la **même** requête : `cache()` de React les fait partager une seule lecture. Sans ça, personnaliser les métadonnées aurait doublé le coût de chaque vue d'un résultat partagé. Les Route Handlers continuent d'importer `getSubmissionById` directement — ce wrapper n'existe que pour la passe de rendu React.
+
+**3. La feuille de partage native s'ouvrait sur un lien nu.** Elle emporte maintenant un texte (`UI_STRINGS.share.textTemplate`, marqué `TODO`) assemblé à partir de blocs déjà livrés plutôt qu'écrit de zéro — mais c'est le premier texte que le produit met dans la bouche de l'utilisateur, donc il mérite une relecture de l'agent produit.
+
+**4. Le lien partagé emportait `?lang=`.** Ce paramètre est le choix de langue **du lecteur** ; le transmettre imposait la langue du partageur à tous les destinataires — exactement ce que R-09 venait d'empêcher côté verdict. `shareUrl()` le retire.
+
+**5. Bug trouvé en ouvrant la fonction : un partage annulé était compté comme un partage.** `navigator.share` rejette avec `AbortError` quand l'utilisateur ferme la feuille. L'ancien `catch` avalait **toutes** les erreurs et enchaînait sur le repli presse-papiers, qui écrivait dans le presse-papiers et émettait l'événement. Une annulation produisait donc un `share` dans GoatCounter — en contradiction directe avec ce que ce fichier affirmait depuis l'étape 11 (« jamais sur un partage annulé »). Corrigé : `AbortError` sort sans rien faire, toute autre erreur (feuille indisponible) tombe bien sur le repli.
+
+**Aussi** : la confirmation de copie desktop passe d'un « ✓ » muet à un vrai libellé « Lien copié »/« Link copied » avec `aria-live`, et l'événement devient `share/<ton>/<méthode>` (`native` ou `copy`) — ça fragmente légèrement l'historique GoatCounter du chemin `share/<ton>`, coût accepté vu le volume et le nettoyage récent des données.
+
+**Volontairement pas fait : les boutons LinkedIn/X.** Les ajouter casserait la règle « exactement 2 CTA, jamais 3 » tranchée à l'étape 7 sur l'écran le plus soigné du produit. C'est un arbitrage design, pas une implémentation — consigné en `REVIEW.md` **R-23** avec les pistes possibles, plus la mise en garde que ces liens sont `nofollow` chez LinkedIn comme chez X et n'ont donc aucune valeur SEO.
+
+**Vérifié en réel** : 182 tests, lint/tsc/build propres, **20 specs Playwright** (+2 : la copie desktop confirme et le lien copié ne contient pas `lang=` ; un partage natif annulé n'émet aucun événement et ne copie rien). Et par requête HTTP directe sur `/r/sample`, les balises réellement produites : `<title>74/100 — Tour de Growth</title>`, `og:description` « Retention is where this growth stalls. Where does yours? », `og:locale`, `twitter:card`, `robots: noindex, follow`.
+
+**Note d'infrastructure (2026-09-05, ~~périmée~~ — voir la mise à jour ci-dessous)** : rendre le check CI bloquant s'avérait impossible sur le plan d'alors — GitHub n'applique pas les rulesets (ni la protection de branche classique) sur un dépôt **privé** d'une organisation en plan **Free**. Voir `REVIEW.md` R-05.
+
+**Mise à jour (2026-09-11)** : c'est fait, et ce n'est plus une règle d'honneur. Le passage du dépôt en public a rendu les rulesets applicables, et `main` en porte un — vérifié à la source (`/rules/branches/main`) et non d'après un document : `Types, tests, build` est un **check requis**, une PR est obligatoire, `deletion` et `non_fast_forward` sont bloqués. Une PR dont le check n'est pas vert affiche `mergeable_state: blocked` et GitHub refuse le merge. À noter pour la prochaine session qui irait vérifier : l'API classique `/branches/main/protection` renvoie une liste de checks **vide**, parce que l'exigence vit dans un ruleset — c'est `/rules/branches/main` qu'il faut lire.
+
+### R-11 : mesurer enfin où les gens décrochent (2026-09-05)
+
+Jusqu'ici seules les **deux extrémités** du funnel étaient instrumentées (`submission_completed`, `share`). On savait combien de personnes terminaient, jamais où les autres partaient. Pour un projet dont l'objet est de démontrer une maîtrise de l'AARRR (SPEC.md §1), l'Activation de l'outil lui-même était la seule chose non mesurée.
+
+**Six événements ajoutés** : `quiz_started`, `quiz_stage_completed/<1..5>`, `tone_selected/<ton>`, `deep_dive_started`, `deep_dive_completed/<with_context|no_context>` — plus `share/<ton>/<méthode>` livré en R-10. Le vocabulaire complet est documenté en tête de `lib/analytics/goatcounter.ts`, avec les listes (`TONES`, `SHARE_METHODS`, `QUIZ_STAGES`, `DEEP_DIVE_CONTEXT_DETAILS`) **exportées et partagées** avec `goatcounter-api.ts` : `include_paths` matche par nom exact, donc un chemin écrit différemment aux deux endroits est un clic que le tableau de bord sous-compte en silence, sans erreur nulle part.
+
+**Trois pièges de comptage évités, pas découverts après coup :**
+- Revenir en arrière et changer une réponse ne doit pas re-déclencher `quiz_started` ni recompter une étape — d'où le garde `firstTimeAnswered`.
+- `tone_selected` est émis dans le `onSubmit` du sélecteur de ton, **pas** dans `handleGetScore`, que le bouton « Réessayer » de l'écran d'erreur appelle aussi : un retry n'est pas un nouveau choix de ton.
+- `deep_dive_started` n'est émis qu'**après** la vérification de propriété (R-01), donc un visiteur redirigé ne compte jamais comme un démarrage.
+
+**Bug corrigé au passage dans `goatcounter-api.ts`** : `limit` était codé en dur à `10`, écrit à l'époque où 4 chemins étaient demandés. Avec 22 chemins, la réponse aurait été tronquée en silence et la queue du funnel sous-rapportée. Il suit maintenant la longueur de la liste, et un test le verrouille.
+
+**`/admin/stats` gagne une vue de déperdition** : vues d'accueil → quiz démarré → chaque étape → ton choisi → résultat créé → partagé, plus le Deep dive, chacun avec son taux par rapport à l'étape pertinente.
+
+**La leçon d'outillage de l'étape précédente, appliquée cette fois d'emblée.** En vérifiant le pied de page, une assertion analytics était passée **à vide** : sans `NEXT_PUBLIC_GOATCOUNTER_CODE`, le script n'est pas injecté, `trackEvent` ne fait rien, et le test réussit sans rien prouver. Ici, le stub GoatCounter est devenu une **fixture Playwright** (`e2e/helpers.ts`) que toutes les specs utilisent, et la CI définit `NEXT_PUBLIC_GOATCOUNTER_CODE: e2e-stub` au build pour que la balise soit réellement rendue. La fixture intercepte la requête du script, donc aucune spec ne joint gc.zgo.at : la CI reste hors-ligne et déterministe.
+
+**Non-trivialité prouvée, pas supposée** : la suite a été rejouée après un build **sans** le code GoatCounter — 3 des 4 specs analytics échouent alors, ce qui confirme qu'elles mesurent bien quelque chose. (La 4ᵉ affirme une liste vide, elle passe dans les deux cas ; c'est une assertion compagnon, pas une garantie.)
+
+**Faux positif ESLint rencontré** : les fixtures Playwright reçoivent un callback `use`, que `react-hooks/rules-of-hooks` prend pour le hook React `use`. Règle désactivée pour `e2e/**` et `playwright.config.ts` uniquement — il n'y a aucun React dans ces fichiers.
+
+**Vérifié en réel** : 183 tests unitaires (+1), **24 specs Playwright** (+4), lint/tsc/build propres. Reste non vérifiable depuis ce bac à sable : que les événements arrivent dans le vrai tableau de bord GoatCounter (le proxy sortant bloque `*.goatcounter.com`, limite déjà documentée à l'étape 11). À confirmer par Antoine après déploiement, en regardant la nouvelle section « Funnel » de `/admin/stats`.
+
+### R-12 : rendre le score ré-explicable à l'écran, pas seulement dans le code (2026-09-05) — clôt le lot C
+
+`CLAUDE.md` pose comme non négociable qu'« un score partagé doit être ré-explicable en 10 secondes ». C'était vrai du **code** — `computeScore` est pur et bien testé — et invisible dans le **produit** : la page de résultat n'a jamais montré les trois réponses derrière un sous-score, alors que `Submission.answers` existait en base sans jamais être lu pour l'affichage.
+
+`ScoreBreakdown` (`src/app/r/[id]/`) : un `<details>` natif placé **après** les CTA et le disclaimer, fermé par défaut, qui déplie par pilier les 3 questions, la réponse choisie, ses points (20/7/0) et le calcul `54/60 → 18/20`.
+
+**Deux contraintes tenues d'emblée :**
+- **Propriétaire uniquement.** Les réponses décrivent une entreprise bien plus que le score ne le fait (« aucune idée de notre CAC ») et `/r/<id>` est public. Elles sont lues depuis le `localStorage` de l'appareil (`tdg.results.v1`, la clé de R-01, qui gagne un champ `answers`), donc **elles n'entrent jamais dans le payload d'un lien partagé** — même raisonnement que R-02, appliqué avant que le problème existe plutôt qu'après.
+- **Les questions viennent du serveur, pas du bundle.** Importer `content/copy-library.ts` (483 lignes, 2 langues) dans le bundle client de la page de résultat aurait refait l'erreur que R-09 venait d'éviter. La page résout ~60 chaînes courtes dans la langue du lecteur et les passe en props. Ces textes sont de toute façon publics — n'importe qui lit les 15 questions en ouvrant `/quiz`. Les **réponses**, elles, ne viennent jamais de là.
+
+**Écarts signalés plutôt que tranchés :**
+- **Aucun composant du design system ne couvre un dépliant** (les 17 du bundle n'en ont pas), donc celui-ci est construit aux tokens seuls, avec un `+`/`−` typographique plutôt qu'une icône — DESIGN-BRIEF.md « Assets » dit explicitement qu'il n'y a aucun fichier d'icône dans ce produit. **Devenu `core/Disclosure` à l'extension 01**, et le panneau est passé à deux niveaux.
+- **La copie est marquée `TODO`** : c'est de la copie d'interface (titres, libellés, gabarit de calcul), même statut que l'écran d'erreur repris du brief, pas de la voix verdict — mais elle reste à relire.
+- **Tension assumée avec `AnswerOption`**, dont la doc dit « never label an option with its score — scoring stays invisible to the user ». Cette règle vaut pour le **questionnaire**, où afficher les points fausserait les réponses. Ici, montrer les points *est* le sujet.
+
+**Vérification : ce qui était couvrable, et ce qui ne l'était pas.** La spec E2E ne couvre que la moitié visiteur (aucun breakdown sur le lien de quelqu'un d'autre, aucune réponse dans le payload) — le breakdown a besoin des `rawPoints` d'une vraie soumission, et `/r/sample` est la seule page de résultat qui s'affiche sans Firestore, avec des données fixes et **aucune réponse derrière** par construction (SPEC.md §12). Le rendu côté propriétaire a donc été vérifié séparément, en navigateur, via un patch **local et jamais committé** donnant temporairement un breakdown à l'échantillon : **32 assertions vertes** (présent, fermé par défaut, s'ouvre au clic, calcul `54/60 → 18/20` correct, 15 questions, les trois valeurs de points, titre localisé, aucun débordement) en EN et FR × desktop et mobile, plus une relecture des captures. Patch retiré et absence de trace vérifiée avant commit.
+
+**Piège de vérification rencontré** : `innerText` renvoie le texte **rendu**, donc le `text-transform: uppercase` du `<summary>` le remonte en majuscules — quatre assertions ont échoué sur une comparaison de casse avant que je regarde la vraie valeur plutôt que de supposer un bug. Comparer sur `textContent` pour du texte transformé en CSS.
+
+**Reste à confirmer après déploiement** : le breakdown sur un **vrai** résultat Firestore (le chemin réel passe les `rawPoints` de `computeScore` au lieu de la valeur fabriquée du patch local).
+
+### R-13 : une URL par langue (2026-09-05) — lot D, moitié SEO
+
+**Le problème.** La même adresse servait le français ou l'anglais selon un cookie. Googlebot ne voit qu'une langue par URL, donc **tout le glossaire français était invisible pour les moteurs** — précisément le contenu sur lequel repose la phase SEO du plan de croissance. Aucun `hreflang` non plus, et aucun moyen de changer de langue dans l'interface : `setLocale` du contexte n'était appelé de nulle part, et `?lang=` n'est pas quelque chose qu'un visiteur devine.
+
+**Ce qui porte un préfixe, et ce qui n'en portera jamais.** Les pages de contenu passent sous `[locale]` (`/en`, `/fr/glossary/cac`). Les pages applicatives — `/quiz`, `/r/<id>`, `/deep-dive/<id>`, `/admin`, `/api` — restent nues, pour deux raisons distinctes : les liens `/r/<id>` sont déjà partagés dans la nature et doivent fonctionner indéfiniment (SPEC.md §12), et **un résultat n'a pas de langue propre** depuis R-09, qui le fait rendre dans celle du lecteur — mettre une langue dans son URL défferait ce travail.
+
+**Le point technique central.** `<html lang>` vit dans le layout racine, qui ne peut pas voir l'URL. Le proxy résout donc la locale une fois (préfixe d'URL > `?lang=` > cookie > `Accept-Language`) et la transmet dans un en-tête `x-tdg-locale` que le layout lit — une seule source de vérité plutôt que chaque page qui re-dérive la réponse et risque d'en trouver une autre.
+
+**Deux bugs trouvés en vérifiant, pas en relisant :**
+1. **Le sélecteur de langue laissait `<html lang>` périmé.** En navigation client, Next réutilise le layout racine sans le re-rendre : passer en français gardait `lang="en"`. Invisible pour les crawlers (qui voient le rendu serveur) mais faux pour les lecteurs d'écran et la traduction navigateur. Le sélecteur utilise donc de vrais `<a>` plutôt que `next/link` — un chargement de page complet sur une action que personne ne répète.
+2. **La langue ne suivait pas jusqu'aux pages applicatives.** Passer en français puis cliquer « Démarre ton Tour » ouvrait un questionnaire anglais, `/quiz` n'ayant pas de préfixe. Un préfixe d'URL est maintenant persisté dans le cookie exactement comme `?lang=` — c'est un choix aussi explicite.
+
+**Piège de couplage évité de justesse** : `goatcounter-api.ts` comptait les vues d'accueil sur le chemin exact `/`. Avec la landing devenue `/en` et `/fr`, la première étape du funnel construit en R-11 serait silencieusement tombée à zéro. Les trois chemins sont maintenant sommés (`/` reste, pour les visites enregistrées avant ce changement).
+
+**Rien de ce qui était publié ne casse** : `/`, `/how-it-works`, `/glossary`, `/glossary/<terme>` redirigent en 308 vers leur forme localisée, query string intacte — un `/?ref=<id>` partagé emporte toujours son parrainage.
+
+**Découpage assumé : le rendu statique part en R-24.** Toutes les routes restent `ƒ` (dynamiques), parce que le layout racine lit un en-tête. Les rendre statiques demande de restructurer les layouts racine (plusieurs racines via groupes de routes), ce qui est un problème distinct — coût et latence, pas indexation — et l'empiler ici aurait donné une PR énorme et difficile à vérifier. Voir `REVIEW.md` R-24, avec la structure proposée et le point de friction connu (`not-found.tsx` global).
+
+**Vérifié en réel** : 191 tests unitaires (+8 sur les helpers de route), **36 specs Playwright** (+9, dont un fichier `locale-routing.spec.ts` dédié), lint/tsc/build propres. Et par requête HTTP directe : `/` redirige selon `Accept-Language`, les 3 URL héritées redirigent, `?ref=` survit, `<html lang>` suit **l'URL et non le cookie** (vérifié avec un cookie contradictoire), les balises `canonical`/`alternate`/`x-default` sont bien émises, le contenu est réellement dans la bonne langue, `/quiz` et `/r/sample` ne sont pas redirigés, `/nonsense` renvoie 404, et le sitemap liste 36 URL (18 pages × 2 langues).
+
+### R-14 : ne plus relire Firestore à chaque vue d'un résultat partagé (2026-09-05) — clôt le lot D
+
+**Constat.** Chaque vue de `/r/<id>` était une lecture Firestore — et un résultat partagé est par définition lu plusieurs fois : la page, ses métadonnées et son image OG voulaient toutes le même document. Le quota gratuit est loin d'être atteint aujourd'hui, mais les lectures sont précisément la ressource qui s'épuise **si la boucle de croissance fonctionne**, c'est-à-dire dans le seul scénario pour lequel ce produit existe.
+
+`lib/submissions/cached-repository.ts` : lecture tagée `submission:<id>` via `unstable_cache`, invalidée explicitement au seul moment où une soumission change — la fin d'un Deep dive. Le TTL d'une heure n'est pas le mécanisme mais le filet : si une invalidation est ratée un jour, la page se répare toute seule dans l'heure au lieu de rester périmée indéfiniment.
+
+- **`unstable_cache` plutôt que `"use cache"`** : ce dernier exige `cacheComponents` dans `next.config`, qui change tout le modèle de rendu — ça appartient à R-24, pas ici.
+- **La route Deep dive garde la lecture NON cachée**, volontairement : son test « déjà complété ? » doit voir l'état courant, sinon deux Deep dive lancés en même temps pourraient tous deux se croire les premiers.
+- **Piège de signature Next 16** : `revalidateTag` prend désormais un **deuxième argument obligatoire** (un profil de cache). `{ expire: 0 }` est le cas « oublie ça tout de suite » ; la doc renvoie vers `updateTag` pour l'expiration immédiate, mais celui-là est réservé aux Server Actions et on est dans un Route Handler.
+
+**Défaut réel découvert par le test unitaire, pas seulement un souci d'environnement.** `revalidateTag` lève hors contexte Next, et comme il était appelé après `saveDeepDive`, une invalidation en échec faisait renvoyer un 502 pour un travail **déjà généré et déjà écrit** — l'utilisateur aurait vu une erreur pour un Deep dive réussi. L'invalidation est maintenant enveloppée dans un `try/catch` qui journalise : elle n'a pas le droit de faire échouer la requête, et le pire cas est justement ce que le TTL couvre.
+
+**Image OG d'un lien mort.** `loadOgData` fabriquait une frame « 0/100 » quand la soumission n'existait pas : un lien erroné ou supprimé s'affichait dans un aperçu social comme un vrai score, catastrophique. Elle renvoie maintenant un 404 — pas d'image vaut mieux qu'une fausse.
+
+**Limite de vérification, assumée** : la spec E2E n'affirme pas le code exact (`404`) mais « jamais une vraie image », parce qu'atteindre une soumission manquante veut dire atteindre Firestore, sans identifiants en CI — on obtient donc 500 là où la production renverra 404. L'assertion vise le comportement **précédent** (un 200 avec un faux score), et elle tient dans les deux environnements.
+
+**Vérifié en réel** : 191 tests unitaires, **37 specs Playwright** (+1), lint/tsc/build propres. Le comportement de cache lui-même (une lecture Firestore par heure au lieu d'une par vue) n'est pas observable sans identifiants — **à confirmer après déploiement** en regardant les lectures dans la console Firebase sur une page de résultat rechargée plusieurs fois.
+
+**Lot D terminé** pour ce qui était couvrable ici (R-13 moitié SEO, R-14). Restent R-24 (rendu statique) et le lot E.
+
+### R-15 : une limite de débit honnête, et `maxDuration` (2026-09-05) — début du lot E
+
+**Constat.** Les deux routes POST sont coûteuses en quota qui n'est pas le nôtre : `POST /api/submissions` écrit dans Firestore (20 000 écritures/jour sur le plan gratuit) et `POST .../deep-dive` vaut deux générations Gemini, chacune pouvant retenter sur quatre modèles. Rien n'empêchait un script de boucler sur l'une ou l'autre.
+
+**`lib/rate-limit.ts`** : fenêtre glissante **en mémoire**, par instance serverless. Limites volontairement généreuses (12 soumissions/h, 5 Deep dive/h, par IP et par route) — un faux positif ici veut dire refuser de scorer un vrai fondateur, ce qui est bien pire que servir quelques requêtes de plus à un curieux. Réponse `429` avec un `Retry-After` réel, jamais zéro (qui inviterait à réessayer immédiatement).
+
+**Ce que ça vaut, dit franchement.** Ça arrête le cas naïf : un client qui martèle un endpoint, qui sur une app à faible trafic retombe généralement sur la même instance chaude. Ça n'arrête **pas** un trafic réparti sur plusieurs instances ni quelqu'un de motivé. Fermer ça demande un store partagé (Upstash Redis — un compte, des identifiants) ou les règles de pare-feu Vercel (selon le plan). Consigné en R-15 comme chemin d'évolution **si un abus réel apparaît** : ajouter dès maintenant une dépendance de service pour un risque encore théorique coûterait plus que ça ne protège.
+
+**`export const maxDuration = 120`** sur la route Deep dive — la seule qui dure vraiment. Un Deep dive réel a été mesuré à ~41 s (deux générations, repli possible sur quatre modèles à 20 s chacun), et le défaut Vercel est plus court : sans cette ligne, une génération lente mais réussie pouvait être coupée en vol.
+
+**Détail de test à connaître** : le limiteur garde un état au niveau du module, donc les tests de route doivent le réinitialiser entre les cas — sans ça la suite finit par se rate-limiter elle-même. `resetRateLimitsForTests()` est là pour ça, appelé dans les `beforeEach` concernés.
+
+**Vérifié en réel** (serveur lancé, `x-forwarded-for` forgé) : 12 soumissions passent depuis une même IP, la 13ᵉ renvoie `429` avec `retry-after: 3600`, et une autre IP n'est pas affectée. 201 tests unitaires (+10), lint/tsc/build propres.
+
+### R-16 : la clé sort de l'URL, et un échec Gemini dit enfin lequel (2026-09-05)
+
+**1. La clé API voyageait dans la query string.** `...:generateContent?key=<clé>` — donc capturable par tout intermédiaire qui journalise des URL : un proxy, un traqueur d'erreurs, un export devtools. Elle passe en en-tête `x-goog-api-key`.
+
+**Vérifié contre la vraie API, pas déduit** : sans clé du tout, elle répond `403 "Method doesn't allow unregistered callers"` ; avec la clé en en-tête (invalide exprès), `400 "API key not valid"`. La deuxième réponse prouve que l'en-tête est bien lu — c'est la différence entre « la clé est refusée » et « aucune clé trouvée ».
+
+**2. Tout échec de génération se lisait pareil.** Un prompt refusé pour raisons de sécurité, une réponse coupée au plafond de tokens et un payload réellement malformé produisaient tous les trois « Unexpected Gemini response shape » — sur le seul chemin où le modèle a le droit de dire non, et précisément sur le ton roast, qui par construction pousse à la limite de ce qu'un modèle accepte d'écrire. `response.ts` lit maintenant `promptFeedback.blockReason` et `candidates[0].finishReason` et nomme la cause. Aucun de ces cas ne mérite un repli sur un autre modèle — c'est une propriété de la requête, pas du modèle — ce que la boucle de repli respectait déjà (elle ne retente que sur erreur HTTP ou réseau) : seul le message manquait. Le payload n'est plus dumpé en entier dans le message, mais tronqué à 300 caractères.
+
+**3. `maxOutputTokens`** ajouté (4096, généreux) pour plafonner une réponse qui s'emballe. Utile surtout maintenant que `MAX_TOKENS` est diagnosticable.
+
+**Découpage assumé : `responseSchema` et l'appel unique partent en R-25.** Les deux modifient la **requête** envoyée à Gemini, sur la seule fonctionnalité IA du produit, qui **fonctionne en production**. Aucun des deux n'est vérifiable ici.
+
+*Ce qui a changé depuis l'étape 6* : `generateContent` est de nouveau **joignable** depuis ce bac à sable (400 rapide sur clé invalide — le blocage silencieux documenté à l'étape 6 a disparu). Ce qui manque n'est plus le réseau mais une **clé valide** : sans `.env.local`, pas de génération réussie, donc rien à valider contre.
+
+- Un `responseSchema` mal formé fait renvoyer 400, qui est **non retriable** dans notre client : tous les Deep dive casseraient jusqu'à correction.
+- L'appel unique ne gagne pas de latence (les deux tons partent déjà en parallèle, donc la latence est celle du plus lent, pas la somme) mais divise le quota par deux. Le risque est un prompt unique portant à la fois le style neutre et le style roast avec son garde-fou : contamination de ton plausible, sur un différenciateur produit, et ça se juge sur des sorties réelles.
+
+**Vérifié en réel** : 208 tests unitaires (+7), lint/tsc/build propres, 37 specs Playwright, plus les deux requêtes HTTP contre la vraie API décrites plus haut.
+
+### R-17 : l'infra entre dans le repo (2026-09-05)
+
+**Constat.** Aucun `firestore.rules`, aucun `firebase.json`, aucun `vercel.json` : toute la configuration Firebase et Vercel vivait uniquement dans des tableaux de bord. Impossible de savoir, en lisant le repo, si les règles Firestore interdisent bien tout accès client. Et `.env.local.example` ne mentionnait ni `ADMIN_DASHBOARD_PASSWORD` ni `GOATCOUNTER_API_TOKEN`, pourtant tous deux requis en production — inventaire fait par `grep` sur `process.env` plutôt qu'à la mémoire : 8 variables lues par le code, 6 documentées.
+
+**`firestore.rules` en deny-all.** Ça ne change rien au fonctionnement : tout passe par l'Admin SDK côté serveur, qui contourne les règles. Le fichier existe pour deux raisons — que l'intention (« aucun client ne touche ces données ») vive sous contrôle de version plutôt que dans une console qu'il faut penser à ouvrir, et que si un SDK client est ajouté un jour, il démarre **fermé**. Le défaut dangereux est l'inverse : des règles laissées permissives par un assistant de création de projet, découvertes plus tard.
+
+**`.env.local.example` complété et réorganisé** en trois blocs — requis pour que l'app score, requis en production pour les fonctionnalités concernées, optionnel — avec pour chacun ce qui casse en son absence. `ADMIN_DASHBOARD_PASSWORD` en particulier **échoue fermé** : sans lui, `/admin/stats` renvoie 401 à tout le monde, y compris à Antoine. C'est le défaut voulu, mais rien dans le repo ne le disait.
+
+**Deux actions manuelles restent côté Antoine** : déployer les règles (`npx firebase-tools deploy --only firestore:rules`) et confirmer dans la console Firebase que celles réellement en place sont bien en deny. Ce fichier documente l'intention ; il ne s'applique qu'une fois déployé.
+
+**Pas de `vercel.json`** : rien à y mettre aujourd'hui. Le seul réglage qui aurait pu y aller est `maxDuration`, déclaré en R-15 dans la route elle-même, ce qui est plus proche du code qui en a besoin.
+
+### R-18 : dépendances et config TypeScript (2026-09-05) — clôt le lot E
+
+**Les 6 vulnérabilités modérées se réduisaient à une seule advisory racine** : `uuid` (<11.1.1, CVSS 7,5), tirée par `gaxios` et `teeny-request` sous `@google-cloud/storage` sous `firebase-admin`. Le reste n'était que la même faille remontée à travers la chaîne.
+
+`npm audit fix` ne changeait **rien** (aucun correctif non cassant), et sa suggestion « à jour » était de **rétrograder `firebase-admin` de 14 à 10.3.0** — quatre majeures en arrière, manifestement pire que le mal.
+
+Correctif retenu : un `overrides` npm forçant `uuid` à `^11.1.1`. Ciblé, et **vérifié plutôt que supposé** avant d'être gardé : `gaxios` et `teeny-request` n'utilisent que `uuid.v4` via un `require("uuid")` CJS, qui fonctionne toujours en v11 (testé en chargeant réellement le module), et `firebase-admin/app` comme `firebase-admin/firestore` se chargent normalement. `npm audit --omit=dev` passe de 6 à **0**. Vérifié aussi que `npm ci` — ce qu'exécute la CI — résout bien `uuid@11.1.1` depuis le lockfile, dans un dossier vierge.
+
+**Le remplacement de `firebase-admin` par `@google-cloud/firestore`, évalué puis écarté — avec une mesure.** Le constat R-18 supposait un gain de cold start. Mesuré : importer `firebase-admin/firestore` charge 455 modules dont **zéro** venant de `@google-cloud/storage`. Le point d'entrée modulaire évite déjà Storage à l'exécution. Et le poids réel est `@google-cloud/firestore` (6,2 Mo), chargé dans les deux cas ; `firebase-admin` n'ajoute qu'un wrapper de 2,1 Mo. Le gain n'est pas net, donc pas de changement du socle de données d'une app qui marche. Ne pas y revenir sans une mesure de cold start réelle sur Vercel qui contredirait celle-ci.
+
+**Config TypeScript** : `baseUrl` retiré (déprécié, `tsc` l'annonçait comme erreur future en TS 7) — `paths` fonctionne seul avec des entrées relatives au fichier. `target` passé de `ES2017` à `ES2022`. `@types/node` de 20 à 22, et un champ `engines: { node: ">=22" }` : Vercel exécute ce projet sur Node 22 et rien dans le repo ne le disait, ce qui est exactement comme on finit par déboguer sur 18.
+
+`npx tsc --noEmit` ne sort maintenant **aucun** avertissement, alors qu'il signalait la dépréciation de `baseUrl` depuis le début de cette revue.
+
+**Vérifié en réel** : 208 tests, 37 specs Playwright, lint/tsc/build propres, `npm audit --omit=dev` à zéro, et `npm ci` rejoué dans un dossier vierge.
+
+### R-19 : ce qu'axe ne peut pas voir (2026-09-05) — lot F
+
+La passe axe ajoutée en R-07 couvrait contraste, noms et rôles. Elle ne dit rien de ce qui se passe **quand l'écran change** — et c'est là qu'était le vrai problème.
+
+**Le focus retombait sur `<body>` à chaque transition.** Répondre supprime le bouton qui avait le focus et remplace la question : un utilisateur clavier devait re-tabuler depuis le haut de la page, **quinze fois de suite**. Le focus va maintenant sur la nouvelle question, ce qui est aussi ce qui la fait annoncer par un lecteur d'écran.
+
+- La zone question porte `role="group"` + `aria-label` = le compteur, donc **une seule** annonce dit « Q 3 / 15 » puis la question. Un `aria-live` sur le compteur, comme le prévoyait le constat initial, aurait couru contre le déplacement de focus et fait parler deux fois — écart assumé.
+- Jamais au premier rendu : voler le focus à l'arrivée est un défaut d'accessibilité à part entière. Un `useRef` distingue « première peinture » de « la question a changé ».
+- Même traitement pour les autres transitions de cet écran : le sélecteur de ton prend le focus en montant (il ne monte qu'après la 15ᵉ réponse, donc c'est exactement la bonne transition), et l'écran d'erreur devient `role="alert"` et prend le focus. Idem sur les 10 questions du Deep dive.
+- Les conteneurs focalisés **programmatiquement** n'affichent pas d'anneau : l'utilisateur n'y a pas tabulé, et ils ne sont pas atteignables au clavier (`tabIndex={-1}`), donc aucun indicateur réel n'est perdu.
+
+**La popover de glossaire annonçait un dialogue et laissait l'utilisateur dehors.** Elle avait `role="dialog"` mais ne prenait jamais le focus ; Escape ne marchait que parce que le gestionnaire est sur `document`. Elle prend le focus à l'ouverture et le **rend à ce qui l'a ouverte** à la fermeture — sans quoi fermer laisse le focus sur `<body>` et le lecteur perd sa place au milieu d'une question. Garde nécessaire : les deux placements (ancré/docké) sont rendus **simultanément**, le CSS choisissant selon le viewport, donc sans le garde `docked` la copie mobile prendrait le focus sur desktop.
+
+**`StageProgress` était cinq `div` décoratifs, sans rôle.** Devient un `role="progressbar"` avec `aria-valuemin/max/now` et un nom localisé fourni par l'appelant (les segments n'ont aucun texte propre). `aria-valuenow` est **borné** : l'écran de contexte libre passe `total + 1` pour peindre tous les segments comme faits, ce qui est correct visuellement mais invalide en ARIA.
+
+**Le textarea de contexte libre n'avait aucun nom accessible** — son intitulé visible est dans une `QuestionCard` au-dessus, pas dans un `<label>`. Le prop `aria-label` est désormais **obligatoire** dans le type, pour qu'un futur appelant ne puisse pas l'oublier.
+
+**Vérifié en réel** : nouveau fichier `e2e/keyboard.spec.ts`, **5 specs** qui vérifient le comportement et pas la présence d'attributs — le focus suit la question en avant *et* en arrière, atterrit sur le sélecteur de ton et sur l'écran d'erreur, la barre de progression annonce sa position et la met à jour à la fin d'une étape, et la popover prend le focus puis le rend au déclencheur après Escape. 42 specs Playwright au total, 208 tests unitaires, lint/tsc/build propres.
+
+**Ce que R-19 ne règle pas** : les 3 paires de contraste sous AA relevées en R-07 restent ouvertes en **R-22**. Ce sont des couleurs de marque livrées par Claude Design, pas des attributs à corriger.
+
+### R-24 : les pages de contenu sont enfin statiques (2026-09-05)
+
+Seconde moitié de R-13, découpée au moment de le livrer. R-13 avait donné une URL par langue ; **toutes les routes restaient rendues à la demande**, donc aucune des 36 pages indexables n'était servie depuis le CDN — une invocation de fonction par visite sur exactement les pages que la phase SEO du plan de croissance existe pour attirer.
+
+**Deux layouts racine, et le premier n'est pas là où REVIEW.md l'annonçait.** Le constat proposait `(content)/layout.tsx` + `(app)/layout.tsx`. Le premier ne peut pas marcher : un layout au-dessus de `[locale]` ne voit pas le paramètre de langue, donc ne sait pas quoi mettre dans `<html lang>` — et c'est précisément ce paramètre qui remplace la lecture d'en-tête. Vérifié empiriquement plutôt que supposé : **Next n'exige pas qu'un layout racine soit à la racine d'un groupe**, seulement que chaque route en ait un dans sa chaîne. Donc `src/app/[locale]/layout.tsx` est lui-même le layout racine des pages de contenu, et `src/app/(app)/layout.tsx` celui des pages applicatives. Le chrome commun (polices `next/font`, script GoatCounter, `LocaleProvider`, `metadataBase`, favicons) vit dans `src/app/root-shell.tsx`, appelé par les deux — sinon il diverge en silence, ce que le constat signalait déjà.
+
+`app/not-found.tsx` global, annoncé comme le point de friction connu de cette structure : **aucun problème en pratique**. `/_not-found` passe même de `ƒ` à `○`, et `/nonsense` renvoie toujours 404.
+
+**Le vrai piège, qui n'était dans aucun des deux documents : un groupe de routes renomme les routes de métadonnées.** Passer `r/[id]` sous `(app)` a transformé `/r/<id>/opengraph-image` en `/r/<id>/opengraph-image-1u74ed`. Ce n'est pas un hasard : Next ajoute un hash à toute route `opengraph-image` dont le chemin parent contient un segment de groupe, pour que deux groupes ne se marchent pas dessus (`next/dist/lib/metadata/get-metadata-route.js`, `getMetadataRouteSuffix`) — lu dans la source installée après avoir reconstruit `main` dans un worktree pour confirmer que le hash venait bien de mon changement et pas d'ailleurs.
+
+La balise `og:image` reste cohérente, donc tout nouveau scrape fonctionne. Mais l'ancienne URL est celle que les plateformes ont déjà aspirée pour les résultats partagés jusqu'ici, et SPEC.md §12 est explicite sur ce qu'une URL morte coûte des mois après un partage. **Alias de compatibilité** dans `next.config.mjs` (une réécriture, pas une redirection). Le hash y est codé en dur parce qu'il est généré au build — ce n'est acceptable que parce qu'un test l'épingle : `e2e/locale-routing.spec.ts` demande l'ancien chemin et exige un vrai PNG, donc si Next change son algorithme la suite rougit au lieu de laisser l'alias pointer dans le vide. Une seconde spec vérifie l'URL que la page **déclare** réellement dans `og:image`, plutôt qu'un chemin recopié dans le test qui pourrait diverger d'elle.
+
+**Une structure essayée puis abandonnée, pour la raison qui compte.** Avant d'accepter ce renommage, j'ai construit la variante sans aucun groupe : un layout racine par route (`quiz/`, `r/`, `deep-dive/`, `admin/`), qui gardait toutes les URL identiques. Elle marche, et **3 specs analytics sont tombées** — pas un défaut du test, le symptôme exact du problème : traverser un layout racine force un chargement complet de document, donc `window` est réinitialisé. Autrement dit `/quiz` → `/r/<id>` (un `router.push`, aujourd'hui une navigation client) serait devenu un rechargement de page sur l'écran que tout le funnel existe pour atteindre, et `/r/<id>` → `/deep-dive/<id>` aussi. Les quatre routes applicatives partagent donc un seul layout racine. C'est le sens de l'arbitrage : quelques partages d'une semaine dont l'aperçu est déjà en cache sous forme d'image, contre la qualité de la transition pour tous les utilisateurs à venir.
+
+À noter, le constat de REVIEW.md affirmait que `/en` → `/quiz` était « déjà une vraie navigation » : c'était faux, les deux partageaient le layout racine unique. Ce lien-là devient effectivement un chargement complet — accepté, c'est un clic sur une landing, pas la fin du parcours.
+
+**Cookie de langue resserré au passage.** Le proxy posait `tdg_locale` sur **chaque** requête préfixée, y compris quand le cookie valait déjà ça. Sur des pages désormais mises en cache par le CDN, un `Set-Cookie` qui répète ce que le navigateur a déjà est du bruit inutile sur exactement les réponses qu'on veut voir cachées. Il n'est plus écrit que quand la valeur change.
+
+**Vérifié en réel** (`next start`, requêtes HTTP directes) : les 36 pages de contenu sortent en `●` du build et répondent avec `x-nextjs-cache: HIT`, `x-nextjs-prerender: 1` et `Cache-Control: s-maxage=31536000` ; `/quiz`, `/r/[id]`, `/deep-dive`, `/admin`, `/api` restent `ƒ` avec `no-store` ; `<html lang>` correct dans les deux arbres, y compris avec un cookie contradictoire (`/en` avec `tdg_locale=fr` reste `en`) ; les 3 redirections héritées 308 avec la query string intacte ; `Accept-Language: fr` sur `/` mène toujours à `/fr` ; les deux adresses d'image OG servent un PNG ; `/nonsense` 404, `/admin/stats` 401. 214 tests unitaires (+6 sur le cookie du proxy), **43 specs Playwright** (+1), lint/tsc propres.
+
+**À confirmer après déploiement** : que Vercel serve bien ces pages depuis son CDN (`x-vercel-cache: HIT` sur `/en/glossary/cac` rechargée deux fois). La vérification ci-dessus porte sur le cache de prérendu de Next sous `next start`, pas sur le CDN de Vercel — et le proxy tourne devant ces routes, ce qui est le seul point où les deux pourraient se comporter différemment.
+
+**Piège d'outillage rencontré** : `pkill -f next-server` **tue le shell** (le motif se retrouve dans la ligne de commande du shell lui-même). Utiliser `pgrep -f 'next[-]server'` puis `kill` par PID. Et `npm run build` se lance depuis la racine du paquet quel que soit le répertoire courant, alors que `npx next start` non — un `next start` lancé depuis `src/` échoue sur « Could not find a production build » alors que le build vient de réussir.
+
+### R-20 : trois petits plus produit (2026-09-05)
+
+Trois compléments indépendants, livrés ensemble parce qu'ils partagent le même magasin `localStorage` et la même question : sans comptes utilisateurs (SPEC.md §5), qu'est-ce que le produit se rappelle de toi ?
+
+**1. Reprise du Deep dive après un rechargement.** Rien n'y était persisté — c'était un choix explicite à l'étape 13 (« parcours court et optionnel, pas la promesse "jamais perdu" de SPEC.md §4 sur les 15 questions »). Le parcours a grossi depuis : 10 questions, puis un 11ᵉ écran de contexte libre (ADDENDUM-02 §1), puis une génération qui peut prendre une minute. Perdre tout ça à un rechargement n'est plus un petit coût. Nouvelle clé `tdg.deepDive.v1`, **une seule entrée** (pas une liste) : c'est une progression en cours, donc une nouvelle remplace l'ancienne, et elle n'est rendue que pour l'id de soumission sous lequel elle a été écrite — la progression d'un résultat ne peut pas fuir dans un autre. Le point de reprise est **dérivé des réponses stockées** (première question sans réponse, ou directement l'écran de contexte si les 10 sont là), jamais un second état à synchroniser — la même règle que le quiz. Effacée **au succès**, pas à l'abandon : `freeContext` est un fondateur qui décrit son entreprise avec ses mots, il n'a aucune raison de survivre à la requête pour laquelle il a été écrit.
+
+**2. Dernier score sur la landing.** Un résultat n'est atteignable que par son URL ; perdue, il est perdu, même pour son auteur. Les ids étaient déjà sur l'appareil (stockés pour le jeton de propriétaire, R-01) : il ne manquait que le score. Ajouté à `StoredResult.total`, et **renvoyé par l'API** (`POST /api/submissions` répond maintenant `{ id, ownerToken, total }`) plutôt que recalculé côté client. Le client aurait pu appeler `computeScore` — même fonction pure, même entrée, et `copy-library` est déjà dans son bundle — mais ç'aurait été *re*calculer ce que le serveur venait de calculer et d'écrire : si le barème changeait un jour, la landing afficherait le nouveau score pour un ancien résultat. Le test de forme de R-02 (`Object.keys(payload)` en liste **exacte**) a rougi comme prévu : mis à jour plutôt qu'assoupli, pour que le prochain champ qui apparaît reste une décision et pas un accident. `LastResult` est un îlot client comme `RefCapture`, pour que la landing reste un Server Component pré-rendu (R-24) ; lecture de `localStorage` **après montage**, et l'état de départ vide est aussi le bon défaut ici — un nouveau visiteur, qui est l'essentiel du trafic de cette page, ne voit rien apparaître puis disparaître.
+
+**3. Benchmark « Moyenne de tous les Tours ».** Document agrégé `stats/global` (`count` + `scoreSum`, `FieldValue.increment`), pas un scan : `growth-stats.ts` calcule la même moyenne en lisant toute la collection, ce qui va pour un tableau de bord qu'une personne ouvre, mais le faire à chaque vue d'un résultat partagé rendrait exactement ce que R-14 venait de gagner. Lecture cachée une heure (même motif que R-14) — un nombre qui bouge d'une fraction de point par soumission n'a pas besoin de mieux.
+
+Trois garde-fous, tous délibérés :
+- **L'incrément ne peut jamais faire échouer une soumission.** Quand il tourne, le résultat est déjà écrit ; lever ici rendrait un 502 pour un Tour qui a réussi. Avalé et journalisé — le pire cas est une soumission absente d'une moyenne sur des centaines. Testé (`recordSubmissionInGlobalStats` qui rejette → toujours 201).
+- **Rien ne s'affiche sous 30 soumissions.** Le compteur démarre à zéro le jour du déploiement, donc « la moyenne » vaudrait deux personnes le premier jour. Un benchmark auquel on ne peut pas se fier est pire qu'aucun, sur l'écran dont la promesse est un score ré-explicable en dix secondes.
+- **Jamais sur `/r/sample`.** Ses chiffres ne sont pas réels ; une vraie moyenne à côté brouillerait la ligne que le badge « pas tes données » existe pour tracer. Épinglé par une spec.
+
+**Conséquence à connaître** : ce chiffre peut légitimement différer de celui de `/admin/stats`, qui lit toute la collection depuis toujours. Le compteur ne couvre que les soumissions créées après son déploiement. Documenté sur place plutôt que découvert plus tard.
+
+**Vérifié en réel.** 231 tests unitaires (+14), **51 specs Playwright** (+8), lint/tsc/build propres. Et non-vacuité prouvée plutôt que supposée : en neutralisant la restauration du Deep dive et en reconstruisant, **exactement les 3 specs de persistance tombent** — elles mesurent bien quelque chose. Le benchmark ne peut pas être exercé ici (pas de Firestore), donc son rendu a été vérifié via un patch **local et jamais committé** donnant temporairement une moyenne à l'échantillon : ligne correcte en EN et FR, placée sous le verdict et au-dessus du crédit, dans le bon ordre de lecture (score → verdict → comparaison → attribution) ; patch retiré et absence de trace vérifiée avant commit. Captures relues : landing EN/FR desktop + FR mobile, résultat EN/FR.
+
+**Fait constaté au passage, consigné en R-21 plutôt que corrigé** : la landing déborde horizontalement à 390 px **dans les deux langues** maintenant (`scrollWidth` 515 en FR, 452 en EN pour un viewport de 390), et non plus seulement en français comme le disait le constat d'origine — R-13 a ajouté le sélecteur de langue dans ce même header. Mesuré avec et sans le nouveau lien « dernier score » : chiffres identiques, donc il n'y contribue pas (son bord droit est à 328).
+
+**À confirmer après déploiement** : l'incrément `stats/global` réel dans Firestore, et l'apparition du benchmark une fois les 30 soumissions atteintes. Ce sont les seules parties de R-20 qui touchent Firestore.
+
+### Couture dans le fond de page (2026-09-05, signalé par Antoine)
+
+**Le symptôme, tel qu'il a été vu** : sur deux captures du même bas de page, une en français une en anglais, une ligne dans le fond ne tombait pas au même endroit par rapport au filet du pied de page. « Moche », et à juste titre.
+
+**La cause.** `--ground-lift` (`tokens/shape.css`) est constitué de deux dégradés radiaux peints sur `body`, et la zone de positionnement d'un fond est la boîte de l'élément lui-même. Or `globals.css` avait `html, body { height: 100% }` : la boîte du `body` faisait donc exactement une hauteur de fenêtre pendant que la page, elle, défilait bien au-delà. `background-repeat` valant `repeat` par défaut, les dégradés se **répétaient en mosaïque**, laissant une couture horizontale franche à chaque multiple de la hauteur de fenêtre.
+
+Et comme cette couture est à un `y` fixe alors que la hauteur de page varie avec la copie, elle tombait à une distance différente du pied de page en français et en anglais. C'est exactement comme ça qu'elle s'est fait repérer : le même écran, deux langues, la ligne ailleurs.
+
+**Mesuré, pas supposé** : capture pleine page, colonne d'un pixel dans la gouttière gauche (là où il n'y a que du fond), écart entre lignes voisines. Le tramage propre au dégradé mesure ~3/255 partout ; à `y=700` dans une fenêtre de 700 px, l'écart était de **28**, sur les trois pages testées. Après correctif, plus aucun écart ≥10 ailleurs que sur les deux filets pointillés eux-mêmes, qui traversent bien toute la largeur (ce sont eux, à ~136, et non le fond).
+
+**Correctif** : `min-height: 100%` au lieu de `height: 100%` sur le `body` (une page courte remplit toujours la fenêtre, mais la boîte grandit avec le contenu), plus `background-repeat: no-repeat` en ceinture et bretelles. Le « page ground » couvre alors la page une seule fois, ce qui est précisément ce que `tokens/shape.css` en dit. **Aucun token n'a été touché** — c'était un défaut d'intégration CSS, pas une valeur du design system.
+
+**Test de non-régression** (`e2e/page-ground.spec.ts`) : l'écart de couleur est mesuré **dans le navigateur**, en décodant la capture via un `canvas` plutôt qu'avec une bibliothèque d'images — `sharp` n'est présent ici qu'en dépendance transitive de Next et la CI ne doit pas reposer là-dessus. L'échantillonnage vise uniquement les multiples de la hauteur de fenêtre, seuls endroits où une mosaïque peut coudre ; balayer toute la colonne signalerait les filets pointillés, qui sont voulus. Deux assertions de propriété complètent la mesure (`body` couvre bien tout le document, `background-repeat` vaut `no-repeat`). Non-vacuité prouvée : en réintroduisant `height: 100%` et en reconstruisant, **les 5 specs tombent**.
+
+**Piège d'outillage à retenir** : `npx playwright test` ne type-vérifie pas les specs, `next build` si (il couvre `e2e/`). Une spec qui passe au runner peut casser le build — lancer `npx tsc --noEmit` **avant** de conclure qu'une nouvelle spec est bonne.
+
+**Trouvé en vérifiant, consigné plutôt qu'absorbé** : une URL inconnue (`/nonsense`) rend le document d'erreur intégré de Next, sans aucune feuille de style de l'app. **Ce n'est pas une régression de R-24** — vérifié en reconstruisant `main` au commit précédent dans un worktree, le résultat est identique : il n'y a simplement jamais eu d'`app/not-found.tsx` dans ce repo. Voir `REVIEW.md` **R-26**.
+
+### Le Deep dive suit enfin le lecteur, et la page de résultat gagne un sélecteur de langue (2026-09-05, signalé par Antoine)
+
+Antoine a fait le premier vrai Tour de bout en bout demandé par sa liste, puis ouvert son résultat en anglais puis en français. Deux constats, liés.
+
+**1. R-09 ne couvrait que la moitié du problème.** Le verdict Quick suit bien le lecteur depuis R-09 — mais dès qu'un Deep dive existe, il **remplace** ces phrases par pilier (`ResultView`, ligne 114 : `deepVerdict ? deepVerdict.pillarRecommendations[pillar] : verdict.pillarSentences[pillar]`) et fournit l'action prioritaire. Or `DeepDiveResult.verdicts` ne stockait **que la langue de génération**. Résultat exact de ce qu'il a vu : les explications des notes et la proposition d'amélioration restées en anglais sur une page par ailleurs française.
+
+Pourquoi R-09 ne l'avait pas attrapé : sa spec de non-régression porte sur `/r/sample`, la seule page de résultat qui s'affiche sans Firestore — et l'échantillon n'a par construction aucun Deep dive.
+
+**Le correctif, et pourquoi celui-là.** Un verdict Quick est un pur lookup dans `copy-library.ts` : le résoudre par requête ne coûte rien. Une sortie Gemini, non. Trois options écartées : régénérer à la volée quand un lecteur d'une autre langue arrive (un appel Gemini sur une vue de page publique — latence inacceptable et surface d'abus), traduire à la lecture (même problème), ou n'afficher le Deep dive qu'aux lecteurs de la bonne langue (le propriétaire perdrait l'action prioritaire pour laquelle il a répondu à 10 questions de plus). Retenu : **générer chaque langue à l'avance**, exactement le raisonnement déjà appliqué aux deux tons à l'étape 13. `completeDeepDiveFlow` fait donc 2 tons × 2 langues = 4 appels, en parallèle, donc la latence reste celle du plus lent et pas la somme.
+
+- **La langue de complétion est requise, les autres sont au mieux.** Un échec sur la seconde langue est journalisé et avalé ; le Deep dive est conservé. L'inverse — perdre le résultat entier parce qu'une génération secondaire a floppé — serait pire pour l'auteur que de lire une recommandation dans la mauvaise langue. `toDeepDiveView` retombe alors sur la langue de génération.
+- **Chaque prompt est résolu entièrement dans la langue qu'il génère** (questions Quick, réponses choisies, libellés de contexte). Seul `freeContext` passe tel quel : ce sont les mots du fondateur, dans la langue qu'il a choisie.
+- **Compatibilité ascendante assumée** : le champ `verdicts` continue d'être écrit dans la langue de génération, et `localized` s'y ajoute. Un document écrit avant ce correctif n'a pas `localized` et retombe donc sur l'ancien comportement — pas une erreur.
+- **Conséquence opérationnelle à connaître** : la route Deep dive est idempotente (« si `deepDive` existe déjà, renvoyer tel quel »), donc **un Deep dive déjà généré ne peut pas être régénéré**. Les documents existants restent monolingues ; seul un nouveau Tour + Deep dive est bilingue.
+- **Coût quota** : la limite de débit reste à 5 Deep dive/h/IP, ce qui fait maintenant 20 générations et non plus 10. Gardé à 5 — un faux positif ici veut dire refuser un vrai fondateur, et 20 reste négligeable face au quota — mais l'arithmétique est écrite dans le commentaire pour que la prochaine personne voie 20.
+
+**2. Aucun sélecteur de langue sur la page de résultat.** R-13 l'avait posé sur les pages de contenu, qui portent leur langue dans l'URL. La page de résultat n'en a pas et n'en aura pas (`lib/i18n/routes.ts` : un lien partagé doit vivre indéfiniment, et depuis R-09 un résultat n'a pas de langue propre). Elle était donc la seule page qui rend dans la langue du lecteur **sans lui donner le moyen de la dire** — Antoine a dû passer `?lang=` à la main.
+
+`LocaleSwitcher` accepte maintenant l'absence de `path` : il pointe alors sur `?lang=<locale>`, une URL relative réduite à la query, qui se résout contre l'adresse courante — le composant n'a donc pas besoin de connaître le chemin, et ça marche aussi bien sur `/r/<id>` que partout ailleurs. Le proxy replie ce `?lang=` dans le cookie, donc le choix suit jusqu'au `/quiz` si le lecteur enchaîne sur son propre Tour. `shareUrl()` retire déjà `lang=` (R-10), donc le lien partagé reste neutre — déjà couvert par une spec existante.
+
+**Volontairement pas ajouté sur `/quiz` ni `/deep-dive/<id>`** : même raisonnement que le pied de page — ce sont les deux parcours que le produit existe pour faire terminer, et un changement de langue y provoque un rechargement complet. Le choix se fait avant, sur la landing ou sur le résultat. Épinglé par une spec, pour que l'inverse soit une décision.
+
+**Vérifié en réel** : 237 tests unitaires (+6), **59 specs Playwright** (+3), lint/tsc/build propres. Par requête HTTP : `/r/sample` émet bien `?lang=en` et `?lang=fr`, `/r/sample?lang=fr` renvoie `<html lang="fr">` **et** le verdict français, pose le cookie, et `/quiz` avec ce cookie s'affiche en français. Captures relues : header desktop EN/FR et mobile FR, aucun débordement horizontal. Les 4 générations et le repli sur échec d'une langue secondaire sont couverts par des tests unitaires avec `callGemini` bouchonné — la partie non vérifiable ici reste la qualité réelle du texte français produit par Gemini, à confirmer après déploiement.
+
+### Vérification contre les services réels, sans me confier les clés (2026-09-05)
+
+Antoine a demandé s'il pouvait me donner un accès Firebase/Gemini, puis a proposé lui-même de passer par des secrets GitHub. **Les secrets GitHub ne sont injectés que dans les exécutions de workflows** — ma session est un conteneur séparé, je ne peux pas les lire, et le seul moyen d'y arriver serait un workflow qui les affiche, exactement l'anti-pattern qu'ils existent pour empêcher. Mais l'idée derrière est meilleure que celle que j'avais proposée (une clé de compte de service temporaire) : **déplacer la vérification là où sont les clés plutôt que d'amener les clés à moi**.
+
+**`.github/workflows/verify-live.yml`** — `workflow_dispatch` **uniquement**. Jamais `pull_request`, et surtout jamais `pull_request_target`, qui exécute du code de fork **avec** accès aux secrets : c'est comme ça que les dépôts fuient, et le passage en public en fait une exigence dure et non une préférence. `permissions: contents: read`, et un `concurrency` non annulable puisque ces sondes partagent une seule base réelle et nettoient derrière elles.
+
+**`vitest.live.config.ts` + `scripts/live/*.live.ts`.** Vitest comme lanceur plutôt qu'un script Node : il résout TypeScript et l'alias `@/`, donc une sonde **importe les modules de l'app** au lieu d'en réimplémenter une copie et de tester la copie. `vitest.config.ts` n'inclut que `src/**/*.test.ts`, donc ces fichiers ne peuvent pas entrer dans la suite normale par accident — vérifié avec `vitest list` sur les deux configs.
+
+- `production.live.ts` (secrets Firebase seuls) exerce le **site déployé en HTTP** et n'utilise l'Admin SDK que pour les assertions et le nettoyage — ce qui est vérifié est donc la production, pas une reconstruction locale. Il couvre ce qui était encore manuel sur la liste d'Antoine : R-09 sur un **vrai** document (jamais prouvé jusqu'ici, la spec existante ne portant que sur `/r/sample`, qui n'a aucun Deep dive par construction), l'image OG, le compteur `stats/global`, le Deep dive bilingue, et l'absence du contexte libre dans la page publique (R-02).
+- `gemini.live.ts` (clé Gemini seule) appelle `callGeminiWithFallback` et `buildDeepDivePrompt` réels. C'est ce qui débloque **R-25** : `responseSchema` et l'appel unique modifient la requête de la seule fonctionnalité IA du produit, et un schéma mal formé renvoie 400, que ce client traite comme non retriable — tous les Deep dive casseraient jusqu'à correction.
+
+**Le nettoyage annule aussi l'incrément `stats/global`** (`FieldValue.increment(-1)` et `-total`), dans un `afterAll` qui tourne même si une assertion a échoué : sinon chaque vérification fausserait la moyenne affichée aux vrais utilisateurs. Le texte français généré est **imprimé, pas assert** — seul un humain peut juger si la voix roast survit à la traduction, et c'est précisément pour ça que la sonde tourne là où Antoine peut la lire.
+
+**Passage du dépôt en public.** Historique scanné avant (voir `REVIEW.md` R-05) : propre. `LICENSE` (AGPL-3.0) et `README.md` ajoutés, le dépôt n'en avait aucun — pour un projet dont la vocation est le portfolio, arriver sur une arborescence nue était un vrai manque. AGPL plutôt que MIT parce que le seul scénario qui coûterait vraiment quelque chose ici est quelqu'un qui déploie une copie de Tour de Growth en service, et c'est exactement ce que l'AGPL couvre ; ça ne gêne en rien le public réel du dépôt (des gens qui le lisent), et Antoine étant seul détenteur des droits, il peut relicencier quand il veut. Le README note aussi que la licence couvre le **code**, pas le nom ni l'identité visuelle.
+
+### Premier run réel du workflow de vérification (2026-09-05)
+
+Antoine a posé les 4 secrets et lancé « Verify against live services ». **7 sondes sur 8 vertes du premier coup**, et elles ferment plusieurs « à confirmer après déploiement » qui traînaient dans ce fichier :
+
+- **Le Deep dive bilingue fonctionne en production** — `localized` contient bien `en` et `fr`, `gemini-3.7-flash` a répondu aux deux, et un lecteur FR voit bien le texte FR. Le français est de vrai français, pas de l'anglais traduit : Gemini a même localisé le métier (*physiotherapists* → *kinésithérapeute*).
+- **Latence : 11 s pour quatre générations en parallèle**, contre ~41 s mesurés à l'étape 12 pour deux. Passer de 2 à 4 appels n'a donc rien coûté — c'était l'hypothèse (`Promise.all`, latence du plus lent), elle est maintenant mesurée.
+- **R-09 sur un vrai document Firestore**, ce qui n'avait jamais été prouvé : la spec existante ne porte que sur `/r/sample`, qui n'a aucun Deep dive par construction.
+- **`stats/global` s'incrémente réellement** (`count: 4`), et le nettoyage annule bien l'incrément.
+
+**La sonde en échec était fausse, pas l'app.** Elle vérifiait que le mot « physiotherapists » n'apparaît pas sur la page publique — or il y est, **parce que Gemini l'a écrit dans ses propres recommandations**. C'est la fonctionnalité qui marche : le champ de contexte libre existe pour rendre les conseils spécifiques. Vérifié dans le log plutôt que supposé : la phrase brute (« onboarding is where people drop ») et la clé `freeContext` sont, elles, bien **absentes** de la page.
+
+Corrigé en testant l'invariant réel plutôt qu'un proxy : un **canari** (`TDG-CANARY-…`) glissé dans le contexte libre — du charabia que Gemini n'a aucune raison de reprendre dans un conseil, donc sa présence dans le HTML signifierait vraiment que le champ stocké a fui — plus l'absence des clés `freeContext`/`contextAnswers`/`modelUsed`, d'un id de question Deep dive, et de tout nom de modèle. Une sonde compagnon affirme l'inverse (le contexte du fondateur **doit** se retrouver dans les recommandations), pour que les deux ne soient plus confondues plus tard. Commentaire explicite dans le fichier : ne pas remettre l'ancienne assertion.
+
+**Fait produit à connaître, pas un défaut** : ce que quelqu'un écrit dans le champ de contexte libre façonne du texte qui atterrit sur une page qu'il peut partager. C'est inhérent à la fonctionnalité et l'auteur l'a choisi en écrivant le champ — mais ça mérite peut-être une ligne sous le champ un jour, à l'appréciation de l'agent produit.
+
+**Correctif de workflow au passage** : l'étape Gemini est passée en `if: ${{ !cancelled() && … }}`. Le premier run s'est arrêté avant elle parce que l'étape production sortait en 1 — quand on demande « both », l'échec de l'une ne doit pas masquer le résultat de l'autre.
+
+### Le probe Gemini trouve un vrai bug : les réponses tronquées passaient pour valides (2026-09-05)
+
+Second run du workflow : **production 9/9**, et la sonde Gemini en échec — cette fois sur un défaut réel de l'app, pas sur mon test.
+
+**Le symptôme.** `SyntaxError: Expected ',' or '}' after property value in JSON at position 2037`, levé dans `extractJson`. La réponse française du ton roast — la plus longue sortie que ce produit demande — revenait coupée en plein objet JSON.
+
+**La cause immédiate, et pourquoi R-16 ne l'avait pas couverte.** `extractGeminiText` inspectait `finishReason` **uniquement quand le texte était absent**. Or une réponse tronquée porte quand même la partie déjà écrite : elle était donc renvoyée comme un succès, et n'échouait que bien plus loin, dans `JSON.parse`, sous une forme qui ne dit rien de ce qui s'est réellement passé. C'est exactement l'opacité que R-16 existait pour supprimer — le test était simplement sur la mauvaise branche. Corrigé : `finishReason` est vérifié **avant** le texte, et tout ce qui n'est pas `STOP` lève une erreur nommée.
+
+**La cause de fond supposée — et démentie au run suivant.** J'avais avancé que les tokens de réflexion (ce sont des modèles à raisonnement, et ils partagent le budget `maxOutputTokens`) mangeaient le plafond de 4096, et relevé celui-ci à 16384.
+
+**Les chiffres ne soutiennent pas cette explication.** Le run n°3 a mesuré un vrai appel à `thoughts=765 answer=440` contre un plafond de 4096 : on en était très loin. La cause réelle de cette troncature reste **inconnue**. Le plafond relevé est conservé comme marge (seuls les tokens réellement produits sont facturés, donc ça ne coûte rien) mais il n'explique rien, et le commentaire dans `client.ts` le dit désormais explicitement plutôt que d'affirmer une cause commode.
+
+Ce qui reste acquis de cette investigation est le correctif de *signalement*, qui vaut par lui-même : le test était sur la mauvaise branche, c'est lisible dans le code, et si la troncature revient l'erreur nommera la raison et les compteurs au lieu d'exploser trois cadres plus loin.
+
+**Leçon de méthode** : j'ai instrumenté avant de conclure, et c'est l'instrumentation qui m'a contredit. Sans les compteurs imprimés dans la sonde, l'explication fausse serait restée dans ce fichier.
+
+**Conséquence utilisateur, à ne pas minimiser** : quand cette troncature touche la langue de complétion, `completeDeepDiveFlow` échoue et l'utilisateur reçoit `DEEP_DIVE_FAILED` après avoir répondu à 10 questions de plus. C'est intermittent (le run production, lui, est passé deux fois) — donc c'était un échec réel et difficile à reproduire, que seule une sonde contre le vrai service pouvait attraper.
+
+3 tests de non-régression ajoutés (`response.test.ts`) : une réponse tronquée **avec** texte partiel doit lever, l'erreur doit porter les compteurs de tokens, et une réponse `STOP` normale doit toujours passer.
+
+### La chaîne de repli Gemini n'attendait jamais (2026-09-05)
+
+Run n°3 : **production 9/9 pour la troisième fois**, et la sonde Gemini échoue sur autre chose encore :
+
+```
+All Gemini model candidates failed. Last error: gemini-flash-latest → HTTP 503
+```
+
+Les quatre candidats ont répondu 503. Ce n'est pas notre code — mais ça expose une vraie faiblesse de conception : **la boucle enchaînait les quatre modèles sans aucune pause**. Le repli protégeait donc contre « ce modèle-là est indisponible », et pas du tout contre « l'API est surchargée pendant deux secondes », qui est le cas de loin le plus fréquent. Toute la chaîne brûlait en moins d'une seconde et l'utilisateur recevait `DEEP_DIVE_FAILED` après avoir répondu à 10 questions de plus.
+
+**Backoff exponentiel avec jitter complet** (500 ms, 1 s, 2 s de plafond, valeur tirée au hasard en dessous). Deux détails qui ne sont pas décoratifs :
+
+- **Le jitter compte particulièrement ici** parce qu'un Deep dive lance **quatre générations en parallèle** (2 tons × 2 langues). Sans lui, elles échouent ensemble et repartent ensemble, au même instant, contre une API déjà en difficulté.
+- **Aucune pause après un 404** : un nom de modèle qui n'existe pas ne se mettra pas à exister parce qu'on a attendu. La condition lit le dernier statut plutôt que d'attendre aveuglément.
+
+`sleepImpl` est injecté comme `fetchImpl` l'était déjà, pour que les tests exercent la politique de retry sans attendre réellement — la suite du client est passée de 8 s à 325 ms au passage, les anciens tests dormant pour de vrai.
+
+**Non-vacuité prouvée finement** : en retirant *seulement* le jitter, seul le test de jitter tombe ; en retirant la pause entière, les deux tests de pause tombent. Les tests distinguent donc bien les deux propriétés.
+
+### Run n°4 : Gemini est réellement dégradé, et la production tombe avec (2026-09-06)
+
+Le backoff livré au run précédent est en place, et le 503 revient quand même — mais cette fois **la sonde production échoue aussi**, avec un vrai `DEEP_DIVE_FAILED` en 502. Ce n'est donc pas la forme de ma sonde : c'est l'API Gemini qui refuse, et un vrai utilisateur aurait exactement le même échec au même moment.
+
+Ce que le run apprend malgré tout :
+
+- **Le backoff fonctionne** : le premier appel de la sonde Gemini a réussi en 16 s après être tombé sur `gemini-3.6-flash` — un repli avec pause, là où la chaîne brûlait auparavant en moins d'une seconde.
+- **Le plafond n'a toujours rien à voir** : `thoughts=1358 answer=453` contre 16384. Deuxième mesure qui enterre définitivement la théorie du run n°3.
+- **Aucun réglage client ne fait disparaître une panne amont.** Multiplier les tentatives contre une API déjà surchargée est au mieux neutre, au pire nuisible.
+
+**La bonne question n'est donc pas « comment éviter l'échec » mais « ce qu'il coûte à l'utilisateur ».** Réponse vérifiée plutôt que supposée : rien de plus qu'un clic. L'écran d'erreur du Deep dive rejoue `submit(answers, freeContext)` depuis l'état en mémoire, et R-20 persiste la progression dans `localStorage` — donc même un rechargement de page pendant la panne ramène sur l'écran de contexte libre avec les 10 réponses et le texte intacts.
+
+**Ce chemin n'avait aucune couverture E2E** — celui-là même qui compte quand Gemini tombe. Deux specs ajoutées (`returning-visitor.spec.ts`) : après un 502, le bouton Réessayer renvoie **les mêmes 10 réponses et le même texte libre** sans que l'utilisateur retouche une seule question ; et un rechargement sur l'écran d'erreur ne le ramène pas à la question 1. Non-vacuité prouvée : en remplaçant `submit(answers, freeContext)` par `submit({}, "")` dans le bouton, exactement ces deux specs tombent.
+
+**Ce qui reste ouvert, et volontairement pas tranché seul** : faut-il étendre le budget de retry (par exemple une seconde passe sur la chaîne des modèles) ? C'est défendable, mais impossible à valider tant que Gemini répond 503 — on ne saurait pas si un run vert vient du changement ou du rétablissement du service. À décider avec Antoine quand l'API sera revenue à la normale.
+
+**Les deux workflows ne sont pas la même chose, et il ne faut jamais les confondre.** Question d'Antoine, en découvrant qu'un run pouvait rougir sans que le code y soit pour rien : « et du coup, toute l'idée de ne merger que si ce workflow passe ? »
+
+- **`ci.yml` est la barrière.** `push` + `pull_request`, entièrement hors-ligne, déterministe. C'est ce check (`Types, tests, build`) — et lui seul — qu'un ruleset doit exiger.
+- **`verify-live.yml` est une sonde.** `workflow_dispatch` uniquement, et elle touche trois services réels.
+
+Deux raisons indépendantes de ne **jamais** la mettre en check requis. La première est mécanique : ne se déclenchant pas sur `pull_request`, elle ne rapporte aucun statut sur une PR — GitHub attendrait donc indéfiniment un statut qui n'arrive jamais, et les merges seraient bloqués **en permanence**, pas seulement pendant une panne. La seconde est de conception : faire dépendre la capacité à livrer de la disponibilité de Gemini serait un mauvais échange.
+
+**Mais l'intuition derrière la question est juste** : un rouge qui ne veut rien dire finit par ne plus être lu. Correctif apporté — les sondes **nomment désormais le type de rouge**. Une chaîne de repli épuisée sur des statuts retriables lève une erreur `UPSTREAM UNAVAILABLE` qui dit explicitement que ce n'est pas une régression et qu'il faut relancer plus tard ; et le 502 côté production, dont la cause est masquée par R-04, explique où aller la chercher (l'étape Gemini du même run, ou les logs Vercel). Elles **échouent toujours** plutôt que d'être ignorées : un `skip` cacherait une panne durable, alors que savoir que le Deep dive est indisponible a de la valeur.
+
+Enfin, ça mérite d'être écrit une fois : en quatre runs, cette sonde a trouvé un bug utilisateur réel et intermittent (les réponses tronquées), une faiblesse de conception (la chaîne de repli sans pause), a démenti une de mes propres théories, et a confirmé sur un vrai document ce qui n'était prouvé que sur l'échantillon. Sa valeur n'est pas d'être verte.
+
+### R-26 : un 404 qui ressemble au produit (2026-09-06)
+
+Une URL inconnue rendait le document d'erreur intégré de Next — `<html id="__next_error__">`, page blanche, aucune de nos feuilles de style. C'était la seule surface du produit qui ne ressemblait pas au produit, et un lien mal recopié depuis un partage tombe dessus.
+
+**Le correctif que `REVIEW.md` proposait était incomplet sur deux points, tous deux trouvés en construisant, pas en relisant.**
+
+**1. Il faut `global-not-found.tsx`, pas `not-found.tsx`.** Un `app/not-found.tsx` posé à la racine se fait imbriquer *dans* le document d'erreur de Next : vérifié, le HTML revenait en `<html id="__next_error__">` avec notre contenu dedans et aucun attribut `lang`. La convention prévue pour une structure à plusieurs layouts racine est `global-not-found.tsx`, que Next monte comme un **layout** et non comme une page (`app-render.js#createNotFoundLoaderTree`, lu dans la source installée) — c'est ce qui lui permet de rendre son propre `<html>`/`<body>` via `RootShell`.
+
+**2. `dynamicParams = false` remplace le `notFound()` du layout de langue.** Le garde de R-13 levait `notFound()` depuis `[locale]/layout.tsx` quand le segment n'était pas une langue. `/nonsense` était donc une route qui **matchait puis levait** — et un `notFound()` levé depuis un layout racine n'a aucune frontière où se rendre : Next retombait sur son document nu. Refuser le match d'emblée en fait une simple absence de route, que `global-not-found` traite normalement. Les deux changements sont indissociables : `/fr/pas-une-page` (aucune route) marchait déjà avec le premier seul, `/nonsense` (route matchée) non.
+
+**Le piège mesuré, et pourquoi il a failli coûter R-24.** Première version : `global-not-found` lisait la langue via `resolveRequestLocale()`. Résultat au build — **les 36 pages de contenu repassent de `●` à `ƒ`**. Un `notFound()` pouvant être levé de n'importe où, la dynamique du 404 se propage à tout ce qui pourrait l'invoquer. Le critère de vérification de R-26 interdisait précisément ça, et sans lui je serais passé à côté.
+
+Ce qui a résolu la tension : une fois le `notFound()` du layout remplacé par `dynamicParams = false`, **plus rien dans l'arbre de contenu ne lève**. La lecture d'en-tête a donc pu revenir, et seul `/_not-found` est dynamique — un excellent échange : une route à la demande que personne ne lie volontairement, contre un 404 dans la langue du lecteur. Vérifié : `/fr/glossary/pas-un-terme` répond en français, `Accept-Language: fr` et le cookie aussi, et les 36 pages restent `●`.
+
+**Refactor au passage** : `NotFoundScreen` extrait dans `components/brand/`, partagé avec le 404 « aucun résultat à cette adresse » de `r/[id]` (**rebâti sur `core/DetourCard` à l'extension 01**). Deux écrans identiques au texte près ; partager le balisage est ce qui les empêche de dériver vers deux produits différents. Les deux gardent le pied de page — un lien mort est un vrai point d'entrée, et la seule chose qu'il ne doit pas être, c'est un cul-de-sac.
+
+**Bruit connu, non corrigé** : Next journalise `Internal: NoFallbackError` côté serveur à chaque 404 sur un paramètre refusé par `dynamicParams = false`. La réponse est correcte (404 + notre page) ; c'est son mécanisme interne qui s'affiche. Nuisance de log en production, rien de plus.
+
+**Vérifié en réel** : 244 tests unitaires, **66 specs Playwright** (+5), lint/tsc propres. Les specs vérifient le comportement et pas la présence d'un fichier — 404 réel, `<html lang>` correct dans les quatre cas, wordmark visible, et **le fond et la police effectivement appliqués** (`getComputedStyle`), puisque « ressembler au produit » ne veut rien dire sans ça. Non-vacuité prouvée : en retirant `global-not-found.tsx` et en reconstruisant, les 5 specs tombent.
+
+### Run n°5 : la sonde Gemini passe, la production tombe — c'est notre propre timeout (2026-09-06)
+
+Dépôt passé en public, workflow relancé : **sonde Gemini 2/2 verte**, sonde production rouge sur le Deep dive (502 `DEEP_DIVE_FAILED` après 47 s). Même API, même clé, même minute. Ce n'est donc plus une panne amont comme au run n°4.
+
+**Ce que les chiffres disent.** Le runner a mesuré l'appel anglais à **18 s** sur `gemini-3.6-flash` (`thoughts=1878 answer=530`), contre 5 s deux runs plus tôt — Gemini est lent ce jour-là, pas en panne. Et ces 18 s sont sur un prompt de sonde qui n'envoyait que **2 réponses Quick + 2 réponses de contexte**, un sixième d'un vrai prompt (15 + 10). Deux secondes sous le plafond de 20 s par tentative, sur un prompt six fois plus court que celui de la production. La lecture : sur une journée lente, une génération de vraie longueur dépasse 20 s et **c'est notre propre client qui l'abandonne**, modèle après modèle, jusqu'à épuiser la chaîne — 47 s, c'est à peu près quatre abandons plus les pauses de repli. Un modèle à raisonnement dépense 1 à 2 k tokens à réfléchir avant ~500 tokens de réponse ; 20 s n'avait jamais été dimensionné pour ça. Cette valeur datait de l'étape 6, posée contre un tout autre problème (un appel qui reste muet indéfiniment depuis le bac à sable).
+
+C'est une hypothèse bien étayée, pas une preuve : R-04 masque la cause du 502 côté navigateur, et seuls les logs Vercel de cette requête (`console.error` dans la route) diraient noir sur blanc « timed out after 20000ms ». Antoine peut la confirmer là si besoin.
+
+**Correctif, deux nombres liés.** `REQUEST_TIMEOUT_MS` passe de 20 à **45 s** par tentative — assez pour une génération lente qui aboutit. Mais quatre tentatives à 45 s dépasseraient le `maxDuration` de 120 s de la route (R-15) : d'où un **budget de chaîne** (`CHAIN_BUDGET_MS`, 100 s) qui borne l'ensemble — modèles et pauses compris — et **rogne la dernière tentative** à ce qui reste plutôt que de la lancer à plein. Sous 5 s restantes, la chaîne s'arrête sans tenter le modèle suivant, et le message le dit. Le message de timeout rapporte désormais la valeur **réellement armée**, pas la nominale — sans quoi une tentative rognée à 10 s aurait prétendu avoir attendu 45 s. Test unitaire dédié (chaîne qui pend : 45 + 45 + 10 = 100 s, trois appels et non quatre, message qui nomme le budget et les 10 s) ; non-vacuité prouvée en neutralisant la garde, seul ce test tombe.
+
+**La sonde devient représentative, et c'est le vrai enseignement.** Une sonde plus légère que ce qu'elle remplace ne peut pas échouer comme lui, et son vert ne vaut rien quand la production est rouge — c'est exactement ce qui s'est passé. `gemini.live.ts` construit maintenant son prompt avec les **15 vraies questions Quick et les 10 vraies questions de contexte**, résolues par les mêmes fonctions que la route (`resolveQuickPromptAnswers` / `resolveContextPromptAnswers`, exportées pour ça), score calculé par `computeScore` sur ces réponses. Chaque appel imprime sa durée à côté du plafond — c'est le seul endroit où le pari que représente ce timeout se mesure contre la vraie API avec un vrai prompt.
+
+**Le texte français du roast, tel que Gemini l'a produit ce run-là** (avant correctif, sur le petit prompt) — à faire lire à Antoine, c'est lui qui juge si la voix survit à la traduction : « Votre produit souffre d'une fuite critique : vos praticiens s'en vont durant les deux premières semaines… ». Le garde-fou tient (ça vise la stratégie, pas la personne), et c'est du français, pas de l'anglais traduit.
+
+**Vérifié en réel** : 245 tests unitaires (+1), 66 specs Playwright, lint/tsc/build propres. Ce qui ne peut se vérifier qu'au prochain run : que la production passe avec le nouveau plafond, et la durée réelle qu'affiche la sonde sur un prompt de vraie longueur — si elle dépasse 45 s un jour lent, c'est ce chiffre qu'il faudra revoir, pas une théorie.
+
+### Run n°6 : vert de bout en bout, et le nouveau plafond a servi (2026-09-06)
+
+Premier run entièrement vert depuis la création du workflow : production 9/9 **et** sonde Gemini 2/2, sur le prompt de vraie longueur.
+
+**Le plafond de 45 s a été exercé pour de vrai, pas seulement relevé.** Le Deep dive de production a mis **70 s** pour ses quatre générations en parallèle, et le côté anglais est sorti de `gemini-3.6-flash` : `gemini-3.7-flash` n'a pas répondu (timeout à 45 s puis repli, ou 503 immédiat — le log de la sonde production ne distingue pas les deux). Sous l'ancien plafond de 20 s, ce même run aurait été un `DEEP_DIVE_FAILED` de plus. Côté sonde, sur un prompt de 3 970 caractères : 5,8 s et 6,9 s pour les deux neutres (`3.7-flash`), **20,6 s** pour le roast français (`3.6-flash`, après un 3.7 refusé vite, `thoughts=2801`). Le roast est ce que le produit demande de plus long à écrire, et il reste à moins de la moitié du plafond un jour ordinaire.
+
+**Le français du roast, produit sur un prompt complet** (à faire lire à Antoine) : « Un outil d'usage quotidien qui n'a aucun suivi de rétention et perd la majorité de ses praticiens au cours du premier mois est la définition même du *leaky bucket*. Sans mécanisme de réengagement ni analyse des causes de départ, le produit s'effondre en silence. » Vise la stratégie, jamais la personne ; et c'est du français.
+
+**Coût utilisateur à garder en tête** : 70 s est long. L'écran de chargement tient (étape 12bis : état « toujours en cours » sans fin fixe), mais si cette durée devient la norme plutôt que l'exception, c'est le nombre de générations par Deep dive (quatre depuis le bilingue) qu'il faudra regarder — pas le plafond.
+
+### R-21 : la nav de la landing sur mobile (2026-09-06)
+
+Décision prise avec Antoine après **mesure** des trois options de `REVIEW.md` sur le vrai build, à 360, 390 et 430 px, en FR et en EN — plutôt qu'en débattant sur plan :
+
+| Option | Débordement | Hauteur du header |
+|---|---|---|
+| État actuel | oui partout (515 px FR, 452 px EN) | 81 px |
+| Masquer les deux liens sous 760 px | aucun | 69 px |
+| Nav sur deux lignes | aucun | 132 à 171 px |
+| Typo de nav réduite à 12 px | toujours oui | 78 px |
+
+Masquer les liens est la seule option qui corrige sans doubler le header sur un téléphone, et le pied de page (2026-09-05) porte déjà « Comment ça marche » et « Glossaire » partout, donc rien ne devient inaccessible. C'est la même décision que celle déjà prise pour le CTA d'en-tête à l'étape 3. Le sélecteur de langue, lui, reste : c'est lui qui avait fait déborder le header (R-13), mais c'est aussi le seul moyen de changer de langue depuis la landing.
+
+**Piège CSS évité d'emblée** : `.navLink { display: none }` en sélecteur à une classe aurait la même spécificité que `.button { display: inline-flex }` d'un autre module CSS — lequel gagne dépendrait de l'ordre d'émission des feuilles, exactement la leçon n°2 de ce fichier. D'où `.nav .navLink`.
+
+**Vérifié en réel** : `e2e/landing-mobile.spec.ts`, 10 specs — `scrollWidth === viewport` sur la landing FR et EN aux trois largeurs, les deux liens masqués dans le header et visibles dans le pied de page à 390 px, présents dans le header à 1 280 px, et `/r/sample` comme `/quiz` (dont les headers portent aussi ces liens) sans débordement à 390 px. 76 specs Playwright au total.
+
+### R-22 + R-23 : contrastes corrigés au niveau des tokens, boutons réseau écartés (2026-09-06)
+
+**Une de mes propres pistes était fausse, et ça mérite d'être écrit.** `REVIEW.md` et la liste d'actions proposaient, pour le bouton principal, de « passer le libellé en gras » afin de tomber sous la règle WCAG du texte large (3:1 au lieu de 4,5:1). Vérifié avant de le proposer à Antoine : le libellé est **déjà** en 600 (`--label-button`), et la règle exige 18,66 px en gras — il fait 15 à 16 px. Ce chemin n'existait pas.
+
+Les trois corrections, toutes calculées avant d'être choisies (voir les ratios dans `tokens/colors.css`) :
+
+1. **Bouton principal** : nouveau paint `--paint-red-action: #cc3e2b`, le rouge de marque assombri de 3 % — 4,65:1 au lieu de 4,42:1, indiscernable côte à côte. Seul `--action-primary-bg` l'utilise ; `--paint-red` reste le rouge de tout le reste (accents, H1, bordures roast, image OG). La bordure du bouton passe sur le même token que son fond, sinon elle dessinerait un liseré plus clair.
+2. **`--text-link` → `--paint-red-deep`** plutôt que corriger le seul disclaimer : ses cinq usages (disclaimer, pied de page, termes liés du glossaire, deux liens de crédit) sont tous du texte rouge sur papier, et le commentaire du paint dit exactement « red text on light grounds ». 5,42:1 sur `--paper-1`, 6,72:1 sur `--paper-0`. Corriger le disclaimer seul aurait laissé les liens du crédit Deep dive à 4,42:1 — non signalés par axe uniquement parce que `/r/sample` n'a pas de Deep dive.
+3. **`--ink-faint`** : opacité 0,45 → 0,65 (5,18:1). Le minimum AA est 0,62 ; 0,65 garde de la marge et reste visiblement plus clair que `--text-muted`, donc la hiérarchie demandée par SPEC-ADDENDUM-02.md §2.1 tient.
+
+`KNOWN_CONTRAST_GAPS` (`e2e/accessibility.spec.ts`) est **vide** — et la passe axe reste verte sur les six écrans, ce qui prouve à la fois que les trois corrections sont effectives et qu'aucune autre paire ne se cachait derrière les entrées connues. Le mécanisme est conservé, avec son mode d'emploi, pour le jour où une décision de marque réintroduirait un écart assumé.
+
+**R-23 clos sans code.** Antoine a tranché : rester à exactement 2 CTA sur la page de résultat, pas de boutons LinkedIn/X. Les raisons sont dans `REVIEW.md` ; la seule à retenir ici est que ces boutons n'auraient eu aucune valeur SEO (`nofollow` chez les deux), donc le seul argument pour les ajouter était le confort, contre une décision de design déjà prise.
+
+### R-25 : le JSON du Deep dive est garanti par l'API, pas seulement demandé (2026-09-06)
+
+Reporté depuis R-16 pour une raison précise : `responseSchema` modifie la **requête** de la seule fonctionnalité IA du produit, et un schéma mal formé renvoie 400, que notre client traite comme non retriable — tous les Deep dive casseraient jusqu'à correction, sans qu'aucun test hors ligne puisse le voir. Ce qui a débloqué l'item, c'est le workflow de vérification : la sonde Gemini envoie désormais **exactement la requête de production** (même fonction `callDeepDiveGemini`, même schéma) à la vraie API, et elle peut être lancée sur une branche avant merge. C'est ce qui a été fait ici — le run sur la branche est la preuve, pas la relecture.
+
+**Ce qui change.** `callGeminiWithFallback` prend un objet d'options (`responseSchema`, `fetchImpl`, `sleepImpl`) à la place de deux paramètres positionnels de test — trois choses injectables en position finissent toujours par se confondre. `lib/gemini/deep-dive.ts` porte le schéma (`DEEP_DIVE_RESPONSE_SCHEMA`, construit depuis `PILLARS` pour qu'un pilier ne puisse pas exister dans le parser et manquer ici) et `callDeepDiveGemini`, l'unique appel Gemini du produit, utilisé par la route **et** par la sonde. L'instruction textuelle du prompt reste : le schéma garantit les clés et les types, il ne dit rien de « 3-4 phrases » ni de « LA prochaine action ». `parseDeepDiveVerdict` reste aussi : une garantie d'un service distant est une seconde ligne de défense, pas une raison de retirer la nôtre.
+
+**Volontairement pas de repli « sans schéma » sur un 400**, que `REVIEW.md` proposait comme alternative : un repli qui retirerait silencieusement le schéma masquerait précisément la mauvaise configuration qu'on veut voir. La sonde avant merge est la bonne protection, et elle est écrite en tête de `gemini.live.ts` : la relancer sur la branche avant tout changement à `deep-dive.ts` ou `client.ts`.
+
+**L'appel unique pour les deux tons, écarté avec Antoine.** Le gain n'a jamais été la latence (les générations partent en parallèle) mais le quota, qui n'est pas une contrainte ; le risque est une contamination entre la voix neutre et la voix roast, sur un différenciateur produit. Pas un bon échange. R-25 est clos sur le seul `responseSchema`.
+
+**Vérifié** : 249 tests unitaires (+4 : le schéma exige exactement les 5 piliers dans l'ordre canonique plus `priorityAction`, le plus petit objet qui le satisfait passe le parser — les deux contrats sont d'accord —, la requête porte le schéma quand on le donne et aucune clé `responseSchema` sinon, et `callDeepDiveGemini` l'attache bien), lint/tsc propres, et **le workflow de vérification lancé sur la branche avant merge** (run n°7, cible `gemini`, déclenché par moi via l'API GitHub — c'est la première fois que la sonde tourne sur une branche plutôt que sur `main`) : la vraie API a accepté le schéma sur les trois appels, tous en `finishReason=STOP` — EN neutre 7,5 s et FR roast 10,2 s sur `gemini-3.7-flash`, FR neutre 19,9 s sur `gemini-3.6-flash` après un 3.7 refusé vite. Aucun 400, donc le schéma est bien formé pour l'API telle qu'elle est aujourd'hui ; c'est la seule preuve qui compte pour ce changement, et elle a été obtenue avant le merge, pas après.
+
+### Brief pour la session Claude Design (2026-09-06)
+
+Antoine a retenu le circuit « projet Claude Design » (celui qui a produit le bundle de 17 composants) plutôt qu'un canevas dessiné ici. `design/DS-EXTENSION-BRIEF-01.md` + `design/ds-extension-01/*.png` (captures 2×, vrai build de production) : le brief en anglais, la langue du design system et de ses `.prompt.md`.
+
+**Le compte était faux dans ma liste d'actions** : ce ne sont pas deux composants sans équivalent dans le système mais **cinq** — le dépliant du calcul de score (R-12), le sélecteur de langue (R-13), le pied de page, l'écran 404 (R-26) et le champ de contexte libre (ADDENDUM-02, spécifié par un document, jamais dessiné). Le brief demande pour chacun le même livrable que le bundle (composant + `.d.ts` + `.prompt.md`, nouveaux tokens dans `tokens/*.css`), donne l'implémentation actuelle token par token, ce qui semble juste et ce qui semble bancal, la copie finale FR/EN, et 16 questions numérotées à trancher — dont deux réutilisations possibles que seul le design peut arbitrer : `ToneToggle` (porté, jamais câblé) comme langage du sélecteur de langue, et l'écran 06c « Detour » comme famille du 404.
+
+**Ce que le brief impose au design, et pourquoi** : les trois tokens changés par R-22 (`--paint-red-action`, `--text-link` → `--paint-red-deep`, `--ink-faint` à 0,65) et le fait que la passe axe n'a plus aucune exception — toute paire sous 4,5:1 fait rougir la CI, donc une nuance plus discrète demande un token qui passe, pas une exception.
+
+**Trouvé en photographiant, corrigé dans le même commit** : le compteur « 520/500 » du champ de contexte utilisait `--paint-red` à 11 px sur fond papier — exactement la paire que R-22 venait de retirer de tous les liens. Passé en `--text-alert`. L'écran Deep dive n'est pas dans la passe axe (il exige un jeton de propriétaire), ce qui explique qu'il soit passé au travers.
+
+**Piège d'outillage** : l'accès direct au projet Claude Design (`DesignSync`) exige une autorisation qui ne s'obtient que depuis une session interactive sur la machine d'Antoine — impossible depuis claude.ai/code. Le retour se fait donc par « Send to Claude Code Web » ou par dépôt des fichiers sous `design/`, comme pour le bundle précédent. Le dépliant a été photographié avec le même patch local jamais committé que R-12 (un `id` et un `breakdown` donnés temporairement à l'échantillon) — retiré et absence de trace vérifiée avant commit.
+
+### Design system extension 01 : sept composants portés, et un bug trouvé par un test de non-vacuité (2026-09-06)
+
+Retour de la session Claude Design (brief `design/DS-EXTENSION-BRIEF-01.md`), déposé tel quel sous `design/ds-extension-01-return/` — le bundle fait autorité, comme celui de l'étape 13. Message d'accompagnement de Claude Design : « extension 01 — Disclosure, Segmented, TextArea, DetourCard, LocaleSwitcher, SiteFooter, ScoreBreakdown + tokens ».
+
+**Quatre primitives nouvelles**, portées en CSS Modules comme le reste du système :
+- `core/Disclosure` — `<details>` natif, marqueur `+`/`−` dans une puce mono encastrée (la puce est l'affordance, le glyphe est l'état ; le système n'a aucune icône). Le glyphe est en `::before` plutôt que dans le DOM, pour qu'un lecteur d'écran annonce l'état d'ouverture natif de `<details>` et non un plus égaré.
+- `core/Segmented` — le contrôle segmenté à deux ou trois options dont `ToneToggle` et `LocaleSwitcher` sont maintenant deux habillages. Deux formes, boutons ou liens, distinguées par une union discriminée plutôt qu'un `as` libre : le formulaire lien n'a pas de `onChange`, et le type l'interdit.
+- `core/TextArea` — la seule saisie de texte du système, et donc ce à quoi ressemblera tout futur champ. `label` est **obligatoire dans le type** (R-19 : l'intitulé visible est dans une `QuestionCard` au-dessus, pas dans un `<label>`).
+- `core/DetourCard` — les deux 404 et l'écran d'erreur 06c deviennent une seule famille en deux températures. `fault` est la seule carte à ombre rouge du système, réservée à **nos** pannes ; un 404 n'est jamais `fault` (« le lecteur est perdu, pas cassé, et le rouge l'accuserait »).
+
+**Trois écrans refaits.** `ScoreBreakdown` passe à deux niveaux : les cinq têtes de pilier avec leur calcul `54/60 → 18/20` visibles d'un coup (c'est *ça*, l'explication en dix secondes), et les trois réponses de chaque pilier derrière un dépliant imbriqué — avant, quinze lignes à plat faisaient un écran par pilier sur mobile. Les `0 pts` passent en rouge (le rouge plein est un diagnostic, et les zéros sont le diagnostic). Le 404 et les deux écrans d'erreur passent sur `DetourCard`, bouton **sous** la carte et non dedans.
+
+**Trois décisions produit prises par le design, signalées plutôt qu'absorbées :**
+1. **Le bouton « Skip » du contexte libre disparaît** — deux actions au lieu de trois. La capacité reste : soumettre un champ vide *est* le fait de passer. La chaîne `skip` de `content/free-context.ts` est **conservée** avec un commentaire disant pourquoi rien ne l'affiche : c'est de la copie livrée par l'agent produit, la supprimer est sa décision, pas la mienne.
+2. **Le header de la page résultat perd « Étape 5/5 — terminé · 15/15 répondues »** (le score en dessous est la preuve que c'est fini). Le badge roast et le tag Deep dive restent : ce sont des états, pas un relevé de progression, et chacun a son composant. Le prompt dit « seulement Wordmark + LocaleSwitcher », mais le README du bundle ne liste que le libellé d'étape dans ses décisions produit — lecture retenue, signalée ici. Les deux chaînes devenues mortes sont supprimées (discipline R-08).
+3. **Le 404 « résultat introuvable » gagne son propre eyebrow** (« Lost result » / « Résultat introuvable »), distinct du « Detour » générique.
+
+**Le sélecteur de langue n'est plus un `nav`.** `Segmented` est un `role="group"` nommé, et le design l'assume (« the group is named for screen readers »). On perd le repère de navigation dans le menu des points de repère d'un lecteur d'écran ; on garde un groupe nommé et des liens. Quatre specs qui cherchaient `getByRole("navigation", …)` ont été pointées sur `getByRole("group", …)` — un changement de test qui suit un changement de design délibéré, pas un test assoupli.
+
+**Écart assumé contre le prompt, pour une raison mesurée** : le segment roast de `Segmented` est peint en `--paint-red-action` et non `--paint-red`. Son libellé est le même 600/15px qu'un bouton principal, donc c'est exactement la paire que R-22 a mesurée à 4,42:1. Le prompt nomme `--paint-red` parce que ce token précède la scission ; c'est la scission que la CI vérifie maintenant. (`ToneToggle` reste non câblé — décision R-23 d'Antoine — donc rien n'expédie cette couleur aujourd'hui, mais une primitive qui échoue à AA dès qu'on l'utilise est précisément ce que R-22 existait pour supprimer.)
+
+**Une fausse alerte de ma part, à ne pas répéter.** J'ai d'abord cru que `--ink-faint` à 0,65 échouait sur le fond papier (4,18:1). Faux : j'avais composé l'encre translucide sur `--paper-0` puis mesuré le résultat sur `--paper-1`. Une couleur translucide se compose sur **le fond réel** — sur `--paper-1` elle donne `#666157`, soit 4,72:1. AA tient sur les deux fonds, et l'affirmation du prompt était juste. Toujours composer avant de mesurer.
+
+**Le vrai bug, trouvé par le test de non-vacuité et pas par la relecture.** En ajoutant le 404 à la passe axe, j'ai cassé exprès la couleur de l'eyebrow pour vérifier que la spec le voyait. Elle est passée quand même. En allant chercher pourquoi — en lisant le CSS *servi*, pas la source — j'ai trouvé que l'eyebrow d'un 404 s'affichait en **rouge d'alerte** au lieu d'encre atténuée. Cause : un `str.replace` Python sans compteur, appliqué à un fichier où `.eyebrow {` apparaît deux fois (une fois seul, une fois dans `.fault .eyebrow {`). Le bloc inséré a coupé la seconde règle en deux, produisant un `.fault .card:focus` absurde et un `.eyebrow { color: var(--text-alert) }` **non scopé** qui repeignait tous les eyebrows en rouge. Exactement ce que le prompt du composant interdit. Le sabotage était masqué par mon propre bug : le rouge passe AA, donc axe n'avait rien à dire. Corrigé, fichier réécrit à la main, puis non-vacuité refaite proprement (seule la spec 404 tombe). Deux leçons : `str.replace` sans compteur sur du CSS où un sélecteur est aussi un préfixe, et **un test de non-vacuité qui passe est lui-même un signal**, pas une formalité.
+
+**Non porté du bundle, volontairement** : `tokens/fonts.css` (import Google Fonts — l'app charge ses polices par `next/font`, ce qui est mieux et déjà en place) et `support.js` (runtime du canevas). Le `guidelines/` que le README du bundle annonce n'était pas dans l'archive — sans conséquence ici, à demander si on en a besoin un jour.
+
+**Vérifié en réel** : 249 tests unitaires, **67 specs Playwright** (+1, le 404 entre dans la passe axe), lint/tsc/build propres. Et en navigateur, captures relues à 2× : header desktop EN et mobile FR (segmented EN|FR), header résultat FR, dépliant fermé/ouvert/pilier ouvert en EN desktop et FR mobile, les deux 404, le champ de contexte vide et au-delà de la limite (bordure rouge pleine + compteur rouge, deux actions), l'écran d'erreur EN et FR. Débordement vérifié par mesure et non à l'œil : `scrollWidth === clientWidth` sur le dépliant aux deux points de rupture.
+
+### R-21 refaite (elle n'avait jamais été livrée) + copie validée (2026-09-06)
+
+**Le vrai sujet de cette entrée est un raté de process, pas un bug de CSS.** Antoine signale que le menu déborde toujours sur mobile. Mesuré : `scrollWidth` 537 en FR et 474 en EN pour un viewport de 390. Or R-21 avait été annoncée livrée et mergée le matin même.
+
+**Ce qui s'est passé.** `git show --stat 54e3b6e` (le squash de la PR #50) : **zéro fichier**. J'avais committé le correctif sur `main` local au lieu de la branche, puis poussé la branche — restée périmée — donc la PR ne contenait rien et son squash était vide. Le commit local a ensuite été détruit par le `git reset --hard origin/main` de synchronisation. La CI était verte : elle testait `main` inchangé. Les trois autres PR du jour (#51, #52, #54) ont bien atterri, vérifié de la même façon (6, 9 et 118 fichiers).
+
+**Convention ajoutée, à tenir** : après chaque merge, vérifier que le squash n'est pas vide (`git show --stat <sha>`) avant d'annoncer quoi que ce soit. Une CI verte sur une PR vide est verte pour la mauvaise raison. Et toujours `git checkout -B <branche>` **avant** d'éditer, jamais après.
+
+**Un second défaut par-dessus, trouvé en mesurant.** Le CTA d'en-tête, lui, était bien masqué — donc seuls les deux liens de nav débordaient. Mais la règle qui le masque (`.headerCta`) est en **une seule classe**, à égalité de spécificité avec `.button { display: inline-flex }` d'un autre module CSS : le gagnant dépend de l'ordre d'émission des feuilles, un artefact de build que l'extension 01 a déjà déplacé une fois en ajoutant quatre composants. Les deux règles passent en deux classes (`.nav .navLink, .nav .headerCta`).
+
+**Ce que le test de non-vacuité a dit, et que je n'aurais pas deviné** : en repassant la règle à une seule classe, **les specs passent quand même** — l'ordre actuel favorise `page.module.css`. Le durcissement est donc une assurance contre un futur changement d'ordre, pas un correctif observable aujourd'hui, et aucun test ici ne peut échouer dessus. C'est écrit tel quel en tête de `e2e/landing-mobile.spec.ts` plutôt que sous-entendu, et la spec qui prétendait vérifier la spécificité a été renommée pour ce qu'elle vérifie vraiment. La vraie non-vacuité (règle retirée) fait bien tomber 10 des 13 specs.
+
+`e2e/landing-mobile.spec.ts` (13 specs) couvre maintenant **320, 360, 390 et 430 px** dans les deux langues, plus le `display` calculé de chaque élément censé disparaître, la présence des liens dans le pied de page, leur retour à 1 280 px, et `/r/sample` comme `/quiz` à 390.
+
+**Reste ouvert, hors contrat** : `/r/<id>` déborde de 37 px à **320 px** seulement, à cause du `PillarChip` (score + nom + déclencheur de glossaire sur une ligne). DESIGN-BRIEF.md fixe le mobile à 390 px et exige de tenir 375-430 : 320 est en dehors. Signalé plutôt que corrigé au jugé — redimensionner un composant du design system hors de sa plage annoncée est une décision de design.
+
+**Copie validée.** Antoine a relu l'ensemble des textes marqués `TODO` (landing FR, écran 404, benchmark, dernier résultat, dépliant du score, texte de partage) et les 15 explications longues du glossaire : tous approuvés. Les marqueurs sont levés dans `dictionary.ts` et `content/glossary.ts`. Le commentaire en tête de `dictionary.ts` dit maintenant qu'une chaîne ajoutée après cette date repart au statut « à relire » — sinon le fichier approuvé devient un endroit où de la copie non relue se glisse sans marquage.

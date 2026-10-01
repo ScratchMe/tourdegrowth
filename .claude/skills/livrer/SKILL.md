@@ -70,11 +70,13 @@ GAME_ENABLED=true NEXT_PUBLIC_GOATCOUNTER_CODE=e2e-stub ADMIN_DASHBOARD_PASSWORD
   ligne de commande tue le shell.
 - `CI=1 GAME_ENABLED=true NEXT_PUBLIC_GOATCOUNTER_CODE=e2e-stub ADMIN_DASHBOARD_PASSWORD=e2e-admin npx playwright test`.
   Sans ces variables, les specs analytics et d'aperçu rougissent ou sautent pour
-  de mauvaises raisons (`TESTING.md`).
+  de mauvaises raisons (`TESTING.md`). Sans l'émulateur Firestore, celles d'un
+  vrai `/r/<id>` sautent avec leur raison (recette locale : `TESTING.md` §5).
 - Un changement qui ne touche que de la doc peut sauter build et Playwright :
   le dire, et dire pourquoi.
-- Le flake connu de `e2e/locale-routing.spec.ts:75` se rejoue isolé avant de
-  conclure quoi que ce soit. Il ne se durcit pas.
+- Un échec de `e2e/locale-routing.spec.ts` se rejoue isolé avant de conclure
+  quoi que ce soit, et ne se durcit pas. Son ancien flake avait une cause
+  produit, corrigée le 2026-09-29 (`TESTING.md` §5, `NEXTJS.md` §1.1).
 
 ## 3. Relire son propre diff comme un relecteur hostile
 

@@ -164,11 +164,13 @@ Et un principe : **les types suivent le runtime, jamais ils ne le précèdent**
   une PR est obligatoire, `deletion` et `non_fast_forward` sont bloqués. Une PR
   dont le check n'est pas vert affiche `mergeable_state: blocked`. Vérifié à la
   source (`/rules/branches/main`), pas d'après un document.
-- **Trois workflows** :
+- **Quatre workflows** :
   - `ci.yml` — la barrière. Un seul job, étapes du moins cher au plus cher
-    (`lint` → `tsc` → `vitest` → `next build` → Playwright). Aucun secret
-    nécessaire : rien de ce que le build touche ne va jusqu'à une base ou une
-    API. Node 22 (le major que la plateforme exécute).
+    (`lint` → `tsc` → `vitest` → `next build` → émulateur Firestore →
+    Playwright). Aucun secret nécessaire : rien de ce que le build touche ne va
+    jusqu'à une base ou une API, et l'émulateur (A7.11, 2026-09-30) tourne sur
+    un projet `demo-` avec une clé jetable (`TESTING.md` §5). Node 22 (le major
+    que la plateforme exécute).
   - `verify-live.yml` — la sonde contre les services réels, `workflow_dispatch`
     seulement. **À relancer sur la branche avant tout changement au client
     Gemini** (voir `GEMINI.md`).
@@ -190,4 +192,5 @@ Et un principe : **les types suivent le runtime, jamais ils ne le précèdent**
   branches de PR mergées disparaissent seules. Ne pas s'en étonner au prochain
   `--force-with-lease`.
 - **Majeures ignorées** avec leur raison dans `dependabot.yml` : TypeScript 7,
-  ESLint 10, `@types/node` 26.
+  ESLint 10, et toute majeure de `@types/node` (elle suit à la main le major
+  de Node qu'exécutent Vercel et la CI).

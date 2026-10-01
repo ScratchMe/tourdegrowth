@@ -7,7 +7,7 @@ même raison qui a fait entrer `AUDIT.md` et `AUDIT-PLAN.md` dans le dépôt.*
 **Où en est le moteur.** Construit derrière `ENGINE_ENABLED` (fermé ; Antoine le
 teste avec l'aperçu propriétaire de `/admin/preview`), route `/{locale}/aarrr-funnel-template`, code dans
 `src/lib/engine/` (pur), `src/content/engine-copy.ts` et `engine-catalog.ts`
-(toute la copie, `TODO: à relire` jusqu'au bon à tirer nº6) et
+(toute la copie, `TODO: à relire` jusqu'au bon à tirer nº8) et
 `src/app/[locale]/aarrr-funnel-template/` (l'îlot, le tableau de bord, les
 slides). Les écarts que l'implémentation a tranchés par rapport à ce document
 sont consignés dans le journal (`JOURNAL.md`), pas réécrits ici.
@@ -2071,547 +2071,18 @@ titre qui dit les mêmes nombres que la grille.
 | titre de `leak` formaté par une autre fonction | deck (titre = corps) | diagnosis |
 
 ---
-## 14. Inventaire de la copie — tout est `TODO: à relire`
+## 14. Inventaire de la copie — retiré le 2026-10-01
 
-Deux modules serveur : `src/content/engine-copy.ts` (UI, gabarits, constats,
-FAQ) et `src/content/engine-catalog.ts` (prose des 15 chiffres). En tête de
-chacun : `// TODO: à relire — copie neuve (convention 6), rédigée par la session
-de code`. Le bon à tirer nº6 se reconstruit **depuis `grep -rn "TODO: à relire"
-src/`**, jamais depuis cette liste. Français avec U+00A0 avant `%`, `€`, `:`,
-`?`, `!`, `»` et après `«` ; anglais avec guillemets droits (garde de
-`copy-typography.test.ts`). Libellés des piliers inchangés (non traduits).
-
-### 14.1 Page (E0) et métadonnées — `page.*`, `meta.*`
-
-| Clé | FR | EN |
-|---|---|---|
-| `meta.title` | Modèle de funnel AARRR — tes chiffres, en local | AARRR funnel template — your numbers, kept local |
-| `meta.description` | Entre les chiffres de tes cinq étapes AARRR, vois où tu perds le plus de monde et exporte des slides pour ton CODIR. Rien n'est envoyé. | Enter the numbers for your five AARRR stages, see where you lose the most people and export slides for your leadership meeting. Nothing is sent. |
-| `meta.breadcrumb` | Moteur de growth | Growth engine |
-| `page.eyebrow` | Le moteur | The engine |
-| `page.title` | Ton moteur de growth | Your growth engine |
-| `page.positioning` | Ton Tour dit si tu mesures. Le moteur montre ce que disent tes chiffres. | Your Tour tells you whether you measure. The engine shows what your numbers say. |
-| `page.promise` | Quinze chiffres, trois par étape : trouve-les, vois où ton moteur perd du monde, et repars avec des slides prêtes pour ton CODIR. | Fifteen numbers, three per stage: find them, see where your engine loses people, and leave with slides ready for your leadership meeting. |
-| `page.privacyTitle` | Rien de ce que tu saisis ne sort d'ici | Nothing you enter leaves this page |
-| `page.privacyBody` | Aucun chiffre ni aucun texte que tu saisis ne quitte ton navigateur. Pas de compte, pas de serveur : ils restent sur cet appareil, et tu peux le vérifier dans l'onglet Réseau. La page compte ses visites, sans cookie — jamais ce que tu y écris. | No number and no text you enter leaves your browser. No account, no server: they stay on this device, and you can check it in the Network tab. The page counts its visits, without cookies — never what you type. |
-| `page.cta` | Entre tes chiffres → | Enter your numbers → |
-| `page.ctaNote` | Gratuit, sans compte. Tout reste sur ton appareil. | Free, no sign-up. Everything stays on your device. |
-| `page.tourFirst` | Faire le Tour d'abord (3 min) | Take the Tour first (3 min) |
-| `page.catalogueTitle` | Les quinze chiffres | The fifteen numbers |
-| `page.catalogueIntro` | Trois par étape, comme les trois questions du Tour. Pour chacun : sa formule, où le trouver, et ce qu'il faut savoir avant de le citer. | Three per stage, like the Tour's three questions. For each: its formula, where to find it, and what to know before quoting it. |
-| `page.faqTitle` | Questions fréquentes | Frequently asked questions |
-
-### 14.2 Réglage (E1) — `setup.*`
-
-| Clé | FR | EN |
-|---|---|---|
-| `setup.title` | Avant de commencer | Before you start |
-| `setup.model` | Ton modèle | Your model |
-| `setup.model.selfserve` | SaaS / produit web en libre-service (essai ou freemium) | SaaS / web product, self-serve (trial or freemium) |
-| `setup.model.salesLed` | B2B avec équipe commerciale | B2B with a sales team |
-| `setup.model.consumerApp` | App grand public | Consumer app |
-| `setup.model.marketplace` | Place de marché | Marketplace |
-| `setup.model.soon` | Bientôt — leur funnel n'a pas la même forme. | Coming soon — their funnel has a different shape. |
-| `setup.referenceMonth` | Mois des flux | Month for flows |
-| `setup.referenceMonthHint` | Visiteurs, inscriptions, dépense, churn et ARPA de ce mois-là. Par défaut : le dernier mois clos. | Visitors, sign-ups, spend, churn and ARPA for that month. Default: the last closed month. |
-| `setup.cohortMonth` | Cohorte suivie | Cohort you follow |
-| `setup.cohortHint` | On suit les inscrits de {cohort} : ceux de {next} n'ont pas encore eu {n} jours. | We follow {cohort}'s sign-ups: {next}'s haven't had {n} days yet. |
-| `setup.currency` | Devise | Currency |
-| `setup.activationWindow` | Fenêtre d'activation | Activation window |
-| `setup.paidWindow` | Fenêtre de paiement | Payment window |
-| `setup.windowDays` | {n} jours | {n} days |
-| `setup.companyLabel` | Nom affiché sur les slides (facultatif) | Name shown on the slides (optional) |
-| `setup.companyHint` | Reste sur cet appareil. | Stays on this device. |
-| `setup.tourFound` | Tu as fait le Tour le {date} ({score}/100). On comparera ce que tu y as déclaré à ce que tu retrouves ici. | You took the Tour on {date} ({score}/100). We'll compare what you declared there with what you find here. |
-| `setup.tourLink` | Comparer avec mon Tour | Compare with my Tour |
-| `setup.start` | Commencer → | Start → |
-
-### 14.3 Le moteur (E2) — `board.*`, `coverage.*`, `actions.*`
-
-| Clé | FR | EN |
-|---|---|---|
-| `board.eyebrow` | Ton moteur de growth · {model} · cohorte de {cohort} · flux de {month} | Your growth engine · {model} · {cohort} cohort · {month} flows |
-| `board.tabEngine` | Le moteur | The engine |
-| `board.tabCollect` | À aller chercher ({n}) | To go and get ({n}) |
-| `coverage.found` | {n} chiffres sur {N} trouvés | {n} of {N} numbers found |
-| `coverage.found.one` | 1 chiffre sur {N} trouvé | 1 of {N} numbers found |
-| `coverage.approximate` | {n} approximatifs | {n} approximate |
-| `coverage.approximate.one` | 1 approximatif | 1 approximate |
-| `coverage.inProgress` | {n} en cours | {n} in progress |
-| `coverage.requested` | {n} demandés | {n} requested |
-| `coverage.requested.one` | 1 demandé | 1 requested |
-| `coverage.missing` | {n} introuvables | {n} missing |
-| `coverage.missing.one` | 1 introuvable | 1 missing |
-| `actions.deck` | Préparer mes slides → | Prepare my slides → |
-| `actions.save` | Sauvegarder (.json) | Save (.json) |
-| `actions.import` | Importer un fichier | Import a file |
-| `actions.erase` | Tout effacer | Erase everything |
-| `board.smallCohort` | Petits effectifs : moins de 100 inscrits dans cette cohorte. Lis la direction, pas les décimales. | Small numbers: fewer than 100 sign-ups in this cohort. Read the direction, not the decimals. |
-
-### 14.4 Vocabulaires fermés — `status.*`, `effort.*`, `repair.*`, `cause.*`, `role.*`, `basis.*`, `variant.*`, `na.*`, `choice.*`
-
-| Clé | FR | EN |
-|---|---|---|
-| `status.todo` | À renseigner | To fill in |
-| `status.requested` | Demandé | Requested |
-| `status.measured` | Trouvé | Found |
-| `status.estimated` | Estimé | Estimated |
-| `status.conflicting` | Deux chiffres | Two numbers |
-| `status.missing` | Introuvable | Missing |
-| `status.notApplicable` | Sans objet | Not applicable |
-| `effort.self5` | Seul, 5 min | On your own, 5 min |
-| `effort.self1h` | Seul, ~1 h | On your own, ~1 h |
-| `effort.ask` | À demander | Ask someone |
-| `effort.build` | À construire | Needs building |
-| `repair.meeting` | une réunion | a meeting |
-| `repair.afternoon` | une après-midi | an afternoon |
-| `repair.sprint` | un sprint | a sprint |
-| `repair.quarter` | un trimestre | a quarter |
-| `cause.notTracked` | On ne le mesure pas | We don't measure it |
-| `cause.notComputed` | Ça existe, mais personne ne l'a calculé | It exists, but nobody has computed it |
-| `cause.noAccess` | Ça existe, mais je n'y ai pas accès | It exists, but I have no access |
-| `cause.noDefinition` | Personne n'est d'accord sur la définition | Nobody agrees on the definition |
-| `cause.conflicting` | J'ai deux chiffres qui ne collent pas | I have two numbers that don't match |
-| `cause.notApplicable` | Ça ne s'applique pas à nous | It doesn't apply to us |
-| `role.finance` | Finance | Finance |
-| `role.data` | Data | Data |
-| `role.product` | Produit | Product |
-| `role.marketing` | Marketing | Marketing |
-| `role.revops` | RevOps | RevOps |
-| `role.support` | Support | Support |
-| `basis.teamHunch` | Intuition d'équipe | Team hunch |
-| `basis.oldNumber` | Un ancien chiffre | An old number |
-| `basis.sample` | Un échantillon | A sample |
-| `basis.other` | Autre | Other |
-| `variant.cac.mediaOnly` | Média seul | Media only |
-| `variant.cac.plusTeam` | + équipe marketing | + marketing team |
-| `variant.cac.fullyLoaded` | Tout chargé | Fully loaded |
-| `variant.ttv.median` | Médiane | Median |
-| `variant.ttv.mean` | Moyenne | Average |
-| `choice.mechanism.none` | Aucun | None |
-| `choice.mechanism.communication` | En communication seulement | In communication only |
-| `choice.mechanism.product` | Dans le produit | In the product |
-| `choice.causeHow.data` | Par les données | From data |
-| `choice.causeHow.interviews` | Par des entretiens | From interviews |
-| `choice.causeHow.hunch` | Par intuition | From gut feel |
-| `na.noInviteMechanism` | Pas de mécanisme d'invitation | No invite mechanism |
-| `na.noFreeTier` | Pas de version gratuite ni d'essai | No free tier or trial |
-| `na.notSubscription` | Pas d'abonnement | No subscription |
-| `source.someoneTold` | Quelqu'un me l'a donné | Someone gave it to me |
-| `source.other` | Autre | Other |
-
-### 14.5 Tiroir, fiche, triage, demande (E3, E3bis, E4) — `sheet.*`, `triage.*`, `request.*`, `collect.*`
-
-| Clé | FR | EN |
-|---|---|---|
-| `sheet.stageEyebrow` | Étape {i} / 5 · {stage} | Stage {i} / 5 · {stage} |
-| `sheet.definition` | Définition → | Definition → |
-| `sheet.formula` | Formule | Formula |
-| `sheet.cohortToUse` | Prends la cohorte de {cohort} : celle de {next} n'a pas encore eu {n} jours. | Use the {cohort} cohort: {next}'s hasn't had {n} days yet. |
-| `sheet.statusQuestion` | Où en es-tu avec ce chiffre ? | Where are you with this number? |
-| `sheet.haveIt` | Je l'ai | I have it |
-| `sheet.canEstimate` | Je peux l'estimer | I can estimate it |
-| `sheet.willAsk` | Je le demande | I'll ask for it |
-| `sheet.cantFind` | Je ne le trouve pas | I can't find it |
-| `sheet.over` | sur | out of |
-| `sheet.live` | {rate}, soit {n} sur 100 {population} | {rate}, i.e. {n} in 100 {population} |
-| `sheet.rateOnly` | Je n'ai que le taux | I only have the rate |
-| `sheet.rateOnlyHint` | Sans les deux comptes, le chiffre sera marqué approximatif. | Without both counts, the number will be marked approximate. |
-| `sheet.source` | D'où vient ce chiffre ? | Where does it come from? |
-| `sheet.variant` | Ce qui est compté | What's counted |
-| `sheet.definitionNote` | Ta définition (facultatif) | Your definition (optional) |
-| `sheet.definitionNoteHint` | Par exemple « actif = au moins un projet modifié ». Elle apparaît dans l'annexe du deck. | For example "active = at least one project edited". It appears in the deck's appendix. |
-| `sheet.low` | Au moins | At least |
-| `sheet.high` | Au plus | At most |
-| `sheet.basis` | Sur quoi repose l'estimation ? | What is the estimate based on? |
-| `sheet.wideRange` | Une fourchette aussi large ne dit presque rien — c'est déjà une information. | A range this wide says almost nothing — that is already information. |
-| `sheet.whereTitle` | Où le trouver | Where to find it |
-| `sheet.trapTitle` | Le piège | The trap |
-| `sheet.alsoIn` | Aussi dans {tool} : {metrics} | Also in {tool}: {metrics} |
-| `sheet.reference` | Repère | Reference |
-| `sheet.referenceContext` | {range} · contexte seulement, {caveat} | {range} · context only, {caveat} |
-| `sheet.noReference` | Pas de repère publiable : {reason} | No reference worth publishing: {reason} |
-| `sheet.target` | Ta cible (facultatif) | Your target (optional) |
-| `sheet.targetHint` | Une cible d'équipe sert de repère pour désigner un frein. | A team target acts as the reference for naming a bottleneck. |
-| `sheet.dependsOnEvent` | Il faut d'abord nommer l'événement d'activation. | Name the activation event first. |
-| `sheet.note` | Note pour toi | Note to self |
-| `sheet.noteHint` | Jamais sur une slide. | Never on a slide. |
-| `sheet.save` | Enregistrer | Save |
-| ~~`sheet.close`~~ | *retirée le 2026-09-26 : une fiche se replie par l'en-tête de sa ligne* | |
-| `triage.question` | Pourquoi ? | Why? |
-| `triage.repair` | Le réparer prendrait | Fixing it would take |
-| `triage.repairComment` | Précision (facultatif) | Detail (optional) |
-| `triage.owner` | Qui l'a ? | Who has it? |
-| `triage.readingA` | Premier chiffre | First number |
-| `triage.readingB` | Second chiffre | Second number |
-| `triage.naReason` | Pourquoi ça ne s'applique pas ? | Why doesn't it apply? |
-| `request.copy` | Copier la demande | Copy the request |
-| `request.copyGroup` | Copier une demande pour les {n} chiffres | Copy one request for the {n} numbers |
-| `request.copied` | Demande copiée | Request copied |
-| `request.remind` | Relancer | Follow up |
-| `request.stale` | à relancer · demandé il y a {n} jours | follow up · asked {n} days ago |
-| `request.message` | Bonjour — je prépare un point sur notre moteur de croissance. Pourrais-tu me sortir : {list} Des chiffres bruts me suffisent, pas de mise en forme. Merci ! | Hi — I'm preparing a review of our growth engine. Could you pull: {list} Raw numbers are enough, no formatting needed. Thanks! |
-| `request.item` | – {what} ({definition}) | – {what} ({definition}) |
-| `collect.self` | À faire toi-même | To do yourself |
-| `collect.ask` | À demander | To ask for |
-| `collect.hint` | Lance les demandes aujourd'hui, remplis le reste en attendant. | Send the requests today, fill in the rest while you wait. |
-| `collect.fill` | Renseigner | Fill in |
-| `collect.empty` | Plus rien à aller chercher. | Nothing left to go and get. |
-
-### 14.6 Diagnostic, comparateur, « et si » — `diagnosis.*`, `whatIf.*`
-
-| Clé | FR | EN |
-|---|---|---|
-| `diagnosis.clear` | Une étape freine le moteur | One stage holds the engine back |
-| `diagnosis.shared` | {n} étapes freinent autant l'une que l'autre | {n} stages hold it back about equally |
-| `diagnosis.level` | Rien ne freine le moteur | Nothing holds the engine back |
-| `diagnosis.notEnough` | Pas assez de cibles pour conclure | Not enough targets to conclude |
-| `diagnosis.belowTarget` | {value}, sous ta cible ({target}) | {value}, below your target ({target}) |
-| `diagnosis.notEnoughBody` | Fixe une cible sur au moins deux étapes : c'est ce qui permet de dire laquelle freine. | Set a target on at least two stages: that's what lets us say which one holds you back. |
-| `diagnosis.notEnoughBelow` | {stage} est {side}. Sans cible sur les autres étapes, impossible de dire si c'est la plus grosse fuite. | {stage} sits {side}. Without targets on the other stages, we can't say whether it's the biggest leak. |
-| `diagnosis.levelBody` | Aucune étape n'est sous sa cible : le levier est le volume ou le prix. | No stage is below its target: the lever is volume or price. |
-| `diagnosis.blind` | {stages} n'est pas mesurée : le vrai frein peut s'y cacher. | {stages} isn't measured: the real bottleneck may be hiding there. |
-| `diagnosis.blind.other` | {stages} ne sont pas mesurées : le vrai frein peut s'y cacher. | {stages} aren't measured: the real bottleneck may be hiding there. |
-| `diagnosis.unpriced` | Aussi sous ta cible, non chiffré en € : {stages} | Also below your target, not priced in €: {stages} |
-| `diagnosis.noArpa` | Le churn n'est pas comparable aux autres étapes sans ARPA. | Churn can't be compared with the other stages without ARPA. |
-| `diagnosis.topOfFunnel` | La plus grosse perte en nombre est toujours en haut du tunnel ; ce n'est pas ce qui désigne un frein. | The biggest loss in numbers is always at the top of the funnel; that's not what names a bottleneck. |
-| `side.*` (depuis P7a et C1) | sous la cible · au-dessus de la cible · à la cible · peut-être sous / au-dessus de la cible — choisis par la direction du chiffre (`phrases.ts#sideKey`) ; les mots « repère » sont retirés le 2026-09-30 (A7.1) | below / above / at the target · possibly below / above the target |
-| `diagnosis.noComparator` | sans cible · fixes-en une | no target · set one |
-| `whatIf.title` | Et si · toutes choses égales par ailleurs | What if · all else being equal |
-| `whatIf.today` | Aujourd'hui | Today |
-| `whatIf.if` | Si | If |
-| `whatIf.then` | Alors | Then |
-| `whatIf.times` | × ARPA | × ARPA |
-| `whatIf.todayFlow` | {rate} → {n} nouveaux payants par mois | {rate} → {n} new paying customers a month |
-| `whatIf.ifFlow` | {stage} atteint {target} | {stage} reaches {target} |
-| `whatIf.thenFlow` | {n} × {target}/{rate} = {m} (+{delta}) | {n} × {target}/{rate} = {m} (+{delta}) |
-| `whatIf.timesFlow` | {arpa} → {amount} de MRR ajouté chaque mois | {arpa} → {amount} of MRR added every month |
-| `whatIf.todayChurn` | {churn} de churn sur {base} clients payants | {churn} churn on {base} paying customers |
-| `whatIf.thenChurn` | {base} × ({churn} − {target}) = {n} clients préservés par mois | {base} × ({churn} − {target}) = {n} customers kept a month |
-| `whatIf.timesChurn` | {arpa} → {amount} de MRR préservé chaque mois | {arpa} → {amount} of MRR kept every month |
-| `whatIf.annual` | Soit {amount} de MRR de plus au bout d'un an, churn compris. | That's {amount} more MRR after a year, churn included. |
-| `whatIf.lessThanOne` | Moins d'un client de plus par mois. | Less than one more customer a month. |
-| `whatIf.assumptionActivation` | Hypothèse : les payants sont parmi les activés. | Assumption: paying customers are among the activated. |
-| `whatIf.multiplication` | Dans un funnel, les taux se multiplient : +20 % sur n'importe quelle étape donne +20 % de clients. Ce qui distingue les étapes, c'est l'écart à leur cible. | In a funnel, rates multiply: +20% at any stage gives +20% customers. What sets stages apart is the gap to their target. |
-| `whatIf.notForecast` | Un calcul, pas une prévision. | A calculation, not a forecast. |
-| `whatIf.targetTeam` | {value} (ta cible) | {value} (your target) |
-
-### 14.7 Peloton et miroir — `peloton.*`, `mirror.*`
-
-| Clé | FR | EN |
-|---|---|---|
-| `peloton.upstream` | ~{n} visiteurs du mois pour 100 inscrits · {source} · {month} | ~{n} visitors a month for 100 sign-ups · {source} · {month} |
-| `peloton.signups` | Inscrits | Sign-ups |
-| `peloton.activated` | Activés | Activated |
-| `peloton.d30` | Actifs à J30 | Active at day 30 |
-| `peloton.paid` | Payants à J{n} | Paying by day {n} |
-| `peloton.legendReferred` | venus par recommandation ({n}) | came through a referral ({n}) |
-| `peloton.legendMeasured` | mesuré | measured |
-| `peloton.legendRange` | fourchette estimée | estimated range |
-| `peloton.legendUnknown` | non mesuré | not measured |
-| `peloton.sameHundred` | Chaque colonne est comptée sur les mêmes 100 inscrits. | Every column is counted on the same 100 sign-ups. |
-| `peloton.lessThanOne` | moins de 1 sur 100 ({n} sur 1 000) | fewer than 1 in 100 ({n} in 1,000) |
-| `peloton.aria` | {n} sur 100 inscrits {population} — {status}, {source}, cohorte de {cohort} | {n} in 100 sign-ups {population} — {status}, {source}, {cohort} cohort |
-| `peloton.title.*` | voir §9.3, slide 1 (mêmes gabarits, un seul module) | see §9.3, slide 1 |
-| `mirror.title` | Ce que tu as déclaré au Tour × ce que tu retrouves ici | What you declared in the Tour × what you find here |
-| `mirror.blindSpot` | Angles morts | Blind spots |
-| `mirror.blindSpotLight` | Angles morts légers | Minor blind spots |
-| `mirror.coherent` | Cohérent | Consistent |
-| `mirror.better` | Mieux que déclaré | Better than declared |
-| `mirror.knownGap` | Lacunes connues | Known gaps |
-| `mirror.card` | Au Tour : « {answer} » ({points} pts). Ici : {found}. | In the Tour: "{answer}" ({points} pts). Here: {found}. |
-| `mirror.noTour` | Fais le Tour pour comparer ce que ton équipe déclare à ce que tu trouves. | Take the Tour to compare what your team declares with what you find. |
-| `mirror.gone` | Le résultat du Tour relié n'est plus sur cet appareil : la comparaison est retirée. | The linked Tour result is no longer on this device: the comparison is removed. |
-
-### 14.8 Écran des slides et chrome des slides — `deck.*`, `slide.*`
-
-| Clé | FR | EN |
-|---|---|---|
-| `deck.title` | Tes slides | Your slides |
-| `deck.include` | Inclure | Include |
-| `deck.checks` | {n} points à vérifier avant de projeter | {n} things to check before presenting |
-| `deck.checks.one` | 1 point à vérifier avant de projeter | 1 thing to check before presenting |
-| `deck.containsData` | Ces fichiers contiennent les chiffres que tu as saisis. | These files contain the numbers you entered. |
-| `deck.showCompany` | Nom de l'entreprise sur les slides | Company name on the slides |
-| `deck.showCredit` | Mention tourdegrowth.com | tourdegrowth.com credit |
-| `deck.showMirror` | Slide « Déclaré × mesuré » | "Declared × measured" slide |
-| `deck.showMirrorHint` | Le Tour est une auto-évaluation : à montrer seulement si l'écart est ton argument. | The Tour is a self-assessment: show it only if the gap is your argument. |
-| `deck.png` | Image (PNG) | Image (PNG) |
-| `deck.pngHd` | Haute définition | High definition |
-| `deck.copyImage` | Copier l'image | Copy image |
-| `deck.pdf` | Télécharger le PDF | Download the PDF |
-| `deck.pdfMobile` | Plus fiable depuis un ordinateur. | More reliable from a computer. |
-| `deck.copyText` | Copier le texte et les notes | Copy the text and notes |
-| `deck.textCopied` | Texte copié | Text copied |
-| `deck.pngFailed` | L'image n'a pas pu être créée dans ce navigateur. Le PDF fonctionne. | The image couldn't be created in this browser. The PDF works. |
-| `deck.englishHint` | Pour un deck en anglais, passe la page en EN : tes chiffres te suivent. | For a deck in French, switch the page to FR: your numbers follow you. |
-| `ask.title` | Ce que tu demandes | What you're asking for |
-| `ask.what` | Quoi (120 caractères) | What (120 characters) |
-| `ask.cost` | Ce que ça coûte | What it costs |
-| `ask.costMoney` | Un montant | An amount |
-| `ask.costTeam` | {weeks} semaines d'une équipe de {people} | {weeks} weeks of a team of {people} |
-| `ask.horizon` | D'ici | By |
-| `ask.successMetric` | Comment nous saurons | How we'll know |
-| `ask.bullets` | Ce que ça finance (3 puces au plus) | What it funds (3 bullets at most) |
-| `ask.measureFirst` | Ce qu'il faut d'abord mesurer | What to measure first |
-| `slide.kicker` | Moteur de growth · {company}{month} · données internes | Growth engine · {company}{month} · internal data |
-| `slide.dataPill` | Données : {m} mesurées · {a} approximatives · {x} introuvables | Data: {m} measured · {a} approximate · {x} missing |
-| `slide.footer` | Cohorte d'inscrits de {cohort} · flux de {month} · sources : {tools} | {cohort} sign-up cohort · {month} flows · sources: {tools} |
-| `slide.leakFooter` | Toutes choses égales par ailleurs · {assumption} | All else being equal · {assumption} |
-| `slide.leakAside` | À côté | Alongside |
-| `slide.cannotExclude` | non mesuré — ne peut pas être exclu | not measured — can't be ruled out |
-| `slide.calcTitle` | Le calcul | The calculation |
-| `slide.visibilityLeft` | Ce qu'on voit | What we can see |
-| `slide.visibilityRight` | Ce qui manque, du plus rapide au plus long à réparer | What's missing, quickest to slowest to fix |
-| `slide.unitCap` | durée de vie plafonnée à 36 mois | lifetime capped at 36 months |
-| `slide.askFunds` | Ce que ça finance | What it funds |
-| `slide.askKnow` | Comment nous saurons | How we'll know |
-| `slide.askMeasure` | Ce qu'il faut d'abord mesurer | What to measure first |
-| `slide.askCheckpoint` | relevé mensuel, premier point le {date} | monthly reading, first checkpoint on {date} |
-| `slide.annexTitle` | Définitions et sources ({i}/{n}) | Definitions and sources ({i}/{n}) |
-| `slide.annexCols` | Chiffre · Formule · Fenêtre · Période · Source · Statut · Confiance | Number · Formula · Window · Period · Source · Status · Confidence |
-| `slide.titles.*` | les gabarits de §9.3, un par cas et par accord | the §9.3 templates, one per case and plural form |
-| `notes.compared` | Comparé à quoi ? — {comparator}. | Compared with what? — {comparator}. |
-| `notes.source` | D'où vient ce chiffre ? — {tool}, {period}, cohorte de {cohort}. | Where does this number come from? — {tool}, {period}, {cohort} cohort. |
-| `notes.seasonal` | Et si c'est saisonnier ? — Un seul mois est mesuré ; la comparaison mois à mois viendra. | What if it's seasonal? — Only one month is measured; month-on-month comparison will come. |
-| `notes.whyNot` | Pourquoi pas {stage} ? — {ranking}. | Why not {stage}? — {ranking}. |
-
-(La clé `deck.englishHint` est affichée dans la langue de la page et pointe vers
-l'autre : FR dit « passe la page en EN », EN dit "switch the page to FR".)
-
-### 14.9 Constats — `findings.*`
-
-| Clé | FR | EN |
-|---|---|---|
-| `findings.chainBreak` | Sur 100 inscrits, on ne sait pas dire combien {verb}. | Out of 100 sign-ups, we can't say how many {verb}. |
-| `findings.verb.activated` | atteignent la première valeur | reach first value |
-| `findings.verb.d30` | sont encore là à J30 | are still active at day 30 |
-| `findings.verb.paid` | paient | pay |
-| `findings.noDefinition` | Il n'existe pas de définition partagée de {metric} — tout chiffre qu'on en donnerait serait l'opinion de quelqu'un. | There's no shared definition of {metric} — any number given for it would be someone's opinion. |
-| `findings.blindSpot` | L'équipe déclare suivre {metric} ; personne n'a pu le sortir. | The team says it tracks {metric}; nobody could pull it. |
-| `findings.belowComparator` | {metric} : {value}, sous {comparator}. | {metric}: {value}, below {comparator}. |
-| `findings.conflict` | {metric} : {a} selon {sourceA}, {b} selon {sourceB}. | {metric}: {a} according to {sourceA}, {b} according to {sourceB}. |
-| `findings.unitEcon` | Impossible de dire en combien de mois un client rembourse son coût : {input} n'est pas mesurée. | We can't say how many months a customer takes to pay back their cost: {input} isn't measured. |
-| `findings.reconcile` | Ta chaîne prédit ~{p} nouveaux payants en {month} ; ta facturation en compte {n}. Au moins une définition ne porte pas sur la même population. | Your chain predicts ~{p} new paying customers in {month}; your billing counts {n}. At least one definition doesn't cover the same population. |
-| `findings.smallCohort` | Moins de 100 inscrits dans la cohorte : chaque inscrit pèse plus d'un point. | Fewer than 100 sign-ups in the cohort: each one weighs more than a point. |
-| `findings.hiddenKnowledge` | Tu en sais plus que ton Tour ne le dit : {metric} est suivi. | You know more than your Tour says: {metric} is tracked. |
-
-### 14.10 Contrôles de cohérence — `sanity.*`
-
-Les huit messages FR de §6.9, plus : EN
-`numGtDen` "More {num} than {den}: one of the two isn't the right one." ·
-`retainedGtActivated` "More active users at day 30 than activated ones: your
-activation definition may be too strict." · `paidGtRetained` "More paying
-customers than active users at day 30: annual prepayment?" · `churnHigh` "Is that
-really a monthly churn?" · `marginOdd` "Check what's counted in direct costs." ·
-`ttvMean` "An average drops when stragglers give up: use the median." ·
-`cohortMismatch` "The peloton's columns don't cover the same cohort." ·
-`reconcileGap` = `findings.reconcile`.
-
-### 14.11 Stockage, fichier, reprise, effacement — `storage.*`, `io.*`, `resume.*`, `erase.*`
-
-| Clé | FR | EN |
-|---|---|---|
-| `storage.backupWarning` | Ton moteur n'existe que dans ce navigateur. Safari efface les données d'un site non visité depuis 7 jours. | Your engine only exists in this browser. Safari erases data from a site not visited for 7 days. |
-| `storage.neverExported` | Jamais sauvegardé | Never saved |
-| `storage.lastExported` | Dernière sauvegarde : {date} | Last saved: {date} |
-| `storage.writeFailed` | Impossible d'enregistrer sur cet appareil. Sauvegarde ta saisie dans un fichier pour ne rien perdre. | Can't save on this device. Save your entries to a file so you lose nothing. |
-| `storage.unreadable` | Les données enregistrées sur cet appareil sont illisibles. Reprends depuis un fichier sauvegardé. | The data saved on this device can't be read. Start again from a saved file. |
-| `io.importTitle` | Importer un moteur | Import an engine |
-| `io.importPreview` | {company} · {month} · {n} chiffres sur {N} | {company} · {month} · {n} of {N} numbers |
-| `io.replace` | Remplacer celui de cet appareil | Replace the one on this device |
-| `io.cancel` | Annuler | Cancel |
-| `io.warnings` | Fichier ouvert avec {n} avertissements : | File opened with {n} warnings: |
-| `io.unknownVersion` | Ce fichier vient d'une version plus récente du moteur : il ne peut pas être lu ici. | This file comes from a newer version of the engine: it can't be read here. |
-| `io.notEngine` | Ce fichier n'est pas un moteur Tour de Growth. | This file isn't a Tour de Growth engine. |
-| `resume.band` | Tu as trouvé {n} chiffres sur {N}. Depuis ta dernière visite (il y a {days} jours) : {pending}. | You've found {n} of {N} numbers. Since your last visit ({days} days ago): {pending}. |
-| `resume.pendingRequests` | {n} demande(s) à relancer ({role}, {metric}) | {n} request(s) to follow up ({role}, {metric}) |
-| `resume.continue` | Reprendre | Continue |
-| `resume.remind` | Relancer {role} | Follow up with {role} |
-| `erase.title` | Tout effacer | Erase everything |
-| `erase.body` | Tes chiffres seront supprimés de cet appareil. Sauvegarde-les d'abord si tu veux les garder. | Your numbers will be deleted from this device. Save them first if you want to keep them. |
-| `erase.confirmLabel` | Tape « {word} » pour confirmer | Type "{word}" to confirm |
-| `erase.fallbackWord` | EFFACER | ERASE |
-| `erase.confirm` | Effacer définitivement | Erase permanently |
-
-### 14.12 FAQ de la page (E0, statique) — `faq.*`
-
-| Q / R | FR | EN |
-|---|---|---|
-| Q1 | Mes chiffres sont-ils envoyés quelque part ? | Are my numbers sent anywhere? |
-| R1 | Non. Ils sont enregistrés dans le stockage local de ton navigateur, sur cet appareil. Aucune requête ne les transporte ; les seules façons de les faire sortir sont un fichier que tu télécharges ou ce que tu copies toi-même. | No. They're stored in your browser's local storage, on this device. No request carries them; the only ways out are a file you download or what you copy yourself. |
-| Q2 | Pourquoi des comptes plutôt que des pourcentages ? | Why counts rather than percentages? |
-| R2 | Parce qu'un pourcentage sans sa base ne se vérifie pas. « 144 sur 800 » se recompte ; « 18 % » ne dit pas de quoi. | Because a percentage without its base can't be checked. "144 out of 800" can be recounted; "18%" doesn't say of what. |
-| Q3 | D'où viennent les repères ? | Where do the references come from? |
-| R3 | Seulement des ordres de grandeur déjà publiés et relus dans le glossaire du site, avec leur réserve. La plupart des étapes n'en ont pas : ta propre cible est alors la référence. | Only orders of magnitude already published and reviewed in the site's glossary, with their caveat. Most stages have none: your own target is then the reference. |
-| Q4 | Que faire d'un chiffre introuvable ? | What do I do with a number I can't find? |
-| R4 | Le dire. Un chiffre introuvable est un constat : l'outil te demande pourquoi, ce que coûterait de le réparer, et le met sur une slide. | Say so. A number you can't find is a finding: the tool asks why, what fixing it would cost, and puts it on a slide. |
-| Q5 | En quoi est-ce différent du Tour ? | How is this different from the Tour? |
-| R5 | Le Tour mesure en trois minutes si ton équipe suit ses chiffres. Le moteur te fait aller les chercher, et confronte les deux si tu as fait le Tour. | The Tour measures in three minutes whether your team tracks its numbers. The engine has you go and get them, and compares the two if you've taken the Tour. |
-
-### 14.13 Catalogue — `content/engine-catalog.ts`, par chiffre
-
-Pour chaque chiffre : `name`, `oneLiner`, `formula`, `inputs` (taux), `where[]`
-(`label` = outil, `path` = chemin), `trap`, `request` (ce qu'il faut sortir),
-`noReferenceReason` ou `benchmarkCaveat`. Les chemins de menu sont **à revérifier
-à la rédaction** (les interfaces bougent) ; le fichier porte
-`ENGINE_CATALOG_VERSION` et la page affiche « chemins vérifiés en {mois} ».
-
-**`acq.signup-rate`**
-- name : Taux d'inscription / Sign-up rate
-- oneLiner : La part des visiteurs du mois qui créent un compte. / The share of the month's visitors who create an account.
-- formula : inscrits du mois ÷ visiteurs uniques du mois / sign-ups in the month ÷ unique visitors in the month
-- inputs : Inscriptions du mois · Visiteurs uniques du mois / Sign-ups in the month · Unique visitors in the month
-- where : GA4 — Rapports › Acquisition › Acquisition de trafic, colonne Utilisateurs (pas Sessions) / Reports › Acquisition › Traffic acquisition, the Users column (not Sessions) · Mixpanel ou Amplitude — un entonnoir Page vue → Inscription sur le mois / a Page view → Sign-up funnel over the month · Base produit — les comptes créés sur le mois, plus fiable pour le numérateur / accounts created in the month, more reliable for the numerator
-- trap : Numérateur et dénominateur viennent souvent de deux outils qui ne comptent pas pareil : dis-le dans ta définition. / Numerator and denominator often come from two tools that count differently: say so in your definition.
-- request : le nombre de visiteurs uniques et le nombre d'inscriptions sur {month} / the number of unique visitors and the number of sign-ups in {month}
-- benchmarkCaveat : pour du trafic payant froid, bien plus pour du trafic chaud — ton trafic est un mélange, donc ce repère ne désigne pas de frein / for cold paid traffic, far higher for warm traffic — your traffic is a mix, so this reference never names a bottleneck
-
-**`acq.top-channel-share`**
-- name : Part du premier canal / Top channel share
-- oneLiner : Combien de tes inscrits viennent de ton meilleur canal. / How many of your sign-ups come from your best channel.
-- formula : inscrits venus du premier canal ÷ inscrits du mois / sign-ups from the top channel ÷ sign-ups in the month
-- inputs : Inscrits du premier canal · Inscrits du mois / Sign-ups from the top channel · Sign-ups in the month ; + « Nom du canal » / "Channel name"
-- where : GA4 — Acquisition d'utilisateurs, dimension Groupe de canaux par défaut du premier utilisateur / User acquisition, dimension First user default channel group · HubSpot — propriété Source d'origine des contacts créés sur le mois / the Original Source property of contacts created in the month · Salesforce — champ Lead Source / the Lead Source field
-- trap : Dans GA4, « Referral » veut dire « site référent », pas « recommandation d'un client ». / In GA4, "Referral" means "referring site", not "a customer's recommendation".
-- request : le nombre d'inscrits de {month} par canal d'origine / the number of {month} sign-ups by original channel
-- noReferenceReason : aucun seuil de dépendance n'est publiable ; la part et le nom du canal suffisent à ouvrir la discussion / no dependency threshold is worth publishing; the share and the channel's name are enough to open the discussion
-
-**`acq.cac`**
-- name : CAC / CAC
-- oneLiner : Ce que coûte un nouveau client payant. / What a new paying customer costs.
-- formula : dépense d'acquisition du mois ÷ nouveaux clients payants du mois / acquisition spend in the month ÷ new paying customers in the month
-- inputs : Dépense d'acquisition du mois · Nouveaux clients payants du mois / Acquisition spend in the month · New paying customers in the month
-- where : Google Ads, Meta Ads Manager, LinkedIn Campaign Manager — le coût du mois, toutes campagnes / the month's cost, all campaigns · Finance — la masse salariale ventes et marketing, pour la variante « tout chargé » / sales and marketing payroll, for the "fully loaded" variant · Stripe ou Chargebee — les abonnements créés et payés dans le mois, hors essais / subscriptions created and paid in the month, trials excluded
-- trap : Dépense du mois ÷ clients du mois est faux dès que le cycle de vente dépasse un mois : dis-le. / This month's spend ÷ this month's customers is wrong as soon as the sales cycle is longer than a month: say so.
-- request : la dépense d'acquisition de {month} ({variant}) et le nombre de nouveaux clients payants du mois / {month}'s acquisition spend ({variant}) and the number of new paying customers that month
-- noReferenceReason : il n'y a pas de bon CAC dans l'absolu — il se juge contre ce qu'un client rapporte (payback, LTV:CAC) / there's no good CAC in absolute terms — it's judged against what a customer brings in (payback, LTV:CAC)
-
-**`act.event`**
-- name : Événement d'activation / Activation event
-- oneLiner : L'action qui prouve qu'un inscrit a touché la valeur du produit. / The action that proves a sign-up has reached the product's value.
-- formula : le nom de l'action, et sa fenêtre en jours / the action's name, and its window in days
-- where : Produit — c'est une décision de l'équipe produit, pas un chiffre d'outil / Product — it's a product team decision, not a tool figure
-- trap : Un événement choisi parce qu'il est facile à compter n'est pas un moment de valeur. / An event picked because it's easy to count isn't a moment of value.
-- request : le nom de l'événement qui marque la première valeur, et sa fenêtre / the name of the event that marks first value, and its window
-
-**`act.rate`**
-- name : Taux d'activation / Activation rate
-- oneLiner : La part des inscrits qui atteignent la première valeur à temps. / The share of sign-ups who reach first value in time.
-- formula : inscrits de la cohorte ayant fait {event} sous {n} jours ÷ inscrits de la cohorte / cohort sign-ups who did {event} within {n} days ÷ cohort sign-ups
-- inputs : Activés sous {n} jours · Inscrits de {cohort} / Activated within {n} days · {cohort} sign-ups
-- where : Amplitude — Funnel Analysis, Inscription → {event}, fenêtre de conversion {n} jours / Funnel Analysis, Sign-up → {event}, {n}-day conversion window · Mixpanel — rapport Funnels, conversion window de {n} jours / Funnels report, {n}-day conversion window · GA4 — Explorer › Exploration de l'entonnoir, si l'événement est envoyé / Explore › Funnel exploration, if the event is sent
-- trap : Change l'événement et le taux change d'un facteur trois : écris ta définition. / Change the event and the rate moves threefold: write your definition down.
-- request : pour la cohorte des inscrits de {cohort}, combien ont fait {event} sous {n} jours, et la taille de la cohorte / for the {cohort} sign-up cohort, how many did {event} within {n} days, and the cohort size
-- benchmarkCaveat : pour un onboarding SaaS, souvent plus bas en essai gratuit ; dépend entièrement de l'exigence de ton événement / for SaaS onboarding, often lower for free trials; depends entirely on how demanding your event is
-
-**`act.ttv`**
-- name : Time-to-value médian / Median time to value
-- oneLiner : Combien de temps il faut à un inscrit pour atteindre la première valeur. / How long a sign-up takes to reach first value.
-- formula : médiane du délai entre l'inscription et {event} / median delay between sign-up and {event}
-- where : Amplitude ou Mixpanel — la vue « time to convert » de l'entonnoir / the funnel's "time to convert" view · GA4 — pas de médiane native : à demander à la data / no native median: ask the data team
-- trap : Une moyenne baisse quand les traînards abandonnent : prends la médiane. / An average drops when stragglers give up: use the median.
-- request : le délai médian entre l'inscription et {event}, cohorte de {cohort} / the median delay between sign-up and {event}, {cohort} cohort
-- noReferenceReason : « dès la première session » est une ambition souvent citée, pas une norme mesurée / "within the first session" is an often-quoted ambition, not a measured norm
-
-**`ret.d30`**
-- name : Rétention à J30 / Day-30 retention
-- oneLiner : La part des inscrits encore actifs un mois après. / The share of sign-ups still active a month later.
-- formula : inscrits de la cohorte encore actifs 30 jours après l'inscription ÷ inscrits de la cohorte / cohort sign-ups still active 30 days after signing up ÷ cohort sign-ups
-- inputs : Actifs à J30 · Inscrits de {cohort} / Active at day 30 · {cohort} sign-ups
-- where : Amplitude — Retention Analysis, événement de départ Inscription / Retention Analysis, starting event Sign-up · Mixpanel — rapport Retention / Retention report · GA4 — Explorer › Exploration de cohortes / Explore › Cohort exploration
-- trap : « Actif » doit être écrit : une connexion n'est pas un usage. / "Active" must be written down: a login isn't usage.
-- request : pour la cohorte des inscrits de {cohort}, combien étaient encore actifs 30 jours après leur inscription, et la taille de la cohorte / for the {cohort} sign-up cohort, how many were still active 30 days after signing up, and the cohort size
-- noReferenceReason : les ordres de grandeur publiés portent sur les applis grand public ; en SaaS, la forme de la courbe compte plus que le niveau / the published orders of magnitude are for consumer apps; in SaaS, the curve's shape matters more than its level
-
-**`ret.logo-churn`**
-- name : Churn logo mensuel / Monthly logo churn
-- oneLiner : La part des clients payants qui partent dans le mois. / The share of paying customers who leave in the month.
-- formula : clients payants perdus dans le mois ÷ clients payants au 1er du mois / paying customers lost in the month ÷ paying customers on the 1st
-- inputs : Clients perdus en {month} · Clients payants au 1er {month} / Customers lost in {month} · Paying customers on {month} 1
-- where : Stripe — Billing, vue d'ensemble, churn des abonnés (selon ton offre) / Billing, overview, subscriber churn (depending on your plan) · Chargebee — RevenueStory (selon l'édition) / RevenueStory (depending on edition) · ChartMogul ou Baremetrics — churn clients / customer churn
-- trap : Un churn mensuel au-dessus de 30 % est souvent un chiffre annuel : vérifie. / A monthly churn above 30% is often an annual figure: check.
-- request : le nombre de clients payants au 1er {month} et le nombre de clients perdus dans le mois / the number of paying customers on {month} 1 and the number lost during the month
-- benchmarkCaveat : pour des produits vendus aux petites entreprises ; les produits entreprise visent bien plus bas, les abonnements grand public tournent bien plus haut / for products sold to small businesses; enterprise products aim much lower, consumer subscriptions run much higher
-
-**`ret.churn-cause`**
-- name : Cause principale de churn / Main churn cause
-- oneLiner : Pourquoi les clients partent, et comment tu le sais. / Why customers leave, and how you know.
-- formula : la cause, et sa source : données, entretiens ou intuition / the cause, and its source: data, interviews or gut feel
-- where : HubSpot ou Salesforce — le champ raison de perte / the loss-reason field · Support — relire les derniers départs / read the latest cancellations
-- trap : Une intuition partagée par toute l'équipe reste une intuition. / A hunch shared by the whole team is still a hunch.
-- request : la raison la plus fréquente des départs de ces trois derniers mois, et d'où elle vient / the most frequent reason for cancellations over the last three months, and where it comes from
-
-**`ref.mechanism`**
-- name : Mécanisme de recommandation / Referral mechanism
-- oneLiner : Ce qui permet à un utilisateur d'en amener un autre. / What lets one user bring in another.
-- where : Produit — l'équipe produit / Product — the product team
-- trap : Le bouche-à-oreille existe sans mécanisme : ne pas en avoir ne dispense pas de mesurer la part recommandée. / Word of mouth exists without a mechanism: not having one doesn't excuse you from measuring the referred share.
-
-**`ref.referred-share`**
-- name : Part des inscrits recommandés / Referred sign-up share
-- oneLiner : La part des inscrits amenés par un utilisateur. / The share of sign-ups brought in by a user.
-- formula : inscrits arrivés par un utilisateur (code, lien d'invitation, réponse « comment nous as-tu connus ? ») ÷ inscrits de la cohorte / sign-ups who came through a user (code, invite link, "how did you hear about us?" answer) ÷ cohort sign-ups
-- inputs : Inscrits recommandés · Inscrits de {cohort} / Referred sign-ups · {cohort} sign-ups
-- where : Outil de parrainage ou table d'invitations — les inscrits avec un parrain / referral tool or invitations table — sign-ups with a referrer · HubSpot — la propriété « comment nous avez-vous connus » / the "how did you hear about us" property
-- trap : La source « referral » de GA4 compte des sites, pas des recommandations. / GA4's "referral" source counts websites, not recommendations.
-- request : pour la cohorte de {cohort}, combien d'inscrits sont arrivés par un code, une invitation ou une recommandation déclarée / for the {cohort} cohort, how many sign-ups came through a code, an invite or a declared recommendation
-- noReferenceReason : de presque zéro à la majorité selon que le produit se voit ou non : compare-toi à toi-même / from nearly zero to a majority depending on whether the product is visible to others: compare with yourself
-
-**`ref.k-factor`**
-- name : Coefficient viral (K) / Viral coefficient (K)
-- oneLiner : Combien de nouveaux inscrits chaque utilisateur amène. / How many new sign-ups each user brings in.
-- formula : inscrits invités par la cohorte ÷ taille de la cohorte / sign-ups invited by the cohort ÷ cohort size
-- inputs : Inscrits invités par la cohorte · Inscrits de {cohort} / Sign-ups invited by the cohort · {cohort} sign-ups
-- where : Mixpanel ou Amplitude, avec la table d'invitations / Mixpanel or Amplitude, with the invitations table
-- trap : K se divise par tous les utilisateurs, pas seulement ceux qui ont partagé. / K divides by every user, not just those who shared.
-- request : pour la cohorte de {cohort}, le nombre d'inscrits amenés par ses invitations / for the {cohort} cohort, the number of sign-ups its invitations brought in
-- benchmarkCaveat : fourchette réaliste pour la plupart des produits ; un K durable au-dessus de 1 est rare et temporaire / realistic range for most products; a sustained K above 1 is rare and temporary
-
-**`rev.paid-conversion`**
-- name : Conversion inscrit → payant / Sign-up to paid conversion
-- oneLiner : La part des inscrits qui paient dans la fenêtre. / The share of sign-ups who pay within the window.
-- formula : inscrits de la cohorte ayant payé sous {n} jours ÷ inscrits de la cohorte / cohort sign-ups who paid within {n} days ÷ cohort sign-ups
-- inputs : Payants sous {n} jours · Inscrits de {cohort} / Paying within {n} days · {cohort} sign-ups
-- where : Data — une jointure entre la base produit et Stripe ou Chargebee sur l'identifiant client / a join between the product database and Stripe or Chargebee on the customer id · HubSpot ou Salesforce — les affaires gagnées de la cohorte, si une vente intervient / the cohort's won deals, if sales is involved
-- trap : Les chiffres qui circulent mélangent essai, freemium et carte à l'inscription : ne compare qu'à toi-même. / The numbers that circulate mix trials, freemium and card-at-sign-up: compare only with yourself.
-- request : pour la cohorte des inscrits de {cohort}, combien ont payé sous {n} jours, et la taille de la cohorte / for the {cohort} sign-up cohort, how many paid within {n} days, and the cohort size
-- noReferenceReason : aucun taux publié ne porte sur la même base que le tien / no published rate uses the same base as yours
-
-**`rev.arpa`**
-- name : ARPA mensuel / Monthly ARPA
-- oneLiner : Le revenu mensuel moyen d'un client payant. / The average monthly revenue of a paying customer.
-- formula : MRR ÷ clients payants / MRR ÷ paying customers
-- inputs : MRR de {month} · Clients payants / {month} MRR · Paying customers
-- where : Stripe — Billing, MRR et clients actifs / Billing, MRR and active customers · Chargebee — le rapport MRR / the MRR report · ChartMogul — ARPA / ARPA
-- trap : Un ARPA qui monte pendant que la base baisse, ce sont souvent les petits clients qui partent. / An ARPA rising while the base shrinks is usually small customers leaving.
-- request : le MRR de fin {month} et le nombre de clients payants / {month}'s closing MRR and the number of paying customers
-- noReferenceReason : il varie de trois ordres de grandeur entre catégories / it varies by three orders of magnitude between categories
-
-**`rev.gross-margin`**
-- name : Marge brute / Gross margin
-- oneLiner : Ce qu'il reste d'un paiement après le coût de le servir. / What's left of a payment after the cost of serving it.
-- formula : (revenu − coût direct de service : hébergement, frais de paiement, support) ÷ revenu / (revenue − direct cost of service: hosting, payment fees, support) ÷ revenue
-- inputs : Marge brute du mois · Revenu du mois / Gross profit in the month · Revenue in the month
-- where : Finance — le compte de résultat du mois / Finance — the month's income statement
-- trap : Prendre le revenu au lieu de la marge flatte le payback : c'est la marge qui rembourse le CAC. / Using revenue instead of margin flatters the payback: margin is what pays the CAC back.
-- request : la marge brute du dernier trimestre clos, et ce qu'elle inclut / gross margin for the last closed quarter, and what it includes
-- benchmarkCaveat : en SaaS ; bien moins dès qu'il y a de la prestation humaine / in SaaS; much lower as soon as there's human delivery
-
-**Calculés** (`rev.ltv`, `rev.cac-payback`, `rev.ltv-cac`) : `name` LTV / LTV ·
-CAC payback / CAC payback · LTV:CAC / LTV:CAC ; `formula` comme §5.7 ;
-`uncomputable` : « incalculable — manque : {input} » / "can't be computed —
-missing: {input}" ; `capNote` : « durée de vie plafonnée à 36 mois : la plupart
-des praticiens plafonnent à trois à cinq ans ; on prend le bas » / "lifetime
-capped at 36 months: most practitioners cap it at three to five years; we take
-the low end" ; `paybackCaveat` : « la vraie comparaison est ta trésorerie » /
-"the real comparison is your runway".
-
-### 14.14 Légal
-
-La phrase de §11.5, dans `content/legal.ts`.
-
----
+Ce paragraphe listait, clé par clé et dans les deux langues, la copie que la
+v1 allait écrire (51 000 caractères). Elle vit depuis dans
+`src/content/engine-copy.ts` et `src/content/engine-catalog.ts`, qui font foi
+et ont changé depuis (dix-sept chiffres au lieu de quinze, A7.1, A7.2, A7.5,
+A7.6, C29…) : la liste était devenue une copie périmée du code. Un renvoi
+« §14.x » de ce document désigne la clé du même nom dans ces deux modules ;
+le texte d'origine se lit dans l'historique (`git show 24c862a:ENGINE.md`).
+Un bon à tirer se construit toujours depuis `grep -rn "TODO: à relire" src/`,
+jamais depuis une liste, et la typographie est tenue par
+`copy-typography.test.ts`.
 
 ## 15. Reporté
 
@@ -3714,6 +3185,10 @@ shortening it brings signatures forward without creating any."
 - *W* = nouveaux clients assistés sur les trois mois : `slgDealsWon` mesuré
   (numérateur du taux de closing ou dénominateur du CAC). Sinon, les
   opportunités conclues × le taux de closing (approximatif). Sinon, inconnu.
+  *Codé en S1 (2026-10-01)* : la seconde voie n'existe pas dans les données.
+  Un taux de closing saisi en comptes porte déjà W au numérateur, et sans
+  comptes il n'y a pas d'opportunités conclues à multiplier. W se lit donc
+  sur le compte partagé (`knownSharedCount`), et il est inconnu sinon.
 - *ACV mensuel* = ACV ÷ 12. *ARPA assisté* = `slg.rev.arpa`. *D* = contrats
   arrivés à échéance sur les trois mois (dénominateur du renouvellement).
 - **Flux** (`lead-to-opp`, `win-rate`) : clients en plus sur trois mois =
@@ -3751,6 +3226,18 @@ shortening it brings signatures forward without creating any."
   variante `annual`. En variante `monthly`, elle reprend la décroissance
   PLG, `Σ (r/100)^k`. Un écart de moins d'un client (ou d'un contrat) donne
   `less-than-one`, sans montant, comme en PLG.
+
+  *Codé en S1 (2026-10-01)*, trois précisions :
+  - **Pas de « → » sur une slide** : les trois fontes ne portent pas la
+    flèche (§10.4, le test des glyphes l'a refusée). La ligne `today` des
+    flux s'écrit donc comme en PLG, « 24 % de closing, soit 18 nouveaux
+    clients sur 3 mois », et le sujet du passage lead → opportunité est
+    « le passage des leads en opportunités ».
+  - `{acvMonthly}` est l'ACV ÷ 12 **arrondi à l'unité monétaire**, pour que
+    « 6 × 2 000 € » se refasse à la calculette quand l'ACV n'est pas un
+    multiple de 12.
+  - La ligne `annual` vaut aussi pour le renouvellement : les contrats
+    sauvés d'un trimestre restent un an en contrats annuels.
 - **Titre = corps** : le titre de `slg:leak` cite `{amount}`, lu sur la
   ligne `per-month` du même objet (`impactHeadline`, étendu). C'est le
   gabarit PLG existant (`leakClearMrrNew` / `leakClearMrrRetained`) : « chaque
@@ -3856,7 +3343,9 @@ Mêmes kinds et mêmes rangs, avec `motion` posé :
   `conflict`.
 - `unit-econ-uncomputable` : payback assisté.
 - `small-cohort` : il devient `small-sample` en assisté, avec le chiffre et
-  `p`.
+  `p`. *Codé en S1* : un seul constat, sur le ★ compté au plus petit
+  dénominateur, comme la phrase du tableau (§18.5.1), et non un par chiffre,
+  qui ferait jusqu'à six constats de rang 4 pour un seul fait.
 - `hidden-knowledge`.
 
 Pas de constat de liaison. Règle inchangée : **aucune phrase n'affirme une
@@ -4578,6 +4067,42 @@ ne bouge pas d'un caractère en attendant (golden vert) :
 - `METRIC_SHAPES` reste le catalogue du libre-service, et chaque module le
   lit comme avant ; un module qui apprend les motions lit
   `shapesOf(motions)`.
+
+**S1 est livré le 2026-10-01** : `relays.ts`, `slg-impact.ts`,
+`slg-scenario.ts` (levier de la liaison compris), `total.ts`, et le
+diagnostic, les unit economics, les contrôles, les constats, le miroir, la
+couverture et la demande copiée qui apprennent leur motion ; l'exemple
+hybride §18.9 (`exampleEngine(words, motions)`). Tous les chiffres de §18.9
+sortent exacts. Deux écarts à la forme de §18.2.1, voulus :
+- `Diagnosis` est générique sur ses candidats (`Diagnosis<C>`, le
+  libre-service par défaut) plutôt qu'un seul type portant les onze : ses
+  positions ne portent que ceux de sa motion, et le compilateur refuse
+  qu'on lise un candidat de l'autre ;
+- `EngineDerived` garde `peloton`, `diagnosis` et `unit` **du libre-service**
+  en plus de `motions` et `total`, les mêmes objets que l'entrée `plg` de
+  `motions` : chaque écran et le deck v1 les lisent, et le golden v1 aussi.
+
+Ce que S1 laisse :
+- **S2** : la prose des 15 chiffres et de la liaison, puis le placeholder
+  `{period}` de `catalogueValues` (« juin à août 2026 ») et son équivalent
+  statique ; la copie neuve de S1 (sujets, entrées manquantes, chaîne
+  `slgChain`, constats et contrôles assistés, mots de l'exemple, intertitres
+  de la demande) est « à relire » ; les hypothèses de l'« Et si » assisté
+  (`SlgScenarioAssumption`) n'ont pas encore de copie ; les pièges hybrides
+  des cinq fiches du libre-service (§18.4.6).
+- **S3** : les écrans lisent `motions` et `total` (bande du total par
+  `total.formatSum`, deux colonnes, relais) ; le curseur de la liaison est
+  `unit: "count"` (`scenario-view.ts` ne sait encore formater que pourcent
+  et monnaie) ; `Diagnosis.tsx`, `StageTabs`, `MetricSheet` sont typés sur le
+  libre-service ; les deux phrases fixes (le cycle, « deux motions, deux
+  segments ») ; la vue exemple dans les motions cochées.
+- **S4** : le deck lit `motions` (`slg:peloton` sur les relais, `slg:leak`
+  par `slgWhatIf` et `slgChainTemplate`, `slg:scenario` et les `whatif:`
+  assistés par `slg-scenario.ts`, `total`, la slide d'unit economics en
+  regard avec `lostInAYear` et `marginIsCompanyWide`) ; ensuite seulement,
+  `EngineDerived` perd ses trois champs du libre-service. La note d'orateur
+  de `slg-cycle-long` (§18.8.3) s'écrit à part : le message du contrôle
+  tutoie (« Ton cycle médian »), il est fait pour l'écran « à vérifier ».
 
 | PR | Contenu | Fichiers possédés | Dépend de | Jours-agent |
 |---|---|---|---|---|

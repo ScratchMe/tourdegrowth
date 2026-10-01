@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { GLOSSARY, type GlossaryTermId } from "../glossary";
 import { QUESTIONS } from "../copy-library";
 import { GLOSSARY_DEEP } from "../glossary-deep";
+import { AUDIT_CATALOG } from "../audit-catalog";
 
 const ALL_IDS = Object.keys(GLOSSARY) as GlossaryTermId[];
 
@@ -35,6 +36,24 @@ describe("GLOSSARY (growth-plan Phase 2: extended /glossary/[term] content)", ()
     for (const id of ALL_IDS) {
       expect(GLOSSARY[id].related.length, id).toBeGreaterThanOrEqual(2);
       expect(GLOSSARY[id].related.length, id).toBeLessThanOrEqual(4);
+    }
+  });
+
+  it("every term is linked from at least two others (GROWTH-PLAN.md 2.4)", () => {
+    // Measured by hand after each batch of wave 2.2, a rule since A7.3.e
+    // (2026-09-30), whose four terms needed eight swaps to get there. The
+    // four new ones must be reached from pages that existed before them, not
+    // only from each other. Non-vacuity (2026-09-30): putting `activation`
+    // back in place of `lead-to-opportunity` in `pql.related` fails this test
+    // alone ("lead-to-opportunity ← acquisition: expected 1").
+    const NEW_SALES_TERMS: GlossaryTermId[] = ["win-rate", "sales-cycle", "acv", "lead-to-opportunity"];
+    for (const id of ALL_IDS) {
+      const from = ALL_IDS.filter((other) => GLOSSARY[other].related.includes(id));
+      expect(from.length, `${id} ← ${from.join(", ")}`).toBeGreaterThanOrEqual(2);
+      if (NEW_SALES_TERMS.includes(id)) {
+        const older = from.filter((other) => !NEW_SALES_TERMS.includes(other));
+        expect(older.length, `${id} ← ${older.join(", ")}`).toBeGreaterThanOrEqual(2);
+      }
     }
   });
 
@@ -134,6 +153,68 @@ describe("long-form term pages (REVIEW-02.md R2-11)", () => {
         words(deep.inTheTour.body[locale]) +
         deep.faq.reduce((n, x) => n + words(x.answer[locale]), 0);
       expect(total, `${id} (${locale}) is ${total} words`).toBeGreaterThanOrEqual(500);
+    }
+  });
+});
+
+/**
+ * A7.3.e (2026-09-30) — the four sales-assisted terms carry NONE of the audit
+ * instrument's orders of magnitude (ENGINE.md §18.4.1 and decision 6). Those
+ * figures — a win rate of 25-35% for small companies and 12-18% for large
+ * ones, a pipeline coverage of 3× to 6× by deal size — live in
+ * `audit-catalog.ts`, whose review (bon à tirer nº4) settled one card out of
+ * 39, and the web repeats them everywhere, which is exactly how they would
+ * slip in. The ranges are READ from the catalogue rather than listed here,
+ * so a figure added to it later is covered the day it lands.
+ *
+ * Non-vacuity, measured on 2026-09-30, both sabotages at once: "25-35 %"
+ * written into the French example of `win-rate` and "3×" into the English
+ * benchmark of `acv` fail exactly the two language cases below — `win-rate
+ * (fr)` found "25-35", `acv (en)` found "3×" — and the 14 other tests of this
+ * file pass. The catalogue yields 24 figures that day.
+ */
+describe("sales-assisted terms, and the audit instrument's figures (A7.3.e)", () => {
+  const SALES_TERMS: GlossaryTermId[] = ["win-rate", "sales-cycle", "acv", "lead-to-opportunity"];
+  /** Spaces unified, dashes and « à » read as one range sign, so "25 à 35 %" and "25-35%" are the same figure. */
+  const normalise = (text: string) =>
+    text
+      .replace(/[\u00a0\u202f]/g, " ")
+      .replace(/(\d)\s*(?:-|–|—|à|to)\s*(\d)/g, "$1-$2")
+      .replace(/(\d)\s+(\d{3})(?!\d)/g, "$1$2");
+  const auditFigures = [
+    ...new Set(
+      AUDIT_CATALOG.filter((row) => row.appliesTo.includes("b2b-assiste"))
+        .flatMap((row) => [row.definition, row.trap, row.where, row.decision, row.absence, row.why])
+        .filter((x): x is string => Boolean(x))
+        .flatMap((text) => normalise(text).match(/\d+(?:,\d+)?-\d+(?:,\d+)?|\d+(?:,\d+)?×|\d+ ?k€/g) ?? []),
+    ),
+  ];
+  const pageText = (id: GlossaryTermId, locale: "en" | "fr") => {
+    const bits: string[] = [];
+    (function walk(v: unknown) {
+      if (v == null) return;
+      if (typeof v === "object" && "fr" in (v as object) && "en" in (v as object)) {
+        bits.push(String((v as Record<string, unknown>)[locale]));
+        return;
+      }
+      if (typeof v === "object") Object.values(v as object).forEach(walk);
+    })({ entry: GLOSSARY[id], deep: GLOSSARY_DEEP[id] });
+    return normalise(bits.join("\n"));
+  };
+
+  it("reads the catalogue's figures, including the two the spec names — otherwise the check below proves nothing", () => {
+    expect(auditFigures).toContain("25-35");
+    expect(auditFigures).toContain("12-18");
+    expect(auditFigures).toContain("3×");
+    expect(auditFigures.length).toBeGreaterThan(5);
+  });
+
+  it.each(["en", "fr"] as const)("none of them appears on the four pages (%s)", (locale) => {
+    for (const id of SALES_TERMS) {
+      const text = pageText(id, locale);
+      expect(text.length, id).toBeGreaterThan(3000);
+      const found = auditFigures.filter((figure) => new RegExp(`(?<![\\d,])${figure.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![\\d,])`).test(text));
+      expect(found, `${id} (${locale})`).toEqual([]);
     }
   });
 });
