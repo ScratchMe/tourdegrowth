@@ -7,7 +7,7 @@ import { resumePosition } from "@/app/[locale]/aarrr-funnel-template/_engine/ste
 import type { StoredResult } from "@/lib/quiz/storage";
 import { buildDeck, deckMarkdown } from "../deck";
 import { deriveEngine } from "../derive";
-import { migrateToV2 } from "../migrate";
+import { migrateToV3 } from "../migrate";
 import { buildScenario } from "../scenario";
 import type { DeckModel, EngineDerived, EngineState, MetricEntry } from "../types";
 import { currentSnapshot } from "../values";
@@ -137,12 +137,13 @@ function outputsOf(state: EngineState, tour: StoredResult | null) {
 }
 
 /**
- * The state a v1 file gives today: the v1 state goes through `migrateToV2`,
- * as a v1 file (`io.ts`) or a v1 store (`storage.ts`) does when a v2 build
- * opens it. Identity until S0 — when the golden was written.
+ * The state a v1 file gives today: the v1 state goes through the migration
+ * a v1 file (`io.ts`) or a v1 store (`storage.ts`) goes through when this
+ * build opens it — `migrateToV2` from S0, `migrateToV3` (v1 → v2 → v3) from
+ * A14 T0. Identity until S0, when the golden was written.
  */
 function openV1(v1: EngineState): EngineState {
-  const migrated = migrateToV2(v1);
+  const migrated = migrateToV3(v1);
   if (!migrated || migrated.from !== 1) throw new Error("A golden input is not a v1 engine");
   return migrated.state;
 }
@@ -170,7 +171,7 @@ describe("golden v1 — a self-serve engine reads the same after the change", ()
     const example = outputs.example as { fr: { derived: { diagnosis: { state: string } } } };
     expect(example.fr.derived.diagnosis.state).toBe("clear");
     expect(inputs["example-whatif-tour"]!.tour).not.toBeNull();
-    for (const i of Object.values(inputs)) expect(i.state.schemaVersion).toBe(1);
+    for (const i of Object.values(inputs)) expect(i.state.schemaVersion as number).toBe(1);
   });
 
   for (const name of Object.keys(inputs)) {

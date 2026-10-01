@@ -2,6 +2,7 @@ import type { Page } from "@playwright/test";
 import type { EngineState, PlgLeverId } from "../src/lib/engine/types";
 import { exampleState } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, openFold, readEachOnScreen, SKIP_ADMIN_REASON, test } from "./helpers";
+import { engineSeed } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -20,7 +21,6 @@ test.beforeEach(async ({ context }) => {
  * the three embedded families only.
  */
 
-const STORAGE_KEY = "tdg.engine.v2";
 
 /** Every lever the example knows, moved: the densest « together » slide the deck can print. */
 const ALL_LEVERS: Record<PlgLeverId, number> = {
@@ -37,12 +37,12 @@ const ALL_LEVERS: Record<PlgLeverId, number> = {
 async function openDeckWith(page: Page, locale: "fr" | "en", whatIf: EngineState["whatIf"]): Promise<void> {
   const state = { ...exampleState(), whatIf };
   await page.addInitScript(
-    ([key, store]) => {
+    (items) => {
       if (sessionStorage.getItem("e2e-engine-seeded")) return;
-      localStorage.setItem(key, JSON.stringify(store));
+      for (const [key, value] of items) localStorage.setItem(key, value);
       sessionStorage.setItem("e2e-engine-seeded", "1");
     },
-    [STORAGE_KEY, { schemaVersion: 2, state }] as const,
+    engineSeed(state),
   );
   await page.goto(`/${locale}/aarrr-funnel-template`);
   await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
@@ -137,12 +137,12 @@ for (const locale of ["fr", "en"] as const) {
 
 test("a target moved on the board's slider becomes a slide", async ({ page }) => {
   await page.addInitScript(
-    ([key, store]) => {
+    (items) => {
       if (sessionStorage.getItem("e2e-engine-seeded")) return;
-      localStorage.setItem(key, JSON.stringify(store));
+      for (const [key, value] of items) localStorage.setItem(key, value);
       sessionStorage.setItem("e2e-engine-seeded", "1");
     },
-    [STORAGE_KEY, { schemaVersion: 2, state: exampleState() }] as const,
+    engineSeed(exampleState()),
   );
   await page.goto("/fr/aarrr-funnel-template");
   await expect(page.getByTestId("engine-board")).toBeVisible();

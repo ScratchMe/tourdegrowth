@@ -2,7 +2,9 @@ import { ALL_LEVER_IDS, ALL_METRIC_SHAPES, TEXT_LIMITS, shapeOf, type MetricShap
 import { SHARED_COUNT_IDS, WHOLE_SHARED_COUNTS } from "./shared-counts";
 import { BASIS_KEY, CAUSE_KEY, REPAIR_KEY, ROLE_KEY, STATUS_KEY } from "./strings";
 import {
+  DECK_THEMES,
   ENGINE_SCHEMA_VERSION,
+  MAX_MONTHS,
   SLIDE_ORDER,
   YEAR_MONTH_PATTERN,
   type Currency,
@@ -177,6 +179,8 @@ function entryErrors(path: string, entry: unknown, shape: MetricShape): string[]
     case "measured":
       checkValue(`${path}.value`, entry.value, shape, errors);
       checkSource(`${path}.source`, entry.source, errors);
+      // §19.5.3: a rate in counts whose denominator comes from another tool. Absent = the same source.
+      if (entry.denominatorSource !== undefined) checkSource(`${path}.denominatorSource`, entry.denominatorSource, errors);
       break;
     case "estimated": {
       const e = entry.estimate;
@@ -265,6 +269,25 @@ function setupErrors(setup: unknown): string[] {
   if (![30, 60, 90].includes(setup.qualificationWindowDays as number)) errors.push("setup.qualificationWindowDays: not 30, 60 or 90");
   if (![30, 60, 90].includes(setup.goLiveWindowDays as number)) errors.push("setup.goLiveWindowDays: not 30, 60 or 90");
   tooLong("setup.companyLabel", setup.companyLabel, TEXT_LIMITS.companyLabel, errors);
+  // §19.5, C32 Q9: optional, and empty means « not said ».
+  if (setup.tools !== undefined) {
+    if (!Array.isArray(setup.tools)) errors.push("setup.tools: not a list");
+    else {
+      setup.tools.forEach((t, i) => {
+        if (!oneOf(TOOLS, t)) errors.push(`setup.tools[${i}]: unknown tool`);
+      });
+      if (new Set(setup.tools).size !== setup.tools.length) errors.push("setup.tools: a tool listed twice");
+    }
+  }
+  // §19.4, C32 Q8: optional, both numbers optional, and both positive when present.
+  if (setup.pipeline !== undefined) {
+    const p = setup.pipeline;
+    if (!isObj(p)) errors.push("setup.pipeline: not an object");
+    else {
+      if (p.quarterTarget !== undefined && (!isNum(p.quarterTarget) || p.quarterTarget <= 0)) errors.push("setup.pipeline.quarterTarget: not a number > 0");
+      if (p.threshold !== undefined && (!isNum(p.threshold) || p.threshold <= 0)) errors.push("setup.pipeline.threshold: not a number > 0");
+    }
+  }
   return errors;
 }
 
@@ -275,6 +298,20 @@ function snapshotErrors(path: string, snapshot: unknown): string[] {
   if (!isYearMonth(snapshot.referenceMonth)) errors.push(`${path}.referenceMonth: not YYYY-MM`);
   if (!isYearMonth(snapshot.cohortMonth)) errors.push(`${path}.cohortMonth: not YYYY-MM`);
   if (!isIso(snapshot.createdAt)) errors.push(`${path}.createdAt: not a date`);
+  // §19.2.3: set on a month when the next one starts.
+  if (snapshot.closedAt !== undefined && !isIso(snapshot.closedAt)) errors.push(`${path}.closedAt: not a date`);
+  if (snapshot.windows !== undefined) {
+    const w = snapshot.windows;
+    if (
+      !isObj(w) ||
+      ![7, 14, 30].includes(w.activationWindowDays as number) ||
+      ![30, 60, 90].includes(w.paidWindowDays as number) ||
+      ![30, 60, 90].includes(w.qualificationWindowDays as number) ||
+      ![30, 60, 90].includes(w.goLiveWindowDays as number)
+    )
+      errors.push(`${path}.windows: not the four windows of a setup`);
+  }
+  if (snapshot.pipelineOpen !== undefined && (!isNum(snapshot.pipelineOpen) || snapshot.pipelineOpen < 0)) errors.push(`${path}.pipelineOpen: not a number >= 0`);
 
   if (!isObj(snapshot.metrics)) errors.push(`${path}.metrics: missing`);
   else
@@ -322,6 +359,8 @@ function deckErrors(deck: unknown): string[] {
     }
   if (!isBool(deck.showCompany)) errors.push("deck.showCompany: not a boolean");
   if (!isBool(deck.showSiteCredit)) errors.push("deck.showSiteCredit: not a boolean");
+  // §19.8, C32 Q14: optional, "paper" when absent.
+  if (deck.theme !== undefined && !oneOf(DECK_THEMES, deck.theme)) errors.push("deck.theme: not paper or white");
 
   const ask = deck.ask;
   if (!isObj(ask)) return [...errors, "deck.ask: missing"];
@@ -371,10 +410,22 @@ export function validateEngine(state: EngineState): string[] {
   if (s.lastExportedAt !== undefined && !isIso(s.lastExportedAt)) errors.push("lastExportedAt: not a date");
   errors.push(...setupErrors(s.setup));
 
-  // v1 keeps exactly one snapshot, but the list exists from day one (D14) so the monthly series migrates nothing;
-  // only an EMPTY list is wrong — there would be nothing to read.
+  // One month per snapshot, oldest first (§19.2, §19.1.6): an EMPTY list is wrong — there would be nothing to read —
+  // and so are two snapshots of the same month, months out of order, more than MAX_MONTHS, or a month before
+  // the last that was never closed.
   if (!Array.isArray(s.snapshots) || s.snapshots.length === 0) errors.push("snapshots: empty");
-  else s.snapshots.forEach((snap, i) => errors.push(...snapshotErrors(`snapshots[${i}]`, snap)));
+  else {
+    s.snapshots.forEach((snap, i) => errors.push(...snapshotErrors(`snapshots[${i}]`, snap)));
+    if (s.snapshots.length > MAX_MONTHS) errors.push(`snapshots: more than ${MAX_MONTHS} months`);
+    const months: unknown[] = s.snapshots;
+    months.forEach((snap, i) => {
+      if (i === 0 || !isObj(snap)) return;
+      const before = months[i - 1];
+      if (isObj(before) && isYearMonth(before.referenceMonth) && isYearMonth(snap.referenceMonth) && snap.referenceMonth <= before.referenceMonth)
+        errors.push(`snapshots[${i}].referenceMonth: not after the month before`);
+      if (isObj(before) && before.closedAt === undefined) errors.push(`snapshots[${i - 1}].closedAt: missing on a month that is not the last`);
+    });
+  }
 
   if (s.tourLink !== null) {
     const t = s.tourLink;

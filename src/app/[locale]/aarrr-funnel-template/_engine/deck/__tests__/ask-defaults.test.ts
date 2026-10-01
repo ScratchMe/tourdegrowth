@@ -24,7 +24,7 @@ function exampleState(ask: EngineAsk = EMPTY_ASK): EngineState {
     "rev.gross-margin": entry({ status: "missing", missing: { cause: "no-access", repair: "meeting", ownerRole: "finance" } }),
   };
   return {
-    schemaVersion: 2,
+    schemaVersion: 3,
     id: "fixture",
     createdAt: AT,
     updatedAt: AT,

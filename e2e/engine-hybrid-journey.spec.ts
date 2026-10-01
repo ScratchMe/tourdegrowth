@@ -4,6 +4,7 @@ import { ENGINE_COPY } from "@/content/engine-copy";
 import { hybridState } from "../src/lib/engine/__tests__/fixtures";
 import type { EngineState, MetricId } from "../src/lib/engine/types";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
+import { engineSeed } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -24,7 +25,6 @@ test.beforeEach(async ({ context }) => {
  *
  * Read from the screen and the device, never from the component's state.
  */
-const STORAGE_KEY = "tdg.engine.v2";
 const NB = " ";
 
 /** The §18.9 hybrid with sales-assisted empty: its targets kept (18 %, 32 %, 92 %), its numbers to type. */
@@ -39,12 +39,12 @@ function selfServeOnly(): EngineState {
 async function seed(page: Page, locale: "fr" | "en") {
   await page.clock.setFixedTime(new Date(2026, 8, 24, 12));
   await page.addInitScript(
-    ([key, state]) => {
+    (items) => {
       if (sessionStorage.getItem("e2e-engine-seeded")) return;
-      localStorage.setItem(key, JSON.stringify({ schemaVersion: 2, state }));
+      for (const [key, value] of items) localStorage.setItem(key, value);
       sessionStorage.setItem("e2e-engine-seeded", "1");
     },
-    [STORAGE_KEY, selfServeOnly()] as const,
+    engineSeed(selfServeOnly()),
   );
   await page.goto(`/${locale}/aarrr-funnel-template`);
   await expect(page.getByTestId("engine-board")).toHaveAttribute("data-motions", "hybrid");

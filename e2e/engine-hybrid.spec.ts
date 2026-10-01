@@ -3,6 +3,7 @@ import { ENGINE_COPY } from "@/content/engine-copy";
 import { hybridState, salesAssistedState } from "../src/lib/engine/__tests__/fixtures";
 import type { EngineState } from "../src/lib/engine/types";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
+import { storedEngineEntry, writeEngineSeed } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -21,7 +22,6 @@ test.beforeEach(async ({ context }) => {
  * 180 000 € sales-assisted MRR, 31 of 130 opportunities from self-serve.
  * Behaviour, read from the screen and from the device's storage.
  */
-const STORAGE_KEY = "tdg.engine.v2";
 const EXAMPLE_CLOCK = new Date(2026, 8, 24, 12);
 const NB = " ";
 
@@ -33,16 +33,13 @@ async function openEngine(page: Page, locale: "en" | "fr" = "en"): Promise<void>
 async function seed(page: Page, state: EngineState, locale: "en" | "fr" = "en"): Promise<void> {
   await page.clock.setFixedTime(EXAMPLE_CLOCK);
   await openEngine(page, locale);
-  await page.evaluate(({ key, state }) => window.localStorage.setItem(key, JSON.stringify({ schemaVersion: 2, state })), { key: STORAGE_KEY, state });
+  await writeEngineSeed(page, state);
   await page.reload();
   await expect(page.getByTestId("engine-board")).toBeVisible();
 }
 
 async function storedMotions(page: Page): Promise<{ plg: boolean; slg: boolean } | null> {
-  return page.evaluate((key) => {
-    const raw = window.localStorage.getItem(key);
-    return raw ? JSON.parse(raw).state.setup.motions : null;
-  }, STORAGE_KEY);
+  return (await storedEngineEntry(page))?.state.setup.motions ?? null;
 }
 
 async function noHorizontalScroll(page: Page): Promise<void> {
@@ -164,7 +161,7 @@ test.describe("the hybrid board (§18.7 E2)", () => {
     await expect(page.getByTestId("whatif-value-slg.rev.win-rate")).toHaveText("30%");
     await expect(page.getByTestId("engine-total-in12")).toContainText(/today|aujourd/);
     await page.getByTestId("whatif-slg-reset-all").click();
-    const whatIf = await page.evaluate((key) => JSON.parse(window.localStorage.getItem(key)!).state.whatIf, STORAGE_KEY);
+    const whatIf = (await storedEngineEntry(page))?.state.whatIf;
     expect(whatIf).toEqual({ "act.rate": 24 });
   });
 
@@ -224,7 +221,7 @@ test.describe("the settings: a motion unticked is hidden, never erased (§18.1.3
     await expect(page.getByTestId("engine-total-band")).toHaveCount(0);
     expect(await storedMotions(page)).toEqual({ plg: true, slg: false });
     // Still on the device.
-    const kept = await page.evaluate((key) => JSON.parse(window.localStorage.getItem(key)!).state.snapshots[0].metrics["slg.rev.win-rate"]?.status, STORAGE_KEY);
+    const kept = (await storedEngineEntry(page))?.state.snapshots[0]!.metrics["slg.rev.win-rate"]?.status;
     expect(kept).toBe("measured");
 
     await page.getByTestId("engine-open-settings").click();

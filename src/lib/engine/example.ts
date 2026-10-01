@@ -1,4 +1,4 @@
-import type { EngineState, MetricEntry, MetricId, MetricValue, Motion, SharedCount, SourceRef, ToolId } from "./types";
+import { ENGINE_SCHEMA_VERSION, type EngineState, type MetricEntry, type MetricId, type MetricValue, type Motion, type SharedCount, type SourceRef, type ToolId } from "./types";
 
 /**
  * The engine spec's §6.0 example — a fictional self-serve SaaS, reference
@@ -124,7 +124,7 @@ export function exampleEngine(words: ExampleWords, motions: Record<Motion, boole
   };
   const targets = { ...(motions.plg ? EXAMPLE_TARGETS : {}), ...(motions.slg ? EXAMPLE_SLG_TARGETS : {}) };
   return structuredClone({
-    schemaVersion: 2,
+    schemaVersion: ENGINE_SCHEMA_VERSION,
     id: "00000000-0000-4000-8000-000000000060",
     createdAt: "2026-09-24T08:00:00.000Z",
     updatedAt: "2026-09-24T09:00:00.000Z",
