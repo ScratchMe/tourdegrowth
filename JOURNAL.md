@@ -1150,3 +1150,34 @@ Points pour le bon à tirer A14.d : la phrase de confidentialité elle-même, p
 - chaque chaîne citée relue dans `dictionary.ts` et `glossary-terms.ts`, chaque contraste recalculé depuis les jetons.
 
 **Consigné** : `CHANTIERS.md` (vue d'ensemble, A15.19, B7, D11), `design/README.md` (l'index), `design/LOIS-UX.md` (la ligne de la similarité), `.design-sync/NOTES.md` (« Synced » : ce que le projet garde sous `design/`). Que de la doc et des images sous `design/` : `vercel-ignore.sh` ne déploie pas.
+
+## B5 : le brief 06 de l'image de partage du moteur (2026-10-01, #267)
+
+Antoine a demandé le brief de B5 le soir de la fin d'A14.c : l'image de partage du moteur se dessine d'abord dans Claude Design (C32 Q17), puis se porte en T6.2. Personne d'autre ne s'en occupait : la seule autre session de design en cours écrivait le brief des puces d'étape (B7).
+
+**Ce qui est livré** : `design/DS-EXTENSION-BRIEF-06.md`, en anglais comme les briefs précédents. Ses captures sont dans `design/ds-extension-06/`, prises sur un build de production du jour, moteur ouvert :
+- les images de partage du site telles qu'elles sont : l'accueil (ce que montre aujourd'hui un lien vers le moteur, comme toutes les pages de contenu), un résultat, et les deux images du jeu ;
+- le haut de la page du moteur, en français à 1 280 px et en anglais à 390 px ;
+- le peloton de l'exemple public, sur la page et en slide. Les captures passent par le bouton « exemple » de la page : aucun vrai chiffre.
+
+**Ce que le brief pose** :
+- le constat : un lien vers le moteur se déplie aujourd'hui en « № 15 questions », c'est-à-dire en Tour ;
+- le cadre commun des images du site, à garder ;
+- les contraintes du produit : jamais de vrais chiffres (l'image est la même pour tous, et rien ne quitte le navigateur), le titre dans les deux langues, et les chaînes existantes, toutes à relire ;
+- les contraintes du moteur de rendu, Satori : flex seulement, pas de variables CSS, les cinq polices et leur sous-ensemble, le contraste ;
+- quatre questions : le fond (papier ou outremer), l'image (le chronomètre, le peloton, les deux ou aucun), les mots, la pastille « 2/3 » ;
+- ce qu'on attend en retour : les deux images en cadre portable, mesures en px et couleurs par jeton, le contrôle à 320 px, le texte alternatif, la liste des chaînes et un README des réponses, le tout en sources lisibles depuis le projet. Cette dernière exigence vient du retour du 04, dont la planche construite n'avait pas pu être rapatriée.
+
+**Une course de numéros, rattrapée avant le merge.** Le brief est d'abord parti sous le numéro 05. Pendant sa CI, B7 a été mergée (#268) avec son propre brief 05, ses captures dans `design/ds-extension-05/` et la même ligne d'index. Avant le merge, la branche a été refaite sur le nouveau `main` : le brief de B5 devient le 06, ses captures passent dans `ds-extension-06/`, et l'index, B5 et le journal sont réécrits sur le texte de B7, sans toucher au sien.
+
+**Une erreur corrigée en route.** La première version de cette entrée disait que `DesignSync` ne servait pas à envoyer un brief. B7 a montré le contraire : un brief se dépose dans le projet Claude Design par `DesignSync`, sous `design/`, sous un plan qui ne nomme que ses fichiers, puis Antoine le lance (D11).
+
+**Le dépôt**, à la demande d'Antoine, le même soir : onze fichiers écrits par `DesignSync` dans le projet `23b9671c-…`, aux mêmes chemins que dans le dépôt, sous un plan qui ne nommait qu'eux, sans suppression. Le bundle, la sentinelle et `_ds_sync.json` ne sont pas touchés. Vérifié :
+- `get_project` avant l'envoi : un design system, modifiable ;
+- `list_files` avant : rien sous `design/ds-extension-06/` ; après : les onze chemins y sont, et les briefs 04 et 05 comme le retour du 04 n'ont pas bougé ;
+- le brief relu côté projet par `get_file`, en entier : le même texte que dans le dépôt ;
+- les fichiers envoyés sont ceux du commit de la PR (`git diff` vide sur `design/`).
+
+`.design-sync/NOTES.md` (« Synced ») dit maintenant ce que le projet garde sous `design/`, brief 06 compris.
+
+**Ce qui reste** : D12 (le lancer). Le retour va dans `design/ds-extension-06-return/`, une session le recopie dans le dépôt et le porte en T6.2 ; sa copie rejoint le bon à tirer du moteur.

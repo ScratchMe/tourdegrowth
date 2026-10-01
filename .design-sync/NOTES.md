@@ -370,7 +370,11 @@ anchor untouched), and Claude Design wrote its return next to them,
 chips, B7) went in the same way: `design/DS-EXTENSION-BRIEF-05.md` and the ten
 PNGs under `design/ds-extension-05/` (eleven files, their own plan, no delete,
 anchor `6da5e42a15ef` untouched); its return is expected under
-`design/ds-extension-05-return/`. A re-sync must leave them: before applying
+`design/ds-extension-05-return/`. Brief 06 (the growth engine's share image,
+B5) followed the same evening: `design/DS-EXTENSION-BRIEF-06.md` and the ten
+PNGs under `design/ds-extension-06/` (eleven files, their own plan, no delete,
+anchor untouched); its return is expected under
+`design/ds-extension-06-return/`. A re-sync must leave them: before applying
 `upload.deletePaths`, check it names nothing under `design/`. Remove them on
 purpose once the return is ported, not as a side effect of a sync.
 
