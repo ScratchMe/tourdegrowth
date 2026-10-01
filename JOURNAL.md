@@ -744,3 +744,48 @@ Le balayage des phrases a gagné six scénarios à deux mois, et le contrat des 
 - des marqueurs « à relire » qui ne nommaient pas les clés qu'ils couvraient : `/bon-a-tirer` part d'un `grep` et n'aurait pas su lesquelles relire ;
 - `notes.series` renvoyait à « la slide « Ce qui a bougé » ». Cette slide est décochée par défaut, et aucun de ses titres ne porte ce nom. La note ne renvoie plus à rien ;
 - un commentaire de `SlideEvolution` décrivait encore une flèche.
+
+## A14.c, T2 : les écrans de la série (2026-10-01, #258)
+
+La troisième PR du moteur complet (`docs/engine/moteur-complet.md` §19.2.2 à §19.2.6), drapeau fermé. T1 est sur `main` le même jour (#256, squash `9d78ef5`). Avec T2, un moteur passe d'un mois au suivant sans quitter la page.
+
+**Ce qui change à l'écran** :
+- **« Démarrer septembre »** : dès que le mois des flux est clos, un bandeau au-dessus du tableau dit « Mois clos : août 2026 » et propose le suivant. Le mois s'ouvre vide, avec les cibles du précédent (`startNextMonth`). Au-delà de 36 mois, le bandeau dit de sauvegarder le fichier et de démarrer un nouveau moteur ;
+- **le sélecteur de mois**, dès deux mois, le plus récent en tête. Un mois passé se relit à sa date (`monthView`), en lecture seule : ses lignes ne s'ouvrent pas, et les « Et si », la liste « À aller chercher », le bandeau de reprise et les boutons de fichier et de slides sont cachés ;
+- **« Corriger ce mois »** rend la saisie d'un mois passé. Ce qui s'enregistre retourne dans ce mois, et les mois suivants sont recollés derrière (`withMonth`) : l'écart du mois suivant se recalcule. Le réglage, le deck et le Tour restent ceux du moteur. Partir vers le deck, les Réglages, le pas à pas, l'import ou l'effacement ramène au mois en cours ;
+- **un écart sur chaque ligne** : « +3 points depuis juillet 2026, vers ta cible », « stable depuis juillet 2026 », ou la raison (« estimé en juillet 2026 », « définition changée »). Les chiffres sont imprimés par les mêmes fonctions que la slide (`evolutionPrinted`, `evolutionApartText`) ; seule la phrase autour est celle du tableau, au « tu » (`_engine/series-view.ts`) ;
+- **« En juillet 2026, la fuite était le churn logo. »** sous le diagnostic, quand la fuite a changé d'étape ;
+- **la fiche d'un nouveau mois** propose la variante, le libellé, la note de définition et la source du mois d'avant, jamais la valeur (`withProposals`), et seulement sur un chiffre que personne n'a encore touché ce mois-ci ;
+- **les Réglages** ne proposent plus un mois des flux antérieur à celui du mois d'avant : la validation l'aurait refusé au chargement suivant ;
+- **la slide « Ce qui a bougé »** reçoit sa mise en page : une ligne par chiffre, avec son nom, le mois d'avant, une flèche dessinée (les polices des slides n'ont pas « → »), ce mois-ci et l'écart, signé, jamais coloré. « vers la cible » s'écrit dessous quand il le faut.
+
+Les écarts à la spec sont notés au §19.2.4.
+
+**La rencontre avec A15.12** (#257, mergée pendant la CI de T1). Une fiche garde maintenant sa saisie non enregistrée quand elle est remontée. Au rebase de T2, les deux se sont rencontrées dans `MetricSheet` : le brouillon gardé passe d'abord, sinon les propositions du mois d'avant. La clé d'un brouillon porte aussi son mois. Sans cela, un chiffre pas encore saisi ce mois-ci et le même chiffre corrigé dans un mois passé, tous deux sans entrée, auraient partagé leur saisie.
+
+**Pièges rencontrés** :
+- la copie disait d'abord « {month} est clos ». Un mois en tête de phrase s'écrit en minuscule (« août 2026 est clos »), et « de {month} » est refusé par la garde d'élision (« de août »). D'où « Mois clos : {month}. » ;
+- le tableau affichait « estimé en août » à côté de l'étiquette « Estimé » : `rowDelta` tait les raisons qui portent sur le mois en cours ;
+- un test supposait que la variante d'une fiche était une liste déroulante. C'est un groupe de boutons radio (`Choices`) ;
+- un build de T1 laissé en place a servi les specs de T2. Reconstruire après chaque changement de branche ;
+- un test de `withMonth` se contredisait : il changeait la fenêtre du réglage, donc la définition. Il est coupé en deux.
+
+**Non-vacuité** : neuf sabotages, chacun fait tomber les tests qui le visent :
+- `withMonth` qui garde le réglage du mois relu : 1 test ; qui laisse tomber les mois suivants : 2 ;
+- les propositions posées sur une fiche déjà remplie : 1 ; qui perdent la source : 2 ;
+- l'écart qui dit la raison du mois en cours : 1 ; qui ne dit jamais « vers ta cible » : 1 ;
+- la fuite du mois d'avant dite même quand elle n'a pas changé : 1 ;
+- en e2e, les lignes d'un mois passé qui s'ouvrent : la spec du mois suivant, en FR et en EN ; une correction enregistrée sans les mois suivants : la spec de la correction, en FR et en EN.
+
+**La relecture de copie** (`relecteur-copie`) a relevé quatre points, corrigés :
+- des marqueurs « à relire » manquants, dont celui de `slide.evolutionToward` ;
+- `{list}` et `{max}` non documentés ;
+- « read only » sans son trait d'union ;
+- le plafond de 36 mois écrit en dur, devenu `{max}`.
+
+**Vérifié** :
+- `vitest --coverage` : 2 797 tests, au-dessus des seuils ;
+- `tsc`, `eslint` et `next build` (avec `GAME_ENABLED=true`) propres ;
+- `e2e/engine-series.spec.ts` gagne neuf specs, 13 en tout : démarrer le mois, la lecture seule, la correction et son recalcul, la fuite du mois d'avant, les propositions de la fiche, les largeurs à 390 et 1 280 px, la garde des Réglages ;
+- Playwright complet (`CI=1`), sur l'arbre rebasé sur T1 : 811 specs, 780 passées, aucune au second essai, et 31 ignorées (25 faute d'émulateur, 6 par construction) ;
+- captures relues en FR et en EN, à 1 280 et 390 px : le bandeau du mois suivant, le tableau avec ses écarts, un mois passé en lecture seule, la correction, et la slide.

@@ -33,6 +33,8 @@ export interface DiagnosisProps {
    * read as one. Absent with one motion.
    */
   motionName?: string;
+  /** « En juillet 2026, la fuite était l'activation. » (§19.2.5, A14 T2): only when the leak changed stage since the month before. */
+  previous?: string | null;
   className?: string;
 }
 
@@ -52,7 +54,7 @@ export interface DiagnosisProps {
  * blind line is always printed when a ★ is unmeasured: an unknown is a
  * finding, and the real bottleneck may be hiding there.
  */
-export function Diagnosis({ diagnosis, strings, locale, metrics, values, motionName, className }: DiagnosisProps) {
+export function Diagnosis({ diagnosis, strings, locale, metrics, values, motionName, previous, className }: DiagnosisProps) {
   const d = strings.diagnosis;
   // Formatting reads the language only, never the clock: a fixed date keeps
   // this component free of `Date.now()` (the engine's time is injected).
@@ -115,6 +117,12 @@ export function Diagnosis({ diagnosis, strings, locale, metrics, values, motionN
       {diagnosis.state === "level" ? <p className={styles.body}>{d.levelBody}</p> : null}
       {diagnosis.state === "not-enough" ? (
         <p className={styles.body}>{notEnoughBelow ?? d.notEnoughBody}</p>
+      ) : null}
+
+      {previous ? (
+        <p className={styles.note} data-testid={`diagnosis-previous-${diagnosis.motion}`}>
+          {previous}
+        </p>
       ) : null}
 
       {unpriced ? <p className={styles.note}>{unpriced}</p> : null}

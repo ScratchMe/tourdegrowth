@@ -254,6 +254,29 @@ export function draftFromEntry(entry: MetricEntry | undefined, shape: MetricShap
   }
 }
 
+/**
+ * A new month's sheet (A14 T2, engine spec §19.2.2): the month before's
+ * definition is offered — its variant, its label, its definition note, its
+ * source — never its value. Only on a number nobody has looked at this month
+ * (`mode` null): one this month already has keeps its own. Every field stays
+ * the person's to change; nothing is saved until they save.
+ */
+export function withProposals(
+  draft: SheetDraft,
+  proposed: Pick<MetricEntry, "variant" | "label" | "definitionNote" | "source"> | null,
+): SheetDraft {
+  if (!proposed || draft.mode !== null) return draft;
+  const { source, role } = sourceChoiceOf(proposed.source);
+  return {
+    ...draft,
+    variant: proposed.variant ?? draft.variant,
+    label: proposed.label ?? draft.label,
+    definitionNote: draft.definitionNote || (proposed.definitionNote ?? ""),
+    source: proposed.source ? source : draft.source,
+    sourceRole: role ?? draft.sourceRole,
+  };
+}
+
 function sourceRefOf(choice: SourceChoice, role: RoleId): SourceRef | null {
   if (choice === "") return null;
   if (choice === "person") return { kind: "person", role };

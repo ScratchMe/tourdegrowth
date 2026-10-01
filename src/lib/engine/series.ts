@@ -74,6 +74,19 @@ export function monthView(state: EngineState, index: number, today: Date): { sta
   };
 }
 
+/**
+ * A past month corrected (§19.2.4, « Corriger ce mois »): the screen edits
+ * `monthView`'s state, whose last month is the one being corrected; this puts
+ * it back in the series. Its months replace the engine's up to `index`, the
+ * later months follow as they were — their changes recompute from it — and
+ * the engine-level fields (setup, deck, « Et si », the Tour) stay the
+ * engine's: a closed month's windows never become the setup's.
+ */
+export function withMonth(state: EngineState, index: number, edited: EngineState): EngineState {
+  if (edited.snapshots.length !== index + 1) throw new Error(`A corrected month ${index} must hold ${index + 1} months, not ${edited.snapshots.length}.`);
+  return { ...state, updatedAt: edited.updatedAt, snapshots: [...edited.snapshots, ...state.snapshots.slice(index + 1)] };
+}
+
 // --- Starting the next month -------------------------------------------------------
 
 export type NextMonth =

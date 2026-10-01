@@ -228,6 +228,28 @@ saisie, avec le bandeau « Tu regardes août. Revenir à septembre ». Un bouton
 « Corriger ce mois » ouvre la saisie sur ce mois. Les écarts du mois suivant
 se recalculent, et le deck se construit toujours sur le dernier mois.
 
+*Écarts au code, T2 (2026-10-01).*
+- **« Démarrer septembre » a son propre bandeau**, au-dessus du tableau, et pas
+  dans le bandeau de reprise : celui-ci ne paraît qu'à un retour, et le mois
+  peut se démarrer dès la première visite où il est clos. Il dit « Mois clos :
+  septembre 2026 », sans mettre un mois en tête de phrase.
+- **Le sélecteur de mois** paraît dès deux mois, le plus récent en tête. Le
+  sélecteur de moteur, à côté, vient avec T5.
+- **Un mois passé en lecture seule** montre le tableau de ce mois, relu à sa
+  date. Il cache : les « Et si », la liste « À aller chercher », le bandeau de
+  reprise et les boutons de fichier et de slides. Ses lignes ne s'ouvrent pas.
+- **« Corriger ce mois »** rend la saisie ; ce qui s'enregistre retourne dans ce
+  mois, et les mois suivants sont recollés derrière (`withMonth`). Le réglage,
+  les « Et si », le deck et le Tour restent ceux du moteur : les fenêtres d'un
+  mois clos ne deviennent jamais celles du réglage.
+- **Un écart sur une ligne** ne dit jamais une raison qui porte sur le mois en
+  cours (« estimé en août ») : l'étiquette de statut, juste à côté, la dit déjà.
+- **Les Réglages** ne proposent plus, pour le mois des flux, un mois antérieur
+  à celui du mois d'avant : la validation le refuserait.
+- **La fiche du nouveau mois** propose la variante, le libellé, la note de
+  définition et la source du mois d'avant, jamais sa valeur, et seulement sur
+  un chiffre que personne n'a encore touché ce mois-ci.
+
 #### 19.2.5 Les écarts d'un mois à l'autre (Q4)
 
 Un écart ne s'affiche que si les deux mois sont **comparables** :

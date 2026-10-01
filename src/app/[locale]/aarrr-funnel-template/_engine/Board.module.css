@@ -531,6 +531,19 @@
   white-space: normal;
 }
 
+/* Its change since the month before (A14 T2, §19.2.5): muted words with a
+   sign, never a colour — red on this board is the leak's. */
+.metricDelta {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+  white-space: normal;
+}
+
+/* A past month read only: the row is a line of text, not a toggle. */
+.metric[data-readonly="true"] .metricToggle {
+  cursor: default;
+}
+
 .metricStatus {
   flex: none;
 }

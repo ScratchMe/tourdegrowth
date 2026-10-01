@@ -1,4 +1,4 @@
-import type { MetricEntry, MetricId } from "@/lib/engine/types";
+import type { MetricEntry, MetricId, YearMonth } from "@/lib/engine/types";
 import type { SheetDraft } from "./sheet-draft";
 
 /*
@@ -9,13 +9,15 @@ import type { SheetDraft } from "./sheet-draft";
  *
  * In memory only: the device keeps what is saved, never a half-typed form. A
  * draft belongs to the entry it started from — saved elsewhere, its
- * `updatedAt` changes and the draft no longer applies — and everything goes
+ * `updatedAt` changes and the draft no longer applies — and to its month, so
+ * a number not yet typed this month and the same number corrected in a past
+ * month (A14 T2) keep two drafts. Everything goes
  * when the whole engine is replaced (an import) or erased (engine-store.ts).
  */
 const drafts = new Map<string, SheetDraft>();
 
-export function draftKey(id: MetricId, entry: MetricEntry | undefined): string {
-  return `${id}@${entry?.updatedAt ?? "new"}`;
+export function draftKey(id: MetricId, entry: MetricEntry | undefined, month: YearMonth): string {
+  return `${month}:${id}@${entry?.updatedAt ?? "new"}`;
 }
 
 export function keptDraft(key: string): SheetDraft | undefined {

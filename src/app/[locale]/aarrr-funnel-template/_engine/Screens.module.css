@@ -232,6 +232,13 @@
 }
 
 /* --- Resume (E6) ------------------------------------------------------- */
+/* The month selector and, on a past month, its band (A14 T2, §19.2.4). */
+.monthBar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
 .resume {
   display: flex;
   flex-direction: column;

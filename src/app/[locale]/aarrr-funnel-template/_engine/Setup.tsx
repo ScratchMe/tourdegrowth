@@ -63,6 +63,7 @@ export function Setup({
   initial,
   existing,
   linked,
+  after,
   onCancel,
 }: {
   strings: EngineStrings;
@@ -83,6 +84,11 @@ export function Setup({
   existing?: { activation: boolean; paid: boolean; qualification: boolean; goLive: boolean; any: boolean; entered: Record<Motion, number> };
   /** In the settings: whether the engine is linked to a Tour now — the box opens on it (C8). */
   linked?: boolean;
+  /**
+   * The monthly series (A14 T2, §19.1.6): the month before's flows. The month
+   * being filled must stay after it, so the earlier months are not offered.
+   */
+  after?: YearMonth;
   onCancel?: () => void;
 }) {
   const s = strings.setup;
@@ -287,7 +293,7 @@ export function Setup({
           label={s.referenceMonth}
           hint={s.referenceMonthHint}
           value={referenceMonth}
-          months={monthOptions(lastClosed, referenceMonth, locale)}
+          months={monthOptions(lastClosed, referenceMonth, locale).filter((m) => after === undefined || m.value > after)}
           onChange={(m) => m && setReferenceMonth(m)}
         />
         {/* The cohort followed is self-serve's (D7): sales-assisted reads three months, computed below. */}

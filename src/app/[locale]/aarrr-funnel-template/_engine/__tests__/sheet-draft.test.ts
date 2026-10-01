@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { shapeOf, TEXT_LIMITS } from "@/lib/engine/catalog-shape";
 import type { MetricEntry, MetricId } from "@/lib/engine/types";
-import { draftFromEntry, entryFromDraft, isWideRange, proposedRepair, triageAnswersFor, type SheetDraft } from "../sheet-draft";
+import { draftFromEntry, entryFromDraft, isWideRange, proposedRepair, triageAnswersFor, withProposals, type SheetDraft } from "../sheet-draft";
 
 /**
  * The sheet's save rules (spec §7 E3, §6.9, D11), pinned where they live:
@@ -274,5 +274,33 @@ describe("triageAnswersFor — no « deux chiffres » for an answer", () => {
     });
     expect(entry).toBeNull();
     expect(problems).toEqual(["triage"]);
+  });
+});
+
+describe("withProposals — a new month offers the month before's definition, never its value (A14 T2, §19.2.2)", () => {
+  const cac = shapeOf("acq.cac");
+  const before: Pick<MetricEntry, "variant" | "label" | "definitionNote" | "source"> = {
+    variant: "fully-loaded",
+    label: "Recherche naturelle",
+    definitionNote: "salaires de l'équipe compris",
+    source: { kind: "person", role: "finance" },
+  };
+
+  it("a number nobody has looked at this month starts from the month before's variant, label, note and source — and no value", () => {
+    const draft = withProposals(draftFromEntry(undefined, cac), before);
+    expect(draft).toMatchObject({ mode: null, variant: "fully-loaded", label: "Recherche naturelle", definitionNote: "salaires de l'équipe compris", source: "person", sourceRole: "finance" });
+    expect(draft).toMatchObject({ numerator: null, denominator: null, amount: null, percent: null });
+  });
+
+  it("a tool source becomes that tool", () => {
+    expect(withProposals(draftFromEntry(undefined, shapeOf("act.rate")), { source: { kind: "tool", tool: "amplitude" } }).source).toBe("tool:amplitude");
+  });
+
+  it("a number this month already has keeps its own; nothing to offer changes nothing", () => {
+    const entry: MetricEntry = { status: "estimated", estimate: { low: 400, high: 600, basis: "team-hunch" }, updatedAt: "2026-10-02T08:00:00.000Z" };
+    const draft = draftFromEntry(entry, cac);
+    expect(withProposals(draft, before)).toBe(draft);
+    const empty = draftFromEntry(undefined, cac);
+    expect(withProposals(empty, null)).toBe(empty);
   });
 });

@@ -31,8 +31,12 @@ export function seasonalNote(state: EngineState, strings: Words): string {
   return n < 2 ? strings.notes.seasonal : fillTemplate(strings.notes.series, { n: String(n) });
 }
 
-/** The two months of one number and their difference, as printed — or `null` when it doesn't compare. */
-function printed(row: SeriesRow, state: EngineState, strings: Words, ctx: EngineCalcContext): { before: string; now: string; change: string; stable: boolean } | null {
+/**
+ * The two months of one number and their difference, as printed — or `null`
+ * when it doesn't compare. The board's rows read it too (A14 T2): the slide
+ * and the screen print one change one way.
+ */
+export function evolutionPrinted(row: SeriesRow, state: EngineState, strings: Words, ctx: EngineCalcContext): { before: string; now: string; change: string; stable: boolean } | null {
   if (!row.comparison.comparable || !row.delta) return null;
   const { before, now } = row.comparison;
   const shape = shapeOf(row.metric);
@@ -58,8 +62,8 @@ function printed(row: SeriesRow, state: EngineState, strings: Words, ctx: Engine
   return { before: a, now: b, change: moved, stable: a === b };
 }
 
-/** Why a number doesn't compare, in words: « estimé en août », « définition changée ». */
-function apartText(row: SeriesRow, series: Series, strings: Words, ctx: EngineCalcContext): string | null {
+/** Why a number doesn't compare, in words: « estimé en août », « définition changée ». The board's rows read it too. */
+export function evolutionApartText(row: SeriesRow, series: Series, strings: Words, ctx: EngineCalcContext): string | null {
   const c = row.comparison;
   if (c.comparable) return null;
   const a = strings.slide.seriesApart;
@@ -105,12 +109,12 @@ export function buildEvolutionSlide(
   const notes = [seasonalNote(state, strings)];
 
   const compared = own.rows.flatMap((row) => {
-    const p = printed(row, state, strings, ctx);
+    const p = evolutionPrinted(row, state, strings, ctx);
     return p ? [{ row, ...p }] : [];
   });
   if (compared.length === 0) {
     const lines: Row[] = own.rows.flatMap((row) => {
-      const text = apartText(row, series, strings, ctx);
+      const text = evolutionApartText(row, series, strings, ctx);
       return text ? [{ row: "apart", id: row.metric, label: name(row.metric), text }] : [];
     });
     const title: SlideTitle = { key: "evolutionApart", values: { before: month, now: formatMonth(series.month, ctx.locale) } };

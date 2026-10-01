@@ -1329,6 +1329,73 @@
   color: var(--text-muted);
 }
 
+/* ── « Ce qui a bougé » (A14 T1-T2, §19.2.6) ──────────────────────────── */
+
+/* One number a line: its name, the month before → this month, the change.
+   Signs and words only — red stays the leak's. */
+.evolutionList {
+  margin: 0;
+  padding: 22px 30px;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border: var(--border-solid);
+  border-radius: var(--radius-card);
+  background: var(--surface-card);
+}
+
+.evolutionRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 0.8fr);
+  gap: 24px;
+  align-items: baseline;
+  padding-bottom: 12px;
+  border-bottom: var(--border-rule);
+}
+
+.evolutionRow:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.evolutionRow[data-tone="apart"] {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.evolutionName {
+  font: var(--slide-label-xs);
+}
+
+.evolutionMove {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font: var(--slide-label-lg);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.evolutionArrow {
+  width: 40px;
+  height: 20px;
+  margin: 0;
+}
+
+.evolutionChange {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font: var(--slide-body-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.evolutionToward,
+.evolutionReason {
+  font: var(--slide-meta);
+  color: var(--text-muted);
+}
+
 /* ── Appendix — definitions and sources (§9.3) ──────────────────────── */
 
 .annex {

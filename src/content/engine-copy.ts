@@ -1597,6 +1597,8 @@ export const ENGINE_COPY = {
     evolutionRow: { fr: "{before}, puis {now} ({change})", en: "{before}, then {now} ({change})" },
     evolutionRowToward: { fr: "{before}, puis {now} ({change}, vers la cible)", en: "{before}, then {now} ({change}, toward the target)" },
     evolutionRowStable: { fr: "{now}, stable", en: "{now}, unchanged" },
+    /** TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T2) : under a change on the slide, when it went the target's way — the words of `evolutionRowToward`, alone (one card with it). */
+    evolutionToward: { fr: "vers la cible", en: "toward the target" },
     /** TODO: à relire (A14 T1) — why a number doesn't compare (§19.2.5). `{month}`: the month the reason is about. */
     seriesApart: {
       definitionChanged: { fr: "définition changée", en: "definition changed" },
@@ -2301,6 +2303,34 @@ export const ENGINE_COPY = {
       fr: "Chiffres trouvés : {counts}. Depuis ta visite de tout à l'heure : {pending}.",
       en: "Numbers found: {counts}. Since your visit earlier today: {pending}.",
     },
+  },
+  /**
+   * TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T2, moteur-complet.md §19.2.1-§19.2.5) :
+   * the screens of the monthly series — every key of this group. `{month}`: a month, formatted
+   * (« août 2026 »); `{change}`: a signed change, formatted; `{stage}`: a stage with its article;
+   * `{list}`: stages joined (« l'activation et le churn logo »); `{max}`: the months an engine holds at most.
+   */
+  series: {
+    /** The month selector, beside the engine's (§19.2.4). */
+    monthLabel: { fr: "Mois", en: "Month" },
+    /** A past month, read only: the band above the board. */
+    viewing: { fr: "Tu regardes {month}, en lecture seule.", en: "You're looking at {month}, read-only." },
+    backTo: { fr: "Revenir à {month}", en: "Back to {month}" },
+    correct: { fr: "Corriger ce mois", en: "Correct this month" },
+    correcting: { fr: "Tu corriges {month} : les écarts du mois suivant se recalculent.", en: "You're correcting {month}: the next month's changes recompute." },
+    doneCorrecting: { fr: "Terminer la correction", en: "Done correcting" },
+    /** The flows' month is over (§19.2.1): the next month can start. */
+    ready: { fr: "Mois clos : {month}. Ses chiffres peuvent commencer ; les cibles et les définitions suivent, les valeurs jamais.", en: "Month over: {month}. Its numbers can start; targets and definitions carry over, values never do." },
+    start: { fr: "Démarrer {month}", en: "Start {month}" },
+    /** `MAX_MONTHS` reached (§19.1.6). */
+    full: { fr: "Ce moteur suit déjà {max} mois, son plafond : sauvegarde le fichier, puis démarre un nouveau moteur pour la suite.", en: "This engine already tracks {max} months, its limit: save the file, then start a new engine for what comes next." },
+    /** On a number's row: how far it moved since the month before (§19.2.5). Signs and words, never a colour. */
+    delta: { fr: "{change} depuis {month}", en: "{change} since {month}" },
+    deltaToward: { fr: "{change} depuis {month}, vers ta cible", en: "{change} since {month}, toward your target" },
+    stable: { fr: "stable depuis {month}", en: "unchanged since {month}" },
+    /** The diagnosis, when the leak changed stage (§19.2.5). */
+    previousLeak: { fr: "En {month}, la fuite était {stage}.", en: "In {month}, the leak was {stage}." },
+    previousLeakShared: { fr: "En {month}, la fuite se partageait entre {list}.", en: "In {month}, the leak was shared between {list}." },
   },
   erase: {
     title: { fr: "Tout effacer", en: "Erase everything" },
