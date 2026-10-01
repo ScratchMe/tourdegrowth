@@ -12,12 +12,12 @@ describe("S1 — the first of January", () => {
   it("starts where the brief says, with the CEO's first call open", () => {
     const s = fresh(L);
     expect(s).toMatchObject({
-      v: 1,
+      v: 2,
       level: "retention",
       q: 0,
       month: 0,
-      subs: 100_000,
-      churn: 0.06,
+      customers: 100_000,
+      metric: 0.06,
       trust: 60,
       radar: 10,
       patience: 55,
@@ -31,8 +31,8 @@ describe("S1 — the first of January", () => {
       fired: false,
       ending: null,
     });
-    expect(s.mrr).toBeCloseTo(1_299_000, 6);
-    expect(s.history).toEqual([{ m: 0, churn: 0.06, trust: 60, subs: 100_000, mrr: s.mrr }]);
+    expect(s.revenue).toBeCloseTo(1_299_000, 6);
+    expect(s.history).toEqual([{ m: 0, metric: 0.06, trust: 60, customers: 100_000, revenue: s.revenue }]);
   });
 
   it("has already dealt the first hand: the four first-quarter patterns are seen", () => {

@@ -40,7 +40,7 @@ const eventKinds = (events: GameEvent[]) => events.map((e) => e.kind);
 describe("Q1 — the target", () => {
   it("hit: +12; missed by half a point: −14; missed by two points or more: −32", () => {
     const probe = runQuarter(quiet(), picked(fresh(quiet()), ["remind", "reco"]));
-    const end = probe.churn;
+    const end = probe.metric;
     const run = (target: number) => {
       const level = quiet({ targets: [target, 1, 1, 1] });
       return runQuarter(level, picked(fresh(level), ["remind", "reco"])).patience - 55;
@@ -130,7 +130,7 @@ describe("Q4 — the DGCCRF", () => {
     expect(control).toEqual({
       kind: "control",
       fine: 75_000,
-      leavers: Math.round(s.subs * 0.015),
+      leavers: Math.round(s.customers * 0.015),
       removed: ["bury", "shame"],
     });
     expect(s.sanction).toBe(true);
@@ -288,7 +288,7 @@ describe("Q11 — the CEO's mid-quarter mail", () => {
         const mail = entry.events[0];
         expect(mail?.kind).toBe("midMail");
         if (!second || mail?.kind !== "midMail") throw new Error("a mail per quarter");
-        expect(mail.moving).toBe(!(second.churn > entry.target));
+        expect(mail.moving).toBe(!(second.metric > entry.target));
         if (mail.moving) moving++;
         else stuck++;
       }
@@ -316,7 +316,7 @@ describe("X5 — the journal holds data, never sentences", () => {
     ...RETENTION_HONEST_IDS,
     ...RETENTION_DARK_IDS,
     "midMail", "present", "surveyAnswers", "control", "reports", "viral", "press", "competitor",
-    "insight", "clean", "extra", "down", "up", "none",
+    "insight", "clean", "extra", "gain", "loss", "none",
     "hit", "cover", "missed", "obeyed", "refused",
     "calm", "firm", "angry", "cold",
   ]);

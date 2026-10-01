@@ -283,7 +283,7 @@ export function GameIsland({ copy, locale }: GameIslandProps) {
               data={{
                 toggle: copy.december.dataToggle,
                 month: copy.december.table.month,
-                churn: copy.december.table.churn,
+                churn: copy.december.table.metric,
                 trust: copy.december.table.trust,
                 rows: december.rows,
               }}

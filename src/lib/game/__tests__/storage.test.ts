@@ -30,11 +30,11 @@ const LEVEL = {
 /** The prototype's fresh() state (design/game/prototype-s-ils-reviennent.html), typed. */
 function fresh(): GameState<RetentionCardId> {
   return {
-    v: 1, level: "retention", q: 0, month: 0, subs: 100_000, churn: 0.06, mrr: 1_199_000,
+    v: 2, level: "retention", q: 0, month: 0, customers: 100_000, metric: 0.06, revenue: 1_199_000,
     trust: 60, radar: 10, patience: 55, lagTrust: 60, callOpen: true,
     order: null, orders: [], obeyed: [], refused: [], active: [], since: {},
     everDark: [], removedDark: [], seenDark: [], insight: false, presented: 0, picks: [],
-    history: [{ m: 0, churn: 0.06, trust: 60, subs: 100_000, mrr: 1_199_000 }], log: [],
+    history: [{ m: 0, metric: 0.06, trust: 60, customers: 100_000, revenue: 1_199_000 }], log: [],
     sanction: false, fired: false, over: false, ending: null, spike: 0, press: 0,
   };
 }
@@ -45,10 +45,10 @@ function afterQ1(): GameState<RetentionCardId> {
   return {
     ...s, q: 1, month: 3, callOpen: false, active: ["pdef"], since: { pdef: 1 },
     everDark: ["pdef"], seenDark: ["pdef", "bury"],
-    history: [...s.history, { m: 1, churn: 0.058, trust: 58, subs: 99_000, mrr: 1_190_000 }],
+    history: [...s.history, { m: 1, metric: 0.058, trust: 58, customers: 99_000, revenue: 1_190_000 }],
     log: [{
       q: 0, picked: ["pdef", "survey"], order: null, fx: [{ card: "pdef", effect: { kind: "none" } }],
-      churnStart: 0.06, churnEnd: 0.055, target: 0.056, gap: -0.001, subs: 98_000, mrr: 1_180_000,
+      metricStart: 0.06, metricEnd: 0.055, target: 0.056, gap: -0.001, customers: 98_000, revenue: 1_180_000,
       patience: 60, events: [{ kind: "competitor" }], boss: { verdict: "hit", order: null }, moodAfter: "calm",
       drivers: { picks: -0.004, production: 0, inspection: 0, word: -0.001, market: 0 },
     }],
@@ -147,8 +147,8 @@ describe("isGameState", () => {
   // checking one of them shows up by name.
   const broken: [string, (s: GameState<RetentionCardId>) => unknown][] = [
     ["another level", (s) => ({ ...s, level: "activation" })],
-    ["another state version", (s) => ({ ...s, v: 2 })],
-    ["a non-finite number", (s) => ({ ...s, churn: Number.NaN })],
+    ["another state version", (s) => ({ ...s, v: 1 })],
+    ["a non-finite number", (s) => ({ ...s, metric: Number.NaN })],
     ["a gauge above 100", (s) => ({ ...s, trust: 140 })],
     ["a gauge below 0", (s) => ({ ...s, patience: -3 })],
     ["an unknown card id", (s) => ({ ...s, active: ["teleport"] })],

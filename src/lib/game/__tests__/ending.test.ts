@@ -10,15 +10,15 @@ type Id = RetentionCardId;
 const L = RETENTION_LEVEL;
 
 function year(overrides: Partial<GameState<Id>>): GameState<Id> {
-  return { ...fresh(L), q: 4, over: true, callOpen: false, churn: 0.05, ...overrides };
+  return { ...fresh(L), q: 4, over: true, callOpen: false, metric: 0.05, ...overrides };
 }
 
 describe("E1 — how the year ends, one hand-built case per ending", () => {
   const cases: [EndingId, Partial<GameState<Id>>][] = [
     ["firedDark", { fired: true, everDark: ["bury"] }],
     ["firedClean", { fired: true }],
-    ["applause", { churn: 0.041 }],
-    ["cleanMiss", { churn: 0.0411 }],
+    ["applause", { metric: 0.041 }],
+    ["cleanMiss", { metric: 0.0411 }],
     ["fine", { everDark: ["bury"], sanction: true, removedDark: ["bury"] }],
     ["repentant", { everDark: ["bury"], removedDark: ["bury"] }],
     ["labyrinth", { everDark: ["bury"], active: ["bury"] }],
@@ -29,14 +29,14 @@ describe("E1 — how the year ends, one hand-built case per ending", () => {
   }
 
   it("is checked in the brief's order: being fired outranks everything, a fine outranks cleaning", () => {
-    expect(computeEnding(L, year({ fired: true, churn: 0.03 }))).toBe("firedClean");
+    expect(computeEnding(L, year({ fired: true, metric: 0.03 }))).toBe("firedClean");
     expect(computeEnding(L, year({ fired: true, everDark: ["pdef"], sanction: true }))).toBe("firedDark");
     expect(computeEnding(L, year({ everDark: ["bury"], sanction: true, active: ["pdef"] }))).toBe("fine");
   });
 
   it("the win line is 4,1 %, not 4,0: the player is judged on what the tile shows", () => {
-    expect(L.constants.winChurn).toBe(0.041);
-    expect(computeEnding(L, year({ churn: 0.0405 }))).toBe("applause");
+    expect(L.constants.win).toBe(0.041);
+    expect(computeEnding(L, year({ metric: 0.0405 }))).toBe("applause");
   });
 
   it("every played year in paths.ts ends where its name says (they seed saves and screenshots)", () => {
@@ -92,18 +92,18 @@ describe("E3 — what each card visibly did (§5.12)", () => {
   });
 
   it("a cut, rounded to the point, rising only while below its ramp", () => {
-    expect(visibleEffect(L, running("pause", 2), "pause")).toEqual({ kind: "down", pct: 4, rising: true });
-    expect(visibleEffect(L, running("pause", 2, true), "pause")).toEqual({ kind: "down", pct: 5, rising: true });
-    expect(visibleEffect(L, running("pause", 5), "pause")).toEqual({ kind: "down", pct: 7, rising: false });
+    expect(visibleEffect(L, running("pause", 2), "pause")).toEqual({ kind: "gain", pct: 4, rising: true });
+    expect(visibleEffect(L, running("pause", 2, true), "pause")).toEqual({ kind: "gain", pct: 5, rising: true });
+    expect(visibleEffect(L, running("pause", 5), "pause")).toEqual({ kind: "gain", pct: 7, rising: false });
     // With the insight, 0,084 is past the 0,07 ramp: no longer rising.
-    expect(visibleEffect(L, running("pause", 5, true), "pause")).toEqual({ kind: "down", pct: 8, rising: false });
+    expect(visibleEffect(L, running("pause", 5, true), "pause")).toEqual({ kind: "gain", pct: 8, rising: false });
     // No ramp, never rising.
-    expect(visibleEffect(L, running("bury", 1), "bury")).toEqual({ kind: "down", pct: 8, rising: false });
+    expect(visibleEffect(L, running("bury", 1), "bury")).toEqual({ kind: "gain", pct: 8, rising: false });
   });
 
   it("a card that raises churn says so; one that has not started says nothing", () => {
-    expect(visibleEffect(L, running("remind", 1), "remind")).toEqual({ kind: "up", pct: 1 });
-    expect(visibleEffect(L, running("three", 1), "three")).toEqual({ kind: "up", pct: 2 });
+    expect(visibleEffect(L, running("remind", 1), "remind")).toEqual({ kind: "loss", pct: 1 });
+    expect(visibleEffect(L, running("three", 1), "three")).toEqual({ kind: "loss", pct: 2 });
     expect(visibleEffect(L, running("onboard", 2), "onboard")).toEqual({ kind: "none" });
   });
 
@@ -112,7 +112,7 @@ describe("E3 — what each card visibly did (§5.12)", () => {
     // −4 %, not −5 %: the survey picked alongside only boosts from NEXT
     // quarter (model v2), so the line must not show a boost that did not act.
     expect(q1?.log[0]?.fx).toEqual([
-      { card: "pause", effect: { kind: "down", pct: 4, rising: true } },
+      { card: "pause", effect: { kind: "gain", pct: 4, rising: true } },
       { card: "survey", effect: { kind: "insight" } },
     ]);
   });
@@ -128,7 +128,7 @@ describe("bossMessageSpec — which message opens the call", () => {
       kind: "quarter",
       q: 1,
       hit: false,
-      churnPrev: q1.log[0]?.churnEnd,
+      metricPrev: q1.log[0]?.metricEnd,
       target: 0.051,
       order: "pdef",
     });

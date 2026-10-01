@@ -74,7 +74,7 @@ describe("X7 — French and English numbers", () => {
           formatEur(locale, n),
           formatPoints(locale, n),
           formatSigned(locale, n),
-          formatDelta(locale, "churn", 0, n),
+          formatDelta(locale, "rate", 0, n),
           formatDelta(locale, "int", 0, n),
           formatDelta(locale, "millions", 0, n),
         );
@@ -98,8 +98,8 @@ describe("X7 — French and English numbers", () => {
 
 describe("deltas", () => {
   it("print the change with its sign, in each tile's unit", () => {
-    expect(formatDelta("fr", "churn", 0.06, 0.057)).toBe(`${MINUS}0,3${NBSP}pt`);
-    expect(formatDelta("en", "churn", 0.057, 0.058)).toBe(`+0.1${NBSP}pts`);
+    expect(formatDelta("fr", "rate", 0.06, 0.057)).toBe(`${MINUS}0,3${NBSP}pt`);
+    expect(formatDelta("en", "rate", 0.057, 0.058)).toBe(`+0.1${NBSP}pts`);
     expect(formatDelta("fr", "int", 100_000, 98_550)).toBe(`${MINUS}1${NBSP}450`);
     expect(formatDelta("en", "int", 55, 67)).toBe("+12");
     expect(formatDelta("fr", "millions", 1_299_000, 1_280_000)).toBe(`${MINUS}0,02${NBSP}M€`);
@@ -107,14 +107,14 @@ describe("deltas", () => {
   });
 
   it("a change that rounds to nothing has no sign, and deltaSign says so too", () => {
-    expect(formatDelta("fr", "churn", 0.06, 0.0596)).toBe(`0,0${NBSP}pt`);
-    expect(deltaSign("churn", 0.06, 0.0596)).toBe(0);
+    expect(formatDelta("fr", "rate", 0.06, 0.0596)).toBe(`0,0${NBSP}pt`);
+    expect(deltaSign("rate", 0.06, 0.0596)).toBe(0);
     expect(formatDelta("en", "millions", 1_299_000, 1_297_000)).toBe("€0.00M");
     expect(deltaSign("millions", 1_299_000, 1_297_000)).toBe(0);
   });
 
   it("deltaSign always agrees with the sign formatDelta prints", () => {
-    const kinds: DeltaKind[] = ["churn", "int", "millions"];
+    const kinds: DeltaKind[] = ["rate", "int", "millions"];
     const values = [-2_000_000, -5_000, -0.0006, -0.0004, -0.4, 0, 0.4, 0.0005, 0.0004, 4_999, 5_000, 2_000_000];
     for (const kind of kinds) {
       for (const b of values) {
@@ -133,11 +133,11 @@ describe("X8 — templates", () => {
   });
 
   it("ignores values the template does not ask for", () => {
-    expect(fill("{churn}", { churn: "6,0 %", unused: "x" })).toBe("6,0 %");
+    expect(fill("{metric}", { metric: "6,0 %", unused: "x" })).toBe("6,0 %");
   });
 
   it("throws on a placeholder without a value, naming it", () => {
-    expect(() => fill("Résiliations à {churn}, confiance à {trust}.", { churn: "4,0 %" })).toThrow(/\{trust\}/);
+    expect(() => fill("Résiliations à {metric}, confiance à {trust}.", { metric: "4,0 %" })).toThrow(/\{trust\}/);
     // An inherited property is not a value.
     expect(() => fill("{toString}", {})).toThrow(/\{toString\}/);
   });

@@ -7,12 +7,12 @@ import { RETENTION_LEVEL, type RetentionCardId } from "../levels/retention";
 import {
   applyPicks,
   bossMessageSpec,
-  cardReduction,
+  cardGain,
   computeEnding,
   dealHand,
   fresh,
   handIds,
-  monthlyReduction,
+  monthlyGains,
   moodNow,
   pickOrder,
   runQuarter,
@@ -118,7 +118,7 @@ describe("X3 — once the year is over", () => {
     const start = fresh(L);
     const alien = { ...saved, level: "acquisition" } as unknown as GameState<Id>;
     expect(reduce(start, { type: "restore", state: alien })).toBe(start);
-    const future = { ...saved, v: 2 } as unknown as GameState<Id>;
+    const future = { ...saved, v: 3 } as unknown as GameState<Id>;
     expect(reduce(start, { type: "restore", state: future })).toBe(start);
   });
 
@@ -148,8 +148,8 @@ describe("X1 — no engine function mutates its input", () => {
       const snapshot = JSON.stringify(s);
       handIds(L, s);
       dealHand(L, s);
-      monthlyReduction(L, s);
-      for (const id of s.active) cardReduction(L, s, id);
+      monthlyGains(L, s);
+      for (const id of s.active) cardGain(L, s, id);
       for (const id of handIds(L, s)) visibleEffect(L, s, id);
       stepMonth(L, s);
       moodNow(L, s);

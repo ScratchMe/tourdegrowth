@@ -14,7 +14,7 @@ type Id = RetentionCardId;
 interface Fixture {
   path: Path;
   /** Churn at the end of each quarter, in percent, as the tile shows it. */
-  churn: number[];
+  metric: number[];
   patience: number[];
   /** The CEO's mood as each quarter's call opens (T1 first). */
   mood?: Mood[];
@@ -31,7 +31,7 @@ interface Fixture {
 const FIXTURES: Record<"A" | "B" | "C" | "D", Fixture> = {
   A: {
     path: PATH_A,
-    churn: [5.8, 5.7, 4.6, 4.0],
+    metric: [5.8, 5.7, 4.6, 4.0],
     patience: [51, 42, 46, 73],
     mood: ["firm", "angry", "angry", "firm"],
     order: [null, "pdef", "call", "bury"],
@@ -39,10 +39,10 @@ const FIXTURES: Record<"A" | "B" | "C" | "D", Fixture> = {
     trust: 83,
     radar: 0,
   },
-  B: { path: PATH_B, churn: [5.8, 5.5, 4.2, 4.0], patience: [51, 31, 50, 77], ending: "applause", trust: 85, radar: 0 },
+  B: { path: PATH_B, metric: [5.8, 5.5, 4.2, 4.0], patience: [51, 31, 50, 77], ending: "applause", trust: 85, radar: 0 },
   C: {
     path: PATH_C,
-    churn: [5.3, 5.0, 5.0, 9.1],
+    metric: [5.3, 5.0, 5.0, 9.1],
     patience: [67, 79, 57, 12],
     mood: ["firm", "calm", "firm", "angry"],
     order: [null, "call", "notice", "pdef"],
@@ -50,7 +50,7 @@ const FIXTURES: Record<"A" | "B" | "C" | "D", Fixture> = {
     trust: 27,
     radar: 1,
   },
-  D: { path: PATH_D, churn: [6.1, 6.2], patience: [42, 19], ending: "firedClean", trust: 73 },
+  D: { path: PATH_D, metric: [6.1, 6.2], patience: [42, 19], ending: "firedClean", trust: 73 },
 };
 
 /**
@@ -61,8 +61,8 @@ const FIXTURES: Record<"A" | "B" | "C" | "D", Fixture> = {
 function mismatches(fixture: Fixture, level: LevelDefinition<Id>): string[] {
   const states = playPath(fixture.path, level);
   const out: string[] = [];
-  fixture.churn.forEach((expected, i) => {
-    const got = (states[i + 1]?.churn ?? NaN) * 100;
+  fixture.metric.forEach((expected, i) => {
+    const got = (states[i + 1]?.metric ?? NaN) * 100;
     if (!(Math.abs(got - expected) <= 0.05)) out.push(`T${i + 1} churn ${got.toFixed(3)} ≠ ${expected}`);
   });
   fixture.patience.forEach((expected, i) => {
