@@ -1,9 +1,12 @@
 import type { ReactNode } from "react";
+import { BasketPill } from "@/components/game/BasketPill";
 import { ClickPill } from "@/components/game/ClickPill";
 import { PhoneMock } from "@/components/game/PhoneMock";
-import type { RetentionCopy } from "@/lib/game/copy";
-import { fill, formatInt } from "@/lib/game/format";
+import { ShopPhone } from "@/components/game/ShopPhone";
+import type { AcquisitionCopy, RetentionCopy } from "@/lib/game/copy";
+import { fill, formatEur, formatInt } from "@/lib/game/format";
 import { RETENTION_LEVEL, type RetentionCardId } from "@/lib/game/levels/retention";
+import { basketFor, shopPhoneView, type Basket } from "@/lib/game/shop-phone";
 import type { LevelSlug } from "@/lib/game/types";
 import { clicksFor, clicksOverLaw, phoneView } from "@/lib/game/view";
 import type { Locale } from "@/lib/i18n/locale";
@@ -79,6 +82,54 @@ export const RETENTION_SIDE: IslandSide<RetentionSideCopy> = {
     const was = clicksFor(RETENTION_LEVEL, retentionIds(before));
     const now = clicksFor(RETENTION_LEVEL, retentionIds(after));
     return now === was ? null : clicksSentence(copy, locale, now);
+  },
+};
+
+// --------------------------------------------------------------- level 2 ---
+
+type AcquisitionSideCopy = Pick<AcquisitionCopy, "phone" | "basket">;
+
+/**
+ * The basket pill's whole sentence: what the basket adds and, with a service
+ * fee outside the price, why it is a problem — the same words the pill shows.
+ */
+export function basketSentence(copy: AcquisitionSideCopy, locale: Locale, basket: Basket): string {
+  const figure = basket.extra > 0 ? fill(copy.basket.extra, { amount: formatEur(locale, basket.extra) }) : copy.basket.none;
+  return basket.fees ? `${figure} · ${copy.basket.feesSuffix}` : figure;
+}
+
+/**
+ * Pédalix's phone and its basket pill (GAME-BRIEF §17.7). Not in
+ * `ISLAND_SIDES` yet: level 2 is still a `DraftLevelSlug`, with no page and no
+ * save key, until A12.f wires it.
+ */
+export const ACQUISITION_SIDE: IslandSide<AcquisitionSideCopy> = {
+  render: ({ ids, copy, locale }) => {
+    const basket = basketFor(ids);
+    return (
+      <>
+        <ShopPhone items={shopPhoneView(ids)} labels={copy.phone} />
+        <BasketPill
+          amount={formatEur(locale, basket.extra)}
+          extra={basket.extra > 0}
+          fees={basket.fees}
+          labels={copy.basket}
+          announce={false}
+        />
+      </>
+    );
+  },
+  pill: ({ ids, copy, locale }) => {
+    const basket = basketFor(ids);
+    return {
+      text: basket.extra > 0 ? fill(copy.basket.extra, { amount: formatEur(locale, basket.extra) }) : copy.basket.none,
+      alert: basket.fees,
+    };
+  },
+  announce: ({ before, after, copy, locale }) => {
+    const was = basketFor(before);
+    const now = basketFor(after);
+    return now.extra === was.extra && now.fees === was.fees ? null : basketSentence(copy, locale, now);
   },
 };
 

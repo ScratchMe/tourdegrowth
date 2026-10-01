@@ -1,0 +1,107 @@
+/*
+ * The frame both levels' phones are drawn in: the night's caption and bezel,
+ * the white screen of somebody else's app, its app bar, and the flash that
+ * outlines what a tick just changed. Shared by Flixo's phone (PhoneMock) and
+ * Pédalix's (ShopPhone); the contents are each phone's own module. Every text
+ * pairing is one game-token-contrast.test.ts measures.
+ *
+ * `--phone-brand` is the app's brand colour, set by the phone that uses the
+ * frame (Flixo's blue, Pédalix's green): the frame draws it, never picks it.
+ */
+
+.phone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  width: min(100%, var(--phone-width));
+  margin: 0 auto;
+}
+
+.caption {
+  align-self: stretch;
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* The bezel is as dark as the night itself (1.06:1): its outline carries the edge. */
+.bezel {
+  width: 100%;
+  padding: var(--space-5);
+  background: var(--phone-bezel);
+  border: var(--border-width) solid var(--phone-bezel-line);
+  border-radius: var(--phone-radius);
+}
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-height: var(--phone-min-height);
+  padding: var(--space-8) var(--space-7);
+  background: var(--app-bg);
+  color: var(--app-ink);
+  border-radius: var(--phone-screen-radius);
+  font: var(--app-text-md);
+}
+
+.appBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-weight: 700;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-round);
+  background: var(--phone-brand);
+}
+
+.time {
+  font: var(--app-text-sm);
+  font-family: var(--font-mono);
+  color: var(--app-muted);
+}
+
+/*
+ * What a ticked card just did. The night's selection amber — the fill of
+ * the ticked card itself — outlines the element it changed, then fades.
+ * Decorative (the change itself is the information); off under reduced
+ * motion with every other animation.
+ */
+.flash {
+  outline: var(--border-width) solid transparent;
+  outline-offset: 2px;
+  animation: phone-flash var(--game-dur-flash) var(--ease-out);
+}
+
+@keyframes phone-flash {
+  from {
+    outline-color: var(--state-selected-bg);
+  }
+  to {
+    outline-color: transparent;
+  }
+}
+
+@media (max-width: 760px) {
+  .phone {
+    width: min(100%, var(--phone-width-mobile));
+  }
+
+  .screen {
+    min-height: var(--phone-min-height-mobile);
+    padding: var(--space-7) var(--space-6);
+  }
+}

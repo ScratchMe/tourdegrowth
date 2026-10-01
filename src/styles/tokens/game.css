@@ -95,6 +95,12 @@
   --app-push-bg: #111827;
   --app-push-text: #ffffff; /* 17.74 */
   --app-modal-bg: #fafbfc;
+  /*
+   * Pédalix's app (level 2, GAME-BRIEF §17.7): its brand is a green, foreign
+   * to Tour de Growth and to Flixo's blue — another company again. Its screen
+   * reads the --app-* island for everything else.
+   */
+  --shop-brand: #1d6b46; /* 6.47 as text on white */
 
   /* The bezel is 1.06:1 against --night-0: its outline carries the edge. */
   --phone-bezel: #0b0907;
@@ -125,6 +131,7 @@
   --app-text-md: 500 15px/1.4 var(--font-ui);
   --app-text-sm: 500 13px/1.4 var(--font-ui);
   --app-text-link: 500 11.5px/1.3 var(--font-ui); /* never under 11px */
+  --app-text-price: 700 22px/1.2 var(--font-ui); /* a shop's price, the largest text on its page */
 
   /*
    * Motion: the game's own loops. Arrivals, stamps, reveals and curves read
