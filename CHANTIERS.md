@@ -242,7 +242,7 @@ livré le même jour dans une seconde PR ([#257](https://github.com/ScratchMe/to
 correctifs A15.7 à A15.14 et les décisions A15.15 à A15.17 et A15.20, qu'il a
 tranchées sur les recos (le détail, et ce que chaque test prouve, sont au
 journal, à « A15.7 à A15.20 »). **A15.18 suit le même jour** ([#262](https://github.com/ScratchMe/tourdegrowth/pull/262)), une fois C33 tranchée : « Dans le jeu » au-dessus de la carte du jeu (le journal, à « C33 »). **A15.19 suit le 2026-10-02** : le brief 05 à Claude Design (B7), puis son
-portage, **A16** : la puce d'étape devient une ligne d'une feuille de score
+portage, **A16** ([#271](https://github.com/ScratchMe/tourdegrowth/pull/271)) : la puce d'étape devient une ligne d'une feuille de score
 (`StageScore`, `StageScores`), avec C34 et C35 tranchées le même jour (le
 journal, à « A16 »). **A15 est clos.**
 
@@ -289,7 +289,7 @@ recopié le 2026-10-02** ([#270](https://github.com/ScratchMe/tourdegrowth/pull/
 [`design/ds-extension-05-return/`](design/ds-extension-05-return/README.md) :
 22 fichiers, la planche toute en source, rejouée dans Chromium aux huit
 cadres (`COPIE.md`). Claude Design n'a rien touché hors de son dossier. **Le
-portage (A16) est livré le 2026-10-02** ; la re-synchro qui l'emporte vers le
+portage (A16) est livré le 2026-10-02**, [#271](https://github.com/ScratchMe/tourdegrowth/pull/271) ; la re-synchro qui l'emporte vers le
 projet est B9.
 
 **B8 : l'index du projet Claude Design, réécrit le 2026-10-01 au soir.** Antoine

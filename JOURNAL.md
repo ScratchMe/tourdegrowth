@@ -1243,7 +1243,7 @@ Le texte du skill `/design-sync` (trouvé en ligne) dit que l'application « cle
 **Consigné** : `design/ds-extension-05-return/COPIE.md`, `docs/decisions.md` (C34, C35), `CHANTIERS.md` (B7 fait, A15.19, A16 ouvert, D11 retiré), `design/README.md`, `design/LOIS-UX.md`, `.design-sync/NOTES.md` (« Synced »). Que de la doc sous `design/`, `docs/` et à la racine : rien ne se déploie.
 
 
-## A16 : la feuille de score portée, C34 et C35 codées (2026-10-02)
+## A16 : la feuille de score portée, C34 et C35 codées (2026-10-02, #271)
 
 **Ce qui change à l'écran** : les cinq puces d'étape du résultat et de l'aperçu de l'accueil deviennent **une feuille de score** (`StageScores`, une `<ol>` nommée « Score par étape, sur 20 »), juste sous le profil du parcours dont elle est la table. Une ligne par étape (`StageScore`, un `<li>`) : la note, une jauge, le nom, le `?`. Ni boîte, ni coin arrondi : un filet plein en tête, des tirets fins entre les lignes, comme `DataTable`. Une seule colonne à toutes les largeurs, 48 px par ligne sur le résultat, 44 px au téléphone et sur l'accueil. La liste est la grille et chaque ligne une sous-grille : les cinq jauges partent du même x et se comparent. `PillarChip` est retiré, ses deux jetons de rembourrage avec lui (le test des jetons morts l'a exigé).
 
