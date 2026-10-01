@@ -31,7 +31,7 @@ import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } fr
  * slide came out byte for byte the same without it) and taken out.
  */
 
-const STORAGE_KEY = "tdg.engine.v1";
+const STORAGE_KEY = "tdg.engine.v2";
 const EXAMPLE_CLOCK = new Date(2026, 8, 24, 12);
 const GAME_OPEN = process.env.GAME_ENABLED === "true";
 
@@ -264,7 +264,7 @@ test.describe("the engine", () => {
     await page.clock.setFixedTime(EXAMPLE_CLOCK);
     await page.goto("/en/aarrr-funnel-template");
     await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
-    await page.evaluate(({ key, state }) => window.localStorage.setItem(key, JSON.stringify({ schemaVersion: 1, state })), {
+    await page.evaluate(({ key, state }) => window.localStorage.setItem(key, JSON.stringify({ schemaVersion: 2, state })), {
       key: STORAGE_KEY,
       state: exampleState(),
     });

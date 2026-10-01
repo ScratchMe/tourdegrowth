@@ -320,6 +320,38 @@ export function formatMonth(month: YearMonth, locale: Locale): string {
   );
 }
 
+/** "juillet" / "July": a month's name alone, for the first end of a run within one year. */
+function monthName(month: YearMonth, locale: Locale): string {
+  const [year, m] = month.split("-").map(Number) as [number, number];
+  return normalise(new Intl.DateTimeFormat(intlLocale(locale), { month: "long", timeZone: "UTC" }).format(new Date(Date.UTC(year, m - 1, 1))));
+}
+
+/**
+ * A run of whole months (C25 Q2: everything sales-assisted reads three):
+ * « juin à août 2026 », « novembre 2025 à janvier 2026 » — the year once
+ * when both ends share it. `from` opens a period inside a sentence
+ * (« leads créés de mai à juillet 2026 », "from May to July 2026"), eliding
+ * before a vowel in French (« d'avril à juin 2026 »); a single month reads
+ * « en août 2026 ». `bare` is for a label or after a colon.
+ */
+export function formatMonthRange(
+  range: { from: YearMonth; to: YearMonth },
+  locale: Locale,
+  words: UnitWords,
+  form: "bare" | "from" = "bare",
+): string {
+  if (range.from === range.to) {
+    const month = formatMonth(range.to, locale);
+    return form === "bare" ? month : fillTemplate(words.periodIn, { range: month });
+  }
+  const sameYear = range.from.slice(0, 4) === range.to.slice(0, 4);
+  const start = sameYear ? monthName(range.from, locale) : formatMonth(range.from, locale);
+  const text = fillTemplate(words.monthRange, { from: start, to: formatMonth(range.to, locale) });
+  if (form === "bare") return text;
+  const elide = locale === "fr" && /^[aeiouyàâéèêîôûh]/i.test(text);
+  return fillTemplate(elide ? words.periodFromElided : words.periodFrom, { range: text });
+}
+
 /**
  * "1er octobre 2026" / "October 1, 2026", from a local calendar date.
  * French writes the first of a month as an ordinal (« le 1er octobre »,

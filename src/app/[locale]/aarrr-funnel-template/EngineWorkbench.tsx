@@ -3,9 +3,9 @@
 import { useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
-import { shapeOf } from "@/lib/engine/catalog-shape";
+import { motionOfMetric, motionShapes, shapeOf } from "@/lib/engine/catalog-shape";
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
-import type { EngineSetup, EngineState, LeverId, MetricEntry, MetricId, RoleId, SharedCount, Snapshot, YearMonth } from "@/lib/engine/types";
+import type { EngineCalcContext, EngineDerived, EngineSetup, EngineState, LeverId, MetricEntry, MetricId, Motion, MotionDerived, RoleId, SharedCount, SlideTitle, Snapshot, YearMonth } from "@/lib/engine/types";
 import type { Locale } from "@/lib/i18n/locale";
 import type { Pillar } from "@/lib/scoring/pillars";
 import { Board } from "./_engine/Board";
@@ -13,13 +13,14 @@ import { DeckView } from "./_engine/deck/DeckView";
 import { collectPlan } from "./_engine/collect";
 import { latestTourWithAnswers } from "@/lib/engine/bridge";
 import { pelotonTitle } from "@/lib/engine/deck";
+import { relaysTitle, totalTitle } from "@/lib/engine/deck-motions";
 import { deriveEngine } from "@/lib/engine/derive";
 import { engineFileName, serializeEngine } from "@/lib/engine/io";
 import { markReminded, markRequested } from "@/lib/engine/request";
 import { requestPersistence } from "@/lib/engine/storage";
 import { newEngineState } from "@/lib/engine/validate";
 import { propagateFrom, withSharedCount } from "@/lib/engine/shared-counts";
-import { trackEngine } from "./_engine/engine-events";
+import { engineSetupDetail, engineStageDetail, trackEngine, type EngineStageDetail } from "./_engine/engine-events";
 import { commit, erase, getClientSnapshot, getServerSnapshot, subscribe, type CommitResult } from "./_engine/engine-store";
 import { EraseDialog } from "./_engine/EraseDialog";
 import { ExampleView } from "./_engine/ExampleView";
@@ -60,7 +61,7 @@ type Screen = "board" | "steps" | "deck" | "import" | "erase" | "settings" | "ex
 // Once per page session, not per mount (§11.6: "first view of the island in the session").
 let openedTracked = false;
 // "The first save of a number of that stage in the session" (§11.6) — the stage, never the number.
-const savedStages = new Set<Pillar>();
+const savedStages = new Set<EngineStageDetail>();
 // navigator.storage.persist() asked once, at the first successful write (§4.3).
 let persistenceAsked = false;
 
@@ -111,6 +112,10 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
   const [selected, setSelected] = useState<Pillar | null>(null);
   const [panelSeq, setPanelSeq] = useState(0);
   const [focusMetric, setFocusMetric] = useState<MetricId | null>(null);
+  // The hybrid's selector (§18.7): the motion of the number opened last in this session, else self-serve.
+  const [motionView, setMotionView] = useState<Motion | null>(null);
+  // The motions the setup card had ticked when « Voir un exemple rempli » was pressed (§18.7).
+  const [exampleMotions, setExampleMotions] = useState<Record<Motion, boolean>>({ plg: true, slg: false });
   const [writeFailed, setWriteFailed] = useState(false);
   const [focusRequest, setFocusRequest] = useState<{ id: string; n: number } | null>(null);
 
@@ -133,10 +138,10 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     const ctx = { today: new Date(openedAt), locale };
     const tourResult = state.tourLink ? (tourResults?.find((r) => r.id === state.tourLink?.resultId) ?? null) : null;
     const derived = deriveEngine(state, ctx, tourResult, bridges, strings.units);
-    // The board's title is the peloton slide's title, from the same function (§7 E2, §9.3):
+    // The board's title is its first slide's title, from the same function (§7 E2, §9.3, §18.8):
     // the screen and the slide cannot word one engine two ways.
-    const verdict = pelotonTitle(state, derived.peloton, strings, metrics, ctx);
-    const plan = collectPlan(lastSnapshot(state), ctx.today);
+    const verdict = verdictOf(state, derived, strings, metrics, ctx);
+    const plan = collectPlan(lastSnapshot(state), ctx.today, motionShapes(state.setup.motions));
     const deviceTour = latestTourWithAnswers(tourResults ?? []);
     const tourOnDevice = deviceTour !== null;
     const view: EngineView = { state, derived, strings, metrics, derivedCopy, bridges, ctx, tourResult, tourOnDevice, deviceTour };
@@ -167,7 +172,8 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     focus("engine-steps-title");
   }
 
-  function openExample() {
+  function openExample(motions?: Record<Motion, boolean>) {
+    if (motions) setExampleMotions(motions);
     setScreen("example");
     focus("engine-example-title");
   }
@@ -191,6 +197,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
           metrics={metrics}
           derivedCopy={derivedCopy}
           bridges={bridges}
+          motions={exampleMotions}
           onBack={() => {
             setScreen("board");
             focus("engine-setup-title");
@@ -270,6 +277,9 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
             tourLink: choice.tourResultId ? { resultId: choice.tourResultId, linkedAt: nowIso } : null,
           };
           persist(next, { fresh: true, stamp: false });
+          // Which boxes were ticked (Q14): a choice, never a number or a word typed.
+          const motions = engineSetupDetail(choice.setup.motions);
+          trackEngine({ name: "engine_setup", detail: motions });
           if (choice.tourResultId) trackEngine({ name: "engine_tour_linked" });
           if (choice.start === "steps") openSteps({ phase: "targets" });
           else openBoard();
@@ -286,10 +296,11 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
       // A count this number shares with others (shared-counts.ts) becomes the base and is
       // written into them: typed once, never contradicting itself across the board.
       const result = persist(withSnapshot(current, (s) => propagateFrom({ ...s, metrics: { ...s.metrics, [id]: entry } }, id)));
-      const stage = shapeOf(id).stage;
-      if (result.ok && !savedStages.has(stage)) {
-        savedStages.add(stage);
-        trackEngine({ name: "engine_stage_saved", detail: stage });
+      // Sales-assisted's stages count apart, prefixed (Q14); the link's block sits under its acquisition.
+      const stageDetail = engineStageDetail(shapeOf(id).stage, motionOfMetric(id));
+      if (result.ok && !savedStages.has(stageDetail)) {
+        savedStages.add(stageDetail);
+        trackEngine({ name: "engine_stage_saved", detail: stageDetail });
       }
       return result;
     },
@@ -325,6 +336,8 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     },
     openMetric(id: MetricId) {
       setScreen("board");
+      // The link sits in sales-assisted's Acquisition panel: its motion, for the selector.
+      setMotionView(motionOfMetric(id));
       setSelected(shapeOf(id).stage);
       setFocusMetric(id);
       setPanelSeq((n) => n + 1);
@@ -391,7 +404,10 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
         existing={{
           activation: snapshot.metrics["act.rate"] !== undefined,
           paid: snapshot.metrics["rev.paid-conversion"] !== undefined,
+          qualification: snapshot.metrics["slg.acq.lead-to-opp"] !== undefined,
+          goLive: snapshot.metrics["slg.act.go-live"] !== undefined,
           any: Object.keys(snapshot.metrics).length > 0,
+          entered: enteredCounts(snapshot),
         }}
         onCancel={openBoard}
         onStart={(choice) => {
@@ -402,6 +418,9 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
           const tourLink = choice.tourResultId === null ? null : (current.tourLink ?? { resultId: choice.tourResultId, linkedAt: new Date().toISOString() });
           const result = persist({ ...settled, tourLink });
           if (result.ok && linking) trackEngine({ name: "engine_tour_linked" });
+          // A motion ticked or unticked after the fact is a new choice of motions (Q14).
+          const changed = engineSetupDetail(choice.setup.motions);
+          if (result.ok && changed !== engineSetupDetail(current.setup.motions)) trackEngine({ name: "engine_setup", detail: changed });
           openBoard();
         }}
       />,
@@ -410,7 +429,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
 
   if (screen === "example") {
     return shell(
-      <ExampleView locale={locale} strings={strings} metrics={metrics} derivedCopy={derivedCopy} bridges={bridges} onBack={openBoard} />,
+      <ExampleView locale={locale} strings={strings} metrics={metrics} derivedCopy={derivedCopy} bridges={bridges} motions={current.setup.motions} onBack={openBoard} />,
     );
   }
 
@@ -466,6 +485,8 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
       panelSeq={panelSeq}
       focusMetric={focusMetric}
       returningFrom={snap.returningFrom}
+      motionView={motionView}
+      onMotion={setMotionView}
       writeFailed={writeFailed}
       onDeck={() => {
         setScreen("deck");
@@ -485,7 +506,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
         setScreen("settings");
         focus("engine-setup-title");
       }}
-      onSteps={() => openSteps(resumePosition(lastSnapshot(current)))}
+      onSteps={() => openSteps(resumePosition(lastSnapshot(current), current.setup.motions))}
     />,
   );
 }
@@ -503,13 +524,40 @@ function withSettings(state: EngineState, setup: EngineSetup, referenceMonth: Ye
   const metrics = { ...snapshot.metrics };
   if (setup.activationWindowDays !== state.setup.activationWindowDays) delete metrics["act.rate"];
   if (setup.paidWindowDays !== state.setup.paidWindowDays) delete metrics["rev.paid-conversion"];
+  // The sales-assisted windows are part of their numbers' definitions too (§18.1.2): the same rule.
+  if (setup.qualificationWindowDays !== state.setup.qualificationWindowDays) delete metrics["slg.acq.lead-to-opp"];
+  if (setup.goLiveWindowDays !== state.setup.goLiveWindowDays) delete metrics["slg.act.go-live"];
   const hadCompany = Boolean(state.setup.companyLabel);
   return {
     ...state,
-    // The model is not editable (one profile in v1), nor is anything the card doesn't show.
-    setup: { ...setup, profile: state.setup.profile },
+    // Unticking a motion loses nothing (§18.1.2): its entries, targets, what-ifs and slide boxes stay in
+    // the state, the storage and the file; the board, the coverage, the diagnosis and the deck ignore them.
+    setup,
     // A name given for the first time goes on the slides, as it does at creation.
     deck: !hadCompany && setup.companyLabel ? { ...state.deck, showCompany: true } : state.deck,
     snapshots: [...state.snapshots.slice(0, -1), { ...snapshot, referenceMonth, cohortMonth, metrics }],
   };
+}
+
+/**
+ * The board's verdict, by the motions (§18.7, §18.8): self-serve alone, the
+ * peloton's title (v1, to the character); sales-assisted alone, the relays';
+ * the hybrid, « deux moteurs, un total ». Each is its deck's first slide.
+ */
+function verdictOf(state: EngineState, derived: EngineDerived, strings: EngineStrings, metrics: ResolvedMetric[], ctx: EngineCalcContext): SlideTitle {
+  const { plg, slg } = state.setup.motions;
+  if (plg && slg && derived.total) return totalTitle(derived.total, state, strings, ctx);
+  const relays = derived.motions.find((m): m is Extract<MotionDerived, { motion: "slg" }> => m.motion === "slg");
+  if (!plg && relays) return relaysTitle(state, relays.relays, strings, metrics, ctx);
+  return pelotonTitle(state, derived.peloton, strings, metrics, ctx);
+}
+
+/** The numbers already entered on each side (anything but « à faire »): what the settings say a motion keeps (§18.1.2). */
+function enteredCounts(snapshot: Snapshot): Record<Motion, number> {
+  const counts: Record<Motion, number> = { plg: 0, slg: 0 };
+  for (const [id, entry] of Object.entries(snapshot.metrics)) {
+    if (!entry || entry.status === "todo") continue;
+    counts[motionOfMetric(id as MetricId)] += 1;
+  }
+  return counts;
 }

@@ -45,8 +45,9 @@ export function SlideUnitEconomics({ slide, context }: SlideProps) {
     }),
   ].filter((tile): tile is Tile => tile !== null);
 
-  // Geometry only: where the payback falls on a 0-36 month axis, never a printed figure.
-  const payback = derived.unit.payback;
+  // Geometry only: where the payback falls on a 0-36 month axis, never a printed figure. Sales-assisted alone: its own.
+  const slg = slide.motion === "slg" ? derived.motions.find((m) => m.motion === "slg") : undefined;
+  const payback = slg ? slg.unit.payback : derived.unit.payback;
   const start = payback.kind === "known" ? Math.min(payback.value.lo, LTV_CAP_MONTHS) : null;
   const end = payback.kind === "known" ? Math.min(payback.value.hi, LTV_CAP_MONTHS) : null;
   const pct = (months: number) => `${(months / LTV_CAP_MONTHS) * 100}%`;

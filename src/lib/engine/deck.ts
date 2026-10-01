@@ -1,5 +1,18 @@
-import { CANDIDATE_IDS, DERIVED_SHAPES, LEVER_IDS, METRIC_SHAPES, PELOTON_METRICS, UNPRICED_CANDIDATES, shapeOf } from "./catalog-shape";
-import { nextMonth, currentMonth, periodOf, windowDaysOf } from "./cohort";
+import {
+  ALL_DERIVED_SHAPES,
+  CANDIDATE_IDS,
+  LEVER_IDS,
+  LINK_METRIC_SHAPES,
+  METRIC_SHAPES,
+  PELOTON_METRICS,
+  SLG_CANDIDATE_IDS,
+  SLG_METRIC_SHAPES,
+  UNPRICED_CANDIDATES,
+  motionOfMetric,
+  motionShapes,
+  shapeOf,
+} from "./catalog-shape";
+import { nextMonth, currentMonth, monthsBefore, periodOf, periodRangeOf, windowDaysOf } from "./cohort";
 import { comparatorOf, impactTarget } from "./diagnose";
 import { formatComparator } from "./findings";
 import {
@@ -15,6 +28,7 @@ import {
   formatInterval,
   formatMoney,
   formatMonth,
+  formatMonthRange,
   formatPerHundred,
   formatPerHundredCount,
   joinList,
@@ -27,6 +41,7 @@ import {
 import { impactHeadline, whatIf } from "./impact";
 import { mapBounds, point } from "./interval";
 import {
+  type AnyDiagnosis,
   blindSentence,
   catalogueValues,
   chainTemplate,
@@ -35,19 +50,25 @@ import {
   notEnoughBelowValues,
   numbered,
   sideText,
+  slgChainTemplate,
   stagePhrase,
   subjectOf,
   unitInputsPhrase,
   worthOf,
 } from "./phrases";
 import { annexPages, type AnnexCells } from "./annex-pages";
+import { buildRelaysSlide, buildSlgWhatIfSlides, buildTotalSlide, buildUnitBoth, buildUnitSlg, motionOf } from "./deck-slg";
+import { linkSentence } from "./deck-motions";
 import { buildScenario, leverAlone } from "./scenario";
+import { renewalTermOf, slgWhatIf } from "./slg-impact";
+import { slgLeverAlone } from "./slg-scenario";
 import type { Scenario, ScenarioFunnel, ScenarioKpis } from "./scenario";
 import { BASIS_KEY, REPAIR_KEY, ROLE_KEY, STATUS_KEY } from "./strings";
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "./strings";
 import { includeKeyOf, SLIDE_ORDER } from "./types";
 import type {
   CandidateId,
+  PlgCandidateId,
   Comparator,
   DeckModel,
   DeckSlide,
@@ -62,10 +83,13 @@ import type {
   MetricId,
   MirrorVerdict,
   MissingCause,
+  Motion,
   Peloton,
+  Position,
   RepairScale,
   FixedSlideId,
   SlideId,
+  SlgCandidateId,
   SlideTitle,
   SourceRef,
   TrackingLevel,
@@ -97,7 +121,7 @@ import { confidenceOf, currentSnapshot, entryOf, knownIn, statusOf } from "./val
  */
 
 type Words = EngineStrings;
-type Row = Record<string, string>;
+export type Row = Record<string, string>;
 
 /** The prose a few rows name computed figures and Tour answers with. Optional: without it those rows print their figures unlabelled. */
 export interface DeckProse {
@@ -105,7 +129,7 @@ export interface DeckProse {
   bridges?: ResolvedBridge[];
 }
 
-const DEFAULT_INCLUDE: Record<FixedSlideId, boolean> = {
+export const DEFAULT_INCLUDE: Record<FixedSlideId, boolean> = {
   peloton: true,
   leak: true,
   visibility: true,
@@ -116,14 +140,14 @@ const DEFAULT_INCLUDE: Record<FixedSlideId, boolean> = {
   annex: true,
 };
 
-const REPAIR_ORDER: readonly RepairScale[] = ["meeting", "afternoon", "sprint", "quarter"];
+export const REPAIR_ORDER: readonly RepairScale[] = ["meeting", "afternoon", "sprint", "quarter"];
 
 /** The title template filled, `**…**` kept: the slide renders it as the red accent, Markdown as bold. */
 export function renderTitle(title: SlideTitle, strings: Words): string {
   return fillTemplate(strings.slideTitles[title.key], title.values);
 }
 
-function metricOf(metrics: ResolvedMetric[], id: MetricId): ResolvedMetric {
+export function metricOf(metrics: ResolvedMetric[], id: MetricId): ResolvedMetric {
   const m = metrics.find((x) => x.id === id);
   if (!m) throw new Error(`No resolved prose for engine metric ${id}`);
   return m;
@@ -319,7 +343,7 @@ export function chainLine(line: ImpactLine, impact: Impact, stage: string, targe
   return { row: "calc", key: line.key, label: label ?? "", text: fillTemplate(template, values) };
 }
 
-interface LeakBuild {
+export interface LeakBuild {
   present: boolean;
   title: SlideTitle;
   lines: Row[];
@@ -328,14 +352,38 @@ interface LeakBuild {
 
 type AsideTone = "below" | "neutral" | "unknown";
 
-function buildLeak(state: EngineState, derived: Omit<EngineDerived, "findings">, strings: Words, metrics: ResolvedMetric[], ctx: EngineCalcContext): LeakBuild {
-  const { diagnosis } = derived;
+/**
+ * The leak slide of one motion (§9.3; §18.8.2 for sales-assisted): its own
+ * diagnosis, its own chain, its own candidates alongside — never a stage of
+ * the other motion (§18.6.4). Self-serve's is the v1 slide to the character
+ * (golden); sales-assisted's prices its quarter then a month (`slg-impact.ts`).
+ */
+export function buildLeak(
+  state: EngineState,
+  diagnosis: AnyDiagnosis,
+  strings: Words,
+  metrics: ResolvedMetric[],
+  ctx: EngineCalcContext,
+): LeakBuild {
   const locale = ctx.locale;
+  const slg = diagnosis.motion === "slg";
   const absent: LeakBuild = { present: false, title: { key: "leakLevel", values: {} }, lines: [], notes: [] };
   const subject = (id: MetricId) => subjectOf(id, strings, metrics);
+  const positions = diagnosis.positions as Record<CandidateId, { position: Position; comparator?: Comparator }>;
   const impactOf = (id: CandidateId): Impact | null => {
-    const comparator = diagnosis.positions[id].comparator;
-    return comparator ? whatIf(state, id, impactTarget(comparator), ctx, strings.units) : null;
+    const comparator = positions[id].comparator;
+    if (!comparator) return null;
+    return slg
+      ? slgWhatIf(state, id as SlgCandidateId, impactTarget(comparator), ctx, strings.units)
+      : whatIf(state, id as PlgCandidateId, impactTarget(comparator), ctx, strings.units);
+  };
+  const named = diagnosis.named as readonly CandidateId[];
+  const term = slg ? renewalTermOf(state, ctx) : null;
+  /** One line of the chain, in its motion's words. */
+  const calcLine = (line: ImpactLine, impact: Impact, stage: string, target: string): Row => {
+    if (!slg) return chainLine(line, impact, stage, target, strings, locale);
+    const { label, template, values } = slgChainTemplate(line, impact, strings, locale, term);
+    return { row: "calc", key: line.key, label: label ?? "", text: fillTemplate(template, { ...line.values, ...values, stage, ...(line.key === "if" ? { target } : {}) }) };
   };
 
   const lines: Row[] = [];
@@ -344,12 +392,12 @@ function buildLeak(state: EngineState, derived: Omit<EngineDerived, "findings">,
   /** What closing the named gap is worth, for the notes that compare the others with it. */
   let top: string | null = null;
 
-  if (diagnosis.state === "clear" && UNPRICED_CANDIDATES.includes(diagnosis.named[0]!)) {
+  if (diagnosis.state === "clear" && UNPRICED_CANDIDATES.includes(named[0]!)) {
     // A stage the model can't price — day-30 retention, the referred share (§6.6) — still gets its slide: without
     // it the deck dropped, without a word, the conclusion the board shows (C9, 2026-09-29). Its title names the
     // value and the target, never an amount; the footer says why there is none; no chain to show, so no card.
-    const id = diagnosis.named[0]!;
-    const comparator = diagnosis.positions[id].comparator;
+    const id = named[0]!;
+    const comparator = positions[id].comparator;
     const known = knownIn(state, id, ctx);
     if (!comparator || known.kind !== "known") return absent;
     const target = targetPhrase(comparator, id, state, strings, ctx);
@@ -358,8 +406,8 @@ function buildLeak(state: EngineState, derived: Omit<EngineDerived, "findings">,
     lines.push({ row: "footer", text: strings.slide.leakFooterUnpriced });
     notes.push(fillTemplate(strings.notes.compared, { comparator: target }));
   } else if (diagnosis.state === "clear") {
-    const id = diagnosis.named[0]!;
-    const comparator = diagnosis.positions[id].comparator;
+    const id = named[0]!;
+    const comparator = positions[id].comparator;
     const impact = impactOf(id);
     // A gain under one customer a month is not an argument for a committee: that slide stays out (C9).
     if (!comparator || !impact || impact.lines.some((l) => l.key === "less-than-one")) return absent;
@@ -368,22 +416,33 @@ function buildLeak(state: EngineState, derived: Omit<EngineDerived, "findings">,
     const head = impactHeadline(impact);
     if (head.amount) {
       title = { key: impact.kind === "retained-mrr" ? "leakClearMrrRetained" : "leakClearMrrNew", values: { stage, target, amount: head.amount } };
+    } else if (slg && impact.kind === "per-hundred") {
+      // No count of new customers: read on the relay's own 100, its words chosen once (`worthOf`).
+      const worth = worthOf(impact, strings, locale);
+      if (!worth) return absent;
+      title = { key: "slgLeakClearPerHundred", values: { stage, target, worth } };
     } else if (head.n) {
-      const base = impact.kind === "per-hundred" ? "leakClearPerHundred" : id === "ret.logo-churn" ? "leakClearKept" : "leakClearCustomers";
+      const base = slg
+        ? id === "slg.ret.renewal"
+          ? "slgLeakClearKept"
+          : "slgLeakClearCustomers"
+        : impact.kind === "per-hundred"
+          ? "leakClearPerHundred"
+          : id === "ret.logo-churn"
+            ? "leakClearKept"
+            : "leakClearCustomers";
       title = { key: numbered(base, head.count, locale), values: { stage, target, n: head.n } };
     } else {
       return absent;
     }
-    for (const line of impact.lines) lines.push(chainLine(line, impact, stage, target, strings, locale));
-    lines.push({
-      row: "footer",
-      // The assumption is said here, once (spec §9.3): the calculation multiplies activation into payers.
-      text: fillSegments(strings.slide.leakFooter, { assumption: id === "act.rate" ? strings.slide.leakAssumption : "" }),
-    });
+    for (const line of impact.lines) lines.push(calcLine(line, impact, stage, target));
+    // The assumption is said here, once (spec §9.3, §18.5.3): what the calculation takes for granted.
+    const assumption = slg ? (strings.slide.slgLeakAssumption[id as keyof Words["slide"]["slgLeakAssumption"]] ?? "") : id === "act.rate" ? strings.slide.leakAssumption : "";
+    lines.push({ row: "footer", text: fillSegments(strings.slide.leakFooter, { assumption }) });
     notes.push(fillTemplate(strings.notes.compared, { comparator: target }));
     top = worthOf(impact, strings, locale);
   } else if (diagnosis.state === "shared") {
-    title = { key: "leakShared", values: { n: String(diagnosis.named.length), list: joinList(diagnosis.named.map(subject), strings.grammar) } };
+    title = { key: "leakShared", values: { n: String(named.length), list: joinList(named.map(subject), strings.grammar) } };
   } else if (diagnosis.state === "level") {
     title = { key: "leakLevel", values: {} };
   } else {
@@ -392,11 +451,11 @@ function buildLeak(state: EngineState, derived: Omit<EngineDerived, "findings">,
     title = { key: "leakNotEnoughBelow", values };
   }
 
-  // Alongside: every other candidate, where it stands — on the right side of its comparator, and what it is worth.
+  // Alongside: every other candidate of the motion, where it stands — on the right side of its comparator, and what it is worth.
   const r = strings.notes.ranking;
-  for (const id of CANDIDATE_IDS) {
-    if (diagnosis.state === "clear" && id === diagnosis.named[0]) continue;
-    const { position, comparator } = diagnosis.positions[id];
+  for (const id of slg ? SLG_CANDIDATE_IDS : CANDIDATE_IDS) {
+    if (diagnosis.state === "clear" && id === named[0]) continue;
+    const { position, comparator } = positions[id];
     const side = sideText(position, comparator, strings);
     let text: string;
     let ranking: string;
@@ -438,8 +497,14 @@ function buildVisibility(state: EngineState, derived: Omit<EngineDerived, "findi
   const N = coverage.denominator;
   const k = N - n;
 
+  // The ticked motions' numbers (the link is optional and never counted, §18.2.2); self-serve alone is the v1 list.
+  const shapes = motionShapes(state.setup.motions);
+  const hybrid = state.setup.motions.plg && state.setup.motions.slg;
+  // In the hybrid, a row says its motion: two numbers can share a stage, and a repair belongs to one team.
+  const motionTag = (id: MetricId): Row => (hybrid ? { motion: motionOfMetric(id) } : {});
+  const motionWord = (id: MetricId) => (hybrid ? strings.hybrid.motionAdjective[motionOfMetric(id)] : "");
   // What is not documented, cheapest repair first: a missing number's own estimate, else the catalogue's default.
-  const undocumented = METRIC_SHAPES.filter((s) => ["todo", "requested", "missing"].includes(statusOf(entryOf(snapshot, s.id)))).map((s) => {
+  const undocumented = shapes.filter((s) => ["todo", "requested", "missing"].includes(statusOf(entryOf(snapshot, s.id)))).map((s) => {
     const entry = entryOf(snapshot, s.id);
     return { id: s.id, entry, repair: entry?.missing?.repair ?? s.defaultRepair };
   });
@@ -463,11 +528,11 @@ function buildVisibility(state: EngineState, derived: Omit<EngineDerived, "findi
         ? { key: "visibilityOne", values: { documented, repair } }
         : { key: "visibility", values: { documented, k: String(k), repair } };
 
-  const lines: Row[] = METRIC_SHAPES.map((s) => {
+  const lines: Row[] = shapes.map((s) => {
     const name = metricOf(metrics, s.id).name;
     const status = strings.status[STATUS_KEY[statusOf(entryOf(snapshot, s.id))]];
     // `label` is the stage (the text export groups by it), `metric` the number's own name; the slide groups by the id's stage.
-    return { row: "metric", id: s.id, label: strings.stages[s.stage], metric: name, status, text: `${name} · ${lowerFirst(status)}` };
+    return { row: "metric", id: s.id, label: strings.stages[s.stage], metric: name, status, text: `${name} · ${lowerFirst(status)}`, ...motionTag(s.id) };
   });
   for (const u of undocumented) {
     const status = statusOf(u.entry);
@@ -477,7 +542,7 @@ function buildVisibility(state: EngineState, derived: Omit<EngineDerived, "findi
     // A role, never a person (§9.1).
     const role = u.entry?.missing?.ownerRole ? strings.role[ROLE_KEY[u.entry.missing.ownerRole]] : u.entry?.request ? strings.role[ROLE_KEY[u.entry.request.role]] : "";
     const fix = strings.repair[REPAIR_KEY[u.repair]];
-    lines.push({ row: "missing", id: u.id, label: name, repair: fix, text: [cause, role, fix].filter(Boolean).join(" · ") });
+    lines.push({ row: "missing", id: u.id, label: name, repair: fix, text: [motionWord(u.id), cause, role, fix].filter(Boolean).join(" · "), ...motionTag(u.id) });
   }
   return { title, lines };
 }
@@ -488,7 +553,7 @@ function buildVisibility(state: EngineState, derived: Omit<EngineDerived, "findi
  * wider (it also holds the conflicting / not-applicable choices, which are
  * statuses here, not causes). A slide states the fact, in no one's voice.
  */
-const SLIDE_CAUSE_KEY: Record<MissingCause, keyof Words["slide"]["cause"]> = {
+export const SLIDE_CAUSE_KEY: Record<MissingCause, keyof Words["slide"]["cause"]> = {
   "not-tracked": "notTracked",
   "not-computed": "notComputed",
   "no-access": "noAccess",
@@ -574,11 +639,12 @@ function buildAsk(
   // What to measure first when nothing is asked for: the team's own first pick; else a blind ★ — the number
   // whose absence keeps the diagnosis from concluding, which is what "before deciding where to invest" means —
   // else the cheapest missing number to repair.
-  const missing = METRIC_SHAPES.filter((s) => statusOf(entryOf(snapshot, s.id)) === "missing")
+  const missing = motionShapes(state.setup.motions)
+    .filter((s) => statusOf(entryOf(snapshot, s.id)) === "missing")
     .map((s) => ({ id: s.id, repair: entryOf(snapshot, s.id)?.missing?.repair ?? s.defaultRepair }))
     .sort((a, b) => REPAIR_ORDER.indexOf(a.repair) - REPAIR_ORDER.indexOf(b.repair));
   const first =
-    missing.find((m) => m.id === ask.measureFirst[0]) ?? missing.find((m) => derived.diagnosis.blind.includes(m.id)) ?? missing[0];
+    missing.find((m) => m.id === ask.measureFirst[0]) ?? missing.find((m) => derived.motions.some((d) => d.diagnosis.blind.includes(m.id))) ?? missing[0];
 
   // The goal, from what the team filled in — only those parts, so no « de  à  d'ici ».
   const id = ask.successMetric;
@@ -658,8 +724,9 @@ function verdictLabel(verdict: MirrorVerdict, count: number, strings: Words, loc
   return strings.mirror[numbered(VERDICT_KEY[verdict], point(count), locale)];
 }
 
-function mirrorLines(mirror: NonNullable<EngineDerived["mirror"]>, strings: Words, metrics: ResolvedMetric[], ctx: EngineCalcContext, prose: DeckProse): Row[] {
-  const isDerived = (id: MetricId | DerivedId): id is DerivedId => DERIVED_SHAPES.some((s) => s.id === id);
+function mirrorLines(mirror: NonNullable<EngineDerived["mirror"]>, strings: Words, metrics: ResolvedMetric[], ctx: EngineCalcContext, prose: DeckProse, hybrid = false): Row[] {
+  // Both motions' computed figures: in the hybrid, a Tour question bridges to sales-assisted's LTV too (§18.4.9).
+  const isDerived = (id: MetricId | DerivedId): id is DerivedId => ALL_DERIVED_SHAPES.some((s) => s.id === id);
   // The counts lead, blind spots first; a verdict nobody reached is not a line.
   const lines: Row[] = VERDICT_ORDER.filter((verdict) => mirror.counts[verdict] > 0).map((verdict) => ({
     row: "verdictCount",
@@ -684,6 +751,7 @@ function mirrorLines(mirror: NonNullable<EngineDerived["mirror"]>, strings: Word
       // The one bridge's verdict, in the singular: the slide's tag on its row.
       tag: row.verdict ? verdictLabel(row.verdict, 1, strings, ctx.locale) : "",
       text: answer ? fillTemplate(strings.mirror.card, { answer, points: String(row.declaredPoints), found }) : found,
+      ...(hybrid ? { motion: row.motion } : {}),
     });
   }
   const takenAt = Date.parse(mirror.takenAt);
@@ -701,10 +769,16 @@ function mirrorLines(mirror: NonNullable<EngineDerived["mirror"]>, strings: Word
 
 function buildAnnex(state: EngineState, strings: Words, metrics: ResolvedMetric[], ctx: EngineCalcContext): (Row & AnnexCells)[] {
   const snapshot = currentSnapshot(state);
-  return METRIC_SHAPES.map((shape) => {
+  const { motions } = state.setup;
+  const hybrid = motions.plg && motions.slg;
+  // Grouped « Libre-service », « Assisté », « Liaison » (§18.8.2); self-serve alone is the v1 table.
+  const shapes = hybrid ? [...motionShapes(motions), ...LINK_METRIC_SHAPES] : motionShapes(motions);
+  return shapes.map((shape) => {
     const entry = entryOf(snapshot, shape.id);
     const metric = metricOf(metrics, shape.id);
-    const period = periodOf(shape, entry, snapshot);
+    // Sales-assisted reads three months (C25 Q2), written bare: « juin à août 2026 ».
+    const range = shape.span > 1 ? periodRangeOf(shape, entry, snapshot, state.setup, ctx.today) : null;
+    const period = range ? null : periodOf(shape, entry, snapshot);
     const days = windowDaysOf(shape, state.setup);
     const known = knownIn(state, shape.id, ctx);
     const confidence = known.kind === "known" ? known.confidence : entry ? confidenceOf(entry) : "unknown";
@@ -716,7 +790,7 @@ function buildAnnex(state: EngineState, strings: Words, metrics: ResolvedMetric[
       // The event is the user's own name for it, so the formula goes through the slide glyphs.
       formula: slideGlyphs(fillTemplate(metric.formula, catalogueValues(state, shape.id, strings, metrics, ctx))),
       window: days > 0 ? formatDuration(days, "days", ctx, strings.units) : "",
-      period: period ? formatMonth(period, ctx.locale) : "",
+      period: range ? formatMonthRange(range, ctx.locale, strings.units) : period ? formatMonth(period, ctx.locale) : "",
       source: entry?.status === "measured" ? sourceLabel(entry.source, strings) : entry?.status === "estimated" && entry.estimate ? strings.basis[BASIS_KEY[entry.estimate.basis]] : "",
       status: strings.status[STATUS_KEY[statusOf(entry)]],
       confidence: strings.slide.confidence[confidence],
@@ -727,7 +801,8 @@ function buildAnnex(state: EngineState, strings: Words, metrics: ResolvedMetric[
     // tool or a role keeps its capital (it is a name), an estimate's basis or « Autre » does not.
     const named = entry?.status === "measured" && (entry.source?.kind === "tool" || entry.source?.kind === "person");
     const source = named ? cells.source : lowerFirst(cells.source);
-    return { ...cells, text: [cells.formula, cells.definition, cells.window, cells.period, source, lowerFirst(cells.status), cells.confidence].filter(Boolean).join(" · ") };
+    const group: Row = hybrid ? { group: shape.scope === "link" ? "link" : shape.scope === "slg" ? "slg" : "plg" } : {};
+    return { ...cells, ...group, text: [cells.formula, cells.definition, cells.window, cells.period, source, lowerFirst(cells.status), cells.confidence].filter(Boolean).join(" · ") };
   });
 }
 
@@ -750,7 +825,7 @@ function buildAnnex(state: EngineState, strings: Words, metrics: ResolvedMetric[
  */
 
 /** `extra`: digits finer than the figure's usual rounding, for a today → projected pair (`pairPrecision`); change printers ignore it. */
-type Print = (i: Interval, extra?: number) => string;
+export type Print = (i: Interval, extra?: number) => string;
 
 /** The growth figures of the table, in the order a leadership meeting reads them, and their row labels. */
 const KPI_ROWS = [
@@ -780,7 +855,7 @@ const STEP_ROWS = [
  * intervals instead would count today's uncertainty twice and turn an exact
  * "+125" into "+0 to +250".
  */
-function changeOf(today: Interval, projected: Interval): Interval {
+export function changeOf(today: Interval, projected: Interval): Interval {
   const a = projected.lo - today.lo;
   const b = projected.hi - today.hi;
   return { lo: Math.min(a, b), hi: Math.max(a, b) };
@@ -800,9 +875,9 @@ function mrrGain(s: Scenario): Interval | null {
 }
 
 /** A gain the title can say « would gain »: at least one unit of currency. A loss, or noise, gets the plain title. */
-const isPricedGain = (gain: Interval | null): gain is Interval => gain !== null && gain.lo >= 1;
+export const isPricedGain = (gain: Interval | null): gain is Interval => gain !== null && gain.lo >= 1;
 
-interface Printers {
+export interface Printers {
   today: Print;
   projected: Print;
   change: Print;
@@ -819,7 +894,7 @@ interface Printers {
  * people (the visitors to two significant digits, as on the peloton: they
  * are back-computed from a rounded rate).
  */
-function whatIfPrinters(state: EngineState, strings: Words, ctx: EngineCalcContext) {
+export function whatIfPrinters(state: EngineState, strings: Words, ctx: EngineCalcContext) {
   const units = strings.units;
   const currency = state.setup.currency;
   const approxMoney: Print = (i, extra = 0) => formatApproxMoneyInterval(i, currency, ctx, units, extra);
@@ -866,7 +941,7 @@ function whatIfPrinters(state: EngineState, strings: Words, ctx: EngineCalcConte
  * stable | moved) is for the slide's emphasis, never printed; `text` is the
  * row as the text export writes it.
  */
-function changeRow(
+export function changeRow(
   row: "kpi" | "funnelStep",
   id: string,
   label: string,
@@ -926,14 +1001,15 @@ function movedLevers(state: EngineState, strings: Words, ctx: EngineCalcContext)
     const alone = leverAlone(state, id, ctx);
     const lever = alone?.levers.find((l) => l.id === id);
     if (!alone || !lever?.today || lever.target === null) return [];
-    const print: Print = (i) => formatInterval(i, lever.unit, ctx, strings.units, { currency: state.setup.currency });
+    // Self-serve's levers are percents and money; the link's count is sales-assisted's, for its slides (S4).
+    const print: Print = (i) => formatInterval(i, lever.unit === "count" ? "ratio" : lever.unit, ctx, strings.units, { currency: state.setup.currency });
     const from = print(lever.today);
     const to = print(point(lever.target));
     return from === to ? [] : [{ id, from, to, alone }];
   });
 }
 
-type BuiltSlide = Omit<DeckSlide, "id" | "included" | "index">;
+export type BuiltSlide = Omit<DeckSlide, "id" | "included" | "index">;
 
 /**
  * The appendix as the pages it prints on (A2.1, 2026-09-29): `annex`,
@@ -1019,12 +1095,14 @@ function buildWhatIfSlides(state: EngineState, strings: Words, ctx: EngineCalcCo
 // --- The model ----------------------------------------------------------------
 
 export function buildDeck(state: EngineState, derived: EngineDerived, strings: Words, metrics: ResolvedMetric[], ctx: EngineCalcContext, prose: DeckProse = {}): DeckModel {
+  // Sales-assisted ticked, alone or with self-serve: the deck of §18.8. Self-serve alone is the v1 deck below, to the character.
+  if (state.setup.motions.slg) return buildMotionsDeck(state, derived, strings, metrics, ctx, prose);
   const snapshot = currentSnapshot(state);
   const starsKnown = METRIC_SHAPES.filter((s) => s.primary && knownIn(state, s.id, ctx).kind === "known").length;
   // Under two ★ known, the message is "we can't see the engine yet": visibility leads and there is no leak to name (§9.2).
   const blindEngine = starsKnown < 2;
 
-  const leak = buildLeak(state, derived, strings, metrics, ctx);
+  const leak = buildLeak(state, derived.diagnosis, strings, metrics, ctx);
   const visibility = buildVisibility(state, derived, strings, metrics, ctx);
   const unit = buildUnitEconomics(state, derived, strings, metrics, ctx, prose);
   const ask = buildAsk(state, derived, strings, metrics, ctx);
@@ -1115,6 +1193,202 @@ export function buildDeck(state: EngineState, derived: EngineDerived, strings: W
   };
 }
 
+/** The tools the measured numbers of these shapes cite, once each, in catalogue order. */
+function toolsOf(state: EngineState, shapes: readonly { id: MetricId }[], strings: Words): string[] {
+  const snapshot = currentSnapshot(state);
+  return [
+    ...new Set(
+      shapes
+        .map((s) => entryOf(snapshot, s.id))
+        .filter((e) => e?.status === "measured" && e.source?.kind === "tool")
+        .map((e) => sourceLabel(e!.source, strings)),
+    ),
+  ];
+}
+
+/** Under two ★ known in a motion, its message is « we can't see that engine yet »: no leak slide for it (§18.8.1). */
+function blindMotion(state: EngineState, motion: Motion, ctx: EngineCalcContext): boolean {
+  const shapes = motion === "plg" ? METRIC_SHAPES : SLG_METRIC_SHAPES;
+  return shapes.filter((s) => s.primary && knownIn(state, s.id, ctx).kind === "known").length < 2;
+}
+
+type Entry = { id: SlideId; slide: BuiltSlide; byDefault: boolean; motion?: Motion };
+
+/**
+ * The deck with sales-assisted ticked (§18.8.1): alone, its slides in the
+ * v1 order; in the hybrid, « deux moteurs, un total » first, then each
+ * motion's slides — self-serve's, then sales-assisted's, never interleaved
+ * and never reordered by their values — then the slides they share. Each
+ * motion's slides wear its kicker, pill and footer (`byMotion`).
+ */
+function buildMotionsDeck(state: EngineState, derived: EngineDerived, strings: Words, metrics: ResolvedMetric[], ctx: EngineCalcContext, prose: DeckProse): DeckModel {
+  const snapshot = currentSnapshot(state);
+  const hybrid = state.setup.motions.plg;
+  const plg = motionOf(derived, "plg");
+  const slg = motionOf(derived, "slg")!;
+  const plgBlind = hybrid && blindMotion(state, "plg", ctx);
+  const slgBlind = blindMotion(state, "slg", ctx);
+  const tag = (motion: Motion) => (entry: Entry): Entry & { motion: Motion } => ({ ...entry, motion });
+
+  // Each motion's slides, in their v1 order: the funnel, the leak, the what-ifs.
+  const plgEntries: (Entry & { motion?: Motion })[] = [];
+  if (plg) {
+    const leak = buildLeak(state, plg.diagnosis, strings, metrics, ctx);
+    const pelotonNotes = plg.peloton.columns
+      .filter((c) => c.source && c.period)
+      .map((c) => fillTemplate(strings.notes.source, { metric: metricOf(metrics, c.metric).name, tool: sourceLabel(c.source, strings), cohort: formatMonth(c.period!, ctx.locale) }));
+    plgEntries.push(
+      tag("plg")({
+        id: "peloton",
+        slide: {
+          present: true,
+          title: pelotonTitle(state, plg.peloton, strings, metrics, ctx),
+          lines: pelotonLines(state, plg.peloton, strings, ctx),
+          notes: [...pelotonNotes, strings.notes.seasonal],
+        },
+        byDefault: true,
+      }),
+      tag("plg")({ id: "leak", slide: { present: leak.present && !plgBlind, title: leak.title, lines: leak.lines, notes: leak.notes }, byDefault: true }),
+      ...buildWhatIfSlides(state, strings, ctx).map((w) => tag("plg")({ ...w, byDefault: true })),
+    );
+  }
+  const slgLeak = buildLeak(state, slg.diagnosis, strings, metrics, ctx);
+  const slgEntries: (Entry & { motion?: Motion })[] = [
+    tag("slg")({ id: "slg:peloton", slide: buildRelaysSlide(state, slg, derived.sanity, strings, metrics, ctx), byDefault: true }),
+    tag("slg")({ id: "slg:leak", slide: { present: slgLeak.present && !slgBlind, title: slgLeak.title, lines: slgLeak.lines, notes: slgLeak.notes }, byDefault: true }),
+    ...buildSlgWhatIfSlides(state, strings, ctx).map((w) => tag("slg")({ ...w, byDefault: true })),
+  ];
+
+  // The slides the two motions share.
+  const visibility = buildVisibility(state, derived, strings, metrics, ctx);
+  const unit = hybrid ? buildUnitBoth(state, derived, strings, metrics, ctx) : buildUnitSlg(state, slg, strings, metrics, ctx, prose.derived ?? []);
+  const ask = buildAsk(state, derived, strings, metrics, ctx);
+  const mirror = derived.mirror;
+  const mirrorLinked = Boolean(state.tourLink && mirror && mirror.resultId === state.tourLink.resultId);
+  const annexRows = buildAnnex(state, strings, metrics, ctx);
+  const visibilityEntry: Entry = { id: "visibility", slide: { present: true, title: visibility.title, lines: visibility.lines, notes: [] }, byDefault: true };
+  const shared: (Entry & { motion?: Motion })[] = [
+    // Sales-assisted alone: its unit economics are its own slide, in its chrome.
+    { id: "unit-economics", slide: { present: unit.present, title: unit.title, lines: unit.lines, notes: [] }, byDefault: true, ...(hybrid ? {} : { motion: "slg" as const }) },
+    {
+      id: "mirror",
+      slide: {
+        present: mirrorLinked,
+        title: {
+          key: "mirror",
+          values: mirror
+            ? {
+                k: String(mirror.rows.filter((row) => row.declared === "tracked").length),
+                m: String(mirror.rows.filter((row) => row.declared === "tracked" && (row.found === "tracked" || row.found === "approximate")).length),
+              }
+            : { k: "0", m: "0" },
+        },
+        lines: mirror ? mirrorLines(mirror, strings, metrics, ctx, prose, hybrid) : [],
+        notes: [],
+      },
+      byDefault: DEFAULT_INCLUDE.mirror,
+    },
+    { id: "ask", slide: { present: ask.present, title: ask.title, lines: ask.lines, notes: [] }, byDefault: true },
+    ...annexSlides({ present: true, title: { key: "annex", values: { i: "1", n: "1" } }, lines: annexRows, notes: [] }, annexRows),
+  ];
+
+  // The total's body cites slide numbers: a placeholder now, written once the deck is numbered.
+  const totalEntry: (Entry & { motion?: Motion })[] = hybrid ? [{ id: "total", slide: { present: Boolean(derived.total), title: { key: "total", values: {} }, lines: [], notes: [] }, byDefault: true }] : [];
+  // Both motions blind: what we can't see leads, right after the total (§18.8.1).
+  const allBlind = (!hybrid || plgBlind) && slgBlind;
+  const entries = allBlind
+    ? [...totalEntry, visibilityEntry, ...plgEntries, ...slgEntries, ...shared]
+    : [...totalEntry, ...plgEntries, ...slgEntries, visibilityEntry, ...shared];
+
+  let index = 0;
+  const slides: DeckSlide[] = entries.map(({ id, slide, byDefault, motion }) => {
+    const included = slide.present && (state.deck.include[includeKeyOf(id)] ?? byDefault);
+    return { id, ...slide, included, index: included ? ++index : null, ...(motion ? { motion } : {}) };
+  });
+  const indexOf = (id: SlideId) => slides.find((s) => s.id === id)?.index ?? null;
+
+  const allTools = toolsOf(state, motionShapes(state.setup.motions), strings);
+  if (hybrid && derived.total) {
+    const at = slides.findIndex((s) => s.id === "total");
+    const built = buildTotalSlide(state, derived, strings, metrics, ctx, (m) => indexOf(m === "plg" ? "leak" : "slg:leak"), joinList(allTools, strings.grammar));
+    slides[at] = { ...slides[at]!, ...built, notes: totalNotes(state, derived, strings, ctx, indexOf) };
+  }
+
+  // The chrome: each motion's own in the hybrid; sales-assisted's for the whole deck when it is alone.
+  const month = formatMonth(snapshot.referenceMonth, ctx.locale);
+  const cohort = formatMonth(snapshot.cohortMonth, ctx.locale);
+  const label = state.deck.showCompany ? slideGlyphs(state.setup.companyLabel ?? "") : "";
+  const company = label ? `${label} · ` : "";
+  const flows = formatMonthRange({ from: monthsBefore(snapshot.referenceMonth, 2), to: snapshot.referenceMonth }, ctx.locale, strings.units, "from");
+  const leadRange = periodRangeOf(shapeOf("slg.acq.lead-to-opp"), entryOf(snapshot, "slg.acq.lead-to-opp"), snapshot, state.setup, ctx.today);
+  const leads = leadRange ? formatMonthRange(leadRange, ctx.locale, strings.units, "from") : "";
+  const slgFooter = fillSegments(strings.slide.footerSlg, { flows, leads, tools: joinList(toolsOf(state, SLG_METRIC_SHAPES, strings), strings.grammar) });
+  const pill = (c: { found: number; approximate: number; missing: number }) => ({ measured: c.found, approximate: c.approximate, missing: c.missing });
+  const credit = state.deck.showSiteCredit ? strings.slide.credit : "";
+  const byMotion: DeckModel["byMotion"] =
+    hybrid && plg
+      ? {
+          plg: {
+            kicker: fillTemplate(strings.slide.kickerMotion, { company, month, motion: strings.hybrid.motionAdjective.plg }),
+            dataPill: pill(plg.coverage),
+            footer: fillSegments(strings.slide.footer, { cohort, month, tools: joinList(toolsOf(state, METRIC_SHAPES, strings), strings.grammar) }),
+          },
+          slg: {
+            kicker: fillTemplate(strings.slide.kickerMotion, { company, month, motion: strings.hybrid.motionAdjective.slg }),
+            dataPill: pill(slg.coverage),
+            footer: slgFooter,
+          },
+        }
+      : undefined;
+  const toolList = joinList(allTools, strings.grammar);
+  return {
+    slides,
+    checks: derived.sanity,
+    dataPill: pill(derived.coverage),
+    kicker: { company, month },
+    footer: {
+      cohort: hybrid ? cohort : "",
+      month,
+      tools: toolList,
+      credit,
+      // The shared slides of the hybrid cite the flows' month and every tool; sales-assisted alone, its own months.
+      text: hybrid ? capitalise(fillSegments(strings.slide.footer, { cohort: "", month, tools: toolList })) : slgFooter,
+    },
+    ...(byMotion ? { byMotion } : {}),
+  };
+}
+
+/**
+ * The total slide's speaker notes (§18.8.3): why the two aren't compared
+ * (each motion's slides cited), what the link is and is not, what moving it
+ * would sign when the team moved it, and who counts where (S8).
+ */
+function totalNotes(state: EngineState, derived: EngineDerived, strings: Words, ctx: EngineCalcContext, indexOf: (id: SlideId) => number | null): string[] {
+  const n = strings.notes;
+  const notes: string[] = [];
+  const i = indexOf("leak") ?? indexOf("peloton");
+  const j = indexOf("slg:leak") ?? indexOf("slg:peloton");
+  if (i !== null && j !== null) notes.push(fillTemplate(n.whyNotCompare, { i: String(i), j: String(j) }));
+  const link = derived.total ? linkSentence(derived.total, state, strings, ctx) : null;
+  if (link) notes.push(fillTemplate(n.selfServeFeeds, { link }));
+  const k = indexOf("whatif:link.pql-handoff");
+  const alone = slgLeverAlone(state, "link.pql-handoff", ctx);
+  const lever = alone?.levers.find((l) => l.id === "link.pql-handoff");
+  if (k !== null && alone && lever?.today && lever.target !== null && alone.today.won && alone.projected.won) {
+    const more = changeOf(alone.today.won, alone.projected.won);
+    notes.push(
+      fillTemplate(n.selfServeLever, {
+        from: formatInterval(lever.today, "ratio", ctx, strings.units),
+        to: formatInterval(point(lever.target), "ratio", ctx, strings.units),
+        n: fillTemplate(strings.units.approx, { n: formatCountInterval(mapBounds(more, (v) => Math.round(v * 10) / 10), ctx, strings.units) }),
+        k: String(k),
+      }),
+    );
+  }
+  notes.push(n.whoCountsWhere);
+  return notes;
+}
+
 /** Machine keys: ids and states a slide maps to its own words, never printed as they are. */
 const MACHINE_KEYS: ReadonlySet<string> = new Set(["row", "key", "id", "questionId", "tone", "verdict"]);
 
@@ -1152,6 +1426,8 @@ export function deckMarkdown(model: DeckModel, strings: Words): string {
     if (body.length) out.push("", ...body);
   }
   out.push("", model.footer.text ?? fillSegments(strings.slide.footer, model.footer));
+  // The hybrid: each motion's slides cite their own months and tools, said once each after the shared line.
+  if (model.byMotion) for (const motion of ["plg", "slg"] as const) out.push(model.byMotion[motion].footer);
   if (model.footer.credit) out.push(model.footer.credit);
   return out.join("\n");
 }

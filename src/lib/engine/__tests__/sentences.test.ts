@@ -3,7 +3,7 @@ import { deriveEngine } from "../derive";
 import { findingText, sanityText } from "../sentences";
 import type { EngineState, Finding, FindingKind, MetricEntry, SanityCheck, SanityId } from "../types";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
-import { exampleState, measured, ratio, tourResult, withEntry } from "./fixtures";
+import { exampleState, hybridState, measured, ratio, tourResult, withEntry } from "./fixtures";
 
 // lib/engine/sentences.ts — the finished sentence of a finding and of a
 // sanity check. One case per kind and per id, read through the real copy,
@@ -28,7 +28,7 @@ function check(state: EngineState, id: SanityId, locale: "fr" | "en" = "fr"): st
   const p = props[locale];
   const c = derived(state, locale).sanity.find((x) => x.id === id);
   if (!c) throw new Error(`no ${id} check in this state`);
-  return sanityText(c, p.strings, locale);
+  return sanityText(c, p.strings, locale, p.metrics);
 }
 
 describe("findingText — one sentence per kind", () => {
@@ -134,5 +134,55 @@ describe("sanityText — one message per check", () => {
     expect(check(one, "reconcile-gap")).toMatch(/^Ta chaîne prédit ~1 nouveau payant /);
     const many = withEntry(exampleState(), "acq.cac", measured(ratio(21_000, 10), { kind: "person", role: "finance" }));
     expect(check(many, "reconcile-gap", "en")).toMatch(/^Your chain predicts ~49–74 new paying customers /);
+  });
+});
+
+// --- Sales-assisted (§18.5.1, §18.5.7, §18.5.8; A7.3.c S1). Non-vacuity,
+// measured on 2026-10-01: the relay's base read off its `base` field instead
+// of the variant prints « Sur 100 leads » where the team counts MQL, and
+// fails the go-live/lead cases; the singular key ignored fails « 1,3 point ».
+
+describe("findingText and sanityText — sales-assisted", () => {
+  const slgSentence = (state: EngineState, kind: FindingKind, locale: "fr" | "en", nth = 0) => {
+    const p = props[locale];
+    const finding = derived(state, locale).findings.filter((f) => f.kind === kind && f.motion === "slg")[nth];
+    if (!finding) throw new Error(`no sales-assisted ${kind} finding in this state`);
+    return findingText(finding, state, p.strings, p.metrics, p.derived, locale);
+  };
+
+  it("chain-break: each relay on its own base of 100, the go-live window in its verb", () => {
+    expect(slgSentence(hybridState(), "chain-break", "fr")).toBe(`Sur 100 nouveaux clients, on ne sait pas dire combien sont en production à 90${NB}jours.`);
+    expect(slgSentence(hybridState(), "chain-break", "en")).toBe("Out of 100 new customers, we can't say how many are live within 90 days.");
+    const noLead = withEntry(hybridState(), "slg.acq.lead-to-opp", { status: "missing", missing: { cause: "not-tracked", repair: "afternoon" }, variant: "mql", updatedAt: "x" });
+    expect(slgSentence(noLead, "chain-break", "fr")).toBe("Sur 100 MQL, on ne sait pas dire combien deviennent une opportunité.");
+    expect(slgSentence(noLead, "chain-break", "en")).toBe("Out of 100 MQLs, we can't say how many become an opportunity.");
+  });
+
+  it("small-sample: the base, the count and the points — « 4 points », « 1,3 point » (French singular under 2)", () => {
+    expect(slgSentence(hybridState(), "small-sample", "fr")).toBe(`Sur 25 contrats échus, un de plus ou de moins bouge le taux de 4${NB}points${NB}: lis la direction.`);
+    expect(slgSentence(hybridState(), "small-sample", "en")).toBe("Out of 25 contracts up for renewal, one more or less moves the rate by 4 points: read the direction.");
+    const wideRenewal = withEntry(hybridState(), "slg.ret.renewal", measured(ratio(110, 125), stripe, { variant: "annual" }));
+    expect(slgSentence(wideRenewal, "small-sample", "fr")).toBe(`Sur 75 opportunités conclues, un de plus ou de moins bouge le taux de 1,3${NB}point${NB}: lis la direction.`);
+    expect(slgSentence(wideRenewal, "small-sample", "en")).toBe("Out of 75 closed opportunities, one more or less moves the rate by 1.3 points: read the direction.");
+  });
+
+  it("unit-econ-uncomputable names the sales-assisted margin, with its article", () => {
+    expect(slgSentence(hybridState(), "unit-econ-uncomputable", "fr")).toBe(
+      "Impossible de dire en combien de mois un client rembourse son coût d'acquisition. Il manque la marge brute de l'assisté.",
+    );
+  });
+
+  it("cac-variants-differ names both variants by their labels", () => {
+    expect(check(hybridState(), "cac-variants-differ")).toBe(
+      `Les deux CAC ne comptent pas les mêmes dépenses${NB}: média seul en libre-service, tout chargé en assisté.`,
+    );
+    const p = props.en;
+    const c = derived(hybridState(), "en").sanity.find((x) => x.id === "cac-variants-differ")!;
+    expect(sanityText(c, p.strings, "en", p.metrics)).toBe("The two CACs don't count the same spend: media only self-serve, fully loaded sales-assisted.");
+  });
+
+  it("the mean's trap is the same on the sales cycle", () => {
+    const mean = withEntry(hybridState(), "slg.acq.cycle", measured({ kind: "duration", value: 64, unit: "days", statistic: "mean" }, stripe));
+    expect(check(mean, "slg-cycle-mean")).toBe(FR.strings.sanity.ttvMean);
   });
 });

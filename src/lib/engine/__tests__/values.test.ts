@@ -89,3 +89,29 @@ describe("knownOf", () => {
     expect(EXAMPLE_TODAY.getDate()).toBe(24);
   });
 });
+
+// --- Three rolling months (C25 Q2; A7.3.c S1). Non-vacuity, measured on
+// 2026-10-01: grading a sales-assisted cohort on the self-serve followed
+// cohort (July) instead of its own span's end fails « go-live without a
+// month of its own », since July has not had 90 days by 24 September.
+
+describe("knownIn — a sales-assisted cohort is mature when its LAST month is", () => {
+  const hubspot = { kind: "tool", tool: "hubspot" } as const;
+
+  it("go-live with no month of its own reads the latest mature one for 90 days (May), not self-serve's July", () => {
+    const s = withEntry(exampleState(), "slg.act.go-live", measured(ratio(12, 15), hubspot));
+    expect(knownIn(s, "slg.act.go-live", CTX_FR)).toMatchObject({ kind: "known", confidence: "solid" });
+  });
+
+  it("lead → opportunity ending in August is still filling at 30 days on 24 September: approximate", () => {
+    const august = withEntry(exampleState(), "slg.acq.lead-to-opp", measured(ratio(72, 480), hubspot, { cohortMonth: "2026-08" }));
+    expect(knownIn(august, "slg.acq.lead-to-opp", CTX_FR)).toMatchObject({ kind: "known", confidence: "approximate" });
+    const july = withEntry(exampleState(), "slg.acq.lead-to-opp", measured(ratio(72, 480), hubspot, { cohortMonth: "2026-07" }));
+    expect(knownIn(july, "slg.acq.lead-to-opp", CTX_FR)).toMatchObject({ kind: "known", confidence: "solid" });
+  });
+
+  it("a flow over three months is never graded on a cohort", () => {
+    const s = withEntry(exampleState(), "slg.rev.win-rate", measured(ratio(18, 75), hubspot));
+    expect(knownIn(s, "slg.rev.win-rate", CTX_FR)).toMatchObject({ kind: "known", confidence: "solid" });
+  });
+});

@@ -164,3 +164,49 @@
     margin-bottom: 0;
   }
 }
+
+/*
+ * The hybrid's columns (engine spec §18.7, A7.3.c S3): each motion's funnel
+ * has half the board, so it takes the 390px layout at any width — the
+ * mini-grid on the left of each row. The rules are the phone's, repeated
+ * under a class rather than a container query: the two motions' columns must
+ * read alike, whatever their width.
+ */
+.compact .columns {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: none;
+  gap: 0;
+}
+
+.compact .column {
+  grid-row: auto;
+  grid-template-columns: 118px minmax(0, 1fr);
+  grid-template-areas:
+    "grid numeral"
+    "grid label"
+    "grid source";
+  grid-template-rows: auto auto 1fr;
+  column-gap: var(--space-7);
+  row-gap: var(--space-2);
+  padding: var(--space-7) 0;
+  border-bottom: var(--border-rule);
+}
+
+.compact .column:first-child {
+  padding-top: 0;
+}
+
+.compact .grid {
+  align-self: start;
+}
+
+.compact .numeral {
+  font: var(--display-section);
+}
+
+.compact .label {
+  font: var(--label-button);
+  text-transform: uppercase;
+  letter-spacing: var(--meta-tracking);
+  margin-bottom: 0;
+}

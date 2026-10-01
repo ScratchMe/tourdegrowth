@@ -82,14 +82,17 @@ export function SlideFrame({
   const { strings, model, locale } = context;
   const title = slideTitle(slide, strings);
   const total = model.slides.filter((s) => s.included).length;
-  const kicker = fillTemplate(strings.slide.kicker, model.kicker);
+  // In the hybrid, a motion's slide wears that motion's chrome: its name in the kicker, its own count, its own months (§18.8.1).
+  const own = slide.motion ? model.byMotion?.[slide.motion] : undefined;
+  const kicker = own?.kicker ?? fillTemplate(strings.slide.kicker, model.kicker);
+  const counts = own?.dataPill ?? model.dataPill;
   const pill = fillTemplate(strings.slide.dataPill, {
-    m: model.dataPill.measured,
-    a: model.dataPill.approximate,
-    x: model.dataPill.missing,
+    m: counts.measured,
+    a: counts.approximate,
+    x: counts.missing,
   });
   // The model finishes every footer (an empty slot dropped whole, never « sources : » left dangling).
-  const sources = footer ?? model.footer.text ?? fillSegments(strings.slide.footer, model.footer);
+  const sources = footer ?? own?.footer ?? model.footer.text ?? fillSegments(strings.slide.footer, model.footer);
   const credit = model.footer.credit ?? "";
   const titleId = `slide-title-${slide.id}`;
 
@@ -97,6 +100,7 @@ export function SlideFrame({
     <div
       className={styles.slide}
       data-slide={slide.id}
+      data-motion={slide.motion}
       data-testid={`slide-${slide.id}`}
       // A slide is printed on paper whatever world the page around it is in.
       data-world="paper"

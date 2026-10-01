@@ -29,6 +29,8 @@ const COLUMNS = ["label", "formula", "window", "period", "source", "status", "co
 export function SlideAnnex({ slide, context }: SlideProps) {
   const { strings } = context;
   const rows = rowsOf(slide, "annex");
+  const groupOf = (row: AnnexRow) => (row as AnnexRow & { group?: "plg" | "slg" | "link" }).group;
+  const groupLabel = (group: "plg" | "slg" | "link") => (group === "link" ? strings.slide.annexLink : strings.hybrid.motionName[group]);
 
   return (
     <SlideFrame slide={slide} context={context}>
@@ -43,22 +45,36 @@ export function SlideAnnex({ slide, context }: SlideProps) {
           </tr>
         </thead>
         <tbody>
-          {rows.map((row) => (
-            <tr key={row.id}>
-              {COLUMNS.map((col) =>
-                col === "label" ? (
-                  <th key={col} scope="row">
-                    <SlideText text={row.label} accent={false} />
+          {rows.flatMap((row, i) => {
+            const group = groupOf(row);
+            // The hybrid's groups (§18.8.2): a heading where a group starts, and again at the top of each page
+            // (lib/engine/annex-pages.ts keeps the room for both).
+            const heading =
+              group && (i === 0 || groupOf(rows[i - 1]!) !== group) ? (
+                <tr key={`group-${group}`} className={styles.annexGroup} data-testid={`slide-annex-group-${group}`}>
+                  <th scope="colgroup" colSpan={COLUMNS.length}>
+                    {groupLabel(group)}
                   </th>
-                ) : (
-                  <td key={col} data-column={col} data-empty={row[col] === "" || undefined}>
-                    {row[col] === "" ? "—" : <SlideText text={row[col]} accent={false} />}
-                    {col === "formula" && row.definition ? <span className={styles.annexDefinition}>{row.definition}</span> : null}
-                  </td>
-                ),
-              )}
-            </tr>
-          ))}
+                </tr>
+              ) : null;
+            return [
+              heading,
+              <tr key={row.id}>
+                {COLUMNS.map((col) =>
+                  col === "label" ? (
+                    <th key={col} scope="row">
+                      <SlideText text={row.label} accent={false} />
+                    </th>
+                  ) : (
+                    <td key={col} data-column={col} data-empty={row[col] === "" || undefined}>
+                      {row[col] === "" ? "—" : <SlideText text={row[col]} accent={false} />}
+                      {col === "formula" && row.definition ? <span className={styles.annexDefinition}>{row.definition}</span> : null}
+                    </td>
+                  ),
+                )}
+              </tr>,
+            ];
+          })}
         </tbody>
       </table>
     </SlideFrame>

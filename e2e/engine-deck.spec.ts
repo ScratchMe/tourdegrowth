@@ -50,7 +50,7 @@ function exampleStore() {
   state.setup.companyLabel = COMPANY_CANARY;
   state.deck.showCompany = true;
   state.tourLink = { resultId: TOUR.id, linkedAt: "2026-09-24T09:00:00.000Z" };
-  return { schemaVersion: 1, state };
+  return { schemaVersion: 2, state };
 }
 
 /** Seeds once per test: a reload must keep what the test changed, not re-seed over it. */
@@ -58,7 +58,7 @@ async function seed(page: Page) {
   await page.addInitScript(
     ([store, tour]) => {
       if (sessionStorage.getItem("e2e-engine-seeded")) return;
-      localStorage.setItem("tdg.engine.v1", JSON.stringify(store));
+      localStorage.setItem("tdg.engine.v2", JSON.stringify(store));
       localStorage.setItem("tdg.results.v1", JSON.stringify([tour]));
       sessionStorage.setItem("e2e-engine-seeded", "1");
     },
@@ -273,7 +273,7 @@ for (const locale of ["fr", "en"] as const) {
       for (const { id } of METRIC_SHAPES) metrics[id] = { ...(metrics[id] ?? missing("not-tracked", "sprint")), definitionNote: LONG_DEFINITION[locale] };
       await page.addInitScript((seeded) => {
         if (sessionStorage.getItem("e2e-engine-seeded")) return;
-        localStorage.setItem("tdg.engine.v1", JSON.stringify(seeded));
+        localStorage.setItem("tdg.engine.v2", JSON.stringify(seeded));
         sessionStorage.setItem("e2e-engine-seeded", "1");
       }, store);
       await page.goto(`/${locale}/aarrr-funnel-template`);
@@ -513,7 +513,7 @@ for (const locale of ["fr", "en"] as const) {
         let state = withEntry(exampleState(), "act.rate", measured(ratio(200, 800)));
         state = withEntry(state, "ret.logo-churn", measured(ratio(6, 400)));
         state = withTarget(withEntry(state, "ret.d30", measured(ratio(40, 800))), "ret.d30", 20);
-        await page.addInitScript((store) => localStorage.setItem("tdg.engine.v1", JSON.stringify(store)), { schemaVersion: 1, state });
+        await page.addInitScript((store) => localStorage.setItem("tdg.engine.v2", JSON.stringify(store)), { schemaVersion: 2, state });
         await page.goto(`/${locale}/aarrr-funnel-template`);
         await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
         const opener = page.getByTestId("engine-open-deck");

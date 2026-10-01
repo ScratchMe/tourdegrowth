@@ -1,4 +1,4 @@
-import type { EngineSetup, EngineState } from "../types";
+import type { EngineSetup, EngineSetupV1, EngineState } from "../types";
 import { newEngineState } from "../validate";
 
 /*
@@ -15,12 +15,27 @@ function counter(): () => string {
 }
 
 export const SETUP: EngineSetup = {
-  profile: "selfserve",
+  type: "b2b-saas",
+  motions: { plg: true, slg: false },
   currency: "EUR",
   activationWindowDays: 7,
   paidWindowDays: 30,
+  qualificationWindowDays: 30,
+  goLiveWindowDays: 90,
   companyLabel: "Mon produit",
 };
+
+/**
+ * The same engine as a v1 build wrote it (schemaVersion 1, `setup.profile`):
+ * what a device or a file from before the sales-assisted motion holds.
+ * Everything but the version and the setup is the v2 state's, byte for byte —
+ * which is what the migration promises to give back.
+ */
+export function toV1(state: EngineState): Record<string, unknown> {
+  const { type: _type, motions: _motions, qualificationWindowDays: _q, goLiveWindowDays: _g, ...rest } = state.setup;
+  const setup: EngineSetupV1 = { profile: "selfserve", ...rest };
+  return { ...structuredClone(state), schemaVersion: 1, setup };
+}
 
 /** An engine with one entry of each status, all valid — the shape a real half-day of collection produces. */
 export function fullState(): EngineState {

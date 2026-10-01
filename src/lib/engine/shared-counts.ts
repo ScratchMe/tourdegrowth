@@ -43,7 +43,28 @@ export const SHARED_COUNTS: Readonly<Record<SharedCount, readonly SharedSlot[]>>
     { metric: "rev.expansion", side: "denominator" },
     { metric: "rev.contraction", side: "denominator" },
   ],
+  // Sales-assisted (engine spec §18.2, S6), all three over the same three months
+  // (C25 Q2). The opportunities created are the referred share's base and the
+  // link's; the new-customer deals won are the win rate's numerator and the
+  // count the ACV and the CAC divide by; the customers at the flows' month end
+  // are the ARPA's base and the reference customers'.
+  slgOppsCreated: [
+    { metric: "slg.ref.referred-share", side: "denominator" },
+    { metric: "link.pql-handoff", side: "denominator" },
+  ],
+  slgDealsWon: [
+    { metric: "slg.rev.win-rate", side: "numerator" },
+    { metric: "slg.rev.acv", side: "denominator" },
+    { metric: "slg.acq.cac", side: "denominator" },
+  ],
+  slgCustomers: [
+    { metric: "slg.rev.arpa", side: "denominator" },
+    { metric: "slg.ref.referenceable", side: "denominator" },
+  ],
 };
+
+/** Counts of people, deals or opportunities: whole numbers. The MRRs are amounts and may carry cents. */
+export const WHOLE_SHARED_COUNTS: readonly SharedCount[] = ["cohortSignups", "monthSignups", "slgOppsCreated", "slgDealsWon", "slgCustomers"];
 
 export const SHARED_COUNT_IDS = Object.keys(SHARED_COUNTS) as SharedCount[];
 

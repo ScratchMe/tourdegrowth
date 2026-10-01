@@ -74,6 +74,9 @@ const SPACE = 5;
  */
 export const ANNEX_PAGE_HEIGHT = 560;
 
+/** A group's heading row in the hybrid's appendix: one line of the table's type, its padding and its rule. */
+export const ANNEX_GROUP_HEIGHT = CELL_PADDING_Y + LINE_HEIGHT;
+
 /** How many lines a cell's text takes at a width, wrapping at spaces only (and inside a word too long for the line: `overflow-wrap: anywhere`). */
 export function wrappedLines(text: string, width: number, glyph = GLYPH): number {
   const words = text.split(/[ \t\n]+/).filter(Boolean);
@@ -125,7 +128,12 @@ export function annexRowHeight(row: AnnexCells): number {
  */
 export function annexPages<T extends AnnexCells>(rows: readonly T[], pageHeight = ANNEX_PAGE_HEIGHT): T[][] {
   if (rows.length === 0) return [[]];
-  const heights = rows.map(annexRowHeight);
+  // The hybrid's rows carry their group (« Libre-service », « Assisté », « Liaison », §18.8.2): a heading row
+  // opens each group, and each page restates the group it starts in — room taken from the rows.
+  const groupOf = (row: T) => (row as T & { group?: string }).group;
+  const grouped = rows.some((row) => groupOf(row) !== undefined);
+  const heights = rows.map((row, i) => annexRowHeight(row) + (grouped && i > 0 && groupOf(rows[i - 1]!) !== groupOf(row) ? ANNEX_GROUP_HEIGHT : 0));
+  if (grouped) pageHeight -= ANNEX_GROUP_HEIGHT;
 
   // The fewest pages: fill each one until the next row would not hold.
   let fewest = 1;

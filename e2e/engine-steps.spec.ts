@@ -16,7 +16,7 @@ test.beforeEach(async ({ context }) => {
  * now be changed after the fact. Behaviour, read from the device's storage
  * and from what the next screen shows — never from the component's state.
  */
-const STORAGE_KEY = "tdg.engine.v1";
+const STORAGE_KEY = "tdg.engine.v2";
 
 type Stored = {
   state: {

@@ -5,7 +5,7 @@ import { ANNEX_COLUMNS, ANNEX_PAGE_HEIGHT, annexPages, annexRowHeight, wrappedLi
 import { buildDeck } from "../deck";
 import { deriveEngine } from "../derive";
 import type { DeckModel, EngineState, MetricId } from "../types";
-import { TEXT_LIMITS } from "../catalog-shape";
+import { TEXT_LIMITS, shapesOf } from "../catalog-shape";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
 import { emptyState, exampleState, missing } from "./fixtures";
 
@@ -86,7 +86,9 @@ describe("the appendix's pages (A2.1)", () => {
           ["annex:2", { i: "2", n: "2" }],
         ]);
         const all = pages.flat();
-        expect(all.map((r) => r.label)).toEqual(props[locale].metrics.map((m) => m.name));
+        // The numbers this setup asks for (§18.2.1): the props carry every motion's.
+        const asked = new Set(shapesOf(exampleState().setup.motions).map((s) => s.id));
+        expect(all.map((r) => r.label)).toEqual(props[locale].metrics.filter((m) => asked.has(m.id)).map((m) => m.name));
         const heights = pages.map((p) => p.reduce((sum, r) => sum + annexRowHeight(r), 0));
         for (const h of heights) expect(h).toBeLessThanOrEqual(ANNEX_PAGE_HEIGHT);
         // Evened out: the two pages differ by less than the tallest row.

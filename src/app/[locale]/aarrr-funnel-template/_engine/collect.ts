@@ -1,4 +1,4 @@
-import { METRIC_SHAPES } from "@/lib/engine/catalog-shape";
+import { METRIC_SHAPES, type MetricShape } from "@/lib/engine/catalog-shape";
 import { isRequestStale } from "@/lib/engine/request";
 import type { Effort, MetricId, RoleId, Snapshot } from "@/lib/engine/types";
 import { EFFORT_ORDER } from "./keys";
@@ -32,7 +32,12 @@ export interface CollectPlan {
   count: number;
 }
 
-export function collectPlan(snapshot: Snapshot, now: Date): CollectPlan {
+/**
+ * `shapes`: the numbers the setup asks for, the link left out (`motionShapes`):
+ * self-serve's alone by default, as a v1 engine. The link is optional and
+ * skippable (§18.4.8): listing it here would make it one more thing owed.
+ */
+export function collectPlan(snapshot: Snapshot, now: Date, shapes: readonly MetricShape[] = METRIC_SHAPES): CollectPlan {
   const self = new Map<Exclude<Effort, "ask">, MetricId[]>();
   const ask = new Map<RoleId, AskGroup>();
   const group = (role: RoleId) => {
@@ -44,7 +49,7 @@ export function collectPlan(snapshot: Snapshot, now: Date): CollectPlan {
     return g;
   };
 
-  for (const shape of METRIC_SHAPES) {
+  for (const shape of shapes) {
     const entry = snapshot.metrics[shape.id];
     const status = entry?.status ?? "todo";
     if (status === "requested") {
@@ -61,7 +66,7 @@ export function collectPlan(snapshot: Snapshot, now: Date): CollectPlan {
     .filter((effort) => self.has(effort))
     .map((effort) => ({ effort, ids: self.get(effort)! }));
   // Stale first, then by how much is waiting; the role order breaks ties so the list never reshuffles between renders.
-  const roles = Object.freeze(["finance", "data", "product", "marketing", "revops", "support"] satisfies RoleId[]);
+  const roles = Object.freeze(["finance", "data", "product", "marketing", "revops", "support", "sales", "customer-success"] satisfies RoleId[]);
   const askGroups = [...ask.values()].sort(
     (a, b) =>
       Number(b.stale.length > 0) - Number(a.stale.length > 0) ||
@@ -73,9 +78,9 @@ export function collectPlan(snapshot: Snapshot, now: Date): CollectPlan {
 }
 
 /** The cheapest number still to fill — where "Continue" takes a returning person (E6), never "the last screen visited". */
-export function cheapestTodo(snapshot: Snapshot): MetricId | null {
+export function cheapestTodo(snapshot: Snapshot, shapes: readonly MetricShape[] = METRIC_SHAPES): MetricId | null {
   for (const effort of EFFORT_ORDER) {
-    const shape = METRIC_SHAPES.find((s) => s.effort === effort && (snapshot.metrics[s.id]?.status ?? "todo") === "todo");
+    const shape = shapes.find((s) => s.effort === effort && (snapshot.metrics[s.id]?.status ?? "todo") === "todo");
     if (shape) return shape.id;
   }
   return null;

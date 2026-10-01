@@ -41,11 +41,32 @@ export function missing(cause: NonNullable<MetricEntry["missing"]>["cause"], rep
 
 /** §6.0, entry by entry — the page's example (`lib/engine/example.ts`), in French. */
 const EXAMPLE_WORDS = { event: "a créé un premier projet", channel: "Recherche naturelle" };
+/** §18.9's words, for the hybrid: what « live » means, the reason for non-renewal, the PQL threshold. */
+const HYBRID_WORDS = {
+  ...EXAMPLE_WORDS,
+  liveEvent: "premier rapport partagé avec l'équipe du client",
+  lossCause: "départ du sponsor chez le client",
+  pqlThreshold: "espace avec 3 membres actifs",
+};
 export const EXAMPLE_METRICS: Partial<Record<MetricId, MetricEntry>> = exampleMetrics(EXAMPLE_WORDS);
 
 /** A fresh, deep-copied §6.0 state: tests mutate it freely. */
 export function exampleState(): EngineState {
   return exampleEngine(EXAMPLE_WORDS);
+}
+
+/**
+ * The §18.9 hybrid: self-serve is exactly §6.0, sales-assisted and the link
+ * are new — flows June to August, leads May to July, new customers March to
+ * May, its own targets (18 %, 32 %, 92 %) and its three counts (130, 18, 100).
+ */
+export function hybridState(): EngineState {
+  return exampleEngine(HYBRID_WORDS, { plg: true, slg: true });
+}
+
+/** The §18.9 sales-assisted half on its own: no self-serve number, no link, no total. */
+export function salesAssistedState(): EngineState {
+  return exampleEngine(HYBRID_WORDS, { plg: false, slg: true });
 }
 
 /** The state with one entry replaced (or removed with `undefined`). */
@@ -57,7 +78,7 @@ export function withEntry(state: EngineState, id: MetricId, entry: MetricEntry |
   return next;
 }
 
-export function withTarget(state: EngineState, id: CandidateId, target: number): EngineState {
+export function withTarget(state: EngineState, id: CandidateId | MetricId, target: number): EngineState {
   const next = structuredClone(state);
   next.snapshots[next.snapshots.length - 1]!.targets[id] = target;
   return next;

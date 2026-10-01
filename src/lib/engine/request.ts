@@ -1,7 +1,8 @@
-import { REMIND_AFTER_DAYS } from "./catalog-shape";
+import { REMIND_AFTER_DAYS, motionOfMetric } from "./catalog-shape";
 import { fillTemplate } from "./format";
 import { catalogueValues, isAnswerMetric } from "./phrases";
 import type { EngineStrings, ResolvedMetric } from "./strings";
+import { MOTIONS } from "./types";
 import type { EngineCalcContext, EngineState, MetricEntry, MetricId, RoleId, Snapshot } from "./types";
 import { currentSnapshot, entryOf } from "./values";
 
@@ -34,6 +35,12 @@ function metricById(metrics: ResolvedMetric[], id: MetricId): ResolvedMetric {
  * `role` is part of the contract so the caller says who it is writing to;
  * the template deliberately doesn't name them ("Hi Finance —" reads like a
  * form letter). The metrics are listed in the order given.
+ *
+ * In the hybrid, one request per role covers both motions (§18.7, E4): the
+ * numbers are listed under « Libre-service » and « Assisté », in that order —
+ * a revenue lead asked for « the win rate » and « the paid conversion » in
+ * one breath can't tell which customers each one is about. The link is
+ * listed with sales-assisted, whose opportunities it counts.
  */
 export function buildRequest(
   role: RoleId,
@@ -44,7 +51,7 @@ export function buildRequest(
   ctx: EngineCalcContext,
 ): string {
   const snapshot = currentSnapshot(state);
-  const items = metricIds.map((id) => {
+  const itemOf = (id: MetricId) => {
     // The event's name is the activation's definition: the recipient can't count "activated" without it,
     // so {event} carries it — quoted and introduced (« l'événement « a créé un premier projet » »).
     const what = fillTemplate(metricById(metrics, id).request, catalogueValues(state, id, strings, metrics, ctx));
@@ -53,11 +60,19 @@ export function buildRequest(
     return definition
       ? fillTemplate(strings.request.item, { what, definition })
       : fillTemplate(strings.request.itemNoDefinition, { what });
-  });
+  };
+  const hybrid = state.setup.motions.plg && state.setup.motions.slg;
+  const heading = { plg: strings.request.groupPlg, slg: strings.request.groupSlg };
+  const list = hybrid
+    ? MOTIONS.flatMap((motion) => {
+        const ids = metricIds.filter((id) => motionOfMetric(id) === motion);
+        return ids.length === 0 ? [] : [[heading[motion], ...ids.map(itemOf)].join("\n")];
+      }).join("\n")
+    : metricIds.map(itemOf).join("\n");
   // « Des chiffres bruts me suffisent » only when there is a number to send: a request for
   // answers alone (the activation event, the churn cause, the referral mechanism) asks for words.
   const template = metricIds.length > 0 && metricIds.every(isAnswerMetric) ? strings.request.messageAnswers : strings.request.message;
-  return fillTemplate(template, { list: items.join("\n") });
+  return fillTemplate(template, { list });
 }
 
 /** Whole days between two instants; null when unreadable or in the future (a clock ahead invents no delay). */

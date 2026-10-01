@@ -111,7 +111,16 @@ export const BASIS_KEY: Record<EstimateBasis, keyof EngineStrings["basis"]> = {
   "old-number": "oldNumber",
   sample: "sample",
   other: "other",
+  "company-wide": "companyWide",
 };
+
+/**
+ * The bases a number's sheet offers for an estimate. Never `company-wide`:
+ * the company's margin stands in for a motion's margin only, offered in the
+ * hybrid by its own « Reprendre la marge globale » on the two margin sheets
+ * (C25 Q4, A7.3.c S3) — and `validate.ts` refuses it anywhere else.
+ */
+export const SHEET_BASES: readonly EstimateBasis[] = (Object.keys(BASIS_KEY) as EstimateBasis[]).filter((b) => b !== "company-wide");
 
 /** Role and repair ids are already valid keys; spelled out so a renamed id breaks the build. */
 export const ROLE_KEY: Record<RoleId, keyof EngineStrings["role"]> = {
@@ -121,6 +130,8 @@ export const ROLE_KEY: Record<RoleId, keyof EngineStrings["role"]> = {
   marketing: "marketing",
   revops: "revops",
   support: "support",
+  sales: "sales",
+  "customer-success": "customer-success",
 };
 
 export const REPAIR_KEY: Record<RepairScale, keyof EngineStrings["repair"]> = {

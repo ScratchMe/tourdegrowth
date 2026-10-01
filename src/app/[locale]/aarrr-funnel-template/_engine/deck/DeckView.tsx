@@ -18,6 +18,9 @@ import { copyText } from "./copy-text";
 import { canCopyImage, copyPng, downloadBlob, renderSlidePng } from "./export-png";
 import { SLIDE_HEIGHT, SLIDE_WIDTH, slideTitle, type SlideContext, type SlideProps } from "./SlideFrame";
 import { SlideAnnex } from "./SlideAnnex";
+import { SlideRelays } from "./SlideRelays";
+import { SlideTotal } from "./SlideTotal";
+import { SlideUnitBoth } from "./SlideUnitBoth";
 import { SlideAsk } from "./SlideAsk";
 import { SlideLeak } from "./SlideLeak";
 import { SlideMirror } from "./SlideMirror";
@@ -75,13 +78,24 @@ const SLIDES: Record<FixedSlideId, ComponentType<SlideProps>> = {
  */
 const isWhatIfSlide = (id: SlideId): id is `whatif:${LeverId}` => id.startsWith("whatif:");
 
-function slideComponent(id: SlideId): ComponentType<SlideProps> {
-  if (id === "scenario") return SlideScenario;
+function slideComponent(slide: DeckSlide): ComponentType<SlideProps> {
+  const { id } = slide;
+  if (id === "scenario" || id === "slg:scenario") return SlideScenario;
   if (isWhatIfSlide(id)) return SlideWhatIf;
   // The appendix's next pages (`annex:2`…): the same table, the rows the model put on that page.
   if (isAnnexPage(id)) return SlideAnnex;
-  return SLIDES[id];
+  // The hybrid's and sales-assisted's own slides (A7.3.c S4, §18.8).
+  if (id === "total") return SlideTotal;
+  if (id === "slg:peloton") return SlideRelays;
+  if (id === "slg:leak") return SlideLeak;
+  // The hybrid sets the two motions side by side; sales-assisted alone keeps the v1 tiles, on its own figures.
+  if (id === "unit-economics" && slide.lines.some((line) => line.row === "unitRow")) return SlideUnitBoth;
+  return SLIDES[id as FixedSlideId];
 }
+
+/** Where a thumbnail sits in the hybrid's list (§18.7 E5): the total, each motion's slides, then the shared ones. */
+type ThumbGroup = "total" | "plg" | "slg" | "end";
+const groupOfSlide = (slide: DeckSlide): ThumbGroup => (slide.id === "total" ? "total" : (slide.motion ?? "end"));
 
 /**
  * The print sheet — engine spec §10.2.
@@ -110,7 +124,7 @@ const PRINT_CSS = `
   body *:has(#engine-deck) { display: block !important; margin: 0 !important; padding: 0 !important; border: 0 !important; width: auto !important; max-width: none !important; min-height: 0 !important; box-shadow: none !important; background: none !important; transform: none !important; }
   #engine-deck { display: block !important; margin: 0 !important; padding: 0 !important; width: ${SLIDE_WIDTH}px !important; max-width: none !important; }
   #engine-deck [data-print="off"], #engine-deck [hidden] { display: none !important; }
-  #engine-deck [data-print="thumbs"] { display: block !important; margin: 0 !important; padding: 0 !important; }
+  #engine-deck [data-print="thumbs"], #engine-deck [data-print="groups"], #engine-deck [data-print="group"] { display: block !important; margin: 0 !important; padding: 0 !important; }
   #engine-deck [data-print="thumb"] { display: block !important; margin: 0 !important; padding: 0 !important; border: 0 !important; box-shadow: none !important; background: none !important; break-inside: avoid; break-after: page; }
   #engine-deck [data-print="thumb"][data-last="true"] { break-after: auto; }
   #engine-deck [data-print="thumb"][data-included="false"] { display: none !important; }
@@ -308,6 +322,75 @@ export function DeckView({
     return name ? `${name} — ${message}` : message;
   };
 
+  // One thumbnail: its box, the slide at projector size, its exports.
+  const thumb = (slide: DeckSlide) => {
+    const Slide = slideComponent(slide);
+    const isEnlarged = enlarged === slide.id;
+    return (
+      <li
+        key={slide.id}
+        ref={(el) => {
+          thumbs.current[slide.id] = el;
+        }}
+        className={styles.thumb}
+        data-print="thumb"
+        data-included={slide.included ? "true" : "false"}
+        data-last={slide.id === lastIncluded ? "true" : undefined}
+        data-enlarged={isEnlarged || undefined}
+        data-testid={`deck-thumb-${slide.id}`}
+      >
+        <div className={styles.thumbHead} data-print="off">
+          <Checkbox
+            label={t.include}
+            checked={slide.included}
+            onChange={(included) => setInclude(slide.id, included)}
+            data-testid={`deck-include-${slide.id}`}
+          />
+          <span className={styles.thumbPosition}>
+            {slide.index !== null ? fillTemplate(u.slidePosition, { i: slide.index, n: included.length }) : u.excluded}
+          </span>
+        </div>
+
+        <ScaledSlide>
+          <Slide slide={slide} context={context} />
+        </ScaledSlide>
+
+        <div className={styles.thumbActions} data-print="off">
+          <Button
+            variant="secondary"
+            onClick={() => exportPng(slide, "download")}
+            loading={busy === `download-${slide.id}`}
+            disabled={busy !== null}
+            data-testid={`deck-png-${slide.id}`}
+          >
+            {t.png}
+          </Button>
+          {canCopy ? (
+            <Button
+              variant="quiet"
+              onClick={() => exportPng(slide, "copy")}
+              loading={busy === `copy-${slide.id}`}
+              disabled={busy !== null}
+              data-testid={`deck-copy-image-${slide.id}`}
+            >
+              {t.copyImage}
+            </Button>
+          ) : null}
+          <Button
+            variant="quiet"
+            className={styles.enlarge}
+            onClick={() => setEnlarged(isEnlarged ? null : slide.id)}
+            aria-pressed={isEnlarged}
+          >
+            {isEnlarged ? u.shrink : u.enlarge}
+          </Button>
+        </div>
+      </li>
+    );
+  };
+  const groups = runs(shown);
+  const groupTitle = (id: ThumbGroup) => (id === "total" ? t.groupTotal : id === "end" ? t.groupEnd : strings.hybrid.motionName[id]);
+
   return (
     <section id="engine-deck" className={styles.deckView} aria-labelledby="engine-deck-title" data-testid="engine-deck">
       <style>{PRINT_CSS}</style>
@@ -414,74 +497,37 @@ export function DeckView({
         </div>
       ) : null}
 
-      <ol className={styles.thumbs} data-print="thumbs">
-        {shown.map((slide) => {
-          const Slide = slideComponent(slide.id);
-          const isEnlarged = enlarged === slide.id;
-          return (
-            <li
-              key={slide.id}
-              ref={(el) => {
-                thumbs.current[slide.id] = el;
-              }}
-              className={styles.thumb}
-              data-print="thumb"
-              data-included={slide.included ? "true" : "false"}
-              data-last={slide.id === lastIncluded ? "true" : undefined}
-              data-enlarged={isEnlarged || undefined}
-              data-testid={`deck-thumb-${slide.id}`}
-            >
-              <div className={styles.thumbHead} data-print="off">
-                <Checkbox
-                  label={t.include}
-                  checked={slide.included}
-                  onChange={(included) => setInclude(slide.id, included)}
-                  data-testid={`deck-include-${slide.id}`}
-                />
-                <span className={styles.thumbPosition}>
-                  {slide.index !== null ? fillTemplate(u.slidePosition, { i: slide.index, n: included.length }) : u.excluded}
-                </span>
-              </div>
-
-              <ScaledSlide>
-                <Slide slide={slide} context={context} />
-              </ScaledSlide>
-
-              <div className={styles.thumbActions} data-print="off">
-                <Button
-                  variant="secondary"
-                  onClick={() => exportPng(slide, "download")}
-                  loading={busy === `download-${slide.id}`}
-                  disabled={busy !== null}
-                  data-testid={`deck-png-${slide.id}`}
-                >
-                  {t.png}
-                </Button>
-                {canCopy ? (
-                  <Button
-                    variant="quiet"
-                    onClick={() => exportPng(slide, "copy")}
-                    loading={busy === `copy-${slide.id}`}
-                    disabled={busy !== null}
-                    data-testid={`deck-copy-image-${slide.id}`}
-                  >
-                    {t.copyImage}
-                  </Button>
-                ) : null}
-                <Button
-                  variant="quiet"
-                  className={styles.enlarge}
-                  onClick={() => setEnlarged(isEnlarged ? null : slide.id)}
-                  aria-pressed={isEnlarged}
-                >
-                  {isEnlarged ? u.shrink : u.enlarge}
-                </Button>
-              </div>
-            </li>
-          );
-        })}
-      </ol>
+      {model.byMotion ? (
+        // The hybrid: four headings over runs of thumbnails, in the deck's own order.
+        <div className={styles.thumbGroups} data-print="groups">
+          {groups.map((group, g) => (
+            <section key={`${group.id}-${g}`} className={styles.thumbGroup} data-print="group" aria-labelledby={`engine-deck-group-${g}`} data-testid={`deck-group-${group.id}`}>
+              <h3 id={`engine-deck-group-${g}`} className={styles.thumbGroupTitle} data-print="off">
+                {groupTitle(group.id)}
+              </h3>
+              <ol className={styles.thumbs} data-print="thumbs">
+                {group.slides.map(thumb)}
+              </ol>
+            </section>
+          ))}
+        </div>
+      ) : (
+        <ol className={styles.thumbs} data-print="thumbs">
+          {shown.map(thumb)}
+        </ol>
+      )}
     </section>
   );
 }
 
+/** Consecutive slides of one group, as the hybrid's list shows them. */
+function runs(slides: readonly DeckSlide[]): { id: ThumbGroup; slides: DeckSlide[] }[] {
+  const out: { id: ThumbGroup; slides: DeckSlide[] }[] = [];
+  for (const slide of slides) {
+    const id = groupOfSlide(slide);
+    const last = out[out.length - 1];
+    if (last && last.id === id) last.slides.push(slide);
+    else out.push({ id, slides: [slide] });
+  }
+  return out;
+}
