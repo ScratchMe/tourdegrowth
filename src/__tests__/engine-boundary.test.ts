@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   ENGINE_DECK_OPENED_EVENT,
+  ENGINE_ENTRY_DETAILS,
   ENGINE_EXPORT_FORMATS,
   ENGINE_EXPORTED_EVENT,
+  ENGINE_MONTH_STARTED_EVENT,
   ENGINE_OPENED_EVENT,
   ENGINE_REQUEST_COPIED_EVENT,
   ENGINE_SETUP_DETAILS,
@@ -42,6 +44,12 @@ import { BY_PATH, FILES, reachable, stripComments, valueImports } from "./helper
  *    `lib/analytics/goatcounter.ts` — never a number, never a label typed by
  *    someone (§11.6). An event path is a way out like any other.
  * 6. The rules are not vacuous: the island exists and the walk walks.
+ * 7. What a person pastes is read in the island, never in `lib/engine` (A14 T5).
+ * 8. Outside the route, only the landing's `EngineResume` reads the engine's
+ *    storage, and it sends nothing — not directly, not through any import
+ *    (A14 T6, T7).
+ * 9. Outside the route, a door into the engine is counted by
+ *    `trackEngineEntry` and a literal from the list (A14 T7).
  *
  * The import graph is `helpers/import-graph.ts`, shared with the other walks:
  * value imports only (`import type` is erased by the compiler), and since the
@@ -150,6 +158,7 @@ const ISLAND_MUST_REACH = [
  */
 const ENGINE_EVENTS: Record<string, readonly string[] | null> = {
   [ENGINE_OPENED_EVENT]: null,
+  [ENGINE_MONTH_STARTED_EVENT]: null,
   [ENGINE_REQUEST_COPIED_EVENT]: null,
   [ENGINE_DECK_OPENED_EVENT]: null,
   [ENGINE_TOUR_LINKED_EVENT]: null,
@@ -406,6 +415,37 @@ describe("growth engine boundary (engine spec §11.4)", () => {
     expect(NETWORK.filter((re) => re.test(code)).map(String)).toEqual([]);
     expect(valueImports(reader).filter((i) => i.includes("analytics") || i.includes("engine-events"))).toEqual([]);
     expect(code).not.toMatch(/\btrack(Event|Engine)\s*\(/);
+    // Not through an import either: a `TrackedLink` would count a click with any detail (security review of A14 T7).
+    expect([...reachable("app/[locale]/EngineResume.tsx")]).not.toContain("lib/analytics/goatcounter.ts");
+    // Its click reaches the landing's analytics through `onFollow` (A14 T7), so what crosses is counted, not named
+    // (convention 11): one call, on the click, with nothing — no loop, no effect, no argument, no alias. Three
+    // mentions: the prop, its destructuring, that call.
+    expect([...code.matchAll(/\bonFollow\b/g)]).toHaveLength(3);
+    expect(code).toMatch(/onClick=\{\(\)\s*=>\s*onFollow\?\.\(\)\}/);
+    // And the side that counts takes nothing: a parameterless arrow, the door by its literal.
+    const landing = stripComments(BY_PATH.get("app/[locale]/LastResult.tsx")!);
+    expect(landing.match(/onFollow=\{[^}]*\}/g)).toEqual(['onFollow={() => trackEngineEntry("landing_resume")}']);
+  });
+
+  it("rule 9 — outside the route, a door into the engine is counted by trackEngineEntry and a literal from the list", () => {
+    const outside = FILES.filter(
+      // The analytics module itself names the event to define and read it: the doors are everywhere else.
+      (f) => !ENGINE.includes(f) && !f.path.includes("__tests__/") && !f.path.startsWith("lib/analytics/"),
+    );
+    const calls = outside.flatMap((f) => {
+      const code = stripComments(f.source);
+      return [...code.matchAll(/\btrackEngineEntry\s*\(/g)].map((m) => ({ file: f.path, arg: argumentsAt(code, m.index! + m[0].length - 1).trim() }));
+    });
+    // The result's owner and the landing's line, at least: the rule looked at something.
+    expect(calls.length).toBeGreaterThanOrEqual(2);
+    for (const call of calls) expect(ENGINE_ENTRY_DETAILS.map((d) => `"${d}"`), `${call.file}: ${call.arg}`).toContain(call.arg);
+    // The event's name with a free detail is nowhere else: only the two older doors name it, through a TrackedLink
+    // and a literal detail (A7.9). A new door named here fails until it goes through `trackEngineEntry`.
+    const naming = outside.filter((f) => /\bENGINE_ENTRY_EVENT\b/.test(stripComments(f.source))).map((f) => f.path);
+    expect(naming.sort()).toEqual(["components/brand/SpaceBand.tsx", "components/brand/SpaceStrip.tsx"]);
+    // Nor spelled out: an engine event typed as a string, in a `trackEvent` or a `TrackedLink`, would be a door no list holds.
+    const spelled = outside.filter((f) => /(?:\btrackEvent\s*\(\s*|\bevent=\{?\s*)["'`]engine_/.test(stripComments(f.source))).map((f) => f.path);
+    expect(spelled).toEqual([]);
   });
 
   it("the flag has one reader: only lib/engine/access.ts reads ENGINE_ENABLED", () => {

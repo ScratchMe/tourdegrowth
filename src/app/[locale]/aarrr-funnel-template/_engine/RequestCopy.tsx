@@ -67,6 +67,7 @@ export function RequestCopy({
     });
     const date = `${day.year}-${String(day.month).padStart(2, "0")}-${String(day.date).padStart(2, "0")}`;
     download(file, fill(r.fileName, { date }), "text/calendar;charset=utf-8");
+    trackEngine({ name: "engine_exported", detail: "ics" });
   }
 
   async function copy() {

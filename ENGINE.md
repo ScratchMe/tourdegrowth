@@ -10,7 +10,11 @@ teste avec l'aperçu propriétaire de `/admin/preview`), route `/{locale}/aarrr-
 (toute la copie, `TODO: à relire` jusqu'au bon à tirer nº8) et
 `src/app/[locale]/aarrr-funnel-template/` (l'îlot, le tableau de bord, les
 slides). Les écarts que l'implémentation a tranchés par rapport à ce document
-sont consignés dans le journal (`JOURNAL.md`), pas réécrits ici.
+sont consignés dans le journal (`JOURNAL.md`), pas réécrits ici. **Le moteur
+complet (§19, A14) est codé depuis le 2026-10-01** (T0 à T7, neuf PR de #255 à #PRNUM),
+drapeau fermé, sauf l'image de partage (T6.2), qui attend la passe de Claude
+Design (B5) ; sa copie neuve attend le bon à tirer A14.d, et l'ouverture
+attend les deux, en plus du reste de `CHANTIERS.md` D2.
 
 **Décisions prises par défaut le 2026-09-24 pour que le travail avance** —
 chacune se renverse en une phrase :
@@ -242,7 +246,7 @@ retiré depuis le même jour : la copie vit dans le code.*
 |---|---|---|
 | §0 à §17, et l'annexe des vérifications | [`docs/engine/v1.md`](docs/engine/v1.md) | La spécification d'implémentation de la v1 libre-service, construite du 2026-09-24 au 2026-09-30. Le code fait foi depuis |
 | §18 | [`docs/engine/assiste-et-hybride.md`](docs/engine/assiste-et-hybride.md) | Le B2B assisté et l'hybride (A7.3), validé par C25 et construit par A7.3.c (#233, 2026-10-01). Le code fait foi depuis |
-| §19 | [`docs/engine/moteur-complet.md`](docs/engine/moteur-complet.md) | Le moteur complet pour le SaaS B2B (A14) : la série mensuelle, la rétention J30 et la part recommandée en €, la couverture du pipeline, les outils, le tableau collé, plusieurs moteurs, la fusion, le fond blanc, les rappels, les portes d'entrée. Écrit et validé le 2026-10-01 (C32), à coder (A14.c) ; l'ouverture du moteur l'attend |
+| §19 | [`docs/engine/moteur-complet.md`](docs/engine/moteur-complet.md) | Le moteur complet pour le SaaS B2B (A14) : la série mensuelle, la rétention J30 et la part recommandée en €, la couverture du pipeline, les outils, le tableau collé, plusieurs moteurs, la fusion, le fond blanc, les rappels, les portes d'entrée. Écrit et validé le 2026-10-01 (C32), construit par A14.c le même jour (T0 à T7, neuf PR de #255 à #PRNUM), sauf l'image de partage (T6.2, après B5). Le code fait foi depuis ; l'ouverture du moteur attend aussi T6.2 et le bon à tirer A14.d (le reste dans `CHANTIERS.md` D2) |
 | Annexe — Les entretiens | ci-dessous | La trame des entretiens (`CHANTIERS.md` D5) |
 
 ---

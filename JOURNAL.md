@@ -1060,3 +1060,63 @@ Points pour le bon à tirer A14.d : le rôle placé dans la phrase (« Relance
 - `package-validate` : 90 aperçus rendus sur 90, aucun mauvais, mince ou identique (`report_validate` envoyé), 303 cellules, et seulement les quatre avertissements permanents ;
 - les 13 composants modifiés sont notés « bon », cellule par cellule, sur leurs captures ;
 - `conventions.md` relu contre le build : tous les noms qu'il cite existent, rien à changer.
+
+## A14.c, T7 : l'intégration — les comptes, la confidentialité, les écrans ensemble (2026-10-01, #PRNUM)
+
+La dernière PR du code du moteur complet (`docs/engine/moteur-complet.md` §19.12 à §19.14), drapeau fermé. **Avec elle, A14.c est fini**, sauf T6.2, l'image de partage, qui attend la passe de Claude Design (B5). Reste le bon à tirer A14.d, puis l'ouverture (D2). Neuf PR en un jour : #255, #256, #258, #259, #260, #261, #263, #264 et celle-ci.
+
+**Ce que fait T7** :
+- **Cinq chemins d'analytics de plus** (§19.12), dans le vocabulaire fermé et au tableau de bord `/admin/stats` :
+  - `engine_month_started`, le seul signal d'un usage répété : compté une fois le mois enregistré sur l'appareil, jamais lequel ;
+  - `engine_exported/ics` et `engine_exported/csv` : un rappel et le modèle de tableau ;
+  - `engine_entry_clicked/result_owner` et `engine_entry_clicked/landing_resume` : les deux portes de T6.
+- **Une porte se compte par `trackEngineEntry`**, typé sur la liste : jamais une chaîne libre, donc ni l'étape ni le score de la page autour.
+- **La porte de l'accueil compte son clic sans rien voir.** `EngineResume`, seul lecteur du moteur hors de sa route, n'a pas le droit d'appeler l'analytics (règle 8). Il reçoit de `LastResult` un rappel `onFollow`, appelé une fois, sur le clic, sans argument ; le côté qui compte est une flèche sans paramètre.
+- **La phrase de confidentialité** dit maintenant tout ce qui est compté : le démarrage d'un nouveau mois, l'ouverture des slides, leur export ou la copie de leur texte, l'export d'un fichier (sauvegarde, rappel ou modèle) et le lien par lequel on entre dans le moteur. Elle disait « l'ouverture ou l'export des slides », et taisait la sauvegarde `.json` et les portes, comptées depuis la v1 et A7.9. Elle repart « à relire », et elle est visible dès le merge, comme celle de S5.
+- **Les écrans d'A14, mesurés ensemble** (§19.13). Chaque PR avait tenu les siens à la largeur où elle les construisait. `engine-mobile.spec.ts` les reprend tous, comme ceux des deux motions :
+  - les dix écrans : le bandeau du mois suivant, un mois démarré, un mois passé en lecture seule, le sélecteur, le réglage d'un nouveau moteur, la suppression, l'aperçu d'un tableau collé, la fusion, le rappel d'une demande et le deck en blanc ;
+  - à 360, 390 et 430 px dans les deux langues, sans un pixel de trop ; à 320 px, mesurés sans être tenus, 0 partout ;
+  - puis axe sur les panneaux : le sélecteur, le tableau, les choix d'import et la suppression.
+- **Le fond blanc à l'impression.** Le PDF est l'impression du navigateur, sans fichier à lire au pixel. La spec lit donc la feuille d'impression là où elle s'applique : en média d'impression, la slide garde son blanc, ou son papier, avec `print-color-adjust: exact`.
+- **L'état** d'`ENGINE.md`, de `CHANTIERS.md` et de `CLAUDE.md`.
+
+Hors de ce qui précède, §19.13 ne manquait de rien : la série, les deux moteurs, la fusion, le tableau collé, les `.ics` et les portes avaient leurs specs depuis leur PR. Les gardes statiques aussi : le collage par la règle 7, `ics.ts` par la règle 3.
+
+**La relecture de sécurité** (`relecteur-securite`) n'a trouvé aucune fuite, mais des gardes nominales (convention 11). Ses quatre constats sont traités :
+- **La vérification d'`onFollow` regardait la forme de l'appel, pas ce qui traverse.** Un appel vide dans une boucle ou dans un effet passait encore, et transmettait un compte ou un bit sans clic. Le côté qui compte n'était tenu par rien. La règle 8 exige maintenant :
+  - trois mentions d'`onFollow` dans `EngineResume` (la prop, sa déstructuration, un seul appel) ;
+  - cet appel sur le clic, sans argument ;
+  - côté `LastResult`, exactement `onFollow={() => trackEngineEntry("landing_resume")}`.
+- **La règle 8 ne voyait que les imports directs** : un `TrackedLink` dans `EngineResume` l'aurait contournée. Elle suit maintenant les imports de proche en proche, et le module d'analytics ne doit pas être atteint.
+- **Les deux portes envoyaient une chaîne libre, et la CI, qui construit moteur fermé, ne les joue jamais.** D'où `trackEngineEntry`, et une règle 9 : hors de la route, chaque porte passe par lui avec un littéral de la liste. Seuls les deux anciens composants, `SpaceStrip` et `SpaceBand`, nomment encore l'événement, et aucun fichier n'écrit un événement du moteur en toutes lettres.
+- **La phrase de confidentialité oubliait la copie du texte des slides, et les portes** : complétée, voir plus haut.
+
+**La relecture de copie** (`relecteur-copie`) a relevé dix constats. Les huit mécaniques ou d'exactitude sont corrigés :
+- la phrase de confidentialité et le commentaire de son marqueur ;
+- dans `CHANTIERS.md`, l'ordre conseillé qui se contredisait, la ligne D qui ne nommait pas A14, et la place de la copie de T6.2 ;
+- dans `ENGINE.md`, les conditions d'ouverture, qui se lisaient comme complètes, et le compte des PR ;
+- « the deck's four » : le deck exporte trois formats, plus la sauvegarde.
+
+Points pour le bon à tirer A14.d : la phrase de confidentialité elle-même, plus longue qu'au nº6, et « ton moteur » au singulier dans le paragraphe qui la précède, alors qu'un appareil en garde jusqu'à dix depuis T5.
+
+**Un piège de git, rattrapé avant la PR** : regrouper les commits de T7 avec `git reset --soft origin/main`, juste après un `fetch` qui venait d'amener B6 (#265, mergée par une autre session pendant la vérification), a produit un commit qui défaisait B6 : 36 fichiers au lieu de 24. Poussé sur la branche, jamais en PR : le `--stat` l'a montré. Le commit a été reconstruit sur sa vraie base, puis rebasé sur B6, les deux entrées du journal gardées. La règle est dans `GITHUB.md` §1.10.
+
+**Sabotages** :
+- sur un build fermé, trois : une largeur forcée sur l'aperçu du tableau fait tomber les six tests de largeur d'A14 ; la règle d'impression retirée fait tomber la spec du PDF ; l'événement du mois retiré fait tomber les deux specs de la série ;
+- sur un build ouvert, les deux clics de porte retirés font tomber les deux specs de l'accueil et celle du résultat ;
+- sept sur les gardes statiques, et chacun fait tomber la règle 8 ou la règle 9 :
+  - `onFollow` appelé depuis un effet ;
+  - `onFollow` qui porte la ligne ;
+  - un `TrackedLink` importé dans `EngineResume` ;
+  - `LastResult` qui lit un argument ;
+  - l'étape du résultat dans la porte ;
+  - un `trackEvent` libre à la place de la porte typée ;
+  - le même, à côté d'elle. Celui-ci n'est tombé qu'avec la dernière vérification, celle qui interdit d'écrire un événement en toutes lettres : avant, le sabotage précédent ne tombait que parce qu'il retirait l'appel typé.
+
+**Vérifié** :
+- `vitest --coverage` : 2 897 tests, au-dessus des seuils ;
+- `tsc`, `eslint` et `next build` propres, moteur fermé comme la CI et moteur ouvert ;
+- Playwright complet sur le build fermé, avec l'émulateur Firestore et `CI=1` : 855 specs, 849 passées, aucune au second essai, 6 ignorées par construction ;
+- sur un build `ENGINE_ENABLED=true`, avec l'émulateur : les specs des portes, de la porte du résultat, des rappels et du canari, 30, toutes passées, clics comptés compris ;
+- dix specs neuves : neuf dans `engine-mobile.spec.ts` (les largeurs dans les deux langues, 320 px mesuré, axe) et une dans `engine-deck-theme.spec.ts` (l'impression) ; les événements neufs sont lus dans les specs de la série, du tableau, des rappels, des portes et du canari ;
+- captures relues : les dix écrans d'A14 en français à 390 px et en anglais à 1 280 px, et la page de confidentialité dans les deux langues.

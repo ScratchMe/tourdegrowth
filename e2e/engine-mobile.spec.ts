@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import type { Locator, Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
-import { hybridState } from "../src/lib/engine/__tests__/fixtures";
+import { exampleState, hybridState } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
 import { engineSeed, storedEngineEntry } from "./engine-helpers";
 
@@ -171,4 +171,154 @@ test("the keyboard alone: tick sales-assisted, open the board, fill its win rate
   await expect(sheet.getByTestId("engine-saved-slg-rev-win-rate")).not.toBeEmpty();
   const stored = (await storedEngineEntry(page))?.state.snapshots[0]!.metrics["slg.rev.win-rate"];
   expect(stored?.value).toEqual({ kind: "ratio", numerator: 18, denominator: 75 });
+});
+
+/*
+ * The screens of the complete engine (engine spec §19.13, A14 T7): each PR
+ * from T2 to T6 held its own screens at the width it was built for; here
+ * they are all measured the same way as the two motions' above — at 360,
+ * 390 and 430, in both languages, with 320 measured and reported but not
+ * held — then read by axe. The month bar and the next month's band, a
+ * month started and a past month read only, the engines' switcher, a new
+ * engine's setup, the deletion, a pasted table's preview, a file's three
+ * choices with the merge's preview, a request's reminder, and the deck in
+ * white.
+ */
+
+const A14_SCREENS = ["month", "started", "past", "switcher", "newEngine", "delete", "table", "merge", "reminder", "white"] as const;
+
+async function seedExample(page: Page, locale: "fr" | "en") {
+  // 2 October: September's flows are over, so the next month can start.
+  await page.clock.setFixedTime(new Date(2026, 9, 2, 12));
+  await page.addInitScript(
+    (items) => {
+      if (sessionStorage.getItem("e2e-engine-seeded")) return;
+      for (const [key, value] of items) localStorage.setItem(key, value);
+      sessionStorage.setItem("e2e-engine-seeded", "1");
+    },
+    engineSeed(exampleState()),
+  );
+  await page.goto(`/${locale}/aarrr-funnel-template`);
+  await expect(page.getByTestId("engine-board")).toBeVisible();
+}
+
+async function reopen(page: Page, locale: "fr" | "en") {
+  await page.goto(`/${locale}/aarrr-funnel-template`);
+  await expect(page.getByTestId("engine-board")).toBeVisible();
+}
+
+async function openSwitcher(page: Page) {
+  const details = page.getByTestId("engine-switcher");
+  if ((await details.getAttribute("open")) === null) await details.locator("summary").click();
+}
+
+/** Every screen A14 adds, each measured: how many pixels the page runs past the viewport. */
+async function measureA14(page: Page, locale: "fr" | "en"): Promise<Record<(typeof A14_SCREENS)[number], number>> {
+  const out = {} as Record<(typeof A14_SCREENS)[number], number>;
+  await seedExample(page, locale);
+  await expect(page.getByTestId("engine-month-next")).toBeVisible();
+  out.month = await overflow(page);
+  await page.getByTestId("engine-month-start").click();
+  await expect(page.getByTestId("engine-month-next")).toHaveCount(0);
+  out.started = await overflow(page);
+  // Newest first: the month before is the second.
+  await page.getByTestId("engine-month-select").selectOption({ index: 1 });
+  await expect(page.getByTestId("engine-month-past")).toBeVisible();
+  out.past = await overflow(page);
+
+  await reopen(page, locale);
+  await openSwitcher(page);
+  out.switcher = await overflow(page);
+  await page.getByTestId("engine-new").click();
+  await expect(page.getByTestId("engine-setup")).toBeVisible();
+  out.newEngine = await overflow(page);
+
+  await reopen(page, locale);
+  await openSwitcher(page);
+  await page.getByTestId("engine-delete-open").click();
+  await expect(page.getByTestId("engine-delete")).toBeVisible();
+  out.delete = await overflow(page);
+
+  await reopen(page, locale);
+  await page.getByTestId("engine-table").locator("summary").click();
+  await page.getByTestId("engine-table-paste").fill("id;chiffre;étape;numérateur;dénominateur;valeur;unité;source\nref.k-factor;;;12;800;;;\nmade.up;Un chiffre au nom bien plus long que la colonne;;1;2;;;\n");
+  await page.getByTestId("engine-table-read").click();
+  await expect(page.getByTestId("engine-table-preview")).toBeVisible();
+  out.table = await overflow(page);
+
+  await reopen(page, locale);
+  const file = exampleState();
+  file.snapshots[0]!.targets["rev.paid-conversion"] = 12;
+  await page.getByTestId("engine-import-open-screen").click();
+  await page.getByTestId("engine-import-file").setInputFiles({ name: "laptop.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(file)) });
+  await page.getByTestId("engine-import-choices").getByRole("radio").nth(2).check();
+  await expect(page.getByTestId("engine-import-merge")).toBeVisible();
+  out.merge = await overflow(page);
+
+  await reopen(page, locale);
+  await page.getByTestId("engine-tab-revenue").click();
+  const toggle = page.getByTestId("engine-metric-rev-gross-margin");
+  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+  const sheet = page.getByTestId("engine-sheet-rev-gross-margin");
+  await sheet.getByRole("radio", { name: ENGINE_COPY.sheet.willAsk[locale] }).check();
+  await sheet.getByTestId("engine-request-copy").click();
+  await expect(sheet.getByTestId("engine-request-remind")).toBeVisible();
+  out.reminder = await overflow(page);
+
+  await page.getByTestId("engine-open-deck").click();
+  await page.getByTestId("deck-white-theme").check();
+  await expect(page.getByTestId("slide-peloton")).toHaveAttribute("data-theme", "white");
+  out.white = await overflow(page);
+  return out;
+}
+
+const NONE = Object.fromEntries(A14_SCREENS.map((k) => [k, 0]));
+
+test.describe("the complete engine's screens (§19.13, A14 T7)", () => {
+  test.use({ permissions: ["clipboard-read", "clipboard-write"] });
+
+  for (const locale of ["fr", "en"] as const) {
+    for (const width of [360, 390, 430] as const) {
+      test(`${locale} at ${width}: nothing A14 adds pushes the page sideways`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 800 });
+        expect(await measureA14(page, locale)).toEqual(NONE);
+      });
+    }
+
+    test(`${locale} at 320: A14's screens measured and reported, not held`, async ({ page }) => {
+      await page.setViewportSize({ width: 320, height: 640 });
+      const measured = await measureA14(page, locale);
+      test.info().annotations.push({ type: "overflow at 320", description: JSON.stringify(measured) });
+      expect(Object.keys(measured)).toHaveLength(A14_SCREENS.length);
+    });
+  }
+
+  /** Axe on what A14 opens over the board: the switcher, a pasted table's preview, the merge's choices, the deletion. */
+  test("no serious or critical accessibility violation on A14's panels", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    const serious = async (): Promise<string[]> => {
+      const results = await new AxeBuilder({ page }).include('[data-testid="engine-workbench"]').analyze();
+      return results.violations
+        .filter((v) => v.impact === "serious" || v.impact === "critical")
+        .flatMap((v) => v.nodes.map((n) => `${v.id} on ${n.target.join(" ")}`));
+    };
+    await seedExample(page, "fr");
+    await openSwitcher(page);
+    await page.getByTestId("engine-table").locator("summary").click();
+    await page.getByTestId("engine-table-paste").fill("id;chiffre;étape;numérateur;dénominateur;valeur;unité;source\nref.k-factor;;;12;800;;;\n");
+    await page.getByTestId("engine-table-read").click();
+    await expect(page.getByTestId("engine-table-preview")).toBeVisible();
+    expect(await serious()).toEqual([]);
+
+    await page.getByTestId("engine-import-open-screen").click();
+    await page.getByTestId("engine-import-file").setInputFiles({ name: "laptop.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(exampleState())) });
+    await expect(page.getByTestId("engine-import-choices")).toBeVisible();
+    expect(await serious()).toEqual([]);
+
+    await reopen(page, "fr");
+    await openSwitcher(page);
+    await page.getByTestId("engine-delete-open").click();
+    await expect(page.getByTestId("engine-delete")).toBeVisible();
+    expect(await serious()).toEqual([]);
+  });
 });

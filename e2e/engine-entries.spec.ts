@@ -2,7 +2,7 @@ import { UI_STRINGS, tc } from "@/lib/i18n/dictionary";
 import type { Page } from "@playwright/test";
 import { exampleState } from "../src/lib/engine/__tests__/fixtures";
 import { ENGINE_INDEX_KEY } from "../src/lib/engine/types";
-import { expect, test } from "./helpers";
+import { expect, test, trackedEvents } from "./helpers";
 import { engineSeed } from "./engine-helpers";
 
 /**
@@ -53,6 +53,13 @@ for (const locale of ["en", "fr"] as const) {
     await expect(page.getByTestId("landing-engine-resume-link")).toHaveAttribute("href", `/${locale}/aarrr-funnel-template`);
     // The other side of the closed build's check: open, the line came from the engine's own code — the search can see it.
     expect((await scripts()).some((body) => body.includes(ENGINE_INDEX_KEY))).toBe(true);
+
+    // Followed, it counts as a door (§19.12) — the only engine event, and never its month or counts.
+    // The engine lives under the other root layout: the click is a full load. Hold it once to read the event where it fired.
+    await page.evaluate(() => document.addEventListener("click", (e) => e.preventDefault(), { capture: true, once: true }));
+    await page.getByTestId("landing-engine-resume-link").click();
+    await expect.poll(() => trackedEvents(page)).toContain("engine_entry_clicked/landing_resume");
+    expect((await trackedEvents(page)).filter((e) => e.startsWith("engine"))).toEqual(["engine_entry_clicked/landing_resume"]);
   });
 }
 

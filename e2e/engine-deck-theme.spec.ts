@@ -92,3 +92,26 @@ for (const locale of ["en", "fr"] as const) {
     expect([g, b]).not.toEqual([255, 255]);
   });
 }
+
+/*
+ * The PDF is the browser's print of the deck (§10.2): no file to read a pixel
+ * of, so the print sheet is read where it applies — under print media, each
+ * slide keeps the ground it is painted with, and `print-color-adjust: exact`
+ * stops the browser dropping it, as it drops backgrounds by default
+ * (engine spec §19.13, A14 T7).
+ */
+test("printed for the PDF, a white slide stays white and a paper one keeps its paper", async ({ page }) => {
+  await openDeck(page, "fr");
+  await page.getByTestId("deck-white-theme").check();
+  await page.emulateMedia({ media: "print" });
+  const printed = (id: string) =>
+    page.getByTestId(`slide-${id}`).evaluate((el) => {
+      const style = getComputedStyle(el);
+      return { color: style.backgroundColor, adjust: style.printColorAdjust };
+    });
+  for (const id of ["peloton", "leak", "annex"]) expect(await printed(id)).toEqual({ color: "rgb(255, 255, 255)", adjust: "exact" });
+  await page.emulateMedia({ media: "screen" });
+  await page.getByTestId("deck-white-theme").uncheck();
+  await page.emulateMedia({ media: "print" });
+  expect(await printed("peloton")).toEqual({ color: "rgb(231, 225, 210)", adjust: "exact" });
+});
