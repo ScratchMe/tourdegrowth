@@ -173,8 +173,8 @@ src/proxy.ts             langue, drapeaux du jeu et du moteur, aperçu propriét
 src/components/          core / brand / quiz / result / glossary / game / viz — le design system porté
 src/content/             toute la copie du site ; ce qui n'est pas encore relu porte « TODO: à relire » (convention 6)
 src/lib/                 scoring (pur), quiz, i18n (dont meta.ts), seo (JSON-LD, llms, robots d'IA), og (polices, tokens, gabarit et adresse versionnée de l'image de résultat), gemini, firebase, submissions (dont segment.ts, benchmark.ts), metrics, analytics, forms (la logique des primitives de formulaire), rate-limit.ts
-src/lib/game/            le jeu « Le côté obscur » (moteur pur, stockage, vue ; un niveau par fichier de levels/, le 2 en brouillon) ; sa copie dans src/content/game/, sa présentation dans src/components/game/, ses pages sous src/app/[locale]/game/ — GAME-BRIEF.md fait foi
-src/lib/engine/          le moteur de growth (pur : dérivations, diagnostic, « et si », deck, phrases) ; sa copie dans src/content/engine-*.ts, son îlot sous src/app/[locale]/aarrr-funnel-template/ — ENGINE.md fait foi
+src/lib/game/            le jeu « Le côté obscur » (moteur pur, stockage, vue ; un niveau par fichier de levels/, le 2 en brouillon) ; sa copie dans src/content/game/, sa présentation dans src/components/game/, ses pages sous src/app/[locale]/game/ — GAME-BRIEF.md fait foi, et chaque niveau au-delà du premier a sa spécification dans docs/game/
+src/lib/engine/          le moteur de growth (pur : dérivations, diagnostic, « et si », deck, phrases) ; sa copie dans src/content/engine-*.ts, son îlot sous src/app/[locale]/aarrr-funnel-template/ — ENGINE.md fait foi (la spécification de la v1 dans docs/engine/v1.md)
 src/lib/owner-preview.ts l'aperçu propriétaire seul du jeu et du moteur (cookie HMAC sous le mot de passe admin, posé par /admin/preview)
 src/lib/viz/             échelles et tracés sans bibliothèque ; composants dans src/components/viz/
 src/lib/audit/           l'instrument d'audit growth (AUDIT.md = le schéma, AUDIT-PLAN.md = le plan par phases) — pur, navigateur seulement, jamais Firestore ; son catalogue est dans src/content/audit-catalog.ts
@@ -192,4 +192,5 @@ scripts/                 vercel-ignore.sh, liens UTM, rapport Search Console, ca
 .github/                 ci.yml (la barrière), verify-live.yml (la sonde), stats.yml, indexnow.yml, dependabot.yml
 .claude/                 skills/ (/livrer, /bon-a-tirer, plug-ins Data et Design), agents/ (les deux relecteurs), hooks/ + settings.json (la garde sur main), plugins-importes/ (provenance des plug-ins installés)
 JOURNAL.md               le journal, volume courant : chaque décision, chaque piège et ce qui a été vérifié, dans l'ordre ; docs/journal/ ses volumes archivés
+docs/                    les volumes archivés du journal, l'index des décisions, les parties d'ENGINE.md et de GAME-BRIEF.md qui ne sont pas le travail en cours
 ```
