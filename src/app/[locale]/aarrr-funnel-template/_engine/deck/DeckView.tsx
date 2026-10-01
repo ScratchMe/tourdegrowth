@@ -315,13 +315,14 @@ export function DeckView({
 
   // The check's sentence is the engine's (`sanityText`: its counts carried
   // formatted by the check itself, its noun agreeing with them). `num-gt-den`
-  // says "the first count" without naming the number, and a screen listing
-  // several checks must say which: its name leads, as a label — a dash rather
+  // says "the first count" without naming the number, and « deux outils »
+  // (§19.5.3) names the tools, not the number: a screen listing several
+  // checks must say which, so its name leads, as a label — a dash rather
   // than a colon, so the line reads right in both languages without a
   // typography rule here.
   const checkText = (check: SanityCheck) => {
     const message = sanityText(check, strings, locale);
-    const name = check.id === "num-gt-den" ? metrics.find((m) => m.id === check.metrics[0])?.name : undefined;
+    const name = check.id === "num-gt-den" || check.id === "two-tools" ? metrics.find((m) => m.id === check.metrics[0])?.name : undefined;
     return name ? `${name} — ${message}` : message;
   };
 

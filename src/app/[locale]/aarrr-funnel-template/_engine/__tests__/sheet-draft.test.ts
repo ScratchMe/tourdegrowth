@@ -209,6 +209,8 @@ describe("entryFromDraft — what refuses a save", () => {
 describe("the round trip — a saved entry reopens as the same form", () => {
   const entries: [MetricId, MetricEntry, Partial<Parameters<typeof entryFromDraft>[3]>][] = [
     ["act.rate", { status: "measured", value: { kind: "ratio", numerator: 144, denominator: 800 }, source: { kind: "tool", tool: "amplitude" }, updatedAt: NOW }, {}],
+    // A14 T4 (§19.5.3): the denominator's own source survives the round trip.
+    ["rev.arpa", { status: "measured", value: { kind: "ratio", numerator: 48_000, denominator: 400 }, source: { kind: "tool", tool: "stripe" }, denominatorSource: { kind: "tool", tool: "hubspot" }, updatedAt: NOW }, {}],
     ["acq.cac", { status: "measured", value: { kind: "amount", amount: 420 }, source: { kind: "person", role: "finance" }, variant: "fully-loaded", updatedAt: NOW }, { hasVariants: true }],
     ["act.ttv", { status: "measured", value: { kind: "duration", value: 3, unit: "days", statistic: "median" }, source: { kind: "other" }, updatedAt: NOW }, {}],
     ["ret.d30", { status: "estimated", estimate: { low: 20, high: 30, basis: "old-number" }, updatedAt: NOW }, {}],
@@ -302,5 +304,32 @@ describe("withProposals — a new month offers the month before's definition, ne
     expect(withProposals(draft, before)).toBe(draft);
     const empty = draftFromEntry(undefined, cac);
     expect(withProposals(empty, null)).toBe(empty);
+  });
+});
+
+describe("the denominator from another tool (§19.5.3, A14 T4)", () => {
+  const counts = { mode: "have" as const, kind: "ratio" as const, numerator: 144, denominator: 800, source: "tool:amplitude" as const };
+
+  it("unticked, nothing changes: one source, no `denominatorSource`", () => {
+    expect(save("act.rate", counts).entry).not.toHaveProperty("denominatorSource");
+  });
+
+  it("ticked, its source is required, and saved", () => {
+    expect(save("act.rate", { ...counts, splitSource: true }).problems).toContain("denominator-source");
+    expect(save("act.rate", { ...counts, splitSource: true, denominatorSource: "tool:ga4" }).entry).toMatchObject({
+      source: { kind: "tool", tool: "amplitude" },
+      denominatorSource: { kind: "tool", tool: "ga4" },
+    });
+  });
+
+  it("only for counts: a rate typed as a percent has one source", () => {
+    const rate = save("act.rate", { mode: "have", kind: "rate", percent: 18, source: "tool:amplitude", splitSource: true });
+    expect(rate.problems).toEqual([]);
+    expect(rate.entry).not.toHaveProperty("denominatorSource");
+  });
+
+  it("a new month offers the month before's denominator source too", () => {
+    const proposed = withProposals(draftFromEntry(undefined, shapeOf("act.rate")), { source: { kind: "tool", tool: "amplitude" }, denominatorSource: { kind: "tool", tool: "ga4" } });
+    expect(proposed).toMatchObject({ source: "tool:amplitude", splitSource: true, denominatorSource: "tool:ga4" });
   });
 });

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { shapeOf } from "../catalog-shape";
 import { blockingCheck, reconcile, sanityChecks } from "../sanity";
+import { sanityText } from "../sentences";
 import type { EngineState, MetricEntry, SanityId } from "../types";
 import { CTX_FR, FR } from "./props";
 import { estimated, exampleState, hybridState, measured, ratio, salesAssistedState, withEntry } from "./fixtures";
@@ -136,5 +137,29 @@ describe("sales-assisted checks", () => {
     expect(ids(off)).toEqual([]);
     const plgOff = { ...hybridState(), setup: { ...hybridState().setup, motions: { plg: false, slg: true } } };
     expect(sanityChecks(withEntry(plgOff, "ret.logo-churn", measured(ratio(140, 400), tool)), CTX_FR, FR.strings.units).map((c) => c.id)).toEqual([]);
+  });
+});
+
+describe("« deux outils » (§19.5.3, A14 T4)", () => {
+  const twoTools = (state: EngineState) => sanityChecks(state, CTX_FR, FR.strings.units).filter((c) => c.id === "two-tools");
+
+  it("a rate whose counts come from two tools is to check, never blocking, and says which", () => {
+    const state = withEntry(exampleState(), "act.rate", measured(ratio(144, 800), { kind: "tool", tool: "amplitude" }, { denominatorSource: { kind: "tool", tool: "ga4" } }));
+    const [check] = twoTools(state);
+    expect(check).toMatchObject({ id: "two-tools", motion: "plg", blocking: false, metrics: ["act.rate"], values: { a: "amplitude", b: "ga4" } });
+    expect(sanityText(check!, FR.strings, "fr")).toBe("Numérateur (Amplitude) et dénominateur (GA4) viennent de deux outils\u00a0: vérifie qu'ils comptent la même chose sur la même période.");
+  });
+
+  it("a tool's name loses its own parenthesis inside the sentence's", () => {
+    const state = withEntry(exampleState(), "act.rate", measured(ratio(144, 800), { kind: "tool", tool: "cs-platform" }, { denominatorSource: { kind: "tool", tool: "hubspot" } }));
+    const text = sanityText(twoTools(state)[0]!, FR.strings, "fr");
+    expect(text).not.toMatch(/\([^)]*\(/);
+    expect(text.startsWith("Numérateur (")).toBe(true);
+  });
+
+  it("nothing for one tool twice, a person, or no second source", () => {
+    const same = withEntry(exampleState(), "act.rate", measured(ratio(144, 800), { kind: "tool", tool: "amplitude" }, { denominatorSource: { kind: "tool", tool: "amplitude" } }));
+    const person = withEntry(exampleState(), "act.rate", measured(ratio(144, 800), { kind: "tool", tool: "amplitude" }, { denominatorSource: { kind: "person", role: "data" } }));
+    for (const state of [exampleState(), same, person]) expect(twoTools(state)).toEqual([]);
   });
 });

@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { Button } from "@/components/core/Button";
+import { Callout } from "@/components/core/Callout";
+import { Checkbox } from "@/components/core/Checkbox";
 import { TEXT_LIMITS, type MetricShape } from "@/lib/engine/catalog-shape";
 import { ROLE_KEY, type ResolvedMetric } from "@/lib/engine/strings";
-import type { RoleId } from "@/lib/engine/types";
+import type { RoleId, ToolId } from "@/lib/engine/types";
 import { formatMoney, formatNumber, formatPercent } from "@/lib/engine/format";
 import type { DraftProblem, SheetDraft, SourceChoice } from "./sheet-draft";
 import { Choices } from "@/components/core/Choices";
@@ -19,6 +21,9 @@ import { moneyUnit, percentUnit, sourceOptions } from "./sources";
 import { fill, midSentence } from "./text";
 import type { EngineView } from "./view";
 import styles from "./Sheet.module.css";
+import { teamTools } from "@/lib/engine/tools";
+import { twoToolsOf } from "@/lib/engine/sanity";
+import { sanityText } from "@/lib/engine/sentences";
 
 const ROLES = Object.keys(ROLE_KEY) as RoleId[];
 
@@ -112,7 +117,14 @@ export function ValueEditor({
     return formatNumber(Math.round(q * 100) / 100, locale);
   })();
 
-  const src = sourceOptions(shape, strings);
+  const src = sourceOptions(shape, strings, teamTools(view.state.setup.tools));
+  // The check « deux outils » (§19.5.3), live as the two sources are chosen: the same sentence the deck's list says.
+  const toolOf = (choice: SourceChoice) => (choice.startsWith("tool:") ? { kind: "tool" as const, tool: choice.slice("tool:".length) as ToolId } : undefined);
+  const pair =
+    draft.kind === "ratio" && draft.splitSource
+      ? twoToolsOf({ status: "measured", value: { kind: "ratio", numerator: 0, denominator: 1 }, source: toolOf(draft.source), denominatorSource: toolOf(draft.denominatorSource) })
+      : null;
+  const twoTools = pair ? sanityText({ id: "two-tools", blocking: false, metrics: [shape.id], values: pair }, strings, locale) : null;
   const needsSource = draft.kind !== "text" && draft.kind !== "choice";
   const numGtDen = rule("num-gt-den");
 
@@ -297,6 +309,44 @@ export function ValueEditor({
           options={ROLES.map((role) => ({ value: role, label: strings.role[ROLE_KEY[role]] }))}
           onChange={(role) => role && update({ sourceRole: role })}
         />
+      ) : null}
+
+      {/* A rate in counts whose two counts come from two places (§19.5.3, A14 T4): its own box, then its own source. */}
+      {needsSource && draft.kind === "ratio" ? (
+        <Checkbox
+          id={`${idPrefix}-split-source`}
+          label={strings.sheet.splitSource}
+          checked={draft.splitSource}
+          onChange={(splitSource) => update({ splitSource })}
+          data-testid={`${idPrefix}-split-source`}
+        />
+      ) : null}
+      {needsSource && draft.kind === "ratio" && draft.splitSource ? (
+        <Select<Exclude<SourceChoice, "">>
+          size="sm"
+          id={`${idPrefix}-denominator-source`}
+          label={strings.sheet.denominatorSource}
+          error={need("denominator-source")}
+          value={draft.denominatorSource}
+          placeholder={w.choose}
+          options={src}
+          onChange={(denominatorSource) => update({ denominatorSource })}
+        />
+      ) : null}
+      {needsSource && draft.kind === "ratio" && draft.splitSource && draft.denominatorSource === "person" ? (
+        <Select<RoleId>
+          size="sm"
+          id={`${idPrefix}-denominator-source-role`}
+          label={w.sourceRole}
+          value={draft.denominatorSourceRole}
+          options={ROLES.map((role) => ({ value: role, label: strings.role[ROLE_KEY[role]] }))}
+          onChange={(role) => role && update({ denominatorSourceRole: role })}
+        />
+      ) : null}
+      {twoTools ? (
+        <Callout tone="caveat" data-testid={`${idPrefix}-two-tools`}>
+          <p>{twoTools}</p>
+        </Callout>
       ) : null}
 
       {metric.variants?.length && draft.kind !== "duration" ? (

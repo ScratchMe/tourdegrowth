@@ -132,7 +132,7 @@ export function findingText(
   }
 }
 
-const SANITY_KEY: Record<Exclude<SanityId, "reconcile-gap">, keyof Words["sanity"]> = {
+const SANITY_KEY: Record<Exclude<SanityId, "reconcile-gap" | "two-tools">, keyof Words["sanity"]> = {
   "num-gt-den": "numGtDen",
   "retained-gt-activated": "retainedGtActivated",
   "paid-gt-retained": "paidGtRetained",
@@ -156,6 +156,12 @@ const SANITY_KEY: Record<Exclude<SanityId, "reconcile-gap">, keyof Words["sanity
 export function sanityText(check: SanityCheck, strings: Words, locale: Locale, metrics: ResolvedMetric[] = []): string {
   const s = strings.sanity;
   if (check.id === "reconcile-gap") return fillTemplate(s[numbered("reconcileGap", check.count, locale)], check.values);
+  // Tool ids in the check, names in the sentence (§19.5.3).
+  if (check.id === "two-tools") {
+    // In the sentence, a tool's name without its own parenthesis (« Outil de Customer Success (Gainsight, …) »): it already sits in one.
+    const name = (id: string | undefined) => (id && id in strings.tools ? strings.tools[id as keyof Words["tools"]] : (id ?? "")).replace(/\s*\(.*\)$/, "");
+    return fillTemplate(s.twoTools, { a: name(check.values.a), b: name(check.values.b) });
+  }
   if (check.id === "cac-variants-differ") {
     const labels = metrics.find((m) => m.id === "acq.cac")?.variants ?? [];
     const label = (id: string | undefined) => lowerFirst(labels.find((v) => v.id === id)?.label ?? id ?? "");

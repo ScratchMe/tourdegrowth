@@ -55,6 +55,10 @@ export interface SheetDraft {
   choice: string;
   source: SourceChoice;
   sourceRole: RoleId;
+  /** « Le dénominateur vient d'un autre outil » (§19.5.3, A14 T4): a rate in counts, its denominator's own source. */
+  splitSource: boolean;
+  denominatorSource: SourceChoice;
+  denominatorSourceRole: RoleId;
   variant: string;
   label: string;
   evidence: "" | "data" | "interviews" | "hunch";
@@ -91,6 +95,7 @@ export type DraftProblem =
   | "text-too-long"
   | "choice"
   | "source"
+  | "denominator-source"
   | "variant"
   | "label-too-long"
   | "evidence"
@@ -186,6 +191,9 @@ export function draftFromEntry(entry: MetricEntry | undefined, shape: MetricShap
     choice: "",
     source: "",
     sourceRole: shape.defaultRole,
+    splitSource: false,
+    denominatorSource: "",
+    denominatorSourceRole: shape.defaultRole,
     variant: "",
     label: "",
     evidence: "",
@@ -209,10 +217,14 @@ export function draftFromEntry(entry: MetricEntry | undefined, shape: MetricShap
     case "measured": {
       const v = entry.value;
       const { source, role } = sourceChoiceOf(entry.source);
+      const den = sourceChoiceOf(entry.denominatorSource);
       Object.assign(draft, {
         mode: "have",
         source,
         sourceRole: role ?? draft.sourceRole,
+        splitSource: entry.denominatorSource !== undefined,
+        denominatorSource: den.source,
+        denominatorSourceRole: den.role ?? draft.denominatorSourceRole,
         variant: entry.variant ?? "",
         label: entry.label ?? "",
         evidence: entry.evidence ?? "",
@@ -263,10 +275,11 @@ export function draftFromEntry(entry: MetricEntry | undefined, shape: MetricShap
  */
 export function withProposals(
   draft: SheetDraft,
-  proposed: Pick<MetricEntry, "variant" | "label" | "definitionNote" | "source"> | null,
+  proposed: Pick<MetricEntry, "variant" | "label" | "definitionNote" | "source" | "denominatorSource"> | null,
 ): SheetDraft {
   if (!proposed || draft.mode !== null) return draft;
   const { source, role } = sourceChoiceOf(proposed.source);
+  const den = sourceChoiceOf(proposed.denominatorSource);
   return {
     ...draft,
     variant: proposed.variant ?? draft.variant,
@@ -274,6 +287,8 @@ export function withProposals(
     definitionNote: draft.definitionNote || (proposed.definitionNote ?? ""),
     source: proposed.source ? source : draft.source,
     sourceRole: role ?? draft.sourceRole,
+    // The denominator's own source travels with the definition (§19.5.3).
+    ...(proposed.denominatorSource ? { splitSource: true, denominatorSource: den.source, denominatorSourceRole: den.role ?? draft.denominatorSourceRole } : {}),
   };
 }
 
@@ -385,6 +400,10 @@ export function entryFromDraft(
       const needsSource = draft.kind !== "text" && draft.kind !== "choice";
       const source = sourceRefOf(draft.source, draft.sourceRole);
       if (needsSource && !source) problems.push("source");
+      // The denominator's own source, when the box says it comes from elsewhere — only for counts (§19.5.3).
+      const split = draft.kind === "ratio" && draft.splitSource;
+      const denominatorSource = split ? sourceRefOf(draft.denominatorSource, draft.denominatorSourceRole) : null;
+      if (split && !denominatorSource) problems.push("denominator-source");
       if (options.hasVariants && draft.kind !== "duration" && !draft.variant) problems.push("variant");
       if (draft.label.length > TEXT_LIMITS.label) problems.push("label-too-long");
       if (options.hasChoices && draft.kind === "text" && !draft.evidence) problems.push("evidence");
@@ -394,6 +413,7 @@ export function entryFromDraft(
           status: "measured",
           value,
           ...(source ? { source } : {}),
+          ...(denominatorSource ? { denominatorSource } : {}),
           ...(options.hasVariants && draft.kind !== "duration" && draft.variant ? { variant: draft.variant } : {}),
           ...(draft.label.trim() ? { label: draft.label.trim() } : {}),
           ...(options.hasChoices && draft.kind === "text" && draft.evidence ? { evidence: draft.evidence } : {}),

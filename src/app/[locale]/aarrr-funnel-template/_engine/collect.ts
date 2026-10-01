@@ -1,6 +1,6 @@
 import { METRIC_SHAPES, type MetricShape } from "@/lib/engine/catalog-shape";
 import { isRequestStale } from "@/lib/engine/request";
-import type { Effort, MetricId, RoleId, Snapshot } from "@/lib/engine/types";
+import type { Effort, MetricId, RoleId, Snapshot, ToolId } from "@/lib/engine/types";
 import { EFFORT_ORDER } from "./keys";
 
 /**
@@ -14,6 +14,13 @@ import { EFFORT_ORDER } from "./keys";
  *   `requested` one, grouped by ROLE — one copied message per person, not
  *   one per number — with the groups holding a request older than
  *   REMIND_AFTER_DAYS first: those are the ones slowing everything down.
+ *
+ * With the team's tools ticked (engine spec §19.5.2, A14 T4), « To do
+ * yourself » is grouped BY TOOL instead: a number goes under the first of
+ * your tools its `where` cites, where its menu path is. A number none of
+ * your tools covers goes to « To ask for », under its default role, even
+ * one you could have read yourself: if you don't have the tool, someone
+ * else does. Nothing ticked, nothing changes: by effort, as before.
  */
 export interface AskGroup {
   role: RoleId;
@@ -26,7 +33,10 @@ export interface AskGroup {
 }
 
 export interface CollectPlan {
+  /** By effort — empty when the team ticked its tools: then `byTool` holds them. */
   self: { effort: Exclude<Effort, "ask">; ids: MetricId[] }[];
+  /** By the team's tool, in the setup's families' order (§19.5.2). Absent without tools: a v1 or v2 plan is unchanged. */
+  byTool?: { tool: ToolId; ids: MetricId[] }[];
   ask: AskGroup[];
   /** todo + requested — the tab's count. */
   count: number;
@@ -37,7 +47,15 @@ export interface CollectPlan {
  * self-serve's alone by default, as a v1 engine. The link is optional and
  * skippable (§18.4.8): listing it here would make it one more thing owed.
  */
-export function collectPlan(snapshot: Snapshot, now: Date, shapes: readonly MetricShape[] = METRIC_SHAPES): CollectPlan {
+export interface CollectTools {
+  /** The team's tools, in the setup's families' order (`teamTools`). Empty = not said. */
+  selected: readonly ToolId[];
+  /** The tools a number's `where` cites, in its order (the catalogue's). */
+  citedBy: (id: MetricId) => readonly ToolId[];
+}
+
+export function collectPlan(snapshot: Snapshot, now: Date, shapes: readonly MetricShape[] = METRIC_SHAPES, tools?: CollectTools): CollectPlan {
+  const byTool = tools && tools.selected.length > 0 ? new Map<ToolId, MetricId[]>() : null;
   const self = new Map<Exclude<Effort, "ask">, MetricId[]>();
   const ask = new Map<RoleId, AskGroup>();
   const group = (role: RoleId) => {
@@ -58,7 +76,12 @@ export function collectPlan(snapshot: Snapshot, now: Date, shapes: readonly Metr
       if (isRequestStale(entry, now)) g.stale.push(shape.id);
     } else if (status === "todo") {
       if (shape.effort === "ask") group(shape.defaultRole).toAsk.push(shape.id);
-      else self.set(shape.effort, [...(self.get(shape.effort) ?? []), shape.id]);
+      else if (byTool && tools) {
+        // The first of the team's tools the number's `where` cites; none, and someone else has it.
+        const tool = tools.citedBy(shape.id).find((t) => tools.selected.includes(t));
+        if (tool) byTool.set(tool, [...(byTool.get(tool) ?? []), shape.id]);
+        else group(shape.defaultRole).toAsk.push(shape.id);
+      } else self.set(shape.effort, [...(self.get(shape.effort) ?? []), shape.id]);
     }
   }
 
@@ -73,8 +96,12 @@ export function collectPlan(snapshot: Snapshot, now: Date, shapes: readonly Metr
       b.toAsk.length + b.requested.length - (a.toAsk.length + a.requested.length) ||
       roles.indexOf(a.role) - roles.indexOf(b.role),
   );
-  const count = selfGroups.reduce((n, g) => n + g.ids.length, 0) + askGroups.reduce((n, g) => n + g.toAsk.length + g.requested.length, 0);
-  return { self: selfGroups, ask: askGroups, count };
+  const toolGroups = byTool && tools ? tools.selected.filter((t) => byTool.has(t)).map((tool) => ({ tool, ids: byTool.get(tool)! })) : null;
+  const count =
+    selfGroups.reduce((n, g) => n + g.ids.length, 0) +
+    (toolGroups ?? []).reduce((n, g) => n + g.ids.length, 0) +
+    askGroups.reduce((n, g) => n + g.toAsk.length + g.requested.length, 0);
+  return { self: selfGroups, ...(toolGroups ? { byTool: toolGroups } : {}), ask: askGroups, count };
 }
 
 /** The cheapest number still to fill — where "Continue" takes a returning person (E6), never "the last screen visited". */

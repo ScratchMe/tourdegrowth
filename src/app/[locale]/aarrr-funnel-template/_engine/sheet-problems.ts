@@ -79,6 +79,8 @@ export function missingLabel(problem: DraftProblem, metric: ResolvedMetric, stri
       return metric.inputs?.denominator ?? metric.name;
     case "source":
       return strings.sheet.source;
+    case "denominator-source":
+      return strings.sheet.denominatorSource;
     case "variant":
       return strings.sheet.variant;
     case "evidence":

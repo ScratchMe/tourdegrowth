@@ -879,3 +879,44 @@ La cinquième PR du moteur complet (`docs/engine/moteur-complet.md` §19.4, C32 
 - Playwright complet (`CI=1`) : 819 specs, 788 passées, aucune au second essai, et 31 ignorées (25 faute d'émulateur, 6 par construction) ;
 - `e2e/engine-pipeline.spec.ts`, nouveau : l'objectif saisi dans les Réglages, la couverture qui apparaît, le mois d'avant, un mois passé sans case, la slide mesurée en FR et en EN, 390 px sans défilement de côté ;
 - captures relues : le tableau, les Réglages, la slide, la colonne de l'hybride à 390 px.
+
+## A14.c, T4 : les outils de l'équipe (2026-10-01, #PR)
+
+La sixième PR du moteur complet (`docs/engine/moteur-complet.md` §19.5, C32 Q9 et Q10), drapeau fermé.
+
+**Ce que font les outils** : l'équipe coche ses outils, et rien n'est obligatoire. Sans outil coché, le moteur se lit exactement comme avant : les goldens v1 et v2 n'ont pas bougé. Avec des outils cochés :
+- `lib/engine/tools.ts`, pur : cinq familles (analytique, facturation, CRM, publicité, autres), dans l'ordre où le réglage les montre. App Store Connect et Play Console ne sont pas proposés : aucun chiffre ne les cite, ils attendent l'app grand public (C32 Q9). Un fichier qui les apporte les garde, sans les lire ;
+- « Tes outils » est un repli facultatif, au premier réglage comme dans les Réglages, avec une case par outil sous le nom de sa famille ;
+- la fiche propose les outils de l'équipe d'abord, en commençant par ceux qu'on attend pour ce chiffre. Les autres outils attendus restent proposés, sous « Autres outils » ;
+- « À faire toi-même » se range par outil, et chaque chiffre y porte le chemin de menu du catalogue. Un chiffre est rangé sous le premier outil coché que cite son `where`. Un chiffre qu'aucun outil coché ne donne passe dans « À demander », au rôle qui le tient ;
+- la fiche a une case « Le dénominateur vient d'un autre outil », qui ouvre une seconde liste de sources. Quand les deux comptes d'un taux viennent de deux outils, le contrôle « deux outils » le dit, sans jamais bloquer. Il paraît dans la fiche et dans la liste « à vérifier » de l'écran du deck, précédé du nom du chiffre. Il ne paraît pas sur la slide de visibilité, où aucun contrôle ne figure aujourd'hui.
+
+**Un bug trouvé par l'e2e avant la PR** : dans la liste par outil, le chemin de menu sortait brut (« Événements › {event} »). La fiche le remplit, la liste ne le faisait pas. Elle passe maintenant par le même remplissage (`catalogFill`), et la spec vérifie qu'aucune accolade ne reste.
+
+**Sabotages** : huit. Sept tombent du premier coup :
+- un chiffre non couvert gardé dans « À faire toi-même » : 2 ;
+- `byTool` présent sans outil coché : 14, dont les goldens v1 ;
+- les outils de l'équipe ignorés dans la fiche : 1 ;
+- « deux outils » pour un seul outil : 1 ;
+- la source du dénominateur non enregistrée : 2 ;
+- la case cochée sans source exigée : 1 ;
+- les outils hors de l'ordre des familles : 1.
+
+Le huitième passait : le dernier outil cité à la place du premier. Aucun chiffre du test n'était cité par deux des outils cochés. Un test couvre maintenant ce cas, et le sabotage tombe.
+
+**La relecture de copie** (`relecteur-copie`) a relevé trois défauts, tous corrigés :
+- l'aide de « Tes outils » disait que « À aller chercher » se range par outil. C'est « À faire toi-même » ;
+- dans la liste « à vérifier » du deck, la phrase « deux outils » ne nommait pas le chiffre, et deux taux tirés des mêmes outils auraient donné deux lignes identiques. Le nom du chiffre la précède, comme pour « premier compte plus grand que le second » ;
+- le nom de l'outil de customer success porte déjà des parenthèses (« Gainsight, Vitally, Planhat… »). La phrase les retire, pour ne pas imbriquer deux parenthèses.
+
+Trois points de vocabulaire vont au bon à tirer A14.d :
+- la fiche dit maintenant « numérateur / dénominateur » (le libellé du §19.5.3), alors que ses messages voisins disent « premier compte / second compte » ;
+- la case promet « un autre outil », alors que la liste qu'elle ouvre propose aussi une personne et « Autre » ;
+- l'anglais dit « the sheet » dans l'aide des outils, et « the cards » pour la même fiche dans `catalogueToggle`.
+
+**Vérifié** :
+- `vitest --coverage` : 2 832 tests, au-dessus des seuils ;
+- `tsc`, `eslint` et `next build` (avec `GAME_ENABLED=true`) propres ;
+- Playwright complet (`CI=1`) : 823 specs, 792 passées, aucune au second essai, et 31 ignorées (25 faute d'émulateur, 6 par construction) ;
+- `e2e/engine-tools.spec.ts`, nouveau, quatre specs : les outils cochés et enregistrés dans l'ordre des familles, la liste rangée par outil sans accolade brute ; un chiffre qu'aucun outil ne donne, passé dans « À demander » ; la fiche avec Mixpanel d'abord, la seconde source, le contrôle « deux outils », puis la liste du deck ; à 390 px en français, sans défilement de côté ;
+- captures relues : le repli des outils dans les Réglages (FR, 1280 px), « À faire toi-même » rangé par GA4, Stripe et HubSpot avec ses chemins remplis, et la fiche à 390 px en anglais avec le contrôle « deux outils ».

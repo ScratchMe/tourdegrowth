@@ -38,13 +38,19 @@ export const ALL_TOOLS = Object.keys(TOOL_ORDER) as ToolId[];
  * usually found in first, then "someone gave it to me" and "other", then
  * every other tool under its own heading — offered, not hidden, because a
  * team that reads its sign-up rate in Amplitude is not wrong, only unusual.
+ *
+ * With the team's tools ticked (§19.5.2, A14 T4), THEY come first — the
+ * usual ones for this number among them first — and every other tool goes
+ * under « Autres outils ». Nothing ticked, the list is the one above.
  */
 export function sourceOptions(
   shape: MetricShape,
   strings: EngineStrings,
+  team: readonly ToolId[] = [],
 ): (SelectOption<Exclude<SourceChoice, "">> | SelectOptionGroup<Exclude<SourceChoice, "">>)[] {
-  const usual = shape.sources.map((tool) => ({ value: `tool:${tool}` as const, label: strings.tools[tool] }));
-  const rest = ALL_TOOLS.filter((tool) => !shape.sources.includes(tool)).map((tool) => ({
+  const first = team.length > 0 ? [...shape.sources.filter((t) => team.includes(t)), ...team.filter((t) => !shape.sources.includes(t))] : shape.sources;
+  const usual = first.map((tool) => ({ value: `tool:${tool}` as const, label: strings.tools[tool] }));
+  const rest = ALL_TOOLS.filter((tool) => !first.includes(tool)).map((tool) => ({
     value: `tool:${tool}` as const,
     label: strings.tools[tool],
   }));

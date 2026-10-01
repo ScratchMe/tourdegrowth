@@ -25,6 +25,7 @@ import { RequestCopy } from "./RequestCopy";
 import { fill } from "./text";
 import type { EngineView } from "./view";
 import styles from "./Sheet.module.css";
+import { teamTools } from "@/lib/engine/tools";
 
 const REPAIRS = Object.keys(REPAIR_KEY) as RepairScale[];
 const ROLES = Object.keys(ROLE_KEY) as RoleId[];
@@ -207,7 +208,7 @@ function ReadingFields({
   const locale = view.ctx.locale;
   const w = strings.workbench;
   const set = (patch: Partial<ReadingDraft>) => onChange({ ...reading, ...patch });
-  const src = sourceOptions(shape, strings);
+  const src = sourceOptions(shape, strings, teamTools(view.state.setup.tools));
   const shortcut = shape.valueKinds.includes("rate") ? "rate" : shape.valueKinds.includes("amount") ? "amount" : null;
   const money = shape.unit === "money";
 
