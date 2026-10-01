@@ -233,7 +233,8 @@ All four are non-blocking and all are expected:
   and `cardMode: "single"` stays refused for the same reason as the others.
 
 Wide components get `cardMode: "column"` in `cfg.overrides` (one full-width
-card per story) — 29 of them now: most of `game` (`ActionCard` joined on
+card per story) — 30 of them now (counted in `config.json` on 2026-10-01; each
+carries `viewport="900x700"` in its `@dsCard` marker): most of `game` (`ActionCard` joined on
 2026-09-29, once its cards took their real 294px width), the two charts,
 `Button` (its `States` grid) and `GlossaryTerm`. Add one when validate prints
 `[GRID_OVERFLOW] … stories render wider than their grid cells`; that warning
@@ -346,7 +347,10 @@ two tokens A14 T6 (#264) added while B6 was in review, `--paper-white` and
 `--surface-white`: no component changed (0 changed, sources and render hashes
 identical), so only the shared files went up (`_preview/`, `_vendor/`,
 `fonts/`, bundle, CSS, README: 101 files), between the two sentinels, then
-`_ds_sync.json`. Render check 90/0/0/0; anchor `6da5e42a15ef`. Earlier uploads: 2026-10-01 B4, the game's
+`_ds_sync.json`. Render check 90/0/0/0; anchor `6da5e42a15ef`. **None of these
+uploads reached the pane** until `_ds_manifest.json` was written by hand later
+that evening (90 cards; see "`_ds_manifest.json`" below): the project's index
+had stayed at the 2026-09-11 upload. Earlier uploads: 2026-10-01 B4, the game's
 level 2 and A7.3.c's engine (90, 303, 19 components uploaded, eight driver
 runs, `fee6cc7084fe`), 2026-09-30 after A11 (88, 292, `8235f4e6de01`),
 2026-09-30 B3 (88, 292, `d1835d51cffd`), 2026-09-30 before A10 (79
@@ -387,8 +391,10 @@ upload asks its own approval once per run (`finalize_plan`).
 The upload path for a pinned project is the skill's **atomic** one: re-fetch
 `_ds_sync.json` right before `finalize_plan` (a moved `bundleSha12` means a
 concurrent sync), sentinel `_ds_needs_recompile` first, content in chunks,
-`upload.deletePaths` verbatim, sentinel again, `_ds_sync.json` last,
-`list_files` to confirm. No size error in either upload of 2026-09-30: first
+`upload.deletePaths` verbatim, sentinel again, **`_ds_manifest.json` from
+`build-manifest.mjs`** (see "`_ds_manifest.json`" below: Claude Design does not
+rebuild it), `_ds_sync.json` last, `list_files` and a `get_file` of the
+manifest to confirm. No size error in either upload of 2026-09-30: first
 two chunks of 200 then `styles.css` then `fonts/`; at B3, `_preview/` +
 `_vendor/` + the root files in one call (94 files, 2.3 MB), `fonts/`, then
 `components/` in two halves of 176. Build the chunk lists from the live
@@ -690,8 +696,64 @@ What the three methods found beyond that:
   known; and « 83 / 100 » keeps plain spaces around the slash in French
   (`december.cells.outOf`), outside the NBSP list above.
 
+## `_ds_manifest.json` — Claude Design never rebuilt it, so the sync writes it
+
+**What Antoine saw on 2026-10-01**: no kilometre marker anywhere in the
+project. The `Bottleneck` card opened on a stencil numeral with « Solid engine,
+one flat tyre » (mockup copy removed on 2026-09-29), and `LoadingScreen` still
+showed three messages and three bars (before A15). Every file under them was
+current: `_preview/Bottleneck.js` opened on `ScoreDisplay variant="marker"`,
+`_preview/ScoreDisplay.js` exported `Marker` and `MarkerSmall`, and
+`_ds_sync.json` held the B6 anchor with 90 components.
+
+**The cause**: `_ds_manifest.json`, the index the Design System pane builds
+its cards from, was still the one of the **2026-09-11** upload: 34 components,
+34 cards in five groups (no `game`, no `viz`, none of extension 04's form
+primitives, no `SpaceBand`…), and 123 tokens at their September values (`--radius-tag: 4px`,
+`--radius-panel: 8px`). The `_ds_needs_recompile` sentinel, which asks Claude
+Design to recompile that index from the cards' `@dsCard` first lines, was
+still there. No upload since 2026-09-11 had been indexed, across six syncs.
+Nobody saw it because every sync checked `list_files` (the files) and
+`_ds_sync.json` (the anchor), and neither says what the pane shows. A public
+report describes the same thing: nothing triggers the compile for files
+written through `DesignSync` alone, and the workaround is to write the
+manifest.
+
+**The fix, 2026-10-01**: a new manifest went up alone, under a plan that named
+only `_ds_manifest.json`. It was first built by a scratch script from the 90
+markers read live; `build-manifest.mjs` was then written and produces the same
+file byte for byte. That upload had no delete and
+did not touch the sentinel, the bundle, `_ds_sync.json` or `design/`. It holds
+90 components and 90 cards in seven groups, and 368 tokens (the :root
+declarations, `:root, [data-world="paper"]` included). Read back with
+`get_file`, it is byte-identical to the file sent. The September manifest was
+kept only in that session's scratchpad: it described a bundle that no longer
+exists, so there is nothing to roll back to.
+
+**Every upload now ends with it**, after the converter and before
+`_ds_sync.json`:
+
+```sh
+node .design-sync/build-manifest.mjs --bundle ./ds-bundle
+```
+
+It reads each card's own first line from the bundle (without `--bundle` it
+derives them from `config.json`: group = the component's folder,
+`viewport="900x700"` iff `cardMode: "column"`, checked against all 90 live
+cards on 2026-10-01). Put `_ds_manifest.json` in the plan's writes, then
+`get_file` it after the upload: its card count must equal the component
+count. If the converter ever ships its own `_ds_manifest.json` again, diff
+the two before choosing one.
+
+**Not yet known** (2026-10-01): whether the pane renders the current files
+once a card is indexed, or a copy compiled with the index. Antoine's check
+after the manifest write decides it; record the answer here.
+
 ## Re-sync risks
 
+- **`list_files` and the anchor do not prove what the pane shows.** Only
+  `_ds_manifest.json` does (section above). Six uploads passed every check while
+  the pane stayed on 2026-09-11.
 - **Merging `main` in the middle of a re-sync.** A5 renamed variant props and
   stories (`mobile`/`desktop`/`compact` → `sm`/`md`, `Frame` → `Call`,
   `tone="red"` → `alert`, `DotGrid size` → `medium`, `DgFace size` →
