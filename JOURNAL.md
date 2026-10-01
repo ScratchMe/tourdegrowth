@@ -6414,3 +6414,12 @@ Tout est corrigé, et le §17.8 pose la règle. Elle a aussi mis en doute, de m�
 **Trouvé en se vérifiant, hors de cette PR** : `npm audit --omit=dev` n'est plus à zéro sur `main`. Il relève trois alertes, dont une **critique sur `next`**, dans `ImageResponse` de `next/og`, que le site utilise pour ses images de partage. Elles deviennent **A13** de `CHANTIERS.md` : une PR à part. Son merge attend l'accord d'Antoine, parce qu'elle touche une dépendance (`/livrer` §0).
 
 **`main` a bougé pendant la PR** : #232 (le niveau 2 du jeu) a pris le numéro A12, et les alertes sont donc devenues A13. `main` a été fusionné en gardant les deux côtés de `CHANTIERS.md`, de `CLAUDE.md` et de ce journal.
+
+**En production (2026-10-01)** : [#235](https://github.com/ScratchMe/tourdegrowth/pull/235), squash `bf06fc2`, 16 fichiers, arbre identique à la tête. Vérifié en HTTP sur `www.tourdegrowth.com` :
+- les huit pages répondent 200 avec leur titre, leur canonique, leur `hreflang` fr, en et x-default, leur `DefinedTerm`, et la date « 30 septembre 2026 » ;
+- l'index du glossaire liste les quatre termes ;
+- le sitemap porte 82 adresses, les 74 d'avant et les huit neuves, dont 56 pages de terme ;
+- `/llms.txt` liste les quatre termes, et `/llms-full.txt` porte leurs quatre parties ;
+- les liens échangés sont servis : `pql` mène à `lead-to-opportunity`, et `revenue` à `win-rate`.
+
+IndexNow a été lancé à la main le même soir (run 20, succès). La demande d'indexation des huit adresses dans Search Console revient à Antoine : elles sont ajoutées à D10.
