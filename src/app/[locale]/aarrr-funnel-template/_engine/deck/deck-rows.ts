@@ -96,6 +96,8 @@ export interface DeckRows {
    * it names this relay ("" otherwise).
    */
   relay: { id: string; base: string; value: string; label: string; source: string; stamp: string; text: string };
+  /** Pipeline coverage on the relays' legend line (§19.4, A14 T3.2): « Couverture : 2,6× l'objectif du trimestre ». */
+  coverage: { text: string };
   /** One motion's block of `total`: `id` the motion, `mrr` and `newMrr` as the sum prints them ("" when unknown), `stage` its diagnosis and slide. */
   totalBlock: { id: string; label: string; mrr: string; newMrr: string; stage: string; text: string };
   /** The link between the two blocks, and what it is not (`note`). */
@@ -157,6 +159,7 @@ export const ROW_FIELDS: { readonly [K in RowKind]: readonly (keyof DeckRows[K])
   lever: ["id", "label", "from", "to", "gain", "text"],
   together: ["text"],
   relay: ["id", "base", "value", "label", "source", "stamp", "text"],
+  coverage: ["text"],
   totalBlock: ["id", "label", "mrr", "newMrr", "stage", "text"],
   link: ["text", "note"],
   sum: ["id", "text"],

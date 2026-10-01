@@ -882,6 +882,42 @@ export const ENGINE_COPY = {
     slideFooter: { fr: "Chaque grille a sa propre base de 100 · {sources}", en: "Each grid has its own base of 100 · {sources}" },
   },
 
+  /**
+   * TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T3.2, §19.4, C32 Q8) : toute la couverture du pipeline.
+   * A leading indicator under the relays: never a stage, never money, never
+   * a published reference — only the team's own threshold says « sous ».
+   * `{ratio}` and `{threshold}` are written with `ratio` (« 2,6× », « 3× »);
+   * `{month}`: « juillet 2026 ». `coverage`, `coverageBelowSlide` and
+   * `previousNote` go on the `slg:peloton` slide and in its notes, which never
+   * say « tu »; `coverageBelow` and `noTarget` are the board's. In English,
+   * « l'objectif » is the « goal »: « target » is the team's target (C1).
+   */
+  pipeline: {
+    /** A coverage, and the threshold's unit in the settings: « 2,6× ». */
+    ratio: { fr: "{n}×", en: "{n}×" },
+    title: { fr: "Couverture du pipeline", en: "Pipeline coverage" },
+    coverage: { fr: "Couverture : {ratio} l'objectif du trimestre", en: "Coverage: {ratio} the quarter's goal" },
+    coverageBelow: { fr: "Couverture : {ratio} l'objectif du trimestre, sous ton seuil de {threshold}", en: "Coverage: {ratio} the quarter's goal, below your {threshold} threshold" },
+    coverageBelowSlide: { fr: "Couverture : {ratio} l'objectif du trimestre, sous le seuil de l'équipe ({threshold})", en: "Coverage: {ratio} the quarter's goal, below the team's threshold ({threshold})" },
+    previous: { fr: "En {month} : {ratio}", en: "In {month}: {ratio}" },
+    /** The `slg:peloton` slide's speaker note: the month before's, kept off the slide's one line. */
+    previousNote: { fr: "Couverture en {month} : {ratio}.", en: "Coverage in {month}: {ratio}." },
+    openLabel: { fr: "Pipeline ouvert du trimestre (en ACV)", en: "Open pipeline this quarter (in ACV)" },
+    openHint: {
+      fr: "Les opportunités encore ouvertes ce mois-là, à la valeur annuelle de leurs contrats.",
+      en: "Opportunities still open that month, at the annual value of their contracts.",
+    },
+    noTarget: { fr: "Pour lire la couverture, ajoute l'objectif du trimestre dans les Réglages.", en: "To read the coverage, add the quarter's goal in the Settings." },
+    targetLabel: { fr: "Objectif de nouveaux contrats du trimestre (en ACV)", en: "New-contract goal for the quarter (in ACV)" },
+    thresholdLabel: { fr: "Seuil de couverture de l'équipe", en: "Team coverage threshold" },
+    /** The threshold box's unit, read out after the number (« 3 fois l'objectif »). */
+    thresholdUnit: { fr: "fois l'objectif", en: "times the goal" },
+    thresholdHint: {
+      fr: "3 pour 3× l'objectif. Sans seuil, le moteur dit la couverture sans la juger.",
+      en: "3 for 3× the goal. Without one, the engine states the coverage without judging it.",
+    },
+  },
+
   // --- Diagnosis and "what if" (§14.6) -------------------------------------
   diagnosis: {
     clear: { fr: "Une étape freine le moteur", en: "One stage holds the engine back" },

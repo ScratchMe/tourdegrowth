@@ -6,8 +6,9 @@ import { knownIn } from "@/lib/engine/values";
 import { Coverage } from "./Coverage";
 import { Diagnosis } from "./Diagnosis";
 import { Peloton } from "./Peloton";
+import { PipelineBand } from "./PipelineBand";
 import { Relays } from "./Relays";
-import type { EngineView } from "./view";
+import type { EngineActions, EngineView } from "./view";
 import styles from "./Board.module.css";
 import { previousLeakLine } from "./series-view";
 
@@ -25,7 +26,7 @@ type SlgDerived = Extract<MotionDerived, { motion: "slg" }>;
  * one's height reads as a size. No amount here (Q12): a leak's money exists
  * only on its own slide.
  */
-export function MotionColumns({ view }: { view: EngineView }) {
+export function MotionColumns({ view, actions, readOnly }: { view: EngineView; actions?: EngineActions; readOnly?: boolean }) {
   const { strings, state, ctx, derived } = view;
   const plgD = derived.motions.find((m): m is PlgDerived => m.motion === "plg");
   const slgD = derived.motions.find((m): m is SlgDerived => m.motion === "slg");
@@ -67,6 +68,7 @@ export function MotionColumns({ view }: { view: EngineView }) {
           <Diagnosis diagnosis={slgD.diagnosis} strings={strings} locale={ctx.locale} metrics={view.metrics} values={values} motionName={strings.hybrid.motionName.slg} previous={previousLeakLine(view, "slg")} />
           <Card elevation="flat" className={styles.pelotonCard} data-testid="engine-board-relays">
             <Relays relays={slgD.relays} state={state} strings={strings} locale={ctx.locale} diagnosis={slgD.diagnosis} compact />
+            {actions ? <PipelineBand key={snapshot.id} view={view} actions={actions} readOnly={readOnly} /> : null}
           </Card>
         </section>
       </div>

@@ -112,7 +112,15 @@ function seriesApart(): EngineState {
   });
 }
 
-const STATES: Record<string, () => EngineState> = { example: exampleState, linked, filledAsk, teamAsk, margin, whatIf, hybrid, hybridLinked, salesAssisted, series, seriesApart };
+/** Pipeline coverage (A14 T3.2, §19.4): sales-assisted with its open pipeline, a target and a threshold, over two months. */
+function pipeline(): EngineState {
+  const s = withMonthBefore(salesAssisted(), (july) => void (july.pipelineOpen = 420_000));
+  s.setup.pipeline = { quarterTarget: 200_000, threshold: 3 };
+  s.snapshots[s.snapshots.length - 1]!.pipelineOpen = 520_000;
+  return s;
+}
+
+const STATES: Record<string, () => EngineState> = { example: exampleState, linked, filledAsk, teamAsk, margin, whatIf, hybrid, hybridLinked, salesAssisted, series, seriesApart, pipeline };
 
 function model(state: EngineState, locale: "fr" | "en"): DeckModel {
   const p = props[locale];

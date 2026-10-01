@@ -32,6 +32,7 @@ import { defaultStage } from "./stage-tabs";
 import { StageTabs } from "./StageTabs";
 import { fill, formatMonth } from "./text";
 import { MotionColumns } from "./MotionColumns";
+import { PipelineBand } from "./PipelineBand";
 import { TotalBand } from "./TotalBand";
 import { Verdict } from "./Verdict";
 import type { EngineActions, EngineView } from "./view";
@@ -225,7 +226,7 @@ export function Board({
       {hybrid && plgD && slgD ? (
         <>
           <TotalBand view={view} verdict={verdict} />
-          <MotionColumns view={view} />
+          <MotionColumns view={view} actions={actions} readOnly={readOnly} />
           {smallSampleText ? (
             <Callout tone="caveat" data-testid="engine-small-sample">
               <p>{smallSampleText}</p>
@@ -256,6 +257,8 @@ export function Board({
           <Diagnosis diagnosis={slgD.diagnosis} strings={strings} locale={ctx.locale} metrics={view.metrics} values={candidateValues} previous={previousLeakLine(view, "slg")} />
           <Card elevation="raised" className={styles.pelotonCard} data-testid="engine-board-relays">
             {relaysOf(false)}
+            {/* Keyed by the month: a past month read on its own shows its own open pipeline (§19.2.4). */}
+            <PipelineBand key={snapshot.id} view={view} actions={actions} readOnly={readOnly} />
           </Card>
           {smallSampleText ? (
             <Callout tone="caveat" data-testid="engine-small-sample">

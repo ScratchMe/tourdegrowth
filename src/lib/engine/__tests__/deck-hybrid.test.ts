@@ -4,7 +4,7 @@ import { deriveEngine } from "../derive";
 import type { DeckModel, EngineState } from "../types";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
 import { QUESTIONS } from "../../../content/copy-library";
-import { estimated, exampleState, hybridState, measured, missing, ratio, salesAssistedState, tourResult, withEntry, withTarget } from "./fixtures";
+import { estimated, exampleState, hybridState, measured, missing, ratio, salesAssistedState, tourResult, withEntry, withMonthBefore, withTarget } from "./fixtures";
 
 /**
  * The deck with sales-assisted ticked (engine spec §18.8, A7.3.c S4): which
@@ -176,6 +176,22 @@ describe("sales-assisted's slides", () => {
     const past = slide(deckOf(withTarget(withTarget(named, "slg.ret.renewal", 85), "slg.ref.referred-share", 60)), "slg:leak");
     expect(past.title.key).toBe("leakClearUnpriced");
     expect(past.lines.find((l) => l.row === "footer")!.text).toBe(nb("Sans montant^: au-delà d'une cible de 50^%, le moteur ne chiffre plus la part des recommandations"));
+  });
+
+  it("slg:peloton: the pipeline coverage under the relays, against the team's threshold, with the month before's (§19.4)", () => {
+    const s = withMonthBefore(hybridState(), (july) => void (july.pipelineOpen = 420_000));
+    s.setup.pipeline = { quarterTarget: 200_000, threshold: 3 };
+    s.snapshots[s.snapshots.length - 1]!.pipelineOpen = 520_000;
+    const row = (locale: "fr" | "en") => slide(deckOf(s, locale), "slg:peloton").lines.find((l) => l.row === "coverage")!;
+    expect(row("fr").text).toBe(nb("Couverture^: 2,6× l'objectif du trimestre, sous le seuil de l'équipe (3×)"));
+    expect(row("en").text).toBe("Coverage: 2.6× the quarter's goal, below the team's threshold (3×)");
+    // The month before's is a note: the slide keeps the line to the legend's one line.
+    expect(slide(deckOf(s), "slg:peloton").notes).toContain(nb("Couverture en juillet 2026^: 2,1×."));
+    // Without a threshold, it states the coverage and judges nothing; without a target, there is no line.
+    delete s.setup.pipeline.threshold;
+    expect(row("fr").text).toBe(nb("Couverture^: 2,6× l'objectif du trimestre"));
+    s.setup.pipeline = {};
+    expect(slide(deckOf(s), "slg:peloton").lines.some((l) => l.row === "coverage")).toBe(false);
   });
 
   it("without an ACV, the sales-assisted leak counts customers a quarter", () => {

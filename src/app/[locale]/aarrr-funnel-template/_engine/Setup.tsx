@@ -15,10 +15,12 @@ import { Checkbox } from "@/components/core/Checkbox";
 import { Choices } from "@/components/core/Choices";
 import { DateField } from "@/components/core/DateField";
 import { Field } from "@/components/core/Field";
+import { NumberField } from "@/components/core/NumberField";
 import { Segmented } from "@/components/core/Segmented";
 import { Select } from "@/components/core/Select";
 import { TextField } from "@/components/core/TextField";
 import { monthsEndingAt } from "@/lib/forms/date";
+import { moneyUnit } from "./sources";
 import styles from "./Screens.module.css";
 
 const CURRENCIES: readonly Currency[] = ["EUR", "USD", "GBP", "CHF"];
@@ -105,6 +107,9 @@ export function Setup({
   const [referenceMonth, setReferenceMonth] = useState<YearMonth>(initial?.referenceMonth ?? lastClosed);
   const [chosenCohort, setChosenCohort] = useState<YearMonth | null>(initial?.cohortMonth ?? null);
   const [company, setCompany] = useState(initial?.setup.companyLabel ?? "");
+  // Sales-assisted pipeline coverage (§19.4, A14 T3.2): the quarter's target and the team's threshold, both optional.
+  const [quarterTarget, setQuarterTarget] = useState<number | null>(initial?.setup.pipeline?.quarterTarget ?? null);
+  const [threshold, setThreshold] = useState<number | null>(initial?.setup.pipeline?.threshold ?? null);
   // A new engine offers the link ticked; the settings open on what is (C8).
   const [linkTour, setLinkTour] = useState(editing ? Boolean(linked) : true);
   const [tried, setTried] = useState(false);
@@ -127,6 +132,10 @@ export function Setup({
       return;
     }
     if (companyTooLong) return;
+    const pipeline = {
+      ...(quarterTarget !== null && quarterTarget > 0 ? { quarterTarget } : {}),
+      ...(threshold !== null && threshold > 0 ? { threshold } : {}),
+    };
     onStart({
       start: how,
       setup: {
@@ -139,6 +148,9 @@ export function Setup({
         qualificationWindowDays: qualification,
         goLiveWindowDays: goLive,
         ...(company.trim() ? { companyLabel: company.trim() } : {}),
+        // What this card doesn't edit is carried, never dropped: the tools a file brought (§19.5).
+        ...(initial?.setup.tools ? { tools: [...initial.setup.tools] } : {}),
+        ...(Object.keys(pipeline).length > 0 ? { pipeline } : {}),
       },
       referenceMonth,
       cohortMonth,
@@ -279,6 +291,37 @@ export function Setup({
                 <div className={styles.motionSettings}>
                   {windowChoice(s.qualificationWindow, qualification, setQualification)}
                   {windowChoice(s.goLiveWindow, goLive, setGoLive)}
+                  {/* Pipeline coverage (§19.4): in the settings only, where the relays' card sends the reader. */}
+                  {editing ? (
+                    <>
+                      <NumberField
+                        size="sm"
+                        id={`${id}-pipeline-target`}
+                        data-testid="engine-setup-pipeline-target"
+                        label={strings.pipeline.targetLabel}
+                        optional={strings.workbench.optional}
+                        value={quarterTarget}
+                        onChange={setQuarterTarget}
+                        locale={locale}
+                        {...moneyUnit(currency, locale)}
+                        parseError={strings.workbench.notANumber}
+                      />
+                      <NumberField
+                        size="sm"
+                        id={`${id}-pipeline-threshold`}
+                        data-testid="engine-setup-pipeline-threshold"
+                        label={strings.pipeline.thresholdLabel}
+                        hint={strings.pipeline.thresholdHint}
+                        optional={strings.workbench.optional}
+                        value={threshold}
+                        onChange={setThreshold}
+                        locale={locale}
+                        suffix={strings.pipeline.ratio.replace("{n}", "").trim()}
+                        unitName={strings.pipeline.thresholdUnit}
+                        parseError={strings.workbench.notANumber}
+                      />
+                    </>
+                  ) : null}
                 </div>
               ) : null}
             </div>

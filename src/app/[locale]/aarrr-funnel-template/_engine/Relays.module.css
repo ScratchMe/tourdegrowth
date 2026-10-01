@@ -205,3 +205,34 @@
   letter-spacing: var(--meta-tracking);
   margin-bottom: 0;
 }
+
+/*
+ * Pipeline coverage under the relays (§19.4, A14 T3.2): a leading
+ * indicator, not a fourth grid — a rule above it, its line in the body's
+ * voice, the month before's and the box in the meta's.
+ */
+.pipeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-5);
+  border-top: var(--border-rule);
+}
+
+.pipelineTitle {
+  font: var(--meta-sm);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.pipelineLine {
+  font: var(--body-sm);
+  font-weight: 600;
+  color: var(--text-body);
+}
+
+.pipelinePrevious {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
