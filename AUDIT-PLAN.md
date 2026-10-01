@@ -11,7 +11,7 @@ l'entrée habituelle à la fin de `JOURNAL.md`. Ce
 fichier est la référence : si une session se souvient d'un plan différent,
 c'est ce fichier qui a raison, et c'est lui qu'on corrige si le plan change.*
 
-*Dernière mise à jour : 2026-09-13 (phase 0 livrée, phase 1 non commencée).*
+*Dernière mise à jour : 2026-09-30 (phases 0 et 1 livrées, puis le plan mis entre parenthèses, ci-dessous).*
 
 > **Mis entre parenthèses par Antoine le 2026-09-30 : priorité au moteur de
 > growth.** Le code reste en place (`/admin/audit`, `lib/audit`, le
@@ -30,7 +30,7 @@ c'est ce fichier qui a raison, et c'est lui qu'on corrige si le plan change.*
 |---|---|---|---|---|---|
 | **0 — Schéma** | `src/lib/audit/` (types, validateur, compteurs, promotion, quadrants, diff, purge), `src/content/audit-catalog.ts` (39 lignes), garde de frontière, `AUDIT.md` | Les dix réponses d'Antoine à la grille | Les cinq décisions irrattrapables prises et testées | Session | **Livrée** (PR #129, 2026-09-13) |
 | **1 — Saisie** | La route `/admin/audit` : créer une mission, renseigner les lignes, enregistrer les définitions, remplir le Tour, écrire les constats, exporter/importer/purger un fichier JSON — sans qu'un octet parte au serveur | Feu vert d'Antoine sur ce plan | Une mission complète fait l'aller-retour fichier ; la spec « canari » prouve que rien ne sort du navigateur | Session | **Livrée** (2026-09-14) |
-| **1 bis — Première mission réelle** | Un fichier de mission AB Tasty, sans mandat, `pending = 0`, exporté ; un journal des frictions ; les entretiens lancés | Phase 1 mergée | Le fichier est valide et complet ; la liste des frictions est écrite | Antoine (la mission), session (les correctifs) | **Prochain chantier — côté Antoine** |
+| **1 bis — Première mission réelle** | Un fichier de mission AB Tasty, sans mandat, `pending = 0`, exporté ; un journal des frictions ; les entretiens lancés | Phase 1 mergée | Le fichier est valide et complet ; la liste des frictions est écrite | Antoine (la mission), session (les correctifs) | **Entre parenthèses** depuis le 2026-09-30 (c'était le prochain chantier) |
 | **2 — Readouts** | Les quatre artefacts du §6 d'`AUDIT.md`, générés depuis le JSON sans édition manuelle ; les passes multiples et leur diff | Phase 1 bis terminée **et** bon à tirer nº4 signé | Le readout AB Tasty sort de l'outil tel quel et sert en réunion | Session | Après la phase 1 bis |
 | **2 bis — Trois à cinq missions réelles** | Autant de fichiers, un journal par mission (source dominante, lignes toujours absentes, ce que la présentation a obtenu) | Phase 2 livrée | Les données du Go/No-Go existent | Antoine | 2-3 mois après la phase 2 |
 | **Go / No-Go** | Une décision écrite ici | Phase 2 bis terminée, entretiens faits, contrat de travail vérifié | La décision et ses raisons sont dans ce fichier | Antoine | — |

@@ -621,7 +621,7 @@ holds.
   Executable doesn't exist`); re-run `npx playwright install chromium`.
 - **The grades in `.design-sync/.cache/` are not committed.** What makes
   verification durable is the uploaded `_ds_sync.json`. If that anchor is ever
-  lost or the project is recreated, all 79 components re-verify from scratch —
+  lost or the project is recreated, every component (88 on 2026-09-30) re-verifies from scratch —
   which is a few hours of reading sheets, not minutes.
 - **The `--entry ./dist/index.js` trick breaks the day the repo gains a real
   `dist/`.** If a build is ever added, drop the flag and set `cfg.buildCmd`.

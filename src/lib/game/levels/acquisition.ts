@@ -1,10 +1,10 @@
 /**
  * Level 2 « Comment les gens vous trouvent » — its card identifiers and its
  * LevelDefinition. The spec is GAME-BRIEF.md §17, validated by Antoine on
- * 2026-10-01 (`CHANTIERS.md` C30). Still a draft in the code: no page, no
- * copy, no save key (`DraftLevelSlug`) until A12 wires it. The level is a
- * model the engine runs and the fixtures F2.1 to F2.4 pin, so the numbers
- * the spec quotes are the numbers the code produces.
+ * 2026-10-01 (C30, `docs/decisions.md`). Still a draft in the code: no
+ * page, no copy, no save key (`DraftLevelSlug`) until A12 wires it. The
+ * level is a model the engine runs and the fixtures F2.1 to F2.4 pin, so the
+ * numbers the spec quotes are the numbers the code produces.
  *
  * The shop is the mirror of level 1's streaming app: the board wants a
  * number UP (new customers a month, 2 000 in January, 3 000 in December)

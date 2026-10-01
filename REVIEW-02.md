@@ -67,9 +67,9 @@ La colonne **Autonomie** dit ce que chaque item attend d'Antoine : **Auto** = je
 | **E — Décisions produit (Antoine)** | R2-26 | Segmenter le benchmark : « la moyenne des SaaS B2B à ton stade » | F | M | Toi | **Fait** (PR #92, 2026-09-08) — copie de `content/segments.ts` relue le 2026-09-09 |
 | | R2-27 | Historique de progression : les données sont déjà sur l'appareil | F | S | Toi | **Fait** (PR #91, 2026-09-08) — copie relue le 2026-09-09 (à part du bon à tirer, où la session avait oublié ces 6 chaînes) |
 | | R2-28 | Une page de métriques publique : l'outil montre son propre AARRR | F | M | Toi | **Fait, fermée** (PR #88, 2026-09-07) — `METRICS_PAGE_ENABLED` à basculer dans Vercel quand tu veux l'ouvrir ; copie de `content/metrics.ts` relue le 2026-09-09 |
-| | R2-29 | Le roast est le crochet viral et il est invisible avant la 15ᵉ question | F | S | Toi | **Brief envoyé** (PR #89, 2026-09-07) — `design/DS-EXTENSION-BRIEF-02.md` ; en attente du retour Claude Design |
+| | R2-29 | Le roast est le crochet viral et il est invisible avant la 15ᵉ question | F | S | Toi | **Clos par `REVIEW-03.md`** — le brief 02 (PR #89, 2026-09-07) n'est jamais parti : le brief 03 l'a remplacé et absorbé (sa section 4), puis a été porté (PR #102 à #113) |
 | | R2-30 | Fenêtre Tour de France (SPEC.md §10) : à caler dans le calendrier | F | S | Toi | **Tranché** (Antoine, 2026-09-07) : pas d'urgence, à caler dans le plan de croissance pour juin 2027 |
-| **F — Hygiène du dépôt** | R2-31 | Branches distantes obsolètes : audit fait, suppression à faire | T | XS | Toi | **Audit fait** (PR #61) — **10 branches à supprimer au 2026-09-08**, toutes issues de PR mergées ; la suppression automatique fonctionne (les branches mergées depuis le 6 disparaissent seules) |
+| **F — Hygiène du dépôt** | R2-31 | Branches distantes obsolètes : audit fait, suppression à faire | T | XS | Toi | **Fait** — audit (PR #61) ; les 10 branches relevées au 2026-09-08 n'existaient plus le 2026-09-14, emportées par la suppression automatique des branches de tête (`JOURNAL.md`, « Bing branché, branches nettoyées ») |
 
 ### Pourquoi cet ordre
 

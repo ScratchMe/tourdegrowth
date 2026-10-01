@@ -212,6 +212,6 @@ l'échantillon. **Sa valeur n'est pas d'être verte.**
 
 ### 2.2 Le coût, mesuré plutôt qu'estimé
 
-Clé passée en palier payant Tier 1 le 2026-09-07, avec plafonds de dépense. Un Deep dive = 4 générations (2 tons × 2 langues), prompt réel ~5 300 caractères, sorties mesurées par la sonde entre 765 et 2 801 tokens de réflexion et ~450-530 de réponse. Soit **~0,04 à 0,06 $ par Deep dive en 2026**, le double à partir de 2027 (les tarifs Flash doublent au 1ᵉʳ janvier). Le mode Quick ne coûte rien du tout — il n'appelle plus Gemini depuis SPEC-ADDENDUM-01 §0. La limite de 5 Deep dive/h/IP borne un abus à ~2,4 $/jour dans le pire cas.
+Clé passée en palier payant Tier 1 le 2026-09-07, avec plafonds de dépense. Un Deep dive = 4 générations (2 tons × 2 langues), prompt réel ~5 300 caractères, sorties mesurées par la sonde entre 765 et 2 801 tokens de réflexion et ~450-530 de réponse. Soit **~0,04 à 0,06 $ par Deep dive en 2026**, le double à partir de 2027 (les tarifs Flash doublent au 1ᵉʳ janvier). Le mode Quick ne coûte rien du tout — il n'appelle plus Gemini depuis SPEC-ADDENDUM-01 §0. La limite de 5 Deep dive/h/IP borne un abus à 120 Deep dive par jour et par adresse, soit ~5 à 7 $ dans le pire cas (le double en 2027) ; le chiffre de ~2,4 $ écrit ici avant le 2026-10-01 ne comptait pas les quatre générations. La limite est par instance (`CLAUDE.md`, R-15) : plusieurs instances chaudes la desserrent d'autant.
 
 Déplacé de l'état du projet de `CLAUDE.md` le 2026-09-27 : c'est un fait sur l'outil, pas sur l'état courant.

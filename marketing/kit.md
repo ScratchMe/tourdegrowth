@@ -64,7 +64,7 @@ qui sert à **vérifier** un texte avant de le poster.*
 |---|---|
 | Nom | **Moteur de growth** / **Growth engine** |
 | URL | `/fr/aarrr-funnel-template`, `/en/aarrr-funnel-template` — définitive une fois ouverte (une URL publiée ne meurt pas ici) |
-| Portier | Bon à tirer nº6 signé, puis `ENGINE_ENABLED` ; d'ici là, aperçu propriétaire seul (`/admin/preview`, derrière le mot de passe admin) |
+| Portier | Bon à tirer nº8 signé et tout le lot A7.3 livré (`CHANTIERS.md` D2), puis `ENGINE_ENABLED` et redéploiement ; d'ici là, aperçu propriétaire seul (`/admin/preview`, derrière le mot de passe admin) |
 | Campagne UTM | `launch_engine` (`--campaign launch_engine`) |
 | Catégories | Analytics · Productivity · SaaS tools · Startup tools · Marketing — **jamais** un annuaire d'IA |
 
@@ -122,7 +122,7 @@ l'utilise attend que la case soit cochée dans `campaigns/engine/show-hn.md`.
 |---|---|
 | Nom | **Le côté obscur** ; le niveau 1 : « S'ils reviennent » / « If they come back » (nom anglais du jeu à confirmer avec la copie livrée — GAME-BRIEF §8.2) |
 | URL | `/fr/game`, `/en/game` (le hub), `/fr/game/retention`, `/en/game/retention` (le niveau) — les posts pointent vers le niveau |
-| Portier | Recette signée (GAME-BRIEF §7.3), relecture juridique du catalogue, puis `GAME_ENABLED` et redéploiement |
+| Portier | Bon à tirer nº7 signé, recette signée (GAME-BRIEF §7.3), relecture juridique du catalogue, et le moteur ouvert d'abord (C23), puis `GAME_ENABLED` et redéploiement |
 | Campagne UTM | `launch_game` (`--campaign launch_game`) |
 | Catégories | Education · Games · Design · Privacy · Product management — jamais un annuaire d'IA |
 

@@ -13,9 +13,11 @@
 #   1. Only production builds. Previews were never used on this project
 #      (the check is a local production build, then CI) — 2026-09-07.
 #   2. A production merge that only touches files the build never reads is
-#      skipped: root-level Markdown, LICENSE, .github/, marketing/, design/,
-#      .design-sync/, scripts/live/. The list was verified against the build
-#      on 2026-09-15; nothing under src/ imports marketing/ or design/.
+#      skipped: root-level Markdown, LICENSE, .github/, docs/, marketing/,
+#      design/, .design-sync/, scripts/live/. The list was verified against the
+#      build on 2026-09-15; nothing under src/ imports marketing/ or design/.
+#      docs/ joined it on 2026-10-01 (the journal's archived volumes): nothing
+#      under src/ imports it either.
 #      Root-level `*.md` only — never `**/*.md`: a Markdown file inside src/
 #      could one day be imported.
 
@@ -47,7 +49,7 @@ files=$(git diff --no-renames --name-only "$base" HEAD) || exit 1
 # when it selected no line — the one status that means "skip". The status of
 # `var=$(pipeline)` is the pipeline's, i.e. grep's (no pipefail needed: grep
 # is last). The output check below stays as a second line of defence.
-outside=$(printf '%s\n' "$files" | grep -Ev '^([^/]+\.md|LICENSE|\.github/.+|marketing/.+|design/.+|\.design-sync/.+|scripts/live/.+)$')
+outside=$(printf '%s\n' "$files" | grep -Ev '^([^/]+\.md|LICENSE|\.github/.+|docs/.+|marketing/.+|design/.+|\.design-sync/.+|scripts/live/.+)$')
 grep_status=$?
 [ "$grep_status" -eq 1 ] || exit 1
 [ -n "$outside" ] && exit 1

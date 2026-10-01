@@ -39,7 +39,8 @@ dans l'app ; rien ici n'est importé par `src/`.*
 | `campaigns/competitive-brief.md` | *(2026-09-24, à relire)* Le paysage : outils de score growth, gabarits AARRR, éducation aux dark patterns, et les trous de positionnement |
 | `campaigns/engine/`, `campaigns/game/` | *(2026-09-24, à relire)* Les textes prêts à coller de B et C : Show HN (titres, premier commentaire, FAQ), Reddit, Indie Hackers, X / Bluesky, pitch newsletter, descriptions d'annuaire 140/300/800 — chacun avec la liste des portiers à cocher avant de poster |
 | `campaigns/brand-review.md` | *(2026-09-24)* La relecture de marque de ces textes par la session : constats, corrections faites, points juridiques, longueurs vérifiées par script |
-| `assets/` | 22 PNG (2,4 Mo) : landing, question, sélecteur de ton, résultat (FR/EN, 1280 et 390, en 2×), la carte d'aperçu en neutre et en roast, les trois images de partage |
+| `assets/` | 34 PNG (5 Mo). Les 22 du Tour (refaites le 2026-09-30 après I + B) : landing, question, sélecteur de ton, résultat (FR/EN, 1280 et 390, en 2×), la carte d'aperçu en neutre et en roast, les trois images de partage. Les 12 `provisoire-*` du moteur et du jeu, prises fermés par l'aperçu propriétaire (`scripts/kit-provisional.capture.ts`, réglages dans `scripts/kit-capture.config.ts`), à refaire à leur ouverture (`CHANTIERS.md` A7.12.c) |
+| `check-lengths.mjs` | Vérifie chaque longueur annoncée dans les textes (`node marketing/check-lengths.mjs`, `--fix` pour réécrire un compte faux) |
 
 ## Comment les captures ont été faites
 

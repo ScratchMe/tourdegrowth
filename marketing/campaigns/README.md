@@ -25,7 +25,7 @@ déjà. La ligne de départ de chaque lancement se relève par le workflow
 |---|---|---|---|
 | Ce que c'est | Le diagnostic AARRR de 3 minutes, avec la copie revue (revue de copie v1) et les correctifs SEO | Un modèle de funnel AARRR **local** : tes dix-sept chiffres, où tu perds du monde, des slides pour ton CODIR | Un jeu de vingt minutes : une année comme PM growth d'une appli de streaming, un DG qui veut du chiffre, huit dark patterns |
 | URL | `/{en,fr}` → `/quiz` | `/{en,fr}/aarrr-funnel-template` | `/{en,fr}/game`, `/{en,fr}/game/retention` |
-| Portier | L'intégration mergée sur `main` | Bon à tirer nº6 signé + `ENGINE_ENABLED` | Recette du jeu signée (GAME-BRIEF §7.3) + relecture juridique du catalogue + `GAME_ENABLED` |
+| Portier | L'intégration mergée sur `main` | Bon à tirer nº8 signé + lot A7.3 livré + `ENGINE_ENABLED` | Bon à tirer nº7 signé + recette du jeu signée (GAME-BRIEF §7.3) + relecture juridique du catalogue + moteur ouvert d'abord (C23) + `GAME_ENABLED` |
 | Campagne UTM | `relaunch_tour` | `launch_engine` | `launch_game` |
 
 **Pourquoi séquencer au lieu de tout lancer le même jour** — trois raisons,
@@ -213,7 +213,7 @@ l'**espacement** entre deux lancements ne se comprime jamais (règle 2 du §0).
 | S1 | A : annuaires restants de la vague 1 (Launching Next d'abord), avec la campagne `relaunch_tour` | Annuaires | Antoine (formulaires), liens déjà dans `kit.md` | — |
 | S1 | ~~A : un fil X / Bluesky « ce qui a changé », EN puis FR le lendemain~~ **Retiré le 2026-09-29 (§10, réponse D2) : A au seul SEO** | X, Bluesky | — | Retiré |
 | **S2** · 5-11 oct | Lecture A à J+7 : Tours créés, partages, `take_own_tour` ; recalage des cibles | `/admin/stats` | Session (workflow), Antoine décide | — |
-| S2 | **Bon à tirer nº6** (copie du moteur) signé ; recette du moteur ; spec canari verte | Revue | Antoine ; **portier B** | — |
+| S2 | **Bon à tirer nº8** (copie du moteur) signé ; recette du moteur ; spec canari verte | Revue | Antoine ; **portier B** | — |
 | S2 | Comptes : commenter sur HN et dans r/SaaS, r/growthhacking **sans lien**, pour que le compte existe avant le post | HN, Reddit | Antoine, 15 min par jour | Continu |
 | **S3** · 12-18 oct | **B** lundi : PR d'ouverture mergée (`ENGINE_ENABLED`, sitemap, liens internes, `legal.ts`) ; vérification en production (page, canari relancée contre le build, export PDF et PNG) | `main` | Session (PR), Antoine (variable + merge) | Portier B |
 | S3 | **B** mardi ou mercredi, 14-16 h Paris : **Show HN** | HN | Antoine présent **trois heures** | Dépend : ouverture vérifiée |
@@ -345,7 +345,7 @@ votes et envois engagent un pseudonyme ou une adresse) :
 
 - Merger l'intégration (A), les PR d'ouverture (B, C), poser `ENGINE_ENABLED`
   et `GAME_ENABLED` dans Vercel.
-- Signer le bon à tirer nº6 (B), la recette du jeu et obtenir la relecture
+- Signer le bon à tirer nº8 (B), le nº7 et la recette du jeu et obtenir la relecture
   juridique du catalogue (C).
 - Relire chaque texte de ce dossier avant de le coller.
 - Poster sous `tourdegrowth` (HN, Reddit, IH, X, Bluesky) et rester trois
