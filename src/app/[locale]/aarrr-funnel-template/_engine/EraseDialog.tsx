@@ -25,18 +25,22 @@ function sameWord(a: string, b: string): boolean {
 
 export function EraseDialog({
   strings,
+  engines,
   companyLabel,
   onErase,
   onCancel,
 }: {
   strings: EngineStrings;
+  /** How many engines the device holds (§19.1.5): « Tout effacer » erases every one, and says so from two. */
+  engines: number;
   companyLabel: string | undefined;
   onErase: () => void;
   onCancel: () => void;
 }) {
   const inputId = useId();
   const [typed, setTyped] = useState("");
-  const word = companyLabel?.trim() || strings.erase.fallbackWord;
+  // Every engine goes (§19.1.5): retyping the name of the one on screen would say otherwise.
+  const word = (engines > 1 ? undefined : companyLabel?.trim()) || strings.erase.fallbackWord;
   const matches = sameWord(typed, word);
 
   return (
@@ -44,7 +48,9 @@ export function EraseDialog({
       <h2 id="engine-erase-title" className={styles.panelTitle} tabIndex={-1}>
         {strings.erase.title}
       </h2>
-      <p className={styles.lead}>{strings.erase.body}</p>
+      <p className={styles.lead} data-testid="engine-erase-body">
+        {engines > 1 ? fill(strings.erase.bodyMany, { n: engines }) : strings.erase.body}
+      </p>
       <p className={styles.lead} data-testid="engine-erase-prompt">
         {fill(strings.erase.confirmPrompt, { word })}
       </p>

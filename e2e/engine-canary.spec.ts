@@ -51,7 +51,9 @@ test.describe("the growth engine keeps everything in the browser (D16)", () => {
     // chance and fail the spec for the wrong reason. Numerator of a count, so
     // it is stored exactly as typed.
     const NUMBER = `9${Date.now().toString().slice(-6)}`;
-    const canaries = [COMPANY, EVENT, NOTE, DEFINITION, CHANNEL, REPAIR, ASKED, ASK, NUMBER];
+    // A14 T5: a count pasted through « Saisie en tableau », the other way a number comes in.
+    const PASTED = `8${Date.now().toString().slice(-6)}`;
+    const canaries = [COMPANY, EVENT, NOTE, DEFINITION, CHANNEL, REPAIR, ASKED, ASK, NUMBER, PASTED];
 
     const seen: Request[] = [];
     page.on("request", (request) => seen.push(request));
@@ -105,6 +107,16 @@ test.describe("the growth engine keeps everything in the browser (D16)", () => {
     // The copy is a way out the person chose: the definition IS in it.
     expect(await clipboard(page)).toContain(ASKED);
 
+    // --- « Saisie en tableau » (A14 T5): the template downloaded, a table pasted and applied --
+    await page.getByTestId("engine-table").locator("summary").click();
+    const template = page.waitForEvent("download");
+    await page.getByTestId("engine-table-template").click();
+    expect(await readFile((await (await template).path())!, "utf8")).toContain(NUMBER);
+    await page.getByTestId("engine-table-paste").fill(`ref.k-factor,,,${PASTED},99999999,,,\n`);
+    await page.getByTestId("engine-table-read").click();
+    await page.getByTestId("engine-table-apply").click();
+    await expect(page.getByTestId("engine-table-applied")).toBeVisible();
+
     // --- The slides: the ask, their text, a PNG, the .json ------------------
     await page.getByTestId("engine-open-deck").click();
     await expect(page.getByTestId("engine-deck")).toBeVisible();
@@ -122,7 +134,17 @@ test.describe("the growth engine keeps everything in the browser (D16)", () => {
 
     const json = page.waitForEvent("download");
     await page.getByTestId("deck-save-json").click();
-    const exported = await readFile((await (await json).path())!, "utf8");
+    const jsonPath = (await (await json).path())!;
+    const exported = await readFile(jsonPath, "utf8");
+
+    // --- The merge (A14 T5): the same file merged back, through its preview --
+    await page.getByTestId("engine-deck-back").click();
+    await page.getByTestId("engine-import-open-screen").click();
+    await page.getByTestId("engine-import-file").setInputFiles(jsonPath);
+    await page.getByRole("radio", { name: /Merge into/ }).check();
+    await expect(page.getByTestId("engine-import-merge")).toBeVisible();
+    await page.getByTestId("engine-import-open").click();
+    await expect(page.getByTestId("engine-board")).toBeVisible();
 
     // --- What the spec proves -------------------------------------------------
 

@@ -308,6 +308,24 @@ describe("growth engine boundary (engine spec §11.4)", () => {
   });
 
   /**
+   * Engine spec §19.13 (A14 T5): a pasted table is read in the island, by the
+   * page's own text box — never by `lib/engine`, whose modules parse no text
+   * from outside, and never through the clipboard API, which would ask the
+   * browser's permission for what a paste already gives. It holds where the
+   * code lives, not what it does: `csv.test.ts` holds that. Non-vacuity,
+   * measured on 2026-10-01: an empty `export function readTable()` added to
+   * `lib/engine/merge.ts` fails it.
+   */
+  it("rule 7 — what a person pastes is read in the island, by its text box, never in lib/engine", () => {
+    const reader = /\breadTable\b|\btablePreview\b|split\(\s*["']\\t["']\s*\)/;
+    const inLib = ENGINE.filter((f) => f.path.startsWith("lib/engine/") && reader.test(stripComments(f.source))).map((f) => f.path);
+    expect(inLib).toEqual([]);
+    expect(ENGINE.map((f) => f.path)).toContain("app/[locale]/aarrr-funnel-template/_engine/csv.ts");
+    const clipboardRead = ENGINE.filter((f) => /clipboard\.read(?:Text)?\s*\(/.test(stripComments(f.source))).map((f) => f.path);
+    expect(clipboardRead).toEqual([]);
+  });
+
+  /**
    * Non-vacuity, measured when this rule was written: add
    * `import { toBlob } from "html-to-image";` to export-png.ts and the first
    * assertion names it; replace its `import("html-to-image")` with a static

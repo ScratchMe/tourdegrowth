@@ -1,4 +1,4 @@
-import { clearEngine, loadEngine, saveEngine, type LoadResult, type SaveResult } from "@/lib/engine/storage";
+import { clearEngine, deleteEngine, listEngines, loadEngine, saveEngine, saveOverUnreadable, setActiveEngine, storedEngineCount, type EngineListing, type LoadResult, type SaveResult } from "@/lib/engine/storage";
 import type { EngineState } from "@/lib/engine/types";
 import { loadStoredResults, type StoredResult } from "@/lib/quiz/storage";
 import { dropAllDrafts } from "./sheet-drafts";
@@ -35,6 +35,14 @@ export interface EngineSnapshot {
   openedAt: string;
   returningFrom: string | null;
   tourResults: StoredResult[];
+  /**
+   * The engines on this device, for the switcher (§19.1.5, A14 T5): names and
+   * months, never numbers. Read again after every write, switch or delete;
+   * null when the device's index cannot be read.
+   */
+  engines: EngineListing[] | null;
+  /** The engine entries on the device, readable or not: what « Tout effacer » says it erases. */
+  stored: number;
 }
 
 let snapshot: EngineSnapshot | null = null;
@@ -57,6 +65,8 @@ export function getClientSnapshot(): EngineSnapshot {
       openedAt: new Date().toISOString(),
       returningFrom: result.kind === "ok" ? result.state.updatedAt : null,
       tourResults: loadStoredResults(),
+      engines: listEngines(),
+      stored: storedEngineCount(),
     };
   }
   return snapshot;
@@ -78,21 +88,66 @@ export type CommitResult = SaveResult;
  * Writes the state and keeps it on screen whatever the device says.
  * `fresh` for an engine that did not exist a moment ago (setup, import): it
  * has no "last visit", so the resume band must not greet it.
- * `replace` when the person has just confirmed that this engine takes the
- * device's place (an import opened over an unreadable store): the store is
- * cleared first, which is the one way past `saveEngine`'s refusal.
+ * `overUnreadable` when the person has just chosen a file on the « illisible »
+ * screen: the one way past `saveEngine`'s refusal, which — since a device
+ * holds several engines (A14 T5) — keeps every engine it can still read
+ * (`saveOverUnreadable`) rather than clearing the device.
  */
-export function commit(state: EngineState, options: { fresh?: boolean; replace?: boolean } = {}): CommitResult {
-  if (options.replace) clearEngine();
+export function commit(state: EngineState, options: { fresh?: boolean; overUnreadable?: boolean; add?: boolean } = {}): CommitResult {
   // An engine that arrives (setup, an import, over a store or not): no
   // half-typed sheet of the one before survives it (A15.12). A metric the new
   // engine has not filled keys its draft `id@new` too, and would come back
   // pre-filled with the other company's figures.
-  if (options.fresh || options.replace) dropAllDrafts();
+  if (options.fresh || options.overUnreadable) dropAllDrafts();
   const current = getClientSnapshot();
   snapshot = { ...current, result: { kind: "ok", state }, returningFrom: options.fresh ? null : current.returningFrom };
   notify();
-  return saveEngine(state);
+  // `add`: beside the device's other engines (« Nouveau moteur », « Ajouter comme nouveau moteur », §19.1.5, §19.7).
+  const saved = options.overUnreadable ? saveOverUnreadable(state) : saveEngine(state, { add: options.add });
+  relist();
+  return saved;
+}
+
+/** The switcher's list, read again once the device has been written. */
+function relist(): void {
+  const engines = listEngines();
+  const stored = storedEngineCount();
+  const current = getClientSnapshot();
+  if (stored === current.stored && JSON.stringify(engines) === JSON.stringify(current.engines)) return;
+  snapshot = { ...current, engines, stored };
+  notify();
+}
+
+/**
+ * Another engine of the device on screen (§19.1.5). No sheet half-typed for
+ * the one before follows it (A15.12); it opens with no « since your last
+ * visit », which was the other engine's.
+ */
+export function switchEngine(id: string): CommitResult {
+  const result = setActiveEngine(id);
+  if (!result.ok) return result;
+  dropAllDrafts();
+  reload();
+  return result;
+}
+
+/**
+ * One engine deleted, after its confirmation (§19.1.5): the others are never
+ * touched, the next in order goes on screen, and the last one leaves the
+ * device empty — the setup.
+ */
+export function removeEngine(id: string): CommitResult {
+  const result = deleteEngine(id);
+  if (!result.ok) return result;
+  dropAllDrafts();
+  reload();
+  return result;
+}
+
+function reload(): void {
+  const current = getClientSnapshot();
+  snapshot = { ...current, result: loadEngine(), returningFrom: null, engines: listEngines(), stored: storedEngineCount() };
+  notify();
 }
 
 /** "Erase everything": the device and the screen, together. */
@@ -100,6 +155,6 @@ export function erase(): void {
   clearEngine();
   dropAllDrafts();
   const current = getClientSnapshot();
-  snapshot = { ...current, result: { kind: "empty" }, returningFrom: null };
+  snapshot = { ...current, result: { kind: "empty" }, returningFrom: null, engines: [], stored: 0 };
   notify();
 }

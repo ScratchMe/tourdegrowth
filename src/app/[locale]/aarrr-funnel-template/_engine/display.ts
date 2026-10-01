@@ -1,7 +1,8 @@
 import type { MetricShape } from "@/lib/engine/catalog-shape";
 import type { EngineStrings } from "@/lib/engine/strings";
 import { CAUSE_KEY, STATUS_KEY } from "@/lib/engine/strings";
-import type { Currency, EngineCalcContext, Interval, Known } from "@/lib/engine/types";
+import type { Currency, EngineCalcContext, Interval, Known, MetricEntry } from "@/lib/engine/types";
+import { confidenceOf, valueInterval } from "@/lib/engine/values";
 import { fillTemplate, formatInterval } from "@/lib/engine/format";
 
 /**
@@ -40,4 +41,18 @@ export function unknownReason(known: Extract<Known, { kind: "unknown" }>, string
     default:
       return strings.cause[CAUSE_KEY[known.why]];
   }
+}
+
+/**
+ * A stored entry in one short phrase, for a preview that lists what a write
+ * would change (A14 T5: the pasted table, the merge): its value through the
+ * engine's formatter when it has one, else its status — « Demandé »,
+ * « Introuvable » — never an empty cell.
+ */
+export function entryText(entry: MetricEntry, shape: MetricShape, currency: Currency, ctx: EngineCalcContext, strings: EngineStrings): string {
+  const value = valueInterval(entry, shape);
+  const confidence = confidenceOf(entry);
+  if (value && confidence !== "unknown") return displayInterval(value, confidence, shape, currency, ctx, strings);
+  if (entry.value?.kind === "text") return entry.value.text;
+  return strings.status[STATUS_KEY[entry.status]];
 }

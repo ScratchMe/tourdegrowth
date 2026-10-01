@@ -934,3 +934,48 @@ A15.18, revenue à Antoine parce que « dans le jeu » ne tenait pas sur la band
 - `eslint`, `tsc`, `next build` propres ; `vitest --coverage` 2 833 tests, seuils tenus ; la suite Playwright complète avec l'émulateur et `CI=1` : 816 passées, 6 ignorées par construction, 4 tombées, toutes dans `game-entry.spec.ts` et toutes du test, pas du produit. Mes trois tests comparaient le surtitre au bord de la bande, qui commence 2 px plus loin, dans la bordure de la carte : ils le comparent maintenant au bord de la carte, comme tout intitulé de section. Et le test du téléphone mesurait les 22 px entre la carte de partage et la carte du jeu, où le surtitre s'intercale maintenant : il les mesure jusqu'au surtitre, puis du surtitre à la carte. Rejoué sur le même build, `game-entry.spec.ts` passe en entier (12, et 3 ignorées « jeu fermé ») : 820 passées sur 826.
 
 **Claude Design** : le contrat de `GameEntry` change, son aperçu est à jour dans le dépôt ; la re-synchro rejoint B6.
+## A14.c, T5 : plusieurs moteurs, la fusion, la saisie en tableau (2026-10-01, #263)
+
+La septième PR du moteur complet (`docs/engine/moteur-complet.md` §19.1.5, §19.6 et §19.7, C32 Q11 à Q13), drapeau fermé. Le stockage à plusieurs moteurs existait depuis T0 : T5 y met les écrans, la fusion et le tableau.
+
+**Ce que fait T5** :
+- **Plusieurs moteurs** : « Moteur : {nom} » en tête du tableau, un repli qui liste les moteurs de l'appareil (« Ouvrir » sur chacun), « Nouveau moteur » (grisé à dix, avec sa raison) et « Supprimer ce moteur », qui propose d'abord la sauvegarde. « Tout effacer » dit combien de moteurs partent.
+- **L'import à trois choix** : « Ajouter comme nouveau moteur » par défaut, « Remplacer », « Fusionner », grisé avec sa raison quand les deux moteurs ne mesurent pas la même chose (motions, devise, fenêtres, plus de 36 mois).
+- **La fusion**, `lib/engine/merge.ts`, pure : mois par mois, un côté vide prend l'autre, deux lectures différentes gardent la plus récente, les cibles, les comptes partagés et le pipeline du fichier ne comblent que ce qui manque. Chaque changement est listé avant d'écrire.
+- **« Saisie en tableau »**, `_engine/csv.ts`, dans l'îlot : le modèle CSV (« ; » et virgule décimale en français), pré-rempli des chiffres trouvés, et un tableau collé depuis un tableur, lu et montré ligne par ligne (nouveau, modifié avec l'ancienne valeur, inchangé, refusé avec sa raison) avant « Appliquer ». Chaque ligne passe par les règles de la fiche (`entryFromDraft`), et un chiffre que le tableau déplace par un compte partagé est listé aussi.
+
+**La relecture de sécurité** (`relecteur-securite`) a trouvé huit constats, tous corrigés avant la PR :
+- **L'id d'un fichier importé était repris tel quel.** Un id vide verrouillait l'index, et le seul chemin de sortie (« Ouvrir un fichier » sur l'écran « illisible ») effaçait alors tous les moteurs. « Ajouter » donne maintenant toujours un id neuf, « Remplacer » donne l'id du moteur à l'écran. Le stockage refuse (`conflict`) un ajout dont l'id est déjà listé, un id vide, et l'écriture d'un moteur que l'appareil ne liste plus.
+- **Ce dernier cas fermait aussi un piège entre deux onglets** : un moteur supprimé dans un onglet, enregistré dans l'autre, prenait la place du moteur à l'écran et le supprimait.
+- **Un fichier ouvert sur l'écran « illisible » vidait l'appareil** (`clearEngine`) : avec dix moteurs, un seul illisible coûtait les neuf autres. `saveOverUnreadable` garde les moteurs encore lisibles, reconstruit un index illisible à partir des entrées, et laisse en place l'entrée qu'il n'a pas pu lire.
+- **Un tableau collé suivait le changement de moteur**, et « Appliquer » l'aurait écrit dans le second. Le tableau de bord est maintenant monté par moteur (`key`).
+- **Une cellule du modèle pouvait devenir une formule** : un compte arrivé en texte par un fichier fusionné partait tel quel dans le CSV. Seul un nombre fini est écrit, et une cellule qui commence comme une formule est écrite en texte.
+- **La fusion plantait la page sur une clé inconnue** (un chiffre ou un compte d'une version ultérieure) : elle ne prend plus que les clés du catalogue.
+- **Le nom du fichier CSV** passe par le même contrôle de mois que celui du `.json` (`monthFileName`).
+- **Le choix d'import restait d'un fichier à l'autre** : chaque fichier repart du choix par défaut.
+- Pour information, sans correctif : la zone de collage n'a pas de limite dure. Seul l'onglet de la personne peut geler.
+
+**La relecture de copie** (`relecteur-copie`) a relevé neuf constats et deux remarques hors copie, tous corrigés :
+- « Remplacer celui de cet appareil » ne désignait plus un seul moteur : le bouton dit « Remplacer », le choix dit lequel ;
+- « Rien ne s'écrit avant l'aperçu » était faux : c'est avant « Appliquer » ;
+- « cible de {name} » et « celui de {other} » écrivaient « de Expansion mensuelle » : les deux phrases sont tournées autrement, et le test qui interdit « de {month} » couvre maintenant `{name}` et `{other}` ;
+- « motions » et « façons de vendre » dans le même diff : « façons de vendre », comme au réglage ;
+- les limites (36 mois, dix moteurs) sont écrites avec `{max}`, depuis les constantes ;
+- « 1 ligne sans chiffre » a sa variante, et le bouton « Appliquer 0 chiffres » ne s'affiche plus ;
+- un marqueur manquait sur les noms de comptes, et l'anglais de la question du choix est aligné ;
+- hors copie, un modèle téléchargé dans l'autre langue était lu comme vide, sans message : il se relit dans l'ordre du modèle ;
+- les nouveaux boutons entrent dans la garde de longueur ;
+- « Tout effacer », avec plusieurs moteurs, demande « EFFACER » plutôt que le nom du moteur affiché.
+
+Points pour le bon à tirer A14.d : ce que « Remplacer » change exactement (le nom, les réglages, les cibles, « Et si »), « Moteur : Moteur sans nom, créé le… », et « le fichier est dans tes téléchargements », affirmé dès le clic.
+
+**Sabotages** : dix-neuf sur les modules purs, et chacun fait tomber au moins un test. Deux de plus sur un build, pour les specs neuves de la relecture de sécurité : sans la `key` du tableau de bord, le tableau collé suit le changement de moteur ; avec l'ancien effacement, l'import sur l'écran « illisible » perd l'autre moteur. Les deux specs tombent.
+
+**Vérifié** :
+- `vitest --coverage` : 2 876 tests, au-dessus des seuils ;
+- `tsc`, `eslint` et `next build` (avec `GAME_ENABLED=true`) propres ;
+- Playwright complet (`CI=1`) : 833 specs, 802 passées, aucune au second essai, et 31 ignorées (25 faute d'émulateur, 6 par construction) ;
+- après la fusion de C33 (#262), mergée pendant la PR : 2 877 tests unitaires, et Playwright complet sur l'arbre fusionné, cette fois avec l'émulateur Firestore comme la CI : 836 specs, 830 passées, aucune au second essai, 6 ignorées par construction ;
+- `e2e/engine-engines.spec.ts`, nouveau, dix specs : deux moteurs créés, basculés et supprimés ; la limite de dix ; une sauvegarde rouverte ajoutée sous un id neuf ; la fusion avec son aperçu, refusée pour une autre devise ; le tableau en français (modèle, aperçu, application, `engine_stage_saved`) ; les tabulations d'un tableur en anglais et « Annuler » ; un tableau qui ne suit pas le changement de moteur ; l'import sur un moteur illisible qui garde l'autre ; « Tout effacer » qui compte les moteurs ; 390 px sans défilement de côté ;
+- le canari passe maintenant aussi par le modèle, un tableau collé et une fusion ;
+- captures relues : le sélecteur, le tableau collé avec son aperçu, l'import à trois choix avec l'aperçu de la fusion, et la suppression, en français à 1 280 px et en anglais à 390 px.

@@ -221,7 +221,8 @@ describe("placeholders", () => {
   });
 
   it("never writes « de {month} » in French — a month may start with a vowel, and a template cannot elide", () => {
-    const offenders = ALL.filter(([, t]) => /\b(de|du|d['’])\s?\{(month|cohort|next)\}/.test(t.fr)).map(
+    // A number's name too (A14 T5): « Expansion mensuelle », « Opportunités recommandées »…
+    const offenders = ALL.filter(([, t]) => /\b(de|du|d['’])\s?\{(month|cohort|next|name|other)\}/.test(t.fr)).map(
       ([p, t]) => `${p}: ${t.fr}`,
     );
     expect(offenders).toEqual([]);
@@ -338,6 +339,8 @@ describe("lengths", () => {
       ...under("sheet.save", "sheet.haveIt", "sheet.canEstimate", "sheet.willAsk", "sheet.cantFind"),
       ...under("page.cta", "page.tourFirst", "setup.startSteps", "setup.startBoard", "setup.tourLink"),
       ...under("steps.skipToSlg", "steps.skipToWhatIf", "sheet.companyWide"),
+      ...under("engines.open", "engines.new", "engines.delete", "engines.deleteConfirm", "io.addApply", "io.mergeApply"),
+      ...under("table.download", "table.read", "table.apply", "table.applyOne", "table.cancel"),
     ];
     expect(buttons.length).toBeGreaterThan(20);
     const long = buttons.flatMap(([p, t]) =>
