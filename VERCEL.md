@@ -354,6 +354,8 @@ Répartition du poids : runtime Next.js 19,5 Mo (41 %), notre code 10,0 Mo
   `src/__tests__/vercel-config.test.ts` contre de vrais dépôts git). 26 des 154 déploiements ne touchaient
   que `*.md` à la racine, `LICENSE`, `.github/`, `marketing/`, `design/`,
   `.design-sync/` ou `scripts/live/` — aucun n'entre dans le build, vérifié.
+  `docs/` s'y ajoute le 2026-10-01, avec les volumes archivés du journal :
+  rien sous `src/` ne l'importe.
   Conception arrêtée : `VERCEL_GIT_PREVIOUS_SHA` en premier, `HEAD^` en repli,
   `exit 1` sur tout le reste. Glob racine (`*.md`), **jamais** `**/*.md`. Dans le
   script, le statut de `grep` compte : 0 = au moins une ligne retenue, 1 = aucune,

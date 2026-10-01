@@ -891,10 +891,11 @@ les volumes du journal sont l'histoire que le README met en avant, le plan
 d'audit attend sa réouverture tel quel, et le brief 02 jamais envoyé garde sa
 place dans la trace de R2-29.
 
-**Gardé hors de cette PR** : ajouter `docs/` à la liste « doc seule » de
-`scripts/vercel-ignore.sh`. C'est un réglage de build, donc l'accord d'Antoine
-avant le merge (`/livrer` §0) ; d'ici là, un merge qui ne touche que
-`docs/` déploie, sans autre coût que le déploiement.
+**`docs/` entre dans la liste « doc seule » de `scripts/vercel-ignore.sh`**,
+pour qu'archiver un volume ne déploie rien. C'est un réglage de build : la
+session l'avait sorti de la PR en attendant l'accord d'Antoine (`/livrer` §0),
+qui l'a donné en cours de route. Un cas de plus dans `vercel-config.test.ts`,
+qui rougit sans le changement du script (vérifié).
 
 **Ce qui était faux, et ne l'est plus** :
 - `README.md` décrivait le produit du lancement : il dit maintenant ce que fait
