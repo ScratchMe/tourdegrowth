@@ -1264,6 +1264,14 @@ Commit `70bdec2`. **Q14** (C25, tranchée oui) : `engine_setup/<plg|slg|hybrid>`
 - un sabotage CSS peut être vide sans que la garde le soit : un `min-width: 400px` écrit au-dessus du `min-width: 0` de la même règle était annulé au build. Forcé pour de bon, il fait déborder le tableau de 190 à 260 px et les six tests de largeur tombent ;
 - la lecture d'une vignette du deck juste après l'avoir fait défiler est revenue vide une fois sur huit (`content-visibility: auto`). La spec attend maintenant que chaque slide ait son texte avant de le lire, plutôt que d'accepter un vide.
 
+**CodeQL a relevé un vrai défaut sur la PR** (*overly permissive regular expression range*) : la classe des glyphes permis d'`engine-deck-hybrid.spec.ts`, recopiée d'`engine-deck.spec.ts`, avait perdu l'espace insécable qui ouvre sa seconde plage. « ` -ÿ` » partait alors de l'espace ordinaire et laissait passer U+007F à U+009F, les contrôles C1 compris. Les deux plages sont maintenant écrites en échappements (` -~ -ÿ`), pour qu'une copie ne les perde plus. **Une plage de caractères copiée se relit en code point**, pas à l'œil.
+
+**Vérifié** (sur la tête de branche, après la fusion d'A12.e) :
+- `eslint` et `tsc` propres. **2 684 tests unitaires**, couverture au-dessus de ses seuils.
+- Build de production avec les variables de la CI, puis **toute la suite Playwright** : 732 specs, 709 passées, 23 ignorées. Les 18 qui lisent un vrai `/r/<id>` sautent sans l'émulateur Firestore, et les 5 « jeu fermé » par construction. Une première suite complète, avant la fusion, était passée sans échec.
+- **Une spec a échoué une fois, puis passé au second essai** : `platform-native.spec.ts:291`, la hauteur du `Disclosure` cinq images après son ouverture. Elle mesurait 46 px, la hauteur fermée, au lieu d'une valeur intermédiaire. Le test vient de #196, et cette PR ne lui change que la clé de stockage. Rejoué 30 fois seul, puis 36 fois à côté des specs qui impriment un PDF, il n'a plus échoué. Cause non trouvée, test non durci : un prochain échec se lit à partir d'ici.
+- Le poids des bundles serveur (`VERCEL.md` §1.2) passe de 46,72 Mo sur `main` à 46,89 Mo sur la branche, soit +0,17 Mo. Tout l'écart est sur la page du moteur (6,75 → 6,92 Mo), sous le seuil de `/livrer` §0.
+
 **Ce qui reste, et qui n'est pas du code de ce lot** :
 - le bon à tirer de la copie neuve (A7.3.d), construit depuis `grep -rn "TODO: à relire" src/` ;
 - `EngineDerived` garde ses trois champs du libre-service (`peloton`, `diagnosis`, `unit`), que §18.11 prévoyait de retirer après S4 : chaque écran du libre-service et le golden v1 les lisent, et les retirer n'apporte rien à l'utilisateur ;
