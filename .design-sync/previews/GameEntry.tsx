@@ -5,7 +5,9 @@ import { GameEntry } from "tour-de-growth";
  * level. It is NOT a third call to action: flat paper, a secondary button,
  * and a thin band of the night world across its top showing the object of
  * the game in one glance — the churn the CEO watches, and the trust that is
- * missing from his dashboard (the empty cell is drawn, not a glyph).
+ * missing from his dashboard (the empty cell is drawn, not a glyph). Above
+ * the card, outside the band, « In the game » / « Dans le jeu » says those
+ * numbers are the game's, not the reader's (C33, 2026-10-01).
  *
  * Copy is content/game/entry.ts, in both languages: the brief's own for a
  * one-level card, the code session's for the card offering several.
@@ -20,6 +22,7 @@ const wrap = { maxWidth: 560 } as const;
 export const English = () => (
   <div style={wrap}>
     <GameEntry
+      eyebrow="In the game"
       title="The dark side of retention"
       body="Now you know what to do. Here is what not to do: play a year as the growth PM of a streaming app, with a CEO who wants the number, and eight tricks you will recognise everywhere afterwards."
       meta="twenty minutes, free"
@@ -45,6 +48,7 @@ export const English = () => (
 export const French = () => (
   <div style={wrap}>
     <GameEntry
+      eyebrow="Dans le jeu"
       title="Le côté obscur de la rétention"
       body="Tes recommandations sont au-dessus. Voici ce qu'il ne faut pas faire : joue une année comme PM growth d'une appli de streaming, un DG qui veut du chiffre, et huit astuces que tu reconnaîtras ensuite partout."
       meta="vingt minutes, gratuit"
@@ -72,6 +76,7 @@ export const French = () => (
 export const Narrow = () => (
   <div style={{ maxWidth: 342 }}>
     <GameEntry
+      eyebrow="Dans le jeu"
       title="Le côté obscur de la rétention"
       body="Tu sais maintenant quoi faire. Voici ce qu'il ne faut pas faire : joue une année comme PM growth d'une appli de streaming, un DG qui veut du chiffre, et huit astuces que tu reconnaîtras ensuite partout."
       meta="vingt minutes, gratuit"
@@ -98,6 +103,7 @@ export const Narrow = () => (
 export const TwoLevels = () => (
   <div style={wrap}>
     <GameEntry
+      eyebrow="In the game"
       title="The dark side of your stages"
       body="Now you know what to do. Here is what not to do: a level for each of the stages below, a year as a growth PM, a CEO who wants the number, and eight tricks a level you will recognise everywhere afterwards."
       meta="twenty minutes a level, free"
@@ -126,6 +132,7 @@ export const TwoLevels = () => (
 export const TwoLevelsNarrow = () => (
   <div style={{ maxWidth: 342 }}>
     <GameEntry
+      eyebrow="Dans le jeu"
       title="Le côté obscur de tes étapes"
       body="Tes recommandations sont au-dessus. Voici ce qu'il ne faut pas faire : un niveau pour chacune des étapes ci-dessous, une année comme PM growth, un DG qui veut du chiffre, et huit astuces par niveau que tu reconnaîtras ensuite partout."
       meta="vingt minutes par niveau, gratuit"

@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import type { Page } from "@playwright/test";
+import { GAME_ENTRY_EYEBROW } from "@/content/game/entry";
 import { ADMIN_PASSWORD, SKIP_ADMIN_REASON, expect, grantOwnerPreview, test, trackedEvents } from "./helpers";
 
 /**
@@ -28,6 +29,7 @@ import { ADMIN_PASSWORD, SKIP_ADMIN_REASON, expect, grantOwnerPreview, test, tra
 const GAME_OPEN = process.env.GAME_ENABLED === "true";
 
 const TITLE = { en: "The dark side of retention", fr: "Le côté obscur de la rétention" } as const;
+const EYEBROW = GAME_ENTRY_EYEBROW;
 
 async function box(page: Page, testId: string) {
   const b = await page.getByTestId(testId).boundingBox();
@@ -121,6 +123,29 @@ test.describe("P23 — the card on the sample's retention bottleneck", () => {
       await expect(cta).toHaveAttribute("href", `/${locale}/game/retention?from=result`);
       expect(await cta.evaluate((el) => el.tagName)).toBe("A");
       await expect(card).toHaveCount(1);
+    });
+  }
+
+  /**
+   * C33 (2026-10-01, decided by Antoine): « RÉSILIATIONS 6,0 % » is the
+   * game's number, read under the reader's own, and nothing said so. The line
+   * above the card does — outside the band, which keeps its one 44px line
+   * (the desktop test below) and its two lines on a phone.
+   */
+  for (const [locale, width] of [["fr", 1280], ["en", 1280], ["fr", 390]] as const) {
+    test(`says « in the game » right above the band (${locale}, ${width}px)`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(`/r/sample?lang=${locale}`);
+      const eyebrow = page.getByTestId("game-entry-eyebrow");
+      await expect(eyebrow).toHaveText(EYEBROW[locale]);
+      const above = await box(page, "game-entry-eyebrow");
+      const band = await box(page, "game-entry-band");
+      // On the line above the band, at the result's 10px section rhythm.
+      expect(above.y + above.height).toBeLessThanOrEqual(band.y);
+      expect(band.y - (above.y + above.height)).toBeLessThan(16);
+      expect(Math.abs(above.x - band.x)).toBeLessThan(2);
+      // One line, even in French on a phone.
+      expect(above.height).toBeLessThan(24);
     });
   }
 

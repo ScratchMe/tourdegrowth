@@ -23,9 +23,9 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
-| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.d (le bon à tirer de la copie neuve), A7.4 après A7.3, et A7.12.c à l'ouverture. **A7.3.c est livré le 2026-10-01**, les textes de lancement de la ligne « Hors code » d'A7.3 le même jour (S0 à S5, PR d'intégration [#233](https://github.com/ScratchMe/tourdegrowth/pull/233), drapeau fermé). A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)**, sa copie, l'îlot partagé, le téléphone de Pédalix et le branchement faits le même jour (A12.c à A12.f.2)  et ses specs (A12.g) : reste A12.h (le bon à tirer, puis la recette). **A14, le moteur complet** : spécifié et validé le 2026-10-01 (C32) ; A14.c a commencé, T0 (le socle v3) et T1 (la série, moteur pur) livrés le même jour. **A13** (trois alertes de dépendances, dont une critique sur `next`) livré le 2026-10-01. **A15**, la finition UI et UX d'après les reels et les lois de l'UX, ouvert le 2026-10-01 : tout livré le même jour en deux PR, sauf A15.18 (revenue en C33) et A15.19 (B7) |
+| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.d (le bon à tirer de la copie neuve), A7.4 après A7.3, et A7.12.c à l'ouverture. **A7.3.c est livré le 2026-10-01**, les textes de lancement de la ligne « Hors code » d'A7.3 le même jour (S0 à S5, PR d'intégration [#233](https://github.com/ScratchMe/tourdegrowth/pull/233), drapeau fermé). A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)**, sa copie, l'îlot partagé, le téléphone de Pédalix et le branchement faits le même jour (A12.c à A12.f.2)  et ses specs (A12.g) : reste A12.h (le bon à tirer, puis la recette). **A14, le moteur complet** : spécifié et validé le 2026-10-01 (C32) ; A14.c a commencé, T0 (le socle v3) et T1 (la série, moteur pur) livrés le même jour. **A13** (trois alertes de dépendances, dont une critique sur `next`) livré le 2026-10-01. **A15**, la finition UI et UX d'après les reels et les lois de l'UX, ouvert le 2026-10-01 : tout livré le même jour : deux PR, puis A15.18 une fois C33 tranchée ; reste A15.19, pour Claude Design (B7) |
 | **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30, après A7.10, A10 et A11** (B3, puis la re-synchro d'A11 le soir même : 88 composants, 292 cellules, 88 aperçus sur 88 rendus). Ouverts le 2026-10-01 : **B4** (la re-synchro du niveau 2 du jeu, faite le même jour), **B5** (l'image de partage du moteur, C32 Q17), **B6** (la re-synchro d'A15) et **B7** (les puces d'étape, A15.19). Hors d'eux, rien à lancer tant qu'un composant, ou une copie qu'un aperçu reprend, ne change pas |
-| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 à C29 tranchées le 2026-09-30, C26 à C29 livrées le même jour, **C25** (la spécification de A7.3, `ENGINE.md` §18) dans sa propre session. **C30** (le niveau 2 du jeu, `GAME-BRIEF.md` §17) le 2026-10-01. **C31** (le bloc « Niveau suivant » du jeu) et **C32** (le moteur complet, `docs/engine/moteur-complet.md` §19.15) le 2026-10-01. **C33** (la carte du jeu sous les chiffres du lecteur, A15.18) ouverte le 2026-10-01 |
+| **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 à C29 tranchées le 2026-09-30, C26 à C29 livrées le même jour, **C25** (la spécification de A7.3, `ENGINE.md` §18) dans sa propre session. **C30** (le niveau 2 du jeu, `GAME-BRIEF.md` §17) le 2026-10-01. **C31** (le bloc « Niveau suivant » du jeu) et **C32** (le moteur complet, `docs/engine/moteur-complet.md` §19.15) le 2026-10-01. **C33** (la carte du jeu sous les chiffres du lecteur, A15.18) ouverte et tranchée le 2026-10-01. **Rien n'est ouvert** |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, la fin d'A7.3 (le code et les textes de lancement sont livrés le 2026-10-01 ; reste le bon à tirer A7.3.d) |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
 
@@ -36,7 +36,7 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 2026-09-30. Le niveau 2 du jeu (A12.h, avec Antoine) peut avancer en
 parallèle : il ne touche pas les mêmes fichiers. Le moteur ouvre avant le jeu (C23). A14.c
 (le moteur complet) a commencé, T0 livré : le moteur n'ouvre qu'après lui (C32 Q1).
-C30 à C32 sont tranchées le 2026-10-01 ; C33, ouverte le même jour, ne bloque rien.
+Rien n'attend dans la section C : C30 à C33 sont tranchées le 2026-10-01.
 
 **Deux sessions en parallèle** écrivent toutes deux à la fin de `JOURNAL.md`
 et dans ce fichier. La seconde à merger fusionne `main` dans sa branche avant
@@ -239,11 +239,10 @@ livrés le 2026-10-01 dans la première (#252 ; le journal, à « A15 »).
 livré le même jour dans une seconde PR ([#257](https://github.com/ScratchMe/tourdegrowth/pull/257)), comme Antoine l'a choisi : les
 correctifs A15.7 à A15.14 et les décisions A15.15 à A15.17 et A15.20, qu'il a
 tranchées sur les recos (le détail, et ce que chaque test prouve, sont au
-journal, à « A15.7 à A15.20 »). **Reste :**
+journal, à « A15.7 à A15.20 »). **A15.18 suit le même jour**, une fois C33 tranchée : « Dans le jeu » au-dessus de la carte du jeu (le journal, à « C33 »). **Reste :**
 
 | # | Quoi | Où |
 |---|---|---|
-| A15.18 | **La carte du jeu affiche « CHURN 6,0 % » sous les chiffres du lecteur** (attention sélective). « Dans le jeu » sur la bande, retenu par Antoine, n'y tient pas : la bande est une ligne de 44 px sur ordinateur et de 56 px au plus à 360 px (P23, `e2e/game-entry.spec.ts`), et il reste 9 px en français sur ordinateur. Trois placements essayés, trois échecs mesurés | Revient à Antoine : **C33** |
 | A15.19 | **Les puces d'étape ont l'allure d'un bouton secondaire** sans en être un (similarité) | Pour Claude Design : **B7** |
 
 ---
@@ -275,7 +274,9 @@ après l'ancre de B4 : `ErrorScreen` (`reset` devient `retry`), `LoadingScreen`
 `conventions.md` sont à jour dans le dépôt ; une synchro les emporte,
 `LoadingScreen` à recapturer. La seconde PR d'A15 en ajoute un quatrième :
 `MetaLabel` prend `as` (`div`, `h2` ou `h3`), pour que les sections du
-résultat soient des titres (A15.13) ; son rendu par défaut ne change pas.
+résultat soient des titres (A15.13) ; son rendu par défaut ne change pas. C33
+en ajoute un cinquième : `GameEntry` prend `eyebrow`, le surtitre « Dans le
+jeu » au-dessus de la carte ; son aperçu est à jour dans le dépôt.
 
 **B7, ouvert le 2026-10-01 : les puces d'étape** (A15.19, la loi de
 similarité, `design/LOIS-UX.md`). `PillarChip`, les cinq notes sur 20 du
@@ -303,35 +304,16 @@ La session qui les pose recopie chaque réponse, avec sa date, à l'endroit où
 vit la question. Une réponse qui demande du code devient un item de la
 section A, un geste d'Antoine un item de la section D.
 
-### Tranchées : C1 à C32
+### Tranchées : C1 à C33
 
 Les vingt-deux questions de la séance du 2026-09-29, puis C23 à C29 le
-2026-09-30, et C30 à C32 le 2026-10-01. Chaque réponse est écrite là où vit la
+2026-09-30, et C30 à C33 le 2026-10-01. Chaque réponse est écrite là où vit la
 question, et leur index (sujet, réponse, où c'est écrit, suite) est dans
 `docs/decisions.md`, où une question tranchée gagne sa ligne.
 
 ### Encore ouvert
 
-**C33, la carte du jeu sous les chiffres du lecteur** (A15.18, ouverte le
-2026-10-01).
-- **Aujourd'hui** : sous le coup de pouce du résultat, la carte `GameEntry`
-  ouvre sur une bande de nuit, « Résiliations 6,0 % · Confiance, pas sur ton
-  dashboard ». Ce 6,0 % est celui du jeu ; rien ne le dit, et il se lit
-  sous les vrais chiffres du lecteur (la loi d'attention sélective). Antoine a
-  retenu « dans le jeu » sur la bande, le 2026-10-01 : **ça n'y tient pas**.
-  La bande est une ligne de 44 px sur ordinateur et de 56 px au plus à
-  360 px (P23, `e2e/game-entry.spec.ts`), et il reste 9 px en français sur
-  ordinateur. Essayés et mesurés : le libellé en élément à part, en ligne,
-  puis raccourci en « Jeu : » ; les trois cassent P23.
-- **Source** : `src/components/game/GameEntry.tsx`, `GAME-BRIEF.md` §15.4 ;
-  `design/LOIS-UX.md`, attention sélective.
-- **Reco** : **un surtitre au-dessus de la bande**, hors d'elle, « Dans le
-  jeu », dans la voix du `MetaLabel` : la bande garde sa ligne, et la carte
-  dit d'où vient son chiffre avant qu'on le lise. Sinon : redessiner la bande
-  avec Claude Design (une passe, et une re-synchro) ; ou ne rien changer, le
-  titre de la carte nommant déjà le jeu juste en dessous.
-
-C25 est tranchée le 2026-09-30, C30, C31 et C32 le 2026-10-01 (`docs/decisions.md`).
+Rien. C25 est tranchée le 2026-09-30, C30 à C33 le 2026-10-01 (`docs/decisions.md`).
 
 ---
 

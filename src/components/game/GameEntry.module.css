@@ -1,4 +1,14 @@
 /*
+ * The eyebrow and the card (C33, 2026-10-01): the result's own section
+ * rhythm, a MetaLabel 10px above what it names (ResultView's `.section`).
+ */
+.entry {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/*
  * Game plan §2.6 `GameEntry` — a flat paper card with a strip of the night
  * across its top. Semantic tokens only: inside the band, `data-world="night"`
  * (NightSurface) rebinds them to the night's ground, text and edges.

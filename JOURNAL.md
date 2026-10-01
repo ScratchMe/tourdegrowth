@@ -920,3 +920,17 @@ Trois points de vocabulaire vont au bon à tirer A14.d :
 - Playwright complet (`CI=1`) : 823 specs, 792 passées, aucune au second essai, et 31 ignorées (25 faute d'émulateur, 6 par construction) ;
 - `e2e/engine-tools.spec.ts`, nouveau, quatre specs : les outils cochés et enregistrés dans l'ordre des familles, la liste rangée par outil sans accolade brute ; un chiffre qu'aucun outil ne donne, passé dans « À demander » ; la fiche avec Mixpanel d'abord, la seconde source, le contrôle « deux outils », puis la liste du deck ; à 390 px en français, sans défilement de côté ;
 - captures relues : le repli des outils dans les Réglages (FR, 1280 px), « À faire toi-même » rangé par GA4, Stripe et HubSpot avec ses chemins remplis, et la fiche à 390 px en anglais avec le contrôle « deux outils ».
+
+
+## C33 : « Dans le jeu » au-dessus de la carte du jeu (2026-10-01)
+
+A15.18, revenue à Antoine parce que « dans le jeu » ne tenait pas sur la bande de la carte (une ligne de 44 px sur desktop, deux de 56 px au plus à 360 px, P23 ; 9 px de reste en français). **Tranché sur captures** : avant, la reco (un surtitre au-dessus de la carte, hors de la bande) et une variante plus explicite, « Dans le jeu, pas dans tes chiffres », chacune capturée sur `/r/sample` à 1 280, 390 et 360 px depuis un vrai build d'essai, jamais poussé. Antoine a pris la version courte.
+
+**Ce qui change** : `GameEntry` prend `eyebrow`, un `MetaLabel wide` à 10 px au-dessus de la carte, le rythme des sections du résultat (« Ce qui tient le mieux »). Ce n'est pas un titre : celui de la carte l'est. Le surtitre vaut pour la carte à un niveau comme pour celle qui en propose plusieurs (`GAME_ENTRY_EYEBROW`, à relire, pour le bon à tirer nº7 ou celui du niveau 2, A12.h). `className` place maintenant l'ensemble, surtitre et carte, dans la page. La bande ne bouge pas d'un pixel : ses tests P23 de hauteur passent tels quels.
+
+**Vérifié** :
+- un test unitaire (les deux langues, et la carte à plusieurs niveaux) et trois e2e : le surtitre au-dessus de la bande, à moins de 16 px, aligné, sur une ligne, en français et en anglais à 1 280 px et en français à 390 px ;
+- **non-vacuité** : un build où le surtitre n'est pas rendu fait tomber exactement ces trois e2e, les neuf autres de `game-entry.spec.ts` passent ;
+- `eslint`, `tsc`, `next build` propres ; `vitest --coverage` 2 833 tests, seuils tenus ; la suite Playwright complète avec l'émulateur et `CI=1` : E2E_RESULT.
+
+**Claude Design** : le contrat de `GameEntry` change, son aperçu est à jour dans le dépôt ; la re-synchro rejoint B6.

@@ -54,6 +54,14 @@ describe("resultGameEntry — P23, the sample's own board", () => {
     expect(entry.meta).toBe("vingt minutes, gratuit");
   });
 
+  // C33 (2026-10-01): the band's numbers are the game's, and the line above
+  // the card says so — on a one-level card as on the card offering several.
+  it("says « in the game » above every card, in the reader's language", () => {
+    expect(resultGameEntry({ bottleneck: RETENTION_CLEAR, locale: "fr", ...open })!.eyebrow).toBe("Dans le jeu");
+    expect(resultGameEntry({ bottleneck: RETENTION_CLEAR, locale: "en", ...open })!.eyebrow).toBe("In the game");
+    expect(resultGameEntry({ bottleneck: SHARED_WITH_RETENTION, locale: "fr", ...open })!.eyebrow).toBe("Dans le jeu");
+  });
+
   it("quotes the level's starting churn, not a number written in the copy", () => {
     const en = resultGameEntry({ bottleneck: RETENTION_CLEAR, locale: "en", ...open })!;
     expect(en.levels[0].metric).toBe("Churn 6.0%");
