@@ -7,6 +7,7 @@
   "tsconfig": "./.design-sync/tsconfig.ds.json",
   "buildCmd": "npx tsc -p .design-sync/tsconfig.dts.json && node .design-sync/relativize-dts.mjs && node .design-sync/check-inventory.mjs",
   "readmeHeader": "./.design-sync/conventions.md",
+  "guidelinesGlob": [],
   "extraEntries": [
     "./.design-sync/shims/process-env.ts",
     "./.design-sync/shims/ds-styles.ts"

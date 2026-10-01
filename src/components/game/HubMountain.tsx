@@ -35,8 +35,8 @@ const at = (x: number, y: number): CSSProperties => ({ left: `${x}%`, top: `${y}
  * The game hub's mountain — design I + B, retained by Antoine on 2026-09-28.
  *
  * « Le côté obscur » is the race's mountain leg, and its hub is set as a
- * night poster: five cols for the five zones, the one you can play filled in
- * the game's ochre and flagged with its number, the others tagged with
+ * night poster: five cols for the five zones, the ones you can play filled in
+ * the game's ochre and each flagged with its number, the others tagged with
  * theirs, an amber moon over the first. The road book the result page draws
  * (`viz/StageProfile`), read in the other world: the geometry is the same
  * pure function (`lib/viz/stage-profile.ts`), the heights are a drawing.

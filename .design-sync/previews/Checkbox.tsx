@@ -55,6 +55,40 @@ export const SettingsRows = () => (
   </div>
 );
 
+/**
+ * The engine's settings, « How you sell » (`_engine/Setup.tsx`, A7.3.c): two
+ * boxes in a Field group, at least one ticked. With self-serve the only one
+ * ticked, its box is disabled and says why under its sentence
+ * (`disabledReason`, `strings.settings.motionLast`) — a reason of its own,
+ * unlike the list at its limit below, where the group's hint is the reason.
+ * Each box stands in its own block, spaced rather than split by the dashed
+ * rule, because a ticked motion unfolds its own windows under it (two
+ * Segmented, left out of this card) — as `Screens.module.css` lays them out.
+ */
+export const LastMotion = () => (
+  <div style={{ maxWidth: 560 }}>
+    <Field group label="How you sell" hint="Both? Tick both: you get two engines and their total, never one against the other.">
+      {({ describedBy }) => (
+        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-5)" }}>
+          <div>
+            <Checkbox
+              label="Self-serve (PLG): customers sign up and pay on their own"
+              checked
+              onChange={() => undefined}
+              disabled
+              disabledReason="You need at least one way you sell."
+              describedBy={describedBy}
+            />
+          </div>
+          <div>
+            <Live initial={false} label="Sales-assisted (SLG): a sales team signs the contracts" describedBy={describedBy} />
+          </div>
+        </div>
+      )}
+    </Field>
+  </div>
+);
+
 type MeasureRow = { id: string; name: string; repair: string };
 
 /** The ask form's « what to measure first » (`_engine/deck/AskForm.tsx`), as a Field group of rows. */
