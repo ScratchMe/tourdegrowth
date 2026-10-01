@@ -583,6 +583,8 @@ Parti d'un reel envoyé par Antoine, lu par sa légende : six règles pour un bo
 
 **Copie neuve ou réécrite, « à relire »** : `errorOffline`, `errorRateLimited` ; dans le moteur, `notANumber` (« Écris un nombre, par exemple 1 250 ou 18,5 »), `lowAboveHigh` (« Échange les deux… »), `amountNegative`, `durationNegative`. Elles changent la copie du nº8, à remettre d'accord.
 
+**Vérifié sur la tête finale** (fusionnée avec #254) : `eslint`, `tsc`, `next build` propres ; `vitest --coverage` 2 719 tests, seuils tenus ; la suite Playwright complète avec l'émulateur et `CI=1`, 770 passées et 6 ignorées par construction, sur 776.
+
 **Claude Design** : trois contrats changent (`ErrorScreen` prend `retry`, `LoadingScreen` dessine autrement, `Button` `sm` décrit sa bande) ; aperçus et conventions suivent dans le dépôt, la re-synchro reste à faire (B).
 
 ### Les lois de l'UX
