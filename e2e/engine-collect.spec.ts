@@ -4,6 +4,7 @@ import type { Locator, Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { EXAMPLE_EXPECTED, exampleState } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, openFold, SKIP_ADMIN_REASON, test, trackedEvents } from "./helpers";
+import { activeEngineKey, storedEngineEntry, writeEngineSeed } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -33,7 +34,6 @@ test.beforeEach(async ({ context }) => {
  * (`lib/engine/__tests__/fixtures.ts`), so a number checked here is the
  * number checked everywhere. The clock is pinned to the example's "today".
  */
-const STORAGE_KEY = "tdg.engine.v2";
 
 /** The example's "today" (24 September 2026), at noon so no time zone moves the day. */
 const EXAMPLE_CLOCK = new Date(2026, 8, 24, 12);
@@ -46,10 +46,7 @@ const EXAMPLE_CLOCK = new Date(2026, 8, 24, 12);
 async function openExample(page: Page, locale: "en" | "fr" = "en", at: Date = EXAMPLE_CLOCK): Promise<void> {
   await page.clock.setFixedTime(at);
   await openEngine(page, locale);
-  await page.evaluate(
-    ({ key, state }) => window.localStorage.setItem(key, JSON.stringify({ schemaVersion: 2, state })),
-    { key: STORAGE_KEY, state: exampleState() },
-  );
+  await writeEngineSeed(page, exampleState());
   await page.reload();
   await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
   await expect(page.getByTestId("engine-board")).toBeVisible();
@@ -93,10 +90,7 @@ async function openSheet(page: Page, stage: string, metricDomId: string): Promis
 }
 
 async function storedEngine(page: Page): Promise<{ state: Record<string, unknown> & { snapshots: { metrics: Record<string, { status: string }> }[] } } | null> {
-  return page.evaluate((key) => {
-    const raw = window.localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : null;
-  }, STORAGE_KEY);
+  return storedEngineEntry(page);
 }
 
 async function noHorizontalScroll(page: Page): Promise<void> {
@@ -294,7 +288,7 @@ test.describe("asking and collecting", () => {
         };
         window.localStorage.setItem(key, JSON.stringify(store));
       },
-      { key: STORAGE_KEY, day },
+      { key: await activeEngineKey(page), day },
     );
     await page.reload();
     const band = page.getByTestId("engine-resume");

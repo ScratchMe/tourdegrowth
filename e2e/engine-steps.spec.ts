@@ -2,6 +2,7 @@ import type { Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { METRIC_SHAPES } from "@/lib/engine/catalog-shape";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
+import { storedEngineEntry } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -16,7 +17,6 @@ test.beforeEach(async ({ context }) => {
  * now be changed after the fact. Behaviour, read from the device's storage
  * and from what the next screen shows — never from the component's state.
  */
-const STORAGE_KEY = "tdg.engine.v2";
 
 type Stored = {
   state: {
@@ -26,10 +26,7 @@ type Stored = {
 };
 
 async function stored(page: Page): Promise<Stored | null> {
-  return page.evaluate((key) => {
-    const raw = window.localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : null;
-  }, STORAGE_KEY);
+  return storedEngineEntry<Stored>(page);
 }
 
 async function open(page: Page, locale: "en" | "fr" = "en"): Promise<void> {

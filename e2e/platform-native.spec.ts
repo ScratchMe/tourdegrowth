@@ -4,6 +4,7 @@ import { exampleState } from "../src/lib/engine/__tests__/fixtures";
 import { PATH_A } from "../src/lib/game/__tests__/paths";
 import { hangUp, LEVEL_PATH } from "./game-helpers";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
+import { writeEngineSeed } from "./engine-helpers";
 
 /**
  * What the platform now does in our place (audit du kit §6, CHANTIERS.md A4,
@@ -32,7 +33,6 @@ import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } fr
  * slide came out byte for byte the same without it) and taken out.
  */
 
-const STORAGE_KEY = "tdg.engine.v2";
 const EXAMPLE_CLOCK = new Date(2026, 8, 24, 12);
 const GAME_OPEN = process.env.GAME_ENABLED === "true";
 
@@ -265,10 +265,7 @@ test.describe("the engine", () => {
     await page.clock.setFixedTime(EXAMPLE_CLOCK);
     await page.goto("/en/aarrr-funnel-template");
     await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
-    await page.evaluate(({ key, state }) => window.localStorage.setItem(key, JSON.stringify({ schemaVersion: 2, state })), {
-      key: STORAGE_KEY,
-      state: exampleState(),
-    });
+    await writeEngineSeed(page, exampleState());
     await page.reload();
     await expect(page.getByTestId("engine-board")).toBeVisible();
   }
@@ -351,7 +348,12 @@ test.describe("the engine", () => {
     await expect(page.getByTestId("engine-sheet-act-event")).toBeHidden();
     await toggle.click();
     await expect(page.getByTestId("engine-sheet-act-event").getByRole("textbox").first()).toHaveValue("typed, never saved");
-    const stored = await page.evaluate((key) => window.localStorage.getItem(key) ?? "", STORAGE_KEY);
+    // Every key on the device: since A14.c T0 an engine lives under its own.
+    const stored = await page.evaluate(() =>
+      Object.keys(window.localStorage)
+        .map((key) => window.localStorage.getItem(key) ?? "")
+        .join("\n"),
+    );
     expect(stored).toContain(JSON.stringify(saved).slice(1, -1));
     expect(stored).not.toContain("typed, never saved");
   });

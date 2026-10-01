@@ -2,6 +2,7 @@ import { ADMIN_PASSWORD, expect, grantOwnerPreview, openFold, seedOwnedResult, S
 import type { Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { exampleState, hybridState } from "../src/lib/engine/__tests__/fixtures";
+import { writeEngineSeed } from "./engine-helpers";
 import { EMULATOR_HOST, REAL_RESULTS, SKIP_EMULATOR_REASON } from "./real-results";
 
 /**
@@ -360,7 +361,7 @@ test.describe("the quiet text button", () => {
     await page.clock.setFixedTime(new Date(2026, 8, 24, 12));
     await page.goto("/en/aarrr-funnel-template");
     await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
-    await page.evaluate((state) => localStorage.setItem("tdg.engine.v2", JSON.stringify({ schemaVersion: 2, state })), exampleState());
+    await writeEngineSeed(page, exampleState());
     await page.reload();
     await openFold(page.getByTestId("engine-board-whatif"));
     const panel = page.getByTestId("engine-whatif-panel");
@@ -466,7 +467,7 @@ test.describe("the small button inside the engine", () => {
     await page.clock.setFixedTime(new Date(2026, 8, 24, 12));
     await page.goto("/fr/aarrr-funnel-template");
     await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
-    await page.evaluate((state) => localStorage.setItem("tdg.engine.v2", JSON.stringify({ schemaVersion: 2, state })), hybridState());
+    await writeEngineSeed(page, hybridState());
     await page.reload();
     await page.getByTestId("engine-motion-selector").getByRole("button", { name: ENGINE_COPY.hybrid.motionName.slg.fr }).click();
     await page.getByTestId("engine-metric-slg-rev-gross-margin").click();
