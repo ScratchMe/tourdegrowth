@@ -1061,7 +1061,7 @@ Points pour le bon à tirer A14.d : le rôle placé dans la phrase (« Relance
 - les 13 composants modifiés sont notés « bon », cellule par cellule, sur leurs captures ;
 - `conventions.md` relu contre le build : tous les noms qu'il cite existent, rien à changer.
 
-## A14.c, T7 : l'intégration — les comptes, la confidentialité, les écrans ensemble (2026-10-01, #PRNUM)
+## A14.c, T7 : l'intégration — les comptes, la confidentialité, les écrans ensemble (2026-10-01, #266)
 
 La dernière PR du code du moteur complet (`docs/engine/moteur-complet.md` §19.12 à §19.14), drapeau fermé. **Avec elle, A14.c est fini**, sauf T6.2, l'image de partage, qui attend la passe de Claude Design (B5). Reste le bon à tirer A14.d, puis l'ouverture (D2). Neuf PR en un jour : #255, #256, #258, #259, #260, #261, #263, #264 et celle-ci.
 
