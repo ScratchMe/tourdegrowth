@@ -1183,7 +1183,7 @@ Antoine a demandé le brief de B5 le soir de la fin d'A14.c : l'image de partag
 **Ce qui reste** : D12 (le lancer). Le retour va dans `design/ds-extension-06-return/`, une session le recopie dans le dépôt et le porte en T6.2 ; sa copie rejoint le bon à tirer du moteur.
 
 
-## B7 : le retour 05 de Claude Design recopié, C34 et C35 tranchées (2026-10-02)
+## B7 : le retour 05 de Claude Design recopié, C34 et C35 tranchées (2026-10-02, #270)
 
 **Ce qui est revenu** : Claude Design a répondu au brief 05 dans le projet, sous `design/ds-extension-05-return/`, et rien hors de ce dossier n'a changé. La liste des fichiers est celle d'avant, le dossier `ds-extension-06` étant celui de B5. `DefinitionTrigger.jsx` garde l'empreinte de `_ds_sync.json` (`sha256`, 12 caractères : la méthode est trouvée ici, elle servira), et les deux contrats qu'un agent de design aurait pu retoucher ne parlent pas de l'extension 05. La consigne ajoutée au prompt de lancement (« ne change aucun fichier hors de ce dossier ») a tenu.
 

@@ -306,7 +306,7 @@ tu ne le lances pas : c'est D12.** Le retour se dépose dans
 ([#268](https://github.com/ScratchMe/tourdegrowth/pull/268),
 [`design/DS-EXTENSION-BRIEF-05.md`](design/DS-EXTENSION-BRIEF-05.md) et ses
 dix captures), Antoine l'a lancé dans Claude Design, et **le retour est
-recopié le 2026-10-02** dans
+recopié le 2026-10-02** ([#270](https://github.com/ScratchMe/tourdegrowth/pull/270)) dans
 [`design/ds-extension-05-return/`](design/ds-extension-05-return/README.md) :
 22 fichiers, la planche toute en source, rejouée dans Chromium aux huit
 cadres (`COPIE.md`). Claude Design n'a rien touché hors de son dossier. Le
