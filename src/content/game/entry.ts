@@ -63,11 +63,12 @@ const TRUST = t("Confiance", "Trust");
 const NOT_ON_DASHBOARD = t("pas sur ton dashboard", "not on your dashboard");
 
 export const GAME_ENTRY_COPY = {
+  // TODO: à relire — nouveau (2026-10-01, CHANTIERS.md A12.f) : toute la carte du niveau 2.
   acquisition: {
     title: t("Le côté obscur de l'acquisition", "The dark side of acquisition"),
     opening: OPENING,
     body: t(
-      "Voici ce qu'il ne faut pas faire : joue une année comme PM growth d'une boutique de vélos en ligne, un DG qui veut des nouveaux clients, et huit astuces que tu reconnaîtras ensuite partout.",
+      "Voici ce qu'il ne faut pas faire : joue une année comme PM growth d'une boutique de vélos en ligne, un DG qui veut de nouveaux clients, et huit astuces que tu reconnaîtras ensuite partout.",
       "Here is what not to do: play a year as the growth PM of an online bike shop, with a CEO who wants new customers, and eight tricks you will recognise everywhere afterwards.",
     ),
     cta: t("Jouer le niveau « Comment les gens vous trouvent »", 'Play the level "How people find you"'),
