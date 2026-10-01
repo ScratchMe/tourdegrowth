@@ -1,5 +1,5 @@
 import { getDb } from "@/lib/firebase/admin";
-import { gameEntryFor } from "@/lib/game/levels";
+import { gameEntriesFor } from "@/lib/game/levels";
 import type { Locale } from "@/lib/i18n/locale";
 import type { Tone } from "@/lib/quiz/tone";
 import { resolveBottleneck } from "@/lib/scoring/bottleneck";
@@ -55,7 +55,7 @@ export interface GrowthStats {
    * Results whose bottleneck group includes a stage with a level of the game
    * — the population the game's result card is shown to (GAME-BRIEF.md
    * §13.3, orchestrator decision 2: a shared bottleneck counts, a "level"
-   * board never does). Decided by the card's own rule (`gameEntryFor`, with
+   * board never does). Decided by the card's own rule (`gameEntriesFor`, with
    * the game open), so the two cannot drift: retention alone until level 2
    * opened acquisition too (2026-10-01, A12.f). The denominator of the
    * result → game pass rate (§13.5), in the two windows the GoatCounter
@@ -114,7 +114,7 @@ export function summarizeSubmissions(submissions: readonly Submission[], now: nu
 
     // Firestore documents are read with a cast, not validated: one malformed
     // `pillars` must cost this one count, not the whole dashboard.
-    if (Array.isArray(s.pillars) && gameEntryFor({ bottleneck: resolveBottleneck(s.pillars), access: "open" })) {
+    if (Array.isArray(s.pillars) && gameEntriesFor({ bottleneck: resolveBottleneck(s.pillars), access: "open" }).length > 0) {
       gameBottleneckResults.allTime += 1;
       if (within30Days) gameBottleneckResults.last30Days += 1;
     }

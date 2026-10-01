@@ -46,7 +46,8 @@ export interface RealResult {
 }
 
 /**
- * Three boards, one per state of the bottleneck block (`resolveBottleneck`).
+ * One board per state of the bottleneck block (`resolveBottleneck`), and two
+ * for the game's card (a Deep dive, two levels on one card).
  * The totals are what `computeScore` gives for these answers; the spec checks
  * the page shows them, so a scoring change announces itself here.
  */
@@ -82,6 +83,18 @@ export const REAL_RESULTS = {
     locale: "en",
     answers: answersFor({ acquisition: 2, activation: 0, retention: 1, referral: 0, revenue: 1 }),
     total: 54,
+  },
+  /**
+   * Acquisition and retention tied at 0/20: a `shared` bottleneck whose two
+   * stages each have a level of the game — the one card that offers both,
+   * stage by stage (C30 Q5, A12.f.2).
+   */
+  twoLevels: {
+    id: "7d3c9e2a-0b1f-4c5d-8e6f-1a2b3c4d5e05",
+    tone: "neutral",
+    locale: "en",
+    answers: answersFor({ acquisition: 2, activation: 0, retention: 2, referral: 1, revenue: 0 }),
+    total: 47,
   },
 } as const satisfies Record<string, RealResult>;
 

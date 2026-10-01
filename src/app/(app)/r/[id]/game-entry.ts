@@ -1,15 +1,15 @@
-import type { GameEntryView } from "@/components/game/GameEntry";
-import { GAME_ENTRY_COPY } from "@/content/game/entry";
+import type { GameEntryLevel, GameEntryView } from "@/components/game/GameEntry";
+import { GAME_ENTRY_COPY, GAME_ENTRY_OPENING, GAME_ENTRY_SEVERAL } from "@/content/game/entry";
 import type { GameAccess } from "@/lib/game/access";
 import { GAME_ENTRY_EVENT, type GameEntryDetail } from "@/lib/game/events";
 import { metricFormat } from "@/lib/game/format";
-import { gameEntryFor, GAME_LEVELS_BY_PILLAR, type BottleneckLike, type GameLevelTable } from "@/lib/game/levels";
+import { gameEntriesFor, GAME_LEVELS_BY_PILLAR, type BottleneckLike, type GameLevelTable } from "@/lib/game/levels";
 import { ACQUISITION_LEVEL } from "@/lib/game/levels/acquisition";
 import { RETENTION_LEVEL } from "@/lib/game/levels/retention";
 import type { LevelDefinition, LevelSlug } from "@/lib/game/types";
 import type { Locale } from "@/lib/i18n/locale";
 import { localePath } from "@/lib/i18n/routes";
-import { tc } from "@/lib/i18n/translatable";
+import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 
 /**
  * The result page's game card, from bottleneck to display strings — game plan
@@ -18,7 +18,7 @@ import { tc } from "@/lib/i18n/translatable";
  * worth of text in one language, never the copy module or the engine).
  *
  * The ONE place the page gets its card from, and the card exists only through
- * `gameEntryFor` — so the three reasons it can be absent are decided in one
+ * `gameEntriesFor` — so the three reasons it can be absent are decided in one
  * pure function and nowhere else: the game is closed (flag and preview
  * cookie), the board is "level", or no stage of the bottleneck group has an
  * enabled level. `src/__tests__/game-entry-wiring.test.ts` holds the page to
@@ -56,30 +56,38 @@ export function resultGameEntry({
   hasDeepDive: boolean;
   levels?: GameLevelTable;
 }): GameEntryView | null {
-  const target = gameEntryFor({ bottleneck, access, levels });
-  if (!target) return null;
+  const targets = gameEntriesFor({ bottleneck, access, levels });
+  if (targets.length === 0) return null;
 
   const from = hasDeepDive ? "deep_dive" : "result";
-  // Typed against the closed vocabulary (`GAME_ENTRY_DETAILS`): a level added
-  // to `LevelSlug` without its two entry paths in `events.ts` does not
-  // compile — which is the only way to learn it before /admin/stats silently
-  // counts zero for it (R-11).
-  const detail: GameEntryDetail = `${from}/${target.slug}`;
+  const opening = tc(hasDeepDive ? GAME_ENTRY_OPENING.deepDive : GAME_ENTRY_OPENING.result, locale);
 
-  const copy = GAME_ENTRY_COPY[target.slug];
-  const opening = tc(hasDeepDive ? copy.opening.deepDive : copy.opening.result, locale);
+  const offered = targets.map(({ pillar, slug }): GameEntryLevel => {
+    const copy = GAME_ENTRY_COPY[slug];
+    // Typed against the closed vocabulary (`GAME_ENTRY_DETAILS`): a level added
+    // to `LevelSlug` without its two entry paths in `events.ts` does not
+    // compile — which is the only way to learn it before /admin/stats silently
+    // counts zero for it (R-11).
+    const detail: GameEntryDetail = `${from}/${slug}`;
+    return {
+      stage: tc(UI_STRINGS.pillars[pillar], locale),
+      href: `${localePath(locale, `/game/${slug}`)}?from=${from}`,
+      cta: tc(copy.cta, locale),
+      metric: tc(copy.band.metric, locale).replace("{metric}", startingMetric(slug, locale)),
+      event: { name: GAME_ENTRY_EVENT, detail },
+    };
+  });
+  const [first, ...rest] = offered as [GameEntryLevel, ...GameEntryLevel[]];
+  const firstCopy = GAME_ENTRY_COPY[targets[0]!.slug];
+  // One level: its own card, as the brief wrote it. Several: one card offers
+  // them all, stage by stage (C30 Q5), under a title and a body of its own.
+  const card = rest.length === 0 ? firstCopy : GAME_ENTRY_SEVERAL;
 
   return {
-    href: `${localePath(locale, `/game/${target.slug}`)}?from=${from}`,
-    title: tc(copy.title, locale),
-    body: `${opening} ${tc(copy.body, locale)}`,
-    cta: tc(copy.cta, locale),
-    meta: tc(copy.meta, locale),
-    band: {
-      metric: tc(copy.band.metric, locale).replace("{metric}", startingMetric(target.slug, locale)),
-      trust: tc(copy.band.trust, locale),
-      notOnDashboard: tc(copy.band.notOnDashboard, locale),
-    },
-    event: { name: GAME_ENTRY_EVENT, detail },
+    title: tc(card.title, locale),
+    body: `${opening} ${tc(card.body, locale)}`,
+    meta: tc(card.meta, locale),
+    band: { trust: tc(firstCopy.band.trust, locale), notOnDashboard: tc(firstCopy.band.notOnDashboard, locale) },
+    levels: [first, ...rest],
   };
 }
