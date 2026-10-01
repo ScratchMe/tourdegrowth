@@ -2,10 +2,10 @@
 
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { Tag } from "@/components/core/Tag";
-import { CANDIDATE_IDS, metricsOfStage, type MetricShape } from "@/lib/engine/catalog-shape";
-import { positionLabel } from "@/lib/engine/phrases";
+import { LINK_METRIC_SHAPES, candidatesOf, metricsOfStageIn, type MetricShape } from "@/lib/engine/catalog-shape";
+import { positionIn, positionLabel, type AnyDiagnosis } from "@/lib/engine/phrases";
 import { STATUS_KEY } from "@/lib/engine/strings";
-import type { CandidateId, MetricId } from "@/lib/engine/types";
+import type { MetricId, Motion } from "@/lib/engine/types";
 import { knownIn } from "@/lib/engine/values";
 import { PILLARS, type Pillar } from "@/lib/scoring/pillars";
 import { displayInterval, unknownReason } from "./display";
@@ -60,6 +60,7 @@ export function StageTabs({
   onSelect,
   panelKey,
   focusMetric,
+  motion = "plg",
 }: {
   view: EngineView;
   actions: EngineActions;
@@ -68,10 +69,13 @@ export function StageTabs({
   /** Remounts the panel — every row folded again, except `focusMetric` when it belongs here. */
   panelKey: string;
   focusMetric: MetricId | null;
+  /** Whose numbers the tabs hold (A7.3.c S3): one motion at a time, the hybrid's selector picks it (§18.7). */
+  motion?: Motion;
 }) {
   const { strings } = view;
   const snapshot = view.state.snapshots[view.state.snapshots.length - 1]!;
-  const tabs = stageTabs(snapshot, view.derived.diagnosis);
+  const diagnosis = diagnosisOf(view, motion);
+  const tabs = stageTabs(snapshot, diagnosis, motion);
   const strip = useRef<HTMLDivElement>(null);
 
   // Keep the selected tab inside the strip's box — by moving the strip's own
@@ -99,7 +103,8 @@ export function StageTabs({
     document.getElementById(tabId(next))?.focus();
   }
 
-  const inStage = focusMetric && metricsOfStage(current).some((s) => s.id === focusMetric) ? focusMetric : null;
+  const link = linkOf(view, motion, current);
+  const inStage = focusMetric && [...metricsOfStageIn(current, motion), ...(link ? [link] : [])].some((s) => s.id === focusMetric) ? focusMetric : null;
 
   return (
     <div className={styles.stages} data-testid="engine-stages">
@@ -145,15 +150,33 @@ export function StageTabs({
         })}
       </div>
       <StagePanel
-        key={panelKey}
+        key={`${motion}:${panelKey}`}
         stage={current}
         index={PILLARS.indexOf(current) + 1}
         view={view}
         actions={actions}
         initiallyOpen={inStage}
+        motion={motion}
+        diagnosis={diagnosis}
+        link={link}
       />
     </div>
   );
+}
+
+/** A motion's diagnosis — the one its tabs stamp and its panel heads word. Self-serve's is the v1 field. */
+function diagnosisOf(view: EngineView, motion: Motion): AnyDiagnosis {
+  return view.derived.motions.find((m) => m.motion === motion)?.diagnosis ?? view.derived.diagnosis;
+}
+
+/**
+ * The link (§18.6.3): under sales-assisted's three Acquisition numbers, in
+ * the hybrid only, as its own block. It is neither motion's number — no tab
+ * mark counts it, no diagnosis names it — and it is optional.
+ */
+function linkOf(view: EngineView, motion: Motion, stage: Pillar): MetricShape | null {
+  const { plg, slg } = view.state.setup.motions;
+  return motion === "slg" && stage === "acquisition" && plg && slg ? LINK_METRIC_SHAPES[0]! : null;
 }
 
 /**
@@ -214,17 +237,22 @@ function StagePanel({
   view,
   actions,
   initiallyOpen,
+  motion,
+  diagnosis,
+  link,
 }: {
   stage: Pillar;
   index: number;
   view: EngineView;
   actions: EngineActions;
   initiallyOpen: MetricId | null;
+  motion: Motion;
+  diagnosis: AnyDiagnosis;
+  link: MetricShape | null;
 }) {
   const { strings, state, ctx } = view;
-  const diagnosis = view.derived.diagnosis;
   const snapshot = state.snapshots[state.snapshots.length - 1]!;
-  const shapes = metricsOfStage(stage);
+  const shapes = metricsOfStageIn(stage, motion);
   // A folded sheet's key: the engine it was drawn from, and how many times its row has folded.
   // An open row keeps the key it opened with, so opening never redraws what Ctrl+F just found.
   const revision = revisionOf(snapshot);
@@ -246,14 +274,58 @@ function StagePanel({
   };
 
   const namedIds = new Set<MetricId>(diagnosis.state === "clear" || diagnosis.state === "shared" ? diagnosis.named : []);
+  const candidates: readonly MetricId[] = candidatesOf(motion);
   const positions = shapes.flatMap((shape) => {
-    if (!(CANDIDATE_IDS as readonly MetricId[]).includes(shape.id)) return [];
-    const at = diagnosis.positions[shape.id as CandidateId];
+    if (!candidates.includes(shape.id)) return [];
+    const at = positionIn(diagnosis, shape.id as Parameters<typeof positionIn>[1]);
     // A position is only worded for a value someone has: an unknown sits nowhere.
     if (!at || knownIn(state, shape.id, ctx).kind !== "known") return [];
     const label = positionLabel(at.position, at.comparator, strings);
     return label ? [{ id: shape.id, text: `${metricById(view.metrics, shape.id).name} · ${label}`, named: namedIds.has(shape.id) }] : [];
   });
+
+  const row = (shape: MetricShape) => {
+    const metric = metricById(view.metrics, shape.id);
+    const status = snapshot.metrics[shape.id]?.status ?? "todo";
+    const isOpen = open.has(shape.id);
+    const bodyId = `engine-metric-body-${domId(shape.id)}`;
+    const value = rowValue(shape, view);
+    return (
+      <div key={shape.id} className={styles.metric} data-open={isOpen ? "true" : "false"}>
+        <h4 className={styles.metricHeading}>
+          <button
+            type="button"
+            id={`engine-metric-${domId(shape.id)}`}
+            className={styles.metricToggle}
+            aria-expanded={isOpen}
+            aria-controls={bodyId}
+            onClick={() => toggle(shape.id)}
+            data-testid={`engine-metric-${domId(shape.id)}`}
+          >
+            <span className={styles.metricName}>{metric.name}</span>
+            <span className={styles.metricMeta}>
+              {value ? (
+                <span className={styles.metricValue} data-kind={value.kind} data-testid={`engine-row-value-${domId(shape.id)}`}>
+                  {value.text}
+                </span>
+              ) : null}
+              {/* Ink for found, outline for the rest — never the red tag: red on this board
+                  is the stage the diagnosis names (the tab's stamp), and a number's status is
+                  not a diagnosis. Contrast is not the reason: the red Tag reads
+                  --surface-accent, 4.65:1 (design audit S-9). */}
+              <Tag tone={status === "measured" ? "ink" : "outline"} className={styles.metricStatus}>
+                {strings.status[STATUS_KEY[status]]}
+              </Tag>
+            </span>
+            <span className={styles.metricMarker} aria-hidden="true" data-open={isOpen ? "true" : "false"} />
+          </button>
+        </h4>
+        <FoldedBody id={bodyId} open={isOpen} onFound={() => unfold(shape.id)}>
+          <MetricSheet key={open.get(shape.id) ?? foldedKey(shape.id)} id={shape.id} view={view} actions={actions} />
+        </FoldedBody>
+      </div>
+    );
+  };
 
   return (
     <div
@@ -266,6 +338,7 @@ function StagePanel({
       className={styles.panel}
       data-testid="engine-panel"
       data-stage={stage}
+      data-motion={motion}
     >
       <div className={styles.panelHead}>
         <h3 className={styles.panelTitle}>{fill(strings.sheet.stageEyebrow, { i: index, stage: stageName(stage) })}</h3>
@@ -280,48 +353,15 @@ function StagePanel({
         ) : null}
       </div>
 
-      {shapes.map((shape) => {
-        const metric = metricById(view.metrics, shape.id);
-        const status = snapshot.metrics[shape.id]?.status ?? "todo";
-        const isOpen = open.has(shape.id);
-        const bodyId = `engine-metric-body-${domId(shape.id)}`;
-        const value = rowValue(shape, view);
-        return (
-          <div key={shape.id} className={styles.metric} data-open={isOpen ? "true" : "false"}>
-            <h4 className={styles.metricHeading}>
-              <button
-                type="button"
-                id={`engine-metric-${domId(shape.id)}`}
-                className={styles.metricToggle}
-                aria-expanded={isOpen}
-                aria-controls={bodyId}
-                onClick={() => toggle(shape.id)}
-                data-testid={`engine-metric-${domId(shape.id)}`}
-              >
-                <span className={styles.metricName}>{metric.name}</span>
-                <span className={styles.metricMeta}>
-                  {value ? (
-                    <span className={styles.metricValue} data-kind={value.kind} data-testid={`engine-row-value-${domId(shape.id)}`}>
-                      {value.text}
-                    </span>
-                  ) : null}
-                  {/* Ink for found, outline for the rest — never the red tag: red on this board
-                      is the stage the diagnosis names (the tab's stamp), and a number's status is
-                      not a diagnosis. Contrast is not the reason: the red Tag reads
-                      --surface-accent, 4.65:1 (design audit S-9). */}
-                  <Tag tone={status === "measured" ? "ink" : "outline"} className={styles.metricStatus}>
-                    {strings.status[STATUS_KEY[status]]}
-                  </Tag>
-                </span>
-                <span className={styles.metricMarker} aria-hidden="true" data-open={isOpen ? "true" : "false"} />
-              </button>
-            </h4>
-            <FoldedBody id={bodyId} open={isOpen} onFound={() => unfold(shape.id)}>
-              <MetricSheet key={open.get(shape.id) ?? foldedKey(shape.id)} id={shape.id} view={view} actions={actions} />
-            </FoldedBody>
-          </div>
-        );
-      })}
+      {shapes.map(row)}
+      {link ? (
+        <div className={styles.linkBlock} data-testid="engine-link-block">
+          <h4 className={styles.linkTitle}>
+            {strings.hybrid.linkBlock} <span className={styles.linkOptional}>{strings.workbench.optional}</span>
+          </h4>
+          {row(link)}
+        </div>
+      ) : null}
     </div>
   );
 }

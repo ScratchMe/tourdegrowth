@@ -1,5 +1,6 @@
-import { METRIC_SHAPES, metricsOfStage, shapeOf } from "@/lib/engine/catalog-shape";
-import type { Diagnosis, MetricId, Snapshot } from "@/lib/engine/types";
+import { METRIC_SHAPES, SLG_METRIC_SHAPES, metricsOfStageIn, shapeOf } from "@/lib/engine/catalog-shape";
+import type { AnyDiagnosis } from "@/lib/engine/phrases";
+import type { MetricId, Motion, Snapshot } from "@/lib/engine/types";
 import { statusOf } from "@/lib/engine/values";
 import { PILLARS, type Pillar } from "@/lib/scoring/pillars";
 import { pillOf, type PillKind } from "./keys";
@@ -33,15 +34,16 @@ export interface StageTab {
  * counts, not just its ★: churn is a candidate, and a diagnosis naming it
  * names the retention stage.
  */
-export function namedStages(diagnosis: Diagnosis): ReadonlySet<Pillar> {
+export function namedStages(diagnosis: AnyDiagnosis): ReadonlySet<Pillar> {
   const named = diagnosis.state === "clear" || diagnosis.state === "shared" ? diagnosis.named : [];
   return new Set(named.map((id) => shapeOf(id).stage));
 }
 
-export function stageTabs(snapshot: Snapshot, diagnosis: Diagnosis): StageTab[] {
+/** One motion's five tabs (A7.3.c S3): its own numbers and its own diagnosis — the hybrid shows one motion's at a time. */
+export function stageTabs(snapshot: Snapshot, diagnosis: AnyDiagnosis, motion: Motion = "plg"): StageTab[] {
   const named = namedStages(diagnosis);
   return PILLARS.map((stage) => {
-    const marks = metricsOfStage(stage).map((shape) => ({ id: shape.id, kind: pillOf(statusOf(snapshot.metrics[shape.id])) }));
+    const marks = metricsOfStageIn(stage, motion).map((shape) => ({ id: shape.id, kind: pillOf(statusOf(snapshot.metrics[shape.id])) }));
     return {
       stage,
       marks,
@@ -57,11 +59,11 @@ export function stageTabs(snapshot: Snapshot, diagnosis: Diagnosis): StageTab[] 
  * diagnosis names, else the first stage with a number still to fill, else
  * acquisition.
  */
-export function defaultStage(snapshot: Snapshot, diagnosis: Diagnosis): Pillar {
+export function defaultStage(snapshot: Snapshot, diagnosis: AnyDiagnosis, motion: Motion = "plg"): Pillar {
   const named = namedStages(diagnosis);
   const byDiagnosis = PILLARS.find((stage) => named.has(stage));
   if (byDiagnosis) return byDiagnosis;
-  const firstTodo = METRIC_SHAPES.find((shape) => statusOf(snapshot.metrics[shape.id]) === "todo");
+  const firstTodo = (motion === "plg" ? METRIC_SHAPES : SLG_METRIC_SHAPES).find((shape) => statusOf(snapshot.metrics[shape.id]) === "todo");
   return firstTodo?.stage ?? "acquisition";
 }
 

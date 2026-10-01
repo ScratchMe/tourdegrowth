@@ -341,7 +341,7 @@ test.describe("the quiet text button", () => {
     await page.clock.setFixedTime(new Date(2026, 8, 24, 12));
     await page.goto("/en/aarrr-funnel-template");
     await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
-    await page.evaluate((state) => localStorage.setItem("tdg.engine.v1", JSON.stringify({ schemaVersion: 1, state })), exampleState());
+    await page.evaluate((state) => localStorage.setItem("tdg.engine.v2", JSON.stringify({ schemaVersion: 2, state })), exampleState());
     await page.reload();
     await openFold(page.getByTestId("engine-board-whatif"));
     const panel = page.getByTestId("engine-whatif-panel");

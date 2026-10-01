@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { clearEngine, loadEngine, requestPersistence, saveEngine } from "../storage";
-import { ENGINE_STORAGE_KEY } from "../types";
-import { fullState } from "./storage-fixtures";
+import { ENGINE_STORAGE_KEY, LEGACY_STORAGE_KEY_V1, type EngineState } from "../types";
+import { fullState, toV1 } from "./storage-fixtures";
 
 /**
  * Two rules, both about never losing someone's numbers (spec §4.3, D15):
@@ -15,6 +15,11 @@ import { fullState } from "./storage-fixtures";
  * store as `empty` fails exactly the three "unreadable" cases; removing the
  * unreadable guard in `saveEngine` fails exactly "an unreadable store is not
  * overwritten…".
+ *
+ * The v1 copy (§18.3.5, test 5, A7.3.c S0), measured on 2026-09-30: removing v1
+ * on every save fails « v1 alone » and « an export from before the migration »;
+ * never removing it fails « the first export after the migration »; reading a
+ * v1 store as `empty` fails « v1 alone » and « an unreadable v1 ».
  */
 
 type FakeStore = {
@@ -56,10 +61,11 @@ describe("engine storage", () => {
     expect(loadEngine()).toEqual({ kind: "empty" });
   });
 
-  it("round-trips an engine under tdg.engine.v1, wrapped in its versioned store", () => {
+  it("round-trips an engine under tdg.engine.v2, wrapped in its versioned store", () => {
     const state = fullState();
+    expect(ENGINE_STORAGE_KEY).toBe("tdg.engine.v2");
     expect(saveEngine(state)).toEqual({ ok: true });
-    expect(JSON.parse(store.map.get(ENGINE_STORAGE_KEY)!)).toMatchObject({ schemaVersion: 1, state: { id: state.id } });
+    expect(JSON.parse(store.map.get(ENGINE_STORAGE_KEY)!)).toMatchObject({ schemaVersion: 2, state: { id: state.id } });
     expect(loadEngine()).toEqual({ kind: "ok", state });
   });
 
@@ -85,15 +91,15 @@ describe("engine storage", () => {
   });
 
   it("a store written by a NEWER version is `unreadable`, not half-read", () => {
-    store.map.set(ENGINE_STORAGE_KEY, JSON.stringify({ schemaVersion: 2, state: fullState() }));
+    store.map.set(ENGINE_STORAGE_KEY, JSON.stringify({ schemaVersion: 3, state: fullState() }));
     expect(loadEngine()).toEqual({ kind: "unreadable" });
-    const innerFuture = { ...fullState(), schemaVersion: 2 };
-    store.map.set(ENGINE_STORAGE_KEY, JSON.stringify({ schemaVersion: 1, state: innerFuture }));
+    const innerFuture = { ...fullState(), schemaVersion: 3 };
+    store.map.set(ENGINE_STORAGE_KEY, JSON.stringify({ schemaVersion: 2, state: innerFuture }));
     expect(loadEngine()).toEqual({ kind: "unreadable" });
   });
 
   it("something that isn't an engine under the key is `unreadable`", () => {
-    store.map.set(ENGINE_STORAGE_KEY, JSON.stringify({ schemaVersion: 1, state: { hello: "world" } }));
+    store.map.set(ENGINE_STORAGE_KEY, JSON.stringify({ schemaVersion: 2, state: { hello: "world" } }));
     expect(loadEngine()).toEqual({ kind: "unreadable" });
   });
 
@@ -105,7 +111,7 @@ describe("engine storage", () => {
   });
 
   it("an unreadable store is not overwritten by a save; only an explicit clear makes room", () => {
-    const newer = JSON.stringify({ schemaVersion: 2, state: { id: "from-the-future" } });
+    const newer = JSON.stringify({ schemaVersion: 3, state: { id: "from-the-future" } });
     store.map.set(ENGINE_STORAGE_KEY, newer);
     expect(saveEngine(fullState())).toEqual({ ok: false, error: "unreadable" });
     expect(store.map.get(ENGINE_STORAGE_KEY)).toBe(newer);
@@ -113,6 +119,57 @@ describe("engine storage", () => {
     clearEngine();
     expect(loadEngine()).toEqual({ kind: "empty" });
     expect(saveEngine(fullState())).toEqual({ ok: true });
+  });
+
+  describe("the v1 copy (§18.3.4) — read once, migrated, kept until a file supersedes it", () => {
+    const v1Store = (state: EngineState) => JSON.stringify({ schemaVersion: 1, state: toV1(state) });
+
+    it("v1 alone: loaded migrated; the first save writes v2 and leaves v1 intact", () => {
+      const state = fullState();
+      store.map.set(LEGACY_STORAGE_KEY_V1, v1Store(state));
+      expect(loadEngine()).toEqual({ kind: "ok", state, migratedFrom: 1 });
+      expect(saveEngine(state)).toEqual({ ok: true });
+      expect(JSON.parse(store.map.get(ENGINE_STORAGE_KEY)!)).toMatchObject({ schemaVersion: 2 });
+      expect(store.map.get(LEGACY_STORAGE_KEY_V1)).toBe(v1Store(state));
+      // From now on the device reads v2, not v1.
+      expect(loadEngine()).toEqual({ kind: "ok", state });
+    });
+
+    it("the first export after the migration removes v1 — the file now holds all of it", () => {
+      const state = fullState();
+      store.map.set(LEGACY_STORAGE_KEY_V1, v1Store(state));
+      saveEngine(state);
+      const exported = { ...state, lastExportedAt: "2026-09-30T12:00:00.000Z" };
+      expect(saveEngine(exported)).toEqual({ ok: true });
+      expect(store.map.has(LEGACY_STORAGE_KEY_V1)).toBe(false);
+      expect(loadEngine()).toEqual({ kind: "ok", state: exported });
+    });
+
+    it("an export from before the migration, or no export at all, keeps v1", () => {
+      const state = { ...fullState(), lastExportedAt: "2026-09-24T11:00:00.000Z" };
+      store.map.set(LEGACY_STORAGE_KEY_V1, v1Store(state));
+      // The v1 state was exported once, by the v1 build: the file it gave is not the migrated engine's.
+      expect(saveEngine(state)).toEqual({ ok: true });
+      expect(saveEngine({ ...state, updatedAt: "2026-09-30T12:00:00.000Z" })).toEqual({ ok: true });
+      expect(store.map.has(LEGACY_STORAGE_KEY_V1)).toBe(true);
+    });
+
+    it("a v1 we cannot read is `unreadable`, never written over; « Tout effacer » clears both versions", () => {
+      store.map.set(LEGACY_STORAGE_KEY_V1, "{\"schemaVersion\":1,\"state\":{");
+      expect(loadEngine()).toEqual({ kind: "unreadable" });
+      expect(saveEngine(fullState())).toEqual({ ok: false, error: "unreadable" });
+      expect(store.map.has(ENGINE_STORAGE_KEY)).toBe(false);
+      clearEngine();
+      expect(store.map.size).toBe(0);
+      expect(loadEngine()).toEqual({ kind: "empty" });
+    });
+
+    it("v2 present: v1 is ignored — the v2 store is the engine", () => {
+      const state = fullState();
+      store.map.set(ENGINE_STORAGE_KEY, JSON.stringify({ schemaVersion: 2, state }));
+      store.map.set(LEGACY_STORAGE_KEY_V1, v1Store({ ...state, id: "the-old-one" }));
+      expect(loadEngine()).toEqual({ kind: "ok", state });
+    });
   });
 
   it("on the server, or with storage refused at the property, reads are `empty` and writes are `unavailable`", () => {

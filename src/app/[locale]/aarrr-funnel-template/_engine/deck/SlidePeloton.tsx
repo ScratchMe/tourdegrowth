@@ -1,7 +1,7 @@
 import { DotGrid, DotLegend } from "@/components/viz/DotGrid";
 import { fillTemplate } from "@/lib/engine/format";
 import { positionLabel } from "@/lib/engine/phrases";
-import type { CandidateId } from "@/lib/engine/types";
+import type { PlgCandidateId } from "@/lib/engine/types";
 import { columnGrid, signupsGrid } from "../visual-model";
 import { rowOf, rowsOf } from "./deck-rows";
 import { SlideFrame, type SlideProps } from "./SlideFrame";
@@ -34,7 +34,7 @@ export function SlidePeloton({ slide, context }: SlideProps) {
 
   const named = derived.diagnosis.state === "clear" || derived.diagnosis.state === "shared" ? derived.diagnosis.named : [];
   // The same words as the board's position label: the side follows the metric's direction.
-  const stampOf = (metric: CandidateId): string | null => {
+  const stampOf = (metric: PlgCandidateId): string | null => {
     if (!named.includes(metric)) return null;
     const p = derived.diagnosis.positions[metric];
     return p ? positionLabel(p.position, p.comparator, strings) : null;

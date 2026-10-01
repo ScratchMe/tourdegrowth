@@ -1,0 +1,207 @@
+/*
+ * The relays — engine spec §18.5.1. The peloton's grammar (Peloton.module.css)
+ * on three grids that do NOT share a base: each column says its own base of
+ * 100 and its own three months above its numeral. The grids are viz/DotGrid's.
+ */
+.relays {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  min-width: 0;
+}
+
+.upstream {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  font: var(--meta-sm);
+  color: var(--text-muted);
+}
+
+.arrow {
+  flex: none;
+  width: 28px;
+  height: 12px;
+  margin-top: 4px;
+  color: var(--viz-ink);
+}
+
+/* Five shared row tracks, as the peloton's four: the bases, numerals, labels and grids each start on one line. */
+.columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: auto auto auto auto 1fr;
+  column-gap: var(--space-11);
+  row-gap: var(--space-4);
+}
+
+.column {
+  display: grid;
+  grid-row: span 5;
+  grid-template-rows: subgrid;
+  grid-template-areas:
+    "base"
+    "numeral"
+    "label"
+    "grid"
+    "source";
+  row-gap: var(--space-4);
+  min-width: 0;
+  align-content: start;
+}
+
+/* Its own base of 100 and its own months: the line that tells the three grids apart. */
+.base {
+  grid-area: base;
+  font: var(--meta-xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding-bottom: var(--space-3);
+  border-bottom: var(--border-rule);
+}
+
+.numeral {
+  grid-area: numeral;
+  font: var(--chart-value-xl);
+  letter-spacing: var(--display-letter-spacing);
+  font-variant-numeric: var(--tabular);
+  color: var(--text-body);
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+
+.label {
+  grid-area: label;
+  align-self: start;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  font: var(--display-wordmark);
+  letter-spacing: var(--display-letter-spacing);
+  text-transform: uppercase;
+  color: var(--text-body);
+  margin-bottom: var(--space-3);
+}
+
+/* The peloton's stamp, on the same accent role (--surface-accent / --text-inverse, 4.65:1). */
+.stamp {
+  display: inline-block;
+  font: var(--meta-2xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-inverse);
+  background: var(--surface-accent);
+  border-radius: var(--radius-tag);
+  padding: var(--space-1) var(--space-3);
+  rotate: -1.5deg;
+  white-space: nowrap;
+}
+
+.grid {
+  grid-area: grid;
+}
+
+.source {
+  grid-area: source;
+  font: var(--meta-xs);
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.ownBase {
+  font: var(--body-sm);
+  color: var(--text-body);
+  padding-top: var(--space-5);
+  border-top: var(--border-rule);
+}
+
+/* Shown only in the compact column, between two relays: never a chain, a new base. */
+.newBase {
+  font: var(--meta-2xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: var(--space-3) 0;
+  border-top: var(--border-rule);
+}
+
+/* One relay under another: the mini-grid on the left, the words on the right. */
+@media (max-width: 760px) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    gap: 0;
+  }
+
+  .column {
+    grid-row: auto;
+    grid-template-columns: 118px minmax(0, 1fr);
+    grid-template-areas:
+      "base base"
+      "grid numeral"
+      "grid label"
+      "grid source";
+    grid-template-rows: auto auto auto 1fr;
+    column-gap: var(--space-7);
+    row-gap: var(--space-2);
+    padding: var(--space-7) 0;
+    border-bottom: var(--border-rule);
+  }
+
+  .column:first-child {
+    padding-top: 0;
+  }
+
+  .grid {
+    align-self: start;
+  }
+
+  .numeral {
+    font: var(--display-section);
+  }
+
+  .label {
+    font: var(--label-button);
+    text-transform: uppercase;
+    letter-spacing: var(--meta-tracking);
+    margin-bottom: 0;
+  }
+}
+
+/* The hybrid's column: the phone's layout at every width (§18.7). */
+.compact .columns {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: none;
+  gap: 0;
+}
+
+.compact .column {
+  grid-row: auto;
+  grid-template-columns: 118px minmax(0, 1fr);
+  grid-template-areas:
+    "base base"
+    "grid numeral"
+    "grid label"
+    "grid source";
+  grid-template-rows: auto auto auto 1fr;
+  column-gap: var(--space-7);
+  row-gap: var(--space-2);
+  padding: var(--space-5) 0 var(--space-7);
+}
+
+.compact .grid {
+  align-self: start;
+}
+
+.compact .numeral {
+  font: var(--display-section);
+}
+
+.compact .label {
+  font: var(--label-button);
+  text-transform: uppercase;
+  letter-spacing: var(--meta-tracking);
+  margin-bottom: 0;
+}

@@ -1,5 +1,6 @@
-import { METRIC_SHAPES } from "./catalog-shape";
-import type { Coverage, Snapshot } from "./types";
+import { METRIC_SHAPES, SLG_METRIC_SHAPES, shapesOf } from "./catalog-shape";
+import type { MetricShape } from "./catalog-shape";
+import type { Coverage, EngineSetup, Motion, Snapshot } from "./types";
 import { statusOf } from "./values";
 
 /**
@@ -12,10 +13,14 @@ import { statusOf } from "./values";
  * point between its counters and its denominator, and nobody saw it until a
  * test summed them. Always shown as a fraction, never as a percentage of
  * completion — "9 of 15" says what is behind it, "60 %" doesn't.
+ *
+ * The link is never counted (§18.2.2, S10): it is optional, and counting it
+ * as a hole would penalise the hybrid that has no PQL.
  */
-export function coverage(snapshot: Snapshot): Coverage {
+export function coverage(snapshot: Snapshot, shapes: readonly MetricShape[] = METRIC_SHAPES): Coverage {
   const result: Coverage = { denominator: 0, found: 0, approximate: 0, missing: 0, inProgress: 0, requested: 0, todo: 0 };
-  for (const shape of METRIC_SHAPES) {
+  for (const shape of shapes) {
+    if (shape.optional) continue;
     const status = statusOf(snapshot.metrics[shape.id]);
     if (status === "not-applicable") continue;
     result.denominator += 1;
@@ -41,4 +46,14 @@ export function coverage(snapshot: Snapshot): Coverage {
     }
   }
   return result;
+}
+
+/** One motion's own numbers (§18.6.1, its column): 17 for self-serve, 15 for sales-assisted. */
+export function motionCoverage(snapshot: Snapshot, motion: Motion): Coverage {
+  return coverage(snapshot, motion === "plg" ? METRIC_SHAPES : SLG_METRIC_SHAPES);
+}
+
+/** The ticked motions together, the link left out — the board's chips, the common slides' footer, `visibility` (§18.9.2). */
+export function setupCoverage(snapshot: Snapshot, setup: EngineSetup): Coverage {
+  return coverage(snapshot, shapesOf(setup.motions));
 }

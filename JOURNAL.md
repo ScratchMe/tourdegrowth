@@ -841,6 +841,58 @@ Ce que la refonte change pour un joueur ne se voit qu'avec le jeu ouvert. C'est 
 
 IndexNow a été lancé à la main le même soir (run 20, succès). La demande d'indexation des huit adresses dans Search Console revient à Antoine : elles sont ajoutées à D10.
 
+## A7.3.c, S0 : le contrat v2, la migration et le golden v1 (2026-09-30)
+
+Première étape du code du B2B assisté et de l'hybride (`ENGINE.md` §18.11), juste après la validation de C25. Elle est construite dans la session d'Antoine, sur sa branche de travail, qui tient lieu de branche d'intégration. Chaque étape y est un commit, et une seule PR brouillon vers `main` porte le tout. Le drapeau reste fermé.
+
+**Le golden v1, avant toute ligne** (`37e9dfe`). Sept états v1 (l'exemple §6.0 avec et sans cibles, avec « Et si » et un Tour relié, l'état de stockage complet, vide, à moitié, en conflit) et ce que le code v1 en tirait, en français et en anglais :
+- le tableau dérivé : couverture, peloton, diagnostic, unit economics, contrôles, constats, miroir ;
+- le deck : titres, lignes et notes de chaque slide, contrôles, pastille ;
+- le texte exporté, le scénario « Et si », les onglets, la reprise et la collecte.
+
+Écrits une fois par `ENGINE_GOLDEN_V1_WRITE=1`, jamais régénérés : seule la projection du test peut suivre un champ qui bouge. Depuis S0, chaque état passe par `migrateToV2` avant d'être comparé.
+
+**Le contrat v2** :
+- `setup.type` + `setup.motions`, et les deux fenêtres de l'assisté ;
+- les ids `slg.*` (15, marge comprise depuis Q4) et `link.pql-handoff` ;
+- `schemaVersion` 2 et la clé `tdg.engine.v2` ;
+- la base d'estimation `company-wide` (Q4) ;
+- deux rôles et deux outils neufs, les trois comptes partagés de l'assisté, les leviers de l'assisté puis la liaison (Q7), et les slides `total` et `slg:*`.
+
+`METRIC_SHAPES` reste le catalogue du libre-service, que chaque module lit comme avant. L'assisté et la liaison vivent dans des listes à part, réunies par `shapesOf(motions)` et `shapeOf`. C'est ce qui garde le libre-service identique au caractère près, sans toucher un seul module de calcul.
+
+**Le fichier, le stockage, la validation** :
+- un fichier v1 est migré puis validé, et l'écran d'import le dit ;
+- un réglage sans motion ni type connu est refusé (`unsupported-setup`) ;
+- le stockage lit v2, sinon migre v1 à la lecture, écrit v2 à la première sauvegarde et garde v1 jusqu'à un export postérieur à tout ce que v1 contient ;
+- « au-dessus de 100 » n'est plus refusé que pour un chiffre borné : une NRR à 106 % s'enregistre ;
+- `company-wide` n'est accepté que sur les deux marges, et le levier de la liaison est un entier.
+
+**Deux écarts à la spécification, écrits dans `ENGINE.md`** :
+- la NRR de l'assisté porte `span: 12`, puisqu'elle se lit sur douze mois ;
+- la règle de retrait du v1 se passe de champ ajouté au stockage : un build v1 ne peut plus exporter, donc « un export postérieur à tout ce que v1 contient » est bien « le premier export qui suit la migration », y compris quand l'export est le tout premier geste après l'ouverture.
+
+**Ce que S0 laisse aux étapes suivantes**, pour que le golden reste vert, est listé en `ENGINE.md` §18.11 : les candidats et les types dérivés en S1, la prose du catalogue en S2, le réglage et le tableau en S3, les slides en S4.
+
+**Non-vacuité, mesurée par sabotage**, le détail en tête de chaque test :
+- une migration qui oublie la fenêtre d'activation fait tomber les sept états du golden ;
+- une migration qui coche l'assisté ne fait encore tomber que les tests de la migration et du fichier : aucun module ne lit les motions avant S1 ;
+- stockage : retirer v1 à chaque sauvegarde, ne jamais le retirer, lire v1 comme vide, chaque sabotage fait tomber les tests qui le visent ;
+- validation : garder « > 100 » partout, lever la règle de `company-wide`, lever l'entier de la liaison, chaque sabotage fait tomber exactement un test ;
+- catalogue et trois mois : même méthode, chaque sabotage fait tomber les tests qui le visent.
+
+**Les e2e passent au stockage v2** : neuf specs semaient encore `tdg.engine.v1`. `engine-migration.spec.ts`, prévue en S5, est écrite dès S0 avec le chemin qu'elle vérifie :
+- un appareil v1 rouvre le même tableau ;
+- v2 est écrit à la première sauvegarde, v1 part au premier export ;
+- un fichier v1 importé affiche le message, dans les deux langues ;
+- un fichier sans motion est refusé.
+
+Un piège en l'écrivant : un fichier passé à `setInputFiles` par un chemin sous `testInfo.outputPath` n'arrivait jamais à la page, sans erreur. Le même fichier passé en mémoire (`buffer`) fonctionne. La cause n'est pas établie ; le nom du dossier de sortie contenait un tiret long.
+
+**La relecture de la copie** (`relecteur-copie`) n'a trouvé aucune règle enfreinte dans les chaînes neuves. Elle a relevé, hors copie, **un vrai défaut** : la fiche d'un chiffre construisait sa liste de bases d'estimation depuis toutes les clés de `BASIS_KEY`. « La marge globale de l'entreprise » était donc proposée sur toutes les fiches, libre-service compris, et donnait une estimation que l'import refusait ensuite. Les fiches lisent maintenant `SHEET_BASES`, sans `company-wide`, et un test le garde. Le vrai repli, le bouton « Reprendre la marge globale » sur les deux marges en hybride, arrive avec S3.
+
+**Vérifié** : `eslint` et `tsc` propres, **2 404 tests unitaires**, `vitest --coverage` au-dessus de ses seuils (lignes 97 %). Build de production avec les variables de la CI, puis la suite Playwright complète : **670 specs, 647 passées, aucun échec**, 23 ignorées par construction. Ce passage précède le correctif de la fiche, qui ne change que sa liste d'options.
+
 ## La documentation remise d'accord avec le code, et le journal découpé en volumes (2026-10-01, demandé par Antoine)
 
 Antoine a demandé de mettre à jour le README et toute documentation qui ne
@@ -969,6 +1021,57 @@ unitaire changent, aucun fichier que le build lit ; la CI les passe quand même.
 
 **Fusionné avec la documentation en volumes** (#237, mergée pendant cette PR) : C30 gagne sa ligne dans `docs/decisions.md`, où C11 renvoie désormais à A12.f, et le découpage de `GAME-BRIEF.md` (section E) n'attend plus qu'A7.3.c.
 
+## A7.3.c, S1 : le calcul de l'assisté, son diagnostic, son total et le levier de la liaison (2026-10-01)
+
+Deuxième étape du lot, sur la même PR brouillon d'intégration ([#233](https://github.com/ScratchMe/tourdegrowth/pull/233)). Antoine a dit « Go pour S1 ». Tout est pur, dans `lib/engine`, et l'écran ne change pas encore : S3 et S4 le liront.
+
+**Ce que S1 calcule** :
+- **les trois relais** (`relays.ts`), chacun sur sa base de 100, sans chaîne multipliée : 15 sur 100 MQL, 24 sur 100 opportunités conclues, la mise en production inconnue, et « ~160 MQL par mois » en amont ;
+- **le diagnostic de l'assisté**, par la même règle que le libre-service appliquée à ses cinq candidats (`diagnose(state, ctx, "slg")`) : la fonction qui nomme une étape est unique, et aucune ne voit les candidats des deux motions ;
+- **l'impact en €** (`slg-impact.ts`), compté sur le trimestre puis ramené au mois : « 18 × 32/24 = 24 (+6) », « 6 × 2 000 € = 12 000 € de MRR nouveau par trimestre », « soit ~4 000 € par mois » ;
+- **les unit economics de l'assisté**, sur l'ACV des nouveaux contrats et sa propre marge (Q4), avec la durée de vie plafonnée à 36 mois (Q6) et « clients perdus sur un an » des deux côtés (Q5) ;
+- **le total** (`total.ts`) : un total n'existe que si ses deux parties existent (S9), et la somme affichée est la somme des parties affichées ;
+- **le « Et si » de l'assisté** (`slg-scenario.ts`), levier de la liaison compris (Q7) : 31 → 40 opportunités venues du libre-service donnent +1,25 signature par trimestre, ~830 € de MRR nouveau par mois, et rien n'est retiré au libre-service ;
+- les contrôles, les constats, le miroir du Tour, la couverture et la demande copiée, qui apprennent leur motion ; l'exemple hybride §18.9.
+
+**L'exemple §18.9 sort exact, chiffre par chiffre** : couverture 21, 3, 3 et 5 sur 32 ; le taux de closing nommé, `clear`, à ~4 000 € par mois contre 2 400 et 600 ; à 30 % de cible, `shared` avec le passage lead → opportunité ; MRR 228 000 € exact ; nouveau MRR « ~5 000 € + ~12 000 € = ~17 000 € » ; MRR dans 12 mois « ~100 000 € + ~330 000 € à 340 000 € = ~430 000 € à 440 000 € » ; payback assisté 12,7 mois à 75 % de marge, 15,8 à 60 % (Q4).
+
+**Deux écarts à la forme de §18.2.1, voulus, écrits dans `ENGINE.md` §18.11** :
+- `Diagnosis` est générique sur ses candidats, le libre-service par défaut : ses positions ne portent que ceux de sa motion, et le compilateur refuse qu'on lise un candidat de l'autre ;
+- `EngineDerived` garde le peloton, le diagnostic et les unit economics du libre-service en plus de `motions` et `total`. Ce sont les mêmes objets, et chaque écran et le deck v1 les lisent ; ils partent quand S4 aura déplacé le dernier lecteur.
+
+**Trois précisions de la spécification, découvertes en codant** (§18.5.3 et §18.5.8) :
+- **le « → » des gabarits ne passe pas sur une slide** : les trois fontes ne portent pas la flèche, et le test des glyphes l'a refusé. La copie écrit « , soit », comme en libre-service ;
+- la seconde voie de W (« opportunités conclues × taux de closing ») n'existe pas dans les données : un taux saisi en comptes porte déjà W ;
+- un seul constat « petits effectifs », sur le ★ au plus petit dénominateur, comme la phrase du tableau.
+
+**La copie neuve** est le strict nécessaire au calcul, « à relire » : sujets et entrées manquantes de l'assisté, la chaîne `slgChain`, les constats et contrôles assistés, les mots de l'exemple hybride, les intertitres de la demande. La prose des 15 chiffres reste à S2.
+
+**Le golden v1 reste vert** sans qu'un octet de ses fichiers bouge. Seule sa projection laisse de côté ce que S1 ajoute (`motions`, `total`, et le champ `motion` des diagnostics, contrôles, constats et lignes du miroir), comme son en-tête le prévoit.
+
+**Non-vacuité, mesurée par sabotage** : trente-sept sabotages, le détail en tête de chaque test.
+- **Indépendance des motions** : mille états tirés au hasard (graine fixe) de chaque côté. Un diagnostic du libre-service qui lirait le taux de closing fait tomber l'indépendance, le golden v1 et les constats hybrides. Un diagnostic assisté qui surveillerait l'ARPA du libre-service ne fait tomber que l'indépendance : aucun autre test ne voit cette fuite.
+- **Trois de mes commentaires de non-vacuité étaient faux avant la mesure**, et sont corrigés :
+  - la tolérance flottante de `clearlyAbove` est nécessaire aussi à la borne de 30 % de l'assisté ;
+  - un relais de mise en production qui lirait l'activation fait aussi tomber les tests des relais ;
+  - le renouvellement classé sur W ne fait tomber que la valeur de classement, la chaîne lisant D d'elle-même.
+- **Un sabotage passait à travers** : arrondir chaque partie d'un total à ses propres deux chiffres. Une partie ronde au millier l'est aussi à la centaine, et la grille ne vérifiait que l'unité commune. Elle vérifie maintenant que chaque partie s'affiche à moins d'une demi-unité commune de sa valeur, et le sabotage tombe.
+- Le tri final des constats, qu'aucun test ne faisait tomber jusqu'ici, est désormais tenu par l'ordre hybride : sans lui, tous les constats du libre-service passeraient avant la rupture de rang 1 de l'assisté.
+
+**La relecture de la copie** (`relecteur-copie`) n'a trouvé aucune règle enfreinte, et deux vrais écarts à la spécification, corrigés avant le commit :
+- le cas « moins d'un » du renouvellement disait « client » : il compte des contrats gardés, et a maintenant ses deux phrases ;
+- les lignes « pour 100 » (sans compte de nouveaux clients) ne nommaient ni la base ni ce qu'on compte. Elles disent maintenant « 8 signatures de plus pour 100 opportunités conclues » ; la base voyage dans l'impact sous forme de clé de copie, jamais de mot.
+
+Deux points restent pour le bon à tirer : la phrase des contrats mensuels sur un an n'a pas de formulation dans la spécification, et « lis la direction », texte exact de §18.5.1, tutoie. Ça va pour la fiche, pas pour une slide. Le message de `slg-cycle-long` tutoie aussi : la note d'orateur de S4 s'écrira à part (`ENGINE.md` §18.11).
+
+**`main` a bougé pendant S1** : les quatre termes d'A7.3.e (#235), la documentation remise d'accord avec le code et le journal découpé en volumes (#237), puis C30 (#234). `main` est fusionné dans la branche en gardant les deux côtés. L'entrée de S0 reste à sa date, entre A7.3.e et la refonte de la doc, et les lignes d'A7.3.c de `CHANTIERS.md` disent S0 et S1 livrés, avec les slugs d'A7.3.e en place pour S2.
+
+**Vérifié** : `eslint` et `tsc` propres, **2 529 tests unitaires** avant la fusion, **2 550 après**, `vitest --coverage` au-dessus de ses seuils (lignes 97 %). Build de production avec les variables de la CI, puis :
+- les 150 specs Playwright du moteur, de `targets` et de `platform-native` passent ;
+- la suite complète passe aussi : **670 specs, 647 passées, aucun échec**, 23 ignorées par construction.
+
+Ces deux passages ont tourné avant les deux correctifs de la relecture. Ceux-ci ne touchent qu'une copie qu'aucun écran n'affiche encore.
+
 ## ENGINE.md et GAME-BRIEF.md découpés à leur tour (2026-10-01, demandé par Antoine)
 
 Le matin, ce découpage avait été reporté : #233 (A7.3.c) écrivait dans le §18
@@ -1096,3 +1199,81 @@ la fusion à trois de #233 avec le nouvel `ENGINE.md` est propre (simulée par
 **Vérifié** :
 - `tsc` et `eslint` propres, **2 479 tests unitaires**, dont 14 neufs sur le téléphone et la pastille : chaque carte a sa place à l'écran (sauf la revue des données, une réunion, et le retour en arrière, qui remet le téléphone comme avant), l'éclair ne marque que ce qu'une carte change, la phrase annoncée est mot pour mot celle de la pastille, aucun contrôle dans le dessin, et la remise affichée seulement à côté du prix de rayon.
 - À l'écran, sur une page de développement jetable (non commitée), en français et en anglais, à 1 280 et 390 px : le départ, une année honnête, le bureau d'une année C, toutes les cartes sombres, toutes les cartes à la fois. Rien ne déborde de l'écran du téléphone, aucune erreur en console ; cocher `anchor` fait clignoter le prix, puis `allin` le prix et le panier, rien d'autre.
+
+## A7.3.c, S2 : la prose de l'assisté, `{period}` et toute la copie neuve de l'hybride (2026-10-01)
+
+Antoine : « Go pour S2 ». Trois commits sur la PR brouillon [#233](https://github.com/ScratchMe/tourdegrowth/pull/233) : `78f9abd` (la prose et `{period}`), `222f34e` (la copie et ses gardes), puis les corrections de la relecture. Rien n'est encore lu par un écran ni par une slide : S3 et S4 posent cette copie, et `ENGINE.md` §18.11 liste ce que chacun reprend.
+
+**La prose du catalogue** (`engine-catalog.ts`) : les quinze chiffres de l'assisté, la liaison et les trois calculés, « à relire ». Les deux dictionnaires sont maintenant typés sur **tous** les identifiants (`Record<MetricId, …>`), si bien qu'une fiche sans prose ne compile plus. Le serveur résout tout le catalogue ; c'est l'îlot qui filtre par `shapesOf(motions)`, et la fiche ne propose « aussi dans cet outil » que les chiffres que la configuration demande. Les quatre fiches d'A7.3.e pointent vers leurs termes. Les trois comptes partagés de l'assisté ont un libellé identique dans chaque groupe, et le test des libellés partagés les couvre désormais, dans les deux langues.
+
+**`{period}` porte sa préposition** : « de mai à juillet 2026 », « d'août à octobre 2026 », « en août 2026 » pour un seul mois, et l'année n'est écrite qu'une fois. Une préposition dans le gabarit aurait buté sur l'élision (« de août »), la même raison qui interdit « de {month} ». Trois remplisseurs l'ont : `catalogueValues` (demandes, annexe), la page statique (« [sur trois mois] ») et `catalogFill`. Ce dernier, le remplisseur propre à la fiche, aurait laissé passer « Leads créés {period} » comme libellé de champ : aucun test de `lib/engine` ne le lisait, et un test le garde maintenant.
+
+**La copie neuve**, toute « à relire » : le réglage (type, motions, fenêtres, périodes de l'assisté), les réglages après coup (§18.1.2), `hybrid`, `total`, `relays`, les titres et pieds des slides des deux motions, les notes d'orateur de §18.8.3, la fiche (période, marge globale, pièges hybrides), le pas à pas par motion, le panneau « Et si » de l'assisté avec ses dix hypothèses, la reprise, l'import, et la sixième question de la FAQ, qui s'affiche déjà sur la page fermée (sa date passe au 2026-10-01). Les pièges hybrides des cinq fiches du libre-service ne sortent qu'en hybride (`phrases.ts#hybridTrapOf`).
+
+**Trois formulations s'écartent de §18.8.2**, écrites dans `ENGINE.md` §18.11 :
+- les titres des relais disent « on ne mesure pas {étapes} » : le taux de closing et la mise en production n'ont pas le même genre, et l'accord ne peut pas suivre les deux ;
+- le cas « un seul payback » dit « il manque {entrée} », comme la slide du libre-service ;
+- ce cas a deux gabarits plutôt qu'un `{libre-service|assisté}` : le libre-service est nommé d'abord même quand seul l'assisté est calculable. Le tableau de §18.8.2 contredisait la règle 1 de §18.6.4 ; la règle gagne. C'est la relecture qui l'a vu.
+
+**Les gardes** :
+- aucun comparatif dans `hybrid.*`, `total.*` et les titres des deux motions. La phrase fixe « chacune se lit contre ses cibles, pas contre l'autre » est la seule exception, et l'exception porte sur la phrase entière, pas sur le mot ;
+- le libre-service avant l'assisté, dans les placeholders et dans les mots, partout où les deux sont nommés côte à côte ;
+- aucune préposition devant `{period}`, et `{period}` absent des fiches du libre-service ;
+- le contrat exact des dix-neuf titres neufs. Le test qui exige que chaque titre soit produit par le deck les tient dans `AWAITING_DECK` : S4 vide la liste, et le test tombe dès qu'un titre de la liste est produit sans en avoir été retiré.
+
+**Non-vacuité, mesurée par sabotage** (onze plus deux) : chaque sabotage fait tomber au moins un test. Il y en a un par garde ci-dessus, plus `catalogFill` sans `{period}`, la page statique sans `{period}`, un libellé de compte partagé qui diverge, un libellé d'un autre groupe recopié, et le serveur réduit au catalogue du libre-service. **Un sabotage n'est tombé que par chance** : `{period}` glissé dans une fiche du libre-service, en anglais seulement. C'est la parité des placeholders qui l'a attrapé, pas le test fait pour ça, qui ne lisait que le français. Il lit maintenant les deux langues ; resaboté, il tombe.
+
+**La relecture de la copie** (`relecteur-copie`), rien de bloquant :
+- **corrigé** : l'ordre des motions dans le cas « un seul payback » (ci-dessus) ; la date de la page ; la réserve « beaucoup de praticiens » perdue dans la note de plafond de la LTV assistée ; « tout se lit sur trois mois », faux pour la NRR à douze mois ; « came » au passé en anglais face au présent français ; la note du levier de la liaison, dont le « en » n'avait d'antécédent qu'après la phrase de liaison ; « reporting de la direction, souvent trimestriel », sans source et différent de l'anglais ; « trois ordres de grandeur » sur l'ACV, quand son terme de glossaire dit « plusieurs » ; un piège de mise en production faux à 30 jours ; la ligne amont des relais, qui lisait « ~1 leads » ; le nom accessible du sélecteur, qui finissait sur « de » ; « Leads passés en opportunité » devenu « Passage des leads en opportunités » ; et la coquille « Quatre fiches » de §18.4.6, qui en liste cinq ;
+- **pour le bon à tirer** : « Passer à l'assisté → » est à l'infinitif, comme dans la spécification et comme les boutons voisins, alors que l'en-tête de la copie veut des impératifs ; et la phrase de liaison nomme « assistées » avant « libre-service ». C'est le texte de §18.6.3, une phrase sur l'une des motions, pas une liste.
+
+**Vérifié** : `tsc` et `eslint` propres, **2 560 tests unitaires** (contre 2 550 avant S2), couverture au-dessus de ses seuils. Build de production avec les variables de la CI : les 151 specs Playwright du moteur et de l'accessibilité passent, puis, après les corrections, les 137 du moteur, des données structurées et de `llms`. La page du moteur pèse ~242 Ko en HTML (FR), catalogue de l'assisté compris.
+
+## A7.3.c, S3 : les écrans du moteur à deux motions (2026-10-01)
+
+Antoine : « Go pour S3, S4 puis S5 ». Deux commits sur la PR brouillon [#233](https://github.com/ScratchMe/tourdegrowth/pull/233) : `da3f2c4` (les écrans), puis `74fef3a` (les tests de la vue, les e2e et les retours des captures).
+
+**La configuration** choisit ses motions : deux cases, au moins une, chacune dépliant ses fenêtres (activation et paiement, qualification et mise en production), la cohorte suivie seulement si le libre-service est coché, et la ligne des trois mois que lit l'assisté. Dans les réglages, la dernière case cochée ne se décoche pas, et chaque changement de motion dit avant l'enregistrement ce qui reste sur l'appareil (« Décocher l'assisté le retire du tableau et des slides. Ses 15 chiffres… restent ») : décocher masque, n'efface jamais.
+
+**Le tableau a trois mises en page** : le libre-service seul est celui de la v1 ; l'assisté seul a ses relais et son diagnostic ; l'hybride ouvre sur « Deux moteurs, un total » (le titre en pochoir est celui de la slide `total`, deux blocs de texte, le libre-service toujours à gauche, la liaison entre eux avec sa flèche dessinée et ce qu'elle n'est pas, puis les sommes), puis deux colonnes (couverture, diagnostic, peloton ou relais), la phrase « deux motions, deux segments », et un sélecteur qui montre les étapes et les « Et si » d'une motion à la fois. La liaison a son bloc sous l'acquisition de l'assisté, facultatif. Les titres des relais et du total vivent dans `lib/engine/deck-motions.ts`, lus par le tableau comme par le deck.
+
+**Le reste** : la fiche (les trois mois, la phrase des petits effectifs, « Reprendre la marge globale » sur les deux fiches de marge en hybride, les pièges hybrides), le pas à pas par motion (les cibles groupées, les deux bases, « Passer à l'assisté → » puis « Passer aux « Et si » → », la liaison sautée), le « Et si » de l'assisté (ses leviers dont la liaison en opportunités entières, son trimestre, et le MRR total dans 12 mois sous les deux panneaux ; « tout remettre » ne touche que ses propres leviers), la reprise et l'import qui comptent par motion, l'exemple dans les motions cochées, et la page statique avec les deux catalogues et le lien.
+
+**Vérifié en réel** : captures FR et EN à 390 et 1 280, relues. Elles ont trouvé deux défauts, corrigés : la ligne des mois de l'assisté était à l'encre d'alerte (une information n'est pas une mise en garde), et le « Et si » de l'assisté parlait du « funnel du mois » et intitulait « Levier » la colonne de son trimestre. Tests de la vue par motion (onglets, collecte, scénario) ; **un sabotage n'a rien fait tomber** : afficher chaque bloc du total avec son propre arrondi passait, parce que les parts de l'exemple sont exactes. Un cas de somme approchée les sépare maintenant. e2e : `engine-hybrid.spec.ts`, et quatre specs existantes mises au pas (la page compte 41 fiches, la configuration n'a plus de « modèle »).
+
+## A7.3.c, S4 : le deck des deux motions (2026-10-01)
+
+Commit `65728bb`. **Le modèle** : en hybride, `total`, puis les slides du libre-service, puis celles de l'assisté (relais, fuite, « Et si », la liaison en dernier, leur cumul), puis visibilité, unit economics, miroir, demande et annexe. L'assisté seul garde cet ordre sans total ni slide du libre-service. Le libre-service seul reste le deck v1 au caractère près : `buildDeck` n'emprunte le nouveau chemin que si l'assisté est coché, et le golden v1 est resté vert à chaque étape. La fuite est une seule fonction pour les deux motions (`buildLeak` lit le diagnostic qu'on lui donne) ; les slides neuves sont dans `lib/engine/deck-slg.ts`. Une motion qui a moins de deux ★ connus perd sa fuite et garde son funnel ; les deux aveugles, la visibilité monte après le total.
+
+**Chaque motion porte son kicker, sa pastille et son pied** (`DeckModel.byMotion`) : « · assisté » dans le kicker, ses propres comptes, « Flux assistés de juin à août 2026 · leads de mai à juillet 2026 · sources : HubSpot et Stripe ». Les unit economics de l'hybride sont un tableau de cinq lignes en regard, jamais trié ; la visibilité, des pastilles par étape et par motion ; l'annexe, trois groupes avec leur en-tête (la pagination compte la place de ces en-têtes) ; le formulaire de la demande ne propose plus rien quand les deux motions nomment une étape. Le balayage des phrases (`sentences-guard`) a vu sa liste `AWAITING_DECK` vidée : chaque titre neuf est produit par un état du balayage, et toutes les règles de forme passent dessus.
+
+**Ce que la vérification a trouvé**, trois défauts corrigés avec leur test :
+- la slide de visibilité de l'hybride débordait sous le pied (trente-deux noms et huit cartes). Elle suit maintenant le texte de §18.8.2, « deux colonnes d'étapes × pastilles », et ses introuvables tiennent sur deux colonnes ;
+- le miroir plantait dès qu'un Tour était relié à un hybride : il cherchait la LTV de l'assisté parmi les calculés du seul libre-service. C'est l'e2e qui l'a vu (le test unitaire du contrat des lignes utilisait un Tour à quatre réponses, sans ce pont) ;
+- le miroir de l'hybride, une ligne par question et par motion, débordait de 170 px : deux colonnes, une par motion.
+
+Deux sabotages ne sont d'abord pas tombés : une motion aveugle gardant sa fuite (le cas de test n'avait de toute façon pas de fuite) et une proposition faite quand les deux motions nomment (aucun test ne le couvrait). Les deux ont maintenant leur cas.
+
+## A7.3.c, S5 : l'intégration (2026-10-01)
+
+Commit `70bdec2`. **Q14** (C25, tranchée oui) : `engine_setup/<plg|slg|hybrid>` à la création du moteur et quand les réglages changent les motions, et les étapes de l'assisté comptées à part (`engine_stage_saved/slg-revenue`). Les listes sont épelées dans `lib/analytics/goatcounter.ts`, jamais construites ; la porte de l'îlot, le tableau de bord `/admin/stats` et la règle 5 de `engine-boundary.test.ts` lisent les mêmes. **La phrase de confidentialité** (D16) le dit : « la façon de vendre cochée (libre-service, assisté ou les deux), le premier chiffre enregistré dans chaque étape de chaque motion » ; elle repart « à relire », et la page est datée du 2026-10-01.
+
+**Les e2e de §18.10.3** : le parcours hybride FR/EN × 1 280/390 (l'assisté saisi par ses fiches, le total exact, les deux diagnostics, la couverture de chaque motion, un rechargement, l'assisté décoché puis recoché, le fichier exporté, l'appareil vidé, le fichier réimporté) ; le canari étendu aux textes de l'assisté, à un compte à neuf chiffres et au changement de motions (aucune requête autre que GET) ; `engine-deck-hybrid.spec.ts` ; `engine-mobile.spec.ts`, qui n'existait pas (largeurs 360, 390 et 430 tenues, 320 mesuré à 0 partout, relais dans leur carte, colonnes de même hauteur, axe sur le tableau hybride, le clavier seul jusqu'au taux de closing).
+
+**Deux pièges de mesure, à connaître** :
+- un sabotage CSS peut être vide sans que la garde le soit : un `min-width: 400px` écrit au-dessus du `min-width: 0` de la même règle était annulé au build. Forcé pour de bon, il fait déborder le tableau de 190 à 260 px et les six tests de largeur tombent ;
+- la lecture d'une vignette du deck juste après l'avoir fait défiler est revenue vide une fois sur huit (`content-visibility: auto`). La spec attend maintenant que chaque slide ait son texte avant de le lire, plutôt que d'accepter un vide.
+
+**CodeQL a relevé un vrai défaut sur la PR** (*overly permissive regular expression range*) : la classe des glyphes permis d'`engine-deck-hybrid.spec.ts`, recopiée d'`engine-deck.spec.ts`, avait perdu l'espace insécable qui ouvre sa seconde plage. « ` -ÿ` » partait alors de l'espace ordinaire et laissait passer U+007F à U+009F, les contrôles C1 compris. Les deux plages sont maintenant écrites en échappements (` -~ -ÿ`), pour qu'une copie ne les perde plus. **Une plage de caractères copiée se relit en code point**, pas à l'œil.
+
+**Vérifié** (sur la tête de branche, après la fusion d'A12.e) :
+- `eslint` et `tsc` propres. **2 684 tests unitaires**, couverture au-dessus de ses seuils.
+- Build de production avec les variables de la CI, puis **toute la suite Playwright** : 732 specs, 709 passées, 23 ignorées. Les 18 qui lisent un vrai `/r/<id>` sautent sans l'émulateur Firestore, et les 5 « jeu fermé » par construction. Une première suite complète, avant la fusion, était passée sans échec.
+- **Une spec a échoué une fois, puis passé au second essai** : `platform-native.spec.ts:291`, la hauteur du `Disclosure` cinq images après son ouverture. Elle mesurait 46 px, la hauteur fermée, au lieu d'une valeur intermédiaire. Le test vient de #196, et cette PR ne lui change que la clé de stockage. Rejoué 30 fois seul, puis 36 fois à côté des specs qui impriment un PDF, il n'a plus échoué. Cause non trouvée, test non durci : un prochain échec se lit à partir d'ici.
+- Le poids des bundles serveur (`VERCEL.md` §1.2) passe de 46,72 Mo sur `main` à 46,89 Mo sur la branche, soit +0,17 Mo. Tout l'écart est sur la page du moteur (6,75 → 6,92 Mo), sous le seuil de `/livrer` §0.
+
+**Ce qui reste, et qui n'est pas du code de ce lot** :
+- le bon à tirer de la copie neuve (A7.3.d), construit depuis `grep -rn "TODO: à relire" src/` ;
+- `EngineDerived` garde ses trois champs du libre-service (`peloton`, `diagnosis`, `unit`), que §18.11 prévoyait de retirer après S4 : chaque écran du libre-service et le golden v1 les lisent, et les retirer n'apporte rien à l'utilisateur ;
+- les textes de lancement : `marketing/kit.md`, `marketing/campaigns/README.md` §8, et la campagne du moteur, qui dit encore « quinze chiffres, trois par étape », « seulement le libre-service, pour l'instant » et traduit les noms d'étape (la relecture de S3 l'a relevé) ;
+- sortir le §18 d'`ENGINE.md` vers `docs/engine/`, une fois #233 mergé (`CHANTIERS.md`, section E).

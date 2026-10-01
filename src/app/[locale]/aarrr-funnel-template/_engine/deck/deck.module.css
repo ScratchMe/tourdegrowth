@@ -277,6 +277,192 @@
   margin: 0;
 }
 
+/* ── Sales-assisted and the hybrid (A7.3.c S4, §18.8.2) ─────────────── */
+
+/* The relays: three grids, each on its own base of 100, a rule between them — never one chain. */
+.relays {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  align-items: start;
+}
+
+.relay {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 0 48px;
+  border-left: var(--border-rule);
+}
+
+.relay:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.relay:last-child {
+  padding-right: 0;
+}
+
+/* The relay's base of 100 and its three months, over its numeral. */
+.relayBase {
+  margin: 0;
+  font: var(--slide-heading);
+  letter-spacing: var(--slide-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* « Deux moteurs, un total »: two blocks of text and the link between them — no bar, no axis (§18.6.4). */
+.total {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 40px;
+}
+
+.totalBlocks {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr) minmax(0, 1fr);
+  gap: 48px;
+  align-items: start;
+}
+
+.totalBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+  padding: 28px 32px;
+  border: var(--border-solid);
+  border-radius: var(--radius-card);
+  background: var(--surface-card);
+}
+
+.totalFigures {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 40px;
+}
+
+.totalFigures dt {
+  font: var(--slide-meta);
+  color: var(--text-muted);
+}
+
+.totalFigures dd {
+  margin: 6px 0 0;
+}
+
+.totalValue {
+  font: var(--slide-figure);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.totalSmall {
+  font: var(--slide-label-md);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.totalStage {
+  margin: 0;
+  font: var(--slide-body-sm);
+}
+
+.totalLink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding-top: 40px;
+  text-align: center;
+}
+
+.totalArrow {
+  width: 96px;
+  height: 48px;
+  margin: 0;
+}
+
+.totalLinkText {
+  margin: 0;
+  font: var(--slide-body-sm);
+}
+
+.totalLinkNote {
+  margin: 0;
+  font: var(--slide-caption);
+  color: var(--text-muted);
+}
+
+.totalSums {
+  margin: 0;
+  padding: 24px 0 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: var(--border-rule);
+  font: var(--slide-body-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The unit economics side by side: one table, two columns, self-serve first — never sorted (§18.6.4). */
+.unitBoth {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 24px;
+}
+
+.unitTable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font: var(--slide-body-sm);
+}
+
+.unitTable th,
+.unitTable td {
+  padding: 14px 20px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: var(--border-width-hairline) solid var(--border-divider);
+}
+
+.unitTable thead th {
+  font: var(--slide-heading);
+  letter-spacing: var(--slide-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: var(--border-solid);
+}
+
+.unitTable thead td {
+  width: 24%;
+  border-bottom: var(--border-solid);
+}
+
+.unitTable tbody th {
+  font: var(--slide-label-sm);
+}
+
+.unitReference {
+  margin: 0;
+  font: var(--slide-meta);
+  color: var(--text-muted);
+}
+
 /* ── Slide 2 — the leak (§6.7, §9.3) ────────────────────────────────── */
 
 .blindLine {
@@ -627,6 +813,49 @@
   border-bottom: var(--border-rule);
 }
 
+/*
+ * The hybrid (§18.8.2): stages × pips, one column per motion — the 32 names
+ * are the appendix's — and the missing numbers in two columns of cards, so
+ * eight of them hold above the footer (measured on the §18.9 example).
+ */
+.visibilityHybrid {
+  grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
+}
+
+.visibilityHybrid .missingList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.pipMatrix {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pipMatrix th,
+.pipMatrix td {
+  padding: 10px 12px 10px 0;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: var(--border-rule);
+}
+
+.pipMatrix thead th {
+  font: var(--slide-heading);
+  letter-spacing: var(--slide-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.pipMatrix tbody th {
+  width: 36%;
+}
+
+.pipMatrix .stageMetrics {
+  gap: 8px 12px;
+}
+
 .stageName {
   font: var(--slide-label-sm);
   /* The pillar ids are lower-case; their names are the AARRR words, never translated. */
@@ -945,6 +1174,35 @@
   border-bottom: var(--border-rule);
 }
 
+/* The hybrid: one column per motion, each gap on two lines — its verdict and number, then the Tour's answer. */
+.mirrorColumns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 48px;
+  align-items: start;
+}
+
+.mirrorColumns > section {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mirrorRowStacked {
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 2px 18px;
+  padding-bottom: 6px;
+}
+
+.mirrorRowStacked .mirrorAnswer {
+  grid-column: 1 / -1;
+}
+
+.mirrorColumns .mirrorRows {
+  gap: 6px;
+}
+
 .mirrorVerdict {
   font: var(--slide-heading);
   letter-spacing: 0.06em;
@@ -1087,6 +1345,15 @@
   vertical-align: top;
   border-bottom: var(--border-width-hairline) solid var(--border-divider);
   overflow-wrap: anywhere;
+}
+
+/* A group's heading in the hybrid's appendix: « Libre-service », « Assisté », « Liaison » (§18.8.2). */
+.annexGroup th {
+  font: var(--slide-table);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-bottom: var(--border-solid);
 }
 
 .annex thead th {
@@ -1294,6 +1561,25 @@
 
 
 
+
+/* The hybrid's thumbnails under four headings: both engines, each motion, to conclude (§18.7 E5). */
+.thumbGroups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-11);
+}
+
+.thumbGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.thumbGroupTitle {
+  margin: 0;
+  font: var(--title-question-sm);
+  letter-spacing: var(--title-question-tracking);
+}
 
 .thumbs {
   margin: 0;

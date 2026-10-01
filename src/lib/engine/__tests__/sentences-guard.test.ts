@@ -12,7 +12,7 @@ import { SLIDE_ORDER } from "../types";
 import type { EngineState, FindingKind, MetricEntry, SanityId, SlideTitleKey, SourceRef, ToolId } from "../types";
 import { knownIn } from "../values";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
-import { emptyState, estimated, exampleState, measured, missing, ratio, tourResult, withEntry, withTarget, withoutTargets } from "./fixtures";
+import { emptyState, estimated, exampleState, hybridState, measured, missing, ratio, salesAssistedState, tourResult, withEntry, withTarget, withoutTargets } from "./fixtures";
 
 /**
  * The guard: every sentence the engine can produce, read as a reader would.
@@ -214,6 +214,50 @@ const SCENARIOS: { name: string; build: () => { state: EngineState; result?: Ret
   { name: "what if: every lever", build: () => ({ state: withWhatIf(allDocumented(), { "acq.signup-rate": 4, "ref.referred-share": 20, "act.rate": 24, "rev.paid-conversion": 10, "ret.logo-churn": 1.5, "rev.expansion": 5, "rev.contraction": 0.5, "rev.arpa": 150 }) }) },
   { name: "what if: two levers, both a loss", build: () => ({ state: withWhatIf(exampleState(), { "act.rate": 12, "rev.arpa": 90 }) }) },
   { name: "what if: a lever, no ARPA (unpriced)", build: () => ({ state: withWhatIf(noArpa(), { "act.rate": 24 }) }) },
+  // Sales-assisted and the hybrid (A7.3.c S4): every title the two motions add, each on a state that fires it.
+  { name: "hybrid §18.9", build: () => ({ state: withWhatIf(hybridState(), { "act.rate": 24, "slg.rev.win-rate": 30, "link.pql-handoff": 40 }) }) },
+  { name: "hybrid, Tour linked", build: () => linked(hybridState(), TOUR_ANSWERS) },
+  { name: "hybrid, relays complete", build: () => ({ state: withEntry(hybridState(), "slg.act.go-live", measured(ratio(12, 20), tool("hubspot"))) }) },
+  { name: "hybrid, relays gap of one", build: () => ({ state: withEntry(withEntry(hybridState(), "slg.rev.win-rate", missing("not-tracked", "sprint")), "slg.act.go-live", measured(ratio(12, 20))) }) },
+  { name: "hybrid, relays gap of two", build: () => ({ state: withEntry(hybridState(), "slg.acq.lead-to-opp", missing("not-tracked", "sprint")) }) },
+  { name: "hybrid, relays broken twice at the tail", build: () => ({ state: withEntry(hybridState(), "slg.rev.win-rate", missing("not-tracked", "sprint")) }) },
+  { name: "hybrid, relays empty", build: () => ({ state: withEntry(withEntry(hybridState(), "slg.rev.win-rate", undefined), "slg.acq.lead-to-opp", undefined) }) },
+  { name: "hybrid, no sales-assisted ACV", build: () => ({ state: withEntry(hybridState(), "slg.rev.acv", undefined) }) },
+  {
+    name: "hybrid, renewal named, no sales-assisted ARPA, one contract kept",
+    build: () => ({ state: withEntry(withEntry(withEntry(hybridState(), "slg.rev.win-rate", measured(ratio(25, 75))), "slg.acq.lead-to-opp", measured(ratio(90, 480))), "slg.rev.arpa", undefined) }),
+  },
+  {
+    name: "hybrid, renewal named, no sales-assisted ARPA, contracts kept",
+    build: () => ({
+      state: withTarget(withEntry(withEntry(withEntry(hybridState(), "slg.rev.win-rate", measured(ratio(25, 75))), "slg.acq.lead-to-opp", measured(ratio(90, 480))), "slg.rev.arpa", undefined), "slg.ret.renewal", 96),
+    }),
+  },
+  { name: "hybrid, neither MRR", build: () => ({ state: withEntry(withEntry(hybridState(), "slg.rev.arpa", undefined), "rev.arpa", undefined) }) },
+  { name: "hybrid, both margins", build: () => ({ state: withEntry(withEntry(hybridState(), "rev.gross-margin", measured(ratio(80, 100), tool("stripe"))), "slg.rev.gross-margin", measured(ratio(75, 100), tool("stripe"))) }) },
+  { name: "hybrid, self-serve's margin only", build: () => ({ state: withEntry(hybridState(), "rev.gross-margin", measured(ratio(80, 100), tool("stripe"))) }) },
+  { name: "hybrid, sales-assisted's margin only", build: () => ({ state: withEntry(hybridState(), "slg.rev.gross-margin", measured(ratio(75, 100), tool("stripe"))) }) },
+  {
+    name: "hybrid, different inputs missing",
+    build: () => ({ state: withEntry(withEntry(hybridState(), "slg.rev.gross-margin", measured(ratio(75, 100), tool("stripe"))), "slg.acq.cac", undefined) }),
+  },
+  {
+    name: "sales-assisted alone, no count of new customers",
+    build: () => {
+      const s = withEntry(withEntry(withEntry(salesAssistedState(), "slg.rev.win-rate", measured({ kind: "rate", percent: 24 })), "slg.rev.acv", undefined), "slg.acq.cac", undefined);
+      delete s.snapshots[0]!.base;
+      return { state: s };
+    },
+  },
+  {
+    name: "sales-assisted alone, one new customer more",
+    build: () => {
+      let s = withEntry(withEntry(salesAssistedState(), "slg.rev.win-rate", measured(ratio(3, 12))), "slg.rev.acv", undefined);
+      s = withEntry(withEntry(s, "slg.acq.cac", undefined), "slg.rev.arpa", undefined);
+      delete s.snapshots[0]!.base;
+      return { state: s };
+    },
+  },
   {
     name: "company named, credit off",
     build: () => {
@@ -463,6 +507,7 @@ describe("the sweep reaches every sentence it claims to", () => {
     for (const locale of ["fr", "en"] as const) expect(SWEEP.samples.filter((s) => s.locale === locale).length).toBeGreaterThan(1_000);
   });
 
+  // Since A7.3.c S4 the sales-assisted and hybrid titles are in the deck too: nothing waits any more.
   it("fires every slide title template", () => {
     const all = Object.keys(FR.strings.slideTitles) as SlideTitleKey[];
     expect(all.filter((k) => !SWEEP.titleKeys.has(k))).toEqual([]);

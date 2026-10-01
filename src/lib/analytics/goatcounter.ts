@@ -251,7 +251,9 @@ export type TourEntryDetail = (typeof TOUR_ENTRY_DETAILS)[number];
  * ---------------------------------------------------------------------------
  *
  *   engine_opened                               the island's first view in a session
- *   engine_stage_saved/<stage>                  first number saved in that stage, once a session
+ *   engine_setup/<plg|slg|hybrid>               the motions ticked when the engine is created, or changed (Q14)
+ *   engine_stage_saved/<stage>                  first number saved in that stage, once a session;
+ *                                               sales-assisted's stages prefixed: slg-revenue (Q14)
  *   engine_request_copied                       a request was put on the clipboard
  *   engine_deck_opened                          the slide screen was opened
  *   engine_exported/<png|pdf|text|json>         a file downloaded, or the deck's text copied
@@ -289,6 +291,36 @@ export type EngineEntryDetail = (typeof ENGINE_ENTRY_DETAILS)[number];
 /** `engine_stage_saved/<stage>` — the five AARRR stages, in the product's canonical order. */
 export const ENGINE_STAGES = ["acquisition", "activation", "retention", "referral", "revenue"] as const;
 
+/**
+ * Sales-assisted's five, prefixed (C25 Q14, 2026-09-30): a stage saved in
+ * the assisted motion counts apart from self-serve's, so the dashboard can
+ * say whether sales-assisted finds its public. Spelled out, never built:
+ * a template here would be a path no list holds.
+ */
+export const ENGINE_SALES_STAGES = ["slg-acquisition", "slg-activation", "slg-retention", "slg-referral", "slg-revenue"] as const;
+
+/** Every detail `engine_stage_saved` may carry: self-serve's five, then sales-assisted's. */
+export const ENGINE_STAGE_DETAILS = [...ENGINE_STAGES, ...ENGINE_SALES_STAGES] as const;
+export type EngineStageDetail = (typeof ENGINE_STAGE_DETAILS)[number];
+
+/** A stage's detail in a motion: self-serve's is the stage itself (the v1 paths), sales-assisted's its prefixed twin. */
+export function engineStageDetail(stage: (typeof ENGINE_STAGES)[number], motion: "plg" | "slg"): EngineStageDetail {
+  return motion === "slg" ? ENGINE_SALES_STAGES[ENGINE_STAGES.indexOf(stage)]! : stage;
+}
+
+/**
+ * `engine_setup/<motions>` — which motions the engine was set up with (C25
+ * Q14): a box ticked, never a number nor a word anyone typed (D16).
+ */
+export const ENGINE_SETUP_EVENT = "engine_setup";
+export const ENGINE_SETUP_DETAILS = ["plg", "slg", "hybrid"] as const;
+export type EngineSetupDetail = (typeof ENGINE_SETUP_DETAILS)[number];
+
+/** The detail for a setup's two boxes. */
+export function engineSetupDetail(motions: { plg: boolean; slg: boolean }): EngineSetupDetail {
+  return motions.plg && motions.slg ? "hybrid" : motions.slg ? "slg" : "plg";
+}
+
 /** `engine_exported/<format>` — the four ways a file (or the deck's text) leaves: none of them sends anything. */
 export const ENGINE_EXPORT_FORMATS = ["png", "pdf", "text", "json"] as const;
 
@@ -304,7 +336,8 @@ export const ENGINE_SIMPLE_EVENTS = [
 export function engineEventPaths(): string[] {
   return [
     ...ENGINE_SIMPLE_EVENTS,
-    ...ENGINE_STAGES.map((stage) => `${ENGINE_STAGE_SAVED_EVENT}/${stage}`),
+    ...ENGINE_SETUP_DETAILS.map((motions) => `${ENGINE_SETUP_EVENT}/${motions}`),
+    ...ENGINE_STAGE_DETAILS.map((stage) => `${ENGINE_STAGE_SAVED_EVENT}/${stage}`),
     ...ENGINE_EXPORT_FORMATS.map((format) => `${ENGINE_EXPORTED_EVENT}/${format}`),
     ...ENGINE_ENTRY_DETAILS.map((where) => `${ENGINE_ENTRY_EVENT}/${where}`),
   ];

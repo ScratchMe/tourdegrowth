@@ -5,8 +5,10 @@ import {
   ENGINE_EXPORTED_EVENT,
   ENGINE_OPENED_EVENT,
   ENGINE_REQUEST_COPIED_EVENT,
+  ENGINE_SETUP_DETAILS,
+  ENGINE_SETUP_EVENT,
+  ENGINE_STAGE_DETAILS,
   ENGINE_STAGE_SAVED_EVENT,
-  ENGINE_STAGES,
   ENGINE_TOUR_LINKED_EVENT,
 } from "@/lib/analytics/goatcounter";
 import { BY_PATH, FILES, reachable, stripComments, valueImports } from "./helpers/import-graph";
@@ -151,7 +153,8 @@ const ENGINE_EVENTS: Record<string, readonly string[] | null> = {
   [ENGINE_REQUEST_COPIED_EVENT]: null,
   [ENGINE_DECK_OPENED_EVENT]: null,
   [ENGINE_TOUR_LINKED_EVENT]: null,
-  [ENGINE_STAGE_SAVED_EVENT]: ENGINE_STAGES,
+  [ENGINE_SETUP_EVENT]: ENGINE_SETUP_DETAILS,
+  [ENGINE_STAGE_SAVED_EVENT]: ENGINE_STAGE_DETAILS,
   [ENGINE_EXPORTED_EVENT]: ENGINE_EXPORT_FORMATS,
 };
 
@@ -359,7 +362,8 @@ describe("growth engine boundary (engine spec §11.4)", () => {
 
     // The door binds each detail to its list at the type level.
     const door = BY_PATH.get(EVENTS_DOOR)!;
-    expect(door).toMatch(/detail:\s*\(typeof ENGINE_STAGES\)\[number\]/);
+    expect(door).toMatch(/detail:\s*\(typeof ENGINE_SETUP_DETAILS\)\[number\]/);
+    expect(door).toMatch(/detail:\s*\(typeof ENGINE_STAGE_DETAILS\)\[number\]/);
     expect(door).toMatch(/detail:\s*\(typeof ENGINE_EXPORT_FORMATS\)\[number\]/);
     expect(door).not.toMatch(/detail\??:\s*string\b/);
   });

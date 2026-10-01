@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { REMIND_AFTER_DAYS } from "../catalog-shape";
 import { buildRequest, daysSinceRequest, isRequestStale, isStale, markReminded, markRequested, requestClock } from "../request";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
-import { EXAMPLE_NOW_ISO, exampleState, measured, ratio, withEntry } from "./fixtures";
+import { EXAMPLE_NOW_ISO, exampleState, hybridState, measured, ratio, withEntry } from "./fixtures";
 
 // Engine spec §13.1 "request". The copied message says what to pull, for
 // which period, under which definition — and carries NO value the user
@@ -112,5 +112,40 @@ describe("the follow-up clock", () => {
     expect(chased.metrics["act.rate"]).toEqual(snapshot.metrics["act.rate"]);
     expect(requestClock(snapshot.metrics["act.rate"])).toBeNull();
     expect(requestClock(snapshot.metrics["ref.k-factor"])).toBe("2026-09-20T09:00:00.000Z");
+  });
+});
+
+// --- The hybrid (§18.7, E4; A7.3.c S1). Non-vacuity, measured on 2026-10-01:
+// listing the ids in the given order without headings fails « under its
+// heading »; adding the headings outside the hybrid fails « self-serve alone ».
+
+describe("buildRequest — one request per role covers both motions", () => {
+  // The real sales-assisted prose since S2 (the S1 stand-ins are gone).
+  const metrics = FR.metrics;
+
+  it("each motion's numbers under its heading, self-serve first — the link with sales-assisted", () => {
+    const fr = buildRequest("revops", ["slg.rev.win-rate", "acq.cac", "link.pql-handoff"], FR.strings, metrics, hybridState(), CTX_FR);
+    const lines = fr.split("\n");
+    const plg = lines.indexOf(FR.strings.request.groupPlg);
+    const slg = lines.indexOf(FR.strings.request.groupSlg);
+    expect(plg).toBeGreaterThan(0);
+    expect(slg).toBe(plg + 2);
+    expect(lines[plg + 1]).toMatch(/^– la dépense d'acquisition/);
+    expect(lines[slg + 1]).toBe("– les opportunités «\u00a0nouveau client\u00a0» conclues de juin à août 2026, et combien ont été gagnées");
+    expect(lines[slg + 2]).toBe(
+      "– les opportunités assistées créées de juin à août 2026, et combien venaient d'un compte du libre-service qualifié, un PQL (espace avec 3 membres actifs)",
+    );
+  });
+
+  it("a hybrid request about one motion still says which one", () => {
+    const fr = buildRequest("revops", ["slg.rev.win-rate"], FR.strings, metrics, hybridState(), CTX_FR);
+    expect(fr).toContain(`${FR.strings.request.groupSlg}\n– les opportunités «\u00a0nouveau client\u00a0» conclues`);
+    expect(fr).not.toContain(FR.strings.request.groupPlg);
+  });
+
+  it("self-serve alone: no heading, the v1 message", () => {
+    const fr = buildRequest("data", ["act.rate", "acq.cac"], FR.strings, FR.metrics, exampleState(), CTX_FR);
+    expect(fr).not.toContain(FR.strings.request.groupPlg);
+    expect(fr.split("\n").filter((l) => l.startsWith("– "))).toHaveLength(2);
   });
 });

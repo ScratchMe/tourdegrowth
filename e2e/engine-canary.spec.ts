@@ -148,6 +148,8 @@ test.describe("the growth engine keeps everything in the browser (D16)", () => {
     expect(events.filter((e) => !vocabulary.includes(e))).toEqual([]);
     for (const expected of [
       "engine_opened",
+      // Which boxes were ticked (C25 Q14): a choice, never a word or a number.
+      "engine_setup/plg",
       "engine_stage_saved/activation",
       "engine_stage_saved/acquisition",
       "engine_stage_saved/retention",
@@ -162,6 +164,108 @@ test.describe("the growth engine keeps everything in the browser (D16)", () => {
 
     // And the spec looked at something: a check that finds nothing must first
     // prove it looked somewhere (run nº8).
+    expect(seen.length).toBeGreaterThan(5);
+  });
+});
+
+/**
+ * The same promise with sales-assisted ticked (engine spec §18.10.3): its
+ * free texts — what « live » means, the reason contracts aren't renewed, the
+ * link's definition, a note — and a nine-digit count, typed through the real
+ * sheets; then the motions changed in the settings, untick and tick again.
+ * Every canary is in the `.json`, the link's definition in the copied text,
+ * none in any request, and not one request of the session is anything but a
+ * GET — the motions' setting included.
+ */
+test.describe("sales-assisted keeps everything in the browser too (D16, §18.10.3)", () => {
+  test.use({ permissions: ["clipboard-read", "clipboard-write"] });
+
+  test("its texts and its counts never leave, and changing the motions sends nothing", async ({ page }) => {
+    const stamp = Date.now().toString(36);
+    const LIVE = `TDG-CANARY-LIVE-${stamp}`;
+    const LOSS = `TDG-CANARY-LOSS-${stamp}`;
+    const PQL = `TDG-CANARY-PQL-${stamp}`;
+    const SLG_NOTE = `TDG-CANARY-SLGNOTE-${stamp}`;
+    // Nine digits, the numerator of a count: stored exactly as typed.
+    const COUNT = `8${Date.now().toString().slice(-8)}`;
+    const canaries = [LIVE, LOSS, PQL, SLG_NOTE, COUNT];
+
+    const seen: Request[] = [];
+    page.on("request", (request) => seen.push(request));
+
+    await page.goto("/en/aarrr-funnel-template");
+    await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
+    await page.getByTestId("engine-motion-slg").check();
+    await page.getByTestId("engine-setup-board").click();
+    await expect(page.getByTestId("engine-board")).toHaveAttribute("data-motions", "hybrid");
+    await page.getByTestId("engine-motion-selector").getByRole("button", { name: ENGINE_COPY.hybrid.motionName.slg.en }).click();
+
+    // What « live » means: sales-assisted's one definition typed as a text.
+    const live = await openSheet(page, "activation", "slg-act-live-event");
+    await live.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en }).check();
+    await live.locator("#engine-slg-act-live-event-text").fill(LIVE);
+    await saveSheet(live, "slg-act-live-event");
+
+    // Why contracts aren't renewed.
+    const loss = await openSheet(page, "retention", "slg-ret-loss-cause");
+    await loss.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en }).check();
+    await loss.locator("#engine-slg-ret-loss-cause-text").fill(LOSS);
+    // A cause is said with how it is known (data, an interview, a hunch): the first answer will do.
+    await loss.getByRole("group", { name: ENGINE_COPY.sheet.evidence.en }).getByRole("radio").first().check();
+    await saveSheet(loss, "slg-ret-loss-cause");
+
+    // A nine-digit count and a note, on the win rate.
+    const win = await openSheet(page, "revenue", "slg-rev-win-rate");
+    await win.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en }).check();
+    await win.locator("#engine-slg-rev-win-rate-num").fill(COUNT);
+    await win.locator("#engine-slg-rev-win-rate-den").fill("999999999");
+    await win.locator("#engine-slg-rev-win-rate-source").selectOption({ index: 1 });
+    await win.locator("#engine-slg-rev-win-rate-note").fill(SLG_NOTE);
+    await saveSheet(win, "slg-rev-win-rate");
+
+    // The link's own definition (its PQL threshold), under sales-assisted's acquisition.
+    const link = await openSheet(page, "acquisition", "link-pql-handoff");
+    await link.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en }).check();
+    await link.locator("#engine-link-pql-handoff-num").fill("31");
+    await link.locator("#engine-link-pql-handoff-den").fill("130");
+    await link.locator("#engine-link-pql-handoff-source").selectOption({ index: 1 });
+    await link.locator("#engine-link-pql-handoff-definition").fill(PQL);
+    await saveSheet(link, "link-pql-handoff");
+
+    // The motions changed after the fact: unticked, saved, ticked again — on the device only.
+    await page.getByTestId("engine-open-settings").click();
+    await page.getByTestId("engine-settings").getByTestId("engine-motion-slg").uncheck();
+    await page.getByTestId("engine-settings-save").click();
+    await expect(page.getByTestId("engine-board")).toHaveAttribute("data-motions", "plg");
+    await page.getByTestId("engine-open-settings").click();
+    await page.getByTestId("engine-settings").getByTestId("engine-motion-slg").check();
+    await page.getByTestId("engine-settings-save").click();
+    await expect(page.getByTestId("engine-board")).toHaveAttribute("data-motions", "hybrid");
+
+    // The slides' text, then the file.
+    await page.getByTestId("engine-open-deck").click();
+    await expect(page.getByTestId("engine-deck")).toBeVisible();
+    await page.getByTestId("deck-copy-text").click();
+    await expect.poll(() => clipboard(page)).toContain(PQL);
+    const json = page.waitForEvent("download");
+    await page.getByTestId("deck-save-json").click();
+    const exported = await readFile((await (await json).path())!, "utf8");
+    for (const canary of canaries) expect(exported, canary).toContain(canary);
+
+    const leaks: string[] = [];
+    for (const request of seen) {
+      const carried = `${request.url()}\n${request.postData() ?? ""}\n${JSON.stringify(await request.allHeaders())}`;
+      for (const canary of canaries) if (carried.includes(canary)) leaks.push(`${request.method()} ${request.url()} ← ${canary}`);
+    }
+    expect(leaks).toEqual([]);
+    expect(seen.filter((r) => r.method() !== "GET").map((r) => `${r.method()} ${r.url()}`)).toEqual([]);
+
+    // The motions, counted as a choice (Q14) — and sales-assisted's stages apart, prefixed.
+    const events = await trackedEvents(page);
+    expect(events.filter((e) => !engineEventPaths().includes(e))).toEqual([]);
+    for (const expected of ["engine_setup/hybrid", "engine_setup/plg", "engine_stage_saved/slg-activation", "engine_stage_saved/slg-revenue", "engine_stage_saved/slg-acquisition"]) {
+      expect(events).toContain(expected);
+    }
     expect(seen.length).toBeGreaterThan(5);
   });
 });

@@ -602,3 +602,199 @@
   min-width: 0;
 }
 
+
+/*
+ * The link (engine spec §18.6.3): under sales-assisted's Acquisition numbers,
+ * in the hybrid only — its own block, because it is neither motion's number.
+ * « facultatif » in Field's quieter grammar (C29), never at the title's weight.
+ */
+.linkBlock {
+  margin-top: var(--space-7);
+  padding-top: var(--space-5);
+  border-top: var(--border-rule);
+}
+
+.linkTitle {
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-body);
+  margin-bottom: var(--space-3);
+}
+
+.linkOptional {
+  font: var(--meta-2xs);
+  color: var(--text-muted);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+/*
+ * The hybrid (engine spec §18.7 E2, A7.3.c S3). The band « Deux moteurs, un
+ * total » — text only, no shared axis (§18.6.4) — then the two motions side
+ * by side from 860px of board, one after the other, in the fixed order,
+ * under it. The two columns share their row tracks (subgrid): a block's
+ * height never says anything about its motion.
+ */
+.totalBand {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.totalEyebrow {
+  font: var(--meta-sm);
+  letter-spacing: var(--meta-tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.totalBlocks {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+}
+
+.totalBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.totalMotion {
+  font: var(--label-button);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-body);
+  margin: 0;
+}
+
+.totalFigures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-9);
+  margin: 0;
+}
+
+.totalFigures dt {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
+.totalFigures dd {
+  margin: 0;
+  font: var(--chart-value-compact);
+  font-variant-numeric: var(--tabular);
+  color: var(--text-body);
+}
+
+/* The link between the two blocks: the arrow points down the stack on a phone, across from 860px. */
+.totalLink {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.totalArrow {
+  width: 28px;
+  height: 12px;
+  color: var(--viz-ink);
+  rotate: 90deg;
+}
+
+.totalLinkText {
+  font: var(--body-sm);
+  color: var(--text-body);
+  margin: 0;
+}
+
+.totalLinkNote {
+  font: var(--meta-xs);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.totalSums {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-5) 0 0;
+  border-top: var(--border-rule);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font: var(--body-sm);
+  font-variant-numeric: var(--tabular);
+  color: var(--text-body);
+}
+
+.motionColumns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-10);
+}
+
+.motionColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.motionEyebrow {
+  font: var(--label-button);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-body);
+  margin: 0;
+  padding-bottom: var(--space-3);
+  border-bottom: var(--border-rule);
+}
+
+.twoSegments {
+  font: var(--body-sm);
+  color: var(--text-body);
+  margin: 0;
+}
+
+.motionSelector {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.slgNote {
+  font: var(--body-sm);
+  color: var(--text-body);
+  margin: 0;
+}
+
+@container board (min-width: 860px) {
+  .totalBlocks {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .totalArrow {
+    rotate: none;
+  }
+
+  .motionColumns {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto auto 1fr;
+    column-gap: var(--space-11);
+    row-gap: var(--space-6);
+  }
+
+  /* One track per part — eyebrow, coverage, diagnosis, funnel — shared by both columns. */
+  .motionColumn {
+    display: grid;
+    grid-row: span 4;
+    grid-template-rows: subgrid;
+    gap: var(--space-6);
+  }
+}

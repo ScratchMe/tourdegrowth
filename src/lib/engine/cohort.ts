@@ -1,7 +1,7 @@
 import { METRIC_SHAPES } from "./catalog-shape";
 import type { MetricShape } from "./catalog-shape";
 import { YEAR_MONTH_PATTERN } from "./types";
-import type { EngineSetup, MetricEntry, MetricId, Snapshot, YearMonth } from "./types";
+import type { EngineSetup, MetricEntry, PlgMetricId, Snapshot, YearMonth } from "./types";
 
 /**
  * cohort.ts — which month a number belongs to (engine spec §6.3, D7).
@@ -84,6 +84,8 @@ export function isImmature(period: YearMonth, windowDays: number, today: Date): 
 export function windowDaysOf(shape: MetricShape, setup: EngineSetup): number {
   if (shape.window === "activation") return setup.activationWindowDays;
   if (shape.window === "paid") return setup.paidWindowDays;
+  if (shape.window === "qualification") return setup.qualificationWindowDays;
+  if (shape.window === "go-live") return setup.goLiveWindowDays;
   return shape.window ?? 0;
 }
 
@@ -101,11 +103,14 @@ export function defaultCohortMonth(setup: EngineSetup, today: Date): YearMonth {
   return matureCohortMonth(Math.max(30, setup.paidWindowDays), today);
 }
 
-/** The month each metric belongs to by default: flows → the reference month, cohort numbers → the followed cohort. */
-export function defaultMonths(setup: EngineSetup, today: Date): Record<MetricId, YearMonth> {
+/**
+ * The month each self-serve metric belongs to by default: flows → the reference month, cohort numbers →
+ * the followed cohort. Sales-assisted numbers read three months (`periodRangeOf`).
+ */
+export function defaultMonths(setup: EngineSetup, today: Date): Record<PlgMetricId, YearMonth> {
   const reference = defaultReferenceMonth(today);
   const cohort = defaultCohortMonth(setup, today);
-  return Object.fromEntries(METRIC_SHAPES.map((s) => [s.id, s.flow === "cohort" ? cohort : reference])) as Record<MetricId, YearMonth>;
+  return Object.fromEntries(METRIC_SHAPES.map((s) => [s.id, s.flow === "cohort" ? cohort : reference])) as Record<PlgMetricId, YearMonth>;
 }
 
 /** The period one entry actually covers: its own cohort month if set, else the snapshot's. null for a definition (event, cause). */
@@ -113,4 +118,52 @@ export function periodOf(shape: MetricShape, entry: MetricEntry | undefined, sna
   if (shape.flow === "month") return snapshot.referenceMonth;
   if (shape.flow === "cohort") return entry?.cohortMonth ?? snapshot.cohortMonth;
   return null;
+}
+
+/** A run of whole months, `from` to `to` included. `from === to` for one month. */
+export interface MonthRange {
+  from: YearMonth;
+  to: YearMonth;
+}
+
+/** `m` moved `n` months back. */
+export function monthsBefore(m: YearMonth, n: number): YearMonth {
+  let out = m;
+  for (let i = 0; i < n; i += 1) out = previousMonth(out);
+  return out;
+}
+
+/**
+ * The last month of a sales-assisted COHORT by default (§18.2, S4): the
+ * latest month mature for the number's own window — its qualification or
+ * go-live window. On 24/09/2026: 30 days → July, 90 days → May. The entry
+ * keeps the month it was measured on (`MetricEntry.cohortMonth`); this is
+ * only what a new entry starts from.
+ */
+export function defaultSpanEnd(shape: MetricShape, setup: EngineSetup, today: Date): YearMonth {
+  return matureCohortMonth(windowDaysOf(shape, setup), today);
+}
+
+/**
+ * The months one entry covers (C25 Q2, 2026-09-30: all of sales-assisted
+ * reads over three rolling months, fixed). A span of 1 is `periodOf`'s one
+ * month. Otherwise the run ENDS at the flows' month for a flow (« juin à
+ * août » for August), and at the entry's cohort month — else the mature one
+ * for its window — for a cohort (« mai à juillet » at 30 days, « mars à mai »
+ * at 90). The 12-month NRR ends at the flows' month. `null` for a definition.
+ */
+export function periodRangeOf(
+  shape: MetricShape,
+  entry: MetricEntry | undefined,
+  snapshot: Snapshot,
+  setup: EngineSetup,
+  today: Date,
+): MonthRange | null {
+  if (shape.span === 1) {
+    const month = periodOf(shape, entry, snapshot);
+    return month ? { from: month, to: month } : null;
+  }
+  if (shape.flow === "none") return null;
+  const to = shape.flow === "month" ? snapshot.referenceMonth : (entry?.cohortMonth ?? defaultSpanEnd(shape, setup, today));
+  return { from: monthsBefore(to, shape.span - 1), to };
 }

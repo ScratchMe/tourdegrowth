@@ -154,6 +154,16 @@
   color: var(--text-body);
 }
 
+/* One motion's subsection (engine spec §18.7 E0): « Libre-service : 17 chiffres », « Assisté : 15 chiffres ». */
+.subheading {
+  font: var(--title-card);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-body);
+  padding-top: var(--space-5);
+  border-top: var(--border-rule);
+}
+
 .stage {
   display: flex;
   flex-direction: column;

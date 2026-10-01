@@ -285,6 +285,13 @@
   margin: 0;
 }
 
+/* Sales-assisted's months (§18.1.2): information, not a warning — the field hints' ink, not the alert's. */
+.periodsLine {
+  font: var(--body-sm);
+  color: var(--text-muted);
+  margin: 0;
+}
+
 /* --- The example's banner title (2026-09-25) ---------------------------- */
 .exampleTitle {
   font: var(--title-card);
@@ -294,4 +301,29 @@
 
 .exampleTitle:focus {
   outline: none;
+}
+
+/*
+ * How the company sells (engine spec §18.1.1, A7.3.c S3): two boxes, each
+ * motion's own windows unfolded under its box — indented under the sentence
+ * they belong to, so a window is never read as the other motion's.
+ */
+.motions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.motion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.motionSettings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding-inline-start: var(--space-7);
+  border-inline-start: var(--border-rule);
 }

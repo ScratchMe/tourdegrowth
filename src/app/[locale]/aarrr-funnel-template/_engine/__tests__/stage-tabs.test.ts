@@ -4,7 +4,7 @@ import { diagnose } from "@/lib/engine/diagnose";
 import type { EngineState, MetricEntry, Snapshot } from "@/lib/engine/types";
 import { PILLARS } from "@/lib/scoring/pillars";
 import { CTX_FR } from "@/lib/engine/__tests__/props";
-import { emptyState, estimated, exampleState, measured, ratio, withEntry } from "@/lib/engine/__tests__/fixtures";
+import { emptyState, estimated, exampleState, hybridState, measured, missing, ratio, salesAssistedState, withEntry } from "@/lib/engine/__tests__/fixtures";
 import { defaultStage, namedStages, stageForKey, stageTabs } from "../stage-tabs";
 
 /**
@@ -117,6 +117,57 @@ describe("namedStages", () => {
     expect(namedStages({ ...d, state: "level" }).size).toBe(0);
     expect(namedStages({ ...d, state: "not-enough" }).size).toBe(0);
     expect([...namedStages(d)]).toEqual(["activation"]);
+  });
+});
+
+/**
+ * Non-vacuity, measured on 2026-10-01: reading self-serve's numbers whatever
+ * the motion fails the first two cases; looking for sales-assisted's first
+ * number to fill among self-serve's fails the last.
+ */
+describe("per motion (A7.3.c S3) — the hybrid shows one motion's five tabs at a time", () => {
+  it("sales-assisted's tabs: its own numbers, ★ first, and its own diagnosis's stage", () => {
+    const state = hybridState();
+    const tabs = stageTabs(last(state), diagnose(state, CTX_FR, "slg"), "slg");
+    expect(Object.fromEntries(tabs.map((t) => [t.stage, t.marks.map((m) => `${m.id}:${m.kind}`)]))).toEqual({
+      acquisition: ["slg.acq.lead-to-opp:found", "slg.acq.cac:found", "slg.acq.cycle:found"],
+      activation: ["slg.act.go-live:missing", "slg.act.live-event:found", "slg.act.time-to-live:inProgress"],
+      retention: ["slg.ret.renewal:found", "slg.ret.nrr:approximate", "slg.ret.loss-cause:found"],
+      referral: ["slg.ref.referred-share:found", "slg.ref.referenceable:inProgress"],
+      revenue: ["slg.rev.win-rate:found", "slg.rev.acv:found", "slg.rev.arpa:found", "slg.rev.gross-margin:missing"],
+    });
+    // The §18.9 example names the win rate: revenue is red, and only it.
+    expect(tabs.filter((t) => t.named).map((t) => t.stage)).toEqual(["revenue"]);
+    expect(defaultStage(last(state), diagnose(state, CTX_FR, "slg"), "slg")).toBe("revenue");
+  });
+
+  it("the link is in neither motion's tabs: it is optional, and its own block under sales-assisted acquisition", () => {
+    const state = hybridState();
+    for (const motion of ["plg", "slg"] as const) {
+      const ids = stageTabs(last(state), motion === "plg" ? diagnose(state, CTX_FR) : diagnose(state, CTX_FR, "slg"), motion).flatMap((t) => t.marks.map((m) => m.id));
+      expect(ids).not.toContain("link.pql-handoff");
+      expect(ids.every((id) => (motion === "slg" ? id.startsWith("slg.") : !id.startsWith("slg.")))).toBe(true);
+    }
+  });
+
+  it("self-serve's tabs in the hybrid are the v1 tabs, to the mark", () => {
+    const hybrid = hybridState();
+    const plgOnly = exampleState();
+    const marks = (s: EngineState) => stageTabs(last(s), diagnose(s, CTX_FR)).map((t) => t.marks);
+    expect(marks(hybrid)).toEqual(marks(plgOnly));
+  });
+
+  it("with nothing named, sales-assisted opens on its own first number still to fill", () => {
+    const state = salesAssistedState();
+    for (const id of ["slg.acq.lead-to-opp", "slg.rev.win-rate", "slg.acq.cac", "slg.acq.cycle"] as const) state.snapshots[0]!.metrics[id] = undefined;
+    const d = diagnose(state, CTX_FR, "slg");
+    expect(d.named).toEqual([]);
+    expect(defaultStage(last(state), d, "slg")).toBe("acquisition");
+    // Acquisition's three answered « on ne l'a pas » (not todo): the first still to fill is activation's.
+    for (const id of ["slg.acq.lead-to-opp", "slg.acq.cac", "slg.acq.cycle"] as const) state.snapshots[0]!.metrics[id] = missing("not-tracked", "sprint");
+    const after = diagnose(state, CTX_FR, "slg");
+    expect(after.named).toEqual([]);
+    expect(defaultStage(last(state), after, "slg")).toBe("activation");
   });
 });
 

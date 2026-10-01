@@ -1,5 +1,6 @@
-import { CANDIDATE_IDS, CLEAR_MARGIN, METRIC_SHAPES, UNPRICED_CANDIDATES } from "./catalog-shape";
+import { CANDIDATE_IDS, CLEAR_MARGIN, METRIC_SHAPES, SLG_CANDIDATE_IDS, SLG_METRIC_SHAPES, UNPRICED_CANDIDATES } from "./catalog-shape";
 import { isFlow, rankingImpact } from "./impact";
+import { isSlgFlow, slgRankingImpact } from "./slg-impact";
 import type {
   CandidateId,
   Comparator,
@@ -9,7 +10,11 @@ import type {
   Impact,
   Interval,
   MetricId,
+  Motion,
+  PlgCandidateId,
   Position,
+  SlgCandidateId,
+  SlgDiagnosis,
 } from "./types";
 import { currentSnapshot, knownIn, statusOf } from "./values";
 
@@ -34,6 +39,10 @@ import { currentSnapshot, knownIn, statusOf } from "./values";
  *   (see impact.ts). `clear` needs `top.lo > second.hi × 1.25`; otherwise
  *   the WHOLE group within that margin is named, never capped at two (the
  *   same deliberate choice as lib/scoring/bottleneck.ts).
+ *
+ * Sales-assisted (§18.5.2) follows the SAME rules on its own five candidates,
+ * priced over the quarter by `slg-impact.ts`: W and the ACV for the two
+ * flows, D and the sales-assisted ARPA for the renewal.
  */
 
 export function directionOf(id: CandidateId): Comparator["direction"] {
@@ -79,16 +88,63 @@ function clearlyAbove(a: number, b: number): boolean {
   return a > b + Math.abs(b) * 1e-9;
 }
 
-/** The ★ of every stage plus churn: unknown, any of them may be where the real bottleneck hides. */
-const BLIND_WATCH: readonly MetricId[] = [...METRIC_SHAPES.filter((s) => s.primary).map((s) => s.id), "ret.logo-churn"];
+/**
+ * What differs between the two motions' diagnoses, and nothing else (§18.5.2):
+ * their candidates, how a gap is priced, which ones are flows, and the one
+ * priced on the customer base instead (churn, the renewal) — which ranks
+ * only in money. The rule that names a stage is ONE function below, so the
+ * two motions cannot drift apart, and no function ever sees the candidates
+ * of both: there is no « biggest leak of the two engines » (§18.6.1).
+ */
+interface MotionRules<C extends CandidateId> {
+  motion: Motion;
+  candidates: readonly C[];
+  price: (state: EngineState, id: C, target: number, ctx: EngineCalcContext) => { gap?: Interval; mrr?: Interval };
+  isFlow: (id: C) => boolean;
+  retention: C;
+  /** The ★ (and churn): unknown, any of them may be where the real bottleneck hides. */
+  blindWatch: readonly MetricId[];
+}
 
-export function diagnose(state: EngineState, ctx: EngineCalcContext): Diagnosis {
-  const positions = {} as Diagnosis["positions"];
-  const measure = new Map<CandidateId, Interval>();
+const PLG_RULES: MotionRules<PlgCandidateId> = {
+  motion: "plg",
+  candidates: CANDIDATE_IDS,
+  price: rankingImpact,
+  isFlow,
+  retention: "ret.logo-churn",
+  blindWatch: [...METRIC_SHAPES.filter((s) => s.primary).map((s) => s.id), "ret.logo-churn"],
+};
+
+/** The five ★ ARE the five candidates: nothing to add, as churn is added in self-serve (§18.5.2). */
+const SLG_RULES: MotionRules<SlgCandidateId> = {
+  motion: "slg",
+  candidates: SLG_CANDIDATE_IDS,
+  price: slgRankingImpact,
+  isFlow: isSlgFlow,
+  retention: "slg.ret.renewal",
+  blindWatch: SLG_METRIC_SHAPES.filter((s) => s.primary).map((s) => s.id),
+};
+
+/**
+ * One motion's diagnosis, against its own targets only. Self-serve by
+ * default, the v1 call every screen makes; `"slg"` reads the sales-assisted
+ * candidates and nothing of self-serve's (the independence test holds both
+ * directions).
+ */
+export function diagnose(state: EngineState, ctx: EngineCalcContext, motion?: "plg"): Diagnosis<PlgCandidateId>;
+export function diagnose(state: EngineState, ctx: EngineCalcContext, motion: "slg"): SlgDiagnosis;
+export function diagnose(state: EngineState, ctx: EngineCalcContext, motion: Motion = "plg"): Diagnosis<PlgCandidateId> | SlgDiagnosis {
+  return motion === "plg" ? diagnoseWith(PLG_RULES, state, ctx) : diagnoseWith(SLG_RULES, state, ctx);
+}
+
+function diagnoseWith<C extends CandidateId>(rules: MotionRules<C>, state: EngineState, ctx: EngineCalcContext): Diagnosis<C> {
+  const { candidates } = rules;
+  const positions = {} as Diagnosis<C>["positions"];
+  const measure = new Map<C, Interval>();
 
   // First pass: position every candidate; price the ones below.
-  const priced: { id: CandidateId; mrr?: Interval; gap?: Interval }[] = [];
-  for (const id of CANDIDATE_IDS) {
+  const priced: { id: C; mrr?: Interval; gap?: Interval }[] = [];
+  for (const id of candidates) {
     const known = knownIn(state, id, ctx);
     const comparator = comparatorOf(state, id);
     if (known.kind === "unknown") {
@@ -102,35 +158,36 @@ export function diagnose(state: EngineState, ctx: EngineCalcContext): Diagnosis 
     const position = positionOf(known.value, comparator);
     positions[id] = { position, comparator };
     if (position === "below") {
-      const r = rankingImpact(state, id, impactTarget(comparator), ctx);
+      const r = rules.price(state, id, impactTarget(comparator), ctx);
       priced.push({ id, ...r });
     }
   }
 
-  const comparable = CANDIDATE_IDS.filter((id) => !["unknown", "no-comparator"].includes(positions[id].position));
-  const belows = CANDIDATE_IDS.filter((id) => positions[id].position === "below");
-  const blind = BLIND_WATCH.filter((id) => {
+  const comparable = candidates.filter((id) => !["unknown", "no-comparator"].includes(positions[id].position));
+  const belows = candidates.filter((id) => positions[id].position === "below");
+  const blind = rules.blindWatch.filter((id) => {
     const status = statusOf(currentSnapshot(state).metrics[id]);
     return status !== "not-applicable" && knownIn(state, id, ctx).kind === "unknown";
   });
 
   // Every money impact the ranking used is attached to its position; the displayed chain is `whatIf`'s.
   for (const p of priced) {
-    if (p.mrr) positions[p.id].impact = numericImpact(state, p.id, positions[p.id].comparator!, p.mrr, ctx);
+    if (p.mrr) positions[p.id].impact = numericImpact(state, p.id, rules.retention, positions[p.id].comparator!, p.mrr, ctx);
   }
 
-  const base = { blind, positions };
+  const base = { motion: rules.motion, blind, positions };
   if (comparable.length < 2) return { state: "not-enough", named: [], basis: "none", belowUnpriced: [], ...base };
   if (belows.length === 0) return { state: "level", named: [], basis: "none", belowUnpriced: [], ...base };
 
-  // Money needs ARPA and N: when it is there for the flows, churn joins the ranking; otherwise the
-  // flows rank by relative gap and churn stands apart ("not comparable without ARPA", §6.6).
-  // N and ARPA are the same for every flow, so the flows are priced all together or not at all.
-  const flowsBelow = priced.filter((p) => isFlow(p.id));
+  // Money needs the volume and the price: when it is there for the flows, churn (the renewal) joins
+  // the ranking; otherwise the flows rank by relative gap and it stands apart ("not comparable
+  // without ARPA", §6.6). The volume and the price are the same for every flow, so the flows are
+  // priced all together or not at all.
+  const flowsBelow = priced.filter((p) => rules.isFlow(p.id));
   const moneyPriced = flowsBelow.length > 0 ? flowsBelow.every((p) => p.mrr) : priced.some((p) => p.mrr);
   const basis: Diagnosis["basis"] = moneyPriced ? "mrr" : "relative-gap";
   for (const p of priced) {
-    const value = basis === "mrr" ? p.mrr : p.id === "ret.logo-churn" ? undefined : p.gap;
+    const value = basis === "mrr" ? p.mrr : p.id === rules.retention ? undefined : p.gap;
     if (value) measure.set(p.id, value);
   }
   const rankable = belows.filter((id) => measure.has(id));
@@ -143,7 +200,7 @@ export function diagnose(state: EngineState, ctx: EngineCalcContext): Diagnosis 
   }
 
   // Top = the greatest lower bound (ties by canonical order); clear only with the margin over EVERY other.
-  const ordered = [...rankable].sort((a, b) => measure.get(b)!.lo - measure.get(a)!.lo || CANDIDATE_IDS.indexOf(a) - CANDIDATE_IDS.indexOf(b));
+  const ordered = [...rankable].sort((a, b) => measure.get(b)!.lo - measure.get(a)!.lo || candidates.indexOf(a) - candidates.indexOf(b));
   const top = ordered[0]!;
   const topLo = measure.get(top)!.lo;
   const othersHi = Math.max(...ordered.slice(1).map((id) => measure.get(id)!.hi), -Infinity);
@@ -160,11 +217,11 @@ export function diagnose(state: EngineState, ctx: EngineCalcContext): Diagnosis 
  * displayed chain — the thing a reader recomputes — is `whatIf`'s job, and
  * it needs the words this function doesn't take.
  */
-function numericImpact(state: EngineState, id: CandidateId, comparator: Comparator, mrr: Interval, ctx: EngineCalcContext): Impact {
+function numericImpact(state: EngineState, id: CandidateId, retention: CandidateId, comparator: Comparator, mrr: Interval, ctx: EngineCalcContext): Impact {
   const known = knownIn(state, id, ctx);
   return {
     metric: id,
-    kind: id === "ret.logo-churn" ? "retained-mrr" : "new-mrr",
+    kind: id === retention ? "retained-mrr" : "new-mrr",
     // Only called for a stage that was positioned, so its value is known.
     from: known.kind === "known" ? known.value : mrr,
     to: impactTarget(comparator),

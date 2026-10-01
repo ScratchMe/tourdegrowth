@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { exampleState } from "@/lib/engine/__tests__/fixtures";
+import { exampleState, hybridState, salesAssistedState, withEntry } from "@/lib/engine/__tests__/fixtures";
 import { CTX_EN, CTX_FR, EN, FR } from "@/lib/engine/__tests__/props";
 import type { LeverId } from "@/lib/engine/types";
 import {
@@ -10,8 +10,12 @@ import {
   kpiRows,
   leverGains,
   leverRows,
+  quarterRows,
   scenarioFor,
   scenarioGrid,
+  slgKpiRows,
+  slgLeverRows,
+  slgScenarioFor,
   targetAt,
   withTarget,
 } from "../scenario-view";
@@ -294,5 +298,80 @@ describe("kpiAnnouncement — the figures, read once when a slider settles (audi
   it("is empty when no figure is known, so the region announces nothing", () => {
     const { strings } = rowsFor({}, "en");
     expect(kpiAnnouncement([], false, strings)).toBe("");
+  });
+});
+
+/**
+ * Sales-assisted's « Et si » (A7.3.c S3, §18.5.5), on the §18.9 example:
+ * 15 % of MQLs become opportunities, 24 % of closed ones are won, 88 % of
+ * contracts renew, a 24 000 € ACV, 130 opportunities a quarter of which 31
+ * come from self-serve.
+ *
+ * Non-vacuity, measured on 2026-10-01: adding the link's target without
+ * taking today's link out fails « nine more opportunities » ; naming the
+ * link's slider after its sheet fails the levers' case and the English one ;
+ * dropping the CAC from the lower-is-better list fails « the CAC falls ».
+ */
+describe("sales-assisted's panel — its own levers, its quarter", () => {
+  const nb = (s: string) => s.replace(/\^/g, "\u00a0");
+
+  it("the levers in order, the link last and only in the hybrid, counted in whole opportunities", () => {
+    const rows = slgLeverRows(slgScenarioFor(hybridState(), {}, CTX_FR), CTX_FR, FR.strings, "EUR", FR.metrics);
+    expect(rows.map((r) => [r.id, r.todayValue])).toEqual([
+      ["slg.acq.lead-to-opp", nb("15^%")],
+      ["slg.rev.win-rate", nb("24^%")],
+      ["slg.ret.renewal", nb("88^%")],
+      ["slg.rev.acv", nb("24^000^€")],
+      ["link.pql-handoff", "31"],
+    ]);
+    // Named for what it moves, not the sheet's share.
+    expect(rows.at(-1)!.name).toBe("Opportunités venues du libre-service, par trimestre");
+    expect(rows.at(-1)).toMatchObject({ min: 0, max: 62, step: 1 });
+    expect(slgLeverRows(slgScenarioFor(salesAssistedState(), {}, CTX_FR), CTX_FR, FR.strings, "EUR", FR.metrics).map((r) => r.id)).not.toContain("link.pql-handoff");
+  });
+
+  it("the link moved to 40: nine more opportunities, one more customer, and the CAC falls — better", () => {
+    const state = hybridState();
+    const s = slgScenarioFor(state, { "link.pql-handoff": 40 }, CTX_FR);
+    expect(quarterRows(state, s, CTX_FR, FR.strings)).toEqual([
+      { id: "opps", label: "Opportunités créées", today: "130", projected: "139" },
+      { id: "fromSelfServe", label: "dont venues du libre-service", today: "31", projected: "40" },
+      { id: "won", label: "Nouveaux clients", today: "18", projected: "19" },
+    ]);
+    const byId = Object.fromEntries(slgKpiRows(s, CTX_FR, FR.strings, "EUR", { state, metrics: FR.metrics }).map((r) => [r.id, r]));
+    expect(byId.won).toMatchObject({ today: "18", projected: "19", delta: "+1", tone: "better" });
+    expect(byId.cac).toMatchObject({ direction: "down", tone: "better" });
+    expect(byId.cac!.delta).toMatch(/^−/);
+    // Renewal didn't move: the NRR claims no change.
+    expect(byId.nrr!.delta).toBeNull();
+  });
+
+  it("the win rate moves the customers but never the opportunities (§18.5.5)", () => {
+    const state = hybridState();
+    const rows = quarterRows(state, slgScenarioFor(state, { "slg.rev.win-rate": 30 }, CTX_FR), CTX_FR, FR.strings);
+    expect(rows.find((r) => r.id === "opps")!.projected).toBeNull();
+    expect(rows.find((r) => r.id === "fromSelfServe")!.projected).toBeNull();
+    expect(rows.find((r) => r.id === "won")).toMatchObject({ today: "18", projected: "23" });
+  });
+
+  it("sales-assisted alone has no « dont venues du libre-service » line", () => {
+    const state = salesAssistedState();
+    expect(quarterRows(state, slgScenarioFor(state, {}, CTX_FR), CTX_FR, FR.strings).map((r) => r.id)).toEqual(["opps", "won"]);
+  });
+
+  it("a figure nobody can compute names ITS missing inputs, sales-assisted's own", () => {
+    const state = withEntry(hybridState(), "slg.rev.arpa", undefined);
+    const byId = Object.fromEntries(slgKpiRows(slgScenarioFor(state, {}, CTX_FR), CTX_FR, FR.strings, "EUR", { state, metrics: FR.metrics }).map((r) => [r.id, r]));
+    expect(byId.mrr12!.today).toBeNull();
+    expect(byId.mrr12!.unknown).toContain("ARPA");
+    expect(byId.ltv!.unknown).toBe("il manque la marge brute de l'assisté");
+    expect(byId.newMrr!.today).toBe(nb("~12^000^€"));
+  });
+
+  it("in English", () => {
+    const state = hybridState();
+    const s = slgScenarioFor(state, { "link.pql-handoff": 40 }, CTX_EN);
+    expect(slgLeverRows(s, CTX_EN, EN.strings, "EUR", EN.metrics).at(-1)).toMatchObject({ name: "Opportunities from self-serve, per quarter", today: "today 31", valueText: "40" });
+    expect(quarterRows(state, s, CTX_EN, EN.strings).map((r) => r.label)).toEqual(["Opportunities created", "of which from self-serve", "New customers"]);
   });
 });

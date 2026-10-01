@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CANDIDATE_IDS } from "@/lib/engine/catalog-shape";
-import type { CandidateId, Diagnosis, EngineAsk, EngineDerived, EngineState, MetricEntry, MetricId } from "@/lib/engine/types";
+import type { Diagnosis, EngineAsk, EngineDerived, EngineState, MetricEntry, MetricId, PlgCandidateId } from "@/lib/engine/types";
+import { SETUP_V2_DEFAULTS } from "@/lib/engine/types";
 import { askDefaults, horizonOptions, isPristineAsk, missingByRepairCost, suggestedSuccess } from "../ask-defaults";
 
 /**
@@ -23,11 +24,11 @@ function exampleState(ask: EngineAsk = EMPTY_ASK): EngineState {
     "rev.gross-margin": entry({ status: "missing", missing: { cause: "no-access", repair: "meeting", ownerRole: "finance" } }),
   };
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     id: "fixture",
     createdAt: AT,
     updatedAt: AT,
-    setup: { profile: "selfserve", currency: "EUR", activationWindowDays: 7, paidWindowDays: 30 },
+    setup: { ...SETUP_V2_DEFAULTS, currency: "EUR", activationWindowDays: 7, paidWindowDays: 30 },
     snapshots: [{ id: "s1", referenceMonth: "2026-08", cohortMonth: "2026-07", createdAt: AT, metrics, targets: {} }],
     tourLink: null,
     deck: { include: {}, showCompany: false, showSiteCredit: true, ask },
@@ -40,12 +41,12 @@ function positions(overrides: Partial<Diagnosis["positions"]> = {}): Diagnosis["
 }
 
 function derivedWith(diagnosis: Partial<Diagnosis>): EngineDerived {
-  return {
-    diagnosis: { state: "not-enough", named: [], basis: "none", belowUnpriced: [], blind: [], positions: positions(), ...diagnosis },
-  } as EngineDerived;
+  const full = { motion: "plg" as const, state: "not-enough" as const, named: [], basis: "none" as const, belowUnpriced: [], blind: [], positions: positions(), ...diagnosis };
+  // The ask reads each ticked motion's diagnosis (`motions`); self-serve alone here, as the v1 engine.
+  return { diagnosis: full, motions: [{ motion: "plg", diagnosis: full }] } as unknown as EngineDerived;
 }
 
-const clearOn = (metric: CandidateId, comparator: Diagnosis["positions"][CandidateId]["comparator"]) =>
+const clearOn = (metric: PlgCandidateId, comparator: Diagnosis["positions"][PlgCandidateId]["comparator"]) =>
   derivedWith({ state: "clear", named: [metric], basis: "mrr", positions: positions({ [metric]: { position: "below", comparator } }) });
 
 describe("missingByRepairCost", () => {
@@ -90,6 +91,29 @@ describe("suggestedSuccess", () => {
   it("suggests nothing when the diagnosis names nothing — the tool doesn't pick a target on its own", () => {
     expect(suggestedSuccess(derivedWith({ state: "not-enough" }))).toEqual({});
     expect(suggestedSuccess(derivedWith({ state: "level" }))).toEqual({});
+  });
+});
+
+/** Non-vacuity, measured on 2026-10-01: proposing a stage as soon as one motion names it fails « both motions ». */
+describe("suggestedSuccess with two motions (§18.8.2, Q13)", () => {
+  const slgClear = {
+    motion: "slg",
+    state: "clear",
+    named: ["slg.rev.win-rate"],
+    basis: "mrr",
+    belowUnpriced: [],
+    blind: [],
+    positions: { "slg.rev.win-rate": { position: "below", comparator: { lo: 32, hi: 32, direction: "higher" } } },
+  };
+  const withSlg = (plg: EngineDerived, slg: unknown) => ({ ...plg, motions: [...plg.motions, { motion: "slg", diagnosis: slg }] }) as unknown as EngineDerived;
+
+  it("both motions name a stage: nothing proposed — the form offers both, the team chooses", () => {
+    const plg = clearOn("rev.paid-conversion", { lo: 12, hi: 12, direction: "higher" });
+    expect(suggestedSuccess(withSlg(plg, slgClear))).toEqual({});
+  });
+
+  it("only one names a stage: that one, its own target", () => {
+    expect(suggestedSuccess(withSlg(derivedWith({ state: "level" }), slgClear))).toEqual({ successMetric: "slg.rev.win-rate", successTarget: 32 });
   });
 });
 

@@ -14,8 +14,9 @@ function share(n: number, of: number): string {
  * game's precedent (`GameSection`). English like the rest of this page.
  *
  * What it can say is deliberately narrow: how many sessions opened the
- * engine, how far into the five stages they saved something, and what left
- * as a file. Never what anyone found — the page promises that nothing typed
+ * engine, with which motions (Q14), how far into the five stages they saved
+ * something — self-serve's and sales-assisted's apart — and what left as a
+ * file. Never what anyone found — the page promises that nothing typed
  * leaves the browser, and these counts are the proof that the analytics keep
  * that promise too. Everything reads zero until the engine is opened.
  */
@@ -38,10 +39,13 @@ function EngineCard({ window }: { window: FunnelWindow }) {
         <li data-testid="admin-engine-entries">
           Entries — landing strip {engine.entries.home_strip}, space band {engine.entries.space_band}
         </li>
+        <li data-testid="admin-engine-setup">
+          Set up — self-serve {engine.setup.plg}, sales-assisted {engine.setup.slg}, both {engine.setup.hybrid}
+        </li>
         {ENGINE_STAGES.map((stage) => (
           <li key={stage}>
             First number saved in {stage} — {engine.stagesSaved[stage]} ({share(engine.stagesSaved[stage], engine.opened)} of
-            openings)
+            openings); sales-assisted {engine.stagesSavedSlg[stage]}
           </li>
         ))}
       </ul>

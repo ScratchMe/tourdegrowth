@@ -456,8 +456,8 @@ export interface MetricShape {
   // … champs existants …
   /** Où le chiffre vit : "link" = hybride seulement. Aucun chiffre commun depuis Q4 (une marge par motion). */
   scope: "plg" | "slg" | "link";
-  /** Mois couverts : 1 (PLG), 3 (tout l'assisté, S4). */
-  span: 1 | 3;
+  /** Mois couverts : 1 (PLG), 3 (tout l'assisté, S4), 12 (la NRR sur douze mois, seule exception, codée en S0). */
+  span: 1 | 3 | 12;
   window?: "activation" | "paid" | "qualification" | "go-live" | 30;
   /** Hors couverture, jamais un constat, jamais candidat (la liaison). */
   optional?: true;
@@ -696,6 +696,13 @@ Un fichier v2 ouvert par un build v1 est déjà refusé en `unknown-version`
   ne détruit jamais la seule copie »). `.v1` n'est retiré qu'au **premier
   export `.json` réussi** qui suit la migration (`lastExportedAt` postérieur à
   la migration). `clearEngine()` efface les deux clés.
+  *Codé en S0 (2026-09-30), sans champ ajouté au stockage* : `.v1` part à la
+  première sauvegarde dont `lastExportedAt` est postérieur **à la dernière
+  écriture et au dernier export de la copie v1**. Un build v1 ne pouvant plus
+  exporter, c'est le même moment que « le premier export qui suit la
+  migration », y compris quand l'export est le tout premier geste après
+  l'ouverture. Un v1 illisible sans v2 est `unreadable`, et rien ne s'écrit
+  avant « Tout effacer ».
 - Portée réelle : le moteur est fermé, donc seul Antoine a un `.v1` sur un
   appareil. La migration protège surtout ses fichiers exportés. Un onglet
   resté sur un ancien build écrirait encore dans `.v1` après la migration,
@@ -1108,7 +1115,7 @@ session des termes (anglais dans les deux langues, R2-16) : `win-rate`,
 - *Glossaire* : `cac-payback` (comme `rev.gross-margin`) · *Repère* : aucun.
 
 **Pièges du libre-service, en hybride seulement** (Q3, tranchée le
-2026-09-30). Quatre fiches du libre-service gagnent une ligne de piège,
+2026-09-30). Cinq fiches du libre-service gagnent une ligne de piège,
 affichée seulement si les deux motions sont cochées :
 - `ret.logo-churn`, `rev.contraction` et `rev.expansion` : « Un compte passé
   à l'assisté n'est ni perdu, ni en baisse, ni en hausse : il quitte le
@@ -1257,6 +1264,10 @@ shortening it brings signatures forward without creating any."
 - *W* = nouveaux clients assistés sur les trois mois : `slgDealsWon` mesuré
   (numérateur du taux de closing ou dénominateur du CAC). Sinon, les
   opportunités conclues × le taux de closing (approximatif). Sinon, inconnu.
+  *Codé en S1 (2026-10-01)* : la seconde voie n'existe pas dans les données.
+  Un taux de closing saisi en comptes porte déjà W au numérateur, et sans
+  comptes il n'y a pas d'opportunités conclues à multiplier. W se lit donc
+  sur le compte partagé (`knownSharedCount`), et il est inconnu sinon.
 - *ACV mensuel* = ACV ÷ 12. *ARPA assisté* = `slg.rev.arpa`. *D* = contrats
   arrivés à échéance sur les trois mois (dénominateur du renouvellement).
 - **Flux** (`lead-to-opp`, `win-rate`) : clients en plus sur trois mois =
@@ -1294,6 +1305,18 @@ shortening it brings signatures forward without creating any."
   variante `annual`. En variante `monthly`, elle reprend la décroissance
   PLG, `Σ (r/100)^k`. Un écart de moins d'un client (ou d'un contrat) donne
   `less-than-one`, sans montant, comme en PLG.
+
+  *Codé en S1 (2026-10-01)*, trois précisions :
+  - **Pas de « → » sur une slide** : les trois fontes ne portent pas la
+    flèche (§10.4, le test des glyphes l'a refusée). La ligne `today` des
+    flux s'écrit donc comme en PLG, « 24 % de closing, soit 18 nouveaux
+    clients sur 3 mois », et le sujet du passage lead → opportunité est
+    « le passage des leads en opportunités ».
+  - `{acvMonthly}` est l'ACV ÷ 12 **arrondi à l'unité monétaire**, pour que
+    « 6 × 2 000 € » se refasse à la calculette quand l'ACV n'est pas un
+    multiple de 12.
+  - La ligne `annual` vaut aussi pour le renouvellement : les contrats
+    sauvés d'un trimestre restent un an en contrats annuels.
 - **Titre = corps** : le titre de `slg:leak` cite `{amount}`, lu sur la
   ligne `per-month` du même objet (`impactHeadline`, étendu). C'est le
   gabarit PLG existant (`leakClearMrrNew` / `leakClearMrrRetained`) : « chaque
@@ -1399,7 +1422,9 @@ Mêmes kinds et mêmes rangs, avec `motion` posé :
   `conflict`.
 - `unit-econ-uncomputable` : payback assisté.
 - `small-cohort` : il devient `small-sample` en assisté, avec le chiffre et
-  `p`.
+  `p`. *Codé en S1* : un seul constat, sur le ★ compté au plus petit
+  dénominateur, comme la phrase du tableau (§18.5.1), et non un par chiffre,
+  qui ferait jusqu'à six constats de rang 4 pour un seul fait.
 - `hidden-knowledge`.
 
 Pas de constat de liaison. Règle inchangée : **aucune phrase n'affirme une
@@ -2045,7 +2070,8 @@ part sous `lib/engine`.
   `slg.rev.win-rate` et une note SLG. On vérifie qu'ils sont dans le `.json`
   et le texte copié, qu'aucune requête ne porte un canari, et qu'il n'y a
   aucune requête non-`GET` de la session, **réglage des motions compris**.
-- **`engine-migration.spec.ts`**
+- **`engine-migration.spec.ts`** — *écrite dès S0 (2026-09-30), avec le
+  chemin qu'elle vérifie*
   - Semer `tdg.engine.v1` (l'exemple §6.0), ouvrir : même titre, même
     couverture « 11 sur 17 », mêmes slides. `tdg.engine.v2` est écrit au
     premier enregistrement, et `tdg.engine.v1` est présent jusqu'à l'export
@@ -2098,6 +2124,147 @@ Le lot A7.3.c. Branche d'intégration `feat/engine-slg` : chaque PR vise
 cette branche (la CI tourne quelle que soit la base), et **un seul merge sur
 `main`**, drapeau fermé, puis la vérification `git show --stat`
 (convention 1). A7 dit « une PR par item » : c'est cette PR d'intégration.
+*En pratique (2026-09-30)* : le lot se construit dans la session d'Antoine,
+sur sa branche de travail, qui tient lieu de branche d'intégration. Chaque
+étape y est un commit (S0, S1…), et **une seule PR brouillon** vers `main`
+porte le tout jusqu'au merge.
+
+**S0 est livré le 2026-09-30** (le golden v1 d'abord, `37e9dfe`, puis le
+contrat). Ce que S0 a laissé aux étapes suivantes, pour que le libre-service
+ne bouge pas d'un caractère en attendant (golden vert) :
+- **S1** : `CandidateId` reste celui du libre-service (`SlgCandidateId` est
+  déclaré à côté) ; les types dérivés neufs (`RelayColumn`, `Relays`,
+  `SlgUnitEconomics`, `MotionDerived`, `TotalView`) et les ids de contrôles
+  et de constats neufs arrivent avec leur calcul ; `UnitInputId` aussi.
+- **S2** : `ENGINE_CATALOG` et `ENGINE_DERIVED_CATALOG` restent typés sur le
+  libre-service jusqu'à la prose de l'assisté ; le test des libellés partagés
+  ne couvre les trois comptes neufs qu'à ce moment-là.
+- **S3** : l'écran de réglage crée un moteur libre-service
+  (`SETUP_V2_DEFAULTS`), et le tableau dit « libre-service » quoi qu'il arrive.
+- **S4** : `DeckView` refuse `total` et `slg:*`, que `deck.ts` ne produit pas
+  encore.
+- `METRIC_SHAPES` reste le catalogue du libre-service, et chaque module le
+  lit comme avant ; un module qui apprend les motions lit
+  `shapesOf(motions)`.
+
+**S1 est livré le 2026-10-01** : `relays.ts`, `slg-impact.ts`,
+`slg-scenario.ts` (levier de la liaison compris), `total.ts`, et le
+diagnostic, les unit economics, les contrôles, les constats, le miroir, la
+couverture et la demande copiée qui apprennent leur motion ; l'exemple
+hybride §18.9 (`exampleEngine(words, motions)`). Tous les chiffres de §18.9
+sortent exacts. Deux écarts à la forme de §18.2.1, voulus :
+- `Diagnosis` est générique sur ses candidats (`Diagnosis<C>`, le
+  libre-service par défaut) plutôt qu'un seul type portant les onze : ses
+  positions ne portent que ceux de sa motion, et le compilateur refuse
+  qu'on lise un candidat de l'autre ;
+- `EngineDerived` garde `peloton`, `diagnosis` et `unit` **du libre-service**
+  en plus de `motions` et `total`, les mêmes objets que l'entrée `plg` de
+  `motions` : chaque écran et le deck v1 les lisent, et le golden v1 aussi.
+
+Ce que S1 laisse :
+- **S2** : la prose des 15 chiffres et de la liaison, puis le placeholder
+  `{period}` de `catalogueValues` (« juin à août 2026 ») et son équivalent
+  statique ; la copie neuve de S1 (sujets, entrées manquantes, chaîne
+  `slgChain`, constats et contrôles assistés, mots de l'exemple, intertitres
+  de la demande) est « à relire » ; les hypothèses de l'« Et si » assisté
+  (`SlgScenarioAssumption`) n'ont pas encore de copie ; les pièges hybrides
+  des cinq fiches du libre-service (§18.4.6).
+- **S3** : les écrans lisent `motions` et `total` (bande du total par
+  `total.formatSum`, deux colonnes, relais) ; le curseur de la liaison est
+  `unit: "count"` (`scenario-view.ts` ne sait encore formater que pourcent
+  et monnaie) ; `Diagnosis.tsx`, `StageTabs`, `MetricSheet` sont typés sur le
+  libre-service ; les deux phrases fixes (le cycle, « deux motions, deux
+  segments ») ; la vue exemple dans les motions cochées.
+- **S4** : le deck lit `motions` (`slg:peloton` sur les relais, `slg:leak`
+  par `slgWhatIf` et `slgChainTemplate`, `slg:scenario` et les `whatif:`
+  assistés par `slg-scenario.ts`, `total`, la slide d'unit economics en
+  regard avec `lostInAYear` et `marginIsCompanyWide`) ; ensuite seulement,
+  `EngineDerived` perd ses trois champs du libre-service. La note d'orateur
+  de `slg-cycle-long` (§18.8.3) s'écrit à part : le message du contrôle
+  tutoie (« Ton cycle médian »), il est fait pour l'écran « à vérifier ».
+
+**S2 est livré le 2026-10-01** : la prose des quinze chiffres de l'assisté,
+de la liaison et des trois calculés (`engine-catalog.ts`, les deux
+dictionnaires typés sur **tous** les identifiants : une fiche sans prose ne
+compile plus) ; le placeholder `{period}`, qui porte sa préposition
+(« de mai à juillet 2026 », « d'août à octobre 2026 », « en août 2026 »),
+rempli par `catalogueValues`, par la fiche (`catalogFill`) et, en crochets,
+par la page statique ; la copie de §18.1, §18.6 à §18.8 (réglage, réglages
+après coup, `hybrid`, `total`, `relays`, titres et pieds de slides, notes
+d'orateur, fiche, pas à pas, « Et si » assisté et ses hypothèses, reprise,
+import) et la sixième question de la FAQ, tout « à relire » ; les pièges
+hybrides des cinq fiches du libre-service, et `phrases.ts#hybridTrapOf` qui
+ne les rend qu'en hybride. Un test balaie `hybrid.*`, `total.*` et les titres
+des deux motions à la recherche d'un comparatif (seule la négation de la
+phrase fixe passe), et un autre vérifie l'ordre libre-service puis assisté.
+Trois formulations s'écartent du texte de §18.8.2 :
+- les titres `gap` et `tail-break` des relais disent « on ne mesure pas
+  {étapes} » : « le taux de closing » et « la mise en production » n'ont pas
+  le même genre, et « n'est pas mesuré(e) » devrait s'accorder avec chacun ;
+- le cas « un seul payback calculable » dit « il manque {entrée} », comme la
+  slide d'unit economics du libre-service, plutôt que « {entrée} n'est pas
+  mesurée » ;
+- et il a **deux gabarits** (`unitEconomicsOneSidePlg`, `…Slg`) au lieu d'un
+  `{libre-service|assisté}` : quand seul l'assisté est calculable, le titre
+  nomme quand même le libre-service d'abord (« Côté libre-service, on ne peut
+  pas encore le dire… Un client assisté rembourse… »). Le tableau de §18.8.2
+  et la règle 1 de §18.6.4 se contredisaient ; c'est la règle qui gagne.
+
+Ce que S2 laisse :
+- **S3** pose la copie sur les écrans : le réglage (`setup.companyType`,
+  `types`, `motions*`, les deux fenêtres, `slgPeriods` ; `setup.models` et
+  `modelSoon` partent alors), `board.eyebrowNoCohort`, `hybrid.*`, la bande
+  du total (`total.*`), les relais (`relays.*`), la fiche
+  (`sheet.periodSlg*`, `companyWide*`, `hybridTrap` par `hybridTrapOf`),
+  le pas à pas (`steps.*Motion`, `baseTitleSlg`…), `settings.motion*` et les
+  deux remises à zéro, le panneau assisté (`scenario.linkSlider`,
+  `totalIn12*`, `slgAssumption`…), `resume.bandMotions*`,
+  `io.importPreviewMotions` ; et sur E0, les deux sous-sections
+  (`page.catalogueTitlePlg`/`Slg`…), en réécrivant ce qui compte encore
+  dix-sept chiffres (`page.promise`, `noscript`, `catalogueToggle`,
+  `durationIntro`, `catalogueTitle`, `catalogueIntro`).
+- **S4** construit les titres neufs : `sentences-guard.test.ts` les tient
+  dans `AWAITING_DECK`, une liste que S4 vide (le test tombe dès qu'un titre
+  de la liste est produit) ; plus `slide.kickerMotion`, `footerSlg`, les
+  lignes de la slide en regard, `relays.clause*`, les notes neuves et les
+  intertitres `deck.group*`.
+
+**S3 est livré le 2026-10-01** : la configuration à deux cases, les trois
+mises en page du tableau (le libre-service seul inchangé, l'assisté seul,
+l'hybride : la bande du total, les deux colonnes, le sélecteur de motion),
+les relais, la fiche (trois mois, petits effectifs, marge globale, pièges
+hybrides), le pas à pas par motion, le « Et si » de l'assisté et la ligne
+du MRR total, la reprise, l'import, l'exemple dans les motions cochées, et
+E0 avec les deux catalogues et le lien. Les titres des relais et du total
+sont dans `lib/engine/deck-motions.ts`, lus par le tableau et par le deck.
+
+**S4 est livré le même jour** : `deck.ts` route vers `buildMotionsDeck` dès
+que l'assisté est coché (le libre-service seul reste le deck v1, golden
+vert) ; les slides neuves dans `lib/engine/deck-slg.ts` ; `buildLeak` sert
+les deux motions ; `DeckModel.byMotion` porte le kicker, la pastille et le
+pied de chaque motion en hybride ; `DeckSlide.motion` dit à quelle motion
+une slide appartient. Deux écarts au texte, voulus :
+- la visibilité de l'hybride ne nomme pas les 32 chiffres : « deux
+  colonnes d'étapes × pastilles », comme le dit §18.8.2, et les
+  introuvables sur deux colonnes (nommer les 32 débordait sous le pied) ;
+- le miroir de l'hybride range ses lignes en deux colonnes, une par
+  motion, pour la même raison.
+
+**S5 est livré le même jour** : Q14 (`engine_setup/<plg|slg|hybrid>`, les
+étapes de l'assisté préfixées `slg-`), la phrase de confidentialité, et les
+e2e de §18.10.3. `engine-setup.spec.ts` n'est pas un fichier à part : ses
+cas sont dans `engine-hybrid.spec.ts` (les deux cases, la dernière qui ne
+se décoche pas) et `engine-mobile.spec.ts` (le clavier) ; `analytics.spec.ts`
+n'a pas bougé, le canari vérifie le vocabulaire neuf.
+
+Ce que A7.3.c laisse :
+- **A7.3.d**, le bon à tirer de toute la copie neuve ;
+- `EngineDerived` garde `peloton`, `diagnosis` et `unit` du libre-service,
+  que la ligne S4 ci-dessus prévoyait de retirer : chaque écran du
+  libre-service et le golden v1 les lisent, et le retrait n'apporte rien à
+  personne ;
+- les textes de lancement qui disent « libre-service seulement »
+  (`CHANTIERS.md`, A7.3, ligne « Hors code »).
 
 | PR | Contenu | Fichiers possédés | Dépend de | Jours-agent |
 |---|---|---|---|---|

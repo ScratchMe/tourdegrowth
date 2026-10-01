@@ -1,8 +1,9 @@
 "use client";
 
 import { Button } from "@/components/core/Button";
+import { motionShapes } from "@/lib/engine/catalog-shape";
 import { ROLE_KEY } from "@/lib/engine/strings";
-import type { MetricId } from "@/lib/engine/types";
+import type { MetricId, Motion } from "@/lib/engine/types";
 import { cheapestTodo, type CollectPlan } from "./collect";
 import { RequestCopy } from "./RequestCopy";
 import { daysBetween, fill, metricById, midSentence } from "./text";
@@ -39,7 +40,8 @@ export function ResumeBand({
   const cov = derived.coverage;
   const days = daysBetween(returningFrom, ctx.today);
   const staleGroup = plan.ask.find((g) => g.stale.length > 0);
-  const next: MetricId | null = cheapestTodo(snapshot);
+  const { motions } = view.state.setup;
+  const next: MetricId | null = cheapestTodo(snapshot, motionShapes(motions));
 
   const found = cov.found === 1 ? fill(strings.coverage.foundOne, { N: cov.denominator }) : fill(strings.coverage.found, { n: cov.found, N: cov.denominator });
   const visit = days === 0 ? null : days === 1 ? strings.workbench.lastVisitOne : fill(strings.workbench.lastVisit, { n: days });
@@ -55,8 +57,25 @@ export function ResumeBand({
   // coverage line two centimetres above it. Seen on the §6.0 example at its own date.
   if (!visit && !pending && !next) return null;
 
-  const sentence =
-    pending && cov.found >= 2
+  // The hybrid counts per motion (§18.7 E6): « libre-service 11 sur 17 · assisté 10 sur 15 ».
+  const counts =
+    motions.plg && motions.slg
+      ? derived.motions
+          .map((m) =>
+            fill(strings.hybrid.motionCount, {
+              motion: strings.hybrid.motionAdjective[m.motion as Motion],
+              n: m.coverage.found,
+              N: m.coverage.denominator,
+            }),
+          )
+          .join(" · ")
+      : null;
+
+  const sentence = counts
+    ? pending
+      ? fill(days === 0 ? strings.resume.bandMotionsToday : days === 1 ? strings.resume.bandMotionsOne : strings.resume.bandMotions, { counts, days, pending })
+      : [counts, visit].filter(Boolean).join(" · ")
+    : pending && cov.found >= 2
       ? fill(days === 0 ? strings.resume.bandToday : days === 1 ? strings.resume.bandOne : strings.resume.band, {
           n: cov.found,
           N: cov.denominator,

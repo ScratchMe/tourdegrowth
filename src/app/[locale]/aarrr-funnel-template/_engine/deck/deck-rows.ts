@@ -88,6 +88,22 @@ export interface DeckRows {
   lever: { id: string; label: string; from: string; to: string; gain: string; text: string };
   /** The levers together against their sum: the compounding sentence. */
   together: { text: string };
+  // Sales-assisted and the hybrid (A7.3.c S4, lib/engine/deck-slg.ts)
+  /**
+   * One relay of `slg:peloton`: `base` its base of 100 and its three months,
+   * `value` the numeral ("" when nobody measures it, never "0"), `label` what
+   * it counts, `source` its tool or status, `stamp` the diagnosis's words when
+   * it names this relay ("" otherwise).
+   */
+  relay: { id: string; base: string; value: string; label: string; source: string; stamp: string; text: string };
+  /** One motion's block of `total`: `id` the motion, `mrr` and `newMrr` as the sum prints them ("" when unknown), `stage` its diagnosis and slide. */
+  totalBlock: { id: string; label: string; mrr: string; newMrr: string; stage: string; text: string };
+  /** The link between the two blocks, and what it is not (`note`). */
+  link: { text: string; note: string };
+  /** A sum of the two motions, « a + b = c ». */
+  sum: { id: string; text: string };
+  /** One row of the hybrid's unit economics, side by side: `plg` and `slg` the two cells, self-serve first. */
+  unitRow: { id: string; label: string; plg: string; slg: string; text: string };
   // Appendix
   annex: {
     id: string;
@@ -135,7 +151,24 @@ export const ROW_FIELDS: { readonly [K in RowKind]: readonly (keyof DeckRows[K])
   funnelStep: ["id", "label", "tone", "today", "projected", "change", "text"],
   lever: ["id", "label", "from", "to", "gain", "text"],
   together: ["text"],
+  relay: ["id", "base", "value", "label", "source", "stamp", "text"],
+  totalBlock: ["id", "label", "mrr", "newMrr", "stage", "text"],
+  link: ["text", "note"],
+  sum: ["id", "text"],
+  unitRow: ["id", "label", "plg", "slg", "text"],
   annex: ["id", "label", "formula", "window", "period", "source", "status", "confidence", "definition", "text"],
+};
+
+/**
+ * The fields a row may carry beyond its own, in the hybrid only (A7.3.c S4):
+ * the motion of a `visibility` row or a mirror bridge, the group of an
+ * appendix row — machine ids a slide groups by, never printed as they are.
+ */
+export const OPTIONAL_FIELDS: { readonly [K in RowKind]?: readonly string[] } = {
+  metric: ["motion"],
+  missing: ["motion"],
+  bridge: ["motion"],
+  annex: ["group"],
 };
 
 /** Whether a record is a well-formed row of that kind: every field present, every field a string. */

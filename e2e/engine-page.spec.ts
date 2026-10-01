@@ -8,10 +8,11 @@ test.beforeEach(async ({ context }) => {
 });
 
 /**
- * The growth engine's page body, E0 (engine spec §7): the part that reads
- * WITHOUT JavaScript and is what a search engine indexes — the seventeen
- * numbers with their formula and where to find them, the five computed
- * ones, the FAQ, and a way to the Tour.
+ * The growth engine's page body, E0 (engine spec §7, §18.7): the part that
+ * reads WITHOUT JavaScript and is what a search engine indexes — both
+ * motions' catalogues (self-serve's seventeen numbers and five computed
+ * ones, sales-assisted's fifteen and three, then the link), each with its
+ * formula and where to find it, the FAQ, and a way to the Tour.
  *
  * Asserted with JavaScript OFF: the island renders nothing useful before
  * hydration, so a page whose catalogue only appeared client-side would pass
@@ -29,13 +30,23 @@ for (const locale of ["en", "fr"] as const) {
     expect(res?.status()).toBe(200);
 
     const catalogue = page.getByTestId("engine-catalogue");
-    // Seventeen numbers across the five stages — three each, five for Revenue since the MRR movements (2026-09-26)…
+    // Self-serve's seventeen across the five stages — three each, five for Revenue since the MRR movements (2026-09-26)…
     for (const stage of ["acquisition", "activation", "retention", "referral", "revenue"]) {
       await expect(page.getByTestId(`engine-stage-${stage}`).locator("article")).toHaveCount(stage === "revenue" ? 5 : 3);
     }
     // …plus the five computed ones, never entered.
     await expect(page.getByTestId("engine-stage-computed").locator("article")).toHaveCount(5);
-    await expect(catalogue.locator("article")).toHaveCount(22);
+    // Sales-assisted's fifteen (A7.3.c): two in Referral, four in Revenue — then its three computed, then the link.
+    const slg = { acquisition: 3, activation: 3, retention: 3, referral: 2, revenue: 4 };
+    for (const [stage, n] of Object.entries(slg)) {
+      await expect(page.getByTestId(`engine-stage-slg-${stage}`).locator("article")).toHaveCount(n);
+    }
+    await expect(page.getByTestId("engine-stage-slg-computed").locator("article")).toHaveCount(3);
+    await expect(page.getByTestId("engine-stage-link").locator("article")).toHaveCount(1);
+    await expect(catalogue.locator("article")).toHaveCount(22 + 15 + 3 + 1);
+    // One heading level per depth: the motions (h3), their stages (h4), the sheets (h5).
+    await expect(catalogue.locator("h3")).toHaveCount(3);
+    await expect(catalogue.locator("article h5")).toHaveCount(41);
 
     // Every sheet prints a formula whose placeholders were filled: a raw
     // `{event}` on an indexed page would be a visible template leak.
@@ -94,13 +105,14 @@ test("the privacy promise comes before the call to action", async ({ page }) => 
   expect(privacy && cta && privacy.y + privacy.height <= cta.y).toBe(true);
 });
 
-test("how long it takes comes before the tool; the fifteen cards are folded but in the HTML", async ({ page }) => {
+test("how long it takes comes before the tool; the cards are folded but in the HTML", async ({ page }) => {
   await page.goto("/fr/aarrr-funnel-template");
   const duration = await page.getByTestId("engine-duration").boundingBox();
   const tool = await page.locator("#engine").boundingBox();
   expect(duration && tool && duration.y + duration.height <= tool.y).toBe(true);
-  // The split is counted from the catalogue's effort tags: 5 + 7 + 5 since the MRR movements.
+  // The split is counted from the catalogue's effort tags: 5 + 7 + 5 since the MRR movements, 4 + 5 + 6 for sales-assisted.
   await expect(page.getByTestId("engine-duration")).toContainText("5 se lisent en cinq minutes, 7 demandent");
+  await expect(page.getByTestId("engine-duration")).toContainText("Sur les quinze de l'assisté, 4 se lisent en cinq minutes, 5 demandent");
   const fold = page.getByTestId("engine-catalogue-toggle");
   await expect(fold).not.toHaveAttribute("open", /.*/);
   await expect(page.getByTestId("engine-stage-acquisition")).toBeHidden();

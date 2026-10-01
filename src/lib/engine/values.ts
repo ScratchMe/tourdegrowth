@@ -1,6 +1,6 @@
 import { shapeOf } from "./catalog-shape";
 import type { MetricShape } from "./catalog-shape";
-import { isImmature, periodOf, windowDaysOf } from "./cohort";
+import { defaultSpanEnd, isImmature, periodOf, windowDaysOf } from "./cohort";
 import { interval, point } from "./interval";
 import type {
   Confidence,
@@ -135,7 +135,10 @@ export function knownOf(
 
   let confidence = confidenceOf(entry) as Exclude<Confidence, "unknown">;
   if (where && shape.flow === "cohort") {
-    const period = periodOf(shape, entry, where.snapshot);
+    // A sales-assisted cohort runs over three months and is mature when its LAST month is (C25 Q2):
+    // its own month when the entry keeps one, else the latest mature one for its window — never the
+    // self-serve followed cohort, which is read on another window.
+    const period = shape.span === 1 ? periodOf(shape, entry, where.snapshot) : (entry.cohortMonth ?? defaultSpanEnd(shape, where.setup, ctx.today));
     if (period && isImmature(period, windowDaysOf(shape, where.setup), ctx.today)) confidence = "approximate";
   }
   return { kind: "known", value, confidence };

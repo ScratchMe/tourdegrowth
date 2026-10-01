@@ -1,5 +1,5 @@
 import type { Page } from "@playwright/test";
-import type { EngineState, LeverId } from "../src/lib/engine/types";
+import type { EngineState, PlgLeverId } from "../src/lib/engine/types";
 import { exampleState } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, openFold, readEachOnScreen, SKIP_ADMIN_REASON, test } from "./helpers";
 
@@ -20,10 +20,10 @@ test.beforeEach(async ({ context }) => {
  * the three embedded families only.
  */
 
-const STORAGE_KEY = "tdg.engine.v1";
+const STORAGE_KEY = "tdg.engine.v2";
 
 /** Every lever the example knows, moved: the densest « together » slide the deck can print. */
-const ALL_LEVERS: Record<LeverId, number> = {
+const ALL_LEVERS: Record<PlgLeverId, number> = {
   "acq.signup-rate": 4,
   "ref.referred-share": 10,
   "act.rate": 24,
@@ -42,7 +42,7 @@ async function openDeckWith(page: Page, locale: "fr" | "en", whatIf: EngineState
       localStorage.setItem(key, JSON.stringify(store));
       sessionStorage.setItem("e2e-engine-seeded", "1");
     },
-    [STORAGE_KEY, { schemaVersion: 1, state }] as const,
+    [STORAGE_KEY, { schemaVersion: 2, state }] as const,
   );
   await page.goto(`/${locale}/aarrr-funnel-template`);
   await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
@@ -142,7 +142,7 @@ test("a target moved on the board's slider becomes a slide", async ({ page }) =>
       localStorage.setItem(key, JSON.stringify(store));
       sessionStorage.setItem("e2e-engine-seeded", "1");
     },
-    [STORAGE_KEY, { schemaVersion: 1, state: exampleState() }] as const,
+    [STORAGE_KEY, { schemaVersion: 2, state: exampleState() }] as const,
   );
   await page.goto("/fr/aarrr-funnel-template");
   await expect(page.getByTestId("engine-board")).toBeVisible();
