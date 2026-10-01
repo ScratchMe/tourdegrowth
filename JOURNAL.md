@@ -645,7 +645,8 @@ La première PR du moteur complet (`docs/engine/moteur-complet.md` §19.1 et §1
 **Un test lent sous charge** : « a row never says a change… » (`deck.test.ts`) prend 1,5 s seul. Il a dépassé ses 5 s une fois, pendant qu'un sabotage tournait à côté de la suite Playwright. Seul, il passe. Relevé ici, pas durci.
 
 **Vérifié** :
-- `vitest --coverage` : 2 727 tests passés (215 fichiers), au-dessus des seuils ;
+- `vitest --coverage` : 2 727 tests passés sur la branche seule, 2 747 une fois fusionnée avec B4 et A15, au-dessus des seuils ;
 - `tsc`, `eslint` et `next build` (avec `GAME_ENABLED=true`, comme la CI) propres ;
-- Playwright sur ce build : 757 specs, 730 passées et 27 ignorées (les 20 de `result-real.spec.ts` et une d'`error-page.spec.ts`, faute d'émulateur ; 6 « jeu fermé », par construction), aucune au second essai. Les cinq specs de migration, dont les deux appareils v1 et v2, passent du premier coup.
+- Playwright sur la branche seule : 757 specs, 730 passées et 27 ignorées, aucune au second essai. Puis, fusionnée avec B4 et A15 (`CI=1`) : 778 specs, 750 passées et 28 ignorées (22 faute d'émulateur, dont la spec d'A15 dans `targets.spec.ts` ; 6 « jeu fermé », par construction), aucun échec. Les cinq specs de migration, dont les deux appareils v1 et v2, passent du premier coup.
+- **Deux fusions de `main` en route**, B4 (#253) puis A15 (#252), mergées pendant que la PR attendait. Tant que la PR était en conflit, GitHub ne lançait pas `ci.yml` : seul CodeQL tournait, et rien ne le disait. La seconde fusion a aussi apporté une graine d'A15 qui écrivait encore l'ancienne clé `tdg.engine.v2` ; elle passe par `writeEngineSeed`. Relevé dans `GITHUB.md` avec T1.
 - la barrière de `/livrer` §0 relève deux fichiers non TypeScript ajoutés sous `src/` : `golden-v2-inputs.json` et `golden-v2.json` (1 Mo à eux deux). Ce sont des données de test lues par `readFileSync` dans Vitest seulement, comme celles du golden v1 ; aucun `.nft.json` du build ne les trace, donc aucun bundle serveur ne les porte.
