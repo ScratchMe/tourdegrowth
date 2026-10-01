@@ -931,6 +931,6 @@ A15.18, revenue à Antoine parce que « dans le jeu » ne tenait pas sur la band
 **Vérifié** :
 - un test unitaire (les deux langues, et la carte à plusieurs niveaux) et trois e2e : le surtitre au-dessus de la bande, à moins de 16 px, aligné, sur une ligne, en français et en anglais à 1 280 px et en français à 390 px ;
 - **non-vacuité** : un build où le surtitre n'est pas rendu fait tomber exactement ces trois e2e, les neuf autres de `game-entry.spec.ts` passent ;
-- `eslint`, `tsc`, `next build` propres ; `vitest --coverage` 2 833 tests, seuils tenus ; la suite Playwright complète avec l'émulateur et `CI=1` : E2E_RESULT.
+- `eslint`, `tsc`, `next build` propres ; `vitest --coverage` 2 833 tests, seuils tenus ; la suite Playwright complète avec l'émulateur et `CI=1` : 816 passées, 6 ignorées par construction, 4 tombées, toutes dans `game-entry.spec.ts` et toutes du test, pas du produit. Mes trois tests comparaient le surtitre au bord de la bande, qui commence 2 px plus loin, dans la bordure de la carte : ils le comparent maintenant au bord de la carte, comme tout intitulé de section. Et le test du téléphone mesurait les 22 px entre la carte de partage et la carte du jeu, où le surtitre s'intercale maintenant : il les mesure jusqu'au surtitre, puis du surtitre à la carte. Rejoué sur le même build, `game-entry.spec.ts` passe en entier (12, et 3 ignorées « jeu fermé ») : 820 passées sur 826.
 
 **Claude Design** : le contrat de `GameEntry` change, son aperçu est à jour dans le dépôt ; la re-synchro rejoint B6.

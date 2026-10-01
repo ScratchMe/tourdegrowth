@@ -140,10 +140,13 @@ test.describe("P23 — the card on the sample's retention bottleneck", () => {
       await expect(eyebrow).toHaveText(EYEBROW[locale]);
       const above = await box(page, "game-entry-eyebrow");
       const band = await box(page, "game-entry-band");
-      // On the line above the band, at the result's 10px section rhythm.
+      const card = await box(page, "game-entry");
+      // On the line above the band, at the result's 10px section rhythm…
       expect(above.y + above.height).toBeLessThanOrEqual(band.y);
       expect(band.y - (above.y + above.height)).toBeLessThan(16);
-      expect(Math.abs(above.x - band.x)).toBeLessThan(2);
+      // …flush with the card's edge, as every section eyebrow is (the band
+      // starts 2px further in, inside the card's border).
+      expect(Math.abs(above.x - card.x)).toBeLessThan(1);
       // One line, even in French on a phone.
       expect(above.height).toBeLessThan(24);
     });
@@ -197,8 +200,11 @@ test.describe("P23 — the card on the sample's retention bottleneck", () => {
     expect(cta.y).toBeLessThan(share.y);
     expect(cta.y).toBeLessThan(entry.y);
     expect(entry.y).toBeGreaterThan(share.y + share.height);
-    // Directly after it: the layout's 22px rhythm, nothing in between.
-    expect(entry.y - (share.y + share.height)).toBeLessThan(30);
+    // Directly after it: the layout's 22px rhythm, then the card's own
+    // eyebrow (C33) and the card — nothing else in between.
+    const eyebrow = await box(page, "game-entry-eyebrow");
+    expect(eyebrow.y - (share.y + share.height)).toBeLessThan(30);
+    expect(entry.y - (eyebrow.y + eyebrow.height)).toBeLessThan(16);
     // The band stacks on a narrow card instead of wrapping, so the "·"
     // cannot be left dangling at the end of a line (seen in a capture).
     await expect(page.getByTestId("game-entry-band-sep")).toBeHidden();
