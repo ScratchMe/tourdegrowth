@@ -1,6 +1,7 @@
 import { clearEngine, loadEngine, saveEngine, type LoadResult, type SaveResult } from "@/lib/engine/storage";
 import type { EngineState } from "@/lib/engine/types";
 import { loadStoredResults, type StoredResult } from "@/lib/quiz/storage";
+import { dropAllDrafts } from "./sheet-drafts";
 
 /**
  * The engine's one source of truth on this device, read through
@@ -82,7 +83,11 @@ export type CommitResult = SaveResult;
  * cleared first, which is the one way past `saveEngine`'s refusal.
  */
 export function commit(state: EngineState, options: { fresh?: boolean; replace?: boolean } = {}): CommitResult {
-  if (options.replace) clearEngine();
+  if (options.replace) {
+    clearEngine();
+    // A whole engine replaced (an import): no half-typed sheet survives it (A15.12).
+    dropAllDrafts();
+  }
   const current = getClientSnapshot();
   snapshot = { ...current, result: { kind: "ok", state }, returningFrom: options.fresh ? null : current.returningFrom };
   notify();
@@ -92,6 +97,7 @@ export function commit(state: EngineState, options: { fresh?: boolean; replace?:
 /** "Erase everything": the device and the screen, together. */
 export function erase(): void {
   clearEngine();
+  dropAllDrafts();
   const current = getClientSnapshot();
   snapshot = { ...current, result: { kind: "empty" }, returningFrom: null };
   notify();

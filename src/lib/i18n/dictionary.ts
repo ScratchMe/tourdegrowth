@@ -106,6 +106,10 @@ export const UI_STRINGS = {
       fr: "Tu repars avec un score sur 100, l'étape qui te freine et une action à mener.",
     },
     ctaPrimary: { en: "Start your Tour →", fr: "Démarre ton Tour →" },
+    // TODO: à relire (convention 6). A15.16 (2026-10-01): a Tour in progress on this device.
+    ctaResume: { en: "Resume your Tour (question {n} of 15) →", fr: "Reprends ton Tour (question {n} sur 15) →" },
+    // TODO: à relire (convention 6).
+    ctaResumeLast: { en: "Resume your Tour (last step) →", fr: "Reprends ton Tour (dernière étape) →" },
     ctaSecondary: { en: "See a sample result", fr: "Voir un résultat d'exemple" },
   },
 
@@ -380,6 +384,11 @@ export const UI_STRINGS = {
    * neutral is the explicit default. */
   toneSelector: {
     headerLabel: { en: "15 / 15 answered", fr: "15 / 15 répondues" },
+    // TODO: à relire (convention 6). A15.7 (2026-10-01): the profile and tone screens said
+    // « 15 / 15 answered » with two screens still to pass — what is left, instead.
+    headerTwoLeft: { en: "Two screens to go", fr: "Plus que deux écrans" },
+    // TODO: à relire (convention 6).
+    headerLast: { en: "Last screen", fr: "Dernier écran" },
     title: { en: "How do you want your results?", fr: "Comment veux-tu tes résultats ?" },
     neutralTitle: { en: "Straight up", fr: "Neutre" },
     neutralDescription: {
@@ -554,6 +563,11 @@ export const UI_STRINGS = {
        level board — which one you push, not which one you fix.
        Relu et validé par Antoine (2026-09-11). */
     roomTitle: { en: "Where there's still room", fr: "Là où il reste de la marge" },
+    /* TODO: à relire (convention 6). A15.14 (2026-10-01): the same defect the other way
+       round — the two highest stages are listed under « Strengths » even
+       when one of them is weak, a weak-band sentence under a title that says
+       strong. Relative, then: which ones hold up best, in both tones. */
+    strengthsTitleRelative: { en: "What holds up best", fr: "Ce qui tient le mieux" },
     // Replaces the mute "✓" the copy fallback used to show — on desktop,
     // where there is no native share sheet, that tick was the ONLY feedback
     // that anything had happened (REVIEW.md R-10).

@@ -37,7 +37,7 @@ describe("parseTypedNumber", () => {
     expect(parseTypedNumber("", "fr")).toBeNull();
     expect(parseTypedNumber("   ", "en")).toBeNull();
     expect(parseTypedNumber("douze", "fr")).toBeNull();
-    expect(parseTypedNumber("12 %", "fr")).toBeNull();
+    expect(parseTypedNumber("12 kg", "fr")).toBeNull();
     expect(parseTypedNumber("1.2.3", "en")).toBeNull();
   });
 
@@ -87,8 +87,8 @@ describe("groupTypedNumber", () => {
   });
 
   it("leaves text it cannot read untouched, so the error is about what was typed", () => {
-    for (const raw of ["12 %", "douze", "1.2.3", "-", ",", "1.234,5", ""]) expect(groupTypedNumber(raw, "fr"), raw).toBe(raw);
-    for (const raw of ["12%", "1.2.3", "."]) expect(groupTypedNumber(raw, "en"), raw).toBe(raw);
+    for (const raw of ["12 kg", "douze", "1.2.3", "-", ",", "1.234,5", ""]) expect(groupTypedNumber(raw, "fr"), raw).toBe(raw);
+    for (const raw of ["12kg", "1.2.3", "."]) expect(groupTypedNumber(raw, "en"), raw).toBe(raw);
   });
 });
 
@@ -119,7 +119,7 @@ describe("regroupTypedNumber — the caret stays where the person is typing", ()
   });
 
   it("unreadable or unchanged text keeps the caret where the browser left it", () => {
-    expect(regroupTypedNumber("12 %", 2, "fr")).toEqual({ text: "12 %", caret: 2 });
+    expect(regroupTypedNumber("12 kg", 2, "fr")).toEqual({ text: "12 kg", caret: 2 });
     expect(regroupTypedNumber("123", 1, "en")).toEqual({ text: "123", caret: 1 });
     expect(regroupTypedNumber("12345", null, "en")).toEqual({ text: "12,345", caret: null });
   });
@@ -171,12 +171,41 @@ describe("isUnreadableNumber", () => {
 
   it("is true for text that reads as no number", () => {
     expect(isUnreadableNumber("abc", "fr")).toBe(true);
-    expect(isUnreadableNumber("25 %%", "en")).toBe(true);
+    expect(isUnreadableNumber("25 kg", "en")).toBe(true);
   });
 
   it("is true for a decimal where a whole number is required, and only then", () => {
     expect(isUnreadableNumber("12,5", "fr", true)).toBe(true);
     expect(isUnreadableNumber("12,5", "fr")).toBe(false);
+  });
+});
+
+/**
+ * A15.10 (2026-10-01), Postel: the unit a box already shows is accepted along
+ * with the number — a spreadsheet's « 18 % », a billing tool's « 1 200 € » —
+ * and dropped from the box, which shows its own.
+ */
+describe("the unit a box shows, typed or pasted with the number", () => {
+  it("reads a percent or a currency sign, before or after, in both languages", () => {
+    expect(parseTypedNumber("18 %", "fr")).toBe(18);
+    expect(parseTypedNumber("18%", "en")).toBe(18);
+    expect(parseTypedNumber("12,5 %", "fr")).toBe(12.5);
+    expect(parseTypedNumber("1 200 €", "fr")).toBe(1200);
+    expect(parseTypedNumber("€1,200", "en")).toBe(1200);
+    expect(parseTypedNumber("$1,200.50", "en")).toBe(1200.5);
+    expect(parseTypedNumber("£300", "en")).toBe(300);
+  });
+
+  it("drops the sign from the box, keeping the grouping and the caret on the digits", () => {
+    expect(groupTypedNumber("1200 €", "fr")).toBe("1\u00a0200");
+    expect(groupTypedNumber("18%", "en")).toBe("18");
+    expect(regroupTypedNumber("1200€", 5, "fr")).toEqual({ text: "1\u00a0200", caret: 5 });
+  });
+
+  it("still refuses what no sign explains", () => {
+    expect(parseTypedNumber("12 kg", "fr")).toBeNull();
+    expect(parseTypedNumber("%", "fr")).toBeNull();
+    expect(isUnreadableNumber("€", "en")).toBe(true);
   });
 });
 

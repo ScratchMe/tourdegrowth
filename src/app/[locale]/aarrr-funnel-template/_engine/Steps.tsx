@@ -217,6 +217,21 @@ function TargetInput({ id, view, actions }: { id: MetricId; view: EngineView; ac
   );
 }
 
+/**
+ * What a base step must not drop in silence (A15.9): a count typed but not
+ * readable as a whole number, or not above zero. Both used to be skipped and
+ * the step went on, so the person never saw the count was not kept. The text
+ * is read from the box itself: its value is `null` both empty and unreadable.
+ */
+function firstUnkept(fields: { id: string; value: number | null }[], locale: "en" | "fr"): { id: string; notPositive: boolean } | null {
+  for (const f of fields) {
+    const raw = (document.getElementById(f.id) as HTMLInputElement | null)?.value ?? "";
+    if (isUnreadableNumber(raw, locale, true)) return { id: f.id, notPositive: false };
+    if (f.value !== null && f.value <= 0) return { id: f.id, notPositive: true };
+  }
+  return null;
+}
+
 /** « Ta base » — the counts several numbers share, typed once (shared-counts.ts). */
 function BaseStep({
   view,
@@ -242,7 +257,21 @@ function BaseStep({
   const cohortHint = fillCatalog(s.baseCohortHint);
   const monthHint = fillCatalog(s.baseMonthHint);
 
+  const [notPositive, setNotPositive] = useState<string | null>(null);
+
   function save() {
+    const stop = firstUnkept(
+      [
+        { id: "engine-base-cohort", value: cohort },
+        { id: "engine-base-month", value: month },
+      ],
+      view.ctx.locale,
+    );
+    if (stop) {
+      setNotPositive(stop.notPositive ? stop.id : null);
+      document.getElementById(stop.id)?.focus();
+      return;
+    }
     const pairs: [SharedCount, number | null][] = [
       ["cohortSignups", cohort],
       ["monthSignups", month],
@@ -265,6 +294,7 @@ function BaseStep({
         <NumberField
           id="engine-base-cohort"
           label={cohortLabel}
+          error={notPositive === "engine-base-cohort" && (cohort === null || cohort <= 0) ? s.countPositive : undefined}
           hint={cohortHint}
           value={cohort}
           onChange={setCohort}
@@ -275,6 +305,7 @@ function BaseStep({
         <NumberField
           id="engine-base-month"
           label={monthLabel}
+          error={notPositive === "engine-base-month" && (month === null || month <= 0) ? s.countPositive : undefined}
           hint={monthHint}
           value={month}
           onChange={setMonth}
@@ -406,7 +437,15 @@ function SlgBaseStep({
     },
   ];
 
+  const [notPositive, setNotPositive] = useState<string | null>(null);
+
   function save() {
+    const stop = firstUnkept(fields, view.ctx.locale);
+    if (stop) {
+      setNotPositive(stop.notPositive ? stop.id : null);
+      document.getElementById(stop.id)?.focus();
+      return;
+    }
     const changed: Partial<Record<SharedCount, number>> = {};
     for (const f of fields) {
       const n = f.value;
@@ -429,6 +468,7 @@ function SlgBaseStep({
             id={f.id}
             label={f.label}
             hint={f.hint}
+            error={notPositive === f.id && (f.value === null || f.value <= 0) ? s.countPositive : undefined}
             value={f.value}
             onChange={f.set}
             locale={view.ctx.locale}

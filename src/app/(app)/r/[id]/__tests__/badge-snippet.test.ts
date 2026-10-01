@@ -53,7 +53,8 @@ describe("the block's wiring", () => {
   const page = readFileSync(join(DIR, "page.tsx"), "utf8");
 
   it("is shown to the owner only", () => {
-    expect(view).toMatch(/\{isOwner && badge \? \(\s*<BadgeSnippet/);
+    // Folded since A15.17: the owner-only branch opens a Disclosure, the badge inside it.
+    expect(view).toMatch(/\{isOwner && badge \? \(\s*<Disclosure[^>]*>\s*<BadgeSnippet/);
     expect(view.match(/<BadgeSnippet\b/g)).toHaveLength(1);
   });
 

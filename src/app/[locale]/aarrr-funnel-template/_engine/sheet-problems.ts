@@ -17,6 +17,7 @@ import { fill, midSentence } from "./text";
 const RULES: readonly DraftProblem[] = [
   "denominator-zero",
   "num-gt-den",
+  "count-negative",
   "percent-range",
   "amount-negative",
   "duration-negative",
@@ -44,6 +45,8 @@ export function ruleMessage(problem: DraftProblem, metric: ResolvedMetric, strin
       });
     case "percent-range":
       return strings.workbench.percentRange;
+    case "count-negative":
+      return strings.workbench.countNegative;
     case "amount-negative":
       return strings.workbench.amountNegative;
     case "duration-negative":

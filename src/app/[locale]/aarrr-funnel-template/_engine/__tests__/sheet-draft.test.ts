@@ -117,6 +117,15 @@ describe("entryFromDraft — what refuses a save", () => {
     expect(cac(0)).toEqual([]);
   });
 
+  // A15.10 (2026-10-01): a count of people, or the whole a share is taken
+  // of, is never below zero — the import said so, the sheet saved it. A
+  // margin over revenue can be: a loss-making business has one.
+  it("refuses a negative count, never a negative margin", () => {
+    expect(save("act.rate", { mode: "have", numerator: -3, denominator: 800, source: "other" }).problems).toEqual(["count-negative"]);
+    expect(save("act.rate", { mode: "have", numerator: 3, denominator: -800, source: "other" }).problems).toEqual(["count-negative"]);
+    expect(save("rev.gross-margin", { mode: "have", numerator: -1200.5, denominator: 40000, source: "other" }).problems).toEqual([]);
+  });
+
   // A15.3: a rate's bounds are rates, held to the 0–100 its value is held to.
   it("holds an estimated rate's bounds to 0–100, and only a rate's", () => {
     expect(save("act.rate", { mode: "estimate", low: 10, high: 140, basis: "sample" }).problems).toEqual(["percent-range"]);

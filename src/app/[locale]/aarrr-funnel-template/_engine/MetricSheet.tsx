@@ -28,6 +28,7 @@ import { MissingTriage } from "./MissingTriage";
 import { RequestCopy } from "./RequestCopy";
 import { draftFromEntry, entryFromDraft, isWideRange, type DraftProblem, type SheetDraft, type SheetMode } from "./sheet-draft";
 import { isRule, missingLabel, ruleMessage } from "./sheet-problems";
+import { draftKey, dropDraft, keepDraft, keptDraft } from "./sheet-drafts";
 import { moneyUnit, percentUnit, wordUnit, type NumberUnit } from "./sources";
 import { catalogFill, daysBetween, domId, fill, formatMonth, joinList, metricById, midSentence, sourceLabel } from "./text";
 import { ValueEditor } from "./ValueEditor";
@@ -93,7 +94,11 @@ export function MetricSheet({
   // A count several numbers share is typed once (shared-counts.ts): an empty side of this
   // number's counts starts from it, and the field says so.
   const shared = sharedSides(id, snapshot);
+  // An unsaved draft comes back when the sheet is remounted (A15.12).
+  const key = draftKey(id, entry);
   const [draft, setDraft] = useState<SheetDraft>(() => {
+    const kept = keptDraft(key);
+    if (kept) return kept;
     const d = draftFromEntry(entry, shape);
     if (d.kind !== "ratio") return d;
     return {
@@ -108,7 +113,7 @@ export function MetricSheet({
   // button, outside any live region, said nothing to a screen reader. Counted,
   // so a second refusal moves it again.
   const [refusals, setRefusals] = useState(0);
-  const sheetRef = useRef<HTMLDivElement>(null);
+  const sheetRef = useRef<HTMLFormElement>(null);
   useEffect(() => {
     if (refusals === 0) return;
     const root = sheetRef.current;
@@ -122,7 +127,11 @@ export function MetricSheet({
   // read when needed, not scrolled past every time (Antoine, 2026-09-25).
   const [whereOpen, setWhereOpen] = useState(false);
   const update = (patch: Partial<SheetDraft>) => {
-    setDraft((current) => ({ ...current, ...patch }));
+    setDraft((current) => {
+      const next = { ...current, ...patch };
+      keepDraft(key, next);
+      return next;
+    });
     setOutcome(null);
   };
 
@@ -142,6 +151,7 @@ export function MetricSheet({
       return;
     }
     const result = actions.saveEntry(id, built.entry);
+    if (result.ok) dropDraft(key);
     setOutcome(result.ok ? "saved" : "failed");
     if (result.ok) onSaved?.();
   }
@@ -217,7 +227,20 @@ export function MetricSheet({
   const [alsoBefore = ""] = strings.sheet.alsoIn.split("{metrics}");
 
   return (
-    <div ref={sheetRef} className={styles.sheet} data-testid={`engine-sheet-${domId(id)}`}>
+    // A form, so Enter in a box saves, as on any other form (A15.20, Jakob's
+    // law, decided by Antoine on 2026-10-01). Nothing is sent anywhere: the
+    // submit is the sheet's own save, on this device. The Save button is the
+    // form's one submit; every other Button is `type="button"` by default.
+    <form
+      ref={sheetRef}
+      className={styles.sheet}
+      data-testid={`engine-sheet-${domId(id)}`}
+      noValidate
+      onSubmit={(event) => {
+        event.preventDefault();
+        save();
+      }}
+    >
       <div className={styles.meta}>
         <Tag tone="outline">{strings.effort[EFFORT_KEY[shape.effort]]}</Tag>
         <a className={styles.definitionLink} href={metric.glossaryHref} target="_blank" rel="noopener">
@@ -548,8 +571,8 @@ export function MetricSheet({
       {draft.mode !== "ask" ? (
         <div className={styles.saveRow}>
           <Button
+            type="submit"
             variant={variant === "step" ? "primary" : "secondary"}
-            onClick={save}
             disabled={draft.mode === null}
             data-testid={`engine-save-${domId(id)}`}
           >
@@ -577,7 +600,7 @@ export function MetricSheet({
           {strings.storage.writeFailed}
         </p>
       ) : null}
-    </div>
+    </form>
   );
 }
 

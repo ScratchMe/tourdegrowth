@@ -73,6 +73,12 @@ export interface MetricShape<Id extends MetricId = MetricId> {
   unit: "percent" | "money" | "ratio" | "duration" | "text" | "choice";
   /** numerator ≤ denominator — a violation blocks the save (sanity `num-gt-den`). */
   bounded: boolean;
+  /**
+   * The two counts of the ratio are amounts — a margin, an MRR movement, an
+   * ARR — not people: typed with their currency, cents allowed (A15.8). They
+   * were whole-number boxes refusing « 12 450,80 » with « these are people ».
+   */
+  amounts?: true;
   /** Which month the number belongs to: the flows' reference month, the followed cohort, or neither. */
   flow: "month" | "cohort" | "none";
   /**
@@ -361,6 +367,7 @@ export const METRIC_SHAPES: readonly MetricShape<PlgMetricId>[] = ([
     primary: false,
     valueKinds: ["ratio", "rate"],
     unit: "percent",
+    amounts: true,
     bounded: true,
     flow: "month",
     effort: "ask",
@@ -380,6 +387,7 @@ export const METRIC_SHAPES: readonly MetricShape<PlgMetricId>[] = ([
     primary: false,
     valueKinds: ["ratio", "rate"],
     unit: "percent",
+    amounts: true,
     // An upgrade wave can in principle exceed the base it grows: not bounded.
     bounded: false,
     flow: "month",
@@ -396,6 +404,7 @@ export const METRIC_SHAPES: readonly MetricShape<PlgMetricId>[] = ([
     primary: false,
     valueKinds: ["ratio", "rate"],
     unit: "percent",
+    amounts: true,
     // A downgrade can only lose what was there on the 1st.
     bounded: true,
     flow: "month",
@@ -551,6 +560,7 @@ export const SLG_METRIC_SHAPES: readonly MetricShape<SlgMetricId>[] = ([
     primary: false,
     valueKinds: ["ratio", "rate"],
     unit: "percent",
+    amounts: true,
     // Two amounts, and expansion can carry it past 100 %: not bounded (§18.3.3).
     bounded: false,
     flow: "month",
@@ -658,6 +668,7 @@ export const SLG_METRIC_SHAPES: readonly MetricShape<SlgMetricId>[] = ([
     primary: false,
     valueKinds: ["ratio", "rate"],
     unit: "percent",
+    amounts: true,
     bounded: true,
     flow: "month",
     effort: "ask",

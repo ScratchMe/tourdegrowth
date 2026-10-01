@@ -43,9 +43,11 @@ import type { DeepDiveView } from "@/lib/submissions/types";
 import { SEGMENT_MODELS, SEGMENT_STAGES } from "@/content/segments";
 import type { Benchmark } from "@/lib/submissions/benchmark";
 import type { SegmentAnswers } from "@/lib/submissions/segment";
+import { Disclosure } from "@/components/core/Disclosure";
 import { BadgeSnippet } from "./BadgeSnippet";
 import { ScoreBreakdown, type BreakdownData } from "./ScoreBreakdown";
 import styles from "./ResultView.module.css";
+import { scoreBand } from "@/lib/scoring/bands";
 
 // Named for readability at the trackEvent() call sites below — the array
 // itself (and the order) is shared with lib/analytics/goatcounter-api.ts's
@@ -236,6 +238,15 @@ export function ResultView({
    * more places on the same screen.
    */
   const level = bottleneck.sharpness === "level";
+
+  /**
+   * « Strengths » lists the two highest stages, and on a low board one of
+   * them can be weak: a weak-band sentence under a title that says strong
+   * (A15.14) — `level`'s defect the other way round. The title turns
+   * relative then; the cards and their sentences stay.
+   */
+  const strengthsShown = roast ? strongestTwo.slice(0, 1) : strongestTwo;
+  const strengthsAreWeak = strengthsShown.some((p) => scoreBand(p.score) === "weak");
 
   /**
    * The sharpness line. The server decided WHICH claim the scores support;
@@ -551,9 +562,11 @@ export function ResultView({
             </PriorityMove>
 
             <section className={`${styles.section} ${styles.slotStrengths}`}>
-              <MetaLabel wide>{tc(roast ? t.strengthsTitleRoast : t.strengthsTitle, locale)}</MetaLabel>
+              <MetaLabel as="h2" wide>
+                {tc(strengthsAreWeak ? t.strengthsTitleRelative : roast ? t.strengthsTitleRoast : t.strengthsTitle, locale)}
+              </MetaLabel>
               <div className={styles.cardGrid}>
-                {(roast ? strongestTwo.slice(0, 1) : strongestTwo).map((p) => (
+                {strengthsShown.map((p) => (
                   <InsightCard key={p.pillar} pillar={tc(UI_STRINGS.pillars[p.pillar], locale)} score={p.score} kind="strength">
                     {sentenceFor(p.pillar)}
                   </InsightCard>
@@ -562,7 +575,7 @@ export function ResultView({
             </section>
 
             <section className={`${styles.section} ${styles.slotWeaknesses}`}>
-              <MetaLabel wide>{tc(level ? t.roomTitle : t.weaknessesTitle, locale)}</MetaLabel>
+              <MetaLabel as="h2" wide>{tc(level ? t.roomTitle : t.weaknessesTitle, locale)}</MetaLabel>
               <div className={styles.cardGrid}>
                 {weakestTwo.map((p) => (
                   <InsightCard
@@ -714,6 +727,22 @@ export function ResultView({
               already spent on the score. It absorbs "Share this result",
               which leaves the CTA row below. */}
           <div className={styles.slotShare} ref={shareSlotRef}>
+            {/* A15.17 (2026-10-01, decided by Antoine): the owner's page ended
+                on this README block — a <pre> of Markdown for developers, the
+                last and lowest thing on a desktop. Folded, and before the
+                share card: the block ends on sharing. */}
+            {isOwner && badge ? (
+              <Disclosure summary={tc(t.badgeCaption, locale)} size="sm" data-testid="badge-fold">
+                <BadgeSnippet
+                  src={badge.src}
+                  alt={badge.alt}
+                  markdown={badge.markdown}
+                  lead={tc(t.badgeLead, locale)}
+                  copyLabel={tc(t.badgeCopy, locale)}
+                  copiedLabel={tc(t.badgeCopied, locale)}
+                />
+              </Disclosure>
+            ) : null}
             <ShareCard
               data-testid="share-card"
               src={shareImageSrc}
@@ -730,17 +759,6 @@ export function ResultView({
               saveHref={shareImageSrc}
               saveFileName={`tour-de-growth-${total}.png`}
             />
-            {isOwner && badge ? (
-              <BadgeSnippet
-                src={badge.src}
-                alt={badge.alt}
-                markdown={badge.markdown}
-                caption={tc(t.badgeCaption, locale)}
-                lead={tc(t.badgeLead, locale)}
-                copyLabel={tc(t.badgeCopy, locale)}
-                copiedLabel={tc(t.badgeCopied, locale)}
-              />
-            ) : null}
           </div>
         </div>
       </main>

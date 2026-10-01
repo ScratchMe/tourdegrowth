@@ -6,6 +6,14 @@
  */
 
 /**
+ * The unit a box already shows, typed or pasted along with the number:
+ * « 18 % » from a spreadsheet cell, « 1 200 € » or « €1,200 » from a billing
+ * tool. Be liberal in what you accept (Postel, A15.10): the box says its unit,
+ * so the sign adds nothing and is dropped, never a reason to refuse.
+ */
+const UNIT_CHARS = /[%€$£]/g;
+
+/**
  * Reads what a person types as a number, the way they write it in their
  * language: "26 000" and "26 000" (NBSP, U+202F) and "26’000" in French,
  * "26,000" in English. French writes the decimal with a comma, English with a
@@ -14,7 +22,7 @@
  * a finite number once the separators are gone.
  */
 export function parseTypedNumber(raw: string, locale: "en" | "fr"): number | null {
-  let s = raw.trim().replace(/[\s  ’']/g, "");
+  let s = raw.trim().replace(/[\s  ’']/g, "").replace(UNIT_CHARS, "");
   if (s === "") return null;
   if (locale === "fr") s = s.replace(",", ".");
   else s = s.replace(/,/g, "");
@@ -81,7 +89,8 @@ function isSignificant(c: string, locale: "en" | "fr"): boolean {
  */
 export function groupTypedNumber(raw: string, locale: "en" | "fr"): string {
   if (parseTypedNumber(raw, locale) === null) return raw;
-  const bare = raw.replace(GROUP_CHARS[locale], "");
+  // The unit sign goes with the group separators: the box shows its own (A15.10).
+  const bare = raw.replace(GROUP_CHARS[locale], "").replace(UNIT_CHARS, "");
   const negative = bare.startsWith("-");
   const body = negative ? bare.slice(1) : bare;
   const sep = [...body].findIndex((c) => isDecimalChar(c, locale));

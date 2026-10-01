@@ -80,6 +80,7 @@ export type DraftProblem =
   | "denominator"
   | "denominator-zero"
   | "num-gt-den"
+  | "count-negative"
   | "percent"
   | "percent-range"
   | "amount"
@@ -261,18 +262,22 @@ function sourceRefOf(choice: SourceChoice, role: RoleId): SourceRef | null {
 }
 
 /** A count-based value: both counts, a non-zero denominator, and — for a share — no more of the part than of the whole. */
-function ratioProblems(num: number | null, den: number | null, bounded: boolean): DraftProblem[] {
+function ratioProblems(num: number | null, den: number | null, bounded: boolean, amounts: boolean): DraftProblem[] {
   const problems: DraftProblem[] = [];
   if (num === null) problems.push("numerator");
   if (den === null) problems.push("denominator");
   else if (den === 0) problems.push("denominator-zero");
+  // A count of people, or the whole a share is taken of, is never below
+  // zero; a margin over revenue can be (A15.10). The import already said so
+  // (validate.ts), the sheet saved it.
+  if ((den !== null && den < 0) || (!amounts && num !== null && num < 0)) problems.push("count-negative");
   if (bounded && num !== null && den !== null && den > 0 && num > den) problems.push("num-gt-den");
   return problems;
 }
 
 function readingValue(r: ReadingDraft, shape: MetricShape): MetricValue | null {
   if (r.kind === "ratio") {
-    if (ratioProblems(r.numerator, r.denominator, shape.bounded).length) return null;
+    if (ratioProblems(r.numerator, r.denominator, shape.bounded, shape.amounts === true).length) return null;
     return { kind: "ratio", numerator: r.numerator!, denominator: r.denominator! };
   }
   if (r.kind === "rate") return r.percent === null || r.percent < 0 || r.percent > 100 ? null : { kind: "rate", percent: r.percent };
@@ -316,7 +321,7 @@ export function entryFromDraft(
       let value: MetricValue | null = null;
       switch (draft.kind) {
         case "ratio":
-          problems.push(...ratioProblems(draft.numerator, draft.denominator, shape.bounded));
+          problems.push(...ratioProblems(draft.numerator, draft.denominator, shape.bounded, shape.amounts === true));
           if (draft.numerator !== null && draft.denominator !== null && draft.denominator !== 0)
             value = { kind: "ratio", numerator: draft.numerator, denominator: draft.denominator };
           break;

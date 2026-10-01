@@ -724,6 +724,8 @@ export const ENGINE_COPY = {
     saveNeeds: { fr: "Pour enregistrer, il manque : {fields}", en: "To save, still missing: {fields}" },
     percentRange: { fr: "Un taux se situe entre 0 et 100 %.", en: "A rate sits between 0 and 100%." },
     // TODO: à relire (convention 6) — A15.3 (2026-10-01) : un montant ou une durée négatifs étaient dits « manquants ».
+    // TODO: à relire (convention 6) — A15.10 (2026-10-01).
+    countNegative: { fr: "Un compte ne peut pas être négatif.", en: "A count can't be negative." },
     amountNegative: { fr: "Un montant ne peut pas être négatif.", en: "An amount can't be negative." },
     // TODO: à relire (convention 6).
     durationNegative: { fr: "Une durée ne peut pas être négative.", en: "A duration can't be negative." },
@@ -1351,7 +1353,9 @@ export const ENGINE_COPY = {
     png: { fr: "Image (PNG)", en: "Image (PNG)" },
     pngHd: { fr: "Haute définition", en: "High definition" },
     copyImage: { fr: "Copier l'image", en: "Copy image" },
-    pdf: { fr: "Télécharger le PDF", en: "Download the PDF" },
+    // TODO: à relire (convention 6) — A15.11 (2026-10-01) : le bouton ouvre la fenêtre d'impression
+    // (window.print), il ne télécharge rien ; le libellé dit maintenant le geste.
+    pdf: { fr: "Imprimer ou enregistrer en PDF", en: "Print or save as PDF" },
     pdfMobile: { fr: "Plus fiable depuis un ordinateur.", en: "More reliable from a computer." },
     copyText: { fr: "Copier le texte et les notes", en: "Copy the text and notes" },
     textCopied: { fr: "Texte copié", en: "Text copied" },
@@ -2086,6 +2090,8 @@ export const ENGINE_COPY = {
       fr: "Deux nombres servent à plusieurs chiffres. Saisis-les une fois ici : on les réutilise partout, et tu peux toujours les modifier.",
       en: "Two numbers feed several of the others. Enter them once here: they are reused everywhere, and you can always change them.",
     },
+    // TODO: à relire (convention 6) — A15.9 (2026-10-01) : un compte de la base à zéro ou moins était jeté sans un mot.
+    countPositive: { fr: "Un nombre plus grand que zéro : on compte des personnes.", en: "A number above zero: these are people." },
     baseCohortHint: {
       fr: "Tous les comptes créés en {cohort}. Ils servent à l'activation, à la rétention à J30, au parrainage et à la conversion en payant.",
       en: "Every account created in {cohort}. They feed activation, day-30 retention, referral and paid conversion.",
