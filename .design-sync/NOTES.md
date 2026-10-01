@@ -310,7 +310,8 @@ story alone at 900×700 (`fullPage: false`), and the review sheet caps a cell at
   `ContentHeader` InTheEngine and `ProsePage` NightIntro show the band in its
   narrow form at card width, and say so.
 - Tall cells lose their bottom (`ProsePage` Page and NightIntro, all three
-  `QuarterReport` cells, `PatternCatalogue` ThreeGroups, `PhoneMock` Dark):
+  `QuarterReport` cells, both `PatternCatalogue` cells since B6 showed all eight
+  tricks, `PhoneMock` Dark):
   graded from the render-check shots or a scratch full-page shot, never from
   the cut sheet alone.
 - `Hand` shows 6 of its cards for the same reason; its doc says which.
@@ -626,7 +627,7 @@ added. Two methods found more, and neither was reading a sheet:
   1 test of 11 fails without the rule).
 
 What to take from it: **a carried grade says the sheet looked right, not that
-its numbers are the model's.** The game previews B4 did NOT regenerate —
+its numbers are the model's.** (Done in B6, below.) The game previews B4 did NOT regenerate —
 `ActionCard`, `DgFace`, `DgMail`, `EndingHero`, `EventClipping`, `Hand`,
 `PatternCatalogue`, `Playbook`, `ResumePrompt`, `ShareRow`, `TourLoop`,
 `VideoCall` — are the next sync's first job, with the same scripts: bundle a
@@ -638,6 +639,45 @@ and check that every string it returns is in the preview byte for byte. A
 story whose doc names no path, or names one that does not produce it, gets a
 real one: a random walk over the reducer (`handIds` + `toggle` + `run`)
 finds a year with the wanted shape in seconds.
+
+### Found in the 2026-10-01 re-sync (B6), by the drift search and by regenerating
+
+B6 carried A15 (`ErrorScreen` `retry`, `LoadingScreen` told by the clock,
+`Button` `sm`'s 44px strip, `MetaLabel` `as`) and C33 (`GameEntry` `eyebrow`).
+What the three methods found beyond that:
+
+- **The drift search** found `NumberField` and `FieldRow` still quoting the two
+  engine messages A15.2 and A15.3 rewrote (« Ce n'est pas un nombre lisible »,
+  « Le minimum dépasse le maximum »). Parse errors never render in a still, so
+  no sheet could show it: the strings were going to the design agent through
+  the `.prompt.md` examples.
+- **The spot check** of components whose code changed without their preview
+  (`Button`, `MetaLabel`, `SpaceBand`, `WordmarkLink`) rendered as graded, but
+  `MetaLabel`'s doc said « It is not a heading », false since A15.13; its
+  `Tracking` story now draws the result's two titles as `ResultView` does
+  (`as="h2" wide`, default size).
+- **Regenerating the twelve game previews B4 left** (three agents in parallel,
+  `playPath` / `finalState` / `endingState` and the island's builders, every
+  leaf compared byte for byte, then the lists by length): seven matched
+  (`Playbook` 38/38, `EndingHero`, `DgMail`, `Hand` 96/96, `TourLoop`;
+  `ActionCard` and `DgFace` right but with comments naming no year, or a wrong
+  place), five did not, all graded good since 2026-09-29:
+  `ShareRow` (a share text typed by hand, « 3.9 %, trust at 71 »: the model says
+  « 4.0 %, trust at 83 / 100 »), `ResumePrompt` (5.7 % then 5.0 %, which no
+  year reaches: the same invented pair as `QuarterTimeline` in B4),
+  `PatternCatalogue` (4 and 3 entries under « the eight tricks », pre-2026-09-25
+  cases, splits no year produces; `ThreeGroups` now comes from a year found by
+  a random walk, named in the story), `EventClipping` (one of the quarter's two
+  clippings in French) and `VideoCall` (`Ringing` passed `message=""`, the
+  island always passes `bossMessage`).
+- **A product doc defect**, fixed in the same PR: `DgFace`'s `framing` JSDoc
+  placed the avatar in « the journal », which draws no face (it is the report
+  and the news screen), and the contract carried it to Claude Design.
+- **Seen, left to the product** (`CHANTIERS.md`): nothing passes
+  `TourLoop.refId`, so the end-of-level « Où en est ta croissance ? » link never
+  carries `?ref=` though GAME-BRIEF 13.3 D says it should when a result id is
+  known; and « 83 / 100 » keeps plain spaces around the slash in French
+  (`december.cells.outOf`), outside the NBSP list above.
 
 ## Re-sync risks
 
