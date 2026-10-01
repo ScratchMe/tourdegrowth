@@ -1304,3 +1304,24 @@ Commit `70bdec2`. **Q14** (C25, tranchée oui) : `engine_setup/<plg|slg|hybrid>`
 - Build de production avec les variables de la CI, émulateur Firestore lancé : **la suite Playwright complète, 695 passées, 6 ignorées par construction, aucun échec**, dont les specs neuves : les deux niveaux au sitemap, au hub et en hreflang, chaque fin nommée par son niveau sur le hub, la page du niveau 2 et ses mots du glossaire, les zones qui se renvoient d'un niveau à l'autre, l'image du niveau 2, son accessibilité, et sur un vrai résultat lu dans l'émulateur l'encart du niveau 2, porte Deep dive, « New customers 2,000 ».
 - Après la dernière retouche (l'étiquette « jouable » pleine), les specs du jeu et d'accessibilité repassées sur le nouveau build : 129 passées.
 - À l'écran, à 1 280 et 390 px, en français et en anglais : l'intro de Pédalix, le bureau avec son téléphone et la pastille dans la barre d'action, une année C jusqu'à la transaction, le bloc de décembre qui mène au niveau 1, le hub à deux zones jouables. Aucun défilement horizontal.
+
+**En production (2026-10-01)** : [#247](https://github.com/ScratchMe/tourdegrowth/pull/247), squash `9b8bfb3`, 57 fichiers, arbre identique à la tête (après une fusion de `main`, qui avait reçu A7.3.c). Cette fois, le statut `Vercel` du commit est `success` : le déploiement de production a emporté A12.e (#246), refusé le matin par le quota, avec A12.f.1 et A7.3.c. Le jeu reste fermé : `/fr/game`, `/fr/game/acquisition` et son image répondent 404, et le sitemap ne nomme aucune page du jeu.
+
+## A12.f.2 : une carte, les deux niveaux (2026-10-01, #248)
+
+**Ce qui change** : quand l'acquisition et la rétention freinent ensemble, l'encart du résultat propose les deux niveaux sur une seule carte, étape par étape (C30 Q5). Jusqu'ici, l'ordre AARRR choisissait à la place du lecteur. Une carte à un seul niveau ne change pas d'un pixel, et la bande reste à 44 px sur ordinateur.
+
+**Les choix** :
+- **`gameEntryFor` devient `gameEntriesFor` et rend une liste** : chaque étape du goulot qui a un niveau, la plus faible d'abord, sans doublon. Le renommage casse chaque appel à la compilation, ce qui est voulu pour un changement de sens. Le dénominateur de `/admin/stats` suit la même règle (`.length > 0`).
+- **`GameEntry` reçoit `levels`**, une entrée par niveau proposé (l'étape, le lien, le bouton, le chiffre, la porte analytique). Le titre, le corps, la mention et la confiance absente sont communs à la carte. Il n'y a aucun chemin analytique neuf : chaque bouton compte la porte de son niveau.
+- **La mise en page de la carte à plusieurs niveaux** : la bande toujours empilée, un chiffre par ligne puis la confiance ; une rangée par étape, son nom au-dessus de son bouton ; la mention une seule fois.
+
+**Ce que l'écran a trouvé** (à 1 280 px, avant la correction) : un « · » suspendu en fin de première ligne quand la bande passait à la ligne, et deux mises en page dans la même carte, le nom « Acquisition » renvoyé au-dessus d'un bouton trop long alors que « Retention » restait à côté du sien. D'où la bande empilée et le nom toujours au-dessus.
+
+**Copie neuve, « à relire »** : `GAME_ENTRY_SEVERAL` (« Le côté obscur de tes étapes », son corps, « vingt minutes par niveau, gratuit »). La relecture de copie a trouvé une phrase fausse sur certains résultats : « un niveau pour chacune des étapes qui te freinent » ne tient pas quand trois étapes sont à égalité et que deux seulement ont un niveau, alors que la page au-dessus dit « 3 étapes te freinent ». C'est devenu « les étapes ci-dessous » et « huit astuces par niveau », et un test tient le cas.
+
+**Vérifié** :
+- `tsc` et `eslint` propres, **2 698 tests unitaires**, dont les cas de la liste : deux niveaux dans l'ordre du goulot, un seul quand une seule étape du goulot en a un, jamais deux fois le même, l'ouverture Deep dive pour toute la carte.
+- Une fixture e2e neuve : un vrai résultat lu dans l'émulateur, avec l'acquisition et la rétention à 0/20. Sa spec voit une carte, deux boutons dans l'ordre, les deux chiffres.
+- Les specs du jeu, des résultats et d'accessibilité : 160 passées, 6 ignorées par construction.
+- À l'écran, en français et en anglais, à 1 280, 390 et 360 px : la carte à deux niveaux et celle à un niveau, sans défilement horizontal.

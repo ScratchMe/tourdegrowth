@@ -16,7 +16,7 @@ import { EMULATOR_HOST, REAL_DEEP_DIVE, REAL_RESULTS, SENTINEL, SKIP_EMULATOR_RE
 test.skip(!EMULATOR_HOST, SKIP_EMULATOR_REASON);
 
 const GAME_OPEN = process.env.GAME_ENABLED === "true";
-const { clear, shared, level, deep } = REAL_RESULTS;
+const { clear, shared, level, deep, twoLevels } = REAL_RESULTS;
 
 /** Every key of a stored document, nested ones included — the answers map's question ids among them. */
 function keysOf(value: unknown, into = new Set<string>()): Set<string> {
@@ -147,6 +147,22 @@ test.describe("a visitor's view of a clear bottleneck", () => {
     await expect(page.getByTestId("game-entry-cta")).toHaveAttribute("href", "/en/game/acquisition?from=deep_dive");
     // Level 2's number in level 2's format: new customers, never a percentage.
     await expect(page.getByTestId("game-entry-band")).toContainText("New customers 2,000");
+  });
+
+  test("offers BOTH levels on one card when acquisition and retention tie at the bottom (C30 Q5)", async ({ page }) => {
+    test.skip(!GAME_OPEN, "GAME_ENABLED is not \"true\" for this build: the card only exists with the game open.");
+    await page.goto(`/r/${twoLevels.id}?lang=en`);
+    // One card, never two.
+    await expect(page.getByTestId("game-entry")).toHaveCount(1);
+    await expect(page.getByTestId("game-entry")).toHaveAttribute("data-levels", "2");
+    await expect(page.getByTestId("game-entry").getByRole("heading", { level: 2 })).toHaveText("The dark side of your stages");
+    // Stage by stage, lowest first: the reader chooses, AARRR order does not.
+    const ctas = page.getByTestId("game-entry-cta");
+    await expect(ctas).toHaveCount(2);
+    await expect(ctas.nth(0)).toHaveAttribute("href", "/en/game/acquisition?from=result");
+    await expect(ctas.nth(1)).toHaveAttribute("href", "/en/game/retention?from=result");
+    await expect(page.getByTestId("game-entry-band")).toContainText("New customers 2,000");
+    await expect(page.getByTestId("game-entry-band")).toContainText("Churn 6.0%");
   });
 });
 

@@ -23,7 +23,7 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
-| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.d (le bon à tirer de la copie neuve), A7.4 après A7.3, les textes de lancement de la ligne « Hors code » d'A7.3, et A7.12.c à l'ouverture. **A7.3.c est livré le 2026-10-01** (S0 à S5, PR d'intégration [#233](https://github.com/ScratchMe/tourdegrowth/pull/233), drapeau fermé). A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)**, sa copie, l'îlot partagé, le téléphone de Pédalix et le branchement faits le même jour (A12.c à A12.f.1) : reste A12.f.2, l'encart qui propose les deux niveaux. **A13** (trois alertes de dépendances, dont une critique sur `next`) livré le 2026-10-01 |
+| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.d (le bon à tirer de la copie neuve), A7.4 après A7.3, les textes de lancement de la ligne « Hors code » d'A7.3, et A7.12.c à l'ouverture. **A7.3.c est livré le 2026-10-01** (S0 à S5, PR d'intégration [#233](https://github.com/ScratchMe/tourdegrowth/pull/233), drapeau fermé). A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)**, sa copie, l'îlot partagé, le téléphone de Pédalix et le branchement faits le même jour (A12.c à A12.f.2) : restent A12.g (les specs du niveau) et A12.h (le bon à tirer, la recette). **A13** (trois alertes de dépendances, dont une critique sur `next`) livré le 2026-10-01 |
 | **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30, après A7.10, A10 et A11** (B3, puis la re-synchro d'A11 le soir même : 88 composants, 292 cellules, 88 aperçus sur 88 rendus). Rien à lancer tant qu'un composant, ou une copie qu'un aperçu reprend, ne change pas |
 | **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 à C29 tranchées le 2026-09-30, C26 à C29 livrées le même jour, **C25** (la spécification de A7.3, `ENGINE.md` §18) dans sa propre session. **C30** (le niveau 2 du jeu, `GAME-BRIEF.md` §17) le 2026-10-01. **Rien n'est ouvert** |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, la fin d'A7.3 (le code est livré le 2026-10-01 ; restent le bon à tirer A7.3.d et les textes de lancement) |
@@ -33,7 +33,7 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 `/bon-a-tirer`), les textes de lancement d'A7.3 (ligne « Hors code »), A7.4,
 puis D. A7.3.c et A13 (l'alerte critique sur `next`) sont livrés le
 2026-10-01. A7.3.e, qui se menait en parallèle, est livré le
-2026-09-30. Le niveau 2 du jeu (A12.f.2 à A12.h) peut avancer en
+2026-09-30. Le niveau 2 du jeu (A12.g, A12.h) peut avancer en
 parallèle : il ne touche pas les mêmes fichiers. Le moteur ouvre avant le jeu (C23). Rien
 n'attend dans la section C : C30 est tranchée le 2026-10-01.
 
@@ -183,7 +183,7 @@ du niveau 2 codé en brouillon, sans page ni texte, avec ses quatre années de
 référence en tests (`lib/game/levels/acquisition.ts`, `acquisition.test.ts`).
 **C30 est tranchée le 2026-10-01** : les cinq recos retenues, la
 spécification validée telle quelle. A12.c, A12.d et A12.e sont faites le même jour,
-A12.f.1 aussi : le niveau est jouable, derrière le drapeau ; A12.f.2 peut partir. Toute copie neuve porte
+A12.f.1 et A12.f.2 aussi : le niveau est jouable, derrière le drapeau, et l'encart du résultat propose les deux niveaux quand ils freinent ensemble. A12.g peut partir. Toute copie neuve porte
 « TODO: à relire » (convention 6).
 
 | # | Quoi | Détail |
@@ -194,7 +194,7 @@ A12.f.1 aussi : le niveau est jouable, derrière le drapeau ; A12.f.2 peut parti
 | A12.d | **L'îlot partagé** | **Fait le 2026-10-01** ([#245](https://github.com/ScratchMe/tourdegrowth/pull/245)). L'îlot vit sous `app/[locale]/game/_island/`, le même pour tout niveau : un niveau y apporte son modèle, sa copie, le format de son chiffre (`metricFormat` : un dixième de point, une dizaine de clients) et son téléphone (`sides.tsx`). Les six composants qui portaient les noms du niveau 1 (`churn`, `subs`, `mrr`, `clicks`) prennent `metric`, `customers`, `revenue`, `pill` ; leurs aperçus suivent, la re-synchro avec Claude Design est B4, après A12.e. Testé sur les deux niveaux : chaque écran de chaque fin du niveau 2 passe par l'îlot sans « % » ni « pt » |
 | A12.e | **Le téléphone de Pédalix** | **Fait le 2026-10-01** ([#246](https://github.com/ScratchMe/tourdegrowth/pull/246)). `ShopPhone` et `BasketPill` (§17.7), calculés par `lib/game/shop-phone.ts` (`shopPhoneView`, `basketFor`) et branchés dans `sides.tsx` (`ACQUISITION_SIDE`), pas encore dans `ISLAND_SIDES` (A12.f). Le cadre du téléphone (`PhoneFrame.module.css`) et son éclair (`phone-flash.ts`) sont partagés avec celui de Flixo ; la pastille reprend les styles de `ClickPill`. Un vert à Pédalix (`--shop-brand`). Deux aperçus pour Claude Design, synchronisés par B4 |
 | A12.f.1 | **Le branchement : le niveau jouable** | **Fait le 2026-10-01** ([#247](https://github.com/ScratchMe/tourdegrowth/pull/247)). `LevelSlug` gagne l'acquisition, et le compilateur a listé ce qu'il exigeait : la clé de sauvegarde (`tdg.game.acquisition.v1`), la copie de l'encart du résultat (« Le côté obscur de l'acquisition », « Nouveaux clients 2 000 »), le modèle et le côté dans l'îlot (devenu générique sur le niveau), le vocabulaire analytique. **Une page de niveau commune** aux deux (`app/[locale]/game/_level/LevelPage.tsx`), chaque `page.tsx` n'apportant que son intro, ses deux mots du glossaire (acquisition et CAC pour le niveau 2), sa copie et son îlot. Ensuite : l'image de partage (son texte reçoit le niveau en paramètre), le sitemap, le hub « jouable » avec sa propre fin (« le contrôle et la transaction »), et les deux pages qui se renvoient l'une à l'autre (zones, et le bloc de décembre devenu lien, « jouable », C31). **Analytique** : les fins comptées par niveau (`game_ending/<niveau>/<fin>`), une porte `other_level`, et le passage résultat → jeu calculé sur tout goulot qui a un niveau. Copie neuve « à relire » |
-| A12.f.2 | **L'encart qui propose les deux niveaux** | Quand plusieurs étapes du goulot ont un niveau, **une carte qui les propose tous**, étape par étape (C30 Q5, `GAME-BRIEF.md` §15.4) : `gameEntryFor` rend une liste, `GameEntry` sait proposer plusieurs niveaux, une copie neuve « à relire », une fixture e2e d'un goulot acquisition + rétention. D'ici là, un tel goulot offre l'acquisition seule (le jeu est fermé) |
+| A12.f.2 | **L'encart qui propose les deux niveaux** | **Fait le 2026-10-01** ([#248](https://github.com/ScratchMe/tourdegrowth/pull/248)). `gameEntriesFor` rend une liste : chaque étape du goulot qui a un niveau, la plus faible d'abord, sans doublon. `GameEntry` reçoit `levels`. À un niveau, la carte est inchangée ; à plusieurs, une carte qui les propose tous (C30 Q5, `GAME-BRIEF.md` §15.4). Sa bande est empilée, avec le chiffre de chaque niveau puis la confiance absente. Elle prend sa propre copie, « à relire » (`GAME_ENTRY_SEVERAL` : « Le côté obscur de tes étapes »), et une rangée par étape, son nom au-dessus de son bouton. Aucun chemin analytique neuf : chaque bouton compte la porte de son niveau. Une fixture e2e, un vrai résultat à goulot acquisition + rétention lu dans l'émulateur |
 | A12.g | **Les specs Playwright** | Sur le modèle de P1 à P27, dans les deux langues, à 1 280 et 390 px |
 | A12.h | **Le bon à tirer, puis la recette** | Un bon à tirer du niveau 2 (`/bon-a-tirer`), puis une recette (D9) qui couvre les deux niveaux, relecture juridique du catalogue comprise |
 
@@ -211,7 +211,7 @@ et C29 (cinq composants recapturés, ancre `8235f4e6de01`), avec **88
 composants, 292 cellules et 88 aperçus sur 88 rendus** (`JOURNAL.md`, « Design sync B3 », et `.design-sync/NOTES.md`,
 « Synced »). B2, le brief S-15, est clos avec A10.
 
-**B4, ouvert le 2026-10-01 : la re-synchro du niveau 2**, à lancer après A12.f.2, qui change encore le contrat de `GameEntry`.
+**B4, ouvert le 2026-10-01 : la re-synchro du niveau 2**, prête à lancer depuis A12.f.2.
 A12.d a renommé des emplacements dans le contrat de six composants du jeu
 (`Dashboard` : `metric`, `customers`, `revenue` ; `EndingCharts` et
 `RevealCells` : `metric` ; `QuarterReport` : les clés de ses chiffres ;
@@ -221,7 +221,7 @@ Design montre encore les anciens noms**. A12.e ajoute deux composants neufs,
 `ShopPhone` (le téléphone de Pédalix) et `BasketPill` (sa pastille), et retouche
 `PhoneMock` (son cadre est maintenant partagé) ; A12.f.1 donne à `NextLevel` un
 `href` (le bloc de décembre devient un lien vers l'autre niveau, deux aperçus
-neufs) ; A12.f.2 fera proposer plusieurs niveaux à `GameEntry`. Une seule
+neufs) ; A12.f.2 fait proposer plusieurs niveaux à `GameEntry` (`levels`, deux aperçus neufs). Une seule
 synchro pour tout, avec la recapture des composants touchés (`.design-sync/NOTES.md`, « Synced »).
 
 **Hors de B4, rien d'ouvert.** La prochaine synchro se lance quand un composant change, ou

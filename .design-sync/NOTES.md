@@ -328,7 +328,7 @@ doc comment says why the layout uses an auto margin rather than
 
 ## Synced
 
-**Stale since 2026-10-01 (A12.d, A12.e, A12.f), re-sync after A12.f.2** — six game
+**Stale since 2026-10-01 (A12.d, A12.e, A12.f), ready to re-sync** — six game
 components renamed level 1's slots in their props: `Dashboard` (`churn`,
 `subs`, `mrr` → `metric`, `customers`, `revenue`), `EndingCharts` and
 `RevealCells` (`churn` → `metric`), `QuarterReport` (figure keys), `ActionBar`
@@ -340,8 +340,10 @@ components — `ShopPhone` (Pédalix's phone, pinned in `dtsPropsFor` like
 and moved `PhoneMock`'s frame into `PhoneFrame.module.css`, shared by both
 phones. A12.f.1 gave `NextLevel` an `href` (December's block links to the
 other level once it is open: solid edge, two new stories, `Playable` and
-`PlayableFrench`), and A12.f.2 will let `GameEntry` offer several levels.
-`CHANTIERS.md` B4 re-syncs all of it at once, after A12.f.2: 90 components,
+`PlayableFrench`), and A12.f.2 let `GameEntry` offer several levels: its
+props became `{ title, body, meta, band, levels }`, one entry per level
+offered, with two new stories (`TwoLevels`, `TwoLevelsNarrow`).
+`CHANTIERS.md` B4 re-syncs all of it at once: 90 components,
 recapture the six renamed ones, `PhoneMock`, `NextLevel` and `GameEntry`, do
 not carry their grades forward.
 
