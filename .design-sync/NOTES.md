@@ -594,6 +594,53 @@ A native `<select>` is closed in a still: its groups and order are never on
 the card, so the `Select` stories say in their doc comments what the list
 holds.
 
+### Found in the 2026-10-01 re-sync (B4), by regenerating and by the drift search
+
+B4 was meant to recapture the nine components A12 had changed and the two it
+added. Two methods found more, and neither was reading a sheet:
+
+- **The drift search** (Re-sync risks, third bullet, run as a script: every
+  string literal of 10+ characters removed from `src/content`, `src/lib/i18n`
+  and the game and engine libs since the last upload, looked up in the
+  previews). It found `ZoneNav` still showing the acquisition zone « coming
+  soon » (open since A12.f.1), `Choices` quoting the engine's model list that
+  A7.3.c replaced by a type of company plus two motion checkboxes, and `Tag`
+  labelling its outline tone with a « coming soon » no call site prints any
+  more. Reading the new call sites added `Checkbox.LastMotion`: A7.3.c wired
+  `disabled` + `disabledReason` (the last motion left in the settings), the
+  state B3 had dropped for want of a call site.
+- **Regenerating every game preview in scope** with the island's own builders
+  (`dashboardProps`, `decemberContent`, `reportContent`, `newsContent`,
+  `timelineSegments`, `phoneView`, `shopPhoneView`, `clicksFor`) and comparing
+  string by string, NBSP included. Most matched exactly. Two did not, and both
+  had been graded good since 2026-09-29: `RevealCells` (4.1% / 18 / 81 and
+  4,4 % / 71 / 6 — no year ends there; 81 is the very radar the 09-29 pass
+  flagged elsewhere) and `QuarterTimeline` (5.7% then 5.0%, and 5,7/5,0/4,4/4,3
+  — no reference year plays those quarters). Both now come from a played
+  year. `PhoneMock` wrote its phone number with plain spaces where the copy
+  has no-break ones.
+- **A product defect**, seen by measuring `LastMotion` in a browser: a box
+  both ticked and disabled lost its fill, because `.disabled .input` (same
+  weight as `.input:checked`, later) repainted it beige, so the one motion
+  left in the engine's settings read as unticked. Fixed in
+  `Checkbox.module.css` (`.disabled .input:checked`, fill clipped inside the
+  dashed edge) with an e2e measure in `engine-hybrid.spec.ts` (non-vacuity:
+  1 test of 11 fails without the rule).
+
+What to take from it: **a carried grade says the sheet looked right, not that
+its numbers are the model's.** The game previews B4 did NOT regenerate —
+`ActionCard`, `DgFace`, `DgMail`, `EndingHero`, `EventClipping`, `Hand`,
+`PatternCatalogue`, `Playbook`, `ResumePrompt`, `ShareRow`, `TourLoop`,
+`VideoCall` — are the next sync's first job, with the same scripts: bundle a
+scratch entry with `.ds-sync/node_modules/.bin/esbuild --bundle
+--platform=node --format=esm --tsconfig=./tsconfig.json --alias:@=./src
+--loader:.css=empty`, play the path the story's doc names
+(`lib/game/__tests__/paths.ts`, `paths-acquisition.ts`), call the builder,
+and check that every string it returns is in the preview byte for byte. A
+story whose doc names no path, or names one that does not produce it, gets a
+real one: a random walk over the reducer (`handIds` + `toggle` + `run`)
+finds a year with the wanted shape in seconds.
+
 ## Re-sync risks
 
 - **Merging `main` in the middle of a re-sync.** A5 renamed variant props and
@@ -631,7 +678,7 @@ holds.
   build change, spot-check that
   `ds-bundle/components/brand/ContentHeader/ContentHeader.d.ts` says
   `locale: "en" | "fr"` and not `locale: Locale`.
-- **The seven `cfg.dtsPropsFor` entries are hand-written** and will not follow
+- **The eight `cfg.dtsPropsFor` entries are hand-written** and will not follow
   their components. If one gains or renames a prop, update the config entry
   or the contract lies.
 - **`componentSrcMap` is the component list** (see above). `check-inventory`
