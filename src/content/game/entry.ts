@@ -95,3 +95,23 @@ export const GAME_ENTRY_COPY = {
     },
   },
 } as const satisfies Record<LevelSlug, GameEntryCopy>;
+
+/**
+ * The card when the bottleneck holds several stages that each have a level
+ * (C30 Q5, Antoine, 2026-10-01): one card offers them all, stage by stage,
+ * and the reader chooses. The shared title, body and mention; each level
+ * keeps its own button and its own number in the band (`GAME_ENTRY_COPY`).
+ * The opening sentence is the same as a one-level card's (`OPENING`).
+ *
+ * TODO: à relire — nouveau (2026-10-01, CHANTIERS.md A12.f.2) : le titre, le corps et la mention.
+ */
+export const GAME_ENTRY_SEVERAL = {
+  title: t("Le côté obscur de tes étapes", "The dark side of your stages"),
+  body: t(
+    "Voici ce qu'il ne faut pas faire : un niveau pour chacune des étapes qui te freinent, une année comme PM growth, un DG qui veut du chiffre, et huit astuces que tu reconnaîtras ensuite partout.",
+    "Here is what not to do: a level for each of the stages holding you back, a year as a growth PM, a CEO who wants the number, and eight tricks you will recognise everywhere afterwards.",
+  ),
+  meta: t("vingt minutes par niveau, gratuit", "twenty minutes a level, free"),
+} as const;
+
+export { OPENING as GAME_ENTRY_OPENING };
