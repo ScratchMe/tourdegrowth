@@ -2229,6 +2229,43 @@ Ce que S2 laisse :
   lignes de la slide en regard, `relays.clause*`, les notes neuves et les
   intertitres `deck.group*`.
 
+**S3 est livré le 2026-10-01** : la configuration à deux cases, les trois
+mises en page du tableau (le libre-service seul inchangé, l'assisté seul,
+l'hybride : la bande du total, les deux colonnes, le sélecteur de motion),
+les relais, la fiche (trois mois, petits effectifs, marge globale, pièges
+hybrides), le pas à pas par motion, le « Et si » de l'assisté et la ligne
+du MRR total, la reprise, l'import, l'exemple dans les motions cochées, et
+E0 avec les deux catalogues et le lien. Les titres des relais et du total
+sont dans `lib/engine/deck-motions.ts`, lus par le tableau et par le deck.
+
+**S4 est livré le même jour** : `deck.ts` route vers `buildMotionsDeck` dès
+que l'assisté est coché (le libre-service seul reste le deck v1, golden
+vert) ; les slides neuves dans `lib/engine/deck-slg.ts` ; `buildLeak` sert
+les deux motions ; `DeckModel.byMotion` porte le kicker, la pastille et le
+pied de chaque motion en hybride ; `DeckSlide.motion` dit à quelle motion
+une slide appartient. Deux écarts au texte, voulus :
+- la visibilité de l'hybride ne nomme pas les 32 chiffres : « deux
+  colonnes d'étapes × pastilles », comme le dit §18.8.2, et les
+  introuvables sur deux colonnes (nommer les 32 débordait sous le pied) ;
+- le miroir de l'hybride range ses lignes en deux colonnes, une par
+  motion, pour la même raison.
+
+**S5 est livré le même jour** : Q14 (`engine_setup/<plg|slg|hybrid>`, les
+étapes de l'assisté préfixées `slg-`), la phrase de confidentialité, et les
+e2e de §18.10.3. `engine-setup.spec.ts` n'est pas un fichier à part : ses
+cas sont dans `engine-hybrid.spec.ts` (les deux cases, la dernière qui ne
+se décoche pas) et `engine-mobile.spec.ts` (le clavier) ; `analytics.spec.ts`
+n'a pas bougé, le canari vérifie le vocabulaire neuf.
+
+Ce que A7.3.c laisse :
+- **A7.3.d**, le bon à tirer de toute la copie neuve ;
+- `EngineDerived` garde `peloton`, `diagnosis` et `unit` du libre-service,
+  que la ligne S4 ci-dessus prévoyait de retirer : chaque écran du
+  libre-service et le golden v1 les lisent, et le retrait n'apporte rien à
+  personne ;
+- les textes de lancement qui disent « libre-service seulement »
+  (`CHANTIERS.md`, A7.3, ligne « Hors code »).
+
 | PR | Contenu | Fichiers possédés | Dépend de | Jours-agent |
 |---|---|---|---|---|
 | **S0 — Contrats et migration** | `types.ts`, `catalog-shape.ts` (formes SLG, `scope`, `span`, `shapesOf`), `migrate.ts`, `validate.ts` (règles §18.3.3, dont le correctif > 100), `io.ts`, `storage.ts`, **golden v1 figé avant toute ligne**, `shared-counts.ts`, `cohort.ts` (trois mois), clés de copie vides | `lib/engine/{types,catalog-shape,migrate,validate,io,storage,shared-counts,cohort}.ts` + tests | — | 1,5 |
