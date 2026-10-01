@@ -6,6 +6,8 @@ import styles from "./deck.module.css";
 
 /** Past this many levers the card takes a denser step, so eight of them still end above the footer. */
 const DENSE_FROM = 4;
+/** And a denser one again for nine — day 30 became a lever (§19.3.1, A14 T3): measured 4px under the footer without it. */
+const DENSER_FROM = 9;
 
 /**
  * The « together » slide: every lever the team moved, at once (Antoine,
@@ -19,7 +21,7 @@ const DENSE_FROM = 4;
  * the what-ifs at once, then the model's sentence that sets the whole
  * against the sum of the parts: the funnel levers multiply, so the whole is
  * more, and that difference is the compounding. The month's funnel is on
- * each lever's slide and in the text export, not here: with eight levers,
+ * each lever's slide and in the text export, not here: with eight levers (nine since §19.3),
  * three tables side by side ran under the footer (measured, 2026-09-27).
  * The assumptions that applied are the dense footer.
  */
@@ -35,7 +37,9 @@ export function SlideScenario({ slide, context }: SlideProps) {
     <SlideFrame slide={slide} context={context} footer={footer} footerDense>
       <div className={styles.scenario}>
         <section
-          className={[styles.leverCard, levers.length >= DENSE_FROM ? styles.leverDense : ""].filter(Boolean).join(" ")}
+          className={[styles.leverCard, levers.length >= DENSE_FROM ? styles.leverDense : "", levers.length >= DENSER_FROM ? styles.leverDenser : ""]
+            .filter(Boolean)
+            .join(" ")}
           data-testid={`${prefix}-levers`}
         >
           <h4 className={styles.cardEyebrow}>{s.scenario.aloneTitle}</h4>

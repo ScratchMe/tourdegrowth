@@ -1,4 +1,4 @@
-import { CANDIDATE_IDS, CLEAR_MARGIN, METRIC_SHAPES, SLG_CANDIDATE_IDS, SLG_METRIC_SHAPES, UNPRICED_CANDIDATES } from "./catalog-shape";
+import { CANDIDATE_IDS, CLEAR_MARGIN, METRIC_SHAPES, SLG_CANDIDATE_IDS, SLG_METRIC_SHAPES, UNPRICED_CANDIDATES, isPricedAt } from "./catalog-shape";
 import { isFlow, rankingImpact } from "./impact";
 import { isSlgFlow, slgRankingImpact } from "./slg-impact";
 import type {
@@ -35,14 +35,16 @@ import { currentSnapshot, knownIn, statusOf } from "./values";
  *   and not ranked ("we can't say whether it's the biggest leak").
  * - Ranking is in money per month when N and ARPA are known — the only unit
  *   common to acquisition, activation, conversion and churn — and by the
- *   relative gap t/r otherwise, which orders the three flows identically
- *   (see impact.ts). `clear` needs `top.lo > second.hi × 1.25`; otherwise
+ *   relative gap otherwise (t/r − 1, or (1 − r) ÷ (1 − t) − 1 for the
+ *   referred share), which orders the flows identically: they all grow the
+ *   same N (see impact.ts, §19.3). `clear` needs `top.lo > second.hi × 1.25`; otherwise
  *   the WHOLE group within that margin is named, never capped at two (the
  *   same deliberate choice as lib/scoring/bottleneck.ts).
  *
  * Sales-assisted (§18.5.2) follows the SAME rules on its own five candidates,
- * priced over the quarter by `slg-impact.ts`: W and the ACV for the two
- * flows, D and the sales-assisted ARPA for the renewal.
+ * priced over the quarter by `slg-impact.ts`: W and the ACV for the three
+ * flows (the referred share among them since §19.3), D and the
+ * sales-assisted ARPA for the renewal.
  */
 
 export function directionOf(id: CandidateId): Comparator["direction"] {
@@ -182,8 +184,9 @@ function diagnoseWith<C extends CandidateId>(rules: MotionRules<C>, state: Engin
   // Money needs the volume and the price: when it is there for the flows, churn (the renewal) joins
   // the ranking; otherwise the flows rank by relative gap and it stands apart ("not comparable
   // without ARPA", §6.6). The volume and the price are the same for every flow, so the flows are
-  // priced all together or not at all.
-  const flowsBelow = priced.filter((p) => rules.isFlow(p.id));
+  // priced all together or not at all — save a referred share past its ceiling (§19.3.2), which no
+  // volume prices: it stands apart, like go-live.
+  const flowsBelow = priced.filter((p) => rules.isFlow(p.id) && isPricedAt(p.id, impactTarget(positions[p.id].comparator!)));
   const moneyPriced = flowsBelow.length > 0 ? flowsBelow.every((p) => p.mrr) : priced.some((p) => p.mrr);
   const basis: Diagnosis["basis"] = moneyPriced ? "mrr" : "relative-gap";
   for (const p of priced) {

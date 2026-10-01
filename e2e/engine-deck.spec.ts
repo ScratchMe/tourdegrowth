@@ -503,17 +503,19 @@ for (const locale of ["fr", "en"] as const) {
     });
 
     /**
-     * C9 (ENGINE.md §9.3): day-30 retention, which the model can't price, is
-     * the only stage behind its target. The leak slide exists — it used to be
-     * dropped without a word — names the stage, and draws no calculation
-     * card, and no amount, at both widths.
+     * C9 (ENGINE.md §9.3): a stage the model can't price is the only one
+     * behind its target — since §19.3 (A14 T3), the referred share past a
+     * 50 % target (day-30 retention, the v1 case, is priced now). The leak
+     * slide exists — it used to be dropped without a word — names the stage,
+     * draws no calculation card and no amount, and says the ceiling, at both
+     * widths.
      */
     for (const width of [1280, 390]) {
       test(`an unpriced stage named alone has its leak slide, without an amount or a calculation, at ${width}px`, async ({ page }) => {
         await page.setViewportSize({ width, height: 900 });
         let state = withEntry(exampleState(), "act.rate", measured(ratio(200, 800)));
         state = withEntry(state, "ret.logo-churn", measured(ratio(6, 400)));
-        state = withTarget(withEntry(state, "ret.d30", measured(ratio(40, 800))), "ret.d30", 20);
+        state = withTarget(state, "ref.referred-share", 60);
         await page.addInitScript((items) => {
           for (const [key, value] of items) localStorage.setItem(key, value);
         }, engineSeed(state));
@@ -524,11 +526,11 @@ for (const locale of ["fr", "en"] as const) {
         const leak = page.locator('[data-slide="leak"]');
         await expect(leak).toHaveCount(1);
         const title = leak.locator("h3");
-        await expect(title).toContainText(locale === "fr" ? "La rétention à J30" : "Day-30 retention");
+        await expect(title).toContainText(locale === "fr" ? "La part des inscrits recommandés" : "The referred share of sign-ups");
         await expect(title).not.toContainText(/€|MRR/);
         await expect(leak.getByText(ENGINE_COPY.slide.calcTitle[locale], { exact: true })).toHaveCount(0);
         await expect(leak.getByText(ENGINE_COPY.slide.leakAside[locale], { exact: true })).toHaveCount(1);
-        await expect(leak).toContainText(ENGINE_COPY.slide.leakFooterUnpriced[locale]);
+        await expect(leak).toContainText(ENGINE_COPY.slide.leakFooterCeiling[locale].split("{max}")[0]!);
         const [scroll, client] = await page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth]);
         expect(scroll).toBe(client);
       });

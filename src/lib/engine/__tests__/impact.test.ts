@@ -39,6 +39,43 @@ describe("whatIf — the §6.6 example", () => {
   });
 });
 
+describe("whatIf — day-30 retention and the referred share, by hand on the example (§19.3)", () => {
+  it("day 30 at 25 %, to 30 %: 42 × 30/25 = 50 (+8), × 120 € → ~960 €, the flows' own chain", () => {
+    const state = withEntry(exampleState(), "ret.d30", measured(ratio(200, 800)));
+    const impact = whatIf(state, "ret.d30", 30, CTX_FR, FR.strings.units)!;
+    expect(impact.kind).toBe("new-mrr");
+    expect(impact.lines.map((l) => l.key)).toEqual(["today", "if", "then", "times", "annual"]);
+    expect(lineOf(impact, "today").values).toEqual({ rate: "25 %", n: "42" });
+    expect(fillTemplate(FR.strings.whatIf.thenFlow, lineOf(impact, "then").values)).toBe("42 × 30/25 = 50 (+8)");
+    expect(lineOf(impact, "times").values).toEqual({ arpa: "120 €", amount: "~960 €" });
+    expect(impact.customersPerMonth).toEqual({ lo: 8, hi: 8 });
+    expect(impactHeadline(impact)).toEqual({ amount: "~960 €" });
+    // The ranking prices the same gap on the same N and ARPA: 42 × (30/25 − 1) × 120.
+    expect(rankingImpact(state, "ret.d30", 30, CTX_FR).mrr!.lo).toBeCloseTo(1_008);
+  });
+
+  it("the referred share at 6 %, to 10 %: 42 × (100 – 6)/(100 – 10) = 44 (+2), × 120 € → ~240 €", () => {
+    const impact = whatIf(exampleState(), "ref.referred-share", 10, CTX_FR, FR.strings.units)!;
+    expect(impact.kind).toBe("new-mrr");
+    expect(lineOf(impact, "today").values).toEqual({ rate: "6 %", n: "42" });
+    expect(fillTemplate(FR.strings.whatIf.thenReferral, lineOf(impact, "then").values)).toBe("42 × (100 – 6)/(100 – 10) = 44 (+2)");
+    expect(lineOf(impact, "times").values.amount).toBe("~240 €");
+    // The « Et si »'s own rule, (1 − r) ÷ (1 − t), on the same N: 42 × 4/90 × 120 = 224 €.
+    expect(rankingImpact(exampleState(), "ref.referred-share", 10, CTX_FR).mrr!.lo).toBeCloseTo(224);
+    const en = whatIf(exampleState(), "ref.referred-share", 10, CTX_EN, EN.strings.units)!;
+    expect(fillTemplate(EN.strings.whatIf.thenReferral, lineOf(en, "then").values)).toBe("42 × (100 – 6)/(100 – 10) = 44 (+2)");
+  });
+
+  it("without N, per 100 sign-ups: the paid conversion grows by the same factor", () => {
+    let noN = withEntry(exampleState(), "acq.cac", measured({ kind: "amount", amount: 500 }, tool));
+    noN = withEntry(noN, "acq.signup-rate", measured({ kind: "rate", percent: 3.2 }));
+    const impact = whatIf(noN, "ref.referred-share", 10, CTX_FR, FR.strings.units)!;
+    expect(impact.kind).toBe("per-hundred");
+    // 6 to 9 payers per 100 sign-ups, × 94/90: 6,3 to 9,4 (+0,3 to 0,4).
+    expect(lineOf(impact, "then").values).toEqual({ n: "6 à 9", rate: "6", target: "10", m: "6,3 à 9,4", delta: "0,3 à 0,4" });
+  });
+});
+
 describe("whatIf — every displayed line recomputes from the one above", () => {
   /** "1,234" → 1234, "~€600" → 600, "€119.50" → 119.5 (English display). */
   const num = (s: string) => Number(s.replace(/[~€,%]/g, ""));
@@ -79,6 +116,29 @@ describe("whatIf — every displayed line recomputes from the one above", () => 
     }
     expect(checked).toBeGreaterThan(250);
   });
+
+  it("the referred share: m = n × (100 – r)/(100 – t), from the displayed numbers (§19.3.2)", () => {
+    let checked = 0;
+    for (const n of [3, 42, 1_234]) {
+      for (const share of [0, 2.5, 6, 18, 41]) {
+        for (const target of [5, 12, 30, 50]) {
+          let state: EngineState = withEntry(exampleState(), "acq.cac", measured(ratio(500 * n, n), tool));
+          state = withEntry(state, "ref.referred-share", measured({ kind: "rate", percent: share }));
+          const impact = whatIf(state, "ref.referred-share", target, CTX_EN, EN.strings.units);
+          if (!impact) {
+            expect(target).toBeLessThanOrEqual(share);
+            continue;
+          }
+          const then = lineOf(impact, "then").values;
+          const [nD, tD, rD, mD, dD] = [then.n!, then.target!, then.rate!, then.m!, then.delta!].map(num) as [number, number, number, number, number];
+          expect(mD).toBe(Math.round((nD * (100 - rD)) / (100 - tD)));
+          expect(dD).toBe(Math.max(0, mD - nD));
+          checked++;
+        }
+      }
+    }
+    expect(checked).toBeGreaterThan(40);
+  });
 });
 
 describe("whatIf — edges", () => {
@@ -96,10 +156,19 @@ describe("whatIf — edges", () => {
     expect(whatIf(exampleState(), "ret.logo-churn", 2.5, CTX_FR, FR.strings.units)).toBeNull();
   });
 
-  it("day 30 and the referred share are never priced; an unknown value has no chain", () => {
+  it("an unknown value has no chain; a referred share past a 50 % target has none either (§19.3.2)", () => {
+    // The example's day 30 is missing.
     expect(whatIf(exampleState(), "ret.d30", 30, CTX_FR, FR.strings.units)).toBeNull();
-    expect(whatIf(exampleState(), "ref.referred-share", 30, CTX_FR, FR.strings.units)).toBeNull();
     expect(whatIf(withEntry(exampleState(), "act.rate", undefined), "act.rate", 20, CTX_FR, FR.strings.units)).toBeNull();
+    expect(whatIf(exampleState(), "ref.referred-share", 51, CTX_FR, FR.strings.units)).toBeNull();
+    expect(whatIf(exampleState(), "ref.referred-share", 50, CTX_FR, FR.strings.units)).not.toBeNull();
+  });
+
+  it("a rate at 0 has no « × t/r », but a referred share at 0 has its gain: the referred all come on top", () => {
+    const zero = withEntry(withEntry(exampleState(), "ret.d30", measured(ratio(0, 800))), "ref.referred-share", measured(ratio(0, 800)));
+    expect(whatIf(zero, "ret.d30", 20, CTX_FR, FR.strings.units)).toBeNull();
+    // 42 × (100 – 0)/(100 – 10) = 46,7 → 47 (+5).
+    expect(lineOf(whatIf(zero, "ref.referred-share", 10, CTX_FR, FR.strings.units)!, "then").values).toMatchObject({ n: "42", m: "47", delta: "5" });
   });
 
   it("ARPA unknown → customers a month; N unknown → per 100 sign-ups", () => {

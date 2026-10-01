@@ -27,7 +27,12 @@ import { countsOf, currentSnapshot, entryOf, knownIn } from "./values";
  * - Activation: the active at day 30 and the paying are among the
  *   activated, so both grow in the same proportion — never above the
  *   activated.
- * - Paid conversion: the new rate, then scaled by activation like above.
+ * - Day-30 retention (§19.3.1, A14 T3): its target is the share of sign-ups
+ *   still active at day 30, never above the activated; the paying are
+ *   assumed among them, so they follow it — the leak slide's own rule
+ *   (`impact.ts`). When it moves, it carries the paying, activation only
+ *   capping it.
+ * - Paid conversion: the new rate, then scaled by activation (or day 30) like above.
  * - ARPA: what NEW customers pay; the MRR already there keeps its price.
  * - Churn, contraction, expansion: the monthly revenue retention of the
  *   base. Churn is logo churn standing in for revenue churn (as in
@@ -94,6 +99,7 @@ export type ScenarioAssumption =
   | "signup-same-visitors"
   | "referral-on-top"
   | "activation-drives-downstream"
+  | "d30-drives-paying"
   | "arpa-new-customers"
   | "churn-as-revenue"
   | "expansion-unknown"
@@ -270,16 +276,25 @@ export function buildScenario(state: EngineState, targets: Partial<Record<LeverI
   if (act && tAct !== null) assumptions.add("activation-drives-downstream");
   const actAfter = act && tAct !== null ? point(tAct) : act;
 
-  // The paid rate after: its target (or today's), carried by activation, never above the activated.
+  // Day 30 after, when its lever moved: its target, never above the activated (§19.3.1).
+  const tD30 = target("ret.d30");
+  const d30Target = d30Today && tD30 !== null ? (actAfter ? Math.min(tD30, actAfter.hi) : tD30) : null;
+  const d30Mid = d30Today ? (d30Today.lo + d30Today.hi) / 2 : 0;
+  if (d30Target !== null) assumptions.add("d30-drives-paying");
+
+  // The paid rate after: its target (or today's), carried by day 30 when it moved, else by activation — never above either.
   const paid = today("rev.paid-conversion");
   const tPaid = target("rev.paid-conversion");
   const paidAfter = (v: number) => {
     const base = tPaid ?? v;
-    const scaled = act && tAct !== null ? base * (tAct / ((act.lo + act.hi) / 2)) : base;
-    return actAfter ? Math.min(scaled, actAfter.hi) : scaled;
+    const scaled =
+      d30Target !== null && d30Mid > 0 ? base * (d30Target / d30Mid) : act && tAct !== null ? base * (tAct / ((act.lo + act.hi) / 2)) : base;
+    const cap = d30Target ?? actAfter?.hi;
+    return cap !== undefined ? Math.min(scaled, cap) : scaled;
   };
-  // Without a paid rate, the payers still follow activation (they are among the activated).
-  const fPaid = paid ? correlatedRatio(paid, paidAfter) : fAct;
+  // Without a paid rate, the payers still follow day 30 when it moved, else activation (they are among both).
+  const fD30 = d30Today && d30Target !== null ? correlatedRatio(d30Today, () => d30Target) : null;
+  const fPaid = paid ? correlatedRatio(paid, paidAfter) : (fD30 ?? fAct);
   const fPayers = mul(mul(fSignup, fRefSignups), fPaid);
 
   // --- The funnel, in people per month --------------------------------------------
@@ -288,7 +303,14 @@ export function buildScenario(state: EngineState, targets: Partial<Record<LeverI
     const visitors = signupsToday && signupRate ? mul(div(scale(signupsToday, 100), signupRate)!, projected ? fRefSignups : one) : null;
     const shareNow = projected && tRef !== null ? point(tRef) : referredShare;
     const actNow = projected ? actAfter : act;
-    const d30Rate = d30Today && projected && act && tAct !== null ? clampHi(mul(d30Today, fAct), point(tAct)) : d30Today;
+    const d30Rate =
+      !projected || !d30Today
+        ? d30Today
+        : d30Target !== null
+          ? point(d30Target)
+          : act && tAct !== null
+            ? clampHi(mul(d30Today, fAct), point(tAct))
+            : d30Today;
     const paidRate = paid ? (projected ? mapBounds(paid, paidAfter) : paid) : null;
     const of = (rate: Interval | null) => (signups && rate ? mul(signups, scale(rate, 1 / 100)) : null);
     return { perHundred: monthSignups === null, visitors, signups, referred: of(shareNow), activated: of(actNow), d30: of(d30Rate), paying: of(paidRate) };
@@ -339,6 +361,7 @@ export function buildScenario(state: EngineState, targets: Partial<Record<LeverI
     "signup-same-visitors",
     "referral-on-top",
     "activation-drives-downstream",
+    "d30-drives-paying",
     "arpa-new-customers",
     "same-spend",
     "churn-as-revenue",

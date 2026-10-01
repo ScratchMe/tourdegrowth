@@ -789,3 +789,54 @@ Les écarts à la spec sont notés au §19.2.4.
 - `e2e/engine-series.spec.ts` gagne neuf specs, 13 en tout : démarrer le mois, la lecture seule, la correction et son recalcul, la fuite du mois d'avant, les propositions de la fiche, les largeurs à 390 et 1 280 px, la garde des Réglages ;
 - Playwright complet (`CI=1`), sur l'arbre rebasé sur T1 : 811 specs, 780 passées, aucune au second essai, et 31 ignorées (25 faute d'émulateur, 6 par construction) ;
 - captures relues en FR et en EN, à 1 280 et 390 px : le bandeau du mois suivant, le tableau avec ses écarts, un mois passé en lecture seule, la correction, et la slide.
+
+## A14.c, T3 : la rétention J30 et la part recommandée chiffrées, et leurs leviers (2026-10-01, #259)
+
+La quatrième PR du moteur complet (`docs/engine/moteur-complet.md` §19.3), drapeau fermé. Elle part de T2 (#258). La couverture du pipeline (§19.4), prévue dans le même lot, part dans la PR suivante : elle demande trois champs de saisie neufs, ce que le chiffrage n'a pas.
+
+**Ce qui se chiffre maintenant** :
+- **la rétention à J30**, comme l'activation. Les payants sont supposés parmi les inscrits encore actifs à J30, donc N les suit : `N × (t/r − 1) × ARPA`. Le pied de slide dit l'hypothèse ;
+- **la part recommandée, dans les deux motions**, avec la règle du « Et si » (`referral-on-top`) : les recommandés s'ajoutent aux autres, qui restent les mêmes, donc les nouveaux clients croissent de `(1 − r) ÷ (1 − t) − 1`. La chaîne s'écrit « 42 × (100 – 6)/(100 – 10) = 44 (+2) », et se recalcule à la main ;
+- **la borne de 50 %** : au-delà, rien n'est chiffré. La slide de fuite reste, sans montant, et son pied dit « au-delà d'une cible de 50 %, le moteur ne chiffre plus la part des recommandations » ;
+- **la mise en production** (assisté) reste seule sans montant (`UNPRICED_CANDIDATES`). Une seule fonction, `isPricedAt`, dit ce qui se chiffre : le classement, les chaînes et les slides la lisent toutes.
+
+**Les deux leviers neufs** :
+- **J30 en libre-service** : quand il bouge, les payants le suivent, et l'activation ne fait que le plafonner ;
+- **la part des opportunités recommandées en assisté** : les opportunités créées et W croissent du même facteur. Le panneau et la slide lisent les opportunités projetées sur le scénario lui-même (`opps`), et non plus sur la seule liaison.
+
+**Écarts à la spec**, notés au §19.3.3 :
+- la part recommandée se chiffre sur N et W, les nouveaux clients, et non sur les inscrits (S) ni sur les opportunités (O). C'est le même N et le même W que les autres flux et que le « Et si ». Sur l'exemple, S × la conversion donne 49 à 74 payants pour 42 comptés, et O × le taux de closing 31 clients pour 18 gagnés. La slide et le « Et si » se seraient contredits ;
+- sans W, la part recommandée de l'assisté se lit pour 100 opportunités créées ;
+- la couverture du pipeline part dans sa propre PR.
+
+**Les goldens v1 et v2 ne bougent pas.** Ils avaient échoué : les deux leviers neufs entraient dans le scénario de chaque moteur, et `opps` dans celui de l'assisté. Aucun titre, aucune slide, aucun texte n'avait bougé. Leur projection retire ces champs ajoutés, et rien d'autre (`__tests__/golden-projection.ts`), comme la règle des goldens le permet. Un test vérifie que ces champs sont bien là avant d'être retirés.
+
+**Sabotages** : douze, dont dix font tomber les tests qui les visent :
+- le gain de la part recommandée sans son dénominateur (100 − t) : 5 tests ;
+- pas de borne à 50 % : 9 ;
+- une part au-delà de 50 % qui fait passer tout le classement en écart relatif : 2 ;
+- la chaîne de la part recommandée en t/r : 4 ;
+- les payants qui ignorent le levier J30 : 1 ;
+- le levier de la part assistée qui ne bouge rien : 2 ;
+- le pied « sans montant » à la place de celui de la borne : 2 ;
+- l'hypothèse de J30 absente du pied : 1 ;
+- la projection des goldens qui ne retire rien : 14 ;
+- les opportunités du panneau lues sur la seule liaison : 2.
+
+Deux sont d'abord passés :
+- **la chaîne de la part recommandée imprimée avec le gabarit d'un flux.** Les tests vérifiaient le gabarit, jamais la slide. Un test du deck lit maintenant la ligne imprimée, et le sabotage tombe ;
+- **J30 retirée des flux du classement.** C'est un mutant équivalent : l'appartenance aux flux ne sert qu'à vérifier qu'ils sont tous chiffrés ensemble, et ils partagent le même N et le même ARPA. J30 reste dans la liste, pour dire ce qu'elle est.
+
+**La relecture de copie** (`relecteur-copie`) :
+- un marqueur « à relire » manquait (`leverSubject["slg.ref.referred-share"]`) ;
+- la ligne « pour 100 opportunités créées » disait « 114 sur 100 », elle dit maintenant « pour 100 opportunités créées aujourd'hui » ;
+- l'anglais de la part assistée nomme sa base (« 20% of opportunities referred ») ;
+- « ne chiffre plus une part » est devenu « ne chiffre plus la part des recommandations » ;
+- « the paying » est devenu « paying customers ».
+
+**Vérifié** :
+- `vitest --coverage` : 2 812 tests, au-dessus des seuils ;
+- `tsc`, `eslint` et `next build` (avec `GAME_ENABLED=true`) propres ;
+- Playwright complet (`CI=1`), sur l'arbre rebasé sur T2 : 813 specs, 782 passées, aucune au second essai, et 31 ignorées (25 faute d'émulateur, 6 par construction). La première passe en avait fait tomber six : la slide « ensemble » à neuf leviers débordait de 4 px sur son pied (un cran plus serré à partir de neuf leviers), et la spec de la slide sans montant prenait J30, chiffrée désormais (elle prend la part recommandée au-delà de 50 %) ;
+- `engine-deck-whatif.spec.ts` imprime maintenant neuf leviers et « ensemble », rien sous 18 px, chaque corps au-dessus de son pied ; deux specs neuves bougent le levier J30 et celui de la part assistée ;
+- captures relues en FR et en EN : la slide « ensemble » à neuf leviers, la fuite de J30 chiffrée, celle de la part assistée.

@@ -236,8 +236,8 @@ describe("the diagnosis sentences", () => {
   });
 
   it("the unpriced ones after the colon, as labels", () => {
-    // Referred share behind a team target: behind, and never priced in v1.
-    const d = diagnosisOf(withTarget(exampleState(), "ref.referred-share", 10));
+    // Referred share behind a team target past 50 %: behind, and not priced (§19.3.2).
+    const d = diagnosisOf(withTarget(exampleState(), "ref.referred-share", 60));
     expect(unpricedSentence(d, FR.strings, FR.metrics)).toBe(`Aussi en retard, sans montant calculable${NB}: Part des inscrits recommandés`);
   });
 });

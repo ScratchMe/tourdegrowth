@@ -498,8 +498,9 @@ export interface QuarterRowView {
 /**
  * Sales-assisted's quarter, where self-serve draws its month's funnel: the
  * opportunities created (and, in the hybrid, how many came from self-serve),
- * then the new customers. Only the link moves the opportunities — the others
- * don't change (§18.5.5) — and the new customers follow every lever.
+ * then the new customers. The link and the referred share move the
+ * opportunities (§18.5.5, §19.3.2), read off the scenario itself; the new
+ * customers follow every lever.
  */
 export function quarterRows(state: EngineState, scenario: SlgScenario, ctx: EngineCalcContext, strings: EngineStrings): QuarterRowView[] {
   const w = strings.scenario;
@@ -509,8 +510,9 @@ export function quarterRows(state: EngineState, scenario: SlgScenario, ctx: Engi
   const link = scenario.levers.find((x) => x.id === "link.pql-handoff");
   const rows: QuarterRowView[] = [];
   if (o !== null) {
-    const projectedO = link?.target !== null && link?.target !== undefined && l ? { lo: o + link.target - l.hi, hi: o + link.target - l.lo } : null;
-    rows.push({ id: "opps", label: w.opps, today: people({ lo: o, hi: o }), projected: projectedO ? people(projectedO) : null });
+    const opps = scenario.today.opps ?? { lo: o, hi: o };
+    const printedO = scenario.projected.opps ? people(scenario.projected.opps) : null;
+    rows.push({ id: "opps", label: w.opps, today: people(opps), projected: printedO !== null && printedO !== people(opps) ? printedO : null });
     if (link && l) {
       rows.push({ id: "fromSelfServe", label: w.oppsFromSelfServe, today: people(l), projected: link.target !== null ? people({ lo: link.target, hi: link.target }) : null });
     }

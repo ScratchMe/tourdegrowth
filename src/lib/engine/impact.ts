@@ -1,4 +1,4 @@
-import { UNPRICED_CANDIDATES } from "./catalog-shape";
+import { REFERRAL_CANDIDATES, isPricedAt } from "./catalog-shape";
 import {
   formatApproxMoneyInterval,
   formatCountInterval,
@@ -32,15 +32,34 @@ import { countsOf, currentSnapshot, entryOf, knownIn } from "./values";
  *   anything that formats them prints what the chain prints. The slide
  *   `leak` takes its title AND its body from one `whatIf` result (§6.7).
  *
- * Retention at day 30 and the referred share are never priced in money in
- * v1 (§6.6): it would take a retention model and a loop model the engine
- * doesn't have. `whatIf` returns null for them.
+ * Retention at day 30 and the referred share were never priced in v1
+ * (§6.6). The complete engine prices them with two models it says (§19.3,
+ * A14 T3), both on the same N and the same ARPA as the flows, so the
+ * identity above holds for them too:
+ *
+ * - day-30 retention like activation: the paying are assumed among the
+ *   sign-ups still active at day 30, so N follows it, `N × (t/r − 1)`;
+ * - the referred share like the « Et si » (`scenario.ts`, `referral-on-top`):
+ *   the referred come on top of the others, who stay what they are, so N
+ *   grows by `(1 − r) ÷ (1 − t) − 1` — up to a target of 50 %
+ *   (`REFERRAL_PRICING_CEILING`), past which the multiplier explodes and
+ *   nothing is priced.
  */
 
-const FLOWS: readonly PlgCandidateId[] = ["acq.signup-rate", "act.rate", "rev.paid-conversion"];
+const FLOWS: readonly PlgCandidateId[] = ["acq.signup-rate", "act.rate", "ret.d30", "ref.referred-share", "rev.paid-conversion"];
 
 export function isFlow(candidate: PlgCandidateId): boolean {
   return FLOWS.includes(candidate);
+}
+
+/**
+ * The relative gain in new customers when a referred share goes from `r` to
+ * `t` (percent): the others stay, the referred make up the new share, so the
+ * whole grows by (1 − r) ÷ (1 − t) − 1 = (t − r) ÷ (100 − t). Per bound, the
+ * fewest with the highest share today. Shared by both motions (§19.3.2).
+ */
+export function referralGain(r: Interval, t: number): Interval {
+  return floorAtZero({ lo: (t - r.hi) / (100 - t), hi: (t - r.lo) / (100 - t) });
 }
 
 /**
@@ -85,7 +104,7 @@ export function rankingImpact(
   ctx: EngineCalcContext,
 ): { gap?: Interval; mrr?: Interval } {
   const r = knownValue(state, candidate, ctx);
-  if (!r || UNPRICED_CANDIDATES.includes(candidate)) return {};
+  if (!r || !isPricedAt(candidate, target)) return {};
   const arpa = knownValue(state, "rev.arpa", ctx);
 
   if (candidate === "ret.logo-churn") {
@@ -95,8 +114,9 @@ export function rankingImpact(
     return { mrr: mul(kept, arpa) };
   }
 
-  if (r.lo <= 0) return {};
-  const gap = floorAtZero({ lo: target / r.hi - 1, hi: target / r.lo - 1 });
+  // A share at 0 has a gain (the referred all come on top); a rate at 0 has no « × t/r ».
+  if (!REFERRAL_CANDIDATES.includes(candidate) && r.lo <= 0) return {};
+  const gap = REFERRAL_CANDIDATES.includes(candidate) ? referralGain(r, target) : floorAtZero({ lo: target / r.hi - 1, hi: target / r.lo - 1 });
   const n = newPayersPerMonth(state, ctx);
   return n && arpa ? { gap, mrr: mul(mul(n.value, gap), arpa) } : { gap };
 }
@@ -116,8 +136,9 @@ function twelveMonthFactor(churnPercent: number): number {
  *
  * Line values are already formatted; each line's template is chosen by the
  * consumer from `line.key` and `impact.metric` (flows: `whatIf.todayFlow`,
- * `ifFlow`, `thenFlow`, `timesFlow`; churn: `todayChurn`, `ifFlow`,
- * `thenChurn`, `timesChurn`; then `annual` and `lessThanOne`). The `if` line
+ * `ifFlow`, `thenFlow`, `timesFlow`; the referred share prints its `then`
+ * with `thenReferral`, « 42 × (100 – 6)/(100 – 10) »; churn: `todayChurn`,
+ * `ifFlow`, `thenChurn`, `timesChurn`; then `annual` and `lessThanOne`). The `if` line
  * carries `{target}` only: the stage's name and the target's wording
  * (« cible de l'équipe ») are copy the consumer adds.
  */
@@ -128,12 +149,14 @@ export function whatIf(
   ctx: EngineCalcContext,
   words: UnitWords,
 ): Impact | null {
-  if (UNPRICED_CANDIDATES.includes(candidate)) return null;
+  if (!isPricedAt(candidate, target)) return null;
   const r = knownValue(state, candidate, ctx);
   if (!r) return null;
 
   const snapshot = currentSnapshot(state);
-  const noDecimals = candidate !== "ret.logo-churn" && candidate !== "acq.signup-rate" && cohortIsSmall(snapshot);
+  const referral = REFERRAL_CANDIDATES.includes(candidate);
+  // A small COHORT shows whole percents; the month's flows (sign-up, churn, the referred share) aren't a cohort.
+  const noDecimals = candidate !== "ret.logo-churn" && candidate !== "acq.signup-rate" && !referral && cohortIsSmall(snapshot);
   const pct = (i: Interval) => formatInterval(i, "percent", ctx, words, { noDecimals });
   const bare = (i: Interval) => formatInterval(i, "ratio", ctx, words); // a displayed rate without its sign, for "20/18"
   const currency = state.setup.currency;
@@ -188,13 +211,18 @@ export function whatIf(
     };
   }
 
-  if (!(rD.lo > 0) || !(tD > rD.lo)) return null;
+  if (!(rD.lo > 0 || referral) || !(tD > rD.lo)) return null;
   const n = newPayersPerMonth(state, ctx);
+  /** What the volume becomes at the target, per bound from the displayed numbers: the fewest with the highest value today. */
+  const grown = (v: Interval, round: (x: number) => number): Interval =>
+    referral
+      ? { lo: round((v.lo * (100 - rD.hi)) / (100 - tD)), hi: round((v.hi * (100 - rD.lo)) / (100 - tD)) }
+      : { lo: round((v.lo * tD) / rD.hi), hi: round((v.hi * tD) / rD.lo) };
 
   if (n) {
     const nD = mapBounds(n.value, Math.round);
     // Per bound, from the displayed numbers: the fewest payers with the highest rate, the most with the lowest.
-    const mD = { lo: Math.round((nD.lo * tD) / rD.hi), hi: Math.round((nD.hi * tD) / rD.lo) };
+    const mD = grown(nD, Math.round);
     const delta = floorAtZero({ lo: mD.lo - nD.lo, hi: mD.hi - nD.hi });
     lines.push(
       { key: "today", values: { rate: pct(rD), n: formatCountInterval(nD, ctx, words) }, count: nD },
@@ -231,7 +259,7 @@ export function whatIf(
   const mD =
     candidate === "rev.paid-conversion"
       ? point(tD) // the rate itself: at target, `target` pay out of 100
-      : mapBounds({ lo: (pD.lo * tD) / rD.hi, hi: (pD.hi * tD) / rD.lo }, (v) => roundDisplay(v));
+      : grown(pD, (v) => roundDisplay(v));
   const delta = floorAtZero(
     candidate === "rev.paid-conversion" ? { lo: tD - rD.hi, hi: tD - rD.lo } : { lo: mD.lo - pD.lo, hi: mD.hi - pD.hi },
   );

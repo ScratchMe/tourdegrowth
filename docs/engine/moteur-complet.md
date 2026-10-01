@@ -364,6 +364,33 @@ le « Et si » ne se contredisent jamais :
 
 `slg.act.go-live` seul. `leakClearUnpriced` et son pied (C9) restent pour lui.
 
+*Écarts au code, T3 (2026-10-01).*
+- **La part recommandée se chiffre sur les nouveaux clients, pas sur les
+  inscrits ni sur les opportunités** : N × ((1 − r) ÷ (1 − t) − 1) en
+  libre-service, W × ((1 − r) ÷ (1 − t) − 1) en assisté. C'est le même N (le
+  compte du CAC, sinon les inscrits × la conversion) et le même W que les
+  autres flux et que le « Et si ». S × la conversion, ou O × le taux de
+  closing, donnaient un autre nombre dès qu'un compte était mesuré (sur
+  l'exemple : 820 × 6 à 9 % contre 42 payants comptés, 130 × 24 % contre 18
+  clients gagnés). La slide de fuite et le « Et si » se seraient alors
+  contredits, et le classement en écart relatif n'aurait plus tenu.
+- **La chaîne s'écrit avec ses deux complémentaires** : « 42 × (100 – 6)/(100
+  – 10) = 44 (+2) ». Elle se recalcule à la main, comme les autres.
+- **Sans W, la part recommandée de l'assisté se lit pour 100 opportunités
+  créées** : « 100 × (100 – 20)/(100 – 30) = 114 (+14) ». C'est le pendant du
+  passage lead → opportunité sans W.
+- **La rétention à J30 devient aussi un flux du classement**, sur le même N.
+  Dans le « Et si », quand son levier bouge, les payants la suivent et
+  l'activation ne fait que la plafonner. Ce sont deux leviers neufs
+  (`ret.d30`, `slg.ref.referred-share`), et les opportunités projetées
+  (`opps`) entrent dans le scénario de l'assisté.
+- **Les goldens v1 et v2 ne bougent pas.** Leur projection retire les deux
+  leviers et `opps`, c'est-à-dire des champs ajoutés
+  (`__tests__/golden-projection.ts`). Un test vérifie que ces champs sont
+  bien là avant d'être retirés.
+- **La couverture du pipeline (§19.4) part dans une PR à elle**, juste après
+  T3. Elle demande trois champs de saisie neufs, ce que le chiffrage n'a pas.
+
 ---
 
 ### 19.4 La couverture du pipeline (assisté, Q8)

@@ -319,6 +319,8 @@ describe("sales-assisted's panel — its own levers, its quarter", () => {
     const rows = slgLeverRows(slgScenarioFor(hybridState(), {}, CTX_FR), CTX_FR, FR.strings, "EUR", FR.metrics);
     expect(rows.map((r) => [r.id, r.todayValue])).toEqual([
       ["slg.acq.lead-to-opp", nb("15^%")],
+      // A14 T3 (§19.3.2): the referred share of opportunities, a lever like the others.
+      ["slg.ref.referred-share", nb("20^%")],
       ["slg.rev.win-rate", nb("24^%")],
       ["slg.ret.renewal", nb("88^%")],
       ["slg.rev.acv", nb("24^000^€")],
@@ -352,6 +354,15 @@ describe("sales-assisted's panel — its own levers, its quarter", () => {
     expect(rows.find((r) => r.id === "opps")!.projected).toBeNull();
     expect(rows.find((r) => r.id === "fromSelfServe")!.projected).toBeNull();
     expect(rows.find((r) => r.id === "won")).toMatchObject({ today: "18", projected: "23" });
+  });
+
+  it("the referred share moves the opportunities: 130 × 80/70 = 149, and the customers with them (§19.3.2)", () => {
+    const state = hybridState();
+    const rows = quarterRows(state, slgScenarioFor(state, { "slg.ref.referred-share": 30 }, CTX_FR), CTX_FR, FR.strings);
+    expect(rows.find((r) => r.id === "opps")).toMatchObject({ today: "130", projected: "149" });
+    // Those from self-serve don't move: only the link moves them.
+    expect(rows.find((r) => r.id === "fromSelfServe")!.projected).toBeNull();
+    expect(rows.find((r) => r.id === "won")).toMatchObject({ today: "18", projected: "21" });
   });
 
   it("sales-assisted alone has no « dont venues du libre-service » line", () => {

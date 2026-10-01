@@ -90,6 +90,17 @@ describe("the sales-assisted levers (§18.5.5)", () => {
     expect(both.assumptions).toEqual(["slg-lead-same-win-rate", "slg-win-same-closed", "slg-same-spend", "slg-twelve-months"]);
   });
 
+  it("the referred share of opportunities, a lever since §19.3.2: 20 → 30 %, the opportunities and W × 80/70", () => {
+    const r = buildSlgScenario(hybridState(), { "slg.ref.referred-share": 30 }, CTX_FR);
+    expect(r.moved).toEqual(["slg.ref.referred-share"]);
+    expect(r.today.opps).toEqual({ lo: 130, hi: 130 });
+    expect(r.projected.opps!.lo).toBeCloseTo(130 * (80 / 70), 9);
+    expect(r.projected.won!.lo).toBeCloseTo(18 * (80 / 70), 9);
+    // The leak slide prices the same W × (t − r)/(100 − t): the « Et si » and the slide never disagree.
+    expect(r.projected.newMrr!.lo - r.today.newMrr!.lo).toBeCloseTo((18 * 10 * 24_000) / 70 / 36, 6);
+    expect(r.assumptions).toEqual(["slg-referral-on-top", "slg-same-spend", "slg-twelve-months"]);
+  });
+
   it("the ACV moves the new contracts only: today's MRR keeps its price", () => {
     const acv = buildSlgScenario(hybridState(), { "slg.rev.acv": 30_000 }, CTX_FR);
     expect(acv.projected.mrr).toEqual(acv.today.mrr);

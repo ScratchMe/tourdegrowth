@@ -320,7 +320,9 @@ export function worthOf(impact: Impact, strings: Words, locale: Locale): string 
   if (slg) {
     if (impact.kind === "per-hundred") {
       // Named: what is counted, and on which 100 — « 8 signatures de plus pour 100 opportunités conclues ».
-      const key = renewal ? "perHundredRenewal" : impact.metric === "slg.acq.lead-to-opp" ? "perHundredLead" : "perHundredWin";
+      // The lead and the referred share both add opportunities: « 14,3 opportunités de plus pour 100 opportunités créées ».
+      const opportunities = impact.metric === "slg.acq.lead-to-opp" || impact.metric === "slg.ref.referred-share";
+      const key = renewal ? "perHundredRenewal" : opportunities ? "perHundredLead" : "perHundredWin";
       const base = strings.findings.base[impact.perHundredBase ?? "leads"];
       return fillTemplate(w[numbered(key, head.count, locale)], { n: head.n, base });
     }
@@ -357,7 +359,9 @@ export function chainTemplate(
     case "if":
       return { label: words.if, template: words.ifFlow };
     case "then":
-      return { label: words.then, template: churn ? pick(numbered("thenChurn", line.count, locale)) : words.thenFlow };
+      if (churn) return { label: words.then, template: pick(numbered("thenChurn", line.count, locale)) };
+      // The referred come on top of the others (§19.3.2): « 42 × (100 – 6)/(100 – 10) ».
+      return { label: words.then, template: impact.metric === "ref.referred-share" ? words.thenReferral : words.thenFlow };
     case "times":
       return { label: words.times, template: churn ? words.timesChurn : words.timesFlow };
     case "annual":
@@ -387,7 +391,8 @@ export function slgChainTemplate(
   const c = strings.slgChain;
   const renewal = impact.metric === "slg.ret.renewal";
   const perHundred = impact.kind === "per-hundred";
-  const phrase = impact.metric === "slg.acq.lead-to-opp" || impact.metric === "slg.rev.win-rate" ? c.phrase[impact.metric] : "";
+  const referral = impact.metric === "slg.ref.referred-share";
+  const phrase = impact.metric in c.phrase ? c.phrase[impact.metric as keyof typeof c.phrase] : "";
   const base = strings.findings.base[impact.perHundredBase ?? "leads"];
   const plain = (label: string | null, template: string) => ({ label, template, values: {} });
   switch (line.key) {
@@ -398,8 +403,8 @@ export function slgChainTemplate(
     case "if":
       return plain(words.if, words.ifFlow);
     case "then":
-      if (perHundred) return { label: words.then, template: c.thenPerHundred, values: { base } };
-      return plain(words.then, renewal ? c[numbered("thenRenewal", line.count, locale)] : c.thenFlow);
+      if (perHundred) return { label: words.then, template: referral ? c.thenReferralPerHundred : c.thenPerHundred, values: { base } };
+      return plain(words.then, renewal ? c[numbered("thenRenewal", line.count, locale)] : referral ? c.thenReferral : c.thenFlow);
     case "times":
       return plain(renewal ? c.timesArpa : c.timesAcv, renewal ? c.timesRenewal : c.timesFlow);
     case "per-month":

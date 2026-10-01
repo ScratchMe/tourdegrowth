@@ -286,6 +286,7 @@ export type PlgLeverId =
   | "acq.signup-rate"
   | "ref.referred-share"
   | "act.rate"
+  | "ret.d30"
   | "rev.paid-conversion"
   | "ret.logo-churn"
   | "rev.expansion"
@@ -296,7 +297,7 @@ export type PlgLeverId =
  * its target is a NUMBER of opportunities from self-serve per quarter, a
  * whole count, never a percent — and the link is never a candidate.
  */
-export type SlgLeverId = "slg.acq.lead-to-opp" | "slg.rev.win-rate" | "slg.ret.renewal" | "slg.rev.acv" | "link.pql-handoff";
+export type SlgLeverId = "slg.acq.lead-to-opp" | "slg.ref.referred-share" | "slg.rev.win-rate" | "slg.ret.renewal" | "slg.rev.acv" | "link.pql-handoff";
 export type LeverId = PlgLeverId | SlgLeverId;
 
 export interface EngineSetup {
@@ -510,7 +511,7 @@ export interface Impact {
    * customers or of contracts up for renewal): which base, as a key of the
    * copy's `findings.base` — never a word.
    */
-  perHundredBase?: "leads" | "mql" | "closedOpps" | "renewals";
+  perHundredBase?: "leads" | "mql" | "closedOpps" | "renewals" | "oppsCreated";
   lines: ImpactLine[];
 }
 
