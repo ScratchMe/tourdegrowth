@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { METRIC_SHAPES } from "../catalog-shape";
+import { ALL_METRIC_SHAPES } from "../catalog-shape";
 import { knownSharedCount, offBase, propagateFrom, SHARED_COUNTS, sharedCountAt, withSharedCount } from "../shared-counts";
 import { validateEngine } from "../validate";
 import { ENGINE_CATALOG } from "@/content/engine-catalog";
@@ -13,17 +13,20 @@ describe("SHARED_COUNTS — which numbers share a count", () => {
   it("groups exactly the count labels the catalogue writes identically, and no other", () => {
     // The catalogue is the source of truth for what a count IS: if two
     // labels read the same, they are one population and belong together.
-    const label = (id: string, side: "numerator" | "denominator") =>
-      ENGINE_CATALOG[id as keyof typeof ENGINE_CATALOG].inputs?.[side]?.fr ?? null;
-    // The sales-assisted counts' labels arrive with their prose (A7.3.c S2), and this loop covers them then.
-    const written = (slots: readonly { metric: string }[]) => slots.every((s) => s.metric in ENGINE_CATALOG);
-    for (const slots of Object.values(SHARED_COUNTS).filter(written)) {
-      const labels = new Set(slots.map((s) => label(s.metric, s.side)));
-      expect(labels.size, JSON.stringify(slots)).toBe(1);
+    const label = (id: string, side: "numerator" | "denominator", locale: "fr" | "en" = "fr") =>
+      ENGINE_CATALOG[id as keyof typeof ENGINE_CATALOG].inputs?.[side]?.[locale] ?? null;
+    // Every group, the three sales-assisted ones included since their prose (A7.3.c S2), in both languages.
+    expect(Object.keys(SHARED_COUNTS)).toEqual(expect.arrayContaining(["slgOppsCreated", "slgDealsWon", "slgCustomers"]));
+    for (const slots of Object.values(SHARED_COUNTS)) {
+      for (const locale of ["fr", "en"] as const) {
+        const labels = new Set(slots.map((s) => label(s.metric, s.side, locale)));
+        expect(labels.size, `${locale} ${JSON.stringify(slots)}`).toBe(1);
+        expect([...labels][0], `${locale} ${JSON.stringify(slots)}`).not.toBeNull();
+      }
     }
-    // And every repeated label across the catalogue is covered by a group.
+    // And every repeated label across the catalogue, every motion's, is covered by a group.
     const seen = new Map<string, string[]>();
-    for (const shape of METRIC_SHAPES) {
+    for (const shape of ALL_METRIC_SHAPES) {
       for (const side of ["numerator", "denominator"] as const) {
         const l = label(shape.id, side);
         if (l) seen.set(l, [...(seen.get(l) ?? []), `${shape.id}:${side}`]);

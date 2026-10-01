@@ -120,10 +120,8 @@ describe("the follow-up clock", () => {
 // heading »; adding the headings outside the hybrid fails « self-serve alone ».
 
 describe("buildRequest — one request per role covers both motions", () => {
-  // The sales-assisted prose arrives with S2: a stand-in, with the shape every resolved metric has.
-  const winRate = { ...FR.metrics.find((m) => m.id === "rev.paid-conversion")!, id: "slg.rev.win-rate" as const, request: "le taux de closing en {month}" };
-  const link = { ...winRate, id: "link.pql-handoff" as const, request: "la part des opportunités venues du libre-service" };
-  const metrics = [...FR.metrics, winRate, link];
+  // The real sales-assisted prose since S2 (the S1 stand-ins are gone).
+  const metrics = FR.metrics;
 
   it("each motion's numbers under its heading, self-serve first — the link with sales-assisted", () => {
     const fr = buildRequest("revops", ["slg.rev.win-rate", "acq.cac", "link.pql-handoff"], FR.strings, metrics, hybridState(), CTX_FR);
@@ -133,13 +131,15 @@ describe("buildRequest — one request per role covers both motions", () => {
     expect(plg).toBeGreaterThan(0);
     expect(slg).toBe(plg + 2);
     expect(lines[plg + 1]).toMatch(/^– la dépense d'acquisition/);
-    expect(lines[slg + 1]).toBe("– le taux de closing en août 2026");
-    expect(lines[slg + 2]).toBe("– la part des opportunités venues du libre-service (espace avec 3 membres actifs)");
+    expect(lines[slg + 1]).toBe("– les opportunités «\u00a0nouveau client\u00a0» conclues de juin à août 2026, et combien ont été gagnées");
+    expect(lines[slg + 2]).toBe(
+      "– les opportunités assistées créées de juin à août 2026, et combien venaient d'un compte du libre-service qualifié, un PQL (espace avec 3 membres actifs)",
+    );
   });
 
   it("a hybrid request about one motion still says which one", () => {
     const fr = buildRequest("revops", ["slg.rev.win-rate"], FR.strings, metrics, hybridState(), CTX_FR);
-    expect(fr).toContain(`${FR.strings.request.groupSlg}\n– le taux de closing`);
+    expect(fr).toContain(`${FR.strings.request.groupSlg}\n– les opportunités «\u00a0nouveau client\u00a0» conclues`);
     expect(fr).not.toContain(FR.strings.request.groupPlg);
   });
 

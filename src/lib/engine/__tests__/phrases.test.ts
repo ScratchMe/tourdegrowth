@@ -103,12 +103,13 @@ describe("the activation event is a noun phrase, the user's words quoted inside 
   });
 });
 
-describe("the catalogue's five placeholders", () => {
+describe("the catalogue's six placeholders", () => {
   it("one number of this state: « en juillet 2026 », the window, the event, the variant lower-cased", () => {
     const s = exampleState();
     expect(catalogueValues(s, "act.rate", FR.strings, FR.metrics, CTX_FR)).toEqual({
       month: "août 2026",
       cohort: "juillet 2026",
+      period: "en juillet 2026",
       n: "7",
       event: `l'événement «${NB}a créé un premier projet${NB}»`,
       variant: "",
@@ -117,8 +118,17 @@ describe("the catalogue's five placeholders", () => {
     expect(catalogueValues(s, "rev.paid-conversion", EN.strings, EN.metrics, CTX_EN).n).toBe("30");
   });
 
+  it("{period}: three months for sales-assisted (C25 Q2), the year once, carrying its own preposition", () => {
+    const h = hybridState();
+    expect(catalogueValues(h, "slg.acq.lead-to-opp", FR.strings, FR.metrics, CTX_FR).period).toBe("de mai à juillet 2026");
+    expect(catalogueValues(h, "slg.act.go-live", FR.strings, FR.metrics, CTX_FR).period).toBe("de mars à mai 2026");
+    expect(catalogueValues(h, "slg.ret.renewal", EN.strings, EN.metrics, CTX_EN).period).toBe("from June to August 2026");
+    expect(catalogueValues(h, "link.pql-handoff", EN.strings, EN.metrics, CTX_EN).period).toBe("from June to August 2026");
+  });
+
   it("the static page: bracketed slots, never a made-up month", () => {
-    expect(staticCatalogueValues(FR.strings)).toEqual({ event: "l'événement d'activation", n: "n", cohort: "[mois de cohorte]", month: "[mois]", variant: "la variante choisie" });
+    expect(staticCatalogueValues(FR.strings)).toEqual({ event: "l'événement d'activation", n: "n", cohort: "[mois de cohorte]", month: "[mois]", period: "[sur trois mois]", variant: "la variante choisie" });
+    expect(staticCatalogueValues(EN.strings).period).toBe("[over three months]");
   });
 
   it("a source mid-sentence: a tool, a role — or « une autre source », never the label « Autre »", () => {

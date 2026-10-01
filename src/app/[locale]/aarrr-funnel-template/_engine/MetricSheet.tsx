@@ -9,7 +9,7 @@ import { NumberField } from "@/components/core/NumberField";
 import { Select } from "@/components/core/Select";
 import { Tag } from "@/components/core/Tag";
 import { TextArea } from "@/components/core/TextArea";
-import { CANDIDATE_IDS, TEXT_LIMITS, shapeOf, type MetricShape } from "@/lib/engine/catalog-shape";
+import { CANDIDATE_IDS, TEXT_LIMITS, shapeOf, shapesOf, type MetricShape } from "@/lib/engine/catalog-shape";
 import { BASIS_KEY, EFFORT_KEY, ROLE_KEY, SHEET_BASES, STATUS_KEY, type ResolvedMetric } from "@/lib/engine/strings";
 import type { MetricId, PlgCandidateId, RoleId } from "@/lib/engine/types";
 import { isImmature, nextMonth, windowDaysOf } from "@/lib/engine/cohort";
@@ -131,7 +131,8 @@ export function MetricSheet({
   // null, not 0, when the definition has no window: the sheet then prints no cohort line at all.
   const windowDays = shape.window ? windowDaysOf(shape, state.setup) : null;
   const variantLabel = metric.variants?.find((v) => v.id === (entry?.variant ?? draft.variant))?.label;
-  const fillCatalog = (text: string) => catalogFill(text, { state, locale, strings, metrics: view.metrics, windowDays, variantLabel });
+  const fillCatalog = (text: string) =>
+    catalogFill(text, { state, locale, strings, metrics: view.metrics, windowDays, variantLabel, period: { id, today: ctx.today } });
   // The count labels carry the same placeholders as the formula ({n},
   // {cohort}, {event}): resolved once here, so the value editor and the two
   // conflicting readings never print a raw "{n}" as a field label.
@@ -172,12 +173,14 @@ export function MetricSheet({
   const requestedAt = entry?.request?.remindedAt ?? entry?.request?.requestedAt;
   const stale = isRequestStale(entry, ctx.today);
 
-  // "Also in Stripe: ARPA, churn" — the other numbers that sit in the same tool.
+  // "Also in Stripe: ARPA, churn" — the other numbers that sit in the same
+  // tool, among the ones this setup asks for (§18.2.1).
+  const shown = new Set<MetricId>(shapesOf(state.setup.motions).map((s) => s.id));
   const alsoIn = metric.where
     .filter((w) => w.source.kind === "tool")
     .map((w) => {
       const tool = w.source.kind === "tool" ? w.source.tool : null;
-      const others = view.metrics.filter((m) => m.id !== id && m.where.some((o) => o.source.kind === "tool" && o.source.tool === tool));
+      const others = view.metrics.filter((m) => m.id !== id && shown.has(m.id) && m.where.some((o) => o.source.kind === "tool" && o.source.tool === tool));
       return { tool, others };
     })
     .filter((x): x is { tool: NonNullable<typeof x.tool>; others: ResolvedMetric[] } => x.tool !== null && x.others.length > 0);

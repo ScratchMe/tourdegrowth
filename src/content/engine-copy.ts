@@ -454,6 +454,17 @@ export const ENGINE_COPY = {
      */
     plus: { fr: "+{n}", en: "+{n}" },
     minus: { fr: "–{n}", en: "–{n}" },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, C25 Q2) :
+     * a run of months, everything sales-assisted reads three (`format.ts#formatMonthRange`).
+     * `{from}` drops its year when both ends share one: « juin à août 2026 ».
+     * The prepositional forms open a period inside a sentence; French elides
+     * before a vowel (« d'avril à juin 2026 »), which the code decides.
+     */
+    monthRange: { fr: "{from} à {to}", en: "{from} to {to}" },
+    periodFrom: { fr: "de {range}", en: "from {range}" },
+    periodFromElided: { fr: "d'{range}", en: "from {range}" },
+    periodIn: { fr: "en {range}", en: "in {range}" },
   },
 
   grammar: {
@@ -1030,6 +1041,8 @@ export const ENGINE_COPY = {
     staticCohort: { fr: "[mois de cohorte]", en: "[cohort month]" },
     staticMonth: { fr: "[mois]", en: "[month]" },
     staticVariant: { fr: "la variante choisie", en: "the chosen variant" },
+    // TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2) : la période de trois mois de l'assisté, sans réglage.
+    staticPeriod: { fr: "[sur trois mois]", en: "[over three months]" },
     primaryNumber: { fr: "Le chiffre de l'étape", en: "The stage's number" },
     effort: { fr: "Effort", en: "Effort" },
     tourTitle: { fr: "Pas encore fait le Tour ?", en: "Haven't taken the Tour yet?" },

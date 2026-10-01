@@ -7,9 +7,7 @@ import { GLOSSARY_TERMS, type GlossaryTermId } from "../glossary-terms";
 import {
   ALL_DERIVED_SHAPES,
   ALL_METRIC_SHAPES,
-  DERIVED_SHAPES,
   LTV_CAP_MONTHS,
-  METRIC_SHAPES,
   TEXT_LIMITS,
   type Benchmark,
 } from "@/lib/engine/catalog-shape";
@@ -24,9 +22,10 @@ import { fillTemplate, glyphOffenders, placeholdersOf } from "./engine-test-help
  * every reference" are pinned by `lib/engine/__tests__/catalog-shape.test.ts`
  * (P0). This file pins what the PROSE promises on top of that: that its
  * references never drift from the approved glossary, that everything a slide
- * can print stays inside the three fonts, that its placeholders are the five
+ * can print stays inside the three fonts, that its placeholders are the six
  * the consumers fill, and that French never needs an elision a template
- * cannot make.
+ * cannot make. Every catalogue: self-serve's, sales-assisted's and the
+ * link's (A7.3.c S2), whose records are keyed by every id the types know.
  */
 
 const entries = Object.entries(ENGINE_CATALOG) as [keyof typeof ENGINE_CATALOG, (typeof ENGINE_CATALOG)[keyof typeof ENGINE_CATALOG]][];
@@ -113,20 +112,20 @@ describe("references never drift from the approved glossary", () => {
       }
     };
     for (const [id, entry] of entries) {
-      const shape = METRIC_SHAPES.find((s) => s.id === id)!;
+      const shape = ALL_METRIC_SHAPES.find((s) => s.id === id)!;
       const terms = [shape.glossary, ...(shape.benchmark ? [shape.benchmark.term] : [])];
       check(id, entry.benchmarkCaveat, terms);
       check(id, entry.noReferenceReason, terms);
     }
     for (const [id, entry] of derived) {
-      const shape = DERIVED_SHAPES.find((s) => s.id === id)!;
+      const shape = ALL_DERIVED_SHAPES.find((s) => s.id === id)!;
       check(id, entry.caveat, [shape.glossary, ...(shape.benchmark ? [shape.benchmark.term] : [])]);
     }
     expect(offenders).toEqual([]);
   });
 
-  it("writes the LTV cap with the constant the calculation uses", () => {
-    const ltv = ENGINE_DERIVED_CATALOG["rev.ltv"];
+  it.each(["rev.ltv", "slg.rev.ltv"] as const)("writes the LTV cap with the constant the calculation uses (%s)", (id) => {
+    const ltv = ENGINE_DERIVED_CATALOG[id];
     for (const locale of LOCALES) {
       expect(ltv.formula[locale]).toContain(String(LTV_CAP_MONTHS));
       expect(ltv.capNote?.[locale]).toContain(String(LTV_CAP_MONTHS));
@@ -137,7 +136,7 @@ describe("references never drift from the approved glossary", () => {
 
 describe("placeholders", () => {
   /** What every consumer of the catalogue fills (`ResolvedMetric`, spec §4.4). */
-  const FILLED = new Set(["month", "cohort", "n", "event", "variant"]);
+  const FILLED = new Set(["month", "cohort", "period", "n", "event", "variant"]);
 
   const allPairs = (): [string, Translatable][] => {
     const out: [string, Translatable][] = [];
@@ -155,7 +154,7 @@ describe("placeholders", () => {
     return out;
   };
 
-  it("uses only the five the consumers fill, plus {input} in the 'can't be computed' line", () => {
+  it("uses only the six the consumers fill, plus {input} in the 'can't be computed' line", () => {
     const unknown = allPairs().flatMap(([path, t]) =>
       LOCALES.flatMap((l) =>
         placeholdersOf(t[l])
@@ -176,12 +175,13 @@ describe("placeholders", () => {
   it("leaves no brace behind once the static page fills them (visual.static*)", () => {
     for (const locale of LOCALES) {
       const v = ENGINE_COPY.visual;
-      // The same five slots `lib/engine/phrases.ts#staticCatalogueValues` fills on the static page.
+      // The same six slots `lib/engine/phrases.ts#staticCatalogueValues` fills on the static page.
       const values = {
         event: v.staticEvent[locale],
         n: v.staticWindow[locale],
         cohort: v.staticCohort[locale],
         month: v.staticMonth[locale],
+        period: v.staticPeriod[locale],
         variant: v.staticVariant[locale],
       };
       for (const [path, t] of allPairs()) {
@@ -196,6 +196,22 @@ describe("placeholders", () => {
       .filter(([, t]) => /\b(de|du|d['’])\s?\{(month|cohort)\}/.test(t.fr))
       .map(([path, t]) => `${path}: ${t.fr}`);
     expect(offenders).toEqual([]);
+  });
+
+  it("never puts a preposition before {period}, which brings its own (« d'août à octobre 2026 », « en août 2026 »)", () => {
+    const offenders = allPairs().flatMap(([path, t]) => [
+      ...(/\b(de|du|d['’]|en|sur|à|au|pendant|depuis)\s?\{period\}/i.test(t.fr) ? [`${path}.fr: ${t.fr}`] : []),
+      ...(/\b(of|from|in|over|during|for|since|to)\s?\{period\}/i.test(t.en) ? [`${path}.en: ${t.en}`] : []),
+    ]);
+    expect(offenders).toEqual([]);
+  });
+
+  it("carries {period} in sales-assisted's flows, and never in self-serve's (which keep {month})", () => {
+    const withPeriod = allPairs()
+      .filter(([, t]) => placeholdersOf(t.fr).includes("period"))
+      .map(([path]) => path.replace(/^derived\./, ""));
+    expect(withPeriod.length).toBeGreaterThan(0);
+    expect(withPeriod.filter((path) => !/^(slg|link)\./.test(path))).toEqual([]);
   });
 });
 
@@ -243,7 +259,7 @@ describe("the prose itself", () => {
   it("names, for every place to look, a tool the shape lists as a source — or a role", () => {
     const strays: string[] = [];
     for (const [id, e] of entries) {
-      const shape = METRIC_SHAPES.find((s) => s.id === id)!;
+      const shape = ALL_METRIC_SHAPES.find((s) => s.id === id)!;
       for (const w of e.where) if (w.source.kind === "tool" && !shape.sources.includes(w.source.tool)) strays.push(`${id}: ${w.source.tool}`);
     }
     expect(strays).toEqual([]);

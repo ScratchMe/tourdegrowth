@@ -5,6 +5,7 @@ import { QUESTIONS } from "@/content/copy-library";
 import { ENGINE_CATALOG, ENGINE_DERIVED_CATALOG } from "@/content/engine-catalog";
 import { PILLARS } from "@/lib/scoring/pillars";
 import {
+  ALL_DERIVED_SHAPES,
   ALL_METRIC_SHAPES,
   CANDIDATE_IDS,
   DERIVED_SHAPES,
@@ -209,12 +210,12 @@ describe("ENGINE_BRIDGES (§6.11)", () => {
  */
 describe("shape ↔ prose", () => {
   it("has exactly the same ids on both sides, computed figures included", () => {
-    expect(Object.keys(ENGINE_CATALOG).sort()).toEqual(METRIC_SHAPES.map((s) => s.id).sort());
-    expect(Object.keys(ENGINE_DERIVED_CATALOG).sort()).toEqual(DERIVED_SHAPES.map((s) => s.id).sort());
+    expect(Object.keys(ENGINE_CATALOG).sort()).toEqual(ALL_METRIC_SHAPES.map((s) => s.id).sort());
+    expect(Object.keys(ENGINE_DERIVED_CATALOG).sort()).toEqual(ALL_DERIVED_SHAPES.map((s) => s.id).sort());
   });
 
   it("labels exactly the closed-list ids the shape declares", () => {
-    for (const shape of METRIC_SHAPES) {
+    for (const shape of ALL_METRIC_SHAPES) {
       const prose = ENGINE_CATALOG[shape.id];
       expect(prose.variants?.map((v) => v.id), `${shape.id} variants`).toEqual(shape.variants);
       expect(prose.naReasons?.map((v) => v.id), `${shape.id} naReasons`).toEqual(shape.naReasons);
@@ -223,7 +224,7 @@ describe("shape ↔ prose", () => {
   });
 
   it("prints a caveat next to every reference, and never a 'no reference' reason next to one", () => {
-    for (const shape of METRIC_SHAPES) {
+    for (const shape of ALL_METRIC_SHAPES) {
       const prose = ENGINE_CATALOG[shape.id];
       if (shape.benchmark) {
         expect(prose.benchmarkCaveat, shape.id).toBeDefined();
@@ -235,7 +236,7 @@ describe("shape ↔ prose", () => {
   });
 
   it("names the two counts of every metric entered as counts, and at most three places to look", () => {
-    for (const shape of METRIC_SHAPES) {
+    for (const shape of ALL_METRIC_SHAPES) {
       const prose = ENGINE_CATALOG[shape.id];
       if (shape.valueKinds.includes("ratio")) expect(prose.inputs, shape.id).toBeDefined();
       expect(prose.where.length, shape.id).toBeGreaterThan(0);

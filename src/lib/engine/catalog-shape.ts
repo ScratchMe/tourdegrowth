@@ -440,7 +440,7 @@ export const SLG_METRIC_SHAPES: readonly MetricShape<SlgMetricId>[] = ([
     effort: "self-1h",
     defaultRole: "revops",
     sources: ["hubspot", "salesforce", "pipedrive"],
-    glossary: "acquisition",
+    glossary: "lead-to-opportunity",
     defaultRepair: "afternoon",
     // The relay's base is named after it: « pour 100 leads » or « pour 100 MQL ».
     variants: ["all-leads", "mql"],
@@ -472,7 +472,7 @@ export const SLG_METRIC_SHAPES: readonly MetricShape<SlgMetricId>[] = ([
     effort: "self-1h",
     defaultRole: "revops",
     sources: ["salesforce", "hubspot", "pipedrive"],
-    glossary: "cac",
+    glossary: "sales-cycle",
     defaultRepair: "afternoon",
     variants: ["median", "mean"],
   },
@@ -620,7 +620,7 @@ export const SLG_METRIC_SHAPES: readonly MetricShape<SlgMetricId>[] = ([
     effort: "self-5min",
     defaultRole: "revops",
     sources: ["salesforce", "hubspot", "pipedrive"],
-    glossary: "revenue",
+    glossary: "win-rate",
     defaultRepair: "meeting",
   },
   {
@@ -634,7 +634,7 @@ export const SLG_METRIC_SHAPES: readonly MetricShape<SlgMetricId>[] = ([
     effort: "self-5min",
     defaultRole: "finance",
     sources: ["hubspot", "salesforce", "pipedrive", "spreadsheet"],
-    glossary: "arpu",
+    glossary: "acv",
     defaultRepair: "meeting",
   },
   {

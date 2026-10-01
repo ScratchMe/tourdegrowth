@@ -1,7 +1,7 @@
 import { ALL_DERIVED_SHAPES, CANDIDATE_IDS, PELOTON_METRICS, SLG_CANDIDATE_IDS, candidatesOf, motionOfMetric, shapeOf } from "./catalog-shape";
-import { windowDaysOf } from "./cohort";
+import { periodRangeOf, windowDaysOf } from "./cohort";
 import { CHAIN_VERB } from "./findings";
-import { capitalise, fillTemplate, formatMonth, joinList, lowerFirst } from "./format";
+import { capitalise, fillTemplate, formatMonth, formatMonthRange, joinList, lowerFirst } from "./format";
 import { impactHeadline } from "./impact";
 import type { EngineStrings, ResolvedMetric } from "./strings";
 import type {
@@ -164,15 +164,18 @@ export function catalogueValues(
   strings: Words,
   metrics: ResolvedMetric[],
   ctx: EngineCalcContext,
-): Record<"month" | "cohort" | "n" | "event" | "variant", string> {
+): Record<CatalogueSlot, string> {
   const snapshot = currentSnapshot(state);
   const shape = shapeOf(id);
   const entry = entryOf(snapshot, id);
   const variantId = entry?.variant ?? shape.variants?.[0];
   const variant = metrics.find((m) => m.id === id)?.variants?.find((v) => v.id === variantId)?.label ?? "";
+  // The months the number covers: three for sales-assisted (C25 Q2), « de mai à juillet 2026 ».
+  const range = periodRangeOf(shape, entry, snapshot, state.setup, ctx.today) ?? { from: snapshot.referenceMonth, to: snapshot.referenceMonth };
   return {
     month: formatMonth(snapshot.referenceMonth, ctx.locale),
     cohort: formatMonth(entry?.cohortMonth ?? snapshot.cohortMonth, ctx.locale),
+    period: formatMonthRange(range, ctx.locale, strings.units, "from"),
     n: String(windowDaysOf(shape, state.setup)),
     event: eventPhrase(state, strings),
     // A label (« Média seul ») sits mid-sentence here: « (média seul) ».
@@ -180,10 +183,13 @@ export function catalogueValues(
   };
 }
 
-/** The same five, for the static catalogue page: bracketed slots, never a made-up month. */
-export function staticCatalogueValues(strings: Words): Record<"month" | "cohort" | "n" | "event" | "variant", string> {
+/** The placeholders every catalogue string may carry — `{period}` since the sales-assisted catalogue (A7.3.c S2). */
+export type CatalogueSlot = "month" | "cohort" | "period" | "n" | "event" | "variant";
+
+/** The same six, for the static catalogue page: bracketed slots, never a made-up month. */
+export function staticCatalogueValues(strings: Words): Record<CatalogueSlot, string> {
   const v = strings.visual;
-  return { event: v.staticEvent, n: v.staticWindow, cohort: v.staticCohort, month: v.staticMonth, variant: v.staticVariant };
+  return { event: v.staticEvent, n: v.staticWindow, cohort: v.staticCohort, month: v.staticMonth, period: v.staticPeriod, variant: v.staticVariant };
 }
 
 /** A source after « selon » / "according to": a tool's name, a role, or « une autre source » — never the label « Autre ». */
