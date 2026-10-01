@@ -201,7 +201,7 @@ const BRAND_WORDS = new Set(BRANDS.flatMap((brand) => brand.split(" ")));
 
 /** Every other capitalised word a case may use: sentence openers, public bodies, places, months. */
 const NOT_BRANDS = new Set([
-  "Aux", "En", "États-Unis", "FTC", "DGCCRF", "Commission", "Paris", "Une", "La", "A",
+  "Aux", "En", "États-Unis", "FTC", "DGCCRF", "Commission", "Paris", "La", "Cette", "That",
   "In", "The", "European", "United", "States", "November", "UK", "France's",
 ]);
 
@@ -227,6 +227,13 @@ describe("C6 · brands", () => {
     for (const brand of BRANDS) expect(cases).toContain(brand);
   });
 
+  it("lists as ordinary only words a case uses — a stale entry is a hole a brand could slip through", () => {
+    const tokens = new Set(
+      Object.values(ACQUISITION_CONTENT.patterns).flatMap((p) => [...(p.cas.fr.match(CAPITALISED) ?? []), ...(p.cas.en.match(CAPITALISED) ?? [])]),
+    );
+    expect([...NOT_BRANDS].filter((word) => !tokens.has(word))).toEqual([]);
+  });
+
   it("keeps real brands out of the game itself: cards, phone, events, CEO", () => {
     const outside = LEAVES.filter(({ path }) => !/^patterns\.[^.]+\.cas$/.test(path));
     const leaks = outside.flatMap(({ path, value }) =>
@@ -241,8 +248,8 @@ describe("C6 · brands", () => {
       expect(commitment.cas.fr).toMatch(/engagé/);
       expect(commitment.cas.en).toMatch(/committed/);
     }
-    expect(countdown.cas.fr).toContain("ce n'est pas une sanction");
-    expect(countdown.cas.en).toContain("it is not a sanction");
+    expect(countdown.cas.fr).toContain("n'est pas une sanction");
+    expect(countdown.cas.en).toContain("is not a sanction");
   });
 });
 

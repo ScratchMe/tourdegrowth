@@ -1161,6 +1161,17 @@ Vérifié le 2026-09-30 sur les sources primaires : Légifrance, les communiqué
 
 **Corrigé dans le §11.1 par cette vérification** : « Classement payé non signalé, DSA article 27 » était faux (l'article 27 porte sur les paramètres des systèmes de recommandation des plateformes, et une boutique qui vend son propre stock n'est pas une plateforme) ; « Faux avis, article L121-2 » était imprécis (L121-4 28° et 27°) ; « prix total obligatoire » allait trop loin (la livraison peut être indiquée à part si elle est annoncée) ; le faux prix barré n'a pas d'amende administrative à lui (l'article L131-5 ne vise que l'article L112-1 et ses arrêtés, lu sur Légifrance le 2026-09-30) : c'est une pratique commerciale trompeuse ; et les engagements de Booking.com datent du 20 décembre 2019, sans être une sanction.
 
+**Corrigé dans la copie par la vérification du 2026-10-01** (A12.c, le texte d'`content/game/acquisition.ts` relu sur les sources primaires) :
+- **28°** dit « modifier des avis », pas « déformer » : « déformer » est le mot de la directive Omnibus, pas celui du Code. Le 27° vise l'affirmation faite « sans avoir pris les mesures nécessaires pour le vérifier ».
+- **Article 5-2 de la loi du 9 juin 2023** (rédaction de l'ordonnance 2024-978, en vigueur depuis le 8 novembre 2024) : « publicité » ou « collaboration commerciale » **ou une mention équivalente**. Seul l'article 5 d'origine imposait les deux mentions.
+- **Frais cachés** : de tous les frais imposés, seule la livraison peut être indiquée à part, **avec son montant** (arrêté du 3 décembre 1987, art. 2) ; « si elle est annoncée » ne suffisait pas.
+- **Temu** : la notification de novembre 2024 suit une enquête coordonnée, et l'action du réseau CPC est **toujours en cours** au 2026-10-01 (page de la Commission). L'amende de 200 M€ infligée à Temu le 28 mai 2026 l'a été au titre du DSA, pour les produits illicites, pas pour les fausses échéances : le texte n'en parle pas. Une veille est posée (`CHANTIERS.md` E).
+- **CMA** : des engagements pris **auprès de** l'autorité britannique, qui ne valent pas aveu (« devant » évoquait un tribunal) ; « les six sites visés par l'enquête » plutôt que « contrôlés », lisible comme « détenus ».
+- **Shein** : les 40 M€ couvraient aussi des allégations environnementales, d'où « notamment pour de fausses réductions ». **Influenceurs** : la DGCCRF dit que **la totalité** des influenceurs en anomalie manquaient à la transparence commerciale (« tous », comme ce tableau ; la copie avait dérivé vers « notamment »). **Fashion Nova** : « a accepté de payer », pendant « près de » quatre ans (fin 2015 à novembre 2019).
+- **Faux prix barré** : la DGCCRF « peut régler » ce délit par une transaction pénale ; « souvent » n'était étayé que par des chiffres tous délits confondus.
+
+Lus sur Légifrance par un outil de lecture : le 28° et l'article 5-2 sont à relire à l'œil avant l'ouverture (D9).
+
 **Sources primaires** :
 - Code de la consommation, articles L112-1-1, L111-7-2, L121-2, L121-3, L121-4, L132-2, L523-1, sur Légifrance ; arrêté du 3 décembre 1987 relatif à l'information du consommateur sur les prix ; loi n° 2023-451 du 9 juin 2023, art. 5-2.
 - DGCCRF : « Pièges sur les sites de commerce en ligne : attention aux dark patterns » (fiche du 08/11/2023) ; communiqué Shein du 3 juillet 2025 ; « Marketing d'influence : 60 % des influenceurs ciblés par la DGCCRF en anomalie » (23/01/2023) ; « Black Friday : gare aux fausses promesses » (24/11/2025), qui cite la condamnation de fin 2024.

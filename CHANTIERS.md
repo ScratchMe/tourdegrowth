@@ -23,7 +23,7 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
-| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.c (le code), **prêt depuis C25** (2026-09-30), A7.3.d après A7.3.c, A7.4 après A7.3, et A7.12.c à l'ouverture. A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)** : A12.c peut partir. **A13** (trois alertes de dépendances, dont une critique sur `next`), ouvert le 2026-10-01, passe en premier |
+| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.c (le code), **prêt depuis C25** (2026-09-30), A7.3.d après A7.3.c, A7.4 après A7.3, et A7.12.c à l'ouverture. A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)**, sa copie faite le même jour (A12.c) : A12.d peut partir. **A13** (trois alertes de dépendances, dont une critique sur `next`), ouvert le 2026-10-01, passe en premier |
 | **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30, après A7.10, A10 et A11** (B3, puis la re-synchro d'A11 le soir même : 88 composants, 292 cellules, 88 aperçus sur 88 rendus). Rien à lancer tant qu'un composant, ou une copie qu'un aperçu reprend, ne change pas |
 | **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 à C29 tranchées le 2026-09-30, C26 à C29 livrées le même jour, **C25** (la spécification de A7.3, `ENGINE.md` §18) dans sa propre session. **C30** (le niveau 2 du jeu, `GAME-BRIEF.md` §17) le 2026-10-01. **Rien n'est ouvert** |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, tout A7.3 |
@@ -32,8 +32,8 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 **L'ordre conseillé** : A13 d'abord (une alerte critique sur `next`, merge
 avec l'accord d'Antoine), A7.3.c (prompt A sur « le lot A7.3.c », dans l'ordre
 du §18.11), puis D. A7.3.e, qui se menait en parallèle, est livré le
-2026-09-30. A12.c (la copie du niveau 2 du jeu) peut partir en parallèle : il
-ne touche pas les mêmes fichiers. Le moteur ouvre avant le jeu (C23). Rien
+2026-09-30. Le niveau 2 du jeu (A12.d, puis A12.e à A12.h) peut avancer en
+parallèle : il ne touche pas les mêmes fichiers. Le moteur ouvre avant le jeu (C23). Rien
 n'attend dans la section C : C30 est tranchée le 2026-10-01.
 
 **Deux sessions en parallèle** écrivent toutes deux à la fin de `JOURNAL.md`
@@ -181,14 +181,15 @@ boutique comme un abonnement, le niveau 1 identique au bit près) et le modèle
 du niveau 2 codé en brouillon, sans page ni texte, avec ses quatre années de
 référence en tests (`lib/game/levels/acquisition.ts`, `acquisition.test.ts`).
 **C30 est tranchée le 2026-10-01** : les cinq recos retenues, la
-spécification validée telle quelle. A12.c peut partir. Toute copie neuve porte
+spécification validée telle quelle. A12.c est faite le même jour ; A12.d peut
+partir. Toute copie neuve porte
 « TODO: à relire » (convention 6).
 
 | # | Quoi | Détail |
 |---|---|---|
 | A12.a | **La spécification et le modèle** | **Faits le 2026-09-30.** `GAME-BRIEF.md` §17 : univers (Pédalix), chiffre du board (nouveaux clients par mois), constantes, les dix-sept cartes et leur rôle au niveau 1, le DG, les quatre années de référence, le téléphone, les événements, les fins, et le catalogue vérifié sur les sources primaires. Cinq questions en §17.10, reprises en C30 |
 | A12.b | **La validation par Antoine** — **close le 2026-10-01** | C30 : nouveaux clients par mois, Pédalix, transaction de 150 000 €, les huit cas tels quels, une carte qui propose les deux niveaux. Réponses datées en `GAME-BRIEF.md` §17.10 |
-| A12.c | **La copie** | `content/game/acquisition.ts`, FR et EN, « à relire », avec la série C du §7.1 (parité, mots interdits, liste blanche des marques) |
+| A12.c | **La copie** | **Faite le 2026-10-01** ([#242](https://github.com/ScratchMe/tourdegrowth/pull/242)). `content/game/acquisition.ts`, FR et EN, « à relire », ce que le niveau 1 dit de toute année repris par référence ; le chapeau et les métadonnées dans `meta.ts` ; la série C du §7.1 tenue par les règles communes (`game-copy-checks.ts`), plus C12 (insécables des nombres), C13 (l'arithmétique du téléphone) et C14 (jamais « amende »). Le catalogue relu sur les sources primaires le même jour (huit corrections, `GAME-BRIEF.md` §17.9) |
 | A12.d | **L'îlot partagé** | L'îlot du niveau 1 (`app/[locale]/game/retention/`) devient celui de tout niveau ; les composants de `components/game` perdent leurs noms d'emplacement du niveau 1 (`churn`, `subs`, `mrr`), ce qui change leur contrat : re-synchro Claude Design (section B) dans la même série |
 | A12.e | **Le téléphone de Pédalix** | Un composant neuf et sa pastille « payé au panier » (§17.7), avec son aperçu pour Claude Design |
 | A12.f | **Le branchement** | Le slug passe de `DraftLevelSlug` à `LevelSlug` et le compilateur liste ce qu'il exige (clé de sauvegarde, encart du résultat, analytique) ; page, image de partage, sitemap, hub « Jouable », et l'encart d'un goulot partagé : **une carte qui propose les deux niveaux** (C30 Q5, `GAME-BRIEF.md` §15.4). Les deux blocs « Niveau suivant » deviennent des liens, et celui du niveau 1 passe de « bientôt » à « jouable » (C31). Le libellé de fin « le contrôle et l'amende » du hub (`GAME_HUB.endings.fine`) vaut pour les deux niveaux : au niveau 2, c'est une transaction |
@@ -285,6 +286,7 @@ rien de privé dans le dépôt, qui est public. Cela vaut pour les chiffres de
 | Le Deep dive à ~70 s devient la norme | Réduire le **nombre** de générations, pas le plafond de temps | `GEMINI.md` §2 |
 | `eslint-config-next` suit | TypeScript 7 et ESLint 10, testés en installant, pas en lisant les plages de peer. Aujourd'hui, `typescript-eslint` refuse TS ≥ 6.1 et `eslint-plugin-react` plante sur ESLint 10 ; Dependabot les ignore en majeure depuis le 2026-09-08 | `GITHUB.md` §1.7 et §2 |
 | Un mois après l'ouverture du jeu | La place de l'encart (C10) et le bouton principal (C16), sur les chiffres | Section C |
+| **La Commission clôt l'action CPC contre Temu** (engagements, sanction ou abandon) | Le catalogue du niveau 2 dit l'action « toujours en cours » (`content/game/acquisition.ts`, `patterns.countdown.cas`), vrai au 2026-10-01. Le réécrire d'après la décision publiée, sans présenter un engagement comme une sanction ; copie neuve, donc « à relire » | `GAME-BRIEF.md` §17.9, la page CPC de la Commission (« Market places and digital services ») |
 | **La Commission publie sa proposition de Digital Fairness Act** (visée pour novembre 2026) | Rien à lancer : le jeu ne sera pas ouvert (C23). Mais la copie du jeu dit la proposition « attendue fin 2026 » (`content/game/retention.ts:487-488`, et son test `game-retention.test.ts:503`). La réécrire d'après le texte publié, en vérifiant ce qu'il dit vraiment du design addictif et des séries, avant l'ouverture du jeu (D2). C'est une copie neuve, donc « à relire » | `GAME-BRIEF.md` §1 et §3, `marketing/campaigns/README.md` §10 |
 | **Juin 2027** | La fenêtre Tour de France (R2-30) : Grand Départ le 2 juillet 2027 à Édimbourg. À construire en juin, pour partir pendant le Tour | `GROWTH-PLAN.md` |
 | Une demande d'effacement (RGPD) | Supprimer le document **et** purger le cache CDN de `/r/<id>/*` : l'image de partage (depuis le 2026-09-14) et le badge (A3) y sont gardés un an sous une adresse immuable, et le badge l'est aussi chez GitHub (camo), hors de notre main. Vérifier d'abord comment Vercel purge par chemin. Relevé par la relecture de sécurité d'A3 | `legal.ts`, `VERCEL.md` §1.8 |

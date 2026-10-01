@@ -262,9 +262,10 @@ export const ACQUISITION_CONTENT: DeepTranslatable<AcquisitionCopy> = {
   },
 
   // GAME-BRIEF §17.9: checked against the primary sources on 2026-09-30, and
-  // again for this wording (JOURNAL.md, A12.c). The legal review of the
-  // catalogue stays Antoine's (CHANTIERS.md D9). A commitment or a
-  // notification is never told as a sanction.
+  // this wording again on 2026-10-01 (JOURNAL.md, A12.c). Temu's « l'action
+  // est toujours en cours » is true on that date: CHANTIERS.md E watches it.
+  // The legal review of the catalogue stays Antoine's (CHANTIERS.md D9). A
+  // commitment or a notification is never told as a sanction.
   patterns: {
     stock: {
       official: t("Fausse rareté", "Fake scarcity"),
@@ -284,12 +285,12 @@ export const ACQUISITION_CONTENT: DeepTranslatable<AcquisitionCopy> = {
     reviews: {
       official: t("Faux avis", "Fake reviews"),
       law: t(
-        "Diffuser de faux avis de consommateurs, ou déformer de vrais avis pour promouvoir un produit, est interdit en toutes circonstances, comme affirmer que des avis viennent d'acheteurs sans l'avoir vérifié : article L121-4 du Code de la consommation. Le site doit aussi dire si ses avis sont contrôlés, et comment (article L111-7-2).",
-        "Publishing fake consumer reviews, or distorting real ones to promote a product, is banned in all circumstances under French law, as is claiming that reviews come from buyers without checking: article L121-4 of the Consumer Code. A site must also say whether its reviews are checked, and how (article L111-7-2).",
+        "Diffuser de faux avis de consommateurs, ou modifier de vrais avis pour promouvoir un produit, est interdit en toutes circonstances, comme affirmer que des avis viennent d'acheteurs sans avoir pris les mesures pour le vérifier : article L121-4 du Code de la consommation. Le site doit aussi dire si ses avis sont contrôlés, et comment (article L111-7-2).",
+        "Publishing fake consumer reviews, or altering real ones to promote a product, is banned in all circumstances under French law, as is claiming that reviews come from buyers without taking steps to check: article L121-4 of the Consumer Code. A site must also say whether its reviews are checked, and how (article L111-7-2).",
       ),
       cas: t(
-        "Aux États-Unis, Fashion Nova a payé 4,2 millions de dollars en 2022 pour clore les accusations de la FTC, l'autorité fédérale de la consommation : l'enseigne aurait bloqué pendant quatre ans la publication des avis de moins de quatre étoiles.",
-        "In the United States, Fashion Nova paid $4.2 million in 2022 to settle charges by the FTC, the federal consumer protection agency, that it had blocked reviews under four stars from being posted for four years.",
+        "Aux États-Unis, Fashion Nova a accepté en 2022 de payer 4,2 millions de dollars pour clore les accusations de la FTC, l'autorité fédérale de la consommation : l'enseigne aurait bloqué pendant près de quatre ans la publication des avis de moins de quatre étoiles.",
+        "In the United States, Fashion Nova agreed in 2022 to pay $4.2 million to settle allegations by the FTC, the federal consumer protection agency, that it had blocked reviews under four stars from being posted for almost four years.",
       ),
       tell: t(
         "Que des cinq étoiles, jamais une critique : quelqu'un a trié.",
@@ -299,12 +300,12 @@ export const ACQUISITION_CONTENT: DeepTranslatable<AcquisitionCopy> = {
     countdown: {
       official: t("Fausse urgence", "Fake urgency"),
       law: t(
-        "Le même article que la fausse rareté : annoncer faussement une offre limitée dans le temps, pour pousser à décider tout de suite, est interdit en toutes circonstances (article L121-4 du Code de la consommation). La DGCCRF cite en exemple un compte à rebours qui recommence indéfiniment.",
-        "The same article as fake scarcity: falsely announcing a time-limited offer, to push for an immediate decision, is banned in all circumstances under French law (article L121-4 of the Consumer Code). The DGCCRF, France's consumer protection authority, gives a countdown that starts over and over again as an example.",
+        "Le même article que la fausse rareté : annoncer faussement une offre limitée dans le temps, pour pousser à décider tout de suite, est interdit en toutes circonstances (article L121-4 du Code de la consommation). La DGCCRF cite en exemple « un compte à rebours qui recommence indéfiniment ».",
+        "The same article as fake scarcity: falsely announcing a time-limited offer, to push for an immediate decision, is banned in all circumstances under French law (article L121-4 of the Consumer Code). The DGCCRF, France's consumer protection authority, gives \"a countdown that restarts indefinitely\" as an example.",
       ),
       cas: t(
-        "En novembre 2024, la Commission européenne et les autorités de consommation ont notifié à Temu des pratiques qu'elles jugeaient illicites, dont de fausses dates limites d'achat. Une notification ouvre une procédure : ce n'est pas une sanction.",
-        "In November 2024, the European Commission and consumer authorities notified Temu of practices they considered unlawful, including fake purchase deadlines. A notification opens a procedure: it is not a sanction.",
+        "En novembre 2024, la Commission européenne et les autorités de consommation ont notifié à Temu des pratiques qu'elles jugeaient illicites, dont de fausses dates limites d'achat. Cette notification n'est pas une sanction, et l'action est toujours en cours.",
+        "In November 2024, the European Commission and consumer authorities notified Temu of practices they considered unlawful, including fake purchase deadlines. That notification is not a sanction, and the action is still ongoing.",
       ),
       tell: t(
         "Recharge la page : si le compteur repart, il n'y a pas d'offre.",
@@ -314,11 +315,11 @@ export const ACQUISITION_CONTENT: DeepTranslatable<AcquisitionCopy> = {
     watchers: {
       official: t("Fausse preuve sociale", "Fake social proof"),
       law: t(
-        "Aucune des pratiques interdites en toutes circonstances ne la nomme : c'est une pratique commerciale trompeuse, article L121-2 du Code de la consommation. La DGCCRF range la fausse activité, du type « X personnes regardent ce produit », parmi les dark patterns illicites.",
-        'None of the practices banned in all circumstances names it: it is a misleading commercial practice under French law, article L121-2 of the Consumer Code. The DGCCRF, France\'s consumer protection authority, lists fake activity, of the "X people are looking at this product" kind, among unlawful dark patterns.',
+        "Aucune des pratiques interdites en toutes circonstances ne la nomme : c'est une pratique commerciale trompeuse, article L121-2 du Code de la consommation. La DGCCRF range la fausse activité, du type « X consommateurs sont en train de regarder le produit », parmi les dark patterns illicites.",
+        'None of the practices banned in all circumstances names it: it is a misleading commercial practice under French law, article L121-2 of the Consumer Code. The DGCCRF, France\'s consumer protection authority, lists fake activity, of the "X consumers are looking at the product" kind, among unlawful dark patterns.',
       ),
       cas: t(
-        "En 2019, six sites de réservation d'hôtels, dont Booking.com et Expedia, se sont engagés devant l'autorité britannique de la concurrence à préciser, quand ils disent que d'autres regardent le même hôtel, que ces personnes cherchent peut-être d'autres dates.",
+        "En 2019, six sites de réservation d'hôtels, dont Booking.com et Expedia, se sont engagés auprès de l'autorité britannique de la concurrence à préciser, quand ils disent que d'autres regardent le même hôtel, que ces personnes cherchent peut-être d'autres dates.",
         "In 2019, six hotel booking sites, including Booking.com and Expedia, committed to the UK competition authority to make clear, when they say others are looking at the same hotel, that those people may be searching for other dates.",
       ),
       tell: t(
@@ -329,12 +330,12 @@ export const ACQUISITION_CONTENT: DeepTranslatable<AcquisitionCopy> = {
     anchor: {
       official: t("Faux prix barré", "Fake reference price"),
       law: t(
-        "Un prix barré doit être le prix le plus bas pratiqué par le vendeur dans les trente jours qui précèdent la réduction : article L112-1-1 du Code de la consommation. Sinon, c'est une pratique commerciale trompeuse, un délit que la DGCCRF règle souvent par une transaction pénale, avec l'accord du parquet.",
-        "Under French law, a struck-through price must be the lowest price the seller charged in the thirty days before the reduction: article L112-1-1 of the Consumer Code. Otherwise it is a misleading commercial practice, a criminal offence the DGCCRF, France's consumer protection authority, often settles with a criminal settlement agreed by the prosecutor.",
+        "Un prix barré doit être le prix le plus bas pratiqué par le vendeur dans les trente jours qui précèdent la réduction : article L112-1-1 du Code de la consommation. Sinon, c'est une pratique commerciale trompeuse, un délit que la DGCCRF peut régler par une transaction pénale, avec l'accord du parquet.",
+        "Under French law, a struck-through price must be the lowest price the seller charged in the thirty days before the reduction: article L112-1-1 of the Consumer Code. Otherwise it is a misleading commercial practice, a criminal offence the DGCCRF, France's consumer protection authority, can settle out of court with the prosecutor's agreement.",
       ),
       cas: t(
-        "En 2025, Shein a accepté une transaction de 40 millions d'euros proposée par la DGCCRF avec l'accord du parquet de Paris : 57 % des réductions contrôlées n'en étaient pas, et 11 % cachaient une hausse de prix.",
-        "In 2025, Shein accepted a €40 million settlement offered by the DGCCRF with the agreement of the Paris prosecutor: 57% of the reductions checked were not reductions at all, and 11% hid a price rise.",
+        "En 2025, Shein a accepté une transaction de 40 millions d'euros proposée par la DGCCRF avec l'accord du parquet de Paris, notamment pour de fausses réductions : 57 % des réductions contrôlées n'en étaient pas, et 11 % cachaient une hausse de prix.",
+        "In 2025, Shein accepted a €40 million settlement offered by the DGCCRF with the agreement of the Paris prosecutor, notably for fake reductions: 57% of the reductions checked were not reductions at all, and 11% hid a price rise.",
       ),
       tell: t(
         "Un prix barré se vérifie : c'est le plus bas des trente derniers jours, pas un prix conseillé.",
@@ -344,12 +345,12 @@ export const ACQUISITION_CONTENT: DeepTranslatable<AcquisitionCopy> = {
     native: {
       official: t("Publicité déguisée", "Disguised advertising"),
       law: t(
-        "Faire passer pour un contenu éditorial une promotion qu'on a payée, sans le dire clairement, est interdit en toutes circonstances : article L121-4 du Code de la consommation. Depuis la loi du 9 juin 2023, un créateur payé doit afficher clairement l'intention commerciale de sa publication, par « publicité » ou « collaboration commerciale ».",
-        'Passing off a paid promotion as editorial content, without saying so clearly, is banned in all circumstances under French law, article L121-4 of the Consumer Code. Since the law of 9 June 2023, a paid creator must clearly display the commercial intent of a post, with "advertising" or "commercial collaboration".',
+        "Faire passer pour un contenu éditorial une promotion qu'on a payée, sans le dire clairement, est interdit en toutes circonstances : article L121-4 du Code de la consommation. Depuis la loi du 9 juin 2023, un créateur payé doit afficher clairement l'intention commerciale de sa publication, par « publicité », « collaboration commerciale » ou une mention équivalente.",
+        'Passing off a paid promotion as editorial content, without saying so clearly, is banned in all circumstances under French law, article L121-4 of the Consumer Code. Since the law of 9 June 2023, a paid creator must clearly display the commercial intent of a post, with "advertising", "commercial collaboration" or an equivalent mention.',
       ),
       cas: t(
-        "En 2023, la DGCCRF a indiqué que 60 % de la soixantaine d'influenceurs qu'elle avait contrôlés depuis 2021 étaient en anomalie, notamment pour ne pas avoir signalé clairement le caractère commercial de leurs publications.",
-        "In 2023, the DGCCRF, France's consumer protection authority, reported that 60% of the sixty or so influencers it had checked since 2021 were in breach, notably for not clearly flagging the commercial nature of their posts.",
+        "En 2023, la DGCCRF a indiqué que 60 % de la soixantaine d'influenceurs qu'elle avait contrôlés depuis 2021 étaient en anomalie, tous pour ne pas avoir signalé clairement le caractère commercial de leurs publications.",
+        "In 2023, the DGCCRF, France's consumer protection authority, reported that 60% of the sixty or so influencers it had checked since 2021 were in breach, all of them for not clearly flagging the commercial nature of their posts.",
       ),
       tell: t(
         "Un vélo qu'on te montre sans dire qui l'a payé est une publicité.",
@@ -359,8 +360,8 @@ export const ACQUISITION_CONTENT: DeepTranslatable<AcquisitionCopy> = {
     teaser: {
       official: t("Frais cachés", "Hidden fees"),
       law: t(
-        "Le prix toutes taxes comprises et les frais de livraison sont des informations substantielles : les taire, ou ne les donner qu'à contretemps, est une omission trompeuse (article L121-3 du Code de la consommation). Le prix affiché doit être la somme effectivement payée ; seuls les frais de livraison peuvent être indiqués à part, à condition d'être annoncés.",
-        "Under French law, the price including all taxes and the delivery costs are material information: leaving them out, or giving them too late, is a misleading omission (article L121-3 of the Consumer Code). The displayed price must be the sum actually paid; only delivery costs may be shown separately, provided they are announced.",
+        "Le prix toutes taxes comprises et les frais de livraison sont des informations substantielles : les taire, ou ne les donner qu'à contretemps, est une omission trompeuse (article L121-3 du Code de la consommation). Le prix affiché doit être la somme effectivement payée ; de tous les frais imposés, seule la livraison peut être indiquée à part, avec son montant.",
+        "Under French law, the price including all taxes and the delivery costs are material information: leaving them out, or giving them too late, is a misleading omission (article L121-3 of the Consumer Code). The displayed price must be the sum actually paid; of all compulsory charges, only delivery may be shown separately, with its amount.",
       ),
       cas: t(
         "En 2019, Booking.com s'est engagé auprès de la Commission européenne à afficher clairement le prix total, frais et taxes inévitables compris.",
@@ -378,8 +379,8 @@ export const ACQUISITION_CONTENT: DeepTranslatable<AcquisitionCopy> = {
         "Showing search results without clearly saying that someone paid for a better ranking is banned in all circumstances under French law, article L121-4 of the Consumer Code.",
       ),
       cas: t(
-        "En 2019, Booking.com s'est engagé auprès de la Commission européenne à dire si les paiements des hôteliers influencent leur place dans les résultats. La même année, les sites de réservation contrôlés par l'autorité britannique de la concurrence ont pris le même engagement sur les commissions.",
-        "In 2019, Booking.com committed to the European Commission to say whether hotels' payments affect their place in the results. The same year, the booking sites checked by the UK competition authority made the same commitment about commissions.",
+        "En 2019, Booking.com s'est engagé auprès de la Commission européenne à dire si les paiements des hébergeurs influencent leur place dans les résultats. La même année, les six sites visés par l'enquête de l'autorité britannique de la concurrence ont pris le même engagement sur les commissions.",
+        "In 2019, Booking.com committed to the European Commission to say whether accommodation providers' payments affect their place in the results. The same year, the six booking sites investigated by the UK competition authority made the same commitment about commissions.",
       ),
       tell: t(
         "En tête de liste ne veut pas dire meilleur : cherche la mention « sponsorisé ».",
