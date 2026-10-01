@@ -17,7 +17,7 @@
  *
  * Relative imports only — see model.ts.
  */
-import type { GameState, LevelDefinition } from "./types";
+import type { GameState, LevelDefinition, ModelSlug } from "./types";
 
 export type UiPhase =
   /** A save with a quarter played was found on arrival: « Reprendre l'année en cours ? » (P15). */
@@ -255,7 +255,7 @@ export function focusFor(phase: UiPhase): FocusTarget {
  * undefined before the first quarter, when there is nothing to compare with.
  */
 export function lastQuarterStart<Id extends string>(
-  level: LevelDefinition<Id>,
+  level: Pick<LevelDefinition<Id, ModelSlug>, "constants">,
   state: GameState<Id>,
 ): GameState<Id> | undefined {
   const quarters = state.log.length;

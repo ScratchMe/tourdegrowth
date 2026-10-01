@@ -17,7 +17,7 @@
  * the fresh year with the first call open, exactly what the page was
  * prerendered with (plan E16); the device is read after mount.
  */
-import { useEffect, useEffectEvent, useReducer, useRef, useState, type RefObject } from "react";
+import { useEffect, useEffectEvent, useMemo, useReducer, useRef, useState, type RefObject } from "react";
 import { useReducedMotion } from "@/components/game/useReducedMotion";
 import { trackEvent } from "@/lib/analytics/goatcounter";
 import {
@@ -35,7 +35,6 @@ import {
   gameStartedDetail,
   parseGameStartFrom,
 } from "@/lib/game/events";
-import { RETENTION_LEVEL, type RetentionCardId } from "@/lib/game/levels/retention";
 import { fresh, moodNow } from "@/lib/game/model";
 import {
   INITIAL_PHASE,
@@ -52,17 +51,24 @@ import {
 } from "@/lib/game/phases";
 import { gameReducer } from "@/lib/game/reducer";
 import { clearGame, loadGame, recordYearEnd, resumeMode, saveGame, type SavedGame } from "@/lib/game/storage";
-import type { GameAction, GameState, MonthPoint } from "@/lib/game/types";
+import type { GameAction, GameState, LevelDefinition, MonthPoint } from "@/lib/game/types";
 import { MONTH_STEP_MS } from "@/lib/game/ui-timing";
-import { clicksFor, monthFrames, phoneIds } from "@/lib/game/view";
+import { monthFrames, phoneIds } from "@/lib/game/view";
 import { fill } from "@/lib/game/format";
-import { bossMessage, clicksSentence, quarterEndAnnouncement, resumeContent, type IslandContext } from "./island-view";
+import { bossMessage, quarterEndAnnouncement, resumeContent, type IslandContext } from "./island-view";
 
-type Id = RetentionCardId;
+type Id = string;
 type State = GameState<Id>;
 
-const L = RETENTION_LEVEL;
-const reduce = gameReducer(L);
+/**
+ * The level the island plays — a playable one, with a save key — and what
+ * its pill makes the one live region say when a tick changes it (the
+ * level's `IslandSide.announce`, bound to its copy and language).
+ */
+export interface PlayedLevel {
+  level: LevelDefinition<Id>;
+  announceTick(before: readonly Id[], after: readonly Id[]): string | null;
+}
 
 /** The query parameters the level page is opened with, read once and then removed (plan §3.7). */
 const FROM_PARAM = "from";
@@ -138,7 +144,10 @@ export interface Game {
   tourLoop: () => void;
 }
 
-export function useGame(ctx: IslandContext, refs: GameRefs): Game {
+export function useGame(ctx: IslandContext, played: PlayedLevel, refs: GameRefs): Game {
+  const L = played.level;
+  // One reducer per level; a level never changes under a mounted island.
+  const reduce = useMemo(() => gameReducer(L), [L]);
   const [game, dispatch] = useReducer(reduce, L, fresh);
   const [phase, setPhase] = useState<UiPhase>(INITIAL_PHASE);
   const [run, setRun] = useState<Run | null>(null);
@@ -301,12 +310,11 @@ export function useGame(ctx: IslandContext, refs: GameRefs): Game {
     // The card's own `aria-pressed` says what happened; focus stays on it.
     const next = apply({ type: "toggle", card: id as Id });
     if (!next) return;
-    // What it did to the cancellation path, in the one region (plan E5) —
-    // and only when it did something: most honest cards leave the count
-    // where it was, and a sentence repeated at every tick stops being heard.
-    const before = clicksFor(L, phoneIds(game));
-    const after = clicksFor(L, phoneIds(next));
-    if (after !== before) announce(clicksSentence(ctx, after));
+    // What it did to the level's pill, in the one region (plan E5) — and
+    // only when it did something: most honest cards leave it where it was,
+    // and a sentence repeated at every tick stops being heard.
+    const said = played.announceTick(phoneIds(game), phoneIds(next));
+    if (said !== null) announce(said);
   };
 
   const runQuarter = () => {

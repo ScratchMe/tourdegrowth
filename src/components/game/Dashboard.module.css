@@ -22,14 +22,14 @@
   gap: var(--space-5);
 }
 
-.churn,
+.metric,
 .tile,
 .secret {
   min-width: 0;
 }
 
 /*
- * Phone: churn on its own row (its target sentence would wrap over three
+ * Phone: the level's number on its own row (its target sentence would wrap over three
  * lines in a third of the screen), then the three visible counters, then the
  * two hidden ones side by side — the pair the year is really about.
  */
@@ -39,7 +39,7 @@
     gap: var(--space-3);
   }
 
-  .churn {
+  .metric {
     grid-column: span 6;
   }
 

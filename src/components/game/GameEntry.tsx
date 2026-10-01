@@ -25,8 +25,8 @@ export interface GameEntryView {
   /** The mono mention beside the button: « vingt minutes, gratuit ». */
   meta: string;
   band: {
-    /** « Résiliations 6,0 % », the number formatted from the level model. */
-    churn: string;
+    /** « Résiliations 6,0 % », the level's number formatted from its model. */
+    metric: string;
     trust: string;
     notOnDashboard: string;
   };
@@ -45,7 +45,7 @@ export interface GameEntryProps extends GameEntryView {
  * the button is secondary (13.3 — never solid red), and the card is flat
  * paper, because the one raised card on this screen is the score. Across its
  * top, a 44px band of the night world shows the object of the game in one
- * glance — the churn the CEO watches, and the trust that is not on his
+ * glance — the number the CEO watches, and the trust that is not on his
  * dashboard. The empty cell stands in for that missing number; it is drawn,
  * not a glyph, so no font can turn it into a tofu box, and it is hidden from
  * assistive technology because the words beside it already say it.
@@ -72,7 +72,7 @@ export function GameEntry({ href, title, body, cta, meta, band, event, className
           {SPACE_PICTO.game}
         </span>
         <span className={styles.bandItems}>
-          <span className={styles.bandItem}>{band.churn}</span>
+          <span className={styles.bandItem}>{band.metric}</span>
           <span className={styles.bandSep} aria-hidden="true" data-testid="game-entry-band-sep">
             ·
           </span>

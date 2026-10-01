@@ -20,7 +20,7 @@ export const English = () => (
       body="Now you know what to do. Here is what not to do: play a year as the growth PM of a streaming app, with a CEO who wants the number, and eight tricks you will recognise everywhere afterwards."
       cta={'Play the level "If they come back"'}
       meta="twenty minutes, free"
-      band={{ churn: "Churn 6.0%", trust: "Trust", notOnDashboard: "not on your dashboard" }}
+      band={{ metric: "Churn 6.0%", trust: "Trust", notOnDashboard: "not on your dashboard" }}
       event={{ name: "game_entry_clicked", detail: "result/retention" }}
     />
   </div>
@@ -39,7 +39,7 @@ export const French = () => (
       body="Tes recommandations sont au-dessus. Voici ce qu'il ne faut pas faire : joue une année comme PM growth d'une appli de streaming, un DG qui veut du chiffre, et huit astuces que tu reconnaîtras ensuite partout."
       cta="Jouer le niveau « S'ils reviennent »"
       meta="vingt minutes, gratuit"
-      band={{ churn: "Résiliations 6,0 %", trust: "Confiance", notOnDashboard: "pas sur ton dashboard" }}
+      band={{ metric: "Résiliations 6,0 %", trust: "Confiance", notOnDashboard: "pas sur ton dashboard" }}
       event={{ name: "game_entry_clicked", detail: "deep_dive/retention" }}
     />
   </div>
@@ -60,7 +60,7 @@ export const Narrow = () => (
       body="Tu sais maintenant quoi faire. Voici ce qu'il ne faut pas faire : joue une année comme PM growth d'une appli de streaming, un DG qui veut du chiffre, et huit astuces que tu reconnaîtras ensuite partout."
       cta="Jouer le niveau « S'ils reviennent »"
       meta="vingt minutes, gratuit"
-      band={{ churn: "Résiliations 6,0 %", trust: "Confiance", notOnDashboard: "pas sur ton dashboard" }}
+      band={{ metric: "Résiliations 6,0 %", trust: "Confiance", notOnDashboard: "pas sur ton dashboard" }}
       event={{ name: "game_entry_clicked", detail: "result/retention" }}
     />
   </div>

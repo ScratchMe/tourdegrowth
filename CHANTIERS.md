@@ -23,7 +23,7 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
-| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.c (le code), **prêt depuis C25** (2026-09-30), A7.3.d après A7.3.c, A7.4 après A7.3, et A7.12.c à l'ouverture. A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)**, sa copie faite le même jour (A12.c) : A12.d peut partir. **A13** (trois alertes de dépendances, dont une critique sur `next`) livré le 2026-10-01 |
+| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.c (le code), **prêt depuis C25** (2026-09-30), A7.3.d après A7.3.c, A7.4 après A7.3, et A7.12.c à l'ouverture. A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)**, sa copie et l'îlot partagé faits le même jour (A12.c, A12.d) : A12.e peut partir. **A13** (trois alertes de dépendances, dont une critique sur `next`) livré le 2026-10-01 |
 | **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30, après A7.10, A10 et A11** (B3, puis la re-synchro d'A11 le soir même : 88 composants, 292 cellules, 88 aperçus sur 88 rendus). Rien à lancer tant qu'un composant, ou une copie qu'un aperçu reprend, ne change pas |
 | **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 à C29 tranchées le 2026-09-30, C26 à C29 livrées le même jour, **C25** (la spécification de A7.3, `ENGINE.md` §18) dans sa propre session. **C30** (le niveau 2 du jeu, `GAME-BRIEF.md` §17) le 2026-10-01. **Rien n'est ouvert** |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, tout A7.3 |
@@ -32,7 +32,7 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 **L'ordre conseillé** : A7.3.c (prompt A sur « le lot A7.3.c », dans l'ordre
 du §18.11), puis D. A13 (l'alerte critique sur `next`) est livré le
 2026-10-01. A7.3.e, qui se menait en parallèle, est livré le
-2026-09-30. Le niveau 2 du jeu (A12.d, puis A12.e à A12.h) peut avancer en
+2026-09-30. Le niveau 2 du jeu (A12.e, puis A12.f à A12.h) peut avancer en
 parallèle : il ne touche pas les mêmes fichiers. Le moteur ouvre avant le jeu (C23). Rien
 n'attend dans la section C : C30 est tranchée le 2026-10-01.
 
@@ -181,8 +181,8 @@ boutique comme un abonnement, le niveau 1 identique au bit près) et le modèle
 du niveau 2 codé en brouillon, sans page ni texte, avec ses quatre années de
 référence en tests (`lib/game/levels/acquisition.ts`, `acquisition.test.ts`).
 **C30 est tranchée le 2026-10-01** : les cinq recos retenues, la
-spécification validée telle quelle. A12.c est faite le même jour ; A12.d peut
-partir. Toute copie neuve porte
+spécification validée telle quelle. A12.c et A12.d sont faites le même jour ;
+A12.e peut partir. Toute copie neuve porte
 « TODO: à relire » (convention 6).
 
 | # | Quoi | Détail |
@@ -190,7 +190,7 @@ partir. Toute copie neuve porte
 | A12.a | **La spécification et le modèle** | **Faits le 2026-09-30.** `GAME-BRIEF.md` §17 (`docs/game/niveau-2.md`) : univers (Pédalix), chiffre du board (nouveaux clients par mois), constantes, les dix-sept cartes et leur rôle au niveau 1, le DG, les quatre années de référence, le téléphone, les événements, les fins, et le catalogue vérifié sur les sources primaires. Cinq questions en §17.10, reprises en C30 |
 | A12.b | **La validation par Antoine** — **close le 2026-10-01** | C30 : nouveaux clients par mois, Pédalix, transaction de 150 000 €, les huit cas tels quels, une carte qui propose les deux niveaux. Réponses datées en `GAME-BRIEF.md` §17.10 |
 | A12.c | **La copie** | **Faite le 2026-10-01** ([#242](https://github.com/ScratchMe/tourdegrowth/pull/242)). `content/game/acquisition.ts`, FR et EN, « à relire », ce que le niveau 1 dit de toute année repris par référence ; le chapeau et les métadonnées dans `meta.ts` ; la série C du §7.1 tenue par les règles communes (`game-copy-checks.ts`), plus C12 (insécables des nombres), C13 (l'arithmétique du téléphone) et C14 (jamais « amende »). Le catalogue relu sur les sources primaires le même jour (huit corrections, `GAME-BRIEF.md` §17.9) |
-| A12.d | **L'îlot partagé** | L'îlot du niveau 1 (`app/[locale]/game/retention/`) devient celui de tout niveau ; les composants de `components/game` perdent leurs noms d'emplacement du niveau 1 (`churn`, `subs`, `mrr`), ce qui change leur contrat : re-synchro Claude Design (section B) dans la même série |
+| A12.d | **L'îlot partagé** | **Fait le 2026-10-01** (PR à suivre). L'îlot vit sous `app/[locale]/game/_island/`, le même pour tout niveau : un niveau y apporte son modèle, sa copie, le format de son chiffre (`metricFormat` : un dixième de point, une dizaine de clients) et son téléphone (`sides.tsx`). Les six composants qui portaient les noms du niveau 1 (`churn`, `subs`, `mrr`, `clicks`) prennent `metric`, `customers`, `revenue`, `pill` ; leurs aperçus suivent, la re-synchro avec Claude Design est B4, après A12.e. Testé sur les deux niveaux : chaque écran de chaque fin du niveau 2 passe par l'îlot sans « % » ni « pt » |
 | A12.e | **Le téléphone de Pédalix** | Un composant neuf et sa pastille « payé au panier » (§17.7), avec son aperçu pour Claude Design |
 | A12.f | **Le branchement** | Le slug passe de `DraftLevelSlug` à `LevelSlug` et le compilateur liste ce qu'il exige (clé de sauvegarde, encart du résultat, analytique) ; page, image de partage, sitemap, hub « Jouable », et l'encart d'un goulot partagé : **une carte qui propose les deux niveaux** (C30 Q5, `GAME-BRIEF.md` §15.4). Les deux blocs « Niveau suivant » deviennent des liens, et celui du niveau 1 passe de « bientôt » à « jouable » (C31). Le libellé de fin « le contrôle et l'amende » du hub (`GAME_HUB.endings.fine`) vaut pour les deux niveaux : au niveau 2, c'est une transaction |
 | A12.g | **Les specs Playwright** | Sur le modèle de P1 à P27, dans les deux langues, à 1 280 et 390 px |
@@ -209,7 +209,17 @@ et C29 (cinq composants recapturés, ancre `8235f4e6de01`), avec **88
 composants, 292 cellules et 88 aperçus sur 88 rendus** (`JOURNAL.md`, « Design sync B3 », et `.design-sync/NOTES.md`,
 « Synced »). B2, le brief S-15, est clos avec A10.
 
-**Rien d'ouvert.** La prochaine synchro se lance quand un composant change, ou
+**B4, ouvert le 2026-10-01 : la re-synchro du niveau 2**, à lancer après A12.e.
+A12.d a renommé des emplacements dans le contrat de six composants du jeu
+(`Dashboard` : `metric`, `customers`, `revenue` ; `EndingCharts` et
+`RevealCells` : `metric` ; `QuarterReport` : les clés de ses chiffres ;
+`ActionBar` : `pill` ; `GameEntry` : `band.metric`). Les aperçus de
+`.design-sync/previews/` sont à jour et vérifiés au type près, mais **Claude
+Design montre encore les anciens noms**. A12.e ajoute le téléphone de Pédalix,
+un composant neuf : une seule synchro pour les deux, avec la recapture des six
+composants renommés (`.design-sync/NOTES.md`, « Synced »).
+
+**Hors de B4, rien d'ouvert.** La prochaine synchro se lance quand un composant change, ou
 quand change une copie, un chiffre du modèle ou un comportement qu'un aperçu
 reprend : c'est ainsi que B3 a trouvé l'amende du jeu et les cartes de
 `SpaceStrip` restées d'avant A7.8 et A7.9, dans des notes reportées. Ce qu'elle

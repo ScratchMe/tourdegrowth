@@ -67,7 +67,7 @@ export function resultGameEntry({
     cta: tc(copy.cta, locale),
     meta: tc(copy.meta, locale),
     band: {
-      churn: tc(copy.band.churn, locale).replace("{churn}", formatPct(locale, STARTING_CHURN[target.slug])),
+      metric: tc(copy.band.churn, locale).replace("{churn}", formatPct(locale, STARTING_CHURN[target.slug])),
       trust: tc(copy.band.trust, locale),
       notOnDashboard: tc(copy.band.notOnDashboard, locale),
     },

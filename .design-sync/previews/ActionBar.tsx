@@ -20,7 +20,7 @@ export const Ready = () => (
   <NightSurface as="div" style={box}>
     <ActionBar
       count="2 / 2"
-      clicks={{ text: "2 clicks to cancel", alert: false }}
+      pill={{ text: "2 clicks to cancel", alert: false }}
       runLabel="Run the quarter"
       canRun
       onRun={noop}
@@ -33,7 +33,7 @@ export const NotReady = () => (
   <NightSurface as="div" style={box}>
     <ActionBar
       count="1 / 2"
-      clicks={{ text: "6 clicks to cancel", alert: true }}
+      pill={{ text: "6 clicks to cancel", alert: true }}
       runLabel="Run the quarter"
       canRun={false}
       onRun={noop}
@@ -46,7 +46,7 @@ export const French = () => (
   <NightSurface as="div" style={box}>
     <ActionBar
       count="2 / 2"
-      clicks={{ text: "5 clics pour résilier", alert: true }}
+      pill={{ text: "5 clics pour résilier", alert: true }}
       runLabel="Lancer le trimestre"
       canRun
       onRun={noop}

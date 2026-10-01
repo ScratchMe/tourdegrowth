@@ -23,23 +23,20 @@ export interface EndingChartRow {
   /** Stable key: the month number, 1-12. */
   id: string;
   month: string;
-  churn: string;
+  metric: string;
   trust: string;
 }
 
 export interface EndingChartsProps {
+  /** The two curves: the level's number (`DecemberView.metric`) and trust. */
+  view: { metric: CurveView; trust: CurveView };
   /**
-   * The two curves. `churn` is level 1's slot name, kept while it is the only
-   * level on screen: the island hands it `DecemberView.metric`.
-   */
-  view: { churn: CurveView; trust: CurveView };
-  /**
-   * The SAME object RevealCells prints. Its `churn` and `trust` become the
+   * The SAME object RevealCells prints. Its `metric` and `trust` become the
    * end-of-curve labels verbatim: the only way the curve can end on the cell's
    * number is to be handed the cell's string (plan R5, X34).
    */
-  figures: Pick<DecemberFigures, "churn" | "trust">;
-  churn: EndingChartCopy;
+  figures: Pick<DecemberFigures, "metric" | "trust">;
+  metric: EndingChartCopy;
   trust: EndingChartCopy;
   /** Twelve initials, January first (`monthInitials`). The curve has one more slot, January 1st, left unlabelled. */
   monthInitials: readonly string[];
@@ -48,7 +45,7 @@ export interface EndingChartsProps {
     toggle: string;
     /** `december.table.*` headers. */
     month: string;
-    churn: string;
+    metric: string;
     trust: string;
     rows: readonly EndingChartRow[];
   };
@@ -78,16 +75,16 @@ function tickFormatter(scaleTicks: readonly number[], labels: readonly string[])
 /**
  * December's two curves — GAME-BRIEF §5.11 point 3, plan §2.6.
  *
- * Churn and trust, one series each, never a double axis: side by side on a
+ * The level's number and trust, one series each, never a double axis: side by side on a
  * desktop, stacked on a phone, each in a `ChartFrame` with its table behind
  * « Voir les données ». The curves are the DS `Sparkline`, not a game copy
  * of it (plan §3.6); what this component adds is only the year's shape — a
  * slot per month — and the rule that each curve ends on its cell's string.
  */
-export function EndingCharts({ view, figures, churn, trust, monthInitials, data, animate = false }: EndingChartsProps) {
+export function EndingCharts({ view, figures, metric, trust, monthInitials, data, animate = false }: EndingChartsProps) {
   const months = monthInitials.length;
   const xLabels = ["", ...monthInitials];
-  const table = (key: "churn" | "trust") => ({
+  const table = (key: "metric" | "trust") => ({
     label: data.toggle,
     columns: [
       { key: "month", header: data.month },
@@ -100,22 +97,22 @@ export function EndingCharts({ view, figures, churn, trust, monthInitials, data,
   return (
     <div className={styles.charts}>
       <ChartFrame
-        id="game-chart-churn"
-        title={churn.title}
-        subtitle={churn.caption}
-        data={table("churn")}
-        data-testid="game-chart-churn"
+        id="game-chart-metric"
+        title={metric.title}
+        subtitle={metric.caption}
+        data={table("metric")}
+        data-testid="game-chart-metric"
       >
         <Sparkline
-          values={slots(view.churn, months)}
-          min={view.churn.scale.min}
-          max={view.churn.scale.max}
-          ticks={view.churn.scale.ticks}
-          formatTick={tickFormatter(view.churn.scale.ticks, churn.ticks)}
-          reference={{ value: view.churn.reference, label: churn.reference }}
+          values={slots(view.metric, months)}
+          min={view.metric.scale.min}
+          max={view.metric.scale.max}
+          ticks={view.metric.scale.ticks}
+          formatTick={tickFormatter(view.metric.scale.ticks, metric.ticks)}
+          reference={{ value: view.metric.reference, label: metric.reference }}
           xLabels={xLabels}
-          endLabel={figures.churn}
-          ariaLabel={churn.ariaLabel}
+          endLabel={figures.metric}
+          ariaLabel={metric.ariaLabel}
           animate={animate}
         />
       </ChartFrame>

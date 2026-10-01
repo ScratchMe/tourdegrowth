@@ -5,11 +5,11 @@ export interface ActionBarProps {
   /** « 1 / 2 », the same string as the hand's counter. */
   count: string;
   /**
-   * The clicks pill, abbreviated: « 5 clics pour résilier ». `alert` when the
-   * path is past what the law expects — the island decides (`clicksOverLaw`),
+   * The level's pill, abbreviated: « 5 clics pour résilier », « +48 € au
+   * panier ». `alert` when it reads as a legal problem — the level decides,
    * the text already says it, the colour only repeats it.
    */
-  clicks: { text: string; alert: boolean };
+  pill: { text: string; alert: boolean };
   runLabel: string;
   /** Exactly two cards ticked and the call closed. */
   canRun: boolean;
@@ -20,7 +20,7 @@ export interface ActionBarProps {
  * The quarter's one action — game plan §2.6, §2.8.
  *
  * Desktop: a block under the hand, the primary button full width. Phone: a bar stuck to the bottom of the screen with the
- * counter, the clicks pill and the button, because twelve cards in one
+ * counter, the level's pill and the button, because twelve cards in one
  * column push all three out of view exactly while the player is choosing
  * (plan R3). `position: sticky` rather than `fixed`: the bar lives in the
  * flow right after the hand, so once the page is scrolled to the end of the
@@ -40,13 +40,13 @@ export interface ActionBarProps {
  * button). The hand's hint is the one sentence about what happens next, at
  * every width.
  */
-export function ActionBar({ count, clicks, runLabel, canRun, onRun }: ActionBarProps) {
+export function ActionBar({ count, pill, runLabel, canRun, onRun }: ActionBarProps) {
   return (
     <div className={styles.bar} data-testid="game-actionbar">
       <div className={styles.status}>
         <span className={styles.count}>{count}</span>
-        <span className={[styles.pill, clicks.alert ? styles.alert : ""].filter(Boolean).join(" ")}>
-          {clicks.text}
+        <span className={[styles.pill, pill.alert ? styles.alert : ""].filter(Boolean).join(" ")}>
+          {pill.text}
         </span>
       </div>
       <Button fullWidth disabled={!canRun} onClick={onRun} data-testid="game-run" className={styles.run}>
