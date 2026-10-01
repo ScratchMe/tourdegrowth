@@ -3,6 +3,7 @@
 import { Fragment, useId } from "react";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
+import { MetaLabel } from "@/components/brand/MetaLabel";
 import { SPACE_PICTO } from "@/components/brand/SpaceBand";
 import { trackEvent } from "@/lib/analytics/goatcounter";
 import { NightSurface } from "./NightSurface";
@@ -28,6 +29,12 @@ export interface GameEntryLevel {
 
 /** Everything the card shows. */
 export interface GameEntryView {
+  /**
+   * Above the card, outside its band: « Dans le jeu ». The band's numbers are
+   * the game's, read under the reader's own; this says so before they are
+   * read (C33, 2026-10-01). Not a heading: the card's title is.
+   */
+  eyebrow: string;
   title: string;
   /** The opening sentence (plain or Deep dive variant) and the rest, joined. */
   body: string;
@@ -68,15 +75,39 @@ export interface GameEntryProps extends GameEntryView {
  * Several levels (C30 Q5, A12.f.2): the band lists each level's number
  * before the missing trust, and the card ends on one row per stage — its
  * name, its button — then the mention, once.
+ *
+ * Above the card, the eyebrow (C33): the band's numbers are the game's, and
+ * the band has no room left to say it. `className` places the whole — eyebrow
+ * and card — in the page.
  */
-export function GameEntry({ title, body, meta, band, levels, className }: GameEntryProps) {
+export function GameEntry({ eyebrow, title, body, meta, band, levels, className }: GameEntryProps) {
   const titleId = useId();
   const several = levels.length > 1;
+  return (
+    <div className={[styles.entry, className ?? ""].filter(Boolean).join(" ")}>
+      <MetaLabel wide data-testid="game-entry-eyebrow">
+        {eyebrow}
+      </MetaLabel>
+      <GameEntryCard titleId={titleId} several={several} title={title} body={body} meta={meta} band={band} levels={levels} />
+    </div>
+  );
+}
+
+/** The card itself: the night band across its top, then the offer. */
+function GameEntryCard({
+  titleId,
+  several,
+  title,
+  body,
+  meta,
+  band,
+  levels,
+}: Omit<GameEntryView, "eyebrow"> & { titleId: string; several: boolean }) {
   return (
     <Card
       elevation="flat"
       padding="0"
-      className={[styles.card, className ?? ""].filter(Boolean).join(" ")}
+      className={styles.card}
       role="region"
       aria-labelledby={titleId}
       data-testid="game-entry"

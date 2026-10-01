@@ -1,5 +1,5 @@
 import type { GameEntryLevel, GameEntryView } from "@/components/game/GameEntry";
-import { GAME_ENTRY_COPY, GAME_ENTRY_OPENING, GAME_ENTRY_SEVERAL } from "@/content/game/entry";
+import { GAME_ENTRY_COPY, GAME_ENTRY_EYEBROW, GAME_ENTRY_OPENING, GAME_ENTRY_SEVERAL } from "@/content/game/entry";
 import type { GameAccess } from "@/lib/game/access";
 import { GAME_ENTRY_EVENT, type GameEntryDetail } from "@/lib/game/events";
 import { metricFormat } from "@/lib/game/format";
@@ -84,6 +84,7 @@ export function resultGameEntry({
   const card = rest.length === 0 ? firstCopy : GAME_ENTRY_SEVERAL;
 
   return {
+    eyebrow: tc(GAME_ENTRY_EYEBROW, locale),
     title: tc(card.title, locale),
     body: `${opening} ${tc(card.body, locale)}`,
     meta: tc(card.meta, locale),

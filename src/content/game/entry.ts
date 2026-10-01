@@ -118,3 +118,13 @@ export const GAME_ENTRY_SEVERAL = {
 } as const;
 
 export { OPENING as GAME_ENTRY_OPENING };
+
+/**
+ * TODO: à relire (convention 6) — C33, tranchée par Antoine le 2026-10-01 :
+ * the line above the card, outside its band. The band's « Résiliations
+ * 6,0 % » is the game's number, read under the reader's own, and nothing
+ * said so (the law of selective attention, design/LOIS-UX.md). « Dans le jeu »
+ * on the band itself did not fit its one 44px line (P23); above the card it
+ * is the result's own section voice, like « Ce qui tient le mieux ».
+ */
+export const GAME_ENTRY_EYEBROW = t("Dans le jeu", "In the game");
