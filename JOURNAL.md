@@ -6371,3 +6371,10 @@ D'où le contrôle du niveau 2 : une transaction de 150 000 €, à trancher (C3
 - surtout, des textes d'événements et de fins qui nommaient des cartes (« les guides », « les prix barrés », « avis vérifiés »), alors que ces événements se déclenchent sur des seuils de radar et de confiance, pas sur ce qui a été joué. L'année D, virée, n'a écrit aucun guide.
 
 Tout est corrigé, et le §17.8 pose la règle. Elle a aussi mis en doute, de mémoire, que le faux prix barré échappe à l'amende administrative. La vérification sur Légifrance le confirme, et le texte le dit maintenant avec sa source plutôt qu'en une phrase absolue.
+
+**En production (2026-10-01)** : [#232](https://github.com/ScratchMe/tourdegrowth/pull/232), squash `24c862a`, 36 fichiers, arbre identique à la tête. Déployé : l'en-tête `age` de `/en` est reparti de zéro une minute après le merge, puis a monté sans nouvelle remise à zéro pendant cinq minutes. Le statut `Vercel` du commit n'était pas lisible d'ici : l'API de Vercel répond 403 à cette session. Vérifié en HTTP sur `www.tourdegrowth.com` :
+- `/fr` et `/en` répondent 200 ;
+- `/fr/game`, `/fr/game/retention`, `/en/game/retention` et `/en/aarrr-funnel-template` répondent 404, puisque le jeu et le moteur restent fermés ;
+- `/r/sample` répond 200, sans l'encart du jeu, et le sitemap ne cite aucune adresse du jeu.
+
+Ce que la refonte change pour un joueur ne se voit qu'avec le jeu ouvert. C'est vérifié dans la suite Playwright et à l'écran sur le build local, pas en production.
