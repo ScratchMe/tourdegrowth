@@ -1181,3 +1181,37 @@ Antoine a demandé le brief de B5 le soir de la fin d'A14.c : l'image de partag
 `.design-sync/NOTES.md` (« Synced ») dit maintenant ce que le projet garde sous `design/`, brief 06 compris.
 
 **Ce qui reste** : D12 (le lancer). Le retour va dans `design/ds-extension-06-return/`, une session le recopie dans le dépôt et le porte en T6.2 ; sa copie rejoint le bon à tirer du moteur.
+
+## B8 : l'index du volet Design System, resté au 11 septembre (2026-10-01, #269)
+
+**Ce qu'Antoine a vu** : pas de borne kilométrique dans le projet Claude Design. Ses deux captures montraient un `Bottleneck` qui ouvrait sur le chiffre au pochoir et sur « Solid engine, one flat tyre », une copie de maquette retirée le 2026-09-29, et un `LoadingScreen` à trois messages et trois barres, d'avant A15.
+
+**Ce qui était en ligne, lu par `DesignSync` (lecture seule d'abord)** :
+- les fichiers sont à jour : `_preview/Bottleneck.js` ouvre sur `ScoreDisplay variant="marker"` et « Retention is lagging… » ; `_preview/ScoreDisplay.js` exporte `Marker` et `MarkerSmall` ; le `.prompt.md` de `ScoreDisplay` documente la variante ; `_ds_sync.json` porte l'ancre de B6 (`6da5e42a15ef`, 90 composants) ;
+- **`_ds_manifest.json`, l'index dont le volet tire ses cartes, est celui de l'envoi du 2026-09-11** : 34 composants, 34 cartes en cinq groupes, sans jeu, sans graphiques, sans les primitives de formulaire de l'extension 04. Ses 123 jetons sont aux valeurs de septembre (`--radius-tag: 4px`, `--radius-panel: 8px`) ;
+- la sentinelle `_ds_needs_recompile` est toujours là : la recompilation qu'elle demande à Claude Design n'a tourné après aucun des six envois depuis le 11 septembre.
+
+**Pourquoi personne ne l'a vu** : chaque synchro relisait `list_files` (les fichiers) et l'ancre de `_ds_sync.json`. Aucun des deux ne dit ce que montre le volet. Un ticket public décrit le même cas : rien ne déclenche la compilation pour des fichiers écrits par `DesignSync`, et le contournement est d'écrire le manifeste.
+
+**Ce qui est fait, avec le feu vert d'Antoine** :
+- **les 90 marqueurs `@dsCard` relus en ligne, un par un.** Groupe = dossier du composant, `viewport="900x700"` exactement pour les 30 cartes en colonne de `config.json`, sans exception ;
+- **un nouvel index** : 90 composants, 90 cartes en sept groupes, et 368 jetons. Ce sont les déclarations de `globals.css` et de ses imports dont le sélecteur contient `:root`. Un premier jet n'acceptait que `:root` seul et perdait les 34 jetons sémantiques déclarés sous `:root, [data-world="paper"]` (`--surface-card`, `--text-body`…) : rattrapé en comparant à l'ancien index. Trois anciens jetons manquent, retirés exprès du produit (`--dur-message`, `--texture-spray-strong`, `--width-mobile`, gardés dehors par des tests de jetons morts) ;
+- **l'envoi** : un plan qui ne nommait que `_ds_manifest.json`, sans suppression. Ni la sentinelle, ni le bundle, ni `_ds_sync.json`, ni `design/` ne sont touchés. L'index en ligne a été relu juste avant, inchangé.
+
+**Vérifié** :
+- l'index relu en ligne après l'envoi est identique, octet pour octet, au fichier envoyé ;
+- `.design-sync/build-manifest.mjs` produit le même fichier, octet pour octet, par ses deux chemins : depuis `config.json`, et depuis un bundle dont chaque carte porte le marqueur relu en ligne ;
+- non-vacuité : un `viewport` faussé dans une carte change la sortie, et une carte sans marqueur fait échouer le script.
+
+**Ce que l'index n'a pas réparé** : Antoine a rechargé le volet après l'envoi, et rien n'a changé. Le volet ne lit donc ni l'index du projet en direct, ni les fichiers de ses cartes : il montre une copie compilée le 2026-09-11. Les captures le laissaient prévoir, puisque `Bottleneck` et `LoadingScreen` étaient déjà indexés et montraient pourtant leur rendu de septembre. La sentinelle est toujours là après le rechargement.
+
+**Ce qui n'est pas touché** : l'agent de Claude Design lit les fichiers du jour. Le retour du brief 05 contient sa copie du `_ds_bundle.css` en ligne (`design/ds-extension-05-return/board/system-snapshot.css`, datée du 2026-10-02), avec `--radius-tag: 999px`, `--paper-white` et le monde nuit. Les maquettes sont construites sur le design system actuel ; seul le catalogue du volet est figé.
+
+**Le diagnostic, avec Antoine** :
+- la piste de la publication est écartée : il n'y a ni bouton « Publier » ni état « brouillon » dans le projet ;
+- le bouton « Actualiser » ne change rien ;
+- une fenêtre privée montre la même chose, ce n'est donc pas un cache du navigateur.
+
+Le texte du skill `/design-sync` (trouvé en ligne) dit que l'application « clears the sentinel whenever the user opens the project » et que les nouvelles cartes « appear next time the user opens or refreshes the project ». Chez nous, la sentinelle survit à chaque ouverture : **le rafraîchissement de Claude Design échoue sur ce projet**, au moins depuis le premier envoi après le 11 septembre, donc avant que `design/` ne contienne quoi que ce soit. Aucun fichier envoyé par la synchro ne le relance. Le signalement à Anthropic est prêt (D13, texte à coller). **Antoine, le même soir : « on laisse comme ça, ce n'est pas si dérangeant »** ; D13 devient facultatif. Le script et l'index restent : l'index est juste, et le script le tiendra juste quand le rafraîchissement remarchera.
+
+**Consigné** : `.design-sync/NOTES.md` (« `_ds_manifest.json` », le chemin d'envoi, « Synced », « Re-sync risks », les 30 cartes en colonne), `CHANTIERS.md` (B8, la vue d'ensemble, le prompt B), `CLAUDE.md` (la correction de « les 90 composants y sont »). Que de la doc et un script hors de `src/` : `vercel-ignore.sh` ne déploie pas.
