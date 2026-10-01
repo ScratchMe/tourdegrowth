@@ -1072,6 +1072,69 @@ Deux points restent pour le bon à tirer : la phrase des contrats mensuels sur u
 
 Ces deux passages ont tourné avant les deux correctifs de la relecture. Ceux-ci ne touchent qu'une copie qu'aucun écran n'affiche encore.
 
+## ENGINE.md et GAME-BRIEF.md découpés à leur tour (2026-10-01, demandé par Antoine)
+
+Le matin, ce découpage avait été reporté : #233 (A7.3.c) écrivait dans le §18
+d'`ENGINE.md`, une session C30 allait écrire dans le §17 de `GAME-BRIEF.md`, et
+git ne suit pas un texte déplacé d'un fichier à l'autre. Antoine a demandé
+s'il était possible désormais. Relevé sur GitHub avant d'agir : C30 est mergée
+(#234), aucune branche ouverte ne touche `GAME-BRIEF.md`, et #233, toujours
+ouverte, ne modifie `ENGINE.md` qu'à partir du §18 (ses sept blocs commencent à
+la ligne 2380 ; le §18 commence à la 2167).
+
+**Ce qui est fait** :
+- `GAME-BRIEF.md` (147 000 caractères) : le §17, la spécification du niveau 2,
+  part tel quel dans `docs/game/niveau-2.md` (39 000). Le brief garde ce qui
+  vaut pour tous les niveaux, une entrée « Organisation » dans son journal des
+  versions et un §17 qui renvoie au fichier. Chaque niveau suivant aura le sien
+  à côté : le brief ne grossira plus d'un niveau à l'autre.
+- `ENGINE.md` (268 000) : la spécification de la v1 (§0 à §17) et son annexe
+  des vérifications partent telles quelles dans `docs/engine/v1.md` (129 000).
+  `ENGINE.md` (141 000) garde les décisions, un tableau « Où vit la
+  spécification », le §18 en cours et la trame des entretiens. **Le §18 reste
+  là jusqu'au merge d'A7.3.c** : c'est la ligne de la section E de
+  `CHANTIERS.md`, mise à jour.
+- Les numéros de section ne changent pas : un renvoi « `ENGINE.md` §9.3 » ou
+  « `GAME-BRIEF.md` §17.10 », dans le code comme dans les documents, se lit
+  dans le fichier que donne l'index en tête de l'original. Les documents
+  vivants (`CHANTIERS.md`, `CLAUDE.md`, `README.md`, `docs/decisions.md`)
+  nomment directement le nouveau fichier.
+
+**La garde** : `src/__tests__/doc-links.test.ts` exige que chaque lien relatif
+des documents (la racine, `docs/`, les README de `design/` et de `marketing/`,
+34 fichiers) mène à un fichier qui existe. Aucun lien mort le jour du
+découpage. Non-vacuité : renommer `docs/engine/v1.md` fait rougir le test, qui
+nomme les deux index qui y renvoient (`ENGINE.md`, `README.md`).
+
+**Vérifié** : les lignes non vides de chaque partie déplacée sont identiques,
+dans le même ordre, et la tête, le §18 et la trame d'`ENGINE.md` sont intacts ;
+la fusion à trois de #233 avec le nouvel `ENGINE.md` est propre (simulée par
+`git merge-file`).
+
+## A13 : la faille critique de `next/og` corrigée, et `npm audit` revenu à zéro (2026-10-01)
+
+**La demande** : Antoine, sur le compte rendu d'A7.3.e : « Go pour fixer la faille critique ». Ce « go » valait l'accord que `/livrer` §0 exige pour un merge qui touche une dépendance, sous réserve d'un poids de bundle sans surprise.
+
+**L'avis, lu à la source** : [GHSA-vcvr-r3jv-pc5j](https://github.com/advisories/GHSA-vcvr-r3jv-pc5j), publié le 2026-09-22, critique (CVSS 9,5). Il permet une exécution de code à distance dans `ImageResponse` de `next/og`, sur le runtime **Node**, quand l'application passe des valeurs contrôlées par un attaquant dans le contenu, les attributs ou les styles du SVG. Il touche `next` de 16.2.0 à 16.3.5 et se corrige en 16.3.6. Le runtime Edge n'est pas touché.
+
+**Notre exposition, à notre lecture : faible, mais réelle sur le principe.**
+- Toutes nos routes tournent sur Node, et un test l'impose (`next-config.test.ts`). Les images de partage passent donc par la voie vulnérable.
+- Le modèle de l'image de résultat (`shareImageModel`) ne contient que des valeurs calculées côté serveur : le total, l'étape qui freine, l'action tirée de notre bibliothèque, la langue et deux booléens. Aucun texte libre, ni d'un visiteur ni de Gemini, n'atteint le SVG.
+- La montée s'imposait quand même : une seule valeur mal bornée un jour aurait suffi.
+
+**Les choix** :
+- **`next` en 16.3.6, pas en 16.3.8**, alors que npm prenait la plus haute version d'office. 16.3.6 est la version corrective nommée par l'avis, publiée depuis neuf jours, et c'est celle que Dependabot propose. 16.3.7 et 16.3.8 apportent d'autres changements, publiés la veille. Le plancher de `package.json` passe à `^16.3.6`, pour qu'aucune installation ne puisse retomber sur une version vulnérable.
+- **Les deux alertes transitives par `npm audit fix`** : `@grpc/grpc-js` en 1.14.5 (par `firebase-admin`) et `brace-expansion` en 2.1.7. S'y ajoute la même alerte sur cinq copies imbriquées de `brace-expansion` dans l'outillage ESLint, en développement seulement. Le lockfile ne change rien d'autre : la liste a été relue paquet par paquet.
+- **Pas la PR groupée de Dependabot** ([#238](https://github.com/ScratchMe/tourdegrowth/pull/238), ouverte la même nuit). Elle monte aussi React en mineure (19.2 → 19.3) et `firebase-admin` (14.3 → 14.5), ce qui est trop pour un correctif de sécurité. Elle reste ouverte et se réduira d'elle-même au rebase.
+- **Un piège d'outillage** : `npm audit fix --omit=dev` élague aussi les dépendances de développement de `node_modules`, sans toucher au lockfile. Le `npm audit fix` complet qui suivait les a remises (« added 337 packages »). Un `npm ci` a ensuite reconstruit l'arbre exact du lockfile avant toute vérification.
+
+**Poids des bundles serveur** (`VERCEL.md` §1.2, `vercel build` hors ligne, `filePathMap` des six bundles physiques) : **46,66 Mo avant, 46,70 Mo après**, soit +0,04 Mo, très loin du seuil d'environ 1 Mo.
+
+**Vérifié** :
+- `npm audit` à 0, en production comme en développement, après un `npm ci` depuis le lockfile neuf.
+- `eslint` et `tsc` propres, **2 403 tests unitaires** (2 405 après la fusion de #240, qui ajoute la garde des liens des documents), `vitest --coverage` au-dessus de ses seuils, et `next build` propre sous « Next.js 16.3.6 ».
+- La suite Playwright complète, avec les variables de la CI et l'émulateur Firestore : **688 specs, 683 passées, 5 ignorées par construction, aucun échec ni rejeu**. Elle comprend les specs des images de partage (`share-previews`, `game-share-images`, `result-real`), qui exercent `ImageResponse`.
+
 ## A7.3.c, S2 : la prose de l'assisté, `{period}` et toute la copie neuve de l'hybride (2026-10-01)
 
 Antoine : « Go pour S2 ». Trois commits sur la PR brouillon [#233](https://github.com/ScratchMe/tourdegrowth/pull/233) : `78f9abd` (la prose et `{period}`), `222f34e` (la copie et ses gardes), puis les corrections de la relecture. Rien n'est encore lu par un écran ni par une slide : S3 et S4 posent cette copie, et `ENGINE.md` §18.11 liste ce que chacun reprend.
