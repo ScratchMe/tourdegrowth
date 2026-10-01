@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Button } from "@/components/core/Button";
 import { Callout } from "@/components/core/Callout";
 import { Card } from "@/components/core/Card";
@@ -30,6 +30,8 @@ import { previousLeakLine } from "./series-view";
 import { SlgWhatIfPanel } from "./SlgWhatIfPanel";
 import { defaultStage } from "./stage-tabs";
 import { StageTabs } from "./StageTabs";
+import type { TablePreview } from "./csv";
+import { TableEntry } from "./TableEntry";
 import { fill, formatMonth } from "./text";
 import { MotionColumns } from "./MotionColumns";
 import { PipelineBand } from "./PipelineBand";
@@ -86,6 +88,9 @@ export function Board({
   onSettings,
   onSteps,
   series,
+  switcher,
+  onTemplate,
+  onApplyTable,
 }: {
   view: EngineView;
   actions: EngineActions;
@@ -109,6 +114,11 @@ export function Board({
   onSteps: () => void;
   /** The monthly series (§19.2, A14 T2): the month selector, a past month read only or corrected, the next month. */
   series?: SeriesControls;
+  /** « Moteur : {nom} », the engines of the device (§19.1.5, A14 T5), at the head of the board. */
+  switcher?: ReactNode;
+  /** « Saisie en tableau » (§19.6, A14 T5): the template's download, and the pasted table written in one go. */
+  onTemplate?: () => void;
+  onApplyTable?: (preview: TablePreview) => boolean;
 }) {
   const { strings, state, ctx, derived } = view;
   // A past month on screen (§19.2.4): read only — no « Et si », no entry, no file actions — unless it is being corrected.
@@ -192,6 +202,7 @@ export function Board({
   return (
     <div className={styles.board} data-testid="engine-board" data-motions={hybrid ? "hybrid" : motion}>
       <header className={styles.head}>
+        {switcher}
         <div className={styles.eyebrowRow}>
           <p className={styles.eyebrow}>{eyebrow}</p>
           <div className={styles.headActions}>
@@ -328,6 +339,9 @@ export function Board({
           <CollectHub plan={plan} view={view} actions={actions} />
         </Disclosure>
       ) : null}
+
+      {/* Beside the collection, even once it is done: a table also corrects what was typed (§19.6). */}
+      {!past && onTemplate && onApplyTable ? <TableEntry view={view} onTemplate={onTemplate} onApply={onApplyTable} /> : null}
 
       {past ? null : (
         <div className={styles.actions} data-testid="engine-actions">

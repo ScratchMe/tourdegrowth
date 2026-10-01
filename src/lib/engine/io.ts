@@ -129,7 +129,12 @@ function looksLikeAnyEngine(o: Record<string, unknown>): boolean {
  * month rather than putting arbitrary text in a file name.
  */
 export function engineFileName(state: EngineState, words: EngineStrings["io"]): string {
+  return monthFileName(state, words.fileName);
+}
+
+/** Any of the engine's files named by its month (the `.json`, the table's template, A14 T5) — the same guard for each. */
+export function monthFileName(state: EngineState, template: string): string {
   const latest = state.snapshots.at(-1)?.referenceMonth;
   const month = latest && YEAR_MONTH_PATTERN.test(latest) ? latest : state.createdAt.slice(0, 7);
-  return words.fileName.replace("{month}", month);
+  return template.replace("{month}", month);
 }

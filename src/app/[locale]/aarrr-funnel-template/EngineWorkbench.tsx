@@ -5,7 +5,7 @@ import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { motionOfMetric, motionShapes, shapeOf } from "@/lib/engine/catalog-shape";
 import type { EngineStrings, ResolvedBridge, ResolvedDerived, ResolvedMetric } from "@/lib/engine/strings";
-import type { EngineCalcContext, EngineDerived, EngineSetup, EngineState, LeverId, MetricEntry, MetricId, Motion, MotionDerived, RoleId, SharedCount, SlideTitle, Snapshot, YearMonth } from "@/lib/engine/types";
+import { MAX_ENGINES, type EngineCalcContext, type EngineDerived, type EngineSetup, type EngineState, type LeverId, type MetricEntry, type MetricId, type Motion, type MotionDerived, type RoleId, type SharedCount, type SlideTitle, type Snapshot, type YearMonth } from "@/lib/engine/types";
 import type { Locale } from "@/lib/i18n/locale";
 import type { Pillar } from "@/lib/scoring/pillars";
 import { Board } from "./_engine/Board";
@@ -16,7 +16,8 @@ import { latestTourWithAnswers } from "@/lib/engine/bridge";
 import { pelotonTitle } from "@/lib/engine/deck";
 import { relaysTitle, totalTitle } from "@/lib/engine/deck-motions";
 import { deriveEngine } from "@/lib/engine/derive";
-import { engineFileName, serializeEngine } from "@/lib/engine/io";
+import { engineFileName, monthFileName, serializeEngine } from "@/lib/engine/io";
+import { mergeEngines } from "@/lib/engine/merge";
 import { markReminded, markRequested } from "@/lib/engine/request";
 import { monthView, nextMonthOf, startNextMonth, withMonth } from "@/lib/engine/series";
 import { teamTools } from "@/lib/engine/tools";
@@ -24,10 +25,13 @@ import { requestPersistence } from "@/lib/engine/storage";
 import { newEngineState } from "@/lib/engine/validate";
 import { propagateFrom, withSharedCount } from "@/lib/engine/shared-counts";
 import { engineSetupDetail, engineStageDetail, trackEngine, type EngineStageDetail } from "./_engine/engine-events";
-import { commit, erase, getClientSnapshot, getServerSnapshot, subscribe, type CommitResult } from "./_engine/engine-store";
+import { commit, erase, getClientSnapshot, getServerSnapshot, removeEngine, subscribe, switchEngine, type CommitResult } from "./_engine/engine-store";
+import { tableTemplate, type TablePreview } from "./_engine/csv";
+import { DeleteEngineDialog } from "./_engine/DeleteEngineDialog";
+import { EngineSwitcher, engineName } from "./_engine/EngineSwitcher";
 import { EraseDialog } from "./_engine/EraseDialog";
 import { ExampleView } from "./_engine/ExampleView";
-import { ImportPanel } from "./_engine/ImportPanel";
+import { ImportPanel, type ImportChoice } from "./_engine/ImportPanel";
 import { Steps } from "./_engine/Steps";
 import { resumePosition, type StepPosition } from "./_engine/steps-model";
 import { Setup, type SetupChoice } from "./_engine/Setup";
@@ -59,7 +63,8 @@ export interface EngineWorkbenchProps {
  * screen is NOT persisted — reopening costs a click, the entries are what is
  * kept; an engine found on arrival opens on the board.
  */
-type Screen = "board" | "steps" | "deck" | "import" | "erase" | "settings" | "example";
+// `new` and `delete` since A14 T5 (§19.1.5): another engine's setup, and one engine's deletion.
+type Screen = "board" | "steps" | "deck" | "import" | "erase" | "settings" | "example" | "new" | "delete";
 
 // Once per page session, not per mount (§11.6: "first view of the island in the session").
 let openedTracked = false;
@@ -67,6 +72,19 @@ let openedTracked = false;
 const savedStages = new Set<EngineStageDetail>();
 // navigator.storage.persist() asked once, at the first successful write (§4.3).
 let persistenceAsked = false;
+
+/** The first save of a number of its stage in the session (§11.6). Sales-assisted's stages count apart, prefixed (Q14); the link's block sits under its acquisition. */
+function stageSaved(id: MetricId): void {
+  const stageDetail = engineStageDetail(shapeOf(id).stage, motionOfMetric(id));
+  if (savedStages.has(stageDetail)) return;
+  savedStages.add(stageDetail);
+  trackEngine({ name: "engine_stage_saved", detail: stageDetail });
+}
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const newId = (): string => globalThis.crypto.randomUUID();
+/** A file opened on an empty device keeps its id when it is one this build would have made; anything else gets a new one. */
+const importedId = (id: unknown): string => (typeof id === "string" && UUID.test(id) ? id : newId());
 
 function lastSnapshot(state: EngineState): Snapshot {
   return state.snapshots[state.snapshots.length - 1]!;
@@ -77,8 +95,8 @@ function withSnapshot(state: EngineState, change: (snapshot: Snapshot) => Snapsh
 }
 
 /** A download that never touches the network: a Blob URL on an anchor IN the document (a detached one doesn't download everywhere), revoked later so a slow start isn't cut. */
-function download(text: string, fileName: string) {
-  const url = URL.createObjectURL(new Blob([text], { type: "application/json" }));
+function download(text: string, fileName: string, type = "application/json") {
+  const url = URL.createObjectURL(new Blob([text], { type }));
   const anchor = document.createElement("a");
   anchor.href = url;
   anchor.download = fileName;
@@ -164,9 +182,9 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
 
   const focus = (id: string) => setFocusRequest((current) => ({ id, n: (current?.n ?? 0) + 1 }));
 
-  function persist(next: EngineState, options: { fresh?: boolean; stamp?: boolean; replace?: boolean } = {}): CommitResult {
+  function persist(next: EngineState, options: { fresh?: boolean; stamp?: boolean; overUnreadable?: boolean; add?: boolean } = {}): CommitResult {
     const stamped = options.stamp === false ? next : { ...next, updatedAt: new Date().toISOString() };
-    const result = commit(stamped, { fresh: options.fresh, replace: options.replace });
+    const result = commit(stamped, { fresh: options.fresh, overUnreadable: options.overUnreadable, add: options.add });
     setWriteFailed(!result.ok);
     if (result.ok && !persistenceAsked) {
       persistenceAsked = true;
@@ -230,11 +248,14 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
         <ImportPanel
           strings={strings}
           locale={locale}
-          hasEngine={false}
+          metrics={metrics}
+          device={null}
           onOpen={(imported) => {
             // Over an unreadable store the device refuses to write (it will not overwrite what it
             // can't read). Choosing a file here IS the confirmed way past it, so clear first.
-            persist(imported, { fresh: true, stamp: false, replace: snap.result.kind === "unreadable" });
+            // Over an unreadable store, under an id of its own: it must not land on an entry nobody could read (A14 T5).
+            if (snap.result.kind === "unreadable") persist({ ...imported, id: newId() }, { fresh: true, stamp: false, overUnreadable: true });
+            else persist({ ...imported, id: importedId(imported.id) }, { fresh: true, stamp: false });
             openBoard();
           }}
           onCancel={() => setScreen("board")}
@@ -246,6 +267,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
         return shell(
           <EraseDialog
             strings={strings}
+            engines={snap.stored}
             companyLabel={undefined}
             onErase={() => {
               erase();
@@ -320,12 +342,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
       // A count this number shares with others (shared-counts.ts) becomes the base and is
       // written into them: typed once, never contradicting itself across the board.
       const result = write(withSnapshot(lensState, (s) => propagateFrom({ ...s, metrics: { ...s.metrics, [id]: entry } }, id)));
-      // Sales-assisted's stages count apart, prefixed (Q14); the link's block sits under its acquisition.
-      const stageDetail = engineStageDetail(shapeOf(id).stage, motionOfMetric(id));
-      if (result.ok && !savedStages.has(stageDetail)) {
-        savedStages.add(stageDetail);
-        trackEngine({ name: "engine_stage_saved", detail: stageDetail });
-      }
+      if (result.ok) stageSaved(id);
       return result;
     },
     setTarget(id: MetricId, target: number | null) {
@@ -391,16 +408,84 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     trackEngine({ name: "engine_exported", detail: "json" });
   }
 
+  // The engines on this device (§19.1.5): the switcher's list, the name the import and the deletion say.
+  const engines = snap.engines ?? [];
+  const currentName = engineName({ createdAt: current.createdAt, ...(current.setup.companyLabel ? { companyLabel: current.setup.companyLabel } : {}) }, strings, locale);
+
+  /** Leaves whatever the board was showing — a past month, a stage, a sheet — for another engine's. */
+  function resetBoard() {
+    toCurrentMonth();
+    setSelected(null);
+    setFocusMetric(null);
+    setMotionView(null);
+  }
+
   if (screen === "import") {
     return shell(
       <ImportPanel
         strings={strings}
         locale={locale}
-        hasEngine
-        onOpen={(imported) => {
-          persist(imported, { fresh: true, stamp: false });
-          setSelected(null);
+        metrics={metrics}
+        device={{ state: current, name: currentName, canAdd: engines.length < MAX_ENGINES }}
+        onOpen={(imported, choice: ImportChoice | null) => {
+          if (choice === "merge") {
+            const merged = mergeEngines(current, imported);
+            if (merged.kind !== "ok") return;
+            persist(merged.state);
+          } else if (choice === "add") {
+            // Beside the others, always under a new id: the file's own may be another engine of the device
+            // (one's own save reopened), an entry nobody could read, or no id at all (the security review of A14 T5).
+            persist({ ...imported, id: newId() }, { fresh: true, stamp: false, add: true });
+          } else {
+            // « Remplacer » the engine on screen — and only it: the file takes its id, so it is written in its place.
+            persist({ ...imported, id: current.id }, { fresh: true, stamp: false });
+          }
+          resetBoard();
           openBoard();
+        }}
+        onCancel={openBoard}
+      />,
+    );
+  }
+
+  if (screen === "new") {
+    return shell(
+      <Setup
+        strings={strings}
+        locale={locale}
+        today={new Date(snap.openedAt)}
+        tour={view.deviceTour}
+        onCancel={openBoard}
+        onStart={(choice: SetupChoice) => {
+          const nowIso = new Date().toISOString();
+          const created = newEngineState(choice.setup, nowIso, { referenceMonth: choice.referenceMonth, cohortMonth: choice.cohortMonth });
+          const next: EngineState = { ...created, tourLink: choice.tourResultId ? { resultId: choice.tourResultId, linkedAt: nowIso } : null };
+          persist(next, { fresh: true, stamp: false, add: true });
+          const motions = engineSetupDetail(choice.setup.motions);
+          trackEngine({ name: "engine_setup", detail: motions });
+          if (choice.tourResultId) trackEngine({ name: "engine_tour_linked" });
+          resetBoard();
+          if (choice.start === "steps") openSteps({ phase: "targets" });
+          else openBoard();
+        }}
+      />,
+    );
+  }
+
+  if (screen === "delete") {
+    return shell(
+      <DeleteEngineDialog
+        name={currentName}
+        strings={strings}
+        onSave={exportJson}
+        onDelete={() => {
+          const last = engines.length <= 1;
+          const result = removeEngine(current.id);
+          setWriteFailed(!result.ok);
+          resetBoard();
+          setScreen("board");
+          // The next engine's board, or — the last one gone — the setup.
+          focus(last && result.ok ? "engine-setup-title" : "engine-verdict");
         }}
         onCancel={openBoard}
       />,
@@ -411,6 +496,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     return shell(
       <EraseDialog
         strings={strings}
+        engines={snap.stored}
         companyLabel={current.setup.companyLabel}
         onErase={() => {
           erase();
@@ -538,7 +624,9 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
   };
 
   return shell(
+    // Keyed by the engine: another engine's board starts fresh — no pasted table, open sheet or pinned tab follows it (A14 T5).
     <Board
+      key={current.id}
       view={view}
       actions={actions}
       verdict={verdict}
@@ -580,6 +668,43 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
       onSteps={() => {
         toCurrentMonth();
         openSteps(resumePosition(lastSnapshot(current), current.setup.motions));
+      }}
+      switcher={
+        engines.length > 0 ? (
+          <EngineSwitcher
+            engines={engines}
+            currentId={current.id}
+            strings={strings}
+            locale={locale}
+            onSwitch={(id) => {
+              const result = switchEngine(id);
+              if (!result.ok) return;
+              resetBoard();
+              focus("engine-verdict");
+            }}
+            onNew={() => {
+              resetBoard();
+              setScreen("new");
+              focus("engine-setup-title");
+            }}
+            onDelete={() => {
+              resetBoard();
+              setScreen("delete");
+              focus("engine-delete-title");
+            }}
+          />
+        ) : null
+      }
+      onTemplate={() => {
+        // The month being filled, its ticked motions, the page's language: « ; » and the decimal comma in French.
+        const text = tableTemplate(current, motionShapes(current.setup.motions), metrics, strings, locale);
+        download(`\uFEFF${text}`, monthFileName(current, strings.table.fileName), "text/csv;charset=utf-8");
+      }}
+      onApplyTable={(preview: TablePreview) => {
+        const result = persist(withSnapshot(current, () => preview.snapshot));
+        // A pasted number is a number saved (§19.12): the first of each stage counts once, as from its sheet.
+        if (result.ok) for (const row of preview.rows) if (row.kind === "new" || row.kind === "changed") stageSaved(row.id);
+        return result.ok;
       }}
     />,
   );

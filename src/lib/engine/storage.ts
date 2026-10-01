@@ -39,7 +39,9 @@ import {
  *    written by a NEWER version). Returning `null` for both would send the
  *    island to the setup screen, and its first save would overwrite the only
  *    copy. `saveEngine` refuses to write over an unreadable store for the
- *    same reason; `clearEngine` is the explicit, confirmed way to start again.
+ *    same reason; `clearEngine` is the explicit, confirmed way to start again,
+ *    and `saveOverUnreadable` the way past it with a file, which keeps the
+ *    engines the device can still read (A14 T5).
  * 3. **An older copy outlives the migration until a file supersedes it.** A
  *    device with only `tdg.engine.v2` (or only `tdg.engine.v1`) loads it
  *    migrated (`migratedFrom: 2`, or 1); the first save writes the v3 index
@@ -54,7 +56,13 @@ import {
  */
 
 export type LoadResult = { kind: "empty" } | { kind: "ok"; state: EngineState; migratedFrom?: 1 | 2 } | { kind: "unreadable" };
-export type SaveResult = { ok: true } | { ok: false; error: "quota" | "unavailable" | "unreadable" | "full" };
+/**
+ * `conflict` (A14 T5): an id the write cannot take — empty, already on the
+ * device for an `add`, or no longer on the device for an ordinary write (an
+ * engine deleted in another tab). Refused, never resolved by replacing
+ * another engine: that would lose one.
+ */
+export type SaveResult = { ok: true } | { ok: false; error: "quota" | "unavailable" | "unreadable" | "full" | "conflict" };
 
 /** What the engine switcher lists (§19.1.5): enough to name an engine, never its numbers. */
 export interface EngineListing {
@@ -193,37 +201,39 @@ export function loadEngine(): LoadResult {
 /**
  * Writes an engine. Returns the failure; the caller shows it (see the header).
  *
- * - The engine on screen (same id) is written in place.
- * - Another engine REPLACES the one on screen — an import « Remplacer », a
- *   setup after « Tout effacer » — and the replaced entry goes, as it did
- *   with one engine per device.
- * - `add: true` adds it beside the others and puts it on screen (« Nouveau
- *   moteur », « Ajouter comme nouveau moteur », §19.1.5, §19.7), refused as
- *   `full` beyond `MAX_ENGINES`.
+ * - An engine the device lists (the one on screen, an import « Remplacer »
+ *   under its id) is written in place and put on screen.
+ * - `add: true` adds a NEW id beside the others and puts it on screen
+ *   (« Nouveau moteur », « Ajouter comme nouveau moteur », §19.1.5, §19.7),
+ *   refused as `full` beyond `MAX_ENGINES`, and as `conflict` for an id the
+ *   device already lists — an add never writes over another engine.
+ * - Any other id is a `conflict`: since A14 T5, no ordinary write replaces
+ *   the engine on screen. One deleted in another tab, saved again here, would
+ *   otherwise take the place of whichever engine is on screen now.
  */
 export function saveEngine(state: EngineState, options: { add?: boolean } = {}): SaveResult {
   const store = storage();
   if (!store) return { ok: false, error: "unavailable" };
+  if (!usableId(state.id)) return { ok: false, error: "conflict" };
   const read = readIndex(store);
   if (read.kind === "unavailable") return { ok: false, error: "unavailable" };
   if (read.kind === "unreadable") return { ok: false, error: "unreadable" };
 
   let next: EngineIndex;
-  let replaced: string | null = null;
   if (read.kind === "ok") {
     const { index } = read;
     const active = readRaw(store, entryKey(index.activeId));
     if (active.kind === "unavailable") return { ok: false, error: "unavailable" };
-    // The engine on screen cannot be read (or is gone): nothing is written until the person confirms (`clearEngine`).
+    // The engine on screen cannot be read (or is gone): nothing is written until the person confirms (`saveOverUnreadable`, `clearEngine`).
     if (active.kind === "absent" || decodeEntry(active.value) === null) return { ok: false, error: "unreadable" };
-    if (state.id === index.activeId || index.order.includes(state.id)) {
+    if (index.order.includes(state.id)) {
+      if (options.add) return { ok: false, error: "conflict" };
       next = { ...index, activeId: state.id };
     } else if (options.add) {
       if (index.order.length >= MAX_ENGINES) return { ok: false, error: "full" };
       next = { ...index, activeId: state.id, order: [...index.order, state.id] };
     } else {
-      replaced = index.activeId;
-      next = { ...index, activeId: state.id, order: index.order.map((id) => (id === index.activeId ? state.id : id)) };
+      return { ok: false, error: "conflict" };
     }
   } else {
     // No v3 index yet: an older store we cannot read keeps the screen on « unreadable », and nothing is written
@@ -232,6 +242,10 @@ export function saveEngine(state: EngineState, options: { add?: boolean } = {}):
     next = { schemaVersion: ENGINE_SCHEMA_VERSION, activeId: state.id, order: [state.id] };
   }
 
+  return write(store, state, next);
+}
+
+function write(store: Storage, state: EngineState, next: EngineIndex): SaveResult {
   const value: EngineStore = { schemaVersion: ENGINE_SCHEMA_VERSION, state };
   try {
     store.setItem(entryKey(state.id), JSON.stringify(value));
@@ -239,9 +253,80 @@ export function saveEngine(state: EngineState, options: { add?: boolean } = {}):
   } catch (err) {
     return { ok: false, error: isQuota(err) ? "quota" : "unavailable" };
   }
-  if (replaced !== null) removeQuietly(store, entryKey(replaced));
   dropSupersededLegacy(store, state);
   return { ok: true };
+}
+
+/** An id the index can hold: a non-empty string of reasonable length (`decodeIndex` refuses an empty one). */
+function usableId(id: unknown): id is string {
+  return typeof id === "string" && id.trim() !== "" && id.length <= 100;
+}
+
+/**
+ * A file opened on the « illisible » screen (A14 T5): the one confirmed way
+ * past an unreadable engine, which — now that a device holds several — must
+ * not cost the others. The file goes on screen beside the engines the device
+ * can still read:
+ * - an index that reads, whose engine on screen does not: that engine leaves
+ *   the index — its entry stays on the device, never destroyed — and the
+ *   file takes its turn;
+ * - an index that does not read: the engines' own entries say which are
+ *   there, and the readable ones are listed again, oldest first;
+ * - no index (an older copy that does not read): the file starts the index,
+ *   and the older copy stays where it is.
+ * An index written by a NEWER version is never rewritten: `unreadable`, and
+ * only « Tout effacer » goes past it. The caller gives the file an id of its
+ * own, so it can't land on an entry this module could not read.
+ */
+export function saveOverUnreadable(state: EngineState): SaveResult {
+  const store = storage();
+  if (!store) return { ok: false, error: "unavailable" };
+  if (!usableId(state.id)) return { ok: false, error: "conflict" };
+  const raw = readRaw(store, ENGINE_INDEX_KEY);
+  if (raw.kind === "unavailable") return { ok: false, error: "unavailable" };
+  let others: string[];
+  if (raw.kind === "absent") others = [];
+  else {
+    const index = decodeIndex(raw.value);
+    if (index) others = index.order.filter((id) => id !== index.activeId);
+    else {
+      const parsed = parse(raw.value);
+      if (parsed && typeof parsed.schemaVersion === "number" && parsed.schemaVersion > ENGINE_SCHEMA_VERSION) return { ok: false, error: "unreadable" };
+      others = readableEntries(store);
+    }
+  }
+  others = others.filter((id) => id !== state.id).slice(0, MAX_ENGINES - 1);
+  return write(store, state, { schemaVersion: ENGINE_SCHEMA_VERSION, activeId: state.id, order: [...others, state.id] });
+}
+
+/** Every engine entry this version can read, oldest first — what an unreadable index is rebuilt from. */
+function readableEntries(store: Storage): string[] {
+  const found: EngineState[] = [];
+  try {
+    for (let i = 0; i < store.length; i++) {
+      const key = store.key(i);
+      if (!key?.startsWith(ENGINE_ENTRY_PREFIX)) continue;
+      const raw = readRaw(store, key);
+      const state = raw.kind === "present" ? decodeEntry(raw.value) : null;
+      if (state && usableId(state.id) && entryKey(state.id) === key) found.push(state);
+    }
+  } catch {
+    return [];
+  }
+  return found.sort((a, b) => (a.createdAt < b.createdAt ? -1 : a.createdAt > b.createdAt ? 1 : 0)).map((s) => s.id);
+}
+
+/** How many engine entries the device holds, readable or not: what « Tout effacer » says it erases. */
+export function storedEngineCount(): number {
+  const store = storage();
+  if (!store) return 0;
+  let n = 0;
+  try {
+    for (let i = 0; i < store.length; i++) if (store.key(i)?.startsWith(ENGINE_ENTRY_PREFIX)) n += 1;
+  } catch {
+    return 0;
+  }
+  return n;
 }
 
 /** The v3 entry is written: only now may an older copy go, and only once a file holds all of it. */

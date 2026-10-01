@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { clearEngine, deleteEngine, listEngines, loadEngine, requestPersistence, saveEngine, setActiveEngine } from "../storage";
+import { clearEngine, deleteEngine, listEngines, loadEngine, requestPersistence, saveEngine, saveOverUnreadable, setActiveEngine, storedEngineCount } from "../storage";
 import { ENGINE_ENTRY_PREFIX, ENGINE_INDEX_KEY, LEGACY_STORAGE_KEY_V1, LEGACY_STORAGE_KEY_V2, MAX_ENGINES, type EngineState } from "../types";
 import { fullState, toV1 } from "./storage-fixtures";
 
@@ -148,13 +148,23 @@ describe("engine storage", () => {
       expect(listEngines()![0]!.companyLabel).toBe("Mon produit");
     });
 
-    it("without `add`, another engine REPLACES the one on screen, in its place — what an import « Remplacer » does", () => {
+    /**
+     * The security review of A14 T5: an ordinary write of an id the device no
+     * longer lists — an engine deleted in another tab, saved again here — used
+     * to take the place of the engine on screen, and delete it. An `add` of an
+     * id already listed wrote over that engine; an empty id locked the whole
+     * index. All three are `conflict` now, and nothing is written.
+     */
+    it("an id the write cannot take is a `conflict`, and nothing is written: never another engine replaced", () => {
       saveEngine(fullState());
       saveEngine(another("second"), { add: true });
-      expect(saveEngine(another("third"))).toEqual({ ok: true });
-      expect(index(store).order).toEqual([fullState().id, "third"]);
-      expect(store.map.has(entry("second"))).toBe(false);
-      expect(store.map.has(entry(fullState().id))).toBe(true);
+      const before = new Map(store.map);
+      expect(saveEngine(another("third"))).toEqual({ ok: false, error: "conflict" });
+      expect(saveEngine(another(fullState().id), { add: true })).toEqual({ ok: false, error: "conflict" });
+      expect(saveEngine(another(""), { add: true })).toEqual({ ok: false, error: "conflict" });
+      expect(saveEngine(another("  "))).toEqual({ ok: false, error: "conflict" });
+      expect(store.map).toEqual(before);
+      expect(listEngines()!.map((e) => e.id)).toEqual([fullState().id, "second"]);
     });
 
     it("an engine already on the device is written in place and put on screen", () => {
@@ -197,6 +207,51 @@ describe("engine storage", () => {
       expect(deleteEngine("second")).toEqual({ ok: true });
       expect(loadEngine()).toEqual({ kind: "empty" });
       expect(store.map.size).toBe(0);
+    });
+
+    describe("a file opened over an unreadable store (A14 T5): the engines the device can still read stay", () => {
+      it("the engine on screen unreadable: it leaves the index, its entry stays, the others and the file are listed", () => {
+        saveEngine(fullState());
+        saveEngine(another("second"), { add: true });
+        store.map.set(entry("second"), "{");
+        expect(loadEngine()).toEqual({ kind: "unreadable" });
+        expect(saveOverUnreadable(another("from-file"))).toEqual({ ok: true });
+        expect(index(store)).toEqual({ schemaVersion: 3, activeId: "from-file", order: [fullState().id, "from-file"] });
+        expect(store.map.get(entry("second"))).toBe("{");
+        expect(loadEngine()).toEqual({ kind: "ok", state: another("from-file") });
+      });
+
+      it("the index unreadable: rebuilt from the readable entries, oldest first, then the file", () => {
+        saveEngine({ ...another("younger"), createdAt: "2026-09-30T08:00:00.000Z" });
+        saveEngine({ ...another("older"), createdAt: "2026-09-01T08:00:00.000Z" }, { add: true });
+        store.map.set(entry("broken"), "{");
+        store.map.set(ENGINE_INDEX_KEY, '{"schemaVersion":3,"activeId":"","order":[""]}');
+        expect(loadEngine()).toEqual({ kind: "unreadable" });
+        expect(listEngines()).toBeNull();
+        expect(saveOverUnreadable(another("from-file"))).toEqual({ ok: true });
+        expect(index(store)).toEqual({ schemaVersion: 3, activeId: "from-file", order: ["older", "younger", "from-file"] });
+        expect(store.map.get(entry("broken"))).toBe("{");
+      });
+
+      it("an index from a newer version is never rewritten; an older copy that does not read stays where it is", () => {
+        const newer = JSON.stringify({ schemaVersion: 4, activeId: "x", order: ["x"] });
+        store.map.set(ENGINE_INDEX_KEY, newer);
+        expect(saveOverUnreadable(another("from-file"))).toEqual({ ok: false, error: "unreadable" });
+        expect(store.map.get(ENGINE_INDEX_KEY)).toBe(newer);
+        store.map.clear();
+        store.map.set(LEGACY_STORAGE_KEY_V2, "{");
+        expect(saveOverUnreadable(another("from-file"))).toEqual({ ok: true });
+        expect(index(store)).toEqual({ schemaVersion: 3, activeId: "from-file", order: ["from-file"] });
+        expect(store.map.get(LEGACY_STORAGE_KEY_V2)).toBe("{");
+      });
+    });
+
+    it("counts the engine entries the device holds, readable or not: what « Tout effacer » says it erases", () => {
+      expect(storedEngineCount()).toBe(0);
+      saveEngine(fullState());
+      saveEngine(another("second"), { add: true });
+      store.map.set(entry("broken"), "{");
+      expect(storedEngineCount()).toBe(3);
     });
 
     it("« Tout effacer » clears every engine, the index and the older copies", () => {

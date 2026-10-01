@@ -549,6 +549,65 @@ mois ajouté et de chaque valeur remplacée, avec l'ancienne et la nouvelle.
 Jamais rien de silencieux. Le module est pur : `lib/engine/merge.ts`,
 `mergeEngines(into, from): { state, changes }`.
 
+*Écarts au code, T5 (2026-10-01).*
+- **Le sélecteur** (§19.1.5) est un repli « Moteur : {nom} », avec la marque
+  « + » des replis du site plutôt qu'un « ▾ ». Chaque moteur y est listé avec
+  « jusqu'à {mois} » et un bouton « Ouvrir » ; celui à l'écran le dit.
+- **« Supprimer ce moteur »** ne demande pas de mot à retaper : les autres
+  moteurs restent, et le bouton de sauvegarde vient en premier sur le même
+  écran. **« Tout effacer »** efface tous les moteurs de l'appareil, et le dit
+  dès qu'il y en a deux.
+- **À l'import**, « Ajouter » est choisi par défaut, contre la règle du
+  composant `Choices` (« jamais d'option par défaut ») : la spec le veut, et
+  c'est le choix qui ne perd rien. À dix moteurs, c'est « Fusionner », s'il
+  est possible, puis rien. « Remplacer » n'est jamais choisi d'office.
+- **L'id du fichier n'est jamais repris tel quel** (relecture de sécurité).
+  « Ajouter » donne toujours un id neuf, et « Remplacer » donne au fichier
+  l'id du moteur à l'écran, qui est donc réécrit à sa place. Un fichier
+  ouvert sur un appareil vide garde le sien seulement s'il a la forme d'un
+  UUID. Côté stockage, un ajout dont l'id est déjà listé, un id vide, ou
+  l'écriture d'un moteur que l'appareil ne liste plus (supprimé dans un autre
+  onglet) sont refusés (`conflict`). Aucune écriture ne remplace plus le
+  moteur à l'écran.
+- **Un fichier ouvert sur l'écran « illisible »** ne vide plus l'appareil :
+  le moteur illisible sort de l'index (son entrée reste), les moteurs encore
+  lisibles restent, et un index illisible est reconstruit à partir des
+  entrées. Seul « Tout effacer », avec son mot à retaper, efface tout.
+- **La fusion** est aussi refusée pour une autre devise et au-delà de 36 mois.
+  Elle ne compare que les fenêtres des motions cochées. Un mois que la fusion
+  place avant un autre est clos le jour où ce mois suivant a démarré. Un
+  compte partagé du fichier ne comble la base que si aucun chiffre du mois
+  fusionné ne le porte déjà. Le pipeline ouvert ne comble qu'un mois qui n'en
+  a pas. Un chiffre seulement « demandé » compte comme vide.
+  Une clé que cette version ne connaît pas (chiffre, cible, compte) est
+  laissée de côté.
+- **« Saisie en tableau »** est un repli à part, juste sous « À aller
+  chercher », visible même quand tout est collecté, puisqu'un tableau corrige
+  aussi. Le modèle ne pré-remplit que les chiffres trouvés ; une estimation, une
+  cause ou un texte reste vide. Le fichier commence par une marque d'ordre
+  des octets, pour qu'Excel lise les accents. Aucune cellule ne peut devenir
+  une formule : un compte qui n'est pas un nombre reste vide, et une cellule
+  qui commence comme une formule est écrite en texte. Un modèle téléchargé
+  dans l'autre langue se relit dans l'ordre du modèle. Le tableau de bord
+  repart de zéro à chaque changement de moteur : un tableau collé ne suit
+  jamais.
+- **Les refus du tableau** ajoutent à la liste du §19.6 : un chiffre hors des
+  motions cochées, un chiffre déjà sur une ligne plus haut, un numérateur sans
+  dénominateur, un nombre négatif, un pourcentage hors de 0 à 100, plus de la
+  part que du tout, et un compte partagé qui contredit une ligne plus haut
+  (l'écrire réécrirait l'autre chiffre en silence). Une durée garde l'unité
+  de la ligne et la statistique déjà choisie, et part dans sa fiche sans elle.
+  Un chiffre que le tableau déplace par un compte partagé, sans ligne à lui,
+  est listé aussi.
+- **La source** d'une ligne se lit par le nom d'un outil, son id, le nom d'un
+  rôle, ou « Quelqu'un me l'a donné ». Vide, c'est le tableur ; inconnue, c'est
+  « Autre ». La source propre du dénominateur (§19.5.3) ne tient que si la
+  ligne garde la source du chiffre.
+- Aucun événement neuf : `engine_exported/csv` vient avec T7 (§19.12). Un
+  chiffre collé compte comme un chiffre enregistré dans sa fiche
+  (`engine_stage_saved`, le premier de chaque étape), comme le veut le §19.12 ;
+  une fusion ne compte rien.
+
 ---
 
 ### 19.8 Le thème de slide sur fond blanc (Q14)

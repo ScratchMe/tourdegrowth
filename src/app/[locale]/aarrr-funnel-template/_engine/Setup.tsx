@@ -461,6 +461,12 @@ export function Setup({
                 {strings.actions.import}
               </Button>
             ) : null}
+            {/* « Nouveau moteur » (§19.1.5, A14 T5): the engine on screen is still there to go back to. */}
+            {onCancel ? (
+              <Button variant="quiet" onClick={onCancel} data-testid="engine-setup-cancel">
+                {strings.settings.cancel}
+              </Button>
+            ) : null}
           </div>
         </>
       )}
