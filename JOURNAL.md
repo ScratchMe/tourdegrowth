@@ -6422,6 +6422,15 @@ Ce que la refonte change pour un joueur ne se voit qu'avec le jeu ouvert. C'est 
 
 **`main` a bougé pendant la PR** : #232 (le niveau 2 du jeu) a pris le numéro A12, et les alertes sont donc devenues A13. `main` a été fusionné en gardant les deux côtés de `CHANTIERS.md`, de `CLAUDE.md` et de ce journal.
 
+**En production (2026-10-01)** : [#235](https://github.com/ScratchMe/tourdegrowth/pull/235), squash `bf06fc2`, 16 fichiers, arbre identique à la tête. Vérifié en HTTP sur `www.tourdegrowth.com` :
+- les huit pages répondent 200 avec leur titre, leur canonique, leur `hreflang` fr, en et x-default, leur `DefinedTerm`, et la date « 30 septembre 2026 » ;
+- l'index du glossaire liste les quatre termes ;
+- le sitemap porte 82 adresses, les 74 d'avant et les huit neuves, dont 56 pages de terme ;
+- `/llms.txt` liste les quatre termes, et `/llms-full.txt` porte leurs quatre parties ;
+- les liens échangés sont servis : `pql` mène à `lead-to-opportunity`, et `revenue` à `win-rate`.
+
+IndexNow a été lancé à la main le même soir (run 20, succès). La demande d'indexation des huit adresses dans Search Console revient à Antoine : elles sont ajoutées à D10.
+
 ## C30 : le niveau 2 du jeu, validé (2026-10-01)
 
 **Posé dans la session qui avait écrit la spécification**, à la demande d'Antoine, qui a demandé pourquoi les questions ne lui avaient pas été posées pendant l'implémentation, alors qu'il était disponible. La réponse honnête : la convention de `CHANTIERS.md` A (« une question produit rencontrée en route part en section C ») a été lue comme « ne pas déranger ». Or elle disait seulement de ne pas trancher seul. Q1, le chiffre du board, conditionnait tout le chiffrage du niveau, et a été posée après. La règle est réécrite : **si Antoine est dans la session, une question produit se pose tout de suite**, surtout quand le reste du travail en dépend ; la section C est pour les questions sans lui.
