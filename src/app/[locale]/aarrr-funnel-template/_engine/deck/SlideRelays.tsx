@@ -29,6 +29,7 @@ export function SlideRelays({ slide, context }: SlideProps) {
   const rows = rowsOf(slide, "relay");
   const upstream = rowOf(slide, "upstream");
   const footer = rowOf(slide, "footer")?.text;
+  const coverage = rowOf(slide, "coverage");
   const slg = derived.motions.find((m): m is SlgDerived => m.motion === "slg");
 
   const columns = (slg?.relays.columns ?? []).flatMap((col) => {
@@ -82,6 +83,14 @@ export function SlideRelays({ slide, context }: SlideProps) {
             { mark: "unknown", label: t.legendUnknown },
           ]}
         />
+        {/* Pipeline coverage (§19.4, A14 T3.2): on the legend's own line, at its right, on ONE line — never a fourth
+            grid, and no height taken from the three: a line of its own pushed their sources under it (measured,
+            2026-10-01). The month before's is in the notes. */}
+        {coverage ? (
+          <p className={styles.coverage} data-testid="slide-coverage">
+            <SlideText text={coverage.text} accent={false} />
+          </p>
+        ) : null}
       </div>
     </SlideFrame>
   );

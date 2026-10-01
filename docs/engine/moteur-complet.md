@@ -411,6 +411,27 @@ fourchette de l'audit (« 3× à 6× ») est exclue par la décision 6.
 Elle n'est jamais une fuite, jamais chiffrée en €, jamais comparée à un repère
 publié (C1). Elle entre dans la slide des relais et dans la série (§19.2).
 
+*Écarts au code, T3.2 (2026-10-01).*
+- **L'objectif du trimestre et le seuil se saisissent dans les Réglages
+  seulement**, pas au premier réglage. Quand l'objectif manque, la carte des
+  relais dit où l'ajouter.
+- **Le pipeline ouvert se saisit sous la carte des relais**, chaque mois. Il
+  s'enregistre quand on quitte la case, comme une cible, et une faute de
+  frappe n'écrit rien.
+- **Un mois passé montre sa propre couverture**, sans case de saisie.
+  Celle du mois d'avant s'affiche sous la ligne sur le tableau, et va dans
+  les notes de la slide.
+- **Sur la slide des relais, la ligne partage celle de la légende**, à sa
+  droite, et ne prend aucune hauteur aux grilles. L'écart entre les éléments
+  d'une colonne passe de 12 à 8 px. Cela corrige au passage un chevauchement
+  existant : la colonne du milieu descendait de 11 px dans la ligne de la
+  légende quand son en-tête tenait sur deux lignes.
+- **La couverture n'entre pas dans « Ce qui a bougé »**, qui ne compare que
+  les chiffres du catalogue. Le mois d'avant se lit sur le tableau et dans
+  les notes.
+- **Au passage**, les Réglages gardent les outils (`tools`) : un fichier v3
+  qui en portait les perdait à l'enregistrement.
+
 ---
 
 ### 19.5 Les outils : au réglage, dans la collecte, et le contrôle « deux outils »

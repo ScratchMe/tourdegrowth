@@ -840,3 +840,42 @@ Deux sont d'abord passés :
 - Playwright complet (`CI=1`), sur l'arbre rebasé sur T2 : 813 specs, 782 passées, aucune au second essai, et 31 ignorées (25 faute d'émulateur, 6 par construction). La première passe en avait fait tomber six : la slide « ensemble » à neuf leviers débordait de 4 px sur son pied (un cran plus serré à partir de neuf leviers), et la spec de la slide sans montant prenait J30, chiffrée désormais (elle prend la part recommandée au-delà de 50 %) ;
 - `engine-deck-whatif.spec.ts` imprime maintenant neuf leviers et « ensemble », rien sous 18 px, chaque corps au-dessus de son pied ; deux specs neuves bougent le levier J30 et celui de la part assistée ;
 - captures relues en FR et en EN : la slide « ensemble » à neuf leviers, la fuite de J30 chiffrée, celle de la part assistée.
+
+## A14.c, T3.2 : la couverture du pipeline (2026-10-01, #260)
+
+La cinquième PR du moteur complet (`docs/engine/moteur-complet.md` §19.4, C32 Q8), drapeau fermé. Elle était prévue dans T3 et part seule, juste après lui (#259) : elle demande trois champs de saisie neufs.
+
+**Ce que fait la couverture** : c'est un indicateur avancé sous la carte des relais. Ce n'est jamais un seizième chiffre, jamais une étape que le diagnostic peut nommer, jamais un montant, jamais une comparaison avec un repère publié (C1). Concrètement :
+- `lib/engine/pipeline.ts`, pur : le pipeline ouvert du trimestre, divisé par l'objectif de nouveaux contrats du trimestre, tous deux en ACV. « Sous » ne se dit que contre le seuil de l'équipe, quand elle en a saisi un. Sans les deux nombres, ou hors de l'assisté, pas de couverture ;
+- le tableau affiche « Couverture : 2,6× l'objectif du trimestre, sous ton seuil de 3× », puis « En juillet 2026 : 2,1× » ;
+- le pipeline ouvert se saisit sous les relais, chaque mois. Il s'enregistre en quittant la case, comme une cible (A15.2). Un mois passé montre sa couverture sans case ;
+- l'objectif et le seuil se saisissent dans les Réglages. Sans objectif, la carte dit où l'ajouter ;
+- la slide des relais porte la ligne sans « ton », et la couverture du mois d'avant va dans les notes.
+
+**La slide des relais n'avait pas la place.** La ligne posée sous les grilles prenait leur hauteur : la colonne du milieu passait sous elle (fin à 855, ligne à 815). Posée sur la ligne de la légende, elle chevauchait encore cette colonne (884 contre 873). Ce second écart existait déjà sans la couverture : quand l'en-tête « Opportunités conclues · juin à août 2026 » passe sur deux lignes, la colonne descend de 11 px dans la ligne de la légende. L'écart entre les éléments d'une colonne passe de 12 à 8 px, la ligne de couverture tient sur une seule ligne à droite de la légende, et le mois d'avant va dans les notes. Une spec e2e le mesure : chaque colonne au-dessus de la légende, la ligne au-dessus du pied, rien sous 18 px.
+
+**Au passage** : les Réglages perdaient les outils (`tools`, §19.5) qu'un fichier v3 apportait, parce qu'ils reconstruisent tout le réglage. Ils les gardent maintenant.
+
+**Sabotages** : huit, chacun fait tomber les tests qui le visent :
+- « sous » sans seuil : 2 ;
+- une couverture hors de l'assisté : 1 ;
+- le mois d'avant lu sur le mois en cours : 2 ;
+- le rapport à l'envers : 4 ;
+- la slide qui tutoie : 2, dont la garde des phrases ;
+- la note du mois d'avant absente : 1 ;
+- la ligne absente de la slide : 3, dont le contrat des lignes ;
+- en e2e, la case de saisie laissée sur un mois passé : 1.
+
+**La relecture de copie** (`relecteur-copie`) a relevé cinq points, tous corrigés :
+- le « × » s'écrivait dans le code : il passe par une clé (`pipeline.ratio`), sous le marqueur, pour que le bon à tirer le voie. Le choix entre « × » et « fois » en français lui revient ;
+- les gardes des slides (glyphes, tutoiement) ne voyaient pas les trois clés qui vont sur la slide et dans ses notes ;
+- en anglais, « target » servait pour l'objectif du trimestre alors qu'il désigne la cible d'équipe (C1) : c'est « goal » ;
+- les libellés anglais prenaient un article que leurs voisins n'ont pas ;
+- l'aide disait « ce mois-ci » pour une case qui se remplit pour le mois du tableau : « ce mois-là ».
+
+**Vérifié** :
+- `vitest --coverage` : 2 817 tests, au-dessus des seuils ;
+- `tsc`, `eslint` et `next build` (avec `GAME_ENABLED=true`) propres ;
+- Playwright complet (`CI=1`) : 819 specs, 788 passées, aucune au second essai, et 31 ignorées (25 faute d'émulateur, 6 par construction) ;
+- `e2e/engine-pipeline.spec.ts`, nouveau : l'objectif saisi dans les Réglages, la couverture qui apparaît, le mois d'avant, un mois passé sans case, la slide mesurée en FR et en EN, 390 px sans défilement de côté ;
+- captures relues : le tableau, les Réglages, la slide, la colonne de l'hybride à 390 px.

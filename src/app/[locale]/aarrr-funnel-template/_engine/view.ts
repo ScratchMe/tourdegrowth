@@ -37,6 +37,8 @@ export interface EngineActions {
   /** A count several numbers share, typed once (shared-counts.ts): the base and every entry carrying it. */
   /** One write for all the counts given: see EngineWorkbench. */
   setBase: (counts: Partial<Record<SharedCount, number>>) => void;
+  /** Sales-assisted: the quarter's open pipeline, in ACV, for the month on screen (§19.4); `null` takes it off. */
+  setPipelineOpen: (open: number | null) => void;
   /**
    * « Et si ? » (2026-09-26): the targets under test, the WHOLE map in one
    * write (a slider, a reset, « all back to today »). Kept in the state so the

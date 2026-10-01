@@ -342,6 +342,14 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
         ),
       );
     },
+    setPipelineOpen(open: number | null) {
+      write(
+        withSnapshot(lensState, (s) => {
+          const { pipelineOpen: _previous, ...rest } = s;
+          return open === null ? rest : { ...rest, pipelineOpen: open };
+        }),
+      );
+    },
     setWhatIf(targets: Partial<Record<LeverId, number>>) {
       // An empty map is « all back to today »: the field goes, so a file never carries an empty scenario.
       const { whatIf: _previous, ...rest } = current;

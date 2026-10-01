@@ -292,7 +292,8 @@
 .relay {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  /* 8, not 12: a base on two lines (« opportunités conclues · juin à août 2026 ») ran its column 11px into the legend's line (measured, 2026-10-01). */
+  gap: 8px;
   min-width: 0;
   padding: 0 48px;
   border-left: var(--border-rule);
@@ -1761,4 +1762,13 @@
   .thumb[data-enlarged] {
     grid-column: 1 / -1;
   }
+}
+
+/* Pipeline coverage on the relays' legend line, at its right, on one line (§19.4, A14 T3.2). */
+.coverage {
+  margin: 0;
+  font: var(--slide-meta);
+  font-weight: 600;
+  color: var(--text-body);
+  white-space: nowrap;
 }

@@ -21,6 +21,7 @@ import {
   formatInterval,
   formatMonth,
   formatMonthRange,
+  formatNumber,
   formatPerHundred,
   formatPerHundredCount,
   joinList,
@@ -29,6 +30,7 @@ import {
 } from "./format";
 import { mapBounds, point } from "./interval";
 import { fillSegments, positionLabel, subjectOf, unitInputsPhrase } from "./phrases";
+import { coverageText, pipelineCoverage } from "./pipeline";
 import { buildSlgScenario, oppsCreated, oppsFromSelfServe, slgLeverAlone, type SlgScenario, type SlgScenarioKpis } from "./slg-scenario";
 import { sanityText } from "./sentences";
 import { STATUS_KEY } from "./strings";
@@ -141,6 +143,19 @@ export function buildRelaysSlide(state: EngineState, slg: SlgDerived, sanity: re
         }),
       );
     }
+  }
+  // Pipeline coverage (§19.4, A14 T3.2): a leading indicator under the relays, never a stage — and no « ton » on a slide.
+  const coverage = pipelineCoverage(state);
+  if (coverage) {
+    const p = strings.pipeline;
+    const ratio = (v: number) => coverageText(v, (n) => formatNumber(n, ctx.locale), p.ratio);
+    const line =
+      coverage.below && coverage.threshold !== null
+        ? fillTemplate(p.coverageBelowSlide, { ratio: ratio(coverage.ratio), threshold: ratio(coverage.threshold) })
+        : fillTemplate(p.coverage, { ratio: ratio(coverage.ratio) });
+    lines.push({ row: "coverage", text: line });
+    // The month before's goes to the notes: on the slide, the line keeps to the legend's one line.
+    if (coverage.previous) notes.push(fillTemplate(p.previousNote, { month: formatMonth(coverage.previous.month, ctx.locale), ratio: ratio(coverage.previous.ratio) }));
   }
   lines.push({ row: "footer", text: fillSegments(r.slideFooter, { sources: joinList(sources, strings.grammar) }) });
 

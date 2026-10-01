@@ -246,6 +246,16 @@ const SCENARIOS: { name: string; build: () => { state: EngineState; result?: Ret
   { name: "hybrid, relays empty", build: () => ({ state: withEntry(withEntry(hybridState(), "slg.rev.win-rate", undefined), "slg.acq.lead-to-opp", undefined) }) },
   { name: "hybrid, no sales-assisted ACV", build: () => ({ state: withEntry(hybridState(), "slg.rev.acv", undefined) }) },
   {
+    // §19.4 (A14 T3.2): the pipeline coverage under the relays, under the team's threshold, with the month before's.
+    name: "sales-assisted, pipeline coverage",
+    build: () => {
+      const s = withMonthBefore(salesAssistedState(), (july) => void (july.pipelineOpen = 420_000));
+      s.setup.pipeline = { quarterTarget: 200_000, threshold: 3 };
+      s.snapshots[s.snapshots.length - 1]!.pipelineOpen = 520_000;
+      return { state: s };
+    },
+  },
+  {
     // §19.3.2: the referred share of opportunities named, priced on W; then past its 50 % ceiling; then without W.
     name: "hybrid, referred share named (priced)",
     build: () => ({ state: withTarget(withTarget(withTarget(hybridState(), "slg.rev.win-rate", 20), "slg.acq.lead-to-opp", 12), "slg.ref.referred-share", 30) }),

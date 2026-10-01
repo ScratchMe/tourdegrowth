@@ -247,7 +247,7 @@ describe("the slides", () => {
   const SLIDE_REACHABLE = [
     "slideTitles", "slide", "notes", "findings", "peloton", "whatIf", "diagnosis", "mirror", "subject", "stages",
     "units", "grammar", "tools", "role", "repair", "cause", "status", "basis", "ask",
-    "side", "worth", "event", "unitInput", "source", "slgChain", "relays", "total", "hybrid",
+    "side", "worth", "event", "unitInput", "source", "slgChain", "relays", "total", "hybrid", "pipeline",
   ];
 
   it("stays inside the three fonts: no arrow, no ≈, no U+2212, no superscript (§10.4)", () => {
@@ -270,6 +270,8 @@ describe("the slides", () => {
   it("never addresses the reader on a slide", () => {
     const onSlide = [
       ...under("slideTitles", "slide", "notes", "side", "worth", "unitInput", "relays", "total", "hybrid.motionName", "hybrid.twoSegments"),
+      // A14 T3.2: the three pipeline keys the relays' slide and its notes print (the board's own say « ton »).
+      ...under("pipeline.coverage", "pipeline.coverageBelowSlide", "pipeline.previousNote"),
       ...under("peloton").filter(([p]) => /clause|unmeasured/.test(p)),
       ...under("whatIf").filter(([p]) => !/title|slider/.test(p)),
     ];
