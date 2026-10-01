@@ -652,7 +652,7 @@ La première PR du moteur complet (`docs/engine/moteur-complet.md` §19.1 et §1
 - la barrière de `/livrer` §0 relève deux fichiers non TypeScript ajoutés sous `src/` : `golden-v2-inputs.json` et `golden-v2.json` (1 Mo à eux deux). Ce sont des données de test lues par `readFileSync` dans Vitest seulement, comme celles du golden v1 ; aucun `.nft.json` du build ne les trace, donc aucun bundle serveur ne les porte.
 
 
-## A14.c, T1 : la série mensuelle, moteur pur (2026-10-01)
+## A14.c, T1 : la série mensuelle, moteur pur (2026-10-01, #256)
 
 La deuxième PR du moteur complet (`docs/engine/moteur-complet.md` §19.2), drapeau fermé. T0 est en production le même jour (#255, squash `647834a`). Aucun écran ne permet encore de démarrer un deuxième mois, c'est T2 ; mais un fichier v3 à deux mois s'importe déjà, et il se lit en entier.
 
