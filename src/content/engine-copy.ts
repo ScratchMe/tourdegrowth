@@ -3,6 +3,7 @@ import type { Translatable } from "@/lib/i18n/translatable";
 import type { Pillar } from "@/lib/scoring/pillars";
 import type { CandidateId, LeverId, SlideTitleKey, ToolId, UnitInputId } from "@/lib/engine/types";
 import type { ScenarioAssumption } from "@/lib/engine/scenario";
+import type { SlgScenarioAssumption } from "@/lib/engine/slg-scenario";
 
 /**
  * engine-copy.ts — every interface string of the growth engine (engine spec
@@ -143,6 +144,19 @@ export const ENGINE_COPY = {
     catalogueComputedTitle: { fr: "Et cinq chiffres calculés", en: "And five computed numbers" },
     catalogueVerified: { fr: "Recettes relues en {month}.", en: "Recipes checked in {month}." },
     faqTitle: { fr: "Questions fréquentes", en: "Frequently asked questions" },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.7 E0) : the catalogue
+     * splits into one subsection per motion, and the link. S3 lays them on
+     * the page; until then the page lists self-serve's alone.
+     */
+    catalogueTitlePlg: { fr: "Libre-service : {n} chiffres", en: "Self-serve: {n} numbers" },
+    catalogueTitleSlg: { fr: "Assisté : {n} chiffres", en: "Sales-assisted: {n} numbers" },
+    catalogueIntroSlg: {
+      fr: "Trois par étape, deux pour Referral et quatre pour Revenue, qui porte aussi la marge de l'assisté. Tout se lit sur trois mois glissants : un mois compte trop peu d'affaires.",
+      en: "Three per stage, two for Referral and four for Revenue, which also carries sales-assisted's margin. Everything reads over rolling three-month periods: one month has too few deals.",
+    },
+    catalogueComputedTitleSlg: { fr: "Et trois chiffres calculés", en: "And three computed numbers" },
+    catalogueLinkTitle: { fr: "La liaison, si tu vends des deux façons", en: "The link, if you sell both ways" },
   },
 
   setup: {
@@ -194,6 +208,39 @@ export const ENGINE_COPY = {
     exampleLink: { fr: "Voir un exemple rempli, funnel et slides →", en: "See a filled-in example, funnel and slides →" },
     startSteps: { fr: "Commencer pas à pas →", en: "Start step by step →" },
     startBoard: { fr: "Tout voir d'un coup", en: "See it all at once" },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.1, C25 Q16) : the
+     * type and the motions. The type is a closed list with one option open,
+     * « Plus tard », never « Bientôt » (Q16); `models` and `modelSoon` above
+     * go when S3 rewires the card. The hint promises what the hybrid never
+     * does: one against the other.
+     */
+    companyType: { fr: "Ton type d'entreprise", en: "Your type of company" },
+    types: {
+      b2bSaas: { fr: "SaaS B2B", en: "B2B SaaS" },
+      consumerApp: { fr: "App grand public", en: "Consumer app" },
+      marketplace: { fr: "Place de marché", en: "Marketplace" },
+    },
+    typeLater: { fr: "Plus tard : leur funnel n'a pas la même forme.", en: "Later: their funnel has a different shape." },
+    motions: { fr: "Comment tu vends", en: "How you sell" },
+    motionPlg: { fr: "Libre-service (PLG) : les clients s'inscrivent et paient seuls", en: "Self-serve (PLG): customers sign up and pay on their own" },
+    motionSlg: { fr: "Assisté (SLG) : une équipe commerciale signe les contrats", en: "Sales-assisted (SLG): a sales team signs the contracts" },
+    motionsHint: {
+      fr: "Les deux ? Coche les deux : tu auras deux moteurs et leur total, jamais l'un contre l'autre.",
+      en: "Both? Tick both: you get two engines and their total, never one against the other.",
+    },
+    motionsRequired: { fr: "Coche au moins une façon de vendre.", en: "Tick at least one way you sell." },
+    qualificationWindow: { fr: "Fenêtre de qualification", en: "Qualification window" },
+    goLiveWindow: { fr: "Fenêtre de mise en production", en: "Go-live window" },
+    /**
+     * Read-only, under the month when sales-assisted is ticked: its periods,
+     * computed (S4). `{flows}`, `{leads}` and `{customers}` carry their
+     * preposition (`units.periodFrom`: « de juin à août 2026 »).
+     */
+    slgPeriods: {
+      fr: "Assisté : les flux {flows} ; les leads {leads} (ils ont eu {q} jours) ; les nouveaux clients {customers} (ils ont eu {g} jours).",
+      en: "Sales-assisted: flows {flows}; leads {leads} (they've had {q} days); new customers {customers} (they've had {g} days).",
+    },
   },
 
   board: {
@@ -201,6 +248,15 @@ export const ENGINE_COPY = {
     eyebrow: {
       fr: "Ton moteur de growth · {model} · cohorte : {cohort} · flux : {month}",
       en: "Your growth engine · {model} · {cohort} cohort · {month} flows",
+    },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, §18.7) : no cohort line. Sales-assisted
+     * alone (`{month}` its three months, « juin à août 2026 ») and the
+     * hybrid (`{month}` the flows' month).
+     */
+    eyebrowNoCohort: {
+      fr: "Ton moteur de growth · {model} · flux : {month}",
+      en: "Your growth engine · {model} · {month} flows",
     },
     smallCohort: {
       fr: "Petits effectifs : moins de 100 inscrits dans cette cohorte. Lis la direction, pas les décimales.",
@@ -555,6 +611,44 @@ export const ENGINE_COPY = {
     },
     offBase: { fr: "Compté sur {n}, pas sur ta base de {base}.", en: "Counted on {n}, not on your base of {base}." },
     saveNext: { fr: "Enregistrer et continuer →", en: "Save and continue →" },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.7 E3, §18.4.6, C25
+     * Q2-Q4) : the sales-assisted period, the company-wide margin, and the
+     * self-serve traps that only hold in the hybrid.
+     */
+    /** A sales-assisted flow: its three months, with their preposition. */
+    periodSlg: {
+      fr: "Prends les trois mois {period} : un seul mois compte trop peu d'affaires.",
+      en: "Take the three months {period}: a single month has too few deals.",
+    },
+    /** A sales-assisted cohort (leads, new customers): the three months that have had their window. */
+    periodSlgCohort: {
+      fr: "Prends les trois mois {period} : ceux d'après n'ont pas encore eu {n} jours.",
+      en: "Take the three months {period}: the later ones haven't had {n} days yet.",
+    },
+    /** The two margin sheets, in the hybrid only (C25 Q4): saved as an estimate, counted approximate, never found. */
+    companyWide: { fr: "Reprendre la marge globale", en: "Use the company-wide margin" },
+    companyWideHint: {
+      fr: "Elle sera comptée approximative : une marge globale n'est celle d'aucune des deux motions. Demande la marge par motion à la finance.",
+      en: "It will count as approximate: a company-wide margin belongs to neither motion. Ask finance for the margin by motion.",
+    },
+    /** `{motion}`: `hybrid.motionAdjective`. */
+    companyWidePrefilled: {
+      fr: "Pré-remplie avec la marge globale déjà saisie côté {motion}.",
+      en: "Prefilled with the company-wide margin already entered on the {motion} side.",
+    },
+    /** Five self-serve sheets gain a trap in the hybrid only (C25 Q3) — `phrases.ts#hybridTrapOf` says which, and when. */
+    hybridTrapTitle: { fr: "Avec l'assisté", en: "With sales-assisted" },
+    hybridTrap: {
+      leaves: {
+        fr: "Un compte passé à l'assisté n'est ni perdu, ni en baisse, ni en hausse : il quitte le libre-service. Si ton outil de facturation l'annule, retire-le des perdus.",
+        en: "An account that moved to sales-assisted isn't lost, downgraded or expanded: it leaves self-serve. If your billing tool cancels it, take it out of the lost accounts.",
+      },
+      signedBySales: {
+        fr: "Un compte signé par un commercial compte en assisté, même s'il est né ici.",
+        en: "An account signed by a salesperson counts as sales-assisted, even if it started here.",
+      },
+    },
   },
   triage: {
     question: { fr: "Pourquoi ?", en: "Why?" },
@@ -640,11 +734,139 @@ export const ENGINE_COPY = {
     /** The model as the board's eyebrow says it — the setup's labels are sentences, too long for a mono line. */
     modelShort: {
       selfserve: { fr: "libre-service", en: "self-serve" },
+      // TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, §18.7).
+      salesAssisted: { fr: "assisté", en: "sales-assisted" },
+      hybrid: { fr: "libre-service et assisté", en: "self-serve and sales-assisted" },
     },
     /** The mark on the comparison strip's target line, written beside the track, never inside it (§8.3). */
     targetMark: { fr: "ta cible", en: "your target" },
     /** The source list's second group: the tools this number is not usually found in, still offered. */
     otherTools: { fr: "Autres outils", en: "Other tools" },
+  },
+
+  /**
+   * TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md
+   * §18.6-§18.7). « Deux moteurs, un total »: the words that name a motion,
+   * and the sentences the hybrid prints once. Never a comparative (§18.6.4):
+   * `engine-copy.test.ts` sweeps this section, `total` and the hybrid's
+   * slide titles for one. The order is fixed everywhere: self-serve, then
+   * sales-assisted.
+   */
+  hybrid: {
+    /** A heading or a label: the column eyebrows, the selector, the annex and slide groups. */
+    motionName: {
+      plg: { fr: "Libre-service", en: "Self-serve" },
+      slg: { fr: "Assisté", en: "Sales-assisted" },
+    },
+    /** As a subject, with its article: « Décocher l'assisté ». */
+    motionSubject: {
+      plg: { fr: "le libre-service", en: "self-serve" },
+      slg: { fr: "l'assisté", en: "sales-assisted" },
+    },
+    /** As an adjective or a mid-sentence label: « un client assisté », « côté libre-service », « assisté 10 sur 15 ». */
+    motionAdjective: {
+      plg: { fr: "libre-service", en: "self-serve" },
+      slg: { fr: "assisté", en: "sales-assisted" },
+    },
+    /** After « le MRR »: « le MRR de l'assisté » / "sales-assisted MRR". */
+    ofMotion: {
+      plg: { fr: "du libre-service", en: "self-serve" },
+      slg: { fr: "de l'assisté", en: "sales-assisted" },
+    },
+    /** The motion selector's accessible name: which motion's stages and what-ifs show below it. */
+    selectorLabel: { fr: "Étapes et « Et si » de", en: "Stages and what-ifs for" },
+    /** A column's eyebrow over its diagnosis: `{verdict}` a `diagnosis` title, lower-cased by the code. */
+    diagnosisEyebrow: { fr: "{motion} — {verdict}", en: "{motion} — {verdict}" },
+    /** The fixed sentence under the two diagnoses and at the foot of the side-by-side slide (§18.6.4). */
+    twoSegments: {
+      fr: "Deux motions, deux segments : chacune se lit contre ses cibles, pas contre l'autre.",
+      en: "Two motions, two segments: each is read against its own targets, not against the other.",
+    },
+    /** One motion's coverage in a line of both: the resume band, the import preview (« libre-service 11 sur 17 · assisté 10 sur 15 »). */
+    motionCount: { fr: "{motion} {n} sur {N}", en: "{motion} {n} of {N}" },
+    /** A motion unticked whose numbers are kept, in the import preview (§18.1.2). */
+    motionCountHidden: { fr: "{motion} {n} sur {N} (masqué)", en: "{motion} {n} of {N} (hidden)" },
+    /** The link's block, under sales-assisted's three Acquisition numbers (§18.6.3). */
+    linkBlock: { fr: "Liaison avec le libre-service", en: "Link with self-serve" },
+  },
+  /**
+   * TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md
+   * §18.6.2-§18.6.3, §18.8.2). The band « Deux moteurs, un total » and the
+   * `total` slide's body. A total is a SUM, and the total shown is the sum of
+   * the parts shown (`total.ts#formatSum`): every line here can be redone
+   * with a calculator.
+   */
+  total: {
+    title: { fr: "Deux moteurs, un total", en: "Two engines, one total" },
+    mrr: { fr: "MRR", en: "MRR" },
+    newMrr: { fr: "Nouveau MRR du mois", en: "New MRR this month" },
+    /** `{plg} + {slg} = {total}`: `total.formatSum`'s three strings, each part rounded to the common unit. */
+    newMrrSum: { fr: "Nouveau MRR du mois : {plg} + {slg} = {total}", en: "New MRR this month: {plg} + {slg} = {total}" },
+    mrr12Sum: { fr: "Dans 12 mois, au rythme actuel : {plg} + {slg} = {total}", en: "In 12 months, at the current pace: {plg} + {slg} = {total}" },
+    /** A block's stage line: the stage its diagnosis names and where its slide is, or why none is named. */
+    stageNamed: { fr: "{stage} (slide {i})", en: "{stage} (slide {i})" },
+    stageLevel: { fr: "rien ne freine", en: "nothing holds it back" },
+    stageNotEnough: { fr: "pas assez de cibles", en: "not enough targets" },
+    /** `{period}`: the three months, bare (« juin à août 2026 »). */
+    link: {
+      fr: "{n} des {m} opportunités assistées viennent de comptes du libre-service ({period}).",
+      en: "{n} of the {m} sales-assisted opportunities came from self-serve accounts ({period}).",
+    },
+    linkOne: {
+      fr: "{n} des {m} opportunités assistées vient d'un compte du libre-service ({period}).",
+      en: "{n} of the {m} sales-assisted opportunities came from a self-serve account ({period}).",
+    },
+    linkNote: {
+      fr: "Une part du pipeline, pas une attribution : on ne sait pas combien de ces comptes auraient signé sans le libre-service.",
+      en: "A share of the pipeline, not an attribution: we don't know how many of these accounts would have signed without self-serve.",
+    },
+    /** The `total` slide's footer, rule S8 printed (C25 Q3). */
+    footer: {
+      fr: "MRR à fin {month} · un client compte dans la motion qui a signé son contrat en cours · sources : {tools}",
+      en: "MRR at the end of {month} · a customer counts in the motion that signed their current contract · sources: {tools}",
+    },
+  },
+  /**
+   * TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md
+   * §18.5.1, §18.8.2). Sales-assisted's funnel in three relays, each on ITS
+   * OWN base of 100: nothing here chains them (« x clients pour 100 leads »
+   * is never printed). `{base}` is `findings.base` (« leads » or « MQL »).
+   */
+  relays: {
+    ownBase: {
+      fr: "Chaque grille a sa propre base de 100 : ce ne sont pas les mêmes personnes.",
+      en: "Each grid has its own base of 100: they aren't the same people.",
+    },
+    /** Between two relays, on the compact column (§18.7). */
+    newBase: { fr: "nouvelle base", en: "new base" },
+    /** The line above relay 1: `{months}` bare (« mai à juillet 2026 »). */
+    upstream: { fr: "~{n} {base} par mois · {source} · {months}", en: "~{n} {base} a month · {source} · {months}" },
+    /** `{label}`: `relays.label.leads` or `.mql`. */
+    upstreamUnknown: { fr: "{label} par mois : non mesuré", en: "{label} a month: not measured" },
+    /** Each grid's labels: its base of 100, then what the rate counts. */
+    label: {
+      leads: { fr: "Leads", en: "Leads" },
+      mql: { fr: "MQL", en: "MQLs" },
+      closedOpps: { fr: "Opportunités conclues", en: "Closed opportunities" },
+      newCustomers: { fr: "Nouveaux clients", en: "New customers" },
+      leadToOpp: { fr: "Devenus opportunités", en: "Became opportunities" },
+      winRate: { fr: "Signées", en: "Signed" },
+      goLive: { fr: "En production à {n} jours", en: "Live within {n} days" },
+    },
+    /** A grid's text equivalent: `{population}` a `findings.relayVerb`, `{period}` with its preposition. */
+    aria: {
+      fr: "{n} sur 100 {base} {population} — {status}, {source}, {period}",
+      en: "{n} in 100 {base} {population} — {status}, {source}, {period}",
+    },
+    /** The `slg:peloton` title's clauses (§18.8.2), joined with « ; », the first capitalised by the code. */
+    clauseLeadToOpp: { fr: "sur 100 {base}, {q} deviennent une opportunité", en: "out of 100 {base}, {q} become an opportunity" },
+    clauseLeadToOppOne: { fr: "sur 100 {base}, {q} devient une opportunité", en: "out of 100 {base}, {q} becomes an opportunity" },
+    clauseWinRate: { fr: "sur 100 opportunités conclues, {w} sont signées", en: "out of 100 closed opportunities, {w} are signed" },
+    clauseWinRateOne: { fr: "sur 100 opportunités conclues, {w} est signée", en: "out of 100 closed opportunities, {w} is signed" },
+    clauseGoLive: { fr: "sur 100 nouveaux clients, {g} sont en production à {n} jours", en: "out of 100 new customers, {g} are live within {n} days" },
+    clauseGoLiveOne: { fr: "sur 100 nouveaux clients, {g} est en production à {n} jours", en: "out of 100 new customers, {g} is live within {n} days" },
+    /** The `slg:peloton` slide's footer: `{sources}`, each relay's. */
+    slideFooter: { fr: "Chaque grille a sa propre base de 100 · {sources}", en: "Each grid has its own base of 100 · {sources}" },
   },
 
   // --- Diagnosis and "what if" (§14.6) -------------------------------------
@@ -709,6 +931,11 @@ export const ENGINE_COPY = {
      */
     // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1 : aucun repère ne désigne).
     noComparator: { fr: "sans cible · fixes-en une", en: "no target · set one" },
+    // TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.5.2) : once, under sales-assisted's diagnosis.
+    cycleNote: {
+      fr: "Le cycle ne bouge pas l'argent dans ce calcul : le raccourcir avance les signatures sans en créer.",
+      en: "The cycle doesn't move the money in this calculation: shortening it brings signatures forward without creating any.",
+    },
   },
   whatIf: {
     today: { fr: "Aujourd'hui", en: "Today" },
@@ -900,6 +1127,42 @@ export const ENGINE_COPY = {
       "expansion-unknown": { fr: "L'expansion n'est pas renseignée : comptée à 0.", en: "Expansion isn't entered: counted as 0." },
       "twelve-months": { fr: "Sur 12 mois, au rythme de ce mois : la base retenue à la NRR chaque mois, plus le nouveau MRR du mois. Ni saisonnalité, ni saturation.", en: "Over 12 months, at this month's pace: the base retained at NRR each month, plus the month's new MRR. No seasonality, no saturation." },
     } satisfies Record<ScenarioAssumption, Translatable>,
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.5.5, C25 Q7) :
+     * the sales-assisted panel and the one line both panels share.
+     */
+    /** The link's slider, in WHOLE opportunities: its own label, not `sliderLabel`'s « cible testée ». */
+    linkSlider: { fr: "Opportunités venues du libre-service, par trimestre", en: "Opportunities from self-serve, per quarter" },
+    /** The hybrid's one line under both panels: a sum, never a comparison. */
+    totalIn12: { fr: "MRR total dans 12 mois", en: "Total MRR in 12 months" },
+    totalIn12Row: {
+      fr: "{today} aujourd'hui, {projected} avec les « Et si » des deux panneaux",
+      en: "{today} today, {projected} with the what-ifs of both panels",
+    },
+    kpiNrr12: { fr: "NRR sur douze mois", en: "12-month NRR" },
+    kpiWon: { fr: "Nouveaux clients par trimestre", en: "New customers a quarter" },
+    /** The sales-assisted panel's quarter, where self-serve shows its month's funnel. */
+    quarterToday: { fr: "Ton trimestre, aujourd'hui", en: "Your quarter, today" },
+    quarterIf: { fr: "Ton trimestre, avec tes « Et si »", en: "Your quarter, with your what-ifs" },
+    opps: { fr: "Opportunités créées", en: "Opportunities created" },
+    oppsFromSelfServe: { fr: "dont venues du libre-service", en: "of which from self-serve" },
+    won: { fr: "Nouveaux clients", en: "New customers" },
+    /** One sentence per rule of `lib/engine/slg-scenario.ts`, printed only when it applied. */
+    slgAssumption: {
+      "slg-lead-same-win-rate": { fr: "Les opportunités en plus se signent au même taux que les autres.", en: "The extra opportunities are signed at the same rate as the others." },
+      "slg-win-same-closed": { fr: "Le nouveau taux de closing s'applique au même nombre d'opportunités conclues.", en: "The new win rate applies to the same number of closed opportunities." },
+      "slg-acv-new-contracts": { fr: "Le nouvel ACV s'applique aux nouveaux contrats ; les contrats en cours gardent leur prix.", en: "The new ACV applies to new contracts; current contracts keep their price." },
+      "slg-renewal-as-nrr": { fr: "Un point de renouvellement compte comme un point de NRR : les contrats sauvés valent la moyenne.", en: "A point of renewal counts as a point of NRR: the contracts saved are worth the average." },
+      "slg-logos-for-revenue": { fr: "Sans NRR, le renouvellement des contrats en tient lieu, comme si chaque contrat valait la moyenne.", en: "Without the NRR, contract renewal stands in for it, as if every contract were worth the average." },
+      "link-others-unchanged": { fr: "Les autres opportunités ne changent pas.", en: "The other opportunities don't change." },
+      "link-same-win-rate": { fr: "Celles venues du libre-service se signent au même taux que les autres.", en: "Those from self-serve are signed at the same rate as the others." },
+      "link-nothing-taken": { fr: "On ne sait pas combien de ces comptes auraient payé seuls : rien n'est retiré au libre-service.", en: "We don't know how many of these accounts would have paid on their own: nothing is taken from self-serve." },
+      "slg-same-spend": { fr: "À dépense égale : plus de signatures font baisser le CAC assisté dans la même proportion.", en: "Same spend: more signatures lower the sales-assisted CAC in the same proportion." },
+      "slg-twelve-months": {
+        fr: "Sur 12 mois, au rythme de ce trimestre : la base retenue à la NRR, plus douze mois de nouveau MRR. Contrats annuels : aucun nouveau ne se renouvelle dans l'année.",
+        en: "Over 12 months, at this quarter's pace: the base retained at the NRR, plus twelve months of new MRR. Annual contracts: none of the new ones comes up for renewal within the year.",
+      },
+    } satisfies Record<SlgScenarioAssumption, Translatable>,
   },
   peloton: {
     upstream: {
@@ -1080,6 +1343,9 @@ export const ENGINE_COPY = {
       fr: "Pour des slides en anglais, passe la page en EN : tes chiffres te suivent.",
       en: "For slides in French, switch the page to FR: your numbers follow you.",
     },
+    // TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.7 E5) : the hybrid's thumbnails under four headings, each motion's under `hybrid.motionName`.
+    groupTotal: { fr: "Les deux moteurs", en: "Both engines" },
+    groupEnd: { fr: "Pour conclure", en: "To conclude" },
   },
   ask: {
     title: { fr: "Ce que tu demandes", en: "What you're asking for" },
@@ -1250,6 +1516,36 @@ export const ENGINE_COPY = {
      * and « de 6 à 9 % à 12 % » can't be read.
      */
     whatIfLeverRow: { fr: "à {to} (aujourd'hui : {from}) · {gain}", en: "from {from} to {to} · {gain}" },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.8.1-§18.8.2) :
+     * the chrome of a motion's slides, and the side-by-side unit economics.
+     */
+    /** A slide of one motion, in the hybrid: its kicker names the motion (`hybrid.motionAdjective`). */
+    kickerMotion: {
+      fr: "Moteur de growth · {company}{month} · {motion} · données internes",
+      en: "Growth engine · {company}{month} · {motion} · internal data",
+    },
+    /** A sales-assisted slide's footer: `{flows}` and `{leads}` with their preposition (« de juin à août 2026 »). */
+    footerSlg: { fr: "Flux assistés {flows} · leads {leads} · sources : {tools}", en: "Sales-assisted flows {flows} · leads {leads} · sources: {tools}" },
+    unitRows: {
+      cac: { fr: "CAC", en: "CAC" },
+      payback: { fr: "Payback", en: "Payback" },
+      basket: { fr: "Panier", en: "Revenue per customer" },
+      lostInAYear: { fr: "Clients perdus sur un an", en: "Customers lost in a year" },
+      ltvCac: { fr: "LTV:CAC", en: "LTV:CAC" },
+    },
+    unitBasketPlg: { fr: "ARPA {arpa} par mois", en: "ARPA {arpa} a month" },
+    unitBasketSlg: { fr: "ACV {acv} par an ({monthly} par mois)", en: "ACV {acv} a year ({monthly} a month)" },
+    /** Self-serve's churn annualised and compounded (C25 Q5): « ~26 % (2,5 % par mois, composé) ». */
+    unitLostPlg: { fr: "{annual} ({monthly} par mois, composé)", en: "{annual} ({monthly} a month, compounded)" },
+    unitLostSlg: { fr: "{rate} des contrats échus", en: "{rate} of contracts up for renewal" },
+    unitLostSlgMonthly: { fr: "{rate} (contrats mensuels, composé)", en: "{rate} (monthly contracts, compounded)" },
+    unitUncomputable: { fr: "incalculable — manque : {input}", en: "can't be computed — missing: {input}" },
+    /** The footer when a margin is the company-wide one (C25 Q4): `{motion}` a `hybrid.motionSubject`. */
+    unitCompanyWide: { fr: "marge globale reprise dans {motion}", en: "company-wide margin used for {motion}" },
+    unitCompanyWideBoth: { fr: "marge globale reprise dans les deux motions", en: "company-wide margin used for both motions" },
+    /** The appendix's third group, after each motion's (§18.8.2). */
+    annexLink: { fr: "Liaison", en: "Link" },
   },
   /** One template per case and grammatical number (§9.3). `**…**` is the red accent. */
   slideTitles: {
@@ -1384,6 +1680,91 @@ export const ENGINE_COPY = {
     scenario: { fr: "Avec les {n} « Et si » ensemble, le MRR dans 12 mois gagnerait **{gain}**.", en: "With the {n} what-ifs together, MRR in 12 months would gain **{gain}**." },
     // TODO: à relire — nouveau (2026-09-26).
     scenarioPlain: { fr: "**Les {n} « Et si » ensemble.**", en: "**The {n} what-ifs together.**" },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.8.2) :
+     * the total, the relays, the sales-assisted leak priced in customers, the
+     * unit economics side by side. `{total}`, `{plg}` and `{slg}` are the
+     * same strings as the body's first line (title = body).
+     */
+    total: { fr: "Le MRR atteint **{total}** : {plg} en libre-service, {slg} en assisté.", en: "MRR stands at **{total}**: {plg} self-serve, {slg} sales-assisted." },
+    /** `{motion}`: `hybrid.ofMotion`. */
+    totalUnknown: {
+      fr: "**On ne peut pas encore additionner les deux moteurs** : le MRR {motion} n'est pas mesuré.",
+      en: "**We can't add the two engines up yet**: {motion} MRR isn't measured.",
+    },
+    totalUnknownBoth: {
+      fr: "**On ne peut pas encore additionner les deux moteurs** : aucun des deux MRR n'est mesuré.",
+      en: "**We can't add the two engines up yet**: neither MRR is measured.",
+    },
+    /** Each value a filled `relays.clause*`, the first capitalised: the last relay carries the accent. */
+    slgPelotonComplete: { fr: "{r1} ; {r2} ; **{r3}**.", en: "{r1}; {r2}; **{r3}**." },
+    /**
+     * « On ne mesure pas {stages} » rather than « {stages} n'est pas
+     * mesurée »: the relays' stages mix genders (« le taux de closing », « la
+     * mise en production ») and French would have to agree with each.
+     */
+    slgPelotonGap: {
+      fr: "{clauses}. **Entre les deux, on ne voit rien : on ne mesure pas {stages}.**",
+      en: "{clauses}. **In between, we see nothing: {stages} aren't measured.**",
+    },
+    slgPelotonGapOne: {
+      fr: "{clauses}. **Entre les deux, on ne voit rien : on ne mesure pas {stages}.**",
+      en: "{clauses}. **In between, we see nothing: {stages} isn't measured.**",
+    },
+    slgPelotonTailBreak: {
+      fr: "{clauses}. **Au-delà, on ne sait pas les suivre : on ne mesure pas {stages}.**",
+      en: "{clauses}. **Beyond that, we can't follow them: {stages} aren't measured.**",
+    },
+    slgPelotonTailBreakOne: {
+      fr: "{clauses}. **Au-delà, on ne sait pas les suivre : on ne mesure pas {stages}.**",
+      en: "{clauses}. **Beyond that, we can't follow them: {stages} isn't measured.**",
+    },
+    slgPelotonEmpty: {
+      fr: "**On ne sait pas encore suivre 100 {base} jusqu'à la mise en production.**",
+      en: "**We can't yet follow 100 {base} all the way to go-live.**",
+    },
+    /** Sales-assisted with no ACV: its chain counts new customers over a quarter (§18.5.3). With an amount, `leakClearMrr*` serve both motions. */
+    slgLeakClearCustomers: {
+      fr: "Ramener {stage} à {target} ajouterait **{n} nouveaux clients** par trimestre.",
+      en: "Bringing {stage} to {target} would add **{n} new customers** a quarter.",
+    },
+    slgLeakClearCustomersOne: {
+      fr: "Ramener {stage} à {target} ajouterait **{n} nouveau client** par trimestre.",
+      en: "Bringing {stage} to {target} would add **{n} new customer** a quarter.",
+    },
+    /** Renewal with no sales-assisted ARPA: contracts KEPT. */
+    slgLeakClearKept: {
+      fr: "Ramener {stage} à {target} garderait **{n} contrats** de plus par trimestre.",
+      en: "Bringing {stage} to {target} would keep **{n} more contracts** a quarter.",
+    },
+    slgLeakClearKeptOne: {
+      fr: "Ramener {stage} à {target} garderait **{n} contrat** de plus par trimestre.",
+      en: "Bringing {stage} to {target} would keep **{n} more contract** a quarter.",
+    },
+    /** No count to multiply: `{worth}` a `worth.perHundred*` phrase, read on the relay's own 100. */
+    slgLeakClearPerHundred: {
+      fr: "Ramener {stage} à {target} donnerait **{worth}**.",
+      en: "Bringing {stage} to {target} would give **{worth}**.",
+    },
+    /** `{plg}`, `{slg}`: two paybacks with their unit (« 4 mois »). Self-serve first, always (§18.6.4). */
+    unitEconomicsBoth: {
+      fr: "Un client libre-service rembourse son coût d'acquisition en **{plg}**, un client assisté en **{slg}**.",
+      en: "A self-serve customer pays back their acquisition cost in **{plg}**, a sales-assisted one in **{slg}**.",
+    },
+    /** `{known}`, `{other}`: `hybrid.motionAdjective`; `{input}` what the other side lacks, with its article (« il manque la marge brute »). */
+    unitEconomicsOneSide: {
+      fr: "Un client {known} rembourse son coût d'acquisition en **{m}**. Côté {other}, **on ne peut pas encore le dire** : il manque {input}.",
+      en: "A {known} customer pays back their acquisition cost in **{m}**. On the {other} side, **we can't say yet**. Missing: {input}.",
+    },
+    unitEconomicsNoneMargins: {
+      fr: "**On ne peut pas encore dire ce que rapporte un client** : la marge brute n'est mesurée dans aucune des deux motions.",
+      en: "**We can't yet say what a customer is worth**: gross margin isn't measured for either motion.",
+    },
+    /** `{plg}`, `{slg}`: `unitInput` phrases, with their article. */
+    unitEconomicsNoneDifferent: {
+      fr: "**On ne peut pas encore dire ce que rapporte un client** : il manque {plg} en libre-service et {slg} en assisté.",
+      en: "**We can't yet say what a customer is worth**: self-serve lacks {plg}, sales-assisted lacks {slg}.",
+    },
   } satisfies Record<SlideTitleKey, Translatable>,
   /** Speaker notes (§9.4), pre-written against the classic objections. */
   notes: {
@@ -1423,6 +1804,39 @@ export const ENGINE_COPY = {
       fr: "Est-ce une prévision ? — Non : une projection au rythme de ce mois, qui ne tient que si les hypothèses en bas de la slide tiennent.",
       en: "Is this a forecast? — No: a projection at this month's pace, which only holds if the assumptions at the bottom of the slide hold.",
     },
+    // TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.8.3) : the hybrid's and sales-assisted's objections.
+    /** `{i}`, `{j}`: the two leak slides, self-serve's first. */
+    whyNotCompare: {
+      fr: "Pourquoi ne pas comparer les deux ? — Les deux motions vendent à des segments différents : chacune se lit contre ses cibles (slides {i} et {j}).",
+      en: "Why not compare the two? — The two motions sell to different segments: each is read against its own targets (slides {i} and {j}).",
+    },
+    /** `{link}`: `total.link` filled. */
+    selfServeFeeds: {
+      fr: "Le libre-service alimente-t-il les ventes ? — {link} Ce n'est pas une attribution.",
+      en: "Does self-serve feed sales? — {link} It isn't an attribution.",
+    },
+    /** The link's lever moved (C25 Q7): `{n}` signatures a quarter, formatted with its « ~ ». */
+    selfServeLever: {
+      fr: "Si le libre-service en passait {to} au lieu de {from}, l'assisté signerait {n} de plus par trimestre (slide {k}).",
+      en: "If self-serve passed on {to} instead of {from}, sales-assisted would sign {n} more a quarter (slide {k}).",
+    },
+    whyThreeMonths: {
+      fr: "Pourquoi trois mois ? — Un mois compte trop peu d'affaires ; trois mois lissent sans mélanger deux grilles tarifaires.",
+      en: "Why three months? — One month has too few deals; three months smooth it out without mixing two price lists.",
+    },
+    /** `{c}`: the median cycle with its unit (« 45 jours »). */
+    cycle: { fr: "Et le cycle ? — Cycle médian de {c}.", en: "What about the cycle? — Median cycle of {c}." },
+    /** `slg-cycle-long` raised: the check's message says « ton », made for the screen; a note is read out to a room (§18.11). */
+    cycleLong: {
+      fr: "Et le cycle ? — Cycle médian de {c}, plus long que les trois mois de la fenêtre : le CAC du trimestre divise sa dépense par des clients venus des dépenses d'avant. C'est un ordre de grandeur.",
+      en: "What about the cycle? — Median cycle of {c}, longer than the three-month window: this quarter's CAC divides its spend by customers from earlier spend. It's an order of magnitude.",
+    },
+    whoCountsWhere: {
+      fr: "Qui compte où ? — Un client compte dans la motion qui a signé son contrat en cours. Un compte du libre-service signé par un commercial compte en assisté, et ce passage n'est pas un départ du libre-service.",
+      en: "Who counts where? — A customer counts in the motion that signed their current contract. A self-serve account signed by a salesperson counts as sales-assisted, and that move isn't a self-serve departure.",
+    },
+    /** One per measured relay: its period is three months, said with its preposition. */
+    sourceSlg: { fr: "D'où vient ce chiffre ? — {metric} : {tool}, {period}.", en: "Where does this number come from? — {metric}: {tool}, {period}." },
   },
 
   // --- Findings and sanity checks (§14.9, §14.10) --------------------------
@@ -1570,6 +1984,45 @@ export const ENGINE_COPY = {
       fr: "Tes chiffres déjà saisis portent sur les mois d'avant. Ils ne sont pas effacés : relis-les.",
       en: "The numbers you already entered are for the previous months. They are not erased: read them again.",
     },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.1.2) : ticking or
+     * unticking a motion afterwards, where nothing is lost. `{motion}`:
+     * `hybrid.motionSubject`, with its article. `{n}`: the numbers already
+     * entered on that side.
+     */
+    motionOff: {
+      fr: "Décocher {motion} le retire du tableau et des slides. Ses {n} chiffres, ses cibles et ses « Et si » restent sur cet appareil et dans ton fichier : recoche pour les retrouver.",
+      en: "Unticking {motion} removes it from the board and the slides. Its {n} numbers, targets and what-ifs stay on this device and in your file: tick it again to get them back.",
+    },
+    motionOffOne: {
+      fr: "Décocher {motion} le retire du tableau et des slides. Son chiffre, ses cibles et ses « Et si » restent sur cet appareil et dans ton fichier : recoche pour les retrouver.",
+      en: "Unticking {motion} removes it from the board and the slides. Its number, targets and what-ifs stay on this device and in your file: tick it again to get them back.",
+    },
+    /** Nothing entered on that side yet: no « 0 chiffres » to keep. */
+    motionOffNone: {
+      fr: "Décocher {motion} le retire du tableau et des slides. Aucun chiffre n'y est encore saisi : rien ne se perd.",
+      en: "Unticking {motion} removes it from the board and the slides. No number has been entered there yet: nothing is lost.",
+    },
+    motionOnSlg: {
+      fr: "L'assisté commence vide : {n} chiffres à aller chercher. Ton libre-service ne change pas.",
+      en: "Sales-assisted starts empty: {n} numbers to go and get. Your self-serve side doesn't change.",
+    },
+    motionOnPlg: {
+      fr: "Le libre-service commence vide : {n} chiffres à aller chercher. Ton assisté ne change pas.",
+      en: "Self-serve starts empty: {n} numbers to go and get. Your sales-assisted side doesn't change.",
+    },
+    motionBack: { fr: "On retrouve les {n} chiffres que tu avais saisis.", en: "Your {n} numbers are back." },
+    motionBackOne: { fr: "On retrouve le chiffre que tu avais saisi.", en: "Your number is back." },
+    /** The box left ticked is disabled, with this under it. */
+    motionLast: { fr: "Il faut au moins une façon de vendre.", en: "You need at least one way you sell." },
+    qualificationReset: {
+      fr: "La fenêtre de qualification fait partie de la définition du passage des leads en opportunités : ton chiffre déjà saisi repassera « à faire », pour que tu le remesures sur {n} jours.",
+      en: "The qualification window is part of the lead-to-opportunity rate's definition: the number you already entered will go back to \"to fill in\", so you can measure it again over {n} days.",
+    },
+    goLiveReset: {
+      fr: "La fenêtre de mise en production fait partie de la définition du taux de mise en production : ton chiffre déjà saisi repassera « à faire », pour que tu le remesures sur {n} jours.",
+      en: "The go-live window is part of the go-live rate's definition: the number you already entered will go back to \"to fill in\", so you can measure it again over {n} days.",
+    },
     saved: { fr: "Réglages enregistrés.", en: "Settings saved." },
   },
 
@@ -1608,6 +2061,32 @@ export const ENGINE_COPY = {
     // des chiffres (événement d'activation, cause de churn, mécanisme de recommandation).
     answerOf: { fr: "Point {i} sur {n} · {stage}", en: "Item {i} of {n} · {stage}" },
     skip: { fr: "Passer, j'y reviendrai", en: "Skip, I'll come back to it" },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.7) : the step by
+     * step per motion. Numbered within a motion (« Assisté · chiffre 4 sur
+     * 15 »), never across both. `{motion}`: `hybrid.motionName`.
+     */
+    numberOfMotion: { fr: "{motion} · chiffre {i} sur {n} · {stage}", en: "{motion} · number {i} of {n} · {stage}" },
+    answerOfMotion: { fr: "{motion} · point {i} sur {n} · {stage}", en: "{motion} · item {i} of {n} · {stage}" },
+    skipToSlg: { fr: "Passer à l'assisté →", en: "Skip to sales-assisted →" },
+    skipToWhatIf: { fr: "Passer aux « Et si » →", en: "Skip to the what-ifs →" },
+    baseTitleSlg: { fr: "Ta base assistée : opportunités, affaires, clients", en: "Your sales-assisted base: opportunities, deals, customers" },
+    baseIntroSlg: {
+      fr: "Trois nombres servent à plusieurs chiffres de l'assisté. Saisis-les une fois ici : on les réutilise partout, et tu peux toujours les modifier.",
+      en: "Three numbers feed several sales-assisted figures. Enter them once here: they are reused everywhere, and you can always change them.",
+    },
+    baseOppsHint: {
+      fr: "Toutes les opportunités créées {period}. Elles servent à la part des opportunités recommandées et, si tu vends aussi en libre-service, à la liaison.",
+      en: "Every opportunity created {period}. They feed the referred share of opportunities and, if you also sell self-serve, the link.",
+    },
+    baseDealsHint: {
+      fr: "Les affaires « nouveau client » gagnées {period}. Elles servent au taux de closing, à l'ACV et au CAC assisté.",
+      en: "The new-customer deals won {period}. They feed the win rate, the ACV and the sales-assisted CAC.",
+    },
+    baseCustomersHint: {
+      fr: "Les clients assistés à fin {month}. Ils servent à l'ARPA assisté et aux clients références.",
+      en: "The sales-assisted customers at the end of {month}. They feed the sales-assisted ARPA and the reference customers.",
+    },
     whatIfTitle: { fr: "Et si ?", en: "What if?" },
     doneTitle: { fr: "Ton moteur est prêt", en: "Your engine is ready" },
     doneBody: {
@@ -1674,6 +2153,8 @@ export const ENGINE_COPY = {
       en: "File from an earlier version: it's been updated, nothing changed in your numbers.",
     },
     fileName: { fr: "tdg-moteur-{month}.json", en: "tdg-engine-{month}.json" },
+    // TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.1.2) : a file with both motions. `{counts}`: `hybrid.motionCount` (or `motionCountHidden`) per motion, joined with « · ».
+    importPreviewMotions: { fr: "{company} · {month} · {counts}", en: "{company} · {month} · {counts}" },
   },
   resume: {
     band: {
@@ -1700,6 +2181,23 @@ export const ENGINE_COPY = {
     },
     continue: { fr: "Reprendre", en: "Continue" },
     remind: { fr: "Relancer : {role}", en: "Follow up: {role}" },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.7 E6) : the band
+     * counts per motion. `{counts}`: `hybrid.motionCount` per ticked motion,
+     * joined with « · » (« libre-service 11 sur 17 · assisté 10 sur 15 »).
+     */
+    bandMotions: {
+      fr: "Chiffres trouvés : {counts}. Depuis ta dernière visite, il y a {days} jours : {pending}.",
+      en: "Numbers found: {counts}. Since your last visit, {days} days ago: {pending}.",
+    },
+    bandMotionsOne: {
+      fr: "Chiffres trouvés : {counts}. Depuis ta visite d'hier : {pending}.",
+      en: "Numbers found: {counts}. Since your visit yesterday: {pending}.",
+    },
+    bandMotionsToday: {
+      fr: "Chiffres trouvés : {counts}. Depuis ta visite de tout à l'heure : {pending}.",
+      en: "Numbers found: {counts}. Since your visit earlier today: {pending}.",
+    },
   },
   erase: {
     title: { fr: "Tout effacer", en: "Erase everything" },
@@ -1755,6 +2253,14 @@ export const ENGINE_COPY = {
       a: {
         fr: "Le Tour mesure en trois minutes si ton équipe suit ses chiffres, sans te demander aucun chiffre. Le moteur te fait aller les chercher, et confronte les deux si tu as fait le Tour sur cet appareil.",
         en: "The Tour measures in three minutes whether your team tracks its numbers, without asking for any number. The engine has you go and get them, and compares the two if you took the Tour on this device.",
+      },
+    },
+    // TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.7 E0).
+    {
+      q: { fr: "Et si on vend avec une équipe commerciale ?", en: "What if we sell through a sales team?" },
+      a: {
+        fr: "Coche « Assisté » au réglage : le moteur suit tes leads, tes opportunités, tes signatures, la mise en production et le renouvellement, sur trois mois glissants, avec tes propres cibles. Si tu vends aussi en libre-service, coche les deux : deux moteurs côte à côte et leur total, jamais l'un contre l'autre.",
+        en: "Tick \"Sales-assisted\" in the setup: the engine follows your leads, opportunities, signatures, go-live and renewals, over rolling three-month periods, against your own targets. If you also sell self-serve, tick both: two engines side by side and their total, never one against the other.",
       },
     },
   ],

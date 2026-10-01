@@ -923,15 +923,15 @@ export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
   "slg.acq.lead-to-opp": {
     name: { fr: "Leads passés en opportunité", en: "Lead-to-opportunity rate" },
     oneLiner: { fr: "La part des leads d'une période qui deviennent une opportunité qualifiée.", en: "The share of a period's leads that become a qualified opportunity." },
-    formula: { fr: "leads créés {period} devenus une opportunité qualifiée sous {n} jours ÷ leads créés {period}", en: "leads created {period} that became a qualified opportunity within {n} days ÷ leads created {period}" },
-    inputs: { numerator: { fr: "Leads devenus opportunités sous {n} jours", en: "Leads turned opportunities within {n} days" }, denominator: { fr: "Leads créés {period}", en: "Leads created {period}" } },
+    formula: { fr: "leads créés {period} devenus une opportunité qualifiée sous {n} jours ÷ leads créés {period}", en: "leads created {period} that became a qualified opportunity within {n} days ÷ leads created {period}" },
+    inputs: { numerator: { fr: "Leads devenus opportunités sous {n} jours", en: "Leads turned opportunities within {n} days" }, denominator: { fr: "Leads créés {period}", en: "Leads created {period}" } },
     where: [
-      { source: tool("hubspot"), label: { fr: "HubSpot", en: "HubSpot" }, path: { fr: "les contacts créés sur la période, avec leur date d'entrée dans l'étape Opportunité du cycle de vie : un export, puis ceux arrivés sous {n} jours", en: "the contacts created over the period, with the date they entered the Opportunity lifecycle stage: an export, then those who got there within {n} days" } },
-      { source: tool("salesforce"), label: { fr: "Salesforce", en: "Salesforce" }, path: { fr: "un rapport de leads avec leur conversion : créés sur la période, convertis sous {n} jours (date de conversion moins date de création)", en: "a leads report with conversion details: created over the period, converted within {n} days (converted date minus created date)" } },
+      { source: tool("hubspot"), label: { fr: "HubSpot", en: "HubSpot" }, path: { fr: "les contacts créés sur la période, avec leur date d'entrée dans l'étape Opportunité du cycle de vie : un export, puis ceux arrivés sous {n} jours", en: "the contacts created over the period, with the date they entered the Opportunity lifecycle stage: an export, then those who got there within {n} days" } },
+      { source: tool("salesforce"), label: { fr: "Salesforce", en: "Salesforce" }, path: { fr: "un rapport de leads avec leur conversion : créés sur la période, convertis sous {n} jours (date de conversion moins date de création)", en: "a leads report with conversion details: created over the period, converted within {n} days (converted date minus created date)" } },
       { source: tool("pipedrive"), label: { fr: "Pipedrive", en: "Pipedrive" }, path: { fr: "la boîte de réception des leads : ceux de la période convertis en affaire ; sinon, un export", en: "the leads inbox: the period's leads converted into a deal; otherwise, an export" } },
     ],
     trap: { fr: "« Lead » n'a pas de définition commune : des contacts importés ou des inscrits à un webinar font chuter le taux. Écris ce qui compte comme lead, et comme opportunité.", en: "\"Lead\" has no shared definition: imported contacts or webinar sign-ups drag the rate down. Write down what counts as a lead, and as an opportunity." },
-    request: { fr: "les leads créés {period}, et combien sont devenus une opportunité qualifiée sous {n} jours", en: "the leads created {period}, and how many became a qualified opportunity within {n} days" },
+    request: { fr: "les leads créés {period}, et combien sont devenus une opportunité qualifiée sous {n} jours", en: "the leads created {period}, and how many became a qualified opportunity within {n} days" },
     noReferenceReason: { fr: "le taux dépend entièrement de ce que l'entreprise appelle un lead", en: "the rate depends entirely on what the company calls a lead" },
     variants: [
       { id: "all-leads", label: { fr: "Tous les leads", en: "All leads" } },
@@ -966,7 +966,7 @@ export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
       { source: tool("hubspot"), label: { fr: "HubSpot", en: "HubSpot" }, path: { fr: "les transactions gagnées, de la date de création à la date de fermeture : un export, puis la médiane, car les rapports donnent des moyennes", en: "the deals won, from create date to close date: an export, then the median, since the reports give averages" } },
       { source: tool("pipedrive"), label: { fr: "Pipedrive", en: "Pipedrive" }, path: { fr: "la durée des affaires dans les rapports est une moyenne : la médiane se calcule sur un export", en: "deal duration in the reports is an average: the median comes from an export" } },
     ],
-    trap: { fr: "Une affaire à 400 jours déplace la moyenne de plusieurs semaines : prends la médiane. Et une opportunité créée tard, après la démo, raccourcit le cycle sur le papier.", en: "One 400-day deal moves the average by weeks: use the median. And an opportunity created late, after the demo, shortens the cycle on paper." },
+    trap: { fr: "Une affaire à 400 jours déplace la moyenne de plusieurs semaines : prends la médiane. Et une opportunité créée tard, après la démo, raccourcit le cycle sur le papier.", en: "One 400-day deal moves the average by weeks: use the median. And an opportunity created late, after the demo, shortens the cycle on paper." },
     request: { fr: "la médiane, en jours, entre la création et la signature des affaires « nouveau client » gagnées {period}", en: "the median, in days, between creation and signature of the new-customer deals won {period}" },
     noReferenceReason: { fr: "le cycle dépend du ticket et de qui signe chez le client : il se suit d'un trimestre à l'autre", en: "the cycle depends on the deal size and on who signs at the customer: it is followed quarter to quarter" },
     variants: [
@@ -982,20 +982,20 @@ export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
       { source: role("customer-success"), label: { fr: "Customer Success et produit", en: "Customer success and product" }, path: { fr: "une décision à prendre ensemble : ce que fait un client en production, et que ne fait pas un compte seulement déployé", en: "a decision to make together: what a live customer does that a merely deployed account doesn't" } },
     ],
     trap: { fr: "« Déployé » n'est pas « en production » : un compte livré que personne n'utilise ne renouvelle pas.", en: "\"Deployed\" isn't \"live\": an account delivered that nobody uses doesn't renew." },
-    request: { fr: "ce qui compte, chez nous, comme un client « en production », et le délai qu'on se donne pour y arriver ({n} jours aujourd'hui)", en: "what counts, for us, as a \"live\" customer, and the time we allow to get there ({n} days today)" },
+    request: { fr: "ce qui compte, chez nous, comme un client « en production », et le délai qu'on se donne pour y arriver ({n} jours aujourd'hui)", en: "what counts, for us, as a \"live\" customer, and the time we allow to get there ({n} days today)" },
   },
   "slg.act.go-live": {
     name: { fr: "Mise en production", en: "Go-live rate" },
     oneLiner: { fr: "La part des nouveaux clients en production dans le délai fixé après la signature.", en: "The share of new customers live within the set time after signature." },
-    formula: { fr: "nouveaux clients signés {period} en production sous {n} jours ÷ nouveaux clients signés {period}", en: "new customers signed {period} live within {n} days ÷ new customers signed {period}" },
-    inputs: { numerator: { fr: "Clients en production sous {n} jours", en: "Customers live within {n} days" }, denominator: { fr: "Nouveaux clients signés {period}", en: "New customers signed {period}" } },
+    formula: { fr: "nouveaux clients signés {period} en production sous {n} jours ÷ nouveaux clients signés {period}", en: "new customers signed {period} live within {n} days ÷ new customers signed {period}" },
+    inputs: { numerator: { fr: "Clients en production sous {n} jours", en: "Customers live within {n} days" }, denominator: { fr: "Nouveaux clients signés {period}", en: "New customers signed {period}" } },
     where: [
       { source: tool("cs-platform"), label: { fr: "Outil de Customer Success", en: "Customer success platform" }, path: { fr: "l'étape d'onboarding de chaque compte et sa date : Gainsight, Vitally ou Planhat la gardent", en: "each account's onboarding stage and its date: Gainsight, Vitally or Planhat keep it" } },
       { source: tool("hubspot"), label: { fr: "HubSpot ou Salesforce", en: "HubSpot or Salesforce" }, path: { fr: "un pipeline d'onboarding, ou un champ date « en production » sur le compte, s'il existe", en: "an onboarding pipeline, or a \"live\" date field on the account, if there is one" } },
       { source: tool("spreadsheet"), label: { fr: "Tableur du Customer Success", en: "Customer success spreadsheet" }, path: { fr: "souvent le seul endroit où la date est notée", en: "often the only place the date is written down" } },
     ],
-    trap: { fr: "Compter les comptes déployés plutôt qu'en production double le taux. Et lis la cohorte mûre : un client signé le mois dernier n'a pas eu ses {n} jours.", en: "Counting deployed accounts instead of live ones doubles the rate. And read the mature cohort: a customer signed last month hasn't had its {n} days." },
-    request: { fr: "les nouveaux clients signés {period}, et combien étaient « en production » sous {n} jours après la signature", en: "the new customers signed {period}, and how many were \"live\" within {n} days of signature" },
+    trap: { fr: "Compter les comptes déployés plutôt qu'en production double le taux. Et lis la cohorte mûre : un client signé le mois dernier n'a pas eu ses {n} jours.", en: "Counting deployed accounts instead of live ones doubles the rate. And read the mature cohort: a customer signed last month hasn't had its {n} days." },
+    request: { fr: "les nouveaux clients signés {period}, et combien étaient « en production » sous {n} jours après la signature", en: "the new customers signed {period}, and how many were \"live\" within {n} days of signature" },
     noReferenceReason: { fr: "la mise en production dépend de ce que l'offre demande d'installer : elle se suit contre sa propre cible", en: "go-live depends on what the offer needs set up: it is followed against its own target" },
   },
   "slg.act.time-to-live": {
@@ -1058,7 +1058,7 @@ export const ENGINE_CATALOG: Record<MetricId, EngineCatalogEntry> = {
       { source: tool("hubspot"), label: { fr: "HubSpot, Salesforce ou Pipedrive", en: "HubSpot, Salesforce or Pipedrive" }, path: { fr: "la raison de perte des renouvellements perdus, souvent un champ personnalisé", en: "the lost reason on lost renewals, often a custom field" } },
       { source: role("customer-success"), label: { fr: "Customer Success", en: "Customer success" }, path: { fr: "relire les derniers départs avec l'équipe", en: "go through the latest departures with the team" } },
     ],
-    trap: { fr: "« Le prix » est la case la plus rapide à cocher. Croise la raison déclarée avec l'usage des 90 jours d'avant.", en: "\"Price\" is the quickest box to tick. Cross the stated reason with usage over the 90 days before." },
+    trap: { fr: "« Le prix » est la case la plus rapide à cocher. Croise la raison déclarée avec l'usage des 90 jours d'avant.", en: "\"Price\" is the quickest box to tick. Cross the stated reason with usage over the 90 days before." },
     request: { fr: "la raison qui revient le plus dans les non-renouvellements des derniers mois, et d'où on la tient", en: "the reason that comes up most in recent non-renewals, and where we get it from" },
     choices: [
       { id: "data", label: { fr: "Par les données", en: "From data" } },
@@ -1227,9 +1227,9 @@ export const ENGINE_DERIVED_CATALOG: Record<DerivedId, EngineDerivedEntry> = {
   // TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2).
   "slg.rev.ltv": {
     name: { fr: "LTV assistée", en: "Sales-assisted LTV" },
-    formula: { fr: "ACV ÷ 12 × marge brute de l'assisté × durée de vie (tirée du renouvellement, au plus 36 mois)", en: "ACV ÷ 12 × sales-assisted gross margin × lifetime (from the renewal rate, at most 36 months)" },
+    formula: { fr: "ACV ÷ 12 × marge brute de l'assisté × durée de vie (tirée du renouvellement, au plus 36 mois)", en: "ACV ÷ 12 × sales-assisted gross margin × lifetime (from the renewal rate, at most 36 months)" },
     uncomputable: { fr: "incalculable — il manque {input}", en: "can't be computed — missing: {input}" },
-    capNote: { fr: "durée de vie plafonnée à 36 mois, comme en libre-service : on prend le bas de trois à cinq ans", en: "lifetime capped at 36 months, as in self-serve: we take the low end of three to five years" },
+    capNote: { fr: "durée de vie plafonnée à 36 mois, comme en libre-service : on prend le bas de trois à cinq ans", en: "lifetime capped at 36 months, as in self-serve: we take the low end of three to five years" },
   },
   "slg.rev.cac-payback": {
     name: { fr: "CAC payback assisté", en: "Sales-assisted CAC payback" },

@@ -14,6 +14,7 @@ import type {
   ImpactLine,
   Interval,
   MetricId,
+  Motion,
   PlgCandidateId,
   Position,
   SlgDiagnosis,
@@ -423,4 +424,25 @@ export function fillSegments(template: string, values: Record<string, string>): 
     .filter((segment) => [...segment.matchAll(/\{(\w+)\}/g)].every(([, key]) => (values[key!] ?? "").trim() !== ""))
     .map((segment) => fillTemplate(segment, values))
     .join(" · ");
+}
+
+/** Which hybrid-only trap a self-serve sheet carries (C25 Q3, §18.4.6), by the copy's `sheet.hybridTrap` keys. */
+const HYBRID_TRAPS: Partial<Record<MetricId, keyof Words["sheet"]["hybridTrap"]>> = {
+  // An account moved to sales-assisted is neither lost, downgraded nor expanded: it leaves self-serve.
+  "ret.logo-churn": "leaves",
+  "rev.contraction": "leaves",
+  "rev.expansion": "leaves",
+  // An account signed by a salesperson counts in sales-assisted, even born in self-serve (S8).
+  "rev.paid-conversion": "signedBySales",
+  "rev.arpa": "signedBySales",
+};
+
+/**
+ * The extra trap line a self-serve sheet shows in the hybrid, and ONLY in
+ * the hybrid (A7.3.c S2): with self-serve alone, the company's accounts are
+ * all self-serve and these lines would warn about nothing. null otherwise.
+ */
+export function hybridTrapOf(id: MetricId, motions: Readonly<Record<Motion, boolean>>): keyof Words["sheet"]["hybridTrap"] | null {
+  if (!(motions.plg && motions.slg)) return null;
+  return HYBRID_TRAPS[id] ?? null;
 }

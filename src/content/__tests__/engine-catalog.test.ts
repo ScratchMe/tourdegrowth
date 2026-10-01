@@ -208,7 +208,7 @@ describe("placeholders", () => {
 
   it("carries {period} in sales-assisted's flows, and never in self-serve's (which keep {month})", () => {
     const withPeriod = allPairs()
-      .filter(([, t]) => placeholdersOf(t.fr).includes("period"))
+      .filter(([, t]) => LOCALES.some((l) => placeholdersOf(t[l]).includes("period")))
       .map(([path]) => path.replace(/^derived\./, ""));
     expect(withPeriod.length).toBeGreaterThan(0);
     expect(withPeriod.filter((path) => !/^(slg|link)\./.test(path))).toEqual([]);

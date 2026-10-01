@@ -463,9 +463,22 @@ describe("the sweep reaches every sentence it claims to", () => {
     for (const locale of ["fr", "en"] as const) expect(SWEEP.samples.filter((s) => s.locale === locale).length).toBeGreaterThan(1_000);
   });
 
-  it("fires every slide title template", () => {
-    const all = Object.keys(FR.strings.slideTitles) as SlideTitleKey[];
+  /**
+   * The sales-assisted and hybrid titles are in the copy since A7.3.c S2 and
+   * in the deck only with S4: until then nothing builds them. S4 empties this
+   * list, and the second expectation fails as soon as one of them fires.
+   */
+  const AWAITING_DECK: readonly SlideTitleKey[] = [
+    "total", "totalUnknown", "totalUnknownBoth",
+    "slgPelotonComplete", "slgPelotonGap", "slgPelotonGapOne", "slgPelotonTailBreak", "slgPelotonTailBreakOne", "slgPelotonEmpty",
+    "slgLeakClearCustomers", "slgLeakClearCustomersOne", "slgLeakClearKept", "slgLeakClearKeptOne", "slgLeakClearPerHundred",
+    "unitEconomicsBoth", "unitEconomicsOneSide", "unitEconomicsNoneMargins", "unitEconomicsNoneDifferent",
+  ];
+
+  it("fires every slide title template (the sales-assisted ones from S4)", () => {
+    const all = (Object.keys(FR.strings.slideTitles) as SlideTitleKey[]).filter((k) => !AWAITING_DECK.includes(k));
     expect(all.filter((k) => !SWEEP.titleKeys.has(k))).toEqual([]);
+    expect(AWAITING_DECK.filter((k) => SWEEP.titleKeys.has(k))).toEqual([]);
   });
 
   it("fires every finding kind and every sanity check", () => {

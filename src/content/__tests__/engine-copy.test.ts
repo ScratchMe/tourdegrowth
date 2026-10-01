@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ENGINE_COPY } from "../engine-copy";
-import { ALL_DERIVED_SHAPES, CANDIDATE_IDS, SLG_CANDIDATE_IDS } from "@/lib/engine/catalog-shape";
+import { ALL_DERIVED_SHAPES, ALL_METRIC_SHAPES, CANDIDATE_IDS, SLG_CANDIDATE_IDS } from "@/lib/engine/catalog-shape";
+import { hybridTrapOf } from "@/lib/engine/phrases";
 import type { SlideTitleKey } from "@/lib/engine/types";
 import { PILLARS } from "@/lib/scoring/pillars";
 import type { Translatable } from "@/lib/i18n/translatable";
@@ -46,9 +47,9 @@ describe("keys the code reads by id", () => {
       for (const l of LOCALES) expect(phrase[l], phrase[l]).toMatch(/^[a-zà-ÿ]/);
   });
 
-  it("offers a static fill for each of the catalogue's five placeholders, month slots bracketed as blanks", () => {
+  it("offers a static fill for each of the catalogue's six placeholders, month slots bracketed as blanks", () => {
     const v = ENGINE_COPY.visual;
-    for (const slot of [v.staticCohort, v.staticMonth]) for (const l of LOCALES) expect(slot[l]).toMatch(/^\[.+\]$/);
+    for (const slot of [v.staticCohort, v.staticMonth, v.staticPeriod]) for (const l of LOCALES) expect(slot[l]).toMatch(/^\[.+\]$/);
     for (const slot of [v.staticEvent, v.staticWindow, v.staticVariant]) for (const l of LOCALES) expect(slot[l].trim()).not.toBe("");
   });
 
@@ -67,8 +68,8 @@ describe("keys the code reads by id", () => {
     for (const phrase of Object.values(ENGINE_COPY.unitInput)) expect(phrase.fr).toMatch(/^(le |la |les |l['’])/);
   });
 
-  it("asks five FAQ questions, each answered in both languages", () => {
-    expect(ENGINE_COPY.faq).toHaveLength(5);
+  it("asks six FAQ questions, each answered in both languages — the sixth for a sales team (§18.7 E0)", () => {
+    expect(ENGINE_COPY.faq).toHaveLength(6);
     for (const { q, a } of ENGINE_COPY.faq) for (const l of LOCALES) expect(q[l].trim() && a[l].trim()).toBeTruthy();
   });
 });
@@ -136,6 +137,25 @@ describe("placeholders", () => {
     whatIfLeverPlain: ["from", "stage", "to"],
     scenario: ["gain", "n"],
     scenarioPlain: ["n"],
+    // Sales-assisted and the hybrid (A7.3.c S2, §18.8.2).
+    total: ["plg", "slg", "total"],
+    totalUnknown: ["motion"],
+    totalUnknownBoth: [],
+    slgPelotonComplete: ["r1", "r2", "r3"],
+    slgPelotonGap: ["clauses", "stages"],
+    slgPelotonGapOne: ["clauses", "stages"],
+    slgPelotonTailBreak: ["clauses", "stages"],
+    slgPelotonTailBreakOne: ["clauses", "stages"],
+    slgPelotonEmpty: ["base"],
+    slgLeakClearCustomers: ["n", "stage", "target"],
+    slgLeakClearCustomersOne: ["n", "stage", "target"],
+    slgLeakClearKept: ["n", "stage", "target"],
+    slgLeakClearKeptOne: ["n", "stage", "target"],
+    slgLeakClearPerHundred: ["stage", "target", "worth"],
+    unitEconomicsBoth: ["plg", "slg"],
+    unitEconomicsOneSide: ["input", "known", "m", "other"],
+    unitEconomicsNoneMargins: [],
+    unitEconomicsNoneDifferent: ["plg", "slg"],
   };
 
   it("gives each slide title exactly the values the slide builder provides (§9.3)", () => {
@@ -160,6 +180,10 @@ describe("placeholders", () => {
       input: "la marge brute", what: "80 000 € et deux personnes pendant un trimestre",
       metric: "Taux d'activation", current: "18 %", horizon: "T2 2027", cost: "un sprint",
       from: "6 à 9 %", to: "12 %", gain: "~12 000 à 18 000 €", i: "1", value: "4,5 à 6,5 %",
+      total: "~228 000 à 241 000 €", plg: "~116 000 à 123 000 €", slg: "~112 000 à 118 000 €", motion: "du libre-service",
+      r1: "Sur 100 MQL, 12 à 15 deviennent une opportunité", r2: "sur 100 opportunités conclues, 22 à 26 sont signées",
+      r3: "sur 100 nouveaux clients, 55 à 60 sont en production à 90 jours", base: "MQL",
+      worth: "3 opportunités de plus pour 100 leads", known: "libre-service", other: "assisté",
     },
     en: {
       activated: "18 reach first value", d30: "9–12 are still active at day 30", paid: "6–9 pay",
@@ -174,6 +198,10 @@ describe("placeholders", () => {
       input: "gross margin", what: "€80,000 and two people for a quarter",
       metric: "Activation rate", current: "18%", horizon: "Q2 2027", cost: "a sprint",
       from: "6–9%", to: "12%", gain: "~€12,000–18,000", i: "1", value: "4.5–6.5%",
+      total: "~€228,000–241,000", plg: "~€116,000–123,000", slg: "~€112,000–118,000", motion: "self-serve",
+      r1: "Out of 100 MQLs, 12–15 become an opportunity", r2: "out of 100 closed opportunities, 22–26 are signed",
+      r3: "out of 100 new customers, 55–60 are live within 90 days", base: "MQLs",
+      worth: "3 more opportunities per 100 leads", known: "self-serve", other: "sales-assisted",
     },
   };
 
@@ -212,7 +240,7 @@ describe("the slides", () => {
   const SLIDE_REACHABLE = [
     "slideTitles", "slide", "notes", "findings", "peloton", "whatIf", "diagnosis", "mirror", "subject", "stages",
     "units", "grammar", "tools", "role", "repair", "cause", "status", "basis", "ask",
-    "side", "worth", "event", "unitInput", "source", "slgChain",
+    "side", "worth", "event", "unitInput", "source", "slgChain", "relays", "total", "hybrid",
   ];
 
   it("stays inside the three fonts: no arrow, no ≈, no U+2212, no superscript (§10.4)", () => {
@@ -234,7 +262,7 @@ describe("the slides", () => {
    */
   it("never addresses the reader on a slide", () => {
     const onSlide = [
-      ...under("slideTitles", "slide", "notes", "side", "worth", "unitInput"),
+      ...under("slideTitles", "slide", "notes", "side", "worth", "unitInput", "relays", "total", "hybrid.motionName", "hybrid.twoSegments"),
       ...under("peloton").filter(([p]) => /clause|unmeasured/.test(p)),
       ...under("whatIf").filter(([p]) => !/title|slider/.test(p)),
     ];
@@ -300,6 +328,7 @@ describe("lengths", () => {
       ...under("deck.png", "deck.pngHd", "deck.copyImage", "deck.pdf", "deck.copyText", "deck.textCopied"),
       ...under("sheet.save", "sheet.haveIt", "sheet.canEstimate", "sheet.willAsk", "sheet.cantFind"),
       ...under("page.cta", "page.tourFirst", "setup.startSteps", "setup.startBoard", "setup.tourLink"),
+      ...under("steps.skipToSlg", "steps.skipToWhatIf", "sheet.companyWide"),
     ];
     expect(buttons.length).toBeGreaterThan(20);
     const long = buttons.flatMap(([p, t]) =>
@@ -320,5 +349,68 @@ describe("an optional field", () => {
     const inLabel = ALL.filter(([, v]) => /\((facultatif|optional)\)/i.test(v.fr) || /\((facultatif|optional)\)/i.test(v.en)).map(([p]) => p);
     expect(inLabel).toEqual([]);
     expect(ENGINE_COPY.workbench.optional).toEqual({ fr: "facultatif", en: "optional" });
+  });
+});
+
+/**
+ * « Deux moteurs, un total », never one against the other (engine spec
+ * §18.6.4, A7.3.c S2). Non-vacuity, measured on 2026-10-01 by sabotage: see
+ * the S2 entry of JOURNAL.md.
+ */
+describe("the hybrid never compares, and always reads self-serve first", () => {
+  /** What the spec sweeps: the hybrid's own words, the total, and the slide titles that hold both motions. */
+  const HYBRID = [
+    ...under("hybrid", "total"),
+    ...under("slideTitles").filter(([p]) => /^slideTitles\.(total|unitEconomics(Both|OneSide|None))/.test(p)),
+  ];
+  /** The fixed sentence says what the hybrid refuses: its negation is the one « contre » / "against" allowed. */
+  const ALLOWED = ["chacune se lit contre ses cibles, pas contre l'autre", "each is read against its own targets, not against the other"];
+  const COMPARATIVE: Record<Locale, RegExp> = {
+    fr: /\b(vs|versus)\b|contre|face à|plus rentable|mieux|meilleur|moins bien|fois plus/i,
+    en: /\b(vs|versus|better|worse|than|against)\b/i,
+  };
+
+  it("has hybrid strings to sweep — otherwise the next test proves nothing", () => {
+    expect(HYBRID.length).toBeGreaterThanOrEqual(25);
+  });
+
+  it("holds no comparative: no « vs », « contre », « plus rentable », « mieux », \"than\", \"against\"…", () => {
+    const offenders = HYBRID.flatMap(([p, t]) =>
+      LOCALES.flatMap((l) => {
+        const text = ALLOWED.reduce((acc, ok) => acc.split(ok).join(""), t[l].replace(/ /g, " "));
+        return COMPARATIVE[l].test(text) ? [`${p}.${l}: ${t[l]}`] : [];
+      }),
+    );
+    expect(offenders).toEqual([]);
+  });
+
+  it("names self-serve before sales-assisted in every string that holds both, in both languages", () => {
+    const both = ALL.filter(([, t]) => placeholdersOf(t.en).includes("plg") && placeholdersOf(t.en).includes("slg"));
+    expect(both.length).toBeGreaterThanOrEqual(4);
+    const misordered = both.flatMap(([p, t]) => LOCALES.filter((l) => t[l].indexOf("{plg}") > t[l].indexOf("{slg}")).map((l) => `${p}.${l}`));
+    expect(misordered).toEqual([]);
+    // The words too, where the two are named side by side: slides, their notes, the hybrid's own words. (A
+    // sentence about one motion — « l'assisté commence vide… ton libre-service ne change pas » — is no list.)
+    const words: Record<Locale, [string, string]> = { fr: ["libre-service", "assisté"], en: ["self-serve", "sales-assisted"] };
+    const sideBySide = under("slideTitles", "slide", "notes", "hybrid");
+    expect(sideBySide.filter(([, t]) => t.fr.includes("libre-service") && t.fr.includes("assisté")).length).toBeGreaterThanOrEqual(4);
+    const wordOrder = sideBySide.flatMap(([p, t]) =>
+      LOCALES.filter((l) => {
+        const [first, second] = words[l];
+        const a = t[l].toLowerCase().indexOf(first);
+        const b = t[l].toLowerCase().indexOf(second);
+        return a >= 0 && b >= 0 && b < a;
+      }).map((l) => `${p}.${l}: ${t[l]}`),
+    );
+    expect(wordOrder).toEqual([]);
+  });
+
+  it("shows the five hybrid-only traps in the hybrid, and none with one motion (C25 Q3)", () => {
+    const hybrid = { plg: true, slg: true };
+    const shown = ALL_METRIC_SHAPES.filter((s) => hybridTrapOf(s.id, hybrid) !== null).map((s) => s.id);
+    expect(shown.sort()).toEqual(["ret.logo-churn", "rev.arpa", "rev.contraction", "rev.expansion", "rev.paid-conversion"]);
+    for (const motions of [{ plg: true, slg: false }, { plg: false, slg: true }])
+      expect(ALL_METRIC_SHAPES.filter((s) => hybridTrapOf(s.id, motions) !== null).map((s) => s.id), JSON.stringify(motions)).toEqual([]);
+    for (const id of shown) expect(ENGINE_COPY.sheet.hybridTrap[hybridTrapOf(id, hybrid)!].fr).toBeTruthy();
   });
 });

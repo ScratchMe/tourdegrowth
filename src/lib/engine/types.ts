@@ -732,7 +732,29 @@ export type SlideTitleKey =
   | "whatIfLeverPlain"
   /** All the levers under test, together. */
   | "scenario"
-  | "scenarioPlain";
+  | "scenarioPlain"
+  /** « Deux moteurs, un total » (A7.3.c S2, §18.8.2): the MRR summed, or which part is missing. */
+  | "total"
+  | "totalUnknown"
+  | "totalUnknownBoth"
+  /** Sales-assisted's relays, each on its own base of 100: the peloton's four cases. */
+  | "slgPelotonComplete"
+  | "slgPelotonGap"
+  | "slgPelotonGapOne"
+  | "slgPelotonTailBreak"
+  | "slgPelotonTailBreakOne"
+  | "slgPelotonEmpty"
+  /** A sales-assisted leak with no amount to print: customers or contracts a quarter, or per 100 of the relay. */
+  | "slgLeakClearCustomers"
+  | "slgLeakClearCustomersOne"
+  | "slgLeakClearKept"
+  | "slgLeakClearKeptOne"
+  | "slgLeakClearPerHundred"
+  /** The unit economics, the two motions side by side, never one against the other. */
+  | "unitEconomicsBoth"
+  | "unitEconomicsOneSide"
+  | "unitEconomicsNoneMargins"
+  | "unitEconomicsNoneDifferent";
 export interface SlideTitle {
   key: SlideTitleKey;
   /** Placeholders, already formatted; `**…**` in the template marks the red accent. */

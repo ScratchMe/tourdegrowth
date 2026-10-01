@@ -4104,6 +4104,46 @@ Ce que S1 laisse :
   de `slg-cycle-long` (§18.8.3) s'écrit à part : le message du contrôle
   tutoie (« Ton cycle médian »), il est fait pour l'écran « à vérifier ».
 
+**S2 est livré le 2026-10-01** : la prose des quinze chiffres de l'assisté,
+de la liaison et des trois calculés (`engine-catalog.ts`, les deux
+dictionnaires typés sur **tous** les identifiants : une fiche sans prose ne
+compile plus) ; le placeholder `{period}`, qui porte sa préposition
+(« de mai à juillet 2026 », « d'août à octobre 2026 », « en août 2026 »),
+rempli par `catalogueValues`, par la fiche (`catalogFill`) et, en crochets,
+par la page statique ; la copie de §18.1, §18.6 à §18.8 (réglage, réglages
+après coup, `hybrid`, `total`, `relays`, titres et pieds de slides, notes
+d'orateur, fiche, pas à pas, « Et si » assisté et ses hypothèses, reprise,
+import) et la sixième question de la FAQ, tout « à relire » ; les pièges
+hybrides des cinq fiches du libre-service, et `phrases.ts#hybridTrapOf` qui
+ne les rend qu'en hybride. Un test balaie `hybrid.*`, `total.*` et les titres
+des deux motions à la recherche d'un comparatif (seule la négation de la
+phrase fixe passe), et un autre vérifie l'ordre libre-service puis assisté.
+Deux formulations s'écartent du texte de §18.8.2, pour l'accord :
+- les titres `gap` et `tail-break` des relais disent « on ne mesure pas
+  {étapes} » : « le taux de closing » et « la mise en production » n'ont pas
+  le même genre, et « n'est pas mesuré(e) » devrait s'accorder avec chacun ;
+- `unitEconomicsOneSide` dit « il manque {entrée} », comme la slide d'unit
+  economics du libre-service, plutôt que « {entrée} n'est pas mesurée ».
+
+Ce que S2 laisse :
+- **S3** pose la copie sur les écrans : le réglage (`setup.companyType`,
+  `types`, `motions*`, les deux fenêtres, `slgPeriods` ; `setup.models` et
+  `modelSoon` partent alors), `board.eyebrowNoCohort`, `hybrid.*`, la bande
+  du total (`total.*`), les relais (`relays.*`), la fiche
+  (`sheet.periodSlg*`, `companyWide*`, `hybridTrap` par `hybridTrapOf`),
+  le pas à pas (`steps.*Motion`, `baseTitleSlg`…), `settings.motion*` et les
+  deux remises à zéro, le panneau assisté (`scenario.linkSlider`,
+  `totalIn12*`, `slgAssumption`…), `resume.bandMotions*`,
+  `io.importPreviewMotions` ; et sur E0, les deux sous-sections
+  (`page.catalogueTitlePlg`/`Slg`…), en réécrivant ce qui compte encore
+  dix-sept chiffres (`page.promise`, `noscript`, `catalogueToggle`,
+  `durationIntro`, `catalogueTitle`, `catalogueIntro`).
+- **S4** construit les titres neufs : `sentences-guard.test.ts` les tient
+  dans `AWAITING_DECK`, une liste que S4 vide (le test tombe dès qu'un titre
+  de la liste est produit) ; plus `slide.kickerMotion`, `footerSlg`, les
+  lignes de la slide en regard, `relays.clause*`, les notes neuves et les
+  intertitres `deck.group*`.
+
 | PR | Contenu | Fichiers possédés | Dépend de | Jours-agent |
 |---|---|---|---|---|
 | **S0 — Contrats et migration** | `types.ts`, `catalog-shape.ts` (formes SLG, `scope`, `span`, `shapesOf`), `migrate.ts`, `validate.ts` (règles §18.3.3, dont le correctif > 100), `io.ts`, `storage.ts`, **golden v1 figé avant toute ligne**, `shared-counts.ts`, `cohort.ts` (trois mois), clés de copie vides | `lib/engine/{types,catalog-shape,migrate,validate,io,storage,shared-counts,cohort}.ts` + tests | — | 1,5 |

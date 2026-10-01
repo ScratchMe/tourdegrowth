@@ -106,7 +106,7 @@ Le journal (`JOURNAL.md`) raconte le projet dans l'ordre où les choses se sont 
 
 En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue, avec les deux modes (Quick déterministe, Deep dive généré par Gemini). La revue technique et fonctionnelle du 2026-09-05 est **close** (`REVIEW.md`, 26 constats). **La seconde revue (`REVIEW-02.md`) est close** : les 25 constats techniques et fonctionnels sont livrés (PR #61 à #92), et les cinq décisions produit du lot E ont été tranchées par Antoine le 2026-09-07 — R2-26 et R2-27 faits, R2-28 fait mais **livré fermé** derrière `METRICS_PAGE_ENABLED`, R2-29 close par `REVIEW-03.md` (le brief 02 n'est jamais parti), R2-30 volontairement reporté (la fenêtre Tour de France est un sujet de calendrier, pas de backlog).
 
-**Les décisions du 2026-09-29 sont codées** (A7, PR #203 à #219 puis celle d'A7.12, le 2026-09-30), sauf A7.3 (spécification validée le 2026-09-30 par C25, les quatre termes A7.3.e livrés le même jour ; le code A7.3.c est en cours, S0 et S1 livrés sur la PR brouillon #233), A7.4 (après A7.3) et A7.12.c (les captures, à l'ouverture). L'audit GEO (A8) est fait.
+**Les décisions du 2026-09-29 sont codées** (A7, PR #203 à #219 puis celle d'A7.12, le 2026-09-30), sauf A7.3 (spécification validée le 2026-09-30 par C25, les quatre termes A7.3.e livrés le même jour ; le code A7.3.c est en cours, S0, S1 et S2 livrés sur la PR brouillon #233), A7.4 (après A7.3) et A7.12.c (les captures, à l'ouverture). L'audit GEO (A8) est fait.
 
 **`REVIEW-03.md` est entièrement livré** : lots A, B et C (PR #102 à #113, 2026-09-08 → 2026-09-11), R2-29 close du même coup. C2 (« l'étape qui freine le plus souvent ce mois-ci ») attend l'ouverture de `/metrics`, qui attend elle-même du volume.
 
