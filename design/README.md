@@ -17,7 +17,7 @@ comme le brief d'origine pour le lancement.
 | **Le prototype du jeu** | 2026-09 | `game/prototype-s-ils-reviennent.html`, jouable seul dans un navigateur | Référence de `GAME-BRIEF.md` |
 | **Les lois de l'UX, traduites** | 2026-10-01 | [`LOIS-UX.md`](LOIS-UX.md) : les règles tirées de [Laws of UX](https://lawsofux.com/), avec l'état du produit ce jour-là | À relire avant de dessiner un écran (correctifs : `CHANTIERS.md` A15) |
 | **Extension 05** : les puces d'étape, une valeur qui a l'allure d'un bouton (loi de similarité, A15.19) | 2026-10-01 | [`DS-EXTENSION-BRIEF-05.md`](DS-EXTENSION-BRIEF-05.md), captures dans `ds-extension-05/`, retour attendu dans `ds-extension-05-return/` | **Déposé** dans le projet Claude Design le 2026-10-01, retour attendu (`CHANTIERS.md` B7, D11) |
-| **Extension 06** : l'image de partage du moteur (B5, C32 Q17) | 2026-10-01 | [`DS-EXTENSION-BRIEF-06.md`](DS-EXTENSION-BRIEF-06.md), captures dans `ds-extension-06/` (les images de partage du site, la page du moteur, son peloton), retour attendu dans `ds-extension-06-return/` | **Écrit**, à déposer dans le projet Claude Design puis à lancer (`CHANTIERS.md` B5, D12) ; le retour se porte en T6.2 |
+| **Extension 06** : l'image de partage du moteur (B5, C32 Q17) | 2026-10-01 | [`DS-EXTENSION-BRIEF-06.md`](DS-EXTENSION-BRIEF-06.md), captures dans `ds-extension-06/` (les images de partage du site, la page du moteur, son peloton), retour attendu dans `ds-extension-06-return/` | **Déposé** dans le projet Claude Design le 2026-10-01, retour attendu (`CHANTIERS.md` B5, D12) ; le retour se porte en T6.2 |
 
 Dans l'autre sens, le système du code part vers le projet Claude Design par la
 design sync : `.design-sync/` (lire `NOTES.md` avant toute re-synchro).

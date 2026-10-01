@@ -1170,6 +1170,14 @@ Antoine a demandé le brief de B5 le soir de la fin d'A14.c : l'image de partag
 
 **Une course de numéros, rattrapée avant le merge.** Le brief est d'abord parti sous le numéro 05. Pendant sa CI, B7 a été mergée (#268) avec son propre brief 05, ses captures dans `design/ds-extension-05/` et la même ligne d'index. Avant le merge, la branche a été refaite sur le nouveau `main` : le brief de B5 devient le 06, ses captures passent dans `ds-extension-06/`, et l'index, B5 et le journal sont réécrits sur le texte de B7, sans toucher au sien.
 
-**Une erreur corrigée en route.** La première version de cette entrée disait que `DesignSync` ne servait pas à envoyer un brief. B7 a montré le contraire : un brief se dépose dans le projet Claude Design par `DesignSync`, sous `design/`, sous un plan qui ne nomme que ses fichiers, puis Antoine le lance (D11). Le brief 06 n'est pas déposé : D12 dit comment le faire.
+**Une erreur corrigée en route.** La première version de cette entrée disait que `DesignSync` ne servait pas à envoyer un brief. B7 a montré le contraire : un brief se dépose dans le projet Claude Design par `DesignSync`, sous `design/`, sous un plan qui ne nomme que ses fichiers, puis Antoine le lance (D11).
 
-**Ce qui reste** : D12 (déposer puis lancer). Le retour va dans `design/ds-extension-06-return/`, une session le recopie dans le dépôt et le porte en T6.2 ; sa copie rejoint le bon à tirer du moteur.
+**Le dépôt**, à la demande d'Antoine, le même soir : onze fichiers écrits par `DesignSync` dans le projet `23b9671c-…`, aux mêmes chemins que dans le dépôt, sous un plan qui ne nommait qu'eux, sans suppression. Le bundle, la sentinelle et `_ds_sync.json` ne sont pas touchés. Vérifié :
+- `get_project` avant l'envoi : un design system, modifiable ;
+- `list_files` avant : rien sous `design/ds-extension-06/` ; après : les onze chemins y sont, et les briefs 04 et 05 comme le retour du 04 n'ont pas bougé ;
+- le brief relu côté projet par `get_file`, en entier : le même texte que dans le dépôt ;
+- les fichiers envoyés sont ceux du commit de la PR (`git diff` vide sur `design/`).
+
+`.design-sync/NOTES.md` (« Synced ») dit maintenant ce que le projet garde sous `design/`, brief 06 compris.
+
+**Ce qui reste** : D12 (le lancer). Le retour va dans `design/ds-extension-06-return/`, une session le recopie dans le dépôt et le porte en T6.2 ; sa copie rejoint le bon à tirer du moteur.
