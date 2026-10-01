@@ -9,6 +9,7 @@ import type { EngineCalcContext, EngineDerived, EngineSetup, EngineState, LeverI
 import type { Locale } from "@/lib/i18n/locale";
 import type { Pillar } from "@/lib/scoring/pillars";
 import { Board } from "./_engine/Board";
+import type { SeriesControls } from "./_engine/MonthBar";
 import { DeckView } from "./_engine/deck/DeckView";
 import { collectPlan } from "./_engine/collect";
 import { latestTourWithAnswers } from "@/lib/engine/bridge";
@@ -17,6 +18,7 @@ import { relaysTitle, totalTitle } from "@/lib/engine/deck-motions";
 import { deriveEngine } from "@/lib/engine/derive";
 import { engineFileName, serializeEngine } from "@/lib/engine/io";
 import { markReminded, markRequested } from "@/lib/engine/request";
+import { monthView, nextMonthOf, startNextMonth, withMonth } from "@/lib/engine/series";
 import { requestPersistence } from "@/lib/engine/storage";
 import { newEngineState } from "@/lib/engine/validate";
 import { propagateFrom, withSharedCount } from "@/lib/engine/shared-counts";
@@ -28,7 +30,7 @@ import { ImportPanel } from "./_engine/ImportPanel";
 import { Steps } from "./_engine/Steps";
 import { resumePosition, type StepPosition } from "./_engine/steps-model";
 import { Setup, type SetupChoice } from "./_engine/Setup";
-import { domId } from "./_engine/text";
+import { domId, formatMonth } from "./_engine/text";
 import type { EngineActions, EngineView } from "./_engine/view";
 import screens from "./_engine/Screens.module.css";
 
@@ -117,6 +119,9 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
   // The motions the setup card had ticked when « Voir un exemple rempli » was pressed (§18.7).
   const [exampleMotions, setExampleMotions] = useState<Record<Motion, boolean>>({ plg: true, slg: false });
   const [writeFailed, setWriteFailed] = useState(false);
+  // The monthly series (§19.2.4): the month on screen — null, the month being filled — and whether a past one is being corrected.
+  const [monthIndex, setMonthIndex] = useState<number | null>(null);
+  const [correcting, setCorrecting] = useState(false);
   const [focusRequest, setFocusRequest] = useState<{ id: string; n: number } | null>(null);
 
   useEffect(() => {
@@ -135,18 +140,22 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
   const tourResults = snap?.tourResults;
   const computed = useMemo(() => {
     if (!state || !openedAt) return null;
-    const ctx = { today: new Date(openedAt), locale };
+    // A past month is read as it was seen (§19.2.3): the months up to it, its windows, the day it was closed.
+    // Every screen below reads the LAST month of the state it gets, so the past month is simply that state's last.
+    const month = monthIndex !== null && monthIndex < state.snapshots.length - 1 ? monthIndex : null;
+    const lens = month === null ? { state, today: new Date(openedAt) } : monthView(state, month, new Date(openedAt));
+    const ctx = { today: lens.today, locale };
     const tourResult = state.tourLink ? (tourResults?.find((r) => r.id === state.tourLink?.resultId) ?? null) : null;
-    const derived = deriveEngine(state, ctx, tourResult, bridges, strings.units);
+    const derived = deriveEngine(lens.state, ctx, tourResult, bridges, strings.units);
     // The board's title is its first slide's title, from the same function (§7 E2, §9.3, §18.8):
     // the screen and the slide cannot word one engine two ways.
-    const verdict = verdictOf(state, derived, strings, metrics, ctx);
-    const plan = collectPlan(lastSnapshot(state), ctx.today, motionShapes(state.setup.motions));
+    const verdict = verdictOf(lens.state, derived, strings, metrics, ctx);
+    const plan = collectPlan(lastSnapshot(lens.state), ctx.today, motionShapes(lens.state.setup.motions));
     const deviceTour = latestTourWithAnswers(tourResults ?? []);
     const tourOnDevice = deviceTour !== null;
-    const view: EngineView = { state, derived, strings, metrics, derivedCopy, bridges, ctx, tourResult, tourOnDevice, deviceTour };
-    return { view, verdict, plan };
-  }, [state, openedAt, tourResults, locale, bridges, strings, metrics, derivedCopy]);
+    const view: EngineView = { state: lens.state, derived, strings, metrics, derivedCopy, bridges, ctx, tourResult, tourOnDevice, deviceTour };
+    return { view, verdict, plan, month };
+  }, [state, openedAt, tourResults, locale, bridges, strings, metrics, derivedCopy, monthIndex]);
 
   const focus = (id: string) => setFocusRequest((current) => ({ id, n: (current?.n ?? 0) + 1 }));
 
@@ -164,6 +173,12 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
   function openBoard() {
     setScreen("board");
     focus("engine-verdict");
+  }
+
+  /** Back to the month being filled: every screen but the board works on it (the deck, the settings, the steps, the files). */
+  function toCurrentMonth() {
+    setMonthIndex(null);
+    setCorrecting(false);
   }
 
   function openSteps(from: StepPosition) {
@@ -288,14 +303,18 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     );
   }
 
-  const { view, verdict, plan } = computed;
+  const { view, verdict, plan, month } = computed;
   const current = state;
+  // What the board's actions edit: the month on screen. A past month is written back in its place (`withMonth`),
+  // and only while it is being corrected — read only, nothing on screen offers to write.
+  const lensState = view.state;
+  const write = (next: EngineState): CommitResult => persist(month === null ? next : withMonth(current, month, next));
 
   const actions: EngineActions = {
     saveEntry(id: MetricId, entry: MetricEntry) {
       // A count this number shares with others (shared-counts.ts) becomes the base and is
       // written into them: typed once, never contradicting itself across the board.
-      const result = persist(withSnapshot(current, (s) => propagateFrom({ ...s, metrics: { ...s.metrics, [id]: entry } }, id)));
+      const result = write(withSnapshot(lensState, (s) => propagateFrom({ ...s, metrics: { ...s.metrics, [id]: entry } }, id)));
       // Sales-assisted's stages count apart, prefixed (Q14); the link's block sits under its acquisition.
       const stageDetail = engineStageDetail(shapeOf(id).stage, motionOfMetric(id));
       if (result.ok && !savedStages.has(stageDetail)) {
@@ -305,8 +324,8 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
       return result;
     },
     setTarget(id: MetricId, target: number | null) {
-      persist(
-        withSnapshot(current, (s) => {
+      write(
+        withSnapshot(lensState, (s) => {
           const targets = { ...s.targets };
           if (target === null) delete targets[id];
           else targets[id] = target;
@@ -317,8 +336,8 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     // Every count in ONE write: two calls in the same tick would both start from the
     // same `current`, and the second would silently drop the first.
     setBase(counts: Partial<Record<SharedCount, number>>) {
-      persist(
-        withSnapshot(current, (s) =>
+      write(
+        withSnapshot(lensState, (s) =>
           (Object.entries(counts) as [SharedCount, number][]).reduce((acc, [count, value]) => withSharedCount(acc, count, value), s),
         ),
       );
@@ -329,10 +348,10 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
       persist(Object.keys(targets).length > 0 ? { ...rest, whatIf: targets } : rest);
     },
     markRequested(ids: MetricId[], role: RoleId) {
-      persist(withSnapshot(current, (s) => markRequested(s, ids, role, new Date().toISOString())));
+      write(withSnapshot(lensState, (s) => markRequested(s, ids, role, new Date().toISOString())));
     },
     markReminded(ids: MetricId[]) {
-      persist(withSnapshot(current, (s) => markReminded(s, ids, new Date().toISOString())));
+      write(withSnapshot(lensState, (s) => markReminded(s, ids, new Date().toISOString())));
     },
     openMetric(id: MetricId) {
       setScreen("board");
@@ -400,6 +419,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
         today={view.ctx.today}
         tour={view.deviceTour}
         linked={current.tourLink !== null}
+        after={current.snapshots[current.snapshots.length - 2]?.referenceMonth}
         initial={{ setup: current.setup, referenceMonth: snapshot.referenceMonth, cohortMonth: snapshot.cohortMonth }}
         existing={{
           activation: snapshot.metrics["act.rate"] !== undefined,
@@ -471,11 +491,45 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     );
   }
 
+  // The monthly series (§19.2): every month by its flows' month, the next month once its flows are over.
+  const lastIndex = current.snapshots.length - 1;
+  const today = new Date(snap.openedAt);
+  const next = nextMonthOf(current, today);
+  const series: SeriesControls = {
+    months: current.snapshots.map((s, index) => ({ index, label: formatMonth(s.referenceMonth, locale) })),
+    shown: month ?? lastIndex,
+    correcting: month !== null && correcting,
+    next: next.kind === "ready" ? { kind: "ready", label: formatMonth(next.referenceMonth, locale) } : next.kind === "full" ? { kind: "full" } : null,
+    onPick(index) {
+      setMonthIndex(index === lastIndex ? null : index);
+      setCorrecting(false);
+      setSelected(null);
+      setFocusMetric(null);
+      focus("engine-verdict");
+    },
+    onCorrect() {
+      setCorrecting(true);
+    },
+    onDoneCorrecting() {
+      setCorrecting(false);
+    },
+    onStart() {
+      // The month that ends is closed with today's date and the setup's windows; the new one starts with its targets only (§19.2.2).
+      const started = startNextMonth(current, today, new Date().toISOString());
+      if (!started) return;
+      persist(started);
+      toCurrentMonth();
+      setSelected(null);
+      focus("engine-verdict");
+    },
+  };
+
   return shell(
     <Board
       view={view}
       actions={actions}
       verdict={verdict}
+      series={series}
       plan={plan}
       selected={selected}
       onSelect={(stage) => {
@@ -489,24 +543,31 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
       onMotion={setMotionView}
       writeFailed={writeFailed}
       onDeck={() => {
+        toCurrentMonth();
         setScreen("deck");
         trackEngine({ name: "engine_deck_opened" });
         focus("engine-deck-title");
       }}
       onSave={exportJson}
       onImport={() => {
+        toCurrentMonth();
         setScreen("import");
         focus("engine-import-title");
       }}
       onErase={() => {
+        toCurrentMonth();
         setScreen("erase");
         focus("engine-erase-title");
       }}
       onSettings={() => {
+        toCurrentMonth();
         setScreen("settings");
         focus("engine-setup-title");
       }}
-      onSteps={() => openSteps(resumePosition(lastSnapshot(current), current.setup.motions))}
+      onSteps={() => {
+        toCurrentMonth();
+        openSteps(resumePosition(lastSnapshot(current), current.setup.motions));
+      }}
     />,
   );
 }

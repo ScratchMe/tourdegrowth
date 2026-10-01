@@ -9,6 +9,7 @@ import { Peloton } from "./Peloton";
 import { Relays } from "./Relays";
 import type { EngineView } from "./view";
 import styles from "./Board.module.css";
+import { previousLeakLine } from "./series-view";
 
 type PlgDerived = Extract<MotionDerived, { motion: "plg" }>;
 type SlgDerived = Extract<MotionDerived, { motion: "slg" }>;
@@ -44,7 +45,7 @@ export function MotionColumns({ view }: { view: EngineView }) {
             {strings.hybrid.motionName.plg}
           </h2>
           <Coverage coverage={plgD.coverage} strings={strings} />
-          <Diagnosis diagnosis={plgD.diagnosis} strings={strings} locale={ctx.locale} metrics={view.metrics} values={values} motionName={strings.hybrid.motionName.plg} />
+          <Diagnosis diagnosis={plgD.diagnosis} strings={strings} locale={ctx.locale} metrics={view.metrics} values={values} motionName={strings.hybrid.motionName.plg} previous={previousLeakLine(view, "plg")} />
           <Card elevation="flat" className={styles.pelotonCard} data-testid="engine-board-peloton">
             <Peloton
               peloton={plgD.peloton}
@@ -63,7 +64,7 @@ export function MotionColumns({ view }: { view: EngineView }) {
             {strings.hybrid.motionName.slg}
           </h2>
           <Coverage coverage={slgD.coverage} strings={strings} />
-          <Diagnosis diagnosis={slgD.diagnosis} strings={strings} locale={ctx.locale} metrics={view.metrics} values={values} motionName={strings.hybrid.motionName.slg} />
+          <Diagnosis diagnosis={slgD.diagnosis} strings={strings} locale={ctx.locale} metrics={view.metrics} values={values} motionName={strings.hybrid.motionName.slg} previous={previousLeakLine(view, "slg")} />
           <Card elevation="flat" className={styles.pelotonCard} data-testid="engine-board-relays">
             <Relays relays={slgD.relays} state={state} strings={strings} locale={ctx.locale} diagnosis={slgD.diagnosis} compact />
           </Card>

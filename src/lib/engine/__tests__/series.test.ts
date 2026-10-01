@@ -12,6 +12,7 @@ import {
   startNextMonth,
   towardTarget,
   windowsOf,
+  withMonth,
 } from "../series";
 import { MAX_MONTHS, type EngineState, type MetricEntry } from "../types";
 import { validateEngine } from "../validate";
@@ -90,6 +91,44 @@ describe("a closed month is read as it was seen (§19.2.3)", () => {
 
   it("the calendar day of an ISO instant, as a local date", () => {
     expect(calendarDay("2026-08-03T09:00:00.000Z")).toEqual(new Date(2026, 7, 3));
+  });
+});
+
+describe("a past month corrected goes back in its place (§19.2.4)", () => {
+  it("its months replace the engine's up to it, the later ones follow, the engine-level fields stay the engine's", () => {
+    const s = twoMonths();
+    s.setup.activationWindowDays = 14;
+    s.whatIf = { "act.rate": 24 };
+    const lens = monthView(s, 0, EXAMPLE_TODAY).state;
+    const edited: EngineState = {
+      ...lens,
+      updatedAt: "2026-10-05T09:00:00.000Z",
+      snapshots: [{ ...lens.snapshots[0]!, metrics: { ...lens.snapshots[0]!.metrics, "act.rate": measured(ratio(130, 800), amplitude) } }],
+    };
+    const merged = withMonth(s, 0, edited);
+    expect(merged.snapshots[0]!.metrics["act.rate"]).toEqual(measured(ratio(130, 800), amplitude));
+    expect(merged.snapshots[1]).toBe(s.snapshots[1]);
+    // The closed month's 7-day window stays on the month; the setup keeps its 14.
+    expect(merged.setup.activationWindowDays).toBe(14);
+    expect(merged.whatIf).toEqual({ "act.rate": 24 });
+    expect(merged.updatedAt).toBe("2026-10-05T09:00:00.000Z");
+    expect(validateEngine(merged)).toEqual([]);
+    // With the setup's window changed since July, the two months no longer compare: the definition moved.
+    expect(deriveSeries(merged, CTX)!.motions[0]!.rows.find((r) => r.metric === "act.rate")?.comparison).toEqual({ comparable: false, why: "definition-changed" });
+  });
+
+  it("the next month's change recomputes from the corrected one", () => {
+    const s = twoMonths();
+    const lens = monthView(s, 0, EXAMPLE_TODAY).state;
+    const july = { ...lens.snapshots[0]!, metrics: { ...lens.snapshots[0]!.metrics, "act.rate": measured(ratio(130, 800), amplitude) } };
+    const merged = withMonth(s, 0, { ...lens, snapshots: [july] });
+    const row = deriveSeries(merged, CTX)!.motions[0]!.rows.find((r) => r.metric === "act.rate");
+    expect(row?.comparison).toEqual({ comparable: true, before: 16.25, now: 18 });
+  });
+
+  it("refuses a state that isn't that month's view", () => {
+    const s = twoMonths();
+    expect(() => withMonth(s, 0, s)).toThrow();
   });
 });
 

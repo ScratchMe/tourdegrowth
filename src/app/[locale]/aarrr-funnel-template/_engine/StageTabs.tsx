@@ -15,6 +15,7 @@ import { stageForKey, stageTabs } from "./stage-tabs";
 import { domId, fill, metricById, stageName } from "./text";
 import type { EngineActions, EngineView } from "./view";
 import styles from "./Board.module.css";
+import { rowDelta } from "./series-view";
 
 const PILL_CLASS: Record<PillKind, string> = {
   found: styles.pillFound!,
@@ -61,6 +62,7 @@ export function StageTabs({
   panelKey,
   focusMetric,
   motion = "plg",
+  readOnly = false,
 }: {
   view: EngineView;
   actions: EngineActions;
@@ -71,6 +73,8 @@ export function StageTabs({
   focusMetric: MetricId | null;
   /** Whose numbers the tabs hold (A7.3.c S3): one motion at a time, the hybrid's selector picks it (§18.7). */
   motion?: Motion;
+  /** A past month, read only (§19.2.4, A14 T2): the rows say their value and their change, and open no sheet. */
+  readOnly?: boolean;
 }) {
   const { strings } = view;
   const snapshot = view.state.snapshots[view.state.snapshots.length - 1]!;
@@ -159,6 +163,7 @@ export function StageTabs({
         motion={motion}
         diagnosis={diagnosis}
         link={link}
+        readOnly={readOnly}
       />
     </div>
   );
@@ -240,6 +245,7 @@ function StagePanel({
   motion,
   diagnosis,
   link,
+  readOnly,
 }: {
   stage: Pillar;
   index: number;
@@ -249,6 +255,7 @@ function StagePanel({
   motion: Motion;
   diagnosis: AnyDiagnosis;
   link: MetricShape | null;
+  readOnly: boolean;
 }) {
   const { strings, state, ctx } = view;
   const snapshot = state.snapshots[state.snapshots.length - 1]!;
@@ -290,6 +297,42 @@ function StagePanel({
     const isOpen = open.has(shape.id);
     const bodyId = `engine-metric-body-${domId(shape.id)}`;
     const value = rowValue(shape, view);
+    // Its change since the month before (§19.2.5): a sign and words, never a colour.
+    const delta = rowDelta(shape.id, view);
+    const meta = (
+      <span className={styles.metricMeta}>
+        {value ? (
+          <span className={styles.metricValue} data-kind={value.kind} data-testid={`engine-row-value-${domId(shape.id)}`}>
+            {value.text}
+          </span>
+        ) : null}
+        {delta ? (
+          <span className={styles.metricDelta} data-testid={`engine-row-delta-${domId(shape.id)}`}>
+            {delta}
+          </span>
+        ) : null}
+        {/* Ink for found, outline for the rest — never the red tag: red on this board
+            is the stage the diagnosis names (the tab's stamp), and a number's status is
+            not a diagnosis. Contrast is not the reason: the red Tag reads
+            --surface-accent, 4.65:1 (design audit S-9). */}
+        <Tag tone={status === "measured" ? "ink" : "outline"} className={styles.metricStatus}>
+          {strings.status[STATUS_KEY[status]]}
+        </Tag>
+      </span>
+    );
+    if (readOnly) {
+      // A past month read only: the row says what it said, and opens nothing to type into.
+      return (
+        <div key={shape.id} className={styles.metric} data-open="false" data-readonly="true">
+          <h4 className={styles.metricHeading}>
+            <span className={styles.metricToggle} data-testid={`engine-metric-${domId(shape.id)}`}>
+              <span className={styles.metricName}>{metric.name}</span>
+              {meta}
+            </span>
+          </h4>
+        </div>
+      );
+    }
     return (
       <div key={shape.id} className={styles.metric} data-open={isOpen ? "true" : "false"}>
         <h4 className={styles.metricHeading}>
@@ -303,20 +346,7 @@ function StagePanel({
             data-testid={`engine-metric-${domId(shape.id)}`}
           >
             <span className={styles.metricName}>{metric.name}</span>
-            <span className={styles.metricMeta}>
-              {value ? (
-                <span className={styles.metricValue} data-kind={value.kind} data-testid={`engine-row-value-${domId(shape.id)}`}>
-                  {value.text}
-                </span>
-              ) : null}
-              {/* Ink for found, outline for the rest — never the red tag: red on this board
-                  is the stage the diagnosis names (the tab's stamp), and a number's status is
-                  not a diagnosis. Contrast is not the reason: the red Tag reads
-                  --surface-accent, 4.65:1 (design audit S-9). */}
-              <Tag tone={status === "measured" ? "ink" : "outline"} className={styles.metricStatus}>
-                {strings.status[STATUS_KEY[status]]}
-              </Tag>
-            </span>
+            {meta}
             <span className={styles.metricMarker} aria-hidden="true" data-open={isOpen ? "true" : "false"} />
           </button>
         </h4>

@@ -20,13 +20,14 @@ import { isRequestStale } from "@/lib/engine/request";
 import { blockingCheck } from "@/lib/engine/sanity";
 import { hybridTrapOf, isCandidate as isCandidateId, numbered, positionIn, positionLabel, statusQuestionOf } from "@/lib/engine/phrases";
 import { smallSampleOf } from "@/lib/engine/relays";
+import { proposedFromBefore } from "@/lib/engine/series";
 import { slgBaseNoun } from "@/lib/engine/sentences";
 import { knownIn } from "@/lib/engine/values";
 import { SHARED_COUNTS, knownSharedCount, sharedCountAt } from "@/lib/engine/shared-counts";
 import { ComparisonStrip } from "./ComparisonStrip";
 import { MissingTriage } from "./MissingTriage";
 import { RequestCopy } from "./RequestCopy";
-import { draftFromEntry, entryFromDraft, isWideRange, type DraftProblem, type SheetDraft, type SheetMode } from "./sheet-draft";
+import { draftFromEntry, entryFromDraft, isWideRange, withProposals, type DraftProblem, type SheetDraft, type SheetMode } from "./sheet-draft";
 import { isRule, missingLabel, ruleMessage } from "./sheet-problems";
 import { draftKey, dropDraft, keepDraft, keptDraft } from "./sheet-drafts";
 import { moneyUnit, percentUnit, wordUnit, type NumberUnit } from "./sources";
@@ -97,12 +98,13 @@ export function MetricSheet({
   // A count several numbers share is typed once (shared-counts.ts): an empty side of this
   // number's counts starts from it, and the field says so.
   const shared = sharedSides(id, snapshot);
-  // An unsaved draft comes back when the sheet is remounted (A15.12).
-  const key = draftKey(id, entry);
+  // An unsaved draft comes back when the sheet is remounted (A15.12), in its own month (A14 T2).
+  const key = draftKey(id, entry, snapshot.referenceMonth);
   const [draft, setDraft] = useState<SheetDraft>(() => {
     const kept = keptDraft(key);
     if (kept) return kept;
-    const d = draftFromEntry(entry, shape);
+    // A new month offers the month before's definition and source, never its value (§19.2.2).
+    const d = withProposals(draftFromEntry(entry, shape), proposedFromBefore(view.state, id));
     if (d.kind !== "ratio") return d;
     return {
       ...d,

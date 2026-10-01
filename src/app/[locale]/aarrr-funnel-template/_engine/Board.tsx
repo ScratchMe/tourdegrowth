@@ -24,7 +24,9 @@ import { Diagnosis } from "./Diagnosis";
 import { Mirror } from "./Mirror";
 import { Peloton } from "./Peloton";
 import { Relays } from "./Relays";
+import { MonthBar, NextMonthBand, type SeriesControls } from "./MonthBar";
 import { ResumeBand } from "./ResumeBand";
+import { previousLeakLine } from "./series-view";
 import { SlgWhatIfPanel } from "./SlgWhatIfPanel";
 import { defaultStage } from "./stage-tabs";
 import { StageTabs } from "./StageTabs";
@@ -82,6 +84,7 @@ export function Board({
   onErase,
   onSettings,
   onSteps,
+  series,
 }: {
   view: EngineView;
   actions: EngineActions;
@@ -103,8 +106,13 @@ export function Board({
   onErase: () => void;
   onSettings: () => void;
   onSteps: () => void;
+  /** The monthly series (§19.2, A14 T2): the month selector, a past month read only or corrected, the next month. */
+  series?: SeriesControls;
 }) {
   const { strings, state, ctx, derived } = view;
+  // A past month on screen (§19.2.4): read only — no « Et si », no entry, no file actions — unless it is being corrected.
+  const past = series ? series.shown !== series.months.length - 1 : false;
+  const readOnly = past && !series?.correcting;
   const { plg: hasPlg, slg: hasSlg } = state.setup.motions;
   const hybrid = hasPlg && hasSlg;
   const motion: Motion = hybrid ? (motionView ?? "plg") : hasPlg ? "plg" : "slg";
@@ -168,7 +176,16 @@ export function Board({
     </Disclosure>
   );
   const tabs = (
-    <StageTabs view={view} actions={actions} current={current} onSelect={onSelect} panelKey={`${current}:${panelSeq}`} focusMetric={focusMetric} motion={motion} />
+    <StageTabs
+      view={view}
+      actions={actions}
+      current={current}
+      onSelect={onSelect}
+      panelKey={`${current}:${panelSeq}`}
+      focusMetric={focusMetric}
+      motion={motion}
+      readOnly={readOnly}
+    />
   );
 
   return (
@@ -200,7 +217,10 @@ export function Board({
         </p>
       ) : null}
 
-      {returningFrom ? <ResumeBand returningFrom={returningFrom} plan={plan} view={view} actions={actions} /> : null}
+      {series ? <MonthBar series={series} strings={strings} /> : null}
+      {series && !past ? <NextMonthBand next={series.next} onStart={series.onStart} strings={strings} /> : null}
+
+      {returningFrom && !past ? <ResumeBand returningFrom={returningFrom} plan={plan} view={view} actions={actions} /> : null}
 
       {hybrid && plgD && slgD ? (
         <>
@@ -228,12 +248,12 @@ export function Board({
             </Field>
           </div>
           {tabs}
-          {whatIf}
+          {past ? null : whatIf}
           <TotalIn12 view={view} />
         </>
       ) : motion === "slg" && slgD ? (
         <>
-          <Diagnosis diagnosis={slgD.diagnosis} strings={strings} locale={ctx.locale} metrics={view.metrics} values={candidateValues} />
+          <Diagnosis diagnosis={slgD.diagnosis} strings={strings} locale={ctx.locale} metrics={view.metrics} values={candidateValues} previous={previousLeakLine(view, "slg")} />
           <Card elevation="raised" className={styles.pelotonCard} data-testid="engine-board-relays">
             {relaysOf(false)}
           </Card>
@@ -243,11 +263,11 @@ export function Board({
             </Callout>
           ) : null}
           {tabs}
-          {whatIf}
+          {past ? null : whatIf}
         </>
       ) : (
         <>
-          <Diagnosis diagnosis={derived.diagnosis} strings={strings} locale={ctx.locale} metrics={view.metrics} values={candidateValues} />
+          <Diagnosis diagnosis={derived.diagnosis} strings={strings} locale={ctx.locale} metrics={view.metrics} values={candidateValues} previous={previousLeakLine(view, "plg")} />
           {/* The screen's one raised card (Card's own rule): the peloton is what the board is about. */}
           <Card elevation="raised" className={styles.pelotonCard} data-testid="engine-board-peloton">
             {pelotonOf(false)}
@@ -264,7 +284,7 @@ export function Board({
           {/* Folded on the board: the funnel it redraws is the one just above, and a
               second full funnel open by default made the longest page of the site
               longer (Antoine, 2026-09-25). The step-by-step shows it open. */}
-          {whatIf}
+          {past ? null : whatIf}
         </>
       )}
 
@@ -300,26 +320,28 @@ export function Board({
         <Mirror mirror={null} strings={strings} locale={ctx.locale} bridges={view.bridges} metrics={view.metrics} derived={view.derivedCopy} />
       )}
 
-      {plan.count > 0 ? (
+      {plan.count > 0 && !past ? (
         <Disclosure summary={fill(strings.board.collectTitle, { n: plan.count })} data-testid="engine-collect-disclosure">
           <CollectHub plan={plan} view={view} actions={actions} />
         </Disclosure>
       ) : null}
 
-      <div className={styles.actions} data-testid="engine-actions">
-        <Button onClick={onDeck} data-testid="engine-open-deck">
-          {strings.actions.deck}
-        </Button>
-        <Button variant="secondary" onClick={onSave} data-testid="engine-save-json">
-          {strings.actions.save}
-        </Button>
-        <Button variant="quiet" onClick={onImport} data-testid="engine-import-open-screen">
-          {strings.actions.import}
-        </Button>
-        <Button variant="quiet" onClick={onErase} data-testid="engine-erase-open">
-          {strings.actions.erase}
-        </Button>
-      </div>
+      {past ? null : (
+        <div className={styles.actions} data-testid="engine-actions">
+          <Button onClick={onDeck} data-testid="engine-open-deck">
+            {strings.actions.deck}
+          </Button>
+          <Button variant="secondary" onClick={onSave} data-testid="engine-save-json">
+            {strings.actions.save}
+          </Button>
+          <Button variant="quiet" onClick={onImport} data-testid="engine-import-open-screen">
+            {strings.actions.import}
+          </Button>
+          <Button variant="quiet" onClick={onErase} data-testid="engine-erase-open">
+            {strings.actions.erase}
+          </Button>
+        </div>
+      )}
 
       <BackupBar state={state} strings={strings} locale={ctx.locale} onSave={onSave} />
     </div>
