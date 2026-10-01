@@ -15,7 +15,7 @@ import "./globals.css";
  * essentially never render — the two root layouts only read a header and a
  * cookie — but when it does, it still looks like the product.
  */
-export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+export default function GlobalError({ error, retry }: { error: Error & { digest?: string }; retry: () => void }) {
   const t = ERROR_SCREEN_STRINGS;
   return (
     <html lang="en">
@@ -25,7 +25,8 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
             {tc(t.errorBody, "en")}
             {error.digest ? ` (${error.digest})` : null}
           </DetourCard>
-          <Button onClick={reset}>{tc(t.errorRetry, "en")}</Button>
+          {/* `retry`, not `reset`: it fetches again (see ErrorScreen, A14.5). */}
+          <Button onClick={retry}>{tc(t.errorRetry, "en")}</Button>
         </main>
       </body>
     </html>
