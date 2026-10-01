@@ -13,8 +13,8 @@ import type { Pillar } from "@/lib/scoring/pillars";
 export type LevelSlug = "retention";
 /**
  * A level whose model is written and tested but not yet wired to a page —
- * level 2 (GAME-BRIEF §17) while its spec waits for Antoine (`CHANTIERS.md`
- * C30). Kept out of `LevelSlug` on purpose: every record keyed by it (the
+ * level 2 (GAME-BRIEF §17, validated on 2026-10-01) until `CHANTIERS.md` A12
+ * wires it. Kept out of `LevelSlug` on purpose: every record keyed by it (the
  * save, the result page's entry card, the analytics) would otherwise demand
  * copy and decisions for a level nobody can play. Wiring the level is moving
  * its slug from here to there, and letting the compiler list what it needs.

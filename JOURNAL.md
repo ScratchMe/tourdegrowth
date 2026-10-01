@@ -6378,3 +6378,17 @@ Tout est corrigé, et le §17.8 pose la règle. Elle a aussi mis en doute, de m�
 - `/r/sample` répond 200, sans l'encart du jeu, et le sitemap ne cite aucune adresse du jeu.
 
 Ce que la refonte change pour un joueur ne se voit qu'avec le jeu ouvert. C'est vérifié dans la suite Playwright et à l'écran sur le build local, pas en production.
+
+## C30 : le niveau 2 du jeu, validé (2026-10-01)
+
+**Posé dans la session qui avait écrit la spécification**, à la demande d'Antoine, qui a demandé pourquoi les questions ne lui avaient pas été posées pendant l'implémentation, alors qu'il était disponible. La réponse honnête : la convention de `CHANTIERS.md` A (« une question produit rencontrée en route part en section C ») a été lue comme « ne pas déranger ». Or elle disait seulement de ne pas trancher seul. Q1, le chiffre du board, conditionnait tout le chiffrage du niveau, et a été posée après. La règle est réécrite : **si Antoine est dans la session, une question produit se pose tout de suite**, surtout quand le reste du travail en dépend ; la section C est pour les questions sans lui.
+
+**Les cinq réponses, toutes selon la reco** (`GAME-BRIEF.md` §17.10) :
+- Q1 : le DG réclame les **nouveaux clients par mois**, pas le taux de conversion. Elle a été posée avec la définition de l'acquisition dans le Tour et les huit astuces rangées par ce qu'elles font monter ;
+- Q2 : **Pédalix** ;
+- Q3 : une **transaction pénale de 150 000 €**, posée à côté de l'amende du niveau 1 et des montants publiés. Écartés : 1,3 M€ et le plafond de 3,75 M€ ;
+- Q4 : **les huit cas tels quels**, Temu compris, dit comme une notification en cours ;
+- Q5 : **une carte qui propose les deux niveaux** quand plusieurs étapes du goulot en ont un. C'est la reco de C11, tranchée avant l'ouverture du niveau 2, et §15.4 est à jour.
+
+**Ce qui en découle** : rien ne bouge dans le modèle, les tests ni les chiffres du §17. A12.b est close et A12.c (la copie) peut partir. L'encart à deux niveaux rejoint A12.f. Le déclencheur « un deuxième niveau ouvre » sort de la veille (section E), puisque sa question est tranchée, et le prompt C30 sort de `CHANTIERS.md`, puisqu'il a servi. Les commentaires du code qui disaient « en attente d'Antoine » (`levels/acquisition.ts`, `types.ts`) sont mis à jour : sans eux, la session d'A12.c aurait lu une validation pendante.
+

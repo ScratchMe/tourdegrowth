@@ -1,9 +1,10 @@
 /**
  * Level 2 « Comment les gens vous trouvent » — its card identifiers and its
- * LevelDefinition. A DRAFT: the spec is GAME-BRIEF.md §17, waiting for
- * Antoine (`CHANTIERS.md` C30). No page, no copy, no save key: the level is
- * a model the engine runs and the fixtures A2-D2 pin, so the numbers the
- * spec quotes are the numbers the code produces.
+ * LevelDefinition. The spec is GAME-BRIEF.md §17, validated by Antoine on
+ * 2026-10-01 (`CHANTIERS.md` C30). Still a draft in the code: no page, no
+ * copy, no save key (`DraftLevelSlug`) until A12 wires it. The level is a
+ * model the engine runs and the fixtures F2.1 to F2.4 pin, so the numbers
+ * the spec quotes are the numbers the code produces.
  *
  * The shop is the mirror of level 1's streaming app: the board wants a
  * number UP (new customers a month, 2 000 in January, 3 000 in December)
@@ -85,7 +86,7 @@ export const ACQUISITION_LEVEL: LevelDefinition<AcquisitionCardId, "acquisition"
     // the DGCCRF settles by a transaction pénale with the prosecutor's
     // agreement (L523-1) — Shein, 40 M€ in 2025. The ceiling for a company
     // online is 3,75 M€ or 10 % of turnover; 150 000 € is about 1 % of this
-    // shop's year. Proposed in GAME-BRIEF §17.3, Antoine decides (C30).
+    // shop's year. GAME-BRIEF §17.3, kept by Antoine on 2026-10-01 (C30 Q3).
     control: {
       radar: 75, fine: 150_000, leaversRate: 0.015,
       radarAfter: 20, trustHit: -10, patienceHit: -15, spike: 500,
