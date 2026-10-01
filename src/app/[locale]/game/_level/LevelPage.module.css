@@ -1,5 +1,6 @@
-/* The level page's paper-world intro (plan §2.1). The frame is ProsePage's;
-   this module adds the three steps and the footnote under the year. */
+/* Every level page's paper-world intro (plan §2.1). The frame is ProsePage's;
+   this module adds the three steps and the footnote under the year. Level 1's
+   page stylesheet until level 2 needed the same page (2026-10-01, A12.f). */
 
 .steps {
   list-style: none;

@@ -1,7 +1,7 @@
 import { Card } from "@/components/core/Card";
 import { MetaLabel } from "@/components/brand/MetaLabel";
 import type { FunnelWindow } from "@/lib/analytics/goatcounter-api";
-import { GAME_ENDINGS } from "@/lib/game/events";
+import { GAME_ENDINGS, GAME_LEVEL_SLUGS } from "@/lib/game/events";
 import type { GrowthStats } from "@/lib/submissions/growth-stats";
 import { gamePass } from "./game";
 import styles from "./page.module.css";
@@ -17,7 +17,7 @@ function share(n: number, of: number): string {
  * surface). Everything reads zero until the game is opened; the 30-day
  * window is the one that says something in the first month after.
  */
-function GameCard({ window, growth }: { window: FunnelWindow; growth: Pick<GrowthStats, "retentionBottleneckResults"> }) {
+function GameCard({ window, growth }: { window: FunnelWindow; growth: Pick<GrowthStats, "gameBottleneckResults"> }) {
   const game = window.stats?.game;
   const pass = gamePass(window, growth);
 
@@ -42,12 +42,16 @@ function GameCard({ window, growth }: { window: FunnelWindow; growth: Pick<Growt
             so one result can produce several clicks. */}
         Result → game —{" "}
         <strong>{pass.clicksPerResult === null ? "—" : pass.clicksPerResult.toFixed(2)}</strong> clicks per
-        retention-bottleneck result ({pass.resultClicks} clicks / {pass.retentionResults ?? "?"} results)
+        result whose bottleneck has a level ({pass.resultClicks} clicks / {pass.gameResults ?? "?"} results)
       </p>
 
       <ul className={styles.list} data-testid="admin-game-entries">
-        <li>Entries — from a result: {game.entries["result/retention"]}</li>
-        <li>Entries — from a result with a Deep dive: {game.entries["deep_dive/retention"]}</li>
+        {GAME_LEVEL_SLUGS.map((slug) => (
+          <li key={slug}>
+            Entries to {slug} — from a result: {game.entries[`result/${slug}`]}, with a Deep dive:{" "}
+            {game.entries[`deep_dive/${slug}`]}
+          </li>
+        ))}
         <li>Entries — footer: {game.entries.footer}</li>
         <li>Entries — hub: {game.entries.hub}</li>
         <li>Entries — landing strip: {game.entries.home_strip}</li>
@@ -57,7 +61,8 @@ function GameCard({ window, growth }: { window: FunnelWindow; growth: Pick<Growt
       <ul className={styles.list}>
         <li>
           Years started — {started} (direct {game.started.direct}, result {game.started.result}, Deep dive{" "}
-          {game.started.deep_dive}, hub {game.started.hub})
+          {game.started.deep_dive}, hub {game.started.hub}, other level {game.started.other_level}) —{" "}
+          {GAME_LEVEL_SLUGS.map((slug) => `${slug} ${game.startedByLevel[slug]}`).join(", ")}
         </li>
         {game.quartersRun.map((count, i) => (
           <li key={i}>
@@ -72,13 +77,15 @@ function GameCard({ window, growth }: { window: FunnelWindow; growth: Pick<Growt
         </li>
       </ul>
 
-      <ul className={styles.list}>
-        {GAME_ENDINGS.map((id) => (
-          <li key={id}>
-            Ending {id} — {game.endings[id]}
-          </li>
-        ))}
-      </ul>
+      {GAME_LEVEL_SLUGS.map((slug) => (
+        <ul key={slug} className={styles.list} data-testid={`admin-game-endings-${slug}`}>
+          {GAME_ENDINGS.map((id) => (
+            <li key={id}>
+              Ending {id} ({slug}) — {game.endings[slug][id]}
+            </li>
+          ))}
+        </ul>
+      ))}
 
       <p className={styles.detail}>
         Catalogue opened {game.catalogueOpened} · replays {game.replays} · shares {game.shares} · back to the Tour{" "}
@@ -88,7 +95,7 @@ function GameCard({ window, growth }: { window: FunnelWindow; growth: Pick<Growt
   );
 }
 
-export function GameSection({ windows, growth }: { windows: FunnelWindow[]; growth: Pick<GrowthStats, "retentionBottleneckResults"> }) {
+export function GameSection({ windows, growth }: { windows: FunnelWindow[]; growth: Pick<GrowthStats, "gameBottleneckResults"> }) {
   return (
     <>
       <MetaLabel size="xs" wide className={styles.sectionLabel}>

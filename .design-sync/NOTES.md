@@ -328,7 +328,7 @@ doc comment says why the layout uses an auto margin rather than
 
 ## Synced
 
-**Stale since 2026-10-01 (A12.d, then A12.e), ready to re-sync** — six game
+**Stale since 2026-10-01 (A12.d, A12.e, A12.f), re-sync after A12.f.2** — six game
 components renamed level 1's slots in their props: `Dashboard` (`churn`,
 `subs`, `mrr` → `metric`, `customers`, `revenue`), `EndingCharts` and
 `RevealCells` (`churn` → `metric`), `QuarterReport` (figure keys), `ActionBar`
@@ -338,8 +338,12 @@ uploaded project still shows the old contracts. A12.e then added two
 components — `ShopPhone` (Pédalix's phone, pinned in `dtsPropsFor` like
 `PhoneMock`) and `BasketPill` (its pill, drawn with `ClickPill`'s styles) —
 and moved `PhoneMock`'s frame into `PhoneFrame.module.css`, shared by both
-phones. `CHANTIERS.md` B4 re-syncs all of it at once: 90 components, recapture
-the six renamed ones and `PhoneMock`, do not carry their grades forward.
+phones. A12.f.1 gave `NextLevel` an `href` (December's block links to the
+other level once it is open: solid edge, two new stories, `Playable` and
+`PlayableFrench`), and A12.f.2 will let `GameEntry` offer several levels.
+`CHANTIERS.md` B4 re-syncs all of it at once, after A12.f.2: 90 components,
+recapture the six renamed ones, `PhoneMock`, `NextLevel` and `GameEntry`, do
+not carry their grades forward.
 
 Project `23b9671c-a55b-452e-aa41-39906ee71ba8` ("Tour de Growth"), pinned as
 `projectId` in `config.json`. **Last upload: 2026-09-30, after A11, C28 and

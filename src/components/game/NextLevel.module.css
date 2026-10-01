@@ -1,4 +1,5 @@
-/* Game plan §2.6 — `--border-dashed`, the system's grammar for "not yet". */
+/* Game plan §2.6 — `--border-dashed`, the system's grammar for "not yet";
+   `--border-solid` once the level is open and the block links to it (C31). */
 
 .card {
   display: flex;
@@ -7,6 +8,10 @@
   padding: var(--pad-card);
   border: var(--border-dashed);
   border-radius: var(--radius-card);
+}
+
+.open {
+  border: var(--border-solid);
 }
 
 .top {
@@ -30,6 +35,16 @@
   font: var(--title-card);
   color: var(--text-body);
   text-wrap: balance;
+}
+
+.link {
+  color: var(--text-link);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.link:hover {
+  color: var(--text-link-hover);
 }
 
 @media (max-width: 760px) {

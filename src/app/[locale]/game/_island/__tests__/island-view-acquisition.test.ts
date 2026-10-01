@@ -28,8 +28,8 @@ import {
 
 /**
  * The island is the same for every level (CHANTIERS.md A12.d): this runs its
- * builders on level 2, « Comment les gens vous trouvent », which no page plays
- * yet. A builder that still assumed churn — a « % » on a count of customers,
+ * builders on level 2, « Comment les gens vous trouvent », written before any
+ * page played it (A12.f wired it). A builder that still assumed churn — a « % » on a count of customers,
  * a gap in points, a curve ticked in percent — fails here before a player
  * could read it.
  */

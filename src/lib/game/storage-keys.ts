@@ -23,6 +23,8 @@ import type { EndingId, LevelSlug } from "./types";
  * still closed, so the only saves this leaves behind are previews.
  */
 export const GAME_SAVE_KEYS = {
+  /** Level 2, 2026-10-01: born with the v2 state shape, so its own key starts at v1. */
+  acquisition: "tdg.game.acquisition.v1",
   retention: "tdg.game.retention.v2",
 } as const satisfies Record<LevelSlug, string>;
 

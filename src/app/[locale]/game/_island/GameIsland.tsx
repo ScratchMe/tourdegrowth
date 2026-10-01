@@ -38,6 +38,7 @@ import { RevealCells } from "@/components/game/RevealCells";
 import { ShareRow } from "@/components/game/ShareRow";
 import { TourLoop } from "@/components/game/TourLoop";
 import { VideoCall } from "@/components/game/VideoCall";
+import { ACQUISITION_LEVEL } from "@/lib/game/levels/acquisition";
 import { RETENTION_LEVEL } from "@/lib/game/levels/retention";
 import { moodNow } from "@/lib/game/model";
 import { actionBarVisible, callViewFor, handHint, handVisible } from "@/lib/game/phases";
@@ -66,20 +67,29 @@ import styles from "./GameIsland.module.css";
 
 /** The model of each playable level. Data only, a few kilobytes: every level ships in the island's bundle. */
 const LEVELS: { [S in LevelSlug]: LevelDefinition<string> } = {
+  acquisition: ACQUISITION_LEVEL,
   retention: RETENTION_LEVEL,
 };
 
-export type GameIslandProps = {
-  [S in LevelSlug]: {
-    /** Which level this island plays. */
-    slug: S;
-    /** The level's copy in the page's language — everything but the intro and the footer, which the page renders itself. */
-    copy: IslandCopies[S];
-    locale: Locale;
-  };
-}[LevelSlug];
+/**
+ * Generic over the level, so its slug, its copy and its side stay correlated
+ * through `ISLAND_SIDES[slug]`: a page cannot hand level 1's copy to level 2's
+ * phone.
+ */
+export interface GameIslandProps<S extends LevelSlug> {
+  /** Which level this island plays. */
+  slug: S;
+  /** The level's copy in the page's language — everything but the intro and the footer, which the page renders itself. */
+  copy: IslandCopies[S];
+  locale: Locale;
+  /**
+   * The other level's page, when it is open (`otherLevelHref`, computed by the
+   * page on the server): December's last block links to it (C31).
+   */
+  nextLevelHref?: string;
+}
 
-export function GameIsland({ slug, copy, locale }: GameIslandProps) {
+export function GameIsland<S extends LevelSlug>({ slug, copy, locale, nextLevelHref }: GameIslandProps<S>) {
   const L = LEVELS[slug];
   const side = ISLAND_SIDES[slug];
   const ctx = useMemo(() => islandContext(L, copy, locale), [L, copy, locale]);
@@ -324,7 +334,12 @@ export function GameIsland({ slug, copy, locale }: GameIslandProps) {
               shareText={shareText(ctx, game, shareUrl)}
               onShare={g.share}
             />
-            <NextLevel eyebrow={copy.nextLevel.eyebrow} title={copy.nextLevel.title} status={copy.nextLevel.status} />
+            <NextLevel
+              eyebrow={copy.nextLevel.eyebrow}
+              title={copy.nextLevel.title}
+              status={copy.nextLevel.status}
+              href={nextLevelHref}
+            />
             <TourLoop question={copy.tourLoop.question} cta={copy.tourLoop.cta} onClick={g.tourLoop} />
           </div>
         </div>

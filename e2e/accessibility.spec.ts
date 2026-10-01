@@ -57,6 +57,7 @@ const PAGES: [name: string, path: string][] = [
   // adresse : e2e/game-island.spec.ts les scanne après avoir semé une année.
   ["game hub (fr)", "/fr/game"],
   ["game level", "/en/game/retention"],
+  ["game level 2 (fr)", "/fr/game/acquisition"],
 ];
 
 interface ContrastData {

@@ -2,10 +2,11 @@ import type { GameEntryView } from "@/components/game/GameEntry";
 import { GAME_ENTRY_COPY } from "@/content/game/entry";
 import type { GameAccess } from "@/lib/game/access";
 import { GAME_ENTRY_EVENT, type GameEntryDetail } from "@/lib/game/events";
-import { formatPct } from "@/lib/game/format";
+import { metricFormat } from "@/lib/game/format";
 import { gameEntryFor, GAME_LEVELS_BY_PILLAR, type BottleneckLike, type GameLevelTable } from "@/lib/game/levels";
+import { ACQUISITION_LEVEL } from "@/lib/game/levels/acquisition";
 import { RETENTION_LEVEL } from "@/lib/game/levels/retention";
-import type { LevelSlug } from "@/lib/game/types";
+import type { LevelDefinition, LevelSlug } from "@/lib/game/types";
 import type { Locale } from "@/lib/i18n/locale";
 import { localePath } from "@/lib/i18n/routes";
 import { tc } from "@/lib/i18n/translatable";
@@ -26,12 +27,20 @@ import { tc } from "@/lib/i18n/translatable";
 
 /**
  * The number on the band, read from each level's model rather than written
- * in the copy: the card must not quote a churn the game does not start from.
- * `Record<LevelSlug, …>` so a new level does not compile without one.
+ * in the copy, and in the level's own format (a churn to the tenth of a
+ * point, new customers to the ten): the card must not quote a number the
+ * game does not start from. `Record<LevelSlug, …>` so a new level does not
+ * compile without one.
  */
-const STARTING_CHURN: Record<LevelSlug, number> = {
-  retention: RETENTION_LEVEL.constants.metric0,
+const LEVEL_MODELS: Record<LevelSlug, Pick<LevelDefinition<string>, "constants" | "display">> = {
+  acquisition: ACQUISITION_LEVEL,
+  retention: RETENTION_LEVEL,
 };
+
+function startingMetric(slug: LevelSlug, locale: Locale): string {
+  const level = LEVEL_MODELS[slug];
+  return metricFormat(level.display).value(locale, level.constants.metric0);
+}
 
 export function resultGameEntry({
   bottleneck,
@@ -67,7 +76,7 @@ export function resultGameEntry({
     cta: tc(copy.cta, locale),
     meta: tc(copy.meta, locale),
     band: {
-      metric: tc(copy.band.churn, locale).replace("{churn}", formatPct(locale, STARTING_CHURN[target.slug])),
+      metric: tc(copy.band.metric, locale).replace("{metric}", startingMetric(target.slug, locale)),
       trust: tc(copy.band.trust, locale),
       notOnDashboard: tc(copy.band.notOnDashboard, locale),
     },

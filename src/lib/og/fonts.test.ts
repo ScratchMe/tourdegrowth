@@ -4,6 +4,11 @@ import { describe, expect, it } from "vitest";
 import { LEVEL_MOVE, NEXT_MOVES } from "@/content/next-moves";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { gameHubShareText } from "@/lib/og/game-hub-share-text";
+import { ACQUISITION_CONTENT } from "@/content/game/acquisition";
+import { ACQUISITION_INTRO, RETENTION_INTRO } from "@/content/game/meta";
+import { RETENTION_CONTENT } from "@/content/game/retention";
+import { ACQUISITION_LEVEL } from "@/lib/game/levels/acquisition";
+import { RETENTION_LEVEL } from "@/lib/game/levels/retention";
 import { gameLevelShareText } from "@/lib/og/game-level-share-text";
 import { LOCALES, type Locale } from "@/lib/i18n/locale";
 import { sampleShareImageModel, shareImageStrings } from "@/lib/og/share-image";
@@ -27,8 +32,9 @@ import { SITE_DOMAIN_LABEL } from "@/lib/site";
  * The game's two images (`lib/og/game-frame.tsx`) are read through the very
  * functions the images call (`gameHubShareText`, `gameLevelShareText`), so
  * their list cannot drift from what is drawn: the capitals of the titles
- * (« LE CÔTÉ OBSCUR », « UNE ANNÉE ») and the churn figure, whose French
- * form puts a U+00A0 and a « % » in the STENCIL, are checked as drawn.
+ * (« LE CÔTÉ OBSCUR », « UNE ANNÉE ») and each level's figure — the churn,
+ * whose French form puts a U+00A0 and a « % » in the STENCIL, and level 2's
+ * « 2 000 » new customers, a U+00A0 between digits — are checked as drawn.
  */
 
 const WORDMARK = "TOUR DE GROWTH";
@@ -39,7 +45,11 @@ function textsByFamily(locale: Locale) {
   const og = UI_STRINGS.og;
   const pillars = PILLARS.map((pillar) => tc(UI_STRINGS.pillars[pillar], locale));
   const hub = gameHubShareText(locale);
-  const level = gameLevelShareText(locale);
+  // Both levels' images (A12.f): the same frame, each with its own words and figure.
+  const levels = [
+    gameLevelShareText(locale, { intro: RETENTION_INTRO, dashboard: RETENTION_CONTENT.dashboard, level: RETENTION_LEVEL }),
+    gameLevelShareText(locale, { intro: ACQUISITION_INTRO, dashboard: ACQUISITION_CONTENT.dashboard, level: ACQUISITION_LEVEL }),
+  ];
   // The result image's own strings, read through the function the frame is
   // handed them by: the space's pill, the profile's labels and flag, and the
   // stage beside the action label, in capitals as drawn.
@@ -55,8 +65,7 @@ function textsByFamily(locale: Locale) {
       NUMERALS,
       // « Le côté obscur » — the two titles and the churn figure.
       hub.title,
-      level.title,
-      ...level.tiles.flatMap((tile) => (tile.value ? [tile.value] : [])),
+      ...levels.flatMap((level) => [level.title, ...level.tiles.flatMap((tile) => (tile.value ? [tile.value] : []))]),
     ],
     inter: [
       tc(landing.subtitle, locale),
@@ -75,7 +84,7 @@ function textsByFamily(locale: Locale) {
       tc(LEVEL_MOVE, locale),
       // « Le côté obscur » — the zone questions and the line under the tiles.
       ...hub.zones.map((zone) => zone.question),
-      level.sentence,
+      ...levels.map((level) => level.sentence),
     ],
     mono: [
       tc(landing.bibTag, locale),
@@ -97,9 +106,11 @@ function textsByFamily(locale: Locale) {
       hub.kicker,
       hub.zonesLabel,
       ...hub.zones.flatMap((zone) => [zone.name, zone.state]),
-      level.kicker,
-      ...level.tiles.flatMap((tile) => [tile.label, ...(tile.unit ? [tile.unit] : [])]),
-      level.hidden,
+      ...levels.flatMap((level) => [
+        level.kicker,
+        ...level.tiles.flatMap((tile) => [tile.label, ...(tile.unit ? [tile.unit] : [])]),
+        level.hidden,
+      ]),
     ],
   };
 }

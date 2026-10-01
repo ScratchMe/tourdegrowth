@@ -17,8 +17,19 @@ import type { EndingId, LevelSlug, Mood } from "./types";
  * pass the name and the detail to `trackEvent` separately.
  */
 
+/** A type that only compiles when `T` is empty — the guards below that a list covers its whole union. */
+type AssertNever<T extends never> = T;
+
 /** The levels the vocabulary covers. Adding a level adds its paths here, and the dashboard follows. */
-export const GAME_LEVEL_SLUGS = ["retention"] as const satisfies readonly LevelSlug[];
+export const GAME_LEVEL_SLUGS = ["acquisition", "retention"] as const satisfies readonly LevelSlug[];
+
+/**
+ * `satisfies` checks that every listed slug is a level, not that every level
+ * is listed: this alias fails to compile when `LevelSlug` gains a member the
+ * list lacks — a level whose starts and endings the dashboard would never ask
+ * GoatCounter for (the same guard as `GameEndingsCovered` below).
+ */
+export type GameLevelsCovered = AssertNever<Exclude<LevelSlug, (typeof GAME_LEVEL_SLUGS)[number]>>;
 
 /**
  * `game_entry_clicked/<detail>` — the doors into the game (§13.3): the four
@@ -26,12 +37,19 @@ export const GAME_LEVEL_SLUGS = ["retention"] as const satisfies readonly LevelS
  * (CHANTIERS.md A7.9, C15, 2026-09-29).
  */
 export const GAME_ENTRY_EVENT = "game_entry_clicked";
-export const GAME_ENTRY_DETAILS = ["result/retention", "deep_dive/retention", "footer", "hub", "home_strip", "space_band"] as const;
+export const GAME_ENTRY_DETAILS = [
+  "result/acquisition", "deep_dive/acquisition", "result/retention", "deep_dive/retention",
+  "footer", "hub", "home_strip", "space_band",
+] as const;
 export type GameEntryDetail = (typeof GAME_ENTRY_DETAILS)[number];
 
-/** `game_started/<level>/<from>` — once, when a fresh year mounts; never on a resume. */
+/**
+ * `game_started/<level>/<from>` — once, when a fresh year mounts; never on a
+ * resume. `other_level`: a link from the other level's page — its zone
+ * navigation, or the block that closes its December (C31, 2026-10-01).
+ */
 export const GAME_STARTED_EVENT = "game_started";
-export const GAME_START_FROM = ["direct", "result", "deep_dive", "hub"] as const;
+export const GAME_START_FROM = ["direct", "result", "deep_dive", "hub", "other_level"] as const;
 export type GameStartFrom = (typeof GAME_START_FROM)[number];
 
 export const GAME_QUARTERS = ["1", "2", "3", "4"] as const;
@@ -51,7 +69,11 @@ export const GAME_ORDER_EVENT = "game_order";
 export const GAME_ORDER_OUTCOMES = ["obeyed", "refused"] as const;
 export type GameOrderOutcome = (typeof GAME_ORDER_OUTCOMES)[number];
 
-/** `game_ending/<id>` — December was reached with this ending. */
+/**
+ * `game_ending/<level>/<id>` — December was reached with this ending. Split by
+ * level since 2026-10-01 (A12.f, the game still closed, so no count was lost):
+ * a « fine » at Flixo and a settlement at Pédalix are not the same year.
+ */
 export const GAME_ENDING_EVENT = "game_ending";
 export const GAME_ENDINGS = [
   "firedDark", "firedClean", "applause", "cleanMiss", "fine", "repentant", "labyrinth",
@@ -62,7 +84,6 @@ export const GAME_ENDINGS = [
  * listed: this alias fails to compile when `EndingId` gains a member the
  * list lacks — which would otherwise be an ending the dashboard never counts.
  */
-type AssertNever<T extends never> = T;
 export type GameEndingsCovered = AssertNever<Exclude<EndingId, (typeof GAME_ENDINGS)[number]>>;
 export type GameMoodsCovered = AssertNever<Exclude<Mood, (typeof GAME_MOODS)[number]>>;
 
@@ -101,6 +122,11 @@ export function gameStartedDetail(level: LevelSlug, from: GameStartFrom): string
   return `${level}/${from}`;
 }
 
+/** The detail for `game_ending`, typed the same way. */
+export function gameEndingDetail(level: LevelSlug, ending: EndingId): string {
+  return `${level}/${ending}`;
+}
+
 /**
  * Reads the `?from=` a page was opened with. Anything outside the list —
  * absent, misspelled, hand-edited — counts as a direct arrival rather than
@@ -119,7 +145,7 @@ export function gameEventPaths(): string[] {
     ...GAME_QUARTERS.map((q) => `${GAME_QUARTER_EVENT}/${q}`),
     ...GAME_MOODS.map((m) => `${GAME_VOICE_EVENT}/${m}`),
     ...GAME_ORDER_OUTCOMES.map((o) => `${GAME_ORDER_EVENT}/${o}`),
-    ...GAME_ENDINGS.map((e) => `${GAME_ENDING_EVENT}/${e}`),
+    ...GAME_LEVEL_SLUGS.flatMap((slug) => GAME_ENDINGS.map((e) => `${GAME_ENDING_EVENT}/${gameEndingDetail(slug, e)}`)),
     ...GAME_RESUME_DETAILS.map((d) => `${GAME_RESUME_EVENT}/${d}`),
     ...GAME_SIMPLE_EVENTS,
   ];

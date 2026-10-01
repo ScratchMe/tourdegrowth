@@ -25,8 +25,9 @@ export const CONTENT_UPDATED_AT: Record<string, string> = {
   "/aarrr-vs-heart": "2026-09-25", // ce que les deux acronymes partagent (revue adversariale R11)
   // Le jeu (GAME-BRIEF 9.3). Listed in the sitemap only when the game is
   // open at build (lib/game/build-flag.ts); dated here like every other page.
-  "/game": "2026-09-29", // légende de la montagne (design I + B)
-  "/game/retention": "2026-09-24", // created (level page, intro only until the island lands)
+  "/game": "2026-10-01", // le niveau 2 ouvert : sa zone devient jouable (A12.f)
+  "/game/acquisition": "2026-10-01", // created (A12.f)
+  "/game/retention": "2026-10-01", // le bloc « Niveau suivant » devient un lien vers le niveau 2 (C31)
   // Le moteur de growth (engine spec §11.1). Same rule as the game: in the
   // sitemap only when ENGINE_ENABLED is open at build (app/sitemap.ts).
   "/aarrr-funnel-template": "2026-09-30", // A7.1 (C1) : la promesse, la FAQ et les réserves des repères, qui ne désignent plus

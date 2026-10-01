@@ -47,6 +47,7 @@ import {
   GAME_STARTED_EVENT,
   GAME_TOUR_LOOP_EVENT,
   GAME_VOICE_EVENT,
+  gameEndingDetail,
   gameEventPaths,
   gameStartedDetail,
   type GameEntryDetail,
@@ -54,7 +55,7 @@ import {
   type GameResumeDetail,
   type GameStartFrom,
 } from "@/lib/game/events";
-import type { EndingId, Mood } from "@/lib/game/types";
+import type { EndingId, LevelSlug, Mood } from "@/lib/game/types";
 
 // Server-only — never import this from a "use client" component.
 // GOATCOUNTER_API_TOKEN is a GoatCounter API key with the "read stats"
@@ -123,11 +124,14 @@ export interface GameFunnelStats {
   entries: Record<GameEntryDetail, number>;
   /** `game_started/<level>/<from>`, summed over levels: fresh years only, never a resume. */
   started: Record<GameStartFrom, number>;
+  /** The same starts, per level and summed over doors. */
+  startedByLevel: Record<LevelSlug, number>;
   /** Quarters 1-4 run (`game_quarter/<q>`), in order — where players stop. */
   quartersRun: number[];
   /** CEO calls hung up per quarter (`game_hangup/<q>`). */
   hangups: number[];
-  endings: Record<EndingId, number>;
+  /** `game_ending/<level>/<id>`: each level's endings apart — a fine at Flixo is not a settlement at Pédalix. */
+  endings: Record<LevelSlug, Record<EndingId, number>>;
   orders: Record<GameOrderOutcome, number>;
   voices: Record<Mood, number>;
   resume: Record<GameResumeDetail, number>;
@@ -334,8 +338,8 @@ export async function fetchFunnelWindow(startISO: string, label: string): Promis
   };
 }
 
-function tally<K extends string>(keys: readonly K[], countOf: (key: K) => number): Record<K, number> {
-  return Object.fromEntries(keys.map((k) => [k, countOf(k)])) as Record<K, number>;
+function tally<K extends string, V = number>(keys: readonly K[], valueOf: (key: K) => V): Record<K, V> {
+  return Object.fromEntries(keys.map((k) => [k, valueOf(k)])) as Record<K, V>;
 }
 
 function gameStats(count: (path: string) => number): GameFunnelStats {
@@ -344,9 +348,14 @@ function gameStats(count: (path: string) => number): GameFunnelStats {
     started: tally(GAME_START_FROM, (from) =>
       GAME_LEVEL_SLUGS.reduce((n, slug) => n + count(`${GAME_STARTED_EVENT}/${gameStartedDetail(slug, from)}`), 0),
     ),
+    startedByLevel: tally(GAME_LEVEL_SLUGS, (slug) =>
+      GAME_START_FROM.reduce((n, from) => n + count(`${GAME_STARTED_EVENT}/${gameStartedDetail(slug, from)}`), 0),
+    ),
     quartersRun: GAME_QUARTERS.map((q) => count(`${GAME_QUARTER_EVENT}/${q}`)),
     hangups: GAME_QUARTERS.map((q) => count(`${GAME_HANGUP_EVENT}/${q}`)),
-    endings: tally(GAME_ENDINGS, (e) => count(`${GAME_ENDING_EVENT}/${e}`)),
+    endings: tally(GAME_LEVEL_SLUGS, (slug) =>
+      tally(GAME_ENDINGS, (e) => count(`${GAME_ENDING_EVENT}/${gameEndingDetail(slug, e)}`)),
+    ),
     orders: tally(GAME_ORDER_OUTCOMES, (o) => count(`${GAME_ORDER_EVENT}/${o}`)),
     voices: tally(GAME_MOODS, (m) => count(`${GAME_VOICE_EVENT}/${m}`)),
     resume: tally(GAME_RESUME_DETAILS, (d) => count(`${GAME_RESUME_EVENT}/${d}`)),

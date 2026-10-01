@@ -11,6 +11,9 @@ function jsonResponse(body: unknown, ok = true, status = 200): Response {
   } as Response;
 }
 
+/** The longest funnel request allowed: half the ~8 KB at which proxies start refusing a GET (see the game's test). */
+const MAX_URL = 4_000;
+
 describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", () => {
   const originalToken = process.env.GOATCOUNTER_API_TOKEN;
   const originalCode = process.env.NEXT_PUBLIC_GOATCOUNTER_CODE;
@@ -248,12 +251,19 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
       "game_entry_clicked/deep_dive/retention",
       "game_entry_clicked/footer",
       "game_entry_clicked/hub",
+      // Level 2 (A12.f, 2026-10-01): its result card, its starts, its endings apart from level 1's.
+      "game_entry_clicked/result/acquisition",
+      "game_started/acquisition/other_level",
+      "game_ending/acquisition/fine",
+      "game_ending/retention/fine",
     ]) {
       expect(paths).toContain(path);
     }
     expect(Number(requested.searchParams.get("limit"))).toBeGreaterThan(paths.length);
-    // A GET URL well under the ~8 KB proxies start refusing; the plan budgets 3 KB.
-    expect(requested.toString().length).toBeLessThan(3_000);
+    // A GET URL well under the ~8 KB proxies start refusing. The plan budgeted
+    // 3 KB; level 2 (A12.f, 2026-10-01) took it to 3 118 characters, with its
+    // starts and each level's endings counted apart: 4 KB, still half the limit.
+    expect(requested.toString().length).toBeLessThan(MAX_URL);
   });
 
   it("reads the game block from the same response", async () => {
@@ -266,10 +276,12 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
           { path: "game_entry_clicked/footer", count: 2, event: true },
           { path: "game_started/retention/result", count: 6, event: true },
           { path: "game_started/retention/direct", count: 4, event: true },
+          { path: "game_started/acquisition/other_level", count: 1, event: true },
           { path: "game_quarter/1", count: 9, event: true },
           { path: "game_quarter/4", count: 3, event: true },
           { path: "game_hangup/2", count: 5, event: true },
-          { path: "game_ending/firedDark", count: 2, event: true },
+          { path: "game_ending/retention/firedDark", count: 2, event: true },
+          { path: "game_ending/acquisition/fine", count: 1, event: true },
           { path: "game_order/refused", count: 1, event: true },
           { path: "game_voice/angry", count: 4, event: true },
           { path: "game_resume/restart", count: 2, event: true },
@@ -283,12 +295,19 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
 
     const game = (await fetchFunnelWindow("2024-01-01T00:00:00Z", "All-time")).stats!.game;
 
-    expect(game.entries).toEqual({ "result/retention": 7, "deep_dive/retention": 0, footer: 2, hub: 0, home_strip: 0, space_band: 0 });
-    expect(game.started).toEqual({ direct: 4, result: 6, deep_dive: 0, hub: 0 });
+    expect(game.entries).toEqual({
+      "result/acquisition": 0, "deep_dive/acquisition": 0, "result/retention": 7, "deep_dive/retention": 0,
+      footer: 2, hub: 0, home_strip: 0, space_band: 0,
+    });
+    expect(game.started).toEqual({ direct: 4, result: 6, deep_dive: 0, hub: 0, other_level: 1 });
+    expect(game.startedByLevel).toEqual({ acquisition: 1, retention: 10 });
     expect(game.quartersRun).toEqual([9, 0, 0, 3]);
     expect(game.hangups).toEqual([0, 5, 0, 0]);
-    expect(game.endings.firedDark).toBe(2);
-    expect(game.endings.applause).toBe(0);
+    expect(game.endings.retention.firedDark).toBe(2);
+    expect(game.endings.retention.applause).toBe(0);
+    // Each level's endings apart: level 2's settlement is not level 1's fine.
+    expect(game.endings.acquisition.fine).toBe(1);
+    expect(game.endings.retention.fine).toBe(0);
     expect(game.orders).toEqual({ obeyed: 0, refused: 1 });
     expect(game.voices.angry).toBe(4);
     expect(game.resume).toEqual({ resume: 0, restart: 2 });
@@ -323,7 +342,7 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
     for (const path of expected) expect(paths).toContain(path);
     expect(new Set(paths).size).toBe(paths.length);
     expect(Number(requested.searchParams.get("limit"))).toBeGreaterThan(paths.length);
-    expect(requested.toString().length).toBeLessThan(3_000);
+    expect(requested.toString().length).toBeLessThan(MAX_URL);
   });
 
   it("reads the engine block from the same response", async () => {

@@ -31,8 +31,8 @@ export const GAME_META = {
     ),
     breadcrumb: t("Le jeu", "The game"),
     shareImageAlt: t(
-      "Le côté obscur de Tour de Growth : les cinq étapes du Tour, dont une seule est ouverte.",
-      "The dark side of Tour de Growth: the five stages of the Tour, one of them open.",
+      "Le côté obscur de Tour de Growth : les cinq étapes du Tour, dont deux sont ouvertes.",
+      "The dark side of Tour de Growth: the five stages of the Tour, two of them open.",
     ),
   },
   retention: {

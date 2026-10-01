@@ -47,10 +47,11 @@ describe("game entry copy", () => {
     }
   });
 
-  it("leaves the band's churn to the level model — a placeholder, never a number", () => {
+  it("leaves the band's number to the level model — a placeholder, never a number", () => {
     for (const copy of Object.values(GAME_ENTRY_COPY)) {
-      expect(copy.band.churn.fr).toContain("{churn}");
-      expect(copy.band.churn.en).toContain("{churn}");
+      expect(copy.band.metric.fr).toContain("{metric}");
+      expect(copy.band.metric.en).toContain("{metric}");
+      expect(copy.band.metric.fr + copy.band.metric.en).not.toMatch(/\d/);
     }
   });
 

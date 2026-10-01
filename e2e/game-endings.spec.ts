@@ -86,7 +86,8 @@ test.describe("the seven endings, each decided by a quarter played through the U
       await expect(hero.getByRole("heading", { level: 2 })).toBeFocused();
 
       const events = await trackedEvents(page);
-      expect(events.filter((e) => e.startsWith("game_ending/"))).toEqual([`game_ending/${ending.id}`]);
+      // Split by level since A12.f: level 1's endings are counted apart from level 2's.
+      expect(events.filter((e) => e.startsWith("game_ending/"))).toEqual([`game_ending/retention/${ending.id}`]);
       // The collection remembers the ending, for the hub (plan §3.7).
       await expect.poll(() => storedEnding(page)).toBe(ending.id);
     });
@@ -202,7 +203,7 @@ test.describe("P20 — the analytics of path A, in order", () => {
         "game_hangup/4",
         "game_order/refused",
         "game_quarter/4",
-        "game_ending/applause",
+        "game_ending/retention/applause",
         "game_catalogue_open",
         "game_share",
         "game_replay",

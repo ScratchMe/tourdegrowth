@@ -423,7 +423,7 @@ const NOT_FROM_PROTOTYPE: Record<string, string> = {
   "patterns.pdef.cas": "fact check — « common », not « the norm »",
   "patterns.streak.law": "fact check — no DFA text exists yet; the consultation, not the act, names streaks",
   "patterns.streak.cas": "fact check — « made the fortune » is a causal claim with no source",
-  "nextLevel.status": "R15",
+  "nextLevel.status": "R15, then C31 — playable once level 2 opened",
   "footer.*": "R15",
   "tourLoop.*": "new — brief §13.3 D",
   "resume.*": "new — brief §9.5, plan §2.6",

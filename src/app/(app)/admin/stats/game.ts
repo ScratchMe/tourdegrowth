@@ -1,14 +1,16 @@
 import type { FunnelWindow } from "@/lib/analytics/goatcounter-api";
+import { GAME_LEVEL_SLUGS } from "@/lib/game/events";
 import type { GrowthStats } from "@/lib/submissions/growth-stats";
 
 /**
  * Result → game, per window — GAME-BRIEF.md §13.5: the one number the
  * decision rule on the result card turns on.
  *
- * Numerator: clicks on the result page's game card (both variants — with and
- * without a Deep dive — sit on the same page). Denominator: results whose
- * bottleneck group includes retention, i.e. the results that card can appear
- * on (GrowthStats.retentionBottleneckResults).
+ * Numerator: clicks on the result page's game card, every level and both
+ * variants (with and without a Deep dive sit on the same page). Denominator:
+ * results whose bottleneck group includes a stage with a level, i.e. the
+ * results that card can appear on (GrowthStats.gameBottleneckResults) —
+ * retention alone until level 2 opened acquisition too (2026-10-01, A12.f).
  *
  * Deliberately called "clicks per result", not a rate, for the reason A4
  * spelled out: a shared result is read by visitors, and they see the card
@@ -20,7 +22,7 @@ import type { GrowthStats } from "@/lib/submissions/growth-stats";
 export interface GamePass {
   label: string;
   resultClicks: number;
-  retentionResults: number | null;
+  gameResults: number | null;
   clicksPerResult: number | null;
 }
 
@@ -29,21 +31,24 @@ export interface GamePass {
  * `fetchFunnelStats` gives it. A window this page does not know gets no
  * denominator rather than a wrong one.
  */
-function retentionResultsFor(label: string, growth: Pick<GrowthStats, "retentionBottleneckResults">): number | null {
-  if (label === "All-time") return growth.retentionBottleneckResults.allTime;
-  if (label === "Last 30 days") return growth.retentionBottleneckResults.last30Days;
+function gameResultsFor(label: string, growth: Pick<GrowthStats, "gameBottleneckResults">): number | null {
+  if (label === "All-time") return growth.gameBottleneckResults.allTime;
+  if (label === "Last 30 days") return growth.gameBottleneckResults.last30Days;
   return null;
 }
 
-export function gamePass(window: FunnelWindow, growth: Pick<GrowthStats, "retentionBottleneckResults">): GamePass | null {
+export function gamePass(window: FunnelWindow, growth: Pick<GrowthStats, "gameBottleneckResults">): GamePass | null {
   const game = window.stats?.game;
   if (!game) return null;
-  const resultClicks = game.entries["result/retention"] + game.entries["deep_dive/retention"];
-  const retentionResults = retentionResultsFor(window.label, growth);
+  const resultClicks = GAME_LEVEL_SLUGS.reduce(
+    (n, slug) => n + game.entries[`result/${slug}`] + game.entries[`deep_dive/${slug}`],
+    0,
+  );
+  const gameResults = gameResultsFor(window.label, growth);
   return {
     label: window.label,
     resultClicks,
-    retentionResults,
-    clicksPerResult: retentionResults ? resultClicks / retentionResults : null,
+    gameResults,
+    clicksPerResult: gameResults ? resultClicks / gameResults : null,
   };
 }

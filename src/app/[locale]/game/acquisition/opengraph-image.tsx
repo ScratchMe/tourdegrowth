@@ -1,6 +1,6 @@
-import { GAME_META, RETENTION_INTRO } from "@/content/game/meta";
-import { RETENTION_CONTENT } from "@/content/game/retention";
-import { RETENTION_LEVEL } from "@/lib/game/levels/retention";
+import { ACQUISITION_CONTENT } from "@/content/game/acquisition";
+import { ACQUISITION_INTRO, GAME_META } from "@/content/game/meta";
+import { ACQUISITION_LEVEL } from "@/lib/game/levels/acquisition";
 import { tc } from "@/lib/i18n/dictionary";
 import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { loadOgFonts } from "@/lib/og/fonts";
@@ -9,12 +9,12 @@ import { gameLevelShareText } from "@/lib/og/game-level-share-text";
 import { OG_SIZE } from "@/lib/og/tokens";
 
 /**
- * Share image of `/{locale}/game/retention`, level 1 « S'ils reviennent »:
- * the level's title over the three dashboard tiles — churn at its January
- * figure, trust and the regulator's radar as the two counters the dashboard
- * does not show (plan §3.9). Its own file, not a re-export of the hub's:
- * Next.js does not inherit `opengraph-image` from a parent segment, and a
- * level deserves a picture of the level.
+ * Share image of `/{locale}/game/acquisition`, level 2 « Comment les gens
+ * vous trouvent » (A12.f, 2026-10-01): the same picture as level 1's
+ * (`retention/opengraph-image.tsx`) — new customers at their January figure,
+ * trust and the regulator's radar as the two counters the dashboard does not
+ * show. Its own file: Next.js does not inherit `opengraph-image` from a
+ * parent segment, nor from a sibling.
  *
  * One image per language, chosen by `[locale]` (a crawler sends no cookie).
  * Like the page, the image is behind the game's flag: the proxy rewrites this
@@ -26,12 +26,12 @@ export const contentType = "image/png";
 export async function generateImageMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const resolved: Locale = isLocale(locale) ? locale : "en";
-  return [{ id: resolved, size, contentType, alt: tc(GAME_META.retention.shareImageAlt, resolved) }];
+  return [{ id: resolved, size, contentType, alt: tc(GAME_META.acquisition.shareImageAlt, resolved) }];
 }
 
 export default async function GameLevelShareImage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const resolved: Locale = isLocale(locale) ? locale : "en";
-  const text = gameLevelShareText(resolved, { intro: RETENTION_INTRO, dashboard: RETENTION_CONTENT.dashboard, level: RETENTION_LEVEL });
+  const text = gameLevelShareText(resolved, { intro: ACQUISITION_INTRO, dashboard: ACQUISITION_CONTENT.dashboard, level: ACQUISITION_LEVEL });
   return renderGameLevelShareImage(text, await loadOgFonts());
 }
