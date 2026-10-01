@@ -6,6 +6,7 @@ import { Choices } from "@/components/core/Choices";
 import { Field } from "@/components/core/Field";
 import { FieldRow } from "@/components/core/FieldRow";
 import { NumberField } from "@/components/core/NumberField";
+import { isUnreadableNumber } from "@/lib/forms/number";
 import { Select } from "@/components/core/Select";
 import { Tag } from "@/components/core/Tag";
 import { TextArea } from "@/components/core/TextArea";
@@ -626,7 +627,10 @@ function TargetField({
       hint={view.strings.sheet.targetHint}
       value={value}
       onChange={setValue}
-      onBlur={() => {
+      onBlur={(event) => {
+        // An unreadable box stays on screen with its message and writes
+        // nothing: the stored target is not erased by a typo (A14.2).
+        if (isUnreadableNumber(event.target.value, view.ctx.locale)) return;
         if ((value ?? undefined) !== target) actions.setTarget(id, value);
       }}
       locale={view.ctx.locale}

@@ -23,6 +23,19 @@ export function parseTypedNumber(raw: string, locale: "en" | "fr"): number | nul
   return Number.isFinite(n) ? n : null;
 }
 
+/**
+ * Something was typed, and it is not a usable number: unreadable, or not
+ * whole where it must be. An empty box is not unreadable — it is empty. A
+ * field that writes on blur reads this first: `NumberField` hands it `null`
+ * for an unreadable box as for an empty one, and only the empty one means
+ * "remove" (CHANTIERS.md A14.2).
+ */
+export function isUnreadableNumber(raw: string, locale: "en" | "fr", integer = false): boolean {
+  if (raw.trim() === "") return false;
+  const parsed = parseTypedNumber(raw, locale);
+  return parsed === null || (integer && !Number.isInteger(parsed));
+}
+
 /*
  * Grouping AS YOU TYPE (Antoine, 2026-09-26: an MRR of 2 000 000 typed as
  * "2000000" stayed "2000000" on screen, and seven zeros in a row don't read).

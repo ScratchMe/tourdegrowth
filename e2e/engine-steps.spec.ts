@@ -251,3 +251,47 @@ async function boardSheet(page: Page, stage: string, metricDomId: string) {
   await expect(sheet).toBeVisible();
   return sheet;
 }
+
+/*
+ * A14.2 (2026-10-01): a target is written when its box is left, and a box
+ * holding text it cannot read used to write `null` — erasing the stored
+ * target while the box still showed the typo and its message. Both target
+ * fields: the step screen's and the board sheet's. Emptying the box is still
+ * how a target is removed.
+ *
+ * Non-vacuity (2026-10-01), one guard at a time: without the step screen's,
+ * the test falls on the step's `toBe(25)` (`undefined`); without the sheet's,
+ * on the sheet's, the step part passing. Each field is held on its own.
+ */
+test("a typo in a target keeps the stored target, on the step screen and in a sheet; an empty box removes it", async ({ page }) => {
+  const target = async () => (await stored(page))?.state.snapshots[0]?.targets["act.rate"];
+  await open(page);
+  await page.getByTestId("engine-setup-start").click();
+
+  const step = page.locator("#engine-step-target-act-rate");
+  await step.fill("25");
+  await step.blur();
+  await expect.poll(target).toBe(25);
+  await step.fill("25 %%");
+  await step.blur();
+  await expect(page.getByText(ENGINE_COPY.workbench.notANumber.en)).toBeVisible();
+  expect(await target()).toBe(25);
+
+  // The same field in a sheet, after a reload: the target came back from the device.
+  await page.reload();
+  await expect(page.getByTestId("engine-board")).toBeVisible();
+  const tab = page.getByTestId("engine-tab-activation");
+  if ((await tab.getAttribute("aria-selected")) !== "true") await tab.click();
+  const toggle = page.getByTestId("engine-metric-act-rate");
+  if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+  const box = page.locator("#engine-act-rate-target");
+  await expect(box).toHaveValue("25");
+  await box.fill("abc");
+  await box.blur();
+  await expect(page.getByTestId("engine-sheet-act-rate").getByText(ENGINE_COPY.workbench.notANumber.en)).toBeVisible();
+  expect(await target()).toBe(25);
+
+  await box.fill("");
+  await box.blur();
+  await expect.poll(target).toBeUndefined();
+});
