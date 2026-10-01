@@ -1307,7 +1307,7 @@ Commit `70bdec2`. **Q14** (C25, tranchée oui) : `engine_setup/<plg|slg|hybrid>`
 
 **En production (2026-10-01)** : [#247](https://github.com/ScratchMe/tourdegrowth/pull/247), squash `9b8bfb3`, 57 fichiers, arbre identique à la tête (après une fusion de `main`, qui avait reçu A7.3.c). Cette fois, le statut `Vercel` du commit est `success` : le déploiement de production a emporté A12.e (#246), refusé le matin par le quota, avec A12.f.1 et A7.3.c. Le jeu reste fermé : `/fr/game`, `/fr/game/acquisition` et son image répondent 404, et le sitemap ne nomme aucune page du jeu.
 
-## A12.f.2 : une carte, les deux niveaux (2026-10-01)
+## A12.f.2 : une carte, les deux niveaux (2026-10-01, #248)
 
 **Ce qui change** : quand l'acquisition et la rétention freinent ensemble, l'encart du résultat propose les deux niveaux sur une seule carte, étape par étape (C30 Q5). Jusqu'ici, l'ordre AARRR choisissait à la place du lecteur. Une carte à un seul niveau ne change pas d'un pixel, et la bande reste à 44 px sur ordinateur.
 
