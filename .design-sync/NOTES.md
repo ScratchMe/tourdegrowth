@@ -175,12 +175,12 @@ become the WHOLE list. The first DS v3 pass pinned four components to fix
 their contracts and the bundle silently shrank from 70 components to 4 —
 with 36 previews left pointing at components that no longer existed.
 
-So `componentSrcMap` now pins all 88 exported components to their file
+So `componentSrcMap` now pins all 90 exported components to their file
 (`"LegalPage": null` stays), and `.design-sync/check-inventory.mjs`, chained
 last in `cfg.buildCmd`, fails the build if a component exported from
 `src/components/**` is missing from the map, pinned to the wrong file, or
 pinned but no longer exported. Its success line is
-`[inventory] 88 components pinned, 1 excluded on purpose, none missing`.
+`[inventory] 90 components pinned, 1 excluded on purpose, none missing`.
 `QuarterNews` (the game's news screen, 2026-09-26) shipped without its entry
 and broke this build for two days — caught by the design audit of
 2026-09-27, not by anything that runs on a PR, since CI does not build the
@@ -243,7 +243,7 @@ viewport media query, not the cell) overlapped its own figure labels.
 
 ## Previews are all repo-owned
 
-All 88 live in `.design-sync/previews/` — none are generated (cell count: see
+All 90 live in `.design-sync/previews/` — none are generated (cell count: see
 "Synced"). Copy is the product's own and numbers are the model's own — **and
 that was not true until the 2026-09-29 re-sync**: this paragraph already said
 so, while 64 of 245 cells carried retired copy, mockup copy, hand-typed game
@@ -329,42 +329,27 @@ doc comment says why the layout uses an auto margin rather than
 
 ## Synced
 
-**Stale since 2026-10-01 (A12.d, A12.e, A12.f), ready to re-sync** — six game
-components renamed level 1's slots in their props: `Dashboard` (`churn`,
-`subs`, `mrr` → `metric`, `customers`, `revenue`), `EndingCharts` and
-`RevealCells` (`churn` → `metric`), `QuarterReport` (figure keys), `ActionBar`
-(`clicks` → `pill`), `GameEntry` (`band.churn` → `band.metric`). Their previews
-here are already renamed and type-checked against the components; the
-uploaded project still shows the old contracts. A12.e then added two
-components — `ShopPhone` (Pédalix's phone, pinned in `dtsPropsFor` like
-`PhoneMock`) and `BasketPill` (its pill, drawn with `ClickPill`'s styles) —
-and moved `PhoneMock`'s frame into `PhoneFrame.module.css`, shared by both
-phones. A12.f.1 gave `NextLevel` an `href` (December's block links to the
-other level once it is open: solid edge, two new stories, `Playable` and
-`PlayableFrench`), and A12.f.2 let `GameEntry` offer several levels: its
-props became `{ title, body, meta, band, levels }`, one entry per level
-offered, with two new stories (`TwoLevels`, `TwoLevelsNarrow`).
-`CHANTIERS.md` B4 re-syncs all of it at once: 90 components,
-recapture the six renamed ones, `PhoneMock`, `NextLevel` and `GameEntry`, do
-not carry their grades forward.
-
 Project `23b9671c-a55b-452e-aa41-39906ee71ba8` ("Tour de Growth"), pinned as
-`projectId` in `config.json`. **Last upload: 2026-09-30, after A11, C28 and
-C29**, from a claude.ai/code cloud session, the same evening as B3 — **88
-components, 292 story cells**, all graded good; the driver re-captured the
-five components those changes touch (`DateField`, `Field`, `FieldRow`,
-`NumberField`, `TextField`, 26 cells regraded) and carried the others forward.
-453 files (352 component files, 88 compiled previews, `_vendor/`, `fonts/`,
-bundle, CSS, README, the sentinel and the anchor), no delete. Pushed twice
-that evening: first with anchor `f8933d513a1e`, then again once the copy
-reviewer (`relecteur-copie`) found four preview docs and `conventions.md`
-still saying what A11 and C29 had just changed (the TextField header, the
-FieldRow joiner, line numbers shifted by the diff, plain spaces in the
-no-break examples) — renders identical, sources only. `report_validate`: 88
-total, 0 bad, 0 thin, 0 identical; anchor `bundleSha12` `8235f4e6de01`. The next re-sync skips every component whose sources did not
-change. Earlier uploads: 2026-09-30 B3 (88, 292, `d1835d51cffd`), 2026-09-30
-before A10 (79 components, 244 cells, anchor `f3b4bf9eb3c5`), 2026-09-29 (77,
-238, `17cca5e0909b`), 2026-09-11 (34, 116).
+`projectId` in `config.json`. **Last upload: 2026-10-01, B4 (the game's
+level 2, and A7.3.c's engine)**, from a claude.ai/code cloud session — **90
+components, 303 story cells**, all graded good. A12.d renamed level 1's
+slots in six game contracts (`Dashboard`: `metric`, `customers`, `revenue`;
+`EndingCharts` and `RevealCells`: `metric`; `QuarterReport`'s figure keys;
+`ActionBar`: `pill`; `GameEntry`: `band.metric`), A12.e added `ShopPhone`
+(pinned in `dtsPropsFor`) and `BasketPill` and moved the phone frame into
+`PhoneFrame.module.css`, A12.f.1 gave `NextLevel` an `href`, A12.f.2 gave
+`GameEntry` its `levels`. The driver queued those nine plus the two new ones;
+the drift search and the regeneration added `ZoneNav`, `Choices`,
+`Checkbox`, `HubMountain`, `Tag`, `RevealCells`, `QuarterTimeline` and
+`PhoneMock` (see "Found in the 2026-10-01 re-sync (B4)"); 19 components
+uploaded, 71 carried forward. 463 files (360 component files, 90 compiled
+previews, `_vendor/`, `fonts/`, bundle, CSS, README, the sentinel and the
+anchor), no delete, `design/` untouched. Eight driver runs; `report_validate`:
+90 total, 0 bad, 0 thin, 0 identical; anchor `bundleSha12` `fee6cc7084fe`.
+Earlier uploads: 2026-09-30 after A11 (88, 292, `8235f4e6de01`),
+2026-09-30 B3 (88, 292, `d1835d51cffd`), 2026-09-30 before A10 (79
+components, 244 cells, anchor `f3b4bf9eb3c5`), 2026-09-29 (77, 238,
+`17cca5e0909b`), 2026-09-11 (34, 116).
 
 The cell count is what the previews export, not a sum of what each session
 announced. `CHANTIERS.md` B3 expected 284 (244, plus `ShareCard.Owner`, plus
@@ -701,7 +686,7 @@ finds a year with the wanted shape in seconds.
   Executable doesn't exist`); re-run `npx playwright install chromium`.
 - **The grades in `.design-sync/.cache/` are not committed.** What makes
   verification durable is the uploaded `_ds_sync.json`. If that anchor is ever
-  lost or the project is recreated, every component (88 on 2026-09-30) re-verifies from scratch —
+  lost or the project is recreated, every component (90 on 2026-10-01) re-verifies from scratch —
   which is a few hours of reading sheets, not minutes.
 - **The `--entry ./dist/index.js` trick breaks the day the repo gains a real
   `dist/`.** If a build is ever added, drop the flag and set `cfg.buildCmd`.
