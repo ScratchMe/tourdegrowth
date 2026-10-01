@@ -271,6 +271,30 @@ test("what was typed in a sheet comes back after another tab, unsaved", async ({
   expect((await storedState(page))?.snapshots[0]?.metrics["act.rate"]).toBeUndefined();
 });
 
+/*
+ * The security review of A15 (2026-10-01): the drafts went only with an
+ * import over an unreadable store. An import from the board kept them, and a
+ * metric the new engine had not filled keys its draft `id@new` too — so the
+ * other company's typing came back in its sheet, one Enter from its file.
+ * Non-vacuity: with `dropAllDrafts()` under `replace` only, as before, this
+ * test fails on the radio, checked again (recorded in the journal).
+ */
+test("an engine imported from the board opens with no half-typed sheet of the one before", async ({ page }) => {
+  const sheet = await openSheet(page, "en", "activation", "act-rate");
+  await sheet.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en }).check();
+  await page.locator("#engine-act-rate-num").fill("144");
+  // Another engine, with nothing saved for this metric either.
+  const other = await storedState(page);
+  expect(other?.snapshots[0]?.metrics["act.rate"]).toBeUndefined();
+  await page.getByTestId("engine-import-open-screen").click();
+  await page.getByTestId("engine-import-file").setInputFiles({ name: "other.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(other)) });
+  await page.getByTestId("engine-import-open").click();
+  const reopened = await openSheet(page, "en", "activation", "act-rate");
+  await expect(reopened.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en })).not.toBeChecked();
+  await reopened.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en }).check();
+  await expect(page.locator("#engine-act-rate-num")).toHaveValue("");
+});
+
 test("Enter in a box saves the sheet, like any form", async ({ page }) => {
   const sheet = await openSheet(page, "en", "activation", "act-rate");
   await sheet.getByRole("radio", { name: ENGINE_COPY.sheet.haveIt.en }).check();

@@ -126,6 +126,15 @@ describe("entryFromDraft — what refuses a save", () => {
     expect(save("rev.gross-margin", { mode: "have", numerator: -1200.5, denominator: 40000, source: "other" }).problems).toEqual([]);
   });
 
+  // The message names what the box holds, as ValueEditor draws it: a revenue
+  // in euros, or an MRR, is an amount, not « a count » (the copy review of
+  // A15, 2026-10-01).
+  it("says « amount » for a negative term in euros, « count » for a count", () => {
+    expect(save("rev.gross-margin", { mode: "have", numerator: 1200, denominator: -40000, source: "other" }).problems).toEqual(["amount-negative"]);
+    expect(save("rev.arpa", { mode: "have", numerator: -9000, denominator: 30, source: "other" }).problems).toEqual(["amount-negative"]);
+    expect(save("rev.arpa", { mode: "have", numerator: 9000, denominator: -30, source: "other" }).problems).toEqual(["count-negative"]);
+  });
+
   // A15.3: a rate's bounds are rates, held to the 0–100 its value is held to.
   it("holds an estimated rate's bounds to 0–100, and only a rate's", () => {
     expect(save("act.rate", { mode: "estimate", low: 10, high: 140, basis: "sample" }).problems).toEqual(["percent-range"]);

@@ -723,9 +723,9 @@ export const ENGINE_COPY = {
     saved: { fr: "Enregistré", en: "Saved" },
     saveNeeds: { fr: "Pour enregistrer, il manque : {fields}", en: "To save, still missing: {fields}" },
     percentRange: { fr: "Un taux se situe entre 0 et 100 %.", en: "A rate sits between 0 and 100%." },
-    // TODO: à relire (convention 6) — A15.3 (2026-10-01) : un montant ou une durée négatifs étaient dits « manquants ».
     // TODO: à relire (convention 6) — A15.10 (2026-10-01).
     countNegative: { fr: "Un compte ne peut pas être négatif.", en: "A count can't be negative." },
+    // TODO: à relire (convention 6) — A15.3 (2026-10-01) : un montant ou une durée négatifs étaient dits « manquants ».
     amountNegative: { fr: "Un montant ne peut pas être négatif.", en: "An amount can't be negative." },
     // TODO: à relire (convention 6).
     durationNegative: { fr: "Une durée ne peut pas être négative.", en: "A duration can't be negative." },
@@ -2092,6 +2092,11 @@ export const ENGINE_COPY = {
     },
     // TODO: à relire (convention 6) — A15.9 (2026-10-01) : un compte de la base à zéro ou moins était jeté sans un mot.
     countPositive: { fr: "Un nombre plus grand que zéro : on compte des personnes.", en: "A number above zero: these are people." },
+    // TODO: à relire (convention 6) — A15.9 : la base assistée compte des opportunités, des affaires et des clients, pas des personnes.
+    countPositiveSlg: {
+      fr: "Un nombre plus grand que zéro : on compte des opportunités, des affaires ou des clients.",
+      en: "A number above zero: these are opportunities, deals or customers.",
+    },
     baseCohortHint: {
       fr: "Tous les comptes créés en {cohort}. Ils servent à l'activation, à la rétention à J30, au parrainage et à la conversion en payant.",
       en: "Every account created in {cohort}. They feed activation, day-30 retention, referral and paid conversion.",

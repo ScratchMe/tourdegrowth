@@ -468,7 +468,7 @@ function SlgBaseStep({
             id={f.id}
             label={f.label}
             hint={f.hint}
-            error={notPositive === f.id && (f.value === null || f.value <= 0) ? s.countPositive : undefined}
+            error={notPositive === f.id && (f.value === null || f.value <= 0) ? s.countPositiveSlg : undefined}
             value={f.value}
             onChange={f.set}
             locale={view.ctx.locale}

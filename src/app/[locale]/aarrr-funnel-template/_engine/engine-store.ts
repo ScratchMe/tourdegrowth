@@ -83,11 +83,12 @@ export type CommitResult = SaveResult;
  * cleared first, which is the one way past `saveEngine`'s refusal.
  */
 export function commit(state: EngineState, options: { fresh?: boolean; replace?: boolean } = {}): CommitResult {
-  if (options.replace) {
-    clearEngine();
-    // A whole engine replaced (an import): no half-typed sheet survives it (A15.12).
-    dropAllDrafts();
-  }
+  if (options.replace) clearEngine();
+  // An engine that arrives (setup, an import, over a store or not): no
+  // half-typed sheet of the one before survives it (A15.12). A metric the new
+  // engine has not filled keys its draft `id@new` too, and would come back
+  // pre-filled with the other company's figures.
+  if (options.fresh || options.replace) dropAllDrafts();
   const current = getClientSnapshot();
   snapshot = { ...current, result: { kind: "ok", state }, returningFrom: options.fresh ? null : current.returningFrom };
   notify();

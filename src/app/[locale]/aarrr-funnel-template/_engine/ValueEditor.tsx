@@ -124,7 +124,7 @@ export function ValueEditor({
         // a rule about the pair is the row's, not one box's.
         <FieldRow
           joiner={strings.sheet.over}
-          error={numGtDen ? <span data-testid="engine-live">{numGtDen}</span> : (rule("count-negative") ?? undefined)}
+          error={numGtDen ? <span data-testid="engine-live">{numGtDen}</span> : (rule("count-negative") ?? rule("amount-negative") ?? undefined)}
         >
           <NumberField
             size="sm"
