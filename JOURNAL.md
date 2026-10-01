@@ -1280,6 +1280,8 @@ Commit `70bdec2`. **Q14** (C25, tranchée oui) : `engine_setup/<plg|slg|hybrid>`
 - les textes de lancement : `marketing/kit.md`, `marketing/campaigns/README.md` §8, et la campagne du moteur, qui dit encore « quinze chiffres, trois par étape », « seulement le libre-service, pour l'instant » et traduit les noms d'étape (la relecture de S3 l'a relevé) ;
 - sortir le §18 d'`ENGINE.md` vers `docs/engine/`, une fois #233 mergé (`CHANTIERS.md`, section E).
 
+**En production (2026-10-01)** : [#233](https://github.com/ScratchMe/tourdegrowth/pull/233), squash `bed81fb`, 149 fichiers, arbre identique à la tête de branche. Le statut `Vercel` du commit est `success` : le quota de déploiements, épuisé pour les aperçus de la PR, n'a pas bloqué la production. `/fr/privacy` et `/en/privacy` portent la nouvelle phrase et la date du 1er octobre, et `/fr/aarrr-funnel-template` comme `/en/aarrr-funnel-template` répondent 404, drapeau fermé. Les deux derniers points ci-dessus sont livrés le même jour (l'entrée « Les textes de lancement du moteur… », plus bas).
+
 ## A12.f.1 : le niveau 2 jouable (2026-10-01, #247)
 
 **Ce qui change** : le niveau 2 « Comment les gens vous trouvent » a sa page, `/{locale}/game/acquisition`, son image de partage, sa sauvegarde, sa place au sitemap et au hub, « jouable ». Le jeu reste fermé derrière son drapeau : rien de visible pour le public, tout pour l'aperçu propriétaire. A12.f est coupé en deux, parce que l'encart qui propose les deux niveaux (C30 Q5) touche la page la plus exposée et un composant du design system : A12.f.2 le fera seul. D'ici là, un goulot partagé entre acquisition et rétention offre l'acquisition seule, la première dans l'ordre AARRR.
@@ -1304,3 +1306,27 @@ Commit `70bdec2`. **Q14** (C25, tranchée oui) : `engine_setup/<plg|slg|hybrid>`
 - Build de production avec les variables de la CI, émulateur Firestore lancé : **la suite Playwright complète, 695 passées, 6 ignorées par construction, aucun échec**, dont les specs neuves : les deux niveaux au sitemap, au hub et en hreflang, chaque fin nommée par son niveau sur le hub, la page du niveau 2 et ses mots du glossaire, les zones qui se renvoient d'un niveau à l'autre, l'image du niveau 2, son accessibilité, et sur un vrai résultat lu dans l'émulateur l'encart du niveau 2, porte Deep dive, « New customers 2,000 ».
 - Après la dernière retouche (l'étiquette « jouable » pleine), les specs du jeu et d'accessibilité repassées sur le nouveau build : 129 passées.
 - À l'écran, à 1 280 et 390 px, en français et en anglais : l'intro de Pédalix, le bureau avec son téléphone et la pastille dans la barre d'action, une année C jusqu'à la transaction, le bloc de décembre qui mène au niveau 1, le hub à deux zones jouables. Aucun défilement horizontal.
+
+
+## Les textes de lancement du moteur, et le §18 d'`ENGINE.md` sorti dans `docs/engine/` (2026-10-01)
+
+Demandé par Antoine après le merge d'A7.3.c : « ce qui reste, hors code », sauf le bon à tirer A7.3.d, qu'il mène avec un autre agent.
+
+**Les textes de lancement** (`CHANTIERS.md` A7.3, ligne « Hors code ») : `marketing/kit.md`, `campaigns/README.md` (§0, §3, §8), `competitive-brief.md` et les six textes de `campaigns/engine/` disent maintenant ce que fait le moteur livré.
+- **Deux motions à cocher** : dix-sept chiffres en libre-service (trois par étape, cinq au revenu), quinze en vente assistée (lus sur trois mois), ou les deux. L'hybride se montre en « deux moteurs, un total », jamais l'un contre l'autre (C4) : une ligne de risque neuve, au §8 du brief, le tient.
+- **La FAQ du Show HN** « Only self-serve SaaS? » devient « What about sales-led B2B? ». La limite connue ne garde que l'appli grand public et la place de marché.
+- **Le fil social ne nomme plus les étapes** : il les traduisait en français, alors que le produit les garde en anglais.
+- **Aucun texte n'annonce plus un nombre de slides.** « 4 à 7 » était faux avant même l'assisté. Mesuré sur les jeux d'exemple des tests, le deck compte 5 slides en libre-service sans aucun chiffre, 7 sur l'exemple, 7 sur l'exemple assisté et 13 sur l'exemple hybride, puis une de plus par levier « Et si » déplacé (17 avec trois). Le kit dit maintenant de ne jamais en annoncer un.
+
+**Trouvé en relisant, hors de la liste de `CHANTIERS.md`** :
+- le kit et le §3 du brief laissaient encore une des deux fourchettes publiées désigner la fuite. C'était la décision 5 du 2026-09-24, que C1 a remplacée le 2026-09-29. Les textes prêts à coller le disaient déjà juste ; les deux documents qui servent à les vérifier, non ;
+- le post Indie Hackers avançait « ~7 KB » pour la bibliothèque PNG, ce que le kit range parmi ce qu'il ne faut pas avancer tant que ce n'est pas remesuré. Il dit maintenant « a small library » ;
+- la liste des événements du kit gagne `engine_setup/<plg|slg|hybrid>` (Q14).
+
+**Le §18 d'`ENGINE.md`** (le B2B assisté et l'hybride) est sorti dans `docs/engine/assiste-et-hybride.md`, à côté de `v1.md`. Le texte est déplacé tel quel : ses 2 071 lignes sont identiques, à l'octet près, à celles de `main`. `ENGINE.md` passe de 2 371 à 300 lignes, et son tableau « Où vit la spécification » pointe le nouveau fichier : les renvois « `ENGINE.md` §18.12 » du code et des documents restent valides. Suivent l'en-tête de `v1.md`, l'index du `README.md`, la carte du dépôt de `CLAUDE.md`, et deux renvois d'`ENGINE.md` : « §18 de ce document », et « §4, §7 et §8 plus bas », périmé depuis le premier découpage.
+
+**Vérifié** :
+- `node marketing/check-lengths.mjs` : 71 longueurs, aucune au-delà de sa limite. Les deux descriptions de 800 caractères ont perdu « deux moteurs, un total » pour tenir.
+- `vitest` : 2 692 tests passent, dont les liens de la documentation et les plafonds du journal et de `CLAUDE.md`. `main` compte 745 specs Playwright depuis A12.f.1 ; les chiffres de référence de `CLAUDE.md` restent ceux d'A7.3.c, mesurés avant.
+- `relecteur-copie` sur le diff de `marketing/` : en cours.
+- Un merge de documentation seule ne déploie rien (`scripts/vercel-ignore.sh`).
