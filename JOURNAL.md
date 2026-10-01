@@ -6395,3 +6395,22 @@ Tout est corrigé, et le §17.8 pose la règle. Elle a aussi mis en doute, de m�
 - Un e2e par terme, par langue et par largeur : les six sections, la vraie question du Tour, les liens voisins, et aucun débordement. `french-typography.spec.ts` couvre `acv` et `win-rate`.
 
 **Copie neuve, donc `TODO: à relire`** (convention 6). Elle ira au bon à tirer d'A7.3.d, qui les comprend déjà.
+
+**Le relecteur-copie** a trouvé six choses, toutes corrigées :
+- un « vous » au milieu du tutoiement ;
+- une durée inventée (« deux semaines ») ;
+- un seul marqueur « à relire » pour les quatre entrées longues, alors que `/bon-a-tirer` regroupe par terme ;
+- une définition anglaise de `lead-to-opportunity` qui ne disait pas la même chose que la française ;
+- deux ordres de grandeur sans source dans le texte d'`acv` ;
+- « la TCV » au féminin, quand l'ACV est au masculin partout ailleurs.
+
+**Vérifié** :
+- `tsc` et `eslint` propres, **2 400 tests unitaires** (après la fusion de #232), `vitest --coverage` au-dessus de ses seuils, `next build` propre, avec 56 pages de terme prérendues.
+- La suite Playwright complète, avec les variables de la CI et l'émulateur Firestore : **688 specs, 683 passées, 5 ignorées par construction, aucun échec ni rejeu**. Elle a tourné trois fois : avant les retours du relecteur, après, puis sur la tête fusionnée.
+- À l'écran, les quatre pages, en FR et en EN, à 1 280 et 390 px : réponse 200, aucun débordement, `hreflang` fr, en et x-default, JSON-LD `DefinedTerm` et fil d'Ariane, ligne de date.
+- Le sitemap porte 56 pages de terme, `/llms.txt` les 28 termes, et `/llms-full.txt` les quatre parties neuves.
+- Mesuré : 1 143 à 1 468 mots par langue et par terme, des extraits de 122 à 160 caractères et des titres de 34 à 56.
+
+**Trouvé en se vérifiant, hors de cette PR** : `npm audit --omit=dev` n'est plus à zéro sur `main`. Il relève trois alertes, dont une **critique sur `next`**, dans `ImageResponse` de `next/og`, que le site utilise pour ses images de partage. Elles deviennent **A13** de `CHANTIERS.md` : une PR à part. Son merge attend l'accord d'Antoine, parce qu'elle touche une dépendance (`/livrer` §0).
+
+**`main` a bougé pendant la PR** : #232 (le niveau 2 du jeu) a pris le numéro A12, et les alertes sont donc devenues A13. `main` a été fusionné en gardant les deux côtés de `CHANTIERS.md`, de `CLAUDE.md` et de ce journal.
