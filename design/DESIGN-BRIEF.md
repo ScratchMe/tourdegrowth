@@ -1,9 +1,15 @@
 > **Note de liaison :** les 10 "Open questions" en fin de ce document ont été
 > passées en revue avec Antoine (agent produit). Les résolutions sont dans
 > `SPEC.md` §12 à la racine du repo — pas dupliquées ici pour éviter que les
-> deux documents divergent. Ce qui reste vraiment ouvert (bibliothèque de
-> textes de verdict, copie française finale) est aussi listé là-bas, avec
-> l'instruction explicite de ne pas l'inventer côté implémentation.
+> deux documents divergent. Ce qui restait ouvert (bibliothèque de textes de
+> verdict, copie française finale) a été livré et validé depuis, et la règle
+> « ne pas l'inventer » est levée depuis le 2026-09-11 (`CLAUDE.md`).
+>
+> **Ce brief est celui du lancement.** Le système a grandi depuis par quatre
+> extensions (`DS-EXTENSION-BRIEF-01` à `04` et leurs retours) et par la
+> synthèse I + B de septembre 2026 : l'index est dans [`README.md`](README.md),
+> et le code (`src/components/`, `src/styles/tokens/`) fait foi pour l'état
+> actuel.
 
 # Handoff: Tour de Growth — AARRR growth check-up
 

@@ -316,10 +316,12 @@ serrée des deux côtés (un écart qui **grandit** est autant une régression q
 - **Playwright** contre un **build de production** (`next start`), jamais
   `next dev` : hydratation, payload RSC et redirections ne se comportent pas
   pareil. Chromium seul.
-- **Les assertions de composant vivent dans `e2e/`**, contre de vraies pages :
-  le runner unitaire ne peut pas rendre un composant (environnement `node`, ni
-  jsdom ni RTL). Un composant non monté par une page n'a donc pas de couverture
-  tant qu'une page ne le monte pas — le dire plutôt que de le laisser croire.
+- **Le balisage d'un composant se teste en unitaire, son comportement dans
+  `e2e/`** : Vitest le rend par `renderToStaticMarkup` (§4), sans jsdom ni RTL
+  (`components/core/__tests__/form-primitives.test.ts`, par exemple). Ce qui
+  est interactif (focus, clics, états) ne se voit que contre une vraie page :
+  un composant qu'aucune page ne monte n'a pas de test de comportement — le
+  dire plutôt que de le laisser croire.
 - **Les routes `/admin/*` échouent fermé** : sans mot de passe configuré, tout
   `/admin` est un 401. La CI le pose au niveau du workflow, et les specs
   concernées **sautent avec un message** s'il manque — jamais faussement
@@ -349,9 +351,14 @@ serrée des deux côtés (un écart qui **grandit** est autant une régression q
   monter, lire `lib/emulator/downloadableEmulatorInfo.json` dans le paquet
   `firebase-tools` du jour. `global-setup.ts` refuse une adresse qui n'est
   pas locale.
-- Chiffres de référence au 2026-09-15 : **709 tests unitaires**, **286 specs
-  Playwright**, seuils de couverture `src/lib/**` à 82 % de lignes.
-- **Flake connu** : `e2e/locale-routing.spec.ts:75`, quatre occurrences,
-  toujours en suite complète parallèle, jamais en isolation. **Ne pas durcir la
-  spec** en attendant le cookie : ça masquerait une éventuelle course produit.
-  La config a `retries: 1` et `trace: "on-first-retry"` en CI.
+- Chiffres de référence : ceux de `CLAUDE.md` (2 382 tests unitaires et 667
+  specs Playwright au 2026-09-30, contre 709 et 286 au 2026-09-15). Seuils de
+  couverture `src/lib/**` : 82 % de lignes, 77 % de fonctions
+  (`vitest.config.ts`).
+- **L'ancien flake de `e2e/locale-routing.spec.ts`** (`:76` et `:320`, en
+  suite complète parallèle, jamais en isolation) avait une cause produit,
+  trouvée le 2026-09-29 : les préchargements de la page quittée réécrivaient
+  le cookie de langue. Le proxy ne l'écrit plus que sur une navigation
+  (`Sec-Fetch-Mode`). La spec n'a pas été durcie, et ne doit pas l'être : un
+  nouvel échec se lit avec `NEXTJS.md` §1.1. La config garde `retries: 1` et
+  `trace: "on-first-retry"` en CI.

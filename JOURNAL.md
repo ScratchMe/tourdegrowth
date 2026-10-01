@@ -781,3 +781,114 @@ D'où le contrôle du niveau 2 : une transaction de 150 000 €, à trancher (C3
 - surtout, des textes d'événements et de fins qui nommaient des cartes (« les guides », « les prix barrés », « avis vérifiés »), alors que ces événements se déclenchent sur des seuils de radar et de confiance, pas sur ce qui a été joué. L'année D, virée, n'a écrit aucun guide.
 
 Tout est corrigé, et le §17.8 pose la règle. Elle a aussi mis en doute, de mémoire, que le faux prix barré échappe à l'amende administrative. La vérification sur Légifrance le confirme, et le texte le dit maintenant avec sa source plutôt qu'en une phrase absolue.
+
+## La documentation remise d'accord avec le code, et le journal découpé en volumes (2026-10-01, demandé par Antoine)
+
+Antoine a demandé de mettre à jour le README et toute documentation qui ne
+l'était plus, avec la liberté de découper des documents pour économiser des
+tokens. Trois audits en lecture seule ont d'abord relevé, contre le code de
+`main` (`24c862a`), ce qui était faux **aujourd'hui** : les fichiers d'outil,
+les documents secondaires, puis l'état de `CLAUDE.md` et de `CHANTIERS.md`.
+
+**Le découpage.** `JOURNAL.md` faisait 834 000 caractères : trop pour que
+GitHub l'affiche, et cher à ouvrir pour une session. Les entrées d'avant le
+2026-09-30 partent **telles quelles** dans `docs/journal/`, huit volumes par
+période, et `JOURNAL.md` garde le volume courant (113 000 caractères) avec la
+table des volumes. Vérifié : les 4 651 lignes non vides d'avant le découpage
+se retrouvent, dans le même ordre, dans les volumes suivis du volume courant ;
+aucun lien relatif n'existait dans le texte déplacé. La règle d'archivage est
+un test (`claude-md-budget.test.ts`) : le volume courant reste sous 200 000
+caractères, et la table nomme exactement les volumes du disque. Non-vacuité :
+remettre les volumes dans `JOURNAL.md` fait rougir le premier test, un volume
+ajouté sans sa ligne le second. Dans `CHANTIERS.md`, l'index des
+vingt-neuf décisions tranchées part dans `docs/decisions.md`, remis dans
+l'ordre des numéros (C25 était après C28), et A10 et A11, clos, laissent la
+place aux quatre restes d'A10 qui n'avaient pas de numéro (A10.1 à A10.4).
+`CHANTIERS.md` passe de 55 000 à 41 000 caractères ; `CLAUDE.md` perd onze
+lignes du tableau des points ouverts, qui doublaient la section E de
+`CHANTIERS.md` ou `.design-sync/NOTES.md`, et sa carte du dépôt nomme enfin ce
+qu'elle oubliait (`proxy.ts`, `llms.txt`, `lib/forms`, `.github/`, `docs/`…).
+
+**Ce qui n'a pas été découpé, et pourquoi.** `ENGINE.md` (318 000) et
+`GAME-BRIEF.md` (145 000) gagneraient à sortir leur §18 et leur §17, mais la PR
+#233 (A7.3.c) écrit dans le §18 et une session C30 écrira dans le §17 : git ne
+suit pas un texte déplacé d'un fichier à l'autre, et ces sessions hériteraient
+d'un conflit. C'est une ligne de la section E de `CHANTIERS.md`. Pour la même
+raison, les modifications de `CLAUDE.md` et `CHANTIERS.md` évitent les lignes
+que touchent #233, #234 et la branche d'A7.3.e (sans PR à cette heure) : la
+fusion à trois de chacune de ces branches avec celle-ci a été simulée
+(`git merge-file`), fichier par fichier, sans aucun conflit hors de la fin
+de `JOURNAL.md` (où deux entrées se suivent, comme à chaque livraison en
+parallèle), et le `CLAUDE.md` comme le `JOURNAL.md` fusionnés restent sous
+leurs budgets.
+
+**Ce qui est supprimé**, Antoine ayant ouvert la suppression en cours de
+route (« tu peux aussi supprimer les documents ou des parties de documents que
+tu jugerais inutiles ») :
+- de `CLAUDE.md`, la section sur les plug-ins (5 400 caractères chargés dans
+  chaque session, pour un usage rare) : elle part telle quelle dans
+  `PLUGINS.md`, un fichier d'outil de plus dans la table des déclencheurs,
+  qui garde dans sa cellule la règle « un plug-in se décide avec Antoine ». Et
+  la consigne « lis dans cet ordre : ce fichier → `SPEC.md` →
+  `DESIGN-BRIEF.md` », écrite pour la première session, devient une lecture
+  sur déclencheur : 44 000 caractères surtout historiques qu'une session
+  obéissante relisait à chaque démarrage. `CLAUDE.md` passe de 38 900 à
+  33 800 caractères ;
+- d'`ENGINE.md`, le §14, l'inventaire de la copie de la v1 clé par clé
+  (50 000 caractères), devenu une copie périmée du code (quinze chiffres au
+  lieu de dix-sept, les renommages d'A7). Un paragraphe le remplace et dit où
+  lire chaque clé ; les renvois « §14.x » restent lisibles. Le reste du
+  document n'est pas touché : #233 y écrit ;
+- de `SPEC.md`, le prompt de la première session (§13) et la liste « avant de
+  lancer Claude Code », et une note sur le §12, dont la consigne « ne pas
+  inventer la copie » est levée depuis le 2026-09-11.
+
+Rien d'autre n'a semblé inutile au point d'être retiré : les trois revues et
+les volumes du journal sont l'histoire que le README met en avant, le plan
+d'audit attend sa réouverture tel quel, et le brief 02 jamais envoyé garde sa
+place dans la trace de R2-29.
+
+**Gardé hors de cette PR** : ajouter `docs/` à la liste « doc seule » de
+`scripts/vercel-ignore.sh`. C'est un réglage de build, donc l'accord d'Antoine
+avant le merge (`/livrer` §0) ; d'ici là, un merge qui ne touche que
+`docs/` déploie, sans autre coût que le déploiement.
+
+**Ce qui était faux, et ne l'est plus** :
+- `README.md` décrivait le produit du lancement : il dit maintenant ce que fait
+  le Tour (l'étape qui freine, l'action, l'image), ce qui l'entoure (glossaire,
+  comparaisons, `llms.txt`), ce qui est construit et fermé (le moteur, le jeu,
+  `/metrics`), comment le lancer et tester, et où vit chaque document ;
+- `SPEC.md` gagne un encart « ce qui a changé depuis ce draft » (barème
+  20/7/0, verdict sans Gemini, deux questions de contexte, partage par
+  `/r/<id>` et K sur toutes les analyses, une adresse par langue, Firestore et
+  `next/og`), sans toucher au texte d'origine ;
+- `TESTING.md` disait que Vitest ne rend pas un composant (il le fait par
+  `renderToStaticMarkup`) et tenait encore le flake de `locale-routing` pour
+  ouvert ; `/livrer` aussi ;
+- `VERCEL.md` : 74 pages de contenu et non 72, le quota de déploiements que le
+  « push gratuit » oubliait, un renvoi au mauvais paragraphe, et la cadence du
+  §2.3 marquée caduque depuis le 2026-09-26 ;
+- `GITHUB.md` : quatre workflows et non trois, et l'émulateur dans `ci.yml` ;
+- `GEMINI.md` : le pire cas d'abus était compté sur une génération au lieu de
+  quatre (~5 à 7 $ par adresse et par jour, pas 2,4) ;
+- `.env.local.example` se disait complet sans six variables d'outils et de
+  tests, et ses commentaires sur le mot de passe admin et sur `ENGINE_ENABLED`
+  (« jusqu'au bon à tirer nº6 ») étaient faux ;
+- les portiers du moteur et du jeu dans `marketing/` (le nº8 et non le nº6, le
+  nº7 et C23 pour le jeu), l'inventaire de `marketing/assets/`, les en-têtes
+  datés de `GROWTH-PLAN.md` et `AUDIT-PLAN.md`, R2-29 et R2-31 dans
+  `REVIEW-02.md`, et la note de `DESIGN-BRIEF.md` qui interdisait encore
+  d'écrire la copie. `design/` gagne un index (`design/README.md`).
+
+**Trouvé en route, pas corrigé ici** : `npm audit --omit=dev` n'est plus à
+zéro sur `main`. Trois alertes, dont une **critique** sur `next` 16.3.4
+(GHSA-vcvr-r3jv-pc5j, exécution de code dans `ImageResponse` de `next/og`,
+dont se servent toutes nos images de partage), corrigées dans leurs plages
+semver. C'est une montée de dépendances, donc une PR à part avec l'accord
+d'Antoine ; la session d'A7.3.e l'a aussi relevée (A13 sur sa branche), et
+`CLAUDE.md` la met en tête de ses points ouverts.
+
+**Vérifié** : `eslint` et `tsc` propres, `vitest --coverage` vert et au-dessus
+de ses seuils, la vérification des longueurs de `marketing/` (71, aucune
+erreur). Ni build ni Playwright en local : seuls des documents et un test
+unitaire changent, aucun fichier que le build lit ; la CI les passe quand même.

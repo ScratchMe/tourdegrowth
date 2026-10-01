@@ -2,6 +2,9 @@
 
 *Tour de Growth · from the codebase to Claude Design · 2026-09-07*
 
+> **Never sent.** Brief 03 (`DS-EXTENSION-BRIEF-03.md`) replaced and absorbed
+> this one the next day: its question is section 4 there. Kept as written.
+
 ## The one question
 
 **How does a first-time visitor learn that the roast tone exists, before

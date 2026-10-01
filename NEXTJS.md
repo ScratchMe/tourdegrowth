@@ -176,8 +176,9 @@ son mécanisme interne qui s'affiche.
 et qu'il grossit tout seul.
 
 Turbopack émet **une copie du chunk SSR par groupe de routes**. Donc un module
-de contenu importé par un module partagé est **recopié dans chaque groupe** —
-et si la facturation est par route (`VERCEL.md` §1.1), multiplié encore.
+de contenu importé par un module partagé est **recopié dans chaque groupe**,
+et le poids disque du déploiement, celui que Vercel facture (`VERCEL.md`
+§1.1), grossit d'autant.
 
 Chez nous : six fichiers de **397 589 octets à l'octet près**, cinq octets de
 différence (le nom de la source map), chacun portant toute la bibliothèque de
@@ -316,7 +317,7 @@ CSS, aucun composant partagé. Les valeurs de tokens sont recopiées à la main.
 
 ### 2.2 Invariants que des tests tiennent
 
-- Les **72** pages de contenu (celles du sitemap) sortent en `●` du build. Tout ce qui les
+- Les pages de contenu (celles du sitemap : 74 au 2026-10-01) sortent en `●` du build. Tout ce qui les
   redynamise est une régression — vérifier le résumé de `next build`.
 - Aucun `Button` du dossier `[locale]` vers une route applicative n'utilise
   `next/link` (garde statique + spec qui enregistre les requêtes réseau).
