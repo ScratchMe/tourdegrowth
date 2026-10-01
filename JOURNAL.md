@@ -550,3 +550,35 @@ Le reste suit la reco : le mois suivant reprend les cibles et les définitions,
 **Une question d'Antoine en route** (Q16) : la carte « Le moteur » de l'accueil et la pastille de la bande noire deviendront-elles cliquables ? Oui, et sans rien à construire : C15 (A7.9) les a câblées sur le même drapeau que l'ouverture, mesurées par `home_strip` et `space_band`. La bande reste sans lien dans le questionnaire et le Deep dive (`bandLinked={false}`), pour ne faire sortir personne en plein parcours. Avis donné : la garder cliquable ailleurs, puisque c'est la seule navigation entre les trois espaces.
 
 **Un numéro rattrapé** : la décision s'appelait C31 dans le premier jet. `docs/decisions.md` montrait C31 déjà prise le matin même par le jeu (le bloc « Niveau suivant »), que la liste de `CHANTIERS.md` ne reportait pas encore. Renumérotée C32 avant le merge. Comme pour un numéro de PR (convention 8), un numéro de décision se lit dans l'index, pas dans une liste qui peut être en retard.
+
+
+## A14.c, T0 : le socle v3, plusieurs moteurs par appareil (2026-10-01)
+
+La première PR du moteur complet (`docs/engine/moteur-complet.md` §19.1 et §19.13), drapeau fermé. Rien ne change à l'écran : T0 pose ce que T1 à T6 vont remplir.
+
+**Le golden v2, figé avant la première ligne.** Six états v2 (l'exemple en libre-service, l'hybride, l'hybride avec « Et si » et Tour lié, l'hybride sans chiffre de l'assisté, l'assisté seul et l'assisté vide), et ce que le build v2 en tirait en français et en anglais : le tableau dérivé entier, le deck entier et son export texte, les deux scénarios, les onglets de chaque motion, la reprise et le plan de collecte. Écrits une fois, au commit « golden v2 figé », par le code v2. Comme pour le golden v1, seule la fonction qui ouvre un v2 peut suivre la version suivante ; ce que le v2 imprimait, non.
+
+**Le fichier passe en version 3.** Un v2 n'y gagne que son numéro : `setup.tools`, `setup.pipeline`, `deck.theme`, et sur un mois `closedAt`, `windows` et `pipelineOpen`, sont **optionnels**, absents voulant dire « pas dit » ou « papier ». C'est un écart à la spec, qui prévoyait d'écrire `tools: []` et `theme: "paper"` à la migration ; il est noté au §19.1.2. Un build v2 refuse proprement un fichier v3 (« version inconnue »), et ce build refuse un v4 de la même façon.
+
+**Plusieurs moteurs par appareil.** Un index sous `tdg.engines.v3` (le moteur à l'écran et l'ordre), et une entrée par moteur sous `tdg.engine.v3.<id>`, de la même forme que l'ancienne clé unique. Dix moteurs au plus (Q12), refusés en `full` au-delà. Les trois règles d'avant tiennent pour chaque clé : une écriture qui échoue est rendue à l'appelant, une entrée illisible n'est jamais prise pour un appareil vide ni écrasée, et l'ancienne copie (`tdg.engine.v2`, ou `v1` derrière elle) reste jusqu'à une sauvegarde exportée plus récente. L'îlot appelle toujours `loadEngine`, `saveEngine` et `clearEngine`, et rien ne change pour lui : sans `add`, un autre moteur **remplace** celui à l'écran, comme l'import « Remplacer » le faisait. `listEngines`, `setActiveEngine`, `deleteEngine` et `saveEngine(…, { add: true })` attendent leur écran, en T5.
+
+**La validation** connaît les règles neuves du §19.1.6 : au plus 36 mois, des mois strictement croissants, `closedAt` sur chacun sauf le dernier, des outils connus et sans doublon, un pipeline positif, un dénominateur venu d'un autre outil vérifié comme une source, et un deck papier ou blanc.
+
+**Le défaut trouvé en écrivant la spec est corrigé** : Pipedrive et la plateforme de customer success manquaient à `ALL_TOOLS`, et donc à « Autres outils ». La liste se déduit maintenant d'un objet typé `satisfies Record<ToolId, true>` : un outil ajouté au type sans être ajouté là ne compile plus.
+
+**Les specs e2e écrivaient l'ancienne clé** : quatorze fichiers posaient `tdg.engine.v2` avec des états v3, que le lecteur de l'ancienne clé refuse (il exige un état v2 dedans). Un assistant, `e2e/engine-helpers.ts`, construit les deux clés comme `storage.ts` les écrit et relit l'entrée du moteur à l'écran. `engine-migration.spec.ts` couvre maintenant un appareil v1 **et** un appareil v2, plus un fichier v2 ouvert sans note de migration.
+
+**Non-vacuité**, mesurée en sabotant puis en restaurant le code. Chaque sabotage fait tomber les tests qui le visent, et aucun autre :
+- garder l'entrée remplacée, revenir au premier moteur après une suppression, oublier les entrées dans « Tout effacer », lever le plafond de dix ;
+- côté validation : un mois ouvert avant le dernier, deux fois le même mois, un outil en double, un objectif à zéro, un dénominateur non vérifié ;
+- faire refuser le v3 par `io.ts` (six tests) ;
+- perdre `whatIf` à la migration : les deux goldens, sur leurs états avec « Et si ».
+
+**Un test était trop faible, et le sabotage l'a montré** : une migration v2 → v3 qui étale l'état au lieu de le copier en profondeur passait tout. Le test « laisse l'objet v2 tel quel » ne regardait que l'objet lui-même. Il modifie maintenant l'intérieur de l'état migré et vérifie que la copie v2 n'a pas bougé.
+
+**Un test lent sous charge** : « a row never says a change… » (`deck.test.ts`) prend 1,5 s seul. Il a dépassé ses 5 s une fois, pendant qu'un sabotage tournait à côté de la suite Playwright. Seul, il passe. Relevé ici, pas durci.
+
+**Vérifié** :
+- `vitest --coverage` : 2 727 tests passés (215 fichiers), au-dessus des seuils ;
+- `tsc`, `eslint` et `next build` (avec `GAME_ENABLED=true`, comme la CI) propres ;
+- Playwright sur ce build : 757 specs, 730 passées et 27 ignorées (les 20 de `result-real.spec.ts` et une d'`error-page.spec.ts`, faute d'émulateur ; 6 « jeu fermé », par construction), aucune au second essai. Les cinq specs de migration, dont les deux appareils v1 et v2, passent du premier coup.

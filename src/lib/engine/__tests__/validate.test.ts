@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ALL_METRIC_SHAPES, TEXT_LIMITS, shapeOf } from "../catalog-shape";
 import { SHEET_BASES } from "../strings";
-import type { EngineState, MetricEntry } from "../types";
+import { MAX_MONTHS, type EngineState, type MetricEntry, type ToolId } from "../types";
 import { defaultDeck, newEngineState, validateEngine, validateEntry } from "../validate";
 import { SETUP, fullState } from "./storage-fixtures";
 
@@ -180,6 +180,104 @@ describe("validateEngine — the v2 setup and the sales-assisted numbers (engine
     expect(validateEngine(s)).toEqual([]);
     s.deck.include = { ...s.deck.include, ["slg:unknown" as never]: true };
     expect(validateEngine(s)).toEqual(["deck.include.slg:unknown: unknown slide"]);
+  });
+});
+
+describe("validateEngine — the v3 fields: the series, the tools, the pipeline, the white deck (§19, A14 T0)", () => {
+  // Non-vacuity, measured on 2026-10-01: allowing an open month before the last, the same month twice, a tool
+  // listed twice, a zero quarter target, or an unchecked denominator source each fails one test of this block, its own.
+  /** Two months of the series: August closed, September open. */
+  function twoMonths(): EngineState {
+    const s = fullState();
+    const august = s.snapshots[0]!;
+    august.closedAt = "2026-10-01T08:00:00.000Z";
+    august.windows = { activationWindowDays: 7, paidWindowDays: 30, qualificationWindowDays: 30, goLiveWindowDays: 90 };
+    const september = { ...structuredClone(august), id: "s-2", referenceMonth: "2026-09", cohortMonth: "2026-08" };
+    delete september.closedAt;
+    delete september.windows;
+    s.snapshots.push(september);
+    return s;
+  }
+
+  it("a series of months, oldest first, every one closed but the last, is valid", () => {
+    expect(validateEngine(twoMonths())).toEqual([]);
+  });
+
+  it("refuses two snapshots of the same month, months out of order, and a month before the last left open", () => {
+    const same = twoMonths();
+    same.snapshots[1]!.referenceMonth = "2026-08";
+    expect(validateEngine(same)).toEqual(["snapshots[1].referenceMonth: not after the month before"]);
+    const backwards = twoMonths();
+    backwards.snapshots[1]!.referenceMonth = "2026-07";
+    expect(validateEngine(backwards)).toEqual(["snapshots[1].referenceMonth: not after the month before"]);
+    const open = twoMonths();
+    delete open.snapshots[0]!.closedAt;
+    expect(validateEngine(open)).toEqual(["snapshots[0].closedAt: missing on a month that is not the last"]);
+  });
+
+  it(`keeps at most ${MAX_MONTHS} months`, () => {
+    const s = fullState();
+    const first = s.snapshots[0]!;
+    first.closedAt = at;
+    const months = Array.from({ length: MAX_MONTHS + 1 }, (_, i) => {
+      const y = 2024 + Math.floor(i / 12);
+      const m = String((i % 12) + 1).padStart(2, "0");
+      return { ...structuredClone(first), id: `s-${i}`, referenceMonth: `${y}-${m}`, cohortMonth: `${y}-${m}` };
+    });
+    delete months.at(-1)!.closedAt;
+    expect(validateEngine({ ...s, snapshots: months.slice(0, MAX_MONTHS) })).toEqual([]);
+    expect(validateEngine({ ...s, snapshots: months })).toEqual([`snapshots: more than ${MAX_MONTHS} months`]);
+  });
+
+  it("a month's own fields: a closing date, the four windows it was read with, the open pipeline", () => {
+    const s = twoMonths();
+    s.snapshots[0]!.closedAt = "last tuesday";
+    s.snapshots[0]!.windows = { activationWindowDays: 7, paidWindowDays: 30, qualificationWindowDays: 45 } as never;
+    s.snapshots[1]!.pipelineOpen = -1;
+    expect(validateEngine(s)).toEqual([
+      "snapshots[0].closedAt: not a date",
+      "snapshots[0].windows: not the four windows of a setup",
+      "snapshots[1].pipelineOpen: not a number >= 0",
+    ]);
+    const zero = twoMonths();
+    zero.snapshots[1]!.pipelineOpen = 0;
+    expect(validateEngine(zero)).toEqual([]);
+  });
+
+  it("the tools: optional, empty allowed, every one known, none twice — pipedrive and the CS platform included", () => {
+    const s = fullState();
+    for (const tools of [[], ["hubspot", "pipedrive", "cs-platform"]] as ToolId[][]) expect(validateEngine({ ...s, setup: { ...s.setup, tools } })).toEqual([]);
+    expect(validateEngine({ ...s, setup: { ...s.setup, tools: ["hubspot", "excel-of-doom"] as never } })).toEqual(["setup.tools[1]: unknown tool"]);
+    expect(validateEngine({ ...s, setup: { ...s.setup, tools: ["hubspot", "hubspot"] } })).toEqual(["setup.tools: a tool listed twice"]);
+    expect(validateEngine({ ...s, setup: { ...s.setup, tools: "hubspot" as never } })).toEqual(["setup.tools: not a list"]);
+  });
+
+  it("the pipeline: both numbers optional, both > 0 when there", () => {
+    const s = fullState();
+    for (const pipeline of [{}, { quarterTarget: 120000 }, { threshold: 2.5 }, { quarterTarget: 120000, threshold: 3 }])
+      expect(validateEngine({ ...s, setup: { ...s.setup, pipeline } })).toEqual([]);
+    expect(validateEngine({ ...s, setup: { ...s.setup, pipeline: { quarterTarget: 0, threshold: -2 } } })).toEqual([
+      "setup.pipeline.quarterTarget: not a number > 0",
+      "setup.pipeline.threshold: not a number > 0",
+    ]);
+    expect(validateEngine({ ...s, setup: { ...s.setup, pipeline: 3 as never } })).toEqual(["setup.pipeline: not an object"]);
+  });
+
+  it("a denominator from another tool is a source like any other; the deck is paper or white", () => {
+    const s = fullState();
+    const rate: MetricEntry = {
+      status: "measured",
+      value: { kind: "ratio", numerator: 40, denominator: 400 },
+      source: { kind: "tool", tool: "amplitude" },
+      denominatorSource: { kind: "tool", tool: "stripe" },
+      updatedAt: at,
+    };
+    expect(validateEntry(rate, shapeOf("act.rate"))).toEqual([]);
+    expect(validateEntry({ ...rate, denominatorSource: { kind: "tool", tool: "abacus" } as never }, shapeOf("act.rate"))).toEqual([
+      "act.rate.denominatorSource.tool: unknown tool",
+    ]);
+    for (const theme of ["paper", "white"] as const) expect(validateEngine({ ...s, deck: { ...s.deck, theme } })).toEqual([]);
+    expect(validateEngine({ ...s, deck: { ...s.deck, theme: "black" as never } })).toEqual(["deck.theme: not paper or white"]);
   });
 });
 

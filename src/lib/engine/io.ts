@@ -1,4 +1,4 @@
-import { migrateToV2 } from "./migrate";
+import { migrateToV3 } from "./migrate";
 import type { EngineStrings } from "./strings";
 import { ENGINE_SCHEMA_VERSION, YEAR_MONTH_PATTERN, type EngineState } from "./types";
 import { validateEngine } from "./validate";
@@ -39,8 +39,8 @@ export interface ParsedEngineFile {
   state: EngineState | null;
   errors: string[];
   refusal?: "unknown-version" | "not-engine" | "unreadable" | "unsupported-setup";
-  /** 1 when the file was a v1 engine, migrated on the way in (§18.3.2): the import screen says so. */
-  migratedFrom?: 1;
+  /** 1 or 2 when the file was an older engine, migrated on the way in (§18.3.2, §19.1.3): the import screen says so. */
+  migratedFrom?: 1 | 2;
 }
 
 /**
@@ -74,17 +74,20 @@ export function parseEngineFile(text: string): ParsedEngineFile {
   if (typeof o.schemaVersion === "number" && o.schemaVersion > ENGINE_SCHEMA_VERSION && looksLikeAnyEngine(o)) {
     return { state: null, errors: [`schemaVersion: ${o.schemaVersion}`], refusal: "unknown-version" };
   }
-  if ((o.schemaVersion !== 1 && o.schemaVersion !== ENGINE_SCHEMA_VERSION) || !looksLikeEngine(o)) {
+  if (!READABLE_VERSIONS.includes(o.schemaVersion as number) || !looksLikeEngine(o)) {
     return { state: null, errors: ["file: not a growth engine"], refusal: "not-engine" };
   }
-  // A v1 engine is migrated, then validated like any v2 one (§18.3.2): nothing in its numbers changes.
-  const migrated = migrateToV2(o);
+  // An older engine is migrated, then validated like any v3 one (§18.3.2, §19.1.3): nothing in its numbers changes.
+  const migrated = migrateToV3(o);
   if (!migrated || !sellsSomehow(migrated.state)) {
     return { state: null, errors: ["setup: no known type or no way of selling"], refusal: "unsupported-setup" };
   }
   const { state, from } = migrated;
-  return { state, errors: validateEngine(state), ...(from === 1 ? { migratedFrom: 1 as const } : {}) };
+  return { state, errors: validateEngine(state), ...(from !== ENGINE_SCHEMA_VERSION ? { migratedFrom: from } : {}) };
 }
+
+/** Every version this build reads: the older ones are migrated on the way in. */
+const READABLE_VERSIONS: readonly number[] = [1, 2, ENGINE_SCHEMA_VERSION];
 
 /**
  * A setup the board can show at all (§18.3.2): a known type, and at least one

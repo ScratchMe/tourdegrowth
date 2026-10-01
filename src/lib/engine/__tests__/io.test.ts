@@ -62,11 +62,11 @@ describe("serializeEngine / parseEngineFile", () => {
   });
 
   it("a newer schema version is refused, not opened with errors", () => {
-    const future = { ...JSON.parse(serializeEngine(fullState())), schemaVersion: 3 };
+    const future = { ...JSON.parse(serializeEngine(fullState())), schemaVersion: 4 };
     const parsed = parseEngineFile(JSON.stringify(future));
     expect(parsed).toMatchObject({ state: null, refusal: "unknown-version" });
     // Even when the newer version moved its fields around, it still reads as "newer", not "wrong file".
-    const moved = { schemaVersion: 3, id: "x", snapshots: [], somethingNew: {} };
+    const moved = { schemaVersion: 4, id: "x", snapshots: [], somethingNew: {} };
     expect(parseEngineFile(JSON.stringify(moved)).refusal).toBe("unknown-version");
   });
 

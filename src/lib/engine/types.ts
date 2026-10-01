@@ -22,14 +22,30 @@
  * in the engine's currency, never converted. Durations keep their own unit.
  */
 
-export const ENGINE_STORAGE_KEY = "tdg.engine.v2";
+/**
+ * Several engines per device (engine spec §19.1.4, A14 T0): an index under
+ * `ENGINE_INDEX_KEY`, and each engine under its own key, `ENGINE_ENTRY_PREFIX`
+ * + its id — one engine that fails to write never takes the others with it.
+ */
+export const ENGINE_INDEX_KEY = "tdg.engines.v3";
+export const ENGINE_ENTRY_PREFIX = "tdg.engine.v3.";
+/** At most this many engines on a device (C32 Q12): « Nouveau moteur » is greyed beyond, with the reason. */
+export const MAX_ENGINES = 10;
+/** At most this many months in one engine (§19.1.6): three years of a monthly review. */
+export const MAX_MONTHS = 36;
+/**
+ * The v2 store (one engine, `EngineStore` v2), read once, migrated, and kept
+ * until the first `.json` export that follows the migration (§19.1.4) — the
+ * same rule the v1 store has had since §18.3.4.
+ */
+export const LEGACY_STORAGE_KEY_V2 = "tdg.engine.v2";
 /**
  * Read once, migrated, and kept until the first successful `.json` export
  * that follows the migration (engine spec §18.3.4): a v1 store is never the
  * copy we destroy first.
  */
 export const LEGACY_STORAGE_KEY_V1 = "tdg.engine.v1";
-export const ENGINE_SCHEMA_VERSION = 2 as const;
+export const ENGINE_SCHEMA_VERSION = 3 as const;
 
 /**
  * Decision 3 (2026-09-29, `CHANTIERS.md` C4): the setup separates the TYPE of
@@ -184,6 +200,12 @@ export interface MetricEntry {
    * catalogue, absent from §4.1.
    */
   evidence?: "data" | "interviews" | "hunch";
+  /**
+   * A rate in counts whose denominator comes from another tool than its
+   * numerator (§19.5.3, C32 Q10). Absent = the same source as `source`.
+   * Two different sources raise a non-blocking « à vérifier ».
+   */
+  denominatorSource?: SourceRef;
   /** Cohort metrics; default = the snapshot's cohortMonth. */
   cohortMonth?: YearMonth;
   /** Display unit (%, currency, days). low ≤ high, refused otherwise. */
@@ -218,6 +240,24 @@ export interface Snapshot {
    * and the entries that carry the same count in step.
    */
   base?: Partial<Record<SharedCount, number>>;
+  /**
+   * When the next month was started (§19.2.3): every computation on a closed
+   * month takes this date for « today », so a month read later keeps the
+   * periods and the confidence it was seen with. Absent on the last month.
+   */
+  closedAt?: string;
+  /** The setup's windows when the month was closed: a number's definition at the time (§19.2.3, §19.2.5). */
+  windows?: SnapshotWindows;
+  /** Sales-assisted: the quarter's open pipeline, in ACV (§19.4, C32 Q8). Optional. */
+  pipelineOpen?: number;
+}
+
+/** The four windows that are part of a number's definition (§19.2.3). */
+export interface SnapshotWindows {
+  activationWindowDays: EngineSetup["activationWindowDays"];
+  paidWindowDays: EngineSetup["paidWindowDays"];
+  qualificationWindowDays: EngineSetup["qualificationWindowDays"];
+  goLiveWindowDays: EngineSetup["goLiveWindowDays"];
 }
 
 /**
@@ -272,6 +312,13 @@ export interface EngineSetup {
   goLiveWindowDays: 30 | 60 | 90;
   /** ≤ 60 chars — only ever on the slides, and only if `deck.showCompany`. */
   companyLabel?: string;
+  /**
+   * The tools the team uses (§19.5, C32 Q9). Absent or empty = « not said »:
+   * nothing changes from the engine without it. Never required.
+   */
+  tools?: ToolId[];
+  /** Sales-assisted pipeline coverage (§19.4, C32 Q8): the quarter's target in ACV, and a team threshold (2.5 = « 2,5× »). */
+  pipeline?: { quarterTarget?: number; threshold?: number };
 }
 
 /**
@@ -335,7 +382,12 @@ export interface EngineDeck {
   showCompany: boolean; // default true when companyLabel is set
   showSiteCredit: boolean; // default true, removable (decision 2, 2026-09-24)
   ask: EngineAsk;
+  /** §19.8, C32 Q14: "white" for a company template. Absent = "paper", the slides as they have always been. */
+  theme?: DeckTheme;
 }
+
+export type DeckTheme = "paper" | "white";
+export const DECK_THEMES: readonly DeckTheme[] = ["paper", "white"];
 
 export interface EngineState {
   schemaVersion: typeof ENGINE_SCHEMA_VERSION;
@@ -345,7 +397,7 @@ export interface EngineState {
   /** Last .json download. The backup band stays up while absent or older than updatedAt. */
   lastExportedAt?: string;
   setup: EngineSetup;
-  /** v1: exactly one. The array exists so the monthly series (v2) migrates nothing. */
+  /** One per month, oldest first, `referenceMonth` strictly increasing (§19.2, §19.1.6). The last is the current month. */
   snapshots: Snapshot[];
   /** The Tour is READ, never copied (D13): only the result id lives here. */
   tourLink: { resultId: string; linkedAt: string } | null;
@@ -359,10 +411,17 @@ export interface EngineState {
   whatIf?: Partial<Record<LeverId, number>>;
 }
 
-/** The value stored under ENGINE_STORAGE_KEY. */
+/** The value stored under `ENGINE_ENTRY_PREFIX` + an engine's id. */
 export interface EngineStore {
-  schemaVersion: 2;
+  schemaVersion: typeof ENGINE_SCHEMA_VERSION;
   state: EngineState;
+}
+
+/** The value stored under `ENGINE_INDEX_KEY`: which engines the device holds, in order, and the one on screen. */
+export interface EngineIndex {
+  schemaVersion: typeof ENGINE_SCHEMA_VERSION;
+  activeId: string;
+  order: string[];
 }
 
 // ---------------------------------------------------------------------------

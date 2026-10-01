@@ -1,6 +1,7 @@
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, openFold, SKIP_ADMIN_REASON, test } from "./helpers";
 import type { Page } from "@playwright/test";
 import { exampleState } from "../src/lib/engine/__tests__/fixtures";
+import { writeEngineSeed } from "./engine-helpers";
 
 /**
  * DS v3 H-2 and H-3 — touch targets measured the way a finger meets them.
@@ -341,7 +342,7 @@ test.describe("the quiet text button", () => {
     await page.clock.setFixedTime(new Date(2026, 8, 24, 12));
     await page.goto("/en/aarrr-funnel-template");
     await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
-    await page.evaluate((state) => localStorage.setItem("tdg.engine.v2", JSON.stringify({ schemaVersion: 2, state })), exampleState());
+    await writeEngineSeed(page, exampleState());
     await page.reload();
     await openFold(page.getByTestId("engine-board-whatif"));
     const panel = page.getByTestId("engine-whatif-panel");

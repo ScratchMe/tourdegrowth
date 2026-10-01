@@ -4,6 +4,7 @@ import { ENGINE_COPY } from "../src/content/engine-copy";
 import { hybridState, salesAssistedState, tourResult } from "../src/lib/engine/__tests__/fixtures";
 import type { EngineState } from "../src/lib/engine/types";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, readEachOnScreen, SKIP_ADMIN_REASON, test } from "./helpers";
+import { engineSeed } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -25,22 +26,22 @@ test.beforeEach(async ({ context }) => {
 
 const TOUR = tourResult(Object.fromEntries(QUESTIONS.map((q, i) => [q.id, (i % 3) as 0 | 1 | 2])));
 
-function hybridStore(): { schemaVersion: 2; state: EngineState } {
+function linkedHybrid(): EngineState {
   const state: EngineState = { ...hybridState(), whatIf: { "act.rate": 24, "slg.rev.win-rate": 30, "link.pql-handoff": 40 } };
   state.tourLink = { resultId: TOUR.id, linkedAt: "2026-09-24T09:00:00.000Z" };
-  return { schemaVersion: 2, state };
+  return state;
 }
 
-async function openDeck(page: Page, locale: "fr" | "en", store: { schemaVersion: 2; state: EngineState }) {
+async function openDeck(page: Page, locale: "fr" | "en", state: EngineState) {
   await page.clock.setFixedTime(new Date(2026, 8, 24, 12));
   await page.addInitScript(
-    ([s, tour]) => {
+    ([items, tour]) => {
       if (sessionStorage.getItem("e2e-engine-seeded")) return;
-      localStorage.setItem("tdg.engine.v2", JSON.stringify(s));
+      for (const [key, value] of items) localStorage.setItem(key, value);
       localStorage.setItem("tdg.results.v1", JSON.stringify([tour]));
       sessionStorage.setItem("e2e-engine-seeded", "1");
     },
-    [store, TOUR] as const,
+    [engineSeed(state), TOUR] as const,
   );
   await page.goto(`/${locale}/aarrr-funnel-template`);
   await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
@@ -61,7 +62,7 @@ for (const locale of ["fr", "en"] as const) {
   test.describe(`hybrid deck (${locale})`, () => {
     test("the total first, each motion's slides under its heading, the shared ones last", async ({ page }) => {
       await page.setViewportSize({ width: 1280, height: 900 });
-      await openDeck(page, locale, hybridStore());
+      await openDeck(page, locale, linkedHybrid());
       await expect(page.getByTestId("slide-total")).toBeVisible();
       const groups = await page.locator('[data-testid^="deck-group-"]').evaluateAll((els) => els.map((e) => e.getAttribute("data-testid")));
       expect(groups).toEqual(["deck-group-total", "deck-group-plg", "deck-group-slg", "deck-group-end"]);
@@ -75,7 +76,7 @@ for (const locale of ["fr", "en"] as const) {
     });
 
     test("unit economics: two columns, self-serve then sales-assisted, whatever their values", async ({ page }) => {
-      await openDeck(page, locale, hybridStore());
+      await openDeck(page, locale, linkedHybrid());
       const plg = await page.getByTestId("slide-unit-col-plg").boundingBox();
       const slg = await page.getByTestId("slide-unit-col-slg").boundingBox();
       expect(plg!.x).toBeLessThan(slg!.x);
@@ -85,7 +86,7 @@ for (const locale of ["fr", "en"] as const) {
     });
 
     test("every slide prints filled templates in the brand's glyphs only", async ({ page }) => {
-      await openDeck(page, locale, hybridStore());
+      await openDeck(page, locale, linkedHybrid());
       await page.getByTestId("deck-include-mirror").check();
       // Each slide laid out before it is read: a thumbnail is `content-visibility: auto`, and the first one,
       // read in the same frame it scrolled in, came back empty once in eight runs (2026-10-01).
@@ -107,7 +108,7 @@ for (const locale of ["fr", "en"] as const) {
     });
 
     test("every slide's body ends above its footer, and nothing is set under 18px", async ({ page }) => {
-      await openDeck(page, locale, hybridStore());
+      await openDeck(page, locale, linkedHybrid());
       await page.getByTestId("deck-include-mirror").check();
       const clashes = await page.locator("[data-slide]").evaluateAll((slides) =>
         slides.flatMap((slide) => {
@@ -136,7 +137,7 @@ for (const locale of ["fr", "en"] as const) {
       await page.addInitScript(() => {
         window.print = () => undefined;
       });
-      await openDeck(page, locale, hybridStore());
+      await openDeck(page, locale, linkedHybrid());
       const expected = await page.locator('[data-print="thumb"][data-included="true"]').count();
       // The total, the relays, sales-assisted's leak and three what-ifs and the « together » are in: at least 17 pages.
       expect(expected).toBeGreaterThanOrEqual(17);
@@ -148,7 +149,7 @@ for (const locale of ["fr", "en"] as const) {
   });
 
   test(`sales-assisted alone (${locale}): no total, no self-serve slide, no group heading`, async ({ page }) => {
-    await openDeck(page, locale, { schemaVersion: 2, state: salesAssistedState() });
+    await openDeck(page, locale, salesAssistedState());
     const ids = await page.locator("[data-slide]").evaluateAll((els) => els.map((e) => e.getAttribute("data-slide")));
     expect(ids[0]).toBe("slg:peloton");
     expect(ids).not.toContain("total");

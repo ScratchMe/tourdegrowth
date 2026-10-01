@@ -3,6 +3,7 @@ import type { Locator, Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { hybridState } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
+import { engineSeed, storedEngineEntry } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -29,7 +30,6 @@ test.beforeEach(async ({ context }) => {
  * first passed — the sabotage, not the guard, was empty.) At 320, every
  * screen measured 0 in both languages.
  */
-const STORAGE_KEY = "tdg.engine.v2";
 
 async function overflow(page: Page): Promise<number> {
   return page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -38,12 +38,12 @@ async function overflow(page: Page): Promise<number> {
 async function seedHybrid(page: Page, locale: "fr" | "en") {
   await page.clock.setFixedTime(new Date(2026, 8, 24, 12));
   await page.addInitScript(
-    ([key, state]) => {
+    (items) => {
       if (sessionStorage.getItem("e2e-engine-seeded")) return;
-      localStorage.setItem(key, JSON.stringify({ schemaVersion: 2, state }));
+      for (const [key, value] of items) localStorage.setItem(key, value);
       sessionStorage.setItem("e2e-engine-seeded", "1");
     },
-    [STORAGE_KEY, hybridState()] as const,
+    engineSeed(hybridState()),
   );
   await page.goto(`/${locale}/aarrr-funnel-template`);
   await expect(page.getByTestId("engine-board")).toHaveAttribute("data-motions", "hybrid");
@@ -169,6 +169,6 @@ test("the keyboard alone: tick sales-assisted, open the board, fill its win rate
   await tabTo(page, sheet.getByTestId("engine-save-slg-rev-win-rate"));
   await page.keyboard.press("Enter");
   await expect(sheet.getByTestId("engine-saved-slg-rev-win-rate")).not.toBeEmpty();
-  const stored = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)!).state.snapshots[0].metrics["slg.rev.win-rate"], STORAGE_KEY);
-  expect(stored.value).toEqual({ kind: "ratio", numerator: 18, denominator: 75 });
+  const stored = (await storedEngineEntry(page))?.state.snapshots[0]!.metrics["slg.rev.win-rate"];
+  expect(stored?.value).toEqual({ kind: "ratio", numerator: 18, denominator: 75 });
 });

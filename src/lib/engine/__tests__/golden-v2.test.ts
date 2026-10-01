@@ -9,6 +9,7 @@ import { QUESTIONS } from "../../../content/copy-library";
 import { motionShapes } from "../catalog-shape";
 import { buildDeck, deckMarkdown } from "../deck";
 import { deriveEngine } from "../derive";
+import { migrateToV3 } from "../migrate";
 import { buildScenario } from "../scenario";
 import { buildSlgScenario } from "../slg-scenario";
 import type { EngineState, MetricId } from "../types";
@@ -97,12 +98,14 @@ function outputsOf(state: EngineState, tour: StoredResult | null) {
 }
 
 /**
- * The state a v2 file gives today. Identity until T0 — when the golden was
- * written; from T0 on, the v2 state goes through the migration a v3 build
- * applies to a v2 file or a v2 store.
+ * The state a v2 file gives today: the v2 state goes through the migration
+ * a v3 build applies to a v2 file (`io.ts`) or a v2 store (`storage.ts`).
+ * Identity until T0, when the golden was written.
  */
 function openV2(v2: EngineState): EngineState {
-  return v2;
+  const migrated = migrateToV3(v2);
+  if (!migrated || migrated.from !== 2) throw new Error("A golden input is not a v2 engine");
+  return migrated.state;
 }
 
 describe("golden v2 — a v2 engine reads the same after the change", () => {
@@ -124,7 +127,7 @@ describe("golden v2 — a v2 engine reads the same after the change", () => {
     expect(Object.keys(inputs).sort()).toEqual(Object.keys(outputs).sort());
     expect(Object.keys(inputs)).toHaveLength(6);
     // Non-vacuity of the fixture set itself: both motions, a total, a linked Tour and an empty motion.
-    for (const i of Object.values(inputs)) expect(i.state.schemaVersion).toBe(2);
+    for (const i of Object.values(inputs)) expect(i.state.schemaVersion as number).toBe(2);
     expect(inputs["hybrid-whatif-tour"]!.tour).not.toBeNull();
     const hybrid = outputs.hybrid as { fr: { derived: { total?: unknown; motions: { motion: string }[] } } };
     expect(hybrid.fr.derived.total).toBeTruthy();

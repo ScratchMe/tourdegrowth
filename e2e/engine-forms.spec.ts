@@ -1,6 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 import { exampleState } from "../src/lib/engine/__tests__/fixtures";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
+import { storedEngineEntry, writeEngineSeed } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -27,7 +28,6 @@ test.beforeEach(async ({ context }) => {
  * third on the first list it reaches, the month.
  */
 
-const STORAGE_KEY = "tdg.engine.v2";
 
 async function openEngine(page: Page, locale: "en" | "fr"): Promise<void> {
   await page.goto(`/${locale}/aarrr-funnel-template`);
@@ -35,10 +35,7 @@ async function openEngine(page: Page, locale: "en" | "fr"): Promise<void> {
 }
 
 async function storedState(page: Page): Promise<ReturnType<typeof exampleState> | null> {
-  return page.evaluate((key) => {
-    const raw = window.localStorage.getItem(key);
-    return raw ? JSON.parse(raw).state : null;
-  }, STORAGE_KEY);
+  return (await storedEngineEntry(page))?.state ?? null;
 }
 
 /** Presses Tab until `target` has focus: the ring under test is the keyboard's. */
@@ -97,10 +94,7 @@ test("« 26 000 » typed in French is 26 000: the sheet reads it, and the live r
 test("« 26,000 » typed in English in the slide builder is stored as 26 000, not 26", async ({ page }) => {
   await page.clock.setFixedTime(new Date(2026, 8, 24, 12));
   await openEngine(page, "en");
-  await page.evaluate(
-    ({ key, state }) => window.localStorage.setItem(key, JSON.stringify({ schemaVersion: 2, state })),
-    { key: STORAGE_KEY, state: exampleState() },
-  );
+  await writeEngineSeed(page, exampleState());
   await page.reload();
   await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
   await page.getByTestId("engine-open-deck").click();
@@ -135,10 +129,7 @@ test("one focus ring, the system's, on every kind of control the engine draws", 
   await expectOneSystemRing(page, sheet.locator("#engine-act-rate-source"), "the source");
 
   // The slide builder: a checkbox, and its own text box.
-  await page.evaluate(
-    ({ key, state }) => window.localStorage.setItem(key, JSON.stringify({ schemaVersion: 2, state })),
-    { key: STORAGE_KEY, state: exampleState() },
-  );
+  await writeEngineSeed(page, exampleState());
   await page.reload();
   await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
   await page.getByTestId("engine-open-deck").click();

@@ -137,11 +137,20 @@ type FixedSlideId = … | "evolution";   // §19.2.6 ; "slg:evolution" en hybrid
 
 `schemaVersion: 3` ; `EngineStore` devient l'index du §19.1.4.
 
+*Écart au code, T0 (2026-10-01).* `tools` et `theme` sont **optionnels** :
+absent veut dire « pas dit » pour l'un, `"paper"` pour l'autre. La migration
+n'écrit donc que la version (§19.1.3), un moteur créé par T0 n'a rien de plus
+à porter, et le golden v2 compare un v2 migré à un état identique au
+caractère près. `EngineStore` reste la forme d'**une entrée**
+(`{ schemaVersion, state }`, celle du v2 sous sa clé unique) et l'index a son
+propre type, `EngineIndex`. Enfin, `MAX_MONTHS` (36) et `MAX_ENGINES` (10)
+sont des constantes de `types.ts`.
+
 #### 19.1.3 Migration (`migrate.ts`)
 
 `migrateToV3(input)` enchaîne : un v1 passe par `migrateToV2` (inchangé, que
-le golden appelle encore), puis un v2 reçoit `setup.tools: []`,
-`deck.theme: "paper"`, et rien d'autre. Aucun id ne change, aucun chiffre n'est
+le golden appelle encore), puis un v2 reçoit la version 3, et rien d'autre
+(`setup.tools` et `deck.theme` restent absents, voir l'écart du §19.1.2). Aucun id ne change, aucun chiffre n'est
 recalculé. Les tests qui attendent aujourd'hui le refus d'un v3
 (`io.test.ts:65-70`, `storage.test.ts:94-114`, `migrate.test.ts:77`) passent
 au refus d'un v4.

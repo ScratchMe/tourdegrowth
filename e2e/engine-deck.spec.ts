@@ -6,6 +6,7 @@ import { METRIC_SHAPES } from "../src/lib/engine/catalog-shape";
 import { exampleState, measured, missing, ratio, tourResult, withEntry, withTarget } from "../src/lib/engine/__tests__/fixtures";
 import { ENGINE_COPY } from "../src/content/engine-copy";
 import { ADMIN_PASSWORD, expect, grantOwnerPreview, readEachOnScreen, SKIP_ADMIN_REASON, test } from "./helpers";
+import { engineSeed } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
 // owner's signed preview, minted by /admin/preview (e2e/helpers.ts).
@@ -45,24 +46,24 @@ const LONG_DEFINITION = {
 /** Every answer given, so `tdg.results.v1` accepts it and the mirror has a verdict per bridge. */
 const TOUR = tourResult(Object.fromEntries(QUESTIONS.map((q, i) => [q.id, (i % 3) as 0 | 1 | 2])));
 
-function exampleStore() {
+function namedExample() {
   const state = exampleState();
   state.setup.companyLabel = COMPANY_CANARY;
   state.deck.showCompany = true;
   state.tourLink = { resultId: TOUR.id, linkedAt: "2026-09-24T09:00:00.000Z" };
-  return { schemaVersion: 2, state };
+  return state;
 }
 
 /** Seeds once per test: a reload must keep what the test changed, not re-seed over it. */
 async function seed(page: Page) {
   await page.addInitScript(
-    ([store, tour]) => {
+    ([items, tour]) => {
       if (sessionStorage.getItem("e2e-engine-seeded")) return;
-      localStorage.setItem("tdg.engine.v2", JSON.stringify(store));
+      for (const [key, value] of items) localStorage.setItem(key, value);
       localStorage.setItem("tdg.results.v1", JSON.stringify([tour]));
       sessionStorage.setItem("e2e-engine-seeded", "1");
     },
-    [exampleStore(), TOUR] as const,
+    [engineSeed(namedExample()), TOUR] as const,
   );
 }
 
@@ -268,14 +269,14 @@ for (const locale of ["fr", "en"] as const) {
      */
     test("the appendix: every definition at its limit adds pages that still fit, and each one exports", async ({ page }) => {
       // Every number of the catalogue gets the definition, the ones nobody found included.
-      const store = exampleStore();
-      const metrics = store.state.snapshots[store.state.snapshots.length - 1]!.metrics;
+      const state = namedExample();
+      const metrics = state.snapshots[state.snapshots.length - 1]!.metrics;
       for (const { id } of METRIC_SHAPES) metrics[id] = { ...(metrics[id] ?? missing("not-tracked", "sprint")), definitionNote: LONG_DEFINITION[locale] };
-      await page.addInitScript((seeded) => {
+      await page.addInitScript((items) => {
         if (sessionStorage.getItem("e2e-engine-seeded")) return;
-        localStorage.setItem("tdg.engine.v2", JSON.stringify(seeded));
+        for (const [key, value] of items) localStorage.setItem(key, value);
         sessionStorage.setItem("e2e-engine-seeded", "1");
-      }, store);
+      }, engineSeed(state));
       await page.goto(`/${locale}/aarrr-funnel-template`);
       await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
       await page.getByTestId("engine-open-deck").click();
@@ -513,7 +514,9 @@ for (const locale of ["fr", "en"] as const) {
         let state = withEntry(exampleState(), "act.rate", measured(ratio(200, 800)));
         state = withEntry(state, "ret.logo-churn", measured(ratio(6, 400)));
         state = withTarget(withEntry(state, "ret.d30", measured(ratio(40, 800))), "ret.d30", 20);
-        await page.addInitScript((store) => localStorage.setItem("tdg.engine.v2", JSON.stringify(store)), { schemaVersion: 2, state });
+        await page.addInitScript((items) => {
+          for (const [key, value] of items) localStorage.setItem(key, value);
+        }, engineSeed(state));
         await page.goto(`/${locale}/aarrr-funnel-template`);
         await expect(page.getByTestId("engine-workbench")).toHaveAttribute("data-state", "ready");
         const opener = page.getByTestId("engine-open-deck");
