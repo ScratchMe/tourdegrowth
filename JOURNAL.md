@@ -841,7 +841,7 @@ Deux sont d'abord passés :
 - `engine-deck-whatif.spec.ts` imprime maintenant neuf leviers et « ensemble », rien sous 18 px, chaque corps au-dessus de son pied ; deux specs neuves bougent le levier J30 et celui de la part assistée ;
 - captures relues en FR et en EN : la slide « ensemble » à neuf leviers, la fuite de J30 chiffrée, celle de la part assistée.
 
-## A14.c, T3.2 : la couverture du pipeline (2026-10-01, #PRNUM)
+## A14.c, T3.2 : la couverture du pipeline (2026-10-01, #260)
 
 La cinquième PR du moteur complet (`docs/engine/moteur-complet.md` §19.4, C32 Q8), drapeau fermé. Elle était prévue dans T3 et part seule, juste après lui (#259) : elle demande trois champs de saisie neufs.
 
