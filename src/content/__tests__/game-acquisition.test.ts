@@ -338,6 +338,23 @@ describe("C13 · the phone's arithmetic", () => {
     });
   }
 
+  /**
+   * « Avis mis en avant » holds the reviews under four stars back: the note
+   * goes up and the count goes DOWN. The spec's first draft had sorting turn
+   * 38 reviews into 1 204, and « dont 31 vérifiés » under 29 (copy review of
+   * A12.c) — a phone that contradicts its card.
+   */
+  it("shows sorted reviews as fewer and better, and never more verified reviews than reviews", () => {
+    const { rating, ratingSorted, verified } = ACQUISITION_CONTENT.phone;
+    for (const locale of ["fr", "en"] as const) {
+      const note = (text: string) => Number(text.match(/^(\d)[,.](\d)/)!.slice(1).join("."));
+      const count = (text: string) => Number(text.match(/(\d[\d ,]*) (?:avis|reviews)/)![1]!.replace(/[ ,]/g, ""));
+      expect(note(ratingSorted[locale])).toBeGreaterThan(note(rating[locale]));
+      expect(count(ratingSorted[locale])).toBeLessThan(count(rating[locale]));
+      expect(amount(verified[locale])).toBeLessThanOrEqual(count(ratingSorted[locale]));
+    }
+  });
+
   it("states the same amounts in both languages", () => {
     for (const key of ["price", "priceStruck", "priceAllIn", "basketDelivery", "basketFees", "total", "totalWithFees"] as const) {
       expect(amount(ACQUISITION_CONTENT.phone[key].fr), key).toBe(amount(ACQUISITION_CONTENT.phone[key].en));

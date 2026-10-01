@@ -49,7 +49,7 @@ export const GAME_META = {
   },
   // TODO: à relire — nouveau (2026-10-01, CHANTIERS.md A12.c) : le niveau 2, tout le bloc.
   acquisition: {
-    title: t("Pédalix : le jeu de l'acquisition — Tour de Growth", "A year at Pédalix: an acquisition game — Tour de Growth"),
+    title: t("Pédalix : le jeu de l'acquisition — Tour de Growth", "Pédalix: the acquisition game — Tour de Growth"),
     description: t(
       "Joue une année comme PM growth d'une boutique de vélos en ligne : un DG qui veut 3 000 nouveaux clients par mois, et huit astuces à reconnaître.",
       "Play a year as the growth PM of an online bike shop: a CEO who wants 3,000 new customers a month, and eight tricks to learn to spot.",
@@ -109,8 +109,8 @@ export const ACQUISITION_INTRO = {
   eyebrow: t("Le côté obscur · niveau 2", "The dark side · level 2"),
   title: t("Une année chez Pédalix", "A year at Pédalix"),
   lead: t(
-    "Ton DG de Flixo dirige maintenant Pédalix, une boutique en ligne de vélos, et il t'a emmené avec lui comme PM growth. 2 000 nouveaux clients par mois, et le board en veut 3 000 d'ici décembre. Chaque trimestre, le DG t'appelle en visio, puis tu as droit à deux actions, nommées comme on les nomme en réunion. Tu ne sauras ce qu'elles valent qu'une fois le trimestre passé. Le DG, lui, sait déjà ce qu'il veut.",
-    "Your CEO from Flixo now runs Pédalix, an online bike shop, and he brought you along as growth PM. 2,000 new customers a month, and the board wants 3,000 by December. Every quarter the CEO calls you on video, then you get two actions, named the way they are named in meetings. You will only learn what they are worth once the quarter is over. The CEO already knows what he wants.",
+    "Ton DG a quitté Flixo, une appli de streaming, pour diriger Pédalix, une boutique en ligne de vélos, et il t'a emmené avec lui comme PM growth. 2 000 nouveaux clients par mois, et le board en veut 3 000 d'ici décembre. Chaque trimestre, le DG t'appelle en visio, puis tu as droit à deux actions, nommées comme on les nomme en réunion. Tu ne sauras ce qu'elles valent qu'une fois le trimestre passé. Le DG, lui, sait déjà ce qu'il veut.",
+    "Your CEO has left Flixo, a streaming app, to run Pédalix, an online bike shop, and he brought you along as growth PM. 2,000 new customers a month, and the board wants 3,000 by December. Every quarter the CEO calls you on video, then you get two actions, named the way they are named in meetings. You will only learn what they are worth once the quarter is over. The CEO already knows what he wants.",
   ),
   stepsTitle: RETENTION_INTRO.stepsTitle,
   steps: RETENTION_INTRO.steps,

@@ -164,7 +164,7 @@ export const ACQUISITION_CONTENT: DeepTranslatable<AcquisitionCopy> = {
       name: t("Guides de choix", "Buying guides"),
       pitch: t(
         "Des guides pour choisir sa taille de cadre, son vélo selon le trajet, son budget.",
-        "Guides to choosing a frame size, a bike for the commute, a budget.",
+        "Guides to choosing a frame size, a bike to suit the ride, a budget.",
       ),
     },
     specs: {
@@ -407,8 +407,8 @@ export const ACQUISITION_CONTENT: DeepTranslatable<AcquisitionCopy> = {
     discount: t("−19 %", "−19%"),
     priceAllIn: t("1 319 € livré", "€1,319 delivered"),
     rating: t("4,1 ★ · 38 avis", "4.1 ★ · 38 reviews"),
-    ratingSorted: t("4,9 ★ · 1 204 avis", "4.9 ★ · 1,204 reviews"),
-    verified: t("dont 31 vérifiés (achat prouvé)", "31 of them verified (proof of purchase)"),
+    ratingSorted: t("4,6 ★ · 29 avis", "4.6 ★ · 29 reviews"),
+    verified: t("dont 24 vérifiés (achat prouvé)", "24 of them verified (proof of purchase)"),
     countdown: t("Offre valable encore 02:59:41", "Offer ends in 02:59:41"),
     stock: t("Plus que 3 en stock", "Only 3 left in stock"),
     watchers: t("12 personnes regardent ce vélo", "12 people are looking at this bike"),
@@ -564,8 +564,8 @@ export const ACQUISITION_CONTENT: DeepTranslatable<AcquisitionCopy> = {
       eyebrow: L1.endings.fine.eyebrow,
       title: L1.endings.fine.title,
       text: t(
-        "Le radar est monté jusqu'au contrôle, la transaction a été signée, la presse a écrit. {metric} nouveaux clients en décembre, confiance à {trust}. Les clients pressés au printemps ne sont pas revenus, et ils l'ont raconté. Ce que tu as mis en production a des noms. Ils sont en dessous.",
-        "The radar climbed all the way to an inspection, the settlement was signed, the press wrote about it. {metric} new customers in December, trust at {trust}. The customers rushed in the spring didn't come back, and they told everyone why. What you put into production has names. They are below.",
+        "Le radar est monté jusqu'au contrôle, la transaction a été signée, la presse a écrit. {metric} nouveaux clients en décembre, confiance à {trust}. Les clients que tu as pressés reviennent moins, et ils l'ont raconté. Ce que tu as mis en production a des noms. Ils sont en dessous.",
+        "The radar climbed all the way to an inspection, the settlement was signed, the press wrote about it. {metric} new customers in December, trust at {trust}. The customers you rushed come back less, and they told everyone why. What you put into production has names. They are below.",
       ),
     },
     labyrinth: {

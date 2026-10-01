@@ -912,7 +912,7 @@ Trois choix, réversibles en une phrase : l'écran ne défile jamais tout seul (
 
 ## 17. Le niveau 2 « Comment les gens vous trouvent » — spécification, validée (C30, 2026-10-01)
 
-Écrite le 2026-09-30, le jour où Antoine a retenu ce niveau pour le deuxième du jeu, avant le lancement. **Ce qui existe déjà** : le moteur du jeu sert désormais les deux sens (un chiffre qui doit baisser, un chiffre qui doit monter), et le modèle du niveau 2 est codé en brouillon, sans page ni texte (`src/lib/game/levels/acquisition.ts`, testé par `src/lib/game/__tests__/acquisition.test.ts`). Tous les chiffres de cette section sont ceux que ce code produit. **Rien d'autre n'est construit** : ni page, ni copie, ni téléphone, ni entrée depuis le Tour. **Antoine l'a validée le 2026-10-01** (C30, §17.10), les cinq recos retenues : la construction peut partir (§17.11).
+Écrite le 2026-09-30, le jour où Antoine a retenu ce niveau pour le deuxième du jeu, avant le lancement. **Ce qui existe déjà** : le moteur du jeu sert désormais les deux sens (un chiffre qui doit baisser, un chiffre qui doit monter), et le modèle du niveau 2 est codé en brouillon, sans page ni texte (`src/lib/game/levels/acquisition.ts`, testé par `src/lib/game/__tests__/acquisition.test.ts`). Tous les chiffres de cette section sont ceux que ce code produit. **Rien d'autre n'est construit** : ni page, ni téléphone, ni entrée depuis le Tour ; la copie est écrite depuis le 2026-10-01 (A12.c, `content/game/acquisition.ts`). **Antoine l'a validée le 2026-10-01** (C30, §17.10), les cinq recos retenues : la construction peut partir (§17.11).
 
 Les textes en français de cette section sont des **premiers jets** : ils passent au statut « à relire » en entrant dans le code (convention 6), l'anglais s'écrit à ce moment-là, et le tout part dans un bon à tirer. Ce document n'a pas d'espaces insécables : elles se posent à l'entrée dans le code, devant `%` et `€` et dans les groupes de chiffres compris, que la garde de typographie ne voit pas.
 
@@ -1099,7 +1099,7 @@ Au niveau 1, le téléphone montrait l'écran de résiliation. Ici, il montre le
 - Résultats pour « vélo de ville » : le premier est le modèle le mieux noté ; avec `sponsored`, c'est celui d'une marque partenaire (Ferlune, une marque inventée), sans mention ; avec `compare`, une ligne « Comparé à 3 sites, prix livrés ».
 - La fiche du « Pédalix Ville 7 », vélo de ville électrique de la maison : photo ; avec `specs`, « 12 photos · taille, poids, compatibilités ». *(« Urbain 7 » jusqu'au 2026-10-01 : trop proche d'un « Urban 7 » réel, vu en écrivant la copie, A12.c.)*
 - Le prix : « 1 290 € » ; avec `anchor`, « ~~1 590 €~~ 1 290 € · −19 % » ; avec `allin`, « 1 319 € livré ».
-- La note : « 4,1 ★ · 38 avis » ; avec `reviews`, « 4,9 ★ · 1 204 avis » ; avec `verified`, « dont 31 vérifiés (achat prouvé) » à la suite.
+- La note : « 4,1 ★ · 38 avis » ; avec `reviews`, « 4,6 ★ · 29 avis », puisque les avis sous quatre étoiles attendent une modération qui ne vient pas ; avec `verified`, « dont 24 vérifiés (achat prouvé) » à la suite. *(« 4,9 ★ · 1 204 avis » et « 31 vérifiés » jusqu'au 2026-10-01 : trier ne fait pas apparaître d'avis, et 31 vérifiés ne tiennent pas dans 29 avis — relecture de copie d'A12.c.)*
 - La pression, une ligne par carte : `countdown` « Offre valable encore 02:59:41 » ; `stock` « Plus que 3 en stock » ; `watchers` « 12 personnes regardent ce vélo ».
 - `delivery` : « Livré le mardi 14 · 29 € ».
 - `guides` : un lien « Quelle taille de cadre pour vous ? ».
