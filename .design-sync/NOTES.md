@@ -291,8 +291,9 @@ December components) are previewed bare.
 
 Three kinds of state a still cannot show, and each story says so rather than
 pretending: **viewport** forms (`ActionBar`'s phone bar with counter and
-clicks pill, `ZoneNav`'s compact line, `RevealCells` stacking — all chosen by
-`@media`, not by the card width), **closed disclosures** (`ChartFrame`'s
+clicks pill, `ZoneNav`'s compact line — both chosen by `@media`, not by the
+card width; `RevealCells` stacks on a container query, so a card 520px wide
+or less would draw it), **closed disclosures** (`ChartFrame`'s
 data table, `GameJournal`'s entries, `PatternCatalogue`'s turned-down and
 unseen groups), and **hover/press/animation** (`Button`'s `HoverAndPress`,
 `VideoCall`'s typing and clock, the December unblur and stamp).
@@ -622,14 +623,15 @@ added. Two methods found more, and neither was reading a sheet:
   state B3 had dropped for want of a call site.
 - **Regenerating every game preview in scope** with the island's own builders
   (`dashboardProps`, `decemberContent`, `reportContent`, `newsContent`,
-  `timelineSegments`, `phoneView`, `shopPhoneView`, `clicksFor`) and comparing
-  string by string, NBSP included. Most matched exactly. Two did not, and both
-  had been graded good since 2026-09-29: `RevealCells` (4.1% / 18 / 81 and
+  `timelineSegments`, `journalEntries`, `phoneView`, `shopPhoneView`,
+  `basketFor`, `clicksFor`) and comparing string by string, NBSP included.
+  Most matched exactly. Two held numbers no year reaches, and both had been
+  graded good since 2026-09-29: `RevealCells` (4.1% / 18 / 81 and
   4,4 % / 71 / 6 — no year ends there; 81 is the very radar the 09-29 pass
   flagged elsewhere) and `QuarterTimeline` (5.7% then 5.0%, and 5,7/5,0/4,4/4,3
   — no reference year plays those quarters). Both now come from a played
-  year. `PhoneMock` wrote its phone number with plain spaces where the copy
-  has no-break ones.
+  year. A third, `PhoneMock`, had the right states but wrote its phone number
+  with plain spaces where the copy has no-break ones.
 - **A product defect**, seen by measuring `LastMotion` in a browser: a box
   both ticked and disabled lost its fill, because `.disabled .input` (same
   weight as `.input:checked`, later) repainted it beige, so the one motion

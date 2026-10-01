@@ -71,8 +71,9 @@ parcours », never « profil de l'étape ».
 Each space wears its colour and its sign, and only where it is the subject:
 the Tour in ink (its pictogram red), the engine in ultramarine
 (`--space-engine-accent`, its labels and rules, and the `Stopwatch` beside its
-intro), the game in ochre on paper and amber at night (`HubMountain` on its
-hub's night poster, `ProsePage introWorld="night"`). `SpaceStrip` is the one
+intro), the game in ochre (on paper, and the open cols of `HubMountain` on its hub's
+night poster, `ProsePage introWorld="night"`, where amber marks only the
+moon, the flags and the titles). `SpaceStrip` is the one
 place the three stand side by side, on the landing. Ochre is never text on
 paper (1.87); the night's amber never leaves the night.
 
@@ -375,5 +376,5 @@ Retired names, and where each went, one family at a time
 - Named object types (`DataTableColumn`, `HandCard`, `ReportFigure`, …) print
   as their name. The previews show every one of them with its real shape — copy
   from those. The few whose contract would otherwise be wrong (`StatTile`,
-  `Sparkline`, `EventClipping`, `PhoneMock`, `ShopPhone`, `NotFoundScreen`)
-  are written out in full.
+  `Sparkline`, `EventClipping`, `PhoneMock`, `ShopPhone`, `NotFoundScreen`,
+  `ProseText`, `ProseActions`) are written out in full.

@@ -29,8 +29,9 @@ export const DarkYear = () => (
 /**
  * A clean year, in French: reference year A (lib/game/__tests__/paths.ts),
  * the applause — the board's 4,0 % reached with trust at 83 and the radar
- * at zero. (On a phone viewport under 560px the three tiles stack; this
- * canvas shows them in a row.)
+ * at zero. (The tiles stack when the row itself is 520px wide or less — a
+ * container query, about a 560px window in the page; this card is wider, so
+ * they sit in a row.)
  */
 export const CleanYearFrench = () => (
   <div style={box}>

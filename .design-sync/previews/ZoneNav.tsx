@@ -1,12 +1,13 @@
 import { ZoneNav } from "tour-de-growth";
 
 /*
- * The game's five zones, one per AARRR stage, on paper, at the top of a
- * level's page. The Tour's stage name stays untranslated in both languages;
- * the game's question form of the zone is translated. The zone being played
- * leads back to the hub, another open level leads to that level, and a zone
- * with no level yet is text with a word (« Bientôt ») — never a greyed link.
- * On a phone (under 760px of viewport) the five columns give way to
+ * The game's five zones, one per AARRR stage, on paper, at the end of a
+ * level's intro, just above the year. The Tour's stage name stays
+ * untranslated in both languages; the game's question form of the zone is
+ * translated. The zone being played leads back to the hub, another open
+ * level leads to that level, and a zone with no level yet is text with a
+ * word (« Bientôt ») — never a greyed link.
+ * On a phone (a viewport of 760px and under) the five columns give way to
  * `compactLabel`; this canvas shows the wide layout.
  *
  * Props as `_level/LevelPage.tsx` builds them since level 2 opened
