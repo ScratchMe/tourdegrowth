@@ -790,7 +790,7 @@ Les écarts à la spec sont notés au §19.2.4.
 - Playwright complet (`CI=1`), sur l'arbre rebasé sur T1 : 811 specs, 780 passées, aucune au second essai, et 31 ignorées (25 faute d'émulateur, 6 par construction) ;
 - captures relues en FR et en EN, à 1 280 et 390 px : le bandeau du mois suivant, le tableau avec ses écarts, un mois passé en lecture seule, la correction, et la slide.
 
-## A14.c, T3 : la rétention J30 et la part recommandée chiffrées, et leurs leviers (2026-10-01, #PRNUM)
+## A14.c, T3 : la rétention J30 et la part recommandée chiffrées, et leurs leviers (2026-10-01, #259)
 
 La quatrième PR du moteur complet (`docs/engine/moteur-complet.md` §19.3), drapeau fermé. Elle part de T2 (#258). La couverture du pipeline (§19.4), prévue dans le même lot, part dans la PR suivante : elle demande trois champs de saisie neufs, ce que le chiffrage n'a pas.
 
