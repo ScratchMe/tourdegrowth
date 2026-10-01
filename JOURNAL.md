@@ -975,6 +975,7 @@ Points pour le bon à tirer A14.d : ce que « Remplacer » change exactement 
 - `vitest --coverage` : 2 876 tests, au-dessus des seuils ;
 - `tsc`, `eslint` et `next build` (avec `GAME_ENABLED=true`) propres ;
 - Playwright complet (`CI=1`) : 833 specs, 802 passées, aucune au second essai, et 31 ignorées (25 faute d'émulateur, 6 par construction) ;
+- après la fusion de C33 (#262), mergée pendant la PR : 2 877 tests unitaires, et Playwright complet sur l'arbre fusionné, cette fois avec l'émulateur Firestore comme la CI : 836 specs, 830 passées, aucune au second essai, 6 ignorées par construction ;
 - `e2e/engine-engines.spec.ts`, nouveau, dix specs : deux moteurs créés, basculés et supprimés ; la limite de dix ; une sauvegarde rouverte ajoutée sous un id neuf ; la fusion avec son aperçu, refusée pour une autre devise ; le tableau en français (modèle, aperçu, application, `engine_stage_saved`) ; les tabulations d'un tableur en anglais et « Annuler » ; un tableau qui ne suit pas le changement de moteur ; l'import sur un moteur illisible qui garde l'autre ; « Tout effacer » qui compte les moteurs ; 390 px sans défilement de côté ;
 - le canari passe maintenant aussi par le modèle, un tableau collé et une fusion ;
 - captures relues : le sélecteur, le tableau collé avec son aperçu, l'import à trois choix avec l'aperçu de la fusion, et la suppression, en français à 1 280 px et en anglais à 390 px.
