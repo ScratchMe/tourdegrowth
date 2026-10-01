@@ -239,7 +239,7 @@ livrés le 2026-10-01 dans la première (#252 ; le journal, à « A15 »).
 livré le même jour dans une seconde PR ([#257](https://github.com/ScratchMe/tourdegrowth/pull/257)), comme Antoine l'a choisi : les
 correctifs A15.7 à A15.14 et les décisions A15.15 à A15.17 et A15.20, qu'il a
 tranchées sur les recos (le détail, et ce que chaque test prouve, sont au
-journal, à « A15.7 à A15.20 »). **A15.18 suit le même jour**, une fois C33 tranchée : « Dans le jeu » au-dessus de la carte du jeu (le journal, à « C33 »). **Reste :**
+journal, à « A15.7 à A15.20 »). **A15.18 suit le même jour** ([#262](https://github.com/ScratchMe/tourdegrowth/pull/262)), une fois C33 tranchée : « Dans le jeu » au-dessus de la carte du jeu (le journal, à « C33 »). **Reste :**
 
 | # | Quoi | Où |
 |---|---|---|

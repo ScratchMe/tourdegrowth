@@ -922,7 +922,7 @@ Trois points de vocabulaire vont au bon à tirer A14.d :
 - captures relues : le repli des outils dans les Réglages (FR, 1280 px), « À faire toi-même » rangé par GA4, Stripe et HubSpot avec ses chemins remplis, et la fiche à 390 px en anglais avec le contrôle « deux outils ».
 
 
-## C33 : « Dans le jeu » au-dessus de la carte du jeu (2026-10-01)
+## C33 : « Dans le jeu » au-dessus de la carte du jeu (2026-10-01, #262)
 
 A15.18, revenue à Antoine parce que « dans le jeu » ne tenait pas sur la bande de la carte (une ligne de 44 px sur desktop, deux de 56 px au plus à 360 px, P23 ; 9 px de reste en français). **Tranché sur captures** : avant, la reco (un surtitre au-dessus de la carte, hors de la bande) et une variante plus explicite, « Dans le jeu, pas dans tes chiffres », chacune capturée sur `/r/sample` à 1 280, 390 et 360 px depuis un vrai build d'essai, jamais poussé. Antoine a pris la version courte.
 
