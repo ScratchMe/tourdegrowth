@@ -24,7 +24,7 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
 | **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.d (le bon à tirer de la copie neuve), A7.4 après A7.3, et A7.12.c à l'ouverture. **A7.3.c est livré le 2026-10-01**, les textes de lancement de la ligne « Hors code » d'A7.3 le même jour (S0 à S5, PR d'intégration [#233](https://github.com/ScratchMe/tourdegrowth/pull/233), drapeau fermé). A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)**, sa copie, l'îlot partagé, le téléphone de Pédalix et le branchement faits le même jour (A12.c à A12.f.2)  et ses specs (A12.g) : reste A12.h (le bon à tirer, puis la recette) et A12.i (le `?ref=` de la boucle inverse, trouvé par B6). **A14, le moteur complet** : spécifié et validé le 2026-10-01 (C32) ; A14.c a commencé, T0 (le socle v3) et T1 (la série, moteur pur) livrés le même jour. **A13** (trois alertes de dépendances, dont une critique sur `next`) livré le 2026-10-01. **A15**, la finition UI et UX d'après les reels et les lois de l'UX, ouvert le 2026-10-01 : tout livré le même jour : deux PR, puis A15.18 une fois C33 tranchée ; reste A15.19, pour Claude Design (B7) |
-| **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30, après A7.10, A10 et A11** (B3, puis la re-synchro d'A11 le soir même : 88 composants, 292 cellules, 88 aperçus sur 88 rendus). Ouverts le 2026-10-01 : **B4** (la re-synchro du niveau 2 du jeu, faite le même jour), **B5** (l'image de partage du moteur, C32 Q17), **B6** (la re-synchro d'A15) et **B7** (les puces d'étape, A15.19). Hors d'eux, rien à lancer tant qu'un composant, ou une copie qu'un aperçu reprend, ne change pas |
+| **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30, après A7.10, A10 et A11** (B3, puis la re-synchro d'A11 le soir même : 88 composants, 292 cellules, 88 aperçus sur 88 rendus). Ouverts le 2026-10-01 : **B4** (la re-synchro du niveau 2 du jeu, faite le même jour), **B5** (l'image de partage du moteur, C32 Q17), **B6** (la re-synchro d'A15 et de C33, faite le même jour : 90 composants, 303 cellules, les douze aperçus du jeu laissés par B4 régénérés) et **B7** (les puces d'étape, A15.19). Hors d'eux, rien à lancer tant qu'un composant, ou une copie qu'un aperçu reprend, ne change pas |
 | **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 à C29 tranchées le 2026-09-30, C26 à C29 livrées le même jour, **C25** (la spécification de A7.3, `ENGINE.md` §18) dans sa propre session. **C30** (le niveau 2 du jeu, `GAME-BRIEF.md` §17) le 2026-10-01. **C31** (le bloc « Niveau suivant » du jeu) et **C32** (le moteur complet, `docs/engine/moteur-complet.md` §19.15) le 2026-10-01. **C33** (la carte du jeu sous les chiffres du lecteur, A15.18) ouverte et tranchée le 2026-10-01. **Rien n'est ouvert** |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, la fin d'A7.3 (le code et les textes de lancement sont livrés le 2026-10-01 ; reste le bon à tirer A7.3.d) |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
@@ -269,18 +269,7 @@ revient se porte dans `lib/og/` en T6.2, une PR à part : T6 est livré sans
 elle (`docs/engine/moteur-complet.md` §19.11). Les images du jeu sont le
 modèle.
 
-**B6, ouvert le 2026-10-01 : la re-synchro d'A15.** Trois contrats changent
-après l'ancre de B4 : `ErrorScreen` (`reset` devient `retry`), `LoadingScreen`
-(la variante `deep` racontée par l'horloge : un message, une barre, le temps
-écoulé) et `Button` (`sm` décrit sa bande de 44 px). Leurs aperçus et
-`conventions.md` sont à jour dans le dépôt ; une synchro les emporte,
-`LoadingScreen` à recapturer. La seconde PR d'A15 en ajoute un quatrième :
-`MetaLabel` prend `as` (`div`, `h2` ou `h3`), pour que les sections du
-résultat soient des titres (A15.13) ; son rendu par défaut ne change pas. C33
-en ajoute un cinquième : `GameEntry` prend `eyebrow`, le surtitre « Dans le
-jeu » au-dessus de la carte ; son aperçu est à jour dans le dépôt.
-A14 T6 ajoute deux jetons, `--paper-white` et `--surface-white` (le fond
-blanc du deck) : une synchro les emporte avec la chaîne des jetons.
+**B6 est fait le 2026-10-01** (PR_B6) : le projet Claude Design est à jour d'A15 et de C33, avec **90 composants et 303 cellules**, toutes notées « bon » (ancre `edc539adcbbf`, 14 composants téléversés, aucune suppression, `design/` intact). Ce que B6 attendait est parti : `ErrorScreen` (`retry`), `LoadingScreen` (la variante `deep` racontée par l'horloge), `Button` (la bande de 44 px de `sm`), `MetaLabel` (`as`) et `GameEntry` (`eyebrow`). La recherche de dérive a trouvé `NumberField` et `FieldRow`, qui citaient encore les deux messages du moteur réécrits par A15 ; le contrôle ponctuel a trouvé la doc de `MetaLabel` (« ce n'est pas un titre », faux depuis A15.13). **Les douze aperçus du jeu que B4 avait laissés sont régénérés** depuis le modèle : sept étaient justes, cinq ne l'étaient pas (`ShareRow`, `ResumePrompt`, `PatternCatalogue`, `EventClipping`, `VideoCall`). La re-synchro a aussi trouvé A12.i (la boucle inverse du jeu ne porte jamais `?ref=`) et une phrase fausse dans la JSDoc de `DgFace`, corrigée. Le détail est dans `.design-sync/NOTES.md`, « Found in the 2026-10-01 re-sync (B6) ».
 
 **B7, ouvert le 2026-10-01 : les puces d'étape** (A15.19, la loi de
 similarité, `design/LOIS-UX.md`). `PillarChip`, les cinq notes sur 20 du
@@ -289,7 +278,7 @@ secondaire sans en être un : seul son `?` se touche. Un brief à Claude Design 
 une puce qui se lit comme une valeur, pas comme une action, sans perdre le
 rouge de l'étape qui freine.
 
-**Hors de B5 à B7, rien d'ouvert.** La prochaine synchro se lance quand un composant change, ou
+**Hors de B5 et B7, rien d'ouvert.** La prochaine synchro se lance quand un composant change, ou
 quand change une copie, un chiffre du modèle ou un comportement qu'un aperçu
 reprend : c'est ainsi que B3 a trouvé l'amende du jeu et les cartes de
 `SpaceStrip` restées d'avant A7.8 et A7.9, dans des notes reportées. Ce qu'elle

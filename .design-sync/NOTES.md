@@ -331,23 +331,19 @@ doc comment says why the layout uses an auto margin rather than
 ## Synced
 
 Project `23b9671c-a55b-452e-aa41-39906ee71ba8` ("Tour de Growth"), pinned as
-`projectId` in `config.json`. **Last upload: 2026-10-01, B4 (the game's
-level 2, and A7.3.c's engine)**, from a claude.ai/code cloud session — **90
-components, 303 story cells**, all graded good. A12.d renamed level 1's
-slots in six game contracts (`Dashboard`: `metric`, `customers`, `revenue`;
-`EndingCharts` and `RevealCells`: `metric`; `QuarterReport`'s figure keys;
-`ActionBar`: `pill`; `GameEntry`: `band.metric`), A12.e added `ShopPhone`
-(pinned in `dtsPropsFor`) and `BasketPill` and moved the phone frame into
-`PhoneFrame.module.css`, A12.f.1 gave `NextLevel` an `href`, A12.f.2 gave
-`GameEntry` its `levels`. The driver queued those nine plus the two new ones;
-the drift search and the regeneration added `ZoneNav`, `Choices`,
-`Checkbox`, `HubMountain`, `Tag`, `RevealCells`, `QuarterTimeline` and
-`PhoneMock` (see "Found in the 2026-10-01 re-sync (B4)"); 19 components
-uploaded, 71 carried forward. 463 files (360 component files, 90 compiled
-previews, `_vendor/`, `fonts/`, bundle, CSS, README, the sentinel and the
-anchor), no delete, `design/` untouched. Eight driver runs; `report_validate`:
-90 total, 0 bad, 0 thin, 0 identical; anchor `bundleSha12` `fee6cc7084fe`.
-Earlier uploads: 2026-09-30 after A11 (88, 292, `8235f4e6de01`),
+`projectId` in `config.json`. **Last upload: 2026-10-01, B6 (A15 and
+C33)**, from a claude.ai/code cloud session — **90 components, 303 story
+cells**, all graded good. The driver keyed 13 components as changed
+(`ErrorScreen`, `LoadingScreen`, `MetaLabel`, `GameEntry`, `NumberField`,
+`FieldRow`, and the seven game previews regenerated from the model, see
+"Found in the 2026-10-01 re-sync (B6)"), all regraded. `NightSurface` went up
+with them: its emitted `.d.ts` and `.prompt.md` differed from the anchor's
+while its sources and render hash did not (not chased further). 14
+components uploaded, 76 carried forward. 463 files, no delete, `design/` untouched. Three driver
+runs; `report_validate`: 90 total, 0 bad, 0 thin, 0 identical; anchor
+`bundleSha12` `edc539adcbbf`. Earlier uploads: 2026-10-01 B4, the game's
+level 2 and A7.3.c's engine (90, 303, 19 components uploaded, eight driver
+runs, `fee6cc7084fe`), 2026-09-30 after A11 (88, 292, `8235f4e6de01`),
 2026-09-30 B3 (88, 292, `d1835d51cffd`), 2026-09-30 before A10 (79
 components, 244 cells, anchor `f3b4bf9eb3c5`), 2026-09-29 (77, 238,
 `17cca5e0909b`), 2026-09-11 (34, 116).
@@ -672,7 +668,9 @@ What the three methods found beyond that:
   island always passes `bossMessage`).
 - **A product doc defect**, fixed in the same PR: `DgFace`'s `framing` JSDoc
   placed the avatar in « the journal », which draws no face (it is the report
-  and the news screen), and the contract carried it to Claude Design.
+  and the news screen). It never reached Claude Design: the emitted `.d.ts`
+  cuts a JSDoc at about 120 characters, before that clause. A long JSDoc is
+  read in full only in the repo.
 - **Seen, left to the product** (`CHANTIERS.md`): nothing passes
   `TourLoop.refId`, so the end-of-level « Où en est ta croissance ? » link never
   carries `?ref=` though GAME-BRIEF 13.3 D says it should when a result id is
