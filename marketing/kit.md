@@ -74,7 +74,7 @@ l'utilise attend que la case soit cochée dans `campaigns/engine/show-hn.md`.
 
 - **Deux motions, à cocher** : le SaaS B2B en libre-service (dix-sept
   chiffres : trois par étape, cinq au revenu), en vente assistée (quinze :
-  trois, trois, trois, deux et quatre, lus sur trois mois), ou les deux, avec
+  trois, trois, trois, deux et quatre, lus sur trois mois, le NRR sur douze), ou les deux, avec
   un chiffre de liaison. Tous saisis **en comptes** (numérateur et
   dénominateur), pas en pourcentages. **[portier]** `src/content/engine-catalog.ts`.
 - **L'hybride se lit en « deux moteurs, un total »**, jamais en face-à-face :
@@ -83,9 +83,9 @@ l'utilise attend que la case soit cochée dans `campaigns/engine/show-hn.md`.
 - La vue principale suit **100 inscrits sur une même base** ; aucune chaîne de
   taux multipliés. **[portier]**
 - Une étape n'est appelée « la fuite » que contre une cible fixée par
-  l'utilisateur. Les **deux** fourchettes du glossaire relues (activation
-  20-40 %, churn de clients 1-2 % par mois) ne font que situer, réserve
-  imprimée, et ne désignent jamais une étape (C1, 2026-09-29, qui remplace la
+  l'utilisateur. Les fourchettes publiées (dont activation 20-40 % et churn
+  de clients 1-2 % par mois, les deux qui désignaient la fuite avant C1) ne
+  font que situer, réserve imprimée, et ne désignent jamais une étape (C1, 2026-09-29, qui remplace la
   décision 5 du 2026-09-24). **[portier]**
 - Chaque chiffre introuvable devient un constat, avec un coût de réparation.
   **[portier]**
@@ -93,8 +93,9 @@ l'utilise attend que la case soit cochée dans `campaigns/engine/show-hn.md`.
   slide (`html-to-image`, chargé au clic — déjà dans `package.json`), ou texte
   avec notes d'orateur. **Pas de PowerPoint.** **[portier]** Le nombre de
   slides dépend des chiffres : 5 en libre-service sans aucun chiffre, 7 sur
-  l'exemple, 7 sur l'exemple assisté, 13 sur l'exemple hybride, et une de
-  plus par levier « Et si » déplacé (mesuré le 2026-10-01 sur les jeux
+  l'exemple, 7 sur l'exemple assisté, 13 sur l'exemple hybride, puis une de
+  plus par levier « Et si » déplacé, et une slide de cumul dès que deux
+  leviers d'un même moteur bougent (mesuré le 2026-10-01 sur les jeux
   d'exemple des tests). **Ne jamais annoncer un nombre de slides.**
 - Aucune IA : aucun import de `lib/gemini` dans l'outil. **[portier]**
   `src/__tests__/engine-boundary.test.ts`.
@@ -119,8 +120,8 @@ l'utilise attend que la case soit cochée dans `campaigns/engine/show-hn.md`.
 - un « PLG contre SLG » : l'hybride montre deux moteurs et un total, jamais
   l'un contre l'autre ;
 - un nombre fixe de slides : il dépend des chiffres saisis ;
-- un « benchmark » : il n'y en a pas, seulement deux fourchettes publiées et
-  la cible de l'équipe ;
+- un « benchmark » : il n'y en a pas, seulement des fourchettes publiées, qui
+  situent, et la cible de l'équipe, qui seule désigne une étape ;
 - une taille de bibliothèque (« ~7 Ko ») tant qu'elle n'est pas remesurée sur
   le build livré ;
 - que les slides « convaincront » un comité, ou tout gain chiffré ;

@@ -39,6 +39,7 @@ même site.
 
 *Notes pour la relecture* : les points 1, 2 et 4 sont des défauts réellement
 vus dans les maquettes des trois conceptions du moteur (spec, §1, tableau
-« défauts vus dans les maquettes ») — vrais, et racontables. Le « ~7 KB » est
-la mesure de la spec (`html-to-image` 1.11.13, 6,7 Ko gzip) : **revérifier sur
-le build livré** avant de le laisser.
+« défauts vus dans les maquettes ») — vrais, et racontables. Le « ~7 KB » de
+la spec (`html-to-image` 1.11.13, 6,7 Ko gzip) est retiré du post le
+2026-10-01 (« a small library ») : le kit interdit d'avancer une taille qui
+n'est pas remesurée sur le build livré.

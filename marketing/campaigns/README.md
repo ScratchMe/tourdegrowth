@@ -7,8 +7,9 @@ envoyé ni déployé : c'est le plan, les textes prêts à coller sont dans
 `brand-review.md`.*
 
 *Contraintes non négociables, héritées de `GROWTH-PLAN.md` (option A, tranchée
-le 2026-09-13) : **pas de LinkedIn**, et **Antoine n'est jamais nommé** dans la
-promotion — ni dans un post, ni dans une bio, ni par un lien vers le CV. Le
+le 2026-09-13) : **pas de LinkedIn**, et **Antoine n'est nommé qu'en réponse à
+« qui est derrière ? »** (C22, 2026-09-29) — ni dans un post, ni dans une bio,
+ni par un lien vers le CV. Le
 site, lui, reste signé. Tout part des comptes de marque `tourdegrowth` et de
 `contact@tourdegrowth.com`.*
 
@@ -56,7 +57,7 @@ est celui du produit, et c'est bien ce que c'est : trois étapes d'un même
 Tour).
 
 **En une phrase** : relancer le Tour sur sa copie revue, puis ouvrir le moteur
-de croissance et le jeu à trois semaines d'intervalle chacun, sous le seul nom
+de growth et le jeu à trois semaines d'intervalle chacun, sous le seul nom
 de la marque, en mesurant chaque lancement dans sa propre fenêtre.
 
 **Objectif principal** (un par lancement, voir §7 pour la mesure exacte) :
@@ -134,7 +135,7 @@ positionnement de la revue de copie §4.3 et de la spec §14.1.)
 |---|---|---|
 | Rien de ce que tu saisis ne quitte le navigateur | Une spec canari sème des chaînes uniques, joue tout le parcours, enregistre toutes les requêtes et exige qu'aucune ne les porte ; un balayage statique interdit `fetch`, `sendBeacon`, `WebSocket` dans l'outil | **[portier]** `e2e/engine-canary.spec.ts`, `src/__tests__/engine-boundary.test.ts` (spec §11.4, §13.3). Le même mécanisme existe déjà et passe pour `/admin/audit` : `e2e/audit-canary.spec.ts` |
 | Tu repars avec un deck, pas avec un tableau | Un deck 16:9, en PDF, en PNG par slide et en texte copiable avec notes d'orateur ; son nombre de slides dépend des chiffres saisis, et ne s'annonce pas (`kit.md`) | **[portier]** spec §9-10 ; `html-to-image` est déjà dans `package.json` |
-| Il ne nomme une fuite que contre ta cible | Une cible que tu fixes ; les deux fourchettes du glossaire relues (activation 20-40 %, churn de clients 1-2 %/mois) ne font que situer, réserve imprimée | **[portier]** spec §5.1, §6.6 ; C1 du 2026-09-29, qui remplace la décision 5 du 2026-09-24 |
+| Il ne nomme une fuite que contre ta cible | Une cible que tu fixes ; les fourchettes publiées (dont activation 20-40 % et churn de clients 1-2 %/mois) ne font que situer, réserve imprimée | **[portier]** spec §5.1, §6.6 ; C1 du 2026-09-29, qui remplace la décision 5 du 2026-09-24 |
 | Aucune IA dans le moteur | Aucun import de `lib/gemini` autorisé dans l'outil | **[portier]** `engine-boundary.test.ts` règle 1 |
 | C'est gratuit, sans compte | Aucune fonction serveur nouvelle, aucun Route Handler : une page prérendue et un îlot client | **[portier]** spec §10.3 |
 

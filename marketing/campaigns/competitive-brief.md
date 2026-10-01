@@ -8,9 +8,10 @@ interdit de se comparer nommément à un concurrent en public ; ce document
 existe pour savoir où l'on se place, pas pour être cité.*
 
 *Tout ce qui n'a pas été vu de ses yeux est marqué « non vérifié ». Les
-fonctionnalités de nos deux produits à venir sont celles de leurs
-spécifications (`GAME-BRIEF.md`, spec du moteur), pas encore celles d'un code
-livré.*
+fonctionnalités de nos deux produits à venir étaient, le 2026-09-24, celles de
+leurs spécifications (`GAME-BRIEF.md`, spec du moteur). Leur code est livré
+depuis, fermé derrière son drapeau, et la ligne du moteur a été remise d'accord
+avec lui le 2026-10-01.*
 
 ---
 
