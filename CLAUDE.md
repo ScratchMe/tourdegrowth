@@ -8,7 +8,7 @@ Tu es le tech lead senior de ce projet — front, back, et ops. Antoine (produit
 
 Les seules choses non négociables sont listées plus bas, parce que ce sont des *décisions produit déjà tranchées*, pas des préférences d'implémentation.
 
-**Lis dans cet ordre :** ce fichier → `SPEC.md` (surtout §12, qui répartit clairement ce qui est déjà tranché de ce qui doit encore remonter à l'agent produit) → `design/DESIGN-BRIEF.md`.
+**Lis ce fichier en entier.** `SPEC.md` (surtout §12) et `design/DESIGN-BRIEF.md` sont le point de départ du Tour, à ouvrir avant de toucher à sa logique ou à son visuel : l'encart en tête de `SPEC.md` dit ce qui a changé depuis, et `ENGINE.md` et `GAME-BRIEF.md` tiennent le même rôle pour le moteur et le jeu. *(Jusqu'au 2026-10-01 : « Lis dans cet ordre : ce fichier → `SPEC.md` → `design/DESIGN-BRIEF.md` », écrit pour la première session.)*
 
 ## Les fichiers d'outil — à ouvrir sur déclencheur, pas au démarrage
 
@@ -31,7 +31,8 @@ pas après.
 | **`GITHUB.md`** | Merger · annoncer qu'un item est livré · écrire ou modifier un workflow · affirmer quoi que ce soit sur l'état du dépôt |
 | **`GEMINI.md`** | Toucher au client de génération ou au prompt · conclure qu'un échec vient du modèle |
 | **`FIRESTORE.md`** | Ajouter une lecture sur un chemin public, un compteur, ou une écriture qui peut entrer en concurrence |
-| **`JOURNAL.md`** | Toucher une zone dont on ne connaît pas l'histoire : y chercher son entrée (`grep`) · **chaque livraison : y ajouter l'entrée, à la fin** · suivre un renvoi « `CLAUDE.md`, étape N / entrée du … » écrit avant le 2026-09-27 |
+| **`PLUGINS.md`** | Installer, mettre à jour ou retirer un plug-in · proposer d'en installer un : **chaque plug-in se décide avec Antoine, un par un, avant de s'installer**, et brancher un hook ou un connecteur est une décision de plus |
+| **`JOURNAL.md`** | Toucher une zone dont on ne connaît pas l'histoire : y chercher son entrée (`grep -rn … JOURNAL.md docs/journal/`) · **chaque livraison : y ajouter l'entrée, à la fin** · suivre un renvoi « `CLAUDE.md`, étape N / entrée du … » écrit avant le 2026-09-27 |
 
 **Pourquoi cette table plutôt qu'un simple lien** : la convention sur la cadence
 de merges était *déjà* dans `CLAUDE.md`, écrite par moi, et je ne l'ai pas suivie
@@ -42,90 +43,19 @@ aller la chercher, c'est l'enterrer. Le déclencheur est la moitié utile.
 fichier, soit environ 150 000 tokens chargés dans chaque session. Tout renvoi
 antérieur du type « `CLAUDE.md`, étape 5 », « l'entrée R-12 de `CLAUDE.md` » ou
 « `CLAUDE.md`, 2026-09-14 », dans le code comme dans les documents, désigne une
-entrée de `JOURNAL.md`. Les règles, les leçons et les conventions numérotées,
-elles, sont restées ici.
+entrée du journal. Les règles, les leçons et les conventions numérotées,
+elles, sont restées ici. **Depuis le 2026-10-01, `JOURNAL.md` n'est plus que le
+volume courant** : les entrées d'avant le 2026-09-30 sont dans `docs/journal/`,
+déplacées telles quelles, et un test le tient sous 200 000 caractères (son
+en-tête dit comment archiver).
 
 Les autres documents de la racine sont des **plans et des revues**, pas des
-conventions : `SPEC.md` et ses addenda (le produit), `REVIEW*.md` (les trois
+conventions : `SPEC.md` (le produit d'origine ; son encart dit ce qui a changé), `REVIEW*.md` (les trois
 revues, closes), `AUDIT.md` + `AUDIT-PLAN.md` (l'instrument d'audit),
 `GROWTH-PLAN.md` (la distribution), `GAME-BRIEF.md` (le jeu « Le côté obscur ») et
 `ENGINE.md` (le moteur de growth). **`CHANTIERS.md` est la liste de travail**,
 rangée par agent (autonome, design sync, décisions, gestes d'Antoine), avec le
 prompt de chaque session : on y retire ce qu'on livre, on y ajoute ce qu'on trouve.
-
-## Les plug-ins s'installent à la main, dans le dépôt
-
-**claude.ai ne livre pas les plug-ins aux sessions cloud.** Constaté le 24/09/2026 sur Ramille :
-Product Management était activé sur le compte, et la session ne le voyait pas (liste des plug-ins
-du compte vide, catalogue « non activé », dossier de synchronisation vide). Le dépôt est la seule
-chose qu'une session cloud est sûre d'emporter. Un plug-in arrive donc en `.zip` et s'installe dans
-le dépôt, sous `.claude/` :
-
-```
-node scripts/installer-un-plugin.mjs <archive.zip | dossier> [--prefixe <court>] [--manuel | --auto] [--licence <fichier>]
-node scripts/installer-un-plugin.mjs --retirer <plug-in>
-```
-
-- **Relancer le script sur une archive plus récente met le plug-in à jour.** Ce qu'il avait posé
-  est retiré d'abord, donc un skill disparu en amont disparaît d'ici. Le préfixe, le mode et la
-  licence choisis la première fois sont repris sans qu'on les redise.
-- **`--retirer` défait exactement ce que dit `installation.json`**, jamais tout ce qui porte le
-  préfixe : un skill écrit ici sous un nom voisin partirait avec. Ce qui cite le plug-in ailleurs
-  (ce fichier, un document) reste à relire à la main, et le script le rappelle.
-- **Ce qui est installé, et ce qui ne l'est pas, se lit dans
-  `.claude/plugins-importes/<plug-in>/installation.json`** : ce qui a été posé, la source et son
-  sha256, le préfixe, le mode, et tout ce qui n'a pas été installé. Le manifeste, la licence ou la
-  notice et `CONNECTORS.md` sont gardés à côté.
-- **Le dépôt est public, donc installer un plug-in, c'est le redistribuer.** Sa licence voyage
-  avec la provenance. Quand l'archive n'en porte pas, `--licence <fichier>` la joint : c'est le cas
-  de Design d'Anthropic, dont la licence (Apache 2.0) est à la racine du dépôt d'amont et non dans
-  le dossier du plug-in. Un plug-in sans licence est signalé.
-- **Prérequis** : Node ≥ 20.11 et le binaire `unzip` (vérifié en CI avec `zip` et `python3`).
-  `.claude/` est exclu du lint et du type-check, et le test de l'installeur vérifie que ça le reste.
-
-L'outil vient de Ramille (ScratchMe/Ramille#261, `aa06744`), copié et non réécrit. Son
-**interface est gardée telle quelle** (nom du script, options en français,
-`.claude/plugins-importes/`, clés d'`installation.json`) pour qu'une provenance veuille dire la
-même chose dans les deux dépôts ; le code, les messages et le test sont en anglais.
-
-**Les trois règles de l'outil**, détaillées en tête du script et gardées par son test :
-
-1. **Tout nom est préfixé par celui du plug-in** : `/product-management-write-spec`, pas
-   `/write-spec`. Marketing et Product Management portent tous deux `competitive-brief`, et
-   Engineering apporte un `code-review` qui masquerait la commande intégrée. C'est le **nom du
-   dossier** qui nomme le skill, pas le champ `name` (mesuré). Le champ est réécrit quand même. Les
-   renvois à d'autres commandes et les liens relatifs dans les consignes sont réécrits aussi. Un
-   fichier modifié porte un avis qui le dit, comme Apache 2.0 l'exige. Un nom de plug-in trop long
-   pour la limite de 64 caractères se raccourcit par `--prefixe`.
-2. **Hooks, connecteurs et agents ne s'installent jamais d'office.** Un hook exécute du code à
-   chaque événement, un connecteur ouvre un compte tiers, un agent choisit ses outils. Ils sont
-   listés dans `installation.json` et dans la sortie. Un en-tête de skill ou de commande qui
-   déclare des hooks est refusé.
-3. **Rien n'est écrit avant que tout soit vérifié** : entrées d'archive qui sortent de leur
-   dossier, liens symboliques, en-têtes illisibles, collisions de noms, noms relus dans
-   `installation.json`. Un refus laisse le dépôt intact.
-
-Ce que le script **ne voit pas**, c'est ce que les consignes disent. Il imprime ce qui mérite un
-regard : adresses, commandes shell, `allowed-tools`, liens morts, noms d'amont non réécrits,
-fichiers qui ne sont pas des consignes. Les consignes se relisent avant de commettre, avec ces
-règles :
-
-- **Les règles du dépôt passent devant les consignes d'un plug-in.** Ces consignes sont écrites
-  pour un produit quelconque : le bilinguisme, le déterminisme du score, le garde-fou anti-moquerie
-  et tout ce qui précède dans ce fichier restent. Leur texte ne se traduit pas : une traduction
-  rendrait chaque mise à jour impossible à rejouer.
-- **Une consigne qui se déclare incontournable** (« utilise-moi en premier sur tout… »)
-  **s'installe en `--manuel`.** Chaque skill charge sa description dans le contexte de chaque
-  session et peut se déclencher seul. En `--manuel`, il sort de la liste présentée à chaque session
-  (mesuré) et reste appelable par son nom. Un skill que l'amont réserve à l'agent y est rendu à la
-  personne.
-- **Aucun contenu du dépôt ne relaie la publicité d'un plug-in.** Sur Ramille, SearchFit SEO
-  signait ses gabarits « Powered by SearchFit.ai » : il a été retiré le jour même.
-- **Chaque plug-in se décide avec Antoine, un par un, AVANT de s'installer.** Ce sont des
-  consignes que l'agent suivra à chaque session, pas un détail d'implémentation. La question se
-  pose sous la forme habituelle : ce qu'il fait, ce qui est en jeu, la recommandation, ce qu'on
-  casse si on se trompe. Rien ne s'installe avant la réponse. **Brancher un hook ou un connecteur
-  est une décision de plus, qui se demande à part.**
 
 ## L'outillage Claude Code du dépôt
 
@@ -174,7 +104,7 @@ Le journal (`JOURNAL.md`) raconte le projet dans l'ordre où les choses se sont 
 
 **En production depuis le 2026-09-25** (PR groupée [#164](https://github.com/ScratchMe/tourdegrowth/pull/164)) : le design system v3, la revue de copie v1, l'audit SEO v1, les campagnes de lancement v2, et le jeu « Le côté obscur » comme le moteur de growth, **tous deux fermés derrière leur drapeau** (`GAME_ENABLED`, `ENGINE_ENABLED`) et ouvrables par Antoine seul depuis `/admin/preview`. Depuis, le jeu et le moteur ont reçu deux séries de retours d'Antoine (PR #166 à #168), puis #173 à #175. **Le niveau 2 du jeu** est spécifié et chiffré (2026-09-30) ; sa construction attend C30 (`CHANTIERS.md` A12). Pour ouvrir le jeu ou le moteur **à tout le monde** : les bons à tirer nº7 et nº8 d'abord (table ci-dessous), la recette du jeu, et **pour le moteur tout le lot `CHANTIERS.md` A7.3** (le B2B assisté, décidé le 2026-09-29), puis la variable dans Vercel et un redéploiement.
 
-En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue, avec les deux modes (Quick déterministe, Deep dive généré par Gemini). La revue technique et fonctionnelle du 2026-09-05 est **close** (`REVIEW.md`, 26 constats). **La seconde revue (`REVIEW-02.md`) est close** : les 25 constats techniques et fonctionnels sont livrés (PR #61 à #92), et les cinq décisions produit du lot E ont été tranchées par Antoine le 2026-09-07 — R2-26 et R2-27 faits, R2-28 fait mais **livré fermé** derrière `METRICS_PAGE_ENABLED`, R2-29 parti en brief Claude Design (`design/DS-EXTENSION-BRIEF-02.md`, retour attendu), R2-30 volontairement reporté (la fenêtre Tour de France est un sujet de calendrier, pas de backlog).
+En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue, avec les deux modes (Quick déterministe, Deep dive généré par Gemini). La revue technique et fonctionnelle du 2026-09-05 est **close** (`REVIEW.md`, 26 constats). **La seconde revue (`REVIEW-02.md`) est close** : les 25 constats techniques et fonctionnels sont livrés (PR #61 à #92), et les cinq décisions produit du lot E ont été tranchées par Antoine le 2026-09-07 — R2-26 et R2-27 faits, R2-28 fait mais **livré fermé** derrière `METRICS_PAGE_ENABLED`, R2-29 close par `REVIEW-03.md` (le brief 02 n'est jamais parti), R2-30 volontairement reporté (la fenêtre Tour de France est un sujet de calendrier, pas de backlog).
 
 **Les décisions du 2026-09-29 sont codées** (A7, PR #203 à #219 puis celle d'A7.12, le 2026-09-30), sauf A7.3 (spécification validée le 2026-09-30 par C25, les quatre termes A7.3.e livrés le même jour, le code A7.3.c peut partir), A7.4 (après A7.3) et A7.12.c (les captures, à l'ouverture). L'audit GEO (A8) est fait.
 
@@ -194,24 +124,16 @@ En production sur [www.tourdegrowth.com](https://www.tourdegrowth.com), bilingue
 
 ### Ce qui reste ouvert, et pourquoi ce n'est pas urgent
 
+Ce qui n'attend qu'un déclencheur (R-15, le Deep dive à ~70 s, `/metrics`, R2-30, TypeScript 7 et ESLint 10, les largeurs à 320 px…) est dans la section E de `CHANTIERS.md`, avec ce qu'on fait alors. Les quatre avertissements permanents de `design-sync validate` sont dans `.design-sync/NOTES.md`.
+
 | Sujet | État | Ce qui le déclencherait |
 |---|---|---|
-| Limite de débit en mémoire (R-15) | Par instance serverless, arrête le cas naïf | Un abus réel. Passer alors sur un store partagé (Upstash) ou le pare-feu Vercel. |
-| Deep dive à ~70 s | Quatre générations en parallèle depuis le bilingue ; l'écran de chargement est conçu pour une attente longue | Si ça devient la norme, regarder le **nombre** de générations, pas le plafond de temps. |
-| `/r/<id>` déborde de 37 px à 320 px | Hors contrat (DESIGN-BRIEF fixe 390 et exige 375-430) ; c'est le `PillarChip` | Une décision de design, pas un correctif évident. Antoine a choisi de laisser. |
-| Quatre avertissements permanents de `design-sync validate` | « Impact » (repli système, police propriétaire) et `GRID_OVERFLOW` sur `DefinitionPopover`, `QuarterNews` et `GlossaryTerm` (couche supérieure, pas de géométrie ; le quatrième depuis A4, accepté par Antoine le 2026-09-30) | Rien — les quatre sont attendus et documentés dans `.design-sync/NOTES.md`. Ne pas appliquer le `cardMode: "single"` suggéré : il masquerait des histoires. |
-| `guidelines/` absent du bundle d'extension 01 | Le README du bundle l'annonce, l'archive ne le contenait pas | Sans conséquence à ce jour ; à demander si on en a besoin. |
-| `/metrics` livrée fermée (R2-28) | Le code est en production, la page renvoie 404 tant que `METRICS_PAGE_ENABLED` n'est pas `"true"` dans Vercel, et se cache aussi d'elle-même sous 50 soumissions | Assez de volume pour que des chiffres publics soient crédibles. Poser la variable, rien d'autre à coder. |
-| R2-30 (fenêtre Tour de France, SPEC.md §10) | Reporté d'un commun accord : pas d'urgence | À construire **avant** juin 2027, pour que le post parte pendant le vrai Tour et pas après. |
-| Flake `locale-routing` (`:76`, `:320`) | **Cause trouvée et corrigée le 2026-09-29** : les préchargements de la page quittée réécrivaient le cookie de langue. Le proxy ne l'écrit plus que sur une navigation (`Sec-Fetch-Mode`) | Un nouvel échec : relire `NEXTJS.md` §1.1 (le proxy ne voit pas les en-têtes du routeur) avant de toucher la spec. |
-| TypeScript 7 et ESLint 10 | Tous deux bloqués par des paquets embarqués dans `eslint-config-next` (`typescript-eslint` refuse TS ≥ 6.1 ; `eslint-plugin-react` plante sur ESLint 10). Dependabot les ignore en majeure depuis le 2026-09-08 | Quand `eslint-config-next` suivra. Re-tester en installant, pas en lisant les plages de peer : c'est l'essai qui a montré qu'ESLint 10 plante. |
-| Instrument d'audit | **Entre parenthèses depuis le 2026-09-30** (Antoine : priorité au moteur). Code et tests en place, usage personnel possible ; ni mission de phase 1 bis, ni bon à tirer nº4, ni phases 2 et 3 | Une décision d'Antoine de le rouvrir : le plan attend tel quel dans `AUDIT-PLAN.md`. |
+| **Trois alertes `npm audit --omit=dev`** (vues le 2026-10-01) | Une **critique** sur `next` 16.3.4 (GHSA-vcvr-r3jv-pc5j, exécution de code dans `ImageResponse` de `next/og`, dont se servent toutes nos images de partage) et deux hautes (`@grpc/grpc-js`, `brace-expansion`). Corrigées dans leurs plages semver (`npm audit fix`) | **À faire d'abord** : `CHANTIERS.md` A13, une PR de dépendances, merge avec **l'accord d'Antoine** (`/livrer` §0) |
 | Copie à relire | **Le nº5 est clos** (2026-09-23, détail dans le journal). [Nº4](https://claude.ai/code/artifact/d45d5d7d-fdfa-4155-ba0d-76290e331dc8) (le catalogue d'audit, 1 carte tranchée sur 39) est **suspendu avec l'audit** le 2026-09-30 | Le prochain document se reconstruit depuis `grep -rn "TODO: à relire" src/`, jamais de mémoire ni depuis un compte écrit ici. Les décisions vivent dans la base de chaque artifact — nº4 dans `lines/`, nº5 dans `cards/` ; lire le bon tiroir avant de conclure qu'un artifact n'a pas été ouvert. |
 | Vercel (Functions Storage, Fluid CPU) | **Plus une contrainte depuis le 2026-09-26** (Antoine : « Vercel n'est plus un problème »). Les gros postes sont traités : bibliothèque de contenu dédupliquée par route, préchargements retirés, image de partage en cache sous une adresse versionnée, région `cdg1`. Le compteur de stockage suit le poids disque, pas le poids par route. Détail : `VERCEL.md` §1.6 et §2.2 | Rien, sauf une facture qui surprendrait. |
 | **Décisions qui attendent Antoine** | **Toute la section C est tranchée, sauf C30** : les 22 questions de la séance du 2026-09-29, puis C23 à C29 le 2026-09-30. L'index est dans `CHANTIERS.md` C, chaque réponse là où vit la question (`ENGINE.md`, `GAME-BRIEF.md`, `AUDIT-PLAN.md`, `GROWTH-PLAN.md`, `marketing/campaigns/README.md`). Les plus lourdes : **le B2B assisté et l'hybride entrent dans la v1 du moteur** (C4, l'ouverture du moteur l'attend), **aucun repère ne désigne plus la fuite** (C1), « Moteur de growth » à la même adresse (C2), **le jeu attend le moteur**, qui part d'abord, et le créneau du Digital Fairness Act est abandonné (C23). « Jamais le nom, jamais LinkedIn » est une question de **calendrier, pas d'anonymat** (C22). **C25 valide la spécification d'A7.3** (`ENGINE.md` §18.12) : une marge par motion (Q4), la liaison en levier « Et si » (Q7), quatre termes de glossaire dès la v1 (Q8) | **C30** : le niveau 2 du jeu (`GAME-BRIEF.md` §17, cinq questions), avec son prompt dans `CHANTIERS.md`. A7.3.c peut partir ; A7.3.e est livré le 2026-09-30. |
 | **Design : la synthèse I + B** | **Retenue par Antoine le 2026-09-28** ([comparaison](https://claude.ai/artifact/XJse5sJWP8uamShXB7qMoj), sources dans `design/alternatives-2026-09/`). **Close** : les cinq PR en production (#177, #178, #181, #182, et #183 pour la fidélité à la maquette, squash `cbe11da`) | Rien pour la passe. Hors d'elle : le constat S-15 de l'audit du kit (lot B2 de `CHANTIERS.md` ; S-6, S-11 et S-17 livrés par A1, S-8 et S-10 par A2, S-16 par A5, le 2026-09-29), les écarts laissés que liste le journal. |
 | Bons à tirer nº7, nº8 | **Le nº6 est clos le 2026-09-29** (37 cartes « ça passe »). **nº7 et nº8 remis d'accord avec le code le 2026-09-28**, aux mêmes adresses. Décisions dans `cards/` : [nº7](https://claude.ai/artifact/65Y8Ft3PCsBR1HDq4bsQSu) (le jeu, 38 cartes : le français validé du prototype est grisé), [nº8](https://claude.ai/artifact/DUjhtzC6kBBN37idxDr1hJ) (le moteur, 82 cartes ; la première, les deux repères, est tranchée le 2026-09-29 (C1) ; A7.1, A7.2, A7.5 et A7.6 ont changé la copie le 2026-09-30, A7.5 montre aussi `tourFound` dans les Réglages, A7.3 la changera : remettre la page d'accord après). Construits en lisant les vrais modules, jamais en recopiant. **Hors de tout bon à tirer** : les deux libellés SEO du 2026-09-28 (`relatedComparisonLabel`, `applyAarrrLabel`), le verdict OKR réécrit le 25/09 (`comparisons.ts`), le bandeau (`space-strings.ts`), la bande de l'accueil (`space-strip.ts`), la montagne du hub, le profil du parcours, le titre de l'annexe du deck devenu « Définitions et sources ({i}/{n}) » (A2, 2026-09-29 : le nº8 porte l'ancien), le bloc du badge README avec le texte du badge (A3, 2026-09-29), le libellé de date des pages de prose (`prosePage.updatedAt`, A8, 2026-09-30), et les en-têtes de `/llms.txt` et `/llms-full.txt` (C27, 2026-09-30) | Les réponses d'Antoine, puis lever les marqueurs et réécrire ce qu'il marque « à changer ». Avant de rouvrir une page, vérifier qu'elle dit encore ce que dit le code (`JOURNAL.md`, 2026-09-28). |
-| Design system → Claude Design | **À jour le 2026-09-30**, après A7.10, A10 (B3) puis A11 : 88 composants, 292 cellules, 88/88 rendus, poussé depuis une session cloud (qui peut le faire depuis le 2026-09-29 : le convertisseur vient avec `/design-sync`). Les aperçus des primitives, écrits d'abord depuis la planche du brief 04, reprennent maintenant les vrais appels du moteur et de l'audit ; la recapture de contrôle a trouvé deux aperçus faux dans des notes reportées (l'amende du jeu, les cartes de `SpaceStrip`) | Rien à lancer tant qu'un composant, ou une copie qu'un aperçu reprend, ne change pas. Ce que B3 a trouvé dans le produit est livré le soir même (A11, C28, C29). |
 | Lecture des stats par la session | **Les deux moitiés marchent** (runs réels le 2026-09-14 puis le 2026-09-29 : tableau de bord et Search Console, déchiffrés par la session, aucun chiffre dans le dépôt). La fenêtre « All-time » du funnel a renvoyé une 404 de GoatCounter les deux fois, passée à la relance les deux fois : relancer avant d'enquêter. Les `/en/glossary/*` ne sont pas encore créditées (les anciennes adresses le sont) : Google ne les avait pas encore explorées, indexation demandée le 2026-09-29 ; à relire au prochain relevé | Un relevé par mois (section E de `CHANTIERS.md`) : un `age-keygen` puis un run (`admin`, `gsc` ou `both`). |
 
 Plus rien d'ouvert côté code dans `REVIEW-02.md`. Le lancement, le seeding et le payant sont dans **`GROWTH-PLAN.md`** (2026-09-13 — sans LinkedIn ni nom pour l'instant, une question de calendrier depuis le 2026-09-29 ; cinq vagues, la moitié menable par la session seule ; la part autonome de la vague 0 est livrée : IndexNow, UTM, kit et textes dans `marketing/`) ; le SEO a été livré en grande partie par le lot C de cette revue, et sa suite est la vague 2 de ce plan, dont **2.1 et 2.4 sont faites** (les deux pages « porte ouverte » et leur maillage, 2026-09-14) et **2.2 est close** (les dix termes, en trois lots, choisis sur le rapport Search Console du jour — le glossaire passe de 15 à 25 termes, puis 24 après la coupe d'`activation-rate`, et 28 termes, soit 56 pages, depuis les quatre de la vente assistée, A7.3.e) et **2.3 est faite** (le cluster « AARRR vs X », quatre pages aux deux langues). Il ne reste, menable par une session seule, plus rien dans la vague 2 : **2.5** attend les 50 soumissions de `stats/global`.
@@ -243,24 +165,31 @@ d'outil qui a le détail à jour.*
 ### Carte du repo
 
 ```
-src/app/[locale]/        pages de contenu, statiques, une URL par langue
-src/app/(app)/           quiz, résultat, deep dive, admin — dynamiques, sans préfixe de langue
+src/app/[locale]/        pages de contenu, statiques, une URL par langue ; aussi le moteur (aarrr-funnel-template/) et le jeu (game/)
+src/app/(app)/           quiz, résultat (et ses routes d'image et de badge), deep dive, admin — dynamiques, sans préfixe de langue
 src/app/api/             deux routes POST : création de soumission, Deep dive
+src/app/                 aussi robots.ts, sitemap.ts, et llms.txt/ et llms-full.txt/, générés depuis le sitemap et les pages (C27)
+src/proxy.ts             langue, drapeaux du jeu et du moteur, aperçu propriétaire, garde de /admin, budget de lectures de /r/<id>
 src/components/          core / brand / quiz / result / glossary / game / viz — le design system porté
-src/content/             toute la copie du site, validée (agent produit pour l'origine, Antoine le 2026-09-06 et le 2026-09-09 pour le reste)
-src/lib/                 scoring (pur), i18n (dont meta.ts), seo (JSON-LD), og (polices, tokens, gabarit et adresse versionnée de l'image de résultat), gemini, submissions (dont segment.ts, benchmark.ts), metrics, analytics
+src/content/             toute la copie du site ; ce qui n'est pas encore relu porte « TODO: à relire » (convention 6)
+src/lib/                 scoring (pur), quiz, i18n (dont meta.ts), seo (JSON-LD, llms, robots d'IA), og (polices, tokens, gabarit et adresse versionnée de l'image de résultat), gemini, firebase, submissions (dont segment.ts, benchmark.ts), metrics, analytics, forms (la logique des primitives de formulaire), rate-limit.ts
 src/lib/game/            le jeu « Le côté obscur » (moteur pur, stockage, vue ; un niveau par fichier de levels/, le 2 en brouillon) ; sa copie dans src/content/game/, sa présentation dans src/components/game/, ses pages sous src/app/[locale]/game/ — GAME-BRIEF.md fait foi
 src/lib/engine/          le moteur de growth (pur : dérivations, diagnostic, « et si », deck, phrases) ; sa copie dans src/content/engine-*.ts, son îlot sous src/app/[locale]/aarrr-funnel-template/ — ENGINE.md fait foi
 src/lib/owner-preview.ts l'aperçu propriétaire seul du jeu et du moteur (cookie HMAC sous le mot de passe admin, posé par /admin/preview)
 src/lib/viz/             échelles et tracés sans bibliothèque ; composants dans src/components/viz/
 src/lib/audit/           l'instrument d'audit growth (AUDIT.md = le schéma, AUDIT-PLAN.md = le plan par phases) — pur, navigateur seulement, jamais Firestore ; son catalogue est dans src/content/audit-catalog.ts
+src/styles/              les jetons (tokens/*.css, tokens.ts) et le mouvement
 VERCEL.md NEXTJS.md      conventions et pièges par outil, ouverts sur déclencheur (table en tête de ce fichier)
 TESTING.md GITHUB.md      — chacun coupé en « portable » / « propre à Tour de Growth »
-GEMINI.md FIRESTORE.md
-GROWTH-PLAN.md           le plan de distribution (sans LinkedIn ni nom pour l'instant) ; marketing/ son kit (textes de lancement, captures, annuaires), marketing/campaigns/ les trois lancements séquencés ; REVIEW*.md les revues ; AUDIT*.md l'instrument d'audit
-design/                  brief d'origine, extensions 01 et 03 (le brief 02 n'est jamais parti), alternatives-2026-09/ (les maquettes I + B)
+GEMINI.md FIRESTORE.md   PLUGINS.md : installer un plug-in, sur déclencheur aussi
+SPEC.md                  le produit d'origine, avec l'encart de ce qui a changé ; ENGINE.md, GAME-BRIEF.md et AUDIT*.md, les trois autres produits
+CHANTIERS.md             la liste de travail, rangée par agent, avec un prompt par session
+GROWTH-PLAN.md           le plan de distribution (sans LinkedIn ni nom pour l'instant) ; marketing/ son kit (textes de lancement, captures, annuaires), marketing/campaigns/ les trois lancements séquencés ; REVIEW*.md les revues
+design/                  le brief d'origine, les extensions 01 à 04 et leurs retours, alternatives-2026-09/ (les maquettes I + B) — index dans design/README.md
+.design-sync/            la synchro du design system vers Claude Design (NOTES.md avant toute re-synchro)
 e2e/                     specs Playwright contre un build de production (dont les canaris audit et moteur)
-scripts/live/            sondes contre les vrais services, lancées à la main
+scripts/                 vercel-ignore.sh, liens UTM, rapport Search Console, captures du kit, installeur de plug-ins ; live/ : les sondes contre les vrais services, lancées à la main
+.github/                 ci.yml (la barrière), verify-live.yml (la sonde), stats.yml, indexnow.yml, dependabot.yml
 .claude/                 skills/ (/livrer, /bon-a-tirer, plug-ins Data et Design), agents/ (les deux relecteurs), hooks/ + settings.json (la garde sur main), plugins-importes/ (provenance des plug-ins installés)
-JOURNAL.md               le journal : chaque décision, chaque piège et ce qui a été vérifié, dans l'ordre
+JOURNAL.md               le journal, volume courant : chaque décision, chaque piège et ce qui a été vérifié, dans l'ordre ; docs/journal/ ses volumes archivés
 ```

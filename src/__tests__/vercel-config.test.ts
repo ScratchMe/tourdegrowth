@@ -104,6 +104,7 @@ describe("scripts/vercel-ignore.sh", () => {
     ["root Markdown", { "CLAUDE.md": "journal\n" }],
     ["LICENSE", { LICENSE: "AGPL\n" }],
     ["a workflow", { ".github/workflows/ci.yml": "on: push\n" }],
+    ["an archived journal volume", { "docs/journal/01-du-scaffold-au-lancement.md": "journal\n" }],
     ["marketing", { "marketing/launch/show-hn.md": "text\n" }],
     ["design", { "design/game/proto.html": "<p>x</p>\n" }],
     [".design-sync", { ".design-sync/NOTES.md": "notes\n" }],

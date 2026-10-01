@@ -1,4 +1,4 @@
-# Faire connaître Tour de Growth — le plan, sans LinkedIn et sans nom
+# Faire connaître Tour de Growth — le plan, sans LinkedIn et sans nom (pour l'instant)
 
 *Le plan de distribution de Tour de Growth sous deux contraintes posées par
 Antoine le 2026-09-13 : **on ne passe pas par LinkedIn**, et **il n'est jamais
@@ -11,7 +11,7 @@ actions ne demandent aucun humain visible. Même règle de tenue que
 `AUDIT-PLAN.md` : quand une action est faite, sa ligne change ici, et
 `JOURNAL.md` reçoit l'entrée de journal.*
 
-*Dernière mise à jour : 2026-09-13 (option A tranchée ; vague 0 : IndexNow, UTM, kit et textes de lancement livrés — le reste de la vague 0 est côté Antoine).*
+*Dernière mise à jour : 2026-09-30 (vague 2 : 2.1 à 2.4 faites, 2.5 attend les 50 soumissions, 2.8 auditée et `llms.txt` livré ; C22, le 2026-09-29 : « sans nom » est une question de calendrier, pas d'anonymat, voir §0 ; C19 et C23 : rien ne part avant que le moteur, puis le jeu, soient prêts). Créé le 2026-09-13 (option A tranchée ; vague 0 : IndexNow, UTM, kit et textes de lancement livrés).*
 
 ---
 

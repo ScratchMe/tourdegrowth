@@ -2,7 +2,46 @@
 
 **Nom :** Tour de Growth
 **Auteur :** Antoine Berthaud — side project portfolio, positionnement Growth PM
-**Statut :** Draft prêt à construire
+**Statut :** Draft prêt à construire — **construit, en production depuis
+fin août 2026.** Le texte ci-dessous est celui qui a lancé le projet, gardé tel
+quel : il dit le *quoi* et le *pourquoi*, qui n'ont pas bougé.
+
+> **Ce qui a changé depuis ce draft** (relevé le 2026-10-01 contre le code ;
+> sur ces points, le code et les documents cités font foi) :
+>
+> - **Barème (§6)** : trois réponses par question, à 20, 7 et 0 points, lues
+>   sur chaque question de `src/content/copy-library.ts`, et non quatre
+>   valeurs. L'arrondi par pilier et la somme des arrondis n'ont pas changé.
+> - **Synthèse (§4, §6)** : le résultat rapide n'appelle plus Gemini. Le
+>   verdict vient d'une bibliothèque relue (`copy-library.ts`, livrée et
+>   validée : la règle « ne pas inventer » du §12 est levée depuis le
+>   2026-09-11, `CLAUDE.md`). Gemini n'écrit que le **Deep dive**, optionnel :
+>   dix questions de plus et un champ libre, environ 70 s (`GEMINI.md`).
+> - **Deux questions de contexte**, jamais notées, situent le résultat parmi
+>   des produits comparables (`src/content/segments.ts`, `REVIEW-02.md`
+>   R2-26) : le produit dit toujours « 15 questions ».
+> - **Le résultat dit quoi faire** : l'étape qui freine (ou rien, quand les
+>   chiffres ne la désignent pas) et une action déterministe, pour le
+>   propriétaire comme pour le visiteur (`REVIEW-03.md`).
+> - **Partage (§7)** : on partage la page `/r/<id>` elle-même ; le `?ref=<id>`
+>   part avec le visiteur qui lance son propre Tour depuis ce résultat
+>   (`/quiz?ref=<id>`). **K = analyses attribuées ÷ toutes les analyses**, et
+>   non ÷ partageurs uniques (`REVIEW-02.md` R2-01).
+> - **Langue (§5, §8)** : les pages de contenu ont une adresse par langue
+>   (`/fr/…`, `/en/…`) ; `?lang=`, puis le cookie, puis le navigateur ne
+>   décident que pour les routes applicatives (`REVIEW.md` R-13).
+> - **Stack (§8)** : Next.js 16 et React, Firestore par `firebase-admin` et
+>   des route handlers Next à la place de Supabase, `next/og` à la place de
+>   `@vercel/og`. Le domaine est `tourdegrowth.com` (§11).
+> - **Ajouté depuis** : `/how-it-works` (§12 l'avait coupé), le glossaire, les
+>   pages « porte ouverte » et « AARRR vs … » (`GROWTH-PLAN.md`), et deux
+>   produits fermés derrière leur drapeau, avec leur propre spécification :
+>   le moteur de growth (`ENGINE.md`) et le jeu (`GAME-BRIEF.md`).
+>
+> Le §13 (le prompt de démarrage de la première session) et la liste « Ce
+> qu'il reste à faire avant de lancer Claude Code » ont servi le premier jour :
+> retirés le 2026-10-01, ils se lisent dans l'historique (`git show
+> 24c862a:SPEC.md`).
 
 ---
 
@@ -149,75 +188,11 @@ Claude Design a produit un handoff très complet (`design/DESIGN-BRIEF.md`) et a
 - Choix du framework front (vanilla vs React/autre) — voir §8, laissé à l'appréciation technique.
 
 **Non tranchées ici, à traiter dans une prochaine session avec moi (agent produit) — Claude Code ne doit PAS inventer ce contenu :**
+
+> *Levé depuis : la bibliothèque est livrée (`src/content/copy-library.ts`), la copie française écrite et validée, et le 2026-09-11 Antoine a ouvert l'écriture à la session ; toute copie neuve repart « à relire » (`CLAUDE.md`, convention 6). Ce qui suit est l'état du lancement.*
+
 - **Bibliothèque de textes de verdict** (Strengths / "Where you're losing time") par palier de score, par pilier, dans les 2 tons × 2 langues. Les phrases actuelles dans le design sont des exemples de calibrage, pas la copie finale.
 - **Le résumé d'une ligne sous le chiffre de score** ("Solid engine, one flat tyre…") ajouté par Claude Design — bon réflexe (le chiffre seul ne dit rien sur mobile), mais les paliers et phrases réels restent à écrire.
 - **Copie française complète** des 15 questions, réponses, pages de résultat et voix "roast" — l'écran 07 du design est un test de mise en page, pas une traduction approuvée. Le ton "roast" en particulier ne survit pas à une traduction automatique.
 
 **En attendant cette bibliothèque de textes**, Claude Code peut construire et tester l'intégralité du pipeline technique (questionnaire → scoring → appel Gemini → rendu → partage) avec le contenu d'exemple déjà présent dans le design, clairement marqué comme temporaire dans le code (ex. `// TODO: copie de verdict finale à venir, voir SPEC.md §12`), sans que ça bloque l'avancement du MVP.
-
----
-
-## 13. Prompt de démarrage pour Claude Code
-
-À copier tel quel dans une nouvelle session Claude Code, dans un dossier de projet vide (avec ce fichier de spec déposé à la racine sous `SPEC.md`) :
-
-```
-Je veux construire "Tour de Growth", un outil web public bilingue (FR/EN) qui
-fait passer un questionnaire guidé sur les fondamentaux growth (framework
-AARRR) à un fondateur/PM, puis génère un score partageable avec une image
-Open Graph dynamique par résultat.
-
-Lis d'abord entièrement, dans cet ordre :
-1. CLAUDE.md à la racine (contexte général, tes marges de manœuvre, et les
-   leçons déjà tirées d'un projet précédent)
-2. SPEC.md à la racine (parcours utilisateur, périmètre MVP, modèle de
-   scoring, réglage de ton Neutre/Roast, stack technique visée, et surtout
-   §12 qui tranche — ou renvoie explicitement à plus tard — les questions
-   ouvertes soulevées par le design)
-3. design/DESIGN-BRIEF.md (tokens exacts, inventaire d'écrans, copie réelle,
-   comportements d'interaction — c'est la référence visuelle à haute fidélité)
-
-Avant d'écrire la moindre ligne de code :
-1. Propose-moi un plan de build découpé en étapes vérifiables (pas un gros
-   bloc monolithique), et attends ma validation avant de commencer.
-2. Si tu identifies un écart entre ce que demande la spec et ce qui est
-   réellement raisonnable à construire pour un MVP solo, dis-le-moi
-   clairement plutôt que d'implémenter silencieusement une version dégradée.
-
-Contraintes de méthode, non négociables (détaillées dans CLAUDE.md) :
-- Le bilingue FR/EN est un prérequis dès le premier commit fonctionnel.
-- Le scoring chiffré doit rester déterministe et explicable (règles fixes,
-  arrondi par pilier avant sommation — voir SPEC.md §6) ; l'IA (Gemini) ne
-  sert qu'à la synthèse qualitative, jamais à modifier les points bruts.
-- Pour l'appel Gemini, réutilise le principe de repli multi-modèles :
-  gemini-3.7-flash → 3.6 → 3.5 → l'alias gemini-flash-latest en dernier
-  recours. Ne code jamais en dur un seul nom de modèle sans repli.
-- Le réglage de ton Neutre/Roast doit être un choix explicite de
-  l'utilisateur, avec le garde-fou anti-moquerie-personnelle codé en dur
-  dans le prompt système Gemini.
-- Le mécanisme de partage (`?ref=`) et son attribution sont le cœur du
-  produit : instrumente-le dès le premier commit fonctionnel.
-- Instrumente les analytics (GoatCounter + événements custom) dès le MVP.
-- Le thème "Tour de France" reste discret par défaut (juste "étapes") — la
-  fonctionnalité événementielle (Maillot Jaune, dates du vrai Tour) est un
-  fast-follow explicite, ne la construis pas dans le MVP.
-- La bibliothèque de textes de verdict (forces/axes par palier, en 2 tons ×
-  2 langues) n'est pas encore fournie (voir SPEC.md §12) : construis et
-  teste tout le pipeline avec le contenu d'exemple du design, marqué
-  clairement comme temporaire dans le code, sans bloquer sur son absence.
-
-Une fois le plan validé, avance étape par étape, en me montrant le résultat
-concret (visuel + comportement réel testé) à chaque étape plutôt qu'en fin
-de parcours.
-```
-
----
-
-## Ce qu'il reste à faire avant de lancer Claude Code
-
-- [ ] Vérifier la disponibilité du nom de domaine pour "Tour de Growth"
-- [ ] Créer un nouveau dossier de projet local + `git init` (ou nouveau repo GitHub, même logique que pour le CV)
-- [ ] Installer l'App GitHub "Claude" sur ce nouveau repo si tu comptes utiliser Claude Code dessus (voir la procédure `/install-github-app` déjà utilisée pour le CV)
-- [ ] Déposer à la racine du projet : `CLAUDE.md`, `SPEC.md` (ce fichier), et le dossier `design/` (DESIGN-BRIEF.md + les fichiers de référence Claude Design)
-- [ ] Lancer Claude Code dans ce dossier avec le prompt du §13
-- [ ] Prévoir une session avec moi (agent produit) pour écrire la bibliothèque de textes de verdict avant que le MVP soit vraiment "fini" (voir §12) — le pipeline technique peut avancer sans, mais le produit ne sera pas complet tant que ce contenu manque

@@ -275,15 +275,16 @@ prévisualisations ne servent à rien et consomment le quota :
 ```
 
 **Corollaire utile** : une fois cette ligne posée, **un push de branche ne
-construit plus rien**. Travailler et pousser sur une branche devient gratuit ;
-seul le merge coûte.
+construit plus rien**. Travailler et pousser sur une branche ne coûte plus de
+Functions Storage ; seul le merge en coûte. Le push crée quand même un
+déploiement, refusé ou sauté, qui compte dans le quota du jour (§1.12).
 
 ### 1.11 Une variable d'environnement modifiée n'atteint que les nouveaux déploiements
 
 La documentation le dit (« not applied to previous deployments ») : changer une
 variable dans le tableau de bord ne change **rien** au déploiement en cours. Un
 drapeau « lu à chaque requête » ne s'ouvre donc pas sans redéploiement — et
-chaque bascule coûte un déploiement de Functions Storage (§1.6). Écrire « sans
+chaque bascule coûte un déploiement de Functions Storage (§1.1). Écrire « sans
 redéploiement » à côté d'un tel drapeau est faux, même quand le code le lit
 bien par requête.
 
@@ -353,6 +354,8 @@ Répartition du poids : runtime Next.js 19,5 Mo (41 %), notre code 10,0 Mo
   `src/__tests__/vercel-config.test.ts` contre de vrais dépôts git). 26 des 154 déploiements ne touchaient
   que `*.md` à la racine, `LICENSE`, `.github/`, `marketing/`, `design/`,
   `.design-sync/` ou `scripts/live/` — aucun n'entre dans le build, vérifié.
+  `docs/` s'y ajoute le 2026-10-01, avec les volumes archivés du journal :
+  rien sous `src/` ne l'importe.
   Conception arrêtée : `VERCEL_GIT_PREVIOUS_SHA` en premier, `HEAD^` en repli,
   `exit 1` sur tout le reste. Glob racine (`*.md`), **jamais** `**/*.md`. Dans le
   script, le statut de `grep` compte : 0 = au moins une ligne retenue, 1 = aucune,
@@ -362,9 +365,16 @@ Répartition du poids : runtime Next.js 19,5 Mo (41 %), notre code 10,0 Mo
 - **Cinq fonctions est le plancher de cette architecture.** Descendre à quatre
   demanderait de fusionner les pages de contenu (`ISR`) avec les pages
   applicatives (`Page`), donc de revenir aux deux layouts racine — ce qui
-  coûterait le prérendu CDN des 72 pages de contenu. Mauvais échange.
+  coûterait le prérendu CDN des pages de contenu (82 le 2026-10-01). Mauvais
+  échange.
 
 ### 2.3 Convention de cadence
+
+*Plus une contrainte depuis le 2026-09-26 (Antoine : « Vercel n'est plus un
+problème »), et depuis le 2026-09-29 la session merge d'elle-même une PR
+verte : la seule barrière qui reste est celle de `/livrer` §0, un bundle
+serveur qui grossit. Le texte ci-dessous est gardé comme mémoire du coût ;
+la capture du tableau de bord n'est plus demandée.*
 
 Chaque merge sur `main` coûte ~43,5 Mo pendant 30 jours. Grouper les pushes
 sur une branche (une vérification complète, un push) et espacer les merges
