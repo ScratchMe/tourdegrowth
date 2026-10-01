@@ -29,8 +29,6 @@
      fit the landing's two CTAs side by side in French at 1280 (515px for a
      495px column); 20px does (491). Full width on a phone keeps 16px sides. */
   --pad-button-lg: 17px 20px;
-  --pad-chip: 11px 14px; /* pillar chip, desktop */
-  --pad-chip-sm: 10px 12px; /* pillar chip, mobile grid */
   --pad-tag: 5px 12px; /* mono uppercase tag */
   --pad-option: 20px; /* answer option */
   --pad-field: 16px; /* TextArea inner padding */
@@ -74,6 +72,14 @@
   --choice-gap: var(--space-3); /* between two option rows */
   --form-gap-sm: var(--space-8); /* field → field in a sheet, 20px */
   --form-gap-md: var(--space-10); /* field → field on a one-question screen, 26px */
+  /*
+   * The stage scores (design system extension 05, design/ds-extension-05-return/):
+   * one row of the score sheet per stage. Never under --hit-min: the « ? »
+   * disc and the landing's link strip of two neighbouring rows touch and
+   * never overlap.
+   */
+  --score-row-height-md: var(--space-13); /* 48px, the result */
+  --score-row-height-sm: var(--hit-min); /* 44px, a phone, the landing */
   /* A number field is as wide as the magnitude it expects; the caller gives
      the digits, this is the fallback (Q6). */
   --field-digits-default: 9;

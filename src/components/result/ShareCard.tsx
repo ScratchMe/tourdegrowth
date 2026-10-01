@@ -36,7 +36,7 @@ export interface ShareCardProps extends HTMLAttributes<HTMLDivElement> {
  *
  * One per result page, for owner and visitor alike. It absorbs "Share this
  * result", which leaves the CTA row; that row then holds the primary alone.
- * Desktop: left column, under the pillar chips — the picture of the result
+ * Desktop: left column, under the score sheet — the picture of the result
  * sits under the result. Mobile: after the primary CTA, before the
  * disclaimer.
  *

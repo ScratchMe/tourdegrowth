@@ -182,19 +182,13 @@
   margin-left: auto;
 }
 
-/*
- * Two equal columns, each chip stretched to its cell: the chips carry a meter
- * whose track is the chip's width, and chips of five widths drew a 16/20 bar
- * as long as an 18/20 one (design I + B, 2026-09-28).
- */
-.previewTags {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 9px;
+/* The score sheet (extension 05, A16), one column under the bottleneck: the
+   card's 14px rhythm and the 6px the chips had above them. */
+.previewScores {
   margin-top: 6px;
 }
 
-/* The card's own 14px rhythm is right between score, bottleneck and chips;
+/* The card's own 14px rhythm is right between score, bottleneck and sheet;
    the action is the last thing and earns a little more air before it. */
 .previewMove {
   margin-top: 4px;
@@ -270,25 +264,4 @@
     flex-direction: column;
     width: 100%;
   }
-}
-
-/* REVIEW-02.md R2-13 — the preview card's chips link to their glossary pages,
-   without changing how the chip looks. (Since 2026-09-28 the chip is
-   stretched to its grid cell, and the link is that cell's item.)
- *
- * NOT `display: contents`, which is what this was: an element with that
- * display generates no box, and Chromium leaves such an anchor out of
- * sequential focus navigation entirely. Measured on the built page — 17 tab
- * stops on `/en` and not one of them was a glossary link, so the five chips
- * were mouse-only. WCAG 2.1.1, level A.
- *
- * `display: flex` makes the link the flex item instead of the chip inside
- * it, which is a box of exactly the same size: the chip is `width:
- * fit-content` and the link now shrink-wraps it. Verified by measuring all
- * five chip rectangles at 1280px and 390px before and after — identical to
- * the pixel. */
-.previewChipLink {
-  display: flex;
-  color: inherit;
-  text-decoration: none;
 }

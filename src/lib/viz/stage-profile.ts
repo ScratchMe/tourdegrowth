@@ -7,7 +7,8 @@
  * total. A stage at 20/20 is flat road; the stage that stalls is the highest
  * climb, and the one the page names is marked « HC » (hors catégorie, the
  * Tour's hardest climb). It shows the shape of the five scores at a glance;
- * the chips under it keep the exact numbers — they are this chart's table.
+ * the score sheet under it (`StageScores`) keeps the exact numbers — it is
+ * this chart's table.
  *
  * Pure and deterministic, no randomness: the same five scores always draw the
  * same path, on the server and in the browser (no hydration mismatch), on the

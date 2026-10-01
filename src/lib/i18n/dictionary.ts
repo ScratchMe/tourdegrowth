@@ -207,7 +207,7 @@ export const UI_STRINGS = {
   },
 
   /**
-   * The stage profile over the pillar chips (`viz/StageProfile`) — design
+   * The stage profile over the score sheet (`viz/StageProfile`) — design
    * I + B, retained by Antoine on 2026-09-28. « Parcours » and never
    * « étape »: the five climbs ARE the étapes, and « profil de l'étape »
    * would ask which one. The abbreviations (`profileAbbr`, below) are the
@@ -629,8 +629,19 @@ export const UI_STRINGS = {
       en: "Share image: {total}/100, with no stage named as a bottleneck.",
       fr: "Image de partage : {total}/100, sans étape désignée comme frein.",
     },
-    // Roast-only stamped tag on the weakest pillar (DESIGN-BRIEF.md §04: "08/20 RETENTION — dead last").
+    // Roast-only stamp on the weakest stage, redrawn by design system extension 05 ("RETENTION · 8/20 · DEAD LAST").
+    // TODO: à relire (convention 6) — the string is unchanged, the stamp around it is not: A16 reorders it and sets it in capitals.
     stampedSuffix: { en: "dead last", fr: "bon dernier" },
+    /*
+     * The score sheet (design system extension 05, A16): the list's accessible
+     * name, and on the landing's preview the name of each stage's link to its
+     * glossary page — it contains the visible stage name and says where the
+     * link goes; the score is read with the row, not with the link.
+     */
+    // TODO: à relire (convention 6).
+    stageScoresLabel: { en: "Score per stage, out of 20", fr: "Score par étape, sur 20" },
+    // TODO: à relire (convention 6).
+    stageLinkLabelTemplate: { en: "{stage} — definition", fr: "{stage} — définition" },
     sampleBadge: { en: "Sample result — not your data", fr: "Résultat d'exemple — pas tes données" },
     /* Design system extension 01 names this case's eyebrow separately from the generic detour. */
     notFoundEyebrow: { en: "Lost result", fr: "Résultat introuvable" },

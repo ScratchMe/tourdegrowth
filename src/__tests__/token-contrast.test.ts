@@ -120,7 +120,11 @@ const PAIRS: Pair[] = [
 
   // --- §5.1 / §5.4: inverse and states ---
   { fg: "text-on-inverse", bg: "surface-inverse", stated: 16.06, role: "text", why: "ink chip, active segment" },
-  { fg: "text-inverse", bg: "surface-accent", stated: 4.65, role: "text", why: "small label on a red fill: Tag red, stamped pillar, roast badge" },
+  { fg: "text-inverse", bg: "surface-accent", stated: 4.65, role: "text", why: "small label on a red fill: Tag red, roast badge" },
+  // --- Design system extension 05: the score sheet's stalling row and the roast's stamp, on the red wash ---
+  { fg: "text-alert", bg: "surface-alert", stated: 5.28, role: "text", why: "the stalling row's figure and name, the stamp's ink" },
+  { fg: "viz-highlight-text", bg: "surface-alert", stated: 5.28, role: "mark", why: "the stalling row's meter: the text red, not the brand red" },
+  { fg: "border-alert", bg: "surface-alert", stated: 3.47, role: "mark", why: "the stalling row's rule and the stamp's edge, on their own wash" },
   { fg: "state-selected-text", bg: "state-selected-bg", stated: 16.06, role: "text", why: "one selection language (H-5)" },
   { fg: "state-good-text", bg: P0, stated: 6.34, role: "text", why: "status good" },
   { fg: "state-good-text", bg: P1, stated: 5.12, role: "text", why: "status good" },

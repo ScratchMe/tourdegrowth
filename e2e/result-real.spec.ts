@@ -225,6 +225,39 @@ test.describe("the other two states of the bottleneck block", () => {
   });
 });
 
+/**
+ * C34 (Antoine, 2026-10-02, the score sheet of design system extension 05):
+ * the sheet's red follows the bottleneck as the route profile does — every
+ * tied stage on a shared bottleneck, none on a level board. Until A16 the
+ * chips reddened ONE stage (the tie-break's pick) while the profile above
+ * flagged both: one screen naming two different things.
+ *
+ * On `twoLevels`, a shared bottleneck in the neutral tone (acquisition and
+ * retention tied at 0/20), so no roast emphasis can stand in for the rule.
+ * Non-vacuity (2026-10-02): with the row's tone keyed on the tie-break's one
+ * stage again, the first test fails with one red row instead of two.
+ */
+test.describe("the score sheet's red follows the bottleneck (C34)", () => {
+  async function redRows(page: Page) {
+    const sheet = page.getByTestId("stage-scores");
+    await sheet.waitFor();
+    return sheet.evaluate((ol) =>
+      [...ol.querySelectorAll(':scope > li[class*="alert"] [class*="name"]')].map((n) => (n.firstChild?.textContent ?? "").trim()),
+    );
+  }
+
+  test("a shared bottleneck reds every tied stage, as the profile flags them", async ({ page }) => {
+    await page.goto(`/r/${twoLevels.id}?lang=en`);
+    expect(await redRows(page)).toEqual(["Acquisition", "Retention"]);
+    await expect(page.getByTestId("stage-profile").locator('[data-hot="true"]')).toHaveCount(2);
+  });
+
+  test("a level board reds no stage", async ({ page }) => {
+    await page.goto(`/r/${level.id}?lang=fr`);
+    expect(await redRows(page)).toEqual([]);
+  });
+});
+
 /** Every visible filled button — the Button recipe's `primary` class, whatever the element. */
 function visiblePrimaries(page: Page) {
   return page.locator('a[class*="__primary"]:visible, button[class*="__primary"]:visible');

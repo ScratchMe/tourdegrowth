@@ -168,12 +168,17 @@ export default async function LandingPage({ params }: PageProps) {
                 straight: sampleVerdicts.neutral.headline,
                 roast: sampleVerdicts.roast.headline,
               }}
-              chips={SAMPLE_RESULT.pillars.map((p) => ({
-                label: tc(UI_STRINGS.pillars[p.pillar], locale),
-                score: p.score,
-                href: localePath(locale, `/glossary/${p.pillar}`),
-                weak: p.pillar === SAMPLE_RESULT.weakestPillar,
-              }))}
+              scoresLabel={tc(UI_STRINGS.result.stageScoresLabel, locale)}
+              stages={SAMPLE_RESULT.pillars.map((p) => {
+                const label = tc(UI_STRINGS.pillars[p.pillar], locale);
+                return {
+                  label,
+                  score: p.score,
+                  href: localePath(locale, `/glossary/${p.pillar}`),
+                  linkLabel: tc(UI_STRINGS.result.stageLinkLabelTemplate, locale).replace("{stage}", label),
+                  weak: p.pillar === SAMPLE_RESULT.weakestPillar,
+                };
+              })}
               moveLabel={tc(UI_STRINGS.result.nextMoveLabel, locale)}
               move={getSampleNextMove(locale)}
             />

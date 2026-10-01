@@ -1,7 +1,7 @@
 import { NightSurface, Tag } from "tour-de-growth";
 
 /*
- * The generic chip. PillarChip, ModeTag and StampedPillar are all purpose-built
+ * The generic chip. ModeTag and StampedPillar are purpose-built
  * and should be preferred where they apply — reach for Tag only for something
  * the system has no named chip for. Every label below is one the product
  * actually sets in a Tag.

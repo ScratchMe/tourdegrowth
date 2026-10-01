@@ -29,6 +29,9 @@
   --radius-mark: 4px; /* the checkbox square; the radio ring is --radius-round */
   --size-mark: 20px;
   --mark-inset: 4px; /* a checked mark: its edge, a gap of its ground, the fill */
+  /* The roast's rubber stamp (extension 05): a rectangle of ink with soft
+     corners, not a pill — the pill was a tag's shape. */
+  --radius-stamp: 4px;
 
   /* --- Borders: exactly three, declared in the world block below --- */
   --border-width: 2px;

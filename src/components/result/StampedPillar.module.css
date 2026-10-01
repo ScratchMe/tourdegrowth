@@ -1,13 +1,44 @@
+/*
+ * The roast's stamp, redrawn by design system extension 05
+ * (design/ds-extension-05-return/components/result/StampedPillar/): a row of
+ * the score sheet (StageScores), the stamp inked across it. `--score-row` is
+ * the sheet's row height, set by StageScores.module.css per size.
+ */
+.row {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  min-height: var(--score-row);
+  padding-inline: var(--space-4);
+  border-bottom: var(--border-width-hairline) dashed var(--border-divider);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+/* Red ink on the wash and a 3px solid red edge: a diagnosis, drawn as a
+   stamp. Was a red-FILLED pill (--surface-accent under --text-inverse), the
+   primary action's red. Text on the wash: 5.28 on paper, 5.56 at night. */
 .stamped {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: var(--space-3);
   width: 100%;
   font: var(--meta-sm);
   font-weight: 600;
-  color: var(--text-inverse);
-  background: var(--surface-accent);
-  border-radius: var(--radius-tag);
-  padding: 8px 12px;
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  font-variant-numeric: var(--tabular);
+  color: var(--text-alert);
+  background: var(--surface-alert);
+  border: var(--border-width-stamp) solid var(--border-alert);
+  border-radius: var(--radius-stamp);
+  padding: var(--space-2) var(--space-5);
   rotate: -1deg;
+}
+
+.score {
+  white-space: nowrap;
 }

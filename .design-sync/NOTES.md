@@ -244,7 +244,7 @@ viewport media query, not the cell) overlapped its own figure labels.
 
 ## Previews are all repo-owned
 
-All 90 live in `.design-sync/previews/` — none are generated (cell count: see
+All 91 live in `.design-sync/previews/` — none are generated (cell count: see
 "Synced"). Copy is the product's own and numbers are the model's own — **and
 that was not true until the 2026-09-29 re-sync**: this paragraph already said
 so, while 64 of 245 cells carried retired copy, mockup copy, hand-typed game

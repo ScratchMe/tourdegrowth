@@ -1,8 +1,8 @@
-import { DefinitionTrigger, PillarChip } from "tour-de-growth";
+import { DefinitionTrigger, StageScore, StageScores } from "tour-de-growth";
 
 /*
  * The "?" that opens a definition. On its own it is deliberately tiny — it
- * has to sit inside a line of question copy or inside a pillar chip without
+ * has to sit inside a line of question copy or a row of the score sheet without
  * pushing anything around, so it is sized to the text it interrupts.
  *
  * It does not own the popover. Whether one is open is the caller's state
@@ -26,38 +26,40 @@ export const Inline = () => (
 );
 
 /*
- * `open` drives aria-expanded and a darker border, so the trigger shows it is
- * the one talking. The whole difference is a border/colour shift on a 16px
- * glyph, which is invisible unless the two states sit side by side — so they
- * do, each captioned with what changes. (For the trigger together with the
- * panel it opens, see GlossaryTerm.)
+ * A solid ring at rest — a real edge, the sign of a control (design system
+ * extension 05, C35: everywhere, the quiz included; it was dashed, which in
+ * this system means « not yet » and read as a loading spinner). `open` drives
+ * aria-expanded and the inverse fill, the system's one language for « this
+ * one ». Side by side, each captioned with what changes. Hover (pointer only)
+ * turns it body ink. (For the trigger with the panel it opens, see
+ * GlossaryTerm.)
  */
 export const Open = () => (
   <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
     <p style={line}>
-      Closed <DefinitionTrigger term="Churn" /> — muted border, aria-expanded=false
+      Closed <DefinitionTrigger term="Churn" /> — a solid muted ring, aria-expanded=false
     </p>
     <p style={line}>
-      Open <DefinitionTrigger term="Churn" open /> — ink border, aria-expanded=true
+      Open <DefinitionTrigger term="Churn" open /> — the inverse fill, aria-expanded=true
     </p>
   </div>
 );
 
 /**
- * `tone` matches the surrounding text: `muted` on paper, `alert` inside a red
- * wash chip — a weak pillar's chip is red, and an ink-coloured "?" in it
- * would read as a different element. Scores are the product's sample result
+ * `tone` matches the surrounding text: `muted` on a neutral row, `alert` on
+ * the stalling stage's red wash — an ink-coloured "?" there would read as a
+ * different element. Scores are the product's sample result
  * (lib/submissions/sample.ts).
  */
 export const Tones = () => (
-  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-    <PillarChip pillar="Acquisition" score={18} total={20}>
+  <StageScores label="Score per stage, out of 20" style={{ maxWidth: 420 }}>
+    <StageScore stage="Acquisition" score={18}>
       <DefinitionTrigger term="Acquisition" label="Definition: Acquisition" tone="muted" />
-    </PillarChip>
-    <PillarChip pillar="Retention" score={8} total={20} weak>
+    </StageScore>
+    <StageScore stage="Retention" score={8} tone="alert">
       <DefinitionTrigger term="Retention" label="Definition: Retention" tone="alert" />
-    </PillarChip>
-  </div>
+    </StageScore>
+  </StageScores>
 );
 
 /** `label` overrides the whole accessible name — the caller localizes it. Here in French, on ret-3. */

@@ -23,8 +23,8 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
-| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.d (le bon à tirer de la copie neuve), A7.4 après A7.3, et A7.12.c à l'ouverture. **A7.3.c est livré le 2026-10-01**, les textes de lancement de la ligne « Hors code » d'A7.3 le même jour (S0 à S5, PR d'intégration [#233](https://github.com/ScratchMe/tourdegrowth/pull/233), drapeau fermé). A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)**, sa copie, l'îlot partagé, le téléphone de Pédalix et le branchement faits le même jour (A12.c à A12.f.2)  et ses specs (A12.g) : reste A12.h (le bon à tirer, puis la recette) et A12.i (le `?ref=` de la boucle inverse, trouvé par B6). **A14, le moteur complet** : spécifié et validé le 2026-10-01 (C32) ; **A14.c est livré le même jour**, T0 à T7 (neuf PR de #255 à #266, drapeau fermé), sauf T6.2 (l'image de partage, après B5) ; reste A14.d, son bon à tirer. **A13** (trois alertes de dépendances, dont une critique sur `next`) livré le 2026-10-01. **A15**, la finition UI et UX d'après les reels et les lois de l'UX, ouvert le 2026-10-01 : tout livré le même jour : deux PR, puis A15.18 une fois C33 tranchée ; reste A15.19 : le retour de Claude Design (B7) est reçu le 2026-10-02, et son portage est **A16** |
-| **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30, après A7.10, A10 et A11** (B3, puis la re-synchro d'A11 le soir même : 88 composants, 292 cellules, 88 aperçus sur 88 rendus). Ouverts le 2026-10-01 : **B4** (la re-synchro du niveau 2 du jeu, faite le même jour), **B5** (l'image de partage du moteur, C32 Q17 : brief 06 écrit et déposé le même jour, à lancer), **B6** (la re-synchro d'A15 et de C33, faite le même jour : 90 composants, 303 cellules, les douze aperçus du jeu laissés par B4 régénérés) et **B7** (les puces d'étape, A15.19 : le retour 05 est reçu et recopié le 2026-10-02 ; son portage est A16). **B8** (ouvert le 2026-10-01 au soir) : le volet Design System montre une copie compilée le 2026-09-11, 34 cartes, alors que les fichiers et l'agent sont à jour ; Claude Design ne rafraîchit plus ce projet à l'ouverture ; laissé en l'état par Antoine le même soir (signalement prêt en D13). Hors d'eux, rien à lancer tant qu'un composant, ou une copie qu'un aperçu reprend, ne change pas |
+| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.d (le bon à tirer de la copie neuve), A7.4 après A7.3, et A7.12.c à l'ouverture. **A7.3.c est livré le 2026-10-01**, les textes de lancement de la ligne « Hors code » d'A7.3 le même jour (S0 à S5, PR d'intégration [#233](https://github.com/ScratchMe/tourdegrowth/pull/233), drapeau fermé). A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)**, sa copie, l'îlot partagé, le téléphone de Pédalix et le branchement faits le même jour (A12.c à A12.f.2)  et ses specs (A12.g) : reste A12.h (le bon à tirer, puis la recette) et A12.i (le `?ref=` de la boucle inverse, trouvé par B6). **A14, le moteur complet** : spécifié et validé le 2026-10-01 (C32) ; **A14.c est livré le même jour**, T0 à T7 (neuf PR de #255 à #266, drapeau fermé), sauf T6.2 (l'image de partage, après B5) ; reste A14.d, son bon à tirer. **A13** (trois alertes de dépendances, dont une critique sur `next`) livré le 2026-10-01. **A15**, la finition UI et UX d'après les reels et les lois de l'UX, ouvert le 2026-10-01 : tout livré le même jour : deux PR, puis A15.18 une fois C33 tranchée ; A15.19 est porté le 2026-10-02 par **A16** (la feuille de score) : A15 est clos |
+| **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30, après A7.10, A10 et A11** (B3, puis la re-synchro d'A11 le soir même : 88 composants, 292 cellules, 88 aperçus sur 88 rendus). Ouverts le 2026-10-01 : **B4** (la re-synchro du niveau 2 du jeu, faite le même jour), **B5** (l'image de partage du moteur, C32 Q17 : brief 06 écrit et déposé le même jour, à lancer), **B6** (la re-synchro d'A15 et de C33, faite le même jour : 90 composants, 303 cellules, les douze aperçus du jeu laissés par B4 régénérés) et **B7** (les puces d'étape, A15.19 : le retour 05 est recopié et porté le 2026-10-02, A16 ; la re-synchro qui l'emporte est **B9**, ouverte le même jour). **B8** (ouvert le 2026-10-01 au soir) : le volet Design System montre une copie compilée le 2026-09-11, 34 cartes, alors que les fichiers et l'agent sont à jour ; Claude Design ne rafraîchit plus ce projet à l'ouverture ; laissé en l'état par Antoine le même soir (signalement prêt en D13). Hors d'eux, rien à lancer tant qu'un composant, ou une copie qu'un aperçu reprend, ne change pas |
 | **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 à C29 tranchées le 2026-09-30, C26 à C29 livrées le même jour, **C25** (la spécification de A7.3, `ENGINE.md` §18) dans sa propre session. **C30** (le niveau 2 du jeu, `GAME-BRIEF.md` §17) le 2026-10-01. **C31** (le bloc « Niveau suivant » du jeu) et **C32** (le moteur complet, `docs/engine/moteur-complet.md` §19.15) le 2026-10-01. **C33** (la carte du jeu sous les chiffres du lecteur, A15.18) ouverte et tranchée le 2026-10-01. **C34** et **C35** (le rouge des ex aequo, le nouveau « ? », nées du retour 05) tranchées le 2026-10-02. **Rien n'est ouvert** |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, la fin d'A7.3 (le code et les textes de lancement sont livrés le 2026-10-01 ; reste le bon à tirer A7.3.d) et celle d'A14 (T6.2 et le bon à tirer A14.d) |
 | **E. La veille** | Personne | — | Rien à lancer avant un déclencheur |
@@ -241,31 +241,10 @@ livrés le 2026-10-01 dans la première (#252 ; le journal, à « A15 »).
 livré le même jour dans une seconde PR ([#257](https://github.com/ScratchMe/tourdegrowth/pull/257)), comme Antoine l'a choisi : les
 correctifs A15.7 à A15.14 et les décisions A15.15 à A15.17 et A15.20, qu'il a
 tranchées sur les recos (le détail, et ce que chaque test prouve, sont au
-journal, à « A15.7 à A15.20 »). **A15.18 suit le même jour** ([#262](https://github.com/ScratchMe/tourdegrowth/pull/262)), une fois C33 tranchée : « Dans le jeu » au-dessus de la carte du jeu (le journal, à « C33 »). **Reste :**
-
-| # | Quoi | Où |
-|---|---|---|
-| A15.19 | **Les puces d'étape ont l'allure d'un bouton secondaire** sans en être un (similarité) | Le retour de Claude Design (**B7**) est reçu le 2026-10-02 ; son portage est **A16** |
-
-### A16 — La feuille de score : le portage de l'extension 05 (ouvert le 2026-10-02)
-
-Le retour de Claude Design au brief 05 est dans
-[`design/ds-extension-05-return/`](design/ds-extension-05-return/README.md),
-recopié le 2026-10-02 (`COPIE.md`). La puce devient **une ligne d'une feuille
-de score**, sous le profil du parcours : la note, une jauge, le nom de
-l'étape, puis le `?`. Pas de cadre, pas de rayon de bouton. Antoine a tranché
-le même jour **C34** (toutes les étapes ex aequo en rouge, comme le profil) et
-**C35** (le nouveau `?` partout, quiz compris), et demandé le portage dans la
-même session. **Une PR.**
-
-| # | Quoi |
-|---|---|
-| A16.a | Les jetons de `tokens/scores.css` dans `src/styles/tokens/` |
-| A16.b | `StageScore` et `StageScores` remplacent `PillarChip`. Le rouge suit la netteté du frein (C34) |
-| A16.c | Le résultat : la feuille sous le profil, une colonne à toutes les largeurs |
-| A16.d | L'accueil : le nom de l'étape devient le lien, avec un nom accessible qui dit où il mène (copie neuve, « à relire ») |
-| A16.e | `StampedPillar` redessiné en tampon encré, ligne de la feuille ; `DefinitionTrigger` plein, survolé, rempli une fois ouvert (C35) |
-| A16.f | Les aperçus de `.design-sync/`, les specs (`targets`, contraste, résultat, accueil), les captures avant/après ; la re-synchro avec Claude Design suit (B) |
+journal, à « A15.7 à A15.20 »). **A15.18 suit le même jour** ([#262](https://github.com/ScratchMe/tourdegrowth/pull/262)), une fois C33 tranchée : « Dans le jeu » au-dessus de la carte du jeu (le journal, à « C33 »). **A15.19 suit le 2026-10-02** : le brief 05 à Claude Design (B7), puis son
+portage, **A16** ([#271](https://github.com/ScratchMe/tourdegrowth/pull/271)) : la puce d'étape devient une ligne d'une feuille de score
+(`StageScore`, `StageScores`), avec C34 et C35 tranchées le même jour (le
+journal, à « A16 »). **A15 est clos.**
 
 ---
 
@@ -309,9 +288,9 @@ dix captures), Antoine l'a lancé dans Claude Design, et **le retour est
 recopié le 2026-10-02** ([#270](https://github.com/ScratchMe/tourdegrowth/pull/270)) dans
 [`design/ds-extension-05-return/`](design/ds-extension-05-return/README.md) :
 22 fichiers, la planche toute en source, rejouée dans Chromium aux huit
-cadres (`COPIE.md`). Claude Design n'a rien touché hors de son dossier. Le
-portage est **A16** ; la re-synchro qui l'emportera vers le projet viendra
-après lui.
+cadres (`COPIE.md`). Claude Design n'a rien touché hors de son dossier. **Le
+portage (A16) est livré le 2026-10-02**, [#271](https://github.com/ScratchMe/tourdegrowth/pull/271) ; la re-synchro qui l'emporte vers le
+projet est B9.
 
 **B8 : l'index du projet Claude Design, réécrit le 2026-10-01 au soir.** Antoine
 ne voyait pas la borne kilométrique dans le projet ; ses captures montraient un
@@ -335,7 +314,19 @@ le 11 septembre. C'est un défaut de Claude Design, qu'aucun fichier envoyé par
 la synchro ne contourne. **Antoine, le 2026-10-01 : « on laisse comme ça, ce n'est pas si dérangeant ».** Le signalement reste prêt (D13) s'il change d'avis. Le portage ne l'attend pas,
 puisque l'agent voit le design system à jour.
 
-**Hors de B5 et B7, rien d'ouvert.** La prochaine synchro se lance quand un composant change, ou
+**B9, ouvert le 2026-10-02 : la re-synchro d'A16.** Ce qu'elle emporte :
+`StageScore` et `StageScores` (nouveaux ; leurs aperçus sont écrits sur des
+plateaux `clear`, `shared`, `level` et roast que le quiz peut produire ou que
+`/r/sample` affiche), `PillarChip` retiré (ses fichiers sortent du projet par
+`upload.deletePaths`, qui ne doit rien nommer sous `design/`), `StampedPillar`
+et `DefinitionTrigger` redessinés, les aperçus de `GlossaryTerm`,
+`DefinitionTrigger`, `StampedPillar`, `StageProfile` et `Tag`, `conventions.md`,
+trois jetons de plus (`--score-row-height-md`, `--score-row-height-sm`, `--radius-stamp`) et deux de moins
+(`--pad-chip*`). Attendu : 91 composants. Le retour 05, sous `design/` dans le
+projet, peut en partir exprès maintenant qu'il est porté (`.design-sync/NOTES.md`,
+« Synced ») : à décider avec Antoine au moment de la synchro.
+
+**Hors de B5 et B9, rien d'ouvert.** La prochaine synchro se lance quand un composant change, ou
 quand change une copie, un chiffre du modèle ou un comportement qu'un aperçu
 reprend : c'est ainsi que B3 a trouvé l'amende du jeu et les cartes de
 `SpaceStrip` restées d'avant A7.8 et A7.9, dans des notes reportées. Ce qu'elle
@@ -403,7 +394,7 @@ rien de privé dans le dépôt, qui est public. Cela vaut pour les chiffres de
 | Des badges en 429 dans des README | Le proxy compte `/r/<id>/…` dans le budget de lectures (120 par 10 minutes et par IP) **avant** le cache CDN, et les images d'un README passent par les quelques IP de camo. Mesurer avant de conclure ; si c'est réel, sortir `/r/<id>/badge/…` du budget, puisque la route ne lit Firestore qu'au premier passage | `src/proxy.ts`, `isResultReadPath` |
 | Une facture Vercel qui surprend | `VERCEL.md` §1.6 et §2.2 | `VERCEL.md` |
 | Besoin de `guidelines/` du bundle d'extension 01 | Le demander à Claude Design (son README l'annonce, l'archive ne le contenait pas) | `design/ds-extension-01-return/README.md` |
-| Un contrat de largeur qui descend à 320 px | À 320 px, le bandeau d'entrée au jeu passe sur trois lignes (la seconde, ≈ 270 px de texte, pour une colonne de 244). Laissé par décision d'Antoine (2026-09-29) : seule une copie plus courte le tiendrait. 360 px est réglé depuis le même jour. De même, `/r/<id>` déborde de 37 px à 320 px (le `PillarChip`) : hors contrat (`DESIGN-BRIEF.md` fixe 390 et exige 375-430), laissé par Antoine | `game/GameEntry.module.css`, `result/PillarChip.module.css` |
+| Un contrat de largeur qui descend à 320 px | À 320 px, le bandeau d'entrée au jeu passe sur trois lignes (la seconde, ≈ 270 px de texte, pour une colonne de 244). Laissé par décision d'Antoine (2026-09-29) : seule une copie plus courte le tiendrait. 360 px est réglé depuis le même jour. De même, `/r/<id>` débordait de 37 px à 320 px (le `PillarChip`), laissé par Antoine : depuis A16 (2026-10-02), la feuille de score tient à 320 px, tampon du roast compris, et `/r/sample` ne déborde plus ; un résultat en roast déborde encore de 14 px, par le badge roast de l'en-tête (`.headerRight`), que A16 ne touche pas. Hors contrat (`DESIGN-BRIEF.md` fixe 390 et exige 375-430) | `game/GameEntry.module.css`, `(app)/r/[id]/ResultView.module.css` |
 
 Un relevé par `stats.yml`, une fois par mois, suffit à voir passer les trois
 premiers. La méthode est la ligne « Lecture des stats par la session » de
