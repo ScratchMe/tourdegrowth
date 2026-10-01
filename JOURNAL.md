@@ -552,7 +552,7 @@ Le reste suit la reco : le mois suivant reprend les cibles et les définitions,
 **Un numéro rattrapé** : la décision s'appelait C31 dans le premier jet. `docs/decisions.md` montrait C31 déjà prise le matin même par le jeu (le bloc « Niveau suivant »), que la liste de `CHANTIERS.md` ne reportait pas encore. Renumérotée C32 avant le merge. Comme pour un numéro de PR (convention 8), un numéro de décision se lit dans l'index, pas dans une liste qui peut être en retard.
 
 
-## A14.c, T0 : le socle v3, plusieurs moteurs par appareil (2026-10-01)
+## A14.c, T0 : le socle v3, plusieurs moteurs par appareil (2026-10-01, #255)
 
 La première PR du moteur complet (`docs/engine/moteur-complet.md` §19.1 et §19.13), drapeau fermé. Rien ne change à l'écran : T0 pose ce que T1 à T6 vont remplir.
 
