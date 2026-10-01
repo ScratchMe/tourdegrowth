@@ -189,7 +189,7 @@ test("every dated prose page prints the sitemap's date, in its language", async 
     const shown = formatLongDate(lastmod, locale as "en" | "fr");
     if (time?.[2] !== shown) off.push(`${path}: shows "${time?.[2] ?? ""}", expected "${shown}"`);
   }
-  // Both languages of 8 articles, 24 terms and 2 legal pages: a sitemap that
+  // Both languages of every article, term and legal page: a sitemap that
   // lost a family would pass the loop by skipping it.
   expect(checked).toBe((articles.size + Object.keys(GLOSSARY).length + 2) * 2);
   expect(off).toEqual([]);

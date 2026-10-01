@@ -363,7 +363,7 @@ Répartition du poids : runtime Next.js 19,5 Mo (41 %), notre code 10,0 Mo
 - **Cinq fonctions est le plancher de cette architecture.** Descendre à quatre
   demanderait de fusionner les pages de contenu (`ISR`) avec les pages
   applicatives (`Page`), donc de revenir aux deux layouts racine — ce qui
-  coûterait le prérendu CDN des pages de contenu (74 le 2026-10-01). Mauvais
+  coûterait le prérendu CDN des pages de contenu (82 le 2026-10-01). Mauvais
   échange.
 
 ### 2.3 Convention de cadence

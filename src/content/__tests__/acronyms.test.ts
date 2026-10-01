@@ -28,6 +28,9 @@ const EXPANSION: Partial<Record<GlossaryTermId, RegExp>> = {
   nps: /net promoter score/i,
   cac: /customer acquisition cost|co[ûu]t d'acquisition client/i,
   ltv: /lifetime value/i,
+  // A7.3.e (2026-09-30) : le seul des quatre termes de la vente assistée qui
+  // soit un sigle.
+  acv: /annual contract value/i,
 };
 
 /** Les acronymes empruntés, et où ils doivent être développés. */
@@ -38,6 +41,14 @@ const BORROWED: [GlossaryTermId, string, RegExp][] = [
   ["revenue", "ARR", /annual recurring revenue|revenu récurrent annuel/i],
   ["revenue", "MRR", /monthly recurring revenue|revenu récurrent mensuel/i],
   ["arpu", "ARPPU", /per paying user|par utilisateur payant/i],
+  // A7.3.e (2026-09-30) — les sigles que les quatre termes de la vente
+  // assistée empruntent, chacun développé sur la page qui l'emploie.
+  ["acv", "ARR", /annual recurring revenue|revenu récurrent annuel/i],
+  ["acv", "TCV", /total contract value|valeur totale du contrat/i],
+  ["acv", "ARPA", /average revenue per account|revenu moyen par compte/i],
+  ["lead-to-opportunity", "MQL", /marketing.qualified lead|lead qualifié par le marketing/i],
+  ["lead-to-opportunity", "SQL", /sales.qualified lead|lead qualifié par les ventes/i],
+  ["lead-to-opportunity", "PQL", /product.qualified lead/i],
 ];
 
 function textOf(node: unknown, locale: Locale): string {
@@ -66,8 +77,8 @@ const pageOf = (id: GlossaryTermId) => ({ entry: GLOSSARY[id], deep: GLOSSARY_DE
 
 describe("les acronymes du glossaire", () => {
   it("couvre un jeu de termes non vide — sinon ce fichier ne prouve rien", () => {
-    expect(Object.keys(EXPANSION).length).toBeGreaterThanOrEqual(7);
-    expect(BORROWED.length).toBeGreaterThanOrEqual(6);
+    expect(Object.keys(EXPANSION).length).toBeGreaterThanOrEqual(8);
+    expect(BORROWED.length).toBeGreaterThanOrEqual(12);
   });
 
   for (const [id, expansion] of Object.entries(EXPANSION) as [GlossaryTermId, RegExp][]) {

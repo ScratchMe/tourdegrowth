@@ -38,7 +38,7 @@ in French or English.
 
 ### Around the Tour — live
 
-- **A glossary** of 24 growth terms, each with a long page in both languages.
+- **A glossary** of 28 growth terms, each with a long page in both languages.
 - **How it works**, which publishes the scoring rules, and **About**.
 - Two "open door" pages — a **growth audit checklist** and a **startup growth
   diagnostic** — and five **"AARRR vs …"** comparisons (North Star Metric,

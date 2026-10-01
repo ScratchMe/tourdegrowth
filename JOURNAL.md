@@ -782,6 +782,49 @@ D'où le contrôle du niveau 2 : une transaction de 150 000 €, à trancher (C3
 
 Tout est corrigé, et le §17.8 pose la règle. Elle a aussi mis en doute, de mémoire, que le faux prix barré échappe à l'amende administrative. La vérification sur Légifrance le confirme, et le texte le dit maintenant avec sa source plutôt qu'en une phrase absolue.
 
+## A7.3.e : les quatre termes de la vente assistée, avant le code qui les cite (2026-09-30)
+
+**La demande** : l'item A7.3.e de `CHANTIERS.md`, né de C25 (Q8). Quatre pages de glossaire, FR et EN, sur le modèle de la vague 2.2 : « taux de closing », « cycle de vente », « ACV » et « conversion lead → opportunité ». Elles s'écrivent **avant** A7.3.c, qu'une autre session construit en même temps, pour que chaque fiche assistée du moteur puisse renvoyer à son terme. Rien sous `lib/engine/`, `content/engine-*.ts` ni `aarrr-funnel-template/` n'a été touché.
+
+**Les requêtes d'abord.** `stats.yml` (portée `gsc`), clé `age` créée dans le scratchpad, rapport déchiffré sur place : aucun chiffre n'entre ici. **Aucune requête ne touche encore la vente assistée**, ce qui était attendu, puisque le site n'a aucune page pour en recevoir. Le rapport confirme en revanche la **forme** de ce qui arrive : des définitions courtes, des développements de sigle et des traductions. Les recherches du jour confirment les quatre slugs proposés (« win rate », « sales cycle length », « ACV », « lead to opportunity conversion rate »). Les FAQ sont donc écrites sur ces variantes : « comment calculer », « c'est quoi un bon… », « ACV, ça veut dire quoi ? », « ACV ou ARR », « MQL, SQL, opportunité : dans quel ordre ? ».
+
+**Les choix, un par un** :
+- **Slugs** : `win-rate`, `sales-cycle`, `acv` et `lead-to-opportunity`, en anglais dans les deux langues (R2-16). Les titres suivent la requête de chaque langue : « Taux de closing — win rate » et « Win rate », « Cycle de vente » et « Sales cycle length », « ACV — Annual Contract Value » (le sigle développé, comme ARPU et NPS), « Conversion lead → opportunité » et « Lead-to-opportunity rate », le nom de la fiche du moteur. « Conversion rate » est dans la définition anglaise, pour la requête. Aucun titre ne dépasse 56 caractères.
+- **Les exemples reprennent le §18.9, rien d'autre** : 72 opportunités sur 480 MQL, 18 gagnées sur 75 conclues et 130 créées, 64 jours de cycle médian, 432 000 € sur 18 contrats, un CAC de 19 000 €, 180 000 € de MRR sur 100 clients et les cibles de 18 % et 32 %. Les marges de 75 % et 60 % sont les cas de test du §18.9.6, et la page les pose en hypothèses. Chaque exemple en tire une leçon qui n'existait pas encore. **Le dénominateur** : 18 ÷ 130 donnerait 14 % au lieu de 24 %. **La médiane** : allonger d'un an la plus longue des 18 affaires ajoute 365 ÷ 18 ≈ 20 jours à la moyenne et rien à la médiane. **L'ACV n'est pas l'ARPA × 12** : 2 000 € contre 1 800 €, parce que les deux ne comptent pas les mêmes clients. **La cohorte n'est pas le flux** : 130 ÷ 480 donnerait 27 %, en mélangeant un flux et une cohorte.
+- **Aucun ordre de grandeur de l'instrument d'audit.** Les recherches du jour répètent partout le « 25-35 % » de l'audit : c'est exactement ainsi qu'il serait entré. Les sections « Ordres de grandeur » disent donc ce qu'un chiffre publié vaut, ou donnent un ordre de grandeur **interne** : sur 75 affaires, une affaire vaut 1,3 point, et sur 480 MQL une opportunité vaut 0,2 point. **Une seule source primaire est citée**, en contexte : Christoph Janz, « Five ways to build a $100 million business » (5 octobre 2014), relu le jour même. Il y parle de revenu par compte et non d'ACV, et la page le dit. C'est un cadrage de modèle économique : il ne désigne rien (C1), et ce n'est pas un repère de fiche.
+- **« Dans le Tour »** : le Tour ne pose aucune de ces questions. Chaque page prend la question la plus proche et dit honnêtement le lien. `win-rate` va à `rev-1` (une perte dont la raison est écrite est un test de prix), `sales-cycle` à `acq-3` (le cycle décide si le CAC est une mesure ou un ordre de grandeur). `acv` va à `rev-2` (la première entrée de la LTV), `lead-to-opportunity` à `acq-1` (un canal est mesuré quand on connaît ses opportunités, pas ses leads).
+
+**Le maillage était saturé**, comme le lot 2 l'avait prévu. Toutes les pages voisines étaient au plafond de quatre liens. Le plafond n'a pas été desserré : **huit échanges**, chacun contre un lien plus lâche vers une page qui en reçoit beaucoup. `revenue` passe de 7 liens entrants à 4, et `activation` de 8 à 6. `cac` et `revenue` mènent à `win-rate`, `cac-payback` et `time-to-value` (le dernier créneau libre utile) à `sales-cycle`. `arpu` et `ltv` mènent à `acv`, `acquisition` et `pql` à `lead-to-opportunity`. La règle mesurée à la main après chaque lot de 2.2 devient un test : tout terme reçoit au moins deux liens, et les quatre neufs en reçoivent deux de pages qui existaient avant eux. Les pages qui ne gagnent qu'un lien gardent leur date : un lien n'est pas du contenu.
+
+**Deux défauts vus à l'écran, pas à la relecture** (leçon nº1, encore) : « 5 » seul en fin de ligne avant « octobre 2014 », et « 13 » séparé de « mois ». Les nombres de ce corpus n'avaient reçu l'insécable que dans les groupes de chiffres et avant « % ». Les chaînes neuves la portent aussi entre un nombre et son unité de temps, et dans les dates. La flèche de « lead → opportunité » est liée au mot qui la suit : liée au mot d'avant, elle faisait passer le titre sur trois lignes à 390 px.
+
+**Les gardes, avec leur non-vacuité** (écrite dans les fichiers) :
+- `glossary.test.ts` lit les ordres de grandeur **dans** `audit-catalog.ts` (24 ce jour-là, dont 25-35, 12-18 et 3×) et exige qu'aucun n'apparaisse sur les quatre pages. Écrire « 25-35 % » dans le français de `win-rate` et « 3× » dans l'anglais d'`acv` fait tomber exactement les deux cas de langue, et rien d'autre.
+- La règle des deux liens entrants : remettre `activation` dans `pql.related` la fait tomber seule.
+- `acronyms.test.ts` développe ACV, et les sigles empruntés : ARR, TCV et ARPA sur `acv`, MQL, SQL et PQL sur `lead-to-opportunity`.
+- Un e2e par terme, par langue et par largeur : les six sections, la vraie question du Tour, les liens voisins, et aucun débordement. `french-typography.spec.ts` couvre `acv` et `win-rate`.
+
+**Copie neuve, donc `TODO: à relire`** (convention 6). Elle ira au bon à tirer d'A7.3.d, qui les comprend déjà.
+
+**Le relecteur-copie** a trouvé six choses, toutes corrigées :
+- un « vous » au milieu du tutoiement ;
+- une durée inventée (« deux semaines ») ;
+- un seul marqueur « à relire » pour les quatre entrées longues, alors que `/bon-a-tirer` regroupe par terme ;
+- une définition anglaise de `lead-to-opportunity` qui ne disait pas la même chose que la française ;
+- deux ordres de grandeur sans source dans le texte d'`acv` ;
+- « la TCV » au féminin, quand l'ACV est au masculin partout ailleurs.
+
+**Vérifié** :
+- `tsc` et `eslint` propres, **2 400 tests unitaires** (après la fusion de #232), `vitest --coverage` au-dessus de ses seuils, `next build` propre, avec 56 pages de terme prérendues.
+- La suite Playwright complète, avec les variables de la CI et l'émulateur Firestore : **688 specs, 683 passées, 5 ignorées par construction, aucun échec ni rejeu**. Elle a tourné trois fois : avant les retours du relecteur, après, puis sur la tête fusionnée.
+- À l'écran, les quatre pages, en FR et en EN, à 1 280 et 390 px : réponse 200, aucun débordement, `hreflang` fr, en et x-default, JSON-LD `DefinedTerm` et fil d'Ariane, ligne de date.
+- Le sitemap porte 56 pages de terme, `/llms.txt` les 28 termes, et `/llms-full.txt` les quatre parties neuves.
+- Mesuré : 1 143 à 1 468 mots par langue et par terme, des extraits de 122 à 160 caractères et des titres de 34 à 56.
+
+**Trouvé en se vérifiant, hors de cette PR** : `npm audit --omit=dev` n'est plus à zéro sur `main`. Il relève trois alertes, dont une **critique sur `next`**, dans `ImageResponse` de `next/og`, que le site utilise pour ses images de partage. Elles deviennent **A13** de `CHANTIERS.md` : une PR à part. Son merge attend l'accord d'Antoine, parce qu'elle touche une dépendance (`/livrer` §0).
+
+**`main` a bougé pendant la PR** : #232 (le niveau 2 du jeu) a pris le numéro A12, et les alertes sont donc devenues A13. `main` a été fusionné en gardant les deux côtés de `CHANTIERS.md`, de `CLAUDE.md` et de ce journal.
+
 ## La documentation remise d'accord avec le code, et le journal découpé en volumes (2026-10-01, demandé par Antoine)
 
 Antoine a demandé de mettre à jour le README et toute documentation qui ne
@@ -865,7 +908,7 @@ avant le merge (`/livrer` §0) ; d'ici là, un merge qui ne touche que
 - `TESTING.md` disait que Vitest ne rend pas un composant (il le fait par
   `renderToStaticMarkup`) et tenait encore le flake de `locale-routing` pour
   ouvert ; `/livrer` aussi ;
-- `VERCEL.md` : 74 pages de contenu et non 72, le quota de déploiements que le
+- `VERCEL.md` : 82 pages de contenu (depuis A7.3.e) et non 72, le quota de déploiements que le
   « push gratuit » oubliait, un renvoi au mauvais paragraphe, et la cadence du
   §2.3 marquée caduque depuis le 2026-09-26 ;
 - `GITHUB.md` : quatre workflows et non trois, et l'émulateur dans `ci.yml` ;
@@ -886,7 +929,8 @@ zéro sur `main`. Trois alertes, dont une **critique** sur `next` 16.3.4
 dont se servent toutes nos images de partage), corrigées dans leurs plages
 semver. C'est une montée de dépendances, donc une PR à part avec l'accord
 d'Antoine ; la session d'A7.3.e l'a aussi relevée (A13 sur sa branche), et
-`CLAUDE.md` la met en tête de ses points ouverts.
+`CLAUDE.md` la met en tête de ses points ouverts. A7.3.e a été mergé (#235)
+pendant cette PR, avec A13 : la ligne de `CLAUDE.md` y renvoie.
 
 **Vérifié** : `eslint` et `tsc` propres, `vitest --coverage` vert et au-dessus
 de ses seuils, la vérification des longueurs de `marketing/` (71, aucune

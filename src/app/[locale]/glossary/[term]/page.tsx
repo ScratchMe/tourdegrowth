@@ -26,7 +26,7 @@ function isGlossaryTermId(value: string): value is GlossaryTermId {
   return Object.hasOwn(GLOSSARY, value);
 }
 
-/** All 15 terms × both locales — a fixed, known set (content/glossary.ts), not user input. */
+/** Every term × both locales — a fixed, known set (content/glossary.ts), not user input. */
 export function generateStaticParams(): { locale: string; term: string }[] {
   return LOCALES.flatMap((locale) => Object.keys(GLOSSARY).map((term) => ({ locale, term })));
 }

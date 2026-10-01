@@ -317,7 +317,7 @@ CSS, aucun composant partagé. Les valeurs de tokens sont recopiées à la main.
 
 ### 2.2 Invariants que des tests tiennent
 
-- Les pages de contenu (celles du sitemap : 74 au 2026-10-01) sortent en `●` du build. Tout ce qui les
+- Les pages de contenu (celles du sitemap : 82 au 2026-10-01, depuis A7.3.e) sortent en `●` du build. Tout ce qui les
   redynamise est une régression — vérifier le résumé de `next build`.
 - Aucun `Button` du dossier `[locale]` vers une route applicative n'utilise
   `next/link` (garde statique + spec qui enregistre les requêtes réseau).
