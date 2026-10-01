@@ -358,7 +358,13 @@ export type AnnexPageId = `annex:${number}`;
  * their v1 ids, so a v1 file's `deck.include` still means what it meant.
  */
 export type SlgSlideId = "slg:peloton" | "slg:leak" | "slg:scenario";
-export type SlideId = FixedSlideId | "total" | SlgSlideId | "scenario" | `whatif:${LeverId}` | AnnexPageId;
+/**
+ * « Ce qui a bougé » (§19.2.6, A14 T1): one per motion, from the second
+ * month only, unchecked by default (C32 Q5). Not a `FixedSlideId`: a
+ * one-month engine — every v1 and v2 file — has no such slide at all.
+ */
+export type SeriesSlideId = "evolution" | "slg:evolution";
+export type SlideId = FixedSlideId | "total" | SlgSlideId | SeriesSlideId | "scenario" | `whatif:${LeverId}` | AnnexPageId;
 
 export const isAnnexPage = (id: SlideId): id is AnnexPageId => id.startsWith("annex:");
 
@@ -814,7 +820,12 @@ export type SlideTitleKey =
   | "unitEconomicsOneSidePlg"
   | "unitEconomicsOneSideSlg"
   | "unitEconomicsNoneMargins"
-  | "unitEconomicsNoneDifferent";
+  | "unitEconomicsNoneDifferent"
+  /** « Ce qui a bougé » (§19.2.6): how many numbers moved since the month before, and the leak; or why the two months don't compare. */
+  | "evolution"
+  | "evolutionOne"
+  | "evolutionStill"
+  | "evolutionApart";
 export interface SlideTitle {
   key: SlideTitleKey;
   /** Placeholders, already formatted; `**…**` in the template marks the red accent. */
@@ -877,6 +888,58 @@ export interface TotalView {
   link: { known: Known; fromSelfServe: number | null; oppsCreated: number | null };
 }
 
+// --- The monthly series (§19.2, A14 T1): computed by series.ts, never stored. ---
+
+/**
+ * Why two months of a number don't compare (§19.2.5). `month` says which of
+ * the two the status reason is about: the board writes « estimé en août », or
+ * says nothing on the month being filled.
+ */
+export type Incomparable =
+  /** Its variant, its window or its definition note changed. */
+  | { why: "definition-changed" }
+  /** Counts one month, a rate typed directly the other: two different readings. */
+  | { why: "entered-differently" }
+  | { why: "not-measured" | "estimated" | "conflicting"; month: "before" | "now" };
+
+export type Comparison = { comparable: true; before: number; now: number } | ({ comparable: false } & Incomparable);
+
+/**
+ * How far a number moved (§19.2.5): a rate in points (« +6 pts »), money and
+ * durations in value and in percent of the month before (« +1 200 € ·
+ * +8 % », the percent `null` from a zero), a plain ratio in value. Signed:
+ * the screen writes the sign and an arrow, never a colour.
+ */
+export type Delta = { kind: "points"; change: number } | { kind: "relative"; change: number; percent: number | null } | { kind: "value"; change: number };
+
+export interface SeriesRow {
+  metric: MetricId;
+  comparison: Comparison;
+  /** Comparable only. */
+  delta?: Delta;
+  towardTarget?: boolean;
+}
+
+export interface MotionSeries {
+  motion: Motion;
+  /** Every number of the motion that is a number, in catalogue order — AARRR, never sorted by how far it moved. */
+  rows: SeriesRow[];
+  /** The stage(s) the month before named, when it named one; `[]` otherwise. */
+  previousLeak: CandidateId[];
+  /** This month names another leak than the month before did (« En août, la fuite était Activation »). */
+  leakChanged: boolean;
+}
+
+export interface Series {
+  /** The month before the one being filled, and that one. */
+  previousMonth: YearMonth;
+  month: YearMonth;
+  /** How many months the engine holds. */
+  months: number;
+  /** The ticked motions, in `MOTIONS` order. */
+  motions: MotionSeries[];
+}
+
 /**
  * Everything the board renders, computed in one pass from the state.
  *
@@ -899,5 +962,7 @@ export interface EngineDerived {
   sanity: SanityCheck[];
   findings: Finding[];
   mirror: Mirror | null;
+  /** The last two months side by side (§19.2.5): absent while the engine holds one month, so a v1 or v2 file derives as it did. */
+  series?: Series;
 }
 

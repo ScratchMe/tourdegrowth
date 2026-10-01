@@ -157,6 +157,10 @@ describe("placeholders", () => {
     unitEconomicsOneSideSlg: ["input", "m"],
     unitEconomicsNoneMargins: [],
     unitEconomicsNoneDifferent: ["plg", "slg"],
+    evolution: ["leak", "month", "n"],
+    evolutionOne: ["leak", "month", "n"],
+    evolutionStill: ["leak", "month"],
+    evolutionApart: ["before", "now"],
   };
 
   it("gives each slide title exactly the values the slide builder provides (§9.3)", () => {
@@ -185,6 +189,7 @@ describe("placeholders", () => {
       r1: "Sur 100 MQL, 12 à 15 deviennent une opportunité", r2: "sur 100 opportunités conclues, 22 à 26 sont signées",
       r3: "sur 100 nouveaux clients, 55 à 60 sont en production à 90 jours", base: "MQL",
       worth: "3 opportunités de plus pour 100 leads", known: "libre-service", other: "assisté",
+      month: "juillet 2026", leak: "\u00a0; l'activation reste la fuite", before: "juillet 2026", now: "août 2026",
     },
     en: {
       activated: "18 reach first value", d30: "9–12 are still active at day 30", paid: "6–9 pay",
@@ -203,6 +208,7 @@ describe("placeholders", () => {
       r1: "Out of 100 MQLs, 12–15 become an opportunity", r2: "out of 100 closed opportunities, 22–26 are signed",
       r3: "out of 100 new customers, 55–60 are live within 90 days", base: "MQLs",
       worth: "3 more opportunities per 100 leads", known: "self-serve", other: "sales-assisted",
+      month: "July 2026", leak: "; activation is still the leak", before: "July 2026", now: "August 2026",
     },
   };
 

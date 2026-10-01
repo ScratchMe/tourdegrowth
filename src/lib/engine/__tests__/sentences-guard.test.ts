@@ -12,7 +12,7 @@ import { SLIDE_ORDER } from "../types";
 import type { EngineState, FindingKind, MetricEntry, SanityId, SlideTitleKey, SourceRef, ToolId } from "../types";
 import { knownIn } from "../values";
 import { CTX_EN, CTX_FR, EN, FR } from "./props";
-import { emptyState, estimated, exampleState, hybridState, measured, missing, ratio, salesAssistedState, tourResult, withEntry, withTarget, withoutTargets } from "./fixtures";
+import { emptyState, estimated, exampleState, hybridState, measured, missing, ratio, salesAssistedState, tourResult, withEntry, withMonthBefore, withTarget, withoutTargets } from "./fixtures";
 
 /**
  * The guard: every sentence the engine can produce, read as a reader would.
@@ -95,9 +95,11 @@ function vowelMonths(state: EngineState): EngineState {
   return state;
 }
 
-/** Every slide included — the mirror too, so its rows are swept. */
+/** Every slide included — the mirror too, so its rows are swept, and « Ce qui a bougé », unticked by default. */
 function includeAll(state: EngineState): EngineState {
   for (const id of SLIDE_ORDER) state.deck.include[id] = true;
+  state.deck.include.evolution = true;
+  state.deck.include["slg:evolution"] = true;
   return state;
 }
 
@@ -267,6 +269,58 @@ const SCENARIOS: { name: string; build: () => { state: EngineState; result?: Ret
       s.deck.showSiteCredit = false;
       return { state: s };
     },
+  },
+  // The monthly series (A14 T1, §19.2): July closed before the example's August, each time with something else moved.
+  {
+    name: "two months, numbers moved, the leak stays",
+    build: () => ({
+      state: withMonthBefore(exampleState(), (july) => {
+        july.metrics["act.rate"] = measured(ratio(120, 800), tool("amplitude"));
+        july.metrics["ret.logo-churn"] = measured(ratio(12, 400), tool("stripe"));
+        july.metrics["rev.arpa"] = measured(ratio(46_000, 400), tool("stripe"));
+        july.metrics["acq.cac"] = measured(ratio(19_000, 40), { kind: "person", role: "finance" }, { variant: "media-only" });
+      }),
+    }),
+  },
+  { name: "two months, one number moved", build: () => ({ state: withMonthBefore(exampleState(), (july) => void (july.metrics["act.rate"] = measured(ratio(120, 800), tool("amplitude")))) }) },
+  { name: "two months, nothing moved", build: () => ({ state: withMonthBefore(exampleState()) }) },
+  {
+    // July: activation above its target, churn behind — July's leak was churn, August's is activation.
+    name: "two months, the leak changes",
+    build: () => ({
+      state: withMonthBefore(exampleState(), (july) => {
+        july.metrics["act.rate"] = measured(ratio(200, 800), tool("amplitude"));
+        july.metrics["ret.logo-churn"] = measured(ratio(16, 400), tool("stripe"));
+      }),
+    }),
+  },
+  {
+    // Every number of July read differently: nothing compares, and the slide says why for each.
+    name: "two months that don't compare",
+    build: () => ({
+      state: withMonthBefore(exampleState(), (july) => {
+        const m = july.metrics;
+        m["acq.signup-rate"] = estimated(2.5, 3.5);
+        m["acq.top-channel-share"] = conflicting;
+        m["acq.cac"] = { ...m["acq.cac"]!, variant: "fully-loaded" };
+        m["act.rate"] = { ...m["act.rate"]!, definitionNote: "un projet créé" };
+        delete m["ret.logo-churn"];
+        m["ref.referred-share"] = measured({ kind: "rate", percent: 6 }, tool("product-db"));
+        m["rev.arpa"] = missing("not-tracked", "meeting");
+        m["rev.expansion"] = estimated(2, 4);
+        m["rev.contraction"] = estimated(1, 2);
+      }),
+    }),
+  },
+  {
+    name: "two months of the hybrid",
+    build: () => ({
+      state: withMonthBefore(hybridState(), (july) => {
+        july.metrics["act.rate"] = measured(ratio(120, 800), tool("amplitude"));
+        july.metrics["slg.rev.win-rate"] = measured(ratio(15, 75), tool("hubspot"));
+        july.metrics["slg.acq.cycle"] = measured({ kind: "duration", value: 70, unit: "days", statistic: "median" }, tool("hubspot"));
+      }),
+    }),
   },
 ];
 

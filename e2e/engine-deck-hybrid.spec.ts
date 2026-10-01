@@ -3,7 +3,7 @@ import { QUESTIONS } from "../src/content/copy-library";
 import { ENGINE_COPY } from "../src/content/engine-copy";
 import { hybridState, salesAssistedState, tourResult } from "../src/lib/engine/__tests__/fixtures";
 import type { EngineState } from "../src/lib/engine/types";
-import { ADMIN_PASSWORD, expect, grantOwnerPreview, readEachOnScreen, SKIP_ADMIN_REASON, test } from "./helpers";
+import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
 import { engineSeed } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
@@ -88,14 +88,23 @@ for (const locale of ["fr", "en"] as const) {
     test("every slide prints filled templates in the brand's glyphs only", async ({ page }) => {
       await openDeck(page, locale, linkedHybrid());
       await page.getByTestId("deck-include-mirror").check();
-      // Each slide laid out before it is read: a thumbnail is `content-visibility: auto`, and the first one,
-      // read in the same frame it scrolled in, came back empty once in eight runs (2026-10-01).
+      // Each slide read ONCE, on screen, when its text is there: a thumbnail is `content-visibility: auto`. The
+      // first one, read in the same frame it scrolled in, came back empty once in eight runs (2026-10-01); then a
+      // second read after scrolling back up to it came back empty once more, under load (A14 T1). So the text the
+      // poll saw laid out is the text checked below — no second read.
       const slides = page.locator("[data-slide]");
+      const texts: (readonly [string | null, string])[] = [];
       for (let i = 0; i < (await slides.count()); i++) {
         await slides.nth(i).scrollIntoViewIfNeeded();
-        await expect.poll(() => slides.nth(i).evaluate((el) => (el as HTMLElement).innerText.length)).toBeGreaterThan(80);
+        let read: readonly [string | null, string] = [null, ""];
+        await expect
+          .poll(async () => {
+            read = await slides.nth(i).evaluate((el) => [el.getAttribute("data-slide"), (el as HTMLElement).innerText] as const);
+            return read[1].length;
+          })
+          .toBeGreaterThan(80);
+        texts.push(read);
       }
-      const texts = await readEachOnScreen(page, slides, (el) => [el.getAttribute("data-slide"), (el as HTMLElement).innerText] as const);
       expect(texts.map(([id]) => id)).toContain("slg:scenario");
       const allowed = /^[\n\t\u0020-\u007e\u00a0-\u00ff–—’«»…€·×÷±]*$/u;
       for (const [id, text] of texts) {

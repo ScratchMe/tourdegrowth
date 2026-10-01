@@ -268,6 +268,32 @@ jamais la date du jour.
   deuxième mois. Un fichier à un seul mois garde la note d'aujourd'hui, au
   caractère près.
 
+*Écarts au code, T1 (2026-10-01).*
+- **La forme d'une ligne** : « Activation : 15 %, puis 18 % (+3 points) »,
+  sans flèche. Les trois polices des slides ne dessinent pas « → » (§10.4,
+  gardé par `engine-copy.test.ts`) ; une slide qui veut la flèche la dessine,
+  comme la slide de la demande. Les points s'écrivent « points », comme sur les
+  slides « Et si », et pas « pts ».
+- **« Vers la cible »** ne se dit que d'un chiffre qui était **en retard** sur
+  sa cible le mois d'avant, et qui a bougé dans le bon sens. « S'en rapprocher »
+  à la lettre aurait écrit « vers la cible » sous une activation tombée de 25 %
+  à 18 % pour une cible à 20 %. Seule la cible d'une étape candidate a un sens ;
+  celle d'un autre chiffre ne dit jamais « vers ».
+- **La slide existe dès le deuxième mois**, décochée, même quand rien ne se
+  compare : c'est le cas « ne se comparent pas encore », qui dit pourquoi. Elle
+  n'est cochée par défaut dans aucun cas (Q5).
+- **Ses identifiants** ne sont pas des `FixedSlideId` mais un type à part,
+  `SeriesSlideId` (`"evolution" | "slg:evolution"`) : un moteur à un mois, donc
+  tout fichier v1 ou v2, n'a pas de slide de ce nom, et ses goldens n'en voient
+  aucune.
+- **Le corps** montre au plus six chiffres qui ont bougé, dans l'ordre du
+  catalogue. Quand aucun n'a bougé, il montre ceux qui sont restés stables
+  (« Rien n'a bougé depuis juillet »). Quand rien ne se compare, il donne la
+  raison de chacun, sauf pour un chiffre qui manque encore ce mois-ci.
+- **Le composant de la slide** est livré avec T1, en version minimale (les lignes
+  « À côté » de la slide de fuite), pour qu'aucune slide du modèle ne reste sans
+  rendu. Sa mise en page propre vient avec T2.
+
 ---
 
 ### 19.3 La rétention J30 et la part recommandée en €
