@@ -3,6 +3,7 @@ import {
   caretAfterSignificant,
   displayNumber,
   groupTypedNumber,
+  isUnreadableNumber,
   parseTypedNumber,
   regroupTypedNumber,
   significantBefore,
@@ -151,3 +152,31 @@ describe("displayNumber (a stored value as the box shows it on load)", () => {
     }
   });
 });
+
+/**
+ * A15.2: a field that writes on blur must tell an empty box (remove the
+ * value) from an unreadable one (keep it). Both reach it as `null`.
+ */
+describe("isUnreadableNumber", () => {
+  it("is false for an empty box, blanks included: empty means remove", () => {
+    expect(isUnreadableNumber("", "fr")).toBe(false);
+    expect(isUnreadableNumber("   ", "en")).toBe(false);
+  });
+
+  it("is false for a number the reader wrote their way", () => {
+    expect(isUnreadableNumber("1 250,5", "fr")).toBe(false);
+    expect(isUnreadableNumber("1,250.5", "en")).toBe(false);
+    expect(isUnreadableNumber("25", "en")).toBe(false);
+  });
+
+  it("is true for text that reads as no number", () => {
+    expect(isUnreadableNumber("abc", "fr")).toBe(true);
+    expect(isUnreadableNumber("25 %%", "en")).toBe(true);
+  });
+
+  it("is true for a decimal where a whole number is required, and only then", () => {
+    expect(isUnreadableNumber("12,5", "fr", true)).toBe(true);
+    expect(isUnreadableNumber("12,5", "fr")).toBe(false);
+  });
+});
+

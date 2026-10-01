@@ -5,8 +5,8 @@ import { ErrorScreen } from "tour-de-growth";
  * reader who lands here still has somewhere to go.
  *
  * It is what Next's error boundaries render, which is why it takes an `Error`
- * and a `reset`: the button re-renders the segment that threw rather than
- * reloading the document.
+ * and a `retry`: the button fetches the segment that threw again and
+ * re-renders it, rather than reloading the document.
  *
  * The technical message is never shown in place of the reassurance — Next's
  * `digest` prints small underneath, so support has something to search on
@@ -20,12 +20,12 @@ const boom = () => {
 };
 
 /** As it ships. */
-export const English = () => <ErrorScreen locale="en" error={boom()} reset={() => {}} />;
+export const English = () => <ErrorScreen locale="en" error={boom()} retry={() => {}} />;
 
 /** In French. */
-export const French = () => <ErrorScreen locale="fr" error={boom()} reset={() => {}} />;
+export const French = () => <ErrorScreen locale="fr" error={boom()} retry={() => {}} />;
 
 /** Without a digest — nothing prints under the card. */
 export const NoDigest = () => (
-  <ErrorScreen locale="en" error={new Error("Request failed (500)")} reset={() => {}} />
+  <ErrorScreen locale="en" error={new Error("Request failed (500)")} retry={() => {}} />
 );

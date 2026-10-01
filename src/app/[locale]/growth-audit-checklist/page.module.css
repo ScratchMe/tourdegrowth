@@ -74,6 +74,7 @@
 /* L'étape est un lien vers sa page de glossaire (R2-13), habillé comme le
    titre qu'il est : pas de soulignement avant le survol. */
 .pillarLink {
+  composes: strip from "../../../styles/hit.module.css";
   color: inherit;
   text-decoration: none;
 }

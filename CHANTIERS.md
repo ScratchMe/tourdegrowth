@@ -23,7 +23,7 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
-| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.d (le bon à tirer de la copie neuve), A7.4 après A7.3, et A7.12.c à l'ouverture. **A7.3.c est livré le 2026-10-01**, les textes de lancement de la ligne « Hors code » d'A7.3 le même jour (S0 à S5, PR d'intégration [#233](https://github.com/ScratchMe/tourdegrowth/pull/233), drapeau fermé). A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)**, sa copie, l'îlot partagé, le téléphone de Pédalix et le branchement faits le même jour (A12.c à A12.f.2)  et ses specs (A12.g) : reste A12.h (le bon à tirer, puis la recette). **A14, le moteur complet** : spécifié et validé le 2026-10-01 (C32), A14.c peut partir. **A13** (trois alertes de dépendances, dont une critique sur `next`) livré le 2026-10-01 |
+| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.d (le bon à tirer de la copie neuve), A7.4 après A7.3, et A7.12.c à l'ouverture. **A7.3.c est livré le 2026-10-01**, les textes de lancement de la ligne « Hors code » d'A7.3 le même jour (S0 à S5, PR d'intégration [#233](https://github.com/ScratchMe/tourdegrowth/pull/233), drapeau fermé). A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)**, sa copie, l'îlot partagé, le téléphone de Pédalix et le branchement faits le même jour (A12.c à A12.f.2)  et ses specs (A12.g) : reste A12.h (le bon à tirer, puis la recette). **A14, le moteur complet** : spécifié et validé le 2026-10-01 (C32), A14.c peut partir. **A13** (trois alertes de dépendances, dont une critique sur `next`) livré le 2026-10-01. **A15**, la finition UI et UX d'après les reels et les lois de l'UX, ouvert le 2026-10-01 : ses six premiers items livrés le même jour |
 | **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30, après A7.10, A10 et A11** (B3, puis la re-synchro d'A11 le soir même : 88 composants, 292 cellules, 88 aperçus sur 88 rendus). Ouverts le 2026-10-01 : **B4** (la re-synchro du niveau 2 du jeu) et **B5** (l'image de partage du moteur, C32 Q17). Hors d'eux, rien à lancer tant qu'un composant, ou une copie qu'un aperçu reprend, ne change pas |
 | **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 à C29 tranchées le 2026-09-30, C26 à C29 livrées le même jour, **C25** (la spécification de A7.3, `ENGINE.md` §18) dans sa propre session. **C30** (le niveau 2 du jeu, `GAME-BRIEF.md` §17) le 2026-10-01. **C31** (le bloc « Niveau suivant » du jeu) et **C32** (le moteur complet, `docs/engine/moteur-complet.md` §19.15) le 2026-10-01. **Rien n'est ouvert** |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, la fin d'A7.3 (le code et les textes de lancement sont livrés le 2026-10-01 ; reste le bon à tirer A7.3.d) |
@@ -222,6 +222,45 @@ fermé, sans branche d'intégration. Toute copie neuve porte « TODO: à relire 
 | A14.c | **Le code** | T0 à T7 (§19.14), ~16,5 jours-agent, une PR chacune mergée dès qu'elle est verte. **T0 d'abord** (golden v2 figé avant toute ligne, puis le socle v3, plusieurs moteurs, le correctif `ALL_TOOLS`), puis T1 à T6 en parallèle, T7 pour finir. L'image de partage (T6) attend B5 |
 | A14.d | **Le bon à tirer de la copie neuve** | Après A14.c, avant l'ouverture (D2), construit depuis `grep -rn "TODO: à relire" src/` |
 
+### A15 — La finition UI et UX avant le lancement (ouvert le 2026-10-01)
+
+Antoine envoie des reels sur l'UI et l'UX, un sujet chacun, et le 2026-10-01
+le recueil [Laws of UX](https://lawsofux.com/). **La méthode, qu'il a fixée** :
+lire la légende (pas la vidéo), confronter chaque règle au code, et ne faire
+que ce qui manque vraiment. Une règle qui est un goût contraire au système (la
+direction I, les jetons) se dit et ne se code pas. Chaque reel traité a son
+entrée au journal, avec ce qui a été retenu et écarté : la chercher avant de
+rouvrir un sujet (`grep -n "reel" JOURNAL.md`). Les règles tirées des lois de
+l'UX vivent dans `design/LOIS-UX.md`. **Une seule PR pour tout le lot**
+(Antoine, 2026-10-01 : moins de déploiements Vercel). A15.1 à A15.6 sont
+livrés le 2026-10-01 (le journal, à « A15 »).
+
+**Ce que les lois de l'UX laissent** (2026-10-01, `design/LOIS-UX.md`), chaque
+écart revérifié à la source. Des correctifs d'abord, que la session mène seule :
+
+| # | Quoi | Détail |
+|---|---|---|
+| A15.7 | **Le quiz ne se corrige plus après la 15ᵉ réponse** (Jakob) | Les écrans du profil et du ton n'ont pas de retour, et un rechargement à 15 réponses y renvoie (`quiz/page.tsx:114`) : un clic de travers à la dernière question est définitif. Un retour sur les deux écrans ; leur en-tête dit « 15 / 15 répondues » au-dessus de deux écrans encore à passer |
+| A15.8 | **Un montant en euros refusé avec ses centimes, « on compte des personnes »** | Les deux cases d'un taux dont les termes sont des montants (marge brute, expansion, contraction, NRR, marge assistée) sont en nombres entiers (`ValueEditor.tsx`, `integer` sauf `unit === "money"`, qui ne vaut que pour la métrique) : « 12 450,80 » est refusé avec le message des comptes de personnes |
+| A15.9 | **L'étape « base » du pas à pas jette une valeur en silence** | Illisible, décimale ou nulle, elle n'est pas écrite et l'étape avance sans rien dire (`Steps.tsx`, les deux `save()`) |
+| A15.10 | **Postel : accepter l'unité que la case affiche** | « 18 % », « 1 200 € », « €1,200 » sont refusés alors que la case porte déjà « % » ou « € » (`lib/forms/number.ts`) ; un compte négatif s'enregistre depuis la fiche alors que l'import le signale |
+| A15.11 | **« Télécharger le PDF » ouvre l'impression** | `window.print()` : le libellé promet un fichier. Un libellé qui dit le geste, « à relire » |
+| A15.12 | **Une fiche ouverte perd sa saisie** quand on change d'onglet ou qu'on la replie | Le panneau est remonté (`panelKey`), sans garde ni brouillon gardé |
+| A15.13 | **Les sections du résultat ne sont pas des titres** | Les titres de section sont des `MetaLabel` (`<div>`) : le seul titre de la page est un `<h1>` masqué, un lecteur d'écran ne peut pas aller de section en section. `MetaLabel` gagne un élément choisi (contrat, re-synchro B) |
+| A15.14 | **« Points forts » peut montrer deux étapes faibles** | La section prend toujours les deux plus hautes (`strongestTwo`), même faibles ; le même désaccord que `roomTitle` a corrigé pour les plus basses d'un tableau de niveau |
+
+Puis des **décisions**, **tranchées par Antoine le 2026-10-01** : les cinq recos retenues telles quelles (A15.15 à A15.18, A15.20), A15.19 part à Claude Design. Il a aussi choisi que la PR #252 (A15.1 à A15.6) se merge seule, et que ces correctifs et décisions suivent dans une seconde PR :
+
+| # | Quoi | Reco, retenue |
+|---|---|---|
+| A15.15 | **Sur téléphone, aucun « Démarre ton Tour » après le premier écran de l'accueil** (position sérielle) : l'appel de l'en-tête est masqué sous 760 px | Répéter l'appel en fin de page sur téléphone |
+| A15.16 | **Un Tour commencé se reprend en silence** (Zeigarnik) : l'accueil dit toujours « Démarre ton Tour », le quiz reprend sans le dire | « Reprendre ton Tour (question 8 sur 15) » quand des réponses sont gardées ; couvre aussi le retour du navigateur, qui quitte le quiz |
+| A15.17 | **La fin du parcours du propriétaire** (pic et fin) : la mention légale sur téléphone, le bloc Markdown du badge sur ordinateur | Finir sur le partage ; le badge, pour développeurs, avant lui ou replié |
+| A15.18 | **La carte du jeu affiche « CHURN 6,0 % » sous les chiffres du lecteur** (attention sélective) : rien ne dit que c'est le jeu | Dire « dans le jeu » sur la bande |
+| A15.19 | **Les puces d'étape ont l'allure d'un bouton secondaire** sans en être un (similarité) | Pour Claude Design : une puce qui ne se lit pas comme un bouton |
+| A15.20 | **Entrée n'enregistre pas une fiche du moteur** (Jakob) | Un vrai formulaire par fiche |
+
+
 ---
 
 ## B. Design sync
@@ -244,7 +283,14 @@ chiffres (un peloton du jeu d'exemple, si l'image en dessine un). Ce qui
 revient se porte dans `lib/og/` avec T6 (`docs/engine/moteur-complet.md`
 §19.11). Les images du jeu sont le modèle.
 
-**Hors de B5, rien d'ouvert.** La prochaine synchro se lance quand un composant change, ou
+**B6, ouvert le 2026-10-01 : la re-synchro d'A15.** Trois contrats changent
+après l'ancre de B4 : `ErrorScreen` (`reset` devient `retry`), `LoadingScreen`
+(la variante `deep` racontée par l'horloge : un message, une barre, le temps
+écoulé) et `Button` (`sm` décrit sa bande de 44 px). Leurs aperçus et
+`conventions.md` sont à jour dans le dépôt ; une synchro les emporte,
+`LoadingScreen` à recapturer.
+
+**Hors de B5 et B6, rien d'ouvert.** La prochaine synchro se lance quand un composant change, ou
 quand change une copie, un chiffre du modèle ou un comportement qu'un aperçu
 reprend : c'est ainsi que B3 a trouvé l'amende du jeu et les cartes de
 `SpaceStrip` restées d'avant A7.8 et A7.9, dans des notes reportées. Ce qu'elle

@@ -9,7 +9,7 @@ import { useLocale } from "@/lib/i18n/locale-context";
  * the segment that threw is replaced. `global-error.tsx` covers the rarer
  * case of the root layout itself failing.
  */
-export default function SegmentError(props: Pick<ErrorScreenProps, "error" | "reset">) {
+export default function SegmentError(props: Pick<ErrorScreenProps, "error" | "retry">) {
   const { locale } = useLocale();
   return <ErrorScreen locale={locale} {...props} />;
 }

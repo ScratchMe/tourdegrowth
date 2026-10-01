@@ -26,6 +26,7 @@ import {
   saveDeepDiveProgress,
 } from "@/lib/quiz/storage";
 import { PILLARS } from "@/lib/scoring/pillars";
+import { failureOf, failureSentence, requestOrFail, type RequestFailure } from "@/lib/quiz/request-failure";
 import styles from "./page.module.css";
 
 type Phase = "answering" | "freeContext" | "loading" | "error";
@@ -64,7 +65,7 @@ export default function DeepDivePage() {
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [freeContext, setFreeContext] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<RequestFailure | null>(null);
   // REVIEW.md R-01: the Deep dive belongs to whoever took the Tour, and the
   // only proof of that on the client is the one-time token stored when the
   // submission was created. Checked after mount (localStorage is
@@ -147,7 +148,7 @@ export default function DeepDivePage() {
     setSubmitError(null);
     setPhase("loading");
     try {
-      const res = await fetch(`/api/submissions/${params.id}/deep-dive`, {
+      await requestOrFail(`/api/submissions/${params.id}/deep-dive`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -160,11 +161,6 @@ export default function DeepDivePage() {
           freeContext: finalFreeContext.trim() || null,
         }),
       });
-      if (!res.ok) {
-        const body: unknown = await res.json().catch(() => null);
-        const message = (body as { error?: string } | null)?.error;
-        throw new Error(message || `Request failed (${res.status})`);
-      }
       trackEvent("deep_dive_completed", finalFreeContext.trim() ? "with_context" : "no_context");
       // Cleared on success, not on abandon: `freeContext` is a founder
       // describing their business in their own words, and it has no reason
@@ -172,7 +168,9 @@ export default function DeepDivePage() {
       clearDeepDiveProgress();
       router.push(`/r/${params.id}`);
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "Unknown error");
+      // The full error for the console; the reader gets a sentence and a stable code (A15.4, R-04).
+      console.error(err);
+      setSubmitError(failureOf(err));
       setPhase("error");
     }
   }
@@ -320,8 +318,16 @@ export default function DeepDivePage() {
               eyebrow={tc(t.errorEyebrow, locale)}
               title={tc(t.errorTitle, locale)}
             >
-              {tc(t.errorBody, locale)}
-              {submitError && <p className={styles.errorDetail}>{submitError}</p>}
+              {failureSentence(submitError, {
+                body: tc(t.errorBody, locale),
+                offline: tc(t.errorOffline, locale),
+                rateLimited: tc(t.errorRateLimited, locale),
+              })}
+              {submitError && (
+                <p className={styles.errorDetail} data-testid="error-code">
+                  {submitError.code}
+                </p>
+              )}
             </DetourCard>
 
             <Button size="lg" data-testid="retry-button" onClick={() => void submit(answers, freeContext)}>

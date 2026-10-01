@@ -8,11 +8,14 @@ import { LoadingScreen } from "tour-de-growth";
  * synchronous, so the screen exists only to keep the transition from
  * flickering (one message, a ~300ms floor).
  *
- * `deep` is a real Gemini call — measured around 70 seconds for four
- * generations. Its three messages run once at 2.6s each and then it holds an
- * open-ended "still working" state indefinitely: never a fixed timeout, since
- * only the response can end the wait. The placeholder numeral breathes and an
- * ellipsis cycles so a long wait still looks alive rather than hung.
+ * `deep` is a real Gemini call — measured between 9 and 70 seconds for four
+ * generations, with nothing reporting progress before the answer. So it
+ * tells the wait by the clock (2026-10-01): one message that is true for the
+ * whole wait, a bar that follows the time spent against the usual minute and
+ * slows without ever filling, the time spent beside it, and after five
+ * seconds the line that this is expected. Only the response ends the wait.
+ * The placeholder numeral breathes and an ellipsis cycles so a long wait
+ * still looks alive rather than hung. A preview shows its first instant.
  */
 
 const frame = { maxWidth: 560, minHeight: 260 } as const;
@@ -31,7 +34,7 @@ export const Quick = () => (
   </div>
 );
 
-/** In French — the rotating messages are copy, so they change length. */
+/** In French — the message is copy, so it changes length. */
 export const French = () => (
   <div style={frame}>
     <LoadingScreen locale="fr" variant="deep" />
