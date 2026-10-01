@@ -6,6 +6,7 @@ import { isLocale, type Locale } from "@/lib/i18n/locale";
 import { loadOgFonts } from "@/lib/og/fonts";
 import { renderGameLevelShareImage } from "@/lib/og/game-frame";
 import { gameLevelShareText } from "@/lib/og/game-level-share-text";
+import { localeShareImage } from "@/lib/og/image-metadata";
 import { OG_SIZE } from "@/lib/og/tokens";
 
 /**
@@ -24,9 +25,8 @@ export const size = OG_SIZE;
 export const contentType = "image/png";
 
 export async function generateImageMetadata({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params;
-  const resolved: Locale = isLocale(locale) ? locale : "en";
-  return [{ id: resolved, size, contentType, alt: tc(GAME_META.acquisition.shareImageAlt, resolved) }];
+  // No image for a first segment that is not a language: Next then answers 404 (lib/og/image-metadata.ts).
+  return localeShareImage(params, (l) => tc(GAME_META.acquisition.shareImageAlt, l));
 }
 
 export default async function GameLevelShareImage({ params }: { params: Promise<{ locale: string }> }) {

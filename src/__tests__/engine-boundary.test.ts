@@ -293,17 +293,18 @@ describe("growth engine boundary (engine spec §11.4)", () => {
       SHARE_IMAGE,
     ]);
     expect(walk.filter((m) => /^content\/engine-/.test(m))).toEqual(["content/engine-share.ts"]);
-    // The rest of the FORBIDDEN list still holds for it.
-    const others = ALL_IMPORTS(BY_PATH.get(SHARE_IMAGE)!).filter((spec) =>
-      FORBIDDEN.filter((re) => !re.test("@/lib/og/")).some((re) => re.test(spec)),
-    );
-    expect(others).toEqual([]);
-    // And nothing of the engine reaches the image or its frame. (The page does
-    // reach lib/og/tokens.ts, for OG_SIZE, through lib/i18n/meta.ts, as every
-    // content page does: a size, not the renderer.)
-    const image = new Set([SHARE_IMAGE, "lib/og/engine-frame.tsx", "lib/og/engine-share-text.ts", "lib/og/fonts.ts"]);
+    // The rest of the FORBIDDEN list holds for everything it reaches, not
+    // only for what it imports itself: each module read as the specifier
+    // that would name it (convention 11 — count what crosses).
+    const asSpecifier = (m: string) => `@/${m.replace(/\.(tsx?|jsx?)$/, "").replace(/\/index$/, "")}`;
+    const notOg = FORBIDDEN.filter((re) => !re.test("@/lib/og/"));
+    expect(walk.filter((m) => notOg.some((re) => re.test(asSpecifier(m))))).toEqual([]);
+    // And nothing else of the engine reaches the OG pipeline but its size:
+    // the page reaches lib/og/tokens.ts, for OG_SIZE, through lib/i18n/meta.ts,
+    // as every content page does — a constant, not the renderer.
     for (const f of ENGINE.filter((x) => x.path !== SHARE_IMAGE)) {
-      expect([...reachable(f.path)].filter((m) => image.has(m)), f.path).toEqual([]);
+      const og = [...reachable(f.path)].filter((m) => m.startsWith("lib/og/") && m !== "lib/og/tokens.ts");
+      expect(og, f.path).toEqual([]);
     }
   });
 

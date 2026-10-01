@@ -299,6 +299,33 @@ CSS, aucun composant partagé. Les valeurs de tokens sont recopiées à la main.
    test qui lit la table `cmap` des polices embarquées et vérifie, famille par
    famille, **toutes les chaînes que les images dessinent réellement**.
 
+Deux écarts de rendu, hors des polices :
+- **`transparent` dans un dégradé se mélange à travers le noir.** Un halo blanc
+  qui finit sur `transparent` assombrit le fond au lieu de l'éclaircir. Mesuré
+  le 2026-10-01 sur un fond `#e7e1d2` : (195, 190, 179) à mi-rayon, contre
+  (238, 233, 222) en finissant sur `rgba(255, 255, 255, 0)`. Finir un dégradé
+  sur la couleur de départ à alpha nul.
+- **Une espace en fin de `<span>` est perdue.** Écrire l'espace en `&nbsp;`, ou
+  la porter par un `gap` du parent (relevé par Claude Design au brief 06).
+
+### 1.11 Une route d'image de métadonnées sert toute langue qu'on lui donne
+
+Un `opengraph-image.tsx` sous `[locale]` avec `generateImageMetadata` devient
+une route que Next rend **à la demande** pour tout premier segment
+(`"fallback": null` dans `prerender-manifest.json`), même quand le layout pose
+`dynamicParams = false`. Ce réglage ne s'applique pas à une route de
+métadonnées : le loader le retire même des réexports
+(`next-metadata-route-loader.js`). Le `GET` généré ne vérifie qu'une chose :
+que l'id demandé figure dans ce que renvoie `generateImageMetadata` pour ces
+paramètres.
+
+Conséquence : un `generateImageMetadata` qui retombe sur `"en"` pour une langue
+inconnue sert `/xx/…/opengraph-image/en`, avec un rendu Satori et une entrée
+ISR à chaque segment neuf. Un proxy qui ferme une page « par langue reconnue »
+ne la ferme pas. **Correctif** : renvoyer `[]` pour une langue inconnue ; Next
+répond alors 404 avant tout rendu. Chez nous : `lib/og/image-metadata.ts`, et
+`share-image-routes.test.ts` qui parcourt tous les fichiers d'image.
+
 ---
 
 ## 2. Propre à Tour de Growth

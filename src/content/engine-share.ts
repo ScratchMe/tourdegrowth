@@ -15,6 +15,7 @@ import type { Translatable } from "@/lib/i18n/translatable";
  */
 
 export const ENGINE_HEADLINE = {
+  // TODO: à relire (convention 6) — déplacé d'engine-copy.ts par T6.2, mots inchangés (bon à tirer nº8).
   eyebrow: { fr: "Le moteur", en: "The engine" },
   // TODO: à relire (convention 6) — renommé le 2026-09-30 (A7.2, C2 : « Moteur de growth »).
   title: { fr: "Ton moteur de growth", en: "Your growth engine" },

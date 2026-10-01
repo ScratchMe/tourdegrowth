@@ -720,10 +720,35 @@ l'image se porte dans `lib/og/` sur ce qui revient. Deux contraintes pour le
 brief : jamais de vrais chiffres (un peloton du jeu d'exemple, si l'image en
 dessine un), et le titre de la page dans les deux langues.
 
-`contentMetadata` reçoit `ownShareImage`. Moteur fermé, la route répond 404 :
+`contentMetadata` reçoit `ownShareImage`. Moteur fermé, la route répond 404 :
 elle le vérifie elle-même, comme le jeu (`game/opengraph-image.tsx:20-24`),
 parce que `isEnginePath` ne reconnaît que le chemin exact
 (`engine/access.ts:45-47`).
+
+**Écarts au code, T6.2** (2026-10-01, @@PR@@). L'image est portée du retour de
+Claude Design (`design/ds-extension-06-return/`) : du papier, la pastille
+« 2/3 · CONTRE-LA-MONTRE » à côté du logo, le titre de la page sur deux lignes
+avec « moteur » en outremer, une ligne et une promesse neuves
+(`content/engine-share.ts`, à relire), et le chronomètre. Pas de peloton : dans
+un fil, les chiffres de l'exemple se liraient comme ceux de qui partage.
+Trois écarts :
+- **La route ne vérifie pas le drapeau elle-même.** Le jeu ne le fait pas non
+  plus, contrairement à ce que dit le paragraphe ci-dessus : c'est le proxy, et
+  `isGamePath` couvre tout ce qui est sous `/game`. `isEnginePath` couvre
+  désormais de même tout ce qui est sous la page, et l'aperçu propriétaire
+  ouvre l'image avec elle.
+- **Le chronomètre est celui de la page, et le pictogramme de la pastille celui
+  du bandeau.** Le retour les avait redessinés à la main : la lunette hors du
+  cadran, un temps couru de 38 % au lieu de 70 %, d'autres boutons. Leurs formes
+  sont devenues des données (`components/brand/stopwatch-geometry.ts`,
+  `space-pictos.ts`), que lisent les composants comme les images, et l'image du
+  résultat a perdu sa copie du pictogramme du Tour. Partout ailleurs, le
+  portage est identique au pixel au rendu des sources du retour.
+- **Les capitales sont posées dans `lib/og/engine-share-text.ts`**, pas par
+  `textTransform` comme dans le retour, pour que `fonts.test.ts` vérifie ce qui
+  est dessiné. Le titre et l'eyebrow de la page vivent maintenant dans
+  `content/engine-share.ts`, que lit `engine-copy.ts` : l'image ne tire pas
+  toute la copie du moteur dans sa fonction.
 
 ---
 
