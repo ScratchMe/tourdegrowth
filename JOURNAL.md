@@ -980,7 +980,7 @@ Points pour le bon à tirer A14.d : ce que « Remplacer » change exactement 
 - le canari passe maintenant aussi par le modèle, un tableau collé et une fusion ;
 - captures relues : le sélecteur, le tableau collé avec son aperçu, l'import à trois choix avec l'aperçu de la fusion, et la suppression, en français à 1 280 px et en anglais à 390 px.
 
-## A14.c, T6 : le fond blanc, les rappels d'agenda, les deux portes (2026-10-01, #PRNUM)
+## A14.c, T6 : le fond blanc, les rappels d'agenda, les deux portes (2026-10-01, #264)
 
 La huitième PR du moteur complet (`docs/engine/moteur-complet.md` §19.8 à §19.10, C32 Q14 à Q16), drapeau fermé. L'image de partage du moteur (§19.11) n'en fait pas partie : elle attend la passe de Claude Design (B5).
 
