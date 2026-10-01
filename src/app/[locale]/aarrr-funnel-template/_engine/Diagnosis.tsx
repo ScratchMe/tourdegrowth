@@ -1,12 +1,14 @@
 import type { Locale } from "@/lib/i18n/locale";
-import type { Diagnosis as DiagnosisModel, Interval, MetricId, PlgCandidateId } from "@/lib/engine/types";
+import type { CandidateId, Interval, MetricId } from "@/lib/engine/types";
 import type { EngineStrings, ResolvedMetric } from "@/lib/engine/strings";
 import { shapeOf } from "@/lib/engine/catalog-shape";
 import {
+  type AnyDiagnosis,
   behindSentence,
   blindSentence as blindSentenceOf,
   churnWithoutCommonAmount,
   notEnoughBelowSentence,
+  positionIn,
   unpricedSentence,
 } from "@/lib/engine/phrases";
 import { formatInterval, formatPercent } from "@/lib/engine/format";
@@ -14,7 +16,7 @@ import { fill, stageLabel } from "./visual-model";
 import styles from "./Diagnosis.module.css";
 
 export interface DiagnosisProps {
-  diagnosis: DiagnosisModel;
+  diagnosis: AnyDiagnosis;
   strings: EngineStrings;
   locale: Locale;
   /** The seventeen numbers' names, to say WHICH number of a stage is below its comparator. */
@@ -24,7 +26,13 @@ export interface DiagnosisProps {
    * and a comparator but not the value itself; the board has it (`knownOf`),
    * and the comparator sentence has to print it.
    */
-  values: Partial<Record<PlgCandidateId, Interval>>;
+  values: Partial<Record<CandidateId, Interval>>;
+  /**
+   * The hybrid's column (§18.7): its eyebrow names the motion — « Libre-service
+   * — une étape freine le moteur » — so two diagnoses side by side are never
+   * read as one. Absent with one motion.
+   */
+  motionName?: string;
   className?: string;
 }
 
@@ -44,14 +52,14 @@ export interface DiagnosisProps {
  * blind line is always printed when a ★ is unmeasured: an unknown is a
  * finding, and the real bottleneck may be hiding there.
  */
-export function Diagnosis({ diagnosis, strings, locale, metrics, values, className }: DiagnosisProps) {
+export function Diagnosis({ diagnosis, strings, locale, metrics, values, motionName, className }: DiagnosisProps) {
   const d = strings.diagnosis;
   // Formatting reads the language only, never the clock: a fixed date keeps
   // this component free of `Date.now()` (the engine's time is injected).
   const ctx = { locale, today: new Date(0) };
   const nameOf = (id: MetricId) => metrics.find((m) => m.id === id)?.name ?? id;
 
-  const eyebrow =
+  const verdict =
     diagnosis.state === "clear"
       ? d.clear
       : diagnosis.state === "shared"
@@ -59,9 +67,10 @@ export function Diagnosis({ diagnosis, strings, locale, metrics, values, classNa
         : diagnosis.state === "level"
           ? d.level
           : d.notEnough;
+  const eyebrow = motionName ? fill(strings.hybrid.diagnosisEyebrow, { motion: motionName, verdict: verdict.charAt(0).toLowerCase() + verdict.slice(1) }) : verdict;
 
-  const comparatorSentence = (id: PlgCandidateId): string | null => {
-    const position = diagnosis.positions[id];
+  const comparatorSentence = (id: CandidateId): string | null => {
+    const position = positionIn(diagnosis, id);
     const value = values[id];
     if (!position?.comparator || !value) return null;
     const c = position.comparator;
@@ -70,7 +79,7 @@ export function Diagnosis({ diagnosis, strings, locale, metrics, values, classNa
     return behindSentence(c, formatted, formatPercent(c.lo, locale), strings);
   };
 
-  const named = diagnosis.state === "clear" || diagnosis.state === "shared" ? diagnosis.named : [];
+  const named: readonly CandidateId[] = diagnosis.state === "clear" || diagnosis.state === "shared" ? diagnosis.named : [];
 
   // The sentences are built in `lib/engine/phrases.ts`, shared with the slides: a stage mid-sentence is a
   // phrase with its article (« Sans chiffre pour la rétention à J30 », never « pour La rétention »), and where
@@ -83,8 +92,9 @@ export function Diagnosis({ diagnosis, strings, locale, metrics, values, classNa
   return (
     <section
       className={[styles.diagnosis, className ?? ""].filter(Boolean).join(" ")}
-      data-testid="engine-diagnosis"
+      data-testid={diagnosis.motion === "slg" ? "engine-diagnosis-slg" : "engine-diagnosis"}
       data-state={diagnosis.state}
+      data-motion={diagnosis.motion}
     >
       <p className={[styles.eyebrow, named.length ? styles.eyebrowNamed : ""].filter(Boolean).join(" ")}>
         {eyebrow}
@@ -116,7 +126,9 @@ export function Diagnosis({ diagnosis, strings, locale, metrics, values, classNa
         </p>
       ) : null}
 
-      <p className={styles.fixed}>{d.topOfFunnel}</p>
+      {/* Self-serve's top of the funnel is its biggest loss in numbers; sales-assisted's relays have no common top,
+          and its own fixed sentence says what the cycle does and doesn't do to the money (§18.5.2). */}
+      <p className={styles.fixed}>{diagnosis.motion === "slg" ? d.cycleNote : d.topOfFunnel}</p>
     </section>
   );
 }

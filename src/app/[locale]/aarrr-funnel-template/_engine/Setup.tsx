@@ -3,12 +3,13 @@
 import { useId, useState } from "react";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
-import { TEXT_LIMITS } from "@/lib/engine/catalog-shape";
+import { METRIC_SHAPES, SLG_METRIC_SHAPES, TEXT_LIMITS, shapeOf } from "@/lib/engine/catalog-shape";
 import type { EngineStrings } from "@/lib/engine/strings";
-import type { Currency, EngineSetup, YearMonth } from "@/lib/engine/types";
+import type { Currency, EngineSetup, Motion, YearMonth } from "@/lib/engine/types";
 import { SETUP_V2_DEFAULTS } from "@/lib/engine/types";
 import type { StoredResult } from "@/lib/quiz/storage";
-import { defaultReferenceMonth, matureCohortMonth, nextMonth } from "@/lib/engine/cohort";
+import { defaultReferenceMonth, defaultSpanEnd, matureCohortMonth, monthsBefore, nextMonth } from "@/lib/engine/cohort";
+import { formatMonthRange } from "@/lib/engine/format";
 import { fill, formatDate, formatMonth } from "./text";
 import { Checkbox } from "@/components/core/Checkbox";
 import { Choices } from "@/components/core/Choices";
@@ -21,6 +22,9 @@ import { monthsEndingAt } from "@/lib/forms/date";
 import styles from "./Screens.module.css";
 
 const CURRENCIES: readonly Currency[] = ["EUR", "USD", "GBP", "CHF"];
+const WINDOWS = [30, 60, 90] as const;
+type Window = (typeof WINDOWS)[number];
+const MOTIONS: readonly Motion[] = ["plg", "slg"];
 
 export interface SetupChoice {
   setup: EngineSetup;
@@ -67,16 +71,16 @@ export function Setup({
   tour: StoredResult | null;
   onStart: (choice: SetupChoice) => void;
   onImport?: () => void;
-  /** « Voir un exemple rempli » — only offered before an engine exists. */
-  onExample?: () => void;
+  /** « Voir un exemple rempli » — only offered before an engine exists, in the motions ticked (§18.7). */
+  onExample?: (motions: Record<Motion, boolean>) => void;
   /**
    * Editing the settings of an engine that exists (Antoine, 2026-09-25: they
    * could not be changed without erasing everything). The card opens on them,
    * says what a change would reset, and saves or cancels.
    */
   initial?: { setup: EngineSetup; referenceMonth: YearMonth; cohortMonth: YearMonth };
-  /** Which numbers a change of window would send back to "to fill in". */
-  existing?: { activation: boolean; paid: boolean; any: boolean };
+  /** Which numbers a change of window would send back to "to fill in", and how many each motion keeps (§18.1.2). */
+  existing?: { activation: boolean; paid: boolean; qualification: boolean; goLive: boolean; any: boolean; entered: Record<Motion, number> };
   /** In the settings: whether the engine is linked to a Tour now — the box opens on it (C8). */
   linked?: boolean;
   onCancel?: () => void;
@@ -88,6 +92,10 @@ export function Setup({
   const [currency, setCurrency] = useState<Currency>(initial?.setup.currency ?? "EUR");
   const [activation, setActivation] = useState<EngineSetup["activationWindowDays"]>(initial?.setup.activationWindowDays ?? 7);
   const [paid, setPaid] = useState<EngineSetup["paidWindowDays"]>(initial?.setup.paidWindowDays ?? 30);
+  // Self-serve ticked, sales-assisted not, at a first visit (C25 Q16): the v1 behaviour.
+  const [motions, setMotions] = useState<Record<Motion, boolean>>(() => ({ ...(initial?.setup.motions ?? SETUP_V2_DEFAULTS.motions) }));
+  const [qualification, setQualification] = useState<Window>(initial?.setup.qualificationWindowDays ?? SETUP_V2_DEFAULTS.qualificationWindowDays);
+  const [goLive, setGoLive] = useState<Window>(initial?.setup.goLiveWindowDays ?? SETUP_V2_DEFAULTS.goLiveWindowDays);
   const [referenceMonth, setReferenceMonth] = useState<YearMonth>(initial?.referenceMonth ?? lastClosed);
   const [chosenCohort, setChosenCohort] = useState<YearMonth | null>(initial?.cohortMonth ?? null);
   const [company, setCompany] = useState(initial?.setup.companyLabel ?? "");
@@ -98,20 +106,32 @@ export function Setup({
   const cohortWindow = Math.max(30, paid);
   const cohortMonth = chosenCohort ?? matureCohortMonth(cohortWindow, today);
   const companyTooLong = company.length > TEXT_LIMITS.companyLabel;
+  const noMotion = !motions.plg && !motions.slg;
+  const ticked = MOTIONS.filter((m) => motions[m]);
+
+  function setMotion(motion: Motion, on: boolean) {
+    setMotions((was) => ({ ...was, [motion]: on }));
+  }
 
   function start(how: SetupChoice["start"]) {
     setTried(true);
+    // The group's message, focused at the send (R-19): the first box, so the error is read with its group.
+    if (noMotion) {
+      document.getElementById(`${id}-motion-plg`)?.focus();
+      return;
+    }
     if (companyTooLong) return;
     onStart({
       start: how,
       setup: {
-        // Self-serve alone until the card asks how the company sells (A7.3.c S3, §18.1).
-        ...SETUP_V2_DEFAULTS,
-        // A copy: the defaults' object must never be the one a state carries (and may one day edit).
-        motions: { ...SETUP_V2_DEFAULTS.motions },
+        type: SETUP_V2_DEFAULTS.type,
+        // A copy: the state's object is never the card's.
+        motions: { ...motions },
         currency,
         activationWindowDays: activation,
         paidWindowDays: paid,
+        qualificationWindowDays: qualification,
+        goLiveWindowDays: goLive,
         ...(company.trim() ? { companyLabel: company.trim() } : {}),
       },
       referenceMonth,
@@ -120,13 +140,55 @@ export function Setup({
     });
   }
 
+  const st = strings.settings;
+  // What ticking or unticking a motion does, said BEFORE the save (§18.1.2): nothing is ever lost.
+  const motionLines =
+    editing && initial
+      ? MOTIONS.flatMap((m) => {
+          const was = initial.setup.motions[m];
+          const is = motions[m];
+          if (was === is) return [];
+          const n = existing?.entered[m] ?? 0;
+          const subject = strings.hybrid.motionSubject[m];
+          if (was) return [n === 0 ? fill(st.motionOffNone, { motion: subject }) : fill(n === 1 ? st.motionOffOne : st.motionOff, { motion: subject, n })];
+          if (n > 0) return [n === 1 ? st.motionBackOne : fill(st.motionBack, { n })];
+          return [fill(m === "slg" ? st.motionOnSlg : st.motionOnPlg, { n: (m === "slg" ? SLG_METRIC_SHAPES : METRIC_SHAPES).length })];
+        })
+      : [];
   const resets = editing && initial
     ? [
-        activation !== initial.setup.activationWindowDays && existing?.activation ? fill(strings.settings.activationReset, { n: activation }) : null,
-        paid !== initial.setup.paidWindowDays && existing?.paid ? fill(strings.settings.paidReset, { n: paid }) : null,
-        (referenceMonth !== initial.referenceMonth || cohortMonth !== initial.cohortMonth) && existing?.any ? strings.settings.monthsChanged : null,
+        ...motionLines,
+        motions.plg && activation !== initial.setup.activationWindowDays && existing?.activation ? fill(st.activationReset, { n: activation }) : null,
+        motions.plg && paid !== initial.setup.paidWindowDays && existing?.paid ? fill(st.paidReset, { n: paid }) : null,
+        motions.slg && qualification !== initial.setup.qualificationWindowDays && existing?.qualification ? fill(st.qualificationReset, { n: qualification }) : null,
+        motions.slg && goLive !== initial.setup.goLiveWindowDays && existing?.goLive ? fill(st.goLiveReset, { n: goLive }) : null,
+        (referenceMonth !== initial.referenceMonth || cohortMonth !== initial.cohortMonth) && existing?.any ? st.monthsChanged : null,
       ].filter((x): x is string => x !== null)
     : [];
+
+  // Sales-assisted's three months, computed, read-only (§18.1.1, S4): the flows end at the flows' month, the
+  // leads and the new customers at the last month whose cohort has had its whole window.
+  const slgWindows = { ...SETUP_V2_DEFAULTS, qualificationWindowDays: qualification, goLiveWindowDays: goLive } as EngineSetup;
+  const run = (to: YearMonth) => formatMonthRange({ from: monthsBefore(to, 2), to }, locale, strings.units, "from");
+  const slgPeriods = fill(s.slgPeriods, {
+    flows: run(referenceMonth),
+    leads: run(defaultSpanEnd(shapeOf("slg.acq.lead-to-opp"), slgWindows, today)),
+    customers: run(defaultSpanEnd(shapeOf("slg.act.go-live"), slgWindows, today)),
+    q: qualification,
+    g: goLive,
+  });
+  const windowChoice = (label: string, value: Window, onChange: (w: Window) => void) => (
+    <Field group label={label}>
+      {({ labelId }) => (
+        <Segmented
+          labelledBy={labelId}
+          value={String(value) as "30" | "60" | "90"}
+          options={WINDOWS.map((n) => ({ id: String(n) as "30" | "60" | "90", label: fill(s.windowDays, { n }) }))}
+          onChange={(v) => onChange(Number(v) as Window)}
+        />
+      )}
+    </Field>
+  );
 
   const cohortHint = fill(s.cohortHint, {
     cohort: formatMonth(cohortMonth, locale),
@@ -141,20 +203,82 @@ export function Setup({
       </h2>
 
       <Choices
-        id={`${id}-model`}
-        legend={s.model}
-        value="selfserve"
+        id={`${id}-type`}
+        legend={s.companyType}
+        value="b2b-saas"
         onChange={() => undefined}
         options={[
-          { value: "selfserve", label: s.models.selfserve },
-          // Shown, not hidden: saying which funnels are coming tells a sales-led
-          // team why the seventeen numbers below won't fit them yet. Dashed and
-          // at full contrast, never faded (design system extension 04, Q18).
-          { value: "sales-led", label: s.models.salesLed, disabledNote: s.modelSoon, disabled: true },
-          { value: "consumer-app", label: s.models.consumerApp, disabledNote: s.modelSoon, disabled: true },
-          { value: "marketplace", label: s.models.marketplace, disabledNote: s.modelSoon, disabled: true },
+          { value: "b2b-saas", label: s.types.b2bSaas },
+          // Shown, not hidden: saying which funnels are coming tells a consumer app why
+          // the numbers below won't fit it yet. Dashed and at full contrast, never faded
+          // (design system extension 04, Q18). « Plus tard », never « Bientôt » (C25 Q16).
+          { value: "consumer-app", label: s.types.consumerApp, disabledNote: s.typeLater, disabled: true },
+          { value: "marketplace", label: s.types.marketplace, disabledNote: s.typeLater, disabled: true },
         ]}
       />
+
+      {/* How the company sells (§18.1.1): two boxes, at least one. Each motion's own settings unfold under its
+          box; unticked, they are hidden, never reset. In the settings, the last box ticked can't be unticked. */}
+      <Field group label={s.motions} hint={s.motionsHint} error={!editing && tried && noMotion ? s.motionsRequired : null}>
+        {({ describedBy }) => (
+          <div className={styles.motions} data-testid="engine-setup-motions">
+            <div className={styles.motion}>
+              <Checkbox
+                id={`${id}-motion-plg`}
+                label={s.motionPlg}
+                checked={motions.plg}
+                onChange={(on) => setMotion("plg", on)}
+                disabled={editing && motions.plg && ticked.length === 1}
+                disabledReason={st.motionLast}
+                describedBy={describedBy}
+                data-testid="engine-motion-plg"
+              />
+              {motions.plg ? (
+                <div className={styles.motionSettings}>
+                  <Field group label={s.activationWindow}>
+                    {({ labelId }) => (
+                      <Segmented
+                        labelledBy={labelId}
+                        value={String(activation) as "7" | "14" | "30"}
+                        options={([7, 14, 30] as const).map((n) => ({ id: String(n) as "7" | "14" | "30", label: fill(s.windowDays, { n }) }))}
+                        onChange={(v) => setActivation(Number(v) as EngineSetup["activationWindowDays"])}
+                      />
+                    )}
+                  </Field>
+                  <Field group label={s.paidWindow}>
+                    {({ labelId }) => (
+                      <Segmented
+                        labelledBy={labelId}
+                        value={String(paid) as "30" | "60" | "90"}
+                        options={WINDOWS.map((n) => ({ id: String(n) as "30" | "60" | "90", label: fill(s.windowDays, { n }) }))}
+                        onChange={(v) => setPaid(Number(v) as EngineSetup["paidWindowDays"])}
+                      />
+                    )}
+                  </Field>
+                </div>
+              ) : null}
+            </div>
+            <div className={styles.motion}>
+              <Checkbox
+                id={`${id}-motion-slg`}
+                label={s.motionSlg}
+                checked={motions.slg}
+                onChange={(on) => setMotion("slg", on)}
+                disabled={editing && motions.slg && ticked.length === 1}
+                disabledReason={st.motionLast}
+                describedBy={describedBy}
+                data-testid="engine-motion-slg"
+              />
+              {motions.slg ? (
+                <div className={styles.motionSettings}>
+                  {windowChoice(s.qualificationWindow, qualification, setQualification)}
+                  {windowChoice(s.goLiveWindow, goLive, setGoLive)}
+                </div>
+              ) : null}
+            </div>
+          </div>
+        )}
+      </Field>
 
       <div className={styles.setupGrid}>
         <DateField
@@ -166,16 +290,24 @@ export function Setup({
           months={monthOptions(lastClosed, referenceMonth, locale)}
           onChange={(m) => m && setReferenceMonth(m)}
         />
-        <DateField
-          precision="month"
-          id={`${id}-cohort`}
-          label={s.cohortMonth}
-          hint={cohortHint}
-          value={cohortMonth}
-          months={monthOptions(lastClosed, cohortMonth, locale)}
-          onChange={(m) => m && setChosenCohort(m)}
-        />
+        {/* The cohort followed is self-serve's (D7): sales-assisted reads three months, computed below. */}
+        {motions.plg ? (
+          <DateField
+            precision="month"
+            id={`${id}-cohort`}
+            label={s.cohortMonth}
+            hint={cohortHint}
+            value={cohortMonth}
+            months={monthOptions(lastClosed, cohortMonth, locale)}
+            onChange={(m) => m && setChosenCohort(m)}
+          />
+        ) : null}
       </div>
+      {motions.slg ? (
+        <p className={styles.caveatLine} data-testid="engine-setup-slg-periods">
+          {slgPeriods}
+        </p>
+      ) : null}
 
       {/* A three-letter code, so a box its size, not the column's (extension 04, Q18.11). */}
       <Select<Currency>
@@ -187,26 +319,6 @@ export function Setup({
         onChange={(c) => c && setCurrency(c)}
       />
 
-      <Field group label={s.activationWindow}>
-        {({ labelId }) => (
-          <Segmented
-            labelledBy={labelId}
-            value={String(activation) as "7" | "14" | "30"}
-            options={([7, 14, 30] as const).map((n) => ({ id: String(n) as "7" | "14" | "30", label: fill(s.windowDays, { n }) }))}
-            onChange={(v) => setActivation(Number(v) as EngineSetup["activationWindowDays"])}
-          />
-        )}
-      </Field>
-      <Field group label={s.paidWindow}>
-        {({ labelId }) => (
-          <Segmented
-            labelledBy={labelId}
-            value={String(paid) as "30" | "60" | "90"}
-            options={([30, 60, 90] as const).map((n) => ({ id: String(n) as "30" | "60" | "90", label: fill(s.windowDays, { n }) }))}
-            onChange={(v) => setPaid(Number(v) as EngineSetup["paidWindowDays"])}
-          />
-        )}
-      </Field>
 
       <TextField
         id={`${id}-company`}
@@ -266,7 +378,7 @@ export function Setup({
           </div>
           <div className={styles.panelActions}>
             {onExample ? (
-              <Button variant="quiet" onClick={onExample} data-testid="engine-setup-example">
+              <Button variant="quiet" onClick={() => onExample(noMotion ? SETUP_V2_DEFAULTS.motions : motions)} data-testid="engine-setup-example">
                 {s.exampleLink}
               </Button>
             ) : null}

@@ -90,9 +90,10 @@ export const ENGINE_COPY = {
     // TODO: à relire — réécrit le 2026-09-28 (audit du design kit) : le moteur collecte dix-sept
     // chiffres depuis le 2026-09-26 (expansion et rétrogradation), la page disait encore quinze.
     // TODO: à relire (convention 6) — réécrit le 2026-09-30 (A7.1, C1 : aucun repère ne désigne).
+    // TODO: à relire (convention 6) — réécrit le 2026-10-01 (A7.3.c S3) : les chiffres de l'assisté.
     promise: {
-      fr: "Dix-sept chiffres, trois par étape et cinq pour Revenue : va les chercher, vois où ton moteur perd du monde et repars avec des slides prêtes pour ton CODIR. Tes chiffres ne sont comparés qu'à toi-même et à ta propre cible : les repères publiés sont là pour situer, jamais pour désigner une étape.",
-      en: "Seventeen numbers, three per stage and five for Revenue: go and get them, see where your engine loses people, and leave with slides ready for your leadership meeting. Your numbers are only compared with yourself and your own target: published references are there for context, never to name a stage.",
+      fr: "Dix-sept chiffres en libre-service, quinze en vente assistée : va les chercher, vois où ton moteur perd du monde et repars avec des slides prêtes pour ton CODIR. Tes chiffres ne sont comparés qu'à toi-même et à ta propre cible : les repères publiés sont là pour situer, jamais pour désigner une étape.",
+      en: "Seventeen numbers for self-serve, fifteen for sales-assisted: go and get them, see where your engine loses people, and leave with slides ready for your leadership meeting. Your numbers are only compared with yourself and your own target: published references are there for context, never to name a stage.",
     },
     privacyTitle: { fr: "Rien de ce que tu saisis ne sort d'ici", en: "Nothing you enter leaves this page" },
     privacyBody: {
@@ -102,15 +103,21 @@ export const ENGINE_COPY = {
     cta: { fr: "Entre tes chiffres →", en: "Enter your numbers →" },
     ctaNote: { fr: "Gratuit, sans compte. Tout reste sur ton appareil.", en: "Free, no sign-up. Everything stays on your device." },
     tourFirst: { fr: "Démarre ton Tour d'abord (3 min)", en: "Start your Tour first (3 min)" },
+    // TODO: à relire (convention 6) — réécrit le 2026-10-01 (A7.3.c S3) : la liste compte les deux motions.
     noscript: {
-      fr: "Le moteur a besoin de JavaScript pour enregistrer tes chiffres. La liste des dix-sept chiffres, plus bas, se lit sans.",
-      en: "The engine needs JavaScript to save your numbers. The list of seventeen numbers, further down, reads without it.",
+      fr: "Le moteur a besoin de JavaScript pour enregistrer tes chiffres. La liste des chiffres, plus bas, se lit sans.",
+      en: "The engine needs JavaScript to save your numbers. The list of numbers, further down, reads without it.",
     },
     // TODO: à relire — nouveau (2026-09-25, retours d'Antoine sur le moteur).
     durationTitle: { fr: "Combien de temps ça prend", en: "How long it takes" },
+    // TODO: à relire (convention 6) — réécrit le 2026-10-01 (A7.3.c S3) : une phrase par motion, comptées sur le catalogue.
     durationIntro: {
-      fr: "Surtout, là où sont tes chiffres. Sur les dix-sept, {quick} se lisent en cinq minutes, {hour} demandent environ une heure chacun et {ask} sont à demander à quelqu'un.",
-      en: "Mostly, where your numbers are. Of the seventeen, {quick} take five minutes to read, {hour} take about an hour each and {ask} have to be asked of someone.",
+      fr: "Surtout, là où sont tes chiffres. Sur les dix-sept du libre-service, {quick} se lisent en cinq minutes, {hour} demandent environ une heure chacun et {ask} sont à demander à quelqu'un.",
+      en: "Mostly, where your numbers are. Of the seventeen self-serve ones, {quick} take five minutes to read, {hour} take about an hour each and {ask} have to be asked of someone.",
+    },
+    durationIntroSlg: {
+      fr: "Sur les quinze de l'assisté, {quick} se lisent en cinq minutes, {hour} demandent environ une heure chacun et {ask} sont à demander à quelqu'un.",
+      en: "Of the fifteen sales-assisted ones, {quick} take five minutes to read, {hour} take about an hour each and {ask} have to be asked of someone.",
     },
     durationReadyLabel: { fr: "Tout est sous la main", en: "Everything is at hand" },
     durationReady: {
@@ -130,11 +137,13 @@ export const ENGINE_COPY = {
     },
     durationDeckLabel: { fr: "Les slides", en: "The slides" },
     durationDeck: { fr: "Un quart d'heure, une fois les chiffres là.", en: "A quarter of an hour, once the numbers are in." },
+    // TODO: à relire (convention 6) — réécrit le 2026-10-01 (A7.3.c S3) : les fiches des deux motions.
     catalogueToggle: {
-      fr: "Ouvrir les dix-sept fiches : formule, où le trouver, piège",
-      en: "Open the seventeen cards: formula, where to find it, trap",
+      fr: "Ouvrir les fiches : formule, où le trouver, piège",
+      en: "Open the cards: formula, where to find it, trap",
     },
-    catalogueTitle: { fr: "Les dix-sept chiffres", en: "The seventeen numbers" },
+    // TODO: à relire (convention 6) — réécrit le 2026-10-01 (A7.3.c S3).
+    catalogueTitle: { fr: "Les chiffres du moteur", en: "The engine's numbers" },
     // TODO: à relire — réécrit le 2026-09-28 : « trois par étape » ne valait plus pour Revenue (cinq).
     catalogueIntro: {
       fr: "Trois par étape, comme les trois questions du Tour, et cinq pour Revenue, qui porte aussi les mouvements du MRR. Pour chacun : sa formule, où le trouver, et le piège à connaître avant de le citer.",
@@ -161,17 +170,6 @@ export const ENGINE_COPY = {
 
   setup: {
     title: { fr: "Avant de commencer", en: "Before you start" },
-    model: { fr: "Ton modèle", en: "Your model" },
-    models: {
-      selfserve: { fr: "SaaS ou produit web en libre-service (essai ou freemium)", en: "SaaS or web product, self-serve (trial or freemium)" },
-      salesLed: { fr: "B2B avec une équipe commerciale", en: "B2B with a sales team" },
-      consumerApp: { fr: "App grand public", en: "Consumer app" },
-      marketplace: { fr: "Place de marché", en: "Marketplace" },
-    },
-    modelSoon: {
-      fr: "Bientôt — leur funnel n'a pas la même forme.",
-      en: "Coming soon — their funnel has a different shape.",
-    },
     referenceMonth: { fr: "Mois des flux", en: "Month for flows" },
     referenceMonthHint: {
       fr: "Visiteurs, inscriptions, dépense, churn et ARPA de ce mois-là. Par défaut : le dernier mois terminé.",
@@ -211,8 +209,8 @@ export const ENGINE_COPY = {
     /**
      * TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S2, ENGINE.md §18.1, C25 Q16) : the
      * type and the motions. The type is a closed list with one option open,
-     * « Plus tard », never « Bientôt » (Q16); `models` and `modelSoon` above
-     * go when S3 rewires the card. The hint promises what the hybrid never
+     * « Plus tard », never « Bientôt » (Q16); it replaced v1's « Ton modèle »
+     * list with S3. The hint promises what the hybrid never
      * does: one against the other.
      */
     companyType: { fr: "Ton type d'entreprise", en: "Your type of company" },
@@ -868,6 +866,9 @@ export const ENGINE_COPY = {
     clauseWinRateOne: { fr: "sur 100 opportunités conclues, {w} est signée", en: "out of 100 closed opportunities, {w} is signed" },
     clauseGoLive: { fr: "sur 100 nouveaux clients, {g} sont en production à {n} jours", en: "out of 100 new customers, {g} are live within {n} days" },
     clauseGoLiveOne: { fr: "sur 100 nouveaux clients, {g} est en production à {n} jours", en: "out of 100 new customers, {g} is live within {n} days" },
+    /** Between two known clauses of a title with a gap (« sur 100 leads, 15 deviennent… ; sur 100 nouveaux clients, 60… »). */
+    // TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S3).
+    clauseJoin: { fr: " ; ", en: "; " },
     /** The `slg:peloton` slide's footer: `{sources}`, each relay's. */
     slideFooter: { fr: "Chaque grille a sa propre base de 100 · {sources}", en: "Each grid has its own base of 100 · {sources}" },
   },
@@ -2113,6 +2114,20 @@ export const ENGINE_COPY = {
     bannerBody: {
       fr: "Chiffres et cibles inventés, pour montrer le funnel et les slides une fois remplis : l'équipe fictive vise {activation} d'activation et {churn} de churn logo par mois. Rien n'est enregistré, et ça ne touche pas à ton moteur.",
       en: "Made-up numbers and targets, to show the funnel and the slides once filled in: the fictional team aims for {activation} activation and {churn} monthly logo churn. Nothing is saved, and it doesn't touch your engine.",
+    },
+    /**
+     * The example in the motions the setup card ticked (A7.3.c S3, §18.7): its targets, read from
+     * `lib/engine/example.ts`, the sales-assisted ones fictional too (§18.9).
+     */
+    // TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S3).
+    bannerBodySlg: {
+      fr: "Chiffres et cibles inventés, pour montrer les relais et les slides une fois remplis : l'équipe fictive vise {winRate} de closing et {renewal} de renouvellement des contrats. Rien n'est enregistré, et ça ne touche pas à ton moteur.",
+      en: "Made-up numbers and targets, to show the relays and the slides once filled in: the fictional team aims for a {winRate} win rate and {renewal} contract renewal. Nothing is saved, and it doesn't touch your engine.",
+    },
+    // TODO: à relire (convention 6) — neuf le 2026-10-01 (A7.3.c S3).
+    bannerBodyHybrid: {
+      fr: "Chiffres et cibles inventés, pour montrer les deux moteurs, leur total et les slides une fois remplis : l'équipe fictive vise {activation} d'activation et {churn} de churn logo par mois en libre-service, {winRate} de closing et {renewal} de renouvellement en assisté. Rien n'est enregistré, et ça ne touche pas à ton moteur.",
+      en: "Made-up numbers and targets, to show the two engines, their total and the slides once filled in: the fictional team aims for {activation} activation and {churn} monthly logo churn self-serve, a {winRate} win rate and {renewal} renewal sales-assisted. Nothing is saved, and it doesn't touch your engine.",
     },
     back: { fr: "← Revenir", en: "← Back" },
     deck: { fr: "Voir les slides de l'exemple →", en: "See the example's slides →" },

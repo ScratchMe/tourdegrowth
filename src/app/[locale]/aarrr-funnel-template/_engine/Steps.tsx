@@ -4,12 +4,24 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { NumberField } from "@/components/core/NumberField";
-import { CANDIDATE_IDS, METRIC_SHAPES } from "@/lib/engine/catalog-shape";
+import { candidatesOf } from "@/lib/engine/catalog-shape";
+import { totalIn12 } from "@/lib/engine/deck-motions";
 import { isAnswerMetric } from "@/lib/engine/phrases";
 import { knownSharedCount } from "@/lib/engine/shared-counts";
 import type { MetricId, SharedCount } from "@/lib/engine/types";
 import { MetricSheet } from "./MetricSheet";
-import { STEP_PHASES, NUMBER_COUNT, nextPosition, phaseOf, previousPosition, type StepPhase, type StepPosition } from "./steps-model";
+import { SlgWhatIfPanel } from "./SlgWhatIfPanel";
+import {
+  STEP_PHASES,
+  nextGroupStart,
+  nextPosition,
+  numberPlace,
+  numberSequence,
+  phaseOf,
+  previousPosition,
+  type StepPhase,
+  type StepPosition,
+} from "./steps-model";
 import { percentUnit } from "./sources";
 import { catalogFill, fill, metricById } from "./text";
 import type { EngineActions, EngineView } from "./view";
@@ -57,8 +69,10 @@ export function Steps({
     moved.current = true;
     setPosition(next);
   };
-  const next = () => go(nextPosition(position));
-  const back = () => go(previousPosition(position));
+  const motions = view.state.setup.motions;
+  const hybrid = motions.plg && motions.slg;
+  const next = () => go(nextPosition(position, motions));
+  const back = () => go(previousPosition(position, motions));
   const current = phaseOf(position);
   const phaseLabel: Record<StepPhase, string> = {
     targets: s.phaseTargets,
@@ -95,11 +109,17 @@ export function Steps({
             {s.targetsTitle}
           </h2>
           <p className={styles.lead}>{s.targetsIntro}</p>
-          <div className={styles.targets}>
-            {CANDIDATE_IDS.map((id) => (
-              <TargetInput key={id} id={id} view={view} actions={actions} />
+          {/* One screen, one group per motion ticked, self-serve first (§18.7); the group headings only in the hybrid. */}
+          {(["plg", "slg"] as const)
+            .filter((m) => motions[m])
+            .map((m) => (
+              <div key={m} className={styles.targets} data-testid={`engine-steps-targets-${m}`}>
+                {hybrid ? <h3 className={styles.groupTitle}>{view.strings.hybrid.motionName[m]}</h3> : null}
+                {candidatesOf(m).map((id) => (
+                  <TargetInput key={id} id={id} view={view} actions={actions} />
+                ))}
+              </div>
             ))}
-          </div>
           <div className={styles.nav}>
             <Button onClick={next} data-testid="engine-steps-next">
               {s.continue}
@@ -108,10 +128,22 @@ export function Steps({
         </Card>
       ) : null}
 
-      {position.phase === "base" ? <BaseStep view={view} actions={actions} heading={heading} onBack={back} onNext={next} /> : null}
+      {position.phase === "base" && (position.motion ?? "plg") === "plg" ? <BaseStep view={view} actions={actions} heading={heading} onBack={back} onNext={next} /> : null}
+      {position.phase === "base" && position.motion === "slg" ? <SlgBaseStep view={view} actions={actions} heading={heading} onBack={back} onNext={next} /> : null}
 
       {position.phase === "number" ? (
-        <NumberStep index={position.index} view={view} actions={actions} heading={heading} onBack={back} onNext={next} />
+        <NumberStep
+          index={position.index}
+          view={view}
+          actions={actions}
+          heading={heading}
+          onBack={back}
+          onNext={next}
+          onSkipGroup={() => {
+            const start = nextGroupStart(position.index, motions);
+            go(start === null ? { phase: "whatif" } : { phase: "number", index: start });
+          }}
+        />
       ) : null}
 
       {position.phase === "whatif" ? (
@@ -119,7 +151,10 @@ export function Steps({
           <h2 id="engine-steps-title" ref={heading} tabIndex={-1} className={styles.title}>
             {s.whatIfTitle}
           </h2>
-          <WhatIfPanel view={view} onChange={actions.setWhatIf} />
+          {/* Both panels in the hybrid, self-serve first, and the one line that adds them (§18.5.5). */}
+          {motions.plg ? <WhatIfPanel view={view} onChange={actions.setWhatIf} /> : null}
+          {motions.slg ? <SlgWhatIfPanel view={view} onChange={actions.setWhatIf} /> : null}
+          {hybrid ? <TotalIn12Line view={view} /> : null}
           <div className={styles.nav}>
             <Button variant="quiet" onClick={back}>
               {s.back}
@@ -264,6 +299,7 @@ function NumberStep({
   heading,
   onBack,
   onNext,
+  onSkipGroup,
 }: {
   index: number;
   view: EngineView;
@@ -271,15 +307,25 @@ function NumberStep({
   heading: React.RefObject<HTMLHeadingElement | null>;
   onBack: () => void;
   onNext: () => void;
+  /** « Passer à l'assisté → » / « Passer aux « Et si » → » (§18.7): past the rest of this motion's numbers. */
+  onSkipGroup: () => void;
 }) {
   const s = view.strings.steps;
-  const shape = METRIC_SHAPES[index]!;
+  const motions = view.state.setup.motions;
+  const shape = numberSequence(motions)[index]!;
   const metric = metricById(view.metrics, shape.id);
+  const place = numberPlace(index, motions);
+  // Numbered within its motion — « Assisté · chiffre 4 sur 15 », never « 21 sur 32 » — once there is more than self-serve.
+  const motionLabel = place.group === "link" ? view.strings.hybrid.linkBlock : view.strings.hybrid.motionName[place.group];
+  const single = !motions.slg;
+  const values = { i: place.i, n: place.n, stage: view.strings.stages[shape.stage], motion: motionLabel };
+  const answer = isAnswerMetric(shape.id);
+  const skip = motions.plg && motions.slg && place.group === "plg" ? s.skipToSlg : place.group !== "plg" ? s.skipToWhatIf : null;
   return (
     <Card elevation="flat" className={styles.card} data-testid="engine-steps-number" data-metric={shape.id}>
       <p className={styles.eyebrow}>
         {/* « Chiffre 4 sur 15 » over the activation event would call a name a number (Antoine, 2026-09-26). */}
-        {fill(isAnswerMetric(shape.id) ? s.answerOf : s.numberOf, { i: index + 1, n: NUMBER_COUNT, stage: view.strings.stages[shape.stage] })}
+        {fill(single ? (answer ? s.answerOf : s.numberOf) : answer ? s.answerOfMotion : s.numberOfMotion, values)}
       </p>
       <h2 id="engine-steps-title" ref={heading} tabIndex={-1} className={styles.title}>
         {metric.name}
@@ -292,7 +338,122 @@ function NumberStep({
         <Button variant="quiet" onClick={onNext} data-testid="engine-steps-skip">
           {s.skip}
         </Button>
+        {skip ? (
+          <Button variant="quiet" onClick={onSkipGroup} data-testid="engine-steps-skip-group">
+            {skip}
+          </Button>
+        ) : null}
       </div>
     </Card>
+  );
+}
+
+/**
+ * Sales-assisted's base (§18.7, S6): the three counts several of its numbers
+ * share, all on the same three months — the opportunities created, the
+ * new-customer deals won, the sales-assisted customers at the flows' month
+ * end. Typed once here, reused everywhere, as self-serve's sign-ups.
+ */
+function SlgBaseStep({
+  view,
+  actions,
+  heading,
+  onBack,
+  onNext,
+}: {
+  view: EngineView;
+  actions: EngineActions;
+  heading: React.RefObject<HTMLHeadingElement | null>;
+  onBack: () => void;
+  onNext: () => void;
+}) {
+  const s = view.strings.steps;
+  const snapshot = view.state.snapshots[view.state.snapshots.length - 1]!;
+  const [opps, setOpps] = useState<number | null>(knownSharedCount(snapshot, "slgOppsCreated")?.value ?? null);
+  const [deals, setDeals] = useState<number | null>(knownSharedCount(snapshot, "slgDealsWon")?.value ?? null);
+  const [customers, setCustomers] = useState<number | null>(knownSharedCount(snapshot, "slgCustomers")?.value ?? null);
+  // Each label is the count's catalogue label, filled with ITS number's three months: one count, one wording.
+  const fillFor = (id: MetricId, text: string) =>
+    catalogFill(text, { state: view.state, locale: view.ctx.locale, strings: view.strings, metrics: view.metrics, windowDays: null, period: { id, today: view.ctx.today } });
+  const fields: { id: string; count: SharedCount; label: string; hint: string; value: number | null; set: (n: number | null) => void }[] = [
+    {
+      id: "engine-base-slg-opps",
+      count: "slgOppsCreated",
+      label: fillFor("slg.ref.referred-share", metricById(view.metrics, "slg.ref.referred-share").inputs?.denominator ?? ""),
+      hint: fillFor("slg.ref.referred-share", s.baseOppsHint),
+      value: opps,
+      set: setOpps,
+    },
+    {
+      id: "engine-base-slg-deals",
+      count: "slgDealsWon",
+      label: fillFor("slg.rev.win-rate", metricById(view.metrics, "slg.rev.win-rate").inputs?.numerator ?? ""),
+      hint: fillFor("slg.rev.win-rate", s.baseDealsHint),
+      value: deals,
+      set: setDeals,
+    },
+    {
+      id: "engine-base-slg-customers",
+      count: "slgCustomers",
+      label: fillFor("slg.rev.arpa", metricById(view.metrics, "slg.rev.arpa").inputs?.denominator ?? ""),
+      hint: fillFor("slg.rev.arpa", s.baseCustomersHint),
+      value: customers,
+      set: setCustomers,
+    },
+  ];
+
+  function save() {
+    const changed: Partial<Record<SharedCount, number>> = {};
+    for (const f of fields) {
+      const n = f.value;
+      if (n !== null && Number.isInteger(n) && n > 0 && n !== knownSharedCount(snapshot, f.count)?.value) changed[f.count] = n;
+    }
+    if (Object.keys(changed).length > 0) actions.setBase(changed);
+    onNext();
+  }
+
+  return (
+    <Card elevation="flat" className={styles.card} data-testid="engine-steps-base-slg">
+      <h2 id="engine-steps-title" ref={heading} tabIndex={-1} className={styles.title}>
+        {s.baseTitleSlg}
+      </h2>
+      <p className={styles.lead}>{s.baseIntroSlg}</p>
+      <div className={styles.targets}>
+        {fields.map((f) => (
+          <NumberField
+            key={f.id}
+            id={f.id}
+            label={f.label}
+            hint={f.hint}
+            value={f.value}
+            onChange={f.set}
+            locale={view.ctx.locale}
+            integer
+            parseError={view.strings.workbench.notAWholeNumber}
+          />
+        ))}
+      </div>
+      <div className={styles.nav}>
+        <Button variant="quiet" onClick={onBack}>
+          {s.back}
+        </Button>
+        <Button onClick={save} data-testid="engine-steps-next">
+          {s.continue}
+        </Button>
+      </div>
+    </Card>
+  );
+}
+
+/** The hybrid's total MRR in twelve months, both panels' what-ifs added (§18.5.5) — a sum, never a comparison. */
+function TotalIn12Line({ view }: { view: EngineView }) {
+  const { strings, state, ctx } = view;
+  const line = totalIn12(state, strings, ctx);
+  if (!line) return null;
+  const value = line.projected ? fill(strings.scenario.totalIn12Row, { today: line.today, projected: line.projected }) : line.today;
+  return (
+    <p className={styles.lead} data-testid="engine-total-in12">
+      <strong>{strings.scenario.totalIn12}</strong> · {value}
+    </p>
   );
 }

@@ -4,8 +4,8 @@ import { useId, useState } from "react";
 import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import type { EngineStrings } from "@/lib/engine/strings";
-import type { EngineState } from "@/lib/engine/types";
-import { coverage } from "@/lib/engine/coverage";
+import type { EngineState, Motion, Snapshot } from "@/lib/engine/types";
+import { coverage, motionCoverage } from "@/lib/engine/coverage";
 import { parseEngineFile } from "@/lib/engine/io";
 import { fill, formatMonth } from "./text";
 import { Field } from "@/components/core/Field";
@@ -91,12 +91,13 @@ export function ImportPanel({
       {state && snapshot && cov ? (
         <div className={styles.preview} data-testid="engine-import-preview">
           <p className={styles.previewLine}>
-            {fill(strings.io.importPreview, {
-              company: state.setup.companyLabel || strings.workbench.noCompany,
-              month: formatMonth(snapshot.referenceMonth, locale),
-              n: cov.found,
-              N: cov.denominator,
-            })}
+            {previewLine(state, snapshot, strings, locale) ??
+              fill(strings.io.importPreview, {
+                company: state.setup.companyLabel || strings.workbench.noCompany,
+                month: formatMonth(snapshot.referenceMonth, locale),
+                n: cov.found,
+                N: cov.denominator,
+              })}
           </p>
           {/* A v1 file was migrated on the way in (§18.3.2): said once, so nobody wonders what « updated » did to their numbers. */}
           {parsed?.migratedFrom === 1 ? (
@@ -130,4 +131,33 @@ export function ImportPanel({
       </div>
     </Card>
   );
+}
+
+/**
+ * A file that holds sales-assisted numbers (§18.1.2): the count per motion,
+ * a motion unticked but kept said as « (masqué) » — « Mon produit · août
+ * 2026 · libre-service 11 sur 17 · assisté 10 sur 15 (masqué) ». null for a
+ * self-serve-only file, which keeps the v1 line.
+ */
+function previewLine(state: EngineState, snapshot: Snapshot, strings: EngineStrings, locale: "en" | "fr"): string | null {
+  const hasSlgData = Object.keys(snapshot.metrics).some((id) => id.startsWith("slg.") || id.startsWith("link."));
+  if (!state.setup.motions.slg && !hasSlgData) return null;
+  const counts = (["plg", "slg"] as const satisfies readonly Motion[])
+    .map((m) => {
+      const cov = motionCoverage(snapshot, m);
+      const shown = state.setup.motions[m];
+      // A motion neither ticked nor holding a number says nothing worth a line.
+      if (!shown && cov.found + cov.approximate + cov.missing + cov.requested === 0) return null;
+      return fill(shown ? strings.hybrid.motionCount : strings.hybrid.motionCountHidden, {
+        motion: strings.hybrid.motionAdjective[m],
+        n: cov.found,
+        N: cov.denominator,
+      });
+    })
+    .filter((x): x is string => x !== null);
+  return fill(strings.io.importPreviewMotions, {
+    company: state.setup.companyLabel || strings.workbench.noCompany,
+    month: formatMonth(snapshot.referenceMonth, locale),
+    counts: counts.join(" · "),
+  });
 }

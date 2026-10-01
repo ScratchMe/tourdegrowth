@@ -1,9 +1,9 @@
 /*
- * The peloton — engine spec §8.1. The grids are viz/DotGrid's (design audit
- * S-10, 2026-09-29): up to 200px with a 4px gap on desktop, a 118px
- * mini-grid on the left of each row at 390px. This sheet only places them.
+ * The relays — engine spec §18.5.1. The peloton's grammar (Peloton.module.css)
+ * on three grids that do NOT share a base: each column says its own base of
+ * 100 and its own three months above its numeral. The grids are viz/DotGrid's.
  */
-.peloton {
+.relays {
   display: flex;
   flex-direction: column;
   gap: var(--space-8);
@@ -18,7 +18,6 @@
   color: var(--text-muted);
 }
 
-/* An SVG, never a glyph: no arrow exists in Stardos Stencil (spec §10.4). */
 .arrow {
   flex: none;
   width: 28px;
@@ -27,32 +26,21 @@
   color: var(--viz-ink);
 }
 
-/*
- * The four row tracks live HERE, not in each column (Antoine, 2026-09-26): the
- * « Sous la cible » stamp makes the named column's label row taller, and with
- * a grid per column that column's 10×10 grid started lower than its
- * neighbours'. Every column spans the four shared rows as a subgrid, so the
- * tallest label sets the label row for all four and the grids start on one
- * line. The row gap is the column's own, set once for the whole peloton.
- */
+/* Five shared row tracks, as the peloton's four: the bases, numerals, labels and grids each start on one line. */
 .columns {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-template-rows: auto auto auto 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: auto auto auto auto 1fr;
   column-gap: var(--space-11);
   row-gap: var(--space-4);
 }
 
-/*
- * Numeral → label → grid → source, in that order. The spec's own mock put
- * the numeral under the grid and it touched the dots; the gap below keeps
- * a clear band between the two at every width.
- */
 .column {
   display: grid;
-  grid-row: span 4;
+  grid-row: span 5;
   grid-template-rows: subgrid;
   grid-template-areas:
+    "base"
     "numeral"
     "label"
     "grid"
@@ -60,6 +48,17 @@
   row-gap: var(--space-4);
   min-width: 0;
   align-content: start;
+}
+
+/* Its own base of 100 and its own months: the line that tells the three grids apart. */
+.base {
+  grid-area: base;
+  font: var(--meta-xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding-bottom: var(--space-3);
+  border-bottom: var(--border-rule);
 }
 
 .numeral {
@@ -74,8 +73,6 @@
 
 .label {
   grid-area: label;
-  /* Top of the shared label row: the names stay on one line across the four columns, and the
-     stamp hangs under its own name rather than pulling the others down to the row's middle. */
   align-self: start;
   display: flex;
   flex-wrap: wrap;
@@ -88,9 +85,7 @@
   margin-bottom: var(--space-3);
 }
 
-/* StampedPillar's grammar (a painted, slightly rotated tag), on the role made
-   for a red fill under small white text: --surface-accent / --text-inverse,
-   4.65:1 where the road-paint red is 4.42 (design audit S-9). */
+/* The peloton's stamp, on the same accent role (--surface-accent / --text-inverse, 4.65:1). */
 .stamp {
   display: inline-block;
   font: var(--meta-2xs);
@@ -115,30 +110,40 @@
   overflow-wrap: anywhere;
 }
 
-.sameHundred {
+.ownBase {
   font: var(--body-sm);
   color: var(--text-body);
   padding-top: var(--space-5);
   border-top: var(--border-rule);
 }
 
+/* Shown only in the compact column, between two relays: never a chain, a new base. */
+.newBase {
+  font: var(--meta-2xs);
+  letter-spacing: var(--meta-tracking);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: var(--space-3) 0;
+  border-top: var(--border-rule);
+}
+
+/* One relay under another: the mini-grid on the left, the words on the right. */
 @media (max-width: 760px) {
-  /* One column under another: nothing to align across, so no shared row tracks. */
   .columns {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: none;
     gap: 0;
   }
 
-  /* One row per column: the mini-grid on the left, the words on the right. */
   .column {
     grid-row: auto;
     grid-template-columns: 118px minmax(0, 1fr);
     grid-template-areas:
+      "base base"
       "grid numeral"
       "grid label"
       "grid source";
-    grid-template-rows: auto auto 1fr;
+    grid-template-rows: auto auto auto 1fr;
     column-gap: var(--space-7);
     row-gap: var(--space-2);
     padding: var(--space-7) 0;
@@ -165,13 +170,7 @@
   }
 }
 
-/*
- * The hybrid's columns (engine spec §18.7, A7.3.c S3): each motion's funnel
- * has half the board, so it takes the 390px layout at any width — the
- * mini-grid on the left of each row. The rules are the phone's, repeated
- * under a class rather than a container query: the two motions' columns must
- * read alike, whatever their width.
- */
+/* The hybrid's column: the phone's layout at every width (§18.7). */
 .compact .columns {
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: none;
@@ -182,18 +181,14 @@
   grid-row: auto;
   grid-template-columns: 118px minmax(0, 1fr);
   grid-template-areas:
+    "base base"
     "grid numeral"
     "grid label"
     "grid source";
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: auto auto auto 1fr;
   column-gap: var(--space-7);
   row-gap: var(--space-2);
-  padding: var(--space-7) 0;
-  border-bottom: var(--border-rule);
-}
-
-.compact .column:first-child {
-  padding-top: 0;
+  padding: var(--space-5) 0 var(--space-7);
 }
 
 .compact .grid {

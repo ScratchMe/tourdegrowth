@@ -920,3 +920,18 @@ export function derivedShapeOf(id: DerivedId): DerivedShape {
 export function metricsOfStage(stage: Pillar): MetricShape<PlgMetricId>[] {
   return METRIC_SHAPES.filter((s) => s.stage === stage).sort((a, b) => Number(b.primary) - Number(a.primary));
 }
+
+/**
+ * One motion's numbers of a stage, ★ first (A7.3.c S3): the board's stage
+ * panel and its tab marks. The link is never one motion's: the sales-assisted
+ * Acquisition panel shows it apart, as its own block (§18.6.3).
+ */
+export function metricsOfStageIn(stage: Pillar, motion: Motion): MetricShape[] {
+  const shapes: readonly MetricShape[] = motion === "plg" ? METRIC_SHAPES : SLG_METRIC_SHAPES;
+  return shapes.filter((s) => s.stage === stage).sort((a, b) => Number(b.primary) - Number(a.primary));
+}
+
+/** One motion's numbers, catalogue order, the link left out: what the collection plan and the coverage count. */
+export function motionShapes(motions: Readonly<Record<Motion, boolean>>): MetricShape[] {
+  return shapesOf(motions).filter((s) => s.scope !== "link");
+}

@@ -117,7 +117,12 @@ export function WhatIfPanel({ view, onChange }: { view: EngineView; onChange: (t
               {w.leversTitle}
             </h3>
             {moved ? (
-              <Button variant="quiet" onClick={() => set({})} data-testid="whatif-reset-all">
+              // Self-serve's levers back to today; sales-assisted's targets, in the same map, stay (A7.3.c S3).
+              <Button
+                variant="quiet"
+                onClick={() => set(Object.fromEntries(Object.entries(targets).filter(([id]) => !scenario.levers.some((l) => l.id === id))) as Targets)}
+                data-testid="whatif-reset-all"
+              >
                 {w.resetAll}
               </Button>
             ) : null}
@@ -247,8 +252,21 @@ export function WhatIfPanel({ view, onChange }: { view: EngineView; onChange: (t
   );
 }
 
-function Kpi({ kpi, better, worse, todayTemplate }: { kpi: KpiView; better: string; worse: string; todayTemplate: string }) {
-  const common = { label: kpi.label, size: "auto" as const, "data-testid": `whatif-kpi-${kpi.id}` };
+/** One growth figure's tile — the sales-assisted panel's too (`testIdPrefix`: two panels can be on one screen). */
+export function Kpi({
+  kpi,
+  better,
+  worse,
+  todayTemplate,
+  testIdPrefix = "whatif-kpi",
+}: {
+  kpi: KpiView;
+  better: string;
+  worse: string;
+  todayTemplate: string;
+  testIdPrefix?: string;
+}) {
+  const common = { label: kpi.label, size: "auto" as const, "data-testid": `${testIdPrefix}-${kpi.id}` };
   if (kpi.projected === null) return <StatTile {...common} value={null} unknownLabel={kpi.unknown} />;
   // « aujourd'hui … » only once it differs: the same figure twice says nothing.
   const sub = kpi.today !== null && kpi.today !== kpi.projected ? fillTemplate(todayTemplate, { value: kpi.today }) : undefined;
