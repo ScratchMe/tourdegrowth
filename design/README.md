@@ -16,6 +16,7 @@ comme le brief d'origine pour le lancement.
 | **Extension 04** : les primitives de formulaire | 2026-09-29 | [`DS-EXTENSION-BRIEF-04.md`](DS-EXTENSION-BRIEF-04.md), captures dans `ds-extension-04/`, retour dans [`ds-extension-04-return/`](ds-extension-04-return/README.md) | Portée (A10, 2026-09-30) |
 | **Le prototype du jeu** | 2026-09 | `game/prototype-s-ils-reviennent.html`, jouable seul dans un navigateur | Référence de `GAME-BRIEF.md` |
 | **Les lois de l'UX, traduites** | 2026-10-01 | [`LOIS-UX.md`](LOIS-UX.md) : les règles tirées de [Laws of UX](https://lawsofux.com/), avec l'état du produit ce jour-là | À relire avant de dessiner un écran (correctifs : `CHANTIERS.md` A15) |
+| **Extension 05** : les puces d'étape, une valeur qui a l'allure d'un bouton (loi de similarité, A15.19) | 2026-10-01 | [`DS-EXTENSION-BRIEF-05.md`](DS-EXTENSION-BRIEF-05.md), captures dans `ds-extension-05/`, retour attendu dans `ds-extension-05-return/` | **Déposé** dans le projet Claude Design le 2026-10-01, retour attendu (`CHANTIERS.md` B7, D11) |
 
 Dans l'autre sens, le système du code part vers le projet Claude Design par la
 design sync : `.design-sync/` (lire `NOTES.md` avant toute re-synchro).
