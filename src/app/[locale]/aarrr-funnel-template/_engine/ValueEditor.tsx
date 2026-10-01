@@ -65,6 +65,10 @@ export function ValueEditor({
   const currency = state.setup.currency;
 
   const numberInvalid = w.notANumber;
+  // A cost per customer counts money over people; a margin or an MRR
+  // movement, money over money (A15.8). Only people are whole numbers.
+  const moneyNumerator = shape.unit === "money" || shape.amounts === true;
+  const moneyDenominator = shape.amounts === true;
 
   // A rule a single value breaks — a rate outside 0–100, a negative amount
   // or duration — is said when the box is left, not only at the save
@@ -120,7 +124,7 @@ export function ValueEditor({
         // a rule about the pair is the row's, not one box's.
         <FieldRow
           joiner={strings.sheet.over}
-          error={numGtDen ? <span data-testid="engine-live">{numGtDen}</span> : undefined}
+          error={numGtDen ? <span data-testid="engine-live">{numGtDen}</span> : (rule("count-negative") ?? rule("amount-negative") ?? undefined)}
         >
           <NumberField
             size="sm"
@@ -131,9 +135,9 @@ export function ValueEditor({
             value={draft.numerator}
             onChange={(numerator) => update({ numerator })}
             locale={locale}
-            integer={shape.unit !== "money"}
-            {...(shape.unit === "money" ? moneyUnit(currency, locale) : {})}
-            parseError={shape.unit === "money" ? numberInvalid : w.notAWholeNumber}
+            integer={!moneyNumerator}
+            {...(moneyNumerator ? moneyUnit(currency, locale) : {})}
+            parseError={moneyNumerator ? numberInvalid : w.notAWholeNumber}
           />
           <NumberField
             size="sm"
@@ -144,8 +148,9 @@ export function ValueEditor({
             value={draft.denominator}
             onChange={(denominator) => update({ denominator })}
             locale={locale}
-            integer
-            parseError={w.notAWholeNumber}
+            integer={!moneyDenominator}
+            {...(moneyDenominator ? moneyUnit(currency, locale) : {})}
+            parseError={moneyDenominator ? numberInvalid : w.notAWholeNumber}
           />
         </FieldRow>
       ) : null}

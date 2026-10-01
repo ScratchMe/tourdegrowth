@@ -186,8 +186,9 @@
 .layout[data-owner] .slotShare { order: 7; }
 .layout[data-owner] .slotCta { order: 8; }
 
-/* The share card, and under it the owner's README badge (CHANTIERS.md A3.1),
-   at the left column's own 22px rhythm. */
+/* The share card, and above it the owner's README badge (CHANTIERS.md A3.1),
+   folded since A15.17 so the block ends on sharing, at the left column's own
+   22px rhythm. */
 .slotShare {
   display: flex;
   flex-direction: column;

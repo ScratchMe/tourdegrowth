@@ -1,5 +1,7 @@
 .label {
   display: block;
+  /* A heading's own margin, when it is rendered as one (`as`). */
+  margin: 0;
 }
 
 .md {

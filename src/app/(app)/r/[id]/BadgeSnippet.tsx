@@ -12,7 +12,7 @@ export interface BadgeSnippetProps {
   alt: string;
   /** The line to paste: the badge, linking to this result, on the canonical domain. */
   markdown: string;
-  caption: string;
+  caption?: string;
   lead: string;
   copyLabel: string;
   copiedLabel: string;
@@ -47,7 +47,8 @@ export function BadgeSnippet({ src, alt, markdown, caption, lead, copyLabel, cop
 
   return (
     <div className={[styles.badge, className ?? ""].filter(Boolean).join(" ")} data-testid="badge-snippet">
-      <p className={styles.caption}>{caption}</p>
+      {/* Optional since A15.17: inside its fold, the fold's own summary says it. */}
+      {caption ? <p className={styles.caption}>{caption}</p> : null}
       <p className={styles.lead}>{lead}</p>
       {/* A route handler's SVG on an immutable address, like the share image beside it: nothing for the optimiser to do. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}

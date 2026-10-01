@@ -28,6 +28,7 @@ import { MissingTriage } from "./MissingTriage";
 import { RequestCopy } from "./RequestCopy";
 import { draftFromEntry, entryFromDraft, isWideRange, type DraftProblem, type SheetDraft, type SheetMode } from "./sheet-draft";
 import { isRule, missingLabel, ruleMessage } from "./sheet-problems";
+import { draftKey, dropDraft, keepDraft, keptDraft } from "./sheet-drafts";
 import { moneyUnit, percentUnit, wordUnit, type NumberUnit } from "./sources";
 import { catalogFill, daysBetween, domId, fill, formatMonth, joinList, metricById, midSentence, sourceLabel } from "./text";
 import { ValueEditor } from "./ValueEditor";
@@ -35,6 +36,9 @@ import type { EngineActions, EngineView } from "./view";
 import styles from "./Sheet.module.css";
 
 const ROLES = Object.keys(ROLE_KEY) as RoleId[];
+
+/** The boxes where Enter submits a form, in a browser (HTML's implicit submission): not a checkbox, a button or a textarea. */
+const TEXT_INPUTS = new Set(["text", "search", "url", "email", "tel", "number"]);
 
 /** The unit inside a bound's or a target's box, placed by the page's language — a duration's word in the number's grammatical number (A11.1). */
 function unitOf(shape: MetricShape, view: EngineView, value: number | null): NumberUnit {
@@ -93,7 +97,11 @@ export function MetricSheet({
   // A count several numbers share is typed once (shared-counts.ts): an empty side of this
   // number's counts starts from it, and the field says so.
   const shared = sharedSides(id, snapshot);
+  // An unsaved draft comes back when the sheet is remounted (A15.12).
+  const key = draftKey(id, entry);
   const [draft, setDraft] = useState<SheetDraft>(() => {
+    const kept = keptDraft(key);
+    if (kept) return kept;
     const d = draftFromEntry(entry, shape);
     if (d.kind !== "ratio") return d;
     return {
@@ -122,7 +130,11 @@ export function MetricSheet({
   // read when needed, not scrolled past every time (Antoine, 2026-09-25).
   const [whereOpen, setWhereOpen] = useState(false);
   const update = (patch: Partial<SheetDraft>) => {
-    setDraft((current) => ({ ...current, ...patch }));
+    setDraft((current) => {
+      const next = { ...current, ...patch };
+      keepDraft(key, next);
+      return next;
+    });
     setOutcome(null);
   };
 
@@ -142,6 +154,7 @@ export function MetricSheet({
       return;
     }
     const result = actions.saveEntry(id, built.entry);
+    if (result.ok) dropDraft(key);
     setOutcome(result.ok ? "saved" : "failed");
     if (result.ok) onSaved?.();
   }
@@ -217,7 +230,25 @@ export function MetricSheet({
   const [alsoBefore = ""] = strings.sheet.alsoIn.split("{metrics}");
 
   return (
-    <div ref={sheetRef} className={styles.sheet} data-testid={`engine-sheet-${domId(id)}`}>
+    // Enter in a box saves, as on any form (A15.20, Jakob's law, decided by
+    // Antoine on 2026-10-01). Not a <form>: one is a carrier, and if its
+    // submit ever ran without this code (before hydration, or a handler that
+    // throws), the browser would put what was typed in a URL. Nothing typed
+    // in the engine leaves the device (ENGINE.md §11.4, rule 3 in
+    // `engine-boundary.test.ts`). So the key itself, from a text box only,
+    // and only when the Save button would take the click.
+    <div
+      ref={sheetRef}
+      className={styles.sheet}
+      data-testid={`engine-sheet-${domId(id)}`}
+      onKeyDown={(event) => {
+        if (event.key !== "Enter" || event.nativeEvent.isComposing) return;
+        if (!(event.target instanceof HTMLInputElement) || !TEXT_INPUTS.has(event.target.type)) return;
+        if (draft.mode === null || draft.mode === "ask") return;
+        event.preventDefault();
+        save();
+      }}
+    >
       <div className={styles.meta}>
         <Tag tone="outline">{strings.effort[EFFORT_KEY[shape.effort]]}</Tag>
         <a className={styles.definitionLink} href={metric.glossaryHref} target="_blank" rel="noopener">
@@ -549,8 +580,8 @@ export function MetricSheet({
         <div className={styles.saveRow}>
           <Button
             variant={variant === "step" ? "primary" : "secondary"}
-            onClick={save}
             disabled={draft.mode === null}
+            onClick={save}
             data-testid={`engine-save-${domId(id)}`}
           >
             {variant === "step" ? strings.sheet.saveNext : strings.sheet.save}
