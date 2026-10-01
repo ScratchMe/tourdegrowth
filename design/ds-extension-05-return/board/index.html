@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stage scores · all boards</title>
+<style>
+  body { margin: 0; padding: 24px; background: #cfc7b4; font: 500 13px/1.5 ui-monospace, monospace; color: #211c15; }
+  h1 { font-size: 15px; margin: 0 0 6px; }
+  p { margin: 0 0 16px; max-width: 70ch; }
+  .row { display: flex; gap: 24px; align-items: flex-start; overflow-x: auto; }
+  figure { margin: 0; flex: none; }
+  figcaption { margin-bottom: 6px; }
+  iframe { border: 2px solid #211c15; height: 90vh; background: #fff; }
+</style>
+</head>
+<body>
+<h1>Extension 05 — every state · paper and night · 390 and 1280 · EN and FR</h1>
+<p>Each frame is board.html with its own query: open one alone at its real width to read it. Served over http (any static server, or the project's preview): an ES module and its import map do not load from file://.</p>
+<div class="row" id="row"></div>
+<script>
+  const row = document.getElementById("row");
+  for (const world of ["paper", "night"]) for (const lang of ["en", "fr"]) for (const w of [390, 1280]) {
+    const f = document.createElement("figure");
+    f.innerHTML = `<figcaption>${world} · ${lang} · ${w}px</figcaption><iframe title="${world} ${lang} ${w}" width="${w + 4}" src="board.html?world=${world}&lang=${lang}&w=${w}"></iframe>`;
+    row.append(f);
+  }
+</script>
+</body>
+</html>

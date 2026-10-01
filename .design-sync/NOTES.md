@@ -374,8 +374,9 @@ anchor untouched), and Claude Design wrote its return next to them,
 `design/ds-extension-04-return/` (56 files). On 2026-10-01 brief 05 (the stage
 chips, B7) went in the same way: `design/DS-EXTENSION-BRIEF-05.md` and the ten
 PNGs under `design/ds-extension-05/` (eleven files, their own plan, no delete,
-anchor `6da5e42a15ef` untouched); its return is expected under
-`design/ds-extension-05-return/`. Brief 06 (the growth engine's share image,
+anchor `6da5e42a15ef` untouched), and Claude Design wrote its return next to
+them on 2026-10-02, `design/ds-extension-05-return/` (22 files, all source,
+copied to the repo the same day; nothing outside that folder changed). Brief 06 (the growth engine's share image,
 B5) followed the same evening: `design/DS-EXTENSION-BRIEF-06.md` and the ten
 PNGs under `design/ds-extension-06/` (eleven files, their own plan, no delete,
 anchor untouched); its return is expected under

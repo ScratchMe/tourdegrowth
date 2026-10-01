@@ -1,0 +1,160 @@
+/* StageScores + StageScore — design system extension 05.
+ *
+ * The five stage scores as one score sheet: a solid rule on top, one row per
+ * stage, a dashed hairline between rows. No box, no button radius, no edge
+ * all round: a row is a line you read, not a thing you press.
+ *
+ * The list is the grid; each row is a subgrid of it, so the score, meter and
+ * name columns line up across the five rows and every meter's track is the
+ * same length (the meter's job: five bars that compare).
+ */
+
+/* ── The sheet ─────────────────────────────────────────────────────────── */
+.StageScores_list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: max-content minmax(var(--score-meter-min), 1fr) max-content;
+  column-gap: var(--score-col-gap);
+  border-top: var(--score-head-rule);
+  font: var(--meta-md);
+  color: var(--score-text);
+}
+.StageScores_sm {
+  font: var(--meta-sm);
+}
+@media (max-width: 760px) {
+  /* `md` shrinks on a phone by itself, as PillarChip did — CSS only. */
+  .StageScores_md {
+    font: var(--meta-sm);
+  }
+}
+
+/* ── A row ─────────────────────────────────────────────────────────────── */
+.StageScore_row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  align-items: center;
+  min-height: var(--score-row-height-md);
+  /* Every row keeps the alert rule's room, so the weak row's text sits on
+     the same line as the others when its rule is drawn. */
+  padding-inline: calc(var(--score-pad-inline) - var(--score-alert-rule-width)) var(--score-pad-inline);
+  border-inline-start: var(--score-alert-rule-width) solid transparent;
+  border-bottom: var(--score-row-rule);
+}
+.StageScore_row:last-child {
+  border-bottom: none;
+}
+.StageScores_sm .StageScore_row {
+  min-height: var(--score-row-height-sm);
+}
+@media (max-width: 760px) {
+  .StageScores_md .StageScore_row {
+    min-height: var(--score-row-height-sm);
+  }
+}
+
+/* The score, first: figure in body ink at 600, "/20" in the row's ink.
+   Set right, in tabular figures, so 8/20 sits under 18/20. */
+.StageScore_score {
+  justify-self: end;
+  white-space: nowrap;
+  font-variant-numeric: var(--tabular);
+}
+.StageScore_figure {
+  font-weight: 600;
+  color: var(--score-figure);
+}
+
+/* The meter: decoration, hidden from assistive technology. */
+.StageScore_meter {
+  position: relative;
+  height: var(--score-meter-height);
+  overflow: hidden;
+  background: var(--score-meter-track);
+  border-radius: var(--radius-tag);
+}
+.StageScore_fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--score-share);
+  background: var(--score-meter-fill);
+  border-radius: inherit;
+}
+
+/* The stage's name, and right after it the "?" (or, on the landing, the
+   name is the link). */
+.StageScore_name {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  /* + the trigger's own 4px: its focus ring clears the name's last letter. */
+  column-gap: var(--space-1);
+  white-space: nowrap;
+}
+
+/* ── The stage that stalls: a diagnosis ─────────────────────────────────── */
+/* Wash across the row + a solid inked rule down its start edge. Never dashed
+   (dashed red is advice: PriorityMove, on the same screen). */
+.StageScore_alert {
+  background: var(--score-alert-bg);
+  border-inline-start-color: var(--score-alert-rule);
+  color: var(--score-alert-text);
+}
+.StageScore_alert .StageScore_figure {
+  color: var(--score-alert-text);
+}
+.StageScore_alert .StageScore_name {
+  font-weight: 600;
+}
+.StageScore_alert .StageScore_fill {
+  background: var(--score-meter-alert);
+}
+
+/* ── The landing: the stage name is a link to its glossary page ────────── */
+/* A link set in its row's type: underlined, in the row's ink (never the red
+   --text-link: on this sheet red belongs to the diagnosis). It takes taps on
+   a 44px strip centred on it (styles/hit.module.css), and the rows' 44px
+   pitch keeps two strips from overlapping. */
+.StageScore_link {
+  position: relative;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: var(--border-width-hairline);
+  text-underline-offset: 3px;
+  border-radius: 2px;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.StageScore_link::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: min(0px, calc((100% - var(--hit-min)) / 2));
+  right: min(0px, calc((100% - var(--hit-min)) / 2));
+  height: max(100%, var(--hit-min));
+  translate: 0 -50%;
+}
+@media (hover: hover) {
+  .StageScore_link:hover {
+    color: var(--text-body);
+    text-decoration-thickness: var(--border-width);
+  }
+}
+.StageScore_link:focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset-tight);
+}
+
+.tdg-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  border: 0;
+  clip-path: inset(50%);
+}

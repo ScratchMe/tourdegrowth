@@ -1,0 +1,46 @@
+/* StampedPillar (proposed name: StageStamp) — the roast's stamp, redrawn by
+ * extension 05. See StampedPillar.delta.md. Changed lines are marked ◆.
+ *
+ * An inked rubber stamp across the weakest stage's row: red ink on a red
+ * wash, a 3px solid edge, slightly askew. It used to be a red-FILLED pill —
+ * the primary action's red, which on a result is the one button that counts. */
+.StampedPillar_row {                                  /* ◆ a row of the sheet */
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  min-height: var(--score-row-height-md);
+  padding-inline: var(--score-pad-inline);
+  border-bottom: var(--score-row-rule);
+}
+.StampedPillar_row:last-child {
+  border-bottom: none;
+}
+.StageScores_sm .StampedPillar_row {
+  min-height: var(--score-row-height-sm);
+}
+@media (max-width: 760px) {
+  .StageScores_md .StampedPillar_row {
+    min-height: var(--score-row-height-sm);
+  }
+}
+.StampedPillar_stamped {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  width: 100%;
+  font: var(--meta-sm);
+  font-weight: 600;
+  letter-spacing: var(--meta-tracking);               /* ◆ */
+  text-transform: uppercase;                          /* ◆ a stamp is set in capitals */
+  font-variant-numeric: var(--tabular);
+  color: var(--score-alert-text);                     /* ◆ was --text-inverse */
+  background: var(--score-alert-bg);                  /* ◆ was --surface-accent */
+  border: var(--border-width-stamp) solid var(--score-alert-rule);  /* ◆ */
+  border-radius: var(--radius-stamp);                 /* ◆ was --radius-tag */
+  padding: var(--space-2) var(--space-5);
+  rotate: var(--stamp-tilt);
+}
+.StampedPillar_score {
+  white-space: nowrap;
+}

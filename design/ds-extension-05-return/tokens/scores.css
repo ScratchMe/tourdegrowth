@@ -1,0 +1,54 @@
+/* tokens/scores.css — design system extension 05, the stage scores.
+ *
+ * What a row of the score sheet needs that the system did not have.
+ * Raw sizes on :root; colours are derived from semantic tokens and declared on
+ * `:root, [data-world]`, so they re-resolve inside the night on their own.
+ * Nothing here reads a --paper-*, --ink-*, --paint-* or --night-* primitive.
+ */
+
+:root {
+  /* ── A row ──────────────────────────────────────────────────────────── */
+  /* Row pitch. Never under --hit-min: the "?" disc (44px) and the landing's
+     link strip (44px) of two neighbouring rows must touch, never overlap. */
+  --score-row-height-md: var(--space-13);   /* 48px, the result */
+  --score-row-height-sm: var(--hit-min);    /* 44px, a phone, the landing */
+  --score-pad-inline: var(--space-4);       /* 10px inside each row */
+  --score-col-gap: var(--space-6);          /* 14px between score, meter, name */
+  /* The meter — the score's share of its total, along the row, so the five
+     bars start at the same x and end at the same scale. */
+  --score-meter-height: 6px;                /* StatTile's track height */
+  --score-meter-min: 64px;                  /* never shorter than this */
+  /* The diagnosis: an inked rule down the weak row's start edge. */
+  --score-alert-rule-width: var(--border-width-stamp);   /* 3px */
+
+  /* ── The stamp (roast) ─────────────────────────────────────────────── */
+  /* A rubber stamp is a rectangle of ink with soft corners, not a pill. */
+  --radius-stamp: 4px;
+  --stamp-tilt: -1deg;
+
+  /* ── The "?" ────────────────────────────────────────────────────────── */
+  --trigger-size: 16px;                     /* drawn; the hit stays 44px */
+}
+
+:root,
+[data-world] {
+  /* The sheet: one solid rule on top, a dashed hairline between rows —
+     DataTable's own ruling, the system's look for readings. */
+  --score-head-rule: var(--border-width) solid var(--border-hard);
+  --score-row-rule: var(--border-width-hairline) dashed var(--border-divider);
+  --score-text: var(--text-muted);          /* "/20" and the stage name */
+  --score-figure: var(--text-body);         /* the figure itself */
+  --score-meter-track: var(--viz-grid);     /* decorative, hidden */
+  --score-meter-fill: var(--viz-ink);
+  /* The weak stage. Wash + solid rule = a diagnosis (never dashed: dashed red
+     is advice). The meter takes the text red, not --viz-highlight: the brand
+     red on its own track measured 2.65:1 on the wash. */
+  --score-alert-bg: var(--surface-alert);
+  --score-alert-rule: var(--border-alert);
+  --score-alert-text: var(--text-alert);
+  --score-meter-alert: var(--viz-highlight-text);
+  /* The "?": a real edge (solid) at rest, the inverse fill once open. */
+  --trigger-hover: var(--text-body);
+  --trigger-open-bg: var(--state-selected-bg);
+  --trigger-open-text: var(--state-selected-text);
+}
