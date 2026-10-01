@@ -23,7 +23,7 @@ en fin de document). `CLAUDE.md` garde l'état courant, `JOURNAL.md` l'histoire.
 
 | Groupe | Qui | Où | Quand |
 |---|---|---|---|
-| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.d (le bon à tirer de la copie neuve), A7.4 après A7.3, et A7.12.c à l'ouverture. **A7.3.c est livré le 2026-10-01**, les textes de lancement de la ligne « Hors code » d'A7.3 le même jour (S0 à S5, PR d'intégration [#233](https://github.com/ScratchMe/tourdegrowth/pull/233), drapeau fermé). A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)**, sa copie, l'îlot partagé, le téléphone de Pédalix et le branchement faits le même jour (A12.c à A12.f.2) : restent A12.g (les specs du niveau) et A12.h (le bon à tirer, la recette). **A13** (trois alertes de dépendances, dont une critique sur `next`) livré le 2026-10-01 |
+| **A. Le travail autonome**, en quatre lots | Une session seule, une PR par lot (A7 : une PR par item) | Session cloud | A1 à A6 livrés le 2026-09-29, A7 et A8 le 2026-09-30. **Reste d'A7** : A7.3.d (le bon à tirer de la copie neuve), A7.4 après A7.3, et A7.12.c à l'ouverture. **A7.3.c est livré le 2026-10-01**, les textes de lancement de la ligne « Hors code » d'A7.3 le même jour (S0 à S5, PR d'intégration [#233](https://github.com/ScratchMe/tourdegrowth/pull/233), drapeau fermé). A10 (S-15), A11 et A7.3.e (les quatre termes du glossaire) livrés le 2026-09-30. **A12, le niveau 2 du jeu** : spécifié et chiffré le 2026-09-30, **validé le 2026-10-01 (C30)**, sa copie, l'îlot partagé, le téléphone de Pédalix et le branchement faits le même jour (A12.c à A12.f.2) : restent A12.g (les specs du niveau) et A12.h (le bon à tirer, la recette). **A13** (trois alertes de dépendances, dont une critique sur `next`) livré le 2026-10-01. **A14**, la finition UI et UX d'après les reels d'Antoine, ouvert le 2026-10-01 |
 | **B. Design sync** | Une session, cloud ou locale | N'importe où : une session cloud pousse vers Claude Design depuis le 2026-09-29 | **À jour le 2026-09-30, après A7.10, A10 et A11** (B3, puis la re-synchro d'A11 le soir même : 88 composants, 292 cellules, 88 aperçus sur 88 rendus). Rien à lancer tant qu'un composant, ou une copie qu'un aperçu reprend, ne change pas |
 | **C. Tes décisions**, une par une | Toi, guidé, avec une recommandation par question | N'importe quelle session | **Tranchées le 2026-09-29** (C18 close à part, par la session D). C23 à C29 tranchées le 2026-09-30, C26 à C29 livrées le même jour, **C25** (la spécification de A7.3, `ENGINE.md` §18) dans sa propre session. **C30** (le niveau 2 du jeu, `GAME-BRIEF.md` §17) le 2026-10-01. **Rien n'est ouvert** |
 | **D. Tes actions**, pas à pas | Toi, accompagné | Session cloud | Selon ce qui est prêt. D10 (l'indexation) est prêt tout de suite. D2 attend les bons à tirer nº7 et nº8, la recette (D9) et, pour le moteur, la fin d'A7.3 (le code et les textes de lancement sont livrés le 2026-10-01 ; reste le bon à tirer A7.3.d) |
@@ -197,6 +197,20 @@ A12.f.1 et A12.f.2 aussi : le niveau est jouable, derrière le drapeau, et l'enc
 | A12.f.2 | **L'encart qui propose les deux niveaux** | **Fait le 2026-10-01** ([#248](https://github.com/ScratchMe/tourdegrowth/pull/248)). `gameEntriesFor` rend une liste : chaque étape du goulot qui a un niveau, la plus faible d'abord, sans doublon. `GameEntry` reçoit `levels`. À un niveau, la carte est inchangée ; à plusieurs, une carte qui les propose tous (C30 Q5, `GAME-BRIEF.md` §15.4). Sa bande est empilée, avec le chiffre de chaque niveau puis la confiance absente. Elle prend sa propre copie, « à relire » (`GAME_ENTRY_SEVERAL` : « Le côté obscur de tes étapes »), et une rangée par étape, son nom au-dessus de son bouton. Aucun chemin analytique neuf : chaque bouton compte la porte de son niveau. Une fixture e2e, un vrai résultat à goulot acquisition + rétention lu dans l'émulateur |
 | A12.g | **Les specs Playwright** | Sur le modèle de P1 à P27, dans les deux langues, à 1 280 et 390 px |
 | A12.h | **Le bon à tirer, puis la recette** | Un bon à tirer du niveau 2 (`/bon-a-tirer`), puis une recette (D9) qui couvre les deux niveaux, relecture juridique du catalogue comprise |
+
+### A14 — La finition UI et UX avant le lancement (ouvert le 2026-10-01)
+
+Antoine envoie des reels sur l'UI et l'UX, un sujet chacun. **La méthode,
+qu'il a fixée** : lire la légende (pas la vidéo), confronter chaque règle au
+code, et ne faire que ce qui manque vraiment. Une règle qui est un goût
+contraire au système (la direction I, les jetons) se dit et ne se code pas.
+Chaque reel traité a son entrée au journal, avec ce qui a été retenu et
+écarté : la chercher avant de rouvrir un sujet (`grep -n "reel" JOURNAL.md`).
+Le premier (le bouton principal) a donné la bande de 44 px de `size="sm"`.
+
+| # | Quoi | Détail |
+|---|---|---|
+| A14.1 | **Les autres cibles touchées sous 44 px** | Trouvées le 2026-10-01 en mesurant à 390 px, par `elementFromPoint`, chaque commande de dix pages : les pastilles de la bande d'espace (`SpaceBand`, 28 × 28, touchées sur 28), le lien du logo (`WordmarkLink`, touché sur 21 px de haut), et des liens posés seuls, hors d'une phrase : le retour et les termes liés d'une page du glossaire (20 px), les étapes de « Comment ça marche » (23 px), les comparaisons (38 px). Hors sujet : un lien dans une phrase (l'exception du WCAG) et le lien d'évitement, hors écran tant qu'il n'a pas le focus. Même remède que `sm`, une bande qui ne déplace rien, et même spec (`targets.spec.ts`) ; les liens d'une liste sont proches les uns des autres, donc l'affirmation 2 (aucun doigt volé) y compte vraiment |
 
 ---
 

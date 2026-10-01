@@ -82,7 +82,9 @@
   text-underline-offset: 3px;
 }
 
-.quiet::before {
+/* The same strip under `sm` (below), the other button drawn under 44px. */
+.quiet::before,
+.sm::before {
   content: "";
   position: absolute;
   top: 50%;
@@ -205,8 +207,15 @@
  * the landing/quiz header's inline CTA, which sits next to the wordmark in
  * a 24px-padding header and was always visually smaller than a normal
  * inline button. A real, already-shipped need, not a new design decision.
+ *
+ * Drawn 39px tall (13 + 2 × 11 + 2 × 2 of border) and, until 2026-10-01,
+ * tapped 39px tall too, under --hit-min, while the engine's margin action,
+ * a chart's retry and the result's badge copy all take a finger. It now carries the quiet button's strip (the
+ * `::before` above): 44px tapped, 39px drawn, nothing around it moves.
+ * `targets.spec.ts` measures it like the quiet one.
  */
 .sm {
+  position: relative;
   font: var(--label-button-sm);
   padding: 11px 20px;
   min-height: auto;

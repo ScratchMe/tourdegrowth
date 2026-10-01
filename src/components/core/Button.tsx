@@ -11,7 +11,8 @@ interface SharedProps {
   /**
    * sm = --label-button-sm, 11px 20px: the header CTA, the admin's small
    * actions, and a `quiet` action beside sliders or fields (the growth
-   * engine) — not part of the DS bundle's own matrix, see Button.module.css ·
+   * engine) — not part of the DS bundle's own matrix, see Button.module.css;
+   * drawn 39px tall, tapped on a 44px strip like `quiet` ·
    * md = the default (14px 24px) · lg = the large CTA: 17px label, 17px 20px
    * padding (16px sides under 760px). `sm` was a `compact` flag beside the
    * size until the variant names were made one word per axis (S-16).

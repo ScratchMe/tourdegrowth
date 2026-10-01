@@ -1350,3 +1350,21 @@ Demandé par Antoine après le merge d'A7.3.c : « ce qui reste, hors code »
 - `vitest` : 2 699 tests passent, sur la tête fusionnée avec A12.f.2,, dont les liens de la documentation et les plafonds du journal et de `CLAUDE.md`. `main` compte 745 specs Playwright depuis A12.f.1 ; les chiffres de référence de `CLAUDE.md` restent ceux d'A7.3.c, mesurés avant.
 - `relecteur-copie` sur le diff de `marketing/` : rien de bloquant sur les règles de la promotion ni sur la typographie. Il a relevé trois affirmations de la FAQ du Show HN contraires au code, toutes corrigées : « only two » repères (il y en a plusieurs, qui tous situent), « the one deliberate simplification » (chaque slide de fuite porte la sienne en pied depuis l'assisté) et une liste d'événements donnée pour complète qui en omettait trois. Corrigés aussi : « deux fourchettes » dans le kit et le brief, la règle du brief « Antoine n'est jamais nommé », qui contredisait C22, « moteur de croissance » (C2), le NRR assisté lu sur douze mois et non trois, une slide de cumul que le compte oubliait, et le marqueur `TODO : à relire` du Show HN, écrit avec une insécable que le grep ne voit pas. Laissés tels quels : deux écarts de parité anciens (« four tools » / « quatre onglets », et une demi-phrase absente de la description française de 800 caractères, qui la ferait dépasser).
 - Un merge de documentation seule ne déploie rien (`scripts/vercel-ignore.sh`).
+
+## A14 : la petite taille de bouton se touche sur 44 px (2026-10-01)
+
+Parti d'un reel envoyé par Antoine, lu par sa légende : six règles pour un bouton principal (taille, libellé, contraste, relief, détail, mouvement). Confrontées à `Button` :
+- **quatre déjà tenues** : la taille par défaut fait 47 px de haut sur 24 px de côté, le contraste est gardé par la CI (convention 7), le retour visuel part à l'image suivante (la transition de 120 ms n'est pas un délai), les libellés sont un verbe et un objet (« Démarre ton Tour → ») ;
+- **deux écartées** : le rayon égal à la demi-hauteur et le relief doux, lumière venue du haut, sont un style, contraire à l'autocollant de la direction I (2026-09-28) ;
+- **un écart réel** : `size="sm"`, dessiné et touché à 39 px, sous `--hit-min` (« jamais moins »).
+
+**Ce qui change** : `.sm` porte la bande transparente de `quiet` (`::before`, 44 px au moins sur chaque axe, centrée sur le bouton). 39 px dessinés, 44 touchés, rien ne bouge autour. Côté public : l'appel de l'en-tête de l'accueil (masqué sous 760 px, visible sur une tablette), « Reprendre la marge globale » du moteur, le « réessayer » d'un graphique en erreur, « Copier le Markdown » du badge ; et les boutons de l'audit. La bande plutôt qu'un `min-height` sur écran tactile, parce que c'est déjà la règle du système pour ce qui est dessiné petit (`quiet`, `Segmented` compact, les `?` du glossaire).
+
+**Vérifié** :
+- `targets.spec.ts` : les aides de `quiet` deviennent `expectTapTargets`, pour tout bouton, et trois tests neufs (l'en-tête à 820 px, la marge de l'hybride à 390 px, le badge d'un vrai résultat lu dans l'émulateur) tiennent les trois mêmes affirmations. Non-vacuité : sans `.sm::before`, exactement ces trois tombent, sur la bande (39,5, 40 et 39,75 px), les neuf autres passent.
+- Le doigt volé à un voisin, balayé : la bande dépasse de 2,5 px, et le voisin le plus proche d'un petit bouton est à 12 px (l'audit), 20 px (l'en-tête), 36 px (le résultat) et 50 px (le moteur, dont les deux fiches de marge sont les seules, sur 130 ouvertes en trois états à 390 et 1 280 px, à en porter un). La spec le dit, plutôt que d'exiger un voisin qui n'existe pas.
+- À l'écran, en français et en anglais : l'en-tête, le badge et la fiche du moteur inchangés.
+- `tsc`, `eslint`, `next build` propres ; `vitest --coverage` : 2 699 tests, seuils tenus. La suite Playwright complète, avec l'émulateur, tournait encore au premier push : son compte suit.
+- Pas de re-synchro Claude Design : rien de visible. Le contrat de `Button.tsx` dit la bande ; la prochaine re-synchro l'emportera.
+
+**Trouvé en route** : `sm` n'était pas la seule cible sous 44 px. Les pastilles de la bande d'espace, le lien du logo et plusieurs liens posés seuls le sont aussi, mesurés par `elementFromPoint` sur dix pages à 390 px. C'est A14.1 dans `CHANTIERS.md`, pour une PR à part.
