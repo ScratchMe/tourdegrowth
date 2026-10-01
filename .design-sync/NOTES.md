@@ -456,6 +456,17 @@ that spread a `{...UNKNOWN_PAGE}` constant defined off-screen. **Drift risk:** a
 prop added to `NotFoundScreen` will not appear in its contract until this entry
 is updated by hand.
 
+## No guidelines are shipped: `guidelinesGlob` is `[]` on purpose
+
+The converter's default `guidelinesGlob` includes `docs/*.md`. This repo had
+no `docs/` until 2026-10-01, when the journal's archived volumes and the
+decisions index moved there; the B4 build then copied `docs/decisions.md`
+(the product decisions' index) into `guidelines/`, ready to upload as design
+guidance. It is not design guidance, and nothing in `docs/` is. The design
+agent's guidance is `conventions.md` (the README's header) and each
+component's `.prompt.md`. If a real design guideline is ever written, point
+`guidelinesGlob` at that file by name rather than restoring the default.
+
 ## Per-component docs are deliberately NOT wired
 
 `[DOCS_UNMAPPED]` lists all 70, and that is correct — do not "fix" it by
