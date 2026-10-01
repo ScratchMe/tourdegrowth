@@ -551,7 +551,11 @@ Le reste suit la reco : le mois suivant reprend les cibles et les définitions,
 
 **Un numéro rattrapé** : la décision s'appelait C31 dans le premier jet. `docs/decisions.md` montrait C31 déjà prise le matin même par le jeu (le bloc « Niveau suivant »), que la liste de `CHANTIERS.md` ne reportait pas encore. Renumérotée C32 avant le merge. Comme pour un numéro de PR (convention 8), un numéro de décision se lit dans l'index, pas dans une liste qui peut être en retard.
 
-## A15 : la petite taille de bouton se touche sur 44 px (2026-10-01)
+## A15 : la finition UI et UX, d'après les reels et les lois de l'UX (2026-10-01)
+
+Une seule PR pour tout le lot, à la demande d'Antoine (moins de déploiements Vercel). Le numéro était A14 jusqu'à ce que #254 prenne A14 pour le moteur complet, mergée la première : la section, les commentaires et les specs sont passés à A15 à la fusion.
+
+### Le premier reel : le bouton
 
 Parti d'un reel envoyé par Antoine, lu par sa légende : six règles pour un bouton principal (taille, libellé, contraste, relief, détail, mouvement). Confrontées à `Button` :
 - **quatre déjà tenues** : la taille par défaut fait 47 px de haut sur 24 px de côté, le contraste est gardé par la CI (convention 7), le retour visuel part à l'image suivante (la transition de 120 ms n'est pas un délai), les libellés sont un verbe et un objet (« Démarre ton Tour → ») ;
@@ -567,7 +571,23 @@ Parti d'un reel envoyé par Antoine, lu par sa légende : six règles pour un bo
 - `tsc`, `eslint`, `next build` propres ; `vitest --coverage` : 2 699 tests, seuils tenus. La suite Playwright complète, avec l'émulateur : 750 specs, 743 passées, 6 ignorées par construction (« jeu fermé »), une tombée : la miniature « total » du deck hybride lue vide (`engine-deck-hybrid.spec.ts:87`, en anglais), pendant que `vitest` tournait à côté. C'est la lecture que le commentaire de la spec décrit déjà ; rejouée seule six fois dans les deux langues, 12 sur 12.
 - Pas de re-synchro Claude Design : rien de visible. Le contrat de `Button.tsx` dit la bande ; la prochaine re-synchro l'emportera.
 
-**Trouvé en route** : `sm` n'était pas la seule cible sous 44 px. Les pastilles de la bande d'espace, le lien du logo et plusieurs liens posés seuls le sont aussi, mesurés par `elementFromPoint` sur dix pages à 390 px. C'est A15.1 dans `CHANTIERS.md`, pour une PR à part.
+
+### A15.1 à A15.6, livrés dans la même PR
+
+- **A15.1, les autres cibles sous 44 px** : pastilles de la bande d'espace, logo, retour et termes liés du glossaire, étapes de « Comment ça marche » et de la checklist, comparaisons. Une bande partagée, `styles/hit.module.css`, composée. Les termes liés tiennent en rangées : à 12 px d'écart, les bandes de deux rangées se rencontraient (« LTV » touché sur 31 px) ; elles passent à 26 px. Non-vacuité : sans la bande, les sept tests tombent ; rangées à 10 px, seul celui des termes liés.
+- **A15.2, un objectif effacé par une faute de frappe** : `isUnreadableNumber` sort de `NumberField` vers `lib/forms/number.ts`, et les deux champs d'objectif n'écrivent rien tant que la case ne se lit pas. Non-vacuité, un champ à la fois.
+- **A15.3, l'enregistrement refusé d'une fiche** : le focus va au premier champ en cause ; un taux hors de 0 à 100, un montant ou une durée négatifs se disent en quittant la case ; un négatif n'est plus « manquant » ; les bornes estimées d'un taux sont tenues à 0–100. Le double message (sous le champ et sous le bouton) est gardé : c'est la règle écrite en tête de `sheet-problems.ts`. **Un sabotage a passé** : la vérification au départ de la case, retirée, laissait le test vert, parce que le test tapait le taux APRÈS un enregistrement refusé, et qu'une fiche déjà essayée relit ses règles à chaque frappe. Test réordonné, puis les deux sabotages tombent chacun sur leur ligne.
+- **A15.4, l'écran d'erreur** : REVIEW.md R-04 voulait le code court et stable sous la phrase, pour le support ; il est gardé. Ce qui change : la phrase dit la panne (hors ligne, limite horaire avec l'attente lue dans `Retry-After`, ou nous), et le code n'est jamais ce qu'a levé la requête (`Failed to fetch`, `Request failed (504)`, une phrase de validation) : `HTTP_504`, `NETWORK`. `lib/quiz/request-failure.ts`, quiz et Deep dive.
+- **A15.5, « Réessayer »** : `reset()` → `retry()`, stable depuis Next 16.3 (lu dans `node_modules/next/dist/docs`). Testé par le comportement : un clic envoie une requête pour la page ; avec `reset`, aucune.
+- **A15.6, l'attente du Deep dive**, validée par Antoine : un message, une barre qui suit l'horloge contre la minute habituelle sans jamais se remplir (`lib/quiz/wait-progress.ts`), le temps écoulé, la ligne R2-09 à 5,2 s. Testé à l'horloge de Playwright, avancée de deux minutes. À l'écran, la première version dessinait le rouge entre deux pointillés : le contour passe en pseudo-élément, sous une pastille pleine. `message2` et `--dur-wait` partent, sans lecteur (`motion-scale.test.ts` l'a dit).
+
+**Copie neuve ou réécrite, « à relire »** : `errorOffline`, `errorRateLimited` ; dans le moteur, `notANumber` (« Écris un nombre, par exemple 1 250 ou 18,5 »), `lowAboveHigh` (« Échange les deux… »), `amountNegative`, `durationNegative`. Elles changent la copie du nº8, à remettre d'accord.
+
+**Claude Design** : trois contrats changent (`ErrorScreen` prend `retry`, `LoadingScreen` dessine autrement, `Button` `sm` décrit sa bande) ; aperçus et conventions suivent dans le dépôt, la re-synchro reste à faire (B).
+
+### Les lois de l'UX
+
+Le recueil Laws of UX (30 lois), confronté au code par trois agents en lecture seule, un par parcours ; chaque écart retenu revérifié à la source. Les règles sont dans `design/LOIS-UX.md` ; huit correctifs (A15.7 à A15.14) et six décisions (A15.15 à A15.20) dans `CHANTIERS.md`. Antoine a retenu les cinq recos qui se codent le même jour, et choisi de merger cette PR seule : correctifs et décisions suivent dans une seconde. Écartés : l'effet esthétique-utilisabilité, les biais cognitifs (déjà « never claim more than the numbers support »), Occam, Pareto, Parkinson, Prägnanz, la connexion uniforme, et le flow du jeu, où rien n'est à corriger.
 
 **Trois autres reels, le même jour** (chargement, validation de formulaire, cartes), confrontés au code par trois agents en lecture seule, chaque constat retenu revérifié à la source. Retenus : A15.2 à A15.6 dans `CHANTIERS.md`. Écartés, avec la raison :
 - les squelettes : aucune page n'attend de données mises en page ;

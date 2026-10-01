@@ -184,7 +184,7 @@ GEMINI.md FIRESTORE.md   PLUGINS.md : installer un plug-in, sur déclencheur aus
 SPEC.md                  le produit d'origine, avec l'encart de ce qui a changé ; ENGINE.md, GAME-BRIEF.md et AUDIT*.md, les trois autres produits
 CHANTIERS.md             la liste de travail, rangée par agent, avec un prompt par session
 GROWTH-PLAN.md           le plan de distribution (sans LinkedIn ni nom pour l'instant) ; marketing/ son kit (textes de lancement, captures, annuaires), marketing/campaigns/ les trois lancements séquencés ; REVIEW*.md les revues
-design/                  le brief d'origine, les extensions 01 à 04 et leurs retours, alternatives-2026-09/ (les maquettes I + B) — index dans design/README.md
+design/                  le brief d'origine, les extensions 01 à 04 et leurs retours, alternatives-2026-09/ (les maquettes I + B), LOIS-UX.md (les règles d'UX, à relire avant de dessiner un écran) — index dans design/README.md
 .design-sync/            la synchro du design system vers Claude Design (NOTES.md avant toute re-synchro)
 e2e/                     specs Playwright contre un build de production (dont les canaris audit et moteur)
 scripts/                 vercel-ignore.sh, liens UTM, rapport Search Console, captures du kit, installeur de plug-ins ; live/ : les sondes contre les vrais services, lancées à la main

@@ -235,6 +235,31 @@ l'UX vivent dans `design/LOIS-UX.md`. **Une seule PR pour tout le lot**
 (Antoine, 2026-10-01 : moins de déploiements Vercel). A15.1 à A15.6 sont
 livrés le 2026-10-01 (le journal, à « A15 »).
 
+**Ce que les lois de l'UX laissent** (2026-10-01, `design/LOIS-UX.md`), chaque
+écart revérifié à la source. Des correctifs d'abord, que la session mène seule :
+
+| # | Quoi | Détail |
+|---|---|---|
+| A15.7 | **Le quiz ne se corrige plus après la 15ᵉ réponse** (Jakob) | Les écrans du profil et du ton n'ont pas de retour, et un rechargement à 15 réponses y renvoie (`quiz/page.tsx:114`) : un clic de travers à la dernière question est définitif. Un retour sur les deux écrans ; leur en-tête dit « 15 / 15 répondues » au-dessus de deux écrans encore à passer |
+| A15.8 | **Un montant en euros refusé avec ses centimes, « on compte des personnes »** | Les deux cases d'un taux dont les termes sont des montants (marge brute, expansion, contraction, NRR, marge assistée) sont en nombres entiers (`ValueEditor.tsx`, `integer` sauf `unit === "money"`, qui ne vaut que pour la métrique) : « 12 450,80 » est refusé avec le message des comptes de personnes |
+| A15.9 | **L'étape « base » du pas à pas jette une valeur en silence** | Illisible, décimale ou nulle, elle n'est pas écrite et l'étape avance sans rien dire (`Steps.tsx`, les deux `save()`) |
+| A15.10 | **Postel : accepter l'unité que la case affiche** | « 18 % », « 1 200 € », « €1,200 » sont refusés alors que la case porte déjà « % » ou « € » (`lib/forms/number.ts`) ; un compte négatif s'enregistre depuis la fiche alors que l'import le signale |
+| A15.11 | **« Télécharger le PDF » ouvre l'impression** | `window.print()` : le libellé promet un fichier. Un libellé qui dit le geste, « à relire » |
+| A15.12 | **Une fiche ouverte perd sa saisie** quand on change d'onglet ou qu'on la replie | Le panneau est remonté (`panelKey`), sans garde ni brouillon gardé |
+| A15.13 | **Les sections du résultat ne sont pas des titres** | Les titres de section sont des `MetaLabel` (`<div>`) : le seul titre de la page est un `<h1>` masqué, un lecteur d'écran ne peut pas aller de section en section. `MetaLabel` gagne un élément choisi (contrat, re-synchro B) |
+| A15.14 | **« Points forts » peut montrer deux étapes faibles** | La section prend toujours les deux plus hautes (`strongestTwo`), même faibles ; le même désaccord que `roomTitle` a corrigé pour les plus basses d'un tableau de niveau |
+
+Puis des **décisions**, **tranchées par Antoine le 2026-10-01** : les cinq recos retenues telles quelles (A15.15 à A15.18, A15.20), A15.19 part à Claude Design. Il a aussi choisi que la PR #252 (A15.1 à A15.6) se merge seule, et que ces correctifs et décisions suivent dans une seconde PR :
+
+| # | Quoi | Reco, retenue |
+|---|---|---|
+| A15.15 | **Sur téléphone, aucun « Démarre ton Tour » après le premier écran de l'accueil** (position sérielle) : l'appel de l'en-tête est masqué sous 760 px | Répéter l'appel en fin de page sur téléphone |
+| A15.16 | **Un Tour commencé se reprend en silence** (Zeigarnik) : l'accueil dit toujours « Démarre ton Tour », le quiz reprend sans le dire | « Reprendre ton Tour (question 8 sur 15) » quand des réponses sont gardées ; couvre aussi le retour du navigateur, qui quitte le quiz |
+| A15.17 | **La fin du parcours du propriétaire** (pic et fin) : la mention légale sur téléphone, le bloc Markdown du badge sur ordinateur | Finir sur le partage ; le badge, pour développeurs, avant lui ou replié |
+| A15.18 | **La carte du jeu affiche « CHURN 6,0 % » sous les chiffres du lecteur** (attention sélective) : rien ne dit que c'est le jeu | Dire « dans le jeu » sur la bande |
+| A15.19 | **Les puces d'étape ont l'allure d'un bouton secondaire** sans en être un (similarité) | Pour Claude Design : une puce qui ne se lit pas comme un bouton |
+| A15.20 | **Entrée n'enregistre pas une fiche du moteur** (Jakob) | Un vrai formulaire par fiche |
+
 
 ---
 
@@ -268,6 +293,12 @@ brief à Claude Design pour l'image de la page `/aarrr-funnel-template`, en
 chiffres (un peloton du jeu d'exemple, si l'image en dessine un). Ce qui
 revient se porte dans `lib/og/` avec T6 (`docs/engine/moteur-complet.md`
 §19.11). Les images du jeu sont le modèle.
+
+**A15 s'ajoute à B4** (2026-10-01) : trois contrats changent, `ErrorScreen`
+(`reset` devient `retry`), `LoadingScreen` (la variante `deep` racontée par
+l'horloge : un message, une barre, le temps écoulé) et `Button` (`sm` décrit sa
+bande de 44 px). Leurs aperçus et `conventions.md` sont à jour dans le dépôt ;
+la même synchro que B4 les emporte, `LoadingScreen` à recapturer.
 
 **Hors de B4 et B5, rien d'ouvert.** La prochaine synchro se lance quand un composant change, ou
 quand change une copie, un chiffre du modèle ou un comportement qu'un aperçu
