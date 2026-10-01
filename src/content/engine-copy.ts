@@ -229,6 +229,22 @@ export const ENGINE_COPY = {
       en: "Both? Tick both: you get two engines and their total, never one against the other.",
     },
     motionsRequired: { fr: "Coche au moins une façon de vendre.", en: "Tick at least one way you sell." },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T4, §19.5.1, C32 Q9) : tools, toolsHint, toolFamily.
+     * Optional, folded: nothing ticked changes nothing. The tools' own names are `tools`.
+     */
+    tools: { fr: "Tes outils", en: "Your tools" },
+    toolsHint: {
+      fr: "Facultatif. Coche ceux que ton équipe utilise : la fiche te les propose d'abord, et « À faire toi-même » se range par outil.",
+      en: "Optional. Tick the ones your team uses: the sheet offers them first, and \"To do yourself\" is grouped by tool.",
+    },
+    toolFamily: {
+      analytics: { fr: "Analytics produit", en: "Product analytics" },
+      billing: { fr: "Facturation", en: "Billing" },
+      crm: { fr: "CRM", en: "CRM" },
+      ads: { fr: "Publicité", en: "Advertising" },
+      other: { fr: "Autres", en: "Other" },
+    },
     qualificationWindow: { fr: "Fenêtre de qualification", en: "Qualification window" },
     goLiveWindow: { fr: "Fenêtre de mise en production", en: "Go-live window" },
     /**
@@ -558,6 +574,9 @@ export const ENGINE_COPY = {
     },
     amountOnly: { fr: "Je n'ai que le montant", en: "I only have the amount" },
     source: { fr: "D'où vient ce chiffre ?", en: "Where does it come from?" },
+    // TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T4, §19.5.3) : splitSource, denominatorSource.
+    splitSource: { fr: "Le dénominateur vient d'un autre outil", en: "The denominator comes from another tool" },
+    denominatorSource: { fr: "D'où vient le dénominateur ?", en: "Where does the denominator come from?" },
     variant: { fr: "Ce qui est compté", en: "What's counted" },
     channelName: { fr: "Nom du canal", en: "Channel name" },
     evidence: { fr: "Comment le sais-tu ?", en: "How do you know?" },
@@ -698,6 +717,14 @@ export const ENGINE_COPY = {
     },
     fill: { fr: "Renseigner", en: "Fill in" },
     empty: { fr: "Plus rien à aller chercher.", en: "Nothing left to go and get." },
+    /**
+     * TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T4, §19.5.2) : byToolHint. « À faire toi-même » grouped by
+     * the team's tools: each number under the first of its tools, with the menu path the catalogue gives (`where.path`).
+     */
+    byToolHint: {
+      fr: "Rangés par outil, chacun avec son chemin. Ce qu'aucun de tes outils ne donne est passé dans « À demander ».",
+      en: "Grouped by tool, each with its path. What none of your tools gives has moved to \"To ask for\".",
+    },
   },
 
   /**
@@ -2136,6 +2163,11 @@ export const ENGINE_COPY = {
     cacVariantsDiffer: {
       fr: "Les deux CAC ne comptent pas les mêmes dépenses : {plg} en libre-service, {slg} en assisté.",
       en: "The two CACs don't count the same spend: {plg} self-serve, {slg} sales-assisted.",
+    },
+    /** TODO: à relire (convention 6) — neuf le 2026-10-01 (A14 T4, §19.5.3) : twoTools. `{a}` and `{b}`: the two tools' names. */
+    twoTools: {
+      fr: "Numérateur ({a}) et dénominateur ({b}) viennent de deux outils : vérifie qu'ils comptent la même chose sur la même période.",
+      en: "Numerator ({a}) and denominator ({b}) come from two tools: check they count the same thing over the same period.",
     },
     toCheck: { fr: "à vérifier", en: "to check" },
   },

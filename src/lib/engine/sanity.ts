@@ -100,6 +100,9 @@ export function sanityChecks(state: EngineState, ctx: EngineCalcContext, words: 
     const blocking = entry ? blockingCheck(entry, shape, ctx.locale) : null;
     // An imported file can carry what the sheet would have refused.
     if (blocking) checks.push({ ...blocking, motion: motionOfMetric(shape.id) });
+    // The numerator from one tool, the denominator from another (§19.5.3): they may not count the same thing.
+    const two = entry ? twoToolsOf(entry) : null;
+    if (two) addFor(motionOfMetric(shape.id))("two-tools", [shape.id], two);
   }
 
   if (motions.plg) selfServeChecks(state, ctx, words, addFor("plg"));
@@ -117,6 +120,18 @@ export function sanityChecks(state: EngineState, ctx: EngineCalcContext, words: 
 }
 
 type Add = (id: SanityCheck["id"], metrics: MetricId[], values?: Record<string, string>, count?: Interval) => void;
+
+/**
+ * A measured rate whose counts come from two different tools (§19.5.3, A14
+ * T4): `{ a, b }`, the numerator's and the denominator's tool ids, for the
+ * sentence to name. null otherwise — one tool, a person, or no second source.
+ */
+export function twoToolsOf(entry: Pick<MetricEntry, "status" | "value" | "source" | "denominatorSource">): { a: string; b: string } | null {
+  if (entry.status !== "measured" || entry.value?.kind !== "ratio") return null;
+  const { source, denominatorSource } = entry;
+  if (source?.kind !== "tool" || denominatorSource?.kind !== "tool" || source.tool === denominatorSource.tool) return null;
+  return { a: source.tool, b: denominatorSource.tool };
+}
 
 function selfServeChecks(state: EngineState, ctx: EngineCalcContext, words: UnitWords, add: Add): void {
   const snapshot = currentSnapshot(state);

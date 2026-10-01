@@ -479,6 +479,27 @@ et dénominateur ({outil B}) viennent de deux outils : vérifie qu'ils comptent
 la même chose sur la même période. » Il paraît dans la fiche et sur la slide
 de visibilité, comme les autres contrôles.
 
+*Écarts au code, T4 (2026-10-01).*
+- **« Tes outils » est un repli facultatif**, au premier réglage comme dans
+  les Réglages, une case par outil sous le nom de sa famille. Les outils
+  s'enregistrent dans l'ordre des familles. Un outil qu'un fichier apporte
+  sans que le réglage le propose (App Store Connect, Play Console) est gardé,
+  mais jamais lu.
+- **Dans la fiche**, les outils de l'équipe viennent d'abord, en commençant
+  par ceux qu'on attend pour ce chiffre. Un outil attendu que l'équipe n'a
+  pas coché passe dans « Autres outils », où il reste proposé.
+- **Dans la liste par outil, chaque chiffre porte le chemin de menu** que
+  donne le catalogue. Ce chemin est rempli comme dans la fiche ({event},
+  {n}…), jamais brut.
+- **Le contrôle « deux outils » paraît dans la fiche**, dès que les deux
+  sources sont choisies, **et dans la liste « à vérifier » de l'écran du
+  deck**, précédé du nom du chiffre. Il n'apparaît pas sur la slide de
+  visibilité : aucun contrôle n'y figure aujourd'hui, et celui-ci fait comme
+  les autres.
+- **La case « Le dénominateur vient d'un autre outil »** ouvre la même liste
+  que la source, personne et « Autre » compris. Le contrôle ne compare que
+  deux outils.
+
 ---
 
 ### 19.6 Coller un tableau (Q11)

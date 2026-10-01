@@ -19,6 +19,7 @@ import { deriveEngine } from "@/lib/engine/derive";
 import { engineFileName, serializeEngine } from "@/lib/engine/io";
 import { markReminded, markRequested } from "@/lib/engine/request";
 import { monthView, nextMonthOf, startNextMonth, withMonth } from "@/lib/engine/series";
+import { teamTools } from "@/lib/engine/tools";
 import { requestPersistence } from "@/lib/engine/storage";
 import { newEngineState } from "@/lib/engine/validate";
 import { propagateFrom, withSharedCount } from "@/lib/engine/shared-counts";
@@ -150,7 +151,11 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
     // The board's title is its first slide's title, from the same function (§7 E2, §9.3, §18.8):
     // the screen and the slide cannot word one engine two ways.
     const verdict = verdictOf(lens.state, derived, strings, metrics, ctx);
-    const plan = collectPlan(lastSnapshot(lens.state), ctx.today, motionShapes(lens.state.setup.motions));
+    // The team's tools, when ticked (§19.5.2): « À faire toi-même » by tool, with each number's `where` in the catalogue's order.
+    const selected = teamTools(lens.state.setup.tools);
+    const citedBy = (id: MetricId) =>
+      (metrics.find((m) => m.id === id)?.where ?? []).flatMap((w) => (w.source.kind === "tool" ? [w.source.tool] : []));
+    const plan = collectPlan(lastSnapshot(lens.state), ctx.today, motionShapes(lens.state.setup.motions), { selected, citedBy });
     const deviceTour = latestTourWithAnswers(tourResults ?? []);
     const tourOnDevice = deviceTour !== null;
     const view: EngineView = { state: lens.state, derived, strings, metrics, derivedCopy, bridges, ctx, tourResult, tourOnDevice, deviceTour };

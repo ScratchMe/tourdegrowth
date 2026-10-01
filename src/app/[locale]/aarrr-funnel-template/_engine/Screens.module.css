@@ -219,6 +219,13 @@
   color: var(--text-muted);
 }
 
+/* A number's menu path in the team's tool (§19.5.2), under its name: where to click, not a sentence. */
+.itemPath {
+  display: block;
+  font: var(--meta-xs);
+  color: var(--text-muted);
+}
+
 .itemStale {
   font: var(--meta-xs);
   color: var(--text-alert);
@@ -333,4 +340,23 @@
   gap: var(--space-5);
   padding-inline-start: var(--space-7);
   border-inline-start: var(--border-rule);
+}
+
+/* « Tes outils » (§19.5.1): one fieldset per family, its tools as boxes. */
+.toolFamily {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-6);
+  margin-top: var(--space-4);
+}
+
+.toolFamilyTitle {
+  width: 100%;
+  padding: 0;
+  margin-bottom: var(--space-2);
+  font: var(--meta-sm);
+  color: var(--text-muted);
 }

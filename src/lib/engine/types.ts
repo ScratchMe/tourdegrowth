@@ -688,7 +688,9 @@ export type SanityId =
   | "slg-ttl-mean"
   | "slg-acv-vs-arpa"
   // The hybrid's one check across motions: the two CACs count different spend.
-  | "cac-variants-differ";
+  | "cac-variants-differ"
+  // A rate's two counts from two tools (§19.5.3, A14 T4): never blocking, said once.
+  | "two-tools";
 export interface SanityCheck {
   id: SanityId;
   /** The motion the check reads; absent for one that reads both (`cac-variants-differ`). */

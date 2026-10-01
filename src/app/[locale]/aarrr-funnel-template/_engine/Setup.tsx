@@ -5,13 +5,15 @@ import { Button } from "@/components/core/Button";
 import { Card } from "@/components/core/Card";
 import { METRIC_SHAPES, SLG_METRIC_SHAPES, TEXT_LIMITS, shapeOf } from "@/lib/engine/catalog-shape";
 import type { EngineStrings } from "@/lib/engine/strings";
-import type { Currency, EngineSetup, Motion, YearMonth } from "@/lib/engine/types";
+import type { Currency, EngineSetup, Motion, ToolId, YearMonth } from "@/lib/engine/types";
+import { SETUP_TOOLS, TOOL_FAMILIES, teamTools } from "@/lib/engine/tools";
 import { SETUP_V2_DEFAULTS } from "@/lib/engine/types";
 import type { StoredResult } from "@/lib/quiz/storage";
 import { defaultReferenceMonth, defaultSpanEnd, matureCohortMonth, monthsBefore, nextMonth } from "@/lib/engine/cohort";
 import { formatMonthRange } from "@/lib/engine/format";
 import { fill, formatDate, formatMonth } from "./text";
 import { Checkbox } from "@/components/core/Checkbox";
+import { Disclosure } from "@/components/core/Disclosure";
 import { Choices } from "@/components/core/Choices";
 import { DateField } from "@/components/core/DateField";
 import { Field } from "@/components/core/Field";
@@ -110,6 +112,9 @@ export function Setup({
   // Sales-assisted pipeline coverage (§19.4, A14 T3.2): the quarter's target and the team's threshold, both optional.
   const [quarterTarget, setQuarterTarget] = useState<number | null>(initial?.setup.pipeline?.quarterTarget ?? null);
   const [threshold, setThreshold] = useState<number | null>(initial?.setup.pipeline?.threshold ?? null);
+  // The team's tools (§19.5.1, A14 T4), optional; a tool the setup doesn't offer that a file brought is kept, unread.
+  const [tools, setTools] = useState<ToolId[]>(() => teamTools(initial?.setup.tools));
+  const keptTools = (initial?.setup.tools ?? []).filter((t) => !SETUP_TOOLS.includes(t));
   // A new engine offers the link ticked; the settings open on what is (C8).
   const [linkTour, setLinkTour] = useState(editing ? Boolean(linked) : true);
   const [tried, setTried] = useState(false);
@@ -148,8 +153,8 @@ export function Setup({
         qualificationWindowDays: qualification,
         goLiveWindowDays: goLive,
         ...(company.trim() ? { companyLabel: company.trim() } : {}),
-        // What this card doesn't edit is carried, never dropped: the tools a file brought (§19.5).
-        ...(initial?.setup.tools ? { tools: [...initial.setup.tools] } : {}),
+        // The tools ticked here, plus any a file brought that the setup doesn't offer: never dropped (§19.5).
+        ...(tools.length + keptTools.length > 0 ? { tools: [...teamTools(tools), ...keptTools] } : {}),
         ...(Object.keys(pipeline).length > 0 ? { pipeline } : {}),
       },
       referenceMonth,
@@ -379,6 +384,26 @@ export function Setup({
         maxLength={TEXT_LIMITS.companyLabel}
         error={tried && companyTooLong ? fill(strings.sheet.tooLong, { n: TEXT_LIMITS.companyLabel }) : null}
       />
+
+      {/* The team's tools (§19.5.1): optional and folded — nothing ticked changes nothing. */}
+      <Disclosure summary={s.tools} size="sm" data-testid="engine-setup-tools">
+        <p className={styles.periodsLine}>{s.toolsHint}</p>
+        {TOOL_FAMILIES.map(({ family, tools: offered }) => (
+          <fieldset key={family} className={styles.toolFamily}>
+            <legend className={styles.toolFamilyTitle}>{s.toolFamily[family]}</legend>
+            {offered.map((tool) => (
+              <Checkbox
+                key={tool}
+                id={`${id}-tool-${tool}`}
+                label={strings.tools[tool]}
+                checked={tools.includes(tool)}
+                onChange={(on) => setTools((was) => (on ? [...was, tool] : was.filter((t) => t !== tool)))}
+                data-testid={`engine-setup-tool-${tool}`}
+              />
+            ))}
+          </fieldset>
+        ))}
+      </Disclosure>
 
       {/* Also in the settings since C8 (2026-09-29): a Tour taken after the engine was started, or
           a box unticked by mistake, could never be linked again. */}
