@@ -43,13 +43,13 @@ describe("resultGameEntry — P23, the sample's own board", () => {
     expect(entry.title).toBe("Le côté obscur de la rétention");
     // The level model's 0.06, formatted the French way — a no-break space
     // before the percent sign, so it cannot be the last thing on a line.
-    expect(entry.band.churn).toBe("Résiliations 6,0 %");
+    expect(entry.band.metric).toBe("Résiliations 6,0 %");
     expect(entry.meta).toBe("vingt minutes, gratuit");
   });
 
   it("quotes the level's starting churn, not a number written in the copy", () => {
     const en = resultGameEntry({ bottleneck: RETENTION_CLEAR, locale: "en", ...open })!;
-    expect(en.band.churn).toBe("Churn 6.0%");
+    expect(en.band.metric).toBe("Churn 6.0%");
     expect(JSON.stringify(GAME_ENTRY_COPY)).not.toMatch(/6[.,]0/);
   });
 

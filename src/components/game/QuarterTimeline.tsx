@@ -9,7 +9,7 @@ export interface TimelineSegment {
   range?: string;
   status: "done" | "current" | "upcoming";
   /**
-   * A played quarter's outcome: the churn it ended on, formatted by the same
+   * A played quarter's outcome: the number it ended on, formatted by the same
    * formatter as the dashboard, and the word that says hit or missed — the
    * colour only repeats it.
    */

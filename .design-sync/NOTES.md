@@ -259,7 +259,7 @@ pasting their output:
 - game: a reference year played through the reducer
   (`lib/game/__tests__/paths.ts`: `PATH_A`, `PATH_C`, `PATH_M`, fired years…),
   turned into props by the island's builders
-  (`app/[locale]/game/retention/island-view.ts`: `dashboardProps`, `handView`,
+  (`app/[locale]/game/_island/island-view.ts`: `dashboardProps`, `handView`,
   `journalEntries`, `newsContent`, `reportContent`, `decemberContent`,
   `bossMessage`, `moodNow`);
 - result: `computeScore`, `resolveBottleneck`, `buildQuickVerdict`,
@@ -327,6 +327,16 @@ doc comment says why the layout uses an auto margin rather than
 `justify-content`.
 
 ## Synced
+
+**Stale since 2026-10-01 (A12.d), on purpose until A12.e lands** — six game
+components renamed level 1's slots in their props: `Dashboard` (`churn`,
+`subs`, `mrr` → `metric`, `customers`, `revenue`), `EndingCharts` and
+`RevealCells` (`churn` → `metric`), `QuarterReport` (figure keys), `ActionBar`
+(`clicks` → `pill`), `GameEntry` (`band.churn` → `band.metric`). Their previews
+here are already renamed and type-checked against the components; the
+uploaded project still shows the old contracts. `CHANTIERS.md` B4 re-syncs
+them together with A12.e's new component (Pédalix's phone): recapture these
+six, do not carry their grades forward.
 
 Project `23b9671c-a55b-452e-aa41-39906ee71ba8` ("Tour de Growth"), pinned as
 `projectId` in `config.json`. **Last upload: 2026-09-30, after A11, C28 and

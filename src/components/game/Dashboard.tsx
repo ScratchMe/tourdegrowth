@@ -11,8 +11,8 @@ export interface DashboardTile {
   delta?: StatTileDelta;
 }
 
-export interface DashboardChurnTile extends DashboardTile {
-  /** The mini bullet under the hero figure: this month's churn against the target, in the same unit. */
+export interface DashboardMetricTile extends DashboardTile {
+  /** The mini bullet under the hero figure: the level's number this month against the target, in the same unit. */
   bullet: {
     value: number;
     target: number;
@@ -60,9 +60,10 @@ export type DashboardSecretTile =
 export interface DashboardProps {
   /** « Ton dashboard ». */
   label: string;
-  churn: DashboardChurnTile;
-  subs: DashboardTile;
-  mrr: DashboardTile;
+  /** The level's number — churn on level 1, new customers on level 2. */
+  metric: DashboardMetricTile;
+  customers: DashboardTile;
+  revenue: DashboardTile;
   patience: DashboardPatienceTile;
   trust: DashboardSecretTile;
   radar: DashboardSecretTile;
@@ -97,12 +98,15 @@ function SecretTile({ tile, testId }: { tile: DashboardSecretTile; testId: strin
 }
 
 /**
- * Flixo's growth dashboard — GAME-BRIEF §5.3, game plan §2.6.
+ * A level's growth dashboard — GAME-BRIEF §5.3, game plan §2.6.
  *
- * Six tiles on the design system's `viz/StatTile`, never re-drawn here: churn
- * as the hero (the stencil « race bib », with a mini `BulletChart` against the
- * quarter's target), then subscribers, revenue, the CEO's patience, and the
- * two tiles the dashboard does not show — trust and the regulator's radar.
+ * Six tiles on the design system's `viz/StatTile`, never re-drawn here: the
+ * level's number as the hero (the stencil « race bib », with a mini
+ * `BulletChart` against the quarter's target), then customers, revenue, the
+ * CEO's patience, and the two tiles the dashboard does not show — trust and
+ * the regulator's radar. The slots are named for what they hold in any level
+ * (`metric`, `customers`, `revenue`), not for level 1's churn, subscribers and
+ * MRR (2026-10-01, CHANTIERS.md A12.d).
  *
  * The other five tiles are `responsive`: the 20px `md` figure on a desktop,
  * the 17px `compact` one under 760px, switched in CSS (a « 1,30 M€ » at 20px
@@ -112,7 +116,7 @@ function SecretTile({ tile, testId }: { tile: DashboardSecretTile; testId: strin
  * quarter would be a burst of announcements; the island says what a quarter
  * did ONCE, in its single live region, when the report opens.
  */
-export function Dashboard({ label, churn, subs, mrr, patience, trust, radar }: DashboardProps) {
+export function Dashboard({ label, metric, customers, revenue, patience, trust, radar }: DashboardProps) {
   return (
     <section className={styles.dashboard} aria-labelledby="game-dashboard-title">
       <h2 id="game-dashboard-title" className={styles.title}>
@@ -121,37 +125,37 @@ export function Dashboard({ label, churn, subs, mrr, patience, trust, radar }: D
       <div className={styles.grid}>
         <StatTile
           size="lg"
-          label={churn.label}
-          value={churn.value}
-          sub={churn.sub}
-          delta={churn.delta}
-          className={styles.churn}
-          data-testid="game-dash-churn"
+          label={metric.label}
+          value={metric.value}
+          sub={metric.sub}
+          delta={metric.delta}
+          className={styles.metric}
+          data-testid="game-dash-metric"
         >
           <BulletChart
-            value={churn.bullet.value}
-            target={churn.bullet.target}
-            domain={churn.bullet.domain}
-            ariaLabel={churn.bullet.ariaLabel}
+            value={metric.bullet.value}
+            target={metric.bullet.target}
+            domain={metric.bullet.domain}
+            ariaLabel={metric.bullet.ariaLabel}
           />
         </StatTile>
         <StatTile
           size="auto"
-          label={subs.label}
-          value={subs.value}
-          sub={subs.sub}
-          delta={subs.delta}
+          label={customers.label}
+          value={customers.value}
+          sub={customers.sub}
+          delta={customers.delta}
           className={styles.tile}
-          data-testid="game-dash-subs"
+          data-testid="game-dash-customers"
         />
         <StatTile
           size="auto"
-          label={mrr.label}
-          value={mrr.value}
-          sub={mrr.sub}
-          delta={mrr.delta}
+          label={revenue.label}
+          value={revenue.value}
+          sub={revenue.sub}
+          delta={revenue.delta}
           className={styles.tile}
-          data-testid="game-dash-mrr"
+          data-testid="game-dash-revenue"
         />
         <StatTile
           size="auto"

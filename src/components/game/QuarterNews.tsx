@@ -15,7 +15,7 @@ export interface NewsFigure {
 }
 
 export type QuarterNewsBody =
-  /** The quarter's verdict: churn against its target, stamped hit or missed, and the three other figures. */
+  /** The quarter's verdict: the level's number against its target, stamped hit or missed, and the three other figures. */
   | {
       kind: "result";
       /** « Résiliations » — the figure the quarter is judged on. */

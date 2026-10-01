@@ -13,8 +13,8 @@ const box = { padding: 24, maxWidth: 760 } as const;
 export const DarkYear = () => (
   <div style={box}>
     <RevealCells
-      figures={{ churn: "4.1%", trust: "18 / 100", radar: "81 / 100" }}
-      labels={{ churn: "Churn in December", trust: "Subscriber trust", radar: "Regulator radar" }}
+      figures={{ metric: "4.1%", trust: "18 / 100", radar: "81 / 100" }}
+      labels={{ metric: "Churn in December", trust: "Subscriber trust", radar: "Regulator radar" }}
       note="Game numbers: a simple model written in code, not a study."
     />
   </div>
@@ -24,8 +24,8 @@ export const DarkYear = () => (
 export const CleanYearFrench = () => (
   <div style={box}>
     <RevealCells
-      figures={{ churn: "4,4 %", trust: "71 / 100", radar: "6 / 100" }}
-      labels={{ churn: "Résiliations en décembre", trust: "Confiance des abonnés", radar: "Radar DGCCRF" }}
+      figures={{ metric: "4,4 %", trust: "71 / 100", radar: "6 / 100" }}
+      labels={{ metric: "Résiliations en décembre", trust: "Confiance des abonnés", radar: "Radar DGCCRF" }}
       note="Chiffres du jeu : un modèle simple écrit dans le code, pas une étude."
     />
   </div>
