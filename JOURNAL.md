@@ -1099,7 +1099,7 @@ la fusion à trois de #233 avec le nouvel `ENGINE.md` est propre (simulée par
 
 **Mergée, pas encore en production (2026-10-01)** : [#246](https://github.com/ScratchMe/tourdegrowth/pull/246), squash `a8d0456`, 19 fichiers, arbre identique à la tête. Le statut `Vercel` du commit est **`failure`** : « Deployment rate limited — retry in 24 hours », le quota quotidien de déploiements du compte épuisé (`VERCEL.md` §1.12). La production reste sur A12.d, sans dommage (le jeu est fermé, rien de visible), et le prochain déploiement de production, une fois la fenêtre passée, emportera tout ce qui aura été mergé entre-temps. Sans merge d'ici là, il faudra un « Redeploy » du dernier commit de `main`.
 
-## A12.f.1 : le niveau 2 jouable (2026-10-01)
+## A12.f.1 : le niveau 2 jouable (2026-10-01, #247)
 
 **Ce qui change** : le niveau 2 « Comment les gens vous trouvent » a sa page, `/{locale}/game/acquisition`, son image de partage, sa sauvegarde, sa place au sitemap et au hub, « jouable ». Le jeu reste fermé derrière son drapeau : rien de visible pour le public, tout pour l'aperçu propriétaire. A12.f est coupé en deux, parce que l'encart qui propose les deux niveaux (C30 Q5) touche la page la plus exposée et un composant du design system : A12.f.2 le fera seul. D'ici là, un goulot partagé entre acquisition et rétention offre l'acquisition seule, la première dans l'ordre AARRR.
 
