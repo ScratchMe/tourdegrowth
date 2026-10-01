@@ -782,6 +782,13 @@ D'où le contrôle du niveau 2 : une transaction de 150 000 €, à trancher (C3
 
 Tout est corrigé, et le §17.8 pose la règle. Elle a aussi mis en doute, de mémoire, que le faux prix barré échappe à l'amende administrative. La vérification sur Légifrance le confirme, et le texte le dit maintenant avec sa source plutôt qu'en une phrase absolue.
 
+**En production (2026-10-01)** : [#232](https://github.com/ScratchMe/tourdegrowth/pull/232), squash `24c862a`, 36 fichiers, arbre identique à la tête. Déployé, mais prouvé après coup. Sur le moment, la seule preuve était l'en-tête `age` de `/en` : reparti de zéro une minute après le merge, puis monté sans nouvelle remise à zéro pendant cinq minutes. L'API de Vercel répond 403 à cette session. Or `VERCEL.md` §1.12 prévient qu'un site qui répond ne prouve rien quand le quota de déploiements est épuisé, et il l'était le soir même : la prévisualisation de #234 a été refusée, « more than 100 » par jour. La preuve est venue de #235, mergée après #232 : ses pages (`/en/glossary/win-rate`) sont servies en production, et un déploiement emporte tout `main`. Vérifié en HTTP sur `www.tourdegrowth.com` :
+- `/fr` et `/en` répondent 200 ;
+- `/fr/game`, `/fr/game/retention`, `/en/game/retention` et `/en/aarrr-funnel-template` répondent 404, puisque le jeu et le moteur restent fermés ;
+- `/r/sample` répond 200, sans l'encart du jeu, et le sitemap ne cite aucune adresse du jeu.
+
+Ce que la refonte change pour un joueur ne se voit qu'avec le jeu ouvert. C'est vérifié dans la suite Playwright et à l'écran sur le build local, pas en production.
+
 ## A7.3.e : les quatre termes de la vente assistée, avant le code qui les cite (2026-09-30)
 
 **La demande** : l'item A7.3.e de `CHANTIERS.md`, né de C25 (Q8). Quatre pages de glossaire, FR et EN, sur le modèle de la vague 2.2 : « taux de closing », « cycle de vente », « ACV » et « conversion lead → opportunité ». Elles s'écrivent **avant** A7.3.c, qu'une autre session construit en même temps, pour que chaque fiche assistée du moteur puisse renvoyer à son terme. Rien sous `lib/engine/`, `content/engine-*.ts` ni `aarrr-funnel-template/` n'a été touché.
@@ -946,3 +953,18 @@ pendant cette PR, avec A13 : la ligne de `CLAUDE.md` y renvoie.
 de ses seuils, la vérification des longueurs de `marketing/` (71, aucune
 erreur). Ni build ni Playwright en local : seuls des documents et un test
 unitaire changent, aucun fichier que le build lit ; la CI les passe quand même.
+
+## C30 : le niveau 2 du jeu, validé (2026-10-01)
+
+**Posé dans la session qui avait écrit la spécification**, à la demande d'Antoine, qui a demandé pourquoi les questions ne lui avaient pas été posées pendant l'implémentation, alors qu'il était disponible. La réponse honnête : la convention de `CHANTIERS.md` A (« une question produit rencontrée en route part en section C ») a été lue comme « ne pas déranger ». Or elle disait seulement de ne pas trancher seul. Q1, le chiffre du board, conditionnait tout le chiffrage du niveau, et a été posée après. La règle est réécrite : **si Antoine est dans la session, une question produit se pose tout de suite**, surtout quand le reste du travail en dépend ; la section C est pour les questions sans lui.
+
+**Les cinq réponses, toutes selon la reco** (`GAME-BRIEF.md` §17.10) :
+- Q1 : le DG réclame les **nouveaux clients par mois**, pas le taux de conversion. Elle a été posée avec la définition de l'acquisition dans le Tour et les huit astuces rangées par ce qu'elles font monter ;
+- Q2 : **Pédalix** ;
+- Q3 : une **transaction pénale de 150 000 €**, posée à côté de l'amende du niveau 1 et des montants publiés. Écartés : 1,3 M€ et le plafond de 3,75 M€ ;
+- Q4 : **les huit cas tels quels**, Temu compris, dit comme une notification en cours ;
+- Q5 : **une carte qui propose les deux niveaux** quand plusieurs étapes du goulot en ont un. C'est la reco de C11, tranchée avant l'ouverture du niveau 2, et §15.4 est à jour.
+
+**Ce qui en découle** : rien ne bouge dans le modèle, les tests ni les chiffres du §17. A12.b est close et A12.c (la copie) peut partir. L'encart à deux niveaux rejoint A12.f. Le déclencheur « un deuxième niveau ouvre » sort de la veille (section E), puisque sa question est tranchée, et le prompt C30 sort de `CHANTIERS.md`, puisqu'il a servi. Les commentaires du code qui disaient « en attente d'Antoine » (`levels/acquisition.ts`, `types.ts`) sont mis à jour : sans eux, la session d'A12.c aurait lu une validation pendante.
+
+**Fusionné avec la documentation en volumes** (#237, mergée pendant cette PR) : C30 gagne sa ligne dans `docs/decisions.md`, où C11 renvoie désormais à A12.f, et le découpage de `GAME-BRIEF.md` (section E) n'attend plus qu'A7.3.c.

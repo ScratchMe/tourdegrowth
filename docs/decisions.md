@@ -8,8 +8,8 @@ question tranchée plus tard y gagne sa ligne, dans le même format.*
 C1 à C22 ont été tranchées dans la séance du 2026-09-29. Les questions de
 design y ont été posées avec des captures du vrai écran : un build local avec
 le jeu et le moteur ouverts, et, pour la vue propriétaire, un build jetable
-jamais commité. C23 à C29 l'ont été le 2026-09-30. Les questions encore
-ouvertes sont dans `CHANTIERS.md`, section C.
+jamais commité. C23 à C29 l'ont été le 2026-09-30, C30 le 2026-10-01. Les
+questions encore ouvertes sont dans `CHANTIERS.md`, section C.
 
 | # | Sujet | Réponse | Écrit dans | Suite |
 |---|---|---|---|---|
@@ -23,7 +23,7 @@ ouvertes sont dans `CHANTIERS.md`, section C.
 | C8 | Le miroir, Tour présent non relié | **Une ligne et un bouton « Relier ce Tour »**, et la liaison dans les Réglages. L'invitation « Fais le Tour » menait à une impasse | `ENGINE.md` §8.5 | A7.5, livré le 2026-09-30 |
 | C9 | Slide fuite d'une étape sans prix | **La slide existe**, avec un titre sans argent. Sous un client, l'omission est gardée | `ENGINE.md` §9.3 | A7.6, livré le 2026-09-30 |
 | C10 | Place de l'encart du jeu | **Sous le bouton principal sur desktop**, comme sur mobile. Mesuré : il faisait descendre le bouton du visiteur de 350 px | `GAME-BRIEF.md` §15.4 | A7.7, livré le 2026-09-30 |
-| C11 | Quand montrer l'encart | Gardé : la rétention dans le groupe, partagé compris. Le cas de plusieurs niveaux se tranche à l'ouverture d'un deuxième niveau | `GAME-BRIEF.md` §15.4 | Section E |
+| C11 | Quand montrer l'encart | Gardé : la rétention dans le groupe, partagé compris. Le cas de plusieurs niveaux se tranche à l'ouverture d'un deuxième niveau | `GAME-BRIEF.md` §15.4 | Tranché d'avance par C30 Q5 (2026-10-01) : A12.f |
 | C12 | Noms de zones bilingues | Gardés : « Retention — S'ils reviennent » | `GAME-BRIEF.md` §15.3 | — |
 | C13 | « Vingt minutes » | Chronométré à la recette : gardé si la médiane des testeurs tombe entre 15 et 25 minutes | `GAME-BRIEF.md` §7.3 | D9 |
 | C14 | Amende du jeu | **Plafonnée à 75 000 €**, le maximum légal pour une entreprise | `GAME-BRIEF.md` §5, règle 5 | A7.8, livré le 2026-09-30 |
@@ -42,3 +42,4 @@ ouvertes sont dans `CHANTIERS.md`, section C.
 | C27 | Publier un `llms.txt` (née d'A8) | **Court et généré, plus `llms-full.txt`** (tranchée le 2026-09-30 ; la reco était sans `llms-full.txt`). `/llms.txt` liste exactement les adresses du sitemap, drapeaux compris, en anglais avec l'adresse française à côté ; `/llms-full.txt` porte le texte anglais des articles et des 24 termes, construit depuis les champs que les pages impriment. Deux tests les tiennent au sitemap et aux pages. En-têtes « à relire » | `src/lib/seo/llms.ts`, `llms-full.ts`, `GROWTH-PLAN.md` 2.8 | Livré le 2026-09-30 ; sa copie ira au prochain bon à tirer |
 | C28 | L'espace entre une unité et son chiffre (tranchée le 2026-09-30) | **L'unité porte son espace** (la reco) : la boîte n'en ajoute plus. Collée en anglais (« €500 », « 20% »), insécable en français (« 21 000 € », « 20 % »), ce que `Intl` donne ; `moneyUnit` reprend l'espace qu'`Intl` met à côté du signe | `Field.module.css`, `NumberField.tsx`, `.design-sync/conventions.md` | Livré le 2026-09-30 avec A11 |
 | C29 | « Facultatif » : dans le libellé, ou par la prop `optional` (tranchée le 2026-09-30) | **Par la prop** (la reco) : le mot sort des quatre libellés du moteur et se dessine plus discret après eux, comme le retour 04 le dessine ; nouvelle clé `workbench.optional`. Les quatre libellés raccourcis et la clé sont « à relire » | `engine-copy.ts`, `.design-sync/conventions.md` | Livré le 2026-09-30 avec A11 |
+| C30 | La spécification du niveau 2 du jeu (tranchée le 2026-10-01, dans la session qui l'avait écrite) | **Validée, les cinq recos.** Q1 : le DG réclame les **nouveaux clients par mois** (2 000 → 3 000), pas le taux de conversion du §11.1. Q2 : **Pédalix**, INPI à consulter avec la relecture juridique. Q3 : le contrôle finit en **transaction pénale de 150 000 €**, fixe. Q4 : **les huit cas tels quels**, Temu présenté comme une notification en cours. Q5 : quand l'acquisition et la rétention freinent ensemble, **une carte qui propose les deux niveaux** (C11) | `GAME-BRIEF.md` §17.10 et §15.4 | A12.c à A12.h |
