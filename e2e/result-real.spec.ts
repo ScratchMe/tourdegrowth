@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import { getSubmissionById } from "@/lib/submissions/repository";
-import { expect, seedOwnedResult, test } from "./helpers";
+import { expect, seedOwnedResult, test, trackedEvents } from "./helpers";
 import { EMULATOR_HOST, REAL_DEEP_DIVE, REAL_RESULTS, SENTINEL, SKIP_EMULATOR_REASON } from "./real-results";
 
 /**
@@ -193,6 +193,12 @@ test.describe("the owner's view", () => {
     if (process.env.ENGINE_ENABLED === "true") {
       await expect(entry).toHaveText(tc(UI_STRINGS.result.engineEntry, "en"));
       await expect(entry).toHaveAttribute("href", "/en/aarrr-funnel-template");
+      // Followed, it counts as a door (§19.12): the owner's result, never its stage nor its score.
+      // The engine lives under the other root layout: the click is a full load. Hold it once to read the event where it fired.
+      await page.evaluate(() => document.addEventListener("click", (e) => e.preventDefault(), { capture: true, once: true }));
+      await entry.click();
+      await expect.poll(() => trackedEvents(page)).toContain("engine_entry_clicked/result_owner");
+      expect((await trackedEvents(page)).filter((e) => e.startsWith("engine"))).toEqual(["engine_entry_clicked/result_owner"]);
     } else {
       await expect(entry).toHaveCount(0);
     }

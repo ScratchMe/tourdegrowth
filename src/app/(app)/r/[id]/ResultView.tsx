@@ -23,7 +23,7 @@ import { StampedPillar } from "@/components/result/StampedPillar";
 import { StageProfile } from "@/components/viz/StageProfile";
 import { ANTOINE_LINKS, cvUrl, DEEP_DIVE_CREDIT, QUICK_CREDIT } from "@/content/antoine-credit";
 import { HOW_IT_WORKS } from "@/content/how-it-works";
-import { PROFILE_CLICK_DETAILS, trackEvent } from "@/lib/analytics/goatcounter";
+import { PROFILE_CLICK_DETAILS, trackEngineEntry, trackEvent } from "@/lib/analytics/goatcounter";
 import { tc, UI_STRINGS } from "@/lib/i18n/dictionary";
 import type { Locale } from "@/lib/i18n/locale";
 import { useLocale } from "@/lib/i18n/locale-context";
@@ -234,12 +234,18 @@ export function ResultView({
    * their real numbers. Owner only (a visitor's numbers are not theirs to
    * enter), only with a named stage, and only when the build opened the
    * engine: the line points at a page a closed build would answer with a 404.
+   * Its click counts where the engine's openings come from (§19.12, A14 T7):
+   * the door, never the stage nor the score.
    */
   const engineEntry =
     SPACE_OPEN_AT_BUILD.engine && isOwner && !isSample && bottleneckPrimary ? (
       <p className={styles.engineEntry}>
         {/* A bare anchor: the engine lives under another root layout, the navigation is a full load anyway (R-24). */}
-        <a href={localePath(locale, "/aarrr-funnel-template")} data-testid="result-engine-entry">
+        <a
+          href={localePath(locale, "/aarrr-funnel-template")}
+          onClick={() => trackEngineEntry("result_owner")}
+          data-testid="result-engine-entry"
+        >
           {tc(t.engineEntry, locale)}
         </a>
       </p>

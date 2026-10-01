@@ -621,12 +621,14 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
       });
       const date = `${day.year}-${String(day.month).padStart(2, "0")}-${String(day.date).padStart(2, "0")}`;
       download(file, fill(r.fileName, { date }), "text/calendar;charset=utf-8");
+      trackEngine({ name: "engine_exported", detail: "ics" });
     },
     onStart() {
       // The month that ends is closed with today's date and the setup's windows; the new one starts with its targets only (§19.2.2).
       const started = startNextMonth(current, today, new Date().toISOString());
       if (!started) return;
-      persist(started);
+      // The one sign of a series in use (§19.12) — counted once the device holds it, never which month.
+      if (persist(started).ok) trackEngine({ name: "engine_month_started" });
       toCurrentMonth();
       setSelected(null);
       focus("engine-verdict");
@@ -709,6 +711,7 @@ export function EngineWorkbench({ locale, strings, metrics, derived: derivedCopy
         // The month being filled, its ticked motions, the page's language: « ; » and the decimal comma in French.
         const text = tableTemplate(current, motionShapes(current.setup.motions), metrics, strings, locale);
         download(`\uFEFF${text}`, monthFileName(current, strings.table.fileName), "text/csv;charset=utf-8");
+        trackEngine({ name: "engine_exported", detail: "csv" });
       }}
       onApplyTable={(preview: TablePreview) => {
         const result = persist(withSnapshot(current, () => preview.snapshot));

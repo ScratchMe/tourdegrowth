@@ -156,6 +156,7 @@ test("« Saisie en tableau », in French: the template downloads, a pasted table
   await page.getByTestId("engine-table-template").click();
   const file = await download;
   expect(file.suggestedFilename()).toBe("tdg-modele-2026-08.csv");
+  await expect.poll(() => trackedEvents(page)).toContain("engine_exported/csv");
   const csv = await readFile((await file.path())!, "utf8");
   expect(csv.startsWith("﻿id;chiffre;étape;numérateur;dénominateur;valeur;unité;source\r\n")).toBe(true);
   expect(csv).toContain("acq.signup-rate;Taux d'inscription;Acquisition;820;26000;;%;GA4\r\n");

@@ -11,6 +11,12 @@ export interface EngineResumeProps {
   locale: "en" | "fr";
   /** Alone on the landing (no Tour on the device): it takes the space the result's link would have taken. */
   alone?: boolean;
+  /**
+   * The link was followed (§19.12, A14 T7). Called with nothing: the click
+   * is counted by `LastResult`, which never sees the line — the month and
+   * the counts stay in this component (rule 8 holds it).
+   */
+  onFollow?: () => void;
 }
 
 /**
@@ -29,7 +35,7 @@ export interface EngineResumeProps {
  * built with the engine closed folds the condition to `false` and carries no
  * chunk of it at all.
  */
-export function EngineResume({ line, cta, href, locale, alone }: EngineResumeProps) {
+export function EngineResume({ line, cta, href, locale, alone, onFollow }: EngineResumeProps) {
   const [text, setText] = useState<string | null>(null);
 
   useEffect(() => {
@@ -53,7 +59,7 @@ export function EngineResume({ line, cta, href, locale, alone }: EngineResumePro
       {text}
       {" — "}
       {/* A bare anchor: the engine is another root layout's page (R-24). */}
-      <a href={href} className={styles.nudgeLink} data-testid="landing-engine-resume-link">
+      <a href={href} className={styles.nudgeLink} onClick={() => onFollow?.()} data-testid="landing-engine-resume-link">
         {cta}
       </a>
     </span>

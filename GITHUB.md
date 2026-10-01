@@ -188,6 +188,23 @@ ailleurs. Dernier piège du même worktree : Turbopack refuse de construire avec
 un `node_modules` lié par un lien symbolique (« points out of the filesystem
 root ») ; le build se fait dans le dépôt principal.
 
+### 1.10 Regrouper ses commits sur une base qui a bougé annule le travail des autres
+
+`git fetch origin main && git reset --soft origin/main && git commit` regroupe
+les commits d'une branche en un seul : l'index garde l'arbre de la branche, et
+le commit se pose sur `origin/main`. C'est juste tant que `origin/main` est la
+base de la branche. **Si le `fetch` vient de faire avancer `main`**, l'arbre
+de la branche ne contient pas ce qui vient d'y entrer, et le commit regroupé
+le **défait** sans un message ni un conflit. Le 2026-10-01 (A14 T7), une PR de
+design mergée par une autre session pendant la vérification : le commit
+regroupé de T7 touchait 36 fichiers au lieu de 24 : il défaisait la PR de
+l'autre. Vu avant toute PR, sur le `--stat`, puis reconstruit sur sa
+vraie base et rebasé.
+
+La règle : regrouper sur la base réelle (`git merge-base HEAD origin/main`),
+puis rebaser ; et lire `git diff origin/main --stat` avant chaque `push` : il
+ne doit lister que les fichiers de la PR.
+
 ---
 
 ## 2. Propre à Tour de Growth

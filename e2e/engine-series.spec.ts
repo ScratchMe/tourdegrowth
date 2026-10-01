@@ -2,7 +2,7 @@ import type { Page } from "@playwright/test";
 import { exampleState, hybridState, measured, ratio, withMonthBefore } from "../src/lib/engine/__tests__/fixtures";
 import type { EngineState } from "../src/lib/engine/types";
 import { engineSeed, storedEngineEntry } from "./engine-helpers";
-import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
+import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test, trackedEvents } from "./helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the owner's signed preview.
 test.skip(!ADMIN_PASSWORD, SKIP_ADMIN_REASON);
@@ -118,6 +118,8 @@ for (const locale of ["fr", "en"] as const) {
     await expect(next).toContainText(t.september);
     await page.getByTestId("engine-month-start").click();
     await expect(next).toHaveCount(0);
+    // The series in use (§19.12): counted once started, and never which month.
+    await expect.poll(() => trackedEvents(page)).toContain("engine_month_started");
 
     // September: no number yet, the targets kept, August closed with today's date and its windows.
     const stored = await storedEngineEntry(page);

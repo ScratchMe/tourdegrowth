@@ -329,6 +329,8 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
     const paths = requested.searchParams.get("include_paths")!.split(",");
     const expected = [
       "engine_opened",
+      // The series in use (§19.12, A14 T7): a month started, never which.
+      "engine_month_started",
       "engine_request_copied",
       "engine_deck_opened",
       "engine_tour_linked",
@@ -336,10 +338,13 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
       ...["plg", "slg", "hybrid"].map((m) => `engine_setup/${m}`),
       ...["acquisition", "activation", "retention", "referral", "revenue"].map((s) => `engine_stage_saved/${s}`),
       ...["acquisition", "activation", "retention", "referral", "revenue"].map((s) => `engine_stage_saved/slg-${s}`),
-      ...["png", "pdf", "text", "json"].map((f) => `engine_exported/${f}`),
-      // The doors into it (A7.9): the landing strip and the space band.
+      // The deck's three and the backup, then a reminder and the table's template (§19.12).
+      ...["png", "pdf", "text", "json", "ics", "csv"].map((f) => `engine_exported/${f}`),
+      // The doors into it (A7.9): the landing strip and the space band; then a result's owner and the landing's line (§19.10).
       "engine_entry_clicked/home_strip",
       "engine_entry_clicked/space_band",
+      "engine_entry_clicked/result_owner",
+      "engine_entry_clicked/landing_resume",
     ];
     expect([...engineEventPaths()].sort()).toEqual([...expected].sort());
     for (const path of expected) expect(paths).toContain(path);
@@ -359,12 +364,16 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
           { path: "engine_stage_saved/revenue", count: 1, event: true },
           { path: "engine_setup/hybrid", count: 2, event: true },
           { path: "engine_stage_saved/slg-revenue", count: 1, event: true },
+          { path: "engine_month_started", count: 4, event: true },
           { path: "engine_request_copied", count: 3, event: true },
           { path: "engine_deck_opened", count: 2, event: true },
           { path: "engine_exported/pdf", count: 2, event: true },
           { path: "engine_exported/json", count: 5, event: true },
+          { path: "engine_exported/ics", count: 3, event: true },
+          { path: "engine_exported/csv", count: 1, event: true },
           { path: "engine_tour_linked", count: 1, event: true },
           { path: "engine_entry_clicked/space_band", count: 6, event: true },
+          { path: "engine_entry_clicked/landing_resume", count: 2, event: true },
         ],
       }),
     );
@@ -374,11 +383,12 @@ describe("fetchFunnelWindow (GoatCounter API — /admin/stats funnel section)", 
       setup: { plg: 0, slg: 0, hybrid: 2 },
       stagesSaved: { acquisition: 0, activation: 4, retention: 0, referral: 0, revenue: 1 },
       stagesSavedSlg: { acquisition: 0, activation: 0, retention: 0, referral: 0, revenue: 1 },
+      monthStarted: 4,
       requestsCopied: 3,
       deckOpened: 2,
-      exported: { png: 0, pdf: 2, text: 0, json: 5 },
+      exported: { png: 0, pdf: 2, text: 0, json: 5, ics: 3, csv: 1 },
       tourLinked: 1,
-      entries: { home_strip: 0, space_band: 6 },
+      entries: { home_strip: 0, space_band: 6, result_owner: 0, landing_resume: 2 },
     });
   });
 

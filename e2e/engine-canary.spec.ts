@@ -193,6 +193,9 @@ test.describe("the growth engine keeps everything in the browser (D16)", () => {
       "engine_exported/text",
       "engine_exported/png",
       "engine_exported/json",
+      // The table's template and the two reminders (§19.12): files that left, never what they hold.
+      "engine_exported/csv",
+      "engine_exported/ics",
     ]) {
       expect(events).toContain(expected);
     }

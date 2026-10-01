@@ -2,6 +2,7 @@ import {
   ENGINE_DECK_OPENED_EVENT,
   ENGINE_EXPORT_FORMATS,
   ENGINE_EXPORTED_EVENT,
+  ENGINE_MONTH_STARTED_EVENT,
   ENGINE_OPENED_EVENT,
   ENGINE_REQUEST_COPIED_EVENT,
   ENGINE_SETUP_DETAILS,
@@ -21,10 +22,11 @@ import {
  * dashboard (`goatcounter-api.ts`) asks GoatCounter for those exact paths:
  * a name typed here and not there is an event counted and never shown (R-11).
  *
- * Typed so a caller cannot pass anything else: the name is one of seven
+ * Typed so a caller cannot pass anything else: the name is one of eight
  * constants, the detail of `engine_setup` one of three motion sets (Q14),
  * of `engine_stage_saved` a stage (sales-assisted's prefixed) and of
- * `engine_exported` one of four formats. Never a diagnosis state, a status,
+ * `engine_exported` one of six formats (the deck's three, the backup's
+ * `json`, a reminder's `ics`, the template's `csv`). Never a diagnosis state, a status,
  * a number or a label the person typed (D16) — and `engine-boundary.test.ts`
  * rule 5 reads every call site to hold it, since a type is erased and a
  * `trackEvent` written next to this module would not be checked by it.
@@ -33,6 +35,7 @@ export { ENGINE_EXPORT_FORMATS, engineSetupDetail, engineStageDetail, type Engin
 
 type EngineEvent =
   | { name: typeof ENGINE_OPENED_EVENT }
+  | { name: typeof ENGINE_MONTH_STARTED_EVENT }
   | { name: typeof ENGINE_SETUP_EVENT; detail: (typeof ENGINE_SETUP_DETAILS)[number] }
   | { name: typeof ENGINE_STAGE_SAVED_EVENT; detail: (typeof ENGINE_STAGE_DETAILS)[number] }
   | { name: typeof ENGINE_REQUEST_COPIED_EVENT }

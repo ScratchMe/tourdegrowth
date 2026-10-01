@@ -254,11 +254,12 @@ export type TourEntryDetail = (typeof TOUR_ENTRY_DETAILS)[number];
  *   engine_setup/<plg|slg|hybrid>               the motions ticked when the engine is created, or changed (Q14)
  *   engine_stage_saved/<stage>                  first number saved in that stage, once a session;
  *                                               sales-assisted's stages prefixed: slg-revenue (Q14)
+ *   engine_month_started                        the next month was started: the one sign of repeated use (§19.12)
  *   engine_request_copied                       a request was put on the clipboard
  *   engine_deck_opened                          the slide screen was opened
- *   engine_exported/<png|pdf|text|json>         a file downloaded, or the deck's text copied
+ *   engine_exported/<png|pdf|text|json|ics|csv> a file downloaded, or the deck's text copied
  *   engine_tour_linked                          the engine was tied to a Tour result on the device
- *   engine_entry_clicked/<where>                a door into the engine was clicked (A7.9, A7.4)
+ *   engine_entry_clicked/<where>                a door into the engine was clicked (A7.9, A7.4, §19.10)
  *
  * PATHS ONLY, and every segment comes from the lists below. The page
  * promises in writing that nothing typed leaves the browser (D16), and an
@@ -271,6 +272,12 @@ export type TourEntryDetail = (typeof TOUR_ENTRY_DETAILS)[number];
  * path spelled on one side only is an event counted and never shown.
  */
 export const ENGINE_OPENED_EVENT = "engine_opened";
+/**
+ * `engine_month_started` — the next month was started (engine spec §19.12,
+ * A14 T7): the one signal that the engine is used month after month, which
+ * is what the series has to prove. No detail: never which month.
+ */
+export const ENGINE_MONTH_STARTED_EVENT = "engine_month_started";
 export const ENGINE_STAGE_SAVED_EVENT = "engine_stage_saved";
 export const ENGINE_REQUEST_COPIED_EVENT = "engine_request_copied";
 export const ENGINE_DECK_OPENED_EVENT = "engine_deck_opened";
@@ -280,13 +287,25 @@ export const ENGINE_TOUR_LINKED_EVENT = "engine_tour_linked";
 /**
  * `engine_entry_clicked/<where>` — a door into the engine was clicked
  * (CHANTIERS.md A7.9 and A7.4, C7 and C15): the landing's strip, the space
- * band's pill. A7.4 adds the three pages that link to it. Fired on the
- * click, before the page it opens, so `/admin/stats` can say where the
- * openings come from.
+ * band's pill; then the two doors of engine spec §19.10 (A14 T7): the line
+ * under a result's action, for its owner, and the landing's « Ton moteur… »
+ * line. A7.4 adds the three pages that link to it. Fired on the click,
+ * before the page it opens, so `/admin/stats` can say where the openings
+ * come from.
  */
 export const ENGINE_ENTRY_EVENT = "engine_entry_clicked";
-export const ENGINE_ENTRY_DETAILS = ["home_strip", "space_band"] as const;
+export const ENGINE_ENTRY_DETAILS = ["home_strip", "space_band", "result_owner", "landing_resume"] as const;
 export type EngineEntryDetail = (typeof ENGINE_ENTRY_DETAILS)[number];
+
+/**
+ * A door into the engine, counted (§19.12, A14 T7): the detail is one of the
+ * list, typed — never a free string, so no stage, score or count from the
+ * page around the door can ride it. `engine-boundary.test.ts` rule 9 holds
+ * every door outside the route to it, with a literal.
+ */
+export function trackEngineEntry(where: EngineEntryDetail): void {
+  trackEvent(ENGINE_ENTRY_EVENT, where);
+}
 
 /** `engine_stage_saved/<stage>` — the five AARRR stages, in the product's canonical order. */
 export const ENGINE_STAGES = ["acquisition", "activation", "retention", "referral", "revenue"] as const;
@@ -321,12 +340,18 @@ export function engineSetupDetail(motions: { plg: boolean; slg: boolean }): Engi
   return motions.plg && motions.slg ? "hybrid" : motions.slg ? "slg" : "plg";
 }
 
-/** `engine_exported/<format>` — the four ways a file (or the deck's text) leaves: none of them sends anything. */
-export const ENGINE_EXPORT_FORMATS = ["png", "pdf", "text", "json"] as const;
+/**
+ * `engine_exported/<format>` — the ways a file (or the deck's text) leaves,
+ * none of them sending anything: the deck's three (png, pdf, text), the
+ * backup's json, then a reminder's `.ics` and the table's CSV template
+ * (engine spec §19.12, A14 T7).
+ */
+export const ENGINE_EXPORT_FORMATS = ["png", "pdf", "text", "json", "ics", "csv"] as const;
 
 /** The events that carry no detail at all. */
 export const ENGINE_SIMPLE_EVENTS = [
   ENGINE_OPENED_EVENT,
+  ENGINE_MONTH_STARTED_EVENT,
   ENGINE_REQUEST_COPIED_EVENT,
   ENGINE_DECK_OPENED_EVENT,
   ENGINE_TOUR_LINKED_EVENT,

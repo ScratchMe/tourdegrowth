@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import type { Page } from "@playwright/test";
 import { ENGINE_COPY } from "@/content/engine-copy";
 import { exampleState } from "../src/lib/engine/__tests__/fixtures";
-import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test } from "./helpers";
+import { ADMIN_PASSWORD, expect, grantOwnerPreview, SKIP_ADMIN_REASON, test, trackedEvents } from "./helpers";
 import { engineSeed } from "./engine-helpers";
 
 // The page ships closed (engine-flag.spec.ts): every test opens it with the
@@ -59,6 +59,8 @@ test.describe("reminders", () => {
     expect(ics.text).toContain("URL:http://");
     expect(ics.text).not.toContain(COMPANY);
     expect(ics.text).not.toContain("?");
+    // A file left (§19.12): counted as a reminder, nothing of it in the path.
+    await expect.poll(() => trackedEvents(page)).toContain("engine_exported/ics");
   });
 
   for (const locale of ["en", "fr"] as const) {

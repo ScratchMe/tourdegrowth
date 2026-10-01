@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { LANDING_RETURN_EVENT, RETAKE_NUDGE_EVENT, trackEvent } from "@/lib/analytics/goatcounter";
+import { LANDING_RETURN_EVENT, RETAKE_NUDGE_EVENT, trackEngineEntry, trackEvent } from "@/lib/analytics/goatcounter";
 import { latestProgression, type Progression, retakeNudge, type RetakeNudge } from "@/lib/quiz/progression";
 import { progressionSentence, type ProgressionTemplates } from "@/lib/quiz/progression-copy";
 import { loadStoredResults, type StoredResult } from "@/lib/quiz/storage";
@@ -70,7 +70,10 @@ export function LastResult({ withScore, withoutScore, progression, nudge, engine
   }, []);
 
   // The engine's way back (§19.10): its own component, which reads the device and sends nothing (rule 8).
-  const engineRow = engine ? <EngineResume {...engine} alone={!last} /> : null;
+  // Its click is counted here, as a door (§19.12): the line's month and counts never reach this file.
+  const engineRow = engine ? (
+    <EngineResume {...engine} alone={!last} onFollow={() => trackEngineEntry("landing_resume")} />
+  ) : null;
 
   if (!last) return engineRow;
 
